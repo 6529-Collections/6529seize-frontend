@@ -330,7 +330,7 @@ export function CompetitionVoteForm({
             </button>
           </div>
           <p
-            id={`competition-vote-range-${entryId}`}
+            id={rangeDescriptionId}
             className="tw-row-start-2 tw-m-0 tw-min-w-0 tw-break-words tw-text-xs tw-leading-5 tw-text-iron-400 @[22rem]/vote-controls:tw-col-span-2"
           >
             {t(locale, "competitions.voteRange", {
@@ -341,7 +341,7 @@ export function CompetitionVoteForm({
           {onExplainVote && (
             <button
               type="button"
-              className="tw-col-start-2 tw-row-start-2 tw-min-h-11 tw-max-w-[9rem] tw-rounded-md tw-border-0 tw-bg-transparent tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-text-iron-500 @[22rem]/vote-controls:tw-row-start-1 desktop-hover:hover:tw-bg-iron-800 md:tw-min-h-9"
+              className="tw-col-start-2 tw-row-start-2 tw-min-h-11 tw-max-w-[9rem] tw-break-words tw-rounded-md tw-border-0 tw-bg-transparent tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-text-iron-500 @[22rem]/vote-controls:tw-row-start-1 desktop-hover:hover:tw-bg-iron-800 md:tw-min-h-9"
               aria-label={t(locale, "waves.voteRationale.explainAriaLabel")}
               title={t(locale, "waves.voteRationale.savedDescription")}
               disabled={
@@ -367,7 +367,7 @@ export function CompetitionVoteForm({
         </div>
         {failed && (
           <p
-            id={`competition-vote-error-${entryId}`}
+            id={errorDescriptionId}
             role="alert"
             className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-red"
           >
@@ -458,7 +458,7 @@ export function CompetitionVoteForm({
         )}
         {failed && (
           <p
-            id={`competition-vote-error-${entryId}`}
+            id={errorDescriptionId}
             role="alert"
             className="tw-text-sm tw-text-red"
           >

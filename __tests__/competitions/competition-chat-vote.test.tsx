@@ -28,9 +28,10 @@ jest.mock(
       return <div>Legacy voting</div>;
     }
 );
+let mockSignedIn = true;
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
-    connectedProfile: { id: "viewer" },
+    connectedProfile: mockSignedIn ? { id: "viewer" } : null,
     setToast: jest.fn(),
     requestAuth: async () => ({ success: true }),
   }),
@@ -130,6 +131,7 @@ function mount(
 }
 beforeEach(() => {
   jest.clearAllMocks();
+  mockSignedIn = true;
   jest.mocked(useCompetitionViewer).mockReturnValue("viewer:self");
   jest.mocked(fetchDropCompetitionContext).mockResolvedValue(context as never);
   jest.mocked(fetchCompetitionCredits).mockResolvedValue(initialBudget);
@@ -518,4 +520,69 @@ it("keeps a vote saved when posting the public explanation fails", async () => {
   await waitFor(() => expect(commonApiPost).toHaveBeenCalledTimes(1));
   expect(screen.getByRole("spinbutton", { name: "Your vote" })).toHaveValue(25);
   expect(screen.getByText("Saved")).toBeInTheDocument();
+});
+
+it("shows the sign-in prompt without vote modes for a signed-out viewer", async () => {
+  mockSignedIn = false;
+  jest.mocked(useCompetitionViewer).mockReturnValue(null);
+  mount(null);
+  await screen.findByText("Connect your wallet to participate.");
+  expect(screen.queryByRole("group", { name: "Vote input mode" })).toBeNull();
+  expect(screen.queryByRole("slider")).toBeNull();
+  expect(fetchCompetitionCredits).not.toHaveBeenCalled();
+});
+it("offers both modes without a reply option when the voter cannot chat", async () => {
+  mount(null, {
+    ...replyDrop,
+    wave: { ...replyDrop.wave, authenticated_user_eligible_to_chat: false },
+  });
+  await screen.findAllByRole("slider");
+  fireEvent.click(screen.getByRole("button", { name: "Numeric", exact: true }));
+  expect(screen.getByRole("spinbutton", { name: "Your vote" })).toBeEnabled();
+  expect(screen.queryByRole("switch", { name: "Explain vote" })).toBeNull();
+});
+it.each(["closed", "inactive"])(
+  "keeps %s voting disabled in either input mode",
+  async (state) => {
+    jest.mocked(fetchDropCompetitionContext).mockResolvedValue({
+      ...context,
+      competition: {
+        ...context.competition,
+        permissions: { vote: state !== "closed" },
+      },
+      entry: {
+        ...context.entry,
+        status: state === "inactive" ? "WITHDRAWN" : "ACTIVE",
+      },
+    } as never);
+    mount(null);
+    await screen.findAllByRole("slider");
+    expect(screen.getByRole("button", { name: "Save vote" })).toBeDisabled();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Numeric", exact: true })
+    );
+    expect(
+      screen.getByRole("spinbutton", { name: "Your vote" })
+    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Save vote" })).toBeDisabled();
+    expect(setCompetitionVote).not.toHaveBeenCalled();
+  }
+);
+it("keeps zero-credit voting bounded in both modes", async () => {
+  jest.mocked(fetchCompetitionCredits).mockResolvedValue({
+    ...initialBudget,
+    available: 0,
+    remaining: 0,
+    min_vote: 0,
+    max_vote: 0,
+  });
+  mount(null);
+  await screen.findAllByRole("slider");
+  fireEvent.click(screen.getByRole("button", { name: "Numeric", exact: true }));
+  const input = screen.getByRole("spinbutton", { name: "Your vote" });
+  expect(input).toHaveAttribute("min", "0");
+  expect(input).toHaveAttribute("max", "0");
+  fireEvent.change(input, { target: { value: "1" } });
+  expect(screen.getByRole("button", { name: "Save vote" })).toBeDisabled();
+  expect(setCompetitionVote).not.toHaveBeenCalled();
 });

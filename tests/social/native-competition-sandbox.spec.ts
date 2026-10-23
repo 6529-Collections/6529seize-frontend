@@ -1630,7 +1630,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       expect(Math.abs(bounds.width - available.width)).toBeLessThanOrEqual(1);
       // The complete control group still fills the row; Explain vote now shares
       // its first line instead of occupying a full-width third line.
-      const voteControls = row.locator("[data-vote-controls]");
+      const voteControls = panel
+        .getByRole("article")
+        .first()
+        .locator("[data-vote-controls]");
       await expect(voteControls).toBeVisible();
       const controlsBounds = (await voteControls.boundingBox())!;
       if (testInfo.project.name === "web-mobile-chromium") {
@@ -3111,6 +3114,242 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       path: testInfo.outputPath("accepted-collaborator-profile.png"),
     });
   });
+
+  test("keeps compact vote controls readable across row breakpoints and save errors", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    let releaseCredits!: () => void;
+    const creditsGate = new Promise<void>((resolve) => {
+      releaseCredits = resolve;
+    });
+    await page.route("**/competitions/alpha/credits/me?**", async (route) => {
+      if (new URL(route.request().url()).searchParams.has("entry_id"))
+        await creditsGate;
+      return route.fallback();
+    });
+    await page.goto(`${ROOT}/alpha?tab=votes`);
+    await dismissNextDevTools(page);
+    const row = page
+      .getByRole("tabpanel", { name: "My Votes", exact: true })
+      .getByRole("article")
+      .first();
+    try {
+      const skeleton = row.getByRole("status", {
+        name: "Loading competition…",
+      });
+      await expect(skeleton).toBeVisible();
+      const loadingHeight = (await row.boundingBox())!.height;
+      releaseCredits();
+      const controls = page
+        .getByRole("tabpanel", { name: "My Votes", exact: true })
+        .getByRole("article")
+        .first()
+        .locator("[data-vote-controls]");
+      await expect(controls).toBeVisible();
+      expect(
+        Math.abs((await row.boundingBox())!.height - loadingHeight)
+      ).toBeLessThanOrEqual(4);
+      const input = controls.getByRole("spinbutton", { name: "Your vote" });
+      const explain = controls.getByRole("button", {
+        name: "Explain vote",
+        exact: true,
+      });
+      await expect(explain).toBeDisabled();
+      const widths =
+        testInfo.project.name === "web-mobile-chromium"
+          ? [320, 390, 430]
+          : [639, 640, 767, 768, 960, 1200, 1600, 1920];
+      for (const width of widths) {
+        await page.setViewportSize({ width, height: 1000 });
+        await input.fill("12345678");
+        const boxes = await controls.evaluate((form) => {
+          const bounds = form.getBoundingClientRect();
+          return [...form.querySelectorAll("input, button, p")].map(
+            (element) => {
+              const rect = element.getBoundingClientRect();
+              return {
+                left: rect.left - bounds.left,
+                right: bounds.right - rect.right,
+                width: rect.width,
+                height: rect.height,
+                clipped: element.scrollWidth > element.clientWidth + 1,
+              };
+            }
+          );
+        });
+        for (const box of boxes) {
+          expect(box.left).toBeGreaterThanOrEqual(-1);
+          expect(box.right).toBeGreaterThanOrEqual(-1);
+          expect(box.clipped).toBe(false);
+        }
+        expect((await input.boundingBox())!.width).toBeLessThanOrEqual(144);
+        if (width < 768)
+          expect((await explain.boundingBox())!.height).toBeGreaterThanOrEqual(
+            44
+          );
+        await expectNoHorizontalOverflow(page);
+      }
+      await input.fill("25");
+      await page.route(
+        "**/competitions/alpha/entries/entry-alpha/votes/me",
+        (route) =>
+          route.fulfill({
+            status: 503,
+            json: { message: "Vote save temporarily unavailable" },
+          })
+      );
+      await controls
+        .getByRole("button", { name: "Save vote", exact: true })
+        .click();
+      const error = controls.getByRole("alert");
+      await expect(error).toBeVisible();
+      await expect(input).toHaveAttribute(
+        "aria-describedby",
+        /competition-vote-error-entry-alpha/
+      );
+      await expect(input).toHaveValue("25");
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("compact-vote-save-error.png"),
+      });
+    } finally {
+      releaseCredits();
+    }
+  });
+
+  for (const popup of ["artist submissions", "participant entries"]) {
+    test(`preserves Numeric votes and explanations in the ${popup} popup`, async ({
+      page,
+    }, testInfo) => {
+      const sandbox = await installCompetitionApi(page);
+      const response = await page.request.get(
+        `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
+      );
+      expect(response.ok()).toBe(true);
+      const fixture = await response.json();
+      const artwork = {
+        ...fixture.drops[0],
+        id: entryDropId("alpha"),
+        title: "Inline voting artwork",
+        drop_type: "SUBMISSION",
+        media: [
+          {
+            url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aS5cAAAAASUVORK5CYII=",
+            mime_type: "image/png",
+          },
+        ],
+        author: {
+          ...fixture.drops[0].author,
+          badges: {
+            ...fixture.drops[0].author.badges,
+            artist_of_main_stage_submissions: 1,
+          },
+          wave_participation: { is_participant: true, is_winner: false },
+        },
+        submission_context: {
+          status: "ACTIVE",
+          has_metadata: false,
+          voting: {
+            is_open: true,
+            total_votes_given: 0,
+            current_calculated_vote: 0,
+            predicted_final_vote: 0,
+            voters_count: 0,
+            place: 1,
+            context_profile_context: {
+              can_vote: true,
+              min: -100,
+              max: 100,
+              current: 0,
+            },
+          },
+        },
+      };
+      await installCollaborationDropFixture(page, () => ({
+        wave: fixture.wave,
+        drop: artwork,
+      }));
+      await page.route(
+        `**/api/identities/${artwork.author.handle}*`,
+        async (route) => {
+          const identityResponse = await route.fetch();
+          const identity = await identityResponse.json();
+          return route.fulfill({
+            json: {
+              ...identity,
+              active_main_stage_submission_ids: [artwork.id],
+            },
+          });
+        }
+      );
+      await page.route(`**/v2/waves/${WAVE}/competition-drops?**`, (route) =>
+        route.fulfill({ json: { data: [artwork], page: 1, next: false } })
+      );
+      await page.goto(`${ROOT}/alpha?drop=${artwork.id}`);
+      await dismissNextDevTools(page);
+      const detail = page
+        .getByRole("main")
+        .locator("[data-video-viewport]")
+        .filter({
+          has: page.getByRole("button", { name: "Close panel", exact: true }),
+        });
+      const badge = detail.getByRole("button", {
+        name:
+          popup === "artist submissions"
+            ? "View 1 art submission"
+            : /View this participant’s competition entries/,
+      });
+      await badge.click();
+      const dialog = page.getByRole("dialog").last();
+      const mode = dialog.getByRole("group", { name: "Vote input mode" });
+      await expect(mode).toHaveCount(1);
+      await expect(dialog.getByRole("slider").first()).toBeVisible();
+      const numeric = mode.getByRole("button", {
+        name: "Numeric",
+        exact: true,
+      });
+      if (testInfo.project.name === "web-mobile-chromium") {
+        await numeric.tap();
+        expect((await numeric.boundingBox())!.height).toBeGreaterThanOrEqual(
+          44
+        );
+      } else {
+        await numeric.focus();
+        await page.keyboard.press("Enter");
+      }
+      const input = dialog.getByRole("spinbutton", { name: "Your vote" });
+      await input.fill("-25");
+      await dialog.getByText("Explain vote", { exact: true }).click();
+      const rationale = dialog.getByLabel("Optional rationale reply");
+      await rationale.fill("An explanation kept while changing input modes");
+      await mode.getByRole("button", { name: "Slider", exact: true }).click();
+      // The range input uses a logarithmic position; the thumb shows the vote.
+      await expect(dialog.getByText("-25", { exact: true })).toBeAttached();
+      await numeric.click();
+      await expect(input).toHaveValue("-25");
+      await expect(rationale).toHaveValue(
+        "An explanation kept while changing input modes"
+      );
+      await expect(
+        dialog.getByText(
+          "Posts a public reply in the wave after your vote is saved."
+        )
+      ).toBeVisible();
+      await input.scrollIntoViewIfNeeded();
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("inline-vote-modes.png"),
+      });
+      await dialog.getByText("Explain vote", { exact: true }).click();
+      await dialog
+        .getByRole("button", { name: "Save vote", exact: true })
+        .click();
+      await expect.poll(() => sandbox.requests.length).toBe(1);
+      expect(sandbox.requests[0]?.body).toMatchObject({ value: -25 });
+      await expect(dialog.getByText("Saved", { exact: true })).toBeVisible();
+    });
+  }
 
   test("restores Explain vote in the competition vote dialog", async ({
     page,
