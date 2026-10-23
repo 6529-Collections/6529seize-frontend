@@ -12,6 +12,7 @@ import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.es-ES
 import { ES_ES_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { ES_ES_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { ES_ES_GLOBAL_ERROR_MESSAGES } from "@/i18n/messages/global-error";
+import { ES_ES_MAPPING_TOOL_MESSAGES } from "@/i18n/messages/mapping-tools";
 import { ES_ES_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { ES_ES_CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
 import { ES_ES_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
@@ -631,6 +632,7 @@ export const ES_ES_MESSAGES = {
   ...ES_ES_CAPACITOR_CONNECT_MESSAGES,
   ...ES_ES_NEW_VERSION_TOAST_MESSAGES,
   ...ES_ES_GLOBAL_ERROR_MESSAGES,
+  ...ES_ES_MAPPING_TOOL_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel":
     "Área de carga de archivos del chat de wave",
   "waves.chat.guidelinesDialog.title": "Directrices de la wave",
