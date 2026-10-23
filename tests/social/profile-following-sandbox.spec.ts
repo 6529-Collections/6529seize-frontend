@@ -6,6 +6,7 @@ import {
 } from "../testHelpers";
 import {
   getSandboxApiOrigin,
+  LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
 import type { Page } from "@playwright/test";
@@ -38,7 +39,14 @@ async function openOwnProfile(page: Page) {
     await webAccountMenu.press("Enter");
     await page.getByRole("link", { name: "Profile", exact: true }).click();
   }
-  await expect(page).toHaveURL(/\/playwright$/);
+  // First-visit compilation can outlast an assertion timeout in the dev server.
+  await page.waitForURL(/\/playwright$/, {
+    timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+  });
+  // App navigation can briefly render both the outgoing and incoming profile.
+  await expect(
+    page.getByRole("button", { name: /Open playwright's followers:/ })
+  ).toHaveCount(1);
 }
 
 const identity = (index: number) => ({
@@ -93,6 +101,9 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
     ].join(".");
     await page.addInitScript(
       ({ address, token }) => {
+        // Keep analytics outside this profile fixture; external writes stay blocked.
+        document.cookie = "essential-cookies-consent=true; path=/";
+        document.cookie = "performance-cookies-consent=false; path=/";
         localStorage.setItem("6529-wallet-active-address", address);
         localStorage.setItem(
           "6529-wallet-accounts",
