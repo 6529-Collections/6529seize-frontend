@@ -738,6 +738,63 @@ test("homepage waits for initial settings and recovers from failed mint status @
   }
 });
 
+test("Latest Drop keeps multiple artist links spaced within the card @smoke @medium @large", async ({
+  page,
+}, testInfo) => {
+  await installComingUpFixture(page);
+  const handles = [
+    "phoebeum",
+    "prxt0alt",
+    "artist-with-a-very-long-handle".repeat(3),
+  ];
+  await page.route("**/api/identities/*", (route) =>
+    route.fulfill({ status: 503, json: { error: "Unavailable" } })
+  );
+  await page.route("**/api/memes_latest", (route) =>
+    route.fulfill({
+      json: { ...loadingTestArtwork, artist_seize_handle: handles.join(", ") },
+    })
+  );
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const section = page
+    .getByRole("main")
+    .locator('[data-home-section="Latest drop"]');
+  const artists = page
+    .getByRole("main")
+    .locator(
+      '[data-home-section="Latest drop"] [data-home-action="Open artist profile"]'
+    );
+  await expect(
+    section.getByRole("link", { name: loadingTestArtwork.name, exact: true })
+  ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+  await expect(artists).toHaveCount(handles.length);
+  const boxes = [];
+  for (const handle of handles) {
+    const link = section.getByRole("link", { name: handle, exact: true });
+    await expect(link).toHaveAttribute("href", `/${handle}`);
+    const box = await link.boundingBox();
+    if (!box) throw new Error("Artist link must be visible");
+    boxes.push(box);
+  }
+  for (let index = 1; index < boxes.length; index++) {
+    const previous = boxes[index - 1]!;
+    const current = boxes[index]!;
+    if (Math.abs(current.y - previous.y) < 1) {
+      expect(current.x - previous.x - previous.width).toBeGreaterThanOrEqual(
+        20
+      );
+    } else {
+      expect(current.y - previous.y - previous.height).toBeGreaterThanOrEqual(
+        12
+      );
+    }
+  }
+  await expectNoHorizontalOverflow(page);
+  await section.screenshot({
+    path: testInfo.outputPath("latest-drop-artists.png"),
+  });
+});
+
 test("homepage selects Next Drop without flashing the previous artwork @smoke @medium @large", async ({
   page,
 }) => {
@@ -749,12 +806,20 @@ test("homepage selects Next Drop without flashing the previous artwork @smoke @m
     wave: comingUpWave,
     media: [{ mime_type: "image/png", url: loadingTestArtwork.image }],
     metadata: [],
-    collaborators: [],
+    collaborators: Array.from({ length: 3 }, (_, index) => ({
+      id: `next-credit-${index}`,
+      handle: `next-collaborator-with-a-long-name-${index}`,
+      display: `Collaborator ${index}`,
+      pfp: loadingTestArtwork.image,
+    })),
     submission_context: {
       meme_card_id: 537,
       voting: { current_calculated_vote: 0 },
     },
   };
+  await page.route("**/api/identities/next-credit-*", (route) =>
+    route.fulfill({ status: 503, json: { error: "Unavailable" } })
+  );
   await page.route(`**/api/waves/${comingUpWave.id}`, (route) =>
     route.fulfill({
       json: {
@@ -883,6 +948,29 @@ test("homepage selects Next Drop without flashing the previous artwork @smoke @m
       "data-previous-drop-rendered",
       "true"
     );
+    const credits = page
+      .getByRole("main")
+      .locator('[data-home-section="Next drop"]')
+      .getByRole("list", { name: "Collaborators" });
+    await expect(credits.getByRole("listitem")).toHaveCount(3);
+    const layout = await credits.evaluate((list) => {
+      const group = list.parentElement!;
+      const artist = group.parentElement!.previousElementSibling!;
+      return {
+        artistGap:
+          group.getBoundingClientRect().top -
+          artist.getBoundingClientRect().bottom,
+        rows: Array.from(list.children, (row) =>
+          row.getBoundingClientRect().toJSON()
+        ),
+      };
+    });
+    expect(layout.artistGap).toBeGreaterThanOrEqual(16);
+    for (let index = 1; index < layout.rows.length; index++) {
+      expect(
+        layout.rows[index]!.top - layout.rows[index - 1]!.bottom
+      ).toBeGreaterThanOrEqual(12);
+    }
     await expectNoHorizontalOverflow(page);
   } finally {
     releaseWinner();

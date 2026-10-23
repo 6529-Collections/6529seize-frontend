@@ -240,7 +240,14 @@ export default function LatestDropNextMintPanel({
                 />
               </div>
 
-              <MemeCollaboratorCredits collaborators={drop.collaborators} />
+              {(drop.collaborators?.length ?? 0) > 0 && (
+                <div className="tw-mt-4">
+                  <MemeCollaboratorCredits
+                    collaborators={drop.collaborators}
+                    layout="stacked"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="tw-grid tw-grid-cols-2 tw-gap-x-8 tw-gap-y-5">
