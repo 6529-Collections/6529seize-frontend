@@ -271,7 +271,6 @@
     "__tests__/components/layout/SmallScreenLayout.test.tsx": 1,
     "__tests__/components/leaderboard/LeaderboardCardsCollected.test.tsx": 1,
     "__tests__/components/leaderboard/MemeLabLeaderboard.test.tsx": 1,
-    "__tests__/components/leaderboard/NFTLeaderboard.component.test.tsx": 2,
     "__tests__/components/levels/ProgressChart.test.tsx": 3,
     "__tests__/components/lfg-slideshow/LFGSlideshow.test.tsx": 4,
     "__tests__/components/manifold-minting/ManifoldMinting.test.tsx": 5,

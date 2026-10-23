@@ -564,6 +564,7 @@ async function installArtworkCompetitionResources(
     if (!drop) return route.fallback();
     return route.fulfill({ json: { wave: fixtureWave, drop } });
   });
+  return { entry, card };
 }
 
 async function installCompetitionApi(
@@ -837,7 +838,7 @@ async function installCompetitionApi(
     else if (resource === `entries/entry-${id}`) body = entry(id);
     else body = pageResult([]);
     if (
-      resource === "leaderboard" &&
+      (resource === "leaderboard" || resource === "votes/me") &&
       url.searchParams.get("include") === "cards"
     )
       body = { ...(body as Record<string, unknown>), cards: [card(id)] };
@@ -1627,6 +1628,21 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       const bounds = (await row.boundingBox())!;
       expect(Math.abs(bounds.x - available.x)).toBeLessThanOrEqual(1);
       expect(Math.abs(bounds.width - available.width)).toBeLessThanOrEqual(1);
+      const voteControls = row
+        .getByRole("spinbutton", { name: "Your vote", exact: true })
+        .locator("..");
+      await expect(voteControls).toBeVisible();
+      const controlsBounds = (await voteControls.boundingBox())!;
+      if (testInfo.project.name === "web-mobile-chromium") {
+        expect(Math.abs(controlsBounds.x - bounds.x - 8)).toBeLessThanOrEqual(
+          1
+        );
+        expect(
+          Math.abs(controlsBounds.width - bounds.width + 16)
+        ).toBeLessThanOrEqual(1);
+      } else {
+        expect(controlsBounds.x).toBeGreaterThan(bounds.x + bounds.width / 2);
+      }
       const selectAll = panel.getByRole("button", {
         name: "Select all",
         exact: true,
@@ -1719,12 +1735,129 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         await expect(submissionNotice).toHaveCount(0);
         await expectNoHorizontalOverflow(page);
         await page.screenshot({
-          path: testInfo.outputPath("leaderboard-without-submission-notice.png"),
+          path: testInfo.outputPath(
+            "leaderboard-without-submission-notice.png"
+          ),
         });
       }
       expect(sandbox.requests).toHaveLength(0);
     });
   }
+
+  test("loads My Votes cards without full drops and fetches more on scroll", async ({
+    page,
+  }) => {
+    await installCompetitionApi(page);
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const fixture = await response.json();
+    const artworks = Array.from({ length: 51 }, (_, index) => ({
+      ...fixture.drops[0],
+      id: `my-voted-drop-${index}`,
+      drop_type: "SUBMISSION",
+      title: `My voted artwork ${index}`,
+      submission_context: {
+        status: "ACTIVE",
+        has_metadata: true,
+        voting: {
+          is_open: true,
+          total_votes_given: 100,
+          current_calculated_vote: 100,
+          predicted_final_vote: 100,
+          voters_count: 1,
+          place: index + 1,
+          context_profile_context: {
+            can_vote: true,
+            min: -1000,
+            max: 1000,
+            current: 1,
+          },
+        },
+      },
+    }));
+    const resources = await installArtworkCompetitionResources(
+      page,
+      WAVE,
+      fixture.wave,
+      () => artworks
+    );
+    const listReads: URL[] = [];
+    const budgetEntries = new Set<string>();
+    const fullDropReads: string[] = [];
+    page.on("request", (request) => {
+      const url = new URL(request.url());
+      if (
+        url.pathname.endsWith("/credits/me") &&
+        url.searchParams.has("entry_id")
+      )
+        budgetEntries.add(url.searchParams.get("entry_id")!);
+      if (
+        url.pathname === "/api/v2/drops" &&
+        url.searchParams.get("ids")?.includes("my-voted-drop-")
+      )
+        fullDropReads.push(url.pathname);
+      if (url.pathname.includes("/v2/drops/my-voted-drop-"))
+        fullDropReads.push(url.pathname);
+    });
+    await page.route(
+      "**/v3/waves/*/competitions/alpha/votes/me?**",
+      (route) => {
+        const url = new URL(route.request().url());
+        listReads.push(url);
+        const start = Number(url.searchParams.get("cursor") ?? 0);
+        const end = start + Number(url.searchParams.get("limit") ?? 50);
+        const items = artworks.slice(start, end);
+        return route.fulfill({
+          json: {
+            data: items.map((drop) => ({
+              entry_id: resources.entry(drop.id).id,
+              drop_id: drop.id,
+              value: 1,
+              credit_spent: 1,
+              entry_status: "ACTIVE",
+            })),
+            cards: items
+              .filter((drop) => drop.id !== "my-voted-drop-9")
+              .map(resources.card),
+            has_more: end < artworks.length,
+            next_cursor: end < artworks.length ? String(end) : null,
+          },
+        });
+      }
+    );
+    await page.goto(`${ROOT}/alpha?tab=votes`);
+    const panel = page.getByRole("tabpanel", { name: "My Votes", exact: true });
+    await expect(panel.getByRole("article")).toHaveCount(50);
+    await expect(
+      panel.getByRole("spinbutton", { name: "Your vote", exact: true }).first()
+    ).toBeVisible();
+    expect(budgetEntries.size).toBeGreaterThan(0);
+    expect(budgetEntries.size).toBeLessThan(50);
+    expect(listReads[0]!.searchParams.get("include")).toBe("cards");
+    expect(fullDropReads).toEqual([]);
+    const unavailable = panel
+      .getByRole("article")
+      .filter({ hasText: "Preview unavailable" });
+    await expect(unavailable).toHaveCount(1);
+    await expect(
+      unavailable.getByText("Your vote: 1", { exact: true })
+    ).toBeVisible();
+    await unavailable.scrollIntoViewIfNeeded();
+    await expect(
+      unavailable.getByRole("spinbutton", { name: "Your vote", exact: true })
+    ).toBeVisible();
+    await panel
+      .getByRole("button", { name: "Load more", exact: true })
+      .scrollIntoViewIfNeeded();
+    await expect(panel.getByRole("article")).toHaveCount(51);
+    expect(
+      listReads.some((url) => url.searchParams.get("cursor") === "50")
+    ).toBe(true);
+    expect(fullDropReads).toEqual([]);
+    await expectNoHorizontalOverflow(page);
+  });
 
   for (const legacy of [false, true]) {
     test(`scrolls overflowing ${legacy ? "legacy" : "native"} Settings and vote Activity`, async ({
@@ -2001,6 +2134,14 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       if (message.type() === "error") consoleErrors.push(message.text());
     });
     const sandbox = await installCompetitionApi(page);
+    const readPublicPreviewCount = async () => {
+      const origin = getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"]);
+      const response = await page.request.get(
+        `${origin}/__composer-sandbox/public-preview`
+      );
+      expect(response.ok()).toBe(true);
+      return (await response.json()).reads as number;
+    };
     await page.goto(ROOT);
     await dismissNextDevTools(page);
     await expect(
@@ -2148,6 +2289,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("spinbutton", { name: "Your vote" })
     ).toHaveValue("0");
+    expect(await readPublicPreviewCount()).toBe(0);
     await page.getByRole("tab", { name: "Chat", exact: true }).click();
     await expect(page).toHaveURL(
       new RegExp(`/waves/${WAVE}\\?tab=chat&competition=beta$`),
@@ -2158,6 +2300,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("link", { name: "Competition", exact: true })
     ).toHaveCount(0);
+    expect(await readPublicPreviewCount()).toBe(0);
     const competitionsTab = page.getByRole("tab", {
       name: /^Competitions(?:\s+\d+\+?)?$/,
     });
@@ -2183,6 +2326,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         /hydration|hydrated|cannot be a (?:child|descendant)/i.test(error)
       )
     ).toEqual([]);
+    const documentResponse = await page.request.get(
+      `/waves/${WAVE}?tab=chat&competition=beta`
+    );
+    expect(documentResponse.ok()).toBe(true);
+    expect(await readPublicPreviewCount()).toBe(1);
   });
 
   test("shows collaboration actors and named artwork in the standard notification header", async ({
@@ -2277,6 +2425,74 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expectNoHorizontalOverflow(page);
     await page.screenshot({
       path: testInfo.outputPath("collaboration-notifications.png"),
+    });
+  });
+
+  test("shows returned voting credits after wins and author deletion without live drop previews", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    const title = "Freedom To Transcend";
+    const longTitle = "SubmissionWithAnUnbrokenName".repeat(8);
+    const notifications = ["WIN", "AUTHOR_DELETED"].map((reason, index) => ({
+      id: 6500 - index,
+      cause: "VOTING_CREDITS_RETURNED",
+      created_at: Date.now(),
+      read_at: null,
+      related_identity: null,
+      related_drops: [],
+      additional_context: {
+        event_id: `release-${index}`,
+        reason,
+        wave_id: WAVE,
+        competition_id: "alpha",
+        competition_title: "The Memes - Main Stage",
+        entry_id: "alpha-entry",
+        drop_id: entryDropId("alpha"),
+        submission_title: index === 0 ? title : longTitle,
+        credit_type: "TDH",
+        amount: 500,
+        released_at: Date.now(),
+      },
+    }));
+    await page.route("**/api/v2/notifications**", (route) => {
+      const params = new URL(route.request().url()).searchParams;
+      const before = params.get("id_less_than");
+      const causes = params.get("cause")?.split(",");
+      return route.fulfill({
+        json: {
+          unread_count: 2,
+          notifications: notifications.filter(
+            (item) =>
+              (before === null || item.id < Number(before)) &&
+              (!causes || causes.includes(item.cause))
+          ),
+        },
+      });
+    });
+    await page.goto("/notifications");
+    await expect(
+      page.getByText("500 voting credits were returned to you.", {
+        exact: false,
+      })
+    ).toHaveCount(2);
+    const winner = page.getByRole("link", { name: title, exact: true });
+    await expect(winner).toHaveAttribute(
+      "href",
+      `${ROOT}/alpha?entry=alpha-entry`
+    );
+    await expect(page.getByText(longTitle, { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: longTitle, exact: true })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("link", { name: "The Memes - Main Stage", exact: true })
+    ).toHaveCount(2);
+    await expectNoHorizontalOverflow(page);
+    await winner.focus();
+    await expect(winner).toBeFocused();
+    await page.screenshot({
+      path: testInfo.outputPath("voting-credit-return-notifications.png"),
     });
   });
 
@@ -5683,6 +5899,141 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
   }
 
+  for (const mode of ["native", "legacy", "app"] as const) {
+    for (const entry of ["leaderboard", "chat"] as const) {
+      test(`shows cached Chat immediately while route and feed responses are held (${mode}, ${entry} document)`, async ({
+        page,
+      }, testInfo) => {
+        test.skip(
+          mode === "app" && testInfo.project.name !== "web-mobile-chromium",
+          "The app simulation uses the mobile viewport."
+        );
+        const sandbox = await installCompetitionApi(page);
+        if (mode === "legacy") await sandbox.legacyPrimary("alpha");
+        if (mode === "app")
+          await installSurfaceSimulation(
+            page.context(),
+            "capacitor-ios-sim",
+            testInfo.project.use.baseURL
+          );
+        const role = mode === "app" ? "button" : "tab";
+        const chat = page.getByRole(role, { name: "Chat", exact: true });
+        const leaderboard = page.getByRole(role, {
+          name: "Leaderboard",
+          exact: true,
+        });
+        const messages = page
+          .getByRole("region", {
+            name: "Wave chat file upload area",
+            exact: true,
+          })
+          .getByText("6529-composer-preview", { exact: false })
+          .first();
+        const chatUrl = `/waves/${WAVE}?tab=chat&competition=alpha`;
+        let releaseRoutes!: () => void;
+        const routesHeld = new Promise<void>((resolve) => {
+          releaseRoutes = resolve;
+        });
+        let releaseFeed!: () => void;
+        let feedHeld = new Promise<void>((resolve) => {
+          releaseFeed = resolve;
+        });
+        const initialReads: string[] = [];
+        await page.route(`**/api/v2/waves/${WAVE}/drops?**`, async (route) => {
+          const url = new URL(route.request().url());
+          if (!url.searchParams.has("serial_no_limit"))
+            initialReads.push(url.search);
+          await feedHeld;
+          await route.fallback();
+        });
+        try {
+          if (entry === "leaderboard") {
+            // Leaderboard already starts the browser feed. Tab churn must reuse it.
+            await page.goto(`${ROOT}/alpha?tab=leaderboard`);
+            await expect(leaderboard).toBeVisible({ timeout: 30000 });
+            await expect.poll(() => initialReads.length).toBe(1);
+            await chat.click();
+            await expect(page).toHaveURL(chatUrl, { timeout: 500 });
+            await leaderboard.click();
+            await chat.click();
+            expect(initialReads).toHaveLength(1);
+          } else {
+            releaseFeed();
+            await page.goto(chatUrl);
+          }
+          releaseFeed();
+          await expect(messages).toBeVisible({ timeout: 30000 });
+          const editor = page.getByRole("textbox", {
+            name: "Write a chat message",
+            exact: true,
+          });
+          await editor.fill("Draft survives a same-wave tab visit");
+          await leaderboard.click();
+          await expect(page).toHaveURL(`${ROOT}/alpha?tab=leaderboard`);
+          await expect(messages).toHaveCount(0);
+          // Hold both Next route responses (including intent prefetch) and newest
+          // feed syncs. Real cached messages must render without releasing either.
+          await page.route(`**/waves/${WAVE}**`, async (route) => {
+            if (new URL(route.request().url()).searchParams.has("_rsc"))
+              await routesHeld;
+            await route.fallback();
+          });
+          feedHeld = new Promise<void>((resolve) => {
+            releaseFeed = resolve;
+          });
+          const beforeReads = initialReads.length;
+          const started = await page.evaluate(() => performance.now());
+          await chat.click();
+          await expect(messages).toBeVisible({ timeout: 500 });
+          const elapsed = await page.evaluate(
+            (start) => performance.now() - start,
+            started
+          );
+          expect(elapsed).toBeLessThan(500);
+          await testInfo.attach("cached-chat-response", {
+            body: JSON.stringify({
+              elapsedMs: elapsed,
+              routeResponsesHeld: true,
+              feedResponsesHeld: true,
+            }),
+            contentType: "application/json",
+          });
+          await expect(editor).toContainText(
+            "Draft survives a same-wave tab visit"
+          );
+          await editor.fill("Composer stays usable during background sync");
+          await page.goBack();
+          await expect(page).toHaveURL(`${ROOT}/alpha?tab=leaderboard`);
+          await expect(messages).toHaveCount(0);
+          await page.goForward();
+          await expect(messages).toBeVisible({ timeout: 500 });
+          await expect(editor).toContainText(
+            "Composer stays usable during background sync"
+          );
+          for (let visit = 0; visit < 2; visit++) {
+            await leaderboard.click();
+            await chat.click();
+            await expect(messages).toBeVisible({ timeout: 500 });
+          }
+          expect(initialReads).toHaveLength(beforeReads);
+          await expectNoHorizontalOverflow(page);
+          await page.screenshot({
+            path: testInfo.outputPath(`immediate-chat-${mode}-${entry}.png`),
+          });
+          releaseRoutes();
+          releaseFeed();
+          await expect(messages).toBeVisible();
+          await expect(editor).toContainText(
+            "Composer stays usable during background sync"
+          );
+        } finally {
+          releaseRoutes();
+          releaseFeed();
+        }
+      });
+    }
+  }
+
   test("opens Chat on wave entry and preserves explicit tabs, reload, back and forward", async ({
     page,
   }, testInfo) => {
@@ -7804,7 +8155,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       page,
     }, testInfo) => {
       test.skip(
-        surface === "app" && testInfo.project.name !== "web-mobile-chromium"
+        surface === "app" && testInfo.project.name !== "web-mobile-chromium",
+        "The app simulation uses the mobile viewport."
       );
       const sandbox = await installCompetitionApi(
         page,

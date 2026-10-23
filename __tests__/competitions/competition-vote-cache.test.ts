@@ -1,4 +1,4 @@
-import { QueryClient } from "@tanstack/react-query";
+import { InfiniteQueryObserver, QueryClient } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { updateCompetitionVoteInCache } from "@/components/react-query-wrapper/utils/updateCompetitionVoteInCache";
 import type { ApiCompetitionCreditBudget } from "@/generated/models/ApiCompetitionCreditBudget";
@@ -49,6 +49,69 @@ beforeEach(() => {
   client = new QueryClient();
 });
 afterEach(() => client.clear());
+
+it("refreshes loaded pages after a vote moves across a page boundary", async () => {
+  let order = ["other", "entry", "last"];
+  const reads: number[] = [];
+  let releaseRefresh!: () => void;
+  const refreshGate = new Promise<void>((resolve) => {
+    releaseRefresh = resolve;
+  });
+  const observer = new InfiniteQueryObserver(client, {
+    queryKey: [...resourceKey, "votes/me", { include: "cards" }],
+    initialPageParam: 0,
+    queryFn: async ({ pageParam }) => {
+      reads.push(pageParam);
+      if (order[0] === "entry") await refreshGate;
+      return {
+        data: [{ entry_id: order[pageParam]!, value: 10, credit_spent: 10 }],
+        has_more: pageParam < order.length - 1,
+        next_cursor: pageParam < order.length - 1 ? pageParam + 1 : null,
+      };
+    },
+    getNextPageParam: (page) => page.next_cursor,
+  });
+  const unsubscribe = observer.subscribe(() => undefined);
+  try {
+    await observer.refetch();
+    await observer.fetchNextPage();
+    const inactiveKey = [...resourceKey, "votes/me", {}];
+    const inactiveRead = jest.fn(
+      async () => observer.getCurrentResult().data!.pages[0]!
+    );
+    await client.fetchInfiniteQuery({
+      queryKey: inactiveKey,
+      initialPageParam: 0,
+      queryFn: inactiveRead,
+      getNextPageParam: (page: { next_cursor: number | null }) =>
+        page.next_cursor,
+    });
+    inactiveRead.mockClear();
+    reads.length = 0;
+    order = ["entry", "other", "last"];
+    await updateCompetitionVoteInCache(client, result);
+    expect(observer.getCurrentResult().isFetching).toBe(true);
+    // Exercise a request from a stale UI snapshot while the production
+    // fire-and-forget invalidation is still refreshing the first page.
+    const overlappingNextPage = observer.fetchNextPage({
+      cancelRefetch: false,
+    });
+    expect(reads).toEqual([0]);
+    releaseRefresh();
+    await overlappingNextPage;
+    expect(reads).toEqual([0, 1]);
+    expect(client.getQueryState(inactiveKey)?.isInvalidated).toBe(true);
+    expect(inactiveRead).not.toHaveBeenCalled();
+    await observer.fetchNextPage({ cancelRefetch: false });
+    expect(
+      observer
+        .getCurrentResult()
+        .data?.pages.flatMap((page) => page.data.map((vote) => vote.entry_id))
+    ).toEqual(order);
+  } finally {
+    unsubscribe();
+  }
+});
 
 it("publishes confirmed credits and the viewer's vote without guessing totals or changing row order", async () => {
   const generalCreditKey = [QueryKey.COMPETITION_CREDITS, scope];

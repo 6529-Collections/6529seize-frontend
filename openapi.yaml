@@ -4776,6 +4776,14 @@ paths:
           required: false
           schema:
             type: string
+        - name: include
+          in: query
+          required: false
+          description: Include lightweight entry cards with native voting summaries.
+          schema:
+            type: string
+            enum:
+              - cards
         - name: limit
           in: query
           required: false
@@ -4795,7 +4803,10 @@ paths:
           name: handleListCompetitionMyVotesV3
       responses:
         "200":
-          description: Command result or identical idempotent replay.
+          description: >-
+            Paged active nonzero personal votes, ordered by vote value
+            descending and vote time ascending; include=cards adds authorized
+            lightweight entry content and summaries.
           content:
             application/json:
               schema:
@@ -5851,7 +5862,9 @@ paths:
               - cards
       responses:
         "200":
-          description: Visible entries with current voting summaries and scoped awards; include=cards also returns optional first-part content and metadata.
+          description: >-
+            Visible entries with current voting summaries and scoped awards;
+            include=cards also returns optional first-part content and metadata.
           content:
             application/json:
               schema:
@@ -9933,6 +9946,75 @@ paths:
           description: User cannot vote
         "404":
           description: Drop or poll not found
+  /v2/drops/search:
+    get:
+      tags:
+        - DropsV2
+      summary: Search messages across all waves visible to the caller
+      operationId: searchDropsV2
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/waves-v2.handlers"
+          name: handleSearchDropsV2
+      parameters:
+        - name: term
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 200
+        - name: author_id
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: cursor
+          in: query
+          description: >-
+            Opaque continuation cursor from the previous response; required
+            after page one.
+          required: false
+          schema:
+            type: string
+            maxLength: 300
+            pattern: ^[A-Za-z0-9_-]+$
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 1
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            maximum: 100
+            minimum: 1
+            default: 20
+      responses:
+        "200":
+          description: >-
+            Messages ordered newest first. Follow cursor while next is true,
+            even if data is empty after a concurrent visibility change. Searches
+            are limited to 100 pages and a 3-second SQL execution budget.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropSearchPage"
+        "400":
+          description: >-
+            At least one of term or author_id is required; term must contain 3
+            to 200 characters
   /feed:
     get:
       tags:
@@ -26216,7 +26298,10 @@ components:
         - has_more
       properties:
         cards:
-          description: Authorized card content and native summaries when include=cards. May be a sparse subset in a different order than data; join by entry.id, never by array position.
+          description: >-
+            Authorized card content and native summaries when include=cards. May
+            be a sparse subset in a different order than data; join by entry.id,
+            never by array position.
           type: array
           items:
             $ref: "#/components/schemas/ApiCompetitionEntryContext"
@@ -26335,7 +26420,10 @@ components:
         - has_more
       properties:
         cards:
-          description: Authorized card content and native summaries when include=cards. May be a sparse subset in a different order than data; join by entry.id, never by array position.
+          description: >-
+            Authorized card content and native summaries when include=cards. May
+            be a sparse subset in a different order than data; join by entry.id,
+            never by array position.
           type: array
           items:
             $ref: "#/components/schemas/ApiCompetitionEntryContext"
@@ -26387,6 +26475,13 @@ components:
         - next_cursor
         - has_more
       properties:
+        cards:
+          description: >-
+            Authorized card content and native summaries when include=cards. May
+            be sparse or differently ordered; join by entry.id.
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionEntryContext"
         data:
           type: array
           items:
@@ -29557,6 +29652,16 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/ApiProfileRepCategorySummary"
+    ApiDropSearchPage:
+      allOf:
+        - $ref: "#/components/schemas/ApiDropV2PageWithoutCount"
+        - type: object
+          properties:
+            cursor:
+              type: string
+              description: >-
+                Opaque continuation cursor. Present when next is true, including
+                for an empty filtered page.
     ApiDropSearchStrategy:
       type: string
       enum:
@@ -34255,6 +34360,18 @@ components:
     ApiNotificationAdditionalContextV2:
       type: object
       properties:
+        reason:
+          $ref: "#/components/schemas/ApiVotingCreditReleaseReason"
+        submission_title:
+          type: string
+          description: Submission title saved before winning or deletion.
+        credit_type:
+          type: string
+          description: Credit type at the time of release.
+        released_at:
+          type: integer
+          format: int64
+          description: Release timestamp in Unix milliseconds.
         artwork_name:
           type: string
           description: >-
@@ -34376,6 +34493,11 @@ components:
         event_type, wave_id, competition_id and competition_title; winner events
         also include entry_id and drop_id. These identify the native competition
         destination independently of the shared drop's legacy projection.
+        VOTING_CREDITS_RETURNED includes event_id, reason, wave_id,
+        competition_id, competition_title, entry_id, drop_id, submission_title,
+        credit_type, amount and released_at. Amount is the positive released
+        allocation, independent of time-weighted winning scores. Related drops
+        are not required.
     ApiNotificationCause:
       type: string
       enum:
@@ -34395,6 +34517,7 @@ components:
         - SUBSCRIPTION_COVERAGE
         - COMPETITION_LIFECYCLE
         - MEME_COLLABORATION
+        - VOTING_CREDITS_RETURNED
     ApiNotificationDropReactedReactor:
       type: object
       required:
@@ -38420,6 +38543,12 @@ components:
           type: boolean
         enforce_hashes:
           type: boolean
+    ApiVotingCreditReleaseReason:
+      type: string
+      description: Why an active WAVE-scoped voting allocation was released.
+      enum:
+        - WIN
+        - AUTHOR_DELETED
     ApiWallet:
       type: object
       required:

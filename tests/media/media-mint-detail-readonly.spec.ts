@@ -1,4 +1,5 @@
 import { defineMobileVideoBatteryTest } from "./mobileVideoBatteryCases";
+import { defineCollectorsLeaderboardTests } from "./collectorsLeaderboardCases";
 import {
   defineNftImageLayoutTests,
   expectContainedImage,
@@ -207,20 +208,14 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     await expect(page).toHaveURL(/focus=collectors/);
     await expect(
       page
-        .getByRole("table")
-        .filter({
-          has: page.getByRole("button", {
-            name: "Sort Balance ascending",
-            exact: true,
-          }),
-        })
-        .getByRole("row")
-        .nth(1)
+        .getByRole("list", { name: "Collectors leaderboard" })
+        .getByRole("listitem")
+        .first()
     ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await expect(
       page
-        .getByRole("button", { name: "Sort Balance ascending", exact: true })
-        .first()
+        .getByRole("group", { name: "Sort collectors by" })
+        .getByRole("button", { name: "Balance", exact: true })
     ).toBeVisible();
     await expect(
       page.getByRole("button", { name: /Download.*CSV/i })
@@ -236,6 +231,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     ).toBeVisible();
   });
 
+  defineCollectorsLeaderboardTests();
   test("renders The Memes card detail shell", async ({ page }) => {
     await gotoReady(page, "/the-memes/1");
 

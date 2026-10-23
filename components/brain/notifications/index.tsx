@@ -44,6 +44,7 @@ const NOTIFICATION_CAUSE_PRIORITY: Record<NotificationCause, number> = {
   [ApiNotificationCause.SubscriptionCoverage]: 13,
   [ApiNotificationCause.CompetitionLifecycle]: 14,
   [ApiNotificationCause.MemeCollaboration]: 15,
+  [ApiNotificationCause.VotingCreditsReturned]: 16,
 };
 
 const compareNotificationCause = (

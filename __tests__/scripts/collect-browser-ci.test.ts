@@ -54,6 +54,7 @@ function select(files: string[]) {
 }
 it.each([
   "components/collect/CollectTradeForm.tsx",
+  "components/nft-market-depth/MarketDepthPriceLevels.tsx",
   "components/the-memes/MemePageLiveStats.tsx",
   "tests/collect/collect-public.spec.ts",
   "components/user/collected/stats/useCollectedStatsData.ts",
@@ -125,7 +126,7 @@ it("selects every core browser lane when their shared workflow changes", () => {
     ],
   });
 });
-it("runs only the isolated Collect spec on both supported browser viewports", () => {
+it("runs the isolated Collect and market specs on both supported browser viewports", () => {
   const job = workflow.jobs["core-playwright-checks"]!;
   const step = job.steps.find(
     (item) => item.name === "Run Collect public browser pack"
@@ -137,6 +138,9 @@ it("runs only the isolated Collect spec on both supported browser viewports", ()
   expect(step.env?.["PLAYWRIGHT_READONLY"]).toBe("1");
   expect(step.run).toContain(
     "playwright test tests/collect/collect-public.spec.ts"
+  );
+  expect(step.run).toContain(
+    "tests/collect/memelab-marketplace-public.spec.ts"
   );
   expect(step.run).toContain("--project=web-desktop-chromium");
   expect(step.run).toContain("--project=web-mobile-chromium");

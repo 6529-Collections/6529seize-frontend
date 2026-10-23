@@ -206,10 +206,14 @@ export async function renderWavesPageContent({
   waveId,
   searchParams,
   routeContext = "waves",
+  includePublicPreview = true,
+  includeServerFeedSeed = true,
 }: {
   waveId: string | null;
   searchParams: WavesSearchParams;
   routeContext?: "waves" | "messages" | undefined;
+  readonly includePublicPreview?: boolean;
+  readonly includeServerFeedSeed?: boolean;
 }) {
   if (waveId === null) {
     return traceServerRouteData(
@@ -275,7 +279,7 @@ export async function renderWavesPageContent({
   const initialFeedRouteFamily =
     routeContext === "messages" ? "/messages/[wave]" : "/waves/[wave]";
   const initialFeedPromise =
-    context.waveId && context.wave
+    includeServerFeedSeed && context.waveId && context.wave
       ? fetchServerWaveFeedSeed({
           headers: context.headers,
           routeFamily: initialFeedRouteFamily,
@@ -283,6 +287,7 @@ export async function renderWavesPageContent({
         })
       : null;
   const publicFeedPromise =
+    includePublicPreview &&
     routeContext === "waves" &&
     context.waveId &&
     context.wave &&

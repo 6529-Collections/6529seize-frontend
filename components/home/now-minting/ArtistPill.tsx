@@ -82,7 +82,7 @@ export default function ArtistPill({
     <Link
       data-home-action="Open artist profile"
       href={href}
-      className="tw-group/artist tw-inline-flex tw-items-center tw-rounded-sm tw-leading-none tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+      className="tw-group/artist tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-center tw-rounded-sm tw-leading-none tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
     >
       {content}
     </Link>

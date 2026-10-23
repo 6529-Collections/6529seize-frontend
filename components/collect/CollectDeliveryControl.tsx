@@ -85,8 +85,11 @@ export default function CollectDeliveryControl({
         >
           {display}
         </span>
-        <span aria-hidden="true">·</span>
+        <span data-collect-delivery-separator aria-hidden="true">
+          ·
+        </span>
         <button
+          data-collect-delivery-change
           ref={trigger}
           type="button"
           disabled={disabled}
