@@ -104,6 +104,14 @@ it("keeps one combobox tab stop and starts a filter from keyboard hints", () => 
   const input = screen.getByRole("combobox");
   input.focus();
   fireEvent.focus(input);
+  const listbox = screen.getByRole("listbox", { name: "Search filters" });
+  expect(input).toHaveAttribute("aria-controls", listbox.id);
+  expect(input).toHaveAttribute("aria-expanded", "true");
+  const activeOptionId = input.getAttribute("aria-activedescendant");
+  expect(document.getElementById(activeOptionId!)).toHaveAttribute(
+    "role",
+    "option"
+  );
   const hints = screen.getAllByRole("option");
   expect(hints).toHaveLength(2);
   hints.forEach((hint) => expect(hint).toHaveAttribute("tabindex", "-1"));
