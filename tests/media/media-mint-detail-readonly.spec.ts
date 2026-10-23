@@ -1,5 +1,6 @@
 import { defineMobileVideoBatteryTest } from "./mobileVideoBatteryCases";
 import { defineCollectorsLeaderboardTests } from "./collectorsLeaderboardCases";
+import { defineNftMarketActivityTests } from "./nftMarketActivityCases";
 import {
   defineNftImageLayoutTests,
   expectContainedImage,
@@ -55,6 +56,7 @@ function isProductionBaseURL(baseURL?: string) {
 
 test.describe("Media, mint, and detail read-only coverage @surface @medium @large @readonly", () => {
   defineCollectorsLeaderboardTests();
+  defineNftMarketActivityTests();
   test("renders The Memes card detail shell", async ({ page }) => {
     await gotoReady(page, "/the-memes/1");
 
