@@ -143,7 +143,7 @@ function BatchReviewDraft({
         )}
         <fieldset
           disabled={loading}
-          className="tw-m-0 tw-min-w-0 tw-border-0 tw-px-4 tw-pb-4 tw-pt-3 [&>div>div>div>button]:tw-ml-auto [&>div>div>div>button]:tw-border [&>div>div>div>button]:tw-border-solid [&>div>div>div>button]:tw-border-white/15 [&>div>div>div>button]:tw-px-4 [&>div>div>div>button]:tw-no-underline [&>div>div>div>span[aria-hidden]]:tw-hidden [&>div]:tw-clear-both"
+          className="tw-m-0 tw-min-w-0 tw-border-0 tw-px-4 tw-pb-4 tw-pt-3 [&>div]:tw-clear-both [&_[data-collect-delivery-change]]:tw-ml-auto [&_[data-collect-delivery-change]]:tw-border [&_[data-collect-delivery-change]]:tw-border-solid [&_[data-collect-delivery-change]]:tw-border-white/15 [&_[data-collect-delivery-change]]:tw-px-4 [&_[data-collect-delivery-change]]:tw-no-underline [&_[data-collect-delivery-separator]]:tw-hidden"
         >
           <legend className="tw-float-left tw-mb-1 tw-w-full tw-text-xs tw-font-medium tw-text-iron-400">
             {t(locale, "collect.batchReview.defaultDelivery")}
