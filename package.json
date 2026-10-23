@@ -23,7 +23,7 @@
     "build:ci": "node scripts/require-6529-command.cjs && pnpm run prebuild && pnpm run base-build && pnpm run museum:build-cardinality && pnpm run postbuild",
     "help-index:sync": "node scripts/require-6529-command.cjs && node scripts/sync-help-index.cjs",
     "agent-files:sync": "node scripts/require-6529-command.cjs && node scripts/sync-agent-files.cjs",
-    "prebuild": "node scripts/require-6529-command.cjs && pnpm run build:env-schema && pnpm run generate && pnpm run help-index:sync && pnpm run agent-files:sync",
+    "prebuild": "node scripts/require-6529-command.cjs && node scripts/memes-calendar.mjs check && pnpm run build:env-schema && pnpm run generate && pnpm run help-index:sync && pnpm run agent-files:sync",
     "postbuild": "node scripts/require-6529-command.cjs && next-sitemap --config next-sitemap.build.cjs",
     "museum:publication-snapshot": "node scripts/require-6529-command.cjs && tsx scripts/build-museum-publication-snapshot.ts",
     "start": "node scripts/require-6529-command.cjs && node scripts/start-next.cjs",
@@ -170,7 +170,10 @@
     "quality": "node scripts/require-6529-command.cjs && node scripts/quality.js",
     "quality:changed": "node scripts/require-6529-command.cjs && node scripts/quality.js --changed",
     "quality:cr": "node scripts/require-6529-command.cjs && node scripts/quality.js --coderabbit",
-    "quality:cr:changed": "node scripts/require-6529-command.cjs && node scripts/quality.js --changed --coderabbit"
+    "quality:cr:changed": "node scripts/require-6529-command.cjs && node scripts/quality.js --changed --coderabbit",
+    "calendar:check": "node scripts/require-6529-command.cjs && node scripts/memes-calendar.mjs check",
+    "calendar:refresh": "node scripts/require-6529-command.cjs && node scripts/memes-calendar.mjs refresh",
+    "calendar:sync": "node scripts/require-6529-command.cjs && node scripts/memes-calendar.mjs sync"
   },
   "dependencies": {
     "@adraffy/ens-normalize": "1.11.1",
