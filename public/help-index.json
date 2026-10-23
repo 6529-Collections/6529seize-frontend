@@ -6397,6 +6397,7 @@
       "keywords": ["profile", "followers", "following", "social"],
       "facts": [
         "Open Followers in a profile's header to see its followers in a dialog or mobile sheet. The legacy /{user}/followers route redirects to the profile.",
+        "When a successful request confirms zero followers, the Followers dialog or mobile sheet says No followers yet. This message is not shown while loading or after a failed request.",
         "On your own signed-in profile, Following appears beside Followers with the total number of identities you follow. Open it to rediscover profiles by their image, handle and level, visit profile links, or unfollow them.",
         "Scroll or choose Load more for additional followed identities. Follow/unfollow actions refresh the list and total.",
         "Following is hidden when signed out, viewing someone else's profile, or using a profile proxy. Public following lists for other identities are not available.",
@@ -6408,6 +6409,7 @@
       "source_refs": [
         "app/[user]/followers/page.tsx",
         "components/user/following/UserPageFollowing.tsx",
+        "components/user/followers/UserPageFollowersModal.tsx",
         "ops/docs/profiles/navigation/feature-header-summary.md"
       ]
     },

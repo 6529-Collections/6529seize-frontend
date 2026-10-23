@@ -1361,6 +1361,7 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
   "modal.title": "Followers",
   "list.label": "Followers",
   "list.loading": "Loading followers",
+  "list.empty": "No followers yet.",
   "profile.linkAriaLabel": "View {handle}'s profile",
   "profile.avatarAlt": "{handle}'s profile image",
 } as const);

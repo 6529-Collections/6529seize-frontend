@@ -120,6 +120,9 @@ at `/{user}`. To create or edit a website, open `/{user}/cms/builder`.
 - If header-side fetches fail (BIO statement, profile-enabled date, followers
   count), the profile route still loads and missing header fields are omitted.
 - Followers count falls back to `0` if the count request fails.
+- The Followers dialog or mobile sheet says `No followers yet.` after a
+  successful request confirms zero followers. Loading or failed list requests
+  do not show this empty-state message.
 - Following shows a loading indicator while its first request runs. A failed
   request shows `Unavailable`, not `0`. Open the list and choose `Retry`.
 - If a later page fails, already loaded identities remain visible with `Retry`.
@@ -141,7 +144,8 @@ at `/{user}`. To create or edit a website, open `/{user}/cms/builder`.
 - Following is private to your own authenticated profile. It is hidden when
   signed out, viewing another profile, or acting through a profile proxy.
 - Switching accounts or entering a proxy session closes the Following list.
-- New Following copy falls back to English in locales without translations.
+- New Following and empty Followers copy falls back to English in locales
+  without translations.
 - Direct-message action requires a signed-in viewer with a handle, a viewed
   profile with a handle, and a target primary wallet.
 - Artist badge and modal tabs depend on loaded

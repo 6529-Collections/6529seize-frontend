@@ -158,7 +158,29 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
         });
       }
     );
+    await page.route(
+      `${api}/api/**identity-subscriptions/incoming/IDENTITY/**`,
+      (route) =>
+        route.fulfill({
+          json: { data: [], count: 0, page: 1, next: false },
+        })
+    );
     await openOwnProfile(page);
+    const followersOpener = page.getByRole("button", {
+      name: /Open playwright's followers:/,
+    });
+    await followersOpener.press("Enter");
+    const followersDialog = page.getByRole("dialog", {
+      name: "Followers",
+      exact: true,
+    });
+    await expect(followersDialog.getByText("No followers yet.")).toBeVisible();
+    await expectAxeClean(page, { include: ['[role="dialog"]'] });
+    await page.screenshot({ path: testInfo.outputPath("followers-empty.png") });
+    await followersDialog
+      .getByRole("button", { name: "Close", exact: true })
+      .click();
+    await expect(followersOpener).toBeFocused();
     const opener = page.getByRole("button", {
       name: "Open your following list: 101",
     });
