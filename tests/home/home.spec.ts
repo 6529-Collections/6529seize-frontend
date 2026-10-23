@@ -495,90 +495,29 @@ test("Coming Up keeps collaborator credits compact and accessible @smoke @medium
   });
 });
 
-for (const hasBoostedDrops of [false, true]) {
-  test(`Coming Up loads while boosted cards are pending, with ${hasBoostedDrops ? "populated" : "empty"} results @smoke @medium @large`, async ({
-    page,
-  }) => {
-    await installComingUpFixture(page);
-    await page.route(comingUpLeaderboardPattern, (route) =>
-      route.fulfill({ json: comingUpLeaderboard })
-    );
-    const previewUrl = "https://example.com/boosted-startup-preview";
-    const boostedDrop = {
-      ...comingUpLeaderboard.drops[0],
-      id: "boosted-startup",
-      serial_no: 42,
-      drop_type: "CHAT",
-      boosts: 5,
-      content: previewUrl,
-      wave: comingUpWave,
-      moderation: { status: "VISIBLE", can_view: true },
-    };
-    const boostedReady = Promise.withResolvers<void>();
-    await page.route("**/api/v2/boosted-drops?*", async (route) => {
-      await boostedReady.promise;
-      await route.fulfill({
-        json: {
-          data: hasBoostedDrops ? [boostedDrop] : [],
-          page: 1,
-          count: hasBoostedDrops ? 1 : 0,
-          next: false,
-        },
-      });
-    });
-    await page.route("**/api/open-graph*", (route) =>
-      route.fulfill({ status: 503, json: {} })
-    );
-
-    try {
-      await page.goto("/", { waitUntil: "domcontentloaded" });
-      const comingUp = page.getByRole("region", {
-        name: "Coming up",
-        exact: true,
-      });
-      await expect(
-        comingUp.getByRole("link", { name: "Coming Up artwork 3", exact: true })
-      ).toBeVisible();
-      await expect(page.getByText("Loading...", { exact: true })).toBeVisible();
-
-      boostedReady.resolve();
-      await expect(page.getByText("Loading...", { exact: true })).toHaveCount(
-        0
-      );
-      if (!hasBoostedDrops) {
-        await expect(
-          page.getByText("Boosted Drops", { exact: true })
-        ).toHaveCount(0);
-        return;
-      }
-
-      const openDrop = page.getByRole("button", {
-        name: "Open boosted drop from coming-up-artist",
-        exact: true,
-      });
-      await expect(openDrop).toBeVisible();
-      await expect(
-        page.getByRole("link", {
-          name: "example.com example.com/boosted-startup-preview",
-          exact: true,
-        })
-      ).toHaveAttribute("href", previewUrl);
-      await expectNoHorizontalOverflow(page);
-      // The preview is its own link; use the card's keyboard action to open the drop.
-      await openDrop.focus();
-      // Navigation includes cold route compilation in the development CI server.
-      await Promise.all([
-        page.waitForURL(
-          new RegExp(`/waves/${comingUpWave.id}\\?serialNo=42$`),
-          { waitUntil: "domcontentloaded" }
-        ),
-        openDrop.press("Enter"),
-      ]);
-    } finally {
-      boostedReady.resolve();
-    }
+test("Coming Up loads without a homepage Boosted section or request @smoke @medium @large", async ({
+  page,
+}) => {
+  await installComingUpFixture(page);
+  await page.route(comingUpLeaderboardPattern, (route) =>
+    route.fulfill({ json: comingUpLeaderboard })
+  );
+  const boostedRequests: string[] = [];
+  await page.route("**/api/v2/boosted-drops?*", async (route) => {
+    boostedRequests.push(route.request().url());
+    await route.fulfill({ json: { data: [], page: 1, count: 0, next: false } });
   });
-}
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const comingUp = page.getByRole("region", { name: "Coming up", exact: true });
+  await expect(
+    comingUp.getByRole("link", { name: "Coming Up artwork 3", exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Boosted Drops", exact: true })
+  ).toHaveCount(0);
+  expect(boostedRequests).toEqual([]);
+  await expectNoHorizontalOverflow(page);
+});
 
 test("Coming Up retains cards across navigation and a failed refresh @smoke @medium @large", async ({
   page,
@@ -1145,16 +1084,14 @@ test.describe("Home Page @smoke @medium @large", () => {
     await expect(comingUp).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     const isNarrowViewport = await page.evaluate(() => innerWidth < 768);
     const viewportWidth = await page.evaluate(() => innerWidth);
-    let sectionTitleSize = "24px";
-    if (viewportWidth < 768) sectionTitleSize = "20px";
-    else if (viewportWidth < 1024) sectionTitleSize = "22px";
+    const sectionTitleSize = isNarrowViewport ? "28px" : "38px";
     await expect(page.getByText(/^(Latest|Next) Drop$/)).toHaveCSS(
       "font-size",
-      sectionTitleSize
+      viewportWidth < 768 ? "28px" : "38px"
     );
     await expect(page.getByText(/^(Latest|Next) Drop$/)).toHaveCSS(
       "margin-bottom",
-      "20px"
+      viewportWidth < 768 ? "28px" : "32px"
     );
     // Both section actions belong in the header and must leave the title clear.
     for (const section of [
@@ -1173,11 +1110,14 @@ test.describe("Home Page @smoke @medium @large", () => {
       const subtitle = section
         .getByRole("heading", { level: 2 })
         .locator("xpath=following-sibling::p");
-      await expect(subtitle).toHaveCSS("font-size", "14px");
-      await expect(subtitle).toHaveCSS("margin-top", "4px");
+      await expect(subtitle).toHaveCSS(
+        "font-size",
+        isNarrowViewport ? "14px" : "15px"
+      );
+      await expect(subtitle).toHaveCSS("margin-top", "12px");
       await expect(
         section.getByRole("heading", { level: 2 }).locator("../..")
-      ).toHaveCSS("margin-bottom", "20px");
+      ).toHaveCSS("margin-bottom", isNarrowViewport ? "28px" : "32px");
       expect(
         await section.evaluate((section) => {
           const heading = section.querySelector("h2");
@@ -1199,17 +1139,16 @@ test.describe("Home Page @smoke @medium @large", () => {
       ).toBe(true);
 
       if (isNarrowViewport) {
-        const subtitleGap = await section.evaluate((section) => {
+        const linkGap = await section.evaluate((section) => {
           const subtitle = section.querySelector("p")!;
           const link = section.querySelector('[data-home-action="View all"]')!;
           return (
-            subtitle.getBoundingClientRect().top -
-            link.getBoundingClientRect().bottom
+            link.getBoundingClientRect().top -
+            subtitle.getBoundingClientRect().bottom
           );
         });
-        // The requested compact header uses a 4px subtitle gap; the action
-        // remains contained within the title row rather than hanging below it.
-        expect(subtitleGap).toBeGreaterThanOrEqual(4);
+        // The approved mobile layout puts the text action below the subtitle.
+        expect(linkGap).toBeGreaterThanOrEqual(12);
       }
     }
 
@@ -1228,6 +1167,36 @@ test.describe("Home Page @smoke @medium @large", () => {
         ).toBeCloseTo(24, 0);
       }
     }
+
+    const start = page.getByRole("region", {
+      name: "How to start",
+      exact: true,
+    });
+    await expect(start).toBeVisible();
+    await expect(start.getByRole("listitem")).toHaveCount(4);
+    await expect(
+      start.getByRole("link", { name: "Create profile", exact: true })
+    ).toHaveAttribute("href", "/join-6529#join-step-profile");
+    const steps = await start
+      .getByRole("listitem")
+      .evaluateAll((items) =>
+        items.map((item) => item.getBoundingClientRect().toJSON())
+      );
+    for (let index = 1; index < steps.length; index++) {
+      if (isNarrowViewport)
+        expect(steps[index]!.top).toBeGreaterThan(steps[index - 1]!.bottom);
+      else expect(steps[index]!.top).toBeCloseTo(steps[0]!.top, 0);
+    }
+    const guide = start.getByRole("link", {
+      name: "Open the Join 6529 guide",
+      exact: true,
+    });
+    await guide.focus();
+    await expect(guide).toBeFocused();
+    await expect(guide).toHaveCSS(
+      "min-height",
+      isNarrowViewport ? "40px" : "32px"
+    );
 
     const footer = page
       .getByRole("link", { name: "Terms of Service", exact: true })
@@ -1370,23 +1339,22 @@ test.describe("Home Page @smoke @medium @large", () => {
     for (const action of await secondaryActions.all()) {
       const isViewAll =
         (await action.getAttribute("data-home-action")) === "View all";
-      const isMobileViewAllLink = isNarrowViewport && isViewAll;
-      const borderOpacity = isViewAll ? 0.15 : 0.1;
-      if (isMobileViewAllLink) {
+      if (isViewAll) {
         await expect(action).toHaveCSS("border-width", "0px");
-        await expect(action).toHaveCSS("height", "28px");
+        await expect(action).toHaveCSS(
+          "min-height",
+          isNarrowViewport ? "40px" : "32px"
+        );
       } else {
         await expect(action).toHaveCSS("border-width", "1px");
         await expect(action).toHaveCSS(
           "border-color",
-          `rgba(255, 255, 255, ${borderOpacity})`
+          "rgba(255, 255, 255, 0.1)"
         );
       }
       await expect(action).toHaveCSS(
         "background-color",
-        isMobileViewAllLink
-          ? "rgba(0, 0, 0, 0)"
-          : `rgba(255, 255, 255, ${isViewAll ? 0.04 : 0.07})`
+        isViewAll ? "rgba(0, 0, 0, 0)" : "rgba(255, 255, 255, 0.07)"
       );
     }
 
@@ -1425,14 +1393,26 @@ test.describe("Home Page @smoke @medium @large", () => {
         const isStartHere =
           (await action.getAttribute("data-home-action")) === "Get started";
         await action.hover();
-        await expect(action).toHaveCSS(
-          "border-color",
-          `rgba(255, 255, 255, ${isStartHere ? 0.2 : 0.3})`
-        );
-        await expect(action).toHaveCSS(
-          "background-color",
-          `rgba(255, 255, 255, ${isStartHere ? 0.1 : 0.08})`
-        );
+        if (isStartHere) {
+          await expect(action).toHaveCSS(
+            "border-color",
+            "rgba(255, 255, 255, 0.2)"
+          );
+          await expect(action).toHaveCSS(
+            "background-color",
+            "rgba(255, 255, 255, 0.1)"
+          );
+        } else {
+          await expect(action).toHaveCSS("color", "rgb(255, 255, 255)");
+          await expect(action).toHaveCSS(
+            "text-decoration-color",
+            "rgba(255, 255, 255, 0.6)"
+          );
+          await expect(action).toHaveCSS(
+            "background-color",
+            "rgba(0, 0, 0, 0)"
+          );
+        }
       }
     }
 

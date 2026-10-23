@@ -55,26 +55,32 @@ sections:
    - Accessible name: `Open network health dashboard`
    - Tooltip/title: `Network health`
 6. The latest-drop slot resolves independently.
-7. Below that slot, the mission block renders with:
-   - Subtle blue-grey radial background glow
-   - Heading: `6529 is a network society`, with medium weight and muted color
-   - Muted mission paragraph, left-aligned at every screen size
-   - Muted uppercase line: `The long-term goal is nation-scale positive impact.`,
-     introduced by a green dot
-   - Supporting region labeled `Mission statement`, with Montserrat text in a
-     rounded box with a faint border and background. It is vertically centered
-     beside the heading, paragraph, and goal on desktop, and sits below the goal
-     on smaller screens.
-8. Selecting the heart icon opens `/network/health`.
+7. Logged-out visitors see `How to start` after the latest-drop slot:
+   - `Connect wallet` opens the same wallet flow as the hero button.
+   - `Create profile` opens `/join-6529#join-step-profile` to continue the
+     existing onboarding flow.
+   - `View collections` opens `/the-memes`; `Browse Waves` opens `/waves`.
+   - `Open the Join 6529 guide` opens `/join-6529`; the wallet/ETH question
+     opens `/join-6529#faq`.
+   - Desktop shows four numbered columns. Mobile shows a vertical timeline.
+   - The mint/subscription sentence is omitted during server rendering and on
+     restricted native iOS (outside the US or unknown country). Those visitors
+     see a browsing/community description; collection browsing remains available.
+8. The mission block shows `6529 is a network society` beside the Bitcoin and
+   Ethereum sentence, with `human coordination itself,` emphasized. On mobile
+   the paragraph follows the heading. The long-term goal appears beneath it
+   in a quiet outlined label. The hero already contains the public-goods
+   definition, so it is not repeated here.
+9. Selecting the heart icon opens `/network/health`.
 
 ## Common Scenarios
 
 - Desktop/tablet: health shortcut is visible near the top-right.
 - Mobile/app small-screen: health shortcut is visible in the header action row.
 - Logged-out or unauthenticated: the compact newcomer actions appear before
-  the dashboard-style activity sections.
+  the activity sections; How to start follows the latest-drop slot.
 - Authenticated: the same hero copy and artwork remain visible; the newcomer
-  actions and What is 6529? explanation are not shown.
+  actions, What is 6529? explanation, and How to start are not shown.
 - Latest-drop data unavailable: mission block still renders below the slot.
 
 ## Edge Cases
@@ -83,7 +89,7 @@ sections:
   on hover and a visible keyboard-focus ring.
 - Reduced-motion settings keep the fan still and make button colour changes immediate.
 - While wallet state is initializing or connecting, the page does not assume
-  the visitor is logged out. The newcomer actions and explanation appear once that state
+  the visitor is logged out. The newcomer actions, explanation, and steps appear once that state
   resolves.
 - If a wallet is present but authentication is not valid, the newcomer
   actions remain available so the visitor can continue through onboarding.
@@ -104,21 +110,21 @@ sections:
 - Home activity remains public; the visitor actions provide onboarding entry
   points rather than gating the dashboard content.
 - Core interactive actions for home continue in sections below (`Latest Drop`,
-  `Coming up`, `Boosted Drops`, and `Most active waves`).
+  `Coming up` and Waves).
 
 ## Related Pages
 
 - [Home Index](README.md)
 - [Home Landing and Section Navigation Flow](flow-home-landing-and-section-navigation.md)
 - [Home Latest Drop and Coming Up](feature-home-latest-drop-and-coming-up.md)
-- [Home Boosted Drops and Most Active Waves](feature-home-discovery-grids.md)
+- [Home Waves Discovery](feature-home-discovery-grids.md)
 - [Home Route and Section Visibility Troubleshooting](troubleshooting-home-route-and-section-visibility.md)
 - [Network Health Dashboard](../network/feature-health-dashboard.md)
 - [Docs Home](../README.md)
 
 ## Localization
 
-Hero and What is 6529? copy and accessible names use the message dictionary.
+Hero, What is 6529?, How to start, and mission copy use the message dictionary.
 The approved English copy currently falls back unchanged for en-GB, fr-FR,
 es-ES, and de-DE. The homepage localization follow-up owns translation review
 and layout verification for these headings, descriptions, and link labels.

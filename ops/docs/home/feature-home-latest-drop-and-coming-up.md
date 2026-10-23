@@ -292,13 +292,25 @@ bring each card into view.
   `about.subscriptions.*` message family to each partial locale dictionary and
   repeat the responsive and assistive-technology QA pass.
 
+## Homepage Presentation
+
+- The homepage Next Drop card uses a darker surface, quiet separators, and a
+  subtle subscription-row treatment. The same panel on the upcoming Meme page
+  retains its existing appearance.
+- Artwork dimensions, grid proportions, details spacing, and type sizes are
+  unchanged. Desktop image height follows the details column, so this refinement
+  changes colour and decoration without changing that column's geometry.
+- Wave, Submitted, Rating, and Mint date labels remain uppercase. All artist and
+  collaborator information, media actions, allowance information, subscription
+  controls, and existing disclosure behavior remain available.
+
 ## Related Pages
 
 - [Home Index](README.md)
 - [Home Landing and Section Navigation Flow](flow-home-landing-and-section-navigation.md)
 - [Home Route and Section Visibility Troubleshooting](troubleshooting-home-route-and-section-visibility.md)
 - [Home Header and Mission Block](feature-home-header-and-mission.md)
-- [Home Boosted Drops and Most Active Waves](feature-home-discovery-grids.md)
+- [Home Waves Discovery](feature-home-discovery-grids.md)
 - [Now Minting Countdown](../media/memes/feature-now-minting-countdown.md)
 - [Latest Drop Stats Grid](../media/memes/feature-latest-drop-stats-grid.md)
 - [Wave Sort and Price Filters](../waves/leaderboard/feature-sort-and-group-filters.md)

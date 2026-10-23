@@ -1,7 +1,7 @@
 "use client";
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { BoostedSection } from "@/components/home/boosted/BoostedSection";
+import HomeHowToStart from "@/components/home/newcomer/HomeHowToStart";
 import { ExploreWavesSection } from "@/components/home/explore-waves/ExploreWavesSection";
 import HomePageTextSection from "@/components/home/HomePageTextSection";
 import HomeNewcomerIntro from "@/components/home/newcomer/HomeNewcomerIntro";
@@ -29,13 +29,10 @@ export default function HomePageContent() {
       <HeroHeader>{showNewcomerIntro && <HomeNewcomerIntro />}</HeroHeader>
       {showNewcomerIntro && <HomeWhatIs6529 />}
       <LatestDropSection />
+      {showNewcomerIntro && <HomeHowToStart />}
       <HomePageTextSection />
-      <div className="tw-h-px tw-w-full tw-bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.08)_15%,rgba(255,255,255,0.08)_85%,transparent_100%)]" />
-      <div className="tw-pt-10 md:tw-pt-16">
-        <NextMintLeadingSection />
-        <BoostedSection />
-        <ExploreWavesSection />
-      </div>
+      <NextMintLeadingSection />
+      <ExploreWavesSection />
     </div>
   );
 }

@@ -43,8 +43,9 @@ jest.mock("@/components/home/next-mint-leading/NextMintLeadingSection", () => ({
   NextMintLeadingSection: () => <div>Next mint</div>,
 }));
 
-jest.mock("@/components/home/boosted/BoostedSection", () => ({
-  BoostedSection: () => <div>Boosted drops</div>,
+jest.mock("@/components/home/newcomer/HomeHowToStart", () => ({
+  __esModule: true,
+  default: () => <div>How to start</div>,
 }));
 
 jest.mock("@/components/home/explore-waves/ExploreWavesSection", () => ({
@@ -72,13 +73,17 @@ describe("HomePageContent", () => {
 
       const intro = screen.queryByText("Newcomer intro");
       const explanation = screen.queryByText("What is 6529?");
+      const steps = screen.queryByText("How to start");
       if (expected) {
         expect(intro).toBeInTheDocument();
         expect(explanation).toBeInTheDocument();
+        expect(steps).toBeInTheDocument();
       } else {
         expect(intro).not.toBeInTheDocument();
         expect(explanation).not.toBeInTheDocument();
+        expect(steps).not.toBeInTheDocument();
       }
+      expect(screen.queryByText("Boosted drops")).not.toBeInTheDocument();
       expect(screen.getByText("Latest drop")).toBeInTheDocument();
     }
   );

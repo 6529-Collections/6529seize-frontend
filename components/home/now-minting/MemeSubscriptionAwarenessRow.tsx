@@ -260,10 +260,10 @@ export default function MemeSubscriptionAwarenessRow({
         : "home.mintSubscriptions.action.setUp"
     );
   return (
-    <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/25 tw-bg-primary-500/10 tw-px-4 tw-py-3.5 tw-shadow-[0_15px_40px_rgba(0,0,0,0.38)]">
+    <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/25 tw-bg-primary-500/10 tw-px-4 tw-py-3.5 tw-shadow-[0_15px_40px_rgba(0,0,0,0.38)] group-data-[home-next-drop]/home-next-drop:tw-rounded-lg group-data-[home-next-drop]/home-next-drop:tw-border-primary-400/15 group-data-[home-next-drop]/home-next-drop:tw-bg-primary-500/[0.04] group-data-[home-next-drop]/home-next-drop:tw-shadow-none">
       <div className="tw-relative tw-z-10 tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-gap-x-3 tw-gap-y-2">
         <div className="tw-col-span-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 sm:tw-col-span-1">
-          <div className="tw-text-sm tw-font-semibold tw-leading-5 tw-tracking-[-0.01em] tw-text-primary-300 sm:tw-leading-none">
+          <div className="tw-text-sm tw-font-semibold tw-leading-5 tw-tracking-[-0.01em] tw-text-primary-300 group-data-[home-next-drop]/home-next-drop:tw-text-iron-200 sm:tw-leading-none">
             {t(locale, "home.mintSubscriptions.awarenessLabel")}
           </div>
           <ReadonlySubscriptionToggle
