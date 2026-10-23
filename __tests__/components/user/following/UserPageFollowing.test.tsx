@@ -99,7 +99,7 @@ function setup(
 
 beforeEach(() => {
   jest.resetAllMocks();
-  jest.mocked(commonApiFetch).mockResolvedValue(response);
+  jest.mocked(commonApiFetch<unknown>).mockResolvedValue(response);
 });
 
 it.each([
@@ -151,7 +151,7 @@ it("loads only the count until opening the list, then requests its first full pa
 
 it("loads the next page with the button when intersection loading is unavailable", async () => {
   jest
-    .mocked(commonApiFetch)
+    .mocked(commonApiFetch<unknown>)
     .mockResolvedValueOnce({ ...response, count: 2, next: true })
     .mockResolvedValueOnce({ ...response, count: 2, next: true })
     .mockResolvedValueOnce({
@@ -176,7 +176,9 @@ it("loads the next page with the button when intersection loading is unavailable
 });
 
 it("shows loading without a fabricated zero", async () => {
-  jest.mocked(commonApiFetch).mockImplementation(() => new Promise(() => {}));
+  jest
+    .mocked(commonApiFetch<unknown>)
+    .mockImplementation(() => new Promise(() => {}));
   setup();
   fireEvent.click(
     screen.getByRole("button", { name: "Open your following list: …" })
@@ -190,7 +192,7 @@ it("shows loading without a fabricated zero", async () => {
 });
 
 it("shows an error and retries instead of showing an empty list", async () => {
-  jest.mocked(commonApiFetch).mockRejectedValue(new Error("Offline"));
+  jest.mocked(commonApiFetch<unknown>).mockRejectedValue(new Error("Offline"));
   setup();
   fireEvent.click(
     await screen.findByRole("button", {
@@ -202,7 +204,7 @@ it("shows an error and retries instead of showing an empty list", async () => {
     screen.queryByText("You aren't following anyone yet.")
   ).not.toBeInTheDocument();
   jest
-    .mocked(commonApiFetch)
+    .mocked(commonApiFetch<unknown>)
     .mockResolvedValue({ ...response, data: [], count: 0 });
   fireEvent.click(screen.getByRole("button", { name: "Retry" }));
   await screen.findByText("You aren't following anyone yet.");
@@ -257,15 +259,17 @@ it("reuses a fresh list on reopen without fetching another full page", async () 
 
 it("refreshes the count after mutations while fetching list pages only when open", async () => {
   let targets = [target, { ...target, id: "second", handle: "second" }];
-  jest.mocked(commonApiFetch).mockImplementation(async ({ params }) => {
-    const size = Number(params?.["page_size"]);
-    return {
-      data: targets.slice(0, size).map((entry) => ({ target: entry })),
-      count: targets.length,
-      page: 1,
-      next: targets.length > size,
-    };
-  });
+  jest
+    .mocked(commonApiFetch<unknown>)
+    .mockImplementation(async ({ params }) => {
+      const size = Number(params?.["page_size"]);
+      return {
+        data: targets.slice(0, size).map((entry) => ({ target: entry })),
+        count: targets.length,
+        page: 1,
+        next: targets.length > size,
+      };
+    });
   const { client } = setup();
   await screen.findByRole("button", { name: "Open your following list: 2" });
   targets = [...targets, { ...target, id: "third", handle: "third" }];
@@ -275,7 +279,7 @@ it("refreshes the count after mutations while fetching list pages only when open
   });
   expect(
     jest
-      .mocked(commonApiFetch)
+      .mocked(commonApiFetch<unknown>)
       .mock.calls.map(([args]) => args.params?.["page_size"])
   ).toEqual(["1", "1"]);
   fireEvent.click(opener);
@@ -288,7 +292,7 @@ it("refreshes the count after mutations while fetching list pages only when open
     screen.queryByRole("link", { name: "artist" })
   ).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Close" }));
-  jest.mocked(commonApiFetch).mockClear();
+  jest.mocked(commonApiFetch<unknown>).mockClear();
   targets = targets.slice(1);
   act(() => createWaveQueryHandlers(client).onIdentityFollowChange());
   fireEvent.click(
@@ -297,17 +301,19 @@ it("refreshes the count after mutations while fetching list pages only when open
   await waitFor(() => expect(screen.getAllByRole("listitem")).toHaveLength(1));
   expect(
     jest
-      .mocked(commonApiFetch)
+      .mocked(commonApiFetch<unknown>)
       .mock.calls.map(([args]) => args.params?.["page_size"])
   ).toEqual(["1", "100"]);
   expect(screen.getByRole("link", { name: "third" })).toBeVisible();
 });
 
 it("does not mistake a successful zero count for a successful list request", async () => {
-  jest.mocked(commonApiFetch).mockImplementation(async ({ params }) => {
-    if (params?.["page_size"] === "100") throw new Error("List unavailable");
-    return { ...response, data: [], count: 0 };
-  });
+  jest
+    .mocked(commonApiFetch<unknown>)
+    .mockImplementation(async ({ params }) => {
+      if (params?.["page_size"] === "100") throw new Error("List unavailable");
+      return { ...response, data: [], count: 0 };
+    });
   setup();
   fireEvent.click(
     await screen.findByRole("button", { name: "Open your following list: 0" })
@@ -317,7 +323,7 @@ it("does not mistake a successful zero count for a successful list request", asy
     screen.queryByText("You aren't following anyone yet.")
   ).not.toBeInTheDocument();
   jest
-    .mocked(commonApiFetch)
+    .mocked(commonApiFetch<unknown>)
     .mockResolvedValue({ ...response, data: [], count: 0 });
   fireEvent.click(screen.getByRole("button", { name: "Retry" }));
   await screen.findByText("You aren't following anyone yet.");
@@ -326,14 +332,14 @@ it("does not mistake a successful zero count for a successful list request", asy
 it("cancels both private requests on account change and ignores their late responses", async () => {
   const pending: ((value: unknown) => void)[] = [];
   jest
-    .mocked(commonApiFetch)
+    .mocked(commonApiFetch<unknown>)
     .mockImplementation(() => new Promise((resolve) => pending.push(resolve)));
   const { change, client, unmount } = setup();
   fireEvent.click(
     screen.getByRole("button", { name: "Open your following list: …" })
   );
   const oldSignals = jest
-    .mocked(commonApiFetch)
+    .mocked(commonApiFetch<unknown>)
     .mock.calls.map(([args]) => args.signal);
   expect(oldSignals).toHaveLength(2);
   change({ ...auth, connectedProfile: { ...owner, id: "other" } }, "other");
