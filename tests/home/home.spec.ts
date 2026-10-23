@@ -756,8 +756,17 @@ test("Latest Drop keeps multiple artist links spaced within the card @smoke @med
     })
   );
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  const section = page.locator('[data-home-section="Latest drop"]');
-  const artists = section.locator('[data-home-action="Open artist profile"]');
+  const section = page
+    .getByRole("main")
+    .locator('[data-home-section="Latest drop"]');
+  const artists = page
+    .getByRole("main")
+    .locator(
+      '[data-home-section="Latest drop"] [data-home-action="Open artist profile"]'
+    );
+  await expect(
+    section.getByRole("link", { name: loadingTestArtwork.name, exact: true })
+  ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
   await expect(artists).toHaveCount(handles.length);
   const boxes = [];
   for (const handle of handles) {
@@ -940,6 +949,7 @@ test("homepage selects Next Drop without flashing the previous artwork @smoke @m
       "true"
     );
     const credits = page
+      .getByRole("main")
       .locator('[data-home-section="Next drop"]')
       .getByRole("list", { name: "Collaborators" });
     await expect(credits.getByRole("listitem")).toHaveCount(3);
