@@ -37,13 +37,23 @@ rank and the next rank skips those ties. A card without a recorded ranking shows
 ## Read listings and offers
 
 The summaries show the lowest captured listing in ETH and the highest captured
-offer in WETH. Each price list starts with up to ten levels. Use Show all levels
-to reveal the complete list, and Show fewer levels to return to the short view.
+offer in WETH. On large screens, each summary sits above its own list, with the
+order count beside the label. On medium and small screens, both summaries stay
+together above the lists so the highest offer is visible before scrolling through listings.
+The lists stack below them, listings before offers, with their own headings.
+A side without quotes retains its summary with an unavailable value and no table.
+Each price list starts with up to ten levels. Use Show all levels to reveal the complete list, and Show fewer levels to return to the
+short view.
 Listings are ordered from lowest price upward and
-offers from highest price downward. Each level shows its unit price and quantity
-at that price. Total shows the cumulative quoted quantity. On narrow screens,
+offers from highest price downward. The first level has a faint blue background
+and a filled action; other actions are outlined and turn blue on row hover or
+keyboard focus. Subtle horizontal separators distinguish the remaining rows,
+and the expand arrow stays beside the price. Each level
+shows its unit price and quantity at that price. Total shows the cumulative quoted quantity. On narrow screens,
 quantity and total appear below the exact price, with **Collect** or **Sell** in
-a separate column. Expand a price row to
+a separate column. Prices and actions have an inset from the row edges. The price and quantity area opens the details together;
+compact blue actions retain a full touch target, and Show all levels spans the
+list width. Expanded orders align with the list. Expand a price row to
 inspect the captured orders behind that quote, including quoted remaining
 quantity, expiry, scope and applicability. Supported order actions appear before
 the technical disclosure. Open Order information for the wallet,
@@ -62,13 +72,17 @@ listing price and **Sell** beside offer prices. A level with one loaded order
 acts on that exact order directly. When several orders share a price, the action
 opens the orders so you can choose one; it does not silently pick a seller or
 offer. The price disclosure remains available for inspecting details.
-The compact and expanded order actions use the same blue action buttons. A busy
+The first price level and expanded orders use filled blue action buttons;
+other price levels use the outlined treatment described above. A busy
 order check disables its action while keeping its accessible name.
 For **Collect**, the site checks that exact listing and adds it to your selection.
 Set **Quantity** for supported editions, or choose
 **Remove** to take it out. Some listings must be collected as a complete lot.
 
-Select one or more listings, then choose **Review selected listings**. The site
+Selected listings keep **Quantity** inside the same neutral card. While any
+listing is selected, **Review selected listings** stays in a sticky bottom bar
+within Listings & offers, above mobile navigation. The bar disappears when the
+selection is empty. The site
 checks each selected order again before opening the purchase review. Choose your
 delivery wallet using the same **Deliver to · Change** picker as minting, including
 your consolidated wallets or **Send to a fren**. Review the total, fees and gas
@@ -78,7 +92,9 @@ delivery address and offers **Price breakdown**, **Exact amounts** and
 changed terms require another review. Supported purchases and deliveries succeed
 together in one transaction or all revert; a revert can still cost gas.
 The selection review fills the screen with a persistent **Back to collecting**
-control. **Deliver all to** sets a common destination; **Change delivery for this
+control. The selection screen groups its existing wallet connection message and
+**Default delivery** controls, with the estimate and review actions at the bottom.
+**Deliver all to** sets a common destination; **Change delivery for this
 artwork** retains per-item exceptions and split details. **Remove** checks and
 requotes the remaining exact orders; a failed update keeps the original review.
 Removing the last item closes an unsigned review only after pending-purchase
@@ -113,7 +129,8 @@ These are captured OpenSea quotes, not a live promise that an order can be
 executed. Multiple listings can share the same seller's inventory, and
 multiple offers can share a bidder's funds. A collection offer has one shared
 budget across eligible cards, so quoted quantities can overlap. Use the About
-these prices details in the panel when interpreting the snapshot.
+these prices details in the panel when interpreting the snapshot. The disclosure
+sits on its own row below the source text, aligned to the left.
 
 Private, inactive and expired orders are excluded from current public depth.
 Some complex orders have no supported fixed unit price or verified eligibility

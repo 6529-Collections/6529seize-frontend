@@ -94,7 +94,7 @@ export default function CollectBatchReviewItem({
   }
   return (
     <li className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-py-4">
-      <div className="tw-flex tw-items-start tw-gap-3">
+      <div className="tw-grid tw-grid-cols-[44px_56px_minmax(0,1fr)] tw-items-start tw-gap-x-3 tw-gap-y-2 sm:tw-grid-cols-[44px_56px_minmax(0,1fr)_auto]">
         <label className="tw-flex tw-min-h-11 tw-min-w-11 tw-cursor-pointer tw-items-center tw-justify-center">
           <input
             type="checkbox"
@@ -107,7 +107,7 @@ export default function CollectBatchReviewItem({
             className="tw-size-4 tw-accent-primary-500"
           />
         </label>
-        <div className="tw-relative tw-flex tw-size-14 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-900 [&_img]:tw-max-h-full [&_img]:tw-object-contain">
+        <div className="tw-relative tw-flex tw-size-14 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 [&_img]:tw-max-h-full [&_img]:tw-object-contain">
           <CollectAssetMedia
             src={item.asset.image_url}
             name={item.asset.name}
@@ -123,11 +123,13 @@ export default function CollectBatchReviewItem({
               quantity: formatDecimalString(locale, item.quantity),
             })}
           </p>
+        </div>
+        <div className="tw-col-start-3 tw-min-w-0 sm:tw-col-start-4 sm:tw-row-start-1 sm:tw-max-w-48 sm:tw-self-center sm:tw-text-right">
           {price}
         </div>
       </div>
       {selected && (
-        <div className="tw-mt-2 tw-space-y-3 sm:tw-pl-14">
+        <div className="tw-mt-2 tw-space-y-3 sm:tw-pl-[124px]">
           {!customized && (
             <button
               type="button"
@@ -140,7 +142,7 @@ export default function CollectBatchReviewItem({
                 }
               )}
               onClick={() => onChange(allocations)}
-              className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-text-xs tw-text-iron-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-text-xs tw-text-iron-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
             >
               {t(locale, "collect.batchReview.customizeDelivery")}
             </button>

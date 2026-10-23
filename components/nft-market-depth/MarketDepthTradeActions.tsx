@@ -575,8 +575,13 @@ function SupportedMarketDepthTradeProvider({
     <TradeContext.Provider value={value}>
       {children}
       <NftPurchasingGate>
+        {/* The small-screen shell is unbounded but overflow-auto. While this bar
+            exists, clip its horizontal overflow without creating a scroll container. */}
         {selected.length > 0 && (
-          <div className="tw-mt-5 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-4">
+          <div
+            data-market-depth-selection-bar
+            className="tw-sticky tw-bottom-0 tw-z-20 tw-mt-5 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-end tw-gap-x-4 tw-gap-y-2 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-py-4 tw-pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:tw-px-5 [body:has([data-mobile-bottom-nav-dock])_&]:tw-bottom-[calc(5rem+max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)))] [div.tw-overflow-auto.tw-bg-black:has(>main_&)]:tw-overflow-x-clip [div.tw-overflow-auto.tw-bg-black:has(>main_&)]:tw-overflow-y-visible"
+          >
             <Button
               type="button"
               variant="action"
