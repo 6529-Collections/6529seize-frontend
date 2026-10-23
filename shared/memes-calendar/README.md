@@ -58,7 +58,10 @@ Craft resolves seasons locally; subscription coverage projects strictly future
 mint dates; Help Bot calculates next/current/specific-mint answers locally. The
 existing frontend API endpoints retain their response shapes and use the same
 query functions. Current windows include opening and exclude closing; next means
-strictly future, including at an exact opening instant.
+strictly future, including at an exact opening instant. A skip changes the next
+mint date but never extends an earlier mint past 17:00 Athens on its next day.
+Standalone override input files are maintained only in this canonical directory;
+unused copies of their former component paths have been removed.
 
 Regression coverage spans all twelve months, both DST transitions, midnight
 carry-over, exact mint boundaries, year/season rollover, leap day, historical

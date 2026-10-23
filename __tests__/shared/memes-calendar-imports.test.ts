@@ -23,9 +23,6 @@ it.each([
   "components/meme-calendar/meme-calendar.szn1.ts",
   "components/meme-calendar/meme-calendar.upcoming.ts",
   "components/meme-calendar/meme-calendar.overrides.ts",
-  "components/meme-calendar/meme-calendar.overrides.extra.ts",
-  "components/meme-calendar/meme-calendar.overrides.skipped.ts",
-  "components/meme-calendar/meme-calendar.overrides.rescheduled.ts",
 ])(
   "%s resolves the local calendar under both web and Core path mappings",
   (path) => {

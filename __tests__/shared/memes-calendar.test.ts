@@ -37,7 +37,7 @@ describe("shared Memes launch calendar", () => {
     ]);
     expect(wallTime(schedule.previewAt)).toBe("17:15");
     expect(wallTime(schedule.postMintAt)).toBe("18:00");
-    expect(schedule.version).toBe("2026-10-23.3");
+    expect(schedule.version).toBe("2026-10-23.4");
     expect(schedule.timeZone).toBe("Europe/Athens");
   });
   it.each([
