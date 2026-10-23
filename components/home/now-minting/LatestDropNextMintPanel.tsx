@@ -147,7 +147,7 @@ export default function LatestDropNextMintPanel({
       })
     : "—";
   return (
-    <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-iron-950 tw-shadow-[0_24px_60px_rgba(0,0,0,0.2)] group-data-[home-next-drop]/home-next-drop:tw-border-white/[0.08] group-data-[home-next-drop]/home-next-drop:tw-bg-iron-950/40 group-data-[home-next-drop]/home-next-drop:tw-shadow-none">
+    <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-iron-950 tw-shadow-[0_24px_60px_rgba(0,0,0,0.2)] group-data-[home-next-drop]/home-next-drop:tw-border-white/[0.08] group-data-[home-next-drop]/home-next-drop:tw-shadow-none">
       <div className="tw-grid tw-grid-cols-1 tw-items-stretch lg:tw-grid-cols-12 xl:tw-grid-cols-9">
         <div
           data-home-artwork-column

@@ -294,9 +294,9 @@ bring each card into view.
 
 ## Homepage Presentation
 
-- The homepage Next Drop card uses a darker surface, quiet separators, and a
-  subtle subscription-row treatment. The same panel on the upcoming Meme page
-  retains its existing appearance.
+- The homepage Next Drop card uses the same solid surface as the Waves cards,
+  quiet separators, and a subtle subscription-row treatment. The same panel on
+  the upcoming Meme page retains its existing appearance.
 - Artwork dimensions, grid proportions, details spacing, and type sizes are
   unchanged. Desktop image height follows the details column, so this refinement
   changes colour and decoration without changing that column's geometry.
