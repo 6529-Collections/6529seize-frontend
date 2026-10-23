@@ -102,7 +102,6 @@ export const publicEnvSchema = z.object({
    * FEATURES / FLAGS (all optional)
    * ────────────────
    */
-  ADVANCED_SEARCH_ENABLED_FOR_USERS: z.string().optional(),
   ENABLE_SECURITY_LOGGING: z.string().optional(),
   ANNOUNCED_VERSION_ENDPOINT: z
     .string()
