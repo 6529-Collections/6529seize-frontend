@@ -201,7 +201,9 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
       "href",
       "/following-artist-0"
     );
-    const longPanel = dialog.locator('[id^="headlessui-dialog-panel-"]');
+    const longPanel = page
+      .getByRole("dialog", { name: "Following", exact: true })
+      .locator('[id^="headlessui-dialog-panel-"]');
     await expect
       .poll(async () => (await longPanel.boundingBox())?.height)
       .toBeLessThanOrEqual(512);
@@ -311,7 +313,9 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
       await opener.click();
       const dialog = page.getByRole("dialog", { name, exact: true });
       await expect(dialog.getByRole("listitem")).toHaveCount(2);
-      const panel = dialog.locator('[id^="headlessui-dialog-panel-"]');
+      const panel = page
+        .getByRole("dialog", { name, exact: true })
+        .locator('[id^="headlessui-dialog-panel-"]');
       await expect
         .poll(async () => (await panel.boundingBox())?.height)
         .toBeGreaterThanOrEqual(240);
@@ -347,9 +351,9 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
       exact: true,
     });
     await expect(followersDialog.getByRole("listitem")).toHaveCount(100);
-    const followersPanel = followersDialog.locator(
-      '[id^="headlessui-dialog-panel-"]'
-    );
+    const followersPanel = page
+      .getByRole("dialog", { name: "Followers", exact: true })
+      .locator('[id^="headlessui-dialog-panel-"]');
     await expect
       .poll(async () => (await followersPanel.boundingBox())?.height)
       .toBeLessThanOrEqual(512);
