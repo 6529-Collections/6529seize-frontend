@@ -1,0 +1,132 @@
+.detailPanel:has([data-collect-detail-header]) > [data-collect-market-link],
+.detailPanel [data-collect-trade-status]:empty {
+  display: none;
+}
+
+.inlineActions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) 44px;
+  align-items: start;
+}
+
+.inlineActions:not(:has([data-collect-owner-action]:not(:empty))) {
+  grid-template-columns: minmax(0, 1fr) 44px;
+}
+
+.inlineActions > button[type="submit"],
+.inlineActions > [data-collect-detail-delivery] {
+  grid-column: 1 / -1;
+}
+
+.inlineActions > [data-collect-secondary-actions] {
+  display: contents;
+}
+
+.inlineActions [data-collect-owner-action] {
+  min-width: 0;
+}
+
+.inlineActions [data-collect-owner-action] > button,
+.inlineActions [data-collect-owner-action] > div > button:first-child {
+  width: 100%;
+}
+
+.inlineActions [data-collect-owner-action]:empty {
+  display: none;
+}
+
+.inlineActions > button,
+.inlineActions > [data-collect-secondary-actions] > button,
+.inlineActions [data-collect-owner-action] > button,
+.inlineActions [data-collect-owner-action] > div > button:first-child {
+  height: 44px;
+  min-width: 0;
+  border-radius: 8px;
+  padding-inline: 12px;
+}
+
+.inlineActions > button:not([type="submit"]),
+.inlineActions > [data-collect-secondary-actions] > button {
+  white-space: normal;
+}
+
+.inlineActions > button[type="submit"]:disabled {
+  border-color: #26272b;
+  background: #26272b;
+  color: #93939f;
+  box-shadow: none;
+  opacity: 1;
+}
+
+@media (max-width: 639px) {
+  .inlineActions > button[type="submit"] {
+    font-size: 16px;
+  }
+
+  .stickyActions > button {
+    height: 44px;
+    min-width: 0;
+    flex: 1;
+    white-space: nowrap;
+    border-radius: 8px;
+    padding-inline: 14px;
+  }
+}
+
+@media (max-width: 399px) {
+  .inlineActions > button:not([type="submit"]),
+  .inlineActions > [data-collect-secondary-actions] > button {
+    padding-inline: 0;
+  }
+}
+
+@media (max-width: 359px) {
+  .stickyActions > button {
+    padding-inline: 8px;
+  }
+
+  .inlineActions [data-collect-owner-action] > button,
+  .inlineActions [data-collect-owner-action] > div > button:first-child {
+    padding-inline: 8px;
+  }
+}
+
+/* The tablet layout has the full page width; desktop returns to a side column. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .inlineActions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .inlineActions > button[type="submit"] {
+    width: auto;
+    min-width: 200px;
+  }
+
+  .inlineActions > button:not([type="submit"]),
+  .inlineActions > [data-collect-secondary-actions] > button,
+  .inlineActions [data-collect-owner-action] {
+    flex: none;
+    min-width: 140px;
+    max-width: 100%;
+  }
+
+  .inlineActions > [data-collect-detail-delivery] {
+    order: 1;
+    flex-basis: 100%;
+  }
+}
+
+/* Active selection review and dialogs take priority over the duplicate actions. */
+:global(
+    body:has(
+      dialog[open],
+      [aria-modal="true"]:not(dialog):not([hidden]):not([aria-hidden="true"]),
+      [data-market-depth-selection-bar]:not([hidden] *)
+    )
+  )
+  .stickyActions {
+  visibility: hidden;
+  pointer-events: none;
+}

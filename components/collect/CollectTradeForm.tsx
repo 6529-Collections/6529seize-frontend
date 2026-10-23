@@ -3,7 +3,7 @@
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
-import { useId, useState } from "react";
+import { useId, useState, type ReactNode } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import CollectRecipientPicker from "./CollectRecipientPicker";
 import CollectOrderExpiryPicker from "./CollectOrderExpiryPicker";
@@ -30,6 +30,7 @@ interface CollectTradeFormProps {
   readonly disabledReason?: string | undefined;
   readonly loading: boolean;
   readonly error?: string | undefined;
+  readonly connectWalletAction?: ReactNode;
   readonly onChange: (draft: CollectTradeDraft) => void;
   readonly onPrepare: (draft: CollectTradeDraft) => void;
 }
@@ -43,6 +44,7 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
   const fixedOfferQuantity =
     props.action === "offer" && props.fixedOfferQuantity !== undefined;
   const fixedQuantityHintId = `${id}-fixed-quantity`;
+  const hasConnectWalletAction = Boolean(props.connectWalletAction);
   const hasRecipient = props.action === "buy";
   const external =
     hasRecipient &&
@@ -62,7 +64,7 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
     ? t(locale, `collect.trade.invalid.${invalid}`, { max: props.maxQuantity })
     : props.error;
   const quantityField = (
-    <div className="tw-min-w-0 tw-space-y-2">
+    <div data-collect-trade-quantity className="tw-min-w-0 tw-space-y-2">
       <label className="tw-block tw-space-y-2 tw-text-xs tw-text-iron-300">
         <span>{t(locale, "collect.trade.quantity")}</span>
         <input
@@ -97,6 +99,34 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
       )}
     </div>
   );
+  const walletLine = (
+    <p
+      data-collect-trade-wallet
+      className="tw-m-0 tw-break-all tw-text-xs tw-leading-5 tw-text-iron-300"
+    >
+      {props.action === "buy"
+        ? t(locale, "collect.trade.payingWalletLine", {
+            wallet: props.makerLabel,
+          })
+        : t(locale, "collect.orders.maker", { wallet: props.makerLabel })}
+    </p>
+  );
+  const reviewButton = (
+    <Button
+      type="submit"
+      variant="action"
+      size="md"
+      className={`tw-min-h-12 tw-text-sm tw-font-medium ${hasConnectWalletAction ? "disabled:tw-border-iron-800 disabled:tw-bg-iron-800 disabled:tw-text-iron-500 disabled:!tw-opacity-100" : ""}`}
+      fullWidth
+      loading={props.loading}
+      disabled={
+        Boolean(props.disabledReason) ||
+        (external && !props.draft.acknowledgeExternalRecipient)
+      }
+    >
+      {t(locale, REVIEW_LABELS[props.action] ?? "collect.trade.prepare")}
+    </Button>
+  );
   return (
     <form
       noValidate
@@ -118,13 +148,23 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
           props.onPrepare(props.draft);
       }}
     >
-      <p className="tw-m-0 tw-break-all tw-text-xs tw-leading-5 tw-text-iron-300">
-        {props.action === "buy"
-          ? t(locale, "collect.trade.payingWalletLine", {
-              wallet: props.makerLabel,
-            })
-          : t(locale, "collect.orders.maker", { wallet: props.makerLabel })}
-      </p>
+      {hasConnectWalletAction ? (
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-4 tw-rounded-xl tw-bg-iron-900 tw-p-4">
+          <div className="tw-min-w-0 tw-flex-[1_1_10rem] tw-space-y-1">
+            {walletLine}
+            {props.disabledReason && (
+              <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+                {props.disabledReason}
+              </p>
+            )}
+          </div>
+          <div className="tw-min-w-0 tw-flex-[1_0_8rem]">
+            {props.connectWalletAction}
+          </div>
+        </div>
+      ) : (
+        walletLine
+      )}
       {!hasPrice && props.action !== "cancel" && quantityField}
       {hasPrice && (
         <>
@@ -236,25 +276,12 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
           {message}
         </p>
       )}
-      {props.disabledReason && (
+      {props.disabledReason && !hasConnectWalletAction && (
         <p className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-300">
           {props.disabledReason}
         </p>
       )}
-      <Button
-        type="submit"
-        variant="action"
-        size="md"
-        className="tw-min-h-12 tw-text-sm tw-font-medium"
-        fullWidth
-        loading={props.loading}
-        disabled={
-          Boolean(props.disabledReason) ||
-          (external && !props.draft.acknowledgeExternalRecipient)
-        }
-      >
-        {t(locale, REVIEW_LABELS[props.action] ?? "collect.trade.prepare")}
-      </Button>
+      {reviewButton}
     </form>
   );
 }

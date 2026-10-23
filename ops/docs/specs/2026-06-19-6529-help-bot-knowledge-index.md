@@ -181,6 +181,12 @@ wider use the sortable table.
 Compact values are presentation only.
 The Listings and Offers record distinguishes direct **Collect** and **Sell**
 actions for one order from the explicit choice among multiple orders at a price.
+The Meme card record places the market link and listing status at the top,
+Collect above its delivery controls, secondary actions below, and connection
+guidance beneath a divider at the bottom. Delivery controls appear once the
+required wallet is connected. Labels and action availability stay unchanged.
+Tabs and the off-screen action replacement stay sticky below 1024px, matching
+the single-column card layout; selected-listing review retains bottom-bar priority.
 Market browsing facts describe quiet periodic updates while visible and idle,
 paused for expanded order details, a chosen listing or open review as applicable.
 Healthy and empty states have no routine Refresh action; retrieval failures retain
@@ -325,6 +331,11 @@ environment; the help runtime continues to consume `/help-index.json`.
   prerequisite, and result.
 
 ## Source Ownership
+
+The artwork Review offers guidance includes its phone layout: the order list
+scrolls above the wallet, quantity and Review exact terms controls, which remain
+visible at the bottom of the sheet. Order selection and wallet authority remain
+unchanged.
 
 The Collect workflow record owns `/collect` and `/collect/orders`, profile-wide
 set scope, direct gift recipients, marketplace review and recovery, observed
