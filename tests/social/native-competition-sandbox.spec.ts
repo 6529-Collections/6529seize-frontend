@@ -5787,6 +5787,51 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         path: testInfo.outputPath(`remembered-${mode}-chat.png`),
         fullPage: true,
       });
+
+      // A competition page retained by the fast Leaderboard -> Chat transition
+      // must still follow the next wave selected from the real wave list.
+      await prepareWaveSwitch();
+      await openWaveFromList("The Memes - Main Stage");
+      await expect(leaderboard).toHaveAttribute(
+        mode === "app" ? "aria-current" : "aria-selected",
+        "true"
+      );
+      await page
+        .getByRole(mode === "app" ? "button" : "tab", {
+          name: "Chat",
+          exact: true,
+        })
+        .click();
+      await expect(chat).toBeVisible();
+      const editor = page.getByRole("textbox", {
+        name: "Write a chat message",
+        exact: true,
+      });
+      await editor.fill("Main Stage draft stays in Main Stage");
+      await prepareWaveSwitch();
+      await openWaveFromList("The Memes - Maybes Bar");
+      await expect(page).toHaveURL(new RegExp(`/waves/${BAR}$`));
+      await expect(
+        page.getByRole("button", { name: `About ${bar.name}`, exact: true })
+      ).toBeVisible();
+      await expect(chat).toBeVisible();
+      await expect(editor).not.toContainText(
+        "Main Stage draft stays in Main Stage"
+      );
+      if (testInfo.project.name === "web-desktop-chromium") {
+        await page.goBack();
+        await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}\\?tab=chat`));
+        await expect(editor).toContainText(
+          "Main Stage draft stays in Main Stage"
+        );
+        await page.goForward();
+        await expect(
+          page.getByRole("button", { name: `About ${bar.name}`, exact: true })
+        ).toBeVisible();
+        await expect(editor).not.toContainText(
+          "Main Stage draft stays in Main Stage"
+        );
+      }
     });
   }
 
