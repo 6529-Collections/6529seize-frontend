@@ -40,7 +40,7 @@ jest.mock("@/services/auth/auth.utils", () => ({
   getWalletAddress: jest.fn(() => "0x123"),
 }));
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStreamOptional: () => ({ processDropRemoved: jest.fn() }),
+  useMyStreamActionsOptional: () => ({ processDropRemoved: jest.fn() }),
 }));
 jest.mock(
   "@/components/waves/memes/submission/layout/ModalLayout",

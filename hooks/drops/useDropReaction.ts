@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey as AppQueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import type { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReactionToDropRequest";
@@ -274,7 +274,7 @@ const useOptimisticStreamDropReaction = ({
   waveId,
 }: {
   readonly applyOptimisticDropUpdate: ReturnType<
-    typeof useMyStream
+    typeof useMyStreamActions
   >["applyOptimisticDropUpdate"];
   readonly connectedProfile: ReturnType<typeof useAuth>["connectedProfile"];
   readonly contextProfileContext:
@@ -426,7 +426,7 @@ export function useDropReaction(
   options?: UseDropReactionOptions
 ): UseDropReactionResult {
   const { setToast, connectedProfile, activeProfileProxy } = useAuth();
-  const { applyOptimisticDropUpdate } = useMyStream();
+  const { applyOptimisticDropUpdate } = useMyStreamActions();
   const { getEligibility, updateEligibility } = useWaveEligibility();
   const queryClient = useQueryClient();
   const websocketStatus = useWebsocketStatus();
