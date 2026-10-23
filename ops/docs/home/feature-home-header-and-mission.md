@@ -6,7 +6,7 @@ The top of `/` shows the home headline and state-aware context before discovery
 sections:
 
 - Brand label and headline
-- Compact newcomer actions for logged-out visitors
+- Compact newcomer actions and a What is 6529? explanation for logged-out visitors
 - A network-health shortcut on home layouts
 - A mission block below the latest-drop slot
 
@@ -26,54 +26,70 @@ sections:
 ## User Journey
 
 1. Open `/`.
-2. The header shows:
-   - Brand label: `6529`, at 12px with medium weight and subtle letter spacing
-   - Left-aligned headline: `Building a decentralized network state`, with
-     `network state` on a separate line in the same color
-3. Logged-out visitors see two actions beneath the main headline, aligned with
-   its left edge:
-   - `Start here`, which opens `/join-6529`
-   - `Connect wallet`, which opens the wallet connection flow
-   - Both actions keep the same rounded corners at every breakpoint. Below the
-     medium breakpoint, they share an equal-width row with 48px touch targets;
-     larger layouts use 44px buttons at the left edge.
-4. The latest-drop slot follows the newcomer actions directly.
+2. The Montserrat hero shows a `6529` pill, the headline
+   `Building a decentralized network state`, and the subtitle
+   `A global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology.`
+   The copy sits beside a decorative fan of five Meme artworks on desktop and
+   above it on mobile. The front artwork follows the existing latest/next-drop
+   selection; the other cards show recent published Memes. Artwork keeps its
+   proportions. Missing images leave a neutral frame. Reduced motion disables
+   the fan entrance and hover spread.
+3. Logged-out visitors see two actions beneath the subtitle, in this order:
+   - `Connect wallet`, the primary action, opens the existing wallet connection flow.
+   - `Start here`, the secondary action, opens `/join-6529`.
+   - Mobile uses two equal-width buttons with 48px touch targets; larger layouts
+     keep the actions together beneath the copy.
+4. Logged-out visitors see `What is 6529?` between the hero and latest-drop slot:
+   - `Art with purpose`: `Browse The Memes` opens `/the-memes`.
+   - `Where the network coordinates`: `Browse Waves` opens `/waves`.
+   - `A real say`: `How voting works` opens `/network/tdh`.
+   - Desktop and tablet use three open columns with subtle vertical dividers.
+     Mobile stacks the topics with horizontal dividers and keyboard-accessible
+     text links. The artwork, wave tiles, and voting bars are decorative; they
+     do not show live vote totals or individual wave presence.
+   - Native iOS purchasing restrictions still apply to the hero fan: restricted
+     users see published collection artwork instead of the upcoming mint promotion.
 5. A heart shortcut is visible on `/`:
    - Larger layouts: fixed near the top-right of the hero area
    - Mobile/app small-screen layouts: in the top header actions
    - Accessible name: `Open network health dashboard`
    - Tooltip/title: `Network health`
 6. The latest-drop slot resolves independently.
-7. Below that slot, the mission block renders with:
-   - Subtle blue-grey radial background glow
-   - Heading: `6529 is a network society`, with medium weight and muted color
-   - Muted mission paragraph, left-aligned at every screen size
-   - Muted uppercase line: `The long-term goal is nation-scale positive impact.`,
-     introduced by a green dot
-   - Supporting region labeled `Mission statement`, with Montserrat text in a
-     rounded box with a faint border and background. It is vertically centered
-     beside the heading, paragraph, and goal on desktop, and sits below the goal
-     on smaller screens.
-8. Selecting the heart icon opens `/network/health`.
+7. Logged-out visitors see `How to start` after the latest-drop slot:
+   - `Connect wallet` opens the same wallet flow as the hero button.
+   - `Create profile` opens `/join-6529#join-step-profile` to continue the
+     existing onboarding flow.
+   - `View collections` opens `/the-memes`; `Browse Waves` opens `/waves`.
+   - `Open the Join 6529 guide` opens `/join-6529`; the wallet/ETH question
+     opens `/join-6529#faq`.
+   - Desktop shows four numbered columns. Mobile shows a vertical timeline.
+   - The mint/subscription sentence is omitted during server rendering and on
+     restricted native iOS (outside the US or unknown country). Those visitors
+     see a browsing/community description; collection browsing remains available.
+8. The mission block shows `6529 is a network society` beside the Bitcoin and
+   Ethereum sentence, with `human coordination itself,` emphasized. On mobile
+   the paragraph follows the heading. The long-term goal appears beneath it
+   in a quiet outlined label. The hero already contains the public-goods
+   definition, so it is not repeated here.
+9. Selecting the heart icon opens `/network/health`.
 
 ## Common Scenarios
 
 - Desktop/tablet: health shortcut is visible near the top-right.
 - Mobile/app small-screen: health shortcut is visible in the header action row.
 - Logged-out or unauthenticated: the compact newcomer actions appear before
-  the dashboard-style activity sections.
-- Authenticated: the current dashboard-first layout remains unchanged and the
-  newcomer actions are not shown.
+  the activity sections; How to start follows the latest-drop slot.
+- Authenticated: the same hero copy and artwork remain visible; the newcomer
+  actions, What is 6529? explanation, and How to start are not shown.
 - Latest-drop data unavailable: mission block still renders below the slot.
 
 ## Edge Cases
 
 - The desktop homepage health shortcut stays still, with a subtle colour change
   on hover and a visible keyboard-focus ring.
-- Action arrows move slightly on hover or keyboard focus. Reduced-motion
-  settings keep arrows still and make colour changes immediate.
+- Reduced-motion settings keep the fan still and make button colour changes immediate.
 - While wallet state is initializing or connecting, the page does not assume
-  the visitor is logged out. The newcomer actions appear once that state
+  the visitor is logged out. The newcomer actions, explanation, and steps appear once that state
   resolves.
 - If a wallet is present but authentication is not valid, the newcomer
   actions remain available so the visitor can continue through onboarding.
@@ -94,14 +110,21 @@ sections:
 - Home activity remains public; the visitor actions provide onboarding entry
   points rather than gating the dashboard content.
 - Core interactive actions for home continue in sections below (`Latest Drop`,
-  `Coming up`, `Boosted Drops`, and `Most active waves`).
+  `Coming up` and Waves).
 
 ## Related Pages
 
 - [Home Index](README.md)
 - [Home Landing and Section Navigation Flow](flow-home-landing-and-section-navigation.md)
 - [Home Latest Drop and Coming Up](feature-home-latest-drop-and-coming-up.md)
-- [Home Boosted Drops and Most Active Waves](feature-home-discovery-grids.md)
+- [Home Waves Discovery](feature-home-discovery-grids.md)
 - [Home Route and Section Visibility Troubleshooting](troubleshooting-home-route-and-section-visibility.md)
 - [Network Health Dashboard](../network/feature-health-dashboard.md)
 - [Docs Home](../README.md)
+
+## Localization
+
+Hero, What is 6529?, How to start, and mission copy use the message dictionary.
+The approved English copy currently falls back unchanged for en-GB, fr-FR,
+es-ES, and de-DE. The homepage localization follow-up owns translation review
+and layout verification for these headings, descriptions, and link labels.

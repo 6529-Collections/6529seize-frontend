@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import HomePageContent from "@/components/home/HomePageContent";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { render, screen } from "@testing-library/react";
@@ -14,12 +15,19 @@ jest.mock("@/components/home/useHomepageTracking", () => ({
 }));
 
 jest.mock("@/components/home/hero", () => ({
-  HeroHeader: () => <div>Hero</div>,
+  HeroHeader: ({ children }: { children: ReactNode }) => (
+    <div>Hero{children}</div>
+  ),
 }));
 
 jest.mock("@/components/home/newcomer/HomeNewcomerIntro", () => ({
   __esModule: true,
   default: () => <div>Newcomer intro</div>,
+}));
+
+jest.mock("@/components/home/newcomer/HomeWhatIs6529", () => ({
+  __esModule: true,
+  default: () => <div>What is 6529?</div>,
 }));
 
 jest.mock("@/components/home/now-minting", () => ({
@@ -35,8 +43,9 @@ jest.mock("@/components/home/next-mint-leading/NextMintLeadingSection", () => ({
   NextMintLeadingSection: () => <div>Next mint</div>,
 }));
 
-jest.mock("@/components/home/boosted/BoostedSection", () => ({
-  BoostedSection: () => <div>Boosted drops</div>,
+jest.mock("@/components/home/newcomer/HomeHowToStart", () => ({
+  __esModule: true,
+  default: () => <div>How to start</div>,
 }));
 
 jest.mock("@/components/home/explore-waves/ExploreWavesSection", () => ({
@@ -53,7 +62,7 @@ describe("HomePageContent", () => {
     ["for a logged-out visitor", "disconnected", false, true],
     ["after a connection error", "error", false, true],
   ] as const)(
-    "shows the newcomer intro only %s",
+    "shows newcomer actions and explanation only %s",
     (_description, connectionState, hasValidWalletAuth, expected) => {
       useSeizeConnectContextMock.mockReturnValue({
         connectionState,
@@ -63,11 +72,18 @@ describe("HomePageContent", () => {
       render(<HomePageContent />);
 
       const intro = screen.queryByText("Newcomer intro");
+      const explanation = screen.queryByText("What is 6529?");
+      const steps = screen.queryByText("How to start");
       if (expected) {
         expect(intro).toBeInTheDocument();
+        expect(explanation).toBeInTheDocument();
+        expect(steps).toBeInTheDocument();
       } else {
         expect(intro).not.toBeInTheDocument();
+        expect(explanation).not.toBeInTheDocument();
+        expect(steps).not.toBeInTheDocument();
       }
+      expect(screen.queryByText("Boosted drops")).not.toBeInTheDocument();
       expect(screen.getByText("Latest drop")).toBeInTheDocument();
     }
   );

@@ -51,6 +51,61 @@ async function installLoadingTestArtwork(page: Page) {
   );
 }
 
+async function installCompletedMintStatus(
+  page: Page,
+  ready: Promise<void> = Promise.resolve()
+) {
+  const claimResult = encodeFunctionResult({
+    abi: MEMES_MANIFOLD_PROXY_ABI,
+    functionName: "getClaimForToken",
+    result: [
+      1n,
+      {
+        total: 328,
+        totalMax: 328,
+        walletMax: 0,
+        startDate: 1,
+        endDate: 2,
+        storageProtocol: 0,
+        merkleRoot: zeroHash,
+        location: "",
+        tokenId: 536n,
+        cost: 0n,
+        paymentReceiver: zeroAddress,
+        erc20: zeroAddress,
+        signingAddress: zeroAddress,
+      },
+    ],
+  });
+  const selector = toFunctionSelector("getClaimForToken(address,uint256)");
+  await page.route("https://rpc.walletconnect.org/**", async (route) => {
+    const rpc = route.request().postDataJSON();
+    if (rpc.method !== "eth_call") {
+      await route.abort();
+      return;
+    }
+    await ready;
+    let result = claimResult;
+    if (!rpc.params[0].data.startsWith(selector)) {
+      const { args, functionName } = decodeFunctionData({
+        abi: multicall3Abi,
+        data: rpc.params[0].data,
+      });
+      if (functionName !== "aggregate3")
+        throw new Error("Unexpected fixture RPC call");
+      result = encodeFunctionResult({
+        abi: multicall3Abi,
+        functionName,
+        result: args[0].map((call) => ({
+          success: call.callData.startsWith(selector),
+          returnData: call.callData.startsWith(selector) ? claimResult : "0x",
+        })),
+      });
+    }
+    await route.fulfill({ json: { jsonrpc: "2.0", id: rpc.id, result } });
+  });
+}
+
 const comingUpWave = {
   id: "00000000-0000-4000-8000-000000000529",
   name: "Coming Up fixture",
@@ -87,6 +142,17 @@ const comingUpLeaderboardPattern = (url: URL) =>
 
 async function installComingUpFixture(page: Page) {
   await installLoadingTestArtwork(page);
+  await page.route("**/api/memes_lite", (route) =>
+    route.fulfill({
+      json: {
+        data: Array.from({ length: 5 }, (_, index) => ({
+          ...loadingTestArtwork,
+          id: loadingTestArtwork.id - index,
+          name: `Recent Meme ${index}`,
+        })),
+      },
+    })
+  );
   await page.route("**/api/settings", (route) =>
     route.fulfill({ json: comingUpSettings })
   );
@@ -115,7 +181,7 @@ test("Subscription Minting stays readable on phones and keeps its desktop layout
     route.fulfill({
       contentType: "text/html",
       body: `<html><head><meta name="viewport" content="width=device-width, initial-scale=1">${documentStyle.styles}</head>
-      <body class="${documentStyle.bodyClass}"><main class="tailwind-scope" style="width:calc(100% - 72px);max-width:600px;margin:24px auto">
+      <body class="${documentStyle.bodyClass}"><main data-home-drop class="tailwind-scope tw-group/home-drop" style="width:calc(100% - 72px);max-width:600px;margin:24px auto">
         <div id="subscription-fixture"></div></main></body></html>`,
     })
   );
@@ -429,90 +495,29 @@ test("Coming Up keeps collaborator credits compact and accessible @smoke @medium
   });
 });
 
-for (const hasBoostedDrops of [false, true]) {
-  test(`Coming Up loads while boosted cards are pending, with ${hasBoostedDrops ? "populated" : "empty"} results @smoke @medium @large`, async ({
-    page,
-  }) => {
-    await installComingUpFixture(page);
-    await page.route(comingUpLeaderboardPattern, (route) =>
-      route.fulfill({ json: comingUpLeaderboard })
-    );
-    const previewUrl = "https://example.com/boosted-startup-preview";
-    const boostedDrop = {
-      ...comingUpLeaderboard.drops[0],
-      id: "boosted-startup",
-      serial_no: 42,
-      drop_type: "CHAT",
-      boosts: 5,
-      content: previewUrl,
-      wave: comingUpWave,
-      moderation: { status: "VISIBLE", can_view: true },
-    };
-    const boostedReady = Promise.withResolvers<void>();
-    await page.route("**/api/v2/boosted-drops?*", async (route) => {
-      await boostedReady.promise;
-      await route.fulfill({
-        json: {
-          data: hasBoostedDrops ? [boostedDrop] : [],
-          page: 1,
-          count: hasBoostedDrops ? 1 : 0,
-          next: false,
-        },
-      });
-    });
-    await page.route("**/api/open-graph*", (route) =>
-      route.fulfill({ status: 503, json: {} })
-    );
-
-    try {
-      await page.goto("/", { waitUntil: "domcontentloaded" });
-      const comingUp = page.getByRole("region", {
-        name: "Coming up",
-        exact: true,
-      });
-      await expect(
-        comingUp.getByRole("link", { name: "Coming Up artwork 3", exact: true })
-      ).toBeVisible();
-      await expect(page.getByText("Loading...", { exact: true })).toBeVisible();
-
-      boostedReady.resolve();
-      await expect(page.getByText("Loading...", { exact: true })).toHaveCount(
-        0
-      );
-      if (!hasBoostedDrops) {
-        await expect(
-          page.getByText("Boosted Drops", { exact: true })
-        ).toHaveCount(0);
-        return;
-      }
-
-      const openDrop = page.getByRole("button", {
-        name: "Open boosted drop from coming-up-artist",
-        exact: true,
-      });
-      await expect(openDrop).toBeVisible();
-      await expect(
-        page.getByRole("link", {
-          name: "example.com example.com/boosted-startup-preview",
-          exact: true,
-        })
-      ).toHaveAttribute("href", previewUrl);
-      await expectNoHorizontalOverflow(page);
-      // The preview is its own link; use the card's keyboard action to open the drop.
-      await openDrop.focus();
-      // Navigation includes cold route compilation in the development CI server.
-      await Promise.all([
-        page.waitForURL(
-          new RegExp(`/waves/${comingUpWave.id}\\?serialNo=42$`),
-          { waitUntil: "domcontentloaded" }
-        ),
-        openDrop.press("Enter"),
-      ]);
-    } finally {
-      boostedReady.resolve();
-    }
+test("Coming Up loads without a homepage Boosted section or request @smoke @medium @large", async ({
+  page,
+}) => {
+  await installComingUpFixture(page);
+  await page.route(comingUpLeaderboardPattern, (route) =>
+    route.fulfill({ json: comingUpLeaderboard })
+  );
+  const boostedRequests: string[] = [];
+  await page.route("**/api/v2/boosted-drops?*", async (route) => {
+    boostedRequests.push(route.request().url());
+    await route.fulfill({ json: { data: [], page: 1, count: 0, next: false } });
   });
-}
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const comingUp = page.getByRole("region", { name: "Coming up", exact: true });
+  await expect(
+    comingUp.getByRole("link", { name: "Coming Up artwork 3", exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Boosted Drops", exact: true })
+  ).toHaveCount(0);
+  expect(boostedRequests).toEqual([]);
+  await expectNoHorizontalOverflow(page);
+});
 
 test("Coming Up retains cards across navigation and a failed refresh @smoke @medium @large", async ({
   page,
@@ -854,59 +859,11 @@ test("homepage selects Next Drop without flashing the previous artwork @smoke @m
       },
     });
   });
-  const claimResult = encodeFunctionResult({
-    abi: MEMES_MANIFOLD_PROXY_ABI,
-    functionName: "getClaimForToken",
-    result: [
-      1n,
-      {
-        total: 328,
-        totalMax: 328,
-        walletMax: 0,
-        startDate: 1,
-        endDate: 2,
-        storageProtocol: 0,
-        merkleRoot: zeroHash,
-        location: "",
-        tokenId: 536n,
-        cost: 0n,
-        paymentReceiver: zeroAddress,
-        erc20: zeroAddress,
-        signingAddress: zeroAddress,
-      },
-    ],
-  });
   let releaseStatus!: () => void;
   const statusReady = new Promise<void>((resolve) => {
     releaseStatus = resolve;
   });
-  const selector = toFunctionSelector("getClaimForToken(address,uint256)");
-  await page.route("https://rpc.walletconnect.org/**", async (route) => {
-    const rpc = route.request().postDataJSON();
-    if (rpc.method !== "eth_call") {
-      await route.abort();
-      return;
-    }
-    await statusReady;
-    let result = claimResult;
-    if (!rpc.params[0].data.startsWith(selector)) {
-      const { args, functionName } = decodeFunctionData({
-        abi: multicall3Abi,
-        data: rpc.params[0].data,
-      });
-      if (functionName !== "aggregate3")
-        throw new Error("Unexpected fixture RPC call");
-      result = encodeFunctionResult({
-        abi: multicall3Abi,
-        functionName,
-        result: args[0].map((call) => ({
-          success: call.callData.startsWith(selector),
-          returnData: call.callData.startsWith(selector) ? claimResult : "0x",
-        })),
-      });
-    }
-    await route.fulfill({ json: { jsonrpc: "2.0", id: rpc.id, result } });
-  });
+  await installCompletedMintStatus(page, statusReady);
   await page.addInitScript(() => {
     new MutationObserver(() => {
       if (document.querySelector('[data-home-section="Latest drop"]')) {
@@ -1019,6 +976,113 @@ test.describe("Home Page @smoke @medium @large", () => {
     await waitForRouteReady(page);
   });
 
+  test("hero keeps the approved copy, action order and responsive artwork @smoke", async ({
+    page,
+  }, testInfo) => {
+    await installCompletedMintStatus(page);
+    await page.reload({ waitUntil: "domcontentloaded" });
+    const hero = page
+      .getByRole("main")
+      .first()
+      .locator('[data-home-section="Introduction"]');
+    const heading = hero.getByRole("heading", { level: 1 });
+    const fan = page
+      .getByRole("main")
+      .first()
+      .locator("[data-home-artwork-fan]");
+    const artworks = page
+      .getByRole("main")
+      .first()
+      .locator("[data-home-artwork-fan] figure");
+    const artworkImages = page
+      .getByRole("main")
+      .first()
+      .locator("[data-home-artwork-fan] img");
+    await expect(heading).toHaveText("Building a decentralized network state");
+    await expect(
+      hero.getByText(
+        "A global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology."
+      )
+    ).toBeVisible();
+    const actions = page
+      .getByRole("region", { name: "New to 6529" })
+      .getByRole("button")
+      .or(page.getByRole("region", { name: "New to 6529" }).getByRole("link"));
+    await expect(actions).toHaveText(["Connect wallet", "Start here"]);
+    await expect(actions.last()).toHaveAttribute("href", "/join-6529");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    for (const width of [390, 1440]) {
+      await page.setViewportSize({ width, height: 1000 });
+      const textBox = await heading.boundingBox();
+      const fanBox = await fan.boundingBox();
+      expect(textBox).not.toBeNull();
+      expect(fanBox).not.toBeNull();
+      if (width < 1024)
+        expect(fanBox!.y).toBeGreaterThan(textBox!.y + textBox!.height);
+      else expect(fanBox!.x).toBeGreaterThan(textBox!.x + textBox!.width);
+      await expect(artworks).toHaveCount(5);
+      await expect(artworks.first()).toHaveCSS("animation-name", "none");
+      await expect(artworkImages).toHaveCount(5);
+      await hero.screenshot({ path: testInfo.outputPath(`hero-${width}.png`) });
+      await expectNoHorizontalOverflow(page);
+    }
+  });
+
+  test("newcomer explanation reflows and keeps its links keyboard accessible @smoke", async ({
+    page,
+  }, testInfo) => {
+    const section = page.getByRole("region", { name: "What is 6529?" });
+    const articles = section.getByRole("article");
+    const links = section.getByRole("link");
+    await expect(section).toBeVisible();
+    await expect(articles).toHaveCount(3);
+    await expect(links).toHaveText([
+      "Browse The Memes",
+      "Browse Waves",
+      "How voting works",
+    ]);
+    for (const width of [390, 768, 1440]) {
+      await page.setViewportSize({ width, height: 1000 });
+      const boxes = await articles.evaluateAll((items) =>
+        items.map((item) => {
+          const { x, y, width, height } = item.getBoundingClientRect();
+          return { x, y, width, height };
+        })
+      );
+      for (const [index, box] of boxes.entries()) {
+        if (index === 0) continue;
+        const previous = boxes[index - 1]!;
+        if (width < 768) {
+          expect(box.y).toBeGreaterThanOrEqual(
+            previous.y + previous.height - 1
+          );
+          expect(Math.abs(box.x - previous.x)).toBeLessThan(1);
+        } else {
+          expect(Math.abs(box.y - previous.y)).toBeLessThan(1);
+          expect(box.x).toBeGreaterThanOrEqual(previous.x + previous.width - 1);
+        }
+      }
+      await links.first().focus();
+      for (let index = 0; index < 3; index++) {
+        const link = links.nth(index);
+        await expect(link).toBeFocused();
+        await expect(link).not.toHaveCSS("box-shadow", "none");
+        if (index < 2) await page.keyboard.press("Tab");
+      }
+      await expectNoHorizontalOverflow(page);
+      await section.screenshot({
+        path: testInfo.outputPath(`what-is-${width}.png`),
+      });
+    }
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await expect(links.first()).toHaveCSS("transition-property", "none");
+    await expect(
+      page
+        .getByRole("link", { name: "Browse The Memes", exact: true })
+        .locator("svg")
+    ).toHaveCSS("transition-property", "none");
+  });
+
   test("should display the home landing content", async ({ page }) => {
     // Prod serves "6529.io"; staging serves "6529 Staging".
     await expect(page).toHaveTitle(/^6529(\.io| Staging)$/);
@@ -1108,16 +1172,14 @@ test.describe("Home Page @smoke @medium @large", () => {
     await expect(comingUp).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     const isNarrowViewport = await page.evaluate(() => innerWidth < 768);
     const viewportWidth = await page.evaluate(() => innerWidth);
-    let sectionTitleSize = "24px";
-    if (viewportWidth < 768) sectionTitleSize = "20px";
-    else if (viewportWidth < 1024) sectionTitleSize = "22px";
+    const sectionTitleSize = isNarrowViewport ? "28px" : "38px";
     await expect(page.getByText(/^(Latest|Next) Drop$/)).toHaveCSS(
       "font-size",
-      sectionTitleSize
+      viewportWidth < 768 ? "28px" : "38px"
     );
     await expect(page.getByText(/^(Latest|Next) Drop$/)).toHaveCSS(
       "margin-bottom",
-      "20px"
+      viewportWidth < 768 ? "28px" : "32px"
     );
     // Both section actions belong in the header and must leave the title clear.
     for (const section of [
@@ -1136,11 +1198,14 @@ test.describe("Home Page @smoke @medium @large", () => {
       const subtitle = section
         .getByRole("heading", { level: 2 })
         .locator("xpath=following-sibling::p");
-      await expect(subtitle).toHaveCSS("font-size", "14px");
-      await expect(subtitle).toHaveCSS("margin-top", "4px");
+      await expect(subtitle).toHaveCSS(
+        "font-size",
+        isNarrowViewport ? "14px" : "15px"
+      );
+      await expect(subtitle).toHaveCSS("margin-top", "12px");
       await expect(
         section.getByRole("heading", { level: 2 }).locator("../..")
-      ).toHaveCSS("margin-bottom", "20px");
+      ).toHaveCSS("margin-bottom", isNarrowViewport ? "28px" : "32px");
       expect(
         await section.evaluate((section) => {
           const heading = section.querySelector("h2");
@@ -1162,17 +1227,16 @@ test.describe("Home Page @smoke @medium @large", () => {
       ).toBe(true);
 
       if (isNarrowViewport) {
-        const subtitleGap = await section.evaluate((section) => {
+        const linkGap = await section.evaluate((section) => {
           const subtitle = section.querySelector("p")!;
           const link = section.querySelector('[data-home-action="View all"]')!;
           return (
-            subtitle.getBoundingClientRect().top -
-            link.getBoundingClientRect().bottom
+            link.getBoundingClientRect().top -
+            subtitle.getBoundingClientRect().bottom
           );
         });
-        // The requested compact header uses a 4px subtitle gap; the action
-        // remains contained within the title row rather than hanging below it.
-        expect(subtitleGap).toBeGreaterThanOrEqual(4);
+        // The approved mobile layout puts the text action below the subtitle.
+        expect(linkGap).toBeGreaterThanOrEqual(12);
       }
     }
 
@@ -1191,6 +1255,36 @@ test.describe("Home Page @smoke @medium @large", () => {
         ).toBeCloseTo(24, 0);
       }
     }
+
+    const start = page.getByRole("region", {
+      name: "How to start",
+      exact: true,
+    });
+    await expect(start).toBeVisible();
+    await expect(start.getByRole("listitem")).toHaveCount(4);
+    await expect(
+      start.getByRole("link", { name: "Create profile", exact: true })
+    ).toHaveAttribute("href", "/join-6529#join-step-profile");
+    const steps = await start
+      .getByRole("listitem")
+      .evaluateAll((items) =>
+        items.map((item) => item.getBoundingClientRect().toJSON())
+      );
+    for (let index = 1; index < steps.length; index++) {
+      if (isNarrowViewport)
+        expect(steps[index]!.top).toBeGreaterThan(steps[index - 1]!.bottom);
+      else expect(steps[index]!.top).toBeCloseTo(steps[0]!.top, 0);
+    }
+    const guide = start.getByRole("link", {
+      name: "Open the Join 6529 guide",
+      exact: true,
+    });
+    await guide.focus();
+    await expect(guide).toBeFocused();
+    await expect(guide).toHaveCSS(
+      "min-height",
+      isNarrowViewport ? "40px" : "32px"
+    );
 
     const footer = page
       .getByRole("link", { name: "Terms of Service", exact: true })
@@ -1224,7 +1318,7 @@ test.describe("Home Page @smoke @medium @large", () => {
     await expectNoHorizontalOverflow(page);
   });
 
-  test("keeps a countdown with days inside the original timer height", async ({
+  test("keeps long countdowns readable in standard and compact homepage layouts", async ({
     page,
   }, testInfo) => {
     if (isMobileWebProject(testInfo.project.name)) {
@@ -1264,7 +1358,7 @@ test.describe("Home Page @smoke @medium @large", () => {
               title: 'Phase 0 (Allowlist) Starts In',
               targetDate: Math.floor(Date.now() / 1000) + 12 * 86400 + 23 * 3600 + 59 * 60 + 59,
               showAllowlistInfo: true,
-              showMintBtn: false,
+              showMintBtn: true,
               isActive: false
             } })
           );
@@ -1296,6 +1390,60 @@ test.describe("Home Page @smoke @medium @large", () => {
     expect(bounds.timer.top).toBeGreaterThanOrEqual(bounds.box.top);
     expect(bounds.timer.bottom).toBeLessThanOrEqual(bounds.box.bottom);
     await expectNoHorizontalOverflow(page);
+    const standardCardHeight = await timer.evaluate(
+      (element) =>
+        element.parentElement!.parentElement!.parentElement!.parentElement!.getBoundingClientRect()
+          .height
+    );
+    await page.getByRole("main").evaluate((element) => {
+      element.setAttribute("data-home-drop", "");
+      element.classList.add("tw-group/home-drop");
+    });
+    const phase = page.getByText("Phase 0 (Allowlist) Starts In", {
+      exact: true,
+    });
+    const mint = page.getByRole("link", { name: "Mint", exact: true });
+    await expect(phase).toBeVisible();
+    await expect(page.getByText("Upcoming", { exact: true })).toBeVisible();
+    await expect(
+      page.locator('[data-tooltip-id="allowlist-info"]')
+    ).toBeVisible();
+    await expect(mint).toHaveAttribute("href", "/the-memes/mint");
+    await expect(timer).toHaveCSS(
+      "font-size",
+      (await page.evaluate(() => innerWidth < 768)) ? "20px" : "24px"
+    );
+    await expect(timer).toHaveCSS("font-weight", "700");
+    const phaseBounds = await phase.boundingBox();
+    const mintBounds = await mint.boundingBox();
+    const compact = await timer.evaluate((element) => {
+      const cell = element.parentElement!.parentElement!;
+      const row = cell.parentElement!;
+      const card = row.parentElement!;
+      return {
+        timer: element.getBoundingClientRect().toJSON(),
+        cell: cell.getBoundingClientRect().toJSON(),
+        row: row.getBoundingClientRect().toJSON(),
+        card: card.getBoundingClientRect().toJSON(),
+        space: card.parentElement!.getBoundingClientRect().toJSON(),
+      };
+    });
+    if (!phaseBounds || !mintBounds)
+      throw new Error("Countdown controls must be visible");
+    expect(phaseBounds.x + phaseBounds.width).toBeLessThanOrEqual(
+      compact.cell.left
+    );
+    expect(compact.timer.left).toBeGreaterThanOrEqual(compact.cell.left);
+    expect(compact.timer.right).toBeLessThanOrEqual(compact.cell.right);
+    expect(compact.timer.top).toBeGreaterThanOrEqual(compact.cell.top);
+    expect(compact.timer.bottom).toBeLessThanOrEqual(compact.cell.bottom);
+    expect(mintBounds.y).toBeGreaterThanOrEqual(compact.row.bottom + 12);
+    expect(mintBounds.height).toBe(44);
+    expect(compact.card.height).toBeLessThan(standardCardHeight);
+    if ((await page.evaluate(() => innerWidth)) >= 1024) {
+      expect(compact.space.height).toBe(standardCardHeight);
+    }
+    await expectNoHorizontalOverflow(page);
     await page.screenshot({ path: testInfo.outputPath("countdown-days.png") });
   });
 
@@ -1326,28 +1474,29 @@ test.describe("Home Page @smoke @medium @large", () => {
       .getByRole("link", { name: "View all", exact: true })
       .locator("svg");
     const secondaryActions = page
-      .getByRole("button", { name: "Connect wallet", exact: true })
+      .getByRole("link", { name: "Start here", exact: true })
       .or(page.getByRole("link", { name: "View all", exact: true }));
     await expect(secondaryActions).toHaveCount(3);
     const isNarrowViewport = await page.evaluate(() => innerWidth < 768);
     for (const action of await secondaryActions.all()) {
       const isViewAll =
         (await action.getAttribute("data-home-action")) === "View all";
-      const isMobileViewAllLink = isNarrowViewport && isViewAll;
-      const borderOpacity = isViewAll ? 0.15 : 0.2;
-      if (isMobileViewAllLink) {
+      if (isViewAll) {
         await expect(action).toHaveCSS("border-width", "0px");
-        await expect(action).toHaveCSS("height", "28px");
+        await expect(action).toHaveCSS(
+          "min-height",
+          isNarrowViewport ? "40px" : "32px"
+        );
       } else {
         await expect(action).toHaveCSS("border-width", "1px");
         await expect(action).toHaveCSS(
           "border-color",
-          `rgba(255, 255, 255, ${borderOpacity})`
+          "rgba(255, 255, 255, 0.1)"
         );
       }
       await expect(action).toHaveCSS(
         "background-color",
-        isMobileViewAllLink ? "rgba(0, 0, 0, 0)" : "rgba(255, 255, 255, 0.04)"
+        isViewAll ? "rgba(0, 0, 0, 0)" : "rgba(255, 255, 255, 0.07)"
       );
     }
 
@@ -1383,15 +1532,29 @@ test.describe("Home Page @smoke @medium @large", () => {
       await expect(arrow).toHaveCSS("transform", "matrix(1, 0, 0, 1, 2, 0)");
 
       for (const action of await secondaryActions.all()) {
+        const isStartHere =
+          (await action.getAttribute("data-home-action")) === "Get started";
         await action.hover();
-        await expect(action).toHaveCSS(
-          "border-color",
-          "rgba(255, 255, 255, 0.3)"
-        );
-        await expect(action).toHaveCSS(
-          "background-color",
-          "rgba(255, 255, 255, 0.08)"
-        );
+        if (isStartHere) {
+          await expect(action).toHaveCSS(
+            "border-color",
+            "rgba(255, 255, 255, 0.2)"
+          );
+          await expect(action).toHaveCSS(
+            "background-color",
+            "rgba(255, 255, 255, 0.1)"
+          );
+        } else {
+          await expect(action).toHaveCSS("color", "rgb(255, 255, 255)");
+          await expect(action).toHaveCSS(
+            "text-decoration-color",
+            "rgba(255, 255, 255, 0.6)"
+          );
+          await expect(action).toHaveCSS(
+            "background-color",
+            "rgba(0, 0, 0, 0)"
+          );
+        }
       }
     }
 
