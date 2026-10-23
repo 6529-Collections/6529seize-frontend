@@ -4,7 +4,9 @@ The canonical pure TypeScript module lives in the frontend at `shared/memes-cale
 The backend bundles a byte-identical copy in `src/memes-calendar`. Calendar
 calculation requires no network, frontend availability, or package registry.
 Craft uses it to resolve a claim's season, retaining the database creation-window check.
-Other existing calendar API consumers are unchanged by this foundation.
+Backend subscription coverage and Help Bot calendar answers also use this module
+locally. Shared next/current/status queries back the existing frontend API; no
+backend calendar consumer depends on that HTTP service.
 
 ## Updating the calendar
 
@@ -49,3 +51,19 @@ folder outside the renderer. Keep that alias unchanged and do not use it for
 calendar imports. Existing calendar helper paths remain compatibility re-exports.
 The regression test resolves those consumers with both frontend and Core-style
 path mappings; a real Core subtree sync/build remains a separate release step.
+
+## Calendar consumers and year-round checks
+
+Craft resolves seasons locally; subscription coverage projects strictly future
+mint dates; Help Bot calculates next/current/specific-mint answers locally. The
+existing frontend API endpoints retain their response shapes and use the same
+query functions. Current windows include opening and exclude closing; next means
+strictly future, including at an exact opening instant.
+
+Regression coverage spans all twelve months, both DST transitions, midnight
+carry-over, exact mint boundaries, year/season rollover, leap day, historical
+reschedules and different host timezones. A five-year sweep checks every regular
+mint date and Athens phase window from 2026 through 2030. Timezone rules use the
+runtime's IANA data; runtime updates remain necessary if timezone law changes.
+See the paired backend guide for the existing services to redeploy and retired
+calendar network settings.
