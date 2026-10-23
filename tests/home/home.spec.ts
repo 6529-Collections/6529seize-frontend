@@ -991,18 +991,33 @@ test.describe("Home Page @smoke @medium @large", () => {
       return route.fulfill({ json: { jsonrpc: "2.0", id: rpc.id, result } });
     });
     await page.reload({ waitUntil: "domcontentloaded" });
-    const hero = page.locator('[data-home-section="Introduction"]');
+    const hero = page
+      .getByRole("main")
+      .first()
+      .locator('[data-home-section="Introduction"]');
     const heading = hero.getByRole("heading", { level: 1 });
-    const fan = hero.locator("[data-home-artwork-fan]");
+    const fan = page
+      .getByRole("main")
+      .first()
+      .locator("[data-home-artwork-fan]");
+    const artworks = page
+      .getByRole("main")
+      .first()
+      .locator("[data-home-artwork-fan] figure");
+    const artworkImages = page
+      .getByRole("main")
+      .first()
+      .locator("[data-home-artwork-fan] img");
     await expect(heading).toHaveText("Building a decentralized network state");
     await expect(
       hero.getByText(
         "A global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology."
       )
     ).toBeVisible();
-    const actions = hero.locator(
-      '[data-home-section="Get started"] button, [data-home-section="Get started"] a'
-    );
+    const actions = page
+      .getByRole("region", { name: "New to 6529" })
+      .getByRole("button")
+      .or(page.getByRole("region", { name: "New to 6529" }).getByRole("link"));
     await expect(actions).toHaveText(["Connect wallet", "Start here"]);
     await expect(actions.last()).toHaveAttribute("href", "/join-6529");
     await page.emulateMedia({ reducedMotion: "reduce" });
@@ -1015,12 +1030,9 @@ test.describe("Home Page @smoke @medium @large", () => {
       if (width < 1024)
         expect(fanBox!.y).toBeGreaterThan(textBox!.y + textBox!.height);
       else expect(fanBox!.x).toBeGreaterThan(textBox!.x + textBox!.width);
-      await expect(fan.locator("figure")).toHaveCount(5);
-      await expect(fan.locator("figure").first()).toHaveCSS(
-        "animation-name",
-        "none"
-      );
-      await expect(fan.locator("img")).toHaveCount(5);
+      await expect(artworks).toHaveCount(5);
+      await expect(artworks.first()).toHaveCSS("animation-name", "none");
+      await expect(artworkImages).toHaveCount(5);
       await hero.screenshot({ path: testInfo.outputPath(`hero-${width}.png`) });
       await expectNoHorizontalOverflow(page);
     }
