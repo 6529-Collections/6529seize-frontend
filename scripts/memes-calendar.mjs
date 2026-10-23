@@ -6,16 +6,23 @@ import {
   mkdirSync,
   readFileSync,
   readdirSync,
+  unlinkSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const canonical = join(root, "shared/memes-calendar");
-const directory = existsSync(canonical)
-  ? canonical
-  : join(root, "src/memes-calendar");
+const packageName = JSON.parse(
+  readFileSync(join(root, "package.json"), "utf8")
+).name;
+if (packageName !== "6529seize" && packageName !== "6529backend")
+  throw new Error(
+    "Calendar commands require the frontend or backend repository"
+  );
+const directory =
+  packageName === "6529backend" ? join(root, "src/memes-calendar") : canonical;
 const manifestPath = join(directory, "manifest.json");
 const sourceFiles = () =>
   readdirSync(directory)
@@ -30,7 +37,9 @@ const hashes = () =>
         .digest("hex"),
     ])
   );
-const [command = "check", target] = process.argv.slice(2).filter((arg) => arg !== "--");
+const [command = "check", target] = process.argv
+  .slice(2)
+  .filter((arg) => arg !== "--");
 
 if (command === "refresh") {
   if (directory !== canonical)
@@ -68,6 +77,35 @@ if (
 )
   throw new Error("Calendar version differs from its manifest");
 
+function pruneObsoleteManagedFiles(destination, currentNames) {
+  const oldManifest = join(destination, "manifest.json");
+  if (!existsSync(oldManifest)) return;
+  const previous = JSON.parse(readFileSync(oldManifest, "utf8"));
+  const obsolete = Object.entries(previous.files).filter(
+    ([name]) => !currentNames.has(name)
+  );
+  for (const [name, hash] of obsolete) {
+    if (
+      basename(name) !== name ||
+      name.includes("\\") ||
+      !(name.endsWith(".ts") || name === ".prettierrc.json")
+    )
+      throw new Error(
+        "Invalid managed calendar filename in the previous manifest"
+      );
+    const path = join(destination, name);
+    if (
+      existsSync(path) &&
+      createHash("sha256").update(readFileSync(path)).digest("hex") !== hash
+    )
+      throw new Error(`Obsolete calendar file has local changes: ${name}`);
+  }
+  for (const [name] of obsolete) {
+    const path = join(destination, name);
+    if (existsSync(path)) unlinkSync(path);
+  }
+}
+
 if (command === "sync") {
   if (directory !== canonical || !target)
     throw new Error(
@@ -81,6 +119,7 @@ if (command === "sync") {
     throw new Error("Target is not the backend repository");
   const destination = join(destinationRoot, "src/memes-calendar");
   mkdirSync(destination, { recursive: true });
+  pruneObsoleteManagedFiles(destination, new Set(sourceFiles()));
   for (const name of [...sourceFiles(), "manifest.json"])
     copyFileSync(join(directory, name), join(destination, name));
   copyFileSync(
