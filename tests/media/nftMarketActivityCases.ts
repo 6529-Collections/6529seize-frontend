@@ -51,8 +51,8 @@ export function defineNftMarketActivityTests() {
       .getByRole("region", { name: "The Memes card activity", exact: true })
       .locator("dl");
     await expect(row).toBeVisible({ timeout: 45000 });
-    await expect(volumes.locator("dt")).toHaveCount(4);
-    await expect(volumes.locator("dd")).toHaveCount(4);
+    await expect(volumes.getByRole("term")).toHaveCount(4);
+    await expect(volumes.getByRole("definition")).toHaveCount(4);
     await expect(table.getByRole("columnheader")).toHaveCount(6);
     await expect(row.getByRole("cell")).toHaveCount(6);
     await expect(
@@ -69,6 +69,19 @@ export function defineNftMarketActivityTests() {
       await page.setViewportSize({ width, height: 1000 });
       await expectNoHorizontalOverflow(page);
       expect(
+        await row
+          .getByRole("cell")
+          .nth(4)
+          .evaluate((element) => {
+            const text = element.firstChild;
+            if (!text) throw new Error("Total text is required");
+            const range = document.createRange();
+            range.setStart(text, 0);
+            range.setEnd(text, (text.textContent ?? "").indexOf(" ETH"));
+            return range.getClientRects().length;
+          })
+      ).toBe(1);
+      expect(
         await volumes.evaluate(
           (element) =>
             getComputedStyle(element).gridTemplateColumns.split(" ").length
@@ -78,6 +91,7 @@ export function defineNftMarketActivityTests() {
         const style = getComputedStyle(element);
         const cells = Array.from(element.querySelectorAll("td"));
         return {
+          availableWidth: element.parentElement?.clientWidth ?? 0,
           border: [
             style.borderTopWidth,
             style.borderRightWidth,
@@ -105,9 +119,16 @@ export function defineNftMarketActivityTests() {
           new Set(layout.positions.map((position) => position.y)).size
         ).toBe(1);
       } else {
-        expect(
-          Math.abs(action.y + action.height / 2 - (total.y + total.height / 2))
-        ).toBeLessThan(1);
+        if (layout.availableWidth >= 320) {
+          expect(
+            Math.abs(
+              action.y + action.height / 2 - (total.y + total.height / 2)
+            )
+          ).toBeLessThan(1);
+        } else {
+          expect(total.y).toBeGreaterThan(action.y);
+          expect(item.y).toBeGreaterThan(total.y);
+        }
         expect(item.y).toBeGreaterThan(action.y);
         expect(maker.y).toBeGreaterThan(item.y);
         expect(recipient.y).toBe(maker.y);
