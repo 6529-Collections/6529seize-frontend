@@ -1,11 +1,9 @@
 "use client";
 
-import WaveRouteShell from "@/components/waves/WaveRouteShell";
+import WavesView from "@/components/waves/WavesView";
 
-export default function CompetitionRoute({
-  waveId,
-}: {
-  readonly waveId: string;
-}) {
-  return <WaveRouteShell waveId={waveId} />;
+export default function CompetitionRoute() {
+  // Tab navigation can retain this entry page while the wave list changes the
+  // selection. Use the same live selection and empty state as the wave entry.
+  return <WavesView />;
 }
