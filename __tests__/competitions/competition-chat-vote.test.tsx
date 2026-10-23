@@ -462,7 +462,7 @@ it("does not post a reply if saving the competition vote fails", async () => {
 it("offers both modes in inline competition forms and preserves the vote and reply draft", async () => {
   mount(null, replyDrop);
   await screen.findAllByRole("slider");
-  fireEvent.click(screen.getByRole("button", { name: "Numeric", exact: true }));
+  fireEvent.click(screen.getByRole("button", { name: "Numeric" }));
   fireEvent.change(screen.getByRole("spinbutton", { name: "Your vote" }), {
     target: { value: "-123" },
   });
@@ -470,9 +470,9 @@ it("offers both modes in inline competition forms and preserves the vote and rep
   fireEvent.change(screen.getByLabelText("Optional rationale reply"), {
     target: { value: "A public explanation" },
   });
-  fireEvent.click(screen.getByRole("button", { name: "Slider", exact: true }));
+  fireEvent.click(screen.getByRole("button", { name: "Slider" }));
   expect(screen.getAllByRole("slider").length).toBeGreaterThan(0);
-  fireEvent.click(screen.getByRole("button", { name: "Numeric", exact: true }));
+  fireEvent.click(screen.getByRole("button", { name: "Numeric" }));
   expect(screen.getByRole("spinbutton", { name: "Your vote" })).toHaveValue(
     -123
   );
@@ -496,9 +496,7 @@ it.each([0, -1500])(
     mount(null);
     const sliders = await screen.findAllByRole("slider");
     expect(sliders[0]).toHaveAttribute("min", String(min));
-    fireEvent.click(
-      screen.getByRole("button", { name: "Numeric", exact: true })
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Numeric" }));
     const input = screen.getByRole("spinbutton", { name: "Your vote" });
     expect(input).toHaveAttribute("min", String(min));
     fireEvent.change(input, { target: { value: "-25" } });
@@ -511,7 +509,7 @@ it("keeps a vote saved when posting the public explanation fails", async () => {
   jest.mocked(commonApiPost).mockRejectedValueOnce(new Error("Reply failed"));
   mount(null, replyDrop);
   await screen.findAllByRole("slider");
-  fireEvent.click(screen.getByRole("button", { name: "Numeric", exact: true }));
+  fireEvent.click(screen.getByRole("button", { name: "Numeric" }));
   fireEvent.change(screen.getByRole("spinbutton", { name: "Your vote" }), {
     target: { value: "25" },
   });
@@ -537,7 +535,7 @@ it("offers both modes without a reply option when the voter cannot chat", async 
     wave: { ...replyDrop.wave, authenticated_user_eligible_to_chat: false },
   });
   await screen.findAllByRole("slider");
-  fireEvent.click(screen.getByRole("button", { name: "Numeric", exact: true }));
+  fireEvent.click(screen.getByRole("button", { name: "Numeric" }));
   expect(screen.getByRole("spinbutton", { name: "Your vote" })).toBeEnabled();
   expect(screen.queryByRole("switch", { name: "Explain vote" })).toBeNull();
 });
@@ -558,9 +556,7 @@ it.each(["closed", "inactive"])(
     mount(null);
     await screen.findAllByRole("slider");
     expect(screen.getByRole("button", { name: "Save vote" })).toBeDisabled();
-    fireEvent.click(
-      screen.getByRole("button", { name: "Numeric", exact: true })
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Numeric" }));
     expect(
       screen.getByRole("spinbutton", { name: "Your vote" })
     ).toBeDisabled();
@@ -578,7 +574,7 @@ it("keeps zero-credit voting bounded in both modes", async () => {
   });
   mount(null);
   await screen.findAllByRole("slider");
-  fireEvent.click(screen.getByRole("button", { name: "Numeric", exact: true }));
+  fireEvent.click(screen.getByRole("button", { name: "Numeric" }));
   const input = screen.getByRole("spinbutton", { name: "Your vote" });
   expect(input).toHaveAttribute("min", "0");
   expect(input).toHaveAttribute("max", "0");
