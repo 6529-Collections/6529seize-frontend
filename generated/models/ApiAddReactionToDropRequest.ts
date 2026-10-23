@@ -11,10 +11,12 @@
  * Do not edit the class manually.
  */
 
+import { ApiDeviceSignature } from '../models/ApiDeviceSignature';
 import { HttpFile } from '../http/http';
 
 export class ApiAddReactionToDropRequest {
     'reaction': string;
+    'device_signature'?: ApiDeviceSignature;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -25,6 +27,12 @@ export class ApiAddReactionToDropRequest {
             "name": "reaction",
             "baseName": "reaction",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "device_signature",
+            "baseName": "device_signature",
+            "type": "ApiDeviceSignature",
             "format": ""
         }    ];
 

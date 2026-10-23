@@ -45,6 +45,7 @@ import {
 } from "./authRequestGuard";
 import { createTimedAbortSignal } from "./authRequestAbortSignal";
 import { createAuthRequestSignIn } from "./authRequestSignIn";
+import { createSignedMessagesGrantRequest } from "./authSignedMessagesGrant";
 import type {
   AuthRequestActions,
   CreateAuthRequestActionsParams,
@@ -95,9 +96,10 @@ export function createAuthRequestActions({
 }: CreateAuthRequestActionsParams): AuthRequestActions {
   const getNonce = async ({
     signerAddress,
-  }: {
-    signerAddress: string;
-  }): Promise<ApiSessionNonceResponse> => {
+    deviceGrant,
+  }: Parameters<
+    typeof getSessionNonce
+  >[0]): Promise<ApiSessionNonceResponse> => {
     if (!signerAddress || typeof signerAddress !== "string") {
       throw new InvalidSignerAddressError(signerAddress);
     }
@@ -107,7 +109,7 @@ export function createAuthRequestActions({
     }
 
     try {
-      const response = await getSessionNonce({ signerAddress });
+      const response = await getSessionNonce({ signerAddress, deviceGrant });
 
       if (!response) {
         throw new NonceResponseValidationError(
@@ -697,6 +699,21 @@ export function createAuthRequestActions({
     }
   };
 
+  const requestSignedMessagesGrant = createSignedMessagesGrantRequest({
+    address,
+    canAuthenticate:
+      !activeProfileProxy &&
+      enableWalletAuthentication &&
+      !isDevAuthenticationEnabled(),
+    canSignActiveWallet,
+    createSigningAuthRequestGuard: () =>
+      createSigningAuthRequestGuard(createAuthRequestGuard({})),
+    isActiveChainSupported,
+    requestSignIn,
+    setAuthLoadingState,
+    setToast,
+  });
+
   const onActiveProfileProxy = async (
     profileProxy: ApiProfileProxy | null
   ): Promise<void> => {
@@ -774,5 +791,6 @@ export function createAuthRequestActions({
     onActiveProfileProxy,
     requestAuth,
     requestSessionUpgrade,
+    requestSignedMessagesGrant,
   };
 }

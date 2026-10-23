@@ -120,7 +120,9 @@
       "services/api/public-review/feedback-codec.ts": ["exports", "types"],
       "services/api/public-review/ledger.ts": ["exports"],
       "services/**": ["files"],
-      "lib/storage/idb-keyval.ts": ["files"],
+      // In-repo idb-keyval clone behind the bundler alias: it keeps the full
+      // package API for aliased third-party consumers knip cannot see.
+      "lib/storage/idb-keyval.ts": ["files", "exports"],
       "playwright.config.ts": ["exports"],
       "next-sitemap.build.cjs": ["exports"],
       "next-sitemap.config.ts": ["exports"],
