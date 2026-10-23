@@ -1036,6 +1036,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       exact: true,
     });
     await expect(cancelRationale).toBeVisible();
+    await expect(
+      page.getByText("Post a public reply in the wave about your saved vote.", {
+        exact: true,
+      })
+    ).toBeVisible();
     await cancelRationale.click();
     await expect(explainVote).toBeFocused();
     await page.getByRole("tab", { name: "Settings", exact: true }).click();
@@ -3118,7 +3123,13 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
   test("keeps compact vote controls readable across row breakpoints and save errors", async ({
     page,
   }, testInfo) => {
-    await installCompetitionApi(page);
+    const sandbox = await installCompetitionApi(page);
+    sandbox.setCompetition("alpha", {
+      voting: {
+        ...competition("alpha", "Parallel Alpha").voting,
+        credit_type: "TDH_PLUS_XTDH",
+      },
+    });
     let releaseCredits!: () => void;
     const creditsGate = new Promise<void>((resolve) => {
       releaseCredits = resolve;

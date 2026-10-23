@@ -310,7 +310,7 @@ export function CompetitionVoteForm({
               aria-describedby={[rangeDescriptionId, errorDescriptionId]
                 .filter(Boolean)
                 .join(" ")}
-              className="tw-h-11 tw-w-[13ch] tw-min-w-0 tw-max-w-full tw-flex-initial tw-rounded-lg tw-border-0 tw-bg-transparent tw-pl-3 tw-pr-0 tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-50 [appearance:textfield] focus:tw-ring-0 md:tw-h-9 [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
+              className="tw-h-11 tw-w-[12ch] tw-min-w-0 tw-max-w-full tw-flex-initial tw-rounded-lg tw-border-0 tw-bg-transparent tw-pl-3 tw-pr-0 tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-50 [appearance:textfield] focus:tw-ring-0 md:tw-h-9 [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
             />
             <span className="tw-max-w-[40%] tw-flex-shrink-0 tw-break-words tw-py-1 tw-text-xs tw-leading-4 tw-text-iron-400">
               {creditLabel}

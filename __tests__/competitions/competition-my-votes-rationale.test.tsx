@@ -126,6 +126,9 @@ it.each(["Cancel rationale", "Send rationale"])(
     const trigger = screen.getByRole("button", { name: "Explain vote" });
     await user.click(trigger);
     expect(screen.getByRole("textbox", { name: "Rationale" })).toHaveFocus();
+    expect(
+      screen.getByText("Post a public reply in the wave about your saved vote.")
+    ).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: action }));
     expect(screen.queryByRole("textbox", { name: "Rationale" })).toBeNull();
     expect(trigger).toHaveFocus();
