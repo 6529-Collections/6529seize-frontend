@@ -29,6 +29,7 @@ import {
 } from "@/helpers/competition.helpers";
 import {
   getLegacyCompetitionTab,
+  getSharedWaveTabRoute,
   waveCompetitionTabs,
 } from "@/helpers/default-competition.helpers";
 import {
@@ -36,15 +37,6 @@ import {
   getWavePathRoute,
   getActiveWaveIdFromUrl,
 } from "@/helpers/navigation.helpers";
-
-const getSharedWaveTabRoute = (pathname: string, tab: MyStreamWaveTab) => {
-  const waveId = getWaveIdFromPathname(pathname);
-  if (!waveId) return null;
-  const params = new URLSearchParams({ tab: tab.toLowerCase() });
-  const competitionId = getCompetitionIdFromPathname(pathname);
-  if (competitionId) params.set("competition", competitionId);
-  return `${getWavePathRoute(waveId)}?${params}`;
-};
 
 export enum WaveVotingState {
   NOT_STARTED = "NOT_STARTED",

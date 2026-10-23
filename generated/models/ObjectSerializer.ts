@@ -399,6 +399,7 @@ export * from '../models/ApiDropReactionV2';
 export * from '../models/ApiDropReferencedNFT';
 export * from '../models/ApiDropResolvedIdentityProfile';
 export * from '../models/ApiDropResolvedIdentityProfileV2';
+export * from '../models/ApiDropSearchPage';
 export * from '../models/ApiDropSearchStrategy';
 export * from '../models/ApiDropSubscriptionActions';
 export * from '../models/ApiDropSubscriptionTargetAction';
@@ -752,6 +753,7 @@ export * from '../models/ApiUploadsPage';
 export * from '../models/ApiValidateProfileCmsAgentCandidateRequest';
 export * from '../models/ApiValidateProfileCmsAgentPatchRequest';
 export * from '../models/ApiValidateProfileCmsPackageRequest';
+export * from '../models/ApiVotingCreditReleaseReason';
 export * from '../models/ApiWallet';
 export * from '../models/ApiWalletDistributionAllocation';
 export * from '../models/ApiWalletDistributionAllocations';
@@ -1311,6 +1313,7 @@ import { ApiDropReactionV2 } from '../models/ApiDropReactionV2';
 import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
 import { ApiDropResolvedIdentityProfile                         } from '../models/ApiDropResolvedIdentityProfile';
 import { ApiDropResolvedIdentityProfileV2            } from '../models/ApiDropResolvedIdentityProfileV2';
+import { ApiDropSearchPage } from '../models/ApiDropSearchPage';
 import { ApiDropSearchStrategy } from '../models/ApiDropSearchStrategy';
 import { ApiDropSubscriptionActions } from '../models/ApiDropSubscriptionActions';
 import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
@@ -1485,7 +1488,7 @@ import { ApiNftOwnerPage } from '../models/ApiNftOwnerPage';
 import { ApiNftsPage } from '../models/ApiNftsPage';
 import { ApiNonceResponse } from '../models/ApiNonceResponse';
 import { ApiNotification        } from '../models/ApiNotification';
-import { ApiNotificationAdditionalContextV2                                         } from '../models/ApiNotificationAdditionalContextV2';
+import { ApiNotificationAdditionalContextV2                                             } from '../models/ApiNotificationAdditionalContextV2';
 import { ApiNotificationCause } from '../models/ApiNotificationCause';
 import { ApiNotificationDropReactedReactor } from '../models/ApiNotificationDropReactedReactor';
 import { ApiNotificationPollVoteOption } from '../models/ApiNotificationPollVoteOption';
@@ -1664,6 +1667,7 @@ import { ApiUploadsPage } from '../models/ApiUploadsPage';
 import { ApiValidateProfileCmsAgentCandidateRequest } from '../models/ApiValidateProfileCmsAgentCandidateRequest';
 import { ApiValidateProfileCmsAgentPatchRequest } from '../models/ApiValidateProfileCmsAgentPatchRequest';
 import { ApiValidateProfileCmsPackageRequest } from '../models/ApiValidateProfileCmsPackageRequest';
+import { ApiVotingCreditReleaseReason } from '../models/ApiVotingCreditReleaseReason';
 import { ApiWallet } from '../models/ApiWallet';
 import { ApiWalletDistributionAllocation, ApiWalletDistributionAllocationPhaseEnum     } from '../models/ApiWalletDistributionAllocation';
 import { ApiWalletDistributionAllocations } from '../models/ApiWalletDistributionAllocations';
@@ -2084,6 +2088,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiUpcomingMemeSubscriptionStatusSourceEnum",
     "ApiUpdateProfilePreferencesDirectMessagePolicyEnum",
     "ApiUpdateProfilePreferencesNotificationLevelEnum",
+    "ApiVotingCreditReleaseReason",
     "ApiWalletDistributionAllocationPhaseEnum",
     "ApiWaveCreditScope",
     "ApiWaveCreditType",
@@ -2485,6 +2490,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDropReferencedNFT": ApiDropReferencedNFT,
     "ApiDropResolvedIdentityProfile": ApiDropResolvedIdentityProfile,
     "ApiDropResolvedIdentityProfileV2": ApiDropResolvedIdentityProfileV2,
+    "ApiDropSearchPage": ApiDropSearchPage,
     "ApiDropSubscriptionActions": ApiDropSubscriptionActions,
     "ApiDropTraceItem": ApiDropTraceItem,
     "ApiDropV2": ApiDropV2,

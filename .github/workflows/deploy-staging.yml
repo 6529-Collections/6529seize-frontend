@@ -42,6 +42,7 @@ jobs:
       API_ENDPOINT: ${{ vars.STAGING_API_ENDPOINT || 'https://api.staging.6529.io' }}
       WS_ENDPOINT: ${{ vars.STAGING_WS_ENDPOINT || 'wss://ws.staging.6529.io' }}
       ALLOWLIST_API_ENDPOINT: ${{ vars.STAGING_ALLOWLIST_API_ENDPOINT || 'https://allowlist-api.staging.6529.io' }}
+      ADVANCED_SEARCH_ENABLED_FOR_USERS: ${{ vars.STAGING_ADVANCED_SEARCH_ENABLED_FOR_USERS }}
       BASE_ENDPOINT: https://staging.6529.io
       NEXTGEN_CHAIN_ID: ${{ vars.STAGING_NEXTGEN_CHAIN_ID || '1' }}
       ASSETS_FROM_S3: "false"

@@ -144,4 +144,12 @@ export async function updateCompetitionVoteInCache(
         })),
       }
   );
+  // Vote value controls list order. Active lists need one read per loaded page
+  // to rebuild offset boundaries; refreshing only page one can skip entries.
+  // Keep confirmed controls responsive while those reads run in the background.
+  // Inactive variants are only marked stale and fetch when opened again.
+  void client.invalidateQueries({
+    queryKey: [...resourceKey, "votes/me"],
+    refetchType: "active",
+  });
 }

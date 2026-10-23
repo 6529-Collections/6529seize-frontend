@@ -2,6 +2,12 @@ import WaveDropsSearchModal from "@/components/waves/drops/search/WaveDropsSearc
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import React from "react";
 
+jest.mock("@/config/env", () => ({
+  publicEnv: { ADVANCED_SEARCH_ENABLED_FOR_USERS: "legacy-only" },
+}));
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: jest.fn() }),
+}));
 const useWaveDropsSearch = jest.fn();
 const useWaveSearchAuthors = jest.fn();
 const refetch = jest.fn(() => Promise.resolve());
@@ -29,6 +35,7 @@ const wave = { id: "wave-1", name: "Design Wave" } as any;
 const result = {
   stableKey: "drop-1",
   serial_no: 42,
+  wave: { id: "wave-1", name: "Design Wave" },
   title: null,
   parts: [
     {

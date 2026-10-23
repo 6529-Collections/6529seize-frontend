@@ -2,6 +2,7 @@
 // but uses the production components, telemetry helpers and pinned Mixpanel SDK.
 import { createContext, useContext, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import mixpanel from "mixpanel-browser/dist/mixpanel-core.cjs.js";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { MyStreamWaveTab } from "@/types/waves.types";
@@ -275,7 +276,14 @@ function Fixture() {
 }
 
 const root = document.getElementById("root");
+const queryClient = new QueryClient();
 // The app downloads the SDK when consent first allows analytics. Load it before
 // rendering so the fixture's synchronous consent controls drive the same SDK.
 if (root)
-  void loadMixpanelSdk().then(() => createRoot(root).render(<Fixture />));
+  void loadMixpanelSdk().then(() =>
+    createRoot(root).render(
+      <QueryClientProvider client={queryClient}>
+        <Fixture />
+      </QueryClientProvider>
+    )
+  );

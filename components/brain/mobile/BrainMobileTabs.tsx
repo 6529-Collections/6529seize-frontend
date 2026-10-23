@@ -1,4 +1,5 @@
 "use client";
+import { useWaveChatPrefetch } from "@/hooks/competitions/useWaveChatPrefetch";
 
 import React, { useCallback, useMemo, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -111,6 +112,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
 }) => {
   const router = useRouter();
   const navigateTab = useWaveTabNavigation();
+  const prefetchChat = useWaveChatPrefetch();
   const ChatButton = waveActive ? TabButton : "button";
   const pathname = usePathname();
   const isCompetitionRoute = isCompetitionPathname(pathname);
@@ -466,6 +468,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                 {...getTabStateProps(isChatActive)}
                 ref={getActiveButtonRef(isChatActive)}
                 onClick={onChatClick}
+                onPointerEnter={prefetchChat}
+                onFocus={prefetchChat}
                 className={getTabButtonClassName(isChatActive)}
               >
                 <span

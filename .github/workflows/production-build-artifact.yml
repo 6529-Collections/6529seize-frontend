@@ -231,6 +231,7 @@ jobs:
         env:
           NODE_ENV: "production"
           VERSION: ${{ inputs.target_sha }}
+          ADVANCED_SEARCH_ENABLED_FOR_USERS: ${{ vars.PRODUCTION_ADVANCED_SEARCH_ENABLED_FOR_USERS }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
           GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY || secrets.GIPHY_API_KEY }}
