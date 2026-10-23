@@ -47,7 +47,12 @@ export function defineNftMarketActivityTests() {
       exact: true,
     });
     const row = table.getByRole("row").filter({ hasText: LONG_NAME });
+    const volumes = page
+      .getByRole("region", { name: "The Memes card activity", exact: true })
+      .locator("dl");
     await expect(row).toBeVisible({ timeout: 45000 });
+    await expect(volumes.locator("dt")).toHaveCount(4);
+    await expect(volumes.locator("dd")).toHaveCount(4);
     await expect(table.getByRole("columnheader")).toHaveCount(6);
     await expect(row.getByRole("cell")).toHaveCount(6);
     await expect(
@@ -63,6 +68,12 @@ export function defineNftMarketActivityTests() {
     for (const width of [1440, 1280, 900, 390, 360]) {
       await page.setViewportSize({ width, height: 1000 });
       await expectNoHorizontalOverflow(page);
+      expect(
+        await volumes.evaluate(
+          (element) =>
+            getComputedStyle(element).gridTemplateColumns.split(" ").length
+        )
+      ).toBe(width < 768 ? 2 : 4);
       const layout = await row.evaluate((element) => {
         const style = getComputedStyle(element);
         const cells = Array.from(element.querySelectorAll("td"));
