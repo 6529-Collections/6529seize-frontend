@@ -4,7 +4,7 @@ import React from "react";
 import { useAuthenticatedContent } from "@/hooks/useAuthenticatedContent";
 import WavesRouteLoading from "./WavesRouteLoading";
 import CommunityCurations from "@/components/community-curations/CommunityCurations";
-import MyStreamWave from "../brain/my-stream/MyStreamWave";
+import WaveRouteShell from "./WaveRouteShell";
 import BrainContent from "../brain/content/BrainContent";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
@@ -31,7 +31,7 @@ const WavesView: React.FC = () => {
     content = <WavesRouteLoading />;
   } else if (serialisedWaveId) {
     content = (
-      <MyStreamWave
+      <WaveRouteShell
         key={`wave-${serialisedWaveId}`}
         waveId={serialisedWaveId}
       />

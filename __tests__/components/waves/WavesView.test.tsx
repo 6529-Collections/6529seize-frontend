@@ -29,7 +29,7 @@ jest.mock("@/components/community-curations/CommunityCurations", () => ({
   ),
 }));
 
-jest.mock("@/components/brain/my-stream/MyStreamWave", () => ({
+jest.mock("@/components/waves/WaveRouteShell", () => ({
   __esModule: true,
   default: ({ waveId }: { readonly waveId: string }) => (
     <div data-testid="wave">{waveId}</div>

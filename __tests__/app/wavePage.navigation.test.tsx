@@ -30,6 +30,7 @@ it.each([
       searchParams: { tab: "chat", competition: "selected" },
       routeContext: "waves",
       includePublicPreview,
+      includeServerFeedSeed: includePublicPreview,
     });
   }
 );

@@ -5899,6 +5899,141 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
   }
 
+  for (const mode of ["native", "legacy", "app"] as const) {
+    for (const entry of ["leaderboard", "chat"] as const) {
+      test(`shows cached Chat immediately while route and feed responses are held (${mode}, ${entry} document)`, async ({
+        page,
+      }, testInfo) => {
+        test.skip(
+          mode === "app" && testInfo.project.name !== "web-mobile-chromium",
+          "The app simulation uses the mobile viewport."
+        );
+        const sandbox = await installCompetitionApi(page);
+        if (mode === "legacy") await sandbox.legacyPrimary("alpha");
+        if (mode === "app")
+          await installSurfaceSimulation(
+            page.context(),
+            "capacitor-ios-sim",
+            testInfo.project.use.baseURL
+          );
+        const role = mode === "app" ? "button" : "tab";
+        const chat = page.getByRole(role, { name: "Chat", exact: true });
+        const leaderboard = page.getByRole(role, {
+          name: "Leaderboard",
+          exact: true,
+        });
+        const messages = page
+          .getByRole("region", {
+            name: "Wave chat file upload area",
+            exact: true,
+          })
+          .getByText("6529-composer-preview", { exact: false })
+          .first();
+        const chatUrl = `/waves/${WAVE}?tab=chat&competition=alpha`;
+        let releaseRoutes!: () => void;
+        const routesHeld = new Promise<void>((resolve) => {
+          releaseRoutes = resolve;
+        });
+        let releaseFeed!: () => void;
+        let feedHeld = new Promise<void>((resolve) => {
+          releaseFeed = resolve;
+        });
+        const initialReads: string[] = [];
+        await page.route(`**/api/v2/waves/${WAVE}/drops?**`, async (route) => {
+          const url = new URL(route.request().url());
+          if (!url.searchParams.has("serial_no_limit"))
+            initialReads.push(url.search);
+          await feedHeld;
+          await route.fallback();
+        });
+        try {
+          if (entry === "leaderboard") {
+            // Leaderboard already starts the browser feed. Tab churn must reuse it.
+            await page.goto(`${ROOT}/alpha?tab=leaderboard`);
+            await expect(leaderboard).toBeVisible({ timeout: 30000 });
+            await expect.poll(() => initialReads.length).toBe(1);
+            await chat.click();
+            await expect(page).toHaveURL(chatUrl, { timeout: 500 });
+            await leaderboard.click();
+            await chat.click();
+            expect(initialReads).toHaveLength(1);
+          } else {
+            releaseFeed();
+            await page.goto(chatUrl);
+          }
+          releaseFeed();
+          await expect(messages).toBeVisible({ timeout: 30000 });
+          const editor = page.getByRole("textbox", {
+            name: "Write a chat message",
+            exact: true,
+          });
+          await editor.fill("Draft survives a same-wave tab visit");
+          await leaderboard.click();
+          await expect(page).toHaveURL(`${ROOT}/alpha?tab=leaderboard`);
+          await expect(messages).toHaveCount(0);
+          // Hold both Next route responses (including intent prefetch) and newest
+          // feed syncs. Real cached messages must render without releasing either.
+          await page.route(`**/waves/${WAVE}**`, async (route) => {
+            if (new URL(route.request().url()).searchParams.has("_rsc"))
+              await routesHeld;
+            await route.fallback();
+          });
+          feedHeld = new Promise<void>((resolve) => {
+            releaseFeed = resolve;
+          });
+          const beforeReads = initialReads.length;
+          const started = await page.evaluate(() => performance.now());
+          await chat.click();
+          await expect(messages).toBeVisible({ timeout: 500 });
+          const elapsed = await page.evaluate(
+            (start) => performance.now() - start,
+            started
+          );
+          expect(elapsed).toBeLessThan(500);
+          await testInfo.attach("cached-chat-response", {
+            body: JSON.stringify({
+              elapsedMs: elapsed,
+              routeResponsesHeld: true,
+              feedResponsesHeld: true,
+            }),
+            contentType: "application/json",
+          });
+          await expect(editor).toContainText(
+            "Draft survives a same-wave tab visit"
+          );
+          await editor.fill("Composer stays usable during background sync");
+          await page.goBack();
+          await expect(page).toHaveURL(`${ROOT}/alpha?tab=leaderboard`);
+          await expect(messages).toHaveCount(0);
+          await page.goForward();
+          await expect(messages).toBeVisible({ timeout: 500 });
+          await expect(editor).toContainText(
+            "Composer stays usable during background sync"
+          );
+          for (let visit = 0; visit < 2; visit++) {
+            await leaderboard.click();
+            await chat.click();
+            await expect(messages).toBeVisible({ timeout: 500 });
+          }
+          expect(initialReads).toHaveLength(beforeReads);
+          await expectNoHorizontalOverflow(page);
+          await page.screenshot({
+            path: testInfo.outputPath(`immediate-chat-${mode}-${entry}.png`),
+          });
+          releaseRoutes();
+          releaseFeed();
+          await expect(messages).toBeVisible();
+          await expect(editor).toContainText(
+            "Composer stays usable during background sync"
+          );
+        } finally {
+          releaseRoutes();
+          releaseFeed();
+        }
+      });
+    }
+  }
+
   test("opens Chat on wave entry and preserves explicit tabs, reload, back and forward", async ({
     page,
   }, testInfo) => {
@@ -8020,7 +8155,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       page,
     }, testInfo) => {
       test.skip(
-        surface === "app" && testInfo.project.name !== "web-mobile-chromium"
+        surface === "app" && testInfo.project.name !== "web-mobile-chromium",
+        "The app simulation uses the mobile viewport."
       );
       const sandbox = await installCompetitionApi(
         page,

@@ -94,8 +94,12 @@ when it is still available, ahead of the wave's latest remembered choice.
    ID and selected tab in the URL so reload and Back/Forward restore the view.
    When switching to a competition route, its controls appear after navigation
    completes, so a newly opened sort sheet or form stays in that view.
-   Switching sections within the same page does not reload the page. A section
-   can still show its own loading state when its data is not available yet.
+   Switching between Leaderboard and Chat for the selected competition reuses
+   the open wave. Previously loaded Chat messages appear immediately while new
+   messages refresh in the background. The primary text draft is kept when
+   switching tabs or using Back/Forward. A first Chat load still waits for its
+   messages; repeated tab choices reuse that request. A section can still show
+   its own loading state when its data is not available yet.
    App tabs and their content use the same availability rules. An unavailable
    legacy competition section opens `Leaderboard`, or `Submissions` after
    voting has ended, and selects that visible tab.
