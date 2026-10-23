@@ -47,6 +47,8 @@ describe("outgoing IDENTITY response boundary", () => {
     { ...target, id: undefined },
     { ...target, handle: 1 },
     { ...target, handle: "../preferences" },
+    { ...target, handle: "." },
+    { ...target, handle: ".." },
     { ...target, pfp: {} },
     { ...target, level: "23" },
     { ...target, primary_address: null },
@@ -58,6 +60,25 @@ describe("outgoing IDENTITY response boundary", () => {
       ).toThrow();
     }
   );
+
+  it.each(["a/b", "a\\b", "?", "#x", ".", "..", "%2e%2e"])(
+    "rejects route-unsafe fallback addresses for handleless identities: %s",
+    (primary_address) => {
+      expect(() =>
+        parseFollowingPage({
+          ...response,
+          data: [{ target: { ...target, handle: null, primary_address } }],
+        })
+      ).toThrow();
+    }
+  );
+
+  it("uses the handle without imposing route restrictions on an unused fallback", () => {
+    const identity = { ...target, primary_address: "unused/fallback" };
+    expect(
+      parseFollowingPage({ ...response, data: [{ target: identity }] }).data
+    ).toEqual([{ identity }]);
+  });
 
   it.each([
     { count: -1 },
