@@ -1,5 +1,15 @@
 "use client";
 
+import { useAuth } from "@/components/auth/Auth";
+import { publicEnv } from "@/config/env";
+import {
+  getPendingSearchFilter,
+  unescapeSearchOperators,
+  isAdvancedSearchEnabledForUser,
+} from "@/helpers/advanced-search.helpers";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { useRouter } from "next/navigation";
+import AdvancedWaveSearchInput from "./AdvancedWaveSearchInput";
 import { useLayoutViewportLock } from "@/components/brain/my-stream/layout/LayoutContext";
 import ProfileAvatar, {
   ProfileBadgeSize,
@@ -146,6 +156,17 @@ export default function WaveDropsSearchModal({
   useLayoutViewportLock(isOpen);
   const modalRef = useRef<HTMLDivElement>(null);
   const locale = useBrowserLocale();
+  const router = useRouter();
+  const { connectedProfile, activeProfileProxy } = useAuth();
+  const advancedSearch = isAdvancedSearchEnabledForUser(
+    publicEnv.ADVANCED_SEARCH_ENABLED_FOR_USERS,
+    connectedProfile?.handle
+  );
+  const readContext = `${connectedProfile?.id ?? "anonymous"}:${activeProfileProxy?.id ?? "direct"}`;
+  const [selectedWave, setSelectedWave] = useState<ApiWave | null>(wave);
+  const scopeWave = advancedSearch ? selectedWave : wave;
+  const scopeName =
+    scopeWave?.name ?? t(locale, "waves.drops.searchModal.advanced.allWaves");
   const [filtersOpen, setFiltersOpen] = useState(false);
   useClickAway(modalRef, () => {
     if (!isOpen) return;
@@ -165,15 +186,19 @@ export default function WaveDropsSearchModal({
   const [authorQuery, setAuthorQuery] = useState("");
   const [afterDate, setAfterDate] = useState("");
   const [beforeDate, setBeforeDate] = useState("");
+  const pendingFilter = advancedSearch ? getPendingSearchFilter(query) : null;
+  const searchText = advancedSearch
+    ? unescapeSearchOperators(pendingFilter?.text ?? query)
+    : query;
   const [debouncedQuery, setDebouncedQuery] = useState("");
-  useDebounce(() => setDebouncedQuery(query), 250, [query]);
+  useDebounce(() => setDebouncedQuery(searchText), 250, [searchText]);
 
   const normalizedQuery = useMemo(
     () => normalize(debouncedQuery),
     [debouncedQuery]
   );
 
-  const liveNormalizedQuery = normalize(query);
+  const liveNormalizedQuery = normalize(searchText);
   const isTextValid =
     liveNormalizedQuery.length === 0 ||
     liveNormalizedQuery.length >= MIN_QUERY_LENGTH;
@@ -181,7 +206,8 @@ export default function WaveDropsSearchModal({
     Boolean(authorFilter) || afterDate.length > 0 || beforeDate.length > 0;
   const hasSearchCriterion = liveNormalizedQuery.length > 0 || hasFilters;
   const validDateRange = isValidWaveSearchDateRange(afterDate, beforeDate);
-  const canSearch = isTextValid && hasSearchCriterion && validDateRange;
+  const canSearch =
+    isTextValid && hasSearchCriterion && validDateRange && !pendingFilter;
   const isQuerySettled = liveNormalizedQuery === normalizedQuery;
   const afterTimestamp = afterDate ? parseLocalDateStart(afterDate) : undefined;
   const beforeTimestamp = beforeDate
@@ -200,7 +226,9 @@ export default function WaveDropsSearchModal({
     isFetchingNextPage,
     refetch,
   } = useWaveDropsSearch({
-    wave,
+    wave: scopeWave,
+    allowGlobalSearch: advancedSearch,
+    readContext,
     term: normalizedQuery,
     authorId: authorFilter?.id,
     after: afterTimestamp,
@@ -240,8 +268,23 @@ export default function WaveDropsSearchModal({
     return null;
   }
 
-  const selectDropResult = (serialNo: number) => {
-    onSelectSerialNo(serialNo);
+  const selectDropResult = (
+    serialNo: number,
+    resultWaveId: string,
+    isDirectMessage: boolean
+  ) => {
+    // The callback scrolls the originating page's wave. Changing the search
+    // scope does not navigate that page, so other waves require a route change.
+    if (resultWaveId === wave.id) onSelectSerialNo(serialNo);
+    else
+      router.push(
+        getWaveRoute({
+          waveId: resultWaveId,
+          serialNo,
+          isDirectMessage,
+          isApp: false,
+        })
+      );
     onClose();
   };
 
@@ -296,7 +339,7 @@ export default function WaveDropsSearchModal({
                       {t(locale, "waves.drops.searchModal.descriptionPrefix")}
                     </span>{" "}
                     <span className="tw-min-w-0 tw-truncate tw-text-iron-300">
-                      {wave.name}
+                      {scopeName}
                     </span>
                   </p>
                 </div>
@@ -319,70 +362,92 @@ export default function WaveDropsSearchModal({
 
               <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 sm:tw-px-5">
                 <div className="tw-flex tw-gap-2">
-                  <div className="tw-relative tw-min-w-0 tw-flex-1">
-                    <MagnifyingGlassIcon
-                      className="tw-pointer-events-none tw-absolute tw-left-3.5 tw-top-1/2 tw-size-5 -tw-translate-y-1/2 tw-text-iron-400"
-                      aria-hidden="true"
+                  {advancedSearch ? (
+                    <AdvancedWaveSearchInput
+                      query={query}
+                      onQueryChange={setQuery}
+                      wave={selectedWave}
+                      onWaveChange={setSelectedWave}
+                      author={authorFilter}
+                      onAuthorChange={setAuthorFilter}
+                      inputRef={inputRef}
+                      enabled={isOpen}
+                      readContext={readContext}
                     />
-                    <label
-                      className="tw-sr-only"
-                      htmlFor="wave-drops-search-input"
-                    >
-                      {t(locale, "waves.drops.searchModal.inputLabel", {
-                        waveName: wave.name,
-                      })}
-                    </label>
-                    <input
-                      id="wave-drops-search-input"
-                      ref={inputRef}
-                      type="text"
-                      autoComplete="off"
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      aria-describedby={SEARCH_INPUT_DESCRIPTION_ID}
-                      className="sm:text-sm tw-form-input tw-block tw-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2.5 tw-pl-10 tw-pr-16 tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-150 tw-ease-out placeholder:tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-ring-iron-600 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300/90"
-                      placeholder={t(
-                        locale,
-                        "waves.drops.searchModal.placeholder"
-                      )}
-                    />
-                    <p id={SEARCH_INPUT_DESCRIPTION_ID} className="tw-sr-only">
-                      {t(locale, "waves.drops.searchModal.inputDescription", {
-                        minLength: formattedMinQueryLength,
-                        waveName: wave.name,
-                      })}
-                    </p>
-                    {query.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setQuery("")}
-                        aria-label={t(locale, "waves.drops.searchModal.clear")}
-                        className="tw-absolute tw-right-2.5 tw-top-1/2 tw-flex tw-h-7 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition tw-duration-150 hover:tw-border-iron-600 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
+                  ) : (
+                    <div className="tw-relative tw-min-w-0 tw-flex-1">
+                      <MagnifyingGlassIcon
+                        className="tw-pointer-events-none tw-absolute tw-left-3.5 tw-top-1/2 tw-size-5 -tw-translate-y-1/2 tw-text-iron-400"
+                        aria-hidden="true"
+                      />
+                      <label
+                        className="tw-sr-only"
+                        htmlFor="wave-drops-search-input"
                       >
-                        {t(locale, "waves.drops.searchModal.clearShort")}
-                      </button>
-                    )}
-                  </div>
-                  <button
-                    ref={filtersButtonRef}
-                    type="button"
-                    onClick={() => setFiltersOpen((open) => !open)}
-                    aria-expanded={filtersOpen}
-                    aria-controls="wave-drops-search-filters-title"
-                    className="tw-flex tw-h-11 tw-flex-shrink-0 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-text-sm tw-font-medium tw-text-iron-200 tw-transition hover:tw-border-iron-600 hover:tw-bg-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
-                  >
-                    <FunnelIcon className="tw-size-4" aria-hidden="true" />
-                    <span className="tw-hidden sm:tw-inline">
-                      {t(locale, "waves.drops.searchModal.filters.open")}
-                    </span>
-                    {activeFilterCount > 0 && (
-                      <span className="tw-text-primary-200 tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-400/20 tw-text-xs">
-                        {formatInteger(locale, activeFilterCount)}
+                        {t(locale, "waves.drops.searchModal.inputLabel", {
+                          waveName: scopeName,
+                        })}
+                      </label>
+                      <input
+                        id="wave-drops-search-input"
+                        ref={inputRef}
+                        type="text"
+                        autoComplete="off"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        aria-describedby={SEARCH_INPUT_DESCRIPTION_ID}
+                        className="sm:text-sm tw-form-input tw-block tw-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2.5 tw-pl-10 tw-pr-16 tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-150 tw-ease-out placeholder:tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-ring-iron-600 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-300/90"
+                        placeholder={t(
+                          locale,
+                          "waves.drops.searchModal.placeholder"
+                        )}
+                      />
+                      <p
+                        id={SEARCH_INPUT_DESCRIPTION_ID}
+                        className="tw-sr-only"
+                      >
+                        {t(locale, "waves.drops.searchModal.inputDescription", {
+                          minLength: formattedMinQueryLength,
+                          waveName: scopeName,
+                        })}
+                      </p>
+                      {query.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setQuery("")}
+                          aria-label={t(
+                            locale,
+                            "waves.drops.searchModal.clear"
+                          )}
+                          className="tw-absolute tw-right-2.5 tw-top-1/2 tw-flex tw-h-7 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition tw-duration-150 hover:tw-border-iron-600 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
+                        >
+                          {t(locale, "waves.drops.searchModal.clearShort")}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  {!advancedSearch && (
+                    <button
+                      ref={filtersButtonRef}
+                      type="button"
+                      onClick={() => setFiltersOpen((open) => !open)}
+                      aria-expanded={filtersOpen}
+                      aria-controls="wave-drops-search-filters-title"
+                      className="tw-flex tw-h-11 tw-flex-shrink-0 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-text-sm tw-font-medium tw-text-iron-200 tw-transition hover:tw-border-iron-600 hover:tw-bg-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70"
+                    >
+                      <FunnelIcon className="tw-size-4" aria-hidden="true" />
+                      <span className="tw-hidden sm:tw-inline">
+                        {t(locale, "waves.drops.searchModal.filters.open")}
                       </span>
-                    )}
-                  </button>
+                      {activeFilterCount > 0 && (
+                        <span className="tw-text-primary-200 tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-400/20 tw-text-xs">
+                          {formatInteger(locale, activeFilterCount)}
+                        </span>
+                      )}
+                    </button>
+                  )}
                 </div>
-                {hasFilters && (
+                {!advancedSearch && hasFilters && (
                   <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-1.5">
                     {authorFilter && (
                       <button
@@ -447,7 +512,7 @@ export default function WaveDropsSearchModal({
                 )}
               </div>
 
-              {filtersOpen && (
+              {!advancedSearch && filtersOpen && (
                 <WaveDropsSearchFilters
                   waveId={wave.id}
                   author={authorFilter}
@@ -476,7 +541,7 @@ export default function WaveDropsSearchModal({
                     description={t(
                       locale,
                       "waves.drops.searchModal.loading.description",
-                      { waveName: wave.name }
+                      { waveName: scopeName }
                     )}
                   />
                 )}
@@ -515,7 +580,9 @@ export default function WaveDropsSearchModal({
                     title={t(locale, "waves.drops.searchModal.idle.title")}
                     description={t(
                       locale,
-                      "waves.drops.searchModal.idle.description",
+                      scopeWave
+                        ? "waves.drops.searchModal.idle.description"
+                        : "waves.drops.searchModal.advanced.idleAll",
                       { minLength: formattedMinQueryLength }
                     )}
                   />
@@ -597,8 +664,10 @@ export default function WaveDropsSearchModal({
                               : drop.author.primary_address;
                           const resultButtonLabel = t(
                             locale,
-                            "waves.drops.searchModal.result.open",
-                            { serialNo, author }
+                            advancedSearch && !scopeWave
+                              ? "waves.drops.searchModal.result.openInWave"
+                              : "waves.drops.searchModal.result.open",
+                            { serialNo, author, wave: drop.wave.name }
                           );
                           const formattedDate = formatDate(
                             locale,
@@ -613,7 +682,14 @@ export default function WaveDropsSearchModal({
                             <button
                               key={drop.stableKey}
                               type="button"
-                              onClick={() => selectDropResult(serialNo)}
+                              onClick={() =>
+                                selectDropResult(
+                                  serialNo,
+                                  drop.wave.id,
+                                  "is_dm_wave" in drop.wave &&
+                                    drop.wave.is_dm_wave === true
+                                )
+                              }
                               aria-label={resultButtonLabel}
                               className="tw-group tw-flex tw-min-h-20 tw-w-full tw-cursor-pointer tw-items-start tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/80 tw-p-3 tw-text-left tw-transition tw-duration-150 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800/80"
                             >
@@ -644,6 +720,11 @@ export default function WaveDropsSearchModal({
                                     {formattedDate} {formattedTime}
                                   </span>
                                 </span>
+                                {advancedSearch && !scopeWave && (
+                                  <span className="tw-mt-0.5 tw-block tw-truncate tw-text-xs tw-text-iron-400">
+                                    #{drop.wave.name}
+                                  </span>
+                                )}
                                 <span className="tw-mt-1 tw-line-clamp-4 tw-block tw-text-sm tw-leading-5 tw-text-iron-300">
                                   <WaveDropSearchResultPreview
                                     title={drop.title}
@@ -676,24 +757,24 @@ export default function WaveDropsSearchModal({
                           );
                         })}
                       </div>
-                      {hasNextPage && (
-                        <div className="tw-flex tw-justify-center tw-pt-2">
-                          <Button
-                            onClick={() => {
-                              fetchNextPage().catch(() => undefined);
-                            }}
-                            loading={isFetchingNextPage}
-                            variant="tertiary"
-                            size="sm"
-                          >
-                            {isFetchingNextPage
-                              ? t(locale, "waves.drops.searchModal.loadingMore")
-                              : t(locale, "waves.drops.searchModal.loadMore")}
-                          </Button>
-                        </div>
-                      )}
                     </div>
                   )}
+                {!showLoading && !isError && canSearch && hasNextPage && (
+                  <div className="tw-flex tw-justify-center tw-pt-2">
+                    <Button
+                      onClick={() => {
+                        fetchNextPage().catch(() => undefined);
+                      }}
+                      loading={isFetchingNextPage}
+                      variant="tertiary"
+                      size="sm"
+                    >
+                      {isFetchingNextPage
+                        ? t(locale, "waves.drops.searchModal.loadingMore")
+                        : t(locale, "waves.drops.searchModal.loadMore")}
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

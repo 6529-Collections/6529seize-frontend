@@ -206,10 +206,12 @@ export async function renderWavesPageContent({
   waveId,
   searchParams,
   routeContext = "waves",
+  includePublicPreview = true,
 }: {
   waveId: string | null;
   searchParams: WavesSearchParams;
   routeContext?: "waves" | "messages" | undefined;
+  readonly includePublicPreview?: boolean;
 }) {
   if (waveId === null) {
     return traceServerRouteData(
@@ -283,6 +285,7 @@ export async function renderWavesPageContent({
         })
       : null;
   const publicFeedPromise =
+    includePublicPreview &&
     routeContext === "waves" &&
     context.waveId &&
     context.wave &&

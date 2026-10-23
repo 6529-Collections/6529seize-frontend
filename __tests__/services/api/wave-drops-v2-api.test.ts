@@ -1,3 +1,4 @@
+import { fetchGlobalDropsSearchV2 } from "@/services/api/global-drops-search-api";
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
@@ -1189,4 +1190,38 @@ it("preserves an empty original artist on managed leaderboard submissions", () =
     wave: waveMin,
   });
   expect(mapped).toHaveProperty("submission_artist", "");
+});
+
+describe("fetchGlobalDropsSearchV2", () => {
+  it("forwards continuation cursors and preserves wave and DM navigation context", async () => {
+    commonApiFetchMock.mockReset();
+    commonApiFetchMock.mockResolvedValue({
+      data: [{ ...createDrop(1), wave: { ...wave, is_dm_wave: true } }],
+      page: 2,
+      next: true,
+      cursor: "next-cursor",
+    });
+    const result = await fetchGlobalDropsSearchV2({
+      term: "hello",
+      authorId: "author-id",
+      page: 2,
+      size: 50,
+      cursor: "previous-cursor",
+    });
+    expect(commonApiFetchMock).toHaveBeenCalledWith({
+      endpoint: "v2/drops/search",
+      params: {
+        term: "hello",
+        author_id: "author-id",
+        page: "2",
+        size: "50",
+        cursor: "previous-cursor",
+      },
+      signal: undefined,
+    });
+    expect(result.cursor).toBe("next-cursor");
+    expect(result.data[0]?.wave).toEqual(
+      expect.objectContaining({ id: "wave-1", is_dm_wave: true })
+    );
+  });
 });

@@ -1,3 +1,4 @@
+import { ApiVotingCreditReleaseReason } from "@/generated/models/ApiVotingCreditReleaseReason";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdentitySubscriptionTargetAction";
@@ -19,6 +20,7 @@ import {
 import { mapLeaderboardDropV2 } from "@/services/api/wave-drops-v2-api";
 import {
   DROP_POLL_VOTED_NOTIFICATION_CAUSE,
+  type INotificationVotingCreditsReturned,
   type INotificationDropPollVoted,
   type INotificationDropReacted,
   type INotificationSubscriptionCoverage,
@@ -297,6 +299,58 @@ const handleUnknownNotificationCause = (
   return [];
 };
 
+const mapVotingCreditsReturnedNotification = (
+  notification: ApiNotificationV2
+): INotificationVotingCreditsReturned[] => {
+  const rawContext: unknown = notification.additional_context;
+  if (
+    rawContext === null ||
+    typeof rawContext !== "object" ||
+    Array.isArray(rawContext)
+  )
+    return [];
+  const context = rawContext as ApiNotificationAdditionalContextV2;
+  if (
+    !context.event_id ||
+    !context.wave_id ||
+    !context.competition_id ||
+    !context.competition_title ||
+    !context.entry_id ||
+    !context.drop_id ||
+    !context.submission_title ||
+    !context.credit_type ||
+    (context.reason !== ApiVotingCreditReleaseReason.Win &&
+      context.reason !== ApiVotingCreditReleaseReason.AuthorDeleted) ||
+    typeof context.amount !== "number" ||
+    !Number.isSafeInteger(context.amount) ||
+    context.amount <= 0 ||
+    typeof context.released_at !== "number" ||
+    !Number.isSafeInteger(context.released_at)
+  )
+    return [];
+  return [
+    {
+      id: notification.id,
+      cause: ApiNotificationCause.VotingCreditsReturned,
+      created_at: notification.created_at,
+      read_at: notification.read_at,
+      additional_context: {
+        event_id: context.event_id,
+        reason: context.reason,
+        wave_id: context.wave_id,
+        competition_id: context.competition_id,
+        competition_title: context.competition_title,
+        entry_id: context.entry_id,
+        drop_id: context.drop_id,
+        submission_title: context.submission_title,
+        credit_type: context.credit_type,
+        amount: context.amount,
+        released_at: context.released_at,
+      },
+    },
+  ];
+};
+
 const mapCompetitionLifecycleNotification = (
   notification: ApiNotificationV2
 ): TypedNotification[] => {
@@ -376,6 +430,9 @@ const mapMemeCollaborationNotification = (
 const mapNotificationV2 = (
   notification: ApiNotificationV2
 ): TypedNotification[] => {
+  if (notification.cause === ApiNotificationCause.VotingCreditsReturned) {
+    return mapVotingCreditsReturnedNotification(notification);
+  }
   if (notification.cause === ApiNotificationCause.MemeCollaboration) {
     return mapMemeCollaborationNotification(notification);
   }

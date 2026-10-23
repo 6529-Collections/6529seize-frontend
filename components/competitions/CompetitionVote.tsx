@@ -1,5 +1,11 @@
 "use client";
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type Ref,
+} from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
@@ -44,7 +50,8 @@ interface CompetitionVoteProps {
 
 export function useCompetitionVoteBudget(
   competition: ApiCompetition,
-  entryId: string
+  entryId: string,
+  enabled = true
 ) {
   const { connectedProfile } = useAuth();
   const viewer = useCompetitionViewer();
@@ -58,7 +65,7 @@ export function useCompetitionVoteBudget(
       { ...competitionScope(identity), viewer, entry_id: entryId },
     ],
     queryFn: ({ signal }) => fetchCompetitionCredits(identity, entryId, signal),
-    enabled: Boolean(connectedProfile),
+    enabled: enabled && Boolean(connectedProfile),
     retry: false,
     staleTime: 0,
   });
@@ -66,6 +73,8 @@ export function useCompetitionVoteBudget(
 
 export function CompetitionVoteForm({
   competition,
+  budgetEnabled = true,
+  budgetVisibilityRef,
   compact = false,
   voteMode = "numeric",
   size,
@@ -78,6 +87,8 @@ export function CompetitionVoteForm({
   disabled,
 }: CompetitionVoteProps & {
   readonly competition: ApiCompetition;
+  readonly budgetEnabled?: boolean | undefined;
+  readonly budgetVisibilityRef?: Ref<HTMLDivElement> | undefined;
   readonly controlledDraft?:
     | {
         readonly value: string;
@@ -118,7 +129,7 @@ export function CompetitionVoteForm({
     WAVE_VOTING_LABELS[competition.voting.credit_type as ApiWaveCreditType];
   const client = useQueryClient();
   const sign = useCompetitionSignatureFor(competition);
-  const credit = useCompetitionVoteBudget(competition, entryId);
+  const credit = useCompetitionVoteBudget(competition, entryId, budgetEnabled);
   const [draft, setDraft] = useState<{ source: string; value: string } | null>(
     null
   );
@@ -227,7 +238,30 @@ export function CompetitionVoteForm({
         {t(locale, "competitions.signIn")}
       </p>
     );
-  if (credit.isPending) return <CompetitionState />;
+  if (credit.isPending)
+    return compact ? (
+      <div
+        ref={budgetVisibilityRef}
+        role="status"
+        aria-label={t(locale, "competitions.loading")}
+        className="tw-col-span-3 tw-row-start-4 tw-flex tw-min-h-28 tw-w-full tw-min-w-0 tw-flex-col tw-gap-2 sm:@[16rem]/my-vote:tw-row-start-3 sm:@[36rem]/my-vote:tw-col-span-1 sm:@[36rem]/my-vote:tw-col-start-3 sm:@[36rem]/my-vote:tw-max-w-72 sm:@[46rem]/my-vote:tw-col-span-1 sm:@[46rem]/my-vote:tw-col-start-4 sm:@[46rem]/my-vote:tw-row-span-3 sm:@[46rem]/my-vote:tw-row-start-1"
+      >
+        <div
+          aria-hidden="true"
+          className="tw-h-10 tw-w-full tw-animate-pulse tw-rounded-lg tw-bg-iron-900 motion-reduce:tw-animate-none"
+        />
+        <div
+          aria-hidden="true"
+          className="tw-h-4 tw-w-3/4 tw-animate-pulse tw-rounded tw-bg-iron-900 motion-reduce:tw-animate-none"
+        />
+        <div
+          aria-hidden="true"
+          className="tw-h-10 tw-w-24 tw-animate-pulse tw-rounded-lg tw-bg-iron-900 motion-reduce:tw-animate-none"
+        />
+      </div>
+    ) : (
+      <CompetitionState />
+    );
   if (
     credit.isError &&
     (!credit.data || isCompetitionAccessError(credit.error))
@@ -253,7 +287,10 @@ export function CompetitionVoteForm({
         <label className="tw-sr-only" htmlFor={`competition-vote-${entryId}`}>
           {t(locale, "competitions.voteValue")}
         </label>
-        <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-pr-1 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus-within:tw-ring-2 focus-within:tw-ring-primary-400 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-1 @[46rem]/my-vote:tw-self-end">
+        <div
+          ref={budgetVisibilityRef}
+          className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-pr-1 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus-within:tw-ring-2 focus-within:tw-ring-primary-400 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-1 @[46rem]/my-vote:tw-self-end"
+        >
           <input
             id={`competition-vote-${entryId}`}
             type="number"

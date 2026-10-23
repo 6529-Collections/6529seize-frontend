@@ -59,6 +59,7 @@ const NOTIFICATION_FILTERS: readonly NotificationFilterOption[] = [
     id: "reactions",
     cause: [
       ApiNotificationCause.DropVoted,
+      ApiNotificationCause.VotingCreditsReturned,
       DROP_POLL_VOTED_NOTIFICATION_CAUSE,
       ApiNotificationCause.DropReacted,
       ApiNotificationCause.DropBoosted,
