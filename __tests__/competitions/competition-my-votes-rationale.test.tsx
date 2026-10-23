@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import CompetitionMyVotes from "@/components/competitions/CompetitionMyVotes";
 import { useCompetitionEntryDrops } from "@/hooks/competitions/useCompetitionEntryDrops";
 
+let mockCanChat = true;
 let mockParts: { part_id: number }[] = [{ part_id: 1 }];
 jest.mock("@/contexts/CompetitionContext", () => ({
   useCompetition: () => ({
@@ -57,7 +58,11 @@ jest.mock("@/hooks/competitions/useCompetitionEntryDrops", () => ({
     {
       data: {
         entry: { status: "ACTIVE" },
-        drop: { id: "drop", parts: mockParts },
+        drop: {
+          id: "drop",
+          parts: mockParts,
+          wave: { authenticated_user_eligible_to_chat: mockCanChat },
+        },
       },
     },
   ]),
@@ -110,6 +115,7 @@ jest.mock("@/components/waves/PrivilegedDropCreator", () => ({
 
 beforeEach(() => {
   mockParts = [{ part_id: 1 }];
+  mockCanChat = true;
 });
 
 it.each(["Cancel rationale", "Send rationale"])(
@@ -165,4 +171,10 @@ it("offers recovery instead of a perpetual loader for a pending row with no fetc
   expect(screen.getByText("Your vote: 7")).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
   expect(screen.queryByText("Loading competition…")).toBeNull();
+});
+
+it("omits the reply action when the voter cannot chat", () => {
+  mockCanChat = false;
+  render(<CompetitionMyVotes />);
+  expect(screen.queryByRole("button", { name: "Explain vote" })).toBeNull();
 });

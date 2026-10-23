@@ -1026,7 +1026,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       )
       .toBe(1);
     const explainVote = page.getByRole("button", {
-      name: "Explain",
+      name: "Explain vote",
       exact: true,
     });
     await expect(explainVote).toBeEnabled();
@@ -1628,9 +1628,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       const bounds = (await row.boundingBox())!;
       expect(Math.abs(bounds.x - available.x)).toBeLessThanOrEqual(1);
       expect(Math.abs(bounds.width - available.width)).toBeLessThanOrEqual(1);
-      const voteControls = row
-        .getByRole("spinbutton", { name: "Your vote", exact: true })
-        .locator("..");
+      // The complete control group still fills the row; Explain vote now shares
+      // its first line instead of occupying a full-width third line.
+      const voteControls = row.locator("[data-vote-controls]");
       await expect(voteControls).toBeVisible();
       const controlsBounds = (await voteControls.boundingBox())!;
       if (testInfo.project.name === "web-mobile-chromium") {
@@ -3112,7 +3112,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
   });
 
-  test("restores Vote with reply in the competition vote dialog", async ({
+  test("restores Explain vote in the competition vote dialog", async ({
     page,
   }, testInfo) => {
     const sandbox = await installCompetitionApi(page);
@@ -3147,11 +3147,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     ).toBeVisible({ timeout: 30000 });
     await detail.getByRole("button", { name: "Vote", exact: true }).click();
     const dialog = page.getByRole("dialog", { name: "Vote for this artwork" });
-    const toggle = dialog.getByRole("switch", { name: "Vote with reply" });
+    const toggle = dialog.getByRole("switch", { name: "Explain vote" });
     await expect(toggle).not.toBeChecked();
     await dialog.getByRole("button", { name: "Numeric", exact: true }).click();
     await dialog.getByRole("spinbutton", { name: "Your vote" }).fill("25");
-    await dialog.getByText("Vote with reply", { exact: true }).click();
+    await dialog.getByText("Explain vote", { exact: true }).click();
     await expect(toggle).toBeChecked();
     const rationale = dialog.getByLabel("Optional rationale reply");
     await expect(rationale).toHaveValue(

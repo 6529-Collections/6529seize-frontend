@@ -371,7 +371,8 @@ export default function CompetitionMyVotes() {
                   disabled={isClosed || resetting}
                   compact
                   onExplainVote={
-                    entryDrop.parts.at(0)?.part_id === undefined
+                    entryDrop.wave.authenticated_user_eligible_to_chat !==
+                      true || entryDrop.parts.at(0)?.part_id === undefined
                       ? undefined
                       : (total, change) => explainVote(entryDrop, total, change)
                   }
