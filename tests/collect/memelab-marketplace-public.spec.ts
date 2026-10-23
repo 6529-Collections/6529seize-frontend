@@ -732,9 +732,13 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
     await expect(market.getByRole("table")).toHaveCount(1);
     const lowest = market.getByText("Lowest listing · ETH", { exact: true });
     const highest = market.getByText("Highest offer · WETH", { exact: true });
-    await expect((offersOnly ? lowest : highest).locator("..")).toContainText(
-      "—"
-    );
+    await expect(
+      market
+        .getByText(offersOnly ? "Lowest listing · ETH" : "Highest offer · WETH", {
+          exact: true,
+        })
+        .locator("..")
+    ).toContainText("—");
     for (const width of [390, 900, 1024, 1440]) {
       await page.setViewportSize({ width, height: 1000 });
       const panelBounds = (await market.boundingBox())!;
