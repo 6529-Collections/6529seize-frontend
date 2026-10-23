@@ -4,6 +4,9 @@
 
 `My Votes` lists active submissions where your current vote is not `0`.
 Past winners are excluded; their historical vote records remain preserved.
+Rows are ordered by your vote value, highest first. Equal votes are ordered by
+vote time, oldest first. Saving a vote refreshes the loaded pages to reflect its
+new position before more rows load.
 You can update votes one row at a time, reset selected rows to `0`, or open a
 prefilled reply for explaining a vote.
 
@@ -64,6 +67,7 @@ while each profile loads. The placeholders stay still when reduced motion is ena
    then `Reset votes`. Review the selected count in the confirmation dialog
    and confirm to set those votes to `0`, or cancel without changing them.
 8. Scroll to the bottom to load more rows.
+   A **Load more** button remains available if automatic loading fails.
 
 ## Common Scenarios
 
@@ -99,9 +103,15 @@ while each profile loads. The placeholders stay still when reduced motion is ena
 - When voting is closed, rows cannot be selected for reset; artwork and title
   buttons still open the drop.
 - `Select all` affects loaded rows only; rows loaded later are not auto-selected.
+- Artwork rows remain visible during background refreshes. Vote inputs load as
+  their rows approach the visible area.
 - Bulk reset runs one selected row at a time.
 
 ## Failure and Recovery
+
+- If an entry preview is unavailable, its personal vote remains visible with
+  **Preview unavailable**, vote controls, and **Try again**. The entry's hidden
+  artwork and author details are not displayed.
 
 - If an All votes profile fails to load, its row keeps the rank and vote total
   and shows **Profile unavailable** with a compact **Try again** button. Retry

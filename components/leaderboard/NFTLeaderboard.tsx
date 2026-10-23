@@ -404,7 +404,7 @@ function CollectorsCsvDownloadControls({
         id={csvTooltipId}
         content={csvButtonLabel}
         place="top"
-        className="md:!tw-hidden"
+        className="md:!tw-hidden [&.react-tooltip\_\_closing]:tw-invisible"
         style={TOOLTIP_STYLES}
         globalCloseEvents={{ escape: true, scroll: true, resize: true }}
       />

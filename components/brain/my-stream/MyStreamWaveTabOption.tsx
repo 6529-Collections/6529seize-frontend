@@ -14,6 +14,7 @@ export interface TabOption {
   readonly leadingIconTooltipId?: string | undefined;
   readonly hasIndicator?: boolean | undefined;
   readonly action?: React.ReactNode | undefined;
+  readonly onIntent?: (() => void) | undefined;
 }
 
 export interface DesktopTabButtonProps {
@@ -30,6 +31,8 @@ export function DesktopTabButton({
   return (
     <TabButton
       onClick={() => onSelect(option.key)}
+      onPointerEnter={option.onIntent}
+      onFocus={option.onIntent}
       role="tab"
       data-wave-tab-value={option.key.toLowerCase()}
       aria-selected={activeKey === option.key}
