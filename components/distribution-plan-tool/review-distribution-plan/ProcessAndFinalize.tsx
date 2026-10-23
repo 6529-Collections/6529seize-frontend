@@ -38,6 +38,7 @@ export default function ProcessAndFinalize({
   const awaitingAuth = job?.status === JobStatus.AwaitingAuth;
   const pending = submitting || job?.status === JobStatus.Pending;
   const inputsMatch = !job || forgeProcessInputsMatch(job, phaseIds);
+  const requiresReset = !inputsMatch && job.status !== JobStatus.Failed;
   const completed = job?.status === JobStatus.Completed && inputsMatch;
   const completion = useRef<string | null>(null);
   useEffect(() => {
@@ -47,7 +48,7 @@ export default function ProcessAndFinalize({
     }
   }, [completed, job, onCompleted]);
   async function run() {
-    if (pending || completed || phaseIds.length !== 3) return;
+    if (pending || completed || requiresReset || phaseIds.length !== 3) return;
     setSubmitting(true);
     setError(null);
     try {
@@ -93,7 +94,11 @@ export default function ProcessAndFinalize({
           void run();
         }}
         disabled={
-          pending || completed || phaseIds.length !== 3 || operation.isLoading
+          pending ||
+          completed ||
+          requiresReset ||
+          phaseIds.length !== 3 ||
+          operation.isLoading
         }
         aria-busy={pending}
         className="tw-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-medium tw-text-white disabled:tw-opacity-50"
@@ -108,7 +113,7 @@ export default function ProcessAndFinalize({
       >
         {pending && `${Math.min((job?.step ?? 0) + 1, 5)} / 5`}
         {phaseIds.length !== 3 && t(locale, "dropForge.inputsMissing")}
-        {!inputsMatch && t(locale, "dropForge.inputsChanged")}
+        {requiresReset && t(locale, "dropForge.inputsChanged")}
         {awaitingAuth && t(locale, "dropForge.authRequired")}
       </div>
       {failure && (

@@ -282,12 +282,61 @@ it("allows a newer publication to replace a blocked unsigned metadata request", 
   );
 });
 
-it("requires exact phase evidence before marking a saved job completed", async () => {
+it.each([
+  [JobStatus.Completed, undefined],
+  [JobStatus.Completed, ["old0", "old1", "old2"]],
+  [JobStatus.AwaitingAuth, ["old0", "old1", "old2"]],
+])(
+  "requires reset for a %s job with stale phase evidence %j",
+  async (status, phaseIds) => {
+    jest.mocked(latestForgeProcess).mockResolvedValue({
+      id: "job",
+      status,
+      phase_ids: phaseIds,
+      kind: "PROCESS_ALL",
+      step: 5,
+    } as ApiDropForgeJob);
+    renderUI(
+      <ProcessAndFinalize
+        contract="creator"
+        claim={123}
+        plan="plan"
+        phaseIds={["p0", "p1", "p2"]}
+      />
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Inputs changed. Reset the distribution before processing again."
+      )
+    );
+    const button = screen.getByRole("button", {
+      name:
+        status === JobStatus.AwaitingAuth
+          ? "Sign in to resume"
+          : "Process and Finalize",
+    });
+    expect(button).toBeDisabled();
+    fireEvent.click(button);
+    expect(mockRequestAuth).not.toHaveBeenCalled();
+    expect(startForgeProcess).not.toHaveBeenCalled();
+  }
+);
+
+it("allows processing changed phases after an explicit reset invalidates the prior job", async () => {
   jest.mocked(latestForgeProcess).mockResolvedValue({
-    id: "job",
-    status: "COMPLETED",
-    kind: "PROCESS_ALL",
+    id: "old-job",
+    status: JobStatus.Failed,
+    phase_ids: ["old0", "old1", "old2"],
+    kind: JobKind.ProcessAll,
     step: 5,
+    error: "Distribution reset; process again",
+  } as ApiDropForgeJob);
+  jest.mocked(startForgeProcess).mockResolvedValue({
+    id: "new-job",
+    status: JobStatus.Pending,
+    phase_ids: ["p0", "p1", "p2"],
+    kind: JobKind.ProcessAll,
+    step: 0,
   } as ApiDropForgeJob);
   renderUI(
     <ProcessAndFinalize
@@ -297,12 +346,26 @@ it("requires exact phase evidence before marking a saved job completed", async (
       phaseIds={["p0", "p1", "p2"]}
     />
   );
-  await screen.findByText(
-    "Inputs changed. Reset the distribution before processing again."
-  );
+  const button = await screen.findByRole("button", {
+    name: "Process and Finalize",
+  });
+  await waitFor(() => expect(button).toBeEnabled());
   expect(
-    screen.getByRole("button", { name: "Process and Finalize" })
-  ).toBeEnabled();
+    screen.queryByText(
+      "Inputs changed. Reset the distribution before processing again."
+    )
+  ).not.toBeInTheDocument();
+  fireEvent.click(button);
+  await waitFor(() =>
+    expect(startForgeProcess).toHaveBeenCalledWith(
+      "creator",
+      123,
+      "plan",
+      ["p0", "p1", "p2"],
+      expect.any(String)
+    )
+  );
+  expect(jest.mocked(startForgeProcess).mock.calls[0]?.[4]).not.toBe("old-job");
 });
 
 it("queues processing with a UUID even when the browser lacks randomUUID", async () => {

@@ -92,6 +92,9 @@ The Memes token distribution outputs.
   - changed phase selections or distribution inputs require explicit reset and
     processing again. Subscription downloads unlock only for completed matching
     jobs; baseline plan exports retain their existing behavior.
+  - if a saved active or completed job has different phase selections, processing
+    stays disabled. A reset invalidates the old job and allows a new operation;
+    restore the original selections to resume an authentication-paused job first.
 - `Publish to GitHub`:
   - enabled only when all are true: normalized, photos count > 0, combined
     artist/team airdrops count > 0.
