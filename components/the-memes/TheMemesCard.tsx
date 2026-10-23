@@ -146,9 +146,9 @@ export default function TheMemesCard({
         name: nft.name,
         tokenId,
       })}
-      className="tw-group tw-block tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-border-white/20 hover:tw-bg-iron-900/50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-[#0D0D0F]"
+      className="tw-group tw-block tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-border-white/20 hover:tw-bg-iron-900/50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-[#0D0D0F] motion-reduce:tw-transition-none max-sm:tw-flex max-sm:tw-flex-col max-sm:tw-border-white/[0.07]"
     >
-      <div className="tw-bg-iron-900">
+      <div className="tw-bg-iron-900 max-sm:tw-relative max-sm:tw-aspect-square max-sm:tw-flex-none max-sm:[&>div]:tw-absolute max-sm:[&>div]:tw-inset-0 max-sm:[&>div]:!tw-h-full">
         <NFTImage
           nft={mediaNft}
           animation={false}
@@ -157,8 +157,8 @@ export default function TheMemesCard({
           showBalance={false}
         />
       </div>
-      <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-px-2 tw-pb-4 tw-pt-4 tw-text-center md:tw-px-4">
-        <div className="tw-w-full tw-max-w-full tw-text-center tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-50 md:tw-text-md">
+      <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-px-2 tw-pb-4 tw-pt-4 tw-text-center max-sm:tw-flex-1 max-sm:tw-items-stretch max-sm:tw-p-2.5 max-sm:tw-text-left md:tw-px-4">
+        <div className="tw-w-full tw-max-w-full tw-text-center tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-50 max-sm:tw-line-clamp-2 max-sm:tw-text-left max-sm:tw-text-[13.5px] max-sm:tw-leading-[18px] md:tw-text-md">
           {nft.name}
         </div>
         <CollectionCardMetadataRow
@@ -166,13 +166,18 @@ export default function TheMemesCard({
           mediaMimeType={mediaMimeType}
           mediaBadgeId={`${nft.contract}-${nft.id}`}
           align="center"
+          className="max-sm:tw-order-last max-sm:tw-mt-auto max-sm:tw-flex-nowrap max-sm:tw-justify-between max-sm:tw-gap-1.5 max-sm:tw-pt-2.5 max-sm:[&>div:first-child>span]:tw-h-5 max-sm:[&>div:first-child>span]:tw-px-1.5 max-sm:[&>div:first-child>span]:tw-text-[9px] max-sm:[&>div:last-child>div]:tw-text-iron-400 max-sm:[&>div:last-child]:-tw-order-1 max-sm:[&>div:last-child]:tw-tabular-nums"
           ownership={{
             contract: nft.contract,
             tokenId: nft.id,
             show: hasConnectedProfile,
           }}
         />
-        <CollectionCardMetricLine text={metricText} align="center" />
+        <CollectionCardMetricLine
+          text={metricText}
+          align="center"
+          className="max-sm:tw-mt-0.5 max-sm:tw-text-left max-sm:tw-leading-4"
+        />
       </div>
     </Link>
   );

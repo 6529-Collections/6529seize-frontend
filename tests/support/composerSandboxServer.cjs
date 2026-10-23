@@ -89,6 +89,7 @@ const CREATED_AT = 1713744000000;
 const PREVIEW_URL = "https://example.com/6529-composer-preview";
 const publicScope = { group: null };
 const requests = [];
+let publicWavePreviewReads = 0;
 // Keep created groups for the lifetime of the local sandbox process so saved
 // wave drafts remain resolvable after the request log is reset between tests.
 let sandboxDropReaction = null;
@@ -2483,6 +2484,15 @@ function loggedRequestBody(pathname, body) {
 
 function recordRequest(method, url, body) {
   const pathname = normalizedPath(url);
+  // The anonymous HTML preview asks for 10 + 1 drops; the streamed feed seed
+  // separately asks for 50 + 1 and must keep loading during client navigation.
+  if (
+    method === "GET" &&
+    pathname === `/api/v2/waves/${SANDBOX_WAVE_ID}/drops` &&
+    url.searchParams.get("limit") === "11"
+  ) {
+    publicWavePreviewReads += 1;
+  }
   if (pathname.startsWith("/__composer-sandbox")) {
     return undefined;
   }
@@ -2505,12 +2515,20 @@ function requestLog() {
 }
 
 function handleDiagnostics(method, pathname, res) {
+  if (
+    pathname === "/__composer-sandbox/public-preview" &&
+    isSafeReadMethod(method)
+  ) {
+    writeJson(res, 200, { reads: publicWavePreviewReads });
+    return true;
+  }
   if (pathname === "/__composer-sandbox/requests" && isSafeReadMethod(method)) {
     writeJson(res, 200, { requests: requestLog() });
     return true;
   }
   if (pathname === "/__composer-sandbox/reset" && method === "POST") {
     requests.length = 0;
+    publicWavePreviewReads = 0;
     sandboxDropReaction = null;
     sandboxWaveGuidelinesEnabled = false;
     sandboxCreatedWaveType = "CHAT";

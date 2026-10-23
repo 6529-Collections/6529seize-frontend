@@ -35,7 +35,7 @@ export default function NowMintingHeader({
         {title}
       </Link>
 
-      <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+      <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-x-5 tw-gap-y-3">
         {artistHandles.length > 0 ? (
           artistHandles.map((handle) => (
             <ArtistPill
