@@ -16,6 +16,7 @@ const coreOptions: ts.CompilerOptions = {
 };
 
 it.each([
+  "app/api/meme-calendar/meme-calendar-response.ts",
   "hooks/useManifoldClaim.ts",
   "components/meme-calendar/meme-calendar.helpers.tsx",
   "components/meme-calendar/meme-calendar.zone.ts",
