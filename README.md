@@ -242,3 +242,5 @@ Launch also displays RPC/database mint-count evidence and retry eligibility for
 post-mint Research and artist payment. The backend setup guide covers the one-time
 17:15 preview and the indexing prerequisite for 18:00 execution; every new report
 goes only to the dedicated operations wave, leaving existing mint announcements unchanged.
+
+Shared Memes calendar maintenance: [guide](shared/memes-calendar/README.md).

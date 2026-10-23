@@ -296,7 +296,7 @@ describe("renderWavesPageContent data paths", () => {
     await Promise.resolve();
   });
 
-  it("does not request a public preview during client navigation", async () => {
+  it("reuses the browser feed without a competing server seed during client navigation", async () => {
     const publicWave = { ...wave, visibility: { scope: { group: null } } };
     (commonApiFetch as jest.Mock).mockResolvedValue(publicWave);
     mockFetchPublicWaveFeed.mockReturnValue(new Promise(() => {}));
@@ -305,9 +305,14 @@ describe("renderWavesPageContent data paths", () => {
       waveId: publicWave.id,
       searchParams: { tab: "chat", competition: "selected" },
       includePublicPreview: false,
+      includeServerFeedSeed: false,
     });
 
     expect(mockFetchPublicWaveFeed).not.toHaveBeenCalled();
+    expect(mockFetchServerWaveFeedSeed).not.toHaveBeenCalled();
+    expect(
+      screen.queryByTestId("wave-server-feed-gate")
+    ).not.toBeInTheDocument();
     render(rendered);
     expect(screen.getByTestId("waves-page-client")).toBeInTheDocument();
   });
