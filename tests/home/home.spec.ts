@@ -181,7 +181,7 @@ test("Subscription Minting stays readable on phones and keeps its desktop layout
     route.fulfill({
       contentType: "text/html",
       body: `<html><head><meta name="viewport" content="width=device-width, initial-scale=1">${documentStyle.styles}</head>
-      <body class="${documentStyle.bodyClass}"><main class="tailwind-scope" style="width:calc(100% - 72px);max-width:600px;margin:24px auto">
+      <body class="${documentStyle.bodyClass}"><main data-home-drop class="tailwind-scope tw-group/home-drop" style="width:calc(100% - 72px);max-width:600px;margin:24px auto">
         <div id="subscription-fixture"></div></main></body></html>`,
     })
   );
