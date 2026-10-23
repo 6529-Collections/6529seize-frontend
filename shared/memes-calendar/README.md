@@ -35,3 +35,13 @@ and their content still matches that manifest. It preserves unrelated files and
 refuses to discard local edits or accept paths outside the managed directory.
 Calendar numbering applies future skips, extras and reschedules consistently in
 both lookup directions; skips take precedence if both overrides name a day.
+
+## Core renderer compatibility
+
+The normal frontend subtree sync includes this module under
+`renderer/shared/memes-calendar`, so Core bundles the same calendar locally.
+Consumers use relative imports: Core reserves `@/shared/*` for its Electron shared
+folder outside the renderer. Keep that alias unchanged and do not use it for
+calendar imports. Existing calendar helper paths remain compatibility re-exports.
+The regression test resolves those consumers with both frontend and Core-style
+path mappings; a real Core subtree sync/build remains a separate release step.

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { mainnet } from "viem/chains";
 import { useReadContract } from "wagmi";
-import { mintPhaseWindowsForDay } from "@/shared/memes-calendar/phases";
+import { mintPhaseWindowsForDay } from "../shared/memes-calendar/phases";
 import {
   MEMES_CONTRACT,
   NULL_ADDRESS,

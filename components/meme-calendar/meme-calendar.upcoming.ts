@@ -1,1 +1,1 @@
-export * from "@/shared/memes-calendar/upcoming";
+export * from "../../shared/memes-calendar/upcoming";

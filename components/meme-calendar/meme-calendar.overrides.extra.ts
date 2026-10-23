@@ -1,1 +1,1 @@
-export * from "@/shared/memes-calendar/overrides.extra";
+export * from "../../shared/memes-calendar/overrides.extra";
