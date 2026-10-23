@@ -107,6 +107,78 @@ describe("useWaveDataFetching", () => {
     return { result, updateData, getData, store };
   }
 
+  it("reuses a pending background sync through rapid tab registrations", async () => {
+    let finish!: (value: { drops: never[]; highestSerialNo: number }) => void;
+    fetchNewestWaveMessages.mockReturnValueOnce(
+      new Promise((resolve) => {
+        finish = resolve;
+      })
+    );
+    const controller = new AbortController();
+    createController.mockReturnValueOnce(controller);
+    const { result } = setup({
+      wave1: { drops: [{ id: "cached", serial_no: 12 }] },
+    });
+    await act(async () => {
+      result.current.registerWave("wave1", true);
+      result.current.registerWave("wave1", true);
+      result.current.registerWave("wave1", true);
+    });
+    expect(fetchNewestWaveMessages).toHaveBeenCalledTimes(1);
+    expect(controller.signal.aborted).toBe(false);
+    expect(fetchWaveMessages).not.toHaveBeenCalled();
+    await act(async () => {
+      finish({ drops: [], highestSerialNo: 12 });
+    });
+    fetchNewestWaveMessages.mockResolvedValueOnce({
+      drops: [],
+      highestSerialNo: 12,
+    });
+    await act(async () => {
+      result.current.registerWave("wave1", true);
+    });
+    expect(fetchNewestWaveMessages).toHaveBeenCalledTimes(2);
+  });
+
+  it("starts current-profile sync when the previous request was aborted", async () => {
+    let finish!: (value: {
+      drops: { id: string; serial_no: number }[];
+      highestSerialNo: number;
+    }) => void;
+    fetchNewestWaveMessages.mockReturnValueOnce(
+      new Promise((resolve) => {
+        finish = resolve;
+      })
+    );
+    const previous = new AbortController();
+    createController
+      .mockReturnValueOnce(previous)
+      .mockReturnValueOnce(new AbortController());
+    const { result, updateData } = setup({
+      wave1: { drops: [{ id: "cached", serial_no: 12 }] },
+    });
+    await act(async () => {
+      result.current.registerWave("wave1", true);
+    });
+    previous.abort();
+    fetchNewestWaveMessages.mockResolvedValueOnce({
+      drops: [],
+      highestSerialNo: 12,
+    });
+    await act(async () => {
+      result.current.registerWave("wave1", true);
+    });
+    expect(fetchNewestWaveMessages).toHaveBeenCalledTimes(2);
+    updateData.mockClear();
+    await act(async () => {
+      finish({
+        drops: [{ id: "old-profile", serial_no: 13 }],
+        highestSerialNo: 13,
+      });
+    });
+    expect(updateData).not.toHaveBeenCalled();
+  });
+
   it("does not start a duplicate initial request while a server seed is pending", async () => {
     let hasSeed = true;
     fetchWaveMessages.mockResolvedValue([{ id: "d1", serial_no: 1 }]);
