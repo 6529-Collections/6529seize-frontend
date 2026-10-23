@@ -112,6 +112,7 @@ export default function CollectDeliveryControl({
           tabletModal
           hideOnDesktopHover={false}
           enableDragToClose={false}
+          headerClassName="!tw-px-5 tw-pb-4"
           focusTitleOnOpen
           fitVisualViewport
           showScrollbar

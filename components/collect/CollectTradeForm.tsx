@@ -64,7 +64,7 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
     ? t(locale, `collect.trade.invalid.${invalid}`, { max: props.maxQuantity })
     : props.error;
   const quantityField = (
-    <div className="tw-min-w-0 tw-space-y-2">
+    <div data-collect-trade-quantity className="tw-min-w-0 tw-space-y-2">
       <label className="tw-block tw-space-y-2 tw-text-xs tw-text-iron-300">
         <span>{t(locale, "collect.trade.quantity")}</span>
         <input
@@ -100,7 +100,10 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
     </div>
   );
   const walletLine = (
-    <p className="tw-m-0 tw-break-all tw-text-xs tw-leading-5 tw-text-iron-300">
+    <p
+      data-collect-trade-wallet
+      className="tw-m-0 tw-break-all tw-text-xs tw-leading-5 tw-text-iron-300"
+    >
       {props.action === "buy"
         ? t(locale, "collect.trade.payingWalletLine", {
             wallet: props.makerLabel,

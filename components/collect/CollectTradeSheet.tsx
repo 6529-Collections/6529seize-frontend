@@ -20,6 +20,7 @@ import {
   isCollectReceiptOperation,
   type CollectKnownTransactionPurpose,
 } from "./collect-receipt.helpers";
+import styles from "./CollectTradeSheet.module.css";
 import type { MarketReviewChangeNotice } from "./market-review-change-description";
 import type {
   CollectReviewFact,
@@ -61,8 +62,10 @@ export function CollectTradeDialog({
   title,
   onClose,
   children,
+  fixedHeight,
 }: Pick<CollectTradeSheetProps, "open" | "title" | "onClose"> & {
   readonly children: ReactNode;
+  readonly fixedHeight?: boolean;
 }) {
   const locale = useBrowserLocale();
   return (
@@ -71,13 +74,19 @@ export function CollectTradeDialog({
       isOpen={open}
       onClose={onClose}
       tabletModal
+      fixedHeight={fixedHeight}
+      surfaceClassName={
+        fixedHeight ? `tw-bg-iron-950 ${styles["orderSheet"] ?? ""}` : undefined
+      }
+      fitVisualViewport={fixedHeight}
       hideOnDesktopHover={false}
       enableDragToClose={false}
       maxWidthClass="md:tw-max-w-xl"
+      headerClassName="!tw-px-5 tw-pb-4 md:!tw-px-7"
       focusTitleOnOpen
       showScrollbar
     >
-      <div>{children}</div>
+      <div data-collect-dialog-content>{children}</div>
     </MobileWrapperDialog>
   );
 }
@@ -426,6 +435,7 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
   };
   const content = (
     <div
+      data-collect-trade-content
       className={`tw-w-full tw-space-y-6 tw-text-iron-100 ${props.compact ? "" : "tw-px-5 md:tw-px-7"}`}
     >
       {renderReview()}

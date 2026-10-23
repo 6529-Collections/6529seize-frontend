@@ -10,11 +10,9 @@ import { fetchCollectAssetOwnership } from "@/services/api/collect-api";
 import { useQuery } from "@tanstack/react-query";
 import { useId, useState } from "react";
 import { collectProfileWallets } from "./collect-recipient.helpers";
+import { COLLECT_SECONDARY_ACTION_CLASS } from "./collect-action.styles";
 import { useConfirmedMarketPurchases } from "./market-activity-store";
 import { collectOwnerRefreshInterval } from "./collect-owner-refresh";
-
-const ACTION_CLASS =
-  "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-text-sm tw-font-medium tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-white";
 
 export default function CollectOwnerAction({
   assetKey,
@@ -74,7 +72,7 @@ export default function CollectOwnerAction({
     return (
       <button
         type="button"
-        className={`${ACTION_CLASS} ${className}`}
+        className={`${COLLECT_SECONDARY_ACTION_CLASS} ${className}`}
         onClick={connection.seizeConnect}
       >
         {t(locale, "collect.menu.list")}
@@ -87,7 +85,7 @@ export default function CollectOwnerAction({
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2">
         <button
           type="button"
-          className={`${ACTION_CLASS} ${className} disabled:tw-opacity-50`}
+          className={`${COLLECT_SECONDARY_ACTION_CLASS} ${className}`}
           disabled
           aria-describedby={ownershipStatusId}
         >
@@ -108,7 +106,7 @@ export default function CollectOwnerAction({
         {ownership.isError && (
           <button
             type="button"
-            className={`${ACTION_CLASS} disabled:tw-opacity-50`}
+            className={COLLECT_SECONDARY_ACTION_CLASS}
             disabled={checkingOwnership}
             aria-label={t(locale, "collect.list.retryOwnership")}
             onClick={() => void ownership.refetch()}
@@ -141,7 +139,7 @@ export default function CollectOwnerAction({
     <div>
       <button
         type="button"
-        className={`${ACTION_CLASS} ${className}`}
+        className={`${COLLECT_SECONDARY_ACTION_CLASS} ${className}`}
         onClick={(event) => {
           if (canList) onList(event.currentTarget);
           else setChooseOwner((value) => !value);

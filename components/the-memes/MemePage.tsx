@@ -508,7 +508,7 @@ export default function MemePage({
     return (
       <nav
         aria-label={t(locale, "theMemes.detail.sections.ariaLabel")}
-        className="tw-sticky tw-top-0 tw-z-30 -tw-mx-4 tw-mb-6 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-px-4 sm:tw-relative sm:tw-top-auto sm:tw-z-auto sm:tw-mx-0 sm:tw-mb-8 sm:tw-overflow-hidden sm:tw-px-0"
+        className="tw-sticky tw-top-0 tw-z-30 -tw-mx-4 tw-mb-6 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-px-4 sm:tw-mx-0 sm:tw-mb-8 sm:tw-overflow-hidden sm:tw-px-0 lg:tw-relative lg:tw-top-auto lg:tw-z-auto"
       >
         <div className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [mask-image:linear-gradient(to_right,#000_calc(100%-32px),transparent)] [scrollbar-width:none] sm:[mask-image:none] [&::-webkit-scrollbar]:tw-hidden">
           <div className="-tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 tw-pr-8 sm:tw-pr-0 lg:tw-gap-x-4">
@@ -627,7 +627,7 @@ export default function MemePage({
   return (
     <div
       data-meme-card-page
-      className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-[calc(84px+env(safe-area-inset-bottom))] tw-text-white sm:tw-pb-5"
+      className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-[calc(84px+env(safe-area-inset-bottom))] tw-text-white lg:tw-pb-5"
     >
       <div className="tw-px-4 tw-py-4 md:tw-px-6 md:tw-pb-10 lg:tw-px-8">
         <header className="tw-pb-4 sm:tw-pb-8">

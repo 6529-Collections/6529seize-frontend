@@ -25,6 +25,79 @@ async function gotoReady(page: Page, path: string) {
   await expectNoHorizontalOverflow(page);
 }
 
+async function expectTradingPanelLayout(page: Page) {
+  const panel = page.getByTestId("collect-detail-panel");
+  const actions = panel.getByTestId("collect-inline-actions");
+  const collect = actions.getByRole("button", { name: /^Collect [0-9]/ });
+  const connect = panel.getByRole("button", {
+    name: "Connect wallet",
+    exact: true,
+  });
+  const market = panel.getByRole("button", {
+    name: "View listings & offers",
+    exact: true,
+  });
+  await expect(collect).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+  await expect(collect).toBeDisabled();
+  await expect(connect).toHaveCount(1);
+  await expect(market).toHaveCount(1);
+  const actionsBox = (await actions.boundingBox())!;
+  const collectBox = (await collect.boundingBox())!;
+  const offerBox = (await actions
+    .getByRole("button", { name: /^Make an offer:/ })
+    .boundingBox())!;
+  const connectBox = (await connect.boundingBox())!;
+  const marketBox = (await market.boundingBox())!;
+  expect(marketBox.y + marketBox.height).toBeLessThanOrEqual(collectBox.y);
+  expect(connectBox.y).toBeGreaterThan(actionsBox.y + actionsBox.height);
+  expect(collectBox.height).toBeGreaterThanOrEqual(44);
+  expect(offerBox.height).toBeGreaterThanOrEqual(44);
+  expect(connectBox.height).toBeGreaterThanOrEqual(44);
+  const listBox = (await actions
+    .getByRole("button", { name: "List", exact: true })
+    .boundingBox())!;
+  const moreBox = (await actions
+    .getByRole("button", { name: /^More trading actions/ })
+    .boundingBox())!;
+  const viewportWidth = page.viewportSize()!.width;
+  const isMedium = viewportWidth >= 768 && viewportWidth < 1024;
+  expect(listBox.y).toBeCloseTo(offerBox.y, 0);
+  expect(moreBox.y).toBeCloseTo(offerBox.y, 0);
+  expect(moreBox.width).toBeCloseTo(44, 0);
+  expect(listBox.height).toBeCloseTo(44, 0);
+  if (isMedium) {
+    expect(collectBox.y).toBeCloseTo(offerBox.y, 0);
+    expect(collectBox.x).toBeCloseTo(actionsBox.x, 0);
+    expect(collectBox.width).toBeGreaterThanOrEqual(200);
+    expect(offerBox.width).toBeGreaterThanOrEqual(140);
+    expect(listBox.width).toBeGreaterThanOrEqual(140);
+    expect(offerBox.x - collectBox.x - collectBox.width).toBeCloseTo(8, 0);
+    expect(moreBox.x + moreBox.width).toBeLessThan(
+      actionsBox.x + actionsBox.width
+    );
+  } else {
+    expect(collectBox.width).toBeCloseTo(actionsBox.width, 0);
+    expect(collectBox.y + collectBox.height).toBeLessThan(offerBox.y);
+    expect(offerBox.x).toBeCloseTo(actionsBox.x, 0);
+    expect(offerBox.width).toBeCloseTo(listBox.width, 0);
+    expect(moreBox.x + moreBox.width).toBeCloseTo(
+      actionsBox.x + actionsBox.width,
+      0
+    );
+  }
+  const connection = panel.locator("[data-collect-connection-header]");
+  const connectionBounds = (await connection.boundingBox())!;
+  const guidanceBounds = (await connection.getByRole("status").boundingBox())!;
+  if (connectBox.y >= guidanceBounds.y + guidanceBounds.height) {
+    expect(connectBox.x).toBeCloseTo(connectionBounds.x, 0);
+    expect(connectBox.width).toBeCloseTo(connectionBounds.width, 0);
+  }
+  expect(connectBox.x + connectBox.width).toBeCloseTo(
+    connectionBounds.x + connectionBounds.width,
+    0
+  );
+}
+
 async function expectNavigation(page: Page, name: string) {
   await expect(page.getByRole("navigation", { name })).toBeVisible();
 }
@@ -58,7 +131,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
   test("preserves Meme card controls while scrolling and switching phone tabs", async ({
     page,
     isMobile,
-  }) => {
+  }, info) => {
     await gotoReady(page, "/the-memes/1");
     const actions = page.getByTestId("collect-inline-actions");
     await expect(actions).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
@@ -69,9 +142,10 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
       page.getByText("Loading listings", { exact: true })
     ).toBeHidden({ timeout: RESPONSE_TIMEOUT_MS });
     await expectMemeArtworkScrolling(page);
+    const sticky = page.getByTestId("collect-sticky-actions");
     const offer = actions.getByRole("button", { name: /^Make an offer:/ });
     await offer.focus();
-    await offer.click();
+    await offer.press("Enter");
     const offerDialog = page.getByRole("dialog");
     const offerConnect = offerDialog.getByRole("button", {
       name: "Connect wallet",
@@ -82,6 +156,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
       exact: true,
     });
     await expect(offerConnect).toBeVisible();
+    await expect(sticky).toBeHidden();
     await offerConnect.scrollIntoViewIfNeeded();
     await expect(offerConnect).toBeInViewport();
     await expect(offerConnect).toHaveCount(1);
@@ -101,42 +176,22 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     await page.keyboard.press("Escape");
     await expect(offerDialog).toHaveCount(0);
     await expect(offer).toBeFocused();
-    const sticky = page.getByTestId("collect-sticky-actions");
+    await expect(
+      page.getByRole("button", { name: "Change", exact: true })
+    ).toHaveCount(0);
+    await expectTradingPanelLayout(page);
+    await page.getByTestId("collect-detail-panel").screenshot({
+      path: info.outputPath("trading-panel.png"),
+    });
     if (!isMobile) {
       await expect(sticky).toBeHidden();
       await expect(
         page.getByRole("button", { name: /^Show all .* properties$/ })
       ).toBeHidden();
-      const collect = actions.getByRole("button", { name: /^Collect [0-9]/ });
-      await expect(collect).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
-      await expect(collect).toBeDisabled();
-      const connect = page.getByRole("button", {
-        name: "Connect wallet",
-        exact: true,
-      });
       const market = page.getByRole("button", {
         name: "View listings & offers",
         exact: true,
       });
-      await expect(connect).toHaveCount(1);
-      await expect(market).toHaveCount(1);
-      const connectBox = (await connect.boundingBox())!;
-      const actionsBox = (await actions.boundingBox())!;
-      const collectBox = (await collect.boundingBox())!;
-      const offerBox = (await actions
-        .getByRole("button", { name: /^Make an offer:/ })
-        .boundingBox())!;
-      const marketBox = (await market.boundingBox())!;
-      expect(connectBox.y + connectBox.height).toBeLessThan(actionsBox.y);
-      expect(collectBox.width).toBeGreaterThan(offerBox.width);
-      expect(marketBox.y).toBeGreaterThanOrEqual(
-        actionsBox.y + actionsBox.height
-      );
-      await page.getByRole("button", { name: "Change", exact: true }).click();
-      await expect(
-        page.getByRole("dialog", { name: "Deliver to", exact: true })
-      ).toHaveCount(0);
-      await page.getByRole("button", { name: "Done", exact: true }).click();
       const moreActions = actions.getByRole("button", {
         name: /^More trading actions/,
       });
@@ -165,26 +220,6 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     }
     await expect(actions).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await actions.scrollIntoViewIfNeeded();
-    const changeDelivery = page.getByRole("button", {
-      name: "Change",
-      exact: true,
-    });
-    await expect(changeDelivery).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
-    await changeDelivery.click();
-    const deliverySheet = page.getByRole("dialog", {
-      name: "Deliver to",
-      exact: true,
-    });
-    await expect(
-      deliverySheet.getByRole("heading", { name: "Deliver to", exact: true })
-    ).toBeVisible();
-    await expect(deliverySheet).toHaveAttribute("aria-modal", "true");
-    await expect(sticky).toBeHidden();
-    await deliverySheet
-      .getByRole("button", { name: "Done", exact: true })
-      .click();
-    await expect(deliverySheet).toHaveCount(0);
-    await expect(changeDelivery).toBeFocused();
     await expect(sticky).toHaveAttribute("aria-hidden", "true");
     const nav = page.getByRole("navigation", { name: "Meme page sections" });
     await nav.evaluate((element) => element.scrollIntoView({ block: "start" }));
@@ -196,6 +231,45 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     await expect
       .poll(async () => (await nav.boundingBox())?.y)
       .toBeLessThanOrEqual(1);
+    const phoneViewport = page.viewportSize()!;
+    // Sticky controls follow the single-column layout, including narrow tablets.
+    for (const width of [
+      320, 359, 360, 390, 420, 485, 639, 640, 653, 767, 768, 900, 1023,
+    ]) {
+      await page.setViewportSize({ width, height: phoneViewport.height });
+      await expectTradingPanelLayout(page);
+      await actions.scrollIntoViewIfNeeded();
+      await expect(sticky).toHaveAttribute("aria-hidden", "true");
+      if (width === 390 || width === 900) {
+        await page.getByTestId("collect-detail-panel").screenshot({
+          path: info.outputPath(
+            `trading-panel-${width === 900 ? "medium" : "mobile"}.png`
+          ),
+        });
+      }
+      await nav.evaluate((element) =>
+        element.scrollIntoView({ block: "start" })
+      );
+      await page.evaluate(() => window.scrollBy(0, 120));
+      await expect(sticky).toBeVisible();
+      await expect(sticky).toBeInViewport();
+      await expect(nav).toHaveCSS("position", "sticky");
+      await expect
+        .poll(async () => (await nav.boundingBox())?.y)
+        .toBeCloseTo(0, 0);
+      const buttons = sticky.getByRole("button");
+      const collectBounds = (await buttons.first().boundingBox())!;
+      const offerBounds = (await buttons.last().boundingBox())!;
+      expect(collectBounds.width).toBeCloseTo(offerBounds.width, 0);
+      await expectNoHorizontalOverflow(page);
+    }
+    await page.setViewportSize({ width: 1024, height: phoneViewport.height });
+    await expectTradingPanelLayout(page);
+    await expect(sticky).toBeHidden();
+    await expect(nav).toHaveCSS("position", "relative");
+    await page.setViewportSize(phoneViewport);
+    await nav.evaluate((element) => element.scrollIntoView({ block: "start" }));
+    await page.evaluate(() => window.scrollBy(0, 240));
     const showProperties = page.getByRole("button", {
       name: /^Show all .* properties$/,
     });
@@ -204,6 +278,37 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     await expect(
       page.getByRole("button", { name: "Show fewer", exact: true }).last()
     ).toHaveAttribute("aria-expanded", "true");
+    await nav
+      .getByRole("button", { name: "Listings & offers", exact: true })
+      .click();
+    const marketPanel = page.getByRole("region", {
+      name: "Listings & offers",
+      exact: true,
+    });
+    await marketPanel
+      .getByRole("button", { name: "Collect", exact: true })
+      .first()
+      .click();
+    const reviewSelected = marketPanel.getByRole("button", {
+      name: "Review selected listings (1)",
+      exact: true,
+    });
+    await expect(reviewSelected).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    await expect(reviewSelected).toBeInViewport();
+    await expect(sticky).toBeHidden();
+    // A hidden market tab retains selection without hiding the card actions.
+    await nav.getByRole("button", { name: "Overview", exact: true }).click();
+    await expect(sticky).toBeVisible();
+    await nav
+      .getByRole("button", { name: "Listings & offers", exact: true })
+      .click();
+    await expect(reviewSelected).toBeInViewport();
+    await expect(sticky).toBeHidden();
+    await marketPanel
+      .getByRole("button", { name: "Remove", exact: true })
+      .click();
+    await expect(reviewSelected).toHaveCount(0);
+    await expect(sticky).toBeVisible();
     await nav.getByRole("button", { name: "Collectors", exact: true }).click();
     await expect(page).toHaveURL(/focus=collectors/);
     await expect(

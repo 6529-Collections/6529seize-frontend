@@ -10,7 +10,6 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { fetchCollectAssets } from "@/services/api/collect-api";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronRightIcon } from "@heroicons/react/20/solid";
 import { lazy, Suspense, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { collectAssetIdentity } from "./collect.adapters";
@@ -23,6 +22,7 @@ import CollectTradeActions from "./CollectTradeActions";
 import { CollectTradeDialog } from "./CollectTradeSheet";
 import CollectOwnerAction from "./CollectOwnerAction";
 import { collectProfileWallets } from "./collect-recipient.helpers";
+import { COLLECT_SECONDARY_ACTION_CLASS } from "./collect-action.styles";
 import {
   MEMES_CONTRACT,
   MEMELAB_CONTRACT,
@@ -33,14 +33,13 @@ import { revealMarketDepth } from "@/components/nft-market-depth/market-depth-di
 import CollectDetailActionRow, {
   CollectDetailLayout,
 } from "./CollectDetailActionRow";
-import styles from "./CollectDetailActionRow.module.css";
+import CollectDetailPanel from "./CollectDetailPanel";
+import CollectMarketButton from "./CollectMarketButton";
 
 const CollectTradeController = lazy(() => import("./CollectTradeController"));
 const MAX_DETAIL_LOOKUP_PAGES = 100;
 const ACTIONS: readonly CollectActionView[] = [{ action: "accept" }];
 const OFFER_MESSAGE_KEY = "collect.menu.offer" as const;
-const ACTION_CLASS =
-  "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-text-sm tw-font-medium tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-white";
 
 interface CollectDetailActionsProps {
   readonly collection: CollectTradeCollection;
@@ -188,17 +187,10 @@ function DetailTrade({
 }
 
 function DetailActions(props: CollectDetailActionsProps) {
-  const panelClassName = props.mobileSticky
-    ? `${styles["detailPanel"] ?? ""} max-sm:tw-rounded-xl max-sm:tw-border max-sm:tw-border-solid max-sm:tw-border-iron-800 max-sm:tw-bg-iron-900 max-sm:tw-p-4 lg:tw-rounded-xl lg:tw-border lg:tw-border-solid lg:tw-border-iron-800 lg:tw-bg-iron-900 lg:tw-p-5 max-sm:[&_[data-collect-connect-wallet]]:!tw-mt-2 max-sm:[&_[data-collect-connect-wallet]]:tw-h-11 max-sm:[&_[data-collect-connect-wallet]]:tw-w-full max-sm:[&_[data-collect-trade-status]:empty]:tw-hidden`
-    : "";
-  const mobileActionClassName = props.mobileSticky
-    ? "max-sm:tw-border-iron-800 max-sm:tw-bg-iron-950"
-    : "";
-  const offerClassName = `${ACTION_CLASS} ${mobileActionClassName}`;
   const viewMarket = (
-    <button
-      type="button"
-      className={`tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-0 tw-text-[13px] tw-font-normal tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-100 ${props.mobileSticky ? "max-sm:tw-w-full max-sm:tw-justify-between max-sm:tw-text-sm max-sm:tw-font-medium max-sm:tw-text-iron-300" : ""}`}
+    <CollectMarketButton
+      locale={props.locale}
+      mobileRow={props.mobileSticky ?? false}
       onClick={() =>
         revealMarketDepth(
           {
@@ -210,15 +202,7 @@ function DetailActions(props: CollectDetailActionsProps) {
           props.tokenId
         )
       }
-    >
-      {t(props.locale, "marketDepth.view")}
-      {props.mobileSticky && (
-        <ChevronRightIcon
-          aria-hidden="true"
-          className="tw-hidden tw-size-4 tw-shrink-0 tw-text-iron-500 max-sm:tw-block"
-        />
-      )}
-    </button>
+    />
   );
   const inlineLookup = useCollectDetailAsset(props.collection, props.tokenId);
   const [action, setAction] = useState<CollectTradeAction | null>(null);
@@ -228,14 +212,15 @@ function DetailActions(props: CollectDetailActionsProps) {
   const close = () => {
     const trigger = opener.current;
     setAction(null);
-    queueMicrotask(() => {
+    // Restore after the dialog's unmount focus cleanup, including on touch layouts.
+    requestAnimationFrame(() => {
       const target =
         trigger?.closest("[hidden]") === null ? trigger : visibleOffer.current;
-      if (target?.isConnected) target.focus();
+      if (target?.isConnected) target.focus({ preventScroll: true });
     });
   };
   return (
-    <div className={`tw-w-full ${panelClassName}`}>
+    <CollectDetailPanel framed={props.mobileSticky ?? false}>
       <CollectDetailLayout.Provider
         value={
           props.mobileSticky
@@ -248,7 +233,7 @@ function DetailActions(props: CollectDetailActionsProps) {
                       action: t(props.locale, OFFER_MESSAGE_KEY),
                       title: props.title,
                     })}
-                    className={offerClassName}
+                    className={COLLECT_SECONDARY_ACTION_CLASS}
                     onClick={(event) => {
                       opener.current = event.currentTarget;
                       setAction("offer");
@@ -282,7 +267,7 @@ function DetailActions(props: CollectDetailActionsProps) {
                   opener.current = event.currentTarget;
                   setAction("offer");
                 }}
-                className={offerClassName}
+                className={COLLECT_SECONDARY_ACTION_CLASS}
               >
                 {t(props.locale, OFFER_MESSAGE_KEY)}
               </button>
@@ -290,7 +275,6 @@ function DetailActions(props: CollectDetailActionsProps) {
                 <div data-collect-owner-action>
                   <CollectOwnerAction
                     assetKey={assetKey}
-                    className={mobileActionClassName}
                     onList={(trigger) => {
                       opener.current = trigger;
                       setAction("list");
@@ -328,7 +312,7 @@ function DetailActions(props: CollectDetailActionsProps) {
                 opener.current = event.currentTarget;
                 setAction("offer");
               }}
-              className={offerClassName}
+              className={COLLECT_SECONDARY_ACTION_CLASS}
             >
               {t(props.locale, OFFER_MESSAGE_KEY)}
             </button>
@@ -351,7 +335,12 @@ function DetailActions(props: CollectDetailActionsProps) {
         {viewMarket}
       </div>
       {action && (
-        <CollectTradeDialog open title={props.title} onClose={close}>
+        <CollectTradeDialog
+          open
+          title={props.title}
+          onClose={close}
+          fixedHeight={action === "accept"}
+        >
           <DetailTrade
             key={action}
             collection={props.collection}
@@ -365,7 +354,7 @@ function DetailActions(props: CollectDetailActionsProps) {
           />
         </CollectTradeDialog>
       )}
-    </div>
+    </CollectDetailPanel>
   );
 }
 

@@ -1,79 +1,68 @@
-@media (min-width: 1024px) {
-  .detailPanel {
-    container: collect-detail / inline-size;
-  }
+.detailPanel:has([data-collect-detail-header]) > [data-collect-market-link],
+.detailPanel [data-collect-trade-status]:empty {
+  display: none;
+}
 
-  /* The form owns the desktop footer; loading and review retain the outer link. */
-  .detailPanel:has([data-collect-inline-buy]) > [data-collect-market-link],
-  .detailPanel [data-collect-trade-status]:empty {
-    display: none;
-  }
+.inlineActions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) 44px;
+  align-items: start;
+}
 
-  .inlineActions {
-    align-items: flex-start;
-  }
+.inlineActions:not(:has([data-collect-owner-action]:not(:empty))) {
+  grid-template-columns: minmax(0, 1fr) 44px;
+}
 
-  .inlineActions > button[type="submit"] {
-    flex: 1 1 140px;
-    min-width: 0;
-    padding-inline: 12px;
-  }
+.inlineActions > button[type="submit"],
+.inlineActions > [data-collect-detail-delivery] {
+  grid-column: 1 / -1;
+}
 
-  .inlineActions > button[type="submit"]:disabled {
-    border-color: #26272b;
-    background: #26272b;
-    color: #93939f;
-    box-shadow: none;
-    opacity: 1;
-  }
+.inlineActions > [data-collect-secondary-actions] {
+  display: contents;
+}
 
-  .inlineActions > [data-collect-secondary-actions] {
-    display: contents;
-  }
+.inlineActions [data-collect-owner-action] {
+  min-width: 0;
+}
 
-  .inlineActions [data-collect-owner-action]:empty {
-    display: none;
-  }
+.inlineActions [data-collect-owner-action] > button,
+.inlineActions [data-collect-owner-action] > div > button:first-child {
+  width: 100%;
+}
 
-  .inlineActions button[aria-haspopup="menu"] {
-    border: 1px solid rgb(255 255 255 / 10%);
-  }
+.inlineActions [data-collect-owner-action]:empty {
+  display: none;
+}
 
-  .detailPanel [data-collect-detail-footer] > :first-child {
-    flex-basis: 230px;
-  }
+.inlineActions > button,
+.inlineActions > [data-collect-secondary-actions] > button,
+.inlineActions [data-collect-owner-action] > button,
+.inlineActions [data-collect-owner-action] > div > button:first-child {
+  height: 44px;
+  min-width: 0;
+  border-radius: 8px;
+  padding-inline: 12px;
+}
 
-  .detailPanel [data-collect-detail-footer] > :last-child {
-    margin-left: auto;
-  }
+.inlineActions > button:not([type="submit"]),
+.inlineActions > [data-collect-secondary-actions] > button {
+  white-space: normal;
+}
 
-  .detailPanel
-    [data-collect-detail-footer]
-    > :first-child:has([aria-expanded="true"]) {
-    flex-basis: 100%;
-  }
-
-  @container collect-detail (max-width: 390px) {
-    .inlineActions > button[type="submit"] {
-      flex-basis: 100%;
-    }
-
-    .inlineActions > button:not([type="submit"]),
-    .inlineActions > [data-collect-secondary-actions] > button {
-      flex: 1;
-    }
-  }
+.inlineActions > button[type="submit"]:disabled {
+  border-color: #26272b;
+  background: #26272b;
+  color: #93939f;
+  box-shadow: none;
+  opacity: 1;
 }
 
 @media (max-width: 639px) {
-  .inlineActions {
-    align-items: flex-start;
+  .inlineActions > button[type="submit"] {
+    font-size: 16px;
   }
 
-  .inlineActions > button,
-  .inlineActions > [data-collect-secondary-actions] > button,
-  .inlineActions [data-collect-owner-action] > button,
-  .inlineActions [data-collect-owner-action] > div > button:first-child,
   .stickyActions > button {
     height: 44px;
     min-width: 0;
@@ -82,49 +71,12 @@
     border-radius: 8px;
     padding-inline: 14px;
   }
+}
 
-  .inlineActions > button,
-  .inlineActions > [data-collect-secondary-actions] > button,
-  .inlineActions [data-collect-owner-action] > button,
-  .inlineActions [data-collect-owner-action] > div > button:first-child {
-    padding-inline: 12px;
-  }
-
-  .inlineActions > button[type="submit"] {
-    flex-basis: 100%;
-    font-size: 16px;
-  }
-
-  .inlineActions > [data-collect-secondary-actions] {
-    display: contents;
-  }
-
-  .inlineActions > button:not([type="submit"]),
-  .inlineActions > [data-collect-secondary-actions] > button,
-  .inlineActions [data-collect-owner-action] {
-    flex: 1 1 0;
-    min-width: 44px;
-  }
-
+@media (max-width: 399px) {
   .inlineActions > button:not([type="submit"]),
   .inlineActions > [data-collect-secondary-actions] > button {
-    /* Keep the offer label readable when panel padding limits row width. */
-    min-width: max-content;
-  }
-
-  .inlineActions [data-collect-owner-action] > button,
-  .inlineActions [data-collect-owner-action] > div > button:first-child {
-    flex-basis: 100%;
-    width: 100%;
-  }
-
-  .inlineActions [data-collect-owner-action]:empty {
-    display: none;
-  }
-
-  .inlineActions button[aria-haspopup="menu"] {
-    border: 1px solid #26272b;
-    background: #131316;
+    padding-inline: 0;
   }
 }
 
@@ -133,20 +85,45 @@
     padding-inline: 8px;
   }
 
-  .inlineActions > button:not([type="submit"]),
-  .inlineActions > [data-collect-secondary-actions] > button,
   .inlineActions [data-collect-owner-action] > button,
   .inlineActions [data-collect-owner-action] > div > button:first-child {
     padding-inline: 8px;
-    font-size: 13px;
   }
 }
 
-/* Portalled sheets and dialogs must also hide the duplicate tab stops. */
+/* The tablet layout has the full page width; desktop returns to a side column. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .inlineActions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .inlineActions > button[type="submit"] {
+    width: auto;
+    min-width: 200px;
+  }
+
+  .inlineActions > button:not([type="submit"]),
+  .inlineActions > [data-collect-secondary-actions] > button,
+  .inlineActions [data-collect-owner-action] {
+    flex: none;
+    min-width: 140px;
+    max-width: 100%;
+  }
+
+  .inlineActions > [data-collect-detail-delivery] {
+    order: 1;
+    flex-basis: 100%;
+  }
+}
+
+/* Active selection review and dialogs take priority over the duplicate actions. */
 :global(
     body:has(
       dialog[open],
-      [aria-modal="true"]:not(dialog):not([hidden]):not([aria-hidden="true"])
+      [aria-modal="true"]:not(dialog):not([hidden]):not([aria-hidden="true"]),
+      [data-market-depth-selection-bar]:not([hidden] *)
     )
   )
   .stickyActions {
