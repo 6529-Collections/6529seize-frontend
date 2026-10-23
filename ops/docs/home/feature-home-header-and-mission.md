@@ -6,7 +6,7 @@ The top of `/` shows the home headline and state-aware context before discovery
 sections:
 
 - Brand label and headline
-- Compact newcomer actions for logged-out visitors
+- Compact newcomer actions and a What is 6529? explanation for logged-out visitors
 - A network-health shortcut on home layouts
 - A mission block below the latest-drop slot
 
@@ -39,9 +39,16 @@ sections:
    - `Start here`, the secondary action, opens `/join-6529`.
    - Mobile uses two equal-width buttons with 48px touch targets; larger layouts
      keep the actions together beneath the copy.
-4. The latest-drop slot follows the hero. Native iOS purchasing restrictions
-   also apply to the fan: restricted users see published collection artwork
-   instead of the upcoming mint promotion.
+4. Logged-out visitors see `What is 6529?` between the hero and latest-drop slot:
+   - `Art with purpose`: `Browse The Memes` opens `/the-memes`.
+   - `Where the network coordinates`: `Browse Waves` opens `/waves`.
+   - `A real say`: `How voting works` opens `/network/tdh`.
+   - Desktop and tablet use three open columns with subtle vertical dividers.
+     Mobile stacks the topics with horizontal dividers and keyboard-accessible
+     text links. The artwork, wave tiles, and voting bars are decorative; they
+     do not show live vote totals or individual wave presence.
+   - Native iOS purchasing restrictions still apply to the hero fan: restricted
+     users see published collection artwork instead of the upcoming mint promotion.
 5. A heart shortcut is visible on `/`:
    - Larger layouts: fixed near the top-right of the hero area
    - Mobile/app small-screen layouts: in the top header actions
@@ -67,7 +74,7 @@ sections:
 - Logged-out or unauthenticated: the compact newcomer actions appear before
   the dashboard-style activity sections.
 - Authenticated: the same hero copy and artwork remain visible; the newcomer
-  actions are not shown.
+  actions and What is 6529? explanation are not shown.
 - Latest-drop data unavailable: mission block still renders below the slot.
 
 ## Edge Cases
@@ -76,7 +83,7 @@ sections:
   on hover and a visible keyboard-focus ring.
 - Reduced-motion settings keep the fan still and make button colour changes immediate.
 - While wallet state is initializing or connecting, the page does not assume
-  the visitor is logged out. The newcomer actions appear once that state
+  the visitor is logged out. The newcomer actions and explanation appear once that state
   resolves.
 - If a wallet is present but authentication is not valid, the newcomer
   actions remain available so the visitor can continue through onboarding.
@@ -111,6 +118,7 @@ sections:
 
 ## Localization
 
-Hero copy and accessible names use the message dictionary. The approved English
-copy currently falls back unchanged for en-GB, fr-FR, es-ES, and de-DE. Translation
-review remains part of the homepage localization follow-up.
+Hero and What is 6529? copy and accessible names use the message dictionary.
+The approved English copy currently falls back unchanged for en-GB, fr-FR,
+es-ES, and de-DE. The homepage localization follow-up owns translation review
+and layout verification for these headings, descriptions, and link labels.

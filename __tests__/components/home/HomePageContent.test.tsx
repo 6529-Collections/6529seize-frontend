@@ -25,6 +25,11 @@ jest.mock("@/components/home/newcomer/HomeNewcomerIntro", () => ({
   default: () => <div>Newcomer intro</div>,
 }));
 
+jest.mock("@/components/home/newcomer/HomeWhatIs6529", () => ({
+  __esModule: true,
+  default: () => <div>What is 6529?</div>,
+}));
+
 jest.mock("@/components/home/now-minting", () => ({
   LatestDropSection: () => <div>Latest drop</div>,
 }));
@@ -56,7 +61,7 @@ describe("HomePageContent", () => {
     ["for a logged-out visitor", "disconnected", false, true],
     ["after a connection error", "error", false, true],
   ] as const)(
-    "shows the newcomer intro only %s",
+    "shows newcomer actions and explanation only %s",
     (_description, connectionState, hasValidWalletAuth, expected) => {
       useSeizeConnectContextMock.mockReturnValue({
         connectionState,
@@ -66,10 +71,13 @@ describe("HomePageContent", () => {
       render(<HomePageContent />);
 
       const intro = screen.queryByText("Newcomer intro");
+      const explanation = screen.queryByText("What is 6529?");
       if (expected) {
         expect(intro).toBeInTheDocument();
+        expect(explanation).toBeInTheDocument();
       } else {
         expect(intro).not.toBeInTheDocument();
+        expect(explanation).not.toBeInTheDocument();
       }
       expect(screen.getByText("Latest drop")).toBeInTheDocument();
     }

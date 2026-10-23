@@ -1001,6 +1001,61 @@ test.describe("Home Page @smoke @medium @large", () => {
     }
   });
 
+  test("newcomer explanation reflows and keeps its links keyboard accessible @smoke", async ({
+    page,
+  }, testInfo) => {
+    const section = page.getByRole("region", { name: "What is 6529?" });
+    const articles = section.getByRole("article");
+    const links = section.getByRole("link");
+    await expect(section).toBeVisible();
+    await expect(articles).toHaveCount(3);
+    await expect(links).toHaveText([
+      "Browse The Memes",
+      "Browse Waves",
+      "How voting works",
+    ]);
+    for (const width of [390, 768, 1440]) {
+      await page.setViewportSize({ width, height: 1000 });
+      const boxes = await articles.evaluateAll((items) =>
+        items.map((item) => {
+          const { x, y, width, height } = item.getBoundingClientRect();
+          return { x, y, width, height };
+        })
+      );
+      for (const [index, box] of boxes.entries()) {
+        if (index === 0) continue;
+        const previous = boxes[index - 1]!;
+        if (width < 768) {
+          expect(box.y).toBeGreaterThanOrEqual(
+            previous.y + previous.height - 1
+          );
+          expect(Math.abs(box.x - previous.x)).toBeLessThan(1);
+        } else {
+          expect(Math.abs(box.y - previous.y)).toBeLessThan(1);
+          expect(box.x).toBeGreaterThanOrEqual(previous.x + previous.width - 1);
+        }
+      }
+      await links.first().focus();
+      for (let index = 0; index < 3; index++) {
+        const link = links.nth(index);
+        await expect(link).toBeFocused();
+        await expect(link).not.toHaveCSS("box-shadow", "none");
+        if (index < 2) await page.keyboard.press("Tab");
+      }
+      await expectNoHorizontalOverflow(page);
+      await section.screenshot({
+        path: testInfo.outputPath(`what-is-${width}.png`),
+      });
+    }
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await expect(links.first()).toHaveCSS("transition-property", "none");
+    await expect(
+      page
+        .getByRole("link", { name: "Browse The Memes", exact: true })
+        .locator("svg")
+    ).toHaveCSS("transition-property", "none");
+  });
+
   test("should display the home landing content", async ({ page }) => {
     // Prod serves "6529.io"; staging serves "6529 Staging".
     await expect(page).toHaveTitle(/^6529(\.io| Staging)$/);

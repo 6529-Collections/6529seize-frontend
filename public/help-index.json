@@ -668,7 +668,13 @@
       "id": "home.overview",
       "kind": "route",
       "title": "6529.io home",
-      "aliases": ["home", "homepage", "landing page", "6529 home"],
+      "aliases": [
+        "home",
+        "homepage",
+        "landing page",
+        "6529 home",
+        "What is 6529?"
+      ],
       "keywords": [
         "home",
         "latest",
@@ -685,6 +691,7 @@
         "The home page is the main 6529.io entry point.",
         "Logged-out visitors see Connect wallet as the primary hero action, followed by Start here linking to /join-6529.",
         "Visitors can browse the public home activity without connecting a wallet.",
+        "Logged-out visitors see What is 6529? below the hero: Art with purpose links to /the-memes, Where the network coordinates links to /waves, and A real say links to /network/tdh through How voting works. It uses three columns on tablet/desktop and stacked rows on mobile; authenticated members do not see this introduction.",
         "Coming up and the homepage waves section each have a View all link in their header: a text link beside the title on mobile and an outlined button on the right from tablet sizes. The waves View all opens /waves; there is no second button below the cards.",
         "Authenticated and logged-out visitors share the hero headline, public-goods subtitle, and decorative Meme artwork fan. Authenticated visitors do not see the hero onboarding buttons. The artwork fan sits beside the copy on desktop and below it on mobile.",
         "It highlights the current or upcoming Meme Card mint, discovery sections, and 6529 mission content.",
@@ -703,12 +710,14 @@
         "/join-6529",
         "/the-memes",
         "/waves",
+        "/network/tdh",
         "/about/subscriptions",
         "/{user}/subscriptions"
       ],
       "tags": ["home", "navigation"],
       "source_refs": [
         "components/home/newcomer/HomeNewcomerIntro.tsx",
+        "components/home/newcomer/HomeWhatIs6529.tsx",
         "components/home/next-mint-leading/NextMintLeadingSection.tsx",
         "components/home/now-minting/LatestDropSection.tsx",
         "ops/docs/home/feature-home-latest-drop-and-coming-up.md",

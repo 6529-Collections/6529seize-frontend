@@ -6,5 +6,16 @@
   "home.hero.title": "Building a decentralized network state",
   "home.hero.description": "A global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology.",
   "home.hero.healthLabel": "Open network health dashboard",
-  "home.hero.healthTitle": "Network health"
+  "home.hero.healthTitle": "Network health",
+  "home.whatIs.title": "What is 6529?",
+  "home.whatIs.art.title": "Art with purpose",
+  "home.whatIs.art.description": "Community-curated, CC0 art that funds public goods.",
+  "home.whatIs.art.action": "Browse The Memes",
+  "home.whatIs.waves.title": "Where the network coordinates",
+  "home.whatIs.waves.description": "Waves are open spaces to discuss, create, vote, and coordinate.",
+  "home.whatIs.waves.action": "Browse Waves",
+  "home.whatIs.voting.title": "A real say",
+  "home.whatIs.voting.description": "Vote in the Waves on what 6529 funds, builds, and mints next.",
+  "home.whatIs.voting.action": "How voting works",
+  "home.whatIs.live": "Live now"
 }
