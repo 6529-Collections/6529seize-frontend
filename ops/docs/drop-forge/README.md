@@ -89,3 +89,8 @@ queue recovery and rollout instructions live in the backend's maintained
 These are internal operator procedures. Keep the public help corpus focused on
 Memes, minting phases/windows and user-facing mention behavior, rather than
 launch signing, distribution processing or infrastructure setup.
+
+Post-mint work adds a one-time 17:15 preview and fresh 18:00 execution checks.
+Research and Pay Artist require finalized RPC/database agreement and completed
+indexing; Launch shows the evidence and retry eligibility. All feature reports go
+only to the dedicated operations wave, with no changes to existing mint announcements.

@@ -12,9 +12,11 @@
  */
 
 import { ApiDropForgeRecovery } from '../models/ApiDropForgeRecovery';
+import { ApiDropForgeSupplyEvidence } from '../models/ApiDropForgeSupplyEvidence';
 import { HttpFile } from '../http/http';
 
 export class ApiDropForgeAction {
+    'supply_evidence'?: ApiDropForgeSupplyEvidence;
     'payment_recipient'?: string | null;
     'payment_amount_wei'?: string | null;
     'disabled_reason'?: string | null;
@@ -49,6 +51,12 @@ export class ApiDropForgeAction {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "supply_evidence",
+            "baseName": "supply_evidence",
+            "type": "ApiDropForgeSupplyEvidence",
+            "format": ""
+        },
         {
             "name": "payment_recipient",
             "baseName": "payment_recipient",

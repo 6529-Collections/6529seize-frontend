@@ -10,6 +10,7 @@ import {
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import DropForgeTransactionRecovery from "./DropForgeTransactionRecovery";
+import DropForgeSupplyEvidence from "./DropForgeSupplyEvidence";
 
 function actionStatus(action: ApiDropForgeAction) {
   if (action.state === State.Confirmed)
@@ -93,6 +94,12 @@ function ActionRow({
       )}
       {action.disabled_reason && (
         <p className="tw-my-1 tw-text-iron-400">{action.disabled_reason}</p>
+      )}
+      {action.supply_evidence && (
+        <DropForgeSupplyEvidence
+          evidence={action.supply_evidence}
+          retryAt={action.retry_at}
+        />
       )}
       {action.attempt_error && (
         <p role="alert" className="tw-my-1 tw-text-error">

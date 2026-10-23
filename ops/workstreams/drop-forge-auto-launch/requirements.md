@@ -3,12 +3,15 @@
 ## Current Research requirement
 
 The existing Launch action timeline and Research completion toggle reflect the
-backend's post-mint step, eligible at 17:15 Europe/Athens the following day.
+backend's post-mint step, eligible at 18:00 Europe/Athens the following day.
 Automatic quantity is `max(0, min(310, frozen Craft edition) - on-chain total)`;
 edition 305 with total 287 means 18. Craft/on-chain maximum discrepancies block
 execution; confirmed manual Research reduces the top-up and a satisfied target
 sends no transaction. Wave reports include transaction links and failure alerts.
-Pay Artist remains manual. The editable manual target is not automatic config.
+Pay Artist is optionally automated in the same 18:00 group and defaults Off;
+manual payment remains available. A separate 17:15 preview posts once to the
+operations wave without authorizing execution. The editable manual Research
+target is not automatic config.
 
 Status: original requirements retained as design context. The companion backend
 and this frontend now implement EMMA Process and Finalize, Craft Launch/Update
@@ -107,8 +110,10 @@ before 17:40. Display each batch's actual backend due/deadline and late status.
    An uncertain transaction must offer reconciliation/status, not a generic
    repeat-airdrop button. Preserve manual operation for claims not managed by
    automation under existing permissions.
-6. Owner-only admin changes remain separate. Pay Artist remains manual and
-   outside automated payout scope until a separate money-flow decision.
+6. Owner-only admin changes remain separate. Pay Artist remains available
+   manually and is optionally automated, Off by default, in the 18:00 group.
+   Its designated payee, verified accounting, wallet funding and configured limit
+   are enforced by the backend.
 
 ## FE-3: @drops6529 and wave visibility
 
@@ -185,8 +190,9 @@ presented as currently available user functionality.
 Review existing Jest and Playwright Drop Forge/EMMA/mention coverage before
 implementation, then add focused state/contract tests and representative browser
 flows for configuration, refresh recovery, manual takeover, and mention display.
-This proposal performs no application tests or browser execution because no
-runtime behavior changes.
+The original analysis was documentation-only. The implemented behavior now has
+focused component, API and backend coverage; live browser/chain checks remain
+part of the documented rollout.
 
 ## Historical dependencies and design proposals (2026-10-09)
 
@@ -196,11 +202,20 @@ categories/order, global mention invocation policy, and backend readiness
 requirements. The wave ID and recipient profile IDs will be provided manually;
 they are deployment inputs, not reasons to hardcode values in the UI.
 
-No frontend deployment is required by this documentation PR. Future API and
-mention contract changes must be coordinated with backend before dependent UI
-rollout. No desktop/Electron changes are in this scope.
+The initial documentation-only proposal needed no deployment. The implemented
+feature requires backend schema, indexing coverage, handlers and API before the
+dependent frontend rollout. No desktop/Electron changes are in scope.
 
 ## Implemented workflow
+
+Post-mint Research/payment now require finalized configured-RPC/database agreement,
+including completed transaction scan coverage. Launch renders the comparison and
+retry eligibility. A 17:15 operations-wave-only preview calculates intended work
+once; it never authorizes the 18:00 transaction. Normal previews are untagged and
+verification warnings alert once without recalculation. Actual disagreements retry
+at 1/5/15 minutes within the execution window. Existing announcement waves and
+`DEPLOYER_ANNOUNCEMENTS_WAVE_IDS` are unchanged. Unexpected settlement evidence
+retains the original transaction and requires reconciliation, never another transfer.
 
 The final workflow uses one EMMA Process and Finalize job and read-only completed
 lists, Craft Launch with immediate initialization, metadata-only Update Claim,

@@ -42,5 +42,22 @@ transfer. Funding does not grant access to edit settings or manage contract admi
 All new labels are message-backed; untranslated locales use en-US fallback.
 These are internal operator controls and are not added to the public Help Bot corpus.
 
+## Post-mint evidence and preview
+
+At 17:15 Europe/Athens, a one-time preview reports the calculated Research remainder
+and optional artist payment in the dedicated operations wave. It shows Off settings
+and payment-limit blocks rather than promising a transfer. Normal previews have no
+tags; verification warnings tag `@drops6529` once. A failed preview is not recalculated.
+The preexisting mint-announcement waves are unchanged and receive no new posts.
+
+At 18:00, fresh checks compare the configured RPC's finalized minted total with
+cumulative DB mints through the same block. Completed indexing coverage is required.
+Launch displays both counts, the comparison block, indexed-through block and retry
+eligibility; missing evidence remains Unavailable rather than becoming zero.
+Disagreement retries after one minute, then five, then fifteen minutes within the
+action window. Successful receipts still wait for verified delivery and indexed
+finality. A retained signed transaction is reconciled, never blindly sent again
+with a new amount or nonce. Unexpected delivery requires operator recovery.
+
 Related: [Drop Forge](README.md), [Launch Claims](feature-launch-claims-list-and-detail.md),
 [backend setup](https://github.com/6529-Collections/6529seize-backend/blob/agent-prxt/drop-forge-auto-launch-requirements/docs/drop-forge-auto-launch-setup.md).

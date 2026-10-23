@@ -29847,6 +29847,8 @@ components:
         - deadline
         - recipients
       properties:
+        supply_evidence:
+          $ref: "#/components/schemas/ApiDropForgeSupplyEvidence"
         payment_recipient:
           type: string
           nullable: true
@@ -30381,6 +30383,34 @@ components:
           type: boolean
         pay_artist_enabled:
           type: boolean
+    ApiDropForgeSupplyEvidence:
+      type: object
+      required:
+        - status
+        - checked_at
+      properties:
+        status:
+          type: string
+          enum:
+            - VERIFIED
+            - WAITING
+        checked_at:
+          type: integer
+          format: int64
+        block_number:
+          type: integer
+        block_hash:
+          type: string
+        block_timestamp:
+          type: integer
+        indexed_through:
+          type: integer
+        rpc_total:
+          type: integer
+        db_total:
+          type: integer
+        reason:
+          type: string
     ApiDropGroupMention:
       type: string
       enum:

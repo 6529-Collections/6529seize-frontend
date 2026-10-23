@@ -3066,6 +3066,15 @@ export const EN_US_MESSAGES = {
   "dropForge.cancelManual": "Cancel unsubmitted manual operation",
   "dropForge.resume": "Resume automatic execution",
   "dropForge.pause": "Pause automatic execution",
+  "dropForge.supply.verified": "RPC and database mint counts agree",
+  "dropForge.supply.waiting": "Waiting for verified mint accounting",
+  "dropForge.supply.unknown": "Unavailable",
+  "dropForge.supply.rpc": "RPC minted",
+  "dropForge.supply.database": "Database minted",
+  "dropForge.supply.block": "Finalized comparison block",
+  "dropForge.supply.indexed": "Database indexed through",
+  "dropForge.supply.retry":
+    "Retry eligible at {time} (Europe/Athens). No new transfer is approved while verification is pending.",
   "dropForge.inputsChanged":
     "Inputs changed. Reset the distribution before processing again.",
   "dropForge.launch": "Launch",

@@ -71,6 +71,15 @@ The launch surface combines:
 
 ## Default Phase Schedule
 
+At 17:15 the following day, the dedicated operations wave receives one readonly
+post-mint preview. Normal previews are untagged; verification warnings alert once
+without recalculating. Research and optional Pay Artist become eligible at 18:00
+and perform fresh finalized RPC/database accounting checks. Both counts, comparison
+block, indexing progress and retry eligibility appear in the action timeline.
+Disagreement keeps work outstanding with 1/5/15-minute retry backoff. A successful
+receipt still needs verified delivery and indexed finality before completion.
+Existing mint-announcement waves receive none of these reports.
+
 The default windows use `Europe/Athens` wall time, including daylight saving:
 Phase 0 17:40–18:20, Phase 1 18:30–18:50, Phase 2 19:00–19:20, and
 public 19:20–17:00 the next day. Initialization and Phase 0 allocations precede
