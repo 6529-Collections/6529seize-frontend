@@ -51,6 +51,61 @@ async function installLoadingTestArtwork(page: Page) {
   );
 }
 
+async function installCompletedMintStatus(
+  page: Page,
+  ready: Promise<void> = Promise.resolve()
+) {
+  const claimResult = encodeFunctionResult({
+    abi: MEMES_MANIFOLD_PROXY_ABI,
+    functionName: "getClaimForToken",
+    result: [
+      1n,
+      {
+        total: 328,
+        totalMax: 328,
+        walletMax: 0,
+        startDate: 1,
+        endDate: 2,
+        storageProtocol: 0,
+        merkleRoot: zeroHash,
+        location: "",
+        tokenId: 536n,
+        cost: 0n,
+        paymentReceiver: zeroAddress,
+        erc20: zeroAddress,
+        signingAddress: zeroAddress,
+      },
+    ],
+  });
+  const selector = toFunctionSelector("getClaimForToken(address,uint256)");
+  await page.route("https://rpc.walletconnect.org/**", async (route) => {
+    const rpc = route.request().postDataJSON();
+    if (rpc.method !== "eth_call") {
+      await route.abort();
+      return;
+    }
+    await ready;
+    let result = claimResult;
+    if (!rpc.params[0].data.startsWith(selector)) {
+      const { args, functionName } = decodeFunctionData({
+        abi: multicall3Abi,
+        data: rpc.params[0].data,
+      });
+      if (functionName !== "aggregate3")
+        throw new Error("Unexpected fixture RPC call");
+      result = encodeFunctionResult({
+        abi: multicall3Abi,
+        functionName,
+        result: args[0].map((call) => ({
+          success: call.callData.startsWith(selector),
+          returnData: call.callData.startsWith(selector) ? claimResult : "0x",
+        })),
+      });
+    }
+    await route.fulfill({ json: { jsonrpc: "2.0", id: rpc.id, result } });
+  });
+}
+
 const comingUpWave = {
   id: "00000000-0000-4000-8000-000000000529",
   name: "Coming Up fixture",
@@ -800,59 +855,11 @@ test("homepage selects Next Drop without flashing the previous artwork @smoke @m
       },
     });
   });
-  const claimResult = encodeFunctionResult({
-    abi: MEMES_MANIFOLD_PROXY_ABI,
-    functionName: "getClaimForToken",
-    result: [
-      1n,
-      {
-        total: 328,
-        totalMax: 328,
-        walletMax: 0,
-        startDate: 1,
-        endDate: 2,
-        storageProtocol: 0,
-        merkleRoot: zeroHash,
-        location: "",
-        tokenId: 536n,
-        cost: 0n,
-        paymentReceiver: zeroAddress,
-        erc20: zeroAddress,
-        signingAddress: zeroAddress,
-      },
-    ],
-  });
   let releaseStatus!: () => void;
   const statusReady = new Promise<void>((resolve) => {
     releaseStatus = resolve;
   });
-  const selector = toFunctionSelector("getClaimForToken(address,uint256)");
-  await page.route("https://rpc.walletconnect.org/**", async (route) => {
-    const rpc = route.request().postDataJSON();
-    if (rpc.method !== "eth_call") {
-      await route.abort();
-      return;
-    }
-    await statusReady;
-    let result = claimResult;
-    if (!rpc.params[0].data.startsWith(selector)) {
-      const { args, functionName } = decodeFunctionData({
-        abi: multicall3Abi,
-        data: rpc.params[0].data,
-      });
-      if (functionName !== "aggregate3")
-        throw new Error("Unexpected fixture RPC call");
-      result = encodeFunctionResult({
-        abi: multicall3Abi,
-        functionName,
-        result: args[0].map((call) => ({
-          success: call.callData.startsWith(selector),
-          returnData: call.callData.startsWith(selector) ? claimResult : "0x",
-        })),
-      });
-    }
-    await route.fulfill({ json: { jsonrpc: "2.0", id: rpc.id, result } });
-  });
+  await installCompletedMintStatus(page, statusReady);
   await page.addInitScript(() => {
     new MutationObserver(() => {
       if (document.querySelector('[data-home-section="Latest drop"]')) {
@@ -945,51 +952,7 @@ test.describe("Home Page @smoke @medium @large", () => {
   test("hero keeps the approved copy, action order and responsive artwork @smoke", async ({
     page,
   }, testInfo) => {
-    const claimResult = encodeFunctionResult({
-      abi: MEMES_MANIFOLD_PROXY_ABI,
-      functionName: "getClaimForToken",
-      result: [
-        1n,
-        {
-          total: 328,
-          totalMax: 328,
-          walletMax: 0,
-          startDate: 1,
-          endDate: 2,
-          storageProtocol: 0,
-          merkleRoot: zeroHash,
-          location: "",
-          tokenId: 536n,
-          cost: 0n,
-          paymentReceiver: zeroAddress,
-          erc20: zeroAddress,
-          signingAddress: zeroAddress,
-        },
-      ],
-    });
-    const selector = toFunctionSelector("getClaimForToken(address,uint256)");
-    await page.route("https://rpc.walletconnect.org/**", async (route) => {
-      const rpc = route.request().postDataJSON();
-      if (rpc.method !== "eth_call") return route.abort();
-      let result = claimResult;
-      if (!rpc.params[0].data.startsWith(selector)) {
-        const { args, functionName } = decodeFunctionData({
-          abi: multicall3Abi,
-          data: rpc.params[0].data,
-        });
-        if (functionName !== "aggregate3")
-          throw new Error("Unexpected fixture RPC call");
-        result = encodeFunctionResult({
-          abi: multicall3Abi,
-          functionName,
-          result: args[0].map((call) => ({
-            success: call.callData.startsWith(selector),
-            returnData: call.callData.startsWith(selector) ? claimResult : "0x",
-          })),
-        });
-      }
-      return route.fulfill({ json: { jsonrpc: "2.0", id: rpc.id, result } });
-    });
+    await installCompletedMintStatus(page);
     await page.reload({ waitUntil: "domcontentloaded" });
     const hero = page
       .getByRole("main")
