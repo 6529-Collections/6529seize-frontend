@@ -1,9 +1,9 @@
 import { dateFromMintNumber, mintEndInstantUtcForMintDay } from './calendar';
 import { MINT_TIME_ZONE, wallTimeToUtcInstantInZone } from './zone';
 
-export const MEMES_CALENDAR_VERSION = '2026-10-23.3';
-export type MintPhaseId = '0' | '1' | '2' | 'public';
-export interface MintPhaseWindow {
+const MEMES_CALENDAR_VERSION = '2026-10-23.4';
+type MintPhaseId = '0' | '1' | '2' | 'public';
+interface MintPhaseWindow {
   id: MintPhaseId;
   name: string;
   isPublic: boolean;

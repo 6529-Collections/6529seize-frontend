@@ -6,6 +6,7 @@ import {
   getMintTimelineStatus,
   getNextMintTimelineDetails,
 } from "../../shared/memes-calendar";
+import { SKIPPED_MINT_UTC_DAYS } from "../../shared/memes-calendar/overrides";
 
 describe("shared calendar queries", () => {
   it.each([
@@ -68,6 +69,36 @@ describe("shared calendar queries", () => {
     expect(getMintTimelineDetails(1).instantUtc.toISOString()).toBe(
       "2022-06-09T17:01:18.000Z"
     );
+  });
+
+  it("keeps next-day closing fixed across a gap with skipped mint days", () => {
+    const days = ["2026-11-02", "2026-11-04"].map((day) =>
+      Date.parse(`${day}T00:00:00Z`)
+    );
+    const skipped = new Set(SKIPPED_MINT_UTC_DAYS);
+    try {
+      days.forEach((day) => SKIPPED_MINT_UTC_DAYS.add(day));
+      const friday = getMintNumberForMintDate(new Date("2026-10-30T00:00:00Z"));
+      expect(
+        getCurrentMintTimelineDetails(new Date("2026-10-31T14:59:59.999Z"))
+          ?.mintNumber
+      ).toBe(friday);
+      expect(
+        getCurrentMintTimelineDetails(new Date("2026-10-31T15:00:00Z"))
+      ).toBeNull();
+      expect(
+        getCurrentMintTimelineDetails(new Date("2026-11-02T12:00:00Z"))
+      ).toBeNull();
+      expect(
+        getNextMintTimelineDetails(
+          new Date("2026-10-31T12:00:00Z")
+        ).instantUtc.toISOString()
+      ).toBe("2026-11-06T15:40:00.000Z");
+    } finally {
+      days.forEach((day) => {
+        if (!skipped.has(day)) SKIPPED_MINT_UTC_DAYS.delete(day);
+      });
+    }
   });
 
   it.each([2026, 2027, 2028, 2029, 2030])(

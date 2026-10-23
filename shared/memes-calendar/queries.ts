@@ -2,7 +2,7 @@ import { getMintNumberForMintDate, getMintTimelineDetails } from './calendar';
 import { getCanonicalNextMintNumber } from './upcoming';
 
 type MintTimelineDetails = ReturnType<typeof getMintTimelineDetails>;
-export type MintTimelineStatus = 'past' | 'live' | 'upcoming';
+type MintTimelineStatus = 'past' | 'live' | 'upcoming';
 
 function validateNow(now: Date): void {
   if (!Number.isFinite(now.getTime()))
@@ -29,6 +29,7 @@ export function getNextMintTimelineDetails(
 export function getCurrentMintTimelineDetails(
   now: Date = new Date()
 ): MintTimelineDetails | null {
+  validateNow(now);
   const nextTimeline = getNextMintTimelineDetails(now);
   const currentOrPreviousTimeline = getMintTimelineDetails(
     getMintNumberForMintDate(now)
