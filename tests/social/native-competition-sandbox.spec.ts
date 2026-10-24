@@ -978,6 +978,8 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
   test("opens Main Stage artwork submission from the leaderboard toolbar", async ({
     page,
   }, testInfo) => {
+    if (testInfo.project.name === "web-desktop-chromium")
+      await page.setViewportSize({ width: 1280, height: 800 });
     const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
     sandbox.onlyCompetition("alpha");
     await sandbox.legacyPrimary("alpha");
@@ -990,6 +992,12 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     const actions = page.getByTestId("leaderboard-submission-actions");
     const submit = actions.getByRole("button", { name: "Drop", exact: true });
     await expect(submit).toBeInViewport({ ratio: 1 });
+    await expect(
+      page.getByRole("button", { name: "Drop", exact: true })
+    ).toHaveCount(1);
+    await expect(
+      page.getByRole("button", { name: /^Submit Work/ })
+    ).toHaveCount(0);
     await expect(
       actions.getByRole("button", { name: "My submissions" })
     ).toBeVisible();
