@@ -975,6 +975,38 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  test("opens Main Stage artwork submission from the leaderboard toolbar", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    await page.goto(`/waves/${MEMES_WAVE}?tab=leaderboard`);
+    await expect(page).toHaveURL(
+      new RegExp(`/waves/${MEMES_WAVE}/competitions/alpha\\?tab=leaderboard`),
+      { timeout: 30000 }
+    );
+    await dismissNextDevTools(page);
+    const actions = page.getByTestId("leaderboard-submission-actions");
+    const submit = actions.getByRole("button", { name: "Drop", exact: true });
+    await expect(submit).toBeInViewport({ ratio: 1 });
+    await expect(
+      actions.getByRole("button", { name: "My submissions" })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("main-stage-leaderboard.png"),
+    });
+    await submit.click();
+    await expect(
+      page.getByRole("dialog", {
+        name: "Submit Work to The Memes",
+        exact: true,
+      })
+    ).toBeVisible();
+    expect(sandbox.requests).toEqual([]);
+  });
+
   test("uses competition resources for the original primary across navigation, votes and settings", async ({
     page,
   }) => {
