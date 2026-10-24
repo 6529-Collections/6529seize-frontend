@@ -31,11 +31,12 @@ Entry behavior differs by wave type:
   - Empty curation lists can show `Drop`.
   - Both entry points open the curation `Drop Artwork` modal.
 - Memes waves:
-  - Desktop (non-compact header mode): use `Submit Work to The Memes` in the
-    meme tabs header.
+  - Chat: use `Submit Work to The Memes` in the meme tabs header on web.
+  - Leaderboard: eligible signed-in users can use the header `Drop` action on
+    desktop and mobile to open the Memes artwork submission form. A configured
+    submission button label replaces `Drop`.
   - Native app wave header: use the icon-only submit action; when it becomes a
     lock, select it to see the restriction reason.
-  - Mobile leaderboard: use header `Drop` when logged in and eligible.
 
 ## User Journey
 
@@ -106,9 +107,10 @@ Entry behavior differs by wave type:
   restriction case.
 - In non-empty leaderboards, blocked users may see no restriction text; the
   entry controls can simply be absent.
-- Memes entry surfaces differ by viewport (`Submit Work to The Memes` on
-  desktop tabs, an icon-only action in the native app header, and leaderboard
-  `Drop` on mobile).
+- Memes chat uses `Submit Work to The Memes` on web and an icon-only action in
+  the native app header. Its leaderboard has a submission action on desktop
+  and mobile when the active profile is eligible, plus `My submissions` for
+  signed-in users on their own profile.
 - Memes desktop urgency/remaining badges are visible only on extra-wide desktop;
   compact desktop and app headers keep submit-state guidance behind the
   restriction icon or short label.
