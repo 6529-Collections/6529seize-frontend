@@ -94,6 +94,7 @@ describe("Device Farm cadence and pack selection", () => {
         web,
         native,
         "target-url": "https://staging.6529.io",
+        "requested-packs": packs,
       });
       expect(manual.summary).toContain(
         `Requested packs: \`${packs}\` (event: \`workflow_dispatch\`)`
@@ -114,5 +115,170 @@ describe("Device Farm cadence and pack selection", () => {
     const result = plan({ EVENT_NAME: "schedule", SCHEDULE_CRON: "0 5 * * 1" });
     expect(result.output).toMatchObject({ web: "true", native: "false" });
     expect(result.log).toContain("::warning::Unrecognized schedule cron");
+  });
+});
+
+describe("Device Farm aggregate outcome", () => {
+  it("recovery cannot package or schedule tests and retains the original verdict", () => {
+    expect(workflow.jobs.plan.if).toBe("inputs.evidence_run_arn == ''");
+    expect(workflow.jobs["package-tests"].needs).toBe("plan");
+    expect(workflow.jobs["web-smoke"].needs).toContain("plan");
+    expect(workflow.jobs["native-android"].needs).toContain("plan");
+    const recovery = workflow.jobs["recover-evidence"];
+    expect(recovery.if).toBe(
+      "github.event_name == 'workflow_dispatch' && inputs.evidence_run_arn != ''"
+    );
+    expect(
+      recovery.steps
+        .filter((step: { run?: string }) => step.run)
+        .map((step: { run: string }) => step.run)
+    ).toEqual([
+      "python3 scripts/device-farm-artifacts.py",
+      "python3 scripts/device-farm-report.py",
+    ]);
+    expect(JSON.stringify(recovery)).not.toContain(
+      "aws-devicefarm-mobile-device-testing"
+    );
+    const collector = recovery.steps.find(
+      (step: { id: string }) => step.id === "evidence"
+    );
+    expect(recovery.steps.at(-1).env.ARTIFACT_FOLDER).toBe(
+      collector.env.ARTIFACT_FOLDER
+    );
+    expect(recovery.steps.at(-1).env.EXPECTED_DEVICES).toBe(
+      "${{ steps.evidence.outputs.expected-devices }}"
+    );
+    expect(recovery.steps.at(-1).env.RUN_RESULT).toBe(
+      "${{ steps.evidence.outputs.result }}"
+    );
+  });
+
+  it.each(["report", "artifacts"])(
+    "validates device %s without accessing AWS",
+    (area) => {
+      const result = spawnSync(
+        "python3",
+        [`scripts/__tests__/device_farm_${area}_test.py`],
+        {
+          encoding: "utf8",
+          timeout: 10_000,
+          env: { ...process.env, PYTHONDONTWRITEBYTECODE: "1" },
+        }
+      );
+      expect(result.error).toBeUndefined();
+      expect(result.stderr).toContain("OK");
+      expect(result.status).toBe(0);
+    }
+  );
+
+  function report(overrides: Record<string, string> = {}) {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "device-farm-report-"));
+    try {
+      const step = workflow.jobs.report.steps.find(
+        (entry: { name: string }) => entry.name === "Summarize pack results"
+      );
+      const result = spawnSync(bash, ["-c", step.run], {
+        encoding: "utf8",
+        timeout: 10_000,
+        env: {
+          ...process.env,
+          PLAN_RESULT: "success",
+          PACKAGE_RESULT: "success",
+          REQUESTED_PACKS: "web",
+          WEB_RESULT: "success",
+          NATIVE_RESULT: "skipped",
+          ...overrides,
+          GITHUB_STEP_SUMMARY: path.join(root, "summary").replaceAll("\\", "/"),
+        },
+      });
+      expect(result.error).toBeUndefined();
+      return result;
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  }
+
+  it("keeps explicitly unrequested packs neutral", () => {
+    expect(report().status).toBe(0);
+    expect(
+      report({
+        REQUESTED_PACKS: "native",
+        WEB_RESULT: "skipped",
+        NATIVE_RESULT: "success",
+      }).status
+    ).toBe(0);
+    expect(
+      report({ REQUESTED_PACKS: "all", NATIVE_RESULT: "success" }).status
+    ).toBe(0);
+  });
+
+  it.each(["failure", "cancelled", "skipped", ""])(
+    "fails closed when a required stage is %s",
+    (state) => {
+      for (const key of ["PLAN_RESULT", "PACKAGE_RESULT", "WEB_RESULT"]) {
+        expect(report({ [key]: state }).status).toBe(1);
+      }
+      expect(
+        report({ REQUESTED_PACKS: "all", NATIVE_RESULT: state }).status
+      ).toBe(1);
+    }
+  );
+
+  it("reports the runner acquisition failure even when both packs skipped", () => {
+    const result = report({
+      PLAN_RESULT: "failure",
+      PACKAGE_RESULT: "skipped",
+      WEB_RESULT: "skipped",
+    });
+    expect(result.status).toBe(1);
+    expect(result.stdout).toContain(
+      "infrastructure/setup failed or tests did not run"
+    );
+    expect(workflow.jobs.report.needs).toContain("package-tests");
+    expect(workflow.jobs.report.if).toBe(
+      "always() && inputs.evidence_run_arn == ''"
+    );
+  });
+
+  it("does not pass missing credentials or missing requested native access", () => {
+    expect(
+      report({ PACKAGE_RESULT: "skipped", WEB_RESULT: "skipped" }).status
+    ).toBe(1);
+    expect(
+      report({ REQUESTED_PACKS: "all", NATIVE_RESULT: "skipped" }).status
+    ).toBe(1);
+    expect(report({ REQUESTED_PACKS: "unknown" }).status).toBe(1);
+  });
+
+  it("collects and diagnoses evidence even after the Device Farm action fails", () => {
+    const steps = workflow.jobs["web-smoke"].steps;
+    const diagnosis = steps.find(
+      (step: { name: string }) => step.name === "Summarize device diagnostics"
+    );
+    expect(diagnosis.if).toBe("always()");
+    expect(diagnosis.run).toContain("python3 scripts/device-farm-report.py");
+    expect(diagnosis.env.EXPECTED_DEVICES).toContain(
+      "steps.evidence.outputs.expected-devices"
+    );
+    expect(diagnosis.env.ARTIFACT_FOLDER).toContain("devicefarm-artifacts/");
+    const action = steps.find(
+      (step: { id: string }) => step.id === "devicefarm"
+    );
+    expect(action["continue-on-error"]).toBeUndefined();
+    expect(action.with["artifact-types"]).toBe("");
+    const collection = steps.find(
+      (step: { id: string }) => step.id === "evidence"
+    );
+    expect(collection.if).toBe(
+      "always() && steps.devicefarm.outputs.arn != ''"
+    );
+    expect(collection.run).toBe("python3 scripts/device-farm-artifacts.py");
+    expect(collection["continue-on-error"]).toBeUndefined();
+    const upload = steps.find(
+      (step: { name: string }) => step.name === "Upload Device Farm artifacts"
+    );
+    expect(upload.if).toBe("always() && steps.devicefarm.outputs.arn != ''");
+    expect(upload.with.path).toBe(collection.env.ARTIFACT_FOLDER);
+    expect(diagnosis.env.ARTIFACT_FOLDER).toBe(collection.env.ARTIFACT_FOLDER);
   });
 });
