@@ -31,12 +31,16 @@ Entry behavior differs by wave type:
   - Empty curation lists can show `Drop`.
   - Both entry points open the curation `Drop Artwork` modal.
 - Memes waves:
-  - Chat: use `Submit Work to The Memes` in the meme tabs header on web.
-  - Leaderboard: eligible signed-in users can use the header `Drop` action on
-    desktop and mobile to open the Memes artwork submission form. A configured
-    submission button label replaces `Drop`.
-  - Native app wave header: use the icon-only submit action; when it becomes a
-    lock, select it to see the restriction reason.
+  - Chat and Leaderboard use the same Main Stage submission control in the top
+    wave header, above the tabs. On web, use `Submit Work to The Memes` (or the
+    compact `Submit Work` label) to open the artwork submission form.
+  - If participation eligibility is missing, use `How to Submit` in that same
+    header to open nomination guidance. Submission timing and limit restrictions
+    also stay in the header.
+  - The native app uses the icon-only equivalent in its top wave header in
+    both views; select a lock to see the restriction reason or nomination help.
+  - `My submissions` remains in the leaderboard toolbar. Main Stage has no
+    separate `Drop` button beside the leaderboard sort controls.
 
 ## User Journey
 
@@ -107,10 +111,10 @@ Entry behavior differs by wave type:
   restriction case.
 - In non-empty leaderboards, blocked users may see no restriction text; the
   entry controls can simply be absent.
-- Memes chat uses `Submit Work to The Memes` on web and an icon-only action in
-  the native app header. Its leaderboard has a submission action on desktop
-  and mobile when the active profile is eligible, plus `My submissions` for
-  signed-in users on their own profile.
+- Main Stage keeps its submission control in the top wave header when switching
+  between Chat and Leaderboard on desktop, mobile web, and the native app.
+  `My submissions` stays available to signed-in users on their own profile in
+  the leaderboard toolbar, including when they cannot currently submit.
 - Memes desktop urgency/remaining badges are visible only on extra-wide desktop;
   compact desktop and app headers keep submit-state guidance behind the
   restriction icon or short label.
