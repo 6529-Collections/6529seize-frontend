@@ -1071,6 +1071,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
             page.getByText("Unlock submissions", { exact: true })
           ).toBeVisible();
           await page.keyboard.press("Escape");
+          await expect(
+            page.getByRole("dialog", {
+              name: "Main Stage submission eligibility",
+            })
+          ).toHaveCount(0);
         }
         const sections =
           surface === "app"
