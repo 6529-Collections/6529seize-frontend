@@ -492,7 +492,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
       !isApp ||
       !loadedWaveId ||
       editingDropId !== null ||
-      activeContentTab !== MyStreamWaveTab.CHAT ||
+      (activeContentTab !== MyStreamWaveTab.CHAT && !isMemesLegacySubmission) ||
       activeCurationId !== null ||
       (!isMemesLegacySubmission && !chatSubmitDropAction.isVisible)
     ) {
