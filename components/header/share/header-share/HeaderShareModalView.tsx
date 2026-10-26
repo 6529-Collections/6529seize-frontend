@@ -33,6 +33,13 @@ import { useSystemShare } from "./useSystemShare";
 const SHARE_ACTION_CLASS_NAME =
   "tw-inline-flex tw-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
 const SHARE_ACTION_ICON_CLASS_NAME = "tw-size-5 tw-flex-shrink-0";
+const CONNECTION_SHARE_STATUS_KEYS = {
+  loading: "headerShare.connectionRefresh.loading",
+  ready: "headerShare.connectionRefresh.ready",
+  error: "headerShare.connectionRefresh.unavailable",
+  "legacy-auth": null,
+  unauthenticated: null,
+} as const;
 const COPY_FEEDBACK_DURATION_MS = 1500;
 const TOOLTIP_STYLE = {
   zIndex: 10000,
@@ -636,6 +643,8 @@ export function HeaderShareModalView({
       activeSubTab === SubMode.DESKTOP
         ? desktopConnectionShareStatus
         : mobileConnectionShareStatus;
+    const connectionStatusKey =
+      CONNECTION_SHARE_STATUS_KEYS[activeConnectionShareStatus];
     const showConnectionControls =
       activeConnectionShareStatus === "ready" ||
       activeConnectionShareStatus === "loading" ||
@@ -646,6 +655,16 @@ export function HeaderShareModalView({
         data-testid="connection-share-content"
         className="tw-relative tw-w-full"
       >
+        <span
+          className="tw-sr-only"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {connectionStatusKey
+            ? t(HEADER_SHARE_LOCALE, connectionStatusKey)
+            : ""}
+        </span>
         <div
           data-testid="connection-share-reserved-space"
           aria-hidden="true"

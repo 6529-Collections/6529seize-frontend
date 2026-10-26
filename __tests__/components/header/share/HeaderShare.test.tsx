@@ -964,6 +964,9 @@ describe("HeaderShare", () => {
         const refresh = screen.getByRole("button", {
           name: "Generate new code",
         });
+        expect(screen.getByRole("status")).toHaveTextContent(
+          "Connection ready"
+        );
         expect(copy.parentElement).not.toContainElement(refresh);
         expect(copy.querySelector("svg")).toHaveClass("tw-size-4");
         expect(refresh.querySelector("svg")).toHaveClass("tw-size-4");
@@ -1024,6 +1027,10 @@ describe("HeaderShare", () => {
       await userEvent.click(refresh);
       expect(refresh).toBeDisabled();
       expect(refresh).toHaveAttribute("aria-busy", "true");
+      expect(screen.getByRole("status")).toHaveAttribute("aria-live", "polite");
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Preparing connection…"
+      );
       expect(screen.getByRole("button", { name: "Copy link" })).toBeDisabled();
       expect(
         screen.queryByTitle(expect.stringContaining("mock-share-code"))
@@ -1068,6 +1075,9 @@ describe("HeaderShare", () => {
           expect(
             screen.getByRole("button", { name: "Copy link" })
           ).toBeDisabled();
+          expect(screen.getByRole("status")).toHaveTextContent(
+            "Connection unavailable"
+          );
           await waitFor(() => expect(refresh).toBeEnabled());
           await userEvent.click(refresh);
           await waitFor(() =>
@@ -1084,6 +1094,58 @@ describe("HeaderShare", () => {
         }
       }
     );
+
+    it("allows another refresh after navigation interrupts a pending refresh", async () => {
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const { rerender } = renderWithProviders(<HeaderShare />);
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+      const refresh = await screen.findByRole("button", {
+        name: "Generate new code",
+      });
+      await waitFor(() => expect(refresh).toBeEnabled());
+      sessionV2.createConnectionShare.mockImplementationOnce(() =>
+        createPendingPromise()
+      );
+      await userEvent.click(refresh);
+      const interruptedSignal =
+        sessionV2.createConnectionShare.mock.calls[1][0].signal;
+      mockPathname = "/new-path";
+      mockSearchParams = new URLSearchParams("changed=true");
+      rerender(
+        <QueryClientProvider client={queryClient}>
+          <HeaderShare />
+        </QueryClientProvider>
+      );
+      expect(interruptedSignal.aborted).toBe(true);
+      await waitFor(() => expect(refresh).toBeEnabled());
+      await userEvent.click(refresh);
+      await waitFor(() =>
+        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(4)
+      );
+      await waitFor(() => expect(refresh).toBeEnabled());
+      expect(screen.getByRole("status")).toHaveTextContent("Connection ready");
+    });
+
+    it("keeps keyboard focus inside the connection dialog", async () => {
+      renderWithProviders(<HeaderShare />);
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+      const refresh = await screen.findByRole("button", {
+        name: "Generate new code",
+      });
+      await waitFor(() => expect(refresh).toBeEnabled());
+      const first = screen.getByRole("link", {
+        name: "Open 6529 app downloads",
+      });
+      refresh.focus();
+      await userEvent.tab();
+      expect(first).toHaveFocus();
+      await userEvent.tab({ shift: true });
+      expect(refresh).toHaveFocus();
+      await userEvent.keyboard("{Escape}");
+      await waitForElementToBeRemoved(() =>
+        screen.queryByRole("heading", { name: "Connect Device" })
+      );
+    });
 
     it("shows only Mobile and Desktop connection targets", async () => {
       renderWithProviders(<HeaderShare />);

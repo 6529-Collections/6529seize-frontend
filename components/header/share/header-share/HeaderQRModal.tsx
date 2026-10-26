@@ -41,6 +41,7 @@ import {
   generateQrCodeSource,
   getCachedConnectionShare,
   getFocusableElements,
+  trapFocusInDialog,
   getLocalLegacyDesktopAuth,
   isAbortError,
   isSessionUpgradeRequiredError,
@@ -162,72 +163,22 @@ function HeaderQRModal({
     Map<string, TerminalConnectionShareStatus>
   >(new Map());
 
-  const trapFocusInDialog = useCallback((event: KeyboardEvent) => {
-    if (event.key !== "Tab") {
-      return;
-    }
-
-    const dialog = dialogRef.current;
-    if (!dialog) {
-      return;
-    }
-
-    const focusableElements = getFocusableElements(dialog);
-    if (focusableElements.length === 0) {
-      event.preventDefault();
-      dialog.focus();
-      return;
-    }
-
-    const firstElement = focusableElements[0];
-    const lastElement = focusableElements.at(-1);
-    if (!firstElement || !lastElement) {
-      event.preventDefault();
-      dialog.focus();
-      return;
-    }
-    const activeElement = document.activeElement as HTMLElement | null;
-    const activeInsideDialog = activeElement
-      ? dialog.contains(activeElement)
-      : false;
-
-    if (event.shiftKey) {
-      if (
-        !activeInsideDialog ||
-        activeElement === firstElement ||
-        activeElement === dialog
-      ) {
-        event.preventDefault();
-        lastElement.focus();
-      }
-      return;
-    }
-
-    if (!activeInsideDialog || activeElement === lastElement) {
-      event.preventDefault();
-      firstElement.focus();
-    }
-  }, []);
-
   useEffect(() => {
     onCloseRef.current = closeModal;
   }, [closeModal]);
 
-  const handleEscapeKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === "Tab") {
-        trapFocusInDialog(event);
-        return;
-      }
+  const handleEscapeKeyDown = useCallback((event: KeyboardEvent) => {
+    if (event.key === "Tab") {
+      trapFocusInDialog(event, dialogRef.current);
+      return;
+    }
 
-      if (event.key === "Escape") {
-        event.stopPropagation();
-        event.preventDefault();
-        onCloseRef.current();
-      }
-    },
-    [trapFocusInDialog]
-  );
+    if (event.key === "Escape") {
+      event.stopPropagation();
+      event.preventDefault();
+      onCloseRef.current();
+    }
+  }, []);
 
   async function generateSources(
     walletAddress: string | null,

@@ -3495,6 +3495,7 @@ export const EN_US_MESSAGES = {
     "Connect and authenticate your wallet before connecting a device.",
   "headerShare.connectionNotice.cancel": "Cancel",
   "headerShare.connectionNotice.update": "Update",
+  "headerShare.connectionRefresh.ready": "Connection ready",
   "headerShare.connectionRefresh.action": "Generate new code",
   "headerShare.connectionRefresh.loading": "Preparing connection…",
   "headerShare.connectionRefresh.unavailable": "Connection unavailable",
