@@ -1,6 +1,10 @@
 "use client";
 
 import { CompactMenu } from "@/components/compact-menu";
+import {
+  COLLECT_SECONDARY_ACTION_CLASS,
+  COLLECT_SECONDARY_ACTION_STYLE,
+} from "./collect-action.styles";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
@@ -35,7 +39,9 @@ export default function CollectTradeActions({
   title,
   locale,
   onTrade,
+  inline = false,
 }: {
+  readonly inline?: boolean;
   readonly actions: readonly CollectActionView[];
   readonly title: string;
   readonly locale: SupportedLocale;
@@ -53,8 +59,33 @@ export default function CollectTradeActions({
       action: t(locale, ACTION_LABELS[action]),
       title,
     });
+  if (inline) {
+    return (
+      <div data-collect-more-actions className="tw-contents">
+        {actions.map(({ action, disabledReason }) => (
+          <button
+            key={action}
+            type="button"
+            disabled={Boolean(disabledReason)}
+            aria-label={
+              disabledReason
+                ? t(locale, "collect.disabledAction", {
+                    action: label(action),
+                    reason: disabledReason,
+                  })
+                : label(action)
+            }
+            className={COLLECT_SECONDARY_ACTION_CLASS}
+            onClick={(event) => onTrade(action, event.currentTarget)}
+          >
+            {t(locale, ACTION_LABELS[action])}
+          </button>
+        ))}
+      </div>
+    );
+  }
   return (
-    <div className="tw-min-w-0">
+    <div data-collect-more-actions className="tw-min-w-0">
       <div className="tw-flex tw-items-center tw-gap-1">
         {buy && (
           <button
@@ -75,12 +106,13 @@ export default function CollectTradeActions({
         {secondary.length > 0 && (
           <CompactMenu
             aria-label={t(locale, "collect.moreActions", { title })}
+            autoFocusItem={false}
             triggerAsChild
             trigger={
               <button
                 ref={menuTrigger}
                 type="button"
-                className="tw-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white"
+                className={`tw-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center ${COLLECT_SECONDARY_ACTION_STYLE}`}
               >
                 <EllipsisHorizontalIcon
                   aria-hidden="true"
@@ -89,6 +121,7 @@ export default function CollectTradeActions({
               </button>
             }
             menuWidthClassName="tw-w-64"
+            menuClassName="tailwind-scope [&:not(:focus-visible)_[data-focus]]:!tw-ring-0 [&:focus-visible_[data-focus]]:!tw-ring-2"
             itemClassName="tw-min-h-11"
             items={secondary.map(({ action, disabledReason }) => {
               const Icon = ACTION_ICONS[action];

@@ -103,6 +103,45 @@
 
 ## Common Scenarios
 
+- On desktop, the artwork stays in the left column while the adjacent card
+  details scroll. It stops at the end of that section, before the tabs. On
+  smaller screens the artwork scrolls normally with the page.
+- Market actions sit in one bordered panel at every screen size.
+  View listings & offers stays at the top left, above any listing status, using
+  the same compact, muted text style on phones, tablets and desktop.
+  Collect keeps the shared blue action style, dimmed and non-interactive when
+  disabled, in both the panel and the bottom bar.
+  Delivery controls stay hidden while a wallet connection is required; after
+  connection, they appear below the main action row.
+- On phones and tablets, the latest card's countdown and Subscription Minting
+  panel appear above the artwork. Ownership, format switching and media actions
+  stay below the artwork. The tab row stays at the top while scrolling below 1024px;
+  swipe the row to reach all four tabs when needed.
+- Collect and Make an offer share one row of 44px buttons on phones, tablets and
+  desktop. Very long labels truncate visually without changing their accessible names.
+  Make an offer fills the row when Collect is unavailable. Review offers and the
+  available List action sit in a darker strip at the bottom of the panel.
+  When a wallet connection is required, that strip also groups the existing
+  guidance with Connect wallet. The text and button wrap when space is limited.
+  Each action keeps its existing availability and trading behavior.
+- Review offers keeps its dialog height stable while the initial offers load.
+  Muted placeholder rows appear first; the wallet and quantity form is revealed
+  with the available orders. On phones, the order list scrolls above a fixed
+  footer containing the wallet, quantity and Review exact terms controls. The
+  footer remains visible when selecting an order or scrolling to the last one.
+  Selecting an order and connecting a wallet work as before.
+- Below 1024px, when the inline market actions leave the screen, a bottom bar
+  repeats the available Collect and Make an offer actions. On desktop windows
+  with a visible left rail, the bar starts after that rail. On phones it spans
+  the screen. In the app it sits above bottom
+  navigation and stays behind open dialogs. While listings are selected in the
+  active Listings & offers tab, the selection review bar takes its place.
+  The card actions return when the selection is cleared or another tab opens.
+  Delivery, owner actions and the additional-actions menu remain in the inline section.
+- Long descriptions initially show five lines on phones. `Read more` reveals
+  the full description and `Show less` restores the preview. Properties show
+  the first six tiles; `Show all N properties` reveals the remainder and
+  `Show fewer` restores the preview. Short sections need no disclosure.
 - In `Collectors`, screens narrower than 768 px show a collector list with this
   card's metrics in a `This card` row, with a `Total` row aligned underneath.
   Each collector has one header row labelling the Balance, TDH and Unweighted TDH
@@ -217,6 +256,7 @@
   deferred shared-timeline debt.
 - Non-source locales fall back to `en-US` for this detail surface until
   reviewed translations are added.
+- Mobile disclosure labels use the same progressive localization fallback.
 - Primary tabs expose selected state with `aria-pressed`; History tabs use the
   shared tablist pattern with `aria-selected` and arrow-key navigation.
 - Deferred loading applies to artwork details, References, Collectors,
