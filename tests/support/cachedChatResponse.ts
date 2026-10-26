@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 
-/** Measure the first observable visible cached text from the actual Chat click. */
+/** Measure cached text visible on a browser frame from the actual Chat click. */
 export async function observeCachedChatResponse(page: Page) {
   const observation = await page.evaluateHandle(() => {
     let started: number | null = null;
@@ -18,7 +18,10 @@ export async function observeCachedChatResponse(page: Page) {
           const element = text.currentNode.parentElement;
           if (
             text.currentNode.textContent?.includes("6529-composer-preview") &&
-            element?.checkVisibility({ visibilityProperty: true }) &&
+            element?.checkVisibility({
+              visibilityProperty: true,
+              opacityProperty: true,
+            }) &&
             !element.closest('[inert], [aria-hidden="true"]')
           ) {
             visible = true;
@@ -59,7 +62,7 @@ export async function observeCachedChatResponse(page: Page) {
     };
     document.addEventListener("click", onClick, true);
     return {
-      read: () => domVisible ?? elapsed,
+      read: () => elapsed,
       details: () => ({ domVisibleMs: domVisible, frameVisibleMs: elapsed }),
       dispose: () => {
         mutations.disconnect();

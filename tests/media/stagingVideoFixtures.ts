@@ -101,10 +101,22 @@ async function loadInventoryPage(
     throw new Error(
       `Staging video fixture inventory must load (HTTP ${response.status()})`
     );
-  const body = (await response.json()) as { data?: unknown };
+  const body = (await response.json()) as {
+    data?: unknown;
+    page?: unknown;
+    next?: unknown;
+  };
   if (!Array.isArray(body.data))
     throw new Error("Staging NFT inventory must contain records");
-  return body.data as unknown[];
+  if (
+    body.page !== pageNumber ||
+    (body.next !== null && typeof body.next !== "string") ||
+    (body.next !== null && body.data.length === 0)
+  )
+    throw new Error("Staging NFT inventory pagination must advance");
+  // Generate each numbered request ourselves; never follow an API-provided URL
+  // with the staging authentication header.
+  return { records: body.data as unknown[], hasNext: body.next !== null };
 }
 
 async function loadStagingVideoFixtures(
@@ -116,14 +128,18 @@ async function loadStagingVideoFixtures(
   if (!access)
     throw new Error("Staging video fixtures require the x-6529-auth cookie");
   const selected: Partial<Record<VideoShape, VideoFixture>> = {};
-  for (let pageNumber = 1; pageNumber <= 3; pageNumber += 1) {
-    const records = await loadInventoryPage(context, access, pageNumber);
+  for (let pageNumber = 1; ; pageNumber += 1) {
+    const { records, hasNext } = await loadInventoryPage(
+      context,
+      access,
+      pageNumber
+    );
     const candidates = selectVideoFixtures(records);
     if (candidates.portrait) selected.portrait ??= candidates.portrait;
     if (candidates.square) selected.square ??= candidates.square;
     if (selected.portrait && selected.square)
       return { portrait: selected.portrait, square: selected.square };
-    if (records.length < 101) break;
+    if (!hasNext) break;
   }
   throw new Error(
     "Staging must provide both a qualified portrait and square MP4/MOV artwork; no geometry cases were skipped"

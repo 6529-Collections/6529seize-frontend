@@ -251,6 +251,29 @@ describe("Museum rendered media readiness", () => {
     ).rejects.toThrow("Media disappeared or was replaced: repeated work");
   });
 
+  it.each(["signed work", ""])(
+    "redacts a failed image's original src in the poll error and its cause: %s",
+    async (alt) => {
+      main.append(
+        mediaImage(alt, {
+          decodeOnVisit: false,
+          attributes: {
+            src: "https://user:PRIVATE_PASSWORD@example.com/work.webp?sig=PRIVATE_QUERY#PRIVATE_FRAGMENT",
+          },
+        })
+      );
+      const failure = await expectNoUnresolvedMuseumMedia(
+        mediaPage(main)
+      ).catch((error: unknown) => error);
+      expect(failure).toBeInstanceOf(Error);
+      const error = failure as Error;
+      expect(error.message).toContain("Image failed to decode:");
+      expect(error.message).toContain('"src":"https://example.com/work.webp"');
+      expect(error.message).not.toContain("PRIVATE_");
+      expect(String(error.cause)).not.toContain("PRIVATE_");
+    }
+  );
+
   it("waits for loading text to clear after the native image has loaded", async () => {
     main.append(mediaImage("loaded work", { loaded: true }));
     const readProblems = jest

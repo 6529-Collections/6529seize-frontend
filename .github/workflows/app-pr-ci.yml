@@ -536,7 +536,9 @@ jobs:
       needs.plan.outputs.install_required == 'true' &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 60
+    # Museum recovery (25m), browser installation (10m), and browser phases
+    # (10m + 20m) need 65m, plus checkout/setup and evidence upload.
+    timeout-minutes: ${{ startsWith(matrix.lane, 'playwright-museum-') && 75 || 60 }}
     permissions:
       contents: read
       issues: read

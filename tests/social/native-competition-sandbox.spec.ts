@@ -976,26 +976,37 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
-  for (const delay of [50, 600]) {
-    test(`measures only visible cached Chat text from the browser click (${delay}ms control)`, async ({
+  for (const { delay, hiddenBy } of [
+    { delay: 50, hiddenBy: "display" },
+    { delay: 600, hiddenBy: "visibility" },
+    { delay: 600, hiddenBy: "opacity" },
+  ]) {
+    test(`measures only visible cached Chat text from the browser click (${delay}ms ${hiddenBy} control)`, async ({
       page,
     }) => {
       await page.setContent(
         '<button>Chat</button><section aria-label="Wave chat file upload area"><span hidden>6529-composer-preview</span></section>'
       );
-      await page.evaluate((delay) => {
-        const message = document.querySelector("span")!;
-        // Exercise display:none and visibility:hidden independently so retained
-        // text cannot satisfy either timing control before it is visible.
-        message.hidden = delay < 500;
-        message.style.visibility = delay < 500 ? "visible" : "hidden";
-        document.querySelector("button")!.onclick = () => {
-          setTimeout(() => {
-            message.hidden = false;
-            message.style.visibility = "visible";
-          }, delay);
-        };
-      }, delay);
+      await page.evaluate(
+        ({ delay, hiddenBy }) => {
+          const message = document.querySelector("span")!;
+          // Retained text must not count until its display, visibility and opacity
+          // permit painting, including opacity inherited from an ancestor.
+          message.hidden = hiddenBy === "display";
+          message.style.visibility =
+            hiddenBy === "visibility" ? "hidden" : "visible";
+          message.parentElement!.style.opacity =
+            hiddenBy === "opacity" ? "0" : "1";
+          document.querySelector("button")!.onclick = () => {
+            setTimeout(() => {
+              message.hidden = false;
+              message.style.visibility = "visible";
+              message.parentElement!.style.opacity = "1";
+            }, delay);
+          };
+        },
+        { delay, hiddenBy }
+      );
       const response = await observeCachedChatResponse(page);
       try {
         await page.getByRole("button", { name: "Chat", exact: true }).click();
@@ -1009,6 +1020,37 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       }
     });
   }
+
+  test("cached Chat measurement ignores text that disappears before a browser frame", async ({
+    page,
+  }) => {
+    await page.setContent(
+      '<button>Chat</button><section aria-label="Wave chat file upload area"><span hidden>6529-composer-preview</span></section>'
+    );
+    await page.evaluate(() => {
+      const message = document.querySelector("span")!;
+      document.querySelector("button")!.onclick = () => {
+        message.hidden = false;
+        queueMicrotask(() => {
+          message.hidden = true;
+        });
+        setTimeout(() => {
+          message.hidden = false;
+        }, 600);
+      };
+    });
+    const response = await observeCachedChatResponse(page);
+    try {
+      await page.getByRole("button", { name: "Chat", exact: true }).click();
+      await expect.poll(() => response.read()).not.toBeNull();
+      expect(await response.read()).toBeGreaterThanOrEqual(600);
+      const details = await response.details();
+      expect(details.domVisibleMs).toBeLessThan(500);
+      expect(details.frameVisibleMs).toBeGreaterThanOrEqual(600);
+    } finally {
+      await response.dispose();
+    }
+  });
   test("keeps message search open when delayed Main Stage data replaces the web header", async ({
     page,
   }) => {
