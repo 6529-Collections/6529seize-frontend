@@ -63,7 +63,9 @@ Wave and direct-message composers support tracked wave mentions.
 
 ## Limitations / Notes
 
-- The suggestion menu shows at most 5 waves.
+- The suggestion menu shows at most 5 waves, with the closest name matches first.
+  Spaces, dashes, apostrophes, and letter case do not need to match. See
+  [Wave name matching](../../navigation/feature-header-search-modal.md#wave-name-matching).
 - Mention links require both mention text and matching `mentioned_waves`
   metadata.
 - Untracked `#[name]` text renders as plain text.
