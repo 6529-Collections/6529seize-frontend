@@ -331,7 +331,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
         {t(locale, "waves.myVotes.inCredit", { credit: voteLabel })}
       </label>
       <div
-        className={`${onExplainVote ? "@[22rem]/vote-controls:tw-col-span-1" : ""} tw-col-span-2 tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-pr-1 tw-ring-1 tw-ring-inset tw-transition-colors tw-duration-200 focus-within:tw-ring-2 @[46rem]/my-vote:tw-col-span-1 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-1 @[46rem]/my-vote:tw-self-end motion-reduce:tw-transition-none ${
+        className={`${onExplainVote ? "@[22rem]/vote-controls:tw-col-span-1" : ""} tw-col-span-2 tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-pr-1 tw-ring-1 tw-ring-inset tw-transition-colors tw-duration-200 focus-within:tw-ring-2 @[46rem]/my-vote:tw-col-span-1 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-1 @[46rem]/my-vote:tw-self-end @[46rem]/my-vote:tw-py-0 motion-reduce:tw-transition-none ${
           isVoteValueOutOfRange
             ? "tw-ring-rose-400 focus-within:!tw-ring-rose-400"
             : "tw-ring-iron-700 focus-within:!tw-ring-primary-400"

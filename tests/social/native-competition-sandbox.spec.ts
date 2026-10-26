@@ -3227,7 +3227,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         ]) {
           await expect(action).toHaveCSS("white-space", "nowrap");
         }
+        const saveInset = await controls
+          .getByRole("button", { name: "Save vote", exact: true })
+          .evaluate((button) => {
+            const bounds = button.getBoundingClientRect();
+            const group = button.parentElement!.getBoundingClientRect();
+            return {
+              top: bounds.top - group.top,
+              bottom: group.bottom - bounds.bottom,
+              height: bounds.height,
+            };
+          });
+        expect(saveInset.top).toBeGreaterThanOrEqual(4);
+        expect(saveInset.bottom).toBeGreaterThanOrEqual(4);
         if (contentWidth < 736) {
+          expect(saveInset.height).toBeGreaterThanOrEqual(44);
           const inputBounds = (await input.boundingBox())!;
           const explainBounds = (await explain.boundingBox())!;
           expect(inputBounds.height).toBeGreaterThanOrEqual(44);
