@@ -53,6 +53,16 @@ interface VoteMutationVariables {
   readonly previousRate: number;
 }
 
+const getRationaleVoteChange = (
+  lastAppliedVoteChange: LastAppliedVoteChange | null,
+  dropId: string,
+  currentVoteValue: number
+): number =>
+  lastAppliedVoteChange?.dropId === dropId &&
+  lastAppliedVoteChange.voteTotal === currentVoteValue
+    ? lastAppliedVoteChange.voteChange
+    : 0;
+
 const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   drop,
@@ -303,11 +313,11 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
     }
   };
 
-  const currentRationaleVoteChange =
-    lastAppliedVoteChange?.dropId === drop.id &&
-    lastAppliedVoteChange.voteTotal === liveCurrentVoteValue
-      ? lastAppliedVoteChange.voteChange
-      : 0;
+  const currentRationaleVoteChange = getRationaleVoteChange(
+    lastAppliedVoteChange,
+    drop.id,
+    liveCurrentVoteValue
+  );
 
   const canExplainVote =
     !!onExplainVote &&
