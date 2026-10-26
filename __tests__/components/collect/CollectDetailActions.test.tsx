@@ -281,7 +281,12 @@ it("does not reopen an escaped offer when suspended content resolves", async () 
   expect(await screen.findByTestId("inline-trade")).toBeInTheDocument();
   expect(screen.queryByTestId("trade")).not.toBeInTheDocument();
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-  expect(trigger).toHaveFocus();
+  // The fallback opener is hidden once loading reveals the canonical action row.
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "Make an offer: Meme Five" })
+    ).toHaveFocus()
+  );
 });
 it("preserves iOS purchasing gate before any query or action", () => {
   mockHidePurchasing = true;

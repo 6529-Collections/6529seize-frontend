@@ -10,7 +10,14 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { fetchCollectAssets } from "@/services/api/collect-api";
 import { useQuery } from "@tanstack/react-query";
-import { lazy, Suspense, useContext, useRef, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useContext,
+  useRef,
+  useState,
+} from "react";
 import type { ReactNode } from "react";
 import { collectAssetIdentity } from "./collect.adapters";
 import type {
@@ -223,6 +230,17 @@ function DetailActions(props: CollectDetailActionsProps) {
   const [purchaseSession, setPurchaseSession] = useState(0);
   const opener = useRef<HTMLButtonElement | null>(null);
   const visibleOffer = useRef<HTMLButtonElement | null>(null);
+  const setVisibleOffer = useCallback((node: HTMLButtonElement | null) => {
+    visibleOffer.current = node;
+    // Loading can replace the fallback opener after the dialog has closed.
+    if (
+      node &&
+      opener.current === document.activeElement &&
+      opener.current?.closest("[hidden]")
+    ) {
+      node.focus({ preventScroll: true });
+    }
+  }, []);
   const close = () => {
     const trigger = opener.current;
     setAction(null);
@@ -307,7 +325,7 @@ function DetailActions(props: CollectDetailActionsProps) {
           renderSecondaryActions={(assetKey) => (
             <>
               <button
-                ref={visibleOffer}
+                ref={setVisibleOffer}
                 type="button"
                 aria-label={t(props.locale, "collect.actionFor", {
                   action: t(props.locale, OFFER_MESSAGE_KEY),
