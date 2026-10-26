@@ -48,13 +48,17 @@ export function useOriginalImage(src: string, allowStillImage = false) {
     requestAutomatically,
     toggle: () => {
       if (canViewOriginal)
-        setState({
-          src,
-          requested: !requested,
-          loaded: false,
-          failed: false,
-          automaticHandled: true,
-        });
+        setState((current) =>
+          current.src !== src
+            ? current
+            : {
+                ...current,
+                requested: !current.requested,
+                loaded: false,
+                failed: false,
+                automaticHandled: true,
+              }
+        );
     },
     onLoad: () =>
       setState((current) =>

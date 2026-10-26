@@ -69,7 +69,9 @@ type Props = Omit<ImageProps, "src" | "unoptimized" | "onError"> & {
   readonly imageScale: ImageScale;
   readonly onError?: (() => void) | undefined;
   readonly preferHighQuality?: boolean | undefined;
-  readonly onAnimationUnavailable?: (() => void) | undefined;
+  // Reports unavailable guaranteed-animated previews once per mount. A legacy
+  // or external preview can still animate, but does not guarantee animation.
+  readonly onAnimatedPreviewUnavailable?: (() => void) | undefined;
 };
 
 const PreviewAttempt = forwardRef<HTMLImageElement, Props>(
@@ -81,7 +83,7 @@ const PreviewAttempt = forwardRef<HTMLImageElement, Props>(
       alt,
       fallback,
       preferHighQuality = false,
-      onAnimationUnavailable,
+      onAnimatedPreviewUnavailable,
       onLoad,
       ...props
     },
@@ -89,19 +91,26 @@ const PreviewAttempt = forwardRef<HTMLImageElement, Props>(
   ) => {
     const [attempt, setAttempt] = useState(0);
     const failedAttempt = useRef<number | null>(null);
+    const notifiedAnimationFallback = useRef(false);
     const highQualitySrc = preferHighQuality
       ? getHighQualityArtworkImageSrc(originalSrc)
       : null;
     const previewSources = getDropImagePreviewSources(
       originalSrc,
       imageScale,
-      Boolean(onAnimationUnavailable)
+      Boolean(onAnimatedPreviewUnavailable)
     );
     const sources = highQualitySrc
       ? [highQualitySrc, ...previewSources]
       : previewSources;
     const source = sources[attempt];
     const optimizationProps = source === highQualitySrc ? { quality: 100 } : {};
+    const notifyAnimatedPreviewUnavailable = () => {
+      if (!isGifImageUrl(originalSrc) || notifiedAnimationFallback.current)
+        return;
+      notifiedAnimationFallback.current = true;
+      onAnimatedPreviewUnavailable?.();
+    };
 
     return (
       <>
@@ -129,11 +138,8 @@ const PreviewAttempt = forwardRef<HTMLImageElement, Props>(
               onLoad?.(event);
               // Legacy and external previews can be stills. Only the versioned
               // GIF contract guarantees animation without inspecting the bytes.
-              if (
-                isGifImageUrl(originalSrc) &&
-                getLegacyGifPreviewUri(source) === source
-              )
-                onAnimationUnavailable?.();
+              if (getLegacyGifPreviewUri(source) === source)
+                notifyAnimatedPreviewUnavailable();
             }}
             onError={() => {
               // Repeated errors from one source must not skip its fallback or
@@ -143,11 +149,10 @@ const PreviewAttempt = forwardRef<HTMLImageElement, Props>(
               setAttempt(attempt + 1);
               const nextSource = sources[attempt + 1];
               if (
-                isGifImageUrl(originalSrc) &&
-                (!nextSource ||
-                  getLegacyGifPreviewUri(nextSource) === nextSource)
+                !nextSource ||
+                getLegacyGifPreviewUri(nextSource) === nextSource
               )
-                onAnimationUnavailable?.();
+                notifyAnimatedPreviewUnavailable();
               if (attempt + 1 === sources.length) onError?.();
             }}
           />
@@ -164,7 +169,7 @@ PreviewAttempt.displayName = "PreviewAttempt";
 export const DropImagePreview = forwardRef<HTMLImageElement, Props>(
   (props, ref) => (
     <PreviewAttempt
-      key={`${props.originalSrc}:${props.imageScale}:${props.preferHighQuality ?? false}:${Boolean(props.onAnimationUnavailable)}`}
+      key={`${props.originalSrc}:${props.imageScale}:${props.preferHighQuality ?? false}:${Boolean(props.onAnimatedPreviewUnavailable)}`}
       {...props}
       ref={ref}
     />

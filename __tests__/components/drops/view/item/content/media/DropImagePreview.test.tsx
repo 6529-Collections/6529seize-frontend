@@ -227,3 +227,65 @@ it("falls back from a rejected GIF animation to a legacy preview, never the orig
   fireEvent.error(screen.getByAltText("GIF"));
   expect(screen.queryByRole("img")).not.toBeInTheDocument();
 });
+
+it("reports unavailable animated previews once across legacy load and error events", () => {
+  const gif = original.replace("file.jpg", "artwork.gif");
+  const onAnimatedPreviewUnavailable = jest.fn();
+  const { rerender } = render(
+    <DropImagePreview
+      originalSrc={gif}
+      imageScale={ImageScale.AUTOx1080}
+      alt="GIF"
+      fill
+      onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
+    />
+  );
+  const image = screen.getByAltText("GIF");
+  fireEvent.error(image);
+  expect(image).toHaveAttribute(
+    "src",
+    gif.replace("artwork.gif", "AUTOx450_gifv2/artwork.gif")
+  );
+  fireEvent.load(image);
+  expect(onAnimatedPreviewUnavailable).not.toHaveBeenCalled();
+  fireEvent.error(image);
+  expect(image).toHaveAttribute(
+    "src",
+    gif.replace("artwork.gif", "AUTOx1080/artwork.gif")
+  );
+  expect(onAnimatedPreviewUnavailable).toHaveBeenCalledTimes(1);
+  fireEvent.load(image);
+  fireEvent.error(image);
+  fireEvent.load(image);
+  fireEvent.error(image);
+  expect(onAnimatedPreviewUnavailable).toHaveBeenCalledTimes(1);
+  rerender(
+    <DropImagePreview
+      originalSrc={gif.replace("artwork", "next")}
+      imageScale={ImageScale.AUTOx1080}
+      alt="GIF"
+      fill
+      onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
+    />
+  );
+  fireEvent.error(screen.getByAltText("GIF"));
+  fireEvent.error(screen.getByAltText("GIF"));
+  expect(onAnimatedPreviewUnavailable).toHaveBeenCalledTimes(2);
+});
+
+it("reports an unverified external GIF preview once without claiming it is static", () => {
+  const onAnimatedPreviewUnavailable = jest.fn();
+  render(
+    <DropImagePreview
+      originalSrc="https://external.example/art.gif"
+      imageScale={ImageScale.AUTOx1080}
+      alt="GIF"
+      fill
+      onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
+    />
+  );
+  fireEvent.load(screen.getByAltText("GIF"));
+  fireEvent.load(screen.getByAltText("GIF"));
+  fireEvent.error(screen.getByAltText("GIF"));
+  expect(onAnimatedPreviewUnavailable).toHaveBeenCalledTimes(1);
+});

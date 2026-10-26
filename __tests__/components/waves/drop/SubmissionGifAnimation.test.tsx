@@ -1,4 +1,12 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  renderHook,
+  screen,
+  within,
+} from "@testing-library/react";
+import { useOriginalImage } from "@/components/drops/view/item/content/media/useOriginalImage";
 import {
   createElement,
   forwardRef,
@@ -47,6 +55,24 @@ jest.mock("react-zoom-pan-pinch", () => ({
 
 const src = "https://d3lqz0a4bldqgf.cloudfront.net/drops/author/art.gif";
 const artwork = { mime_type: "image/gif", url: src };
+
+it("applies batched quality toggles to the latest choice and ignores a previous artwork's toggle", () => {
+  const { result, rerender } = renderHook(
+    ({ source }) => useOriginalImage(source),
+    { initialProps: { source: src } }
+  );
+  act(() => {
+    result.current.toggle();
+    result.current.toggle();
+  });
+  expect(result.current.requested).toBe(false);
+  const staleToggle = result.current.toggle;
+  rerender({ source: src.replace("art.gif", "next.gif") });
+  act(staleToggle);
+  expect(result.current.requested).toBe(false);
+  act(() => result.current.requestAutomatically());
+  expect(result.current.requested).toBe(true);
+});
 
 function rejectAnimatedPreviews() {
   const preview = screen.getByAltText("Drop media");

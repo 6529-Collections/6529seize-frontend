@@ -3,6 +3,8 @@ import type { Page } from "@playwright/test";
 import type { ApiDropV2 } from "../../generated/models/ApiDropV2";
 import { ApiDropMainType } from "../../generated/models/ApiDropMainType";
 import type { ApiWaveOverview } from "../../generated/models/ApiWaveOverview";
+import type { ApiWave } from "../../generated/models/ApiWave";
+import composerSandboxConstants from "../support/composerSandboxConstants.json";
 import {
   expect,
   expectNoHorizontalOverflow,
@@ -47,12 +49,20 @@ export function defineSubmissionArtworkPreviewTests() {
       baseURL,
     }) => {
       const { apiOrigin, feed, source } = await fetchSandboxDrop(page, baseURL);
+      const memesWaveId = composerSandboxConstants.linkedDropMemesWaveId;
+      const waveResponse = await page.request.get(
+        `${apiOrigin}/api/waves/${WAVE_ID}`
+      );
+      expect(waveResponse.ok()).toBe(true);
+      const wave = (await waveResponse.json()) as ApiWave;
+      const submissionWave = { ...feed.wave, id: memesWaveId };
       const original = `${MEDIA_ROOT}artwork.${extension}`;
       const description =
         "First photographic line\nSecond photographic line\n\nA separate paragraph";
       const metadata = [{ data_key: "description", data_value: description }];
       const drop: ApiDropV2 = {
         ...source,
+        wave: submissionWave,
         title: "Artwork quality fixture",
         content: "",
         drop_type: ApiDropMainType.Submission,
@@ -65,11 +75,32 @@ export function defineSubmissionArtworkPreviewTests() {
         ],
       };
       const headers = { "access-control-allow-origin": "*" };
+      await page.route("**/api/open-graph**", (route) =>
+        route.fulfill({ headers, json: { results: {} } })
+      );
       await page.route(`${apiOrigin}/api/settings`, (route) =>
-        route.fulfill({ headers, json: { memes_wave_id: WAVE_ID } })
+        route.fulfill({ headers, json: { memes_wave_id: memesWaveId } })
+      );
+      await page.route(`${apiOrigin}/api/waves/${memesWaveId}`, (route) =>
+        route.fulfill({ headers, json: { ...wave, id: memesWaveId } })
+      );
+      await page.route(`${apiOrigin}/api/v2/drops?**`, (route) => {
+        const ids =
+          new URL(route.request().url()).searchParams.get("ids")?.split(",") ??
+          [];
+        if (!ids.includes(DROP_ID)) return route.fallback();
+        return route.fulfill({
+          headers,
+          json: { data: [drop], page: 1, next: false },
+        });
+      });
+      await page.route(
+        `${apiOrigin}/api/v3/waves/${memesWaveId}/drops/${DROP_ID}/competition-context`,
+        (route) =>
+          route.fulfill({ headers, json: { competition: null, entry: null } })
       );
       await page.route(`${apiOrigin}/api/v2/drops/${DROP_ID}`, (route) =>
-        route.fulfill({ headers, json: { drop, wave: feed.wave } })
+        route.fulfill({ headers, json: { drop, wave: submissionWave } })
       );
       await page.route(
         `${apiOrigin}/api/v2/drops/${DROP_ID}/metadata`,
@@ -91,12 +122,15 @@ export function defineSubmissionArtworkPreviewTests() {
         });
       });
       const directOriginalRequests: string[] = [];
+      const rejectedAnimatedPreviews: string[] = [];
       await page.route(`${MEDIA_ROOT}**`, (route) => {
-        if (animationUnavailable && route.request().url().includes("_gifv2/"))
+        if (animationUnavailable && route.request().url().includes("_gifv2/")) {
+          rejectedAnimatedPreviews.push(route.request().url());
           return route.fulfill({
             status: 422,
             json: { error: "DECODED_IMAGE_TOO_LARGE" },
           });
+        }
         const isOriginal = route.request().url() === original;
         if (isOriginal) directOriginalRequests.push(original);
         const animation = isOriginal && extension === "gif";
@@ -132,6 +166,12 @@ export function defineSubmissionArtworkPreviewTests() {
           hero.getByRole("img", { name: "Original GIF animation", exact: true })
         ).toBeVisible();
         await expect(preview).toBeHidden();
+        expect(rejectedAnimatedPreviews).toEqual(
+          expect.arrayContaining([
+            `${MEDIA_ROOT}AUTOx1080_gifv2/artwork.gif`,
+            `${MEDIA_ROOT}AUTOx450_gifv2/artwork.gif`,
+          ])
+        );
       } else {
         await expect(preview).toBeVisible();
       }
