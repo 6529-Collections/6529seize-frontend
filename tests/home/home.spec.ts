@@ -1318,7 +1318,7 @@ test.describe("Home Page @smoke @medium @large", () => {
     await expect(phase).toBeVisible();
     await expect(page.getByText("Upcoming", { exact: true })).toBeVisible();
     await expect(
-      page.locator('[data-tooltip-id="allowlist-info"]')
+      page.getByRole("main").locator('[data-tooltip-id="allowlist-info"]')
     ).toBeVisible();
     await expect(mint).toHaveAttribute("href", "/the-memes/mint");
     await expect(timer).toHaveCSS(
