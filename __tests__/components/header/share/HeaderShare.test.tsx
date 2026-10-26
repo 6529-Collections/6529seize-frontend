@@ -983,7 +983,9 @@ describe("HeaderShare", () => {
             "/accept-connection-sharing?token=replacement-desktop-token",
         });
         await userEvent.click(refresh);
-        await waitFor(() => expect(refresh).toBeEnabled());
+        await waitFor(() =>
+          expect(refresh).toHaveAttribute("aria-disabled", "false")
+        );
         expect(screen.getByRole("button", { name: target })).toHaveAttribute(
           "aria-pressed",
           "true"
@@ -1019,21 +1021,22 @@ describe("HeaderShare", () => {
       const refresh = await screen.findByRole("button", {
         name: "Generate new code",
       });
-      await waitFor(() => expect(refresh).toBeEnabled());
+      await waitFor(() =>
+        expect(refresh).toHaveAttribute("aria-disabled", "false")
+      );
+      expect(screen.getByTitle(/mock-share-code/)).toBeInTheDocument();
       sessionV2.createConnectionShare.mockImplementation(() =>
         createPendingPromise()
       );
       await userEvent.click(refresh);
-      expect(refresh).toBeDisabled();
+      expect(refresh).toHaveAttribute("aria-disabled", "true");
       expect(refresh).toHaveAttribute("aria-busy", "true");
       expect(screen.getByRole("status")).toHaveAttribute("aria-live", "polite");
       expect(screen.getByRole("status")).toHaveTextContent(
         "Preparing connection…"
       );
       expect(screen.getByRole("button", { name: "Copy link" })).toBeDisabled();
-      expect(
-        screen.queryByTitle(expect.stringContaining("mock-share-code"))
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTitle(/mock-share-code/)).not.toBeInTheDocument();
       await userEvent.click(refresh);
       expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2);
       const signal = sessionV2.createConnectionShare.mock.calls[1][0].signal;
@@ -1058,7 +1061,9 @@ describe("HeaderShare", () => {
           const refresh = await screen.findByRole("button", {
             name: "Generate new code",
           });
-          await waitFor(() => expect(refresh).toBeEnabled());
+          await waitFor(() =>
+            expect(refresh).toHaveAttribute("aria-disabled", "false")
+          );
           await userEvent.click(screen.getByRole("button", { name: target }));
           const shareMock =
             target === "Mobile"
@@ -1075,7 +1080,9 @@ describe("HeaderShare", () => {
           expect(screen.getByRole("status")).toHaveTextContent(
             "Connection unavailable"
           );
-          await waitFor(() => expect(refresh).toBeEnabled());
+          await waitFor(() =>
+            expect(refresh).toHaveAttribute("aria-disabled", "false")
+          );
           await userEvent.click(refresh);
           await waitFor(() =>
             expect(
@@ -1099,7 +1106,9 @@ describe("HeaderShare", () => {
       const refresh = await screen.findByRole("button", {
         name: "Generate new code",
       });
-      await waitFor(() => expect(refresh).toBeEnabled());
+      await waitFor(() =>
+        expect(refresh).toHaveAttribute("aria-disabled", "false")
+      );
       sessionV2.createConnectionShare.mockImplementationOnce(() =>
         createPendingPromise()
       );
@@ -1114,13 +1123,56 @@ describe("HeaderShare", () => {
         </QueryClientProvider>
       );
       expect(interruptedSignal.aborted).toBe(true);
-      await waitFor(() => expect(refresh).toBeEnabled());
+      await waitFor(() =>
+        expect(refresh).toHaveAttribute("aria-disabled", "false")
+      );
       await userEvent.click(refresh);
       await waitFor(() =>
         expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(4)
       );
-      await waitFor(() => expect(refresh).toBeEnabled());
+      await waitFor(() =>
+        expect(refresh).toHaveAttribute("aria-disabled", "false")
+      );
       expect(screen.getByRole("status")).toHaveTextContent("Connection ready");
+    });
+
+    it("keeps keyboard focus on refresh while busy and rejects repeated activation", async () => {
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      renderWithProviders(<HeaderShare />);
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+      const refresh = await screen.findByRole("button", {
+        name: "Generate new code",
+      });
+      await waitFor(() =>
+        expect(refresh).toHaveAttribute("aria-disabled", "false")
+      );
+      let finishRefresh!: () => void;
+      const pending = new Promise<void>((resolve) => {
+        finishRefresh = resolve;
+      });
+      sessionV2.createConnectionShare.mockImplementationOnce(async () => {
+        await pending;
+        return {
+          connection_share_code: "keyboard-refreshed-code",
+          expires_at: new Date(Date.now() + 60_000).toISOString(),
+          address: "0x1234567890123456789012345678901234567890",
+          deep_link_path:
+            "/accept-connection-sharing?connection_share_code=keyboard-refreshed-code",
+        };
+      });
+      refresh.focus();
+      await userEvent.keyboard("{Enter}");
+      expect(refresh).toHaveAttribute("aria-disabled", "true");
+      expect(refresh).toHaveFocus();
+      await userEvent.keyboard("{Enter} ");
+      expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2);
+      expect(refresh).toHaveFocus();
+      finishRefresh();
+      await waitFor(() =>
+        expect(refresh).toHaveAttribute("aria-disabled", "false")
+      );
+      expect(refresh).toHaveFocus();
+      expect(screen.getByTitle(/keyboard-refreshed-code/)).toBeInTheDocument();
     });
 
     it("keeps keyboard focus inside the connection dialog", async () => {
@@ -1129,7 +1181,9 @@ describe("HeaderShare", () => {
       const refresh = await screen.findByRole("button", {
         name: "Generate new code",
       });
-      await waitFor(() => expect(refresh).toBeEnabled());
+      await waitFor(() =>
+        expect(refresh).toHaveAttribute("aria-disabled", "false")
+      );
       const first = screen.getByRole("link", {
         name: "Open 6529 app downloads",
       });
@@ -1223,7 +1277,9 @@ describe("HeaderShare", () => {
         const refresh = await screen.findByRole("button", {
           name: "Generate new code",
         });
-        await waitFor(() => expect(refresh).toBeEnabled());
+        await waitFor(() =>
+          expect(refresh).toHaveAttribute("aria-disabled", "false")
+        );
         await userEvent.click(screen.getByRole("button", { name: target }));
         const reveal = screen
           .getByTestId("header-share-modal")
@@ -1256,7 +1312,9 @@ describe("HeaderShare", () => {
           refresh
         );
         completeRefresh();
-        await waitFor(() => expect(refresh).toBeEnabled());
+        await waitFor(() =>
+          expect(refresh).toHaveAttribute("aria-disabled", "false")
+        );
         expect(reveal).toHaveClass(
           "tw-animate-fadeIn",
           "motion-reduce:tw-animate-none"

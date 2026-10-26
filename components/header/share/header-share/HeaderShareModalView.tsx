@@ -402,9 +402,17 @@ export function HeaderShareModalView({
           aria-label={refreshLabel}
           title={refreshLabel}
           aria-busy={isConnectionShareLoading}
-          disabled={isConnectionShareLoading}
-          onClick={refreshConnectionShare}
-          className="tw-inline-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-bg-iron-800 enabled:hover:tw-text-iron-100 disabled:tw-cursor-wait disabled:tw-opacity-50"
+          aria-disabled={isConnectionShareLoading}
+          onClick={() => {
+            if (!isConnectionShareLoading) {
+              refreshConnectionShare();
+            }
+          }}
+          className={`tw-inline-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${
+            isConnectionShareLoading
+              ? "tw-cursor-wait tw-opacity-50"
+              : "hover:tw-bg-iron-800 hover:tw-text-iron-100"
+          }`}
         >
           <FontAwesomeIcon
             icon={faRotate}
