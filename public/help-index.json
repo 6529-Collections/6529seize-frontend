@@ -71,7 +71,7 @@
         "In the app, the competition setup editor keeps the focused name or description field above the keyboard and action bar. Closing the keyboard restores the editor's full height.",
         "In the native app, the competition collection filters and Votes subtabs use the same compact pills as wave information. More opens remaining collection choices and shows the selected choice's name after selection. Dismissing More leaves the selection unchanged. Desktop and mobile web also use compact pills for collection filters, with all available filters visible. Votes subtabs use the same compact pills on desktop and mobile web. Decision-pause notices appear below the Votes pills. Entry-submission eligibility notices appear only in Leaderboard, not in My Votes, All votes, or Activity; published competitions keep the shared wave-level navigation.",
         "When switching to a competition route, its controls appear after navigation completes, so a newly opened sort sheet or form stays in that view.",
-        "Switching between Leaderboard and Chat for the selected competition reuses the open wave. Loaded Chat messages appear immediately while new messages refresh in the background. The primary text draft is kept when switching tabs or using Back/Forward. A first Chat load still waits for its messages, and repeated tab choices reuse that request.",
+        "Switching between Leaderboard and Chat for the selected competition reuses the open wave. Loaded Chat messages appear immediately while new messages refresh in the background. The primary text draft is kept when switching tabs or using Back/Forward. A first Chat load still waits for its messages, and repeated tab choices reuse that request. Selecting another wave after returning to Chat opens that wave's conversation and its own draft. Returning to the wave list closes the previous conversation.",
         "A wave link targeting a specific chat message remains in Chat even when the link also names another section. The message target takes priority over that conflicting destination.",
         "Ordinary wave navigation restores each wave’s last selected valid tab in the same browser or app, including after reloads or app restarts. Main Stage can remember Leaderboard while Maybes Bar independently remembers Chat. Switching waves keeps the wave list in place and opens the remembered section directly; pending competition data loads in that section without opening Chat or Competitions first. With no valid remembered choice, Chat is the fallback, including Memes and completed waves. Loading or refreshing competition data does not override deliberate Chat selections. Remembered competition views retain their competition identity; if the default changes, ordinary entry falls back to Chat. Explicit tab and competition links retain their destination. Competition tabs use the default unless an explicit selection supplies another competition. One eligible competition wins; otherwise the earliest-starting running competition wins, including paused decisions. With none running, the soonest upcoming wins over history; otherwise the most recently ended wins, including archived completed history. Drafts, archived never-published drafts and cancelled competitions are excluded. With none eligible, shared chat remains usable. Chat and every selected published competition share one wave-level row: Chat, competition views, Votes, Settings, then Competitions when available, then curations. Votes contains My Votes, All votes and Activity, scoped to the selected competition. Settings renders its access, rules, appearance and pause history, including the original competitions in older waves. About and wave Configuration live in the information panel. Select the wave name to open it; mobile Close or the device’s Back action returns to the original competition, tab, curation and scroll. Administrators retain Competitions; other viewers see it for more than one visible competition. Unknown counts or permissions keep it hidden until administrator access or more than one visible competition is established. Direct collection links remain readable. Temporary refresh failures retain loaded competition content and its selected section; rejected access or an unavailable competition shows a retryable error in that section. Explicit competition choices and open forms keep their original competition.",
         "Routine background competition refreshes keep established tabs in place. The Competitions tab updates when refreshed competition data or permissions change, not merely because another request starts.",
@@ -1826,13 +1826,12 @@
         "find"
       ],
       "facts": [
-        "Search 6529 finds Pages, NFTs, Profiles, and Waves, with an always-visible result-type selector and a result count tied to the visible query.",
+        "Search 6529 finds Pages, NFTs, Profiles, Waves, and Messages, with an always-visible result-type selector and a result count tied to the visible query.",
         "Search 6529 ranks exact, prefix, and substring profile-handle matches before ENS-only matches, then orders each match group by level from highest to lowest.",
         "Wave results in Search 6529 exclude direct-message conversations.",
         "The search control in an active Wave opens Search messages for that Wave; use Search all 6529 in the dialog to switch to site search.",
-        "When advanced message search is available, in: selects a Wave and from: selects an author. Both appear as removable chips alongside the usual text search. Search starts with the current Wave selected; remove its in: chip to search all Waves you can read. Results show their Wave and open the matching message.",
+        "Message search is available to everyone. The Messages tab starts across all readable Waves. Message matches appear only in Messages, not All. in: selects a Wave and from: selects an author. Both appear as removable chips alongside the usual text search. When opened inside a Wave, search starts with that Wave selected; remove its in: chip to search all Waves you can read. Results show their Wave and open the matching message.",
         "Type in: or from: to choose a suggestion with the mouse, arrow keys and Enter. Combine both filters with message text of at least three characters, or search with just an author. Private Wave and conversation visibility rules still apply. To search literal from: or in: text, prefix the keyword with a backslash.",
-        "Profiles without advanced message search can open Filters to limit results to one author who has posted in the Wave, an After date, a Before date, or a combination of those filters.",
         "Arrow keys move through site results and Enter opens the selected result.",
         "Site search keeps the last query and recently opened queries for the current browser-tab session."
       ],
@@ -4110,6 +4109,7 @@
         "Video artwork in Quick Vote starts automatically, muted and inline, on web and in the native app. Reduced-motion preferences keep autoplay off, and playback controls remain available.",
         "The Memes - Main Stage is a Memes wave context, not the /the-memes collection browse or mint route.",
         "Submission availability depends on login, proxy mode, participation eligibility, the submission window, and per-user submission limits.",
+        "On The Memes Main Stage, Chat and Leaderboard keep the same submission control in the top wave header above the tabs. On web it shows Submit Work to The Memes or the compact Submit Work label when available; How to Submit opens nomination guidance when participation eligibility is missing. Timing and submission-limit restrictions stay in that header. The native app uses the equivalent submit or lock icon in its top header in both views. My submissions remains in the leaderboard toolbar for signed-in users on their own profile; Main Stage has no separate Drop button beside the leaderboard sort controls.",
         "Unavailable conversation-header submission actions show a lock icon on desktop, tablet, and phone. Hover, focus, or select the lock to read the full restriction reason, including opening or closing dates and submission limits. Recover by logging in, disabling proxy mode, waiting for the submission window, or freeing submission capacity. The desktop How to Submit helper keeps its label.",
         "In the Artwork step, Continue remains available before required fields are complete, except while an interactive artwork hash is being verified; selecting Continue turns every missing or invalid field and the missing media control red, shows inline recovery messages, and focuses the first missing item in form order.",
         "On larger viewports the artwork remains visible while the metadata form scrolls independently. On smaller viewports the complete form scrolls as one page, focused text fields move into view when the software keyboard opens, and the native modal shrinks to keep its action bar above the keyboard.",
@@ -6388,18 +6388,34 @@
     {
       "id": "profiles.followers-tab",
       "kind": "route",
-      "title": "Profile followers",
-      "aliases": ["followers", "profile followers", "who follows profile"],
+      "title": "Profile followers and your following list",
+      "aliases": [
+        "followers",
+        "profile followers",
+        "who follows profile",
+        "following",
+        "who I follow",
+        "find people I follow"
+      ],
       "keywords": ["profile", "followers", "following", "social"],
       "facts": [
-        "Profile followers live at /{user}/followers.",
-        "Use this route when users ask where to see follower relationships for a profile.",
-        "Follower information is profile-specific, not a Network-wide leaderboard."
+        "Open Followers in a profile's header to see its followers in a dialog or mobile sheet. The legacy /{user}/followers route redirects to the profile.",
+        "When a successful request confirms zero followers, the Followers dialog or mobile sheet says No followers yet. This message is not shown while loading or after a failed request.",
+        "On your own signed-in profile, Following appears beside Followers with the total number of identities you follow. The list loads when you open it. Rediscover profiles by their image, handle and level, visit profile links, or unfollow them.",
+        "Both Followers and Following use compact panels for short lists and scroll within a bounded panel for longer lists.",
+        "Scroll or choose Load more for additional followed identities. Follow/unfollow actions refresh the list and total.",
+        "Following is hidden when signed out, viewing someone else's profile, or using a profile proxy. Public following lists for other identities are not available.",
+        "If Following shows Unavailable, opening the list retries the count. If a list request fails, choose Retry. A failed request is not a zero count or an empty list."
       ],
-      "canonical_path": "/{user}/followers",
-      "related_paths": ["/{user}"],
+      "canonical_path": "/{user}",
+      "related_paths": ["/{user}/followers"],
       "tags": ["profiles", "followers"],
-      "source_refs": ["app/[user]/followers/page.tsx"]
+      "source_refs": [
+        "app/[user]/followers/page.tsx",
+        "components/user/following/UserPageFollowing.tsx",
+        "components/user/followers/UserPageFollowersModal.tsx",
+        "ops/docs/profiles/navigation/feature-header-summary.md"
+      ]
     },
     {
       "id": "profiles.xtdh-tab",
