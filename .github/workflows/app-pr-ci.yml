@@ -214,7 +214,9 @@ jobs:
             corePlaywrightLanes.push({ lane: "playwright-smoke", label: "Playwright smoke", runner: defaultRunner });
           }
           if (plan.checks.playwright_native_competition?.required) {
-            corePlaywrightLanes.push({ lane: "playwright-native-competition", label: "Native competitions desktop and mobile", runner: defaultRunner });
+            for (const shard of [1, 2]) {
+              corePlaywrightLanes.push({ lane: "playwright-native-competition", label: `Native competitions shard ${shard}/2`, runner: defaultRunner, shard });
+            }
           }
           if (plan.checks.playwright_pdf_attachments?.required) {
             corePlaywrightLanes.push({ lane: "playwright-pdf-attachments", label: "PDF attachments in WebKit", runner: defaultRunner });
@@ -434,7 +436,8 @@ jobs:
         env:
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/native-competition"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/native-competition"
-        run: ./bin/6529 run test:e2e:native-competition-sandbox
+          NATIVE_COMPETITION_SHARD: "${{ matrix.shard }}/2"
+        run: ./bin/6529 run test:e2e:native-competition-sandbox --shard="$NATIVE_COMPETITION_SHARD"
 
       - name: Run PDF attachment browser regression pack
         if: matrix.lane == 'playwright-pdf-attachments'
@@ -519,7 +522,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: app-pr-ci-results-${{ matrix.lane }}-${{ github.event.pull_request.number || github.run_id }}
+          name: app-pr-ci-results-${{ matrix.lane }}${{ matrix.shard && format('-{0}', matrix.shard) || '' }}-${{ github.event.pull_request.number || github.run_id }}
           path: |
             test-results/**
             playwright-report/**

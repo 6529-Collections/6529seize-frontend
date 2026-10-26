@@ -5,6 +5,7 @@ import type { Frame, Locator, Page, WebSocketRoute } from "@playwright/test";
 import type { ApiDropAndWave } from "@/generated/models/ApiDropAndWave";
 import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2PageWithoutCount";
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
+import { observeCachedChatResponse } from "../support/cachedChatResponse";
 import { expectCompetitionScroll } from "../support/competitionScroll";
 import {
   expectNativeLeaderboardArtwork,
@@ -975,11 +976,41 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  for (const delay of [50, 600]) {
+    test(`measures only visible cached Chat text from the browser click (${delay}ms control)`, async ({
+      page,
+    }) => {
+      await page.setContent(
+        '<button>Chat</button><section aria-label="Wave chat file upload area"><span hidden>6529-composer-preview</span></section>'
+      );
+      await page.evaluate((delay) => {
+        document.querySelector("button")!.onclick = () => {
+          setTimeout(() => {
+            document.querySelector("span")!.hidden = false;
+          }, delay);
+        };
+      }, delay);
+      const response = await observeCachedChatResponse(page);
+      try {
+        await page.getByRole("button", { name: "Chat", exact: true }).click();
+        await expect.poll(() => response.read()).not.toBeNull();
+        const elapsed = await response.read();
+        expect(elapsed).toBeGreaterThanOrEqual(delay);
+        if (delay < 500) expect(elapsed).toBeLessThan(500);
+        else expect(elapsed).toBeGreaterThan(500);
+      } finally {
+        await response.dispose();
+      }
+    });
+  }
   test("keeps message search open when delayed Main Stage data replaces the web header", async ({
     page,
   }) => {
     const sandbox = await installCompetitionApi(page, false, false, MEMES_WAVE);
     sandbox.onlyCompetition("alpha");
+    // The generic server returns the ordinary composer wave for unknown IDs.
+    // Bind the real Main Stage identity before resolving its delayed detail.
+    await sandbox.legacyPrimary("alpha");
     sandbox.setCompetition("alpha", {
       permissions: {
         ...competition("alpha", "Main Stage").permissions,
@@ -987,6 +1018,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         administer: false,
       },
     });
+    let detailReads = 0;
     let releaseDetail = () => {};
     const detailReady = new Promise<void>((resolve) => {
       releaseDetail = resolve;
@@ -994,12 +1026,15 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await page.route(
       `**/v3/waves/${MEMES_WAVE}/competitions/alpha`,
       async (route) => {
+        detailReads += 1;
         await detailReady;
         await route.fallback();
       }
     );
     try {
-      await page.goto(`/waves/${MEMES_WAVE}?tab=chat`);
+      await page.goto(`/waves/${MEMES_WAVE}?tab=chat`, {
+        waitUntil: "domcontentloaded",
+      });
       await page
         .getByRole("button", {
           name: "Search messages in this wave",
@@ -1009,6 +1044,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       const input = page.getByPlaceholder("Search messages", { exact: true });
       await expect(input).toBeVisible();
       await input.fill("xx");
+      await expect.poll(() => detailReads).toBeGreaterThan(0);
       await expect(
         page.getByRole("button", { name: "How to Submit", exact: true })
       ).toHaveCount(0);
@@ -6592,6 +6628,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             exact: true,
           });
           await editor.fill("Draft survives a same-wave tab visit");
+          // Cached data alone is insufficient: rebuilding the composer/feed can
+          // exceed the response budget. Retain the actual visited DOM as well.
+          const cachedEditor = await editor.elementHandle();
           await leaderboard.click();
           await expect(page).toHaveURL(`${ROOT}/alpha?tab=leaderboard`);
           await expect(messages).toHaveCount(0);
@@ -6606,25 +6645,38 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             releaseFeed = resolve;
           });
           const beforeReads = initialReads.length;
-          const started = await page.evaluate(() => performance.now());
-          await chat.click();
-          await expect(messages).toBeVisible({ timeout: 500 });
-          const elapsed = await page.evaluate(
-            (start) => performance.now() - start,
-            started
-          );
-          expect(elapsed).toBeLessThan(500);
-          await testInfo.attach("cached-chat-response", {
-            body: JSON.stringify({
-              elapsedMs: elapsed,
-              routeResponsesHeld: true,
-              feedResponsesHeld: true,
-            }),
-            contentType: "application/json",
-          });
+          const response = await observeCachedChatResponse(page);
+          let elapsed: number | null = null;
+          const driverStarted = performance.now();
+          try {
+            await chat.click();
+            await expect(messages).toBeVisible({ timeout: 500 });
+            await expect.poll(() => response.read()).not.toBeNull();
+            elapsed = await response.read();
+            expect(elapsed).toBeLessThan(500);
+          } finally {
+            await testInfo.attach("cached-chat-response", {
+              body: JSON.stringify({
+                elapsedMs: elapsed ?? (await response.read()),
+                ...(await response.details()),
+                driverElapsedMs: performance.now() - driverStarted,
+                routeResponsesHeld: true,
+                feedResponsesHeld: true,
+              }),
+              contentType: "application/json",
+            });
+            await response.dispose();
+          }
           await expect(editor).toContainText(
             "Draft survives a same-wave tab visit"
           );
+          expect(
+            await editor.evaluate(
+              (node, cached) => node === cached,
+              cachedEditor
+            )
+          ).toBe(true);
+          await cachedEditor?.dispose();
           await editor.fill("Composer stays usable during background sync");
           await page.goBack();
           await expect(page).toHaveURL(`${ROOT}/alpha?tab=leaderboard`);
