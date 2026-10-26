@@ -127,11 +127,11 @@ export function defineSubmissionArtworkPreviewTests() {
     test(`shows artwork HD in both views and preserves description lines for ${extension}${animationUnavailable ? " with unavailable animated previews" : ""}${nativeApp ? " in the native mobile app" : ""}`, async ({
       page,
       baseURL,
-    }, testInfo) => {
+      isMobile,
+      hasTouch,
+    }) => {
       const automaticOriginal =
-        animationUnavailable &&
-        !nativeApp &&
-        testInfo.project.name === "web-desktop-chromium";
+        animationUnavailable && !nativeApp && !isMobile && !hasTouch;
       if (nativeApp)
         await installSurfaceSimulation(
           page.context(),
