@@ -15,6 +15,88 @@ const parse = (file: string) => {
   return { source, workflow: YAML.parse(source) };
 };
 
+describe("staging Ubuntu mirror preparation", () => {
+  const steps = parse("staging-e2e.yml").workflow.jobs["staging-packs"].steps;
+  const preparation = steps.find(
+    (step: { name?: string }) =>
+      step.name === "Use HTTPS Ubuntu archive for browser dependencies"
+  );
+  // Execute the actual inline program, changing only its file argument. No
+  // package manager, sudo, host APT files or network access is involved.
+  const source = (preparation.run as string)
+    .split("<<'NODE'\n")[1]!
+    .split("\nNODE")[0]!;
+
+  it("prepares the mirror before apt can acquire installation locks", () => {
+    const installIndex = steps.findIndex(
+      (step: { id?: string }) => step.id === "playwright_dependencies_primary"
+    );
+    expect(steps.indexOf(preparation)).toBeLessThan(installIndex);
+    expect(preparation.run).toContain(
+      'sudo "$(command -v node)" - /etc/apt/apt-mirrors.txt'
+    );
+    expect(preparation["continue-on-error"]).toBeUndefined();
+  });
+
+  it.each([
+    [
+      "hosted runner priorities and CRLF",
+      "http://azure.archive.ubuntu.com/ubuntu/\tpriority:1\r\nhttps://archive.ubuntu.com/ubuntu/\tpriority:2\r\nhttps://security.ubuntu.com/ubuntu/\tpriority:3\r\n",
+      "https://archive.ubuntu.com/ubuntu/\tpriority:1\r\nhttps://archive.ubuntu.com/ubuntu/\tpriority:2\r\nhttps://security.ubuntu.com/ubuntu/\tpriority:3\r\n",
+    ],
+    [
+      "bare URI",
+      "http://azure.archive.ubuntu.com/ubuntu",
+      "https://archive.ubuntu.com/ubuntu",
+    ],
+    [
+      "indented URI",
+      "  http://azure.archive.ubuntu.com/ubuntu priority:1\n",
+      "  https://archive.ubuntu.com/ubuntu priority:1\n",
+    ],
+    [
+      "custom mirror",
+      "https://mirror.example.org/ubuntu/\n",
+      "https://mirror.example.org/ubuntu/\n",
+    ],
+    [
+      "similar URI",
+      "http://azure.archive.ubuntu.com/ubuntu-ports/\n",
+      "http://azure.archive.ubuntu.com/ubuntu-ports/\n",
+    ],
+    [
+      "comment",
+      "# http://azure.archive.ubuntu.com/ubuntu\n",
+      "# http://azure.archive.ubuntu.com/ubuntu\n",
+    ],
+    ["missing mirror list", null, null],
+  ])(
+    "preserves %s while removing only the failing endpoint",
+    (_label, before, after) => {
+      const root = fs.mkdtempSync(path.join(os.tmpdir(), "e2e-apt-mirror-"));
+      try {
+        const mirrorListPath = path.join(root, "apt-mirrors.txt");
+        if (before !== null) fs.writeFileSync(mirrorListPath, before);
+        const run = () =>
+          childProcess.spawnSync(process.execPath, ["-", mirrorListPath], {
+            input: source,
+            encoding: "utf8",
+            timeout: 5000,
+          });
+        for (let attempt = 0; attempt < 2; attempt += 1) {
+          const result = run();
+          expect(result.error).toBeUndefined();
+          expect(result.status).toBe(0);
+          if (after === null) expect(fs.existsSync(mirrorListPath)).toBe(false);
+          else expect(fs.readFileSync(mirrorListPath, "utf8")).toBe(after);
+        }
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
+    }
+  );
+});
+
 it("allows the Museum job to finish its recovery and browser budgets", () => {
   const job = parse("app-pr-ci.yml").workflow.jobs["app-checks"];
   expect(job["timeout-minutes"]).toBe(
