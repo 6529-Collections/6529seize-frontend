@@ -56,6 +56,16 @@ export function defineNftMarketActivityTests() {
                 to_display: "collector",
               },
             },
+            {
+              ...activityEvent,
+              event_id: "activity-wide-desktop-amount",
+              price:
+                "115792089237316195423570985008687907853269984665640564039457.584007913129639935",
+              transaction_details: {
+                from_display: "wide-amount.eth",
+                to_display: "collector",
+              },
+            },
           ],
           next: null,
           market_history_started_at: null,
@@ -66,6 +76,10 @@ export function defineNftMarketActivityTests() {
     await page.goto("/the-memes/1?focus=activity");
     const table = page.getByRole("table", {
       name: "NFT activity",
+      exact: true,
+    });
+    const scrollRegion = page.getByRole("region", {
+      name: "Scrollable NFT activity table",
       exact: true,
     });
     const row = table.getByRole("row").filter({ hasText: LONG_NAME });
@@ -98,6 +112,12 @@ export function defineNftMarketActivityTests() {
     await expect(
       table.getByRole("cell", {
         name: "12,345,678,901,234,567,890.000000000000000001 ETH",
+        exact: true,
+      })
+    ).toBeVisible();
+    await expect(
+      table.getByRole("cell", {
+        name: "115,792,089,237,316,195,423,570,985,008,687,907,853,269,984,665,640,564,039,457.584007913129639935 ETH",
         exact: true,
       })
     ).toBeVisible();
@@ -204,6 +224,12 @@ export function defineNftMarketActivityTests() {
         ).toBe(1);
       } else {
         expect(
+          await scrollRegion.evaluate(
+            (element) => element.scrollWidth > element.clientWidth + 1
+          ),
+          `Phone and tablet cards need no horizontal scrolling at ${width}px`
+        ).toBe(false);
+        expect(
           Math.abs(action.y + action.height / 2 - (total.y + total.height / 2))
         ).toBeLessThan(1);
         expect(action.x).toBeLessThan(total.x);
@@ -231,5 +257,21 @@ export function defineNftMarketActivityTests() {
         (element) => getComputedStyle(element).outlineStyle
       )
     ).not.toBe("none");
+
+    await page.setViewportSize({ width: 1050, height: 1000 });
+    await expectNoHorizontalOverflow(page);
+    expect(
+      await scrollRegion.evaluate(
+        (element) => element.scrollWidth > element.clientWidth
+      )
+    ).toBe(true);
+    await scrollRegion.scrollIntoViewIfNeeded();
+    await scrollRegion.focus();
+    await expect(scrollRegion).toBeFocused();
+    await transaction.focus();
+    await expect(transaction).toBeFocused();
+    await expect
+      .poll(() => scrollRegion.evaluate((element) => element.scrollLeft))
+      .toBeGreaterThan(0);
   });
 }

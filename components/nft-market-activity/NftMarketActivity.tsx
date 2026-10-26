@@ -388,7 +388,7 @@ function EventRow({
         role="cell"
         className={`${CELL} tw-col-start-1 tw-row-start-1 tw-self-center`}
       >
-        <span className="tw-inline-flex tw-rounded-lg tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-300 [overflow-wrap:anywhere]">
+        <span className="tw-inline-flex tw-rounded-lg tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-300 [overflow-wrap:anywhere] @4xl:tw-whitespace-nowrap">
           {actionLabel}
         </span>
         {evidenceLabel && (
@@ -578,7 +578,7 @@ export default function NftMarketActivity({
             role="region"
             aria-label={t(locale, "nftActivity.scrollRegion")}
             tabIndex={0}
-            className="tw-relative before:tw-content-none after:tw-content-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&_*]:before:tw-content-none [&_*]:after:tw-content-none"
+            className="tw-relative tw-overflow-x-auto before:tw-content-none after:tw-content-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&_*]:before:tw-content-none [&_*]:after:tw-content-none"
           >
             {/* Explicit roles preserve table semantics when narrow layouts use block/grid display. */}
             <table
