@@ -71,36 +71,70 @@ describe("DropItemChat", () => {
     expect(screen.queryByText("Loading drop preview")).not.toBeInTheDocument();
   });
 
-  it("shows drop details when loaded", () => {
+  it.each([false, true])(
+    "shows available drop details immediately (isFetching: %s)",
+    (isFetching) => {
+      (useDrop as jest.Mock).mockReturnValue({
+        isFetching,
+        isError: false,
+        drop: {
+          drop_type: ApiDropType.Participatory,
+          parts: [{ media: [{ mime_type: "video/mp4", url: "video" }] }],
+          metadata: [{ data_key: "title", data_value: "Title" }],
+          title: "T",
+          wave: { id: "w", name: "Wave" },
+          rank: 2,
+        },
+      });
+      render(<DropItemChat href="https://base.com/p" dropId="d1" />);
+      expect(
+        screen.queryByText("Loading drop preview")
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("status", { name: "Drop preview" })
+      ).not.toBeInTheDocument();
+      const links = screen.getAllByRole("link");
+      expect(links[0]).toHaveAttribute("href", "/p");
+      expect(screen.getByRole("heading", { name: "Title" })).toHaveClass(
+        "tw-m-0"
+      );
+      expect(screen.getByTestId("position")).toHaveTextContent("2");
+      expect(screen.getByTestId("media")).toHaveAttribute(
+        "data-media-url",
+        "video"
+      );
+      expect(screen.getByTestId("media")).toHaveAttribute(
+        "data-fill-video-container",
+        "true"
+      );
+      expect(screen.getByTestId("media").parentElement).toHaveClass(
+        "tw-bg-iron-900/30"
+      );
+      expect(screen.getByTestId("href-buttons")).toHaveTextContent("/p");
+    }
+  );
+
+  it("removes the skeleton as soon as data arrives without waiting for a timer", () => {
+    (useDrop as jest.Mock).mockReturnValue({ drop: undefined, isError: false });
+    const { rerender } = render(
+      <DropItemChat href="https://base.com/p" dropId="d1" />
+    );
+    expect(screen.getByText("Loading drop preview")).toBeInTheDocument();
+
     (useDrop as jest.Mock).mockReturnValue({
       drop: {
-        drop_type: ApiDropType.Participatory,
-        parts: [{ media: [{ mime_type: "video/mp4", url: "video" }] }],
-        metadata: [{ data_key: "title", data_value: "Title" }],
-        title: "T",
+        drop_type: ApiDropType.Chat,
+        title: "Ready now",
         wave: { id: "w", name: "Wave" },
-        rank: 2,
       },
+      isError: false,
     });
-    render(<DropItemChat href="https://base.com/p" dropId="d1" />);
-    const links = screen.getAllByRole("link");
-    expect(links[0]).toHaveAttribute("href", "/p");
-    expect(screen.getByRole("heading", { name: "Title" })).toHaveClass(
-      "tw-m-0"
-    );
-    expect(screen.getByTestId("position")).toHaveTextContent("2");
-    expect(screen.getByTestId("media")).toHaveAttribute(
-      "data-media-url",
-      "video"
-    );
-    expect(screen.getByTestId("media")).toHaveAttribute(
-      "data-fill-video-container",
-      "true"
-    );
-    expect(screen.getByTestId("media").parentElement).toHaveClass(
-      "tw-bg-iron-900/30"
-    );
-    expect(screen.getByTestId("href-buttons")).toHaveTextContent("/p");
+    rerender(<DropItemChat href="https://base.com/p" dropId="d1" />);
+
+    expect(
+      screen.getByRole("heading", { name: "Ready now" })
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Loading drop preview")).not.toBeInTheDocument();
   });
 
   it("renders chat drop title as plain text when loaded", () => {
