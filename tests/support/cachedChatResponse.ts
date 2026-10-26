@@ -18,7 +18,7 @@ export async function observeCachedChatResponse(page: Page) {
           const element = text.currentNode.parentElement;
           if (
             text.currentNode.textContent?.includes("6529-composer-preview") &&
-            element?.checkVisibility() &&
+            element?.checkVisibility({ visibilityProperty: true }) &&
             !element.closest('[inert], [aria-hidden="true"]')
           ) {
             visible = true;

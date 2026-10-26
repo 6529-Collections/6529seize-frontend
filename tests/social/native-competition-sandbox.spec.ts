@@ -984,9 +984,15 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         '<button>Chat</button><section aria-label="Wave chat file upload area"><span hidden>6529-composer-preview</span></section>'
       );
       await page.evaluate((delay) => {
+        const message = document.querySelector("span")!;
+        // Exercise display:none and visibility:hidden independently so retained
+        // text cannot satisfy either timing control before it is visible.
+        message.hidden = delay < 500;
+        message.style.visibility = delay < 500 ? "visible" : "hidden";
         document.querySelector("button")!.onclick = () => {
           setTimeout(() => {
-            document.querySelector("span")!.hidden = false;
+            message.hidden = false;
+            message.style.visibility = "visible";
           }, delay);
         };
       }, delay);
