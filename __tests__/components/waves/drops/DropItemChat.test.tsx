@@ -44,10 +44,9 @@ describe("DropItemChat", () => {
   it("reserves an artwork card while loading without showing the raw URL", () => {
     (useDrop as jest.Mock).mockReturnValue({ drop: undefined, isError: false });
     render(<DropItemChat href="https://base.com/path" dropId="d1" />);
-    expect(screen.getByRole("group", { name: "Drop preview" })).toHaveAttribute(
-      "aria-busy",
-      "true"
-    );
+    expect(
+      screen.getByRole("status", { name: "Drop preview" })
+    ).toHaveAttribute("aria-busy", "true");
     expect(screen.getByText("Loading drop preview")).toBeInTheDocument();
     expect(screen.queryByText("https://base.com/path")).not.toBeInTheDocument();
     expect(screen.getByTestId("href-buttons")).toHaveTextContent("/path");
@@ -62,10 +61,9 @@ describe("DropItemChat", () => {
     (useDrop as jest.Mock).mockReturnValue({ drop: undefined, isError: true });
     rerender(<DropItemChat href="https://base.com/path" dropId="d1" />);
     expect(screen.getByText("Drop preview unavailable")).toBeInTheDocument();
-    expect(screen.getByRole("group", { name: "Drop preview" })).toHaveAttribute(
-      "aria-busy",
-      "false"
-    );
+    expect(
+      screen.getByRole("status", { name: "Drop preview" })
+    ).toHaveAttribute("aria-busy", "false");
     expect(screen.getByRole("link", { name: "Open drop" })).toHaveAttribute(
       "href",
       "/path"

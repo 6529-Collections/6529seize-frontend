@@ -288,7 +288,12 @@ const WaveDropQuoteContent: React.FC<WaveDropQuoteProps> = ({
 
   if (isNotFound || isUnavailable || drop === null) {
     return (
-      <div className="tw-mt-1" onClick={handleQuoteContainerClick}>
+      <div
+        className="tw-mt-1"
+        role="presentation"
+        onClick={(event) => event.stopPropagation()}
+        onKeyDown={(event) => event.stopPropagation()}
+      >
         <DropPreviewPlaceholder
           unavailable={isNotFound || isUnavailable}
           notFound={isNotFound}

@@ -1,6 +1,8 @@
+"use client";
+
 import Link from "next/link";
 
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
 export default function DropPreviewPlaceholder({
@@ -14,6 +16,9 @@ export default function DropPreviewPlaceholder({
   readonly notFound?: boolean | undefined;
   readonly href?: string | undefined;
 }) {
+  const locale = useBrowserLocale();
+  const isUnavailable = unavailable || notFound;
+
   return (
     <div
       className={`tw-flex tw-w-full tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-p-4 ${
@@ -21,15 +26,15 @@ export default function DropPreviewPlaceholder({
           ? "tw-min-h-[31.0625rem] sm:tw-min-h-[31.5625rem]"
           : "tw-min-h-28"
       }`}
-      aria-busy={!unavailable}
-      aria-label={t(DEFAULT_LOCALE, "dropPreview.label")}
-      role="group"
+      aria-busy={!isUnavailable}
+      aria-label={t(locale, "dropPreview.label")}
+      role="status"
     >
-      {unavailable ? (
+      {isUnavailable ? (
         <div className="tw-my-auto tw-flex tw-flex-col tw-items-start tw-gap-2">
           <p className="tw-m-0 tw-text-sm tw-text-iron-300">
             {t(
-              DEFAULT_LOCALE,
+              locale,
               notFound ? "dropPreview.notFound" : "dropPreview.unavailable"
             )}
           </p>
@@ -39,15 +44,13 @@ export default function DropPreviewPlaceholder({
               onClick={(event) => event.stopPropagation()}
               className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-text-sm tw-font-medium tw-text-iron-100 tw-underline tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
             >
-              {t(DEFAULT_LOCALE, "dropPreview.open")}
+              {t(locale, "dropPreview.open")}
             </Link>
           )}
         </div>
       ) : (
         <>
-          <span className="tw-sr-only">
-            {t(DEFAULT_LOCALE, "dropPreview.loading")}
-          </span>
+          <span className="tw-sr-only">{t(locale, "dropPreview.loading")}</span>
           <div
             aria-hidden="true"
             className="tw-flex tw-flex-1 tw-flex-col tw-gap-2 motion-safe:tw-animate-pulse"

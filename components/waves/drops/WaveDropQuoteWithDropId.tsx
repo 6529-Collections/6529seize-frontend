@@ -162,7 +162,12 @@ const WaveDropQuoteWithDropId: React.FC<WaveDropQuoteWithDropIdProps> = ({
       partId={partId}
       onQuoteClick={onQuoteClick}
       isNotFound={isNotFound}
-      isUnavailable={resolvedDrop === null && !isActiveWaveHydrating && !!error}
+      isUnavailable={
+        resolvedDrop === null &&
+        !isActiveWaveHydrating &&
+        !isNotFound &&
+        !!error
+      }
       fallbackHref={
         targetWaveId
           ? getWaveRoute({

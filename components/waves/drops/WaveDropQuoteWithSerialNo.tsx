@@ -56,8 +56,7 @@ const WaveDropQuoteWithSerialNo: React.FC<WaveDropQuoteWithSerialNoProps> = ({
     <WaveDropQuote
       drop={drop}
       partId={1}
-      isUnavailable={!drop && isError}
-      isNotFound={!drop && isSuccess}
+      isUnavailable={!drop && (isError || isSuccess)}
       fallbackHref={getWaveRoute({
         waveId,
         serialNo,

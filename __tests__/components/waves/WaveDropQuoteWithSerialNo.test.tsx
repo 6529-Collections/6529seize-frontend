@@ -52,11 +52,11 @@ describe("WaveDropQuoteWithSerialNo", () => {
     expect(capturedQuoteProps.hideLinkPreviews).toBeTruthy();
   });
   it.each([
-    { isError: true, isSuccess: false, unavailable: true, missing: false },
-    { isError: false, isSuccess: true, unavailable: false, missing: true },
+    { isError: true, isSuccess: false },
+    { isError: false, isSuccess: true },
   ])(
     "resolves empty serial lookups into a terminal state: %p",
-    ({ isError, isSuccess, unavailable, missing }) => {
+    ({ isError, isSuccess }) => {
       useQueryMock.mockReturnValue({ data: null, isError, isSuccess });
       render(
         <WaveDropQuoteWithSerialNo
@@ -65,8 +65,8 @@ describe("WaveDropQuoteWithSerialNo", () => {
           onQuoteClick={jest.fn()}
         />
       );
-      expect(capturedQuoteProps.isUnavailable).toBe(unavailable);
-      expect(capturedQuoteProps.isNotFound).toBe(missing);
+      expect(capturedQuoteProps.isUnavailable).toBe(true);
+      expect(capturedQuoteProps.isNotFound).toBeUndefined();
       expect(capturedQuoteProps.fallbackHref).toBe("/waves/w?serialNo=5");
     }
   );

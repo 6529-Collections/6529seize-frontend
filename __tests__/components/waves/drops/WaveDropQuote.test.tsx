@@ -397,8 +397,9 @@ test("falls back to link preview context for nested markdown suppression", () =>
 
 test("replaces a failed quote with an accessible link without bubbling", async () => {
   const onParentClick = jest.fn();
+  const onParentKeyDown = jest.fn();
   render(
-    <div onClick={onParentClick}>
+    <div onClick={onParentClick} onKeyDown={onParentKeyDown}>
       <WaveDropQuote
         drop={null}
         partId={1}
@@ -413,5 +414,7 @@ test("replaces a failed quote with an accessible link without bubbling", async (
   const link = screen.getByRole("link", { name: "Open drop" });
   expect(link).toHaveAttribute("href", "/waves/w1?drop=d1");
   await userEvent.click(link);
+  await userEvent.keyboard("{Enter}");
   expect(onParentClick).not.toHaveBeenCalled();
+  expect(onParentKeyDown).not.toHaveBeenCalled();
 });

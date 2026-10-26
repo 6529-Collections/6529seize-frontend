@@ -423,7 +423,7 @@ test("drop link loading reserves its card and keeps the chat at bottom", async (
   });
   try {
     await page.goto(path, { waitUntil: "domcontentloaded" });
-    const placeholder = page.getByRole("group", {
+    const placeholder = page.getByRole("status", {
       name: "Drop preview",
       exact: true,
     });
@@ -445,7 +445,7 @@ test("drop link loading reserves its card and keeps the chat at bottom", async (
       path: testInfo.outputPath("drop-preview-loading.png"),
     });
     await expectAxeClean(page, {
-      include: ['[role="group"][aria-label="Drop preview"]'],
+      include: ['[role="status"][aria-label="Drop preview"]'],
     });
     lookup.release();
     const title = page.getByRole("heading", {
@@ -497,7 +497,7 @@ for (const failure of ["missing", "network"] as const) {
       page.getByText("Drop preview unavailable", { exact: true })
     ).toBeVisible({ timeout: 20000 });
     await expect(
-      page.getByRole("group", { name: "Drop preview", exact: true })
+      page.getByRole("status", { name: "Drop preview", exact: true })
     ).toHaveAttribute("aria-busy", "false");
     const link = page.getByRole("link", { name: "Open drop", exact: true });
     await expect(link).toHaveAttribute("href", /\/waves\/[^?]+\?drop=/);
