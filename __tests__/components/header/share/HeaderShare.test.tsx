@@ -945,6 +945,146 @@ describe("HeaderShare", () => {
       });
     });
 
+    it.each(["Mobile", "Desktop"])(
+      "refreshes %s in place and copies the replacement link",
+      async (target) => {
+        const sessionV2 = require("@/services/auth/session-v2.utils");
+        const qrcode = require("qrcode");
+        renderWithProviders(<HeaderShare />);
+        await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+        await waitFor(() =>
+          expect(
+            screen.getByRole("button", { name: "Copy link" })
+          ).toBeEnabled()
+        );
+        await userEvent.click(
+          screen.getByRole("button", { name: target, exact: true })
+        );
+        const copy = screen.getByRole("button", { name: "Copy link" });
+        const refresh = screen.getByRole("button", {
+          name: "Generate new code",
+        });
+        expect(copy.parentElement).not.toContainElement(refresh);
+        expect(copy.querySelector("svg")).toHaveClass("tw-size-4");
+        expect(refresh.querySelector("svg")).toHaveClass("tw-size-4");
+
+        sessionV2.createConnectionShare.mockResolvedValue({
+          connection_share_code: "replacement-code",
+          expires_at: new Date(Date.now() + 300_000).toISOString(),
+          address: "0x1234567890123456789012345678901234567890",
+          role: null,
+          target_client_type: "native",
+          deep_link_path:
+            "/accept-connection-sharing?connection_share_code=replacement-code",
+        });
+        sessionV2.createLegacyDesktopConnectionShare.mockResolvedValue({
+          deep_link_path:
+            "/accept-connection-sharing?token=replacement-desktop-token",
+        });
+        await userEvent.click(refresh);
+        await waitFor(() => expect(refresh).toBeEnabled());
+        expect(
+          screen.getByRole("button", { name: target, exact: true })
+        ).toHaveAttribute("aria-pressed", "true");
+        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2);
+        expect(
+          sessionV2.createLegacyDesktopConnectionShare
+        ).toHaveBeenCalledTimes(2);
+        expect(qrcode.toDataURL).toHaveBeenLastCalledWith(
+          expect.stringContaining("connection_share_code=replacement-code"),
+          QR_CODE_OPTIONS
+        );
+        await userEvent.click(
+          screen.getByRole("button", { name: "Copy link" })
+        );
+        expect(navigator.clipboard.writeText).toHaveBeenLastCalledWith(
+          expect.stringContaining(
+            target === "Mobile"
+              ? "replacement-code"
+              : "replacement-desktop-token"
+          )
+        );
+        expect(
+          screen.getByRole("heading", { name: "Connect Device" })
+        ).toBeInTheDocument();
+      }
+    );
+
+    it("disables repeat refresh and stale copy while preparing a replacement", async () => {
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      renderWithProviders(<HeaderShare />);
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+      const refresh = await screen.findByRole("button", {
+        name: "Generate new code",
+      });
+      await waitFor(() => expect(refresh).toBeEnabled());
+      sessionV2.createConnectionShare.mockImplementation(() =>
+        createPendingPromise()
+      );
+      await userEvent.click(refresh);
+      expect(refresh).toBeDisabled();
+      expect(refresh).toHaveAttribute("aria-busy", "true");
+      expect(screen.getByRole("button", { name: "Copy link" })).toBeDisabled();
+      expect(
+        screen.queryByTitle(expect.stringContaining("mock-share-code"))
+      ).not.toBeInTheDocument();
+      await userEvent.click(refresh);
+      expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2);
+      const signal = sessionV2.createConnectionShare.mock.calls[1][0].signal;
+      await userEvent.click(
+        screen.getByLabelText("Close connect device modal")
+      );
+      expect(signal.aborted).toBe(true);
+    });
+
+    it.each(["Mobile", "Desktop"])(
+      "allows retry after %s refresh fails",
+      async (target) => {
+        const sessionV2 = require("@/services/auth/session-v2.utils");
+        const consoleError = jest
+          .spyOn(console, "error")
+          .mockImplementation(() => undefined);
+        try {
+          renderWithProviders(<HeaderShare />);
+          await userEvent.click(
+            screen.getByRole("button", { name: "QR Code" })
+          );
+          const refresh = await screen.findByRole("button", {
+            name: "Generate new code",
+          });
+          await waitFor(() => expect(refresh).toBeEnabled());
+          await userEvent.click(
+            screen.getByRole("button", { name: target, exact: true })
+          );
+          const shareMock =
+            target === "Mobile"
+              ? sessionV2.createConnectionShare
+              : sessionV2.createLegacyDesktopConnectionShare;
+          shareMock.mockRejectedValueOnce(new Error("temporary share failure"));
+          await userEvent.click(refresh);
+          expect(
+            await screen.findByText("Device Connection Unavailable")
+          ).toBeInTheDocument();
+          expect(
+            screen.getByRole("button", { name: "Copy link" })
+          ).toBeDisabled();
+          await waitFor(() => expect(refresh).toBeEnabled());
+          await userEvent.click(refresh);
+          await waitFor(() =>
+            expect(
+              screen.getByRole("button", { name: "Copy link" })
+            ).toBeEnabled()
+          );
+          expect(shareMock).toHaveBeenCalledTimes(3);
+          expect(
+            screen.queryByText("Device Connection Unavailable")
+          ).not.toBeInTheDocument();
+        } finally {
+          consoleError.mockRestore();
+        }
+      }
+    );
+
     it("shows only Mobile and Desktop connection targets", async () => {
       renderWithProviders(<HeaderShare />);
 

@@ -114,6 +114,7 @@ function HeaderQRModal({
   const [navigateAppSrc, setNavigateAppSrc] = useState<string>("");
   const [shareConnectionSrc, setShareConnectionSrc] = useState<string>("");
   const [urlCopied, setUrlCopied] = useState<boolean>(false);
+  const [connectionShareRevision, setConnectionShareRevision] = useState(0);
   const [closingDisplayState, setClosingDisplayState] =
     useState<ShareDisplayState | null>(null);
 
@@ -155,6 +156,7 @@ function HeaderQRModal({
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const connectionShareAbortRef = useRef<AbortController | null>(null);
   const shareGenerationIdRef = useRef(0);
+  const connectionShareRefreshPendingRef = useRef(false);
   const cachedConnectionShareRef = useRef<CachedConnectionShare | null>(null);
   const terminalConnectionShareFailuresRef = useRef<
     Map<string, TerminalConnectionShareStatus>
@@ -595,6 +597,31 @@ function HeaderQRModal({
     setShareConnectionCoreUrl("");
   }
 
+  const isConnectionShareLoading =
+    mobileConnectionShareStatus === "loading" ||
+    desktopConnectionShareStatus === "loading";
+
+  const refreshConnectionShare = () => {
+    if (
+      !show ||
+      mode !== Mode.CONNECT ||
+      isConnectionShareLoading ||
+      connectionShareRefreshPendingRef.current
+    ) {
+      return;
+    }
+
+    connectionShareRefreshPendingRef.current = true;
+    shareGenerationIdRef.current += 1;
+    connectionShareAbortRef.current?.abort();
+    cachedConnectionShareRef.current = null;
+    terminalConnectionShareFailuresRef.current.clear();
+    setUrlCopied(false);
+    setUnavailableMobileConnectionShare("loading");
+    setUnavailableDesktopConnectionShare("loading");
+    setConnectionShareRevision((revision) => revision + 1);
+  };
+
   useEffect(() => {
     terminalConnectionShareFailuresRef.current.clear();
   }, [activeWalletAddress, hasValidWalletAuth]);
@@ -606,6 +633,7 @@ function HeaderQRModal({
       terminalConnectionShareFailuresRef.current.clear();
       connectionShareAbortRef.current?.abort();
       connectionShareAbortRef.current = null;
+      connectionShareRefreshPendingRef.current = false;
       const nextStatus: ConnectionShareStatus =
         hasValidWalletAuth || hasWalletAddress
           ? "legacy-auth"
@@ -622,7 +650,11 @@ function HeaderQRModal({
     const controller = new AbortController();
     connectionShareAbortRef.current = controller;
 
-    void generateSources(activeWalletAddress, controller.signal);
+    void generateSources(activeWalletAddress, controller.signal).finally(() => {
+      if (!controller.signal.aborted) {
+        connectionShareRefreshPendingRef.current = false;
+      }
+    });
 
     return () => {
       shareGenerationIdRef.current += 1;
@@ -639,6 +671,7 @@ function HeaderQRModal({
     pathname,
     searchParamsString,
     mode,
+    connectionShareRevision,
   ]);
 
   useEffect(() => {
@@ -761,6 +794,8 @@ function HeaderQRModal({
       desktopConnectionShareStatus={displayState.desktopConnectionShareStatus}
       terminalConnectionShareFailuresRef={terminalConnectionShareFailuresRef}
       requestSessionUpgrade={requestSessionUpgrade}
+      refreshConnectionShare={refreshConnectionShare}
+      isConnectionShareLoading={isConnectionShareLoading}
       urlCopied={urlCopied}
       setUrlCopied={setUrlCopied}
       isMobile={isMobile}
