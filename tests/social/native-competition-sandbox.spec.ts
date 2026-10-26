@@ -975,6 +975,137 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  for (const surface of ["web", "app"] as const) {
+    for (const eligible of [true, false]) {
+      test(`keeps the Main Stage header action consistent in Chat and Leaderboard (${surface}, ${eligible ? "eligible" : "not eligible"})`, async ({
+        page,
+      }, testInfo) => {
+        test.skip(
+          surface === "app" && testInfo.project.name !== "web-mobile-chromium",
+          "Native app simulation uses the mobile viewport."
+        );
+        if (testInfo.project.name === "web-desktop-chromium")
+          await page.setViewportSize({ width: 1280, height: 800 });
+        if (surface === "app")
+          await installSurfaceSimulation(
+            page.context(),
+            "capacitor-ios-sim",
+            testInfo.project.use.baseURL
+          );
+        const sandbox = await installCompetitionApi(
+          page,
+          false,
+          true,
+          MEMES_WAVE
+        );
+        sandbox.onlyCompetition("alpha");
+        await sandbox.legacyPrimary("alpha");
+        if (!eligible)
+          sandbox.setCompetition("alpha", {
+            permissions: {
+              ...competition("alpha", "Main Stage").permissions,
+              submit: false,
+            },
+          });
+        await page.goto(`/waves/${MEMES_WAVE}?tab=leaderboard`);
+        await expect(page).toHaveURL(
+          new RegExp(
+            `/waves/${MEMES_WAVE}/competitions/alpha\\?tab=leaderboard`
+          ),
+          { timeout: 30000 }
+        );
+        await dismissNextDevTools(page);
+        const actions = page.getByTestId("leaderboard-submission-actions");
+        const submit = page.getByRole("button", {
+          name: eligible ? /^Submit (Work|Meme)/ : "How to Submit",
+        });
+        await expect(submit).toBeInViewport({ ratio: 1 });
+        await expect(
+          page.getByRole("button", { name: "Drop", exact: true })
+        ).toHaveCount(0);
+        await expect(
+          actions.getByRole("button", { name: "My submissions" })
+        ).toBeVisible();
+        const expectHeaderPosition = async () => {
+          const actionBox = await submit.boundingBox();
+          const nav =
+            surface === "app"
+              ? page.getByRole("navigation", { name: "Wave sections" })
+              : waveTabStrip(page);
+          const navBox = await nav.boundingBox();
+          expect(actionBox).not.toBeNull();
+          expect(navBox).not.toBeNull();
+          expect(actionBox!.y + actionBox!.height).toBeLessThanOrEqual(
+            navBox!.y
+          );
+        };
+        await expectHeaderPosition();
+        await expectNoHorizontalOverflow(page);
+        await page.screenshot({
+          path: testInfo.outputPath(
+            `main-stage-leaderboard-${surface}-${eligible}.png`
+          ),
+        });
+        await submit.click();
+        if (eligible) {
+          await expect(
+            page.getByRole("dialog", {
+              name: "Submit Work to The Memes",
+              exact: true,
+            })
+          ).toBeVisible();
+          await page.keyboard.press("Escape");
+          await expect(
+            page.getByRole("dialog", {
+              name: "Submit Work to The Memes",
+              exact: true,
+            })
+          ).toHaveCount(0);
+        } else {
+          await expect(
+            page.getByRole("dialog", {
+              name: "Main Stage submission eligibility",
+            })
+          ).toBeVisible();
+          await expect(
+            page.getByText("Unlock submissions", { exact: true })
+          ).toBeVisible();
+          await page.keyboard.press("Escape");
+          await expect(
+            page.getByRole("dialog", {
+              name: "Main Stage submission eligibility",
+            })
+          ).toHaveCount(0);
+        }
+        const sections =
+          surface === "app"
+            ? page.getByRole("navigation", { name: "Wave sections" })
+            : waveTabStrip(page);
+        await sections
+          .getByRole(surface === "app" ? "button" : "tab", {
+            name: "Chat",
+            exact: true,
+          })
+          .click();
+        await expect(page).toHaveURL(
+          new RegExp(`/waves/${MEMES_WAVE}\\?tab=chat`)
+        );
+        await expect(submit).toBeInViewport({ ratio: 1 });
+        await expectHeaderPosition();
+        await sections
+          .getByRole(surface === "app" ? "button" : "tab", {
+            name: "Leaderboard",
+            exact: true,
+          })
+          .click();
+        await expect(submit).toBeInViewport({ ratio: 1 });
+        await expectHeaderPosition();
+        await expectNoHorizontalOverflow(page);
+        expect(sandbox.requests).toEqual([]);
+      });
+    }
+  }
+
   test("uses competition resources for the original primary across navigation, votes and settings", async ({
     page,
   }) => {
@@ -5548,6 +5679,51 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         path: testInfo.outputPath(`remembered-${mode}-chat.png`),
         fullPage: true,
       });
+
+      // A competition page retained by the fast Leaderboard -> Chat transition
+      // must still follow the next wave selected from the real wave list.
+      await prepareWaveSwitch();
+      await openWaveFromList("The Memes - Main Stage");
+      await expect(leaderboard).toHaveAttribute(
+        mode === "app" ? "aria-current" : "aria-selected",
+        "true"
+      );
+      await page
+        .getByRole(mode === "app" ? "button" : "tab", {
+          name: "Chat",
+          exact: true,
+        })
+        .click();
+      await expect(chat).toBeVisible();
+      const editor = page.getByRole("textbox", {
+        name: "Write a chat message",
+        exact: true,
+      });
+      await editor.fill("Main Stage draft stays in Main Stage");
+      await prepareWaveSwitch();
+      await openWaveFromList("The Memes - Maybes Bar");
+      await expect(page).toHaveURL(new RegExp(`/waves/${BAR}$`));
+      await expect(
+        page.getByRole("button", { name: `About ${bar.name}`, exact: true })
+      ).toBeVisible();
+      await expect(chat).toBeVisible();
+      await expect(editor).not.toContainText(
+        "Main Stage draft stays in Main Stage"
+      );
+      if (testInfo.project.name === "web-desktop-chromium") {
+        await page.goBack();
+        await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}\\?tab=chat`));
+        await expect(editor).toContainText(
+          "Main Stage draft stays in Main Stage"
+        );
+        await page.goForward();
+        await expect(
+          page.getByRole("button", { name: `About ${bar.name}`, exact: true })
+        ).toBeVisible();
+        await expect(editor).not.toContainText(
+          "Main Stage draft stays in Main Stage"
+        );
+      }
     });
   }
 
@@ -5897,6 +6073,141 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         releaseNavigation();
       }
     });
+  }
+
+  for (const mode of ["native", "legacy", "app"] as const) {
+    for (const entry of ["leaderboard", "chat"] as const) {
+      test(`shows cached Chat immediately while route and feed responses are held (${mode}, ${entry} document)`, async ({
+        page,
+      }, testInfo) => {
+        test.skip(
+          mode === "app" && testInfo.project.name !== "web-mobile-chromium",
+          "The app simulation uses the mobile viewport."
+        );
+        const sandbox = await installCompetitionApi(page);
+        if (mode === "legacy") await sandbox.legacyPrimary("alpha");
+        if (mode === "app")
+          await installSurfaceSimulation(
+            page.context(),
+            "capacitor-ios-sim",
+            testInfo.project.use.baseURL
+          );
+        const role = mode === "app" ? "button" : "tab";
+        const chat = page.getByRole(role, { name: "Chat", exact: true });
+        const leaderboard = page.getByRole(role, {
+          name: "Leaderboard",
+          exact: true,
+        });
+        const messages = page
+          .getByRole("region", {
+            name: "Wave chat file upload area",
+            exact: true,
+          })
+          .getByText("6529-composer-preview", { exact: false })
+          .first();
+        const chatUrl = `/waves/${WAVE}?tab=chat&competition=alpha`;
+        let releaseRoutes!: () => void;
+        const routesHeld = new Promise<void>((resolve) => {
+          releaseRoutes = resolve;
+        });
+        let releaseFeed!: () => void;
+        let feedHeld = new Promise<void>((resolve) => {
+          releaseFeed = resolve;
+        });
+        const initialReads: string[] = [];
+        await page.route(`**/api/v2/waves/${WAVE}/drops?**`, async (route) => {
+          const url = new URL(route.request().url());
+          if (!url.searchParams.has("serial_no_limit"))
+            initialReads.push(url.search);
+          await feedHeld;
+          await route.fallback();
+        });
+        try {
+          if (entry === "leaderboard") {
+            // Leaderboard already starts the browser feed. Tab churn must reuse it.
+            await page.goto(`${ROOT}/alpha?tab=leaderboard`);
+            await expect(leaderboard).toBeVisible({ timeout: 30000 });
+            await expect.poll(() => initialReads.length).toBe(1);
+            await chat.click();
+            await expect(page).toHaveURL(chatUrl, { timeout: 500 });
+            await leaderboard.click();
+            await chat.click();
+            expect(initialReads).toHaveLength(1);
+          } else {
+            releaseFeed();
+            await page.goto(chatUrl);
+          }
+          releaseFeed();
+          await expect(messages).toBeVisible({ timeout: 30000 });
+          const editor = page.getByRole("textbox", {
+            name: "Write a chat message",
+            exact: true,
+          });
+          await editor.fill("Draft survives a same-wave tab visit");
+          await leaderboard.click();
+          await expect(page).toHaveURL(`${ROOT}/alpha?tab=leaderboard`);
+          await expect(messages).toHaveCount(0);
+          // Hold both Next route responses (including intent prefetch) and newest
+          // feed syncs. Real cached messages must render without releasing either.
+          await page.route(`**/waves/${WAVE}**`, async (route) => {
+            if (new URL(route.request().url()).searchParams.has("_rsc"))
+              await routesHeld;
+            await route.fallback();
+          });
+          feedHeld = new Promise<void>((resolve) => {
+            releaseFeed = resolve;
+          });
+          const beforeReads = initialReads.length;
+          const started = await page.evaluate(() => performance.now());
+          await chat.click();
+          await expect(messages).toBeVisible({ timeout: 500 });
+          const elapsed = await page.evaluate(
+            (start) => performance.now() - start,
+            started
+          );
+          expect(elapsed).toBeLessThan(500);
+          await testInfo.attach("cached-chat-response", {
+            body: JSON.stringify({
+              elapsedMs: elapsed,
+              routeResponsesHeld: true,
+              feedResponsesHeld: true,
+            }),
+            contentType: "application/json",
+          });
+          await expect(editor).toContainText(
+            "Draft survives a same-wave tab visit"
+          );
+          await editor.fill("Composer stays usable during background sync");
+          await page.goBack();
+          await expect(page).toHaveURL(`${ROOT}/alpha?tab=leaderboard`);
+          await expect(messages).toHaveCount(0);
+          await page.goForward();
+          await expect(messages).toBeVisible({ timeout: 500 });
+          await expect(editor).toContainText(
+            "Composer stays usable during background sync"
+          );
+          for (let visit = 0; visit < 2; visit++) {
+            await leaderboard.click();
+            await chat.click();
+            await expect(messages).toBeVisible({ timeout: 500 });
+          }
+          expect(initialReads).toHaveLength(beforeReads);
+          await expectNoHorizontalOverflow(page);
+          await page.screenshot({
+            path: testInfo.outputPath(`immediate-chat-${mode}-${entry}.png`),
+          });
+          releaseRoutes();
+          releaseFeed();
+          await expect(messages).toBeVisible();
+          await expect(editor).toContainText(
+            "Composer stays usable during background sync"
+          );
+        } finally {
+          releaseRoutes();
+          releaseFeed();
+        }
+      });
+    }
   }
 
   test("opens Chat on wave entry and preserves explicit tabs, reload, back and forward", async ({
@@ -8020,7 +8331,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       page,
     }, testInfo) => {
       test.skip(
-        surface === "app" && testInfo.project.name !== "web-mobile-chromium"
+        surface === "app" && testInfo.project.name !== "web-mobile-chromium",
+        "The app simulation uses the mobile viewport."
       );
       const sandbox = await installCompetitionApi(
         page,

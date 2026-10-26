@@ -1,13 +1,12 @@
 "use client";
 
 import { useCompetitionRoute } from "@/contexts/CompetitionRouteContext";
-import MyStreamWave from "@/components/brain/my-stream/MyStreamWave";
 import CompetitionDetail, {
   NativeCompetitionContent,
 } from "./CompetitionDetail";
 import { CompetitionState } from "./CompetitionState";
 
-export default function CompetitionWaveRoute({
+export default function CompetitionWaveContent({
   waveId,
   competitionId,
 }: {
@@ -27,11 +26,5 @@ export default function CompetitionWaveRoute({
       <CompetitionDetail waveId={waveId} competitionId={competitionId} />
     );
   else content = <NativeCompetitionContent embedded />;
-  return (
-    <MyStreamWave
-      key={`${waveId}:${competitionId}:${route.viewer ?? "anonymous"}`}
-      waveId={waveId}
-      competitionContent={content}
-    />
-  );
+  return content;
 }

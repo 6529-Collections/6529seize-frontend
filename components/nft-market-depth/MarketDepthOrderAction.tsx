@@ -29,7 +29,15 @@ import {
 const ACTION_CLASS =
   "tw-font-inherit tw-min-h-11 tw-max-w-full !tw-whitespace-normal tw-px-3 tw-py-2 tw-text-meta tw-leading-5";
 const COMPACT_ACTION_CLASS =
-  "tw-font-inherit tw-my-0.5 tw-min-h-11 tw-min-w-16 tw-max-w-full !tw-whitespace-normal tw-px-2 tw-py-2 tw-text-meta tw-leading-5 focus-visible:tw-outline-offset-[-2px]";
+  "tw-font-inherit tw-min-h-11 tw-min-w-16 tw-max-w-full !tw-whitespace-normal tw-px-4 tw-py-1.5 tw-text-meta tw-leading-5 focus-visible:tw-outline-offset-[-2px] sm:tw-min-h-[34px] sm:touch-only:tw-min-h-11";
+
+// The transparent 5px edges keep a 44px target around the 34px mobile surface.
+// Clipping the background also gives the visible surface an 8px corner radius.
+const MOBILE_TRADE_ACTION_CLASS =
+  "max-sm:tw-w-20 max-sm:tw-flex-wrap max-sm:tw-gap-x-1 max-sm:tw-rounded-[8px/13px] max-sm:tw-border-x-0 max-sm:tw-border-y-[5px] max-sm:!tw-border-transparent max-sm:tw-bg-clip-padding max-sm:tw-px-1 max-sm:tw-py-0 max-sm:tw-text-meta max-sm:tw-leading-4 max-sm:tw-shadow-none max-sm:tw-ring-0";
+
+const OUTLINED_LEVEL_ACTION_CLASS =
+  "!tw-border-white/[0.12] !tw-bg-transparent !tw-text-iron-200 !tw-shadow-none !tw-ring-0 enabled:group-hover:!tw-border-primary-500 enabled:group-hover:!tw-bg-primary-500 enabled:group-hover:!tw-text-white focus-visible:!tw-border-primary-500 focus-visible:!tw-bg-primary-500 focus-visible:!tw-text-white max-sm:!tw-border-transparent max-sm:!tw-shadow-[inset_0_0_0_1px_rgb(255_255_255_/_0.12)] max-sm:enabled:group-hover:!tw-border-transparent max-sm:focus-visible:!tw-border-transparent";
 
 export interface RowState {
   readonly busy: boolean;
@@ -74,6 +82,7 @@ export function useMarketDepthTradeActionsAvailable(): boolean {
 
 export function MarketDepthLevelAction({
   order,
+  outlined = false,
   side,
   locale,
   open,
@@ -81,6 +90,7 @@ export function MarketDepthLevelAction({
   onClick,
 }: {
   readonly order?: ApiMarketOrder | undefined;
+  readonly outlined?: boolean;
   readonly side: "ask" | "bid";
   readonly locale: SupportedLocale;
   readonly open: boolean;
@@ -111,6 +121,7 @@ export function MarketDepthLevelAction({
         order={order}
         locale={locale}
         compact
+        outlined={outlined}
         actionRef={actionRef}
       />
     );
@@ -121,7 +132,7 @@ export function MarketDepthLevelAction({
         type="button"
         variant="action"
         size={null}
-        className={COMPACT_ACTION_CLASS}
+        className={`${COMPACT_ACTION_CLASS} ${MOBILE_TRADE_ACTION_CLASS} ${outlined ? OUTLINED_LEVEL_ACTION_CLASS : ""}`}
         aria-expanded={open}
         aria-controls={panelId}
         onClick={onClick}
@@ -145,11 +156,13 @@ export function MarketDepthOrderAction({
   order,
   locale,
   compact = false,
+  outlined = false,
   actionRef,
 }: {
   readonly order: ApiMarketOrder;
   readonly locale: SupportedLocale;
   readonly compact?: boolean;
+  readonly outlined?: boolean;
   readonly actionRef?: Ref<HTMLButtonElement> | undefined;
 }) {
   const context = useContext(TradeContext);
@@ -180,7 +193,7 @@ export function MarketDepthOrderAction({
             type="button"
             variant={selected ? "secondary" : "action"}
             size={null}
-            className={compact ? COMPACT_ACTION_CLASS : ACTION_CLASS}
+            className={`${compact ? COMPACT_ACTION_CLASS : ACTION_CLASS} ${MOBILE_TRADE_ACTION_CLASS} ${outlined && !selected ? OUTLINED_LEVEL_ACTION_CLASS : ""}`}
             aria-label={t(
               locale,
               order.side === ApiMarketOrderSideEnum.Ask
@@ -237,9 +250,11 @@ export function MarketDepthOrderFeedback({
     )
   );
   const feedback = (
-    <div className="tw-space-y-2 tw-pb-4 tw-pt-2 tw-text-left">
+    <div
+      className={`tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-pb-4 tw-pt-2 tw-text-left ${tableRow ? "tw-px-3 sm:tw-px-5" : ""}`}
+    >
       {selected && (
-        <label className="tw-inline-grid tw-gap-1.5 tw-text-meta tw-text-iron-400">
+        <label className="tw-inline-flex tw-items-center tw-gap-3 tw-text-meta tw-text-iron-400">
           <span>{t(locale, "marketDepth.trade.quantity")}</span>
           <input
             type="text"
@@ -253,7 +268,7 @@ export function MarketDepthOrderFeedback({
             onChange={(event) =>
               context.updateQuantity(order, event.currentTarget.value)
             }
-            className="tw-font-inherit tw-h-11 tw-w-24 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-text-sm tw-tabular-nums tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            className="tw-font-inherit tw-h-11 tw-w-16 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-text-center tw-text-sm tw-tabular-nums tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
           />
         </label>
       )}
@@ -266,7 +281,7 @@ export function MarketDepthOrderFeedback({
         <p
           id={quantityErrorId}
           role="alert"
-          className="tw-m-0 tw-text-xs tw-text-rose-200"
+          className="tw-m-0 tw-w-full tw-text-xs tw-text-rose-200"
         >
           {t(locale, "marketDepth.trade.quantityInvalid")}
         </p>
@@ -296,7 +311,15 @@ export function MarketDepthOrderFeedback({
     <NftPurchasingGate>
       {tableRow ? (
         <tr>
-          <td colSpan={4} className="tw-p-0">
+          {/* Bridge MarketDepthPriceLevels' border-spacing-y-1 (4px). */}
+          <td
+            colSpan={4}
+            className={
+              selected
+                ? "tw-relative tw-rounded-b-xl tw-bg-iron-900 tw-p-0 tw-shadow-[inset_1px_0_0_theme(colors.iron.800),inset_-1px_0_0_theme(colors.iron.800),inset_0_-1px_0_theme(colors.iron.800)] before:tw-absolute before:tw-inset-x-0 before:tw-top-[-4px] before:tw-h-1 before:tw-bg-iron-900 before:tw-shadow-[inset_1px_0_0_theme(colors.iron.800),inset_-1px_0_0_theme(colors.iron.800)] before:!tw-content-['']"
+                : "tw-p-0"
+            }
+          >
             {feedback}
           </td>
         </tr>

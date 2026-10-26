@@ -78,7 +78,11 @@ Use this page for visibility rules, state switches, and route targets.
    when reduced motion is enabled. Collapsed links are excluded from keyboard
    navigation. File type and dimensions appear inside `Edition Details` when
    available; the artist row contains the artist identity without a media-type
-   badge.
+   badge. Multiple artists have space between their profile links and wrap onto
+   new lines on narrower screens. Long handles truncate within the card.
+   `Next Drop` shows accepted collaborators below the artist with a separate
+   `Collaborators` label and one compact profile per row, including available
+   levels and badges.
 5. `Coming up` resolves after app settings load and `memes_wave_id` is
    available.
 6. `Coming up` then shows:
