@@ -342,7 +342,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
         isSelectionDisabled ? "" : "tw-cursor-pointer"
       } ${isSelected ? "tw-bg-primary-500/10" : "tw-bg-iron-950"} ${
         !isSelected && !isSelectionDisabled
-          ? "desktop-hover:hover:tw-bg-iron-900"
+          ? "desktop-hover:hover:tw-bg-iron-900/80"
           : ""
       }`}
     >
