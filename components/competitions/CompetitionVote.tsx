@@ -263,11 +263,11 @@ export function CompetitionVoteForm({
           className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 tw-gap-y-1"
         >
           <div
-            className={`tw-col-span-2 tw-h-11 tw-animate-pulse tw-rounded-lg tw-bg-iron-900 @[22rem]/vote-controls:tw-col-span-1 @[46rem]/my-vote:tw-col-span-2 motion-reduce:tw-animate-none ${onExplainVote ? "" : "@[22rem]/vote-controls:!tw-col-span-2"}`}
+            className={`tw-col-span-2 tw-h-11 tw-animate-pulse tw-rounded-lg tw-bg-iron-900 @[24rem]/vote-controls:tw-col-span-1 motion-reduce:tw-animate-none ${onExplainVote ? "" : "@[24rem]/vote-controls:!tw-col-span-2"}`}
           />
-          <div className="tw-row-start-2 tw-h-5 tw-w-3/4 tw-animate-pulse tw-rounded tw-bg-iron-900 @[22rem]/vote-controls:tw-col-span-2 @[46rem]/my-vote:tw-col-span-1 motion-reduce:tw-animate-none" />
+          <div className="tw-row-start-2 tw-h-5 tw-w-3/4 tw-animate-pulse tw-rounded tw-bg-iron-900 @[24rem]/vote-controls:tw-col-span-2 motion-reduce:tw-animate-none" />
           {onExplainVote && (
-            <div className="tw-col-start-2 tw-row-start-2 tw-h-11 tw-w-24 tw-animate-pulse tw-rounded-md tw-bg-iron-900 @[22rem]/vote-controls:tw-row-start-1 @[46rem]/my-vote:tw-row-start-2 @[46rem]/my-vote:tw-h-9 @[46rem]/my-vote:tw-w-24 motion-reduce:tw-animate-none" />
+            <div className="tw-col-start-2 tw-row-start-2 tw-h-11 tw-w-24 tw-animate-pulse tw-rounded-md tw-bg-iron-900 @[24rem]/vote-controls:tw-row-start-1 @[46rem]/my-vote:tw-h-9 @[46rem]/my-vote:tw-w-24 motion-reduce:tw-animate-none" />
           )}
         </div>
       </div>
@@ -304,7 +304,7 @@ export function CompetitionVoteForm({
           className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 tw-gap-y-1"
         >
           <div
-            className={`tw-col-span-2 tw-flex tw-min-w-0 tw-items-center tw-gap-x-1 tw-rounded-lg tw-bg-iron-900 tw-pr-1 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus-within:tw-ring-2 focus-within:tw-ring-primary-400 @[22rem]/vote-controls:tw-col-span-1 @[46rem]/my-vote:tw-col-span-2 @[46rem]/my-vote:tw-gap-x-2 ${onExplainVote ? "" : "@[22rem]/vote-controls:!tw-col-span-2"}`}
+            className={`tw-col-span-2 tw-flex tw-min-w-0 tw-items-center tw-gap-x-1 tw-rounded-lg tw-bg-iron-900 tw-pr-1 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus-within:tw-ring-2 focus-within:tw-ring-primary-400 @[24rem]/vote-controls:tw-col-span-1 @[46rem]/my-vote:tw-gap-x-2 ${onExplainVote ? "" : "@[24rem]/vote-controls:!tw-col-span-2"}`}
           >
             <input
               id={`competition-vote-${entryId}`}
@@ -342,7 +342,7 @@ export function CompetitionVoteForm({
           </div>
           <p
             id={rangeDescriptionId}
-            className="tw-row-start-2 tw-m-0 tw-min-w-0 tw-break-words tw-text-xs tw-leading-5 tw-text-iron-400 @[22rem]/vote-controls:tw-col-span-2 @[46rem]/my-vote:tw-col-span-1"
+            className="tw-row-start-2 tw-m-0 tw-min-w-0 tw-break-words tw-text-xs tw-leading-5 tw-text-iron-400 @[24rem]/vote-controls:tw-col-span-2"
           >
             {t(locale, "competitions.voteRange", {
               min: formatInteger(locale, min ?? 0),
@@ -354,7 +354,7 @@ export function CompetitionVoteForm({
               <Button
                 variant="tertiary"
                 size="sm"
-                className="tw-relative tw-col-start-2 tw-row-start-2 tw-my-1 tw-self-center after:tw-absolute after:tw-inset-x-0 after:tw-top-1/2 after:tw-h-11 after:-tw-translate-y-1/2 after:tw-content-[''] @[22rem]/vote-controls:tw-row-start-1 @[46rem]/my-vote:tw-row-start-2 @[46rem]/my-vote:tw-my-0"
+                className="tw-relative tw-col-start-2 tw-row-start-2 tw-my-1 tw-self-center after:tw-absolute after:tw-inset-x-0 after:tw-top-1/2 after:tw-h-11 after:-tw-translate-y-1/2 after:tw-content-[''] @[24rem]/vote-controls:tw-row-start-1 @[46rem]/my-vote:tw-my-0"
                 aria-label={t(locale, "waves.voteRationale.explainAriaLabel")}
                 data-tooltip-id={explainTooltipId}
                 data-tooltip-content={t(

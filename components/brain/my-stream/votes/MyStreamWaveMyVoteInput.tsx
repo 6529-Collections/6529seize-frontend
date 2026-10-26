@@ -327,14 +327,14 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   return (
     <div
       data-vote-controls
-      className="tw-col-span-3 tw-row-start-3 tw-grid tw-w-full tw-min-w-0 tw-cursor-default tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-@container/vote-controls @[32rem]/my-vote:tw-col-span-2 @[32rem]/my-vote:tw-col-start-2 @[46rem]/my-vote:tw-contents"
+      className="tw-col-span-3 tw-row-start-3 tw-grid tw-w-full tw-min-w-0 tw-cursor-default tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-@container/vote-controls @[32rem]/my-vote:tw-col-span-2 @[32rem]/my-vote:tw-col-start-2 @[46rem]/my-vote:tw-col-span-1 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-span-2 @[46rem]/my-vote:tw-row-start-1 @[46rem]/my-vote:tw-self-start"
     >
       <label htmlFor={voteInputId} className="tw-sr-only">
         {t(locale, "waves.myVotes.yourVotes")}{" "}
         {t(locale, "waves.myVotes.inCredit", { credit: voteLabel })}
       </label>
       <div
-        className={`${onExplainVote ? "@[22rem]/vote-controls:tw-col-span-1" : ""} tw-col-span-2 tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-pr-1 tw-ring-1 tw-ring-inset tw-transition-colors tw-duration-200 focus-within:tw-ring-2 @[46rem]/my-vote:tw-col-span-1 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-1 @[46rem]/my-vote:tw-self-end motion-reduce:tw-transition-none ${
+        className={`${onExplainVote ? "@[24rem]/vote-controls:tw-col-span-1" : ""} tw-col-span-2 tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-pr-1 tw-ring-1 tw-ring-inset tw-transition-colors tw-duration-200 focus-within:tw-ring-2 motion-reduce:tw-transition-none ${
           isVoteValueOutOfRange
             ? "tw-ring-rose-400 focus-within:!tw-ring-rose-400"
             : "tw-ring-iron-700 focus-within:!tw-ring-primary-400"
@@ -384,10 +384,10 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
           </span>
         </Button>
       </div>
-      <div className="tw-contents @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-2 @[46rem]/my-vote:tw-mt-0 @[46rem]/my-vote:tw-flex @[46rem]/my-vote:tw-min-h-6 @[46rem]/my-vote:tw-min-w-0 @[46rem]/my-vote:tw-flex-wrap @[46rem]/my-vote:tw-items-center @[46rem]/my-vote:tw-justify-between @[46rem]/my-vote:tw-gap-x-3 @[46rem]/my-vote:tw-gap-y-1 @[46rem]/my-vote:tw-self-start @[46rem]/my-vote:tw-text-sm @[46rem]/my-vote:tw-leading-6">
+      <div className="tw-contents">
         <p
           id={maxRatingId}
-          className="tw-row-start-2 tw-m-0 tw-flex tw-items-center tw-text-xs tw-font-normal tw-text-iron-400 @[22rem]/vote-controls:tw-col-span-2 @[46rem]/my-vote:tw-min-h-8"
+          className="tw-row-start-2 tw-m-0 tw-flex tw-items-center tw-text-xs tw-font-normal tw-text-iron-400 @[24rem]/vote-controls:tw-col-span-2 @[46rem]/my-vote:tw-min-h-8"
         >
           {maxRatingLabel} {formatInteger(locale, liveMaxRating)}
         </p>
@@ -407,7 +407,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
                 locale,
                 "waves.voteRationale.savedDescription"
               )}
-              className="tw-relative tw-col-start-2 tw-row-start-2 tw-my-1 after:tw-absolute after:tw-inset-x-0 after:tw-top-1/2 after:tw-h-11 after:-tw-translate-y-1/2 after:tw-content-[''] @[22rem]/vote-controls:tw-row-start-1 @[46rem]/my-vote:tw-my-0 @[46rem]/my-vote:tw-h-8"
+              className="tw-relative tw-col-start-2 tw-row-start-2 tw-my-1 after:tw-absolute after:tw-inset-x-0 after:tw-top-1/2 after:tw-h-11 after:-tw-translate-y-1/2 after:tw-content-[''] @[24rem]/vote-controls:tw-row-start-1 @[46rem]/my-vote:tw-my-0 @[46rem]/my-vote:tw-h-8"
             >
               {t(locale, "waves.voteRationale.explain")}
             </Button>
@@ -431,7 +431,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       {displayedVoteLimitMessage && (
         <output
           id={voteLimitMessageId}
-          className="tw-col-span-2 tw-mb-0 tw-mt-2 tw-min-w-0 tw-text-sm tw-leading-5 tw-text-amber-300 @[46rem]/my-vote:tw-col-span-1 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-3 @[46rem]/my-vote:tw-mt-0"
+          className="tw-col-span-2 tw-mb-0 tw-mt-2 tw-min-w-0 tw-text-sm tw-leading-5 tw-text-amber-300"
         >
           {displayedVoteLimitMessage}
         </output>

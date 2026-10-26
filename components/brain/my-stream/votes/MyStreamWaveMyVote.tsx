@@ -350,7 +350,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
         className={`tw-grid tw-grid-cols-[28px_64px_minmax(0,1fr)] tw-gap-x-2 tw-gap-y-3 @[32rem]/my-vote:tw-grid-cols-[28px_80px_minmax(0,1fr)] @[32rem]/my-vote:tw-gap-x-4 ${
           isVotingClosed
             ? "@[46rem]/my-vote:tw-grid-cols-[28px_96px_minmax(0,1fr)]"
-            : "@[46rem]/my-vote:tw-grid-cols-[28px_96px_minmax(0,1fr)_18rem]"
+            : "@[46rem]/my-vote:tw-grid-cols-[28px_96px_minmax(0,1fr)_25rem]"
         }`}
       >
         <div className="tw-flex tw-h-16 tw-items-center tw-justify-center @[32rem]/my-vote:tw-row-span-2 @[32rem]/my-vote:tw-h-20 @[46rem]/my-vote:tw-h-24">

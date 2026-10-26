@@ -3299,28 +3299,42 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
               parseFloat(getComputedStyle(button, "::after").height)
             )
           ).toBeGreaterThanOrEqual(44);
-          const controlsWidth = (await controls.boundingBox())!.width;
-          if (controlsWidth >= 352) {
-            expect(
-              Math.abs(
-                inputBounds.y +
-                  inputBounds.height / 2 -
-                  (explainBounds.y + explainBounds.height / 2)
-              )
-            ).toBeLessThanOrEqual(1);
-            expect(explainBounds.x).toBeGreaterThanOrEqual(
-              inputBounds.x + inputBounds.width
-            );
-          } else {
-            // On narrow rows, keep complete action labels and the full number
-            // readable by placing Explain beside the hint below the field.
-            expect(explainBounds.y).toBeGreaterThanOrEqual(
-              inputBounds.y + inputBounds.height
-            );
-          }
           await expect(input).toHaveCSS("font-size", "16px");
         } else {
           expect(saveInset.label).toBe("Save vote");
+        }
+        const inputBounds = (await input.boundingBox())!;
+        const explainBounds = (await explain.boundingBox())!;
+        const controlsWidth = (await controls.boundingBox())!.width;
+        if (controlsWidth >= 384) {
+          expect(
+            Math.abs(
+              inputBounds.y +
+                inputBounds.height / 2 -
+                (explainBounds.y + explainBounds.height / 2)
+            )
+          ).toBeLessThanOrEqual(1);
+          const saveBounds = (await controls
+            .getByRole("button", { name: "Save vote", exact: true })
+            .boundingBox())!;
+          expect(explainBounds.x).toBeGreaterThanOrEqual(
+            saveBounds.x + saveBounds.width + 8
+          );
+          const rangeBounds = (await controls
+            .getByText(/^Enter a whole number between/)
+            .boundingBox())!;
+          expect(rangeBounds.y).toBeGreaterThanOrEqual(
+            Math.max(
+              inputBounds.y + inputBounds.height,
+              explainBounds.y + explainBounds.height
+            )
+          );
+        } else {
+          // Narrow phone rows keep complete action labels and the full number
+          // readable by placing Explain beside the hint below the field.
+          expect(explainBounds.y).toBeGreaterThanOrEqual(
+            inputBounds.y + inputBounds.height
+          );
         }
         await expectNoHorizontalOverflow(page);
       }
