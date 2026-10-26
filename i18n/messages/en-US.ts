@@ -1351,9 +1351,19 @@ const USER_CIC_TYPE_MESSAGES = objectMessages("user.cicType", {
 } as const);
 
 const FOLLOWERS_MESSAGES = objectMessages("followers", {
+  "following.title": "Following",
+  "following.open": "Open your following list: {count}",
+  "following.loadingCount": "…",
+  "following.unavailableCount": "Unavailable",
+  "following.loading": "Loading following list…",
+  "following.empty": "You aren't following anyone yet.",
+  "following.error": "Couldn't load your following list. Please try again.",
+  "following.retry": "Retry",
+  "following.loadMore": "Load more",
   "modal.title": "Followers",
   "list.label": "Followers",
   "list.loading": "Loading followers",
+  "list.empty": "No followers yet.",
   "profile.linkAriaLabel": "View {handle}'s profile",
   "profile.avatarAlt": "{handle}'s profile image",
 } as const);
@@ -2924,6 +2934,7 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   "category.pages": "Pages",
   "category.profiles": "Profiles",
   "category.waves": "Waves",
+  "category.messages": "Messages",
   "category.error": "Some results could not be loaded",
   "category.loading": "Loading {category} results",
   clear: "Clear search",
@@ -2931,7 +2942,7 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   close: "Close search",
   "dialogTitle.site": "Search 6529",
   "dialogTitle.wave": "Search this Wave",
-  "dialogDescription.site": "Find pages, NFTs, profiles, and Waves.",
+  "dialogDescription.site": "Find pages, NFTs, profiles, Waves, and messages.",
   error: "Something went wrong while searching. Please try again.",
   "error.partial.one": "{category} results could not be loaded.",
   "error.partial.other": "Some result types could not be loaded: {categories}.",

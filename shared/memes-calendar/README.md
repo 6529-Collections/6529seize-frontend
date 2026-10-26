@@ -70,3 +70,8 @@ mint date and Athens phase window from 2026 through 2030. Timezone rules use the
 runtime's IANA data; runtime updates remain necessary if timezone law changes.
 See the paired backend guide for the existing services to redeploy and retired
 calendar network settings.
+
+Consecutive extra mint days remain valid: there is at most one mint per eligible
+date, and each window closes at 17:00 Athens the next day before that day's 17:40
+opening. The current mint is therefore the date-derived ordinal or its immediate
+predecessor. Adjacent-extra-day regressions cover that bound and the closing gap.

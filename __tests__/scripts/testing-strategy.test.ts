@@ -331,6 +331,18 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.build.required).toBe(false);
   });
 
+  it.each([
+    "components/user/following/UserPageFollowing.tsx",
+    "hooks/useFollowingList.ts",
+  ])(
+    "selects the Following browser lane for isolated runtime changes to %s",
+    (file) => {
+      const plan = createCiPlan([file]);
+      expect(plan.risk.computed_floor).toBe(3);
+      expect(plan.checks["playwright_critical_shell"]?.required).toBe(true);
+    }
+  );
+
   it("routes guarded or build-sensitive changes through build and workflow review", () => {
     const plan = createCiPlan([
       ".github/workflows/app-pr-ci.yml",

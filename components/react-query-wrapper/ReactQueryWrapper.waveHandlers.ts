@@ -109,6 +109,9 @@ export const createWaveQueryHandlers = (queryClient: QueryClient) => {
     }, 1000);
   };
   const onIdentityFollowChange = () => {
+    void queryClient.invalidateQueries({
+      queryKey: [QueryKey.IDENTITY_FOLLOWING],
+    });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.IDENTITY_FOLLOWING_ACTIONS],
     });

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import {
   formatUserStatsRowInteger,
@@ -33,6 +34,7 @@ interface UserStatsRowProps {
   readonly rep: number;
   readonly cic: number;
   readonly followersCount: number | null;
+  readonly followingStat?: ReactNode;
   readonly className?: string | undefined;
   readonly size?: UserStatsRowSize | undefined;
   readonly rateClassName?: string | undefined;
@@ -49,6 +51,7 @@ export default function UserStatsRow({
   rep,
   cic,
   followersCount,
+  followingStat,
   className = "",
   size = UserStatsRowSize.MEDIUM,
   rateClassName,
@@ -216,6 +219,7 @@ export default function UserStatsRow({
             </span>
           </Link>
         )}
+        {followingStat}
       </div>
     </div>
   );
