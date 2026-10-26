@@ -1,5 +1,6 @@
 "use client";
 
+import { useNowMintingStatus } from "@/hooks/useNowMintingStatus";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import HomeHowToStart from "@/components/home/newcomer/HomeHowToStart";
 import { ExploreWavesSection } from "@/components/home/explore-waves/ExploreWavesSection";
@@ -13,6 +14,7 @@ import { useHomepageTracking } from "./useHomepageTracking";
 
 export default function HomePageContent() {
   const { connectionState, hasValidWalletAuth } = useSeizeConnectContext();
+  const mintStatus = useNowMintingStatus();
   const { rootRef, onClickCapture } = useHomepageTracking(hasValidWalletAuth);
   const showNewcomerIntro =
     connectionState !== "initializing" &&
@@ -26,9 +28,11 @@ export default function HomePageContent() {
       onAuxClickCapture={onClickCapture}
       className="tw-overflow-x-hidden tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800"
     >
-      <HeroHeader>{showNewcomerIntro && <HomeNewcomerIntro />}</HeroHeader>
+      <HeroHeader mintStatus={mintStatus}>
+        {showNewcomerIntro && <HomeNewcomerIntro />}
+      </HeroHeader>
       {showNewcomerIntro && <HomeWhatIs6529 />}
-      <LatestDropSection />
+      <LatestDropSection mintStatus={mintStatus} />
       {showNewcomerIntro && <HomeHowToStart />}
       <HomePageTextSection />
       <NextMintLeadingSection />

@@ -9,7 +9,7 @@ import { shouldShowNextMintInLatestDrop } from "@/helpers/mint-visibility.helper
 import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
 import { useNextMintDrop } from "@/hooks/useNextMintDrop";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
-import { useNowMintingStatus } from "@/hooks/useNowMintingStatus";
+import type { NowMintingStatus } from "@/hooks/useNowMintingStatus";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
@@ -135,10 +135,12 @@ function ArtworkFan({
 
 function CurrentArtworkFan({
   recent,
+  mintStatus,
 }: {
   readonly recent: readonly Artwork[];
+  readonly mintStatus: NowMintingStatus;
 }) {
-  const { nft, isDropComplete, isStatusLoading } = useNowMintingStatus();
+  const { nft, isDropComplete, isStatusLoading } = mintStatus;
   const { nextMint, nextMintTitle, isLoading } = useNextMintDrop();
   const transitionReady = useLatestDropTransitionReady({
     isDropComplete,
@@ -166,7 +168,11 @@ function CurrentArtworkFan({
   return <ArtworkFan recent={recent} front={front} />;
 }
 
-export default function HeroArtworkFan() {
+export default function HeroArtworkFan({
+  mintStatus,
+}: {
+  readonly mintStatus: NowMintingStatus;
+}) {
   const { hideNftPurchasing } = useNftPurchasingVisibility();
   const { data: recent = [] } = useQuery({
     queryKey: [QueryKey.MEMES_LITE],
@@ -183,7 +189,7 @@ export default function HeroArtworkFan() {
     return <ArtworkFan recent={recent} front={recent[0]} />;
   return (
     <NftPurchasingGate>
-      <CurrentArtworkFan recent={recent} />
+      <CurrentArtworkFan recent={recent} mintStatus={mintStatus} />
     </NftPurchasingGate>
   );
 }

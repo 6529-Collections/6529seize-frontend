@@ -36,6 +36,7 @@ jest.mock("@/helpers/waves/drop.helpers", () => ({
 }));
 
 const mockStatus = jest.mocked(useNowMintingStatus);
+let mintStatus: ReturnType<typeof useNowMintingStatus>;
 const mockNext = jest.mocked(useNextMintDrop);
 const mockVisibility = jest.mocked(useNftPurchasingVisibility);
 const mockTransition = jest.mocked(useLatestDropTransitionReady);
@@ -47,23 +48,24 @@ beforeEach(() => {
     shouldRedirect: false,
   });
   mockTransition.mockReturnValue(false);
-  mockStatus.mockReturnValue({
+  mintStatus = {
     nft: { id: 5, name: "Meme 5", scaled: "", image: "" },
     isStatusLoading: false,
-  } as ReturnType<typeof useNowMintingStatus>);
+  } as ReturnType<typeof useNowMintingStatus>;
   mockNext.mockReturnValue({ nextMint: null, isLoading: false } as ReturnType<
     typeof useNextMintDrop
   >);
 });
 
 test("shows the current artwork once with four recent cards", () => {
-  const { container } = render(<HeroArtworkFan />);
+  const { container } = render(<HeroArtworkFan mintStatus={mintStatus} />);
   expect(container.querySelectorAll("figure")).toHaveLength(5);
   expect(container.querySelector('[data-slot="4"]')).toHaveTextContent(
     "Meme 5"
   );
   expect(screen.getAllByText("Meme 5")).toHaveLength(1);
   expect(container.firstChild).toHaveAttribute("aria-hidden", "true");
+  expect(mockStatus).not.toHaveBeenCalled();
 });
 
 test("follows the existing next-drop transition without changing mint selection", () => {
@@ -78,7 +80,7 @@ test("follows the existing next-drop transition without changing mint selection"
     nextMintTitle: "Next artwork",
     isLoading: false,
   } as unknown as ReturnType<typeof useNextMintDrop>);
-  const { container } = render(<HeroArtworkFan />);
+  const { container } = render(<HeroArtworkFan mintStatus={mintStatus} />);
   expect(container.querySelector('[data-slot="4"]')).toHaveTextContent(
     "Next artwork#6"
   );
@@ -86,10 +88,10 @@ test("follows the existing next-drop transition without changing mint selection"
 });
 
 test("does not guess the front artwork while the initial mint decision loads", () => {
-  mockStatus.mockReturnValue({ isStatusLoading: true } as ReturnType<
+  mintStatus = { isStatusLoading: true } as ReturnType<
     typeof useNowMintingStatus
-  >);
-  const { container } = render(<HeroArtworkFan />);
+  >;
+  const { container } = render(<HeroArtworkFan mintStatus={mintStatus} />);
   expect(
     container.querySelector('[data-slot="4"] figcaption span')
   ).toBeEmptyDOMElement();
@@ -100,7 +102,7 @@ test("restricted and pre-hydration views show published art without mounting min
     hideNftPurchasing: true,
     shouldRedirect: false,
   });
-  const { container } = render(<HeroArtworkFan />);
+  const { container } = render(<HeroArtworkFan mintStatus={mintStatus} />);
   expect(container.querySelector('[data-slot="4"]')).toHaveTextContent(
     "Meme 5"
   );

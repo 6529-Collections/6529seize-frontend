@@ -23,6 +23,7 @@ export default function HomeHowToStart() {
   const steps = [
     {
       id: "wallet",
+      trackingAction: "Connect wallet",
       title: t(locale, "home.start.wallet.title"),
       description: t(locale, "home.start.wallet.description"),
       action: t(
@@ -35,6 +36,7 @@ export default function HomeHowToStart() {
     },
     {
       id: "profile",
+      trackingAction: "Create profile",
       title: t(locale, "home.start.profile.title"),
       description: t(locale, "home.start.profile.description"),
       action: t(locale, "home.start.profile.title"),
@@ -42,6 +44,7 @@ export default function HomeHowToStart() {
     },
     {
       id: "create",
+      trackingAction: "View collections",
       title: t(locale, "home.start.create.title"),
       description: t(
         locale,
@@ -54,6 +57,7 @@ export default function HomeHowToStart() {
     },
     {
       id: "community",
+      trackingAction: "Browse Waves",
       title: t(locale, "home.start.community.title"),
       description: t(locale, "home.start.community.description"),
       action: t(locale, "home.whatIs.waves.action"),
@@ -64,6 +68,7 @@ export default function HomeHowToStart() {
   return (
     <section
       aria-labelledby="home-start-heading"
+      data-home-section="How to start"
       className="tw-px-4 tw-pt-20 md:tw-px-6 md:tw-pt-32 lg:tw-px-8"
     >
       <div className="tw-mx-auto tw-max-w-[1200px]">
@@ -76,7 +81,11 @@ export default function HomeHowToStart() {
               {t(locale, "home.start.description")}
             </p>
           </div>
-          <Link href="/join-6529" className={HOME_TEXT_LINK_CLASSES}>
+          <Link
+            href="/join-6529"
+            data-home-action="Get started"
+            className={HOME_TEXT_LINK_CLASSES}
+          >
             {t(locale, "home.start.guide")}
             <ArrowRightIcon aria-hidden className={HOME_ACTION_ARROW_CLASSES} />
           </Link>
@@ -110,6 +119,7 @@ export default function HomeHowToStart() {
                 {step.href ? (
                   <Link
                     href={step.href}
+                    data-home-action={step.trackingAction}
                     className={`${HOME_TEXT_LINK_CLASSES} tw-mt-auto`}
                   >
                     {step.action}
@@ -121,6 +131,7 @@ export default function HomeHowToStart() {
                 ) : (
                   <button
                     type="button"
+                    data-home-action={step.trackingAction}
                     disabled={isConnectBusy}
                     aria-busy={isConnectBusy}
                     onClick={() => {
@@ -147,19 +158,15 @@ export default function HomeHowToStart() {
             />
             {t(locale, "home.start.browseFirst")}
           </span>
-          <Link href="/join-6529#faq" className={HOME_TEXT_LINK_CLASSES}>
+          <Link
+            href="/join-6529#faq"
+            data-home-action="Getting started FAQ"
+            className={HOME_TEXT_LINK_CLASSES}
+          >
             {t(locale, "home.start.faq")}
             <ArrowRightIcon aria-hidden className={HOME_ACTION_ARROW_CLASSES} />
           </Link>
         </p>
-        <span
-          role="status"
-          aria-live="polite"
-          aria-atomic="true"
-          className="tw-sr-only"
-        >
-          {isConnectBusy ? t(locale, "join6529.action.connecting") : ""}
-        </span>
       </div>
     </section>
   );

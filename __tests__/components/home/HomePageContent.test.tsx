@@ -1,7 +1,17 @@
+import { useNowMintingStatus } from "@/hooks/useNowMintingStatus";
+import { HeroHeader } from "@/components/home/hero";
+import { LatestDropSection } from "@/components/home/now-minting";
 import type { ReactNode } from "react";
 import HomePageContent from "@/components/home/HomePageContent";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { render, screen } from "@testing-library/react";
+
+jest.mock("@/hooks/useNowMintingStatus", () => ({
+  useNowMintingStatus: jest.fn(() => ({
+    nft: undefined,
+    isStatusLoading: false,
+  })),
+}));
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
@@ -15,9 +25,9 @@ jest.mock("@/components/home/useHomepageTracking", () => ({
 }));
 
 jest.mock("@/components/home/hero", () => ({
-  HeroHeader: ({ children }: { children: ReactNode }) => (
+  HeroHeader: jest.fn(({ children }: { children: ReactNode }) => (
     <div>Hero{children}</div>
-  ),
+  )),
 }));
 
 jest.mock("@/components/home/newcomer/HomeNewcomerIntro", () => ({
@@ -31,7 +41,7 @@ jest.mock("@/components/home/newcomer/HomeWhatIs6529", () => ({
 }));
 
 jest.mock("@/components/home/now-minting", () => ({
-  LatestDropSection: () => <div>Latest drop</div>,
+  LatestDropSection: jest.fn(() => <div>Latest drop</div>),
 }));
 
 jest.mock("@/components/home/HomePageTextSection", () => ({
@@ -86,5 +96,20 @@ describe("HomePageContent", () => {
       expect(screen.queryByText("Boosted drops")).not.toBeInTheDocument();
       expect(screen.getByText("Latest drop")).toBeInTheDocument();
     }
+  );
+});
+
+it("shares one mint-status result between the hero and Latest Drop", () => {
+  jest.clearAllMocks();
+  useSeizeConnectContextMock.mockReturnValue({
+    connectionState: "disconnected",
+    hasValidWalletAuth: false,
+  } as ReturnType<typeof useSeizeConnectContext>);
+  render(<HomePageContent />);
+  expect(useNowMintingStatus).toHaveBeenCalledTimes(1);
+  const status = jest.mocked(useNowMintingStatus).mock.results[0]?.value;
+  expect(jest.mocked(HeroHeader).mock.calls[0]?.[0].mintStatus).toBe(status);
+  expect(jest.mocked(LatestDropSection).mock.calls[0]?.[0].mintStatus).toBe(
+    status
   );
 });

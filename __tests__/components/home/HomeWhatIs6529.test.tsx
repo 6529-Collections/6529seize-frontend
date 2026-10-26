@@ -1,3 +1,4 @@
+import { getHomepageClick } from "@/components/home/homepageTracking";
 import HomeWhatIs6529 from "@/components/home/newcomer/HomeWhatIs6529";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { render, screen, within } from "@testing-library/react";
@@ -24,3 +25,17 @@ it.each(["en-US", "en-GB", "fr-FR", "es-ES", "de-DE"] as const)(
     expect(section.queryAllByRole("img")).toHaveLength(0);
   }
 );
+
+it("tracks all explanation links using fixed analytics labels", () => {
+  jest.mocked(useBrowserLocale).mockReturnValue("en-US");
+  const { container } = render(<HomeWhatIs6529 />);
+  for (const [name, action] of [
+    ["Browse The Memes", "Browse Memes"],
+    ["Browse Waves", "Browse Waves"],
+    ["How voting works", "How voting works"],
+  ] as const) {
+    expect(
+      getHomepageClick(container, screen.getByRole("link", { name }))
+    ).toEqual({ section: "What is 6529?", action });
+  }
+});

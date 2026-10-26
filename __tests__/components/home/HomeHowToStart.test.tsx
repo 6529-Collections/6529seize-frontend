@@ -1,3 +1,5 @@
+import HomeNewcomerIntro from "@/components/home/newcomer/HomeNewcomerIntro";
+import { getHomepageClick } from "@/components/home/homepageTracking";
 import HomeHowToStart from "@/components/home/newcomer/HomeHowToStart";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -119,11 +121,50 @@ it("omits purchasing promotions from server HTML", () => {
 
 it("opens the existing wallet flow and reflects an already open chooser", async () => {
   const user = userEvent.setup();
-  const { rerender } = render(<HomeHowToStart />);
-  await user.click(screen.getByRole("button", { name: "Connect wallet" }));
+  const sections = (
+    <>
+      <HomeNewcomerIntro />
+      <HomeHowToStart />
+    </>
+  );
+  const { rerender } = render(sections);
+  await user.click(
+    screen.getAllByRole("button", { name: "Connect wallet" })[1]!
+  );
   expect(connect).toHaveBeenCalledTimes(1);
   walletContext.seizeConnectOpen = true;
-  rerender(<HomeHowToStart />);
-  expect(screen.getByRole("button", { name: "Opening wallet" })).toBeDisabled();
+  rerender(
+    <>
+      <HomeNewcomerIntro />
+      <HomeHowToStart />
+    </>
+  );
+  for (const button of screen.getAllByRole("button", {
+    name: "Opening wallet",
+  })) {
+    expect(button).toBeDisabled();
+  }
+  expect(screen.getAllByRole("status")).toHaveLength(1);
   expect(screen.getByRole("status")).toHaveTextContent("Opening wallet");
+});
+
+it("tracks every getting-started action using fixed analytics labels", () => {
+  const { container } = render(<HomeHowToStart />);
+  for (const [name, action] of [
+    ["Connect wallet", "Connect wallet"],
+    ["Create profile", "Create profile"],
+    ["View collections", "View collections"],
+    ["Browse Waves", "Browse Waves"],
+    ["Open the Join 6529 guide", "Get started"],
+    ["Do I need a wallet or ETH to start?", "Getting started FAQ"],
+  ] as const) {
+    const target =
+      name === "Connect wallet"
+        ? screen.getByRole("button", { name })
+        : screen.getByRole("link", { name });
+    expect(getHomepageClick(container, target)).toEqual({
+      section: "How to start",
+      action,
+    });
+  }
 });

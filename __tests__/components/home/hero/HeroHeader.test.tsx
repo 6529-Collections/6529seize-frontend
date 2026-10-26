@@ -1,3 +1,4 @@
+import type { NowMintingStatus } from "@/hooks/useNowMintingStatus";
 import HeroHeader from "@/components/home/hero/HeroHeader";
 import { render, screen } from "@testing-library/react";
 
@@ -20,7 +21,7 @@ jest.mock("@/hooks/useBrowserLocale", () => ({
 
 describe("HeroHeader", () => {
   it("renders the hero heading copy", () => {
-    render(<HeroHeader />);
+    render(<HeroHeader mintStatus={{} as NowMintingStatus} />);
 
     const heading = screen.getByRole("heading", {
       name: "Building a decentralized network state",
@@ -37,7 +38,7 @@ describe("HeroHeader", () => {
   });
 
   it("renders a quick link to network health", () => {
-    render(<HeroHeader />);
+    render(<HeroHeader mintStatus={{} as NowMintingStatus} />);
 
     const healthLink = screen.getByRole("link", {
       name: "Open network health dashboard",
@@ -47,7 +48,7 @@ describe("HeroHeader", () => {
   });
 
   it("hides the fixed health link inside the native app shell", () => {
-    render(<HeroHeader />);
+    render(<HeroHeader mintStatus={{} as NowMintingStatus} />);
 
     expect(
       screen.getByRole("link", {

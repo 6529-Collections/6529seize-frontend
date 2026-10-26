@@ -11,9 +11,9 @@ import Link from "next/link";
 import { HOME_ACTION_ARROW_CLASSES } from "../homeInteractionStyles";
 
 const TOPICS = [
-  { id: "art", href: "/the-memes" },
-  { id: "waves", href: "/waves" },
-  { id: "voting", href: "/network/tdh" },
+  { id: "art", href: "/the-memes", trackingAction: "Browse Memes" },
+  { id: "waves", href: "/waves", trackingAction: "Browse Waves" },
+  { id: "voting", href: "/network/tdh", trackingAction: "How voting works" },
 ] as const;
 
 const MEME_THUMBNAILS = [
@@ -34,6 +34,7 @@ export default function HomeWhatIs6529() {
   return (
     <section
       aria-labelledby="home-what-is-title"
+      data-home-section="What is 6529?"
       className="tw-px-4 tw-pb-20 tw-pt-10 md:tw-px-6 md:tw-pb-24 md:tw-pt-16 lg:tw-px-8 lg:tw-pb-32 lg:tw-pt-12"
     >
       <div className="tw-mx-auto tw-max-w-[1200px]">
@@ -44,7 +45,7 @@ export default function HomeWhatIs6529() {
           {t(locale, "home.whatIs.title")}
         </h2>
         <div className="tw-grid tw-grid-cols-1 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.08] md:tw-grid-cols-3 md:tw-divide-x md:tw-divide-y-0">
-          {TOPICS.map(({ id, href }) => (
+          {TOPICS.map(({ id, href, trackingAction }) => (
             <article
               key={id}
               className="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-py-[26px] first:tw-pt-0 last:tw-pb-0 md:tw-px-6 md:tw-py-0 md:first:tw-pl-0 md:last:tw-pr-0 lg:tw-px-10"
@@ -105,6 +106,7 @@ export default function HomeWhatIs6529() {
               </p>
               <Link
                 href={href}
+                data-home-action={trackingAction}
                 className="tw-group/action tw-mt-auto tw-inline-flex tw-min-h-10 tw-items-center tw-gap-2 tw-rounded-sm tw-text-xs tw-font-medium tw-leading-relaxed tw-text-iron-200 tw-no-underline tw-transition-colors tw-duration-200 focus-visible:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-4 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none md:tw-min-h-8 md:tw-text-[13px]"
               >
                 <span className="tw-underline tw-decoration-iron-600 tw-decoration-1 tw-underline-offset-[5px]">
