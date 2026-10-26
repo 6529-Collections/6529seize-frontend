@@ -74,12 +74,11 @@ it.each(["en-US", "en-GB", "fr-FR", "es-ES", "de-DE"] as const)(
       screen.getByRole("link", { name: "Create profile" })
     ).toHaveAttribute("href", "/join-6529#join-step-profile");
     expect(
-      screen.getByRole("link", { name: "View collections" })
+      screen.getByRole("link", { name: "Create, collect or vote" })
     ).toHaveAttribute("href", "/the-memes");
-    expect(screen.getByRole("link", { name: "Browse Waves" })).toHaveAttribute(
-      "href",
-      "/waves"
-    );
+    expect(
+      screen.getByRole("link", { name: "Join the community" })
+    ).toHaveAttribute("href", "/waves");
     expect(
       screen.getByRole("link", { name: "Open the Join 6529 guide" })
     ).toHaveAttribute("href", "/join-6529");
@@ -110,7 +109,7 @@ it.each([
       allowed
     );
     expect(
-      screen.getByRole("link", { name: "View collections" })
+      screen.getByRole("link", { name: "Create, collect or vote" })
     ).toBeVisible();
   }
 );
@@ -153,8 +152,8 @@ it("tracks every getting-started action using fixed analytics labels", () => {
   for (const [name, action] of [
     ["Connect wallet", "Connect wallet"],
     ["Create profile", "Create profile"],
-    ["View collections", "View collections"],
-    ["Browse Waves", "Browse Waves"],
+    ["Create, collect or vote", "View collections"],
+    ["Join the community", "Browse Waves"],
     ["Open the Join 6529 guide", "Get started"],
     ["Do I need a wallet or ETH to start?", "Getting started FAQ"],
   ] as const) {

@@ -16,6 +16,9 @@ import {
 } from "../homeInteractionStyles";
 import { useHomeWalletConnect } from "./useHomeWalletConnect";
 
+const STEP_ACTION_CLASSES =
+  "tw-group/action tw-inline-flex tw-min-h-10 tw-max-w-full tw-items-center tw-gap-2 tw-rounded-sm tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-base tw-font-semibold tw-leading-6 tw-tracking-[-0.02em] tw-text-iron-100 tw-no-underline tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-4 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none";
+
 export default function HomeHowToStart() {
   const locale = useBrowserLocale();
   const { hideNftPurchasing } = useNftPurchasingVisibility();
@@ -101,7 +104,7 @@ export default function HomeHowToStart() {
             >
               <span
                 aria-hidden
-                className="tw-absolute tw-bottom-[-28px] tw-left-5 tw-top-10 tw-w-px tw-bg-iron-800 group-last/step:tw-hidden md:tw-bottom-auto md:tw-left-10 md:tw-right-[-36px] md:tw-top-5 md:tw-h-px md:tw-w-auto"
+                className="tw-absolute tw-bottom-[-28px] tw-left-5 tw-top-10 tw-w-px tw-bg-iron-800/80 group-last/step:tw-hidden md:tw-bottom-auto md:tw-left-10 md:tw-right-[-36px] md:tw-top-5 md:tw-h-px md:tw-w-auto"
               />
               <span
                 aria-hidden
@@ -109,43 +112,52 @@ export default function HomeHowToStart() {
               >
                 {formatInteger(locale, index + 1)}
               </span>
-              <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col md:tw-mt-7">
-                <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-tracking-[-0.02em] tw-text-iron-100">
-                  {step.title}
+              <div className="tw-min-w-0 md:tw-mt-6">
+                <h3 className="tw-m-0">
+                  {step.href ? (
+                    <Link
+                      href={step.href}
+                      title={step.action}
+                      data-home-action={step.trackingAction}
+                      className={STEP_ACTION_CLASSES}
+                    >
+                      <span>{step.title}</span>
+                      <ArrowRightIcon
+                        aria-hidden
+                        className={
+                          HOME_ACTION_ARROW_CLASSES +
+                          " tw-text-iron-500 group-focus-visible/action:tw-text-iron-300 desktop-hover:group-hover/action:tw-text-iron-300"
+                        }
+                      />
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      data-home-action={step.trackingAction}
+                      disabled={isConnectBusy}
+                      aria-busy={isConnectBusy}
+                      onClick={() => {
+                        void handleConnect();
+                      }}
+                      className={
+                        STEP_ACTION_CLASSES +
+                        " disabled:tw-cursor-wait disabled:tw-opacity-60"
+                      }
+                    >
+                      <span>{step.action}</span>
+                      <ArrowRightIcon
+                        aria-hidden
+                        className={
+                          HOME_ACTION_ARROW_CLASSES +
+                          " tw-text-iron-500 group-focus-visible/action:tw-text-iron-300 desktop-hover:group-hover/action:tw-text-iron-300"
+                        }
+                      />
+                    </button>
+                  )}
                 </h3>
-                <p className="tw-mb-4 tw-mt-2 tw-text-[13px] tw-leading-relaxed tw-text-iron-400">
+                <p className="tw-mb-0 tw-mt-2 tw-text-[13px] tw-leading-relaxed tw-text-iron-400 md:tw-text-sm">
                   {step.description}
                 </p>
-                {step.href ? (
-                  <Link
-                    href={step.href}
-                    data-home-action={step.trackingAction}
-                    className={`${HOME_TEXT_LINK_CLASSES} tw-mt-auto`}
-                  >
-                    {step.action}
-                    <ArrowRightIcon
-                      aria-hidden
-                      className={HOME_ACTION_ARROW_CLASSES}
-                    />
-                  </Link>
-                ) : (
-                  <button
-                    type="button"
-                    data-home-action={step.trackingAction}
-                    disabled={isConnectBusy}
-                    aria-busy={isConnectBusy}
-                    onClick={() => {
-                      void handleConnect();
-                    }}
-                    className={`${HOME_TEXT_LINK_CLASSES} tw-mt-auto disabled:tw-cursor-wait disabled:tw-opacity-60`}
-                  >
-                    {step.action}
-                    <ArrowRightIcon
-                      aria-hidden
-                      className={HOME_ACTION_ARROW_CLASSES}
-                    />
-                  </button>
-                )}
               </div>
             </li>
           ))}

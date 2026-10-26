@@ -63,17 +63,24 @@ Use this page for visibility rules, state switches, and route targets.
    - `Next Drop` when the current mint is complete, its grace period has
      elapsed, and a next winner exists.
 4. `Latest Drop` groups its details beside the artwork: title and artist;
-   stats with `Edition Details` directly below; `Your allowance` followed by
-   subscription awareness; and the countdown and mint action at the bottom.
+   stats with `Edition Details` directly below; `Your allowance` when a wallet is
+   connected; and the
+   countdown and mint action followed by subscription awareness.
    `Edition`, `Status`, `Mint price`, and `Floor` share one row at 640px and
    wider, with a two-column layout on smaller screens.
    Countdown states are `Upcoming`, `Live`, `Mint Complete`, or `Error`. When
    the card has an explicit Main Stage mapping, edition details also includes
    `Main Stage Submission` → `View`.
-   The countdown keeps each unit directly beside its number, for example `8m`
-   and `5s`. Days appear first when at least 24 hours remain. Zero
-   days, hours, and minutes are omitted; seconds always remain visible. The
-   timer strip keeps the same height across screen sizes.
+   The homepage countdown places the phase name and status pill in the first
+   row. The second row shows `Starts In` or `Ends In`, the existing allowlist
+   information icon when applicable, and the segmented timer. Each number is
+   zero-padded, such as `08m` and `05s`, with smaller unit labels. Days appear
+   first when at least 24 hours remain. Zero days, hours, and minutes are still
+   omitted; seconds always remain visible. The timer moves below its label
+   when space is limited. On mobile it aligns left beneath the label; a
+   four-part timer uses two balanced rows in the narrowest content slots.
+   The pill's slow ping stops under reduced motion. `Mint` remains below the
+   box, and desktop keeps the previous reserved countdown height.
    `Edition Details` opens and closes with a brief transition, or immediately
    when reduced motion is enabled. Collapsed links are excluded from keyboard
    navigation. File type and dimensions appear inside `Edition Details` when
@@ -96,6 +103,14 @@ proportions without cropping. On phones, loaded still images use their natural
 height at the card width, like Latest Drop. Tablet and desktop keep the 3:4
 artwork frame. Keyboard users can tab through the links to
 bring each card into view.
+
+The Coming up subtitle keeps “Next in queue and current vote leaders.” and
+adds the next scheduled decision when available. Times use the viewer's device
+time zone, including daylight-saving changes, in 24-hour format. Decisions on
+the viewer's current day say “Next decision today at …”; later decisions show
+the local date. The time appears after the page loads and is omitted when the
+schedule is missing or the decision time has passed, until updated wave data
+provides another future decision. It describes the voting decision, not minting.
 
 ## Common Scenarios
 
@@ -166,9 +181,9 @@ bring each card into view.
   row, and a non-US, unknown, or failed result leaves nothing. The remembered
   result only keeps the blank space; the row and its requests always wait for
   the current check. The space holds no text, icons, links, or controls.
-- Latest Drop and mapped Next Drop cards always show `Your allowance`. Before a
-  wallet is connected, the row prompts the user to connect to view it. Once
-  connected, compact wrapping pills list each nonzero Phase 0, Phase 1, Phase 2,
+- Latest Drop and mapped Next Drop cards omit `Your allowance` while no wallet
+  address is available, including during initial connection. Once connected,
+  compact wrapping pills list each nonzero Phase 0, Phase 1, Phase 2,
   or Public allocation, spelling out Airdrop and Allowlist counts; Public can
   contain Airdrop only.
 - The allowance row distinguishes loading, an unpublished distribution, a

@@ -9,6 +9,7 @@ type NextMintDropState = {
   readonly nextMint: ApiDropV2View | null;
   readonly nextMintTitle: string | null;
   readonly waveId: string | null;
+  readonly nextDecisionTime: number | null;
   readonly isReady: boolean;
   readonly isSettingsLoaded: boolean;
   readonly isFetching: boolean;
@@ -49,6 +50,8 @@ export const useNextMintDrop = (): NextMintDropState => {
     nextMint,
     nextMintTitle,
     waveId,
+    nextDecisionTime:
+      wave?.id === waveId ? (wave.wave.next_decision_time ?? null) : null,
     isReady: isLoaded && !!waveId,
     isSettingsLoaded: isLoaded,
     isFetching: isFetching || (!isLoaded && !!waveId),

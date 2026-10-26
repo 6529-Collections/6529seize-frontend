@@ -2,7 +2,6 @@
 
 import { HeartIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
-import type { NowMintingStatus } from "@/hooks/useNowMintingStatus";
 import type { ReactNode } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -10,9 +9,7 @@ import HeroArtworkFan from "./HeroArtworkFan";
 
 export default function HeroHeader({
   children,
-  mintStatus,
 }: {
-  readonly mintStatus: NowMintingStatus;
   readonly children?: ReactNode;
 }) {
   const locale = useBrowserLocale();
@@ -49,7 +46,7 @@ export default function HeroHeader({
           </p>
           {children}
         </div>
-        <HeroArtworkFan mintStatus={mintStatus} />
+        <HeroArtworkFan />
       </div>
     </section>
   );

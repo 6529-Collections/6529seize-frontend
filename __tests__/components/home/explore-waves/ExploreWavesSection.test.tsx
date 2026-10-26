@@ -1,7 +1,7 @@
 import { renderWithQueryClient } from "../../../utils/reactQuery";
 import { ExploreWavesSection } from "@/components/home/explore-waves/ExploreWavesSection";
 import { fetchWavesV2Page } from "@/services/api/waves-v2-api";
-import { waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 
@@ -10,9 +10,13 @@ jest.mock("@/components/auth/Auth", () => ({
 }));
 
 jest.mock("@/components/home/explore-waves/ExploreWaveCard", () => ({
-  ExploreWaveCard: ({ wave }: { readonly wave: { readonly name: string } }) => (
-    <div>{wave.name}</div>
-  ),
+  ExploreWaveCard: ({
+    wave,
+    variant,
+  }: {
+    readonly wave: { readonly name: string };
+    readonly variant?: string;
+  }) => <div data-card-variant={variant}>{wave.name}</div>,
 }));
 
 jest.mock("@/components/home/explore-waves/ExploreWaveCardSkeleton", () => ({
@@ -34,6 +38,31 @@ describe("ExploreWavesSection", () => {
       page: 1,
       next: null,
     });
+  });
+
+  it.each(["home", "default"] as const)(
+    "uses the explicitly selected %s card without changing the query",
+    async (variant) => {
+      useAuthMock.mockReturnValue({ connectedProfile: null });
+      renderWithQueryClient(<ExploreWavesSection cardVariant={variant} />);
+      expect(await screen.findByText("Scored wave")).toHaveAttribute(
+        "data-card-variant",
+        variant
+      );
+      expect(fetchWavesV2PageMock).toHaveBeenCalledTimes(1);
+      expect(fetchWavesV2PageMock).toHaveBeenCalledWith(
+        expect.objectContaining({ pageSize: 6 })
+      );
+    }
+  );
+
+  it("keeps discovery on its existing card variant by default", async () => {
+    useAuthMock.mockReturnValue({ connectedProfile: null });
+    renderWithQueryClient(<ExploreWavesSection headingVariant="page" />);
+    expect(await screen.findByText("Scored wave")).toHaveAttribute(
+      "data-card-variant",
+      "default"
+    );
   });
 
   it("does not request followed-wave exclusion for anonymous discovery", async () => {

@@ -59,7 +59,9 @@ jest.mock("@/components/home/newcomer/HomeHowToStart", () => ({
 }));
 
 jest.mock("@/components/home/explore-waves/ExploreWavesSection", () => ({
-  ExploreWavesSection: () => <div>Explore waves</div>,
+  ExploreWavesSection: ({ cardVariant }: { readonly cardVariant?: string }) => (
+    <div data-card-variant={cardVariant}>Explore waves</div>
+  ),
 }));
 
 const useSeizeConnectContextMock = jest.mocked(useSeizeConnectContext);
@@ -92,14 +94,21 @@ describe("HomePageContent", () => {
         expect(intro).not.toBeInTheDocument();
         expect(explanation).not.toBeInTheDocument();
         expect(steps).not.toBeInTheDocument();
+        expect(screen.getByText("Latest drop").previousElementSibling).toBe(
+          screen.getByText("Hero")
+        );
       }
+      expect(screen.getByText("Explore waves")).toHaveAttribute(
+        "data-card-variant",
+        "home"
+      );
       expect(screen.queryByText("Boosted drops")).not.toBeInTheDocument();
       expect(screen.getByText("Latest drop")).toBeInTheDocument();
     }
   );
 });
 
-it("shares one mint-status result between the hero and Latest Drop", () => {
+it("fetches mint status once for Latest Drop without coupling the static hero", () => {
   jest.clearAllMocks();
   useSeizeConnectContextMock.mockReturnValue({
     connectionState: "disconnected",
@@ -108,7 +117,9 @@ it("shares one mint-status result between the hero and Latest Drop", () => {
   render(<HomePageContent />);
   expect(useNowMintingStatus).toHaveBeenCalledTimes(1);
   const status = jest.mocked(useNowMintingStatus).mock.results[0]?.value;
-  expect(jest.mocked(HeroHeader).mock.calls[0]?.[0].mintStatus).toBe(status);
+  expect(jest.mocked(HeroHeader).mock.calls[0]?.[0]).not.toHaveProperty(
+    "mintStatus"
+  );
   expect(jest.mocked(LatestDropSection).mock.calls[0]?.[0].mintStatus).toBe(
     status
   );

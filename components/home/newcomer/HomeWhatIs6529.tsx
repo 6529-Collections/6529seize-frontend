@@ -2,10 +2,7 @@
 
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import {
-  ArrowRightIcon,
-  ChatBubbleLeftRightIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
 import { HOME_ACTION_ARROW_CLASSES } from "../homeInteractionStyles";
@@ -21,12 +18,13 @@ const MEME_THUMBNAILS = [
   { id: 2, className: "tw-z-10 -tw-ml-2 tw-h-[52px]" },
   { id: 4, className: "-tw-ml-2 tw-rotate-12" },
 ];
+// Fixed public wave avatars; the illustration does not query live activity.
 const WAVE_TILES = [
-  { id: "first", className: "tw-bg-iron-800" },
-  { id: "second", className: "tw-bg-iron-900" },
-  { id: "third", className: "tw-bg-iron-700" },
-  { id: "fourth", className: "tw-bg-iron-800" },
-];
+  "memes-main-stage",
+  "memes-chat",
+  "maybes-dive-bar",
+  "tech-feedback",
+] as const;
 
 export default function HomeWhatIs6529() {
   const locale = useBrowserLocale();
@@ -77,10 +75,17 @@ export default function HomeWhatIs6529() {
                     <div className="tw-flex -tw-space-x-2">
                       {WAVE_TILES.map((tile) => (
                         <span
-                          key={tile.id}
-                          className={`tw-flex tw-size-[34px] tw-items-center tw-justify-center tw-rounded-lg tw-border-2 tw-border-solid tw-border-black tw-text-iron-400 ${tile.className}`}
+                          key={tile}
+                          className="tw-relative tw-block tw-size-[34px] tw-overflow-hidden tw-rounded-lg tw-border-2 tw-border-solid tw-border-black tw-bg-iron-800"
                         >
-                          <ChatBubbleLeftRightIcon className="tw-size-4" />
+                          <Image
+                            src={`/home/waves/${tile}.webp`}
+                            alt=""
+                            width={96}
+                            height={96}
+                            unoptimized
+                            className="tw-h-full tw-w-full tw-object-cover"
+                          />
                         </span>
                       ))}
                     </div>

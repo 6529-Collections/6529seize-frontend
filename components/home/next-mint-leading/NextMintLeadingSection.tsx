@@ -12,6 +12,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { ComingUpNextDecision } from "./ComingUpNextDecision";
 import { LeadingCard } from "./LeadingCard";
 import { NextMintCard } from "./NextMintCard";
 import {
@@ -39,6 +40,7 @@ export function NextMintLeadingSection() {
   const {
     nextMint,
     nextMintTitle,
+    nextDecisionTime,
     waveId,
     isReady,
     isFetching: isWinnersFetching,
@@ -78,7 +80,8 @@ export function NextMintLeadingSection() {
   if (!isReady || !waveId) return null;
   if (!hasCards && !isFetching) return null;
 
-  const sectionClassName = "tw-relative tw-z-10 tw-px-4 md:tw-px-6 lg:tw-px-8";
+  const sectionClassName =
+    "tw-relative tw-z-10 tw-px-4 tw-@container md:tw-px-6 lg:tw-px-8";
   const header = (
     <div className="tw-mb-7 tw-flex tw-flex-col tw-items-start tw-gap-3 md:tw-mb-8 md:tw-flex-row md:tw-items-end md:tw-justify-between md:tw-gap-6">
       <div className="tw-min-w-0">
@@ -87,6 +90,7 @@ export function NextMintLeadingSection() {
         </h2>
         <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-400 md:tw-text-[15px]">
           {t(locale, "home.comingUp.subtitle")}
+          <ComingUpNextDecision timestamp={nextDecisionTime} locale={locale} />
         </p>
       </div>
       <Link
@@ -110,7 +114,7 @@ export function NextMintLeadingSection() {
       data-home-section="Coming up"
       className={sectionClassName}
     >
-      <div className="tw-mx-auto tw-max-w-[1200px] tw-@container">
+      <div>
         {header}
         {showLoadingCards && (
           <output className="tw-sr-only">
@@ -144,7 +148,7 @@ const NextMintLeadingSkeletonCard = () => {
           <div className="tw-h-4 tw-w-20 tw-animate-pulse tw-rounded-md tw-bg-iron-800/60" />
           <div className="tw-h-4 tw-w-24 tw-animate-pulse tw-rounded-md tw-bg-iron-800/60" />
         </div>
-        <div className="tw-mx-4 tw-aspect-[3/4] tw-w-[calc(100%-2rem)] tw-shrink-0 tw-animate-pulse tw-bg-iron-900/70" />
+        <div className="tw-aspect-[3/4] tw-w-full tw-shrink-0 tw-animate-pulse tw-bg-iron-900/70" />
         <div className="tw-flex tw-flex-col tw-gap-3 tw-px-4 tw-pb-5 tw-pt-5">
           <div className="tw-flex tw-items-center tw-gap-2">
             <div className="tw-h-4 tw-w-10 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />

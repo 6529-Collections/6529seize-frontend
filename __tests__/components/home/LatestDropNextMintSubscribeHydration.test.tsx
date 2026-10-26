@@ -186,11 +186,13 @@ describe("Home subscription row visibility around hydration", () => {
       expect(container.querySelector("a, button, svg, img")).toBeNull();
       const space = spaceElement();
       expect(space).not.toBeNull();
-      expect(space).toBeEmptyDOMElement();
+      expect(space).toHaveTextContent("");
       expect(space).toHaveAttribute("aria-hidden", "true");
-      expect(space).toHaveClass(
-        "tw-min-h-[6.875rem]",
-        "sm:tw-min-h-[5.375rem]"
+      expect(space).toHaveClass("tw-@container/subscription");
+      expect(space?.firstElementChild).toBeEmptyDOMElement();
+      expect(space?.firstElementChild).toHaveClass(
+        "tw-h-[7.625rem]",
+        "@[22.125rem]/subscription:tw-h-[5.375rem]"
       );
     }
   );

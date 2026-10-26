@@ -88,7 +88,7 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
         <div
           data-testid="coming-up-artwork"
           className={clsx(
-            "tw-relative tw-mx-4 tw-flex tw-aspect-[3/4] tw-w-[calc(100%-2rem)] tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950",
+            "tw-relative tw-flex tw-aspect-[3/4] tw-w-full tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950",
             media?.mime_type.startsWith("image/") &&
               "max-md:has-[img.tw-opacity-100]:tw-aspect-auto max-md:[&_[data-drop-image-content]]:tw-relative max-md:[&_[data-drop-image-content]]:tw-block max-md:[&_img]:!tw-relative max-md:[&_img]:tw-block max-md:[&_img]:!tw-h-auto max-md:[&_img]:!tw-max-h-none"
           )}

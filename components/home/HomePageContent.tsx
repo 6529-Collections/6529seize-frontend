@@ -28,15 +28,13 @@ export default function HomePageContent() {
       onAuxClickCapture={onClickCapture}
       className="tw-overflow-x-hidden tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800"
     >
-      <HeroHeader mintStatus={mintStatus}>
-        {showNewcomerIntro && <HomeNewcomerIntro />}
-      </HeroHeader>
+      <HeroHeader>{showNewcomerIntro && <HomeNewcomerIntro />}</HeroHeader>
       {showNewcomerIntro && <HomeWhatIs6529 />}
       <LatestDropSection mintStatus={mintStatus} />
       {showNewcomerIntro && <HomeHowToStart />}
       <HomePageTextSection />
       <NextMintLeadingSection />
-      <ExploreWavesSection />
+      <ExploreWavesSection cardVariant="home" />
     </div>
   );
 }

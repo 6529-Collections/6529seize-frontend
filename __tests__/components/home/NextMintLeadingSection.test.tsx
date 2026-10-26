@@ -54,6 +54,7 @@ beforeEach(() => {
   winnerMock.mockReturnValue({
     nextMint: null,
     nextMintTitle: null,
+    nextDecisionTime: null,
     waveId: "main-stage",
     isReady: true,
     isSettingsLoaded: true,

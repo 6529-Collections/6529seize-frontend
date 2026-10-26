@@ -15,14 +15,15 @@ Drops section. Boosting and boosted-drop preferences inside Waves are unchanged.
 
 ## Layout and Content
 
-- The existing Waves card design is retained. Below `768px`, its image fills
-  the left third and the name, activity, description, and scores sit on the right.
-  From `768px`, the cover sits above the details with its existing gradient.
+- Homepage cards use a small square wave avatar beside the name and activity,
+  followed by the description. This compact layout is used only on `/`;
+  Explore Waves and other discovery surfaces keep their existing cards.
 - Relative last-drop time and total drops appear beneath the name. A wave with
   no activity shows `No drops yet`.
 - Descriptions are plain text from the wave description drop, not the latest
-  chat message. One line is visible on mobile and up to two from `768px`;
+  chat message. Up to three lines are visible on desktop and mobile;
   links and media inside the description are not interactive previews.
+  There is no message-author row and no additional drop request.
 - Labelled Score, Hot, and REP values remain at the bottom, separated by a
   subtle line. Missing metrics remain omitted according to the existing data.
 - The grid has one column below `640px`, two from `640px`, and three from
