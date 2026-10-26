@@ -371,7 +371,8 @@ export default function CompetitionMyVotes() {
                   disabled={isClosed || resetting}
                   compact
                   onExplainVote={
-                    entryDrop.parts.at(0)?.part_id === undefined
+                    entryDrop.wave.authenticated_user_eligible_to_chat !==
+                      true || entryDrop.parts.at(0)?.part_id === undefined
                       ? undefined
                       : (total, change) => explainVote(entryDrop, total, change)
                   }
@@ -379,7 +380,10 @@ export default function CompetitionMyVotes() {
               }
             />
             {rationale?.drop.id === vote.drop_id && (
-              <div className="tw-mx-2 tw-mb-6 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/30 tw-bg-iron-950 tw-px-4 tw-py-3 sm:tw-mx-4">
+              <div className="tw-mx-2 tw-mb-6 tw-mt-4 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/30 tw-bg-iron-950 tw-px-4 tw-py-3 sm:tw-mx-4">
+                <p className="tw-mb-3 tw-mt-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+                  {t(locale, "waves.voteRationale.savedDescription")}
+                </p>
                 <PrivilegedDropCreator
                   activeDrop={{
                     action: ActiveDropAction.REPLY,
