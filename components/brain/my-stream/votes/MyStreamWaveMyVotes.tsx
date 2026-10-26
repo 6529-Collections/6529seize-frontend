@@ -194,7 +194,12 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
                 <MyStreamWaveMyVote
                   drop={drop}
                   onDropClick={onDropClick}
-                  onExplainVote={handleExplainVote}
+                  onExplainVote={
+                    drop.wave.authenticated_user_eligible_to_chat === true &&
+                    drop.parts.at(0)?.part_id !== undefined
+                      ? handleExplainVote
+                      : undefined
+                  }
                   isChecked={
                     !isVotingControlsLocked && checkedDrops.has(drop.id)
                   }
