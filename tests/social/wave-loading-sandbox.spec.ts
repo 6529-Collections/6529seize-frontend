@@ -10,6 +10,60 @@ import {
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
+import {
+  installWaveListScrollFixture,
+  sidebarScrollMetrics,
+} from "../support/waveListScroll";
+
+for (const collection of ["All", "Pinned", "Joined"]) {
+  test(`wave list keeps the reader's place during incoming activity in ${collection}`, async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    const fixture = await installWaveListScrollFixture(page, baseURL);
+    await page.goto("/waves", { waitUntil: "domcontentloaded" });
+    await page
+      .getByRole("group", { name: "Wave list filter" })
+      .getByRole("button", { name: collection, exact: true })
+      .click();
+    const list = page
+      .getByRole("region", {
+        name:
+          collection === "Pinned"
+            ? "Pinned"
+            : collection === "Joined"
+              ? "Following waves list"
+              : "All recent waves list",
+        exact: true,
+      })
+      .filter({ visible: true });
+    await expect(
+      list.getByRole("link", { name: "Scroll wave 0", exact: true })
+    ).toBeVisible();
+    await sidebarScrollMetrics(list, 1200);
+    const anchor = list.getByRole("link", {
+      name: "Scroll wave 15",
+      exact: true,
+    });
+    await expect(anchor).toBeInViewport();
+    const before = (await anchor.boundingBox())!;
+    await fixture.incoming(15);
+    await expect(
+      list.getByRole("link", { name: "Scroll wave 15", exact: true })
+    ).toBeInViewport();
+    await expect
+      .poll(async () => Math.abs((await anchor.boundingBox())!.y - before.y))
+      .toBeLessThanOrEqual(1);
+    await page.screenshot({
+      path: testInfo.outputPath("wave-list-scrolled.png"),
+    });
+    if (!testInfo.project.use.isMobile) {
+      const metrics = await sidebarScrollMetrics(list);
+      expect(metrics.width).not.toBe("none");
+      expect(metrics.display).not.toBe("none");
+    }
+  });
+}
 
 const WAVE = "00000000-0000-4000-8000-000000000529";
 const ANNOUNCEMENTS = "00000000-0000-4000-8000-000000000599";
