@@ -18,22 +18,16 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
 import { AnnouncementWaveIcon } from "@/components/brain/left-sidebar/waves/SidebarIconTile";
-import type { SetActiveContentTab } from "@/components/brain/ContentTabContext";
-import LazyHeaderSearchModal from "@/components/header/header-search/LazyHeaderSearchModal";
-import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import {
-  getWaveHomeRoute,
-  getWavePathRoute,
-} from "@/helpers/navigation.helpers";
-import { isCompetitionPathname } from "@/helpers/competition.helpers";
+import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
 import { getDirectMessageProfileHref } from "@/helpers/waves/direct-message-profile.helpers";
 import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
-import { MyStreamWaveTab } from "@/types/waves.types";
-import LazyWaveDropsSearchModal, {
+import type { MyStreamWaveTab } from "@/types/waves.types";
+import { useOpenMyStreamWaveSearch } from "./MyStreamWaveSearch";
+import {
   preloadWaveDropsSearchModal,
   useWaveDropsSearchModalEarlyPreload,
 } from "@/components/waves/drops/search/LazyWaveDropsSearchModal";
@@ -52,7 +46,6 @@ import { PlaintextDmEncryptionNotice } from "@/components/e2ee/plaintext/Plainte
 
 const TRUNCATION_EPSILON_PX = 1;
 const WAVE_SCORE_LEARN_MORE_HREF = "/network/wave-score";
-type OpenSearch = "site" | "wave" | null;
 
 export interface MyStreamWaveTabsHeaderActionContext {
   readonly activeContentTab: MyStreamWaveTab;
@@ -63,8 +56,6 @@ export interface MyStreamWaveTabsHeaderActionContext {
 interface MyStreamWaveTabsHeaderProps {
   readonly wave: ApiWave;
   readonly activeContentTab: MyStreamWaveTab;
-  readonly setActiveContentTab: SetActiveContentTab;
-  readonly onSelectCuration: (curationId: string | null) => void;
   readonly isCompact: boolean;
   readonly showBackButton: boolean;
   readonly headerActionsTooltipId: string;
@@ -283,8 +274,6 @@ function MyStreamWaveHeaderIdentity({
 export default function MyStreamWaveTabsHeader({
   wave,
   activeContentTab,
-  setActiveContentTab,
-  onSelectCuration,
   isCompact,
   showBackButton,
   headerActionsTooltipId,
@@ -304,7 +293,8 @@ export default function MyStreamWaveTabsHeader({
   });
   const { isApp } = useDeviceInfo();
   const { connectedProfile, activeProfileProxy } = useAuth();
-  const [openSearch, setOpenSearch] = useState<OpenSearch>(null);
+  const { open: openSearch, trigger: searchTrigger } =
+    useOpenMyStreamWaveSearch();
 
   // Warm the wave search modal from the visitor's first interaction (or when
   // idle), so the first open does not wait on the network. The chunk stays out
@@ -313,7 +303,6 @@ export default function MyStreamWaveTabsHeader({
   const descriptionPreviewRef = useRef<HTMLSpanElement>(null);
   const [isDescriptionPreviewTruncated, setIsDescriptionPreviewTruncated] =
     useState(false);
-  const waveChatScroll = useWaveChatScrollOptional();
   const isDirectMessage = getWaveIsDirectMessage(wave);
   // Reserve the description row's space even when it is empty, matching the
   // pending header so metadata cannot move the divider and chat tabs.
@@ -366,23 +355,6 @@ export default function MyStreamWaveTabsHeader({
       ? `${basePath}?${params.toString()}`
       : basePath;
     router.push(newUrl, { scroll: false });
-  };
-
-  const handleSearchSelect = (serialNo: number) => {
-    onSelectCuration(null);
-    setActiveContentTab(MyStreamWaveTab.CHAT);
-    if (waveChatScroll && !isCompetitionPathname(pathname)) {
-      waveChatScroll.requestScrollToSerialNo({ waveId: wave.id, serialNo });
-      return;
-    }
-
-    const params = new URLSearchParams(searchParams.toString() || "");
-    params.delete("curation");
-    params.set("serialNo", String(serialNo));
-    const chatPath = isCompetitionPathname(pathname)
-      ? getWavePathRoute(wave.id)
-      : pathname;
-    router.replace(`${chatPath}?${params.toString()}`, { scroll: false });
   };
 
   const searchMessagesLabel = "Search messages in this wave";
@@ -522,7 +494,8 @@ export default function MyStreamWaveTabsHeader({
           )}
           <button
             type="button"
-            onClick={() => setOpenSearch("wave")}
+            ref={searchTrigger}
+            onClick={openSearch}
             onPointerEnter={preloadWaveDropsSearchModal}
             onFocus={preloadWaveDropsSearchModal}
             aria-label={searchMessagesLabel}
@@ -562,19 +535,6 @@ export default function MyStreamWaveTabsHeader({
         </div>
       </div>
       <MyStreamActionTooltip id={headerActionsTooltipId} />
-      <LazyWaveDropsSearchModal
-        isOpen={openSearch === "wave"}
-        onClose={() => setOpenSearch(null)}
-        wave={wave}
-        onSelectSerialNo={handleSearchSelect}
-        onSearchAll={() => setOpenSearch("site")}
-      />
-      {openSearch === "site" && (
-        <LazyHeaderSearchModal
-          onClose={() => setOpenSearch(null)}
-          wave={null}
-        />
-      )}
     </>
   );
 }

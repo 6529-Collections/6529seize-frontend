@@ -1177,8 +1177,8 @@ jobs:
         continue-on-error: true
         run: |
           set -euo pipefail
-          # A timed-out install can leave apt-get running. Let it finish before
-          # retrying; never delete its locks or kill the package manager.
+          # A timed-out install can leave apt-get running. Wait for it rather
+          # than deleting locks or killing another package-manager process.
           sudo timeout 300 bash -euc '
             command -v fuser >/dev/null
             while fuser /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/lib/apt/lists/lock >/dev/null 2>&1; do

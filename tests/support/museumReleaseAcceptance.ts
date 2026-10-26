@@ -96,7 +96,14 @@ async function settleImages(page: Page, selector: string) {
           if (image.occurrence <= (expected.get(image.key) ?? 0)) continue;
           expected.set(image.key, image.occurrence);
           stableSince = Date.now();
-          // Sequential scrolling gives each lazy image its own viewport visit.
+        }
+        // Keep the next unresolved lazy image in view until the browser finishes
+        // it. A two-frame visit followed by scrolling to the bottom can leave
+        // native lazy loading (or a newly selected responsive source) deferred.
+        const pending = inventory.find(
+          (image) => !image.loaded && !image.failed
+        );
+        if (pending !== undefined) {
           await images.evaluateAll((elements, identity) => {
             const matches = elements.filter((element) => {
               const image = element as HTMLImageElement;
@@ -108,8 +115,7 @@ async function settleImages(page: Page, selector: string) {
             matches[identity.occurrence - 1]?.scrollIntoView({
               block: "center",
             });
-          }, image);
-          // Give each lazy image a rendering frame in view before scrolling on.
+          }, pending);
           await waitForLazyImageFrame(page);
         }
         const current = await snapshot();
@@ -135,7 +141,55 @@ async function settleImages(page: Page, selector: string) {
           "Every observed Museum image must remain present and decode successfully",
       }
     )
-    .toEqual([]);
+    .toEqual([])
+    .catch(async (error: unknown) => {
+      const state = await images.evaluateAll((elements) => {
+        const safeUrl = (value: string | null) => {
+          if (!value) return value;
+          try {
+            const base =
+              typeof document === "undefined"
+                ? "https://example.invalid"
+                : document.baseURI;
+            const url = new URL(value, base);
+            if (!["https:", "http:"].includes(url.protocol))
+              return "[non-HTTP URL]";
+            return `${url.origin}${url.pathname}`;
+          } catch {
+            return "[invalid URL]";
+          }
+        };
+        return elements.map((element) => {
+          const image = element as HTMLImageElement;
+          return {
+            alt: image.alt,
+            src: safeUrl(image.getAttribute("src")),
+            currentSrc: safeUrl(image.currentSrc),
+            // Data URLs contain commas that are not candidate separators. Drop
+            // the entire field before splitting so no inline payload is logged.
+            srcSet: /(?:^|[\s,])data:/iu.test(
+              image.getAttribute("srcset") ?? ""
+            )
+              ? "[inline srcset redacted]"
+              : (image.getAttribute("srcset") ?? "")
+                  .split(",")
+                  .map((candidate) => {
+                    const [url, descriptor] = candidate.trim().split(/\s+/u);
+                    return { url: safeUrl(url ?? null), descriptor };
+                  }),
+            sizes: image.getAttribute("sizes"),
+            loading: image.loading,
+            complete: image.complete,
+            naturalWidth: image.naturalWidth,
+            naturalHeight: image.naturalHeight,
+          };
+        });
+      });
+      throw new Error(
+        `${error instanceof Error ? error.message : String(error)}\nBrowser media state: ${JSON.stringify(state)}`,
+        { cause: error }
+      );
+    });
 }
 
 export async function expectNoUnresolvedMuseumMedia(
