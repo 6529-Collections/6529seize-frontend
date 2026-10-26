@@ -5,7 +5,6 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { DropSize, type ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
   DROP_DETAIL_STALE_TIME_MS,
@@ -162,25 +161,6 @@ const WaveDropQuoteWithDropId: React.FC<WaveDropQuoteWithDropIdProps> = ({
       partId={partId}
       onQuoteClick={onQuoteClick}
       isNotFound={isNotFound}
-      isUnavailable={
-        resolvedDrop === null &&
-        !isActiveWaveHydrating &&
-        !isNotFound &&
-        !!error
-      }
-      fallbackHref={
-        targetWaveId
-          ? getWaveRoute({
-              waveId: targetWaveId,
-              extraParams: { drop: normalizedDropId },
-              isDirectMessage:
-                myStream?.directMessages.list.some(
-                  (wave) => wave.id === targetWaveId
-                ) ?? false,
-              isApp: false,
-            })
-          : undefined
-      }
       embedPath={embedPath}
       quotePath={quotePath}
       embedDepth={embedDepth}

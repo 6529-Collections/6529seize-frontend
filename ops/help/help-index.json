@@ -7574,9 +7574,9 @@
       "aliases": ["quote link", "link preview", "quote card", "drop link card"],
       "keywords": ["waves", "drop", "quote", "link", "card", "preview"],
       "facts": [
-        "Drop and serial links in wave and direct-message chats show card-shaped loading placeholders. Main Stage artwork previews reserve the header and artwork area; quotes reserve author and text space. Reduced motion keeps the skeleton static.",
-        "The loaded card keeps its normal content and navigation. Hidden link previews and unsupported links still use plain links.",
-        "Missing or failed targets show Drop not found or Drop preview unavailable instead of staying in loading. Open drop retains the destination link when available; it does not grant access to a restricted drop."
+        "Wave quote link cards are documented under drop actions.",
+        "Supported source links and rendering behavior are covered in the quote-link docs.",
+        "If a quote card fails, the original link can still be opened or copied where available."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],

@@ -125,7 +125,6 @@ describe("WaveDropQuoteWithDropId", () => {
     };
     const waveMessages = { drops: [waveDrop] };
     useMyStreamOptional.mockReturnValue({
-      directMessages: { list: [] },
       activeWave: { id: "w1" },
       waveMessagesStore: {
         getData: jest.fn(() => waveMessages),
@@ -166,7 +165,6 @@ describe("WaveDropQuoteWithDropId", () => {
       moderation: { status: "MODERATOR_REMOVED", can_view: false },
     };
     useMyStreamOptional.mockReturnValue({
-      directMessages: { list: [] },
       activeWave: { id: "w1" },
       waveMessagesStore: {
         getData: jest.fn(() => waveMessages),
@@ -270,23 +268,5 @@ describe("WaveDropQuoteWithDropId", () => {
 
     expect(capturedProps.drop).toBeNull();
     expect(capturedProps.isNotFound).toBe(true);
-  });
-  it("ends loading for a network error without calling it not found", () => {
-    useQuery.mockReturnValue({
-      data: undefined,
-      error: new Error("Network error"),
-    });
-    render(
-      <WaveDropQuoteWithDropId
-        dropId="d1"
-        waveId="w1"
-        partId={1}
-        maybeDrop={null}
-        onQuoteClick={jest.fn()}
-      />
-    );
-    expect(capturedProps.isUnavailable).toBe(true);
-    expect(capturedProps.isNotFound).toBe(false);
-    expect(capturedProps.fallbackHref).toBe("/waves/w1?drop=d1");
   });
 });

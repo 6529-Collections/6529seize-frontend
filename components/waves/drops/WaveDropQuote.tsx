@@ -13,7 +13,7 @@ import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useMemo } from "react";
-import DropPreviewPlaceholder from "./DropPreviewPlaceholder";
+import DropNotFound from "./DropNotFound";
 import WaveDropTime from "./time/WaveDropTime";
 import {
   useWaveDropQuoteDisplay,
@@ -30,8 +30,6 @@ interface WaveDropQuoteProps {
   readonly partId: number;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly isNotFound?: boolean;
-  readonly isUnavailable?: boolean | undefined;
-  readonly fallbackHref?: string | undefined;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
@@ -233,8 +231,6 @@ const WaveDropQuoteContent: React.FC<WaveDropQuoteProps> = ({
   partId,
   onQuoteClick,
   isNotFound = false,
-  isUnavailable = false,
-  fallbackHref,
   embedPath,
   quotePath,
   embedDepth,
@@ -287,19 +283,13 @@ const WaveDropQuoteContent: React.FC<WaveDropQuoteProps> = ({
     isInteractive ? "tw-cursor-pointer" : ""
   } tw-rounded-xl tw-bg-iron-950 tw-px-3 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800`;
 
-  if (isNotFound || isUnavailable || drop === null) {
+  if (isNotFound) {
     return (
       <div
-        className="tw-mt-1"
-        role="presentation"
-        onClick={(event) => event.stopPropagation()}
-        onKeyDown={(event) => event.stopPropagation()}
+        className={quoteContainerClassName}
+        onClick={handleQuoteContainerClick}
       >
-        <DropPreviewPlaceholder
-          unavailable={isNotFound || isUnavailable}
-          notFound={isNotFound}
-          href={fallbackHref}
-        />
+        <DropNotFound />
       </div>
     );
   }
