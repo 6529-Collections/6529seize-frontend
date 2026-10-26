@@ -80,6 +80,41 @@ async function expectSubmissionGifLoadingLayout(
   ).toBeEnabled();
 }
 
+async function selectSubmissionOriginal(
+  hero: Locator,
+  {
+    automaticOriginal,
+    animationUnavailable,
+    directOriginalRequests,
+    releaseOriginal,
+  }: {
+    automaticOriginal: boolean;
+    animationUnavailable: boolean;
+    directOriginalRequests: readonly string[];
+    releaseOriginal: () => void;
+  }
+) {
+  if (automaticOriginal) return;
+
+  await hero
+    .getByRole("button", { name: "View original", exact: true })
+    .click();
+  if (!animationUnavailable) return;
+
+  try {
+    await expect.poll(() => directOriginalRequests.length).toBeGreaterThan(0);
+    await expectSubmissionGifLoadingLayout(hero, "View optimized");
+    await expect(
+      hero.getByRole("status", {
+        name: "Loading original GIF",
+        exact: true,
+      })
+    ).toHaveCount(0);
+  } finally {
+    releaseOriginal();
+  }
+}
+
 // Parent suites supply the local-only mutation guard and desktop/touch projects.
 // Pixel-budget arithmetic belongs in the resizer tests.
 export function defineSubmissionArtworkPreviewTests() {
@@ -226,12 +261,15 @@ export function defineSubmissionArtworkPreviewTests() {
         exact: true,
         includeHidden: true,
       });
-      if (extension === "gif") {
-        try {
+      // Route readiness covers the shell; the submission panel fetches separately.
+      // Keep previews gated until its artwork frame has mounted.
+      try {
+        await expect(hero).toBeVisible({ timeout: 30000 });
+        if (extension === "gif") {
           await expectSubmissionGifLoadingLayout(hero);
-        } finally {
-          releaseGifPreviews();
         }
+      } finally {
+        releaseGifPreviews();
       }
       if (automaticOriginal) {
         try {
@@ -290,42 +328,30 @@ export function defineSubmissionArtworkPreviewTests() {
         .filter({ hasText: "First photographic line" });
       await expect(paragraph).toHaveCSS("white-space", "pre-wrap");
       expect(await paragraph.textContent()).toBe(description);
+      const qualityLabel = automaticOriginal
+        ? "View optimized"
+        : "View original";
       const inlineToggle = hero.getByRole("button", {
-        name: automaticOriginal ? "View optimized" : "View original",
+        name: qualityLabel,
         exact: true,
       });
       await expect(inlineToggle).toBeVisible();
       await expect(
         hero
           .getByRole("button", {
-            name: automaticOriginal ? "View optimized" : "View original",
+            name: qualityLabel,
             exact: true,
           })
           .locator("..")
           .getByRole("button")
           .first()
-      ).toHaveAccessibleName(
-        automaticOriginal ? "View optimized" : "View original"
-      );
-      if (!automaticOriginal) {
-        await inlineToggle.click();
-        if (animationUnavailable) {
-          try {
-            await expect
-              .poll(() => directOriginalRequests.length)
-              .toBeGreaterThan(0);
-            await expectSubmissionGifLoadingLayout(hero, "View optimized");
-            await expect(
-              hero.getByRole("status", {
-                name: "Loading original GIF",
-                exact: true,
-              })
-            ).toHaveCount(0);
-          } finally {
-            releaseOriginal();
-          }
-        }
-      }
+      ).toHaveAccessibleName(qualityLabel);
+      await selectSubmissionOriginal(hero, {
+        automaticOriginal,
+        animationUnavailable,
+        directOriginalRequests,
+        releaseOriginal,
+      });
       const originalAlt =
         extension === "gif" ? "Original GIF animation" : "Original image";
       const inlineOriginal = hero.getByRole("img", {
