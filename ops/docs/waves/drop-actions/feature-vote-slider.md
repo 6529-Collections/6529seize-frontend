@@ -26,7 +26,8 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
 - Switch entry mode with:
   - `Switch to slider`
   - `Switch to numeric`
-  - mini-card mode toggle icon
+  - `Slider` / `Numeric` in competition submission popups
+  - mini-card mode toggle icon for older non-competition votes
 
 ## User Journey
 
@@ -38,7 +39,7 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
    - `%` quick buttons (normal numeric mode)
    - `+` and `-` step buttons (normal numeric mode)
 4. Review the live value and vote-credit label.
-5. Optional: edit the prefilled rationale reply and leave `Vote with reply`
+5. Optional: edit the prefilled rationale reply and leave `Explain vote`
    on.
 6. Select `Vote` or `Vote + reply` to submit.
 
@@ -59,7 +60,7 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
 - Normal vote modal/sheet controls include an optional rationale reply. The
   switch starts off, turns on with the first text edit, and keeps the user's
   later manual on/off choice.
-- Users can turn `Vote with reply` on without editing. In that case, the reply
+- Users can turn `Explain vote` on without editing. In that case, the reply
   contains only the generated vote total, plus the vote change when it differs
   from the total.
 
@@ -80,9 +81,9 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
 ## Failure and Recovery
 
 - Changing slider or numeric input does not submit automatically.
-- A rationale reply is posted only when `Vote with reply` is on. Turning it off
+- A rationale reply is posted only when `Explain vote` is on. Turning it off
   keeps the text but submits only the vote.
-- If `Vote with reply` is on and all rationale text is removed, submission is
+- If `Explain vote` is on and all rationale text is removed, submission is
   blocked with a visible and accessible message until text is added or the
   switch is turned off.
 - If the vote succeeds but the optional reply fails, the vote stays saved and
@@ -113,6 +114,8 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
 - [Wave Leaderboard Drop States](../leaderboard/feature-drop-states.md)
 - [Docs Home](../../README.md)
 
-Competition vote dialogs include **Vote with reply** when the acting profile can
+Competition vote dialogs include **Explain vote** when the acting profile can
 chat in the wave. This also applies to authorized proxy voting. The reply posts
 only after the vote succeeds; a reply failure does not undo the saved vote.
+
+Competition artist submissions and participant entries offer the same **Slider** / **Numeric** control as the voting dialog. Switching modes keeps the entered value; it does not save a vote. **Explain vote** posts a public reply in the wave after the vote saves. It is omitted when the voter cannot chat.
