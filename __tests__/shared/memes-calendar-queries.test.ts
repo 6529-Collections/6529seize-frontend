@@ -179,10 +179,10 @@ describe("shared calendar queries", () => {
           });
           ["17:40", "18:30", "19:00", "19:20"].forEach((time, index) => {
             const phase = wall(schedule.phases[index]!.start);
-            expect(`${phase.hour}:${phase.minute}`).toBe(time);
-            expect(phase.day).toBe(String(day.getUTCDate()).padStart(2, "0"));
+            expect(`${phase["hour"]}:${phase["minute"]}`).toBe(time);
+            expect(phase["day"]).toBe(String(day.getUTCDate()).padStart(2, "0"));
             const end = wall(schedule.phases[index]!.end);
-            expect(`${end.hour}:${end.minute}`).toBe(
+            expect(`${end["hour"]}:${end["minute"]}`).toBe(
               ["18:20", "18:50", "19:20", "17:00"][index]
             );
           });
@@ -203,16 +203,16 @@ describe("shared calendar queries", () => {
   it.each(["UTC", "America/Los_Angeles", "Asia/Tokyo"])(
     "ignores the host timezone %s",
     (zone) => {
-      const old = process.env.TZ;
+      const old = process.env["TZ"];
       try {
-        process.env.TZ = zone;
+        process.env["TZ"] = zone;
         const next = getNextMintTimelineDetails(
           new Date("2026-10-25T22:30:00Z")
         );
         expect(next.instantUtc.toISOString()).toBe("2026-10-26T15:40:00.000Z");
       } finally {
-        if (old === undefined) delete process.env.TZ;
-        else process.env.TZ = old;
+        if (old === undefined) delete process.env["TZ"];
+        else process.env["TZ"] = old;
       }
     }
   );
