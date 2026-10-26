@@ -114,8 +114,15 @@ jobs:
         run: |
           set -euo pipefail
           export VERSION_BUILD_TIMESTAMP="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          # The committed help artifacts use the production publication profile.
+          BASE_ENDPOINT=https://6529.io ./bin/6529 run help-index:sync
+          ./bin/6529 run agent-files:sync
+          test -z "$(git status --porcelain=v1 --untracked-files=all -- public/help-index.json public/glossary.json public/llms.txt)"
+
+          # Generate staging-only help records, then preserve these exact bytes.
           ./bin/6529 run help-index:sync
           ./bin/6529 run agent-files:sync
+          help_artifact_checksums="$(sha256sum public/help-index.json public/glossary.json public/llms.txt)"
           rm -rf staging-artifact .staging-bundle
           ./bin/6529 run base-build
 
@@ -170,7 +177,7 @@ jobs:
             --pnpm-version "$(pnpm --version)" \
             --output staging-artifact/artifact-portability.json
           (cd staging-artifact && sha256sum manifest.json artifact-portability.json package.zip > SHA256SUMS)
-          test -z "$(git status --porcelain=v1 --untracked-files=all -- public/help-index.json public/glossary.json public/llms.txt)"
+          printf '%s\n' "$help_artifact_checksums" | sha256sum -c -
           test -z "$(git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews)"
 
       - name: Save Next.js build cache
