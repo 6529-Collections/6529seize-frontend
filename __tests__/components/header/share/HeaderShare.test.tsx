@@ -957,9 +957,7 @@ describe("HeaderShare", () => {
             screen.getByRole("button", { name: "Copy link" })
           ).toBeEnabled()
         );
-        await userEvent.click(
-          screen.getByRole("button", { name: target, exact: true })
-        );
+        await userEvent.click(screen.getByRole("button", { name: target }));
         const copy = screen.getByRole("button", { name: "Copy link" });
         const refresh = screen.getByRole("button", {
           name: "Generate new code",
@@ -986,9 +984,10 @@ describe("HeaderShare", () => {
         });
         await userEvent.click(refresh);
         await waitFor(() => expect(refresh).toBeEnabled());
-        expect(
-          screen.getByRole("button", { name: target, exact: true })
-        ).toHaveAttribute("aria-pressed", "true");
+        expect(screen.getByRole("button", { name: target })).toHaveAttribute(
+          "aria-pressed",
+          "true"
+        );
         expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2);
         expect(
           sessionV2.createLegacyDesktopConnectionShare
@@ -1060,9 +1059,7 @@ describe("HeaderShare", () => {
             name: "Generate new code",
           });
           await waitFor(() => expect(refresh).toBeEnabled());
-          await userEvent.click(
-            screen.getByRole("button", { name: target, exact: true })
-          );
+          await userEvent.click(screen.getByRole("button", { name: target }));
           const shareMock =
             target === "Mobile"
               ? sessionV2.createConnectionShare
