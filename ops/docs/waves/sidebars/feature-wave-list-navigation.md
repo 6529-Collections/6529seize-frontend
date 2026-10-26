@@ -128,8 +128,10 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
   an empty list pending even before an address is available. Once wallet and
   profile loading settle, a genuinely empty guest or connected list can show
   its empty message.
-- This uses the existing name matching. Typo tolerance and relevance changes
-  are outside this redesign. Unread state, pin controls and subwaves remain on
+- Wave search ignores spaces, dashes, apostrophes, and letter case, and ranks
+  the closest name matches first. See
+  [Wave name matching](../../navigation/feature-header-search-modal.md#wave-name-matching)
+  for examples and ordering. Unread state, pin controls and subwaves remain on
   normal collection rows; the DM list retains its existing behavior.
 
 ## Location in the Site
