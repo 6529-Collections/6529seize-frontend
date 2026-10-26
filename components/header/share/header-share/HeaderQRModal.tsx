@@ -41,6 +41,7 @@ import {
   generateQrCodeSource,
   getCachedConnectionShare,
   getFocusableElements,
+  trapFocusInDialog,
   getLocalLegacyDesktopAuth,
   isAbortError,
   isSessionUpgradeRequiredError,
@@ -114,6 +115,7 @@ function HeaderQRModal({
   const [navigateAppSrc, setNavigateAppSrc] = useState<string>("");
   const [shareConnectionSrc, setShareConnectionSrc] = useState<string>("");
   const [urlCopied, setUrlCopied] = useState<boolean>(false);
+  const [connectionShareRevision, setConnectionShareRevision] = useState(0);
   const [closingDisplayState, setClosingDisplayState] =
     useState<ShareDisplayState | null>(null);
 
@@ -155,77 +157,28 @@ function HeaderQRModal({
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const connectionShareAbortRef = useRef<AbortController | null>(null);
   const shareGenerationIdRef = useRef(0);
+  const connectionShareRefreshPendingRef = useRef(false);
   const cachedConnectionShareRef = useRef<CachedConnectionShare | null>(null);
   const terminalConnectionShareFailuresRef = useRef<
     Map<string, TerminalConnectionShareStatus>
   >(new Map());
 
-  const trapFocusInDialog = useCallback((event: KeyboardEvent) => {
-    if (event.key !== "Tab") {
-      return;
-    }
-
-    const dialog = dialogRef.current;
-    if (!dialog) {
-      return;
-    }
-
-    const focusableElements = getFocusableElements(dialog);
-    if (focusableElements.length === 0) {
-      event.preventDefault();
-      dialog.focus();
-      return;
-    }
-
-    const firstElement = focusableElements[0];
-    const lastElement = focusableElements.at(-1);
-    if (!firstElement || !lastElement) {
-      event.preventDefault();
-      dialog.focus();
-      return;
-    }
-    const activeElement = document.activeElement as HTMLElement | null;
-    const activeInsideDialog = activeElement
-      ? dialog.contains(activeElement)
-      : false;
-
-    if (event.shiftKey) {
-      if (
-        !activeInsideDialog ||
-        activeElement === firstElement ||
-        activeElement === dialog
-      ) {
-        event.preventDefault();
-        lastElement.focus();
-      }
-      return;
-    }
-
-    if (!activeInsideDialog || activeElement === lastElement) {
-      event.preventDefault();
-      firstElement.focus();
-    }
-  }, []);
-
   useEffect(() => {
     onCloseRef.current = closeModal;
   }, [closeModal]);
 
-  const handleEscapeKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === "Tab") {
-        trapFocusInDialog(event);
-        return;
-      }
+  const handleEscapeKeyDown = useCallback((event: KeyboardEvent) => {
+    if (event.key === "Tab") {
+      trapFocusInDialog(event, dialogRef.current);
+      return;
+    }
 
-      if (event.key === "Escape") {
-        event.stopPropagation();
-        event.preventDefault();
-        onCloseRef.current();
-      }
-    },
-    [trapFocusInDialog]
-  );
+    if (event.key === "Escape") {
+      event.stopPropagation();
+      event.preventDefault();
+      onCloseRef.current();
+    }
+  }, []);
 
   async function generateSources(
     walletAddress: string | null,
@@ -595,6 +548,31 @@ function HeaderQRModal({
     setShareConnectionCoreUrl("");
   }
 
+  const isConnectionShareLoading =
+    mobileConnectionShareStatus === "loading" ||
+    desktopConnectionShareStatus === "loading";
+
+  const refreshConnectionShare = () => {
+    if (
+      !show ||
+      mode !== Mode.CONNECT ||
+      isConnectionShareLoading ||
+      connectionShareRefreshPendingRef.current
+    ) {
+      return;
+    }
+
+    connectionShareRefreshPendingRef.current = true;
+    shareGenerationIdRef.current += 1;
+    connectionShareAbortRef.current?.abort();
+    cachedConnectionShareRef.current = null;
+    terminalConnectionShareFailuresRef.current.clear();
+    setUrlCopied(false);
+    setUnavailableMobileConnectionShare("loading");
+    setUnavailableDesktopConnectionShare("loading");
+    setConnectionShareRevision((revision) => revision + 1);
+  };
+
   useEffect(() => {
     terminalConnectionShareFailuresRef.current.clear();
   }, [activeWalletAddress, hasValidWalletAuth]);
@@ -606,6 +584,7 @@ function HeaderQRModal({
       terminalConnectionShareFailuresRef.current.clear();
       connectionShareAbortRef.current?.abort();
       connectionShareAbortRef.current = null;
+      connectionShareRefreshPendingRef.current = false;
       const nextStatus: ConnectionShareStatus =
         hasValidWalletAuth || hasWalletAddress
           ? "legacy-auth"
@@ -622,7 +601,11 @@ function HeaderQRModal({
     const controller = new AbortController();
     connectionShareAbortRef.current = controller;
 
-    void generateSources(activeWalletAddress, controller.signal);
+    void generateSources(activeWalletAddress, controller.signal).finally(() => {
+      if (!controller.signal.aborted) {
+        connectionShareRefreshPendingRef.current = false;
+      }
+    });
 
     return () => {
       shareGenerationIdRef.current += 1;
@@ -639,6 +622,7 @@ function HeaderQRModal({
     pathname,
     searchParamsString,
     mode,
+    connectionShareRevision,
   ]);
 
   useEffect(() => {
@@ -761,6 +745,8 @@ function HeaderQRModal({
       desktopConnectionShareStatus={displayState.desktopConnectionShareStatus}
       terminalConnectionShareFailuresRef={terminalConnectionShareFailuresRef}
       requestSessionUpgrade={requestSessionUpgrade}
+      refreshConnectionShare={refreshConnectionShare}
+      isConnectionShareLoading={isConnectionShareLoading}
       urlCopied={urlCopied}
       setUrlCopied={setUrlCopied}
       isMobile={isMobile}

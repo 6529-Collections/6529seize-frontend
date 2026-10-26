@@ -1,4 +1,8 @@
-import { faCopy, faExternalLink } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCopy,
+  faExternalLink,
+  faRotate,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   ArrowDownTrayIcon,
@@ -29,6 +33,13 @@ import { useSystemShare } from "./useSystemShare";
 const SHARE_ACTION_CLASS_NAME =
   "tw-inline-flex tw-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
 const SHARE_ACTION_ICON_CLASS_NAME = "tw-size-5 tw-flex-shrink-0";
+const CONNECTION_SHARE_STATUS_KEYS = {
+  loading: "headerShare.connectionRefresh.loading",
+  ready: "headerShare.connectionRefresh.ready",
+  error: "headerShare.connectionRefresh.unavailable",
+  "legacy-auth": null,
+  unauthenticated: null,
+} as const;
 const COPY_FEEDBACK_DURATION_MS = 1500;
 const TOOLTIP_STYLE = {
   zIndex: 10000,
@@ -60,6 +71,8 @@ export function HeaderShareModalView({
   desktopConnectionShareStatus,
   terminalConnectionShareFailuresRef,
   requestSessionUpgrade,
+  refreshConnectionShare,
+  isConnectionShareLoading,
   urlCopied,
   setUrlCopied,
   isMobile,
@@ -349,32 +362,54 @@ export function HeaderShareModalView({
   };
 
   const renderConnectionUrl = (url: string) => {
-    if (!isConnectMode) {
-      return null;
-    }
-
-    if (!url) {
-      return null;
-    }
+    const refreshLabel = t(
+      HEADER_SHARE_LOCALE,
+      "headerShare.connectionRefresh.action"
+    );
+    const unavailableLabel = t(
+      HEADER_SHARE_LOCALE,
+      isConnectionShareLoading
+        ? "headerShare.connectionRefresh.loading"
+        : "headerShare.connectionRefresh.unavailable"
+    );
 
     return (
-      <div className="tw-flex tw-h-10 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-px-3">
-        <div
-          className="tw-min-w-0 tw-flex-1 tw-truncate tw-text-sm tw-text-iron-400"
-          title={url}
-        >
-          {url}
+      <div className="tw-flex tw-h-10 tw-w-full tw-items-center tw-gap-2">
+        <div className="tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-px-3">
+          <div
+            className="tw-min-w-0 tw-flex-1 tw-truncate tw-text-sm tw-text-iron-400"
+            title={url || undefined}
+          >
+            {url || unavailableLabel}
+          </div>
+          <button
+            type="button"
+            aria-label={t(HEADER_SHARE_LOCALE, "headerShare.copy.ariaLabel")}
+            disabled={!url || isConnectionShareLoading}
+            className="tw-inline-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-bg-iron-800 enabled:hover:tw-text-iron-100 disabled:tw-opacity-50"
+            data-tooltip-id="copy-url-tooltip"
+            onClick={() => void copyUrl(url)}
+          >
+            <FontAwesomeIcon
+              icon={faCopy}
+              aria-hidden="true"
+              className={`tw-size-4 ${urlCopied ? "tw-text-green-500" : ""}`}
+            />
+          </button>
         </div>
         <button
           type="button"
-          aria-label={t(HEADER_SHARE_LOCALE, "headerShare.copy.ariaLabel")}
-          className="tw-inline-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-100"
-          data-tooltip-id="copy-url-tooltip"
-          onClick={() => void copyUrl(url)}
+          aria-label={refreshLabel}
+          title={refreshLabel}
+          aria-busy={isConnectionShareLoading}
+          disabled={isConnectionShareLoading}
+          onClick={refreshConnectionShare}
+          className="tw-inline-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-bg-iron-800 enabled:hover:tw-text-iron-100 disabled:tw-cursor-wait disabled:tw-opacity-50"
         >
           <FontAwesomeIcon
-            icon={faCopy}
-            className={urlCopied ? "tw-text-green-500" : ""}
+            icon={faRotate}
+            aria-hidden="true"
+            className={`tw-size-4 ${isConnectionShareLoading ? "tw-animate-spin motion-reduce:tw-animate-none" : ""}`}
           />
         </button>
         <Tooltip
@@ -388,9 +423,7 @@ export function HeaderShareModalView({
           openEvents={isMobile ? { click: true } : { mouseenter: true }}
           closeEvents={isMobile ? { click: true } : { mouseleave: true }}
           positionStrategy="fixed"
-          style={{
-            ...TOOLTIP_STYLE,
-          }}
+          style={TOOLTIP_STYLE}
         />
       </div>
     );
@@ -606,11 +639,32 @@ export function HeaderShareModalView({
       );
     }
 
+    const activeConnectionShareStatus =
+      activeSubTab === SubMode.DESKTOP
+        ? desktopConnectionShareStatus
+        : mobileConnectionShareStatus;
+    const connectionStatusKey =
+      CONNECTION_SHARE_STATUS_KEYS[activeConnectionShareStatus];
+    const showConnectionControls =
+      activeConnectionShareStatus === "ready" ||
+      activeConnectionShareStatus === "loading" ||
+      activeConnectionShareStatus === "error";
+
     return (
       <div
         data-testid="connection-share-content"
         className="tw-relative tw-w-full"
       >
+        <span
+          className="tw-sr-only"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {connectionStatusKey
+            ? t(HEADER_SHARE_LOCALE, connectionStatusKey)
+            : ""}
+        </span>
         <div
           data-testid="connection-share-reserved-space"
           aria-hidden="true"
@@ -620,7 +674,7 @@ export function HeaderShareModalView({
           <div className="tw-h-10 tw-w-full" />
         </div>
         <div className="tw-absolute tw-inset-0">
-          {url ? (
+          {showConnectionControls ? (
             <div className="tw-animate-in tw-fade-in tw-flex tw-h-full tw-w-full tw-flex-col tw-gap-2 tw-duration-200 motion-reduce:tw-animate-none">
               {qrContent}
               {renderConnectionUrl(url)}
