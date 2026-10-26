@@ -27,7 +27,6 @@ const HOMEPAGE_ACTIONS = [
   "How voting works",
   "Create profile",
   "View collections",
-  "Getting started FAQ",
   "Open artwork",
   "Open artist profile",
   "Toggle edition details",

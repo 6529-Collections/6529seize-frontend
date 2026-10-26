@@ -1221,7 +1221,6 @@ test.describe("Home Page @smoke @medium @large", () => {
       ["Create, collect or vote", "/the-memes"],
       ["Join the community", "/waves"],
       ["Open the Join 6529 guide", "/join-6529"],
-      ["Do I need a wallet or ETH to start?", "/join-6529#faq"],
     ] as const) {
       await expect(
         start.getByRole("link", { name, exact: true })

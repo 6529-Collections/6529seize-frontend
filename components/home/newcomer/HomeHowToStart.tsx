@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  ArrowRightIcon,
-  InformationCircleIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
@@ -162,23 +159,6 @@ export default function HomeHowToStart() {
             </li>
           ))}
         </ol>
-        <p className="tw-mb-0 tw-mt-8 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-text-xs tw-leading-relaxed tw-text-iron-400 md:tw-mt-10">
-          <span className="tw-inline-flex tw-items-center tw-gap-2">
-            <InformationCircleIcon
-              aria-hidden
-              className="tw-size-4 tw-shrink-0"
-            />
-            {t(locale, "home.start.browseFirst")}
-          </span>
-          <Link
-            href="/join-6529#faq"
-            data-home-action="Getting started FAQ"
-            className={HOME_TEXT_LINK_CLASSES}
-          >
-            {t(locale, "home.start.faq")}
-            <ArrowRightIcon aria-hidden className={HOME_ACTION_ARROW_CLASSES} />
-          </Link>
-        </p>
       </div>
     </section>
   );

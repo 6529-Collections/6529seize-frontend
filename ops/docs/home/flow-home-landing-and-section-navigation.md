@@ -32,7 +32,7 @@ next route.
   - `Create profile`: `/join-6529#join-step-profile`
   - `View collections`: `/the-memes`
   - `Browse Waves`: `/waves`
-  - Guide: `/join-6529`; wallet/ETH question: `/join-6529#faq`
+  - Guide: `/join-6529`
 - `Latest Drop`:
   - Title: `/the-memes/{id}`
   - Artist pills: `/{handle}` (one or more)

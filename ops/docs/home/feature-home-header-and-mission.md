@@ -64,8 +64,7 @@ sections:
    - The step headings are the actions, with an arrow beside each title.
      `Create, collect or vote` opens `/the-memes`; `Join the community` opens
      `/waves`. Their hover titles remain `View collections` and `Browse Waves`.
-   - `Open the Join 6529 guide` opens `/join-6529`; the wallet/ETH question
-     opens `/join-6529#faq`.
+   - `Open the Join 6529 guide` opens `/join-6529`.
    - Desktop shows four numbered columns. Mobile shows a vertical timeline.
    - The mint/subscription sentence is omitted during server rendering and on
      restricted native iOS (outside the US or unknown country). Those visitors

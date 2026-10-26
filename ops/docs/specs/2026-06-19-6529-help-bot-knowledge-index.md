@@ -42,7 +42,7 @@ showing latest chat messages or message authors.
 
 The `home.overview` record maps the four clickable How to start headings to
 the wallet flow, profile guide, The Memes, and Waves. It also retains the
-“Four steps into 6529.” introduction, guide link, and wallet/ETH FAQ entry point.
+“Four steps into 6529.” introduction and guide link.
 
 The `home.overview` record explains the Coming up full-width vertical card
 list below 768px, keyboard navigation through card links, tablet/desktop grid,

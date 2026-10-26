@@ -83,8 +83,11 @@ it.each(["en-US", "en-GB", "fr-FR", "es-ES", "de-DE"] as const)(
       screen.getByRole("link", { name: "Open the Join 6529 guide" })
     ).toHaveAttribute("href", "/join-6529");
     expect(
-      screen.getByRole("link", { name: "Do I need a wallet or ETH to start?" })
-    ).toHaveAttribute("href", "/join-6529#faq");
+      screen.queryByRole("link", { name: "Do I need a wallet or ETH to start?" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Browse first, connect when ready.")
+    ).not.toBeInTheDocument();
   }
 );
 
@@ -155,7 +158,6 @@ it("tracks every getting-started action using fixed analytics labels", () => {
     ["Create, collect or vote", "View collections"],
     ["Join the community", "Browse Waves"],
     ["Open the Join 6529 guide", "Get started"],
-    ["Do I need a wallet or ETH to start?", "Getting started FAQ"],
   ] as const) {
     const target =
       name === "Connect wallet"
