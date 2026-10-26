@@ -64,11 +64,15 @@ function fixturePage(
   access: string | null = "fixture-access"
 ) {
   const get = jest.fn();
-  for (const records of pages)
+  for (const [index, records] of pages.entries())
     get.mockResolvedValueOnce({
       ok: () => ok,
       status: () => (ok ? 200 : 503),
-      json: async () => ({ data: records }),
+      json: async () => ({
+        data: records,
+        page: index + 1,
+        next: index + 1 < pages.length ? "/nfts?next-page" : null,
+      }),
     });
   const context = {
     cookies: async () =>
@@ -81,7 +85,7 @@ function fixturePage(
   return { page, get, context };
 }
 
-it("qualifies both shapes across bounded pages and reuses the inventory within a browser context", async () => {
+it("qualifies both shapes across inventory pages and reuses the inventory within a browser context", async () => {
   jest.resetModules();
   const { getStagingVideoFixtures } =
     await import("../../tests/media/stagingVideoFixtures");
@@ -100,6 +104,56 @@ it("qualifies both shapes across bounded pages and reuses the inventory within a
   expect(get.mock.calls[0][1]).toEqual({
     headers: { "x-6529-auth": "fixture-access" },
   });
+});
+
+it("finds a required shape after the third page without following response URLs", async () => {
+  const { getStagingVideoFixtures } =
+    await import("../../tests/media/stagingVideoFixtures");
+  const { page, get } = fixturePage([
+    [video(900, 640, 960)],
+    [video(800, 640, 960)],
+    [video(700, 640, 960)],
+    [video(600, 1000, 1000)],
+  ]);
+  await expect(getStagingVideoFixtures(page)).resolves.toEqual({
+    portrait: { id: 900, width: 640, height: 960 },
+    square: { id: 600, width: 1000, height: 1000 },
+  });
+  expect(get).toHaveBeenCalledTimes(4);
+  for (const [index, [url]] of get.mock.calls.entries()) {
+    expect(new URL(url).origin).toBe("https://api.staging.6529.io");
+    expect(new URL(url).searchParams.get("page")).toBe(String(index + 1));
+  }
+});
+
+it("stops at the end of a full inventory page when a shape is absent", async () => {
+  const { getStagingVideoFixtures } =
+    await import("../../tests/media/stagingVideoFixtures");
+  const { page, get } = fixturePage([
+    Array.from({ length: 101 }, (_, index) => video(index + 1, 640, 960)),
+  ]);
+  await expect(getStagingVideoFixtures(page)).rejects.toThrow(
+    "both a qualified portrait and square"
+  );
+  expect(get).toHaveBeenCalledTimes(1);
+});
+
+it("rejects a non-advancing inventory page rather than looping", async () => {
+  const { getStagingVideoFixtures } =
+    await import("../../tests/media/stagingVideoFixtures");
+  const { page, get } = fixturePage([]);
+  get.mockResolvedValue({
+    ok: () => true,
+    json: async () => ({
+      data: [video(549, 640, 960)],
+      page: 1,
+      next: "/nfts",
+    }),
+  });
+  await expect(getStagingVideoFixtures(page)).rejects.toThrow(
+    "pagination must advance"
+  );
+  expect(get).toHaveBeenCalledTimes(2);
 });
 
 it("fails explicitly if the inventory cannot supply both shapes", async () => {

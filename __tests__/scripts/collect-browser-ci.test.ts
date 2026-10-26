@@ -32,6 +32,7 @@ function select(
       playwright_critical_shell: { required: false },
       playwright_museum: { required: false },
       playwright_artwork_documentation: { required: false },
+      playwright_native_competition: { required: false },
       ...extraChecks,
     },
   };
@@ -65,8 +66,15 @@ it("schedules submission artwork separately without replacing competition covera
     include: [
       {
         lane: "playwright-native-competition",
-        label: "Native competitions desktop and mobile",
+        label: "Native competitions shard 1/2",
         runner: "ubuntu-latest",
+        shard: 1,
+      },
+      {
+        lane: "playwright-native-competition",
+        label: "Native competitions shard 2/2",
+        runner: "ubuntu-latest",
+        shard: 2,
       },
       {
         lane: "playwright-submission-artwork",
@@ -171,4 +179,41 @@ it("runs the isolated Collect and market specs on both supported browser viewpor
   expect(step.run).toContain("--project=web-mobile-chromium");
   expect(step.run).toContain("--workers=1");
   expect(job.permissions).toEqual({ contents: "read", issues: "read" });
+});
+
+it("partitions the full native competition pack across two uniquely identified jobs", () => {
+  const outputs = select([], {
+    playwright_native_competition: { required: true },
+  });
+  expect(JSON.parse(outputs["core_playwright_matrix"]!)).toEqual({
+    include: [
+      {
+        lane: "playwright-native-competition",
+        label: "Native competitions shard 1/2",
+        runner: "ubuntu-latest",
+        shard: 1,
+      },
+      {
+        lane: "playwright-native-competition",
+        label: "Native competitions shard 2/2",
+        runner: "ubuntu-latest",
+        shard: 2,
+      },
+    ],
+  });
+  const job = workflow.jobs["core-playwright-checks"]!;
+  const step = job.steps.find(
+    (item) => item.name === "Run native competition browser regression pack"
+  )!;
+  expect(step.run).toBe(
+    './bin/6529 run test:e2e:native-competition-sandbox --shard="$NATIVE_COMPETITION_SHARD"'
+  );
+  expect(step.env?.["NATIVE_COMPETITION_SHARD"]).toBe("${{ matrix.shard }}/2");
+  const upload = job.steps.find(
+    (item) => item.name === "Upload app check artifacts"
+  )!;
+  expect(upload).toHaveProperty(
+    "with.name",
+    "app-pr-ci-results-${{ matrix.lane }}${{ matrix.shard && format('-{0}', matrix.shard) || '' }}-${{ github.event.pull_request.number || github.run_id }}"
+  );
 });

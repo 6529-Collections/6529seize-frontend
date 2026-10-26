@@ -67,7 +67,7 @@ async function waitForLazyImageFrame(page: Page) {
 
 async function settleImages(page: Page, selector: string) {
   const images = page.locator(selector);
-  const expected = new Map<string, number>();
+  const expected = new Map<string, { count: number; label: string }>();
   let stableSince = Date.now();
   // Track the media identity, not its position: a failed managed image can be
   // replaced by an alert, shifting every subsequent img in the document.
@@ -81,6 +81,9 @@ async function settleImages(page: Page, selector: string) {
         counts.set(key, occurrence);
         return {
           key,
+          // Keep the full source only as an internal identity. Assertion text
+          // uses alternative text; sanitized URLs are in Browser media state.
+          label: image.alt || "Unnamed image",
           occurrence,
           loaded: image.complete && image.naturalWidth > 0,
           failed: image.complete && image.naturalWidth === 0,
@@ -93,8 +96,12 @@ async function settleImages(page: Page, selector: string) {
       async () => {
         const inventory = await snapshot();
         for (const image of inventory) {
-          if (image.occurrence <= (expected.get(image.key) ?? 0)) continue;
-          expected.set(image.key, image.occurrence);
+          if (image.occurrence <= (expected.get(image.key)?.count ?? 0))
+            continue;
+          expected.set(image.key, {
+            count: image.occurrence,
+            label: image.label,
+          });
           stableSince = Date.now();
         }
         // Keep the next unresolved lazy image in view until the browser finishes
@@ -120,14 +127,14 @@ async function settleImages(page: Page, selector: string) {
         }
         const current = await snapshot();
         const problems: string[] = [];
-        for (const [key, count] of expected) {
+        for (const [key, { count, label }] of expected) {
           const matches = current.filter((image) => image.key === key);
           if (matches.length < count)
-            problems.push(`Media disappeared or was replaced: ${key}`);
+            problems.push(`Media disappeared or was replaced: ${label}`);
           for (const image of matches) {
-            if (image.failed) problems.push(`Image failed to decode: ${key}`);
+            if (image.failed) problems.push(`Image failed to decode: ${label}`);
             else if (!image.loaded)
-              problems.push(`Image still loading: ${key}`);
+              problems.push(`Image still loading: ${label}`);
           }
         }
         if (Date.now() - stableSince < 500)
@@ -220,7 +227,9 @@ export async function expectNoUnresolvedMuseumMedia(
             if (!isVisible(element)) continue;
             if (!(element instanceof HTMLImageElement)) continue;
             if (!element.complete || element.naturalWidth === 0) {
-              failures.push(`unresolved image: ${element.alt || element.src}`);
+              failures.push(
+                `unresolved image: ${element.alt || "Unnamed image"}`
+              );
             }
           }
           for (const element of root.querySelectorAll(
