@@ -6,7 +6,10 @@ import {
   getMintTimelineStatus,
   getNextMintTimelineDetails,
 } from "../../shared/memes-calendar";
-import { SKIPPED_MINT_UTC_DAYS } from "../../shared/memes-calendar/overrides";
+import {
+  EXTRA_MINT_UTC_DAYS,
+  SKIPPED_MINT_UTC_DAYS,
+} from "../../shared/memes-calendar/overrides";
 
 describe("shared calendar queries", () => {
   it.each([
@@ -97,6 +100,43 @@ describe("shared calendar queries", () => {
     } finally {
       days.forEach((day) => {
         if (!skipped.has(day)) SKIPPED_MINT_UTC_DAYS.delete(day);
+      });
+    }
+  });
+
+  it("finds live mints with adjacent extra days followed by a regular day", () => {
+    const days = ["2026-10-31", "2026-11-01"].map((day) =>
+      Date.parse(`${day}T00:00:00Z`)
+    );
+    const extras = new Set(EXTRA_MINT_UTC_DAYS);
+    const friday = getMintNumberForMintDate(new Date("2026-10-30T00:00:00Z"));
+    try {
+      days.forEach((day) => EXTRA_MINT_UTC_DAYS.add(day));
+      const cases = [
+        ["2026-10-31T14:59:59.999Z", 0],
+        ["2026-10-31T15:00:00Z", null],
+        ["2026-10-31T15:40:00Z", 1],
+        ["2026-11-01T10:00:00Z", 1],
+        ["2026-11-01T15:00:00Z", null],
+        ["2026-11-01T15:40:00Z", 2],
+        ["2026-11-02T10:00:00Z", 2],
+        ["2026-11-02T15:00:00Z", null],
+        ["2026-11-02T15:40:00Z", 3],
+      ] as const;
+      for (const [clock, offset] of cases) {
+        const now = new Date(clock);
+        const current = getCurrentMintTimelineDetails(now);
+        if (offset === null) expect(current).toBeNull();
+        else {
+          expect(current?.mintNumber).toBe(friday + offset);
+          expect([0, 1]).toContain(
+            getMintNumberForMintDate(now) - current!.mintNumber
+          );
+        }
+      }
+    } finally {
+      days.forEach((day) => {
+        if (!extras.has(day)) EXTRA_MINT_UTC_DAYS.delete(day);
       });
     }
   });
