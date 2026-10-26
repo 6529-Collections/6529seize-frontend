@@ -216,6 +216,9 @@ jobs:
           if (plan.checks.playwright_native_competition?.required) {
             corePlaywrightLanes.push({ lane: "playwright-native-competition", label: "Native competitions desktop and mobile", runner: defaultRunner });
           }
+          if (plan.checks.playwright_submission_artwork?.required) {
+            corePlaywrightLanes.push({ lane: "playwright-submission-artwork", label: "Submission artwork desktop and mobile", runner: defaultRunner });
+          }
           if (plan.checks.playwright_pdf_attachments?.required) {
             corePlaywrightLanes.push({ lane: "playwright-pdf-attachments", label: "PDF attachments in WebKit", runner: defaultRunner });
           }
@@ -435,6 +438,13 @@ jobs:
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/native-competition"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/native-competition"
         run: ./bin/6529 run test:e2e:native-competition-sandbox
+
+      - name: Run submission artwork browser regression pack
+        if: matrix.lane == 'playwright-submission-artwork'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/submission-artwork"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/submission-artwork"
+        run: ./bin/6529 run test:e2e:submission-artwork-sandbox
 
       - name: Run PDF attachment browser regression pack
         if: matrix.lane == 'playwright-pdf-attachments'
