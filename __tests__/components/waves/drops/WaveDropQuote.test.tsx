@@ -55,7 +55,7 @@ test("renders loading placeholder when drop missing", () => {
   const { container } = render(
     <WaveDropQuote drop={null} partId={1} onQuoteClick={jest.fn()} />
   );
-  expect(container.querySelector(".tw-animate-pulse")).toBeInTheDocument();
+  expect(container.querySelector('[aria-busy="true"]')).toBeInTheDocument();
   expect(screen.queryByText("Drop not found")).not.toBeInTheDocument();
 });
 
@@ -70,7 +70,7 @@ test("renders not-found state without loading placeholder", () => {
   );
 
   expect(screen.getByText("Drop not found")).toBeInTheDocument();
-  expect(container.querySelector(".tw-animate-pulse")).not.toBeInTheDocument();
+  expect(container.querySelector('[aria-busy="true"]')).not.toBeInTheDocument();
   expect(screen.queryByRole("button")).not.toBeInTheDocument();
 });
 
@@ -97,7 +97,7 @@ test("does not bubble loading quote clicks to parent", async () => {
       <WaveDropQuote drop={null} partId={1} onQuoteClick={jest.fn()} />
     </div>
   );
-  const loadingPlaceholder = container.querySelector(".tw-animate-pulse");
+  const loadingPlaceholder = container.querySelector('[aria-busy="true"]');
 
   expect(loadingPlaceholder).toBeInTheDocument();
 
@@ -351,7 +351,8 @@ test("clears quoted part content when drop becomes null", () => {
   expect(screen.getByTestId("markdown")).toHaveTextContent("text");
 
   rerender(<WaveDropQuote drop={null} partId={5} onQuoteClick={jest.fn()} />);
-  expect(screen.getByTestId("markdown")).toHaveTextContent("");
+  expect(screen.queryByTestId("markdown")).not.toBeInTheDocument();
+  expect(screen.getByText("Loading drop preview")).toBeInTheDocument();
 });
 
 test("passes explicit link-card suppression callback into nested markdown", () => {
@@ -430,4 +431,28 @@ test("falls back to link preview context for nested markdown suppression", () =>
   expect(markdownProps.onLinkCardActionsActiveChange).toBe(
     onCardActionsActiveChange
   );
+});
+
+test("replaces a failed quote with an accessible link without bubbling", async () => {
+  const onParentClick = jest.fn();
+  const onParentKeyDown = jest.fn();
+  render(
+    <div onClick={onParentClick} onKeyDown={onParentKeyDown}>
+      <WaveDropQuote
+        drop={null}
+        partId={1}
+        onQuoteClick={jest.fn()}
+        isUnavailable
+        fallbackHref="/waves/w1?drop=d1"
+      />
+    </div>
+  );
+  expect(screen.getByText("Drop preview unavailable")).toBeInTheDocument();
+  expect(screen.queryByText("Loading drop preview")).not.toBeInTheDocument();
+  const link = screen.getByRole("link", { name: "Open drop" });
+  expect(link).toHaveAttribute("href", "/waves/w1?drop=d1");
+  await userEvent.click(link);
+  await userEvent.keyboard("{Enter}");
+  expect(onParentClick).not.toHaveBeenCalled();
+  expect(onParentKeyDown).not.toHaveBeenCalled();
 });

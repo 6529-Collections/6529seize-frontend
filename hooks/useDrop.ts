@@ -26,6 +26,7 @@ export const useDrop = ({
   const {
     data: drop,
     isFetching,
+    isError,
     refetch,
   } = useQuery<ApiDrop | undefined>({
     queryKey: getDropQueryKey(dropId),
@@ -47,6 +48,7 @@ export const useDrop = ({
   return {
     drop,
     isFetching,
+    isError,
     prefetchDrop,
     refetch,
   };

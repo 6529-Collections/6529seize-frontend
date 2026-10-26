@@ -8,8 +8,11 @@ import { ApiSubmissionDropStatus } from "@/generated/models/ApiSubmissionDropSta
 import { useWaveById } from "@/hooks/useWaveById";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { commonApiFetch } from "@/services/api/common-api";
-import { fetchDropByIdBatched } from "@/services/api/drop-api";
-import { renderWithQueryClient } from "../../../utils/reactQuery";
+import { fetchDropByIdBatched, getDropQueryKey } from "@/services/api/drop-api";
+import {
+  createTestQueryClient,
+  renderWithQueryClient,
+} from "../../../utils/reactQuery";
 
 const mockDrop = jest.fn(() => <div data-testid="drop" />);
 const mockWaveDropQuote = jest.fn(() => <div data-testid="quote" />);
@@ -195,6 +198,25 @@ describe("WaveDropLinkPreview", () => {
     });
   });
 
+  it("renders a cached drop on the first render without a placeholder or request", () => {
+    const queryClient = createTestQueryClient();
+    queryClient.setQueryData(getDropQueryKey("drop-1"), buildDrop());
+
+    const { getByTestId } = renderWithQueryClient(
+      <WaveDropLinkPreview
+        href="https://site.com/waves/wave-1?drop=drop-1"
+        waveId="wave-1"
+        dropId="drop-1"
+        onQuoteClick={jest.fn()}
+      />,
+      { queryClient }
+    );
+
+    expect(getByTestId("drop")).toBeInTheDocument();
+    expect(mockWaveDropQuote).not.toHaveBeenCalled();
+    expect(fetchDropByIdBatchedMock).not.toHaveBeenCalled();
+  });
+
   it("fetches by drop id and renders participatory drops through Drop", async () => {
     fetchDropByIdBatchedMock.mockResolvedValue(buildDrop());
 
@@ -378,5 +400,29 @@ describe("WaveDropLinkPreview", () => {
       );
     });
     expect(mockDrop).not.toHaveBeenCalled();
+  });
+  it.each([
+    new Error("Network error"),
+    { status: 403 },
+    new Error("Drop drop-1 not found"),
+  ])("ends the placeholder when lookup fails: %p", async (error) => {
+    fetchDropByIdBatchedMock.mockRejectedValue(error);
+    renderWithQueryClient(
+      <WaveDropLinkPreview
+        href="https://site.com/waves/wave-1?drop=drop-1"
+        waveId="wave-1"
+        dropId="drop-1"
+        onQuoteClick={jest.fn()}
+      />
+    );
+    await waitFor(() =>
+      expect(mockWaveDropQuote).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          drop: null,
+          isUnavailable: true,
+          fallbackHref: expect.stringContaining("/waves/wave-1?drop=drop-1"),
+        })
+      )
+    );
   });
 });

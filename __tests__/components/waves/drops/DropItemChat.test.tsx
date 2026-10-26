@@ -41,47 +41,100 @@ const { useDrop } = require("@/hooks/useDrop");
 const { removeBaseEndpoint } = require("@/helpers/Helpers");
 
 describe("DropItemChat", () => {
-  it("renders fallback link when drop not loaded", () => {
-    (useDrop as jest.Mock).mockReturnValue({ drop: null });
-    const { container } = render(
-      <DropItemChat href="https://base.com/path" dropId="d1" />
-    );
-    const link = container.querySelector("a");
-    expect(link).toHaveAttribute("href", "/path");
-    expect(link).toHaveTextContent("https://base.com/path");
+  it("reserves an artwork card while loading without showing the raw URL", () => {
+    (useDrop as jest.Mock).mockReturnValue({ drop: undefined, isError: false });
+    render(<DropItemChat href="https://base.com/path" dropId="d1" />);
+    expect(
+      screen.getByRole("status", { name: "Drop preview" })
+    ).toHaveAttribute("aria-busy", "true");
+    expect(screen.getByText("Loading drop preview")).toBeInTheDocument();
+    expect(screen.queryByText("https://base.com/path")).not.toBeInTheDocument();
+    expect(screen.getByTestId("href-buttons")).toHaveTextContent("/path");
     expect(removeBaseEndpoint).toHaveBeenCalledWith("https://base.com/path");
   });
 
-  it("shows drop details when loaded", () => {
+  it("replaces loading with an unavailable state and preserves the link on error", () => {
+    (useDrop as jest.Mock).mockReturnValue({ drop: undefined, isError: false });
+    const { rerender } = render(
+      <DropItemChat href="https://base.com/path" dropId="d1" />
+    );
+    (useDrop as jest.Mock).mockReturnValue({ drop: undefined, isError: true });
+    rerender(<DropItemChat href="https://base.com/path" dropId="d1" />);
+    expect(screen.getByText("Drop preview unavailable")).toBeInTheDocument();
+    expect(
+      screen.getByRole("status", { name: "Drop preview" })
+    ).toHaveAttribute("aria-busy", "false");
+    expect(screen.getByRole("link", { name: "Open drop" })).toHaveAttribute(
+      "href",
+      "/path"
+    );
+    expect(screen.queryByText("Loading drop preview")).not.toBeInTheDocument();
+  });
+
+  it.each([false, true])(
+    "shows available drop details immediately (isFetching: %s)",
+    (isFetching) => {
+      (useDrop as jest.Mock).mockReturnValue({
+        isFetching,
+        isError: false,
+        drop: {
+          drop_type: ApiDropType.Participatory,
+          parts: [{ media: [{ mime_type: "video/mp4", url: "video" }] }],
+          metadata: [{ data_key: "title", data_value: "Title" }],
+          title: "T",
+          wave: { id: "w", name: "Wave" },
+          rank: 2,
+        },
+      });
+      render(<DropItemChat href="https://base.com/p" dropId="d1" />);
+      expect(
+        screen.queryByText("Loading drop preview")
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("status", { name: "Drop preview" })
+      ).not.toBeInTheDocument();
+      const links = screen.getAllByRole("link");
+      expect(links[0]).toHaveAttribute("href", "/p");
+      expect(screen.getByRole("heading", { name: "Title" })).toHaveClass(
+        "tw-m-0"
+      );
+      expect(screen.getByTestId("position")).toHaveTextContent("2");
+      expect(screen.getByTestId("media")).toHaveAttribute(
+        "data-media-url",
+        "video"
+      );
+      expect(screen.getByTestId("media")).toHaveAttribute(
+        "data-fill-video-container",
+        "true"
+      );
+      expect(screen.getByTestId("media").parentElement).toHaveClass(
+        "tw-bg-iron-900/30"
+      );
+      expect(screen.getByTestId("href-buttons")).toHaveTextContent("/p");
+    }
+  );
+
+  it("removes the skeleton as soon as data arrives without waiting for a timer", () => {
+    (useDrop as jest.Mock).mockReturnValue({ drop: undefined, isError: false });
+    const { rerender } = render(
+      <DropItemChat href="https://base.com/p" dropId="d1" />
+    );
+    expect(screen.getByText("Loading drop preview")).toBeInTheDocument();
+
     (useDrop as jest.Mock).mockReturnValue({
       drop: {
-        drop_type: ApiDropType.Participatory,
-        parts: [{ media: [{ mime_type: "video/mp4", url: "video" }] }],
-        metadata: [{ data_key: "title", data_value: "Title" }],
-        title: "T",
+        drop_type: ApiDropType.Chat,
+        title: "Ready now",
         wave: { id: "w", name: "Wave" },
-        rank: 2,
       },
+      isError: false,
     });
-    render(<DropItemChat href="https://base.com/p" dropId="d1" />);
-    const links = screen.getAllByRole("link");
-    expect(links[0]).toHaveAttribute("href", "/p");
-    expect(screen.getByRole("heading", { name: "Title" })).toHaveClass(
-      "tw-m-0"
-    );
-    expect(screen.getByTestId("position")).toHaveTextContent("2");
-    expect(screen.getByTestId("media")).toHaveAttribute(
-      "data-media-url",
-      "video"
-    );
-    expect(screen.getByTestId("media")).toHaveAttribute(
-      "data-fill-video-container",
-      "true"
-    );
-    expect(screen.getByTestId("media").parentElement).toHaveClass(
-      "tw-bg-iron-900/30"
-    );
-    expect(screen.getByTestId("href-buttons")).toHaveTextContent("/p");
+    rerender(<DropItemChat href="https://base.com/p" dropId="d1" />);
+
+    expect(
+      screen.getByRole("heading", { name: "Ready now" })
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Loading drop preview")).not.toBeInTheDocument();
   });
 
   it("renders chat drop title as plain text when loaded", () => {
@@ -99,6 +152,11 @@ describe("DropItemChat", () => {
     render(<DropItemChat href="https://base.com/p" dropId="d1" />);
 
     expect(screen.getByText("Chat Title").closest("a")).toBeNull();
+    expect(screen.getByText("Chat Title").closest(".tw-border")).toHaveClass(
+      "tw-min-h-[31.0625rem]",
+      "sm:tw-min-h-[31.5625rem]"
+    );
+    expect(screen.queryByTestId("media")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Wave" })).toHaveAttribute(
       "href",
       "/p"
