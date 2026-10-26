@@ -20,12 +20,14 @@ function mediaImage(
   options: {
     loaded?: boolean;
     decodeOnVisit?: boolean;
+    visitsBeforeDecode?: number;
     onVisit?: () => void;
   } = {}
 ) {
   const source = `https://example.com/${encodeURIComponent(alt)}.png`;
   let loaded = options.loaded ?? false;
   let complete = loaded;
+  let visits = 0;
   return {
     alt,
     getAttribute: (name: string) => (name === "src" ? source : null),
@@ -36,8 +38,9 @@ function mediaImage(
       return loaded ? 100 : 0;
     },
     scrollIntoView: jest.fn(() => {
-      complete = true;
-      loaded = options.decodeOnVisit ?? true;
+      visits += 1;
+      complete = visits >= (options.visitsBeforeDecode ?? 1);
+      loaded = complete && (options.decodeOnVisit ?? true);
       options.onVisit?.();
     }),
   };
@@ -142,6 +145,18 @@ describe("Museum rendered media readiness", () => {
     await expect(
       expectNoUnresolvedMuseumMedia(mediaPage(main))
     ).rejects.toThrow("Media disappeared or was replaced: first work");
+  });
+
+  it("keeps a pending lazy image in view instead of leaving it behind after one visit", async () => {
+    const pending = mediaImage("responsive work", { visitsBeforeDecode: 3 });
+    const next = mediaImage("next work");
+    main.append(pending, next);
+    await expect(
+      expectNoUnresolvedMuseumMedia(mediaPage(main))
+    ).resolves.toBeUndefined();
+    expect(pending.scrollIntoView).toHaveBeenCalledTimes(3);
+    expect(next.scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(pending.complete && pending.naturalWidth > 0).toBe(true);
   });
 
   it("rejects a failed native decode", async () => {

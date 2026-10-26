@@ -482,6 +482,74 @@ async function fulfillLocalReadOnlyFixture(
 
 async function openLocalWaveSearchModal(page: Page) {
   await installLocalActiveWaveSearchFixture(page);
+  // Resolve Main Stage only after search is open. This replaces the shared
+  // header with its competition variant and must preserve the dialog/focus.
+  let resolveCompetition = () => {};
+  const competitionReady = new Promise<void>((resolve) => {
+    resolveCompetition = resolve;
+  });
+  await page.route(
+    `**/v3/waves/${LOCAL_ACTIVE_WAVE_ID}/default-competition`,
+    (route) =>
+      fulfillLocalReadOnlyFixture(route, {
+        json: {
+          competition_id: "search-main-stage",
+          evaluated_at: Date.now(),
+          next_refresh_at: null,
+        },
+      })
+  );
+  await page.route(
+    `**/v3/waves/${LOCAL_ACTIVE_WAVE_ID}/competitions/search-main-stage`,
+    async (route) => {
+      await competitionReady;
+      await fulfillLocalReadOnlyFixture(route, {
+        json: {
+          id: "search-main-stage",
+          wave_id: LOCAL_ACTIVE_WAVE_ID,
+          type: "RANK",
+          title: "Local Main Stage",
+          lifecycle: "PUBLISHED",
+          computed_phase: "SUBMISSION_OPEN",
+          config_version: 1,
+          capabilities: ["MAIN_STAGE"],
+          presentation: [],
+          voting: {
+            ...localFixtureWave.voting,
+            starts_at: null,
+            ends_at: null,
+            credit_creditor: null,
+          },
+          participation: {
+            ...localFixtureWave.participation,
+            starts_at: null,
+            ends_at: null,
+            submission_type: "DROP",
+            max_entries_per_participant: null,
+          },
+          decisions: {
+            strategy: null,
+            time_lock_ms: null,
+            next_decision_time: null,
+          },
+          winners: {
+            max_winners: null,
+            winning_min_threshold: null,
+            winning_threshold_min_duration_ms: null,
+          },
+          outcome_config: [],
+          permissions: {
+            view: true,
+            submit: false,
+            vote: false,
+            administer: false,
+          },
+          created_at: 1,
+          updated_at: 1,
+        },
+      });
+    }
+  );
   await gotoReady(page, `/waves?wave=${LOCAL_ACTIVE_WAVE_ID}`);
 
   await page
@@ -492,7 +560,12 @@ async function openLocalWaveSearchModal(page: Page) {
     .click();
   const searchInput = page.locator("#wave-drops-search-input");
   // The search modal loads on demand, so the first open waits for its chunk.
-  await expect(searchInput).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+  await expect(searchInput)
+    .toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS })
+    .finally(resolveCompetition);
+  await expect(
+    page.getByRole("button", { name: "How to Submit", exact: true })
+  ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
   await expect(searchInput).toBeFocused({ timeout: NAVIGATION_TIMEOUT_MS });
 
   return {

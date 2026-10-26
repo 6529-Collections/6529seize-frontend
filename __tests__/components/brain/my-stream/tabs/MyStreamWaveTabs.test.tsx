@@ -1,7 +1,46 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
 const registerRef = jest.fn();
+const mockReplace = jest.fn();
+const mockSetTab = jest.fn();
+jest.mock("next/navigation", () => ({
+  usePathname: () => "/waves/w1",
+  useSearchParams: () => new URLSearchParams("curation=c1&divider=1"),
+  useRouter: () => ({ replace: mockReplace }),
+}));
+jest.mock("@/components/brain/ContentTabContext", () => ({
+  useContentTab: () => ({ setActiveContentTab: mockSetTab }),
+}));
+jest.mock("@/contexts/wave/WaveChatScrollContext", () => ({
+  useWaveChatScrollOptional: () => null,
+}));
+jest.mock("@/components/waves/drops/search/LazyWaveDropsSearchModal", () => ({
+  __esModule: true,
+  default: ({
+    isOpen,
+    onClose,
+    onSearchAll,
+    onSelectSerialNo,
+  }: {
+    isOpen: boolean;
+    onClose: () => void;
+    onSearchAll: () => void;
+    onSelectSerialNo: (serial: number) => void;
+  }) =>
+    isOpen ? (
+      <div role="dialog" aria-label="Message search">
+        <input aria-label="Query" autoFocus />
+        <button onClick={onSearchAll}>Search all</button>
+        <button onClick={() => onSelectSerialNo(42)}>Result</button>
+        <button onClick={onClose}>Close search</button>
+      </div>
+    ) : null,
+}));
+jest.mock("@/components/header/header-search/LazyHeaderSearchModal", () => ({
+  __esModule: true,
+  default: () => <div role="dialog" aria-label="Site search" />,
+}));
 
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ registerRef }),
@@ -13,12 +52,32 @@ jest.mock("@/hooks/useWave", () => ({
 
 jest.mock("@/components/brain/my-stream/tabs/MyStreamWaveTabsMeme", () => ({
   __esModule: true,
-  default: () => <div data-testid="meme" />,
+  default: () => {
+    const { useOpenMyStreamWaveSearch } = jest.requireActual(
+      "@/components/brain/my-stream/tabs/MyStreamWaveSearch"
+    );
+    const { open, trigger } = useOpenMyStreamWaveSearch();
+    return (
+      <button ref={trigger} data-testid="meme" onClick={open}>
+        Search messages
+      </button>
+    );
+  },
 }));
 
 jest.mock("@/components/brain/my-stream/tabs/MyStreamWaveTabsDefault", () => ({
   __esModule: true,
-  default: () => <div data-testid="default" />,
+  default: () => {
+    const { useOpenMyStreamWaveSearch } = jest.requireActual(
+      "@/components/brain/my-stream/tabs/MyStreamWaveSearch"
+    );
+    const { open, trigger } = useOpenMyStreamWaveSearch();
+    return (
+      <button ref={trigger} data-testid="default" onClick={open}>
+        Search messages
+      </button>
+    );
+  },
 }));
 
 import { MyStreamWaveTabs } from "@/components/brain/my-stream/tabs/MyStreamWaveTabs";
@@ -77,4 +136,48 @@ describe("MyStreamWaveTabs", () => {
     expect(screen.getByTestId("default")).toBeInTheDocument();
     expect(screen.queryByTestId("meme")).toBeNull();
   });
+});
+
+it("keeps the same open search, query and focus while competition resolution replaces the header", async () => {
+  (useWave as jest.Mock).mockReturnValue({ isMemesWave: true });
+  const selectCuration = jest.fn();
+  const tabs = (ready: boolean, id = "w1") => (
+    <MyStreamWaveTabs
+      wave={{ id, name: "Wave" } as ApiWave}
+      competitionSubmissionReady={ready}
+      viewMode="chat"
+      onToggleViewMode={jest.fn()}
+      showGalleryToggle={false}
+      onSelectCuration={selectCuration}
+    />
+  );
+  const { rerender } = render(tabs(false));
+  fireEvent.click(screen.getByRole("button", { name: "Search messages" }));
+  const input = screen.getByRole("textbox", { name: "Query" });
+  fireEvent.change(input, { target: { value: "preserve this query" } });
+  expect(input).toHaveFocus();
+  rerender(tabs(true));
+  expect(screen.getByTestId("meme")).toBeInTheDocument();
+  expect(screen.getByRole("textbox")).toBe(input);
+  expect(input).toHaveValue("preserve this query");
+  expect(input).toHaveFocus();
+  fireEvent.click(screen.getByRole("button", { name: "Close search" }));
+  await waitFor(() => expect(screen.getByTestId("meme")).toHaveFocus());
+  fireEvent.click(screen.getByTestId("meme"));
+  const reopenedInput = screen.getByRole("textbox");
+  // Refetching back to shared tabs must also preserve the dialog.
+  rerender(tabs(false));
+  expect(screen.getByRole("textbox")).toBe(reopenedInput);
+  fireEvent.click(screen.getByRole("button", { name: "Result" }));
+  expect(selectCuration).toHaveBeenCalledWith(null);
+  expect(mockReplace).toHaveBeenCalledWith("/waves/w1?divider=1&serialNo=42", {
+    scroll: false,
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Search all" }));
+  expect(screen.queryByRole("dialog", { name: "Message search" })).toBeNull();
+  expect(
+    screen.getByRole("dialog", { name: "Site search" })
+  ).toBeInTheDocument();
+  rerender(tabs(true, "w2"));
+  expect(screen.queryByRole("dialog")).toBeNull();
 });

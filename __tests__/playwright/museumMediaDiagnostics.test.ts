@@ -79,3 +79,27 @@ it("captures original status and ORB evidence without replacing it with a replay
   await detach();
   expect(session.detach).toHaveBeenCalledTimes(1);
 });
+
+it("includes same-origin editorial images while excluding unrelated and cross-origin paths", () => {
+  const documentUrl = "https://staging.6529.io/museum/network/research";
+  const image =
+    "https://staging.6529.io/museum/research/editorial/magnum/work.webp";
+  expect(
+    museumMediaEvidenceUrl(`${image}?token=private#fragment`, documentUrl)
+  ).toBe(image);
+  expect(
+    museumMediaEvidenceUrl(image, "https://6529.io/museum/network/research")
+  ).toBeNull();
+  expect(
+    museumMediaEvidenceUrl(
+      "https://staging.6529.io/profile/private.png",
+      documentUrl
+    )
+  ).toBeNull();
+  expect(
+    museumMediaEvidenceUrl(
+      "https://staging.6529.io/museum/config.json",
+      documentUrl
+    )
+  ).toBeNull();
+});

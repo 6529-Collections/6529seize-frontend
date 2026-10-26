@@ -9,6 +9,14 @@ let mockConnectedProfile: { handle: string } | null = { handle: "alice" };
 let mockActiveProfileProxy: { created_by: { handle: string } } | null = null;
 let mockShowJoinCta = false;
 
+const mockOpenWaveSearch = jest.fn();
+jest.mock("@/components/brain/my-stream/tabs/MyStreamWaveSearch", () => ({
+  useOpenMyStreamWaveSearch: () => ({
+    open: mockOpenWaveSearch,
+    trigger: { current: null },
+  }),
+}));
+
 jest.mock("next/navigation", () => ({
   usePathname: () => "/waves/wave-1",
   useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
@@ -130,7 +138,7 @@ describe("MyStreamWaveTabsHeader", () => {
     mockShowJoinCta = false;
   });
 
-  it("can expand Wave search into the site-wide search", async () => {
+  it("opens search through the stable tabs owner", () => {
     render(
       <MyStreamWaveTabsHeader
         wave={wave}
@@ -148,15 +156,7 @@ describe("MyStreamWaveTabsHeader", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "Search messages in this wave" })
     );
-    expect(
-      await screen.findByTestId("wave-drops-search-modal")
-    ).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "Search all 6529" }));
-    expect(screen.queryByTestId("wave-drops-search-modal")).toBeNull();
-    expect(
-      await screen.findByTestId("header-search-modal")
-    ).toBeInTheDocument();
+    expect(mockOpenWaveSearch).toHaveBeenCalledTimes(1);
   });
 
   it("keeps the score in the identity and REP beside the header icon buttons", () => {
