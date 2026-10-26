@@ -685,16 +685,24 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
     await reviewSelected.click();
     await expect(reviewSelected).toHaveAttribute("aria-busy", "true");
     await expect(reviewSelected).toBeDisabled();
-    await expect(reviewSelected.locator("svg")).toBeVisible();
+    await expect(
+      page
+        .getByRole("button", { name: /^Review selected listings/ })
+        .locator("svg")
+    ).toBeVisible();
     await expect(reviewSelected).toHaveCSS("opacity", "1");
-    await expect(reviewSelected.locator("svg path").last()).toHaveCSS(
-      "fill",
-      "rgb(255, 255, 255)"
-    );
-    await expect(reviewSelected.locator("svg path").first()).toHaveCSS(
-      "fill",
-      "rgba(255, 255, 255, 0.25)"
-    );
+    await expect(
+      page
+        .getByRole("button", { name: /^Review selected listings/ })
+        .locator("svg path")
+        .last()
+    ).toHaveCSS("fill", "rgb(255, 255, 255)");
+    await expect(
+      page
+        .getByRole("button", { name: /^Review selected listings/ })
+        .locator("svg path")
+        .first()
+    ).toHaveCSS("fill", "rgba(255, 255, 255, 0.25)");
     const loadingMessage = market.getByRole("status").filter({
       hasText: "Checking selected listings…",
     });
@@ -799,7 +807,9 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
     .getByRole("menuitem", { name: "Review offers: Meme Lab artwork" })
     .click();
   const ordersDialog = page.getByRole("dialog");
-  const ordersPanel = ordersDialog.locator(".mobile-wrapper-dialog");
+  const ordersPanel = page
+    .getByRole("dialog")
+    .locator(".mobile-wrapper-dialog");
   const orderQuantity = ordersDialog.getByLabel("Quantity", { exact: true });
   let pendingBounds;
   let quantityInput;
@@ -823,7 +833,7 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
       ordersDialog.getByRole("button", { name: "Close", exact: true })
     ).toBeVisible();
     await expect(
-      ordersDialog.locator('[role="status"] [aria-hidden="true"]')
+      page.getByRole("dialog").locator('[role="status"] [aria-hidden="true"]')
     ).toHaveCSS("animation-name", "none");
     quantityInput = await orderQuantity.elementHandle();
     pendingBounds = (await ordersPanel.boundingBox())!;
@@ -853,12 +863,18 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
   const closeBox = (await ordersDialog
     .getByRole("button", { name: "Close", exact: true })
     .boundingBox())!;
-  const legendBox = (await ordersDialog.locator("legend").boundingBox())!;
-  const firstChoiceBox = (await orderChoices
+  const legendBox = (await page
+    .getByRole("dialog")
+    .locator("legend")
+    .boundingBox())!;
+  const firstChoiceBox = (await ordersDialog
+    .getByRole("radio")
     .nth(0)
     .locator("..")
     .boundingBox())!;
-  const walletSummary = ordersDialog.locator("[data-collect-wallet-summary]");
+  const walletSummary = page
+    .getByRole("dialog")
+    .locator("[data-collect-wallet-summary]");
   const walletSummaryBox = (await walletSummary.boundingBox())!;
   expect(walletSummaryBox.y - closeBox.y - closeBox.height).toBeCloseTo(16, 0);
   expect(
@@ -875,17 +891,20 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
     "rgb(236, 236, 238)"
   );
   await expect(
-    ordersDialog.locator("[data-collect-order-footer]").getByRole("button", {
-      name: "Connect wallet",
-      exact: true,
-    })
+    page
+      .getByRole("dialog")
+      .locator("[data-collect-order-footer]")
+      .getByRole("button", {
+        name: "Connect wallet",
+        exact: true,
+      })
   ).toHaveCount(0);
   expect(legendBox.x).toBeCloseTo(headingBox.x, 0);
   expect(firstChoiceBox.x).toBeCloseTo(headingBox.x, 0);
   expect(firstChoiceBox.y - legendBox.y - legendBox.height).toBeCloseTo(16, 0);
   await expect(orderChoices.nth(0)).not.toBeChecked();
   await expect(orderChoices.nth(1)).not.toBeChecked();
-  await orderChoices.nth(0).locator("..").click();
+  await ordersDialog.getByRole("radio").nth(0).locator("..").click();
   await orderQuantity.fill("2");
   await orderChoices.nth(1).press("Space");
   await expect(orderChoices.nth(1)).toBeChecked();
@@ -900,15 +919,22 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
       exact: true,
     })
   ).toBeDisabled();
-  if (isMobile) {
+  {
     const originalViewport = page.viewportSize()!;
-    const orderBook = ordersDialog.locator("[data-collect-order-book]");
-    const footer = ordersDialog.locator("[data-collect-order-footer]");
+    const orderBook = page
+      .getByRole("dialog")
+      .locator("[data-collect-order-book]");
+    const footer = page
+      .getByRole("dialog")
+      .locator("[data-collect-order-footer]");
     const reviewTerms = ordersDialog.getByRole("button", {
       name: "Review exact terms",
       exact: true,
     });
-    for (const viewport of [originalViewport, { width: 320, height: 568 }]) {
+    for (const viewport of [
+      originalViewport,
+      isMobile ? { width: 320, height: 568 } : { width: 1280, height: 720 },
+    ]) {
       await page.setViewportSize(viewport);
       await expect(orderQuantity).toBeInViewport();
       await expect(reviewTerms).toBeInViewport();
@@ -917,11 +943,16 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
       expect(bookBounds.y + bookBounds.height).toBeLessThanOrEqual(
         footerBefore.y
       );
-      await orderChoices.last().locator("..").scrollIntoViewIfNeeded();
+      await ordersDialog
+        .getByRole("radio")
+        .last()
+        .locator("..")
+        .scrollIntoViewIfNeeded();
       const footerAfter = (await footer.boundingBox())!;
       expect(footerAfter.y).toBeCloseTo(footerBefore.y, 0);
       await expect(reviewTerms).toBeInViewport();
-      const lastChoiceBounds = (await orderChoices
+      const lastChoiceBounds = (await ordersDialog
+        .getByRole("radio")
         .last()
         .locator("..")
         .boundingBox())!;
@@ -933,7 +964,7 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
       await expectNoHorizontalOverflow(page);
     }
     // A very short available viewport must still allow reaching every control.
-    await page.setViewportSize({ width: 390, height: 400 });
+    await page.setViewportSize({ width: isMobile ? 390 : 1280, height: 400 });
     await reviewTerms.scrollIntoViewIfNeeded();
     await expect(reviewTerms).toBeInViewport();
     const connectWallet = ordersDialog.getByRole("button", {
@@ -946,7 +977,11 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
     await expect(orderQuantity).toHaveValue("1");
     await page.setViewportSize(originalViewport);
     await ordersDialog.getByRole("heading").scrollIntoViewIfNeeded();
-    await orderChoices.nth(1).locator("..").scrollIntoViewIfNeeded();
+    await ordersDialog
+      .getByRole("radio")
+      .nth(1)
+      .locator("..")
+      .scrollIntoViewIfNeeded();
   }
   await ordersPanel.screenshot({
     path: info.outputPath("review-offers-ready.png"),
@@ -988,9 +1023,12 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
     const highest = market.getByText("Highest offer · WETH", { exact: true });
     await expect(
       market
-        .getByText(offersOnly ? "Lowest listing · ETH" : "Highest offer · WETH", {
-          exact: true,
-        })
+        .getByText(
+          offersOnly ? "Lowest listing · ETH" : "Highest offer · WETH",
+          {
+            exact: true,
+          }
+        )
         .locator("..")
     ).toContainText("—");
     for (const width of [390, 900, 1024, 1440]) {

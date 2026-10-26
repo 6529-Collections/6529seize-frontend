@@ -83,7 +83,7 @@ trading panel, beside **List** when available. Other artwork pages keep
 wallet** in the same card at the top when a connection is needed. It appears
 before the offer fields or order chooser. The button wraps to its own full-width
 row when space is limited; the order chooser keeps quantity and **Review exact
-terms** in its bottom controls on phones.
+terms** visible in its bottom controls on phones and desktop.
 If ownership is still loading, **List** stays visible but unavailable.
 If that check fails, choose **Try again** beside the action.
 

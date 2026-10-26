@@ -81,7 +81,9 @@ async function expectTradingPanelLayout(page: Page) {
   );
   expect(reviewBox.height).toBeCloseTo(36, 0);
   expect(listBox.height).toBeCloseTo(36, 0);
-  const footer = panel.locator("[data-collect-detail-strip-actions]");
+  const footer = page
+    .getByTestId("collect-detail-panel")
+    .locator("[data-collect-detail-strip-actions]");
   const footerBox = (await footer.boundingBox())!;
   // Supporting actions remain compact and right-aligned; only phone Connect fills a row.
   expect(listBox.x + listBox.width).toBeCloseTo(
@@ -107,10 +109,11 @@ async function expectTradingPanelLayout(page: Page) {
   } else {
     expect(connectBox.width).toBeLessThan(170);
   }
-  await expect(panel.locator("[data-collect-detail-strip]")).toHaveCSS(
-    "border-top-width",
-    "0px"
-  );
+  await expect(
+    page
+      .getByTestId("collect-detail-panel")
+      .locator("[data-collect-detail-strip]")
+  ).toHaveCSS("border-top-width", "0px");
   await expect(
     panel.getByRole("button", { name: /^Review offers:/ })
   ).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
@@ -123,13 +126,18 @@ async function expectTradingPanelLayout(page: Page) {
   ]) {
     await expect(button).toHaveCSS("white-space", "nowrap");
     // Overflow is contained with an ellipsis; the complete accessible name remains.
-    const label = button === collect ? button.locator(":scope > span") : button;
+    const label =
+      button === collect
+        ? actions
+            .getByRole("button", { name: /^Collect [0-9]/ })
+            .locator(":scope > span")
+        : button;
     await expect(label).toHaveCSS("overflow", "hidden");
     await expect(label).toHaveCSS("text-overflow", "ellipsis");
   }
-  const guidance = panel.locator(
-    "[data-collect-connection-header] [role='status']"
-  );
+  const guidance = page
+    .getByTestId("collect-detail-panel")
+    .locator("[data-collect-connection-header] [role='status']");
   const guidanceBox = (await guidance.boundingBox())!;
   expect(footerBox.y).toBeGreaterThanOrEqual(
     guidanceBox.y + guidanceBox.height + 12
@@ -245,9 +253,9 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
       await expect(
         reviewDialog.getByText("Choose an order", { exact: true })
       ).toBeVisible();
-      const walletSummary = reviewDialog.locator(
-        "[data-collect-wallet-summary]"
-      );
+      const walletSummary = page
+        .getByRole("dialog")
+        .locator("[data-collect-wallet-summary]");
       await expect(
         walletSummary.getByRole("button", {
           name: "Connect wallet",
@@ -255,7 +263,8 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
         })
       ).toBeVisible();
       const walletBox = (await walletSummary.boundingBox())!;
-      const orderBookBox = (await reviewDialog
+      const orderBookBox = (await page
+        .getByRole("dialog")
         .locator("[data-collect-order-book]")
         .boundingBox())!;
       expect(walletBox.y + walletBox.height).toBeLessThan(orderBookBox.y);
@@ -399,7 +408,9 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     const panel = page.getByTestId("collect-detail-panel");
     const sticky = page.getByTestId("collect-sticky-actions");
     const collect = panel.getByRole("button", { name: /^Collect [0-9]/ });
-    const stickyCollect = sticky.locator('button[type="submit"]');
+    const stickyCollect = page
+      .getByTestId("collect-sticky-actions")
+      .locator('button[type="submit"]');
     for (const width of [320, 360, 375, 390, 430, 768, 1023, 1024, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       await expectTradingPanelLayout(page);
@@ -416,7 +427,9 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
           )
         );
       }
-      const guidance = panel.locator("[data-collect-connection-header] span");
+      const guidance = page
+        .getByTestId("collect-detail-panel")
+        .locator("[data-collect-connection-header] span");
       await expect(guidance).toHaveCSS("text-wrap-style", "pretty");
       if (width < 1024) {
         await page
@@ -428,7 +441,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
         });
         await expect(stickyOffer).toHaveCSS("overflow", "hidden");
         await expect(stickyOffer).toHaveCSS("text-overflow", "ellipsis");
-        const sidebar = page.locator("[data-primary-sidebar]");
+        const sidebar = page.getByLabel("Primary sidebar", { exact: true });
         const railRight = (await sidebar.isVisible())
           ? (await sidebar.boundingBox())!.x +
             (await sidebar.boundingBox())!.width
@@ -485,7 +498,9 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     try {
       await gotoReady(page, "/the-memes/1");
       const panel = page.getByTestId("collect-detail-panel");
-      const loading = panel.locator("[data-collect-detail-loading]");
+      const loading = page
+        .getByTestId("collect-detail-panel")
+        .locator("[data-collect-detail-loading]");
       await expect(loading).toBeVisible();
       await page.evaluate(() => document.fonts.ready);
       const initialBox = (await panel.boundingBox())!;
