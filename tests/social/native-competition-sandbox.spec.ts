@@ -1633,8 +1633,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       const bounds = (await row.boundingBox())!;
       expect(Math.abs(bounds.x - available.x)).toBeLessThanOrEqual(1);
       expect(Math.abs(bounds.width - available.width)).toBeLessThanOrEqual(1);
-      // The complete control group still fills the row; Explain vote now shares
-      // its first line instead of occupying a full-width third line.
+      // The controls fill the row inside its 16px horizontal padding.
       const voteControls = panel
         .getByRole("article")
         .first()
@@ -1642,11 +1641,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(voteControls).toBeVisible();
       const controlsBounds = (await voteControls.boundingBox())!;
       if (testInfo.project.name === "web-mobile-chromium") {
-        expect(Math.abs(controlsBounds.x - bounds.x - 8)).toBeLessThanOrEqual(
+        expect(Math.abs(controlsBounds.x - bounds.x - 16)).toBeLessThanOrEqual(
           1
         );
         expect(
-          Math.abs(controlsBounds.width - bounds.width + 16)
+          Math.abs(controlsBounds.width - bounds.width + 32)
         ).toBeLessThanOrEqual(1);
       } else {
         expect(controlsBounds.x).toBeGreaterThan(bounds.x + bounds.width / 2);
@@ -3215,17 +3214,39 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           thumbnail!.x + thumbnail!.width
         );
         expect(Math.abs(title!.y - thumbnail!.y)).toBeLessThanOrEqual(1);
+        await expect(row.getByRole("heading").getByRole("button")).toHaveCSS(
+          "white-space",
+          "nowrap"
+        );
+        await expect(
+          row.getByRole("link", { name: "playwright", exact: true })
+        ).toHaveCSS("white-space", "nowrap");
+        for (const action of [
+          explain,
+          controls.getByRole("button", { name: "Save vote", exact: true }),
+        ]) {
+          await expect(action).toHaveCSS("white-space", "nowrap");
+        }
         if (contentWidth < 736) {
           const inputBounds = (await input.boundingBox())!;
           const explainBounds = (await explain.boundingBox())!;
           expect(inputBounds.height).toBeGreaterThanOrEqual(44);
           expect(explainBounds.height).toBeGreaterThanOrEqual(44);
-          expect(Math.abs(inputBounds.y - explainBounds.y)).toBeLessThanOrEqual(
-            1
-          );
-          expect(explainBounds.x).toBeGreaterThanOrEqual(
-            inputBounds.x + inputBounds.width
-          );
+          const controlsWidth = (await controls.boundingBox())!.width;
+          if (controlsWidth >= 352) {
+            expect(
+              Math.abs(inputBounds.y - explainBounds.y)
+            ).toBeLessThanOrEqual(1);
+            expect(explainBounds.x).toBeGreaterThanOrEqual(
+              inputBounds.x + inputBounds.width
+            );
+          } else {
+            // On narrow rows, keep complete action labels and the full number
+            // readable by placing Explain beside the hint below the field.
+            expect(explainBounds.y).toBeGreaterThanOrEqual(
+              inputBounds.y + inputBounds.height
+            );
+          }
           await expect(input).toHaveCSS("font-size", "16px");
         }
         await expectNoHorizontalOverflow(page);

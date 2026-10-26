@@ -154,22 +154,25 @@ function MyVoteAuthor({ author }: { readonly author: ExtendedDrop["author"] }) {
           <div className="tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10"></div>
         )}
       </div>
-      <UserProfileTooltipWrapper user={author.handle ?? author.id}>
-        <Link
-          href={`/${author.handle ?? author.primary_address}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            globalThis.open(
-              `/${author.handle ?? author.primary_address}`,
-              "_blank"
-            );
-          }}
-          className="tw-min-w-0 tw-text-sm tw-font-semibold tw-leading-5 tw-tracking-identity tw-text-white tw-no-underline tw-transition-colors tw-duration-200 [overflow-wrap:anywhere] desktop-hover:hover:tw-underline motion-reduce:tw-transition-none"
-        >
-          {author.handle ?? author.primary_address}
-        </Link>
-      </UserProfileTooltipWrapper>
+      <div className="tw-min-w-0">
+        <UserProfileTooltipWrapper user={author.handle ?? author.id}>
+          <Link
+            href={`/${author.handle ?? author.primary_address}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              globalThis.open(
+                `/${author.handle ?? author.primary_address}`,
+                "_blank"
+              );
+            }}
+            title={author.handle ?? author.primary_address}
+            className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-tracking-identity tw-text-white tw-no-underline tw-transition-colors tw-duration-200 desktop-hover:hover:tw-underline motion-reduce:tw-transition-none"
+          >
+            {author.handle ?? author.primary_address}
+          </Link>
+        </UserProfileTooltipWrapper>
+      </div>
       <UserCICAndLevel
         level={author.level || 0}
         size={UserCICAndLevelSize.SMALL}
@@ -335,7 +338,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
     <article // NOSONAR -- S1082/S6847: the native checkbox provides keyboard selection.
       aria-labelledby={titleId}
       onClick={handleRowClick}
-      className={`tw-px-2 tw-py-4 tw-transition-colors tw-duration-200 tw-@container/my-vote motion-reduce:tw-transition-none sm:tw-px-4 sm:tw-py-6 ${
+      className={`tw-px-4 tw-py-4 tw-transition-colors tw-duration-200 tw-@container/my-vote motion-reduce:tw-transition-none sm:tw-py-6 ${
         isSelectionDisabled ? "" : "tw-cursor-pointer"
       } ${isSelected ? "tw-bg-primary-500/10" : "tw-bg-iron-950"} ${
         !isSelected && !isSelectionDisabled
@@ -440,7 +443,8 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               <button
                 type="button"
                 onClick={handleOpenDrop}
-                className="tw-max-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 tw-transition-colors tw-duration-200 [overflow-wrap:anywhere] focus-visible:tw-rounded-sm focus-visible:tw-text-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-400 motion-reduce:tw-transition-none"
+                title={dropTitle}
+                className="tw-max-w-full tw-truncate tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 tw-transition-colors tw-duration-200 focus-visible:tw-rounded-sm focus-visible:tw-text-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-400 motion-reduce:tw-transition-none"
               >
                 {dropTitle}
               </button>

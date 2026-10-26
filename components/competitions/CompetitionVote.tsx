@@ -258,11 +258,11 @@ export function CompetitionVoteForm({
           className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 tw-gap-y-1"
         >
           <div
-            className={`tw-h-11 tw-animate-pulse tw-rounded-lg tw-bg-iron-900 @[46rem]/my-vote:tw-col-span-2 @[46rem]/my-vote:tw-h-9 motion-reduce:tw-animate-none ${onExplainVote ? "" : "tw-col-span-2"}`}
+            className={`tw-col-span-2 tw-h-11 tw-animate-pulse tw-rounded-lg tw-bg-iron-900 @[22rem]/vote-controls:tw-col-span-1 @[46rem]/my-vote:tw-col-span-2 @[46rem]/my-vote:tw-h-9 motion-reduce:tw-animate-none ${onExplainVote ? "" : "@[22rem]/vote-controls:!tw-col-span-2"}`}
           />
-          <div className="tw-col-span-2 tw-row-start-2 tw-h-5 tw-w-3/4 tw-animate-pulse tw-rounded tw-bg-iron-900 @[46rem]/my-vote:tw-col-span-1 motion-reduce:tw-animate-none" />
+          <div className="tw-row-start-2 tw-h-5 tw-w-3/4 tw-animate-pulse tw-rounded tw-bg-iron-900 @[22rem]/vote-controls:tw-col-span-2 @[46rem]/my-vote:tw-col-span-1 motion-reduce:tw-animate-none" />
           {onExplainVote && (
-            <div className="tw-col-start-2 tw-row-start-1 tw-h-11 tw-w-20 tw-animate-pulse tw-rounded-md tw-bg-iron-900 @[46rem]/my-vote:tw-row-start-2 @[46rem]/my-vote:tw-h-9 @[46rem]/my-vote:tw-w-24 motion-reduce:tw-animate-none" />
+            <div className="tw-col-start-2 tw-row-start-2 tw-h-11 tw-w-24 tw-animate-pulse tw-rounded-md tw-bg-iron-900 @[22rem]/vote-controls:tw-row-start-1 @[46rem]/my-vote:tw-row-start-2 @[46rem]/my-vote:tw-h-9 @[46rem]/my-vote:tw-w-24 motion-reduce:tw-animate-none" />
           )}
         </div>
       </div>
@@ -299,7 +299,7 @@ export function CompetitionVoteForm({
           className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 tw-gap-y-1"
         >
           <div
-            className={`tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1 tw-rounded-lg tw-bg-iron-900 tw-pr-1 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus-within:tw-ring-2 focus-within:tw-ring-primary-400 @[18rem]/vote-controls:tw-flex-nowrap @[46rem]/my-vote:tw-col-span-2 @[46rem]/my-vote:tw-gap-x-2 ${onExplainVote ? "" : "tw-col-span-2"}`}
+            className={`tw-col-span-2 tw-flex tw-min-w-0 tw-items-center tw-gap-x-1 tw-rounded-lg tw-bg-iron-900 tw-pr-1 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus-within:tw-ring-2 focus-within:tw-ring-primary-400 @[22rem]/vote-controls:tw-col-span-1 @[46rem]/my-vote:tw-col-span-2 @[46rem]/my-vote:tw-gap-x-2 ${onExplainVote ? "" : "@[22rem]/vote-controls:!tw-col-span-2"}`}
           >
             <input
               id={`competition-vote-${entryId}`}
@@ -316,12 +316,12 @@ export function CompetitionVoteForm({
                 .join(" ")}
               className="tw-h-11 tw-w-[12ch] tw-min-w-[10ch] tw-max-w-[12ch] tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-pl-3 tw-pr-0 tw-text-base tw-font-semibold tw-tabular-nums tw-text-iron-50 [appearance:textfield] focus:tw-ring-0 @[46rem]/my-vote:tw-h-9 @[46rem]/my-vote:tw-min-w-0 @[46rem]/my-vote:tw-text-sm [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
             />
-            <span className="tw-max-w-12 tw-flex-shrink-0 tw-break-words tw-py-1 tw-text-xs tw-leading-4 tw-text-iron-400 @[46rem]/my-vote:tw-max-w-[40%]">
+            <span className="tw-flex-shrink-0 tw-whitespace-nowrap tw-py-1 tw-text-xs tw-leading-4 tw-text-iron-400">
               {creditLabel}
             </span>
             <button
               type="submit"
-              className="tw-ml-auto tw-min-h-11 tw-min-w-0 tw-max-w-full tw-break-words tw-rounded-md tw-border-0 tw-bg-primary-500 tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-bg-transparent disabled:tw-text-iron-500 @[46rem]/my-vote:tw-min-h-9"
+              className="tw-ml-auto tw-min-h-11 tw-flex-shrink-0 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-bg-primary-500 tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-bg-transparent disabled:tw-text-iron-500 @[46rem]/my-vote:tw-min-h-9"
               disabled={
                 busy ||
                 disabled ||
@@ -335,7 +335,7 @@ export function CompetitionVoteForm({
           </div>
           <p
             id={rangeDescriptionId}
-            className="tw-col-span-2 tw-row-start-2 tw-m-0 tw-min-w-0 tw-break-words tw-text-xs tw-leading-5 tw-text-iron-400 @[46rem]/my-vote:tw-col-span-1"
+            className="tw-row-start-2 tw-m-0 tw-min-w-0 tw-break-words tw-text-xs tw-leading-5 tw-text-iron-400 @[22rem]/vote-controls:tw-col-span-2 @[46rem]/my-vote:tw-col-span-1"
           >
             {t(locale, "competitions.voteRange", {
               min: formatInteger(locale, min ?? 0),
@@ -345,7 +345,7 @@ export function CompetitionVoteForm({
           {onExplainVote && (
             <button
               type="button"
-              className="tw-col-start-2 tw-row-start-1 tw-min-h-11 tw-max-w-20 tw-self-start tw-break-words tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-text-iron-500 @[32rem]/my-vote:tw-max-w-[9rem] @[46rem]/my-vote:tw-row-start-2 @[46rem]/my-vote:tw-min-h-9 @[46rem]/my-vote:tw-rounded-md @[46rem]/my-vote:tw-ring-0 desktop-hover:hover:tw-bg-iron-800"
+              className="tw-col-start-2 tw-row-start-2 tw-min-h-11 tw-self-start tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-text-iron-500 @[22rem]/vote-controls:tw-row-start-1 @[46rem]/my-vote:tw-row-start-2 @[46rem]/my-vote:tw-min-h-9 @[46rem]/my-vote:tw-rounded-md @[46rem]/my-vote:tw-ring-0 desktop-hover:hover:tw-bg-iron-800"
               aria-label={t(locale, "waves.voteRationale.explainAriaLabel")}
               title={t(locale, "waves.voteRationale.savedDescription")}
               disabled={

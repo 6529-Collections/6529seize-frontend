@@ -801,4 +801,4 @@ preserving limits, errors, warnings, and the bottom criteria summary.
 
 Competition list corrections: My Votes includes only active nonzero votes; archived winner votes remain retained. Winners paginate by win time newest first.
 
-Voting help records use **Explain vote** for public rationale replies in My Votes and voting dialogs. They distinguish sending a reply about a saved vote from posting one after a successful vote, and cover Slider / Numeric entry in competition submission popups. The My Votes record also describes compact phone and tablet rows, side-by-side amount and Explain controls, and desktop controls on the right.
+Voting help records use **Explain vote** for public rationale replies in My Votes and voting dialogs. They distinguish sending a reply about a saved vote from posting one after a successful vote, and cover Slider / Numeric entry in competition submission popups. The My Votes record also describes compact phone and tablet rows, 16-pixel side padding, single-line titles and action labels, amount and Explain controls that adapt to the available width, and desktop controls on the right.
