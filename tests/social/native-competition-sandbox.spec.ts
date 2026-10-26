@@ -3198,6 +3198,15 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       for (const width of widths) {
         await page.setViewportSize({ width, height: 1000 });
         await input.fill("12345678");
+        await input.press("Shift+Tab");
+        await page.keyboard.press("Tab");
+        await expect(input).toBeFocused();
+        await expect(input).toHaveCSS("outline-color", "rgba(0, 0, 0, 0)");
+        expect(
+          await input.evaluate(
+            (element) => getComputedStyle(element.parentElement!).boxShadow
+          )
+        ).toMatch(/inset.*2px/);
         const boxes = await controls.evaluate((form) => {
           const bounds = form.getBoundingClientRect();
           return [...form.querySelectorAll("input, button, p")].map(

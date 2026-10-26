@@ -319,7 +319,7 @@ export function CompetitionVoteForm({
               aria-describedby={[rangeDescriptionId, errorDescriptionId]
                 .filter(Boolean)
                 .join(" ")}
-              className="tw-h-11 tw-w-[12ch] tw-min-w-[10ch] tw-max-w-[12ch] tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-pl-3 tw-pr-0 tw-text-base tw-font-semibold tw-tabular-nums tw-text-iron-50 [appearance:textfield] focus:tw-ring-0 @[46rem]/my-vote:tw-h-9 @[46rem]/my-vote:tw-min-w-0 @[46rem]/my-vote:tw-text-sm [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
+              className="tw-h-11 tw-w-[12ch] tw-min-w-[10ch] tw-max-w-[12ch] tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-pl-3 tw-pr-0 tw-text-base tw-font-semibold tw-tabular-nums tw-text-iron-50 tw-outline-none [appearance:textfield] focus:tw-ring-0 @[46rem]/my-vote:tw-h-9 @[46rem]/my-vote:tw-min-w-0 @[46rem]/my-vote:tw-text-sm [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
             />
             <span className="tw-ml-auto tw-mr-2 tw-flex-shrink-0 tw-whitespace-nowrap tw-py-1 tw-text-xs tw-leading-4 tw-text-iron-400">
               {creditLabel}
