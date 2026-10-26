@@ -7,10 +7,6 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
-The `waves.drop.quote-link-cards` record covers card-shaped loading states for
-Main Stage links and quotes, reduced motion, and missing or unavailable previews
-with an `Open drop` fallback. Hidden previews remain plain links.
-
 The search record covers punctuation-tolerant Wave names across site search,
 sidebar search, composer mentions and the message-search Wave picker. It explains
 all-term matching, partial names, relevance ordering, literal wildcard characters,

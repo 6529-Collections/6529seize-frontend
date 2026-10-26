@@ -3,8 +3,6 @@
 import React from "react";
 
 import WaveDropQuote from "./WaveDropQuote";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { useQuery } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -33,12 +31,7 @@ const WaveDropQuoteWithSerialNo: React.FC<WaveDropQuoteWithSerialNoProps> = ({
   maxEmbedDepth,
   onLinkCardActionsActiveChange,
 }) => {
-  const myStream = useMyStreamOptional();
-  const {
-    data: drop = null,
-    isError,
-    isSuccess,
-  } = useQuery<ApiDrop | null>({
+  const { data: drop = null } = useQuery<ApiDrop | null>({
     queryKey: [
       QueryKey.DROP,
       "wave-drop-quote-serial",
@@ -58,15 +51,6 @@ const WaveDropQuoteWithSerialNo: React.FC<WaveDropQuoteWithSerialNoProps> = ({
     <WaveDropQuote
       drop={drop}
       partId={1}
-      isUnavailable={!drop && (isError || isSuccess)}
-      fallbackHref={getWaveRoute({
-        waveId,
-        serialNo,
-        isDirectMessage:
-          myStream?.directMessages.list.some((wave) => wave.id === waveId) ??
-          false,
-        isApp: false,
-      })}
       onQuoteClick={onQuoteClick}
       embedPath={embedPath}
       quotePath={quotePath}
