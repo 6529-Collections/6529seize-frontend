@@ -94,6 +94,7 @@ export function defineNftMarketActivityTests() {
       row.getByText("123,456,789.123456789012345678 ETH")
     ).toBeVisible();
     await expect(realAmount).toBeVisible();
+    await expect(filter).toBeVisible();
     await expect(
       table.getByRole("cell", {
         name: "12,345,678,901,234,567,890.000000000000000001 ETH",
@@ -123,19 +124,30 @@ export function defineNftMarketActivityTests() {
         }),
         `The real offer amount stays on one line at ${width}px`
       ).toBe(1);
-      const headingBox = await heading.boundingBox();
-      const filterBox = await filter.boundingBox();
-      if (!headingBox || !filterBox)
-        throw new Error("Activity heading and filter must be visible");
+      // Read both rectangles together so page movement after a resize cannot
+      // make measurements from different frames look like misalignment.
+      const headerLayout = await heading.evaluate((element) => {
+        const dropdown = element.parentElement?.querySelector(
+          'button[aria-haspopup="true"]'
+        );
+        if (!dropdown) throw new Error("Activity filter must be present");
+        const headingBox = element.getBoundingClientRect();
+        const filterBox = dropdown.getBoundingClientRect();
+        return {
+          centerDifference: Math.abs(
+            headingBox.y +
+              headingBox.height / 2 -
+              (filterBox.y + filterBox.height / 2)
+          ),
+          headingRight: headingBox.right,
+          filterLeft: filterBox.left,
+        };
+      });
       expect(
-        Math.abs(
-          headingBox.y +
-            headingBox.height / 2 -
-            (filterBox.y + filterBox.height / 2)
-        ),
+        headerLayout.centerDifference,
         `Activity heading and filter are vertically centered at ${width}px`
       ).toBeLessThan(1);
-      expect(headingBox.x + headingBox.width).toBeLessThan(filterBox.x);
+      expect(headerLayout.headingRight).toBeLessThan(headerLayout.filterLeft);
       expect(
         await row
           .getByText("Revalidated", { exact: true })
