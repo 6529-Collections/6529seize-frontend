@@ -6076,6 +6076,7 @@
       ],
       "facts": [
         "The NFT activity feed lives at /nft-activity.",
+        "Activity appears in columns on wide screens and stacked rows on phones or narrow panels. Each row retains its action, item, sender, recipient, total, date and available transaction link; sideways scrolling is not needed.",
         "The feed combines indexed sales, mints, airdrops, transfers and burns with recorded OpenSea listings, offers, cancellations, expirations and order validity changes for The Memes, Meme Lab, Gradients and NextGen.",
         "Choose collection and action filters and use Load more to see older activity. Changing filters starts a new result list. Empty and failed requests have clear states and a retry control.",
         "Off-chain market actions may have no transaction hash. Market history begins with captured provider events and status observations; best-effort delivery does not guarantee every historical off-chain action.",
