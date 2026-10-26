@@ -4,7 +4,10 @@ import {
   DropImagePreview,
   getDropImagePreviewSources,
 } from "./DropImagePreview";
-import { GifPreviewLoadingIndicator } from "./GifPreviewLoadingIndicator";
+import {
+  GifPreviewLoadingIndicator,
+  type GifPreviewLoadingLayout,
+} from "./GifPreviewLoadingIndicator";
 import { isGifImageUrl } from "@/helpers/gif-preview.helpers";
 import Button from "@/components/utils/button/Button";
 import { useDropImageGallery } from "@/components/drops/view/part/DropImageGalleryProvider";
@@ -56,6 +59,17 @@ function OriginalImageLoadingIndicator({ isGif }: { readonly isGif: boolean }) {
   );
 }
 
+function getAutomaticGifFallback(
+  enabled: boolean,
+  canToggleOriginal: boolean,
+  isGif: boolean,
+  requestAutomatically: () => void
+) {
+  return enabled && canToggleOriginal && isGif
+    ? requestAutomatically
+    : undefined;
+}
+
 function LoadingPlaceholder({
   hasTouchScreen,
 }: {
@@ -85,6 +99,7 @@ function DropImageContent({
   handleIntrinsicImageError,
   handleError,
   preferHighQualityImage,
+  onAnimatedPreviewUnavailable,
 }: {
   readonly src: string;
   readonly alt: string;
@@ -99,6 +114,7 @@ function DropImageContent({
   readonly handleIntrinsicImageError: () => void;
   readonly handleError: () => void;
   readonly preferHighQualityImage: boolean;
+  readonly onAnimatedPreviewUnavailable?: (() => void) | undefined;
 }) {
   const [aspectRatio, setAspectRatio] = useState<string | undefined>();
   const imageClassName = `${
@@ -135,6 +151,7 @@ function DropImageContent({
         originalSrc={src}
         imageScale={imageScale}
         preferHighQuality={preferHighQualityImage}
+        onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
         alt={alt}
         fill
         loading={loadStrategy === "eager" ? "eager" : undefined}
@@ -152,6 +169,7 @@ function DropImageContent({
       originalSrc={src}
       imageScale={imageScale}
       preferHighQuality={preferHighQualityImage}
+      onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
       alt={alt}
       fill
       loading={loadStrategy === "eager" ? "eager" : undefined}
@@ -212,6 +230,8 @@ type DropListItemContentMediaImageProps = {
   readonly galleryItemId?: string | undefined;
   readonly showOriginalQualityToggle?: boolean | undefined;
   readonly preferHighQualityImage?: boolean | undefined;
+  readonly autoAnimateGif?: boolean | undefined;
+  readonly imageLoadingLayout?: GifPreviewLoadingLayout | undefined;
 };
 
 function DropListItemContentMediaImage({
@@ -243,6 +263,8 @@ function DropListItemContentMediaImageContent({
   galleryItemId,
   showOriginalQualityToggle = false,
   preferHighQualityImage = false,
+  autoAnimateGif = false,
+  imageLoadingLayout = "inline",
 }: DropListItemContentMediaImageProps & { readonly imageScale: ImageScale }) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const [loaded, setLoaded] = useState(false);
@@ -256,6 +278,12 @@ function DropListItemContentMediaImageContent({
   const canToggleOriginal =
     showOriginalQualityToggle && quality.canViewOriginal;
   const isGif = isGifImageUrl(src);
+  const onAnimatedPreviewUnavailable = getAutomaticGifFallback(
+    autoAnimateGif,
+    canToggleOriginal,
+    isGif,
+    quality.requestAutomatically
+  );
 
   const imageFrameRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -420,6 +448,7 @@ function DropListItemContentMediaImageContent({
                 handleIntrinsicImageError={handleIntrinsicImageError}
                 handleError={handleError}
                 preferHighQualityImage={preferHighQualityImage}
+                onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
               />
             </span>
           )}
@@ -430,7 +459,7 @@ function DropListItemContentMediaImageContent({
             !loaded &&
             !unavailable &&
             !quality.showingOriginal &&
-            isGif && <GifPreviewLoadingIndicator />}
+            isGif && <GifPreviewLoadingIndicator layout={imageLoadingLayout} />}
           {unavailable && !quality.showingOriginal && !disableModal && (
             <div className="tw-absolute tw-bottom-3 tw-left-1/2 tw-z-30 -tw-translate-x-1/2">
               <Button
@@ -497,6 +526,7 @@ function DropListItemContentMediaImageContent({
           fullscreenTargetAvailable={!isCapacitor}
           originalQuality={canToggleOriginal ? quality : undefined}
           preferHighQualityPreview={preferHighQualityImage}
+          onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
         />
       )}
     </>
