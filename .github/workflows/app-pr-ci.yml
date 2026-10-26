@@ -203,7 +203,7 @@ jobs:
           ];
           const corePlaywrightLanes = [];
           const collectBrowserRequired = plan.changed_files.some((file) =>
-            /^(?:app\/collect\/|components\/collect\/|components\/user\/collected\/|components\/nextGen\/|components\/6529Gradient\/|components\/the-memes\/|tests\/collect\/|generated\/models\/Api(?:Collect|Market))/.test(file) ||
+            /^(?:app\/collect\/|components\/collect\/|components\/nft-market-depth\/|components\/user\/collected\/|components\/nextGen\/|components\/6529Gradient\/|components\/the-memes\/|tests\/collect\/|generated\/models\/Api(?:Collect|Market))/.test(file) ||
             ["services/api/collect-api.ts", "services/api/collect-rules-api.ts", "services/api/market-api.ts", "components/common/RecipientSelector.tsx", "components/mobile-wrapper-dialog/MobileWrapperDialog.tsx", "i18n/messages/collect.ts", "openapi.yaml", ".github/workflows/app-pr-ci.yml"].includes(file)
           );
           write("playwright_collect_required", String(collectBrowserRequired));
@@ -417,6 +417,7 @@ jobs:
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/collect"
         run: |
           ./bin/6529 exec playwright test tests/collect/collect-public.spec.ts \
+            tests/collect/memelab-marketplace-public.spec.ts \
             --project=web-desktop-chromium \
             --project=web-mobile-chromium \
             --workers=1
@@ -495,6 +496,13 @@ jobs:
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/session-recovery"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/session-recovery"
         run: ./bin/6529 run test:e2e:session-recovery-sandbox
+
+      - name: Run own-profile Following browser regression pack
+        if: matrix.lane == 'playwright-critical-shell'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/profile-following"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/profile-following"
+        run: ./bin/6529 run test:e2e:profile-following-sandbox
 
       # A dev server killed by the kernel OOM killer exits without any output,
       # so record the container's memory peak and OOM-kill count.

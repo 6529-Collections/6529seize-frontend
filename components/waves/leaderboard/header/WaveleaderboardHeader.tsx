@@ -495,7 +495,6 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
           }
           refObject={submissionActionsRowRef}
           balanceRows={balanceSubmissionRows}
-          isMemesWave={isMemesWave}
           additionalActions={showAdditionalActions ? additionalActions : null}
           onCreateDrop={canCreateDrop ? onCreateDrop : undefined}
           createLabel={createLabel}
