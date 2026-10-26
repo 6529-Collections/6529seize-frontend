@@ -20,12 +20,12 @@ const MyStreamWaveMyVoteVotes: React.FC<MyStreamWaveMyVoteVotesProps> = ({
     typeof winningThreshold === "number" && winningThreshold > 0;
 
   return (
-    <div className="tw-flex tw-min-h-6 tw-items-center tw-gap-x-1.5 tw-text-sm tw-leading-6">
+    <div className="tw-flex tw-min-h-6 tw-items-center tw-gap-x-1.5 tw-text-sm tw-leading-5">
       <span className="tw-text-iron-400">
         {t(locale, "waves.myVotes.total")}
       </span>
       <span
-        className={`tw-text-body tw-font-semibold tw-tabular-nums tw-leading-5 tw-tracking-identity ${voteClass}`}
+        className={`tw-font-semibold tw-tabular-nums tw-tracking-identity ${voteClass}`}
       >
         {formatInteger(locale, drop.rating)}
       </span>
@@ -47,7 +47,7 @@ const MyStreamWaveMyVoteVotes: React.FC<MyStreamWaveMyVoteVotesProps> = ({
         subtle={true}
         visualVariant="memes"
         numberFont="sans"
-        numberSize="body"
+        numberSize="sm"
         numberWeight="semibold"
       />
     </div>

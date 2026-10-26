@@ -243,7 +243,7 @@ function MyVoteVoters({ drop }: { readonly drop: ExtendedDrop }) {
           ))}
         </div>
       )}
-      <span className="tw-whitespace-nowrap tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-300">
+      <span className="tw-whitespace-nowrap tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-300">
         <span>{formatInteger(locale, drop.raters_count)}</span>{" "}
         {t(
           locale,
