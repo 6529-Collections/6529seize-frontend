@@ -28,25 +28,27 @@ To search for literal `from:` or `in:` text, prefix the keyword with a backslash
 
 ## Wave name matching
 
-Wave names match regardless of letter case, spaces, dashes, and apostrophes.
+Wave names match regardless of letter case, spaces, and separator punctuation
+such as dashes and apostrophes. In wave-name search, `%`, `_`, and backslashes
+remain literal characters, not search wildcards.
 For example, `memes chat`, `memeschat`, and `memes-chat` find `Memes-Chat`;
 `maybes dive bar` finds `maybe's dive bar`. Every typed word must match, in any
 order, and partial words work: `chat memes` and `meme chat` also find
 `Memes-Chat`.
 
 Exact names appear first, followed by names equivalent after punctuation is
-removed, full-phrase matches, and then matches containing every term. A
-full-phrase match contains the whole query contiguously after punctuation and
-spaces are removed. Shorter names after that same normalization rank ahead
-within each group; equally relevant names use newest first. A query containing
-only punctuation returns no matches. In wave-name search, `%`, `_`, and
-backslashes are literal characters, not search wildcards.
+removed under these rules, full-phrase matches, and then matches containing
+every term. A full-phrase match contains the normalized query contiguously.
+Shorter names after that same normalization rank ahead within each group;
+equally relevant names use newest first. A query containing only punctuation
+returns no matches.
 
 These rules apply to the `Waves` results, the `in:` Wave picker, sidebar
-`Find a wave…`, and composer `#` mentions. Each surface keeps its own minimum
-query length and access rules. The `Waves` results, sidebar, and mentions exclude
-DMs; the `in:` picker can include conversations you can read. Searching without
-a name in the `in:` picker keeps newest-first suggestions.
+`Find a wave…`, and composer `#` mentions. The `in:` picker has no minimum name
+length and shows newest-first suggestions when no name is entered. The `Waves`
+results, sidebar, and mentions keep their existing minimum query lengths.
+Access rules are unchanged: the `Waves` results, sidebar, and mentions exclude
+DMs; the `in:` picker can include conversations you can read.
 
 ## Location in the Site
 
