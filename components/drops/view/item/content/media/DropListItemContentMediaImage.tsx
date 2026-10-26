@@ -29,7 +29,10 @@ import { useMediaActions } from "./useMediaActions";
 import Image from "next/image";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { ImageQualityToggle } from "./ImageQualityToggle";
-import { useOriginalImage } from "./useOriginalImage";
+import {
+  useOriginalImage,
+  type OriginalImageQuality,
+} from "./useOriginalImage";
 
 const loadingPlaceholderStyle: React.CSSProperties = {
   width: "100%",
@@ -70,16 +73,28 @@ function getAutomaticGifFallback(
     : undefined;
 }
 
-function getGifLoadingState(
-  loaded: boolean,
-  unavailable: boolean,
-  showingOriginal: boolean,
-  loadingOriginal: boolean
-) {
+function getImageLoadingState({
+  loaded,
+  unavailable,
+  quality,
+  canToggleOriginal,
+  continuousGifLoading,
+}: {
+  readonly loaded: boolean;
+  readonly unavailable: boolean;
+  readonly quality: Pick<OriginalImageQuality, "loading" | "showingOriginal">;
+  readonly canToggleOriginal: boolean;
+  readonly continuousGifLoading: boolean;
+}) {
+  const loadingOriginal = continuousGifLoading && quality.loading;
+  const hideUnavailable = loadingOriginal && unavailable;
   return {
     showLoading:
-      !showingOriginal && (loadingOriginal || (!loaded && !unavailable)),
-    hideUnavailable: loadingOriginal && unavailable,
+      !quality.showingOriginal &&
+      (loadingOriginal || (!loaded && !unavailable)),
+    hideUnavailable,
+    hidePreview:
+      (quality.showingOriginal && canToggleOriginal) || hideUnavailable,
   };
 }
 
@@ -389,12 +404,14 @@ function DropListItemContentMediaImageContent({
   const {
     showLoading: showGifLoading,
     hideUnavailable: hideUnavailableGifPreview,
-  } = getGifLoadingState(
+    hidePreview,
+  } = getImageLoadingState({
     loaded,
     unavailable,
-    quality.showingOriginal,
-    continuousGifLoading && quality.loading
-  );
+    quality,
+    canToggleOriginal,
+    continuousGifLoading,
+  });
 
   const resolvedObjectPosition =
     imageObjectPosition ?? (isCompetitionDrop ? "center" : "left top");
@@ -455,10 +472,7 @@ function DropListItemContentMediaImageContent({
               className={
                 intrinsicHeight ? "tw-block" : "tw-absolute tw-inset-0"
               }
-              hidden={
-                (quality.showingOriginal && canToggleOriginal) ||
-                hideUnavailableGifPreview
-              }
+              hidden={hidePreview}
             >
               <DropImageContent
                 src={src}
