@@ -15,6 +15,37 @@ const parse = (file: string) => {
   return { source, workflow: YAML.parse(source) };
 };
 
+it("allows the Museum job to finish its recovery and browser budgets", () => {
+  const job = parse("app-pr-ci.yml").workflow.jobs["app-checks"];
+  expect(job["timeout-minutes"]).toBe(
+    "${{ startsWith(matrix.lane, 'playwright-museum-') && 75 || 60 }}"
+  );
+  const setupBudget = job.steps
+    .filter(
+      (step: { id?: string; name?: string }) =>
+        [
+          "playwright_dependencies_primary",
+          "playwright_dependencies_retry",
+        ].includes(step.id ?? "") || step.name === "Install Playwright browser"
+    )
+    .reduce(
+      (minutes: number, step: { "timeout-minutes": number }) =>
+        minutes + step["timeout-minutes"],
+      0
+    );
+  const browser = job.steps.find(
+    (step: { name?: string }) =>
+      step.name === "Run Network Museum Playwright packs"
+  ).run as string;
+  const phaseBudgets = [...browser.matchAll(/--kill-after=30s (\d+)m/gu)].map(
+    (match) => Number(match[1])
+  );
+  expect(phaseBudgets).toEqual([10, 20]);
+  expect(
+    setupBudget + phaseBudgets.reduce((sum, minutes) => sum + minutes, 0)
+  ).toBeLessThanOrEqual(65);
+});
+
 it.each(["staging", "production"])(
   "%s failure notifications use evidence from the same run attempt",
   (environment) => {

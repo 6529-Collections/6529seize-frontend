@@ -16,6 +16,20 @@ import {
 import { MemesDropArtworkHero } from "@/components/waves/drop/MemesDropArtworkHero";
 import DropListItemContentMediaImage from "@/components/drops/view/item/content/media/DropListItemContentMediaImage";
 
+const mockDevice = {
+  isMobileDevice: false,
+  isApp: false,
+  isAppleMobile: false,
+  hasTouchScreen: false,
+};
+let mockDetectionResolved = true;
+jest.mock("@/hooks/isMobileDevice", () => ({
+  useIsMobileDeviceStatus: () => ({
+    isMobileDevice: mockDevice.isMobileDevice,
+    isDeviceDetectionResolved: mockDetectionResolved,
+  }),
+}));
+
 type MockImageProps = ComponentProps<"img"> & {
   readonly fill?: boolean;
   readonly unoptimized?: boolean;
@@ -43,7 +57,7 @@ jest.mock("@/hooks/useCapacitor", () => ({
 }));
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
-  default: () => ({ hasTouchScreen: true }),
+  default: () => mockDevice,
 }));
 jest.mock("@/hooks/useFullScreenSupported", () => ({
   useFullScreenSupported: () => true,
@@ -55,6 +69,78 @@ jest.mock("react-zoom-pan-pinch", () => ({
 
 const src = "https://d3lqz0a4bldqgf.cloudfront.net/drops/author/art.gif";
 const artwork = { mime_type: "image/gif", url: src };
+
+beforeEach(() => {
+  Object.assign(mockDevice, {
+    isMobileDevice: false,
+    isApp: false,
+    isAppleMobile: false,
+    hasTouchScreen: false,
+  });
+  mockDetectionResolved = true;
+});
+
+it.each([
+  ["mobile browser", { isMobileDevice: true }],
+  ["native mobile app", { isApp: true }],
+  ["desktop-UA iPad", { isAppleMobile: true }],
+  ["touch-first tablet", { hasTouchScreen: true }],
+])(
+  "keeps the original GIF manual on %s and keeps the artwork loader",
+  (_surface, device) => {
+    Object.assign(mockDevice, device);
+    render(<MemesDropArtworkHero artworkMedia={artwork} />);
+    expect(screen.getByRole("status", { name: "Loading image" })).toHaveClass(
+      "tw-inset-0",
+      "tw-items-center",
+      "tw-justify-center"
+    );
+    const preview = screen.getByAltText("Drop media");
+    for (let attempt = 0; attempt < 4; attempt++) fireEvent.error(preview);
+    expect(screen.queryByAltText("Original GIF animation")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "View original" }));
+    expect(screen.getByAltText("Original GIF animation")).toHaveAttribute(
+      "src",
+      src
+    );
+    expect(screen.getByRole("status", { name: "Loading image" })).toHaveClass(
+      "tw-inset-0"
+    );
+    expect(
+      screen.queryByRole("status", { name: "Loading original GIF" })
+    ).toBeNull();
+    fireEvent.load(screen.getByAltText("Original GIF animation"));
+    expect(screen.queryByRole("status", { name: "Loading image" })).toBeNull();
+  }
+);
+
+it("does not request an original before device detection resolves", () => {
+  mockDetectionResolved = false;
+  const url = "http://external.example/art.gif";
+  const { rerender } = render(
+    <MemesDropArtworkHero artworkMedia={{ ...artwork, url }} />
+  );
+  expect(screen.queryByAltText("Original GIF animation")).toBeNull();
+  mockDevice.isMobileDevice = true;
+  mockDetectionResolved = true;
+  rerender(<MemesDropArtworkHero artworkMedia={{ ...artwork, url }} />);
+  expect(screen.queryByAltText("Original GIF animation")).toBeNull();
+});
+
+it("enables automatic original fallback after desktop detection resolves", () => {
+  mockDetectionResolved = false;
+  const url = "http://external.example/art.gif";
+  const { rerender } = render(
+    <MemesDropArtworkHero artworkMedia={{ ...artwork, url }} />
+  );
+  expect(screen.queryByAltText("Original GIF animation")).toBeNull();
+  mockDetectionResolved = true;
+  rerender(<MemesDropArtworkHero artworkMedia={{ ...artwork, url }} />);
+  expect(screen.getByAltText("Original GIF animation")).toHaveAttribute(
+    "src",
+    url
+  );
+});
 
 it("automatically loads a submission GIF with no eligible preview source", () => {
   const url = "http://external.example/art.gif";
