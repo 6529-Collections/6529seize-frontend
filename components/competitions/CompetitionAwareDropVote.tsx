@@ -7,8 +7,8 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ApiCompetitionEntryStatus } from "@/generated/models/ApiCompetitionEntryStatus";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
-import type {
-  SingleWaveDropVoteMode,
+import {
+  type SingleWaveDropVoteMode,
   SingleWaveDropVoteSize,
 } from "@/components/waves/drop/SingleWaveDropVote.types";
 import { useCompetitionViewer } from "@/hooks/competitions/useCompetitionQueries";
@@ -88,7 +88,13 @@ export default function CompetitionAwareDropVote(
     drop.parts.at(0)?.part_id !== undefined;
   const VoteForm = canReply ? CompetitionVoteWithReply : CompetitionVoteForm;
   return (
-    <div className="tw-space-y-3">
+    <div
+      className={
+        props.size === SingleWaveDropVoteSize.MINI
+          ? "is-mini tw-group/inline-vote tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-3 tw-gap-y-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 [&>fieldset>button]:tw-rounded-md [&>fieldset]:tw-col-start-2 [&>fieldset]:tw-row-start-1 [&>fieldset]:tw-rounded-lg [&>fieldset]:tw-p-0.5"
+          : "tw-space-y-3"
+      }
+    >
       {viewer && props.voteMode === undefined && (
         <VoteModeControl value={localVoteMode} onChange={setLocalVoteMode} />
       )}

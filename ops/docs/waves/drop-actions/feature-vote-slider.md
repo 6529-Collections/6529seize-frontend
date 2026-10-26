@@ -64,6 +64,14 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
   contains only the generated vote total, plus the vote change when it differs
   from the total.
 
+### Competition Submission Popups
+
+Artist submissions and participant entries place the vote label and mode switch
+above the input. Remaining credits appear first, with spent and available credits
+in a smaller summary. `Explain vote` and `Save vote` share a row until the reply
+field is expanded. Vote amounts, limits, eligibility, and saving work the same in
+both input modes.
+
 ## Edge Cases
 
 - When min and max are both zero, the slider rests at center.

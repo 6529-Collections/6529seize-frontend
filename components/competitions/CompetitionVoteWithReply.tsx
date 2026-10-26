@@ -32,7 +32,7 @@ export default function CompetitionVoteWithReply({
   const invalid =
     rationale.shouldPostRationale && !rationale.rationaleText.trim();
   const content = (
-    <div className="tw-space-y-3">
+    <div className="tw-space-y-3 group-[.is-mini]/inline-vote:tw-col-start-1 group-[.is-mini]/inline-vote:tw-row-start-4 group-[.is-mini]/inline-vote:tw-min-w-0 group-[.is-mini]/inline-vote:has-[textarea]:tw-col-span-2">
       <label className="tw-flex tw-min-h-11 tw-w-fit tw-cursor-pointer tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-200">
         <span className="tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-items-center">
           <input
