@@ -34,7 +34,7 @@ The relevant asynchronous lifecycle is concrete: `useCompetitionSubmissionWave` 
 
 The search owner now lives above that branch replacement, keyed by wave identity. Query/filter state and input focus survive competition resolution and refetching. Closing restores focus to the current header trigger; changing waves resets the dialog. Existing message selection, curation clearing, chat selection, serial navigation and global search remain supported.
 
-Coverage: component regression checks the same input node, query and focus across both header transitions, current-trigger focus restoration, selection routing, global scope and wave changes. The existing local browser search scenario now deliberately withholds Main Stage detail until the input is visible, then requires the competition header and focused input to coexist. Deployed discovery, search, scope and empty-result assertions remain intact.
+Coverage: component regression checks the same input node, query and focus across both header transitions, current-trigger focus restoration, selection routing, global scope and wave changes. The native-competition CI browser pack now deliberately withholds Main Stage detail until the input is visible, then requires the competition header and focused input to coexist in desktop and mobile Chromium. The existing live search scenario is unchanged. Deployed discovery, search, scope and empty-result assertions remain intact.
 
 ## Video fixture drift
 

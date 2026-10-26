@@ -975,6 +975,64 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  test("keeps message search open when delayed Main Stage data replaces the web header", async ({
+    page,
+  }) => {
+    const sandbox = await installCompetitionApi(page, false, false, MEMES_WAVE);
+    sandbox.onlyCompetition("alpha");
+    sandbox.setCompetition("alpha", {
+      permissions: {
+        ...competition("alpha", "Main Stage").permissions,
+        submit: false,
+        administer: false,
+      },
+    });
+    let releaseDetail = () => {};
+    const detailReady = new Promise<void>((resolve) => {
+      releaseDetail = resolve;
+    });
+    await page.route(
+      `**/v3/waves/${MEMES_WAVE}/competitions/alpha`,
+      async (route) => {
+        await detailReady;
+        await route.fallback();
+      }
+    );
+    try {
+      await page.goto(`/waves/${MEMES_WAVE}?tab=chat`);
+      await page
+        .getByRole("button", {
+          name: "Search messages in this wave",
+          exact: true,
+        })
+        .click();
+      const input = page.getByPlaceholder("Search messages", { exact: true });
+      await expect(input).toBeVisible();
+      await input.fill("xx");
+      await expect(
+        page.getByRole("button", { name: "How to Submit", exact: true })
+      ).toHaveCount(0);
+      releaseDetail();
+      // This action belongs to the resolved Main Stage header. Its appearance
+      // proves that the header branch changed while the dialog was already open.
+      await expect(
+        page.getByRole("button", { name: "How to Submit", exact: true })
+      ).toBeVisible();
+      await expect(input).toBeFocused();
+      await expect(input).toHaveValue("xx");
+      await page.keyboard.press("Escape");
+      await expect(input).toBeHidden();
+      await expect(
+        page.getByRole("button", {
+          name: "Search messages in this wave",
+          exact: true,
+        })
+      ).toBeFocused();
+      expect(sandbox.requests).toEqual([]);
+    } finally {
+      releaseDetail();
+    }
+  });
   for (const surface of ["web", "app"] as const) {
     for (const eligible of [true, false]) {
       test(`keeps the Main Stage header action consistent in Chat and Leaderboard (${surface}, ${eligible ? "eligible" : "not eligible"})`, async ({
