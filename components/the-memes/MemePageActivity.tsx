@@ -13,11 +13,11 @@ import { ChartBarSquareIcon } from "@heroicons/react/24/outline";
 import { useMemo, useState } from "react";
 
 const SECTION_HEADER_TITLE_CLASS =
-  "tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400";
+  "tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400";
 const METRIC_LABEL_CLASS =
-  "tw-mb-1 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400";
+  "tw-mb-1 md:tw-mb-2 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400";
 const METRIC_VALUE_CLASS =
-  "tw-m-0 tw-text-sm tw-font-semibold tw-leading-5 tw-tabular-nums tw-text-iron-100";
+  "tw-text-sm md:tw-text-lg tw-font-semibold tw-leading-6 tw-text-white";
 function formatEthVolume(volume: number, locale: SupportedLocale) {
   if (volume <= 0) {
     return t(locale, "theMemes.detail.activity.volume.unavailable");
@@ -86,19 +86,19 @@ export function MemePageActivity(
             {t(locale, "theMemes.detail.activity.volume.heading")}
           </h3>
         </div>
-        <dl className="tw-mb-0 tw-mt-5 tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-5 md:tw-grid-cols-4">
+        <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-start tw-gap-x-6 tw-gap-y-6 sm:tw-gap-x-16">
           {volumeStats.map((stat) => (
             <div key={stat.label}>
-              <dt className={METRIC_LABEL_CLASS}>{stat.label}</dt>
-              <dd className={METRIC_VALUE_CLASS}>{stat.value}</dd>
+              <div className={METRIC_LABEL_CLASS}>{stat.label}</div>
+              <div className={METRIC_VALUE_CLASS}>{stat.value}</div>
             </div>
           ))}
-        </dl>
+        </div>
       </section>
 
       <section className="tw-scroll-mt-24">
-        <div className="tw-mb-4 tw-flex tw-flex-col tw-items-stretch tw-justify-between tw-gap-3 md:tw-flex-row md:tw-items-center">
-          <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-200">
+        <div className="tw-mb-4 tw-flex tw-items-center tw-justify-between tw-gap-3">
+          <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-200">
             {t(locale, "theMemes.detail.tabs.cardActivity")}
           </h3>
           <div className="tw-ml-auto tw-w-auto tw-shrink-0">

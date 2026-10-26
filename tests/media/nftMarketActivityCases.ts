@@ -8,29 +8,51 @@ export function defineNftMarketActivityTests() {
   test("card activity reflows without losing links, values, or table semantics", async ({
     page,
   }) => {
+    const activityEvent = {
+      event_id: "activity-responsive-fixture",
+      kind: "market",
+      action: "revalidation",
+      occurred_at: "2026-09-10T12:00:00Z",
+      observed_at: "2026-09-10T12:00:00Z",
+      source: "ethereum",
+      evidence: "provider_order_status",
+      contract: "0x33FD426905F149f8376e227d0C9D3340AaD17aF1",
+      token_id: null,
+      collection_slug: "the-memes-by-6529",
+      quantity: "12",
+      maker: MAKER,
+      taker: RECIPIENT,
+      price: "123456789.123456789012345678",
+      currency: { symbol: "ETH", decimals: 18, address: MAKER },
+      transaction_hash: `0x${"a".repeat(64)}`,
+      transaction_details: {
+        from_display: LONG_NAME,
+        to_display: "collector",
+      },
+    };
     await page.route("**/api/nft-activity?*", (route) =>
       route.fulfill({
         json: {
           data: [
+            activityEvent,
             {
-              event_id: "activity-responsive-fixture",
-              kind: "market",
-              action: "revalidation",
-              occurred_at: "2026-09-10T12:00:00Z",
-              observed_at: "2026-09-10T12:00:00Z",
-              source: "ethereum",
-              evidence: "provider_order_status",
-              contract: "0x33FD426905F149f8376e227d0C9D3340AaD17aF1",
-              token_id: null,
-              collection_slug: "the-memes-by-6529",
-              quantity: "12",
-              maker: MAKER,
-              taker: RECIPIENT,
-              price: "123456789.123456789012345678",
-              currency: { symbol: "ETH", decimals: 18, address: MAKER },
-              transaction_hash: `0x${"a".repeat(64)}`,
+              ...activityEvent,
+              event_id: "activity-real-amount",
+              action: "offer",
+              evidence: "chain",
+              price: "0.06510000000000001",
+              currency: { symbol: "WETH", decimals: 18, address: MAKER },
               transaction_details: {
-                from_display: LONG_NAME,
+                from_display: "real-amount.eth",
+                to_display: "collector",
+              },
+            },
+            {
+              ...activityEvent,
+              event_id: "activity-extreme-amount",
+              price: "12345678901234567890.000000000000000001",
+              transaction_details: {
+                from_display: "extreme-amount.eth",
                 to_display: "collector",
               },
             },
@@ -47,12 +69,19 @@ export function defineNftMarketActivityTests() {
       exact: true,
     });
     const row = table.getByRole("row").filter({ hasText: LONG_NAME });
-    const volumes = page
-      .getByRole("region", { name: "The Memes card activity", exact: true })
-      .locator("dl");
+    const realAmount = table.getByRole("cell", {
+      name: "0.06510000000000001 WETH",
+      exact: true,
+    });
+    const heading = page.getByRole("heading", {
+      name: "Card Activity",
+      exact: true,
+    });
+    const filter = page.getByRole("button", {
+      name: "Transaction Type: All activity",
+      exact: true,
+    });
     await expect(row).toBeVisible({ timeout: 45000 });
-    await expect(volumes.getByRole("term")).toHaveCount(4);
-    await expect(volumes.getByRole("definition")).toHaveCount(4);
     await expect(table.getByRole("columnheader")).toHaveCount(6);
     await expect(row.getByRole("cell")).toHaveCount(6);
     await expect(
@@ -64,10 +93,49 @@ export function defineNftMarketActivityTests() {
     await expect(
       row.getByText("123,456,789.123456789012345678 ETH")
     ).toBeVisible();
+    await expect(realAmount).toBeVisible();
+    await expect(
+      table.getByRole("cell", {
+        name: "12,345,678,901,234,567,890.000000000000000001 ETH",
+        exact: true,
+      })
+    ).toBeVisible();
 
-    for (const width of [1440, 1280, 900, 390, 360]) {
+    for (const width of [1440, 1280, 900, 390, 360, 320]) {
       await page.setViewportSize({ width, height: 1000 });
       await expectNoHorizontalOverflow(page);
+      expect(
+        await table
+          .getByRole("cell")
+          .evaluateAll((cells) =>
+            cells.some((cell) => cell.scrollWidth > cell.clientWidth + 1)
+          ),
+        `All activity values remain inside their cells at ${width}px`
+      ).toBe(false);
+      expect(
+        await realAmount.evaluate((element) => {
+          const text = element.firstChild;
+          if (!text) throw new Error("Total text is required");
+          const range = document.createRange();
+          range.setStart(text, 0);
+          range.setEnd(text, (text.textContent ?? "").indexOf(" WETH"));
+          return range.getClientRects().length;
+        }),
+        `The real offer amount stays on one line at ${width}px`
+      ).toBe(1);
+      const headingBox = await heading.boundingBox();
+      const filterBox = await filter.boundingBox();
+      if (!headingBox || !filterBox)
+        throw new Error("Activity heading and filter must be visible");
+      expect(
+        Math.abs(
+          headingBox.y +
+            headingBox.height / 2 -
+            (filterBox.y + filterBox.height / 2)
+        ),
+        `Activity heading and filter are vertically centered at ${width}px`
+      ).toBeLessThan(1);
+      expect(headingBox.x + headingBox.width).toBeLessThan(filterBox.x);
       expect(
         await row
           .getByText("Revalidated", { exact: true })
@@ -77,25 +145,17 @@ export function defineNftMarketActivityTests() {
             return range.getClientRects().length;
           })
       ).toBe(1);
-      expect(
-        await row
-          .getByRole("cell")
-          .nth(4)
-          .evaluate((element) => {
-            const text = element.firstChild;
-            if (!text) throw new Error("Total text is required");
-            const range = document.createRange();
-            range.setStart(text, 0);
-            range.setEnd(text, (text.textContent ?? "").indexOf(" ETH"));
-            return range.getClientRects().length;
-          })
-      ).toBe(1);
-      expect(
-        await volumes.evaluate(
-          (element) =>
-            getComputedStyle(element).gridTemplateColumns.split(" ").length
-        )
-      ).toBe(width < 768 ? 2 : 4);
+      const totalLineCount = await row
+        .getByRole("cell")
+        .nth(4)
+        .evaluate((element) => {
+          const text = element.firstChild;
+          if (!text) throw new Error("Total text is required");
+          const range = document.createRange();
+          range.setStart(text, 0);
+          range.setEnd(text, (text.textContent ?? "").indexOf(" ETH"));
+          return range.getClientRects().length;
+        });
       const layout = await row.evaluate((element) => {
         const style = getComputedStyle(element);
         const cells = Array.from(element.querySelectorAll("td"));
@@ -120,6 +180,9 @@ export function defineNftMarketActivityTests() {
       expect(layout.overflowing, `Activity cells overflow at ${width}px`).toBe(
         false
       );
+      if (layout.availableWidth >= 320) {
+        expect(totalLineCount).toBe(1);
+      }
       const [action, item, maker, recipient, total, date] = layout.positions;
       if (!action || !item || !maker || !recipient || !total || !date)
         throw new Error("Six activity cells are required");
@@ -128,17 +191,12 @@ export function defineNftMarketActivityTests() {
           new Set(layout.positions.map((position) => position.y)).size
         ).toBe(1);
       } else {
-        if (layout.availableWidth >= 320) {
-          expect(
-            Math.abs(
-              action.y + action.height / 2 - (total.y + total.height / 2)
-            )
-          ).toBeLessThan(1);
-        } else {
-          expect(total.y).toBeGreaterThan(action.y);
-          expect(item.y).toBeGreaterThan(total.y);
-        }
+        expect(
+          Math.abs(action.y + action.height / 2 - (total.y + total.height / 2))
+        ).toBeLessThan(1);
+        expect(action.x).toBeLessThan(total.x);
         expect(item.y).toBeGreaterThan(action.y);
+        expect(item.y).toBeGreaterThan(total.y);
         expect(maker.y).toBeGreaterThan(item.y);
         expect(recipient.y).toBe(maker.y);
         expect(date.y).toBeGreaterThan(maker.y);

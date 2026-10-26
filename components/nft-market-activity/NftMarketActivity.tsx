@@ -382,7 +382,7 @@ function EventRow({
   return (
     <tr
       role="row"
-      className="tw-grid tw-grid-cols-2 tw-gap-x-2 tw-gap-y-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-py-4 last:tw-border-b-0 @xs:tw-grid-cols-[6rem_minmax(0,1fr)_minmax(0,1fr)_6rem] @4xl:tw-table-row @4xl:tw-py-0"
+      className="tw-grid tw-grid-cols-[fit-content(6rem)_minmax(0,1fr)] tw-gap-x-2 tw-gap-y-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-py-4 last:tw-border-b-0 @4xl:tw-table-row @4xl:tw-py-0"
     >
       <td
         role="cell"
@@ -397,10 +397,7 @@ function EventRow({
           </span>
         )}
       </td>
-      <td
-        role="cell"
-        className={`${CELL} tw-col-span-2 tw-row-start-3 @xs:tw-col-span-4 @xs:tw-row-start-2`}
-      >
+      <td role="cell" className={`${CELL} tw-col-span-2 tw-row-start-2`}>
         <EventItem
           event={event}
           nfts={nfts}
@@ -410,7 +407,7 @@ function EventRow({
       </td>
       <td
         role="cell"
-        className={`${CELL} ${PARTY_CELL} tw-col-start-1 tw-row-start-4 @xs:tw-col-span-2 @xs:tw-row-start-3`}
+        className={`${CELL} ${PARTY_CELL} tw-col-span-2 tw-col-start-1 tw-row-start-3 tw-w-[calc(50%-0.25rem)] tw-justify-self-start @4xl:tw-w-auto`}
       >
         <span aria-hidden="true" className={MOBILE_LABEL}>
           {t(locale, "nftActivity.maker")}
@@ -423,7 +420,7 @@ function EventRow({
       </td>
       <td
         role="cell"
-        className={`${CELL} ${PARTY_CELL} tw-col-start-2 tw-row-start-4 @xs:tw-col-span-2 @xs:tw-col-start-3 @xs:tw-row-start-3`}
+        className={`${CELL} ${PARTY_CELL} tw-col-span-2 tw-col-start-1 tw-row-start-3 tw-w-[calc(50%-0.25rem)] tw-justify-self-end @4xl:tw-w-auto`}
       >
         <span aria-hidden="true" className={MOBILE_LABEL}>
           {t(locale, "nftActivity.recipient")}
@@ -436,7 +433,7 @@ function EventRow({
       </td>
       <td
         role="cell"
-        className={`${CELL} tw-col-span-2 tw-col-start-1 tw-row-start-2 tw-self-center tw-whitespace-normal tw-text-right tw-font-mono tw-text-xs tw-font-semibold tw-tabular-nums tw-text-iron-100 @xs:tw-col-span-3 @xs:tw-col-start-2 @xs:tw-row-start-1 @4xl:tw-text-sm [&>[aria-hidden=true]]:tw-font-normal [&>[aria-hidden=true]]:tw-text-iron-500`}
+        className={`${CELL} tw-col-start-2 tw-row-start-1 tw-self-center tw-whitespace-normal tw-text-right tw-font-mono tw-text-xs tw-font-semibold tw-tabular-nums tw-text-iron-100 [overflow-wrap:anywhere] @4xl:tw-text-sm @4xl:[overflow-wrap:normal] [&>[aria-hidden=true]]:tw-font-normal [&>[aria-hidden=true]]:tw-text-iron-500`}
       >
         {totalPrice ?? (
           <>
@@ -449,7 +446,7 @@ function EventRow({
       </td>
       <td
         role="cell"
-        className={`${CELL} tw-col-span-2 tw-row-start-5 tw-text-xs tw-leading-5 tw-text-iron-500 @xs:tw-col-span-4 @xs:tw-row-start-4`}
+        className={`${CELL} tw-col-span-2 tw-row-start-4 tw-text-xs tw-leading-5 tw-text-iron-500`}
       >
         <div className="tw-flex tw-items-center tw-gap-2">
           {occurredAtDateTime ? (
