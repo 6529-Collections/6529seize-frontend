@@ -152,6 +152,8 @@ async function settleImages(page: Page, selector: string) {
                 ? "https://example.invalid"
                 : document.baseURI;
             const url = new URL(value, base);
+            if (!["https:", "http:"].includes(url.protocol))
+              return "[non-HTTP URL]";
             return `${url.origin}${url.pathname}`;
           } catch {
             return "[invalid URL]";
@@ -163,12 +165,18 @@ async function settleImages(page: Page, selector: string) {
             alt: image.alt,
             src: safeUrl(image.getAttribute("src")),
             currentSrc: safeUrl(image.currentSrc),
-            srcSet: (image.getAttribute("srcset") ?? "")
-              .split(",")
-              .map((candidate) => {
-                const [url, descriptor] = candidate.trim().split(/\s+/u);
-                return { url: safeUrl(url ?? null), descriptor };
-              }),
+            // Data URLs contain commas that are not candidate separators. Drop
+            // the entire field before splitting so no inline payload is logged.
+            srcSet: /(?:^|[\s,])data:/iu.test(
+              image.getAttribute("srcset") ?? ""
+            )
+              ? "[inline srcset redacted]"
+              : (image.getAttribute("srcset") ?? "")
+                  .split(",")
+                  .map((candidate) => {
+                    const [url, descriptor] = candidate.trim().split(/\s+/u);
+                    return { url: safeUrl(url ?? null), descriptor };
+                  }),
             sizes: image.getAttribute("sizes"),
             loading: image.loading,
             complete: image.complete,

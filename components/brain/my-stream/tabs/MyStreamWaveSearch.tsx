@@ -3,6 +3,7 @@
 import {
   createContext,
   useContext,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -48,6 +49,11 @@ export function MyStreamWaveSearch({
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  const searchContext = useMemo(
+    () => ({ open: () => setOpenSearch("wave"), trigger }),
+    []
+  );
+
   const closeSearch = () => {
     setOpenSearch(null);
     requestAnimationFrame(() =>
@@ -72,9 +78,7 @@ export function MyStreamWaveSearch({
   };
 
   return (
-    <WaveSearchContext.Provider
-      value={{ open: () => setOpenSearch("wave"), trigger }}
-    >
+    <WaveSearchContext.Provider value={searchContext}>
       {children}
       <LazyWaveDropsSearchModal
         isOpen={openSearch === "wave"}

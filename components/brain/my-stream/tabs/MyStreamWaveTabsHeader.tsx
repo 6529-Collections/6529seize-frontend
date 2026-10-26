@@ -18,7 +18,6 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
 import { AnnouncementWaveIcon } from "@/components/brain/left-sidebar/waves/SidebarIconTile";
-import type { SetActiveContentTab } from "@/components/brain/ContentTabContext";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
@@ -56,8 +55,6 @@ export interface MyStreamWaveTabsHeaderActionContext {
 interface MyStreamWaveTabsHeaderProps {
   readonly wave: ApiWave;
   readonly activeContentTab: MyStreamWaveTab;
-  readonly setActiveContentTab: SetActiveContentTab;
-  readonly onSelectCuration: (curationId: string | null) => void;
   readonly isCompact: boolean;
   readonly showBackButton: boolean;
   readonly headerActionsTooltipId: string;

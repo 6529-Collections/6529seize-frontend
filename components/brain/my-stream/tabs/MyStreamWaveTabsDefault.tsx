@@ -166,8 +166,6 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
       <MyStreamWaveTabsHeader
         wave={wave}
         activeContentTab={activeContentTab}
-        setActiveContentTab={setActiveContentTab}
-        onSelectCuration={onSelectCuration}
         isCompact={isCompact}
         showBackButton={showBackButton}
         headerActionsTooltipId={headerActionsTooltipId}

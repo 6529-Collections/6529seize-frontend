@@ -58,7 +58,11 @@ it("accepts renderer-supported metadata animation URLs and MOV", () => {
   ).toEqual({ square: { id: 7, width: 100, height: 100 } });
 });
 
-function fixturePage(pages: unknown[][], ok = true) {
+function fixturePage(
+  pages: unknown[][],
+  ok = true,
+  access: string | null = "fixture-access"
+) {
   const get = jest.fn();
   for (const records of pages)
     get.mockResolvedValueOnce({
@@ -66,16 +70,18 @@ function fixturePage(pages: unknown[][], ok = true) {
       status: () => (ok ? 200 : 503),
       json: async () => ({ data: records }),
     });
-  const page = {
-    context: () => ({
-      cookies: async () => [{ name: "x-6529-auth", value: "fixture-access" }],
-    }),
+  const context = {
+    cookies: async () =>
+      access === null ? [] : [{ name: "x-6529-auth", value: access }],
     request: { get },
+  };
+  const page = {
+    context: () => context,
   } as unknown as import("@playwright/test").Page;
-  return { page, get };
+  return { page, get, context };
 }
 
-it("qualifies both shapes across bounded pages and reuses the inventory within a worker", async () => {
+it("qualifies both shapes across bounded pages and reuses the inventory within a browser context", async () => {
   jest.resetModules();
   const { getStagingVideoFixtures } =
     await import("../../tests/media/stagingVideoFixtures");
@@ -115,5 +121,64 @@ it("does not retry or disguise an unsuccessful authenticated inventory request",
   await expect(getStagingVideoFixtures(page)).rejects.toThrow(
     "Staging video fixture inventory must load"
   );
+  expect(get).toHaveBeenCalledTimes(1);
+});
+
+it("isolates inventory and auth for concurrent browser contexts", async () => {
+  const { getStagingVideoFixtures } =
+    await import("../../tests/media/stagingVideoFixtures");
+  const first = fixturePage(
+    [[video(11, 640, 960), video(12, 1000, 1000)]],
+    true,
+    "first-access"
+  );
+  const second = fixturePage(
+    [[video(21, 640, 960), video(22, 1000, 1000)]],
+    true,
+    "second-access"
+  );
+  const [a, b] = await Promise.all([
+    getStagingVideoFixtures(first.page),
+    getStagingVideoFixtures(second.page),
+  ]);
+  expect(a.portrait.id).toBe(11);
+  expect(b.portrait.id).toBe(21);
+  expect(first.get).toHaveBeenCalledWith(expect.any(String), {
+    headers: { "x-6529-auth": "first-access" },
+  });
+  expect(second.get).toHaveBeenCalledWith(expect.any(String), {
+    headers: { "x-6529-auth": "second-access" },
+  });
+  const siblingPage = {
+    context: () => first.context,
+  } as unknown as import("@playwright/test").Page;
+  expect(await getStagingVideoFixtures(siblingPage)).toBe(a);
+  expect(first.get).toHaveBeenCalledTimes(1);
+});
+
+it("reports missing staging auth before making an inventory request", async () => {
+  const { getStagingVideoFixtures } =
+    await import("../../tests/media/stagingVideoFixtures");
+  const { page, get } = fixturePage([[]], true, null);
+  await expect(getStagingVideoFixtures(page)).rejects.toThrow(
+    "require the x-6529-auth cookie"
+  );
+  expect(get).not.toHaveBeenCalled();
+});
+
+it("does not expose staging auth from transport error call logs", async () => {
+  const { getStagingVideoFixtures } =
+    await import("../../tests/media/stagingVideoFixtures");
+  const { page, get } = fixturePage([]);
+  get.mockRejectedValue(new Error("Call log: x-6529-auth: PRIVATE_TOKEN"));
+  const failure = await getStagingVideoFixtures(page).catch(
+    (error: unknown) => error
+  );
+  expect(failure).toBeInstanceOf(Error);
+  expect((failure as Error).message).toContain(
+    "transport failed before an HTTP response"
+  );
+  expect(String(failure)).not.toContain("PRIVATE_TOKEN");
+  expect((failure as Error).cause).toBeUndefined();
   expect(get).toHaveBeenCalledTimes(1);
 });

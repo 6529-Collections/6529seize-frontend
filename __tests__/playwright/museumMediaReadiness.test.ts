@@ -22,6 +22,8 @@ function mediaImage(
     decodeOnVisit?: boolean;
     visitsBeforeDecode?: number;
     onVisit?: () => void;
+    attributes?: Record<string, string>;
+    currentSrc?: string;
   } = {}
 ) {
   const source = `https://example.com/${encodeURIComponent(alt)}.png`;
@@ -30,7 +32,9 @@ function mediaImage(
   let visits = 0;
   return {
     alt,
-    getAttribute: (name: string) => (name === "src" ? source : null),
+    getAttribute: (name: string) =>
+      options.attributes?.[name] ?? (name === "src" ? source : null),
+    currentSrc: options.currentSrc ?? source,
     get complete() {
       return complete;
     },
@@ -165,6 +169,75 @@ describe("Museum rendered media readiness", () => {
     await expect(
       expectNoUnresolvedMuseumMedia(mediaPage(main))
     ).rejects.toThrow("Image failed to decode: failed work");
+  });
+
+  it.each([
+    "data:image/png;base64,PRIVATE_INLINE_PAYLOAD 1x, /museum/other.webp 2x",
+    "/museum/work.webp 1x, data:image/svg+xml,<svg>PRIVATE_INLINE_PAYLOAD</svg> 2x",
+    "DATA:image/png;base64,PRIVATE_INLINE_PAYLOAD,WITH_COMMAS 1x",
+  ])(
+    "redacts inline srcset payloads before diagnostic candidate parsing: %s",
+    async (srcset) => {
+      main.append(
+        mediaImage("failed work", {
+          decodeOnVisit: false,
+          attributes: { srcset },
+        })
+      );
+      const failure = await expectNoUnresolvedMuseumMedia(
+        mediaPage(main)
+      ).catch((error: unknown) => error);
+      expect(failure).toBeInstanceOf(Error);
+      expect((failure as Error).message).toContain("[inline srcset redacted]");
+      expect((failure as Error).message).not.toContain(
+        "PRIVATE_INLINE_PAYLOAD"
+      );
+      expect((failure as Error).message).not.toContain("WITH_COMMAS");
+    }
+  );
+
+  it.each([
+    "data:image/png;base64,PRIVATE_CURRENT_SOURCE",
+    "blob:https://example.com/PRIVATE_CURRENT_SOURCE",
+    "file:///PRIVATE_CURRENT_SOURCE",
+  ])(
+    "rejects non-HTTP selected sources in diagnostics: %s",
+    async (currentSrc) => {
+      main.append(
+        mediaImage("failed work", { decodeOnVisit: false, currentSrc })
+      );
+      const failure = await expectNoUnresolvedMuseumMedia(
+        mediaPage(main)
+      ).catch((error: unknown) => error);
+      expect(failure).toBeInstanceOf(Error);
+      expect((failure as Error).message).toContain("[non-HTTP URL]");
+      expect((failure as Error).message).not.toContain(
+        "PRIVATE_CURRENT_SOURCE"
+      );
+    }
+  );
+
+  it("retains HTTP responsive candidates with credentials, queries and fragments removed", async () => {
+    main.append(
+      mediaImage("failed work", {
+        decodeOnVisit: false,
+        attributes: {
+          srcset:
+            "https://user:PRIVATE_PASSWORD@example.com/work.webp?sig=PRIVATE_QUERY#PRIVATE_FRAGMENT 1x, /museum/large.webp?key=PRIVATE_QUERY 2x",
+        },
+        currentSrc:
+          "https://user:PRIVATE_PASSWORD@example.com/work.webp?sig=PRIVATE_QUERY#PRIVATE_FRAGMENT",
+      })
+    );
+    const failure = await expectNoUnresolvedMuseumMedia(mediaPage(main)).catch(
+      (error: unknown) => error
+    );
+    expect(failure).toBeInstanceOf(Error);
+    expect((failure as Error).message).toContain(
+      '"url":"https://example.com/work.webp","descriptor":"1x"'
+    );
+    expect((failure as Error).message).toContain('"descriptor":"2x"');
+    expect((failure as Error).message).not.toContain("PRIVATE_");
   });
 
   it("requires both occurrences of the same source and alternative text", async () => {

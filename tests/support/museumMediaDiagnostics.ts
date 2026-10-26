@@ -76,10 +76,7 @@ export async function attachMuseumMediaDiagnostics(
       documentURL?: string;
       request: { url: string };
     }) => {
-      const url = museumMediaEvidenceUrl(
-        event.request.url,
-        event.documentURL ?? page.url?.()
-      );
+      const url = museumMediaEvidenceUrl(event.request.url, event.documentURL);
       if (url === null) {
         requests.delete(event.requestId);
         return;

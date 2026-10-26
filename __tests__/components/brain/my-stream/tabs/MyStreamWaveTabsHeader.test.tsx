@@ -143,8 +143,6 @@ describe("MyStreamWaveTabsHeader", () => {
       <MyStreamWaveTabsHeader
         wave={wave}
         activeContentTab={MyStreamWaveTab.CHAT}
-        setActiveContentTab={jest.fn()}
-        onSelectCuration={jest.fn()}
         isCompact={false}
         showBackButton={false}
         headerActionsTooltipId="header-actions"
@@ -164,8 +162,6 @@ describe("MyStreamWaveTabsHeader", () => {
       <MyStreamWaveTabsHeader
         wave={wave}
         activeContentTab={MyStreamWaveTab.CHAT}
-        setActiveContentTab={jest.fn()}
-        onSelectCuration={jest.fn()}
         isCompact={false}
         showBackButton={false}
         headerActionsTooltipId="header-actions"
@@ -192,8 +188,6 @@ describe("MyStreamWaveTabsHeader", () => {
       <MyStreamWaveTabsHeader
         wave={wave}
         activeContentTab={MyStreamWaveTab.CHAT}
-        setActiveContentTab={jest.fn()}
-        onSelectCuration={jest.fn()}
         isCompact={false}
         showBackButton={false}
         headerActionsTooltipId="header-actions"
@@ -229,8 +223,6 @@ describe("MyStreamWaveTabsHeader", () => {
       <MyStreamWaveTabsHeader
         wave={wave}
         activeContentTab={MyStreamWaveTab.CHAT}
-        setActiveContentTab={jest.fn()}
-        onSelectCuration={jest.fn()}
         isCompact={false}
         showBackButton={false}
         headerActionsTooltipId="header-actions"
@@ -260,8 +252,6 @@ describe("MyStreamWaveTabsHeader", () => {
       <MyStreamWaveTabsHeader
         wave={wave}
         activeContentTab={MyStreamWaveTab.CHAT}
-        setActiveContentTab={jest.fn()}
-        onSelectCuration={jest.fn()}
         isCompact
         showBackButton
         headerActionsTooltipId="header-actions"
@@ -294,8 +284,6 @@ describe("MyStreamWaveTabsHeader", () => {
             chat: { scope: { group: { is_direct_message: state === "DM" } } },
           }}
           activeContentTab={MyStreamWaveTab.CHAT}
-          setActiveContentTab={jest.fn()}
-          onSelectCuration={jest.fn()}
           isCompact={false}
           showBackButton={false}
           headerActionsTooltipId="header-actions"
@@ -320,8 +308,6 @@ describe("MyStreamWaveTabsHeader", () => {
           },
         }}
         activeContentTab={MyStreamWaveTab.CHAT}
-        setActiveContentTab={jest.fn()}
-        onSelectCuration={jest.fn()}
         isCompact={false}
         showBackButton={false}
         headerActionsTooltipId="header-actions"
@@ -348,8 +334,6 @@ describe("MyStreamWaveTabsHeader", () => {
       <MyStreamWaveTabsHeader
         wave={wave}
         activeContentTab={MyStreamWaveTab.CHAT}
-        setActiveContentTab={jest.fn()}
-        onSelectCuration={jest.fn()}
         isCompact={true}
         showBackButton={false}
         headerActionsTooltipId="header-actions"
@@ -367,8 +351,6 @@ describe("MyStreamWaveTabsHeader", () => {
       <MyStreamWaveTabsHeader
         wave={wave}
         activeContentTab={MyStreamWaveTab.CHAT}
-        setActiveContentTab={jest.fn()}
-        onSelectCuration={jest.fn()}
         isCompact={false}
         showBackButton={false}
         headerActionsTooltipId="header-actions"
@@ -417,8 +399,6 @@ describe("MyStreamWaveTabsHeader", () => {
             description_drop: { id: "drop-1", parts: [{ content }] },
           }}
           activeContentTab={MyStreamWaveTab.CHAT}
-          setActiveContentTab={jest.fn()}
-          onSelectCuration={jest.fn()}
           isCompact={false}
           showBackButton={false}
           headerActionsTooltipId="header-actions"
@@ -448,8 +428,6 @@ describe("MyStreamWaveTabsHeader", () => {
           },
         }}
         activeContentTab={MyStreamWaveTab.CHAT}
-        setActiveContentTab={jest.fn()}
-        onSelectCuration={jest.fn()}
         isCompact={false}
         showBackButton={false}
         headerActionsTooltipId="header-actions"
