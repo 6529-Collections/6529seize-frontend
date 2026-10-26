@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import type { ApiDropV2 } from "../../generated/models/ApiDropV2";
 import { ApiDropMainType } from "../../generated/models/ApiDropMainType";
 import type { ApiWaveOverview } from "../../generated/models/ApiWaveOverview";
@@ -34,6 +34,46 @@ async function fetchSandboxDrop(page: Page, baseURL: string | undefined) {
   const source = feed.drops.find((drop) => drop.id === DROP_ID);
   if (!source) throw new Error("Image fixture requires the sandbox drop");
   return { apiOrigin, feed, source };
+}
+
+async function expectSubmissionGifLoadingLayout(hero: Locator) {
+  const loader = hero.getByRole("status", {
+    name: "Loading image",
+    exact: true,
+  });
+  await expect(loader).toBeVisible();
+  const frame = hero
+    .getByRole("img", { name: "Drop media", exact: true, includeHidden: true })
+    .locator("xpath=ancestor::*[@data-artwork-image-frame]");
+  const frameBox = await frame.boundingBox();
+  const loaderBox = await loader.boundingBox();
+  const spinnerBox = await hero
+    .getByRole("status", { name: "Loading image", exact: true })
+    .locator('[aria-hidden="true"]')
+    .boundingBox();
+  expect(frameBox).not.toBeNull();
+  expect(loaderBox).not.toBeNull();
+  expect(spinnerBox).not.toBeNull();
+  for (const axis of ["x", "y", "width", "height"] as const) {
+    expect(Math.abs(loaderBox![axis] - frameBox![axis])).toBeLessThanOrEqual(1);
+  }
+  expect(
+    Math.abs(
+      spinnerBox!.x +
+        spinnerBox!.width / 2 -
+        (loaderBox!.x + loaderBox!.width / 2)
+    )
+  ).toBeLessThanOrEqual(1);
+  expect(
+    Math.abs(
+      spinnerBox!.y +
+        spinnerBox!.height / 2 -
+        (loaderBox!.y + loaderBox!.height / 2)
+    )
+  ).toBeLessThanOrEqual(1);
+  await expect(
+    hero.getByRole("button", { name: "View original", exact: true })
+  ).toBeEnabled();
 }
 
 // Parent suites supply the local-only mutation guard and desktop/touch projects.
@@ -168,42 +208,7 @@ export function defineSubmissionArtworkPreviewTests() {
       });
       if (extension === "gif") {
         try {
-          const loader = hero.getByRole("status", {
-            name: "Loading image",
-            exact: true,
-          });
-          await expect(loader).toBeVisible();
-          const frame = hero.locator("[data-artwork-image-frame]");
-          const frameBox = await frame.boundingBox();
-          const loaderBox = await loader.boundingBox();
-          const spinnerBox = await loader
-            .locator('[aria-hidden="true"]')
-            .boundingBox();
-          expect(frameBox).not.toBeNull();
-          expect(loaderBox).not.toBeNull();
-          expect(spinnerBox).not.toBeNull();
-          for (const axis of ["x", "y", "width", "height"] as const) {
-            expect(
-              Math.abs(loaderBox![axis] - frameBox![axis])
-            ).toBeLessThanOrEqual(1);
-          }
-          expect(
-            Math.abs(
-              spinnerBox!.x +
-                spinnerBox!.width / 2 -
-                (loaderBox!.x + loaderBox!.width / 2)
-            )
-          ).toBeLessThanOrEqual(1);
-          expect(
-            Math.abs(
-              spinnerBox!.y +
-                spinnerBox!.height / 2 -
-                (loaderBox!.y + loaderBox!.height / 2)
-            )
-          ).toBeLessThanOrEqual(1);
-          await expect(
-            hero.getByRole("button", { name: "View original", exact: true })
-          ).toBeEnabled();
+          await expectSubmissionGifLoadingLayout(hero);
         } finally {
           releaseGifPreviews();
         }

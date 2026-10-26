@@ -11,7 +11,14 @@ import {
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import Image, { type ImageProps } from "next/image";
-import { forwardRef, useRef, useState, type ReactNode } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 export function getDropImagePreviewSources(
   src: string,
@@ -105,12 +112,18 @@ const PreviewAttempt = forwardRef<HTMLImageElement, Props>(
       : previewSources;
     const source = sources[attempt];
     const optimizationProps = source === highQualitySrc ? { quality: 100 } : {};
-    const notifyAnimatedPreviewUnavailable = () => {
+    const notifyAnimatedPreviewUnavailable = useCallback(() => {
       if (!isGifImageUrl(originalSrc) || notifiedAnimationFallback.current)
         return;
       notifiedAnimationFallback.current = true;
       onAnimatedPreviewUnavailable?.();
-    };
+    }, [originalSrc, onAnimatedPreviewUnavailable]);
+
+    useEffect(() => {
+      // This callback uses an internal notification guard, not the forwarded DOM ref.
+      // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-ref-to-parent
+      if (sources.length === 0) notifyAnimatedPreviewUnavailable();
+    }, [sources.length, notifyAnimatedPreviewUnavailable]);
 
     return (
       <>

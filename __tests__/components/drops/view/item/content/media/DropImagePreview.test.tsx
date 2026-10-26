@@ -1,5 +1,10 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import { createElement, forwardRef, type ComponentProps } from "react";
+import {
+  createElement,
+  forwardRef,
+  StrictMode,
+  type ComponentProps,
+} from "react";
 import { DropImagePreview } from "@/components/drops/view/item/content/media/DropImagePreview";
 import { ImageScale } from "@/helpers/image.helpers";
 
@@ -288,4 +293,28 @@ it("reports an unverified external GIF preview once without claiming it is stati
   fireEvent.load(screen.getByAltText("GIF"));
   fireEvent.error(screen.getByAltText("GIF"));
   expect(onAnimatedPreviewUnavailable).toHaveBeenCalledTimes(1);
+});
+
+it("reports a missing GIF preview once across strict effects and rerenders", () => {
+  const onUnavailable = jest.fn();
+  const view = (src: string) => (
+    <StrictMode>
+      <DropImagePreview
+        originalSrc={src}
+        imageScale={ImageScale.AUTOx1080}
+        alt="GIF"
+        onAnimatedPreviewUnavailable={() => onUnavailable()}
+      />
+    </StrictMode>
+  );
+  const src = "http://external.example/art.gif";
+  const { rerender } = render(view(src));
+  expect(screen.queryByRole("img")).not.toBeInTheDocument();
+  expect(onUnavailable).toHaveBeenCalledTimes(1);
+  rerender(view(src));
+  expect(onUnavailable).toHaveBeenCalledTimes(1);
+  rerender(view(src.replace("art.gif", "next.gif")));
+  expect(onUnavailable).toHaveBeenCalledTimes(2);
+  rerender(view(src.replace("art.gif", "still.jpg")));
+  expect(onUnavailable).toHaveBeenCalledTimes(2);
 });

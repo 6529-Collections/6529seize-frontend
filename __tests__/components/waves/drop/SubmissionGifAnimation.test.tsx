@@ -56,6 +56,18 @@ jest.mock("react-zoom-pan-pinch", () => ({
 const src = "https://d3lqz0a4bldqgf.cloudfront.net/drops/author/art.gif";
 const artwork = { mime_type: "image/gif", url: src };
 
+it("automatically loads a submission GIF with no eligible preview source", () => {
+  const url = "http://external.example/art.gif";
+  render(<MemesDropArtworkHero artworkMedia={{ ...artwork, url }} />);
+  expect(screen.getByAltText("Original GIF animation")).toHaveAttribute(
+    "src",
+    url
+  );
+  expect(screen.queryByAltText("Drop media")).toBeNull();
+  fireEvent.load(screen.getByAltText("Original GIF animation"));
+  expect(screen.queryByRole("status", { name: "Loading image" })).toBeNull();
+});
+
 it("fills the reserved submission frame with a centered, reduced-motion-safe GIF loader", () => {
   const { rerender } = render(<MemesDropArtworkHero artworkMedia={artwork} />);
   const loader = screen.getByRole("status", { name: "Loading image" });
