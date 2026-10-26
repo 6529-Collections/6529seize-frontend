@@ -331,6 +331,9 @@ environment; the help runtime continues to consume `/help-index.json`.
 
 ## Source Ownership
 
+The NFT activity record describes both wide-screen columns and stacked rows on
+narrow screens, with the same activity information, links, filters and pagination.
+
 The Collect workflow record owns `/collect` and `/collect/orders`, profile-wide
 set scope, direct gift recipients, marketplace review and recovery, observed
 price/TDH coverage, and saved rules that prepare purchases for wallet approval.
