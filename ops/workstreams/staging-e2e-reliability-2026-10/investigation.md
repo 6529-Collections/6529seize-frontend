@@ -68,8 +68,16 @@ Focused component/helper tests and browser-selector/type checks validate the cha
 
 Full local app browser attempts for the Research matrix and delayed-competition search could not reach the application: cold Turbopack readiness timed out, and the webpack fallback remained compiling without an HTTP response. The temporary server was stopped; resulting empty-response test failures are local execution limitations, not evidence of these application assertions passing or failing. No dev server is left running.
 
-No staging rerun, deployment, shared staging push, main merge, timeout/retry increase, new skip, pack-selection narrowing or unrelated WebSocket exclusion change is part of this work. Revalidation on the eventual deployed head remains necessary, and requires separate authorization.
+No staging rerun, deployment, shared staging push, main merge, browser assertion timeout/retry increase, new skip, pack-selection narrowing or unrelated WebSocket exclusion change is part of this work. Revalidation on the eventual deployed head remains necessary, and requires separate authorization.
 
 ## Diagnostic privacy and attribution
 
 The added `Browser media state` URL fields retain only HTTP(S) origin/path. A `srcset` containing any inline `data:` candidate is redacted as a whole before comma splitting, because payload commas cannot safely be treated as candidate separators. Normal responsive HTTP(S) candidates retain their sanitized URLs and descriptors. CDP same-origin evidence uses the request's document URL; it does not infer the originating document from the page's potentially newer navigation state.
+
+## PR CI setup failure on the repair branch
+
+[App PR CI run 40317095671, Museum mobile](https://github.com/6529-Collections/6529seize-frontend/actions/runs/40317095671/job/121552569440) failed before any browser or test started. The primary `playwright install-deps chromium` step hit its three-minute limit during Ubuntu package downloads. Its `apt-get` child remained alive. The immediate retry failed with exit 100 because that process still owned `/var/lib/dpkg/lock-frontend`; verification then correctly failed the job. Matrix fail-fast cancelled the sibling quality, build and desktop jobs. The downloaded mobile artifact contains only the surface-registry report, with no Playwright report. The desktop embedded browser report independently records seven passes, zero failures, zero flakes and zero skips before job cancellation.
+
+This setup defect is unchanged from the PR base and is separate from the original staging assertion failures. The user explicitly assigned its repair to this PR. PR Museum setup now follows the existing staging/production recovery: a ten-minute initial installation budget, then a bounded five-minute wait for package-manager locks before the existing retry, within a fifteen-minute recovery step. The wait never deletes locks or kills a package-manager process, and setup remains fatal unless one installation succeeds. Browser assertion timeouts, test retries, pack selection and failure alerts are unchanged.
+
+The shell regression executes the actual workflow recovery block with controlled commands for a free lock, a lock that clears, a lock that stays held, an installer failure and successful/failed setup verification. It covers PR Museum lanes alongside the existing staging and production recovery cases. Hosted Ubuntu package download performance remains dependent on its mirror; local shell coverage cannot prove mirror availability.
