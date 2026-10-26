@@ -1030,7 +1030,25 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       exact: true,
     });
     await expect(explainVote).toBeEnabled();
+    await expect(explainVote).not.toHaveAttribute("title");
+    await explainVote.focus();
+    const explanationTooltip = page.getByRole("tooltip");
+    await expect(explanationTooltip).toHaveText(
+      "Post a public reply in the wave about your saved vote."
+    );
+    await expect(explanationTooltip).toHaveCSS(
+      "background-color",
+      "rgb(55, 55, 62)"
+    );
+    await expect(explanationTooltip).toHaveCSS("border-radius", "6px");
+    await expect(explainVote).toHaveAttribute(
+      "aria-describedby",
+      (await explanationTooltip.getAttribute("id"))!
+    );
+    await explainVote.press("Escape");
+    await expect(explanationTooltip).toBeHidden();
     await explainVote.click();
+    await expect(explanationTooltip).toHaveCount(0);
     const cancelRationale = page.getByRole("button", {
       name: "Cancel reply",
       exact: true,
@@ -3231,17 +3249,29 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .getByRole("button", { name: "Save vote", exact: true })
           .evaluate((button) => {
             const bounds = button.getBoundingClientRect();
+            const visibleButton =
+              button.firstElementChild!.getBoundingClientRect();
             const group = button.parentElement!.getBoundingClientRect();
             return {
-              top: bounds.top - group.top,
-              bottom: group.bottom - bounds.bottom,
+              top: visibleButton.top - group.top,
+              bottom: group.bottom - visibleButton.bottom,
               height: bounds.height,
+              visibleHeight: visibleButton.height,
+              label: button.innerText,
             };
           });
         expect(saveInset.top).toBeGreaterThanOrEqual(4);
         expect(saveInset.bottom).toBeGreaterThanOrEqual(4);
         if (contentWidth < 736) {
           expect(saveInset.height).toBeGreaterThanOrEqual(44);
+          expect(saveInset.visibleHeight).toBe(36);
+          expect(saveInset.label).toBe("Save vote");
+          expect(
+            (await controls
+              .getByRole("button", { name: "Explain vote", exact: true })
+              .locator("span")
+              .boundingBox())!.height
+          ).toBe(36);
           const inputBounds = (await input.boundingBox())!;
           const explainBounds = (await explain.boundingBox())!;
           expect(inputBounds.height).toBeGreaterThanOrEqual(44);
@@ -3262,6 +3292,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             );
           }
           await expect(input).toHaveCSS("font-size", "16px");
+        } else {
+          expect(saveInset.label).toBe("Save vote");
         }
         await expectNoHorizontalOverflow(page);
       }

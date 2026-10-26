@@ -1,5 +1,6 @@
 "use client";
 import {
+  useId,
   useLayoutEffect,
   useRef,
   useState,
@@ -8,6 +9,8 @@ import {
 } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
+import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import {
   competitionScope,
@@ -128,6 +131,7 @@ export function CompetitionVoteForm({
     };
   }, [viewer]);
   const locale = useBrowserLocale();
+  const explainTooltipId = useId();
   const creditLabel =
     WAVE_VOTING_LABELS[competition.voting.credit_type as ApiWaveCreditType];
   const client = useQueryClient();
@@ -258,7 +262,7 @@ export function CompetitionVoteForm({
           className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 tw-gap-y-1"
         >
           <div
-            className={`tw-col-span-2 tw-h-[52px] tw-animate-pulse tw-rounded-lg tw-bg-iron-900 @[22rem]/vote-controls:tw-col-span-1 @[46rem]/my-vote:tw-col-span-2 @[46rem]/my-vote:tw-h-11 motion-reduce:tw-animate-none ${onExplainVote ? "" : "@[22rem]/vote-controls:!tw-col-span-2"}`}
+            className={`tw-col-span-2 tw-h-11 tw-animate-pulse tw-rounded-lg tw-bg-iron-900 @[22rem]/vote-controls:tw-col-span-1 @[46rem]/my-vote:tw-col-span-2 motion-reduce:tw-animate-none ${onExplainVote ? "" : "@[22rem]/vote-controls:!tw-col-span-2"}`}
           />
           <div className="tw-row-start-2 tw-h-5 tw-w-3/4 tw-animate-pulse tw-rounded tw-bg-iron-900 @[22rem]/vote-controls:tw-col-span-2 @[46rem]/my-vote:tw-col-span-1 motion-reduce:tw-animate-none" />
           {onExplainVote && (
@@ -299,7 +303,7 @@ export function CompetitionVoteForm({
           className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 tw-gap-y-1"
         >
           <div
-            className={`tw-col-span-2 tw-flex tw-min-w-0 tw-items-center tw-gap-x-1 tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-pr-1 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus-within:tw-ring-2 focus-within:tw-ring-primary-400 @[22rem]/vote-controls:tw-col-span-1 @[46rem]/my-vote:tw-col-span-2 @[46rem]/my-vote:tw-gap-x-2 ${onExplainVote ? "" : "@[22rem]/vote-controls:!tw-col-span-2"}`}
+            className={`tw-col-span-2 tw-flex tw-min-w-0 tw-items-center tw-gap-x-1 tw-rounded-lg tw-bg-iron-900 tw-pr-1 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus-within:tw-ring-2 focus-within:tw-ring-primary-400 @[22rem]/vote-controls:tw-col-span-1 @[46rem]/my-vote:tw-col-span-2 @[46rem]/my-vote:tw-gap-x-2 ${onExplainVote ? "" : "@[22rem]/vote-controls:!tw-col-span-2"}`}
           >
             <input
               id={`competition-vote-${entryId}`}
@@ -321,7 +325,7 @@ export function CompetitionVoteForm({
             </span>
             <button
               type="submit"
-              className="tw-ml-auto tw-min-h-11 tw-flex-shrink-0 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-bg-primary-500 tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-bg-transparent disabled:tw-text-iron-500 @[46rem]/my-vote:tw-min-h-9"
+              className="tw-group/vote-save tw-ml-auto tw-h-11 tw-min-w-11 tw-flex-shrink-0 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-bg-transparent tw-px-0 tw-py-1 tw-text-xs tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
               disabled={
                 busy ||
                 disabled ||
@@ -330,7 +334,9 @@ export function CompetitionVoteForm({
                 numeric === credit.data.current_vote
               }
             >
-              {t(locale, busy ? "competitions.saving" : "competitions.vote")}
+              <span className="tw-flex tw-h-9 tw-w-full tw-items-center tw-justify-center tw-rounded-md tw-bg-primary-500 tw-px-2 group-disabled/vote-save:tw-bg-transparent group-disabled/vote-save:tw-text-iron-500">
+                {t(locale, busy ? "competitions.saving" : "competitions.vote")}
+              </span>
             </button>
           </div>
           <p
@@ -343,30 +349,52 @@ export function CompetitionVoteForm({
             })}
           </p>
           {onExplainVote && (
-            <button
-              type="button"
-              className="tw-col-start-2 tw-row-start-2 tw-min-h-11 tw-self-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-text-iron-500 @[22rem]/vote-controls:tw-row-start-1 @[46rem]/my-vote:tw-row-start-2 @[46rem]/my-vote:tw-min-h-9 @[46rem]/my-vote:tw-rounded-md @[46rem]/my-vote:tw-ring-0 desktop-hover:hover:tw-bg-iron-800"
-              aria-label={t(locale, "waves.voteRationale.explainAriaLabel")}
-              title={t(locale, "waves.voteRationale.savedDescription")}
-              disabled={
-                busy ||
-                disabled ||
-                !competition.permissions.vote ||
-                credit.data.current_vote === null ||
-                credit.data.current_vote === 0
-              }
-              onClick={() => {
-                const total = credit.data.current_vote ?? 0;
-                onExplainVote(
-                  total,
-                  lastVote?.source === source && lastVote.total === total
-                    ? lastVote.change
-                    : 0
-                );
-              }}
-            >
-              {t(locale, "waves.voteRationale.explain")}
-            </button>
+            <>
+              <button
+                type="button"
+                className="tw-group/vote-explain tw-col-start-2 tw-row-start-2 tw-h-11 tw-self-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-text-iron-500 @[22rem]/vote-controls:tw-row-start-1 @[46rem]/my-vote:tw-row-start-2 @[46rem]/my-vote:tw-h-9 @[46rem]/my-vote:tw-rounded-md @[46rem]/my-vote:tw-py-0"
+                aria-label={t(locale, "waves.voteRationale.explainAriaLabel")}
+                data-tooltip-id={explainTooltipId}
+                data-tooltip-content={t(
+                  locale,
+                  "waves.voteRationale.savedDescription"
+                )}
+                disabled={
+                  busy ||
+                  disabled ||
+                  !competition.permissions.vote ||
+                  credit.data.current_vote === null ||
+                  credit.data.current_vote === 0
+                }
+                onClick={() => {
+                  const total = credit.data.current_vote ?? 0;
+                  onExplainVote(
+                    total,
+                    lastVote?.source === source && lastVote.total === total
+                      ? lastVote.change
+                      : 0
+                  );
+                }}
+              >
+                <span className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-rounded-md tw-px-2 tw-ring-1 tw-ring-inset tw-ring-iron-700 @[46rem]/my-vote:tw-ring-0 desktop-hover:group-hover/vote-explain:tw-bg-iron-800">
+                  {t(locale, "waves.voteRationale.explain")}
+                </span>
+              </button>
+              <BodyPortalTooltip
+                id={explainTooltipId}
+                place="top"
+                offset={8}
+                opacity={1}
+                style={TOOLTIP_STYLES}
+                className="tw-max-w-64 tw-whitespace-normal"
+                closeEvents={{ mouseleave: true, blur: true, click: true }}
+                globalCloseEvents={{
+                  escape: true,
+                  clickOutsideAnchor: true,
+                  scroll: true,
+                }}
+              />
+            </>
           )}
         </div>
         {failed && (

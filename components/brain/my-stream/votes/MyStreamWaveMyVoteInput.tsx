@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useState } from "react";
+import { useContext, useId, useState } from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import type { DropRateChangeRequest } from "@/entities/IDrop";
@@ -17,6 +17,8 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import Button from "@/components/utils/button/Button";
+import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 
 interface MyStreamWaveMyVoteInputProps {
   readonly drop: ExtendedDrop;
@@ -59,6 +61,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   onExplainVote,
 }) => {
   const locale = useBrowserLocale();
+  const explainTooltipId = useId();
   const { requestAuth, setToast } = useContext(AuthContext);
   const queryClient = useQueryClient();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -331,7 +334,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
         {t(locale, "waves.myVotes.inCredit", { credit: voteLabel })}
       </label>
       <div
-        className={`${onExplainVote ? "@[22rem]/vote-controls:tw-col-span-1" : ""} tw-col-span-2 tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-pr-1 tw-ring-1 tw-ring-inset tw-transition-colors tw-duration-200 focus-within:tw-ring-2 @[46rem]/my-vote:tw-col-span-1 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-1 @[46rem]/my-vote:tw-self-end @[46rem]/my-vote:tw-py-0 motion-reduce:tw-transition-none ${
+        className={`${onExplainVote ? "@[22rem]/vote-controls:tw-col-span-1" : ""} tw-col-span-2 tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-pr-1 tw-ring-1 tw-ring-inset tw-transition-colors tw-duration-200 focus-within:tw-ring-2 @[46rem]/my-vote:tw-col-span-1 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-1 @[46rem]/my-vote:tw-self-end motion-reduce:tw-transition-none ${
           isVoteValueOutOfRange
             ? "tw-ring-rose-400 focus-within:!tw-ring-rose-400"
             : "tw-ring-iron-700 focus-within:!tw-ring-primary-400"
@@ -371,12 +374,14 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
           size="sm"
           loading={isProcessing || isResetting}
           hideChildrenWhenLoading
-          className={`!tw-h-11 tw-min-w-[60px] !tw-border-0 !tw-text-sm !tw-shadow-none @[46rem]/my-vote:!tw-h-8 ${
-            isEditing ? "" : "!tw-bg-transparent"
-          }`}
+          className="!tw-h-11 tw-min-w-11 !tw-border-0 !tw-bg-transparent !tw-px-0 !tw-py-1 !tw-text-xs !tw-shadow-none @[46rem]/my-vote:!tw-h-10"
           aria-label={t(locale, "waves.myVotes.submitVote")}
         >
-          {t(locale, "waves.myVotes.vote")}
+          <span
+            className={`tw-flex tw-h-9 tw-w-full tw-items-center tw-justify-center tw-rounded-md tw-px-2 @[46rem]/my-vote:tw-h-8 ${isEditing ? "tw-bg-iron-200 tw-text-iron-950" : ""}`}
+          >
+            {t(locale, "waves.myVotes.vote")}
+          </span>
         </Button>
       </div>
       <div className="tw-contents @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-2 @[46rem]/my-vote:tw-mt-0 @[46rem]/my-vote:tw-flex @[46rem]/my-vote:tw-min-h-6 @[46rem]/my-vote:tw-min-w-0 @[46rem]/my-vote:tw-flex-wrap @[46rem]/my-vote:tw-items-center @[46rem]/my-vote:tw-justify-between @[46rem]/my-vote:tw-gap-x-3 @[46rem]/my-vote:tw-gap-y-1 @[46rem]/my-vote:tw-self-start @[46rem]/my-vote:tw-text-sm @[46rem]/my-vote:tw-leading-6">
@@ -387,20 +392,42 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
           {maxRatingLabel} {formatInteger(locale, liveMaxRating)}
         </p>
         {onExplainVote && (
-          <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleExplainVote();
-            }}
-            disabled={!canExplainVote}
-            variant="tertiary"
-            size="xs"
-            aria-label={t(locale, "waves.voteRationale.explainAriaLabel")}
-            title={t(locale, "waves.voteRationale.savedDescription")}
-            className="tw-col-start-2 tw-row-start-2 !tw-min-h-11 tw-whitespace-nowrap @[22rem]/vote-controls:tw-row-start-1 @[46rem]/my-vote:!tw-min-h-0"
-          >
-            {t(locale, "waves.voteRationale.explain")}
-          </Button>
+          <>
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleExplainVote();
+              }}
+              disabled={!canExplainVote}
+              variant="tertiary"
+              size="xs"
+              aria-label={t(locale, "waves.voteRationale.explainAriaLabel")}
+              data-tooltip-id={explainTooltipId}
+              data-tooltip-content={t(
+                locale,
+                "waves.voteRationale.savedDescription"
+              )}
+              className="tw-col-start-2 tw-row-start-2 !tw-h-11 tw-whitespace-nowrap !tw-border-0 !tw-bg-transparent !tw-px-0 !tw-py-1 !tw-shadow-none @[22rem]/vote-controls:tw-row-start-1 @[46rem]/my-vote:!tw-h-8 @[46rem]/my-vote:!tw-py-0"
+            >
+              <span className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-rounded-md tw-px-2 tw-ring-1 tw-ring-inset tw-ring-iron-800 @[46rem]/my-vote:tw-h-8">
+                {t(locale, "waves.voteRationale.explain")}
+              </span>
+            </Button>
+            <BodyPortalTooltip
+              id={explainTooltipId}
+              place="top"
+              offset={8}
+              opacity={1}
+              style={TOOLTIP_STYLES}
+              className="tw-max-w-64 tw-whitespace-normal"
+              closeEvents={{ mouseleave: true, blur: true, click: true }}
+              globalCloseEvents={{
+                escape: true,
+                clickOutsideAnchor: true,
+                scroll: true,
+              }}
+            />
+          </>
         )}
       </div>
       {displayedVoteLimitMessage && (
