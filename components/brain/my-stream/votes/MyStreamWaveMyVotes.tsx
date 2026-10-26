@@ -204,7 +204,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
                   onToggleCheck={handleToggleCheck}
                 />
                 {voteRationaleReply?.drop.id === drop.id && (
-                  <div className="tw-mx-2 tw-mb-6 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/30 tw-bg-iron-950 tw-px-4 tw-py-3 sm:tw-mx-4">
+                  <div className="tw-mx-2 tw-mb-6 tw-mt-4 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/30 tw-bg-iron-950 tw-px-4 tw-py-3 sm:tw-mx-4">
                     <p className="tw-mb-3 tw-text-xs tw-leading-5 tw-text-iron-400">
                       {t(locale, "waves.voteRationale.savedDescription")}
                     </p>

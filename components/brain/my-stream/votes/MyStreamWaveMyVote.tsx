@@ -139,7 +139,7 @@ const resolveCurationPreviewMedia = (
 
 function MyVoteAuthor({ author }: { readonly author: ExtendedDrop["author"] }) {
   return (
-    <div className="tw-mt-3 tw-flex tw-min-w-0 tw-items-center tw-gap-2">
+    <div className="tw-mt-2 tw-flex tw-min-w-0 tw-items-center tw-gap-2 @[46rem]/my-vote:tw-mt-3">
       <div className="tw-relative tw-size-6 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10">
         {author.pfp ? (
           <Image
@@ -335,7 +335,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
     <article // NOSONAR -- S1082/S6847: the native checkbox provides keyboard selection.
       aria-labelledby={titleId}
       onClick={handleRowClick}
-      className={`tw-px-2 tw-py-5 tw-transition-colors tw-duration-200 tw-@container/my-vote motion-reduce:tw-transition-none sm:tw-px-4 sm:tw-py-6 ${
+      className={`tw-px-2 tw-py-4 tw-transition-colors tw-duration-200 tw-@container/my-vote motion-reduce:tw-transition-none sm:tw-px-4 sm:tw-py-6 ${
         isSelectionDisabled ? "" : "tw-cursor-pointer"
       } ${isSelected ? "tw-bg-primary-500/10" : "tw-bg-iron-950"} ${
         !isSelected && !isSelectionDisabled
@@ -344,13 +344,13 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
       }`}
     >
       <div
-        className={`tw-grid tw-grid-cols-[28px_96px_minmax(0,1fr)] tw-gap-x-2 tw-gap-y-4 sm:@[36rem]/my-vote:tw-gap-x-4 sm:@[36rem]/my-vote:tw-gap-y-3 ${
+        className={`tw-grid tw-grid-cols-[28px_64px_minmax(0,1fr)] tw-gap-x-2 tw-gap-y-3 @[32rem]/my-vote:tw-grid-cols-[28px_80px_minmax(0,1fr)] @[32rem]/my-vote:tw-gap-x-4 ${
           isVotingClosed
-            ? ""
+            ? "@[46rem]/my-vote:tw-grid-cols-[28px_96px_minmax(0,1fr)]"
             : "@[46rem]/my-vote:tw-grid-cols-[28px_96px_minmax(0,1fr)_18rem]"
         }`}
       >
-        <div className="tw-flex tw-h-24 tw-items-center tw-justify-center sm:@[36rem]/my-vote:tw-row-span-2">
+        <div className="tw-flex tw-h-16 tw-items-center tw-justify-center @[32rem]/my-vote:tw-row-span-2 @[32rem]/my-vote:tw-h-20 @[46rem]/my-vote:tw-h-24">
           {!isVotingClosed && onToggleCheck ? (
             <label
               htmlFor={selectionInputId}
@@ -400,7 +400,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           )}
         </div>
 
-        <div className="tw-relative tw-size-24 sm:@[36rem]/my-vote:tw-row-span-2">
+        <div className="tw-relative tw-size-16 @[32rem]/my-vote:tw-row-span-2 @[32rem]/my-vote:tw-size-20 @[46rem]/my-vote:tw-size-24">
           <button
             type="button"
             onClick={handleOpenDrop}
@@ -425,7 +425,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           </button>
         </div>
 
-        <div className="tw-col-span-3 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-col sm:@[16rem]/my-vote:tw-col-span-1 sm:@[16rem]/my-vote:tw-col-start-3 sm:@[16rem]/my-vote:tw-row-start-1">
+        <div className="tw-col-start-3 tw-row-start-1 tw-flex tw-min-w-0 tw-flex-col">
           <div className="tw-flex tw-min-w-0 tw-items-start tw-gap-2">
             <MediaTypeBadge
               mimeType={badgeMimeType}
@@ -449,7 +449,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           <MyVoteAuthor author={drop.author} />
         </div>
 
-        <div className="tw-col-span-3 tw-row-start-3 tw-flex tw-min-h-6 tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 @[46rem]/my-vote:tw-min-h-8 sm:@[16rem]/my-vote:tw-row-start-2 sm:@[36rem]/my-vote:tw-col-span-1 sm:@[36rem]/my-vote:tw-col-start-3 sm:@[36rem]/my-vote:tw-self-start">
+        <div className="tw-col-span-3 tw-row-start-2 tw-flex tw-min-h-6 tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 @[32rem]/my-vote:tw-col-span-1 @[32rem]/my-vote:tw-col-start-3 @[32rem]/my-vote:tw-self-start @[46rem]/my-vote:tw-min-h-8 @[46rem]/my-vote:tw-gap-x-4">
           <MyStreamWaveMyVoteVotes
             drop={drop}
             winningThreshold={winningThreshold}

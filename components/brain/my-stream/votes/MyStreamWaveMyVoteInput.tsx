@@ -324,14 +324,14 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   return (
     <div
       data-vote-controls
-      className="tw-col-span-3 tw-row-start-4 tw-flex tw-w-full tw-min-w-0 tw-cursor-default tw-flex-col @[46rem]/my-vote:tw-contents sm:@[16rem]/my-vote:tw-row-start-3 sm:@[36rem]/my-vote:tw-col-span-1 sm:@[36rem]/my-vote:tw-col-start-3 sm:@[36rem]/my-vote:tw-max-w-72"
+      className="tw-col-span-3 tw-row-start-3 tw-grid tw-w-full tw-min-w-0 tw-cursor-default tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 tw-gap-y-1 @[32rem]/my-vote:tw-col-span-2 @[32rem]/my-vote:tw-col-start-2 @[46rem]/my-vote:tw-contents"
     >
       <label htmlFor={voteInputId} className="tw-sr-only">
         {t(locale, "waves.myVotes.yourVotes")}{" "}
         {t(locale, "waves.myVotes.inCredit", { credit: voteLabel })}
       </label>
       <div
-        className={`tw-flex tw-min-w-0 tw-items-center tw-gap-3 tw-rounded-lg tw-bg-iron-900 tw-pr-1 tw-ring-1 tw-ring-inset tw-transition-colors tw-duration-200 focus-within:tw-ring-2 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-1 @[46rem]/my-vote:tw-self-end motion-reduce:tw-transition-none ${
+        className={`${onExplainVote ? "" : "tw-col-span-2"} tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-pr-1 tw-ring-1 tw-ring-inset tw-transition-colors tw-duration-200 focus-within:tw-ring-2 @[46rem]/my-vote:tw-col-span-1 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-1 @[46rem]/my-vote:tw-self-end motion-reduce:tw-transition-none ${
           isVoteValueOutOfRange
             ? "tw-ring-rose-400 focus-within:!tw-ring-rose-400"
             : "tw-ring-iron-700 focus-within:!tw-ring-primary-400"
@@ -354,7 +354,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
             inputMode="numeric"
             aria-describedby={voteInputDescription}
             aria-invalid={isVoteValueOutOfRange ? true : undefined}
-            className="tw-h-12 tw-w-full tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-0 tw-pl-3 tw-pr-0 tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-50 tw-placeholder-iron-400 tw-outline-none focus:tw-ring-0 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 md:tw-h-10"
+            className="tw-h-11 tw-w-full tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-0 tw-pl-3 tw-pr-0 tw-text-base tw-font-semibold tw-tabular-nums tw-text-iron-50 tw-placeholder-iron-400 tw-outline-none focus:tw-ring-0 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 @[46rem]/my-vote:tw-h-10 @[46rem]/my-vote:tw-text-sm"
           />
           <span className="tw-max-w-[40%] tw-flex-shrink-0 tw-break-words tw-py-1 tw-text-sm tw-leading-4 tw-text-iron-400">
             {voteLabel}
@@ -371,7 +371,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
           size="sm"
           loading={isProcessing || isResetting}
           hideChildrenWhenLoading
-          className={`!tw-h-11 tw-min-w-[60px] !tw-border-0 !tw-text-sm !tw-shadow-none md:!tw-h-8 ${
+          className={`!tw-h-11 tw-min-w-[60px] !tw-border-0 !tw-text-sm !tw-shadow-none @[46rem]/my-vote:!tw-h-8 ${
             isEditing ? "" : "!tw-bg-transparent"
           }`}
           aria-label={t(locale, "waves.myVotes.submitVote")}
@@ -379,10 +379,10 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
           {t(locale, "waves.myVotes.vote")}
         </Button>
       </div>
-      <div className="tw-mt-2 tw-flex tw-min-h-6 tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-3 tw-gap-y-1 tw-text-sm tw-leading-6 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-2 @[46rem]/my-vote:tw-mt-0 @[46rem]/my-vote:tw-self-start">
+      <div className="tw-contents @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-2 @[46rem]/my-vote:tw-mt-0 @[46rem]/my-vote:tw-flex @[46rem]/my-vote:tw-min-h-6 @[46rem]/my-vote:tw-min-w-0 @[46rem]/my-vote:tw-flex-wrap @[46rem]/my-vote:tw-items-center @[46rem]/my-vote:tw-justify-between @[46rem]/my-vote:tw-gap-x-3 @[46rem]/my-vote:tw-gap-y-1 @[46rem]/my-vote:tw-self-start @[46rem]/my-vote:tw-text-sm @[46rem]/my-vote:tw-leading-6">
         <p
           id={maxRatingId}
-          className="tw-m-0 tw-flex tw-items-center tw-text-xs tw-font-normal tw-text-iron-400 @[46rem]/my-vote:tw-min-h-8"
+          className="tw-col-span-2 tw-row-start-2 tw-m-0 tw-flex tw-items-center tw-text-xs tw-font-normal tw-text-iron-400 @[46rem]/my-vote:tw-min-h-8"
         >
           {maxRatingLabel} {formatInteger(locale, liveMaxRating)}
         </p>
@@ -397,6 +397,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
             size="xs"
             aria-label={t(locale, "waves.voteRationale.explainAriaLabel")}
             title={t(locale, "waves.voteRationale.savedDescription")}
+            className="tw-col-start-2 tw-row-start-1 !tw-min-h-11 tw-max-w-20 tw-whitespace-normal @[32rem]/my-vote:tw-max-w-[9rem] @[46rem]/my-vote:!tw-min-h-0"
           >
             {t(locale, "waves.voteRationale.explain")}
           </Button>
@@ -405,7 +406,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       {displayedVoteLimitMessage && (
         <output
           id={voteLimitMessageId}
-          className="tw-mb-0 tw-mt-2 tw-min-w-0 tw-text-sm tw-leading-5 tw-text-amber-300 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-3 @[46rem]/my-vote:tw-mt-0"
+          className="tw-col-span-2 tw-mb-0 tw-mt-2 tw-min-w-0 tw-text-sm tw-leading-5 tw-text-amber-300 @[46rem]/my-vote:tw-col-span-1 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-3 @[46rem]/my-vote:tw-mt-0"
         >
           {displayedVoteLimitMessage}
         </output>

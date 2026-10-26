@@ -3195,10 +3195,39 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           expect(box.clipped).toBe(false);
         }
         expect((await input.boundingBox())!.width).toBeLessThanOrEqual(144);
-        if (width < 768)
-          expect((await explain.boundingBox())!.height).toBeGreaterThanOrEqual(
-            44
+        const contentWidth = await row.evaluate((element) => {
+          const style = getComputedStyle(element);
+          return (
+            element.clientWidth -
+            parseFloat(style.paddingLeft) -
+            parseFloat(style.paddingRight)
           );
+        });
+        const thumbnail = await row
+          .getByRole("button", { name: /^Open / })
+          .boundingBox();
+        const title = await row.getByRole("heading").boundingBox();
+        const thumbnailSize =
+          contentWidth >= 736 ? 96 : contentWidth >= 512 ? 80 : 64;
+        expect(thumbnail!.width).toBe(thumbnailSize);
+        expect(thumbnail!.height).toBe(thumbnailSize);
+        expect(title!.x).toBeGreaterThanOrEqual(
+          thumbnail!.x + thumbnail!.width
+        );
+        expect(Math.abs(title!.y - thumbnail!.y)).toBeLessThanOrEqual(1);
+        if (contentWidth < 736) {
+          const inputBounds = (await input.boundingBox())!;
+          const explainBounds = (await explain.boundingBox())!;
+          expect(inputBounds.height).toBeGreaterThanOrEqual(44);
+          expect(explainBounds.height).toBeGreaterThanOrEqual(44);
+          expect(Math.abs(inputBounds.y - explainBounds.y)).toBeLessThanOrEqual(
+            1
+          );
+          expect(explainBounds.x).toBeGreaterThanOrEqual(
+            inputBounds.x + inputBounds.width
+          );
+          await expect(input).toHaveCSS("font-size", "16px");
+        }
         await expectNoHorizontalOverflow(page);
       }
       await input.fill("25");

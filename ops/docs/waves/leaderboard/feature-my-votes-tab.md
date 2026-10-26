@@ -71,7 +71,7 @@ while each profile loads. The placeholders stay still when reduced motion is ena
 
 ## Common Scenarios
 
-Competition rows keep **Save vote** and **Explain vote** together with the amount when there is room. In narrower containers, **Explain vote** sits beside the allowed range. The amount field stays compact; longer ranges and labels wrap. **Explain vote** is unavailable for a saved vote of zero and is omitted when you cannot chat in the wave. Opening it does not save a vote: review and send the public reply separately.
+On phones, the checkbox, a small artwork thumbnail, and the title with its author share the first line. Vote totals, voters, and rank appear below; long totals can wrap. The amount and **Explain vote** sit side by side, with the allowed range underneath. Tablet rows use a larger thumbnail with details beside it and controls below. Wide desktop rows keep controls on the right, with **Explain vote** beside the allowed range. Phone and tablet inputs and Explain actions are at least 44 pixels tall, and phone inputs use 16-pixel text. Longer ranges and labels wrap. **Explain vote** is unavailable for a saved vote of zero and is omitted when you cannot chat in the wave. Opening it does not save a vote: review and send the public reply separately.
 
 - Rows use a subtle charcoal background. Hovering an unselected row lightens
   it further. Hovering or focusing the title highlights it in blue.
