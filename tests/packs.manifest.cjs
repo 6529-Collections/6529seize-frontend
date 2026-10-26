@@ -478,6 +478,20 @@ const PACKS = [
   ),
   {
     ...sandboxPack(
+      "test:e2e:profile-following-sandbox",
+      "Own-profile Following dialog, pagination, navigation and recovery.",
+      ["tests/social/profile-following-sandbox.spec.ts"],
+      {
+        ...AUTH_SANDBOX_ENV,
+        USE_DEV_AUTH: "false",
+        NEXT_DEV_DIST_DIR: ".next-playwright-following",
+      },
+      [DESKTOP, MOBILE, "capacitor-ios-sim", "capacitor-android-sim"]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
+  {
+    ...sandboxPack(
       "test:e2e:wave-creation-sandbox",
       "Wave creation, permissions, and draft recovery on desktop and mobile.",
       ["tests/social/create-wave-sandbox.spec.ts"],

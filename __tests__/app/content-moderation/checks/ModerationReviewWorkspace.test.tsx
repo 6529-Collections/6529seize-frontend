@@ -229,9 +229,9 @@ it("retains report-only work after its check is reviewed and removes a resolved 
     screen.getByRole("button", { name: /Saved deleted post preview/ })
   ).toHaveAttribute("aria-current", "true");
   expect(
-    within(
+    await within(
       screen.getByRole("button", { name: /Saved deleted post preview/ })
-    ).getByText("Open reports: 1 · Checks needing review: 0")
+    ).findByText("Open reports: 1 · Checks needing review: 0")
   ).toBeVisible();
   rows = [rep, reportOnly];
   await act(() =>

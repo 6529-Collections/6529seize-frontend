@@ -1,18 +1,6 @@
 // These are command syntax, shared across locales with the parser below.
 export const SEARCH_OPERATOR_LABELS = { from: "from:", in: "in:" } as const;
 
-export function isAdvancedSearchEnabledForUser(
-  configuredUsers: string | undefined,
-  handle: string | null | undefined
-): boolean {
-  if (!configuredUsers?.trim()) return true;
-  if (!handle) return false;
-  const normalizedHandle = handle.toLowerCase();
-  return configuredUsers
-    .split(",")
-    .some((user) => user.trim().toLowerCase() === normalizedHandle);
-}
-
 export function getPendingSearchFilter(query: string) {
   const match = /(?:^|\s)(from|in):\s*(.*)$/i.exec(query);
   if (!match) return null;

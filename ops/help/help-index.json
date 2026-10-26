@@ -1833,13 +1833,12 @@
         "find"
       ],
       "facts": [
-        "Search 6529 finds Pages, NFTs, Profiles, and Waves, with an always-visible result-type selector and a result count tied to the visible query.",
+        "Search 6529 finds Pages, NFTs, Profiles, Waves, and Messages, with an always-visible result-type selector and a result count tied to the visible query.",
         "Search 6529 ranks exact, prefix, and substring profile-handle matches before ENS-only matches, then orders each match group by level from highest to lowest.",
         "Wave results in Search 6529 exclude direct-message conversations.",
         "The search control in an active Wave opens Search messages for that Wave; use Search all 6529 in the dialog to switch to site search.",
-        "When advanced message search is available, in: selects a Wave and from: selects an author. Both appear as removable chips alongside the usual text search. Search starts with the current Wave selected; remove its in: chip to search all Waves you can read. Results show their Wave and open the matching message.",
+        "Message search is available to everyone. The Messages tab starts across all readable Waves. Message matches appear only in Messages, not All. in: selects a Wave and from: selects an author. Both appear as removable chips alongside the usual text search. When opened inside a Wave, search starts with that Wave selected; remove its in: chip to search all Waves you can read. Results show their Wave and open the matching message.",
         "Type in: or from: to choose a suggestion with the mouse, arrow keys and Enter. Combine both filters with message text of at least three characters, or search with just an author. Private Wave and conversation visibility rules still apply. To search literal from: or in: text, prefix the keyword with a backslash.",
-        "Profiles without advanced message search can open Filters to limit results to one author who has posted in the Wave, an After date, a Before date, or a combination of those filters.",
         "Arrow keys move through site results and Enter opens the selected result.",
         "Site search keeps the last query and recently opened queries for the current browser-tab session."
       ],
@@ -4117,6 +4116,7 @@
         "Video artwork in Quick Vote starts automatically, muted and inline, on web and in the native app. Reduced-motion preferences keep autoplay off, and playback controls remain available.",
         "The Memes - Main Stage is a Memes wave context, not the /the-memes collection browse or mint route.",
         "Submission availability depends on login, proxy mode, participation eligibility, the submission window, and per-user submission limits.",
+        "On The Memes Main Stage, Chat and Leaderboard keep the same submission control in the top wave header above the tabs. On web it shows Submit Work to The Memes or the compact Submit Work label when available; How to Submit opens nomination guidance when participation eligibility is missing. Timing and submission-limit restrictions stay in that header. The native app uses the equivalent submit or lock icon in its top header in both views. My submissions remains in the leaderboard toolbar for signed-in users on their own profile; Main Stage has no separate Drop button beside the leaderboard sort controls.",
         "Unavailable conversation-header submission actions show a lock icon on desktop, tablet, and phone. Hover, focus, or select the lock to read the full restriction reason, including opening or closing dates and submission limits. Recover by logging in, disabling proxy mode, waiting for the submission window, or freeing submission capacity. The desktop How to Submit helper keeps its label.",
         "In the Artwork step, Continue remains available before required fields are complete, except while an interactive artwork hash is being verified; selecting Continue turns every missing or invalid field and the missing media control red, shows inline recovery messages, and focuses the first missing item in form order.",
         "On larger viewports the artwork remains visible while the metadata form scrolls independently. On smaller viewports the complete form scrolls as one page, focused text fields move into view when the software keyboard opens, and the native modal shrinks to keep its action bar above the keyboard.",
@@ -6075,6 +6075,7 @@
       ],
       "facts": [
         "The NFT activity feed lives at /nft-activity.",
+        "Activity appears in columns on wide screens and stacked rows on phones or narrow panels. Each row retains its action, item, sender, recipient, total, date and available transaction link; sideways scrolling is not needed.",
         "The feed combines indexed sales, mints, airdrops, transfers and burns with recorded OpenSea listings, offers, cancellations, expirations and order validity changes for The Memes, Meme Lab, Gradients and NextGen.",
         "Choose collection and action filters and use Load more to see older activity. Changing filters starts a new result list. Empty and failed requests have clear states and a retry control.",
         "Off-chain market actions may have no transaction hash. Market history begins with captured provider events and status observations; best-effort delivery does not guarantee every historical off-chain action.",
@@ -6395,18 +6396,34 @@
     {
       "id": "profiles.followers-tab",
       "kind": "route",
-      "title": "Profile followers",
-      "aliases": ["followers", "profile followers", "who follows profile"],
+      "title": "Profile followers and your following list",
+      "aliases": [
+        "followers",
+        "profile followers",
+        "who follows profile",
+        "following",
+        "who I follow",
+        "find people I follow"
+      ],
       "keywords": ["profile", "followers", "following", "social"],
       "facts": [
-        "Profile followers live at /{user}/followers.",
-        "Use this route when users ask where to see follower relationships for a profile.",
-        "Follower information is profile-specific, not a Network-wide leaderboard."
+        "Open Followers in a profile's header to see its followers in a dialog or mobile sheet. The legacy /{user}/followers route redirects to the profile.",
+        "When a successful request confirms zero followers, the Followers dialog or mobile sheet says No followers yet. This message is not shown while loading or after a failed request.",
+        "On your own signed-in profile, Following appears beside Followers with the total number of identities you follow. The list loads when you open it. Rediscover profiles by their image, handle and level, visit profile links, or unfollow them.",
+        "Both Followers and Following use compact panels for short lists and scroll within a bounded panel for longer lists.",
+        "Scroll or choose Load more for additional followed identities. Follow/unfollow actions refresh the list and total.",
+        "Following is hidden when signed out, viewing someone else's profile, or using a profile proxy. Public following lists for other identities are not available.",
+        "If Following shows Unavailable, opening the list retries the count. If a list request fails, choose Retry. A failed request is not a zero count or an empty list."
       ],
-      "canonical_path": "/{user}/followers",
-      "related_paths": ["/{user}"],
+      "canonical_path": "/{user}",
+      "related_paths": ["/{user}/followers"],
       "tags": ["profiles", "followers"],
-      "source_refs": ["app/[user]/followers/page.tsx"]
+      "source_refs": [
+        "app/[user]/followers/page.tsx",
+        "components/user/following/UserPageFollowing.tsx",
+        "components/user/followers/UserPageFollowersModal.tsx",
+        "ops/docs/profiles/navigation/feature-header-summary.md"
+      ]
     },
     {
       "id": "profiles.xtdh-tab",
