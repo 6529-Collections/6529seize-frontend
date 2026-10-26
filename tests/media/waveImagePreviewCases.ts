@@ -5,6 +5,7 @@ import { ApiDropMainType } from "../../generated/models/ApiDropMainType";
 import type { ApiWaveOverview } from "../../generated/models/ApiWaveOverview";
 import type { ApiWave } from "../../generated/models/ApiWave";
 import composerSandboxConstants from "../support/composerSandboxConstants.json";
+import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import {
   expect,
   expectNoHorizontalOverflow,
@@ -82,15 +83,26 @@ async function expectSubmissionGifLoadingLayout(
 // Parent suites supply the local-only mutation guard and desktop/touch projects.
 // Pixel-budget arithmetic belongs in the resizer tests.
 export function defineSubmissionArtworkPreviewTests() {
-  for (const { extension, animationUnavailable } of [
-    { extension: "jpg", animationUnavailable: false },
-    { extension: "gif", animationUnavailable: false },
-    { extension: "gif", animationUnavailable: true },
+  for (const { extension, animationUnavailable, nativeApp } of [
+    { extension: "jpg", animationUnavailable: false, nativeApp: false },
+    { extension: "gif", animationUnavailable: false, nativeApp: false },
+    { extension: "gif", animationUnavailable: true, nativeApp: false },
+    { extension: "gif", animationUnavailable: true, nativeApp: true },
   ] as const) {
-    test(`shows artwork HD in both views and preserves description lines for ${extension}${animationUnavailable ? " with automatic original animation" : ""}`, async ({
+    test(`shows artwork HD in both views and preserves description lines for ${extension}${animationUnavailable ? " with unavailable animated previews" : ""}${nativeApp ? " in the native mobile app" : ""}`, async ({
       page,
       baseURL,
-    }) => {
+    }, testInfo) => {
+      const automaticOriginal =
+        animationUnavailable &&
+        !nativeApp &&
+        testInfo.project.name === "web-desktop-chromium";
+      if (nativeApp)
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          baseURL
+        );
       const { apiOrigin, feed, source } = await fetchSandboxDrop(page, baseURL);
       const memesWaveId = composerSandboxConstants.linkedDropMemesWaveId;
       const waveResponse = await page.request.get(
@@ -221,7 +233,7 @@ export function defineSubmissionArtworkPreviewTests() {
           releaseGifPreviews();
         }
       }
-      if (animationUnavailable) {
+      if (automaticOriginal) {
         try {
           await expect
             .poll(() => directOriginalRequests.length)
@@ -267,7 +279,7 @@ export function defineSubmissionArtworkPreviewTests() {
       } else if (!animationUnavailable) {
         await expect(preview).toHaveAttribute("src", /AUTOx1080_gifv2/);
       }
-      if (animationUnavailable)
+      if (automaticOriginal)
         expect(directOriginalRequests.length).toBeGreaterThan(0);
       else expect(directOriginalRequests).toEqual([]);
       await expect(
@@ -279,23 +291,41 @@ export function defineSubmissionArtworkPreviewTests() {
       await expect(paragraph).toHaveCSS("white-space", "pre-wrap");
       expect(await paragraph.textContent()).toBe(description);
       const inlineToggle = hero.getByRole("button", {
-        name: animationUnavailable ? "View optimized" : "View original",
+        name: automaticOriginal ? "View optimized" : "View original",
         exact: true,
       });
       await expect(inlineToggle).toBeVisible();
       await expect(
         hero
           .getByRole("button", {
-            name: animationUnavailable ? "View optimized" : "View original",
+            name: automaticOriginal ? "View optimized" : "View original",
             exact: true,
           })
           .locator("..")
           .getByRole("button")
           .first()
       ).toHaveAccessibleName(
-        animationUnavailable ? "View optimized" : "View original"
+        automaticOriginal ? "View optimized" : "View original"
       );
-      if (!animationUnavailable) await inlineToggle.click();
+      if (!automaticOriginal) {
+        await inlineToggle.click();
+        if (animationUnavailable) {
+          try {
+            await expect
+              .poll(() => directOriginalRequests.length)
+              .toBeGreaterThan(0);
+            await expectSubmissionGifLoadingLayout(hero, "View optimized");
+            await expect(
+              hero.getByRole("status", {
+                name: "Loading original GIF",
+                exact: true,
+              })
+            ).toHaveCount(0);
+          } finally {
+            releaseOriginal();
+          }
+        }
+      }
       const originalAlt =
         extension === "gif" ? "Original GIF animation" : "Original image";
       const inlineOriginal = hero.getByRole("img", {

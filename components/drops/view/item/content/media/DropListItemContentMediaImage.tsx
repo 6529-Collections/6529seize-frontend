@@ -78,17 +78,22 @@ function getImageLoadingState({
   unavailable,
   quality,
   canToggleOriginal,
-  continuousGifLoading,
+  isGif,
+  imageLoadingLayout,
 }: {
   readonly loaded: boolean;
   readonly unavailable: boolean;
   readonly quality: Pick<OriginalImageQuality, "loading" | "showingOriginal">;
   readonly canToggleOriginal: boolean;
-  readonly continuousGifLoading: boolean;
+  readonly isGif: boolean;
+  readonly imageLoadingLayout: GifPreviewLoadingLayout;
 }) {
+  const continuousGifLoading =
+    isGif && imageLoadingLayout === "artwork" && canToggleOriginal;
   const loadingOriginal = continuousGifLoading && quality.loading;
   const hideUnavailable = loadingOriginal && unavailable;
   return {
+    continuousGifLoading,
     showLoading:
       !quality.showingOriginal &&
       (loadingOriginal || (!loaded && !unavailable)),
@@ -400,8 +405,8 @@ function DropListItemContentMediaImageContent({
   const unavailable =
     getDropImagePreviewSources(src, imageScale).length === 0 ||
     errorCount > maxRetries;
-  const continuousGifLoading = Boolean(onAnimatedPreviewUnavailable);
   const {
+    continuousGifLoading,
     showLoading: showGifLoading,
     hideUnavailable: hideUnavailableGifPreview,
     hidePreview,
@@ -410,7 +415,8 @@ function DropListItemContentMediaImageContent({
     unavailable,
     quality,
     canToggleOriginal,
-    continuousGifLoading,
+    isGif,
+    imageLoadingLayout,
   });
 
   const resolvedObjectPosition =
