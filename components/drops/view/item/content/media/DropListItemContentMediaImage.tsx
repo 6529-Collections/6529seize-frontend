@@ -70,6 +70,19 @@ function getAutomaticGifFallback(
     : undefined;
 }
 
+function getGifLoadingState(
+  loaded: boolean,
+  unavailable: boolean,
+  showingOriginal: boolean,
+  loadingOriginal: boolean
+) {
+  return {
+    showLoading:
+      !showingOriginal && (loadingOriginal || (!loaded && !unavailable)),
+    hideUnavailable: loadingOriginal && unavailable,
+  };
+}
+
 function LoadingPlaceholder({
   hasTouchScreen,
 }: {
@@ -372,6 +385,16 @@ function DropListItemContentMediaImageContent({
   const unavailable =
     getDropImagePreviewSources(src, imageScale).length === 0 ||
     errorCount > maxRetries;
+  const continuousGifLoading = Boolean(onAnimatedPreviewUnavailable);
+  const {
+    showLoading: showGifLoading,
+    hideUnavailable: hideUnavailableGifPreview,
+  } = getGifLoadingState(
+    loaded,
+    unavailable,
+    quality.showingOriginal,
+    continuousGifLoading && quality.loading
+  );
 
   const resolvedObjectPosition =
     imageObjectPosition ?? (isCompetitionDrop ? "center" : "left top");
@@ -432,7 +455,10 @@ function DropListItemContentMediaImageContent({
               className={
                 intrinsicHeight ? "tw-block" : "tw-absolute tw-inset-0"
               }
-              hidden={quality.showingOriginal && canToggleOriginal}
+              hidden={
+                (quality.showingOriginal && canToggleOriginal) ||
+                hideUnavailableGifPreview
+              }
             >
               <DropImageContent
                 src={src}
@@ -452,26 +478,30 @@ function DropListItemContentMediaImageContent({
               />
             </span>
           )}
-          {quality.loading && canToggleOriginal && !isModalOpen && (
-            <OriginalImageLoadingIndicator isGif={isGif} />
+          {quality.loading &&
+            canToggleOriginal &&
+            !isModalOpen &&
+            !continuousGifLoading && (
+              <OriginalImageLoadingIndicator isGif={isGif} />
+            )}
+          {shouldLoadImage && showGifLoading && isGif && (
+            <GifPreviewLoadingIndicator layout={imageLoadingLayout} />
           )}
-          {shouldLoadImage &&
-            !loaded &&
-            !unavailable &&
+          {unavailable &&
             !quality.showingOriginal &&
-            isGif && <GifPreviewLoadingIndicator layout={imageLoadingLayout} />}
-          {unavailable && !quality.showingOriginal && !disableModal && (
-            <div className="tw-absolute tw-bottom-3 tw-left-1/2 tw-z-30 -tw-translate-x-1/2">
-              <Button
-                type="button"
-                variant="tertiary"
-                size="xs"
-                onClick={manualRetry}
-              >
-                {t(DEFAULT_LOCALE, "drop.media.retry")}
-              </Button>
-            </div>
-          )}
+            !disableModal &&
+            !hideUnavailableGifPreview && (
+              <div className="tw-absolute tw-bottom-3 tw-left-1/2 tw-z-30 -tw-translate-x-1/2">
+                <Button
+                  type="button"
+                  variant="tertiary"
+                  size="xs"
+                  onClick={manualRetry}
+                >
+                  {t(DEFAULT_LOCALE, "drop.media.retry")}
+                </Button>
+              </div>
+            )}
           {!disableModal && (
             <ImageInteractionLayer
               boundsStyle={imageActionBoundsStyle}
