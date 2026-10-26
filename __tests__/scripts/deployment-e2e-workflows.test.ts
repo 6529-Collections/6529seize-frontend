@@ -26,7 +26,11 @@ it("allows the Museum job to finish its recovery and browser budgets", () => {
         [
           "playwright_dependencies_primary",
           "playwright_dependencies_retry",
-        ].includes(step.id ?? "") || step.name === "Install Playwright browser"
+        ].includes(step.id ?? "") ||
+        [
+          "Ensure package-lock inspection tool",
+          "Install Playwright browser",
+        ].includes(step.name ?? "")
     )
     .reduce(
       (minutes: number, step: { "timeout-minutes": number }) =>
@@ -43,7 +47,7 @@ it("allows the Museum job to finish its recovery and browser budgets", () => {
   expect(phaseBudgets).toEqual([10, 20]);
   expect(
     setupBudget + phaseBudgets.reduce((sum, minutes) => sum + minutes, 0)
-  ).toBeLessThanOrEqual(65);
+  ).toBeLessThanOrEqual(70);
 });
 
 it.each(["staging", "production"])(
@@ -119,6 +123,88 @@ function writeExecutable(root: string, name: string, source: string) {
   fs.mkdirSync(path.dirname(destination), { recursive: true });
   fs.writeFileSync(destination, source, { mode: 0o755 });
 }
+
+describe("PR Museum lock-tool prerequisite", () => {
+  const steps = parse("app-pr-ci.yml").workflow.jobs["app-checks"].steps;
+  const prerequisite = steps.find(
+    (step: { name?: string }) =>
+      step.name === "Ensure package-lock inspection tool"
+  );
+
+  it("provides the tool before either dependency installation can acquire locks", () => {
+    expect(prerequisite.if).toBe(
+      "startsWith(matrix.lane, 'playwright-museum-')"
+    );
+    expect(prerequisite["timeout-minutes"]).toBe(5);
+    expect(prerequisite["continue-on-error"]).toBeUndefined();
+    const installIndex = steps.findIndex(
+      (step: { id?: string }) => step.id === "playwright_dependencies_primary"
+    );
+    expect(steps.indexOf(prerequisite)).toBeLessThan(installIndex);
+  });
+
+  it.each([
+    ["present", 0, []],
+    ["missing", 0, ["install"]],
+    ["install-fails", 77, ["install"]],
+    ["tool-still-missing", 1, ["install"]],
+  ])(
+    "handles %s without running a real package manager",
+    (mode, status, events) => {
+      const root = fs.mkdtempSync(path.join(os.tmpdir(), "e2e-lock-tool-"));
+      try {
+        writeExecutable(root, "sudo", '#!/bin/bash\nexec "$@"\n');
+        writeExecutable(
+          root,
+          "apt-get",
+          `#!/bin/bash
+[[ "$*" == '-o DPkg::Lock::Timeout=120 install --no-install-recommends -y psmisc' ]] || exit 99
+echo install >> "$EVENTS"
+[[ "$TOOL_MODE" != install-fails ]] || exit 77
+if [[ "$TOOL_MODE" != tool-still-missing ]]; then
+  echo '#!/bin/bash' > "$TOOL_BIN/fuser"
+  chmod +x "$TOOL_BIN/fuser"
+fi
+`
+        );
+        // Deliberately exclude the host's PATH: the missing-tool cases must remain
+        // missing even if the test runner itself already supplies fuser.
+        const chmod = childProcess
+          .execFileSync("which", ["chmod"], { encoding: "utf8" })
+          .trim();
+        fs.symlinkSync(chmod, path.join(root, "bin", "chmod"));
+        if (mode === "present")
+          writeExecutable(root, "fuser", "#!/bin/bash\nexit 0\n");
+        const eventFile = path.join(root, "events");
+        const result = childProcess.spawnSync(
+          "/bin/bash",
+          ["-c", prerequisite.run],
+          {
+            cwd: root,
+            encoding: "utf8",
+            timeout: 5000,
+            env: {
+              ...process.env,
+              PATH: path.join(root, "bin"),
+              TOOL_BIN: path.join(root, "bin"),
+              TOOL_MODE: mode,
+              EVENTS: eventFile,
+            },
+          }
+        );
+        expect(result.error).toBeUndefined();
+        expect(result.status).toBe(status);
+        expect(
+          fs.existsSync(eventFile)
+            ? fs.readFileSync(eventFile, "utf8").trim().split("\n")
+            : []
+        ).toEqual(events);
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
+    }
+  );
+});
 
 function selectionFixture(
   environment: string,
