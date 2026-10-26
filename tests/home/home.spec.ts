@@ -51,6 +51,61 @@ async function installLoadingTestArtwork(page: Page) {
   );
 }
 
+async function installCompletedMintStatus(
+  page: Page,
+  ready: Promise<void> = Promise.resolve()
+) {
+  const claimResult = encodeFunctionResult({
+    abi: MEMES_MANIFOLD_PROXY_ABI,
+    functionName: "getClaimForToken",
+    result: [
+      1n,
+      {
+        total: 328,
+        totalMax: 328,
+        walletMax: 0,
+        startDate: 1,
+        endDate: 2,
+        storageProtocol: 0,
+        merkleRoot: zeroHash,
+        location: "",
+        tokenId: 536n,
+        cost: 0n,
+        paymentReceiver: zeroAddress,
+        erc20: zeroAddress,
+        signingAddress: zeroAddress,
+      },
+    ],
+  });
+  const selector = toFunctionSelector("getClaimForToken(address,uint256)");
+  await page.route("https://rpc.walletconnect.org/**", async (route) => {
+    const rpc = route.request().postDataJSON();
+    if (rpc.method !== "eth_call") {
+      await route.abort();
+      return;
+    }
+    await ready;
+    let result = claimResult;
+    if (!rpc.params[0].data.startsWith(selector)) {
+      const { args, functionName } = decodeFunctionData({
+        abi: multicall3Abi,
+        data: rpc.params[0].data,
+      });
+      if (functionName !== "aggregate3")
+        throw new Error("Unexpected fixture RPC call");
+      result = encodeFunctionResult({
+        abi: multicall3Abi,
+        functionName,
+        result: args[0].map((call) => ({
+          success: call.callData.startsWith(selector),
+          returnData: call.callData.startsWith(selector) ? claimResult : "0x",
+        })),
+      });
+    }
+    await route.fulfill({ json: { jsonrpc: "2.0", id: rpc.id, result } });
+  });
+}
+
 const comingUpWave = {
   id: "00000000-0000-4000-8000-000000000529",
   name: "Coming Up fixture",
@@ -87,6 +142,17 @@ const comingUpLeaderboardPattern = (url: URL) =>
 
 async function installComingUpFixture(page: Page) {
   await installLoadingTestArtwork(page);
+  await page.route("**/api/memes_lite", (route) =>
+    route.fulfill({
+      json: {
+        data: Array.from({ length: 5 }, (_, index) => ({
+          ...loadingTestArtwork,
+          id: loadingTestArtwork.id - index,
+          name: `Recent Meme ${index}`,
+        })),
+      },
+    })
+  );
   await page.route("**/api/settings", (route) =>
     route.fulfill({ json: comingUpSettings })
   );
@@ -98,7 +164,65 @@ async function installComingUpFixture(page: Page) {
   );
 }
 
-test("Subscription Minting stays readable on phones and keeps its desktop layout @smoke @medium @large", async ({
+test.describe("Coming up local decision time", () => {
+  test.use({ timezoneId: "Asia/Shanghai", locale: "en-US" });
+
+  test("Coming up shows the existing wave decision in the visitor timezone @smoke @medium @large", async ({
+    page,
+  }, testInfo) => {
+    const now = new Date("2026-10-26T12:00:00Z");
+    const decision = new Date("2026-10-26T16:00:00Z");
+    await page.clock.setFixedTime(now);
+    await installComingUpFixture(page);
+    let waveRequests = 0;
+    await page.route(`**/api/waves/${comingUpWave.id}`, (route) => {
+      waveRequests += 1;
+      return route.fulfill({
+        json: {
+          ...comingUpWave,
+          wave: { next_decision_time: decision.getTime() },
+        },
+      });
+    });
+    await page.route(comingUpLeaderboardPattern, (route) =>
+      route.fulfill({ json: comingUpLeaderboard })
+    );
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const section = page.getByRole("region", {
+      name: "Coming up",
+      exact: true,
+    });
+    const decisionLabel = page
+      .getByRole("region", { name: "Coming up", exact: true })
+      .locator("time");
+    await expect(decisionLabel).toHaveText(
+      "Next decision on Oct 27, 2026 at 00:00."
+    );
+    await expect(decisionLabel).toHaveAttribute(
+      "datetime",
+      decision.toISOString()
+    );
+    await expect(
+      section.getByText("Next in queue and current vote leaders.", {
+        exact: false,
+      })
+    ).toBeVisible();
+    await expect(
+      section.getByRole("link", { name: "View all", exact: true })
+    ).toHaveAttribute("href", `/waves/${comingUpWave.id}`);
+    expect(waveRequests).toBe(1);
+    for (const width of [390, 1440]) {
+      await page.setViewportSize({ width, height: 1100 });
+      await decisionLabel.scrollIntoViewIfNeeded();
+      await expectNoHorizontalOverflow(page);
+      await section.screenshot({
+        path: testInfo.outputPath(`decision-${width}.png`),
+      });
+    }
+  });
+});
+
+test("Subscription Minting stays readable with the reference layout @smoke @medium @large", async ({
   page,
 }, testInfo) => {
   await installComingUpFixture(page);
@@ -115,7 +239,7 @@ test("Subscription Minting stays readable on phones and keeps its desktop layout
     route.fulfill({
       contentType: "text/html",
       body: `<html><head><meta name="viewport" content="width=device-width, initial-scale=1">${documentStyle.styles}</head>
-      <body class="${documentStyle.bodyClass}"><main class="tailwind-scope" style="width:calc(100% - 72px);max-width:600px;margin:24px auto">
+      <body class="${documentStyle.bodyClass}"><main data-home-drop class="tailwind-scope tw-group/home-drop" style="width:calc(100% - 72px);max-width:600px;margin:24px auto">
         <div id="subscription-fixture"></div></main></body></html>`,
     })
   );
@@ -169,14 +293,17 @@ test("Subscription Minting stays readable on phones and keeps its desktop layout
         .boundingBox();
       if (!heading || !actionBox || !infoBox)
         throw new Error("Subscription controls must be visible");
-      if (width < 640) {
-        expect(heading.height).toBeLessThanOrEqual(20);
-        expect(actionBox.y).toBeGreaterThan(heading.y + heading.height);
-        expect(actionBox.height).toBeGreaterThanOrEqual(24);
-        expect(actionBox.y).toBeCloseTo(infoBox.y, 0);
+      expect(heading.height).toBeLessThanOrEqual(20);
+      expect(actionBox.y).toBeGreaterThan(heading.y + heading.height);
+      expect(actionBox.height).toBeGreaterThanOrEqual(24);
+      const cardWidth = (await region.boundingBox())?.width ?? 0;
+      if (cardWidth < 354) {
+        expect(actionBox.y).toBeGreaterThanOrEqual(infoBox.y + infoBox.height);
       } else {
-        expect(Math.abs(actionBox.y - heading.y)).toBeLessThanOrEqual(5);
+        // Wide cards place Set up/Manage beneath the toggle, beside the count.
+        // Narrow cards give the action its own row, regardless of viewport.
         expect(infoBox.y).toBeGreaterThan(heading.y + heading.height);
+        expect(actionBox.x).toBeGreaterThanOrEqual(infoBox.x + infoBox.width);
       }
       expect(
         await region.evaluate((element) =>
@@ -248,7 +375,7 @@ for (const cardCount of [1, 3]) {
       await frame.scrollIntoViewIfNeeded();
       await expect(frame.getByRole("img")).toHaveCSS("opacity", "1");
     }
-    const widths = [320, 390, 639, 640, 767, 768, 1024, 1280];
+    const widths = [320, 390, 639, 640, 767, 768, 1024, 1280, 1920];
     for (const width of widths) {
       await page.setViewportSize({ width, height: 900 });
       await cards
@@ -257,7 +384,13 @@ for (const cardCount of [1, 3]) {
         .scrollIntoViewIfNeeded();
       const geometry = await cards.evaluate((element) => {
         const style = getComputedStyle(element);
+        const section = element.closest("section")!;
+        const sectionStyle = getComputedStyle(section);
         return {
+          sectionAvailable:
+            section.clientWidth -
+            Number.parseFloat(sectionStyle.paddingLeft) -
+            Number.parseFloat(sectionStyle.paddingRight),
           available:
             element.clientWidth -
             Number.parseFloat(style.paddingLeft) -
@@ -270,6 +403,7 @@ for (const cardCount of [1, 3]) {
         };
       });
       expect(geometry.overflow).toBeLessThanOrEqual(1);
+      expect(geometry.available).toBeCloseTo(geometry.sectionAvailable, 0);
       if (width < 768) {
         for (const [index, card] of geometry.cards.entries()) {
           expect(card.width).toBeCloseTo(geometry.available, 0);
@@ -305,8 +439,14 @@ for (const cardCount of [1, 3]) {
         const artwork = await frame.evaluate((element) => {
           const image = element.querySelector("img")!;
           const bounds = element.getBoundingClientRect();
+          const card = element.parentElement!;
+          const cardStyle = getComputedStyle(card);
           return {
             width: bounds.width,
+            cardInnerWidth:
+              card.getBoundingClientRect().width -
+              Number.parseFloat(cardStyle.borderLeftWidth) -
+              Number.parseFloat(cardStyle.borderRightWidth),
             height: bounds.height,
             imageHeight: image.getBoundingClientRect().height,
             ratio: image.naturalHeight / image.naturalWidth,
@@ -314,6 +454,7 @@ for (const cardCount of [1, 3]) {
           };
         });
         expect(artwork.fit).toBe("contain");
+        expect(artwork.width).toBeCloseTo(artwork.cardInnerWidth, 0);
         expect(artwork.height).toBeCloseTo(
           artwork.width * (width < 768 ? artwork.ratio : 4 / 3),
           0
@@ -429,90 +570,29 @@ test("Coming Up keeps collaborator credits compact and accessible @smoke @medium
   });
 });
 
-for (const hasBoostedDrops of [false, true]) {
-  test(`Coming Up loads while boosted cards are pending, with ${hasBoostedDrops ? "populated" : "empty"} results @smoke @medium @large`, async ({
-    page,
-  }) => {
-    await installComingUpFixture(page);
-    await page.route(comingUpLeaderboardPattern, (route) =>
-      route.fulfill({ json: comingUpLeaderboard })
-    );
-    const previewUrl = "https://example.com/boosted-startup-preview";
-    const boostedDrop = {
-      ...comingUpLeaderboard.drops[0],
-      id: "boosted-startup",
-      serial_no: 42,
-      drop_type: "CHAT",
-      boosts: 5,
-      content: previewUrl,
-      wave: comingUpWave,
-      moderation: { status: "VISIBLE", can_view: true },
-    };
-    const boostedReady = Promise.withResolvers<void>();
-    await page.route("**/api/v2/boosted-drops?*", async (route) => {
-      await boostedReady.promise;
-      await route.fulfill({
-        json: {
-          data: hasBoostedDrops ? [boostedDrop] : [],
-          page: 1,
-          count: hasBoostedDrops ? 1 : 0,
-          next: false,
-        },
-      });
-    });
-    await page.route("**/api/open-graph*", (route) =>
-      route.fulfill({ status: 503, json: {} })
-    );
-
-    try {
-      await page.goto("/", { waitUntil: "domcontentloaded" });
-      const comingUp = page.getByRole("region", {
-        name: "Coming up",
-        exact: true,
-      });
-      await expect(
-        comingUp.getByRole("link", { name: "Coming Up artwork 3", exact: true })
-      ).toBeVisible();
-      await expect(page.getByText("Loading...", { exact: true })).toBeVisible();
-
-      boostedReady.resolve();
-      await expect(page.getByText("Loading...", { exact: true })).toHaveCount(
-        0
-      );
-      if (!hasBoostedDrops) {
-        await expect(
-          page.getByText("Boosted Drops", { exact: true })
-        ).toHaveCount(0);
-        return;
-      }
-
-      const openDrop = page.getByRole("button", {
-        name: "Open boosted drop from coming-up-artist",
-        exact: true,
-      });
-      await expect(openDrop).toBeVisible();
-      await expect(
-        page.getByRole("link", {
-          name: "example.com example.com/boosted-startup-preview",
-          exact: true,
-        })
-      ).toHaveAttribute("href", previewUrl);
-      await expectNoHorizontalOverflow(page);
-      // The preview is its own link; use the card's keyboard action to open the drop.
-      await openDrop.focus();
-      // Navigation includes cold route compilation in the development CI server.
-      await Promise.all([
-        page.waitForURL(
-          new RegExp(`/waves/${comingUpWave.id}\\?serialNo=42$`),
-          { waitUntil: "domcontentloaded" }
-        ),
-        openDrop.press("Enter"),
-      ]);
-    } finally {
-      boostedReady.resolve();
-    }
+test("Coming Up loads without a homepage Boosted section or request @smoke @medium @large", async ({
+  page,
+}) => {
+  await installComingUpFixture(page);
+  await page.route(comingUpLeaderboardPattern, (route) =>
+    route.fulfill({ json: comingUpLeaderboard })
+  );
+  const boostedRequests: string[] = [];
+  await page.route("**/api/v2/boosted-drops?*", async (route) => {
+    boostedRequests.push(route.request().url());
+    await route.fulfill({ json: { data: [], page: 1, count: 0, next: false } });
   });
-}
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const comingUp = page.getByRole("region", { name: "Coming up", exact: true });
+  await expect(
+    comingUp.getByRole("link", { name: "Coming Up artwork 3", exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Boosted Drops", exact: true })
+  ).toHaveCount(0);
+  expect(boostedRequests).toEqual([]);
+  await expectNoHorizontalOverflow(page);
+});
 
 test("Coming Up retains cards across navigation and a failed refresh @smoke @medium @large", async ({
   page,
@@ -732,6 +812,12 @@ test("homepage waits for initial settings and recovers from failed mint status @
       artwork.getByText("Unavailable", { exact: true }).first()
     ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await expect(image).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Your allowance" })
+    ).toHaveCount(0);
+    await expect(
+      page.getByText("Connect your wallet to view details.", { exact: true })
+    ).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
   } finally {
     releaseSettings();
@@ -854,59 +940,11 @@ test("homepage selects Next Drop without flashing the previous artwork @smoke @m
       },
     });
   });
-  const claimResult = encodeFunctionResult({
-    abi: MEMES_MANIFOLD_PROXY_ABI,
-    functionName: "getClaimForToken",
-    result: [
-      1n,
-      {
-        total: 328,
-        totalMax: 328,
-        walletMax: 0,
-        startDate: 1,
-        endDate: 2,
-        storageProtocol: 0,
-        merkleRoot: zeroHash,
-        location: "",
-        tokenId: 536n,
-        cost: 0n,
-        paymentReceiver: zeroAddress,
-        erc20: zeroAddress,
-        signingAddress: zeroAddress,
-      },
-    ],
-  });
   let releaseStatus!: () => void;
   const statusReady = new Promise<void>((resolve) => {
     releaseStatus = resolve;
   });
-  const selector = toFunctionSelector("getClaimForToken(address,uint256)");
-  await page.route("https://rpc.walletconnect.org/**", async (route) => {
-    const rpc = route.request().postDataJSON();
-    if (rpc.method !== "eth_call") {
-      await route.abort();
-      return;
-    }
-    await statusReady;
-    let result = claimResult;
-    if (!rpc.params[0].data.startsWith(selector)) {
-      const { args, functionName } = decodeFunctionData({
-        abi: multicall3Abi,
-        data: rpc.params[0].data,
-      });
-      if (functionName !== "aggregate3")
-        throw new Error("Unexpected fixture RPC call");
-      result = encodeFunctionResult({
-        abi: multicall3Abi,
-        functionName,
-        result: args[0].map((call) => ({
-          success: call.callData.startsWith(selector),
-          returnData: call.callData.startsWith(selector) ? claimResult : "0x",
-        })),
-      });
-    }
-    await route.fulfill({ json: { jsonrpc: "2.0", id: rpc.id, result } });
-  });
+  await installCompletedMintStatus(page, statusReady);
   await page.addInitScript(() => {
     new MutationObserver(() => {
       if (document.querySelector('[data-home-section="Latest drop"]')) {
@@ -948,6 +986,12 @@ test("homepage selects Next Drop without flashing the previous artwork @smoke @m
       "data-previous-drop-rendered",
       "true"
     );
+    await expect(
+      page.getByRole("heading", { name: "Your allowance" })
+    ).toHaveCount(0);
+    await expect(
+      page.getByText("Connect your wallet to view details.", { exact: true })
+    ).toHaveCount(0);
     const credits = page
       .getByRole("main")
       .locator('[data-home-section="Next drop"]')
@@ -1019,6 +1063,269 @@ test.describe("Home Page @smoke @medium @large", () => {
     await waitForRouteReady(page);
   });
 
+  test("hero keeps the approved copy, action order and responsive artwork @smoke", async ({
+    page,
+  }, testInfo) => {
+    await installCompletedMintStatus(page);
+    await page.reload({ waitUntil: "domcontentloaded" });
+    const hero = page
+      .getByRole("main")
+      .first()
+      .locator('[data-home-section="Introduction"]');
+    const heading = hero.getByRole("heading", { level: 1 });
+    const fan = page
+      .getByRole("main")
+      .first()
+      .locator("[data-home-artwork-fan]");
+    const artworks = page
+      .getByRole("main")
+      .first()
+      .locator("[data-home-artwork-fan] figure");
+    const artworkImages = page
+      .getByRole("main")
+      .first()
+      .locator("[data-home-artwork-fan] img");
+    await expect(heading).toHaveText("Building a decentralized network state");
+    await expect(
+      hero.getByText(
+        "a decentralized, permissionless global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology."
+      )
+    ).toBeVisible();
+    const actions = page
+      .getByRole("region", { name: "New to 6529" })
+      .getByRole("button")
+      .or(page.getByRole("region", { name: "New to 6529" }).getByRole("link"));
+    await expect(actions).toHaveText(["Connect wallet", "Start here"]);
+    await expect(actions.last()).toHaveAttribute("href", "/join-6529");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    for (const width of [390, 1440]) {
+      await page.setViewportSize({ width, height: 1000 });
+      const textBox = await heading.boundingBox();
+      const fanBox = await fan.boundingBox();
+      expect(textBox).not.toBeNull();
+      expect(fanBox).not.toBeNull();
+      if (width < 1024)
+        expect(fanBox!.y).toBeGreaterThan(textBox!.y + textBox!.height);
+      else expect(fanBox!.x).toBeGreaterThan(textBox!.x + textBox!.width);
+      await expect(artworks).toHaveCount(5);
+      await expect(artworks.first()).toHaveCSS("animation-name", "none");
+      await expect(artworkImages).toHaveCount(5);
+      await expect
+        .poll(() =>
+          artworkImages.evaluateAll((images) =>
+            images.every(
+              (image) =>
+                image instanceof HTMLImageElement &&
+                image.complete &&
+                image.naturalWidth > 0
+            )
+          )
+        )
+        .toBe(true);
+      await hero.screenshot({ path: testInfo.outputPath(`hero-${width}.png`) });
+      await expectNoHorizontalOverflow(page);
+    }
+  });
+
+  test("newcomer explanation reflows and keeps its links keyboard accessible @smoke", async ({
+    page,
+  }, testInfo) => {
+    const section = page.getByRole("region", { name: "What is 6529?" });
+    const articles = section.getByRole("article");
+    const waveImages = page
+      .getByRole("region", { name: "What is 6529?" })
+      .getByRole("article")
+      .filter({
+        has: page.getByRole("heading", {
+          name: "Where the network coordinates",
+        }),
+      })
+      .locator("img");
+    const links = section.getByRole("link");
+    await expect(section).toBeVisible();
+    await expect(articles).toHaveCount(3);
+    await expect(links).toHaveText([
+      "Browse The Memes",
+      "Browse Waves",
+      "How voting works",
+    ]);
+    for (const width of [390, 768, 1440]) {
+      await page.setViewportSize({ width, height: 1000 });
+      const boxes = await articles.evaluateAll((items) =>
+        items.map((item) => {
+          const { x, y, width, height } = item.getBoundingClientRect();
+          return { x, y, width, height };
+        })
+      );
+      for (const [index, box] of boxes.entries()) {
+        if (index === 0) continue;
+        const previous = boxes[index - 1]!;
+        if (width < 768) {
+          expect(box.y).toBeGreaterThanOrEqual(
+            previous.y + previous.height - 1
+          );
+          expect(Math.abs(box.x - previous.x)).toBeLessThan(1);
+        } else {
+          expect(Math.abs(box.y - previous.y)).toBeLessThan(1);
+          expect(box.x).toBeGreaterThanOrEqual(previous.x + previous.width - 1);
+        }
+      }
+      await links.first().focus();
+      for (let index = 0; index < 3; index++) {
+        const link = links.nth(index);
+        await expect(link).toBeFocused();
+        await expect(link).not.toHaveCSS("box-shadow", "none");
+        if (index < 2) await page.keyboard.press("Tab");
+      }
+      await expectNoHorizontalOverflow(page);
+      await expect(waveImages).toHaveCount(4);
+      await waveImages.first().scrollIntoViewIfNeeded();
+      await expect
+        .poll(() =>
+          waveImages.evaluateAll((images) =>
+            images.every(
+              (image) =>
+                image instanceof HTMLImageElement &&
+                image.complete &&
+                image.naturalWidth > 0
+            )
+          )
+        )
+        .toBe(true);
+      await section.screenshot({
+        path: testInfo.outputPath(`what-is-${width}.png`),
+      });
+    }
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await expect(links.first()).toHaveCSS("transition-property", "none");
+    await expect(
+      page
+        .getByRole("link", { name: "Browse The Memes", exact: true })
+        .locator("svg")
+    ).toHaveCSS("transition-property", "none");
+  });
+
+  test("How to start keeps heading actions accessible across screen sizes @smoke", async ({
+    page,
+  }, testInfo) => {
+    const start = page.getByRole("region", {
+      name: "How to start",
+      exact: true,
+    });
+    await expect(start).toBeVisible();
+    await expect(
+      start.getByText("Four steps into 6529.", { exact: true })
+    ).toBeVisible();
+    for (const [name, href] of [
+      ["Create profile", "/join-6529#join-step-profile"],
+      ["Create, collect or vote", "/the-memes"],
+      ["Join the community", "/waves"],
+      ["Open the Join 6529 guide", "/join-6529"],
+    ] as const) {
+      await expect(
+        start.getByRole("link", { name, exact: true })
+      ).toHaveAttribute("href", href);
+    }
+    const actions = page
+      .getByRole("region", { name: "How to start", exact: true })
+      .getByRole("heading", { level: 3 })
+      .getByRole("link")
+      .or(
+        page
+          .getByRole("region", { name: "How to start", exact: true })
+          .getByRole("heading", { level: 3 })
+          .getByRole("button")
+      );
+    await expect(actions).toHaveCount(4);
+    for (const width of [320, 390, 768, 1440]) {
+      await page.setViewportSize({ width, height: 1100 });
+      for (const action of await actions.all()) {
+        await action.focus();
+        await expect(action).toBeFocused();
+        const target = await action.boundingBox();
+        expect(target!.height).toBeGreaterThanOrEqual(40);
+      }
+      const boxes = await start
+        .getByRole("listitem")
+        .evaluateAll((items) =>
+          items.map((item) => item.getBoundingClientRect().toJSON())
+        );
+      for (let index = 1; index < boxes.length; index++) {
+        if (width < 768)
+          expect(boxes[index]!.top).toBeGreaterThan(boxes[index - 1]!.bottom);
+        else expect(boxes[index]!.top).toBeCloseTo(boxes[0]!.top, 0);
+      }
+      await expectNoHorizontalOverflow(page);
+      if (width === 390 || width === 1440) {
+        await start.screenshot({
+          path: testInfo.outputPath(`how-to-start-${width}.png`),
+        });
+      }
+    }
+  });
+
+  test("homepage wave cards use compact avatars and keep details aligned", async ({
+    page,
+  }) => {
+    const cards = page.getByRole("link", { name: /^View wave / });
+    await expect(cards.first()).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    await expectNoHorizontalOverflow(page);
+    // Homepage cards use small avatars beside the name at every breakpoint.
+    // The existing description, activity, metrics, and wave navigation remain.
+    for (const card of await page
+      .getByRole("link", { name: /^View wave / })
+      .all()) {
+      await expect(card).toHaveAttribute("data-wave-card-variant", "home");
+      const layout = await card.evaluate((element) => {
+        const header = element.querySelector("[data-wave-card-header]")!;
+        const avatar = header.firstElementChild!;
+        const details = header.lastElementChild!;
+        const title = details.firstElementChild!;
+        const activity = details.lastElementChild!;
+        const description = element.querySelector("[data-wave-card-preview]")!;
+        const metrics = element.querySelector(".explore-wave-card-metrics")!;
+        return {
+          header: header.getBoundingClientRect().toJSON(),
+          avatar: avatar.getBoundingClientRect().toJSON(),
+          details: details.getBoundingClientRect().toJSON(),
+          title: title.getBoundingClientRect().toJSON(),
+          activity: activity.getBoundingClientRect().toJSON(),
+          description: description.getBoundingClientRect().toJSON(),
+          metrics: metrics.getBoundingClientRect().toJSON(),
+          card: element.getBoundingClientRect().toJSON(),
+          paddingBottom: Number.parseFloat(
+            getComputedStyle(element).paddingBottom
+          ),
+          borderBottom: Number.parseFloat(
+            getComputedStyle(element).borderBottomWidth
+          ),
+        };
+      });
+      expect(layout.avatar.width).toBe(44);
+      expect(layout.avatar.height).toBe(44);
+      expect(layout.avatar.right).toBeLessThan(layout.details.left);
+      expect(layout.activity.top).toBeGreaterThanOrEqual(layout.title.bottom);
+      expect(layout.description.top).toBeGreaterThanOrEqual(
+        layout.header.bottom
+      );
+      expect(layout.metrics.top).toBeGreaterThanOrEqual(
+        layout.description.bottom
+      );
+      expect(layout.card.bottom - layout.metrics.bottom).toBeCloseTo(
+        layout.paddingBottom + layout.borderBottom,
+        0
+      );
+    }
+
+    await cards.first().focus();
+    await expect(cards.first()).toBeFocused();
+    expect(
+      await cards
+        .first()
+        .evaluate((element) => getComputedStyle(element).boxShadow)
+    ).not.toBe("none");
+  });
+
   test("should display the home landing content", async ({ page }) => {
     // Prod serves "6529.io"; staging serves "6529 Staging".
     await expect(page).toHaveTitle(/^6529(\.io| Staging)$/);
@@ -1041,66 +1348,6 @@ test.describe("Home Page @smoke @medium @large", () => {
     const waveLink = page.getByRole("link", { name: /^View wave / }).first();
     await expect(waveLink).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
 
-    const imageArea = page
-      .getByRole("link", { name: /^View wave / })
-      .first()
-      .locator(":scope > div")
-      .first();
-    const details = page
-      .getByRole("link", { name: /^View wave / })
-      .first()
-      .locator(":scope > div")
-      .last();
-    const imageBox = await imageArea.boundingBox();
-    const detailsBox = await details.boundingBox();
-    if (!imageBox || !detailsBox) {
-      throw new Error(
-        "The wave card image and details must have visible bounds"
-      );
-    }
-
-    if (await page.evaluate(() => globalThis.innerWidth < 768)) {
-      expect(imageBox.x + imageBox.width).toBeLessThanOrEqual(detailsBox.x);
-      expect(imageBox.y).toBeCloseTo(detailsBox.y, 1);
-      expect(imageBox.height).toBeCloseTo(detailsBox.height, 1);
-    } else {
-      expect(imageBox.y + imageBox.height).toBeLessThanOrEqual(detailsBox.y);
-    }
-
-    // Activity belongs under the title; the scores stay at the card bottom
-    // even when a description takes fewer lines than its neighbors.
-    for (const card of await page
-      .getByRole("link", { name: /^View wave / })
-      .all()) {
-      const layout = await card.evaluate((element) => {
-        const body = element.lastElementChild!;
-        const [title, activity, description, metrics] = Array.from(
-          body.children
-        );
-        return {
-          title: title!.getBoundingClientRect().toJSON(),
-          activity: activity!.getBoundingClientRect().toJSON(),
-          description: description!.getBoundingClientRect().toJSON(),
-          metrics: metrics!.getBoundingClientRect().toJSON(),
-          body: body.getBoundingClientRect().toJSON(),
-          paddingBottom: Number.parseFloat(
-            getComputedStyle(body).paddingBottom
-          ),
-        };
-      });
-      expect(layout.activity.top).toBeGreaterThanOrEqual(layout.title.bottom);
-      expect(layout.description.top).toBeGreaterThanOrEqual(
-        layout.activity.bottom
-      );
-      expect(layout.metrics.top).toBeGreaterThanOrEqual(
-        layout.description.bottom
-      );
-      expect(layout.body.bottom - layout.metrics.bottom).toBeCloseTo(
-        layout.paddingBottom,
-        0
-      );
-    }
-
     const comingUp = page.getByRole("region", {
       name: "Coming up",
       exact: true,
@@ -1108,16 +1355,14 @@ test.describe("Home Page @smoke @medium @large", () => {
     await expect(comingUp).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     const isNarrowViewport = await page.evaluate(() => innerWidth < 768);
     const viewportWidth = await page.evaluate(() => innerWidth);
-    let sectionTitleSize = "24px";
-    if (viewportWidth < 768) sectionTitleSize = "20px";
-    else if (viewportWidth < 1024) sectionTitleSize = "22px";
+    const sectionTitleSize = isNarrowViewport ? "28px" : "38px";
     await expect(page.getByText(/^(Latest|Next) Drop$/)).toHaveCSS(
       "font-size",
-      sectionTitleSize
+      viewportWidth < 768 ? "28px" : "38px"
     );
     await expect(page.getByText(/^(Latest|Next) Drop$/)).toHaveCSS(
       "margin-bottom",
-      "20px"
+      viewportWidth < 768 ? "28px" : "32px"
     );
     // Both section actions belong in the header and must leave the title clear.
     for (const section of [
@@ -1136,11 +1381,14 @@ test.describe("Home Page @smoke @medium @large", () => {
       const subtitle = section
         .getByRole("heading", { level: 2 })
         .locator("xpath=following-sibling::p");
-      await expect(subtitle).toHaveCSS("font-size", "14px");
-      await expect(subtitle).toHaveCSS("margin-top", "4px");
+      await expect(subtitle).toHaveCSS(
+        "font-size",
+        isNarrowViewport ? "14px" : "15px"
+      );
+      await expect(subtitle).toHaveCSS("margin-top", "12px");
       await expect(
         section.getByRole("heading", { level: 2 }).locator("../..")
-      ).toHaveCSS("margin-bottom", "20px");
+      ).toHaveCSS("margin-bottom", isNarrowViewport ? "28px" : "32px");
       expect(
         await section.evaluate((section) => {
           const heading = section.querySelector("h2");
@@ -1162,17 +1410,16 @@ test.describe("Home Page @smoke @medium @large", () => {
       ).toBe(true);
 
       if (isNarrowViewport) {
-        const subtitleGap = await section.evaluate((section) => {
+        const linkGap = await section.evaluate((section) => {
           const subtitle = section.querySelector("p")!;
           const link = section.querySelector('[data-home-action="View all"]')!;
           return (
-            subtitle.getBoundingClientRect().top -
-            link.getBoundingClientRect().bottom
+            link.getBoundingClientRect().top -
+            subtitle.getBoundingClientRect().bottom
           );
         });
-        // The requested compact header uses a 4px subtitle gap; the action
-        // remains contained within the title row rather than hanging below it.
-        expect(subtitleGap).toBeGreaterThanOrEqual(4);
+        // The approved mobile layout puts the text action below the subtitle.
+        expect(linkGap).toBeGreaterThanOrEqual(12);
       }
     }
 
@@ -1191,6 +1438,36 @@ test.describe("Home Page @smoke @medium @large", () => {
         ).toBeCloseTo(24, 0);
       }
     }
+
+    const start = page.getByRole("region", {
+      name: "How to start",
+      exact: true,
+    });
+    await expect(start).toBeVisible();
+    await expect(start.getByRole("listitem")).toHaveCount(4);
+    await expect(
+      start.getByRole("link", { name: "Create profile", exact: true })
+    ).toHaveAttribute("href", "/join-6529#join-step-profile");
+    const steps = await start
+      .getByRole("listitem")
+      .evaluateAll((items) =>
+        items.map((item) => item.getBoundingClientRect().toJSON())
+      );
+    for (let index = 1; index < steps.length; index++) {
+      if (isNarrowViewport)
+        expect(steps[index]!.top).toBeGreaterThan(steps[index - 1]!.bottom);
+      else expect(steps[index]!.top).toBeCloseTo(steps[0]!.top, 0);
+    }
+    const guide = start.getByRole("link", {
+      name: "Open the Join 6529 guide",
+      exact: true,
+    });
+    await guide.focus();
+    await expect(guide).toBeFocused();
+    await expect(guide).toHaveCSS(
+      "min-height",
+      isNarrowViewport ? "40px" : "32px"
+    );
 
     const footer = page
       .getByRole("link", { name: "Terms of Service", exact: true })
@@ -1224,7 +1501,7 @@ test.describe("Home Page @smoke @medium @large", () => {
     await expectNoHorizontalOverflow(page);
   });
 
-  test("keeps a countdown with days inside the original timer height", async ({
+  test("keeps long countdowns readable in standard and compact homepage layouts", async ({
     page,
   }, testInfo) => {
     if (isMobileWebProject(testInfo.project.name)) {
@@ -1259,15 +1536,16 @@ test.describe("Home Page @smoke @medium @large", () => {
           import { createElement } from 'react';
           import { createRoot } from 'react-dom/client';
           import Countdown from './components/home/now-minting/NowMintingCountdownActive';
-          createRoot(document.getElementById('countdown-fixture')).render(
-            createElement(Countdown, { countdown: {
+          const root = createRoot(document.getElementById('countdown-fixture'));
+          const countdown = {
               title: 'Phase 0 (Allowlist) Starts In',
               targetDate: Math.floor(Date.now() / 1000) + 12 * 86400 + 23 * 3600 + 59 * 60 + 59,
               showAllowlistInfo: true,
-              showMintBtn: false,
+              showMintBtn: true,
               isActive: false
-            } })
-          );
+          };
+          root.render(createElement(Countdown, { countdown }));
+          globalThis.addEventListener('show-home-countdown', () => root.render(createElement(Countdown, { countdown, variant: 'home' })));
         `,
       },
       bundle: true,
@@ -1296,7 +1574,151 @@ test.describe("Home Page @smoke @medium @large", () => {
     expect(bounds.timer.top).toBeGreaterThanOrEqual(bounds.box.top);
     expect(bounds.timer.bottom).toBeLessThanOrEqual(bounds.box.bottom);
     await expectNoHorizontalOverflow(page);
+    const standardCardHeight = await timer.evaluate(
+      (element) =>
+        element.parentElement!.parentElement!.parentElement!.parentElement!.getBoundingClientRect()
+          .height
+    );
+    await page.evaluate(() =>
+      globalThis.dispatchEvent(new Event("show-home-countdown"))
+    );
+    if (isMobileWebProject(testInfo.project.name)) {
+      // Match the narrow slot left by the homepage sidebar and card padding.
+      await page.getByRole("main").evaluate((element) => {
+        element.style.width = "calc(100% - 155px)";
+      });
+    }
+    const phase = page.getByText("Phase 0 (Allowlist)", {
+      exact: true,
+    });
+    const mint = page.getByRole("link", { name: "Mint", exact: true });
+    await expect(phase).toBeVisible();
+    await expect(page.getByText("Upcoming", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("main").locator('[data-tooltip-id="allowlist-info"]')
+    ).toBeVisible();
+    await expect(mint).toHaveAttribute("href", "/the-memes/mint");
+    await expect(timer).toHaveText(/^12d : 23h : 59m : \d{2}s$/);
+    const values = page.getByRole("timer").locator("[data-countdown-value]");
+    await expect(values).toHaveCount(4);
+    await expect(values.first()).toHaveCSS(
+      "font-size",
+      (await page.evaluate(() => innerWidth < 768)) ? "20px" : "24px"
+    );
+    await expect(values.first()).toHaveCSS("font-weight", "700");
+    await expect(page.getByText("Starts In", { exact: true })).toBeVisible();
+    const phaseBounds = await phase.boundingBox();
+    const mintBounds = await mint.boundingBox();
+    const compact = await timer.evaluate((element) => {
+      const row = element.closest("[data-countdown-timing]")!;
+      const box = element.closest("[data-home-countdown]")!;
+      const label = row.firstElementChild!;
+      return {
+        timer: element.getBoundingClientRect().toJSON(),
+        label: label.getBoundingClientRect().toJSON(),
+        row: row.getBoundingClientRect().toJSON(),
+        box: box.getBoundingClientRect().toJSON(),
+        paddingX: Number.parseFloat(getComputedStyle(box).paddingLeft),
+        paddingBottom: Number.parseFloat(getComputedStyle(box).paddingBottom),
+        space: box.parentElement!.getBoundingClientRect().toJSON(),
+      };
+    });
+    if (!phaseBounds || !mintBounds)
+      throw new Error("Countdown controls must be visible");
+    expect(phaseBounds.y + phaseBounds.height).toBeLessThanOrEqual(
+      compact.row.top
+    );
+    expect(compact.timer.left).toBeGreaterThanOrEqual(
+      compact.box.left + compact.paddingX
+    );
+    expect(compact.timer.right).toBeLessThanOrEqual(
+      compact.box.right - compact.paddingX
+    );
+    expect(compact.timer.bottom).toBeLessThanOrEqual(
+      compact.box.bottom - compact.paddingBottom
+    );
+    if (
+      isMobileWebProject(testInfo.project.name) ||
+      compact.timer.top >= compact.label.bottom
+    ) {
+      expect(compact.timer.top).toBeGreaterThanOrEqual(
+        compact.label.bottom + 8
+      );
+    } else {
+      expect(compact.timer.left).toBeGreaterThanOrEqual(
+        compact.label.right + 16
+      );
+    }
+    expect(mintBounds.y).toBeGreaterThanOrEqual(compact.box.bottom + 10);
+    expect(mintBounds.height).toBe(44);
+    if ((await page.evaluate(() => innerWidth)) >= 1024) {
+      expect(compact.space.height).toBe(standardCardHeight);
+    }
+    await page
+      .getByRole("main")
+      .locator('[data-home-countdown] [data-tooltip-id="allowlist-info"]')
+      .focus();
+    await expect(page.getByRole("tooltip")).toContainText(
+      "Please refer to the distribution plan to check if you are in the allowlist."
+    );
+    await mint.focus();
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await expect(
+      page.getByRole("main").locator("[data-home-countdown] .tw-absolute")
+    ).toHaveCSS("animation-name", "none");
+    await expectNoHorizontalOverflow(page);
     await page.screenshot({ path: testInfo.outputPath("countdown-days.png") });
+    if (isMobileWebProject(testInfo.project.name)) {
+      for (const width of [320, 390, 430]) {
+        await page.setViewportSize({ width, height: 800 });
+        const mobileLayout = await timer.evaluate((element) => {
+          const box = element.closest("[data-home-countdown]")!;
+          const phase = box.querySelector("[data-countdown-phase]")!;
+          return {
+            timer: element.getBoundingClientRect().toJSON(),
+            box: box.getBoundingClientRect().toJSON(),
+            phase: phase.getBoundingClientRect().toJSON(),
+            badge: phase.nextElementSibling!.getBoundingClientRect().toJSON(),
+            segments: Array.from(element.children, (segment) =>
+              segment.getBoundingClientRect().toJSON()
+            ),
+          };
+        });
+        // Wrapped mobile timers align with the phase rather than floating right.
+        expect(mobileLayout.timer.left).toBe(mobileLayout.phase.left);
+        expect(
+          mobileLayout.badge.top >= mobileLayout.phase.bottom ||
+            mobileLayout.badge.left >= mobileLayout.phase.right
+        ).toBe(true);
+        for (const segment of mobileLayout.segments) {
+          expect(segment.left).toBeGreaterThanOrEqual(mobileLayout.timer.left);
+          expect(segment.right).toBeLessThanOrEqual(mobileLayout.timer.right);
+        }
+        await expect(values.first()).toHaveCSS("font-size", "20px");
+        if (width === 320) {
+          // Four units form two balanced rows in the tightest content slot.
+          expect(mobileLayout.segments[0]!.top).toBe(
+            mobileLayout.segments[1]!.top
+          );
+          expect(mobileLayout.segments[2]!.top).toBe(
+            mobileLayout.segments[3]!.top
+          );
+          expect(mobileLayout.segments[2]!.left).toBe(
+            mobileLayout.segments[0]!.left
+          );
+        } else {
+          expect(
+            mobileLayout.segments.every(
+              (segment) => segment.top === mobileLayout.segments[0]!.top
+            )
+          ).toBe(true);
+        }
+        await expectNoHorizontalOverflow(page);
+        await page.screenshot({
+          path: testInfo.outputPath(`countdown-days-${width}.png`),
+        });
+      }
+    }
   });
 
   test("should expose the network health route", async ({ page }) => {
@@ -1326,28 +1748,29 @@ test.describe("Home Page @smoke @medium @large", () => {
       .getByRole("link", { name: "View all", exact: true })
       .locator("svg");
     const secondaryActions = page
-      .getByRole("button", { name: "Connect wallet", exact: true })
+      .getByRole("link", { name: "Start here", exact: true })
       .or(page.getByRole("link", { name: "View all", exact: true }));
     await expect(secondaryActions).toHaveCount(3);
     const isNarrowViewport = await page.evaluate(() => innerWidth < 768);
     for (const action of await secondaryActions.all()) {
       const isViewAll =
         (await action.getAttribute("data-home-action")) === "View all";
-      const isMobileViewAllLink = isNarrowViewport && isViewAll;
-      const borderOpacity = isViewAll ? 0.15 : 0.2;
-      if (isMobileViewAllLink) {
+      if (isViewAll) {
         await expect(action).toHaveCSS("border-width", "0px");
-        await expect(action).toHaveCSS("height", "28px");
+        await expect(action).toHaveCSS(
+          "min-height",
+          isNarrowViewport ? "40px" : "32px"
+        );
       } else {
         await expect(action).toHaveCSS("border-width", "1px");
         await expect(action).toHaveCSS(
           "border-color",
-          `rgba(255, 255, 255, ${borderOpacity})`
+          "rgba(255, 255, 255, 0.1)"
         );
       }
       await expect(action).toHaveCSS(
         "background-color",
-        isMobileViewAllLink ? "rgba(0, 0, 0, 0)" : "rgba(255, 255, 255, 0.04)"
+        isViewAll ? "rgba(0, 0, 0, 0)" : "rgba(255, 255, 255, 0.07)"
       );
     }
 
@@ -1371,27 +1794,41 @@ test.describe("Home Page @smoke @medium @large", () => {
       await waveLink.scrollIntoViewIfNeeded();
       const before = await waveLink.boundingBox();
       await waveLink.hover();
-      await expect(waveLink).toHaveCSS(
-        "border-color",
-        "rgba(255, 255, 255, 0.2)"
-      );
+      // The approved homepage description cards use the iron-700 hover border.
+      await expect(waveLink).toHaveCSS("border-color", "rgb(55, 55, 62)");
       await expect(waveLink).toHaveCSS("transform", "none");
-      await expect(waveLink.getByRole("img")).toHaveCSS("transform", "none");
+      await expect(
+        page.getByRole("link", { name: /^View wave / }).first().locator("img")
+      ).toHaveCSS("transform", "none");
       expect(await waveLink.boundingBox()).toEqual(before);
 
       await viewAll.hover();
       await expect(arrow).toHaveCSS("transform", "matrix(1, 0, 0, 1, 2, 0)");
 
       for (const action of await secondaryActions.all()) {
+        const isStartHere =
+          (await action.getAttribute("data-home-action")) === "Get started";
         await action.hover();
-        await expect(action).toHaveCSS(
-          "border-color",
-          "rgba(255, 255, 255, 0.3)"
-        );
-        await expect(action).toHaveCSS(
-          "background-color",
-          "rgba(255, 255, 255, 0.08)"
-        );
+        if (isStartHere) {
+          await expect(action).toHaveCSS(
+            "border-color",
+            "rgba(255, 255, 255, 0.2)"
+          );
+          await expect(action).toHaveCSS(
+            "background-color",
+            "rgba(255, 255, 255, 0.1)"
+          );
+        } else {
+          await expect(action).toHaveCSS("color", "rgb(255, 255, 255)");
+          await expect(action).toHaveCSS(
+            "text-decoration-color",
+            "rgba(255, 255, 255, 0.6)"
+          );
+          await expect(action).toHaveCSS(
+            "background-color",
+            "rgba(0, 0, 0, 0)"
+          );
+        }
       }
     }
 

@@ -135,6 +135,33 @@ describe("ExploreWaveCard", () => {
     expect(mockContentDisplay).not.toHaveBeenCalled();
   });
 
+  it("uses a homepage-only compact avatar and keeps the existing description and link", () => {
+    const wave = createWave({
+      descriptionDrop: {
+        contents: "**A wave** for [art](https://example.com)",
+        media: [],
+      },
+      picture: "https://example.com/wave.png",
+    });
+    const { rerender } = render(
+      <ExploreWaveCard wave={wave} variant="home" horizontalOnMobile />
+    );
+    const link = screen.getByRole("link", { name: /^View wave Wave One/ });
+    expect(link).toHaveAttribute("data-wave-card-variant", "home");
+    expect(link).toHaveAttribute("href", "/waves/wave-1");
+    expect(screen.getByText("A wave for art")).toBeInTheDocument();
+    expect(screen.getByText(/2m ago · 3/i)).toBeInTheDocument();
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+    expect(link.querySelector("img")).toHaveAttribute("sizes", "44px");
+    expect(mockContentDisplay).not.toHaveBeenCalled();
+
+    rerender(<ExploreWaveCard wave={wave} />);
+    expect(
+      screen.getByRole("link", { name: /^View wave Wave One/ })
+    ).not.toHaveAttribute("data-wave-card-variant");
+    expect(screen.getByTestId("content-display")).toBeInTheDocument();
+  });
+
   it("shows empty state when latest drop is missing", () => {
     render(
       <ExploreWaveCard

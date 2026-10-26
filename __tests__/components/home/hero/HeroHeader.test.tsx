@@ -10,6 +10,14 @@ jest.mock("next/link", () => ({
   ),
 }));
 
+jest.mock("@/components/home/hero/HeroArtworkFan", () => ({
+  __esModule: true,
+  default: () => <div data-testid="artwork-fan" />,
+}));
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: () => "en-US",
+}));
+
 describe("HeroHeader", () => {
   it("renders the hero heading copy", () => {
     render(<HeroHeader />);
@@ -19,6 +27,11 @@ describe("HeroHeader", () => {
     });
 
     expect(heading).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "a decentralized, permissionless global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology."
+      )
+    ).toBeInTheDocument();
     expect(heading).toHaveClass("tw-font-semibold");
     expect(heading).not.toHaveClass("tw-font-medium");
   });

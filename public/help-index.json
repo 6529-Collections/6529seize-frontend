@@ -669,7 +669,13 @@
       "id": "home.overview",
       "kind": "route",
       "title": "6529.io home",
-      "aliases": ["home", "homepage", "landing page", "6529 home"],
+      "aliases": [
+        "home",
+        "homepage",
+        "landing page",
+        "6529 home",
+        "What is 6529?"
+      ],
       "keywords": [
         "home",
         "latest",
@@ -684,17 +690,23 @@
       ],
       "facts": [
         "The home page is the main 6529.io entry point.",
-        "Logged-out visitors see a prominent Start here link to /join-6529 and a visible Connect wallet action before home activity.",
+        "Logged-out visitors see Connect wallet as the primary hero action, followed by Start here linking to /join-6529.",
         "Visitors can browse the public home activity without connecting a wallet.",
-        "Coming up and the homepage waves section each have a View all link in their header: a text link beside the title on mobile and an outlined button on the right from tablet sizes. The waves View all opens /waves; there is no second button below the cards.",
-        "Authenticated visitors keep the dashboard-first home experience.",
+        "Logged-out visitors see What is 6529? below the hero: Art with purpose links to /the-memes, Where the network coordinates links to /waves, and A real say links to /network/tdh through How voting works. It uses three columns on tablet/desktop and stacked rows on mobile; authenticated members do not see this introduction.",
+        "Coming up and the homepage Waves section each have an underlined View all link: below the subtitle on mobile and on the right from tablet sizes. The Waves View all opens /waves; there is no second button below the cards.",
+        "Authenticated and logged-out visitors share the hero headline, public-goods subtitle, and decorative Meme artwork fan. Authenticated visitors do not see the hero onboarding buttons. The artwork fan sits beside the copy on desktop and below it on mobile. It always shows the same local images of Meme cards #1–5, with #1 at the front; it does not follow current or upcoming mints.",
         "It highlights the current or upcoming Meme Card mint, discovery sections, and 6529 mission content.",
+        "Logged-out visitors see How to start after the latest-drop slot. The step headings are clickable actions with arrows: Connect wallet opens the existing wallet flow, Create profile opens /join-6529#join-step-profile, Create, collect or vote opens /the-memes, and Join the community opens /waves. The collection and community links retain the hover titles View collections and Browse Waves. The guide link opens /join-6529. The four numbered steps form columns on desktop and a vertical timeline on mobile. The same authentication visibility as the hero actions applies.",
+        "How to start omits the mint/subscription promotion during server rendering and for restricted native iOS users outside the US or with unknown country. Browsing collections remains available.",
+        "The mid-page network society statement uses the Bitcoin/Ethereum sentence; the public-goods definition remains under the hero title.",
+        "The homepage no longer shows Boosted Drops. Boosting and boosted-drop preferences inside Waves are unchanged. Homepage Waves cards use small square avatars beside the name and activity, with up to three lines of the existing plain-text wave description and labelled Score, Hot, and REP values at the bottom. These are descriptions, not latest chat messages, and there is no message-author row. This compact card variant is only used on the homepage; Explore Waves retains its existing cards. Card data, requests, ranking, and routes are unchanged.",
         "Coming up shows the next mint when available and current vote leaders. Below 768px, cards stack vertically at full width with space between them. Scroll the page to see the remaining cards. Keyboard users can tab through their links. Tablet and desktop show a grid. Status and mint date or TDH have their own row above uncropped artwork. Card titles open the drop, artist names open profiles, and View all opens the wave.",
+        "The Coming up subtitle adds the next scheduled voting decision from the wave when available, in the visitor's device time zone with daylight-saving adjustment and 24-hour time. It says today for the current local day and gives a date otherwise. The time appears after the page loads; missing or passed decision times are omitted until updated wave data supplies a future decision. This is the voting decision time, not the mint time.",
         "Coming up cards with collaborators show overlapping avatars beside the artist, with up to two collaborator names on a quieter line below. Up to four avatars are shown including the artist; extra avatars use a +N chip. The +N more link opens the drop to see all collaborators. Visible names open their profiles.",
         "After the current Meme mint ends, the homepage keeps Latest Drop through a configurable grace period before replacing it with a mapped Next Drop.",
         "The top artwork slot shows a loading placeholder until the initial mint-status and next-winner checks finish, then displays the selected artwork without briefly showing the previous drop. If artwork data fails to load, use Try again. Mint-status failures leave the artwork visible with unavailable stats; loaded artwork stays visible during background refreshes.",
         "Coming up keeps recently loaded leader cards visible when returning during the same app session and during pull-to-refresh. Failed updates preserve available cards. NEXT MINT waits for confirmed current-artwork and mint-status information; leader cards can load independently. When NEXT MINT appears first, two loading placeholders remain until the leader request finishes.",
-        "Latest Drop groups title and artist first, then stats with Edition Details beneath them, then Your allowance above Subscription Minting, and the countdown and mint action at the bottom.",
+        "Latest Drop groups title and artist first, then stats with Edition Details beneath them. Connected wallets also see Your allowance. The homepage countdown has phase name and status in the first row, then Starts In or Ends In, the allowlist info tooltip when applicable, and a zero-padded segmented timer in the second row. The timer wraps when needed on small screens. Mint stays below and Subscription Minting afterward. Other countdown surfaces retain their existing layout.",
         "A mapped Latest Drop adds Main Stage Submission -> View as the last Edition Details row, and a mapped Next Drop shows a The Memes #{id} pill linked to the Meme card.",
         "The home mint panel can surface The Memes subscription awareness with read-only status, subscription info, and Set up or Manage actions for the profile Subscriptions tab. On native iOS outside the US, or while the country check is loading, the row is not shown; on every platform it appears just after the page loads rather than in the first render.",
         "Use it when users ask where to start or where the current mint is surfaced."
@@ -704,12 +716,16 @@
         "/join-6529",
         "/the-memes",
         "/waves",
+        "/network/tdh",
         "/about/subscriptions",
         "/{user}/subscriptions"
       ],
       "tags": ["home", "navigation"],
       "source_refs": [
         "components/home/newcomer/HomeNewcomerIntro.tsx",
+        "components/home/newcomer/HomeWhatIs6529.tsx",
+        "components/home/newcomer/HomeHowToStart.tsx",
+        "components/home/explore-waves/ExploreWavesSection.tsx",
         "components/home/next-mint-leading/NextMintLeadingSection.tsx",
         "components/home/now-minting/LatestDropSection.tsx",
         "ops/docs/home/feature-home-latest-drop-and-coming-up.md",
@@ -5555,7 +5571,7 @@
         "Current and upcoming Meme Card mint information is surfaced from home and The Memes-related pages.",
         "Home uses explicit Main Stage mappings for its submission and Meme-card links and omits those links when a mapping is unavailable.",
         "When an unresolved /the-memes/{id} route is the canonical next Meme and its Main Stage winner is explicitly mapped to that id, it shows the winning artwork panel with Mint Date and subscription awareness above the calendar without waiting for the current mint or homepage mode; other upcoming Meme routes keep the standalone subscription and calendar view.",
-        "Home Latest Drop and mapped Next Drop cards always show Your allowance. Before a wallet is connected, the row prompts the user to connect to view it. Once connected, wrapping pills list each nonzero Airdrop or Allowlist count for Phase 0, Phase 1, and Phase 2, plus a Public Airdrop count; Public never shows Allowlist. The row distinguishes unavailable distribution data, an unpublished distribution, and a published distribution with no matching allocation; unavailable data does not mean the allocation is zero, and none of these states promises that an allocation is still mintable.",
+        "Home Latest Drop and mapped Next Drop cards omit Your allowance while no wallet address is available. Once connected, wrapping pills list each nonzero Airdrop or Allowlist count for Phase 0, Phase 1, and Phase 2, plus a Public Airdrop count; Public never shows Allowlist. The row distinguishes unavailable distribution data, an unpublished distribution, and a published distribution with no matching allocation; unavailable data does not mean the allocation is zero, and none of these states promises that an allocation is still mintable.",
         "Meme calendar and meme gas routes provide additional minting context.",
         "Subscription minting is a separate optional mechanism and does not grant extra eligibility."
       ],
@@ -11127,52 +11143,6 @@
       "brief_answer": "For the **{{percentage}}%** recovery range in **6529 Desktop**, check the TDH worker **Logs** and share the redacted error. Let any active work finish; do not widen reconciliation or start a reset because calculation failed. Once calculation completes successfully, do TDH and Merkle Root now match 6529.io at the same Last Block?\n\nRange: {{percentage}}% of blocks {{minimum_block}}–{{checkpoint}}.",
       "reconciliation_min_block": 13360860,
       "answer_links": []
-    },
-    {
-      "id": "waves.signed-messages",
-      "kind": "workflow",
-      "title": "Signed messages and the Devices tab",
-      "aliases": [
-        "signed messages",
-        "turn on signed messages",
-        "device signature",
-        "devices tab",
-        "can now post as you",
-        "revoke device",
-        "signed by its author",
-        "not signed by its author"
-      ],
-      "keywords": [
-        "waves",
-        "signature",
-        "device",
-        "grant",
-        "revoke",
-        "verify",
-        "ed25519",
-        "preferences"
-      ],
-      "facts": [
-        "Signed messages are staged behind a flag (on for staging, off in production). With them on, a web browser holds a non-extractable Ed25519 key per wallet; one wallet signature grants it the right to sign your posts, edits, deletes and reactions for 180 days. There is no wallet prompt per message and chat behaves as before.",
-        "The grant rides on the ordinary web sign-in. A logged-in user without a grant in this browser sees Turn on signed messages (one signature) above the empty wave composer; Turn on asks for one signature and the notice can be dismissed for 30 days. In a grant's last 14 days the notice offers Renew; after expiry writes go unsigned until renewed.",
-        "Signing never blocks or delays a write. If signing fails or a signature is rejected, the drop, edit, delete or reaction is sent unsigned exactly as before.",
-        "Preferences > Devices at /preferences?tab=devices lists every browser that can post as you with its label, This device marker, scopes, wallet, added, expiry and last-used dates and status (Active, Expired, Revoked). Revoke asks for confirmation; earlier signatures stay verifiable. Proxies cannot manage devices.",
-        "When a new browser gains a grant for your profile, other browsers show {label} can now post as you. Not you? with Revoke above the composer. The check runs when a wave opens and at most every 10 minutes while the tab is visible.",
-        "The Signature item in a drop's More menu (or touch menu) verifies the drop in your browser and reports Signed by its author, Not signed by its author, or The signature could not be verified, with wallet, device key fingerprint, grant expiry and whether the current content is the signed version. Contract wallets show Contract wallet: verified by 6529.io at sign-in. Signed drops carry no badge.",
-        "Signed messages are web only: the mobile and desktop apps, proxy sessions and browsers without Ed25519 support sign in and post exactly as before. Votes and ratings are not signed yet."
-      ],
-      "canonical_path": "/preferences?tab=devices",
-      "link_label": "Devices",
-      "related_paths": ["/preferences", "/waves"],
-      "tags": ["waves", "privacy", "security", "preferences"],
-      "source_refs": [
-        "ops/docs/waves/drop-actions/feature-signed-messages.md",
-        "ops/docs/notifications/feature-profile-preferences.md",
-        "components/device-signing/SignedMessagesNotice.tsx",
-        "components/preferences/DevicesPreferencesSettings.tsx",
-        "components/waves/drops/signature/DropSignatureDialog.tsx",
-        "lib/device-signing/sign-write.ts"
-      ]
     },
     {
       "id": "desktop.delegation-index-upgrade",

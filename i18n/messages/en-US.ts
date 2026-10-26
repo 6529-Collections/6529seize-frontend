@@ -3771,7 +3771,7 @@ export const EN_US_MESSAGES = {
   "home.comingUp.credits.moreNames": "+{count} more",
   "home.comingUp.credits.viewAllCredits": "View all collaborators on this drop",
   "home.comingUp.credits.anonymousArtist": "Anonymous",
-  "home.comingUp.subtitle": "Next in queue and current vote leaders",
+  "home.comingUp.subtitle": "Next in queue and current vote leaders.",
   "home.comingUp.viewAll": "View all",
   "home.comingUp.loading": "Loading upcoming artwork…",
   "home.nowMinting.stats.unavailable": "Unavailable",

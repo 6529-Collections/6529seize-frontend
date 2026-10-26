@@ -23,9 +23,11 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { HomeWaveCard } from "./HomeWaveCard";
 
 interface ExploreWaveCardProps {
   readonly wave: SidebarWave;
+  readonly variant?: "default" | "home";
   readonly headingDetails?: ReactNode;
   readonly isApp?: boolean;
   readonly compact?: boolean;
@@ -278,6 +280,7 @@ function getWaveCardClassNames(
 
 export function ExploreWaveCard({
   wave,
+  variant = "default",
   headingDetails,
   isApp = false,
   compact = false,
@@ -357,6 +360,24 @@ export function ExploreWaveCard({
             scoreSummary: scoreSummaryLabel,
           }
         );
+
+  if (variant === "home") {
+    return (
+      <HomeWaveCard
+        wave={wave}
+        href={waveHref}
+        ariaLabel={cardAriaLabel}
+        activity={activityRow}
+        metrics={
+          <ExploreWaveCompactMetrics
+            metrics={metrics}
+            compact={false}
+            horizontalOnMobile
+          />
+        }
+      />
+    );
+  }
 
   return (
     <Link

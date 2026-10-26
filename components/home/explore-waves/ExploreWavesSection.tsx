@@ -21,12 +21,15 @@ import { ExploreWaveCardSkeleton } from "./ExploreWaveCardSkeleton";
 import {
   HOME_ACTION_ARROW_CLASSES,
   HOME_VIEW_ALL_CLASSES,
+  HOME_TEXT_LINK_CLASSES,
+  HOME_SECTION_TITLE_CLASSES,
 } from "../homeInteractionStyles";
 
 const DEFAULT_WAVES_LIMIT = 6;
 
 interface ExploreWavesSectionProps {
   readonly headingVariant?: "default" | "page" | undefined;
+  readonly cardVariant?: "default" | "home" | undefined;
   readonly title?: string | undefined;
   readonly subtitle?: string | null | undefined;
   readonly limit?: number | undefined;
@@ -50,6 +53,7 @@ interface ExploreWavesSectionProps {
 
 export function ExploreWavesSection({
   headingVariant = "default",
+  cardVariant = "default",
   title,
   subtitle,
   limit = DEFAULT_WAVES_LIMIT,
@@ -72,10 +76,12 @@ export function ExploreWavesSection({
 }: ExploreWavesSectionProps) {
   const locale = useBrowserLocale();
   const effectiveTitle = title ?? t(locale, "home.exploreWaves.heading.title");
+  const defaultSubtitleKey =
+    headingVariant === "default"
+      ? "home.exploreWaves.gallery.subtitle"
+      : "home.exploreWaves.heading.subtitle";
   const effectiveSubtitle =
-    subtitle === undefined
-      ? t(locale, "home.exploreWaves.heading.subtitle")
-      : subtitle;
+    subtitle === undefined ? t(locale, defaultSubtitleKey) : subtitle;
   const effectiveStatusLabel =
     statusLabel ?? t(locale, "home.exploreWaves.status.defaultLabel");
   const { connectedProfile } = useAuth();
@@ -162,10 +168,14 @@ export function ExploreWavesSection({
         });
   const hasHeaderAdditions = Boolean(headerControls);
   const headerSpacingClassName =
-    headingVariant === "page" ? "tw-mb-10 md:tw-mb-12" : "tw-mb-5";
+    headingVariant === "page" ? "tw-mb-10 md:tw-mb-12" : "tw-mb-7 md:tw-mb-8";
+  const headerLayout =
+    headingVariant === "page"
+      ? "tw-block md:tw-gap-4"
+      : "tw-flex tw-flex-col tw-items-start tw-gap-3 md:tw-gap-6";
   const headerClassName = hasHeaderAdditions
     ? "tw-mb-5 tw-flex tw-flex-col tw-items-start tw-gap-4 md:tw-mb-8"
-    : `tw-relative ${headerSpacingClassName} tw-block md:tw-flex md:tw-items-end md:tw-justify-between md:tw-gap-4`;
+    : `tw-relative ${headerSpacingClassName} ${headerLayout} md:tw-flex md:tw-flex-row md:tw-items-end md:tw-justify-between`;
   const titleClassName =
     headingVariant === "page"
       ? "tw-w-full tw-min-w-0 tw-text-left"
@@ -179,10 +189,16 @@ export function ExploreWavesSection({
       className={
         headingVariant === "page"
           ? "tw-px-4 tw-pb-10 tw-pt-4 md:tw-px-6 md:tw-pb-16 lg:tw-px-8"
-          : "tw-px-4 tw-pb-10 tw-pt-9 md:tw-px-6 md:tw-pb-16 md:tw-pt-10 lg:tw-px-8"
+          : "tw-px-4 tw-pb-20 tw-pt-20 md:tw-px-6 md:tw-pb-32 md:tw-pt-32 lg:tw-px-8"
       }
     >
-      <div>
+      <div
+        className={
+          headingVariant === "default"
+            ? "tw-mx-auto tw-max-w-[1200px]"
+            : undefined
+        }
+      >
         <div className={headerClassName}>
           <div className={titleClassName}>
             {headingVariant === "page" ? (
@@ -193,18 +209,14 @@ export function ExploreWavesSection({
                 {headerActions}
               </div>
             ) : (
-              <h2
-                className={`tw-m-0 tw-text-balance tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-[-0.03em] tw-text-iron-50 md:tw-text-[22px] lg:tw-text-2xl ${viewAllHref ? "tw-pr-24 md:tw-pr-0" : ""}`}
-              >
-                {effectiveTitle}
-              </h2>
+              <h2 className={HOME_SECTION_TITLE_CLASSES}>{effectiveTitle}</h2>
             )}
             {effectiveSubtitle && (
               <p
                 className={
                   headingVariant === "page"
                     ? "tw-mb-0 tw-mt-2 tw-text-base tw-text-iron-500"
-                    : "tw-mb-0 tw-mt-1 tw-text-sm tw-font-normal tw-leading-[1.55] tw-text-iron-400"
+                    : "tw-mb-0 tw-mt-3 tw-max-w-[640px] tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-400 md:tw-text-[15px]"
                 }
               >
                 {effectiveSubtitle}
@@ -215,7 +227,11 @@ export function ExploreWavesSection({
             <Link
               data-home-action="View all"
               href={viewAllHref}
-              className={`${HOME_VIEW_ALL_CLASSES} tw-absolute tw-right-0 tw-top-0 tw-inline-flex md:tw-static`}
+              className={
+                headingVariant === "default"
+                  ? HOME_TEXT_LINK_CLASSES
+                  : `${HOME_VIEW_ALL_CLASSES} tw-absolute tw-right-0 tw-top-0 tw-inline-flex md:tw-static`
+              }
             >
               <span>{t(locale, "home.exploreWaves.viewAll")}</span>
               <ArrowRightIcon
@@ -249,6 +265,7 @@ export function ExploreWavesSection({
                     className="tw-h-full tw-w-full"
                   >
                     <ExploreWaveCardSkeleton
+                      variant={cardVariant}
                       horizontalOnMobile={headingVariant === "default"}
                     />
                   </div>
@@ -256,6 +273,7 @@ export function ExploreWavesSection({
               : waves?.map((wave) => (
                   <div key={wave.id} className="tw-h-full tw-w-full">
                     <ExploreWaveCard
+                      variant={cardVariant}
                       wave={wave}
                       horizontalOnMobile={headingVariant === "default"}
                       subtleHover={headingVariant === "default"}

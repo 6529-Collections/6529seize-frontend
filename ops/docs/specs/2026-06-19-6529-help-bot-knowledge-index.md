@@ -39,9 +39,34 @@ individual check history. Back to list appears on mobile; desktop uses the
 visible list without a redundant back button. Automated outcome is distinct
 from deletion and manual review status.
 
+The `home.overview` record also describes the shared hero artwork and copy, with
+Connect wallet followed by Start here for logged-out visitors. The hero uses a
+fixed selection of Meme cards #1–5, with #1 at the front, independent of mint state. The visitor-only
+What is 6529? section explains art, Waves, and participation, linking to
+`/the-memes`, `/waves`, and `/network/tdh` respectively.
+
+The `home.overview` record distinguishes the compact homepage wave cards from
+Explore Waves. Homepage cards retain wave descriptions and activity rather than
+showing latest chat messages or message authors.
+
+The `home.overview` record maps the four clickable How to start headings to
+the wallet flow, profile guide, The Memes, and Waves. It also retains the
+“Four steps into 6529.” introduction and guide link.
+
 The `home.overview` record explains the Coming up full-width vertical card
 list below 768px, keyboard navigation through card links, tablet/desktop grid,
-and drop, profile and wave destinations.
+and drop, profile and wave destinations. It also explains the optional next
+voting-decision time in the visitor's local time zone, including daylight-saving
+adjustments, and omission when no future scheduled decision is available.
+
+The `home.overview` record also describes the homepage-only two-row countdown,
+with separate phase and timing labels, zero-padded segments, and responsive wrapping.
+The shared phase-selection and mint-action rules are unchanged.
+
+The `the-memes.minting` record explains that Latest Drop and mapped Next Drop
+cards omit Your allowance until a wallet address is available. Connected wallets
+retain allocation pills and distinct loading, unpublished, empty, and unavailable
+states; an allocation does not guarantee that it remains mintable.
 
 The `waves.drop.editing` record covers author-only editing, the normal edit
 window, and unlimited editing of the wave's current pinned description drop.

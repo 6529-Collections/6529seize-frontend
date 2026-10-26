@@ -1,12 +1,39 @@
 "use client";
 
 export function ExploreWaveCardSkeleton({
+  variant = "default",
   compact = false,
   horizontalOnMobile = false,
 }: {
+  readonly variant?: "default" | "home";
   readonly compact?: boolean;
   readonly horizontalOnMobile?: boolean;
 }) {
+  if (variant === "home") {
+    return (
+      <div
+        aria-hidden="true"
+        className="tw-flex tw-h-full tw-min-h-[248px] tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-iron-800/60 tw-bg-iron-950 tw-p-5 sm:tw-min-h-[264px] sm:tw-p-6 motion-reduce:[&_*]:tw-animate-none"
+      >
+        <div className="tw-flex tw-items-center tw-gap-3">
+          <div className="tw-size-11 tw-shrink-0 tw-animate-pulse tw-rounded-lg tw-bg-iron-800" />
+          <div className="tw-min-w-0 tw-flex-1 tw-space-y-2">
+            <div className="tw-h-4 tw-w-3/4 tw-animate-pulse tw-rounded tw-bg-iron-800" />
+            <div className="tw-h-3 tw-w-1/2 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
+          </div>
+        </div>
+        <div className="tw-my-5 tw-space-y-2.5">
+          <div className="tw-h-3 tw-w-full tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
+          <div className="tw-h-3 tw-w-full tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
+          <div className="tw-h-3 tw-w-2/3 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
+        </div>
+        <div className="tw-mt-auto tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-3.5">
+          <div className="tw-h-3 tw-w-3/4 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
+        </div>
+      </div>
+    );
+  }
+
   if (compact) {
     return (
       <div
