@@ -308,7 +308,7 @@ export default function CompetitionLeaderboard({
         onViewModeChange={setViewMode}
         sort={sort}
         onSortChange={setSort}
-        onCreateDrop={onCreateDrop}
+        onCreateDrop={isMainStage ? undefined : onCreateDrop}
         additionalActions={<CompetitionMySubmissions />}
         minPrice={priceRange.minPrice}
         maxPrice={priceRange.maxPrice}

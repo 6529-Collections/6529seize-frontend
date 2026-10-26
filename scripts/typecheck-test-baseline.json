@@ -362,7 +362,6 @@
     "__tests__/components/providers/MixpanelSetup.test.tsx": 2,
     "__tests__/components/providers/PullToRefresh.test.tsx": 1,
     "__tests__/components/ProxyActionAcceptanceButton.test.tsx": 1,
-    "__tests__/components/react-query-wrapper/ReactQueryWrapper.test.tsx": 1,
     "__tests__/components/react-query-wrapper/utils/updateAttachmentInCachedDrops.test.ts": 4,
     "__tests__/components/ReactQueryWrapper.test.tsx": 3,
     "__tests__/components/rememes/RememeAddComponent.test.tsx": 2,

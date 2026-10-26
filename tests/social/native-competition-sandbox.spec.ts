@@ -975,6 +975,137 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  for (const surface of ["web", "app"] as const) {
+    for (const eligible of [true, false]) {
+      test(`keeps the Main Stage header action consistent in Chat and Leaderboard (${surface}, ${eligible ? "eligible" : "not eligible"})`, async ({
+        page,
+      }, testInfo) => {
+        test.skip(
+          surface === "app" && testInfo.project.name !== "web-mobile-chromium",
+          "Native app simulation uses the mobile viewport."
+        );
+        if (testInfo.project.name === "web-desktop-chromium")
+          await page.setViewportSize({ width: 1280, height: 800 });
+        if (surface === "app")
+          await installSurfaceSimulation(
+            page.context(),
+            "capacitor-ios-sim",
+            testInfo.project.use.baseURL
+          );
+        const sandbox = await installCompetitionApi(
+          page,
+          false,
+          true,
+          MEMES_WAVE
+        );
+        sandbox.onlyCompetition("alpha");
+        await sandbox.legacyPrimary("alpha");
+        if (!eligible)
+          sandbox.setCompetition("alpha", {
+            permissions: {
+              ...competition("alpha", "Main Stage").permissions,
+              submit: false,
+            },
+          });
+        await page.goto(`/waves/${MEMES_WAVE}?tab=leaderboard`);
+        await expect(page).toHaveURL(
+          new RegExp(
+            `/waves/${MEMES_WAVE}/competitions/alpha\\?tab=leaderboard`
+          ),
+          { timeout: 30000 }
+        );
+        await dismissNextDevTools(page);
+        const actions = page.getByTestId("leaderboard-submission-actions");
+        const submit = page.getByRole("button", {
+          name: eligible ? /^Submit (Work|Meme)/ : "How to Submit",
+        });
+        await expect(submit).toBeInViewport({ ratio: 1 });
+        await expect(
+          page.getByRole("button", { name: "Drop", exact: true })
+        ).toHaveCount(0);
+        await expect(
+          actions.getByRole("button", { name: "My submissions" })
+        ).toBeVisible();
+        const expectHeaderPosition = async () => {
+          const actionBox = await submit.boundingBox();
+          const nav =
+            surface === "app"
+              ? page.getByRole("navigation", { name: "Wave sections" })
+              : waveTabStrip(page);
+          const navBox = await nav.boundingBox();
+          expect(actionBox).not.toBeNull();
+          expect(navBox).not.toBeNull();
+          expect(actionBox!.y + actionBox!.height).toBeLessThanOrEqual(
+            navBox!.y
+          );
+        };
+        await expectHeaderPosition();
+        await expectNoHorizontalOverflow(page);
+        await page.screenshot({
+          path: testInfo.outputPath(
+            `main-stage-leaderboard-${surface}-${eligible}.png`
+          ),
+        });
+        await submit.click();
+        if (eligible) {
+          await expect(
+            page.getByRole("dialog", {
+              name: "Submit Work to The Memes",
+              exact: true,
+            })
+          ).toBeVisible();
+          await page.keyboard.press("Escape");
+          await expect(
+            page.getByRole("dialog", {
+              name: "Submit Work to The Memes",
+              exact: true,
+            })
+          ).toHaveCount(0);
+        } else {
+          await expect(
+            page.getByRole("dialog", {
+              name: "Main Stage submission eligibility",
+            })
+          ).toBeVisible();
+          await expect(
+            page.getByText("Unlock submissions", { exact: true })
+          ).toBeVisible();
+          await page.keyboard.press("Escape");
+          await expect(
+            page.getByRole("dialog", {
+              name: "Main Stage submission eligibility",
+            })
+          ).toHaveCount(0);
+        }
+        const sections =
+          surface === "app"
+            ? page.getByRole("navigation", { name: "Wave sections" })
+            : waveTabStrip(page);
+        await sections
+          .getByRole(surface === "app" ? "button" : "tab", {
+            name: "Chat",
+            exact: true,
+          })
+          .click();
+        await expect(page).toHaveURL(
+          new RegExp(`/waves/${MEMES_WAVE}\\?tab=chat`)
+        );
+        await expect(submit).toBeInViewport({ ratio: 1 });
+        await expectHeaderPosition();
+        await sections
+          .getByRole(surface === "app" ? "button" : "tab", {
+            name: "Leaderboard",
+            exact: true,
+          })
+          .click();
+        await expect(submit).toBeInViewport({ ratio: 1 });
+        await expectHeaderPosition();
+        await expectNoHorizontalOverflow(page);
+        expect(sandbox.requests).toEqual([]);
+      });
+    }
+  }
+
   test("uses competition resources for the original primary across navigation, votes and settings", async ({
     page,
   }) => {

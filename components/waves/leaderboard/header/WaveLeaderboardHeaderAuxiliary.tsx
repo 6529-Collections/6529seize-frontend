@@ -80,7 +80,6 @@ export function SubmissionActionsRow({
   isVisible,
   refObject,
   balanceRows,
-  isMemesWave,
   additionalActions,
   onCreateDrop,
   createLabel,
@@ -88,7 +87,6 @@ export function SubmissionActionsRow({
   readonly isVisible: boolean;
   readonly refObject: React.RefObject<HTMLDivElement | null>;
   readonly balanceRows: boolean;
-  readonly isMemesWave: boolean;
   readonly additionalActions: React.ReactNode;
   readonly onCreateDrop: (() => void) | undefined;
   readonly createLabel: string;
@@ -100,7 +98,7 @@ export function SubmissionActionsRow({
       ref={refObject}
       className={`tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-gap-2 ${
         balanceRows ? "tw-w-full tw-justify-between" : "tw-ml-auto"
-      } ${isMemesWave ? "lg:tw-hidden" : ""}`}
+      }`}
     >
       {additionalActions}
       {onCreateDrop && (

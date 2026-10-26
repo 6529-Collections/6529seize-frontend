@@ -152,6 +152,16 @@ const RISK_RULES = [
       "API models, route handlers, and shared data paths can affect trust boundaries.",
   },
   {
+    level: 3,
+    name: "profile-following-runtime",
+    patterns: [
+      /^components\/user\/following\//,
+      /^hooks\/usefollowinglist\.ts$/,
+    ],
+    reason:
+      "Private Following data and account transitions need critical-shell browser evidence.",
+  },
+  {
     level: 2,
     name: "user-visible-runtime",
     patterns: [

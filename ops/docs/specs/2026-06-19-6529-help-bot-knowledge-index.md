@@ -7,6 +7,11 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The `profiles.followers-tab` record points to the profile header's Followers
+dialog and private Following list. It covers own-profile authentication and
+proxy restrictions, total counts, pagination, profile navigation, unfollowing,
+and error recovery. The legacy followers URL remains a redirect.
+
 The `content-moderation.controls` record covers WatchTower's red Deleted pills,
 reasoned and confirmed resolution of open reports for a deleted post, retained
 evidence and history, and the distinction from Mark reviewed. Live originals
