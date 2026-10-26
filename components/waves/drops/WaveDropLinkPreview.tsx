@@ -5,6 +5,7 @@ import { useCallback, useMemo } from "react";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import LinkHandlerFrame from "@/components/waves/LinkHandlerFrame";
+import { removeBaseEndpoint } from "@/helpers/Helpers";
 import type { DropInteractionParams } from "@/components/waves/drops/drop.types";
 import { DropLocation } from "@/components/waves/drops/drop.types";
 import Drop from "@/components/waves/drops/Drop";
@@ -198,6 +199,11 @@ export default function WaveDropLinkPreview({
           partId={1}
           onQuoteClick={onQuoteClick}
           isNotFound={isNotFound}
+          isUnavailable={
+            !drop &&
+            (!!error || (normalizedDropId === null && parsedSerialNo === null))
+          }
+          fallbackHref={removeBaseEndpoint(href)}
           embedPath={embedPath}
           quotePath={quotePath}
           embedDepth={embedDepth}

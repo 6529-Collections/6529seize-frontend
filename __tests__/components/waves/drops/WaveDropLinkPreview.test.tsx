@@ -379,4 +379,28 @@ describe("WaveDropLinkPreview", () => {
     });
     expect(mockDrop).not.toHaveBeenCalled();
   });
+  it.each([
+    new Error("Network error"),
+    { status: 403 },
+    new Error("Drop drop-1 not found"),
+  ])("ends the placeholder when lookup fails: %p", async (error) => {
+    fetchDropByIdBatchedMock.mockRejectedValue(error);
+    renderWithQueryClient(
+      <WaveDropLinkPreview
+        href="https://site.com/waves/wave-1?drop=drop-1"
+        waveId="wave-1"
+        dropId="drop-1"
+        onQuoteClick={jest.fn()}
+      />
+    );
+    await waitFor(() =>
+      expect(mockWaveDropQuote).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          drop: null,
+          isUnavailable: true,
+          fallbackHref: expect.stringContaining("/waves/wave-1?drop=drop-1"),
+        })
+      )
+    );
+  });
 });

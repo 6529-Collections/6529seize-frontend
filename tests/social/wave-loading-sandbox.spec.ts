@@ -1,3 +1,4 @@
+import { installLinkedDropVideoSandbox } from "../support/videoArtworkSandbox";
 import type { Page } from "@playwright/test";
 import {
   expect,
@@ -406,5 +407,102 @@ for (const width of [375, 390, 768, 1024, 1440]) {
     } finally {
       content.release();
     }
+  });
+}
+
+test("drop link loading reserves its card and keeps the chat at bottom", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const path = await installLinkedDropVideoSandbox(page, baseURL);
+  const lookup = gate();
+  await page.route("**/api/v2/drops?*", async (route) => {
+    await lookup.ready;
+    await route.fallback();
+  });
+  try {
+    await page.goto(path, { waitUntil: "domcontentloaded" });
+    const placeholder = page.getByRole("group", {
+      name: "Drop preview",
+      exact: true,
+    });
+    await expect(placeholder).toBeVisible();
+    await expect(placeholder).toHaveAttribute("aria-busy", "true");
+    await expect(
+      page.getByRole("link", { name: /^https?:.*[?&]drop=/ })
+    ).toHaveCount(0);
+    expect(
+      await placeholder.evaluate((element) =>
+        [...element.querySelectorAll("*")].every(
+          (child) => getComputedStyle(child).animationName === "none"
+        )
+      )
+    ).toBe(true);
+    const before = await placeholder.boundingBox();
+    expect(before).not.toBeNull();
+    await page.screenshot({
+      path: testInfo.outputPath("drop-preview-loading.png"),
+    });
+    await expectAxeClean(page, {
+      include: ['[role="group"][aria-label="Drop preview"]'],
+    });
+    lookup.release();
+    const title = page.getByRole("heading", {
+      name: "Local linked video fixture",
+      exact: true,
+    });
+    await expect(title).toBeVisible();
+    await expect(placeholder).toHaveCount(0);
+    const loaded = await title.evaluate((element) => {
+      const card = element.closest(".tw-border");
+      const scroll = element.closest("[data-wave-drops-scroll-container]");
+      if (!card || !scroll)
+        throw new Error("Missing linked card or chat container");
+      const bounds = card.getBoundingClientRect();
+      return {
+        height: bounds.height,
+        bottom: bounds.bottom,
+        scrollTop: scroll.scrollTop,
+      };
+    });
+    expect(Math.abs(loaded.height - before!.height)).toBeLessThanOrEqual(2);
+    expect(
+      Math.abs(loaded.bottom - (before!.y + before!.height))
+    ).toBeLessThanOrEqual(2);
+    expect(Math.abs(loaded.scrollTop)).toBeLessThanOrEqual(2);
+    await expectNoHorizontalOverflow(page);
+  } finally {
+    lookup.release();
+  }
+});
+
+for (const failure of ["missing", "network"] as const) {
+  test(`drop link loading ends after a ${failure} failure`, async ({
+    page,
+    baseURL,
+  }) => {
+    const path = await installLinkedDropVideoSandbox(page, baseURL);
+    await page.route("**/api/v2/drops?*", (route) =>
+      route.fulfill({
+        status: failure === "network" ? 503 : 200,
+        json:
+          failure === "network"
+            ? { error: "Preview unavailable" }
+            : { data: [], page: 1, next: null },
+      })
+    );
+    await page.goto(path, { waitUntil: "domcontentloaded" });
+    await expect(
+      page.getByText("Drop preview unavailable", { exact: true })
+    ).toBeVisible({ timeout: 20000 });
+    await expect(
+      page.getByRole("group", { name: "Drop preview", exact: true })
+    ).toHaveAttribute("aria-busy", "false");
+    const link = page.getByRole("link", { name: "Open drop", exact: true });
+    await expect(link).toHaveAttribute("href", /\/waves\/[^?]+\?drop=/);
+    await link.focus();
+    await expect(link).toBeFocused();
+    await expectNoHorizontalOverflow(page);
   });
 }

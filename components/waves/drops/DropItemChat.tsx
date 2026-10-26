@@ -5,6 +5,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import { removeBaseEndpoint } from "@/helpers/Helpers";
 import { useDrop } from "@/hooks/useDrop";
 import Link from "next/link";
+import DropPreviewPlaceholder from "./DropPreviewPlaceholder";
 import ChatItemHrefButtons from "../ChatItemHrefButtons";
 import { SingleWaveDropPosition } from "../drop/SingleWaveDropPosition";
 import { SingleWaveDropVotes } from "../drop/SingleWaveDropVotes";
@@ -17,7 +18,7 @@ export default function DropItemChat({
   readonly dropId: string;
 }) {
   const { isMemesSubmission } = useSeizeSettings();
-  const { drop } = useDrop({ dropId });
+  const { drop, isError } = useDrop({ dropId });
   const relativeLink = removeBaseEndpoint(href);
   const artworkMedia = drop?.parts?.at(0)?.media?.at(0);
 
@@ -27,7 +28,18 @@ export default function DropItemChat({
   const canOpenDrop = drop?.drop_type !== ApiDropType.Chat;
 
   if (!drop) {
-    return <Link href={relativeLink}>{href}</Link>;
+    return (
+      <div className="tw-flex tw-w-full tw-items-stretch tw-gap-x-1">
+        <div className="tw-min-w-0 tw-flex-1">
+          <DropPreviewPlaceholder
+            artwork
+            unavailable={isError}
+            href={relativeLink}
+          />
+        </div>
+        <ChatItemHrefButtons href={href} relativeHref={relativeLink} />
+      </div>
+    );
   }
 
   return (

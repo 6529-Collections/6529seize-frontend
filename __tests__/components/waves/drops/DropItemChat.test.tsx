@@ -41,15 +41,36 @@ const { useDrop } = require("@/hooks/useDrop");
 const { removeBaseEndpoint } = require("@/helpers/Helpers");
 
 describe("DropItemChat", () => {
-  it("renders fallback link when drop not loaded", () => {
-    (useDrop as jest.Mock).mockReturnValue({ drop: null });
-    const { container } = render(
+  it("reserves an artwork card while loading without showing the raw URL", () => {
+    (useDrop as jest.Mock).mockReturnValue({ drop: undefined, isError: false });
+    render(<DropItemChat href="https://base.com/path" dropId="d1" />);
+    expect(screen.getByRole("group", { name: "Drop preview" })).toHaveAttribute(
+      "aria-busy",
+      "true"
+    );
+    expect(screen.getByText("Loading drop preview")).toBeInTheDocument();
+    expect(screen.queryByText("https://base.com/path")).not.toBeInTheDocument();
+    expect(screen.getByTestId("href-buttons")).toHaveTextContent("/path");
+    expect(removeBaseEndpoint).toHaveBeenCalledWith("https://base.com/path");
+  });
+
+  it("replaces loading with an unavailable state and preserves the link on error", () => {
+    (useDrop as jest.Mock).mockReturnValue({ drop: undefined, isError: false });
+    const { rerender } = render(
       <DropItemChat href="https://base.com/path" dropId="d1" />
     );
-    const link = container.querySelector("a");
-    expect(link).toHaveAttribute("href", "/path");
-    expect(link).toHaveTextContent("https://base.com/path");
-    expect(removeBaseEndpoint).toHaveBeenCalledWith("https://base.com/path");
+    (useDrop as jest.Mock).mockReturnValue({ drop: undefined, isError: true });
+    rerender(<DropItemChat href="https://base.com/path" dropId="d1" />);
+    expect(screen.getByText("Drop preview unavailable")).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Drop preview" })).toHaveAttribute(
+      "aria-busy",
+      "false"
+    );
+    expect(screen.getByRole("link", { name: "Open drop" })).toHaveAttribute(
+      "href",
+      "/path"
+    );
+    expect(screen.queryByText("Loading drop preview")).not.toBeInTheDocument();
   });
 
   it("shows drop details when loaded", () => {
