@@ -45,7 +45,7 @@ export default function DropItemChat({
   return (
     <div className="tw-flex tw-w-full tw-items-stretch tw-gap-x-1">
       <div className="tw-min-w-0 tw-flex-1">
-        <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-p-4">
+        <div className="tw-min-h-[31.0625rem] tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-p-4 sm:tw-min-h-[31.5625rem]">
           <div className="tw-flex tw-flex-row tw-items-center tw-gap-x-4">
             <div className="tw-flex tw-items-center tw-gap-x-2">
               {isMemesSubmission(drop) && (

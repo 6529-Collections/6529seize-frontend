@@ -48,7 +48,8 @@ Rules:
 - Same-thread quote-card clicks jump in place.
 - Cross-thread quote-card clicks navigate first, then jump by `serialNo`.
 - While a target is loading, a card-shaped skeleton appears instead of its raw
-  URL. Main Stage artwork links reserve the image and header area. Quote
+  URL. Main Stage artwork links reserve the image and header area and keep that
+  minimum card height if the target has no media. Quote
   placeholders reserve space for the author and text. Skeletons remain static
   when reduced motion is enabled.
 - Extra query keys do not block quote rendering unless `drop` is present.

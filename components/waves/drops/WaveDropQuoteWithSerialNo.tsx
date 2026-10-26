@@ -3,6 +3,7 @@
 import React from "react";
 
 import WaveDropQuote from "./WaveDropQuote";
+import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { useQuery } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -32,6 +33,7 @@ const WaveDropQuoteWithSerialNo: React.FC<WaveDropQuoteWithSerialNoProps> = ({
   maxEmbedDepth,
   onLinkCardActionsActiveChange,
 }) => {
+  const myStream = useMyStreamOptional();
   const {
     data: drop = null,
     isError,
@@ -60,7 +62,9 @@ const WaveDropQuoteWithSerialNo: React.FC<WaveDropQuoteWithSerialNoProps> = ({
       fallbackHref={getWaveRoute({
         waveId,
         serialNo,
-        isDirectMessage: false,
+        isDirectMessage:
+          myStream?.directMessages.list.some((wave) => wave.id === waveId) ??
+          false,
         isApp: false,
       })}
       onQuoteClick={onQuoteClick}

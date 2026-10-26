@@ -118,6 +118,11 @@ describe("DropItemChat", () => {
     render(<DropItemChat href="https://base.com/p" dropId="d1" />);
 
     expect(screen.getByText("Chat Title").closest("a")).toBeNull();
+    expect(screen.getByText("Chat Title").closest(".tw-border")).toHaveClass(
+      "tw-min-h-[31.0625rem]",
+      "sm:tw-min-h-[31.5625rem]"
+    );
+    expect(screen.queryByTestId("media")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Wave" })).toHaveAttribute(
       "href",
       "/p"

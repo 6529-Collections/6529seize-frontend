@@ -7,6 +7,11 @@ jest.mock("@/components/waves/drops/WaveDropQuote", () => (props: any) => {
   return <div data-testid="quote">{props.drop ? props.drop.id : "none"}</div>;
 });
 
+const useMyStreamMock = jest.fn();
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
+  useMyStreamOptional: () => useMyStreamMock(),
+}));
+
 const useQueryMock = jest.fn();
 jest.mock("@tanstack/react-query", () => ({
   useQuery: (...args: any) => useQueryMock(...args),
@@ -19,6 +24,7 @@ describe("WaveDropQuoteWithSerialNo", () => {
   beforeEach(() => {
     capturedQuoteProps = undefined;
     useQueryMock.mockReset();
+    useMyStreamMock.mockReturnValue(null);
   });
 
   it("fetches drop by serial number and renders quote", async () => {
@@ -51,6 +57,21 @@ describe("WaveDropQuoteWithSerialNo", () => {
     });
     expect(capturedQuoteProps.hideLinkPreviews).toBeTruthy();
   });
+  it("preserves the messages route for unavailable DM quotes", () => {
+    useMyStreamMock.mockReturnValue({
+      directMessages: { list: [{ id: "dm" }] },
+    });
+    useQueryMock.mockReturnValue({ data: null, isError: true });
+    render(
+      <WaveDropQuoteWithSerialNo
+        serialNo={5}
+        waveId="dm"
+        onQuoteClick={jest.fn()}
+      />
+    );
+    expect(capturedQuoteProps.fallbackHref).toBe("/messages/dm?serialNo=5");
+  });
+
   it.each([
     { isError: true, isSuccess: false },
     { isError: false, isSuccess: true },

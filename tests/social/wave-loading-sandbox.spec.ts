@@ -486,6 +486,7 @@ for (const failure of ["missing", "network"] as const) {
     await page.route("**/api/v2/drops?*", (route) =>
       route.fulfill({
         status: failure === "network" ? 503 : 200,
+        headers: { "access-control-allow-origin": "*" },
         json:
           failure === "network"
             ? { error: "Preview unavailable" }
