@@ -1214,6 +1214,63 @@ describe("HeaderShare", () => {
       );
     });
 
+    it.each(["Mobile", "Desktop"])(
+      "replays the reveal when a %s refresh becomes ready without replacing the controls",
+      async (target) => {
+        const sessionV2 = require("@/services/auth/session-v2.utils");
+        renderWithProviders(<HeaderShare />);
+        await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+        const refresh = await screen.findByRole("button", {
+          name: "Generate new code",
+        });
+        await waitFor(() => expect(refresh).toBeEnabled());
+        await userEvent.click(screen.getByRole("button", { name: target }));
+        const reveal = screen
+          .getByTestId("header-share-modal")
+          .querySelector("#header-share-content");
+        expect(reveal).toHaveClass(
+          "tw-animate-fadeIn",
+          "motion-reduce:tw-animate-none"
+        );
+        let completeRefresh!: () => void;
+        const pending = new Promise<void>((resolve) => {
+          completeRefresh = resolve;
+        });
+        const shareMock =
+          target === "Mobile"
+            ? sessionV2.createConnectionShare
+            : sessionV2.createLegacyDesktopConnectionShare;
+        shareMock.mockImplementationOnce(async () => {
+          await pending;
+          return {
+            connection_share_code: "refreshed-code",
+            expires_at: new Date(Date.now() + 60_000).toISOString(),
+            address: "0x1234567890123456789012345678901234567890",
+            deep_link_path:
+              "/accept-connection-sharing?connection_share_code=refreshed-code",
+          };
+        });
+        await userEvent.click(refresh);
+        expect(reveal).not.toHaveClass("tw-animate-fadeIn");
+        expect(screen.getByRole("button", { name: "Generate new code" })).toBe(
+          refresh
+        );
+        completeRefresh();
+        await waitFor(() => expect(refresh).toBeEnabled());
+        expect(reveal).toHaveClass(
+          "tw-animate-fadeIn",
+          "motion-reduce:tw-animate-none"
+        );
+        expect(screen.getByRole("button", { name: "Generate new code" })).toBe(
+          refresh
+        );
+        expect(screen.getByRole("button", { name: target })).toHaveAttribute(
+          "aria-pressed",
+          "true"
+        );
+      }
+    );
+
     it("keeps preparing visible until the connection QR is ready", async () => {
       const qrcode = require("qrcode");
       let resolveQrCode!: (source: string) => void;
@@ -1230,6 +1287,10 @@ describe("HeaderShare", () => {
       await waitFor(() => expect(qrcode.toDataURL).toHaveBeenCalledTimes(1));
 
       const loadingNotice = screen.getByTestId("connection-share-notice");
+      const reveal = screen
+        .getByTestId("header-share-modal")
+        .querySelector("#header-share-content");
+      expect(reveal).not.toHaveClass("tw-animate-fadeIn");
       expect(loadingNotice).toHaveAttribute("data-status", "loading");
       expect(loadingNotice).not.toHaveClass("tw-border", "tw-bg-iron-900/50");
       expect(
@@ -1247,6 +1308,10 @@ describe("HeaderShare", () => {
       expect(
         await screen.findByAltText("Connect 6529 Mobile QR code")
       ).toHaveAttribute("src", "data:image/png;base64,READY_QR_CODE");
+      expect(reveal).toHaveClass(
+        "tw-animate-fadeIn",
+        "motion-reduce:tw-animate-none"
+      );
       expect(
         screen.queryByText("Preparing Device Connection")
       ).not.toBeInTheDocument();

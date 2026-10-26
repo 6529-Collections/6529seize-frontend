@@ -590,6 +590,10 @@ export function HeaderShareModalView({
 
   function renderActiveContent() {
     const { content, url } = getDisplayContent();
+    const activeConnectionShareStatus =
+      activeSubTab === SubMode.DESKTOP
+        ? desktopConnectionShareStatus
+        : mobileConnectionShareStatus;
     const pageShareQrSize = isSystemShareAvailable ? "14.25rem" : "10.75rem";
     const qrContent = (
       <div
@@ -598,6 +602,10 @@ export function HeaderShareModalView({
           isConnectMode
             ? "tw-w-full"
             : "tw-w-48 sm:tw-w-[var(--page-share-qr-size)]"
+        } ${
+          isConnectMode && activeConnectionShareStatus === "ready"
+            ? "tw-animate-fadeIn motion-reduce:tw-animate-none"
+            : ""
         }`}
       >
         <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center">
@@ -639,10 +647,6 @@ export function HeaderShareModalView({
       );
     }
 
-    const activeConnectionShareStatus =
-      activeSubTab === SubMode.DESKTOP
-        ? desktopConnectionShareStatus
-        : mobileConnectionShareStatus;
     const connectionStatusKey =
       CONNECTION_SHARE_STATUS_KEYS[activeConnectionShareStatus];
     const showConnectionControls =
@@ -675,7 +679,7 @@ export function HeaderShareModalView({
         </div>
         <div className="tw-absolute tw-inset-0">
           {showConnectionControls ? (
-            <div className="tw-animate-in tw-fade-in tw-flex tw-h-full tw-w-full tw-flex-col tw-gap-2 tw-duration-200 motion-reduce:tw-animate-none">
+            <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-gap-2">
               {qrContent}
               {renderConnectionUrl(url)}
             </div>
