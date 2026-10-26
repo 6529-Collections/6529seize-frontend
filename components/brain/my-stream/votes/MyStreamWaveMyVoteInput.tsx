@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useState } from "react";
+import { useContext, useId, useState } from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import type { DropRateChangeRequest } from "@/entities/IDrop";
@@ -17,6 +17,8 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import Button from "@/components/utils/button/Button";
+import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 
 interface MyStreamWaveMyVoteInputProps {
   readonly drop: ExtendedDrop;
@@ -51,6 +53,16 @@ interface VoteMutationVariables {
   readonly previousRate: number;
 }
 
+const getRationaleVoteChange = (
+  lastAppliedVoteChange: LastAppliedVoteChange | null,
+  dropId: string,
+  currentVoteValue: number
+): number =>
+  lastAppliedVoteChange?.dropId === dropId &&
+  lastAppliedVoteChange.voteTotal === currentVoteValue
+    ? lastAppliedVoteChange.voteChange
+    : 0;
+
 const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   drop,
@@ -59,6 +71,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   onExplainVote,
 }) => {
   const locale = useBrowserLocale();
+  const explainTooltipId = useId();
   const { requestAuth, setToast } = useContext(AuthContext);
   const queryClient = useQueryClient();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -300,11 +313,11 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
     }
   };
 
-  const currentRationaleVoteChange =
-    lastAppliedVoteChange?.dropId === drop.id &&
-    lastAppliedVoteChange.voteTotal === liveCurrentVoteValue
-      ? lastAppliedVoteChange.voteChange
-      : 0;
+  const currentRationaleVoteChange = getRationaleVoteChange(
+    lastAppliedVoteChange,
+    drop.id,
+    liveCurrentVoteValue
+  );
 
   const canExplainVote =
     !!onExplainVote &&
@@ -324,14 +337,14 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   return (
     <div
       data-vote-controls
-      className="tw-col-span-3 tw-row-start-4 tw-flex tw-w-full tw-min-w-0 tw-cursor-default tw-flex-col sm:@[16rem]/my-vote:tw-row-start-3 sm:@[36rem]/my-vote:tw-col-span-1 sm:@[36rem]/my-vote:tw-col-start-3 sm:@[36rem]/my-vote:tw-max-w-72 @[46rem]/my-vote:tw-contents"
+      className="tw-col-span-3 tw-row-start-3 tw-grid tw-w-full tw-min-w-0 tw-cursor-default tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-@container/vote-controls @[32rem]/my-vote:tw-col-span-2 @[32rem]/my-vote:tw-col-start-2 @[46rem]/my-vote:tw-col-span-1 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-span-2 @[46rem]/my-vote:tw-row-start-1 @[46rem]/my-vote:tw-self-start"
     >
       <label htmlFor={voteInputId} className="tw-sr-only">
         {t(locale, "waves.myVotes.yourVotes")}{" "}
         {t(locale, "waves.myVotes.inCredit", { credit: voteLabel })}
       </label>
       <div
-        className={`tw-flex tw-min-w-0 tw-items-center tw-gap-3 tw-rounded-lg tw-bg-iron-900 tw-pr-1 tw-ring-1 tw-ring-inset tw-transition-colors tw-duration-200 focus-within:tw-ring-2 motion-reduce:tw-transition-none @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-1 @[46rem]/my-vote:tw-self-end ${
+        className={`${onExplainVote ? "@[24rem]/vote-controls:tw-col-span-1" : ""} tw-col-span-2 tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-pr-1 tw-ring-1 tw-ring-inset tw-transition-colors tw-duration-200 focus-within:tw-ring-2 motion-reduce:tw-transition-none ${
           isVoteValueOutOfRange
             ? "tw-ring-rose-400 focus-within:!tw-ring-rose-400"
             : "tw-ring-iron-700 focus-within:!tw-ring-primary-400"
@@ -354,9 +367,9 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
             inputMode="numeric"
             aria-describedby={voteInputDescription}
             aria-invalid={isVoteValueOutOfRange ? true : undefined}
-            className="tw-h-12 tw-w-full tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-0 tw-pl-3 tw-pr-0 tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-50 tw-placeholder-iron-400 tw-outline-none focus:tw-ring-0 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 md:tw-h-10"
+            className="tw-h-11 tw-w-full tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-0 tw-pl-3 tw-pr-0 tw-text-base tw-font-semibold tw-tabular-nums tw-text-iron-50 tw-placeholder-iron-400 tw-outline-none focus:tw-ring-0 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 @[46rem]/my-vote:tw-h-10 @[46rem]/my-vote:tw-text-sm"
           />
-          <span className="tw-max-w-[40%] tw-flex-shrink-0 tw-break-words tw-py-1 tw-text-sm tw-leading-4 tw-text-iron-400">
+          <span className="tw-flex-shrink-0 tw-whitespace-nowrap tw-py-1 tw-text-sm tw-leading-4 tw-text-iron-400">
             {voteLabel}
           </span>
         </div>
@@ -371,40 +384,64 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
           size="sm"
           loading={isProcessing || isResetting}
           hideChildrenWhenLoading
-          className={`!tw-h-11 tw-min-w-[60px] !tw-border-0 !tw-text-sm !tw-shadow-none md:!tw-h-8 ${
-            isEditing ? "" : "!tw-bg-transparent"
-          }`}
+          className="!tw-h-11 tw-min-w-11 !tw-border-0 !tw-bg-transparent !tw-px-0 !tw-py-1 !tw-text-xs !tw-shadow-none @[46rem]/my-vote:!tw-h-10"
           aria-label={t(locale, "waves.myVotes.submitVote")}
         >
-          {t(locale, "waves.myVotes.vote")}
+          <span
+            className={`tw-flex tw-h-9 tw-w-full tw-items-center tw-justify-center tw-rounded-md tw-px-2 @[46rem]/my-vote:tw-h-8 ${isEditing ? "tw-bg-iron-200 tw-text-iron-950" : ""}`}
+          >
+            {t(locale, "waves.myVotes.vote")}
+          </span>
         </Button>
       </div>
-      <div className="tw-mt-2 tw-flex tw-min-h-6 tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-3 tw-gap-y-1 tw-text-sm tw-leading-6 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-2 @[46rem]/my-vote:tw-mt-0 @[46rem]/my-vote:tw-self-start">
+      <div className="tw-contents">
         <p
           id={maxRatingId}
-          className="tw-m-0 tw-flex tw-items-center tw-text-xs tw-font-normal tw-text-iron-400 @[46rem]/my-vote:tw-min-h-8"
+          className="tw-row-start-2 tw-m-0 tw-flex tw-items-center tw-text-xs tw-font-normal tw-text-iron-400 @[24rem]/vote-controls:tw-col-span-2 @[46rem]/my-vote:tw-min-h-8"
         >
           {maxRatingLabel} {formatInteger(locale, liveMaxRating)}
         </p>
         {onExplainVote && (
-          <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleExplainVote();
-            }}
-            disabled={!canExplainVote}
-            variant="tertiary"
-            size="xs"
-            aria-label={t(locale, "waves.voteRationale.explainAriaLabel")}
-          >
-            {t(locale, "waves.voteRationale.explain")}
-          </Button>
+          <>
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleExplainVote();
+              }}
+              disabled={!canExplainVote}
+              variant="tertiary"
+              size="sm"
+              aria-label={t(locale, "waves.voteRationale.explainAriaLabel")}
+              data-tooltip-id={explainTooltipId}
+              data-tooltip-content={t(
+                locale,
+                "waves.voteRationale.savedDescription"
+              )}
+              className="tw-relative tw-col-start-2 tw-row-start-2 tw-my-1 after:tw-absolute after:tw-inset-x-0 after:tw-top-1/2 after:tw-h-11 after:-tw-translate-y-1/2 after:tw-content-[''] @[24rem]/vote-controls:tw-row-start-1 @[46rem]/my-vote:tw-my-0 @[46rem]/my-vote:tw-h-8"
+            >
+              {t(locale, "waves.voteRationale.explain")}
+            </Button>
+            <BodyPortalTooltip
+              id={explainTooltipId}
+              place="top"
+              offset={8}
+              opacity={1}
+              style={TOOLTIP_STYLES}
+              className="tw-max-w-64 tw-whitespace-normal"
+              closeEvents={{ mouseleave: true, blur: true, click: true }}
+              globalCloseEvents={{
+                escape: true,
+                clickOutsideAnchor: true,
+                scroll: true,
+              }}
+            />
+          </>
         )}
       </div>
       {displayedVoteLimitMessage && (
         <output
           id={voteLimitMessageId}
-          className="tw-mb-0 tw-mt-2 tw-min-w-0 tw-text-sm tw-leading-5 tw-text-amber-300 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-3 @[46rem]/my-vote:tw-mt-0"
+          className="tw-col-span-2 tw-mb-0 tw-mt-2 tw-min-w-0 tw-text-sm tw-leading-5 tw-text-amber-300"
         >
           {displayedVoteLimitMessage}
         </output>
