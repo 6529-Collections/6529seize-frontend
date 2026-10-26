@@ -59,6 +59,7 @@ export function ImageMediaModal({
   gallery,
   originalQuality,
   preferHighQualityPreview = false,
+  onAnimationUnavailable,
 }: {
   readonly src: string;
   readonly imageRef: React.RefObject<HTMLImageElement | null>;
@@ -71,6 +72,7 @@ export function ImageMediaModal({
   readonly fullscreenTargetAvailable?: boolean | undefined;
   readonly originalQuality?: OriginalImageQuality | undefined;
   readonly preferHighQualityPreview?: boolean | undefined;
+  readonly onAnimationUnavailable?: (() => void) | undefined;
   readonly gallery?:
     | {
         readonly canGoNext: boolean;
@@ -249,6 +251,7 @@ export function ImageMediaModal({
                         originalSrc={src}
                         imageScale={ImageScale.AUTOx1080}
                         preferHighQuality={preferHighQualityPreview}
+                        onAnimationUnavailable={onAnimationUnavailable}
                         alt={t(DEFAULT_LOCALE, "drop.media.previewAlt")}
                         fill
                         sizes="95vw"

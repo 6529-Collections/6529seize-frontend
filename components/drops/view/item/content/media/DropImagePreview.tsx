@@ -13,20 +13,25 @@ import { t } from "@/i18n/messages";
 import Image, { type ImageProps } from "next/image";
 import { forwardRef, useRef, useState, type ReactNode } from "react";
 
-export function getDropImagePreviewSources(src: string, scale: ImageScale) {
+export function getDropImagePreviewSources(
+  src: string,
+  scale: ImageScale,
+  preferAnimation = false
+) {
   const original = resolveIpfsUrlSync(src);
   // An IPFS gateway URL is still an original, even when resolving it changes
   // the URL string. Try bounded CDN copies before the guarded external proxy.
-  const sources = [scale, ImageScale.AUTOx450]
-    .map((size) =>
-      isGifImageUrl(original)
-        ? getAnimatedImagePreviewUri(original, size)
-        : getScaledImageUri(original, size)
-    )
-    .flatMap((url) => [url, getLegacyGifPreviewUri(url)])
-    .filter(
-      (url, index, all) => url !== original && all.indexOf(url) === index
-    );
+  const previews = [scale, ImageScale.AUTOx450].map((size) =>
+    isGifImageUrl(original)
+      ? getAnimatedImagePreviewUri(original, size)
+      : getScaledImageUri(original, size)
+  );
+  const ordered = preferAnimation
+    ? [...previews, ...previews.map(getLegacyGifPreviewUri)]
+    : previews.flatMap((url) => [url, getLegacyGifPreviewUri(url)]);
+  const sources = ordered.filter(
+    (url, index, all) => url !== original && all.indexOf(url) === index
+  );
   if (sources.length || !isAllowedOgImageSourceUrl(original)) return sources;
 
   // External embeds have no CDN scale path. The existing guarded image proxy
@@ -64,6 +69,7 @@ type Props = Omit<ImageProps, "src" | "unoptimized" | "onError"> & {
   readonly imageScale: ImageScale;
   readonly onError?: (() => void) | undefined;
   readonly preferHighQuality?: boolean | undefined;
+  readonly onAnimationUnavailable?: (() => void) | undefined;
 };
 
 const PreviewAttempt = forwardRef<HTMLImageElement, Props>(
@@ -75,6 +81,8 @@ const PreviewAttempt = forwardRef<HTMLImageElement, Props>(
       alt,
       fallback,
       preferHighQuality = false,
+      onAnimationUnavailable,
+      onLoad,
       ...props
     },
     ref
@@ -84,7 +92,11 @@ const PreviewAttempt = forwardRef<HTMLImageElement, Props>(
     const highQualitySrc = preferHighQuality
       ? getHighQualityArtworkImageSrc(originalSrc)
       : null;
-    const previewSources = getDropImagePreviewSources(originalSrc, imageScale);
+    const previewSources = getDropImagePreviewSources(
+      originalSrc,
+      imageScale,
+      Boolean(onAnimationUnavailable)
+    );
     const sources = highQualitySrc
       ? [highQualitySrc, ...previewSources]
       : previewSources;
@@ -113,12 +125,29 @@ const PreviewAttempt = forwardRef<HTMLImageElement, Props>(
             src={source}
             unoptimized={source !== highQualitySrc}
             {...optimizationProps}
+            onLoad={(event) => {
+              onLoad?.(event);
+              // Legacy and external previews can be stills. Only the versioned
+              // GIF contract guarantees animation without inspecting the bytes.
+              if (
+                isGifImageUrl(originalSrc) &&
+                getLegacyGifPreviewUri(source) === source
+              )
+                onAnimationUnavailable?.();
+            }}
             onError={() => {
               // Repeated errors from one source must not skip its fallback or
               // notify the parent twice before React commits the next render.
               if (failedAttempt.current === attempt) return;
               failedAttempt.current = attempt;
               setAttempt(attempt + 1);
+              const nextSource = sources[attempt + 1];
+              if (
+                isGifImageUrl(originalSrc) &&
+                (!nextSource ||
+                  getLegacyGifPreviewUri(nextSource) === nextSource)
+              )
+                onAnimationUnavailable?.();
               if (attempt + 1 === sources.length) onError?.();
             }}
           />
@@ -135,7 +164,7 @@ PreviewAttempt.displayName = "PreviewAttempt";
 export const DropImagePreview = forwardRef<HTMLImageElement, Props>(
   (props, ref) => (
     <PreviewAttempt
-      key={`${props.originalSrc}:${props.imageScale}:${props.preferHighQuality ?? false}`}
+      key={`${props.originalSrc}:${props.imageScale}:${props.preferHighQuality ?? false}:${Boolean(props.onAnimationUnavailable)}`}
       {...props}
       ref={ref}
     />

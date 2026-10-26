@@ -1,4 +1,5 @@
 import { writeFile } from "node:fs/promises";
+import { defineSubmissionArtworkPreviewTests } from "../media/waveImagePreviewCases";
 import composerSandboxConstants from "../support/composerSandboxConstants.json";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import type { Frame, Locator, Page, WebSocketRoute } from "@playwright/test";
@@ -975,6 +976,8 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  defineSubmissionArtworkPreviewTests();
+
   for (const surface of ["web", "app"] as const) {
     for (const eligible of [true, false]) {
       test(`keeps the Main Stage header action consistent in Chat and Leaderboard (${surface}, ${eligible ? "eligible" : "not eligible"})`, async ({

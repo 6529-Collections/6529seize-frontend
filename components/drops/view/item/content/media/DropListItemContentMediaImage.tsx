@@ -85,6 +85,7 @@ function DropImageContent({
   handleIntrinsicImageError,
   handleError,
   preferHighQualityImage,
+  onAnimationUnavailable,
 }: {
   readonly src: string;
   readonly alt: string;
@@ -99,6 +100,7 @@ function DropImageContent({
   readonly handleIntrinsicImageError: () => void;
   readonly handleError: () => void;
   readonly preferHighQualityImage: boolean;
+  readonly onAnimationUnavailable?: (() => void) | undefined;
 }) {
   const [aspectRatio, setAspectRatio] = useState<string | undefined>();
   const imageClassName = `${
@@ -135,6 +137,7 @@ function DropImageContent({
         originalSrc={src}
         imageScale={imageScale}
         preferHighQuality={preferHighQualityImage}
+        onAnimationUnavailable={onAnimationUnavailable}
         alt={alt}
         fill
         loading={loadStrategy === "eager" ? "eager" : undefined}
@@ -152,6 +155,7 @@ function DropImageContent({
       originalSrc={src}
       imageScale={imageScale}
       preferHighQuality={preferHighQualityImage}
+      onAnimationUnavailable={onAnimationUnavailable}
       alt={alt}
       fill
       loading={loadStrategy === "eager" ? "eager" : undefined}
@@ -212,6 +216,7 @@ type DropListItemContentMediaImageProps = {
   readonly galleryItemId?: string | undefined;
   readonly showOriginalQualityToggle?: boolean | undefined;
   readonly preferHighQualityImage?: boolean | undefined;
+  readonly autoAnimateGif?: boolean | undefined;
 };
 
 function DropListItemContentMediaImage({
@@ -243,6 +248,7 @@ function DropListItemContentMediaImageContent({
   galleryItemId,
   showOriginalQualityToggle = false,
   preferHighQualityImage = false,
+  autoAnimateGif = false,
 }: DropListItemContentMediaImageProps & { readonly imageScale: ImageScale }) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const [loaded, setLoaded] = useState(false);
@@ -256,6 +262,10 @@ function DropListItemContentMediaImageContent({
   const canToggleOriginal =
     showOriginalQualityToggle && quality.canViewOriginal;
   const isGif = isGifImageUrl(src);
+  const onAnimationUnavailable =
+    autoAnimateGif && canToggleOriginal && isGif
+      ? quality.requestAutomatically
+      : undefined;
 
   const imageFrameRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -420,6 +430,7 @@ function DropListItemContentMediaImageContent({
                 handleIntrinsicImageError={handleIntrinsicImageError}
                 handleError={handleError}
                 preferHighQualityImage={preferHighQualityImage}
+                onAnimationUnavailable={onAnimationUnavailable}
               />
             </span>
           )}
@@ -497,6 +508,7 @@ function DropListItemContentMediaImageContent({
           fullscreenTargetAvailable={!isCapacitor}
           originalQuality={canToggleOriginal ? quality : undefined}
           preferHighQualityPreview={preferHighQualityImage}
+          onAnimationUnavailable={onAnimationUnavailable}
         />
       )}
     </>

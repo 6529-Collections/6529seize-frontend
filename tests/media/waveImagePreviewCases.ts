@@ -34,12 +34,15 @@ async function fetchSandboxDrop(page: Page, baseURL: string | undefined) {
   return { apiOrigin, feed, source };
 }
 
-// The parent composer suite supplies the local-only mutation guard and both
-// desktop/touch projects. Browser requests, decoding and gallery resets are the
-// regression risk here; pixel-budget arithmetic belongs in the resizer tests.
-export function defineWaveImagePreviewTests() {
-  for (const extension of ["jpg", "gif"] as const) {
-    test(`shows artwork HD in both views and preserves description lines for ${extension}`, async ({
+// Parent suites supply the local-only mutation guard and desktop/touch projects.
+// Pixel-budget arithmetic belongs in the resizer tests.
+export function defineSubmissionArtworkPreviewTests() {
+  for (const { extension, animationUnavailable } of [
+    { extension: "jpg", animationUnavailable: false },
+    { extension: "gif", animationUnavailable: false },
+    { extension: "gif", animationUnavailable: true },
+  ] as const) {
+    test(`shows artwork HD in both views and preserves description lines for ${extension}${animationUnavailable ? " with automatic original animation" : ""}`, async ({
       page,
       baseURL,
     }) => {
@@ -89,6 +92,11 @@ export function defineWaveImagePreviewTests() {
       });
       const directOriginalRequests: string[] = [];
       await page.route(`${MEDIA_ROOT}**`, (route) => {
+        if (animationUnavailable && route.request().url().includes("_gifv2/"))
+          return route.fulfill({
+            status: 422,
+            json: { error: "DECODED_IMAGE_TOO_LARGE" },
+          });
         const isOriginal = route.request().url() === original;
         if (isOriginal) directOriginalRequests.push(original);
         const animation = isOriginal && extension === "gif";
@@ -117,8 +125,16 @@ export function defineWaveImagePreviewTests() {
       const preview = hero.getByRole("img", {
         name: "Drop media",
         exact: true,
+        includeHidden: true,
       });
-      await expect(preview).toBeVisible();
+      if (animationUnavailable) {
+        await expect(
+          hero.getByRole("img", { name: "Original GIF animation", exact: true })
+        ).toBeVisible();
+        await expect(preview).toBeHidden();
+      } else {
+        await expect(preview).toBeVisible();
+      }
       await expect
         .poll(() =>
           preview.evaluate((img: HTMLImageElement) => img.naturalWidth)
@@ -133,28 +149,35 @@ export function defineWaveImagePreviewTests() {
         expect(previewUrl.searchParams.get("url")).toBe(original);
         expect(previewUrl.searchParams.get("q")).toBe("100");
         await expect(preview).toHaveAttribute("srcset", /w=1920/);
-      } else {
+      } else if (!animationUnavailable) {
         await expect(preview).toHaveAttribute("src", /AUTOx1080_gifv2/);
       }
-      expect(directOriginalRequests).toEqual([]);
+      if (animationUnavailable)
+        expect(directOriginalRequests.length).toBeGreaterThan(0);
+      else expect(directOriginalRequests).toEqual([]);
       const paragraph = page.getByText("First photographic line", {
         exact: false,
       });
       await expect(paragraph).toHaveCSS("white-space", "pre-wrap");
       expect(await paragraph.textContent()).toBe(description);
       const inlineToggle = hero.getByRole("button", {
-        name: "View original",
+        name: animationUnavailable ? "View optimized" : "View original",
         exact: true,
       });
       await expect(inlineToggle).toBeVisible();
       await expect(
         hero
-          .getByRole("button", { name: "View original", exact: true })
+          .getByRole("button", {
+            name: animationUnavailable ? "View optimized" : "View original",
+            exact: true,
+          })
           .locator("..")
           .getByRole("button")
           .first()
-      ).toHaveAccessibleName("View original");
-      await inlineToggle.click();
+      ).toHaveAccessibleName(
+        animationUnavailable ? "View optimized" : "View original"
+      );
+      if (!animationUnavailable) await inlineToggle.click();
       const originalAlt =
         extension === "gif" ? "Original GIF animation" : "Original image";
       const inlineOriginal = hero.getByRole("img", {
@@ -207,6 +230,10 @@ export function defineWaveImagePreviewTests() {
       await expectNoHorizontalOverflow(page);
     });
   }
+}
+
+export function defineWaveImagePreviewTests() {
+  defineSubmissionArtworkPreviewTests();
 
   test("opens preview and additional images above the Memes drop detail view", async ({
     page,

@@ -46,6 +46,7 @@ export default function DropListItemContentMedia({
   galleryItemId,
   showOriginalQualityToggle = false,
   preferHighQualityImage = false,
+  autoAnimateGif = false,
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
@@ -64,6 +65,7 @@ export default function DropListItemContentMedia({
   readonly galleryItemId?: string | undefined;
   readonly showOriginalQualityToggle?: boolean | undefined;
   readonly preferHighQualityImage?: boolean | undefined;
+  readonly autoAnimateGif?: boolean | undefined;
 }) {
   const dropContext = useOptionalDropContext();
   const showVideoFullscreen = dropContext?.showVideoFullscreen ?? true;
@@ -107,6 +109,7 @@ export default function DropListItemContentMedia({
           galleryItemId={galleryItemId}
           showOriginalQualityToggle={showOriginalQualityToggle}
           preferHighQualityImage={preferHighQualityImage}
+          autoAnimateGif={autoAnimateGif}
         />
       );
     case MediaType.VIDEO:
