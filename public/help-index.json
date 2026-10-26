@@ -1829,6 +1829,7 @@
         "Search 6529 finds Pages, NFTs, Profiles, Waves, and Messages, with an always-visible result-type selector and a result count tied to the visible query.",
         "Search 6529 ranks exact, prefix, and substring profile-handle matches before ENS-only matches, then orders each match group by level from highest to lowest.",
         "Wave results in Search 6529 exclude direct-message conversations.",
+        "Wave-name search ignores letter case, spaces and separator punctuation such as dashes and apostrophes, while %, _ and backslashes remain literal characters. memes chat, memeschat, memes-chat, chat memes and meme chat find Memes-Chat; maybes dive bar finds maybe's dive bar. Every word must match, in any order, and partial words work. Exact and punctuation-equivalent names rank before full phrases, then all-term matches; the full phrase means the normalized query appears contiguously under these same rules. Shorter names after that normalization rank first within each group, then newer waves. These rules apply to Search 6529 Waves, sidebar Find a wave, composer # mentions and the in: Wave picker, with existing visibility rules. The in: picker has no minimum name length and shows newest-first suggestions for an empty name; other surfaces keep their existing minimum query lengths. Punctuation-only queries return no matches. The in: picker can include readable DMs, while the other wave search surfaces exclude DMs.",
         "The search control in an active Wave opens Search messages for that Wave; use Search all 6529 in the dialog to switch to site search.",
         "Message search is available to everyone. The Messages tab starts across all readable Waves. Message matches appear only in Messages, not All. in: selects a Wave and from: selects an author. Both appear as removable chips alongside the usual text search. When opened inside a Wave, search starts with that Wave selected; remove its in: chip to search all Waves you can read. Results show their Wave and open the matching message.",
         "Type in: or from: to choose a suggestion with the mouse, arrow keys and Enter. Combine both filters with message text of at least three characters, or search with just an author. Private Wave and conversation visibility rules still apply. To search literal from: or in: text, prefix the keyword with a backslash.",
@@ -11121,52 +11122,6 @@
       "brief_answer": "For the **{{percentage}}%** recovery range in **6529 Desktop**, check the TDH worker **Logs** and share the redacted error. Let any active work finish; do not widen reconciliation or start a reset because calculation failed. Once calculation completes successfully, do TDH and Merkle Root now match 6529.io at the same Last Block?\n\nRange: {{percentage}}% of blocks {{minimum_block}}–{{checkpoint}}.",
       "reconciliation_min_block": 13360860,
       "answer_links": []
-    },
-    {
-      "id": "waves.signed-messages",
-      "kind": "workflow",
-      "title": "Signed messages and the Devices tab",
-      "aliases": [
-        "signed messages",
-        "turn on signed messages",
-        "device signature",
-        "devices tab",
-        "can now post as you",
-        "revoke device",
-        "signed by its author",
-        "not signed by its author"
-      ],
-      "keywords": [
-        "waves",
-        "signature",
-        "device",
-        "grant",
-        "revoke",
-        "verify",
-        "ed25519",
-        "preferences"
-      ],
-      "facts": [
-        "Signed messages are staged behind a flag (on for staging, off in production). With them on, a web browser holds a non-extractable Ed25519 key per wallet; one wallet signature grants it the right to sign your posts, edits, deletes and reactions for 180 days. There is no wallet prompt per message and chat behaves as before.",
-        "The grant rides on the ordinary web sign-in. A logged-in user without a grant in this browser sees Turn on signed messages (one signature) above the empty wave composer; Turn on asks for one signature and the notice can be dismissed for 30 days. In a grant's last 14 days the notice offers Renew; after expiry writes go unsigned until renewed.",
-        "Signing never blocks or delays a write. If signing fails or a signature is rejected, the drop, edit, delete or reaction is sent unsigned exactly as before.",
-        "Preferences > Devices at /preferences?tab=devices lists every browser that can post as you with its label, This device marker, scopes, wallet, added, expiry and last-used dates and status (Active, Expired, Revoked). Revoke asks for confirmation; earlier signatures stay verifiable. Proxies cannot manage devices.",
-        "When a new browser gains a grant for your profile, other browsers show {label} can now post as you. Not you? with Revoke above the composer. The check runs when a wave opens and at most every 10 minutes while the tab is visible.",
-        "The Signature item in a drop's More menu (or touch menu) verifies the drop in your browser and reports Signed by its author, Not signed by its author, or The signature could not be verified, with wallet, device key fingerprint, grant expiry and whether the current content is the signed version. Contract wallets show Contract wallet: verified by 6529.io at sign-in. Signed drops carry no badge.",
-        "Signed messages are web only: the mobile and desktop apps, proxy sessions and browsers without Ed25519 support sign in and post exactly as before. Votes and ratings are not signed yet."
-      ],
-      "canonical_path": "/preferences?tab=devices",
-      "link_label": "Devices",
-      "related_paths": ["/preferences", "/waves"],
-      "tags": ["waves", "privacy", "security", "preferences"],
-      "source_refs": [
-        "ops/docs/waves/drop-actions/feature-signed-messages.md",
-        "ops/docs/notifications/feature-profile-preferences.md",
-        "components/device-signing/SignedMessagesNotice.tsx",
-        "components/preferences/DevicesPreferencesSettings.tsx",
-        "components/waves/drops/signature/DropSignatureDialog.tsx",
-        "lib/device-signing/sign-write.ts"
-      ]
     },
     {
       "id": "desktop.delegation-index-upgrade",

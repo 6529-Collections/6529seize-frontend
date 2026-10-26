@@ -11,6 +11,11 @@ The `waves.drop.quote-link-cards` record covers card-shaped loading states for
 Main Stage links and quotes, reduced motion, and missing or unavailable previews
 with an `Open drop` fallback. Hidden previews remain plain links.
 
+The search record covers punctuation-tolerant Wave names across site search,
+sidebar search, composer mentions and the message-search Wave picker. It explains
+all-term matching, partial names, relevance ordering, literal wildcard characters,
+and each surface's existing minimum-length and access rules.
+
 The `profiles.followers-tab` record points to the profile header's Followers
 dialog and private Following list. It covers own-profile authentication and
 proxy restrictions, total counts, pagination, profile navigation, unfollowing,
