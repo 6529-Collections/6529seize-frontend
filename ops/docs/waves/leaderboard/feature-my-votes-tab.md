@@ -46,7 +46,7 @@ while each profile loads. The placeholders stay still when reduced motion is ena
 - Open an eligible wave.
 - Switch to `Votes`, then `My Votes`.
 - Use rows or their checkboxes to select votes for reset, vote inputs to edit
-  votes, and `Explain` actions to explain them.
+  votes, and `Explain vote` actions to explain them.
 
 ## User Journey
 
@@ -60,7 +60,7 @@ while each profile loads. The placeholders stay still when reduced motion is ena
    route, including with `Enter` or `Space`. Checkboxes, vote controls, and
    profile links keep their own actions; selecting text does not toggle the row.
 5. Edit a vote, then submit with `Vote` or `Enter`.
-6. Optional: select `Explain` to open an inline reply composer prefilled as
+6. Optional: select `Explain vote` to open an inline reply composer prefilled as
    `Vote rationale (...)`.
 7. Select rows by clicking outside their controls, using the checkboxes beside
    the artwork, or using `Select all` / `Deselect all`,
@@ -70,6 +70,8 @@ while each profile loads. The placeholders stay still when reduced motion is ena
    A **Load more** button remains available if automatic loading fails.
 
 ## Common Scenarios
+
+On phones, the checkbox, a small artwork thumbnail, and the title with its author share the first line. Vote totals, voters, and rank appear below; long totals can wrap. Rows have 16-pixel side padding. Titles and author names stay on one line with an ellipsis when needed; action labels stay on one line. The amount and **Explain vote** sit side by side when space allows, with the allowed range underneath. In narrower rows, **Explain vote** sits beside the range below the amount. Tablet rows use a larger thumbnail with details beside it and controls below. On tablet and wide desktop rows, **Explain vote** stays immediately to the right of the amount control, with the allowed range underneath. Wide desktop rows keep this control group to the right of the artwork and details. Phone and tablet buttons use compact 36-pixel faces inside 44-pixel tap targets, keeping their existing **Save vote** (or **Vote** on legacy rows) and **Explain vote** labels. Inputs remain 44 pixels tall on phones and tablets, with 16-pixel text. Hovering or focusing **Explain vote** shows a styled tooltip explaining that it posts a public reply. Longer range hints can wrap. **Explain vote** is unavailable for a saved vote of zero and is omitted when you cannot chat in the wave. Opening it does not save a vote: review and send the public reply separately.
 
 - Rows use a subtle charcoal background. Hovering an unselected row lightens
   it further. Hovering or focusing the title highlights it in blue.
@@ -82,7 +84,7 @@ while each profile loads. The placeholders stay still when reduced motion is ena
   submitting it.
 - `Vote` is enabled only when the input is valid and changed.
 - `Vote` shows a spinner while the row request is running.
-- `Explain` opens the normal drop reply composer and does not submit or change a
+- `Explain vote` opens the normal drop reply composer and does not submit or change a
   vote by itself.
 - The prefilled reply includes the user's vote total at time of posting. If the
   current session just applied a vote change and that change differs from the
@@ -131,7 +133,7 @@ while each profile loads. The placeholders stay still when reduced motion is ena
 - This tab does not show drops where your current vote is already `0`.
 - Editing and reset still depend on wave voting permissions and backend
   validation.
-- `Explain` uses standard chat replies; it does not create a separate rationale
+- `Explain vote` uses standard chat replies; it does not create a separate rationale
   object or require dedicated backend support.
 - Vote totals, available votes, and maximum values use locale-aware number
   formatting. Focusing a vote input shows its editable digits without grouping.

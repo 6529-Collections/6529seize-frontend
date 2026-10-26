@@ -51,6 +51,8 @@
 - The primary tabs are `Overview`, `Listings & offers`, `Collectors`, and `History`.
   They keep the blue underline. History sub-tabs use compact round pills, and
   the activity-type dropdown is a compact framed button aligned to the right.
+- Card Activity rows stack on narrow screens while preserving their item,
+  wallet, total, date and transaction links.
 - `Your Transactions` appears only when the connected wallet has transactions
   for the card; otherwise the route falls back to `Card Activity`.
 

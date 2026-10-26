@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { render, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ReactQueryWrapper, {
@@ -81,6 +81,9 @@ describe("ReactQueryWrapper context", () => {
   it("onIdentityFollowChange invalidates related queries", () => {
     const { client, ctx } = createTestSetup();
     act(() => ctx.onIdentityFollowChange());
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.IDENTITY_FOLLOWING],
+    });
     expect(client.invalidateQueries).toHaveBeenCalledWith({
       queryKey: [QueryKey.IDENTITY_FOLLOWING_ACTIONS],
     });

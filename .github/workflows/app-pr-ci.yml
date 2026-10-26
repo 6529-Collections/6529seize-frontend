@@ -497,6 +497,13 @@ jobs:
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/session-recovery"
         run: ./bin/6529 run test:e2e:session-recovery-sandbox
 
+      - name: Run own-profile Following browser regression pack
+        if: matrix.lane == 'playwright-critical-shell'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/profile-following"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/profile-following"
+        run: ./bin/6529 run test:e2e:profile-following-sandbox
+
       # A dev server killed by the kernel OOM killer exits without any output,
       # so record the container's memory peak and OOM-kill count.
       - name: Report browser lane memory pressure

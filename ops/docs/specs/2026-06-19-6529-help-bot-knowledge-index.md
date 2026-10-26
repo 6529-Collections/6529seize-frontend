@@ -7,6 +7,11 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The `profiles.followers-tab` record points to the profile header's Followers
+dialog and private Following list. It covers own-profile authentication and
+proxy restrictions, total counts, pagination, profile navigation, unfollowing,
+and error recovery. The legacy followers URL remains a redirect.
+
 The `content-moderation.controls` record covers WatchTower's red Deleted pills,
 reasoned and confirmed resolution of open reports for a deleted post, retained
 evidence and history, and the distinction from Mark reviewed. Live originals
@@ -339,6 +344,9 @@ Connect wallet share the same top card as Make an offer, before the order list.
 The order list scrolls above quantity and Review exact terms, which remain visible
 at the bottom of the sheet. Connected wallet details remain beside those bottom
 controls. The Meme trading block uses one initial loading placeholder before revealing its controls, without replacing them during background listing refreshes. Order selection and wallet authority remain unchanged.
+
+The NFT activity record describes both wide-screen columns and stacked rows on
+narrow screens, with the same activity information, links, filters and pagination.
 
 The Collect workflow record owns `/collect` and `/collect/orders`, profile-wide
 set scope, direct gift recipients, marketplace review and recovery, observed
@@ -814,3 +822,5 @@ Create Wave and Network Filter omit empty-selection sentences in both tabs while
 preserving limits, errors, warnings, and the bottom criteria summary.
 
 Competition list corrections: My Votes includes only active nonzero votes; archived winner votes remain retained. Winners paginate by win time newest first.
+
+Voting help records use **Explain vote** for public rationale replies in My Votes and voting dialogs. They distinguish sending a reply about a saved vote from posting one after a successful vote, and cover Slider / Numeric entry in competition submission popups. The My Votes record also describes compact phone and tablet rows, 16-pixel side padding, single-line titles and action labels, compact controls with unchanged labels on smaller rows, styled public-reply tooltips, controls that adapt to the available width, and Explain vote beside the amount control on tablet and desktop with the range hint underneath. Desktop controls stay to the right of the artwork and details.

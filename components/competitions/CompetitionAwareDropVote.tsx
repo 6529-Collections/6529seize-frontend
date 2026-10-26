@@ -1,6 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { VoteModeControl } from "@/components/voting/VoteModeControl";
 import { useQuery } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -54,6 +55,8 @@ export default function CompetitionAwareDropVote(
   props: CompetitionAwareDropVoteProps
 ) {
   const viewer = useCompetitionViewer();
+  const [localVoteMode, setLocalVoteMode] =
+    useState<SingleWaveDropVoteMode>("slider");
   const { drop } = props;
   const knownContext = getKnownContext(drop, viewer);
   const context = useQuery({
@@ -85,19 +88,24 @@ export default function CompetitionAwareDropVote(
     drop.parts.at(0)?.part_id !== undefined;
   const VoteForm = canReply ? CompetitionVoteWithReply : CompetitionVoteForm;
   return (
-    <VoteForm
-      key={`${viewer ?? "anonymous"}:${entry.id}`}
-      drop={drop}
-      competition={competition}
-      entryId={entry.id}
-      dropId={entry.drop_id}
-      disabled={entry.status !== ApiCompetitionEntryStatus.Active}
-      voteMode={props.voteMode ?? "slider"}
-      size={props.size}
-      onVoteSuccess={() => {
-        props.onVoteSuccess?.();
-        props.onVoteRequestStarted?.();
-      }}
-    />
+    <div className="tw-space-y-3">
+      {viewer && props.voteMode === undefined && (
+        <VoteModeControl value={localVoteMode} onChange={setLocalVoteMode} />
+      )}
+      <VoteForm
+        key={`${viewer ?? "anonymous"}:${entry.id}`}
+        drop={drop}
+        competition={competition}
+        entryId={entry.id}
+        dropId={entry.drop_id}
+        disabled={entry.status !== ApiCompetitionEntryStatus.Active}
+        voteMode={props.voteMode ?? localVoteMode}
+        size={props.size}
+        onVoteSuccess={() => {
+          props.onVoteSuccess?.();
+          props.onVoteRequestStarted?.();
+        }}
+      />
+    </div>
   );
 }

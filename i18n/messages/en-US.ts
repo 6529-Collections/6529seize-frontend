@@ -832,15 +832,18 @@ const WAVE_COMPETITION_BADGE_MESSAGES = objectMessages(
 );
 
 const WAVE_VOTE_RATIONALE_MESSAGES = objectMessages("waves.voteRationale", {
-  explain: "Explain",
-  explainAriaLabel: "Reply with vote rationale",
+  explain: "Explain vote",
+  explainAriaLabel: "Explain vote",
+  savedDescription: "Post a public reply in the wave about your saved vote.",
+  publicReplyDescription:
+    "Posts a public reply in the wave after your vote is saved.",
   fieldLabel: "Optional rationale reply",
   fieldDescription:
-    "Editing this text turns on Vote with reply until you choose the switch setting yourself.",
-  switchLabel: "Vote with reply",
+    "Posts a public reply in the wave after your vote is saved. Editing this text turns on Explain vote until you choose the switch setting yourself.",
+  switchLabel: "Explain vote",
   stateOn: "On",
   stateOff: "Off",
-  emptyBlockReason: "Add rationale text or turn Vote with reply off.",
+  emptyBlockReason: "Add rationale text or turn Explain vote off.",
   submitLabel: "Vote + reply",
   postErrorTitle: "Vote saved, but couldn't post your rationale reply.",
   postErrorRetry: "Please try posting the reply again.",
@@ -1350,9 +1353,19 @@ const USER_CIC_TYPE_MESSAGES = objectMessages("user.cicType", {
 } as const);
 
 const FOLLOWERS_MESSAGES = objectMessages("followers", {
+  "following.title": "Following",
+  "following.open": "Open your following list: {count}",
+  "following.loadingCount": "…",
+  "following.unavailableCount": "Unavailable",
+  "following.loading": "Loading following list…",
+  "following.empty": "You aren't following anyone yet.",
+  "following.error": "Couldn't load your following list. Please try again.",
+  "following.retry": "Retry",
+  "following.loadMore": "Load more",
   "modal.title": "Followers",
   "list.label": "Followers",
   "list.loading": "Loading followers",
+  "list.empty": "No followers yet.",
   "profile.linkAriaLabel": "View {handle}'s profile",
   "profile.avatarAlt": "{handle}'s profile image",
 } as const);
@@ -2923,6 +2936,7 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   "category.pages": "Pages",
   "category.profiles": "Profiles",
   "category.waves": "Waves",
+  "category.messages": "Messages",
   "category.error": "Some results could not be loaded",
   "category.loading": "Loading {category} results",
   clear: "Clear search",
@@ -2930,7 +2944,7 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   close: "Close search",
   "dialogTitle.site": "Search 6529",
   "dialogTitle.wave": "Search this Wave",
-  "dialogDescription.site": "Find pages, NFTs, profiles, and Waves.",
+  "dialogDescription.site": "Find pages, NFTs, profiles, Waves, and messages.",
   error: "Something went wrong while searching. Please try again.",
   "error.partial.one": "{category} results could not be loaded.",
   "error.partial.other": "Some result types could not be loaded: {categories}.",

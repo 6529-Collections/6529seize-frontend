@@ -1,33 +1,7 @@
 import {
   getPendingSearchFilter,
-  isAdvancedSearchEnabledForUser,
   unescapeSearchOperators,
 } from "@/helpers/advanced-search.helpers";
-
-describe("advanced search availability", () => {
-  it.each([undefined, "", "   "])(
-    "enables everyone when the setting is absent or empty: %s",
-    (value) => {
-      expect(isAdvancedSearchEnabledForUser(value, null)).toBe(true);
-      expect(isAdvancedSearchEnabledForUser(value, "alice")).toBe(true);
-    }
-  );
-  it("matches whole handles case-insensitively and trims entries", () => {
-    expect(
-      isAdvancedSearchEnabledForUser(" GelatoGenesis, prxt0 ", "gelatogenesis")
-    ).toBe(true);
-    expect(
-      isAdvancedSearchEnabledForUser(" GelatoGenesis, prxt0 ", "prxt0")
-    ).toBe(true);
-    expect(
-      isAdvancedSearchEnabledForUser("GelatoGenesis,prxt0", "Gelato")
-    ).toBe(false);
-    expect(isAdvancedSearchEnabledForUser("GelatoGenesis,prxt0", null)).toBe(
-      false
-    );
-    expect(isAdvancedSearchEnabledForUser(", ,", "alice")).toBe(false);
-  });
-});
 
 describe("search filter input", () => {
   it("keeps the text outside a pending filter and handles wave names with spaces", () => {

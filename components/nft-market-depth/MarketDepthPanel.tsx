@@ -472,6 +472,10 @@ export default function MarketDepthPanel({
         !(book === wethBook && side === "bid")
     ),
   ];
+  const hasSingleTable = nonEmptySides.length === 1;
+  const sideLayoutClassName = hasSingleTable
+    ? "tw-contents"
+    : "tw-contents lg:tw-flex";
   const controlledDetails =
     data && data.status !== ApiMarketDepthStatusEnum.Unavailable
       ? [
@@ -614,7 +618,9 @@ export default function MarketDepthPanel({
                       </p>
                     )}
                 </div>
-                <div className="tw-grid tw-grid-cols-2 tw-items-start tw-gap-x-4 tw-gap-y-6 lg:tw-gap-x-12 lg:tw-gap-y-10">
+                <div
+                  className={`tw-grid tw-grid-cols-2 tw-items-start tw-gap-x-4 tw-gap-y-6 lg:tw-gap-x-12 ${hasSingleTable ? "lg:tw-gap-y-0" : "lg:tw-gap-y-10"}`}
+                >
                   {displayedSides.map(
                     ({ book, side, levels, summary }, index) => {
                       const value =
@@ -639,7 +645,7 @@ export default function MarketDepthPanel({
                             `${book?.currency.address ?? "empty"}-${side}`
                           }
                           hidden={!summary && !open}
-                          className={`${!summary && !open ? "tw-hidden" : "tw-contents lg:tw-flex"} tw-min-w-0 tw-flex-col`}
+                          className={`${!summary && !open ? "tw-hidden" : sideLayoutClassName} tw-min-w-0 tw-flex-col`}
                         >
                           {summary && (
                             <div className="tw-order-first tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-justify-between tw-gap-1 lg:tw-flex-row lg:tw-gap-4 lg:tw-pb-4">
@@ -664,7 +670,7 @@ export default function MarketDepthPanel({
                           <div
                             id={`${id}-side-${index}`}
                             hidden={!open}
-                            className="tw-col-span-2 tw-min-w-0 [overflow-anchor:none] max-lg:empty:tw-hidden"
+                            className="tw-col-span-2 tw-min-w-0 [overflow-anchor:none] empty:tw-hidden"
                           >
                             {book && levels.length > 0 && (
                               <>
