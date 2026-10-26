@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
+import Button from "@/components/utils/button/Button";
 import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
@@ -320,12 +321,12 @@ export function CompetitionVoteForm({
                 .join(" ")}
               className="tw-h-11 tw-w-[12ch] tw-min-w-[10ch] tw-max-w-[12ch] tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-pl-3 tw-pr-0 tw-text-base tw-font-semibold tw-tabular-nums tw-text-iron-50 [appearance:textfield] focus:tw-ring-0 @[46rem]/my-vote:tw-h-9 @[46rem]/my-vote:tw-min-w-0 @[46rem]/my-vote:tw-text-sm [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
             />
-            <span className="tw-flex-shrink-0 tw-whitespace-nowrap tw-py-1 tw-text-xs tw-leading-4 tw-text-iron-400">
+            <span className="tw-ml-auto tw-mr-2 tw-flex-shrink-0 tw-whitespace-nowrap tw-py-1 tw-text-xs tw-leading-4 tw-text-iron-400">
               {creditLabel}
             </span>
             <button
               type="submit"
-              className="tw-group/vote-save tw-ml-auto tw-h-11 tw-min-w-11 tw-flex-shrink-0 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-bg-transparent tw-px-0 tw-py-1 tw-text-xs tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+              className="tw-group/vote-save tw-h-11 tw-min-w-11 tw-flex-shrink-0 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-bg-transparent tw-px-0 tw-py-1 tw-text-xs tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
               disabled={
                 busy ||
                 disabled ||
@@ -350,9 +351,10 @@ export function CompetitionVoteForm({
           </p>
           {onExplainVote && (
             <>
-              <button
-                type="button"
-                className="tw-group/vote-explain tw-col-start-2 tw-row-start-2 tw-h-11 tw-self-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-text-iron-500 @[22rem]/vote-controls:tw-row-start-1 @[46rem]/my-vote:tw-row-start-2 @[46rem]/my-vote:tw-h-9 @[46rem]/my-vote:tw-rounded-md @[46rem]/my-vote:tw-py-0"
+              <Button
+                variant="tertiary"
+                size="sm"
+                className="tw-relative tw-col-start-2 tw-row-start-2 tw-my-1 tw-self-center after:tw-absolute after:tw-inset-x-0 after:tw-top-1/2 after:tw-h-11 after:-tw-translate-y-1/2 after:tw-content-[''] @[22rem]/vote-controls:tw-row-start-1 @[46rem]/my-vote:tw-row-start-2 @[46rem]/my-vote:tw-my-0"
                 aria-label={t(locale, "waves.voteRationale.explainAriaLabel")}
                 data-tooltip-id={explainTooltipId}
                 data-tooltip-content={t(
@@ -376,10 +378,8 @@ export function CompetitionVoteForm({
                   );
                 }}
               >
-                <span className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-rounded-md tw-px-2 tw-ring-1 tw-ring-inset tw-ring-iron-700 @[46rem]/my-vote:tw-ring-0 desktop-hover:group-hover/vote-explain:tw-bg-iron-800">
-                  {t(locale, "waves.voteRationale.explain")}
-                </span>
-              </button>
+                {t(locale, "waves.voteRationale.explain")}
+              </Button>
               <BodyPortalTooltip
                 id={explainTooltipId}
                 place="top"

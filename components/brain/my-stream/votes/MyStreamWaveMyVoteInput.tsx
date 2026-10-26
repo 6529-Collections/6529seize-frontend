@@ -400,18 +400,16 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
               }}
               disabled={!canExplainVote}
               variant="tertiary"
-              size="xs"
+              size="sm"
               aria-label={t(locale, "waves.voteRationale.explainAriaLabel")}
               data-tooltip-id={explainTooltipId}
               data-tooltip-content={t(
                 locale,
                 "waves.voteRationale.savedDescription"
               )}
-              className="tw-col-start-2 tw-row-start-2 !tw-h-11 tw-whitespace-nowrap !tw-border-0 !tw-bg-transparent !tw-px-0 !tw-py-1 !tw-shadow-none @[22rem]/vote-controls:tw-row-start-1 @[46rem]/my-vote:!tw-h-8 @[46rem]/my-vote:!tw-py-0"
+              className="tw-relative tw-col-start-2 tw-row-start-2 tw-my-1 after:tw-absolute after:tw-inset-x-0 after:tw-top-1/2 after:tw-h-11 after:-tw-translate-y-1/2 after:tw-content-[''] @[22rem]/vote-controls:tw-row-start-1 @[46rem]/my-vote:tw-my-0 @[46rem]/my-vote:tw-h-8"
             >
-              <span className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-rounded-md tw-px-2 tw-ring-1 tw-ring-inset tw-ring-iron-800 @[46rem]/my-vote:tw-h-8">
-                {t(locale, "waves.voteRationale.explain")}
-              </span>
+              {t(locale, "waves.voteRationale.explain")}
             </Button>
             <BodyPortalTooltip
               id={explainTooltipId}

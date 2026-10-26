@@ -977,7 +977,7 @@ async function openAppearanceDraft(
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
   test("uses competition resources for the original primary across navigation, votes and settings", async ({
     page,
-  }) => {
+  }, testInfo) => {
     const sandbox = await installCompetitionApi(page);
     sandbox.onlyCompetition("alpha");
     await sandbox.legacyPrimary("alpha");
@@ -1047,7 +1047,14 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     );
     await explainVote.press("Escape");
     await expect(explanationTooltip).toBeHidden();
-    await explainVote.click();
+    if (testInfo.project.name === "web-mobile-chromium") {
+      const bounds = (await explainVote.boundingBox())!;
+      // The shared small button stays visually compact; its expanded touch
+      // area must still open the composer just outside the visible border.
+      await page.touchscreen.tap(bounds.x + bounds.width / 2, bounds.y - 3);
+    } else {
+      await explainVote.click();
+    }
     await expect(explanationTooltip).toHaveCount(0);
     const cancelRationale = page.getByRole("button", {
       name: "Cancel reply",
@@ -3258,28 +3265,39 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
               height: bounds.height,
               visibleHeight: visibleButton.height,
               label: button.innerText,
+              creditGap:
+                bounds.left -
+                button.previousElementSibling!.getBoundingClientRect().right,
             };
           });
         expect(saveInset.top).toBeGreaterThanOrEqual(4);
         expect(saveInset.bottom).toBeGreaterThanOrEqual(4);
+        expect(saveInset.creditGap).toBeGreaterThanOrEqual(12);
+        expect(saveInset.creditGap).toBeLessThanOrEqual(16);
         if (contentWidth < 736) {
           expect(saveInset.height).toBeGreaterThanOrEqual(44);
           expect(saveInset.visibleHeight).toBe(36);
           expect(saveInset.label).toBe("Save vote");
-          expect(
-            (await controls
-              .getByRole("button", { name: "Explain vote", exact: true })
-              .locator("span")
-              .boundingBox())!.height
-          ).toBe(36);
+          await expect(explain).toHaveCSS("border-radius", "8px");
+          await expect(explain).toHaveCSS("border-width", "1px");
+          await expect(explain).toHaveCSS("padding-left", "12px");
           const inputBounds = (await input.boundingBox())!;
           const explainBounds = (await explain.boundingBox())!;
           expect(inputBounds.height).toBeGreaterThanOrEqual(44);
-          expect(explainBounds.height).toBeGreaterThanOrEqual(44);
+          expect(explainBounds.height).toBe(36);
+          expect(
+            await explain.evaluate((button) =>
+              parseFloat(getComputedStyle(button, "::after").height)
+            )
+          ).toBeGreaterThanOrEqual(44);
           const controlsWidth = (await controls.boundingBox())!.width;
           if (controlsWidth >= 352) {
             expect(
-              Math.abs(inputBounds.y - explainBounds.y)
+              Math.abs(
+                inputBounds.y +
+                  inputBounds.height / 2 -
+                  (explainBounds.y + explainBounds.height / 2)
+              )
             ).toBeLessThanOrEqual(1);
             expect(explainBounds.x).toBeGreaterThanOrEqual(
               inputBounds.x + inputBounds.width
