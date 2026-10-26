@@ -1137,42 +1137,55 @@ describe("HeaderShare", () => {
     });
 
     it("keeps keyboard focus on refresh while busy and rejects repeated activation", async () => {
-      const sessionV2 = require("@/services/auth/session-v2.utils");
-      renderWithProviders(<HeaderShare />);
-      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
-      const refresh = await screen.findByRole("button", {
-        name: "Generate new code",
-      });
-      await waitFor(() =>
-        expect(refresh).toHaveAttribute("aria-disabled", "false")
-      );
-      let finishRefresh!: () => void;
-      const pending = new Promise<void>((resolve) => {
-        finishRefresh = resolve;
-      });
-      sessionV2.createConnectionShare.mockImplementationOnce(async () => {
-        await pending;
-        return {
-          connection_share_code: "keyboard-refreshed-code",
-          expires_at: new Date(Date.now() + 60_000).toISOString(),
-          address: "0x1234567890123456789012345678901234567890",
-          deep_link_path:
-            "/accept-connection-sharing?connection_share_code=keyboard-refreshed-code",
-        };
-      });
-      refresh.focus();
-      await userEvent.keyboard("{Enter}");
-      expect(refresh).toHaveAttribute("aria-disabled", "true");
-      expect(refresh).toHaveFocus();
-      await userEvent.keyboard("{Enter} ");
-      expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2);
-      expect(refresh).toHaveFocus();
-      finishRefresh();
-      await waitFor(() =>
-        expect(refresh).toHaveAttribute("aria-disabled", "false")
-      );
-      expect(refresh).toHaveFocus();
-      expect(screen.getByTitle(/keyboard-refreshed-code/)).toBeInTheDocument();
+      const initialFrames: FrameRequestCallback[] = [];
+      const requestFrame = jest
+        .spyOn(globalThis, "requestAnimationFrame")
+        .mockImplementation((callback) => initialFrames.push(callback));
+      try {
+        const sessionV2 = require("@/services/auth/session-v2.utils");
+        renderWithProviders(<HeaderShare />);
+        await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+        const refresh = await screen.findByRole("button", {
+          name: "Generate new code",
+        });
+        await waitFor(() =>
+          expect(refresh).toHaveAttribute("aria-disabled", "false")
+        );
+        let finishRefresh!: () => void;
+        const pending = new Promise<void>((resolve) => {
+          finishRefresh = resolve;
+        });
+        sessionV2.createConnectionShare.mockImplementationOnce(async () => {
+          await pending;
+          return {
+            connection_share_code: "keyboard-refreshed-code",
+            expires_at: new Date(Date.now() + 60_000).toISOString(),
+            address: "0x1234567890123456789012345678901234567890",
+            deep_link_path:
+              "/accept-connection-sharing?connection_share_code=keyboard-refreshed-code",
+          };
+        });
+        refresh.focus();
+        await userEvent.keyboard("{Enter}");
+        expect(refresh).toHaveAttribute("aria-disabled", "true");
+        act(() => {
+          initialFrames.splice(0).forEach((callback) => callback(0));
+        });
+        expect(refresh).toHaveFocus();
+        await userEvent.keyboard("{Enter} ");
+        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2);
+        expect(refresh).toHaveFocus();
+        finishRefresh();
+        await waitFor(() =>
+          expect(refresh).toHaveAttribute("aria-disabled", "false")
+        );
+        expect(refresh).toHaveFocus();
+        expect(
+          screen.getByTitle(/keyboard-refreshed-code/)
+        ).toBeInTheDocument();
+      } finally {
+        requestFrame.mockRestore();
+      }
     });
 
     it("keeps keyboard focus inside the connection dialog", async () => {
@@ -1187,6 +1200,7 @@ describe("HeaderShare", () => {
       const first = screen.getByRole("link", {
         name: "Open 6529 app downloads",
       });
+      await waitFor(() => expect(first).toHaveFocus());
       refresh.focus();
       await userEvent.tab();
       expect(first).toHaveFocus();

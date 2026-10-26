@@ -674,7 +674,7 @@ function HeaderQRModal({
 
     const raf = requestAnimationFrame(() => {
       const dialog = dialogRef.current;
-      if (!dialog) {
+      if (!dialog || dialog.contains(document.activeElement)) {
         return;
       }
 
