@@ -170,9 +170,10 @@ describe.each(["default", "home"] as const)(
         expect(
           screen.getByText(isActive ? "Live" : "Upcoming", { exact: true })
         ).toBeInTheDocument();
-        expect(
-          screen.getByRole("link", { name: "Mint", exact: true })
-        ).toHaveAttribute("href", "/the-memes/mint");
+        expect(screen.getByRole("link", { name: "Mint" })).toHaveAttribute(
+          "href",
+          "/the-memes/mint"
+        );
         expect(
           document.querySelector('[data-tooltip-id="allowlist-info"]') !== null
         ).toBe(!isActive);

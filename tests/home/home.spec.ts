@@ -1585,7 +1585,7 @@ test.describe("Home Page @smoke @medium @large", () => {
     );
     if (isMobileWebProject(testInfo.project.name)) {
       // Match the narrow slot left by the homepage sidebar and card padding.
-      await page.locator("main").evaluate((element) => {
+      await page.getByRole("main").evaluate((element) => {
         element.style.width = "calc(100% - 155px)";
       });
     }
@@ -1600,7 +1600,7 @@ test.describe("Home Page @smoke @medium @large", () => {
     ).toBeVisible();
     await expect(mint).toHaveAttribute("href", "/the-memes/mint");
     await expect(timer).toHaveText(/^12d : 23h : 59m : \d{2}s$/);
-    const values = timer.locator("[data-countdown-value]");
+    const values = page.getByRole("timer").locator("[data-countdown-value]");
     await expect(values).toHaveCount(4);
     await expect(values.first()).toHaveCSS(
       "font-size",
@@ -1656,6 +1656,7 @@ test.describe("Home Page @smoke @medium @large", () => {
       expect(compact.space.height).toBe(standardCardHeight);
     }
     await page
+      .getByRole("main")
       .locator('[data-home-countdown] [data-tooltip-id="allowlist-info"]')
       .focus();
     await expect(page.getByRole("tooltip")).toContainText(
@@ -1663,10 +1664,9 @@ test.describe("Home Page @smoke @medium @large", () => {
     );
     await mint.focus();
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await expect(page.locator("[data-home-countdown] .tw-absolute")).toHaveCSS(
-      "animation-name",
-      "none"
-    );
+    await expect(
+      page.getByRole("main").locator("[data-home-countdown] .tw-absolute")
+    ).toHaveCSS("animation-name", "none");
     await expectNoHorizontalOverflow(page);
     await page.screenshot({ path: testInfo.outputPath("countdown-days.png") });
     if (isMobileWebProject(testInfo.project.name)) {
