@@ -28,9 +28,10 @@ jest.mock(
       return <div>Legacy voting</div>;
     }
 );
+let mockSignedIn = true;
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
-    connectedProfile: { id: "viewer" },
+    connectedProfile: mockSignedIn ? { id: "viewer" } : null,
     setToast: jest.fn(),
     requestAuth: async () => ({ success: true }),
   }),
@@ -110,7 +111,7 @@ const initialBudget = {
   max_vote: 1500,
 } as ApiCompetitionCreditBudget;
 function mount(
-  voteMode: "slider" | "numeric" = "numeric",
+  voteMode: "slider" | "numeric" | null = "numeric",
   voteDrop: ApiDrop = drop,
   onClose?: () => void
 ) {
@@ -121,7 +122,7 @@ function mount(
     <QueryClientProvider client={client}>
       <SingleWaveDropVote
         drop={voteDrop}
-        voteMode={voteMode}
+        voteMode={voteMode ?? undefined}
         onVoteRequestStarted={onClose}
       />
     </QueryClientProvider>
@@ -130,6 +131,7 @@ function mount(
 }
 beforeEach(() => {
   jest.clearAllMocks();
+  mockSignedIn = true;
   jest.mocked(useCompetitionViewer).mockReturnValue("viewer:self");
   jest.mocked(fetchDropCompetitionContext).mockResolvedValue(context as never);
   jest.mocked(fetchCompetitionCredits).mockResolvedValue(initialBudget);
@@ -409,13 +411,13 @@ const replyDrop = {
   wave: { ...drop.wave, authenticated_user_eligible_to_chat: true },
   parts: [{ part_id: 7 }],
 } as ApiDrop;
-it("restores Vote with reply for proxy competition votes after the vote succeeds", async () => {
+it("restores Explain vote for proxy competition votes after the vote succeeds", async () => {
   jest.mocked(useCompetitionViewer).mockReturnValue("viewer:proxy");
   jest.mocked(commonApiPost).mockResolvedValue({ id: "reply" } as never);
   mount("numeric", replyDrop);
   const input = await screen.findByRole("spinbutton", { name: "Your vote" });
   fireEvent.change(input, { target: { value: "25" } });
-  fireEvent.click(screen.getByRole("switch", { name: "Vote with reply" }));
+  fireEvent.click(screen.getByRole("switch", { name: "Explain vote" }));
   const rationale = screen.getByLabelText("Optional rationale reply");
   expect(rationale).toHaveValue("Vote rationale (+25 at time of posting):\n\n");
   fireEvent.change(rationale, { target: { value: "Proxy vote rationale" } });
@@ -437,7 +439,7 @@ it("restores Vote with reply for proxy competition votes after the vote succeeds
 it("blocks empty enabled replies before submitting a vote", async () => {
   mount("numeric", replyDrop);
   await screen.findByRole("spinbutton", { name: "Your vote" });
-  fireEvent.click(screen.getByRole("switch", { name: "Vote with reply" }));
+  fireEvent.click(screen.getByRole("switch", { name: "Explain vote" }));
   fireEvent.change(screen.getByLabelText("Optional rationale reply"), {
     target: { value: " " },
   });
@@ -451,8 +453,132 @@ it("does not post a reply if saving the competition vote fails", async () => {
   mount("numeric", replyDrop);
   const input = await screen.findByRole("spinbutton", { name: "Your vote" });
   fireEvent.change(input, { target: { value: "25" } });
-  fireEvent.click(screen.getByRole("switch", { name: "Vote with reply" }));
+  fireEvent.click(screen.getByRole("switch", { name: "Explain vote" }));
   fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
   await screen.findByRole("alert");
   expect(commonApiPost).not.toHaveBeenCalled();
+});
+
+it("offers both modes in inline competition forms and preserves the vote and reply draft", async () => {
+  mount(null, replyDrop);
+  await screen.findAllByRole("slider");
+  fireEvent.click(screen.getByRole("button", { name: "Numeric" }));
+  fireEvent.change(screen.getByRole("spinbutton", { name: "Your vote" }), {
+    target: { value: "-123" },
+  });
+  fireEvent.click(screen.getByRole("switch", { name: "Explain vote" }));
+  fireEvent.change(screen.getByLabelText("Optional rationale reply"), {
+    target: { value: "A public explanation" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Slider" }));
+  expect(screen.getAllByRole("slider").length).toBeGreaterThan(0);
+  fireEvent.click(screen.getByRole("button", { name: "Numeric" }));
+  expect(screen.getByRole("spinbutton", { name: "Your vote" })).toHaveValue(
+    -123
+  );
+  expect(screen.getByLabelText("Optional rationale reply")).toHaveValue(
+    "A public explanation"
+  );
+  expect(setCompetitionVote).not.toHaveBeenCalled();
+  expect(commonApiPost).not.toHaveBeenCalled();
+});
+it("does not duplicate the mode switch supplied by a voting dialog", async () => {
+  mount("slider", replyDrop);
+  await screen.findAllByRole("slider");
+  expect(screen.queryByRole("group", { name: "Vote input mode" })).toBeNull();
+});
+it.each([0, -1500])(
+  "uses the same limits in both inline entry modes with minimum %s",
+  async (min) => {
+    jest
+      .mocked(fetchCompetitionCredits)
+      .mockResolvedValue({ ...initialBudget, min_vote: min });
+    mount(null);
+    const sliders = await screen.findAllByRole("slider");
+    expect(sliders[0]).toHaveAttribute("min", String(min));
+    fireEvent.click(screen.getByRole("button", { name: "Numeric" }));
+    const input = screen.getByRole("spinbutton", { name: "Your vote" });
+    expect(input).toHaveAttribute("min", String(min));
+    fireEvent.change(input, { target: { value: "-25" } });
+    expect(
+      screen.getByRole("button", { name: "Save vote" }).hasAttribute("disabled")
+    ).toBe(min === 0);
+  }
+);
+it("keeps a vote saved when posting the public explanation fails", async () => {
+  jest.mocked(commonApiPost).mockRejectedValueOnce(new Error("Reply failed"));
+  mount(null, replyDrop);
+  await screen.findAllByRole("slider");
+  fireEvent.click(screen.getByRole("button", { name: "Numeric" }));
+  fireEvent.change(screen.getByRole("spinbutton", { name: "Your vote" }), {
+    target: { value: "25" },
+  });
+  fireEvent.click(screen.getByRole("switch", { name: "Explain vote" }));
+  fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+  await waitFor(() => expect(commonApiPost).toHaveBeenCalledTimes(1));
+  expect(screen.getByRole("spinbutton", { name: "Your vote" })).toHaveValue(25);
+  expect(screen.getByText("Saved")).toBeInTheDocument();
+});
+
+it("shows the sign-in prompt without vote modes for a signed-out viewer", async () => {
+  mockSignedIn = false;
+  jest.mocked(useCompetitionViewer).mockReturnValue(null);
+  mount(null);
+  await screen.findByText("Connect your wallet to participate.");
+  expect(screen.queryByRole("group", { name: "Vote input mode" })).toBeNull();
+  expect(screen.queryByRole("slider")).toBeNull();
+  expect(fetchCompetitionCredits).not.toHaveBeenCalled();
+});
+it("offers both modes without a reply option when the voter cannot chat", async () => {
+  mount(null, {
+    ...replyDrop,
+    wave: { ...replyDrop.wave, authenticated_user_eligible_to_chat: false },
+  });
+  await screen.findAllByRole("slider");
+  fireEvent.click(screen.getByRole("button", { name: "Numeric" }));
+  expect(screen.getByRole("spinbutton", { name: "Your vote" })).toBeEnabled();
+  expect(screen.queryByRole("switch", { name: "Explain vote" })).toBeNull();
+});
+it.each(["closed", "inactive"])(
+  "keeps %s voting disabled in either input mode",
+  async (state) => {
+    jest.mocked(fetchDropCompetitionContext).mockResolvedValue({
+      ...context,
+      competition: {
+        ...context.competition,
+        permissions: { vote: state !== "closed" },
+      },
+      entry: {
+        ...context.entry,
+        status: state === "inactive" ? "WITHDRAWN" : "ACTIVE",
+      },
+    } as never);
+    mount(null);
+    await screen.findAllByRole("slider");
+    expect(screen.getByRole("button", { name: "Save vote" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Numeric" }));
+    expect(
+      screen.getByRole("spinbutton", { name: "Your vote" })
+    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Save vote" })).toBeDisabled();
+    expect(setCompetitionVote).not.toHaveBeenCalled();
+  }
+);
+it("keeps zero-credit voting bounded in both modes", async () => {
+  jest.mocked(fetchCompetitionCredits).mockResolvedValue({
+    ...initialBudget,
+    available: 0,
+    remaining: 0,
+    min_vote: 0,
+    max_vote: 0,
+  });
+  mount(null);
+  await screen.findAllByRole("slider");
+  fireEvent.click(screen.getByRole("button", { name: "Numeric" }));
+  const input = screen.getByRole("spinbutton", { name: "Your vote" });
+  expect(input).toHaveAttribute("min", "0");
+  expect(input).toHaveAttribute("max", "0");
+  fireEvent.change(input, { target: { value: "1" } });
+  expect(screen.getByRole("button", { name: "Save vote" })).toBeDisabled();
+  expect(setCompetitionVote).not.toHaveBeenCalled();
 });
