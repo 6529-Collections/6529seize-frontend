@@ -3402,6 +3402,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         const saveInset = await controls
           .getByRole("button", { name: "Save vote", exact: true })
           .evaluate((button) => {
+            if (!(button instanceof HTMLButtonElement)) {
+              throw new Error("Expected Save vote to be an HTML button");
+            }
             const bounds = button.getBoundingClientRect();
             const visibleButton =
               button.firstElementChild!.getBoundingClientRect();
