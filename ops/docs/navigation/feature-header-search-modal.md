@@ -26,6 +26,26 @@ combined with text. An unfinished filter waits for a selection before searching.
 To search for literal `from:` or `in:` text, prefix the keyword with a backslash
 (for example, `\in: progress`).
 
+## Wave name matching
+
+Wave names match regardless of letter case, spaces, dashes, and apostrophes.
+For example, `memes chat`, `memeschat`, and `memes-chat` find `Memes-Chat`;
+`maybes dive bar` finds `maybe's dive bar`. Every typed word must match, in any
+order, and partial words work: `chat memes` and `meme chat` also find
+`Memes-Chat`.
+
+Exact names appear first, followed by names equivalent after punctuation is
+removed, full-phrase matches, and then matches containing every term. Shorter
+matching names rank ahead within each group; equally relevant names use newest
+first. A query containing only punctuation returns no matches. `%`, `_`, and
+backslashes in a name are literal characters, not search wildcards.
+
+These rules apply to the `Waves` results, the `in:` Wave picker, sidebar
+`Find a wave…`, and composer `#` mentions. Each surface keeps its own minimum
+query length and access rules. The `Waves` results, sidebar, and mentions exclude
+DMs; the `in:` picker can include conversations you can read. Searching without
+a name in the `in:` picker keeps newest-first suggestions.
+
 ## Location in the Site
 
 - Desktop web sidebar: `Search` row.
