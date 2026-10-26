@@ -36,7 +36,10 @@ async function fetchSandboxDrop(page: Page, baseURL: string | undefined) {
   return { apiOrigin, feed, source };
 }
 
-async function expectSubmissionGifLoadingLayout(hero: Locator) {
+async function expectSubmissionGifLoadingLayout(
+  hero: Locator,
+  qualityLabel = "View original"
+) {
   const loader = hero.getByRole("status", {
     name: "Loading image",
     exact: true,
@@ -72,7 +75,7 @@ async function expectSubmissionGifLoadingLayout(hero: Locator) {
     )
   ).toBeLessThanOrEqual(1);
   await expect(
-    hero.getByRole("button", { name: "View original", exact: true })
+    hero.getByRole("button", { name: qualityLabel, exact: true })
   ).toBeEnabled();
 }
 
@@ -163,6 +166,10 @@ export function defineSubmissionArtworkPreviewTests() {
       });
       const directOriginalRequests: string[] = [];
       const rejectedAnimatedPreviews: string[] = [];
+      let releaseOriginal: () => void = () => undefined;
+      const originalGate = new Promise<void>((resolve) => {
+        releaseOriginal = resolve;
+      });
       let releaseGifPreviews: () => void = () => undefined;
       const gifPreviewGate = new Promise<void>((resolve) => {
         releaseGifPreviews = resolve;
@@ -178,6 +185,7 @@ export function defineSubmissionArtworkPreviewTests() {
         }
         const isOriginal = route.request().url() === original;
         if (isOriginal) directOriginalRequests.push(original);
+        if (isOriginal && animationUnavailable) await originalGate;
         const animation = isOriginal && extension === "gif";
         return route.fulfill({
           contentType: animation ? "image/gif" : "image/png",
@@ -214,6 +222,21 @@ export function defineSubmissionArtworkPreviewTests() {
         }
       }
       if (animationUnavailable) {
+        try {
+          await expect
+            .poll(() => directOriginalRequests.length)
+            .toBeGreaterThan(0);
+          await expect(preview).toBeVisible();
+          await expectSubmissionGifLoadingLayout(hero, "View optimized");
+          await expect(
+            hero.getByRole("status", {
+              name: "Loading original GIF",
+              exact: true,
+            })
+          ).toHaveCount(0);
+        } finally {
+          releaseOriginal();
+        }
         await expect(
           hero.getByRole("img", { name: "Original GIF animation", exact: true })
         ).toBeVisible();
@@ -250,9 +273,9 @@ export function defineSubmissionArtworkPreviewTests() {
       await expect(
         hero.getByRole("status", { name: "Loading image", exact: true })
       ).toHaveCount(0);
-      const paragraph = page.getByText("First photographic line", {
-        exact: false,
-      });
+      const paragraph = page
+        .getByRole("paragraph")
+        .filter({ hasText: "First photographic line" });
       await expect(paragraph).toHaveCSS("white-space", "pre-wrap");
       expect(await paragraph.textContent()).toBe(description);
       const inlineToggle = hero.getByRole("button", {

@@ -107,6 +107,54 @@ it("clears the submission loader when the original loads before a legacy preview
   expect(screen.queryByRole("status", { name: "Loading image" })).toBeNull();
 });
 
+it("keeps one loader through preview exhaustion until the original is ready", () => {
+  render(<MemesDropArtworkHero artworkMedia={artwork} />);
+  const loader = screen.getByRole("status", { name: "Loading image" });
+  const preview = rejectAnimatedPreviews();
+  fireEvent.load(preview);
+  expect(screen.getByRole("status", { name: "Loading image" })).toBe(loader);
+  expect(
+    screen.queryByRole("status", { name: "Loading original GIF" })
+  ).toBeNull();
+  fireEvent.error(preview);
+  fireEvent.error(preview);
+  expect(screen.getByRole("status", { name: "Loading image" })).toBe(loader);
+  expect(screen.getAllByRole("status")).toHaveLength(1);
+  expect(screen.queryByRole("button", { name: "Retry" })).toBeNull();
+  fireEvent.load(screen.getByAltText("Original GIF animation"));
+  expect(screen.queryByRole("status", { name: "Loading image" })).toBeNull();
+});
+
+it("clears continuous loading after original failure or a manual cancellation", () => {
+  render(<MemesDropArtworkHero artworkMedia={artwork} />);
+  const preview = rejectAnimatedPreviews();
+  fireEvent.load(preview);
+  fireEvent.error(screen.getByAltText("Original GIF animation"));
+  expect(screen.queryByRole("status", { name: "Loading image" })).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "View original" }));
+  expect(
+    screen.getByRole("status", { name: "Loading image" })
+  ).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "View optimized" }));
+  expect(screen.queryByRole("status", { name: "Loading image" })).toBeNull();
+});
+
+it("fills a card frame without automatically loading the original GIF", () => {
+  render(
+    <DropListItemContentMediaImage src={src} imageLoadingLayout="artwork" />
+  );
+  expect(screen.getByRole("status", { name: "Loading image" })).toHaveClass(
+    "tw-inset-0",
+    "tw-items-center",
+    "tw-justify-center"
+  );
+  const preview = screen.getByAltText("Drop media");
+  fireEvent.error(preview);
+  expect(screen.queryByAltText("Original GIF animation")).toBeNull();
+  fireEvent.load(preview);
+  expect(screen.queryByRole("status", { name: "Loading image" })).toBeNull();
+});
+
 it("applies batched quality toggles to the latest choice and ignores a previous artwork's toggle", () => {
   const { result, rerender } = renderHook(
     ({ source }) => useOriginalImage(source),
@@ -163,8 +211,11 @@ it("automatically animates the submission after both animated previews fail and 
   expect(original).not.toBeVisible();
   expect(preview).toBeVisible();
   expect(
-    screen.getByRole("status", { name: "Loading original GIF" })
+    screen.getByRole("status", { name: "Loading image" })
   ).toBeInTheDocument();
+  expect(
+    screen.queryByRole("status", { name: "Loading original GIF" })
+  ).toBeNull();
   fireEvent.load(original);
   expect(original).toBeVisible();
   expect(preview).not.toBeVisible();

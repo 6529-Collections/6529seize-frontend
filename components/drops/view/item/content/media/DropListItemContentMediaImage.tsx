@@ -29,7 +29,10 @@ import { useMediaActions } from "./useMediaActions";
 import Image from "next/image";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { ImageQualityToggle } from "./ImageQualityToggle";
-import { useOriginalImage } from "./useOriginalImage";
+import {
+  useOriginalImage,
+  type OriginalImageQuality,
+} from "./useOriginalImage";
 
 const loadingPlaceholderStyle: React.CSSProperties = {
   width: "100%",
@@ -68,6 +71,31 @@ function getAutomaticGifFallback(
   return enabled && canToggleOriginal && isGif
     ? requestAutomatically
     : undefined;
+}
+
+function getImageLoadingState({
+  loaded,
+  unavailable,
+  quality,
+  canToggleOriginal,
+  continuousGifLoading,
+}: {
+  readonly loaded: boolean;
+  readonly unavailable: boolean;
+  readonly quality: Pick<OriginalImageQuality, "loading" | "showingOriginal">;
+  readonly canToggleOriginal: boolean;
+  readonly continuousGifLoading: boolean;
+}) {
+  const loadingOriginal = continuousGifLoading && quality.loading;
+  const hideUnavailable = loadingOriginal && unavailable;
+  return {
+    showLoading:
+      !quality.showingOriginal &&
+      (loadingOriginal || (!loaded && !unavailable)),
+    hideUnavailable,
+    hidePreview:
+      (quality.showingOriginal && canToggleOriginal) || hideUnavailable,
+  };
 }
 
 function LoadingPlaceholder({
@@ -372,6 +400,18 @@ function DropListItemContentMediaImageContent({
   const unavailable =
     getDropImagePreviewSources(src, imageScale).length === 0 ||
     errorCount > maxRetries;
+  const continuousGifLoading = Boolean(onAnimatedPreviewUnavailable);
+  const {
+    showLoading: showGifLoading,
+    hideUnavailable: hideUnavailableGifPreview,
+    hidePreview,
+  } = getImageLoadingState({
+    loaded,
+    unavailable,
+    quality,
+    canToggleOriginal,
+    continuousGifLoading,
+  });
 
   const resolvedObjectPosition =
     imageObjectPosition ?? (isCompetitionDrop ? "center" : "left top");
@@ -432,7 +472,7 @@ function DropListItemContentMediaImageContent({
               className={
                 intrinsicHeight ? "tw-block" : "tw-absolute tw-inset-0"
               }
-              hidden={quality.showingOriginal && canToggleOriginal}
+              hidden={hidePreview}
             >
               <DropImageContent
                 src={src}
@@ -452,26 +492,30 @@ function DropListItemContentMediaImageContent({
               />
             </span>
           )}
-          {quality.loading && canToggleOriginal && !isModalOpen && (
-            <OriginalImageLoadingIndicator isGif={isGif} />
+          {quality.loading &&
+            canToggleOriginal &&
+            !isModalOpen &&
+            !continuousGifLoading && (
+              <OriginalImageLoadingIndicator isGif={isGif} />
+            )}
+          {shouldLoadImage && showGifLoading && isGif && (
+            <GifPreviewLoadingIndicator layout={imageLoadingLayout} />
           )}
-          {shouldLoadImage &&
-            !loaded &&
-            !unavailable &&
+          {unavailable &&
             !quality.showingOriginal &&
-            isGif && <GifPreviewLoadingIndicator layout={imageLoadingLayout} />}
-          {unavailable && !quality.showingOriginal && !disableModal && (
-            <div className="tw-absolute tw-bottom-3 tw-left-1/2 tw-z-30 -tw-translate-x-1/2">
-              <Button
-                type="button"
-                variant="tertiary"
-                size="xs"
-                onClick={manualRetry}
-              >
-                {t(DEFAULT_LOCALE, "drop.media.retry")}
-              </Button>
-            </div>
-          )}
+            !disableModal &&
+            !hideUnavailableGifPreview && (
+              <div className="tw-absolute tw-bottom-3 tw-left-1/2 tw-z-30 -tw-translate-x-1/2">
+                <Button
+                  type="button"
+                  variant="tertiary"
+                  size="xs"
+                  onClick={manualRetry}
+                >
+                  {t(DEFAULT_LOCALE, "drop.media.retry")}
+                </Button>
+              </div>
+            )}
           {!disableModal && (
             <ImageInteractionLayer
               boundsStyle={imageActionBoundsStyle}

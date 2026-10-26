@@ -44,7 +44,7 @@ describe("E2E pack manifest", () => {
 
   it("defines every package pack once and satisfies the safety contract", () => {
     expect(manifestTools.validateManifest(packs, { root: ROOT })).toEqual([]);
-    expect(packs).toHaveLength(82);
+    expect(packs).toHaveLength(83);
 
     const rendered = manifestTools.renderPackageJsonScripts(packs);
     const packageScripts = JSON.parse(
@@ -140,6 +140,39 @@ describe("E2E pack manifest", () => {
           "node tests/support/composerSandboxServer.cjs",
       },
     });
+  });
+
+  it("isolates submission artwork from the complete competition pack", () => {
+    expect(
+      packs.find(
+        (pack) => pack.scriptKey === "test:e2e:submission-artwork-sandbox"
+      )
+    ).toMatchObject({
+      safety: "sandbox",
+      environments: ["local"],
+      triggers: ["pr-ci", "manual"],
+      specs: ["tests/media/submission-artwork-sandbox.spec.ts"],
+      projects: ["web-desktop-chromium", "web-mobile-chromium"],
+      env: {
+        PLAYWRIGHT_AUTH_SANDBOX: "1",
+        NEXT_DEV_DIST_DIR: ".next-playwright-submission-artwork",
+      },
+    });
+    const nativeSpec = fs.readFileSync(
+      path.join(ROOT, "tests/social/native-competition-sandbox.spec.ts"),
+      "utf8"
+    );
+    expect(nativeSpec).not.toContain("defineSubmissionArtworkPreviewTests");
+    const workflow = fs.readFileSync(
+      path.join(ROOT, ".github/workflows/app-pr-ci.yml"),
+      "utf8"
+    );
+    expect(workflow).toContain(
+      "if: matrix.lane == 'playwright-submission-artwork'"
+    );
+    expect(workflow).toContain(
+      "run: ./bin/6529 run test:e2e:submission-artwork-sandbox"
+    );
   });
 
   it("keeps artwork documentation mutations in the local desktop and mobile sandbox", () => {

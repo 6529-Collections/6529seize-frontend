@@ -84,6 +84,12 @@ Keep those ownership rules covered in
 `__tests__/scripts/app-pr-ci-effective-plan.test.ts`; merely registering a
 pack here does not make a product-only PR select it.
 
+Submission artwork loading, GIF original fallback and HD controls run on both
+web viewports in `test:e2e:submission-artwork-sandbox`, in a separate PR CI job
+with its own server/build output. Shared image and artwork-renderer changes select
+this pack in addition to existing competition coverage. The artwork scenarios do
+not extend the competition job's test list or timeout budget.
+
 <!-- BEGIN GENERATED: e2e-pack-table -->
 
 Generated from `tests/packs.manifest.cjs` by
@@ -123,6 +129,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:reaction-sandbox`                         | —                             | sandbox  | local       | manual                    | 15m     | Drop reaction sandbox against the local mock API.                                                     |
 | `test:e2e:edit-drop-sandbox`                        | —                             | sandbox  | local       | manual                    | 15m     | Drop edit sandbox against the local mock API.                                                         |
 | `test:e2e:native-competition-sandbox`               | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Native competition context, parallel budgets and navigation against the local mock API.               |
+| `test:e2e:submission-artwork-sandbox`               | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Submission artwork loading, GIF animation and HD controls in an isolated media sandbox.               |
 | `test:e2e:signature-sandbox`                        | —                             | sandbox  | local       | manual                    | 15m     | Signed participation sandbox that fails closed unsigned.                                              |
 | `test:e2e:session-recovery-sandbox`                 | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Expired session cold-start and foreground recovery against the local mock API.                        |
 | `test:e2e:auth-sandbox`                             | —                             | sandbox  | local       | manual                    | 15m     | Aggregate authenticated sandbox pack.                                                                 |
