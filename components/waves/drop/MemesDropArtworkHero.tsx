@@ -55,6 +55,7 @@ export function MemesDropArtworkHero({
                 showOriginalQualityToggle={isImage}
                 preferHighQualityImage={isImage}
                 autoAnimateGif={artworkMedia.mime_type === "image/gif"}
+                imageLoadingLayout="artwork"
                 loadStrategy={loadStrategy}
                 artworkVideoLayout={isVideo}
                 fillVideoContainer={!isVideo}

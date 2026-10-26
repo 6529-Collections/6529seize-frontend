@@ -124,6 +124,7 @@ function applyEffectiveAppPrCiPlan(plan) {
         "tests/media/waveImagePreviewCases.ts",
         "components/waves/drop/MemesDropArtworkHero.tsx",
         "components/drops/view/item/content/media/DropImagePreview.tsx",
+        "components/drops/view/item/content/media/GifPreviewLoadingIndicator.tsx",
         "components/drops/view/item/content/media/DropListItemContentMedia.tsx",
         "components/drops/view/item/content/media/DropListItemContentMediaImage.tsx",
         "components/drops/view/item/content/media/ImageMediaModal.tsx",

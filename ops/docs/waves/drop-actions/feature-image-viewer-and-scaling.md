@@ -40,6 +40,10 @@ no HD click is needed. HD highlights when the original is selected. Choose
    wide and tall and constrained to the available space, while their preview loads. It
    disappears when the preview is ready; failed previews use the existing
    retry or unavailable state. Reduced-motion settings disable the pulse. The placeholder uses a fallback size, not the GIF’s actual dimensions.
+   The main GIF artwork in a single-submission view instead shows a subtle
+   backdrop filling the reserved artwork frame with a centered loading spinner.
+   Reduced-motion settings disable the spin; HD remains available during loading.
+   This frame is reserved viewing space, not the GIF's measured dimensions.
 3. Click or tap the image to open the modal viewer.
 4. Zoom the image and use modal controls:
    - `Open in Browser` opens the source URL in a new tab.

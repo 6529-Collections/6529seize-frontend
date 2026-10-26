@@ -4,7 +4,10 @@ import {
   DropImagePreview,
   getDropImagePreviewSources,
 } from "./DropImagePreview";
-import { GifPreviewLoadingIndicator } from "./GifPreviewLoadingIndicator";
+import {
+  GifPreviewLoadingIndicator,
+  type GifPreviewLoadingLayout,
+} from "./GifPreviewLoadingIndicator";
 import { isGifImageUrl } from "@/helpers/gif-preview.helpers";
 import Button from "@/components/utils/button/Button";
 import { useDropImageGallery } from "@/components/drops/view/part/DropImageGalleryProvider";
@@ -228,6 +231,7 @@ type DropListItemContentMediaImageProps = {
   readonly showOriginalQualityToggle?: boolean | undefined;
   readonly preferHighQualityImage?: boolean | undefined;
   readonly autoAnimateGif?: boolean | undefined;
+  readonly imageLoadingLayout?: GifPreviewLoadingLayout | undefined;
 };
 
 function DropListItemContentMediaImage({
@@ -260,6 +264,7 @@ function DropListItemContentMediaImageContent({
   showOriginalQualityToggle = false,
   preferHighQualityImage = false,
   autoAnimateGif = false,
+  imageLoadingLayout = "inline",
 }: DropListItemContentMediaImageProps & { readonly imageScale: ImageScale }) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const [loaded, setLoaded] = useState(false);
@@ -454,7 +459,7 @@ function DropListItemContentMediaImageContent({
             !loaded &&
             !unavailable &&
             !quality.showingOriginal &&
-            isGif && <GifPreviewLoadingIndicator />}
+            isGif && <GifPreviewLoadingIndicator layout={imageLoadingLayout} />}
           {unavailable && !quality.showingOriginal && !disableModal && (
             <div className="tw-absolute tw-bottom-3 tw-left-1/2 tw-z-30 -tw-translate-x-1/2">
               <Button

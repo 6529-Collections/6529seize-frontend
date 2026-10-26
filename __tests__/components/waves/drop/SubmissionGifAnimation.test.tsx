@@ -56,6 +56,45 @@ jest.mock("react-zoom-pan-pinch", () => ({
 const src = "https://d3lqz0a4bldqgf.cloudfront.net/drops/author/art.gif";
 const artwork = { mime_type: "image/gif", url: src };
 
+it("fills the reserved submission frame with a centered, reduced-motion-safe GIF loader", () => {
+  const { rerender } = render(<MemesDropArtworkHero artworkMedia={artwork} />);
+  const loader = screen.getByRole("status", { name: "Loading image" });
+  expect(loader).toHaveClass(
+    "tw-inset-0",
+    "tw-flex",
+    "tw-items-center",
+    "tw-justify-center",
+    "tw-bg-iron-800/40",
+    "tw-pointer-events-none"
+  );
+  expect(loader).not.toHaveClass("tw-w-64", "tw-max-h-64", "tw-left-0");
+  expect(loader.querySelector('[aria-hidden="true"]')).toHaveClass(
+    "tw-size-8",
+    "motion-safe:tw-animate-spin"
+  );
+  expect(screen.getByRole("button", { name: "View original" })).toBeEnabled();
+  fireEvent.load(screen.getByAltText("Drop media"));
+  expect(screen.queryByRole("status", { name: "Loading image" })).toBeNull();
+  rerender(
+    <MemesDropArtworkHero
+      artworkMedia={{ ...artwork, url: src.replace("art.gif", "next.gif") }}
+    />
+  );
+  expect(screen.getByRole("status", { name: "Loading image" })).toHaveClass(
+    "tw-inset-0"
+  );
+});
+
+it("clears the submission loader when the original loads before a legacy preview", () => {
+  render(<MemesDropArtworkHero artworkMedia={artwork} />);
+  rejectAnimatedPreviews();
+  expect(
+    screen.getByRole("status", { name: "Loading image" })
+  ).toBeInTheDocument();
+  fireEvent.load(screen.getByAltText("Original GIF animation"));
+  expect(screen.queryByRole("status", { name: "Loading image" })).toBeNull();
+});
+
 it("applies batched quality toggles to the latest choice and ignores a previous artwork's toggle", () => {
   const { result, rerender } = renderHook(
     ({ source }) => useOriginalImage(source),

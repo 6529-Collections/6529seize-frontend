@@ -123,7 +123,12 @@ export function defineSubmissionArtworkPreviewTests() {
       });
       const directOriginalRequests: string[] = [];
       const rejectedAnimatedPreviews: string[] = [];
-      await page.route(`${MEDIA_ROOT}**`, (route) => {
+      let releaseGifPreviews: () => void = () => undefined;
+      const gifPreviewGate = new Promise<void>((resolve) => {
+        releaseGifPreviews = resolve;
+      });
+      await page.route(`${MEDIA_ROOT}**`, async (route) => {
+        if (extension === "gif") await gifPreviewGate;
         if (animationUnavailable && route.request().url().includes("_gifv2/")) {
           rejectedAnimatedPreviews.push(route.request().url());
           return route.fulfill({
@@ -161,6 +166,48 @@ export function defineSubmissionArtworkPreviewTests() {
         exact: true,
         includeHidden: true,
       });
+      if (extension === "gif") {
+        try {
+          const loader = hero.getByRole("status", {
+            name: "Loading image",
+            exact: true,
+          });
+          await expect(loader).toBeVisible();
+          const frame = hero.locator("[data-artwork-image-frame]");
+          const frameBox = await frame.boundingBox();
+          const loaderBox = await loader.boundingBox();
+          const spinnerBox = await loader
+            .locator('[aria-hidden="true"]')
+            .boundingBox();
+          expect(frameBox).not.toBeNull();
+          expect(loaderBox).not.toBeNull();
+          expect(spinnerBox).not.toBeNull();
+          for (const axis of ["x", "y", "width", "height"] as const) {
+            expect(
+              Math.abs(loaderBox![axis] - frameBox![axis])
+            ).toBeLessThanOrEqual(1);
+          }
+          expect(
+            Math.abs(
+              spinnerBox!.x +
+                spinnerBox!.width / 2 -
+                (loaderBox!.x + loaderBox!.width / 2)
+            )
+          ).toBeLessThanOrEqual(1);
+          expect(
+            Math.abs(
+              spinnerBox!.y +
+                spinnerBox!.height / 2 -
+                (loaderBox!.y + loaderBox!.height / 2)
+            )
+          ).toBeLessThanOrEqual(1);
+          await expect(
+            hero.getByRole("button", { name: "View original", exact: true })
+          ).toBeEnabled();
+        } finally {
+          releaseGifPreviews();
+        }
+      }
       if (animationUnavailable) {
         await expect(
           hero.getByRole("img", { name: "Original GIF animation", exact: true })
@@ -195,6 +242,9 @@ export function defineSubmissionArtworkPreviewTests() {
       if (animationUnavailable)
         expect(directOriginalRequests.length).toBeGreaterThan(0);
       else expect(directOriginalRequests).toEqual([]);
+      await expect(
+        hero.getByRole("status", { name: "Loading image", exact: true })
+      ).toHaveCount(0);
       const paragraph = page.getByText("First photographic line", {
         exact: false,
       });
