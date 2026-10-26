@@ -1794,12 +1794,12 @@ test.describe("Home Page @smoke @medium @large", () => {
       await waveLink.scrollIntoViewIfNeeded();
       const before = await waveLink.boundingBox();
       await waveLink.hover();
-      await expect(waveLink).toHaveCSS(
-        "border-color",
-        "rgba(255, 255, 255, 0.2)"
-      );
+      // The approved homepage description cards use the iron-700 hover border.
+      await expect(waveLink).toHaveCSS("border-color", "rgb(55, 55, 62)");
       await expect(waveLink).toHaveCSS("transform", "none");
-      await expect(waveLink.getByRole("img")).toHaveCSS("transform", "none");
+      await expect(
+        page.getByRole("link", { name: /^View wave / }).first().locator("img")
+      ).toHaveCSS("transform", "none");
       expect(await waveLink.boundingBox()).toEqual(before);
 
       await viewAll.hover();
