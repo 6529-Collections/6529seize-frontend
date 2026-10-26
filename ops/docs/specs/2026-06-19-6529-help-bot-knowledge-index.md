@@ -332,10 +332,13 @@ environment; the help runtime continues to consume `/help-index.json`.
 
 ## Source Ownership
 
-The artwork Review offers guidance includes its phone layout: the order list
-scrolls above the wallet, quantity and Review exact terms controls, which remain
-visible at the bottom of the sheet. Order selection and wallet authority remain
-unchanged.
+The artwork Review offers guidance distinguishes the direct button in the Meme
+card bottom strip from the more-actions menu on other artwork pages. It includes
+the phone review layout: when a connection is required, wallet guidance and
+Connect wallet share the same top card as Make an offer, before the order list.
+The order list scrolls above quantity and Review exact terms, which remain visible
+at the bottom of the sheet. Connected wallet details remain beside those bottom
+controls. The Meme trading block uses one initial loading placeholder before revealing its controls, without replacing them during background listing refreshes. Order selection and wallet authority remain unchanged.
 
 The Collect workflow record owns `/collect` and `/collect/orders`, profile-wide
 set scope, direct gift recipients, marketplace review and recovery, observed

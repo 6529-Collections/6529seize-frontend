@@ -1,7 +1,10 @@
 "use client";
 
 import { CompactMenu } from "@/components/compact-menu";
-import { COLLECT_SECONDARY_ACTION_STYLE } from "./collect-action.styles";
+import {
+  COLLECT_SECONDARY_ACTION_CLASS,
+  COLLECT_SECONDARY_ACTION_STYLE,
+} from "./collect-action.styles";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
@@ -36,7 +39,9 @@ export default function CollectTradeActions({
   title,
   locale,
   onTrade,
+  inline = false,
 }: {
+  readonly inline?: boolean;
   readonly actions: readonly CollectActionView[];
   readonly title: string;
   readonly locale: SupportedLocale;
@@ -54,6 +59,31 @@ export default function CollectTradeActions({
       action: t(locale, ACTION_LABELS[action]),
       title,
     });
+  if (inline) {
+    return (
+      <div data-collect-more-actions className="tw-contents">
+        {actions.map(({ action, disabledReason }) => (
+          <button
+            key={action}
+            type="button"
+            disabled={Boolean(disabledReason)}
+            aria-label={
+              disabledReason
+                ? t(locale, "collect.disabledAction", {
+                    action: label(action),
+                    reason: disabledReason,
+                  })
+                : label(action)
+            }
+            className={COLLECT_SECONDARY_ACTION_CLASS}
+            onClick={(event) => onTrade(action, event.currentTarget)}
+          >
+            {t(locale, ACTION_LABELS[action])}
+          </button>
+        ))}
+      </div>
+    );
+  }
   return (
     <div data-collect-more-actions className="tw-min-w-0">
       <div className="tw-flex tw-items-center tw-gap-1">

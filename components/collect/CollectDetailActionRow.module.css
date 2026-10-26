@@ -5,16 +5,29 @@
 
 .inlineActions {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) 44px;
-  align-items: start;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 8px;
 }
 
-.inlineActions:not(:has([data-collect-owner-action]:not(:empty))) {
-  grid-template-columns: minmax(0, 1fr) 44px;
+.inlineActions > button,
+.inlineActions > [data-collect-secondary-actions] > button {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
-.inlineActions > button[type="submit"],
-.inlineActions > [data-collect-detail-delivery] {
+.inlineActions > [data-collect-detail-delivery],
+.inlineActions [data-collect-detail-other-actions] {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+/* The offer can be wrapped in display: contents; span its actual button. */
+.inlineActions:not(:has(> button[type="submit"])) > button,
+.inlineActions:not(:has(> button[type="submit"]))
+  > [data-collect-secondary-actions]
+  > button {
   grid-column: 1 / -1;
 }
 
@@ -22,13 +35,18 @@
   display: contents;
 }
 
-.inlineActions [data-collect-owner-action] {
-  min-width: 0;
+.inlineActions [data-collect-detail-other-actions] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
 }
 
-.inlineActions [data-collect-owner-action] > button,
-.inlineActions [data-collect-owner-action] > div > button:first-child {
-  width: 100%;
+.inlineActions [data-collect-owner-action] {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .inlineActions [data-collect-owner-action]:empty {
@@ -40,27 +58,167 @@
 .inlineActions [data-collect-owner-action] > button,
 .inlineActions [data-collect-owner-action] > div > button:first-child {
   height: 44px;
-  min-width: 0;
   border-radius: 8px;
   padding-inline: 12px;
 }
 
-.inlineActions > button:not([type="submit"]),
+.inlineActions > button,
 .inlineActions > [data-collect-secondary-actions] > button {
-  white-space: normal;
+  height: 44px;
+  min-height: 44px;
+  white-space: nowrap;
+  padding-block: 4px;
+  font-size: 14px;
+  line-height: 16px;
 }
 
-.inlineActions > button[type="submit"]:disabled {
-  border-color: #26272b;
-  background: #26272b;
-  color: #93939f;
+.inlineActions [data-collect-owner-action] > button,
+.inlineActions [data-collect-owner-action] > div > button:first-child {
+  min-width: 96px;
+}
+
+/* Text can truncate as a last resort without changing the accessible name. */
+.inlineActions > button:not([type="submit"]),
+.inlineActions > [data-collect-secondary-actions] > button,
+.stickyActions > button:not([type="submit"]) {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Below lg the desktop shell reserves its collapsed rail; phone/app shells do not. */
+:global(body:has(.layout-root[data-small="false"][data-mobile="false"]))
+  .stickyActions {
+  left: theme("spacing.20");
+}
+
+.detailPanel [data-collect-detail-strip] [data-collect-connection-header] span {
+  text-wrap: pretty;
+}
+
+.detailPanel [data-collect-detail-strip] [data-collect-connect-wallet],
+.detailPanel [data-collect-detail-strip] [data-collect-more-actions] > button,
+.detailPanel [data-collect-detail-strip] [data-collect-owner-action] > button,
+.detailPanel
+  [data-collect-detail-strip]
+  [data-collect-owner-action]
+  > div
+  > button {
+  height: 36px;
+  min-height: 36px;
+  padding: 0 14px;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.detailPanel [data-collect-detail-strip] > [data-collect-connection-header] {
+  flex: 0 0 100%;
+  min-width: 0;
+}
+
+.detailPanel
+  [data-collect-detail-strip]
+  [data-collect-connection-header]
+  > div:empty {
+  display: none;
+}
+
+.detailPanel [data-collect-detail-strip-actions] {
+  flex: 0 0 100%;
+  min-width: 0;
+}
+
+.detailPanel [data-collect-detail-strip-actions] > button,
+.detailPanel
+  [data-collect-detail-strip-actions]
+  [data-collect-more-actions]
+  > button,
+.detailPanel [data-collect-detail-strip-actions] [data-collect-owner-action] {
+  flex: 0 1 auto;
+  max-width: 100%;
+}
+
+.detailPanel [data-collect-detail-strip] [data-collect-connect-wallet] {
+  margin-inline-end: auto;
+}
+
+.detailPanel [data-collect-detail-strip] [data-collect-owner-action]:empty {
+  display: none;
+}
+
+.detailPanel [data-collect-detail-strip] [data-collect-more-actions] > button {
+  border-color: transparent;
+  background: transparent;
   box-shadow: none;
-  opacity: 1;
+}
+
+.detailPanel [data-collect-detail-strip] [data-collect-owner-action] > button,
+.detailPanel
+  [data-collect-detail-strip]
+  [data-collect-owner-action]
+  > div
+  > button {
+  width: auto;
+  border-color: theme("colors.iron.800");
+  background: theme("colors.iron.900");
+}
+
+/* Ownership feedback gets a readable row without displacing the compact actions. */
+.detailPanel
+  [data-collect-detail-strip]
+  [data-collect-owner-action]:has(> div > [role="status"]),
+.detailPanel
+  [data-collect-detail-strip]
+  [data-collect-owner-action]
+  > div:has(> [role="status"]) {
+  display: contents;
+}
+
+.detailPanel
+  [data-collect-detail-strip]
+  [data-collect-owner-action]
+  > div
+  > [role="status"] {
+  order: -1;
+  flex: 0 0 100%;
+  min-width: 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .detailPanel
+    [data-collect-detail-strip]
+    [data-collect-more-actions]
+    > button:enabled:hover {
+    background: theme("colors.iron.800");
+  }
+
+  .detailPanel
+    [data-collect-detail-strip]
+    [data-collect-owner-action]
+    > button:enabled:hover,
+  .detailPanel
+    [data-collect-detail-strip]
+    [data-collect-owner-action]
+    > div
+    > button:enabled:hover {
+    border-color: theme("colors.iron.700");
+    background: theme("colors.iron.800");
+  }
+}
+
+@media (max-width: 479px) {
+  .detailPanel [data-collect-detail-strip] [data-collect-connect-wallet] {
+    flex-basis: 100%;
+    width: 100%;
+    height: 40px;
+    min-height: 40px;
+  }
 }
 
 @media (max-width: 639px) {
-  .inlineActions > button[type="submit"] {
-    font-size: 16px;
+  .inlineActions > button,
+  .inlineActions > [data-collect-secondary-actions] > button {
+    font-size: 15px;
   }
 
   .stickyActions > button {
@@ -74,47 +232,19 @@
 }
 
 @media (max-width: 399px) {
-  .inlineActions > button:not([type="submit"]),
+  .inlineActions {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 4fr);
+  }
+
+  .inlineActions > button,
   .inlineActions > [data-collect-secondary-actions] > button {
-    padding-inline: 0;
+    padding-inline: 8px;
   }
 }
 
 @media (max-width: 359px) {
   .stickyActions > button {
     padding-inline: 8px;
-  }
-
-  .inlineActions [data-collect-owner-action] > button,
-  .inlineActions [data-collect-owner-action] > div > button:first-child {
-    padding-inline: 8px;
-  }
-}
-
-/* The tablet layout has the full page width; desktop returns to a side column. */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .inlineActions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-  }
-
-  .inlineActions > button[type="submit"] {
-    width: auto;
-    min-width: 200px;
-  }
-
-  .inlineActions > button:not([type="submit"]),
-  .inlineActions > [data-collect-secondary-actions] > button,
-  .inlineActions [data-collect-owner-action] {
-    flex: none;
-    min-width: 140px;
-    max-width: 100%;
-  }
-
-  .inlineActions > [data-collect-detail-delivery] {
-    order: 1;
-    flex-basis: 100%;
   }
 }
 

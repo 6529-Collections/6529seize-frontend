@@ -29,10 +29,10 @@ export function CollectDetailHeader({
   return (
     <div
       data-collect-detail-header
-      className="tw-flex tw-min-h-5 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-3 tw-gap-y-1"
+      className="-tw-mt-3 tw-flex tw-min-h-5 tw-flex-col tw-items-start tw-gap-1"
     >
-      {children}
       {layout.marketLink}
+      {children}
     </div>
   );
 }
@@ -93,7 +93,7 @@ function MobileActionRow({
         ref={observeRow}
         data-collect-inline-actions
         data-testid="collect-inline-actions"
-        className={`tw-flex tw-flex-wrap tw-items-center tw-gap-2 ${styles["inlineActions"] ?? ""}`}
+        className={styles["inlineActions"]}
       >
         {primaryAction}
         {children}

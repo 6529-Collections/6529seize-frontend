@@ -68,6 +68,7 @@ jest.mock("@/components/collect/CollectTradeController", () => ({
     presentation,
     layout,
     secondaryActions,
+    supportingActions,
   }: {
     asset: ApiCollectAsset;
     action: CollectTradeAction;
@@ -76,6 +77,7 @@ jest.mock("@/components/collect/CollectTradeController", () => ({
     presentation?: string;
     layout?: string;
     secondaryActions?: ReactNode;
+    supportingActions?: ReactNode;
   }) {
     const [reviewed, setReviewed] = useState(false);
     mockControllerRender();
@@ -90,6 +92,7 @@ jest.mock("@/components/collect/CollectTradeController", () => ({
       >
         {layout === "inline-buy" && <button>Collect</button>}
         {layout === "inline-buy" && secondaryActions}
+        {layout === "inline-buy" && supportingActions}
         <button onClick={onClose}>Close trade</button>
         <button onClick={onMarketChange}>Market changed</button>
         <button onClick={() => setReviewed(true)}>Prepare review</button>
@@ -172,6 +175,26 @@ it("loads canonical inline Collect without a modal or initial Collect click", as
     page: 1,
     signal: expect.any(AbortSignal),
   });
+});
+it("opens the same accept flow from the Meme supporting strip and restores focus", async () => {
+  const changed = jest.fn();
+  renderActions("5", changed, "memes", true);
+  const inlineTrade = await screen.findByTestId("inline-trade");
+  const trigger = within(inlineTrade).getByRole("button", {
+    name: "Review offers: Meme Five",
+  });
+  const user = userEvent.setup();
+  await user.click(trigger);
+  const trade = await screen.findByTestId("trade");
+  expect(trade).toHaveAttribute("data-asset", asset.asset_key);
+  expect(trade).toHaveAttribute("data-action", "accept");
+  await user.click(
+    within(trade).getByRole("button", { name: "Market changed" })
+  );
+  expect(changed).toHaveBeenCalledTimes(1);
+  await user.keyboard("{Escape}");
+  await waitFor(() => expect(trigger).toHaveFocus());
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 });
 it("loads the exact Meme Lab asset through its explicit family and retains shared controls", async () => {
   const lab = {
@@ -450,3 +473,34 @@ it.each(["profile", "membership"])(
     );
   }
 );
+
+it("shows one Meme panel placeholder before artwork lookup resolves", async () => {
+  let finish!: (value: { data: ApiCollectAsset[] }) => void;
+  mockFetchAssets.mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      })
+  );
+  renderActions("5", undefined, "memes", true);
+  const panel = screen.getByTestId("collect-detail-panel");
+  expect(within(panel).getByRole("status")).toHaveTextContent(
+    "Loading this artwork…"
+  );
+  expect(
+    within(panel).queryByRole("button", { name: "Make an offer: Meme Five" })
+  ).not.toBeInTheDocument();
+  expect(
+    within(panel).queryByRole("button", { name: "Review offers: Meme Five" })
+  ).not.toBeInTheDocument();
+  await act(async () => {
+    finish({ data: [asset] });
+  });
+  const trade = await screen.findByTestId("inline-trade");
+  expect(
+    within(trade).getByRole("button", { name: "Make an offer: Meme Five" })
+  ).toBeEnabled();
+  expect(
+    within(trade).getByRole("button", { name: "Review offers: Meme Five" })
+  ).toBeEnabled();
+});

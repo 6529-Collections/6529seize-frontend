@@ -36,6 +36,10 @@ const COMPACT_ACTION_CLASS =
 const MOBILE_TRADE_ACTION_CLASS =
   "max-sm:tw-w-20 max-sm:tw-flex-wrap max-sm:tw-gap-x-1 max-sm:tw-rounded-[8px/13px] max-sm:tw-border-x-0 max-sm:tw-border-y-[5px] max-sm:!tw-border-transparent max-sm:tw-bg-clip-padding max-sm:tw-px-1 max-sm:tw-py-0 max-sm:tw-text-meta max-sm:tw-leading-4 max-sm:tw-shadow-none max-sm:tw-ring-0";
 
+// Expanded order actions keep the same compact surface at every viewport size.
+const ORDER_ACTION_CLASS =
+  "tw-font-inherit tw-min-h-11 tw-min-w-20 tw-max-w-full tw-flex-wrap tw-gap-x-1 !tw-rounded-[8px/13px] !tw-border-x-0 !tw-border-y-[5px] !tw-border-transparent tw-bg-clip-padding tw-px-3 tw-py-0 tw-text-meta tw-leading-4 !tw-shadow-none !tw-ring-0";
+
 const OUTLINED_LEVEL_ACTION_CLASS =
   "!tw-border-white/[0.12] !tw-bg-transparent !tw-text-iron-200 !tw-shadow-none !tw-ring-0 enabled:group-hover:!tw-border-primary-500 enabled:group-hover:!tw-bg-primary-500 enabled:group-hover:!tw-text-white focus-visible:!tw-border-primary-500 focus-visible:!tw-bg-primary-500 focus-visible:!tw-text-white max-sm:!tw-border-transparent max-sm:!tw-shadow-[inset_0_0_0_1px_rgb(255_255_255_/_0.12)] max-sm:enabled:group-hover:!tw-border-transparent max-sm:focus-visible:!tw-border-transparent";
 
@@ -193,7 +197,7 @@ export function MarketDepthOrderAction({
             type="button"
             variant={selected ? "secondary" : "action"}
             size={null}
-            className={`${compact ? COMPACT_ACTION_CLASS : ACTION_CLASS} ${MOBILE_TRADE_ACTION_CLASS} ${outlined && !selected ? OUTLINED_LEVEL_ACTION_CLASS : ""}`}
+            className={`${compact ? COMPACT_ACTION_CLASS : ORDER_ACTION_CLASS} ${compact ? MOBILE_TRADE_ACTION_CLASS : ""} ${outlined && !selected ? OUTLINED_LEVEL_ACTION_CLASS : ""}`}
             aria-label={t(
               locale,
               order.side === ApiMarketOrderSideEnum.Ask

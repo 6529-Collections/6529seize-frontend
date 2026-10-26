@@ -9,8 +9,10 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import { useContext, type ReactNode } from "react";
+import CollectDetailLoading from "./CollectDetailLoading";
 import CollectInlineBuyForm from "./CollectInlineBuyForm";
 import CollectConnectionPrompt from "./CollectConnectionPrompt";
+import CollectTradeWalletSummary from "./CollectTradeWalletSummary";
 import CollectTradeForm from "./CollectTradeForm";
 import CollectDetailActionRow, {
   CollectDetailLayout,
@@ -41,6 +43,7 @@ interface CollectTradeControllerFormProps {
   readonly orders: readonly ApiMarketTradeOrder[];
   readonly buyOrders: readonly ApiMarketTradeOrder[];
   readonly ordersUpdatedAt?: number;
+  readonly initialLoading?: boolean;
   readonly ordersLoading: boolean;
   readonly ordersFailed: boolean;
   readonly makerLabel: string;
@@ -50,6 +53,7 @@ interface CollectTradeControllerFormProps {
   readonly preparing: boolean;
   readonly error: string | undefined;
   readonly secondaryActions?: ReactNode;
+  readonly supportingActions?: ReactNode;
   readonly onChange: (draft: CollectTradeDraft) => void;
   readonly onQuantityEdited: () => void;
   readonly onClearSelectedOrder: () => void;
@@ -230,9 +234,11 @@ function InlineTradeForm({
 function StandardTradeForm({
   props,
   connectWalletAction,
+  connectionHeader,
 }: {
   readonly props: CollectTradeControllerFormProps;
   readonly connectWalletAction: ReactNode;
+  readonly connectionHeader: boolean;
 }) {
   return (
     <CollectTradeForm
@@ -265,6 +271,7 @@ function StandardTradeForm({
       loading={props.preparing}
       error={props.error}
       connectWalletAction={connectWalletAction}
+      connectionHeader={connectionHeader}
       onChange={props.onChange}
       onPrepare={props.onPrepare}
     />
@@ -303,6 +310,10 @@ export default function CollectTradeControllerForm(
   props: CollectTradeControllerFormProps
 ) {
   const detailLayout = useContext(CollectDetailLayout);
+  const loadingDetail =
+    Boolean(detailLayout) && props.inlineBuy && props.initialLoading === true;
+  // The controller retains draft/query state; do not mount action portals until ready.
+  if (loadingDetail) return <CollectDetailLoading locale={props.locale} />;
   const loadingOfferOrders =
     props.action === "accept" &&
     props.needsOrder &&
@@ -312,15 +323,25 @@ export default function CollectTradeControllerForm(
   const connectionHeader =
     Boolean(detailLayout) && props.inlineBuy && props.showConnect;
   const connectInsideOffer = !props.inlineBuy && props.action === "offer";
+  const connectAboveOrders = !props.inlineBuy && props.action === "accept";
+  const orderConnectionHeader = connectAboveOrders && props.showConnect;
   let connectClassName: string | undefined;
-  if (connectInsideOffer) {
+  if (connectInsideOffer || connectAboveOrders) {
     connectClassName = "tw-min-h-11 tw-w-full";
   }
   const connectWalletAction = props.showConnect ? (
     <Button
       data-collect-connect-wallet
-      variant={connectInsideOffer || connectionHeader ? "primary" : "secondary"}
-      size={connectInsideOffer || connectionHeader ? "lg" : "md"}
+      variant={
+        connectInsideOffer || connectAboveOrders || connectionHeader
+          ? "primary"
+          : "secondary"
+      }
+      size={
+        connectInsideOffer || connectAboveOrders || connectionHeader
+          ? "lg"
+          : "md"
+      }
       className={connectClassName}
       onClick={props.onConnect}
     >
@@ -333,21 +354,44 @@ export default function CollectTradeControllerForm(
     <StandardTradeForm
       props={props}
       connectWalletAction={connectInsideOffer ? connectWalletAction : null}
+      connectionHeader={orderConnectionHeader}
     />
   );
 
-  const formContent = connectionHeader ? (
-    <div>
-      {tradeForm}
-      <div className="tw-mt-3 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-3">
-        <CollectConnectionPrompt message={props.disabledReason}>
-          {connectWalletAction}
-        </CollectConnectionPrompt>
-      </div>
+  const hasSupportingActions = Boolean(props.supportingActions);
+  const stripActions = (
+    <div
+      data-collect-detail-strip-actions
+      className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-end tw-gap-x-1 tw-gap-y-2"
+    >
+      {connectionHeader && connectWalletAction}
+      {hasSupportingActions && (
+        <div data-collect-detail-other-actions className="tw-contents">
+          {props.supportingActions}
+        </div>
+      )}
     </div>
-  ) : (
-    tradeForm
   );
+  const formContent =
+    hasSupportingActions || connectionHeader ? (
+      <div>
+        {tradeForm}
+        <div
+          data-collect-detail-strip
+          className="-tw-mx-4 -tw-mb-4 tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-rounded-b-[11px] tw-bg-iron-950 tw-px-4 tw-py-3"
+        >
+          {connectionHeader && (
+            <CollectConnectionPrompt message={props.disabledReason}>
+              {null}
+            </CollectConnectionPrompt>
+          )}
+          {/* Keep action state mounted when connection guidance changes. */}
+          {stripActions}
+        </div>
+      </div>
+    ) : (
+      tradeForm
+    );
 
   return (
     <>
@@ -358,6 +402,14 @@ export default function CollectTradeControllerForm(
         hidden={loadingOfferOrders}
         className="tw-space-y-6"
       >
+        {orderConnectionHeader && (
+          <CollectTradeWalletSummary
+            action={props.action}
+            makerLabel={props.makerLabel}
+            message={props.disabledReason}
+            connectWalletAction={connectWalletAction}
+          />
+        )}
         {props.needsOrder && !props.inlineBuy && !props.fixedOrder && (
           <StandardOrderBook
             loading={props.ordersLoading}
@@ -387,7 +439,10 @@ export default function CollectTradeControllerForm(
                 {t(props.locale, "collect.retry")}
               </Button>
             )}
-          {!connectInsideOffer && !connectionHeader && connectWalletAction}
+          {!connectInsideOffer &&
+            !connectAboveOrders &&
+            !connectionHeader &&
+            connectWalletAction}
         </div>
       </div>
     </>

@@ -61,6 +61,9 @@ Listing prices load before you connect a wallet. While a price is unavailable,
 the Collect area shows whether listings are loading, could not be loaded, or contain
 no supported orders. **Connect wallet** remains available; connecting is required
 before reviewing a purchase.
+On Meme cards, one placeholder stays in place while the initial artwork, listings,
+trading availability and wallet initialization resolve. The trading controls then
+appear together. Background listing refreshes retain the current controls.
 
 Listing availability updates quietly while the artwork page is visible and idle.
 The site preserves an active purchase choice or review instead of replacing it
@@ -73,10 +76,14 @@ confirmed wallet in the profile holds the NFT. Connect that holding wallet to
 list it; profile consolidation does not grant another wallet permission to sign.
 Before connecting, **List** opens the wallet connection flow so ownership
 can be checked.
-The more-actions menu contains **Review offers**.
-An offer dialog that needs a wallet groups the wallet guidance and **Connect
-wallet** at the top, before the price and quantity fields. The button wraps to
-its own full-width row when space is limited.
+On Meme cards, **Review offers** appears directly in the bottom strip of the
+trading panel, beside **List** when available. Other artwork pages keep
+**Review offers** in the more-actions menu.
+**Make an offer** and **Review offers** group wallet guidance and **Connect
+wallet** in the same card at the top when a connection is needed. It appears
+before the offer fields or order chooser. The button wraps to its own full-width
+row when space is limited; the order chooser keeps quantity and **Review exact
+terms** in its bottom controls on phones.
 If ownership is still loading, **List** stays visible but unavailable.
 If that check fails, choose **Try again** beside the action.
 

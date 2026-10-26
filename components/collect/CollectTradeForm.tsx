@@ -5,6 +5,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
 import { useId, useState, type ReactNode } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import CollectTradeWalletSummary from "./CollectTradeWalletSummary";
 import CollectRecipientPicker from "./CollectRecipientPicker";
 import CollectOrderExpiryPicker from "./CollectOrderExpiryPicker";
 import { validateCollectTrade } from "./collect-form.validation";
@@ -31,6 +32,8 @@ interface CollectTradeFormProps {
   readonly loading: boolean;
   readonly error?: string | undefined;
   readonly connectWalletAction?: ReactNode;
+  /** The same wallet guidance is already rendered above the order chooser. */
+  readonly connectionHeader?: boolean;
   readonly onChange: (draft: CollectTradeDraft) => void;
   readonly onPrepare: (draft: CollectTradeDraft) => void;
 }
@@ -45,6 +48,7 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
     props.action === "offer" && props.fixedOfferQuantity !== undefined;
   const fixedQuantityHintId = `${id}-fixed-quantity`;
   const hasConnectWalletAction = Boolean(props.connectWalletAction);
+  const hasConnectionPrompt = hasConnectWalletAction || props.connectionHeader;
   const hasRecipient = props.action === "buy";
   const external =
     hasRecipient &&
@@ -99,24 +103,12 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
       )}
     </div>
   );
-  const walletLine = (
-    <p
-      data-collect-trade-wallet
-      className="tw-m-0 tw-break-all tw-text-xs tw-leading-5 tw-text-iron-300"
-    >
-      {props.action === "buy"
-        ? t(locale, "collect.trade.payingWalletLine", {
-            wallet: props.makerLabel,
-          })
-        : t(locale, "collect.orders.maker", { wallet: props.makerLabel })}
-    </p>
-  );
   const reviewButton = (
     <Button
       type="submit"
       variant="action"
       size="md"
-      className={`tw-min-h-12 tw-text-sm tw-font-medium ${hasConnectWalletAction ? "disabled:tw-border-iron-800 disabled:tw-bg-iron-800 disabled:tw-text-iron-500 disabled:!tw-opacity-100" : ""}`}
+      className={`tw-min-h-12 tw-text-sm tw-font-medium ${hasConnectionPrompt ? "disabled:tw-border-iron-800 disabled:tw-bg-iron-800 disabled:tw-text-iron-500 disabled:!tw-opacity-100" : ""}`}
       fullWidth
       loading={props.loading}
       disabled={
@@ -148,22 +140,13 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
           props.onPrepare(props.draft);
       }}
     >
-      {hasConnectWalletAction ? (
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-4 tw-rounded-xl tw-bg-iron-900 tw-p-4">
-          <div className="tw-min-w-0 tw-flex-[1_1_10rem] tw-space-y-1">
-            {walletLine}
-            {props.disabledReason && (
-              <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-                {props.disabledReason}
-              </p>
-            )}
-          </div>
-          <div className="tw-min-w-0 tw-flex-[1_0_8rem]">
-            {props.connectWalletAction}
-          </div>
-        </div>
-      ) : (
-        walletLine
+      {!props.connectionHeader && (
+        <CollectTradeWalletSummary
+          action={props.action}
+          makerLabel={props.makerLabel}
+          message={props.disabledReason}
+          connectWalletAction={props.connectWalletAction}
+        />
       )}
       {!hasPrice && props.action !== "cancel" && quantityField}
       {hasPrice && (
@@ -276,7 +259,7 @@ export default function CollectTradeForm(props: CollectTradeFormProps) {
           {message}
         </p>
       )}
-      {props.disabledReason && !hasConnectWalletAction && (
+      {props.disabledReason && !hasConnectionPrompt && (
         <p className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-300">
           {props.disabledReason}
         </p>

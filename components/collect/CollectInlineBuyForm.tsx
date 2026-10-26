@@ -2,7 +2,7 @@
 
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
+import { t, tRich } from "@/i18n/messages";
 import {
   useContext,
   useId,
@@ -57,6 +57,26 @@ export default function CollectInlineBuyForm(props: Props) {
   const message = invalid
     ? t(locale, `collect.trade.invalid.${invalid}`, { max: props.maxQuantity })
     : props.error;
+  let buyLabel: ReactNode = t(locale, "collect.action.buy");
+  if (props.amountWei !== null) {
+    const price = marketAmount(props.amountWei, MARKET_ZERO);
+    buyLabel = detailLayout ? (
+      <span className="tw-block tw-min-w-0 tw-truncate">
+        {tRich(locale, "collect.buy.atPrice", {
+          price: (
+            <span
+              key="price"
+              className="tw-whitespace-nowrap tw-font-medium tw-tabular-nums tw-opacity-80"
+            >
+              {price}
+            </span>
+          ),
+        })}
+      </span>
+    ) : (
+      t(locale, "collect.buy.atPrice", { price })
+    );
+  }
   const buyButton = (
     <Button
       form={id}
@@ -70,11 +90,7 @@ export default function CollectInlineBuyForm(props: Props) {
         (external && !props.draft.acknowledgeExternalRecipient)
       }
     >
-      {props.amountWei === null
-        ? t(locale, "collect.action.buy")
-        : t(locale, "collect.buy.atPrice", {
-            price: marketAmount(props.amountWei, MARKET_ZERO),
-          })}
+      {buyLabel}
     </Button>
   );
   const deliveryControl =
@@ -176,9 +192,6 @@ export default function CollectInlineBuyForm(props: Props) {
         </p>
       )}
       <CollectDetailActionRow primaryAction={buyButton}>
-        {detailLayout && deliveryControl && (
-          <div data-collect-detail-delivery>{deliveryControl}</div>
-        )}
         {props.secondaryActions !== null &&
           props.secondaryActions !== undefined && (
             <div
@@ -188,6 +201,9 @@ export default function CollectInlineBuyForm(props: Props) {
               {props.secondaryActions}
             </div>
           )}
+        {detailLayout && deliveryControl && (
+          <div data-collect-detail-delivery>{deliveryControl}</div>
+        )}
       </CollectDetailActionRow>
       {!detailLayout && <div data-collect-detail-footer>{deliveryControl}</div>}
       {props.onSplitDelivery && (

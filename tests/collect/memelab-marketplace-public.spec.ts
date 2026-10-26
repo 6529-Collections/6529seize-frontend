@@ -559,7 +559,10 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
       exact: true,
     });
     await expect(accept).toHaveCount(2);
-    expect((await accept.first().boundingBox())!.width).toBeCloseTo(80, 0);
+    await expect(accept.first()).toHaveCSS("white-space", "nowrap");
+    await expect(accept.first()).toHaveCSS("padding-left", "12px");
+    await expect(accept.first()).toHaveCSS("padding-right", "12px");
+    expect((await accept.first().boundingBox())!.width).toBeGreaterThan(80);
     expect((await accept.first().boundingBox())!.height).toBeCloseTo(44, 0);
     await groupedAction.click();
     await expect(groupedAction).toHaveAttribute("aria-expanded", "false");
@@ -586,6 +589,24 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
         listingBounds.x + listingBounds.width
       );
     }
+    const groupedPrice = offers.getByRole("button", {
+      name: "Offers at 0.012 WETH",
+      exact: true,
+    });
+    await groupedPrice.click();
+    const accept = offers.getByRole("button", {
+      name: "Accept offer",
+      exact: true,
+    });
+    await expect(accept).toHaveCount(2);
+    await expect(accept.first()).toHaveCSS("white-space", "nowrap");
+    await expect(accept.first()).toHaveCSS("padding-left", "12px");
+    await expect(accept.first()).toHaveCSS("padding-right", "12px");
+    await expect(accept.first()).toHaveCSS("border-top-width", "5px");
+    await expect(accept.first()).toHaveCSS("border-bottom-width", "5px");
+    await expect(accept.first()).toHaveCSS("line-height", "16px");
+    expect((await accept.first().boundingBox())!.height).toBeCloseTo(44, 0);
+    await groupedPrice.click();
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth)
     ).toBeLessThanOrEqual(width + 1);
@@ -828,7 +849,28 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
     .nth(0)
     .locator("..")
     .boundingBox())!;
-  expect(legendBox.y - closeBox.y - closeBox.height).toBeCloseTo(16, 0);
+  const walletSummary = ordersDialog.locator("[data-collect-wallet-summary]");
+  const walletSummaryBox = (await walletSummary.boundingBox())!;
+  expect(walletSummaryBox.y - closeBox.y - closeBox.height).toBeCloseTo(16, 0);
+  expect(
+    legendBox.y - walletSummaryBox.y - walletSummaryBox.height
+  ).toBeCloseTo(isMobile ? 20 : 24, 0);
+  const connectInSummary = walletSummary.getByRole("button", {
+    name: "Connect wallet",
+    exact: true,
+  });
+  await expect(connectInSummary).toHaveCount(1);
+  await expect(connectInSummary).toHaveAttribute("type", "button");
+  await expect(connectInSummary).toHaveCSS(
+    "background-color",
+    "rgb(236, 236, 238)"
+  );
+  await expect(
+    ordersDialog.locator("[data-collect-order-footer]").getByRole("button", {
+      name: "Connect wallet",
+      exact: true,
+    })
+  ).toHaveCount(0);
   expect(legendBox.x).toBeCloseTo(headingBox.x, 0);
   expect(firstChoiceBox.x).toBeCloseTo(headingBox.x, 0);
   expect(firstChoiceBox.y - legendBox.y - legendBox.height).toBeCloseTo(16, 0);
