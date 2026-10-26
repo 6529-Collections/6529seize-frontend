@@ -35,10 +35,12 @@ order, and partial words work: `chat memes` and `meme chat` also find
 `Memes-Chat`.
 
 Exact names appear first, followed by names equivalent after punctuation is
-removed, full-phrase matches, and then matches containing every term. Shorter
-matching names rank ahead within each group; equally relevant names use newest
-first. A query containing only punctuation returns no matches. `%`, `_`, and
-backslashes in a name are literal characters, not search wildcards.
+removed, full-phrase matches, and then matches containing every term. A
+full-phrase match contains the whole query contiguously after punctuation and
+spaces are removed. Shorter names after that same normalization rank ahead
+within each group; equally relevant names use newest first. A query containing
+only punctuation returns no matches. In wave-name search, `%`, `_`, and
+backslashes are literal characters, not search wildcards.
 
 These rules apply to the `Waves` results, the `in:` Wave picker, sidebar
 `Find a wave…`, and composer `#` mentions. Each surface keeps its own minimum
