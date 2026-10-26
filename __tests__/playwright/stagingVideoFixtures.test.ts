@@ -1,9 +1,5 @@
 /** @jest-environment node */
 import { selectVideoFixtures } from "../../tests/media/stagingVideoFixtures";
-jest.mock("../../tests/testHelpers", () => ({
-  expect:
-    jest.requireActual<typeof import("@jest/globals")>("@jest/globals").expect,
-}));
 const contract = "0x33FD426905F149f8376e227d0C9D3340AaD17aF1";
 const video = (id: number, width: number, height: number) => ({
   id,
@@ -67,6 +63,7 @@ function fixturePage(pages: unknown[][], ok = true) {
   for (const records of pages)
     get.mockResolvedValueOnce({
       ok: () => ok,
+      status: () => (ok ? 200 : 503),
       json: async () => ({ data: records }),
     });
   const page = {

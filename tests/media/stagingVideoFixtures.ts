@@ -1,5 +1,4 @@
 import type { Page } from "@playwright/test";
-import { expect } from "../testHelpers";
 
 const MEMES_CONTRACT = "0x33fd426905f149f8376e227d0c9d3340aad17af1";
 export type VideoShape = "portrait" | "square";
@@ -87,15 +86,14 @@ async function loadStagingVideoFixtures(
         headers: access ? { "x-6529-auth": access } : {},
       }
     );
-    expect(response.ok(), "Staging video fixture inventory must load").toBe(
-      true
-    );
+    if (!response.ok())
+      throw new Error(
+        `Staging video fixture inventory must load (HTTP ${response.status()})`
+      );
     const body = (await response.json()) as { data?: unknown };
-    expect(
-      Array.isArray(body.data),
-      "Staging NFT inventory must contain records"
-    ).toBe(true);
-    const records = body.data as unknown[];
+    if (!Array.isArray(body.data))
+      throw new Error("Staging NFT inventory must contain records");
+    const records: unknown[] = body.data;
     const candidates = selectVideoFixtures(records);
     if (candidates.portrait) selected.portrait ??= candidates.portrait;
     if (candidates.square) selected.square ??= candidates.square;

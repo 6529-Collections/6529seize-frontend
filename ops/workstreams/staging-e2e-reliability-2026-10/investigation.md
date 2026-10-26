@@ -12,17 +12,17 @@ The latest run has 18 packs and 588 test cases: **505 passed, 9 terminal failure
 
 Each row failed its initial attempt and both Playwright retries.
 
-| Project          | Test                            | Viewport    | Observed failure                                                                              | Ownership                              |
-| ---------------- | ------------------------------- | ----------- | --------------------------------------------------------------------------------------------- | -------------------------------------- |
-| Mobile Chromium  | Wave read-only message search   | Pixel 7     | Input visible then absent; first attempt fails visibility, retries fail placeholder assertion | Application lifecycle defect           |
-| Desktop Chromium | Video 550 containment/centering | 390 × 844   | No video player; page renders JPEG artwork                                                    | Incorrect live-data fixture assumption |
-| Desktop Chromium | Video 550 containment/centering | 390 × 600   | Same                                                                                          | Incorrect live-data fixture assumption |
-| Desktop Chromium | Video 550 containment/centering | 1440 × 1000 | Same                                                                                          | Incorrect live-data fixture assumption |
-| Desktop Chromium | Video 550 containment/centering | 1440 × 600  | Same                                                                                          | Incorrect live-data fixture assumption |
-| Mobile Chromium  | Video 550 containment/centering | 390 × 844   | Same                                                                                          | Incorrect live-data fixture assumption |
-| Mobile Chromium  | Video 550 containment/centering | 390 × 600   | Same                                                                                          | Incorrect live-data fixture assumption |
-| Mobile Chromium  | Video 550 containment/centering | 1440 × 1000 | Same                                                                                          | Incorrect live-data fixture assumption |
-| Mobile Chromium  | Video 550 containment/centering | 1440 × 600  | Same                                                                                          | Incorrect live-data fixture assumption |
+| Project          | Test                            | Viewport    | Observed failure                                                                                | Ownership                              |
+| ---------------- | ------------------------------- | ----------- | ----------------------------------------------------------------------------------------------- | -------------------------------------- |
+| Mobile Chromium  | Wave read-only message search   | Pixel 7     | Dialog absent after opening; first attempt fails visibility, retries fail placeholder assertion | Application lifecycle defect           |
+| Desktop Chromium | Video 550 containment/centering | 390 × 844   | No video player; page renders JPEG artwork                                                      | Incorrect live-data fixture assumption |
+| Desktop Chromium | Video 550 containment/centering | 390 × 600   | Same                                                                                            | Incorrect live-data fixture assumption |
+| Desktop Chromium | Video 550 containment/centering | 1440 × 1000 | Same                                                                                            | Incorrect live-data fixture assumption |
+| Desktop Chromium | Video 550 containment/centering | 1440 × 600  | Same                                                                                            | Incorrect live-data fixture assumption |
+| Mobile Chromium  | Video 550 containment/centering | 390 × 844   | Same                                                                                            | Incorrect live-data fixture assumption |
+| Mobile Chromium  | Video 550 containment/centering | 390 × 600   | Same                                                                                            | Incorrect live-data fixture assumption |
+| Mobile Chromium  | Video 550 containment/centering | 1440 × 1000 | Same                                                                                            | Incorrect live-data fixture assumption |
+| Mobile Chromium  | Video 550 containment/centering | 1440 × 600  | Same                                                                                            | Incorrect live-data fixture assumption |
 
 Search source: `tests/social/search-waves-readonly.spec.ts`, originally line 1206. Video source: `tests/media/media-mint-detail-readonly.spec.ts`, originally line 387. These are failures before the geometry assertions, not evidence that centering or video dimensions regressed.
 
