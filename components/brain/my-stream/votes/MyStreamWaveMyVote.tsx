@@ -167,7 +167,7 @@ function MyVoteAuthor({ author }: { readonly author: ExtendedDrop["author"] }) {
               );
             }}
             title={author.handle ?? author.primary_address}
-            className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-tracking-identity tw-text-white tw-no-underline tw-transition-colors tw-duration-200 desktop-hover:hover:tw-underline motion-reduce:tw-transition-none"
+            className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200 tw-no-underline tw-transition-colors tw-duration-200 desktop-hover:hover:tw-underline motion-reduce:tw-transition-none"
           >
             {author.handle ?? author.primary_address}
           </Link>
@@ -243,10 +243,8 @@ function MyVoteVoters({ drop }: { readonly drop: ExtendedDrop }) {
           ))}
         </div>
       )}
-      <span className="tw-whitespace-nowrap tw-text-sm tw-leading-6 tw-text-iron-400">
-        <span className="tw-font-semibold tw-text-iron-300">
-          {formatInteger(locale, drop.raters_count)}
-        </span>{" "}
+      <span className="tw-whitespace-nowrap tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-300">
+        <span>{formatInteger(locale, drop.raters_count)}</span>{" "}
         {t(
           locale,
           drop.raters_count === 1
@@ -444,7 +442,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                 type="button"
                 onClick={handleOpenDrop}
                 title={dropTitle}
-                className="tw-max-w-full tw-truncate tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 tw-transition-colors tw-duration-200 focus-visible:tw-rounded-sm focus-visible:tw-text-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-400 motion-reduce:tw-transition-none"
+                className="tw-max-w-full tw-truncate tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100 tw-transition-colors tw-duration-200 focus-visible:tw-rounded-sm focus-visible:tw-text-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-400 motion-reduce:tw-transition-none"
               >
                 {dropTitle}
               </button>

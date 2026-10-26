@@ -15,7 +15,7 @@ const MyStreamWaveMyVoteVotes: React.FC<MyStreamWaveMyVoteVotesProps> = ({
   winningThreshold,
 }) => {
   const locale = useBrowserLocale();
-  const voteClass = drop.rating >= 0 ? "tw-text-emerald-500" : "tw-text-rose-400";
+  const voteClass = drop.rating >= 0 ? "tw-text-iron-100" : "tw-text-rose-400";
   const hasWinningThreshold =
     typeof winningThreshold === "number" && winningThreshold > 0;
 
@@ -24,7 +24,9 @@ const MyStreamWaveMyVoteVotes: React.FC<MyStreamWaveMyVoteVotesProps> = ({
       <span className="tw-text-iron-400">
         {t(locale, "waves.myVotes.total")}
       </span>
-      <span className={`tw-font-semibold tw-tabular-nums ${voteClass}`}>
+      <span
+        className={`tw-text-body tw-font-semibold tw-tabular-nums tw-leading-5 tw-tracking-identity ${voteClass}`}
+      >
         {formatInteger(locale, drop.rating)}
       </span>
 
@@ -45,9 +47,8 @@ const MyStreamWaveMyVoteVotes: React.FC<MyStreamWaveMyVoteVotesProps> = ({
         subtle={true}
         visualVariant="memes"
         numberFont="sans"
-        numberSize="sm"
+        numberSize="body"
         numberWeight="semibold"
-        numberTracking="normal"
       />
     </div>
   );
