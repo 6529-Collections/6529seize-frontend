@@ -83,3 +83,17 @@ On Apple mobile only, new drops can stay pending until you return to bottom.
 - [Wave Chat Composer Availability](feature-chat-composer-availability.md)
 - [Wave Troubleshooting](../troubleshooting-wave-navigation-and-posting.md)
 - [Mobile Keyboard and Bottom Navigation Layout](../../navigation/feature-android-keyboard-layout.md)
+
+## Direct Post Links Without JavaScript
+
+A public `/waves/{waveId}?drop={dropId}` or `?serialNo={number}` link includes
+that selected post in the initial page HTML, even when it is older than the
+latest ten posts. The preview includes the author, publication date in UTC,
+plain-text content, images, and links to other attached media. A storm includes
+up to ten parts; longer storms offer guidance to connect and read the rest.
+Private, direct-message, moderated, inaccessible, and wrong-wave posts do not
+produce a public post preview. An unavailable selection does not substitute
+unrelated latest posts. Links without a post selection retain the recent feed.
+
+This is the existing no-JavaScript preview: browser loading states, the
+signed-out connect-wallet gate, and the interactive post overlay are unchanged.

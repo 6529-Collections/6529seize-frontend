@@ -1,3 +1,7 @@
+import { fetchPublicWaveDrop } from "@/app/waves/public-wave-drop.server";
+jest.mock("@/app/waves/public-wave-drop.server", () => ({
+  fetchPublicWaveDrop: jest.fn().mockResolvedValue(null),
+}));
 import { redirect } from "next/navigation";
 import { commonApiFetch } from "@/services/api/common-api";
 import { renderWavesPageContent } from "@/app/waves/waves-page.shared";
@@ -226,5 +230,94 @@ describe("renderWavesPageContent route family redirects", () => {
 
     expect(mockFetchPublicWaveFeed).toHaveBeenCalledWith("regular-wave");
     expect(screen.queryByTestId("public-wave-feed")).not.toBeInTheDocument();
+  });
+});
+
+describe("selected drop server preview", () => {
+  const selectedDrop = {
+    id: "old-drop",
+    waveId: "regular-wave",
+    waveName: "Public Wave",
+    author: "selected-author",
+    title: "Selected old post",
+    serialNo: 42,
+    publishedAt: "2025-06-15T15:06:40.000Z",
+    href: "/waves/regular-wave?drop=old-drop",
+    hasMoreParts: false,
+    parts: [
+      { partNo: 1, text: "Content outside the latest ten posts", media: [] },
+    ],
+  };
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (commonApiFetch as jest.Mock).mockResolvedValue(makeWave(false));
+    (fetchPublicWaveDrop as jest.Mock).mockResolvedValue(selectedDrop);
+    mockFetchServerWaveFeedSeed.mockResolvedValue({ ok: false });
+  });
+
+  it("renders the selected post instead of requesting the latest feed", async () => {
+    render(
+      await renderWavesPageContent({
+        waveId: "regular-wave",
+        searchParams: { drop: "old-drop" },
+      })
+    );
+    expect(fetchPublicWaveDrop).toHaveBeenCalledWith("regular-wave", {
+      key: "drop",
+      value: "old-drop",
+    });
+    expect(mockFetchPublicWaveFeed).not.toHaveBeenCalled();
+    expect(
+      screen.getByText("Content outside the latest ten posts")
+    ).toBeInTheDocument();
+    expect(screen.getByText("selected-author")).toBeInTheDocument();
+  });
+
+  it("uses the same serialNo precedence as metadata and canonical generation", async () => {
+    render(
+      await renderWavesPageContent({
+        waveId: "regular-wave",
+        searchParams: { serialNo: "42", drop: "old-drop" },
+      })
+    );
+    expect(fetchPublicWaveDrop).toHaveBeenCalledWith("regular-wave", {
+      key: "serialNo",
+      value: "42",
+    });
+  });
+
+  it("does not substitute unrelated recent posts when the selected drop is unavailable", async () => {
+    (fetchPublicWaveDrop as jest.Mock).mockResolvedValue(null);
+    render(
+      await renderWavesPageContent({
+        waveId: "regular-wave",
+        searchParams: { drop: "missing" },
+      })
+    );
+    expect(mockFetchPublicWaveFeed).not.toHaveBeenCalled();
+    expect(screen.queryByRole("article")).not.toBeInTheDocument();
+  });
+
+  it("does not request a selected preview for private waves", async () => {
+    (commonApiFetch as jest.Mock).mockResolvedValue(makeWave(false, "members"));
+    render(
+      await renderWavesPageContent({
+        waveId: "regular-wave",
+        searchParams: { drop: "private" },
+      })
+    );
+    expect(fetchPublicWaveDrop).not.toHaveBeenCalled();
+  });
+
+  it("preserves the client-navigation preview opt-out", async () => {
+    render(
+      await renderWavesPageContent({
+        waveId: "regular-wave",
+        searchParams: { drop: "old-drop" },
+        includePublicPreview: false,
+      })
+    );
+    expect(fetchPublicWaveDrop).not.toHaveBeenCalled();
+    expect(mockFetchPublicWaveFeed).not.toHaveBeenCalled();
   });
 });

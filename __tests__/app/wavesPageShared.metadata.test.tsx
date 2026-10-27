@@ -1,3 +1,6 @@
+jest.mock("@/app/waves/public-wave-drop.server", () => ({
+  fetchPublicWaveDrop: jest.fn().mockResolvedValue(null),
+}));
 import { commonApiFetch } from "@/services/api/common-api";
 import { buildWavesMetadata } from "@/app/waves/waves-page.shared";
 
@@ -65,9 +68,7 @@ describe("buildWavesMetadata", () => {
     const metadata = await buildWavesMetadata("wave-1");
 
     expect(metadata.title).toBe("The Memes - Main Stage | Brain");
-    expect(metadata.description).toBe(
-      "A public Wave for The Memes. | 6529.io"
-    );
+    expect(metadata.description).toBe("A public Wave for The Memes. | 6529.io");
     expect(metadata.openGraph).toMatchObject({
       title: "The Memes - Main Stage | Brain",
       description: "A public Wave for The Memes. | 6529.io",
@@ -109,9 +110,7 @@ describe("buildWavesMetadata", () => {
 
     const privateMetadata = await buildWavesMetadata("private-wave");
     expect(privateMetadata.robots).toEqual({ index: false, follow: true });
-    expect(privateMetadata.description).toBe(
-      "Explore this Wave. | 6529.io"
-    );
+    expect(privateMetadata.description).toBe("Explore this Wave. | 6529.io");
     expect(privateMetadata.description).not.toContain("private description");
     expect(privateMetadata.openGraph?.description).not.toContain(
       "private description"

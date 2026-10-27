@@ -5,6 +5,20 @@
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "waves.selected-post-preview",
+      "kind": "workflow",
+      "title": "Read a selected public Wave post without JavaScript",
+      "aliases": ["selected drop preview", "public drop link"],
+      "keywords": ["waves", "drop", "serialNo", "preview", "JavaScript"],
+      "facts": [
+        "Without JavaScript, a public Wave link containing drop or serialNo shows the selected post's author, UTC publication date, text, images and links to other media instead of the latest feed. Storm previews include at most ten parts.",
+        "Private, direct-message, moderated, unavailable and wrong-wave posts have no public post preview. The preview never uses wallet-only access. Interactive post overlays still require connecting a wallet."
+      ],
+      "canonical_path": "/waves",
+      "tags": ["waves", "drops", "preview"],
+      "source_refs": ["ops/docs/waves/chat/feature-scroll-behavior.md"]
+    },
+    {
       "id": "waves.my-submissions",
       "kind": "workflow",
       "title": "Find and confirm your competition submission",
