@@ -5,6 +5,38 @@
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "waves.artist-submissions-popup",
+      "kind": "ui_affordance",
+      "title": "Artist Submissions popup and Additional Action badge",
+      "aliases": [
+        "cup icon beside artist name",
+        "trophy submissions popup",
+        "Additional Action in submissions"
+      ],
+      "keywords": [
+        "artist",
+        "submissions",
+        "trophy",
+        "palette",
+        "additional action",
+        "promise",
+        "voting"
+      ],
+      "facts": [
+        "Select the artist activity icon beside a name to open the artist’s submissions or minted Memes. When both are available, use Active Submissions or Minted to Memes to switch views.",
+        "Active Submissions cards show Additional Action when the artist marked the artwork as promising something extra, such as an event, donation, physical item, airdrop, or future deliverable. The same amber badge appears on the leaderboard. Hover or focus the badge for its explanation; selecting the badge keeps the popup open and does not cast a vote.",
+        "Artwork cards without an additional-action promise do not show the badge. Open the artwork to inspect its details; voting remains a separate control below the card."
+      ],
+      "canonical_path": "/waves",
+      "link_label": "Open Waves",
+      "tags": ["waves", "artists", "submissions", "voting"],
+      "source_refs": [
+        "components/waves/drops/ArtistActiveSubmissionContent.tsx",
+        "components/waves/drops/AdditionalActionPromiseBadge.tsx",
+        "ops/docs/waves/drop-actions/feature-artist-preview-modal.md"
+      ]
+    },
+    {
       "id": "waves.my-submissions",
       "kind": "workflow",
       "title": "Find and confirm your competition submission",
@@ -3072,6 +3104,7 @@
         "Every Worth Checking Out recommendation also appears in All at its recent-activity position; Joined normally includes only waves the user has joined.",
         "Joined waves load in batches without skipping entries when new activity changes their order. Recent activity includes joined, unmuted subwaves. Muting a wave removes its own activity from the ordering. More rows load near the bottom, with Load more joined waves as a fallback. Failed loads keep existing rows available and show Retry. Expired lists refresh automatically, and newly joined waves appear on refresh.",
         "Switching All and Joined preserves list position instead of jumping to the active wave; a shorter list can clamp the position. Selecting another wave reveals its active row again.",
+        "After you scroll or interact with the Waves list, incoming activity does not automatically scroll back to the open wave. Badges and recent-activity ordering still update. Opening another wave enables active-row reveal again. Desktop pointer devices have a slim scrollbar for dragging and track clicks; touch devices keep native scrolling.",
         "A Wave opened from a direct link remains visible and highlighted in the left sidebar even when it is not followed, pinned, or present in the loaded overview; this temporary route context does not join or pin it.",
         "When a direct link opens a subwave, the sidebar surfaces its visible parent, loads and expands the subwave list, reveals the selected child row, and keeps that parent tree ahead of paginated activity rows so every sibling remains reachable.",
         "An active subwave header shows an up-left arrow and a linked parent wave name; selecting that name opens the parent wave.",
@@ -4115,6 +4148,7 @@
         "On The Memes Main Stage, Chat and Leaderboard keep the same submission control in the top wave header above the tabs. On web it shows Submit Work to The Memes or the compact Submit Work label when available; How to Submit opens nomination guidance when participation eligibility is missing. Timing and submission-limit restrictions stay in that header. The native app uses the equivalent submit or lock icon in its top header in both views. My submissions remains in the leaderboard toolbar for signed-in users on their own profile; Main Stage has no separate Drop button beside the leaderboard sort controls.",
         "Unavailable conversation-header submission actions show a lock icon on desktop, tablet, and phone. Hover, focus, or select the lock to read the full restriction reason, including opening or closing dates and submission limits. Recover by logging in, disabling proxy mode, waiting for the submission window, or freeing submission capacity. The desktop How to Submit helper keeps its label.",
         "In the Artwork step, Continue remains available before required fields are complete, except while an interactive artwork hash is being verified; selecting Continue turns every missing or invalid field and the missing media control red, shows inline recovery messages, and focuses the first missing item in form order.",
+        "Memes submission text metadata, including About the Artist and Artwork Commentary, removes leading and trailing whitespace, including non-breaking spaces, tabs and blank lines, before signing and submitting. Internal spaces and paragraph breaks are preserved. Required fields containing only whitespace still block progress, and text length limits use the trimmed value.",
         "On larger viewports the artwork remains visible while the metadata form scrolls independently. On smaller viewports the complete form scrolls as one page, focused text fields move into view when the software keyboard opens, and the native modal shrinks to keep its action bar above the keyboard.",
         "On The Memes Main Stage, the desktop How to Submit control and native app lock both open Unlock submissions with the current 50,000 MemesNominee REP requirement, live progress, and a Get nominated action.",
         "Main Stage file uploads accept PNG, JPG/JPEG, GIF, MP4/MOV, and binary GLB models up to 250 MB (250,000,000 bytes); the upload area shows Max 250 MB beside the format badges; JSON .gltf files are not accepted, and the service verifies the stored file size when the submission is created.",
