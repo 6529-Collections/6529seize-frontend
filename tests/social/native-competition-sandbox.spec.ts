@@ -8921,6 +8921,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     );
     expect(response.ok()).toBe(true);
     const fixture = await response.json();
+    // One promised action and one ordinary submission prove conditional visibility.
     const artwork = ["alpha", "beta"].map((id, index) => ({
       ...fixture.drops[0],
       id: entryDropId(id),
@@ -8948,6 +8949,14 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       () => artwork
     );
     const url = `/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard`;
+    const isNativeApp = testInfo.project.name === "web-mobile-chromium";
+    if (isNativeApp) {
+      await installSurfaceSimulation(
+        page.context(),
+        "capacitor-ios-sim",
+        testInfo.project.use.baseURL
+      );
+    }
     await page.goto(url);
     await dismissNextDevTools(page);
     const widths =
@@ -8958,6 +8967,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await page.getByRole("tab", { name: view, exact: true }).click();
         const badge = page.getByText("Additional Action", { exact: true });
         await expect(badge).toHaveCount(1);
+        const isTouchGrid = isNativeApp && view === "Grid view";
+        await expect
+          .poll(() => badge.evaluate((element) => element.tagName))
+          .toBe(isTouchGrid ? "SPAN" : "BUTTON");
         await badge.hover();
         const tooltip = page.getByRole("tooltip").filter({
           hasText:
@@ -8993,7 +9006,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           )
           .toBe(true);
         // Touch grid cards own the focus target; their badge is a non-focusable span.
-        if (await badge.evaluate((element) => element.tagName === "BUTTON")) {
+        if (!isTouchGrid) {
           await badge.click();
           await expect(page).toHaveURL(url);
           await badge.press("Escape");
