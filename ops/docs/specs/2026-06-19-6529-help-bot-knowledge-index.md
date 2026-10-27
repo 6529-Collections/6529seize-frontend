@@ -39,6 +39,10 @@ The `home.overview` record explains the Coming up full-width vertical card
 list below 768px, keyboard navigation through card links, tablet/desktop grid,
 and drop, profile and wave destinations.
 
+The `waves.artist-submissions-popup` record explains the artist activity icon,
+Active Submissions promise badges, and the distinction between reading a badge,
+opening artwork, and casting a vote.
+
 The `waves.drop.editing` record covers author-only editing, the normal edit
 window, and unlimited editing of the wave's current pinned description drop.
 
@@ -191,6 +195,17 @@ wider use the sortable table.
 Compact values are presentation only.
 The Listings and Offers record distinguishes direct **Collect** and **Sell**
 actions for one order from the explicit choice among multiple orders at a price.
+The Meme card record places connection guidance first when needed, then Collect
+and Make an offer beside the more-actions menu. Collect keeps its complete label
+and price; Make an offer can shrink. Very narrow panels place Collect on its own
+row above the other controls. When Collect is present, the available List action moves into the menu; without
+Collect it takes the second slot, or Make an offer spans both slots if List is
+unavailable. Review offers remains available in the menu. Delivery controls appear
+below the actions once the required wallet is connected. View listings & offers
+has a separate navigation row below Supply details & rankings. Labels, action
+availability and wallet requirements stay unchanged.
+Tabs and the off-screen action replacement stay sticky below 1024px, matching
+the single-column card layout; selected-listing review retains bottom-bar priority.
 Market browsing facts describe quiet periodic updates while visible and idle,
 paused for expanded order details, a chosen listing or open review as applicable.
 Healthy and empty states have no routine Refresh action; retrieval failures retain
@@ -335,6 +350,14 @@ environment; the help runtime continues to consume `/help-index.json`.
   prerequisite, and result.
 
 ## Source Ownership
+
+The artwork Review offers guidance places that action in the more-actions menu
+on artwork pages. It includes
+the responsive review layout: when a connection is required, wallet guidance and
+Connect wallet share the same top card as Make an offer, before the order list.
+The order list scrolls above quantity and Review exact terms, which remain visible
+at the bottom of the phone sheet and desktop dialog. Connected wallet details remain beside those bottom
+controls. The Meme trading block uses one initial loading placeholder before revealing its controls, without replacing them during background listing refreshes. Order selection and wallet authority remain unchanged.
 
 The NFT activity record describes both wide-screen columns and stacked rows on
 narrow screens, with the same activity information, links, filters and pagination.
