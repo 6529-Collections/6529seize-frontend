@@ -316,19 +316,27 @@ test("Subscription Minting stays readable with the reference layout @smoke @medi
         expect(Math.abs(toggleBox.y - heading.y)).toBeLessThanOrEqual(2);
         expect(toggleBox.x - (heading.x + heading.width)).toBeCloseTo(8, 0);
       }
+      const overflowingElements = await region.evaluate((element) =>
+        Array.from(element.querySelectorAll("*"))
+          .filter(
+            (child) =>
+              child instanceof HTMLElement &&
+              child.clientWidth > 0 &&
+              !child.classList.contains("tw-sr-only") &&
+              child.scrollWidth > child.clientWidth + 1
+          )
+          .map((child) => ({
+            tag: child.tagName,
+            text: child.textContent,
+            className: child.className,
+            clientWidth: child.clientWidth,
+            scrollWidth: child.scrollWidth,
+          }))
+      );
       expect(
-        await region.evaluate((element) =>
-          Array.from(element.querySelectorAll("*")).every((child) => {
-            if (
-              !(child instanceof HTMLElement) ||
-              child.clientWidth === 0 ||
-              child.classList.contains("tw-sr-only")
-            )
-              return true;
-            return child.scrollWidth <= child.clientWidth + 1;
-          })
-        )
-      ).toBe(true);
+        overflowingElements,
+        `Subscription content must fit at ${width}px`
+      ).toEqual([]);
     }
     await expectNoHorizontalOverflow(page);
     if (width === 390 || width === 1280) {
