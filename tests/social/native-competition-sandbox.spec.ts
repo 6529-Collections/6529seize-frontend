@@ -3759,7 +3759,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           )
           .toBe(true);
         await promiseBadge.click();
-        await expect(dialog).toBeVisible();
+        // The dialog wrapper has fixed-position children and no box of its own.
+        await expect(promiseBadge).toBeVisible();
+        await expect(
+          dialog.getByRole("button", { name: "Close Gallery", exact: true })
+        ).toBeVisible();
         await expect(page).toHaveURL(`${ROOT}/alpha?drop=${artwork.id}`);
         expect(sandbox.requests).toEqual([]);
       }
@@ -8916,11 +8920,13 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
   }, testInfo) => {
     const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
     sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
     const response = await page.request.get(
       `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${MEMES_WAVE}/drops`
     );
     expect(response.ok()).toBe(true);
     const fixture = await response.json();
+    fixture.wave.id = MEMES_WAVE;
     // One promised action and one ordinary submission prove conditional visibility.
     const artwork = ["alpha", "beta"].map((id, index) => ({
       ...fixture.drops[0],
@@ -8959,6 +8965,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     }
     await page.goto(url);
     await dismissNextDevTools(page);
+    await expectNativeLeaderboardReady(page, false);
     const widths =
       testInfo.project.name === "web-desktop-chromium" ? [1440, 390] : [390];
     for (const width of widths) {
