@@ -461,7 +461,7 @@ export function CompetitionVoteForm({
                 step="1"
                 min={min ?? undefined}
                 max={max ?? undefined}
-                className={`${COMPETITION_INPUT} !tw-w-40 group-[.is-mini]/inline-vote:!tw-w-full group-[.is-mini]/inline-vote:tw-min-w-0 group-[.is-mini]/inline-vote:tw-text-base group-[.is-mini]/inline-vote:tw-tabular-nums`}
+                className={`${COMPETITION_INPUT} !tw-w-40 group-[.is-mini]/inline-vote:!tw-w-full group-[.is-mini]/inline-vote:tw-h-8 group-[.is-mini]/inline-vote:tw-min-w-0 group-[.is-mini]/inline-vote:tw-border-iron-800 group-[.is-mini]/inline-vote:tw-bg-iron-900 group-[.is-mini]/inline-vote:tw-px-3 group-[.is-mini]/inline-vote:tw-py-0 group-[.is-mini]/inline-vote:tw-text-[13px] group-[.is-mini]/inline-vote:tw-font-semibold group-[.is-mini]/inline-vote:tw-leading-4 group-[.is-mini]/inline-vote:tw-tabular-nums group-[.is-mini]/inline-vote:[appearance:textfield] group-[.is-mini]/inline-vote:[&::-webkit-inner-spin-button]:tw-appearance-none group-[.is-mini]/inline-vote:[&::-webkit-outer-spin-button]:tw-appearance-none group-[.is-mini]/inline-vote:tw-transition-colors group-[.is-mini]/inline-vote:tw-duration-150 group-[.is-mini]/inline-vote:hover:tw-border-iron-700 group-[.is-mini]/inline-vote:focus:tw-border-primary-500/70 group-[.is-mini]/inline-vote:motion-reduce:tw-transition-none group-[.is-mini]/inline-vote:max-sm:tw-h-11 group-[.is-mini]/inline-vote:max-sm:tw-text-base group-[.is-mini]/inline-vote:touch-only:tw-h-11 group-[.is-mini]/inline-vote:touch-only:tw-text-base`}
                 value={value}
                 disabled={busy || disabled || !competition.permissions.vote}
                 aria-invalid={!valid}
