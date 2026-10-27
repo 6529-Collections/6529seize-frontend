@@ -317,7 +317,7 @@ it("keeps guest List in the listed-card menu and opens the same connection flow"
   const onTrade = jest.fn();
   render(supportingActions(onTrade));
   expect(
-    screen.queryByRole("button", { name: "List", exact: true })
+    screen.queryByRole("button", { name: "List" })
   ).not.toBeInTheDocument();
   const { user } = await openSupportingMenu();
   await user.click(screen.getByRole("menuitem", { name: "List: Card" }));
@@ -398,7 +398,7 @@ it.each(["guest", "owner", "non-owner"])(
     if (state === "non-owner") mockAnalysis!.requirements = [{ holdings: [] }];
     const onTrade = jest.fn();
     render(supportingActions(onTrade, false));
-    const list = screen.queryByRole("button", { name: "List", exact: true });
+    const list = screen.queryByRole("button", { name: "List" });
     if (state === "non-owner") expect(list).not.toBeInTheDocument();
     else {
       fireEvent.click(list!);
