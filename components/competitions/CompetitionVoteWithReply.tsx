@@ -95,13 +95,11 @@ export default function CompetitionVoteWithReply({
                 <textarea
                   id={fieldId}
                   rows={4}
-                  placeholder={
-                    getVoteRationaleReplyMarkdown({
-                      voteTotal: total,
-                      voteChange: total - previous,
-                      locale,
-                    }).trimEnd()
-                  }
+                  placeholder={getVoteRationaleReplyMarkdown({
+                    voteTotal: total,
+                    voteChange: total - previous,
+                    locale,
+                  }).trimEnd()}
                   value={
                     rationale.isUsingGeneratedRationale
                       ? ""
