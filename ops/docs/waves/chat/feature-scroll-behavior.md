@@ -74,16 +74,6 @@ On Apple mobile only, new drops can stay pending until you return to bottom.
 - Keyboard and app-shell spacing behavior is documented in
   [Mobile Keyboard and Bottom Navigation Layout](../../navigation/feature-android-keyboard-layout.md).
 
-## Related Pages
-
-- [Wave Chat Index](README.md)
-- [Wave Chat Serial Jump Navigation](feature-serial-jump-navigation.md)
-- [Wave Chat Unread Divider and Jump Controls](feature-unread-divider-and-controls.md)
-- [Wave Chat Typing Indicator](feature-typing-indicator.md)
-- [Wave Chat Composer Availability](feature-chat-composer-availability.md)
-- [Wave Troubleshooting](../troubleshooting-wave-navigation-and-posting.md)
-- [Mobile Keyboard and Bottom Navigation Layout](../../navigation/feature-android-keyboard-layout.md)
-
 ## Direct Post Links Without JavaScript
 
 A public `/waves/{waveId}?drop={dropId}` or `?serialNo={number}` link includes
@@ -95,7 +85,17 @@ Private, direct-message, moderated, inaccessible, and wrong-wave posts do not
 produce a public post preview. An unavailable selection does not substitute
 unrelated latest posts. Links without a post selection retain the recent feed.
 
-This is the existing no-JavaScript preview: browser loading states, the
-signed-out connect-wallet gate, and the interactive post overlay are unchanged.
+Browser loading states, the signed-out connect-wallet gate, and the interactive
+post overlay apply to these links as described in the User Journey section.
 Supported `locale` query values format the publication day for that locale;
 preview labels currently fall back to English where translations are missing.
+
+## Related Pages
+
+- [Wave Chat Index](README.md)
+- [Wave Chat Serial Jump Navigation](feature-serial-jump-navigation.md)
+- [Wave Chat Unread Divider and Jump Controls](feature-unread-divider-and-controls.md)
+- [Wave Chat Typing Indicator](feature-typing-indicator.md)
+- [Wave Chat Composer Availability](feature-chat-composer-availability.md)
+- [Wave Troubleshooting](../troubleshooting-wave-navigation-and-posting.md)
+- [Mobile Keyboard and Bottom Navigation Layout](../../navigation/feature-android-keyboard-layout.md)

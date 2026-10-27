@@ -6,6 +6,7 @@ import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
 import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
 import type { ApiDropModeration } from "@/generated/models/ApiDropModeration";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
+import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2PageWithoutCount";
 import type { ApiDropPartV2 } from "@/generated/models/ApiDropPartV2";
 import { getWavePathRoute } from "@/helpers/navigation.helpers";
 import { markdownToPlainText } from "@/helpers/waves/waveDescriptionPreview";
@@ -105,6 +106,28 @@ async function fetchExtraPart(dropId: string, partNo: number) {
   return toPublicPart(partNo, part);
 }
 
+// Resolve serial links to an ID before requesting the Wave visibility metadata.
+async function fetchSelectedDrop(
+  key: PublicWaveDropSelection["key"],
+  value: string
+): Promise<ApiDropAndWave | null> {
+  let dropId = value;
+  if (key === "serialNo") {
+    const page = await fetchAnonymous<ApiDropV2PageWithoutCount>(
+      `drops?serial_nos=${encodeURIComponent(value)}&page_size=1`
+    );
+    const selected = page?.data.find(
+      (drop) => String(drop.serial_no) === value
+    );
+    if (!selected?.id || !isVisible(selected.moderation)) return null;
+    dropId = selected.id;
+  }
+  const result = await fetchAnonymous<ApiDropAndWave>(
+    `drops/${encodeURIComponent(dropId)}`
+  );
+  return result?.drop.id === dropId ? result : null;
+}
+
 export async function fetchPublicWaveDrop(
   waveId: string,
   selection: PublicWaveDropSelection
@@ -114,9 +137,7 @@ export async function fetchPublicWaveDrop(
   if (selection.key === "serialNo" && !/^\d+$/.test(value)) return null;
 
   try {
-    const result = await fetchAnonymous<ApiDropAndWave>(
-      `drops/${encodeURIComponent(value)}`
-    );
+    const result = await fetchSelectedDrop(selection.key, value);
     if (!result) return null;
     const { drop, wave } = result;
     const matchesSelection =

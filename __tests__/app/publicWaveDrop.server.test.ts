@@ -68,16 +68,69 @@ describe("selected public Wave drop", () => {
     );
   });
 
-  it("supports serial-number links and rejects a mismatched serial number", async () => {
+  it("resolves serial links through the collection before fetching Wave metadata", async () => {
+    resolve({ data: [response().drop], page: 1, next: false });
     resolve(response());
     expect(
       await fetchPublicWaveDrop("wave-1", { key: "serialNo", value: "42" })
     ).toMatchObject({ href: "/waves/wave-1?serialNo=42" });
-    resolve(response());
-    expect(
-      await fetchPublicWaveDrop("wave-1", { key: "serialNo", value: "43" })
-    ).toBeNull();
+    expect(mockAnonymousSsrFetch).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining("/api/v2/drops?serial_nos=42&page_size=1"),
+      { cache: "no-store" }
+    );
+    expect(mockAnonymousSsrFetch).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining("/api/v2/drops/old-drop"),
+      { cache: "no-store" }
+    );
+    expect(mockAnonymousSsrFetch).toHaveBeenCalledTimes(2);
   });
+
+  it.each([
+    { data: [] },
+    { data: [{ ...response().drop, serial_no: 43 }] },
+    {
+      data: [
+        {
+          ...response().drop,
+          moderation: { status: "VISIBLE", can_view: false },
+        },
+      ],
+    },
+  ])(
+    "omits serial previews when the lookup has no visible match: %p",
+    async (page) => {
+      resolve({ ...page, page: 1, next: false });
+      expect(
+        await fetchPublicWaveDrop("wave-1", { key: "serialNo", value: "42" })
+      ).toBeNull();
+      expect(mockAnonymousSsrFetch).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it.each([
+    { drop: { ...response().drop, serial_no: 43 } },
+    { drop: { ...response().drop, id: "another-drop" } },
+    {
+      drop: {
+        ...response().drop,
+        moderation: { status: "VISIBLE", can_view: false },
+      },
+    },
+    { wave: { ...response().wave, id: "another-wave" } },
+    { wave: { ...response().wave, is_private: true } },
+    { wave: { ...response().wave, is_dm_wave: true } },
+  ])(
+    "rechecks identity and visibility after serial resolution: %p",
+    async (change) => {
+      resolve({ data: [response().drop], page: 1, next: false });
+      resolve({ ...response(), ...change });
+      expect(
+        await fetchPublicWaveDrop("wave-1", { key: "serialNo", value: "42" })
+      ).toBeNull();
+    }
+  );
 
   it.each([
     { key: "drop", value: "" },
