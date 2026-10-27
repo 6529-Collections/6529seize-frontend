@@ -23,16 +23,20 @@ Frontend staging serializes whole deployment runs with `staging-deploy` and
 `cancel-in-progress: false`. An active run finishes its pinned source and verified
 artifact even if a newer `1a-staging` push queues during its build. The server
 fetches complete history when its checkout is shallow, requires that source to
-remain in staging history, checks out the run's exact SHA, and retains artifact
-checksums and exact local and HTTP version checks. It does not substitute the
-latest branch head or rebuild on the server.
+remain in staging history, prepares the run's exact SHA in a temporary detached
+worktree, and retains artifact checksums and exact local and HTTP version checks.
+It does not substitute the latest branch head or rebuild on the server.
 
 Under the instance deployment lock, the healthy running app's SHA must be an
 ancestor of, or equal to, the candidate SHA. Older or divergent reruns, unavailable
 history, and an unhealthy or unknown running version fail before activation.
-A fresh host with no existing app can deploy normally. Intentional rollbacks use
-a new reviewed revert commit through the normal workflow; automatic recovery to
-the previous healthy runtime after failed activation remains unchanged.
+The live checkout remains unchanged, including on rejection, so a legacy PM2
+restart or rollback continues to use its original files. The temporary source
+worktree is removed after the deployment attempt; the immutable app release
+remains independent of it. A fresh host with no existing app can deploy normally.
+Intentional rollbacks use a new reviewed revert commit through the normal
+workflow; automatic recovery to the previous healthy runtime after failed
+activation remains unchanged.
 
 The default queue retains one pending run. A later push can replace that pending
 run while preserving the active run, so shared staging pushes must preserve all
