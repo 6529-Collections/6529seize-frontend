@@ -95,9 +95,9 @@ const VotingModal: React.FC<VotingModalProps> = ({ drop, isOpen, onClose }) => {
           closeButtonClassName="-tw-mr-2 tw-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-600 tw-transition-colors desktop-hover:hover:tw-bg-white/[0.06] desktop-hover:hover:tw-text-iron-300"
           closeIconClassName="tw-size-5 tw-flex-shrink-0"
           wrapperClassName="tw-px-0"
-          contentClassName="tw-relative tw-z-10 tw-px-6 tw-pt-0 tw-pb-6"
+          contentClassName="tw-group/voting-dialog tw-relative tw-z-10 tw-px-6 tw-pt-0 tw-pb-6"
         >
-          <div className="tw-mb-5">
+          <div className="tw-mb-5 group-has-[.is-vote-panel]/voting-dialog:tw-absolute group-has-[.is-vote-panel]/voting-dialog:tw-right-6 group-has-[.is-vote-panel]/voting-dialog:tw-top-[25px] group-has-[.is-vote-panel]/voting-dialog:tw-z-10 group-has-[.is-vote-panel]/voting-dialog:tw-mb-0 group-has-[.is-vote-panel]/voting-dialog:-tw-translate-y-1/2">
             <VoteModeControl
               value={voteInputMode}
               onChange={setVoteInputMode}

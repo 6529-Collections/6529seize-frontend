@@ -3684,6 +3684,23 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     const dialog = page.getByRole("dialog", { name: "Vote for this artwork" });
     const toggle = dialog.getByRole("switch", { name: "Explain vote" });
     await expect(toggle).not.toBeChecked();
+    const voteHeading = dialog.locator(
+      ".is-vote-panel > div > p > span:first-child"
+    );
+    const modeTabs = dialog.getByRole("group", { name: "Vote input mode" });
+    const expectCenteredVoteHeader = async () => {
+      const labelBox = await voteHeading.boundingBox();
+      const tabsBox = await modeTabs.boundingBox();
+      expect(labelBox).not.toBeNull();
+      expect(tabsBox).not.toBeNull();
+      expect(labelBox!.x + labelBox!.width).toBeLessThan(tabsBox!.x);
+      expect(
+        Math.abs(
+          labelBox!.y + labelBox!.height / 2 - tabsBox!.y - tabsBox!.height / 2
+        )
+      ).toBeLessThan(2);
+    };
+    await expectCenteredVoteHeader();
     const creditLabels = ["Available", "Spent", "Remaining"].map((name) =>
       dialog.getByText(name, { exact: true })
     );
@@ -3700,6 +3717,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     expect(voteSlider).not.toBeNull();
     expect(creditBoxes[0]!.y).toBeGreaterThan(voteSlider!.y);
     await dialog.getByRole("button", { name: "Numeric", exact: true }).click();
+    await expectCenteredVoteHeader();
     await dialog.getByRole("spinbutton", { name: "Your vote" }).fill("25");
     await dialog.getByText("Explain vote", { exact: true }).click();
     await expect(toggle).toBeChecked();
