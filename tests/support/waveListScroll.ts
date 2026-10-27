@@ -87,7 +87,7 @@ export async function installWaveListScrollFixture(
   };
 }
 
-export async function sidebarScrollMetrics(list: Locator, scrollTop?: number) {
+export function sidebarScrollMetrics(list: Locator, scrollTop?: number) {
   return list.evaluate((element, top) => {
     let container = element.parentElement;
     while (

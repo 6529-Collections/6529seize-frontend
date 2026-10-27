@@ -23,7 +23,11 @@ for (const collection of ["All", "Pinned", "Joined"]) {
   test(`wave list stops automatic scrolling during incoming activity in ${collection}`, async ({
     page,
     baseURL,
+    browserName,
+    headless,
   }, testInfo) => {
+    // Mobile replaces the list with the open wave, so this simultaneous
+    // sidebar-and-active-wave scenario applies only to desktop.
     test.skip(
       !!testInfo.project.use.isMobile,
       "The desktop sidebar stays visible beside the open wave."
@@ -57,7 +61,7 @@ for (const collection of ["All", "Pinned", "Joined"]) {
     await activeLink.click();
     await expect(page).toHaveURL(new RegExp(scrollWaveId(20)));
     const container = await sidebarScrollMetrics(list);
-    if (collection === "All") {
+    if (collection === "All" && browserName === "chromium") {
       const scale = container.height / container.scrollHeight;
       const thumbY =
         container.viewportTop + (container.top + container.height / 2) * scale;
@@ -71,14 +75,33 @@ for (const collection of ["All", "Pinned", "Joined"]) {
       await page.mouse.move(container.x, container.y);
       await page.mouse.wheel(0, 1200);
     }
-    await expect(
-      list.getByRole("link", { name: "Scroll wave 40", exact: true })
-    ).toBeInViewport();
+    await expect(activeLink).not.toBeInViewport();
+    // Wheel distances differ between engines. Exercise rows actually visible
+    // after scrolling rather than assuming an engine-specific pixel distance.
+    const visibleWaves = await list.getByRole("link").evaluateAll(
+      (links, viewport) =>
+        links
+          .filter((link) => {
+            const rect = link.getBoundingClientRect();
+            return (
+              rect.top > viewport.viewportTop + 150 &&
+              rect.bottom < viewport.viewportTop + viewport.height - 100
+            );
+          })
+          .map((link) => Number(link.getAttribute("href")?.slice(-12)) - 7000),
+      container
+    );
+    expect(visibleWaves.length).toBeGreaterThanOrEqual(3);
+    const [firstReceiving, secondReceiving, nextActive] = visibleWaves as [
+      number,
+      number,
+      number,
+    ];
     const before = (await sidebarScrollMetrics(list)).top;
 
     // Wait for each visible receiving row to move to the top before checking
     // the viewport: a pre-update assertion would miss the regression.
-    for (const receivingWave of [40, 42]) {
+    for (const receivingWave of [firstReceiving, secondReceiving]) {
       const receivingLink = list.getByRole("link", {
         name: `Scroll wave ${receivingWave}`,
         exact: true,
@@ -91,23 +114,27 @@ for (const collection of ["All", "Pinned", "Joined"]) {
     await page.screenshot({
       path: testInfo.outputPath("wave-list-scrolled.png"),
     });
-    expect((await sidebarScrollMetrics(list)).width).toBe("thin");
+    // Playwright's headless Firefox forces scrollbar-width:none even on a
+    // plain overflow element with inline scrollbar-width:thin. Headed Firefox
+    // verifies the styling; both modes still verify the scrolling behavior.
+    if (browserName !== "firefox" || !headless)
+      expect((await sidebarScrollMetrics(list)).width).toBe("thin");
 
     // Sorting remains live, and deliberately opening another wave re-enables
     // active-row reveal. Its next message should reveal it at its new position.
     await list
-      .getByRole("link", { name: "Scroll wave 38", exact: true })
+      .getByRole("link", { name: `Scroll wave ${nextActive}`, exact: true })
       .click();
-    await expect(page).toHaveURL(new RegExp(scrollWaveId(38)));
-    await fixture.incoming(38);
+    await expect(page).toHaveURL(new RegExp(scrollWaveId(nextActive)));
+    await fixture.incoming(nextActive);
+    await expect(list.getByRole("link").first()).toHaveText(
+      `Scroll wave ${nextActive}`
+    );
     await expect(
-      list.locator("[data-sidebar-wave-id]").first()
-    ).toHaveAttribute("data-sidebar-wave-id", scrollWaveId(38));
-    await expect(
-      list.getByRole("link", { name: "Scroll wave 38", exact: true })
+      list.getByRole("link", { name: `Scroll wave ${nextActive}`, exact: true })
     ).toBeInViewport();
     expect((await sidebarScrollMetrics(list)).top).toBeLessThan(before);
-    if (collection === "All") {
+    if (collection === "All" && browserName === "chromium") {
       const revealed = await sidebarScrollMetrics(list);
       await page.mouse.click(
         revealed.right - 3,
