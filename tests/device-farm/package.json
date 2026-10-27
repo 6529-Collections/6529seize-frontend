@@ -9,7 +9,7 @@
     "test:native": "mocha specs/native-android.smoke.spec.cjs --timeout 900000 --retries 1 --reporter spec"
   },
   "dependencies": {
-    "mocha": "^11.1.0",
+    "mocha": "^12.0.3",
     "webdriverio": "^9.12.2"
   },
   "bundleDependencies": true
