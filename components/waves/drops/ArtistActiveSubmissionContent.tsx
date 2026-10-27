@@ -107,14 +107,14 @@ export const ArtistActiveSubmissionContent: React.FC<
         }
 
         return (
-          <div className="tw-grid tw-grid-cols-1 tw-gap-6 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
+          <div className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-6 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
             {submissionsWithDrops.map((submission) => (
               <div
                 key={submission.id}
-                className="tw-flex tw-h-full tw-flex-col"
+                className="tw-flex tw-min-w-0 tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-shadow-lg [&>.is-mini]:tw-rounded-none [&>.is-mini]:tw-border-x-0 [&>.is-mini]:tw-border-b-0"
               >
                 <div
-                  className="tw-group tw-relative tw-mb-3 tw-flex tw-flex-1 tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-shadow-lg tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-shadow-xl"
+                  className="tw-group tw-relative tw-flex tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-bg-iron-950/50 tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-900/50"
                   onClick={() => handleDropClick(submission.id)}
                 >
                   <div className="tw-relative tw-aspect-square tw-overflow-hidden tw-bg-iron-950/50">
