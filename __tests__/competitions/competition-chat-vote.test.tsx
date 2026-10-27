@@ -571,6 +571,16 @@ it("shows the sign-in prompt without vote modes for a signed-out viewer", async 
   expect(screen.queryByRole("slider")).toBeNull();
   expect(fetchCompetitionCredits).not.toHaveBeenCalled();
 });
+it("hides the MINI vote footer for a signed-out viewer", async () => {
+  mockSignedIn = false;
+  jest.mocked(useCompetitionViewer).mockReturnValue(null);
+  mount(null, drop, undefined, SingleWaveDropVoteSize.MINI);
+  const prompt = await screen.findByText("Connect your wallet to participate.");
+  expect(prompt).not.toBeVisible();
+  expect(screen.queryByRole("group", { name: "Vote input mode" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Save vote" })).toBeNull();
+  expect(fetchCompetitionCredits).not.toHaveBeenCalled();
+});
 it("offers both modes without a reply option when the voter cannot chat", async () => {
   mount(null, {
     ...replyDrop,

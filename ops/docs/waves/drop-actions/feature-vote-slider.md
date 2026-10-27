@@ -67,7 +67,9 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
 
 ### Competition Submission Popups
 
-Artist submissions place the voting footer inside each artwork card. Cards keep
+Artist submissions place the voting footer inside each artwork card. When the
+wallet is disconnected, the compact footer is hidden, including the connection
+message and its spacing. Cards keep
 their own height when an explanation is open. Artist submissions and participant
 entries place the vote label and mode switch above the input. Credit labels
 `Available`, `Spent`, and `Remaining` sit side by side, with smaller, muted values
