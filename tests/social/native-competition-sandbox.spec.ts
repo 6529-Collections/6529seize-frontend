@@ -3722,10 +3722,13 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await dialog.getByText("Explain vote", { exact: true }).click();
     await expect(toggle).toBeChecked();
     const rationale = dialog.getByLabel("Optional rationale reply");
-    await expect(rationale).toHaveValue(
-      "Vote rationale (+25 at time of posting):\n\n"
+    await expect(rationale).toHaveValue("");
+    await expect(rationale).toHaveAttribute(
+      "placeholder",
+      "Vote rationale (+25 at time of posting):"
     );
-    await rationale.fill("My competition rationale");
+    await rationale.pressSequentially("My competition rationale");
+    await expect(rationale).toHaveValue("My competition rationale");
     await expectNoHorizontalOverflow(page);
     await page.screenshot({
       path: testInfo.outputPath("competition-vote-with-reply.png"),

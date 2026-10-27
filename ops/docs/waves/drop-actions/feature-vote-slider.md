@@ -40,7 +40,8 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
    - `+` and `-` step buttons (normal numeric mode)
 4. Review the live value and vote-credit label.
 5. Optional: enable `Explain vote` and edit the rationale. Competition popups
-   display the generated rationale as a placeholder; normal dialogs prefill it.
+   and full competition dialogs display the generated rationale as a placeholder;
+   non-competition dialogs prefill it.
 6. Select `Vote` or `Vote + reply` to submit.
 
 ## Common Scenarios
@@ -88,8 +89,9 @@ the same in both input modes.
 The full competition voting modal and mobile sheet use the same unboxed
 `Available`, `Spent`, and `Remaining` row beneath the input, and the same
 centered `Explain vote` and `Save vote` actions. Their numeric input and
-rationale field are taller than the card controls. The normal dialog keeps its
-existing generated rationale prefill and voting behavior.
+rationale field are taller than the card controls. Generated rationale appears
+as a placeholder here too: typing starts in an empty field, while an untouched
+field retains the existing generated reply.
 
 ## Edge Cases
 
