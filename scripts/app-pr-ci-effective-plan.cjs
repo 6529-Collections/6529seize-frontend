@@ -112,7 +112,11 @@ function applyEffectiveAppPrCiPlan(plan) {
       /^(?:components\/competitions\/|hooks\/competitions\/|__tests__\/competitions\/|app\/waves\/\[wave\]\/competitions\/|components\/waves\/create-wave\/|components\/waves\/leaderboard\/|__tests__\/components\/waves\/leaderboard\/|generated\/models\/ApiCompetition)/u.test(
         file
       ) ||
+      /^(?:hooks\/(?:useMemesQuickVote|useMemesWaveFooterStats|memesQuickVote\.)|components\/brain\/left-sidebar\/waves\/memes-quick-vote\/)/u.test(
+        file
+      ) ||
       [
+        "components/brain/left-sidebar/waves/MemesWaveFooter.tsx",
         "contexts/CompetitionContext.tsx",
         "helpers/competition.helpers.ts",
         "helpers/competition-labels.helpers.ts",

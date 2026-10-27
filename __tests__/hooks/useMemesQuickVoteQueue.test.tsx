@@ -58,6 +58,7 @@ const createWrapper = ({
     defaultOptions: {
       queries: {
         retry: false,
+        gcTime: Infinity,
       },
       mutations: {
         retry: false,
@@ -353,5 +354,72 @@ describe("useMemesQuickVoteQueue", () => {
     expect(commonApiPostMock).not.toHaveBeenCalled();
     expect(readStoredNumbers(getAmountsStorageKey())).toEqual([]);
     expect(result.current.activeDrop?.id).toBe(drop30.id);
+  });
+  it.each([
+    { connectedProfileHandle: null },
+    { activeProfileProxy: { id: "proxy" } },
+  ])(
+    "does not discover or show candidates without an eligible profile: %o",
+    async (options) => {
+      const { result } = renderHook(
+        () => useMemesQuickVoteQueue({ sessionId: 1 }),
+        { wrapper: createWrapper(options) }
+      );
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(result.current.activeDrop).toBeNull();
+      expect(commonApiFetchMock).not.toHaveBeenCalled();
+    }
+  );
+
+  it("restores counts and power after a rejected stale vote and shows the server error", async () => {
+    currentUndiscoveredDrops = [
+      createDrop({ id: "first", serialNo: 2 }),
+      createDrop({ id: "next", serialNo: 1 }),
+    ];
+    leftThisRoundCount = totalCount = 2;
+    const setToast = jest.fn();
+    commonApiPostMock.mockRejectedValueOnce("Voting is closed in this wave");
+    const { result } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: 1 }),
+      { wrapper: createWrapper({ setToast }) }
+    );
+    await waitFor(() => expect(result.current.nextDrop?.id).toBe("next"));
+    await act(async () => {
+      await result.current.submitVote(result.current.activeDrop!, 100);
+    });
+    await waitFor(() =>
+      expect(setToast).toHaveBeenCalledWith({
+        message: "Voting is closed in this wave",
+        type: "error",
+      })
+    );
+    await waitFor(() => expect(result.current.unratedCount).toBe(2));
+    expect(result.current.leftThisRoundCount).toBe(2);
+    expect(result.current.uncastPower).toBe(5000);
+    expect(result.current.activeDrop).not.toBeNull();
+  });
+
+  it("updates unrated count only for a vote, while skip updates the round count", async () => {
+    currentUndiscoveredDrops = [
+      createDrop({ id: "first", serialNo: 2 }),
+      createDrop({ id: "next", serialNo: 1 }),
+    ];
+    leftThisRoundCount = totalCount = 2;
+    const pending = createDeferred<any>();
+    commonApiPostMock.mockReturnValueOnce(pending.promise);
+    const { result, unmount } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: 1 }),
+      { wrapper: createWrapper() }
+    );
+    await waitFor(() => expect(result.current.nextDrop?.id).toBe("next"));
+    await act(async () => {
+      await result.current.skipDrop(result.current.activeDrop!);
+    });
+    expect(result.current.unratedCount).toBe(2);
+    expect(result.current.leftThisRoundCount).toBe(1);
+    expect(result.current.uncastPower).toBe(5000);
+    unmount();
   });
 });

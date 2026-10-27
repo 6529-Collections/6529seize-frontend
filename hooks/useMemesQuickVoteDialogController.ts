@@ -44,7 +44,7 @@ export const useMemesQuickVoteDialogController =
     const lastIssuedSessionIdRef = useRef(0);
     const reservedSessionIdRef = useRef<number | null>(null);
     const quickVoteQueue = useMemesQuickVoteQueue({
-      enabled: quickVoteSessionId > 0,
+      enabled: isQuickVoteOpen,
       sessionId: quickVoteSessionId,
     });
     const { retryDiscovery } = quickVoteQueue;

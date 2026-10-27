@@ -98,6 +98,10 @@ const getQueuedRatingErrorMessage = ({
     return error.message;
   }
 
+  if (typeof error === "string" && error.trim()) {
+    return error;
+  }
+
   return type === "skip"
     ? "Quick vote couldn't skip that meme."
     : "Quick vote couldn't submit that vote.";

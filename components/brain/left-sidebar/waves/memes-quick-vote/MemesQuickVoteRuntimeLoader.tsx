@@ -67,7 +67,9 @@ export const useMemesQuickVoteRuntimeLauncher =
     }, []);
 
     const resetQuickVoteRuntime = useCallback(() => {
-      setRuntimeIntent(null);
+      setRuntimeIntent((current) =>
+        current ? { ...current, action: "idle" } : null
+      );
     }, []);
 
     return {

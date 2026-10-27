@@ -49,7 +49,7 @@ describe("useMemesQuickVoteDialogController", () => {
 
     expect(result.current.quickVoteSessionId).toBe(1);
     expect(useMemesQuickVoteQueueMock).toHaveBeenLastCalledWith({
-      enabled: true,
+      enabled: false,
       sessionId: 1,
     });
 
