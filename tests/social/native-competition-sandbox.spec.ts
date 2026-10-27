@@ -3604,14 +3604,15 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await input.fill("-25");
       await dialog.getByText("Explain vote", { exact: true }).click();
       const rationale = dialog.getByLabel("Optional rationale reply");
-      await expect(rationale).toHaveValue("");
-      await expect(rationale).toHaveAttribute(
-        "placeholder",
-        /Vote rationale \(-25.*at time of posting\):/
+      await expect(rationale).toHaveValue(
+        /Vote rationale \(-25.*at time of posting\):\n\n/
       );
       await expect(
+        dialog.getByText("Add rationale text or turn Explain vote off.")
+      ).toHaveCount(0);
+      await expect(
         dialog.getByRole("button", { name: "Save vote", exact: true })
-      ).toBeDisabled();
+      ).toBeEnabled();
       await rationale.fill("An explanation kept while changing input modes");
       await expect(
         dialog.getByRole("button", { name: "Save vote", exact: true })

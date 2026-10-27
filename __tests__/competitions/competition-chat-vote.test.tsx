@@ -439,39 +439,48 @@ it("restores Explain vote for proxy competition votes after the vote succeeds", 
   );
   expect(setCompetitionVote).toHaveBeenCalledTimes(1);
 });
-it("uses the generated rationale as a placeholder in MINI popups and posts only written text", async () => {
+it("preserves the original rationale prefill and validation in MINI popups", async () => {
   jest.mocked(commonApiPost).mockResolvedValue({ id: "reply" } as never);
   mount("numeric", replyDrop, undefined, SingleWaveDropVoteSize.MINI);
   const input = await screen.findByRole("spinbutton", { name: "Your vote" });
   fireEvent.click(screen.getByRole("switch", { name: "Explain vote" }));
   const rationale = screen.getByLabelText("Optional rationale reply");
   const save = screen.getByRole("button", { name: "Save vote" });
-  expect(rationale).toHaveValue("");
-  expect(rationale).toHaveAttribute(
-    "placeholder",
-    "Vote rationale (0 at time of posting):"
-  );
-  expect(save).toBeDisabled();
+  expect(rationale).toHaveValue("Vote rationale (0 at time of posting):\n\n");
+  expect(save).toBeEnabled();
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   fireEvent.change(input, { target: { value: "25" } });
-  expect(rationale).toHaveValue("");
-  expect(rationale).toHaveAttribute(
-    "placeholder",
-    "Vote rationale (+25 at time of posting):"
-  );
+  expect(rationale).toHaveValue("Vote rationale (+25 at time of posting):\n\n");
   expect(setCompetitionVote).not.toHaveBeenCalled();
   expect(commonApiPost).not.toHaveBeenCalled();
-  fireEvent.change(rationale, { target: { value: "My explanation" } });
+  fireEvent.change(rationale, { target: { value: " " } });
+  expect(save).toBeDisabled();
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    "Add rationale text or turn Explain vote off."
+  );
+  fireEvent.change(rationale, {
+    target: {
+      value: "Vote rationale (+25 at time of posting):\n\nMy explanation",
+    },
+  });
   fireEvent.change(input, { target: { value: "-25" } });
   fireEvent.click(screen.getByRole("switch", { name: "Explain vote" }));
   fireEvent.click(screen.getByRole("switch", { name: "Explain vote" }));
-  expect(rationale).toHaveValue("My explanation");
+  expect(rationale).toHaveValue(
+    "Vote rationale (-25 at time of posting):\n\nMy explanation"
+  );
   expect(save).toBeEnabled();
   fireEvent.click(save);
   await waitFor(() =>
     expect(commonApiPost).toHaveBeenCalledWith(
       expect.objectContaining({
         body: expect.objectContaining({
-          parts: [expect.objectContaining({ content: "My explanation" })],
+          parts: [
+            expect.objectContaining({
+              content:
+                "Vote rationale (-25 at time of posting):\n\nMy explanation",
+            }),
+          ],
         }),
       })
     )
