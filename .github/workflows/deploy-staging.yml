@@ -460,7 +460,12 @@ jobs:
             sudo -H -u "$RUN_AS" git -C "$REPO_DIR" "$@"
           }
 
-          run_git fetch --no-tags origin "$BRANCH"
+          shallow_repository="$(run_git rev-parse --is-shallow-repository)"
+          if [ "$shallow_repository" = true ]; then
+            run_git fetch --no-tags --unshallow origin "$BRANCH"
+          else
+            run_git fetch --no-tags origin "$BRANCH"
+          fi
           remote_sha="$(run_git rev-parse FETCH_HEAD)"
           # A later push may queue while this run builds. Require membership
           # in staging history, then use this run's verified source and bytes.

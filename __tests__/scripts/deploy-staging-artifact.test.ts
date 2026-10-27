@@ -530,6 +530,16 @@ bash() { printf 'bash %s\\n' "$*" >> "$TEST_COMMAND_LOG"; }
     return fs.readFileSync(commandLog, "utf8").trim().split("\n");
   }
 
+  function makeShallowCheckout(sha: string) {
+    git(historyRepo, "update-ref", "refs/heads/1a-staging", sha);
+    fs.rmSync(repo, { recursive: true, force: true });
+    fs.mkdirSync(repo);
+    git(repo, "clone", "--quiet", "--depth=1", `file://${historyRepo}`, ".");
+    fs.writeFileSync(commandLog, "");
+    expect(git(repo, "rev-parse", "--is-shallow-repository")).toBe("true");
+    expect(git(repo, "rev-list", "--count", "HEAD")).toBe("1");
+  }
+
   it("rejects source outside staging history before changing the checkout", () => {
     const result = runWrapper(divergentSha);
 
@@ -538,6 +548,7 @@ bash() { printf 'bash %s\\n' "$*" >> "$TEST_COMMAND_LOG"; }
     expect(result.stderr).toContain("is not in origin 1a-staging history");
     expect(result.stderr).not.toContain("[[: not found");
     expect(commands()).toEqual([
+      "git rev-parse --is-shallow-repository",
       "git fetch --no-tags origin 1a-staging",
       "git rev-parse FETCH_HEAD",
       `git cat-file -e ${expectedSha}^{commit}`,
@@ -555,6 +566,7 @@ bash() { printf 'bash %s\\n' "$*" >> "$TEST_COMMAND_LOG"; }
       expect(result.status).toBe(0);
       expect(result.stderr).toBe("");
       expect(commands()).toEqual([
+        "git rev-parse --is-shallow-repository",
         "git fetch --no-tags origin 1a-staging",
         "git rev-parse FETCH_HEAD",
         `git cat-file -e ${expectedSha}^{commit}`,
@@ -572,6 +584,45 @@ bash() { printf 'bash %s\\n' "$*" >> "$TEST_COMMAND_LOG"; }
       expect(git(repo, "rev-parse", "HEAD")).toBe(expectedSha);
     }
   );
+
+  it.each(["matching", "advanced"])(
+    "restores shallow history before pinning when staging is %s",
+    (head) => {
+      const fetchedSha = head === "advanced" ? newerSha : expectedSha;
+      makeShallowCheckout(fetchedSha);
+
+      const result = runWrapper(fetchedSha);
+
+      expect(result.error).toBeUndefined();
+      expect(result.status).toBe(0);
+      expect(result.stderr).toBe("");
+      expect(git(repo, "rev-parse", "--is-shallow-repository")).toBe("false");
+      expect(git(repo, "rev-parse", "HEAD")).toBe(expectedSha);
+      expect(
+        git(repo, "merge-base", "--is-ancestor", previousSha, expectedSha)
+      ).toBe("");
+      expect(commands()).toContain(
+        "git fetch --no-tags --unshallow origin 1a-staging"
+      );
+    }
+  );
+
+  it("stops before checkout and activation when unshallowing fails", () => {
+    makeShallowCheckout(newerSha);
+    git(repo, "remote", "set-url", "origin", path.join(repo, "missing-origin"));
+
+    const result = runWrapper(newerSha);
+
+    expect(result.error).toBeUndefined();
+    expect(result.status).not.toBe(0);
+    expect(git(repo, "rev-parse", "HEAD")).toBe(newerSha);
+    expect(
+      commands().some((command) => command.startsWith("git checkout"))
+    ).toBe(false);
+    expect(commands().some((command) => command.startsWith("bash "))).toBe(
+      false
+    );
+  });
 
   it("rejects an unavailable pinned commit before changing the checkout", () => {
     const result = runWrapper(newerSha, expectedSha, "f".repeat(40));

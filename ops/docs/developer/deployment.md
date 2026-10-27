@@ -22,9 +22,10 @@ actual deployment.
 Frontend staging serializes whole deployment runs with `staging-deploy` and
 `cancel-in-progress: false`. An active run finishes its pinned source and verified
 artifact even if a newer `1a-staging` push queues during its build. The server
-requires that source to remain in the fetched staging history, checks out the
-run's exact SHA, and retains artifact checksums and exact local and HTTP version
-checks. It does not substitute the latest branch head or rebuild on the server.
+fetches complete history when its checkout is shallow, requires that source to
+remain in staging history, checks out the run's exact SHA, and retains artifact
+checksums and exact local and HTTP version checks. It does not substitute the
+latest branch head or rebuild on the server.
 
 Under the instance deployment lock, the healthy running app's SHA must be an
 ancestor of, or equal to, the candidate SHA. Older or divergent reruns, unavailable
