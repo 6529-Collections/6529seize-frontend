@@ -1,12 +1,19 @@
 "use client";
 
 import type { SidebarWaveTreeRow } from "@/hooks/useSidebarWaveTree";
-import { useLayoutEffect, useMemo, useRef, type RefObject } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  type RefObject,
+} from "react";
 
 interface UseRevealActiveSidebarWaveOptions {
   readonly activeParentWaveId: string | null;
   readonly activeWaveId: string | null;
   readonly filterKey?: string;
+  readonly preserveScrollOnInteraction?: boolean;
   readonly scrollContainerRef: RefObject<HTMLElement | null>;
   readonly scrollToVirtualIndex: (index: number) => boolean;
   readonly staticRows: readonly (readonly SidebarWaveTreeRow[])[];
@@ -39,6 +46,7 @@ export function useRevealActiveSidebarWave({
   activeParentWaveId,
   activeWaveId,
   filterKey = "all",
+  preserveScrollOnInteraction = true,
   scrollContainerRef,
   scrollToVirtualIndex,
   staticRows,
@@ -50,6 +58,23 @@ export function useRevealActiveSidebarWave({
     filterKey,
     preserveScroll: false,
   });
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!preserveScrollOnInteraction || container === null) return;
+
+    // Reader input takes over from automatic reveals until another wave opens.
+    // Listen to input rather than scroll: our own reveals also dispatch scroll.
+    const preserveScroll = () => {
+      revealContextRef.current.preserveScroll = true;
+    };
+    const events = ["wheel", "touchstart", "pointerdown", "keydown"] as const;
+    for (const event of events)
+      container.addEventListener(event, preserveScroll, { passive: true });
+    return () => {
+      for (const event of events)
+        container.removeEventListener(event, preserveScroll);
+    };
+  }, [preserveScrollOnInteraction, scrollContainerRef]);
   const staticWaveIds = useMemo(
     () =>
       new Set(
@@ -98,8 +123,8 @@ export function useRevealActiveSidebarWave({
     }
     revealContext.filterKey = filterKey;
 
-    // A filter change takes precedence over automatic reveals, including delayed
-    // list hydration. Navigating to another wave enables automatic reveals again.
+    // Reader input and filter changes take precedence over automatic reveals,
+    // including delayed hydration. Another wave navigation enables them again.
     if (revealContext.preserveScroll) {
       return;
     }

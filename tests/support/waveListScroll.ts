@@ -1,4 +1,6 @@
 import type { Locator, Page, WebSocketRoute } from "@playwright/test";
+import type { ApiWave } from "../../generated/models/ApiWave";
+import type { ApiWaveOverviewPage } from "../../generated/models/ApiWaveOverviewPage";
 import { expect } from "../testHelpers";
 import { getSandboxApiOrigin } from "./localSandbox";
 
@@ -12,7 +14,8 @@ export async function installWaveListScrollFixture(
   const origin = getSandboxApiOrigin(baseURL);
   const response = await page.request.get(`${origin}/api/v2/waves`);
   expect(response.ok()).toBe(true);
-  const template = (await response.json()).data[0];
+  const template = ((await response.json()) as ApiWaveOverviewPage).data[0];
+  if (!template) throw new Error("Missing sandbox wave fixture");
   const waves = Array.from({ length: 60 }, (_, index) => ({
     ...template,
     id: scrollWaveId(index),
@@ -36,6 +39,22 @@ export async function installWaveListScrollFixture(
       },
     })
   );
+  const detailResponse = await page.request.get(
+    `${origin}/api/waves/${template.id}`
+  );
+  expect(detailResponse.ok()).toBe(true);
+  const detail = (await detailResponse.json()) as ApiWave;
+  await page.route(
+    /\/api\/waves\/00000000-0000-4000-8000-000000007\d{3}$/,
+    (route) => {
+      const id = new URL(route.request().url()).pathname.split("/").at(-1);
+      const wave = waves.find((item) => item.id === id);
+      return route.fulfill({
+        json: { ...detail, id, name: wave?.name, pinned: true },
+      });
+    }
+  );
+  await page.route("**/api/open-graph", (route) => route.fulfill({ json: {} }));
   const sockets: WebSocketRoute[] = [];
   await page.routeWebSocket(
     (url) => url.port === new URL(origin).port,
@@ -81,7 +100,12 @@ export async function sidebarScrollMetrics(list: Locator, scrollTop?: number) {
     return {
       top: container.scrollTop,
       width: getComputedStyle(container).scrollbarWidth,
-      display: getComputedStyle(container, "::-webkit-scrollbar").display,
+      x: container.getBoundingClientRect().x + container.clientWidth / 2,
+      y: container.getBoundingClientRect().y + container.clientHeight / 2,
+      right: container.getBoundingClientRect().right,
+      viewportTop: container.getBoundingClientRect().top,
+      height: container.clientHeight,
+      scrollHeight: container.scrollHeight,
     };
   }, scrollTop);
 }
