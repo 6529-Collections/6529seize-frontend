@@ -90,22 +90,24 @@ export default function CompetitionVoteWithReply({
               >
                 {t(locale, "waves.voteRationale.fieldLabel")}
               </label>
-              <textarea
-                id={fieldId}
-                rows={4}
-                placeholder={t(locale, "waves.voteRationale.fieldPlaceholder")}
-                value={rationale.rationaleText}
-                onChange={(event) =>
-                  rationale.handleRationaleTextChange(event.target.value)
-                }
-                aria-invalid={Boolean(invalid)}
-                aria-describedby={invalid ? descriptionId : undefined}
-                className={`tw-block tw-w-full tw-resize-y tw-rounded-lg tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 focus:tw-border-primary-400 focus:tw-outline-none group-[.is-mini]/inline-vote:tw-h-14 group-[.is-mini]/inline-vote:tw-min-h-14 group-[.is-mini]/inline-vote:tw-overflow-hidden group-[.is-mini]/inline-vote:tw-border-iron-800 group-[.is-mini]/inline-vote:tw-px-2.5 group-[.is-mini]/inline-vote:tw-py-2 group-[.is-mini]/inline-vote:tw-text-[13px] group-[.is-mini]/inline-vote:tw-leading-[18px] group-[.is-mini]/inline-vote:max-sm:tw-text-base ${
-                  rationale.isUsingGeneratedRationale
-                    ? "tw-text-iron-600"
-                    : "tw-text-iron-100"
-                }`}
-              />
+              <div className="tw-block group-[.is-mini]/inline-vote:tw-h-14 group-[.is-mini]/inline-vote:tw-min-h-14 group-[.is-mini]/inline-vote:tw-resize-y group-[.is-mini]/inline-vote:tw-overflow-hidden group-[.is-mini]/inline-vote:tw-rounded-lg">
+                <textarea
+                  id={fieldId}
+                  rows={4}
+                  placeholder={t(locale, "waves.voteRationale.fieldPlaceholder")}
+                  value={rationale.rationaleText}
+                  onChange={(event) =>
+                    rationale.handleRationaleTextChange(event.target.value)
+                  }
+                  aria-invalid={Boolean(invalid)}
+                  aria-describedby={invalid ? descriptionId : undefined}
+                  className={`tw-block tw-w-full tw-resize-y tw-rounded-lg tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 focus:tw-border-primary-400 focus:tw-outline-none group-[.is-mini]/inline-vote:tw-h-full group-[.is-mini]/inline-vote:tw-min-h-full group-[.is-mini]/inline-vote:tw-resize-none group-[.is-mini]/inline-vote:tw-overflow-clip group-[.is-mini]/inline-vote:tw-border-iron-800 group-[.is-mini]/inline-vote:tw-px-2.5 group-[.is-mini]/inline-vote:tw-py-2 group-[.is-mini]/inline-vote:tw-text-[13px] group-[.is-mini]/inline-vote:tw-leading-[18px] group-[.is-mini]/inline-vote:max-sm:tw-text-base ${
+                    rationale.isUsingGeneratedRationale
+                      ? "tw-text-iron-600"
+                      : "tw-text-iron-100"
+                  }`}
+                />
+              </div>
               {invalid && (
                 <p
                   id={descriptionId}

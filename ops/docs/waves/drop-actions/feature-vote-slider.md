@@ -74,9 +74,9 @@ beneath their labels. The icon-style `Explain vote` control and compact `Save
 vote` button share the bottom row. The explanation opens above that row, with
 its public-reply note below the text field. It opens and closes with a short
 expand/fade transition, respecting reduced-motion settings. The generated reply
-text stays muted until edited. The compact text field hides its inner scrollbar;
-drag its resize handle to enlarge it. Empty fields show `Why this vote?
-(optional)`. The slider design, numeric input, vote amounts,
+text stays muted until edited. The compact text field does not scroll internally;
+drag its resize handle to enlarge it and reveal longer explanations. Empty fields
+show `Why this vote? (optional)`. The slider design, numeric input, vote amounts,
 limits, eligibility, and saving work the same in both input modes.
 
 ## Edge Cases
