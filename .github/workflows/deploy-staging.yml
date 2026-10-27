@@ -13,6 +13,7 @@ permissions:
   contents: read
 
 concurrency:
+  # Let the active pinned artifact finish while the next staging push waits.
   group: staging-deploy
   cancel-in-progress: false
 
