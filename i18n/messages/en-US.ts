@@ -4641,6 +4641,7 @@ export const EN_US_MESSAGES = {
   "waves.publicDrop.title": "Drop #{number}",
   "waves.publicDrop.image": "{title} — image {number}",
   "waves.publicDrop.media": "Open attachment {number} ({type})",
+  "waves.publicDrop.published": "Published {date} (UTC)",
   "waves.publicDrop.moreParts":
     "Connect your wallet to read the rest of this storm.",
   "waves.discovery.voteList": "Active voting waves",

@@ -97,3 +97,5 @@ unrelated latest posts. Links without a post selection retain the recent feed.
 
 This is the existing no-JavaScript preview: browser loading states, the
 signed-out connect-wallet gate, and the interactive post overlay are unchanged.
+Supported `locale` query values format the publication day for that locale;
+preview labels currently fall back to English where translations are missing.

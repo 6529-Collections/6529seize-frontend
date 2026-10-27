@@ -37,7 +37,7 @@ export interface PublicWaveDrop {
   readonly hasMoreParts: boolean;
 }
 
-export interface PublicWaveDropSelection {
+interface PublicWaveDropSelection {
   readonly key: "drop" | "serialNo";
   readonly value: string;
 }

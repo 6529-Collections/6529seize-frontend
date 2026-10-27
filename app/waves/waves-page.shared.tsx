@@ -30,7 +30,7 @@ import type { ApiOgMetadataProfile } from "@/generated/models/ApiOgMetadataProfi
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { formatAddress } from "@/helpers/Helpers";
 import { isPublicNonDirectMessageWave } from "@/helpers/waves/wave.helpers";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { DEFAULT_LOCALE, normalizeLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
   getWaveRouteWithSearchParams,
@@ -316,7 +316,14 @@ export async function renderWavesPageContent({
   const publicDrop = publicDropPromise ? await publicDropPromise : null;
   let publicFeedFallback = null;
   if (publicDrop) {
-    publicFeedFallback = <PublicWaveDrop drop={publicDrop} />;
+    publicFeedFallback = (
+      <PublicWaveDrop
+        drop={publicDrop}
+        locale={normalizeLocale(
+          getFirstSearchParamValue(searchParams, "locale")
+        )}
+      />
+    );
   } else if (publicFeed?.ok && publicFeed.items.length > 0) {
     publicFeedFallback = <PublicWaveFeed feed={publicFeed} />;
   }

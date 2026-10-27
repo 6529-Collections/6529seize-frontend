@@ -288,6 +288,18 @@ describe("selected drop server preview", () => {
     expect(mockFetchPublicWaveFeed).toHaveBeenCalledWith("regular-wave");
   });
 
+  it("uses the requested locale for the selected preview publication day", async () => {
+    render(
+      await renderWavesPageContent({
+        waveId: "regular-wave",
+        searchParams: { drop: "old-drop", locale: "fr-FR" },
+      })
+    );
+    expect(
+      screen.getByText("Published 15 juin 2025 (UTC)")
+    ).toBeInTheDocument();
+  });
+
   it("uses the same serialNo precedence as metadata and canonical generation", async () => {
     render(
       await renderWavesPageContent({
