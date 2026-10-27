@@ -112,6 +112,84 @@ describe("submissionMetadata", () => {
     );
   });
 
+  it("trims metadata text while preserving internal whitespace and source values", () => {
+    const traits = buildTraits({
+      title: " \tTest Artwork\n",
+      description: "\nFirst  paragraph.\n\nSecond paragraph.\t ",
+      artist: "\u00a0Test Artist\u00a0",
+      style: "  Digital  art  ",
+      pointsPower: 0,
+      gradient: false,
+    });
+    const operationalData = {
+      ...mockOperationalData,
+      commentary: "\nMade with  AI tools.\n\nMore details. \t",
+      about_artist: "  Artist bio.\n\nSecond paragraph.\n",
+      payment_info: {
+        ...mockOperationalData.payment_info,
+        designated_payee_name: " Payee name ",
+      },
+    };
+
+    const metadata = buildSubmissionMetadata({ traits, operationalData });
+    const metadataMap = new Map(
+      metadata.map((item) => [item.data_key, item.data_value])
+    );
+
+    expect(metadataMap.get("title")).toBe("Test Artwork");
+    expect(metadataMap.get("description")).toBe(
+      "First  paragraph.\n\nSecond paragraph."
+    );
+    expect(metadataMap.get("artist")).toBe("Test Artist");
+    expect(metadataMap.get("style")).toBe("Digital  art");
+    expect(metadataMap.get("pointsPower")).toBe("0");
+    expect(metadataMap.get("gradient")).toBe("false");
+    expect(metadataMap.get("commentary")).toBe(
+      "Made with  AI tools.\n\nMore details."
+    );
+    expect(metadataMap.get("about_artist")).toBe(
+      "Artist bio.\n\nSecond paragraph."
+    );
+    expect(metadataMap.get("payment_info")).toBe(
+      JSON.stringify(operationalData.payment_info)
+    );
+    expect(traits.title).toBe(" \tTest Artwork\n");
+    expect(operationalData.about_artist).toBe(
+      "  Artist bio.\n\nSecond paragraph.\n"
+    );
+  });
+
+  it.each(["", "   ", "\t\n", "\u00a0"])(
+    "omits trait values that are empty after trimming (%j)",
+    (value) => {
+      const metadata = buildSubmissionMetadata({
+        traits: buildTraits({ artist: "Artist", bonus: value }),
+      });
+
+      expect(metadata).toEqual([{ data_key: "artist", data_value: "Artist" }]);
+    }
+  );
+
+  it("checks length limits against the trimmed values that will be submitted", () => {
+    const validation = getSubmissionMetadataLengthValidation({
+      traits: buildTraits({
+        title: ` ${"t".repeat(255)} `,
+        description: `\n${"d".repeat(8000)}\n`,
+      }),
+      operationalData: {
+        ...mockOperationalData,
+        about_artist: `\t${"a".repeat(5000)}\u00a0`,
+        commentary: ` ${"c".repeat(5000)}\n`,
+      },
+    });
+
+    expect(validation.hasErrors).toBe(false);
+    expect(validation.statusesByKey["title"]?.length).toBe(255);
+    expect(validation.statusesByKey["description"]?.length).toBe(8000);
+    expect(validation.statusesByKey["about_artist"]?.length).toBe(5000);
+    expect(validation.statusesByKey["commentary"]?.length).toBe(5000);
+  });
+
   it("uses key-specific metadata value limits", () => {
     const validation = getSubmissionMetadataLengthValidation({
       traits: buildTraits({
