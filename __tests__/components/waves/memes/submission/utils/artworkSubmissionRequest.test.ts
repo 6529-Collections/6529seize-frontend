@@ -8,7 +8,7 @@ describe("transformToApiRequest", () => {
       waveId: "main-stage",
       traits: {
         title: "  Artwork  ",
-        description: "Description",
+        description: "\nFirst  paragraph.\n\nSecond paragraph.\t ",
       } as TraitsData,
       media: {
         url: "https://cdn.example/drops/artwork.png",
@@ -27,5 +27,16 @@ describe("transformToApiRequest", () => {
       media_upload_id: "upload-123",
     });
     expect(request.title).toBe("Artwork");
+    expect(request.metadata).toEqual([
+      { data_key: "title", data_value: "Artwork" },
+      {
+        data_key: "description",
+        data_value: "First  paragraph.\n\nSecond paragraph.",
+      },
+      { data_key: "collab", data_value: "false" },
+    ]);
+    expect(request.parts[0]?.content).toBe(
+      "\nFirst  paragraph.\n\nSecond paragraph.\t "
+    );
   });
 });

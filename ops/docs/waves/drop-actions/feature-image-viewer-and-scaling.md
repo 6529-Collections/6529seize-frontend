@@ -14,6 +14,13 @@ small loader until the original is ready; **View optimized** switches back or
 cancels a pending switch. Moving to another image resets this choice. Thread images have no HD control or GIF badge. In the Memes submission artwork
 view, the HD control is always visible for both still images and GIFs, including
 on touch devices. The initial artwork and popup share the selected quality.
+On desktop, GIF artwork in the single-submission view tries animated previews
+first. If those previews are unavailable, the original animation loads
+automatically; no HD click is needed. Mobile browsers, tablets, and the native
+mobile app keep bounded previews and require HD to load the original. The
+improved artwork loading indicator is shared across all platforms.
+HD highlights when the original is selected. Choose
+**View optimized** to return to the preview or cancel the original load.
 
 ## Location in the Site
 
@@ -36,6 +43,15 @@ on touch devices. The initial artwork and popup share the selected quality.
    wide and tall and constrained to the available space, while their preview loads. It
    disappears when the preview is ready; failed previews use the existing
    retry or unavailable state. Reduced-motion settings disable the pulse. The placeholder uses a fallback size, not the GIF’s actual dimensions.
+   GIF artwork in submission, leaderboard, participation, and winner cards instead
+   shows a subtle backdrop filling the reserved media frame with a centered spinner.
+   In the single-submission view on every platform, this same indicator stays
+   visible while an original loads until the animation is ready, without a separate
+   “Loading original GIF” stage. An available fallback preview stays behind it.
+   Reduced-motion settings disable the spin; HD remains available during loading.
+   These frames are reserved viewing space, not the GIF's measured dimensions.
+   Card previews keep their existing GIF processing limits and do not load the
+   original animation automatically.
 3. Click or tap the image to open the modal viewer.
 4. Zoom the image and use modal controls:
    - `Open in Browser` opens the source URL in a new tab.
@@ -98,13 +114,20 @@ on touch devices. The initial artwork and popup share the selected quality.
 - GIF previews use a versioned animation-preserving resize path. The worker can
   reduce preview resolution to retain every frame within its output budget.
   GIFs that exceed processing limits fall back to a legacy preview, which may
-  be static. Choose **View original** with the popup toolbar's HD icon if the
-  preview does not animate. The original loads only after that action and may
-  use more bandwidth and device memory.
+  be static. In the desktop single-submission artwork view and its popup, unavailable
+  animated previews automatically load the original GIF. An available legacy
+  preview stays visible until the original is ready. This can use more
+  bandwidth and device memory. Choosing **View optimized** prevents another
+  automatic switch for that artwork. Mobile browsers, tablets, native mobile apps,
+  feeds, grids, thread images, and supplemental
+  images keep their optimized previews; choose **View original** with the popup
+  toolbar's HD icon to load their original GIF deliberately.
 - If loading the original fails, the viewer restores its preview, announces the
   failure, and lets you try again. The HD button shows a warning icon and its
   tooltip explains the failure. Selecting it retries and restores the HD icon;
   no playback controls or messages cover the artwork.
+  An automatic desktop submission GIF load is attempted once per artwork view; a failure
+  does not repeatedly reload the original when the popup is opened.
 - If a fullscreen request is denied or interrupted, the modal stays open and
   the other image actions continue to work.
 - If fullscreen is unavailable, users can still open the source in a new tab.

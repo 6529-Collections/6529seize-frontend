@@ -97,6 +97,27 @@ describe("AdditionalInfoStep", () => {
     );
   });
 
+  it.each(["artworkCommentary", "aboutArtist"] as const)(
+    "blocks whitespace-only required %s before preview or submission",
+    (field) => {
+      const { rerender } = render(<AdditionalInfoStep {...baseProps} />);
+
+      expect(screen.getByRole("button", { name: "Preview" })).toBeEnabled();
+      expect(
+        screen.getByRole("button", { name: "Submit Artwork" })
+      ).toBeEnabled();
+
+      rerender(
+        <AdditionalInfoStep {...baseProps} {...{ [field]: "\u00a0 \t\n" }} />
+      );
+
+      expect(screen.getByRole("button", { name: "Preview" })).toBeDisabled();
+      expect(
+        screen.getByRole("button", { name: "Submit Artwork" })
+      ).toBeDisabled();
+    }
+  );
+
   it("keeps the text Back action operable and disabled during submission", async () => {
     const user = userEvent.setup();
     const onBack = jest.fn();
