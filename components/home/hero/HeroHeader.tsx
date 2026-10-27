@@ -5,7 +5,6 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import HeroArtworkFan from "./HeroArtworkFan";
 
 export default function HeroHeader({
   children,
@@ -29,24 +28,19 @@ export default function HeroHeader({
           <HeartIcon className="tw-relative tw-size-4" aria-hidden />
         </span>
       </Link>
-      <div className="tw-mx-auto tw-grid tw-max-w-[1200px] tw-grid-cols-1 tw-items-center tw-gap-6 lg:tw-grid-cols-2 lg:tw-gap-10">
+      <div className="tw-mx-auto tw-max-w-[1200px]">
         <div className="tw-min-w-0">
-          <p className="tw-m-0 tw-inline-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.02] tw-px-3 tw-py-1.5 tw-text-[11px] tw-font-medium tw-leading-4 tw-tracking-widest tw-text-iron-400">
-            <span
-              aria-hidden="true"
-              className="tw-size-1.5 tw-rounded-full tw-bg-iron-500"
-            />
+          <p className="tw-m-0 tw-text-xs tw-font-medium tw-leading-4 tw-tracking-[0.2em] tw-text-iron-400">
             6529
           </p>
-          <h1 className="tw-mb-0 tw-mt-6 tw-max-w-[620px] tw-text-[clamp(2.375rem,10cqw,3.5rem)] tw-font-semibold tw-leading-[1.06] tw-tracking-[-0.05em] tw-text-iron-50 lg:tw-text-[clamp(2.375rem,5.7cqw,4.5rem)]">
+          <h1 className="tw-mb-0 tw-mt-6 tw-max-w-[1000px] tw-text-balance tw-text-[clamp(2.375rem,10cqw,3.5rem)] tw-font-semibold tw-leading-[1.06] tw-tracking-[-0.05em] tw-text-iron-50 lg:tw-text-[clamp(2.375rem,5.7cqw,4.5rem)]">
             {t(locale, "home.hero.title")}
           </h1>
-          <p className="tw-mb-0 tw-mt-6 tw-max-w-[560px] tw-text-base tw-leading-relaxed tw-text-iron-300 md:tw-text-lg">
+          <p className="tw-mb-0 tw-mt-6 tw-max-w-[720px] tw-text-pretty tw-text-base tw-leading-relaxed tw-text-iron-300 md:tw-mt-8 md:tw-text-lg">
             {t(locale, "home.hero.description")}
           </p>
           {children}
         </div>
-        <HeroArtworkFan />
       </div>
     </section>
   );

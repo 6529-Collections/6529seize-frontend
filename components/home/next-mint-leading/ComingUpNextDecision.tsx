@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getCalendarDayIndex } from "@/helpers/timeDisplayHelpers";
 import { usePageVisible } from "@/hooks/usePageVisibility";
 import { formatDate, formatTime } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -52,16 +53,28 @@ export function ComingUpNextDecision({
     return null;
   }
 
-  const date = formatDate(locale, decisionTime);
+  const timeZone = new Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const daysUntil =
+    getCalendarDayIndex(decisionTime, timeZone) -
+    getCalendarDayIndex(now, timeZone);
   const time = formatTime(locale, decisionTime, {
     hour: "2-digit",
     minute: "2-digit",
     hourCycle: "h23",
   });
-  const label =
-    date === formatDate(locale, now)
-      ? t(locale, "home.comingUp.nextDecisionToday", { time })
-      : t(locale, "home.comingUp.nextDecisionOn", { date, time });
+  let label: string;
+  if (daysUntil === 0) {
+    label = t(locale, "home.comingUp.nextDecisionToday", { time });
+  } else if (daysUntil === 1) {
+    label = t(locale, "home.comingUp.nextDecisionTomorrow", { time });
+  } else {
+    const date = formatDate(
+      locale,
+      decisionTime,
+      daysUntil < 7 ? { weekday: "long" } : { month: "short", day: "numeric" }
+    );
+    label = t(locale, "home.comingUp.nextDecisionOn", { date, time });
+  }
 
   return (
     <>

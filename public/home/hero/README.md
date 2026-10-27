@@ -27,6 +27,5 @@ Lanczos3 resize, WebP quality 82, alpha quality 100, effort 6, smart subsampling
 720px covers the artwork's maximum displayed size at 3× pixel density. All five
 files total 262,928 bytes, down from 467,280 bytes.
 
-The hero serves these files directly; no artwork is generated or selected from
-live mint data at runtime. Card #1 loads eagerly; the four background cards use
-lazy loading. The layout reserves space before the images load.
+These assets are retained for future design exploration. The typography-only
+homepage hero does not render or request them.

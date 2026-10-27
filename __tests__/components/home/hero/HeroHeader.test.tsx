@@ -10,23 +10,20 @@ jest.mock("next/link", () => ({
   ),
 }));
 
-jest.mock("@/components/home/hero/HeroArtworkFan", () => ({
-  __esModule: true,
-  default: () => <div data-testid="artwork-fan" />,
-}));
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
 
 describe("HeroHeader", () => {
-  it("renders the hero heading copy", () => {
-    render(<HeroHeader />);
+  it("renders the hero heading copy without artwork", () => {
+    const { container } = render(<HeroHeader />);
 
     const heading = screen.getByRole("heading", {
       name: "Building a decentralized network state",
     });
 
     expect(heading).toBeInTheDocument();
+    expect(container.querySelector("img")).toBeNull();
     expect(
       screen.getByText(
         "a decentralized, permissionless global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology."

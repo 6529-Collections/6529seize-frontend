@@ -196,7 +196,7 @@ test.describe("Coming up local decision time", () => {
       .getByRole("region", { name: "Coming up", exact: true })
       .locator("time");
     await expect(decisionLabel).toHaveText(
-      "Next decision on Oct 27, 2026 at 00:00."
+      "Next decision tomorrow at 00:00."
     );
     await expect(decisionLabel).toHaveAttribute(
       "datetime",
@@ -254,7 +254,8 @@ test("Subscription Minting stays readable with the reference layout @smoke @medi
         const states = [
           { subscribed: false, subscriptionsCount: 564, profileCoverageSummary: 'Not configured · 0 ETH' },
           { subscribed: true, subscribedCount: 12, subscriptionsCount: 123456789, profileCoverageSummary: 'Ready · 12 mints · 0.78348 ETH' },
-          { subscribed: false, subscriptionsCountLoading: true }
+          { subscribed: false, subscriptionsCountLoading: true },
+          { subscribed: true, subscribedCount: 2, subscriptionsCount: 564, profileSubscriptionsActionLabel: 'Choose drops', profileCoverageSummary: 'Manual · 0.18 ETH · 4 drops funded' }
         ];
         createRoot(document.getElementById('subscription-fixture')).render(
           createElement('div', { className: 'tw-space-y-6' }, ...states.map((props, index) =>
@@ -278,7 +279,7 @@ test("Subscription Minting stays readable with the reference layout @smoke @medi
   }
   await expect(
     page.getByText("Subscription Minting", { exact: true })
-  ).toHaveCount(3);
+  ).toHaveCount(4);
   await page.evaluate(() => document.fonts.ready);
   for (const width of [320, 360, 375, 390, 430, 640, 1280]) {
     await page.setViewportSize({ width, height: 900 });
@@ -286,24 +287,34 @@ test("Subscription Minting stays readable with the reference layout @smoke @medi
       const heading = await region
         .getByText("Subscription Minting", { exact: true })
         .boundingBox();
-      const action = region.getByRole("link", { name: /^(Set up|Manage)$/ });
+      const action = region.getByRole("link", { name: /^(Set up|Manage|Choose drops)$/ });
       const actionBox = await action.boundingBox();
       const infoBox = await region
         .getByRole("link", { name: "Learn more about The Memes subscriptions" })
         .boundingBox();
-      if (!heading || !actionBox || !infoBox)
+      const toggleBox = await region
+        .getByRole("img", { name: "Subscription status", exact: true })
+        .boundingBox();
+      if (!heading || !actionBox || !infoBox || !toggleBox)
         throw new Error("Subscription controls must be visible");
-      expect(heading.height).toBeLessThanOrEqual(20);
-      expect(actionBox.y).toBeGreaterThan(heading.y + heading.height);
       expect(actionBox.height).toBeGreaterThanOrEqual(24);
-      const cardWidth = (await region.boundingBox())?.width ?? 0;
-      if (cardWidth < 354) {
+      const card = await region.boundingBox();
+      if (!card) throw new Error("Subscription card must be visible");
+      // The requested action stays at the far right. Very narrow cards stack
+      // it below the details to preserve readable labels and every control.
+      expect(card.x + card.width - (actionBox.x + actionBox.width)).toBe(17);
+      expect(infoBox.y).toBeGreaterThan(heading.y + heading.height);
+      if (card.width < 226) {
         expect(actionBox.y).toBeGreaterThanOrEqual(infoBox.y + infoBox.height);
       } else {
-        // Wide cards place Set up/Manage beneath the toggle, beside the count.
-        // Narrow cards give the action its own row, regardless of viewport.
-        expect(infoBox.y).toBeGreaterThan(heading.y + heading.height);
-        expect(actionBox.x).toBeGreaterThanOrEqual(infoBox.x + infoBox.width);
+        expect(actionBox.x).toBeGreaterThanOrEqual(heading.x + heading.width);
+        expect(actionBox.y).toBeLessThanOrEqual(heading.y + heading.height);
+        expect(actionBox.y + actionBox.height).toBeLessThanOrEqual(infoBox.y);
+      }
+      if (card.width >= 354) {
+        expect(heading.height).toBeLessThanOrEqual(20);
+        expect(Math.abs(toggleBox.y - heading.y)).toBeLessThanOrEqual(2);
+        expect(toggleBox.x - (heading.x + heading.width)).toBeCloseTo(8, 0);
       }
       expect(
         await region.evaluate((element) =>
@@ -1063,7 +1074,7 @@ test.describe("Home Page @smoke @medium @large", () => {
     await waitForRouteReady(page);
   });
 
-  test("hero keeps the approved copy, action order and responsive artwork @smoke", async ({
+  test("hero keeps the approved copy and actions in a responsive typography layout @smoke", async ({
     page,
   }, testInfo) => {
     await installCompletedMintStatus(page);
@@ -1073,18 +1084,6 @@ test.describe("Home Page @smoke @medium @large", () => {
       .first()
       .locator('[data-home-section="Introduction"]');
     const heading = hero.getByRole("heading", { level: 1 });
-    const fan = page
-      .getByRole("main")
-      .first()
-      .locator("[data-home-artwork-fan]");
-    const artworks = page
-      .getByRole("main")
-      .first()
-      .locator("[data-home-artwork-fan] figure");
-    const artworkImages = page
-      .getByRole("main")
-      .first()
-      .locator("[data-home-artwork-fan] img");
     await expect(heading).toHaveText("Building a decentralized network state");
     await expect(
       hero.getByText(
@@ -1098,30 +1097,25 @@ test.describe("Home Page @smoke @medium @large", () => {
     await expect(actions).toHaveText(["Connect wallet", "Start here"]);
     await expect(actions.last()).toHaveAttribute("href", "/join-6529");
     await page.emulateMedia({ reducedMotion: "reduce" });
-    for (const width of [390, 1440]) {
+    for (const width of [320, 390, 768, 1440]) {
       await page.setViewportSize({ width, height: 1000 });
       const textBox = await heading.boundingBox();
-      const fanBox = await fan.boundingBox();
-      expect(textBox).not.toBeNull();
-      expect(fanBox).not.toBeNull();
-      if (width < 1024)
-        expect(fanBox!.y).toBeGreaterThan(textBox!.y + textBox!.height);
-      else expect(fanBox!.x).toBeGreaterThan(textBox!.x + textBox!.width);
-      await expect(artworks).toHaveCount(5);
-      await expect(artworks.first()).toHaveCSS("animation-name", "none");
-      await expect(artworkImages).toHaveCount(5);
-      await expect
-        .poll(() =>
-          artworkImages.evaluateAll((images) =>
-            images.every(
-              (image) =>
-                image instanceof HTMLImageElement &&
-                image.complete &&
-                image.naturalWidth > 0
-            )
-          )
-        )
-        .toBe(true);
+      const heroBox = await hero.boundingBox();
+      if (!textBox || !heroBox) throw new Error("Hero must be visible");
+      expect(textBox.x).toBeGreaterThanOrEqual(heroBox.x);
+      expect(textBox.x + textBox.width).toBeLessThanOrEqual(
+        heroBox.x + heroBox.width
+      );
+      await expect(hero.locator("img")).toHaveCount(0);
+      await expect(heading).toHaveCSS("font-family", /Montserrat/);
+      for (const action of await actions.all()) {
+        await expect(action).toBeVisible();
+        const actionBox = await action.boundingBox();
+        if (!actionBox) throw new Error("Hero action must be visible");
+        expect(actionBox.y).toBeGreaterThan(textBox.y + textBox.height);
+        if (width < 768) expect(actionBox.height).toBeGreaterThanOrEqual(48);
+      }
+      await expect(actions.first()).toHaveCSS("transition-property", "none");
       await hero.screenshot({ path: testInfo.outputPath(`hero-${width}.png`) });
       await expectNoHorizontalOverflow(page);
     }
@@ -1588,7 +1582,7 @@ test.describe("Home Page @smoke @medium @large", () => {
         element.style.width = "calc(100% - 155px)";
       });
     }
-    const phase = page.getByText("Phase 0 (Allowlist)", {
+    const phase = page.getByText("Phase 0 (Allowlist) Starts In", {
       exact: true,
     });
     const mint = page.getByRole("link", { name: "Mint", exact: true });
@@ -1598,6 +1592,7 @@ test.describe("Home Page @smoke @medium @large", () => {
       page.getByRole("main").locator('[data-tooltip-id="allowlist-info"]')
     ).toBeVisible();
     await expect(mint).toHaveAttribute("href", "/the-memes/mint");
+    await expect(mint).toHaveCSS("border-radius", "8px");
     await expect(timer).toHaveText(/^12d : 23h : 59m : \d{2}s$/);
     const values = page.getByRole("timer").locator("[data-countdown-value]");
     await expect(values).toHaveCount(4);
@@ -1606,17 +1601,18 @@ test.describe("Home Page @smoke @medium @large", () => {
       (await page.evaluate(() => innerWidth < 768)) ? "20px" : "24px"
     );
     await expect(values.first()).toHaveCSS("font-weight", "700");
-    await expect(page.getByText("Starts In", { exact: true })).toBeVisible();
+    await expect(page.getByText("Starts In", { exact: true })).toHaveCount(0);
     const phaseBounds = await phase.boundingBox();
     const mintBounds = await mint.boundingBox();
     const compact = await timer.evaluate((element) => {
       const row = element.closest("[data-countdown-timing]")!;
       const box = element.closest("[data-home-countdown]")!;
-      const label = row.firstElementChild!;
       return {
         timer: element.getBoundingClientRect().toJSON(),
-        label: label.getBoundingClientRect().toJSON(),
         row: row.getBoundingClientRect().toJSON(),
+        rowBackground: getComputedStyle(row).backgroundColor,
+        rowBorder: getComputedStyle(row).borderWidth,
+        boxBorder: getComputedStyle(box).borderWidth,
         box: box.getBoundingClientRect().toJSON(),
         paddingX: Number.parseFloat(getComputedStyle(box).paddingLeft),
         paddingBottom: Number.parseFloat(getComputedStyle(box).paddingBottom),
@@ -1637,18 +1633,18 @@ test.describe("Home Page @smoke @medium @large", () => {
     expect(compact.timer.bottom).toBeLessThanOrEqual(
       compact.box.bottom - compact.paddingBottom
     );
-    if (
-      isMobileWebProject(testInfo.project.name) ||
-      compact.timer.top >= compact.label.bottom
-    ) {
-      expect(compact.timer.top).toBeGreaterThanOrEqual(
-        compact.label.bottom + 8
-      );
-    } else {
-      expect(compact.timer.left).toBeGreaterThanOrEqual(
-        compact.label.right + 16
-      );
-    }
+    // The requested layout restores the complete heading above a dark timer row.
+    expect(compact.rowBackground).toBe("rgb(19, 19, 22)");
+    expect(compact.rowBorder).toBe("0px");
+    expect(compact.boxBorder).toBe("0px");
+    expect(compact.row.height).toBeGreaterThanOrEqual(48);
+    expect(compact.timer.top).toBeGreaterThanOrEqual(compact.row.top + 12);
+    expect(
+      Math.abs(
+        compact.timer.left + compact.timer.width / 2 -
+          (compact.row.left + compact.row.width / 2)
+      )
+    ).toBeLessThanOrEqual(1);
     expect(mintBounds.y).toBeGreaterThanOrEqual(compact.box.bottom + 10);
     expect(mintBounds.height).toBe(44);
     if ((await page.evaluate(() => innerWidth)) >= 1024) {
@@ -1684,8 +1680,14 @@ test.describe("Home Page @smoke @medium @large", () => {
             ),
           };
         });
-        // Wrapped mobile timers align with the phase rather than floating right.
-        expect(mobileLayout.timer.left).toBe(mobileLayout.phase.left);
+        // The timer stays centered in its own row below the complete heading.
+        expect(mobileLayout.timer.top).toBeGreaterThan(mobileLayout.phase.bottom);
+        expect(
+          Math.abs(
+            mobileLayout.timer.left + mobileLayout.timer.width / 2 -
+              (mobileLayout.box.left + mobileLayout.box.width / 2)
+          )
+        ).toBeLessThanOrEqual(1);
         expect(
           mobileLayout.badge.top >= mobileLayout.phase.bottom ||
             mobileLayout.badge.left >= mobileLayout.phase.right

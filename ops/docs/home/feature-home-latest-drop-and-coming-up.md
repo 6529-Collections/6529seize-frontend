@@ -64,23 +64,23 @@ Use this page for visibility rules, state switches, and route targets.
      elapsed, and a next winner exists.
 4. `Latest Drop` groups its details beside the artwork: title and artist;
    stats with `Edition Details` directly below; `Your allowance` when a wallet is
-   connected; and the
-   countdown and mint action followed by subscription awareness.
+   connected; subscription awareness; then the countdown and mint action.
    `Edition`, `Status`, `Mint price`, and `Floor` share one row at 640px and
    wider, with a two-column layout on smaller screens.
    Countdown states are `Upcoming`, `Live`, `Mint Complete`, or `Error`. When
    the card has an explicit Main Stage mapping, edition details also includes
    `Main Stage Submission` → `View`.
-   The homepage countdown places the phase name and status pill in the first
-   row. The second row shows `Starts In` or `Ends In`, the existing allowlist
-   information icon when applicable, and the segmented timer. Each number is
-   zero-padded, such as `08m` and `05s`, with smaller unit labels. Days appear
-   first when at least 24 hours remain. Zero days, hours, and minutes are still
-   omitted; seconds always remain visible. The timer moves below its label
-   when space is limited. On mobile it aligns left beneath the label; a
-   four-part timer uses two balanced rows in the narrowest content slots.
+   The homepage countdown keeps the complete phase heading, such as
+   `Public Phase Ends In`, beside its status pill and the existing allowlist
+   information icon when applicable. A separate dark row below centers the
+   segmented timer. The panel and timer row use background contrast without
+   outlines. Each number is zero-padded, such as `08m` and `05s`, with
+   smaller unit labels. Days appear first when at least 24 hours remain. Zero
+   days, hours, and minutes are still omitted; seconds always remain visible.
+   A four-part timer uses two balanced rows in the narrowest content slots.
    The pill's slow ping stops under reduced motion. `Mint` remains below the
-   box, and desktop keeps the previous reserved countdown height.
+   box. Desktop keeps the previous reserved countdown height, with any extra
+   space below the controls so the subscription row and countdown stay together.
    `Edition Details` opens and closes with a brief transition, or immediately
    when reduced motion is enabled. Collapsed links are excluded from keyboard
    navigation. File type and dimensions appear inside `Edition Details` when
@@ -111,8 +111,10 @@ bring each card into view.
 The Coming up subtitle keeps “Next in queue and current vote leaders.” and
 adds the next scheduled decision when available. Times use the viewer's device
 time zone, including daylight-saving changes, in 24-hour format. Decisions on
-the viewer's current day say “Next decision today at …”; later decisions show
-the local date. The time appears after the page loads and is omitted when the
+the viewer's current day say “Next decision today at …”; the following day uses
+“tomorrow.” Decisions two to six calendar days away show the weekday; decisions
+seven or more days away show the short month and day, without a year. The full
+local date, time, and timezone remain available on hover. The time appears after the page loads and is omitted when the
 schedule is missing or the decision time has passed, until updated wave data
 provides another future decision. It describes the voting decision, not minting.
 
@@ -210,10 +212,10 @@ provides another future decision. It describes the voting decision, not minting.
   blue read-only `Subscription Minting` box, a non-mutating on/off toggle,
   optional `xN` user subscribed count when already subscribed, an
   `xN subscribers` total, a contextual profile-subscriptions action, and a
-  right-edge question-mark info link. Below 640px, the title and toggle have
-  their own row, the coverage and subscription count use the full width below,
-  and the profile action and info link share the bottom row. Wider layouts keep
-  the profile action beside the title.
+  question-mark info link. The toggle stays beside the title and the contextual
+  profile action is aligned at the far right. Counts, coverage, and the info
+  link use the full width below. Labels can wrap; the narrowest cards place the
+  action below the details, still aligned right, to avoid squeezing controls.
 - For a connected non-proxy profile, the awareness row can also show the
   compact runway summary, for example
   `Automatic · 0.18 ETH · 4 drops funded`. Its action follows the coverage
