@@ -92,7 +92,7 @@ export default function CompetitionAwareDropVote(
       hidden={props.size === SingleWaveDropVoteSize.MINI && !viewer}
       className={
         props.size === SingleWaveDropVoteSize.MINI
-          ? "is-mini tw-group/inline-vote tw-grid [&[hidden]]:tw-hidden tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-3 tw-gap-y-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 [&>fieldset>button]:tw-rounded-md [&>fieldset>button]:tw-text-xs [&>fieldset>button]:sm:tw-min-h-[22px] [&>fieldset]:tw-col-start-2 [&>fieldset]:tw-row-start-1 [&>fieldset]:tw-items-center [&>fieldset]:tw-rounded-lg [&>fieldset]:tw-p-0.5"
+          ? "is-mini tw-group/inline-vote tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-3 tw-gap-y-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 [&>fieldset>button]:tw-inline-flex [&>fieldset>button]:tw-items-center [&>fieldset>button]:tw-justify-center [&>fieldset>button]:tw-rounded-md [&>fieldset>button]:tw-text-xs [&>fieldset>button]:desktop-hover:tw-min-h-6 [&>fieldset>button]:touch-only:tw-min-h-11 [&>fieldset]:tw-col-start-2 [&>fieldset]:tw-row-start-1 [&>fieldset]:tw-items-center [&>fieldset]:tw-self-center [&>fieldset]:tw-rounded-lg [&>fieldset]:tw-p-0.5 [&[hidden]]:tw-hidden"
           : "tw-space-y-3"
       }
     >
