@@ -117,6 +117,10 @@ reached), select the header restriction control to see the reason, then use
 - While an interactive artwork hash is being verified, `Continue` stays
   disabled until that check finishes.
 - Numeric trait fields reject `0`.
+- Submission text metadata drops leading and trailing whitespace, including
+  non-breaking spaces, tabs, and blank lines, before signing. Spaces and paragraph
+  breaks inside the text are kept.
+  Required fields containing only whitespace still need text before proceeding.
 - Upload checks:
   - accepted formats include `PNG`, `JPG/JPEG`, `GIF`, `MP4/MOV`, and
     binary `GLB` models; JSON `.gltf` files are not accepted, and `.glb`
