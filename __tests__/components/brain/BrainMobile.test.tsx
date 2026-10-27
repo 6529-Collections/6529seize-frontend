@@ -416,6 +416,27 @@ describe("BrainMobile", () => {
     expect(screen.getByTestId("drop")).toBeInTheDocument();
   });
 
+  it("closes an unavailable drop immediately and preserves native route state", () => {
+    mockPathname = "/waves/wave-1";
+    mockSearchParams.set("drop", "d1");
+    mockDropError = new Error("Unavailable");
+    window.history.replaceState(
+      { savedTab: "chat" },
+      "",
+      "/waves/wave-1?drop=d1&tab=chat#message"
+    );
+    render(<BrainMobile>child</BrainMobile>);
+    fireEvent.keyDown(screen.getByRole("button", { name: "Close panel" }), {
+      key: "Escape",
+    });
+    expect(
+      window.location.pathname + window.location.search + window.location.hash
+    ).toBe("/waves/wave-1?tab=chat#message");
+    expect(window.history.state).toEqual({ savedTab: "chat" });
+    expect(mockReplace).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("single-drop-loading")).not.toBeInTheDocument();
+  });
+
   it("shows pending feedback during a retry that retains the previous error", () => {
     mockSearchParams.set("drop", "d1");
     mockDropError = new Error("Unavailable");

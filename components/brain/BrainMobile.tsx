@@ -1,4 +1,5 @@
 "use client";
+import { closeDropInCurrentUrl } from "@/helpers/waves/close-drop.helpers";
 import { useWaveCompetitionsTab } from "@/hooks/competitions/useWaveCompetitionsTab";
 import {
   getCompetitionRoute,
@@ -19,11 +20,18 @@ import type { ReactNode } from "react";
 import React, {
   Suspense,
   useCallback,
+  useEffect,
   useMemo,
   useState,
   useSyncExternalStore,
 } from "react";
-import { LazyMotion, domAnimation, m, useReducedMotion } from "framer-motion";
+import {
+  LazyMotion,
+  domAnimation,
+  m,
+  useReducedMotion,
+  useAnimationControls,
+} from "framer-motion";
 import BrainMobileTabs from "./mobile/BrainMobileTabs";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -275,6 +283,20 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
       searchParams,
     ]
   );
+  const viewAnimation = useAnimationControls();
+  useEffect(() => {
+    // Animate the transition without using the view as the subtree's lifetime.
+    // A tab key discarded the shared wave/chat DOM on every native tab visit.
+    viewAnimation.set({ opacity: shouldReduceMotion ? 1 : 0.92 });
+    void viewAnimation.start({
+      opacity: 1,
+      transition: shouldReduceMotion
+        ? { duration: 0 }
+        : { duration: 0.12, ease: "easeOut" },
+    });
+    return () => viewAnimation.stop();
+  }, [activeView, waveId, shouldReduceMotion, viewAnimation]);
+
   const [aboutTabState, setAboutTabState] = useState<MobileAboutTabState>({
     waveId: null,
     activeTab: SidebarTab.ABOUT,
@@ -312,12 +334,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     if (dropId) {
       beginClosingDrop(dropId);
     }
-    const params = new URLSearchParams(searchParams.toString() || "");
-    params.delete("drop");
-    const newUrl = params.toString()
-      ? `${pathname}?${params.toString()}`
-      : pathname || getHomeRoute();
-    router.replace(newUrl, { scroll: false });
+    closeDropInCurrentUrl();
   };
 
   const isDropOpen =
@@ -472,10 +489,10 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
           ))}
         <LazyMotion features={domAnimation}>
           <m.div
-            key={activeView}
+            key={waveId ?? "root"}
             {...swipeBackHandlers}
             initial={shouldReduceMotion ? false : { opacity: 0.92 }}
-            animate={{ opacity: 1 }}
+            animate={viewAnimation}
             transition={
               shouldReduceMotion
                 ? { duration: 0 }
