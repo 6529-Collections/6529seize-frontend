@@ -3826,9 +3826,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     const dialog = page.getByRole("dialog", { name: "Vote for this artwork" });
     const toggle = dialog.getByRole("switch", { name: "Explain vote" });
     await expect(toggle).not.toBeChecked();
-    const voteHeading = dialog.locator(
-      ".is-vote-panel > div > p > span:first-child"
-    );
+    const voteHeading = page
+      .getByRole("dialog", { name: "Vote for this artwork" })
+      .locator(".is-vote-panel > div > p > span:first-child");
     const modeTabs = dialog.getByRole("group", { name: "Vote input mode" });
     const expectCenteredVoteHeader = async () => {
       const labelBox = await voteHeading.boundingBox();
@@ -3843,8 +3843,12 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       ).toBeLessThan(2);
     };
     await expectCenteredVoteHeader();
-    const creditSummary = dialog.locator(".is-vote-panel dl:visible");
-    const creditGroups = creditSummary.locator(":scope > div");
+    const creditSummary = page
+      .getByRole("dialog", { name: "Vote for this artwork" })
+      .locator(".is-vote-panel dl:visible");
+    const creditGroups = page
+      .getByRole("dialog", { name: "Vote for this artwork" })
+      .locator(".is-vote-panel dl:visible > div");
     await expect(creditGroups).toHaveCount(2);
     await expect(creditGroups.nth(0)).toContainText("remaining");
     await expect(creditGroups.nth(1)).toContainText(/of.*credits spent/);
