@@ -547,7 +547,8 @@ jobs:
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ${{ matrix.runner }}
     # Museum recovery (25m), browser installation (10m), and browser phases
-    # (10m + 20m) need 65m, plus checkout/setup and evidence upload.
+    # (10m + 20m) need 65m; the optional lock-tool install adds at most 5m.
+    # Leave the remaining 5m for checkout/setup and evidence upload.
     timeout-minutes: ${{ startsWith(matrix.lane, 'playwright-museum-') && 75 || 60 }}
     permissions:
       contents: read
@@ -1167,6 +1168,18 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-node22-playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Ensure package-lock inspection tool
+        if: startsWith(matrix.lane, 'playwright-museum-')
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          # Custom Linux runners may omit psmisc. Provide fuser before an
+          # install timeout could leave apt holding locks needed by recovery.
+          if ! command -v fuser >/dev/null; then
+            sudo apt-get -o DPkg::Lock::Timeout=120 install --no-install-recommends -y psmisc
+          fi
+          command -v fuser >/dev/null
 
       - name: Install Playwright dependencies
         id: playwright_dependencies_primary

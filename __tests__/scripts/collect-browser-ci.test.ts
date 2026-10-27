@@ -32,7 +32,6 @@ function select(
       playwright_critical_shell: { required: false },
       playwright_museum: { required: false },
       playwright_artwork_documentation: { required: false },
-      playwright_native_competition: { required: false },
       ...extraChecks,
     },
   };

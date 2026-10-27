@@ -15,6 +15,88 @@ const parse = (file: string) => {
   return { source, workflow: YAML.parse(source) };
 };
 
+describe("staging Ubuntu mirror preparation", () => {
+  const steps = parse("staging-e2e.yml").workflow.jobs["staging-packs"].steps;
+  const preparation = steps.find(
+    (step: { name?: string }) =>
+      step.name === "Use HTTPS Ubuntu archive for browser dependencies"
+  );
+  // Execute the actual inline program, changing only its file argument. No
+  // package manager, sudo, host APT files or network access is involved.
+  const source = (preparation.run as string)
+    .split("<<'NODE'\n")[1]!
+    .split("\nNODE")[0]!;
+
+  it("prepares the mirror before apt can acquire installation locks", () => {
+    const installIndex = steps.findIndex(
+      (step: { id?: string }) => step.id === "playwright_dependencies_primary"
+    );
+    expect(steps.indexOf(preparation)).toBeLessThan(installIndex);
+    expect(preparation.run).toContain(
+      'sudo "$(command -v node)" - /etc/apt/apt-mirrors.txt'
+    );
+    expect(preparation["continue-on-error"]).toBeUndefined();
+  });
+
+  it.each([
+    [
+      "hosted runner priorities and CRLF",
+      "http://azure.archive.ubuntu.com/ubuntu/\tpriority:1\r\nhttps://archive.ubuntu.com/ubuntu/\tpriority:2\r\nhttps://security.ubuntu.com/ubuntu/\tpriority:3\r\n",
+      "https://archive.ubuntu.com/ubuntu/\tpriority:1\r\nhttps://archive.ubuntu.com/ubuntu/\tpriority:2\r\nhttps://security.ubuntu.com/ubuntu/\tpriority:3\r\n",
+    ],
+    [
+      "bare URI",
+      "http://azure.archive.ubuntu.com/ubuntu",
+      "https://archive.ubuntu.com/ubuntu",
+    ],
+    [
+      "indented URI",
+      "  http://azure.archive.ubuntu.com/ubuntu priority:1\n",
+      "  https://archive.ubuntu.com/ubuntu priority:1\n",
+    ],
+    [
+      "custom mirror",
+      "https://mirror.example.org/ubuntu/\n",
+      "https://mirror.example.org/ubuntu/\n",
+    ],
+    [
+      "similar URI",
+      "http://azure.archive.ubuntu.com/ubuntu-ports/\n",
+      "http://azure.archive.ubuntu.com/ubuntu-ports/\n",
+    ],
+    [
+      "comment",
+      "# http://azure.archive.ubuntu.com/ubuntu\n",
+      "# http://azure.archive.ubuntu.com/ubuntu\n",
+    ],
+    ["missing mirror list", null, null],
+  ])(
+    "preserves %s while removing only the failing endpoint",
+    (_label, before, after) => {
+      const root = fs.mkdtempSync(path.join(os.tmpdir(), "e2e-apt-mirror-"));
+      try {
+        const mirrorListPath = path.join(root, "apt-mirrors.txt");
+        if (before !== null) fs.writeFileSync(mirrorListPath, before);
+        const run = () =>
+          childProcess.spawnSync(process.execPath, ["-", mirrorListPath], {
+            input: source,
+            encoding: "utf8",
+            timeout: 5000,
+          });
+        for (let attempt = 0; attempt < 2; attempt += 1) {
+          const result = run();
+          expect(result.error).toBeUndefined();
+          expect(result.status).toBe(0);
+          if (after === null) expect(fs.existsSync(mirrorListPath)).toBe(false);
+          else expect(fs.readFileSync(mirrorListPath, "utf8")).toBe(after);
+        }
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
+    }
+  );
+});
+
 it("allows the Museum job to finish its recovery and browser budgets", () => {
   const job = parse("app-pr-ci.yml").workflow.jobs["app-checks"];
   expect(job["timeout-minutes"]).toBe(
@@ -26,7 +108,11 @@ it("allows the Museum job to finish its recovery and browser budgets", () => {
         [
           "playwright_dependencies_primary",
           "playwright_dependencies_retry",
-        ].includes(step.id ?? "") || step.name === "Install Playwright browser"
+        ].includes(step.id ?? "") ||
+        [
+          "Ensure package-lock inspection tool",
+          "Install Playwright browser",
+        ].includes(step.name ?? "")
     )
     .reduce(
       (minutes: number, step: { "timeout-minutes": number }) =>
@@ -43,7 +129,7 @@ it("allows the Museum job to finish its recovery and browser budgets", () => {
   expect(phaseBudgets).toEqual([10, 20]);
   expect(
     setupBudget + phaseBudgets.reduce((sum, minutes) => sum + minutes, 0)
-  ).toBeLessThanOrEqual(65);
+  ).toBeLessThanOrEqual(70);
 });
 
 it.each(["staging", "production"])(
@@ -119,6 +205,88 @@ function writeExecutable(root: string, name: string, source: string) {
   fs.mkdirSync(path.dirname(destination), { recursive: true });
   fs.writeFileSync(destination, source, { mode: 0o755 });
 }
+
+describe("PR Museum lock-tool prerequisite", () => {
+  const steps = parse("app-pr-ci.yml").workflow.jobs["app-checks"].steps;
+  const prerequisite = steps.find(
+    (step: { name?: string }) =>
+      step.name === "Ensure package-lock inspection tool"
+  );
+
+  it("provides the tool before either dependency installation can acquire locks", () => {
+    expect(prerequisite.if).toBe(
+      "startsWith(matrix.lane, 'playwright-museum-')"
+    );
+    expect(prerequisite["timeout-minutes"]).toBe(5);
+    expect(prerequisite["continue-on-error"]).toBeUndefined();
+    const installIndex = steps.findIndex(
+      (step: { id?: string }) => step.id === "playwright_dependencies_primary"
+    );
+    expect(steps.indexOf(prerequisite)).toBeLessThan(installIndex);
+  });
+
+  it.each([
+    ["present", 0, []],
+    ["missing", 0, ["install"]],
+    ["install-fails", 77, ["install"]],
+    ["tool-still-missing", 1, ["install"]],
+  ])(
+    "handles %s without running a real package manager",
+    (mode, status, events) => {
+      const root = fs.mkdtempSync(path.join(os.tmpdir(), "e2e-lock-tool-"));
+      try {
+        writeExecutable(root, "sudo", '#!/bin/bash\nexec "$@"\n');
+        writeExecutable(
+          root,
+          "apt-get",
+          `#!/bin/bash
+[[ "$*" == '-o DPkg::Lock::Timeout=120 install --no-install-recommends -y psmisc' ]] || exit 99
+echo install >> "$EVENTS"
+[[ "$TOOL_MODE" != install-fails ]] || exit 77
+if [[ "$TOOL_MODE" != tool-still-missing ]]; then
+  echo '#!/bin/bash' > "$TOOL_BIN/fuser"
+  chmod +x "$TOOL_BIN/fuser"
+fi
+`
+        );
+        // Deliberately exclude the host's PATH: the missing-tool cases must remain
+        // missing even if the test runner itself already supplies fuser.
+        const chmod = childProcess
+          .execFileSync("which", ["chmod"], { encoding: "utf8" })
+          .trim();
+        fs.symlinkSync(chmod, path.join(root, "bin", "chmod"));
+        if (mode === "present")
+          writeExecutable(root, "fuser", "#!/bin/bash\nexit 0\n");
+        const eventFile = path.join(root, "events");
+        const result = childProcess.spawnSync(
+          "/bin/bash",
+          ["-c", prerequisite.run],
+          {
+            cwd: root,
+            encoding: "utf8",
+            timeout: 5000,
+            env: {
+              ...process.env,
+              PATH: path.join(root, "bin"),
+              TOOL_BIN: path.join(root, "bin"),
+              TOOL_MODE: mode,
+              EVENTS: eventFile,
+            },
+          }
+        );
+        expect(result.error).toBeUndefined();
+        expect(result.status).toBe(status);
+        expect(
+          fs.existsSync(eventFile)
+            ? fs.readFileSync(eventFile, "utf8").trim().split("\n")
+            : []
+        ).toEqual(events);
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
+    }
+  );
+});
 
 function selectionFixture(
   environment: string,
