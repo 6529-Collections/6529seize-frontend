@@ -3787,7 +3787,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await input.fill("-25");
       await dialog.getByText("Explain vote", { exact: true }).click();
       const rationale = dialog.getByLabel("Optional rationale reply");
+      await expect(rationale).toHaveValue("");
+      await expect(rationale).toHaveAttribute(
+        "placeholder",
+        /Vote rationale \(-25.*at time of posting\):/
+      );
+      await expect(
+        dialog.getByText("Add rationale text or turn Explain vote off.")
+      ).toHaveCount(0);
+      await expect(
+        dialog.getByRole("button", { name: "Save vote", exact: true })
+      ).toBeEnabled();
       await rationale.fill("An explanation kept while changing input modes");
+      await expect(
+        dialog.getByRole("button", { name: "Save vote", exact: true })
+      ).toBeEnabled();
       await mode.getByRole("button", { name: "Slider", exact: true }).click();
       // The range input uses a logarithmic position; the thumb shows the vote.
       await expect(dialog.getByText("-25", { exact: true })).toBeAttached();
@@ -3853,15 +3867,66 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     const dialog = page.getByRole("dialog", { name: "Vote for this artwork" });
     const toggle = dialog.getByRole("switch", { name: "Explain vote" });
     await expect(toggle).not.toBeChecked();
+    const voteHeading = page
+      .getByRole("dialog", { name: "Vote for this artwork" })
+      .locator(".is-vote-panel > div > p > span:first-child");
+    const modeTabs = dialog.getByRole("group", { name: "Vote input mode" });
+    const expectCenteredVoteHeader = async () => {
+      const labelBox = await voteHeading.boundingBox();
+      const tabsBox = await modeTabs.boundingBox();
+      expect(labelBox).not.toBeNull();
+      expect(tabsBox).not.toBeNull();
+      expect(labelBox!.x + labelBox!.width).toBeLessThan(tabsBox!.x);
+      expect(
+        Math.abs(
+          labelBox!.y + labelBox!.height / 2 - tabsBox!.y - tabsBox!.height / 2
+        )
+      ).toBeLessThan(2);
+    };
+    await expectCenteredVoteHeader();
+    const creditSummary = page
+      .getByRole("dialog", { name: "Vote for this artwork" })
+      .locator(".is-vote-panel dl:visible");
+    const creditGroups = page
+      .getByRole("dialog", { name: "Vote for this artwork" })
+      .locator(".is-vote-panel dl:visible > div");
+    await expect(creditGroups).toHaveCount(2);
+    await expect(creditGroups.nth(0)).toContainText("remaining");
+    await expect(creditGroups.nth(1)).toContainText(/of.*credits spent/);
+    for (const label of [
+      "Available credits",
+      "Spent credits",
+      "Remaining credits",
+    ]) {
+      await expect(creditSummary.getByText(label, { exact: true })).toHaveClass(
+        /tw-sr-only/
+      );
+    }
+    const creditBoxes = await Promise.all([
+      creditGroups.nth(0).boundingBox(),
+      creditGroups.nth(1).boundingBox(),
+    ]);
+    for (const box of creditBoxes) {
+      expect(box).not.toBeNull();
+      // The summary can wrap between groups, but each group stays on one line.
+      expect(box!.height).toBeLessThanOrEqual(18);
+    }
+    const voteSlider = await dialog.getByRole("slider").first().boundingBox();
+    expect(voteSlider).not.toBeNull();
+    expect(creditBoxes[0]!.y).toBeGreaterThan(voteSlider!.y);
     await dialog.getByRole("button", { name: "Numeric", exact: true }).click();
+    await expectCenteredVoteHeader();
     await dialog.getByRole("spinbutton", { name: "Your vote" }).fill("25");
     await dialog.getByText("Explain vote", { exact: true }).click();
     await expect(toggle).toBeChecked();
     const rationale = dialog.getByLabel("Optional rationale reply");
-    await expect(rationale).toHaveValue(
-      "Vote rationale (+25 at time of posting):\n\n"
+    await expect(rationale).toHaveValue("");
+    await expect(rationale).toHaveAttribute(
+      "placeholder",
+      "Vote rationale (+25 at time of posting):"
     );
-    await rationale.fill("My competition rationale");
+    await rationale.pressSequentially("My competition rationale");
+    await expect(rationale).toHaveValue("My competition rationale");
     await expectNoHorizontalOverflow(page);
     await page.screenshot({
       path: testInfo.outputPath("competition-vote-with-reply.png"),
@@ -3987,7 +4052,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         .getByRole("button", { name: "Numeric", exact: true })
         .click();
       await expect(input).toHaveValue("-25");
-      await expect(dialog.getByText("75", { exact: true })).toBeVisible();
+      await expect(
+        dialog.getByText("75", { exact: true }).filter({ visible: true })
+      ).toBeVisible();
       await expect(
         dialog.getByText("Loading competition…", { exact: true })
       ).toHaveCount(0);
@@ -3999,7 +4066,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       releaseRefresh();
       await refreshed;
       await expect(input).toHaveValue("-25");
-      await expect(dialog.getByText("75", { exact: true })).toBeVisible();
+      await expect(
+        dialog.getByText("75", { exact: true }).filter({ visible: true })
+      ).toBeVisible();
     } finally {
       releaseContext();
       releaseRefresh();
