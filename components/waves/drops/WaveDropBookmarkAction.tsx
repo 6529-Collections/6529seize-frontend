@@ -51,15 +51,21 @@ function AuthenticatedBookmarkAction({
       }}
       className={
         mobile
-          ? "tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 tw-text-left tw-text-base tw-font-semibold tw-text-iron-300 active:tw-bg-iron-800 disabled:tw-opacity-50"
-          : "tw-flex tw-w-full tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-font-medium tw-text-iron-300 hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-primary-400 disabled:tw-opacity-50"
+          ? "tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 tw-text-left tw-text-iron-300 active:tw-bg-iron-800 disabled:tw-opacity-50"
+          : "tw-flex tw-w-full tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-iron-300 hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-primary-400 disabled:tw-opacity-50"
       }
     >
       <Icon
         className={mobile ? "tw-size-5 tw-shrink-0" : "tw-size-4 tw-shrink-0"}
         aria-hidden="true"
       />
-      <span>{label}</span>
+      <span
+        className={
+          mobile ? "tw-text-base tw-font-semibold" : "tw-text-sm tw-font-medium"
+        }
+      >
+        {label}
+      </span>
     </button>
   );
 }
