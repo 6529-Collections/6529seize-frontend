@@ -15,6 +15,7 @@ The craft surface combines:
 - source URL cards with copy/open actions for image and animation assets
 - traits and core-info editing
 - Arweave publishing
+- asynchronous `Launch` and metadata-only `Update Claim` controls
 - craft-focused status pills that stay on publish state until you move into the
   launch workflow
 - distribution-photo review
@@ -58,6 +59,11 @@ The craft surface combines:
    `Publish to Arweave`.
 8. After publish starts, watch the status pill until it returns to `Published`
    and published Arweave links are available.
+9. After EMMA Process and Finalize completes, click `Launch`. It queues
+   initialization immediately using the fixed mint calendar and shows progress.
+10. After saving and republishing later metadata changes, click `Update Claim`.
+    The update preserves active mint settings and completed allocations. Unsaved
+    edits, pending/manual work or blocked execution disable conflicting requests.
 
 ## Common Scenarios
 
@@ -86,6 +92,9 @@ The craft surface combines:
 - Arweave publishing:
   - Publish image, animation, and metadata after saving draft changes.
   - Copy or open the resulting Arweave links once they exist.
+- Claim controls:
+  - `Launch` queues initialization immediately after publication and completed EMMA processing.
+  - `Update Claim` synchronizes republished metadata while retaining mint settings and completed allocations.
 - Distribution review:
   - Inspect distribution photos and grouped phase summaries while preparing the
     claim for launch.
@@ -136,15 +145,14 @@ The craft surface combines:
 ## Limitations / Notes
 
 - Craft access is limited to distribution-admin wallets.
-- Arweave publishing is a separate step after editing; saving metadata alone
-  does not publish the claim.
+- Arweave publishing is a separate step after editing; saving metadata alone does not publish the claim.
+- `Launch` and `Update Claim` become available against published metadata and track asynchronous backend execution.
 - Media-detail checks do not require all editable draft fields to be complete.
   HTML animation details remain format-only, and GLB does not require video
   dimensions, duration, or codecs.
 - The craft editor is section-based. Different sections can have independent
   dirty state and save actions.
-- Published links are informational only; launch initialization happens from the
-  separate launch route family.
+- Published links are informational. Craft `Launch` queues initialization; the Launch route retains coordinated manual operations and the execution timeline.
 
 ## Related Pages
 
