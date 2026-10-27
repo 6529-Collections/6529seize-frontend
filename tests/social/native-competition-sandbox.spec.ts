@@ -3678,6 +3678,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         submission_context: {
           status: "ACTIVE",
           has_metadata: false,
+          is_additional_action_promised: true,
           voting: {
             is_open: true,
             total_votes_given: 0,
@@ -3730,6 +3731,46 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       });
       await badge.click();
       const dialog = page.getByRole("dialog").last();
+      if (popup === "artist submissions") {
+        const promiseBadge = dialog.getByRole("button", {
+          name: "Additional Action",
+          exact: true,
+        });
+        await expect(promiseBadge).toBeVisible();
+        await promiseBadge.focus();
+        const promiseTooltip = page
+          .getByRole("tooltip", { includeHidden: true })
+          .filter({
+            hasText:
+              "The creator marked this submission as promising an extra action",
+          })
+          .filter({ visible: true });
+        await expect(promiseTooltip).toBeVisible();
+        await expect(promiseTooltip).toBeInViewport({ ratio: 1 });
+        await expect
+          .poll(() =>
+            promiseTooltip.evaluate((element) => {
+              const box = element.getBoundingClientRect();
+              const previous = element.style.pointerEvents;
+              element.style.pointerEvents = "auto";
+              const hit = document.elementFromPoint(
+                box.left + box.width / 2,
+                box.top + box.height / 2
+              );
+              element.style.pointerEvents = previous;
+              return hit !== null && element.contains(hit);
+            })
+          )
+          .toBe(true);
+        await promiseBadge.click();
+        // The dialog wrapper has fixed-position children and no box of its own.
+        await expect(promiseBadge).toBeVisible();
+        await expect(
+          dialog.getByRole("button", { name: "Close Gallery", exact: true })
+        ).toBeVisible();
+        await expect(page).toHaveURL(`${ROOT}/alpha?drop=${artwork.id}`);
+        expect(sandbox.requests).toEqual([]);
+      }
       const mode = dialog.getByRole("group", { name: "Vote input mode" });
       await expect(mode).toHaveCount(1);
       await expect(dialog.getByRole("slider").first()).toBeVisible();
@@ -8877,6 +8918,118 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       }
     });
   }
+
+  test("keeps Additional Action tooltips above cards and inside the viewport", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${MEMES_WAVE}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const fixture = await response.json();
+    fixture.wave.id = MEMES_WAVE;
+    // One promised action and one ordinary submission prove conditional visibility.
+    const artwork = ["alpha", "beta"].map((id, index) => ({
+      ...fixture.drops[0],
+      id: entryDropId(id),
+      drop_type: "SUBMISSION",
+      title: `Tooltip artwork ${index + 1}`,
+      submission_context: {
+        status: "ACTIVE",
+        has_metadata: false,
+        is_additional_action_promised: index === 0,
+        voting: {
+          is_open: true,
+          total_votes_given: 100,
+          current_calculated_vote: 100,
+          predicted_final_vote: 100,
+          voters_count: 1,
+          place: index + 1,
+          context_profile_context: { can_vote: false, current: 0 },
+        },
+      },
+    }));
+    await installArtworkCompetitionResources(
+      page,
+      MEMES_WAVE,
+      fixture.wave,
+      () => artwork
+    );
+    const url = `/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard`;
+    const isNativeApp = testInfo.project.name === "web-mobile-chromium";
+    if (isNativeApp) {
+      await installSurfaceSimulation(
+        page.context(),
+        "capacitor-ios-sim",
+        testInfo.project.use.baseURL
+      );
+    }
+    await page.goto(url);
+    await dismissNextDevTools(page);
+    await expectNativeLeaderboardReady(page, false);
+    const widths =
+      testInfo.project.name === "web-desktop-chromium" ? [1440, 390] : [390];
+    for (const width of widths) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const view of ["Grid view", "List view"]) {
+        await page.getByRole("tab", { name: view, exact: true }).click();
+        const badge = page.getByText("Additional Action", { exact: true });
+        await expect(badge).toHaveCount(1);
+        await expect
+          .poll(() => badge.evaluate((element) => element.tagName))
+          .toBe(isNativeApp ? "SPAN" : "BUTTON");
+        await badge.hover();
+        const tooltip = page.getByRole("tooltip").filter({
+          hasText:
+            "The creator marked this submission as promising an extra action",
+        });
+        await expect(tooltip).toBeVisible();
+        await expect(tooltip).toBeInViewport({ ratio: 1 });
+        await expect
+          .poll(() =>
+            tooltip.evaluate((element) => {
+              const box = element.getBoundingClientRect();
+              return box.left >= 0 && box.right <= window.innerWidth;
+            })
+          )
+          .toBe(true);
+        await expect
+          .poll(() =>
+            tooltip.evaluate((element) => {
+              const box = element.getBoundingClientRect();
+              const previous = element.style.pointerEvents;
+              // Include the tooltip in hit testing to detect neighboring cards painting over it.
+              element.style.pointerEvents = "auto";
+              const unobscured = [0.1, 0.5, 0.9].every((fraction) => {
+                const hit = document.elementFromPoint(
+                  box.left + box.width * fraction,
+                  box.top + box.height / 2
+                );
+                return hit !== null && element.contains(hit);
+              });
+              element.style.pointerEvents = previous;
+              return unobscured;
+            })
+          )
+          .toBe(true);
+        // Native touch cards own the focus target in both grid and list views.
+        if (!isNativeApp) {
+          await badge.click();
+          await expect(page).toHaveURL(url);
+          await badge.press("Escape");
+          await expect(tooltip).toBeHidden();
+          await expect(badge).toBeFocused();
+        } else {
+          await page.keyboard.press("Escape");
+          await expect(tooltip).toBeHidden();
+        }
+      }
+    }
+    expect(sandbox.requests).toEqual([]);
+  });
 
   for (const surface of ["web", "app"] as const) {
     test(`preserves populated legacy Main Stage artwork in ${surface} views`, async ({

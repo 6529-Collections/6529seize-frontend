@@ -73,6 +73,10 @@ cards omit Your allowance until a wallet address is available. Connected wallets
 retain allocation pills and distinct loading, unpublished, empty, and unavailable
 states; an allocation does not guarantee that it remains mintable.
 
+The `waves.artist-submissions-popup` record explains the artist activity icon,
+Active Submissions promise badges, and the distinction between reading a badge,
+opening artwork, and casting a vote.
+
 The `waves.drop.editing` record covers author-only editing, the normal edit
 window, and unlimited editing of the wave's current pinned description drop.
 
