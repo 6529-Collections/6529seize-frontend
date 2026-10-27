@@ -22,7 +22,7 @@
   min-block-size: var(--collect-detail-min-height, 7.75rem);
 }
 
-.detailPanel:has([data-collect-detail-header])
+.detailPanel:has([data-collect-detail-header], [data-collect-detail-utilities])
   > .detailPanelContent
   > [data-collect-market-link],
 .detailPanel [data-collect-trade-status]:empty {

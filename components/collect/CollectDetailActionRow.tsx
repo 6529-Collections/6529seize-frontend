@@ -36,11 +36,7 @@ export function CollectDetailHeader({
 }
 
 /** Allows supporting controls to occupy slots in the shared action grid. */
-function CollectDetailFooter({
-  children,
-}: {
-  readonly children?: ReactNode;
-}) {
+function CollectDetailFooter({ children }: { readonly children?: ReactNode }) {
   const layout = useContext(CollectDetailLayout);
   if (!layout) return children;
   return (
