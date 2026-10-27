@@ -23,6 +23,7 @@ import { t } from "@/i18n/messages";
 import DevicesIcon from "@/components/common/icons/DevicesIcon";
 import HeaderUserConnectedAccounts from "./connected/HeaderUserConnectedAccounts";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
+import HeaderBookmarksLink from "./HeaderBookmarksLink";
 import HeaderArtworkDocumentationLink from "./HeaderArtworkDocumentationLink";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
@@ -444,6 +445,7 @@ export default function HeaderUserMenuDropdown({
                         />
                       </Link>
                     </div>
+                    <HeaderBookmarksLink onClose={onClose} />
                     <HeaderArtworkDocumentationLink
                       onClose={onClose}
                       enabled={artworkDocumentationEnabled}

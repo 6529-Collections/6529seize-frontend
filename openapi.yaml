@@ -8573,6 +8573,38 @@ paths:
                 $ref: "#/components/schemas/ApiDrop"
         "404":
           description: Drop not found
+  /drops-bookmarked/status:
+    get:
+      tags:
+        - Drops
+      summary: Get the signed-in owner's accessible bookmark count
+      description: >-
+        Private to the authenticated owner, independently of the active proxy
+        profile.
+      operationId: getDropBookmarksStatus
+      parameters:
+        - name: drop_id
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drops/drop-bookmarks-status.handler"
+          name: getDropBookmarksStatus
+      responses:
+        "200":
+          description: Accessible bookmark count for the authenticated owner
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropBookmarksStatus"
+        "403":
+          description: Authentication with a profile required
   /drops-bookmarked/:
     get:
       tags:
@@ -8580,7 +8612,8 @@ paths:
       summary: Get bookmarked drops for authenticated user
       description: >-
         Requires the user to be authenticated. Returns drops bookmarked by the
-        current user, sorted by bookmark time.
+        authenticated owner, independently of the active proxy profile, sorted
+        by bookmark time.
       operationId: getBookmarkedDrops
       parameters:
         - name: wave_id
@@ -29126,6 +29159,19 @@ components:
         attachment_id:
           type: string
           maxLength: 100
+    ApiDropBookmarksStatus:
+      type: object
+      required:
+        - count
+      properties:
+        count:
+          type: integer
+          minimum: 0
+        bookmarked:
+          type: boolean
+          description: >-
+            Whether the optional drop_id is accessible and bookmarked by this
+            owner.
     ApiDropBoost:
       type: object
       required:
@@ -39293,6 +39339,9 @@ components:
         - pinned
         - identity_wave
       properties:
+        is_direct_message:
+          type: boolean
+          description: Whether conversation links should open in Messages.
         id:
           type: string
         name:

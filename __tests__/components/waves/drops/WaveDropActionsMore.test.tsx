@@ -6,6 +6,14 @@ import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+jest.mock("@/components/waves/drops/WaveDropBookmarkAction", () => ({
+  __esModule: true,
+  default: ({ onSelected }: { onSelected: () => void }) => (
+    <button type="button" onClick={onSelected}>
+      Bookmark
+    </button>
+  ),
+}));
 jest.mock(
   "@/components/waves/drops/WaveDropDocumentationAction",
   () => () => null
@@ -324,5 +332,16 @@ describe("WaveDropActionsMore", () => {
 
     expect(screen.queryByRole("button", { name: "More actions" })).toBeNull();
     expect(screen.queryByTestId("dropdown")).toBeNull();
+  });
+  it("returns keyboard focus to More after bookmarking", async () => {
+    const user = userEvent.setup();
+    render(<WaveDropActionsMore drop={drop} />);
+    const trigger = screen.getByRole("button", { name: "More actions" });
+    trigger.focus();
+    await user.keyboard("{Enter}");
+    screen.getByRole("button", { name: /^Bookmark$/ }).focus();
+    await user.keyboard("{Enter}");
+    expect(screen.queryByTestId("dropdown")).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
   });
 });
