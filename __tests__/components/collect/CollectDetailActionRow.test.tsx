@@ -113,3 +113,40 @@ it("keeps unlisted actions above the measured native navigation without adding C
   expect(within(sticky).getAllByRole("button")).toHaveLength(1);
   expect(within(sticky).queryByRole("button", { name: /Collect/ })).toBeNull();
 });
+
+it("uses the latest intersection when scrolling changes are delivered together", () => {
+  render(
+    <CollectDetailLayout.Provider
+      value={{ offerAction: <button>Make an offer</button>, marketLink: null }}
+    >
+      <CollectDetailActionRow>
+        <button>Make an offer</button>
+      </CollectDetailActionRow>
+    </CollectDetailLayout.Provider>
+  );
+  const sticky = screen.getByTestId("collect-sticky-actions");
+
+  act(() =>
+    mockIntersection(
+      [
+        { isIntersecting: true },
+        { isIntersecting: false },
+      ] as IntersectionObserverEntry[],
+      {} as IntersectionObserver
+    )
+  );
+  expect(sticky).toHaveAttribute("aria-hidden", "false");
+  expect(sticky).not.toHaveAttribute("inert");
+
+  act(() =>
+    mockIntersection(
+      [
+        { isIntersecting: false },
+        { isIntersecting: true },
+      ] as IntersectionObserverEntry[],
+      {} as IntersectionObserver
+    )
+  );
+  expect(sticky).toHaveAttribute("aria-hidden", "true");
+  expect(sticky).toHaveAttribute("inert");
+});
