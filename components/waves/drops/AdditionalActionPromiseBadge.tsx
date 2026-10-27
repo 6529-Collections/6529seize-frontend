@@ -1,10 +1,10 @@
 "use client";
 
+import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { useId, type MouseEvent } from "react";
-import { Tooltip } from "react-tooltip";
 
 const ADDITIONAL_ACTION_PROMISE_LABEL = t(
   DEFAULT_LOCALE,
@@ -57,7 +57,7 @@ export function AdditionalActionPromiseBadge({
           {ADDITIONAL_ACTION_PROMISE_LABEL}
         </span>
       )}
-      <Tooltip
+      <BodyPortalTooltip
         id={tooltipId}
         place="top"
         offset={8}
@@ -69,7 +69,7 @@ export function AdditionalActionPromiseBadge({
         className="tw-max-w-[min(20rem,calc(100vw-2rem))] tw-whitespace-normal tw-text-left tw-leading-5"
       >
         {ADDITIONAL_ACTION_PROMISE_TOOLTIP}
-      </Tooltip>
+      </BodyPortalTooltip>
       <span id={descriptionId} className="tw-sr-only">
         {ADDITIONAL_ACTION_PROMISE_TOOLTIP}
       </span>

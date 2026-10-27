@@ -170,6 +170,8 @@ function applyEffectiveAppPrCiPlan(plan) {
         "__tests__/components/waves/drops/WaveDropActionsOpen.test.tsx",
         "components/waves/drops/WaveDropMobileMenuOpen.tsx",
         "__tests__/components/waves/drops/WaveDropMobileMenuOpen.test.tsx",
+        "components/waves/drops/AdditionalActionPromiseBadge.tsx",
+        "components/utils/tooltip/BodyPortalTooltip.tsx",
         "components/waves/header/WaveJoinCta.tsx",
         "components/brain/left-sidebar/waves/BrainLeftSidebarWavePin.tsx",
         "tests/packs.manifest.cjs",
