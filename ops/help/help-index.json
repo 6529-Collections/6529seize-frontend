@@ -5,6 +5,38 @@
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "waves.artist-submissions-popup",
+      "kind": "ui_affordance",
+      "title": "Artist Submissions popup and Additional Action badge",
+      "aliases": [
+        "cup icon beside artist name",
+        "trophy submissions popup",
+        "Additional Action in submissions"
+      ],
+      "keywords": [
+        "artist",
+        "submissions",
+        "trophy",
+        "palette",
+        "additional action",
+        "promise",
+        "voting"
+      ],
+      "facts": [
+        "Select the artist activity icon beside a name to open the artist’s submissions or minted Memes. When both are available, use Active Submissions or Minted to Memes to switch views.",
+        "Active Submissions cards show Additional Action when the artist marked the artwork as promising something extra, such as an event, donation, physical item, airdrop, or future deliverable. The same amber badge appears on the leaderboard. Hover or focus the badge for its explanation; selecting the badge keeps the popup open and does not cast a vote.",
+        "Artwork cards without an additional-action promise do not show the badge. Open the artwork to inspect its details; voting remains a separate control below the card."
+      ],
+      "canonical_path": "/waves",
+      "link_label": "Open Waves",
+      "tags": ["waves", "artists", "submissions", "voting"],
+      "source_refs": [
+        "components/waves/drops/ArtistActiveSubmissionContent.tsx",
+        "components/waves/drops/AdditionalActionPromiseBadge.tsx",
+        "ops/docs/waves/drop-actions/feature-artist-preview-modal.md"
+      ]
+    },
+    {
       "id": "waves.my-submissions",
       "kind": "workflow",
       "title": "Find and confirm your competition submission",
