@@ -54,6 +54,9 @@ Badge state decides which section opens first.
 - `Active Submissions` loading state shows `Loading submissions...`.
 - `Active Submissions` cards show artwork preview, optional title, position,
   current score, submission date, and mini vote control.
+- Cards marked `Additional Action` indicate that the artist promised something
+  beyond the artwork. Hover or focus the badge for an explanation. Selecting
+  the badge keeps the popup open and does not cast a vote.
 - Submission position labels use ordinal place formatting (`1st`, `2nd`,
   `3rd`, `4th`, and so on).
 - `Minted to Memes` loading state shows `Loading minted memes...`.
@@ -79,7 +82,7 @@ header to share or copy its link. See [Wave Drop Open and Copy Links](feature-op
 - Minted-memes cards can be fewer than trophy counts when winner-drop or
   prevote-card lookups fail.
 - If no minted-memes cards are renderable, the modal shows `No minted memes
-  found.`.
+found.`.
 - On desktop web, `Esc` closes this modal.
 - Header subtitle is fixed to `The Memes Collection`.
 

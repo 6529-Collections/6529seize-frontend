@@ -379,6 +379,7 @@ const UnifiedWavesListWaves = forwardRef<
       [animatedAnnouncementRows]
     );
     useRevealActiveSidebarWave({
+      preserveScrollOnInteraction: !isDirectMessage,
       activeParentWaveId: effectiveActiveParentWaveId,
       activeWaveId: navigation.searching ? null : activeWaveId,
       filterKey: navigation.scrollKey,

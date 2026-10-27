@@ -39,6 +39,10 @@ The `home.overview` record explains the Coming up full-width vertical card
 list below 768px, keyboard navigation through card links, tablet/desktop grid,
 and drop, profile and wave destinations.
 
+The `waves.artist-submissions-popup` record explains the artist activity icon,
+Active Submissions promise badges, and the distinction between reading a badge,
+opening artwork, and casting a vote.
+
 The `waves.drop.editing` record covers author-only editing, the normal edit
 window, and unlimited editing of the wave's current pinned description drop.
 
