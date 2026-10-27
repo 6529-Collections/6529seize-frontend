@@ -45,6 +45,9 @@ The `home.overview` record distinguishes the compact homepage wave cards from
 Explore Waves. Homepage cards retain wave descriptions and activity rather than
 showing latest chat messages or message authors.
 
+The `home.overview` record describes the typography-only hero without artwork,
+while preserving the original copy, onboarding actions, and authentication rules.
+
 The `home.overview` record maps the four clickable How to start headings to
 the wallet flow, profile guide, The Memes, and Waves. It also retains the
 “Four steps into 6529.” introduction and guide link.
@@ -53,10 +56,16 @@ The `home.overview` record explains the Coming up full-width vertical card
 list below 768px, keyboard navigation through card links, tablet/desktop grid,
 and drop, profile and wave destinations. It also explains the optional next
 voting-decision time in the visitor's local time zone, including daylight-saving
-adjustments, and omission when no future scheduled decision is available.
+adjustments, and omission when no future scheduled decision is available. The
+label uses today, tomorrow, a weekday for two to six days ahead, or a short
+month/day for later dates. Its hover title retains the full local timestamp.
 
 The `home.overview` record also describes the homepage-only two-row countdown,
-with separate phase and timing labels, zero-padded segments, and responsive wrapping.
+with the complete phase heading above a dark timer row, zero-padded segments,
+and responsive wrapping. The countdown uses background contrast without outlines.
+Subscription awareness appears above the Latest Drop countdown. It keeps its
+toggle beside the title and its contextual action aligned right, with details
+below and a stacked fallback in narrow cards.
 The shared phase-selection and mint-action rules are unchanged.
 
 The `the-memes.minting` record explains that Latest Drop and mapped Next Drop

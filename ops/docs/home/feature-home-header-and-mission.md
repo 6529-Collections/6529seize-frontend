@@ -26,14 +26,12 @@ sections:
 ## User Journey
 
 1. Open `/`.
-2. The Montserrat hero shows a `6529` pill, the headline
+2. The Montserrat hero shows a small `6529` label, the headline
    `Building a decentralized network state`, and the subtitle
    `a decentralized, permissionless global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology.`
-   The copy sits beside a decorative fan of five Meme artworks on desktop and
-   above it on mobile. The fan always shows Meme cards #1–5, with #1 at the
-   front. Its selection does not change with current or upcoming mints. Artwork keeps its
-   proportions. Missing images leave a neutral frame. Reduced motion disables
-   the fan entrance and hover spread.
+   The hero is a single left-aligned typography block without artwork or
+   illustration. The headline scales with the available width, and the
+   subtitle has a readable line length. No space is reserved for hero images.
 3. Logged-out visitors see two actions beneath the subtitle, in this order:
    - `Connect wallet`, the primary action, opens the existing wallet connection flow.
    - `Start here`, the secondary action, opens `/join-6529`.
@@ -49,8 +47,6 @@ sections:
      do not show live vote totals or individual wave presence. The four wave
      tiles use fixed local thumbnails of The Memes Main Stage, Memes-Chat,
      maybe’s dive bar, and 6529 Tech Feedback.
-   - The hero fan shows the same published collection artwork for everyone,
-     including native iOS users; it contains no mint promotion or purchase action.
 5. A heart shortcut is visible on `/`:
    - Larger layouts: fixed near the top-right of the hero area
    - Mobile/app small-screen layouts: in the top header actions
@@ -82,7 +78,7 @@ sections:
 - Mobile/app small-screen: health shortcut is visible in the header action row.
 - Logged-out or unauthenticated: the compact newcomer actions appear before
   the activity sections; How to start follows the latest-drop slot.
-- Authenticated: the same hero copy and artwork remain visible; the newcomer
+- Authenticated: the same typography-only hero remains visible; the newcomer
   actions, What is 6529? explanation, and How to start are not shown. The
   hero and latest-drop sections keep their own spacing when the explanation
   is absent.
@@ -92,7 +88,7 @@ sections:
 
 - The desktop homepage health shortcut stays still, with a subtle colour change
   on hover and a visible keyboard-focus ring.
-- Reduced-motion settings keep the fan still and make button colour changes immediate.
+- Reduced-motion settings make button colour changes immediate.
 - While wallet state is initializing or connecting, the page does not assume
   the visitor is logged out. The newcomer actions, explanation, and steps appear once that state
   resolves.

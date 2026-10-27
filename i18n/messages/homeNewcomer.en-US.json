@@ -37,6 +37,7 @@
   "home.statement.after": " so any activity can be organized permissionlessly.",
   "home.statement.goal": "The long-term goal is nation-scale positive impact.",
   "home.comingUp.nextDecisionToday": "Next decision today at {time}.",
-  "home.comingUp.nextDecisionOn": "Next decision on {date} at {time}.",
+  "home.comingUp.nextDecisionTomorrow": "Next decision tomorrow at {time}.",
+  "home.comingUp.nextDecisionOn": "Next decision {date} at {time}.",
   "home.exploreWaves.gallery.subtitle": "Join the most interesting chats in crypto, where artists, collectors and developers build together."
 }

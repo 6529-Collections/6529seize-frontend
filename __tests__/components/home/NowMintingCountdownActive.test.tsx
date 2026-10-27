@@ -161,12 +161,10 @@ describe.each(["default", "home"] as const)(
           />
         );
         expect(
-          screen.getByText(variant === "home" ? phase : `${phase} ${timing}`, {
+          screen.getByText(`${phase} ${timing}`, {
             exact: true,
           })
         ).toBeInTheDocument();
-        if (variant === "home")
-          expect(screen.getByText(timing, { exact: true })).toBeInTheDocument();
         expect(
           screen.getByText(isActive ? "Live" : "Upcoming", { exact: true })
         ).toBeInTheDocument();

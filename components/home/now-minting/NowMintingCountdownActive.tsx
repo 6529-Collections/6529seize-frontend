@@ -132,55 +132,22 @@ function HomeCountdown({
   readonly countdown: CountdownData;
   readonly children: ReactNode;
 }) {
-  // Split the existing display title only; phase selection remains in the hook.
-  const titleParts = /^(.*) (Starts In|Ends In)$/.exec(countdown.title);
-  const phaseName = titleParts?.[1] ?? countdown.title;
-  const timingLabel = titleParts?.[2];
-
   return (
     <div
-      className={`tw-flex tw-flex-col tw-justify-end ${countdown.showMintBtn ? "lg:tw-min-h-[190px]" : "lg:tw-min-h-[134px]"}`}
+      className={`tw-flex tw-flex-col tw-justify-start ${countdown.showMintBtn ? "lg:tw-min-h-[190px]" : "lg:tw-min-h-[134px]"}`}
     >
       {countdown.showAllowlistInfo && <AllowlistInfoTooltip />}
       <div
         data-home-countdown
-        className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.03] tw-px-4 tw-pb-4 tw-pt-4 tw-@container/countdown max-[360px]:tw-px-3 md:tw-px-5 md:tw-pb-[18px]"
+        className="tw-rounded-xl tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 max-[360px]:tw-px-3 md:tw-px-5"
       >
         <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-2 md:tw-items-center md:tw-gap-3">
-          <span
+          <div
             data-countdown-phase
-            className="tw-min-w-0 tw-flex-1 tw-basis-20 tw-text-[15px] tw-font-medium tw-leading-[22px] tw-tracking-[-0.01em] tw-text-iron-200"
+            className="tw-flex tw-min-w-0 tw-flex-1 tw-basis-20 tw-items-center tw-gap-1.5"
           >
-            {phaseName}
-          </span>
-          <span
-            className={`tw-inline-flex tw-h-5 tw-shrink-0 tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-pl-[7px] tw-pr-2 ${countdown.isActive ? "tw-border-success/20 tw-bg-success/10" : "tw-border-amber-400/[0.16] tw-bg-amber-400/[0.07]"}`}
-          >
-            <span
-              aria-hidden="true"
-              className="tw-relative tw-flex tw-size-[5px]"
-            >
-              <span
-                className={`tw-absolute tw-inset-0 tw-animate-[ping_2.4s_cubic-bezier(0,0,0.2,1)_infinite] tw-rounded-full tw-opacity-60 motion-reduce:tw-animate-none ${countdown.isActive ? "tw-bg-success" : "tw-bg-amber-400"}`}
-              />
-              <span
-                className={`tw-relative tw-size-[5px] tw-rounded-full ${countdown.isActive ? "tw-bg-success" : "tw-bg-amber-400"}`}
-              />
-            </span>
-            <span
-              className={`tw-text-[11px] tw-font-semibold tw-leading-none tw-tracking-[0.02em] ${countdown.isActive ? "tw-text-success" : "tw-text-amber-300"}`}
-            >
-              {countdown.isActive ? "Live" : "Upcoming"}
-            </span>
-          </span>
-        </div>
-        <div
-          data-countdown-timing
-          className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-mt-2.5"
-        >
-          <div className="tw-flex tw-items-center tw-gap-1.5">
-            <span className="tw-whitespace-nowrap tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500">
-              {timingLabel}
+            <span className="tw-text-sm tw-font-medium tw-leading-5 tw-tracking-[-0.01em] tw-text-iron-200">
+              {countdown.title}
             </span>
             {countdown.showAllowlistInfo && (
               <InformationCircleIcon
@@ -188,10 +155,35 @@ function HomeCountdown({
                 data-tooltip-content="The timer displays the current time remaining for a specific phase of the drop. Please refer to the distribution plan to check if you are in the allowlist."
                 aria-label="The timer displays the current time remaining for a specific phase of the drop. Please refer to the distribution plan to check if you are in the allowlist."
                 tabIndex={0}
-                className="tw-size-4 tw-cursor-help tw-text-iron-600 tw-transition-colors focus-visible:tw-rounded-full focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none"
+                className="tw-size-4 tw-shrink-0 tw-cursor-help tw-text-iron-600 tw-transition-colors focus-visible:tw-rounded-full focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none"
               />
             )}
           </div>
+          <span
+            className={`tw-inline-flex tw-h-5 tw-shrink-0 tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-pl-[7px] tw-pr-2 ${countdown.isActive ? "tw-border-emerald-400/20 tw-bg-emerald-400/10" : "tw-border-amber-400/[0.16] tw-bg-amber-400/[0.07]"}`}
+          >
+            <span
+              aria-hidden="true"
+              className="tw-relative tw-flex tw-size-[5px]"
+            >
+              <span
+                className={`tw-absolute tw-inset-0 tw-animate-[ping_2.4s_cubic-bezier(0,0,0.2,1)_infinite] tw-rounded-full tw-opacity-60 motion-reduce:tw-animate-none ${countdown.isActive ? "tw-bg-emerald-400" : "tw-bg-amber-400"}`}
+              />
+              <span
+                className={`tw-relative tw-size-[5px] tw-rounded-full ${countdown.isActive ? "tw-bg-emerald-400" : "tw-bg-amber-400"}`}
+              />
+            </span>
+            <span
+              className={`tw-text-[11px] tw-font-semibold tw-leading-none tw-tracking-[0.02em] ${countdown.isActive ? "tw-text-emerald-400" : "tw-text-amber-300"}`}
+            >
+              {countdown.isActive ? "Live" : "Upcoming"}
+            </span>
+          </span>
+        </div>
+        <div
+          data-countdown-timing
+          className="tw-mt-2.5 tw-flex tw-min-h-12 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-px-1 tw-py-3 tw-@container/countdown md:tw-px-2.5"
+        >
           {children}
         </div>
       </div>
@@ -201,7 +193,7 @@ function HomeCountdown({
           href="/the-memes/mint"
           size="lg"
           fullWidth
-          className="tw-group/action tw-mt-2.5 tw-rounded-xl motion-reduce:tw-transition-none"
+          className="tw-group/action tw-mt-2.5 tw-rounded-lg motion-reduce:tw-transition-none"
         >
           Mint
           <ArrowRightIcon
@@ -264,7 +256,7 @@ const LiveCountdown = memo(
       <span
         role="timer"
         aria-label={display}
-        className="tw-flex tw-w-full tw-max-w-full tw-flex-wrap tw-items-baseline tw-gap-y-2 tw-tabular-nums md:tw-ml-auto md:tw-w-auto md:tw-justify-end [&:has(>span:nth-child(4))>span:nth-child(3)>[aria-hidden]]:tw-hidden @[11rem]/countdown:[&:has(>span:nth-child(4))>span:nth-child(3)>[aria-hidden]]:tw-inline [&:has(>span:nth-child(4))]:tw-grid [&:has(>span:nth-child(4))]:tw-grid-cols-2 @[11rem]/countdown:[&:has(>span:nth-child(4))]:tw-flex"
+        className="tw-flex tw-w-fit tw-max-w-full tw-flex-wrap tw-items-baseline tw-justify-center tw-gap-y-2 tw-tabular-nums [&:has(>span:nth-child(4))>span:nth-child(3)>[aria-hidden]]:tw-hidden @[11rem]/countdown:[&:has(>span:nth-child(4))>span:nth-child(3)>[aria-hidden]]:tw-inline [&:has(>span:nth-child(4))]:tw-grid [&:has(>span:nth-child(4))]:tw-grid-cols-2 @[11rem]/countdown:[&:has(>span:nth-child(4))]:tw-flex"
       >
         {display.split(" : ").map((part, index) => (
           <span

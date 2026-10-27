@@ -191,8 +191,9 @@ describe("Home subscription row visibility around hydration", () => {
       expect(space).toHaveClass("tw-@container/subscription");
       expect(space?.firstElementChild).toBeEmptyDOMElement();
       expect(space?.firstElementChild).toHaveClass(
-        "tw-h-[7.625rem]",
-        "@[22.125rem]/subscription:tw-h-[5.375rem]"
+        "tw-h-[7.375rem]",
+        "@[14.125rem]/subscription:tw-h-[6.375rem]",
+        "@[19.5rem]/subscription:tw-h-[5.375rem]"
       );
     }
   );
