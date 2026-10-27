@@ -87,7 +87,8 @@ If the connected profile has a primary wallet, the form pre-fills:
   - `About the Artist` and `Artwork Commentary` must contain text beyond spaces,
     tabs, or blank lines
   - leading and trailing whitespace is removed before signing and submitting;
-    spaces and paragraph breaks within the text are preserved
+    this includes non-breaking spaces, tabs, and blank lines; spaces and
+    paragraph breaks within the text are preserved
 - Metadata size checks:
   - each stored metadata value must stay at or below `5000` characters
   - text counters and limits use the value after removing leading and trailing
