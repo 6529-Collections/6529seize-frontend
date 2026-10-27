@@ -471,17 +471,19 @@ jobs:
 
           run_git fetch --no-tags origin "$BRANCH"
           remote_sha="$(run_git rev-parse FETCH_HEAD)"
-          if [ "$remote_sha" != "$EXPECTED_SHA" ]; then
-            echo "origin $BRANCH is $remote_sha, expected $EXPECTED_SHA." >&2
-            echo "A newer staging push superseded this run; refusing to deploy stale bytes." >&2
+          # A later push may queue while this run builds. Require membership
+          # in staging history, then use this run's verified source and bytes.
+          run_git cat-file -e "$EXPECTED_SHA^{commit}"
+          if ! run_git merge-base --is-ancestor "$EXPECTED_SHA" "$remote_sha"; then
+            echo "Expected source $EXPECTED_SHA is not in origin $BRANCH history ($remote_sha)." >&2
             exit 1
           fi
           run_git reset --hard HEAD
           run_git clean -fd generated
-          run_git checkout -B "$BRANCH" FETCH_HEAD
+          run_git checkout -B "$BRANCH" "$EXPECTED_SHA"
           run_git config "branch.$BRANCH.remote" origin
           run_git config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
-          run_git reset --hard FETCH_HEAD
+          run_git reset --hard "$EXPECTED_SHA"
           test "$(run_git rev-parse HEAD)" = "$EXPECTED_SHA"
           cd "$REPO_DIR"
           bash -n ops/scripts/deploy-staging-artifact.sh

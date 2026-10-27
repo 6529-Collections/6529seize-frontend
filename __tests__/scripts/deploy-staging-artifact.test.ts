@@ -17,13 +17,68 @@ const workflowSource = fs.readFileSync(
   "utf8"
 );
 const workflow = YAML.parse(workflowSource);
-const previousSha = "a".repeat(40);
-const expectedSha = "b".repeat(40);
+let historyRepo: string;
+let previousSha: string;
+let expectedSha: string;
+let newerSha: string;
+let divergentSha: string;
 const expectedDigest = "c".repeat(64);
 const preflightScript = script.slice(
   0,
   script.indexOf("\nprune_release_cache\n")
 );
+
+function git(repo: string, ...args: string[]) {
+  return childProcess
+    .execFileSync("git", ["-C", repo, ...args], {
+      encoding: "utf8",
+      input: "",
+      timeout: 10_000,
+      env: {
+        ...process.env,
+        GIT_AUTHOR_NAME: "Staging Test",
+        GIT_AUTHOR_EMAIL: "staging@example.invalid",
+        GIT_COMMITTER_NAME: "Staging Test",
+        GIT_COMMITTER_EMAIL: "staging@example.invalid",
+      },
+    })
+    .trim();
+}
+
+beforeAll(() => {
+  historyRepo = fs.realpathSync(
+    fs.mkdtempSync(path.join(os.tmpdir(), "staging-history-"))
+  );
+  git(historyRepo, "init", "--quiet", "--initial-branch=1a-staging");
+  const tree = git(historyRepo, "mktree");
+  const commit = (message: string, parent?: string) =>
+    git(
+      historyRepo,
+      "-c",
+      "commit.gpgsign=false",
+      "commit-tree",
+      tree,
+      "-m",
+      message,
+      ...(parent ? ["-p", parent] : [])
+    );
+  previousSha = commit("Previously deployed");
+  expectedSha = commit("Active deployment", previousSha);
+  newerSha = commit("Queued deployment", expectedSha);
+  divergentSha = commit("Divergent deployment", previousSha);
+  git(historyRepo, "update-ref", "refs/heads/1a-staging", newerSha);
+});
+
+afterAll(() => {
+  fs.rmSync(historyRepo, { recursive: true, force: true });
+});
+
+function copyHistory(repo: string) {
+  fs.cpSync(path.join(historyRepo, ".git"), path.join(repo, ".git"), {
+    recursive: true,
+  });
+  git(repo, "update-ref", "HEAD", expectedSha);
+}
 
 function createRelease(runtimeRoot: string, releaseId: string, sha: string) {
   const app = path.join(runtimeRoot, "releases", releaseId, "app");
@@ -60,6 +115,11 @@ install() {
 chown() { :; }
 flock() { [[ "$TEST_LOCK_HELD" != true ]]; }
 sudo() {
+  if [[ "$4" == git ]]; then
+    shift 4
+    command git "$@"
+    return
+  fi
   [[ "$1" == -H && "$2" == -u && "$4" == pm2 ]] || return 1
   shift 4
   case "$1" in
@@ -121,7 +181,7 @@ describe("staging runtime directory", () => {
     repo = fs.realpathSync(
       fs.mkdtempSync(path.join(os.tmpdir(), "staging-runtime-"))
     );
-    fs.mkdirSync(path.join(repo, ".git"));
+    copyHistory(repo);
     fs.mkdirSync(path.join(repo, "ops", "scripts"), { recursive: true });
     fs.copyFileSync(
       path.join(root, "ops", "scripts", "validate-ethereum-rpc-url.cjs"),
@@ -134,8 +194,8 @@ describe("staging runtime directory", () => {
     fs.rmSync(repo, { recursive: true, force: true });
   });
 
-  function createPreviousRuntime() {
-    const previousApp = createRelease(runtimeRoot, previousSha, previousSha);
+  function createPreviousRuntime(sha = previousSha) {
+    const previousApp = createRelease(runtimeRoot, sha, sha);
     fs.symlinkSync(previousApp, path.join(runtimeRoot, "current"));
     fs.writeFileSync(path.join(runtimeRoot, "deploy.lock"), "existing lock");
     fs.writeFileSync(
@@ -206,6 +266,59 @@ describe("staging runtime directory", () => {
     expect(result.status).toBe(0);
     expect(fs.lstatSync(runtimeRoot).isDirectory()).toBe(true);
     expect(fs.existsSync(path.join(runtimeRoot, "deploy.lock"))).toBe(true);
+  });
+
+  it.each(["newer", "divergent", "missing history"] as const)(
+    "rejects a candidate over a healthy runtime with %s source",
+    (source) => {
+      const versions = {
+        newer: newerSha,
+        divergent: divergentSha,
+        "missing history": "e".repeat(40),
+      };
+      const previousApp = createPreviousRuntime(versions[source]);
+      const result = runHostPreflight(repo, previousApp);
+
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain("Refusing to replace healthy staging");
+      expect(fs.realpathSync(path.join(runtimeRoot, "current"))).toBe(
+        previousApp
+      );
+      expect(fs.existsSync(path.join(repo, "pm2-events"))).toBe(false);
+      expect(
+        fs.existsSync(
+          path.join(runtimeRoot, "releases", `${expectedSha}-${expectedDigest}`)
+        )
+      ).toBe(false);
+    }
+  );
+
+  it("rejects an unhealthy runtime before activation", () => {
+    const previousApp = createPreviousRuntime();
+    fs.writeFileSync(
+      path.join(previousApp, "version.json"),
+      JSON.stringify({ stale: true, version: previousSha })
+    );
+
+    const result = runHostPreflight(repo, previousApp);
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain(
+      "without an exact healthy pre-mutation local version"
+    );
+    expect(fs.existsSync(path.join(repo, "pm2-events"))).toBe(false);
+  });
+
+  it("verifies the pinned checkout while holding the instance lock", () => {
+    git(repo, "update-ref", "HEAD", newerSha);
+
+    const result = runHostPreflight(repo);
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain(
+      "checkout that differs from the verified source"
+    );
+    expect(fs.existsSync(path.join(repo, "pm2-events"))).toBe(false);
   });
 
   it("rejects a malformed Ethereum RPC URL before changing runtime state", () => {
@@ -341,7 +454,8 @@ describe("staging SSM shell wrapper", () => {
     repo = fs.realpathSync(
       fs.mkdtempSync(path.join(os.tmpdir(), "staging-ssm-"))
     );
-    fs.mkdirSync(path.join(repo, ".git"));
+    copyHistory(repo);
+    git(repo, "remote", "add", "origin", historyRepo);
     commandLog = path.join(repo, "commands");
     fs.writeFileSync(commandLog, "");
   });
@@ -350,7 +464,12 @@ describe("staging SSM shell wrapper", () => {
     fs.rmSync(repo, { recursive: true, force: true });
   });
 
-  function runWrapper(fetchedSha: string, finalSha = expectedSha) {
+  function runWrapper(
+    fetchedSha: string,
+    finalSha = expectedSha,
+    candidateSha = expectedSha
+  ) {
+    git(historyRepo, "update-ref", "refs/heads/1a-staging", fetchedSha);
     const sendStep = workflow.jobs["deploy-staging"].steps.find(
       (step: { name?: string }) => step.name === "Send staging deploy command"
     );
@@ -372,75 +491,98 @@ sudo() {
   shift 6
   printf 'git %s\\n' "$*" >> "$TEST_COMMAND_LOG"
   case "$1 $2" in
-    'rev-parse FETCH_HEAD') printf '%s\\n' "$TEST_FETCHED_SHA" ;;
     'rev-parse HEAD') printf '%s\\n' "$TEST_FINAL_SHA" ;;
-    'fetch --no-tags'|'reset --hard'|'clean -fd'|'checkout -B'|'config '*) : ;;
-    *) return 1 ;;
+    *) command git -C "$REPO_DIR" "$@" 2>/dev/null ;;
   esac
 }
 bash() { printf 'bash %s\\n' "$*" >> "$TEST_COMMAND_LOG"; }
 `;
-    return childProcess.spawnSync("/bin/sh", ["-c", `${hostCommands}\n${body}`], {
-      encoding: "utf8",
-      timeout: 10_000,
-      env: {
-        ...process.env,
-        REPO_DIR: repo,
-        RUN_AS: "staging-test",
-        BRANCH: "1a-staging",
-        EXPECTED_SHA: expectedSha,
-        EXPECTED_DIGEST: expectedDigest,
-        ARTIFACT_URL: "https://example.invalid/artifact.zip",
-        PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64: "e30=",
-        SSR_CLIENT_ID_B64: "Y2xpZW50",
-        SSR_CLIENT_SECRET_B64: "c2VjcmV0",
-        TEST_COMMAND_LOG: commandLog,
-        ETHEREUM_RPC_URL_B64: Buffer.from("https://example.invalid").toString(
-          "base64"
-        ),
-        ALCHEMY_API_KEY_B64: Buffer.from("staging-test-key").toString("base64"),
-        TEST_FETCHED_SHA: fetchedSha,
-        TEST_FINAL_SHA: finalSha,
-      },
-    });
+    return childProcess.spawnSync(
+      "/bin/sh",
+      ["-c", `${hostCommands}\n${body}`],
+      {
+        encoding: "utf8",
+        timeout: 10_000,
+        env: {
+          ...process.env,
+          REPO_DIR: repo,
+          RUN_AS: "staging-test",
+          BRANCH: "1a-staging",
+          EXPECTED_SHA: candidateSha,
+          EXPECTED_DIGEST: expectedDigest,
+          ARTIFACT_URL: "https://example.invalid/artifact.zip",
+          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64: "e30=",
+          SSR_CLIENT_ID_B64: "Y2xpZW50",
+          SSR_CLIENT_SECRET_B64: "c2VjcmV0",
+          TEST_COMMAND_LOG: commandLog,
+          ETHEREUM_RPC_URL_B64: Buffer.from("https://example.invalid").toString(
+            "base64"
+          ),
+          ALCHEMY_API_KEY_B64:
+            Buffer.from("staging-test-key").toString("base64"),
+          TEST_FINAL_SHA: finalSha,
+        },
+      }
+    );
   }
 
   function commands() {
     return fs.readFileSync(commandLog, "utf8").trim().split("\n");
   }
 
-  it("rejects superseded source before changing the checkout", () => {
-    const result = runWrapper(previousSha, previousSha);
+  it("rejects source outside staging history before changing the checkout", () => {
+    const result = runWrapper(divergentSha);
 
     expect(result.error).toBeUndefined();
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("refusing to deploy stale bytes");
+    expect(result.stderr).toContain("is not in origin 1a-staging history");
     expect(result.stderr).not.toContain("[[: not found");
     expect(commands()).toEqual([
       "git fetch --no-tags origin 1a-staging",
       "git rev-parse FETCH_HEAD",
+      `git cat-file -e ${expectedSha}^{commit}`,
+      `git merge-base --is-ancestor ${expectedSha} ${divergentSha}`,
     ]);
   });
 
-  it("activates matching source after both SHA checks", () => {
-    const result = runWrapper(expectedSha);
+  it.each(["matching", "advanced"])(
+    "pins the verified source when staging is %s",
+    (head) => {
+      const fetchedSha = head === "advanced" ? newerSha : expectedSha;
+      const result = runWrapper(fetchedSha);
 
-    expect(result.error).toBeUndefined();
-    expect(result.status).toBe(0);
-    expect(result.stderr).toBe("");
-    expect(commands()).toEqual([
-      "git fetch --no-tags origin 1a-staging",
-      "git rev-parse FETCH_HEAD",
-      "git reset --hard HEAD",
-      "git clean -fd generated",
-      "git checkout -B 1a-staging FETCH_HEAD",
-      "git config branch.1a-staging.remote origin",
-      "git config branch.1a-staging.merge refs/heads/1a-staging",
-      "git reset --hard FETCH_HEAD",
-      "git rev-parse HEAD",
-      "bash -n ops/scripts/deploy-staging-artifact.sh",
-      "bash ops/scripts/deploy-staging-artifact.sh",
-    ]);
+      expect(result.error).toBeUndefined();
+      expect(result.status).toBe(0);
+      expect(result.stderr).toBe("");
+      expect(commands()).toEqual([
+        "git fetch --no-tags origin 1a-staging",
+        "git rev-parse FETCH_HEAD",
+        `git cat-file -e ${expectedSha}^{commit}`,
+        `git merge-base --is-ancestor ${expectedSha} ${fetchedSha}`,
+        "git reset --hard HEAD",
+        "git clean -fd generated",
+        `git checkout -B 1a-staging ${expectedSha}`,
+        "git config branch.1a-staging.remote origin",
+        "git config branch.1a-staging.merge refs/heads/1a-staging",
+        `git reset --hard ${expectedSha}`,
+        "git rev-parse HEAD",
+        "bash -n ops/scripts/deploy-staging-artifact.sh",
+        "bash ops/scripts/deploy-staging-artifact.sh",
+      ]);
+      expect(git(repo, "rev-parse", "HEAD")).toBe(expectedSha);
+    }
+  );
+
+  it("rejects an unavailable pinned commit before changing the checkout", () => {
+    const result = runWrapper(newerSha, expectedSha, "f".repeat(40));
+
+    expect(result.status).not.toBe(0);
+    expect(
+      commands().some((command) => command.startsWith("git checkout"))
+    ).toBe(false);
+    expect(commands().some((command) => command.startsWith("bash "))).toBe(
+      false
+    );
   });
 
   it("still refuses activation when final HEAD differs", () => {
@@ -450,7 +592,9 @@ bash() { printf 'bash %s\\n' "$*" >> "$TEST_COMMAND_LOG"; }
     expect(result.status).toBe(1);
     expect(result.stderr).toBe("");
     expect(commands().at(-1)).toBe("git rev-parse HEAD");
-    expect(commands().some((command) => command.startsWith("bash "))).toBe(false);
+    expect(commands().some((command) => command.startsWith("bash "))).toBe(
+      false
+    );
   });
 });
 
