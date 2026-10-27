@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { mainnet } from "viem/chains";
 import { useReadContract } from "wagmi";
-import { wallTimeToUtcInstantInZone } from "@/components/meme-calendar/meme-calendar.helpers";
+import { mintPhaseWindowsForDay } from "../shared/memes-calendar/phases";
 import {
   MEMES_CONTRACT,
   NULL_ADDRESS,
@@ -26,20 +26,6 @@ export enum ManifoldPhase {
   PUBLIC = "Public Phase",
 }
 
-interface PhaseBoundary {
-  hour: number;
-  minute: number;
-  dayOffset?: number | undefined;
-}
-
-interface PhaseDefinition {
-  id: string;
-  name: string;
-  type: ManifoldPhase;
-  start: PhaseBoundary;
-  end: PhaseBoundary;
-}
-
 type MemesRootsState =
   | {
       status: "idle" | "loading" | "error";
@@ -57,37 +43,6 @@ export interface MemePhase {
   start: Time;
   end: Time;
 }
-
-const PHASE_DEFINITIONS: PhaseDefinition[] = [
-  {
-    id: "0",
-    name: "Phase 0 (Allowlist)",
-    type: ManifoldPhase.ALLOWLIST,
-    start: { hour: 17, minute: 40 },
-    end: { hour: 18, minute: 20 },
-  },
-  {
-    id: "1",
-    name: "Phase 1 (Allowlist)",
-    type: ManifoldPhase.ALLOWLIST,
-    start: { hour: 18, minute: 30 },
-    end: { hour: 18, minute: 50 },
-  },
-  {
-    id: "2",
-    name: "Phase 2 (Allowlist)",
-    type: ManifoldPhase.ALLOWLIST,
-    start: { hour: 19, minute: 0 },
-    end: { hour: 19, minute: 20 },
-  },
-  {
-    id: "public",
-    name: "Public Phase",
-    type: ManifoldPhase.PUBLIC,
-    start: { hour: 19, minute: 20 },
-    end: { hour: 17, minute: 0, dayOffset: 1 },
-  },
-];
 
 const ACTIVE_CLAIM_REFETCH_INTERVAL_MS = 5000;
 const INACTIVE_CLAIM_REFETCH_INTERVAL_MS = 10000;
@@ -181,24 +136,12 @@ function getMemePhaseIdForRootPhase(
 }
 
 export function buildMemesPhases(mintDate: Time = Time.now()): MemePhase[] {
-  const resolveTime = ({
-    hour,
-    minute,
-    dayOffset = 0,
-  }: PhaseBoundary): Time => {
-    const reference = dayOffset === 0 ? mintDate : mintDate.plusDays(dayOffset);
-    const instant = wallTimeToUtcInstantInZone(
-      reference.toDate(),
-      hour,
-      minute
-    );
-    return Time.millis(instant.getTime());
-  };
-
-  return PHASE_DEFINITIONS.map(({ start, end, ...phase }) => ({
-    ...phase,
-    start: resolveTime(start),
-    end: resolveTime(end),
+  return mintPhaseWindowsForDay(mintDate.toDate()).map((phase) => ({
+    id: phase.id,
+    name: phase.isPublic ? "Public Phase" : `${phase.name} (Allowlist)`,
+    type: phase.isPublic ? ManifoldPhase.PUBLIC : ManifoldPhase.ALLOWLIST,
+    start: Time.millis(phase.start.getTime()),
+    end: Time.millis(phase.end.getTime()),
   }));
 }
 
