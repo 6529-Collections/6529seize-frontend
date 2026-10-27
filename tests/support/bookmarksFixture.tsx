@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useMemo } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import HeaderBookmarksLink from "@/components/header/user/HeaderBookmarksLink";
@@ -18,34 +18,31 @@ const AuthContext = createContext<{
   activeProfileProxy: null,
   fetchingProfile: false,
   setToast: () => {},
-  requestAuth: async () => ({ success: true }),
+  requestAuth: () => Promise.resolve({ success: true }),
 });
 export const useAuth = () => useContext(AuthContext);
 const saved = new Map<string, boolean>();
 let owner = "alice";
 export const getWalletAddress = () => owner;
-export async function fetchBookmarkStatus(
-  _signal?: AbortSignal,
-  dropId?: string
-) {
-  return {
+export function fetchBookmarkStatus(_signal?: AbortSignal, dropId?: string) {
+  return Promise.resolve({
     count: saved.get(owner) ? 1 : 0,
     ...(dropId ? { bookmarked: saved.get(owner) === true } : {}),
-  };
+  });
 }
-export async function fetchBookmarks() {
-  return {
+export function fetchBookmarks() {
+  return Promise.resolve({
     page: 1,
     next: false,
     count: saved.get(owner) ? 1 : 0,
     data: saved.get(owner)
       ? [{ id: "saved-drop", serial_no: 12, wave: { id: "wave-one" } }]
       : [],
-  };
+  });
 }
-export async function updateDropBookmark(_dropId: string, bookmarked: boolean) {
+export function updateDropBookmark(_dropId: string, bookmarked: boolean) {
   saved.set(owner, bookmarked);
-  return { id: "saved-drop" };
+  return Promise.resolve({ id: "saved-drop" });
 }
 function Fixture() {
   const [account, setAccount] = useState("alice");
@@ -60,18 +57,20 @@ function Fixture() {
         },
       })
   );
+  const authValue = useMemo(
+    () => ({
+      connectedProfile: { id: account },
+      isAuthenticated: true,
+      activeProfileProxy: proxy ? { id: "delegated-profile" } : null,
+      fetchingProfile: false,
+      setToast: () => {},
+      requestAuth: () => Promise.resolve({ success: true }),
+    }),
+    [account, proxy]
+  );
   return (
     <QueryClientProvider client={client}>
-      <AuthContext.Provider
-        value={{
-          connectedProfile: { id: account },
-          isAuthenticated: true,
-          activeProfileProxy: proxy ? { id: "delegated-profile" } : null,
-          fetchingProfile: false,
-          setToast: () => {},
-          requestAuth: async () => ({ success: true }),
-        }}
-      >
+      <AuthContext.Provider value={authValue}>
         <div className="tw-mx-auto tw-max-w-4xl tw-p-4">
           <nav className="tw-flex tw-flex-wrap tw-gap-3 tw-text-iron-200">
             <button onClick={() => setProxy(!proxy)}>Toggle proxy</button>

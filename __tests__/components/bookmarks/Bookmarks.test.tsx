@@ -1,9 +1,12 @@
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import BookmarkCard from "@/components/bookmarks/BookmarkCard";
 import {
   act,
   fireEvent,
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
@@ -184,7 +187,7 @@ it("keeps the page open with an empty state after the last removal", async () =>
   await screen.findByRole("heading", { name: "No bookmarks yet" });
   expect(
     screen.getByRole("heading", { name: "Bookmarks", exact: true })
-  ).toBeInTheDocument();
+  ).toHaveFocus();
 });
 it("does not fetch private data while signed out", async () => {
   mockOwner = null;
@@ -197,4 +200,64 @@ it("does not fetch private data while signed out", async () => {
   await act(async () => {});
   expect(fetchBookmarkStatus).not.toHaveBeenCalled();
   expect(fetchBookmarks).not.toHaveBeenCalled();
+});
+
+it("keeps the menu visible when removing one of multiple saved messages", async () => {
+  const ids = new Set(["drop-1", "drop-2"]);
+  jest
+    .mocked(fetchBookmarkStatus)
+    .mockImplementation(async (_signal, dropId) => ({
+      count: ids.size,
+      ...(dropId ? { bookmarked: ids.has(dropId) } : {}),
+    }));
+  jest.mocked(fetchBookmarks).mockImplementation(async () => ({
+    count: ids.size,
+    page: 1,
+    next: false,
+    data: [...ids].map((id) => ({
+      id,
+      serial_no: 12,
+      wave: { id: "wave-1" },
+    })) as Awaited<ReturnType<typeof fetchBookmarks>>["data"],
+  }));
+  jest.mocked(updateDropBookmark).mockImplementation(async (id) => {
+    ids.delete(id);
+    return { id } as Awaited<ReturnType<typeof updateDropBookmark>>;
+  });
+  render(
+    <>
+      <HeaderBookmarksLink onClose={() => {}} />
+      <BookmarksPage />
+    </>,
+    { wrapper: Wrapper }
+  );
+  await screen.findByText("drop-1");
+  const card = screen.getByText("drop-1").closest("article");
+  expect(card).not.toBeNull();
+  fireEvent.click(
+    within(card!).getByRole("button", { name: "Remove bookmark" })
+  );
+  await waitFor(() =>
+    expect(screen.queryByText("drop-1")).not.toBeInTheDocument()
+  );
+  expect(
+    screen.getByRole("link", { name: "Bookmarks", exact: true })
+  ).toBeInTheDocument();
+  expect(screen.getByText("drop-2")).toBeInTheDocument();
+});
+
+it("does not create a broken conversation link from missing wave metadata", () => {
+  const { container } = render(
+    <BookmarkCard
+      apiDrop={
+        { id: "missing-wave", wave: null, serial_no: 12 } as unknown as ApiDrop
+      }
+      onRemoved={() => {}}
+    />,
+    { wrapper: Wrapper }
+  );
+  expect(container.querySelector("article")).toBeNull();
+  expect(
+    screen.queryByRole("link", { name: "Open in conversation" })
+  ).not.toBeInTheDocument();
 });

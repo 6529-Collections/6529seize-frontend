@@ -196,16 +196,20 @@ const PACKS = [
     "bookmarks",
     "bookmarks",
     "Private bookmarks route authentication guard.",
-    ["tests/social/bookmarks-readonly.spec.ts"]
-  ),
-  productionPack(
-    "bookmarks",
-    "Private bookmarks route authentication guard.",
     ["tests/social/bookmarks-readonly.spec.ts"],
-    ["post-deploy", "manual"],
-    15,
-    [DESKTOP, MOBILE]
+    { env: { ...STAGING_READONLY_ENV, USE_DEV_AUTH: "false" } }
   ),
+  {
+    ...productionPack(
+      "bookmarks",
+      "Private bookmarks route authentication guard.",
+      ["tests/social/bookmarks-readonly.spec.ts"],
+      ["post-deploy", "manual"],
+      15,
+      [DESKTOP, MOBILE]
+    ),
+    env: { ...PRODUCTION_READONLY_ENV, USE_DEV_AUTH: "false" },
+  },
 
   {
     scriptKey: "test:e2e",

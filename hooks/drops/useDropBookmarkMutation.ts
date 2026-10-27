@@ -34,11 +34,14 @@ export function useDropBookmarkMutation(
   const busy = useIsMutating({ mutationKey }) > 0;
   const state = useQuery({
     queryKey: dropKey,
-    queryFn: ({ signal }) => fetchBookmarkStatus(signal, dropId),
+    queryFn: async ({ signal }) => {
+      const result = await fetchBookmarkStatus(signal, dropId);
+      return { bookmarked: result.bookmarked === true };
+    },
     enabled: !!owner && knownBookmarked === undefined,
     ...(knownBookmarked === undefined
       ? {}
-      : { initialData: { count: 0, bookmarked: knownBookmarked } }),
+      : { initialData: { bookmarked: knownBookmarked } }),
     staleTime: 30_000,
     gcTime: 0,
     meta: { persist: false },
@@ -49,22 +52,29 @@ export function useDropBookmarkMutation(
     onMutate: async (bookmarked: boolean) => {
       const wallet = getWalletAddress();
       await queryClient.cancelQueries({ queryKey: rootKey });
-      const previousDrop =
-        queryClient.getQueryData<ApiDropBookmarksStatus>(dropKey);
+      const previousDrop = queryClient.getQueryData<{ bookmarked: boolean }>(
+        dropKey
+      );
       const previousList =
         queryClient.getQueryData<InfiniteData<ApiDropsPage>>(listKey);
-      const previousStatus = queryClient.getQueryData<ApiDropBookmarksStatus>(
-        statusKey
-      ) ?? { count: previousList?.pages[0]?.count ?? state.data?.count ?? 0 };
-      const count = Math.max(0, previousStatus.count + (bookmarked ? 1 : -1));
-      queryClient.setQueryData(statusKey, { count });
-      queryClient.setQueryData(dropKey, { count, bookmarked });
+      // Total counts come only from the owner summary or a fetched list, never a per-drop seed.
+      const listCount = previousList?.pages[0]?.count;
+      let previousStatus =
+        queryClient.getQueryData<ApiDropBookmarksStatus>(statusKey);
+      if (!previousStatus && listCount !== undefined)
+        previousStatus = { count: listCount };
+      const countDelta = bookmarked ? 1 : -1;
+      const count = previousStatus
+        ? Math.max(0, previousStatus.count + countDelta)
+        : undefined;
+      if (count !== undefined) queryClient.setQueryData(statusKey, { count });
+      queryClient.setQueryData(dropKey, { bookmarked });
       if (!bookmarked && previousList)
         queryClient.setQueryData<InfiniteData<ApiDropsPage>>(listKey, {
           ...previousList,
           pages: previousList.pages.map((page) => ({
             ...page,
-            count,
+            count: count ?? Math.max(0, page.count - 1),
             data: page.data.filter((drop) => drop.id !== dropId),
           })),
         });
@@ -102,7 +112,7 @@ export function useDropBookmarkMutation(
   return {
     bookmarked: state.data?.bookmarked === true,
     canBookmark: !!owner,
-    pending: busy || mutation.isPending || state.isLoading,
+    pending: busy || mutation.isPending || (!state.data && !state.isError),
     failed: state.isError,
     retry: state.refetch,
     toggle: () => {

@@ -228,7 +228,7 @@ jobs:
             corePlaywrightLanes.push({ lane: "playwright-wave-feature-usage", label: "Wave feature tracking desktop and mobile", runner: defaultRunner });
           }
           const bookmarksBrowserRequired = plan.changed_files.some((file) =>
-            /^(?:app\/bookmarks\/|components\/bookmarks\/|components\/header\/user\/HeaderBookmarksLink|components\/waves\/drops\/WaveDropBookmarkAction|hooks\/drops\/useDropBookmark|services\/api\/drop-bookmarks|tests\/social\/bookmarks-sandbox|tests\/support\/bookmarks)/.test(file)
+            /^(?:app\/bookmarks\/|components\/bookmarks\/|components\/header\/user\/HeaderBookmarksLink|components\/waves\/drops\/WaveDropBookmarkAction|hooks\/drops\/useDropBookmark|services\/api\/drop-bookmarks|tests\/social\/bookmarks-sandbox|tests\/support\/bookmarks|package\.json$|\.github\/workflows\/app-pr-ci\.yml$)/.test(file)
           );
           if (bookmarksBrowserRequired) {
             corePlaywrightLanes.push({ lane: "playwright-bookmarks", label: "Private bookmarks desktop and mobile", runner: defaultRunner });

@@ -18,7 +18,8 @@ test("private bookmarks survive proxy changes and isolate account switches @loca
   await expect(
     accountMenu.getByRole("link", { name: "Bookmarks" })
   ).toHaveCount(0);
-  await menu.getByRole("button", { name: "Bookmark", exact: true }).click();
+  await menu.getByRole("button", { name: "Bookmark", exact: true }).focus();
+  await page.keyboard.press("Enter");
   await expect(
     accountMenu.getByRole("link", { name: "Bookmarks" })
   ).toBeVisible();
@@ -47,15 +48,19 @@ test("private bookmarks survive proxy changes and isolate account switches @loca
     fullPage: true,
   });
   await page
-    .locator("article")
+    .getByRole("article")
     .getByRole("button", { name: "Remove bookmark" })
-    .click();
+    .focus();
+  await page.keyboard.press("Enter");
   await expect(
     page.getByRole("heading", { name: "No bookmarks yet" })
   ).toBeVisible();
   await expect(
     accountMenu.getByRole("link", { name: "Bookmarks" })
   ).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Bookmarks", exact: true })
+  ).toBeFocused();
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth

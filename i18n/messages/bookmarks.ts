@@ -10,6 +10,7 @@ export const BOOKMARK_MESSAGES = {
   "bookmarks.empty": "No bookmarks yet",
   "bookmarks.emptyDescription":
     "Bookmark a message from its menu to find it here later.",
+  "bookmarks.loaded": "Your bookmarks are ready.",
   "bookmarks.loading": "Loading bookmarks…",
   "bookmarks.error": "Couldn't load bookmarks. Please try again.",
   "bookmarks.saveError": "Couldn't update your bookmark. Please try again.",

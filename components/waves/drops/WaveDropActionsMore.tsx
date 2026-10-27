@@ -88,7 +88,10 @@ export default function WaveDropActionsMore({
     onOpenChange?.(newIsOpen);
   };
 
-  const closeDropdown = () => handleOpenChange(false);
+  const closeDropdown = () => {
+    handleOpenChange(false);
+    buttonRef.current?.focus({ preventScroll: true });
+  };
 
   const handleDeleteClick = () => {
     handleOpenChange(false);

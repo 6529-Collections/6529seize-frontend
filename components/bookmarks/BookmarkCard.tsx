@@ -8,13 +8,31 @@ import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import WaveDropBookmarkAction from "@/components/waves/drops/WaveDropBookmarkAction";
+const hasConversation = ({
+  wave,
+  serial_no,
+}: {
+  readonly wave?: unknown;
+  readonly serial_no?: unknown;
+}) =>
+  typeof wave === "object" &&
+  wave !== null &&
+  "id" in wave &&
+  typeof wave.id === "string" &&
+  wave.id.length > 0 &&
+  typeof serial_no === "number" &&
+  Number.isSafeInteger(serial_no);
+
 export default function BookmarkCard({
   apiDrop,
+  onRemoved,
 }: {
   readonly apiDrop: ApiDrop;
+  readonly onRemoved: () => void;
 }) {
   const router = useRouter();
   const locale = useBrowserLocale();
+  if (!hasConversation(apiDrop)) return null;
   const drop = convertApiDropToExtendedDrop(apiDrop);
   const href = getWaveRoute({
     waveId: drop.wave.id,
@@ -37,7 +55,6 @@ export default function BookmarkCard({
         onReply={open}
         onReplyClick={open}
         onQuoteClick={open}
-        onDropContentClick={open}
         showInteractions={false}
       />
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-p-3">
@@ -48,7 +65,11 @@ export default function BookmarkCard({
           {t(locale, "bookmarks.open")}
         </Link>
         <div>
-          <WaveDropBookmarkAction dropId={drop.id} knownBookmarked />
+          <WaveDropBookmarkAction
+            dropId={drop.id}
+            knownBookmarked
+            onSelected={onRemoved}
+          />
         </div>
       </div>
     </article>
