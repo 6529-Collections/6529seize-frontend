@@ -67,10 +67,10 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
 ### Competition Submission Popups
 
 Artist submissions and participant entries place the vote label and mode switch
-above the input. Available, spent, and remaining credits sit side by side, with
-each value beneath its label. `Explain vote` and `Save vote` share a row until the
-reply field is expanded. Vote amounts, limits, eligibility, and saving work the
-same in both input modes.
+above the input. Credit labels `Available`, `Spent`, and `Remaining` sit side by
+side, with each value beneath its label. `Explain vote` and a smaller `Save vote`
+button share a row until the reply field is expanded. Vote amounts, limits,
+eligibility, and saving work the same in both input modes.
 
 ## Edge Cases
 

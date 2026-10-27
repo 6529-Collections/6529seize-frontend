@@ -477,7 +477,7 @@ export function CompetitionVoteForm({
         {reply?.content}
         <button
           type="submit"
-          className={`${COMPETITION_BUTTON} group-[.is-mini]/inline-vote:tw-col-start-2 group-[.is-mini]/inline-vote:tw-row-start-4 group-[.is-mini]/inline-vote:tw-justify-self-end group-[.is-mini]/inline-vote:tw-border-transparent group-[.is-mini]/inline-vote:tw-bg-primary-500 group-[.is-mini]/inline-vote:tw-text-white group-[.is-mini:has(textarea)]/inline-vote:tw-row-start-5 group-[.is-mini]/inline-vote:hover:tw-bg-primary-600`}
+          className={`${COMPETITION_BUTTON} group-[.is-mini]/inline-vote:tw-col-start-2 group-[.is-mini]/inline-vote:tw-row-start-4 group-[.is-mini]/inline-vote:tw-justify-self-end group-[.is-mini]/inline-vote:tw-min-h-9 group-[.is-mini]/inline-vote:tw-px-3 group-[.is-mini]/inline-vote:tw-py-1.5 group-[.is-mini]/inline-vote:tw-text-xs group-[.is-mini]/inline-vote:tw-border-transparent group-[.is-mini]/inline-vote:tw-bg-primary-500 group-[.is-mini]/inline-vote:tw-text-white group-[.is-mini:has(textarea)]/inline-vote:tw-row-start-5 group-[.is-mini]/inline-vote:hover:tw-bg-primary-600`}
           disabled={
             busy ||
             disabled ||

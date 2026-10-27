@@ -101,6 +101,9 @@ export const COMPETITION_MESSAGES = {
   "competitions.available": "Available credits",
   "competitions.spent": "Spent credits",
   "competitions.remaining": "Remaining credits",
+  "competitions.availableShort": "Available",
+  "competitions.spentShort": "Spent",
+  "competitions.remainingShort": "Remaining",
   "competitions.entryBudget":
     "Credits are calculated separately for each entry.",
   "competitions.saved": "Saved",

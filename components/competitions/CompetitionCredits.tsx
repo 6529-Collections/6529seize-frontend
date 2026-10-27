@@ -19,7 +19,12 @@ export default function CompetitionCredits({
         {(["available", "spent", "remaining"] as const).map((field) => (
           <div key={field}>
             <dt className="tw-text-xs tw-text-iron-400 group-[.is-mini]/inline-vote:tw-text-[11px]">
-              {t(locale, `competitions.${field}`)}
+              <span className="group-[.is-mini]/inline-vote:tw-hidden">
+                {t(locale, `competitions.${field}`)}
+              </span>
+              <span className="tw-hidden group-[.is-mini]/inline-vote:tw-inline">
+                {t(locale, `competitions.${field}Short`)}
+              </span>
             </dt>
             <dd className="tw-m-0 tw-text-lg tw-font-semibold tw-tabular-nums tw-text-iron-100 group-[.is-mini]/inline-vote:tw-break-all group-[.is-mini]/inline-vote:tw-text-sm">
               {budget[field] === null
