@@ -177,6 +177,37 @@ function museumPack(pack) {
 
 const PACKS = [
   {
+    ...sandboxPack(
+      "test:e2e:bookmarks-sandbox",
+      "Private bookmark menus, account isolation, and saved-page flow.",
+      ["tests/social/bookmarks-sandbox.spec.ts"],
+      {
+        PLAYWRIGHT_BASE_URL: "http://127.0.0.1:3307",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://127.0.0.1:3307",
+        PLAYWRIGHT_FORCE_WEB_SERVER: "1",
+        PLAYWRIGHT_WEB_SERVER_COMMAND:
+          "node tests/support/bookmarksSandboxServer.cjs",
+      },
+      [DESKTOP, MOBILE]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
+  stagingPack(
+    "bookmarks",
+    "bookmarks",
+    "Private bookmarks route authentication guard.",
+    ["tests/social/bookmarks-readonly.spec.ts"]
+  ),
+  productionPack(
+    "bookmarks",
+    "Private bookmarks route authentication guard.",
+    ["tests/social/bookmarks-readonly.spec.ts"],
+    ["post-deploy", "manual"],
+    15,
+    [DESKTOP, MOBILE]
+  ),
+
+  {
     scriptKey: "test:e2e",
     description: "Full local suite on the desktop web shell.",
     safety: "local",

@@ -10982,6 +10982,38 @@
         "https://github.com/6529-Collections/6529-core/blob/2e8b4b2c2e3f5464b9c3639fcbe5fd817b648ed3/ops/docs/native-four-wallet-consolidation.md",
         "https://github.com/6529-Collections/6529-core/blob/2e8b4b2c2e3f5464b9c3639fcbe5fd817b648ed3/electron-src/scheduled-tasks/workers/tdh-worker/index.ts"
       ]
+    },
+    {
+      "id": "waves.private-bookmarks",
+      "kind": "workflow",
+      "title": "Privately bookmark a message",
+      "aliases": [
+        "saved messages",
+        "bookmarks",
+        "save a drop"
+      ],
+      "keywords": [
+        "bookmark",
+        "private",
+        "saved",
+        "message",
+        "proxy"
+      ],
+      "facts": [
+        "Use Bookmark in a message More menu on desktop or its long-press menu on mobile. Remove bookmark reverses the save. Saving does not notify the author.",
+        "Bookmarks appears in the account menu below Profile and above My artwork documentation only when the signed-in owner has accessible bookmarks. The native app exposes it in the menu drawer account actions.",
+        "The private /bookmarks page lists newest saves first. Open in conversation jumps to the original message. Removing the last bookmark keeps the empty page open and hides the menu item.",
+        "Bookmarks belong to the authenticated owner independently of the selected proxy. Proxy access never exposes another profile bookmarks or grants access to otherwise unavailable messages. Deleted or inaccessible messages are omitted."
+      ],
+      "canonical_path": "/bookmarks",
+      "tags": [
+        "waves",
+        "privacy",
+        "navigation"
+      ],
+      "source_refs": [
+        "ops/docs/waves/chat/feature-private-bookmarks.md"
+      ]
     }
   ]
 }
