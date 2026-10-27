@@ -115,7 +115,7 @@ const useInvalidateQuickVoteUndiscoveredDrop = ({
 
 const useMemesQuickVoteQueueSubmission = ({
   invalidateQuickVoteUndiscoveredDrop,
-  pendingDropIdsRef,
+  updatePendingDropIds,
   requestAuth,
   session,
   setAndPersistRecentAmounts,
@@ -124,7 +124,7 @@ const useMemesQuickVoteQueueSubmission = ({
   stateKey,
 }: {
   readonly invalidateQuickVoteUndiscoveredDrop: () => void;
-  readonly pendingDropIdsRef: { current: readonly string[] };
+  readonly updatePendingDropIds: (dropId: string, pending: boolean) => void;
   readonly requestAuth: ContextType<typeof AuthContext>["requestAuth"];
   readonly session: UseMemesQuickVoteSessionStateResult;
   readonly setAndPersistRecentAmounts: (
@@ -138,9 +138,7 @@ const useMemesQuickVoteQueueSubmission = ({
 }) =>
   useMemesQuickVoteSubmit({
     onRatingFailure: (drop, amount, type) => {
-      pendingDropIdsRef.current = pendingDropIdsRef.current.filter(
-        (id) => id !== drop.id
-      );
+      updatePendingDropIds(drop.id, false);
       session.restoreFailedDrop(drop);
 
       if (type === "vote") {
@@ -161,7 +159,7 @@ const useMemesQuickVoteQueueSubmission = ({
       invalidateQuickVoteUndiscoveredDrop();
     },
     onRatingQueued: (drop, amount, type) => {
-      pendingDropIdsRef.current = [...pendingDropIdsRef.current, drop.id];
+      updatePendingDropIds(drop.id, true);
       session.advanceVisibleDrop(drop, type === "vote");
 
       if (type === "vote") {
@@ -180,9 +178,7 @@ const useMemesQuickVoteQueueSubmission = ({
       }
     },
     onRatingSuccess: (drop, _amount, nextRemainingPower, type) => {
-      pendingDropIdsRef.current = pendingDropIdsRef.current.filter(
-        (id) => id !== drop.id
-      );
+      updatePendingDropIds(drop.id, false);
       if (type === "vote") {
         setOptimisticRemainingVotePowerState((current) =>
           reconcileOptimisticRemainingVotePower({
@@ -232,6 +228,14 @@ export const useMemesQuickVoteQueue = ({
       memesWaveId,
     });
   const pendingDropIdsRef = useRef<readonly string[]>([]);
+  const updatePendingDropIds = useCallback(
+    (dropId: string, pending: boolean) => {
+      pendingDropIdsRef.current = pending
+        ? [...pendingDropIdsRef.current, dropId]
+        : pendingDropIdsRef.current.filter((id) => id !== dropId);
+    },
+    []
+  );
   const session = useMemesQuickVoteSessionState({
     contextProfile,
     enabled,
@@ -252,7 +256,7 @@ export const useMemesQuickVoteQueue = ({
   const { pendingDropIds, submitSkip, submitVote } =
     useMemesQuickVoteQueueSubmission({
       invalidateQuickVoteUndiscoveredDrop,
-      pendingDropIdsRef,
+      updatePendingDropIds,
       requestAuth,
       session,
       setAndPersistRecentAmounts,

@@ -505,8 +505,9 @@ export const useMemesQuickVoteSessionState = ({
     () =>
       queryClient.getQueryCache().subscribe((event) => {
         if (event.type !== "updated" || event.action.type !== "success") return;
-        const key: unknown = event.query.queryKey[0];
-        const scope: unknown = event.query.queryKey[1];
+        const queryKey = event.query.queryKey as readonly unknown[];
+        const key = queryKey[0];
+        const scope = queryKey[1];
         if (
           key !== MEMES_QUICK_VOTE_UNDISCOVERED_DROP_QUERY_KEY ||
           typeof scope !== "object" ||
