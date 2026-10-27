@@ -72,11 +72,6 @@ done
 
 REAL_PNPM="$(PATH="$clean_path" command -v pnpm || true)"
 
-# The native Windows firewall needs Corepack's cmd launcher, not its Bash shim.
-if [[ "${OS:-}" == "Windows_NT" && -f "${REAL_PNPM}.cmd" ]]; then
-  REAL_PNPM="${REAL_PNPM}.cmd"
-fi
-
 if [[ -z "$REAL_PNPM" ]]; then
   echo "pnpm is not available. Activate the repo-pinned pnpm with Corepack first." >&2
   exit 1
@@ -84,6 +79,11 @@ fi
 if [[ "$REAL_PNPM" != /* ]] || [[ ! -x "$REAL_PNPM" ]]; then
   echo "pnpm must resolve to an absolute executable outside the repository wrapper path." >&2
   exit 1
+fi
+
+# The native Windows firewall needs Corepack's cmd launcher, not its Bash shim.
+if [[ "${OS:-}" == "Windows_NT" && -f "${REAL_PNPM}.cmd" ]]; then
+  REAL_PNPM="${REAL_PNPM}.cmd"
 fi
 
 if [[ "$command_name" == "staging" ]]; then
