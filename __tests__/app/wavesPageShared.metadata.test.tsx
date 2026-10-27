@@ -43,6 +43,25 @@ describe("buildWavesMetadata", () => {
     jest.clearAllMocks();
   });
 
+  it.each([
+    [{ divider: "42" }, "/waves/wave-1"],
+    [{ drop: "old-drop", divider: "42" }, "/waves/wave-1?drop=old-drop"],
+    [{ serialNo: "7", divider: "42" }, "/waves/wave-1?serialNo=7"],
+  ] as const)(
+    "excludes the unread divider from canonical URLs for %p",
+    async (params, path) => {
+      (commonApiFetch as jest.Mock).mockResolvedValue({
+        id: "wave-1",
+        name: "Public Wave",
+        author: { handle: "artist", primary_address: "0x123" },
+      });
+      const metadata = await buildWavesMetadata("wave-1", params);
+      expect(metadata.alternates?.canonical?.toString()).toBe(
+        `https://6529.io${path}`
+      );
+    }
+  );
+
   it("uses the wave OG image endpoint for wave metadata", async () => {
     (commonApiFetch as jest.Mock).mockResolvedValue({
       id: "wave-1",

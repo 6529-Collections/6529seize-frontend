@@ -255,22 +255,37 @@ describe("selected drop server preview", () => {
     mockFetchServerWaveFeedSeed.mockResolvedValue({ ok: false });
   });
 
-  it("renders the selected post instead of requesting the latest feed", async () => {
+  it.each([undefined, "7"])(
+    "renders the selected post regardless of divider %s",
+    async (divider) => {
+      render(
+        await renderWavesPageContent({
+          waveId: "regular-wave",
+          searchParams: { drop: "old-drop", ...(divider ? { divider } : {}) },
+        })
+      );
+      expect(fetchPublicWaveDrop).toHaveBeenCalledWith("regular-wave", {
+        key: "drop",
+        value: "old-drop",
+      });
+      expect(mockFetchPublicWaveFeed).not.toHaveBeenCalled();
+      expect(
+        screen.getByText("Content outside the latest ten posts")
+      ).toBeInTheDocument();
+      expect(screen.getByText("selected-author")).toBeInTheDocument();
+    }
+  );
+
+  it("keeps divider-only links on the recent feed", async () => {
+    mockFetchPublicWaveFeed.mockResolvedValue({ ok: false });
     render(
       await renderWavesPageContent({
         waveId: "regular-wave",
-        searchParams: { drop: "old-drop" },
+        searchParams: { divider: "42" },
       })
     );
-    expect(fetchPublicWaveDrop).toHaveBeenCalledWith("regular-wave", {
-      key: "drop",
-      value: "old-drop",
-    });
-    expect(mockFetchPublicWaveFeed).not.toHaveBeenCalled();
-    expect(
-      screen.getByText("Content outside the latest ten posts")
-    ).toBeInTheDocument();
-    expect(screen.getByText("selected-author")).toBeInTheDocument();
+    expect(fetchPublicWaveDrop).not.toHaveBeenCalled();
+    expect(mockFetchPublicWaveFeed).toHaveBeenCalledWith("regular-wave");
   });
 
   it("uses the same serialNo precedence as metadata and canonical generation", async () => {
