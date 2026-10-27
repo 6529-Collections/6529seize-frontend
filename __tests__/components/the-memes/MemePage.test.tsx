@@ -598,7 +598,7 @@ describe("MemePage search params handling", () => {
     expect(detailsColumn?.className).toContain("[&>*:first-child]:tw-order-1");
     expect(detailsColumn?.className).toContain("[&>*:nth-child(2)]:tw-order-3");
     expect(artworkColumn).toHaveClass("tw-order-2");
-    expect(artworkColumn).toHaveClass("lg:tw-self-stretch");
+    expect(artworkColumn).toHaveClass("lg:tw-sticky", "lg:tw-self-start");
   });
 
   it("passes active locale into the art viewer", async () => {
