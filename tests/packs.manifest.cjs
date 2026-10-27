@@ -57,6 +57,7 @@ const PUBLIC_REVIEW_SANDBOX_ENV = {
 };
 
 const READONLY_SPECS = {
+  bookmarks: ["tests/social/bookmarks-readonly.spec.ts"],
   social: ["tests/social/waves-profile-readonly.spec.ts"],
   inputDetection: ["tests/input/win8-touch-latch-readonly.spec.ts"],
   media: [
@@ -196,14 +197,14 @@ const PACKS = [
     "bookmarks",
     "bookmarks",
     "Private bookmarks route authentication guard.",
-    ["tests/social/bookmarks-readonly.spec.ts"],
+    READONLY_SPECS.bookmarks,
     { env: { ...STAGING_READONLY_ENV, USE_DEV_AUTH: "false" } }
   ),
   {
     ...productionPack(
       "bookmarks",
       "Private bookmarks route authentication guard.",
-      ["tests/social/bookmarks-readonly.spec.ts"],
+      READONLY_SPECS.bookmarks,
       ["post-deploy", "manual"],
       15,
       [DESKTOP, MOBILE]
@@ -865,6 +866,7 @@ const PACKS = [
     "Combined production-safe release validation.",
     [
       "tests/home/home.spec.ts",
+      ...READONLY_SPECS.bookmarks,
       ...READONLY_SPECS.social,
       ...READONLY_SPECS.media,
       ...READONLY_SPECS.delegation,
