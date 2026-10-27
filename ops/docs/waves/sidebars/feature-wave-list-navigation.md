@@ -31,6 +31,11 @@ Wave and DM rows in the left list control which thread is open.
   its subwaves are loaded, the parent opens, and the active child row is
   highlighted.
 - Navigating to a wave scrolls its active row into the nearest visible position.
+- Once you scroll or interact with the Waves list, incoming activity does not
+  automatically pull the list back to the open wave. Badges and recent-activity
+  ordering still update. Opening another wave enables active-row reveal again.
+- On desktop pointer devices, the Waves list uses a slim iron scrollbar for
+  dragging and track clicks. Touch devices keep their native scrolling behavior.
 - `All`, `Pinned`, and `Joined` are peer collections in one sticky row, with
   a separate search icon on the right. The collection group matches the search
   button height, including the larger touch controls. Switch directly without
