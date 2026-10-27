@@ -79,7 +79,7 @@ export default function CompetitionVoteWithReply({
           <div className="tw-space-y-3 tw-pt-3 group-[.is-mini]/inline-vote:tw-flex group-[.is-mini]/inline-vote:tw-flex-col group-[.is-mini]/inline-vote:tw-gap-1.5 group-[.is-mini]/inline-vote:tw-space-y-0 group-[.is-mini]/inline-vote:tw-pb-3 group-[.is-mini]/inline-vote:tw-pt-0">
             <p
               id={publicReplyDescriptionId}
-              className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400 group-[.is-mini]/inline-vote:tw-order-2 group-[.is-mini]/inline-vote:tw-leading-4 group-[.is-mini]/inline-vote:tw-text-iron-500"
+              className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400 group-[.is-mini]/inline-vote:tw-order-2 group-[.is-mini]/inline-vote:tw-leading-[14px] group-[.is-mini]/inline-vote:tw-text-iron-500"
             >
               {t(locale, "waves.voteRationale.publicReplyDescription")}
             </p>
