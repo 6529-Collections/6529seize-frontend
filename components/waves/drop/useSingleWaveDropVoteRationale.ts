@@ -18,9 +18,11 @@ interface UseSingleWaveDropVoteRationaleParams {
   readonly drop: ApiDrop;
   readonly voteTotal: number;
   readonly voteChange: number;
+  readonly prefillRationale?: boolean;
 }
 
 interface UseSingleWaveDropVoteRationaleResult {
+  readonly generatedRationaleText: string;
   readonly rationaleText: string;
   readonly isUsingGeneratedRationale: boolean;
   readonly shouldPostRationale: boolean;
@@ -77,7 +79,7 @@ const buildRationaleReplyRequest = ({
 export const useSingleWaveDropVoteRationale = (
   params: UseSingleWaveDropVoteRationaleParams
 ): UseSingleWaveDropVoteRationaleResult => {
-  const { drop, voteTotal, voteChange } = params;
+  const { drop, voteTotal, voteChange, prefillRationale = true } = params;
   const locale = useBrowserLocale();
   const { setToast } = useAuth();
   const { isSafeWallet, address } = useSeizeConnectContext();
@@ -96,12 +98,13 @@ export const useSingleWaveDropVoteRationale = (
     activeRationaleDraft?.rationaleText.startsWith(
       activeRationaleDraft.generatedRationaleText
     ) ?? false;
+  const initialRationaleText = prefillRationale ? generatedRationaleText : "";
   const rationaleText =
     usesGeneratedPrefix && activeRationaleDraft !== null
       ? `${generatedRationaleText}${activeRationaleDraft.rationaleText.slice(
           activeRationaleDraft.generatedRationaleText.length
         )}`
-      : (activeRationaleDraft?.rationaleText ?? generatedRationaleText);
+      : (activeRationaleDraft?.rationaleText ?? initialRationaleText);
   const postRationale = activeRationaleDraft?.postRationale ?? false;
 
   const handlePostRationaleChange = useCallback(
@@ -211,6 +214,7 @@ export const useSingleWaveDropVoteRationale = (
   );
 
   return {
+    generatedRationaleText,
     rationaleText,
     isUsingGeneratedRationale: rationaleText === generatedRationaleText,
     shouldPostRationale: postRationale,

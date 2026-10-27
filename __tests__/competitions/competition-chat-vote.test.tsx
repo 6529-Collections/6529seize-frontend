@@ -8,6 +8,7 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useLayoutEffect } from "react";
 import * as competitionVoteCache from "@/components/react-query-wrapper/utils/updateCompetitionVoteInCache";
+import { SingleWaveDropVoteSize } from "@/components/waves/drop/SingleWaveDropVote.types";
 import { SingleWaveDropVote } from "@/components/waves/drop/SingleWaveDropVote";
 import { commonApiPost } from "@/services/api/common-api";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -113,7 +114,8 @@ const initialBudget = {
 function mount(
   voteMode: "slider" | "numeric" | null = "numeric",
   voteDrop: ApiDrop = drop,
-  onClose?: () => void
+  onClose?: () => void,
+  size = SingleWaveDropVoteSize.NORMAL
 ) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -122,6 +124,7 @@ function mount(
     <QueryClientProvider client={client}>
       <SingleWaveDropVote
         drop={voteDrop}
+        size={size}
         voteMode={voteMode ?? undefined}
         onVoteRequestStarted={onClose}
       />
@@ -430,6 +433,45 @@ it("restores Explain vote for proxy competition votes after the vote succeeds", 
           wave_id: "wave",
           reply_to: { drop_id: "drop", drop_part_id: 7 },
           parts: [expect.objectContaining({ content: "Proxy vote rationale" })],
+        }),
+      })
+    )
+  );
+  expect(setCompetitionVote).toHaveBeenCalledTimes(1);
+});
+it("uses the generated rationale as a placeholder in MINI popups and posts only written text", async () => {
+  jest.mocked(commonApiPost).mockResolvedValue({ id: "reply" } as never);
+  mount("numeric", replyDrop, undefined, SingleWaveDropVoteSize.MINI);
+  const input = await screen.findByRole("spinbutton", { name: "Your vote" });
+  fireEvent.click(screen.getByRole("switch", { name: "Explain vote" }));
+  const rationale = screen.getByLabelText("Optional rationale reply");
+  const save = screen.getByRole("button", { name: "Save vote" });
+  expect(rationale).toHaveValue("");
+  expect(rationale).toHaveAttribute(
+    "placeholder",
+    "Vote rationale (0 at time of posting):"
+  );
+  expect(save).toBeDisabled();
+  fireEvent.change(input, { target: { value: "25" } });
+  expect(rationale).toHaveValue("");
+  expect(rationale).toHaveAttribute(
+    "placeholder",
+    "Vote rationale (+25 at time of posting):"
+  );
+  expect(setCompetitionVote).not.toHaveBeenCalled();
+  expect(commonApiPost).not.toHaveBeenCalled();
+  fireEvent.change(rationale, { target: { value: "My explanation" } });
+  fireEvent.change(input, { target: { value: "-25" } });
+  fireEvent.click(screen.getByRole("switch", { name: "Explain vote" }));
+  fireEvent.click(screen.getByRole("switch", { name: "Explain vote" }));
+  expect(rationale).toHaveValue("My explanation");
+  expect(save).toBeEnabled();
+  fireEvent.click(save);
+  await waitFor(() =>
+    expect(commonApiPost).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          parts: [expect.objectContaining({ content: "My explanation" })],
         }),
       })
     )
