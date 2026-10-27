@@ -48,6 +48,10 @@ distinct from an unlisted artwork.
 focus to the market. The price summary and order levels appear immediately,
 without a second accordion. Switching tabs retains selections and active reviews.
 Memes, Meme Lab, Gradients and Pebbles use the same trading controls and review layout.
+On phones, **Change** beside **Deliver to** on an artwork page opens the receiving
+wallet picker in a bottom sheet. Choose a profile wallet, use **Send to a fren**,
+or enter a wallet address, then choose **Done** to return to the artwork. Desktop
+keeps the inline picker. Changing delivery does not submit a purchase.
 Meme Lab supports trades on individual card pages; the set planner, Lowest
 listings and TDH tools cover Memes, Gradients and Pebbles.
 Memes and Meme Lab show traits, metadata and original files below the description
@@ -57,6 +61,12 @@ Listing prices load before you connect a wallet. While a price is unavailable,
 the Collect area shows whether listings are loading, could not be loaded, or contain
 no supported orders. **Connect wallet** remains available; connecting is required
 before reviewing a purchase.
+On Meme cards, one placeholder stays in place while the initial artwork, listings,
+trading availability and wallet initialization resolve. The trading controls then
+appear together. The placeholder keeps compact text and button rows stable while loading. Once
+ready, the panel fits its controls without retaining empty placeholder space;
+additional form details can expand it. Background listing refreshes retain the
+current controls.
 
 Listing availability updates quietly while the artwork page is visible and idle.
 The site preserves an active purchase choice or review instead of replacing it
@@ -69,7 +79,19 @@ confirmed wallet in the profile holds the NFT. Connect that holding wallet to
 list it; profile consolidation does not grant another wallet permission to sign.
 Before connecting, **List** opens the wallet connection flow so ownership
 can be checked.
-The more-actions menu contains **Review offers**.
+**Review offers** is available in the more-actions menu on artwork pages.
+On Meme cards, Collect keeps its complete label and price visible while Make an
+offer uses the remaining width beside the more-actions menu. In very narrow
+panels, Collect fills its own row above those controls. When Collect is present, the available **List** action is inside that menu.
+Without Collect, **List** appears beside Make an offer when available; otherwise
+Make an offer fills both labelled button slots. **Review offers** stays in the menu.
+**View listings & offers** has its own row below **Supply details & rankings**;
+it still opens the existing market tab.
+**Make an offer** and **Review offers** group wallet guidance and **Connect
+wallet** in the same card at the top when a connection is needed. It appears
+before the offer fields or order chooser. The button wraps to its own full-width
+row when space is limited; the order chooser keeps quantity and **Review exact
+terms** visible in its bottom controls on phones and desktop.
 If ownership is still loading, **List** stays visible but unavailable.
 If that check fails, choose **Try again** beside the action.
 

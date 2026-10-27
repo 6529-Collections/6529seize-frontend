@@ -85,8 +85,10 @@ Selected listings keep **Quantity** inside the same neutral card. While any
 listing is selected, **Review selected listings** stays in a sticky bottom bar
 within Listings & offers, above mobile navigation. The bar disappears when the
 selection is empty. The site
-checks each selected order again before opening the purchase review. Choose your
-delivery wallet using the same **Deliver to · Change** picker as minting, including
+checks each selected order again before opening the purchase review. During this
+check, a spinner replaces the button label without resizing the button or the bar.
+The loading message remains available to screen readers; errors remain visible.
+Choose your delivery wallet using the same **Deliver to · Change** picker as minting, including
 your consolidated wallets or **Send to a fren**. Review the total, fees and gas
 before authorizing in your wallet. The review separates **Pay with** from each
 delivery address and offers **Price breakdown**, **Exact amounts** and

@@ -31,7 +31,9 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
   const { isRightSidebarOpen } = useSidebarState();
   const pathname = usePathname();
   const smallWebOverflow =
-    pathname === "/the-memes" ? "tw-overflow-x-clip" : "tw-overflow-auto";
+    pathname === "/the-memes" || /^\/the-memes\/\d+\/?$/.test(pathname)
+      ? "tw-overflow-x-clip"
+      : "tw-overflow-auto";
 
   // Changing responsive chrome must not remount page state or live uploads.
   // Close the old menu just as the previous separate layout did on unmount.
