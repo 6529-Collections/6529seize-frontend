@@ -411,7 +411,7 @@ export function CompetitionVoteForm({
   return (
     <div className="tw-space-y-3 group-[.is-mini]/inline-vote:tw-contents group-[.is-mini]/inline-vote:tw-space-y-0">
       <CompetitionCredits budget={credit.data} />
-      <p className="tw-text-sm tw-text-iron-400 group-[.is-mini]/inline-vote:tw-col-start-1 group-[.is-mini]/inline-vote:tw-row-start-1 group-[.is-mini]/inline-vote:tw-m-0 group-[.is-mini]/inline-vote:tw-flex group-[.is-mini]/inline-vote:tw-flex-wrap group-[.is-mini]/inline-vote:tw-items-baseline group-[.is-mini]/inline-vote:tw-gap-x-1.5 group-[.is-mini:has(input[type=number])]/inline-vote:tw-contents">
+      <p className="tw-text-sm tw-text-iron-400 group-[.is-mini]/inline-vote:tw-col-start-1 group-[.is-mini]/inline-vote:tw-row-start-1 group-[.is-mini]/inline-vote:tw-m-0 group-[.is-mini]/inline-vote:tw-flex group-[.is-mini]/inline-vote:tw-flex-wrap group-[.is-mini]/inline-vote:tw-items-center group-[.is-mini]/inline-vote:tw-gap-x-1.5 group-[.is-mini:has(input[type=number])]/inline-vote:tw-contents">
         <span className="tw-hidden tw-font-medium tw-text-iron-400 group-[.is-mini]/inline-vote:tw-col-start-1 group-[.is-mini]/inline-vote:tw-row-start-1 group-[.is-mini]/inline-vote:tw-inline">
           {t(locale, "competitions.voteValue")}
         </span>
@@ -428,7 +428,7 @@ export function CompetitionVoteForm({
       >
         {voteMode === "slider" ? (
           <fieldset
-            className="tw-m-0 tw-min-w-0 tw-border-0 tw-px-0 tw-pb-6 tw-pt-0 group-[.is-mini]/inline-vote:tw-col-span-2 group-[.is-mini]/inline-vote:tw-row-start-2 group-[.is-mini]/inline-vote:tw-px-2 group-[.is-mini]/inline-vote:tw-pb-5 group-[.is-mini]/inline-vote:tw-pt-8 group-[.is-mini]/inline-vote:focus-within:tw-rounded-lg group-[.is-mini]/inline-vote:focus-within:tw-ring-2 group-[.is-mini]/inline-vote:focus-within:tw-ring-primary-400"
+            className="tw-m-0 tw-min-w-0 tw-border-0 tw-px-0 tw-pb-6 tw-pt-0 group-[.is-mini]/inline-vote:tw-col-span-2 group-[.is-mini]/inline-vote:tw-row-start-2 group-[.is-mini]/inline-vote:tw-px-2 group-[.is-mini]/inline-vote:tw-pb-0 group-[.is-mini]/inline-vote:tw-pt-8 group-[.is-mini]/inline-vote:focus-within:tw-rounded-lg group-[.is-mini]/inline-vote:focus-within:tw-ring-2 group-[.is-mini]/inline-vote:focus-within:tw-ring-primary-400"
             disabled={busy || disabled || !competition.permissions.vote}
           >
             <legend className="tw-sr-only">
