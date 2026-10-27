@@ -1,7 +1,8 @@
 import { defineConfig } from "@playwright/test";
 import baseConfig from "./playwright.config";
 
-export default defineConfig(baseConfig, {
+export default defineConfig({
+  ...baseConfig,
   testMatch: "social/wave-loading-sandbox.spec.ts",
   grep: /automatic scrolling/,
   timeout: 180000,

@@ -7,6 +7,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: wave-scroll-windows-qa
+  cancel-in-progress: true
+
 jobs:
   windows-browsers:
     runs-on: windows-2025
