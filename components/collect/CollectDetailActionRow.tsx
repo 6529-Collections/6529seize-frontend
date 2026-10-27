@@ -105,7 +105,8 @@ function MobileActionRow({
 
   const observeRow = useCallback((row: HTMLDivElement | null) => {
     if (!row || typeof IntersectionObserver === "undefined") return;
-    const observer = new IntersectionObserver(([entry]) => {
+    const observer = new IntersectionObserver((entries) => {
+      const entry = entries.at(-1);
       setOffscreen(Boolean(entry && !entry.isIntersecting));
     });
     observer.observe(row);
