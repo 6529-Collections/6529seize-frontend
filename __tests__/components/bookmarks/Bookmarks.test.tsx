@@ -127,7 +127,7 @@ it("reveals the menu entry on first save and hides it after the last removal", a
   );
 });
 it("keeps bookmarks with the owner across proxy changes and isolates account switches", async () => {
-  saved.alice = true;
+  saved["alice"] = true;
   const view = render(<Controls />, { wrapper: Wrapper });
   await screen.findByRole("link", { name: "Bookmarks" });
   mockProxy = "someone-else";
@@ -162,10 +162,10 @@ it("rolls back a failed first save", async () => {
   ).not.toBeInTheDocument();
 });
 it("keeps the page open with an empty state after the last removal", async () => {
-  saved.alice = true;
+  saved["alice"] = true;
   jest.mocked(fetchBookmarks).mockImplementation(async () => ({
-    count: saved.alice ? 1 : 0,
-    data: saved.alice
+    count: saved["alice"] ? 1 : 0,
+    data: saved["alice"]
       ? ([
           {
             id: "drop-1",
@@ -186,7 +186,7 @@ it("keeps the page open with an empty state after the last removal", async () =>
   fireEvent.click(remove);
   await screen.findByRole("heading", { name: "No bookmarks yet" });
   expect(
-    screen.getByRole("heading", { name: "Bookmarks", exact: true })
+    screen.getByRole("heading", { name: /^Bookmarks$/ })
   ).toHaveFocus();
 });
 it("does not fetch private data while signed out", async () => {
@@ -241,7 +241,7 @@ it("keeps the menu visible when removing one of multiple saved messages", async 
     expect(screen.queryByText("drop-1")).not.toBeInTheDocument()
   );
   expect(
-    screen.getByRole("link", { name: "Bookmarks", exact: true })
+    screen.getByRole("link", { name: /^Bookmarks$/ })
   ).toBeInTheDocument();
   expect(screen.getByText("drop-2")).toBeInTheDocument();
 });

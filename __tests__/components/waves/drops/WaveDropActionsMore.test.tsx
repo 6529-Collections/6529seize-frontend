@@ -339,7 +339,7 @@ describe("WaveDropActionsMore", () => {
     const trigger = screen.getByRole("button", { name: "More actions" });
     trigger.focus();
     await user.keyboard("{Enter}");
-    screen.getByRole("button", { name: "Bookmark", exact: true }).focus();
+    screen.getByRole("button", { name: /^Bookmark$/ }).focus();
     await user.keyboard("{Enter}");
     expect(screen.queryByTestId("dropdown")).not.toBeInTheDocument();
     expect(trigger).toHaveFocus();

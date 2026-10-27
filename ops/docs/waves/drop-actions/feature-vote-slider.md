@@ -39,8 +39,9 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
    - `%` quick buttons (normal numeric mode)
    - `+` and `-` step buttons (normal numeric mode)
 4. Review the live value and vote-credit label.
-5. Optional: edit the prefilled rationale reply and leave `Explain vote`
-   on.
+5. Optional: enable `Explain vote` and edit the rationale. Competition popups
+   and full competition dialogs display the generated rationale as a placeholder;
+   non-competition dialogs prefill it.
 6. Select `Vote` or `Vote + reply` to submit.
 
 ## Common Scenarios
@@ -63,6 +64,37 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
 - Users can turn `Explain vote` on without editing. In that case, the reply
   contains only the generated vote total, plus the vote change when it differs
   from the total.
+
+### Competition Submission Popups
+
+Artist submissions place the voting footer inside each artwork card. When the
+wallet is disconnected, the compact footer is hidden, including the connection
+message and its spacing. Cards keep
+their own height when an explanation is open. Artist submissions and participant
+entries place the vote label and mode switch above the input. A compact credit
+line below the input shows the remaining balance on the left and spent credits
+out of available credits on the right, for example `679 remaining` and
+`33,591 of 34,270 credits spent`. On narrow cards it wraps between those two groups;
+numbers stay with their words. Full credit labels remain available to screen
+readers. The icon-style `Explain vote` control and compact `Save
+vote` button share the bottom row. The explanation opens above that row, with
+its public-reply note below the text field. It opens and closes with a short
+expand/fade transition, respecting reduced-motion settings. Generated text such
+as `Vote rationale (0 at time of posting):` appears as a placeholder, so typing
+starts in an empty field. Opening `Explain vote` does not show an empty-field
+warning. Leaving the field untouched preserves the existing generated reply;
+entering text replaces it. Clearing an edited field while `Explain vote` is on
+blocks `Save vote` until you enter text or turn the control off. The compact
+text field does not scroll internally; drag its resize handle to enlarge it and
+reveal longer explanations. Vote amounts, limits, eligibility, and saving work
+the same in both input modes.
+
+The full competition voting modal and mobile sheet use the same compact
+remaining/spent credit line beneath the input, and the same
+centered `Explain vote` and `Save vote` actions. Their numeric input and
+rationale field are taller than the card controls. Generated rationale appears
+as a placeholder here too: typing starts in an empty field, while an untouched
+field retains the existing generated reply.
 
 ## Edge Cases
 
