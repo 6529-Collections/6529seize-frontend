@@ -791,10 +791,10 @@ describe("testing strategy CI plan", () => {
     expect(workflow).toContain("Restore Playwright browser");
     expect(workflow).toContain("node22-pr-production-nextjs");
 
-    // PR lanes retry quickly; deployed E2E allows slow downloads and waits for
-    // a timed-out apt-get before retrying.
+    // Both PR Museum lanes and deployed E2E allow slow package downloads and
+    // wait for a timed-out apt-get before retrying.
     for (const [source, installMinutes, retryMinutes] of [
-      [workflow, 3, 3],
+      [workflow, 10, 15],
       [stagingWorkflow, 10, 15],
       [productionWorkflow, 10, 15],
     ] as const) {

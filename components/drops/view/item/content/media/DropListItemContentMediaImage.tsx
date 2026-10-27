@@ -4,7 +4,10 @@ import {
   DropImagePreview,
   getDropImagePreviewSources,
 } from "./DropImagePreview";
-import { GifPreviewLoadingIndicator } from "./GifPreviewLoadingIndicator";
+import {
+  GifPreviewLoadingIndicator,
+  type GifPreviewLoadingLayout,
+} from "./GifPreviewLoadingIndicator";
 import { isGifImageUrl } from "@/helpers/gif-preview.helpers";
 import Button from "@/components/utils/button/Button";
 import { useDropImageGallery } from "@/components/drops/view/part/DropImageGalleryProvider";
@@ -26,7 +29,10 @@ import { useMediaActions } from "./useMediaActions";
 import Image from "next/image";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { ImageQualityToggle } from "./ImageQualityToggle";
-import { useOriginalImage } from "./useOriginalImage";
+import {
+  useOriginalImage,
+  type OriginalImageQuality,
+} from "./useOriginalImage";
 
 const loadingPlaceholderStyle: React.CSSProperties = {
   width: "100%",
@@ -54,6 +60,47 @@ function OriginalImageLoadingIndicator({ isGif }: { readonly isGif: boolean }) {
       {label}
     </output>
   );
+}
+
+function getAutomaticGifFallback(
+  enabled: boolean,
+  canToggleOriginal: boolean,
+  isGif: boolean,
+  requestAutomatically: () => void
+) {
+  return enabled && canToggleOriginal && isGif
+    ? requestAutomatically
+    : undefined;
+}
+
+function getImageLoadingState({
+  loaded,
+  unavailable,
+  quality,
+  canToggleOriginal,
+  isGif,
+  imageLoadingLayout,
+}: {
+  readonly loaded: boolean;
+  readonly unavailable: boolean;
+  readonly quality: Pick<OriginalImageQuality, "loading" | "showingOriginal">;
+  readonly canToggleOriginal: boolean;
+  readonly isGif: boolean;
+  readonly imageLoadingLayout: GifPreviewLoadingLayout;
+}) {
+  const continuousGifLoading =
+    isGif && imageLoadingLayout === "artwork" && canToggleOriginal;
+  const loadingOriginal = continuousGifLoading && quality.loading;
+  const hideUnavailable = loadingOriginal && unavailable;
+  return {
+    continuousGifLoading,
+    showLoading:
+      !quality.showingOriginal &&
+      (loadingOriginal || (!loaded && !unavailable)),
+    hideUnavailable,
+    hidePreview:
+      (quality.showingOriginal && canToggleOriginal) || hideUnavailable,
+  };
 }
 
 function LoadingPlaceholder({
@@ -85,6 +132,7 @@ function DropImageContent({
   handleIntrinsicImageError,
   handleError,
   preferHighQualityImage,
+  onAnimatedPreviewUnavailable,
 }: {
   readonly src: string;
   readonly alt: string;
@@ -99,6 +147,7 @@ function DropImageContent({
   readonly handleIntrinsicImageError: () => void;
   readonly handleError: () => void;
   readonly preferHighQualityImage: boolean;
+  readonly onAnimatedPreviewUnavailable?: (() => void) | undefined;
 }) {
   const [aspectRatio, setAspectRatio] = useState<string | undefined>();
   const imageClassName = `${
@@ -135,6 +184,7 @@ function DropImageContent({
         originalSrc={src}
         imageScale={imageScale}
         preferHighQuality={preferHighQualityImage}
+        onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
         alt={alt}
         fill
         loading={loadStrategy === "eager" ? "eager" : undefined}
@@ -152,6 +202,7 @@ function DropImageContent({
       originalSrc={src}
       imageScale={imageScale}
       preferHighQuality={preferHighQualityImage}
+      onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
       alt={alt}
       fill
       loading={loadStrategy === "eager" ? "eager" : undefined}
@@ -212,6 +263,8 @@ type DropListItemContentMediaImageProps = {
   readonly galleryItemId?: string | undefined;
   readonly showOriginalQualityToggle?: boolean | undefined;
   readonly preferHighQualityImage?: boolean | undefined;
+  readonly autoAnimateGif?: boolean | undefined;
+  readonly imageLoadingLayout?: GifPreviewLoadingLayout | undefined;
 };
 
 function DropListItemContentMediaImage({
@@ -243,6 +296,8 @@ function DropListItemContentMediaImageContent({
   galleryItemId,
   showOriginalQualityToggle = false,
   preferHighQualityImage = false,
+  autoAnimateGif = false,
+  imageLoadingLayout = "inline",
 }: DropListItemContentMediaImageProps & { readonly imageScale: ImageScale }) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const [loaded, setLoaded] = useState(false);
@@ -256,6 +311,12 @@ function DropListItemContentMediaImageContent({
   const canToggleOriginal =
     showOriginalQualityToggle && quality.canViewOriginal;
   const isGif = isGifImageUrl(src);
+  const onAnimatedPreviewUnavailable = getAutomaticGifFallback(
+    autoAnimateGif,
+    canToggleOriginal,
+    isGif,
+    quality.requestAutomatically
+  );
 
   const imageFrameRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -344,6 +405,19 @@ function DropListItemContentMediaImageContent({
   const unavailable =
     getDropImagePreviewSources(src, imageScale).length === 0 ||
     errorCount > maxRetries;
+  const {
+    continuousGifLoading,
+    showLoading: showGifLoading,
+    hideUnavailable: hideUnavailableGifPreview,
+    hidePreview,
+  } = getImageLoadingState({
+    loaded,
+    unavailable,
+    quality,
+    canToggleOriginal,
+    isGif,
+    imageLoadingLayout,
+  });
 
   const resolvedObjectPosition =
     imageObjectPosition ?? (isCompetitionDrop ? "center" : "left top");
@@ -404,7 +478,7 @@ function DropListItemContentMediaImageContent({
               className={
                 intrinsicHeight ? "tw-block" : "tw-absolute tw-inset-0"
               }
-              hidden={quality.showingOriginal && canToggleOriginal}
+              hidden={hidePreview}
             >
               <DropImageContent
                 src={src}
@@ -420,29 +494,34 @@ function DropListItemContentMediaImageContent({
                 handleIntrinsicImageError={handleIntrinsicImageError}
                 handleError={handleError}
                 preferHighQualityImage={preferHighQualityImage}
+                onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
               />
             </span>
           )}
-          {quality.loading && canToggleOriginal && !isModalOpen && (
-            <OriginalImageLoadingIndicator isGif={isGif} />
+          {quality.loading &&
+            canToggleOriginal &&
+            !isModalOpen &&
+            !continuousGifLoading && (
+              <OriginalImageLoadingIndicator isGif={isGif} />
+            )}
+          {shouldLoadImage && showGifLoading && isGif && (
+            <GifPreviewLoadingIndicator layout={imageLoadingLayout} />
           )}
-          {shouldLoadImage &&
-            !loaded &&
-            !unavailable &&
+          {unavailable &&
             !quality.showingOriginal &&
-            isGif && <GifPreviewLoadingIndicator />}
-          {unavailable && !quality.showingOriginal && !disableModal && (
-            <div className="tw-absolute tw-bottom-3 tw-left-1/2 tw-z-30 -tw-translate-x-1/2">
-              <Button
-                type="button"
-                variant="tertiary"
-                size="xs"
-                onClick={manualRetry}
-              >
-                {t(DEFAULT_LOCALE, "drop.media.retry")}
-              </Button>
-            </div>
-          )}
+            !disableModal &&
+            !hideUnavailableGifPreview && (
+              <div className="tw-absolute tw-bottom-3 tw-left-1/2 tw-z-30 -tw-translate-x-1/2">
+                <Button
+                  type="button"
+                  variant="tertiary"
+                  size="xs"
+                  onClick={manualRetry}
+                >
+                  {t(DEFAULT_LOCALE, "drop.media.retry")}
+                </Button>
+              </div>
+            )}
           {!disableModal && (
             <ImageInteractionLayer
               boundsStyle={imageActionBoundsStyle}
@@ -497,6 +576,7 @@ function DropListItemContentMediaImageContent({
           fullscreenTargetAvailable={!isCapacitor}
           originalQuality={canToggleOriginal ? quality : undefined}
           preferHighQualityPreview={preferHighQualityImage}
+          onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
         />
       )}
     </>

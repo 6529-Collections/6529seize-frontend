@@ -48,8 +48,6 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
         <MyStreamWaveTabsHeader
           wave={wave}
           activeContentTab={activeContentTab}
-          setActiveContentTab={setActiveContentTab}
-          onSelectCuration={onSelectCuration}
           isCompact={isCompact}
           showBackButton={showBackButton}
           headerActionsTooltipId={headerActionsTooltipId}
