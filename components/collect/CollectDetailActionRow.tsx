@@ -12,13 +12,15 @@ import {
 import { createPortal } from "react-dom";
 import styles from "./CollectDetailActionRow.module.css";
 
+export const CollectDetailHasPrimaryAction = createContext(false);
+
 // Only the Meme detail page opts in; other inline trade surfaces keep their layout.
 export const CollectDetailLayout = createContext<{
   readonly offerAction: ReactNode;
   readonly marketLink: ReactNode;
 } | null>(null);
 
-/** Groups the existing status and market link without changing either action. */
+/** Keeps the existing listing status above its actions. */
 export function CollectDetailHeader({
   children,
 }: {
@@ -27,12 +29,28 @@ export function CollectDetailHeader({
   const layout = useContext(CollectDetailLayout);
   if (!layout) return children;
   return (
-    <div
-      data-collect-detail-header
-      className="-tw-mt-3 tw-flex tw-min-h-5 tw-flex-col tw-items-start tw-gap-1"
-    >
-      {layout.marketLink}
+    <div data-collect-detail-header className="empty:tw-hidden">
       {children}
+    </div>
+  );
+}
+
+/** Allows supporting controls to occupy slots in the shared action grid. */
+export function CollectDetailFooter({
+  children,
+}: {
+  readonly children?: ReactNode;
+}) {
+  const layout = useContext(CollectDetailLayout);
+  if (!layout) return children;
+  return (
+    <div data-collect-detail-utilities className="tw-contents">
+      {Boolean(children) && (
+        <div data-collect-detail-other-actions className="tw-contents">
+          {children}
+        </div>
+      )}
+      {layout.marketLink}
     </div>
   );
 }
@@ -40,10 +58,14 @@ export function CollectDetailHeader({
 export default function CollectDetailActionRow({
   children,
   primaryAction,
+  supportingActions,
+  details,
   active = true,
 }: {
   readonly children: ReactNode;
   readonly primaryAction?: ReactNode;
+  readonly supportingActions?: ReactNode;
+  readonly details?: ReactNode;
   readonly active?: boolean;
 }) {
   const layout = useContext(CollectDetailLayout);
@@ -52,6 +74,7 @@ export default function CollectDetailActionRow({
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
         {primaryAction}
         {children}
+        {supportingActions}
       </div>
     );
   }
@@ -59,6 +82,8 @@ export default function CollectDetailActionRow({
     <MobileActionRow
       primaryAction={primaryAction}
       offerAction={layout.offerAction}
+      supportingActions={supportingActions}
+      details={details}
     >
       {children}
     </MobileActionRow>
@@ -69,10 +94,14 @@ function MobileActionRow({
   children,
   primaryAction,
   offerAction,
+  supportingActions,
+  details,
 }: {
   readonly children: ReactNode;
   readonly primaryAction: ReactNode;
   readonly offerAction: ReactNode;
+  readonly supportingActions?: ReactNode;
+  readonly details?: ReactNode;
 }) {
   const [offscreen, setOffscreen] = useState(false);
   const { isCapacitor } = useCapacitor();
@@ -95,8 +124,16 @@ function MobileActionRow({
         data-testid="collect-inline-actions"
         className={styles["inlineActions"]}
       >
-        {primaryAction}
-        {children}
+        <CollectDetailHasPrimaryAction.Provider value={Boolean(primaryAction)}>
+          <div data-collect-action-group className={styles["actionGroup"]}>
+            <div data-collect-main-actions className={styles["mainActions"]}>
+              {primaryAction}
+              {children}
+            </div>
+            <CollectDetailFooter>{supportingActions}</CollectDetailFooter>
+          </div>
+        </CollectDetailHasPrimaryAction.Provider>
+        {details}
       </div>
       {typeof document !== "undefined" &&
         createPortal(

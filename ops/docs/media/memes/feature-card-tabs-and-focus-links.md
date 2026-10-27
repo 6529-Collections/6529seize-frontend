@@ -107,8 +107,10 @@
   details scroll. It stops at the end of that section, before the tabs. On
   smaller screens the artwork scrolls normally with the page.
 - Market actions sit in one bordered panel at every screen size.
-  View listings & offers stays at the top left, above any listing status, using
-  the same compact, muted text style on phones, tablets and desktop.
+  When a wallet connection is required, its existing guidance and white Connect
+  wallet button lead the panel. The button shares the line in wider panels and
+  fills its own row in narrower panels. A divider separates this requirement
+  from the trading actions.
   Collect keeps the shared blue action style, dimmed and non-interactive when
   disabled, in both the panel and the bottom bar.
   Delivery controls stay hidden while a wallet connection is required; after
@@ -117,12 +119,19 @@
   panel appear above the artwork. Ownership, format switching and media actions
   stay below the artwork. The tab row stays at the top while scrolling below 1024px;
   swipe the row to reach all four tabs when needed.
-- Collect and Make an offer share one row of 44px buttons on phones, tablets and
-  desktop. Very long labels truncate visually without changing their accessible names.
-  Make an offer fills the row when Collect is unavailable. Review offers and the
-  available List action sit in a darker strip at the bottom of the panel.
-  When a wallet connection is required, that strip also groups the existing
-  guidance with Connect wallet. The text and button wrap when space is limited.
+- Collect and Make an offer use 44px buttons. Collect keeps enough width for its
+  complete label and price; Make an offer uses the remaining space and can truncate
+  visually without changing its accessible name. In very narrow panels, Collect
+  fills the first row, with Make an offer and the square more-actions menu below.
+  Wider panels keep all three controls on one row. The bottom bar also keeps the
+  complete Collect label visible. When Collect
+  is present, the available List action is inside that menu. Without Collect,
+  Make an offer and the available List action share the row; when List is also
+  unavailable, Make an offer fills both labelled slots. Review offers remains
+  available inside the menu. All actions share one panel
+  background and retain their existing button styles.
+  View listings & offers is a separate navigation row below Supply details &
+  rankings, outside the trading panel. It still opens the Listings & offers tab.
   Each action keeps its existing availability and trading behavior.
 - Review offers keeps its dialog height stable while the initial offers load.
   Muted placeholder rows appear first; the wallet and quantity form is revealed

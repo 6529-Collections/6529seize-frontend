@@ -186,10 +186,15 @@ wider use the sortable table.
 Compact values are presentation only.
 The Listings and Offers record distinguishes direct **Collect** and **Sell**
 actions for one order from the explicit choice among multiple orders at a price.
-The Meme card record places the market link and listing status at the top,
-Collect above its delivery controls, secondary actions below, and connection
-guidance beneath a divider at the bottom. Delivery controls appear once the
-required wallet is connected. Labels and action availability stay unchanged.
+The Meme card record places connection guidance first when needed, then Collect
+and Make an offer beside the more-actions menu. Collect keeps its complete label
+and price; Make an offer can shrink. Very narrow panels place Collect on its own
+row above the other controls. When Collect is present, the available List action moves into the menu; without
+Collect it takes the second slot, or Make an offer spans both slots if List is
+unavailable. Review offers remains available in the menu. Delivery controls appear
+below the actions once the required wallet is connected. View listings & offers
+has a separate navigation row below Supply details & rankings. Labels, action
+availability and wallet requirements stay unchanged.
 Tabs and the off-screen action replacement stay sticky below 1024px, matching
 the single-column card layout; selected-listing review retains bottom-bar priority.
 Market browsing facts describe quiet periodic updates while visible and idle,
@@ -337,8 +342,8 @@ environment; the help runtime continues to consume `/help-index.json`.
 
 ## Source Ownership
 
-The artwork Review offers guidance distinguishes the direct button in the Meme
-card bottom strip from the more-actions menu on other artwork pages. It includes
+The artwork Review offers guidance places that action in the more-actions menu
+on artwork pages. It includes
 the responsive review layout: when a connection is required, wallet guidance and
 Connect wallet share the same top card as Make an offer, before the order list.
 The order list scrolls above quantity and Review exact terms, which remain visible

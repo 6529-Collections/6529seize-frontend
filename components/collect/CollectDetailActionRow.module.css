@@ -1,85 +1,109 @@
-.detailPanel:has([data-collect-detail-header]) > [data-collect-market-link],
+.detailPanel {
+  container-type: inline-size;
+}
+
+/* Reserve space while the actions are unknown; resolved content sizes naturally. */
+.detailPanelContent {
+  --collect-detail-min-height: 7.75rem;
+  min-block-size: 0;
+}
+
+.detailPanelContent:has([data-collect-detail-loading]) {
+  min-block-size: var(--collect-detail-min-height);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .detailPanelContent:not(:has([data-collect-detail-loading])) {
+    transition: min-block-size 150ms ease-out;
+  }
+}
+
+.detailLoading {
+  min-block-size: var(--collect-detail-min-height, 7.75rem);
+}
+
+.detailPanel:has([data-collect-detail-header])
+  > .detailPanelContent
+  > [data-collect-market-link],
 .detailPanel [data-collect-trade-status]:empty {
   display: none;
 }
 
 .inlineActions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.actionGroup {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: stretch;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) 44px;
+  align-items: start;
   gap: 8px;
 }
 
-.inlineActions > button,
-.inlineActions > [data-collect-secondary-actions] > button {
-  min-width: 0;
-  width: 100%;
-  max-width: 100%;
+/* List keeps its label and padding; Make an offer fills the rest of its row. */
+.actionGroup:has([data-collect-owner-action]) {
+  grid-template-columns: minmax(0, 1fr) max-content 44px;
 }
 
-.inlineActions > [data-collect-detail-delivery],
-.inlineActions [data-collect-detail-other-actions] {
-  grid-column: 1 / -1;
-  min-width: 0;
+/* Collect keeps its entire price; the secondary action takes the remaining width. */
+.actionGroup:has(.mainActions > button[type="submit"]) {
+  grid-template-columns: minmax(max-content, 1fr) minmax(44px, 1fr) 44px;
 }
 
-/* The offer can be wrapped in display: contents; span its actual button. */
-.inlineActions:not(:has(> button[type="submit"])) > button,
-.inlineActions:not(:has(> button[type="submit"]))
-  > [data-collect-secondary-actions]
-  > button {
-  grid-column: 1 / -1;
+.stickyActions:has(> button[type="submit"]) {
+  grid-template-columns: minmax(max-content, 1fr) minmax(44px, 1fr);
 }
 
-.inlineActions > [data-collect-secondary-actions] {
+.mainActions,
+.mainActions > [data-collect-secondary-actions] {
   display: contents;
 }
 
-.inlineActions [data-collect-detail-other-actions] {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: start;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 4px;
+.actionGroup [data-collect-more-actions] {
+  grid-column: 3;
+  grid-row: 1;
 }
 
-.inlineActions [data-collect-owner-action] {
+.actionGroup [data-collect-owner-action] {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+/* Without Collect or an eligible List control, the offer fills both label slots. */
+.actionGroup:not(:has([data-collect-owner-action]))
+  .mainActions:not(:has(> button[type="submit"]))
+  > button,
+.actionGroup:not(:has([data-collect-owner-action]))
+  .mainActions:not(:has(> button[type="submit"]))
+  > [data-collect-secondary-actions]
+  > button {
+  grid-column: 1 / span 2;
+}
+
+.actionGroup [data-collect-owner-feedback] {
+  grid-column: 1 / -1;
+}
+
+.mainActions > button,
+.mainActions > [data-collect-secondary-actions] > button,
+.actionGroup [data-collect-owner-action] {
   min-width: 0;
+  width: 100%;
   max-width: 100%;
-}
-
-.inlineActions [data-collect-owner-action]:empty {
-  display: none;
-}
-
-.inlineActions > button,
-.inlineActions > [data-collect-secondary-actions] > button,
-.inlineActions [data-collect-owner-action] > button,
-.inlineActions [data-collect-owner-action] > div > button:first-child {
-  height: 44px;
-  border-radius: 8px;
-  padding-inline: 12px;
-}
-
-.inlineActions > button,
-.inlineActions > [data-collect-secondary-actions] > button {
   height: 44px;
   min-height: 44px;
+  border-radius: 8px;
+  padding: 4px 12px;
   white-space: nowrap;
-  padding-block: 4px;
   font-size: 14px;
   line-height: 16px;
 }
 
-.inlineActions [data-collect-owner-action] > button,
-.inlineActions [data-collect-owner-action] > div > button:first-child {
-  min-width: 96px;
-}
-
-/* Text can truncate as a last resort without changing the accessible name. */
-.inlineActions > button:not([type="submit"]),
-.inlineActions > [data-collect-secondary-actions] > button,
+/* Only secondary labels truncate; Collect must always show the complete price. */
+.mainActions > button:not([type="submit"]),
+.mainActions > [data-collect-secondary-actions] > button,
 .stickyActions > button:not([type="submit"]) {
   display: block;
   overflow: hidden;
@@ -92,132 +116,65 @@
   left: theme("spacing.20");
 }
 
-.detailPanel [data-collect-detail-strip] [data-collect-connection-header] span {
-  text-wrap: pretty;
-}
-
-.detailPanel [data-collect-detail-strip] [data-collect-connect-wallet],
-.detailPanel [data-collect-detail-strip] [data-collect-more-actions] > button,
-.detailPanel [data-collect-detail-strip] [data-collect-owner-action] > button,
-.detailPanel
-  [data-collect-detail-strip]
-  [data-collect-owner-action]
-  > div
-  > button {
-  height: 36px;
-  min-height: 36px;
-  padding: 0 14px;
-  font-size: 14px;
-  line-height: 20px;
-}
-
-.detailPanel [data-collect-detail-strip] > [data-collect-connection-header] {
-  flex: 0 0 100%;
-  min-width: 0;
-}
-
-.detailPanel
-  [data-collect-detail-strip]
-  [data-collect-connection-header]
-  > div:empty {
-  display: none;
-}
-
-.detailPanel [data-collect-detail-strip-actions] {
-  flex: 0 0 100%;
-  min-width: 0;
-}
-
-.detailPanel [data-collect-detail-strip-actions] > button,
-.detailPanel
-  [data-collect-detail-strip-actions]
-  [data-collect-more-actions]
-  > button,
-.detailPanel [data-collect-detail-strip-actions] [data-collect-owner-action] {
-  flex: 0 1 auto;
-  max-width: 100%;
-}
-
-.detailPanel [data-collect-detail-strip] [data-collect-connect-wallet] {
-  margin-inline-end: auto;
-}
-
-.detailPanel [data-collect-detail-strip] [data-collect-owner-action]:empty {
-  display: none;
-}
-
-.detailPanel [data-collect-detail-strip] [data-collect-more-actions] > button {
-  border-color: transparent;
-  background: transparent;
-  box-shadow: none;
-}
-
-.detailPanel [data-collect-detail-strip] [data-collect-owner-action] > button,
-.detailPanel
-  [data-collect-detail-strip]
-  [data-collect-owner-action]
-  > div
-  > button {
-  width: auto;
-  border-color: theme("colors.iron.800");
-  background: theme("colors.iron.900");
-}
-
-/* Ownership feedback gets a readable row without displacing the compact actions. */
-.detailPanel
-  [data-collect-detail-strip]
-  [data-collect-owner-action]:has(> div > [role="status"]),
-.detailPanel
-  [data-collect-detail-strip]
-  [data-collect-owner-action]
-  > div:has(> [role="status"]) {
-  display: contents;
-}
-
-.detailPanel
-  [data-collect-detail-strip]
-  [data-collect-owner-action]
-  > div
-  > [role="status"] {
-  order: -1;
-  flex: 0 0 100%;
-  min-width: 0;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .detailPanel
-    [data-collect-detail-strip]
-    [data-collect-more-actions]
-    > button:enabled:hover {
-    background: theme("colors.iron.800");
-  }
-
-  .detailPanel
-    [data-collect-detail-strip]
-    [data-collect-owner-action]
-    > button:enabled:hover,
-  .detailPanel
-    [data-collect-detail-strip]
-    [data-collect-owner-action]
-    > div
-    > button:enabled:hover {
-    border-color: theme("colors.iron.700");
-    background: theme("colors.iron.800");
+@container (min-width: 420px) {
+  .detailPanel [data-collect-connection-header] {
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 20px;
   }
 }
 
-@media (max-width: 479px) {
-  .detailPanel [data-collect-detail-strip] [data-collect-connect-wallet] {
-    flex-basis: 100%;
-    width: 100%;
-    height: 40px;
-    min-height: 40px;
+@container (max-width: 399px) {
+  .mainActions > button,
+  .mainActions > [data-collect-secondary-actions] > button {
+    padding-inline: 8px;
+  }
+}
+
+/* Extremely narrow panels need a separate Collect row to keep every target usable. */
+@container (max-width: 283px) {
+  .actionGroup:has(.mainActions > button[type="submit"]) {
+    grid-template-columns: minmax(0, 1fr) 44px;
+  }
+
+  .mainActions > button[type="submit"] {
+    grid-column: 1 / -1;
+  }
+
+  .actionGroup:has(.mainActions > button[type="submit"])
+    [data-collect-more-actions] {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+
+/* Leave room for the existing progress indicator as well as the full price. */
+@container (max-width: 311px) {
+  .actionGroup:has(.mainActions > button[type="submit"][aria-busy="true"]) {
+    grid-template-columns: minmax(0, 1fr) 44px;
+  }
+
+  .mainActions > button[type="submit"][aria-busy="true"] {
+    grid-column: 1 / -1;
+  }
+
+  .actionGroup:has(.mainActions > button[type="submit"][aria-busy="true"])
+    [data-collect-more-actions] {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+
+@media (max-width: 399px) {
+  :global(body:has(.layout-root[data-small="false"][data-mobile="false"]))
+    .stickyActions:has(> button[type="submit"]) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-flow: row;
   }
 }
 
 @media (max-width: 639px) {
-  .inlineActions > button,
-  .inlineActions > [data-collect-secondary-actions] > button {
+  .mainActions > button,
+  .mainActions > [data-collect-secondary-actions] > button {
     font-size: 15px;
   }
 
@@ -228,17 +185,6 @@
     white-space: nowrap;
     border-radius: 8px;
     padding-inline: 14px;
-  }
-}
-
-@media (max-width: 399px) {
-  .inlineActions {
-    grid-template-columns: minmax(0, 5fr) minmax(0, 4fr);
-  }
-
-  .inlineActions > button,
-  .inlineActions > [data-collect-secondary-actions] > button {
-    padding-inline: 8px;
   }
 }
 

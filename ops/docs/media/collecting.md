@@ -63,7 +63,10 @@ no supported orders. **Connect wallet** remains available; connecting is require
 before reviewing a purchase.
 On Meme cards, one placeholder stays in place while the initial artwork, listings,
 trading availability and wallet initialization resolve. The trading controls then
-appear together. Background listing refreshes retain the current controls.
+appear together. The placeholder keeps compact text and button rows stable while loading. Once
+ready, the panel fits its controls without retaining empty placeholder space;
+additional form details can expand it. Background listing refreshes retain the
+current controls.
 
 Listing availability updates quietly while the artwork page is visible and idle.
 The site preserves an active purchase choice or review instead of replacing it
@@ -76,9 +79,14 @@ confirmed wallet in the profile holds the NFT. Connect that holding wallet to
 list it; profile consolidation does not grant another wallet permission to sign.
 Before connecting, **List** opens the wallet connection flow so ownership
 can be checked.
-On Meme cards, **Review offers** appears directly in the bottom strip of the
-trading panel, beside **List** when available. Other artwork pages keep
-**Review offers** in the more-actions menu.
+**Review offers** is available in the more-actions menu on artwork pages.
+On Meme cards, Collect keeps its complete label and price visible while Make an
+offer uses the remaining width beside the more-actions menu. In very narrow
+panels, Collect fills its own row above those controls. When Collect is present, the available **List** action is inside that menu.
+Without Collect, **List** appears beside Make an offer when available; otherwise
+Make an offer fills both labelled button slots. **Review offers** stays in the menu.
+**View listings & offers** has its own row below **Supply details & rankings**;
+it still opens the existing market tab.
 **Make an offer** and **Review offers** group wallet guidance and **Connect
 wallet** in the same card at the top when a connection is needed. It appears
 before the offer fields or order chooser. The button wraps to its own full-width
