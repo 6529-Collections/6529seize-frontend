@@ -36,9 +36,9 @@ export default function CompetitionVoteWithReply({
   const invalid =
     rationale.shouldPostRationale && !rationale.rationaleText.trim();
   const content = (
-    <div className="group-[.is-mini]/inline-vote:tw-col-span-2 group-[.is-mini]/inline-vote:tw-col-start-1 group-[.is-mini]/inline-vote:tw-row-start-4 group-[.is-mini]/inline-vote:tw-flex group-[.is-mini]/inline-vote:tw-min-w-0 group-[.is-mini]/inline-vote:tw-flex-col">
-      <label className="tw-flex tw-min-h-11 tw-w-fit tw-cursor-pointer tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-200 group-[.is-mini]/inline-vote:tw-order-2 group-[.is-mini]/inline-vote:tw-min-h-[34px] group-[.is-mini]/inline-vote:tw-gap-1.5 group-[.is-mini]/inline-vote:tw-rounded-md group-[.is-mini]/inline-vote:tw-text-[13px] group-[.is-mini]/inline-vote:tw-text-iron-400 group-[.is-mini]/inline-vote:tw-transition-colors group-[.is-mini]/inline-vote:tw-duration-150 group-[.is-mini]/inline-vote:has-[:checked]:tw-text-iron-100 group-[.is-mini]/inline-vote:has-[:focus-visible]:tw-ring-2 group-[.is-mini]/inline-vote:has-[:focus-visible]:tw-ring-primary-400 group-[.is-mini]/inline-vote:desktop-hover:hover:tw-text-iron-50 group-[.is-mini]/inline-vote:motion-reduce:tw-transition-none group-[.is-mini]/inline-vote:max-sm:tw-text-sm">
-        <span className="tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-items-center group-[.is-mini]/inline-vote:tw-size-3.5">
+    <div className="group-[.is-vote-panel]/inline-vote:tw-col-span-2 group-[.is-vote-panel]/inline-vote:tw-col-start-1 group-[.is-vote-panel]/inline-vote:tw-row-start-4 group-[.is-vote-panel]/inline-vote:tw-flex group-[.is-vote-panel]/inline-vote:tw-min-w-0 group-[.is-vote-panel]/inline-vote:tw-flex-col">
+      <label className="tw-flex tw-min-h-11 tw-w-fit tw-cursor-pointer tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-200 group-[.is-vote-panel]/inline-vote:tw-order-2 group-[.is-vote-panel]/inline-vote:tw-min-h-[34px] group-[.is-vote-panel]/inline-vote:tw-gap-1.5 group-[.is-vote-panel]/inline-vote:tw-rounded-md group-[.is-vote-panel]/inline-vote:tw-text-[13px] group-[.is-vote-panel]/inline-vote:tw-text-iron-400 group-[.is-vote-panel]/inline-vote:tw-transition-colors group-[.is-vote-panel]/inline-vote:tw-duration-150 group-[.is-vote-panel]/inline-vote:has-[:checked]:tw-text-iron-100 group-[.is-vote-panel]/inline-vote:has-[:focus-visible]:tw-ring-2 group-[.is-vote-panel]/inline-vote:has-[:focus-visible]:tw-ring-primary-400 group-[.is-vote-panel]/inline-vote:desktop-hover:hover:tw-text-iron-50 group-[.is-vote-panel]/inline-vote:motion-reduce:tw-transition-none group-[.is-vote-panel]/inline-vote:max-sm:tw-text-sm">
+        <span className="tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-items-center group-[.is-vote-panel]/inline-vote:tw-size-3.5">
           <input
             type="checkbox"
             role="switch"
@@ -56,15 +56,15 @@ export default function CompetitionVoteWithReply({
           />
           <span
             aria-hidden="true"
-            className={`tw-absolute tw-inset-0 tw-rounded-full tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition-colors group-[.is-mini]/inline-vote:tw-hidden peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none ${rationale.shouldPostRationale ? "tw-bg-primary-500" : "tw-bg-iron-650"}`}
+            className={`tw-absolute tw-inset-0 tw-rounded-full tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition-colors group-[.is-vote-panel]/inline-vote:tw-hidden peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none ${rationale.shouldPostRationale ? "tw-bg-primary-500" : "tw-bg-iron-650"}`}
           />
           <span
             aria-hidden="true"
-            className={`tw-absolute tw-left-0.5 tw-top-0.5 tw-size-5 tw-rounded-full tw-bg-iron-50 tw-shadow tw-transition-transform group-[.is-mini]/inline-vote:tw-hidden motion-reduce:tw-transition-none ${rationale.shouldPostRationale ? "tw-translate-x-5" : ""}`}
+            className={`tw-absolute tw-left-0.5 tw-top-0.5 tw-size-5 tw-rounded-full tw-bg-iron-50 tw-shadow tw-transition-transform group-[.is-vote-panel]/inline-vote:tw-hidden motion-reduce:tw-transition-none ${rationale.shouldPostRationale ? "tw-translate-x-5" : ""}`}
           />
           <ChatBubbleLeftIcon
             aria-hidden="true"
-            className="tw-hidden tw-size-3.5 group-[.is-mini]/inline-vote:tw-block peer-checked:tw-fill-current"
+            className="tw-hidden tw-size-3.5 group-[.is-vote-panel]/inline-vote:tw-block peer-checked:tw-fill-current"
           />
         </span>
         {t(locale, "waves.voteRationale.switchLabel")}
@@ -79,21 +79,21 @@ export default function CompetitionVoteWithReply({
         }`}
       >
         <div className="tw-min-h-0 tw-overflow-hidden">
-          <div className="tw-space-y-3 tw-pt-3 group-[.is-mini]/inline-vote:tw-flex group-[.is-mini]/inline-vote:tw-flex-col group-[.is-mini]/inline-vote:tw-gap-1.5 group-[.is-mini]/inline-vote:tw-space-y-0 group-[.is-mini]/inline-vote:tw-pb-3 group-[.is-mini]/inline-vote:tw-pt-0">
+          <div className="tw-space-y-3 tw-pt-3 group-[.is-vote-panel]/inline-vote:tw-flex group-[.is-vote-panel]/inline-vote:tw-flex-col group-[.is-vote-panel]/inline-vote:tw-gap-1.5 group-[.is-vote-panel]/inline-vote:tw-space-y-0 group-[.is-vote-panel]/inline-vote:tw-pb-3 group-[.is-vote-panel]/inline-vote:tw-pt-0">
             <p
               id={publicReplyDescriptionId}
-              className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400 group-[.is-mini]/inline-vote:tw-order-2 group-[.is-mini]/inline-vote:tw-leading-[14px] group-[.is-mini]/inline-vote:tw-text-iron-500"
+              className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400 group-[.is-vote-panel]/inline-vote:tw-order-2 group-[.is-vote-panel]/inline-vote:tw-leading-[14px] group-[.is-vote-panel]/inline-vote:tw-text-iron-500"
             >
               {t(locale, "waves.voteRationale.publicReplyDescription")}
             </p>
-            <div className="tw-space-y-2 group-[.is-mini]/inline-vote:tw-space-y-0">
+            <div className="tw-space-y-2 group-[.is-vote-panel]/inline-vote:tw-space-y-0">
               <label
                 htmlFor={fieldId}
-                className="tw-block tw-text-xs tw-font-semibold tw-text-iron-300 group-[.is-mini]/inline-vote:tw-sr-only"
+                className="tw-block tw-text-xs tw-font-semibold tw-text-iron-300 group-[.is-vote-panel]/inline-vote:tw-sr-only"
               >
                 {t(locale, "waves.voteRationale.fieldLabel")}
               </label>
-              <div className="tw-block group-[.is-mini]/inline-vote:tw-h-14 group-[.is-mini]/inline-vote:tw-min-h-14 group-[.is-mini]/inline-vote:tw-resize-y group-[.is-mini]/inline-vote:tw-overflow-hidden group-[.is-mini]/inline-vote:tw-rounded-lg">
+              <div className="tw-block group-[.is-vote-panel:not(.is-mini)]/inline-vote:tw-h-24 group-[.is-vote-panel]/inline-vote:tw-h-14 group-[.is-vote-panel]/inline-vote:tw-min-h-14 group-[.is-vote-panel]/inline-vote:tw-resize-y group-[.is-vote-panel]/inline-vote:tw-overflow-hidden group-[.is-vote-panel]/inline-vote:tw-rounded-lg">
                 <textarea
                   id={fieldId}
                   rows={4}
@@ -116,7 +116,7 @@ export default function CompetitionVoteWithReply({
                   }
                   aria-invalid={Boolean(invalid)}
                   aria-describedby={invalid ? descriptionId : undefined}
-                  className={`tw-block tw-w-full tw-resize-y tw-rounded-lg tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 group-[.is-mini]/inline-vote:tw-h-full group-[.is-mini]/inline-vote:tw-min-h-full group-[.is-mini]/inline-vote:tw-resize-none group-[.is-mini]/inline-vote:tw-overflow-clip group-[.is-mini]/inline-vote:tw-border-iron-800 group-[.is-mini]/inline-vote:tw-px-2.5 group-[.is-mini]/inline-vote:tw-py-2 group-[.is-mini]/inline-vote:tw-text-xs group-[.is-mini]/inline-vote:tw-leading-[18px] group-[.is-mini]/inline-vote:placeholder:tw-text-iron-600 focus:tw-border-primary-400 focus:tw-outline-none group-[.is-mini]/inline-vote:touch-only:tw-text-base group-[.is-mini]/inline-vote:max-sm:tw-text-base ${
+                  className={`tw-block tw-w-full tw-resize-y tw-rounded-lg tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 group-[.is-vote-panel]/inline-vote:tw-h-full group-[.is-vote-panel]/inline-vote:tw-min-h-full group-[.is-vote-panel]/inline-vote:tw-resize-none group-[.is-vote-panel]/inline-vote:tw-overflow-clip group-[.is-vote-panel]/inline-vote:tw-border-iron-800 group-[.is-vote-panel]/inline-vote:tw-px-2.5 group-[.is-vote-panel]/inline-vote:tw-py-2 group-[.is-vote-panel]/inline-vote:tw-text-xs group-[.is-vote-panel]/inline-vote:tw-leading-[18px] group-[.is-vote-panel]/inline-vote:placeholder:tw-text-iron-600 focus:tw-border-primary-400 focus:tw-outline-none group-[.is-vote-panel]/inline-vote:touch-only:tw-text-base group-[.is-vote-panel]/inline-vote:max-sm:tw-text-base ${
                     rationale.isUsingGeneratedRationale
                       ? "tw-text-iron-600"
                       : "tw-text-iron-100"

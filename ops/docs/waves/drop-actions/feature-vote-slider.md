@@ -85,6 +85,12 @@ text field does not scroll internally; drag its resize handle to enlarge it and
 reveal longer explanations. Vote amounts, limits, eligibility, and saving work
 the same in both input modes.
 
+The full competition voting modal and mobile sheet use the same unboxed
+`Available`, `Spent`, and `Remaining` row beneath the input, and the same
+centered `Explain vote` and `Save vote` actions. Their numeric input and
+rationale field are taller than the card controls. The normal dialog keeps its
+existing generated rationale prefill and voting behavior.
+
 ## Edge Cases
 
 - When min and max are both zero, the slider rests at center.

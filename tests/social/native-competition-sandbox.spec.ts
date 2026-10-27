@@ -3684,6 +3684,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     const dialog = page.getByRole("dialog", { name: "Vote for this artwork" });
     const toggle = dialog.getByRole("switch", { name: "Explain vote" });
     await expect(toggle).not.toBeChecked();
+    const creditLabels = ["Available", "Spent", "Remaining"].map((name) =>
+      dialog.getByText(name, { exact: true })
+    );
+    for (const label of creditLabels) await expect(label).toBeVisible();
+    const creditBoxes = await Promise.all(
+      creditLabels.map((label) => label.boundingBox())
+    );
+    expect(creditBoxes.every((box) => box !== null)).toBe(true);
+    expect(
+      Math.max(...creditBoxes.map((box) => box!.y)) -
+        Math.min(...creditBoxes.map((box) => box!.y))
+    ).toBeLessThan(2);
+    const voteSlider = await dialog.getByRole("slider").first().boundingBox();
+    expect(voteSlider).not.toBeNull();
+    expect(creditBoxes[0]!.y).toBeGreaterThan(voteSlider!.y);
     await dialog.getByRole("button", { name: "Numeric", exact: true }).click();
     await dialog.getByRole("spinbutton", { name: "Your vote" }).fill("25");
     await dialog.getByText("Explain vote", { exact: true }).click();
