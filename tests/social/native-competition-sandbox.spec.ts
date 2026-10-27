@@ -4052,7 +4052,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         .getByRole("button", { name: "Numeric", exact: true })
         .click();
       await expect(input).toHaveValue("-25");
-      await expect(dialog.getByText("75", { exact: true })).toBeVisible();
+      await expect(
+        dialog.getByText("75", { exact: true }).filter({ visible: true })
+      ).toBeVisible();
       await expect(
         dialog.getByText("Loading competition…", { exact: true })
       ).toHaveCount(0);
@@ -4064,7 +4066,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       releaseRefresh();
       await refreshed;
       await expect(input).toHaveValue("-25");
-      await expect(dialog.getByText("75", { exact: true })).toBeVisible();
+      await expect(
+        dialog.getByText("75", { exact: true }).filter({ visible: true })
+      ).toBeVisible();
     } finally {
       releaseContext();
       releaseRefresh();
