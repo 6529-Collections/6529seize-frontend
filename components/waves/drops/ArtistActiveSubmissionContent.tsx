@@ -21,6 +21,7 @@ import {
   SingleWaveDropVote,
   SingleWaveDropVoteSize,
 } from "../drop/SingleWaveDropVote";
+import { AdditionalActionPromiseBadge } from "./AdditionalActionPromiseBadge";
 import { SubmissionPosition } from "./SubmissionPosition";
 
 interface ArtistActiveSubmissionContentProps {
@@ -146,6 +147,13 @@ export const ArtistActiveSubmissionContent: React.FC<
                         <SubmissionPosition drop={submission.drop} />
                       )}
                     </div>
+                    {submission.drop?.is_additional_action_promised ===
+                      true && (
+                      <div className="tw-mb-3 tw-flex">
+                        {/* Keep the body tooltip above PreviewModalShell's dialog. */}
+                        <AdditionalActionPromiseBadge tooltipZIndex={1000002} />
+                      </div>
+                    )}
                     {submission.drop && (
                       <div className="tw-mb-3">
                         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5">

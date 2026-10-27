@@ -30,6 +30,7 @@ jest.mock("react-tooltip", () => ({
       data-delay-show={delayShow}
       data-placement={place}
       data-shared-styles={style === TOOLTIP_STYLES}
+      style={style}
     >
       {children}
     </span>
@@ -56,6 +57,16 @@ describe("AdditionalActionPromiseBadge", () => {
     expect(tooltip).toHaveAttribute("data-placement", "top");
     expect(tooltip).toHaveAttribute("data-delay-show", "200");
     expect(tooltip).toHaveAttribute("data-shared-styles", "true");
+  });
+
+  it("can layer the tooltip above a modal without changing its appearance", () => {
+    render(<AdditionalActionPromiseBadge tooltipZIndex={1000002} />);
+
+    const { style } = screen.getByTestId("shared-tooltip");
+    expect(style.zIndex).toBe("1000002");
+    expect(style.padding).toBe(TOOLTIP_STYLES.padding);
+    expect(style.fontSize).toBe(TOOLTIP_STYLES.fontSize);
+    expect(style.pointerEvents).toBe(TOOLTIP_STYLES.pointerEvents);
   });
 
   it("keeps the accessible description in server-rendered markup", () => {

@@ -3674,6 +3674,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         submission_context: {
           status: "ACTIVE",
           has_metadata: false,
+          is_additional_action_promised: true,
           voting: {
             is_open: true,
             total_votes_given: 0,
@@ -3726,6 +3727,42 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       });
       await badge.click();
       const dialog = page.getByRole("dialog").last();
+      if (popup === "artist submissions") {
+        const promiseBadge = dialog.getByRole("button", {
+          name: "Additional Action",
+          exact: true,
+        });
+        await expect(promiseBadge).toBeVisible();
+        await promiseBadge.focus();
+        const promiseTooltip = page
+          .getByRole("tooltip", { includeHidden: true })
+          .filter({
+            hasText:
+              "The creator marked this submission as promising an extra action",
+          })
+          .filter({ visible: true });
+        await expect(promiseTooltip).toBeVisible();
+        await expect(promiseTooltip).toBeInViewport({ ratio: 1 });
+        await expect
+          .poll(() =>
+            promiseTooltip.evaluate((element) => {
+              const box = element.getBoundingClientRect();
+              const previous = element.style.pointerEvents;
+              element.style.pointerEvents = "auto";
+              const hit = document.elementFromPoint(
+                box.left + box.width / 2,
+                box.top + box.height / 2
+              );
+              element.style.pointerEvents = previous;
+              return hit !== null && element.contains(hit);
+            })
+          )
+          .toBe(true);
+        await promiseBadge.click();
+        await expect(dialog).toBeVisible();
+        await expect(page).toHaveURL(`${ROOT}/alpha?drop=${artwork.id}`);
+        expect(sandbox.requests).toEqual([]);
+      }
       const mode = dialog.getByRole("group", { name: "Vote input mode" });
       await expect(mode).toHaveCount(1);
       await expect(dialog.getByRole("slider").first()).toBeVisible();

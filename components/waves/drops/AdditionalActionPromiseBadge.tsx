@@ -22,6 +22,7 @@ const BADGE_CLASSES =
 interface AdditionalActionPromiseBadgeProps {
   readonly className?: string | undefined;
   readonly focusable?: boolean | undefined;
+  readonly tooltipZIndex?: number | undefined;
 }
 
 function stopBadgeClickPropagation(event: MouseEvent<HTMLButtonElement>) {
@@ -31,6 +32,7 @@ function stopBadgeClickPropagation(event: MouseEvent<HTMLButtonElement>) {
 export function AdditionalActionPromiseBadge({
   className = "",
   focusable = true,
+  tooltipZIndex,
 }: AdditionalActionPromiseBadgeProps) {
   const badgeClassName = `${BADGE_CLASSES} ${className}`;
   const descriptionId = useId();
@@ -65,7 +67,11 @@ export function AdditionalActionPromiseBadge({
         delayShow={200}
         positionStrategy="fixed"
         globalCloseEvents={{ escape: true, scroll: true }}
-        style={TOOLTIP_STYLES}
+        style={
+          tooltipZIndex === undefined
+            ? TOOLTIP_STYLES
+            : { ...TOOLTIP_STYLES, zIndex: tooltipZIndex }
+        }
         className="tw-max-w-[min(20rem,calc(100vw-2rem))] tw-whitespace-normal tw-text-left tw-leading-5"
       >
         {ADDITIONAL_ACTION_PROMISE_TOOLTIP}
