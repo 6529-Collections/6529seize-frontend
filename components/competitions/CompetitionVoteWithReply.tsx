@@ -110,7 +110,7 @@ export default function CompetitionVoteWithReply({
                 <p
                   id={descriptionId}
                   role="alert"
-                  className="tw-text-sm tw-text-iron-300"
+                  className="tw-text-xs tw-leading-4 tw-text-rose-400"
                 >
                   {t(locale, "waves.voteRationale.emptyBlockReason")}
                 </p>
