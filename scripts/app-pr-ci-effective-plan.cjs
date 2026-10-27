@@ -121,6 +121,20 @@ function applyEffectiveAppPrCiPlan(plan) {
         "services/wallet-signatures/competition-signature.ts",
         "i18n/messages/competitions.ts",
         "tests/social/native-competition-sandbox.spec.ts",
+        "tests/media/waveImagePreviewCases.ts",
+        "components/waves/drop/MemesDropArtworkHero.tsx",
+        "components/drops/view/item/content/media/DropImagePreview.tsx",
+        "components/drops/view/item/content/media/GifPreviewLoadingIndicator.tsx",
+        "components/drops/view/item/content/media/DropListItemContentMedia.tsx",
+        "components/drops/view/item/content/media/DropListItemContentMediaImage.tsx",
+        "components/drops/view/item/content/media/MediaDisplay.tsx",
+        "components/drops/view/item/content/media/MediaDisplayImage.tsx",
+        "components/memes/drops/MemeParticipationDrop.tsx",
+        "components/memes/drops/MemeWinnerDrop.tsx",
+        "components/memes/drops/MemesLeaderboardDrop.tsx",
+        "components/drops/view/item/content/media/ImageMediaModal.tsx",
+        "components/drops/view/item/content/media/useOriginalImage.ts",
+        "helpers/gif-preview.helpers.ts",
         "tests/social/wave-notification-settings-sandbox.spec.ts",
         "tests/social/wave-switch-loading.spec.ts",
         "tests/social/wave-loading-sandbox.spec.ts",
@@ -164,6 +178,33 @@ function applyEffectiveAppPrCiPlan(plan) {
         "scripts/app-pr-ci-effective-plan.cjs",
         "__tests__/scripts/app-pr-ci-effective-plan.test.ts",
       ].includes(file)
+  );
+
+  const playwrightSubmissionArtwork = files.some((file) =>
+    [
+      "tests/media/submission-artwork-sandbox.spec.ts",
+      "tests/media/waveImagePreviewCases.ts",
+      "components/waves/drop/MemesDropArtworkHero.tsx",
+      "components/drops/view/item/content/media/DropImagePreview.tsx",
+      "components/drops/view/item/content/media/GifPreviewLoadingIndicator.tsx",
+      "components/drops/view/item/content/media/DropListItemContentMedia.tsx",
+      "components/drops/view/item/content/media/DropListItemContentMediaImage.tsx",
+      "components/drops/view/item/content/media/MediaDisplay.tsx",
+      "components/drops/view/item/content/media/MediaDisplayImage.tsx",
+      "components/drops/view/item/content/media/ImageMediaModal.tsx",
+      "components/drops/view/item/content/media/useOriginalImage.ts",
+      "components/memes/drops/MemeParticipationDrop.tsx",
+      "components/memes/drops/MemeWinnerDrop.tsx",
+      "components/memes/drops/MemesLeaderboardDrop.tsx",
+      "helpers/gif-preview.helpers.ts",
+      "tests/support/composerSandboxServer.cjs",
+      "tests/packs.manifest.cjs",
+      "playwright.config.ts",
+      "tsconfig.playwright.json",
+      ".github/workflows/app-pr-ci.yml",
+      "scripts/app-pr-ci-effective-plan.cjs",
+      "__tests__/scripts/app-pr-ci-effective-plan.test.ts",
+    ].includes(file)
   );
 
   const playwrightWaveFeatureUsage = files.some(
@@ -239,6 +280,12 @@ function applyEffectiveAppPrCiPlan(plan) {
       playwrightNativeCompetition
         ? "Native competition changes require desktop and mobile sandbox browser coverage."
         : "No native competition surfaces changed."
+    ),
+    playwright_submission_artwork: check(
+      playwrightSubmissionArtwork,
+      playwrightSubmissionArtwork
+        ? "Submission artwork media or its browser contract requires isolated desktop and mobile coverage."
+        : "No submission artwork media or browser contract changed."
     ),
     playwright_wave_feature_usage: check(
       playwrightWaveFeatureUsage,

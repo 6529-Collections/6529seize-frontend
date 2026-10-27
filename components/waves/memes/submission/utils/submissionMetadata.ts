@@ -53,11 +53,11 @@ const buildOperationalMetadata = (
     },
     {
       data_key: "commentary",
-      data_value: operationalData.commentary,
+      data_value: operationalData.commentary.trim(),
     },
     {
       data_key: "about_artist",
-      data_value: operationalData.about_artist,
+      data_value: operationalData.about_artist.trim(),
     },
   ];
 
@@ -105,7 +105,7 @@ export const buildSubmissionMetadata = ({
   const traitMetadata: ApiDropMetadata[] = objectEntries(traits)
     .map(([key, value]) => ({
       data_key: String(key),
-      data_value: value.toString(),
+      data_value: value.toString().trim(),
     }))
     .filter((metadata) => metadata.data_value.length > 0);
 

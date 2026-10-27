@@ -214,7 +214,12 @@ jobs:
             corePlaywrightLanes.push({ lane: "playwright-smoke", label: "Playwright smoke", runner: defaultRunner });
           }
           if (plan.checks.playwright_native_competition?.required) {
-            corePlaywrightLanes.push({ lane: "playwright-native-competition", label: "Native competitions desktop and mobile", runner: defaultRunner });
+            for (const shard of [1, 2]) {
+              corePlaywrightLanes.push({ lane: "playwright-native-competition", label: `Native competitions shard ${shard}/2`, runner: defaultRunner, shard });
+            }
+          }
+          if (plan.checks.playwright_submission_artwork?.required) {
+            corePlaywrightLanes.push({ lane: "playwright-submission-artwork", label: "Submission artwork desktop and mobile", runner: defaultRunner });
           }
           if (plan.checks.playwright_pdf_attachments?.required) {
             corePlaywrightLanes.push({ lane: "playwright-pdf-attachments", label: "PDF attachments in WebKit", runner: defaultRunner });
@@ -434,7 +439,15 @@ jobs:
         env:
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/native-competition"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/native-competition"
-        run: ./bin/6529 run test:e2e:native-competition-sandbox
+          NATIVE_COMPETITION_SHARD: "${{ matrix.shard }}/2"
+        run: ./bin/6529 run test:e2e:native-competition-sandbox --shard="$NATIVE_COMPETITION_SHARD"
+
+      - name: Run submission artwork browser regression pack
+        if: matrix.lane == 'playwright-submission-artwork'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/submission-artwork"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/submission-artwork"
+        run: ./bin/6529 run test:e2e:submission-artwork-sandbox
 
       - name: Run PDF attachment browser regression pack
         if: matrix.lane == 'playwright-pdf-attachments'
@@ -519,7 +532,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: app-pr-ci-results-${{ matrix.lane }}-${{ github.event.pull_request.number || github.run_id }}
+          name: app-pr-ci-results-${{ matrix.lane }}${{ matrix.shard && format('-{0}', matrix.shard) || '' }}-${{ github.event.pull_request.number || github.run_id }}
           path: |
             test-results/**
             playwright-report/**
@@ -533,7 +546,10 @@ jobs:
       needs.plan.outputs.install_required == 'true' &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 60
+    # Museum recovery (25m), browser installation (10m), and browser phases
+    # (10m + 20m) need 65m; the optional lock-tool install adds at most 5m.
+    # Leave the remaining 5m for checkout/setup and evidence upload.
+    timeout-minutes: ${{ startsWith(matrix.lane, 'playwright-museum-') && 75 || 60 }}
     permissions:
       contents: read
       issues: read
@@ -1153,19 +1169,41 @@ jobs:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-node22-playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
 
+      - name: Ensure package-lock inspection tool
+        if: startsWith(matrix.lane, 'playwright-museum-')
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          # Custom Linux runners may omit psmisc. Provide fuser before an
+          # install timeout could leave apt holding locks needed by recovery.
+          if ! command -v fuser >/dev/null; then
+            sudo apt-get -o DPkg::Lock::Timeout=120 install --no-install-recommends -y psmisc
+          fi
+          command -v fuser >/dev/null
+
       - name: Install Playwright dependencies
         id: playwright_dependencies_primary
         if: startsWith(matrix.lane, 'playwright-museum-')
-        timeout-minutes: 3
+        timeout-minutes: 10
         continue-on-error: true
         run: ./bin/6529 exec playwright install-deps chromium
 
       - name: Retry Playwright dependencies
         id: playwright_dependencies_retry
         if: startsWith(matrix.lane, 'playwright-museum-') && steps.playwright_dependencies_primary.outcome != 'success'
-        timeout-minutes: 3
+        timeout-minutes: 15
         continue-on-error: true
-        run: ./bin/6529 exec playwright install-deps chromium
+        run: |
+          set -euo pipefail
+          # A timed-out install can leave apt-get running. Wait for it rather
+          # than deleting locks or killing another package-manager process.
+          sudo timeout 300 bash -euc '
+            command -v fuser >/dev/null
+            while fuser /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/lib/apt/lists/lock >/dev/null 2>&1; do
+              sleep 2
+            done
+          '
+          ./bin/6529 exec playwright install-deps chromium
 
       - name: Verify Playwright dependencies
         if: startsWith(matrix.lane, 'playwright-museum-')
