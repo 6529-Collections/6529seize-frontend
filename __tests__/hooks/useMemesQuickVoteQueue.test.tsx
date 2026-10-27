@@ -1,5 +1,6 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { useMemesQuickVoteQueue } from "@/hooks/useMemesQuickVoteQueue";
@@ -407,7 +408,7 @@ describe("useMemesQuickVoteQueue", () => {
       createDrop({ id: "next", serialNo: 1 }),
     ];
     leftThisRoundCount = totalCount = 2;
-    const pending = createDeferred<any>();
+    const pending = createDeferred<ApiDrop>();
     commonApiPostMock.mockReturnValueOnce(pending.promise);
     const { result, unmount } = renderHook(
       () => useMemesQuickVoteQueue({ sessionId: 1 }),
