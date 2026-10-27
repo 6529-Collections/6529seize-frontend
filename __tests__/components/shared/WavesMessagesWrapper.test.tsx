@@ -354,6 +354,7 @@ describe("WavesMessagesWrapper", () => {
     mockWaveId = "wave-1";
     mockEffectiveDropId = "drop-1";
     mockSearchParams.set("drop", "drop-1");
+    window.history.replaceState(null, "", "/waves?drop=drop-1&tab=chat");
     const retry = jest.fn();
     mockUseQuery.mockReturnValue({
       data: undefined,
@@ -385,7 +386,10 @@ describe("WavesMessagesWrapper", () => {
       screen.getByRole("status", { name: "Loading…" })
     ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Close panel" }));
-    expect(mockRouterReplace).toHaveBeenCalledWith("/waves", { scroll: false });
+    expect(window.location.pathname + window.location.search).toBe(
+      "/waves?tab=chat"
+    );
+    expect(mockRouterReplace).not.toHaveBeenCalled();
   });
 
   it("suppresses the sidebar while a drop overlay is open", () => {

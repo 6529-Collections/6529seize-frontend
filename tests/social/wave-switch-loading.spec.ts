@@ -636,8 +636,19 @@ for (const app of [false, true]) {
       );
       const close = pending.getByRole("button", { name: "Close panel" });
       await expect(close).toBeFocused();
+      // Closing client-owned detail must not wait on another server render.
+      const routeReads: string[] = [];
+      await page.route(`**/waves/${SOURCE}**`, async (route) => {
+        if (new URL(route.request().url()).searchParams.has("_rsc")) {
+          routeReads.push(route.request().url());
+          return route.abort();
+        }
+        return route.fallback();
+      });
       await page.keyboard.press("Escape");
       await expect(page).not.toHaveURL(/drop=/);
+      await expect(pending).toHaveCount(0);
+      expect(routeReads).toEqual([]);
     } finally {
       release();
     }
