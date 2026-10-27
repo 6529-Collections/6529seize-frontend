@@ -66,13 +66,16 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
 
 ### Competition Submission Popups
 
-Artist submissions and participant entries place the vote label and mode switch
-above the input. Credit labels `Available`, `Spent`, and `Remaining` sit side by
-side, with each value beneath its label. `Explain vote` and a smaller `Save vote`
-button share a row until the reply field is expanded. The explanation opens and
-closes with a short expand/fade transition, respecting reduced-motion settings.
-The generated reply text stays muted until edited. Vote amounts, limits,
-eligibility, and saving work the same in both input modes.
+Artist submissions place the voting footer inside each artwork card. Cards keep
+their own height when an explanation is open. Artist submissions and participant
+entries place the vote label and mode switch above the input. Credit labels
+`Available`, `Spent`, and `Remaining` sit side by side, with smaller, muted values
+beneath their labels. The icon-style `Explain vote` control and compact `Save
+vote` button share the bottom row. The explanation opens above that row, with
+its public-reply note below the text field. It opens and closes with a short
+expand/fade transition, respecting reduced-motion settings. The generated reply
+text stays muted until edited. The slider design, numeric input, vote amounts,
+limits, eligibility, and saving work the same in both input modes.
 
 ## Edge Cases
 

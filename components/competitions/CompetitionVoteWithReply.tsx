@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState, type ComponentProps } from "react";
+import { ChatBubbleLeftIcon } from "@heroicons/react/24/outline";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useSingleWaveDropVoteRationale } from "@/components/waves/drop/useSingleWaveDropVoteRationale";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -32,9 +33,9 @@ export default function CompetitionVoteWithReply({
   const invalid =
     rationale.shouldPostRationale && !rationale.rationaleText.trim();
   const content = (
-    <div className="group-[.is-mini]/inline-vote:tw-col-span-2 group-[.is-mini]/inline-vote:tw-col-start-1 group-[.is-mini]/inline-vote:tw-row-start-4 group-[.is-mini]/inline-vote:tw-min-w-0">
-      <label className="tw-flex tw-min-h-11 tw-w-fit tw-cursor-pointer tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-200">
-        <span className="tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-items-center">
+    <div className="group-[.is-mini]/inline-vote:tw-col-span-2 group-[.is-mini]/inline-vote:tw-col-start-1 group-[.is-mini]/inline-vote:tw-row-start-4 group-[.is-mini]/inline-vote:tw-min-w-0 group-[.is-mini]/inline-vote:tw-flex group-[.is-mini]/inline-vote:tw-flex-col">
+      <label className="tw-flex tw-min-h-11 tw-w-fit tw-cursor-pointer tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-200 group-[.is-mini]/inline-vote:tw-order-2 group-[.is-mini]/inline-vote:tw-min-h-8 group-[.is-mini]/inline-vote:tw-rounded-md group-[.is-mini]/inline-vote:tw-gap-1.5 group-[.is-mini]/inline-vote:tw-text-[13px] group-[.is-mini]/inline-vote:tw-text-iron-400 group-[.is-mini]/inline-vote:has-[:checked]:tw-text-iron-100 group-[.is-mini]/inline-vote:has-[:focus-visible]:tw-ring-2 group-[.is-mini]/inline-vote:has-[:focus-visible]:tw-ring-primary-400 group-[.is-mini]/inline-vote:max-sm:tw-min-h-11 group-[.is-mini]/inline-vote:max-sm:tw-text-sm">
+        <span className="tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 group-[.is-mini]/inline-vote:tw-size-3.5 tw-items-center">
           <input
             type="checkbox"
             role="switch"
@@ -52,11 +53,15 @@ export default function CompetitionVoteWithReply({
           />
           <span
             aria-hidden="true"
-            className={`tw-absolute tw-inset-0 tw-rounded-full tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition-colors peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none ${rationale.shouldPostRationale ? "tw-bg-primary-500" : "tw-bg-iron-650"}`}
+            className={`group-[.is-mini]/inline-vote:tw-hidden tw-absolute tw-inset-0 tw-rounded-full tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition-colors peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none ${rationale.shouldPostRationale ? "tw-bg-primary-500" : "tw-bg-iron-650"}`}
           />
           <span
             aria-hidden="true"
-            className={`tw-absolute tw-left-0.5 tw-top-0.5 tw-size-5 tw-rounded-full tw-bg-iron-50 tw-shadow tw-transition-transform motion-reduce:tw-transition-none ${rationale.shouldPostRationale ? "tw-translate-x-5" : ""}`}
+            className={`group-[.is-mini]/inline-vote:tw-hidden tw-absolute tw-left-0.5 tw-top-0.5 tw-size-5 tw-rounded-full tw-bg-iron-50 tw-shadow tw-transition-transform motion-reduce:tw-transition-none ${rationale.shouldPostRationale ? "tw-translate-x-5" : ""}`}
+          />
+          <ChatBubbleLeftIcon
+            aria-hidden="true"
+            className="tw-hidden tw-size-3.5 group-[.is-mini]/inline-vote:tw-block peer-checked:tw-fill-current"
           />
         </span>
         {t(locale, "waves.voteRationale.switchLabel")}
@@ -71,30 +76,31 @@ export default function CompetitionVoteWithReply({
         }`}
       >
         <div className="tw-min-h-0 tw-overflow-hidden">
-          <div className="tw-space-y-3 tw-pt-3 group-[.is-mini]/inline-vote:tw-pb-12">
+          <div className="tw-space-y-3 tw-pt-3 group-[.is-mini]/inline-vote:tw-flex group-[.is-mini]/inline-vote:tw-flex-col group-[.is-mini]/inline-vote:tw-gap-1.5 group-[.is-mini]/inline-vote:tw-space-y-0 group-[.is-mini]/inline-vote:tw-pb-3 group-[.is-mini]/inline-vote:tw-pt-0">
             <p
               id={publicReplyDescriptionId}
-              className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400"
+              className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400 group-[.is-mini]/inline-vote:tw-order-2 group-[.is-mini]/inline-vote:tw-text-iron-500"
             >
               {t(locale, "waves.voteRationale.publicReplyDescription")}
             </p>
-            <div className="tw-space-y-2">
+            <div className="tw-space-y-2 group-[.is-mini]/inline-vote:tw-space-y-0">
               <label
                 htmlFor={fieldId}
-                className="tw-block tw-text-xs tw-font-semibold tw-text-iron-300"
+                className="tw-block tw-text-xs tw-font-semibold tw-text-iron-300 group-[.is-mini]/inline-vote:tw-sr-only"
               >
                 {t(locale, "waves.voteRationale.fieldLabel")}
               </label>
               <textarea
                 id={fieldId}
                 rows={4}
+                placeholder={t(locale, "waves.voteRationale.fieldLabel")}
                 value={rationale.rationaleText}
                 onChange={(event) =>
                   rationale.handleRationaleTextChange(event.target.value)
                 }
                 aria-invalid={Boolean(invalid)}
                 aria-describedby={invalid ? descriptionId : undefined}
-                className={`tw-block tw-w-full tw-resize-y tw-rounded-lg tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 focus:tw-border-primary-400 focus:tw-outline-none ${
+                className={`tw-block tw-w-full tw-resize-y tw-rounded-lg tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 focus:tw-border-primary-400 focus:tw-outline-none group-[.is-mini]/inline-vote:tw-h-14 group-[.is-mini]/inline-vote:tw-min-h-14 group-[.is-mini]/inline-vote:tw-border-iron-800 group-[.is-mini]/inline-vote:tw-px-2.5 group-[.is-mini]/inline-vote:tw-py-2 group-[.is-mini]/inline-vote:tw-text-[13px] group-[.is-mini]/inline-vote:tw-leading-[18px] group-[.is-mini]/inline-vote:max-sm:tw-text-base ${
                   rationale.isUsingGeneratedRationale
                     ? "tw-text-iron-600"
                     : "tw-text-iron-100"
