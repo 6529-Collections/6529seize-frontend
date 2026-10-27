@@ -100,6 +100,8 @@ export function sidebarScrollMetrics(list: Locator, scrollTop?: number) {
     return {
       top: container.scrollTop,
       width: getComputedStyle(container).scrollbarWidth,
+      color: getComputedStyle(container).scrollbarColor,
+      gutter: container.offsetWidth - container.clientWidth,
       x: container.getBoundingClientRect().x + container.clientWidth / 2,
       y: container.getBoundingClientRect().y + container.clientHeight / 2,
       right: container.getBoundingClientRect().right,

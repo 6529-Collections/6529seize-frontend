@@ -1,0 +1,61 @@
+name: Wave scrollbar Windows verification
+
+on:
+  push:
+    branches: [codex/wave-list-scroll-windows-qa]
+
+permissions:
+  contents: read
+
+jobs:
+  windows-browsers:
+    runs-on: windows-2025
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    env:
+      PLAYWRIGHT_ENV: local
+      PLAYWRIGHT_AUTH_SANDBOX: "1"
+      PLAYWRIGHT_COMPOSER_SANDBOX: "1"
+      PLAYWRIGHT_FORCE_WEB_SERVER: "1"
+      PLAYWRIGHT_WEB_SERVER_COMMAND: node tests/support/composerSandboxServer.cjs
+      PLAYWRIGHT_WEB_SERVER_TIMEOUT_MS: "240000"
+      PLAYWRIGHT_BASE_URL: http://localhost:3001
+      BASE_ENDPOINT: http://localhost:3001
+      USE_DEV_AUTH: "true"
+      USE_TURBO: "false"
+      ASSETS_FROM_S3: "false"
+      PLAYWRIGHT_DEV_AUTH_PROFILE_HANDLE: playwright
+      NODE_OPTIONS: --max-old-space-size=8192
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.17.1"
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable pnpm
+          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+      - name: Install Socket Firewall
+        id: socket_firewall
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
+        with:
+          mode: firewall
+      - name: Install dependencies through the repository wrapper
+        env:
+          SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
+        run: ./bin/6529 ci
+      - name: Test installed Chrome and Edge on Windows
+        run: ./bin/6529 exec playwright test --config=playwright.windows-scroll.config.ts
+      - name: Upload screenshots and evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: windows-wave-scroll-evidence
+          path: |
+            test-results/windows-wave-scroll/
+            playwright-report/windows-wave-scroll/
+          retention-days: 7

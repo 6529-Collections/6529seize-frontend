@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import os from "node:os";
 import {
   expect,
   expectAxeClean,
@@ -25,6 +26,7 @@ for (const collection of ["All", "Pinned", "Joined"]) {
     baseURL,
     browserName,
     headless,
+    browser,
   }, testInfo) => {
     // Mobile replaces the list with the open wave, so this simultaneous
     // sidebar-and-active-wave scenario applies only to desktop.
@@ -52,6 +54,33 @@ for (const collection of ["All", "Pinned", "Joined"]) {
     await expect(
       list.getByRole("link", { name: "Scroll wave 0", exact: true })
     ).toBeVisible();
+    expect(process.platform).toBe("win32");
+    await page.mouse.move(1100, 20);
+    const initialScrollbar = await sidebarScrollMetrics(list);
+    await testInfo.attach("windows-browser-evidence", {
+      contentType: "application/json",
+      body: JSON.stringify(
+        {
+          platform: process.platform,
+          release: os.release(),
+          osVersion: os.version(),
+          browserVersion: browser.version(),
+          channel: testInfo.project.use.channel,
+          colorScheme: testInfo.project.use.colorScheme,
+          headless,
+          initialScrollbar,
+        },
+        null,
+        2
+      ),
+    });
+    await page.screenshot({
+      path: testInfo.outputPath("scrollbar-before-scrolling.png"),
+    });
+    expect(initialScrollbar.top).toBe(0);
+    expect(initialScrollbar.width).toBe("thin");
+    expect(initialScrollbar.gutter).toBeGreaterThan(0);
+    expect(initialScrollbar.color).toBe("rgb(132, 132, 144) rgb(38, 39, 43)");
     await sidebarScrollMetrics(list, 1200);
     const activeLink = list.getByRole("link", {
       name: "Scroll wave 20",
