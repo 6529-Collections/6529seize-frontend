@@ -50,18 +50,30 @@ beforeAll(() => {
     fs.mkdtempSync(path.join(os.tmpdir(), "staging-history-"))
   );
   git(historyRepo, "init", "--quiet", "--initial-branch=1a-staging");
-  const tree = git(historyRepo, "mktree");
-  const commit = (message: string, parent?: string) =>
-    git(
+  const fixtureScripts = path.join(historyRepo, "ops", "scripts");
+  fs.mkdirSync(fixtureScripts, { recursive: true });
+  fs.writeFileSync(
+    path.join(fixtureScripts, "deploy-staging-artifact.sh"),
+    preflightScript
+  );
+  fs.copyFileSync(
+    path.join(root, "ops", "scripts", "validate-ethereum-rpc-url.cjs"),
+    path.join(fixtureScripts, "validate-ethereum-rpc-url.cjs")
+  );
+  const commit = (message: string, parent?: string) => {
+    fs.writeFileSync(path.join(historyRepo, "source-version.txt"), message);
+    git(historyRepo, "add", "ops", "source-version.txt");
+    return git(
       historyRepo,
       "-c",
       "commit.gpgsign=false",
       "commit-tree",
-      tree,
+      git(historyRepo, "write-tree"),
       "-m",
       message,
       ...(parent ? ["-p", parent] : [])
     );
+  };
   previousSha = commit("Previously deployed");
   expectedSha = commit("Active deployment", previousSha);
   newerSha = commit("Queued deployment", expectedSha);
@@ -91,17 +103,9 @@ function createRelease(runtimeRoot: string, releaseId: string, sha: string) {
   return app;
 }
 
-function runHostPreflight(
-  repo: string,
-  pm2Current?: string,
-  afterPreflight = "",
-  lockHeld = false,
-  ethereumRpcUrl = "https://eth-mainnet.example.test",
-  alchemyApiKey = "staging-test-key"
-) {
-  // Exercise the real path adoption, PM2 validation and rollback functions;
-  // replace only host privileges, PM2, the lock command and HTTP transport.
-  const hostCommands = `
+// Exercise actual source checks, runtime validation and rollback functions;
+// replace host privileges, PM2, the lock command and HTTP transport.
+const runtimeHostCommands = `
 install() {
   while [[ "$1" == -* ]]; do
     case "$1" in
@@ -133,8 +137,17 @@ sudo() {
     *) return 1 ;;
   esac
 }
-curl() { command cat "$REPO_DIR/.deploy/current/version.json"; }
+curl() { command cat "\${TEST_LOCAL_VERSION_FILE:-$REPO_DIR/.deploy/current/version.json}"; }
 `;
+
+function runHostPreflight(
+  repo: string,
+  pm2Current?: string,
+  afterPreflight = "",
+  lockHeld = false,
+  ethereumRpcUrl = "https://eth-mainnet.example.test",
+  alchemyApiKey = "staging-test-key"
+) {
   const pm2Processes = pm2Current
     ? [
         {
@@ -150,13 +163,14 @@ curl() { command cat "$REPO_DIR/.deploy/current/version.json"; }
     : [];
   return childProcess.spawnSync(
     "bash",
-    ["-c", `${hostCommands}\n${preflightScript}\n${afterPreflight}`],
+    ["-c", `${runtimeHostCommands}\n${preflightScript}\n${afterPreflight}`],
     {
       encoding: "utf8",
       timeout: 10_000,
       env: {
         ...process.env,
         REPO_DIR: repo,
+        SOURCE_DIR: repo,
         RUN_AS: os.userInfo().username,
         ARTIFACT_URL: "https://example.invalid/artifact.zip",
         EXPECTED_SHA: expectedSha,
@@ -456,6 +470,7 @@ describe("staging SSM shell wrapper", () => {
     );
     copyHistory(repo);
     git(repo, "remote", "add", "origin", historyRepo);
+    git(repo, "reset", "--hard", newerSha);
     commandLog = path.join(repo, "commands");
     fs.writeFileSync(commandLog, "");
   });
@@ -467,7 +482,12 @@ describe("staging SSM shell wrapper", () => {
   function runWrapper(
     fetchedSha: string,
     finalSha = expectedSha,
-    candidateSha = expectedSha
+    candidateSha = expectedSha,
+    runtime?: {
+      kind: "managed" | "legacy";
+      version: string;
+      lockHeld?: boolean;
+    }
   ) {
     git(historyRepo, "update-ref", "refs/heads/1a-staging", fetchedSha);
     const sendStep = workflow.jobs["deploy-staging"].steps.find(
@@ -478,8 +498,49 @@ describe("staging SSM shell wrapper", () => {
     )?.[1];
     expect(body).toBeDefined();
 
-    // AWS-RunShellScript uses /bin/sh. Stub host operations, keeping the actual
-    // workflow's conditionals and final HEAD check in that interpreter.
+    const preflightRunner = path.join(repo, "test-host.sh");
+    fs.writeFileSync(preflightRunner, `${runtimeHostCommands}\nsource "$1"\n`);
+    const localVersionFile = path.join(repo, "test-local-version.json");
+    fs.writeFileSync(
+      localVersionFile,
+      JSON.stringify({ stale: false, version: runtime?.version })
+    );
+    let pm2Processes: unknown[] = [];
+    if (runtime?.kind === "legacy") {
+      pm2Processes = [
+        {
+          name: "6529seize",
+          pm2_env: {
+            exec_mode: "fork_mode",
+            pm_exec_path: "/bin/bash",
+            pm_cwd: repo,
+            args: ["-lc", `cd "${repo}" && ./bin/6529 run start:standalone`],
+          },
+        },
+      ];
+    } else if (runtime?.kind === "managed") {
+      const current = path.join(repo, ".deploy", "current");
+      const app = createRelease(
+        path.join(repo, ".deploy"),
+        runtime.version,
+        runtime.version
+      );
+      fs.symlinkSync(app, current);
+      pm2Processes = [
+        {
+          name: "6529seize",
+          pm2_env: {
+            exec_mode: "cluster_mode",
+            pm_exec_path: path.join(current, "server.js"),
+            pm_cwd: current,
+            args: [],
+          },
+        },
+      ];
+    }
+
+    // Keep the real /bin/sh wrapper and real Git worktrees. The integrated
+    // cases also execute the candidate's actual runtime preflight in Bash.
     const hostCommands = `
 set -eu
 id() { return 0; }
@@ -487,15 +548,26 @@ base64() { :; }
 jq() { :; }
 sudo() {
   [ "$1" = -H ] && [ "$2" = -u ] && [ "$3" = "$RUN_AS" ] &&
-    [ "$4" = git ] && [ "$5" = -C ] && [ "$6" = "$REPO_DIR" ] || return 1
+    [ "$4" = mktemp ] && { command mktemp -d "$REPO_DIR/.candidate.XXXXXX"; return; }
+  [ "$1" = -H ] && [ "$2" = -u ] && [ "$3" = "$RUN_AS" ] &&
+    [ "$4" = git ] && [ "$5" = -C ] || return 1
+  git_dir="$6"
   shift 6
   printf 'git %s\\n' "$*" >> "$TEST_COMMAND_LOG"
   case "$1 $2" in
     'rev-parse HEAD') printf '%s\\n' "$TEST_FINAL_SHA" ;;
-    *) command git -C "$REPO_DIR" "$@" 2>/dev/null ;;
+    'worktree add') command git -C "$git_dir" "$@" > /dev/null 2>&1 ;;
+    *) command git -C "$git_dir" "$@" 2>/dev/null ;;
   esac
 }
-bash() { printf 'bash %s\\n' "$*" >> "$TEST_COMMAND_LOG"; }
+bash() {
+  printf 'bash %s\\n' "$*" >> "$TEST_COMMAND_LOG"
+  if [ "$1" = -n ]; then command bash "$@"; return; fi
+  command git -C "$SOURCE_DIR" rev-parse HEAD > "$REPO_DIR/candidate-head"
+  if [ "$TEST_RUN_PREFLIGHT" = true ]; then
+    command bash "$TEST_PREFLIGHT_RUNNER" "$@"
+  fi
+}
 `;
     return childProcess.spawnSync(
       "/bin/sh",
@@ -506,7 +578,7 @@ bash() { printf 'bash %s\\n' "$*" >> "$TEST_COMMAND_LOG"; }
         env: {
           ...process.env,
           REPO_DIR: repo,
-          RUN_AS: "staging-test",
+          RUN_AS: os.userInfo().username,
           BRANCH: "1a-staging",
           EXPECTED_SHA: candidateSha,
           EXPECTED_DIGEST: expectedDigest,
@@ -521,13 +593,34 @@ bash() { printf 'bash %s\\n' "$*" >> "$TEST_COMMAND_LOG"; }
           ALCHEMY_API_KEY_B64:
             Buffer.from("staging-test-key").toString("base64"),
           TEST_FINAL_SHA: finalSha,
+          TEST_RUN_PREFLIGHT: String(Boolean(runtime)),
+          TEST_PREFLIGHT_RUNNER: preflightRunner,
+          TEST_LOCAL_VERSION_FILE: localVersionFile,
+          TEST_PM2_JSON: JSON.stringify(pm2Processes),
+          TEST_LOCK_HELD: String(runtime?.lockHeld ?? false),
         },
       }
     );
   }
 
   function commands() {
-    return fs.readFileSync(commandLog, "utf8").trim().split("\n");
+    return fs
+      .readFileSync(commandLog, "utf8")
+      .trim()
+      .split("\n")
+      .map((command) =>
+        command.replace(/\/[^ ]+\/\.candidate\.[^ ]+/gu, "<candidate>")
+      );
+  }
+
+  function makeShallowCheckout(sha: string) {
+    git(historyRepo, "update-ref", "refs/heads/1a-staging", sha);
+    fs.rmSync(repo, { recursive: true, force: true });
+    fs.mkdirSync(repo);
+    git(repo, "clone", "--quiet", "--depth=1", `file://${historyRepo}`, ".");
+    fs.writeFileSync(commandLog, "");
+    expect(git(repo, "rev-parse", "--is-shallow-repository")).toBe("true");
+    expect(git(repo, "rev-list", "--count", "HEAD")).toBe("1");
   }
 
   it("rejects source outside staging history before changing the checkout", () => {
@@ -538,6 +631,7 @@ bash() { printf 'bash %s\\n' "$*" >> "$TEST_COMMAND_LOG"; }
     expect(result.stderr).toContain("is not in origin 1a-staging history");
     expect(result.stderr).not.toContain("[[: not found");
     expect(commands()).toEqual([
+      "git rev-parse --is-shallow-repository",
       "git fetch --no-tags origin 1a-staging",
       "git rev-parse FETCH_HEAD",
       `git cat-file -e ${expectedSha}^{commit}`,
@@ -555,23 +649,68 @@ bash() { printf 'bash %s\\n' "$*" >> "$TEST_COMMAND_LOG"; }
       expect(result.status).toBe(0);
       expect(result.stderr).toBe("");
       expect(commands()).toEqual([
+        "git rev-parse --is-shallow-repository",
         "git fetch --no-tags origin 1a-staging",
         "git rev-parse FETCH_HEAD",
         `git cat-file -e ${expectedSha}^{commit}`,
         `git merge-base --is-ancestor ${expectedSha} ${fetchedSha}`,
-        "git reset --hard HEAD",
-        "git clean -fd generated",
-        `git checkout -B 1a-staging ${expectedSha}`,
-        "git config branch.1a-staging.remote origin",
-        "git config branch.1a-staging.merge refs/heads/1a-staging",
-        `git reset --hard ${expectedSha}`,
+        `git worktree add --detach <candidate> ${expectedSha}`,
         "git rev-parse HEAD",
         "bash -n ops/scripts/deploy-staging-artifact.sh",
         "bash ops/scripts/deploy-staging-artifact.sh",
+        "git worktree remove <candidate>",
       ]);
-      expect(git(repo, "rev-parse", "HEAD")).toBe(expectedSha);
+      expect(git(repo, "rev-parse", "HEAD")).toBe(newerSha);
+      expect(
+        fs.readFileSync(path.join(repo, "candidate-head"), "utf8").trim()
+      ).toBe(expectedSha);
+      expect(
+        git(repo, "worktree", "list", "--porcelain").match(/^worktree /gmu)
+      ).toHaveLength(1);
     }
   );
+
+  it.each(["matching", "advanced"])(
+    "restores shallow history before pinning when staging is %s",
+    (head) => {
+      const fetchedSha = head === "advanced" ? newerSha : expectedSha;
+      makeShallowCheckout(fetchedSha);
+
+      const result = runWrapper(fetchedSha);
+
+      expect(result.error).toBeUndefined();
+      expect(result.status).toBe(0);
+      expect(result.stderr).toBe("");
+      expect(git(repo, "rev-parse", "--is-shallow-repository")).toBe("false");
+      expect(git(repo, "rev-parse", "HEAD")).toBe(fetchedSha);
+      expect(
+        fs.readFileSync(path.join(repo, "candidate-head"), "utf8").trim()
+      ).toBe(expectedSha);
+      expect(
+        git(repo, "merge-base", "--is-ancestor", previousSha, expectedSha)
+      ).toBe("");
+      expect(commands()).toContain(
+        "git fetch --no-tags --unshallow origin 1a-staging"
+      );
+    }
+  );
+
+  it("stops before checkout and activation when unshallowing fails", () => {
+    makeShallowCheckout(newerSha);
+    git(repo, "remote", "set-url", "origin", path.join(repo, "missing-origin"));
+
+    const result = runWrapper(newerSha);
+
+    expect(result.error).toBeUndefined();
+    expect(result.status).not.toBe(0);
+    expect(git(repo, "rev-parse", "HEAD")).toBe(newerSha);
+    expect(
+      commands().some((command) => command.startsWith("git checkout"))
+    ).toBe(false);
+    expect(commands().some((command) => command.startsWith("bash "))).toBe(
+      false
+    );
+  });
 
   it("rejects an unavailable pinned commit before changing the checkout", () => {
     const result = runWrapper(newerSha, expectedSha, "f".repeat(40));
@@ -591,10 +730,103 @@ bash() { printf 'bash %s\\n' "$*" >> "$TEST_COMMAND_LOG"; }
     expect(result.error).toBeUndefined();
     expect(result.status).toBe(1);
     expect(result.stderr).toBe("");
-    expect(commands().at(-1)).toBe("git rev-parse HEAD");
+    expect(commands()).toContain("git rev-parse HEAD");
+    expect(commands().at(-1)).toBe("git worktree remove <candidate>");
     expect(commands().some((command) => command.startsWith("bash "))).toBe(
       false
     );
+  });
+
+  it.each(["managed", "legacy"] as const)(
+    "leaves the live checkout and %s runtime intact when rejecting an old rerun",
+    (kind) => {
+      const marker = path.join(repo, "source-version.txt");
+      fs.writeFileSync(marker, "Live checkout local contents");
+      const beforeStatus = git(
+        repo,
+        "diff",
+        "HEAD",
+        "--",
+        "source-version.txt"
+      );
+
+      const result = runWrapper(newerSha, expectedSha, expectedSha, {
+        kind,
+        version: newerSha,
+      });
+
+      expect(result.error).toBeUndefined();
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain("Refusing to replace healthy staging");
+      expect(git(repo, "rev-parse", "HEAD")).toBe(newerSha);
+      expect(fs.readFileSync(marker, "utf8")).toBe(
+        "Live checkout local contents"
+      );
+      expect(git(repo, "diff", "HEAD", "--", "source-version.txt")).toBe(
+        beforeStatus
+      );
+      expect(fs.existsSync(path.join(repo, "pm2-events"))).toBe(false);
+      expect(
+        git(repo, "worktree", "list", "--porcelain").match(/^worktree /gmu)
+      ).toHaveLength(1);
+      if (kind === "managed") {
+        expect(
+          JSON.parse(
+            fs.readFileSync(
+              path.join(repo, ".deploy", "current", "version.json"),
+              "utf8"
+            )
+          ).version
+        ).toBe(newerSha);
+      }
+    }
+  );
+
+  it.each(["managed", "legacy"] as const)(
+    "accepts a forward candidate from isolated source with a %s runtime",
+    (kind) => {
+      git(repo, "reset", "--hard", previousSha);
+
+      const result = runWrapper(newerSha, expectedSha, expectedSha, {
+        kind,
+        version: previousSha,
+      });
+
+      expect(result.error).toBeUndefined();
+      expect(result.status).toBe(0);
+      expect(result.stderr).toBe("");
+      expect(git(repo, "rev-parse", "HEAD")).toBe(previousSha);
+      expect(
+        fs.readFileSync(path.join(repo, "source-version.txt"), "utf8")
+      ).toBe("Previously deployed");
+      expect(
+        fs.readFileSync(path.join(repo, "candidate-head"), "utf8").trim()
+      ).toBe(expectedSha);
+      expect(
+        git(repo, "worktree", "list", "--porcelain").match(/^worktree /gmu)
+      ).toHaveLength(1);
+    }
+  );
+
+  it("leaves the live checkout intact and cleans the candidate when the instance lock is held", () => {
+    const result = runWrapper(newerSha, expectedSha, expectedSha, {
+      kind: "managed",
+      version: previousSha,
+      lockHeld: true,
+    });
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain(
+      "Another instance-local staging deployment"
+    );
+    expect(git(repo, "rev-parse", "HEAD")).toBe(newerSha);
+    expect(fs.readFileSync(path.join(repo, "source-version.txt"), "utf8")).toBe(
+      "Queued deployment"
+    );
+    expect(fs.existsSync(path.join(repo, "pm2-events"))).toBe(false);
+    expect(
+      git(repo, "worktree", "list", "--porcelain").match(/^worktree /gmu)
+    ).toHaveLength(1);
   });
 });
 
@@ -798,7 +1030,12 @@ describe("staging immutable artifact deployment", () => {
       'sudo -H -u "$RUN_AS" git -C "$REPO_DIR" "$@"'
     );
     expect(sendStep.run).toContain("run_git fetch --no-tags origin");
-    expect(sendStep.run).toContain("run_git checkout -B");
+    expect(sendStep.run).toContain(
+      'run_git worktree add --detach "$source_dir" "$EXPECTED_SHA"'
+    );
+    expect(sendStep.run).not.toContain("run_git checkout");
+    expect(sendStep.run).not.toContain("run_git reset");
+    expect(sendStep.run).toContain('SOURCE_DIR="$source_dir"');
     expect(sendStep.run).not.toContain(
       "git config --global --add safe.directory"
     );

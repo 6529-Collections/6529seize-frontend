@@ -245,6 +245,9 @@
         "web-desktop-chromium"
       ]
     },
+    "/bookmarks": {
+      "classification": "auth"
+    },
     "/buidl": {
       "classification": "crawlable",
       "family": "info"

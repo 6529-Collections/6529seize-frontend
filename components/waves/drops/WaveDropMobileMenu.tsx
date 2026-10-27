@@ -39,6 +39,7 @@ import WaveDropMobileMenuOpen from "./WaveDropMobileMenuOpen";
 import WaveDropActionsQuickReact from "./WaveDropActionsQuickReact";
 import { useWaveDropLayers } from "./WaveDropLayerContext";
 import WaveDropMobileMenuCopyLink from "./WaveDropMobileMenuCopyLink";
+import WaveDropBookmarkAction from "./WaveDropBookmarkAction";
 import WaveDropMobileMenuCopyText from "./WaveDropMobileMenuCopyText";
 import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
 import ReportDropModal from "@/components/content-moderation/ReportDropModal";
@@ -279,6 +280,7 @@ function WaveDropMobileMenuAuthenticatedActions({
         </>
       )}
 
+      <WaveDropBookmarkAction dropId={drop.id} onSelected={closeMenu} mobile />
       <WaveDropDocumentationAction drop={drop} onSelected={closeMenu} mobile />
 
       <DropSignatureMenuItem
