@@ -79,7 +79,7 @@ export default function CompetitionVoteWithReply({
           <div className="tw-space-y-3 tw-pt-3 group-[.is-mini]/inline-vote:tw-flex group-[.is-mini]/inline-vote:tw-flex-col group-[.is-mini]/inline-vote:tw-gap-1.5 group-[.is-mini]/inline-vote:tw-space-y-0 group-[.is-mini]/inline-vote:tw-pb-3 group-[.is-mini]/inline-vote:tw-pt-0">
             <p
               id={publicReplyDescriptionId}
-              className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400 group-[.is-mini]/inline-vote:tw-order-2 group-[.is-mini]/inline-vote:tw-text-iron-500"
+              className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400 group-[.is-mini]/inline-vote:tw-order-2 group-[.is-mini]/inline-vote:tw-leading-4 group-[.is-mini]/inline-vote:tw-text-iron-500"
             >
               {t(locale, "waves.voteRationale.publicReplyDescription")}
             </p>
@@ -93,14 +93,14 @@ export default function CompetitionVoteWithReply({
               <textarea
                 id={fieldId}
                 rows={4}
-                placeholder={t(locale, "waves.voteRationale.fieldLabel")}
+                placeholder={t(locale, "waves.voteRationale.fieldPlaceholder")}
                 value={rationale.rationaleText}
                 onChange={(event) =>
                   rationale.handleRationaleTextChange(event.target.value)
                 }
                 aria-invalid={Boolean(invalid)}
                 aria-describedby={invalid ? descriptionId : undefined}
-                className={`tw-block tw-w-full tw-resize-y tw-rounded-lg tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 focus:tw-border-primary-400 focus:tw-outline-none group-[.is-mini]/inline-vote:tw-h-14 group-[.is-mini]/inline-vote:tw-min-h-14 group-[.is-mini]/inline-vote:tw-border-iron-800 group-[.is-mini]/inline-vote:tw-px-2.5 group-[.is-mini]/inline-vote:tw-py-2 group-[.is-mini]/inline-vote:tw-text-[13px] group-[.is-mini]/inline-vote:tw-leading-[18px] group-[.is-mini]/inline-vote:max-sm:tw-text-base ${
+                className={`tw-block tw-w-full tw-resize-y tw-rounded-lg tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 focus:tw-border-primary-400 focus:tw-outline-none group-[.is-mini]/inline-vote:tw-h-14 group-[.is-mini]/inline-vote:tw-min-h-14 group-[.is-mini]/inline-vote:tw-overflow-hidden group-[.is-mini]/inline-vote:tw-border-iron-800 group-[.is-mini]/inline-vote:tw-px-2.5 group-[.is-mini]/inline-vote:tw-py-2 group-[.is-mini]/inline-vote:tw-text-[13px] group-[.is-mini]/inline-vote:tw-leading-[18px] group-[.is-mini]/inline-vote:max-sm:tw-text-base ${
                   rationale.isUsingGeneratedRationale
                     ? "tw-text-iron-600"
                     : "tw-text-iron-100"
