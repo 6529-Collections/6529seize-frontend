@@ -11,22 +11,34 @@ import {
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import Image, { type ImageProps } from "next/image";
-import { forwardRef, useRef, useState, type ReactNode } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
-export function getDropImagePreviewSources(src: string, scale: ImageScale) {
+export function getDropImagePreviewSources(
+  src: string,
+  scale: ImageScale,
+  preferAnimation = false
+) {
   const original = resolveIpfsUrlSync(src);
   // An IPFS gateway URL is still an original, even when resolving it changes
   // the URL string. Try bounded CDN copies before the guarded external proxy.
-  const sources = [scale, ImageScale.AUTOx450]
-    .map((size) =>
-      isGifImageUrl(original)
-        ? getAnimatedImagePreviewUri(original, size)
-        : getScaledImageUri(original, size)
-    )
-    .flatMap((url) => [url, getLegacyGifPreviewUri(url)])
-    .filter(
-      (url, index, all) => url !== original && all.indexOf(url) === index
-    );
+  const previews = [scale, ImageScale.AUTOx450].map((size) =>
+    isGifImageUrl(original)
+      ? getAnimatedImagePreviewUri(original, size)
+      : getScaledImageUri(original, size)
+  );
+  const ordered = preferAnimation
+    ? [...previews, ...previews.map(getLegacyGifPreviewUri)]
+    : previews.flatMap((url) => [url, getLegacyGifPreviewUri(url)]);
+  const sources = ordered.filter(
+    (url, index, all) => url !== original && all.indexOf(url) === index
+  );
   if (sources.length || !isAllowedOgImageSourceUrl(original)) return sources;
 
   // External embeds have no CDN scale path. The existing guarded image proxy
@@ -64,6 +76,9 @@ type Props = Omit<ImageProps, "src" | "unoptimized" | "onError"> & {
   readonly imageScale: ImageScale;
   readonly onError?: (() => void) | undefined;
   readonly preferHighQuality?: boolean | undefined;
+  // Reports unavailable guaranteed-animated previews once per mount. A legacy
+  // or external preview can still animate, but does not guarantee animation.
+  readonly onAnimatedPreviewUnavailable?: (() => void) | undefined;
 };
 
 const PreviewAttempt = forwardRef<HTMLImageElement, Props>(
@@ -75,21 +90,40 @@ const PreviewAttempt = forwardRef<HTMLImageElement, Props>(
       alt,
       fallback,
       preferHighQuality = false,
+      onAnimatedPreviewUnavailable,
+      onLoad,
       ...props
     },
     ref
   ) => {
     const [attempt, setAttempt] = useState(0);
     const failedAttempt = useRef<number | null>(null);
+    const notifiedAnimationFallback = useRef(false);
     const highQualitySrc = preferHighQuality
       ? getHighQualityArtworkImageSrc(originalSrc)
       : null;
-    const previewSources = getDropImagePreviewSources(originalSrc, imageScale);
+    const previewSources = getDropImagePreviewSources(
+      originalSrc,
+      imageScale,
+      Boolean(onAnimatedPreviewUnavailable)
+    );
     const sources = highQualitySrc
       ? [highQualitySrc, ...previewSources]
       : previewSources;
     const source = sources[attempt];
     const optimizationProps = source === highQualitySrc ? { quality: 100 } : {};
+    const notifyAnimatedPreviewUnavailable = useCallback(() => {
+      if (!isGifImageUrl(originalSrc) || notifiedAnimationFallback.current)
+        return;
+      notifiedAnimationFallback.current = true;
+      onAnimatedPreviewUnavailable?.();
+    }, [originalSrc, onAnimatedPreviewUnavailable]);
+
+    useEffect(() => {
+      // This callback uses an internal notification guard, not the forwarded DOM ref.
+      // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-ref-to-parent
+      if (sources.length === 0) notifyAnimatedPreviewUnavailable();
+    }, [sources.length, notifyAnimatedPreviewUnavailable]);
 
     return (
       <>
@@ -113,12 +147,25 @@ const PreviewAttempt = forwardRef<HTMLImageElement, Props>(
             src={source}
             unoptimized={source !== highQualitySrc}
             {...optimizationProps}
+            onLoad={(event) => {
+              onLoad?.(event);
+              // Legacy and external previews can be stills. Only the versioned
+              // GIF contract guarantees animation without inspecting the bytes.
+              if (getLegacyGifPreviewUri(source) === source)
+                notifyAnimatedPreviewUnavailable();
+            }}
             onError={() => {
               // Repeated errors from one source must not skip its fallback or
               // notify the parent twice before React commits the next render.
               if (failedAttempt.current === attempt) return;
               failedAttempt.current = attempt;
               setAttempt(attempt + 1);
+              const nextSource = sources[attempt + 1];
+              if (
+                !nextSource ||
+                getLegacyGifPreviewUri(nextSource) === nextSource
+              )
+                notifyAnimatedPreviewUnavailable();
               if (attempt + 1 === sources.length) onError?.();
             }}
           />
@@ -135,7 +182,7 @@ PreviewAttempt.displayName = "PreviewAttempt";
 export const DropImagePreview = forwardRef<HTMLImageElement, Props>(
   (props, ref) => (
     <PreviewAttempt
-      key={`${props.originalSrc}:${props.imageScale}:${props.preferHighQuality ?? false}`}
+      key={`${props.originalSrc}:${props.imageScale}:${props.preferHighQuality ?? false}:${Boolean(props.onAnimatedPreviewUnavailable)}`}
       {...props}
       ref={ref}
     />

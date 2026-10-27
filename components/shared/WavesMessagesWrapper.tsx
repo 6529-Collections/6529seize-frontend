@@ -1,11 +1,12 @@
 "use client";
+import { closeDropInCurrentUrl } from "@/helpers/waves/close-drop.helpers";
 import { useWaveInformation } from "@/contexts/WaveInformationContext";
 import { useWaveById } from "@/hooks/useWaveById";
 import WaveInformationSheet from "@/components/brain/mobile/WaveInformationSheet";
 
 import useCreateModalState from "@/hooks/useCreateModalState";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { createBreakpoint } from "react-use";
@@ -79,7 +80,6 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
 }) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const router = useRouter();
   const breakpoint = useBreakpoint();
   const prefersReducedMotion = useReducedMotion();
 
@@ -164,13 +164,8 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
     if (dropId) {
       beginClosingDrop(dropId);
     }
-    const params = new URLSearchParams(searchParams.toString() || "");
-    params.delete("drop");
-    const newUrl = params.toString()
-      ? `${pathname}?${params.toString()}`
-      : pathname || defaultPath;
-    router.replace(newUrl, { scroll: false });
-  }, [dropId, beginClosingDrop, searchParams, pathname, defaultPath, router]);
+    closeDropInCurrentUrl();
+  }, [dropId, beginClosingDrop]);
 
   const isDropOpen = useMemo(
     () =>

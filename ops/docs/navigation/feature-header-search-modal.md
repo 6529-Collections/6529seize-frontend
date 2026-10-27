@@ -137,6 +137,8 @@ DMs; the `in:` picker can include conversations you can read.
 - Results from an earlier query are hidden immediately while the next query is
   settling.
 - Background page scroll is locked while the modal is open.
+- In-wave search keeps its query, filters, and input focus when competition
+  details finish loading in the background.
 - When opened from a header search button, focus returns to that button on close.
 
 ## Failure and Recovery

@@ -12,6 +12,7 @@ type EffectivePlan = {
     playwright_museum: { required: boolean };
     playwright_artwork_documentation: { required: boolean };
     playwright_native_competition: { required: boolean };
+    playwright_submission_artwork: { required: boolean };
     playwright_wave_feature_usage: { required: boolean };
     playwright_pdf_attachments: { required: boolean };
     install: { required: boolean };
@@ -84,6 +85,38 @@ it("keeps the Wave tracking browser lane out of unrelated changes", () => {
 
 describe("effective App PR CI plan", () => {
   it.each([
+    "tests/media/submission-artwork-sandbox.spec.ts",
+    "tests/media/waveImagePreviewCases.ts",
+    "components/waves/drop/MemesDropArtworkHero.tsx",
+    "components/drops/view/item/content/media/DropImagePreview.tsx",
+    "components/drops/view/item/content/media/GifPreviewLoadingIndicator.tsx",
+    "components/drops/view/item/content/media/DropListItemContentMedia.tsx",
+    "components/drops/view/item/content/media/DropListItemContentMediaImage.tsx",
+    "components/drops/view/item/content/media/MediaDisplay.tsx",
+    "components/drops/view/item/content/media/MediaDisplayImage.tsx",
+    "components/drops/view/item/content/media/ImageMediaModal.tsx",
+    "components/drops/view/item/content/media/useOriginalImage.ts",
+    "components/memes/drops/MemeParticipationDrop.tsx",
+    "components/memes/drops/MemeWinnerDrop.tsx",
+    "components/memes/drops/MemesLeaderboardDrop.tsx",
+    "helpers/gif-preview.helpers.ts",
+    "tests/packs.manifest.cjs",
+    ".github/workflows/app-pr-ci.yml",
+    "scripts/app-pr-ci-effective-plan.cjs",
+  ])("selects isolated submission artwork browser evidence for %s", (file) => {
+    expect(
+      executePlan([file]).checks.playwright_submission_artwork.required
+    ).toBe(true);
+  });
+
+  it("keeps submission artwork out of unrelated competition changes", () => {
+    expect(
+      executePlan(["components/competitions/CompetitionVote.tsx"]).checks
+        .playwright_submission_artwork.required
+    ).toBe(false);
+  });
+
+  it.each([
     "components/competitions/CompetitionVote.tsx",
     "hooks/competitions/useCompetitionQueries.ts",
     "__tests__/competitions/competition-api.test.ts",
@@ -97,6 +130,20 @@ describe("effective App PR CI plan", () => {
     "services/wallet-signatures/competition-signature.ts",
     "i18n/messages/competitions.ts",
     "tests/social/native-competition-sandbox.spec.ts",
+    "tests/media/waveImagePreviewCases.ts",
+    "components/waves/drop/MemesDropArtworkHero.tsx",
+    "components/drops/view/item/content/media/DropImagePreview.tsx",
+    "components/drops/view/item/content/media/GifPreviewLoadingIndicator.tsx",
+    "components/drops/view/item/content/media/DropListItemContentMedia.tsx",
+    "components/drops/view/item/content/media/DropListItemContentMediaImage.tsx",
+    "components/drops/view/item/content/media/MediaDisplay.tsx",
+    "components/drops/view/item/content/media/MediaDisplayImage.tsx",
+    "components/memes/drops/MemeParticipationDrop.tsx",
+    "components/memes/drops/MemeWinnerDrop.tsx",
+    "components/memes/drops/MemesLeaderboardDrop.tsx",
+    "components/drops/view/item/content/media/ImageMediaModal.tsx",
+    "components/drops/view/item/content/media/useOriginalImage.ts",
+    "helpers/gif-preview.helpers.ts",
     "tests/social/wave-switch-loading.spec.ts",
     "tests/social/wave-loading-sandbox.spec.ts",
     "components/brain/left-sidebar/waves/SidebarDiscovery.tsx",
