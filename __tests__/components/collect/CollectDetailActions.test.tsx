@@ -1,3 +1,4 @@
+import type { CollectOwnerActionRenderer } from "@/components/collect/CollectOwnerAction";
 import CollectDetailActions from "@/components/collect/CollectDetailActions";
 import { MEMES_CONTRACT, MEMELAB_CONTRACT } from "@/constants/constants";
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
@@ -54,9 +55,18 @@ jest.mock("@/services/api/collect-api", () => ({
 }));
 jest.mock("@/components/collect/CollectOwnerAction", () => ({
   __esModule: true,
-  default: ({ onList }: { onList: (trigger: HTMLButtonElement) => void }) => (
-    <button onClick={(event) => onList(event.currentTarget)}>List</button>
-  ),
+  default: ({
+    onList,
+    renderAction,
+  }: {
+    onList: (trigger: HTMLButtonElement) => void;
+    renderAction?: CollectOwnerActionRenderer;
+  }) =>
+    renderAction ? (
+      renderAction({ onSelect: onList }, null)
+    ) : (
+      <button onClick={(event) => onList(event.currentTarget)}>List</button>
+    ),
 }));
 jest.mock("@/components/collect/CollectTradeController", () => ({
   __esModule: true,
@@ -176,15 +186,18 @@ it("loads canonical inline Collect without a modal or initial Collect click", as
     signal: expect.any(AbortSignal),
   });
 });
-it("opens the same accept flow from the Meme supporting strip and restores focus", async () => {
+it("opens the same accept flow from the Meme more-actions menu and restores focus", async () => {
   const changed = jest.fn();
   renderActions("5", changed, "memes", true);
   const inlineTrade = await screen.findByTestId("inline-trade");
   const trigger = within(inlineTrade).getByRole("button", {
-    name: "Review offers: Meme Five",
+    name: "More trading actions for Meme Five",
   });
   const user = userEvent.setup();
   await user.click(trigger);
+  await user.click(
+    screen.getByRole("menuitem", { name: "Review offers: Meme Five" })
+  );
   const trade = await screen.findByTestId("trade");
   expect(trade).toHaveAttribute("data-asset", asset.asset_key);
   expect(trade).toHaveAttribute("data-action", "accept");
@@ -505,7 +518,12 @@ it("shows one Meme panel placeholder before artwork lookup resolves", async () =
   expect(
     within(trade).getByRole("button", { name: "Make an offer: Meme Five" })
   ).toBeEnabled();
+  await userEvent.click(
+    within(trade).getByRole("button", {
+      name: "More trading actions for Meme Five",
+    })
+  );
   expect(
-    within(trade).getByRole("button", { name: "Review offers: Meme Five" })
+    screen.getByRole("menuitem", { name: "Review offers: Meme Five" })
   ).toBeEnabled();
 });

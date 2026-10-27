@@ -41,6 +41,7 @@ import CollectDetailActionRow, {
   CollectDetailLayout,
 } from "./CollectDetailActionRow";
 import CollectDetailLoading from "./CollectDetailLoading";
+import CollectDetailSupportingActions from "./CollectDetailSupportingActions";
 import CollectDetailPanel from "./CollectDetailPanel";
 import CollectMarketButton from "./CollectMarketButton";
 
@@ -56,6 +57,7 @@ interface CollectDetailActionsProps {
   readonly locale: SupportedLocale;
   readonly onMarketChange?: () => void;
   readonly mobileSticky?: boolean;
+  readonly hideMarketLink?: boolean;
 }
 
 function isExactAsset(
@@ -205,7 +207,7 @@ function DetailTrade({
 }
 
 function DetailActions(props: CollectDetailActionsProps) {
-  const viewMarket = (
+  const viewMarket = props.hideMarketLink ? null : (
     <CollectMarketButton
       locale={props.locale}
       mobileRow={props.mobileSticky ?? false}
@@ -252,6 +254,18 @@ function DetailActions(props: CollectDetailActionsProps) {
     });
   };
   const renderSupportingActions = (assetKey: string | undefined) => {
+    if (props.mobileSticky)
+      return (
+        <CollectDetailSupportingActions
+          assetKey={assetKey}
+          title={props.title}
+          locale={props.locale}
+          onTrade={(nextAction, trigger) => {
+            opener.current = trigger;
+            setAction(nextAction);
+          }}
+        />
+      );
     const ownerAction = assetKey && (
       <div data-collect-owner-action>
         <CollectOwnerAction
@@ -265,7 +279,6 @@ function DetailActions(props: CollectDetailActionsProps) {
     );
     const reviewAction = (
       <CollectTradeActions
-        inline={props.mobileSticky ?? false}
         actions={ACTIONS}
         title={props.title}
         locale={props.locale}
@@ -275,12 +288,7 @@ function DetailActions(props: CollectDetailActionsProps) {
         }}
       />
     );
-    return props.mobileSticky ? (
-      <>
-        {reviewAction}
-        {ownerAction}
-      </>
-    ) : (
+    return (
       <>
         {ownerAction}
         {reviewAction}
@@ -368,7 +376,6 @@ function DetailActions(props: CollectDetailActionsProps) {
             </button>
             <div data-collect-detail-other-actions className="tw-contents">
               <CollectTradeActions
-                inline={props.mobileSticky ?? false}
                 actions={ACTIONS}
                 title={props.title}
                 locale={props.locale}
@@ -381,12 +388,14 @@ function DetailActions(props: CollectDetailActionsProps) {
           </CollectDetailActionRow>
         </div>
       </CollectDetailLayout.Provider>
-      <div
-        data-collect-market-link
-        className={props.mobileSticky ? "tw-mt-1 max-sm:tw-mt-2" : "tw-mt-1"}
-      >
-        {viewMarket}
-      </div>
+      {viewMarket && (
+        <div
+          data-collect-market-link
+          className={props.mobileSticky ? "tw-mt-1 max-sm:tw-mt-2" : "tw-mt-1"}
+        >
+          {viewMarket}
+        </div>
+      )}
       {action && (
         <CollectTradeDialog
           open

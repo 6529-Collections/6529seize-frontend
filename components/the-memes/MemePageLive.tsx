@@ -3,6 +3,10 @@
 import type { NFT } from "@/entities/INFT";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import CollectDetailActions from "@/components/collect/CollectDetailActions";
+import CollectMarketButton from "@/components/collect/CollectMarketButton";
+import NftPurchasingGate from "@/components/common/NftPurchasingGate";
+import { revealMarketDepth } from "@/components/nft-market-depth/market-depth-disclosure";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import { parseNftDescriptionToHtml } from "@/helpers/Helpers";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -23,6 +27,7 @@ export function MemePageLiveRightMenu(props: {
 }) {
   if (props.show && props.nft) {
     const locale = props.locale ?? DEFAULT_LOCALE;
+    const tokenId = String(props.nft.id);
 
     return (
       <div className="tw-w-full">
@@ -30,8 +35,9 @@ export function MemePageLiveRightMenu(props: {
         <div className="tw-py-3">
           <CollectDetailActions
             mobileSticky
+            hideMarketLink
             collection="memes"
-            tokenId={String(props.nft.id)}
+            tokenId={tokenId}
             title={props.nft.name}
             locale={locale}
             {...(props.onMarketChange
@@ -42,6 +48,16 @@ export function MemePageLiveRightMenu(props: {
         {props.nftMeta && (
           <MemeEditionSizeStats nftMeta={props.nftMeta} locale={locale} />
         )}
+        <NftPurchasingGate>
+          <div className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-py-1">
+            <CollectMarketButton
+              locale={locale}
+              mobileRow
+              fullWidth
+              onClick={() => revealMarketDepth(MEMES_CONTRACT, tokenId)}
+            />
+          </div>
+        </NftPurchasingGate>
         <MemeNftLivePanel
           nft={props.nft}
           recordedInTdh={props.nftMeta?.recorded_in_tdh}

@@ -27,6 +27,7 @@ type Props = ComponentProps<typeof CollectTradeForm> & {
   readonly amountWei: string | null;
   readonly orderOptions?: ReactNode;
   readonly secondaryActions?: ReactNode;
+  readonly supportingActions?: ReactNode;
   readonly quantityStep?: string;
   readonly onSplitDelivery?: (() => void) | undefined;
   readonly connectionHeader?: boolean;
@@ -61,7 +62,7 @@ export default function CollectInlineBuyForm(props: Props) {
   if (props.amountWei !== null) {
     const price = marketAmount(props.amountWei, MARKET_ZERO);
     buyLabel = detailLayout ? (
-      <span className="tw-block tw-min-w-0 tw-truncate">
+      <span className="tw-block tw-shrink-0 tw-whitespace-nowrap">
         {tRich(locale, "collect.buy.atPrice", {
           price: (
             <span
@@ -191,7 +192,15 @@ export default function CollectInlineBuyForm(props: Props) {
           {props.disabledReason}
         </p>
       )}
-      <CollectDetailActionRow primaryAction={buyButton}>
+      <CollectDetailActionRow
+        primaryAction={buyButton}
+        supportingActions={props.supportingActions}
+        details={
+          detailLayout && deliveryControl ? (
+            <div data-collect-detail-delivery>{deliveryControl}</div>
+          ) : null
+        }
+      >
         {props.secondaryActions !== null &&
           props.secondaryActions !== undefined && (
             <div
@@ -201,9 +210,6 @@ export default function CollectInlineBuyForm(props: Props) {
               {props.secondaryActions}
             </div>
           )}
-        {detailLayout && deliveryControl && (
-          <div data-collect-detail-delivery>{deliveryControl}</div>
-        )}
       </CollectDetailActionRow>
       {!detailLayout && <div data-collect-detail-footer>{deliveryControl}</div>}
       {props.onSplitDelivery && (

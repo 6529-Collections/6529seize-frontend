@@ -7,7 +7,7 @@ import {
   expectContainedImage,
   expectMemeArtworkScrolling,
 } from "./imageArtworkLayoutCases";
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 
 import {
   expect,
@@ -27,6 +27,27 @@ async function gotoReady(page: Page, path: string) {
   await expectNoHorizontalOverflow(page);
 }
 
+async function expectFullCollectLabel(button: Locator) {
+  const fits = await button.evaluate((element) => {
+    const label = element.querySelector(":scope > span");
+    if (!label) return false;
+    const range = document.createRange();
+    range.selectNodeContents(label);
+    const text = range.getBoundingClientRect();
+    const bounds = element.getBoundingClientRect();
+    const styles = getComputedStyle(element);
+    return (
+      text.left >= bounds.left + Number.parseFloat(styles.paddingLeft) - 1 &&
+      text.right <= bounds.right - Number.parseFloat(styles.paddingRight) + 1 &&
+      range.getClientRects().length > 0 &&
+      text.height <= bounds.height
+    );
+  });
+  expect(fits, "Collect's complete label fits inside its button padding").toBe(
+    true
+  );
+}
+
 async function expectTradingPanelLayout(page: Page) {
   const panel = page.getByTestId("collect-detail-panel");
   const actions = panel.getByTestId("collect-inline-actions");
@@ -35,7 +56,7 @@ async function expectTradingPanelLayout(page: Page) {
     name: "Connect wallet",
     exact: true,
   });
-  const market = panel.getByRole("button", {
+  const market = page.getByRole("button", {
     name: "View listings & offers",
     exact: true,
   });
@@ -50,101 +71,74 @@ async function expectTradingPanelLayout(page: Page) {
     .boundingBox())!;
   const connectBox = (await connect.boundingBox())!;
   const marketBox = (await market.boundingBox())!;
-  expect(marketBox.y + marketBox.height).toBeLessThanOrEqual(collectBox.y);
-  expect(connectBox.y).toBeGreaterThan(actionsBox.y + actionsBox.height);
+  const supplyBox = (await page
+    .getByText("Supply details & rankings", { exact: true })
+    .boundingBox())!;
+  expect(marketBox.y).toBeGreaterThan(supplyBox.y + supplyBox.height);
+  await expect(
+    panel.getByRole("button", { name: "View listings & offers", exact: true })
+  ).toHaveCount(0);
+  expect(connectBox.y + connectBox.height).toBeLessThan(collectBox.y);
   expect(collectBox.height).toBeCloseTo(44, 0);
   expect(offerBox.height).toBeCloseTo(44, 0);
-  expect(connectBox.height).toBeCloseTo(
-    page.viewportSize()!.width < 480 ? 40 : 36,
-    0
-  );
-  const listBox = (await panel
-    .getByRole("button", { name: "List", exact: true })
-    .boundingBox())!;
-  const reviewBox = (await panel
-    .getByRole("button", { name: /^Review offers:/ })
-    .boundingBox())!;
-  const viewportWidth = page.viewportSize()!.width;
-  // The approved layout keeps both actions on one row, even in narrow columns.
+  expect(connectBox.height).toBeCloseTo(44, 0);
+  const more = panel.getByRole("button", { name: /^More trading actions for/ });
+  const moreBox = (await more.boundingBox())!;
+  // Collect gets its intrinsic width before the secondary label can truncate.
   expect(collectBox.x).toBeCloseTo(actionsBox.x, 0);
-  expect(collectBox.y).toBeCloseTo(offerBox.y, 0);
-  expect(offerBox.x - collectBox.x - collectBox.width).toBeCloseTo(8, 0);
-  expect(offerBox.x + offerBox.width).toBeCloseTo(
+  expect(offerBox.width).toBeGreaterThanOrEqual(44);
+  if (Math.abs(collectBox.y - offerBox.y) < 1) {
+    expect(collectBox.width).toBeGreaterThanOrEqual(offerBox.width - 1);
+    expect(offerBox.x - collectBox.x - collectBox.width).toBeCloseTo(8, 0);
+  } else {
+    // At the narrowest sizes, preserve the full price and usable secondary targets.
+    expect(collectBox.width).toBeCloseTo(actionsBox.width, 0);
+    expect(offerBox.x).toBeCloseTo(actionsBox.x, 0);
+    expect(offerBox.y - collectBox.y - collectBox.height).toBeCloseTo(8, 0);
+  }
+  expect(moreBox.y).toBeCloseTo(offerBox.y, 0);
+  await expectFullCollectLabel(collect);
+  expect(moreBox.height).toBeCloseTo(44, 0);
+  expect(moreBox.width).toBeCloseTo(44, 0);
+  expect(moreBox.x - offerBox.x - offerBox.width).toBeCloseTo(8, 0);
+  expect(moreBox.x + moreBox.width).toBeCloseTo(
     actionsBox.x + actionsBox.width,
     0
   );
-  expect(collectBox.width / offerBox.width).toBeCloseTo(
-    viewportWidth < 400 ? 5 / 4 : 1,
-    2
-  );
-  expect(listBox.y).toBeGreaterThanOrEqual(
-    collectBox.y + collectBox.height + 8
-  );
-  expect(reviewBox.height).toBeCloseTo(36, 0);
-  expect(listBox.height).toBeCloseTo(36, 0);
-  const footer = page
-    .getByTestId("collect-detail-panel")
-    .locator("[data-collect-detail-strip-actions]");
-  const footerBox = (await footer.boundingBox())!;
-  // Supporting actions remain compact and right-aligned; only phone Connect fills a row.
-  expect(listBox.x + listBox.width).toBeCloseTo(
-    footerBox.x + footerBox.width,
-    0
-  );
-  expect(reviewBox.width).toBeLessThan(150);
-  expect(listBox.width).toBeLessThan(90);
-  if (Math.abs(reviewBox.y - listBox.y) < 1) {
-    expect(listBox.x - reviewBox.x - reviewBox.width).toBeCloseTo(4, 0);
-  } else {
-    expect(reviewBox.x + reviewBox.width).toBeCloseTo(
-      footerBox.x + footerBox.width,
-      0
-    );
-  }
-  expect(connectBox.x).toBeCloseTo(footerBox.x, 0);
-  if (viewportWidth < 480) {
-    expect(connectBox.width).toBeCloseTo(footerBox.width, 0);
-    expect(reviewBox.y).toBeGreaterThanOrEqual(
-      connectBox.y + connectBox.height + 8
-    );
-  } else {
-    expect(connectBox.width).toBeLessThan(170);
-  }
+  await expect(
+    panel.getByRole("button", { name: "List", exact: true })
+  ).toHaveCount(0);
+  await expect(
+    panel.getByRole("button", { name: /^Review offers:/ })
+  ).toHaveCount(0);
+  await expect(more).toHaveCSS("background-color", "rgb(19, 19, 22)");
   await expect(
     page
       .getByTestId("collect-detail-panel")
       .locator("[data-collect-detail-strip]")
-  ).toHaveCSS("border-top-width", "0px");
-  await expect(
-    panel.getByRole("button", { name: /^Review offers:/ })
-  ).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
-  await expect(
-    panel.getByRole("button", { name: "List", exact: true })
-  ).toHaveCSS("background-color", "rgb(28, 28, 33)");
-  for (const button of [
-    collect,
-    actions.getByRole("button", { name: /^Make an offer:/ }),
-  ]) {
-    await expect(button).toHaveCSS("white-space", "nowrap");
-    // Overflow is contained with an ellipsis; the complete accessible name remains.
-    const label =
-      button === collect
-        ? actions
-            .getByRole("button", { name: /^Collect [0-9]/ })
-            .locator(":scope > span")
-        : button;
-    await expect(label).toHaveCSS("overflow", "hidden");
-    await expect(label).toHaveCSS("text-overflow", "ellipsis");
+  ).toHaveCount(0);
+  if (actionsBox.width < 420) {
+    expect(connectBox.width).toBeCloseTo(actionsBox.width, 0);
+  } else {
+    expect(connectBox.width).toBeLessThan(170);
   }
+  await expect(collect).toHaveCSS("white-space", "nowrap");
+  const offer = actions.getByRole("button", { name: /^Make an offer:/ });
+  await expect(offer).toHaveCSS("white-space", "nowrap");
+  await expect(offer).toHaveCSS("overflow", "hidden");
+  await expect(offer).toHaveCSS("text-overflow", "ellipsis");
   const guidance = page
     .getByTestId("collect-detail-panel")
     .locator("[data-collect-connection-header] [role='status']");
   const guidanceBox = (await guidance.boundingBox())!;
-  expect(footerBox.y).toBeGreaterThanOrEqual(
-    guidanceBox.y + guidanceBox.height + 12
-  );
-  expect(footerBox.x).toBeCloseTo(actionsBox.x, 0);
-  expect(footerBox.width).toBeCloseTo(actionsBox.width, 0);
+  expect(guidanceBox.y + guidanceBox.height).toBeLessThan(collectBox.y);
+  expect(guidanceBox.x).toBeCloseTo(actionsBox.x, 0);
+  // Wallet guidance remains adjacent to its existing Connect action.
+  if (Math.abs(connectBox.y - guidanceBox.y) > 12) {
+    expect(connectBox.y).toBeGreaterThanOrEqual(
+      guidanceBox.y + guidanceBox.height + 12
+    );
+  }
 }
 
 async function expectNavigation(page: Page, name: string) {
@@ -243,12 +237,11 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
       });
       const reviewOffers = page
         .getByTestId("collect-detail-panel")
-        .getByRole("button", {
-          name: /^Review offers:/,
-        });
-      // The same review flow is now reached directly from the supporting strip.
+        .getByRole("button", { name: /^More trading actions for/ });
+      // The same review flow is reached through the existing keyboard-accessible menu.
       await reviewOffers.focus();
       await reviewOffers.press("Enter");
+      await page.getByRole("menuitem", { name: /^Review offers:/ }).click();
       const reviewDialog = page.getByRole("dialog");
       await expect(reviewDialog.getByRole("heading")).toBeVisible();
       await expect(
@@ -326,7 +319,9 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
       const buttons = sticky.getByRole("button");
       const collectBounds = (await buttons.first().boundingBox())!;
       const offerBounds = (await buttons.last().boundingBox())!;
-      expect(collectBounds.width).toBeCloseTo(offerBounds.width, 0);
+      expect(collectBounds.width).toBeGreaterThanOrEqual(offerBounds.width - 1);
+      expect(offerBounds.width).toBeGreaterThanOrEqual(44);
+      await expectFullCollectLabel(buttons.first());
       await expectNoHorizontalOverflow(page);
     }
     await page.setViewportSize({ width: 1024, height: phoneViewport.height });
@@ -402,7 +397,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     ).toBeVisible();
   });
 
-  test("keeps Meme trading actions side by side and clear of the desktop rail", async ({
+  test("keeps Meme Collect labels complete and actions clear of the desktop rail", async ({
     page,
   }, info) => {
     await gotoReady(page, "/the-memes/1");
@@ -412,7 +407,10 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     const stickyCollect = page
       .getByTestId("collect-sticky-actions")
       .locator('button[type="submit"]');
-    for (const width of [320, 360, 375, 390, 430, 768, 1023, 1024, 1440]) {
+    for (const width of [
+      320, 359, 360, 375, 390, 399, 400, 430, 479, 480, 639, 640, 767, 768,
+      1023, 1024, 1052, 1088, 1100, 1200, 1280, 1440, 1680,
+    ]) {
       await page.setViewportSize({ width, height: 900 });
       await expectTradingPanelLayout(page);
       await expectNoHorizontalOverflow(page);
@@ -440,6 +438,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
         const stickyOffer = sticky.getByRole("button", {
           name: /^Make an offer:/,
         });
+        await expectFullCollectLabel(stickyCollect);
         await expect(stickyOffer).toHaveCSS("overflow", "hidden");
         await expect(stickyOffer).toHaveCSS("text-overflow", "ellipsis");
         const sidebar = page.getByLabel("Primary sidebar", { exact: true });
@@ -465,97 +464,165 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     }
   });
 
-  test("keeps one Meme trading placeholder throughout initial loading", async ({
-    page,
-  }, info) => {
-    let releaseAsset!: () => void;
-    let releaseOrders!: () => void;
-    let releaseCapabilities!: () => void;
-    const assetGate = new Promise<void>((resolve) => {
-      releaseAsset = resolve;
-    });
-    const ordersGate = new Promise<void>((resolve) => {
-      releaseOrders = resolve;
-    });
-    const capabilitiesGate = new Promise<void>((resolve) => {
-      releaseCapabilities = resolve;
-    });
-    let ordersRequested = false;
-    let capabilitiesRequested = false;
-    await page.route("**/api/collect/assets**", async (route) => {
-      await assetGate;
-      await route.continue();
-    });
-    await page.route("**/api/market/orders**", async (route) => {
-      ordersRequested = true;
-      await ordersGate;
-      await route.continue();
-    });
-    await page.route("**/api/collect/capabilities", async (route) => {
-      capabilitiesRequested = true;
-      await capabilitiesGate;
-      await route.continue();
-    });
-    try {
-      await gotoReady(page, "/the-memes/1");
-      const panel = page.getByTestId("collect-detail-panel");
-      const loading = page
-        .getByTestId("collect-detail-panel")
-        .locator("[data-collect-detail-loading]");
-      await expect(loading).toBeVisible();
-      await page.evaluate(() => document.fonts.ready);
-      const initialBox = (await panel.boundingBox())!;
-      const expectStableLoading = async () => {
+  for (const listed of [true, false]) {
+    test(`keeps one Meme trading placeholder throughout initial loading (${listed ? "listed" : "unlisted"})`, async ({
+      page,
+    }, info) => {
+      let releaseAsset!: () => void;
+      let releaseOrders!: () => void;
+      let releaseCapabilities!: () => void;
+      const assetGate = new Promise<void>((resolve) => {
+        releaseAsset = resolve;
+      });
+      const ordersGate = new Promise<void>((resolve) => {
+        releaseOrders = resolve;
+      });
+      const capabilitiesGate = new Promise<void>((resolve) => {
+        releaseCapabilities = resolve;
+      });
+      let ordersRequested = false;
+      let capabilitiesRequested = false;
+      await page.route("**/api/collect/assets**", async (route) => {
+        await assetGate;
+        await route.continue();
+      });
+      await page.route("**/api/market/orders**", async (route) => {
+        ordersRequested = true;
+        await ordersGate;
+        if (
+          !listed &&
+          new URL(route.request().url()).pathname === "/api/market/orders"
+        ) {
+          await route.fulfill({ json: { orders: [], next: null } });
+        } else {
+          await route.continue();
+        }
+      });
+      await page.route("**/api/collect/capabilities", async (route) => {
+        capabilitiesRequested = true;
+        await capabilitiesGate;
+        await route.continue();
+      });
+      try {
+        await gotoReady(page, "/the-memes/1");
+        const panel = page.getByTestId("collect-detail-panel");
+        const loading = page
+          .getByTestId("collect-detail-panel")
+          .locator("[data-collect-detail-loading]");
         await expect(loading).toBeVisible();
-        await expect(
-          loading.getByText("Loading this artwork…", { exact: true })
-        ).toBeAttached();
-        await expect(
-          panel.getByRole("button", {
-            name: "View listings & offers",
-            exact: true,
-          })
-        ).toHaveCount(1);
-        await expect(
-          panel.getByRole("button", { name: /^Make an offer:/ })
-        ).toHaveCount(0);
-        await expect(
-          panel.getByRole("button", { name: /^Review offers:/ })
-        ).toHaveCount(0);
-        await expect(
-          panel.getByRole("button", { name: "Connect wallet", exact: true })
-        ).toHaveCount(0);
-        await expect(page.getByTestId("collect-sticky-actions")).toHaveCount(0);
-        expect((await panel.boundingBox())!.height).toBeCloseTo(
-          initialBox.height,
-          0
+        await page.evaluate(() => document.fonts.ready);
+        const viewport = page.viewportSize()!;
+        const widths = [320, 360, 375, 390, 430, 768, 1023, 1024, 1440];
+        for (const width of widths) {
+          await page.setViewportSize({ width, height: viewport.height });
+          const rows = page
+            .getByTestId("collect-detail-panel")
+            .locator('[data-collect-detail-loading] > [aria-hidden="true"]');
+          await expect(rows).toHaveCount(3);
+          const textBox = (await rows.nth(0).boundingBox())!;
+          const connectBox = (await rows.nth(1).boundingBox())!;
+          const actionsBox = (await rows.nth(2).boundingBox())!;
+          const panelBox = (await panel.boundingBox())!;
+          expect(connectBox.y - textBox.y - textBox.height).toBeCloseTo(12, 0);
+          expect(actionsBox.y - connectBox.y - connectBox.height).toBeCloseTo(
+            12,
+            0
+          );
+          expect(
+            panelBox.y + panelBox.height - actionsBox.y - actionsBox.height
+          ).toBeCloseTo(17, 0);
+        }
+        await page.setViewportSize(viewport);
+        const initialBox = (await panel.boundingBox())!;
+        const expectStableLoading = async () => {
+          await expect(loading).toHaveCount(1);
+          await expect(loading).toBeVisible();
+          await expect(
+            loading.getByText("Loading this artwork…", { exact: true })
+          ).toBeAttached();
+          await expect(
+            page.getByRole("button", {
+              name: "View listings & offers",
+              exact: true,
+            })
+          ).toHaveCount(1);
+          await expect(
+            panel.getByRole("button", { name: /^Make an offer:/ })
+          ).toHaveCount(0);
+          await expect(
+            panel.getByRole("button", { name: /^Review offers:/ })
+          ).toHaveCount(0);
+          await expect(
+            panel.getByRole("button", { name: "Connect wallet", exact: true })
+          ).toHaveCount(0);
+          await expect(page.getByTestId("collect-sticky-actions")).toHaveCount(
+            0
+          );
+          expect((await panel.boundingBox())!.height).toBeCloseTo(
+            initialBox.height,
+            0
+          );
+        };
+        await expectStableLoading();
+        await panel.screenshot({
+          path: info.outputPath("trading-loading.png"),
+        });
+        releaseAsset();
+        await expect
+          .poll(() => ordersRequested && capabilitiesRequested)
+          .toBe(true);
+        await expectStableLoading();
+        const ordersResponse = page.waitForResponse(
+          (response) =>
+            new URL(response.url()).pathname === "/api/market/orders" &&
+            response.ok()
         );
-      };
-      await expectStableLoading();
-      await panel.screenshot({ path: info.outputPath("trading-loading.png") });
-      releaseAsset();
-      await expect
-        .poll(() => ordersRequested && capabilitiesRequested)
-        .toBe(true);
-      await expectStableLoading();
-      const ordersResponse = page.waitForResponse(
-        (response) =>
-          new URL(response.url()).pathname === "/api/market/orders" &&
-          response.ok()
-      );
-      releaseOrders();
-      await ordersResponse;
-      await expectStableLoading();
-      releaseCapabilities();
-      await expect(loading).toHaveCount(0);
-      await expectTradingPanelLayout(page);
-      await expectNoHorizontalOverflow(page);
-    } finally {
-      releaseAsset();
-      releaseOrders();
-      releaseCapabilities();
-    }
-  });
+        releaseOrders();
+        await ordersResponse;
+        await expectStableLoading();
+        releaseCapabilities();
+        await expect(loading).toHaveCount(0);
+        if (listed) {
+          await expectTradingPanelLayout(page);
+        } else {
+          await expect(
+            panel.getByText("This artwork is not currently listed.", {
+              exact: true,
+            })
+          ).toBeVisible();
+          await expect(
+            panel.getByRole("button", { name: /^Collect/ })
+          ).toHaveCount(0);
+        }
+        for (const width of widths) {
+          await page.setViewportSize({ width, height: viewport.height });
+          // Loading keeps its reserve, but resolved controls must not retain a
+          // blank footer (especially for the shorter connected-wallet states).
+          await expect
+            .poll(async () => {
+              const panelBox = (await panel.boundingBox())!;
+              const actionsBox = (await panel
+                .getByTestId("collect-inline-actions")
+                .boundingBox())!;
+              return (
+                panelBox.y + panelBox.height - actionsBox.y - actionsBox.height
+              );
+            })
+            .toBeCloseTo(17, 0);
+          await expectNoHorizontalOverflow(page);
+          if (width === 360 || width === 1024) {
+            await panel.screenshot({
+              path: info.outputPath(`trading-loaded-${width}.png`),
+            });
+          }
+        }
+      } finally {
+        releaseAsset();
+        releaseOrders();
+        releaseCapabilities();
+      }
+    });
+  }
 
   test("fills the Meme action row when no eligible listing is available", async ({
     page,
@@ -581,15 +648,53 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
       panel.getByRole("button", { name: "List", exact: true })
     ).toBeVisible();
     await expect(
-      panel.getByRole("button", { name: /^Review offers:/ })
+      panel.getByRole("button", { name: /^More trading actions for/ })
     ).toBeVisible();
-    for (const width of [320, 360, 375, 390, 430, 768, 1023, 1024, 1440]) {
+    for (const width of [
+      320, 359, 360, 375, 390, 399, 400, 430, 479, 480, 639, 640, 767, 768,
+      1023, 1024, 1052, 1088, 1100, 1200, 1280, 1440, 1680,
+    ]) {
       await page.setViewportSize({ width, height: 900 });
-      const bounds = (await row.boundingBox())!;
+      const bounds = (await page
+        .getByTestId("collect-detail-panel")
+        .locator("[data-collect-action-group]")
+        .boundingBox())!;
       const offerBounds = (await offer.boundingBox())!;
       expect(offerBounds.x).toBeCloseTo(bounds.x, 0);
-      expect(offerBounds.width).toBeCloseTo(bounds.width, 0);
       expect(offerBounds.height).toBeCloseTo(44, 0);
+      const listBounds = (await row
+        .getByRole("button", { name: "List", exact: true })
+        .boundingBox())!;
+      const moreBounds = (await row
+        .getByRole("button", { name: /^More trading actions for/ })
+        .boundingBox())!;
+      expect(listBounds.y).toBeCloseTo(moreBounds.y, 0);
+      expect(moreBounds.x - listBounds.x - listBounds.width).toBeCloseTo(8, 0);
+      expect(listBounds.y).toBeCloseTo(offerBounds.y, 0);
+      const listContentWidth = await row
+        .getByRole("button", { name: "List", exact: true })
+        .evaluate((button) => {
+          const range = document.createRange();
+          range.selectNodeContents(button);
+          const styles = getComputedStyle(button);
+          return (
+            range.getBoundingClientRect().width +
+            Number.parseFloat(styles.paddingLeft) +
+            Number.parseFloat(styles.paddingRight) +
+            Number.parseFloat(styles.borderLeftWidth) +
+            Number.parseFloat(styles.borderRightWidth)
+          );
+        });
+      expect(listBounds.width).toBeCloseTo(listContentWidth, 0);
+      expect(offerBounds.width).toBeCloseTo(
+        bounds.width - listBounds.width - moreBounds.width - 16,
+        0
+      );
+      expect(listBounds.x - offerBounds.x - offerBounds.width).toBeCloseTo(
+        8,
+        0
+      );
+      expect(moreBounds.width).toBeCloseTo(44, 0);
       await expectNoHorizontalOverflow(page);
     }
     await offer.click();
@@ -602,6 +707,21 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     ).toBeDisabled();
     await page.keyboard.press("Escape");
     await expect(offer).toBeFocused();
+    const more = panel.getByRole("button", {
+      name: /^More trading actions for/,
+    });
+    await more.click();
+    await page.getByRole("menuitem", { name: /^Review offers:/ }).click();
+    await expect(
+      dialog.getByText("No executable orders were returned for this artwork.", {
+        exact: true,
+      })
+    ).toBeVisible();
+    await expect(
+      dialog.getByRole("button", { name: "Review exact terms", exact: true })
+    ).toBeDisabled();
+    await page.keyboard.press("Escape");
+    await expect(more).toBeFocused();
   });
 
   defineCollectorsLeaderboardTests();

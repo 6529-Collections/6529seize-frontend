@@ -183,17 +183,18 @@ function InlineTradeForm({
         <CollectDetailHeader>
           <p
             role={props.ordersFailed ? "alert" : "status"}
-            className="tw-m-0 tw-text-[13px] tw-leading-[18px] tw-text-iron-300"
+            className="tw-m-0 tw-text-xs tw-text-iron-500"
           >
             {noInlineOrder}
           </p>
         </CollectDetailHeader>
-        {props.secondaryActions !== undefined &&
-          props.secondaryActions !== null && (
-            <CollectDetailActionRow>
-              {props.secondaryActions}
-            </CollectDetailActionRow>
-          )}
+        {((props.secondaryActions !== undefined &&
+          props.secondaryActions !== null) ||
+          Boolean(props.supportingActions)) && (
+          <CollectDetailActionRow supportingActions={props.supportingActions}>
+            {props.secondaryActions}
+          </CollectDetailActionRow>
+        )}
       </div>
     );
 
@@ -223,6 +224,7 @@ function InlineTradeForm({
       loading={props.preparing}
       error={props.error}
       secondaryActions={props.secondaryActions}
+      supportingActions={props.supportingActions}
       onChange={inlineDraftChange}
       onPrepare={props.onPrepare}
       onSplitDelivery={props.onSplitDelivery}
@@ -358,36 +360,15 @@ export default function CollectTradeControllerForm(
     />
   );
 
-  const hasSupportingActions = Boolean(props.supportingActions);
-  const stripActions = (
-    <div
-      data-collect-detail-strip-actions
-      className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-end tw-gap-x-1 tw-gap-y-2"
-    >
-      {connectionHeader && connectWalletAction}
-      {hasSupportingActions && (
-        <div data-collect-detail-other-actions className="tw-contents">
-          {props.supportingActions}
-        </div>
-      )}
-    </div>
-  );
   const formContent =
-    hasSupportingActions || connectionHeader ? (
-      <div>
+    Boolean(detailLayout) && props.inlineBuy ? (
+      <div className="tw-space-y-4">
+        {connectionHeader && (
+          <CollectConnectionPrompt message={props.disabledReason}>
+            {connectWalletAction}
+          </CollectConnectionPrompt>
+        )}
         {tradeForm}
-        <div
-          data-collect-detail-strip
-          className="-tw-mx-4 -tw-mb-4 tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-rounded-b-[11px] tw-bg-iron-950 tw-px-4 tw-py-3"
-        >
-          {connectionHeader && (
-            <CollectConnectionPrompt message={props.disabledReason}>
-              {null}
-            </CollectConnectionPrompt>
-          )}
-          {/* Keep action state mounted when connection guidance changes. */}
-          {stripActions}
-        </div>
       </div>
     ) : (
       tradeForm
