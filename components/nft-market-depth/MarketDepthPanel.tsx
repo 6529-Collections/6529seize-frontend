@@ -524,7 +524,7 @@ export default function MarketDepthPanel({
               </button>
             )}
           </h2>
-          <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2.5 tw-gap-y-0.5">
+          <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-1 tw-gap-y-0.5">
             <p
               hidden={!open}
               className="tw-m-0 tw-text-meta tw-leading-5 tw-text-iron-400"
