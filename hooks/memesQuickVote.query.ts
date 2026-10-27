@@ -23,7 +23,7 @@ export const getMemesQuickVoteUndiscoveredDropQueryKey = ({
   [
     MEMES_QUICK_VOTE_UNDISCOVERED_DROP_QUERY_KEY,
     {
-      context_profile: contextProfile ?? null,
+      context_profile: contextProfile?.trim() ?? null,
       proxyId: proxyId ?? null,
       sessionId,
       skip,
@@ -57,7 +57,18 @@ export const updateMemesQuickVoteCachedDrop = (
   drop: ApiDrop,
   contextProfile: string | null | undefined
 ): void => {
-  if (!contextProfile) return;
+  if (!contextProfile?.trim()) return;
+  const footerKey = getMemesQuickVoteUndiscoveredDropQueryKey({
+    contextProfile,
+    proxyId: null,
+    sessionId: 0,
+    skip: 0,
+    waveId: drop.wave.id,
+  });
+  const replacesFooter =
+    queryClient.getQueryData<ApiUndiscoveredDrop>(footerKey)?.drop?.id ===
+    drop.id;
+  // Quick vote is unavailable to proxy sessions; never update their cache.
   queryClient.setQueriesData<ApiUndiscoveredDrop>(
     {
       queryKey: [
@@ -71,4 +82,12 @@ export const updateMemesQuickVoteCachedDrop = (
     (current) =>
       current?.drop?.id === drop.id ? { ...current, drop } : current
   );
+  if (replacesFooter) {
+    void queryClient
+      .invalidateQueries(
+        { queryKey: footerKey, exact: true, refetchType: "active" },
+        { cancelRefetch: false }
+      )
+      .catch(() => undefined);
+  }
 };

@@ -16,6 +16,7 @@ const fetchMock = jest.mocked(commonApiFetch);
 const drop = (id: string, rating = 0) =>
   ({
     id,
+    wave: { id: "memes" },
     context_profile_context: { rating, max_rating: 1000, min_rating: 0 },
   }) as ApiDrop;
 const response = (id: string | null, count = 10): ApiUndiscoveredDrop => ({
@@ -342,5 +343,24 @@ it("limits other-surface rating updates to the authenticated profile cache", () 
     client.getQueryData<ApiUndiscoveredDrop>(key("voter", "proxy"))?.drop
       ?.context_profile_context?.rating
   ).toBe(0);
+  client.clear();
+});
+
+it("normalizes cache profile keys and invalidates a retired footer candidate", () => {
+  const client = new QueryClient();
+  const key = getMemesQuickVoteUndiscoveredDropQueryKey({
+    contextProfile: " voter ",
+    proxyId: null,
+    sessionId: 0,
+    skip: 0,
+    waveId: "memes",
+  });
+  client.setQueryData(key, response("first"));
+  updateMemesQuickVoteCachedDrop(client, drop("first", 100), "voter");
+  expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+  expect(
+    client.getQueryData<ApiUndiscoveredDrop>(key)?.drop?.context_profile_context
+      ?.rating
+  ).toBe(100);
   client.clear();
 });

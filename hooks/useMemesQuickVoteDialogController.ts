@@ -10,6 +10,7 @@ export type MemesQuickVoteDialogState = Pick<
   UseMemesQuickVoteQueueResult,
   | "activeDrop"
   | "hasDiscoveryError"
+  | "submissionError"
   | "isExhausted"
   | "isRestartingRound"
   | "leftThisRoundCount"
@@ -103,6 +104,7 @@ export const useMemesQuickVoteDialogController =
       dialogState: {
         activeDrop: quickVoteQueue.activeDrop,
         hasDiscoveryError: quickVoteQueue.hasDiscoveryError,
+        submissionError: quickVoteQueue.submissionError,
         isExhausted: quickVoteQueue.isExhausted,
         isRestartingRound: quickVoteQueue.isRestartingRound,
         isOpen: isQuickVoteOpen,

@@ -366,7 +366,7 @@ for (const width of [375, 390, 768, 1024, 1440]) {
       await expect(
         dialog.getByRole("button", { name: /^Vote / })
       ).toBeEnabled();
-      const artwork = dialog.locator("img").first();
+      const artwork = dialog.getByRole("img").first();
       await expect(artwork).toBeVisible();
       await expect
         .poll(() =>
@@ -455,6 +455,25 @@ for (const width of [375, 390, 768, 1024, 1440]) {
       await expect(
         dialog.getByRole("button", { name: "Skip", exact: true })
       ).toBeEnabled();
+      await page.route("**/api/drops/*/ratings", (route) =>
+        route.fulfill({
+          status: 400,
+          json: { error: "Voting is closed in this wave" },
+        })
+      );
+      await dialog.getByRole("button", { name: /^Vote / }).click();
+      // Native dialogs obscure global toasts. Rejections must be announced
+      // within the dialog, with the original voting controls restored.
+      await expect(dialog.getByRole("alert")).toHaveText(
+        "Voting is closed in this wave"
+      );
+      await expect(dialog.getByRole("alert")).toBeVisible();
+      await expect(
+        dialog.getByRole("button", { name: /^Vote / })
+      ).toBeEnabled();
+      await page.screenshot({
+        path: testInfo.outputPath("quick-vote-rejected.png"),
+      });
       await close.click();
       await expect(dialog).toBeHidden();
       await expect(trigger).toBeFocused();

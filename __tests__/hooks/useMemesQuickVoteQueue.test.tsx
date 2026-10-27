@@ -3,6 +3,7 @@ import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { useMemesWaveFooterStats } from "@/hooks/useMemesWaveFooterStats";
 import { useMemesQuickVoteQueue } from "@/hooks/useMemesQuickVoteQueue";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -400,6 +401,9 @@ describe("useMemesQuickVoteQueue", () => {
     expect(result.current.leftThisRoundCount).toBe(2);
     expect(result.current.uncastPower).toBe(5000);
     expect(result.current.activeDrop).not.toBeNull();
+    expect(result.current.submissionError).toBe(
+      "Voting is closed in this wave"
+    );
   });
 
   it("updates unrated count only for a vote, while skip updates the round count", async () => {
@@ -422,5 +426,40 @@ describe("useMemesQuickVoteQueue", () => {
     expect(result.current.leftThisRoundCount).toBe(1);
     expect(result.current.uncastPower).toBe(5000);
     unmount();
+  });
+  it("refreshes the footer when a pending vote settles after the dialog closes", async () => {
+    const first = createDrop({ id: "first", serialNo: 2 });
+    const next = createDrop({ id: "next", serialNo: 1 });
+    currentUndiscoveredDrops = [first, next];
+    leftThisRoundCount = totalCount = 2;
+    const pending = createDeferred<ApiDrop>();
+    commonApiPostMock.mockReturnValueOnce(pending.promise);
+    const { result, rerender } = renderHook(
+      ({ enabled }) => ({
+        queue: useMemesQuickVoteQueue({ sessionId: 1, enabled }),
+        footer: useMemesWaveFooterStats(),
+      }),
+      { wrapper: createWrapper(), initialProps: { enabled: true } }
+    );
+    await waitFor(() => expect(result.current.queue.nextDrop?.id).toBe("next"));
+    await act(async () =>
+      result.current.queue.submitVote(result.current.queue.activeDrop!, 100)
+    );
+    rerender({ enabled: false });
+    const before = commonApiFetchMock.mock.calls.length;
+    currentUndiscoveredDrops = [next];
+    leftThisRoundCount = totalCount = 1;
+    await act(async () =>
+      pending.resolve({
+        ...first,
+        context_profile_context: {
+          ...first.context_profile_context,
+          rating: 100,
+        },
+      })
+    );
+    await waitFor(() => expect(result.current.footer.unratedCount).toBe(1));
+    expect(result.current.footer.isAvailable).toBe(true);
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(before + 1);
   });
 });

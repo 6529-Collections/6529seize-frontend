@@ -96,8 +96,9 @@ participatory submissions in the configured memes wave.
   `Couldn't load quick vote` and offers `Try again`.
 - At the end of a skipped round, quick vote waits for the next discovery request
   before showing the next round. Slow requests can take several seconds.
-- If a vote submission fails, quick vote shows an error toast, refreshes the
-  queue state, and lets the user continue from the refreshed result.
+- If a vote submission fails, quick vote shows the error inside the open dialog
+  as well as in a toast, restores the counts and voting power, and refreshes the
+  queue. The inline message clears when you vote or skip again.
 - If the trigger is missing, first confirm the current surface and state:
   quick vote is hidden when there are no unrated memes left, no remaining power
   left, or the user is outside the supported waves surfaces.

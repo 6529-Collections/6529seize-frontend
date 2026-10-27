@@ -50,6 +50,7 @@ type UseMemesQuickVoteQueueOptions = {
 export type UseMemesQuickVoteQueueResult = {
   readonly activeDrop: ExtendedDrop | null;
   readonly hasDiscoveryError: boolean;
+  readonly submissionError: string | null;
   readonly isExhausted: boolean;
   readonly isLoading: boolean;
   readonly isRestartingRound: boolean;
@@ -82,32 +83,35 @@ const useInvalidateQuickVoteUndiscoveredDrop = ({
 }) =>
   useCallback(() => {
     queryClient
-      .invalidateQueries({
-        refetchType: "none",
-        predicate: (query) => {
-          if (
-            !Array.isArray(query.queryKey) ||
-            query.queryKey[0] !==
-              MEMES_QUICK_VOTE_UNDISCOVERED_DROP_QUERY_KEY ||
-            typeof query.queryKey[1] !== "object" ||
-            query.queryKey[1] === null
-          ) {
-            return false;
-          }
+      .invalidateQueries(
+        {
+          refetchType: "active",
+          predicate: (query) => {
+            if (
+              !Array.isArray(query.queryKey) ||
+              query.queryKey[0] !==
+                MEMES_QUICK_VOTE_UNDISCOVERED_DROP_QUERY_KEY ||
+              typeof query.queryKey[1] !== "object" ||
+              query.queryKey[1] === null
+            ) {
+              return false;
+            }
 
-          const undiscoveredQuery = query.queryKey[1] as {
-            readonly context_profile?: string | null;
-            readonly proxyId?: string | null;
-            readonly waveId?: string | null;
-          };
+            const undiscoveredQuery = query.queryKey[1] as {
+              readonly context_profile?: string | null;
+              readonly proxyId?: string | null;
+              readonly waveId?: string | null;
+            };
 
-          return (
-            undiscoveredQuery.context_profile === (contextProfile ?? null) &&
-            undiscoveredQuery.proxyId === (proxyId ?? null) &&
-            undiscoveredQuery.waveId === waveId
-          );
+            return (
+              undiscoveredQuery.context_profile === (contextProfile ?? null) &&
+              undiscoveredQuery.proxyId === (proxyId ?? null) &&
+              undiscoveredQuery.waveId === waveId
+            );
+          },
         },
-      })
+        { cancelRefetch: false }
+      )
       .catch(() => {
         // Query invalidation is best-effort. The next footer read will recover.
       });
@@ -121,6 +125,7 @@ const useMemesQuickVoteQueueSubmission = ({
   setAndPersistRecentAmounts,
   setOptimisticRemainingVotePowerState,
   setToast,
+  setSubmissionError,
   stateKey,
 }: {
   readonly invalidateQuickVoteUndiscoveredDrop: () => void;
@@ -134,10 +139,17 @@ const useMemesQuickVoteQueueSubmission = ({
     SetStateAction<KeyedOptimisticRemainingVotePowerState>
   >;
   readonly setToast: ContextType<typeof AuthContext>["setToast"];
+  readonly setSubmissionError: Dispatch<
+    SetStateAction<{
+      readonly key: string;
+      readonly message: string;
+    } | null>
+  >;
   readonly stateKey: string;
 }) =>
   useMemesQuickVoteSubmit({
-    onRatingFailure: (drop, amount, type) => {
+    onRatingFailure: (drop, amount, type, message) => {
+      setSubmissionError({ key: stateKey, message });
       updatePendingDropIds(drop.id, false);
       session.restoreFailedDrop(drop);
 
@@ -159,6 +171,7 @@ const useMemesQuickVoteQueueSubmission = ({
       invalidateQuickVoteUndiscoveredDrop();
     },
     onRatingQueued: (drop, amount, type) => {
+      setSubmissionError(null);
       updatePendingDropIds(drop.id, true);
       session.advanceVisibleDrop(drop, type === "vote");
 
@@ -216,6 +229,10 @@ export const useMemesQuickVoteQueue = ({
       ? memesWaveId
       : null;
   const stateKey = `${waveId ?? ""}:${contextProfile ?? ""}:${proxyId ?? ""}`;
+  const [submissionError, setSubmissionError] = useState<{
+    readonly key: string;
+    readonly message: string;
+  } | null>(null);
   const [
     optimisticRemainingVotePowerState,
     setOptimisticRemainingVotePowerState,
@@ -262,6 +279,7 @@ export const useMemesQuickVoteQueue = ({
       setAndPersistRecentAmounts,
       setOptimisticRemainingVotePowerState,
       setToast,
+      setSubmissionError,
       stateKey,
     });
 
@@ -311,6 +329,8 @@ export const useMemesQuickVoteQueue = ({
   return {
     activeDrop,
     hasDiscoveryError: session.sessionState.hasDiscoveryError,
+    submissionError:
+      submissionError?.key === stateKey ? submissionError.message : null,
     isExhausted:
       session.sessionState.isExhausted ||
       effectiveOptimisticRemainingPower === 0,

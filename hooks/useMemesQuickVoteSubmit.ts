@@ -40,7 +40,8 @@ type UseMemesQuickVoteSubmitOptions = {
   readonly onRatingFailure: (
     drop: ExtendedDrop,
     amount: number,
-    type: QueuedRating["type"]
+    type: QueuedRating["type"],
+    message: string
   ) => void;
   readonly onRatingQueued: (
     drop: ExtendedDrop,
@@ -178,17 +179,16 @@ const flushMemesQuickVoteRatings = async ({
           queuedRating.type
         );
       } catch (error) {
-        setToast({
-          message: getQueuedRatingErrorMessage({
-            error,
-            type: queuedRating.type,
-          }),
-          type: "error",
+        const message = getQueuedRatingErrorMessage({
+          error,
+          type: queuedRating.type,
         });
+        setToast({ message, type: "error" });
         onRatingFailure(
           queuedRating.drop,
           queuedRating.amount,
-          queuedRating.type
+          queuedRating.type,
+          message
         );
       } finally {
         ratingQueueRef.current.shift();

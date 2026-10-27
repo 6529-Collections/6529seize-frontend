@@ -15,6 +15,7 @@ describe("useMemesQuickVoteDialogController", () => {
     activeDrop: null,
     hasDiscoveryError: false,
     isExhausted: false,
+    submissionError: null,
     isLoading: false,
     isReady: false,
     isRestartingRound: false,

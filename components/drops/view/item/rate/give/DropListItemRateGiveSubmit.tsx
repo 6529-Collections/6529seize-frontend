@@ -48,7 +48,8 @@ export default function DropListItemRateGiveSubmit({
   readonly onSuccessfulRateChange: () => void;
   readonly isMobile?: boolean | undefined;
 }) {
-  const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
+  const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
+    useContext(AuthContext);
   const queryClient = useQueryClient();
   const [mutating, setMutating] = useState<boolean>(false);
   const [clickCount, setClickCount] = useState<number>(0);
@@ -69,7 +70,9 @@ export default function DropListItemRateGiveSubmit({
     onSuccess: (updatedDrop) => {
       onSuccessfulRateChange();
       applyWaveDropVoteUpdate(queryClient, updatedDrop, drop.wave.id, {
-        contextProfile: connectedProfile?.handle,
+        contextProfile: activeProfileProxy
+          ? undefined
+          : connectedProfile?.handle,
       });
       optimisticRollbackRef.current = null;
     },
