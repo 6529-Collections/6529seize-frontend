@@ -32,7 +32,7 @@ export default function CompetitionVoteWithReply({
   const invalid =
     rationale.shouldPostRationale && !rationale.rationaleText.trim();
   const content = (
-    <div className="tw-space-y-3 group-[.is-mini]/inline-vote:tw-col-start-1 group-[.is-mini]/inline-vote:tw-row-start-4 group-[.is-mini]/inline-vote:tw-min-w-0 group-[.is-mini]/inline-vote:has-[textarea]:tw-col-span-2">
+    <div className="group-[.is-mini]/inline-vote:tw-col-span-2 group-[.is-mini]/inline-vote:tw-col-start-1 group-[.is-mini]/inline-vote:tw-row-start-4 group-[.is-mini]/inline-vote:tw-min-w-0">
       <label className="tw-flex tw-min-h-11 tw-w-fit tw-cursor-pointer tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-200">
         <span className="tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-items-center">
           <input
@@ -61,44 +61,58 @@ export default function CompetitionVoteWithReply({
         </span>
         {t(locale, "waves.voteRationale.switchLabel")}
       </label>
-      {rationale.shouldPostRationale && (
-        <p
-          id={publicReplyDescriptionId}
-          className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400"
-        >
-          {t(locale, "waves.voteRationale.publicReplyDescription")}
-        </p>
-      )}
-      {rationale.shouldPostRationale && (
-        <div className="tw-space-y-2">
-          <label
-            htmlFor={fieldId}
-            className="tw-block tw-text-xs tw-font-semibold tw-text-iron-300"
-          >
-            {t(locale, "waves.voteRationale.fieldLabel")}
-          </label>
-          <textarea
-            id={fieldId}
-            rows={4}
-            value={rationale.rationaleText}
-            onChange={(event) =>
-              rationale.handleRationaleTextChange(event.target.value)
-            }
-            aria-invalid={Boolean(invalid)}
-            aria-describedby={invalid ? descriptionId : undefined}
-            className="tw-block tw-w-full tw-resize-y tw-rounded-lg tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 tw-text-iron-100 focus:tw-border-primary-400 focus:tw-outline-none"
-          />
-          {invalid && (
+      <div
+        aria-hidden={!rationale.shouldPostRationale}
+        inert={!rationale.shouldPostRationale}
+        className={`tw-grid tw-transition-[grid-template-rows,opacity] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none ${
+          rationale.shouldPostRationale
+            ? "tw-grid-rows-[1fr] tw-opacity-100"
+            : "tw-grid-rows-[0fr] tw-opacity-0"
+        }`}
+      >
+        <div className="tw-min-h-0 tw-overflow-hidden">
+          <div className="tw-space-y-3 tw-pt-3 group-[.is-mini]/inline-vote:tw-pb-12">
             <p
-              id={descriptionId}
-              role="alert"
-              className="tw-text-sm tw-text-iron-300"
+              id={publicReplyDescriptionId}
+              className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400"
             >
-              {t(locale, "waves.voteRationale.emptyBlockReason")}
+              {t(locale, "waves.voteRationale.publicReplyDescription")}
             </p>
-          )}
+            <div className="tw-space-y-2">
+              <label
+                htmlFor={fieldId}
+                className="tw-block tw-text-xs tw-font-semibold tw-text-iron-300"
+              >
+                {t(locale, "waves.voteRationale.fieldLabel")}
+              </label>
+              <textarea
+                id={fieldId}
+                rows={4}
+                value={rationale.rationaleText}
+                onChange={(event) =>
+                  rationale.handleRationaleTextChange(event.target.value)
+                }
+                aria-invalid={Boolean(invalid)}
+                aria-describedby={invalid ? descriptionId : undefined}
+                className={`tw-block tw-w-full tw-resize-y tw-rounded-lg tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 focus:tw-border-primary-400 focus:tw-outline-none ${
+                  rationale.isUsingGeneratedRationale
+                    ? "tw-text-iron-600"
+                    : "tw-text-iron-100"
+                }`}
+              />
+              {invalid && (
+                <p
+                  id={descriptionId}
+                  role="alert"
+                  className="tw-text-sm tw-text-iron-300"
+                >
+                  {t(locale, "waves.voteRationale.emptyBlockReason")}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
   return (

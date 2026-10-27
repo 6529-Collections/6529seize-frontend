@@ -69,7 +69,9 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
 Artist submissions and participant entries place the vote label and mode switch
 above the input. Credit labels `Available`, `Spent`, and `Remaining` sit side by
 side, with each value beneath its label. `Explain vote` and a smaller `Save vote`
-button share a row until the reply field is expanded. Vote amounts, limits,
+button share a row until the reply field is expanded. The explanation opens and
+closes with a short expand/fade transition, respecting reduced-motion settings.
+The generated reply text stays muted until edited. Vote amounts, limits,
 eligibility, and saving work the same in both input modes.
 
 ## Edge Cases
