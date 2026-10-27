@@ -7,6 +7,11 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The search record covers punctuation-tolerant Wave names across site search,
+sidebar search, composer mentions and the message-search Wave picker. It explains
+all-term matching, partial names, relevance ordering, literal wildcard characters,
+and each surface's existing minimum-length and access rules.
+
 The `profiles.followers-tab` record points to the profile header's Followers
 dialog and private Following list. It covers own-profile authentication and
 proxy restrictions, total counts, pagination, profile navigation, unfollowing,
@@ -33,6 +38,10 @@ from deletion and manual review status.
 The `home.overview` record explains the Coming up full-width vertical card
 list below 768px, keyboard navigation through card links, tablet/desktop grid,
 and drop, profile and wave destinations.
+
+The `waves.artist-submissions-popup` record explains the artist activity icon,
+Active Submissions promise badges, and the distinction between reading a badge,
+opening artwork, and casting a vote.
 
 The `waves.drop.editing` record covers author-only editing, the normal edit
 window, and unlimited editing of the wave's current pinned description drop.
@@ -186,6 +195,17 @@ wider use the sortable table.
 Compact values are presentation only.
 The Listings and Offers record distinguishes direct **Collect** and **Sell**
 actions for one order from the explicit choice among multiple orders at a price.
+The Meme card record places connection guidance first when needed, then Collect
+and Make an offer beside the more-actions menu. Collect keeps its complete label
+and price; Make an offer can shrink. Very narrow panels place Collect on its own
+row above the other controls. When Collect is present, the available List action moves into the menu; without
+Collect it takes the second slot, or Make an offer spans both slots if List is
+unavailable. Review offers remains available in the menu. Delivery controls appear
+below the actions once the required wallet is connected. View listings & offers
+has a separate navigation row below Supply details & rankings. Labels, action
+availability and wallet requirements stay unchanged.
+Tabs and the off-screen action replacement stay sticky below 1024px, matching
+the single-column card layout; selected-listing review retains bottom-bar priority.
 Market browsing facts describe quiet periodic updates while visible and idle,
 paused for expanded order details, a chosen listing or open review as applicable.
 Healthy and empty states have no routine Refresh action; retrieval failures retain
@@ -330,6 +350,17 @@ environment; the help runtime continues to consume `/help-index.json`.
   prerequisite, and result.
 
 ## Source Ownership
+
+The artwork Review offers guidance places that action in the more-actions menu
+on artwork pages. It includes
+the responsive review layout: when a connection is required, wallet guidance and
+Connect wallet share the same top card as Make an offer, before the order list.
+The order list scrolls above quantity and Review exact terms, which remain visible
+at the bottom of the phone sheet and desktop dialog. Connected wallet details remain beside those bottom
+controls. The Meme trading block uses one initial loading placeholder before revealing its controls, without replacing them during background listing refreshes. Order selection and wallet authority remain unchanged.
+
+The NFT activity record describes both wide-screen columns and stacked rows on
+narrow screens, with the same activity information, links, filters and pagination.
 
 The Collect workflow record owns `/collect` and `/collect/orders`, profile-wide
 set scope, direct gift recipients, marketplace review and recovery, observed
@@ -805,3 +836,5 @@ Create Wave and Network Filter omit empty-selection sentences in both tabs while
 preserving limits, errors, warnings, and the bottom criteria summary.
 
 Competition list corrections: My Votes includes only active nonzero votes; archived winner votes remain retained. Winners paginate by win time newest first.
+
+Voting help records use **Explain vote** for public rationale replies in My Votes and voting dialogs. They distinguish sending a reply about a saved vote from posting one after a successful vote, and cover Slider / Numeric entry in competition submission popups. The My Votes record also describes compact phone and tablet rows, 16-pixel side padding, single-line titles and action labels, compact controls with unchanged labels on smaller rows, styled public-reply tooltips, controls that adapt to the available width, and Explain vote beside the amount control on tablet and desktop with the range hint underneath. Desktop controls stay to the right of the artwork and details.

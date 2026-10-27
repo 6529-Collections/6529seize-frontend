@@ -832,15 +832,18 @@ const WAVE_COMPETITION_BADGE_MESSAGES = objectMessages(
 );
 
 const WAVE_VOTE_RATIONALE_MESSAGES = objectMessages("waves.voteRationale", {
-  explain: "Explain",
-  explainAriaLabel: "Reply with vote rationale",
+  explain: "Explain vote",
+  explainAriaLabel: "Explain vote",
+  savedDescription: "Post a public reply in the wave about your saved vote.",
+  publicReplyDescription:
+    "Posts a public reply in the wave after your vote is saved.",
   fieldLabel: "Optional rationale reply",
   fieldDescription:
-    "Editing this text turns on Vote with reply until you choose the switch setting yourself.",
-  switchLabel: "Vote with reply",
+    "Posts a public reply in the wave after your vote is saved. Editing this text turns on Explain vote until you choose the switch setting yourself.",
+  switchLabel: "Explain vote",
   stateOn: "On",
   stateOff: "Off",
-  emptyBlockReason: "Add rationale text or turn Vote with reply off.",
+  emptyBlockReason: "Add rationale text or turn Explain vote off.",
   submitLabel: "Vote + reply",
   postErrorTitle: "Vote saved, but couldn't post your rationale reply.",
   postErrorRetry: "Please try posting the reply again.",
@@ -3490,11 +3493,15 @@ export const EN_US_MESSAGES = {
   "headerShare.connectionNotice.loadingMessage":
     "Creating a one-time connection code.",
   "headerShare.connectionNotice.errorMessage":
-    "We couldn't prepare this device connection. Close this dialog and try again.",
+    "We couldn't prepare this device connection. Use Generate new code to try again.",
   "headerShare.connectionNotice.unauthenticatedMessage":
     "Connect and authenticate your wallet before connecting a device.",
   "headerShare.connectionNotice.cancel": "Cancel",
   "headerShare.connectionNotice.update": "Update",
+  "headerShare.connectionRefresh.ready": "Connection ready",
+  "headerShare.connectionRefresh.action": "Generate new code",
+  "headerShare.connectionRefresh.loading": "Preparing connection…",
+  "headerShare.connectionRefresh.unavailable": "Connection unavailable",
   "headerShare.invalidConnectTarget": "Invalid connection target",
   "headerShare.copy.ariaLabel": "Copy link",
   "headerShare.copy.default": "Copy Link",
@@ -3833,6 +3840,10 @@ export const EN_US_MESSAGES = {
   "theMemes.card.metric.marketCapUnavailable": "Market Cap: N/A",
   "theMemes.card.metric.volume": "Volume ({volumeType}): {value}",
   "theMemes.card.metric.ethValue": "{value} ETH",
+  "theMemes.detail.mobile.readMore": "Read more",
+  "theMemes.detail.mobile.showLess": "Show less",
+  "theMemes.detail.mobile.showProperties": "Show all {count} properties",
+  "theMemes.detail.mobile.fewerProperties": "Show fewer",
   "theMemes.detail.backLink.ariaLabel": "Back to The Memes",
   "theMemes.detail.heading.card": "Card {tokenId}",
   "theMemes.detail.heading.ariaLabel": "Card {tokenId} - {name}",

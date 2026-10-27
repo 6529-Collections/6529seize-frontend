@@ -447,6 +447,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     [animatedAnnouncementRows]
   );
   useRevealActiveSidebarWave({
+    preserveScrollOnInteraction: !isDirectMessage,
     activeParentWaveId: effectiveActiveParentWaveId,
     activeWaveId: navigation.searching ? null : activeWaveId,
     filterKey: navigation.scrollKey,

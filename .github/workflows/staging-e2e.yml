@@ -267,6 +267,24 @@ jobs:
             echo "publication_commit=$(jq -r .publication_commit "$identity_file")"
           } >> "$GITHUB_OUTPUT"
 
+      - name: Use HTTPS Ubuntu archive for browser dependencies
+        run: |
+          # The hosted runner's Azure HTTP mirror can stall apt while the
+          # official HTTPS archive remains reachable. Preserve mirror metadata
+          # and all other configured sources. This is inline because deployed
+          # source may predate a repository-owned setup helper.
+          sudo "$(command -v node)" - /etc/apt/apt-mirrors.txt <<'NODE'
+          const fs = require("node:fs");
+          const mirrorListPath = process.argv[2];
+          if (!fs.existsSync(mirrorListPath)) process.exit(0);
+          const before = fs.readFileSync(mirrorListPath, "utf8");
+          const after = before.replace(
+            /^([ \t]*)http:\/\/azure\.archive\.ubuntu\.com\/ubuntu(\/?)(?=[ \t\r]|$)/gm,
+            "$1https://archive.ubuntu.com/ubuntu$2"
+          );
+          if (after !== before) fs.writeFileSync(mirrorListPath, after);
+          NODE
+
       - name: Install Playwright dependencies
         id: playwright_dependencies_primary
         timeout-minutes: 10
