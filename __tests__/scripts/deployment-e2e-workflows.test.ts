@@ -317,9 +317,12 @@ describe("separate post-deploy E2E", () => {
   describe.each([
     ["staging", stagingE2e],
     ["production", productionE2e],
-  ])("%s dependency installation recovery", (_environment, e2e) => {
+    ["PR", parse("app-pr-ci.yml")],
+  ])("%s dependency installation recovery", (environment, e2e) => {
     const job =
-      e2e.workflow.jobs.readonly ?? e2e.workflow.jobs["staging-packs"];
+      environment === "PR"
+        ? e2e.workflow.jobs["app-checks"]
+        : (e2e.workflow.jobs.readonly ?? e2e.workflow.jobs["staging-packs"]);
     const primary = job.steps.find(
       (step: { id?: string }) => step.id === "playwright_dependencies_primary"
     );
@@ -428,7 +431,9 @@ exit "\${INSTALL_EXIT:-0}"
         expect(primary["timeout-minutes"]).toBe(10);
         expect(retry["timeout-minutes"]).toBe(15);
         expect(retry.if).toBe(
-          "steps.playwright_dependencies_primary.outcome != 'success'"
+          environment === "PR"
+            ? "startsWith(matrix.lane, 'playwright-museum-') && steps.playwright_dependencies_primary.outcome != 'success'"
+            : "steps.playwright_dependencies_primary.outcome != 'success'"
         );
         const result = childProcess.spawnSync(bash, ["-c", verify.run], {
           encoding: "utf8",
