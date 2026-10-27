@@ -3701,18 +3701,29 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       ).toBeLessThan(2);
     };
     await expectCenteredVoteHeader();
-    const creditLabels = ["Available", "Spent", "Remaining"].map((name) =>
-      dialog.getByText(name, { exact: true })
-    );
-    for (const label of creditLabels) await expect(label).toBeVisible();
-    const creditBoxes = await Promise.all(
-      creditLabels.map((label) => label.boundingBox())
-    );
-    expect(creditBoxes.every((box) => box !== null)).toBe(true);
-    expect(
-      Math.max(...creditBoxes.map((box) => box!.y)) -
-        Math.min(...creditBoxes.map((box) => box!.y))
-    ).toBeLessThan(2);
+    const creditSummary = dialog.locator(".is-vote-panel dl:visible");
+    const creditGroups = creditSummary.locator(":scope > div");
+    await expect(creditGroups).toHaveCount(2);
+    await expect(creditGroups.nth(0)).toContainText("remaining");
+    await expect(creditGroups.nth(1)).toContainText(/of.*spent/);
+    for (const label of [
+      "Available credits",
+      "Spent credits",
+      "Remaining credits",
+    ]) {
+      await expect(creditSummary.getByText(label, { exact: true })).toHaveClass(
+        /tw-sr-only/
+      );
+    }
+    const creditBoxes = await Promise.all([
+      creditGroups.nth(0).boundingBox(),
+      creditGroups.nth(1).boundingBox(),
+    ]);
+    for (const box of creditBoxes) {
+      expect(box).not.toBeNull();
+      // The summary can wrap between groups, but each group stays on one line.
+      expect(box!.height).toBeLessThanOrEqual(18);
+    }
     const voteSlider = await dialog.getByRole("slider").first().boundingBox();
     expect(voteSlider).not.toBeNull();
     expect(creditBoxes[0]!.y).toBeGreaterThan(voteSlider!.y);
