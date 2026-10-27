@@ -184,10 +184,10 @@ describe("submissionMetadata", () => {
     });
 
     expect(validation.hasErrors).toBe(false);
-    expect(validation.statusesByKey.title?.length).toBe(255);
-    expect(validation.statusesByKey.description?.length).toBe(8000);
-    expect(validation.statusesByKey.about_artist?.length).toBe(5000);
-    expect(validation.statusesByKey.commentary?.length).toBe(5000);
+    expect(validation.statusesByKey["title"]?.length).toBe(255);
+    expect(validation.statusesByKey["description"]?.length).toBe(8000);
+    expect(validation.statusesByKey["about_artist"]?.length).toBe(5000);
+    expect(validation.statusesByKey["commentary"]?.length).toBe(5000);
   });
 
   it("uses key-specific metadata value limits", () => {
