@@ -3705,7 +3705,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     const creditGroups = creditSummary.locator(":scope > div");
     await expect(creditGroups).toHaveCount(2);
     await expect(creditGroups.nth(0)).toContainText("remaining");
-    await expect(creditGroups.nth(1)).toContainText(/of.*spent/);
+    await expect(creditGroups.nth(1)).toContainText(/of.*credits spent/);
     for (const label of [
       "Available credits",
       "Spent credits",

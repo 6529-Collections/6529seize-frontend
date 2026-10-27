@@ -74,7 +74,7 @@ their own height when an explanation is open. Artist submissions and participant
 entries place the vote label and mode switch above the input. A compact credit
 line below the input shows the remaining balance on the left and spent credits
 out of available credits on the right, for example `679 remaining` and
-`33,591 of 34,270 spent`. On narrow cards it wraps between those two groups;
+`33,591 of 34,270 credits spent`. On narrow cards it wraps between those two groups;
 numbers stay with their words. Full credit labels remain available to screen
 readers. The icon-style `Explain vote` control and compact `Save
 vote` button share the bottom row. The explanation opens above that row, with
