@@ -36,7 +36,7 @@ id "$RUN_AS" >/dev/null 2>&1 || {
   exit 1
 }
 
-for command in base64 curl flock grep jq node sha256sum sudo unzip; do
+for command in base64 curl flock git grep jq node sha256sum sudo unzip; do
   command -v "$command" >/dev/null 2>&1 || {
     echo "Required staging command '$command' is unavailable." >&2
     exit 1
@@ -81,6 +81,10 @@ flock -n 9 || {
   echo "Another instance-local staging deployment is active." >&2
   exit 1
 }
+if [[ "$(sudo -H -u "$RUN_AS" git -C "$REPO_DIR" rev-parse HEAD)" != "$EXPECTED_SHA" ]]; then
+  echo "Refusing to deploy with a checkout that differs from the verified source." >&2
+  exit 1
+fi
 physical_release_root="$(readlink -f "$release_root")"
 release_id="$EXPECTED_SHA-$EXPECTED_DIGEST"
 release_dir="$physical_release_root/releases/$release_id"
@@ -193,6 +197,13 @@ if [[ "$process_kind" != absent ]]; then
     echo "Refusing to deploy without an exact healthy pre-mutation local version." >&2
     exit 1
   }
+  # Branch advancement is safe while a run is active. Replaying an older or
+  # divergent run after a newer runtime is healthy must not roll staging back.
+  if ! sudo -H -u "$RUN_AS" git -C "$REPO_DIR" merge-base \
+    --is-ancestor "$previous_local_version" "$EXPECTED_SHA"; then
+    echo "Refusing to replace healthy staging $previous_local_version with older, divergent, or unverifiable source $EXPECTED_SHA." >&2
+    exit 1
+  fi
 fi
 
 if [[ "$process_kind" == managed && \
