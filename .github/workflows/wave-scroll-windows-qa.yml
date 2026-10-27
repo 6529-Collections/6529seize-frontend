@@ -60,6 +60,7 @@ jobs:
           export SFW_BIN="${SFW_BIN}.exe"
           ./bin/6529 ci
       - name: Test installed Chrome and Edge on Windows
+        timeout-minutes: 20
         run: ./bin/6529 exec playwright test --config=playwright.windows-scroll.config.ts
       - name: Upload screenshots and evidence
         if: always()

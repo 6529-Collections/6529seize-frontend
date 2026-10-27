@@ -3,9 +3,9 @@ import baseConfig from "./playwright.config";
 
 export default defineConfig({
   ...baseConfig,
-  testMatch: "social/wave-loading-sandbox.spec.ts",
-  grep: /automatic scrolling/,
-  timeout: 180000,
+  testMatch: "social/wave-scrollbar-windows.spec.ts",
+  timeout: 240000,
+  maxFailures: 2,
   expect: { timeout: 15000 },
   retries: 0,
   workers: 1,
