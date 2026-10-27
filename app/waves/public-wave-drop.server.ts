@@ -149,7 +149,7 @@ export async function fetchPublicWaveDrop(
       )
     );
     // Do not serialize a partial storm when a part becomes inaccessible.
-    if (extraParts.some((part) => part === null)) return null;
+    if (extraParts.includes(null)) return null;
 
     return {
       id: drop.id,
