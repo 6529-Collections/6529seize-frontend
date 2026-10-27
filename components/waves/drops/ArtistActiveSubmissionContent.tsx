@@ -135,25 +135,29 @@ export const ArtistActiveSubmissionContent: React.FC<
                     </div>
                   </div>
                   <div className="tw-flex tw-flex-1 tw-flex-col tw-justify-between tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-3">
-                    <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between">
-                      <div className="tw-mr-2 tw-min-w-0 tw-flex-1">
-                        {submission.title && (
-                          <p className="tw-mb-0 tw-truncate tw-text-sm tw-font-bold tw-leading-tight tw-text-iron-100">
-                            {submission.title}
-                          </p>
+                    <div className="tw-mb-3">
+                      <div className="tw-flex tw-items-center tw-justify-between">
+                        <div className="tw-mr-2 tw-min-w-0 tw-flex-1">
+                          {submission.title && (
+                            <p className="tw-my-0 tw-truncate tw-text-sm tw-font-bold tw-leading-tight tw-text-iron-100">
+                              {submission.title}
+                            </p>
+                          )}
+                        </div>
+                        {submission.drop && (
+                          <SubmissionPosition drop={submission.drop} />
                         )}
                       </div>
-                      {submission.drop && (
-                        <SubmissionPosition drop={submission.drop} />
+                      {submission.drop?.is_additional_action_promised ===
+                        true && (
+                        <div className="tw-mt-1 tw-flex">
+                          {/* Keep the body tooltip above PreviewModalShell's dialog. */}
+                          <AdditionalActionPromiseBadge
+                            tooltipZIndex={1000002}
+                          />
+                        </div>
                       )}
                     </div>
-                    {submission.drop?.is_additional_action_promised ===
-                      true && (
-                      <div className="tw-mb-3 tw-flex">
-                        {/* Keep the body tooltip above PreviewModalShell's dialog. */}
-                        <AdditionalActionPromiseBadge tooltipZIndex={1000002} />
-                      </div>
-                    )}
                     {submission.drop && (
                       <div className="tw-mb-3">
                         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5">
