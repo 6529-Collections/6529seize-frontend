@@ -29,7 +29,7 @@ export default function CompetitionCredits({
           </div>
         ))}
       </dl>
-      <dl className="tw-m-0 tw-hidden tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-3 tw-gap-y-1 tw-text-[11px] tw-tabular-nums tw-leading-4 group-[.is-vote-panel]/inline-vote:tw-flex @[22rem]/vote:tw-text-xs">
+      <dl className="tw-m-0 tw-hidden tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-3 tw-gap-y-1 tw-text-xs tw-tabular-nums tw-leading-4 group-[.is-vote-panel]/inline-vote:tw-flex @[22rem]/vote:tw-text-[13px]">
         <div className="tw-flex tw-items-baseline tw-gap-1 tw-whitespace-nowrap">
           <dt className="tw-sr-only">{t(locale, "competitions.remaining")}</dt>
           <dd className="tw-m-0 tw-flex tw-items-baseline tw-gap-1">
