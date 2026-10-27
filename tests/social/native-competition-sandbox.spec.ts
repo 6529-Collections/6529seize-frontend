@@ -8974,10 +8974,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await page.getByRole("tab", { name: view, exact: true }).click();
         const badge = page.getByText("Additional Action", { exact: true });
         await expect(badge).toHaveCount(1);
-        const isTouchGrid = isNativeApp && view === "Grid view";
         await expect
           .poll(() => badge.evaluate((element) => element.tagName))
-          .toBe(isTouchGrid ? "SPAN" : "BUTTON");
+          .toBe(isNativeApp ? "SPAN" : "BUTTON");
         await badge.hover();
         const tooltip = page.getByRole("tooltip").filter({
           hasText:
@@ -9012,8 +9011,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             })
           )
           .toBe(true);
-        // Touch grid cards own the focus target; their badge is a non-focusable span.
-        if (!isTouchGrid) {
+        // Native touch cards own the focus target in both grid and list views.
+        if (!isNativeApp) {
           await badge.click();
           await expect(page).toHaveURL(url);
           await badge.press("Escape");
