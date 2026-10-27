@@ -1106,7 +1106,12 @@ test.describe("Home Page @smoke @medium @large", () => {
       expect(textBox.x + textBox.width).toBeLessThanOrEqual(
         heroBox.x + heroBox.width
       );
-      await expect(hero.locator("img")).toHaveCount(0);
+      await expect(
+        page
+          .getByRole("main")
+          .first()
+          .locator('[data-home-section="Introduction"] img')
+      ).toHaveCount(0);
       await expect(heading).toHaveCSS("font-family", /Montserrat/);
       for (const action of await actions.all()) {
         await expect(action).toBeVisible();
