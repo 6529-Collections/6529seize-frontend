@@ -39,8 +39,8 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
    - `%` quick buttons (normal numeric mode)
    - `+` and `-` step buttons (normal numeric mode)
 4. Review the live value and vote-credit label.
-5. Optional: edit the prefilled rationale reply and leave `Explain vote`
-   on.
+5. Optional: enable `Explain vote` and edit the rationale. Competition popups
+   display the generated rationale as a placeholder; normal dialogs prefill it.
 6. Select `Vote` or `Vote + reply` to submit.
 
 ## Common Scenarios
@@ -75,11 +75,12 @@ entries place the vote label and mode switch above the input. Credit labels
 beneath their labels. The icon-style `Explain vote` control and compact `Save
 vote` button share the bottom row. The explanation opens above that row, with
 its public-reply note below the text field. It opens and closes with a short
-expand/fade transition, respecting reduced-motion settings. The field retains
-its generated prefilled text, such as `Vote rationale (0 at time of posting):`,
-which reflects the entered vote. Opening `Explain vote` does not show an empty-field
-warning. If you clear the field while `Explain vote` is on, `Save vote` is blocked
-until you enter text or turn the control off. The compact
+expand/fade transition, respecting reduced-motion settings. Generated text such
+as `Vote rationale (0 at time of posting):` appears as a placeholder, so typing
+starts in an empty field. Opening `Explain vote` does not show an empty-field
+warning. Leaving the field untouched preserves the existing generated reply;
+entering text replaces it. Clearing an edited field while `Explain vote` is on
+blocks `Save vote` until you enter text or turn the control off. The compact
 text field does not scroll internally; drag its resize handle to enlarge it and
 reveal longer explanations. Vote amounts, limits, eligibility, and saving work
 the same in both input modes.

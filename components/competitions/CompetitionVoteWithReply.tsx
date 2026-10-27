@@ -3,6 +3,8 @@
 import { useId, useState, type ComponentProps } from "react";
 import { ChatBubbleLeftIcon } from "@heroicons/react/24/outline";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { SingleWaveDropVoteSize } from "@/components/waves/drop/SingleWaveDropVote.types";
+import { getVoteRationaleReplyMarkdown } from "@/helpers/waves/vote-rationale.helpers";
 import { useSingleWaveDropVoteRationale } from "@/components/waves/drop/useSingleWaveDropVoteRationale";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -16,6 +18,7 @@ export default function CompetitionVoteWithReply({
   ...props
 }: ComponentProps<typeof CompetitionVoteForm> & { readonly drop: ApiDrop }) {
   const locale = useBrowserLocale();
+  const isMini = props.size === SingleWaveDropVoteSize.MINI;
   const fieldId = useId();
   const descriptionId = useId();
   const publicReplyDescriptionId = useId();
@@ -94,11 +97,20 @@ export default function CompetitionVoteWithReply({
                 <textarea
                   id={fieldId}
                   rows={4}
-                  placeholder={t(
-                    locale,
-                    "waves.voteRationale.fieldPlaceholder"
-                  )}
-                  value={rationale.rationaleText}
+                  placeholder={
+                    isMini
+                      ? getVoteRationaleReplyMarkdown({
+                          voteTotal: total,
+                          voteChange: total - previous,
+                          locale,
+                        }).trimEnd()
+                      : t(locale, "waves.voteRationale.fieldPlaceholder")
+                  }
+                  value={
+                    isMini && rationale.isUsingGeneratedRationale
+                      ? ""
+                      : rationale.rationaleText
+                  }
                   onChange={(event) =>
                     rationale.handleRationaleTextChange(event.target.value)
                   }
