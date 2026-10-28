@@ -1,4 +1,5 @@
 import { extractErrorStatusCode } from "@/utils/errorStatus";
+import { isDropReactionRequestTimeout } from "@/helpers/reactions/dropReactionRequestQueue";
 
 const PROXY_REACTION_PERMISSION_DENIED_MESSAGE =
   "Proxy doesn't have permission to add reactions";
@@ -85,6 +86,16 @@ export function classifyReactionError(error: unknown): {
   }
 
   return { statusCode, errorKind: "server" };
+}
+
+export function isReactionRequestOutcomeUncertain(error: unknown): boolean {
+  if (isDropReactionRequestTimeout(error)) {
+    return true;
+  }
+  const { statusCode, errorKind } = classifyReactionError(error);
+  // Losing a response, including its body after HTTP 200, does not prove that
+  // the write failed. Explicit API rejections keep their existing handling.
+  return statusCode === null && errorKind === "network";
 }
 
 export function isWaveReactionDisabledApiError(error: unknown): boolean {
