@@ -85,6 +85,30 @@ it("keeps the Wave tracking browser lane out of unrelated changes", () => {
 
 describe("effective App PR CI plan", () => {
   it.each([
+    "components/user/rep/modify-rep/UserPageRepModifyModal.tsx",
+    "components/user/utils/rate/UserPageRateInput.tsx",
+    "hooks/useRepAllocation.ts",
+    "tests/social/profile-rep-edit-sandbox.spec.ts",
+  ])("selects the profile dialog browser pack for %s", (file) => {
+    const input = plan([file]);
+    input.checks.playwright_critical_shell = {
+      required: false,
+      reason: "Not selected by the base plan.",
+    };
+    expect(
+      executeRawPlan(input).checks.playwright_critical_shell?.required
+    ).toBe(true);
+  });
+
+  it("preserves the critical shell decision for unrelated changes", () => {
+    const input = plan(["README.md"]);
+    input.checks.playwright_critical_shell.required = false;
+    expect(
+      executeRawPlan(input).checks.playwright_critical_shell?.required
+    ).toBe(false);
+  });
+
+  it.each([
     "tests/media/submission-artwork-sandbox.spec.ts",
     "tests/media/waveImagePreviewCases.ts",
     "components/waves/drop/MemesDropArtworkHero.tsx",
