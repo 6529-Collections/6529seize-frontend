@@ -28,7 +28,7 @@ function MobileTabButton({
 }) {
   const isSelected = activeTab === tab;
   const buttonStateClasses = isSelected
-    ? "tw-bg-iron-900 tw-shadow-[0_1px_2px_rgba(0,0,0,0.5)] tw-ring-1 tw-ring-inset tw-ring-white/[0.08]"
+    ? "tw-bg-iron-900 tw-shadow-[0_1px_2px_rgba(0,0,0,0.5)] tw-ring-1 tw-ring-inset tw-ring-white/[0.12]"
     : "tw-bg-transparent active:tw-bg-white/[0.04] desktop-hover:hover:tw-bg-white/[0.03]";
   const labelColorClasses = isSelected
     ? ACTIVE_LABEL_COLOR[tab]
@@ -79,7 +79,7 @@ export default function MobileTabCards({
   const nicValue = cicOverview?.total_cic ?? profile.cic;
 
   return (
-    <div className="tw-flex tw-gap-1 tw-rounded-xl tw-bg-white/[0.025] tw-p-1 tw-ring-1 tw-ring-inset tw-ring-white/[0.07] tw-@container">
+    <div className="tw-flex tw-gap-1 tw-rounded-xl tw-bg-white/[0.025] tw-p-1 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-@container">
       <MobileTabButton
         tab="rep"
         label={t(locale, "user.profile.identity.mobileTabs.totalRep")}
