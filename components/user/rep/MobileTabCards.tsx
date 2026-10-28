@@ -32,26 +32,23 @@ function MobileTabButton({
     : "tw-bg-transparent active:tw-bg-white/[0.04] desktop-hover:hover:tw-bg-white/[0.03]";
   const labelColorClasses = isSelected
     ? ACTIVE_LABEL_COLOR[tab]
-    : "tw-text-iron-400";
+    : "tw-text-iron-500";
   const valueColorClasses = isSelected ? "tw-text-white" : "tw-text-iron-300";
-
-  const textSizeClasses =
-    "tw-text-[13px] tw-leading-[17px] @[340px]:tw-text-sm @[340px]:tw-leading-[18px]";
 
   return (
     <button
       type="button"
       aria-pressed={isSelected}
       onClick={() => onTabChange(tab)}
-      className={`tw-flex tw-min-h-[60px] tw-min-w-0 tw-flex-auto tw-cursor-pointer tw-touch-manipulation tw-flex-col tw-items-center tw-justify-center tw-gap-0.5 tw-rounded-lg tw-border-0 tw-px-1.5 tw-py-2 tw-text-center tw-transition-[background-color,box-shadow] tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-300 motion-reduce:tw-transition-none @[340px]:tw-px-2.5 ${buttonStateClasses}`}
+      className={`tw-flex tw-min-h-[60px] tw-min-w-0 tw-flex-auto tw-cursor-pointer tw-touch-manipulation tw-flex-col tw-items-center tw-justify-center tw-gap-1 tw-rounded-lg tw-border-0 tw-px-1.5 tw-py-2 tw-text-center tw-transition-[background-color,box-shadow] tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-300 motion-reduce:tw-transition-none @[340px]:tw-px-2.5 ${buttonStateClasses}`}
     >
       <span
-        className={`tw-block tw-max-w-full tw-truncate tw-font-medium tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none ${textSizeClasses} ${labelColorClasses}`}
+        className={`tw-block tw-max-w-full tw-truncate tw-text-[11px] tw-font-medium tw-uppercase tw-leading-[15px] tw-tracking-[0.03em] tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none @[340px]:tw-text-xs @[340px]:tw-leading-4 @[340px]:tw-tracking-[0.04em] ${labelColorClasses}`}
       >
         {label}
       </span>
       <span
-        className={`tw-block tw-max-w-full tw-truncate tw-font-semibold tw-tabular-nums tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none ${textSizeClasses} ${valueColorClasses}`}
+        className={`tw-block tw-max-w-full tw-truncate tw-text-[13px] tw-font-semibold tw-tabular-nums tw-leading-[17px] tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none @[340px]:tw-text-sm @[340px]:tw-leading-[18px] ${valueColorClasses}`}
       >
         {value}
       </span>
