@@ -165,9 +165,15 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     ).toBeDisabled();
     // WebKit can report no animations before the entry transition starts.
     // Wait for Headless UI to finish entering before measuring the panel.
-    await expect(dialogPanel(page).locator("..")).not.toHaveAttribute(
-      "data-enter"
-    );
+    await expect(
+      page
+        .getByRole("dialog", {
+          name: `Add Rep to ${TARGET}`,
+          exact: true,
+        })
+        .locator(".mobile-wrapper-dialog")
+        .locator("..")
+    ).not.toHaveAttribute("data-enter");
     const loadingBox = await dialogPanel(page).boundingBox();
     resolveAllowance();
     await expect(input).toHaveValue("20");
