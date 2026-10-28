@@ -1,4 +1,5 @@
 import type { Page, Route } from "@playwright/test";
+import type { ApiWaveDropsFeedV2 } from "@/generated/models/ApiWaveDropsFeedV2";
 
 import {
   expect,
@@ -92,6 +93,62 @@ test.describe("Wave reaction local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("confirms committed add and remove after losing their responses without replay", async ({
+    baseURL,
+    page,
+  }) => {
+    await gotoSandboxWave(page);
+    await installCanonicalDropReadFixture(page);
+    await page.route(`**${REACTION_PATH}`, async (route) => {
+      if (!["POST", "DELETE"].includes(route.request().method())) {
+        await route.fallback();
+        return;
+      }
+      // Commit in the mock API, then lose the response on its way to the client.
+      const response = await route.fetch();
+      expect(response.ok()).toBe(true);
+      await route.abort("connectionreset");
+    });
+    const drop = page.getByRole("main").locator('[data-serial-no="1"]').first();
+    await drop.hover();
+    const waitForRecoveryRead = () =>
+      page.waitForResponse(
+        (response) =>
+          new URL(response.url()).pathname === "/api/v2/drops" && response.ok()
+      );
+    const added = waitForRecoveryRead();
+    await drop
+      .getByRole("button", { name: "React with Thumbs up" })
+      .first()
+      .click();
+    await added;
+    await expect
+      .poll(() => getReactionMutationMethods(baseURL))
+      .toEqual(["POST"]);
+    const chip = page
+      .getByRole("main")
+      .locator('[data-serial-no="1"]')
+      .first()
+      .getByRole("button")
+      .filter({ hasText: /^\D*1$/ });
+    await expect(chip).toBeVisible();
+    // A saved reaction must not surface a failure toast or be rolled back.
+    // Next's route announcer is an empty alert; any notification text fails.
+    const failureToast = page.getByRole("alert").filter({ hasText: /\S/ });
+    await expect(failureToast).toHaveCount(0);
+    const removed = waitForRecoveryRead();
+    await chip.click();
+    await removed;
+    await expect
+      .poll(() => getReactionMutationMethods(baseURL))
+      .toEqual(["POST", "DELETE"]);
+    await expect(chip).toHaveCount(0);
+    await expect(failureToast).toHaveCount(0);
+    await reloadSandboxWave(page);
+    await expect(chip).toHaveCount(0);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("retains quick-reaction history after reopening and selecting from the picker", async ({
     baseURL,
     page,
@@ -180,6 +237,29 @@ async function gotoSandboxWave(page: Page) {
 async function reloadSandboxWave(page: Page) {
   await page.reload({ waitUntil: "domcontentloaded" });
   await expectSandboxWaveReady(page);
+}
+
+async function installCanonicalDropReadFixture(page: Page) {
+  await page.route("**/api/v2/drops?**", async (route) => {
+    const url = new URL(route.request().url());
+    const ids = new Set(url.searchParams.get("ids")?.split(",") ?? []);
+    // The sandbox's batch endpoint is an empty page. Serve the actual current
+    // drop from its stateful wave read, including the embedded-wave contract.
+    const response = await route.fetch({
+      url: new URL(`/api/v2/waves/${SANDBOX_WAVE_ID}/drops`, url).toString(),
+    });
+    expect(response.ok()).toBe(true);
+    const feed = (await response.json()) as ApiWaveDropsFeedV2;
+    await route.fulfill({
+      json: {
+        data: feed.drops
+          .filter((drop) => ids.has(drop.id))
+          .map((drop) => ({ ...drop, wave: feed.wave })),
+        page: 1,
+        next: false,
+      },
+    });
+  });
 }
 
 async function expectSandboxWaveReady(page: Page) {
