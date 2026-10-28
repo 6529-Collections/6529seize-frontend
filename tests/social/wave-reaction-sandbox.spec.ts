@@ -107,7 +107,7 @@ test.describe("Wave reaction local sandbox @auth @medium @local-only", () => {
       expect(response.ok()).toBe(true);
       await route.abort("connectionreset");
     });
-    const drop = page.locator('[data-serial-no="1"]').first();
+    const drop = page.getByRole("main").locator('[data-serial-no="1"]').first();
     await drop.hover();
     const waitForRecoveryRead = () =>
       page.waitForResponse(
@@ -123,7 +123,12 @@ test.describe("Wave reaction local sandbox @auth @medium @local-only", () => {
     await expect
       .poll(() => getReactionMutationMethods(baseURL))
       .toEqual(["POST"]);
-    const chip = drop.locator("button").filter({ hasText: /^\D*1$/ });
+    const chip = page
+      .getByRole("main")
+      .locator('[data-serial-no="1"]')
+      .first()
+      .getByRole("button")
+      .filter({ hasText: /^\D*1$/ });
     await expect(chip).toBeVisible();
     // A saved reaction must not surface a failure toast or be rolled back.
     const failureToast = page.getByText(
