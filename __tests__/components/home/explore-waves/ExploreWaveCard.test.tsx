@@ -189,6 +189,25 @@ describe("ExploreWaveCard", () => {
     mediaSpy.mockRestore();
   });
 
+  it("keeps the untinted fallback when a homepage Wave has no artwork", () => {
+    const samplingCalls = jest.mocked(getWaveCardTint).mock.calls.length;
+    render(
+      <ExploreWaveCard
+        wave={createWave({ picture: null })}
+        horizontalOnMobile
+      />
+    );
+
+    const card = screen.getByRole("link");
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    expect(
+      (card.lastElementChild as HTMLElement).style.getPropertyValue("--card-tint")
+    ).toBe("");
+    expect(getWaveCardTint).toHaveBeenCalledTimes(samplingCalls);
+    expect(card).toHaveAttribute("href", "/waves/wave-1");
+    expect(screen.getByText("Description preview")).toBeInTheDocument();
+  });
+
   it("shows empty state when latest drop is missing", () => {
     render(
       <ExploreWaveCard
