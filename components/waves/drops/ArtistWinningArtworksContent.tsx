@@ -80,7 +80,7 @@ const WinnerTrophyCard: React.FC<{
 
         <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-2 tw-bg-iron-950 tw-p-4">
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 empty:tw-hidden">
-            {drop.parts[0]?.media[0] && (
+            {drop.parts[0]?.media?.[0] && (
               <MediaTypeBadge
                 mimeType={drop.parts[0].media[0].mime_type}
                 dropId={drop.id}

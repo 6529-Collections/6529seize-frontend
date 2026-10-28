@@ -147,6 +147,24 @@ describe("ArtistWinningArtworksContent", () => {
     );
   });
 
+  it("keeps the text fallback when media metadata is absent", () => {
+    const drop = createWinnerDrop(0);
+    Reflect.deleteProperty(drop.parts[0]!, "media");
+    useUserWinningArtworksMock.mockReturnValue({
+      winningDrops: [drop],
+      isLoading: false,
+    });
+    render(
+      <ArtistWinningArtworksContent
+        user={user}
+        isOpen
+        onDropClick={jest.fn()}
+      />
+    );
+    expect(screen.getByText("Artwork")).toBeInTheDocument();
+    expect(screen.queryByTestId("media-display")).not.toBeInTheDocument();
+  });
+
   it("does not render epoch as the win date when decision time is missing", () => {
     const drop = createWinnerDrop(0);
     useUserWinningArtworksMock.mockReturnValue({

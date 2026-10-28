@@ -190,7 +190,13 @@ describe("ArtistActiveSubmissionContent", () => {
         name: "Additional Action",
       });
       expect(badges).toHaveLength(1);
-      expect(screen.getByText("23rd")).toBeInTheDocument();
+      const position = screen.getByText("23rd");
+      expect(position).toBeInTheDocument();
+      expect(position.querySelector("svg")).toHaveAttribute(
+        "aria-hidden",
+        "true"
+      );
+      expect(screen.queryByLabelText(/winner/i)).not.toBeInTheDocument();
       expect(screen.queryByText("1st")).not.toBeInTheDocument();
       expect(badges[0]).toHaveAccessibleDescription(
         /The creator marked this submission as promising an extra action/

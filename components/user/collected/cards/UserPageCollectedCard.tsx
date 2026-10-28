@@ -63,6 +63,7 @@ export default function UserPageCollectedCard({
     returnTo,
   });
   const tooltipId = useId();
+  const hasMediaBadge = Boolean(mediaBadge);
   const isSelectMode = interactiveMode === "select";
   const canSelect = copiesMax > 0;
   const isSelectModeAndCanSelect = isSelectMode && canSelect;
@@ -323,7 +324,7 @@ export default function UserPageCollectedCard({
         </div>
 
         <div
-          className={`tw-flex tw-justify-between tw-gap-x-2 ${Boolean(mediaBadge) ? "tw-items-center [&>h3]:tw-min-w-0 [&>h3]:tw-flex-1" : ""}`}
+          className={`tw-flex tw-justify-between tw-gap-x-2 ${hasMediaBadge ? "tw-items-center [&>h3]:tw-min-w-0 [&>h3]:tw-flex-1" : ""}`}
         >
           {mediaBadge}
           <h3 className="tw-m-0 tw-line-clamp-1 tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100 tw-transition-colors group-hover:tw-text-white group-data-[typography=collected]/collected-cards:tw-text-[15px] group-data-[typography=collected]/collected-cards:tw-leading-[19.25px]">
