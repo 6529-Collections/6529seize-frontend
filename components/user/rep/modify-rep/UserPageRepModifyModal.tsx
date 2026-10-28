@@ -199,6 +199,7 @@ export default function UserPageRepModifyModal({
           >
             <UserRateAdjustmentHelper
               inLineValues
+              valueLayout="inline"
               originalValue={repState?.rater_contribution ?? 0}
               adjustedValue={newRating}
               adjustmentType="Rep"
