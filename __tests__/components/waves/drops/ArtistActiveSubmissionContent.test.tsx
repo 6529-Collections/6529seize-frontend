@@ -151,6 +151,10 @@ describe("ArtistActiveSubmissionContent", () => {
     // Should render the submission titles
     expect(screen.getByText("Test Artwork 1")).toBeInTheDocument();
     expect(screen.getByText("Test Artwork 2")).toBeInTheDocument();
+    expect(screen.getByLabelText("Image - JPEG")).toBeInTheDocument();
+    expect(screen.getByLabelText("Image - PNG")).toBeInTheDocument();
+    // Reusing the leaderboard badge must not invent first place for unranked art.
+    expect(screen.queryByText("1st")).not.toBeInTheDocument();
   });
 
   it.each([false, true])(
@@ -164,6 +168,7 @@ describe("ArtistActiveSubmissionContent", () => {
           drop: createMockDrop({
             id: `promise-${index}`,
             is_additional_action_promised: promised,
+            rank: index === 0 ? 23 : null,
           }),
         })
       );
@@ -185,6 +190,14 @@ describe("ArtistActiveSubmissionContent", () => {
         name: "Additional Action",
       });
       expect(badges).toHaveLength(1);
+      const position = screen.getByText("23rd");
+      expect(position).toBeInTheDocument();
+      expect(position.querySelector("svg")).toHaveAttribute(
+        "aria-hidden",
+        "true"
+      );
+      expect(screen.queryByLabelText(/winner/i)).not.toBeInTheDocument();
+      expect(screen.queryByText("1st")).not.toBeInTheDocument();
       expect(badges[0]).toHaveAccessibleDescription(
         /The creator marked this submission as promising an extra action/
       );
