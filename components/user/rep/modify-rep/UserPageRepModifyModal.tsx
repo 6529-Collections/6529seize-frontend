@@ -128,7 +128,7 @@ export default function UserPageRepModifyModal({
       headerVariant="minimal"
     >
       <div className="tw-px-4 sm:tw-px-6">
-        <div className="tw-relative tw-mt-6 tw-grid tw-min-h-24">
+        <div className="tw-relative tw-mt-5 tw-grid tw-min-h-10">
           <div
             className={isError ? "tw-invisible" : undefined}
             aria-hidden={isError}
@@ -146,8 +146,11 @@ export default function UserPageRepModifyModal({
             </output>
           )}
           {isError && (
-            <div className="tw-absolute tw-inset-0 tw-flex tw-flex-col tw-items-start tw-justify-center tw-gap-2">
-              <p role="alert" className="tw-m-0 tw-text-sm tw-text-iron-300">
+            <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-gap-3">
+              <p
+                role="alert"
+                className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-xs tw-text-iron-300"
+              >
                 {t(locale, "rep.categories.edit.loadError")}
               </p>
               <Button
@@ -163,12 +166,12 @@ export default function UserPageRepModifyModal({
         </div>
         <form
           onSubmit={onSubmit}
-          className="tw-mt-4"
+          className="tw-mt-6"
           aria-busy={!repState && !isError}
         >
           <label
             htmlFor={inputId}
-            className="tw-block tw-break-words tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-500"
+            className="tw-block tw-break-words tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400"
           >
             {tRich(locale, "rep.categories.edit.totalLabel", {
               category: (
@@ -181,7 +184,7 @@ export default function UserPageRepModifyModal({
               ),
             })}
           </label>
-          <div className="tw-relative tw-mt-1.5 tw-flex">
+          <div className="tw-relative tw-mt-2 tw-flex">
             <UserPageRateInput
               value={repState ? adjustedRatingStr : ""}
               onChange={setDraftRating}
@@ -206,12 +209,13 @@ export default function UserPageRepModifyModal({
               adjustmentType="Rep"
             />
           </div>
-          <div className="tw-mt-8 tw-flex tw-flex-col tw-gap-3">
+          <div className="tw-mt-7 tw-flex tw-flex-col tw-gap-1">
             <Button
               type="submit"
               disabled={isSaveDisabled}
               loading={mutating}
-              size="lg"
+              variant="action"
+              size="xl"
               fullWidth
             >
               {t(locale, "rep.categories.edit.save")}
@@ -219,7 +223,7 @@ export default function UserPageRepModifyModal({
             <Button
               onClick={close}
               disabled={mutating}
-              variant="secondary"
+              variant="ghost"
               size="lg"
               fullWidth
             >

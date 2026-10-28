@@ -40,7 +40,7 @@ export default function UserPageRepModifyModalRaterStats({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-2 tw-text-xs tw-font-normal tw-text-iron-400">
-      <div className="tw-flex tw-min-h-10 tw-justify-between tw-gap-4">
+      <div className="tw-flex tw-items-baseline tw-justify-between tw-gap-4">
         <span className="tw-min-w-0 tw-break-words">
           {t(locale, "rep.categories.edit.availableRep")}
         </span>
@@ -48,7 +48,7 @@ export default function UserPageRepModifyModalRaterStats({
           {isLoading ? "…" : formatNumberWithCommas(heroAvailableCredit)}
         </span>
       </div>
-      <div className="tw-flex tw-min-h-10 tw-justify-between tw-gap-4">
+      <div className="tw-flex tw-items-baseline tw-justify-between tw-gap-4">
         <span className="tw-min-w-0 tw-break-words">
           {t(locale, "rep.categories.edit.ratingLimit", { category })}
         </span>
