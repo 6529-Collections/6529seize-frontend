@@ -243,7 +243,31 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(
       page.getByRole("button", { name: /Edit REP category/ })
     ).toHaveCount(0);
-    await page.goto("/playwright", { waitUntil: "domcontentloaded" });
+    // Navigate through the shell so pending wallet initialization survives
+    // the profile change, as it does during normal in-app navigation.
+    if ((page.viewportSize()?.width ?? 0) < 1024) {
+      await page
+        .getByRole("button", { name: "Open menu", exact: true })
+        .click();
+    }
+    const nativeProfileLink = page.getByRole("link", {
+      name: "Open playwright profile",
+      exact: true,
+    });
+    const accountMenu = page.getByRole("button", {
+      name: "Open account and profiles menu",
+      exact: true,
+    });
+    await expect(nativeProfileLink.or(accountMenu)).toBeVisible();
+    if (await nativeProfileLink.isVisible()) {
+      await nativeProfileLink.click();
+    } else {
+      await accountMenu.press("Enter");
+      await page.getByRole("link", { name: "Profile", exact: true }).click();
+    }
+    await page.waitForURL(/\/playwright$/, {
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
     await expect(
       page.getByRole("navigation", { name: "Profile sections" })
     ).toBeVisible();
