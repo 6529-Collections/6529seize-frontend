@@ -132,17 +132,18 @@ export function useRevealActiveSidebarWave({
       return;
     }
 
-    if (activeWaveId === null || revealWaveId === null) {
-      lastRevealKeyRef.current = null;
-      return;
-    }
-
     // Wait for the initial list before revealing a wave once. Later activity
     // can reorder it without moving the reader's viewport. DMs keep following
     // the active row's position.
     if (preserveScrollOnInteraction && isLoading) {
       return;
     }
+
+    if (activeWaveId === null || revealWaveId === null) {
+      lastRevealKeyRef.current = null;
+      return;
+    }
+
     const revealKey = preserveScrollOnInteraction
       ? `${activeWaveId}:${revealWaveId}`
       : `${activeWaveId}:${revealWaveId}:${virtualRowIndex}`;

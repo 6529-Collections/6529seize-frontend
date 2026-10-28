@@ -290,5 +290,10 @@ describe("useRevealActiveSidebarWave", () => {
     rerender({ virtualRows: [activeRow], isLoading: true });
     rerender({ virtualRows: [activeRow], isLoading: false });
     expect(scrollToVirtualIndex).toHaveBeenCalledTimes(1);
+
+    // Keep the completed reveal even if a reload temporarily removes all rows.
+    rerender({ virtualRows: [], isLoading: true });
+    rerender({ virtualRows: [activeRow], isLoading: false });
+    expect(scrollToVirtualIndex).toHaveBeenCalledTimes(1);
   });
 });
