@@ -32,7 +32,7 @@ export function MemePageLiveRightMenu(props: {
     return (
       <div className="tw-w-full">
         <MemeArtworkDetails nft={props.nft} locale={locale} compactMobile />
-        <div className="tw-py-3">
+        <div className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-6 tw-pt-5">
           <CollectDetailActions
             mobileSticky
             hideMarketLink
