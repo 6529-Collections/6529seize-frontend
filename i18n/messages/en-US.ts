@@ -1,3 +1,4 @@
+import { BOOKMARK_MESSAGES } from "@/i18n/messages/bookmarks";
 import { VOTING_CREDIT_RETURN_MESSAGES } from "@/i18n/messages/voting-credit-returns";
 import { MEME_COLLABORATION_MESSAGES } from "@/i18n/messages/meme-collaborations";
 import emmaMessages from "@/i18n/messages/emma.en-US.json";
@@ -266,6 +267,20 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "search.placeholder": "Type a category name",
   "search.resultsLabel": "REP category search results",
   "helpBotReserved.error": "{category} is managed by help6529.",
+  "edit.loading": "Loading your Rep allowance…",
+  "edit.loadError": "Couldn't load your Rep allowance.",
+  "edit.retry": "Try again",
+  "edit.title": "Add Rep to {name}",
+  "edit.totalLabel": "Your total Rep for {category}:",
+  "edit.save": "Save",
+  "edit.cancel": "Cancel",
+  "edit.availableRep": "Your available Rep:",
+  "edit.ratingLimit": "Your max/min Rep Rating to {category}:",
+  "edit.proxy": "You are acting as proxy for: {name}",
+  "edit.updated": "Rep updated.",
+  "edit.updateError": "Couldn't update this Rep rating.",
+  "edit.tryAgain": "Please try again.",
+  "edit.loginRequired": "Log in to continue.",
   "grant.searchPlaceholder": "Category to grant REP for",
   "grant.minimumCharacters": "Type at least {min} characters.",
   "grant.maximumCharacters": "Type at most {max} characters.",
@@ -838,6 +853,7 @@ const WAVE_VOTE_RATIONALE_MESSAGES = objectMessages("waves.voteRationale", {
   publicReplyDescription:
     "Posts a public reply in the wave after your vote is saved.",
   fieldLabel: "Optional rationale reply",
+  fieldPlaceholder: "Why this vote? (optional)",
   fieldDescription:
     "Posts a public reply in the wave after your vote is saved. Editing this text turns on Explain vote until you choose the switch setting yourself.",
   switchLabel: "Explain vote",
@@ -3840,6 +3856,10 @@ export const EN_US_MESSAGES = {
   "theMemes.card.metric.marketCapUnavailable": "Market Cap: N/A",
   "theMemes.card.metric.volume": "Volume ({volumeType}): {value}",
   "theMemes.card.metric.ethValue": "{value} ETH",
+  "theMemes.detail.mobile.readMore": "Read more",
+  "theMemes.detail.mobile.showLess": "Show less",
+  "theMemes.detail.mobile.showProperties": "Show all {count} properties",
+  "theMemes.detail.mobile.fewerProperties": "Show fewer",
   "theMemes.detail.backLink.ariaLabel": "Back to The Memes",
   "theMemes.detail.heading.card": "Card {tokenId}",
   "theMemes.detail.heading.ariaLabel": "Card {tokenId} - {name}",
@@ -4574,6 +4594,7 @@ export const EN_US_MESSAGES = {
   ...MY_STREAM_CURATION_MESSAGES,
   ...PROFILE_CURATION_MESSAGES,
   ...ARTWORK_DOCUMENTATION_MESSAGES,
+  ...BOOKMARK_MESSAGES,
   ...ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
@@ -4587,6 +4608,9 @@ export const EN_US_MESSAGES = {
   ...WAVE_DROP_ACTIONS_MESSAGES,
   ...WAVE_PROPOSAL_CARD_MESSAGES,
   ...WAVE_COMPETITION_BADGE_MESSAGES,
+  "waves.artistPreview.submissionCategories": "Submission categories",
+  "waves.artistPreview.activeSubmissions": "Active Submissions",
+  "waves.artistPreview.mintedMemes": "Minted to Memes",
   ...WAVE_VOTE_RATIONALE_MESSAGES,
   ...WAVE_VOTE_MODE_MESSAGES,
   ...WAVE_VOTE_MESSAGES,

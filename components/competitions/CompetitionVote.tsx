@@ -409,19 +409,26 @@ export function CompetitionVoteForm({
       </form>
     );
   return (
-    <div className="tw-space-y-3">
+    <div className="tw-space-y-3 group-[.is-vote-panel]/inline-vote:tw-contents group-[.is-vote-panel]/inline-vote:tw-space-y-0">
       <CompetitionCredits budget={credit.data} />
-      <p className="tw-text-sm tw-text-iron-400">{creditLabel}</p>
+      <p className="tw-text-sm tw-text-iron-400 group-[.is-vote-panel]/inline-vote:tw-col-start-1 group-[.is-vote-panel]/inline-vote:tw-row-start-1 group-[.is-vote-panel]/inline-vote:tw-m-0 group-[.is-vote-panel]/inline-vote:tw-flex group-[.is-vote-panel:has(input[type=number])]/inline-vote:tw-contents group-[.is-vote-panel]/inline-vote:tw-flex-wrap group-[.is-vote-panel]/inline-vote:tw-items-center group-[.is-vote-panel]/inline-vote:tw-gap-x-1.5">
+        <span className="tw-hidden tw-font-medium tw-text-iron-400 group-[.is-vote-panel]/inline-vote:tw-col-start-1 group-[.is-vote-panel]/inline-vote:tw-row-start-1 group-[.is-vote-panel]/inline-vote:tw-inline">
+          {t(locale, "competitions.voteValue")}
+        </span>
+        <span className="group-[.is-vote-panel:has(input[type=number])]/inline-vote:tw-pointer-events-none group-[.is-vote-panel:has(input[type=number])]/inline-vote:tw-z-10 group-[.is-vote-panel:has(input[type=number])]/inline-vote:tw-col-span-2 group-[.is-vote-panel:has(input[type=number])]/inline-vote:tw-col-start-1 group-[.is-vote-panel:has(input[type=number])]/inline-vote:tw-row-start-2 group-[.is-vote-panel:has(input[type=number])]/inline-vote:tw-mr-3 group-[.is-vote-panel:has(input[type=range])]/inline-vote:tw-hidden group-[.is-vote-panel:has(input[type=number])]/inline-vote:tw-justify-self-end group-[.is-vote-panel:has(input[type=number])]/inline-vote:tw-text-[13px] group-[.is-vote-panel:has(input[type=number])]/inline-vote:tw-leading-4 group-[.is-vote-panel:has(input[type=number])]/inline-vote:tw-text-iron-500">
+          {creditLabel}
+        </span>
+      </p>
       <form
         onSubmit={(event) => {
           event.preventDefault();
           void submit();
         }}
-        className="tw-space-y-3"
+        className="tw-space-y-3 group-[.is-vote-panel]/inline-vote:tw-contents group-[.is-vote-panel]/inline-vote:tw-space-y-0 group-[.is-vote-panel]/inline-vote:[&>output]:tw-col-span-2 group-[.is-vote-panel]/inline-vote:[&>p]:tw-col-span-2 group-[.is-vote-panel]/inline-vote:[&>p]:tw-m-0"
       >
         {voteMode === "slider" ? (
           <fieldset
-            className="tw-m-0 tw-min-w-0 tw-border-0 tw-px-0 tw-pb-6 tw-pt-0"
+            className="tw-m-0 tw-min-w-0 tw-border-0 tw-px-0 tw-pb-6 tw-pt-0 group-[.is-vote-panel]/inline-vote:tw-col-span-2 group-[.is-vote-panel]/inline-vote:tw-row-start-2 group-[.is-vote-panel]/inline-vote:tw-px-2 group-[.is-mini]/inline-vote:tw-pt-8 group-[.is-vote-panel:not(.is-mini)]/inline-vote:tw-pb-2 group-[.is-vote-panel]/inline-vote:tw-pb-0 group-[.is-vote-panel]/inline-vote:focus-within:tw-rounded-lg group-[.is-vote-panel]/inline-vote:focus-within:tw-ring-2 group-[.is-vote-panel]/inline-vote:focus-within:tw-ring-primary-400"
             disabled={busy || disabled || !competition.permissions.vote}
           >
             <legend className="tw-sr-only">
@@ -445,18 +452,18 @@ export function CompetitionVoteForm({
           <>
             <label
               htmlFor={`competition-vote-${entryId}`}
-              className="tw-block tw-text-sm tw-text-iron-200"
+              className="tw-block tw-text-sm tw-text-iron-200 group-[.is-vote-panel]/inline-vote:tw-sr-only"
             >
               {t(locale, "competitions.voteValue")}
             </label>
-            <div className="tw-flex tw-flex-wrap tw-gap-2">
+            <div className="tw-flex tw-flex-wrap tw-gap-2 group-[.is-vote-panel]/inline-vote:tw-col-span-2 group-[.is-vote-panel]/inline-vote:tw-col-start-1 group-[.is-vote-panel]/inline-vote:tw-row-start-2">
               <input
                 id={`competition-vote-${entryId}`}
                 type="number"
                 step="1"
                 min={min ?? undefined}
                 max={max ?? undefined}
-                className={`${COMPETITION_INPUT} !tw-w-40`}
+                className={`${COMPETITION_INPUT} !tw-w-40 group-[.is-vote-panel:not(.is-mini)]/inline-vote:tw-h-11 group-[.is-vote-panel]/inline-vote:tw-h-9 group-[.is-vote-panel]/inline-vote:!tw-w-full group-[.is-vote-panel]/inline-vote:tw-min-w-0 group-[.is-vote-panel]/inline-vote:tw-border-iron-800 group-[.is-vote-panel]/inline-vote:tw-bg-iron-900 group-[.is-vote-panel]/inline-vote:tw-py-0 group-[.is-vote-panel]/inline-vote:tw-pl-3 group-[.is-vote-panel]/inline-vote:tw-pr-28 group-[.is-vote-panel]/inline-vote:tw-text-[13px] group-[.is-vote-panel]/inline-vote:tw-font-semibold group-[.is-vote-panel]/inline-vote:tw-tabular-nums group-[.is-vote-panel]/inline-vote:tw-leading-4 group-[.is-vote-panel]/inline-vote:tw-transition-colors group-[.is-vote-panel]/inline-vote:tw-duration-150 group-[.is-vote-panel]/inline-vote:[appearance:textfield] group-[.is-vote-panel]/inline-vote:hover:tw-border-iron-700 group-[.is-vote-panel]/inline-vote:focus:tw-border-primary-500/70 group-[.is-vote-panel]/inline-vote:touch-only:tw-h-11 group-[.is-vote-panel]/inline-vote:touch-only:tw-text-base group-[.is-vote-panel]/inline-vote:motion-reduce:tw-transition-none group-[.is-vote-panel]/inline-vote:max-sm:tw-h-11 group-[.is-vote-panel]/inline-vote:max-sm:tw-text-base group-[.is-vote-panel:not(.is-mini)]/inline-vote:sm:desktop-hover:tw-text-sm group-[.is-vote-panel]/inline-vote:[&::-webkit-inner-spin-button]:tw-appearance-none group-[.is-vote-panel]/inline-vote:[&::-webkit-outer-spin-button]:tw-appearance-none`}
                 value={value}
                 disabled={busy || disabled || !competition.permissions.vote}
                 aria-invalid={!valid}
@@ -472,7 +479,7 @@ export function CompetitionVoteForm({
         {reply?.content}
         <button
           type="submit"
-          className={COMPETITION_BUTTON}
+          className={`${COMPETITION_BUTTON} group-[.is-vote-panel]/inline-vote:tw-col-start-2 group-[.is-vote-panel]/inline-vote:tw-row-start-4 group-[.is-vote-panel]/inline-vote:tw-min-h-8 group-[.is-vote-panel]/inline-vote:tw-place-self-end group-[.is-vote-panel]/inline-vote:tw-border-transparent group-[.is-vote-panel]/inline-vote:tw-bg-primary-500 group-[.is-vote-panel]/inline-vote:tw-px-3.5 group-[.is-vote-panel]/inline-vote:tw-py-1.5 group-[.is-vote-panel]/inline-vote:tw-text-[13px] group-[.is-vote-panel]/inline-vote:tw-text-white group-[.is-vote-panel]/inline-vote:hover:tw-bg-primary-600 group-[.is-vote-panel]/inline-vote:disabled:tw-cursor-default group-[.is-vote-panel]/inline-vote:disabled:tw-bg-iron-800 group-[.is-vote-panel]/inline-vote:disabled:tw-text-iron-600`}
           disabled={
             busy ||
             disabled ||

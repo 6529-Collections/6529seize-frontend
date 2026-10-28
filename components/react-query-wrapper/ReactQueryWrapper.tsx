@@ -293,10 +293,13 @@ const createReactQueryContextValue = (
   };
 
   const invalidateProfileRepRatings = (profile: ApiIdentity) => {
-    const handles = getHandlesFromProfile(profile);
+    const handles = new Set([
+      ...getHandlesFromProfile(profile),
+      (profile.query ?? profile.handle ?? profile.display).toLowerCase(),
+    ]);
     invalidateQueries({
       key: QueryKey.PROFILE_REP_RATINGS,
-      values: handles.map((h) => ({
+      values: Array.from(handles, (h) => ({
         handleOrWallet: h,
       })),
     });
@@ -447,6 +450,9 @@ const createReactQueryContextValue = (
     readonly connectedProfile: ApiIdentity | null;
     readonly profileProxy: ApiProfileProxy | null;
   }) => {
+    const targetHandleOrWallet = (
+      targetProfile.query ?? targetProfile.handle ?? targetProfile.display
+    ).toLowerCase();
     invalidateProfile(targetProfile);
     invalidateProfileRepRatings(targetProfile);
     invalidateLogs();
@@ -474,7 +480,7 @@ const createReactQueryContextValue = (
         values: [
           {
             rater: connectedProfile.handle,
-            handleOrWallet: targetProfile.handle,
+            handleOrWallet: targetHandleOrWallet,
           },
         ],
       });
@@ -508,11 +514,11 @@ const createReactQueryContextValue = (
         values: [
           {
             rater: profileProxy.created_by.handle,
-            handleOrWallet: targetProfile.handle,
+            handleOrWallet: targetHandleOrWallet,
           },
           {
             rater: profileProxy.granted_to.handle,
-            handleOrWallet: targetProfile.handle,
+            handleOrWallet: targetHandleOrWallet,
           },
         ],
       });

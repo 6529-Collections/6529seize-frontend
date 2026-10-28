@@ -1,8 +1,10 @@
 "use client";
 
 import Button from "@/components/utils/button/Button";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { t } from "@/i18n/messages";
 import { useId, useRef, useState } from "react";
 import { getAddress, isAddress } from "viem";
@@ -17,6 +19,7 @@ export default function CollectDeliveryControl({
   disabled = false,
   invalid = false,
   errorId,
+  mobileSheet = false,
 }: {
   readonly profile: ApiIdentity | null;
   readonly payingWallet?: string;
@@ -25,8 +28,11 @@ export default function CollectDeliveryControl({
   readonly disabled?: boolean;
   readonly invalid?: boolean;
   readonly errorId: string;
+  readonly mobileSheet?: boolean;
 }) {
   const locale = useBrowserLocale();
+  const isPhone = useMediaQuery("(max-width: 639px)");
+  const useSheet = mobileSheet && isPhone;
   const id = useId();
   const trigger = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
@@ -39,6 +45,36 @@ export default function CollectDeliveryControl({
     : t(locale, "collect.buy.chooseDelivery");
   const display =
     own?.display && !isAddress(own.display) ? own.display : addressLabel;
+  const restoreFocus = () => trigger.current?.focus({ preventScroll: true });
+  const close = () => {
+    setOpen(false);
+    if (!useSheet) restoreFocus();
+  };
+  const picker = (
+    <fieldset
+      id={useSheet ? undefined : `${id}-delivery`}
+      disabled={disabled}
+      className={`tw-m-0 tw-min-w-0 tw-space-y-3 ${useSheet ? "tw-border-0 tw-px-5 tw-pb-2 tw-pt-0" : "tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-p-4"}`}
+    >
+      <CollectRecipientPicker
+        compact
+        profile={profile}
+        {...(payingWallet ? { payingWallet } : {})}
+        value={value}
+        invalid={invalid}
+        errorId={errorId}
+        onChange={onChange}
+      />
+      <Button
+        variant="secondary"
+        size="sm"
+        className={useSheet ? "tw-min-h-11 tw-w-full" : undefined}
+        onClick={close}
+      >
+        {t(locale, "collect.buy.doneDelivery")}
+      </Button>
+    </fieldset>
+  );
   return (
     <div>
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-text-iron-400">
@@ -58,6 +94,7 @@ export default function CollectDeliveryControl({
           type="button"
           disabled={disabled}
           aria-expanded={open}
+          aria-haspopup={useSheet ? "dialog" : undefined}
           aria-controls={`${id}-delivery`}
           onClick={() => setOpen((current) => !current)}
           className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-text-xs tw-text-iron-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
@@ -65,32 +102,25 @@ export default function CollectDeliveryControl({
           {t(locale, "collect.buy.changeDelivery")}
         </button>
       </div>
-      {open && (
-        <fieldset
+      {useSheet ? (
+        <MobileWrapperDialog
           id={`${id}-delivery`}
-          disabled={disabled}
-          className="tw-m-0 tw-min-w-0 tw-space-y-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-p-4"
+          title={t(locale, "collect.buy.deliverTo")}
+          isOpen={open}
+          onClose={close}
+          onAfterLeave={restoreFocus}
+          tabletModal
+          hideOnDesktopHover={false}
+          enableDragToClose={false}
+          headerClassName="!tw-px-5 tw-pb-4"
+          focusTitleOnOpen
+          fitVisualViewport
+          showScrollbar
         >
-          <CollectRecipientPicker
-            compact
-            profile={profile}
-            {...(payingWallet ? { payingWallet } : {})}
-            value={value}
-            invalid={invalid}
-            errorId={errorId}
-            onChange={onChange}
-          />
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              setOpen(false);
-              trigger.current?.focus();
-            }}
-          >
-            {t(locale, "collect.buy.doneDelivery")}
-          </Button>
-        </fieldset>
+          {picker}
+        </MobileWrapperDialog>
+      ) : (
+        open && picker
       )}
     </div>
   );

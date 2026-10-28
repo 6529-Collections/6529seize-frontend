@@ -3656,6 +3656,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         ...fixture.drops[0],
         id: entryDropId("alpha"),
         title: "Inline voting artwork",
+        rating: 123_456_789,
+        rating_prediction: 123_456_999,
         drop_type: "SUBMISSION",
         media: [
           {
@@ -3674,11 +3676,12 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         submission_context: {
           status: "ACTIVE",
           has_metadata: false,
+          is_additional_action_promised: true,
           voting: {
             is_open: true,
-            total_votes_given: 0,
-            current_calculated_vote: 0,
-            predicted_final_vote: 0,
+            total_votes_given: 123_456_789,
+            current_calculated_vote: 123_456_789,
+            predicted_final_vote: 123_456_999,
             voters_count: 0,
             place: 1,
             context_profile_context: {
@@ -3694,6 +3697,43 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         wave: fixture.wave,
         drop: artwork,
       }));
+      if (popup === "artist submissions") {
+        const winnerArtwork = {
+          ...artwork,
+          id: entryDropId("beta"),
+          title: "Minted GIF artwork",
+          media: [{ ...artwork.media[0], mime_type: "image/gif" }],
+          submission_context: {
+            ...artwork.submission_context,
+            status: "WINNER",
+          },
+        };
+        await installCollaborationDropFixture(page, () => ({
+          wave: fixture.wave,
+          drop: winnerArtwork,
+        }));
+        await page.route("**/api/nfts?**", (route) =>
+          route.fulfill({
+            json: {
+              data: [
+                {
+                  id: 136,
+                  name: "Older video Meme",
+                  scaled: artwork.media[0]!.url,
+                  image: artwork.media[0]!.url,
+                  animation: "https://example.com/art.mp4",
+                  metadata: { animation_details: { format: "MP4" } },
+                  tdh: 1234,
+                  tdh_rank: 20,
+                },
+              ],
+              page: 1,
+              next: false,
+              count: 1,
+            },
+          })
+        );
+      }
       await page.route(
         `**/api/identities/${artwork.author.handle}*`,
         async (route) => {
@@ -3703,6 +3743,12 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             json: {
               ...identity,
               active_main_stage_submission_ids: [artwork.id],
+              ...(popup === "artist submissions"
+                ? {
+                    winner_main_stage_drop_ids: [entryDropId("beta")],
+                    artist_of_prevote_cards: [136],
+                  }
+                : {}),
             },
           });
         }
@@ -3710,6 +3756,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await page.route(`**/v2/waves/${WAVE}/competition-drops?**`, (route) =>
         route.fulfill({ json: { data: [artwork], page: 1, next: false } })
       );
+      let releaseCredits: (() => void) | undefined;
+      if (popup === "artist submissions") {
+        const creditsGate = new Promise<void>((resolve) => {
+          releaseCredits = resolve;
+        });
+        await page.route(
+          "**/competitions/alpha/credits/me?**",
+          async (route) => {
+            if (new URL(route.request().url()).searchParams.has("entry_id")) {
+              await creditsGate;
+            }
+            return route.fallback();
+          }
+        );
+      }
       await page.goto(`${ROOT}/alpha?drop=${artwork.id}`);
       await dismissNextDevTools(page);
       const detail = page
@@ -3726,6 +3787,193 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       });
       await badge.click();
       const dialog = page.getByRole("dialog").last();
+      if (popup === "artist submissions") {
+        try {
+          const loading = page
+            .getByRole("dialog")
+            .last()
+            .locator(".is-mini")
+            .getByRole("status")
+            .filter({ hasText: "Loading competition…" });
+          await expect(loading).toBeAttached();
+          const card = page.getByRole("dialog").last().locator(".tw-shadow-sm");
+          // Loading vote data must not reserve an empty footer below the artwork.
+          await expect
+            .poll(() =>
+              card.evaluate((element) => {
+                const content = element.firstElementChild!;
+                return (
+                  element.getBoundingClientRect().height -
+                  content.getBoundingClientRect().height
+                );
+              })
+            )
+            .toBeLessThanOrEqual(2);
+          await expect(
+            dialog.getByRole("group", { name: "Vote input mode" })
+          ).toBeHidden();
+          await expect(loading).toHaveCSS("position", "absolute");
+          await page.screenshot({
+            path: testInfo.outputPath("artist-submissions-loading-no-gap.png"),
+          });
+        } finally {
+          releaseCredits?.();
+        }
+        const promiseBadge = dialog.getByRole("button", {
+          name: "Additional Action",
+          exact: true,
+        });
+        await expect(promiseBadge).toBeVisible();
+        const mediaBadge = dialog.getByLabel("Image - PNG", { exact: true });
+        const rankBadge = dialog.getByText("1st", { exact: true });
+        const artworkTitle = dialog.getByText("Inline voting artwork", {
+          exact: true,
+        });
+        await expect(mediaBadge).toBeVisible();
+        await expect(rankBadge).toBeVisible();
+        const originalViewport = page.viewportSize()!;
+        const headerWidths =
+          testInfo.project.name === "web-desktop-chromium"
+            ? [800, originalViewport.width]
+            : [originalViewport.width];
+        for (const width of headerWidths) {
+          await page.setViewportSize({ ...originalViewport, width });
+          await expect
+            .poll(async () => {
+              const [media, promise, rank, title] = await Promise.all([
+                mediaBadge.boundingBox(),
+                promiseBadge.boundingBox(),
+                rankBadge.boundingBox(),
+                artworkTitle.boundingBox(),
+              ]);
+              if (!media || !promise || !rank || !title) return false;
+              return (
+                media.x + media.width <= promise.x &&
+                promise.x + promise.width < rank.x &&
+                Math.abs(
+                  media.y + media.height / 2 - (rank.y + rank.height / 2)
+                ) < 2 &&
+                title.y >=
+                  Math.max(
+                    media.y + media.height,
+                    promise.y + promise.height,
+                    rank.y + rank.height
+                  )
+              );
+            })
+            .toBe(true);
+          await expectNoHorizontalOverflow(page);
+          await page.screenshot({
+            path: testInfo.outputPath(`artist-media-rank-row-${width}.png`),
+          });
+        }
+        await mediaBadge.focus();
+        const mediaTooltip = page
+          .getByRole("tooltip", { includeHidden: true })
+          .filter({ hasText: /^Image - PNG$/ })
+          .filter({ visible: true });
+        await expect(mediaTooltip).toBeVisible();
+        await expect(mediaTooltip).toHaveCSS("position", "fixed");
+        await expect(mediaTooltip).toHaveCSS("z-index", "1000002");
+        await expect(mediaTooltip).toBeInViewport({ ratio: 1 });
+        await promiseBadge.focus();
+        await expect(mediaTooltip).toBeHidden();
+        const promiseTooltip = page
+          .getByRole("tooltip", { includeHidden: true })
+          .filter({
+            hasText:
+              "The creator marked this submission as promising an extra action",
+          })
+          .filter({ visible: true });
+        await expect(promiseTooltip).toBeVisible();
+        await expect(promiseTooltip).toBeInViewport({ ratio: 1 });
+        await expect
+          .poll(() =>
+            promiseTooltip.evaluate((element) => {
+              const box = element.getBoundingClientRect();
+              const previous = element.style.pointerEvents;
+              element.style.pointerEvents = "auto";
+              const hit = document.elementFromPoint(
+                box.left + box.width / 2,
+                box.top + box.height / 2
+              );
+              element.style.pointerEvents = previous;
+              return hit !== null && element.contains(hit);
+            })
+          )
+          .toBe(true);
+        await promiseBadge.click();
+        // The dialog wrapper has fixed-position children and no box of its own.
+        await expect(promiseBadge).toBeVisible();
+        await expect(
+          dialog.getByRole("button", { name: "Close Gallery", exact: true })
+        ).toBeVisible();
+        await expect(page).toHaveURL(`${ROOT}/alpha?drop=${artwork.id}`);
+        expect(sandbox.requests).toEqual([]);
+
+        await dialog
+          .getByRole("button", { name: "Close Gallery", exact: true })
+          .focus();
+        await expect(promiseTooltip).toBeHidden();
+        const currentTotal = dialog.getByText("123,456,789", { exact: true });
+        const projectedTotal = dialog.getByText("123,456,999", { exact: true });
+        for (const property of [
+          "font-family",
+          "font-size",
+          "font-weight",
+          "font-variant-numeric",
+          "letter-spacing",
+        ]) {
+          await expect(projectedTotal).toHaveCSS(
+            property,
+            await currentTotal.evaluate(
+              (element, name) =>
+                getComputedStyle(element).getPropertyValue(name),
+              property
+            )
+          );
+        }
+        await projectedTotal.hover();
+        const projectedTooltip = page
+          .getByRole("tooltip", { includeHidden: true })
+          .filter({
+            hasText: "Projected vote count at decision time: 123,456,999",
+          })
+          .filter({ visible: true });
+        await expect(projectedTooltip).toBeVisible();
+        await expect(projectedTooltip).toHaveCSS("opacity", "1");
+        await expect(projectedTooltip).toBeInViewport({ ratio: 1 });
+        await expect(projectedTooltip).toHaveCSS("position", "fixed");
+        // Check the popup edges as well as its center: a clipped tooltip can
+        // still have the right bounds and an unobscured center.
+        await expect
+          .poll(() =>
+            projectedTooltip.evaluate((element) => {
+              const box = element.getBoundingClientRect();
+              const previous = element.style.pointerEvents;
+              element.style.pointerEvents = "auto";
+              try {
+                return [
+                  box.left + 8,
+                  (box.left + box.right) / 2,
+                  box.right - 8,
+                ].every((x) => {
+                  const hit = document.elementFromPoint(
+                    x,
+                    box.top + box.height / 2
+                  );
+                  return hit !== null && element.contains(hit);
+                });
+              } finally {
+                element.style.pointerEvents = previous;
+              }
+            })
+          )
+          .toBe(true);
+        await page.screenshot({
+          path: testInfo.outputPath("artist-projected-total-tooltip.png"),
+        });
+      }
       const mode = dialog.getByRole("group", { name: "Vote input mode" });
       await expect(mode).toHaveCount(1);
       await expect(dialog.getByRole("slider").first()).toBeVisible();
@@ -3746,7 +3994,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await input.fill("-25");
       await dialog.getByText("Explain vote", { exact: true }).click();
       const rationale = dialog.getByLabel("Optional rationale reply");
+      await expect(rationale).toHaveValue("");
+      await expect(rationale).toHaveAttribute(
+        "placeholder",
+        /Vote rationale \(-25.*at time of posting\):/
+      );
+      await expect(
+        dialog.getByText("Add rationale text or turn Explain vote off.")
+      ).toHaveCount(0);
+      await expect(
+        dialog.getByRole("button", { name: "Save vote", exact: true })
+      ).toBeEnabled();
       await rationale.fill("An explanation kept while changing input modes");
+      await expect(
+        dialog.getByRole("button", { name: "Save vote", exact: true })
+      ).toBeEnabled();
       await mode.getByRole("button", { name: "Slider", exact: true }).click();
       // The range input uses a logarithmic position; the thumb shows the vote.
       await expect(dialog.getByText("-25", { exact: true })).toBeAttached();
@@ -3772,6 +4034,95 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect.poll(() => sandbox.requests.length).toBe(1);
       expect(sandbox.requests[0]?.body).toMatchObject({ value: -25 });
       await expect(dialog.getByText("Saved", { exact: true })).toBeVisible();
+      if (popup === "artist submissions") {
+        await dialog
+          .getByRole("tab", { name: "Minted to Memes", exact: true })
+          .click();
+        const winnerCard = dialog.getByTestId("trophy-item-winner");
+        const olderCard = dialog.getByTestId("trophy-item-prevote");
+        await expect(
+          winnerCard.getByLabel("Image - GIF", { exact: true })
+        ).toBeVisible();
+        const olderIndicator = olderCard.getByLabel("Video - MP4", {
+          exact: true,
+        });
+        await expect(olderIndicator).toBeVisible();
+        const originalViewport = page.viewportSize()!;
+        const mintedWidths =
+          testInfo.project.name === "web-mobile-chromium"
+            ? [320, originalViewport.width]
+            : [originalViewport.width];
+        for (const width of mintedWidths) {
+          await page.setViewportSize({ ...originalViewport, width });
+          for (const [card, label, title] of [
+            [winnerCard, "Image - GIF", "Minted GIF artwork"],
+            [olderCard, "Video - MP4", "Older video Meme"],
+          ] as const) {
+            await expect
+              .poll(async () => {
+                const media = await card
+                  .getByLabel(label, { exact: true })
+                  .boundingBox();
+                const heading = await card
+                  .getByRole("heading", { name: title })
+                  .boundingBox();
+                if (!media || !heading) return false;
+                return (
+                  media.x + media.width < heading.x &&
+                  Math.abs(
+                    media.y + media.height / 2 - heading.y - heading.height / 2
+                  ) < 2
+                );
+              })
+              .toBe(true);
+          }
+          if (width < 640) {
+            const tablist = dialog.getByRole("tablist", {
+              name: "Submission categories",
+            });
+            await expect
+              .poll(() =>
+                tablist.evaluate((element) => {
+                  const group = element.firstElementChild!;
+                  const buttons = [...element.querySelectorAll('[role="tab"]')];
+                  const groupBox = group.getBoundingClientRect();
+                  return (
+                    Math.abs(groupBox.width - element.clientWidth) <= 1 &&
+                    element.scrollWidth <= element.clientWidth &&
+                    buttons.every(
+                      (button) =>
+                        button.getBoundingClientRect().width >=
+                        groupBox.width / 2 - 10
+                    )
+                  );
+                })
+              )
+              .toBe(true);
+          }
+          await expectNoHorizontalOverflow(page);
+        }
+        await expect(olderCard.getByRole("link")).toHaveAttribute(
+          "href",
+          "/the-memes/136"
+        );
+        await olderIndicator.scrollIntoViewIfNeeded();
+        await olderIndicator.focus();
+        await olderIndicator.press("Enter");
+        const tooltip = page
+          .getByRole("tooltip", { includeHidden: true })
+          .filter({ hasText: /^Video - MP4$/ })
+          .filter({ visible: true });
+        await expect(tooltip).toBeVisible();
+        await expect(tooltip).toHaveCSS("position", "fixed");
+        await expect(tooltip).toHaveCSS("z-index", "1000002");
+        await expect(tooltip).toHaveCSS("opacity", "1");
+        await expect(tooltip).toBeInViewport({ ratio: 1 });
+        await expectNoHorizontalOverflow(page);
+        await page.screenshot({
+          path: testInfo.outputPath("artist-minted-media-indicators.png"),
+        });
+        expect(sandbox.requests).toHaveLength(1);
+      }
     });
   }
 
@@ -3812,15 +4163,66 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     const dialog = page.getByRole("dialog", { name: "Vote for this artwork" });
     const toggle = dialog.getByRole("switch", { name: "Explain vote" });
     await expect(toggle).not.toBeChecked();
+    const voteHeading = page
+      .getByRole("dialog", { name: "Vote for this artwork" })
+      .locator(".is-vote-panel > div > p > span:first-child");
+    const modeTabs = dialog.getByRole("group", { name: "Vote input mode" });
+    const expectCenteredVoteHeader = async () => {
+      const labelBox = await voteHeading.boundingBox();
+      const tabsBox = await modeTabs.boundingBox();
+      expect(labelBox).not.toBeNull();
+      expect(tabsBox).not.toBeNull();
+      expect(labelBox!.x + labelBox!.width).toBeLessThan(tabsBox!.x);
+      expect(
+        Math.abs(
+          labelBox!.y + labelBox!.height / 2 - tabsBox!.y - tabsBox!.height / 2
+        )
+      ).toBeLessThan(2);
+    };
+    await expectCenteredVoteHeader();
+    const creditSummary = page
+      .getByRole("dialog", { name: "Vote for this artwork" })
+      .locator(".is-vote-panel dl:visible");
+    const creditGroups = page
+      .getByRole("dialog", { name: "Vote for this artwork" })
+      .locator(".is-vote-panel dl:visible > div");
+    await expect(creditGroups).toHaveCount(2);
+    await expect(creditGroups.nth(0)).toContainText("remaining");
+    await expect(creditGroups.nth(1)).toContainText(/of.*credits spent/);
+    for (const label of [
+      "Available credits",
+      "Spent credits",
+      "Remaining credits",
+    ]) {
+      await expect(creditSummary.getByText(label, { exact: true })).toHaveClass(
+        /tw-sr-only/
+      );
+    }
+    const creditBoxes = await Promise.all([
+      creditGroups.nth(0).boundingBox(),
+      creditGroups.nth(1).boundingBox(),
+    ]);
+    for (const box of creditBoxes) {
+      expect(box).not.toBeNull();
+      // The summary can wrap between groups, but each group stays on one line.
+      expect(box!.height).toBeLessThanOrEqual(18);
+    }
+    const voteSlider = await dialog.getByRole("slider").first().boundingBox();
+    expect(voteSlider).not.toBeNull();
+    expect(creditBoxes[0]!.y).toBeGreaterThan(voteSlider!.y);
     await dialog.getByRole("button", { name: "Numeric", exact: true }).click();
+    await expectCenteredVoteHeader();
     await dialog.getByRole("spinbutton", { name: "Your vote" }).fill("25");
     await dialog.getByText("Explain vote", { exact: true }).click();
     await expect(toggle).toBeChecked();
     const rationale = dialog.getByLabel("Optional rationale reply");
-    await expect(rationale).toHaveValue(
-      "Vote rationale (+25 at time of posting):\n\n"
+    await expect(rationale).toHaveValue("");
+    await expect(rationale).toHaveAttribute(
+      "placeholder",
+      "Vote rationale (+25 at time of posting):"
     );
-    await rationale.fill("My competition rationale");
+    await rationale.pressSequentially("My competition rationale");
+    await expect(rationale).toHaveValue("My competition rationale");
     await expectNoHorizontalOverflow(page);
     await page.screenshot({
       path: testInfo.outputPath("competition-vote-with-reply.png"),
@@ -3946,7 +4348,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         .getByRole("button", { name: "Numeric", exact: true })
         .click();
       await expect(input).toHaveValue("-25");
-      await expect(dialog.getByText("75", { exact: true })).toBeVisible();
+      await expect(
+        dialog.getByText("75", { exact: true }).filter({ visible: true })
+      ).toBeVisible();
       await expect(
         dialog.getByText("Loading competition…", { exact: true })
       ).toHaveCount(0);
@@ -3958,7 +4362,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       releaseRefresh();
       await refreshed;
       await expect(input).toHaveValue("-25");
-      await expect(dialog.getByText("75", { exact: true })).toBeVisible();
+      await expect(
+        dialog.getByText("75", { exact: true }).filter({ visible: true })
+      ).toBeVisible();
     } finally {
       releaseContext();
       releaseRefresh();
@@ -8873,6 +9279,118 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       }
     });
   }
+
+  test("keeps Additional Action tooltips above cards and inside the viewport", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${MEMES_WAVE}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const fixture = await response.json();
+    fixture.wave.id = MEMES_WAVE;
+    // One promised action and one ordinary submission prove conditional visibility.
+    const artwork = ["alpha", "beta"].map((id, index) => ({
+      ...fixture.drops[0],
+      id: entryDropId(id),
+      drop_type: "SUBMISSION",
+      title: `Tooltip artwork ${index + 1}`,
+      submission_context: {
+        status: "ACTIVE",
+        has_metadata: false,
+        is_additional_action_promised: index === 0,
+        voting: {
+          is_open: true,
+          total_votes_given: 100,
+          current_calculated_vote: 100,
+          predicted_final_vote: 100,
+          voters_count: 1,
+          place: index + 1,
+          context_profile_context: { can_vote: false, current: 0 },
+        },
+      },
+    }));
+    await installArtworkCompetitionResources(
+      page,
+      MEMES_WAVE,
+      fixture.wave,
+      () => artwork
+    );
+    const url = `/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard`;
+    const isNativeApp = testInfo.project.name === "web-mobile-chromium";
+    if (isNativeApp) {
+      await installSurfaceSimulation(
+        page.context(),
+        "capacitor-ios-sim",
+        testInfo.project.use.baseURL
+      );
+    }
+    await page.goto(url);
+    await dismissNextDevTools(page);
+    await expectNativeLeaderboardReady(page, false);
+    const widths =
+      testInfo.project.name === "web-desktop-chromium" ? [1440, 390] : [390];
+    for (const width of widths) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const view of ["Grid view", "List view"]) {
+        await page.getByRole("tab", { name: view, exact: true }).click();
+        const badge = page.getByText("Additional Action", { exact: true });
+        await expect(badge).toHaveCount(1);
+        await expect
+          .poll(() => badge.evaluate((element) => element.tagName))
+          .toBe(isNativeApp ? "SPAN" : "BUTTON");
+        await badge.hover();
+        const tooltip = page.getByRole("tooltip").filter({
+          hasText:
+            "The creator marked this submission as promising an extra action",
+        });
+        await expect(tooltip).toBeVisible();
+        await expect(tooltip).toBeInViewport({ ratio: 1 });
+        await expect
+          .poll(() =>
+            tooltip.evaluate((element) => {
+              const box = element.getBoundingClientRect();
+              return box.left >= 0 && box.right <= window.innerWidth;
+            })
+          )
+          .toBe(true);
+        await expect
+          .poll(() =>
+            tooltip.evaluate((element) => {
+              const box = element.getBoundingClientRect();
+              const previous = element.style.pointerEvents;
+              // Include the tooltip in hit testing to detect neighboring cards painting over it.
+              element.style.pointerEvents = "auto";
+              const unobscured = [0.1, 0.5, 0.9].every((fraction) => {
+                const hit = document.elementFromPoint(
+                  box.left + box.width * fraction,
+                  box.top + box.height / 2
+                );
+                return hit !== null && element.contains(hit);
+              });
+              element.style.pointerEvents = previous;
+              return unobscured;
+            })
+          )
+          .toBe(true);
+        // Native touch cards own the focus target in both grid and list views.
+        if (!isNativeApp) {
+          await badge.click();
+          await expect(page).toHaveURL(url);
+          await badge.press("Escape");
+          await expect(tooltip).toBeHidden();
+          await expect(badge).toBeFocused();
+        } else {
+          await page.keyboard.press("Escape");
+          await expect(tooltip).toBeHidden();
+        }
+      }
+    }
+    expect(sandbox.requests).toEqual([]);
+  });
 
   for (const surface of ["web", "app"] as const) {
     test(`preserves populated legacy Main Stage artwork in ${surface} views`, async ({

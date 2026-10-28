@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import path from "node:path";
+import { expectNoHorizontalOverflow } from "../testHelpers";
 
 const LAB = "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb";
 const ZERO = "0x0000000000000000000000000000000000000000";
@@ -137,6 +138,18 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
   let offersOnly = false;
   let listingsOnly = false;
   let additionalCurrency = false;
+  let reviewRequestGate: Promise<void> | null = null;
+  let offerRequestGate: Promise<void> | null = null;
+  const reviewOffers = [
+    "b",
+    "c",
+    ...Array.from({ length: 10 }, (_, index) => String(index)),
+  ].map((hash) => ({
+    ...listing,
+    identity: { protocol_address: SEAPORT, order_hash: "0x" + hash.repeat(64) },
+    side: "OFFER",
+    currency: WETH,
+  }));
   const writes: string[] = [];
   const lookups: string[] = [];
   await page.route("**/*", async (route) => {
@@ -184,8 +197,10 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
           platform_fee_bps: 0,
         },
       });
-    if (url.pathname === `/api/market/orders/${listing.identity.order_hash}`)
+    if (url.pathname === `/api/market/orders/${listing.identity.order_hash}`) {
+      if (reviewRequestGate) await reviewRequestGate;
       return route.fulfill({ json: listing });
+    }
     if (url.pathname === "/api/market/batch-capabilities")
       return route.fulfill({
         json: {
@@ -198,13 +213,16 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
           max_calldata_bytes: 1048576,
         },
       });
-    if (url.pathname === "/api/market/orders")
+    if (url.pathname === "/api/market/orders") {
+      const isOffer = url.searchParams.get("side") === "OFFER";
+      if (isOffer && offerRequestGate) await offerRequestGate;
       return route.fulfill({
         json: {
-          orders: url.searchParams.get("side") === "LISTING" ? [listing] : [],
+          orders: isOffer ? reviewOffers : [listing],
           next: null,
         },
       });
+    }
     if (url.pathname.startsWith("/api/market-depth/"))
       return route.fulfill({
         json: {
@@ -550,7 +568,10 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
       exact: true,
     });
     await expect(accept).toHaveCount(2);
-    expect((await accept.first().boundingBox())!.width).toBeCloseTo(80, 0);
+    await expect(accept.first()).toHaveCSS("white-space", "nowrap");
+    await expect(accept.first()).toHaveCSS("padding-left", "12px");
+    await expect(accept.first()).toHaveCSS("padding-right", "12px");
+    expect((await accept.first().boundingBox())!.width).toBeGreaterThan(80);
     expect((await accept.first().boundingBox())!.height).toBeCloseTo(44, 0);
     await groupedAction.click();
     await expect(groupedAction).toHaveAttribute("aria-expanded", "false");
@@ -577,6 +598,24 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
         listingBounds.x + listingBounds.width
       );
     }
+    const groupedPrice = offers.getByRole("button", {
+      name: "Offers at 0.012 WETH",
+      exact: true,
+    });
+    await groupedPrice.click();
+    const accept = offers.getByRole("button", {
+      name: "Accept offer",
+      exact: true,
+    });
+    await expect(accept).toHaveCount(2);
+    await expect(accept.first()).toHaveCSS("white-space", "nowrap");
+    await expect(accept.first()).toHaveCSS("padding-left", "12px");
+    await expect(accept.first()).toHaveCSS("padding-right", "12px");
+    await expect(accept.first()).toHaveCSS("border-top-width", "5px");
+    await expect(accept.first()).toHaveCSS("border-bottom-width", "5px");
+    await expect(accept.first()).toHaveCSS("line-height", "16px");
+    expect((await accept.first().boundingBox())!.height).toBeCloseTo(44, 0);
+    await groupedPrice.click();
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth)
     ).toBeLessThanOrEqual(width + 1);
@@ -636,7 +675,58 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
   expect(focusedLevelBounds.y + focusedLevelBounds.height).toBeLessThanOrEqual(
     (await bar.boundingBox())!.y
   );
-  await reviewSelected.click();
+  const idleButtonBounds = (await reviewSelected.boundingBox())!;
+  const idleBarBounds = (await bar.boundingBox())!;
+  let releaseReview!: () => void;
+  reviewRequestGate = new Promise<void>((resolve) => {
+    releaseReview = resolve;
+  });
+  try {
+    await reviewSelected.click();
+    await expect(reviewSelected).toHaveAttribute("aria-busy", "true");
+    await expect(reviewSelected).toBeDisabled();
+    await expect(
+      page
+        .getByRole("button", { name: /^Review selected listings/ })
+        .locator("svg")
+    ).toBeVisible();
+    await expect(reviewSelected).toHaveCSS("opacity", "1");
+    await expect(
+      page
+        .getByRole("button", { name: /^Review selected listings/ })
+        .locator("svg path")
+        .last()
+    ).toHaveCSS("fill", "rgb(255, 255, 255)");
+    await expect(
+      page
+        .getByRole("button", { name: /^Review selected listings/ })
+        .locator("svg path")
+        .first()
+    ).toHaveCSS("fill", "rgba(255, 255, 255, 0.25)");
+    const loadingMessage = market.getByRole("status").filter({
+      hasText: "Checking selected listings…",
+    });
+    await expect(loadingMessage).toHaveCSS("clip", "rect(0px, 0px, 0px, 0px)");
+    const loadingButtonBounds = (await reviewSelected.boundingBox())!;
+    const loadingBarBounds = (await bar.boundingBox())!;
+    for (const dimension of ["x", "y", "width", "height"] as const) {
+      expect(loadingButtonBounds[dimension]).toBeCloseTo(
+        idleButtonBounds[dimension],
+        0
+      );
+      expect(loadingBarBounds[dimension]).toBeCloseTo(
+        idleBarBounds[dimension],
+        0
+      );
+    }
+    await page.screenshot({
+      path: info.outputPath("market-depth-review-loading.png"),
+      fullPage: false,
+    });
+  } finally {
+    releaseReview();
+    reviewRequestGate = null;
+  }
   const purchaseReview = page.getByRole("dialog", {
     name: "Review your purchase",
     exact: true,
@@ -703,6 +793,205 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
   await expect(quantity).toHaveCount(0);
   expect(lookups).toContain("memelab");
   expect(lookups).not.toContain("memes");
+  // Hold the first offer response so the loading-to-picker layout is observable.
+  let releaseOffers!: () => void;
+  offerRequestGate = new Promise<void>((resolve) => {
+    releaseOffers = resolve;
+  });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const moreActions = page.getByRole("button", {
+    name: "More trading actions for Meme Lab artwork",
+  });
+  await moreActions.click();
+  await page
+    .getByRole("menuitem", { name: "Review offers: Meme Lab artwork" })
+    .click();
+  const ordersDialog = page.getByRole("dialog");
+  const ordersPanel = page
+    .getByRole("dialog")
+    .locator(".mobile-wrapper-dialog");
+  const orderQuantity = ordersDialog.getByLabel("Quantity", { exact: true });
+  let pendingBounds;
+  let quantityInput;
+  try {
+    await expect(ordersDialog.getByRole("status")).toHaveText(
+      "Loading artwork"
+    );
+    await expect(orderQuantity).toHaveCount(1);
+    await expect(orderQuantity).toBeHidden();
+    await expect(
+      ordersDialog.getByRole("button", { name: "Connect wallet", exact: true })
+    ).toHaveCount(0);
+    await expect(
+      ordersDialog.getByRole("button", {
+        name: "Review exact terms",
+        exact: true,
+      })
+    ).toHaveCount(0);
+    await expect(ordersDialog.getByRole("radio")).toHaveCount(0);
+    await expect(
+      ordersDialog.getByRole("button", { name: "Close", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("dialog").locator('[role="status"] [aria-hidden="true"]')
+    ).toHaveCSS("animation-name", "none");
+    quantityInput = await orderQuantity.elementHandle();
+    pendingBounds = (await ordersPanel.boundingBox())!;
+    await ordersPanel.screenshot({
+      path: info.outputPath("review-offers-loading.png"),
+    });
+  } finally {
+    releaseOffers();
+    offerRequestGate = null;
+  }
+  await expect(ordersDialog.getByRole("radio")).toHaveCount(
+    reviewOffers.length
+  );
+  await expect(orderQuantity).toBeVisible();
+  expect(
+    await orderQuantity.evaluate(
+      (element, original) => element === original,
+      quantityInput
+    )
+  ).toBe(true);
+  const readyBounds = (await ordersPanel.boundingBox())!;
+  for (const dimension of ["x", "y", "width", "height"] as const) {
+    expect(readyBounds[dimension]).toBeCloseTo(pendingBounds![dimension], 0);
+  }
+  const orderChoices = ordersDialog.getByRole("radio");
+  const headingBox = (await ordersDialog.getByRole("heading").boundingBox())!;
+  const closeBox = (await ordersDialog
+    .getByRole("button", { name: "Close", exact: true })
+    .boundingBox())!;
+  const legendBox = (await page
+    .getByRole("dialog")
+    .locator("legend")
+    .boundingBox())!;
+  const firstChoiceBox = (await ordersDialog
+    .getByRole("radio")
+    .nth(0)
+    .locator("..")
+    .boundingBox())!;
+  const walletSummary = page
+    .getByRole("dialog")
+    .locator("[data-collect-wallet-summary]");
+  const walletSummaryBox = (await walletSummary.boundingBox())!;
+  expect(walletSummaryBox.y - closeBox.y - closeBox.height).toBeCloseTo(16, 0);
+  expect(
+    legendBox.y - walletSummaryBox.y - walletSummaryBox.height
+  ).toBeCloseTo(isMobile ? 20 : 24, 0);
+  const connectInSummary = walletSummary.getByRole("button", {
+    name: "Connect wallet",
+    exact: true,
+  });
+  await expect(connectInSummary).toHaveCount(1);
+  await expect(connectInSummary).toHaveAttribute("type", "button");
+  await expect(connectInSummary).toHaveCSS(
+    "background-color",
+    "rgb(236, 236, 238)"
+  );
+  await expect(
+    page
+      .getByRole("dialog")
+      .locator("[data-collect-order-footer]")
+      .getByRole("button", {
+        name: "Connect wallet",
+        exact: true,
+      })
+  ).toHaveCount(0);
+  expect(legendBox.x).toBeCloseTo(headingBox.x, 0);
+  expect(firstChoiceBox.x).toBeCloseTo(headingBox.x, 0);
+  expect(firstChoiceBox.y - legendBox.y - legendBox.height).toBeCloseTo(16, 0);
+  await expect(orderChoices.nth(0)).not.toBeChecked();
+  await expect(orderChoices.nth(1)).not.toBeChecked();
+  await ordersDialog.getByRole("radio").nth(0).locator("..").click();
+  await orderQuantity.fill("2");
+  await orderChoices.nth(1).press("Space");
+  await expect(orderChoices.nth(1)).toBeChecked();
+  await expect(orderChoices.nth(0)).not.toBeChecked();
+  await expect(orderQuantity).toHaveValue("1");
+  await expect(
+    ordersDialog.getByRole("button", { name: "Connect wallet", exact: true })
+  ).toBeVisible();
+  await expect(
+    ordersDialog.getByRole("button", {
+      name: "Review exact terms",
+      exact: true,
+    })
+  ).toBeDisabled();
+  {
+    const originalViewport = page.viewportSize()!;
+    const orderBook = page
+      .getByRole("dialog")
+      .locator("[data-collect-order-book]");
+    const footer = page
+      .getByRole("dialog")
+      .locator("[data-collect-order-footer]");
+    const reviewTerms = ordersDialog.getByRole("button", {
+      name: "Review exact terms",
+      exact: true,
+    });
+    for (const viewport of [
+      originalViewport,
+      isMobile ? { width: 320, height: 568 } : { width: 1280, height: 720 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await expect(orderQuantity).toBeInViewport();
+      await expect(reviewTerms).toBeInViewport();
+      const footerBefore = (await footer.boundingBox())!;
+      const bookBounds = (await orderBook.boundingBox())!;
+      expect(bookBounds.y + bookBounds.height).toBeLessThanOrEqual(
+        footerBefore.y
+      );
+      await ordersDialog
+        .getByRole("radio")
+        .last()
+        .locator("..")
+        .scrollIntoViewIfNeeded();
+      const footerAfter = (await footer.boundingBox())!;
+      expect(footerAfter.y).toBeCloseTo(footerBefore.y, 0);
+      await expect(reviewTerms).toBeInViewport();
+      const lastChoiceBounds = (await ordersDialog
+        .getByRole("radio")
+        .last()
+        .locator("..")
+        .boundingBox())!;
+      expect(lastChoiceBounds.y + lastChoiceBounds.height).toBeLessThanOrEqual(
+        footerAfter.y
+      );
+      await expect(orderChoices.nth(1)).toBeChecked();
+      await expect(orderQuantity).toHaveValue("1");
+      await expectNoHorizontalOverflow(page);
+    }
+    // A very short available viewport must still allow reaching every control.
+    await page.setViewportSize({ width: isMobile ? 390 : 1280, height: 400 });
+    await reviewTerms.scrollIntoViewIfNeeded();
+    await expect(reviewTerms).toBeInViewport();
+    const connectWallet = ordersDialog.getByRole("button", {
+      name: "Connect wallet",
+      exact: true,
+    });
+    await connectWallet.scrollIntoViewIfNeeded();
+    await expect(connectWallet).toBeInViewport();
+    await expect(orderChoices.nth(1)).toBeChecked();
+    await expect(orderQuantity).toHaveValue("1");
+    await page.setViewportSize(originalViewport);
+    await ordersDialog.getByRole("heading").scrollIntoViewIfNeeded();
+    await ordersDialog
+      .getByRole("radio")
+      .nth(1)
+      .locator("..")
+      .scrollIntoViewIfNeeded();
+  }
+  await ordersPanel.screenshot({
+    path: info.outputPath("review-offers-ready.png"),
+  });
+  await ordersDialog
+    .getByRole("button", { name: "Close", exact: true })
+    .click();
+  await expect(ordersDialog).toHaveCount(0);
+  await expect(moreActions).toBeFocused();
+  await page.emulateMedia({ reducedMotion: "no-preference" });
   const offer = page.getByRole("button", {
     name: "Make an offer: Meme Lab artwork",
   });
@@ -734,9 +1023,12 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
     const highest = market.getByText("Highest offer · WETH", { exact: true });
     await expect(
       market
-        .getByText(offersOnly ? "Lowest listing · ETH" : "Highest offer · WETH", {
-          exact: true,
-        })
+        .getByText(
+          offersOnly ? "Lowest listing · ETH" : "Highest offer · WETH",
+          {
+            exact: true,
+          }
+        )
         .locator("..")
     ).toContainText("—");
     for (const width of [390, 900, 1024, 1440]) {
@@ -775,8 +1067,21 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
   await expect(additionalTable).toBeVisible();
   for (const width of [390, 900]) {
     await page.setViewportSize({ width, height: 1000 });
-    const extraBounds = (await additionalTable.boundingBox())!;
-    const canonicalBounds = (await offers.boundingBox())!;
+    // Read both tables in one frame; late card data can move the whole section.
+    const { extraBounds, canonicalBounds } = await additionalTable.evaluate(
+      (extra, canonical) => {
+        if (!canonical) throw new Error("Expected the offers table");
+        const bounds = (element: Element) => {
+          const { x, y, width, height } = element.getBoundingClientRect();
+          return { x, y, width, height };
+        };
+        return {
+          extraBounds: bounds(extra),
+          canonicalBounds: bounds(canonical),
+        };
+      },
+      await offers.elementHandle()
+    );
     expect(extraBounds.width).toBeCloseTo(canonicalBounds.width, 0);
     expect(extraBounds.x).toBeCloseTo(canonicalBounds.x, 0);
     expect(extraBounds.y).toBeGreaterThan(

@@ -363,6 +363,7 @@ export * from '../models/ApiDrop';
 export * from '../models/ApiDropAndDropVote';
 export * from '../models/ApiDropAndWave';
 export * from '../models/ApiDropAttachmentReference';
+export * from '../models/ApiDropBookmarksStatus';
 export * from '../models/ApiDropBoost';
 export * from '../models/ApiDropBoostV2';
 export * from '../models/ApiDropBoostsPage';
@@ -1277,6 +1278,7 @@ import { ApiDrop                                      } from '../models/ApiDrop'
 import { ApiDropAndDropVote } from '../models/ApiDropAndDropVote';
 import { ApiDropAndWave } from '../models/ApiDropAndWave';
 import { ApiDropAttachmentReference } from '../models/ApiDropAttachmentReference';
+import { ApiDropBookmarksStatus } from '../models/ApiDropBookmarksStatus';
 import { ApiDropBoost } from '../models/ApiDropBoost';
 import { ApiDropBoostV2 } from '../models/ApiDropBoostV2';
 import { ApiDropBoostsPage } from '../models/ApiDropBoostsPage';
@@ -1701,7 +1703,7 @@ import { ApiWaveMentionSearchResult } from '../models/ApiWaveMentionSearchResult
 import { ApiWaveMetadata } from '../models/ApiWaveMetadata';
 import { ApiWaveMetadataType } from '../models/ApiWaveMetadataType';
 import { ApiWaveMetrics } from '../models/ApiWaveMetrics';
-import { ApiWaveMin                           } from '../models/ApiWaveMin';
+import { ApiWaveMin                            } from '../models/ApiWaveMin';
 import { ApiWaveNotificationPreferences } from '../models/ApiWaveNotificationPreferences';
 import { ApiWaveOutcome        } from '../models/ApiWaveOutcome';
 import { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
@@ -2458,6 +2460,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDropAndDropVote": ApiDropAndDropVote,
     "ApiDropAndWave": ApiDropAndWave,
     "ApiDropAttachmentReference": ApiDropAttachmentReference,
+    "ApiDropBookmarksStatus": ApiDropBookmarksStatus,
     "ApiDropBoost": ApiDropBoost,
     "ApiDropBoostV2": ApiDropBoostV2,
     "ApiDropBoostsPage": ApiDropBoostsPage,
