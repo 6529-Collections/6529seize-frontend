@@ -92,6 +92,57 @@ test.describe("Wave reaction local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("confirms committed add and remove after losing their responses without replay", async ({
+    baseURL,
+    page,
+  }) => {
+    await gotoSandboxWave(page);
+    await page.route(`**${REACTION_PATH}`, async (route) => {
+      if (!["POST", "DELETE"].includes(route.request().method())) {
+        await route.fallback();
+        return;
+      }
+      // Commit in the mock API, then lose the response on its way to the client.
+      const response = await route.fetch();
+      expect(response.ok()).toBe(true);
+      await route.abort("connectionreset");
+    });
+    const drop = page.locator('[data-serial-no="1"]').first();
+    await drop.hover();
+    const waitForRecoveryRead = () =>
+      page.waitForResponse(
+        (response) =>
+          new URL(response.url()).pathname === "/api/v2/drops" && response.ok()
+      );
+    const added = waitForRecoveryRead();
+    await drop
+      .getByRole("button", { name: "React with Thumbs up" })
+      .first()
+      .click();
+    await added;
+    await expect
+      .poll(() => getReactionMutationMethods(baseURL))
+      .toEqual(["POST"]);
+    const chip = drop.locator("button").filter({ hasText: /^\D*1$/ });
+    await expect(chip).toBeVisible();
+    // A saved reaction must not surface a failure toast or be rolled back.
+    const failureToast = page.getByText(
+      /Network request failed|Could not confirm your reaction|Error (adding|removing) reaction/
+    );
+    await expect(failureToast).toHaveCount(0);
+    const removed = waitForRecoveryRead();
+    await chip.click();
+    await removed;
+    await expect
+      .poll(() => getReactionMutationMethods(baseURL))
+      .toEqual(["POST", "DELETE"]);
+    await expect(chip).toHaveCount(0);
+    await expect(failureToast).toHaveCount(0);
+    await reloadSandboxWave(page);
+    await expect(chip).toHaveCount(0);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("retains quick-reaction history after reopening and selecting from the picker", async ({
     baseURL,
     page,
