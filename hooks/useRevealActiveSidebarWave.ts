@@ -13,6 +13,7 @@ interface UseRevealActiveSidebarWaveOptions {
   readonly activeParentWaveId: string | null;
   readonly activeWaveId: string | null;
   readonly filterKey?: string;
+  readonly isLoading?: boolean;
   readonly preserveScrollOnInteraction?: boolean;
   readonly scrollContainerRef: RefObject<HTMLElement | null>;
   readonly scrollToVirtualIndex: (index: number) => boolean;
@@ -46,6 +47,7 @@ export function useRevealActiveSidebarWave({
   activeParentWaveId,
   activeWaveId,
   filterKey = "all",
+  isLoading = false,
   preserveScrollOnInteraction = true,
   scrollContainerRef,
   scrollToVirtualIndex,
@@ -118,6 +120,7 @@ export function useRevealActiveSidebarWave({
     if (revealContext.activeWaveId !== activeWaveId) {
       revealContext.activeWaveId = activeWaveId;
       revealContext.preserveScroll = false;
+      lastRevealKeyRef.current = null;
     } else if (revealContext.filterKey !== filterKey) {
       revealContext.preserveScroll = true;
     }
@@ -129,17 +132,21 @@ export function useRevealActiveSidebarWave({
       return;
     }
 
+    // Wait for the initial list before revealing a wave once. Later activity
+    // can reorder it without moving the reader's viewport. DMs keep following
+    // the active row's position.
+    if (preserveScrollOnInteraction && isLoading) {
+      return;
+    }
+
     if (activeWaveId === null || revealWaveId === null) {
       lastRevealKeyRef.current = null;
       return;
     }
 
-    // Main-list queries hydrate independently. Include the virtual position so
-    // rows inserted ahead of the active wave cannot move it back off-screen
-    // after the first successful reveal.
-    const revealLocation =
-      virtualRowIndex >= 0 ? `virtual:${virtualRowIndex}` : "static";
-    const revealKey = `${activeWaveId}:${revealWaveId}:${revealLocation}`;
+    const revealKey = preserveScrollOnInteraction
+      ? `${activeWaveId}:${revealWaveId}`
+      : `${activeWaveId}:${revealWaveId}:${virtualRowIndex}`;
     if (lastRevealKeyRef.current === revealKey) {
       return;
     }
@@ -166,6 +173,8 @@ export function useRevealActiveSidebarWave({
   }, [
     activeWaveId,
     filterKey,
+    isLoading,
+    preserveScrollOnInteraction,
     revealWaveId,
     scrollContainerRef,
     scrollToVirtualIndex,
