@@ -5,10 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AuthContext } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "@/services/api/common-api";
-import type {
-  ApiProfileRepRatesState,
-  RatingStats,
-} from "@/entities/IProfile";
+import type { ApiProfileRepRatesState, RatingStats } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 
@@ -23,20 +20,23 @@ export function useRepAllocation({
   heroAvailableRep: number;
   proxyAvailableCredit: number | null;
   minMaxValues: { readonly min: number; readonly max: number };
+  isError: boolean;
+  isFetching: boolean;
+  retry: () => void;
 } {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
-  const { data: proxyGrantorRepRates } = useQuery<ApiProfileRepRatesState>({
+  const proxyQuery = useQuery<ApiProfileRepRatesState>({
     queryKey: [
       QueryKey.PROFILE_REP_RATINGS,
       {
         rater: activeProfileProxy?.created_by.handle,
-        handleOrWallet: profile?.handle,
+        handleOrWallet: profile.handle,
       },
     ],
     queryFn: async () =>
       await commonApiFetch<ApiProfileRepRatesState>({
-        endpoint: `profiles/${profile?.query}/rep/ratings/received`,
+        endpoint: `profiles/${profile.query ?? profile.handle ?? profile.display}/rep/ratings/received`,
         params: activeProfileProxy?.created_by.handle
           ? { rater: activeProfileProxy.created_by.handle }
           : {},
@@ -44,24 +44,27 @@ export function useRepAllocation({
     enabled: !!activeProfileProxy?.created_by.handle,
   });
 
-  const { data: connectedProfileRepRates } =
-    useQuery<ApiProfileRepRatesState>({
-      queryKey: [
-        QueryKey.PROFILE_REP_RATINGS,
-        {
-          rater: connectedProfile?.handle,
-          handleOrWallet: profile?.handle,
-        },
-      ],
-      queryFn: async () =>
-        await commonApiFetch<ApiProfileRepRatesState>({
-          endpoint: `profiles/${profile?.query}/rep/ratings/received`,
-          params: connectedProfile?.handle
-            ? { rater: connectedProfile.handle }
-            : {},
-        }),
-      enabled: !!connectedProfile?.handle,
-    });
+  const connectedQuery = useQuery<ApiProfileRepRatesState>({
+    queryKey: [
+      QueryKey.PROFILE_REP_RATINGS,
+      {
+        rater: connectedProfile?.handle,
+        handleOrWallet: profile.handle,
+      },
+    ],
+    queryFn: async () =>
+      await commonApiFetch<ApiProfileRepRatesState>({
+        endpoint: `profiles/${profile.query ?? profile.handle ?? profile.display}/rep/ratings/received`,
+        params: connectedProfile?.handle
+          ? { rater: connectedProfile.handle }
+          : {},
+      }),
+    enabled: !!connectedProfile?.handle,
+  });
+
+  const { data: proxyGrantorRepRates } = proxyQuery;
+  const { data: connectedProfileRepRates } = connectedQuery;
+  const activeQuery = activeProfileProxy ? proxyQuery : connectedQuery;
 
   const getRepState = (): RatingStats | null => {
     if (!category) return null;
@@ -172,5 +175,15 @@ export function useRepAllocation({
     [repState, proxyGrantorRepRates, proxyAvailableCredit, heroAvailableRep]
   );
 
-  return { repState, heroAvailableRep, proxyAvailableCredit, minMaxValues };
+  return {
+    repState,
+    heroAvailableRep,
+    proxyAvailableCredit,
+    minMaxValues,
+    isError: activeQuery.isError,
+    isFetching: activeQuery.isFetching,
+    retry: () => {
+      void activeQuery.refetch();
+    },
+  };
 }

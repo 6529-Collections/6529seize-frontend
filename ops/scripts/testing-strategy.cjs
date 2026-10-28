@@ -153,13 +153,15 @@ const RISK_RULES = [
   },
   {
     level: 3,
-    name: "profile-following-runtime",
+    name: "profile-dialog-runtime",
     patterns: [
       /^components\/user\/following\//,
-      /^hooks\/usefollowinglist\.ts$/,
+      /^hooks\/(usefollowinglist|userepallocation)\.ts$/,
+      /^components\/user\/rep\//,
+      /^components\/user\/utils\/rate\//,
     ],
     reason:
-      "Private Following data and account transitions need critical-shell browser evidence.",
+      "Profile rating and Following dialogs need critical-shell browser evidence.",
   },
   {
     level: 2,

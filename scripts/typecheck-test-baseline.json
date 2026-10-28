@@ -415,7 +415,6 @@
     "__tests__/components/user/proxy/proxy/list/ProxyActionRow.test.tsx": 1,
     "__tests__/components/user/proxy/proxy/list/ProxyActionRowDataMode.test.tsx": 1,
     "__tests__/components/user/proxy/proxy/list/ProxyActionRowStatus.test.tsx": 2,
-    "__tests__/components/user/rep/modify-rep/UserPageRepModifyModal.test.tsx": 5,
     "__tests__/components/user/rep/new-rep/UserPageRepNewRep.test.tsx": 1,
     "__tests__/components/user/rep/UserPageRep.test.tsx": 1,
     "__tests__/components/user/rep/UserPageRepWrapper.test.tsx": 2,

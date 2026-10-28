@@ -531,8 +531,11 @@ const PACKS = [
   {
     ...sandboxPack(
       "test:e2e:profile-following-sandbox",
-      "Own-profile Following dialog, pagination, navigation and recovery.",
-      ["tests/social/profile-following-sandbox.spec.ts"],
+      "Profile Following and REP editing dialogs, permissions and recovery.",
+      [
+        "tests/social/profile-following-sandbox.spec.ts",
+        "tests/social/profile-rep-edit-sandbox.spec.ts",
+      ],
       {
         ...AUTH_SANDBOX_ENV,
         USE_DEV_AUTH: "false",
