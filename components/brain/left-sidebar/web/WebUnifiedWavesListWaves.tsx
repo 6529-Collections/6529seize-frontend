@@ -448,9 +448,16 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   );
   useRevealActiveSidebarWave({
     preserveScrollOnInteraction: !isDirectMessage,
+    // Animated rows settle one render after their source list.
+    isLoading:
+      isLoading ||
+      streamWaves.isPinnedWavesLoading === true ||
+      allRows.length !== virtualizedRows.length ||
+      allRows.some((row, index) => row.key !== virtualizedRows[index]?.key),
     activeParentWaveId: effectiveActiveParentWaveId,
     activeWaveId: navigation.searching ? null : activeWaveId,
-    filterKey: navigation.scrollKey,
+    // Restoring the account is not a user filter change.
+    filterKey: isDirectMessage ? navigation.scrollKey : navigation.viewKey,
     scrollContainerRef: scrollContainerRef ?? listContainerRef,
     scrollToVirtualIndex: virtual.scrollToIndex,
     staticRows: revealStaticRows,
