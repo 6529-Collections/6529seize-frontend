@@ -3711,6 +3711,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await page.route(`**/v2/waves/${WAVE}/competition-drops?**`, (route) =>
         route.fulfill({ json: { data: [artwork], page: 1, next: false } })
       );
+      let releaseCredits: (() => void) | undefined;
+      if (popup === "artist submissions") {
+        const creditsGate = new Promise<void>((resolve) => {
+          releaseCredits = resolve;
+        });
+        await page.route(
+          "**/competitions/alpha/credits/me?**",
+          async (route) => {
+            if (new URL(route.request().url()).searchParams.has("entry_id")) {
+              await creditsGate;
+            }
+            return route.fallback();
+          }
+        );
+      }
       await page.goto(`${ROOT}/alpha?drop=${artwork.id}`);
       await dismissNextDevTools(page);
       const detail = page
@@ -3728,6 +3743,35 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await badge.click();
       const dialog = page.getByRole("dialog").last();
       if (popup === "artist submissions") {
+        try {
+          const loading = dialog
+            .locator(".is-mini")
+            .getByRole("status")
+            .filter({ hasText: "Loading competition…" });
+          await expect(loading).toBeAttached();
+          const card = dialog.locator(".tw-shadow-lg");
+          // Loading vote data must not reserve an empty footer below the artwork.
+          await expect
+            .poll(() =>
+              card.evaluate((element) => {
+                const content = element.firstElementChild!;
+                return (
+                  element.getBoundingClientRect().height -
+                  content.getBoundingClientRect().height
+                );
+              })
+            )
+            .toBeLessThanOrEqual(2);
+          await expect(
+            dialog.getByRole("group", { name: "Vote input mode" })
+          ).toBeHidden();
+          await expect(loading).toHaveCSS("position", "absolute");
+          await page.screenshot({
+            path: testInfo.outputPath("artist-submissions-loading-no-gap.png"),
+          });
+        } finally {
+          releaseCredits?.();
+        }
         const promiseBadge = dialog.getByRole("button", {
           name: "Additional Action",
           exact: true,

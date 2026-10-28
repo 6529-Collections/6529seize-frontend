@@ -111,7 +111,8 @@ export const ArtistActiveSubmissionContent: React.FC<
             {submissionsWithDrops.map((submission) => (
               <div
                 key={submission.id}
-                className="tw-flex tw-min-w-0 tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-shadow-lg [&>.is-mini]:tw-rounded-none [&>.is-mini]:tw-border-x-0 [&>.is-mini]:tw-border-b-0"
+                // Keep pending vote announcements accessible without a temporary card footer.
+                className="tw-flex tw-min-w-0 tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-shadow-lg [&>.is-mini:has(>[role=status])>fieldset]:tw-hidden [&>.is-mini:has(>[role=status])]:tw-contents [&>.is-mini>[role=status]]:tw-sr-only [&>.is-mini]:tw-rounded-none [&>.is-mini]:tw-border-x-0 [&>.is-mini]:tw-border-b-0 [&>[role=status]]:tw-sr-only"
               >
                 <div
                   className="tw-group tw-relative tw-flex tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-bg-iron-950/50 tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-900/50"
