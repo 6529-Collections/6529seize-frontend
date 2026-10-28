@@ -140,7 +140,7 @@ function MobileActionRow({
             aria-hidden={!offscreen}
             inert={!offscreen}
             style={{ bottom: isCapacitor ? spaces.mobileNavSpace || 104 : 0 }}
-            className={`tailwind-scope ${styles["stickyActions"] ?? ""} tw-fixed tw-inset-x-0 tw-z-40 tw-grid tw-auto-cols-fr tw-grid-flow-col tw-gap-2 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-px-4 tw-pb-[calc(10px+env(safe-area-inset-bottom))] tw-pt-2.5 tw-transition-[transform,opacity,visibility] tw-duration-150 motion-reduce:tw-transition-none lg:tw-hidden [&>button]:tw-min-w-0 ${offscreen ? "tw-visible tw-translate-y-0 tw-opacity-100" : "tw-invisible tw-translate-y-2 tw-opacity-0"}`}
+            className={`tailwind-scope ${styles["stickyActions"] ?? ""} tw-fixed tw-inset-x-0 tw-z-40 tw-grid tw-auto-cols-fr tw-grid-flow-col tw-gap-2 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-px-4 tw-pb-[calc(10px+env(safe-area-inset-bottom))] tw-pt-2.5 tw-transition-[transform,opacity,visibility] tw-duration-150 motion-reduce:tw-transition-none lg:tw-hidden [&>button[type=button]:enabled:active]:tw-bg-iron-950 [&>button[type=button]:enabled:hover:not(:active)]:desktop-hover:tw-bg-iron-900 [&>button[type=button]:enabled:hover]:desktop-hover:tw-border-iron-650 [&>button[type=button]:enabled:hover]:desktop-hover:tw-text-white [&>button[type=button]]:tw-border-iron-700 [&>button[type=button]]:tw-bg-transparent [&>button[type=button]]:tw-text-iron-100 [&>button[type=button]]:tw-shadow-none [&>button]:tw-min-w-0 ${offscreen ? "tw-visible tw-translate-y-0 tw-opacity-100" : "tw-invisible tw-translate-y-2 tw-opacity-0"}`}
           >
             {primaryAction}
             {offerAction}

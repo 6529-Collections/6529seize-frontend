@@ -85,6 +85,11 @@ export default function CollectInlineBuyForm(props: Props) {
       variant="action"
       size="lg"
       loading={props.loading}
+      className={
+        detailLayout
+          ? "aria-busy:tw-relative [&>svg>path:first-child]:tw-text-white/25 [&>svg]:tw-absolute [&>svg]:tw-inset-0 [&>svg]:tw-m-auto [&>svg]:tw-text-white [&[aria-busy=true]>span]:tw-opacity-0"
+          : undefined
+      }
       disabled={
         props.amountWei === null ||
         Boolean(props.disabledReason) ||
