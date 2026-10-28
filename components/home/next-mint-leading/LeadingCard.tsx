@@ -77,11 +77,11 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
       <div className="tw-relative tw-flex tw-h-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 tw-transition-colors tw-duration-200 tw-ease-out focus-within:tw-border-white/20 desktop-hover:hover:tw-border-white/20 motion-reduce:tw-transition-none">
         <div className="tw-flex tw-shrink-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-px-4 tw-py-4">
           <span
-            className={`tw-rounded-full tw-border tw-border-solid tw-border-white/[0.08] tw-px-2 tw-py-1 tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.06em] ${rankLabelClass}`}
+            className={`tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] ${rankLabelClass}`}
           >
             {rank === 1 ? "LEADING" : `${formatOrdinal(rank)} PLACE`}
           </span>
-          <span className="tw-rounded-full tw-border tw-border-solid tw-border-white/[0.08] tw-px-2 tw-py-1 tw-text-[10px] tw-font-medium tw-tabular-nums tw-leading-4 tw-text-iron-400">
+          <span className="tw-text-xs tw-font-medium tw-tabular-nums tw-leading-4 tw-text-iron-400">
             {formatNumberWithCommas(drop.rating)} TDH
           </span>
         </div>
@@ -93,7 +93,7 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
               "max-md:has-[img.tw-opacity-100]:tw-aspect-auto max-md:[&_[data-drop-image-content]]:tw-relative max-md:[&_[data-drop-image-content]]:tw-block max-md:[&_img]:!tw-relative max-md:[&_img]:tw-block max-md:[&_img]:!tw-h-auto max-md:[&_img]:!tw-max-h-none"
           )}
         >
-          <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center [&>div]:tw-mx-0">
+          <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center [&>div]:tw-mx-0 [&>div]:tw-justify-center">
             {mediaContent}
           </div>
         </div>

@@ -26,7 +26,7 @@ describe("HeroHeader", () => {
     expect(container.querySelector("img")).toBeNull();
     expect(
       screen.getByText(
-        "a decentralized, permissionless global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology."
+        "A decentralized, permissionless global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology."
       )
     ).toBeInTheDocument();
     expect(heading).toHaveClass("tw-font-semibold");

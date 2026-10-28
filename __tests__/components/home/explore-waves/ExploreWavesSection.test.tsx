@@ -12,11 +12,20 @@ jest.mock("@/components/auth/Auth", () => ({
 jest.mock("@/components/home/explore-waves/ExploreWaveCard", () => ({
   ExploreWaveCard: ({
     wave,
-    variant,
+    horizontalOnMobile,
+    artworkOverlay,
   }: {
     readonly wave: { readonly name: string };
-    readonly variant?: string;
-  }) => <div data-card-variant={variant}>{wave.name}</div>,
+    readonly horizontalOnMobile?: boolean;
+    readonly artworkOverlay?: boolean;
+  }) => (
+    <div
+      data-horizontal-on-mobile={horizontalOnMobile}
+      data-artwork-overlay={artworkOverlay}
+    >
+      {wave.name}
+    </div>
+  ),
 }));
 
 jest.mock("@/components/home/explore-waves/ExploreWaveCardSkeleton", () => ({
@@ -40,14 +49,23 @@ describe("ExploreWavesSection", () => {
     });
   });
 
-  it.each(["home", "default"] as const)(
-    "uses the explicitly selected %s card without changing the query",
-    async (variant) => {
+  it.each([
+    ["default", "true"],
+    ["page", "false"],
+  ] as const)(
+    "selects the %s card presentation without changing the query",
+    async (headingVariant, horizontalOnMobile) => {
       useAuthMock.mockReturnValue({ connectedProfile: null });
-      renderWithQueryClient(<ExploreWavesSection cardVariant={variant} />);
+      renderWithQueryClient(
+        <ExploreWavesSection headingVariant={headingVariant} />
+      );
       expect(await screen.findByText("Scored wave")).toHaveAttribute(
-        "data-card-variant",
-        variant
+        "data-horizontal-on-mobile",
+        horizontalOnMobile
+      );
+      expect(screen.getByText("Scored wave")).toHaveAttribute(
+        "data-artwork-overlay",
+        String(headingVariant === "page")
       );
       expect(fetchWavesV2PageMock).toHaveBeenCalledTimes(1);
       expect(fetchWavesV2PageMock).toHaveBeenCalledWith(
@@ -55,15 +73,6 @@ describe("ExploreWavesSection", () => {
       );
     }
   );
-
-  it("keeps discovery on its existing card variant by default", async () => {
-    useAuthMock.mockReturnValue({ connectedProfile: null });
-    renderWithQueryClient(<ExploreWavesSection headingVariant="page" />);
-    expect(await screen.findByText("Scored wave")).toHaveAttribute(
-      "data-card-variant",
-      "default"
-    );
-  });
 
   it("does not request followed-wave exclusion for anonymous discovery", async () => {
     useAuthMock.mockReturnValue({ connectedProfile: null });

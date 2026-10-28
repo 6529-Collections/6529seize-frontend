@@ -28,7 +28,7 @@ sections:
 1. Open `/`.
 2. The Montserrat hero shows a small `6529` label, the headline
    `Building a decentralized network state`, and the subtitle
-   `a decentralized, permissionless global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology.`
+   `A decentralized, permissionless global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology.`
    The hero is a single left-aligned typography block without artwork or
    illustration. The headline scales with the available width, and the
    subtitle has a readable line length. No space is reserved for hero images.
@@ -39,8 +39,11 @@ sections:
      keep the actions together beneath the copy.
 4. Logged-out visitors see `What is 6529?` between the hero and latest-drop slot:
    - `Art with purpose`: `Browse The Memes` opens `/the-memes`.
-   - `Where the network coordinates`: `Browse Waves` opens `/waves`.
-   - `A real say`: `How voting works` opens `/network/tdh`.
+   - `Where the network coordinates`: “Waves are open spaces to discuss, create,
+     and vote together.” `Browse Waves` opens `/waves`.
+   - `A real say`: “Vote on what 6529 funds, builds, and mints next.”
+     `Explore Main Stage` opens The Memes - Main Stage Wave at
+     `/waves/b6128077-ea78-4dd9-b381-52c4eadb2077`.
    - Desktop and tablet use three open columns with subtle vertical dividers.
      Mobile stacks the topics with horizontal dividers and keyboard-accessible
      text links. The artwork, wave tiles, and voting bars are decorative; they
@@ -53,18 +56,26 @@ sections:
    - Accessible name: `Open network health dashboard`
    - Tooltip/title: `Network health`
 6. The latest-drop slot resolves independently.
-7. Logged-out visitors see `How to start` after the latest-drop slot:
-   - `Connect wallet` opens the same wallet flow as the hero button.
-   - `Create profile` opens `/join-6529#join-step-profile` to continue the
-     existing onboarding flow.
-   - The step headings are the actions, with an arrow beside each title.
-     `Create, collect or vote` opens `/the-memes`; `Join the community` opens
-     `/waves`. Their hover titles remain `View collections` and `Browse Waves`.
-   - `Open the Join 6529 guide` opens `/join-6529`.
+7. Logged-out visitors see `How to start` after the latest-drop slot, with the
+   introduction “Four steps into 6529.” The steps appear in this order:
+   - `Connect wallet`: “Your wallet is your sign-in.” Opens the same wallet flow
+     as the hero button.
+   - `Create profile`: “Add a name, avatar, and bio.” Opens
+     `/join-6529#join-step-profile` to continue the existing onboarding flow.
+   - `Join a Wave`: “Chat, post, and vote.” Opens `/waves`.
+   - `Collect or create`: “Hold Meme Cards to earn voting weight, or submit your
+     own art.” The heading is plain text. Within the unchanged sentence,
+     `Hold Meme Cards` links to `/the-memes` and `submit your own art` links to
+     `/about/apply`, which explains eligibility and the nomination path for new
+     artists. There are no separate buttons below the description.
+   - The first three step headings are actions, with an arrow beside each title.
+     The community link keeps its `Browse Waves` hover title.
+   - `Read the full guide` opens `/join-6529`.
    - Desktop shows four numbered columns. Mobile shows a vertical timeline.
-   - The mint/subscription sentence is omitted during server rendering and on
-     restricted native iOS (outside the US or unknown country). Those visitors
-     see a browsing/community description; collection browsing remains available.
+   - The collection/submission description is omitted during server rendering
+     and on restricted native iOS (outside the US or unknown country). Those
+     visitors see a browsing/community description without the two inline links.
+     Collection browsing remains available through `Browse The Memes` above.
 8. The mission block shows `6529 is a network society` beside the Bitcoin and
    Ethereum sentence, with `human coordination itself,` emphasized. On mobile
    the paragraph follows the heading. The long-term goal appears beneath it

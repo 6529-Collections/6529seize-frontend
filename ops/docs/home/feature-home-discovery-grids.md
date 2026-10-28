@@ -15,24 +15,27 @@ Drops section. Boosting and boosted-drop preferences inside Waves are unchanged.
 
 ## Layout and Content
 
-- Homepage cards use a small square wave avatar beside the name and activity,
-  followed by the description. This compact layout is used only on `/`;
-  Explore Waves and other discovery surfaces keep their existing cards.
+- Below `768px`, the wave cover occupies the left third of each homepage card,
+  beside its content. From `768px`, the cover fills the card behind a dark, image-tinted fade
+  that keeps the text readable. The tint comes from a small, cached sample of the
+  loaded cover; unreadable pixels keep the Iron fallback. Homepage mobile does not sample
+  images. Discover uses the same overlay design at every breakpoint.
 - Relative last-drop time and total drops appear beneath the name. A wave with
   no activity shows `No drops yet`.
 - Descriptions are plain text from the wave description drop, not the latest
-  chat message. Up to three lines are visible on desktop and mobile;
-  links and media inside the description are not interactive previews.
+  chat message. One line is visible at each
+  breakpoint; links and media inside the description are not interactive previews.
   There is no message-author row and no additional drop request.
-- Labelled Score, Hot, and REP values remain at the bottom, separated by a
-  subtle line. Missing metrics remain omitted according to the existing data.
+- Labelled Score, Hot, and REP values remain at the bottom. A subtle line
+  separates them on mobile. Missing metrics remain omitted according to the
+  existing data.
 - The grid has one column below `640px`, two from `640px`, and three from
   `1024px`.
 - Section headings are 28px on mobile and 38px from `768px`. `View all` is an
   underlined text action below the subtitle on mobile and beside it on desktop.
-- Cards use a short border-colour transition without lifting or zooming.
-  Keyboard focus remains visible; reduced motion disables transitions and
-  arrow movement.
+- On desktop, hovering gently lifts the card and slowly zooms its cover; the
+  wave name stays white. Mobile keeps its border feedback. Keyboard focus
+  remains visible; reduced motion disables the lift, zoom, and transitions.
 - The homepage footer keeps all social, legal, API, contact, and status links,
   with wrapping rows and bottom safe-area spacing.
 
@@ -46,8 +49,9 @@ Drops section. Boosting and boosted-drop preferences inside Waves are unchanged.
 ## Limitations
 
 - Discovery data and ranking are unchanged by the homepage styling.
-- The dedicated `/discover` route keeps its existing layout and description
-  preview, up to 20 results, and backend exclude-followed filtering.
+- The dedicated `/discover` route uses the artwork-overlay design on mobile
+  and desktop, retaining its description/media preview, up to 20 results,
+  and backend exclude-followed filtering.
 
 ## Related Pages
 

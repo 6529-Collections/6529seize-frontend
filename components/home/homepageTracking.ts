@@ -34,6 +34,7 @@ const HOMEPAGE_ACTIONS = [
   "Mint",
   "Manage subscriptions",
   "About subscriptions",
+  "About submissions",
   "View all",
   "Open drop",
   "Open wave",
