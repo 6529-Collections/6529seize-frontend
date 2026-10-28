@@ -1,4 +1,5 @@
 import type { Page, Route } from "@playwright/test";
+import type { ApiWaveDropsFeedV2 } from "@/generated/models/ApiWaveDropsFeedV2";
 
 import {
   expect,
@@ -97,6 +98,7 @@ test.describe("Wave reaction local sandbox @auth @medium @local-only", () => {
     page,
   }) => {
     await gotoSandboxWave(page);
+    await installCanonicalDropReadFixture(page);
     await page.route(`**${REACTION_PATH}`, async (route) => {
       if (!["POST", "DELETE"].includes(route.request().method())) {
         await route.fallback();
@@ -131,9 +133,8 @@ test.describe("Wave reaction local sandbox @auth @medium @local-only", () => {
       .filter({ hasText: /^\D*1$/ });
     await expect(chip).toBeVisible();
     // A saved reaction must not surface a failure toast or be rolled back.
-    const failureToast = page.getByText(
-      /Network request failed|Could not confirm your reaction|Error (adding|removing) reaction/
-    );
+    // Next's route announcer is an empty alert; any notification text fails.
+    const failureToast = page.getByRole("alert").filter({ hasText: /\S/ });
     await expect(failureToast).toHaveCount(0);
     const removed = waitForRecoveryRead();
     await chip.click();
@@ -236,6 +237,29 @@ async function gotoSandboxWave(page: Page) {
 async function reloadSandboxWave(page: Page) {
   await page.reload({ waitUntil: "domcontentloaded" });
   await expectSandboxWaveReady(page);
+}
+
+async function installCanonicalDropReadFixture(page: Page) {
+  await page.route("**/api/v2/drops?**", async (route) => {
+    const url = new URL(route.request().url());
+    const ids = new Set(url.searchParams.get("ids")?.split(",") ?? []);
+    // The sandbox's batch endpoint is an empty page. Serve the actual current
+    // drop from its stateful wave read, including the embedded-wave contract.
+    const response = await route.fetch({
+      url: new URL(`/api/v2/waves/${SANDBOX_WAVE_ID}/drops`, url).toString(),
+    });
+    expect(response.ok()).toBe(true);
+    const feed = (await response.json()) as ApiWaveDropsFeedV2;
+    await route.fulfill({
+      json: {
+        data: feed.drops
+          .filter((drop) => ids.has(drop.id))
+          .map((drop) => ({ ...drop, wave: feed.wave })),
+        page: 1,
+        next: false,
+      },
+    });
+  });
 }
 
 async function expectSandboxWaveReady(page: Page) {
