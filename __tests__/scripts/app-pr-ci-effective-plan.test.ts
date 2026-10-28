@@ -87,6 +87,7 @@ describe("effective App PR CI plan", () => {
   it.each([
     "components/user/rep/modify-rep/UserPageRepModifyModal.tsx",
     "components/user/utils/rate/UserPageRateInput.tsx",
+    "components/react-query-wrapper/ReactQueryWrapper.tsx",
     "hooks/useRepAllocation.ts",
     "tests/social/profile-rep-edit-sandbox.spec.ts",
   ])("selects the profile dialog browser pack for %s", (file) => {

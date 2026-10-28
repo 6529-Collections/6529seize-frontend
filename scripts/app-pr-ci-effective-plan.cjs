@@ -107,6 +107,7 @@ function applyEffectiveAppPrCiPlan(plan) {
     (file) =>
       file.startsWith("components/user/rep/") ||
       file.startsWith("components/user/utils/rate/") ||
+      file === "components/react-query-wrapper/ReactQueryWrapper.tsx" ||
       file === "hooks/useRepAllocation.ts" ||
       file === "tests/social/profile-rep-edit-sandbox.spec.ts"
   );
