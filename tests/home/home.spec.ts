@@ -1283,8 +1283,10 @@ test.describe("Home Page @smoke @medium @large", () => {
         });
       }
     }
-    await start.getByRole("link", { name: "submit your own art", exact: true }).click();
-    await expect(page).toHaveURL(/\/about\/apply$/);
+    await Promise.all([
+      page.waitForURL(/\/about\/apply$/, { waitUntil: "domcontentloaded" }),
+      start.getByRole("link", { name: "submit your own art", exact: true }).click(),
+    ]);
     await expect(page.getByRole("heading", { name: "Apply", exact: true, level: 1 })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Seeking a Nomination (New Artists)", exact: true })).toBeVisible();
   });
@@ -1464,10 +1466,12 @@ test.describe("Home Page @smoke @medium @large", () => {
     expect(
       await firstCard.evaluate((card) => getComputedStyle(card).transform)
     ).toBe("none");
-    await firstCard.press("Enter");
-    await expect(page).toHaveURL(
-      new RegExp(originalHref!.replaceAll("/", "\\/"))
-    );
+    await Promise.all([
+      page.waitForURL(new RegExp(originalHref!.replaceAll("/", "\\/")), {
+        waitUntil: "domcontentloaded",
+      }),
+      firstCard.press("Enter"),
+    ]);
   });
 
   test("should display the home landing content", async ({ page }) => {
@@ -1739,7 +1743,10 @@ test.describe("Home Page @smoke @medium @large", () => {
     await expect(phase).toBeVisible();
     await expect(page.getByText("Upcoming", { exact: true })).toBeVisible();
     await expect(
-      page.getByRole("main").locator('[data-tooltip-id="allowlist-info"]')
+      page.getByRole("img", {
+        name: "The timer displays the current time remaining for a specific phase of the drop. Please refer to the distribution plan to check if you are in the allowlist.",
+        exact: true,
+      })
     ).toBeVisible();
     await expect(mint).toHaveAttribute("href", "/the-memes/mint");
     await expect(mint).toHaveCSS("border-radius", "8px");

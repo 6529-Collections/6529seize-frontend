@@ -153,6 +153,8 @@ function HomeCountdown({
               <InformationCircleIcon
                 data-tooltip-id="allowlist-info"
                 data-tooltip-content="The timer displays the current time remaining for a specific phase of the drop. Please refer to the distribution plan to check if you are in the allowlist."
+                role="img"
+                aria-hidden={false}
                 aria-label="The timer displays the current time remaining for a specific phase of the drop. Please refer to the distribution plan to check if you are in the allowlist."
                 tabIndex={0}
                 className="tw-size-4 tw-shrink-0 tw-cursor-help tw-text-iron-600 tw-transition-colors focus-visible:tw-rounded-full focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none"
