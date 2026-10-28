@@ -1,5 +1,5 @@
 import React from "react";
-import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { ModalTab } from "./ArtistPreviewModal";
@@ -18,27 +18,27 @@ export const ArtistPreviewModalTabs: React.FC<ArtistPreviewModalTabsProps> = ({
   const locale = useBrowserLocale();
 
   return (
-    <div className="tw-mt-4 tw-overflow-x-auto tw-px-6">
-      <TabToggleWithOverflow
-        variant="compactPills"
-        options={[
+    <div className="tw-mt-4 tw-px-6">
+      <CommonTabs<ModalTab>
+        items={[
           {
             key: "active",
+            value: "active",
             label: t(locale, "waves.artistPreview.activeSubmissions"),
             panelId,
           },
           {
             key: "winners",
+            value: "winners",
             label: t(locale, "waves.artistPreview.mintedMemes"),
             panelId,
           },
         ]}
-        activeKey={activeTab}
-        onSelect={(key) => {
-          if (key === "active" || key === "winners") {
-            onTabChange(key);
-          }
-        }}
+        activeItem={activeTab}
+        setSelected={onTabChange}
+        filterLabel={t(locale, "waves.artistPreview.submissionCategories")}
+        size="sm"
+        fill={false}
       />
     </div>
   );
