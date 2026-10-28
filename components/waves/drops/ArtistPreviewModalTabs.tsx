@@ -1,5 +1,5 @@
 import React from "react";
-import { TabToggle } from "@/components/common/TabToggle";
+import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { ModalTab } from "./ArtistPreviewModal";
@@ -19,7 +19,8 @@ export const ArtistPreviewModalTabs: React.FC<ArtistPreviewModalTabsProps> = ({
 
   return (
     <div className="tw-mt-4 tw-overflow-x-auto tw-px-6">
-      <TabToggle
+      <TabToggleWithOverflow
+        variant="compactPills"
         options={[
           {
             key: "active",
