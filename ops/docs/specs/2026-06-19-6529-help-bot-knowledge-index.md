@@ -7,6 +7,9 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The `profiles.identity-tab` record covers the existing-category Rep editor,
+its permission rules, stable allowance loading, retry action, and dismissal.
+
 The search record covers punctuation-tolerant Wave names across site search,
 sidebar search, composer mentions and the message-search Wave picker. It explains
 all-term matching, partial names, relevance ordering, literal wildcard characters,
