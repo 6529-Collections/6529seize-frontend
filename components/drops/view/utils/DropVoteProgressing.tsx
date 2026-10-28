@@ -170,7 +170,7 @@ export default function DropVoteProgressing({
         className={
           tooltipPortal
             ? "tw-max-w-[min(20rem,calc(100vw-2rem))] tw-whitespace-normal tw-text-left tw-leading-5"
-            : undefined
+            : ""
         }
         style={{
           padding: "4px 8px",

@@ -39,6 +39,8 @@ const WinnerTrophyCard: React.FC<{
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }> = ({ drop, onDropClick }) => {
   const extendedDrop = convertApiDropToExtendedDrop(drop);
+  const media = drop.parts[0]?.media;
+  const firstMedia = media?.[0];
   const decisionTime = drop.winning_context?.decision_time;
   const topRaters = drop.top_raters.slice(0, 3);
   const hasDecisionTime = typeof decisionTime === "number" && decisionTime > 0;
@@ -80,9 +82,9 @@ const WinnerTrophyCard: React.FC<{
 
         <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-2 tw-bg-iron-950 tw-p-4">
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 empty:tw-hidden">
-            {drop.parts[0]?.media?.[0] && (
+            {firstMedia && (
               <MediaTypeBadge
-                mimeType={drop.parts[0].media[0].mime_type}
+                mimeType={firstMedia.mime_type}
                 dropId={drop.id}
                 size="sm"
                 iconClassName="focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
