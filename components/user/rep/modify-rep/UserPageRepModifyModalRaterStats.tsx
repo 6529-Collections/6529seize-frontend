@@ -39,12 +39,12 @@ export default function UserPageRepModifyModalRaterStats({
   }
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-500">
+    <div className="tw-flex tw-flex-col tw-gap-2 tw-text-xs tw-font-normal tw-text-iron-400">
       <div className="tw-flex tw-min-h-10 tw-justify-between tw-gap-4">
         <span className="tw-min-w-0 tw-break-words">
           {t(locale, "rep.categories.edit.availableRep")}
         </span>
-        <span className="tw-w-32 tw-shrink-0 tw-text-right tw-font-semibold tw-tabular-nums tw-text-iron-300">
+        <span className="tw-w-32 tw-shrink-0 tw-text-right tw-font-medium tw-tabular-nums tw-text-iron-300">
           {isLoading ? "…" : formatNumberWithCommas(heroAvailableCredit)}
         </span>
       </div>
@@ -52,7 +52,7 @@ export default function UserPageRepModifyModalRaterStats({
         <span className="tw-min-w-0 tw-break-words">
           {t(locale, "rep.categories.edit.ratingLimit", { category })}
         </span>
-        <span className="tw-w-32 tw-shrink-0 tw-text-right tw-font-semibold tw-tabular-nums tw-text-iron-300">
+        <span className="tw-w-32 tw-shrink-0 tw-text-right tw-font-medium tw-tabular-nums tw-text-iron-300">
           {isLoading ? "…" : `+/- ${formatNumberWithCommas(minMaxValues.max)}`}
         </span>
       </div>
