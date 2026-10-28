@@ -17,6 +17,12 @@ Frontend staging retains its existing `ops/**`-only push exclusion. Dispatch
 `deploy-staging.yml` on `1a-staging` when an authorized ops-only change needs an
 actual deployment.
 
+The staging build first verifies that the committed help artifacts match the
+production publication profile. It then generates the staging profile, including
+staging-only help records, and verifies that those generated files remain unchanged
+through packaging. Staging-generated help data does not belong in the production
+source snapshot.
+
 ### Shared staging queue
 
 Frontend staging serializes whole deployment runs with `staging-deploy` and

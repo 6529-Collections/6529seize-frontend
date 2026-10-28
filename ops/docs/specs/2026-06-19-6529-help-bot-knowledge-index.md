@@ -38,9 +38,51 @@ individual check history. Back to list appears on mobile; desktop uses the
 visible list without a redundant back button. Automated outcome is distinct
 from deletion and manual review status.
 
+The `home.overview` record also describes the shared hero artwork and copy, with
+Connect wallet followed by Start here for logged-out visitors. The hero uses a
+fixed selection of Meme cards #1–5, with #1 at the front, independent of mint state. The visitor-only
+What is 6529? section explains art, Waves, and participation, linking to
+`/the-memes`, `/waves`, and The Memes - Main Stage Wave respectively.
+
+The `home.overview` record describes the shared discovery cards on the homepage:
+covers beside the content on mobile and filling the card behind a dark, image-tinted text
+fade on larger screens. Homepage
+cards retain wave descriptions and activity rather than showing latest chat
+messages or message authors. Explore Waves keeps its existing layout.
+
+The `home.overview` record describes the typography-only hero without artwork,
+while preserving the original copy, onboarding actions, and authentication rules.
+
+The `home.overview` record maps the first three How to start headings to the
+wallet flow, profile guide, and Waves. Collect or create has a plain heading and
+two inline links within its existing sentence: “Hold Meme Cards” opens
+`/the-memes` and “submit your own art” opens `/about/apply`, explaining submission
+eligibility and nominations for new artists. Restricted iOS visitors keep the
+browsing/community description without those links. The record includes the
+“Four steps into 6529.” introduction, the “Read the full guide” link, and
+“Explore Main Stage” as the A real say card's link to
+`/waves/b6128077-ea78-4dd9-b381-52c4eadb2077`.
+
 The `home.overview` record explains the Coming up full-width vertical card
 list below 768px, keyboard navigation through card links, tablet/desktop grid,
-and drop, profile and wave destinations.
+and drop, profile and wave destinations. It also explains the optional next
+voting-decision time in the visitor's local time zone, including daylight-saving
+adjustments, and omission when no future scheduled decision is available. The
+label uses today, tomorrow, a weekday for two to six days ahead, or a short
+month/day for later dates. Its hover title retains the full local timestamp.
+
+The `home.overview` record also describes the homepage-only two-row countdown,
+with the complete phase heading above a dark timer row, zero-padded segments,
+and responsive wrapping. The countdown uses background contrast without outlines.
+Subscription awareness appears above the Latest Drop countdown. It keeps its
+toggle beside the title and its contextual action aligned right, with details
+below and a stacked fallback in narrow cards.
+The shared phase-selection and mint-action rules are unchanged.
+
+The `the-memes.minting` record explains that Latest Drop and mapped Next Drop
+cards omit Your allowance until a wallet address is available. Connected wallets
+retain allocation pills and distinct loading, unpublished, empty, and unavailable
+states; an allocation does not guarantee that it remains mintable.
 
 The `waves.artist-submissions-popup` record explains the artist activity icon,
 Active Submissions promise badges, and the distinction between reading a badge,

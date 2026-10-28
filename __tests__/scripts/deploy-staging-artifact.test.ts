@@ -831,6 +831,42 @@ bash() {
 });
 
 describe("staging immutable artifact deployment", () => {
+  it("validates canonical help before generating and preserving the staging variant", () => {
+    const buildStep = workflow.jobs["build-staging-artifact"].steps.find(
+      (step: { name?: string }) =>
+        step.name === "Build and package exact staging bytes"
+    );
+    const buildCommands: string = buildStep.run;
+    const canonicalGeneration = buildCommands.indexOf(
+      "BASE_ENDPOINT=https://6529.io ./bin/6529 run help-index:sync"
+    );
+    const canonicalCheck = buildCommands.indexOf(
+      'test -z "$(git status --porcelain=v1 --untracked-files=all -- public/help-index.json public/glossary.json public/llms.txt)"'
+    );
+    const stagingGeneration = buildCommands.indexOf(
+      "\n./bin/6529 run help-index:sync",
+      canonicalCheck
+    );
+    const stagingSnapshot = buildCommands.indexOf(
+      'help_artifact_checksums="$(sha256sum public/help-index.json public/glossary.json public/llms.txt)"'
+    );
+    const build = buildCommands.indexOf("./bin/6529 run base-build");
+    const packageValidation = buildCommands.indexOf(
+      "node scripts/package-public-review-artifacts.cjs assert-zip"
+    );
+    const unchangedCheck = buildCommands.indexOf(
+      `printf '%s\\n' "$help_artifact_checksums" | sha256sum -c -`
+    );
+
+    expect(canonicalGeneration).toBeGreaterThanOrEqual(0);
+    expect(canonicalCheck).toBeGreaterThan(canonicalGeneration);
+    expect(stagingGeneration).toBeGreaterThan(canonicalCheck);
+    expect(stagingSnapshot).toBeGreaterThan(stagingGeneration);
+    expect(build).toBeGreaterThan(stagingSnapshot);
+    expect(packageValidation).toBeGreaterThan(build);
+    expect(unchangedCheck).toBeGreaterThan(packageValidation);
+  });
+
   it("keeps the remote activation script syntactically valid and fail-closed", () => {
     expect(childProcess.spawnSync("bash", ["-n", scriptPath]).status).toBe(0);
     expect(script).toContain('[[ "$ARTIFACT_URL" == https://* ]]');
