@@ -153,10 +153,15 @@ async function expectDetailActionHover(page: Page, button: Locator) {
   await expect(button).toHaveCSS("border-color", "rgb(76, 76, 85)");
   await expect(button).toHaveCSS("color", "rgb(255, 255, 255)");
   if ((await button.getAttribute("aria-haspopup")) === "menu") {
-    await expect(button.locator("svg")).toHaveCSS(
-      "color",
-      "rgb(255, 255, 255)"
-    );
+    await expect
+      .poll(() =>
+        button.evaluate((element) =>
+          getComputedStyle(element.querySelector("svg")!).getPropertyValue(
+            "color"
+          )
+        )
+      )
+      .toBe("rgb(255, 255, 255)");
   }
   await page.mouse.down();
   try {
