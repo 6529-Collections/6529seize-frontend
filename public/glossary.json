@@ -409,6 +409,8 @@
         "rate nic",
         "rep dialog",
         "grant rep",
+        "edit rep category",
+        "rep allowance error",
         "rep category spelling",
         "memesnominee rep",
         "activity log"
@@ -422,6 +424,7 @@
         "Grant REP keeps its compact category pills and existing search and selection behavior, including similarly named categories remaining separate and selectable.",
         "The exact MemesNominee category pill is marked as counting toward the 50,000 REP submission requirement and is surfaced first when the typed value differs only by capitalization, spacing, punctuation, or Unicode width; search guidance stays neutral until a category is selected, selecting exact MemesNominee confirms the requirement in green, and selecting a subdued look-alike shows an amber note explaining that it remains a separate category.",
         "In the Grant REP and Rate NIC dialogs, type the desired rating amount. The plus/minus symbols are informational, not buttons. Use Grant REP or Rate to save, or Cancel to leave without saving.",
+        "The category pencil in Received opens an editor for the viewer's existing total Rep contribution. It is hidden when signed out or viewing the acting profile; authorized proxies use their grantor's allowance. The editor is a desktop dialog or mobile bottom sheet. Allowance loading keeps the panel stable; if it fails, Try again reloads it and Save stays disabled. Save updates the total; Cancel, Close and Escape dismiss the editor and return focus to the pencil.",
         "Owner and permission rules affect which identity actions are visible."
       ],
       "canonical_path": "/{user}",
