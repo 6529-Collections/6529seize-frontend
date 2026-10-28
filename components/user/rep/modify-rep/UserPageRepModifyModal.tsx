@@ -187,6 +187,7 @@ export default function UserPageRepModifyModal({
               onChange={setDraftRating}
               minMax={minMaxValues}
               isProxy={!!activeProfileProxy}
+              variant="form"
               inputId={inputId}
               readOnly={isUnavailable}
               autoFocus
