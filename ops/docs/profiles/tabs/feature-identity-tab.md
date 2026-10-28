@@ -129,12 +129,14 @@ Mobile (`< lg`):
 
 - Surfaces: the Grant REP and Rate NIC dialogs under the profile Identity tab,
   including their desktop/mobile entry points, the category editor, and Current /
-  Adjustment summaries. The editor's loading and retry states use `en-US`
-  fallback messages in untranslated locales.
+  Adjustment summaries. The category editor's title, allowance labels, input
+  label, actions, feedback, and loading/retry states use `en-US` fallback
+  messages in untranslated locales.
 - Current fallback: `rep.categories.grant.*` messages use the canonical `en-US`
   source copy in locales without translated entries, including the REP amount
-  label. Dialog titles, NIC labels and actions, unavailable-state Cancel buttons,
-  proxy labels, rating feedback, and adjustment summaries retain existing English
+  label. Outside the category editor, dialog titles, NIC labels and actions,
+  unavailable-state Cancel buttons, proxy labels, and rating feedback retain
+  existing English strings. Shared adjustment summaries also retain English
   strings. Rating summaries retain the existing comma-separated number formatting.
 - User impact: supported non-English locales can see English copy and number
   formatting while both rating flows remain functional.

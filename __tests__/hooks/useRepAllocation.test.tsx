@@ -34,12 +34,38 @@ function setup(activeProfileProxy: ApiProfileProxy | null = null) {
       </QueryClientProvider>
     );
   }
-  return renderHook(() => useRepAllocation({ profile, category: "Artist" }), {
-    wrapper: Wrapper,
-  });
+  return renderHook(
+    ({ target }) => useRepAllocation({ profile: target, category: "Artist" }),
+    { wrapper: Wrapper, initialProps: { target: profile } }
+  );
 }
 
 beforeEach(() => jest.resetAllMocks());
+
+it("keeps allowance caches separate for identities without handles", async () => {
+  fetchApi.mockResolvedValueOnce({
+    rep_rates_left_for_rater: 80,
+    rating_stats: [],
+  });
+  const { result, rerender } = setup();
+  await waitFor(() => expect(result.current.heroAvailableRep).toBe(80));
+  fetchApi.mockResolvedValueOnce({
+    rep_rates_left_for_rater: 30,
+    rating_stats: [],
+  });
+  rerender({ target: { handle: null, query: "0xAbC" } as ApiIdentity });
+  await waitFor(() => expect(result.current.heroAvailableRep).toBe(30));
+  fetchApi.mockResolvedValueOnce({
+    rep_rates_left_for_rater: 50,
+    rating_stats: [],
+  });
+  rerender({ target: { handle: null, display: "0xDeF" } as ApiIdentity });
+  await waitFor(() => expect(result.current.heroAvailableRep).toBe(50));
+  expect(fetchApi).toHaveBeenLastCalledWith({
+    endpoint: "profiles/0xdef/rep/ratings/received",
+    params: { rater: "viewer" },
+  });
+});
 
 it.each([20, -20])(
   "preserves non-proxy limits for an existing contribution of %s",

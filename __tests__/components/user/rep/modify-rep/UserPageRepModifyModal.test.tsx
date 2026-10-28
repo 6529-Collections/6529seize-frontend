@@ -241,6 +241,24 @@ it("does not submit if authentication is declined", async () => {
   });
 });
 
+it("preserves the draft and allows retry when authentication rejects", async () => {
+  requestAuth.mockRejectedValueOnce(new Error("Authentication unavailable"));
+  renderModal();
+  const input = await screen.findByRole("textbox");
+  fireEvent.change(input, { target: { value: "30" } });
+  await userEvent.click(screen.getByRole("button", { name: "Save" }));
+  expect(post).not.toHaveBeenCalled();
+  expect(setToast).toHaveBeenCalledWith(
+    expect.objectContaining({
+      type: "error",
+      title: "Couldn't update this Rep rating.",
+    })
+  );
+  expect(input).toHaveValue("30");
+  await userEvent.click(screen.getByRole("button", { name: "Save" }));
+  await waitFor(() => expect(post).toHaveBeenCalledTimes(1));
+});
+
 it("does not overwrite an edited amount when the allowance refreshes", async () => {
   const { rerender } = renderModal();
   const input = await screen.findByRole("textbox");

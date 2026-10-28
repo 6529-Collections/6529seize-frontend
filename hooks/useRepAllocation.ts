@@ -25,18 +25,21 @@ export function useRepAllocation({
   retry: () => void;
 } {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const profileIdentity = (
+    profile.query ?? profile.handle ?? profile.display
+  ).toLowerCase();
 
   const proxyQuery = useQuery<ApiProfileRepRatesState>({
     queryKey: [
       QueryKey.PROFILE_REP_RATINGS,
       {
         rater: activeProfileProxy?.created_by.handle,
-        handleOrWallet: profile.handle,
+        handleOrWallet: profileIdentity,
       },
     ],
     queryFn: async () =>
       await commonApiFetch<ApiProfileRepRatesState>({
-        endpoint: `profiles/${profile.query ?? profile.handle ?? profile.display}/rep/ratings/received`,
+        endpoint: `profiles/${profileIdentity}/rep/ratings/received`,
         params: activeProfileProxy?.created_by.handle
           ? { rater: activeProfileProxy.created_by.handle }
           : {},
@@ -49,12 +52,12 @@ export function useRepAllocation({
       QueryKey.PROFILE_REP_RATINGS,
       {
         rater: connectedProfile?.handle,
-        handleOrWallet: profile.handle,
+        handleOrWallet: profileIdentity,
       },
     ],
     queryFn: async () =>
       await commonApiFetch<ApiProfileRepRatesState>({
-        endpoint: `profiles/${profile.query ?? profile.handle ?? profile.display}/rep/ratings/received`,
+        endpoint: `profiles/${profileIdentity}/rep/ratings/received`,
         params: connectedProfile?.handle
           ? { rater: connectedProfile.handle }
           : {},

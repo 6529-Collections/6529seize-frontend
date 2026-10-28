@@ -11,7 +11,7 @@ import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
-import { t } from "@/i18n/messages";
+import { t, tRich } from "@/i18n/messages";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { useContext, useId, useState } from "react";
@@ -67,7 +67,10 @@ export default function UserPageRepModifyModal({
         body,
       }),
     onSuccess: () => {
-      setToast({ message: "Rep updated.", type: "success" });
+      setToast({
+        message: t(locale, "rep.categories.edit.updated"),
+        type: "success",
+      });
       onProfileRepModify({
         targetProfile: profile,
         connectedProfile,
@@ -78,8 +81,8 @@ export default function UserPageRepModifyModal({
     onError: (error) => {
       setToast({
         type: "error",
-        title: "Couldn't update this Rep rating.",
-        description: "Please try again.",
+        title: t(locale, "rep.categories.edit.updateError"),
+        description: t(locale, "rep.categories.edit.tryAgain"),
         details: getToastErrorDetails(error),
       });
     },
@@ -90,18 +93,33 @@ export default function UserPageRepModifyModal({
     event.preventDefault();
     if (mutating || isSaveDisabled) return;
     setMutating(true);
-    const { success } = await requestAuth();
-    if (!success) {
-      setToast({ message: "Log in to continue.", type: "error" });
+    try {
+      const { success } = await requestAuth();
+      if (!success) {
+        setToast({
+          message: t(locale, "rep.categories.edit.loginRequired"),
+          type: "error",
+        });
+        setMutating(false);
+        return;
+      }
+      addRepMutation.mutate({ amount: newRating, category });
+    } catch (error) {
+      setToast({
+        type: "error",
+        title: t(locale, "rep.categories.edit.updateError"),
+        description: t(locale, "rep.categories.edit.tryAgain"),
+        details: getToastErrorDetails(error),
+      });
       setMutating(false);
-      return;
     }
-    addRepMutation.mutate({ amount: newRating, category });
   };
 
   return (
     <MobileWrapperDialog
-      title={`Add Rep to ${profile.query ?? profile.handle ?? profile.display}`}
+      title={t(locale, "rep.categories.edit.title", {
+        name: profile.query ?? profile.handle ?? profile.display,
+      })}
       isOpen={isOpen}
       onClose={close}
       onAfterLeave={onClose}
@@ -152,11 +170,16 @@ export default function UserPageRepModifyModal({
             htmlFor={inputId}
             className="tw-block tw-break-words tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-500"
           >
-            Your total Rep for{" "}
-            <span className="tw-font-semibold tw-text-iron-300">
-              {category}
-            </span>
-            :
+            {tRich(locale, "rep.categories.edit.totalLabel", {
+              category: (
+                <span
+                  key="category"
+                  className="tw-font-semibold tw-text-iron-300"
+                >
+                  {category}
+                </span>
+              ),
+            })}
           </label>
           <div className="tw-relative tw-mt-1.5 tw-flex">
             <UserPageRateInput
@@ -189,7 +212,7 @@ export default function UserPageRepModifyModal({
               size="lg"
               fullWidth
             >
-              Save
+              {t(locale, "rep.categories.edit.save")}
             </Button>
             <Button
               onClick={close}
@@ -198,7 +221,7 @@ export default function UserPageRepModifyModal({
               size="lg"
               fullWidth
             >
-              Cancel
+              {t(locale, "rep.categories.edit.cancel")}
             </Button>
           </div>
         </form>
