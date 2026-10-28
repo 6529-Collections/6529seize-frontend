@@ -3744,12 +3744,14 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       const dialog = page.getByRole("dialog").last();
       if (popup === "artist submissions") {
         try {
-          const loading = dialog
+          const loading = page
+            .getByRole("dialog")
+            .last()
             .locator(".is-mini")
             .getByRole("status")
             .filter({ hasText: "Loading competition…" });
           await expect(loading).toBeAttached();
-          const card = dialog.locator(".tw-shadow-lg");
+          const card = page.getByRole("dialog").last().locator(".tw-shadow-lg");
           // Loading vote data must not reserve an empty footer below the artwork.
           await expect
             .poll(() =>
