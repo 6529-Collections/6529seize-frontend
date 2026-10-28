@@ -163,12 +163,11 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(
       dialog.getByRole("button", { name: "Save", exact: true })
     ).toBeDisabled();
-    // Measure after the entrance animation; the delayed allowance must not move it.
-    await expect
-      .poll(() =>
-        dialog.evaluate((el) => el.getAnimations({ subtree: true }).length)
-      )
-      .toBe(0);
+    // WebKit can report no animations before the entry transition starts.
+    // Wait for Headless UI to finish entering before measuring the panel.
+    await expect(dialogPanel(page).locator("..")).not.toHaveAttribute(
+      "data-enter"
+    );
     const loadingBox = await dialogPanel(page).boundingBox();
     resolveAllowance();
     await expect(input).toHaveValue("20");
