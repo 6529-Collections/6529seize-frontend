@@ -676,7 +676,7 @@ export default function TheMemesComponent({
             aria-label={t(locale, "theMemes.sorting.regionLabel")}
             className="tw-mb-5 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800/80 tw-pb-4 max-sm:tw-sticky max-sm:tw-top-0 max-sm:tw-z-30 max-sm:-tw-mx-4 max-sm:tw-mb-3.5 max-sm:tw-border-iron-800/90 max-sm:tw-bg-[#0D0D0F] max-sm:tw-py-2.5 max-sm:tw-pl-4"
           >
-            <div className="tw-flex tw-items-center tw-gap-2.5">
+            <div className="tw-flex tw-items-center tw-gap-5">
               <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-2.5 lg:[body:not(.capacitor-native)_&]:tw-gap-1">
                 <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
                   {t(locale, "theMemes.sorting.sortBy")}
