@@ -141,9 +141,9 @@ export default function UserPageRepModifyModal({
             />
           </div>
           {!repState && !isError && (
-            <span role="status" className="tw-sr-only">
+            <output className="tw-sr-only">
               {t(locale, "rep.categories.edit.loading")}
-            </span>
+            </output>
           )}
           {isError && (
             <div className="tw-absolute tw-inset-0 tw-flex tw-flex-col tw-items-start tw-justify-center tw-gap-2">
