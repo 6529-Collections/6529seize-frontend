@@ -88,7 +88,7 @@ export function NextMintLeadingSection() {
         <h2 id="coming-up-heading" className={HOME_SECTION_TITLE_CLASSES}>
           {t(locale, "home.comingUp.title")}
         </h2>
-        <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-400 md:tw-text-[15px]">
+        <p className="tw-mb-0 tw-mt-3 tw-text-pretty tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-400 md:tw-text-[15px]">
           {t(locale, "home.comingUp.subtitle")}
           <ComingUpNextDecision timestamp={nextDecisionTime} locale={locale} />
         </p>

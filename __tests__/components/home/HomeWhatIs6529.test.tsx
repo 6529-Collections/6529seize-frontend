@@ -18,7 +18,7 @@ it.each(["en-US", "en-GB", "fr-FR", "es-ES", "de-DE"] as const)(
     for (const [name, href] of [
       ["Browse The Memes", "/the-memes"],
       ["Browse Waves", "/waves"],
-      ["How voting works", "/network/tdh"],
+      ["Explore Main Stage", "/waves/b6128077-ea78-4dd9-b381-52c4eadb2077"],
     ] as const) {
       expect(section.getByRole("link", { name })).toHaveAttribute("href", href);
     }
@@ -32,7 +32,7 @@ it("tracks all explanation links using fixed analytics labels", () => {
   for (const [name, action] of [
     ["Browse The Memes", "Browse Memes"],
     ["Browse Waves", "Browse Waves"],
-    ["How voting works", "How voting works"],
+    ["Explore Main Stage", "How voting works"],
   ] as const) {
     expect(
       getHomepageClick(container, screen.getByRole("link", { name }))

@@ -29,7 +29,6 @@ const DEFAULT_WAVES_LIMIT = 6;
 
 interface ExploreWavesSectionProps {
   readonly headingVariant?: "default" | "page" | undefined;
-  readonly cardVariant?: "default" | "home" | undefined;
   readonly title?: string | undefined;
   readonly subtitle?: string | null | undefined;
   readonly limit?: number | undefined;
@@ -53,7 +52,6 @@ interface ExploreWavesSectionProps {
 
 export function ExploreWavesSection({
   headingVariant = "default",
-  cardVariant = "default",
   title,
   subtitle,
   limit = DEFAULT_WAVES_LIMIT,
@@ -265,18 +263,18 @@ export function ExploreWavesSection({
                     className="tw-h-full tw-w-full"
                   >
                     <ExploreWaveCardSkeleton
-                      variant={cardVariant}
                       horizontalOnMobile={headingVariant === "default"}
+                      artworkOverlay={headingVariant === "page"}
                     />
                   </div>
                 ))
               : waves?.map((wave) => (
                   <div key={wave.id} className="tw-h-full tw-w-full">
                     <ExploreWaveCard
-                      variant={cardVariant}
                       wave={wave}
                       horizontalOnMobile={headingVariant === "default"}
-                      subtleHover={headingVariant === "default"}
+                      artworkOverlay={headingVariant === "page"}
+                      subtleHover
                     />
                   </div>
                 ))}

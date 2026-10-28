@@ -42,18 +42,26 @@ The `home.overview` record also describes the shared hero artwork and copy, with
 Connect wallet followed by Start here for logged-out visitors. The hero uses a
 fixed selection of Meme cards #1–5, with #1 at the front, independent of mint state. The visitor-only
 What is 6529? section explains art, Waves, and participation, linking to
-`/the-memes`, `/waves`, and `/network/tdh` respectively.
+`/the-memes`, `/waves`, and The Memes - Main Stage Wave respectively.
 
-The `home.overview` record distinguishes the compact homepage wave cards from
-Explore Waves. Homepage cards retain wave descriptions and activity rather than
-showing latest chat messages or message authors.
+The `home.overview` record describes the shared discovery cards on the homepage:
+covers beside the content on mobile and filling the card behind a dark, image-tinted text
+fade on larger screens. Homepage
+cards retain wave descriptions and activity rather than showing latest chat
+messages or message authors. Explore Waves keeps its existing layout.
 
 The `home.overview` record describes the typography-only hero without artwork,
 while preserving the original copy, onboarding actions, and authentication rules.
 
-The `home.overview` record maps the four clickable How to start headings to
-the wallet flow, profile guide, The Memes, and Waves. It also retains the
-“Four steps into 6529.” introduction and guide link.
+The `home.overview` record maps the first three How to start headings to the
+wallet flow, profile guide, and Waves. Collect or create has a plain heading and
+two inline links within its existing sentence: “Hold Meme Cards” opens
+`/the-memes` and “submit your own art” opens `/about/apply`, explaining submission
+eligibility and nominations for new artists. Restricted iOS visitors keep the
+browsing/community description without those links. The record includes the
+“Four steps into 6529.” introduction, the “Read the full guide” link, and
+“Explore Main Stage” as the A real say card's link to
+`/waves/b6128077-ea78-4dd9-b381-52c4eadb2077`.
 
 The `home.overview` record explains the Coming up full-width vertical card
 list below 768px, keyboard navigation through card links, tablet/desktop grid,

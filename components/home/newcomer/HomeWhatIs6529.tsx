@@ -10,7 +10,11 @@ import { HOME_ACTION_ARROW_CLASSES } from "../homeInteractionStyles";
 const TOPICS = [
   { id: "art", href: "/the-memes", trackingAction: "Browse Memes" },
   { id: "waves", href: "/waves", trackingAction: "Browse Waves" },
-  { id: "voting", href: "/network/tdh", trackingAction: "How voting works" },
+  {
+    id: "voting",
+    href: "/waves/b6128077-ea78-4dd9-b381-52c4eadb2077",
+    trackingAction: "How voting works",
+  },
 ] as const;
 
 const MEME_THUMBNAILS = [

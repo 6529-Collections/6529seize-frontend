@@ -59,9 +59,7 @@ jest.mock("@/components/home/newcomer/HomeHowToStart", () => ({
 }));
 
 jest.mock("@/components/home/explore-waves/ExploreWavesSection", () => ({
-  ExploreWavesSection: ({ cardVariant }: { readonly cardVariant?: string }) => (
-    <div data-card-variant={cardVariant}>Explore waves</div>
-  ),
+  ExploreWavesSection: () => <div>Explore waves</div>,
 }));
 
 const useSeizeConnectContextMock = jest.mocked(useSeizeConnectContext);
@@ -98,10 +96,7 @@ describe("HomePageContent", () => {
           screen.getByText("Hero")
         );
       }
-      expect(screen.getByText("Explore waves")).toHaveAttribute(
-        "data-card-variant",
-        "home"
-      );
+      expect(screen.getByText("Explore waves")).toBeInTheDocument();
       expect(screen.queryByText("Boosted drops")).not.toBeInTheDocument();
       expect(screen.getByText("Latest drop")).toBeInTheDocument();
     }

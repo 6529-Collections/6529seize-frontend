@@ -26,13 +26,14 @@ next route.
 - Logged-out `What is 6529?`:
   - `Browse The Memes`: `/the-memes`
   - `Browse Waves`: `/waves`
-  - `How voting works`: `/network/tdh`
+  - `Explore Main Stage`: `/waves/b6128077-ea78-4dd9-b381-52c4eadb2077`
 - Logged-out `How to start`:
   - `Connect wallet`: opens the wallet connection flow
   - `Create profile`: `/join-6529#join-step-profile`
-  - `View collections`: `/the-memes`
-  - `Browse Waves`: `/waves`
-  - Guide: `/join-6529`
+  - `Join a Wave`: `/waves`
+  - Step 4 inline `Hold Meme Cards`: `/the-memes`
+  - Step 4 inline `submit your own art`: `/about/apply`
+  - `Read the full guide`: `/join-6529`
 - `Latest Drop`:
   - Title: `/the-memes/{id}`
   - Artist pills: `/{handle}` (one or more)
@@ -65,7 +66,7 @@ next route.
 2. If logged out, use the compact newcomer actions to either:
    - Select `Start here` to continue through `/join-6529`.
    - Select `Connect wallet` to begin connecting immediately.
-   - Browse The Memes, Waves, or the TDH explanation through `What is 6529?`.
+   - Browse The Memes, Waves, or Main Stage through `What is 6529?`.
    - Keep browsing without a wallet and continue into current activity.
 3. Open `/network/health` from the heart shortcut when needed.
 4. Wait for the top slot to resolve:

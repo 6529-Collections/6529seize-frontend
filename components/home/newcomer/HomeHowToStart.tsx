@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { formatInteger } from "@/i18n/format";
-import { t } from "@/i18n/messages";
+import { t, tRich } from "@/i18n/messages";
 import {
   HOME_ACTION_ARROW_CLASSES,
   HOME_SECTION_TITLE_CLASSES,
@@ -15,6 +15,9 @@ import { useHomeWalletConnect } from "./useHomeWalletConnect";
 
 const STEP_ACTION_CLASSES =
   "tw-group/action tw-inline-flex tw-min-h-10 tw-max-w-full tw-items-center tw-gap-2 tw-rounded-sm tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-base tw-font-semibold tw-leading-6 tw-tracking-[-0.02em] tw-text-iron-100 tw-no-underline tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-4 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none";
+
+const STEP_INLINE_LINK_CLASSES =
+  "tw-rounded-sm tw-text-iron-300 tw-underline tw-decoration-iron-600 tw-underline-offset-4 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none";
 
 export default function HomeHowToStart() {
   const locale = useBrowserLocale();
@@ -43,25 +46,43 @@ export default function HomeHowToStart() {
       href: "/join-6529#join-step-profile",
     },
     {
-      id: "create",
-      trackingAction: "View collections",
-      title: t(locale, "home.start.create.title"),
-      description: t(
-        locale,
-        hideNftPurchasing
-          ? "home.start.create.browseDescription"
-          : "home.start.create.description"
-      ),
-      action: t(locale, "home.start.create.action"),
-      href: "/the-memes",
-    },
-    {
       id: "community",
       trackingAction: "Browse Waves",
       title: t(locale, "home.start.community.title"),
       description: t(locale, "home.start.community.description"),
       action: t(locale, "home.whatIs.waves.action"),
       href: "/waves",
+    },
+    {
+      id: "create",
+      trackingAction: "View collections",
+      title: t(locale, "home.start.create.title"),
+      description: hideNftPurchasing
+        ? t(locale, "home.start.create.browseDescription")
+        : tRich(locale, "home.start.create.description", {
+            collect: (
+              <Link
+                key="collect"
+                href="/the-memes"
+                data-home-action="View collections"
+                className={STEP_INLINE_LINK_CLASSES}
+              >
+                {t(locale, "home.start.create.collectLink")}
+              </Link>
+            ),
+            create: (
+              <Link
+                key="create"
+                href="/about/apply"
+                data-home-action="About submissions"
+                className={STEP_INLINE_LINK_CLASSES}
+              >
+                {t(locale, "home.start.create.submitLink")}
+              </Link>
+            ),
+          }),
+      action: t(locale, "home.start.create.title"),
+      href: null,
     },
   ];
 
@@ -111,7 +132,12 @@ export default function HomeHowToStart() {
               </span>
               <div className="tw-min-w-0 md:tw-mt-6">
                 <h3 className="tw-m-0">
-                  {step.href ? (
+                  {step.id === "create" && (
+                    <span className="tw-flex tw-min-h-10 tw-items-center tw-text-base tw-font-semibold tw-leading-6 tw-tracking-[-0.02em] tw-text-iron-100">
+                      {step.title}
+                    </span>
+                  )}
+                  {step.href && (
                     <Link
                       href={step.href}
                       title={step.action}
@@ -127,7 +153,8 @@ export default function HomeHowToStart() {
                         }
                       />
                     </Link>
-                  ) : (
+                  )}
+                  {step.id === "wallet" && (
                     <button
                       type="button"
                       data-home-action={step.trackingAction}
@@ -152,7 +179,7 @@ export default function HomeHowToStart() {
                     </button>
                   )}
                 </h3>
-                <p className="tw-mb-0 tw-mt-2 tw-text-[13px] tw-leading-relaxed tw-text-iron-400 md:tw-text-sm">
+                <p className="tw-mb-0 tw-mt-2 tw-text-pretty tw-text-[13px] tw-leading-relaxed tw-text-iron-400 md:tw-text-sm">
                   {step.description}
                 </p>
               </div>

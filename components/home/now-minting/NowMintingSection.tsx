@@ -29,7 +29,7 @@ export default function NowMintingSection({
               <div className="tw-relative tw-min-h-[clamp(360px,65vw,640px)] tw-w-full tw-rounded-none tw-bg-iron-800/50 motion-safe:tw-animate-pulse" />
             </div>
 
-            <div className="tw-min-w-0 tw-p-5 md:tw-p-6 lg:tw-col-span-6 lg:tw-p-8 xl:tw-col-span-4">
+            <div className="tw-min-w-0 tw-px-5 tw-py-8 md:tw-px-6 md:tw-py-10 lg:tw-col-span-6 lg:tw-p-8 xl:tw-col-span-4">
               <div className="tw-flex tw-flex-col tw-gap-8 lg:tw-gap-10">
                 <div className="tw-space-y-2">
                   <div className="tw-h-4 tw-w-24 tw-rounded tw-bg-iron-800/50 motion-safe:tw-animate-pulse" />
@@ -95,7 +95,7 @@ export default function NowMintingSection({
             <HomeNftArtwork nft={nft} />
           </div>
 
-          <div className="tw-min-w-0 tw-p-5 md:tw-p-6 lg:tw-col-span-6 lg:tw-p-8 xl:tw-col-span-4">
+          <div className="tw-min-w-0 tw-px-5 tw-py-8 md:tw-px-6 md:tw-py-10 lg:tw-col-span-6 lg:tw-p-8 xl:tw-col-span-4">
             <NowMintingDetails nft={nft} />
           </div>
         </div>

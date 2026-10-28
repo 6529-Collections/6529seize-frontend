@@ -34,7 +34,7 @@ export default function HomePageContent() {
       {showNewcomerIntro && <HomeHowToStart />}
       <HomePageTextSection />
       <NextMintLeadingSection />
-      <ExploreWavesSection cardVariant="home" />
+      <ExploreWavesSection />
     </div>
   );
 }

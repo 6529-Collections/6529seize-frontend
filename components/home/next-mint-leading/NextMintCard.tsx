@@ -54,7 +54,7 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
     <div className="tw-group tw-min-w-0 tw-text-left">
       <div className="tw-relative tw-flex tw-h-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 tw-transition-colors tw-duration-200 tw-ease-out focus-within:tw-border-white/20 desktop-hover:hover:tw-border-white/20 motion-reduce:tw-transition-none">
         <div className="tw-flex tw-shrink-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-px-4 tw-py-4">
-          <div className="tw-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-border-white/[0.08] tw-px-2 tw-py-1">
+          <div className="tw-flex tw-items-center tw-gap-2">
             <span
               aria-hidden="true"
               className="tw-size-1.5 tw-shrink-0 tw-rounded-full tw-bg-emerald-500"
@@ -63,7 +63,7 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
               NEXT MINT
             </span>
           </div>
-          <span className="tw-rounded-full tw-border tw-border-solid tw-border-white/[0.08] tw-px-2 tw-py-1 tw-text-[10px] tw-font-medium tw-tabular-nums tw-leading-4 tw-text-iron-400">
+          <span className="tw-text-xs tw-font-medium tw-tabular-nums tw-leading-4 tw-text-iron-400">
             {timestamp}
           </span>
         </div>
@@ -75,7 +75,7 @@ export const NextMintCard = ({ drop }: NextMintCardProps) => {
               "max-md:has-[img.tw-opacity-100]:tw-aspect-auto max-md:[&_[data-drop-image-content]]:tw-relative max-md:[&_[data-drop-image-content]]:tw-block max-md:[&_img]:!tw-relative max-md:[&_img]:tw-block max-md:[&_img]:!tw-h-auto max-md:[&_img]:!tw-max-h-none"
           )}
         >
-          <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center [&>div]:tw-mx-0">
+          <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center [&>div]:tw-mx-0 [&>div]:tw-justify-center">
             {media ? (
               <DropListItemContentMedia
                 media_mime_type={media.mime_type}

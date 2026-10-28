@@ -69,18 +69,45 @@ it.each(["en-US", "en-GB", "fr-FR", "es-ES", "de-DE"] as const)(
   (locale) => {
     jest.mocked(useBrowserLocale).mockReturnValue(locale);
     render(<HomeHowToStart />);
+    expect(screen.getByText("Four steps into 6529.")).toBeVisible();
     expect(screen.getAllByRole("listitem")).toHaveLength(4);
+    expect(
+      screen
+        .getAllByRole("heading", { level: 3 })
+        .map((step) => step.textContent)
+    ).toEqual([
+      "Connect wallet",
+      "Create profile",
+      "Join a Wave",
+      "Collect or create",
+    ]);
     expect(
       screen.getByRole("link", { name: "Create profile" })
     ).toHaveAttribute("href", "/join-6529#join-step-profile");
     expect(
-      screen.getByRole("link", { name: "Create, collect or vote" })
-    ).toHaveAttribute("href", "/the-memes");
+      screen.queryByRole("link", { name: "Collect or create" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Hold Meme Cards" })).toHaveAttribute(
+      "href", "/the-memes"
+    );
+    expect(screen.getByRole("link", { name: "submit your own art" })).toHaveAttribute(
+      "href", "/about/apply"
+    );
     expect(
-      screen.getByRole("link", { name: "Join the community" })
-    ).toHaveAttribute("href", "/waves");
+      screen.getByRole("heading", { name: "Collect or create" }).parentElement?.querySelector("p")
+    ).toHaveTextContent("Hold Meme Cards to earn voting weight, or submit your own art.");
     expect(
-      screen.getByRole("link", { name: "Open the Join 6529 guide" })
+      screen.queryByRole("link", { name: "Browse The Memes" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Submit your art" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Join a Wave" })).toHaveAttribute(
+      "href",
+      "/waves"
+    );
+    expect(
+      screen.getByRole("link", { name: "Read the full guide" })
     ).toHaveAttribute("href", "/join-6529");
     expect(
       screen.queryByRole("link", { name: "Do I need a wallet or ETH to start?" })
@@ -108,17 +135,23 @@ it.each([
       isCountryPending: country === "",
     } as ReturnType<typeof useCookieConsent>);
     render(<HomeHowToStart />);
-    expect(Boolean(screen.queryByText(/Submit art, mint or subscribe/))).toBe(
+    const description = screen.getByRole("heading", {
+      name: "Collect or create",
+    }).parentElement?.querySelector("p");
+    expect(description).toHaveTextContent(
       allowed
+        ? "Hold Meme Cards to earn voting weight, or submit your own art."
+        : "Explore the art and take part in the community."
     );
-    expect(
-      screen.getByRole("link", { name: "Create, collect or vote" })
-    ).toBeVisible();
+    expect(Boolean(screen.queryByRole("link", { name: "Hold Meme Cards" }))).toBe(allowed);
+    expect(Boolean(screen.queryByRole("link", { name: "submit your own art" }))).toBe(allowed);
   }
 );
 
 it("omits purchasing promotions from server HTML", () => {
-  expect(renderToString(<HomeHowToStart />)).not.toContain("mint or subscribe");
+  const html = renderToString(<HomeHowToStart />);
+  expect(html).not.toContain("Hold Meme Cards");
+  expect(html).not.toContain('href="/about/apply"');
 });
 
 it("opens the existing wallet flow and reflects an already open chooser", async () => {
@@ -155,9 +188,10 @@ it("tracks every getting-started action using fixed analytics labels", () => {
   for (const [name, action] of [
     ["Connect wallet", "Connect wallet"],
     ["Create profile", "Create profile"],
-    ["Create, collect or vote", "View collections"],
-    ["Join the community", "Browse Waves"],
-    ["Open the Join 6529 guide", "Get started"],
+    ["Hold Meme Cards", "View collections"],
+    ["submit your own art", "About submissions"],
+    ["Join a Wave", "Browse Waves"],
+    ["Read the full guide", "Get started"],
   ] as const) {
     const target =
       name === "Connect wallet"

@@ -4,9 +4,10 @@
 
 `/discover` renders a dedicated grid of active-wave cards.
 
-- Cards share the same artwork-led design and wave information as home
-  `Most active waves`, with artwork that fills rounded cards and fades into a
-  dark background behind the text.
+- Cards share the same artwork-led design and wave information as the homepage
+  `Tired of bot replies?` section, with artwork that fills rounded cards and fades into a
+  dark image-tinted background behind the text. This layout applies at every
+  breakpoint; the homepage retains horizontal cards below `768px`.
 - The dedicated route expands the list to 20 cards.
 - The route requests discovery data with `exclude_followed=true`.
 - There is no `View all` footer because `/discover` is already the expanded
@@ -48,11 +49,13 @@ from home discovery.
   otherwise it shows the Wave REP score out of 100. Screen-reader labels
   distinguish the raw total from the score.
 - Description text is limited to two lines. Cards keep space for the preview
-  when it is absent, with drop count and relative activity time aligned below.
+  when it is absent. Drop count and relative activity time sit beneath the name,
+  with scores below the preview.
 - Loading cards reuse the shared solid iron wave-card skeleton pattern while
   reserving the Discover card height.
-- Artwork is subtly desaturated at rest and returns to full color on hover or
-  keyboard focus. Touch cards retain full color.
+- Artwork retains its color. Desktop hover gently lifts the card and zooms the
+  cover; reduced motion disables the animation. The dark tint is sampled once
+  per loaded image URL and cached, with an Iron fallback if sampling is unavailable.
 - Sort and score filters use the shared chip style at every screen size:
   inactive chips have a soft gray fill, transparent border, and no shadow;
   the selected chip stays light. Compact layouts retain the existing sort sheet.
@@ -63,8 +66,8 @@ from home discovery.
 
 ## Edge Cases
 
-- Discovery cards share the same metadata, preview, and route mapping as home
-  `Most active waves` cards.
+- Discovery cards share the same metadata, preview, and route mapping as the homepage
+  `Tired of bot replies?` section cards.
 - Preview content comes from the wave description drop rather than the latest
   chat message.
 - Description previews retain their existing text and media handling; markdown
