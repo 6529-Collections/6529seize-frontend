@@ -9167,6 +9167,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           });
           await expect(voters).toBeVisible();
           const card = page
+            .getByRole("tabpanel")
             .locator(".tw-group.tw-cursor-pointer")
             .filter({ has: voters });
           await expect(card).toHaveCount(1);
