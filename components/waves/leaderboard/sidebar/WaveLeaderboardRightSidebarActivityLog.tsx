@@ -13,7 +13,7 @@ import {
   AnonymousAuthorAvatar,
   AnonymousAuthorName,
 } from "@/components/waves/drops/AnonymousDropAuthor";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
   ArrowRightIcon,
@@ -36,6 +36,7 @@ interface WaveLeaderboardRightSidebarActivityLogProps {
 export const WaveLeaderboardRightSidebarActivityLog: React.FC<
   WaveLeaderboardRightSidebarActivityLogProps
 > = ({ log, creditType, onDropClick }) => {
+  const locale = useBrowserLocale();
   const unknownProfile = waveRightPanelText(
     "waves.sidebar.rightPanel.activity.unknownProfile"
   );
@@ -56,7 +57,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
   ]);
   const isAnonymousCreator = log.drop_author?.is_anonymous === true;
   const dropCreatorLabel = isAnonymousCreator
-    ? t(DEFAULT_LOCALE, "competitions.anonymousAuthor")
+    ? t(locale, "competitions.anonymousAuthor")
     : (dropCreatorProfile ?? unknownProfile);
   const oldVoteValue: unknown = log.contents["oldVote"];
   const newVoteValue: unknown = log.contents["newVote"];

@@ -43,8 +43,14 @@ it("renders embedded cards without another request, accepts page updates and cle
       wave_id: "wave",
       competition_id: "competition",
       status: "ACTIVE",
+      submitter: { id: "author", handle: "Alice" },
     },
-    drop: { id: "drop", wave: { id: "wave" }, title: "Loaded artwork" },
+    drop: {
+      id: "drop",
+      author: { id: "author", handle: "Alice" },
+      wave: { id: "wave" },
+      title: "Loaded artwork",
+    },
     awards: [],
     vote_summary: { rating: 10, user_vote: 2 },
   } as unknown as ApiCompetitionEntryContext;

@@ -69,12 +69,14 @@ export default function DropMinimalIdentityRow({
             </UserProfileTooltipWrapper>
           )}
         </p>
-        <DropAuthorBadges
-          profile={drop.author}
-          wave={drop.wave}
-          tooltipIdPrefix={`minimal-author-badges-${drop.id}`}
-          size="compact"
-        />
+        {!isAnonymousAuthor(drop.author) && (
+          <DropAuthorBadges
+            profile={drop.author}
+            wave={drop.wave}
+            tooltipIdPrefix={`minimal-author-badges-${drop.id}`}
+            size="compact"
+          />
+        )}
       </div>
       {!isStackedTimestamp && (
         <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700" />

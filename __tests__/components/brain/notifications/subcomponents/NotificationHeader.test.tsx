@@ -50,6 +50,21 @@ jest.mock("@/components/nft-image/utils/gateway-fallback", () => ({
 }));
 
 describe("NotificationHeader", () => {
+  it("renders an unlinked fallback for historical notifications without a profile target", () => {
+    render(
+      <NotificationHeader
+        author={
+          { id: "missing" } as ComponentProps<
+            typeof NotificationHeader
+          >["author"]
+        }
+      >
+        <span>posted</span>
+      </NotificationHeader>
+    );
+    expect(screen.getByText("Unknown profile")).toBeInTheDocument();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  });
   it("keeps anonymous notification authors unlinked and hides profile actions", () => {
     const author = {
       id: "anonymous-entry-author",

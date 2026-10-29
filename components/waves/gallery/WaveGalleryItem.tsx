@@ -79,7 +79,8 @@ export const WaveGalleryItem = memo<WaveGalleryItemProps>(
                 {drop.title}
               </span>
             )}
-            {drop.author.handle && (
+            {(drop.author.is_anonymous === true ||
+              Boolean(drop.author.handle)) && (
               <span className="tw-mt-1 tw-block tw-text-xs tw-text-iron-300">
                 {drop.author.is_anonymous ? (
                   <AnonymousAuthorName />
@@ -97,13 +98,14 @@ export const WaveGalleryItem = memo<WaveGalleryItemProps>(
             size="sm"
           />
         </div>
-        {drop.author.handle && (
+        {(drop.author.is_anonymous === true || Boolean(drop.author.handle)) && (
           <div className="tw-absolute tw-bottom-2 tw-left-2 tw-right-2 tw-flex tw-items-center tw-gap-2 tw-opacity-100 tw-transition-opacity tw-duration-300 desktop-hover:group-hover:tw-opacity-100 touch-only:!tw-opacity-100 lg:tw-opacity-0">
-            {drop.author.is_anonymous ? (
+            {drop.author.is_anonymous && (
               <span className="tw-rounded-lg tw-bg-black/60 tw-px-2 tw-py-1 tw-text-xs">
                 <AnonymousAuthorName />
               </span>
-            ) : (
+            )}
+            {!drop.author.is_anonymous && drop.author.handle && (
               <UserProfileTooltipWrapper user={drop.author.handle}>
                 <Link
                   onClick={(e) => e.stopPropagation()}

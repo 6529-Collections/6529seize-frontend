@@ -389,14 +389,14 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
                   {opensWholeCard ? title : drop.title}
                 </h3>
               )}
-              {drop.author.handle &&
-                (opensWholeCard || drop.author.is_anonymous) && (
-                  <span className="tw-mt-1 tw-block tw-max-w-full tw-truncate tw-text-xs tw-text-iron-400">
-                    {drop.author.is_anonymous
-                      ? t(locale, "competitions.anonymousAuthor")
-                      : drop.author.handle}
-                  </span>
-                )}
+              {(drop.author.is_anonymous === true ||
+                (Boolean(drop.author.handle) && opensWholeCard)) && (
+                <span className="tw-mt-1 tw-block tw-max-w-full tw-truncate tw-text-xs tw-text-iron-400">
+                  {drop.author.is_anonymous
+                    ? t(locale, "competitions.anonymousAuthor")
+                    : drop.author.handle}
+                </span>
+              )}
               {drop.author.handle &&
                 !opensWholeCard &&
                 !drop.author.is_anonymous && (

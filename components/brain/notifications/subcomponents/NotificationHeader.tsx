@@ -5,6 +5,8 @@ import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileToo
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { useGatewayImageLoadState } from "@/components/common/image/useGatewayImageLoadState";
 import { AnonymousAuthorName } from "@/components/waves/drops/AnonymousDropAuthor";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface NotificationHeaderProps {
   readonly author: ApiProfileMin;
@@ -23,6 +25,36 @@ export default function NotificationHeader({
 }: NotificationHeaderProps) {
   const { activeSrc, isPlaceholder, unoptimized, handleError } =
     useGatewayImageLoadState(author.is_anonymous ? null : author.pfp);
+  const locale = useBrowserLocale();
+  const authorIdentity = [author.handle, author.primary_address]
+    .map((identifier) => identifier?.trim())
+    .find((identifier): identifier is string => Boolean(identifier));
+  let authorContent;
+  if (author.is_anonymous) {
+    authorContent = (
+      <span className={`${authorClassName} tw-font-semibold`}>
+        <AnonymousAuthorName />
+      </span>
+    );
+  } else if (authorIdentity) {
+    authorContent = (
+      <UserProfileTooltipWrapper user={authorIdentity}>
+        <Link
+          href={`/${authorIdentity}`}
+          prefetch={false}
+          className={`${authorClassName} tw-max-w-full tw-rounded-sm tw-font-semibold tw-text-iron-50 tw-no-underline tw-underline-offset-4 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-underline`}
+        >
+          {authorIdentity}
+        </Link>
+      </UserProfileTooltipWrapper>
+    );
+  } else {
+    authorContent = (
+      <span className={`${authorClassName} tw-font-semibold tw-text-iron-400`}>
+        {t(locale, "notifications.unknownProfile")}
+      </span>
+    );
+  }
 
   return (
     <div
@@ -46,21 +78,7 @@ export default function NotificationHeader({
       </div>
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-2">
         <div className="tw-flex tw-min-w-[min(100%,16rem)] tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-leading-6 [overflow-wrap:anywhere]">
-          {author.is_anonymous ? (
-            <span className={`${authorClassName} tw-font-semibold`}>
-              <AnonymousAuthorName />
-            </span>
-          ) : (
-            <UserProfileTooltipWrapper user={author.handle ?? ""}>
-              <Link
-                href={`/${author.handle ?? author.primary_address}`}
-                prefetch={false}
-                className={`${authorClassName} tw-max-w-full tw-rounded-sm tw-font-semibold tw-text-iron-50 tw-no-underline tw-underline-offset-4 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-underline`}
-              >
-                {author.handle}
-              </Link>
-            </UserProfileTooltipWrapper>
-          )}
+          {authorContent}
           {children}
         </div>
         {Boolean(actions) && !author.is_anonymous && (

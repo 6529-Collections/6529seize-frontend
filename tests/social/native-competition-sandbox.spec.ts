@@ -1008,8 +1008,16 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     sandbox.setAnonymousEntry("alpha", true);
     sandbox.setAnonymousEntry("beta", true);
     await page.goto(`${ROOT}/alpha`, { waitUntil: "domcontentloaded" });
-    await expect(page.locator("[data-anonymous-author]").first()).toBeVisible();
-    await expect(page.locator('a[href="/Anonymous"]')).toHaveCount(0);
+    const leaderboard = page.getByRole("region", {
+      name: "Leaderboard",
+      exact: true,
+    });
+    await expect(
+      leaderboard.getByText("Anonymous", { exact: true })
+    ).toBeVisible();
+    await expect(
+      leaderboard.getByRole("link", { name: /Anonymous/ })
+    ).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
     await page.screenshot({
       path: testInfo.outputPath("anonymous-submission.png"),
@@ -1019,10 +1027,16 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByText("Immutable alpha entry content", { exact: true })
     ).toBeVisible();
-    await expect(page.locator("[data-anonymous-author]")).toHaveCount(0);
+    await expect(
+      leaderboard.getByText("Anonymous", { exact: true })
+    ).toHaveCount(0);
     await page.goto(`${ROOT}/beta`, { waitUntil: "domcontentloaded" });
-    await expect(page.locator("[data-anonymous-author]").first()).toBeVisible();
-    await expect(page.locator('a[href="/Anonymous"]')).toHaveCount(0);
+    await expect(
+      leaderboard.getByText("Anonymous", { exact: true })
+    ).toBeVisible();
+    await expect(
+      leaderboard.getByRole("link", { name: /Anonymous/ })
+    ).toHaveCount(0);
   });
 
   test("defaults anonymity off and includes an enabled choice in the saved competition draft", async ({

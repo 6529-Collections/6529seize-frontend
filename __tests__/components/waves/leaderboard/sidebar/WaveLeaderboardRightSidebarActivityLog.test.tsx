@@ -5,11 +5,17 @@ import { WaveLeaderboardRightSidebarActivityLog } from "@/components/waves/leade
 import type { ApiWaveLog } from "@/generated/models/ApiWaveLog";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ImageScale } from "@/helpers/image.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import * as messages from "@/i18n/messages";
 import {
   CDN_AVATAR_URL,
   getRequestedImageSrc,
   scaledAvatarPath,
 } from "@/__tests__/utils/avatarSrc";
+
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: jest.fn(() => "en-US"),
+}));
 
 // Mock dependencies
 jest.mock("@/helpers/Helpers", () => ({
@@ -87,6 +93,7 @@ describe("WaveLeaderboardRightSidebarActivityLog", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useBrowserLocale).mockReturnValue("en-US");
   });
 
   const renderComponent = (props = {}) => {
@@ -235,6 +242,30 @@ describe("WaveLeaderboardRightSidebarActivityLog", () => {
       "src",
       expect.stringContaining("author.jpg")
     );
+  });
+
+  it("uses the browser locale for the anonymous name and creator title", () => {
+    jest.mocked(useBrowserLocale).mockReturnValue("fr-FR");
+    const originalTranslate = messages.t;
+    const translate = jest
+      .spyOn(messages, "t")
+      .mockImplementation((locale, key, params) =>
+        locale === "fr-FR" && key === "competitions.anonymousAuthor"
+          ? "Anonyme"
+          : originalTranslate(locale, key, params)
+      );
+    try {
+      renderComponent({
+        log: {
+          ...mockLog,
+          drop_author: { ...mockLog.drop_author, is_anonymous: true },
+        },
+      });
+      expect(screen.getByText("Anonyme")).toBeVisible();
+      expect(screen.getByTitle("Drop creator: Anonyme")).toBeVisible();
+    } finally {
+      translate.mockRestore();
+    }
   });
 
   it("keeps anonymous drop attribution noninteractive while preserving the voter's profile", () => {
