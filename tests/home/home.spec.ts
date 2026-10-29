@@ -1307,6 +1307,9 @@ test.describe("Home Page @smoke @medium @large", () => {
     await waitForRouteReady(page);
     const cards = page.getByRole("link", { name: /^View wave / });
     await expect(cards.first()).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    // Require artwork so sampling remains covered even when other live Waves
+    // have no cover image and intentionally use the Iron fallback.
+    await expect(cards.getByRole("img").first()).toBeVisible();
     // The requested desktop treatment fills the card with the cover behind text.
     // Mobile keeps its existing side-by-side layout.
     // Description, activity, metrics, and wave navigation are unchanged.
@@ -1316,20 +1319,23 @@ test.describe("Home Page @smoke @medium @large", () => {
       for (const card of await cards.all()) {
         await expect(card).toHaveAttribute("href", /\/(waves|messages)\//);
         await card.scrollIntoViewIfNeeded();
+        const hasArtwork = (await card.getByRole("img").count()) > 0;
+        const expectedTint = width >= 768 && hasArtwork ? "58 7 7" : "";
         await expect.poll(() => card.evaluate((element) => {
           const details = element.lastElementChild!;
           return getComputedStyle(details).getPropertyValue("--card-tint").trim();
-        })).toBe(width < 768 ? "" : "58 7 7");
+        })).toBe(expectedTint);
         const gradient = await card.evaluate((element) =>
           getComputedStyle(element.lastElementChild!).backgroundImage
         );
         if (width < 768) {
           expect(gradient).toBe("none");
         } else {
-          // The reference has a solid dark tint under text and a short fade.
-          expect(gradient).toContain("rgb(58, 7, 7) 0%");
-          expect(gradient).toContain("rgb(58, 7, 7) calc(100% - 60px)");
-          expect(gradient).toContain("rgba(58, 7, 7, 0.8) calc(100% - 34px)");
+          // Preserve the same fade geometry for sampled and fallback colors.
+          const color = hasArtwork ? "58, 7, 7" : "19, 19, 22";
+          expect(gradient).toContain(`rgb(${color}) 0%`);
+          expect(gradient).toContain(`rgb(${color}) calc(100% - 60px)`);
+          expect(gradient).toContain(`rgba(${color}, 0.8) calc(100% - 34px)`);
         }
         const layout = await card.evaluate((element) => {
           const cover = element.firstElementChild!;
