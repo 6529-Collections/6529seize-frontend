@@ -2,6 +2,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { getMemesQuickVoteUndiscoveredDropQueryKey } from "@/hooks/memesQuickVote.query";
 import { useMemesQuickVoteQueue } from "@/hooks/useMemesQuickVoteQueue";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -48,22 +49,26 @@ const createWrapper = ({
   connectedProfileHandle = DEFAULT_CONTEXT_PROFILE,
   requestAuth = jest.fn().mockResolvedValue({ success: true }),
   setToast = jest.fn(),
+  queryClient: providedQueryClient,
 }: {
   readonly activeProfileProxy?: { readonly id: string } | null;
   readonly connectedProfileHandle?: string | null;
   readonly requestAuth?: jest.Mock;
   readonly setToast?: jest.Mock;
+  readonly queryClient?: QueryClient;
 } = {}) => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
+  const queryClient =
+    providedQueryClient ??
+    new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+        mutations: {
+          retry: false,
+        },
       },
-      mutations: {
-        retry: false,
-      },
-    },
-  });
+    });
 
   return ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>
@@ -169,17 +174,61 @@ describe("useMemesQuickVoteQueue", () => {
         readonly params?: Record<string, string>;
       };
 
-      if (endpoint === `waves/${DEFAULT_MEMES_WAVE_ID}/undiscovered-drop`) {
-        const skip = Number(params?.skip ?? "0");
+      if (endpoint === `waves/${DEFAULT_MEMES_WAVE_ID}/undiscovered-drops`) {
+        const limit = Number(params?.limit ?? "4");
 
         return {
-          drop: currentUndiscoveredDrops[skip] ?? null,
+          drops: currentUndiscoveredDrops.slice(0, limit),
           left_to_vote_in_current_round: leftThisRoundCount,
           total_count: totalCount,
         } as any;
       }
 
       throw new Error(`Unexpected endpoint: ${endpoint}`);
+    });
+  });
+
+  it("loads the preview window once and shares its counts with the footer", async () => {
+    const drops = [40, 30, 20, 10].map((serialNo) =>
+      createDrop({ id: `drop-${serialNo}`, serialNo })
+    );
+    currentUndiscoveredDrops = drops;
+    leftThisRoundCount = 3;
+    totalCount = 8;
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const { result } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: 1 }),
+      {
+        wrapper: createWrapper({ queryClient }),
+      }
+    );
+    await waitFor(() =>
+      expect(result.current.activeDrop?.id).toBe(drops[0].id)
+    );
+    expect(result.current.nextDrop?.id).toBe(drops[1].id);
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+    expect(commonApiFetchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: `waves/${DEFAULT_MEMES_WAVE_ID}/undiscovered-drops`,
+        params: { limit: "4" },
+      })
+    );
+    expect(
+      queryClient.getQueryData(
+        getMemesQuickVoteUndiscoveredDropQueryKey({
+          contextProfile: DEFAULT_CONTEXT_PROFILE,
+          proxyId: null,
+          sessionId: 0,
+          skip: 0,
+          waveId: DEFAULT_MEMES_WAVE_ID,
+        })
+      )
+    ).toEqual({
+      drop: drops[0],
+      total_count: 8,
+      left_to_vote_in_current_round: 3,
     });
   });
 

@@ -472,6 +472,10 @@ for (const width of [375, 390, 768, 1024, 1440]) {
       touch ? width >= 768 : width < 768,
       "Use the matching pointer/viewport project."
     );
+    // Keep external analytics code outside the strict loopback mutation sandbox.
+    await page.route("https://www.googletagmanager.com/gtag/js?**", (route) =>
+      route.fulfill({ contentType: "application/javascript", body: "" })
+    );
     await page.setViewportSize({ width, height: 900 });
     await page.emulateMedia({ reducedMotion: "reduce" });
     if (touch && width === 375)
@@ -513,17 +517,27 @@ for (const width of [375, 390, 768, 1024, 1440]) {
       boosts: 0,
       moderation: { status: "VISIBLE", can_view: true },
     };
-    let first = true;
     let fail = false;
     const content = gate();
     await page.route("**/api/waves/*/undiscovered-drop**", async (route) => {
-      const footer = first;
-      first = false;
+      const footer = !new URL(route.request().url()).pathname.endsWith(
+        "/undiscovered-drops"
+      );
       if (!footer) await content.ready;
       await route.fulfill(
         fail && !footer
           ? { status: 400, json: { error: "Fixture error" } }
-          : { json: { drop, total_count: 5, left_to_vote_in_current_round: 3 } }
+          : {
+              json: {
+                ...(new URL(route.request().url()).pathname.endsWith(
+                  "/undiscovered-drops"
+                )
+                  ? { drops: [drop] }
+                  : { drop }),
+                total_count: 5,
+                left_to_vote_in_current_round: 3,
+              },
+            }
       );
     });
     try {
@@ -609,7 +623,6 @@ for (const width of [375, 390, 768, 1024, 1440]) {
         await expect(trigger).toBeFocused();
       }
       fail = true;
-      first = true;
       await page.reload({ waitUntil: "domcontentloaded" });
       await trigger.click();
       await expect(

@@ -185,7 +185,6 @@ const useMemesQuickVoteQueueSubmission = ({
         );
       }
 
-      invalidateQuickVoteUndiscoveredDrop();
       runBestEffortSync(session.syncUndiscoveredWindow);
     },
     requestAuth,

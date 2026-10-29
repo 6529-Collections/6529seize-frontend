@@ -1,3 +1,4 @@
+import type { ApiUndiscoveredDrops } from "@/generated/models/ApiUndiscoveredDrops";
 import type { ApiUndiscoveredDrop } from "@/generated/models/ApiUndiscoveredDrop";
 import { commonApiFetch } from "@/services/api/common-api";
 
@@ -48,3 +49,16 @@ export const fetchMemesQuickVoteUndiscoveredDrop = async ({
     signal,
   });
 };
+
+export const fetchMemesQuickVoteUndiscoveredDrops = async ({
+  waveId,
+  signal,
+}: {
+  readonly waveId: string;
+  readonly signal?: AbortSignal | undefined;
+}): Promise<ApiUndiscoveredDrops> =>
+  await commonApiFetch<ApiUndiscoveredDrops>({
+    endpoint: `waves/${waveId}/undiscovered-drops`,
+    params: { limit: `${MEMES_QUICK_VOTE_LOOKAHEAD_COUNT}` },
+    signal,
+  });

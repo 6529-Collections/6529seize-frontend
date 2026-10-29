@@ -10,9 +10,10 @@ import {
   type MemesQuickVoteSessionState,
 } from "@/hooks/memesQuickVote.queue.state";
 import {
-  fetchMemesQuickVoteUndiscoveredDrop,
-  MEMES_QUICK_VOTE_LOOKAHEAD_COUNT,
+  fetchMemesQuickVoteUndiscoveredDrops,
+  getMemesQuickVoteUndiscoveredDropQueryKey,
 } from "@/hooks/memesQuickVote.query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type KeyedSessionState = {
@@ -154,6 +155,7 @@ const useMemesQuickVoteWindowSync = ({
   setCurrentSessionState,
   waveId,
 }: UseMemesQuickVoteWindowSyncOptions) => {
+  const queryClient = useQueryClient();
   const syncAbortControllerRef = useRef<AbortController | null>(null);
   const syncInFlightRef = useRef<boolean>(false);
   const syncRequestIdRef = useRef(0);
@@ -209,37 +211,43 @@ const useMemesQuickVoteWindowSync = ({
       syncRequestIdRef.current = requestId;
       const abortController = new AbortController();
       syncAbortControllerRef.current = abortController;
+      const isCurrentRequest = () =>
+        !abortController.signal.aborted &&
+        syncRequestIdRef.current === requestId;
 
       setCurrentSessionState(getQuickVoteSyncPendingState);
 
       try {
-        const responses = await Promise.all(
-          Array.from({ length: MEMES_QUICK_VOTE_LOOKAHEAD_COUNT }, (_, skip) =>
-            fetchMemesQuickVoteUndiscoveredDrop({
-              signal: abortController.signal,
-              skip,
-              waveId,
-            })
-          )
-        );
-
-        if (
-          abortController.signal.aborted ||
-          syncRequestIdRef.current !== requestId
-        ) {
+        const response = await fetchMemesQuickVoteUndiscoveredDrops({
+          signal: abortController.signal,
+          waveId,
+        });
+        if (!isCurrentRequest()) {
           return;
         }
-
-        const primaryResponse = responses[0] ?? null;
-        const primaryDrop = primaryResponse?.drop ?? null;
-        const rawLeftThisRoundCount =
-          primaryResponse?.left_to_vote_in_current_round ?? 0;
-        const rawUnratedCount = primaryResponse?.total_count ?? 0;
-        const fetchedDrops = getUniqueDrops(
-          responses.flatMap((response) =>
-            response.drop ? [response.drop] : []
-          )
-        );
+        const footerQueryKey = getMemesQuickVoteUndiscoveredDropQueryKey({
+          contextProfile,
+          proxyId: null,
+          sessionId: 0,
+          skip: 0,
+          waveId,
+        });
+        await queryClient.cancelQueries({
+          queryKey: footerQueryKey,
+          exact: true,
+        });
+        if (!isCurrentRequest()) {
+          return;
+        }
+        const primaryDrop = response.drops[0] ?? null;
+        const rawLeftThisRoundCount = response.left_to_vote_in_current_round;
+        const rawUnratedCount = response.total_count;
+        const fetchedDrops = getUniqueDrops(response.drops);
+        queryClient.setQueryData(footerQueryKey, {
+          drop: primaryDrop,
+          left_to_vote_in_current_round: rawLeftThisRoundCount,
+          total_count: rawUnratedCount,
+        });
 
         setCurrentSessionState((current) =>
           applyFetchedWindowState({
@@ -252,10 +260,7 @@ const useMemesQuickVoteWindowSync = ({
           })
         );
       } catch {
-        if (
-          abortController.signal.aborted ||
-          syncRequestIdRef.current !== requestId
-        ) {
+        if (!isCurrentRequest()) {
           return;
         }
 
@@ -286,6 +291,7 @@ const useMemesQuickVoteWindowSync = ({
       isQuickVoteEnabled,
       isSettingsLoaded,
       pendingDropIdsRef,
+      queryClient,
       setCurrentSessionState,
       waveId,
     ]
