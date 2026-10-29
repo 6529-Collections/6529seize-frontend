@@ -544,7 +544,8 @@
       "facts": [
         "REP is peer-given reputation in categories and waves.",
         "CIC is the community interaction count signal shown on profiles and Network surfaces.",
-        "REP category analytics and category-level views live under /rep/categories."
+        "REP category analytics and category-level views live under /rep/categories.",
+        "On devices without touch, profile hover cards show up to three Top Rep categories ordered by the magnitude of their net REP total, so a large negative can appear first. Equal magnitudes use case-sensitive category-name order. Signed values and their positive, negative, or zero colors are preserved."
       ],
       "canonical_path": "/rep/categories",
       "related_paths": [
