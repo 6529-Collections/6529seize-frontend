@@ -335,8 +335,10 @@ export async function invalidateCompetitionAuthors(
     client.invalidateQueries({
       queryKey: [QueryKey.DROP],
       predicate: (query) => {
-        const drop = query.state.data as ApiDrop | undefined;
-        return drop?.wave.id === waveId;
+        const drop = query.state.data as
+          | Partial<Pick<ApiDrop, "wave">>
+          | undefined;
+        return drop?.wave?.id === waveId;
       },
       refetchType: "active",
     }),
