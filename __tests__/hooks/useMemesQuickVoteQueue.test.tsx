@@ -3,6 +3,7 @@ import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { getMemesQuickVoteUndiscoveredDropQueryKey } from "@/hooks/memesQuickVote.query";
+import { useMemesWaveFooterStats } from "@/hooks/useMemesWaveFooterStats";
 import { useMemesQuickVoteQueue } from "@/hooks/useMemesQuickVoteQueue";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -184,6 +185,14 @@ describe("useMemesQuickVoteQueue", () => {
         } as any;
       }
 
+      if (endpoint === `waves/${DEFAULT_MEMES_WAVE_ID}/undiscovered-drop`) {
+        return {
+          drop: currentUndiscoveredDrops[0] ?? null,
+          left_to_vote_in_current_round: leftThisRoundCount,
+          total_count: totalCount,
+        } as any;
+      }
+
       throw new Error(`Unexpected endpoint: ${endpoint}`);
     });
   });
@@ -230,6 +239,62 @@ describe("useMemesQuickVoteQueue", () => {
       total_count: 8,
       left_to_vote_in_current_round: 3,
     });
+  });
+
+  it("refreshes the footer when the post-vote batch fails", async () => {
+    const first = createDrop({ id: "first", serialNo: 2 });
+    const second = createDrop({ id: "second", serialNo: 1 });
+    currentUndiscoveredDrops = [first, second];
+    leftThisRoundCount = 2;
+    totalCount = 2;
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    queryClient.setQueryData(
+      getMemesQuickVoteUndiscoveredDropQueryKey({
+        contextProfile: DEFAULT_CONTEXT_PROFILE,
+        proxyId: null,
+        sessionId: 0,
+        skip: 0,
+        waveId: DEFAULT_MEMES_WAVE_ID,
+      }),
+      { drop: first, total_count: 2, left_to_vote_in_current_round: 2 }
+    );
+    const { result } = renderHook(
+      () => ({
+        queue: useMemesQuickVoteQueue({ sessionId: 1 }),
+        footer: useMemesWaveFooterStats(),
+      }),
+      { wrapper: createWrapper({ queryClient }) }
+    );
+    await waitFor(() =>
+      expect(result.current.queue.activeDrop?.id).toBe(first.id)
+    );
+    const fetchAvailableData = commonApiFetchMock.getMockImplementation()!;
+    commonApiFetchMock.mockImplementation((request) => {
+      if (request.endpoint.endsWith("/undiscovered-drops")) {
+        return Promise.reject(new Error("Batch unavailable"));
+      }
+      return fetchAvailableData(request);
+    });
+    commonApiPostMock.mockImplementationOnce(async () => {
+      currentUndiscoveredDrops = [second];
+      leftThisRoundCount = 1;
+      totalCount = 1;
+      return {} as any;
+    });
+    await act(async () => {
+      await result.current.queue.submitVote(
+        result.current.queue.activeDrop!,
+        250
+      );
+    });
+    await waitFor(() => expect(result.current.footer.unratedCount).toBe(1));
+    expect(commonApiFetchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: `waves/${DEFAULT_MEMES_WAVE_ID}/undiscovered-drop`,
+      })
+    );
   });
 
   it("hydrates signed recent quick-vote amounts from storage on mount", () => {

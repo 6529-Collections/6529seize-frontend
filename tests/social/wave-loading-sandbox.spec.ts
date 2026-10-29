@@ -520,20 +520,16 @@ for (const width of [375, 390, 768, 1024, 1440]) {
     let fail = false;
     const content = gate();
     await page.route("**/api/waves/*/undiscovered-drop**", async (route) => {
-      const footer = !new URL(route.request().url()).pathname.endsWith(
+      const isBatch = new URL(route.request().url()).pathname.endsWith(
         "/undiscovered-drops"
       );
-      if (!footer) await content.ready;
+      if (isBatch) await content.ready;
       await route.fulfill(
-        fail && !footer
+        fail && isBatch
           ? { status: 400, json: { error: "Fixture error" } }
           : {
               json: {
-                ...(new URL(route.request().url()).pathname.endsWith(
-                  "/undiscovered-drops"
-                )
-                  ? { drops: [drop] }
-                  : { drop }),
+                ...(isBatch ? { drops: [drop] } : { drop }),
                 total_count: 5,
                 left_to_vote_in_current_round: 3,
               },

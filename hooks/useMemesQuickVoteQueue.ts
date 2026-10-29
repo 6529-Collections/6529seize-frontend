@@ -185,7 +185,11 @@ const useMemesQuickVoteQueueSubmission = ({
         );
       }
 
-      runBestEffortSync(session.syncUndiscoveredWindow);
+      runBestEffortSync(async () => {
+        if (!(await session.syncUndiscoveredWindow())) {
+          invalidateQuickVoteUndiscoveredDrop();
+        }
+      });
     },
     requestAuth,
     setAndPersistRecentAmounts,
@@ -209,7 +213,7 @@ export const useMemesQuickVoteQueue = ({
     typeof memesWaveId === "string" && memesWaveId.length > 0
       ? memesWaveId
       : null;
-  const stateKey = `${sessionId}:${waveId ?? ""}:${contextProfile ?? ""}`;
+  const stateKey = `${sessionId}:${waveId ?? ""}:${contextProfile ?? ""}:${proxyId ?? ""}`;
   const [
     optimisticRemainingVotePowerState,
     setOptimisticRemainingVotePowerState,
@@ -224,6 +228,7 @@ export const useMemesQuickVoteQueue = ({
   const pendingDropIdsRef = useRef<readonly string[]>([]);
   const session = useMemesQuickVoteSessionState({
     contextProfile,
+    proxyId: proxyId ?? null,
     enabled,
     isQuickVoteEnabled,
     isSettingsLoaded,

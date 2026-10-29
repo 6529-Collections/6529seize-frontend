@@ -23,6 +23,7 @@ type KeyedSessionState = {
 
 type UseMemesQuickVoteSessionStateOptions = {
   readonly contextProfile: string | null | undefined;
+  readonly proxyId: string | null;
   readonly enabled: boolean;
   readonly isQuickVoteEnabled: boolean;
   readonly isSettingsLoaded: boolean;
@@ -35,7 +36,7 @@ export type UseMemesQuickVoteSessionStateResult = {
   readonly advanceVisibleDrop: (drop: ExtendedDrop) => void;
   readonly restoreFailedDrop: (drop: ExtendedDrop) => void;
   readonly sessionState: MemesQuickVoteSessionState;
-  readonly syncUndiscoveredWindow: () => Promise<void>;
+  readonly syncUndiscoveredWindow: () => Promise<boolean>;
 };
 
 type UseKeyedMemesQuickVoteSessionStoreResult = {
@@ -54,7 +55,7 @@ type UseMemesQuickVoteWindowSyncOptions = Omit<
   readonly setCurrentSessionState: UseKeyedMemesQuickVoteSessionStoreResult["setCurrentSessionState"];
 };
 
-export const runBestEffortSync = (sync: () => Promise<void>): void => {
+export const runBestEffortSync = (sync: () => Promise<unknown>): void => {
   sync().catch(() => {
     // Session state already models sync failures; callers should not block on this.
   });
@@ -148,6 +149,7 @@ const useKeyedMemesQuickVoteSessionStore = (
 
 const useMemesQuickVoteWindowSync = ({
   contextProfile,
+  proxyId,
   enabled,
   isQuickVoteEnabled,
   isSettingsLoaded,
@@ -183,14 +185,14 @@ const useMemesQuickVoteWindowSync = ({
   }, [clearSyncRetryTimeout]);
 
   const syncUndiscoveredWindow = useCallback(
-    async function syncWindow() {
+    async function syncWindow(): Promise<boolean> {
       if (syncInFlightRef.current) {
         syncRerunRequestedRef.current = true;
-        return;
+        return false;
       }
 
       if (!enabled) {
-        return;
+        return false;
       }
 
       if (isSettingsLoaded && !isQuickVoteEnabled) {
@@ -198,11 +200,11 @@ const useMemesQuickVoteWindowSync = ({
           ...createInitialSessionState(),
           isExhausted: true,
         });
-        return;
+        return false;
       }
 
       if (!isQuickVoteEnabled || !contextProfile || waveId === null) {
-        return;
+        return false;
       }
 
       syncInFlightRef.current = true;
@@ -223,11 +225,11 @@ const useMemesQuickVoteWindowSync = ({
           waveId,
         });
         if (!isCurrentRequest()) {
-          return;
+          return false;
         }
         const footerQueryKey = getMemesQuickVoteUndiscoveredDropQueryKey({
           contextProfile,
-          proxyId: null,
+          proxyId,
           sessionId: 0,
           skip: 0,
           waveId,
@@ -237,7 +239,7 @@ const useMemesQuickVoteWindowSync = ({
           exact: true,
         });
         if (!isCurrentRequest()) {
-          return;
+          return false;
         }
         const primaryDrop = response.drops[0] ?? null;
         const rawLeftThisRoundCount = response.left_to_vote_in_current_round;
@@ -259,12 +261,14 @@ const useMemesQuickVoteWindowSync = ({
             rawUnratedCount,
           })
         );
+        return true;
       } catch {
         if (!isCurrentRequest()) {
-          return;
+          return false;
         }
 
         setCurrentSessionState(getQuickVoteSyncFailureState);
+        return false;
       } finally {
         if (syncRequestIdRef.current === requestId) {
           if (syncAbortControllerRef.current === abortController) {
@@ -291,6 +295,7 @@ const useMemesQuickVoteWindowSync = ({
       isQuickVoteEnabled,
       isSettingsLoaded,
       pendingDropIdsRef,
+      proxyId,
       queryClient,
       setCurrentSessionState,
       waveId,
@@ -324,7 +329,7 @@ const useMemesQuickVoteSessionEffects = ({
   readonly setCurrentSessionState: UseKeyedMemesQuickVoteSessionStoreResult["setCurrentSessionState"];
   readonly stateKey: string;
   readonly stopActiveSync: () => void;
-  readonly syncUndiscoveredWindow: () => Promise<void>;
+  readonly syncUndiscoveredWindow: () => Promise<boolean>;
   readonly waveId: string | null;
 }) => {
   useEffect(() => {
@@ -431,6 +436,7 @@ const useMemesQuickVoteSessionEffects = ({
 
 export const useMemesQuickVoteSessionState = ({
   contextProfile,
+  proxyId,
   enabled,
   isQuickVoteEnabled,
   isSettingsLoaded,
@@ -443,6 +449,7 @@ export const useMemesQuickVoteSessionState = ({
   const { stopActiveSync, syncUndiscoveredWindow } =
     useMemesQuickVoteWindowSync({
       contextProfile,
+      proxyId,
       enabled,
       isQuickVoteEnabled,
       isSettingsLoaded,
