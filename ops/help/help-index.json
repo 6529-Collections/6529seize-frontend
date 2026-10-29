@@ -3050,12 +3050,16 @@
       "facts": [
         "REP is peer-given reputation in categories and waves.",
         "CIC is the community interaction count signal shown on profiles and Network surfaces.",
-        "REP category analytics and category-level views live under /rep/categories."
+        "REP category analytics and category-level views live under /rep/categories.",
+        "On devices without touch, profile hover cards show up to three Top Rep categories ordered by the magnitude of their net REP total, so a large negative can appear first. Equal magnitudes use case-sensitive category-name order. Signed values and their positive, negative, or zero colors are preserved."
       ],
       "canonical_path": "/rep/categories",
       "related_paths": ["/network/levels"],
       "tags": ["rep", "cic", "network", "glossary"],
-      "source_refs": ["ops/docs/network/feature-network-levels.md"]
+      "source_refs": [
+        "ops/docs/network/feature-network-levels.md",
+        "ops/docs/shared/feature-hover-cards-and-tooltips.md"
+      ]
     },
     {
       "id": "help-bot.credits",
@@ -11049,18 +11053,8 @@
       "id": "waves.private-bookmarks",
       "kind": "workflow",
       "title": "Privately bookmark a message",
-      "aliases": [
-        "saved messages",
-        "bookmarks",
-        "save a drop"
-      ],
-      "keywords": [
-        "bookmark",
-        "private",
-        "saved",
-        "message",
-        "proxy"
-      ],
+      "aliases": ["saved messages", "bookmarks", "save a drop"],
+      "keywords": ["bookmark", "private", "saved", "message", "proxy"],
       "facts": [
         "Use Bookmark in a message More menu on desktop or its long-press menu on mobile. Remove bookmark reverses the save. Saving does not notify the author.",
         "Bookmarks appears in the account menu below Profile and above My artwork documentation only when the signed-in owner has accessible bookmarks. The native app exposes it in the menu drawer account actions.",
@@ -11068,14 +11062,8 @@
         "Bookmarks belong to the authenticated owner independently of the selected proxy. Proxy access never exposes another profile bookmarks or grants access to otherwise unavailable messages. Deleted or inaccessible messages are omitted."
       ],
       "canonical_path": "/bookmarks",
-      "tags": [
-        "waves",
-        "privacy",
-        "navigation"
-      ],
-      "source_refs": [
-        "ops/docs/waves/chat/feature-private-bookmarks.md"
-      ]
+      "tags": ["waves", "privacy", "navigation"],
+      "source_refs": ["ops/docs/waves/chat/feature-private-bookmarks.md"]
     }
   ]
 }
