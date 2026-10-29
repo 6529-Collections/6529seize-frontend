@@ -1,7 +1,7 @@
 "use client";
 
 import type { ApiUndiscoveredDrop } from "@/generated/models/ApiUndiscoveredDrop";
-import { useQueryClient } from "@tanstack/react-query";
+import { type QueryState, useQueryClient } from "@tanstack/react-query";
 import { isMemesQuickVoteVoteableDrop } from "@/hooks/memesQuickVote.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
@@ -16,6 +16,7 @@ import {
 import {
   fetchMemesQuickVoteUndiscoveredDrop,
   getMemesQuickVoteUndiscoveredDropQueryKey,
+  MEMES_QUICK_VOTE_CACHE_TIME_MS,
   MEMES_QUICK_VOTE_LOOKAHEAD_COUNT,
   MEMES_QUICK_VOTE_UNDISCOVERED_DROP_QUERY_KEY,
 } from "@/hooks/memesQuickVote.query";
@@ -116,24 +117,32 @@ const getCurrentSessionState = ({
 
 const useKeyedMemesQuickVoteSessionStore = (
   stateKey: string,
-  initialResponse: ApiUndiscoveredDrop | undefined
+  cached: QueryState<ApiUndiscoveredDrop> | undefined
 ): UseKeyedMemesQuickVoteSessionStoreResult => {
-  const [sessionState, setSessionState] = useState<KeyedSessionState>(() => ({
-    key: stateKey,
-    value:
-      initialResponse?.drop &&
-      isMemesQuickVoteVoteableDrop(initialResponse.drop)
-        ? applyFetchedWindowState({
-            current: createInitialSessionState(),
-            fetchedDrops: [initialResponse.drop],
-            pendingDropIds: [],
-            primaryDrop: initialResponse.drop,
-            rawLeftThisRoundCount:
-              initialResponse.left_to_vote_in_current_round,
-            rawUnratedCount: initialResponse.total_count,
-          })
-        : createInitialSessionState(),
-  }));
+  const [sessionState, setSessionState] = useState<KeyedSessionState>(() => {
+    const initialResponse =
+      cached &&
+      !cached.isInvalidated &&
+      Date.now() - cached.dataUpdatedAt < MEMES_QUICK_VOTE_CACHE_TIME_MS
+        ? cached.data
+        : undefined;
+    return {
+      key: stateKey,
+      value:
+        initialResponse?.drop &&
+        isMemesQuickVoteVoteableDrop(initialResponse.drop)
+          ? applyFetchedWindowState({
+              current: createInitialSessionState(),
+              fetchedDrops: [initialResponse.drop],
+              pendingDropIds: [],
+              primaryDrop: initialResponse.drop,
+              rawLeftThisRoundCount:
+                initialResponse.left_to_vote_in_current_round,
+              rawUnratedCount: initialResponse.total_count,
+            })
+          : createInitialSessionState(),
+    };
+  });
 
   const setCurrentSessionState = useCallback(
     (
@@ -265,7 +274,10 @@ const useMemesQuickVoteWindowSync = ({
                     skip,
                     waveId,
                   }),
-                staleTime: skip === 0 && reusePrimary ? 60_000 : 0,
+                staleTime:
+                  skip === 0 && reusePrimary
+                    ? MEMES_QUICK_VOTE_CACHE_TIME_MS
+                    : 0,
                 retry: false,
               });
               if (
@@ -499,8 +511,22 @@ export const useMemesQuickVoteSessionState = ({
   const { currentSessionState, setCurrentSessionState } =
     useKeyedMemesQuickVoteSessionStore(
       stateKey,
-      isQuickVoteEnabled && !cached?.isInvalidated ? cached?.data : undefined
+      isQuickVoteEnabled ? cached : undefined
     );
+  // Retain a recently closed session, but do not keep old candidates indefinitely.
+  // Pending submissions continue independently and known votes stay excluded.
+  useEffect(() => {
+    if (enabled) return;
+    const timeoutId = globalThis.setTimeout(() => {
+      setCurrentSessionState((current) => ({
+        ...createInitialSessionState(),
+        recentlyHandledDropIds: current.recentlyHandledDropIds,
+        recentlyVotedDropIds: current.recentlyVotedDropIds,
+      }));
+    }, MEMES_QUICK_VOTE_CACHE_TIME_MS);
+    return () => globalThis.clearTimeout(timeoutId);
+  }, [enabled, setCurrentSessionState]);
+
   useEffect(
     () =>
       queryClient.getQueryCache().subscribe((event) => {

@@ -28,7 +28,8 @@ participatory submissions in the configured memes wave.
 1. Open quick vote from any available trigger.
 2. Quick vote uses the submission already loaded with the Uncast Power counts,
    so its artwork and vote controls can appear while the next submissions load.
-   Closing and reopening keeps the current submission ready. The close button
+   Reopening within a minute keeps the current submission ready; after a longer
+   pause, quick vote refreshes its candidates. The close button
    receives initial keyboard focus. A skeleton appears only when no usable
    submission is available yet.
 3. Review the current meme preview, including artwork, title, description,

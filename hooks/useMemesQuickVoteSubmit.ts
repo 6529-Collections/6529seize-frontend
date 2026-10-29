@@ -13,7 +13,7 @@ import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import type { UseMutationResult } from "@tanstack/react-query";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { TypeOptions } from "react-toastify";
 
 const DEFAULT_DROP_RATE_CATEGORY = "Rep";
@@ -109,6 +109,7 @@ const getQueuedRatingErrorMessage = ({
 };
 
 const flushMemesQuickVoteRatings = async ({
+  isRuntimeActive,
   isFlushingRef,
   onRatingFailure,
   onRatingSuccess,
@@ -120,6 +121,7 @@ const flushMemesQuickVoteRatings = async ({
   setPendingRatingCount,
   setToast,
 }: {
+  readonly isRuntimeActive: () => boolean;
   readonly isFlushingRef: RefValue<boolean>;
   readonly onRatingFailure: UseMemesQuickVoteSubmitOptions["onRatingFailure"];
   readonly onRatingSuccess: UseMemesQuickVoteSubmitOptions["onRatingSuccess"];
@@ -145,7 +147,7 @@ const flushMemesQuickVoteRatings = async ({
   isFlushingRef.current = true;
 
   try {
-    while (ratingQueueRef.current.length > 0) {
+    while (isRuntimeActive() && ratingQueueRef.current.length > 0) {
       const queuedRating = ratingQueueRef.current[0];
 
       if (!queuedRating) {
@@ -154,6 +156,9 @@ const flushMemesQuickVoteRatings = async ({
 
       try {
         const { success } = await requestAuth();
+        // The runtime is remounted when the voting identity changes. Never send
+        // a queued rating using the next identity's authentication.
+        if (!isRuntimeActive()) return;
 
         if (!success) {
           throw new Error("Quick vote couldn't verify your session.");
@@ -163,6 +168,7 @@ const flushMemesQuickVoteRatings = async ({
           amount: queuedRating.amount,
           dropId: queuedRating.drop.id,
         });
+        if (!isRuntimeActive()) return;
         const appliedAmount = getQueuedRatingAppliedAmount({
           nextRating: response.context_profile_context?.rating,
           queuedRating,
@@ -179,6 +185,7 @@ const flushMemesQuickVoteRatings = async ({
           queuedRating.type
         );
       } catch (error) {
+        if (!isRuntimeActive()) return;
         const message = getQueuedRatingErrorMessage({
           error,
           type: queuedRating.type,
@@ -267,6 +274,13 @@ export const useMemesQuickVoteSubmit = ({
   onRatingQueued,
   onRatingSuccess,
 }: UseMemesQuickVoteSubmitOptions): UseMemesQuickVoteSubmitResult => {
+  const isMountedRef = useRef(false);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
   const ratingQueueRef = useRef<QueuedRating[]>([]);
   const queuedDropIdsRef = useRef<Set<string>>(new Set());
   const isFlushingRef = useRef(false);
@@ -292,6 +306,7 @@ export const useMemesQuickVoteSubmit = ({
 
   const flushQueuedRatings = useCallback(() => {
     void flushMemesQuickVoteRatings({
+      isRuntimeActive: () => isMountedRef.current,
       isFlushingRef,
       onRatingFailure,
       onRatingSuccess,

@@ -12,7 +12,13 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 
 jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
-const fetchMock = jest.mocked(commonApiFetch);
+const fetchMock = commonApiFetch as jest.MockedFunction<
+  (request: {
+    endpoint: string;
+    params?: Record<string, string> | undefined;
+    signal?: AbortSignal | undefined;
+  }) => Promise<ApiUndiscoveredDrop>
+>;
 const drop = (id: string, rating = 0) =>
   ({
     id,
@@ -33,7 +39,7 @@ function deferred<T>() {
   });
   return { promise, resolve, reject };
 }
-function setup(seed?: ApiUndiscoveredDrop) {
+function setup(seed?: ApiUndiscoveredDrop, updatedAt = Date.now()) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: Infinity } },
   });
@@ -46,14 +52,16 @@ function setup(seed?: ApiUndiscoveredDrop) {
         skip: 0,
         waveId: "memes",
       }),
-      seed
+      seed,
+      { updatedAt }
     );
   const pendingDropIdsRef = { current: [] as string[] };
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={client}>{children}</QueryClientProvider>
   );
+  const initialProps: { profile?: string; enabled?: boolean } = {};
   const hook = renderHook(
-    ({ profile = "voter", enabled = true } = {}) =>
+    ({ profile = "voter", enabled = true }: typeof initialProps) =>
       useMemesQuickVoteSessionState({
         contextProfile: profile,
         enabled,
@@ -64,7 +72,7 @@ function setup(seed?: ApiUndiscoveredDrop) {
         stateKey: profile,
         waveId: "memes",
       }),
-    { wrapper }
+    { wrapper, initialProps }
   );
   return { ...hook, client, pendingDropIdsRef };
 }
@@ -80,16 +88,16 @@ it("renders the footer's cached first drop immediately and fetches only lookahea
   const { result, unmount } = setup(response("first"));
   expect(result.current.sessionState.currentDrop?.id).toBe("first");
   await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
-  expect(fetchMock.mock.calls.map(([request]) => request.params?.skip)).toEqual(
-    ["1", "2", "3"]
-  );
+  expect(
+    fetchMock.mock.calls.map(([request]) => request.params?.["skip"])
+  ).toEqual(["1", "2", "3"]);
   unmount();
 });
 
 it("publishes the first response without waiting for lookahead and retains it after a background failure", async () => {
   const background = deferred<ApiUndiscoveredDrop>();
   fetchMock.mockImplementation(({ params }) =>
-    params?.skip ? background.promise : Promise.resolve(response("first"))
+    params?.["skip"] ? background.promise : Promise.resolve(response("first"))
   );
   const { result } = setup();
   await waitFor(() =>
@@ -102,8 +110,8 @@ it("publishes the first response without waiting for lookahead and retains it af
 
 it("uses a successful lookahead even when the primary request fails", async () => {
   fetchMock.mockImplementation(({ params }) =>
-    params?.skip
-      ? Promise.resolve(response(`next-${params.skip}`))
+    params?.["skip"]
+      ? Promise.resolve(response(`next-${params["skip"]}`))
       : Promise.reject(new Error("primary failed"))
   );
   const { result } = setup();
@@ -146,7 +154,7 @@ it("does not expose the previous profile's buffered drop", async () => {
 
 it("keeps the queue on close and reopen without fetching another full window", async () => {
   fetchMock.mockImplementation(({ params }) =>
-    Promise.resolve(response(`drop-${params?.skip ?? 0}`))
+    Promise.resolve(response(`drop-${params?.["skip"] ?? 0}`))
   );
   const { result, rerender } = setup(response("drop-0"));
   await waitFor(() =>
@@ -165,7 +173,7 @@ it("keeps the queue on close and reopen without fetching another full window", a
 
 it("refills only the missing slots after advancing", async () => {
   fetchMock.mockImplementation(({ params }) =>
-    Promise.resolve(response(`drop-${params?.skip ?? 0}`))
+    Promise.resolve(response(`drop-${params?.["skip"] ?? 0}`))
   );
   const { result } = setup(response("drop-0"));
   await waitFor(() =>
@@ -178,7 +186,7 @@ it("refills only the missing slots after advancing", async () => {
     )
   );
   fetchMock.mockImplementation(({ params }) =>
-    Promise.resolve(response(`drop-${Number(params?.skip ?? 0) + 1}`, 9))
+    Promise.resolve(response(`drop-${Number(params?.["skip"] ?? 0) + 1}`, 9))
   );
   await act(async () => result.current.syncUndiscoveredWindow());
   expect(result.current.sessionState.currentDrop?.id).toBe("drop-1");
@@ -186,7 +194,7 @@ it("refills only the missing slots after advancing", async () => {
     result.current.sessionState.lookaheadDrops.map((item) => item.id)
   ).toEqual(["drop-2", "drop-3", "drop-4"]);
   expect(
-    fetchMock.mock.calls.slice(3).map(([request]) => request.params?.skip)
+    fetchMock.mock.calls.slice(3).map(([request]) => request.params?.["skip"])
   ).toEqual([undefined, "3"]);
   expect(result.current.sessionState.unratedCount).toBe(9);
 });
@@ -289,7 +297,7 @@ it("shows all done when the server reports no voting power", async () => {
 
 it("ignores an old submission callback while the dialog is closed", async () => {
   fetchMock.mockImplementation(({ params }) =>
-    Promise.resolve(response(`drop-${params?.skip ?? 0}`))
+    Promise.resolve(response(`drop-${params?.["skip"] ?? 0}`))
   );
   const { result, rerender } = setup(response("drop-0"));
   await waitFor(() =>
@@ -304,7 +312,7 @@ it("ignores an old submission callback while the dialog is closed", async () => 
 
 it("clears cached candidates when the server reports no unrated drops", async () => {
   fetchMock.mockImplementation(({ params }) =>
-    Promise.resolve(response(`drop-${params?.skip ?? 0}`))
+    Promise.resolve(response(`drop-${params?.["skip"] ?? 0}`))
   );
   const { result } = setup(response("drop-0"));
   await waitFor(() =>
@@ -363,4 +371,76 @@ it("normalizes cache profile keys and invalidates a retired footer candidate", (
       ?.rating
   ).toBe(100);
   client.clear();
+});
+
+it("waits for a fresh candidate when the footer cache is older than a minute", async () => {
+  const background = deferred<ApiUndiscoveredDrop>();
+  fetchMock.mockReturnValue(background.promise);
+  const { result, unmount } = setup(response("old"), Date.now() - 60_001);
+  expect(result.current.sessionState.currentDrop).toBeNull();
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4));
+  await act(async () => background.resolve(response("fresh")));
+  expect(result.current.sessionState.currentDrop?.id).toBe("fresh");
+  unmount();
+});
+
+it("expires a closed buffer without issuing background requests and refreshes on reopen", async () => {
+  jest.useFakeTimers();
+  fetchMock.mockImplementation(({ params }) =>
+    Promise.resolve(response(`old-${params?.["skip"] ?? 0}`))
+  );
+  const { result, rerender } = setup(response("old-0"));
+  await act(async () => jest.advanceTimersByTimeAsync(1));
+  expect(result.current.sessionState.lookaheadDrops).toHaveLength(3);
+  rerender({ enabled: false });
+  const calls = fetchMock.mock.calls.length;
+  await act(async () => jest.advanceTimersByTimeAsync(60_001));
+  expect(fetchMock).toHaveBeenCalledTimes(calls);
+  expect(result.current.sessionState.currentDrop).toBeNull();
+  expect(result.current.sessionState.lookaheadDrops).toEqual([]);
+
+  fetchMock.mockImplementation(({ params }) =>
+    Promise.resolve(response(`fresh-${params?.["skip"] ?? 0}`))
+  );
+  rerender({ enabled: true });
+  await act(async () => jest.advanceTimersByTimeAsync(1));
+  expect(result.current.sessionState.currentDrop?.id).toBe("fresh-0");
+  expect(fetchMock).toHaveBeenCalledTimes(calls + 4);
+});
+
+it("keeps the visible and preloaded next candidates stable as responses arrive out of order", async () => {
+  const pending = Array.from({ length: 3 }, () =>
+    deferred<ApiUndiscoveredDrop>()
+  );
+  fetchMock.mockImplementation(
+    ({ params }) => pending[Number(params?.["skip"]) - 1]!.promise
+  );
+  const { result } = setup(response("first"));
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
+  await act(async () => pending[2]!.resolve(response("third")));
+  expect(result.current.sessionState.lookaheadDrops[0]?.id).toBe("third");
+  await act(async () => pending[0]!.resolve(response("second")));
+  await act(async () => pending[1]!.resolve(response("second")));
+  expect(result.current.sessionState.currentDrop?.id).toBe("first");
+  expect(
+    result.current.sessionState.lookaheadDrops.map((candidate) => candidate.id)
+  ).toEqual(["third", "second"]);
+  act(() => result.current.advanceVisibleDrop(drop("first") as ExtendedDrop));
+  expect(result.current.sessionState.currentDrop?.id).toBe("third");
+});
+
+it("keeps the retained buffer bounded when the refreshed primary is a new submission", async () => {
+  fetchMock.mockImplementation(({ params }) =>
+    Promise.resolve(response(`drop-${params?.["skip"] ?? 0}`))
+  );
+  const { result } = setup(response("drop-0"));
+  await waitFor(() =>
+    expect(result.current.sessionState.lookaheadDrops).toHaveLength(3)
+  );
+  fetchMock.mockResolvedValue(response("newest"));
+  await act(async () => result.current.syncUndiscoveredWindow());
+  expect(result.current.sessionState.currentDrop?.id).toBe("drop-0");
+  expect(
+    result.current.sessionState.lookaheadDrops.map((candidate) => candidate.id)
+  ).toEqual(["drop-1", "drop-2", "drop-3"]);
 });

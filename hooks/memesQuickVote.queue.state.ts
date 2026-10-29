@@ -1,3 +1,4 @@
+import { MEMES_QUICK_VOTE_LOOKAHEAD_COUNT } from "@/hooks/memesQuickVote.query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
@@ -152,9 +153,9 @@ export const applyFetchedWindowState = ({
   );
   currentDrop ??= safeFetchedDrops[0] ?? null;
 
-  const lookaheadDrops = safeFetchedDrops.filter(
-    (drop) => drop.id !== currentDrop?.id
-  );
+  const lookaheadDrops = safeFetchedDrops
+    .filter((drop) => drop.id !== currentDrop?.id)
+    .slice(0, MEMES_QUICK_VOTE_LOOKAHEAD_COUNT - 1);
   const leftThisRoundCount = getDisplayLeftThisRoundCount({
     hiddenDropIds: new Set([...resurfacedHandledDropIds, ...pendingDropIds]),
     rawLeftThisRoundCount,
