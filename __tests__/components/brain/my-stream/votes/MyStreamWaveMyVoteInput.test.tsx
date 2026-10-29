@@ -54,7 +54,11 @@ const expectMaxVotes = (value: string, label = "Max for wave") => {
 describe("MyStreamWaveMyVoteInput", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useQueryClientMock.mockReturnValue({ invalidateQueries, setQueriesData });
+    useQueryClientMock.mockReturnValue({
+      invalidateQueries,
+      setQueriesData,
+      getQueryData: jest.fn(),
+    });
     useMutationMock.mockImplementation((config: any) => ({
       mutateAsync: async (variables: {
         rate: number;

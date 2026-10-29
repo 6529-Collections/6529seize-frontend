@@ -1,8 +1,12 @@
 "use client";
 
+import type { ApiUndiscoveredDrop } from "@/generated/models/ApiUndiscoveredDrop";
+import { type QueryState, useQueryClient } from "@tanstack/react-query";
+import { isMemesQuickVoteVoteableDrop } from "@/hooks/memesQuickVote.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
   applyFailedDropRestoreState,
+  applyKnownRatedDrop,
   applyFetchedWindowState,
   applyOptimisticAdvanceState,
   createInitialSessionState,
@@ -11,7 +15,10 @@ import {
 } from "@/hooks/memesQuickVote.queue.state";
 import {
   fetchMemesQuickVoteUndiscoveredDrop,
+  getMemesQuickVoteUndiscoveredDropQueryKey,
+  MEMES_QUICK_VOTE_CACHE_TIME_MS,
   MEMES_QUICK_VOTE_LOOKAHEAD_COUNT,
+  MEMES_QUICK_VOTE_UNDISCOVERED_DROP_QUERY_KEY,
 } from "@/hooks/memesQuickVote.query";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -26,12 +33,13 @@ type UseMemesQuickVoteSessionStateOptions = {
   readonly isQuickVoteEnabled: boolean;
   readonly isSettingsLoaded: boolean;
   readonly pendingDropIdsRef: { current: readonly string[] };
+  readonly proxyId: string | null | undefined;
   readonly stateKey: string;
   readonly waveId: string | null;
 };
 
 export type UseMemesQuickVoteSessionStateResult = {
-  readonly advanceVisibleDrop: (drop: ExtendedDrop) => void;
+  readonly advanceVisibleDrop: (drop: ExtendedDrop, isVote?: boolean) => void;
   readonly restoreFailedDrop: (drop: ExtendedDrop) => void;
   readonly sessionState: MemesQuickVoteSessionState;
   readonly syncUndiscoveredWindow: () => Promise<void>;
@@ -51,6 +59,7 @@ type UseMemesQuickVoteWindowSyncOptions = Omit<
   "stateKey"
 > & {
   readonly setCurrentSessionState: UseKeyedMemesQuickVoteSessionStoreResult["setCurrentSessionState"];
+  readonly sessionStateRef: { current: MemesQuickVoteSessionState };
 };
 
 export const runBestEffortSync = (sync: () => Promise<void>): void => {
@@ -59,7 +68,8 @@ export const runBestEffortSync = (sync: () => Promise<void>): void => {
   });
 };
 
-const QUICK_VOTE_RESTART_TIMEOUT_MS = 3000;
+// Allow a slow discovery request to complete before treating a restart as failed.
+const QUICK_VOTE_RESTART_TIMEOUT_MS = 30_000;
 
 const shouldRerunQuickVoteSync = ({
   abortController,
@@ -106,12 +116,33 @@ const getCurrentSessionState = ({
   state.key === key ? state.value : createInitialSessionState();
 
 const useKeyedMemesQuickVoteSessionStore = (
-  stateKey: string
+  stateKey: string,
+  cached: QueryState<ApiUndiscoveredDrop> | undefined
 ): UseKeyedMemesQuickVoteSessionStoreResult => {
-  const [sessionState, setSessionState] = useState<KeyedSessionState>(() => ({
-    key: stateKey,
-    value: createInitialSessionState(),
-  }));
+  const [sessionState, setSessionState] = useState<KeyedSessionState>(() => {
+    const initialResponse =
+      cached &&
+      !cached.isInvalidated &&
+      Date.now() - cached.dataUpdatedAt < MEMES_QUICK_VOTE_CACHE_TIME_MS
+        ? cached.data
+        : undefined;
+    return {
+      key: stateKey,
+      value:
+        initialResponse?.drop &&
+        isMemesQuickVoteVoteableDrop(initialResponse.drop)
+          ? applyFetchedWindowState({
+              current: createInitialSessionState(),
+              fetchedDrops: [initialResponse.drop],
+              pendingDropIds: [],
+              primaryDrop: initialResponse.drop,
+              rawLeftThisRoundCount:
+                initialResponse.left_to_vote_in_current_round,
+              rawUnratedCount: initialResponse.total_count,
+            })
+          : createInitialSessionState(),
+    };
+  });
 
   const setCurrentSessionState = useCallback(
     (
@@ -151,34 +182,32 @@ const useMemesQuickVoteWindowSync = ({
   isQuickVoteEnabled,
   isSettingsLoaded,
   pendingDropIdsRef,
+  proxyId,
   setCurrentSessionState,
+  sessionStateRef,
   waveId,
 }: UseMemesQuickVoteWindowSyncOptions) => {
+  const queryClient = useQueryClient();
   const syncAbortControllerRef = useRef<AbortController | null>(null);
   const syncInFlightRef = useRef<boolean>(false);
   const syncRequestIdRef = useRef(0);
   const syncRerunRequestedRef = useRef<boolean>(false);
-  const syncRetryTimeoutRef = useRef<ReturnType<
-    typeof globalThis.setTimeout
-  > | null>(null);
-
-  const clearSyncRetryTimeout = useCallback(() => {
-    if (syncRetryTimeoutRef.current === null) {
-      return;
-    }
-
-    globalThis.clearTimeout(syncRetryTimeoutRef.current);
-    syncRetryTimeoutRef.current = null;
-  }, []);
-
+  const hasSyncedRef = useRef(false);
+  const enabledRef = useRef(enabled);
+  useEffect(() => {
+    enabledRef.current = enabled;
+    return () => {
+      enabledRef.current = false;
+    };
+  }, [enabled]);
   const stopActiveSync = useCallback(() => {
+    hasSyncedRef.current = false;
     syncRequestIdRef.current += 1;
     syncInFlightRef.current = false;
     syncRerunRequestedRef.current = false;
     syncAbortControllerRef.current?.abort();
     syncAbortControllerRef.current = null;
-    clearSyncRetryTimeout();
-  }, [clearSyncRetryTimeout]);
+  }, []);
 
   const syncUndiscoveredWindow = useCallback(
     async function syncWindow() {
@@ -187,7 +216,7 @@ const useMemesQuickVoteWindowSync = ({
         return;
       }
 
-      if (!enabled) {
+      if (!enabledRef.current) {
         return;
       }
 
@@ -210,47 +239,82 @@ const useMemesQuickVoteWindowSync = ({
       const abortController = new AbortController();
       syncAbortControllerRef.current = abortController;
 
+      const reusePrimary = !hasSyncedRef.current;
+      hasSyncedRef.current = true;
       setCurrentSessionState(getQuickVoteSyncPendingState);
 
       try {
-        const responses = await Promise.all(
-          Array.from({ length: MEMES_QUICK_VOTE_LOOKAHEAD_COUNT }, (_, skip) =>
-            fetchMemesQuickVoteUndiscoveredDrop({
-              signal: abortController.signal,
-              skip,
-              waveId,
-            })
-          )
+        // Reuse the footer's first drop and in-flight request. Each successful
+        // response is usable immediately; a failed lookahead is not a queue error.
+        const responses: (ApiUndiscoveredDrop | undefined)[] = [];
+        const buffered = sessionStateRef.current;
+        const nextSkip = Math.max(
+          1,
+          buffered.lookaheadDrops.length + (buffered.currentDrop ? 1 : 0)
         );
-
+        const requestCount = Math.max(
+          1,
+          MEMES_QUICK_VOTE_LOOKAHEAD_COUNT - nextSkip + 1
+        );
+        await Promise.all(
+          Array.from({ length: requestCount }, async (_, index) => {
+            const skip = index === 0 ? 0 : nextSkip + index - 1;
+            try {
+              const response = await queryClient.fetchQuery({
+                queryKey: getMemesQuickVoteUndiscoveredDropQueryKey({
+                  contextProfile,
+                  proxyId,
+                  sessionId: 0,
+                  skip,
+                  waveId,
+                }),
+                queryFn: ({ signal }) =>
+                  fetchMemesQuickVoteUndiscoveredDrop({
+                    signal,
+                    skip,
+                    waveId,
+                  }),
+                staleTime:
+                  skip === 0 && reusePrimary
+                    ? MEMES_QUICK_VOTE_CACHE_TIME_MS
+                    : 0,
+                retry: false,
+              });
+              if (
+                abortController.signal.aborted ||
+                syncRequestIdRef.current !== requestId
+              )
+                return;
+              responses[index] = response;
+              const primary = responses[0] ?? response;
+              const fetchedDrops = getUniqueDrops(
+                responses.flatMap((item) => (item?.drop ? [item.drop] : []))
+              );
+              setCurrentSessionState((current) =>
+                applyFetchedWindowState({
+                  current,
+                  handledDropIdsAtRequest: buffered.recentlyHandledDropIds,
+                  fetchedDrops,
+                  pendingDropIds: pendingDropIdsRef.current,
+                  primaryDrop: primary.drop,
+                  rawLeftThisRoundCount: primary.left_to_vote_in_current_round,
+                  rawUnratedCount: primary.total_count,
+                  isPartial: responses.filter(Boolean).length < requestCount,
+                })
+              );
+            } catch {
+              // The completed window decides whether there is usable content.
+            }
+          })
+        );
         if (
           abortController.signal.aborted ||
           syncRequestIdRef.current !== requestId
-        ) {
+        )
           return;
+        if (responses.filter(Boolean).length < requestCount) {
+          setCurrentSessionState(getQuickVoteSyncFailureState);
         }
-
-        const primaryResponse = responses[0] ?? null;
-        const primaryDrop = primaryResponse?.drop ?? null;
-        const rawLeftThisRoundCount =
-          primaryResponse?.left_to_vote_in_current_round ?? 0;
-        const rawUnratedCount = primaryResponse?.total_count ?? 0;
-        const fetchedDrops = getUniqueDrops(
-          responses.flatMap((response) =>
-            response.drop ? [response.drop] : []
-          )
-        );
-
-        setCurrentSessionState((current) =>
-          applyFetchedWindowState({
-            current,
-            fetchedDrops,
-            pendingDropIds: pendingDropIdsRef.current,
-            primaryDrop,
-            rawLeftThisRoundCount,
-            rawUnratedCount,
-          })
-        );
       } catch {
         if (
           abortController.signal.aborted ||
@@ -286,13 +350,15 @@ const useMemesQuickVoteWindowSync = ({
       isQuickVoteEnabled,
       isSettingsLoaded,
       pendingDropIdsRef,
+      proxyId,
+      queryClient,
+      sessionStateRef,
       setCurrentSessionState,
       waveId,
     ]
   );
 
   return {
-    clearSyncRetryTimeout,
     stopActiveSync,
     syncUndiscoveredWindow,
   };
@@ -357,9 +423,9 @@ const useMemesQuickVoteSessionEffects = ({
 
     const shouldContinueSync =
       currentSessionState.isRestartingRound ||
-      currentSessionState.recentlyHandledDropIds.length > 0 ||
-      (pendingDropIdsRef.current.length > 0 &&
-        currentSessionState.currentDrop === null);
+      (currentSessionState.currentDrop === null &&
+        currentSessionState.recentlyHandledDropIds.length > 0 &&
+        pendingDropIdsRef.current.length === 0);
 
     if (!shouldContinueSync) {
       return;
@@ -376,7 +442,6 @@ const useMemesQuickVoteSessionEffects = ({
     currentSessionState.currentDrop,
     currentSessionState.hasDiscoveryError,
     currentSessionState.isExhausted,
-    currentSessionState.isLoading,
     currentSessionState.isRestartingRound,
     currentSessionState.recentlyHandledDropIds.length,
     enabled,
@@ -429,11 +494,75 @@ export const useMemesQuickVoteSessionState = ({
   isQuickVoteEnabled,
   isSettingsLoaded,
   pendingDropIdsRef,
+  proxyId,
   stateKey,
   waveId,
 }: UseMemesQuickVoteSessionStateOptions): UseMemesQuickVoteSessionStateResult => {
+  const queryClient = useQueryClient();
+  const cached = queryClient.getQueryState<ApiUndiscoveredDrop>(
+    getMemesQuickVoteUndiscoveredDropQueryKey({
+      contextProfile,
+      proxyId,
+      sessionId: 0,
+      skip: 0,
+      waveId,
+    })
+  );
   const { currentSessionState, setCurrentSessionState } =
-    useKeyedMemesQuickVoteSessionStore(stateKey);
+    useKeyedMemesQuickVoteSessionStore(
+      stateKey,
+      isQuickVoteEnabled ? cached : undefined
+    );
+  // Retain a recently closed session, but do not keep old candidates indefinitely.
+  // Pending submissions continue independently and known votes stay excluded.
+  useEffect(() => {
+    if (enabled) return;
+    const timeoutId = globalThis.setTimeout(() => {
+      setCurrentSessionState((current) => ({
+        ...createInitialSessionState(),
+        recentlyHandledDropIds: current.recentlyHandledDropIds,
+        recentlyVotedDropIds: current.recentlyVotedDropIds,
+      }));
+    }, MEMES_QUICK_VOTE_CACHE_TIME_MS);
+    return () => globalThis.clearTimeout(timeoutId);
+  }, [enabled, setCurrentSessionState]);
+
+  useEffect(
+    () =>
+      queryClient.getQueryCache().subscribe((event) => {
+        if (event.type !== "updated" || event.action.type !== "success") return;
+        const queryKey = event.query.queryKey as readonly unknown[];
+        const key = queryKey[0];
+        const scope = queryKey[1];
+        if (
+          key !== MEMES_QUICK_VOTE_UNDISCOVERED_DROP_QUERY_KEY ||
+          typeof scope !== "object" ||
+          scope === null ||
+          !("context_profile" in scope) ||
+          scope.context_profile !== contextProfile ||
+          !("proxyId" in scope) ||
+          scope.proxyId !== (proxyId ?? null) ||
+          !("waveId" in scope) ||
+          scope.waveId !== waveId
+        )
+          return;
+        const response = event.query.state.data as
+          | ApiUndiscoveredDrop
+          | undefined;
+        const rating = response?.drop?.context_profile_context?.rating;
+        if (response?.drop && typeof rating === "number" && rating !== 0) {
+          const ratedDrop = response.drop;
+          setCurrentSessionState((current) =>
+            applyKnownRatedDrop(current, ratedDrop)
+          );
+        }
+      }),
+    [contextProfile, proxyId, queryClient, setCurrentSessionState, waveId]
+  );
+  const sessionStateRef = useRef(currentSessionState);
+  useEffect(() => {
+    sessionStateRef.current = currentSessionState;
+  }, [currentSessionState]);
   const { stopActiveSync, syncUndiscoveredWindow } =
     useMemesQuickVoteWindowSync({
       contextProfile,
@@ -441,7 +570,9 @@ export const useMemesQuickVoteSessionState = ({
       isQuickVoteEnabled,
       isSettingsLoaded,
       pendingDropIdsRef,
+      proxyId,
       setCurrentSessionState,
+      sessionStateRef,
       waveId,
     });
 
@@ -459,17 +590,17 @@ export const useMemesQuickVoteSessionState = ({
   });
 
   const advanceVisibleDrop = useCallback(
-    (drop: ExtendedDrop) => {
+    (drop: ExtendedDrop, isVote = false) => {
       setCurrentSessionState((current) =>
         applyOptimisticAdvanceState({
+          isVote,
           current,
           dropId: drop.id,
           pendingDropIds: pendingDropIdsRef.current,
         })
       );
-      runBestEffortSync(syncUndiscoveredWindow);
     },
-    [pendingDropIdsRef, setCurrentSessionState, syncUndiscoveredWindow]
+    [pendingDropIdsRef, setCurrentSessionState]
   );
 
   const restoreFailedDrop = useCallback(

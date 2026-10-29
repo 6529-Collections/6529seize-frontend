@@ -72,7 +72,8 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
 }) => {
   const locale = useBrowserLocale();
   const explainTooltipId = useId();
-  const { requestAuth, setToast } = useContext(AuthContext);
+  const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
+    useContext(AuthContext);
   const queryClient = useQueryClient();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isVoteInputFocused, setIsVoteInputFocused] = useState(false);
@@ -247,7 +248,11 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
         message: t(locale, "waves.myVotes.voteUpdated"),
         type: "success",
       });
-      applyWaveDropVoteUpdate(queryClient, response, drop.wave.id);
+      applyWaveDropVoteUpdate(queryClient, response, drop.wave.id, {
+        contextProfile: activeProfileProxy
+          ? undefined
+          : connectedProfile?.handle,
+      });
     },
     onError: (error) => {
       setToast({

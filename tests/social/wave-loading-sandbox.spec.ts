@@ -494,7 +494,12 @@ for (const width of [375, 390, 768, 1024, 1440]) {
         {
           part_id: 1,
           content: "Local loading fixture",
-          media: [],
+          media: [
+            {
+              url: "https://6529.io/meme-lab.jpg",
+              mime_type: "image/jpeg",
+            },
+          ],
           attachments: [],
           quoted_drop: null,
         },
@@ -515,6 +520,10 @@ for (const width of [375, 390, 768, 1024, 1440]) {
     };
     let first = true;
     let fail = false;
+    let candidate = drop;
+    await page.route("**/*meme-lab*", (route) =>
+      route.fulfill({ path: "public/meme-lab.jpg", contentType: "image/jpeg" })
+    );
     const content = gate();
     await page.route("**/api/waves/*/undiscovered-drop**", async (route) => {
       const footer = first;
@@ -523,7 +532,13 @@ for (const width of [375, 390, 768, 1024, 1440]) {
       await route.fulfill(
         fail && !footer
           ? { status: 400, json: { error: "Fixture error" } }
-          : { json: { drop, total_count: 5, left_to_vote_in_current_round: 3 } }
+          : {
+              json: {
+                drop: candidate,
+                total_count: 5,
+                left_to_vote_in_current_round: 3,
+              },
+            }
       );
     });
     try {
@@ -559,8 +574,23 @@ for (const width of [375, 390, 768, 1024, 1440]) {
         (element) => element.nextElementSibling?.getBoundingClientRect().height
       );
       const button = await close.elementHandle();
+      // The visible footer already loaded this candidate. Slow lookahead must
+      // not delay usable controls or move focus/the close button.
+      await expect(
+        dialog.getByRole("button", { name: "Skip", exact: true })
+      ).toBeEnabled();
+      await expect(
+        dialog.getByRole("button", { name: /^Vote / })
+      ).toBeEnabled();
+      const artwork = dialog.getByRole("img").first();
+      await expect(artwork).toBeVisible();
+      await expect
+        .poll(() =>
+          artwork.evaluate((img: HTMLImageElement) => img.naturalWidth)
+        )
+        .toBeGreaterThan(0);
       await page.screenshot({
-        path: testInfo.outputPath("quick-vote-loading.png"),
+        path: testInfo.outputPath("quick-vote-cached.png"),
       });
       content.release();
       await expect(
@@ -602,20 +632,64 @@ for (const width of [375, 390, 768, 1024, 1440]) {
       await page.keyboard.press("Escape");
       await expect(dialog).toBeHidden();
       await expect(trigger).toBeFocused();
-      if (!touch) {
-        await trigger.click();
-        await dialog.click({ position: { x: 5, y: 5 } });
-        await expect(dialog).toBeHidden();
-        await expect(trigger).toBeFocused();
-      }
+      await trigger.click();
+      await expect(artwork).toBeVisible();
+      await expect
+        .poll(() =>
+          artwork.evaluate((img: HTMLImageElement) => img.naturalWidth)
+        )
+        .toBeGreaterThan(0);
+      if (touch) await close.click();
+      else await dialog.click({ position: { x: 5, y: 5 } });
+      await expect(dialog).toBeHidden();
+      await expect(trigger).toBeFocused();
       fail = true;
       first = true;
       await page.reload({ waitUntil: "domcontentloaded" });
       await trigger.click();
+      // A failed background window cannot replace the cached artwork with an error.
+      await expect(
+        dialog.getByRole("button", { name: "Skip", exact: true })
+      ).toBeEnabled();
+      await expect(
+        dialog.getByRole("button", { name: "Try again" })
+      ).toBeHidden();
+      expect(await close.boundingBox()).toEqual(before);
+      // Once the only usable candidate is consumed, a genuine discovery
+      // failure must still expose Retry without moving the close control.
+      await page.route("**/api/drops/*/ratings", (route) =>
+        route.fulfill({ json: drop })
+      );
+      await dialog.getByRole("button", { name: "Skip", exact: true }).click();
       await expect(
         dialog.getByRole("button", { name: "Try again" })
       ).toBeVisible();
       expect(await close.boundingBox()).toEqual(before);
+      fail = false;
+      candidate = { ...drop, id: "00000000-0000-4000-8000-000000000999" };
+      await dialog.getByRole("button", { name: "Try again" }).click();
+      await expect(
+        dialog.getByRole("button", { name: "Skip", exact: true })
+      ).toBeEnabled();
+      await page.route("**/api/drops/*/ratings", (route) =>
+        route.fulfill({
+          status: 400,
+          json: { error: "Voting is closed in this wave" },
+        })
+      );
+      await dialog.getByRole("button", { name: /^Vote / }).click();
+      // Native dialogs obscure global toasts. Rejections must be announced
+      // within the dialog, with the original voting controls restored.
+      await expect(dialog.getByRole("alert")).toHaveText(
+        "Voting is closed in this wave"
+      );
+      await expect(dialog.getByRole("alert")).toBeVisible();
+      await expect(
+        dialog.getByRole("button", { name: /^Vote / })
+      ).toBeEnabled();
+      await page.screenshot({
+        path: testInfo.outputPath("quick-vote-rejected.png"),
+      });
       await close.click();
       await expect(dialog).toBeHidden();
       await expect(trigger).toBeFocused();
