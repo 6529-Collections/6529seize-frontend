@@ -188,8 +188,8 @@ describe("useMemesQuickVoteQueue", () => {
       }
 
       if (endpoint === `waves/${DEFAULT_MEMES_WAVE_ID}/undiscovered-drops`) {
-        const skip = Number(params?.skip ?? "0");
-        const limit = Number(params?.limit ?? "4");
+        const skip = Number(params?.["skip"] ?? "0");
+        const limit = Number(params?.["limit"] ?? "4");
         return {
           drops: currentUndiscoveredDrops.slice(skip, skip + limit),
           left_to_vote_in_current_round: leftThisRoundCount,
