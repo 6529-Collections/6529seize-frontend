@@ -6,9 +6,17 @@ import {
 } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import type { ApiCompetition } from "@/generated/models/ApiCompetition";
+import type { ApiCompetitionEntryContext } from "@/generated/models/ApiCompetitionEntryContext";
+import { ApiCompetitionComputedPhase } from "@/generated/models/ApiCompetitionComputedPhase";
 import { ApiCompetitionEntryStatus } from "@/generated/models/ApiCompetitionEntryStatus";
+import { ApiCompetitionLifecycle } from "@/generated/models/ApiCompetitionLifecycle";
+import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { SingleWaveDropAuthor } from "@/components/waves/drop/SingleWaveDropAuthor";
 import { useCompetitionEvents } from "@/hooks/competitions/useCompetitionEvents";
@@ -19,18 +27,66 @@ import {
 } from "@/services/api/competition-entry-drops-api";
 
 let mockListener: (event: unknown) => void;
-const mockCompetition = {
+const mockCompetition: ApiCompetition = {
   id: "competition",
   wave_id: "wave",
   title: "Anonymous art",
-  type: "RANK",
-  permissions: { vote: true },
-  voting: {
-    credit_type: "TDH",
-    credit_scope: "WAVE",
+  description: null,
+  type: ApiCompetitionType.Rank,
+  lifecycle: ApiCompetitionLifecycle.Published,
+  computed_phase: ApiCompetitionComputedPhase.VotingOpen,
+  config_version: 1,
+  participation: {
+    anonymous_submissions: true,
+    group_id: null,
+    signature_required: false,
+    max_entries_per_participant: null,
+    required_metadata: [],
+    required_media: [],
+    submission_type: null,
+    identity_submission_strategy: null,
+    identity_submission_duplicates: null,
     starts_at: null,
     ends_at: null,
+    terms: null,
   },
+  permissions: { view: true, submit: true, vote: true, administer: false },
+  voting: {
+    group_id: null,
+    credit_type: "TDH",
+    credit_scope: "WAVE",
+    credit_category: null,
+    credit_creditor: null,
+    credit_nfts: [],
+    signature_required: false,
+    starts_at: null,
+    ends_at: null,
+    max_votes_per_identity_to_entry: null,
+    forbid_negative_votes: false,
+  },
+  decisions: {
+    strategy: null,
+    next_decision_time: null,
+    winning_min_threshold: null,
+    winning_max_threshold: null,
+    winning_threshold_min_duration_ms: 0,
+    max_winners: 1,
+    time_lock_ms: null,
+  },
+  winners: {
+    max_winners: 1,
+    winning_min_threshold: null,
+    winning_max_threshold: null,
+    winning_threshold_min_duration_ms: 0,
+  },
+  outcome_config: [],
+  capabilities: [],
+  created_at: 1,
+  updated_at: 1,
+  published_at: 1,
+  ended_at: null,
+  cancelled_at: null,
+  archived_at: null,
 };
 jest.mock("@/contexts/CompetitionContext", () => ({
   useCompetition: () => ({ competition: mockCompetition }),
@@ -63,25 +119,90 @@ jest.mock("@/components/waves/drops/DropAuthorBadges", () => ({
   DropAuthorBadges: () => null,
 }));
 
-const author = (entryId: string, revealed = false) =>
-  ({
-    id: revealed ? "real-author" : `anonymous-${entryId}`,
-    handle: revealed ? "Alice" : "Anonymous",
-    ...(revealed ? {} : { is_anonymous: true }),
-    primary_address: "",
-    pfp: null,
-    level: 0,
-    classification: ApiProfileClassification.Pseudonym,
-  }) as ApiProfileMin;
-const drop = (entryId: string, revealed = false, waveId = "wave") =>
-  ({
-    id: `drop-${entryId}`,
-    author: author(entryId, revealed),
-    wave: { id: waveId },
-    created_at: 1,
-    parts: [],
-  }) as ApiDrop;
-const context = (entryId: string, revealed = false) => ({
+const author = (entryId: string, revealed = false): ApiProfileMin => ({
+  id: revealed ? "real-author" : `anonymous-${entryId}`,
+  handle: revealed ? "Alice" : "Anonymous",
+  ...(revealed ? {} : { is_anonymous: true }),
+  primary_address: "",
+  pfp: null,
+  level: 0,
+  classification: ApiProfileClassification.Pseudonym,
+  sub_classification: null,
+  banner1_color: null,
+  banner2_color: null,
+  cic: 0,
+  rep: 0,
+  tdh: 0,
+  tdh_rate: 0,
+  xtdh: 0,
+  xtdh_rate: 0,
+  subscribed_actions: [],
+  archived: false,
+  active_main_stage_submission_ids: [],
+  winner_main_stage_drop_ids: [],
+  artist_of_prevote_cards: [],
+  profile_wave_id: null,
+  is_wave_creator: false,
+});
+const drop = (entryId: string, revealed = false, waveId = "wave"): ApiDrop => ({
+  id: `drop-${entryId}`,
+  serial_no: 1,
+  drop_type: revealed ? ApiDropType.Winner : ApiDropType.Participatory,
+  rank: revealed ? 1 : null,
+  author: author(entryId, revealed),
+  wave: {
+    id: waveId,
+    name: "Anonymous art",
+    picture: null,
+    description_drop_id: "description",
+    last_drop_time: 1,
+    submission_type: null,
+    authenticated_user_eligible_to_vote: true,
+    authenticated_user_eligible_to_participate: true,
+    authenticated_user_eligible_to_chat: true,
+    authenticated_user_admin: false,
+    visibility_group_id: null,
+    participation_group_id: null,
+    chat_group_id: null,
+    voting_group_id: null,
+    admin_group_id: null,
+    voting_period_start: null,
+    voting_period_end: null,
+    voting_credit_type: ApiWaveCreditType.Tdh,
+    voting_credit_scope: ApiWaveCreditScope.Wave,
+    voting_credit_nfts: null,
+    admin_drop_deletion_enabled: false,
+    forbid_negative_votes: false,
+    pinned: false,
+    identity_wave: false,
+  },
+  created_at: 1,
+  updated_at: null,
+  title: null,
+  parts: [],
+  parts_count: 0,
+  referenced_nfts: [],
+  mentioned_users: [],
+  mentioned_groups: [],
+  mentioned_waves: [],
+  metadata: [],
+  rating: 1,
+  realtime_rating: 1,
+  rating_prediction: 1,
+  top_raters: [],
+  raters_count: 1,
+  context_profile_context: null,
+  subscribed_actions: [],
+  is_signed: false,
+  reactions: [],
+  boosts: 0,
+  is_additional_action_promised: false,
+  hide_link_preview: false,
+});
+const context = (
+  entryId: string,
+  revealed = false
+): ApiCompetitionEntryContext => ({
   entry: {
     id: entryId,
     wave_id: "wave",
@@ -131,15 +252,16 @@ it("refreshes winner identity in cached cards, chat and detail after the decisio
   jest
     .mocked(competitionCardDrop)
     .mockImplementation((item) => drop(item.entry.id));
-  jest.mocked(fetchCompetitionEntryDrop).mockImplementation(
-    async (_identity, _viewer, entryId, _dropId, _signal, cached) =>
-      ({
+  jest
+    .mocked(fetchCompetitionEntryDrop)
+    .mockImplementation(
+      async (_identity, _viewer, entryId, _dropId, _signal, cached) => ({
         ...context(entryId, won && entryId === "winner"),
         competition: mockCompetition,
         // The optimized card reader reuses original content even after an identity reveal.
         original: cached?.original ?? drop(entryId),
-      }) as NonNullable<Awaited<ReturnType<typeof fetchCompetitionEntryDrop>>>
-  );
+      })
+    );
   function Entries() {
     useCompetitionEvents("wave");
     const entries = useCompetitionEntryDrops(references, cards);
