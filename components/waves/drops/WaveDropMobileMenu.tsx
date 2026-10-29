@@ -402,18 +402,32 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
 
   const isAuthor = useMemo(
     () =>
-      connectedProfile?.handle === drop.author.handle && !activeProfileProxy,
-    [connectedProfile, activeProfileProxy, drop.author.handle]
+      !drop.author.is_anonymous &&
+      connectedProfile?.handle === drop.author.handle &&
+      !activeProfileProxy,
+    [
+      connectedProfile,
+      activeProfileProxy,
+      drop.author.handle,
+      drop.author.is_anonymous,
+    ]
   );
   const connectedProfileHandle = connectedProfile?.handle ?? null;
 
   const showOptions = useMemo(
     () =>
       connectedProfileHandle !== null &&
+      !drop.author.is_anonymous &&
       !activeProfileProxy &&
       !drop.id.startsWith("temp-") &&
       connectedProfileHandle === drop.author.handle,
-    [connectedProfileHandle, activeProfileProxy, drop.id, drop.author.handle]
+    [
+      connectedProfileHandle,
+      activeProfileProxy,
+      drop.id,
+      drop.author.handle,
+      drop.author.is_anonymous,
+    ]
   );
 
   const closeMenu = () => setOpen(false);

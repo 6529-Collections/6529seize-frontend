@@ -77,6 +77,7 @@
       "aliases": [
         "parallel competitions",
         "competition credits",
+        "anonymous submissions",
         "create competition",
         "pause decisions",
         "default competition",
@@ -99,6 +100,7 @@
       ],
       "facts": [
         "Where the competition experience is available, use Competitions in a wave to browse its active competitions and history. Each competition opens on Leaderboard and has its own entries, votes, rules, budget and results while Shared chat returns to the wave conversation. There is no separate Entries tab.",
+        "Anonymous submissions is an optional competition setup setting and is off by default. It is fixed after publication. Other users see each entry without its author identity until that entry wins; the author's other submissions remain anonymous, including across later draws. You can manage your own entries through My submissions. Your identity is revealed automatically if your submission wins. Unrevealed anonymous entries remain visible despite account blocks so blocking cannot identify their author; hiding a specific drop and platform moderation still apply. Related author notifications remain visible despite account blocks and identity mutes until that entry wins; ordinary notifications retain their existing filters. Content and metadata remain visible as submitted, so self-disclosure there is the submitter's responsibility. If an older upload cannot be used anonymously, upload the media again and retry; the submission form keeps your other input.",
         "Competition links use /waves/{waveId}/competitions/{competitionId}; an entry link adds ?entry={entryId}. Explicit competition and entry links preserve that competition across tabs, reload and Back/Forward even when another competition becomes the default.",
         "In competition setup, Competition type offers Rank and Approve in a desktop dropdown or a bottom sheet on smaller screens, including the app. The current choice is marked. Selecting a type closes the picker; dismissing it leaves the choice unchanged.",
         "In the app, the competition setup editor keeps the focused name or description field above the keyboard and action bar. Closing the keyboard restores the editor's full height.",
