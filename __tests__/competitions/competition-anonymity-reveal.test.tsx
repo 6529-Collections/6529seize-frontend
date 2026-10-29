@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropVoteSummary } from "@/generated/models/ApiDropVoteSummary";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
@@ -25,6 +26,7 @@ import {
   competitionCardDrop,
   fetchCompetitionEntryDrop,
 } from "@/services/api/competition-entry-drops-api";
+import { invalidateCompetitionAuthors } from "@/services/api/competitions-api";
 
 let mockListener: (event: unknown) => void;
 const mockCompetition: ApiCompetition = {
@@ -228,6 +230,34 @@ const context = (
     user_vote: 0,
     top_raters: [],
   },
+});
+
+it("refreshes matching drop identities when vote summaries and collaborations share the drop cache", async () => {
+  const client = new QueryClient({
+    defaultOptions: { queries: { gcTime: Infinity } },
+  });
+  const summaryKey = [
+    QueryKey.DROP,
+    { drop_id: "drop-winner", view: "vote-summary" },
+  ];
+  const collaborationKey = [QueryKey.DROP, "collaborations", "drop-winner"];
+  const detailKey = [QueryKey.DROP, { drop_id: "drop-winner" }];
+  const unrelatedKey = [QueryKey.DROP, { drop_id: "drop-elsewhere" }];
+  client.setQueryData<ApiDropVoteSummary>(summaryKey, {});
+  client.setQueryData(collaborationKey, []);
+  client.setQueryData(detailKey, drop("winner"));
+  client.setQueryData(unrelatedKey, drop("elsewhere", false, "elsewhere"));
+  try {
+    await expect(
+      invalidateCompetitionAuthors(client, "wave")
+    ).resolves.toBeUndefined();
+    expect(client.getQueryState(detailKey)?.isInvalidated).toBe(true);
+    expect(client.getQueryState(unrelatedKey)?.isInvalidated).toBe(false);
+    expect(client.getQueryState(summaryKey)?.isInvalidated).toBe(false);
+    expect(client.getQueryState(collaborationKey)?.isInvalidated).toBe(false);
+  } finally {
+    client.clear();
+  }
 });
 
 it("refreshes winner identity in cached cards, chat and detail after the decision event while other entries stay anonymous", async () => {
