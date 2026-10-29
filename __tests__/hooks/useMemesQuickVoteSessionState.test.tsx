@@ -12,7 +12,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 
 jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
-const fetchMock = commonApiFetch as jest.MockedFunction<
+const fetchMock = jest.fn() as jest.MockedFunction<
   (request: {
     endpoint: string;
     params?: Record<string, string> | undefined;
@@ -76,6 +76,30 @@ function setup(seed?: ApiUndiscoveredDrop, updatedAt = Date.now()) {
   );
   return { ...hook, client, pendingDropIdsRef };
 }
+
+// Reuse single-candidate fixtures while modeling the server's ordered batch envelope.
+// Physical request fanout is covered independently by the queue batching test.
+beforeEach(() => {
+  (commonApiFetch as jest.Mock).mockImplementation(
+    async (request: Parameters<typeof fetchMock>[0]) => {
+      if (!request.endpoint.endsWith("/undiscovered-drops"))
+        return fetchMock(request);
+      const skip = Number(request.params?.["skip"] ?? 0);
+      const limit = Number(request.params?.["limit"] ?? 4);
+      const responses = await Promise.all(
+        Array.from({ length: limit }, (_, index) =>
+          fetchMock({ ...request, params: { skip: `${skip + index}` } })
+        )
+      );
+      return {
+        drops: responses.flatMap((item) => (item.drop ? [item.drop] : [])),
+        total_count: responses[0]?.total_count ?? 0,
+        left_to_vote_in_current_round:
+          responses[0]?.left_to_vote_in_current_round ?? 0,
+      };
+    }
+  );
+});
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -408,7 +432,7 @@ it("expires a closed buffer without issuing background requests and refreshes on
   expect(fetchMock).toHaveBeenCalledTimes(calls + 4);
 });
 
-it("keeps the visible and preloaded next candidates stable as responses arrive out of order", async () => {
+it("keeps the visible candidate stable while the ordered background batch is pending", async () => {
   const pending = Array.from({ length: 3 }, () =>
     deferred<ApiUndiscoveredDrop>()
   );
@@ -418,15 +442,16 @@ it("keeps the visible and preloaded next candidates stable as responses arrive o
   const { result } = setup(response("first"));
   await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
   await act(async () => pending[2]!.resolve(response("third")));
-  expect(result.current.sessionState.lookaheadDrops[0]?.id).toBe("third");
+  expect(result.current.sessionState.currentDrop?.id).toBe("first");
+  expect(result.current.sessionState.lookaheadDrops).toEqual([]);
   await act(async () => pending[0]!.resolve(response("second")));
   await act(async () => pending[1]!.resolve(response("second")));
   expect(result.current.sessionState.currentDrop?.id).toBe("first");
   expect(
     result.current.sessionState.lookaheadDrops.map((candidate) => candidate.id)
-  ).toEqual(["third", "second"]);
+  ).toEqual(["second", "third"]);
   act(() => result.current.advanceVisibleDrop(drop("first") as ExtendedDrop));
-  expect(result.current.sessionState.currentDrop?.id).toBe("third");
+  expect(result.current.sessionState.currentDrop?.id).toBe("second");
 });
 
 it("keeps the retained buffer bounded when the refreshed primary is a new submission", async () => {
