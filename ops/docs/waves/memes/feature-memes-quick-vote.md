@@ -26,9 +26,12 @@ participatory submissions in the configured memes wave.
 ## User Journey
 
 1. Open quick vote from any available trigger.
-2. Quick vote opens a full dialog skeleton while it loads the unrated memes
-   queue and remembered vote amounts. The close button is available and receives
-   initial keyboard focus during loading.
+2. Quick vote uses the submission already loaded with the Uncast Power counts,
+   so its artwork and vote controls can appear while the next submissions load.
+   Reopening within a minute keeps the current submission ready; after a longer
+   pause, quick vote refreshes its candidates. The close button
+   receives initial keyboard focus. A skeleton appears only when no usable
+   submission is available yet.
 3. Review the current meme preview, including artwork, title, description,
    author, and timestamp. Submission counts appear at the top; remaining voting
    power appears above the voting controls.
@@ -89,11 +92,14 @@ participatory submissions in the configured memes wave.
 
 ## Failure and Recovery
 
-- If quick vote cannot load the queue, the dialog shows
-  `Couldn't load your queue`, explains that quick vote could not reach the
-  leaderboard, and offers `Try again`.
-- If a vote submission fails, quick vote shows an error toast, refreshes the
-  queue state, and lets the user continue from the refreshed result.
+- A failed background request keeps the current submission and voting controls
+  available. If no usable submission can be loaded, the dialog shows
+  `Couldn't load quick vote` and offers `Try again`.
+- At the end of a skipped round, quick vote waits for the next discovery request
+  before showing the next round. Slow requests can take several seconds.
+- If a vote submission fails, quick vote shows the error inside the open dialog
+  as well as in a toast, restores the counts and voting power, and refreshes the
+  queue. The inline message clears when you vote or skip again.
 - If the trigger is missing, first confirm the current surface and state:
   quick vote is hidden when there are no unrated memes left, no remaining power
   left, or the user is outside the supported waves surfaces.
