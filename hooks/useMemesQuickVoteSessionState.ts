@@ -15,6 +15,7 @@ import {
 } from "@/hooks/memesQuickVote.queue.state";
 import {
   fetchMemesQuickVoteUndiscoveredDrop,
+  fetchMemesQuickVoteUndiscoveredDrops,
   getMemesQuickVoteUndiscoveredDropQueryKey,
   MEMES_QUICK_VOTE_CACHE_TIME_MS,
   MEMES_QUICK_VOTE_LOOKAHEAD_COUNT,
@@ -256,57 +257,94 @@ const useMemesQuickVoteWindowSync = ({
           1,
           MEMES_QUICK_VOTE_LOOKAHEAD_COUNT - nextSkip + 1
         );
-        await Promise.all(
-          Array.from({ length: requestCount }, async (_, index) => {
-            const skip = index === 0 ? 0 : nextSkip + index - 1;
-            try {
-              const response = await queryClient.fetchQuery({
-                queryKey: getMemesQuickVoteUndiscoveredDropQueryKey({
+        const publishResponses = () => {
+          if (
+            abortController.signal.aborted ||
+            syncRequestIdRef.current !== requestId
+          )
+            return;
+          const primary = responses[0] ?? responses.find(Boolean);
+          if (!primary) return;
+          setCurrentSessionState((current) =>
+            applyFetchedWindowState({
+              current,
+              handledDropIdsAtRequest: buffered.recentlyHandledDropIds,
+              fetchedDrops: getUniqueDrops(
+                responses.flatMap((item) => (item?.drop ? [item.drop] : []))
+              ),
+              pendingDropIds: pendingDropIdsRef.current,
+              primaryDrop: primary.drop,
+              rawLeftThisRoundCount: primary.left_to_vote_in_current_round,
+              rawUnratedCount: primary.total_count,
+              isPartial: responses.filter(Boolean).length < requestCount,
+            })
+          );
+        };
+        const primaryRequest = async () => {
+          try {
+            responses[0] = await queryClient.fetchQuery({
+              queryKey: getMemesQuickVoteUndiscoveredDropQueryKey({
+                contextProfile,
+                proxyId,
+                sessionId: 0,
+                skip: 0,
+                waveId,
+              }),
+              queryFn: ({ signal }) =>
+                fetchMemesQuickVoteUndiscoveredDrop({
+                  signal,
+                  skip: 0,
+                  waveId,
+                }),
+              staleTime: reusePrimary ? MEMES_QUICK_VOTE_CACHE_TIME_MS : 0,
+              retry: false,
+            });
+            publishResponses();
+          } catch {
+            // A usable background window can still recover a failed primary.
+          }
+        };
+        const lookaheadRequest = async () => {
+          if (requestCount <= 1) return;
+          try {
+            const window = await fetchMemesQuickVoteUndiscoveredDrops({
+              signal: abortController.signal,
+              skip: nextSkip,
+              limit: requestCount - 1,
+              waveId,
+            });
+            if (
+              abortController.signal.aborted ||
+              syncRequestIdRef.current !== requestId
+            )
+              return;
+            for (let index = 1; index < requestCount; index++) {
+              const response: ApiUndiscoveredDrop = {
+                drop: window.drops[index - 1] ?? null,
+                total_count: window.total_count,
+                left_to_vote_in_current_round:
+                  window.left_to_vote_in_current_round,
+              };
+              responses[index] = response;
+              // Preserve the individual candidate cache used by other voting
+              // surfaces to retire already-rated buffered drops immediately.
+              queryClient.setQueryData(
+                getMemesQuickVoteUndiscoveredDropQueryKey({
                   contextProfile,
                   proxyId,
                   sessionId: 0,
-                  skip,
+                  skip: nextSkip + index - 1,
                   waveId,
                 }),
-                queryFn: ({ signal }) =>
-                  fetchMemesQuickVoteUndiscoveredDrop({
-                    signal,
-                    skip,
-                    waveId,
-                  }),
-                staleTime:
-                  skip === 0 && reusePrimary
-                    ? MEMES_QUICK_VOTE_CACHE_TIME_MS
-                    : 0,
-                retry: false,
-              });
-              if (
-                abortController.signal.aborted ||
-                syncRequestIdRef.current !== requestId
-              )
-                return;
-              responses[index] = response;
-              const primary = responses[0] ?? response;
-              const fetchedDrops = getUniqueDrops(
-                responses.flatMap((item) => (item?.drop ? [item.drop] : []))
+                response
               );
-              setCurrentSessionState((current) =>
-                applyFetchedWindowState({
-                  current,
-                  handledDropIdsAtRequest: buffered.recentlyHandledDropIds,
-                  fetchedDrops,
-                  pendingDropIds: pendingDropIdsRef.current,
-                  primaryDrop: primary.drop,
-                  rawLeftThisRoundCount: primary.left_to_vote_in_current_round,
-                  rawUnratedCount: primary.total_count,
-                  isPartial: responses.filter(Boolean).length < requestCount,
-                })
-              );
-            } catch {
-              // The completed window decides whether there is usable content.
             }
-          })
-        );
+            publishResponses();
+          } catch {
+            // A failed background batch must not hide a ready primary candidate.
+          }
+        };
+        await Promise.all([primaryRequest(), lookaheadRequest()]);
         if (
           abortController.signal.aborted ||
           syncRequestIdRef.current !== requestId
