@@ -63,6 +63,19 @@ describe("WaveDropReply", () => {
     expect(within(fixedContainer).getByTestId("loading")).toBeInTheDocument();
   });
 
+  it("shows anonymous reply attribution without linking an author profile", () => {
+    hookData.drop = {
+      id: "d",
+      author: { handle: "Anonymous", pfp: null, is_anonymous: true },
+      serial_no: 1,
+      moderation: { status: ApiDropModerationStatus.Visible, can_view: true },
+    };
+    render(<WaveDropReply {...baseProps} />);
+    expect(screen.getByText("Anonymous")).toBeInTheDocument();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.getByTestId("content")).toBeInTheDocument();
+  });
+
   it("shows not found when author missing", () => {
     hookData.isLoading = false;
     hookData.drop = { author: { handle: null } } as any;

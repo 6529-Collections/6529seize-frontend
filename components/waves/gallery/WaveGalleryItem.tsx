@@ -3,6 +3,7 @@
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import { AnonymousAuthorName } from "@/components/waves/drops/AnonymousDropAuthor";
 import { ImageScale } from "@/helpers/image.helpers";
 import {
   type ExtendedDrop,
@@ -80,7 +81,11 @@ export const WaveGalleryItem = memo<WaveGalleryItemProps>(
             )}
             {drop.author.handle && (
               <span className="tw-mt-1 tw-block tw-text-xs tw-text-iron-300">
-                {drop.author.handle}
+                {drop.author.is_anonymous ? (
+                  <AnonymousAuthorName />
+                ) : (
+                  drop.author.handle
+                )}
               </span>
             )}
           </div>
@@ -94,15 +99,21 @@ export const WaveGalleryItem = memo<WaveGalleryItemProps>(
         </div>
         {drop.author.handle && (
           <div className="tw-absolute tw-bottom-2 tw-left-2 tw-right-2 tw-flex tw-items-center tw-gap-2 tw-opacity-100 tw-transition-opacity tw-duration-300 desktop-hover:group-hover:tw-opacity-100 touch-only:!tw-opacity-100 lg:tw-opacity-0">
-            <UserProfileTooltipWrapper user={drop.author.handle}>
-              <Link
-                onClick={(e) => e.stopPropagation()}
-                href={`/${drop.author.handle}`}
-                className="tw-rounded-lg tw-bg-black/60 tw-px-2 tw-py-1 tw-text-xs tw-text-white/90 tw-no-underline tw-backdrop-blur-sm tw-transition-colors desktop-hover:hover:tw-bg-black/80"
-              >
-                {drop.author.handle}
-              </Link>
-            </UserProfileTooltipWrapper>
+            {drop.author.is_anonymous ? (
+              <span className="tw-rounded-lg tw-bg-black/60 tw-px-2 tw-py-1 tw-text-xs">
+                <AnonymousAuthorName />
+              </span>
+            ) : (
+              <UserProfileTooltipWrapper user={drop.author.handle}>
+                <Link
+                  onClick={(e) => e.stopPropagation()}
+                  href={`/${drop.author.handle}`}
+                  className="tw-rounded-lg tw-bg-black/60 tw-px-2 tw-py-1 tw-text-xs tw-text-white/90 tw-no-underline tw-backdrop-blur-sm tw-transition-colors desktop-hover:hover:tw-bg-black/80"
+                >
+                  {drop.author.handle}
+                </Link>
+              </UserProfileTooltipWrapper>
+            )}
           </div>
         )}
       </div>

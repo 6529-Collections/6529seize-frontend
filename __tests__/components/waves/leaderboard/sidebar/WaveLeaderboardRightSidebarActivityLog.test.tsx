@@ -237,6 +237,30 @@ describe("WaveLeaderboardRightSidebarActivityLog", () => {
     );
   });
 
+  it("keeps anonymous drop attribution noninteractive while preserving the voter's profile", () => {
+    const { container } = renderComponent({
+      log: {
+        ...mockLog,
+        drop_author: {
+          ...mockLog.drop_author,
+          id: "anonymous-entry-author",
+          handle: "Anonymous",
+          is_anonymous: true,
+        },
+      },
+    });
+    expect(screen.getByText("Anonymous")).toBeInTheDocument();
+    expect(container.querySelector('a[href="/Anonymous"]')).toBeNull();
+    const creator = screen.getByTitle("Drop creator: Anonymous");
+    expect(creator.tagName).toBe("DIV");
+    expect(creator.querySelector("img")).toBeNull();
+    expect(creator.querySelector("a")).toBeNull();
+    expect(screen.getByTitle("Voter: voter_user")).toHaveAttribute(
+      "href",
+      "/voter_user"
+    );
+  });
+
   it("displays drop author information without profile picture", () => {
     const logWithoutAuthorPfp = {
       ...mockLog,

@@ -13,6 +13,7 @@ import DropNotFound from "./DropNotFound";
 import { parseStandaloneMediaUrl } from "./media-utils";
 import { useDropContent } from "./useDropContent";
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
+import { AnonymousAuthorName } from "./AnonymousDropAuthor";
 
 interface WaveDropReplyProps {
   readonly dropId: string;
@@ -95,7 +96,7 @@ export default function WaveDropReply({
           ? renderFixedReplyContent(
               <div className="tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-x-1.5">
                 <div className="tw-relative tw-z-10 tw-h-6 tw-w-6 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800">
-                  {drop.author.pfp ? (
+                  {drop.author.pfp && !drop.author.is_anonymous ? (
                     <Image
                       src={getScaledImageUri(
                         drop.author.pfp,
@@ -112,12 +113,18 @@ export default function WaveDropReply({
                 </div>
                 <div className="tw-min-w-0 tw-flex-1">
                   <p className="tw-mb-0 tw-mt-0 tw-flex tw-min-w-0 tw-items-center xl:tw-pr-24">
-                    <Link
-                      href={`/${drop.author.handle}`}
-                      className="tw-mr-1 tw-flex-shrink-0 tw-text-sm tw-font-medium tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
-                    >
-                      {drop.author.handle}
-                    </Link>
+                    {drop.author.is_anonymous ? (
+                      <span className="tw-mr-1 tw-flex-shrink-0 tw-text-sm tw-font-medium">
+                        <AnonymousAuthorName />
+                      </span>
+                    ) : (
+                      <Link
+                        href={`/${drop.author.handle}`}
+                        className="tw-mr-1 tw-flex-shrink-0 tw-text-sm tw-font-medium tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
+                      >
+                        {drop.author.handle}
+                      </Link>
+                    )}
                     <ContentDisplay
                       content={replyPreviewContent}
                       onClick={() => {

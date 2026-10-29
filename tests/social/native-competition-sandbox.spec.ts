@@ -608,6 +608,7 @@ async function installCompetitionApi(
   let refreshAfter: number | null = null;
   let selectionReads = 0;
   const configurations = new Map<string, Record<string, unknown>>();
+  const anonymousEntries = new Set<string>();
   const votes: Record<string, number> = { alpha: 0, beta: 0 };
   const requests: { path: string; body: Record<string, unknown> }[] = [];
   await page.route("**/v3/waves", async (route) => {
@@ -630,7 +631,14 @@ async function installCompetitionApi(
     wave_id: waveId,
     competition_id: id,
     drop_id: entryDropId(id),
-    submitter: { id: PROFILE, handle: "playwright", pfp: null },
+    submitter: anonymousEntries.has(id)
+      ? {
+          id: `anonymous-${id}`,
+          handle: "Anonymous",
+          pfp: null,
+          is_anonymous: true,
+        }
+      : { id: PROFILE, handle: "playwright", pfp: null },
     status: "ACTIVE",
     config_version: 1,
     submitted_at: 1,
@@ -852,6 +860,19 @@ async function installCompetitionApi(
     title: `Recorded ${id} entry`,
     content: `Immutable ${id} entry content`,
     ...collaborationFixtures.get(page)?.get(entryDropId(id))?.().drop,
+    ...(anonymousEntries.has(id)
+      ? {
+          author: {
+            id: `anonymous-${id}`,
+            handle: "Anonymous",
+            is_anonymous: true,
+            primary_address: "",
+            level: 0,
+            classification: "PSEUDONYM",
+            badges: { artist_of_main_stage_submissions: 0, artist_of_memes: 0 },
+          },
+        }
+      : {}),
   });
   // The detail overlay reads the batch endpoint; keep it consistent with the
   // single-drop fixture rather than accidentally asserting the covered card.
@@ -887,6 +908,10 @@ async function installCompetitionApi(
 
   return {
     requests,
+    setAnonymousEntry: (id: string, hidden: boolean) => {
+      if (hidden) anonymousEntries.add(id);
+      else anonymousEntries.delete(id);
+    },
     setPhase: (id: string, phase: string) => {
       const selected = competitions.find((item) => item.id === id);
       expect(selected).toBeDefined();
@@ -976,6 +1001,59 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  test("conceals anonymous author navigation and reveals only the selected winning entry", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page);
+    sandbox.setAnonymousEntry("alpha", true);
+    sandbox.setAnonymousEntry("beta", true);
+    await page.goto(`${ROOT}/alpha`, { waitUntil: "domcontentloaded" });
+    await expect(page.locator("[data-anonymous-author]").first()).toBeVisible();
+    await expect(page.locator('a[href="/Anonymous"]')).toHaveCount(0);
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("anonymous-submission.png"),
+    });
+    sandbox.setAnonymousEntry("alpha", false);
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await expect(
+      page.getByText("Immutable alpha entry content", { exact: true })
+    ).toBeVisible();
+    await expect(page.locator("[data-anonymous-author]")).toHaveCount(0);
+    await page.goto(`${ROOT}/beta`, { waitUntil: "domcontentloaded" });
+    await expect(page.locator("[data-anonymous-author]").first()).toBeVisible();
+    await expect(page.locator('a[href="/Anonymous"]')).toHaveCount(0);
+  });
+
+  test("defaults anonymity off and includes an enabled choice in the saved competition draft", async ({
+    page,
+  }) => {
+    const sandbox = await installCompetitionApi(page);
+    await page.goto(`${ROOT}/new`);
+    const choice = page.getByRole("checkbox", {
+      name: "Anonymous submissions",
+      exact: true,
+    });
+    await expect(choice).not.toBeChecked();
+    await choice.check();
+    await page
+      .getByLabel("Competition name", { exact: true })
+      .fill("Anonymous art competition");
+    await expect
+      .poll(() =>
+        sandbox.requests.some((request) => {
+          const config = request.body["config"] as
+            | Record<string, unknown>
+            | undefined;
+          const participation = config?.["participation"] as
+            | Record<string, unknown>
+            | undefined;
+          return participation?.["anonymous_submissions"] === true;
+        })
+      )
+      .toBe(true);
+    await expectNoHorizontalOverflow(page);
+  });
   for (const { delay, hiddenBy } of [
     { delay: 50, hiddenBy: "display" },
     { delay: 600, hiddenBy: "visibility" },

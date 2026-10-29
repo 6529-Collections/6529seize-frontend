@@ -4,6 +4,7 @@ import { getScaledResolvedImageUri, ImageScale } from "@/helpers/image.helpers";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { useGatewayImageLoadState } from "@/components/common/image/useGatewayImageLoadState";
+import { AnonymousAuthorName } from "@/components/waves/drops/AnonymousDropAuthor";
 
 interface NotificationHeaderProps {
   readonly author: ApiProfileMin;
@@ -21,7 +22,7 @@ export default function NotificationHeader({
   align = "start",
 }: NotificationHeaderProps) {
   const { activeSrc, isPlaceholder, unoptimized, handleError } =
-    useGatewayImageLoadState(author.pfp);
+    useGatewayImageLoadState(author.is_anonymous ? null : author.pfp);
 
   return (
     <div
@@ -45,18 +46,26 @@ export default function NotificationHeader({
       </div>
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-2">
         <div className="tw-flex tw-min-w-[min(100%,16rem)] tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-leading-6 [overflow-wrap:anywhere]">
-          <UserProfileTooltipWrapper user={author.handle ?? ""}>
-            <Link
-              href={`/${author.handle}`}
-              prefetch={false}
-              className={`${authorClassName} tw-max-w-full tw-rounded-sm tw-font-semibold tw-text-iron-50 tw-no-underline tw-underline-offset-4 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-underline`}
-            >
-              {author.handle}
-            </Link>
-          </UserProfileTooltipWrapper>
+          {author.is_anonymous ? (
+            <span className={`${authorClassName} tw-font-semibold`}>
+              <AnonymousAuthorName />
+            </span>
+          ) : (
+            <UserProfileTooltipWrapper user={author.handle ?? ""}>
+              <Link
+                href={`/${author.handle ?? author.primary_address}`}
+                prefetch={false}
+                className={`${authorClassName} tw-max-w-full tw-rounded-sm tw-font-semibold tw-text-iron-50 tw-no-underline tw-underline-offset-4 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-underline`}
+              >
+                {author.handle}
+              </Link>
+            </UserProfileTooltipWrapper>
+          )}
           {children}
         </div>
-        {actions && <div className="tw-max-w-full tw-flex-none">{actions}</div>}
+        {Boolean(actions) && !author.is_anonymous && (
+          <div className="tw-max-w-full tw-flex-none">{actions}</div>
+        )}
       </div>
     </div>
   );

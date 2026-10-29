@@ -66,7 +66,9 @@ export const getStableDropKey = (
     wave_id: drop.wave.id,
     reply_to_id: drop.reply_to?.drop_id ?? null,
     reply_to_part_id: drop.reply_to?.drop_part_id ?? null,
-    author_handle: drop.author.handle,
+    author_handle: drop.author.is_anonymous
+      ? drop.author.id
+      : drop.author.handle,
     title: drop.title,
     parts_content: drop.parts.map((part) => part.content).join(""),
     metadata: drop.metadata
@@ -93,6 +95,12 @@ const findClosestMatch = (
   return existingDrops.reduce(
     (closest, current) => {
       if (current.type === DropSize.LIGHT) {
+        return closest;
+      }
+      if (
+        (current.author.is_anonymous || newDrop.author.is_anonymous) &&
+        current.author.id !== newDrop.author.id
+      ) {
         return closest;
       }
       if (

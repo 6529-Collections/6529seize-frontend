@@ -203,6 +203,23 @@ describe("DropAuthorBadges", () => {
     expect(screen.queryByTestId("profile-wave-badge")).toBeNull();
   });
 
+  it("does not expose badges or profile previews for an anonymous author", () => {
+    const { container } = render(
+      <DropAuthorBadges
+        profile={{
+          ...baseProfile,
+          is_anonymous: true,
+          active_main_stage_submission_ids: ["entry"],
+          winner_main_stage_drop_ids: ["winner"],
+          profile_wave_id: "private-author-wave",
+        }}
+      />
+    );
+    expect(container.firstChild).toBeNull();
+    expect(screen.queryByTestId("artist-activity-badge")).toBeNull();
+    expect(screen.queryByTestId("profile-wave-badge")).toBeNull();
+  });
+
   it("renders activity badge and derives submission/trophy counts from profile", () => {
     render(
       <DropAuthorBadges
