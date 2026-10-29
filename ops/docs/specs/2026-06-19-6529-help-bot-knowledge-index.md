@@ -7,6 +7,15 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The `waves.native-competitions` record covers optional anonymous submissions,
+their default-off creation setting, publication lock, per-entry winner reveal,
+continued anonymity across later draws, own-entry access, and submitters'
+responsibility for identifying information in authored content or metadata.
+Unrevealed entries bypass account blocks to prevent author identification;
+related author notifications also bypass account blocks and identity mutes
+until that entry wins. Explicit drop hiding, platform moderation, and ordinary
+notification filters remain effective.
+
 The `profiles.identity-tab` record covers the existing-category Rep editor,
 its permission rules, stable allowance loading, retry action, and dismissal.
 

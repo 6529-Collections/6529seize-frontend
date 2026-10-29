@@ -120,6 +120,18 @@ tabs. The collection lets you choose a different competition at any time.
 
 ## Common Scenarios
 
+- A competition can use **Anonymous submissions**. Other users see each
+  submission without its author identity until that submission wins. A win
+  reveals only that entry's author; the same person's other entries stay
+  anonymous, including through later draws. You can still find your own entries
+  in **My submissions**. Content and metadata remain visible as submitted, so
+  avoid including identifying information if you want to stay anonymous.
+- Unrevealed anonymous submissions remain visible even when you have blocked
+  their author's account, so blocking cannot identify the author. Hiding a
+  specific drop and platform moderation still apply. Related author
+  notifications remain visible despite account blocks and identity mutes until
+  that entry wins; ordinary notifications retain their existing filters.
+
 - After a submission is accepted, its entry opens with a confirmation naming
   the competition and **View my entry**. **My submissions** is available on the
   leaderboard and direct-entry view for your own signed-in profile.
@@ -164,6 +176,9 @@ tabs. The collection lets you choose a different competition at any time.
   do not accept new entries or votes.
 
 ## Failure and Recovery
+
+- If an older upload cannot be used for an anonymous submission, upload the
+  media again and retry. The submission form keeps your other input.
 
 - If a leaderboard load fails, use **Retry**. Already loaded rows remain visible
   if a refresh fails. Entry recovery does not create another submission.

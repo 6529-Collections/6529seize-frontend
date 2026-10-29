@@ -10127,6 +10127,75 @@ paths:
           description: User cannot vote
         "404":
           description: Drop or poll not found
+  /v2/drops/search:
+    get:
+      tags:
+        - DropsV2
+      summary: Search messages across all waves visible to the caller
+      operationId: searchDropsV2
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/waves-v2.handlers"
+          name: handleSearchDropsV2
+      parameters:
+        - name: term
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 200
+        - name: author_id
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: cursor
+          in: query
+          description: >-
+            Opaque continuation cursor from the previous response; required
+            after page one.
+          required: false
+          schema:
+            type: string
+            maxLength: 300
+            pattern: ^[A-Za-z0-9_-]+$
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 1
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            maximum: 100
+            minimum: 1
+            default: 20
+      responses:
+        "200":
+          description: >-
+            Messages ordered newest first. Follow cursor while next is true,
+            even if data is empty after a concurrent visibility change. Searches
+            are limited to 100 pages and a 3-second SQL execution budget.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropSearchPage"
+        "400":
+          description: >-
+            At least one of term or author_id is required; term must contain 3
+            to 200 characters
   /e2ee/me:
     get:
       tags:
@@ -11505,75 +11574,6 @@ paths:
           description: Payload too large (E2EE_TOO_LARGE)
         "429":
           description: Rate limited (E2EE_RATE_LIMITED)
-  /v2/drops/search:
-    get:
-      tags:
-        - DropsV2
-      summary: Search messages across all waves visible to the caller
-      operationId: searchDropsV2
-      x-6529-router:
-        enabled: true
-        auth: optional
-        handler:
-          import: "@/api/waves/waves-v2.handlers"
-          name: handleSearchDropsV2
-      parameters:
-        - name: term
-          in: query
-          required: false
-          schema:
-            type: string
-            minLength: 3
-            maxLength: 200
-        - name: author_id
-          in: query
-          required: false
-          schema:
-            type: string
-            minLength: 1
-            maxLength: 100
-        - name: cursor
-          in: query
-          description: >-
-            Opaque continuation cursor from the previous response; required
-            after page one.
-          required: false
-          schema:
-            type: string
-            maxLength: 300
-            pattern: ^[A-Za-z0-9_-]+$
-        - name: page
-          in: query
-          required: false
-          schema:
-            type: number
-            format: int64
-            minimum: 1
-            maximum: 100
-            default: 1
-        - name: size
-          in: query
-          required: false
-          schema:
-            type: number
-            format: int64
-            maximum: 100
-            minimum: 1
-            default: 20
-      responses:
-        "200":
-          description: >-
-            Messages ordered newest first. Follow cursor while next is true,
-            even if data is empty after a concurrent visibility change. Searches
-            are limited to 100 pages and a 3-second SQL execution budget.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiDropSearchPage"
-        "400":
-          description: >-
-            At least one of term or author_id is required; term must contain 3
-            to 200 characters
   /feed:
     get:
       tags:
@@ -28199,6 +28199,13 @@ components:
         - ends_at
         - terms
       properties:
+        anonymous_submissions:
+          type: boolean
+          default: false
+          description: >-
+            Competition creation option. Conceal each submission author from
+            other users until that entry wins. Fixed when published; defaults to
+            false.
         group_id:
           type: string
           nullable: true
@@ -29890,6 +29897,13 @@ components:
         - required_media
         - terms
       properties:
+        anonymous_submissions:
+          type: boolean
+          default: false
+          description: >-
+            Competition creation option. Conceal each submission author from
+            other users until that entry wins. Fixed when published; defaults to
+            false.
         scope:
           $ref: "#/components/schemas/ApiCreateNewWaveScope"
         no_of_applications_allowed_per_participant:
@@ -33385,6 +33399,11 @@ components:
         - profile_wave_id
         - is_wave_creator
       properties:
+        is_anonymous:
+          type: boolean
+          description: >-
+            True for an anonymous competition author. Identity details and
+            profile links are unavailable.
         id:
           type: string
           nullable: true
@@ -33505,6 +33524,11 @@ components:
         - classification
         - badges
       properties:
+        is_anonymous:
+          type: boolean
+          description: >-
+            True for an anonymous competition author. Identity details and
+            profile links are unavailable.
         id:
           type: string
         handle:
@@ -37325,6 +37349,11 @@ components:
       required:
         - id
       properties:
+        is_anonymous:
+          type: boolean
+          description: >-
+            True for an anonymous competition author. Identity details and
+            profile links are unavailable.
         id:
           type: string
         handle:
@@ -38770,6 +38799,11 @@ components:
         - profile_wave_id
         - is_wave_creator
       properties:
+        is_anonymous:
+          type: boolean
+          description: >-
+            True for an anonymous competition author. Identity details and
+            profile links are unavailable.
         id:
           type: string
           format: uuid
@@ -39550,6 +39584,11 @@ components:
       required:
         - handle
       properties:
+        is_anonymous:
+          type: boolean
+          description: >-
+            True for an anonymous competition author. Identity details and
+            profile links are unavailable.
         handle:
           type: string
         pfp:
