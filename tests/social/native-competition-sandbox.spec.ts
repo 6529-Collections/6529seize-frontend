@@ -9047,104 +9047,168 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     }
   });
 
-  test("renders winners without legacy drop or metadata loading", async ({
-    page,
-  }) => {
-    const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
-    sandbox.onlyCompetition("alpha");
-    await sandbox.legacyPrimary("alpha");
-    const response = await page.request.get(
-      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${MEMES_WAVE}/drops`
-    );
-    const fixture = await response.json();
-    const winner = {
-      id: "entry-alpha",
-      wave_id: MEMES_WAVE,
-      competition_id: "alpha",
-      drop_id: entryDropId("alpha"),
-      submitter: { id: PROFILE, handle: "playwright", pfp: null },
-      status: "WINNER",
-      config_version: 1,
-      submitted_at: 1,
-      won_at: 2000,
-      decision_id: "winner-decision",
-      rank: 1,
-    };
-    await page.route(
-      `**/v3/waves/${MEMES_WAVE}/competitions/alpha/winners*`,
-      (route) => {
-        expect(new URL(route.request().url()).searchParams.get("include")).toBe(
-          "cards"
-        );
-        return route.fulfill({
-          json: {
-            ...pageResult([winner]),
-            cards: [
-              {
-                entry: winner,
-                awards: [],
-                metadata: [{ data_key: "Artist", data_value: "Direct artist" }],
-                vote_summary: {
-                  rating: 123,
-                  realtime_rating: 123,
-                  rating_prediction: 123,
-                  user_vote: 0,
-                  rank: 1,
-                  raters_count: 2,
-                  top_raters: [],
-                },
-                drop: {
-                  ...fixture.drops[0],
-                  id: winner.drop_id,
-                  title: "Direct native winner",
-                  media: [],
-                  submission_context: {
-                    status: "WINNER",
-                    voting: {
-                      is_open: false,
-                      total_votes_given: 123,
-                      current_calculated_vote: 123,
-                      predicted_final_vote: 123,
-                      voters_count: 2,
-                      place: 1,
+  for (const waveId of [MEMES_WAVE, WAVE]) {
+    test(`renders winners without legacy drop or metadata loading in ${waveId === WAVE ? "QUORUM approval" : "Main Stage"}`, async ({
+      page,
+    }, testInfo) => {
+      const sandbox = await installCompetitionApi(page, false, true, waveId);
+      sandbox.onlyCompetition("alpha");
+      await sandbox.legacyPrimary("alpha");
+      if (waveId === WAVE) {
+        sandbox.setCompetition("alpha", {
+          type: "APPROVE",
+          capabilities: ["QUORUM"],
+        });
+      }
+      const response = await page.request.get(
+        `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${waveId}/drops`
+      );
+      const fixture = await response.json();
+      const winner = {
+        id: "entry-alpha",
+        wave_id: waveId,
+        competition_id: "alpha",
+        drop_id: entryDropId("alpha"),
+        submitter: { id: PROFILE, handle: "playwright", pfp: null },
+        status: "WINNER",
+        config_version: 1,
+        submitted_at: 1,
+        won_at: 2000,
+        decision_id: "winner-decision",
+        rank: 1,
+      };
+      await page.route(
+        `**/v3/waves/${waveId}/competitions/alpha/winners*`,
+        (route) => {
+          expect(
+            new URL(route.request().url()).searchParams.get("include")
+          ).toBe("cards");
+          return route.fulfill({
+            json: {
+              ...pageResult([winner]),
+              cards: [
+                {
+                  entry: winner,
+                  awards: [],
+                  metadata: [
+                    { data_key: "Artist", data_value: "Direct artist" },
+                  ],
+                  vote_summary: {
+                    rating: 123,
+                    realtime_rating: 123,
+                    rating_prediction: 123,
+                    user_vote: 1,
+                    rank: 1,
+                    raters_count: 11,
+                    top_raters: Array.from({ length: 5 }, (_, index) => ({
+                      profile: {
+                        ...fixture.drops[0].author,
+                        id: `winner-voter-${index}`,
+                        handle: `voter${index}`,
+                        pfp: null,
+                      },
+                      rating: 1,
+                    })),
+                  },
+                  drop: {
+                    ...fixture.drops[0],
+                    id: winner.drop_id,
+                    title: "Direct native winner",
+                    media: [],
+                    submission_context: {
+                      status: "WINNER",
+                      voting: {
+                        is_open: false,
+                        total_votes_given: 123,
+                        current_calculated_vote: 123,
+                        predicted_final_vote: 123,
+                        voters_count: 2,
+                        place: 1,
+                      },
                     },
                   },
                 },
-              },
-            ],
-          },
-        });
+              ],
+            },
+          });
+        }
+      );
+      let legacyReads = 0;
+      let release = () => {};
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      await page.route(
+        (url) =>
+          url.pathname === "/api/v2/drops" ||
+          /^\/api\/v2\/drops\/[^/]+(?:\/metadata)?$/.test(url.pathname),
+        async (route) => {
+          legacyReads += 1;
+          await gate;
+          return route.fallback();
+        }
+      );
+      try {
+        await page.goto(`/waves/${waveId}/competitions/alpha?tab=decisions`);
+        if (waveId === MEMES_WAVE) {
+          await expect(
+            page
+              .getByRole("heading", {
+                name: "Direct native winner",
+                exact: true,
+              })
+              .first()
+          ).toBeVisible();
+        }
+        if (waveId === WAVE) {
+          const voters = page.getByRole("button", {
+            name: "View voters and vote log for 11 voters",
+            exact: true,
+          });
+          await expect(voters).toBeVisible();
+          const card = page
+            .getByRole("tabpanel")
+            .locator(".tw-group.tw-cursor-pointer")
+            .filter({ has: voters });
+          await expect(card).toHaveCount(1);
+          const widths =
+            testInfo.project.name === "web-mobile-chromium"
+              ? [320, 440]
+              : [1440];
+          for (const width of widths) {
+            await page.setViewportSize({ width, height: 1000 });
+            // Document overflow alone misses content clipped by the scroll container.
+            await expect
+              .poll(() =>
+                card.evaluate((element) => {
+                  const bounds = element.getBoundingClientRect();
+                  return Array.from(
+                    element.querySelectorAll("a, button, span")
+                  ).every((child) => {
+                    const rect = child.getBoundingClientRect();
+                    return (
+                      rect.width === 0 ||
+                      (rect.left >= bounds.left - 1 &&
+                        rect.right <= bounds.right + 1)
+                    );
+                  });
+                })
+              )
+              .toBe(true);
+            await testInfo.attach(`winner-vote-wrapping-${width}`, {
+              body: await card.screenshot(),
+              contentType: "image/png",
+            });
+          }
+        }
+        expect(legacyReads).toBe(0);
+        await expectNoHorizontalOverflow(page);
+        expect(sandbox.requests).toEqual([]);
+      } finally {
+        release();
       }
-    );
-    let legacyReads = 0;
-    let release = () => {};
-    const gate = new Promise<void>((resolve) => {
-      release = resolve;
     });
-    await page.route(
-      (url) =>
-        url.pathname === "/api/v2/drops" ||
-        /^\/api\/v2\/drops\/[^/]+(?:\/metadata)?$/.test(url.pathname),
-      async (route) => {
-        legacyReads += 1;
-        await gate;
-        return route.fallback();
-      }
-    );
-    try {
-      await page.goto(`/waves/${MEMES_WAVE}/competitions/alpha?tab=decisions`);
-      await expect(
-        page
-          .getByRole("heading", { name: "Direct native winner", exact: true })
-          .first()
-      ).toBeVisible();
-      expect(legacyReads).toBe(0);
-      await expectNoHorizontalOverflow(page);
-      expect(sandbox.requests).toEqual([]);
-    } finally {
-      release();
-    }
-  });
+  }
 
   for (const variant of ["empty", "populated", "text-only"] as const) {
     test(`validates the live native leaderboard contract with ${variant} data`, async ({
