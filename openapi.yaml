@@ -19232,6 +19232,51 @@ paths:
           description: User is not eligible to quick vote in this wave
         "404":
           description: Wave not found
+  /waves/{id}/undiscovered-drops:
+    get:
+      tags:
+        - Waves
+      summary: Get an ordered quick vote preview window with shared counts
+      operationId: getWaveUndiscoveredDrops
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/waves/wave-quick-vote.handler"
+          name: handleGetWaveUndiscoveredDrops
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Maximum number of previews, ordered by unskipped then skipped drops.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 4
+            default: 4
+        - name: skip
+          in: query
+          description: Zero-based offset within the four-preview quick vote window.
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 3
+            default: 0
+      responses:
+        "200":
+          description: Ordered previews and exact counts for the acting profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiUndiscoveredDrops"
+        "403":
+          description: User is not eligible to quick vote in this wave
+        "404":
+          description: Wave not found
   /waves/{id}/pinned-drop:
     post:
       tags:
@@ -40836,6 +40881,24 @@ components:
           anyOf:
             - type: "null"
             - $ref: "#/components/schemas/ApiDrop"
+        left_to_vote_in_current_round:
+          type: integer
+          format: int64
+        total_count:
+          type: integer
+          format: int64
+    ApiUndiscoveredDrops:
+      type: object
+      required:
+        - drops
+        - left_to_vote_in_current_round
+        - total_count
+      properties:
+        drops:
+          type: array
+          maxItems: 4
+          items:
+            $ref: "#/components/schemas/ApiDrop"
         left_to_vote_in_current_round:
           type: integer
           format: int64

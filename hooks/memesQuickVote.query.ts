@@ -1,5 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiUndiscoveredDrops } from "@/generated/models/ApiUndiscoveredDrops";
 import type { ApiUndiscoveredDrop } from "@/generated/models/ApiUndiscoveredDrop";
 import { commonApiFetch } from "@/services/api/common-api";
 
@@ -92,3 +93,20 @@ export const updateMemesQuickVoteCachedDrop = (
       .catch(() => undefined);
   }
 };
+
+export const fetchMemesQuickVoteUndiscoveredDrops = async ({
+  skip,
+  limit,
+  waveId,
+  signal,
+}: {
+  readonly skip: number;
+  readonly limit: number;
+  readonly waveId: string;
+  readonly signal?: AbortSignal | undefined;
+}): Promise<ApiUndiscoveredDrops> =>
+  await commonApiFetch<ApiUndiscoveredDrops>({
+    endpoint: `waves/${waveId}/undiscovered-drops`,
+    params: { skip: `${skip}`, limit: `${limit}` },
+    signal,
+  });

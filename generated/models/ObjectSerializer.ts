@@ -782,6 +782,7 @@ export * from '../models/ApiTokenTdhRank';
 export * from '../models/ApiTransaction';
 export * from '../models/ApiTransactionPage';
 export * from '../models/ApiUndiscoveredDrop';
+export * from '../models/ApiUndiscoveredDrops';
 export * from '../models/ApiUnpublishProfileCmsPackageRequest';
 export * from '../models/ApiUpcomingMemeSubscriptionStatus';
 export * from '../models/ApiUpdateCompetitionRequest';
@@ -1743,6 +1744,7 @@ import { ApiTokenTdhRank } from '../models/ApiTokenTdhRank';
 import { ApiTransaction } from '../models/ApiTransaction';
 import { ApiTransactionPage } from '../models/ApiTransactionPage';
 import { ApiUndiscoveredDrop } from '../models/ApiUndiscoveredDrop';
+import { ApiUndiscoveredDrops } from '../models/ApiUndiscoveredDrops';
 import { ApiUnpublishProfileCmsPackageRequest } from '../models/ApiUnpublishProfileCmsPackageRequest';
 import { ApiUpcomingMemeSubscriptionStatus   , ApiUpcomingMemeSubscriptionStatusSourceEnum   } from '../models/ApiUpcomingMemeSubscriptionStatus';
 import { ApiUpdateCompetitionRequest } from '../models/ApiUpdateCompetitionRequest';
@@ -2939,6 +2941,7 @@ let typeMap: {[index: string]: any} = {
     "ApiTransaction": ApiTransaction,
     "ApiTransactionPage": ApiTransactionPage,
     "ApiUndiscoveredDrop": ApiUndiscoveredDrop,
+    "ApiUndiscoveredDrops": ApiUndiscoveredDrops,
     "ApiUnpublishProfileCmsPackageRequest": ApiUnpublishProfileCmsPackageRequest,
     "ApiUpcomingMemeSubscriptionStatus": ApiUpcomingMemeSubscriptionStatus,
     "ApiUpdateCompetitionRequest": ApiUpdateCompetitionRequest,
