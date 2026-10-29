@@ -427,6 +427,41 @@ describe("useMemesQuickVoteQueue", () => {
     expect(result.current.uncastPower).toBe(5000);
     unmount();
   });
+  it.each([100, 1000])(
+    "accepts a later server power increase after confirming a %i vote",
+    async (amount) => {
+      const first = createDrop({ id: "first", serialNo: 2, maxRating: 1000 });
+      const next = createDrop({ id: "next", serialNo: 1, maxRating: 1000 });
+      currentUndiscoveredDrops = [first, next];
+      leftThisRoundCount = totalCount = 2;
+      const { result, rerender } = renderHook(
+        ({ enabled }) => useMemesQuickVoteQueue({ sessionId: 1, enabled }),
+        { wrapper: createWrapper(), initialProps: { enabled: true } }
+      );
+      await waitFor(() => expect(result.current.nextDrop?.id).toBe("next"));
+      currentUndiscoveredDrops = [
+        createDrop({ id: "next", serialNo: 1, maxRating: 1000 - amount }),
+      ];
+      leftThisRoundCount = totalCount = 1;
+      await act(async () =>
+        result.current.submitVote(result.current.activeDrop!, amount)
+      );
+      await waitFor(() =>
+        expect(result.current.uncastPower).toBe(
+          amount === 1000 ? null : 1000 - amount
+        )
+      );
+      await act(async () => result.current.retryDiscovery());
+      rerender({ enabled: false });
+      currentUndiscoveredDrops = [
+        createDrop({ id: "next", serialNo: 1, maxRating: 1000 }),
+      ];
+      rerender({ enabled: true });
+      await act(async () => result.current.retryDiscovery());
+      await waitFor(() => expect(result.current.uncastPower).toBe(1000));
+    }
+  );
+
   it("refreshes the footer when a pending vote settles after the dialog closes", async () => {
     const first = createDrop({ id: "first", serialNo: 2 });
     const next = createDrop({ id: "next", serialNo: 1 });

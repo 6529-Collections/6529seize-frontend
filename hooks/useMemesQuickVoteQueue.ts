@@ -297,6 +297,20 @@ export const useMemesQuickVoteQueue = ({
         state: optimisticRemainingVotePowerState,
       }),
     });
+  // Release a confirmed estimate (or an expired closed buffer) so it cannot
+  // cap a later server-side increase in available voting power.
+  if (
+    pendingDropIds.length === 0 &&
+    optimisticRemainingVotePowerState.key === stateKey &&
+    optimisticRemainingVotePowerState.value !== null &&
+    (session.sessionState.isExhausted ||
+      (effectiveOptimisticRemainingPower === null &&
+        (activeApiDrop !== null || !enabled)))
+  ) {
+    setOptimisticRemainingVotePowerState(
+      createInitialOptimisticRemainingVotePowerState(stateKey)
+    );
+  }
   const activeDropCandidate = useMemo(() => {
     if (!activeApiDrop) {
       return null;
