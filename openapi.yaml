@@ -17732,6 +17732,14 @@ paths:
             minimum: 1
             maximum: 4
             default: 4
+        - name: skip
+          in: query
+          description: Zero-based offset within the four-preview quick vote window.
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 3
+            default: 0
       responses:
         "200":
           description: Ordered previews and exact counts for the acting profile
