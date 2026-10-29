@@ -103,6 +103,15 @@ function applyEffectiveAppPrCiPlan(plan) {
   // Museum lane itself. The selection tool then runs only the affected packs.
   const playwrightMuseum = files.some(requiresMuseumLane);
 
+  const playwrightProfileRep = files.some(
+    (file) =>
+      file.startsWith("components/user/rep/") ||
+      file.startsWith("components/user/utils/rate/") ||
+      file === "components/react-query-wrapper/ReactQueryWrapper.tsx" ||
+      file === "hooks/useRepAllocation.ts" ||
+      file === "tests/social/profile-rep-edit-sandbox.spec.ts"
+  );
+
   const playwrightArtworkDocumentation = files.some((file) =>
     ARTWORK_DOCUMENTATION_BROWSER_PATTERNS.some((pattern) => pattern.test(file))
   );
@@ -174,6 +183,10 @@ function applyEffectiveAppPrCiPlan(plan) {
         "__tests__/components/waves/drops/WaveDropActionsOpen.test.tsx",
         "components/waves/drops/WaveDropMobileMenuOpen.tsx",
         "__tests__/components/waves/drops/WaveDropMobileMenuOpen.test.tsx",
+        "components/waves/drops/AdditionalActionPromiseBadge.tsx",
+        "components/waves/drops/ArtistActiveSubmissionContent.tsx",
+        "__tests__/components/waves/drops/ArtistActiveSubmissionContent.test.tsx",
+        "components/utils/tooltip/BodyPortalTooltip.tsx",
         "components/waves/header/WaveJoinCta.tsx",
         "components/brain/left-sidebar/waves/BrainLeftSidebarWavePin.tsx",
         "tests/packs.manifest.cjs",
@@ -253,6 +266,12 @@ function applyEffectiveAppPrCiPlan(plan) {
 
   const checks = {
     ...plan.checks,
+    playwright_critical_shell: playwrightProfileRep
+      ? check(
+          true,
+          "Profile REP and rating changes require the profile dialog browser pack."
+        )
+      : baseChecks.playwright_critical_shell,
     install: check(
       true,
       playwrightMuseum

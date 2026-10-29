@@ -565,6 +565,9 @@ function SupportedMarketDepthTradeProvider({
   const selectionValid = selected.every((item) =>
     marketDepthListingQuantityIsValid(item.asset, item.order, item.quantity)
   );
+  const reviewLabel = t(locale, "marketDepth.trade.review", {
+    count: formatNumber(locale, selected.length),
+  });
   const restoreFocus = (trigger: HTMLButtonElement | null) => {
     queueMicrotask(() => {
       if (trigger?.isConnected) trigger.focus();
@@ -586,7 +589,8 @@ function SupportedMarketDepthTradeProvider({
               type="button"
               variant="action"
               size="lg"
-              className="tw-font-inherit tw-w-full !tw-whitespace-normal sm:tw-w-auto"
+              aria-label={reviewLabel}
+              className="tw-font-inherit tw-relative tw-w-full !tw-whitespace-normal aria-busy:!tw-opacity-100 sm:tw-w-auto [&>svg>path:first-child]:tw-text-white/25 [&>svg]:tw-absolute [&>svg]:tw-inset-0 [&>svg]:tw-m-auto [&>svg]:tw-text-white"
               disabled={!selectionValid}
               loading={reviewState.busy}
               onClick={(event) => {
@@ -594,14 +598,18 @@ function SupportedMarketDepthTradeProvider({
                 reviewSelection();
               }}
             >
-              {t(locale, "marketDepth.trade.review", {
-                count: formatNumber(locale, selected.length),
-              })}
+              <span className={reviewState.busy ? "tw-invisible" : undefined}>
+                {reviewLabel}
+              </span>
             </Button>
             {reviewState.message && (
               <p
                 role={reviewState.error ? "alert" : "status"}
-                className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400"
+                className={
+                  reviewState.busy
+                    ? "tw-sr-only"
+                    : "tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400"
+                }
               >
                 {reviewState.message}
               </p>

@@ -44,7 +44,7 @@ describe("E2E pack manifest", () => {
 
   it("defines every package pack once and satisfies the safety contract", () => {
     expect(manifestTools.validateManifest(packs, { root: ROOT })).toEqual([]);
-    expect(packs).toHaveLength(82);
+    expect(packs).toHaveLength(85);
 
     const rendered = manifestTools.renderPackageJsonScripts(packs);
     const packageScripts = JSON.parse(
@@ -279,17 +279,17 @@ describe("E2E pack manifest", () => {
       (pack) => pack.environments[0] === "production"
     );
 
-    expect(staging).toHaveLength(19);
+    expect(staging).toHaveLength(20);
     expect(
       staging.filter((pack) => pack.triggers.includes("post-deploy"))
-    ).toHaveLength(18);
-    expect(production).toHaveLength(18);
+    ).toHaveLength(19);
+    expect(production).toHaveLength(19);
     expect(
       production.filter((pack) => pack.triggers.includes("cron"))
     ).toHaveLength(12);
     expect(
       production.filter((pack) => pack.triggers.includes("post-deploy"))
-    ).toHaveLength(17);
+    ).toHaveLength(18);
 
     for (const environmentPacks of [staging, production]) {
       const specs = environmentPacks
@@ -349,8 +349,12 @@ describe("E2E pack manifest", () => {
       ])
     );
 
-    const first = clonePack(packs[0]!);
-    const second = clonePack(packs[1]!);
+    const first = clonePack(
+      packs.find((pack) => pack.scriptKey === "test:e2e") as Pack
+    );
+    const second = clonePack(
+      packs.find((pack) => pack.scriptKey === "test:e2e:all-projects") as Pack
+    );
     first.alias = "duplicate";
     second.alias = "duplicate";
     expect(manifestTools.validateManifest([first, second])).toEqual(

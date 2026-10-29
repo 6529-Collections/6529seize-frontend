@@ -146,7 +146,7 @@ export default function TheMemesCard({
         name: nft.name,
         tokenId,
       })}
-      className="tw-group tw-block tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-border-white/20 hover:tw-bg-iron-900/50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-[#0D0D0F] motion-reduce:tw-transition-none max-sm:tw-flex max-sm:tw-flex-col max-sm:tw-border-white/[0.07]"
+      className="tw-group tw-block tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-border-white/20 hover:tw-bg-iron-900/50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-[#0D0D0F] motion-reduce:tw-transition-none max-sm:tw-flex max-sm:tw-flex-col max-sm:tw-border-white/5"
     >
       <div className="tw-bg-iron-900 max-sm:tw-relative max-sm:tw-aspect-square max-sm:tw-flex-none max-sm:[&>div]:tw-absolute max-sm:[&>div]:tw-inset-0 max-sm:[&>div]:!tw-h-full">
         <NFTImage
