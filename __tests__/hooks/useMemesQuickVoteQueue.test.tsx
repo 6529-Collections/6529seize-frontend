@@ -427,38 +427,73 @@ describe("useMemesQuickVoteQueue", () => {
     expect(result.current.uncastPower).toBe(5000);
     unmount();
   });
+  it("keeps the power cap for older buffered candidates after refreshing the current one", async () => {
+    currentUndiscoveredDrops = [
+      createDrop({ id: "first", serialNo: 3, maxRating: 1000 }),
+      createDrop({ id: "next", serialNo: 2, maxRating: 1000 }),
+      createDrop({ id: "third", serialNo: 1, maxRating: 1000 }),
+    ];
+    leftThisRoundCount = totalCount = 3;
+    const { result } = renderHook(
+      () => useMemesQuickVoteQueue({ sessionId: 1 }),
+      { wrapper: createWrapper() }
+    );
+    await waitFor(() => expect(result.current.nextDrop?.id).toBe("next"));
+    currentUndiscoveredDrops = [
+      createDrop({ id: "next", serialNo: 2, maxRating: 900 }),
+      createDrop({ id: "third", serialNo: 1, maxRating: 900 }),
+    ];
+    leftThisRoundCount = totalCount = 2;
+    await act(async () =>
+      result.current.submitVote(result.current.activeDrop!, 100)
+    );
+    await act(async () => result.current.retryDiscovery());
+    expect(result.current.uncastPower).toBe(900);
+    act(() => {
+      void result.current.skipDrop(result.current.activeDrop!);
+    });
+    expect(result.current.activeDrop?.id).toBe("third");
+    expect(result.current.uncastPower).toBe(900);
+    await act(async () => Promise.resolve());
+  });
+
   it.each([100, 1000])(
-    "accepts a later server power increase after confirming a %i vote",
+    "uses fresh server power after a closed buffer expires following a %i vote",
     async (amount) => {
-      const first = createDrop({ id: "first", serialNo: 2, maxRating: 1000 });
-      const next = createDrop({ id: "next", serialNo: 1, maxRating: 1000 });
-      currentUndiscoveredDrops = [first, next];
-      leftThisRoundCount = totalCount = 2;
-      const { result, rerender } = renderHook(
-        ({ enabled }) => useMemesQuickVoteQueue({ sessionId: 1, enabled }),
-        { wrapper: createWrapper(), initialProps: { enabled: true } }
-      );
-      await waitFor(() => expect(result.current.nextDrop?.id).toBe("next"));
-      currentUndiscoveredDrops = [
-        createDrop({ id: "next", serialNo: 1, maxRating: 1000 - amount }),
-      ];
-      leftThisRoundCount = totalCount = 1;
-      await act(async () =>
-        result.current.submitVote(result.current.activeDrop!, amount)
-      );
-      await waitFor(() =>
+      jest.useFakeTimers();
+      try {
+        const first = createDrop({ id: "first", serialNo: 2, maxRating: 1000 });
+        const next = createDrop({ id: "next", serialNo: 1, maxRating: 1000 });
+        currentUndiscoveredDrops = [first, next];
+        leftThisRoundCount = totalCount = 2;
+        const { result, rerender } = renderHook(
+          ({ enabled }) => useMemesQuickVoteQueue({ sessionId: 1, enabled }),
+          { wrapper: createWrapper(), initialProps: { enabled: true } }
+        );
+        await act(async () => jest.advanceTimersByTimeAsync(1));
+        expect(result.current.nextDrop?.id).toBe("next");
+        currentUndiscoveredDrops = [
+          createDrop({ id: "next", serialNo: 1, maxRating: 1000 - amount }),
+        ];
+        leftThisRoundCount = totalCount = 1;
+        await act(async () =>
+          result.current.submitVote(result.current.activeDrop!, amount)
+        );
+        await act(async () => jest.advanceTimersByTimeAsync(1));
         expect(result.current.uncastPower).toBe(
           amount === 1000 ? null : 1000 - amount
-        )
-      );
-      await act(async () => result.current.retryDiscovery());
-      rerender({ enabled: false });
-      currentUndiscoveredDrops = [
-        createDrop({ id: "next", serialNo: 1, maxRating: 1000 }),
-      ];
-      rerender({ enabled: true });
-      await act(async () => result.current.retryDiscovery());
-      await waitFor(() => expect(result.current.uncastPower).toBe(1000));
+        );
+        rerender({ enabled: false });
+        await act(async () => jest.advanceTimersByTimeAsync(60_001));
+        currentUndiscoveredDrops = [
+          createDrop({ id: "next", serialNo: 1, maxRating: 1000 }),
+        ];
+        rerender({ enabled: true });
+        await act(async () => jest.advanceTimersByTimeAsync(1));
+        expect(result.current.uncastPower).toBe(1000);
+      } finally {
+        jest.useRealTimers();
+      }
     }
   );
 

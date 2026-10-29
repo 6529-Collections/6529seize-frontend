@@ -297,15 +297,15 @@ export const useMemesQuickVoteQueue = ({
         state: optimisticRemainingVotePowerState,
       }),
     });
-  // Release a confirmed estimate (or an expired closed buffer) so it cannot
-  // cap a later server-side increase in available voting power.
+  // Expire the estimate with its closed buffer. While candidates remain,
+  // keep the cap: their older rating ranges can still overstate voting power.
   if (
+    !enabled &&
+    activeApiDrop === null &&
+    session.sessionState.lookaheadDrops.length === 0 &&
     pendingDropIds.length === 0 &&
     optimisticRemainingVotePowerState.key === stateKey &&
-    optimisticRemainingVotePowerState.value !== null &&
-    (session.sessionState.isExhausted ||
-      (effectiveOptimisticRemainingPower === null &&
-        (activeApiDrop !== null || !enabled)))
+    optimisticRemainingVotePowerState.value !== null
   ) {
     setOptimisticRemainingVotePowerState(
       createInitialOptimisticRemainingVotePowerState(stateKey)
