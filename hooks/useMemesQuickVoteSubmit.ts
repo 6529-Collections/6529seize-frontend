@@ -168,7 +168,8 @@ const flushMemesQuickVoteRatings = async ({
           amount: queuedRating.amount,
           dropId: queuedRating.drop.id,
         });
-        if (!isRuntimeActive()) return;
+        // An already-sent vote must still reconcile its original profile cache,
+        // even if that runtime has since unmounted. Callbacks belong to it.
         const appliedAmount = getQueuedRatingAppliedAmount({
           nextRating: response.context_profile_context?.rating,
           queuedRating,
@@ -185,12 +186,11 @@ const flushMemesQuickVoteRatings = async ({
           queuedRating.type
         );
       } catch (error) {
-        if (!isRuntimeActive()) return;
         const message = getQueuedRatingErrorMessage({
           error,
           type: queuedRating.type,
         });
-        setToast({ message, type: "error" });
+        if (isRuntimeActive()) setToast({ message, type: "error" });
         onRatingFailure(
           queuedRating.drop,
           queuedRating.amount,

@@ -56,7 +56,7 @@ it("does not send a queued vote if the voting runtime changes during authenticat
   expect(onRatingFailure).not.toHaveBeenCalled();
 });
 
-it("does not send the remaining queue or update a new runtime after an in-flight vote finishes", async () => {
+it("settles an already-sent vote in its original scope without sending the remaining queue", async () => {
   const rating = deferred<ApiDrop>();
   post.mockReturnValue(rating.promise);
   const { result, unmount, onRatingSuccess, onRatingFailure } = setup();
@@ -68,7 +68,7 @@ it("does not send the remaining queue or update a new runtime after an in-flight
   unmount();
   await act(async () => rating.resolve({} as ApiDrop));
   expect(post).toHaveBeenCalledTimes(1);
-  expect(onRatingSuccess).not.toHaveBeenCalled();
+  expect(onRatingSuccess).toHaveBeenCalledWith(drop("first"), 100, 900, "vote");
   expect(onRatingFailure).not.toHaveBeenCalled();
 });
 
