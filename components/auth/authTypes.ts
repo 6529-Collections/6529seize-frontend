@@ -27,7 +27,7 @@ export type AuthContextType = {
   readonly setToast: (toast: AppToastInput) => void;
   readonly setActiveProfileProxy: (
     profileProxy: ApiProfileProxy | null
-  ) => Promise<void>;
+  ) => Promise<boolean>;
 };
 
 export interface RequestAuthOptions {
