@@ -1,5 +1,8 @@
 "use client";
 import dynamic from "next/dynamic";
+import { useCompetitionSubmissionWave } from "@/hooks/competitions/useCompetitionSubmissionWave";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { getWaveSubmissionButtonLabelOverrideFromMetadata } from "@/helpers/waves/wave-metadata.helpers";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -12,6 +15,7 @@ import {
 import { useContentTab } from "../ContentTabContext";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import MyStreamWaveChat from "./MyStreamWaveChat";
+import WaveChatActivity from "./WaveChatActivity";
 import MyStreamWavePending from "./MyStreamWavePending";
 import MyStreamWaveCurationContent from "./curations/MyStreamWaveCurationContent";
 import { useWaveData } from "@/hooks/useWaveData";
@@ -139,6 +143,8 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
           router.push(newUrl, { scroll: false });
         },
   });
+  const submissionTarget = useCompetitionSubmissionWave(wave, !competitionOnly);
+  const submissionWave = submissionTarget.wave ?? wave;
   const metadataWaveId = wave?.id;
   useWaveContentTabRegistration(wave, competitionOnly);
   const defaultNavigation = useDefaultCompetitionNavigation(
@@ -280,15 +286,13 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   // Get wave type info to determine if gallery toggle should be shown
   // Show for CHAT type waves (normal waves), hide for RANK, MEMES, and DMs
   const {
-    isRankWave,
-    isApproveWave,
     isMemesWave,
     isCurationWave,
     isQuorumWave,
     isDm,
     isChatWave,
     participation,
-  } = useWave(wave);
+  } = useWave(submissionWave);
   const {
     canSubmitNow: participationCanSubmitNow,
     endTime: participationEndTime,
@@ -299,9 +303,11 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     status: participationStatus,
   } = participation;
   const { isVotingControlsLocked: isApprovalVotingControlsLocked } =
-    useApprovalWaveStatus({ wave });
+    useApprovalWaveStatus({ wave: submissionWave });
   const showGalleryToggle =
-    !isRankWave && !isApproveWave && !isMemesWave && !isDm;
+    wave?.wave.type === ApiWaveType.Chat &&
+    !isDm &&
+    !isCompetitionPathname(pathname);
   const hasSerialTarget = searchParams.get("serialNo") !== null;
   const submissionExperience = useMemo(
     () =>
@@ -309,13 +315,14 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
         isMemesWave,
         isCurationWave,
         isQuorumWave,
-        submissionStrategy: wave?.participation.submission_strategy ?? null,
+        submissionStrategy:
+          submissionWave?.participation.submission_strategy ?? null,
       }),
     [
       isCurationWave,
       isMemesWave,
       isQuorumWave,
-      wave?.participation.submission_strategy,
+      submissionWave?.participation.submission_strategy,
     ]
   );
   const isLoggedIn = Boolean(connectedProfile?.handle);
@@ -336,18 +343,27 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   const canOpenChatSubmitDrop =
     dropEligibility.canCreateDrop && !isApprovalVotingControlsLocked;
   const showChatSubmitDropAction =
+    Boolean(submissionTarget.wave) &&
     !isChatWave &&
     !isMemesWave &&
     submissionExperience !== WaveSubmissionExperience.MEMES_LEGACY;
-  const customSubmissionButtonLabel = useWaveSubmissionButtonLabelOverride({
+  const waveSubmissionButtonLabel = useWaveSubmissionButtonLabelOverride({
     enabled: showChatSubmitDropAction,
     waveId: loadedWaveId,
   });
+  const customSubmissionButtonLabel = submissionTarget.wave
+    ? getWaveSubmissionButtonLabelOverrideFromMetadata(
+        (submissionTarget.wave.competition.presentation ?? []).map(
+          (item, id) => ({ ...item, id })
+        )
+      )
+    : waveSubmissionButtonLabel;
   const chatSubmitDropLabels = getChatSubmitDropLabels(
     submissionExperience,
     customSubmissionButtonLabel
   );
   const isMemesLegacySubmission =
+    Boolean(submissionTarget.wave) &&
     submissionExperience === WaveSubmissionExperience.MEMES_LEGACY;
   const outcomesVisible = useWaveOutcomeVisibility(wave);
   const [chatSubmitDropState, setChatSubmitDropState] = useState<{
@@ -477,7 +493,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
       !isApp ||
       !loadedWaveId ||
       editingDropId !== null ||
-      activeContentTab !== MyStreamWaveTab.CHAT ||
+      (activeContentTab !== MyStreamWaveTab.CHAT && !isMemesLegacySubmission) ||
       activeCurationId !== null ||
       (!isMemesLegacySubmission && !chatSubmitDropAction.isVisible)
     ) {
@@ -579,7 +595,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     ),
     [MyStreamWaveTab.CHAT]: (
       <MyStreamWaveChat
-        wave={wave}
+        wave={submissionWave ?? wave}
         firstUnreadSerialNo={enhancedData.firstUnreadSerialNo}
         viewMode={showGalleryToggle ? viewMode : "chat"}
         onDropClick={onDropClick}
@@ -662,7 +678,8 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
         </div>
       ) : (
         <MyStreamWaveTabs
-          wave={wave}
+          wave={submissionWave ?? wave}
+          competitionSubmissionReady={Boolean(submissionTarget.wave)}
           viewMode={viewMode}
           onToggleViewMode={toggleViewMode}
           showGalleryToggle={showGalleryToggle}
@@ -688,11 +705,16 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
             : getContentTabPanelId(activeContentTab)
         }
       >
-        {activeTabContent}
+        <WaveChatActivity
+          active={activeTabContent === components[MyStreamWaveTab.CHAT]}
+          chat={components[MyStreamWaveTab.CHAT]}
+        >
+          {activeTabContent}
+        </WaveChatActivity>
       </div>
       <MemesArtSubmissionModal
         isOpen={isAppMemesSubmitModalOpen}
-        wave={wave}
+        wave={submissionWave ?? wave}
         onClose={closeAppMemesSubmit}
       />
     </div>

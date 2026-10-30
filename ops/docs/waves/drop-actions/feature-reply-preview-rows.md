@@ -34,6 +34,8 @@ to the replied drop instead of opening that URL.
 ## Common Scenarios
 
 - The row keeps `24px` height in loading, loaded, and not-found states.
+- If the replied-to author has no profile picture, the row shows a placeholder
+  avatar with their handle and the preview. A profile picture is not required.
 - In grouped chat replies, repeated headers to the same parent are hidden after
   the first visible row.
 - If preview text is exactly one standalone image URL, preview switches to a

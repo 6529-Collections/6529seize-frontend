@@ -1,4 +1,5 @@
 "use client";
+import type { ApiMemeCollaboratorProfile } from "@/generated/models/ApiMemeCollaboratorProfile";
 
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -27,6 +28,7 @@ const getProfileBio = (statements: CicStatement[] | null | undefined): string =>
       statement.statement_group === STATEMENT_GROUP.GENERAL
   )?.statement_value ?? "";
 
+/** Own the artwork draft and expose field actions while retaining edits across submission steps. */
 export function useArtworkSubmissionForm(
   agreement: SubmissionAgreement,
   initialDraft?: MemesSubmissionInitialDraft
@@ -105,7 +107,14 @@ export function useArtworkSubmissionForm(
     [acceptedAgreement, formActions, traits]
   );
 
+  const setCollaborators = useCallback(
+    (profiles: ApiMemeCollaboratorProfile[]) =>
+      dispatch({ type: "SET_COLLABORATORS", payload: profiles }),
+    []
+  );
   return {
+    collaborators: state.collaborators ?? [],
+    setCollaborators,
     proposalFrame: state.proposalFrame,
     setProposalFrame,
     currentStep: agreements ? state.currentStep : SubmissionStep.AGREEMENT,
@@ -143,6 +152,7 @@ export function useArtworkSubmissionForm(
     updateTraitField: formActions.updateTraitField,
     isAdditionalActionPromised: state.isAdditionalActionPromised,
     setAdditionalActionPromised: formActions.setAdditionalActionPromised,
+    setAdditionalActionPlan: formActions.setAdditionalActionPlan,
 
     operationalData: state.operationalData,
     setAirdropConfig: formActions.setAirdropConfig,

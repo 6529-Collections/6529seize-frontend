@@ -1,4 +1,5 @@
 "use client";
+import { MemeCollaboratorCredits } from "@/components/waves/memes/collaborations/MemeCollaboratorCredits";
 
 import Link from "next/link";
 import UserCICAndLevel, {
@@ -73,6 +74,9 @@ const MemesLeaderboardDropArtistInfo = ({
           <span className="tw-text-sm tw-text-iron-500">•</span>
           <WaveDropTime timestamp={drop.created_at} />
         </span>
+        <div className="tw-w-full">
+          <MemeCollaboratorCredits collaborators={drop.collaborators} />
+        </div>
       </div>
     </div>
   );

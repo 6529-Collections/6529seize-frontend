@@ -16,6 +16,9 @@ export const getReportOutcomeLabel = (
   if (reportStatus === ApiContentModerationReportStatus.ResolvedRemoved) {
     return t(locale, "contentModeration.report.outcomeRemoved");
   }
+  if (reportStatus === ApiContentModerationReportStatus.ResolvedDeleted) {
+    return t(locale, "contentModeration.report.outcomeDeleted");
+  }
   return t(locale, "contentModeration.report.outcomePending");
 };
 

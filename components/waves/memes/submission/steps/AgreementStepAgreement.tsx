@@ -5,18 +5,26 @@ import remarkGfm from "remark-gfm";
 
 interface AgreementStepAgreementProps {
   readonly text: string;
+  readonly scrollable?: boolean;
 }
 
 /**
- * A component that renders markdown text in a scrollable container.
- * Used for displaying legal agreements, terms, and other formatted text.
+ * Renders sanitized agreement Markdown, scrolling independently by default.
+ * Disable scrolling when the containing dialog already owns the scroll area.
  */
 export default function AgreementStepAgreement({
   text,
+  scrollable = true,
 }: AgreementStepAgreementProps) {
   return (
-    <div className="tw-w-full tw-flex tw-flex-col tw-items-center">
-      <div className="tw-w-full tw-border tw-border-iron-800 tw-rounded-lg tw-overflow-y-auto tw-overflow-x-hidden tw-p-4 tw-max-h-[50vh] md:tw-max-h-[60vh] lg:tw-min-h-[20vh] tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800">
+    <div className="tw-flex tw-w-full tw-flex-col tw-items-center">
+      <div
+        className={
+          scrollable
+            ? "tw-max-h-[50vh] tw-w-full tw-overflow-y-auto tw-overflow-x-hidden tw-rounded-lg tw-border tw-border-iron-800 tw-p-4 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 md:tw-max-h-[60vh] lg:tw-min-h-[20vh]"
+            : "tw-w-full"
+        }
+      >
         <Markdown
           rehypePlugins={[
             [
@@ -30,59 +38,59 @@ export default function AgreementStepAgreement({
             [rehypeSanitize],
           ]}
           remarkPlugins={[remarkGfm]}
-          className="tw-text-iron-200 tw-w-full"
+          className="tw-w-full tw-text-iron-200"
           components={{
             h1: ({ children }) => (
-              <h1 className="tw-text-2xl tw-font-semibold tw-text-iron-100 tw-mt-4 tw-mb-2">
+              <h1 className="tw-mb-2 tw-mt-4 tw-text-2xl tw-font-semibold tw-text-iron-100">
                 {children}
               </h1>
             ),
             h2: ({ children }) => (
-              <h2 className="tw-text-xl tw-font-semibold tw-text-iron-100 tw-mt-3 tw-mb-2">
+              <h2 className="tw-mb-2 tw-mt-3 tw-text-xl tw-font-semibold tw-text-iron-100">
                 {children}
               </h2>
             ),
             h3: ({ children }) => (
-              <h3 className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-mt-3 tw-mb-1">
+              <h3 className="tw-mb-1 tw-mt-3 tw-text-lg tw-font-semibold tw-text-iron-100">
                 {children}
               </h3>
             ),
             p: ({ children }) => (
-              <p className="tw-text-iron-300 tw-mb-3 tw-leading-relaxed tw-whitespace-pre-wrap tw-break-words">
+              <p className="tw-mb-3 tw-whitespace-pre-wrap tw-break-words tw-leading-relaxed tw-text-iron-300">
                 {children}
               </p>
             ),
             ul: ({ children }) => (
-              <ul className="tw-list-disc tw-pl-6 tw-mb-3">{children}</ul>
+              <ul className="tw-mb-3 tw-list-disc tw-pl-6">{children}</ul>
             ),
             ol: ({ children }) => (
-              <ol className="tw-list-decimal tw-pl-6 tw-mb-3">{children}</ol>
+              <ol className="tw-mb-3 tw-list-decimal tw-pl-6">{children}</ol>
             ),
             li: ({ children }) => (
-              <li className="tw-text-iron-300 tw-mb-1">{children}</li>
+              <li className="tw-mb-1 tw-text-iron-300">{children}</li>
             ),
             a: ({ href, children }) => (
               <a
                 href={href}
                 target="_blank"
                 rel="nofollow noopener noreferrer"
-                className="tw-text-blue-400 hover:tw-text-blue-300 tw-underline"
+                className="tw-text-blue-400 tw-underline hover:tw-text-blue-300"
               >
                 {children}
               </a>
             ),
             blockquote: ({ children }) => (
-              <blockquote className="tw-border-l-4 tw-border-iron-500 tw-pl-4 tw-italic tw-my-3">
+              <blockquote className="tw-my-3 tw-border-l-4 tw-border-iron-500 tw-pl-4 tw-italic">
                 {children}
               </blockquote>
             ),
             code: ({ children }) => (
-              <code className="tw-bg-iron-800 tw-rounded tw-px-1 tw-py-0.5 tw-font-mono tw-text-sm">
+              <code className="tw-rounded tw-bg-iron-800 tw-px-1 tw-py-0.5 tw-font-mono tw-text-sm">
                 {children}
               </code>
             ),
             pre: ({ children }) => (
-              <pre className="tw-bg-iron-800 tw-rounded tw-p-3 tw-overflow-x-auto tw-my-3 tw-font-mono tw-text-sm">
+              <pre className="tw-my-3 tw-overflow-x-auto tw-rounded tw-bg-iron-800 tw-p-3 tw-font-mono tw-text-sm">
                 {children}
               </pre>
             ),

@@ -193,18 +193,29 @@ function useSyncExistingWaveNewestMessages({
   readonly isCapacitor: boolean;
   readonly syncNewestMessages: ReturnType<typeof useSyncNewestMessages>;
 }) {
+  const inFlight = useRef(
+    new Map<
+      string,
+      {
+        controller: AbortController;
+        promise: Promise<void>;
+      }
+    >()
+  );
   return useCallback(
-    async (waveId: string): Promise<void> => {
+    (waveId: string): Promise<void> => {
+      const pending = inFlight.current.get(waveId);
+      if (pending && !pending.controller.signal.aborted) return pending.promise;
       const wave = getData(waveId);
       if (wave === undefined || wave.drops.length === 0) {
-        return;
+        return Promise.resolve();
       }
 
       const highestSerialNo = Math.max(
         ...wave.drops.map((drop) => drop.serial_no)
       );
       if (!Number.isFinite(highestSerialNo)) {
-        return;
+        return Promise.resolve();
       }
 
       const abortKey = getNewestSyncAbortKey(waveId);
@@ -216,44 +227,51 @@ function useSyncExistingWaveNewestMessages({
         loadSource: "background_sync",
       });
 
-      try {
-        const result = await syncNewestMessages(
-          waveId,
-          highestSerialNo,
-          controller.signal
-        );
-        if (result.drops === null) {
-          trackWaveFeedLoadFailure({
-            error: createWaveFeedUnavailableError(),
+      const promise = (async () => {
+        try {
+          const result = await syncNewestMessages(
+            waveId,
+            highestSerialNo,
+            controller.signal
+          );
+          if (result.drops === null) {
+            trackWaveFeedLoadFailure({
+              error: createWaveFeedUnavailableError(),
+              hadCachedDrops: true,
+              isNative: isCapacitor,
+              loadSource: "background_sync",
+              remainedUnavailable: false,
+              startedAtMs: telemetryStartedAtMs,
+            });
+            return;
+          }
+
+          trackWaveFeedLoadSuccess({
+            dropCount: result.drops.length,
+            hadCachedDrops: true,
+            isNative: isCapacitor,
+            loadSource: "background_sync",
+            startedAtMs: telemetryStartedAtMs,
+          });
+        } catch (error: unknown) {
+          trackWaveFeedLoadTerminalFromError({
+            error,
             hadCachedDrops: true,
             isNative: isCapacitor,
             loadSource: "background_sync",
             remainedUnavailable: false,
             startedAtMs: telemetryStartedAtMs,
           });
-          return;
+          throw error;
+        } finally {
+          cleanupController(abortKey, controller);
+          if (inFlight.current.get(waveId)?.controller === controller) {
+            inFlight.current.delete(waveId);
+          }
         }
-
-        trackWaveFeedLoadSuccess({
-          dropCount: result.drops.length,
-          hadCachedDrops: true,
-          isNative: isCapacitor,
-          loadSource: "background_sync",
-          startedAtMs: telemetryStartedAtMs,
-        });
-      } catch (error: unknown) {
-        trackWaveFeedLoadTerminalFromError({
-          error,
-          hadCachedDrops: true,
-          isNative: isCapacitor,
-          loadSource: "background_sync",
-          remainedUnavailable: false,
-          startedAtMs: telemetryStartedAtMs,
-        });
-        throw error;
-      } finally {
-        cleanupController(abortKey, controller);
-      }
+      })();
+      inFlight.current.set(waveId, { controller, promise });
+      return promise;
     },
     [
       cleanupController,

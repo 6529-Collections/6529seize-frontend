@@ -4,6 +4,7 @@ import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import React from "react";
+import { MemeCollaboratorCredits } from "@/components/waves/memes/collaborations/MemeCollaboratorCredits";
 import WaveWinnersDropHeaderAuthorHandle from "./WaveWinnersDropHeaderAuthorHandle";
 import WaveWinnersDropHeaderTotalVotes from "./WaveWinnersDropHeaderTotalVotes";
 import WaveWinnersDropHeaderVoters from "./WaveWinnersDropHeaderVoters";
@@ -28,6 +29,7 @@ export const WaveWinnersDropHeader: React.FC<WaveWinnersDropHeaderProps> = ({
     >
       <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 xl:tw-w-auto">
         <WaveWinnersDropHeaderAuthorHandle winner={winner} />
+        <MemeCollaboratorCredits collaborators={winner.drop.collaborators} />
         <DropAuthorBadges
           profile={winner.drop.author}
           wave={winner.drop.wave}

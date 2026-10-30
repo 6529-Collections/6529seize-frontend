@@ -31,6 +31,12 @@ Wave and DM rows in the left list control which thread is open.
   its subwaves are loaded, the parent opens, and the active child row is
   highlighted.
 - Navigating to a wave scrolls its active row into the nearest visible position.
+- Incoming messages update badges and recent-activity ordering without moving
+  the Waves list's scroll position, including messages in the open wave.
+  Opening another wave reveals its row once after the list finishes loading;
+  later messages do not scroll to it again.
+- On desktop pointer devices, the Waves list uses a slim iron scrollbar for
+  dragging and track clicks. Touch devices keep their native scrolling behavior.
 - `All`, `Pinned`, and `Joined` are peer collections in one sticky row, with
   a separate search icon on the right. The collection group matches the search
   button height, including the larger touch controls. Switch directly without
@@ -124,9 +130,14 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
   while the page is running. Refresh starts with an empty search and restores
   the last selected All / Pinned / Joined collection. The list area below the tabs shows a small centered spinner only while the
   selected collection has no rows and is loading. Existing rows refresh silently;
-  an empty message appears only after loading finishes.
-- This uses the existing name matching. Typo tolerance and relevance changes
-  are outside this redesign. Unread state, pin controls and subwaves remain on
+  an empty message appears only after loading finishes. Wallet restoration keeps
+  an empty list pending even before an address is available. Once wallet and
+  profile loading settle, a genuinely empty guest or connected list can show
+  its empty message.
+- Wave search ignores spaces, dashes, apostrophes, and letter case, and ranks
+  the closest name matches first. See
+  [Wave name matching](../../navigation/feature-header-search-modal.md#wave-name-matching)
+  for examples and ordering. Unread state, pin controls and subwaves remain on
   normal collection rows; the DM list retains its existing behavior.
 
 ## Location in the Site

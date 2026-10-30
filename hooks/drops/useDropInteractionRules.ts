@@ -111,6 +111,7 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
   const canVote = voteState === DropVoteState.CAN_VOTE;
 
   const isAuthor =
+    !drop.author.is_anonymous &&
     !!connectedProfile?.handle &&
     connectedProfile.handle === drop.author.handle;
 

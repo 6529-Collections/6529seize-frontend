@@ -103,6 +103,15 @@ function applyEffectiveAppPrCiPlan(plan) {
   // Museum lane itself. The selection tool then runs only the affected packs.
   const playwrightMuseum = files.some(requiresMuseumLane);
 
+  const playwrightProfileRep = files.some(
+    (file) =>
+      file.startsWith("components/user/rep/") ||
+      file.startsWith("components/user/utils/rate/") ||
+      file === "components/react-query-wrapper/ReactQueryWrapper.tsx" ||
+      file === "hooks/useRepAllocation.ts" ||
+      file === "tests/social/profile-rep-edit-sandbox.spec.ts"
+  );
+
   const playwrightArtworkDocumentation = files.some((file) =>
     ARTWORK_DOCUMENTATION_BROWSER_PATTERNS.some((pattern) => pattern.test(file))
   );
@@ -112,7 +121,11 @@ function applyEffectiveAppPrCiPlan(plan) {
       /^(?:components\/competitions\/|hooks\/competitions\/|__tests__\/competitions\/|app\/waves\/\[wave\]\/competitions\/|components\/waves\/create-wave\/|components\/waves\/leaderboard\/|__tests__\/components\/waves\/leaderboard\/|generated\/models\/ApiCompetition)/u.test(
         file
       ) ||
+      /^(?:hooks\/(?:useMemesQuickVote|useMemesWaveFooterStats|memesQuickVote\.)|components\/brain\/left-sidebar\/waves\/memes-quick-vote\/)/u.test(
+        file
+      ) ||
       [
+        "components/brain/left-sidebar/waves/MemesWaveFooter.tsx",
         "contexts/CompetitionContext.tsx",
         "helpers/competition.helpers.ts",
         "helpers/competition-labels.helpers.ts",
@@ -121,9 +134,25 @@ function applyEffectiveAppPrCiPlan(plan) {
         "services/wallet-signatures/competition-signature.ts",
         "i18n/messages/competitions.ts",
         "tests/social/native-competition-sandbox.spec.ts",
+        "tests/media/waveImagePreviewCases.ts",
+        "components/waves/drop/MemesDropArtworkHero.tsx",
+        "components/drops/view/item/content/media/DropImagePreview.tsx",
+        "components/drops/view/item/content/media/GifPreviewLoadingIndicator.tsx",
+        "components/drops/view/item/content/media/DropListItemContentMedia.tsx",
+        "components/drops/view/item/content/media/DropListItemContentMediaImage.tsx",
+        "components/drops/view/item/content/media/MediaDisplay.tsx",
+        "components/drops/view/item/content/media/MediaDisplayImage.tsx",
+        "components/memes/drops/MemeParticipationDrop.tsx",
+        "components/memes/drops/MemeWinnerDrop.tsx",
+        "components/memes/drops/MemesLeaderboardDrop.tsx",
+        "components/drops/view/item/content/media/ImageMediaModal.tsx",
+        "components/drops/view/item/content/media/useOriginalImage.ts",
+        "helpers/gif-preview.helpers.ts",
         "tests/social/wave-notification-settings-sandbox.spec.ts",
         "tests/social/wave-switch-loading.spec.ts",
         "tests/social/wave-loading-sandbox.spec.ts",
+        "components/brain/my-stream/MyStreamWaveChat.tsx",
+        "components/waves/drops/wave-drops-all/hooks/useWaveDropsSerialScroll.ts",
         "components/brain/left-sidebar/waves/SidebarDiscovery.tsx",
         "components/brain/left-sidebar/waves/SidebarDiscoverySkeletons.tsx",
         "components/brain/left-sidebar/waves/SidebarActiveVotes.tsx",
@@ -156,6 +185,10 @@ function applyEffectiveAppPrCiPlan(plan) {
         "__tests__/components/waves/drops/WaveDropActionsOpen.test.tsx",
         "components/waves/drops/WaveDropMobileMenuOpen.tsx",
         "__tests__/components/waves/drops/WaveDropMobileMenuOpen.test.tsx",
+        "components/waves/drops/AdditionalActionPromiseBadge.tsx",
+        "components/waves/drops/ArtistActiveSubmissionContent.tsx",
+        "__tests__/components/waves/drops/ArtistActiveSubmissionContent.test.tsx",
+        "components/utils/tooltip/BodyPortalTooltip.tsx",
         "components/waves/header/WaveJoinCta.tsx",
         "components/brain/left-sidebar/waves/BrainLeftSidebarWavePin.tsx",
         "tests/packs.manifest.cjs",
@@ -164,6 +197,33 @@ function applyEffectiveAppPrCiPlan(plan) {
         "scripts/app-pr-ci-effective-plan.cjs",
         "__tests__/scripts/app-pr-ci-effective-plan.test.ts",
       ].includes(file)
+  );
+
+  const playwrightSubmissionArtwork = files.some((file) =>
+    [
+      "tests/media/submission-artwork-sandbox.spec.ts",
+      "tests/media/waveImagePreviewCases.ts",
+      "components/waves/drop/MemesDropArtworkHero.tsx",
+      "components/drops/view/item/content/media/DropImagePreview.tsx",
+      "components/drops/view/item/content/media/GifPreviewLoadingIndicator.tsx",
+      "components/drops/view/item/content/media/DropListItemContentMedia.tsx",
+      "components/drops/view/item/content/media/DropListItemContentMediaImage.tsx",
+      "components/drops/view/item/content/media/MediaDisplay.tsx",
+      "components/drops/view/item/content/media/MediaDisplayImage.tsx",
+      "components/drops/view/item/content/media/ImageMediaModal.tsx",
+      "components/drops/view/item/content/media/useOriginalImage.ts",
+      "components/memes/drops/MemeParticipationDrop.tsx",
+      "components/memes/drops/MemeWinnerDrop.tsx",
+      "components/memes/drops/MemesLeaderboardDrop.tsx",
+      "helpers/gif-preview.helpers.ts",
+      "tests/support/composerSandboxServer.cjs",
+      "tests/packs.manifest.cjs",
+      "playwright.config.ts",
+      "tsconfig.playwright.json",
+      ".github/workflows/app-pr-ci.yml",
+      "scripts/app-pr-ci-effective-plan.cjs",
+      "__tests__/scripts/app-pr-ci-effective-plan.test.ts",
+    ].includes(file)
   );
 
   const playwrightWaveFeatureUsage = files.some(
@@ -208,6 +268,12 @@ function applyEffectiveAppPrCiPlan(plan) {
 
   const checks = {
     ...plan.checks,
+    playwright_critical_shell: playwrightProfileRep
+      ? check(
+          true,
+          "Profile REP and rating changes require the profile dialog browser pack."
+        )
+      : baseChecks.playwright_critical_shell,
     install: check(
       true,
       playwrightMuseum
@@ -239,6 +305,12 @@ function applyEffectiveAppPrCiPlan(plan) {
       playwrightNativeCompetition
         ? "Native competition changes require desktop and mobile sandbox browser coverage."
         : "No native competition surfaces changed."
+    ),
+    playwright_submission_artwork: check(
+      playwrightSubmissionArtwork,
+      playwrightSubmissionArtwork
+        ? "Submission artwork media or its browser contract requires isolated desktop and mobile coverage."
+        : "No submission artwork media or browser contract changed."
     ),
     playwright_wave_feature_usage: check(
       playwrightWaveFeatureUsage,

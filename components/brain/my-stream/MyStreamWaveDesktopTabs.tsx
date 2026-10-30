@@ -24,6 +24,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useCompetitionNavigation } from "@/contexts/CompetitionNavigationContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { isCompetitionSubmissionHistory } from "@/helpers/competition-lifecycle.helpers";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 import {
   getApproveWaveTabLabelsFromMetadata,
@@ -57,6 +58,7 @@ import MyStreamWaveCreateActionsMenu from "./tabs/MyStreamWaveCreateActionsMenu"
 import MyStreamWaveCurationTabMenu from "./tabs/MyStreamWaveCurationTabMenu";
 import MobileTabsScrollControls from "./MobileTabsScrollControls";
 import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
+import { useWaveChatPrefetch } from "@/hooks/competitions/useWaveChatPrefetch";
 
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
@@ -274,6 +276,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const searchParams = useSearchParams();
   const { ref: featureUsageRef } = useWaveFeatureUsage("wave_tabs", wave.id);
   const pathname = usePathname();
+  const prefetchChat = useWaveChatPrefetch();
 
   const locale = useBrowserLocale();
   const { flat, nativeCompetition } = useCompetitionNavigation();
@@ -429,12 +432,18 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
           else if (tab === MyStreamWaveTab.POLLS) badgeCount = unansweredPolls;
           return {
             key: tab,
-            label: getTabLabel({
-              approveLabels,
-              isApproveWave: selectedIsApprove,
-              tab,
-              locale,
-            }),
+            onIntent: tab === MyStreamWaveTab.CHAT ? prefetchChat : undefined,
+            label:
+              nativeDefault &&
+              tab === MyStreamWaveTab.LEADERBOARD &&
+              isCompetitionSubmissionHistory(nativeDefault)
+                ? t(locale, "competitions.submissions")
+                : getTabLabel({
+                    approveLabels,
+                    isApproveWave: selectedIsApprove,
+                    tab,
+                    locale,
+                  }),
             panelId: getContentTabPanelId(tab),
             badgeCount,
           };
@@ -451,6 +460,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       unansweredPolls,
       activeCompetitionCount,
       effectiveCompetitionId,
+      prefetchChat,
       nativeDefault,
       selectedIsApprove,
       locale,
