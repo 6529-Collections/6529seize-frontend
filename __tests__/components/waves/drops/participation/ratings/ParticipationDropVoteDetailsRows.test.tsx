@@ -1,6 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
 import {
   ParticipationDropVoteDetailsLogRow,
   ParticipationDropVoteDetailsVoterRow,
@@ -18,6 +24,18 @@ const identity = {
 } as any;
 
 describe("ParticipationDropVoteDetailsRows", () => {
+  it("requests the AUTOx50 derivative for voter avatars", () => {
+    render(
+      <ParticipationDropVoteDetailsVoterRow
+        voter={{ voter: { ...identity, pfp: CDN_AVATAR_URL }, vote: 1 } as any}
+        creditType={ApiWaveCreditType.Tdh}
+      />
+    );
+    expect(
+      getRequestedImageSrc(screen.getByAltText("alice's avatar"))
+    ).toContain(scaledAvatarPath(ImageScale.W_AUTO_H_50));
+  });
+
   it("shows signed positive and negative voter amounts", () => {
     const { rerender } = render(
       <ParticipationDropVoteDetailsVoterRow

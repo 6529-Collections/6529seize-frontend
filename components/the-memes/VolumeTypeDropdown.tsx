@@ -1,5 +1,6 @@
 "use client";
 
+import FilterButton from "@/components/utils/button/FilterButton";
 import CommonDropdownItemsWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsWrapper";
 import { getVolumeTypeLabel } from "@/components/the-memes/theMemesI18n";
 import { VolumeType } from "@/entities/INFT";
@@ -8,12 +9,9 @@ import { t } from "@/i18n/messages";
 import { faCheck, faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRef, useState } from "react";
+import { getMemesSortButtonClasses } from "./theMemesSortStyles";
 
 const VOLUME_TYPES = Object.values(VolumeType);
-const VOLUME_TRIGGER_LABEL_CLASS =
-  "tw-shrink-0 tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-500";
-const VOLUME_TRIGGER_VALUE_CLASS =
-  "tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200 group-hover:tw-text-white";
 
 export default function VolumeTypeDropdown({
   isVolumeSort,
@@ -50,40 +48,35 @@ export default function VolumeTypeDropdown({
       data-testid="dropdown"
       className="tailwind-scope tw-relative tw-inline-flex tw-shrink-0"
     >
-      <button
+      <FilterButton
         ref={buttonRef}
-        type="button"
+        selected={isVolumeSort}
         aria-haspopup="true"
+        aria-pressed={isVolumeSort}
         aria-expanded={isOpen}
         aria-label={t(resolvedLocale, "theMemes.volume.triggerWithValue", {
           volumeType: selectedVolumeLabel,
         })}
         onClick={() => setIsOpen(!isOpen)}
-        className={`tw-group tw-relative tw-m-0 tw-inline-flex tw-shrink-0 tw-cursor-pointer tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-bg-transparent tw-px-0.5 tw-py-1 tw-text-left tw-no-underline tw-shadow-none tw-transition-colors tw-duration-200 after:tw-absolute after:-tw-bottom-0.5 after:tw-left-0 after:tw-h-px after:tw-w-full after:tw-origin-left after:tw-transition-transform after:tw-duration-200 after:tw-content-[''] focus:tw-outline-none focus-visible:tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 sm:tw-shrink ${
-          isVolumeSort
-            ? "tw-text-white after:tw-scale-x-100 after:tw-bg-primary-400"
-            : "tw-text-iron-500 after:tw-scale-x-0 after:tw-bg-iron-700 hover:tw-text-iron-200 hover:after:tw-scale-x-100"
-        }`}
+        className={getMemesSortButtonClasses(isVolumeSort)}
       >
         <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5">
-          <span className={VOLUME_TRIGGER_LABEL_CLASS}>
+          <span className="tw-shrink-0 tw-whitespace-nowrap">
             {t(resolvedLocale, "theMemes.volume.trigger")}
             {isVolumeSort ? ":" : ""}
           </span>
           {isVolumeSort && (
-            <span className={VOLUME_TRIGGER_VALUE_CLASS}>
-              {selectedVolumeLabel}
-            </span>
+            <span className="tw-truncate">{selectedVolumeLabel}</span>
           )}
         </span>
         <FontAwesomeIcon
           icon={faChevronDown}
-          className={`tw-h-3 tw-w-3 tw-shrink-0 tw-text-iron-500 tw-transition-transform tw-duration-200 group-hover:tw-text-iron-300 ${
+          className={`tw-h-3 tw-w-3 tw-shrink-0 tw-transition-transform tw-duration-200 ${
             isOpen ? "tw-rotate-180" : ""
           }`}
           aria-hidden="true"
         />
-      </button>
+      </FilterButton>
 
       <CommonDropdownItemsWrapper
         isOpen={isOpen}
@@ -107,9 +100,12 @@ export default function VolumeTypeDropdown({
                 type="button"
                 data-testid="item"
                 role="menuitem"
+                aria-current={isActive ? "true" : undefined}
                 onClick={() => handleSelect(volumeType)}
                 className={`${
-                  isMobile ? "tw-px-4 tw-py-3" : "tw-px-3 tw-py-2"
+                  isMobile
+                    ? "tw-min-h-12 tw-px-3 tw-py-3 max-lg:tw-rounded-lg max-lg:tw-text-[15px]"
+                    : "tw-px-3 tw-py-2"
                 } tw-box-border tw-flex tw-w-full tw-max-w-full tw-items-center tw-justify-between tw-gap-x-2 tw-overflow-hidden tw-rounded-md tw-border-0 tw-bg-transparent tw-text-left tw-text-sm tw-font-medium tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
                   isActive ? "tw-bg-iron-800 tw-text-iron-100" : ""
                 }`}

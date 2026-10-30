@@ -1,10 +1,11 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { render, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ReactQueryWrapper, {
   ReactQueryWrapperContext,
   QueryKey,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 jest.mock("@/helpers/Helpers", () => ({
   ...jest.requireActual("../../../helpers/Helpers"),
@@ -14,6 +15,11 @@ jest.mock("@/helpers/Helpers", () => ({
 const wait = require("@/helpers/Helpers").wait as jest.Mock;
 
 type ContextType = {
+  onProfileRepModify: (params: {
+    targetProfile: ApiIdentity;
+    connectedProfile: ApiIdentity | null;
+    profileProxy: null;
+  }) => void;
   setProfile: (profile: any) => void;
   setWaveDrops: (params: { waveDrops: any; waveId: string }) => void;
   waitAndInvalidateDrops: () => Promise<void>;
@@ -56,6 +62,23 @@ const createTestSetup = () => {
 };
 
 describe("ReactQueryWrapper context", () => {
+  it("invalidates REP allowances for a target without a handle", () => {
+    const { client, ctx } = createTestSetup();
+    const key = [
+      QueryKey.PROFILE_REP_RATINGS,
+      { handleOrWallet: "0xabc", rater: "viewer" },
+    ];
+    client.setQueryData(key, { rep_rates_left_for_rater: 80 });
+    act(() =>
+      ctx.onProfileRepModify({
+        targetProfile: { handle: null, query: "0xAbC" } as ApiIdentity,
+        connectedProfile: { handle: "viewer" } as ApiIdentity,
+        profileProxy: null,
+      })
+    );
+    expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+  });
+
   it("sets profile data in query cache", () => {
     const { client, ctx } = createTestSetup();
     const profile = {
@@ -81,6 +104,9 @@ describe("ReactQueryWrapper context", () => {
   it("onIdentityFollowChange invalidates related queries", () => {
     const { client, ctx } = createTestSetup();
     act(() => ctx.onIdentityFollowChange());
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.IDENTITY_FOLLOWING],
+    });
     expect(client.invalidateQueries).toHaveBeenCalledWith({
       queryKey: [QueryKey.IDENTITY_FOLLOWING_ACTIONS],
     });

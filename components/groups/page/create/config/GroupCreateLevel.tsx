@@ -1,4 +1,8 @@
-import { GROUP_CREATE_PANEL_STYLES } from "../GroupCreate.styles";
+import {
+  GROUP_CREATE_PANEL_STYLES,
+  GROUP_CREATE_TITLE_STYLES,
+  GROUP_CREATE_DESCRIPTION_STYLES,
+} from "../GroupCreate.styles";
 import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
 import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
 
@@ -12,10 +16,8 @@ export default function GroupCreateLevel({
   return (
     <div className={GROUP_CREATE_PANEL_STYLES}>
       <div className="tw-mb-4">
-        <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
-          Level
-        </p>
-        <p className="tw-m-0 tw-text-sm tw-font-normal tw-text-iron-500">
+        <p className={GROUP_CREATE_TITLE_STYLES}>Level</p>
+        <p className={GROUP_CREATE_DESCRIPTION_STYLES}>
           Set the group&apos;s minimum level requirement.
         </p>
       </div>

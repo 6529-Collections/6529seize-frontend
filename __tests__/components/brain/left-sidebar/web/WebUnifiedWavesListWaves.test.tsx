@@ -414,10 +414,12 @@ it("shows the worth checking out description when no profile is connected", () =
   renderWebWaves();
 
   expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
-  expect(screen.getByText("Highly rated waves.")).toBeVisible();
+  expect(
+    screen.getByText("Highly rated waves you don’t follow.")
+  ).toBeVisible();
   expect(
     screen.queryByRole("button", {
-      name: "Highly rated waves.",
+      name: "Highly rated waves you don’t follow.",
     })
   ).not.toBeInTheDocument();
 });

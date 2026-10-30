@@ -18,6 +18,17 @@ import {
 import { useEffect, useState } from "react";
 
 /**
+ * How long the browser keeps query data that no mounted component uses.
+ * Five minutes (TanStack's own default) keeps back-navigation and recently
+ * opened waves instant without holding every page, wave and profile visited
+ * in memory for the rest of the session. Data is stale after `staleTime`
+ * anyway, so a revisit refetches either way; past this window it shows its
+ * loading state instead of stale data first. Queries that must outlive it
+ * set their own `gcTime`.
+ */
+const BROWSER_GC_TIME_MS = 5 * 60 * 1000;
+
+/**
  * The default `retry` below is meant for observer-driven queries. React Query
  * only keeps imperative fetches (`fetchQuery`, `prefetchQuery`,
  * `ensureQueryData` and the infinite variants, which all go through
@@ -56,7 +67,7 @@ function createQueryClient() {
         // Queries that set their own `retry` still take precedence.
         retry: environmentManager.isServer() ? 0 : shouldRetryQuery,
         // Server caches die with the request; do not retain them with GC timers.
-        gcTime: environmentManager.isServer() ? Infinity : 1000 * 60 * 60 * 24,
+        gcTime: environmentManager.isServer() ? Infinity : BROWSER_GC_TIME_MS,
       },
     },
   });

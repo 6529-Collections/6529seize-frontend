@@ -1,3 +1,6 @@
+import CollectDetailSupportingActions from "@/components/collect/CollectDetailSupportingActions";
+import { CollectDetailHasPrimaryAction } from "@/components/collect/CollectDetailActionRow";
+import userEvent from "@testing-library/user-event";
 import CollectOwnerAction from "@/components/collect/CollectOwnerAction";
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { ConfirmedMarketPurchase } from "@/components/collect/market-activity-store";
@@ -286,3 +289,123 @@ it("keeps confirmed non-owners and profiles without eligible wallets quiet", () 
   rerender(<CollectOwnerAction assetKey={asset} onList={jest.fn()} />);
   expect(container).toBeEmptyDOMElement();
 });
+
+function supportingActions(onTrade: jest.Mock, listed = true) {
+  return (
+    <CollectDetailHasPrimaryAction.Provider value={listed}>
+      <CollectDetailSupportingActions
+        assetKey={asset}
+        title="Card"
+        locale="en-US"
+        onTrade={onTrade}
+      />
+    </CollectDetailHasPrimaryAction.Provider>
+  );
+}
+
+async function openSupportingMenu() {
+  const user = userEvent.setup();
+  const trigger = screen.getByRole("button", {
+    name: "More trading actions for Card",
+  });
+  await user.click(trigger);
+  return { user, trigger };
+}
+
+it("keeps guest List in the listed-card menu and opens the same connection flow", async () => {
+  mockProfile = null;
+  const onTrade = jest.fn();
+  render(supportingActions(onTrade));
+  expect(
+    screen.queryByRole("button", { name: "List" })
+  ).not.toBeInTheDocument();
+  const { user } = await openSupportingMenu();
+  await user.click(screen.getByRole("menuitem", { name: "List: Card" }));
+  expect(mockConnect).toHaveBeenCalledTimes(1);
+  expect(onTrade).not.toHaveBeenCalled();
+});
+
+it("opens the same owner listing review from the menu with its persistent trigger", async () => {
+  mockAddress = owner;
+  const onTrade = jest.fn();
+  render(supportingActions(onTrade));
+  const { user, trigger } = await openSupportingMenu();
+  await user.click(screen.getByRole("menuitem", { name: "List: Card" }));
+  expect(onTrade).toHaveBeenCalledWith("list", trigger);
+  expect(mockConnect).not.toHaveBeenCalled();
+  expect(mockSwitch).not.toHaveBeenCalled();
+});
+
+it("still requires the holding wallet before listing through the menu", async () => {
+  const onTrade = jest.fn();
+  render(supportingActions(onTrade));
+  const { user } = await openSupportingMenu();
+  await user.click(screen.getByRole("menuitem", { name: "List: Card" }));
+  expect(onTrade).not.toHaveBeenCalled();
+  await user.click(screen.getByRole("button", { name: /custody.eth/ }));
+  expect(mockSwitch).toHaveBeenCalledWith(owner);
+  expect(mockConnect).not.toHaveBeenCalled();
+  expect(onTrade).not.toHaveBeenCalled();
+});
+
+it("keeps Review offers available to non-owners without introducing List", async () => {
+  mockAnalysis!.requirements = [{ holdings: [] }];
+  const onTrade = jest.fn();
+  render(supportingActions(onTrade));
+  const { user, trigger } = await openSupportingMenu();
+  expect(
+    screen.queryByRole("menuitem", { name: "List: Card" })
+  ).not.toBeInTheDocument();
+  await user.click(
+    screen.getByRole("menuitem", { name: "Review offers: Card" })
+  );
+  expect(onTrade).toHaveBeenCalledWith("accept", trigger);
+});
+
+it.each(["checking", "error"])(
+  "retains disabled List and ownership feedback in the menu during %s",
+  async (state) => {
+    mockIsPending = state === "checking";
+    mockIsError = state === "error";
+    const onTrade = jest.fn();
+    render(supportingActions(onTrade));
+    const message =
+      state === "checking"
+        ? "Checking ownership…"
+        : "Ownership could not be checked.";
+    expect(screen.getByRole("status")).toHaveTextContent(message);
+    const { user } = await openSupportingMenu();
+    const list = screen.getByRole("menuitem", { name: /List: Card/ });
+    expect(list).toHaveAttribute("aria-disabled", "true");
+    await user.click(list);
+    expect(onTrade).not.toHaveBeenCalled();
+    expect(mockConnect).not.toHaveBeenCalled();
+    await user.keyboard("{Escape}");
+    if (state === "error") {
+      await user.click(
+        screen.getByRole("button", { name: "Retry ownership check" })
+      );
+      expect(mockRefetch).toHaveBeenCalledTimes(1);
+    }
+  }
+);
+
+it.each(["guest", "owner", "non-owner"])(
+  "keeps original List availability and handler inline on an unlisted card for %s",
+  (state) => {
+    if (state === "guest") mockProfile = null;
+    if (state === "owner") mockAddress = owner;
+    if (state === "non-owner") mockAnalysis!.requirements = [{ holdings: [] }];
+    const onTrade = jest.fn();
+    render(supportingActions(onTrade, false));
+    const list = screen.queryByRole("button", { name: "List" });
+    if (state === "non-owner") expect(list).not.toBeInTheDocument();
+    else {
+      fireEvent.click(list!);
+      if (state === "guest") {
+        expect(mockConnect).toHaveBeenCalledTimes(1);
+        expect(onTrade).not.toHaveBeenCalled();
+      } else expect(onTrade).toHaveBeenCalledWith("list", list);
+    }
+  }
+);
