@@ -851,9 +851,37 @@ test("shared post stays in view after URL cleanup and delayed loading", async ({
   }
   await expect(post(20)).toBeInViewport({ timeout: 30000 });
   await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
-  // The original bug shows the target briefly, then replaces its chat after
-  // URL cleanup. Check the settled viewport, beyond the scroll retry timers.
+  const chat = page.getByRole("region", {
+    name: "Wave chat file upload area",
+    exact: true,
+  });
+  let afterHeight = 0;
+  // Observe beyond the scroll retry timers. Simulate neighboring media growing,
+  // then redistribute that height across the target without resizing the list.
+  // A list ResizeObserver alone misses the second movement.
   for (let second = 0; second < 8; second += 1) {
+    if (second === 2) {
+      afterHeight = await page
+        .getByRole("region", {
+          name: "Wave chat file upload area",
+          exact: true,
+        })
+        .locator("#drop-21")
+        .evaluate((element) => {
+          const height = element.getBoundingClientRect().height;
+          (element as HTMLElement).style.minHeight = `${height + 1000}px`;
+          return height;
+        });
+    } else if (second === 4) {
+      await chat.evaluate((element, height) => {
+        const before = element.querySelector<HTMLElement>("#drop-19");
+        const after = element.querySelector<HTMLElement>("#drop-21");
+        if (!before || !after)
+          throw new Error("Missing neighboring fixture rows");
+        before.style.minHeight = `${before.getBoundingClientRect().height + 1000}px`;
+        after.style.minHeight = `${height}px`;
+      }, afterHeight);
+    }
     await page.waitForTimeout(1000);
     await expect(post(20)).toBeInViewport();
   }
