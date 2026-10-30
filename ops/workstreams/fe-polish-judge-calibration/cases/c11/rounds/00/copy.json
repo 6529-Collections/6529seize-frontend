@@ -1,0 +1,149 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "museum-home-consolidation-final",
+  "coverage": [
+    {
+      "route": "/museum/network",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/home-1440x1000-01..04.png"
+    },
+    {
+      "route": "/museum/network",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/home-820x1000-01..06.png"
+    },
+    {
+      "route": "/museum/network",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/home-390x844-01..10.png"
+    }
+  ],
+  "dimensions": {
+    "J07": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/home-1440x1000-01.png",
+        "evidence/home-1440x1000-02.png",
+        "evidence/home-1440x1000-03.png",
+        "evidence/home-1440x1000-04.png",
+        "evidence/home-820x1000-04.png",
+        "evidence/home-390x844-03.png",
+        "evidence/home-390x844-06.png"
+      ],
+      "findings": ["E-001", "E-002", "E-003", "E-004", "E-005", "E-006"],
+      "note": "Captions, counts, dates, the edition size, and acquisition status are specific and written in a museum register. Below the floor: the governance statement and a seven-noun list each appear twice, two summaries of the Collection disagree, some card copy is abstract or defensive, and TDH, Wave and Safe are never explained. The LCL environment badge in the app shell was treated as part of the capture environment, not route copy."
+    }
+  },
+  "checks": {
+    "I1": "pass",
+    "I2": "pass",
+    "I3": "pass"
+  },
+  "findings": [
+    {
+      "id": "E-001",
+      "targets": ["J07"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/home-1440x1000-03.png",
+      "observation": "The holding and governance statement appears twice in near-identical words. The first is the band under Acquisitions (\"Held by the 6529 Network\", \"Governed through TDH\", \"Art held on Ethereum\", \"Governance and execution are moving progressively on-chain\"). The second is the How the Network Museum works section (\"The collection is held by the 6529 Network and governed through TDH. Its artworks are held on Ethereum, while its decisions, records, and operating systems are moving progressively on-chain.\"; home-1440x1000-04). Three links to this one topic use three labels: \"How the Network Museum works\", \"How the Museum works\" and \"Read about the Network Museum\". The Keys and Gates list \"access, exclusion, permission, surveillance, custody, autonomy, and exit\" appears word for word in its acquisition card (home-1440x1000-02) and again in the feature band (home-1440x1000-03). The gift card names \"Themes and Variations\" four times, in the caption, credit, heading and body.",
+      "consequence": "Readers get the same claims and lists again instead of new information. The home page reads as padded, and the governance statement it is trying to make loses force.",
+      "change": "State holding and governance once, in How the Network Museum works. Cut the band down to its four short labels, or remove it. Give every link to the same destination one label. In the feature band, replace the repeated Keys and Gates list with what the program page adds. Shorten the gift card body to \"Accepted as a gift: one unique output from the project's fixed edition of 500, recorded as both a visual composition and a live, browser-rendered generative program.\"",
+      "acceptance_check": "At all three widths, no sentence, list or claim appears twice on the page. Links to the same destination share one label. The gift card names the work no more than twice.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-002",
+      "targets": ["J07"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/home-1440x1000-03.png",
+      "observation": "Explore the collection says \"The Museum collects significant works of digital art, with a particular focus on art native to computation, networks, and the blockchain.\" The hero says the Collection holds \"digital art and photography\" (home-1440x1000-01), and two of the four acquisitions shown are photography: Conflict at Its Edges (photographs from 1952 to 2016) and Keys and Gates. The hero's second paragraph describes the Collection as \"accepted gifts alongside acquisitions still underway\". The Acquisitions intro (home-1440x1000-02) instead lists three completed acquisitions, only one of them labeled a gift, plus one in progress.",
+      "consequence": "Two summaries of what the Museum holds disagree on medium and on acquisition status, so a visitor cannot tell which is right. On a museum home page, that weakens trust in every other record on the page.",
+      "change": "Use \"The Museum collects digital art and photography, with a particular focus on art native to computation, networks, and the blockchain.\" Replace the hero's second paragraph with \"Follow each work through its artist, project, and accession history, including acquisitions still in progress.\" Drop \"significant\" unless a stated criterion supports it.",
+      "acceptance_check": "Every summary of the Collection on the page names the same media as the hero lead. Any status summary matches the Acquisitions intro: three completed acquisitions, with Keys and Gates in progress.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-003",
+      "targets": ["J07"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/home-1440x1000-02.png",
+      "observation": "The System in Seven States is counted among \"three completed acquisitions\", but its card says \"A Museum curatorial grouping reads seven accessioned Casey Reas works through related computational systems without claiming an artist-defined canonical group.\" The Keys and Gates card opens with \"The program's selected group brings together…\" and never names the program. The eyebrow \"CURRENT ACQUISITIONS\" repeats the heading \"Acquisitions\", and \"current\" sits over acquisitions that are mostly complete. The Casey Reas feature (home-1440x1000-03) says only \"Read the artist and practice profile, then move through the projects and works held in the collection.\"",
+      "consequence": "The abstract verb (\"reads … through\"), the defensive disclaimer and the unnamed program leave visitors to work out what each group is. The Reas blurb could sit on any artist's page and gives no reason to click.",
+      "change": "The System in Seven States: \"Seven Casey Reas works in the permanent Collection, grouped by the Museum around related computational systems. The grouping is the Museum's, not a series defined by the artist.\" Keys and Gates: \"Sixteen photographs selected for the Keys and Gates acquisition program, on access, exclusion, permission, surveillance, custody, autonomy, and exit. Selection is complete; acquisition and minting are pending.\" Remove the eyebrow, or use one that does not repeat the heading. Casey Reas feature: \"Seven works in the Collection, grouped in The System in Seven States, with a profile of Reas's practice.\"",
+      "acceptance_check": "Each acquisition card says in plain words what the item is (acquisition, gift or program) and how many works it covers. No card uses \"reads … through\", \"canonical\" or an unnamed \"the program\". The eyebrow differs from the heading. The Reas blurb states a fact about his holdings.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-004",
+      "targets": ["J07"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/home-1440x1000-04.png",
+      "observation": "\"Governed through TDH\" (in the band) and \"governed through TDH\" (in How the Network Museum works) never expand or explain TDH or say who decides, even though the section heading promises to explain how the Museum works. \"View Wave publication\" (home-1440x1000-02) uses the 6529 product term Wave without saying what opens. The Public record links \"Museum Safe\", \"Decisions\" and \"Public repository\" are bare labels in a separate block, away from the claims they support.",
+      "consequence": "A museum visitor who is new to 6529 cannot learn who governs the Collection or what a Safe or a Wave is. The governance claim reads as atmosphere, and visitors have to guess where the links lead.",
+      "change": "Expand TDH where it first appears and say who decides in one sentence, describing only the mechanism that actually exists (draft: \"Acquisitions are decided by [who], weighted by TDH (Total Days Held); each decision is published in Decisions.\"). Put the Museum Safe, Decisions and Public repository links directly under that sentence, each with a short descriptor (draft: \"Museum Safe: the Ethereum wallet that holds the Collection\"). Rename \"View Wave publication\" so it names what it opens.",
+      "acceptance_check": "TDH is expanded where it first appears. How the Network Museum works names who decides and links the decision record next to that sentence. No link label relies on Wave or Safe without a plain description.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-005",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/home-1440x1000-03.png",
+      "observation": "\"Collection\" is capitalized in \"permanent Collection\" (the hero, the Acquisitions intro and the status lines) but lowercase in \"See every accessioned artwork in the permanent collection.\" and \"held in the collection\". The link label \"Read Research\" reads awkwardly.",
+      "consequence": "Small inconsistencies in labels make the publication look less carefully edited.",
+      "change": "Choose one style for the Collection as a proper noun and use it throughout. Relabel \"Read Research\" as \"Read the research\" or \"Browse Research\".",
+      "acceptance_check": "Collection is capitalized the same way across the page, and the research link reads naturally.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-006",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/home-1440x1000-02.png",
+      "observation": "The credit for Take the Key! reads \"GulYildiz\", a joined, handle-like form, next to full-name credits such as \"David Seymour\" and \"Vera Molnár, in collaboration with Martin Grasser\".",
+      "consequence": "If this is a handle rather than the artist's name of record, the label reads as a machine identifier.",
+      "change": "If the artist's name of record differs from the handle, use the name of record, with its spacing and diacritics.",
+      "acceptance_check": "The credit matches the artist's name of record.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "The Acquisitions intro names the three completed acquisitions and states Keys and Gates' status with a count (\"its sixteen selected photographs await minting and accession\").",
+    "Artwork captions give title, artist, collaborator and project (for example \"Vera Molnár, in collaboration with Martin Grasser · Themes and Variations\").",
+    "Each acquisition has a plain status line (\"Accessioned into the permanent Collection\"; \"Selected through an acquisition program; unminted\").",
+    "The Seymour photograph has a full credit line (\"David Seymour, Negev, 1952. © David Seymour/Magnum Photos 2022.\").",
+    "The Conflict at Its Edges description gives a count and a date range (five photographs, 1952 to 2016) and names its source curations.",
+    "The gift card gives specific facts: one unique output from a fixed edition of 500, recorded as both a visual composition and a live generative program.",
+    "Governance language is hedged (\"moving progressively on-chain\") rather than overclaiming.",
+    "The hero lead sentence is plain and its primary action (\"Explore the collection\") is concrete.",
+    "The All works, Artists and Projects link descriptions each name the object and the action.",
+    "The Public record inspection links (Museum Safe, Decisions, Public repository) and the Source and contribute footer."
+  ]
+}

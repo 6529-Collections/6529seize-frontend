@@ -48,7 +48,7 @@ standard and `ops/standards/frontend-design-ui-ux.md` first.
      coherent batch, commit, set `candidate.commit` in `run.json` to the new
      head, then repeat from step 2. When `budget.recovery_batch` is
      true, target the single most promising required finding.
-   - `accepted`: stop. Report the label `judge-accepted (uncalibrated)`.
+   - `accepted`: stop. Report the label `judge-accepted (partially calibrated)`.
    - `threshold_not_reached`: stop. Report the `best` round and its unresolved
      findings.
    - If a prerequisite (fixture, environment, auth) is genuinely unavailable,

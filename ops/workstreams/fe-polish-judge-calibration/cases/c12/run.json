@@ -1,0 +1,64 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "profile": "museum",
+  "run_id": "calibration-c12",
+  "candidate": {
+    "commit": "museum-pre-art-first-production",
+    "build": "production"
+  },
+  "scope": {
+    "routes": [
+      "/museum/network",
+      "/museum/network/gifts/[accessionId]",
+      "/museum/network/objects/[objectId]",
+      "/museum/network/programs/[programId]"
+    ],
+    "audience": "Visitors to the 6529 Network Museum",
+    "primary_task": "Experience the Museum's art and understand what it holds and why",
+    "states": ["default"],
+    "viewports": ["1440x1000", "820x1000", "390x844"],
+    "locales": ["en-US"],
+    "cells": [
+      {
+        "route": "/museum/network",
+        "state": "default",
+        "viewport": "1440x1000",
+        "locale": "en-US"
+      },
+      {
+        "route": "/museum/network",
+        "state": "default",
+        "viewport": "390x844",
+        "locale": "en-US"
+      },
+      {
+        "route": "/museum/network/gifts/[accessionId]",
+        "state": "default",
+        "viewport": "1440x1000",
+        "locale": "en-US"
+      },
+      {
+        "route": "/museum/network/objects/[objectId]",
+        "state": "default",
+        "viewport": "1440x1000",
+        "locale": "en-US"
+      },
+      {
+        "route": "/museum/network/programs/[programId]",
+        "state": "default",
+        "viewport": "1440x1000",
+        "locale": "en-US"
+      }
+    ]
+  },
+  "not_applicable": {
+    "J08": "Screenshot-only calibration; interactions were not exercised",
+    "J11": "Screenshot-only calibration; no performance evidence was captured",
+    "J12": "Calibration evidence is en-US only",
+    "J09": "Screenshot-only calibration; only the populated state was captured",
+    "J13": "No wallet or chain interaction on this surface"
+  },
+  "budget": {
+    "repair_batches": 6
+  }
+}
