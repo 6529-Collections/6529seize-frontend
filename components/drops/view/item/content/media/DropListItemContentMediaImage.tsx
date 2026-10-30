@@ -404,10 +404,9 @@ function DropListItemContentMediaImageContent({
 
   const localSource = useLocalImagePreviewSource(src);
   const shouldLoadImage = loadStrategy === "eager" || inView;
-  const unavailable =
-    (!localSource &&
-      getDropImagePreviewSources(src, imageScale).length === 0) ||
-    errorCount > maxRetries;
+  const previewSource =
+    localSource ?? getDropImagePreviewSources(src, imageScale)[0];
+  const unavailable = !previewSource || errorCount > maxRetries;
   const {
     continuousGifLoading,
     showLoading: showGifLoading,
