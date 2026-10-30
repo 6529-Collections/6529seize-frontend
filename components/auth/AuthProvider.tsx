@@ -42,7 +42,7 @@ import {
   ReactQueryWrapperContext,
 } from "../react-query-wrapper/ReactQueryWrapper";
 import { AuthSignModal } from "./AuthSignModal";
-import { createAuthRequestActions } from "./authActions";
+import { useAuthRequestActions } from "./useAuthRequestActions";
 import { AuthContext } from "./authContext";
 import {
   getAuthSessionRole,
@@ -82,7 +82,6 @@ import {
 import { useSeizeConnectContext } from "./SeizeConnectContext";
 import { useAuthChainGuard } from "./useAuthChainGuard";
 import { useSessionRecovery } from "./useSessionRecovery";
-import { useProfileProxySwitch } from "./useProfileProxySwitch";
 
 export default function Auth({
   children,
@@ -551,7 +550,7 @@ export default function Auth({
   });
 
   const { onActiveProfileProxy, requestAuth, requestSessionUpgrade } =
-    createAuthRequestActions({
+    useAuthRequestActions({
       activeProfileProxy,
       address,
       authRolloutSettings,
@@ -561,7 +560,6 @@ export default function Auth({
       invalidateAll,
       isAddressAuthorized,
       isActiveChainSupported: authChainGuard.isLatestChainSupported,
-      seizeConnect,
       seizeDisconnect,
       resetSessionUpgradeExpiryDedupe,
       setActiveProfileProxy,
@@ -574,15 +572,6 @@ export default function Auth({
       signMessage,
       signModalReason,
     });
-
-  const switchActiveProfileProxy = useProfileProxySwitch({
-    activeProxyId: activeProfileProxy?.id ?? null,
-    canSignActiveWallet,
-    contextFingerprint: `${address?.toLowerCase() ?? ""}:${activeProfileProxy?.id ?? ""}`,
-    enableWalletAuthentication,
-    onSwitch: onActiveProfileProxy,
-    setToast,
-  });
 
   const navigateAfterProfileSwitchForRoute = useCallback(() => {
     navigateAfterProfileSwitch({ pathname, queryClient, router });
@@ -767,7 +756,7 @@ export default function Auth({
       requestSessionUpgrade,
       ensureActiveSessionV2WebSession:
         ensureActiveSessionV2WebSessionForActiveWallet,
-      setActiveProfileProxy: switchActiveProfileProxy,
+      setActiveProfileProxy: onActiveProfileProxy,
     }),
     [
       activeProfileProxy,
@@ -776,7 +765,7 @@ export default function Auth({
       isAddressAuthorized,
       isFetchingConnectedProfile,
       isDirectProfileSession,
-      switchActiveProfileProxy,
+      onActiveProfileProxy,
       receivedProfileProxies,
       requestAuth,
       requestSessionUpgrade,
