@@ -14,7 +14,7 @@ import { useDropReactionView } from "@/hooks/drops/useDropReactionView";
 import { COMMUNITY_CURATIONS_DROPS_QUERY_KEY } from "@/hooks/useCommunityCurationsDrops";
 import {
   isReactionMutationLatest,
-  recordReactionTimeoutReconciled,
+  recordReactionFailureReconciled,
   type beginReactionMutation,
 } from "@/utils/monitoring/dropReactionMonitoring";
 import type { InfiniteData, QueryClient } from "@tanstack/react-query";
@@ -143,7 +143,7 @@ export const useDropReactionRecovery = ({
     [applyCanonicalDrop, dropId]
   );
 
-  const reconcileTimeout = useCallback(
+  const reconcileRequestFailure = useCallback(
     async (
       mutation: ReactionMutation,
       intendedReaction: string | null,
@@ -155,7 +155,7 @@ export const useDropReactionRecovery = ({
         isCurrent,
         isConfirmed: () => typeof mutation.realtimeReconciledAt === "number",
       });
-      recordReactionTimeoutReconciled(mutation, result.outcome);
+      recordReactionFailureReconciled(mutation, result.outcome);
       if (isCurrent() && result.drop) {
         applyCanonicalDrop(result.drop);
       }
@@ -168,6 +168,6 @@ export const useDropReactionRecovery = ({
     captureOwner,
     isCurrentMutation,
     refreshAfterFailure,
-    reconcileTimeout,
+    reconcileRequestFailure,
   };
 };

@@ -3,6 +3,11 @@ import { render, screen } from "@testing-library/react";
 import MessagesLoading from "@/app/messages/loading";
 import WavesLoading from "@/app/waves/loading";
 
+jest.mock("next/navigation", () => ({
+  usePathname: () => "/waves",
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 describe("stream route loading fallbacks", () => {
   const expectedMinHeight =
     "calc(100dvh - var(--stream-route-loading-header-reserve, 0px) - var(--stream-route-loading-bottom-reserve, 0px))";

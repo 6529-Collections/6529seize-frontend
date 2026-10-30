@@ -229,6 +229,6 @@ export const AppToastContainer = (
     closeButton={<AppToastCloseButton />}
     limit={props.limit ?? 5}
     newestOnTop={props.newestOnTop ?? true}
-    style={{ zIndex: 100000, ...props.style }}
+    style={{ zIndex: 1000010, ...props.style }}
   />
 );

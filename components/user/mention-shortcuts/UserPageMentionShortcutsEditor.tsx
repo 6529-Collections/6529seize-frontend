@@ -20,10 +20,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
-import {
-  MagnifyingGlassIcon,
-  PlusIcon,
-} from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useRef, type ReactNode, type RefObject } from "react";
 
 const MAX_MEMBERS = 25;
@@ -311,7 +308,7 @@ export function AliasEditor({
                 }
                 maxLength={15}
                 autoComplete="off"
-                className="tw-min-h-11 tw-w-full tw-border-0 tw-bg-transparent tw-px-1.5 tw-py-2.5 tw-text-base/5 tw-font-normal tw-text-iron-100 md:desktop-hover:tw-text-sm/5 tw-outline-none placeholder:tw-text-iron-600"
+                className="tw-min-h-11 tw-w-full tw-border-0 tw-bg-transparent tw-px-1.5 tw-py-2.5 tw-text-base/5 tw-font-normal tw-text-iron-100 tw-outline-none placeholder:tw-text-iron-600 md:desktop-hover:tw-text-sm/5"
               />
             </div>
           </label>
@@ -382,7 +379,7 @@ export function AliasEditor({
                 )}
                 disabled={members.length >= MAX_MEMBERS}
                 autoComplete="off"
-                className="tw-min-h-11 tw-w-full tw-border-0 tw-bg-transparent tw-px-2 tw-py-2.5 tw-text-base/5 tw-font-normal tw-text-iron-100 md:desktop-hover:tw-text-sm/5 tw-outline-none placeholder:tw-text-iron-600 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+                className="tw-min-h-11 tw-w-full tw-border-0 tw-bg-transparent tw-px-2 tw-py-2.5 tw-text-base/5 tw-font-normal tw-text-iron-100 tw-outline-none placeholder:tw-text-iron-600 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 md:desktop-hover:tw-text-sm/5"
               />
             </div>
 
@@ -406,14 +403,16 @@ export function AliasEditor({
       </div>
 
       <div className="tw-mt-5 tw-flex tw-flex-col-reverse tw-gap-2 sm:tw-flex-row sm:tw-justify-end">
-        <Button
-          variant="secondary"
-          size="sm"
-          disabled={isSaving}
-          onClick={onCancel}
-        >
-          {t(locale, "user.mentionShortcuts.cancel")}
-        </Button>
+        {!isMobileSheet && (
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={isSaving}
+            onClick={onCancel}
+          >
+            {t(locale, "user.mentionShortcuts.cancel")}
+          </Button>
+        )}
         <Button
           variant="action"
           size="sm"

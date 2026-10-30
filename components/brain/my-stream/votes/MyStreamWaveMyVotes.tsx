@@ -194,7 +194,12 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
                 <MyStreamWaveMyVote
                   drop={drop}
                   onDropClick={onDropClick}
-                  onExplainVote={handleExplainVote}
+                  onExplainVote={
+                    drop.wave.authenticated_user_eligible_to_chat === true &&
+                    drop.parts.at(0)?.part_id !== undefined
+                      ? handleExplainVote
+                      : undefined
+                  }
                   isChecked={
                     !isVotingControlsLocked && checkedDrops.has(drop.id)
                   }
@@ -204,7 +209,10 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
                   onToggleCheck={handleToggleCheck}
                 />
                 {voteRationaleReply?.drop.id === drop.id && (
-                  <div className="tw-mx-2 tw-mb-6 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/30 tw-bg-iron-950 tw-px-4 tw-py-3 sm:tw-mx-4">
+                  <div className="tw-mx-2 tw-mb-6 tw-mt-4 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/30 tw-bg-iron-950 tw-px-4 tw-py-3 sm:tw-mx-4">
+                    <p className="tw-mb-3 tw-mt-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+                      {t(locale, "waves.voteRationale.savedDescription")}
+                    </p>
                     <PrivilegedDropCreator
                       activeDrop={{
                         action: ActiveDropAction.REPLY,

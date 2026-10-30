@@ -1,16 +1,10 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { HTMLAttributes, TouchEvent } from "react";
 
 const DISMISS_DRAG_DISTANCE_PX = 44;
 const DISMISS_DRAG_FLICK_DISTANCE_PX = 18;
 const DISMISS_DRAG_FLICK_VELOCITY_PX_MS = 0.42;
 const DISMISS_DRAG_SETTLE_MS = 150;
-const DRAG_START_REGION_PX = 112;
 const MAX_DRAG_OFFSET_PX = 260;
 const TABLET_MODAL_DESKTOP_QUERY = "(min-width: 768px)";
 
@@ -21,24 +15,11 @@ type DragTouchHandlers = Pick<
 
 type MobileDialogDragOptions = {
   readonly dismissible: boolean;
-  readonly showDragHandle?: boolean | undefined;
   readonly enableDragToClose?: boolean | undefined;
   readonly tabletModal?: boolean | undefined;
   readonly onClose: () => void;
   readonly onAfterLeave?: (() => void) | undefined;
 };
-
-function startsInDragRegion(event: TouchEvent<HTMLDivElement>): boolean {
-  const touch = event.touches[0];
-  if (!touch) {
-    return false;
-  }
-
-  return (
-    touch.clientY - event.currentTarget.getBoundingClientRect().top <=
-    DRAG_START_REGION_PX
-  );
-}
 
 function shouldDismissDrag(releasedOffset: number, startedAt: number): boolean {
   const elapsed = Math.max(performance.now() - startedAt, 1);
@@ -130,13 +111,13 @@ function useDragOffsetState() {
 
 export function useMobileDialogDrag({
   dismissible,
-  showDragHandle,
   enableDragToClose,
   tabletModal,
   onClose,
   onAfterLeave,
 }: MobileDialogDragOptions) {
   const [isDragging, setIsDragging] = useState(false);
+  const dragStartXRef = useRef(0);
   const dragStartYRef = useRef<number | null>(null);
   const dragStartedAtRef = useRef(0);
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -148,13 +129,7 @@ export function useMobileDialogDrag({
     setImmediateDragOffset,
   } = useDragOffsetState();
 
-  const handleClose = useCallback(() => {
-    if (dismissible) {
-      onClose();
-    }
-  }, [dismissible, onClose]);
-
-  const canDragToClose = dismissible && (enableDragToClose ?? !!showDragHandle);
+  const canDragToClose = dismissible && (enableDragToClose ?? true);
 
   const cancelScheduledDismiss = useCallback(() => {
     if (dismissTimerRef.current === null) {
@@ -164,6 +139,13 @@ export function useMobileDialogDrag({
     globalThis.clearTimeout(dismissTimerRef.current);
     dismissTimerRef.current = null;
   }, []);
+
+  const handleClose = useCallback(() => {
+    if (dismissible) {
+      cancelScheduledDismiss();
+      onClose();
+    }
+  }, [cancelScheduledDismiss, dismissible, onClose]);
 
   const resetDrag = useCallback(() => {
     cancelScheduledDragFrame();
@@ -188,22 +170,32 @@ export function useMobileDialogDrag({
 
   const handleDragStart = useCallback(
     (event: TouchEvent<HTMLDivElement>) => {
+      if (dismissTimerRef.current !== null) return;
+      if (event.touches.length !== 1) {
+        resetDrag();
+        return;
+      }
       const touch = event.touches[0];
       if (
         !touch ||
         !canDragToClose ||
         isCenteredTabletModal(tabletModal) ||
-        !startsInDragRegion(event)
+        !(event.target instanceof Element) ||
+        !event.currentTarget.contains(event.target) ||
+        event.target.closest(
+          'a, button, input, select, textarea, [contenteditable], [role="button"], [role="link"], [role="menuitem"], [role="tab"], [role="switch"], [tabindex]:not([tabindex="-1"])'
+        )
       ) {
         return;
       }
 
+      dragStartXRef.current = touch.clientX;
       dragStartYRef.current = touch.clientY;
       dragStartedAtRef.current = performance.now();
       setIsDragging(true);
       setClampedDragOffset(0);
     },
-    [canDragToClose, setClampedDragOffset, tabletModal]
+    [canDragToClose, resetDrag, setClampedDragOffset, tabletModal]
   );
 
   const handleDragMove = useCallback(
@@ -214,18 +206,24 @@ export function useMobileDialogDrag({
       }
 
       const nextOffset = touch.clientY - dragStartYRef.current;
-      if (nextOffset <= 0) {
-        setClampedDragOffset(0);
+      const horizontalOffset = Math.abs(touch.clientX - dragStartXRef.current);
+      if (
+        event.touches.length !== 1 ||
+        horizontalOffset > Math.abs(nextOffset)
+      ) {
+        resetDrag();
         return;
       }
 
-      event.preventDefault();
+      // The header owns vertical touch gestures through touch-action. Content
+      // below it keeps normal scrolling, including when already scrolled down.
       setClampedDragOffset(nextOffset);
     },
-    [canDragToClose, setClampedDragOffset]
+    [canDragToClose, resetDrag, setClampedDragOffset]
   );
 
   const handleDragEnd = useCallback(() => {
+    if (dismissTimerRef.current !== null) return;
     if (!canDragToClose || dragStartYRef.current === null) {
       resetDrag();
       return;
@@ -263,13 +261,19 @@ export function useMobileDialogDrag({
     onAfterLeave?.();
   }, [onAfterLeave, resetDrag]);
 
-  let dragTouchHandlers: DragTouchHandlers = { onTouchCancel: resetDrag };
+  const handleDragCancel = useCallback(() => {
+    if (dismissTimerRef.current === null) resetDrag();
+  }, [resetDrag]);
+
+  let dragTouchHandlers: DragTouchHandlers = {
+    onTouchCancel: handleDragCancel,
+  };
   if (canDragToClose) {
     dragTouchHandlers = {
       onTouchStart: handleDragStart,
       onTouchMove: handleDragMove,
       onTouchEnd: handleDragEnd,
-      onTouchCancel: resetDrag,
+      onTouchCancel: handleDragCancel,
     };
   }
 

@@ -1,10 +1,10 @@
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTooltip";
-import { WaveInformationNotificationsContext } from "@/components/brain/mobile/WaveInformationNotificationsContext";
+import { useWaveInformationPanel } from "@/components/brain/mobile/WaveInformationPanelContext";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { AtSymbolIcon, BellIcon, CheckIcon } from "@heroicons/react/24/outline";
 import type { ComponentProps, ComponentType, SVGProps } from "react";
-import { Fragment, useContext, useEffect, useId, useRef } from "react";
+import { Fragment, useId } from "react";
 import { createPortal } from "react-dom";
 import { waveNotificationSettingsMessage } from "./waveNotificationSettings.messages";
 import type { WaveNotificationSettingsState } from "./useWaveNotificationSettings";
@@ -135,42 +135,30 @@ export default function WaveNotificationPreferenceButtons({
   settings,
   compact = false,
 }: WaveNotificationPreferenceButtonsProps) {
-  const sheet = useContext(WaveInformationNotificationsContext);
-  const mobile = sheet !== null;
+  const title = waveNotificationSettingsMessage(
+    "waves.notificationSettings.trigger.tooltip"
+  );
+  const sheet = useWaveInformationPanel(title);
+  const mobile = sheet.isInSheet;
   const instanceId = useId();
-  const buttonRef = useRef<HTMLButtonElement>(null);
   const tooltipId = `wave-notification-actions-${waveId}-${instanceId}`;
   const triggerId = `${tooltipId}-trigger`;
   const menuId = `${tooltipId}-menu`;
-  const wasOpen = useRef(false);
-  const isOpen = sheet?.isOpen ?? false;
-  useEffect(() => {
-    const restoreFocus = wasOpen.current && !isOpen;
-    wasOpen.current = isOpen;
-    if (!restoreFocus) return;
-    const frame = globalThis.requestAnimationFrame(() =>
-      buttonRef.current?.focus({ preventScroll: true })
-    );
-    return () => globalThis.cancelAnimationFrame(frame);
-  }, [isOpen]);
+  const isOpen = sheet.isOpen;
   const triggerActive =
     settings.broadcastMentionsEnabled || settings.allDropsEnabled;
   const triggerSizeClass = compact
     ? "tw-size-9 tw-p-0"
     : "tw-h-10 tw-w-full tw-px-2.5 tw-py-2 lg:tw-h-9";
-  const title = waveNotificationSettingsMessage(
-    "waves.notificationSettings.trigger.tooltip"
-  );
   const trigger = (
     <button
       id={triggerId}
-      ref={buttonRef}
       type="button"
       disabled={settings.loading && !settings.loadingTarget}
       aria-disabled={settings.loading}
       onClick={(event) => {
         if (settings.loading) event.preventDefault();
-        else sheet?.open();
+        else if (mobile) sheet.open(event.currentTarget);
       }}
       onKeyDown={(event) => {
         if (
@@ -252,7 +240,7 @@ export default function WaveNotificationPreferenceButtons({
           {trigger}
           {sheet.isOpen &&
             sheet.container &&
-            createPortal(choices(sheet.back), sheet.container)}
+            createPortal(choices(sheet.close), sheet.container)}
         </>
       ) : (
         <Menu>

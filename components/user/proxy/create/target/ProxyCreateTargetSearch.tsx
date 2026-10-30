@@ -9,6 +9,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { AuthContext } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 const MIN_SEARCH_LENGTH = 3;
 function classNames(...classes: unknown[]) {
@@ -85,7 +86,10 @@ export default function ProxyCreateTargetSearch({
           <div className="tw-flex tw-items-center tw-gap-x-3">
             {profileProxy.granted_to.pfp ? (
               <img
-                src={profileProxy.granted_to.pfp}
+                src={getScaledImageUri(
+                  profileProxy.granted_to.pfp,
+                  ImageScale.W_AUTO_H_50
+                )}
                 alt="Profile picture"
                 className="tw-h-6 tw-w-6 tw-flex-none tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
               />
@@ -162,7 +166,10 @@ export default function ProxyCreateTargetSearch({
                     <div className="tw-flex tw-items-center">
                       {profile.pfp ? (
                         <img
-                          src={profile.pfp}
+                          src={getScaledImageUri(
+                            profile.pfp,
+                            ImageScale.W_AUTO_H_50
+                          )}
                           alt="Profile picture"
                           className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-full"
                         />

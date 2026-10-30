@@ -9,6 +9,11 @@ import { expectUrlState } from "../support/urlState";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import { expectCompetitionScroll } from "../support/competitionScroll";
 import {
+  expectNativeLeaderboardArtwork,
+  expectNativeLeaderboardReady,
+  observeNativeLeaderboard,
+} from "../support/nativeLeaderboard";
+import {
   monitorRememberedLeaderboard,
   retainDesktopWaveSidebar,
 } from "../support/waveNavigationContinuity";
@@ -722,11 +727,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
           { timeout: 30000 }
         );
         await expect(leaderboardContent).toBeVisible({ timeout: 30000 });
-        await expect(
-          page
-            .getByRole("list", { name: "Leaderboard drops", exact: true })
-            .or(page.getByText("No drops to show", { exact: true }))
-        ).toBeVisible({ timeout: 30000 });
+        await expectNativeLeaderboardReady(page);
         await expect(chat).toHaveCount(0);
         await expect(
           page.getByText(
@@ -859,82 +860,53 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     ).toBe(true);
     const settings = await settingsResult.json();
     expect(settings.memes_wave_id).toMatch(/^[0-9a-f-]{36}$/i);
-    await gotoReady(page, `/waves/${settings.memes_wave_id}`);
-    const navigation = page.getByRole("navigation", { name: "Wave sections" });
-    await expect(
-      navigation.getByRole("button", { name: /^(Chat|Leaderboard|Winners)$/ })
-    ).toHaveText(["Chat", "Leaderboard", "Winners"], {
-      timeout: RESPONSE_TIMEOUT_MS,
-    });
-    await testInfo.attach("main-stage-chat-first-app-tabs", {
-      body: await page.screenshot(),
-      contentType: "image/png",
-    });
-    const [response] = await Promise.all([
-      page.waitForResponse(
-        (candidate) => {
-          const url = new URL(candidate.url());
-          return (
-            candidate.request().method() === "GET" &&
-            url.pathname ===
-              `/api/v2/waves/${settings.memes_wave_id}/leaderboard` &&
-            url.searchParams.get("sort") === "RANK"
-          );
-        },
-        { timeout: RESPONSE_TIMEOUT_MS }
-      ),
-      navigation
+    const observed = observeNativeLeaderboard(page, settings.memes_wave_id);
+    try {
+      await gotoReady(page, `/waves/${settings.memes_wave_id}`);
+      const navigation = page.getByRole("navigation", {
+        name: "Wave sections",
+      });
+      await expect(
+        navigation.getByRole("button", { name: /^(Chat|Leaderboard|Winners)$/ })
+      ).toHaveText(["Chat", "Leaderboard", "Winners"], {
+        timeout: RESPONSE_TIMEOUT_MS,
+      });
+      await testInfo.attach("main-stage-chat-first-app-tabs", {
+        body: await page.screenshot(),
+        contentType: "image/png",
+      });
+      await navigation
         .getByRole("button", { name: "Leaderboard", exact: true })
-        .click(),
-    ]);
-    expect(
-      response.ok(),
-      `Main Stage leaderboard returned HTTP ${response.status()}`
-    ).toBe(true);
-    const data = await response.json();
-    expect(data.wave.id).toBe(settings.memes_wave_id);
-    await testInfo.attach("main-stage-leaderboard-counts", {
-      body: JSON.stringify({
-        waveId: settings.memes_wave_id,
-        route: new URL(page.url()).pathname,
-        sort: "RANK",
-        count: data.count,
-        returned: data.drops.length,
-        withMedia: data.drops.filter((drop: { media?: unknown[] }) =>
-          Boolean(drop.media?.length)
-        ).length,
-      }),
-      contentType: "application/json",
-    });
-    expect(data.count).toBeGreaterThanOrEqual(0);
-    const artwork = data.drops.find((drop: { media?: unknown[] }) =>
-      Boolean(drop.media?.length)
-    );
-    await page.getByRole("tab", { name: "Grid view", exact: true }).click();
-    if (!artwork) {
-      await expect(
-        page.getByText("No drops to show", { exact: true })
-      ).toBeVisible();
-      await expect(
-        page.getByRole("list", { name: "Leaderboard drops" })
-      ).toHaveCount(0);
-      return;
+        .click();
+      const { competition, data } = await observed.originalLeaderboard();
+      await testInfo.attach("main-stage-leaderboard-counts", {
+        body: JSON.stringify({
+          waveId: settings.memes_wave_id,
+          competitionId: competition.id,
+          route: new URL(page.url()).pathname,
+          sort: "rating",
+          returned: data.data.length,
+          hasMore: data.has_more,
+          entries: data.data.map((entry) => ({
+            entryId: entry.entry_id,
+            dropId: entry.drop_id,
+          })),
+        }),
+        contentType: "application/json",
+      });
+      await expectNativeLeaderboardArtwork(
+        page,
+        competition,
+        data,
+        observed.reads
+      );
+      await testInfo.attach("main-stage-app-leaderboard", {
+        body: await page.screenshot(),
+        contentType: "image/png",
+      });
+    } finally {
+      observed.dispose();
     }
-    await expect(
-      page.getByRole("list", { name: "Leaderboard drops" })
-    ).toBeVisible();
-    await expect(
-      page
-        .getByRole("list", { name: "Leaderboard drops" })
-        .locator(`[data-leaderboard-drop-id="${artwork.id}"]`)
-    ).toBeVisible();
-    await expect(
-      page.getByText("No drops to show", { exact: true })
-    ).toHaveCount(0);
-    await testInfo.attach("main-stage-app-leaderboard", {
-      body: await page.screenshot(),
-      contentType: "image/png",
-    });
   });
 
   test("preserves Main Stage's dedicated tabs, timeline, and winner cards", async ({
@@ -1384,14 +1356,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     ).toBeVisible();
     await aboutPanel.getByRole("tab", { name: "About", exact: true }).click();
     await expect(page.getByText("Created by", { exact: true })).toHaveCount(0);
-    const creationDate = page
-      .getByRole("complementary", { name: "Wave details" })
-      .locator("time[datetime]")
-      .or(
-        page
-          .getByRole("dialog", { name: "Wave details" })
-          .locator("time[datetime]")
-      );
+    // Pinned drops can render their own dates inside link previews. Select the
+    // wave's creation date explicitly instead of every date in the panel.
+    const creationDate = aboutPanel.getByTestId("wave-creation-date");
     await expect(creationDate).toBeVisible();
     await expect(creationDate).toHaveAttribute(
       "datetime",
@@ -1480,12 +1447,82 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         test.info(),
         "profile-activity-loading"
       );
+
+      // Releasing the held request starts the network round trip; it does not
+      // mean the activity data has arrived. Keep network and render readiness
+      // separate, and fail explicitly if the activity endpoint returns an error.
+      const activityResponse = page.waitForResponse(
+        (response) => {
+          const url = new URL(response.url());
+          return (
+            response.request().method() === "GET" &&
+            url.pathname === "/api/profile-logs" &&
+            url.searchParams.get("profile") === PROFILE_HANDLE
+          );
+        },
+        { timeout: RESPONSE_TIMEOUT_MS }
+      );
+      releaseLogs();
+      const response = await activityResponse;
+      expect(
+        response.ok(),
+        `Profile activity request returned HTTP ${response.status()}`
+      ).toBe(true);
+      await expect(
+        response.finished(),
+        "Profile activity response must complete successfully"
+      ).resolves.toBeNull();
+      await expect(
+        page.getByRole("status", { name: "Loading activity log" })
+      ).toHaveCount(0);
     } finally {
       releaseLogs();
     }
-    await expect(
-      page.getByRole("status", { name: "Loading activity log" })
-    ).toHaveCount(0);
+  });
+
+  test("waits for identity guidance hydration before accepting activation", async ({
+    page,
+  }) => {
+    // Desktop-only SSR check: mobile requires hydrated tab navigation to reveal
+    // this panel, so it cannot expose the button while scripts are held. The
+    // existing profile-shell test still covers mobile guidance activation.
+    test.skip(
+      (page.viewportSize()?.width ?? 1280) < 1024,
+      "The mobile statements panel requires hydrated tab navigation."
+    );
+    let releaseScripts: () => void = () => undefined;
+    const scriptsReady = new Promise<void>((resolve) => {
+      releaseScripts = resolve;
+    });
+    await page.route("**/_next/static/chunks/**", async (route) => {
+      if (new URL(route.request().url()).pathname.endsWith(".js")) {
+        await scriptsReady;
+      }
+      await route.continue();
+    });
+    const guidanceButton = page.getByRole("button", {
+      name: "About identity statements",
+      exact: true,
+    });
+    const guidance = page.getByRole("tooltip", {
+      name: /All statements are optional\./,
+    });
+    try {
+      // Commit waits for the document response, allowing inspection of server
+      // markup while client scripts remain held at the browser boundary.
+      await page.goto(`/${PROFILE_HANDLE}`, { waitUntil: "commit" });
+      await expect(guidanceButton).toBeVisible();
+      await expect(guidanceButton).toBeDisabled();
+    } finally {
+      releaseScripts();
+    }
+    await expect(guidanceButton).toBeEnabled();
+    await guidanceButton.click();
+    await expect(guidanceButton).toHaveAttribute("aria-expanded", "true");
+    await expect(guidance).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(guidanceButton).toHaveAttribute("aria-expanded", "false");
+    await expect(guidance).toHaveCount(0);
   });
 
   test("renders the stable public profile shell read-only", async ({
@@ -1506,7 +1543,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       // Its numeric count replaces the server placeholder only after this
       // streamed section hydrates and its statement query resolves.
       await expect(statements).toHaveAccessibleName(
-        /^\d[\d,]* ID Statements$/,
+        /^ID Statements \d[\d,]*$/,
         { timeout: RESPONSE_TIMEOUT_MS }
       );
       await statements.click();
@@ -1557,9 +1594,13 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(
       page.getByText("Consolidated Addresses", { exact: true })
     ).toHaveCount(0);
-    await page
-      .getByRole("button", { name: "About identity statements", exact: true })
-      .click();
+    const guidanceButton = page.getByRole("button", {
+      name: "About identity statements",
+      exact: true,
+    });
+    await expect(guidanceButton).toBeEnabled();
+    await guidanceButton.scrollIntoViewIfNeeded();
+    await guidanceButton.click();
     await expect(
       page.getByRole("button", {
         name: "About identity statements",
@@ -1569,6 +1610,22 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     // A scroll-into-view event can arrive after the opening click. It must
     // not dismiss guidance when the trigger has already reached its position.
     await page.evaluate(() => document.dispatchEvent(new Event("scroll")));
+    // Production also adjusted page scroll by 3px after guidance opened. A
+    // programmatic adjustment must reposition the popup instead of closing it.
+    const adjusted = await page.evaluate(async () => {
+      const scroller = document.scrollingElement;
+      if (!scroller) return false;
+      const before = scroller.scrollTop;
+      scroller.scrollBy({
+        top: before >= 3 ? -3 : 3,
+        behavior: "instant",
+      });
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+      );
+      return scroller.scrollTop !== before;
+    });
+    expect(adjusted).toBe(true);
     await page.mouse.move(0, 0);
     await expect(
       page.getByRole("button", {
@@ -1576,7 +1633,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         exact: true,
       })
     ).toHaveAttribute("aria-expanded", "true");
-    const guidance = page.getByRole("tooltip");
+    // Statement-row tooltips can still be closing while guidance is open.
+    // Select its existing accessible name instead of every tooltip on the page.
+    const guidance = page.getByRole("tooltip", {
+      name: /All statements are optional\./,
+    });
     await expect(guidance).toBeVisible();
     const guidanceBox = await guidance.boundingBox();
     expect(guidanceBox).not.toBeNull();

@@ -12,7 +12,7 @@ export function useCompetitionSignature() {
   return useCompetitionSignatureFor(competition);
 }
 
-export function useCompetitionSignatureFor(competition: ApiCompetition) {
+export function useCompetitionSignatureFor(competition: ApiCompetition | null) {
   const { signMessageAsync } = useSignMessage();
   const { connectedProfile, activeProfileProxy } = useAuth();
   const { address } = useSeizeConnectContext();
@@ -22,6 +22,8 @@ export function useCompetitionSignatureFor(competition: ApiCompetition) {
     entryId: string | null,
     dropId: string | null
   ): Promise<ApiCompetitionSignature> => {
+    if (!competition)
+      throw new Error("Competition signature scope is required");
     if (!connectedProfile?.id || !address)
       throw new Error("A connected wallet is required");
     const message = buildCompetitionSignatureMessage({

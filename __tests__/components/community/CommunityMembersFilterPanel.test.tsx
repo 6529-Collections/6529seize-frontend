@@ -1,4 +1,5 @@
-import type { ComponentProps } from "react";
+import { useState, type ComponentProps } from "react";
+import type { GroupCriteriaView } from "@/components/groups/assignment/GroupCriteriaEditor";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CommunityMembersFilterPanel from "@/components/community/CommunityMembersFilterPanel";
@@ -39,13 +40,36 @@ const createdGroup = {
   name: "Network filter",
 } as ApiGroupFull;
 
+function PanelHarness(
+  props: Omit<
+    ComponentProps<typeof CommunityMembersFilterPanel>,
+    "view" | "onViewChange"
+  >
+) {
+  const [view, setView] = useState<GroupCriteriaView | null>(
+    props.mobileNavigation ? null : "identities"
+  );
+  return (
+    <>
+      {props.mobileNavigation && view !== null && (
+        <button onClick={() => setView(null)}>Back</button>
+      )}
+      <CommunityMembersFilterPanel
+        {...props}
+        view={view}
+        onViewChange={setView}
+      />
+    </>
+  );
+}
+
 function renderPanel(
   overrides: Partial<ComponentProps<typeof CommunityMembersFilterPanel>> = {}
 ) {
   const onCreateGroup = jest.fn().mockResolvedValue(createdGroup);
   const onChange = jest.fn();
   render(
-    <CommunityMembersFilterPanel
+    <PanelHarness
       suggestedName="Network filter"
       defaultLabel="All Network members"
       selectedGroup={null}
@@ -53,71 +77,104 @@ function renderPanel(
       collapseOnClickAway={false}
       onCreateGroup={onCreateGroup}
       onChange={onChange}
+      mobileNavigation
       {...overrides}
     />
   );
   return { onCreateGroup, onChange };
 }
 
+async function openCriterion(
+  user: ReturnType<typeof userEvent.setup>,
+  name: string | RegExp
+) {
+  const back = screen.queryByRole("button", { name: "Back" });
+  if (back) await user.click(back);
+  await user.click(screen.getByRole("button", { name }));
+}
+
 beforeAll(() => {
   HTMLElement.prototype.scrollTo = jest.fn();
+  HTMLElement.prototype.scrollIntoView = jest.fn();
 });
 
-it("starts with Identities first and keeps all eight criteria and readiness guidance", () => {
+it("opens the mobile list with all eight criteria and readiness guidance on demand", async () => {
+  const user = userEvent.setup();
   renderPanel();
+  expect(screen.queryByText("Before editing")).not.toBeInTheDocument();
+  expect(screen.queryByText("After editing")).not.toBeInTheDocument();
+  expect(screen.queryByText("All Network members")).not.toBeInTheDocument();
+  expect(screen.getByText("No criteria selected")).toBeVisible();
+  const choices = screen.getByRole("group", { name: "Filter Network" });
   expect(
-    screen.queryByRole("spinbutton", { name: "Level at least" })
-  ).not.toBeInTheDocument();
-  for (const name of [
+    within(choices)
+      .getAllByRole("button")
+      .filter((button) => button.hasAttribute("data-criterion"))
+      .map((button) => button.textContent)
+  ).toEqual([
+    "Identities",
     "Level",
     "TDH",
     "NIC",
     "Rep",
-    "Identities",
     "Required NFTs",
     "Collection Access",
     "xTDH Grant",
-  ]) {
-    expect(screen.getByRole("button", { name })).toBeInTheDocument();
-  }
-  const choices = screen.getByRole("group", { name: "Filter Network" });
-  expect(choices).toBeVisible();
-  expect(within(choices).getAllByRole("button")[0]).toHaveTextContent(
-    "Identities"
-  );
+  ]);
+  expect(screen.queryByRole("region")).not.toBeInTheDocument();
   expect(
-    screen.queryByRole("button", { name: "All filters" })
+    screen.queryByRole("button", { name: "Back" })
   ).not.toBeInTheDocument();
+  expect(
+    screen.queryByText(
+      "Finish the missing group rules before you create this group."
+    )
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Create and use new group" })
+  ).toBeDisabled();
+  await user.click(screen.getByRole("button", { name: "Not ready yet." }));
+  const guidance = await screen.findByRole("tooltip");
+  expect(guidance).toHaveTextContent("Not ready yet.");
+  expect(guidance).toHaveTextContent(
+    "Finish the missing group rules before you create this group."
+  );
+});
+
+it("keeps the desktop rail and opens Identities beside it", () => {
+  renderPanel({ mobileNavigation: false });
+  expect(screen.getByRole("group", { name: "Filter Network" })).toBeVisible();
+  expect(screen.getByRole("region", { name: "Identities" })).toBeVisible();
   expect(screen.getByRole("button", { name: "Identities" })).toHaveAttribute(
     "aria-current",
     "true"
   );
+});
+
+it("opens one mobile editor and returns focus to its configured row", async () => {
+  const user = userEvent.setup();
+  renderPanel();
+  await openCriterion(user, "Level");
+  const input = screen.getByRole("spinbutton", { name: "Level at least" });
+  await user.type(input, "10");
+  expect(
+    screen.queryByRole("group", { name: "Filter Network" })
+  ).not.toBeInTheDocument();
+  expect(screen.queryByText("Before editing")).not.toBeInTheDocument();
+  await user.click(screen.getByRole("button", { name: "Back" }));
+  expect(
+    screen.getByRole("button", { name: "Level Configured" })
+  ).toHaveFocus();
+  expect(screen.queryByText("Before editing")).not.toBeInTheDocument();
+  await openCriterion(user, "Level Configured");
+  expect(
+    screen.getByRole("spinbutton", { name: "Level at least" })
+  ).toHaveValue(10);
+  await user.clear(screen.getByRole("spinbutton", { name: "Level at least" }));
+  await user.click(screen.getByRole("button", { name: "Back" }));
   expect(screen.getByRole("button", { name: "Level" })).not.toHaveAttribute(
-    "aria-current"
+    "data-configured"
   );
-  expect(
-    screen.queryByRole("button", { name: "More filters" })
-  ).not.toBeInTheDocument();
-  expect(
-    screen.getByText("No identities are explicitly included.")
-  ).toBeInTheDocument();
-  const identityModes = screen.getByRole("tablist", {
-    name: "Identity treatment",
-  });
-  expect(
-    within(identityModes).getByRole("tab", { name: "Included" })
-  ).toHaveAttribute("aria-selected", "true");
-  expect(
-    within(identityModes).getByRole("tab", { name: "Excluded" })
-  ).toHaveAttribute("aria-selected", "false");
-  expect(
-    screen.queryByRole("button", { name: "Edit criteria" })
-  ).not.toBeInTheDocument();
-  expect(
-    screen.getByText(
-      "Finish the missing group rules before you create this group."
-    )
-  ).toBeVisible();
   expect(
     screen.getByRole("button", { name: "Create and use new group" })
   ).toBeDisabled();
@@ -126,12 +183,12 @@ it("starts with Identities first and keeps all eight criteria and readiness guid
 it("preserves common criteria while visiting advanced criteria and submits the existing group payload", async () => {
   const user = userEvent.setup();
   const { onCreateGroup, onChange } = renderPanel();
-  await user.click(screen.getByRole("button", { name: "Level" }));
+  await openCriterion(user, "Level");
   await user.type(
     screen.getByRole("spinbutton", { name: "Level at least" }),
     "10"
   );
-  await user.click(screen.getByRole("button", { name: "TDH" }));
+  await openCriterion(user, "TDH");
   await user.type(
     screen.getByRole("spinbutton", { name: "TDH + xTDH at least" }),
     "100"
@@ -139,30 +196,36 @@ it("preserves common criteria while visiting advanced criteria and submits the e
   expect(
     screen.getByRole("spinbutton", { name: "TDH + xTDH at least" })
   ).toHaveValue(100);
-  await user.click(screen.getByRole("button", { name: "Identities" }));
-  expect(screen.getByRole("button", { name: "Identities" })).toHaveAttribute(
-    "aria-current",
-    "true"
-  );
+  await openCriterion(user, "Identities");
+  expect(screen.getByRole("region", { name: "Identities" })).toBeVisible();
   expect(
-    screen.getByRole("button", { name: /^Level(?: Configured)?$/ })
-  ).not.toHaveAttribute("aria-current");
+    screen.queryByText("No identities are explicitly included.")
+  ).not.toBeInTheDocument();
+  expect(screen.queryByText("No allowlist added.")).not.toBeInTheDocument();
+  expect(screen.queryByText("No CSV file added.")).not.toBeInTheDocument();
   expect(
-    screen.getByText("No identities are explicitly included.")
-  ).toBeInTheDocument();
-  expect(screen.getByText("No allowlist added.")).toBeInTheDocument();
-  expect(screen.getByText("No CSV file added.")).toBeInTheDocument();
+    screen.queryByText("0 unique identities included")
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("heading", { name: "Find an identity to include" })
+  ).toBeVisible();
+  expect(
+    screen.getByRole("textbox", { name: "Find an identity to include" })
+  ).toHaveAttribute("placeholder", "Search identities to include...");
   await user.click(screen.getByRole("tab", { name: "Excluded" }));
   expect(screen.getByRole("tab", { name: "Excluded" })).toHaveAttribute(
     "aria-selected",
     "true"
   );
   expect(
-    screen.getByText("No identities are explicitly excluded.")
-  ).toBeInTheDocument();
-  await user.click(
-    screen.getByRole("button", { name: /^Level(?: Configured)?$/ })
-  );
+    screen.queryByText("No identities are explicitly excluded.")
+  ).not.toBeInTheDocument();
+  expect(screen.queryByText("No allowlist added.")).not.toBeInTheDocument();
+  expect(screen.queryByText("No CSV file added.")).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("0 unique identities excluded")
+  ).not.toBeInTheDocument();
+  await openCriterion(user, /^Level(?: Configured)?$/);
   expect(
     screen.getByRole("spinbutton", { name: "Level at least" })
   ).toHaveValue(10);
@@ -205,12 +268,16 @@ it("prefills a saved group, keeps both previews, and does not change the origina
       "0x0000000000000000000000000000000000000002",
     ],
   });
-  await user.click(
-    screen.getByRole("button", { name: /^Level(?: Configured)?$/ })
-  );
+  for (const label of screen.getAllByText("Original group")) {
+    expect(label).toBeVisible();
+  }
+  expect(screen.queryByText("Before editing")).not.toBeInTheDocument();
+  expect(screen.queryByText("After editing")).not.toBeInTheDocument();
+  await openCriterion(user, /^Level(?: Configured)?$/);
   expect(
     screen.getByRole("spinbutton", { name: "Level at least" })
   ).toHaveValue(20);
+  await user.click(screen.getByRole("button", { name: "Back" }));
   expect(screen.getAllByRole("button", { name: "View members" })).toHaveLength(
     2
   );
@@ -224,6 +291,7 @@ it("prefills a saved group, keeps both previews, and does not change the origina
     screen.getByRole("dialog", { name: "Member preview" })
   ).toHaveTextContent("draft");
   await user.click(screen.getByRole("button", { name: "Close preview" }));
+  await openCriterion(user, /^Level(?: Configured)?$/);
   await user.clear(screen.getByRole("spinbutton", { name: "Level at least" }));
   await user.type(
     screen.getByRole("spinbutton", { name: "Level at least" }),
@@ -252,7 +320,7 @@ it("keeps a failed or cancelled draft for another attempt", async () => {
   const onCreateGroup = jest.fn().mockResolvedValue(null);
   const onChange = jest.fn();
   renderPanel({ onCreateGroup, onChange });
-  await user.click(screen.getByRole("button", { name: "Level" }));
+  await openCriterion(user, "Level");
   await user.type(
     screen.getByRole("spinbutton", { name: "Level at least" }),
     "10"
@@ -281,7 +349,7 @@ it("keeps criteria editable while group creation is pending", async () => {
       })
   );
   renderPanel({ onCreateGroup });
-  await user.click(screen.getByRole("button", { name: "Level" }));
+  await openCriterion(user, "Level");
   await user.type(
     screen.getByRole("spinbutton", { name: "Level at least" }),
     "10"
@@ -293,6 +361,7 @@ it("keeps criteria editable while group creation is pending", async () => {
   expect(
     screen.getByRole("spinbutton", { name: "Level at least" })
   ).toBeEnabled();
+  await user.click(screen.getByRole("button", { name: "Back" }));
   expect(screen.getByRole("button", { name: "TDH" })).toBeEnabled();
   resolveCreate(null);
   await waitFor(() =>
@@ -300,4 +369,51 @@ it("keeps criteria editable while group creation is pending", async () => {
       screen.getByRole("button", { name: "Create and use new group" })
     ).toBeEnabled()
   );
+});
+
+it("shows import results and errors while hiding the empty Included count", async () => {
+  const user = userEvent.setup();
+  renderPanel();
+  await openCriterion(user, "Identities");
+  const upload = screen.getByLabelText(
+    "Choose a CSV file of identities to include"
+  );
+  await user.upload(
+    upload,
+    new File(["invalid wallet"], "empty.csv", { type: "text/csv" })
+  );
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "No valid Ethereum wallet addresses were found."
+  );
+  expect(
+    screen.queryByText("0 unique identities included")
+  ).not.toBeInTheDocument();
+  await user.upload(
+    upload,
+    new File(
+      [
+        "0x1111111111111111111111111111111111111111\n0x2222222222222222222222222222222222222222\n0x1111111111111111111111111111111111111111",
+      ],
+      "included.csv",
+      { type: "text/csv" }
+    )
+  );
+  expect(await screen.findByText("2 identities added")).toBeVisible();
+  expect(
+    screen.queryByText("2 unique identities included")
+  ).not.toBeInTheDocument();
+  expect(screen.getByText("2 explicitly included users")).toBeVisible();
+  expect(upload).toBeVisible();
+  expect(screen.getByText("included.csv")).toBeVisible();
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  await user.click(screen.getByRole("button", { name: "Remove CSV file" }));
+  expect(
+    screen.queryByText("2 unique identities included")
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("0 unique identities included")
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("No identities are explicitly included.")
+  ).not.toBeInTheDocument();
 });

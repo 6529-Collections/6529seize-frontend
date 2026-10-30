@@ -2,7 +2,7 @@
 
 import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
 import ReportedContentPreview from "@/components/preferences/ReportedContentPreview";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { ApiContentModerationReportStatus } from "@/generated/models/ApiContentModerationReportStatus";
 import type { ApiContentModerationUserReport } from "@/generated/models/ApiContentModerationUserReport";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
@@ -39,6 +39,8 @@ const getReportStatusLabel = (
       return t(locale, "contentModeration.report.contentRemoved");
     case ApiContentModerationReportStatus.Withdrawn:
       return t(locale, "contentModeration.preferences.reports.withdrawn");
+    case ApiContentModerationReportStatus.ResolvedDeleted:
+      return t(locale, "contentModeration.report.contentDeleted");
     case ApiContentModerationReportStatus.ResolvedAllowed:
       return t(locale, "contentModeration.report.noActionTaken");
   }
@@ -99,7 +101,7 @@ function ReportRow({
         >
           {report.author_pfp && (
             <Image
-              src={resolveIpfsUrlSync(report.author_pfp)}
+              src={getScaledImageUri(report.author_pfp, ImageScale.W_200_H_200)}
               alt=""
               fill
               sizes="40px"
