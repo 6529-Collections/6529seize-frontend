@@ -120,6 +120,15 @@ export const useWaveDropsSerialScroll = ({
   scrollToVisualBottom,
 }: UseWaveDropsSerialScrollParams): UseWaveDropsSerialScrollResult => {
   const [serialTarget, setSerialTarget] = useState<number | null>(initialDrop);
+  const [previousInitialDrop, setPreviousInitialDrop] = useState(initialDrop);
+
+  if (previousInitialDrop !== initialDrop) {
+    setPreviousInitialDrop(initialDrop);
+    // A new same-wave link is a new request; URL cleanup must not cancel it.
+    if (initialDrop !== null) {
+      setSerialTarget(initialDrop);
+    }
+  }
 
   const targetDropRef = useRef<HTMLDivElement | null>(null);
 
@@ -128,7 +137,6 @@ export const useWaveDropsSerialScroll = ({
   const scrollOperationLockRef = useRef(false);
   const activeScrollTargetRef = useRef<number | null>(null);
 
-  const latestWaveMessagesRef = useRef(waveMessages);
   const smallestSerialNo = useRef<number | null>(null);
   const lastScrolledToSerialRef = useRef<number | null>(null);
   const lastAutoPinnedNewestDropKeyRef = useRef<string | null>(null);
@@ -186,8 +194,6 @@ export const useWaveDropsSerialScroll = ({
   }, []);
 
   useEffect(() => {
-    latestWaveMessagesRef.current = waveMessages;
-
     if (waveMessages && waveMessages.drops.length > 0) {
       const minSerialNo = Math.min(
         ...waveMessages.drops.map((drop) => drop.serial_no)
@@ -199,7 +205,7 @@ export const useWaveDropsSerialScroll = ({
   }, [waveMessages]);
 
   useEffect(() => {
-    const currentMessages = latestWaveMessagesRef.current;
+    const currentMessages = waveMessages;
     if (currentMessages && currentMessages.drops.length > 0) {
       const newestDrop = currentMessages.drops[0];
       const newestDropKey = newestDrop
@@ -213,19 +219,31 @@ export const useWaveDropsSerialScroll = ({
 
       const shouldAutoPinNewestDrop =
         shouldPinToBottom &&
+        serialTarget === null &&
+        !isScrolling &&
         newestDropKey !== null &&
         newestDropKey !== previousNewestDropKey &&
-        (init || previousNewestDropKey !== null || newestDrop?.id.startsWith("temp-"));
-
-      lastAutoPinnedNewestDropKeyRef.current = newestDropKey;
+        (init ||
+          previousNewestDropKey !== null ||
+          newestDrop?.id.startsWith("temp-"));
 
       if (shouldAutoPinNewestDrop) {
-        setTimeout(() => {
+        const timeoutId = setTimeout(() => {
+          lastAutoPinnedNewestDropKeyRef.current = newestDropKey;
           scrollToVisualBottom();
         }, 100);
+        return () => clearTimeout(timeoutId);
       }
+      lastAutoPinnedNewestDropKeyRef.current = newestDropKey;
     }
-  }, [waveMessages, shouldPinToBottom, scrollToVisualBottom, init]);
+  }, [
+    waveMessages,
+    shouldPinToBottom,
+    scrollToVisualBottom,
+    init,
+    serialTarget,
+    isScrolling,
+  ]);
 
   const scrollToSerialNo = useCallback(
     (behavior: ScrollBehavior, targetSerialNo?: number) => {
@@ -282,8 +300,10 @@ export const useWaveDropsSerialScroll = ({
                 });
 
               if (!stillInContainer && finalTarget && finalContainer) {
+                // Some engines do not finish smooth scrolling in reverse flex
+                // lists. The final attempt must actually reach the target.
                 scrollElementIntoContainerCenter({
-                  behavior,
+                  behavior: "auto",
                   container: finalContainer,
                   target: finalTarget,
                 });

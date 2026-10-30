@@ -1,4 +1,5 @@
-import type { Page } from "@playwright/test";
+import type { ApiWaveDropsFeedV2 } from "../../generated/models/ApiWaveDropsFeedV2";
+import type { Page, WebSocketRoute } from "@playwright/test";
 import {
   expect,
   expectAxeClean,
@@ -7,6 +8,7 @@ import {
 } from "../testHelpers";
 import {
   getSandboxApiOrigin,
+  installLocalSandboxBrowserMutationGuard,
   LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
@@ -701,3 +703,231 @@ for (const width of [375, 390, 768, 1024, 1440]) {
     }
   });
 }
+
+async function sharedPostFixture(page: Page, baseURL: string | undefined) {
+  await page.route("**/api/drops/*/curations", (route) =>
+    route.fulfill({ json: [] })
+  );
+  await page.route("**/api/open-graph", (route) => route.fulfill({ json: {} }));
+  const response = await page.request.get(
+    `${getSandboxApiOrigin(baseURL)}/api/v2/waves/${WAVE}/drops?limit=50`
+  );
+  expect(response.ok()).toBe(true);
+  const feed = (await response.json()) as ApiWaveDropsFeedV2;
+  const template = feed.drops[0];
+  if (!template) throw new Error("Missing sandbox drop fixture");
+  const drops = Array.from({ length: 150 }, (_, index) => {
+    const serial = index + 2;
+    return {
+      ...template,
+      id: `00000000-0000-4000-8000-${String(serial + 9000).padStart(12, "0")}`,
+      serial_no: serial,
+      created_at: 1714000000000 + serial * 60000,
+      content: `Shared link fixture post ${serial}`,
+    };
+  }).reverse();
+  await page.route("**/api/v2/drops?**", (route) => {
+    const ids =
+      new URL(route.request().url()).searchParams.get("ids")?.split(",") ?? [];
+    return route.fulfill({
+      json: {
+        data: drops
+          .filter((drop) => ids.includes(drop.id))
+          .map((drop) => ({ ...drop, wave: feed.wave })),
+        next: false,
+      },
+    });
+  });
+  const sockets: WebSocketRoute[] = [];
+  await page.routeWebSocket(
+    (url) => url.port === new URL(getSandboxApiOrigin(baseURL)).port,
+    (socket) => {
+      sockets.push(socket);
+      socket.onMessage((message) => {
+        if (JSON.parse(String(message)).type === "AUTHENTICATE") {
+          socket.send(JSON.stringify({ type: "AUTHENTICATED", data: {} }));
+        }
+      });
+    }
+  );
+  await page.route(`**/api/v2/waves/${WAVE}/drops?**`, (route) => {
+    const params = new URL(route.request().url()).searchParams;
+    const serial = Number(params.get("serial_no_limit"));
+    const strategy = params.get("search_strategy");
+    let selected = drops;
+    if (strategy === "FIND_BOTH") {
+      selected = drops.filter((drop) => Math.abs(drop.serial_no - serial) < 20);
+    } else if (strategy === "FIND_OLDER") {
+      selected = drops.filter((drop) => drop.serial_no < serial);
+    } else if (strategy === "FIND_NEWER") {
+      selected = drops.filter((drop) => drop.serial_no > serial);
+    }
+    return route.fulfill({
+      json: {
+        ...feed,
+        drops: selected.slice(0, Number(params.get("limit")) || 50),
+      },
+    });
+  });
+  await page.route("**/api/drop-ids?**", (route) => {
+    const params = new URL(route.request().url()).searchParams;
+    const minimum = Number(params.get("min_serial_no"));
+    return route.fulfill({
+      json: drops
+        .filter((drop) => drop.serial_no >= minimum)
+        .map((drop) => ({
+          id: drop.id,
+          serial_no: drop.serial_no,
+        })),
+    });
+  });
+  return {
+    post: (serial: number) =>
+      page
+        .getByRole("region", {
+          name: "Wave chat file upload area",
+        })
+        .getByText(`Shared link fixture post ${serial}`, { exact: true }),
+    async incoming() {
+      const drop = {
+        ...drops[0]!,
+        id: "00000000-0000-4000-8000-000000009152",
+        serial_no: 152,
+        content: "Shared link fixture post 152",
+      };
+      drops.unshift(drop);
+      await expect.poll(() => sockets.length).toBeGreaterThan(0);
+      for (const socket of sockets)
+        socket.send(
+          JSON.stringify({
+            type: "DROP_UPDATE_REF",
+            data: {
+              update_type: "DROP_UPDATE",
+              wave_id: WAVE,
+              drop_id: drop.id,
+              serial_no: drop.serial_no,
+              author_id: "another-reader",
+            },
+          })
+        );
+    },
+  };
+}
+
+test("shared post stays in view after URL cleanup and delayed loading", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  const { post, incoming } = await sharedPostFixture(page, baseURL);
+  const target = gate();
+  let held = 0;
+  await page.route(`**/api/v2/waves/${WAVE}/drops?**`, async (route) => {
+    if (
+      new URL(route.request().url()).searchParams.get("search_strategy") ===
+      "FIND_BOTH"
+    ) {
+      held += 1;
+      await target.ready;
+    }
+    return route.fallback();
+  });
+  await page.goto(`/waves/${WAVE}?serialNo=20`, {
+    waitUntil: "domcontentloaded",
+  });
+  try {
+    await expect.poll(() => held).toBeGreaterThan(0);
+    await expect(post(20)).not.toBeVisible();
+    await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
+  } finally {
+    target.release();
+  }
+  await expect(post(20)).toBeInViewport({ timeout: 30000 });
+  await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
+  // The original bug shows the target briefly, then replaces its chat after
+  // URL cleanup. Check the settled viewport, beyond the scroll retry timers.
+  for (let second = 0; second < 8; second += 1) {
+    await page.waitForTimeout(1000);
+    await expect(post(20)).toBeInViewport();
+  }
+  await incoming();
+  // The update must reach the rendered list before checking preservation.
+  await expect(post(152)).toBeAttached();
+  await expect(post(20)).toBeInViewport();
+  await expectNoHorizontalOverflow(page);
+  await page.screenshot({
+    path: testInfo.outputPath("shared-post-settled.png"),
+  });
+  await page
+    .getByRole("button", { name: "Scroll to bottom", exact: true })
+    .click();
+  await expect(post(152)).toBeInViewport();
+  await expect(post(20)).not.toBeInViewport();
+});
+
+test("copied shared post links settle in a separate tab and when reopened", async ({
+  page,
+  context,
+  baseURL,
+  browserName,
+}, testInfo) => {
+  test.skip(
+    browserName !== "chromium",
+    "Clipboard permissions are supported by Chromium."
+  );
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  const { post } = await sharedPostFixture(page, baseURL);
+  await page.goto(`/waves/${WAVE}?serialNo=20`, {
+    waitUntil: "domcontentloaded",
+  });
+  await expect(post(20)).toBeInViewport({ timeout: 30000 });
+  const row = page.locator("#drop-20");
+  if (testInfo.project.use.hasTouch) {
+    await post(20).tap({ trial: true });
+    const box = await post(20).boundingBox();
+    if (!box) throw new Error("Shared post is not visible");
+    const touch = await context.newCDPSession(page);
+    try {
+      await touch.send("Input.dispatchTouchEvent", {
+        type: "touchStart",
+        touchPoints: [{ x: box.x + 15, y: box.y + 10 }],
+      });
+      await page.waitForTimeout(750);
+      await touch.send("Input.dispatchTouchEvent", {
+        type: "touchCancel",
+        touchPoints: [],
+      });
+    } finally {
+      await touch.detach();
+    }
+    await page
+      .getByRole("dialog", { name: "Drop actions", exact: true })
+      .getByRole("button", { name: /copy link/i })
+      .tap();
+  } else {
+    await row.hover();
+    await row
+      .getByRole("button", { name: "More actions", exact: true })
+      .click();
+    await page.getByRole("button", { name: "Copy link", exact: true }).click();
+  }
+  const copied = await page.evaluate(() => navigator.clipboard.readText());
+  expect(copied).toBe(`${baseURL}/waves/${WAVE}?serialNo=20`);
+  const opened = await context.newPage();
+  const guard = await installLocalSandboxBrowserMutationGuard(opened, baseURL);
+  const fixture = await sharedPostFixture(opened, baseURL);
+  try {
+    for (let visit = 0; visit < 2; visit += 1) {
+      await opened.goto(copied, { waitUntil: "domcontentloaded" });
+      await expect(fixture.post(20)).toBeInViewport({ timeout: 30000 });
+      await expect(opened).toHaveURL(new RegExp(`/waves/${WAVE}$`));
+      await opened.waitForTimeout(3000);
+      await expect(fixture.post(20)).toBeInViewport();
+    }
+    await opened.screenshot({
+      path: testInfo.outputPath("copied-post-reopened.png"),
+    });
+    guard.assertNoBlockedMutations();
+  } finally {
+    await opened.close();
+  }
+});
