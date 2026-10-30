@@ -1,4 +1,6 @@
 import Button from "@/components/utils/button/Button";
+import { useContext } from "react";
+import { WaveSettingEditorContext } from "./WaveSettingEditorContext";
 
 interface WaveSettingEditorActionsProps {
   readonly disabled: boolean;
@@ -20,16 +22,19 @@ export default function WaveSettingEditorActions({
   secondaryAction = null,
   submitDisabled = false,
 }: WaveSettingEditorActionsProps) {
+  const surface = useContext(WaveSettingEditorContext);
   return (
     <div className="tw-flex tw-items-center tw-justify-end tw-gap-2">
-      <Button
-        disabled={disabled}
-        onClick={onCancel}
-        variant="tertiary"
-        size="xs"
-      >
-        Cancel
-      </Button>
+      {surface === "popover" && (
+        <Button
+          disabled={disabled}
+          onClick={onCancel}
+          variant="tertiary"
+          size="xs"
+        >
+          Cancel
+        </Button>
+      )}
       {secondaryAction && (
         <Button
           disabled={disabled || secondaryAction.disabled}

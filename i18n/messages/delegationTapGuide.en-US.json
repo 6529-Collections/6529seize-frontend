@@ -30,7 +30,7 @@
   "delegation.tapGuide.roles.transaction.connects": "Recognized marketplaces only",
   "delegation.tapGuide.roles.transaction.rule.marketplaces": "Only connect it to marketplaces you recognize.",
   "delegation.tapGuide.roles.transaction.rule.move": "Once you buy, move the NFT to your vault.",
-  "delegation.tapGuide.roles.transaction.rule.manager": "On 6529, make it your vault's Delegation Manager, so the vault never signs.",
+  "delegation.tapGuide.roles.transaction.rule.manager": "On 6529, make it your vault's Delegation Manager, so the vault does not need to sign after appointment.",
   "delegation.tapGuide.roles.social.name": "Social wallet",
   "delegation.tapGuide.roles.social.temperature": "Hot",
   "delegation.tapGuide.roles.social.kind": "Any wallet app. This is your hot wallet; older guides call it the minting wallet.",

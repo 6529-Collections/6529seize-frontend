@@ -107,6 +107,6 @@ mobile viewports.
 - [Direct Message Creation](feature-direct-message-creation.md)
 - [Wave List Navigation](../sidebars/feature-wave-list-navigation.md)
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
-- [Wave Creation Schedule](feature-dates-step.md)
-- [Wave Creation Drop Settings](feature-drops-step.md)
+- [Wave Creation Schedule](../competitions/setup/feature-dates-step.md)
+- [Wave Creation Drop Settings](../competitions/setup/feature-drops-step.md)
 - [Docs Home](../../README.md)

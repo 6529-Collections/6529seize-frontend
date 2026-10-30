@@ -134,6 +134,7 @@ interface CollectTradeControllerProps {
   ) => void;
   readonly onMarketChange?: () => void;
   readonly secondaryActions?: ReactNode;
+  readonly supportingActions?: ReactNode;
   readonly presentation?: CollectTradePresentation;
   readonly layout?: "standard" | "inline-buy";
 }
@@ -199,11 +200,17 @@ function CollectTradeControllerContent({
   onCommitment,
   onMarketChange,
   secondaryActions,
+  supportingActions,
   presentation = "dialog",
   layout = "standard",
 }: CollectTradeControllerProps) {
   const locale = useBrowserLocale();
-  const { connectedProfile, activeProfileProxy, isAuthenticated } = useAuth();
+  const {
+    connectedProfile,
+    activeProfileProxy,
+    isAuthenticated,
+    fetchingProfile,
+  } = useAuth();
   const connection = useSeizeConnectContext();
   const { isCapacitor } = useCapacitor();
   const client = useQueryClient();
@@ -531,6 +538,12 @@ function CollectTradeControllerContent({
       selectedOrder={selectedOrder}
       orders={orders.data?.orders ?? []}
       buyOrders={buyOrders}
+      initialLoading={
+        orders.isPending ||
+        capability.isPending ||
+        fetchingProfile ||
+        connection.connectionState === "initializing"
+      }
       ordersLoading={orders.isPending}
       ordersUpdatedAt={orders.dataUpdatedAt}
       ordersFailed={orders.isError}
@@ -540,6 +553,7 @@ function CollectTradeControllerContent({
       preparing={preparing}
       error={error}
       secondaryActions={secondaryActions}
+      supportingActions={supportingActions}
       onChange={setDraft}
       onQuantityEdited={() => setQuantityEdited(true)}
       onClearSelectedOrder={() => setSelectedOrder(null)}

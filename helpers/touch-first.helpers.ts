@@ -14,6 +14,8 @@
  * laptops and misclassify them as mobile.
  */
 
+import { parseMobileAppUserAgent } from "@/helpers/mobileAppUserAgent";
+
 type MatchMediaWindow = typeof globalThis & {
   matchMedia?: (query: string) => MediaQueryList;
 };
@@ -243,7 +245,9 @@ export const hasTouchCapability = (): boolean => {
 };
 
 // "Android.*Mobile" keeps Android tablets (which omit "Mobile" from the UA)
-// out of the phone fallback when client hints are unavailable.
+// out of the phone fallback when client hints are unavailable. It runs on the
+// user agent without 6529 Mobile's `6529Mobile/<version>` token, which would
+// otherwise make every Android device inside the app match.
 const MOBILE_USER_AGENT_REGEX =
   /iPhone|iPod|BlackBerry|IEMobile|Opera Mini|Android.*Mobile/i;
 
@@ -264,7 +268,9 @@ const isMobileUserAgent = (): boolean => {
   if (typeof uaDataMobile === "boolean") {
     return uaDataMobile;
   }
-  return MOBILE_USER_AGENT_REGEX.test(nav.userAgent);
+  return MOBILE_USER_AGENT_REGEX.test(
+    parseMobileAppUserAgent(nav.userAgent).browserUserAgent
+  );
 };
 
 // Hydrate the latch from a previous session at module load so the very first
@@ -288,7 +294,8 @@ if (!isMobileUserAgent() && readPersistedFinePointer()) {
 export const isTouchFirstEnvironment = (options?: {
   readonly touchDetected?: boolean;
 }): boolean => {
-  const touchCapable = (options?.touchDetected ?? false) || hasTouchCapability();
+  const touchCapable =
+    (options?.touchDetected ?? false) || hasTouchCapability();
   if (!touchCapable) {
     return false;
   }

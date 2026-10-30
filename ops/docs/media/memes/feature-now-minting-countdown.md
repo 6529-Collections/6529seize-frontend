@@ -53,7 +53,16 @@ the card has an explicit mapping, a `Main Stage Submission` action.
   - Timer updates continuously
 - Home latest-drop details:
   - The countdown appears below drop metadata and the stats grid in the same
-    panel.
+    panel. Its first row shows the phase name and `Upcoming` or `Live` pill.
+    The second row shows `Starts In` or `Ends In` with the existing allowlist
+    information tooltip when applicable, and a timer with zero-padded numbers
+    and smaller unit labels. Mobile timers align left below the label, and
+    four-part timers use two balanced rows in the narrowest content slots.
+    The `Mint` button remains directly below the box. Reduced motion stops the
+    pill animation. Other countdown surfaces retain their existing layout and
+    timer formatting.
+  - The desktop countdown keeps its previous space in the details column so
+    compacting the visible box does not resize the adjacent artwork.
   - `Edition`, `Status`, `Mint price`, and `Floor` row behavior is documented
     in [Latest Drop Stats Grid](feature-latest-drop-stats-grid.md).
   - The `Edition Details` accordion always includes `Mint date`,
