@@ -15,6 +15,7 @@ interface LocalDateTimeProps {
   /** Pins the locale; defaults to the browser locale after hydration. */
   readonly locale?: SupportedLocale | undefined;
   readonly className?: string | undefined;
+  readonly "data-testid"?: string | undefined;
 }
 
 const DATE_OPTIONS = {
@@ -73,6 +74,7 @@ export default function LocalDateTime({
   format = "date",
   locale,
   className,
+  "data-testid": testId,
 }: LocalDateTimeProps) {
   const hasHydrated = useHasHydrated();
   const browserLocale = useBrowserLocale();
@@ -86,7 +88,7 @@ export default function LocalDateTime({
 
   if (hasHydrated) {
     return (
-      <time dateTime={dateTime} className={className}>
+      <time data-testid={testId} dateTime={dateTime} className={className}>
         {formatViewerLocal(resolvedLocale, date, format)}
       </time>
     );
@@ -96,7 +98,7 @@ export default function LocalDateTime({
   if (format === "relative") {
     // Relative time depends on the render time, so the server never guesses it.
     return (
-      <time dateTime={dateTime} className={className}>
+      <time data-testid={testId} dateTime={dateTime} className={className}>
         <span
           aria-hidden="true"
           className="tw-inline-block tw-h-3 tw-w-6 tw-rounded-sm tw-bg-iron-800 tw-align-middle"
@@ -107,7 +109,7 @@ export default function LocalDateTime({
   }
 
   return (
-    <time dateTime={dateTime} className={className}>
+    <time data-testid={testId} dateTime={dateTime} className={className}>
       {utcFallback}
     </time>
   );

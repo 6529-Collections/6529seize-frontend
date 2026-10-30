@@ -49,13 +49,23 @@ const mixpanelMock = {
   stop_batch_senders: stopBatchMock,
 };
 
+const loadMixpanelSdkMock = jest.fn();
+let sdkAvailable = true;
+
 const loadModule = async ({
   nodeEnv,
   token,
+  sdkLoaded = true,
 }: {
   nodeEnv: string;
   token?: string;
+  sdkLoaded?: boolean;
 }) => {
+  sdkAvailable = sdkLoaded;
+  loadMixpanelSdkMock.mockReset().mockImplementation(async () => {
+    sdkAvailable = true;
+    return mixpanelMock;
+  });
   jest.resetModules();
   initMock.mockReset();
   trackMock.mockReset().mockReturnValue({ event: "accepted", properties: {} });
@@ -91,12 +101,26 @@ const loadModule = async ({
       NODE_ENV: nodeEnv,
     },
   }));
-  jest.doMock("mixpanel-browser/dist/mixpanel-core.cjs.js", () => ({
-    __esModule: true,
-    default: mixpanelMock,
+  jest.doMock("@/services/analytics/mixpanelSdk", () => ({
+    getLoadedMixpanelSdk: () => (sdkAvailable ? mixpanelMock : undefined),
+    loadMixpanelSdk: loadMixpanelSdkMock,
   }));
 
   return import("@/services/analytics/mixpanel");
+};
+
+const deferSdkDownload = () => {
+  const downloads: Array<(sdk: typeof mixpanelMock | undefined) => void> = [];
+  loadMixpanelSdkMock.mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        downloads.push((sdk) => {
+          sdkAvailable = sdk !== undefined;
+          resolve(sdk);
+        });
+      })
+  );
+  return downloads;
 };
 
 const retryAfterClearing = async (
@@ -732,6 +756,182 @@ describe("mixpanel analytics wrapper", () => {
     mixpanelMock.request_batchers.events.sendRequest(payload, {}, onResponse);
     expect(sendBatchMock).not.toHaveBeenCalled();
     expect(onResponse).toHaveBeenCalledWith(1);
+  });
+});
+
+describe("mixpanel SDK download", () => {
+  beforeEach(() => {
+    document.cookie = "performance-cookies-consent=true; path=/";
+  });
+  afterEach(() => {
+    document.cookie = "performance-cookies-consent=; Max-Age=0; path=/";
+  });
+
+  it("does not download the SDK until initialization is requested", async () => {
+    const analytics = await loadModule({
+      nodeEnv: "production",
+      token: "public-token",
+      sdkLoaded: false,
+    });
+
+    expect(analytics.trackPageView("/waves")).toBe(false);
+    expect(analytics.trackAnalyticsEvent("Product Event")).toBe(false);
+    expect(analytics.identify("42")).toBe(false);
+    analytics.clearIdentity();
+    analytics.disableAnalytics();
+
+    expect(loadMixpanelSdkMock).not.toHaveBeenCalled();
+    expect(analytics.isAnalyticsTrackingAllowed()).toBe(false);
+  });
+
+  it.each<{ nodeEnv: string; token?: string }>([
+    { nodeEnv: "development", token: "public-token" },
+    { nodeEnv: "production" },
+  ])(
+    "never downloads the SDK when analytics is unsupported (%o)",
+    async (environment) => {
+      const analytics = await loadModule({ ...environment, sdkLoaded: false });
+
+      expect(analytics.initAnalytics()).toBe(false);
+
+      expect(loadMixpanelSdkMock).not.toHaveBeenCalled();
+      expect(initMock).not.toHaveBeenCalled();
+    }
+  );
+
+  it("initializes when the SDK arrives and lets callers recover", async () => {
+    const analytics = await loadModule({
+      nodeEnv: "production",
+      token: "public-token",
+      sdkLoaded: false,
+    });
+    const downloads = deferSdkDownload();
+    let recoveredPageView: boolean | undefined;
+    const recovered = jest.fn(() => {
+      analytics.initAnalytics();
+      recoveredPageView = analytics.trackPageView("/waves");
+    });
+    const unsubscribe = analytics.subscribeAnalyticsRecovery(recovered);
+
+    expect(analytics.initAnalytics()).toBe(false);
+    expect(analytics.trackPageView("/waves")).toBe(false);
+    expect(loadMixpanelSdkMock).toHaveBeenCalledTimes(1);
+    expect(initMock).not.toHaveBeenCalled();
+
+    downloads[0]?.(mixpanelMock);
+    await waitFor(() => expect(recovered).toHaveBeenCalledTimes(1));
+    unsubscribe();
+
+    expect(recoveredPageView).toBe(true);
+    expect(initMock).toHaveBeenCalledTimes(1);
+    expect(startBatchMock).toHaveBeenCalledTimes(2);
+    expect(trackMock).toHaveBeenCalledTimes(1);
+    expect(trackMock).toHaveBeenCalledWith("Page Viewed", { path: "/waves" });
+    expect(analytics.identify("42")).toBe(true);
+  });
+
+  it("does not initialize an SDK that arrives after consent withdrawal", async () => {
+    const analytics = await loadModule({
+      nodeEnv: "production",
+      token: "public-token",
+      sdkLoaded: false,
+    });
+    const downloads = deferSdkDownload();
+    const recovered = jest.fn();
+    const unsubscribe = analytics.subscribeAnalyticsRecovery(recovered);
+
+    analytics.initAnalytics();
+    analytics.disableAnalytics();
+    document.cookie = "performance-cookies-consent=false; path=/";
+    downloads[0]?.(mixpanelMock);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(initMock).not.toHaveBeenCalled();
+    expect(recovered).not.toHaveBeenCalled();
+    expect(analytics.isAnalyticsTrackingAllowed()).toBe(false);
+    unsubscribe();
+
+    document.cookie = "performance-cookies-consent=true; path=/";
+    expect(analytics.initAnalytics()).toBe(true);
+    expect(initMock).toHaveBeenCalledTimes(1);
+    expect(loadMixpanelSdkMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses one continuation for repeated requests during a download", async () => {
+    const analytics = await loadModule({
+      nodeEnv: "production",
+      token: "public-token",
+      sdkLoaded: false,
+    });
+    const downloads = deferSdkDownload();
+    const recovered = jest.fn();
+    const unsubscribe = analytics.subscribeAnalyticsRecovery(recovered);
+
+    expect(analytics.initAnalytics()).toBe(false);
+    expect(analytics.initAnalytics()).toBe(false);
+    expect(analytics.initAnalytics()).toBe(false);
+    expect(loadMixpanelSdkMock).toHaveBeenCalledTimes(1);
+
+    downloads[0]?.(mixpanelMock);
+    await waitFor(() => expect(recovered).toHaveBeenCalledTimes(1));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    unsubscribe();
+
+    expect(recovered).toHaveBeenCalledTimes(1);
+    expect(initMock).toHaveBeenCalledTimes(1);
+    expect(startBatchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("downloads again when consent returns after a withdrawn download failed", async () => {
+    const analytics = await loadModule({
+      nodeEnv: "production",
+      token: "public-token",
+      sdkLoaded: false,
+    });
+    const downloads = deferSdkDownload();
+    const recovered = jest.fn();
+    const unsubscribe = analytics.subscribeAnalyticsRecovery(recovered);
+
+    analytics.initAnalytics();
+    analytics.disableAnalytics();
+    downloads[0]?.(undefined);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(initMock).not.toHaveBeenCalled();
+
+    expect(analytics.initAnalytics()).toBe(false);
+    expect(loadMixpanelSdkMock).toHaveBeenCalledTimes(2);
+    downloads[1]?.(mixpanelMock);
+    await waitFor(() => expect(recovered).toHaveBeenCalledTimes(1));
+    unsubscribe();
+
+    expect(initMock).toHaveBeenCalledTimes(1);
+    expect(analytics.isAnalyticsTrackingAllowed()).toBe(true);
+  });
+
+  it("requests the SDK again after a failed download", async () => {
+    const analytics = await loadModule({
+      nodeEnv: "production",
+      token: "public-token",
+      sdkLoaded: false,
+    });
+    const downloads = deferSdkDownload();
+    const recovered = jest.fn();
+    const unsubscribe = analytics.subscribeAnalyticsRecovery(recovered);
+
+    analytics.initAnalytics();
+    downloads[0]?.(undefined);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(initMock).not.toHaveBeenCalled();
+    expect(recovered).not.toHaveBeenCalled();
+
+    expect(analytics.initAnalytics()).toBe(false);
+    expect(loadMixpanelSdkMock).toHaveBeenCalledTimes(2);
+    downloads[1]?.(mixpanelMock);
+    await waitFor(() => expect(recovered).toHaveBeenCalledTimes(1));
+    unsubscribe();
+
+    expect(initMock).toHaveBeenCalledTimes(1);
+    expect(analytics.isAnalyticsTrackingAllowed()).toBe(true);
   });
 });
 import { waitFor } from "@testing-library/react";

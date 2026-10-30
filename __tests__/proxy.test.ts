@@ -233,7 +233,10 @@ describe("proxy", () => {
     "/.git/config",
     "/.env",
     "/.well-known/security.txt",
-    "/.well-known/apple-app-site-association",
+    "/.well-known/assetlinks.json",
+    "/.well-known/apple-app-site-association/",
+    "/.well-known/apple-app-site-association.json",
+    "/%2Ewell-known/apple-app-site-association",
     "/%2Egit/HEAD",
     "/punk6529/.hidden",
     "/api/.env",
@@ -255,6 +258,26 @@ describe("proxy", () => {
     expect(mockNext).not.toHaveBeenCalled();
     expect(mockRedirect).not.toHaveBeenCalled();
   });
+
+  it.each([STAGING_BASE_ENDPOINT, PRODUCTION_BASE_ENDPOINT])(
+    "passes the apple-app-site-association to its route without the gate on %s",
+    async (baseEndpoint) => {
+      proxy = loadProxy(baseEndpoint);
+      const fetchMock = jest
+        .spyOn(globalThis, "fetch")
+        .mockRejectedValue(new Error("access control should not run"));
+
+      const response = await proxy(
+        createRequest("/.well-known/apple-app-site-association", {
+          origin: baseEndpoint,
+        })
+      );
+
+      expect(response).toEqual({ kind: "next" });
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(mockRedirect).not.toHaveBeenCalled();
+    }
+  );
 
   describe("staging access gate", () => {
     it("forwards the staging auth cookie to the probe", async () => {

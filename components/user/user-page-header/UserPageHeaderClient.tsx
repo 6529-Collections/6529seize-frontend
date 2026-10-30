@@ -1,6 +1,8 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
+
+import { skipToken, useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useContext, useMemo, useState } from "react";
 
@@ -385,9 +387,9 @@ export default function UserPageHeaderClient({
   defaultBanner1,
   defaultBanner2,
   initialStatements,
-  profileEnabledAt,
-  followersCount,
-  cmsWebsiteHref,
+  profileEnabledAt: initialProfileEnabledAt,
+  followersCount: initialFollowersCount,
+  cmsWebsiteHref: initialCmsWebsiteHref,
 }: Readonly<Props>) {
   const params = useParams();
   const router = useRouter();
@@ -456,6 +458,38 @@ export default function UserPageHeaderClient({
     initialData: initialStatements,
     staleTime: 60_000,
   });
+  const { data: enabledAt } = useQuery<string | null>({
+    queryKey: [QueryKey.PROFILE_HEADER, normalizedHandleOrWallet, "enabledAt"],
+    queryFn: skipToken,
+  });
+  const { data: websiteHref } = useQuery<string | null>({
+    queryKey: [
+      QueryKey.PROFILE_HEADER,
+      normalizedHandleOrWallet,
+      "cmsWebsiteHref",
+    ],
+    queryFn: skipToken,
+  });
+  const { data: followers } = useQuery<ApiIncomingIdentitySubscriptionsPage>({
+    queryKey: [
+      QueryKey.IDENTITY_FOLLOWERS,
+      { profile_id: profile.id, page_size: 1 },
+    ],
+    queryFn: () => {
+      if (!profile.id) throw new Error("Missing profile ID for followers");
+      return commonApiFetch<ApiIncomingIdentitySubscriptionsPage>({
+        endpoint: `identity-subscriptions/incoming/IDENTITY/${profile.id}`,
+        params: { page_size: "1" },
+      });
+    },
+    enabled: !!profile.id,
+    staleTime: 60_000,
+  });
+  const profileEnabledAt =
+    enabledAt === undefined ? initialProfileEnabledAt : enabledAt;
+  const cmsWebsiteHref =
+    websiteHref === undefined ? initialCmsWebsiteHref : websiteHref;
+  const followersCount = followers?.count ?? initialFollowersCount;
 
   const aboutStatement = useMemo(
     () => getAboutStatement(statements),

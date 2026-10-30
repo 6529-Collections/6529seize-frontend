@@ -26,3 +26,11 @@ export const FOCUS_ITEM_RING_CLASSES =
 
 export const DEFAULT_ANCHOR: NonNullable<MenuItemsProps["anchor"]> =
   "bottom end";
+
+export const MOBILE_ACTION_ITEM_CLASSES =
+  "tw-group tw-flex tw-w-full tw-items-start tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-2 tw-text-left tw-text-base tw-font-medium tw-text-iron-200 tw-transition-colors tw-duration-200 active:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 motion-reduce:tw-transition-none";
+
+export const MOBILE_ACTION_ICON_CLASSES =
+  "tw-flex tw-h-6 tw-shrink-0 tw-items-center tw-justify-center tw-text-iron-400 tw-transition-colors desktop-hover:group-hover:tw-text-white motion-reduce:tw-transition-none";
+
+export const ACTION_LABEL_CLASSES = "tw-font-semibold tw-text-iron-100";

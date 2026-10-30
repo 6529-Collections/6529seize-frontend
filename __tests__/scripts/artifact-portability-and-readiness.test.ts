@@ -746,6 +746,42 @@ describe("artifact-portability.v1", () => {
     );
   });
 
+  it("classifies existing staging messaging flags without authorizing artifact reuse", () => {
+    const flags = [
+      "NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES",
+      "NEXT_PUBLIC_E2EE_DM_ENABLED",
+    ];
+    const fixture = makeArtifactFixture(
+      "staging",
+      Object.fromEntries(flags.map((name) => [name, "true"]))
+    );
+    fixtures.push(fixture);
+    const inventory = fixture.build();
+
+    expect(inventory.unclassified_runtime_keys).toEqual([]);
+    for (const name of flags) {
+      expect(inventory.baked_inputs).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name,
+            classification: "known_runtime_fail_closed",
+            environment_bound: true,
+            present: true,
+          }),
+        ])
+      );
+      expect(inventory.portability.blockers).toContain(
+        `baked environment input: ${name}`
+      );
+    }
+    expect(inventory.portability).toMatchObject({
+      status: "NOT_PORTABLE",
+      portable: false,
+      reuse_authorized: false,
+      promotion_authorized: false,
+    });
+  });
+
   it("records unknown baked runtime keys for fail-closed review", () => {
     const fixture = makeArtifactFixture("staging", {
       FUTURE_ENDPOINT: "https://unknown.invalid",

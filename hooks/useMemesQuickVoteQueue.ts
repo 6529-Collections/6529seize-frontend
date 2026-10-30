@@ -50,6 +50,7 @@ type UseMemesQuickVoteQueueOptions = {
 export type UseMemesQuickVoteQueueResult = {
   readonly activeDrop: ExtendedDrop | null;
   readonly hasDiscoveryError: boolean;
+  readonly submissionError: string | null;
   readonly isExhausted: boolean;
   readonly isLoading: boolean;
   readonly isRestartingRound: boolean;
@@ -82,31 +83,35 @@ const useInvalidateQuickVoteUndiscoveredDrop = ({
 }) =>
   useCallback(() => {
     queryClient
-      .invalidateQueries({
-        predicate: (query) => {
-          if (
-            !Array.isArray(query.queryKey) ||
-            query.queryKey[0] !==
-              MEMES_QUICK_VOTE_UNDISCOVERED_DROP_QUERY_KEY ||
-            typeof query.queryKey[1] !== "object" ||
-            query.queryKey[1] === null
-          ) {
-            return false;
-          }
+      .invalidateQueries(
+        {
+          refetchType: "active",
+          predicate: (query) => {
+            if (
+              !Array.isArray(query.queryKey) ||
+              query.queryKey[0] !==
+                MEMES_QUICK_VOTE_UNDISCOVERED_DROP_QUERY_KEY ||
+              typeof query.queryKey[1] !== "object" ||
+              query.queryKey[1] === null
+            ) {
+              return false;
+            }
 
-          const undiscoveredQuery = query.queryKey[1] as {
-            readonly context_profile?: string | null;
-            readonly proxyId?: string | null;
-            readonly waveId?: string | null;
-          };
+            const undiscoveredQuery = query.queryKey[1] as {
+              readonly context_profile?: string | null;
+              readonly proxyId?: string | null;
+              readonly waveId?: string | null;
+            };
 
-          return (
-            undiscoveredQuery.context_profile === (contextProfile ?? null) &&
-            undiscoveredQuery.proxyId === (proxyId ?? null) &&
-            undiscoveredQuery.waveId === waveId
-          );
+            return (
+              undiscoveredQuery.context_profile === (contextProfile ?? null) &&
+              undiscoveredQuery.proxyId === (proxyId ?? null) &&
+              undiscoveredQuery.waveId === waveId
+            );
+          },
         },
-      })
+        { cancelRefetch: false }
+      )
       .catch(() => {
         // Query invalidation is best-effort. The next footer read will recover.
       });
@@ -114,14 +119,17 @@ const useInvalidateQuickVoteUndiscoveredDrop = ({
 
 const useMemesQuickVoteQueueSubmission = ({
   invalidateQuickVoteUndiscoveredDrop,
+  updatePendingDropIds,
   requestAuth,
   session,
   setAndPersistRecentAmounts,
   setOptimisticRemainingVotePowerState,
   setToast,
+  setSubmissionError,
   stateKey,
 }: {
   readonly invalidateQuickVoteUndiscoveredDrop: () => void;
+  readonly updatePendingDropIds: (dropId: string, pending: boolean) => void;
   readonly requestAuth: ContextType<typeof AuthContext>["requestAuth"];
   readonly session: UseMemesQuickVoteSessionStateResult;
   readonly setAndPersistRecentAmounts: (
@@ -131,10 +139,18 @@ const useMemesQuickVoteQueueSubmission = ({
     SetStateAction<KeyedOptimisticRemainingVotePowerState>
   >;
   readonly setToast: ContextType<typeof AuthContext>["setToast"];
+  readonly setSubmissionError: Dispatch<
+    SetStateAction<{
+      readonly key: string;
+      readonly message: string;
+    } | null>
+  >;
   readonly stateKey: string;
 }) =>
   useMemesQuickVoteSubmit({
-    onRatingFailure: (drop, amount, type) => {
+    onRatingFailure: (drop, amount, type, message) => {
+      setSubmissionError({ key: stateKey, message });
+      updatePendingDropIds(drop.id, false);
       session.restoreFailedDrop(drop);
 
       if (type === "vote") {
@@ -155,7 +171,9 @@ const useMemesQuickVoteQueueSubmission = ({
       invalidateQuickVoteUndiscoveredDrop();
     },
     onRatingQueued: (drop, amount, type) => {
-      session.advanceVisibleDrop(drop);
+      setSubmissionError(null);
+      updatePendingDropIds(drop.id, true);
+      session.advanceVisibleDrop(drop, type === "vote");
 
       if (type === "vote") {
         setOptimisticRemainingVotePowerState((current) =>
@@ -172,7 +190,8 @@ const useMemesQuickVoteQueueSubmission = ({
         );
       }
     },
-    onRatingSuccess: (_drop, _amount, nextRemainingPower, type) => {
+    onRatingSuccess: (drop, _amount, nextRemainingPower, type) => {
+      updatePendingDropIds(drop.id, false);
       if (type === "vote") {
         setOptimisticRemainingVotePowerState((current) =>
           reconcileOptimisticRemainingVotePower({
@@ -195,7 +214,6 @@ const useMemesQuickVoteQueueSubmission = ({
 
 export const useMemesQuickVoteQueue = ({
   enabled = true,
-  sessionId,
 }: UseMemesQuickVoteQueueOptions): UseMemesQuickVoteQueueResult => {
   const { requestAuth, setToast } = useContext(AuthContext);
   const queryClient = useQueryClient();
@@ -210,7 +228,11 @@ export const useMemesQuickVoteQueue = ({
     typeof memesWaveId === "string" && memesWaveId.length > 0
       ? memesWaveId
       : null;
-  const stateKey = `${sessionId}:${waveId ?? ""}:${contextProfile ?? ""}`;
+  const stateKey = `${waveId ?? ""}:${contextProfile ?? ""}:${proxyId ?? ""}`;
+  const [submissionError, setSubmissionError] = useState<{
+    readonly key: string;
+    readonly message: string;
+  } | null>(null);
   const [
     optimisticRemainingVotePowerState,
     setOptimisticRemainingVotePowerState,
@@ -223,12 +245,21 @@ export const useMemesQuickVoteQueue = ({
       memesWaveId,
     });
   const pendingDropIdsRef = useRef<readonly string[]>([]);
+  const updatePendingDropIds = useCallback(
+    (dropId: string, pending: boolean) => {
+      pendingDropIdsRef.current = pending
+        ? [...pendingDropIdsRef.current, dropId]
+        : pendingDropIdsRef.current.filter((id) => id !== dropId);
+    },
+    []
+  );
   const session = useMemesQuickVoteSessionState({
     contextProfile,
     enabled,
     isQuickVoteEnabled,
     isSettingsLoaded,
     pendingDropIdsRef,
+    proxyId,
     stateKey,
     waveId,
   });
@@ -242,11 +273,13 @@ export const useMemesQuickVoteQueue = ({
   const { pendingDropIds, submitSkip, submitVote } =
     useMemesQuickVoteQueueSubmission({
       invalidateQuickVoteUndiscoveredDrop,
+      updatePendingDropIds,
       requestAuth,
       session,
       setAndPersistRecentAmounts,
       setOptimisticRemainingVotePowerState,
       setToast,
+      setSubmissionError,
       stateKey,
     });
 
@@ -264,6 +297,20 @@ export const useMemesQuickVoteQueue = ({
         state: optimisticRemainingVotePowerState,
       }),
     });
+  // Expire the estimate with its closed buffer. While candidates remain,
+  // keep the cap: their older rating ranges can still overstate voting power.
+  if (
+    !enabled &&
+    activeApiDrop === null &&
+    session.sessionState.lookaheadDrops.length === 0 &&
+    pendingDropIds.length === 0 &&
+    optimisticRemainingVotePowerState.key === stateKey &&
+    optimisticRemainingVotePowerState.value !== null
+  ) {
+    setOptimisticRemainingVotePowerState(
+      createInitialOptimisticRemainingVotePowerState(stateKey)
+    );
+  }
   const activeDropCandidate = useMemo(() => {
     if (!activeApiDrop) {
       return null;
@@ -296,7 +343,11 @@ export const useMemesQuickVoteQueue = ({
   return {
     activeDrop,
     hasDiscoveryError: session.sessionState.hasDiscoveryError,
-    isExhausted: session.sessionState.isExhausted,
+    submissionError:
+      submissionError?.key === stateKey ? submissionError.message : null,
+    isExhausted:
+      session.sessionState.isExhausted ||
+      effectiveOptimisticRemainingPower === 0,
     isLoading: session.sessionState.isLoading && activeDrop === null,
     isRestartingRound: session.sessionState.isRestartingRound,
     isReady: activeDrop !== null,

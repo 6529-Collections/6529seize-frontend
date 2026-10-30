@@ -56,6 +56,44 @@ describe("fetchWaveDecisionsV2", () => {
     jest.clearAllMocks();
   });
 
+  it.each([true, false])(
+    "preserves optional collaborator credits in next-mint winners (present: %s)",
+    async (hasCredits) => {
+      const collaborators = [
+        {
+          id: "credit-id",
+          handle: "collaborator",
+          display: "Collaborator",
+          pfp: null,
+        },
+      ];
+      const source = {
+        ...createWinnerDrop(1, true),
+        ...(hasCredits ? { collaborators } : {}),
+      };
+      commonApiFetchMock.mockResolvedValueOnce({
+        data: [
+          {
+            decision_time: 2000,
+            winners: [{ place: 1, awards: [], drop: source }],
+          },
+        ],
+        count: 1,
+        page: 1,
+        next: false,
+      });
+
+      const result = await fetchWaveDecisionsV2({
+        waveId: "wave-1",
+        params: { page: "1" },
+      });
+
+      expect(result.data[0]?.winners[0]?.drop.collaborators).toEqual(
+        hasCredits ? collaborators : []
+      );
+    }
+  );
+
   it.each([
     { scenario: "missing voter history", count: 0, available: false },
     { scenario: "recorded zero voters", count: 0, available: true },
@@ -67,7 +105,14 @@ describe("fetchWaveDecisionsV2", () => {
         {
           decision_time: 2000,
           winners: [
-            { place: 1, awards: [], drop: createWinnerDrop(count, available) },
+            {
+              place: 1,
+              awards: [],
+              drop: {
+                ...createWinnerDrop(count, available),
+                submission_artist: "",
+              },
+            },
           ],
         },
       ],
@@ -82,6 +127,7 @@ describe("fetchWaveDecisionsV2", () => {
       params: { page: "1" },
     });
     const winner = result.data[0]?.winners[0]?.drop;
+    expect(winner).toHaveProperty("submission_artist", "");
 
     expect(commonApiFetchMock).toHaveBeenCalledWith({
       endpoint: "v2/waves/wave-1/decisions",

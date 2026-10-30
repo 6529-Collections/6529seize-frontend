@@ -1,10 +1,15 @@
 "use client";
 
+import { useBookmarkStatus } from "@/hooks/drops/useDropBookmarks";
+
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { memo, useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { useClickAway } from "react-use";
 import { getConnectionProfileIndicator } from "@/components/auth/connection-state-indicator";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 import { HeaderConnectModal } from "@/components/header/share/HeaderShare";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import HeaderUserMenuDropdown from "@/components/header/user/HeaderUserMenuDropdown";
@@ -48,6 +53,7 @@ function WebSidebarUser({
     address,
     seizeConnect,
     seizeConnectFresh,
+    seizeConnectOpen,
     connectionState,
     hasValidWalletAuth: isAuthenticated,
     isConnected,
@@ -84,6 +90,7 @@ function WebSidebarUser({
   // Stay subscribed while the account UI is mounted, including while its menu
   // is closed. No persistent cache or menu-triggered request is needed.
   const artworkAccess = useArtworkDocumentationAccess();
+  useBookmarkStatus();
   const accountScope = JSON.stringify([
     address,
     connectedProfile?.id,
@@ -166,6 +173,8 @@ function WebSidebarUser({
       DEFAULT_LOCALE,
       address ? "webSidebar.account.retry" : "webSidebar.account.connect"
     );
+    // The first click can still be loading the wallet connection services.
+    const isOpeningConnection = !address && seizeConnectOpen;
     return (
       <div
         className={containerClasses}
@@ -197,12 +206,17 @@ function WebSidebarUser({
             }
           }}
           aria-label={label}
+          aria-busy={isOpeningConnection || undefined}
           data-tooltip-id="sidebar-tooltip"
           data-tooltip-content={label}
           data-tooltip-hidden={!isCollapsed}
         >
           <span className={avatarClasses}>
-            <WebSidebarAccountAvatar src={null} />
+            {isOpeningConnection ? (
+              <CircleLoader size={CircleLoaderSize.LARGE} />
+            ) : (
+              <WebSidebarAccountAvatar src={null} />
+            )}
           </span>
           {!isCollapsed && (
             <span className="tw-truncate tw-text-sm tw-font-medium">
