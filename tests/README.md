@@ -394,9 +394,13 @@ Surface matrix:
   feedback flow on both baseline web projects. It verifies the responsive
   Show/Hide feedback control, the primary comment input, optional section,
   category, severity and technical-detail controls, the Wave preview, and the
-  exact four-field review metadata submitted to the local mock API. The mock
-  permits one canonical review drop per test and rejects every other drop
-  mutation. It never writes to staging or production.
+  exact four-field review metadata submitted to the local mock API. It also
+  checks the saved-snapshot page position and Previous/Next stepping. The spec
+  derives review titles, versions and page counts from the review definition
+  and section targets from the rendered headings, so it follows new review
+  snapshots. The mock permits one review drop per test in the fixed feedback
+  layout and rejects every other drop mutation; the spec asserts the exact
+  review context and content. It never writes to staging or production.
 - `test:e2e:reaction-sandbox` runs a local-only authenticated Waves reaction
   sandbox on desktop Chromium. It adds and removes the deterministic quick
   reaction on the synthetic sandbox drop, then verifies that only the exact
