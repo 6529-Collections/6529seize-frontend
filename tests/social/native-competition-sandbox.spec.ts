@@ -473,7 +473,15 @@ async function installArtworkCompetitionResources(
       const url = new URL(route.request().url());
       onRead?.(url);
       const start = Number(url.searchParams.get("cursor") ?? 0);
-      const drops = getDrops();
+      const drops = getDrops().filter(
+        (drop) =>
+          url.searchParams.get("is_additional_action_promised") !== "true" ||
+          (
+            drop["submission_context"] as
+              | { is_additional_action_promised?: boolean }
+              | undefined
+          )?.is_additional_action_promised === true
+      );
       const end = start + Number(url.searchParams.get("limit") ?? 50);
       return route.fulfill({
         json: {
@@ -9440,6 +9448,234 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
   }
 
+  test("filters Additional Action across pages, views, retries and narrow layouts", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${MEMES_WAVE}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const fixture = await response.json();
+    fixture.wave.id = MEMES_WAVE;
+    let artwork = Array.from({ length: 111 }, (_, index) => ({
+      ...fixture.drops[0],
+      id: `00000000-0000-4000-8000-${String(index + 8000).padStart(12, "0")}`,
+      serial_no: index + 8000,
+      drop_type: "SUBMISSION",
+      title: `${index < 51 ? "Ordinary" : "Promised"} artwork ${index}`,
+      submission_context: {
+        status: "ACTIVE",
+        has_metadata: false,
+        is_additional_action_promised: index >= 51,
+        voting: {
+          is_open: true,
+          total_votes_given: 100,
+          current_calculated_vote: 100,
+          predicted_final_vote: 100,
+          voters_count: 1,
+          place: index + 1,
+          context_profile_context: { can_vote: false, current: 0 },
+        },
+      },
+    }));
+    const reads: URL[] = [];
+    await installArtworkCompetitionResources(
+      page,
+      MEMES_WAVE,
+      fixture.wave,
+      () => artwork,
+      (url) => reads.push(url)
+    );
+    await page.goto(`/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard`);
+    await dismissNextDevTools(page);
+    const toggle = page.getByRole("checkbox", {
+      name: "Additional Action",
+      exact: true,
+    });
+    const list = page.getByRole("list", {
+      name: "Leaderboard drops",
+      exact: true,
+    });
+    await expect(toggle).not.toBeChecked();
+    await expect(list).toContainText("Ordinary artwork 0");
+    // Clicking the label is the complete interaction, including on touch screens.
+    await page
+      .getByRole("checkbox", { name: "Additional Action", exact: true })
+      .locator("..")
+      .getByText("Additional Action", { exact: true })
+      .click();
+    await expect(toggle).toBeChecked();
+    await expect(list).toContainText("Promised artwork 51");
+    await expect(list).not.toContainText("Ordinary artwork");
+    const scroller = page
+      .getByRole("list", { name: "Leaderboard drops", exact: true })
+      .locator('xpath=ancestor::div[contains(@class,"tw-overflow-y-auto")][1]');
+    await scroller.evaluate((element) =>
+      element.scrollTo({ top: element.scrollHeight, behavior: "instant" })
+    );
+    await page
+      .getByRole("button", { name: "Load more drops", exact: true })
+      .click();
+    await expect
+      .poll(() =>
+        reads.some(
+          (url) =>
+            url.searchParams.get("cursor") === "50" &&
+            url.searchParams.get("is_additional_action_promised") === "true"
+        )
+      )
+      .toBe(true);
+    await expect(list.getByRole("listitem").first()).toHaveAttribute(
+      "aria-setsize",
+      "60"
+    );
+    await scroller.evaluate((element) =>
+      element.scrollTo({ top: 0, behavior: "instant" })
+    );
+    if (testInfo.project.name === "web-desktop-chromium") {
+      await expect(
+        page.getByRole("tab", { name: "Current Vote", exact: true })
+      ).toHaveAttribute("aria-selected", "true");
+      await page.getByRole("tab", { name: "Newest", exact: true }).click();
+    } else {
+      await page
+        .getByRole("button", { name: "Sort: Current Vote", exact: true })
+        .click();
+      await page.getByRole("menuitem", { name: "Newest", exact: true }).click();
+    }
+    await expect
+      .poll(() => reads.at(-1)?.searchParams.get("sort"))
+      .toBe("submitted_at");
+    await expect(toggle).toBeChecked();
+    for (const width of testInfo.project.name === "web-desktop-chromium"
+      ? [1440, 1024, 390, 320]
+      : [390, 320]) {
+      await page.setViewportSize({ width, height: 900 });
+      if (width >= 1024) {
+        await expect(
+          page.getByRole("tablist", { name: "Sort options", exact: true })
+        ).toBeVisible();
+        await expect(
+          page.getByRole("tab", { name: "Current Vote", exact: true })
+        ).toBeVisible();
+        await expect(
+          page.getByRole("tab", { name: "Hot", exact: true })
+        ).toBeVisible();
+        await expect(
+          page.getByRole("tab", { name: "Newest", exact: true })
+        ).toHaveAttribute("aria-selected", "true");
+      }
+      for (const view of ["List view", "Grid view"]) {
+        await page.getByRole("tab", { name: view, exact: true }).click();
+        await expect(toggle).toBeChecked();
+        await expect(list).not.toContainText("Ordinary artwork");
+        await expectNoHorizontalOverflow(page);
+        await expect(
+          page
+            .getByRole("checkbox", { name: "Additional Action", exact: true })
+            .locator("..")
+        ).toBeInViewport({ ratio: 1 });
+        expect(
+          (
+            await page
+              .getByRole("checkbox", { name: "Additional Action", exact: true })
+              .locator("..")
+              .boundingBox()
+          )!.height
+        ).toBeGreaterThanOrEqual(44);
+      }
+      await testInfo.attach(`additional-action-${width}px`, {
+        body: await page.screenshot(),
+        contentType: "image/png",
+      });
+    }
+    await toggle.focus();
+    await page.keyboard.press("Space");
+    await expect(toggle).not.toBeChecked();
+    await expect(list).toContainText("Ordinary artwork");
+    await expect(
+      page.getByRole("button", { name: "Sort: Newest", exact: true })
+    ).toBeVisible();
+
+    // A fresh filtered request fails; all-results cards must not masquerade as filtered results.
+    await page.reload();
+    let fail = true;
+    await page.route(
+      `**/api/v3/waves/${MEMES_WAVE}/competitions/alpha/leaderboard*`,
+      (route) => {
+        if (
+          fail &&
+          new URL(route.request().url()).searchParams.has(
+            "is_additional_action_promised"
+          )
+        )
+          return route.fulfill({
+            status: 503,
+            json: { error: "Temporarily unavailable" },
+          });
+        return route.fallback();
+      }
+    );
+    await toggle.check();
+    await expect(
+      page.getByRole("alert").filter({ hasText: "Couldn’t load submissions." })
+    ).toBeVisible();
+    await expect(list).toHaveCount(0);
+    fail = false;
+    artwork = artwork.filter(
+      (drop) => !drop.submission_context.is_additional_action_promised
+    );
+    await page.getByRole("button", { name: "Retry", exact: true }).click();
+    await expect(
+      page.getByText(
+        "No submissions marked Additional Action. Turn off the filter to see all submissions.",
+        { exact: true }
+      )
+    ).toBeVisible();
+    await toggle.uncheck();
+    await expect(list).toContainText("Ordinary artwork");
+
+    // A late response from an abandoned filtered request cannot replace all results.
+    await page.reload();
+    let releaseLate!: () => void;
+    const lateResponse = new Promise<void>((resolve) => {
+      releaseLate = resolve;
+    });
+    let held = false;
+    let completed = false;
+    await page.route(
+      `**/api/v3/waves/${MEMES_WAVE}/competitions/alpha/leaderboard*`,
+      async (route) => {
+        if (
+          !new URL(route.request().url()).searchParams.has(
+            "is_additional_action_promised"
+          )
+        )
+          return route.fallback();
+        held = true;
+        await lateResponse;
+        await route.fulfill({
+          json: { data: [], cards: [], has_more: false, next_cursor: null },
+        });
+        completed = true;
+      }
+    );
+    try {
+      await toggle.check();
+      await expect.poll(() => held).toBe(true);
+      await toggle.uncheck();
+      await expect(list).toContainText("Ordinary artwork");
+    } finally {
+      releaseLate();
+    }
+    await expect.poll(() => completed).toBe(true);
+    await expect(toggle).not.toBeChecked();
+    await expect(list).toContainText("Ordinary artwork");
+  });
+
   test("keeps Additional Action tooltips above cards and inside the viewport", async ({
     page,
   }, testInfo) => {
@@ -9497,7 +9733,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await page.setViewportSize({ width, height: 900 });
       for (const view of ["Grid view", "List view"]) {
         await page.getByRole("tab", { name: view, exact: true }).click();
-        const badge = page.getByText("Additional Action", { exact: true });
+        const badge = page
+          .getByRole("list", { name: "Leaderboard drops", exact: true })
+          .getByText("Additional Action", { exact: true });
         await expect(badge).toHaveCount(1);
         await expect
           .poll(() => badge.evaluate((element) => element.tagName))

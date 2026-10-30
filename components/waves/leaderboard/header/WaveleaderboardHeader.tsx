@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
+import { AdditionalActionFilter } from "./AdditionalActionFilter";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { resolveWaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
@@ -25,6 +26,7 @@ import {
   getActionsRemeasureVariant,
   getHeaderRowFlexClass,
   getHeaderControlsRowClass,
+  getHeaderSortMode,
   getLeaderboardViewModes,
   HeaderViewModeTabs,
   MeasurementProbes,
@@ -43,6 +45,8 @@ import {
 } from "./waveLeaderboardHeaderLayout";
 
 interface WaveLeaderboardHeaderProps {
+  readonly additionalActionOnly?: boolean | undefined;
+  readonly onAdditionalActionChange?: ((checked: boolean) => void) | undefined;
   readonly wave: ApiWave;
   readonly onCreateDrop?: (() => void) | undefined;
   readonly additionalActions?: React.ReactNode | undefined;
@@ -294,6 +298,8 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   minPrice,
   maxPrice,
   onPriceRangeChange,
+  additionalActionOnly = false,
+  onAdditionalActionChange,
 }) => {
   const isLargeScreen = useMediaQuery("(min-width: 1024px)");
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
@@ -395,7 +401,10 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
       }),
     [measurements, showPriceActions]
   );
-  const sortMode = isLargeScreen ? "tabs" : "dropdown";
+  const showAdditionalActionFilter = isMemesWave && !!onAdditionalActionChange;
+  const sortMode = getHeaderSortMode({
+    isLargeScreen,
+  });
 
   const onTogglePriceFilters = () => {
     if (hasActivePriceFilters) {
@@ -461,6 +470,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             compactSubmissionControls,
             balanceSubmissionRows,
             enableControlsScroll: layout.enableControlsScroll,
+            showAdditionalActionFilter,
           })}
         >
           <HeaderViewModeTabs
@@ -479,6 +489,12 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
               items={sortItems}
             />
           </div>
+          {showAdditionalActionFilter && (
+            <AdditionalActionFilter
+              checked={additionalActionOnly}
+              onChange={onAdditionalActionChange}
+            />
+          )}
         </div>
         <PriceActionsRow
           isVisible={showHeaderActions}

@@ -24,13 +24,18 @@ export function getHeaderControlsRowClass({
   compactSubmissionControls,
   balanceSubmissionRows,
   enableControlsScroll,
+  showAdditionalActionFilter,
 }: {
   readonly flexClass: string;
   readonly basisClass: string;
   readonly compactSubmissionControls: boolean;
   readonly balanceSubmissionRows: boolean;
   readonly enableControlsScroll: boolean;
+  readonly showAdditionalActionFilter: boolean;
 }) {
+  if (showAdditionalActionFilter) {
+    return "tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-2";
+  }
   return `tw-flex tw-min-w-0 ${flexClass} tw-flex-nowrap tw-items-start ${
     compactSubmissionControls
       ? "tw-gap-1 [&_[role=tab]]:tw-w-[26px]"
@@ -40,6 +45,14 @@ export function getHeaderControlsRowClass({
       ? "tw-no-scrollbar tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60"
       : "tw-overflow-x-hidden"
   }`;
+}
+
+export function getHeaderSortMode({
+  isLargeScreen,
+}: {
+  readonly isLargeScreen: boolean;
+}): "tabs" | "dropdown" {
+  return isLargeScreen ? "tabs" : "dropdown";
 }
 
 export function PriceActionsRow({
