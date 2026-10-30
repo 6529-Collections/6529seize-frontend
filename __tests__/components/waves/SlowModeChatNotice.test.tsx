@@ -16,8 +16,19 @@ const makeWave = (chat: Record<string, unknown>): any => ({
   chat,
 });
 
+function setVisibility(value: DocumentVisibilityState) {
+  act(() => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value,
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+}
+
 describe("SlowModeChatNotice", () => {
   afterEach(() => {
+    setVisibility("visible");
     jest.useRealTimers();
     jest.clearAllMocks();
   });
@@ -89,5 +100,40 @@ describe("SlowModeChatNotice", () => {
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: [QueryKey.WAVE, { wave_id: "wave-1" }],
     });
+  });
+
+  it("pauses while hidden and refreshes the wave as soon as it is shown", () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(1_000);
+
+    render(
+      <SlowModeChatNotice
+        wave={makeWave({
+          slow_mode_cooldown_ms: 60_000,
+          next_drop_allowed: 3_000,
+        })}
+        isDropMode={false}
+      />
+    );
+    expect(
+      screen.getByText("Slow mode: send again in 00:02")
+    ).toBeInTheDocument();
+
+    setVisibility("hidden");
+    expect(jest.getTimerCount()).toBe(0);
+    act(() => {
+      jest.advanceTimersByTime(5_000);
+    });
+    expect(invalidateQueries).not.toHaveBeenCalled();
+
+    setVisibility("visible");
+    expect(invalidateQueries).toHaveBeenCalledTimes(1);
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE, { wave_id: "wave-1" }],
+    });
+    expect(
+      screen.getByText("Slow mode: one message every 1m")
+    ).toBeInTheDocument();
+    expect(jest.getTimerCount()).toBe(0);
   });
 });

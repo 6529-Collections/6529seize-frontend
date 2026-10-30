@@ -14,14 +14,24 @@
 import { HttpFile } from '../http/http';
 
 export class ApiReplyToDropAuthor {
+    /**
+    * True for an anonymous competition author. Identity details and profile links are unavailable.
+    */
+    'is_anonymous'?: boolean;
     'handle': string;
-    'pfp': string;
+    'pfp'?: string;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "is_anonymous",
+            "baseName": "is_anonymous",
+            "type": "boolean",
+            "format": ""
+        },
         {
             "name": "handle",
             "baseName": "handle",

@@ -91,7 +91,7 @@ export const convertWaveToUpdateWave = (
     signature_required: !!wave.voting.signature_required,
     ...getPeriodUpdate(wave.voting.period),
     ...getCreditNftsUpdate(wave),
-    forbid_negative_votes: wave.voting.forbid_negative_votes,
+    forbid_negative_votes: !!wave.voting.forbid_negative_votes,
   },
   visibility: {
     scope: {

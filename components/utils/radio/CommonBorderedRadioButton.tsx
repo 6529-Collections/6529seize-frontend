@@ -5,6 +5,9 @@ type CommonBorderedRadioButtonProps<T extends string> = {
   readonly variant?: "default" | "subtle" | undefined;
   readonly ariaLabel?: string | undefined;
   readonly name?: string | undefined;
+  /** Keep native radio activation: selecting the current value does not emit a change. */
+  readonly nativeSelection?: boolean | undefined;
+  readonly multiline?: boolean | undefined;
   readonly onChange: (type: T) => void;
 } & (
   | { readonly label: string; readonly children?: undefined }
@@ -69,9 +72,12 @@ export default function CommonBorderedRadioButton<T extends string>({
   variant = "default",
   ariaLabel,
   name,
+  nativeSelection = false,
+  multiline = false,
   onChange,
   children,
 }: CommonBorderedRadioButtonProps<T>) {
+  const Wrapper = nativeSelection ? "label" : "div";
   const isSelected = selected === type;
   const isSubtle = variant === "subtle";
   const wrapperClasses = getWrapperClasses({
@@ -85,6 +91,9 @@ export default function CommonBorderedRadioButton<T extends string>({
     : "tw-text-primary-400 focus:tw-ring-primary-400";
 
   const labelClasses = getLabelClasses({ disabled, isSelected, isSubtle });
+  const focusClasses = nativeSelection
+    ? "has-[:focus-visible]:tw-ring-2 has-[:focus-visible]:tw-ring-inset has-[:focus-visible]:tw-ring-primary-400"
+    : "focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400";
 
   const onSelectedChange = () => {
     if (!disabled) {
@@ -92,23 +101,20 @@ export default function CommonBorderedRadioButton<T extends string>({
     }
   };
   return (
-    <div
-      onClick={onSelectedChange}
+    <Wrapper
+      onClick={nativeSelection ? undefined : onSelectedChange}
       className={`${wrapperClasses} tw-group tw-relative tw-flex tw-flex-1 ${
         isSubtle ? "tw-items-start" : "tw-items-center"
       } tw-gap-x-3 tw-border tw-border-solid tw-px-4 tw-py-4 ${
         isSubtle ? "" : "tw-ring-1 tw-ring-inset"
-      } ${
-        isSubtle
-          ? "focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400"
-          : ""
-      } tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none ${
+      } ${isSubtle ? focusClasses : ""} tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none ${
         disabled ? "tw-cursor-not-allowed tw-opacity-50" : "tw-cursor-pointer"
       }`}
     >
       <input
-        id={type}
+        id={nativeSelection && name ? `${name}-${type}` : type}
         type="radio"
+        value={nativeSelection ? type : undefined}
         name={name}
         disabled={disabled}
         checked={isSelected}
@@ -136,8 +142,18 @@ export default function CommonBorderedRadioButton<T extends string>({
           />
         </span>
       )}
-      <div className="tw-flex tw-items-center tw-truncate tw-whitespace-nowrap tw-transition tw-duration-300 tw-ease-out">
-        <div className="tw-flex tw-flex-col tw-truncate tw-text-sm tw-font-medium tw-transition tw-duration-300 tw-ease-out">
+      <span
+        className={`tw-flex tw-items-center tw-transition tw-duration-300 tw-ease-out ${
+          multiline
+            ? "tw-min-w-0 tw-whitespace-normal"
+            : "tw-truncate tw-whitespace-nowrap"
+        }`}
+      >
+        <span
+          className={`tw-flex tw-flex-col tw-text-sm tw-font-medium tw-transition tw-duration-300 tw-ease-out ${
+            multiline ? "tw-min-w-0" : "tw-truncate"
+          }`}
+        >
           {label ? (
             <span
               className={`${labelClasses} ${
@@ -149,8 +165,8 @@ export default function CommonBorderedRadioButton<T extends string>({
           ) : (
             children
           )}
-        </div>
-      </div>
-    </div>
+        </span>
+      </span>
+    </Wrapper>
   );
 }

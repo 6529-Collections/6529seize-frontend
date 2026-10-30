@@ -1,5 +1,6 @@
 "use client";
 
+import CommonBorderedRadioButton from "@/components/utils/radio/CommonBorderedRadioButton";
 import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -18,23 +19,21 @@ function CollectOrderPicker({
   const locale = useBrowserLocale();
   const id = useId();
   return (
-    <fieldset className="tw-mb-5 tw-min-w-0 tw-space-y-2 tw-border-0 tw-p-0">
-      <legend className="tw-mb-3 tw-text-sm tw-font-semibold tw-text-iron-100">
+    <fieldset className="tw-mx-0 tw-mb-5 tw-min-w-0 tw-space-y-2 tw-border-0 tw-p-0">
+      <legend className="tw-mb-2 tw-p-0 tw-text-sm tw-font-medium tw-text-iron-300">
         {t(locale, "collect.trade.selectOrder")}
       </legend>
       {orders.map((order) => (
-        <label
+        <CommonBorderedRadioButton
           key={order.identity.order_hash}
-          className="tw-flex tw-min-h-11 tw-cursor-pointer tw-items-start tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-p-3"
+          type={order.identity.order_hash}
+          selected={value ?? ""}
+          name={id}
+          variant="subtle"
+          nativeSelection
+          multiline
+          onChange={() => onChange(order)}
         >
-          <input
-            type="radio"
-            name={id}
-            value={order.identity.order_hash}
-            checked={value === order.identity.order_hash}
-            onChange={() => onChange(order)}
-            className="tw-mt-1 tw-size-4 tw-shrink-0 tw-accent-primary-500"
-          />
           <span className="tw-min-w-0 tw-space-y-1">
             <span className="tw-block tw-text-sm tw-font-semibold tw-text-iron-100">
               {marketAmount(order.total_wei, order.currency)}
@@ -48,7 +47,7 @@ function CollectOrderPicker({
               {t(locale, "collect.trade.orderMaker", { wallet: order.maker })}
             </span>
           </span>
-        </label>
+        </CommonBorderedRadioButton>
       ))}
     </fieldset>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useContext, useEffect, useMemo } from "react";
+import { useCallback, useContext, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { AuthContext } from "@/components/auth/Auth";
@@ -49,13 +49,10 @@ export default function UserPageXtdh({ profile }: UserPageXtdhProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const statsProfileId = useMemo(() =>
-    profile.query ??
-    profile.handle ??
-    profile.primary_wallet ??
-    profile.consolidation_key ??
-    null,
-    [profile.consolidation_key, profile.handle, profile.primary_wallet, profile.query]);
+  const statsProfileId = useMemo(
+    () => profile.query ?? profile.handle ?? profile.primary_wallet,
+    [profile.handle, profile.primary_wallet, profile.query]
+  );
 
   const activeFilter = useMemo(
     () => parseFilter(searchParams?.get("tab") ?? null),
@@ -79,19 +76,6 @@ export default function UserPageXtdh({ profile }: UserPageXtdhProps) {
     profile.consolidation_key,
     profile.handle,
   ]);
-
-  useEffect(() => {
-    if (!pathname) return;
-    if (searchParams?.has("tab")) return;
-
-    const params = new URLSearchParams(searchParams?.toString());
-    params.set("tab", DEFAULT_FILTER);
-    const queryString = params.toString();
-
-    router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
-      scroll: false,
-    });
-  }, [pathname, router, searchParams]);
 
   const handleFilterChange = useCallback(
     (filter: XtdhViewFilter) => {

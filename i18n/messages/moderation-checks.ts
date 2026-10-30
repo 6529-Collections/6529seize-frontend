@@ -1,4 +1,33 @@
+const NEEDS_REVIEW = "Needs review";
+
 export const MODERATION_CHECK_MESSAGES = {
+  "checks.caseAuthor": "Author: {profile}",
+  "checks.caseReports": "User reports for this case",
+  "checks.reviewReport": "Review report",
+  "checks.caseOutcome": "Automated outcome: {outcome}",
+  "checks.automatedOutcome": "Automated outcome: {outcome}",
+  "checks.backToNeedsReview": "Back to Needs review",
+  "checks.backToList": "Back to list",
+  "checks.needsReviewOnly": "Needs review only",
+  "checks.unappliedChanges": "Unapplied changes",
+  "checks.needsReview": NEEDS_REVIEW,
+  "checks.allChecks": "All checks",
+  "checks.selectedCase": "Selected",
+  "checks.reviewCaseDetails": "Case details",
+  "checks.reviewWorkspace": NEEDS_REVIEW,
+  "checks.caseChecks": "Checks for this case",
+  "checks.caseResolved": "This case no longer needs review.",
+  "checks.selectCase": "Select a case to review.",
+  "checks.caseFilter":
+    "Showing checks for this case. Clear filters to return to all checks.",
+  "checks.caseRequirements":
+    "Open reports: {reports} · Checks needing review: {checks}",
+  "checks.reviewCase": "Review case",
+  "contentModeration.moderator.tabs.needsReview": NEEDS_REVIEW,
+  "contentModeration.moderator.tabs.needsReviewCompact": "Review",
+  "checks.queue.userReport": "User report",
+  "checks.queue.automatedCheck": "Automated check",
+  "checks.queue.empty": "There are no items needing review.",
   "checks.operation.CREATE": "Create",
   "checks.operation.UPDATE": "Update",
   "checks.operation.SAVE": "Save",
@@ -30,7 +59,7 @@ export const MODERATION_CHECK_MESSAGES = {
   "checks.count.rejected_today": "Rejected checks today",
   "checks.count.evaluator_failures_today": "Evaluator failures today",
   "checks.count.help":
-    "Today is measured in UTC. Counts cover all items, independently of filters.",
+    "Needs review counts unique cases with open reports or checks awaiting manual review. Today is measured in UTC. Counts are independent of filters.",
   "checks.filters": "Filter checks",
   "checks.filter.subject_type": "Content type",
   "checks.filter.outcome": "Check outcome",
@@ -58,7 +87,7 @@ export const MODERATION_CHECK_MESSAGES = {
   "checks.outcome.PENDING": "Pending",
   "checks.policy.PUBLIC_FIELDS": "Public-facing text",
   "checks.policy.WAVE_CONTENT": "Wave safety",
-  "checks.review.NEEDS_REVIEW": "Needs review",
+  "checks.review.NEEDS_REVIEW": NEEDS_REVIEW,
   "checks.review.REVIEWED": "Reviewed",
   "checks.trigger.SUBMISSION": "Submission",
   "checks.trigger.REPORT": "Report",
@@ -121,6 +150,11 @@ export const MODERATION_CHECK_MESSAGES = {
   "checks.action.BLOCK": "Uphold rejection",
   "checks.action.REVOKE_OVERRIDE": "Revoke override or permit",
   "checks.action.MARK_REVIEWED": "Mark reviewed",
+  "checks.action.RESOLVE_DELETED_REPORT": "Resolve reports — post deleted",
+  "checks.deletedReportHelp":
+    "This post has been deleted. Resolve reports — post deleted closes all its open reports with a reason and removes them from the open queue. Saved evidence and decision history remain available; the post is not restored.",
+  "checks.markReviewedHelp":
+    "Mark reviewed records a review of this check. It does not resolve the post’s open reports.",
   "checks.action.SUPPRESS": "Suppress this field",
   "checks.action.RESTORE": "Restore this revision",
   "checks.action.QUARANTINE": "Quarantine post",

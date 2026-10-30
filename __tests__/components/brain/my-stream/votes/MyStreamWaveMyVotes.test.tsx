@@ -30,16 +30,23 @@ jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
 jest.mock(
   "@/components/brain/my-stream/votes/MyStreamWaveMyVote",
   () => (p: any) => (
-    <button
-      type="button"
-      data-testid="vote"
-      data-is-checked={String(p.isChecked)}
-      data-is-voting-closed={String(p.isVotingClosed)}
-      data-winning-threshold={p.winningThreshold ?? ""}
-      onClick={() => p.onToggleCheck(p.drop.id)}
-    >
-      {p.drop.id}
-    </button>
+    <>
+      <button
+        type="button"
+        data-testid="vote"
+        data-is-checked={String(p.isChecked)}
+        data-is-voting-closed={String(p.isVotingClosed)}
+        data-winning-threshold={p.winningThreshold ?? ""}
+        onClick={() => p.onToggleCheck(p.drop.id)}
+      >
+        {p.drop.id}
+      </button>
+      {p.onExplainVote && (
+        <button type="button" onClick={() => p.onExplainVote(p.drop, 2, 0)}>
+          Explain vote
+        </button>
+      )}
+    </>
   )
 );
 jest.mock(
@@ -79,6 +86,40 @@ describe("MyStreamWaveMyVotes", () => {
     resetProps = null;
   });
 
+  it.each([
+    { canChat: true, parts: [{ part_id: 1 }], expected: true },
+    { canChat: false, parts: [{ part_id: 1 }], expected: false },
+    { canChat: undefined, parts: [{ part_id: 1 }], expected: false },
+    { canChat: true, parts: [], expected: false },
+  ])(
+    "offers Explain vote only for an eligible, replyable drop: %j",
+    ({ canChat, parts, expected }) => {
+      useWaveDropsLeaderboardMock.mockReturnValue({
+        drops: [
+          {
+            id: "a",
+            wave: { authenticated_user_eligible_to_chat: canChat },
+            parts,
+            context_profile_context: { rating: 2, max_rating: 10 },
+          },
+        ],
+        fetchNextPage: jest.fn(),
+        hasNextPage: false,
+        isFetching: false,
+        isFetchingNextPage: false,
+      });
+      render(
+        <AuthContext.Provider value={auth}>
+          <MyStreamWaveMyVotes wave={wave} onDropClick={onDropClick} />
+        </AuthContext.Provider>
+      );
+      expect(
+        screen.queryByRole("button", { name: "Explain vote" }) !== null
+      ).toBe(expected);
+      expect(screen.getByTestId("vote")).toBeInTheDocument();
+    }
+  );
+
   it("shows empty message when no drops", () => {
     useWaveDropsLeaderboardMock.mockReturnValue({
       drops: [],
@@ -104,6 +145,8 @@ describe("MyStreamWaveMyVotes", () => {
       drops: [
         {
           id: "a",
+          wave: { authenticated_user_eligible_to_chat: true },
+          parts: [{ part_id: 1 }],
           context_profile_context: { rating: 2, max_rating: 10 },
         },
       ],
@@ -129,6 +172,8 @@ describe("MyStreamWaveMyVotes", () => {
       drops: [
         {
           id: "a",
+          wave: { authenticated_user_eligible_to_chat: true },
+          parts: [{ part_id: 1 }],
           context_profile_context: { rating: 2, max_rating: 10 },
         },
       ],
@@ -159,6 +204,8 @@ describe("MyStreamWaveMyVotes", () => {
       drops: [
         {
           id: "a",
+          wave: { authenticated_user_eligible_to_chat: true },
+          parts: [{ part_id: 1 }],
           context_profile_context: { rating: 1, max_rating: 5 },
         },
       ],
@@ -189,6 +236,8 @@ describe("MyStreamWaveMyVotes", () => {
       drops: [
         {
           id: "a",
+          wave: { authenticated_user_eligible_to_chat: true },
+          parts: [{ part_id: 1 }],
           context_profile_context: { rating: 1, max_rating: 5 },
         },
       ],
@@ -230,6 +279,8 @@ describe("MyStreamWaveMyVotes", () => {
       drops: [
         {
           id: "a",
+          wave: { authenticated_user_eligible_to_chat: true },
+          parts: [{ part_id: 1 }],
           context_profile_context: { rating: 1, max_rating: 5 },
         },
       ],
@@ -266,6 +317,8 @@ describe("MyStreamWaveMyVotes", () => {
       drops: [
         {
           id: "a",
+          wave: { authenticated_user_eligible_to_chat: true },
+          parts: [{ part_id: 1 }],
           context_profile_context: { rating: 1, max_rating: 5 },
         },
       ],
@@ -303,6 +356,8 @@ describe("MyStreamWaveMyVotes", () => {
       drops: [
         {
           id: "a",
+          wave: { authenticated_user_eligible_to_chat: true },
+          parts: [{ part_id: 1 }],
           context_profile_context: { rating: 1, max_rating: 5 },
         },
       ],
@@ -337,6 +392,8 @@ describe("MyStreamWaveMyVotes", () => {
       drops: [
         {
           id: "a",
+          wave: { authenticated_user_eligible_to_chat: true },
+          parts: [{ part_id: 1 }],
           context_profile_context: { rating: 1, max_rating: 5 },
         },
       ],

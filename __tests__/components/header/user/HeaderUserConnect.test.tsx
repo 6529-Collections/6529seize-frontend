@@ -17,6 +17,28 @@ it("calls seizeConnectFresh on click", async () => {
   expect(seizeConnectFresh).toHaveBeenCalled();
 });
 
+it("shows a busy state until the wallet connection opens", async () => {
+  const user = userEvent.setup();
+  let finishOpening!: () => void;
+  const seizeConnectFresh = jest.fn(
+    () =>
+      new Promise<void>((resolve) => {
+        finishOpening = resolve;
+      })
+  );
+  (useSeizeConnectContext as jest.Mock).mockReturnValue({ seizeConnectFresh });
+  render(<HeaderUserConnect />);
+  const button = screen.getByRole("button", { name: "Connect" });
+
+  await user.click(button);
+  expect(button).toHaveAttribute("aria-busy", "true");
+  expect(button).toBeDisabled();
+
+  finishOpening();
+  await waitFor(() => expect(button).not.toHaveAttribute("aria-busy"));
+  expect(button).toBeEnabled();
+});
+
 it("reports fresh connect failures", async () => {
   const user = userEvent.setup();
   const setToast = jest.fn();

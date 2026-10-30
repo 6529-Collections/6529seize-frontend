@@ -1,4 +1,7 @@
 export const PROFILE_CURATION_MESSAGES = {
+  "profileCuration.editor.createTitle": "Create curation",
+  "profileCuration.editor.editTitle": "Edit curation",
+  "profileCuration.editor.groupBack": "Back to selected group",
   "profileCuration.setup.title": "Create a Curation",
   "profileCuration.setup.intro": "Give your Curation a name to get started.",
   "profileCuration.setup.nameLabel": "Curation name",

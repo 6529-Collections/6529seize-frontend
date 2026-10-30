@@ -26,9 +26,10 @@ export default function ProfileCollectedActivityLink({
   const returnContext = getProfileCollectedReturnContext(
     `${pathname}?${searchParams.toString()}#${anchor}`
   );
+  const separator = href.includes("?") ? "&" : "?";
   const linkHref =
     href && returnContext
-      ? `${href}?${new URLSearchParams({
+      ? `${href}${separator}${new URLSearchParams({
           [PROFILE_COLLECTED_RETURN_PARAM]: returnContext.href,
         }).toString()}`
       : href;

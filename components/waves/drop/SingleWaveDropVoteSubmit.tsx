@@ -93,7 +93,8 @@ const SingleWaveDropVoteSubmit = forwardRef<
     ref
   ) => {
     const position = drop.rank;
-    const { requestAuth, setToast } = useContext(AuthContext);
+    const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
+      useContext(AuthContext);
     const queryClient = useQueryClient();
     const [loading, setLoading] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
@@ -129,7 +130,11 @@ const SingleWaveDropVoteSubmit = forwardRef<
           },
         }),
       onSuccess: (updatedDrop) => {
-        applyWaveDropVoteUpdate(queryClient, updatedDrop, drop.wave.id);
+        applyWaveDropVoteUpdate(queryClient, updatedDrop, drop.wave.id, {
+          contextProfile: activeProfileProxy
+            ? undefined
+            : connectedProfile?.handle,
+        });
       },
       onError: (error) => {
         setToast({

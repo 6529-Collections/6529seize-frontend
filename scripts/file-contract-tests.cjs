@@ -13,6 +13,10 @@ const CONTRACTS = [
     inputs: [/^\.github\/workflows\/device-farm-qa\.yml$/u],
   },
   {
+    test: "__tests__/scripts/mobile-lab-workflow.test.ts",
+    inputs: [/^\.github\/workflows\/mobile-lab\.yml$/u],
+  },
+  {
     test: "__tests__/scripts/production-canary-workflow.test.ts",
     inputs: [/^\.github\/workflows\/production-e2e\.yml$/u],
   },
