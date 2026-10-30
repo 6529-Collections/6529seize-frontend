@@ -5948,7 +5948,7 @@
       ],
       "facts": [
         "The notifications feed lives at /notifications.",
-        "Opening Notifications marks notifications read. Rows still reported as unread display an Unread label and dot; grouped reactions are unread while any notification in the group is unread. The label disappears when refreshed data confirms the notifications are read.",
+        "Opening the desktop sidebar bell previews notifications without leaving the current page or marking them read. The newest rows appear first with compact previews and Load more for older items. Clicking a row marks that notification read and opens its destination; Mark all as read explicitly clears unread notifications. Close with Escape, the close button, the bell, or a click outside. View all notifications opens /notifications. Mobile and app bells still open the full page directly. Opening the full /notifications page marks notifications read. Rows still reported as unread display an Unread label and dot; grouped reactions are unread while any notification in the group is unread. The label disappears when refreshed data confirms the notifications are read.",
         "A connected wallet without a profile sees the profile setup prompt and can open its profile setup route with Create profile.",
         "It supports a responsive multi-select feed filter, row actions, read state, paging, and navigation to related app content.",
         "The notification filter opens as a bottom sheet in the mobile layout and as an anchored dropdown on wider viewports.",
@@ -6059,6 +6059,7 @@
         "Push notification behavior depends on mobile app support and notification permissions.",
         "After a phone transfer, push registration uses a separate native-device identity. Old cleanup retries stay saved but cannot block the replacement phone. Migration removes only old registrations matching this phone’s current push token; other phones remain connected and notification preferences carry forward.",
         "If only some connected profiles finish push registration, returning to the active app or reconnecting retries registration while preserving successful profiles and old delivery targets. Reconnect a profile whose saved session has expired.",
+        "If signing out before the phone first registered for push left cleanup waiting for a missing or expired session, connecting a fresh account session lets the app reconcile it without signing out the fresh login. Push registration resumes after cleanup succeeds; failed cleanup stays saved.",
         "Push settings include toggles for Identity - REP, Identity - NIC, New Follows, Mentions, Drops - Quoted, Drops - Replied, Drops - Voted, Drops - Reacted, Drops - Boosted, Wave Invites, and Subscription Coverage.",
         "Running-low and action-required subscription coverage can send mobile push; the earlier plan-a-top-up alert remains in the in-app feed without a push.",
         "Tapping a subscription coverage push opens the matching profile's Subscriptions tab.",
