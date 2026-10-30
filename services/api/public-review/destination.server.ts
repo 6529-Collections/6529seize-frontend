@@ -148,3 +148,96 @@ export function resolvePublicReviewDiscussionDestination({
 
   return { logicalKey, environment, waveId };
 }
+
+const SITE_DESTINATION_TIMEOUT_MS = 15_000;
+const SITE_DESTINATION_CACHE_MS = 10 * 60_000;
+
+const siteDestinations = new Map<
+  string,
+  {
+    readonly destination: Promise<PublicReviewDiscussionDestination>;
+    readonly expiresAt: number;
+  }
+>();
+
+async function requestSiteDestination({
+  environment,
+  logicalKey,
+  url,
+}: {
+  readonly environment: PublicReviewEnvironment;
+  readonly logicalKey: string;
+  readonly url: URL;
+}): Promise<PublicReviewDiscussionDestination> {
+  const response = await fetch(url, {
+    headers: { Accept: "application/json" },
+    redirect: "error",
+    signal: AbortSignal.timeout(SITE_DESTINATION_TIMEOUT_MS),
+  });
+  if (!response.ok) {
+    throw new Error(
+      `The site's public review destination is unavailable (HTTP ${response.status}).`
+    );
+  }
+
+  const payload: unknown = await response.json();
+  const waveId = isRecord(payload) ? payload["waveId"] : undefined;
+  if (
+    !isRecord(payload) ||
+    payload["environment"] !== environment ||
+    payload["logicalKey"] !== logicalKey ||
+    typeof waveId !== "string" ||
+    !WAVE_ID_PATTERN.test(waveId)
+  ) {
+    throw new Error("The site returned an invalid public review destination.");
+  }
+
+  return { logicalKey, environment, waveId: waveId.toLowerCase() };
+}
+
+/**
+ * Asks the site for a destination, for servers that carry none of the site's
+ * configuration (the desktop app). The site's review pages already show the
+ * destination to every reader. Answers are kept for ten minutes.
+ */
+export function fetchSitePublicReviewDiscussionDestination({
+  environment,
+  logicalKey,
+  path,
+  siteOrigin,
+}: {
+  readonly environment: PublicReviewEnvironment;
+  readonly logicalKey: string;
+  readonly path: string;
+  readonly siteOrigin: string;
+}): Promise<PublicReviewDiscussionDestination> {
+  if (!isValidLogicalKey(logicalKey)) {
+    return Promise.reject(new Error("Invalid public review destination key."));
+  }
+  const origin = new URL(siteOrigin).origin;
+  const url = new URL(path, origin);
+  if (url.origin !== origin) {
+    return Promise.reject(
+      new Error("The public review destination path leaves the site.")
+    );
+  }
+
+  const cacheKey = `${environment}:${logicalKey}:${url.toString()}`;
+  const now = Date.now();
+  const cached = siteDestinations.get(cacheKey);
+  if (cached && cached.expiresAt > now) {
+    return cached.destination;
+  }
+
+  const destination = requestSiteDestination({ environment, logicalKey, url });
+  siteDestinations.set(cacheKey, {
+    destination,
+    expiresAt: now + SITE_DESTINATION_CACHE_MS,
+  });
+  destination.catch(() => {
+    if (siteDestinations.get(cacheKey)?.destination === destination) {
+      siteDestinations.delete(cacheKey);
+    }
+  });
+  return destination;
+}

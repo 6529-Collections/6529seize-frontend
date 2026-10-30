@@ -34,6 +34,7 @@ interface MemesArtSubmissionStepContentProps {
   readonly onPromoVideoChange: (url: string) => void;
 }
 
+/** Wire the active submission step to its draft, including the optional public plan. */
 export function MemesArtSubmissionStepContent({
   form,
   wave,
@@ -105,6 +106,8 @@ export function MemesArtSubmissionStepContent({
         <ArtworkStep
           proposalFrame={form.proposalFrame}
           onProposalFrameChange={form.setProposalFrame}
+          collaborators={form.collaborators}
+          onCollaboratorsChange={form.setCollaborators}
           traits={form.traits}
           artworkUploaded={form.artworkUploaded}
           artworkUrl={form.artworkUrl}
@@ -134,6 +137,10 @@ export function MemesArtSubmissionStepContent({
           setTraits={form.setTraits}
           isAdditionalActionPromised={form.isAdditionalActionPromised}
           onAdditionalActionPromisedChange={form.setAdditionalActionPromised}
+          additionalActionPlan={
+            form.operationalData.additional_action_plan ?? ""
+          }
+          onAdditionalActionPlanChange={form.setAdditionalActionPlan}
           isSubmitting={isSubmitting}
           submissionPhase={submissionPhase}
           uploadProgress={uploadProgress}
@@ -146,6 +153,7 @@ export function MemesArtSubmissionStepContent({
       if (isPreviewMode && previewDrop) {
         return (
           <MemesSubmissionPreviewScreen
+            collaborators={form.collaborators}
             proposalCard={
               form.proposalFrame
                 ? {
@@ -176,6 +184,10 @@ export function MemesArtSubmissionStepContent({
       return (
         <AdditionalInfoStep
           traits={form.traits}
+          isAdditionalActionPromised={form.isAdditionalActionPromised}
+          additionalActionPlan={
+            form.operationalData.additional_action_plan ?? ""
+          }
           airdropEntries={form.operationalData.airdrop_config}
           onAirdropEntriesChange={form.setAirdropConfig}
           paymentInfo={form.operationalData.payment_info}

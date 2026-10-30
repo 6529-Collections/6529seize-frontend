@@ -124,6 +124,6 @@ The standard wave composer supports metadata submissions.
 - [Wave Curation URL Submissions](feature-curation-url-submissions.md)
 - [Wave Drop Composer Enter-Key Behavior](feature-enter-key-behavior.md)
 - [Wave Drop Composer Body Length Limits and Storm Rules](feature-wave-drop-body-length-limits.md)
-- [Wave Creation Drop Settings](../create/feature-drops-step.md)
+- [Wave Creation Drop Settings](../competitions/setup/feature-drops-step.md)
 - [Wave Drop Content Display](../drop-actions/feature-content-display.md)
 - [Docs Home](../../README.md)

@@ -5,6 +5,7 @@ import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import DropListItemContentMediaAudio from "./DropListItemContentMediaAudio";
 import { ImageScale } from "@/helpers/image.helpers";
 import type { MediaLoadStrategy } from "./mediaLoadStrategy";
+import type { GifPreviewLoadingLayout } from "./GifPreviewLoadingIndicator";
 
 import DropListItemContentMediaImage from "./DropListItemContentMediaImage";
 import DropListItemContentMediaVideo from "./DropListItemContentMediaVideo";
@@ -46,6 +47,8 @@ export default function DropListItemContentMedia({
   galleryItemId,
   showOriginalQualityToggle = false,
   preferHighQualityImage = false,
+  autoAnimateGif = false,
+  imageLoadingLayout = "inline",
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
@@ -64,6 +67,8 @@ export default function DropListItemContentMedia({
   readonly galleryItemId?: string | undefined;
   readonly showOriginalQualityToggle?: boolean | undefined;
   readonly preferHighQualityImage?: boolean | undefined;
+  readonly autoAnimateGif?: boolean | undefined;
+  readonly imageLoadingLayout?: GifPreviewLoadingLayout | undefined;
 }) {
   const dropContext = useOptionalDropContext();
   const showVideoFullscreen = dropContext?.showVideoFullscreen ?? true;
@@ -107,6 +112,8 @@ export default function DropListItemContentMedia({
           galleryItemId={galleryItemId}
           showOriginalQualityToggle={showOriginalQualityToggle}
           preferHighQualityImage={preferHighQualityImage}
+          autoAnimateGif={autoAnimateGif}
+          imageLoadingLayout={imageLoadingLayout}
         />
       );
     case MediaType.VIDEO:

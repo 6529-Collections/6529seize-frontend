@@ -17,9 +17,14 @@ import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useAuth } from "@/components/auth/Auth";
+import { isAuthResolving } from "@/components/auth/authResolution";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import Button from "@/components/utils/button/Button";
+import { JoinedWavesListRecovery } from "./JoinedWavesListRecovery";
 
 interface UnifiedWavesListProps {
+  readonly hasLoadingError?: boolean | undefined;
+  readonly retryLoading?: (() => void) | undefined;
   readonly waves: MinimalWave[];
   readonly fetchNextPage: () => void;
   readonly hasNextPage: boolean | undefined;
@@ -32,6 +37,8 @@ interface UnifiedWavesListProps {
 
 const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   waves,
+  hasLoadingError = false,
+  retryLoading,
   fetchNextPage,
   hasNextPage,
   isFetching,
@@ -48,10 +55,15 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   const [search] = useWaveSidebarSearch(key ?? "guest");
   const isSearching = Boolean(search.trim());
   const collection = canUseCollections ? savedCollection : "all";
+  const { connectedProfile, activeProfileProxy, fetchingProfile } = useAuth();
+  const { connectionState } = useSeizeConnectContext();
+  // This list already consumes the wallet identity through discovery. Keep
+  // its empty state pending until wallet and profile restoration settle.
   const collectionFetching =
-    isFetching || (collection === "pinned" && isPinnedWavesLoading);
+    isFetching ||
+    isAuthResolving(connectionState, fetchingProfile) ||
+    (collection === "pinned" && isPinnedWavesLoading);
   const [following] = useShowFollowingWaves();
-  const { connectedProfile, activeProfileProxy } = useAuth();
   const isJoinedFilterActive =
     following && !!connectedProfile?.handle && !activeProfileProxy;
   // Refs to the scroll container and sentinel
@@ -68,13 +80,15 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   // Reset the fetch flag when dependencies change
   useEffect(() => {
     hasFetchedRef.current = false;
-  }, [hasNextPage, isFetchingNextPage]);
+  }, [hasNextPage, isFetchingNextPage, isFetching]);
 
   // Set up intersection observer for infinite scrolling
   useEffect(() => {
     const sentinel = listRef.current?.sentinelRef.current;
     if (
       !sentinel ||
+      hasLoadingError ||
+      isFetching ||
       isSearching ||
       collection === "pinned" ||
       !hasNextPage ||
@@ -102,7 +116,14 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
     obs.observe(sentinel);
 
     return () => obs.disconnect();
-  }, [collection, isSearching, hasNextPage, isFetchingNextPage]);
+  }, [
+    collection,
+    isSearching,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching,
+    hasLoadingError,
+  ]);
 
   return (
     <div className="tw-mb-4">
@@ -144,7 +165,16 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
           />
 
           {/* Empty state */}
-          {!isSearching && (
+          {!isSearching && collection === "joined" && (
+            <JoinedWavesListRecovery
+              hasError={hasLoadingError}
+              hasNextPage={hasNextPage === true}
+              isFetching={collectionFetching || isFetchingNextPage}
+              onLoadMore={fetchNextPage}
+              onRetry={retryLoading ?? fetchNextPage}
+            />
+          )}
+          {!isSearching && !hasLoadingError && (
             <UnifiedWavesListEmpty
               sortedWaves={waves}
               isFetching={collectionFetching}

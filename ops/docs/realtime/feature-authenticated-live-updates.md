@@ -56,6 +56,7 @@ updates. When auth is missing, the session disconnects and push updates pause.
 - Temporary disconnects retry automatically while auth is still valid, using
   exponential backoff (`2s`, `3s`, `4.5s`, capped at `30s`) with +/-25%
   random jitter on every delay so clients do not reconnect in lockstep.
+- After reconnect, foreground resume, or a server request to recover missed updates, active data queries refresh after a short staggered delay. Repeated requests are combined; background tabs wait until visible. Inactive queries refresh when needed.
 - Live-update listeners remain ready while the connection recovers, so Waves
   and Messages resume receiving supported events as soon as reconnection and
   authentication finish.
@@ -74,7 +75,7 @@ updates. When auth is missing, the session disconnects and push updates pause.
 
 ## Failure and Recovery
 
-- Unexpected closes (non-`1000`) with a valid token trigger automatic retries.
+- Server-initiated closes, including normal closes, trigger automatic retries while auth remains valid. Signing out and intentional local disconnects still stop the session. Automatic closure of a persistently blocked listener requires the updated client to advertise recovery support; older tabs retain their existing behavior until refreshed.
 - Retry scheduling allows up to `20` attempts by default (`2s`, `3s`, `4.5s`,
   capped at `30s`, each +/-25% jittered).
 - After the cap is reached, scheduled reconnect retries stop; periodic health

@@ -21,10 +21,21 @@ const EVIDENCE_HEADERS = new Set([
 const MAX_RECORDS = 32;
 const MAX_REQUESTS = 128;
 
-export function museumMediaEvidenceUrl(value: string): string | null {
+export function museumMediaEvidenceUrl(
+  value: string,
+  documentUrl?: string
+): string | null {
   try {
     const url = new URL(value);
-    if (url.protocol !== "https:" || !MEDIA_HOSTS.has(url.hostname))
+    const isEditorialImage =
+      documentUrl !== undefined &&
+      url.origin === new URL(documentUrl).origin &&
+      /^\/museum\/.*\.(?:webp|png|jpe?g|avif)$/iu.test(url.pathname) &&
+      ["https:", "http:"].includes(url.protocol);
+    if (
+      !isEditorialImage &&
+      (url.protocol !== "https:" || !MEDIA_HOSTS.has(url.hostname))
+    )
       return null;
     return `${url.origin}${url.pathname}`;
   } catch {
@@ -60,8 +71,12 @@ export async function attachMuseumMediaDiagnostics(
   };
   session.on(
     "Network.requestWillBeSent",
-    (event: { requestId: string; request: { url: string } }) => {
-      const url = museumMediaEvidenceUrl(event.request.url);
+    (event: {
+      requestId: string;
+      documentURL?: string;
+      request: { url: string };
+    }) => {
+      const url = museumMediaEvidenceUrl(event.request.url, event.documentURL);
       if (url === null) {
         requests.delete(event.requestId);
         return;
@@ -101,6 +116,7 @@ export async function attachMuseumMediaDiagnostics(
       const url = requests.get(event.requestId);
       if (url === undefined) return;
       // Bodies withheld by ORB cannot be inferred from a later HTTP replay.
+      requests.delete(event.requestId);
       record({
         url,
         error: event.errorText,
@@ -108,8 +124,12 @@ export async function attachMuseumMediaDiagnostics(
       });
     }
   );
+  session.on("Network.loadingFinished", (event: { requestId: string }) => {
+    requests.delete(event.requestId);
+  });
   await session.send("Network.enable");
   return async () => {
+    for (const url of requests.values()) record({ url, pendingAtEnd: true });
     await session.detach().catch(() => undefined);
   };
 }

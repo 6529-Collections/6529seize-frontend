@@ -49,6 +49,16 @@ export const CONTENT_MODERATION_MESSAGES = {
   "contentModeration.report.underReview": "Reported · Under review",
   "contentModeration.report.noActionTaken": "Reviewed · No action taken",
   "contentModeration.report.contentRemoved": "Reviewed · Content removed",
+  "contentModeration.report.contentDeleted": "Resolved · Post deleted",
+  "contentModeration.report.outcomeDeleted": "Post deleted",
+  "contentModeration.originalPost.open": "Open original post",
+  "contentModeration.originalPost.deleted": "Deleted",
+  "contentModeration.originalPost.deletedHelp":
+    "Original post deleted. Saved evidence retained.",
+  "contentModeration.originalPost.deletedWithoutEvidence":
+    "Original post deleted.",
+  "contentModeration.originalPost.unavailable":
+    "Original post link unavailable: the saved Wave or post ID is missing or invalid.",
   "contentModeration.report.outcomeTitle": "Report outcome",
   "contentModeration.report.outcomePendingDescription":
     "Your report is awaiting moderator review.",
@@ -165,7 +175,7 @@ export const CONTENT_MODERATION_MESSAGES = {
     "Couldn't check your WatchTower access. Try again.",
   "contentModeration.moderator.retryAccess": "Retry permission check",
   "contentModeration.moderator.openReportsIndicator":
-    "Open reports need review",
+    "Cases need manual review",
   "contentModeration.moderator.loadError": "Couldn't load WatchTower.",
   "contentModeration.moderator.reason": "Moderator note (optional)",
   "contentModeration.moderator.reasonPlaceholder":

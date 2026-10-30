@@ -1,6 +1,7 @@
 import { act, render } from "@testing-library/react";
 import WebBrainLeftSidebarWaves from "@/components/brain/left-sidebar/web/WebBrainLeftSidebarWaves";
 import { MyStreamProvider, useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useWaveDataManager } from "@/contexts/wave/hooks/useWaveDataManager";
 import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 
 const mockSetActiveWave = jest.fn();
@@ -99,6 +100,9 @@ jest.mock("@/contexts/wave/hooks/useWaveMessagesStore", () => ({
     removeDrop: jest.fn(),
     subscribe: jest.fn(),
     unsubscribe: jest.fn(),
+    trackActiveWave: jest.fn(),
+    isWaveInUse: jest.fn(() => false),
+    subscribeToEvictions: jest.fn(() => () => {}),
     optimisticUpdateDrop: jest.fn(),
     hasServerFeedSeed: jest.fn(() => false),
     registerPendingServerFeedSeed: jest.fn(),
@@ -260,6 +264,52 @@ describe("MyStreamProvider resume sync", () => {
       ...createListData(dmRefetch, dmRefreshStale),
       viewerIdentityKey: "wallet:primary",
     });
+  });
+
+  it("keeps the active wave cached and releases the data of evicted waves", async () => {
+    useWaveMessagesStoreMock.mockImplementation(
+      jest.requireActual("@/contexts/wave/hooks/useWaveMessagesStore").default
+    );
+    const { getContext } = renderWithContext();
+    const updateData = jest
+      .mocked(useWaveDataManager)
+      .mock.calls.at(-1)?.[0].updateData;
+    const waveIds = [
+      "wave-1",
+      "wave-2",
+      "wave-3",
+      "wave-4",
+      "wave-5",
+      "wave-6",
+      "wave-7",
+    ];
+    mockCancelWaveDataFetch.mockClear();
+    mockCancelPaginationFetch.mockClear();
+
+    for (const waveId of waveIds) {
+      act(() => updateData?.({ key: waveId, isLoading: true, drops: [] }));
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+    }
+
+    const { getData } = getContext().waveMessagesStore;
+    // wave-1 is the active wave, so the two least recent others go instead.
+    expect(waveIds.filter((waveId) => getData(waveId) !== undefined)).toEqual([
+      "wave-1",
+      "wave-4",
+      "wave-5",
+      "wave-6",
+      "wave-7",
+    ]);
+    expect(mockCancelWaveDataFetch.mock.calls).toEqual([
+      ["wave-2"],
+      ["wave-3"],
+    ]);
+    expect(mockCancelPaginationFetch.mock.calls).toEqual([
+      ["wave-2"],
+      ["wave-3"],
+    ]);
   });
 
   it.each([

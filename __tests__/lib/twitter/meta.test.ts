@@ -1,3 +1,5 @@
+jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
+
 import { extractMetaImage } from "@/lib/twitter/meta";
 
 describe("extractMetaImage", () => {
