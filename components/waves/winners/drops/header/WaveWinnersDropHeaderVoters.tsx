@@ -23,8 +23,8 @@ export default function WaveWinnersDropHeaderVoters({
   const hasTopRaters = winner.drop.top_raters.length > 0;
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-4 tw-gap-y-2">
-      <div className="tw-flex tw-items-center tw-gap-2 tw-whitespace-nowrap tw-text-sm tw-leading-5">
+    <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-whitespace-nowrap tw-text-sm tw-leading-5">
         {hasTopRaters && (
           <div className="tw-flex tw-items-center -tw-space-x-2">
             {winner.drop.top_raters.map((voter, index) => (

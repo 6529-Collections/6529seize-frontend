@@ -1,3 +1,5 @@
+import { installGroupGrantFixtures } from "../support/groupGrantFixtures";
+import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import type { Locator, Page } from "@playwright/test";
 
 import {
@@ -259,7 +261,11 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       "Collection Access",
       "xTDH Grant",
     ];
-    await expect(choices.getByRole("button")).toHaveText(criteria);
+    await expect(
+      filter
+        .getByRole("group", { name: "Filter Network", includeHidden: true })
+        .locator("[data-criterion]")
+    ).toHaveText(criteria);
     const identityEditor = filter.getByRole("region", { name: "Identities" });
     if (narrowFilter) {
       await expect(identityEditor).toBeHidden();
@@ -298,7 +304,9 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     });
     await expect(apply).toBeDisabled();
     await expect(apply).toBeInViewport({ ratio: 1 });
-    await expect(filter.getByText("No criteria selected")).toBeInViewport();
+    const emptySummary = filter.getByText("No criteria selected");
+    if (narrowFilter) await emptySummary.scrollIntoViewIfNeeded();
+    await expect(emptySummary).toBeInViewport();
     await expect(
       filter.getByText("Before editing", { exact: true })
     ).toHaveCount(0);
@@ -380,15 +388,18 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await clearGrantFilters.click();
     await expect(collectionName).toHaveValue("");
     await expect(clearGrantFilters).toHaveCount(0);
-    await filter.getByRole("button", { name: "Pending", exact: true }).click();
+    await filter.getByRole("tab", { name: "Pending", exact: true }).click();
+    await expect(clearGrantFilters).toHaveCount(0);
+    await collectionName.fill("Memes");
     await expect(clearGrantFilters).toBeVisible();
     await clearGrantFilters.click();
     await expect(
-      filter.getByRole("button", { name: "Granted", exact: true })
-    ).toHaveAttribute("aria-pressed", "true");
+      filter.getByRole("tab", { name: "Pending", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
     await expect(
-      filter.getByRole("button", { name: "Granted", exact: true })
+      filter.getByRole("tab", { name: "Pending", exact: true })
     ).toBeFocused();
+    await expect(collectionName).toHaveValue("");
     await expect(clearGrantFilters).toHaveCount(0);
     await expect(apply).toBeDisabled();
     await openCriterion("Level");
@@ -396,13 +407,16 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await openCriterion("Identities");
     await expect(
       filter.getByText("No identities are explicitly included.")
-    ).toBeVisible();
+    ).toHaveCount(0);
     await expect(
       filter.getByRole("heading", { name: "Find an identity to include" })
-    ).toHaveCount(0);
+    ).toBeVisible();
     await expect(
       filter.getByRole("textbox", { name: "Find an identity to include" })
     ).toBeVisible();
+    await expect(
+      filter.getByRole("textbox", { name: "Find an identity to include" })
+    ).toHaveAttribute("placeholder", "Search identities to include...");
     await expect(
       filter.getByText("No allowlist added.", { exact: true })
     ).toHaveCount(0);
@@ -411,6 +425,21 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     ).toHaveCount(0);
     await expect(
       filter.getByText("0 unique identities included", { exact: true })
+    ).toHaveCount(0);
+    await expect(
+      filter.getByRole("heading", { name: "EMMA", exact: true })
+    ).toBeVisible();
+    await expect(
+      filter.getByRole("heading", { name: "CSV file", exact: true })
+    ).toBeVisible();
+    await expect(
+      filter.getByRole("textbox", { name: "Search allowlists", exact: true })
+    ).toBeVisible();
+    await expect(
+      filter.getByRole("button", { name: "EMMA", exact: true })
+    ).toHaveCount(0);
+    await expect(
+      filter.getByRole("button", { name: "CSV file", exact: true })
     ).toHaveCount(0);
     const identityModes = filter.getByRole("tablist", {
       name: "Identity treatment",
@@ -426,7 +455,13 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     ).toHaveAttribute("aria-selected", "true");
     await expect(
       filter.getByText("No identities are explicitly excluded.")
-    ).toBeVisible();
+    ).toHaveCount(0);
+    await expect(
+      filter.getByText("No allowlist added.", { exact: true })
+    ).toHaveCount(0);
+    await expect(
+      filter.getByText("No CSV file added.", { exact: true })
+    ).toHaveCount(0);
     await openCriterion(/^Level(?: Configured)?$/);
     await expect(levelInput).toHaveValue("10");
     await expect(apply).toBeEnabled();
@@ -451,9 +486,18 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     ).toBeVisible();
     await expect(apply).toBeInViewport({ ratio: 1 });
     await expectNoHorizontalOverflow(page);
-    await expect(
-      filter.getByRole("button", { name: "View members" })
-    ).toBeInViewport();
+    const preview = filter.getByRole("button", { name: "View members" });
+    if (narrowFilter) {
+      await preview.scrollIntoViewIfNeeded();
+      expect(
+        await criteriaTags.evaluate((element) => ({
+          maxHeight: getComputedStyle(element).maxHeight,
+          overflow: getComputedStyle(element).overflowY,
+        }))
+      ).toEqual({ maxHeight: "none", overflow: "visible" });
+    }
+    await expect(preview).toBeInViewport();
+    await expect(apply).toBeInViewport({ ratio: 1 });
     await expect(
       page
         .getByRole("button", { name: "Choose group" })
@@ -520,7 +564,7 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expectNoHorizontalOverflow(page);
   });
 
-  test("keeps Back and Close visible while a narrow editor scrolls", async ({
+  test("scrolls the mobile summary after the editor while keeping navigation and the action visible", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 620 });
@@ -540,6 +584,15 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       name: "Identities",
       exact: true,
     });
+    const summary = filter
+      .getByRole("region", { name: "Identities", exact: true })
+      .locator("[data-group-criteria-summary]");
+    await expect(summary).toHaveCount(1);
+    await expect(summary).not.toBeInViewport();
+    const apply = filter.getByRole("button", {
+      name: "Create and use new group",
+    });
+    const applyBeforeScroll = await apply.boundingBox();
     const backBeforeScroll = await back.boundingBox();
     // Mobile WebKit does not support mouse.wheel. Scroll the real editor
     // directly and keep the same rendered-position and navigation guarantees.
@@ -550,6 +603,19 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       .poll(() => identities.evaluate((element) => element.scrollTop))
       .toBeGreaterThan(0);
     await expect(choices).toBeHidden();
+    await expect(summary).toBeInViewport({ ratio: 1 });
+    await expect(
+      summary.getByText("Level at least 10", { exact: true })
+    ).toBeVisible();
+    expect(
+      await summary.evaluate((element) => ({
+        background: getComputedStyle(element).backgroundColor,
+        borderWidth: getComputedStyle(element).borderTopWidth,
+      }))
+    ).toEqual({ background: "rgb(28, 28, 33)", borderWidth: "0px" });
+    await expect
+      .poll(async () => (await apply.boundingBox())?.y)
+      .toBeCloseTo(applyBeforeScroll?.y ?? 0, 0);
     await expect(back).toBeInViewport({ ratio: 1 });
     await expect
       .poll(async () => (await back.boundingBox())?.y)
@@ -573,64 +639,13 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
 
   test("scrolls mobile grant filters and paginated results together", async ({
     page,
+    isMobile,
   }) => {
-    const requestedPages: number[] = [];
-    await page.route("**/api/xtdh/grants?**", async (route) => {
-      const pageNumber = Number(
-        new URL(route.request().url()).searchParams.get("page")
-      );
-      requestedPages.push(pageNumber);
-      const offset = pageNumber === 1 ? 0 : 20;
-      const length = pageNumber === 1 ? 20 : 2;
-      await route.fulfill({
-        json: {
-          data: Array.from({ length }, (_, index) => ({
-            id: `scroll-grant-${offset + index + 1}`,
-            grantor: {
-              id: "scroll-grantor",
-              handle: "scroll-grantor",
-              pfp: null,
-              banner1_color: null,
-              banner2_color: null,
-              cic: 0,
-              rep: 0,
-              tdh: 0,
-              tdh_rate: 0,
-              xtdh: 0,
-              xtdh_rate: 0,
-              level: 1,
-              classification: "PSEUDONYM",
-              sub_classification: null,
-              primary_address: "0x0000000000000000000000000000000000000001",
-              subscribed_actions: [],
-              archived: false,
-              active_main_stage_submission_ids: [],
-              winner_main_stage_drop_ids: [],
-              artist_of_prevote_cards: [],
-              profile_wave_id: null,
-              is_wave_creator: false,
-            },
-            target_chain: "ETHEREUM_MAINNET",
-            target_contract: "0x0000000000000000000000000000000000000002",
-            target_token_mode: "ALL",
-            target_tokens_count: 1,
-            target_collection_name: `Scroll collection ${offset + index + 1}`,
-            created_at: 1700000000000,
-            updated_at: 1700000000000,
-            valid_from: 1700000000000,
-            valid_to: null,
-            rate: 1,
-            error_details: null,
-            status: "GRANTED",
-            is_irrevocable: false,
-            total_granted: 1,
-          })),
-          count: 22,
-          page: pageNumber,
-          next: pageNumber === 1,
-        },
-      });
-    });
+    const requestedPages = await installGroupGrantFixtures(page);
+    // The synthetic grant has no real audience; keep its read-only preview local.
+    await page.route("**/api/groups/preview-members?**", (route) =>
+      route.fulfill({ json: { data: [], count: 0, page: 1, next: false } })
+    );
     await page.setViewportSize({ width: 390, height: 620 });
     await gotoReady(page, "/network");
     await openGroupFilters(page);
@@ -652,6 +667,19 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     });
     await expect(cards).toHaveCount(20);
     await expect(collectionName).toBeInViewport();
+    const statusTabs = editor.getByRole("tablist", {
+      name: "Filter by status",
+    });
+    const statusBounds = await statusTabs.boundingBox();
+    const inputBounds = await collectionName.boundingBox();
+    expect(statusBounds!.width).toBeCloseTo(inputBounds!.width, 0);
+    const lastStatusBounds = await statusTabs
+      .getByRole("tab", { name: "Failed", exact: true })
+      .boundingBox();
+    expect(lastStatusBounds!.x + lastStatusBounds!.width).toBeCloseTo(
+      statusBounds!.x + statusBounds!.width - 5,
+      0
+    );
     await expect(loadMore).not.toBeInViewport();
     const list = editor.getByRole("list");
     expect(
@@ -704,6 +732,100 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
         )
         .toBe(320);
     }
+    await cards
+      .last()
+      .getByText("Scroll collection 22", { exact: true })
+      .click();
+    const selection = editor.getByRole("group", {
+      name: "xTDH Grant Beneficiary",
+      exact: true,
+    });
+    await expect(selection).toBeFocused();
+    await expect(
+      selection.getByText("Scroll collection 22", { exact: true })
+    ).toBeInViewport({ ratio: 1 });
+    await expect(
+      editor.getByRole("textbox", { name: "Collection name" })
+    ).toHaveCount(0);
+    await expect(
+      filter.getByRole("button", { name: "Close", exact: true })
+    ).toBeInViewport({ ratio: 1 });
+  });
+
+  test("keeps the mobile sheet header stable while keyboard layout animates", async ({
+    page,
+    baseURL,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, "Native keyboard geometry uses the mobile viewport.");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await installSurfaceSimulation(
+      page.context(),
+      "capacitor-ios-sim",
+      baseURL
+    );
+    await installGroupGrantFixtures(page);
+    await gotoReady(page, "/network");
+    await openGroupFilters(page);
+    const filter = page.getByRole("dialog", { name: "Filter Network" });
+    await filter
+      .getByRole("button", { name: "xTDH Grant", exact: true })
+      .click();
+    await expect(
+      filter.getByRole("textbox", { name: "Collection name" })
+    ).toBeVisible();
+    const sheet = page
+      .getByRole("dialog", { name: "Filter Network" })
+      .locator(".mobile-wrapper-dialog");
+    // The native phone supplies these CSS variables. This checks browser layout,
+    // not the OS keyboard or its animation frame rate.
+    const geometry = await sheet.evaluate(async (element) => {
+      const style = document.documentElement.style;
+      const insetName = "--native-keyboard-inset-bottom";
+      const durationName = "--native-keyboard-layout-transition-duration";
+      const previousInset = style.getPropertyValue(insetName);
+      const previousDuration = style.getPropertyValue(durationName);
+      const initial = element.getBoundingClientRect();
+      const samples: { top: number; height: number }[] = [];
+      const sampleTransition = (inset: number) =>
+        new Promise<void>((resolve) => {
+          style.setProperty(insetName, `${inset}px`);
+          const start = performance.now();
+          const sample = () => {
+            const bounds = element.getBoundingClientRect();
+            samples.push({ top: bounds.top, height: bounds.height });
+            if (performance.now() - start < 400) requestAnimationFrame(sample);
+            else resolve();
+          };
+          requestAnimationFrame(sample);
+        });
+      try {
+        style.setProperty(durationName, "250ms");
+        await sampleTransition(300);
+        await sampleTransition(0);
+        return { top: initial.top, height: initial.height, samples };
+      } finally {
+        if (previousInset) style.setProperty(insetName, previousInset);
+        else style.removeProperty(insetName);
+        if (previousDuration) style.setProperty(durationName, previousDuration);
+        else style.removeProperty(durationName);
+      }
+    });
+    expect(
+      Math.max(
+        ...geometry.samples.map(({ top }) => Math.abs(top - geometry.top))
+      )
+    ).toBeLessThan(2);
+    expect(
+      Math.min(...geometry.samples.map(({ height }) => height))
+    ).toBeLessThan(geometry.height - 290);
+    expect(geometry.samples.at(-1)!.height).toBeCloseTo(geometry.height, 0);
+    await expect(
+      filter.getByRole("button", { name: "Back", exact: true })
+    ).toBeInViewport({ ratio: 1 });
+    await expect(
+      filter.getByRole("button", { name: "Close", exact: true })
+    ).toBeInViewport({ ratio: 1 });
   });
 
   test("keeps the Network filter as a sheet at tablet and touch widths", async ({

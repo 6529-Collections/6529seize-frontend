@@ -13,6 +13,7 @@ import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
   type RefObject,
+  type ReactNode,
 } from "react";
 
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
@@ -89,6 +90,10 @@ const getHeaderSearchItemKey = (item: HeaderSearchModalItemType): string => {
 
 const getResultOptionId = (index: number) => `header-search-result-${index}`;
 interface HeaderSearchSiteResultsProps {
+  readonly messagesContent: ReactNode;
+  readonly messageCount: number;
+  readonly messagesLoading: boolean;
+  readonly messagesError: boolean;
   readonly selectedCategory: CATEGORY;
   readonly setSelectedCategory: (category: CATEGORY) => void;
   readonly resultsByCategory: Record<
@@ -129,6 +134,10 @@ export function HeaderSearchSiteResults({
   shouldShowCountdown,
   charactersRemaining,
   resultsPanelRef,
+  messagesContent,
+  messageCount,
+  messagesLoading,
+  messagesError,
 }: HeaderSearchSiteResultsProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -150,6 +159,8 @@ export function HeaderSearchSiteResults({
           return t(locale, "headerSearch.category.nfts");
         case CATEGORY.PROFILES:
           return t(locale, "headerSearch.category.profiles");
+        case CATEGORY.MESSAGES:
+          return t(locale, "headerSearch.category.messages");
         case CATEGORY.WAVES:
           return t(locale, "headerSearch.category.waves");
       }
@@ -174,32 +185,46 @@ export function HeaderSearchSiteResults({
 
   const tabOptions = useMemo(
     () =>
-      [CATEGORY.ALL, ...FILTERABLE_CATEGORIES].map((category) => {
-        const scopedCategories = isFilterableCategory(category)
-          ? [category]
-          : FILTERABLE_CATEGORIES;
-        const count = isFilterableCategory(category)
-          ? resultsByCategory[category].length
-          : totalResultCount;
-        return {
-          key: category,
-          label: getCategoryLabel(category),
-          panelId: HEADER_SEARCH_RESULTS_PANEL_ID,
-          count,
-          isLoading: scopedCategories.some(
-            (scopedCategory) => categoryFetching[scopedCategory]
-          ),
-          hasError: scopedCategories.some(
-            (scopedCategory) => categoryErrors[scopedCategory]
-          ),
-        };
-      }),
+      [CATEGORY.ALL, ...FILTERABLE_CATEGORIES, CATEGORY.MESSAGES].map(
+        (category) => {
+          if (category === CATEGORY.MESSAGES)
+            return {
+              key: category,
+              label: getCategoryLabel(category),
+              panelId: HEADER_SEARCH_RESULTS_PANEL_ID,
+              count: messageCount,
+              isLoading: messagesLoading,
+              hasError: messagesError,
+            };
+          const scopedCategories = isFilterableCategory(category)
+            ? [category]
+            : FILTERABLE_CATEGORIES;
+          const count = isFilterableCategory(category)
+            ? resultsByCategory[category].length
+            : totalResultCount;
+          return {
+            key: category,
+            label: getCategoryLabel(category),
+            panelId: HEADER_SEARCH_RESULTS_PANEL_ID,
+            count,
+            isLoading: scopedCategories.some(
+              (scopedCategory) => categoryFetching[scopedCategory]
+            ),
+            hasError: scopedCategories.some(
+              (scopedCategory) => categoryErrors[scopedCategory]
+            ),
+          };
+        }
+      ),
     [
       categoryErrors,
       categoryFetching,
       getCategoryLabel,
       resultsByCategory,
       totalResultCount,
+      messageCount,
+      messagesLoading,
+      messagesError,
     ]
   );
 
@@ -234,6 +259,7 @@ export function HeaderSearchSiteResults({
   const handleCategorySelect = (category: CATEGORY) => {
     setSelectedCategory(category);
     setSelectedItemIndex(0);
+    if (resultsPanelRef.current) resultsPanelRef.current.scrollTop = 0;
   };
 
   const rememberCurrentSearch = useCallback(() => {
@@ -653,10 +679,16 @@ export function HeaderSearchSiteResults({
           aria-label={t(locale, "headerSearch.results.panelLabel", {
             category: getCategoryLabel(selectedCategory),
           })}
-          aria-busy={derivedState === STATE.LOADING}
+          aria-busy={
+            selectedCategory === CATEGORY.MESSAGES
+              ? messagesLoading
+              : derivedState === STATE.LOADING
+          }
           className="tw-min-h-0 tw-overflow-y-auto tw-px-4 tw-pb-5 tw-pt-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/20 desktop-hover:hover:tw-scrollbar-thumb-white/30 md:tw-px-0"
         >
-          {renderPanelContent()}
+          {selectedCategory === CATEGORY.MESSAGES
+            ? messagesContent
+            : renderPanelContent()}
         </div>
       </div>
     </>

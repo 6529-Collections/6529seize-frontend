@@ -448,6 +448,57 @@ describe("AppHeader", () => {
     ).toBeInTheDocument();
   });
 
+  it("returns from the score page to the exact Discover view in the app", () => {
+    const returnTo = "/discover?sort=QUALITY&filter=REP_60";
+    setup({
+      address: null,
+      asPath: "/network/wave-score",
+      query: { returnTo },
+      canGoBack: false,
+    });
+    expect(screen.getByTestId("back")).toHaveAttribute(
+      "data-return-to",
+      returnTo
+    );
+  });
+
+  it("uses navigation history for a score page without an explicit origin", () => {
+    setup({ address: null, asPath: "/network/wave-score", canGoBack: true });
+    expect(screen.getByTestId("back")).toHaveAttribute("data-return-to", "");
+  });
+
+  it.each([
+    undefined,
+    "https://example.com",
+    "//example.com",
+    "/network/wave-score",
+  ])(
+    "keeps a safe back destination for a direct score page visit: %s",
+    (returnTo) => {
+      setup({
+        address: null,
+        asPath: "/network/wave-score",
+        query: returnTo ? { returnTo } : {},
+        canGoBack: false,
+      });
+      expect(screen.getByTestId("back")).toHaveAttribute(
+        "data-return-to",
+        "/about"
+      );
+    }
+  );
+
+  it("keeps the menu action on web score page headers", () => {
+    useCapacitor.mockReturnValue({ isCapacitor: false });
+    setup({
+      address: null,
+      asPath: "/network/wave-score",
+      query: { returnTo: "/discover" },
+      canGoBack: true,
+    });
+    expect(screen.queryByTestId("back")).not.toBeInTheDocument();
+  });
+
   it("uses the native back button for a collected token origin", () => {
     const returnTo =
       "/Shelby/collected?collection=memelab#collected-card-memelab-65";
@@ -463,6 +514,57 @@ describe("AppHeader", () => {
       "data-return-to",
       returnTo
     );
+  });
+
+  it.each(["/collect", "/collect/orders"])(
+    "shows native Back on %s when a real origin exists",
+    (asPath) => {
+      setup({ asPath, canGoBack: true });
+      expect(screen.getByTestId("back")).toBeInTheDocument();
+    }
+  );
+
+  it.each(["/collect", "/collect/orders"])(
+    "keeps the menu on a cold native %s visit",
+    (asPath) => {
+      setup({ asPath, canGoBack: false });
+      expect(screen.queryByTestId("back")).not.toBeInTheDocument();
+    }
+  );
+
+  it.each(["/collect", "/collect/orders"])(
+    "preserves the Collected anchor for native %s returns",
+    (asPath) => {
+      const returnTo =
+        "/Shelby/collected?details=closed&page=3#collected-activity-manage-orders";
+      setup({ asPath, canGoBack: false, query: { returnTo } });
+      expect(screen.getByTestId("back")).toHaveAttribute(
+        "data-return-to",
+        returnTo
+      );
+    }
+  );
+
+  it.each(["/collect", "/collect/orders"])(
+    "leaves the web %s header unchanged",
+    (asPath) => {
+      useCapacitor.mockReturnValue({ isCapacitor: false });
+      setup({
+        asPath,
+        canGoBack: true,
+        query: { returnTo: "/Shelby/collected" },
+      });
+      expect(screen.queryByTestId("back")).not.toBeInTheDocument();
+    }
+  );
+
+  it("rejects a non-profile return address on native Orders", () => {
+    setup({
+      asPath: "/collect/orders",
+      canGoBack: false,
+      query: { returnTo: "/safe/..//example.invalid" },
+    });
+    expect(screen.queryByTestId("back")).not.toBeInTheDocument();
   });
 
   it("does not add the native back button to web token headers", () => {

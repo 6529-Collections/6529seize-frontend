@@ -265,9 +265,7 @@ function FocusPlugin({ isApp }: { isApp: boolean }) {
     const focusEditor = () => {
       editor.focus();
       requestAnimationFrame(() => {
-        const contentEditable = document.querySelector(
-          '[contenteditable="true"]'
-        ) as HTMLElement;
+        const contentEditable = editor.getRootElement();
         if (contentEditable && document.activeElement !== contentEditable) {
           contentEditable.focus();
           contentEditable.click();

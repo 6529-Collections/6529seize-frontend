@@ -1,22 +1,22 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import Button from "@/components/utils/button/Button";
-import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
+import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
+import Button from "@/components/utils/button/Button";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useRepAllocation } from "@/hooks/useRepAllocation";
+import { t, tRich } from "@/i18n/messages";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
-import { useContext, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { motion } from "framer-motion";
-import { useClickAway, useKeyPressEvent } from "react-use";
-import UserPageRepModifyModalHeader from "./UserPageRepModifyModalHeader";
+import { useContext, useId, useState } from "react";
 import UserPageRepModifyModalRaterStats from "./UserPageRepModifyModalRaterStats";
-import { useRepAllocation } from "@/hooks/useRepAllocation";
+
 interface ApiAddRepRatingToProfileRequest {
   readonly amount: number;
   readonly category: string;
@@ -31,125 +31,44 @@ export default function UserPageRepModifyModal({
   readonly profile: ApiIdentity;
   readonly category: string;
 }) {
+  const locale = useBrowserLocale();
+  const inputId = useId();
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
+  const {
+    repState,
+    heroAvailableRep,
+    minMaxValues,
+    isError,
+    isFetching,
+    retry,
+  } = useRepAllocation({ profile, category });
 
-  const { repState, heroAvailableRep, minMaxValues } = useRepAllocation({
-    profile,
-    category,
-  });
-
-  const [adjustedRatingStr, setAdjustedRatingStr] = useState<string>(
-    `${repState?.rater_contribution ?? 0}`
-  );
-
-  useEffect(() => {
-    setAdjustedRatingStr(`${repState?.rater_contribution ?? 0}`);
-  }, [repState]);
-
-  const inputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [inputRef]);
-
-  const modalRef = useRef<HTMLDivElement>(null);
-  useClickAway(modalRef, onClose);
-  useKeyPressEvent("Escape", onClose);
-
-  const [isMounted, setIsMounted] = useState(false);
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (globalThis.document === undefined || globalThis.window === undefined) {
-      return;
-    }
-
-    const currentWindow = globalThis.window;
-    const previousOverflow = document.body.style.overflow;
-    const previousPaddingRight = document.body.style.paddingRight;
-    const scrollbarGap =
-      currentWindow.innerWidth - document.documentElement.clientWidth;
-
-    document.body.style.overflow = "hidden";
-    if (scrollbarGap > 0) {
-      document.body.style.paddingRight = `${scrollbarGap}px`;
-    }
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.body.style.paddingRight = previousPaddingRight;
-    };
-  }, []);
-
-  const adjustedValueNum = getStringAsNumberOrZero(adjustedRatingStr);
+  // The caller removes this component after the shared dialog finishes leaving.
+  const [isOpen, setIsOpen] = useState(true);
+  const close = () => setIsOpen(false);
+  const [draftRating, setDraftRating] = useState<string | null>(null);
+  const adjustedRatingStr =
+    draftRating ?? `${repState?.rater_contribution ?? 0}`;
+  const newRating = getStringAsNumberOrZero(adjustedRatingStr);
+  const haveChanged = newRating !== repState?.rater_contribution;
   const isValidValue =
     !!activeProfileProxy ||
-    (adjustedValueNum >= minMaxValues.min &&
-      adjustedValueNum <= minMaxValues.max);
-
-  const [newRating, setNewRating] = useState<number>(
-    getStringAsNumberOrZero(adjustedRatingStr)
-  );
-
-  useEffect(() => {
-    setNewRating(getStringAsNumberOrZero(adjustedRatingStr));
-  }, [adjustedRatingStr]);
-
-  const [haveChanged, setHaveChanged] = useState<boolean>(
-    newRating !== repState?.rater_contribution
-  );
-
-  useEffect(() => {
-    setHaveChanged(newRating !== repState?.rater_contribution);
-  }, [newRating, repState]);
-
-  const getIsSaveDisabled = (): boolean => {
-    if (!repState) {
-      return true;
-    }
-    if (!haveChanged) {
-      return true;
-    }
-
-    if (!isValidValue) {
-      return true;
-    }
-
-    return false;
-  };
-
-  const [isSaveDisabled, setIsSaveDisabled] =
-    useState<boolean>(getIsSaveDisabled());
-
-  useEffect(() => {
-    setIsSaveDisabled(getIsSaveDisabled());
-  }, [haveChanged, isValidValue, repState]);
-
-  const [mutating, setMutating] = useState<boolean>(false);
+    (newRating >= minMaxValues.min && newRating <= minMaxValues.max);
+  const isUnavailable = !repState || isError;
+  const isSaveDisabled = isUnavailable || !haveChanged || !isValidValue;
+  const [mutating, setMutating] = useState(false);
 
   const addRepMutation = useMutation({
-    mutationFn: async ({
-      amount,
-      category,
-    }: {
-      amount: number;
-      category: string;
-    }) =>
+    mutationFn: async (body: ApiAddRepRatingToProfileRequest) =>
       await commonApiPost<ApiAddRepRatingToProfileRequest, void>({
-        endpoint: `profiles/${profile?.query}/rep/rating`,
-        body: {
-          amount,
-          category,
-        },
+        endpoint: `profiles/${profile.query ?? profile.handle ?? profile.display}/rep/rating`,
+        body,
       }),
     onSuccess: () => {
       setToast({
-        message: "Rep updated.",
+        message: t(locale, "rep.categories.edit.updated"),
         type: "success",
       });
       onProfileRepModify({
@@ -157,128 +76,162 @@ export default function UserPageRepModifyModal({
         connectedProfile,
         profileProxy: activeProfileProxy ?? null,
       });
-      onClose();
+      close();
     },
     onError: (error) => {
       setToast({
         type: "error",
-        title: "Couldn't update this Rep rating.",
-        description: "Please try again.",
+        title: t(locale, "rep.categories.edit.updateError"),
+        description: t(locale, "rep.categories.edit.tryAgain"),
         details: getToastErrorDetails(error),
       });
     },
-    onSettled: () => {
-      setMutating(false);
-    },
+    onSettled: () => setMutating(false),
   });
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (mutating) {
-      return;
-    }
+    if (mutating || isSaveDisabled) return;
     setMutating(true);
-    const { success } = await requestAuth();
-    if (!success) {
+    try {
+      const { success } = await requestAuth();
+      if (!success) {
+        setToast({
+          message: t(locale, "rep.categories.edit.loginRequired"),
+          type: "error",
+        });
+        setMutating(false);
+        return;
+      }
+      addRepMutation.mutate({ amount: newRating, category });
+    } catch (error) {
       setToast({
-        message: "Log in to continue.",
         type: "error",
+        title: t(locale, "rep.categories.edit.updateError"),
+        description: t(locale, "rep.categories.edit.tryAgain"),
+        details: getToastErrorDetails(error),
       });
       setMutating(false);
-      return;
     }
-    if (!haveChanged) {
-      setMutating(false);
-      return;
-    }
-
-    await addRepMutation.mutateAsync({
-      amount: newRating,
-      category,
-    });
   };
 
-  if (!isMounted || globalThis.document === undefined) {
-    return null;
-  }
-
-  return createPortal(
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1100] tw-cursor-default"
+  return (
+    <MobileWrapperDialog
+      title={t(locale, "rep.categories.edit.title", {
+        name: profile.query ?? profile.handle ?? profile.display,
+      })}
+      isOpen={isOpen}
+      onClose={close}
+      onAfterLeave={onClose}
+      tabletModal
+      maxWidthClass="md:tw-max-w-md"
+      headerVariant="minimal"
     >
-      <div className="tw-absolute tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px]" />
-      <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-items-end tw-justify-center tw-overflow-y-auto tw-p-2 tw-text-center sm:tw-items-center lg:tw-p-0">
-        <div
-          ref={modalRef}
-          className="tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full sm:tw-max-w-md"
-        >
-          <UserPageRepModifyModalHeader
-            handleOrWallet={profile.query ?? profile.handle ?? profile.display}
-            onClose={onClose}
-          />
-          {repState && (
+      <div className="tw-px-4 sm:tw-px-6">
+        <div className="tw-relative tw-mt-5 tw-grid tw-min-h-10">
+          <div
+            className={isError ? "tw-invisible" : undefined}
+            aria-hidden={isError}
+          >
             <UserPageRepModifyModalRaterStats
-              repState={repState}
+              category={category}
               minMaxValues={minMaxValues}
               heroAvailableCredit={heroAvailableRep}
+              isLoading={!repState}
             />
+          </div>
+          {!repState && !isError && (
+            <output className="tw-sr-only">
+              {t(locale, "rep.categories.edit.loading")}
+            </output>
           )}
-          <form onSubmit={onSubmit} className="tw-mt-4">
-            <div>
-              <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-500">
-                Your total Rep for{" "}
-                <span className="tw-font-semibold tw-text-iron-300">
+          {isError && (
+            <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-gap-3">
+              <p
+                role="alert"
+                className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-xs tw-text-iron-300"
+              >
+                {t(locale, "rep.categories.edit.loadError")}
+              </p>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={retry}
+                loading={isFetching}
+              >
+                {t(locale, "rep.categories.edit.retry")}
+              </Button>
+            </div>
+          )}
+        </div>
+        <form
+          onSubmit={onSubmit}
+          className="tw-mt-6"
+          aria-busy={!repState && !isError}
+        >
+          <label
+            htmlFor={inputId}
+            className="tw-block tw-break-words tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400"
+          >
+            {tRich(locale, "rep.categories.edit.totalLabel", {
+              category: (
+                <span
+                  key="category"
+                  className="tw-font-semibold tw-text-iron-300"
+                >
                   {category}
                 </span>
-                :
-              </label>
-              <div className="tw-relative tw-mt-1.5 tw-flex">
-                <UserPageRateInput
-                  value={adjustedRatingStr}
-                  onChange={setAdjustedRatingStr}
-                  minMax={minMaxValues}
-                  isProxy={!!activeProfileProxy}
-                  inputRef={inputRef}
-                  required
-                />
-              </div>
-              <UserRateAdjustmentHelper
-                inLineValues={true}
-                originalValue={repState?.rater_contribution ?? 0}
-                adjustedValue={getStringAsNumberOrZero(adjustedRatingStr)}
-                adjustmentType="Rep"
-              />
-            </div>
-
-            <div className="tw-mt-8">
-              <div className="tw-flex tw-flex-col tw-gap-3">
-                <Button
-                  type="submit"
-                  disabled={isSaveDisabled}
-                  loading={mutating}
-                  size="lg"
-                  fullWidth
-                >
-                  Save
-                </Button>
-                <Button
-                  onClick={onClose}
-                  disabled={mutating}
-                  variant="secondary"
-                  size="lg"
-                  fullWidth
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          </form>
-        </div>
+              ),
+            })}
+          </label>
+          <div className="tw-relative tw-mt-2 tw-flex">
+            <UserPageRateInput
+              value={repState ? adjustedRatingStr : ""}
+              onChange={setDraftRating}
+              minMax={minMaxValues}
+              isProxy={!!activeProfileProxy}
+              variant="form"
+              inputId={inputId}
+              readOnly={isUnavailable}
+              autoFocus
+              required
+            />
+          </div>
+          <div
+            className={!repState ? "tw-invisible" : undefined}
+            aria-hidden={!repState}
+          >
+            <UserRateAdjustmentHelper
+              inLineValues
+              valueLayout="inline"
+              originalValue={repState?.rater_contribution ?? 0}
+              adjustedValue={newRating}
+              adjustmentType="Rep"
+            />
+          </div>
+          <div className="tw-mt-7 tw-flex tw-flex-col tw-gap-1">
+            <Button
+              type="submit"
+              disabled={isSaveDisabled}
+              loading={mutating}
+              variant="action"
+              size="xl"
+              fullWidth
+            >
+              {t(locale, "rep.categories.edit.save")}
+            </Button>
+            <Button
+              onClick={close}
+              disabled={mutating}
+              variant="ghost"
+              size="lg"
+              fullWidth
+            >
+              {t(locale, "rep.categories.edit.cancel")}
+            </Button>
+          </div>
+        </form>
       </div>
-    </motion.div>,
-    document.body
+    </MobileWrapperDialog>
   );
 }

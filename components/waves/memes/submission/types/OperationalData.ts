@@ -5,6 +5,7 @@ export enum MemesSubmissionAdditionalInfoKey {
   ADDITIONAL_MEDIA = "additional_media",
   COMMENTARY = "commentary",
   ABOUT_ARTIST = "about_artist",
+  ADDITIONAL_ACTION_PLAN = "additional_action_plan",
 }
 
 export const MEMES_SUBMISSION_ADDITIONAL_INFO_KEYS: string[] = Object.values(
@@ -45,4 +46,5 @@ export interface OperationalData {
   additional_media: AdditionalMedia;
   commentary: string;
   about_artist: string;
+  additional_action_plan?: string;
 }

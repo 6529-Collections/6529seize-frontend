@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { ApiIdentityAndSubscriptionActions } from "@/generated/models/ApiIdentityAndSubscriptionActions";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
@@ -19,7 +19,12 @@ export default function Follower({
   showFollowButton = false,
   mutedBackground = false,
 }: {
-  readonly follower: ApiIdentityAndSubscriptionActions;
+  readonly follower: {
+    readonly identity: Pick<
+      ApiProfileMin,
+      "id" | "handle" | "primary_address" | "pfp" | "level"
+    >;
+  };
   readonly showFollowButton?: boolean | undefined;
   readonly mutedBackground?: boolean | undefined;
 }) {

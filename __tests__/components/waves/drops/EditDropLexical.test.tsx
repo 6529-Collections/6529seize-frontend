@@ -1,5 +1,5 @@
 import React from "react";
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
@@ -28,6 +28,9 @@ const editorMock = {
   })),
   registerCommand: jest.fn(() => jest.fn()),
   focus: jest.fn(),
+  getRootElement: jest.fn(() =>
+    document.querySelector<HTMLElement>('[data-testid="content-editable"]')
+  ),
 };
 
 let mentionSelectHandler: MentionSelectHandler | null = null;
@@ -78,6 +81,7 @@ jest.mock("@lexical/react/LexicalContentEditable", () => ({
       className={className}
       style={style}
       contentEditable="true"
+      tabIndex={-1}
       suppressContentEditableWarning
     />
   ),
@@ -339,6 +343,25 @@ describe("EditDropLexical", () => {
     expect(screen.getByLabelText("Edit message")).toBe(
       screen.getByTestId("content-editable")
     );
+  });
+
+  it("focuses its own editor when another editable appears first on the page", async () => {
+    render(
+      <>
+        <div
+          contentEditable
+          tabIndex={-1}
+          suppressContentEditableWarning
+          data-testid="other-editor"
+        />
+        <EditDropLexical {...defaultProps} />
+      </>
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId("content-editable")).toHaveFocus()
+    );
+    expect(screen.getByTestId("other-editor")).not.toHaveFocus();
   });
 
   it("keeps global mentions for import and export but not live typing", () => {
