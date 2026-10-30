@@ -20,7 +20,6 @@ import { t } from "@/i18n/messages";
 import type { CreateWaveDescriptionHandles } from "../description/CreateWaveDescription";
 import { getCreateWaveDropRequest } from "../services/createWaveDropRequest";
 import { multiPartUpload } from "../services/multiPartUpload";
-import { useAddWaveMutation } from "../services/waveApiService";
 import {
   getAdminGroupId,
   WaveAdminGroupError,
@@ -29,7 +28,6 @@ import { getWaveGroupValidationRequest } from "@/helpers/waves/wave-group-valida
 import { validateWaveGroups } from "@/services/api/wave-group-validation-api";
 import { useSubwaveAccessConfirmation } from "@/components/waves/hooks/useSubwaveAccessConfirmation";
 import {
-  isMultiCompetitionEnabled,
   isRejectedCompetitionCommand,
   newCompetitionRequestKey,
 } from "@/helpers/competition.helpers";
@@ -158,55 +156,6 @@ export function useCreateWaveSubmission({
     });
   };
 
-  const addWaveMutation = useAddWaveMutation({
-    onSuccess: async (response, variables) => {
-      if (variables.displayMetadataRequests.length > 0) {
-        try {
-          await Promise.all(
-            variables.displayMetadataRequests.map((body) =>
-              createWaveMetadata({
-                waveId: response.id,
-                body,
-              })
-            )
-          );
-        } catch {
-          setToast({
-            message:
-              "Wave created, but custom display settings were not saved.",
-            type: "warning",
-          });
-        }
-      }
-
-      void waitAndInvalidateDrops();
-      onWaveCreated();
-      onSuccess?.();
-      const createdWaveRoute = getWaveRoute({
-        waveId: response.id,
-        isDirectMessage: false,
-        isApp,
-      });
-      showWaveCreatedToast(response.id);
-      if (isApp) {
-        router.replace(createdWaveRoute);
-      } else {
-        router.push(createdWaveRoute);
-      }
-    },
-    onError: (error) => {
-      setToast({
-        type: "error",
-        title: t(locale, "competitions.waveCreationFailure"),
-        description: t(locale, "competitions.tryAgain"),
-        details: getToastErrorDetails(error),
-      });
-    },
-    onSettled: () => {
-      finishSubmitting();
-    },
-  });
-
   const onHaveDropToSubmitChange = (haveDrop: boolean) => {
     if (haveDrop) {
       setShowDropError(false);
@@ -321,6 +270,7 @@ export function useCreateWaveSubmission({
         visibility: waveBody.visibility,
         chat: waveBody.chat,
         admin_group: { group_id: adminGroupId },
+        admin_drop_deletion_enabled: config.drops.adminCanDeleteDrops,
         ...(parentWaveId ? { parent_wave_id: parentWaveId } : {}),
       };
     }
@@ -350,6 +300,7 @@ export function useCreateWaveSubmission({
     });
     nativeHubRequest.current = null;
     nativeDisplayMetadata.current = [];
+    void waitAndInvalidateDrops();
     onWaveCreated();
     onSuccess?.();
     showWaveCreatedToast(hub.id);
@@ -395,7 +346,6 @@ export function useCreateWaveSubmission({
 
     submissionInProgressRef.current = true;
     setSubmitting(true);
-    let mutationStarted = false;
 
     try {
       const { success } = await requestAuth();
@@ -445,31 +395,20 @@ export function useCreateWaveSubmission({
         adminGroupId
       );
 
-      if (isMultiCompetitionEnabled()) {
-        await createNativeHub(waveBody, displayMetadataRequests, adminGroupId);
-        return;
-      }
-
-      mutationStarted = true;
-      await addWaveMutation.mutateAsync({
-        body: waveBody,
-        displayMetadataRequests,
-      });
+      await createNativeHub(waveBody, displayMetadataRequests, adminGroupId);
     } catch (error) {
       if (isRejectedCompetitionCommand(error)) {
         nativeHubRequest.current = null;
       }
-      if (!mutationStarted) {
-        setToast({
-          type: "error",
-          title: t(locale, "competitions.waveCreationFailure"),
-          description: nativeHubRequest.current
-            ? t(locale, "competitions.hubRetry")
-            : t(locale, "competitions.tryAgain"),
-          details: getToastErrorDetails(error, "Could not create wave."),
-        });
-        finishSubmitting();
-      }
+      setToast({
+        type: "error",
+        title: t(locale, "competitions.waveCreationFailure"),
+        description: nativeHubRequest.current
+          ? t(locale, "competitions.hubRetry")
+          : t(locale, "competitions.tryAgain"),
+        details: getToastErrorDetails(error, "Could not create wave."),
+      });
+      finishSubmitting();
     }
   };
 

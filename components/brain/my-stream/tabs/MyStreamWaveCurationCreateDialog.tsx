@@ -8,6 +8,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import Button from "@/components/utils/button/Button";
 import SelectGroupModalSearchName from "@/components/utils/select-group/SelectGroupModalSearchName";
+import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
 import { getWaveCurationsQueryKey } from "@/hooks/waves/useWaveCurations";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -25,6 +26,7 @@ import {
 } from "@tanstack/react-query";
 import clsx from "clsx";
 import { useRef, useState, type ReactNode, type ChangeEvent } from "react";
+import { createPortal } from "react-dom";
 
 import CurationGroupRow from "./CurationGroupRow";
 
@@ -51,6 +53,8 @@ const getMatchingPresetLabel = (
 };
 
 interface MyStreamWaveCurationCreateDialogProps {
+  /** The Wave information panel owns the header, focus trap and dismissal. */
+  readonly panelContainer?: HTMLDivElement | null | undefined;
   readonly wave:
     | Pick<ApiWave, "id" | "wave">
     | Pick<ApiWaveMin, "id" | "admin_group_id">;
@@ -185,6 +189,7 @@ function CurationGroupSearchState({
   readonly selectedGroupId: string | null;
   readonly onGroupSelect: (group: ApiGroupFull) => void;
 }) {
+  const locale = useBrowserLocale();
   const loadingMessage = isSearchFiltered
     ? "Searching groups..."
     : "Loading groups...";
@@ -232,6 +237,7 @@ function CurationGroupSearchState({
         {canCloseGroupSearch && (
           <button
             type="button"
+            aria-label={t(locale, "profileCuration.editor.groupBack")}
             onClick={onCloseGroupSearch}
             className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition group-data-[profile-typography=true]/curation-dialog:tw-text-meta desktop-hover:hover:tw-text-iron-200"
           >
@@ -327,13 +333,20 @@ export default function MyStreamWaveCurationCreateDialog({
   curation,
   initialGroup,
   permissionMode = "standard",
+  panelContainer,
 }: MyStreamWaveCurationCreateDialogProps) {
+  const isEmbedded = panelContainer !== undefined;
   const queryClient = useQueryClient();
   const locale = useBrowserLocale();
   const { requestAuth, setToast } = useAuth();
   const isEditMode = !!curation;
   const initialName = curation?.name ?? "";
-  const dialogTitle = isEditMode ? "Edit curation" : "Create curation";
+  const dialogTitle = t(
+    locale,
+    isEditMode
+      ? "profileCuration.editor.editTitle"
+      : "profileCuration.editor.createTitle"
+  );
   const fallbackErrorMessage = isEditMode
     ? "Failed to update curation."
     : "Failed to create curation.";
@@ -351,6 +364,8 @@ export default function MyStreamWaveCurationCreateDialog({
   );
   const [groupSearchName, setGroupSearchName] = useState<string | null>(null);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useKeyboardFocusScroll(scrollRef, "nearest");
   const {
     data: resolvedInitialGroup,
     isLoading: isInitialGroupLoading,
@@ -534,6 +549,119 @@ export default function MyStreamWaveCurationCreateDialog({
     );
   }
 
+  const content = (
+    <div
+      className={clsx(
+        "tw-group/curation-dialog tw-flex tw-min-h-0 tw-flex-1 tw-flex-col",
+        isEmbedded && "tw-h-full"
+      )}
+      data-profile-typography={permissionMode === "profile"}
+    >
+      <div
+        ref={scrollRef}
+        className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+      >
+        <div className="tw-flex tw-flex-col tw-gap-8 tw-px-4 tw-py-6 sm:tw-px-6">
+          <div className="tw-space-y-4">
+            <label
+              htmlFor="curation-name"
+              className="tw-block tw-text-sm tw-font-medium tw-text-iron-300 group-data-[profile-typography=true]/curation-dialog:tw-text-iron-100"
+            >
+              Name
+            </label>
+            <div className="tw-flex tw-flex-wrap tw-gap-2.5">
+              {CURATION_NAME_PRESETS.map((preset) => {
+                const isSelected = selectedPresetLabel === preset;
+
+                return (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => handlePresetSelect(preset)}
+                    aria-pressed={isSelected}
+                    className={clsx(
+                      "tw-inline-flex tw-appearance-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-shadow-sm tw-transition-all tw-duration-300 group-data-[profile-typography=true]/curation-dialog:tw-text-meta focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400",
+                      isSelected
+                        ? "tw-border-white/20 tw-bg-iron-800 tw-text-iron-100"
+                        : "tw-border-white/10 tw-bg-iron-900 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50"
+                    )}
+                  >
+                    {preset}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="tw-relative tw-w-full sm:tw-max-w-[260px]">
+              <input
+                ref={nameInputRef}
+                id="curation-name"
+                type="text"
+                value={name}
+                onChange={handleNameChange}
+                maxLength={50}
+                autoComplete="off"
+                placeholder="Create your own custom..."
+                className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-100 tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-sm placeholder:tw-text-iron-500 group-data-[profile-typography=true]/curation-dialog:tw-text-base group-data-[profile-typography=true]/curation-dialog:tw-font-normal group-data-[profile-typography=true]/curation-dialog:placeholder:tw-text-base hover:tw-ring-iron-650 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 md:desktop-hover:group-data-[profile-typography=true]/curation-dialog:tw-text-sm md:desktop-hover:group-data-[profile-typography=true]/curation-dialog:placeholder:tw-text-sm"
+              />
+            </div>
+          </div>
+
+          {permissionMode === "profile" ? (
+            <details className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/60 tw-px-4 tw-py-3">
+              <summary className="tw-cursor-pointer tw-text-meta tw-font-medium tw-text-iron-300 group-data-[profile-typography=true]/curation-dialog:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400">
+                {t(locale, "profileCuration.permissions.advanced")}
+              </summary>
+              <div className="tw-mt-4 tw-space-y-4">
+                <p className="tw-mb-0 tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-500">
+                  {t(locale, "profileCuration.permissions.description")}
+                </p>
+                <div className="tw-space-y-3.5">{groupPickerContent}</div>
+              </div>
+            </details>
+          ) : (
+            <div className="tw-space-y-4">
+              <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-300 group-data-[profile-typography=true]/curation-dialog:tw-text-iron-100">
+                Who can curate?
+              </span>
+              <div className="tw-space-y-3.5">{groupPickerContent}</div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="tw-flex-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-px-5 tw-py-5 sm:tw-px-6">
+        <div className="tw-flex tw-justify-end tw-gap-3">
+          {!isEmbedded && (
+            <Button
+              onClick={onClose}
+              variant="tertiary"
+              size="md"
+              className="tw-hidden md:tw-inline-flex"
+            >
+              Cancel
+            </Button>
+          )}
+          <Button
+            loading={saveMutation.isPending}
+            disabled={isSubmitDisabled}
+            onClick={handleSubmit}
+            variant="primary"
+            size="md"
+            className="tw-px-6"
+          >
+            {submitButtonLabel}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (isEmbedded) {
+    return isOpen && panelContainer
+      ? createPortal(content, panelContainer)
+      : null;
+  }
+
   return (
     <MobileWrapperDialog
       title={dialogTitle}
@@ -545,102 +673,12 @@ export default function MyStreamWaveCurationCreateDialog({
       isOpen={isOpen}
       onClose={onClose}
       noPadding
-      tabletModal={true}
-      tall={true}
+      tabletModal
+      tall
       maxWidthClass="md:tw-max-w-lg"
       headerClassName="tw-mb-0 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-white/[0.06] tw-py-4"
     >
-      <div
-        className="tw-group/curation-dialog tw-flex tw-min-h-0 tw-flex-1 tw-flex-col"
-        data-profile-typography={permissionMode === "profile"}
-      >
-        <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
-          <div className="tw-flex tw-flex-col tw-gap-8 tw-px-4 tw-py-6 sm:tw-px-6">
-            <div className="tw-space-y-4">
-              <label
-                htmlFor="curation-name"
-                className="tw-block tw-text-sm tw-font-medium tw-text-iron-300 group-data-[profile-typography=true]/curation-dialog:tw-text-iron-100"
-              >
-                Name
-              </label>
-              <div className="tw-flex tw-flex-wrap tw-gap-2.5">
-                {CURATION_NAME_PRESETS.map((preset) => {
-                  const isSelected = selectedPresetLabel === preset;
-
-                  return (
-                    <button
-                      key={preset}
-                      type="button"
-                      onClick={() => handlePresetSelect(preset)}
-                      aria-pressed={isSelected}
-                      className={clsx(
-                        "tw-inline-flex tw-appearance-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-shadow-sm tw-transition-all tw-duration-300 group-data-[profile-typography=true]/curation-dialog:tw-text-meta focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400",
-                        isSelected
-                          ? "tw-border-white/20 tw-bg-iron-800 tw-text-iron-100"
-                          : "tw-border-white/10 tw-bg-iron-900 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50"
-                      )}
-                    >
-                      {preset}
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="tw-relative tw-w-full sm:tw-max-w-[260px]">
-                <input
-                  ref={nameInputRef}
-                  id="curation-name"
-                  type="text"
-                  value={name}
-                  onChange={handleNameChange}
-                  maxLength={50}
-                  autoComplete="off"
-                  placeholder="Create your own custom..."
-                  className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-100 tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-sm placeholder:tw-text-iron-500 group-data-[profile-typography=true]/curation-dialog:tw-text-base group-data-[profile-typography=true]/curation-dialog:tw-font-normal group-data-[profile-typography=true]/curation-dialog:placeholder:tw-text-base hover:tw-ring-iron-650 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 md:desktop-hover:group-data-[profile-typography=true]/curation-dialog:tw-text-sm md:desktop-hover:group-data-[profile-typography=true]/curation-dialog:placeholder:tw-text-sm"
-                />
-              </div>
-            </div>
-
-            {permissionMode === "profile" ? (
-              <details className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/60 tw-px-4 tw-py-3">
-                <summary className="tw-cursor-pointer tw-text-meta tw-font-medium tw-text-iron-300 group-data-[profile-typography=true]/curation-dialog:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400">
-                  {t(locale, "profileCuration.permissions.advanced")}
-                </summary>
-                <div className="tw-mt-4 tw-space-y-4">
-                  <p className="tw-mb-0 tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-500">
-                    {t(locale, "profileCuration.permissions.description")}
-                  </p>
-                  <div className="tw-space-y-3.5">{groupPickerContent}</div>
-                </div>
-              </details>
-            ) : (
-              <div className="tw-space-y-4">
-                <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-300 group-data-[profile-typography=true]/curation-dialog:tw-text-iron-100">
-                  Who can curate?
-                </span>
-                <div className="tw-space-y-3.5">{groupPickerContent}</div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="tw-flex-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-px-5 tw-py-5 sm:tw-px-6">
-          <div className="tw-flex tw-justify-end tw-gap-3">
-            <Button onClick={onClose} variant="tertiary" size="md">
-              Cancel
-            </Button>
-            <Button
-              loading={saveMutation.isPending}
-              disabled={isSubmitDisabled}
-              onClick={handleSubmit}
-              variant="primary"
-              size="md"
-              className="tw-px-6"
-            >
-              {submitButtonLabel}
-            </Button>
-          </div>
-        </div>
-      </div>
+      {content}
     </MobileWrapperDialog>
   );
 }

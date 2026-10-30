@@ -33,6 +33,9 @@ If the connected profile has a primary wallet, the form pre-fills:
 
 ## User Journey
 
+Review the `Additional Action` summary first. Use `Back` to edit the checkbox
+or plan in `Artwork`; see [Additional Action](feature-memes-submission.md#additional-action).
+
 1. Review/edit `Airdrop Distribution`.
 2. Review/edit `Payment`, optionally enabling `Designated Payee`.
 3. Add optional `Allowlist Configuration` batches.
@@ -84,10 +87,15 @@ If the connected profile has a primary wallet, the form pre-fills:
   - each batch contract must be a strict `0x` address
   - token ID text must match supported list/range formats
 - Required text checks:
-  - `About the Artist` must be non-empty
-  - `Artwork Commentary` must be non-empty
+  - `About the Artist` and `Artwork Commentary` must contain text beyond spaces,
+    tabs, or blank lines
+  - leading and trailing whitespace is removed before signing and submitting;
+    this includes non-breaking spaces, tabs, and blank lines; spaces and
+    paragraph breaks within the text are preserved
 - Metadata size checks:
   - each stored metadata value must stay at or below `5000` characters
+  - text counters and limits use the value after removing leading and trailing
+    whitespace
   - `About the Artist` and `Artwork Commentary` show inline over-limit errors
   - any over-limit metadata value blocks `Preview` and `Submit Artwork`
 - Media checks:
@@ -110,6 +118,11 @@ If the connected profile has a primary wallet, the form pre-fills:
   addresses.
 - `Preview Image`, `Promo Video`, `Additional Media`, `About the Artist`, and
   `Artwork Commentary` each render only when data exists.
+- A marked additional action displays its saved plan in a separate
+  `Additional Action` section. If no plan was provided, the section says so.
+  This does not infer a plan from artist bio or commentary.
+- While the saved plan loads, the section shows a loading message. If loading
+  fails, use `Retry loading plan`. A failed request does not mean no plan exists.
 - `Additional Media` shows at most `4` items.
 - Click or tap `Preview Image` or an image in `Additional Media` to open the
   [image viewer](../drop-actions/feature-image-viewer-and-scaling.md), with zoom,

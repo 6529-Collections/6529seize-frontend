@@ -7,6 +7,12 @@ import type { AuthContextType } from "@/components/auth/authTypes";
 import type { SeizeConnectContextType } from "@/components/auth/seizeConnectTypes";
 import { ProfileConnectedStatus } from "@/entities/IProfile";
 import { useIdentity } from "@/hooks/useIdentity";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
@@ -117,6 +123,19 @@ describe("AppSidebarConnectedAccounts", () => {
       "0x2222222222222222222222222222222222222222"
     );
     expect(onNavigate).toHaveBeenCalledTimes(1);
+  });
+
+  it("requests the AUTOx50 derivative of a CDN profile picture", () => {
+    useIdentityMock.mockReturnValue({
+      profile: { handle: "second", pfp: CDN_AVATAR_URL },
+      isLoading: false,
+    } as unknown as ReturnType<typeof useIdentity>);
+
+    render(<AppSidebarConnectedAccounts onNavigate={jest.fn()} />);
+
+    expect(getRequestedImageSrc(screen.getByAltText("second"))).toContain(
+      scaledAvatarPath(ImageScale.W_AUTO_H_50)
+    );
   });
 
   it("starts the add-profile flow and closes the sidebar", async () => {

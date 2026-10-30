@@ -9,7 +9,7 @@ import {
 } from "@/helpers/AllowlistToolHelpers";
 import { formatNumberWithCommas, getTimeAgoShort } from "@/helpers/Helpers";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -89,7 +89,7 @@ function VoterAvatar({ identity }: { readonly identity: ApiIdentityOverview }) {
   return (
     <Image
       unoptimized
-      src={resolveIpfsUrlSync(identity.pfp)}
+      src={getScaledImageUri(identity.pfp, ImageScale.W_AUTO_H_50)}
       alt={`${label}'s avatar`}
       width={24}
       height={24}

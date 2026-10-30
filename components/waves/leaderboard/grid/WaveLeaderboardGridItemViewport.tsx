@@ -1,8 +1,11 @@
 "use client";
 
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
+import { extractFirstUrl } from "@/components/home/boosted/extractStandaloneUrl";
 import VotingModalButton from "@/components/voting/VotingModalButton";
+import MarketplacePreview from "@/components/waves/MarketplacePreview";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
+import { isNftMarketplaceLink } from "@/components/waves/marketplace/urlKind";
 import { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
@@ -132,6 +135,10 @@ export const WaveLeaderboardGridItemViewport: React.FC<
   const primaryMedia = activePart?.media[0];
   const mediaUrl = primaryMedia?.url.trim() ?? "";
   const hasMedia = mediaUrl.length > 0;
+  const firstUrl = hasMedia ? null : extractFirstUrl(activePart?.content);
+  const marketplaceUrl =
+    firstUrl && isNftMarketplaceLink(firstUrl) ? firstUrl : null;
+  const hasVisualContent = hasMedia || marketplaceUrl !== null;
   const hasTextContent = (activePart?.content ?? "").trim().length > 0;
   const summary = useMemo(
     () =>
@@ -151,7 +158,7 @@ export const WaveLeaderboardGridItemViewport: React.FC<
   const mediaPreviewImageUrl = mediaMimeType.includes("image")
     ? null
     : previewImageUrl;
-  const showSummary = !isContentOnlyMode || !hasMedia;
+  const showSummary = !isContentOnlyMode || !hasVisualContent;
   const openActionLabel = hasTextContent
     ? t(locale, "waves.leaderboard.grid.readFull")
     : t(locale, "waves.leaderboard.grid.open");
@@ -180,8 +187,12 @@ export const WaveLeaderboardGridItemViewport: React.FC<
         </div>
       )}
 
+      {marketplaceUrl && <MarketplacePreview href={marketplaceUrl} compact />}
+
       {showSummary ? (
-        <div className={`tw-px-3 tw-pb-2 ${hasMedia ? "tw-pt-3" : "tw-pt-4"}`}>
+        <div
+          className={`tw-px-3 tw-pb-2 ${hasVisualContent ? "tw-pt-3" : "tw-pt-4"}`}
+        >
           <h3
             id={titleId}
             className="tw-mb-0 tw-line-clamp-3 tw-break-words tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100"
@@ -191,7 +202,7 @@ export const WaveLeaderboardGridItemViewport: React.FC<
           {summary.description && (
             <p
               className={`tw-mb-0 tw-mt-2 tw-break-words tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-400 ${
-                hasMedia ? "tw-line-clamp-3" : "tw-line-clamp-6"
+                hasVisualContent ? "tw-line-clamp-3" : "tw-line-clamp-6"
               }`}
             >
               {summary.description}

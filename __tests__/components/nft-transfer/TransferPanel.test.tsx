@@ -119,4 +119,33 @@ describe("TransferPanel", () => {
     expect(mockTransferModal).toHaveBeenCalled();
     expect(screen.getByLabelText("Collapse panel")).toBeInTheDocument();
   });
+
+  afterEach(() => {
+    document.body.style.overflow = "";
+    jest.restoreAllMocks();
+  });
+
+  it("restores scrolling and removes the Escape listener when unmounted expanded", () => {
+    mockUseTransfer.mockReturnValue({
+      enabled: true,
+      selected: new Map([
+        ["MEMES:1", { key: "MEMES:1", title: "Card 1", qty: 1, max: 1 }],
+      ]),
+      count: 1,
+      totalQty: 1,
+      clear: jest.fn(),
+      setEnabled: jest.fn(),
+    });
+    document.body.style.overflow = "auto";
+    const removeListener = jest.spyOn(globalThis, "removeEventListener");
+    const view = render(<TransferPanel />);
+    fireEvent.click(screen.getByLabelText("Expand panel"));
+    expect(document.body.style.overflow).toBe("hidden");
+    view.unmount();
+    expect(document.body.style.overflow).toBe("auto");
+    expect(removeListener).toHaveBeenCalledWith(
+      "keydown",
+      expect.any(Function)
+    );
+  });
 });

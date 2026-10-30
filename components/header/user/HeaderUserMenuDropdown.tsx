@@ -23,7 +23,9 @@ import { t } from "@/i18n/messages";
 import DevicesIcon from "@/components/common/icons/DevicesIcon";
 import HeaderUserConnectedAccounts from "./connected/HeaderUserConnectedAccounts";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
+import HeaderBookmarksLink from "./HeaderBookmarksLink";
 import HeaderArtworkDocumentationLink from "./HeaderArtworkDocumentationLink";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 const HEADER_USER_MENU_LOCALE = DEFAULT_LOCALE;
 
@@ -80,8 +82,17 @@ export default function HeaderUserMenuDropdown({
   const onActivateProfileProxy = async (
     profileProxy: ApiProfileProxy | null
   ) => {
-    await setActiveProfileProxy(profileProxy);
-    onClose();
+    if (pendingAction) {
+      return;
+    }
+    setPendingAction("switch-proxy");
+    try {
+      if (await setActiveProfileProxy(profileProxy)) {
+        onClose();
+      }
+    } finally {
+      setPendingAction(null);
+    }
   };
 
   const getLabel = (): string => {
@@ -209,11 +220,13 @@ export default function HeaderUserMenuDropdown({
                       <div className="tw-h-full">
                         <button
                           type="button"
+                          disabled={pendingAction !== null}
+                          aria-pressed={!activeProfileProxy}
                           className={`${
                             activeProfileProxy
                               ? "tw-bg-transparent hover:tw-bg-iron-700"
                               : "tw-bg-iron-700"
-                          } tw-group tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-px-3 tw-py-2.5 tw-text-left tw-text-white tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400`}
+                          } tw-group tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-px-3 tw-py-2.5 tw-text-left tw-text-white tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60`}
                           onClick={() => onActivateProfileProxy(null)}
                         >
                           {profile.pfp ? (
@@ -226,7 +239,10 @@ export default function HeaderUserMenuDropdown({
                               }
                             >
                               <img
-                                src={profile.pfp}
+                                src={getScaledImageUri(
+                                  profile.pfp,
+                                  ImageScale.W_200_H_200
+                                )}
                                 alt={`${label} avatar`}
                                 className="tw-absolute tw-inset-0 tw-block tw-h-full tw-w-full tw-rounded-lg tw-bg-iron-700 tw-object-cover tw-transition tw-duration-300 tw-ease-out"
                               />
@@ -275,6 +291,7 @@ export default function HeaderUserMenuDropdown({
                           profileProxy={profileProxy}
                           activeProfileProxy={activeProfileProxy}
                           onActivateProfileProxy={onActivateProfileProxy}
+                          disabled={pendingAction !== null}
                         />
                       ))}
                     </li>
@@ -440,6 +457,7 @@ export default function HeaderUserMenuDropdown({
                         />
                       </Link>
                     </div>
+                    <HeaderBookmarksLink onClose={onClose} />
                     <HeaderArtworkDocumentationLink
                       onClose={onClose}
                       enabled={artworkDocumentationEnabled}
