@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import UserPageSubscriptions from '@/components/user/subscriptions/UserPageSubscriptions';
 import { renderWithAuth } from '@/__tests__/utils/testContexts';
@@ -220,21 +220,27 @@ describe('UserPageSubscriptions', () => {
       await waitFor(() => {
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint: 'subscriptions/consolidation/details/test-key',
+          signal: expect.any(AbortSignal),
         });
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint: 'subscriptions/consolidation/test-key/airdrop-address',
+          signal: expect.any(AbortSignal),
         });
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint: 'subscriptions/consolidation/top-up/test-key?page=1&page_size=10',
+          signal: expect.any(AbortSignal),
         });
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint: 'subscriptions/consolidation/upcoming-memes/test-key?card_count=5',
+          signal: expect.any(AbortSignal),
         });
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint: 'subscriptions/consolidation/redeemed/test-key?page=1&page_size=10',
+          signal: expect.any(AbortSignal),
         });
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint: 'subscriptions/consolidation/logs/test-key?page=1&page_size=10',
+          signal: expect.any(AbortSignal),
         });
       });
     });
@@ -250,6 +256,7 @@ describe('UserPageSubscriptions', () => {
       await waitFor(() => {
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint: 'subscriptions/consolidation/upcoming-memes/test-key?card_count=6',
+          signal: expect.any(AbortSignal),
         });
       });
     });
@@ -312,6 +319,7 @@ describe('UserPageSubscriptions', () => {
       await waitFor(() => {
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint: 'subscriptions/consolidation/top-up/test-key?page=2&page_size=10',
+          signal: expect.any(AbortSignal),
         });
       });
     });
@@ -331,6 +339,7 @@ describe('UserPageSubscriptions', () => {
       await waitFor(() => {
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint: 'subscriptions/consolidation/redeemed/test-key?page=2&page_size=10',
+          signal: expect.any(AbortSignal),
         });
       });
     });
@@ -350,6 +359,7 @@ describe('UserPageSubscriptions', () => {
       await waitFor(() => {
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint: 'subscriptions/consolidation/logs/test-key?page=2&page_size=10',
+          signal: expect.any(AbortSignal),
         });
       });
     });
@@ -427,6 +437,7 @@ describe('UserPageSubscriptions', () => {
       await waitFor(() => {
         expect(mockCommonApiFetch).toHaveBeenCalledWith({
           endpoint: 'subscriptions/consolidation/details/new-key',
+          signal: expect.any(AbortSignal),
         });
       });
     });
@@ -471,6 +482,49 @@ describe('UserPageSubscriptions', () => {
           'Memes: 0'
         );
       });
+    });
+
+    it('should ignore a superseded profile request that settles after the current one', async () => {
+      const oldUpcoming: { reject?: (error: Error) => void } = {};
+      const page = { count: 1, page: 1, next: false, data: [{ id: 1 }] };
+      mockCommonApiFetch.mockImplementation(async ({ endpoint }) => {
+        if (endpoint.includes('upcoming-memes/test-key')) {
+          // Settles only after the newer profile's request and ignores the
+          // abort, so the stale failure still reaches the component.
+          return new Promise((_resolve, reject) => {
+            oldUpcoming.reject = reject;
+          });
+        }
+        if (endpoint.includes('upcoming-memes/new-key')) {
+          return [{ id: 1 }, { id: 2 }];
+        }
+        return page;
+      });
+
+      const { rerender } = renderWithAuth(
+        <UserPageSubscriptions profile={mockProfile} />,
+        { connectedProfile: null }
+      );
+      await waitFor(() => expect(oldUpcoming.reject).toBeDefined());
+
+      rerender(
+        <UserPageSubscriptions
+          profile={{ ...mockProfile, consolidation_key: 'new-key' } as ApiIdentity}
+        />
+      );
+      await waitFor(() => {
+        expect(screen.getByTestId('subscriptions-upcoming')).toHaveTextContent(
+          'Memes: 2'
+        );
+      });
+
+      await act(async () => {
+        oldUpcoming.reject?.(new Error('Old profile request failed'));
+      });
+
+      expect(screen.getByTestId('subscriptions-upcoming')).toHaveTextContent(
+        'Memes: 2'
+      );
     });
 
     it('should not fetch when profile key is undefined', () => {
