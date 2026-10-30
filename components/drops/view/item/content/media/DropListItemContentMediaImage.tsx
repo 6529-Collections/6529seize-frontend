@@ -28,6 +28,7 @@ import type { MediaLoadStrategy } from "./mediaLoadStrategy";
 import { useMediaActions } from "./useMediaActions";
 import Image from "next/image";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { useLocalImagePreviewSource } from "./LocalImagePreviewContext";
 import { ImageQualityToggle } from "./ImageQualityToggle";
 import {
   useOriginalImage,
@@ -401,10 +402,11 @@ function DropListItemContentMediaImageContent({
     }
   }, [quality.showingOriginal]);
 
+  const localSource = useLocalImagePreviewSource(src);
   const shouldLoadImage = loadStrategy === "eager" || inView;
-  const unavailable =
-    getDropImagePreviewSources(src, imageScale).length === 0 ||
-    errorCount > maxRetries;
+  const previewSource =
+    localSource ?? getDropImagePreviewSources(src, imageScale)[0];
+  const unavailable = !previewSource || errorCount > maxRetries;
   const {
     continuousGifLoading,
     showLoading: showGifLoading,

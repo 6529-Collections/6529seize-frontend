@@ -1,7 +1,6 @@
 "use client";
 
 import { competitionPresentationWave } from "@/helpers/competition-presentation.helpers";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -9,11 +8,10 @@ import { useCallback, useMemo } from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useWaveData } from "@/hooks/useWaveData";
-import { DROP_DETAIL_STALE_TIME_MS } from "@/services/api/drop-api";
-import { fetchDropMetadataByIdV2 } from "@/services/api/wave-drops-v2-api";
-import { useQuery } from "@tanstack/react-query";
 import { useDropVoteSummary } from "./useDropVoteSummary";
+import { useDropDetailMetadata } from "./useDropDetailMetadata";
 
+/** Combine wave, full metadata, and vote-summary state for Memes detail panels. */
 export const useSingleWaveDropData = (
   initialDrop: ExtendedDrop,
   onClose: () => void
@@ -38,23 +36,8 @@ export const useSingleWaveDropData = (
       ? competitionPresentationWave(parentWave, competition)
       : parentWave;
 
-  const { data: hydratedMetadata } = useQuery({
-    queryKey: [
-      QueryKey.DROP,
-      {
-        drop_id: initialDrop.id,
-        view: "metadata",
-      },
-    ],
-    queryFn: ({ signal }) =>
-      fetchDropMetadataByIdV2({
-        dropId: initialDrop.id,
-        priorityMetadata: initialDrop.metadata,
-        signal,
-      }),
-    enabled: initialDrop.id.trim().length > 0,
-    staleTime: DROP_DETAIL_STALE_TIME_MS,
-  });
+  const { metadata: hydratedMetadata, metadataState } =
+    useDropDetailMetadata(initialDrop);
 
   const voteSummary = useDropVoteSummary({
     dropId: initialDrop.id,
@@ -87,6 +70,7 @@ export const useSingleWaveDropData = (
     wave,
     extendedDrop,
     voteSummary,
+    metadataState,
     isWaveError,
     isWaveFetching,
     refetchWave,
