@@ -17,6 +17,9 @@ wrapper expects that location.
 - `deploy-hub-shadow.cjs`: validates exact frontend PR manifests, partitions
   adjacent target cohorts, and publishes clearly labelled, non-deploying shadow
   status phases for the Deploy Hub pilot.
+- `mobile-lab/`: phone-emulated load measurements of the live site with the
+  mobile plan's stage 0 budgets; run by the `Mobile lab` workflow after web
+  deploys. See its README.
 - `native-surface-evidence.cjs`: executable native-surface evidence
   classifier. It reports whether current Capacitor/Electron coverage is only
   browser simulation or whether package prerequisites are present.

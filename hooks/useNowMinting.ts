@@ -9,7 +9,7 @@ const fetchNowMinting = () =>
   });
 
 export const useNowMinting = () => {
-  const { data, isFetched, isFetching, isLoading, error } =
+  const { data, isFetched, isFetching, isLoading, error, refetch } =
     useQuery<ApiMemesExtendedData>({
       queryKey: [QueryKey.MEMES_LATEST],
       queryFn: fetchNowMinting,
@@ -21,5 +21,6 @@ export const useNowMinting = () => {
     isFetching,
     isLoading,
     error,
+    refetch,
   };
 };

@@ -1,4 +1,5 @@
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
 import { CompactMenu } from "@/components/compact-menu";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
@@ -33,11 +34,12 @@ describe("MobileWrapperDialog", () => {
 
   const fireTouch = (
     element: Element,
-    type: "touchstart" | "touchmove" | "touchend",
-    clientY: number | null = 0
+    type: "touchstart" | "touchmove" | "touchend" | "touchcancel",
+    clientY: number | null = 0,
+    clientX = 0
   ) => {
     const event = new Event(type, { bubbles: true, cancelable: true });
-    const touch = clientY === null ? null : { clientX: 0, clientY };
+    const touch = clientY === null ? null : { clientX, clientY };
     const touches = type === "touchend" || !touch ? [] : [touch];
     Object.assign(touches, {
       item: (index: number) => touches[index] ?? null,
@@ -252,12 +254,12 @@ describe("MobileWrapperDialog", () => {
       expect(container).toHaveClass(
         "[--mobile-wrapper-dialog-keyboard-inset:var(--native-keyboard-inset-bottom,0px)]"
       );
-      expect(container?.style.bottom).toBe("0px");
-      expect(container?.style.transform).toBe(
-        "translate3d(0, calc(0px - var(--mobile-wrapper-dialog-keyboard-inset, 0px)), 0)"
+      expect(container?.style.bottom).toBe(
+        "var(--mobile-wrapper-dialog-keyboard-inset, 0px)"
       );
+      expect(container?.style.transform).toBe("");
       expect(container?.style.transition).toBe(
-        "transform var(--native-keyboard-layout-transition-duration, 0ms) ease-out"
+        "bottom var(--native-keyboard-layout-transition-duration, 0ms) ease-out"
       );
       expect(surface?.style.maxHeight).toBe(
         "min(var(--mobile-wrapper-dialog-resting-height, calc(min(100vh, 100svh) - 10rem)), var(--mobile-wrapper-dialog-available-height, max(0px, calc(min(100vh, 100svh) - 4rem - var(--mobile-wrapper-dialog-keyboard-inset, 0px)))))"
@@ -388,6 +390,13 @@ describe("MobileWrapperDialog", () => {
 
     it.each([
       {
+        name: "enables swipe dismissal by default on touch screens",
+        props: {},
+        isTouchDevice: true,
+        canDrag: true,
+        showsHandle: true,
+      },
+      {
         name: "enables dragging with the standard handle",
         props: { enableDragToClose: true },
         isTouchDevice: true,
@@ -435,12 +444,10 @@ describe("MobileWrapperDialog", () => {
         <MobileWrapperDialog {...defaultProps} {...props} isOpen={true} />
       );
 
-      const dragSurface = document.querySelector<HTMLElement>(
-        ".mobile-wrapper-dialog"
-      );
+      const dragSurface = screen.getByTestId("mobile-dialog-header");
       expect(dragSurface).toBeInTheDocument();
-      expect(dragSurface?.style.transform).toBe(
-        canDrag ? "translate3d(0, 0px, 0)" : ""
+      expect(dragSurface.style.touchAction ?? "").toBe(
+        canDrag ? "pan-x pinch-zoom" : ""
       );
       const dragHandle = document.querySelector(
         ".tw-h-1.tw-w-10.tw-rounded-full"
@@ -450,15 +457,183 @@ describe("MobileWrapperDialog", () => {
       } else {
         expect(dragHandle).not.toBeInTheDocument();
       }
-      if (!isTouchDevice && canDrag) {
-        expect(
-          screen.getByRole("button", { name: "Close" })
-        ).toBeInTheDocument();
+      if (canDrag) {
+        expect(screen.getByRole("button", { name: "Close" })).not.toHaveClass(
+          "!tw-hidden"
+        );
       }
     });
   });
 
   describe("user interactions", () => {
+    it("keeps a pending confirmation on screen and restores dismissal afterward", async () => {
+      const onClose = jest.fn();
+      const props = {
+        isOpen: true,
+        onClose,
+        onConfirm: jest.fn(),
+        title: "Delete curation",
+        message: "Delete this curation?",
+        confirmText: "Delete",
+      };
+      const { rerender } = render(
+        <MobileWrapperConfirmationDialog {...props} isConfirming />
+      );
+      expect(screen.queryByRole("button", { name: "Close" })).toBeNull();
+      expect(screen.getByRole("button", { name: "Cancel" })).toBeDisabled();
+      const header = screen.getByTestId("mobile-dialog-header");
+      const panel = header.closest<HTMLElement>(".mobile-wrapper-dialog")!;
+      const originalTransform = panel.style.transform;
+      fireTouch(header, "touchstart", 20);
+      fireTouch(header, "touchmove", 100);
+      fireTouch(header, "touchend");
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 180));
+      });
+      expect(onClose).not.toHaveBeenCalled();
+      expect(panel.style.transform).toBe(originalTransform);
+      rerender(
+        <MobileWrapperConfirmationDialog {...props} isConfirming={false} />
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Close" }));
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it("closes a default sheet with a downward header swipe", async () => {
+      const onClose = jest.fn();
+      render(
+        <MobileWrapperDialog {...defaultProps} isOpen onClose={onClose} />
+      );
+      const header = screen.getByTestId("mobile-dialog-header");
+      fireTouch(header, "touchstart", 20);
+      fireTouch(header, "touchmove", 100);
+      fireTouch(header, "touchend");
+      await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    });
+
+    it.each(["touchStart", "touchMove"] as const)(
+      "cancels a drag on a second finger's %s",
+      async (event) => {
+        const onClose = jest.fn();
+        render(
+          <MobileWrapperDialog {...defaultProps} isOpen onClose={onClose} />
+        );
+        const header = screen.getByTestId("mobile-dialog-header");
+        fireTouch(header, "touchstart", 20);
+        fireTouch(header, "touchmove", 100);
+        fireEvent[event](header, {
+          touches: [
+            { clientX: 0, clientY: 100 },
+            { clientX: 40, clientY: 100 },
+          ],
+        });
+        fireTouch(header, "touchend");
+        await act(async () => {
+          await new Promise((resolve) => setTimeout(resolve, 180));
+        });
+        expect(onClose).not.toHaveBeenCalled();
+        expect(
+          header.closest<HTMLElement>(".mobile-wrapper-dialog")?.style.transform
+        ).toBe("translate3d(0, 0px, 0)");
+      }
+    );
+
+    it("finishes a released dismissal despite later touch events", async () => {
+      const onClose = jest.fn();
+      render(
+        <MobileWrapperDialog {...defaultProps} isOpen onClose={onClose} />
+      );
+      const header = screen.getByTestId("mobile-dialog-header");
+      fireTouch(header, "touchstart", 20);
+      fireTouch(header, "touchmove", 100);
+      fireTouch(header, "touchend");
+      fireEvent.touchStart(header, {
+        touches: [
+          { clientX: 0, clientY: 100 },
+          { clientX: 40, clientY: 100 },
+        ],
+      });
+      fireTouch(header, "touchcancel");
+      fireTouch(header, "touchend");
+      await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    });
+
+    it("keeps a custom header control operable without starting a drag", async () => {
+      const onClose = jest.fn();
+      render(
+        <MobileWrapperDialog
+          {...defaultProps}
+          isOpen
+          onClose={onClose}
+          titleActions={
+            <span role="tab" tabIndex={0}>
+              Settings tab
+            </span>
+          }
+        />
+      );
+      const tab = screen.getByRole("tab", { name: "Settings tab" });
+      fireTouch(tab, "touchstart", 20);
+      fireTouch(tab, "touchmove", 100);
+      fireTouch(tab, "touchend");
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 180));
+      });
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      { name: "short", x: 0, y: 25, end: "touchend" as const },
+      { name: "upward", x: 0, y: -60, end: "touchend" as const },
+      { name: "horizontal", x: 100, y: 60, end: "touchend" as const },
+      { name: "cancelled", x: 0, y: 100, end: "touchcancel" as const },
+    ])("keeps the sheet open after a $name gesture", async ({ x, y, end }) => {
+      const onClose = jest.fn();
+      render(
+        <MobileWrapperDialog {...defaultProps} isOpen onClose={onClose} />
+      );
+      const header = screen.getByTestId("mobile-dialog-header");
+      fireTouch(header, "touchstart", 20);
+      fireTouch(header, "touchmove", y, x);
+      fireTouch(header, end);
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 180));
+      });
+      expect(onClose).not.toHaveBeenCalled();
+      expect(
+        header.closest<HTMLElement>(".mobile-wrapper-dialog")?.style.transform
+      ).toBe("translate3d(0, 0px, 0)");
+    });
+
+    it.each(["content", "close button", "opted out", "non-dismissible"])(
+      "does not start a dismissal from %s",
+      async (scenario) => {
+        const onClose = jest.fn();
+        render(
+          <MobileWrapperDialog
+            {...defaultProps}
+            isOpen
+            onClose={onClose}
+            dismissible={scenario !== "non-dismissible"}
+            enableDragToClose={scenario === "opted out" ? false : undefined}
+          />
+        );
+        let target = screen.getByTestId("mobile-dialog-header");
+        if (scenario === "content")
+          target = screen.getByTestId("child-content");
+        if (scenario === "close button") {
+          target = screen.getByRole("button", { name: "Close" });
+        }
+        fireTouch(target, "touchstart", 20);
+        fireTouch(target, "touchmove", 100);
+        fireTouch(target, "touchend");
+        await act(async () => {
+          await new Promise((resolve) => setTimeout(resolve, 180));
+        });
+        expect(onClose).not.toHaveBeenCalled();
+      }
+    );
+
     it("calls onClose when close button is clicked", async () => {
       const onClose = jest.fn();
       const user = userEvent.setup();
@@ -583,9 +758,7 @@ describe("MobileWrapperDialog", () => {
         />
       );
 
-      const dragSurface = document.querySelector<HTMLElement>(
-        ".mobile-wrapper-dialog"
-      );
+      const dragSurface = screen.getByTestId("mobile-dialog-header");
       expect(dragSurface).toBeInTheDocument();
 
       fireTouch(dragSurface!, "touchstart", 20);
@@ -606,9 +779,7 @@ describe("MobileWrapperDialog", () => {
         />
       );
 
-      const dragSurface = document.querySelector<HTMLElement>(
-        ".mobile-wrapper-dialog"
-      );
+      const dragSurface = screen.getByTestId("mobile-dialog-header");
       expect(dragSurface).toBeInTheDocument();
 
       fireTouch(dragSurface!, "touchstart", 20);
@@ -643,9 +814,7 @@ describe("MobileWrapperDialog", () => {
           />
         );
 
-        const dragSurface = document.querySelector<HTMLElement>(
-          ".mobile-wrapper-dialog"
-        );
+        const dragSurface = screen.getByTestId("mobile-dialog-header");
         expect(dragSurface).toBeInTheDocument();
 
         fireTouch(dragSurface!, "touchstart", 20);

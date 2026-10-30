@@ -42,7 +42,7 @@ const defaultAuthContext: AuthContextValue = {
   requestSessionUpgrade: async () => ({ success: false }),
   ensureActiveSessionV2WebSession: async () => false,
   setToast: () => {},
-  setActiveProfileProxy: async () => {},
+  setActiveProfileProxy: () => Promise.resolve(false),
 };
 
 const useCtx = useSeizeConnectContext as jest.MockedFunction<
@@ -83,7 +83,11 @@ function renderWithProfile(
 ) {
   return render(
     <AuthContext.Provider
-      value={{ ...defaultAuthContext, connectedProfile: profile, ...authContext }}
+      value={{
+        ...defaultAuthContext,
+        connectedProfile: profile,
+        ...authContext,
+      }}
     >
       <UserSetUpProfileCta />
     </AuthContext.Provider>

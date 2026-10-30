@@ -17,6 +17,8 @@ Quick Tags let a profile save a private tag for several profiles. For example,
   `Quick Tags` section.
 - Select a visible Quick Tag to edit it. On mobile, create and edit forms open
   in a bottom sheet; on wider screens, they replace the card content inline.
+  Use the sheet's Back, Close, or downward header swipe to discard edits; the
+  inline editor keeps a Cancel button.
 
 ## User Journey
 

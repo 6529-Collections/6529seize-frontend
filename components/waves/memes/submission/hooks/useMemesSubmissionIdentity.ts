@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  competitionPresentationWave,
+  presentationCompetition,
+} from "@/helpers/competition-presentation.helpers";
+import { fetchCompetition } from "@/services/api/competitions-api";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
@@ -134,6 +139,7 @@ export function useMemesSubmissionIdentity(
     connectionState,
   } = useSeizeConnectContext();
   const locale = useBrowserLocale();
+  const nativeCompetition = presentationCompetition(wave);
   const [isStartingConnection, setIsStartingConnection] = useState(false);
   const [isVerifyingProfile, setIsVerifyingProfile] = useState(false);
   const [initialProfileKey] = useState(() =>
@@ -169,10 +175,23 @@ export function useMemesSubmissionIdentity(
   } = useQuery<ApiWave>({
     queryKey: [
       QueryKey.MEMES_SUBMISSION_ELIGIBILITY,
-      { wave_id: wave.id, profile: profileKey, signer: address?.toLowerCase() },
+      {
+        wave_id: wave.id,
+        competition_id: nativeCompetition?.id ?? null,
+        profile: profileKey,
+        signer: address?.toLowerCase(),
+      },
     ],
-    queryFn: async () =>
-      await commonApiFetch<ApiWave>({ endpoint: `waves/${wave.id}` }),
+    queryFn: async () => {
+      if (nativeCompetition) {
+        const fresh = await fetchCompetition({
+          waveId: wave.id,
+          competitionId: nativeCompetition.id,
+        });
+        return competitionPresentationWave(wave, fresh);
+      }
+      return commonApiFetch<ApiWave>({ endpoint: `waves/${wave.id}` });
+    },
     enabled: isLiveProfileReady && requiresFreshEligibility,
     staleTime: 0,
     refetchOnWindowFocus: false,

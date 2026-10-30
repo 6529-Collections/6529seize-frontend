@@ -8,20 +8,33 @@ import { t } from "@/i18n/messages";
 import { createFetchDeadline } from "@/lib/fetch/fetchDeadline";
 import { fetchCollectAssetOwnership } from "@/services/api/collect-api";
 import { useQuery } from "@tanstack/react-query";
-import { useId, useState } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { collectProfileWallets } from "./collect-recipient.helpers";
+import { COLLECT_SECONDARY_ACTION_CLASS } from "./collect-action.styles";
 import { useConfirmedMarketPurchases } from "./market-activity-store";
 import { collectOwnerRefreshInterval } from "./collect-owner-refresh";
 
-const ACTION_CLASS =
-  "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-text-sm tw-font-medium tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-white";
+export interface CollectOwnerActionPresentation {
+  readonly onSelect?: (trigger: HTMLButtonElement) => void;
+  readonly disabledReason?: string;
+  readonly descriptionId?: string;
+}
+
+export type CollectOwnerActionRenderer = (
+  action: CollectOwnerActionPresentation | null,
+  feedback: ReactNode
+) => ReactNode;
 
 export default function CollectOwnerAction({
   assetKey,
   onList,
+  className = "",
+  renderAction,
 }: {
   readonly assetKey: string;
   readonly onList: (trigger: HTMLButtonElement) => void;
+  readonly className?: string;
+  readonly renderAction?: CollectOwnerActionRenderer;
 }) {
   const locale = useBrowserLocale();
   const { connectedProfile } = useAuth();
@@ -68,45 +81,41 @@ export default function CollectOwnerAction({
         analysis: query.state.data,
       }),
   });
-  if (!connectedProfile?.id)
+  if (!connectedProfile?.id) {
+    if (renderAction)
+      return renderAction({ onSelect: connection.seizeConnect }, null);
     return (
       <button
         type="button"
-        className={ACTION_CLASS}
+        className={`${COLLECT_SECONDARY_ACTION_CLASS} ${className}`}
         onClick={connection.seizeConnect}
       >
         {t(locale, "collect.menu.list")}
       </button>
     );
+  }
   const checkingOwnership =
     ownership.isPending || (ownership.isError && ownership.isFetching);
-  if (wallets.length > 0 && (checkingOwnership || ownership.isError))
-    return (
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2">
-        <button
-          type="button"
-          className={`${ACTION_CLASS} disabled:tw-opacity-50`}
-          disabled
-          aria-describedby={ownershipStatusId}
-        >
-          {t(locale, "collect.menu.list")}
-        </button>
+  if (wallets.length > 0 && (checkingOwnership || ownership.isError)) {
+    const disabledReason = t(
+      locale,
+      checkingOwnership
+        ? "collect.list.checkingOwnership"
+        : "collect.list.ownershipError"
+    );
+    const feedback = (
+      <>
         <span
           id={ownershipStatusId}
           role="status"
           className="tw-text-xs tw-leading-5 tw-text-iron-400"
         >
-          {t(
-            locale,
-            checkingOwnership
-              ? "collect.list.checkingOwnership"
-              : "collect.list.ownershipError"
-          )}
+          {disabledReason}
         </span>
         {ownership.isError && (
           <button
             type="button"
-            className={`${ACTION_CLASS} disabled:tw-opacity-50`}
+            className={COLLECT_SECONDARY_ACTION_CLASS}
             disabled={checkingOwnership}
             aria-label={t(locale, "collect.list.retryOwnership")}
             onClick={() => void ownership.refetch()}
@@ -114,8 +123,27 @@ export default function CollectOwnerAction({
             {t(locale, "collect.retry")}
           </button>
         )}
+      </>
+    );
+    if (renderAction)
+      return renderAction(
+        { disabledReason, descriptionId: ownershipStatusId },
+        feedback
+      );
+    return (
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2">
+        <button
+          type="button"
+          className={`${COLLECT_SECONDARY_ACTION_CLASS} ${className}`}
+          disabled
+          aria-describedby={ownershipStatusId}
+        >
+          {t(locale, "collect.menu.list")}
+        </button>
+        {feedback}
       </div>
     );
+  }
   const analysis = ownership.data;
   const owned =
     analysis?.account.profile_id === connectedProfile.id
@@ -130,53 +158,55 @@ export default function CollectOwnerAction({
           )
         )
       : [];
-  if (owned.length === 0) return null;
+  if (owned.length === 0) return renderAction ? renderAction(null, null) : null;
   const canList = owned.some(
     (wallet) =>
       wallet.wallet.toLowerCase() === connection.address?.toLowerCase()
   );
+  const selectList = (trigger: HTMLButtonElement) => {
+    if (canList) onList(trigger);
+    else setChooseOwner((value) => !value);
+  };
+  const ownerOptions = chooseOwner && !canList && (
+    <div className="tw-space-y-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-p-3">
+      <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-300">
+        {t(locale, "collect.list.chooseOwner")}
+      </p>
+      {owned.map((wallet) => (
+        <button
+          key={wallet.wallet}
+          type="button"
+          className="tw-block tw-min-h-11 tw-w-full tw-break-all tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-text-left tw-text-xs tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          onClick={() => {
+            if (
+              connection.connectedAccounts.some(
+                (account) =>
+                  account.address.toLowerCase() === wallet.wallet.toLowerCase()
+              )
+            )
+              connection.seizeSwitchConnectedAccount(wallet.wallet);
+            else connection.seizeConnect();
+          }}
+        >
+          <span className="tw-block">{wallet.display}</span>
+          <span className="tw-block tw-font-mono tw-text-iron-400">
+            {wallet.wallet}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+  if (renderAction) return renderAction({ onSelect: selectList }, ownerOptions);
   return (
     <div>
       <button
         type="button"
-        className={ACTION_CLASS}
-        onClick={(event) => {
-          if (canList) onList(event.currentTarget);
-          else setChooseOwner((value) => !value);
-        }}
+        className={`${COLLECT_SECONDARY_ACTION_CLASS} ${className}`}
+        onClick={(event) => selectList(event.currentTarget)}
       >
         {t(locale, "collect.menu.list")}
       </button>
-      {chooseOwner && !canList && (
-        <div className="tw-space-y-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-p-3">
-          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-300">
-            {t(locale, "collect.list.chooseOwner")}
-          </p>
-          {owned.map((wallet) => (
-            <button
-              key={wallet.wallet}
-              type="button"
-              className="tw-block tw-min-h-11 tw-w-full tw-break-all tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-text-left tw-text-xs tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-              onClick={() => {
-                if (
-                  connection.connectedAccounts.some(
-                    (account) =>
-                      account.address.toLowerCase() ===
-                      wallet.wallet.toLowerCase()
-                  )
-                )
-                  connection.seizeSwitchConnectedAccount(wallet.wallet);
-                else connection.seizeConnect();
-              }}
-            >
-              <span className="tw-block">{wallet.display}</span>
-              <span className="tw-block tw-font-mono tw-text-iron-400">
-                {wallet.wallet}
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
+      {ownerOptions}
     </div>
   );
 }

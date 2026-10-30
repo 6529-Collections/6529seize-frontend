@@ -109,6 +109,16 @@ the `More` menu.
    card with a 6529 Desktop logo and compact white launch label. The entire card
    opens 6529 Desktop, not only the visible label.
 
+7. Copy the connection link with the copy icon inside the link field. Use the
+   separate refresh button to its right (`Generate new code`) to prepare a new
+   connection without closing the dialog. The selected tab stays open.
+8. While preparing the connection, copy and refresh are disabled and the previous
+   link cannot be used from the dialog. If preparation fails, use refresh to retry.
+
+The refresh action prepares both connection targets again. Mobile receives a new
+one-time code. Desktop requests a new handoff for session-v2 authentication;
+legacy authentication rebuilds the link from the current local credentials.
+
 No copy-page, social, or current-page Share actions appear in this dialog.
 
 ## Common Scenarios

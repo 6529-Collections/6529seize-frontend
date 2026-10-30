@@ -12,6 +12,34 @@ import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
 import { useCompetitionEvents } from "@/hooks/competitions/useCompetitionEvents";
 import { useWaveData } from "@/hooks/useWaveData";
 import { CompetitionState } from "@/components/competitions/CompetitionState";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiCompetition } from "@/generated/models/ApiCompetition";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+
+const mockUseCompetitionSubmissionWave = jest.fn(
+  (wave: ApiWave | null | undefined, enabled = true) => ({
+    wave:
+      wave && enabled
+        ? {
+            ...wave,
+            competition: Object.assign(new ApiCompetition(), {
+              id: "primary",
+              wave_id: wave.id,
+              presentation: [],
+              capabilities: [],
+            }),
+          }
+        : null,
+    pending: false,
+    retry: jest.fn(),
+  })
+);
+jest.mock("@/hooks/competitions/useCompetitionSubmissionWave", () => ({
+  useCompetitionSubmissionWave: (
+    wave: ApiWave | null | undefined,
+    enabled?: boolean
+  ) => mockUseCompetitionSubmissionWave(wave, enabled),
+}));
 
 jest.mock("@/hooks/competitions/useCompetitionEvents", () => ({
   useCompetitionEvents: jest.fn(),
@@ -31,6 +59,8 @@ const mockEditingDropState: {
   setEditingDropId: jest.fn(),
 };
 
+let mockActiveContentTab = "CHAT";
+
 jest.mock("@/contexts/EditingDropContext", () => ({
   useEditingDrop: () => mockEditingDropState,
   EditingDropProvider: ({ children }: { children: React.ReactNode }) =>
@@ -46,6 +76,9 @@ const mockSetViewMode = jest.fn();
 const mockToggleViewMode = jest.fn();
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
+const mockSharedWaveTabs = jest.fn((_props: { showGalleryToggle: boolean }) => (
+  <div data-testid="tabs" />
+));
 const mockMemesArtSubmissionModal = jest.fn((props: any) =>
   props.isOpen ? <div data-testid="memes-submit-modal" /> : null
 );
@@ -54,7 +87,7 @@ let mockPathname = "/waves/wave-1";
 const mockWave = {
   id: "wave-1",
   name: "Wave 1",
-  chat: { authenticated_user_eligible: true },
+  chat: { authenticated_user_eligible: true, scope: { group: null } },
   voting: { authenticated_user_eligible: true },
   participation: {
     authenticated_user_eligible: true,
@@ -134,7 +167,7 @@ jest.mock("@/components/brain/ContentTabContext", () => ({
     "@/components/brain/ContentTabContext"
   ),
   useContentTab: () => ({
-    activeContentTab: "CHAT",
+    activeContentTab: mockActiveContentTab,
     updateAvailableTabs: mockUpdateAvailableTabs,
   }),
 }));
@@ -243,7 +276,8 @@ jest.mock("@/components/waves/winners/WaveWinners", () => ({
 }));
 
 jest.mock("@/components/brain/my-stream/tabs/MyStreamWaveTabs", () => ({
-  MyStreamWaveTabs: () => <div data-testid="tabs" />,
+  MyStreamWaveTabs: (props: { showGalleryToggle: boolean }) =>
+    mockSharedWaveTabs(props),
 }));
 
 jest.mock("@/components/brain/my-stream/MyStreamWaveDesktopTabs", () => ({
@@ -304,6 +338,7 @@ describe("MyStreamWave registration", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockIsApp = false;
+    mockActiveContentTab = "CHAT";
     mockWaveInfo = getDefaultMockWaveInfo();
     mockResolvedWave = mockWave;
     mockSearchParams = new URLSearchParams();
@@ -317,12 +352,38 @@ describe("MyStreamWave registration", () => {
 
     await waitFor(() => {
       expect(mockRegisterWave).toHaveBeenCalledWith("wave-1", true);
+      expect(mockUseCompetitionSubmissionWave).toHaveBeenCalledWith(
+        mockResolvedWave,
+        true
+      );
       expect(mockCompleteInitialRegistration).toHaveBeenCalledWith("wave-1");
       expect(mockUpdateAvailableTabs).toHaveBeenCalledWith(
         expect.objectContaining({ waveId: "wave-1" })
       );
     });
   });
+
+  it.each([
+    { pathname: "/waves/wave-1", visible: true },
+    { pathname: "/waves/wave-1/competitions/alpha", visible: false },
+  ])(
+    "scopes the shared Chat gallery action on $pathname with a native submission target",
+    ({ pathname, visible }) => {
+      mockPathname = pathname;
+      mockResolvedWave = {
+        ...mockWave,
+        wave: { ...mockWave.wave, type: ApiWaveType.Chat },
+      };
+      renderWave();
+      expect(mockUseCompetitionSubmissionWave).toHaveBeenCalledWith(
+        mockResolvedWave,
+        true
+      );
+      expect(mockSharedWaveTabs).toHaveBeenCalledWith(
+        expect.objectContaining({ showGalleryToggle: visible })
+      );
+    }
+  );
 
   it.each([
     "/waves/wave-1/competitions",
@@ -360,7 +421,7 @@ describe("MyStreamWave registration", () => {
     expect(mockPush).not.toHaveBeenCalled();
   });
 
-  it("keeps ordinary absent-wave content empty", () => {
+  it("shows loading identity without mounting chat or unrelated competition content", () => {
     mockResolvedWave = undefined;
     render(
       <HeaderProvider>
@@ -370,6 +431,7 @@ describe("MyStreamWave registration", () => {
         />
       </HeaderProvider>
     );
+    expect(screen.getByRole("status")).toHaveTextContent("Loading wave…");
     expect(screen.queryByRole("alert")).toBeNull();
     expect(screen.queryByTestId("chat")).toBeNull();
   });
@@ -461,23 +523,29 @@ describe("MyStreamWave registration", () => {
     });
   });
 
-  it("exposes the app header memes submit action", async () => {
-    mockIsApp = true;
-    mockWaveInfo = {
-      ...getDefaultMockWaveInfo(),
-      isMemesWave: true,
-    };
+  it.each(["CHAT", "LEADERBOARD"])(
+    "exposes the app header memes submit action on %s",
+    async (tab) => {
+      mockIsApp = true;
+      mockActiveContentTab = tab;
+      mockWaveInfo = {
+        ...getDefaultMockWaveInfo(),
+        isMemesWave: true,
+      };
 
-    renderWave();
+      renderWave();
 
-    await waitFor(() => {
-      expect(screen.getByTestId("header-action")).toHaveTextContent(
-        "Submit Work to The Memes"
+      await waitFor(() => {
+        expect(screen.getByTestId("header-action")).toHaveTextContent(
+          "Submit Work to The Memes"
+        );
+      });
+
+      fireEvent.click(
+        screen.getByRole("button", { name: "Open header action" })
       );
-    });
 
-    fireEvent.click(screen.getByRole("button", { name: "Open header action" }));
-
-    expect(screen.getByTestId("memes-submit-modal")).toBeInTheDocument();
-  });
+      expect(screen.getByTestId("memes-submit-modal")).toBeInTheDocument();
+    }
+  );
 });
