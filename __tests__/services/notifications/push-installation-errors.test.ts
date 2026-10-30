@@ -39,3 +39,27 @@ it("does not expose rejected response bodies, credentials, or storage messages",
     )
   ).toBe("logout_pending");
 });
+
+it.each([
+  null,
+  undefined,
+  "private storage contents",
+  42,
+  true,
+  { reason: "forged" },
+])("safely classifies non-Error preparation failure %#", (failure) => {
+  expect(getPushPreparationFailureReason(failure)).toBe(
+    "storage_or_identity_failure"
+  );
+});
+
+it.each(["logout_pending", "installation_changed", "auth_changed"] as const)(
+  "preserves the diagnostic reason %s while sharing the safe message",
+  (reason) => {
+    const error = new PushInstallationPreparationError(reason);
+    expect(getPushPreparationFailureReason(error)).toBe(reason);
+    expect(error.message).toBe(
+      "Push registration deferred until logout reconciliation completes"
+    );
+  }
+);
