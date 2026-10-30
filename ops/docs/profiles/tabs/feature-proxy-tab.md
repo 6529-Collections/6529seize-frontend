@@ -57,6 +57,21 @@ Use this page to:
 
 ## Current Tab Behavior
 
+### Switch into a received proxy
+
+Open your account menu and select a profile under `Proxy Profile`. If your
+wallet is disconnected, reconnect the wallet belonging to your signed-in
+profile. The selected proxy resumes after reconnection and asks for a sign-in
+signature. If your wallet uses an unsupported network, switch to a supported
+network and select the profile again.
+
+Your current profile stays signed in until the replacement sign-in succeeds.
+Canceling the wallet prompt or a failed sign-in leaves your current selection
+in place and shows an error. Select your own profile under `Proxy Profile` to
+return to your primary profile; that switch also requires signing in.
+
+### Relationship list
+
 - Default list filter is `All`.
 - `All`, `Received`, and `Granted` are visible tabs on phone, tablet, and desktop.
   Use the arrow keys to switch tabs, or `Home` / `End` to select the first / last tab.

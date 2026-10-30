@@ -1,4 +1,11 @@
 import { notFound } from "next/navigation";
+import { cache } from "react";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { CicStatement, ProfileActivityLog } from "@/entities/IProfile";
@@ -40,7 +47,7 @@ async function fetchProfileEnabledLog(
   });
 }
 
-async function fetchFollowersCount(
+async function fetchFollowers(
   profileId: string | number | null | undefined,
   headers: Record<string, string>
 ) {
@@ -56,7 +63,7 @@ async function fetchFollowersCount(
     headers,
   });
 
-  return response.count;
+  return response;
 }
 
 function extractProfileEnabledAt(
@@ -71,6 +78,62 @@ function extractProfileEnabledAt(
   }
   return new Date(createdAt).toISOString();
 }
+
+// Layout and page share these request-local reads. Pages continue refreshing the
+// data on navigation even though the header's DOM now belongs to the layout.
+export const getUserPageHeaderState = cache(
+  async (
+    normalizedHandle: string,
+    profileId: string | null,
+    cmsHandle: string | null
+  ) => {
+    const queryClient = new QueryClient();
+    const headers = await getAppCommonHeaders();
+    const updatedAt = Date.now();
+    await Promise.allSettled([
+      fetchStatements(normalizedHandle, headers).then((data) => {
+        return queryClient.setQueryData(
+          [QueryKey.PROFILE_CIC_STATEMENTS, normalizedHandle],
+          data,
+          { updatedAt }
+        );
+      }),
+      fetchProfileEnabledLog(normalizedHandle, headers).then((data) => {
+        return queryClient.setQueryData(
+          [QueryKey.PROFILE_HEADER, normalizedHandle, "enabledAt"],
+          extractProfileEnabledAt(data),
+          { updatedAt }
+        );
+      }),
+      fetchFollowers(profileId, headers).then((data) => {
+        if (data !== null) {
+          return queryClient.setQueryData(
+            [
+              QueryKey.IDENTITY_FOLLOWERS,
+              { profile_id: profileId, page_size: 1 },
+            ],
+            data,
+            { updatedAt }
+          );
+        }
+        return null;
+      }),
+      (cmsHandle
+        ? getProfileCmsPrimarySite({ handle: cmsHandle, headers })
+        : Promise.resolve(null)
+      ).then((site) => {
+        return queryClient.setQueryData(
+          [QueryKey.PROFILE_HEADER, normalizedHandle, "cmsWebsiteHref"],
+          site
+            ? getCmsPublicPath(site.cmsPackage, site.cmsPackage.site.base_path)
+            : null,
+          { updatedAt }
+        );
+      }),
+    ]);
+    return dehydrate(queryClient);
+  }
+);
 
 type Props = {
   readonly profile: ApiIdentity;
@@ -87,49 +150,29 @@ export default async function UserPageHeader({
     notFound();
   }
 
-  const headers = await getAppCommonHeaders();
   const normalizedHandle = handleOrWallet.toLowerCase();
-
   const cmsHandle = profile.handle?.toLowerCase() ?? null;
-  const [statementsResult, profileLogResult, followersResult, cmsSiteResult] =
-    await Promise.allSettled([
-      fetchStatements(normalizedHandle, headers),
-      fetchProfileEnabledLog(normalizedHandle, headers),
-      fetchFollowersCount(profile.id, headers),
-      cmsHandle
-        ? getProfileCmsPrimarySite({ handle: cmsHandle, headers })
-        : Promise.resolve(null),
-    ]);
-
-  const statements: CicStatement[] =
-    statementsResult.status === "fulfilled" ? statementsResult.value : [];
-
-  const profileLog: CountlessPage<ProfileActivityLog> | null =
-    profileLogResult.status === "fulfilled" ? profileLogResult.value : null;
-
+  const state = await getUserPageHeaderState(
+    normalizedHandle,
+    profile.id,
+    cmsHandle
+  );
   const defaultBanner1 = getRandomColor();
   const defaultBanner2 = getRandomColor();
 
   return (
-    <UserPageHeaderClient
-      profile={profile}
-      handleOrWallet={normalizedHandle}
-      fallbackMainAddress={fallbackMainAddress}
-      defaultBanner1={defaultBanner1}
-      defaultBanner2={defaultBanner2}
-      initialStatements={statements}
-      profileEnabledAt={extractProfileEnabledAt(profileLog)}
-      followersCount={
-        followersResult.status === "fulfilled" ? followersResult.value : null
-      }
-      cmsWebsiteHref={
-        cmsHandle && cmsSiteResult.status === "fulfilled" && cmsSiteResult.value
-          ? getCmsPublicPath(
-              cmsSiteResult.value.cmsPackage,
-              cmsSiteResult.value.cmsPackage.site.base_path
-            )
-          : null
-      }
-    />
+    <HydrationBoundary state={state}>
+      <UserPageHeaderClient
+        profile={profile}
+        handleOrWallet={normalizedHandle}
+        fallbackMainAddress={fallbackMainAddress}
+        defaultBanner1={defaultBanner1}
+        defaultBanner2={defaultBanner2}
+        initialStatements={[]}
+        profileEnabledAt={null}
+        followersCount={null}
+        cmsWebsiteHref={null}
+      />
+    </HydrationBoundary>
   );
 }

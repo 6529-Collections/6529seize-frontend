@@ -1,3 +1,4 @@
+import { MemeCollaboratorCredits } from "@/components/waves/memes/collaborations/MemeCollaboratorCredits";
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -20,28 +21,42 @@ export const WaveDropMetaRow = ({
   mimeType,
   children,
 }: WaveDropMetaRowProps) => (
-  <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-    <SingleWaveDropInfoAuthorSection drop={drop} />
-    <span className="tw-text-white/40">{"\u00b7"}</span>
-    <WaveDropTime timestamp={drop.created_at} size="sm" />
-    {mimeType && (
-      <>
-        <span className="tw-text-white/40">{"\u00b7"}</span>
-        <MediaTypeBadge mimeType={mimeType} dropId={drop.id} />
-      </>
+  <>
+    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+      <SingleWaveDropInfoAuthorSection drop={drop} />
+      <span className="tw-text-white/40">{"\u00b7"}</span>
+      <WaveDropTime timestamp={drop.created_at} size="sm" />
+      {mimeType && (
+        <>
+          <span className="tw-text-white/40">{"\u00b7"}</span>
+          <MediaTypeBadge mimeType={mimeType} dropId={drop.id} />
+        </>
+      )}
+      {isWinner && (
+        <>
+          <span className="tw-text-white/40">{"\u00b7"}</span>
+          <WinnerBadge drop={drop} variant="simple" />
+        </>
+      )}
+      {!isWinner && drop.drop_type === ApiDropType.Participatory && (
+        <>
+          <span className="tw-text-white/40">{"\u00b7"}</span>
+          <SingleWaveDropPosition
+            rank={drop.rank}
+            drop={drop}
+            variant="simple"
+          />
+        </>
+      )}
+      {children}
+    </div>
+    {(drop.collaborators?.length ?? 0) > 0 && (
+      <div className="tw-mt-6">
+        <MemeCollaboratorCredits
+          collaborators={drop.collaborators}
+          size="default"
+        />
+      </div>
     )}
-    {isWinner && (
-      <>
-        <span className="tw-text-white/40">{"\u00b7"}</span>
-        <WinnerBadge drop={drop} variant="simple" />
-      </>
-    )}
-    {!isWinner && drop?.drop_type === ApiDropType.Participatory && (
-      <>
-        <span className="tw-text-white/40">{"\u00b7"}</span>
-        <SingleWaveDropPosition rank={drop.rank} drop={drop} variant="simple" />
-      </>
-    )}
-    {children}
-  </div>
+  </>
 );

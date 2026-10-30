@@ -123,6 +123,16 @@ export const ROOT_PUBLIC_FILES: ReadonlySet<string> = new Set([
   "/x_black.png",
 ]);
 
+/**
+ * The only dot-prefixed paths a route serves (`app/.well-known/*`). They skip
+ * the staging gate because Apple's CDN fetches them without cookies. Add
+ * `/.well-known/assetlinks.json` here with its route once Android App Links
+ * have the app's signing-certificate fingerprint.
+ */
+export const SERVED_WELL_KNOWN_PATHS: ReadonlySet<string> = new Set([
+  "/.well-known/apple-app-site-association",
+]);
+
 /** Root-level paths kept ungated although no committed `public/` file backs them. */
 const GENERATED_ROOT_STATIC_PATHS: ReadonlySet<string> = new Set([
   "/favicon.ico",
@@ -201,12 +211,15 @@ function isDotPrefixedSegment(segment: string): boolean {
 
 /**
  * True for paths no route or public file can serve: any dot-prefixed segment
- * such as `/.git/HEAD`, `/.env` or `/.well-known/*`. Neither `public/` nor
- * `app/` has dot-prefixed entries (the contract test checks); adding one, such
- * as `public/.well-known/*`, needs an allowlist here first.
+ * such as `/.git/HEAD`, `/.env` or `/.well-known/security.txt`, except the
+ * exact `SERVED_WELL_KNOWN_PATHS`. The contract test checks that `public/` and
+ * `app/` have no other dot-prefixed entries.
  */
 export function isUnservableDotPath(pathname: string): boolean {
-  return pathname.split("/").some(isDotPrefixedSegment);
+  return (
+    !SERVED_WELL_KNOWN_PATHS.has(pathname) &&
+    pathname.split("/").some(isDotPrefixedSegment)
+  );
 }
 
 /**
@@ -218,6 +231,7 @@ export function isStaticAssetPath(pathname: string): boolean {
   return (
     ROOT_PUBLIC_FILES.has(pathname) ||
     GENERATED_ROOT_STATIC_PATHS.has(pathname) ||
+    SERVED_WELL_KNOWN_PATHS.has(pathname) ||
     isGeneratedSitemapPath(pathname) ||
     STATIC_SEGMENT_PREFIXES.some((prefix) =>
       hasSegmentPrefix(pathname, prefix)

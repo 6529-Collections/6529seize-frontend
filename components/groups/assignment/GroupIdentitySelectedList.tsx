@@ -27,8 +27,10 @@ const lookupProfile = pLimit(4);
 function SelectedWallet({
   identity,
   onRemove,
+  mobilePresentation,
 }: {
   readonly identity: CommunityMemberMinimal;
+  readonly mobilePresentation: boolean;
   readonly onRemove: (wallet: string) => void;
 }) {
   const locale = useBrowserLocale();
@@ -66,7 +68,9 @@ function SelectedWallet({
     profile.isError && getStructuredApiErrorStatus(profile.error) !== 404;
 
   return (
-    <li className="tw-flex tw-min-h-14 tw-min-w-0 tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-1">
+    <li
+      className={`tw-flex tw-min-h-14 tw-min-w-0 tw-items-center tw-gap-3 ${mobilePresentation ? "tw-rounded-xl tw-bg-iron-800 tw-px-3 tw-py-2 tw-ring-1 tw-ring-iron-700" : "tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-1"}`}
+    >
       <ProfileAvatar
         pfpUrl={data?.pfp}
         size={ProfileBadgeSize.SMALL}
@@ -131,7 +135,7 @@ function SelectedWallet({
             wallet: shortWallet,
           }
         )}
-        className="tw-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-error"
+        className={`tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${mobilePresentation ? "tw-relative tw-size-8 tw-rounded-full tw-text-iron-500 after:tw-absolute after:-tw-inset-1.5 after:tw-content-[''] active:tw-bg-iron-700 active:tw-text-iron-50 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-50" : "tw-size-11 tw-rounded-lg tw-text-iron-400 desktop-hover:hover:tw-text-error"}`}
       >
         <XMarkIcon aria-hidden="true" className="tw-size-4" />
       </button>
@@ -142,8 +146,10 @@ function SelectedWallet({
 export default function GroupIdentitySelectedList({
   identities,
   onRemove,
+  mobilePresentation = false,
 }: {
   readonly identities: readonly CommunityMemberMinimal[];
+  readonly mobilePresentation?: boolean;
   readonly onRemove: (wallet: string) => void;
 }) {
   const locale = useBrowserLocale();
@@ -158,11 +164,14 @@ export default function GroupIdentitySelectedList({
 
   return (
     <div className="tw-w-full tw-min-w-0">
-      <ul className="tw-m-0 tw-list-none tw-p-0">
+      <ul
+        className={`tw-m-0 tw-list-none tw-p-0 ${mobilePresentation ? "tw-space-y-3" : ""}`}
+      >
         {visibleIdentities.map((identity) => (
           <SelectedWallet
             key={identity.wallet}
             identity={identity}
+            mobilePresentation={mobilePresentation}
             onRemove={onRemove}
           />
         ))}

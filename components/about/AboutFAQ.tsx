@@ -169,13 +169,17 @@ export default function AboutFAQ() {
                   </ul>
                 </dd>
 
-                <dt>Network Identity Credits (NIC)</dt>
+                <dt>Network Identity Check (NIC)</dt>
                 <dd>
                   <ul>
                     <li>
-                      Represents your identity within and outside of 6529.
+                      Reflects the network&apos;s rating of whether your profile
+                      accurately represents your identity.
                     </li>
-                    <li>Helps the network understand you.</li>
+                    <li>
+                      Shown as one of five labels, from Inaccurate to Highly
+                      Accurate.
+                    </li>
                   </ul>
                 </dd>
               </dl>

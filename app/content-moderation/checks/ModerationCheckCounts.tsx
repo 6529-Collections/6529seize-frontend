@@ -1,26 +1,28 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { fetchModerationCounts } from "@/services/api/moderation-checks-api";
-import { MODERATION_CHECKS_QUERY_KEY } from "@/services/content-moderation/content-moderation-query";
+import type { useModerationReviewCounts } from "@/hooks/content-moderation/useModerationReviewCounts";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { checkButtonClass } from "./checks.helpers";
 
 export default function ModerationCheckCounts({
-  profileId,
+  query,
 }: {
-  readonly profileId: string;
+  readonly query: ReturnType<typeof useModerationReviewCounts>;
 }) {
   const locale = useBrowserLocale();
-  const query = useQuery({
-    queryKey: [...MODERATION_CHECKS_QUERY_KEY, profileId, "counts"],
-    queryFn: ({ signal }) => fetchModerationCounts(signal),
-    refetchInterval: 60_000,
-    retry: false,
-    gcTime: 0,
-  });
+  function formatCount(
+    key:
+      | "needs_review"
+      | "quarantined"
+      | "rejected_today"
+      | "evaluator_failures_today"
+  ) {
+    const value =
+      key === "needs_review" ? query.needsReviewCount : query.data?.[key];
+    return value === undefined ? "—" : formatInteger(locale, value);
+  }
   return (
     <section className="tw-mt-6" aria-label={t(locale, "checks.title")}>
       <dl
@@ -43,7 +45,7 @@ export default function ModerationCheckCounts({
               {t(locale, `checks.count.${key}`)}
             </dt>
             <dd className="tw-mb-0 tw-ml-0 tw-mt-2 tw-text-2xl tw-font-semibold tw-tabular-nums tw-text-iron-50">
-              {query.data ? formatInteger(locale, query.data[key]) : "—"}
+              {formatCount(key)}
             </dd>
           </div>
         ))}
