@@ -83,7 +83,11 @@ describe("DropListItemRateGiveSubmit", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     auth.requestAuth.mockResolvedValue({ success: true });
-    useQueryClientMock.mockReturnValue({ invalidateQueries, setQueriesData });
+    useQueryClientMock.mockReturnValue({
+      invalidateQueries,
+      setQueriesData,
+      getQueryData: jest.fn(),
+    });
     useMutationMock.mockImplementation((config: any) => ({
       mutateAsync: async (variables: any) => {
         mutateAsync(variables);

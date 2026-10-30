@@ -11,9 +11,7 @@ import { DropSize } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import ConnectWallet from "@/components/common/ConnectWallet";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "@/components/distribution-plan-tool/common/CircleLoader";
+import NotificationsLoading from "./NotificationsLoading";
 import UserSetUpProfileCta from "@/components/user/utils/set-up-profile/UserSetUpProfileCta";
 import { useAuth } from "@/components/auth/Auth";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -25,23 +23,14 @@ export default function NotificationsPage() {
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const { activeDrop: modalDrop, isDropOpen, onDropClose } = useDropModal();
   const { isApp } = useDeviceInfo();
-  const { notificationsViewStyle, spaces } = useLayout();
+  const { spaces } = useLayout();
 
   const onCancelReplyQuote = () => {
     setActiveDrop(null);
   };
 
   if (connectionState === "initializing" || connectionState === "connecting") {
-    return (
-      <div
-        className="tailwind-scope tw-flex tw-items-center tw-justify-center tw-bg-black"
-        style={notificationsViewStyle}
-      >
-        <output aria-label="Loading notifications" aria-live="polite">
-          <CircleLoader size={CircleLoaderSize.LARGE} />
-        </output>
-      </div>
-    );
+    return <NotificationsLoading />;
   }
 
   if (!hasValidWalletAuth) {

@@ -17,7 +17,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
-import { useId, useState } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { Tooltip } from "react-tooltip";
 import { COLLECTED_COLLECTIONS_META } from "../filters/user-page-collected-filters.helpers";
 
@@ -25,6 +25,7 @@ export default function UserPageCollectedCard({
   card,
   contractType,
   showDataRow,
+  mediaBadge,
   interactiveMode = "link",
   selected = false,
   onToggle,
@@ -40,6 +41,7 @@ export default function UserPageCollectedCard({
   readonly card: CollectedCard;
   readonly contractType: ContractType;
   readonly showDataRow: boolean;
+  readonly mediaBadge?: ReactNode;
   readonly interactiveMode?: "link" | "select" | undefined;
   readonly selected?: boolean | undefined;
   readonly onToggle: () => void;
@@ -61,6 +63,7 @@ export default function UserPageCollectedCard({
     returnTo,
   });
   const tooltipId = useId();
+  const hasMediaBadge = Boolean(mediaBadge);
   const isSelectMode = interactiveMode === "select";
   const canSelect = copiesMax > 0;
   const isSelectModeAndCanSelect = isSelectMode && canSelect;
@@ -320,7 +323,10 @@ export default function UserPageCollectedCard({
           </span>
         </div>
 
-        <div className="tw-flex tw-justify-between tw-gap-x-2">
+        <div
+          className={`tw-flex tw-justify-between tw-gap-x-2 ${hasMediaBadge ? "tw-items-center [&>h3]:tw-min-w-0 [&>h3]:tw-flex-1" : ""}`}
+        >
+          {mediaBadge}
           <h3 className="tw-m-0 tw-line-clamp-1 tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100 tw-transition-colors group-hover:tw-text-white group-data-[typography=collected]/collected-cards:tw-text-[15px] group-data-[typography=collected]/collected-cards:tw-leading-[19.25px]">
             {card.token_name}
           </h3>
@@ -349,9 +355,9 @@ export default function UserPageCollectedCard({
         </div>
 
         {showDataRow && (
-          <div className="tw-mt-2 tw-flex tw-items-center tw-justify-between group-data-[typography=collected]/collected-cards:tw-flex-wrap group-data-[typography=collected]/collected-cards:tw-gap-x-2 group-data-[typography=collected]/collected-cards:tw-gap-y-1 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-2.5">
+          <div className="tw-mt-2 tw-flex tw-items-center tw-justify-between tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-2.5 group-data-[typography=collected]/collected-cards:tw-flex-wrap group-data-[typography=collected]/collected-cards:tw-gap-x-2 group-data-[typography=collected]/collected-cards:tw-gap-y-1">
             <div className="tw-flex tw-items-baseline tw-gap-1.5">
-              <span className="tw-text-[13px] tw-font-semibold tw-text-iron-300 group-data-[typography=collected]/collected-cards:tw-font-medium group-data-[typography=collected]/collected-cards:tw-text-iron-100 group-data-[typography=collected]/collected-cards:tw-tabular-nums">
+              <span className="tw-text-[13px] tw-font-semibold tw-text-iron-300 group-data-[typography=collected]/collected-cards:tw-font-medium group-data-[typography=collected]/collected-cards:tw-tabular-nums group-data-[typography=collected]/collected-cards:tw-text-iron-100">
                 {getTdhDisplay()}
               </span>
               <span className="tw-text-[13px] tw-font-semibold tw-text-iron-600 group-data-[typography=collected]/collected-cards:tw-font-normal group-data-[typography=collected]/collected-cards:tw-text-iron-500">

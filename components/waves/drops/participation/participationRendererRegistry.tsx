@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, type FC } from "react";
+import type { ApiCompetitionCapability } from "@/generated/models/ApiCompetitionCapability";
 import type { WaveParticipationVariant } from "@/helpers/waves/wave-participation-presentation.helpers";
 import MemeParticipationDrop from "@/components/memes/drops/MemeParticipationDrop";
 import QuorumParticipationDrop from "@/components/waves/quorum/QuorumParticipationDrop";
@@ -39,9 +40,10 @@ const ProposalCardParticipationDrop: FC<ParticipationDropProps> = (props) => (
 );
 
 export const useWaveParticipationRendererSet = (
-  waveId: string | null | undefined
+  waveId: string | null | undefined,
+  capabilities?: readonly ApiCompetitionCapability[]
 ): ResolvedWaveParticipationRendererSet => {
-  const variant = useWaveParticipationVariant(waveId);
+  const variant = useWaveParticipationVariant(waveId, capabilities);
   const proposalCardPresentation = useWaveProposalCardPresentation(waveId);
 
   return useMemo(() => {

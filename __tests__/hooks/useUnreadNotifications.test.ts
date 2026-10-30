@@ -51,6 +51,7 @@ describe("useUnreadNotifications", () => {
             auth: getAuthTokenFingerprint("valid-jwt"),
             limit: "1",
             version: "v2",
+            includeCompetitions: true,
           },
         ],
         enabled: true,

@@ -42,6 +42,11 @@ import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRe
 
 // Define nested structures for context data
 interface WavesContextData {
+  readonly recommendationsStatus?: "pending" | "error" | "success";
+  readonly retryRecommendations?: (() => void) | undefined;
+  readonly isAnnouncementsLoading?: boolean;
+  readonly hasLoadingError?: boolean | undefined;
+  readonly retryLoading?: (() => void) | undefined;
   readonly isPinnedWavesLoading?: boolean;
   readonly list: MinimalWave[];
   readonly isFetching: boolean;
@@ -579,6 +584,11 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
         : null;
 
     const waves: WavesContextData = {
+      recommendationsStatus: mainWavesData.recommendationsStatus,
+      retryRecommendations: mainWavesData.retryRecommendations,
+      isAnnouncementsLoading: mainWavesData.isAnnouncementsLoading,
+      hasLoadingError: mainWavesData.hasLoadingError,
+      retryLoading: mainWavesData.retryLoading,
       isPinnedWavesLoading: mainWavesData.isPinnedWavesLoading,
       list: wavesHookData.waves,
       // A list still waiting for its first request reads as loading, so the
@@ -652,6 +662,11 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   }, [
     wavesHookData.waves,
     mainWavesData.isPinnedWavesLoading,
+    mainWavesData.recommendationsStatus,
+    mainWavesData.retryRecommendations,
+    mainWavesData.isAnnouncementsLoading,
+    mainWavesData.hasLoadingError,
+    mainWavesData.retryLoading,
     isMainWavesListEnabled,
     wavesHookData.isFetching,
     wavesHookData.isFetchingNextPage,

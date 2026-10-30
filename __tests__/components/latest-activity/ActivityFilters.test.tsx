@@ -112,10 +112,10 @@ describe("ActivityFilters", () => {
       const { wrapper } = renderFilters();
       expect(wrapper).toHaveClass(
         "tw-flex",
-        "tw-w-full",
+        "tw-w-auto",
         "tw-items-center",
         "tw-gap-4",
-        "md:tw-w-1/2"
+        "tw-ml-auto"
       );
     });
 

@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import SubscriptionsPage from "@/app/[user]/subscriptions/page";
+import SubscriptionsPage from "@/app/[user]/(profile)/subscriptions/page";
 
 let mockCountry = "CY";
 let mockIsCountryPending = false;
