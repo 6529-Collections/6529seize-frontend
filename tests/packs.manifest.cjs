@@ -528,6 +528,19 @@ const PACKS = [
     ],
     AUTH_SANDBOX_ENV
   ),
+  sandboxPack(
+    "test:e2e:notifications-inbox-sandbox",
+    "Desktop notification preview, explicit read actions, and mobile navigation.",
+    ["tests/auth/notifications-inbox-sandbox.spec.ts"],
+    {
+      ...AUTH_SANDBOX_ENV,
+      NEXT_DEV_DIST_DIR: ".next-playwright-notifications-inbox",
+      PLAYWRIGHT_BASE_URL: "http://localhost:3309",
+      PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3309",
+      PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4309",
+    },
+    [DESKTOP, MOBILE]
+  ),
   {
     ...sandboxPack(
       "test:e2e:profile-following-sandbox",
