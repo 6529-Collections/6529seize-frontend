@@ -49,12 +49,10 @@ export function getHeaderControlsRowClass({
 
 export function getHeaderSortMode({
   isLargeScreen,
-  showAdditionalActionFilter,
 }: {
   readonly isLargeScreen: boolean;
-  readonly showAdditionalActionFilter: boolean;
 }): "tabs" | "dropdown" {
-  return isLargeScreen && !showAdditionalActionFilter ? "tabs" : "dropdown";
+  return isLargeScreen ? "tabs" : "dropdown";
 }
 
 export function PriceActionsRow({

@@ -404,7 +404,6 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   const showAdditionalActionFilter = isMemesWave && !!onAdditionalActionChange;
   const sortMode = getHeaderSortMode({
     isLargeScreen,
-    showAdditionalActionFilter,
   });
 
   const onTogglePriceFilters = () => {

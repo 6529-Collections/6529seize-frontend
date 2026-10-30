@@ -9531,18 +9531,39 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await scroller.evaluate((element) =>
       element.scrollTo({ top: 0, behavior: "instant" })
     );
-    await page
-      .getByRole("button", { name: "Sort: Current Vote", exact: true })
-      .click();
-    await page.getByRole("menuitem", { name: "Newest", exact: true }).click();
+    if (testInfo.project.name === "web-desktop-chromium") {
+      await expect(
+        page.getByRole("tab", { name: "Current Vote", exact: true })
+      ).toHaveAttribute("aria-selected", "true");
+      await page.getByRole("tab", { name: "Newest", exact: true }).click();
+    } else {
+      await page
+        .getByRole("button", { name: "Sort: Current Vote", exact: true })
+        .click();
+      await page.getByRole("menuitem", { name: "Newest", exact: true }).click();
+    }
     await expect
       .poll(() => reads.at(-1)?.searchParams.get("sort"))
       .toBe("submitted_at");
     await expect(toggle).toBeChecked();
     for (const width of testInfo.project.name === "web-desktop-chromium"
-      ? [1440, 390, 320]
+      ? [1440, 1024, 390, 320]
       : [390, 320]) {
       await page.setViewportSize({ width, height: 900 });
+      if (width >= 1024) {
+        await expect(
+          page.getByRole("tablist", { name: "Sort options", exact: true })
+        ).toBeVisible();
+        await expect(
+          page.getByRole("tab", { name: "Current Vote", exact: true })
+        ).toBeVisible();
+        await expect(
+          page.getByRole("tab", { name: "Hot", exact: true })
+        ).toBeVisible();
+        await expect(
+          page.getByRole("tab", { name: "Newest", exact: true })
+        ).toHaveAttribute("aria-selected", "true");
+      }
       for (const view of ["List view", "Grid view"]) {
         await page.getByRole("tab", { name: view, exact: true }).click();
         await expect(toggle).toBeChecked();
