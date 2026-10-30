@@ -1970,7 +1970,9 @@ test.describe("Home Page @smoke @medium @large", () => {
         "matrix(1.06, 0, 0, 1.06, 0, 0)"
       );
       await expect(
-        waveLink.getByText("The Memes - Main Stage", { exact: true })
+        // Wave names and ordering differ between deployed environments.
+        // Keep checking the hovered card's actual title color.
+        waveLink.locator("span.tw-font-semibold")
       ).toHaveCSS("color", "rgb(255, 255, 255)");
       const after = await waveLink.boundingBox();
       expect(after!.y).toBeCloseTo(before!.y - 4, 0);
