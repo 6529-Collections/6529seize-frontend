@@ -565,6 +565,9 @@ function SupportedMarketDepthTradeProvider({
   const selectionValid = selected.every((item) =>
     marketDepthListingQuantityIsValid(item.asset, item.order, item.quantity)
   );
+  const reviewLabel = t(locale, "marketDepth.trade.review", {
+    count: formatNumber(locale, selected.length),
+  });
   const restoreFocus = (trigger: HTMLButtonElement | null) => {
     queueMicrotask(() => {
       if (trigger?.isConnected) trigger.focus();
@@ -575,13 +578,19 @@ function SupportedMarketDepthTradeProvider({
     <TradeContext.Provider value={value}>
       {children}
       <NftPurchasingGate>
+        {/* The small-screen shell is unbounded but overflow-auto. While this bar
+            exists, clip its horizontal overflow without creating a scroll container. */}
         {selected.length > 0 && (
-          <div className="tw-mt-5 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-4">
+          <div
+            data-market-depth-selection-bar
+            className="tw-sticky tw-bottom-0 tw-z-20 tw-mt-5 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-end tw-gap-x-4 tw-gap-y-2 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-py-4 tw-pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:tw-px-5 [body:has([data-mobile-bottom-nav-dock])_&]:tw-bottom-[calc(5rem+max(env(safe-area-inset-bottom,0px),var(--safe-area-inset-bottom,0px)))] [div.tw-overflow-auto.tw-bg-black:has(>main_&)]:tw-overflow-x-clip [div.tw-overflow-auto.tw-bg-black:has(>main_&)]:tw-overflow-y-visible"
+          >
             <Button
               type="button"
               variant="action"
               size="lg"
-              className="tw-font-inherit tw-w-full !tw-whitespace-normal sm:tw-w-auto"
+              aria-label={reviewLabel}
+              className="tw-font-inherit tw-relative tw-w-full !tw-whitespace-normal aria-busy:!tw-opacity-100 sm:tw-w-auto [&>svg>path:first-child]:tw-text-white/25 [&>svg]:tw-absolute [&>svg]:tw-inset-0 [&>svg]:tw-m-auto [&>svg]:tw-text-white"
               disabled={!selectionValid}
               loading={reviewState.busy}
               onClick={(event) => {
@@ -589,14 +598,18 @@ function SupportedMarketDepthTradeProvider({
                 reviewSelection();
               }}
             >
-              {t(locale, "marketDepth.trade.review", {
-                count: formatNumber(locale, selected.length),
-              })}
+              <span className={reviewState.busy ? "tw-invisible" : undefined}>
+                {reviewLabel}
+              </span>
             </Button>
             {reviewState.message && (
               <p
                 role={reviewState.error ? "alert" : "status"}
-                className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400"
+                className={
+                  reviewState.busy
+                    ? "tw-sr-only"
+                    : "tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400"
+                }
               >
                 {reviewState.message}
               </p>

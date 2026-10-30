@@ -248,7 +248,8 @@ export default function UserPageProfileCurationSetupDialog({
       title={t(locale, "profileCuration.setup.title")}
       titleClassName="!tw-text-lg tw-font-semibold !tw-text-iron-100 md:!tw-text-xl"
       isOpen={isOpen}
-      onClose={isSubmitting ? () => undefined : onClose}
+      onClose={onClose}
+      dismissible={!isSubmitting}
       noPadding
       tabletModal
       tall
@@ -355,6 +356,7 @@ export default function UserPageProfileCurationSetupDialog({
             variant="tertiary"
             size="md"
             disabled={isSubmitting}
+            className="tw-hidden md:tw-inline-flex"
           >
             {t(locale, "profileCuration.setup.cancel")}
           </Button>

@@ -4,6 +4,12 @@ import userEvent from '@testing-library/user-event';
 import ProxyListItem from '@/components/user/proxy/list/ProxyListItem';
 import { AuthContext } from '@/components/auth/Auth';
 import type { ApiProfileProxy } from '@/generated/models/ApiProfileProxy';
+import { ImageScale } from '@/helpers/image.helpers';
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from '@/__tests__/utils/avatarSrc';
 
 jest.mock('@/components/user/proxy/proxy/list/ProxyActions', () => () => <div data-testid="actions" />);
 jest.mock('@/components/user/proxy/proxy/create-action/ProxyCreateAction', () => (props: any) => <div data-testid="create" onClick={props.onCancel} />);
@@ -31,6 +37,21 @@ describe('ProxyListItem', () => {
     const btn = screen.getByRole('button', { name: /Add A Proxy/i });
     await user.click(btn);
     expect(screen.getByTestId('create')).toBeInTheDocument();
+  });
+
+  it('requests AUTOx50 derivatives for grantor and recipient pictures', () => {
+    renderComp(false, {
+      ...proxy,
+      created_by: { ...proxy.created_by, pfp: CDN_AVATAR_URL },
+      granted_to: { ...proxy.granted_to, pfp: CDN_AVATAR_URL },
+    });
+    const sources = screen
+      .getAllByAltText('Profile picture')
+      .map(getRequestedImageSrc);
+    expect(sources).toEqual([
+      expect.stringContaining(scaledAvatarPath(ImageScale.W_AUTO_H_50)),
+      expect.stringContaining(scaledAvatarPath(ImageScale.W_AUTO_H_50)),
+    ]);
   });
 
   it('shows addresses for grantors and recipients without handles', () => {

@@ -21,7 +21,8 @@ import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTo
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import CreateDropGifPicker from "./CreateDropGifPicker";
+import { createDropGifPickerLoader } from "./CreateDropGifPickerLoader";
+import LazyCreateDropGifPicker from "./LazyCreateDropGifPicker";
 import StormButton from "./StormButton";
 
 interface CreateDropActionsProps {
@@ -43,10 +44,15 @@ interface CreateDropActionsProps {
   readonly onGifDrop: (gif: string) => void;
 }
 
+// Warms the Giphy chunk when someone reaches for the GIF button, so opening the
+// picker rarely waits on the network.
+const preloadGifPicker = createDropGifPickerLoader.preload;
+
 interface CompactActionButtonProps {
   readonly label: string;
   readonly icon: React.ReactNode;
   readonly onClick: () => void;
+  readonly onPreload?: (() => void) | undefined;
   readonly disabled?: boolean;
   readonly pressed?: boolean;
   readonly required?: boolean;
@@ -116,6 +122,7 @@ const CompactActionButton: React.FC<CompactActionButtonProps> = ({
   label,
   icon,
   onClick,
+  onPreload,
   disabled = false,
   pressed,
   required = false,
@@ -123,6 +130,8 @@ const CompactActionButton: React.FC<CompactActionButtonProps> = ({
   <button
     type="button"
     onClick={onClick}
+    onPointerEnter={onPreload}
+    onFocus={onPreload}
     disabled={disabled}
     aria-pressed={pressed}
     className={`tw-group tw-flex tw-w-11 tw-flex-none tw-flex-col tw-items-center tw-gap-1.5 tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${
@@ -411,6 +420,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                           onClick={() =>
                             runCompactAction(() => setShowGifPicker(true))
                           }
+                          onPreload={preloadGifPicker}
                           icon={
                             <span className="tw-text-[11px] tw-font-bold tw-tracking-[-0.02em]">
                               GIF
@@ -539,6 +549,8 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                         </>
                         <button
                           onClick={() => setShowGifPicker(true)}
+                          onPointerEnter={preloadGifPicker}
+                          onFocus={preloadGifPicker}
                           aria-label={addGifLabel}
                           className="tw-flex tw-size-8 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-text-iron-300 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7"
                           data-tooltip-id={gifTooltipId}
@@ -635,7 +647,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
             onChange={onFiles}
           />
         </div>
-        <CreateDropGifPicker
+        <LazyCreateDropGifPicker
           giphyApiKey={gifPickerKey}
           show={showGifPicker}
           setShow={setShowGifPicker}

@@ -1,3 +1,6 @@
+import safeCollectingMessages from "@/i18n/messages/safeCollecting.fr-FR.json";
+import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.fr-FR.json";
+import networkTdhConsolidationMessages from "@/i18n/messages/networkTdhConsolidation.fr-FR.json";
 import { FR_FR_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
 import { FR_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import { FR_FR_DROP_REQUIREMENT_MESSAGES } from "@/i18n/messages/drop-requirements";
@@ -13,6 +16,7 @@ import { FR_FR_MAPPING_TOOL_MESSAGES } from "@/i18n/messages/mapping-tools";
 import { FR_FR_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { FR_FR_CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
 import { FR_FR_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
+import { FR_FR_DATE_COUNTDOWN_MESSAGES } from "@/i18n/messages/date-countdown";
 import { FR_FR_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { FR_FR_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { FR_FR_THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
@@ -21,7 +25,12 @@ import stormComposerFrMessages from "@/i18n/messages/stormComposer.fr-FR.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.fr-FR.json";
 
+const LOADING_LABEL = "Chargement…";
+
 export const FR_FR_MESSAGES = {
+  ...safeCollectingMessages,
+  ...delegationTapGuideMessages,
+  ...networkTdhConsolidationMessages,
   ...FR_SUBMISSION_DISCOVERY_MESSAGES,
   ...FR_FR_DROP_REQUIREMENT_MESSAGES,
   ...FR_FR_DROP_METADATA_MESSAGES,
@@ -31,6 +40,8 @@ export const FR_FR_MESSAGES = {
   "singleDrop.shared": "Lien partagé",
   "singleDrop.close": "Fermer",
   "singleDrop.closeLabel": "Fermer le panneau",
+  "singleDrop.loading": LOADING_LABEL,
+  "singleDrop.loadError": "Impossible de charger ce contenu.",
   "singleDrop.showChat": "Afficher le chat",
   "singleDrop.hideChat": "Masquer le chat",
   "singleDrop.chatLabel": "Chat du drop",
@@ -118,7 +129,7 @@ export const FR_FR_MESSAGES = {
     "La publication a échoué. Veuillez réessayer.",
   "profileCms.builder.history.title": "Historique des versions",
   "profileCms.builder.history.refresh": "Actualiser",
-  "profileCms.builder.history.loading": "Chargement…",
+  "profileCms.builder.history.loading": LOADING_LABEL,
   "profileCms.builder.history.unavailable":
     "Connectez-vous en tant que propriétaire de ce profil pour voir les versions publiées.",
   "profileCms.builder.history.failed":
@@ -208,7 +219,7 @@ export const FR_FR_MESSAGES = {
   "user.brain.sidebar.retry": "Réessayer",
   "user.brain.sidebar.retryLoadMore": "Réessayer d’en charger davantage",
   "user.brain.sidebar.loadMore": "Charger plus",
-  "user.brain.sidebar.loadingMore": "Chargement…",
+  "user.brain.sidebar.loadingMore": LOADING_LABEL,
   "user.brain.sidebar.allWavesLoaded": "Toutes les Waves sont chargées.",
   "user.brain.sidebar.more": "Plus",
   "user.brain.sidebar.showLess": "Afficher moins",
@@ -650,6 +661,7 @@ export const FR_FR_MESSAGES = {
     "Réessayez avant d’envoyer votre message.",
   ...stormComposerFrMessages,
   "waves.loadingStatus": "Chargement des waves",
+  "waves.threadLoadError": "Ce fil de discussion n’a pas pu être chargé.",
   "waves.gifPicker.open": "Ajouter un GIF",
   "waves.gifPicker.dialogTitle": "Recherche de GIF",
   "waves.gifPicker.searchPlaceholder": "Rechercher des GIF",
@@ -1050,6 +1062,7 @@ export const FR_FR_MESSAGES = {
   "waves.proposalCard.tabLabels.errorReserved":
     "Les libellés ne peuvent pas correspondre aux onglets existants.",
   ...FR_FR_PAGINATION_MESSAGES,
+  ...FR_FR_DATE_COUNTDOWN_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} restant ce tour",
   "memes.quickVote.unrated": "{count} non notés",
   "memes.quickVote.summary": "{leftThisRound}, {unrated}",
@@ -1087,7 +1100,7 @@ export const FR_FR_MESSAGES = {
     "Impossible de charger d’autres drops. Sélectionnez Réessayer pour relancer le chargement.",
   "waves.leaderboard.retryMore": "Réessayer de charger d’autres drops",
   "waves.leaderboard.loadMore": "Charger plus de drops",
-  "waves.leaderboard.loadingMoreButton": "Chargement…",
+  "waves.leaderboard.loadingMoreButton": LOADING_LABEL,
   "waves.leaderboard.grid.untitled": "Drop sans titre",
   "waves.leaderboard.grid.readFull": "Tout lire",
   "waves.leaderboard.grid.open": "Ouvrir",

@@ -20,7 +20,10 @@ export default function WaveDropActionsEdit({
   const { connectedProfile } = useContext(AuthContext);
 
   // Only show edit for drop authors
-  if (connectedProfile?.handle !== drop.author.handle) {
+  if (
+    drop.author.is_anonymous ||
+    connectedProfile?.handle !== drop.author.handle
+  ) {
     return null;
   }
 

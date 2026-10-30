@@ -11,10 +11,15 @@
  * Do not edit the class manually.
  */
 
+import { ApiCompetitionEntryContext } from '../models/ApiCompetitionEntryContext';
 import { ApiCompetitionMyVote } from '../models/ApiCompetitionMyVote';
 import { HttpFile } from '../http/http';
 
 export class ApiCompetitionMyVotePage {
+    /**
+    * Authorized card content and native summaries when include=cards. May be sparse or differently ordered; join by entry.id.
+    */
+    'cards'?: Array<ApiCompetitionEntryContext>;
     'data': Array<ApiCompetitionMyVote>;
     'next_cursor': string | null;
     'has_more': boolean;
@@ -24,6 +29,12 @@ export class ApiCompetitionMyVotePage {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "cards",
+            "baseName": "cards",
+            "type": "Array<ApiCompetitionEntryContext>",
+            "format": ""
+        },
         {
             "name": "data",
             "baseName": "data",

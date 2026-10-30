@@ -1,4 +1,4 @@
-import type { Locator, Page, Route } from "@playwright/test";
+import type { Locator, Page, Route, TestInfo } from "@playwright/test";
 
 import {
   expect,
@@ -251,6 +251,186 @@ async function installLocalActiveWaveSearchFixture(page: Page) {
   );
 }
 
+const OTHER_SEARCH_WAVE_ID = "00000000-0000-4000-8000-000000000530";
+const OTHER_SEARCH_WAVE_NAME = "Another Search Wave";
+
+async function installAdvancedSearchFixture(page: Page) {
+  const overview = {
+    ...localFixtureWaveOverview,
+    id: OTHER_SEARCH_WAVE_ID,
+    name: OTHER_SEARCH_WAVE_NAME,
+    is_dm_wave: false,
+  };
+  await page.route(
+    `**/api/v2/waves/${LOCAL_ACTIVE_WAVE_ID}/search-authors**`,
+    (route) =>
+      fulfillLocalReadOnlyFixture(route, {
+        json: [{ id: "search-author", handle: "alice", pfp: null }],
+      })
+  );
+  await page.route("**/api/waves?**", (route) => {
+    const url = new URL(route.request().url());
+    if (!url.searchParams.has("name")) return route.fallback();
+    return fulfillLocalReadOnlyFixture(route, {
+      json: [
+        {
+          ...localFixtureWave,
+          id: OTHER_SEARCH_WAVE_ID,
+          name: OTHER_SEARCH_WAVE_NAME,
+        },
+      ],
+    });
+  });
+  await page.route(`**/api/waves/${OTHER_SEARCH_WAVE_ID}**`, (route) =>
+    fulfillLocalReadOnlyFixture(route, {
+      json: {
+        ...localFixtureWave,
+        id: OTHER_SEARCH_WAVE_ID,
+        name: OTHER_SEARCH_WAVE_NAME,
+      },
+    })
+  );
+  await page.route(`**/api/v2/waves/${OTHER_SEARCH_WAVE_ID}/drops**`, (route) =>
+    fulfillLocalReadOnlyFixture(route, { json: { wave: overview, drops: [] } })
+  );
+  await page.route(
+    `**/api/v2/waves/${OTHER_SEARCH_WAVE_ID}/search**`,
+    (route) =>
+      fulfillLocalReadOnlyFixture(route, {
+        json: { data: [], next: false, page: 1 },
+      })
+  );
+  await page.route("**/api/v2/drops/search**", (route) => {
+    const pageNumber = Number(
+      new URL(route.request().url()).searchParams.get("page")
+    );
+    return fulfillLocalReadOnlyFixture(route, {
+      json: {
+        data: [
+          {
+            id: `advanced-search-drop-${pageNumber}`,
+            serial_no: 42 + pageNumber,
+            wave: overview,
+            author: { ...localFixtureProfile, handle: "alice", badges: {} },
+            created_at: 1713744000000,
+            content: "hello from another wave",
+            parts_count: 1,
+            media: [],
+            attachments: [],
+            metadata: [],
+            mentioned_users: [],
+            mentioned_waves: [],
+            reactions: [],
+            referenced_nfts: [],
+            context_profile_context: {},
+            type: "CHAT",
+            drop_type: "CHAT",
+            main_type: "CHAT",
+          },
+        ],
+        page: pageNumber,
+        cursor: `fixture-cursor-${pageNumber}`,
+        next: pageNumber === 1,
+      },
+    });
+  });
+}
+
+async function exerciseAdvancedSearch(
+  page: Page,
+  searchInput: Locator,
+  testInfo: TestInfo
+) {
+  await installAdvancedSearchFixture(page);
+  const waveChip = page.getByRole("button", {
+    name: `Remove wave filter ${localFixtureWave.name}`,
+  });
+  await expect(waveChip).toBeVisible();
+  await searchInput.fill("from: ali");
+  await expect(page.getByRole("option", { name: "@ alice" })).toBeVisible();
+  await searchInput.press("ArrowDown");
+  const authorOnly = page.waitForRequest((request) => {
+    const url = new URL(request.url());
+    return (
+      url.pathname.endsWith(`/${LOCAL_ACTIVE_WAVE_ID}/search`) &&
+      url.searchParams.get("author_id") === "search-author" &&
+      !url.searchParams.has("term")
+    );
+  });
+  await searchInput.press("Enter");
+  await authorOnly;
+  await expect(
+    page.getByRole("button", { name: "Remove author filter alice" })
+  ).toBeVisible();
+  await searchInput.fill("hello");
+  const globalSearch = page.waitForRequest((request) => {
+    const url = new URL(request.url());
+    return (
+      url.pathname.endsWith("/v2/drops/search") &&
+      url.searchParams.get("author_id") === "search-author" &&
+      url.searchParams.get("term") === "hello"
+    );
+  });
+  await waveChip.click();
+  await globalSearch;
+  await expect(
+    page.getByRole("button", {
+      name: `Open message 43 by alice in ${OTHER_SEARCH_WAVE_NAME}`,
+    })
+  ).toContainText(OTHER_SEARCH_WAVE_NAME);
+  const continuation = page.waitForRequest((request) => {
+    const url = new URL(request.url());
+    return (
+      url.pathname.endsWith("/v2/drops/search") &&
+      url.searchParams.get("cursor") === "fixture-cursor-1"
+    );
+  });
+  await page.getByRole("button", { name: "Load more", exact: true }).click();
+  await continuation;
+  await expect(
+    page.getByRole("button", {
+      name: `Open message 44 by alice in ${OTHER_SEARCH_WAVE_NAME}`,
+    })
+  ).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+  await captureSafeScreenshot(
+    page,
+    testInfo,
+    "advanced-message-search-cross-wave"
+  );
+  await searchInput.fill("hello in: Another");
+  await page
+    .getByRole("option", { name: `# ${OTHER_SEARCH_WAVE_NAME}` })
+    .click();
+  await expect(
+    page.getByRole("button", {
+      name: `Remove wave filter ${OTHER_SEARCH_WAVE_NAME}`,
+    })
+  ).toBeVisible();
+  await expect(searchInput).toHaveValue("hello ");
+  await expect(
+    page.getByRole("status").getByText("No messages found", { exact: true })
+  ).toBeVisible();
+  await captureSafeScreenshot(
+    page,
+    testInfo,
+    "advanced-message-search-both-chips"
+  );
+  await page
+    .getByRole("button", {
+      name: `Remove wave filter ${OTHER_SEARCH_WAVE_NAME}`,
+    })
+    .click();
+  await page
+    .getByRole("button", {
+      name: `Open message 43 by alice in ${OTHER_SEARCH_WAVE_NAME}`,
+    })
+    .click();
+  await expect(page).toHaveURL(
+    new RegExp(`/waves/${OTHER_SEARCH_WAVE_ID}\\?serialNo=43`)
+  );
+}
+
 async function installSidebarScoreFixture(
   page: Page,
   votesReady?: Promise<void>
@@ -387,6 +567,154 @@ async function openSearchOnFirstWaveWithSearch(page: Page) {
 }
 
 test.describe("Search and wave-detail read-only coverage @surface @medium @large @readonly", () => {
+  test("discovery filters preserve URL state and the compact sort sheet restores focus", async ({
+    page,
+  }, testInfo) => {
+    const activate = (control: Locator) =>
+      testInfo.project.use.hasTouch ? control.tap() : control.click();
+    await page.route("**/api/v2/waves?*", async (route) => {
+      await fulfillLocalReadOnlyFixture(route, {
+        status: 200,
+        json: { page: 1, next: false, count: 0, data: [] },
+      });
+    });
+    await gotoReady(page, "/discover?filter=SCORE_50");
+    await expect(
+      page.getByText("No waves match these filters.", { exact: true }).last()
+    ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+    const threshold = page.getByRole("radiogroup", {
+      name: "Wave score threshold",
+    });
+    const formula = page.getByRole("link", {
+      name: "Score formula",
+      exact: true,
+    });
+    await expect(formula).toBeVisible();
+    const formulaUrl = new URL(
+      (await formula.getAttribute("href"))!,
+      page.url()
+    );
+    expect(formulaUrl.pathname).toBe("/network/wave-score");
+    expect(formulaUrl.searchParams.get("returnTo")).toBe(
+      "/discover?filter=SCORE_50"
+    );
+    await expect(
+      threshold.getByRole("radio", { name: "Score 50+" })
+    ).toBeChecked();
+
+    const compactSort = page.getByRole("button", {
+      name: /^Wave discovery sort: /,
+    });
+    if (testInfo.project.use.isMobile) {
+      await expect(compactSort).toBeVisible();
+    }
+    if (await compactSort.isVisible()) {
+      await activate(compactSort);
+      const sheet = page.getByRole("dialog", { name: "Wave discovery sort" });
+      await expect(
+        sheet.getByRole("heading", { name: "Wave discovery sort" })
+      ).toBeVisible();
+      for (const name of [
+        "Balanced",
+        "Quality",
+        "Hot",
+        "REP",
+        "Newest",
+        "Latest Posts",
+      ]) {
+        const option = sheet.getByRole("button", { name, exact: true });
+        await expect(option).toBeVisible();
+        await expect(option).toBeInViewport();
+        // Wait for the shared sheet animation to settle without selecting.
+        await option.click({ trial: true });
+        expect((await option.boundingBox())!.height).toBeGreaterThanOrEqual(48);
+      }
+      await expect(
+        sheet.getByRole("heading", { name: "Wave discovery sort" })
+      ).toBeFocused();
+      // The shared dialog must be outside the transformed page main.
+      expect(
+        await sheet.evaluate((element) => element.closest("main"))
+      ).toBeNull();
+      await page.keyboard.press("Escape");
+      await expect(sheet).not.toBeAttached();
+      await expect(compactSort).toBeFocused();
+      await activate(compactSort);
+      await expect(
+        sheet.getByRole("heading", { name: "Wave discovery sort" })
+      ).toBeFocused();
+      if (testInfo.project.use.hasTouch) await page.touchscreen.tap(10, 10);
+      else await page.mouse.click(10, 10);
+      await expect(sheet).not.toBeAttached();
+      await expect(compactSort).toBeFocused();
+      await activate(compactSort);
+      await activate(
+        sheet.getByRole("button", { name: "Quality", exact: true })
+      );
+      await expect(sheet).not.toBeAttached();
+      await expect(compactSort).toBeFocused();
+      await expect(compactSort).toHaveAccessibleName(
+        "Wave discovery sort: Quality"
+      );
+    } else {
+      const sorts = page.getByRole("tablist", {
+        name: "Wave discovery sort",
+        exact: true,
+      });
+      await expect(sorts.getByRole("tab")).toHaveCount(6);
+      await sorts
+        .getByRole("tab", { name: "Balanced", exact: true })
+        .press("ArrowRight");
+      await expect(
+        sorts.getByRole("tab", { name: "Quality", exact: true })
+      ).toBeFocused();
+    }
+    await expect(page).toHaveURL(/filter=SCORE_50&sort=QUALITY/);
+    await threshold.getByRole("radio", { name: "Score 50+" }).press("End");
+    await expect(
+      threshold.getByRole("radio", { name: "REP 60+" })
+    ).toBeChecked();
+    await expect(page).toHaveURL(/filter=REP_60&sort=QUALITY/);
+    await expect(
+      threshold.getByRole("radio", { name: "REP 60+" })
+    ).toBeFocused();
+    await expect(
+      threshold.getByRole("radio", { name: "REP 60+" })
+    ).toBeInViewport({ ratio: 1 });
+    await page.getByRole("tab", { name: "Active Votes", exact: true }).click();
+    await expect(page).toHaveURL(
+      /filter=REP_60&sort=QUALITY&view=active-votes/
+    );
+    await page
+      .getByRole("tab", { name: "Worth Checking Out", exact: true })
+      .click();
+    await expect(
+      threshold.getByRole("radio", { name: "REP 60+" })
+    ).toBeChecked();
+    await expectNoHorizontalOverflow(page);
+
+    const discoverUrl = page.url();
+    await activate(formula);
+    await expect(
+      page.getByRole("heading", {
+        name: "Wave score transparency",
+        exact: true,
+      })
+    ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+    if (testInfo.project.name === "capacitor-ios-sim") {
+      await activate(page.getByRole("button", { name: "Back", exact: true }));
+    } else {
+      await activate(
+        page.getByRole("link", { name: "Back to previous page", exact: true })
+      );
+    }
+    await expect(page).toHaveURL(discoverUrl);
+    await expect(
+      threshold.getByRole("radio", { name: "REP 60+" })
+    ).toBeChecked();
+    await expect(formula).toBeVisible();
+  });
+
   test("mobile wave shortcuts keep generous touch areas around compact buttons", async ({
     page,
   }, testInfo) => {
@@ -396,6 +724,16 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       "Touch target geometry is mobile-only"
     );
     await gotoReady(page, "/waves");
+    // The server shell is replaced as the mobile list hydrates. Measure the
+    // interactive controls only after a data row confirms that it has mounted.
+    await expect(
+      page
+        .getByRole("region", {
+          name: /All recent waves list|Regular waves list/,
+        })
+        .getByRole("link")
+        .first()
+    ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
     const shortcuts = [
       page.getByRole("link", { name: "Profile Waves Feed", exact: true }),
       page.getByRole("button", { name: "Find a wave…", exact: true }),
@@ -592,12 +930,23 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       await activeToggle.click();
     if ((await recommendationsToggle.getAttribute("aria-expanded")) === "false")
       await recommendationsToggle.click();
-    await expect(
-      discovery.getByText("Community decisions powered by TDH.")
-    ).toBeVisible();
-    await expect(
-      discovery.getByText("Highly rated waves.", { exact: true })
-    ).toBeVisible();
+    // A successfully empty section has only its empty message; descriptions
+    // accompany real content, never initial loading or an empty result.
+    for (const [description, empty] of [
+      ["Community decisions powered by TDH.", "No active TDH votes right now."],
+      ["Highly rated waves you don’t follow.", "No recommendations right now."],
+    ] as const) {
+      await expect(
+        discovery
+          .getByText(description, { exact: true })
+          .or(discovery.getByText(empty, { exact: true }))
+      ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+      if (await discovery.getByText(empty, { exact: true }).isVisible()) {
+        await expect(
+          discovery.getByText(description, { exact: true })
+        ).toHaveCount(0);
+      }
+    }
     const voteList = discovery.getByRole("region", {
       name: "Active voting waves",
     });
@@ -735,10 +1084,129 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     await expectNoHorizontalOverflow(page);
   });
 
+  test("global Messages search supports filters and keeps matches out of All", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    const local = isLocalBaseURL(baseURL);
+    if (local) {
+      await installLocalActiveWaveSearchFixture(page);
+      await installAdvancedSearchFixture(page);
+      await page.route("**/api/community-members?**", (route) =>
+        fulfillLocalReadOnlyFixture(route, {
+          json: [
+            {
+              profile_id: "search-author",
+              handle: "alice",
+              wallet: localFixtureProfile.primary_address,
+              display: "alice",
+              level: 0,
+              pfp: null,
+            },
+          ],
+        })
+      );
+    }
+    await gotoReady(page, "/waves");
+    await openHeaderSearch(page);
+    await page.getByRole("tab", { name: /^Messages/ }).click();
+    const messagesTab = page.getByRole("tab", { name: /^Messages/ });
+    await messagesTab.focus();
+    await messagesTab.press(
+      testInfo.project.use.isMobile ? "ArrowLeft" : "ArrowUp"
+    );
+    const wavesTab = page.getByRole("tab", { name: /^Waves/ });
+    await expect(wavesTab).toBeFocused();
+    await wavesTab.press(
+      testInfo.project.use.isMobile ? "ArrowRight" : "ArrowDown"
+    );
+    await expect(messagesTab).toBeFocused();
+    await expect(messagesTab).toHaveAttribute("aria-selected", "true");
+    const input = page.getByRole("combobox", {
+      name: "Search messages",
+      exact: true,
+    });
+    await expect(input).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /^Remove wave filter/ })
+    ).toHaveCount(0);
+    await input.fill(local ? "hello" : "6529");
+    const results = page.getByRole("tabpanel", { name: "Messages results" });
+    const firstResult = results
+      .getByRole("button", { name: /^Open message / })
+      .first();
+    await expect(firstResult).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+    await expect(firstResult).toContainText("#");
+    await expect(page.getByRole("tab", { name: /^Messages/ })).toBeInViewport({
+      ratio: 0.99,
+    });
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(
+      page,
+      testInfo,
+      "global-messages-search-results"
+    );
+    await input.fill(local ? "hello from: ali" : "6529 from: 6529");
+    const author = page.getByRole("option").first();
+    await expect(author).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+    await input.press("Enter");
+    await expect(
+      page.getByRole("button", { name: /^Remove author filter/ })
+    ).toBeVisible();
+    await input.fill(local ? "hello in: Another" : "6529 in: Memes");
+    await page.getByRole("option").first().click();
+    const wave = page.getByRole("button", { name: /^Remove wave filter/ });
+    await expect(wave).toBeVisible();
+    await expect(input).toBeFocused();
+    await expect(results).toHaveAttribute("aria-busy", "false", {
+      timeout: NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(page.getByRole("tab", { name: /^Messages/ })).toBeInViewport({
+      ratio: 0.99,
+    });
+    await captureSafeScreenshot(
+      page,
+      testInfo,
+      "global-messages-search-filters"
+    );
+    await wave.click();
+    await page.getByRole("button", { name: /^Remove author filter/ }).click();
+    await expect(firstResult).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+    await page.getByRole("tab", { name: /^All / }).click();
+    await expect(
+      page.getByRole("button", { name: /^Open message / })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("combobox", { name: "Search 6529", exact: true })
+    ).toHaveValue(local ? "hello " : "6529 ");
+    await page.getByRole("tab", { name: /^Messages/ }).click();
+    const serialNo = /^Open message (\d+)/.exec(
+      (await firstResult.getAttribute("aria-label")) ?? ""
+    )?.[1];
+    const targetWaveId = await firstResult.getAttribute("data-wave-id");
+    expect(serialNo).toBeTruthy();
+    expect(targetWaveId).toBeTruthy();
+    const jumpRequest = page.waitForRequest((request) => {
+      const url = new URL(request.url());
+      return (
+        url.pathname.endsWith(`/v2/waves/${targetWaveId}/drops`) &&
+        url.searchParams.get("serial_no_limit") === serialNo &&
+        url.searchParams.get("search_strategy") === "FIND_BOTH"
+      );
+    });
+    await firstResult.click();
+    await jumpRequest;
+    await expect
+      .poll(() => new URL(page.url()).pathname, {
+        timeout: NAVIGATION_TIMEOUT_MS,
+      })
+      .toMatch(new RegExp(`/(waves|messages)/${targetWaveId}$`));
+  });
+
   test("wave search exposes read-only message search safely", async ({
     baseURL,
     page,
-  }) => {
+  }, testInfo) => {
     const { expectedPath, expectedQueryWaveId, searchInput } = isLocalBaseURL(
       baseURL
     )
@@ -767,6 +1235,10 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       )
       .toBe(true);
     await expect(searchInput).toHaveAttribute("placeholder", "Search messages");
+    await expect(searchInput).toHaveAttribute("role", "combobox");
+    await expect(
+      page.getByRole("button", { name: /^Remove wave filter/ })
+    ).toBeVisible();
     const minimumQueryMessage = page
       .locator("#wave-drops-search-idle-status")
       .getByText(
@@ -788,6 +1260,10 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
 
     await page.getByRole("button", { name: "Clear search" }).click();
     await expect(searchInput).toHaveValue("");
+    if (isLocalBaseURL(baseURL)) {
+      await expect(searchInput).toHaveAttribute("role", "combobox");
+      await exerciseAdvancedSearch(page, searchInput, testInfo);
+    }
     await expectNoHorizontalOverflow(page);
   });
 });

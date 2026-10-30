@@ -5,6 +5,7 @@ import { formatNumberWithCommas } from "@/helpers/Helpers";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 interface MemeDropVoteStatsProps {
   readonly drop: ExtendedDrop;
@@ -84,7 +85,10 @@ export default function MemeDropVoteStats({ drop }: MemeDropVoteStatsProps) {
                 {voter.profile.pfp ? (
                   <img
                     className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
-                    src={voter.profile.pfp}
+                    src={getScaledImageUri(
+                      voter.profile.pfp,
+                      ImageScale.W_AUTO_H_50
+                    )}
                     alt="Recent voter"
                   />
                 ) : (

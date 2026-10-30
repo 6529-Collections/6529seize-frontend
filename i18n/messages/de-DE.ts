@@ -1,3 +1,6 @@
+import safeCollectingMessages from "@/i18n/messages/safeCollecting.de-DE.json";
+import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.de-DE.json";
+import networkTdhConsolidationMessages from "@/i18n/messages/networkTdhConsolidation.de-DE.json";
 import { DE_DE_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
 import { DE_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import { DE_DE_DROP_REQUIREMENT_MESSAGES } from "@/i18n/messages/drop-requirements";
@@ -13,6 +16,7 @@ import { DE_DE_MAPPING_TOOL_MESSAGES } from "@/i18n/messages/mapping-tools";
 import { DE_DE_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { DE_DE_CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
 import { DE_DE_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
+import { DE_DE_DATE_COUNTDOWN_MESSAGES } from "@/i18n/messages/date-countdown";
 import { DE_DE_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { DE_DE_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { DE_DE_THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
@@ -24,6 +28,9 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.de-DE.jso
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  ...safeCollectingMessages,
+  ...delegationTapGuideMessages,
+  ...networkTdhConsolidationMessages,
   ...DE_SUBMISSION_DISCOVERY_MESSAGES,
   ...DE_DE_DROP_REQUIREMENT_MESSAGES,
   ...DE_DE_DROP_METADATA_MESSAGES,
@@ -33,6 +40,8 @@ export const DE_DE_MESSAGES = {
   "singleDrop.shared": "Link geteilt",
   "singleDrop.close": "Schließen",
   "singleDrop.closeLabel": "Panel schließen",
+  "singleDrop.loading": "Wird geladen…",
+  "singleDrop.loadError": "Dieser Inhalt konnte nicht geladen werden.",
   "singleDrop.showChat": "Chat anzeigen",
   "singleDrop.hideChat": "Chat ausblenden",
   "singleDrop.chatLabel": "Drop-Chat",
@@ -644,6 +653,7 @@ export const DE_DE_MESSAGES = {
     "Versuche es erneut, bevor du deine Nachricht sendest.",
   ...stormComposerDeMessages,
   "waves.loadingStatus": "Waves werden geladen",
+  "waves.threadLoadError": "Dieser Thread konnte nicht geladen werden.",
   "waves.gifPicker.open": "GIF hinzufügen",
   "waves.gifPicker.dialogTitle": "GIF-Suche",
   "waves.gifPicker.searchPlaceholder": "GIFs suchen",
@@ -1042,6 +1052,7 @@ export const DE_DE_MESSAGES = {
   "waves.proposalCard.tabLabels.errorReserved":
     "Bezeichnungen dürfen nicht mit vorhandenen Tabs übereinstimmen.",
   ...DE_DE_PAGINATION_MESSAGES,
+  ...DE_DE_DATE_COUNTDOWN_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} in dieser Runde übrig",
   "memes.quickVote.unrated": "{count} unbewertet",
   "memes.quickVote.summary": "{leftThisRound}, {unrated}",
