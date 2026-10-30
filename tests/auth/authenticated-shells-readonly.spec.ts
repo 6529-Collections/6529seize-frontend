@@ -8,6 +8,7 @@ import {
   waitForRouteReady,
 } from "../testHelpers";
 
+import { installSubscriptionFixtures } from "../support/subscriptionFixtures";
 import { isCapacitorSimulationProject } from "../support/surfaceSimulation";
 
 const plan = {
@@ -377,17 +378,32 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
 
     await expectProfileShell(page, "Subscriptions");
     await expect(
-      page.getByRole("heading", { name: "Subscribe" })
+      page
+        .locator("main")
+        .getByRole("link", { name: "Learn more", exact: true })
+    ).toHaveAttribute("href", "/about/subscriptions");
+    await expect(
+      page.getByText("Subscription balance", { exact: true })
     ).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "Learn More" })
-    ).toHaveAttribute("href", "/about/subscriptions");
-    await expect(page.getByText("Current Balance")).toBeVisible();
-    await expect(page.getByText("Airdrop Address")).toBeVisible();
-    await expect(page.getByText("Mode")).toBeVisible();
-    await expect(page.getByText("Edition Preference")).toBeVisible();
-    await expect(page.getByText("Upcoming Drops")).toBeVisible();
-    await expect(page.getByText("Subscription History")).toBeVisible();
+      page.getByRole("heading", { name: "Upcoming Drops" })
+    ).toBeVisible();
+    const settings = page.getByRole("button", { name: /^Minting Settings/ });
+    const history = page.getByRole("button", { name: "Subscription History" });
+    await expect(settings).toHaveAttribute("aria-expanded", "false");
+    await expect(history).toHaveAttribute("aria-expanded", "false");
+    await page.getByRole("button", { name: "Details", exact: true }).click();
+    await expect(page.getByText("Mode", { exact: true })).toBeVisible();
+    await settings.click();
+    await expect(
+      page.getByRole("heading", { name: "Airdrop Address" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("group", { name: "Edition Preference" })
+    ).toBeVisible();
+    await history.click();
+    await expect(page.getByRole("tab", { name: "Redeemed" })).toBeVisible();
+    await expectNoHorizontalOverflow(page);
   });
 
   test("scrolls to and focuses the top-up section from the notification link", async ({
@@ -409,6 +425,101 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(topUp).toHaveAttribute("id", hash.slice(1));
     await expect(heading).toBeFocused();
     await expect(heading).toBeInViewport();
+  });
+
+  test("subscriptions preserve full details, compact top up and history pagination", async ({
+    page,
+  }, testInfo) => {
+    await page.clock.setFixedTime(new Date("2026-10-30T00:01:00Z"));
+    const { address } = await installSubscriptionFixtures(page);
+    await gotoReady(page, `${PROFILE_BASE_PATH}/subscriptions`);
+    await expect(
+      page.getByRole("heading", { name: "Running low, covered until Nov 4" })
+    ).toBeVisible();
+    const upcoming = page.getByRole("region", { name: "Upcoming Drops" });
+    await expect(
+      upcoming.getByRole("switch", { name: "Automatic subscription mode" })
+    ).toBeChecked();
+    await expect(
+      upcoming.getByRole("switch", {
+        name: "Toggle subscription for The Memes #568",
+      })
+    ).toBeDisabled();
+    await expect(upcoming.getByRole("combobox").first()).toBeDisabled();
+    await upcoming.getByRole("button", { name: "Minting Today" }).focus();
+    await expect(
+      page.getByRole("tooltip", { name: "No changes allowed on minting day" })
+    ).toBeVisible();
+    await upcoming.getByRole("button", { name: "Show More" }).click();
+    await expect(
+      upcoming.getByText("Next unfunded", { exact: true })
+    ).toHaveCount(1);
+    await upcoming.getByRole("link", { name: "Top up", exact: true }).click();
+    const topUp = page.getByRole("region", { name: "Top up", exact: true });
+    await expect(
+      topUp.getByRole("heading", { name: "Top up", exact: true })
+    ).toBeFocused();
+    await topUp.getByRole("button", { name: /^Recommended/ }).click();
+    await expect(
+      topUp.getByText("Funds 24 intended drops through The Memes #591")
+    ).toBeVisible();
+    await expect(
+      topUp.getByRole("button", { name: "Top up 2.73392 ETH" })
+    ).toBeVisible();
+    await topUp.getByRole("button", { name: /^Minimum for next drop/ }).click();
+    await expect(
+      topUp.getByRole("button", { name: "Top up 0.12232 ETH" })
+    ).toBeVisible();
+    await topUp.getByRole("button", { name: "More", exact: true }).click();
+    await expect(
+      topUp.getByText("Deep Time Subscriptions", { exact: true })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(page, testInfo, "subscriptions-top-up");
+    await topUp.getByRole("button", { name: "Cancel", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "Top up", exact: true })
+    ).toBeFocused();
+    await page.getByRole("button", { name: "Details", exact: true }).click();
+    await expect(
+      page.getByText("Automatic since Oct 2, 2026, 19:03 UTC")
+    ).toBeVisible();
+    await page.getByRole("button", { name: /^Minting Settings/ }).click();
+    await expect(
+      page.getByRole("radio", { name: "All eligible", exact: true })
+    ).toBeChecked();
+    await expect(
+      page.getByRole("button", { name: address, exact: true })
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Subscription History" }).click();
+    for (const [tab, heading] of [
+      ["Redeemed", "Redeemed Subscriptions"],
+      ["Log", "Log History"],
+      ["Top Ups", "Top Up History"],
+    ]) {
+      await page.getByRole("tab", { name: tab, exact: true }).click();
+      const panel = page.getByRole("tabpanel");
+      await expect(
+        panel.getByRole("heading", { name: heading, exact: true })
+      ).toBeVisible();
+      await panel.getByRole("button", { name: "Next page" }).click();
+      await expect(
+        panel.getByRole("textbox", { name: "Page number" })
+      ).toHaveValue("2");
+      await expectNoHorizontalOverflow(page);
+    }
+    await page.getByRole("tab", { name: "Log", exact: true }).click();
+    await expect(
+      page.getByText(
+        "Added to Final Subscription for Meme #568 on 2026-10-30",
+        { exact: true }
+      )
+    ).toBeVisible();
+    await captureSafeScreenshot(
+      page,
+      testInfo,
+      "subscriptions-details-history"
+    );
   });
 
   test("renders the own-profile proxy shell without creating a proxy", async ({

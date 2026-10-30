@@ -3,6 +3,8 @@ import DotLoader from "@/components/dotLoader/DotLoader";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import Link from "next/link";
 import { Tooltip } from "react-tooltip";
 
@@ -13,7 +15,7 @@ interface AirdropAddress {
 
 export interface AirdropAddressResult {
   tdh_wallet: AirdropAddress;
-  airdrop_address: AirdropAddress;
+  airdrop_address?: AirdropAddress | null;
 }
 
 export default function UserPageSubscriptionsAirdropAddress(
@@ -23,6 +25,7 @@ export default function UserPageSubscriptionsAirdropAddress(
     fetching?: boolean | undefined;
   }>
 ) {
+  const locale = useBrowserLocale();
   const airdropAddress = props.airdrop?.airdrop_address;
   const addressTooltipId = `airdrop-address-${airdropAddress?.address ?? "unavailable"}`;
   const editHref = `/safe-collecting/register-delegation?collection=${MEMES_CONTRACT}&use_case=${AIRDROPS_USE_CASE.use_case}`;
@@ -30,16 +33,16 @@ export default function UserPageSubscriptionsAirdropAddress(
   return (
     <div className="tw-min-w-0">
       <div className="tw-flex tw-min-h-8 tw-items-center tw-justify-between tw-gap-3">
-        <h3 className="tw-m-0 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
-          Airdrop Address
+        <h3 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
+          {t(locale, "subscriptions.airdrop.title")}
         </h3>
         {airdropAddress && props.show_edit && (
           <>
             <Link
               href={editHref}
-              aria-label="Change airdrop address"
+              aria-label={t(locale, "subscriptions.airdrop.change")}
               data-tooltip-id="subscriptions-change-airdrop-address"
-              className="tw-inline-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
+              className="tw-inline-flex tw-size-11 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
             >
               <PencilSquareIcon className="tw-size-4" aria-hidden="true" />
             </Link>
@@ -52,7 +55,7 @@ export default function UserPageSubscriptionsAirdropAddress(
               opacity={1}
               style={TOOLTIP_STYLES}
             >
-              Change airdrop address
+              {t(locale, "subscriptions.airdrop.change")}
             </Tooltip>
           </>
         )}
@@ -73,7 +76,7 @@ export default function UserPageSubscriptionsAirdropAddress(
                   type="button"
                   data-tooltip-id={addressTooltipId}
                   aria-describedby={addressTooltipId}
-                  className={`tw-block tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-leading-5 max-sm:tw-truncate ${
+                  className={`tw-block tw-w-full tw-break-all tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-leading-5 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${
                     airdropAddress.ens
                       ? "tw-text-xs tw-text-iron-500"
                       : "tw-text-sm tw-text-iron-200"
@@ -98,14 +101,14 @@ export default function UserPageSubscriptionsAirdropAddress(
             {!airdropAddress && (
               <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
                 <span className="tw-text-meta tw-font-normal tw-text-iron-500">
-                  No airdrop address found
+                  {t(locale, "subscriptions.airdrop.empty")}
                 </span>
                 {props.show_edit && (
                   <Link
                     href={editHref}
                     className="desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-md tw-px-1 tw-text-sm tw-font-semibold tw-text-primary-300 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
                   >
-                    Set airdrop address
+                    {t(locale, "subscriptions.airdrop.set")}
                   </Link>
                 )}
               </div>

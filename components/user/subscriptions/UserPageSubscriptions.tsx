@@ -17,6 +17,7 @@ import type { Page } from "@/helpers/Types";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
+import { formatAddress } from "@/helpers/Helpers";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { AirdropAddressResult } from "./UserPageSubscriptionsAirdropAddress";
@@ -24,19 +25,15 @@ import UserPageSubscriptionsAirdropAddress from "./UserPageSubscriptionsAirdropA
 import UserPageSubscriptionsBalance from "./UserPageSubscriptionsBalance";
 import UserPageSubscriptionsEditionPreference from "./UserPageSubscriptionsEditionPreference";
 import UserPageSubscriptionsHistory from "./UserPageSubscriptionsHistory";
-import UserPageSubscriptionsMode from "./UserPageSubscriptionsMode";
-import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
+import UserPageSubscriptionsDisclosure from "./UserPageSubscriptionsDisclosure";
+import { useSubscriptionDisclosure } from "./useSubscriptionDisclosure";
+import { useScrollToHashOnMount } from "@/hooks/useScrollToHashOnMount";
 import UserPageSubscriptionsTopUp from "./UserPageSubscriptionsTopUp";
 import UserPageSubscriptionsUpcoming from "./UserPageSubscriptionsUpcoming";
 import SubscriptionCoverageSummary from "./coverage/SubscriptionCoverageSummary";
 import { useSubscriptionCoverage } from "./coverage/useSubscriptionCoverage";
 
 const HISTORY_PAGE_SIZE = 10;
-const SUBSCRIBE_GROUP_CLASS =
-  "tw-relative tw-h-full tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] tw-transition-all tw-duration-500 tw-ease-out max-md:tw-p-4 max-md:tw-shadow-none max-md:tw-bg-iron-900 md:tw-grid md:tw-grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)]";
-const SUBSCRIBE_GROUP_CONTENT_CLASS =
-  "tw-min-w-0 md:tw-flex md:tw-h-full md:tw-flex-col";
-
 function getSubscriptionProfileKey(
   profile: ApiIdentity | null | undefined
 ): string | undefined {
@@ -62,6 +59,19 @@ export default function UserPageSubscriptions(
     : getSubscriptionProfileKey(connectedProfile);
   const isConnectedAccount = !!profileKey && connectedProfileKey === profileKey;
   const coverageQuery = useSubscriptionCoverage({ profileKey });
+  const topUp = useSubscriptionDisclosure(
+    "profile-subscriptions-top-up",
+    isConnectedAccount
+  );
+  useScrollToHashOnMount("profile-subscriptions-overview", {
+    enabled: !!profileKey,
+    focusId: "profile-subscriptions-overview-title",
+  });
+
+  const [fetchErrors, setFetchErrors] = useState<Record<string, boolean>>({});
+  const setFetchError = (request: string, failed: boolean) => {
+    setFetchErrors((current) => ({ ...current, [request]: failed }));
+  };
 
   const [details, setDetails] = useState<SubscriptionDetails>();
   const [fetchingDetails, setFetchingDetails] = useState<boolean>(true);
@@ -113,6 +123,7 @@ export default function UserPageSubscriptions(
       return;
     }
     setFetchingDetails(true);
+    setFetchError("details", false);
     commonApiFetch<SubscriptionDetails>({
       endpoint: `subscriptions/consolidation/details/${profileKey}`,
     })
@@ -120,6 +131,7 @@ export default function UserPageSubscriptions(
         setDetails(data);
       })
       .catch(() => {
+        setFetchError("details", true);
         setDetails(undefined);
       })
       .finally(() => {
@@ -132,6 +144,7 @@ export default function UserPageSubscriptions(
       return;
     }
     setFetchingAirdropAddress(true);
+    setFetchError("airdrop", false);
     commonApiFetch<AirdropAddressResult>({
       endpoint: `subscriptions/consolidation/${profileKey}/airdrop-address`,
     })
@@ -139,6 +152,7 @@ export default function UserPageSubscriptions(
         setAirdropResult(data);
       })
       .catch(() => {
+        setFetchError("airdrop", true);
         setAirdropResult(undefined);
       })
       .finally(() => {
@@ -151,6 +165,7 @@ export default function UserPageSubscriptions(
       return;
     }
     setFetchingTopUpHistory(true);
+    setFetchError("topups", false);
     commonApiFetch<{
       count: number;
       page: number;
@@ -162,6 +177,9 @@ export default function UserPageSubscriptions(
       .then((data) => {
         setTopUpHistory(data);
       })
+      .catch(() => {
+        setFetchError("topups", true);
+      })
       .finally(() => {
         setFetchingTopUpHistory(false);
       });
@@ -172,6 +190,7 @@ export default function UserPageSubscriptions(
       return;
     }
     setFetchingRedeemedHistory(true);
+    setFetchError("redeemed", false);
     commonApiFetch<{
       count: number;
       page: number;
@@ -183,6 +202,9 @@ export default function UserPageSubscriptions(
       .then((data) => {
         setRedeemedHistory(data);
       })
+      .catch(() => {
+        setFetchError("redeemed", true);
+      })
       .finally(() => {
         setFetchingRedeemedHistory(false);
       });
@@ -193,6 +215,7 @@ export default function UserPageSubscriptions(
       return;
     }
     setFetchingMemeSubscriptions(true);
+    setFetchError("upcoming", false);
     let upcomingLimit: number = remainingMintsForSeason;
     if (isMintingToday()) {
       upcomingLimit += 1;
@@ -202,6 +225,9 @@ export default function UserPageSubscriptions(
     })
       .then((data) => {
         setMemeSubscriptions(data);
+      })
+      .catch(() => {
+        setFetchError("upcoming", true);
       })
       .finally(() => {
         setFetchingMemeSubscriptions(false);
@@ -213,6 +239,7 @@ export default function UserPageSubscriptions(
       return;
     }
     setFetchingSubscriptionLogs(true);
+    setFetchError("logs", false);
     commonApiFetch<{
       count: number;
       page: number;
@@ -223,6 +250,9 @@ export default function UserPageSubscriptions(
     })
       .then((data) => {
         setSubscriptionLogs(data);
+      })
+      .catch(() => {
+        setFetchError("logs", true);
       })
       .finally(() => {
         setFetchingSubscriptionLogs(false);
@@ -260,20 +290,41 @@ export default function UserPageSubscriptions(
     return <></>;
   }
 
+  const settingsSummary = [
+    t(
+      locale,
+      details?.subscribe_all_editions
+        ? "subscriptions.settings.all"
+        : "subscriptions.coverage.editions.one"
+    ),
+    airdropResult?.airdrop_address?.address
+      ? formatAddress(airdropResult.airdrop_address.address)
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
-    <div className="tw-space-y-4 tw-pb-6">
-      <UserPageSubscriptionsSection
-        id="profile-subscriptions-overview"
-        title={t(locale, "subscriptions.page.title")}
-        action={
-          <Link
-            href="/about/subscriptions"
-            className="tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-font-semibold tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-rounded-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 desktop-hover:hover:tw-text-primary-300"
+    <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-8 tw-pb-12 md:tw-gap-10">
+      {Object.values(fetchErrors).some(Boolean) && (
+        <div
+          role="status"
+          className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/30 tw-p-4 tw-text-sm tw-text-amber-200"
+        >
+          <span>{t(locale, "subscriptions.page.refreshError")}</span>
+          <button
+            type="button"
+            onClick={fetchSubscriptionData}
+            className="tw-min-h-11 tw-rounded-lg tw-border tw-border-solid tw-border-amber-300/40 tw-bg-transparent tw-px-4 tw-font-medium tw-text-amber-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
           >
-            {t(locale, "subscriptions.page.learnMore")}
-            <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
-          </Link>
-        }
+            {t(locale, "subscriptions.page.retry")}
+          </button>
+        </div>
+      )}
+      <section
+        id="profile-subscriptions-overview"
+        aria-labelledby="profile-subscriptions-overview-title"
+        className="tw-scroll-mt-24 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-p-5 md:tw-p-8"
       >
         <SubscriptionCoverageSummary
           coverage={coverageQuery.data}
@@ -283,70 +334,40 @@ export default function UserPageSubscriptions(
           onRefresh={() => {
             void coverageQuery.refetch();
           }}
-        />
-        <div
-          id="profile-subscriptions-settings"
-          className="tw-mt-6 tw-scroll-mt-24"
+          details={details}
+          subscriptions={memeSubscriptions}
+          upcomingLoading={fetchingMemeSubscriptions}
+          topUpExpanded={topUp.expanded}
+          onToggleTopUp={() => topUp.setExpanded(!topUp.expanded)}
+          balance={
+            <UserPageSubscriptionsBalance
+              coverage={coverageQuery.data}
+              details={details}
+              fetching={fetchingDetails}
+              refresh={refresh}
+              show_refresh={isConnectedAccount}
+            />
+          }
         >
-          <h3 className="tw-mb-3 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
-            {t(locale, "subscriptions.page.settingsTitle")}
-          </h3>
-          <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2">
-            <div className={SUBSCRIBE_GROUP_CLASS}>
-              <div
-                className={`${SUBSCRIBE_GROUP_CONTENT_CLASS} md:-tw-translate-y-1 md:tw-justify-start`}
-              >
-                <UserPageSubscriptionsBalance
-                  coverage={coverageQuery.data}
-                  details={details}
-                  fetching={fetchingDetails}
-                  refresh={refresh}
-                  show_refresh={isConnectedAccount}
-                />
-              </div>
-              <div className="tw-my-4 tw-h-px tw-bg-white/[0.05]" />
-              <div
-                className={`${SUBSCRIBE_GROUP_CONTENT_CLASS} md:tw-justify-start`}
-              >
-                <UserPageSubscriptionsAirdropAddress
-                  show_edit={isConnectedAccount}
-                  airdrop={airdropResult}
-                  fetching={fetchingAirdropAddress}
-                />
-              </div>
+          {isConnectedAccount && (
+            <div hidden={!topUp.expanded}>
+              <UserPageSubscriptionsTopUp
+                expanded={topUp.expanded}
+                coverage={coverageQuery.data}
+                onTransactionConfirmed={refresh}
+                onCancel={() => {
+                  topUp.setExpanded(false);
+                  requestAnimationFrame(() =>
+                    document
+                      .getElementById("subscription-top-up-opener")
+                      ?.focus()
+                  );
+                }}
+              />
             </div>
-            <div className={SUBSCRIBE_GROUP_CLASS}>
-              <div
-                className={`${SUBSCRIBE_GROUP_CONTENT_CLASS} md:tw-justify-start`}
-              >
-                <UserPageSubscriptionsMode
-                  profileKey={profileKey}
-                  details={details}
-                  readonly={!isConnectedAccount}
-                  refresh={refresh}
-                />
-              </div>
-              <div className="tw-my-4 tw-h-px tw-bg-white/[0.05]" />
-              <div
-                className={`${SUBSCRIBE_GROUP_CONTENT_CLASS} md:tw-justify-center`}
-              >
-                <UserPageSubscriptionsEditionPreference
-                  profileKey={profileKey}
-                  details={details}
-                  readonly={!isConnectedAccount}
-                  refresh={refresh}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </UserPageSubscriptionsSection>
-      {isConnectedAccount && (
-        <UserPageSubscriptionsTopUp
-          coverage={coverageQuery.data}
-          onTransactionConfirmed={refresh}
-        />
-      )}
+          )}
+        </SubscriptionCoverageSummary>
+      </section>
       <UserPageSubscriptionsUpcoming
         profileKey={profileKey}
         details={details}
@@ -354,24 +375,57 @@ export default function UserPageSubscriptions(
         readonly={!isConnectedAccount}
         refresh={refresh}
         loading={fetchingMemeSubscriptions}
+        coverage={coverageQuery.isError ? undefined : coverageQuery.data}
       />
-      <UserPageSubscriptionsHistory
-        topups={topUpHistory}
-        redeemed={redeemedHistory}
-        logs={subscriptionLogs}
-        topUpsLoading={fetchingTopUpHistory}
-        redeemedLoading={fetchingRedeemedHistory}
-        logsLoading={fetchingSubscriptionLogs}
-        setRedeemedPage={(page: number) => {
-          fetchRedeemHistory(page);
-        }}
-        setTopUpPage={(page: number) => {
-          fetchTopUpHistory(page);
-        }}
-        setLogsPage={(page: number) => {
-          fetchLogs(page);
-        }}
-      />
+      <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06] tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950">
+        <UserPageSubscriptionsDisclosure
+          id="profile-subscriptions-settings"
+          title={t(locale, "subscriptions.page.settingsTitle")}
+          summary={fetchingDetails ? undefined : settingsSummary}
+        >
+          <UserPageSubscriptionsEditionPreference
+            profileKey={profileKey}
+            details={details}
+            readonly={!isConnectedAccount}
+            refresh={refresh}
+          />
+          <div className="tw-mt-4 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4">
+            <UserPageSubscriptionsAirdropAddress
+              show_edit={isConnectedAccount}
+              airdrop={airdropResult}
+              fetching={fetchingAirdropAddress}
+            />
+          </div>
+        </UserPageSubscriptionsDisclosure>
+        <UserPageSubscriptionsDisclosure
+          id="profile-subscriptions-history"
+          title={t(locale, "subscriptions.history.title")}
+        >
+          <UserPageSubscriptionsHistory
+            topups={topUpHistory}
+            redeemed={redeemedHistory}
+            logs={subscriptionLogs}
+            topUpsLoading={fetchingTopUpHistory}
+            redeemedLoading={fetchingRedeemedHistory}
+            logsLoading={fetchingSubscriptionLogs}
+            setRedeemedPage={fetchRedeemHistory}
+            setTopUpPage={fetchTopUpHistory}
+            setLogsPage={fetchLogs}
+          />
+        </UserPageSubscriptionsDisclosure>
+        <Link
+          href="/about/subscriptions"
+          className="tw-flex tw-min-h-14 tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-px-5 tw-py-4 tw-text-sm tw-text-iron-100 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 max-md:tw-px-4"
+        >
+          <span className="tw-text-[15px] tw-font-medium">
+            {t(locale, "subscriptions.page.learnMore")}
+          </span>
+          <ArrowRightIcon
+            aria-hidden="true"
+            className="tw-size-4 tw-text-iron-400"
+          />
+        </Link>
+      </div>
     </div>
   );
 }

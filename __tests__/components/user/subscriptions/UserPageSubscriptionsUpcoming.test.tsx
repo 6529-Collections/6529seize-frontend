@@ -207,25 +207,18 @@ describe("UserPageSubscriptionsUpcoming", () => {
   it("displays dates for subscriptions", () => {
     renderComponent();
 
-    expect(screen.getByText("2024-01-01 / Monday")).toBeInTheDocument();
-    expect(screen.getByText("2024-01-02 / Tuesday")).toBeInTheDocument();
+    expect(screen.getByText("Mon, Jan 1")).toBeInTheDocument();
+    expect(screen.getByText("Tue, Jan 2")).toBeInTheDocument();
   });
 
   it("formats upcoming mint days as UTC calendar days", () => {
-    const {
-      formatFullDate,
-    } = require("@/components/meme-calendar/meme-calendar.helpers");
-
+    const format = jest.spyOn(Intl, "DateTimeFormat");
     renderComponent();
-
-    expect(formatFullDate).toHaveBeenCalledWith(
-      mockUpcomingRows[0].utcDay,
-      "utc"
+    expect(format).toHaveBeenCalledWith(
+      "en-US",
+      expect.objectContaining({ timeZone: "UTC" })
     );
-    expect(formatFullDate).toHaveBeenCalledWith(
-      mockUpcomingRows[1].utcDay,
-      "utc"
-    );
+    format.mockRestore();
   });
 
   it("shows minting today message when applicable", () => {

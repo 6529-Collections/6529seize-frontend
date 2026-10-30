@@ -3645,6 +3645,94 @@ export const EN_US_MESSAGES = {
   "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}x Allowlist",
   "home.mintAllowlist.pill.mixed":
     "{phase} · {airdrop}x Airdrop · {allowlist}x Allowlist",
+  "subscriptions.answer.notSetUpVisitor":
+    "Subscription minting has not been set up for this profile.",
+  "subscriptions.answer.unavailableVisitor":
+    "The forecast inputs are incomplete. Coverage is unavailable until settings and schedule data are available.",
+  "subscriptions.answer.fetchUnavailableVisitor":
+    "Coverage is temporarily unavailable. Subscription settings have not changed.",
+  "subscriptions.page.refreshError":
+    "Some subscription data could not be refreshed. Previously loaded data may be out of date.",
+  "subscriptions.page.retry": "Retry",
+  "subscriptions.airdrop.title": "Airdrop Address",
+  "subscriptions.airdrop.change": "Change airdrop address",
+  "subscriptions.airdrop.empty": "No airdrop address found",
+  "subscriptions.airdrop.set": "Set airdrop address",
+  "subscriptions.details.title": "Details",
+  "subscriptions.details.status": "Status",
+  "subscriptions.details.drops": "Drops funded",
+  "subscriptions.details.mode": "Mode",
+  "subscriptions.details.eligibility": "Eligibility",
+  "subscriptions.details.none": "None",
+  "subscriptions.details.unavailable": "Unavailable",
+  "subscriptions.answer.covered": "Covered until {date}",
+  "subscriptions.answer.runningLow": "Running low, covered until {date}",
+  "subscriptions.answer.actionRequired": "Your next drop is not fully funded",
+  "subscriptions.answer.actionRequiredVisitor":
+    "The next intended drop is not fully funded",
+  "subscriptions.answer.coveredVisitor":
+    "The immediate intended drops are fully funded.",
+  "subscriptions.answer.planVisitor":
+    "The intended drops are covered for now. The funded runway will end soon.",
+  "subscriptions.answer.noSelectionsVisitor":
+    "Manual mode has no upcoming drops selected.",
+  "subscriptions.answer.next.one":
+    "Next: The Memes #{token} {date}, {count} card.",
+  "subscriptions.answer.next.many":
+    "Next: The Memes #{token} {date}, {count} cards.",
+  "subscriptions.answer.today": "today",
+  "subscriptions.answer.keepMinting": "Top up to keep minting.",
+  "subscriptions.answer.plan": "Plan a top up before then.",
+  "subscriptions.answer.choose": "Turn on the drops you want below.",
+  "subscriptions.answer.topUpAndChoose":
+    "Top up, then turn on the drops you want below.",
+  "subscriptions.answer.topUpFor": "Top up to receive The Memes #{token}.",
+  "subscriptions.balance.loading": "Loading balance",
+  "subscriptions.balance.refresh": "Refresh balance",
+  "subscriptions.mode.label": "Automatic subscription mode",
+  "subscriptions.mode.since": "{mode} since {date}",
+  "subscriptions.mode.automaticDescription":
+    "Automatic airdrops of all eligible drops unless you opt-out",
+  "subscriptions.mode.manualDescription":
+    "You have to opt-in to each specific drop",
+  "subscriptions.mode.manualVisitorDescription":
+    "Each specific drop must be opted into.",
+  "subscriptions.settings.editions": "Edition Preference",
+  "subscriptions.settings.all": "All eligible",
+  "subscriptions.settings.loading": "Loading settings",
+  "subscriptions.settings.eligibilityBadge": "Eligibility x{count}",
+  "subscriptions.settings.allDescription":
+    "You will receive all editions you are eligible for",
+  "subscriptions.settings.oneDescription": "You will receive only one edition",
+  "subscriptions.settings.allVisitorDescription":
+    "All eligible editions are included.",
+  "subscriptions.settings.oneVisitorDescription":
+    "Only one edition is included.",
+  "subscriptions.topUp.ios": "Top-up on 6529.io",
+  "subscriptions.topUp.remaining": "Remaining {period} {number}",
+  "subscriptions.topUp.other": "Other",
+  "subscriptions.topUp.countPlaceholder": "count",
+  "subscriptions.topUp.customLabel": "Other card count",
+  "subscriptions.topUp.more": "More",
+  "subscriptions.topUp.less": "Less",
+  "subscriptions.topUp.deepTime": "Deep Time Subscriptions",
+  "subscriptions.topUp.cancel": "Cancel",
+  "subscriptions.upcoming.title": "Upcoming Drops",
+  "subscriptions.upcoming.loading": "Loading upcoming drops",
+  "subscriptions.upcoming.empty": "No upcoming drops found",
+  "subscriptions.row.cards.one": "{count} card",
+  "subscriptions.row.cards.many": "{count} cards",
+  "subscriptions.history.title": "Subscription History",
+  "subscriptions.history.redeemed": "Redeemed",
+  "subscriptions.history.logs": "Log",
+  "subscriptions.history.topups": "Top Ups",
+  "subscriptions.history.redeemedTitle": "Redeemed Subscriptions",
+  "subscriptions.history.logsTitle": "Log History",
+  "subscriptions.history.topupsTitle": "Top Up History",
+  "subscriptions.history.emptyRedeemed": "No Redeemed Subscriptions found",
+  "subscriptions.history.emptyLogs": "No logs found",
+  "subscriptions.history.emptyTopups": "No Top Ups found",
+  "subscriptions.history.loading": "Loading {title}",
   "subscriptions.coverage.title": "Subscription coverage",
   "subscriptions.coverage.loading": "Loading subscription coverage",
   "subscriptions.coverage.unavailable":
@@ -3715,7 +3803,7 @@ export const EN_US_MESSAGES = {
     "{status} · through The Memes #{token}, {date}",
   "subscriptions.coverage.header.noFundedThrough": "{status}",
   "subscriptions.page.title": "Subscription minting",
-  "subscriptions.page.settingsTitle": "Minting settings",
+  "subscriptions.page.settingsTitle": "Minting Settings",
   "subscriptions.page.learnMore": "Learn more",
   "subscriptions.page.topUpTitle": "Top up",
   "subscriptions.balance.title": "Subscription balance",

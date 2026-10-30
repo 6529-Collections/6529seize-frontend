@@ -1,15 +1,12 @@
-import DotLoader, { Spinner } from "@/components/dotLoader/DotLoader";
+import DotLoader from "@/components/dotLoader/DotLoader";
 import { MEMES_MINT_PRICE } from "@/constants/constants";
 import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
-import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import { Tooltip } from "react-tooltip";
-import EthereumIcon from "../utils/icons/EthereumIcon";
 import { formatSubscriptionEth } from "./coverage/subscriptionCoverage.helpers";
 
 function getMintCapacityLabel(
@@ -51,68 +48,41 @@ export default function UserPageSubscriptionsBalance(
   const mintCapacityLabel = getMintCapacityLabel(locale, mintCapacity);
 
   return (
-    <div className="tw-min-w-0" aria-busy={props.fetching}>
-      <div className="tw-flex tw-min-h-8 tw-items-center tw-justify-between tw-gap-3">
-        <h3 className="tw-m-0 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
-          {t(locale, "subscriptions.balance.title")}
-        </h3>
-        {props.show_refresh &&
-          (props.fetching ? (
-            <span className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center">
-              <Spinner />
-            </span>
-          ) : (
-            <>
-              <button
-                type="button"
-                onClick={props.refresh}
-                data-tooltip-id="subscriptions-refresh-balance"
-                className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
-                aria-label="Refresh balance"
-              >
-                <ArrowPathIcon className="tw-size-4" aria-hidden="true" />
-              </button>
-              <Tooltip
-                id="subscriptions-refresh-balance"
-                place="top"
-                positionStrategy="fixed"
-                offset={8}
-                delayShow={250}
-                opacity={1}
-                style={TOOLTIP_STYLES}
-              >
-                Refresh balance
-              </Tooltip>
-            </>
-          ))}
-      </div>
-      <div className="tw-min-h-9">
-        {props.fetching ? (
-          <>
-            <output className="tw-sr-only">Loading balance</output>
-            <DotLoader />
-          </>
-        ) : (
-          <span className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1">
-            <span className="tw-flex tw-items-baseline tw-gap-2">
-              <b className="tw-text-2xl tw-font-medium tw-tabular-nums tw-leading-none tw-tracking-tight tw-text-iron-100 md:tw-text-3xl">
-                {formatSubscriptionEth(locale, balance)}
-              </b>
-              <span className="tw-inline-flex tw-h-5 tw-w-3 tw-flex-shrink-0 tw-self-center tw-text-iron-500">
-                <EthereumIcon />
-                <span className="tw-sr-only">
-                  {t(locale, "subscriptions.balance.ethUnit")}
-                </span>
-              </span>
-            </span>
-            {numericBalance > 0 && (
-              <span className="tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
-                ({mintCapacityLabel})
-              </span>
-            )}
+    <div
+      className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-sm tw-text-iron-400"
+      aria-busy={props.fetching}
+    >
+      <span>{t(locale, "subscriptions.balance.title")}</span>
+      {props.fetching ? (
+        <>
+          <output className="tw-sr-only">
+            {t(locale, "subscriptions.balance.loading")}
+          </output>
+          <DotLoader />
+        </>
+      ) : (
+        <>
+          <span className="tw-font-medium tw-tabular-nums tw-text-iron-100">
+            {formatSubscriptionEth(locale, balance)}{" "}
+            {t(locale, "subscriptions.balance.ethUnit")}
           </span>
-        )}
-      </div>
+          <span className="tw-tabular-nums">({mintCapacityLabel})</span>
+        </>
+      )}
+      {props.show_refresh && (
+        <button
+          type="button"
+          onClick={props.refresh}
+          disabled={props.fetching}
+          aria-label={t(locale, "subscriptions.balance.refresh")}
+          className="tw-inline-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-opacity-50 desktop-hover:hover:tw-text-iron-100"
+        >
+          <ArrowPathIcon
+            className={`tw-size-4 ${props.fetching ? "tw-animate-spin motion-reduce:tw-animate-none" : ""}`}
+            aria-hidden="true"
+          />
+        </button>
+      )}
     </div>
   );
 }

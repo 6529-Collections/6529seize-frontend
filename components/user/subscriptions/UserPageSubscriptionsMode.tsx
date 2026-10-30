@@ -4,7 +4,9 @@ import { AuthContext } from "@/components/auth/Auth";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
-import { useContext, useEffect, useId, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import UserPageSubscriptionsToggle from "./UserPageSubscriptionsToggle";
 
 export default function UserPageSubscriptionsMode(
@@ -15,12 +17,12 @@ export default function UserPageSubscriptionsMode(
     refresh: () => void;
   }>
 ) {
+  const locale = useBrowserLocale();
   const { requestAuth, setToast } = useContext(AuthContext);
 
   const [isAuto, setIsAuto] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
-  const descriptionId = useId();
-  const isDisabled = props.readonly || isUpdating;
+  const isDisabled = props.readonly || isUpdating || !props.details;
 
   useEffect(() => {
     setIsAuto(props.details?.automatic ?? false);
@@ -75,64 +77,20 @@ export default function UserPageSubscriptionsMode(
   };
 
   return (
-    <div className="tw-min-w-0 tw-p-1">
-      <div className="tw-min-w-0">
-        <div className="tw-flex tw-min-w-0 tw-items-baseline tw-justify-between tw-gap-3">
-          <h3 className="tw-m-0 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
-            Mode
-          </h3>
-          {props.details && props.details.last_update > 0 && (
-            <span className="tw-ml-auto tw-whitespace-nowrap tw-text-right tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
-              {new Date(props.details.last_update).toLocaleString("en-US", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: false,
-                timeZone: "UTC",
-              })}{" "}
-              UTC
-            </span>
-          )}
-        </div>
-        <div className="tw-mt-1 tw-flex tw-min-h-11 tw-items-center tw-gap-2.5">
-          <label
-            htmlFor="subscription-mode"
-            className={`tw-whitespace-nowrap tw-text-xs tw-font-medium sm:tw-text-sm ${
-              isDisabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"
-            } ${isAuto ? "tw-text-iron-500" : "tw-text-iron-100"}`}
-          >
-            Manual
-          </label>
-          <UserPageSubscriptionsToggle
-            disabled={isDisabled}
-            id="subscription-mode"
-            checked={isAuto}
-            onChange={toggleMode}
-            ariaLabel="Automatic subscription mode"
-            describedBy={props.readonly ? undefined : descriptionId}
-          />
-          <label
-            htmlFor="subscription-mode"
-            className={`tw-whitespace-nowrap tw-text-xs tw-font-medium sm:tw-text-sm ${
-              isDisabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"
-            } ${isAuto ? "tw-text-iron-100" : "tw-text-iron-500"}`}
-          >
-            Automatic
-          </label>
-        </div>
-      </div>
-      {!props.readonly && (
-        <p
-          id={descriptionId}
-          className="tw-mb-0 tw-mt-1 tw-text-meta tw-font-normal tw-leading-relaxed tw-text-iron-500"
-        >
-          {isAuto
-            ? "Automatic airdrops of all eligible drops unless you opt-out"
-            : "You have to opt-in to each specific drop"}
-        </p>
-      )}
+    <div className="tw-flex tw-min-h-11 tw-shrink-0 tw-items-center tw-gap-2.5">
+      <label
+        htmlFor="subscription-mode"
+        className="tw-text-sm tw-text-iron-300"
+      >
+        {t(locale, "subscriptions.coverage.mode.automatic")}
+      </label>
+      <UserPageSubscriptionsToggle
+        disabled={isDisabled}
+        id="subscription-mode"
+        checked={isAuto}
+        onChange={toggleMode}
+        ariaLabel={t(locale, "subscriptions.mode.label")}
+      />
     </div>
   );
 }

@@ -58,7 +58,7 @@ describe("UserPageSubscriptionsBalance", () => {
       />
     );
 
-    expect(screen.getByText("0.18")).toBeInTheDocument();
+    expect(screen.getByText("0.18 ETH")).toBeInTheDocument();
     expect(screen.getByText("(2 mints available)")).toBeInTheDocument();
     expect(screen.queryByText("99")).not.toBeInTheDocument();
   });
@@ -73,7 +73,7 @@ describe("UserPageSubscriptionsBalance", () => {
       />
     );
 
-    expect(screen.getByText("0.2")).toBeInTheDocument();
+    expect(screen.getByText("0.2 ETH")).toBeInTheDocument();
     expect(screen.getByText("(3 mints available)")).toBeInTheDocument();
   });
 
@@ -93,8 +93,6 @@ describe("UserPageSubscriptionsBalance", () => {
       />
     );
 
-    expect(
-      screen.getByText("(mint capacity unavailable)")
-    ).toBeInTheDocument();
+    expect(screen.getByText("(mint capacity unavailable)")).toBeInTheDocument();
   });
 });
