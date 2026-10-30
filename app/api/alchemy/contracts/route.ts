@@ -1,49 +1,39 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import pLimit from "p-limit";
 
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
 import { isValidEthAddress } from "@/helpers/Helpers";
+import { createClientRateLimiter } from "@/lib/security/clientRateLimit";
 import { normaliseAddress } from "@/services/alchemy/utils";
 import type { SupportedChain } from "@/types/nft";
+import {
+  type ContractMetadataEntry,
+  fetchContractMetadata,
+  getContractCacheKey,
+} from "../contractMetadata";
 import { readJsonBody } from "../readJsonBody";
 
 const NO_STORE_HEADERS = { "Cache-Control": "no-store" };
 const MAX_CONTRACTS_PER_REQUEST = 50;
 const MAX_BODY_BYTES = 16 * 1024;
-const CACHE_TTL_MS = 5 * 60 * 1000;
-const MAX_CACHE_ENTRIES = 500;
+const MAX_CONCURRENT_LOOKUPS_PER_REQUEST = 10;
 
-const NETWORK_MAP: Record<SupportedChain, string> = {
-  ethereum: "eth-mainnet",
-};
+// Each requested contract counts against the client's lookup budget.
+const enforceRateLimit = createClientRateLimiter({
+  limit: 600,
+  windowMs: 60 * 1000,
+  errorMessage: "Too many contract metadata requests",
+});
 
 type ContractRequest = {
   readonly address: `0x${string}`;
   readonly chain: SupportedChain;
 };
 
-type ContractResponseEntry = {
-  readonly address: `0x${string}`;
-  readonly chain: SupportedChain;
-  readonly metadata: Record<string, unknown> | null;
-  readonly error?: string | undefined;
-  readonly status?: number | undefined;
-};
-
 type ParseResult =
   | { ok: true; contracts: ContractRequest[] }
   | { ok: false; response: NextResponse };
-
-type CacheEntry = {
-  readonly expiresAt: number;
-  readonly entry: ContractResponseEntry;
-};
-
-const contractCache = new Map<string, CacheEntry>();
-
-function resolveNetwork(chain: SupportedChain): string {
-  return NETWORK_MAP[chain];
-}
 
 function jsonError(message: string, status = 400): NextResponse {
   return NextResponse.json(
@@ -70,59 +60,11 @@ function parseContractAddress(value: unknown): `0x${string}` | null {
   return normaliseAddress(value);
 }
 
-function getContractCacheKey(
-  address: `0x${string}`,
-  chain: SupportedChain
-): string {
-  return `${chain}:${address.toLowerCase()}`;
-}
-
-function getCachedContract(
-  address: `0x${string}`,
-  chain: SupportedChain,
-  now = Date.now()
-): ContractResponseEntry | null {
-  const key = getContractCacheKey(address, chain);
-  const cached = contractCache.get(key);
-  if (!cached) {
-    return null;
-  }
-  if (cached.expiresAt <= now) {
-    contractCache.delete(key);
-    return null;
-  }
-  return cached.entry;
-}
-
-function pruneContractCache(now = Date.now()): void {
-  contractCache.forEach((entry, key) => {
-    if (entry.expiresAt <= now) {
-      contractCache.delete(key);
-    }
-  });
-
-  while (contractCache.size >= MAX_CACHE_ENTRIES) {
-    const oldestEntry = contractCache.keys().next();
-    if (oldestEntry.done) {
-      break;
-    }
-    contractCache.delete(oldestEntry.value);
-  }
-}
-
-function setCachedContract(entry: ContractResponseEntry): void {
-  pruneContractCache();
-  contractCache.set(getContractCacheKey(entry.address, entry.chain), {
-    expiresAt: Date.now() + CACHE_TTL_MS,
-    entry,
-  });
-}
-
 function contractErrorEntry(
   contract: ContractRequest,
   error = "Failed to fetch contract metadata",
   status = 502
-): ContractResponseEntry {
+): ContractMetadataEntry {
   return {
     address: contract.address,
     chain: contract.chain,
@@ -195,63 +137,6 @@ function parseRequestBody(body: unknown): ParseResult {
   return { ok: true, contracts };
 }
 
-async function fetchContractMetadata({
-  address,
-  apiKey,
-  chain,
-  signal,
-}: ContractRequest & {
-  readonly apiKey: string;
-  readonly signal: AbortSignal;
-}): Promise<ContractResponseEntry> {
-  const cached = getCachedContract(address, chain);
-  if (cached) {
-    return cached;
-  }
-
-  const network = resolveNetwork(chain);
-  const url = `https://${network}.g.alchemy.com/nft/v3/${apiKey}/getContractMetadata?contractAddress=${address}`;
-  const response = await fetch(url, {
-    headers: { Accept: "application/json" },
-    signal,
-  });
-
-  if (response.status === 404) {
-    const entry: ContractResponseEntry = { address, chain, metadata: null };
-    setCachedContract(entry);
-    return entry;
-  }
-
-  if (!response.ok) {
-    return {
-      address,
-      chain,
-      metadata: null,
-      error: "Failed to fetch contract metadata",
-      status: response.status,
-    };
-  }
-
-  const payload: unknown = await response.json();
-  if (!isRecord(payload)) {
-    return {
-      address,
-      chain,
-      metadata: null,
-      error: "Invalid contract metadata response",
-      status: response.status,
-    };
-  }
-
-  const entry: ContractResponseEntry = {
-    address,
-    chain,
-    metadata: { ...payload, _checksum: address },
-  };
-  setCachedContract(entry);
-  return entry;
-}
-
 async function fetchContractMetadataEntry({
   apiKey,
   contract,
@@ -260,7 +145,7 @@ async function fetchContractMetadataEntry({
   readonly apiKey: string;
   readonly contract: ContractRequest;
   readonly signal: AbortSignal;
-}): Promise<ContractResponseEntry> {
+}): Promise<ContractMetadataEntry> {
   try {
     return await fetchContractMetadata({
       ...contract,
@@ -287,15 +172,26 @@ export async function POST(request: NextRequest) {
     return parseResult.response;
   }
 
+  const rateLimitResponse = enforceRateLimit(
+    request,
+    parseResult.contracts.length
+  );
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const apiKey = getAlchemyApiKey();
+    const limitLookup = pLimit(MAX_CONCURRENT_LOOKUPS_PER_REQUEST);
     const contracts = await Promise.all(
       parseResult.contracts.map((contract) =>
-        fetchContractMetadataEntry({
-          apiKey,
-          contract,
-          signal: request.signal,
-        })
+        limitLookup(() =>
+          fetchContractMetadataEntry({
+            apiKey,
+            contract,
+            signal: request.signal,
+          })
+        )
       )
     );
 

@@ -1,0 +1,135 @@
+/* Only the card order chooser opts in; later reviews retain their layout. */
+.orderSheet {
+  container: collect-order-sheet / size;
+}
+.orderSheet:has([data-collect-order-book]:not([hidden] *)) > div {
+  overflow: hidden;
+}
+
+.orderSheet [data-testid="mobile-dialog-header"] {
+  flex-shrink: 0;
+}
+
+.orderSheet:has([data-collect-order-book]:not([hidden] *))
+  :is(
+    [data-collect-dialog-content],
+    [data-collect-trade-content],
+    [data-collect-order-form]
+  ) {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.orderSheet [data-collect-wallet-summary] + [data-collect-order-book] {
+  margin-top: 20px;
+}
+
+.orderSheet [data-collect-order-book] {
+  flex: 1;
+  min-height: 48px;
+  margin: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: 16px;
+  scroll-padding-block: 8px;
+}
+
+.orderSheet [data-collect-order-book] fieldset {
+  margin-bottom: 0;
+}
+
+.orderSheet
+  [data-collect-order-form]
+  > [data-collect-order-footer]:not([hidden]) {
+  flex-shrink: 0;
+  margin: 0 -20px;
+  border-top: 1px solid theme("colors.iron.800");
+  padding: 16px 20px 0;
+}
+
+.orderSheet [data-collect-order-footer] > :not(:first-child) {
+  margin-top: 12px;
+}
+
+.orderSheet [data-collect-order-footer] form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 88px;
+  gap: 12px;
+}
+
+.orderSheet [data-collect-order-footer] form > * {
+  grid-column: 1 / -1;
+}
+
+.orderSheet [data-collect-order-footer] form > :not([hidden]) ~ :not([hidden]) {
+  margin: 0;
+}
+
+.orderSheet [data-collect-order-footer] [data-collect-trade-wallet] {
+  grid-column: 1;
+  align-self: center;
+}
+
+.orderSheet [data-collect-order-footer] [data-collect-trade-quantity] {
+  grid-column: 1 / -1;
+}
+
+.orderSheet
+  [data-collect-order-footer]
+  form:has([data-collect-trade-wallet])
+  [data-collect-trade-quantity] {
+  grid-column: 2;
+}
+
+.orderSheet
+  [data-collect-order-footer]
+  form:not(:has([data-collect-trade-wallet]))
+  [data-collect-trade-quantity]
+  > label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.orderSheet
+  [data-collect-order-footer]
+  form:not(:has([data-collect-trade-wallet]))
+  [data-collect-trade-quantity]
+  input {
+  width: 88px;
+  margin-top: 0;
+}
+
+.orderSheet [data-collect-trade-status]:empty {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .orderSheet [data-collect-wallet-summary] + [data-collect-order-book] {
+    margin-top: 24px;
+  }
+
+  .orderSheet
+    [data-collect-order-form]
+    > [data-collect-order-footer]:not([hidden]) {
+    margin-inline: -28px;
+    padding-inline: 28px;
+  }
+}
+
+/* Leave room for a complete order row above the footer on shorter phones. */
+@media (max-width: 767px) and (max-height: 640px) {
+  .orderSheet {
+    --mobile-wrapper-dialog-resting-height: calc(min(100vh, 100svh) - 4rem);
+  }
+}
+
+/* Keep every control reachable if a keyboard leaves too little room for both areas. */
+@container collect-order-sheet (max-height: 400px) {
+  .orderSheet:has([data-collect-order-book]:not([hidden] *)) > div {
+    overflow-y: auto;
+  }
+}

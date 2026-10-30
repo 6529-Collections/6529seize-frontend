@@ -1,6 +1,8 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react";
+import { DELEGATION_ABI } from "@/abis/abis";
 import { DelegationSubmitGroups } from "@/components/delegation/DelegationFormParts";
+import { DELEGATION_CONTRACT } from "@/constants/constants";
 
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
@@ -50,6 +52,42 @@ describe("DelegationSubmitGroups", () => {
     fireEvent.click(screen.getByRole("button", { name: "Submit" }));
     expect(mockWriteContract).not.toHaveBeenCalled();
     expect(screen.getByText("err")).toBeInTheDocument();
+  });
+
+  it("validates against the time of the submit click", () => {
+    Object.defineProperty(globalThis, "scrollBy", {
+      value: jest.fn(),
+      writable: true,
+    });
+    const submittedAtMs = Date.parse("2026-10-14T19:00:00Z");
+    const nowSpy = jest.spyOn(Date, "now").mockReturnValue(submittedAtMs);
+    const validate = jest.fn().mockReturnValue(["too soon"]);
+    try {
+      render(
+        <DelegationSubmitGroups
+          title="T"
+          writeParams={{
+            address: DELEGATION_CONTRACT.contract,
+            abi: DELEGATION_ABI,
+            chainId: DELEGATION_CONTRACT.chain_id,
+            functionName: "registerDelegationAddress",
+            args: [],
+          }}
+          showCancel={false}
+          gasError={undefined}
+          validate={validate}
+          onHide={jest.fn()}
+          onSetToast={jest.fn()}
+        />
+      );
+      expect(validate).not.toHaveBeenCalled();
+      fireEvent.click(screen.getByRole("button", { name: "Submit" }));
+    } finally {
+      nowSpy.mockRestore();
+    }
+    expect(validate).toHaveBeenCalledWith(submittedAtMs);
+    expect(mockWriteContract).not.toHaveBeenCalled();
+    expect(screen.getByText("too soon")).toBeInTheDocument();
   });
 
   it("clears validation errors before a valid resubmission", () => {

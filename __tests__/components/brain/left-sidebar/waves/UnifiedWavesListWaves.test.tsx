@@ -595,7 +595,7 @@ it("keeps the overlaid score inside the wave link and opens details on hover", a
   expect(scoreBadgePaths).toHaveLength(1);
   expect(scoreBadgePaths?.[0]).toHaveClass(
     "tw-fill-iron-900",
-    "tw-stroke-white/25"
+    "tw-stroke-iron-800"
   );
   fireEvent.click(scoreBadgeText);
   expect(
@@ -898,10 +898,12 @@ it("shows the worth checking out description when no profile is connected", () =
   );
 
   expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
-  expect(screen.getByText("Highly rated waves.")).toBeVisible();
+  expect(
+    screen.getByText("Highly rated waves you don’t follow.")
+  ).toBeVisible();
   expect(
     screen.queryByRole("button", {
-      name: "Highly rated waves.",
+      name: "Highly rated waves you don’t follow.",
     })
   ).not.toBeInTheDocument();
 });
@@ -964,6 +966,7 @@ it("expands regular subwaves and keeps child rows unpinned", async () => {
           hasSubwaves: true,
           createdAt: 10,
           unreadDropsCount: 1,
+          isFollowing: true,
         }),
       ]}
       onHover={jest.fn()}

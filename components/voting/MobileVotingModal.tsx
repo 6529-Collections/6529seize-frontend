@@ -45,6 +45,8 @@ const MobileVotingModal: React.FC<MobileVotingModalProps> = ({
       isOpen
       onClose={handleClose}
       title={t(locale, "waves.vote.modalTitle")}
+      surfaceClassName="tw-group/voting-dialog tw-bg-iron-950"
+      headerClassName="tw-relative group-has-[.is-vote-panel]/voting-dialog:[&>div:last-child]:tw-absolute group-has-[.is-vote-panel]/voting-dialog:[&>div:last-child]:tw-right-4 group-has-[.is-vote-panel]/voting-dialog:[&>div:last-child]:tw-top-[calc(100%+33px)] group-has-[.is-vote-panel]/voting-dialog:[&>div:last-child]:tw-z-10 group-has-[.is-vote-panel]/voting-dialog:[&>div:last-child]:tw-mt-0 group-has-[.is-vote-panel]/voting-dialog:[&>div:last-child]:-tw-translate-y-1/2"
       headerActions={
         <VoteModeControl value={voteInputMode} onChange={setVoteInputMode} />
       }

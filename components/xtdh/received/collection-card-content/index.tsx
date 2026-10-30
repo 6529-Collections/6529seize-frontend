@@ -139,12 +139,12 @@ export function XtdhReceivedCollectionCard({
             )}
           </div>
           <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
-            <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
+            <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50 group-data-[typography=profile]/profile-xtdh:tw-text-[15px] group-data-[typography=profile]/profile-xtdh:tw-text-iron-100">
               {displayName}
             </p>
             <div className="tw-flex tw-w-full tw-items-center tw-gap-2">
               <p
-                className="tw-m-0 tw-mb-0 tw-text-xs tw-text-iron-500"
+                className="tw-m-0 tw-mb-0 tw-text-xs tw-text-iron-500 group-data-[typography=profile]/profile-xtdh:tw-text-meta group-data-[typography=profile]/profile-xtdh:tw-font-normal group-data-[typography=profile]/profile-xtdh:tw-tabular-nums"
                 title={secondaryLabelTitle}
               >
                 {secondaryLabel}

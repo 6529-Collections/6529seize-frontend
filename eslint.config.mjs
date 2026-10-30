@@ -604,11 +604,12 @@ export const createEslintConfig = ({
       files: [
         "config/alchemyEnv.ts",
         "config/assets.ts",
-        "config/deploymentEnv.ts",
         "config/env.ts",
         "config/ethereumRpcEnv.ts",
+        "config/frontendRoot.server.ts",
         "config/museumPublicationEnv.server.ts",
         "config/nextConfig.ts",
+        "config/nextPhase.ts",
         "config/publicReviewDestinationEnv.server.ts",
         "config/reviewbotUsageEnv.ts",
         "config/runtimeConfig.ts",

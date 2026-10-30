@@ -75,7 +75,12 @@ const shouldGroupWithDrop = (
   currentDrop: ExtendedDrop,
   otherDrop: ExtendedDrop | null
 ): boolean => {
-  if (!otherDrop || currentDrop.parts.length > 1) {
+  if (
+    !otherDrop ||
+    currentDrop.parts.length > 1 ||
+    currentDrop.author.is_anonymous ||
+    otherDrop.author.is_anonymous
+  ) {
     return false;
   }
 

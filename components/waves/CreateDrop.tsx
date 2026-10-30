@@ -1,5 +1,8 @@
 "use client";
 
+import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
+import { useCompetitionEntrySubmit } from "@/hooks/competitions/useCompetitionEntrySubmit";
+
 import { useRef, useState, useCallback, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
 import type { CreateDropConfig } from "@/entities/IDrop";
@@ -52,6 +55,8 @@ import type {
 import { getDropSubmissionErrorContent } from "./create-drop-content/drop-submission-error.helpers";
 import type { CreateDropProps } from "./create-drop-content/create-drop.types";
 import { reportDropSubmissionFailure } from "@/utils/monitoring/dropSubmissionMonitoring";
+import { removeTemporaryThreadReply } from "./drops/reply-threads/pending-replies";
+import { isWaveRepliesCollapsed } from "@/helpers/waves/collapsed-replies.helpers";
 
 export default function CreateDrop({
   activeDrop,
@@ -115,6 +120,8 @@ export default function CreateDrop({
     wave,
   });
   const { isMemesWave, isCurationWave, isQuorumWave } = useWave(wave);
+  const nativeCompetition = presentationCompetition(wave);
+  const submitCompetitionEntry = useCompetitionEntrySubmit(nativeCompetition);
   const resolvedSubmissionExperience = resolveWaveSubmissionExperience({
     isMemesWave,
     isCurationWave,
@@ -441,6 +448,7 @@ export default function CreateDrop({
 
   const addDropMutation = useMutation({
     mutationFn: async (body: QueuedDropMutationBody) => {
+      if (body.nativeEntrySubmit) return body.nativeEntrySubmit(body.drop);
       return commonApiPost<ApiCreateDropRequest, ApiDrop>({
         endpoint: `drops`,
         body: body.drop,
@@ -449,6 +457,12 @@ export default function CreateDrop({
     },
     onSuccess: (serverDrop, body) => {
       if (body.dropId) {
+        if (isWaveRepliesCollapsed(wave))
+          removeTemporaryThreadReply(
+            queryClient,
+            body.drop.wave_id,
+            body.dropId
+          );
         processDropRemoved(body.drop.wave_id, body.dropId);
       }
       startLocalSlowModeCooldown(body);
@@ -489,6 +503,12 @@ export default function CreateDrop({
         if (!body.dropId) {
           return;
         }
+        if (isWaveRepliesCollapsed(wave))
+          removeTemporaryThreadReply(
+            queryClient,
+            body.drop.wave_id,
+            body.dropId
+          );
 
         if (
           isContentModerationRejection &&
@@ -590,13 +610,16 @@ export default function CreateDrop({
         return false;
       }
 
-      const queuedDropRequest: QueuedDropMutationBody =
-        slowModeChatReservation === null
-          ? dropRequest
-          : {
-              ...dropRequest,
-              slowModeChatReservation,
-            };
+      const queuedDropRequest: QueuedDropMutationBody = {
+        ...dropRequest,
+        ...(slowModeChatReservation === null
+          ? {}
+          : { slowModeChatReservation }),
+        nativeEntrySubmit:
+          nativeCompetition && dropRequest.drop.drop_type !== ApiDropType.Chat
+            ? submitCompetitionEntry
+            : undefined,
+      };
 
       // Add to queue
       queueRef.current.push(queuedDropRequest);
@@ -628,9 +651,11 @@ export default function CreateDrop({
     },
     [
       markChatSubmitted,
+      nativeCompetition,
       onDropAddedToQueue,
       processNextDrop,
       reserveSlowModeChatQueueSlot,
+      submitCompetitionEntry,
       unreadDividerContext,
     ]
   );

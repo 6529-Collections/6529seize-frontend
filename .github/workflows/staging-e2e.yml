@@ -267,6 +267,24 @@ jobs:
             echo "publication_commit=$(jq -r .publication_commit "$identity_file")"
           } >> "$GITHUB_OUTPUT"
 
+      - name: Use HTTPS Ubuntu archive for browser dependencies
+        run: |
+          # The hosted runner's Azure HTTP mirror can stall apt while the
+          # official HTTPS archive remains reachable. Preserve mirror metadata
+          # and all other configured sources. This is inline because deployed
+          # source may predate a repository-owned setup helper.
+          sudo "$(command -v node)" - /etc/apt/apt-mirrors.txt <<'NODE'
+          const fs = require("node:fs");
+          const mirrorListPath = process.argv[2];
+          if (!fs.existsSync(mirrorListPath)) process.exit(0);
+          const before = fs.readFileSync(mirrorListPath, "utf8");
+          const after = before.replace(
+            /^([ \t]*)http:\/\/azure\.archive\.ubuntu\.com\/ubuntu(\/?)(?=[ \t\r]|$)/gm,
+            "$1https://archive.ubuntu.com/ubuntu$2"
+          );
+          if (after !== before) fs.writeFileSync(mirrorListPath, after);
+          NODE
+
       - name: Install Playwright dependencies
         id: playwright_dependencies_primary
         timeout-minutes: 10
@@ -353,7 +371,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: staging-e2e-artifacts-${{ github.run_id }}
+          name: staging-e2e-artifacts-${{ github.run_id }}-attempt-${{ github.run_attempt }}
           path: staging-e2e-artifacts/
           retention-days: 30
           if-no-files-found: ignore
@@ -364,6 +382,7 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: read
     steps:
       - name: Check out CI wave notifier
@@ -373,8 +392,18 @@ jobs:
           ref: ${{ github.workflow_sha }}
           persist-credentials: false
           path: .ci-wave-notifier
-          sparse-checkout: scripts/notify-ci-wave.mjs
+          sparse-checkout: |
+            scripts/notify-ci-wave.mjs
+            scripts/ci-failure-details.cjs
           sparse-checkout-cone-mode: false
+
+      - name: Download failed validation evidence
+        if: always() && needs.staging-packs.result != 'success'
+        continue-on-error: true
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: staging-e2e-artifacts-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          path: .ci-e2e-evidence
 
       - name: Post staging WEB validation outcome
         if: always() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
@@ -383,6 +412,8 @@ jobs:
           CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
           CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
           CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
+          GH_TOKEN: ${{ github.token }}
+          CI_PIPELINES_FAILURE_ARTIFACT_ROOT: .ci-e2e-evidence
           CI_PIPELINES_ALERT_TYPE: web_e2e
           CI_PIPELINES_TARGET_ENV: staging
           CI_PIPELINES_STATUS: ${{ needs.staging-packs.result == 'success' && 'success' || 'failure' }}

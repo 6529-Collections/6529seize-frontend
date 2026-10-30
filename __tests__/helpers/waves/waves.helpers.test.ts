@@ -142,6 +142,26 @@ describe("waves.helpers", () => {
       });
     });
 
+    it.each([
+      [false, false],
+      [true, true],
+      [0, false],
+      [1, true],
+      [null, false],
+      [undefined, false],
+    ])(
+      "normalizes the negative-vote flag %s to boolean %s",
+      (value, expected) => {
+        const wave = makeWave();
+        wave.wave.type = ApiWaveType.Chat;
+        wave.voting.forbid_negative_votes = value;
+
+        const result = convertWaveToUpdateWave(wave);
+
+        expect(result.voting.forbid_negative_votes).toBe(expected);
+      }
+    );
+
     it("preserves approve threshold hold time", () => {
       const wave = makeWave();
       wave.wave.winning_threshold_min_duration_ms = 120_000;
@@ -206,6 +226,25 @@ describe("waves.helpers", () => {
       expect(result.chat).toMatchObject({
         links_disabled: true,
       });
+    });
+
+    it("preserves reply settings", () => {
+      const wave = makeWave();
+      wave.chat.replies = {
+        open: true,
+        collapsed: true,
+        authenticated_user_eligible: true,
+      };
+
+      const result = convertWaveToUpdateWave(wave);
+
+      expect(result.chat.replies).toEqual({ open: true, collapsed: true });
+    });
+
+    it("omits reply settings the wave response did not include", () => {
+      const result = convertWaveToUpdateWave(makeWave());
+
+      expect(result.chat).not.toHaveProperty("replies");
     });
 
     it("preserves card-set TDH credit NFTs", () => {

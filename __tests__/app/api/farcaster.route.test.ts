@@ -1,3 +1,5 @@
+jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
+
 /**
  * Captures mocked JSON responses from the Farcaster route.
  */
@@ -280,6 +282,59 @@ describe("farcaster API route", () => {
     expect(options).toEqual(
       expect.objectContaining({ userAgent: expect.any(String) })
     );
+  });
+
+  it("reads frame metadata from large, deeply nested documents", async () => {
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(
+        `<html><head><title>Frame &amp; Title</title><meta property="fc:frame" content="vNext"></head><body>${"<div>".repeat(150_000)}<meta content="/frame.png" property="fc:frame:image"><meta property="fc:frame:button:1" content="Mint"></body></html>`,
+        {
+          headers: { "content-type": "text/html" },
+          url: "https://example.com/frame",
+        }
+      )
+    );
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://api.local/farcaster?url=https://example.com/frame"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      type: "frame",
+      canonicalUrl: "https://example.com/frame",
+      frame: {
+        frameUrl: "https://example.com/frame",
+        title: "Frame & Title",
+        siteName: undefined,
+        imageUrl: "https://example.com/frame.png",
+        buttons: ["Mint"],
+      },
+    });
+  });
+
+  it("returns unsupported for documents of unterminated tags", async () => {
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(`<meta ${"<meta ".repeat(200_000)}`, {
+        headers: { "content-type": "text/html" },
+        url: "https://example.com/broken",
+      })
+    );
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://api.local/farcaster?url=https://example.com/broken"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      type: "unsupported",
+      canonicalUrl: "https://example.com/broken",
+      reason: "Unsupported Farcaster URL",
+    });
   });
 
   it("returns unsupported for non-HTML generic URLs", async () => {

@@ -1,4 +1,5 @@
 "use client";
+import { SidebarAnnouncementSkeleton } from "@/components/brain/left-sidebar/waves/SidebarDiscoverySkeletons";
 import { SidebarDiscovery } from "@/components/brain/left-sidebar/waves/SidebarDiscovery";
 import {
   SidebarWaveNavigationControls,
@@ -151,7 +152,11 @@ function CreateWaveButton({
           : "tw-h-8 tw-gap-2 tw-rounded-lg tw-px-3 tw-py-0 tw-text-xs touch-only:tw-h-11"
       }
     >
-      <FontAwesomeIcon icon={faPlus} className="tw-size-4" aria-hidden="true" />
+      <FontAwesomeIcon
+        icon={faPlus}
+        className={compact ? "tw-size-4" : "-tw-ml-1 tw-size-4"}
+        aria-hidden="true"
+      />
       {!compact && <span>{label}</span>}
     </Button>
   );
@@ -442,9 +447,17 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     [animatedAnnouncementRows]
   );
   useRevealActiveSidebarWave({
+    preserveScrollOnInteraction: !isDirectMessage,
+    // Animated rows settle one render after their source list.
+    isLoading:
+      isLoading ||
+      streamWaves.isPinnedWavesLoading === true ||
+      allRows.length !== virtualizedRows.length ||
+      allRows.some((row, index) => row.key !== virtualizedRows[index]?.key),
     activeParentWaveId: effectiveActiveParentWaveId,
     activeWaveId: navigation.searching ? null : activeWaveId,
-    filterKey: navigation.scrollKey,
+    // Restoring the account is not a user filter change.
+    filterKey: isDirectMessage ? navigation.scrollKey : navigation.viewKey,
     scrollContainerRef: scrollContainerRef ?? listContainerRef,
     scrollToVirtualIndex: virtual.scrollToIndex,
     staticRows: revealStaticRows,
@@ -516,6 +529,13 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
         )}
 
         <div>
+          {!isDirectMessage &&
+            !hideHeaders &&
+            !isCollapsed &&
+            !hasAnnouncementRows &&
+            streamWaves.isAnnouncementsLoading && (
+              <SidebarAnnouncementSkeleton />
+            )}
           {hasAnnouncementRows && (
             <SidebarWaveRowsSection
               ariaLabel={t(
@@ -539,14 +559,23 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
               transitionClassName="tw-w-full"
             />
           )}
-          {hasAnnouncementRows && !hideHeaders && shouldShowBottomHeader && (
-            <div className="tw-mb-1 tw-mt-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
-          )}
+          {(hasAnnouncementRows ||
+            (!isDirectMessage &&
+              !isCollapsed &&
+              streamWaves.isAnnouncementsLoading)) &&
+            !hideHeaders &&
+            shouldShowBottomHeader && (
+              <div className="tw-mb-1 tw-mt-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+            )}
 
           {!isDirectMessage && !hideHeaders && !isCollapsed && (
             <SidebarDiscovery
               scoreDetailsDisabled={navigation.searchOpen}
               previewItems={highlyRatedPreviewItems}
+              recommendationsStatus={
+                streamWaves.recommendationsStatus ?? "pending"
+              }
+              onRetryRecommendations={streamWaves.retryRecommendations}
               isTouchPreview={isTouchDevice}
             />
           )}

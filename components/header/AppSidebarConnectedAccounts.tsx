@@ -2,7 +2,7 @@
 
 import { getConnectionProfileIndicator } from "@/components/auth/connection-state-indicator";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
 import { useIdentity } from "@/hooks/useIdentity";
 import { ArrowPathIcon, PlusIcon } from "@heroicons/react/24/outline";
@@ -29,7 +29,9 @@ function AppSidebarConnectedAccountAvatar({
     isAuthenticated: true,
     isConnected,
   });
-  const resolvedPfp = profile?.pfp ? resolveIpfsUrlSync(profile.pfp) : null;
+  const resolvedPfp = profile?.pfp
+    ? getScaledImageUri(profile.pfp, ImageScale.W_AUTO_H_50)
+    : null;
   const shouldShowFallbackPfp = !isProfileLoading && !resolvedPfp;
   const avatarSrc =
     resolvedPfp ??

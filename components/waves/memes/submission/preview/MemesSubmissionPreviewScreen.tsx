@@ -18,7 +18,10 @@ import type { ProposalCardDocumentInput } from "@/lib/proposal-card/document";
 import { AdditionalActionSummary } from "../components/AdditionalActionSummary";
 import { MemesSubmissionAdditionalInfoKey } from "../types/OperationalData";
 
+import type { ApiMemeCollaboratorProfile } from "@/generated/models/ApiMemeCollaboratorProfile";
+
 interface MemesSubmissionPreviewScreenProps {
+  readonly collaborators?: readonly ApiMemeCollaboratorProfile[];
   readonly proposalCard?: ProposalCardDocumentInput | undefined;
   readonly previewDrop: ExtendedDrop;
   readonly onBackToEdit: () => void;
@@ -33,6 +36,7 @@ interface MemesSubmissionPreviewScreenProps {
 /** Review the metadata-backed drop and its operational information before submitting. */
 export function MemesSubmissionPreviewScreen({
   proposalCard,
+  collaborators,
   previewDrop,
   onBackToEdit,
   onSubmit,
@@ -76,6 +80,26 @@ export function MemesSubmissionPreviewScreen({
             )?.data_value
           }
         />
+        {(collaborators?.length ?? 0) > 0 && (
+          <div className="tw-space-y-2 tw-text-sm tw-text-iron-300">
+            <p className="tw-m-0 tw-font-medium">
+              {t(locale, "memes.collaborations.previewInvites")}
+            </p>
+            <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-2 tw-p-0">
+              {collaborators?.map((profile) => (
+                <li
+                  key={profile.id}
+                  className="tw-rounded-full tw-bg-iron-900 tw-px-3 tw-py-1 tw-text-iron-100"
+                >
+                  @{profile.handle}
+                </li>
+              ))}
+            </ul>
+            <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+              {t(locale, "memes.collaborations.hint")}
+            </p>
+          </div>
+        )}
 
         {proposalCard && (
           <div className="tw-space-y-3">

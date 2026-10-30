@@ -12,6 +12,7 @@ type EffectivePlan = {
     playwright_museum: { required: boolean };
     playwright_artwork_documentation: { required: boolean };
     playwright_native_competition: { required: boolean };
+    playwright_submission_artwork: { required: boolean };
     playwright_wave_feature_usage: { required: boolean };
     playwright_pdf_attachments: { required: boolean };
     install: { required: boolean };
@@ -84,6 +85,63 @@ it("keeps the Wave tracking browser lane out of unrelated changes", () => {
 
 describe("effective App PR CI plan", () => {
   it.each([
+    "components/user/rep/modify-rep/UserPageRepModifyModal.tsx",
+    "components/user/utils/rate/UserPageRateInput.tsx",
+    "components/react-query-wrapper/ReactQueryWrapper.tsx",
+    "hooks/useRepAllocation.ts",
+    "tests/social/profile-rep-edit-sandbox.spec.ts",
+  ])("selects the profile dialog browser pack for %s", (file) => {
+    const input = plan([file]);
+    input.checks.playwright_critical_shell = {
+      required: false,
+      reason: "Not selected by the base plan.",
+    };
+    expect(
+      executeRawPlan(input).checks.playwright_critical_shell?.required
+    ).toBe(true);
+  });
+
+  it("preserves the critical shell decision for unrelated changes", () => {
+    const input = plan(["README.md"]);
+    input.checks.playwright_critical_shell.required = false;
+    expect(
+      executeRawPlan(input).checks.playwright_critical_shell?.required
+    ).toBe(false);
+  });
+
+  it.each([
+    "tests/media/submission-artwork-sandbox.spec.ts",
+    "tests/media/waveImagePreviewCases.ts",
+    "components/waves/drop/MemesDropArtworkHero.tsx",
+    "components/drops/view/item/content/media/DropImagePreview.tsx",
+    "components/drops/view/item/content/media/GifPreviewLoadingIndicator.tsx",
+    "components/drops/view/item/content/media/DropListItemContentMedia.tsx",
+    "components/drops/view/item/content/media/DropListItemContentMediaImage.tsx",
+    "components/drops/view/item/content/media/MediaDisplay.tsx",
+    "components/drops/view/item/content/media/MediaDisplayImage.tsx",
+    "components/drops/view/item/content/media/ImageMediaModal.tsx",
+    "components/drops/view/item/content/media/useOriginalImage.ts",
+    "components/memes/drops/MemeParticipationDrop.tsx",
+    "components/memes/drops/MemeWinnerDrop.tsx",
+    "components/memes/drops/MemesLeaderboardDrop.tsx",
+    "helpers/gif-preview.helpers.ts",
+    "tests/packs.manifest.cjs",
+    ".github/workflows/app-pr-ci.yml",
+    "scripts/app-pr-ci-effective-plan.cjs",
+  ])("selects isolated submission artwork browser evidence for %s", (file) => {
+    expect(
+      executePlan([file]).checks.playwright_submission_artwork.required
+    ).toBe(true);
+  });
+
+  it("keeps submission artwork out of unrelated competition changes", () => {
+    expect(
+      executePlan(["components/competitions/CompetitionVote.tsx"]).checks
+        .playwright_submission_artwork.required
+    ).toBe(false);
+  });
+
+  it.each([
     "components/competitions/CompetitionVote.tsx",
     "hooks/competitions/useCompetitionQueries.ts",
     "__tests__/competitions/competition-api.test.ts",
@@ -97,6 +155,37 @@ describe("effective App PR CI plan", () => {
     "services/wallet-signatures/competition-signature.ts",
     "i18n/messages/competitions.ts",
     "tests/social/native-competition-sandbox.spec.ts",
+    "tests/media/waveImagePreviewCases.ts",
+    "components/waves/drop/MemesDropArtworkHero.tsx",
+    "components/drops/view/item/content/media/DropImagePreview.tsx",
+    "components/drops/view/item/content/media/GifPreviewLoadingIndicator.tsx",
+    "components/drops/view/item/content/media/DropListItemContentMedia.tsx",
+    "components/drops/view/item/content/media/DropListItemContentMediaImage.tsx",
+    "components/drops/view/item/content/media/MediaDisplay.tsx",
+    "components/drops/view/item/content/media/MediaDisplayImage.tsx",
+    "components/memes/drops/MemeParticipationDrop.tsx",
+    "components/memes/drops/MemeWinnerDrop.tsx",
+    "components/memes/drops/MemesLeaderboardDrop.tsx",
+    "components/drops/view/item/content/media/ImageMediaModal.tsx",
+    "components/drops/view/item/content/media/useOriginalImage.ts",
+    "helpers/gif-preview.helpers.ts",
+    "tests/social/wave-switch-loading.spec.ts",
+    "tests/social/wave-loading-sandbox.spec.ts",
+    "hooks/useMemesQuickVoteSessionState.ts",
+    "hooks/memesQuickVote.queue.state.ts",
+    "hooks/useMemesWaveFooterStats.ts",
+    "components/brain/left-sidebar/waves/MemesWaveFooter.tsx",
+    "components/brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteRuntime.tsx",
+    "components/brain/left-sidebar/waves/SidebarDiscovery.tsx",
+    "components/brain/left-sidebar/waves/SidebarDiscoverySkeletons.tsx",
+    "components/brain/left-sidebar/waves/SidebarActiveVotes.tsx",
+    "components/brain/left-sidebar/waves/UnifiedWavesListWaves.tsx",
+    "components/brain/left-sidebar/web/WebUnifiedWavesListWaves.tsx",
+    "components/brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog.tsx",
+    "components/brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialogSkeleton.tsx",
+    "hooks/useWavesList.ts",
+    "contexts/wave/MyStreamContext.tsx",
+    "components/brain/my-stream/MyStreamWavePending.tsx",
     "tests/support/composerSandboxServer.cjs",
     "components/waves/WavesMobile.tsx",
     "components/brain/BrainMobile.tsx",
@@ -132,6 +221,26 @@ describe("effective App PR CI plan", () => {
     "__tests__/components/waves/drops/WaveDropActionsOpen.test.tsx",
     "components/waves/drops/WaveDropMobileMenuOpen.tsx",
     "__tests__/components/waves/drops/WaveDropMobileMenuOpen.test.tsx",
+    "components/waves/drops/AdditionalActionPromiseBadge.tsx",
+    "components/waves/drops/ArtistActiveSubmissionContent.tsx",
+    "__tests__/components/waves/drops/ArtistActiveSubmissionContent.test.tsx",
+    "components/utils/tooltip/BodyPortalTooltip.tsx",
+    "components/waves/header/WaveJoinCta.tsx",
+    "components/waves/specs/wave-notification-settings/WaveNotificationPreferenceButtons.tsx",
+    "components/brain/mobile/WaveInformationPanelContext.ts",
+    "components/brain/right-sidebar/BrainRightSidebar.tsx",
+    "components/waves/specs/WaveSettingRow.tsx",
+    "components/waves/specs/groups/group/edit/WaveGroupEditButtons.tsx",
+    "components/waves/specs/groups/group/edit/WaveGroupChangeDialog.tsx",
+    "components/groups/assignment/GroupAssignmentDialog.tsx",
+    "contexts/WaveInformationContext.tsx",
+    "components/mobile-wrapper-dialog/MobileWrapperDialog.tsx",
+    "components/mobile-wrapper-dialog/MobileWrapperDialogHeader.tsx",
+    "components/brain/my-stream/MyStreamActionTooltip.tsx",
+    "tests/social/wave-notification-settings-sandbox.spec.ts",
+    "components/header/AppHeader.tsx",
+    "components/brain/mobile/WaveInformationSheet.tsx",
+    "components/brain/left-sidebar/waves/BrainLeftSidebarWavePin.tsx",
     "components\\waves\\leaderboard\\MySubmissionsDialog.tsx",
   ])(
     "selects native competition browser evidence for shared surface %s",

@@ -414,10 +414,12 @@ it("shows the worth checking out description when no profile is connected", () =
   renderWebWaves();
 
   expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
-  expect(screen.getByText("Highly rated waves.")).toBeVisible();
+  expect(
+    screen.getByText("Highly rated waves you don’t follow.")
+  ).toBeVisible();
   expect(
     screen.queryByRole("button", {
-      name: "Highly rated waves.",
+      name: "Highly rated waves you don’t follow.",
     })
   ).not.toBeInTheDocument();
 });
@@ -577,6 +579,7 @@ it("expands regular subwaves and keeps child rows unpinned", async () => {
         hasSubwaves: true,
         createdAt: 10,
         unreadDropsCount: 1,
+        isFollowing: true,
       }),
     ],
   });
@@ -641,6 +644,7 @@ it("hides expanded child rows immediately while the sidebar is collapsed", async
       parentWaveId: "parent",
       createdAt: 10,
       unreadDropsCount: 1,
+      isFollowing: true,
     }),
   ];
   const sentinelRef = React.createRef<HTMLDivElement>();

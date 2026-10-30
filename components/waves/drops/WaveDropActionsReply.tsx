@@ -26,6 +26,10 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
   const isEligibleToChat =
     waveEligibility?.authenticated_user_eligible_to_chat ??
     drop.wave.authenticated_user_eligible_to_chat;
+  // Open replies let people outside the chat group reply to drops.
+  const isEligibleToReply =
+    waveEligibility?.authenticated_user_eligible_to_reply ??
+    drop.wave.authenticated_user_eligible_to_reply;
   const isSlowModeOnlyBlock =
     isEligibleToChat === false &&
     waveEligibility?.authenticated_user_chat_restriction ===
@@ -34,7 +38,11 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
   const canReply = !isTemporaryDrop;
 
   const handleReplyClick = () => {
-    if (isEligibleToChat === false && !isSlowModeOnlyBlock) {
+    if (
+      isEligibleToChat === false &&
+      isEligibleToReply !== true &&
+      !isSlowModeOnlyBlock
+    ) {
       setToast({
         message: "You are not eligible to chat in this wave",
         type: "error",

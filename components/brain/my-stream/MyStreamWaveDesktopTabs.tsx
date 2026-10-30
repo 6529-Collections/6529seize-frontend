@@ -24,6 +24,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useCompetitionNavigation } from "@/contexts/CompetitionNavigationContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { isCompetitionSubmissionHistory } from "@/helpers/competition-lifecycle.helpers";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 import {
   getApproveWaveTabLabelsFromMetadata,
@@ -57,6 +58,7 @@ import MyStreamWaveCreateActionsMenu from "./tabs/MyStreamWaveCreateActionsMenu"
 import MyStreamWaveCurationTabMenu from "./tabs/MyStreamWaveCurationTabMenu";
 import MobileTabsScrollControls from "./MobileTabsScrollControls";
 import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
+import { useWaveChatPrefetch } from "@/hooks/competitions/useWaveChatPrefetch";
 
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
@@ -274,6 +276,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const searchParams = useSearchParams();
   const { ref: featureUsageRef } = useWaveFeatureUsage("wave_tabs", wave.id);
   const pathname = usePathname();
+  const prefetchChat = useWaveChatPrefetch();
 
   const locale = useBrowserLocale();
   const { flat, nativeCompetition } = useCompetitionNavigation();
@@ -429,12 +432,18 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
           else if (tab === MyStreamWaveTab.POLLS) badgeCount = unansweredPolls;
           return {
             key: tab,
-            label: getTabLabel({
-              approveLabels,
-              isApproveWave: selectedIsApprove,
-              tab,
-              locale,
-            }),
+            onIntent: tab === MyStreamWaveTab.CHAT ? prefetchChat : undefined,
+            label:
+              nativeDefault &&
+              tab === MyStreamWaveTab.LEADERBOARD &&
+              isCompetitionSubmissionHistory(nativeDefault)
+                ? t(locale, "competitions.submissions")
+                : getTabLabel({
+                    approveLabels,
+                    isApproveWave: selectedIsApprove,
+                    tab,
+                    locale,
+                  }),
             panelId: getContentTabPanelId(tab),
             badgeCount,
           };
@@ -451,6 +460,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       unansweredPolls,
       activeCompetitionCount,
       effectiveCompetitionId,
+      prefetchChat,
       nativeDefault,
       selectedIsApprove,
       locale,
@@ -616,61 +626,68 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
         </div>
         <MobileTabsScrollControls scrollerRef={mobileTabsScrollerRef} />
       </div>
-      <div
-        ref={desktopTabsScrollerRef}
-        className="tw-hidden tw-min-w-0 tw-flex-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-block"
-      >
-        <DndContext
-          sensors={sortableSensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleCurationDragEnd}
+      <div className="tw-relative tw-hidden tw-min-w-0 tw-flex-1 sm:tw-block">
+        <div
+          ref={desktopTabsScrollerRef}
+          data-wave-tabs-scroll="desktop"
+          className="tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300"
         >
-          <div className="tw-flex tw-w-auto tw-gap-x-[13px]" role="tablist">
-            {leadingOptions.map((option) => (
-              <DesktopTabOption
-                key={option.key}
-                option={option}
-                activeKey={activeKey}
-                onSelect={selectStandardTab}
-              />
-            ))}
-            {trailingOptions.map((option) => (
-              <DesktopTabOption
-                key={option.key}
-                option={option}
-                activeKey={activeKey}
-                onSelect={selectStandardTab}
-              />
-            ))}
-            <SortableContext
-              items={curationTabKeys}
-              strategy={horizontalListSortingStrategy}
-            >
-              {curationOptions.map((option) => (
-                <React.Fragment key={option.key}>
-                  {canDragCurations ? (
-                    <SortableCurationTabOption
-                      option={option}
-                      activeKey={activeKey}
-                      isSortingDisabled={isCurationReorderPending}
-                      onSelect={(key) =>
-                        onSelectCuration(getCurationIdFromTabKey(key))
-                      }
-                    />
-                  ) : (
-                    <DesktopTabOption
-                      option={option}
-                      activeKey={activeKey}
-                      onSelect={(key) =>
-                        onSelectCuration(getCurationIdFromTabKey(key))
-                      }
-                    />
-                  )}
-                </React.Fragment>
+          <DndContext
+            sensors={sortableSensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleCurationDragEnd}
+          >
+            <div className="tw-flex tw-w-auto tw-gap-x-[13px]" role="tablist">
+              {leadingOptions.map((option) => (
+                <DesktopTabOption
+                  key={option.key}
+                  option={option}
+                  activeKey={activeKey}
+                  onSelect={selectStandardTab}
+                />
               ))}
-            </SortableContext>
-          </div>
-        </DndContext>
+              {trailingOptions.map((option) => (
+                <DesktopTabOption
+                  key={option.key}
+                  option={option}
+                  activeKey={activeKey}
+                  onSelect={selectStandardTab}
+                />
+              ))}
+              <SortableContext
+                items={curationTabKeys}
+                strategy={horizontalListSortingStrategy}
+              >
+                {curationOptions.map((option) => (
+                  <React.Fragment key={option.key}>
+                    {canDragCurations ? (
+                      <SortableCurationTabOption
+                        option={option}
+                        activeKey={activeKey}
+                        isSortingDisabled={isCurationReorderPending}
+                        onSelect={(key) =>
+                          onSelectCuration(getCurationIdFromTabKey(key))
+                        }
+                      />
+                    ) : (
+                      <DesktopTabOption
+                        option={option}
+                        activeKey={activeKey}
+                        onSelect={(key) =>
+                          onSelectCuration(getCurationIdFromTabKey(key))
+                        }
+                      />
+                    )}
+                  </React.Fragment>
+                ))}
+              </SortableContext>
+            </div>
+          </DndContext>
+        </div>
+        <MobileTabsScrollControls
+          scrollerRef={desktopTabsScrollerRef}
+          showButtons={false}
+        />
       </div>
       {showCreateActionsMenu && (
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2 sm:tw-ml-auto">

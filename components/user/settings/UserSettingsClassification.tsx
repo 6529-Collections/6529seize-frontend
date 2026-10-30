@@ -57,7 +57,7 @@ export default function UserSettingsClassification({
         aria-labelledby={`${labelId} ${valueId}`}
         aria-expanded={isOpen}
         aria-controls={isOpen ? optionsId : undefined}
-        className="tw-mt-2 tw-flex tw-w-full tw-items-center tw-justify-between tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-left tw-text-base tw-font-normal tw-text-iron-50 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-200 tw-ease-out hover:tw-ring-white/15 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400/60"
+        className="tw-mt-2 tw-flex tw-w-full tw-items-center tw-justify-between tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-left tw-text-base tw-font-normal tw-text-iron-50 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-200 tw-ease-out hover:tw-ring-white/15 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400/60 focus-visible:tw-ring-primary-400"
       >
         <span id={valueId}>{title}</span>
         <svg

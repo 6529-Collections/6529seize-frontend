@@ -203,7 +203,7 @@ jobs:
           ];
           const corePlaywrightLanes = [];
           const collectBrowserRequired = plan.changed_files.some((file) =>
-            /^(?:app\/collect\/|components\/collect\/|components\/user\/collected\/|components\/nextGen\/|components\/6529Gradient\/|components\/the-memes\/|tests\/collect\/|generated\/models\/Api(?:Collect|Market))/.test(file) ||
+            /^(?:app\/collect\/|components\/collect\/|components\/nft-market-depth\/|components\/user\/collected\/|components\/nextGen\/|components\/6529Gradient\/|components\/the-memes\/|tests\/collect\/|generated\/models\/Api(?:Collect|Market))/.test(file) ||
             ["services/api/collect-api.ts", "services/api/collect-rules-api.ts", "services/api/market-api.ts", "components/common/RecipientSelector.tsx", "components/mobile-wrapper-dialog/MobileWrapperDialog.tsx", "i18n/messages/collect.ts", "openapi.yaml", ".github/workflows/app-pr-ci.yml"].includes(file)
           );
           write("playwright_collect_required", String(collectBrowserRequired));
@@ -214,7 +214,12 @@ jobs:
             corePlaywrightLanes.push({ lane: "playwright-smoke", label: "Playwright smoke", runner: defaultRunner });
           }
           if (plan.checks.playwright_native_competition?.required) {
-            corePlaywrightLanes.push({ lane: "playwright-native-competition", label: "Native competitions desktop and mobile", runner: defaultRunner });
+            for (const shard of [1, 2]) {
+              corePlaywrightLanes.push({ lane: "playwright-native-competition", label: `Native competitions shard ${shard}/2`, runner: defaultRunner, shard });
+            }
+          }
+          if (plan.checks.playwright_submission_artwork?.required) {
+            corePlaywrightLanes.push({ lane: "playwright-submission-artwork", label: "Submission artwork desktop and mobile", runner: defaultRunner });
           }
           if (plan.checks.playwright_pdf_attachments?.required) {
             corePlaywrightLanes.push({ lane: "playwright-pdf-attachments", label: "PDF attachments in WebKit", runner: defaultRunner });
@@ -222,12 +227,25 @@ jobs:
           if (plan.checks.playwright_wave_feature_usage?.required) {
             corePlaywrightLanes.push({ lane: "playwright-wave-feature-usage", label: "Wave feature tracking desktop and mobile", runner: defaultRunner });
           }
+          const bookmarksBrowserRequired = plan.changed_files.some((file) =>
+            /^(?:app\/bookmarks\/|components\/bookmarks\/|components\/header\/user\/HeaderBookmarksLink|components\/waves\/drops\/WaveDropBookmarkAction|hooks\/drops\/useDropBookmark|services\/api\/drop-bookmarks|i18n\/messages\/bookmarks|tests\/social\/bookmarks-sandbox|tests\/support\/bookmarks|package\.json$|\.github\/workflows\/app-pr-ci\.yml$)/.test(file)
+          );
+          if (bookmarksBrowserRequired) {
+            corePlaywrightLanes.push({ lane: "playwright-bookmarks", label: "Private bookmarks desktop and mobile", runner: defaultRunner });
+          }
           const waveCreationBrowserRequired = plan.changed_files.some((file) =>
             /^(?:app\/waves\/create\/|components\/waves\/create-wave\/|components\/drops\/create\/|helpers\/waves\/create-wave|tests\/social\/create-wave-sandbox)/.test(file) ||
             ["components/brain/left-sidebar/web/WebUnifiedWavesListWaves.tsx", "components/shared/WavesMessagesWrapper.tsx", "components/user/utils/set-up-profile/UserPageSetUpProfile.tsx", "components/header/header-search/header-search-modal/constants.ts", "components/header/header-search/header-search-modal/pageSearch.ts", "i18n/messages/en-US.ts", "i18n/messages/wave-creation.en-US.json", ".github/workflows/app-pr-ci.yml"].includes(file)
           );
           if (waveCreationBrowserRequired) {
             corePlaywrightLanes.push({ lane: "playwright-wave-creation", label: "Wave creation desktop and mobile", runner: defaultRunner });
+          }
+          const dropEditingBrowserRequired = plan.changed_files.some((file) =>
+            /^(?:components\/waves\/drops\/|contexts\/EditingDropContext\.tsx|hooks\/useLongPressClickSuppression\.ts|tests\/social\/wave-edit-drop-sandbox\.spec\.ts)/.test(file) ||
+            ["services/api/common-api.ts", "services/api/submission-request-key.ts", "styles/globals.css", "tests/packs.manifest.cjs", "tests/support/composerSandboxServer.cjs", ".github/workflows/app-pr-ci.yml"].includes(file)
+          );
+          if (dropEditingBrowserRequired) {
+            corePlaywrightLanes.push({ lane: "playwright-drop-editing", label: "Drop editing desktop and mobile", runner: defaultRunner });
           }
           if (plan.checks.playwright_critical_shell.required) {
             corePlaywrightLanes.push({
@@ -320,7 +338,8 @@ jobs:
       needs.plan.outputs.core_playwright_required == 'true' &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 20
+    # The complete native pack needs room for its dev-server bootstrap and tests.
+    timeout-minutes: ${{ matrix.lane == 'playwright-native-competition' && 30 || 20 }}
     permissions:
       contents: read
       issues: read
@@ -409,6 +428,7 @@ jobs:
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/collect"
         run: |
           ./bin/6529 exec playwright test tests/collect/collect-public.spec.ts \
+            tests/collect/memelab-marketplace-public.spec.ts \
             --project=web-desktop-chromium \
             --project=web-mobile-chromium \
             --workers=1
@@ -425,7 +445,15 @@ jobs:
         env:
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/native-competition"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/native-competition"
-        run: ./bin/6529 run test:e2e:native-competition-sandbox
+          NATIVE_COMPETITION_SHARD: "${{ matrix.shard }}/2"
+        run: ./bin/6529 run test:e2e:native-competition-sandbox --shard="$NATIVE_COMPETITION_SHARD"
+
+      - name: Run submission artwork browser regression pack
+        if: matrix.lane == 'playwright-submission-artwork'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/submission-artwork"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/submission-artwork"
+        run: ./bin/6529 run test:e2e:submission-artwork-sandbox
 
       - name: Run PDF attachment browser regression pack
         if: matrix.lane == 'playwright-pdf-attachments'
@@ -433,6 +461,10 @@ jobs:
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/pdf-attachments"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/pdf-attachments"
         run: ./bin/6529 run test:e2e:pdf-attachments-sandbox
+
+      - name: Run private bookmarks browser pack
+        if: matrix.lane == 'playwright-bookmarks'
+        run: ./bin/6529 run test:e2e:bookmarks-sandbox
 
       - name: Run isolated Wave feature tracking browser pack
         if: matrix.lane == 'playwright-wave-feature-usage'
@@ -448,12 +480,38 @@ jobs:
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/wave-creation"
         run: ./bin/6529 run test:e2e:wave-creation-sandbox
 
+      - name: Run drop editing browser regression pack
+        if: matrix.lane == 'playwright-drop-editing'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/drop-editing"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/drop-editing"
+        run: ./bin/6529 run test:e2e:edit-drop-sandbox
+
+      # One `next dev` session that compiles every critical-shell route grows
+      # Turbopack's native memory past the 16 GB runner, and the OOM killer
+      # silently ends the dev server near the last route (/waves/create).
+      # Run the pack as two complementary title filters, each with a fresh
+      # dev server, so every test still runs exactly once.
       - name: Run critical route-shell Playwright pack
+        id: critical_shell_routes
         if: matrix.lane == 'playwright-critical-shell'
         env:
           NEXT_DEV_DIST_DIR: ".next-playwright-critical-shell"
+          NEXT_DEV_TURBOPACK_FS_CACHE: "0"
           PLAYWRIGHT_READONLY: "1"
-        run: ./bin/6529 run test:e2e:critical-shell
+        run: ./bin/6529 run test:e2e:critical-shell "--grep=Critical read-only route shells"
+
+      - name: Run critical-shell hydration Playwright pack
+        if: >-
+          matrix.lane == 'playwright-critical-shell' &&
+          (success() || steps.critical_shell_routes.outcome == 'failure')
+        env:
+          NEXT_DEV_DIST_DIR: ".next-playwright-critical-shell-hydration"
+          NEXT_DEV_TURBOPACK_FS_CACHE: "0"
+          PLAYWRIGHT_READONLY: "1"
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/critical-shell-hydration"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/critical-shell-hydration"
+        run: ./bin/6529 run test:e2e:critical-shell "--grep-invert=Critical read-only route shells"
 
       - name: Run session recovery browser regression pack
         if: matrix.lane == 'playwright-critical-shell'
@@ -462,11 +520,29 @@ jobs:
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/session-recovery"
         run: ./bin/6529 run test:e2e:session-recovery-sandbox
 
+      - name: Run own-profile Following browser regression pack
+        if: matrix.lane == 'playwright-critical-shell'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/profile-following"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/profile-following"
+        run: ./bin/6529 run test:e2e:profile-following-sandbox
+
+      # A dev server killed by the kernel OOM killer exits without any output,
+      # so record the container's memory peak and OOM-kill count.
+      - name: Report browser lane memory pressure
+        if: always() && matrix.lane == 'playwright-critical-shell'
+        run: |
+          for file in memory.peak memory.max memory.events; do
+            echo "== /sys/fs/cgroup/${file}"
+            cat "/sys/fs/cgroup/${file}" 2>/dev/null || echo "unavailable"
+          done
+          free -m || true
+
       - name: Upload app check artifacts
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: app-pr-ci-results-${{ matrix.lane }}-${{ github.event.pull_request.number || github.run_id }}
+          name: app-pr-ci-results-${{ matrix.lane }}${{ matrix.shard && format('-{0}', matrix.shard) || '' }}-${{ github.event.pull_request.number || github.run_id }}
           path: |
             test-results/**
             playwright-report/**
@@ -480,7 +556,10 @@ jobs:
       needs.plan.outputs.install_required == 'true' &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 60
+    # Museum recovery (25m), browser installation (10m), and browser phases
+    # (10m + 20m) need 65m; the optional lock-tool install adds at most 5m.
+    # Leave the remaining 5m for checkout/setup and evidence upload.
+    timeout-minutes: ${{ startsWith(matrix.lane, 'playwright-museum-') && 75 || 60 }}
     permissions:
       contents: read
       issues: read
@@ -639,6 +718,8 @@ jobs:
           ./bin/6529 run test:no-coverage --runInBand --runTestsByPath \
             __tests__/scripts/app-pr-ci-effective-plan.test.ts \
             __tests__/scripts/ci-wave-web-validation.test.ts \
+            __tests__/scripts/ci-failure-details.test.ts \
+            __tests__/scripts/notify-ci-wave.test.ts \
             __tests__/scripts/deploy-staging-artifact.test.ts \
             __tests__/scripts/e2e-packs.test.ts \
             __tests__/scripts/frontend-deployment-workflows.test.ts \
@@ -1098,19 +1179,41 @@ jobs:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-node22-playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
 
+      - name: Ensure package-lock inspection tool
+        if: startsWith(matrix.lane, 'playwright-museum-')
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          # Custom Linux runners may omit psmisc. Provide fuser before an
+          # install timeout could leave apt holding locks needed by recovery.
+          if ! command -v fuser >/dev/null; then
+            sudo apt-get -o DPkg::Lock::Timeout=120 install --no-install-recommends -y psmisc
+          fi
+          command -v fuser >/dev/null
+
       - name: Install Playwright dependencies
         id: playwright_dependencies_primary
         if: startsWith(matrix.lane, 'playwright-museum-')
-        timeout-minutes: 3
+        timeout-minutes: 10
         continue-on-error: true
         run: ./bin/6529 exec playwright install-deps chromium
 
       - name: Retry Playwright dependencies
         id: playwright_dependencies_retry
         if: startsWith(matrix.lane, 'playwright-museum-') && steps.playwright_dependencies_primary.outcome != 'success'
-        timeout-minutes: 3
+        timeout-minutes: 15
         continue-on-error: true
-        run: ./bin/6529 exec playwright install-deps chromium
+        run: |
+          set -euo pipefail
+          # A timed-out install can leave apt-get running. Wait for it rather
+          # than deleting locks or killing another package-manager process.
+          sudo timeout 300 bash -euc '
+            command -v fuser >/dev/null
+            while fuser /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/lib/apt/lists/lock >/dev/null 2>&1; do
+              sleep 2
+            done
+          '
+          ./bin/6529 exec playwright install-deps chromium
 
       - name: Verify Playwright dependencies
         if: startsWith(matrix.lane, 'playwright-museum-')

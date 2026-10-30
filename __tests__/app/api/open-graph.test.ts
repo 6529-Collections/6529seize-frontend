@@ -1,3 +1,5 @@
+jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
+
 jest.mock("node:dns/promises", () => ({
   lookup: jest.fn(),
 }));
@@ -208,6 +210,38 @@ describe("open-graph route helpers", () => {
 
     expect(result.title).toBe("Deep Image Fallback");
     expect(result.image).toBeNull();
+  });
+
+  it("reads metadata and JSON-LD from very large, deeply nested bodies", () => {
+    const html = `
+      <html>
+        <head><meta property="og:description" content="Head description" /></head>
+        <body>
+          ${"<div><span>".repeat(80_000)}
+          <script type="application/ld+json">${JSON.stringify({
+            "@type": "Article",
+            headline: "Body JSON-LD Title",
+            author: { name: "Body Author" },
+          })}</script>
+          <meta property="og:image" content="/body-image.jpg" />
+        </body>
+      </html>
+    `;
+
+    const result = buildResponse(baseUrl, html, "text/html");
+
+    expect(result.title).toBe("Body JSON-LD Title");
+    expect(result.description).toBe("Head description");
+    expect(result.author).toBe("Body Author");
+    expect(result.image?.url).toBe("https://example.com/body-image.jpg");
+  });
+
+  it("only reads metadata from the first 1 MiB of a page", () => {
+    const html = `<title>Early Title</title>${" ".repeat(1024 * 1024)}<meta property="og:title" content="Late Title" />`;
+
+    const result = buildResponse(baseUrl, html, "text/html");
+
+    expect(result.title).toBe("Early Title");
   });
 
   it("builds a Google Docs preview with public availability", async () => {

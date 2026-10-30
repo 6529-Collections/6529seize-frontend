@@ -53,7 +53,7 @@ export default function UserPageStatsActivityWalletTableRowMainAddress({
   const walletDisplay = getWalletDisplay();
 
   return (
-    <span className="tw-text-sm tw-font-medium tw-text-iron-300 sm:tw-text-base">
+    <span className="tw-text-[15px]/5 tw-font-medium tw-text-iron-300 sm:tw-leading-6">
       {walletDisplay}
     </span>
   );

@@ -8,6 +8,7 @@ import { buildSubmissionMetadata } from "./submissionMetadata";
 
 /** Convert a validated artwork draft into the API request, preserving the action marker and its metadata. */
 export const transformToApiRequest = (data: {
+  collaboratorIds?: string[];
   waveId: string;
   traits: TraitsData;
   operationalData?: OperationalData | undefined;
@@ -27,6 +28,7 @@ export const transformToApiRequest = (data: {
   } = data;
 
   return {
+    collaborator_ids: data.collaboratorIds ?? [],
     wave_id: waveId,
     drop_type: ApiDropType.Participatory,
     is_additional_action_promised: isAdditionalActionPromised,
@@ -40,7 +42,7 @@ export const transformToApiRequest = (data: {
     referenced_nfts: [],
     mentioned_users: [],
     metadata: buildSubmissionMetadata({
-      traits,
+      traits: { ...traits, collab: false },
       operationalData,
       isAdditionalActionPromised,
     }),

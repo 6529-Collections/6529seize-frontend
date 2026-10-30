@@ -25,7 +25,7 @@ import {
   isNextgenContract,
 } from "@/helpers/Helpers";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
-import Link from "next/link";
+import ProfileCollectedActivityLink from "@/components/user/collected/ProfileCollectedActivityLink";
 import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import UserPageStatsActivityWalletTableRowGas from "./UserPageStatsActivityWalletTableRowGas";
@@ -323,28 +323,29 @@ export default function UserPageStatsActivityWalletTableRow({
             type={type}
             profile={profile}
           />
-          <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-500 sm:tw-text-base">
+          <span className="tw-whitespace-nowrap tw-text-[15px]/5 tw-font-normal tw-text-iron-300 sm:tw-leading-6">
             {TYPE_TP_ACTION[type]}
           </span>
           {transaction.token_count > 1 && (
-            <span className="tw-whitespace-nowrap tw-text-base tw-font-medium tw-text-iron-400">
+            <span className="tw-whitespace-nowrap tw-text-[15px]/6 tw-font-medium tw-tabular-nums tw-text-iron-300">
               x{transaction.token_count}
             </span>
           )}
-          <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium sm:tw-text-base">
-            <Link
+          <span className="tw-whitespace-nowrap tw-text-[15px]/5 tw-font-medium sm:tw-leading-6">
+            <ProfileCollectedActivityLink
+              activityKey={`wallet-${transaction.from_address}-${transaction.to_address}-${transaction.transaction}-${transaction.token_id}`}
               className="tw-text-iron-300 tw-transition-colors tw-duration-200 hover:tw-text-iron-100"
               href={getPath()}
             >
               {getLinkContent()}
-            </Link>
+            </ProfileCollectedActivityLink>
           </span>
           <img
             className="tw-ml-1 tw-h-auto tw-max-h-10 tw-w-auto tw-min-w-10 tw-flex-shrink-0 tw-rounded-sm tw-bg-iron-800 tw-object-contain tw-ring-1 tw-ring-white/10"
             src={getImageSrc()}
             alt={nftLite?.name ?? ""}
           />
-          <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300 sm:tw-text-base">
+          <span className="tw-whitespace-nowrap tw-text-[15px]/5 tw-font-medium tw-text-iron-300 sm:tw-leading-6">
             {showAnotherSide && (
               <UserPageStatsActivityWalletTableRowSecondAddress
                 type={type}
@@ -353,7 +354,7 @@ export default function UserPageStatsActivityWalletTableRow({
             )}
           </span>
           {showValue() && (
-            <span className="tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-text-base">
+            <span className="tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-[15px]/5 tw-font-normal tw-text-iron-300 sm:tw-leading-6">
               for{" "}
               <span className="tw-ml-0.5 tw-inline-flex tw-items-center">
                 <svg
@@ -380,7 +381,7 @@ export default function UserPageStatsActivityWalletTableRow({
                   <path d="m420.1 1078.7 539.7 760.6v-441.7z" fill="#8a92b2" />
                   <path d="m959.8 1397.6v441.7l540.1-760.6z" fill="#62688f" />
                 </svg>
-                <span className="tw-whitespace-nowrap tw-text-iron-300">
+                <span className="tw-whitespace-nowrap tw-tabular-nums tw-text-iron-300">
                   {value}
                 </span>
               </span>
@@ -426,6 +427,7 @@ export default function UserPageStatsActivityWalletTableRow({
       </td>
       <td className="tw-w-24 tw-py-2.5 tw-text-right sm:tw-w-32">
         <CommonTimeAgo
+          className="tw-text-meta/5 tw-tabular-nums sm:tw-leading-6"
           timestamp={new Date(transaction.transaction_date).getTime()}
         />
       </td>

@@ -59,6 +59,33 @@ describe("DropPlaceholder", () => {
     expect(mockSeizeConnect).not.toHaveBeenCalled();
   });
 
+  it("tells people who can only reply how to join in", () => {
+    render(
+      <DropPlaceholder
+        type="chat"
+        chatRestriction={ChatRestriction.NO_PERMISSION}
+        canReply
+      />
+    );
+    expect(
+      screen.getByText(
+        "Only chat members can start new drops here. You can reply to any drop."
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("keeps the no-permission message when replies are closed", () => {
+    render(
+      <DropPlaceholder
+        type="chat"
+        chatRestriction={ChatRestriction.NO_PERMISSION}
+      />
+    );
+    expect(
+      screen.getByText("You don't have permission to chat in this wave")
+    ).toBeInTheDocument();
+  });
+
   it("preserves mixed non-auth restrictions without offering sign-in", () => {
     render(
       <DropPlaceholder

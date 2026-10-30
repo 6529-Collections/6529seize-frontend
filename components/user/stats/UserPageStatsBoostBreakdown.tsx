@@ -25,7 +25,7 @@ const BOOST_VALUE_FORMAT_OPTIONS = {
 } satisfies Intl.NumberFormatOptions;
 
 const BOOST_ROW_HEADER_CLASS =
-  "tw-whitespace-nowrap tw-px-2 tw-py-2 tw-text-left tw-font-medium tw-text-iron-400 md:tw-px-4 md:tw-py-3";
+  "tw-whitespace-nowrap tw-px-2 tw-py-2 tw-text-left tw-font-medium tw-text-iron-300 md:tw-px-4 md:tw-py-3";
 const BOOST_VALUE_CELL_CLASS = `${STATS_TABLE_VALUE_CELL_CLASS} md:tw-min-w-36`;
 
 type BoostMessageKey = Extract<
@@ -100,7 +100,7 @@ export default function UserPageStatsBoostBreakdown({
         <th
           scope="rowgroup"
           colSpan={3}
-          className="tw-whitespace-nowrap tw-px-2 tw-py-2 tw-text-left tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-300 md:tw-px-4 md:tw-py-3"
+          className="tw-whitespace-nowrap tw-px-2 tw-py-2 tw-text-left tw-text-[11px]/4 tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500 md:tw-px-4 md:tw-py-3"
         >
           {boostMessage(
             locale,
@@ -207,7 +207,7 @@ export default function UserPageStatsBoostBreakdown({
         </h3>
         <Link
           href="/network/tdh#tdh-1-4"
-          className="tw-text-xs tw-font-medium tw-text-iron-500 tw-no-underline hover:tw-text-iron-300 hover:tw-underline"
+          className="tw-text-meta/4 tw-font-normal tw-text-iron-500 tw-no-underline hover:tw-text-iron-300 hover:tw-underline"
         >
           {boostMessage(
             locale,
@@ -363,7 +363,7 @@ function BoostBreakdownInfo({
       <Tooltip
         id={tooltipId}
         place="top"
-        className="!tw-bg-iron-800 !tw-px-2 !tw-py-1 !tw-text-iron-50"
+        className="!tw-bg-iron-800 !tw-px-2 !tw-py-1 !tw-text-meta !tw-font-normal !tw-tabular-nums !tw-text-iron-100"
       >
         {info.length > 1 ? (
           <ul className="tw-mb-0 tw-pl-4 tw-text-left">

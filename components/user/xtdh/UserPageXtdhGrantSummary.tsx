@@ -192,10 +192,10 @@ export default function UserPageXtdhGrantSummary({
 }: Readonly<UserPageXtdhGrantSummaryProps>) {
   return (
     <div className="tw-flex tw-flex-col tw-gap-1">
-      <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+      <p className="tw-m-0 tw-text-[15px] tw-font-normal tw-tabular-nums tw-text-iron-300">
         {getSelectionSummary({ contract, selection, amount })}
       </p>
-      <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+      <p className="tw-m-0 tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
         {getValiditySummary(validUntil)}
       </p>
     </div>

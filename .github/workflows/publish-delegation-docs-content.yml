@@ -21,7 +21,7 @@ on:
       version:
         description: "Delegation docs package version"
         required: true
-        default: "delegation-docs-2026-06-16"
+        default: "delegation-docs-2026-10-15"
         type: string
 
 permissions:
@@ -30,17 +30,37 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    environment: delegation-docs
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
 
     env:
       DELEGATION_DOCS_VERSION: ${{ inputs.version }}
-      DELEGATION_DOCS_IPFS_API_ENDPOINT: ${{ secrets.DELEGATION_DOCS_IPFS_API_ENDPOINT }}
-      DELEGATION_DOCS_IPFS_API_BEARER_TOKEN: ${{ secrets.DELEGATION_DOCS_IPFS_API_BEARER_TOKEN }}
-      DELEGATION_DOCS_IPFS_API_AUTH_HEADER: ${{ secrets.DELEGATION_DOCS_IPFS_API_AUTH_HEADER }}
       DELEGATION_DOCS_IPFS_GATEWAY_BASE_URL: ${{ vars.DELEGATION_DOCS_IPFS_GATEWAY_BASE_URL }}
       DELEGATION_DOCS_CDN_S3_URI: ${{ vars.DELEGATION_DOCS_CDN_S3_URI }}
       DELEGATION_DOCS_CDN_BASE_URL: ${{ vars.DELEGATION_DOCS_CDN_BASE_URL }}
 
     steps:
+      - name: Validate CDN deployment role
+        id: deploy_role
+        if: ${{ inputs.skip_cdn_sync == false && startsWith(vars.DELEGATION_DOCS_CDN_S3_URI, 's3://') }}
+        env:
+          AWS_DEPLOY_ROLE_ARN: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          CDN_AWS_REGION: ${{ vars.DELEGATION_DOCS_CDN_AWS_REGION || 'eu-west-1' }}
+        run: |
+          if ! [[ "$AWS_DEPLOY_ROLE_ARN" =~ ^arn:aws:iam::([0-9]{12}):role/[A-Za-z0-9_+=,.@/-]+$ ]]; then
+            echo "::error::Configure a valid AWS_DEPLOY_ROLE_ARN in the delegation-docs environment"
+            exit 1
+          fi
+          account_id="${BASH_REMATCH[1]}"
+          if [ "$CDN_AWS_REGION" != "eu-west-1" ] || [ "$DELEGATION_DOCS_CDN_S3_URI" != 's3://6529bucket/delegation-content/{cid}' ]; then
+            echo "::error::The CDN configuration must match the scoped delegation-docs role"
+            exit 1
+          fi
+          echo "account_id=$account_id" >> "$GITHUB_OUTPUT"
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -70,14 +90,31 @@ jobs:
         run: ./bin/6529 ci
 
       - name: Configure AWS credentials for optional CDN sync
-        if: ${{ inputs.dry_run == false && inputs.skip_cdn_sync == false && startsWith(vars.DELEGATION_DOCS_CDN_S3_URI, 's3://') }}
-        uses: aws-actions/configure-aws-credentials@ff717079ee2060e4bcee96c4779b553acc87447c # v4
+        id: aws_credentials
+        if: ${{ inputs.skip_cdn_sync == false && startsWith(vars.DELEGATION_DOCS_CDN_S3_URI, 's3://') }}
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.DELEGATION_DOCS_CDN_AWS_REGION || 'us-east-1' }}
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          allowed-account-ids: ${{ steps.deploy_role.outputs.account_id }}
+          role-session-name: frontend-docs-${{ github.run_id }}
+          role-duration-seconds: 3600
+          unset-current-credentials: true
+          aws-region: eu-west-1
+
+      - name: Verify scoped CDN access
+        if: ${{ inputs.skip_cdn_sync == false && startsWith(vars.DELEGATION_DOCS_CDN_S3_URI, 's3://') }}
+        env:
+          AUTH_OUTCOME: ${{ steps.aws_credentials.outcome }}
+        run: |
+          test "$AUTH_OUTCOME" = "success"
+          aws s3api get-bucket-location --bucket 6529bucket --region eu-west-1 --query LocationConstraint
+          aws s3api list-objects-v2 --bucket 6529bucket --prefix delegation-content/ --max-keys 1 --region eu-west-1 --query KeyCount
 
       - name: Publish delegation docs package
+        env:
+          DELEGATION_DOCS_IPFS_API_ENDPOINT: ${{ secrets.DELEGATION_DOCS_IPFS_API_ENDPOINT }}
+          DELEGATION_DOCS_IPFS_API_BEARER_TOKEN: ${{ secrets.DELEGATION_DOCS_IPFS_API_BEARER_TOKEN }}
+          DELEGATION_DOCS_IPFS_API_AUTH_HEADER: ${{ secrets.DELEGATION_DOCS_IPFS_API_AUTH_HEADER }}
         run: |
           args=()
           if [ "${{ inputs.dry_run }}" = "true" ]; then

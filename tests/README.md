@@ -85,10 +85,19 @@ drop navigation. Changes under `components/waves/leaderboard/` or its
 `__tests__/components/waves/leaderboard/` tests therefore select this pack, as
 do the desktop `components/waves/drops/WaveDropActionsOpen.tsx` and mobile
 `components/waves/drops/WaveDropMobileMenuOpen.tsx` actions and their focused
-tests.
+tests. The pack also owns the wave header Join call to action
+(`components/waves/header/WaveJoinCta.tsx`) and the sidebar row pin tooltip
+layering (`components/brain/left-sidebar/waves/BrainLeftSidebarWavePin.tsx`),
+so changes to either select it.
 Keep those ownership rules covered in
 `__tests__/scripts/app-pr-ci-effective-plan.test.ts`; merely registering a
 pack here does not make a product-only PR select it.
+
+Submission artwork loading, GIF original fallback and HD controls run on both
+web viewports in `test:e2e:submission-artwork-sandbox`, in a separate PR CI job
+with its own server/build output. Shared image and artwork-renderer changes select
+this pack in addition to existing competition coverage. The artwork scenarios do
+not extend the competition job's test list or timeout budget.
 
 <!-- BEGIN GENERATED: e2e-pack-table -->
 
@@ -97,6 +106,9 @@ Generated from `tests/packs.manifest.cjs` by
 
 | Pack                                                | Alias                         | Safety   | Environment | Triggers                  | Timeout | Description                                                                                           |
 | --------------------------------------------------- | ----------------------------- | -------- | ----------- | ------------------------- | ------- | ----------------------------------------------------------------------------------------------------- |
+| `test:e2e:bookmarks-sandbox`                        | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Private bookmark menus, account isolation, and saved-page flow.                                       |
+| `test:e2e:staging:bookmarks`                        | bookmarks                     | readonly | staging     | post-deploy, manual       | 15m     | Private bookmarks route authentication guard.                                                         |
+| `test:e2e:production:bookmarks`                     | bookmarks                     | readonly | production  | post-deploy, manual       | 15m     | Private bookmarks route authentication guard.                                                         |
 | `test:e2e`                                          | —                             | local    | local       | manual                    | 60m     | Full local suite on the desktop web shell.                                                            |
 | `test:e2e:all-projects`                             | —                             | local    | local       | manual                    | 90m     | Full local suite across every configured project.                                                     |
 | `test:e2e:ui`                                       | —                             | local    | local       | manual                    | 90m     | Playwright UI mode for local debugging.                                                               |
@@ -129,9 +141,11 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:reaction-sandbox`                         | —                             | sandbox  | local       | manual                    | 15m     | Drop reaction sandbox against the local mock API.                                                     |
 | `test:e2e:edit-drop-sandbox`                        | —                             | sandbox  | local       | manual                    | 15m     | Drop edit sandbox against the local mock API.                                                         |
 | `test:e2e:native-competition-sandbox`               | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Native competition context, parallel budgets and navigation against the local mock API.               |
+| `test:e2e:submission-artwork-sandbox`               | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Submission artwork loading, GIF animation and HD controls in an isolated media sandbox.               |
 | `test:e2e:signature-sandbox`                        | —                             | sandbox  | local       | manual                    | 15m     | Signed participation sandbox that fails closed unsigned.                                              |
 | `test:e2e:session-recovery-sandbox`                 | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Expired session cold-start and foreground recovery against the local mock API.                        |
 | `test:e2e:auth-sandbox`                             | —                             | sandbox  | local       | manual                    | 15m     | Aggregate authenticated sandbox pack.                                                                 |
+| `test:e2e:profile-following-sandbox`                | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Profile Following and REP editing dialogs, permissions and recovery.                                  |
 | `test:e2e:wave-creation-sandbox`                    | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Wave creation, permissions, and draft recovery on desktop and mobile.                                 |
 | `test:e2e:smoke:surface-matrix`                     | —                             | local    | local       | pr-ci, manual             | 15m     | @smoke subset on desktop and mobile web shells.                                                       |
 | `test:e2e:surface-matrix`                           | —                             | local    | local       | pr-ci, manual             | 15m     | Core surfaces on desktop and mobile web shells.                                                       |
@@ -217,11 +231,27 @@ Remote read-only defaults:
   registered first-party mutations.
 - WalletConnect RPC POSTs are body-classified: known read-only JSON-RPC methods
   may continue, while unsafe, unknown, or unparseable calls fail the run.
+
 - For staging, the shared `context` fixture installs the read-only mutation
   guard before the `page` fixture unlocks the access gate. The current access
   gate uses safe GET requests plus a browser cookie.
 - Traces are disabled for staging and production by default because they can
   retain credentials or private page state.
+
+Readiness checks must follow the behavior under test. A visible `main` can
+precede hydration, wallet restoration, and API-backed content. Give the
+specific rendered data or resolved wallet state the bounded data-readiness
+budget. Wait for an API response only when that response is itself part of
+the contract; rendered rows may also come from cached data. Use the existing
+hydration-ready marker when checking the transition from server HTML to
+interactive chrome.
+Use `expectUrlState` from `support/urlState.ts` for route/query predicates;
+Playwright's predicate-based `toHaveURL` also waits for the page load event,
+which pending media can delay even after the correct URL is committed. Keep
+destination content, focus, scroll restoration, and media assertions separate.
+The distribution return coverage also expands its panel after focus returns to
+exercise late layout changes. It retains the original URL, focus, and viewport
+assertions; the test never scrolls the returned row into view itself.
 
 App PR CI:
 
@@ -243,6 +273,13 @@ App PR CI:
   Playwright packs. A separate Museum lane joins the matrix when a change can
   affect a Museum page or the Museum lane itself; Museum unit tests and
   workflows without Museum lanes do not start it.
+- The PR critical-shell lane runs `test:e2e:critical-shell` twice with
+  complementary `--grep` / `--grep-invert` title filters, so each half gets a
+  fresh `next dev` server and every test still runs once. One Turbopack dev
+  session that compiles every critical-shell route outgrows the 16 GB runner's
+  memory. Those steps also set `NEXT_DEV_TURBOPACK_FS_CACHE=0`, which
+  `next.config.ts` maps to `experimental.turbopackFileSystemCacheForDev:
+  false` because CI dev servers always start cold.
 - Museum selection: `scripts/museum-release-selection.cjs` maps each changed
   file to Museum page surfaces through the surface registry and import graph
   (copy keys and `public/museum` assets map through the sources that name

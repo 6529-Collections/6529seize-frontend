@@ -1,4 +1,5 @@
 import {
+  act,
   render,
   screen,
   waitFor,
@@ -6,6 +7,8 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
+import { createPortal } from "react-dom";
+import { WaveInformationPanelContext } from "@/components/brain/mobile/WaveInformationPanelContext";
 
 let mockPrefersReducedMotion = false;
 
@@ -19,7 +22,7 @@ jest.mock("@tanstack/react-query", () => ({
   keepPreviousData: {},
 }));
 
-const WaveContentMock = jest.fn((props: any) => <div data-testid="content" />);
+const WaveContentMock = jest.fn((_props: any) => <div data-testid="content" />);
 jest.mock("@/components/brain/right-sidebar/WaveContent", () => ({
   __esModule: true,
   WaveContent: (props: any) => WaveContentMock(props),
@@ -49,6 +52,12 @@ import {
 } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
 import { SidebarProvider } from "@/hooks/useSidebarState";
 import { useQuery } from "@tanstack/react-query";
+import { commonApiFetch } from "@/services/api/common-api";
+
+jest.mock("@/services/api/common-api", () => ({
+  ...jest.requireActual("@/services/api/common-api"),
+  commonApiFetch: jest.fn(),
+}));
 
 const mockUseQuery = useQuery as jest.Mock;
 
@@ -58,6 +67,7 @@ describe("BrainRightSidebar", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    WaveContentMock.mockImplementation(() => <div data-testid="content" />);
     mockPrefersReducedMotion = false;
     mockUseQuery.mockReturnValue({
       data: wave,
@@ -69,6 +79,18 @@ describe("BrainRightSidebar", () => {
 
   const renderSidebar = (ui: React.ReactNode) =>
     render(<SidebarProvider>{ui}</SidebarProvider>);
+
+  const inlineSidebar = (isOpen: boolean) => (
+    <SidebarProvider>
+      <BrainRightSidebar
+        isOpen={isOpen}
+        variant="inline"
+        waveId="1"
+        activeTab={SidebarTab.ABOUT}
+        setActiveTab={setActiveTab}
+      />
+    </SidebarProvider>
+  );
 
   it("renders WaveContent with fetched wave data", () => {
     renderSidebar(
@@ -88,6 +110,26 @@ describe("BrainRightSidebar", () => {
       })
     );
     expect(screen.getByTestId("content")).toBeInTheDocument();
+  });
+
+  it("keeps HTTP status on the shared right-sidebar wave query", async () => {
+    jest.mocked(commonApiFetch).mockResolvedValue(wave);
+    renderSidebar(
+      <BrainRightSidebar
+        isOpen={true}
+        waveId="1"
+        activeTab={SidebarTab.ABOUT}
+        setActiveTab={setActiveTab}
+      />
+    );
+    const { queryFn } = mockUseQuery.mock.calls[0][0] as {
+      queryFn: () => Promise<unknown>;
+    };
+    await expect(queryFn()).resolves.toBe(wave);
+    expect(commonApiFetch).toHaveBeenCalledWith({
+      endpoint: "waves/1",
+      errorMode: "structured",
+    });
   });
 
   it("toggles collapsed state when button clicked", async () => {
@@ -151,23 +193,12 @@ describe("BrainRightSidebar", () => {
   });
 
   it("keeps the inline panel mounted until its exit motion completes", async () => {
-    const sidebar = (isOpen: boolean) => (
-      <SidebarProvider>
-        <BrainRightSidebar
-          isOpen={isOpen}
-          variant="inline"
-          waveId="1"
-          activeTab={SidebarTab.ABOUT}
-          setActiveTab={setActiveTab}
-        />
-      </SidebarProvider>
-    );
-    const { rerender } = render(sidebar(true));
+    const { rerender } = render(inlineSidebar(true));
 
     const panel = screen.getByRole("complementary", {
       name: "Wave details",
     });
-    rerender(sidebar(false));
+    rerender(inlineSidebar(false));
 
     expect(screen.getByTestId("brain-right-sidebar-slot")).toHaveAttribute(
       "data-state",
@@ -257,25 +288,61 @@ describe("BrainRightSidebar", () => {
 
   it("removes the panel without movement when reduced motion is preferred", async () => {
     mockPrefersReducedMotion = true;
-    const sidebar = (isOpen: boolean) => (
-      <SidebarProvider>
-        <BrainRightSidebar
-          isOpen={isOpen}
-          variant="inline"
-          waveId="1"
-          activeTab={SidebarTab.ABOUT}
-          setActiveTab={setActiveTab}
-        />
-      </SidebarProvider>
-    );
-    const { rerender } = render(sidebar(true));
+    const { rerender } = render(inlineSidebar(true));
 
-    rerender(sidebar(false));
+    rerender(inlineSidebar(false));
 
     await waitFor(() => {
       expect(
         screen.queryByRole("complementary", { name: "Wave details" })
       ).not.toBeInTheDocument();
     });
+  });
+
+  it("keeps the current editor open when an earlier editor finishes saving", async () => {
+    const user = userEvent.setup();
+    let finishSave = () => {};
+    function Editors() {
+      const panel = React.useContext(WaveInformationPanelContext)!;
+      return (
+        <>
+          <button onClick={() => panel.open("links", "Edit links")}>
+            Links
+          </button>
+          <button onClick={() => panel.open("admins", "Edit admins")}>
+            Admins
+          </button>
+          {panel.container &&
+            panel.view !== "about" &&
+            createPortal(
+              <button
+                onClick={() => {
+                  finishSave = panel.back;
+                }}
+              >
+                Save later
+              </button>,
+              panel.container
+            )}
+        </>
+      );
+    }
+    WaveContentMock.mockImplementation(() => <Editors />);
+    renderSidebar(
+      <BrainRightSidebar
+        isOpen
+        waveId="1"
+        activeTab={SidebarTab.ABOUT}
+        setActiveTab={setActiveTab}
+      />
+    );
+    await user.click(screen.getByRole("button", { name: "Links" }));
+    await user.click(screen.getByRole("button", { name: "Save later" }));
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    await user.click(screen.getByRole("button", { name: "Admins" }));
+    act(() => finishSave());
+    expect(screen.getByRole("dialog", { name: "Edit admins" })).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    expect(screen.getByRole("button", { name: "Admins" })).toBeVisible();
   });
 });

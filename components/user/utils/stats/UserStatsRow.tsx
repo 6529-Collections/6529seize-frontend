@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import {
   formatUserStatsRowInteger,
@@ -33,8 +34,10 @@ interface UserStatsRowProps {
   readonly rep: number;
   readonly cic: number;
   readonly followersCount: number | null;
+  readonly followingStat?: ReactNode;
   readonly className?: string | undefined;
   readonly size?: UserStatsRowSize | undefined;
+  readonly rateClassName?: string | undefined;
   readonly onFollowersClick?: (() => void) | undefined;
   readonly locale?: SupportedLocale | undefined;
 }
@@ -48,8 +51,10 @@ export default function UserStatsRow({
   rep,
   cic,
   followersCount,
+  followingStat,
   className = "",
   size = UserStatsRowSize.MEDIUM,
+  rateClassName,
   onFollowersClick,
   locale = DEFAULT_LOCALE,
 }: UserStatsRowProps) {
@@ -63,6 +68,7 @@ export default function UserStatsRow({
     locale
   );
   const classes = SIZE_CLASSES[size];
+  const rateClasses = rateClassName ?? classes.rate;
   const tdhValue = formatUserStatsRowStatFloor(tdh, locale);
   const tdhRateValue = formatUserStatsRowStatFloor(tdh_rate, locale);
   const xtdhValue = formatUserStatsRowStatFloor(xtdh, locale);
@@ -108,7 +114,7 @@ export default function UserStatsRow({
             <>
               {" "}
               <span
-                className={`${classes.rate} tw-font-semibold tw-text-emerald-500`}
+                className={`${rateClasses} tw-font-semibold tw-text-emerald-500`}
               >
                 +{tdhRateValue}
               </span>
@@ -131,7 +137,7 @@ export default function UserStatsRow({
             <>
               {" "}
               <span
-                className={`${classes.rate} tw-font-semibold tw-text-emerald-500`}
+                className={`${rateClasses} tw-font-semibold tw-text-emerald-500`}
               >
                 +{xtdhRateValue}
               </span>
@@ -213,6 +219,7 @@ export default function UserStatsRow({
             </span>
           </Link>
         )}
+        {followingStat}
       </div>
     </div>
   );

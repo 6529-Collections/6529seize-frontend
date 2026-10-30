@@ -103,7 +103,7 @@ const getDisabledButtonClassName = (variant: "floating" | "fixed") => {
       ? "tw-justify-start"
       : "tw-justify-center tw-rounded-full";
 
-  return `tw-pointer-events-none tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-border-0 tw-bg-transparent tw-opacity-40 tw-transition-colors focus:tw-outline-none ${layoutClassName}`;
+  return `tw-pointer-events-none tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-border-0 tw-bg-transparent tw-opacity-40 tw-transition-colors ${layoutClassName}`;
 };
 
 const NavItemLinkContent = ({

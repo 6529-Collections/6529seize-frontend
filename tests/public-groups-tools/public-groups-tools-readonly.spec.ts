@@ -1,7 +1,11 @@
+import { installGroupGrantFixtures } from "../support/groupGrantFixtures";
+import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import type { Locator, Page } from "@playwright/test";
 
 import {
   expect,
+  expectActiveOptionIndicator,
+  expectKeyboardFocusIndicator,
   expectNoHorizontalOverflow,
   test,
   waitForRouteReady,
@@ -86,6 +90,59 @@ async function getStagingApiHeaders(
 }
 
 test.describe("Public tools, calendar, and removed Groups route coverage @surface @medium @large @readonly", () => {
+  test("About groups Safe Collecting pages and keeps GDRC and Primary Address last", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/about");
+    const main = page.getByRole("main").first();
+    const wallets = main.getByRole("region", {
+      name: "Safe Collecting",
+      exact: true,
+    });
+    // Links by exact href, scoped under accessible queries.
+    const mainLinkTo = (href: string) =>
+      page.getByRole("main").first().locator(`a[href="${href}"]`);
+    const walletLinkTo = (href: string) =>
+      page
+        .getByRole("main")
+        .first()
+        .getByRole("region", { name: "Safe Collecting", exact: true })
+        .locator(`a[href="${href}"]`);
+    const collections = main.getByRole("region", {
+      name: "Collections & Minting",
+      exact: true,
+    });
+    await expect(wallets).toBeVisible();
+    await expect(wallets.getByRole("link").last()).toHaveAttribute(
+      "href",
+      "/about/primary-address"
+    );
+    await expect(collections.getByRole("link").last()).toHaveAttribute(
+      "href",
+      "/about/gdrc1"
+    );
+    await expect(mainLinkTo("/about/nft-delegation")).toHaveCount(0);
+    await expect(walletLinkTo("/about/gdrc1")).toHaveCount(0);
+    for (const path of [
+      "/safe-collecting",
+      "/safe-collecting/tap-guide",
+      "/safe-collecting/faq",
+      "/safe-collecting/consolidation-use-cases",
+      "/safe-collecting/wallet-checker",
+    ]) {
+      await expect(walletLinkTo(path)).toHaveCount(1);
+    }
+    await wallets
+      .getByRole("link", { name: "Open page: FAQ", exact: true })
+      .click();
+    await expect(page).toHaveURL(
+      (url) => url.pathname === "/safe-collecting/faq"
+    );
+    await expect(
+      page.getByRole("heading", { level: 1, name: "FAQ", exact: true })
+    ).toBeVisible();
+  });
+
   test("renders the Tools index with grouped utility links", async ({
     page,
   }) => {
@@ -96,7 +153,9 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expect(
       page.getByRole("heading", { level: 1, name: "6529 Tools" })
     ).toBeVisible();
-    await expect(page.getByText("NFT Delegation")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Safe Collecting", exact: true })
+    ).toBeVisible();
     await expect(page.getByText("The Memes Tools")).toBeVisible();
     await expect(page.getByText("Builder Tools")).toBeVisible();
     await expect(
@@ -142,19 +201,52 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await openGroupFilters(page);
     const filter = page.getByRole("dialog", { name: "Filter Network" });
     const narrowFilter = await page.evaluate(
-      () => window.matchMedia("(max-width: 1023px)").matches
+      () =>
+        window.matchMedia("(max-width: 1023px), (any-pointer: coarse)").matches
     );
     const choices = filter.getByRole("group", {
       name: "Filter Network",
       includeHidden: true,
     });
-    const allFilters = filter.getByRole("button", { name: "All filters" });
     const openCriterion = async (name: string | RegExp) => {
-      if (narrowFilter && (await allFilters.isVisible())) {
-        await allFilters.click();
-      }
+      const back = filter.getByRole("button", { name: "Back", exact: true });
+      if (await back.isVisible()) await back.click();
       await choices.getByRole("button", { name, exact: true }).click();
     };
+    const readiness = filter.getByRole("button", { name: "Not ready yet." });
+    const guidance = page.getByRole("tooltip");
+    await expect(guidance).toBeHidden();
+    if (narrowFilter) {
+      await readiness.tap();
+    } else {
+      await readiness.hover();
+    }
+    await expect(guidance).toBeVisible();
+    await expect(guidance).toContainText(
+      "Finish the missing group rules before you create this group."
+    );
+    const guidanceBounds = await guidance.boundingBox();
+    const viewportWidth = await page.evaluate(() => window.innerWidth);
+    expect(guidanceBounds!.width).toBeGreaterThanOrEqual(240);
+    expect(guidanceBounds!.x).toBeGreaterThanOrEqual(0);
+    expect(guidanceBounds!.x + guidanceBounds!.width).toBeLessThanOrEqual(
+      viewportWidth
+    );
+    expect(
+      await guidance
+        .getByRole("paragraph")
+        .last()
+        .evaluate((element) =>
+          Number.parseFloat(getComputedStyle(element).lineHeight)
+        )
+    ).toBeGreaterThanOrEqual(19);
+    await choices
+      .getByRole("button", { name: "Identities", exact: true })
+      .focus();
+    await page.mouse.move(0, 0);
+    await expect(guidance).toBeHidden();
+    await readiness.focus();
+    await expect(guidance).toBeVisible();
     const levelInput = filter.getByRole("spinbutton", {
       name: "Level at least",
     });
@@ -169,21 +261,41 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       "Collection Access",
       "xTDH Grant",
     ];
-    await expect(choices.getByRole("button")).toHaveText(criteria);
+    await expect(
+      filter
+        .getByRole("group", { name: "Filter Network", includeHidden: true })
+        .locator("[data-criterion]")
+    ).toHaveText(criteria);
+    const identityEditor = filter.getByRole("region", { name: "Identities" });
     if (narrowFilter) {
-      await expect(
-        filter.getByRole("region", { name: "Identities" })
-      ).toBeHidden();
+      await expect(identityEditor).toBeHidden();
+      await expect(choices).toBeVisible();
     } else {
-      await expect(
-        filter.getByRole("region", { name: "Identities" })
-      ).toBeVisible();
+      await expect(identityEditor).toBeVisible();
+    }
+    if (!narrowFilter) {
+      const navigationBounds = await choices.boundingBox();
+      const editorBounds = await filter
+        .getByRole("region", { name: "Identities", exact: true })
+        .boundingBox();
+      expect(editorBounds!.x).toBeGreaterThanOrEqual(
+        navigationBounds!.x + navigationBounds!.width
+      );
+      const positions = await choices
+        .getByRole("button")
+        .evaluateAll((buttons) =>
+          buttons.map((button) => button.getBoundingClientRect().x)
+        );
+      expect(Math.max(...positions) - Math.min(...positions)).toBeLessThan(1);
     }
     for (const name of criteria) {
-      await expect(
-        filter.getByRole("button", { name, exact: true })
-      ).toBeInViewport();
+      const choice = choices.getByRole("button", { name, exact: true });
+      await choice.scrollIntoViewIfNeeded();
+      await expect(choice).toBeInViewport();
     }
+    await choices
+      .getByRole("button", { name: "Identities", exact: true })
+      .scrollIntoViewIfNeeded();
     await expect(
       filter.getByRole("button", { name: "Edit criteria" })
     ).toHaveCount(0);
@@ -192,7 +304,18 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     });
     await expect(apply).toBeDisabled();
     await expect(apply).toBeInViewport({ ratio: 1 });
-    await expect(filter.getByText("After editing")).toBeInViewport();
+    const emptySummary = filter.getByText("No criteria selected");
+    if (narrowFilter) await emptySummary.scrollIntoViewIfNeeded();
+    await expect(emptySummary).toBeInViewport();
+    await expect(
+      filter.getByText("Before editing", { exact: true })
+    ).toHaveCount(0);
+    await expect(
+      filter.getByText("After editing", { exact: true })
+    ).toHaveCount(0);
+    await expect(
+      filter.getByText("All Network members", { exact: true })
+    ).toHaveCount(0);
     const restingHeight = await choices.evaluate(
       (element) =>
         element.closest(".mobile-wrapper-dialog")?.getBoundingClientRect()
@@ -202,13 +325,14 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       const availableHeight = await page.evaluate(
         () => window.innerHeight - 64
       );
-      expect(restingHeight).toBeCloseTo(Math.min(640, availableHeight), 0);
-      const emptySpace = await choices.evaluate(
-        (element) =>
-          element.getBoundingClientRect().bottom -
-          (element.lastElementChild?.getBoundingClientRect().bottom ?? 0)
+      expect(restingHeight).toBeCloseTo(availableHeight, 0);
+      const navigationWidth = await choices.evaluate((element) => ({
+        width: element.clientWidth,
+        scrollWidth: element.scrollWidth,
+      }));
+      expect(navigationWidth.scrollWidth).toBeLessThanOrEqual(
+        navigationWidth.width
       );
-      expect(emptySpace).toBeLessThan(80);
     }
     if (narrowFilter) {
       const widths = await apply.evaluate((element) => ({
@@ -243,22 +367,80 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
         )
         .toBeCloseTo(restingHeight ?? 0, 0);
       if (narrowFilter) {
-        await expect(allFilters).toBeInViewport();
+        await expect(choices).toBeHidden();
+        await expect(
+          filter.getByRole("button", { name: "Back", exact: true })
+        ).toBeInViewport({ ratio: 1 });
       } else {
-        await expect(
-          filter.getByRole("button", { name: "Level", exact: true })
-        ).toBeInViewport();
-        await expect(
-          filter.getByRole("button", { name: "xTDH Grant", exact: true })
-        ).toBeInViewport();
+        await expect(choices).toBeInViewport({ ratio: 1 });
       }
     }
+    const clearGrantFilters = filter.getByRole("button", {
+      name: "Clear filters",
+      exact: true,
+    });
+    const collectionName = filter.getByRole("textbox", {
+      name: "Collection name",
+    });
+    await expect(clearGrantFilters).toHaveCount(0);
+    await collectionName.fill("Memes");
+    await expect(clearGrantFilters).toBeVisible();
+    await clearGrantFilters.click();
+    await expect(collectionName).toHaveValue("");
+    await expect(clearGrantFilters).toHaveCount(0);
+    await filter.getByRole("tab", { name: "Pending", exact: true }).click();
+    await expect(clearGrantFilters).toHaveCount(0);
+    await collectionName.fill("Memes");
+    await expect(clearGrantFilters).toBeVisible();
+    await clearGrantFilters.click();
+    await expect(
+      filter.getByRole("tab", { name: "Pending", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(
+      filter.getByRole("tab", { name: "Pending", exact: true })
+    ).toBeFocused();
+    await expect(collectionName).toHaveValue("");
+    await expect(clearGrantFilters).toHaveCount(0);
+    await expect(apply).toBeDisabled();
     await openCriterion("Level");
     await levelInput.fill("10");
     await openCriterion("Identities");
     await expect(
       filter.getByText("No identities are explicitly included.")
+    ).toHaveCount(0);
+    await expect(
+      filter.getByRole("heading", { name: "Find an identity to include" })
     ).toBeVisible();
+    await expect(
+      filter.getByRole("textbox", { name: "Find an identity to include" })
+    ).toBeVisible();
+    await expect(
+      filter.getByRole("textbox", { name: "Find an identity to include" })
+    ).toHaveAttribute("placeholder", "Search identities to include...");
+    await expect(
+      filter.getByText("No allowlist added.", { exact: true })
+    ).toHaveCount(0);
+    await expect(
+      filter.getByText("No CSV file added.", { exact: true })
+    ).toHaveCount(0);
+    await expect(
+      filter.getByText("0 unique identities included", { exact: true })
+    ).toHaveCount(0);
+    await expect(
+      filter.getByRole("heading", { name: "EMMA", exact: true })
+    ).toBeVisible();
+    await expect(
+      filter.getByRole("heading", { name: "CSV file", exact: true })
+    ).toBeVisible();
+    await expect(
+      filter.getByRole("textbox", { name: "Search allowlists", exact: true })
+    ).toBeVisible();
+    await expect(
+      filter.getByRole("button", { name: "EMMA", exact: true })
+    ).toHaveCount(0);
+    await expect(
+      filter.getByRole("button", { name: "CSV file", exact: true })
+    ).toHaveCount(0);
     const identityModes = filter.getByRole("tablist", {
       name: "Identity treatment",
     });
@@ -273,7 +455,13 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     ).toHaveAttribute("aria-selected", "true");
     await expect(
       filter.getByText("No identities are explicitly excluded.")
-    ).toBeVisible();
+    ).toHaveCount(0);
+    await expect(
+      filter.getByText("No allowlist added.", { exact: true })
+    ).toHaveCount(0);
+    await expect(
+      filter.getByText("No CSV file added.", { exact: true })
+    ).toHaveCount(0);
     await openCriterion(/^Level(?: Configured)?$/);
     await expect(levelInput).toHaveValue("10");
     await expect(apply).toBeEnabled();
@@ -298,9 +486,18 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     ).toBeVisible();
     await expect(apply).toBeInViewport({ ratio: 1 });
     await expectNoHorizontalOverflow(page);
-    await expect(
-      filter.getByRole("button", { name: "View members" })
-    ).toBeInViewport();
+    const preview = filter.getByRole("button", { name: "View members" });
+    if (narrowFilter) {
+      await preview.scrollIntoViewIfNeeded();
+      expect(
+        await criteriaTags.evaluate((element) => ({
+          maxHeight: getComputedStyle(element).maxHeight,
+          overflow: getComputedStyle(element).overflowY,
+        }))
+      ).toEqual({ maxHeight: "none", overflow: "visible" });
+    }
+    await expect(preview).toBeInViewport();
+    await expect(apply).toBeInViewport({ ratio: 1 });
     await expect(
       page
         .getByRole("button", { name: "Choose group" })
@@ -367,7 +564,7 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expectNoHorizontalOverflow(page);
   });
 
-  test("keeps All filters and Close visible while a narrow editor scrolls", async ({
+  test("scrolls the mobile summary after the editor while keeping navigation and the action visible", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 620 });
@@ -375,13 +572,10 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await openGroupFilters(page);
     const filter = page.getByRole("dialog", { name: "Filter Network" });
     const choices = filter.getByRole("group", { name: "Filter Network" });
-    const back = filter.getByRole("button", {
-      name: "All filters",
-      exact: true,
-    });
     const level = filter.getByRole("spinbutton", { name: "Level at least" });
     await choices.getByRole("button", { name: "Level", exact: true }).click();
     await level.fill("10");
+    const back = filter.getByRole("button", { name: "Back", exact: true });
     await back.click();
     await choices
       .getByRole("button", { name: "Identities", exact: true })
@@ -390,19 +584,38 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       name: "Identities",
       exact: true,
     });
+    const summary = filter
+      .getByRole("region", { name: "Identities", exact: true })
+      .locator("[data-group-criteria-summary]");
+    await expect(summary).toHaveCount(1);
+    await expect(summary).not.toBeInViewport();
+    const apply = filter.getByRole("button", {
+      name: "Create and use new group",
+    });
+    const applyBeforeScroll = await apply.boundingBox();
     const backBeforeScroll = await back.boundingBox();
     // Mobile WebKit does not support mouse.wheel. Scroll the real editor
     // directly and keep the same rendered-position and navigation guarantees.
     await identities.evaluate((element) => {
-      const editor = element.parentElement;
-      if (!editor) throw new Error("Expected the criterion scroll container");
-      editor.scrollTo({ top: editor.scrollHeight });
+      element.scrollTo({ top: element.scrollHeight });
     });
     await expect
-      .poll(() =>
-        identities.evaluate((element) => element.parentElement?.scrollTop)
-      )
+      .poll(() => identities.evaluate((element) => element.scrollTop))
       .toBeGreaterThan(0);
+    await expect(choices).toBeHidden();
+    await expect(summary).toBeInViewport({ ratio: 1 });
+    await expect(
+      summary.getByText("Level at least 10", { exact: true })
+    ).toBeVisible();
+    expect(
+      await summary.evaluate((element) => ({
+        background: getComputedStyle(element).backgroundColor,
+        borderWidth: getComputedStyle(element).borderTopWidth,
+      }))
+    ).toEqual({ background: "rgb(28, 28, 33)", borderWidth: "0px" });
+    await expect
+      .poll(async () => (await apply.boundingBox())?.y)
+      .toBeCloseTo(applyBeforeScroll?.y ?? 0, 0);
     await expect(back).toBeInViewport({ ratio: 1 });
     await expect
       .poll(async () => (await back.boundingBox())?.y)
@@ -413,6 +626,7 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expect(
       filter.getByRole("button", { name: "Create and use new group" })
     ).toBeInViewport({ ratio: 1 });
+    await expect(identities).toBeFocused();
     await back.click();
     await expect(
       choices.getByRole("button", { name: "Identities", exact: true })
@@ -421,6 +635,197 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       .getByRole("button", { name: "Level Configured", exact: true })
       .click();
     await expect(level).toHaveValue("10");
+  });
+
+  test("scrolls mobile grant filters and paginated results together", async ({
+    page,
+    isMobile,
+  }) => {
+    const requestedPages = await installGroupGrantFixtures(page);
+    // The synthetic grant has no real audience; keep its read-only preview local.
+    await page.route("**/api/groups/preview-members?**", (route) =>
+      route.fulfill({ json: { data: [], count: 0, page: 1, next: false } })
+    );
+    await page.setViewportSize({ width: 390, height: 620 });
+    await gotoReady(page, "/network");
+    await openGroupFilters(page);
+    const filter = page.getByRole("dialog", { name: "Filter Network" });
+    await filter
+      .getByRole("button", { name: "xTDH Grant", exact: true })
+      .click();
+    const editor = filter.getByRole("region", {
+      name: "xTDH Grant",
+      exact: true,
+    });
+    const cards = editor.getByRole("button", { name: /Scroll collection / });
+    const loadMore = editor.getByRole("button", {
+      name: "Load more",
+      exact: true,
+    });
+    const collectionName = editor.getByRole("textbox", {
+      name: "Collection name",
+    });
+    await expect(cards).toHaveCount(20);
+    await expect(collectionName).toBeInViewport();
+    const statusTabs = editor.getByRole("tablist", {
+      name: "Filter by status",
+    });
+    const statusBounds = await statusTabs.boundingBox();
+    const inputBounds = await collectionName.boundingBox();
+    expect(statusBounds!.width).toBeCloseTo(inputBounds!.width, 0);
+    const lastStatusBounds = await statusTabs
+      .getByRole("tab", { name: "Failed", exact: true })
+      .boundingBox();
+    expect(lastStatusBounds!.x + lastStatusBounds!.width).toBeCloseTo(
+      statusBounds!.x + statusBounds!.width - 5,
+      0
+    );
+    await expect(loadMore).not.toBeInViewport();
+    const list = editor.getByRole("list");
+    expect(
+      await list.evaluate((element) => {
+        let ancestor = element.parentElement;
+        let nestedScrollers = 0;
+        while (ancestor && ancestor.tagName !== "SECTION") {
+          if (
+            ["auto", "scroll"].includes(getComputedStyle(ancestor).overflowY) &&
+            ancestor.scrollHeight > ancestor.clientHeight + 1
+          )
+            nestedScrollers++;
+          ancestor = ancestor.parentElement;
+        }
+        return nestedScrollers;
+      })
+    ).toBe(0);
+    const back = filter.getByRole("button", { name: "Back", exact: true });
+    const headerBefore = await back.boundingBox();
+    await loadMore.scrollIntoViewIfNeeded();
+    await expect(collectionName).not.toBeInViewport();
+    await expect(loadMore).toBeInViewport({ ratio: 1 });
+    const lastCardBounds = await cards.last().boundingBox();
+    const loadMoreBounds = await loadMore.boundingBox();
+    expect(loadMoreBounds!.y).toBeGreaterThanOrEqual(
+      lastCardBounds!.y + lastCardBounds!.height
+    );
+    await expect(back).toBeInViewport({ ratio: 1 });
+    expect((await back.boundingBox())!.y).toBeCloseTo(headerBefore!.y, 0);
+    await expect(
+      filter.getByRole("button", { name: "Close", exact: true })
+    ).toBeInViewport({ ratio: 1 });
+    await expect(
+      filter.getByRole("button", { name: "Create and use new group" })
+    ).toBeInViewport({ ratio: 1 });
+    await loadMore.click();
+    await expect(cards).toHaveCount(22);
+    await expect(loadMore).toHaveCount(0);
+    expect(requestedPages).toEqual([1, 2]);
+    await cards.last().scrollIntoViewIfNeeded();
+    await expect(cards.last()).toBeInViewport({ ratio: 1 });
+    await expectNoHorizontalOverflow(page);
+    if (
+      !(await page.evaluate(() => matchMedia("(any-pointer: coarse)").matches))
+    ) {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await expect
+        .poll(() =>
+          list.evaluate((element) => element.parentElement?.clientHeight)
+        )
+        .toBe(320);
+    }
+    await cards
+      .last()
+      .getByText("Scroll collection 22", { exact: true })
+      .click();
+    const selection = editor.getByRole("group", {
+      name: "xTDH Grant Beneficiary",
+      exact: true,
+    });
+    await expect(selection).toBeFocused();
+    await expect(
+      selection.getByText("Scroll collection 22", { exact: true })
+    ).toBeInViewport({ ratio: 1 });
+    await expect(
+      editor.getByRole("textbox", { name: "Collection name" })
+    ).toHaveCount(0);
+    await expect(
+      filter.getByRole("button", { name: "Close", exact: true })
+    ).toBeInViewport({ ratio: 1 });
+  });
+
+  test("keeps the mobile sheet header stable while keyboard layout animates", async ({
+    page,
+    baseURL,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, "Native keyboard geometry uses the mobile viewport.");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await installSurfaceSimulation(
+      page.context(),
+      "capacitor-ios-sim",
+      baseURL
+    );
+    await installGroupGrantFixtures(page);
+    await gotoReady(page, "/network");
+    await openGroupFilters(page);
+    const filter = page.getByRole("dialog", { name: "Filter Network" });
+    await filter
+      .getByRole("button", { name: "xTDH Grant", exact: true })
+      .click();
+    await expect(
+      filter.getByRole("textbox", { name: "Collection name" })
+    ).toBeVisible();
+    const sheet = page
+      .getByRole("dialog", { name: "Filter Network" })
+      .locator(".mobile-wrapper-dialog");
+    // The native phone supplies these CSS variables. This checks browser layout,
+    // not the OS keyboard or its animation frame rate.
+    const geometry = await sheet.evaluate(async (element) => {
+      const style = document.documentElement.style;
+      const insetName = "--native-keyboard-inset-bottom";
+      const durationName = "--native-keyboard-layout-transition-duration";
+      const previousInset = style.getPropertyValue(insetName);
+      const previousDuration = style.getPropertyValue(durationName);
+      const initial = element.getBoundingClientRect();
+      const samples: { top: number; height: number }[] = [];
+      const sampleTransition = (inset: number) =>
+        new Promise<void>((resolve) => {
+          style.setProperty(insetName, `${inset}px`);
+          const start = performance.now();
+          const sample = () => {
+            const bounds = element.getBoundingClientRect();
+            samples.push({ top: bounds.top, height: bounds.height });
+            if (performance.now() - start < 400) requestAnimationFrame(sample);
+            else resolve();
+          };
+          requestAnimationFrame(sample);
+        });
+      try {
+        style.setProperty(durationName, "250ms");
+        await sampleTransition(300);
+        await sampleTransition(0);
+        return { top: initial.top, height: initial.height, samples };
+      } finally {
+        if (previousInset) style.setProperty(insetName, previousInset);
+        else style.removeProperty(insetName);
+        if (previousDuration) style.setProperty(durationName, previousDuration);
+        else style.removeProperty(durationName);
+      }
+    });
+    expect(
+      Math.max(
+        ...geometry.samples.map(({ top }) => Math.abs(top - geometry.top))
+      )
+    ).toBeLessThan(2);
+    expect(
+      Math.min(...geometry.samples.map(({ height }) => height))
+    ).toBeLessThan(geometry.height - 290);
+    expect(geometry.samples.at(-1)!.height).toBeCloseTo(geometry.height, 0);
+    await expect(
+      filter.getByRole("button", { name: "Back", exact: true })
+    ).toBeInViewport({ ratio: 1 });
+    await expect(
+      filter.getByRole("button", { name: "Close", exact: true })
+    ).toBeInViewport({ ratio: 1 });
   });
 
   test("keeps the Network filter as a sheet at tablet and touch widths", async ({
@@ -630,6 +1035,13 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       0
     );
 
+    // A @tailwindcss/forms control drawing its own ring on keyboard focus.
+    await expectKeyboardFocusIndicator(
+      page,
+      page.getByLabel("Contract", { exact: true }),
+      { maxTabs: 150 }
+    );
+
     if (testInfo.project.name === "web-desktop-chromium") {
       const [logoBox, contractBox] = await Promise.all([
         page.getByAltText("re-memes").boundingBox(),
@@ -655,6 +1067,9 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       await memeOption.tap();
     } else {
       await referenceSearch.press("ArrowDown");
+      // The active Headless UI option keeps focus on the input, so it has to
+      // paint its own indicator instead of a background tint alone.
+      await expectActiveOptionIndicator(memeOption);
       await referenceSearch.press("Enter");
     }
 

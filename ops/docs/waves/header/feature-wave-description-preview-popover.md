@@ -28,15 +28,22 @@ Users can:
 
 - Visible only for active non-DM waves.
 - Hidden when `description_drop.id` is missing.
-- Hidden when the first description part resolves to empty preview text.
+- Hidden when the first description part resolves to empty preview text,
+  including a pinned drop that is only an image or a 6529 drop link. Its full
+  content stays available from the wave name's `About` panel.
 - On mobile tabs headers, the wave-name button still opens search; preview uses
   a separate trigger below it.
 
 ## Preview Text Rules
 
 - Source is the first description part only.
-- Markdown links become `label (url)`.
-- Markdown images become their raw URL in preview text.
+- Markdown links become `label (url)`. When the link points at media or a 6529
+  wave/drop link, only the label is kept.
+- Markdown images, bare media URLs (6529 media CDN or image/video file links),
+  and bare 6529 wave/drop links are left out of the preview text, because the
+  full description renders them as media or embedded cards. Other bare URLs
+  stay. If nothing readable remains, the preview line is hidden (see
+  Availability Rules).
 - Common markdown formatting is stripped to plain text and whitespace is
   collapsed.
 
@@ -57,6 +64,9 @@ Users can:
 5. Close with trigger reselect, outside click/tap, or `Escape`.
 6. Continue thread actions without route or tab changes.
 
+When no preview line is shown, select the wave name to open the wave details
+panel; its `About` tab shows the full pinned description drop.
+
 ## Edge Cases
 
 - If description markdown is malformed, preview keeps remaining source text
@@ -69,7 +79,7 @@ Users can:
 ## Failure and Recovery
 
 - If no preview appears, verify the wave has a valid description drop and
-  non-empty first-part content.
+  first-part content with readable text (not only media or a 6529 drop link).
 - If only a short snippet is visible, open the popover for full content.
 - If popover placement is tight on small viewports, resize or scroll; content
   remains accessible within the popover container.

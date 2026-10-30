@@ -19,6 +19,12 @@ import { ApiProfileClassification } from "@/generated/models/ApiProfileClassific
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { mainnet } from "viem/chains";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
 
 jest.mock(
   "@/hooks/artwork-documentation/useArtworkDocumentationAccess",
@@ -376,6 +382,17 @@ describe("HeaderUserMenuDropdown", () => {
       isConnected: true,
     });
     expect(screen.getByText("alice")).toBeInTheDocument();
+  });
+
+  it("requests the 200x200 derivative of a CDN profile picture", () => {
+    renderDropdown({
+      profile: { ...profileBase, pfp: CDN_AVATAR_URL },
+      address: "0xabc",
+      isConnected: true,
+    });
+    expect(getRequestedImageSrc(screen.getByAltText("alice avatar"))).toContain(
+      scaledAvatarPath(ImageScale.W_200_H_200)
+    );
   });
 
   it("renders Profile and Preferences as separate links in one row", () => {

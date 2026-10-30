@@ -228,10 +228,7 @@ export default function WaveRepRatingModal({
       title={t(WAVE_REP_MODAL_LOCALE, "waves.rep.modal.title")}
       isOpen
       onClose={onClose}
-      closeLabel={t(
-        WAVE_REP_MODAL_LOCALE,
-        "waves.rep.modal.closeAriaLabel"
-      )}
+      closeLabel={t(WAVE_REP_MODAL_LOCALE, "waves.rep.modal.closeAriaLabel")}
       tabletModal
       showScrollbar
       enableDragToClose
@@ -361,7 +358,7 @@ export default function WaveRepRatingModal({
               variant="secondary"
               size="lg"
               fullWidth
-              className="sm:tw-w-auto"
+              className="tw-hidden md:tw-inline-flex md:tw-w-auto"
             >
               Cancel
             </Button>

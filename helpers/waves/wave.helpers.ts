@@ -81,6 +81,11 @@ export const toApiWaveMin = (wave: ApiWave): ApiWaveMin => {
     authenticated_user_eligible_to_participate:
       wave.participation.authenticated_user_eligible,
     authenticated_user_eligible_to_chat: wave.chat.authenticated_user_eligible,
+    authenticated_user_eligible_to_reply:
+      wave.chat.replies?.authenticated_user_eligible ??
+      wave.chat.authenticated_user_eligible,
+    authenticated_user_can_delete_replies:
+      wave.chat.replies?.authenticated_user_can_delete ?? false,
     authenticated_user_admin: wave.wave.authenticated_user_eligible_for_admin,
     visibility_group_id: wave.visibility.scope.group?.id ?? null,
     participation_group_id: wave.participation.scope.group?.id ?? null,

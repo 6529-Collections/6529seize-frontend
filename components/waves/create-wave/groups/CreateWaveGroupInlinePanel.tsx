@@ -16,8 +16,12 @@ export default function CreateWaveGroupInlinePanel(
   return (
     <GroupAssignmentPanel
       {...props}
+      presentation="embedded"
+      collapseOnClickAway={false}
       showChooseGroup={false}
       isWaveAccessEditor={true}
+      mobileCriteriaNavigation
+      simplifyCriteriaCopy
     />
   );
 }

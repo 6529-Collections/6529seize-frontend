@@ -14,6 +14,14 @@ jest.mock("@/contexts/WaveInformationContext", () => ({
   useWaveInformation: () => ({ open: mockOpenInformation }),
 }));
 
+const mockOpenWaveSearch = jest.fn();
+jest.mock("@/components/brain/my-stream/tabs/MyStreamWaveSearch", () => ({
+  useOpenMyStreamWaveSearch: () => ({
+    open: mockOpenWaveSearch,
+    trigger: { current: null },
+  }),
+}));
+
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush, replace: jest.fn(), back: jest.fn() }),
   useSearchParams: () => new URLSearchParams("wave=w1"),
@@ -37,6 +45,12 @@ jest.mock("react-use", () => {
 });
 
 const useContentTab = jest.fn();
+
+// The Join CTA owns its auth/query wiring and has dedicated tests.
+jest.mock("@/components/waves/header/WaveJoinCta", () => ({
+  __esModule: true,
+  default: () => null,
+}));
 
 jest.mock("@/components/brain/my-stream/MyStreamWaveDesktopTabs", () => ({
   __esModule: true,

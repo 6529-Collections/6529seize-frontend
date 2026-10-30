@@ -23,7 +23,9 @@ import { t } from "@/i18n/messages";
 import DevicesIcon from "@/components/common/icons/DevicesIcon";
 import HeaderUserConnectedAccounts from "./connected/HeaderUserConnectedAccounts";
 import HeaderUserProxyDropdownItem from "./HeaderUserProxyDropdownItem";
+import HeaderBookmarksLink from "./HeaderBookmarksLink";
 import HeaderArtworkDocumentationLink from "./HeaderArtworkDocumentationLink";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 const HEADER_USER_MENU_LOCALE = DEFAULT_LOCALE;
 
@@ -226,7 +228,10 @@ export default function HeaderUserMenuDropdown({
                               }
                             >
                               <img
-                                src={profile.pfp}
+                                src={getScaledImageUri(
+                                  profile.pfp,
+                                  ImageScale.W_200_H_200
+                                )}
                                 alt={`${label} avatar`}
                                 className="tw-absolute tw-inset-0 tw-block tw-h-full tw-w-full tw-rounded-lg tw-bg-iron-700 tw-object-cover tw-transition tw-duration-300 tw-ease-out"
                               />
@@ -440,6 +445,7 @@ export default function HeaderUserMenuDropdown({
                         />
                       </Link>
                     </div>
+                    <HeaderBookmarksLink onClose={onClose} />
                     <HeaderArtworkDocumentationLink
                       onClose={onClose}
                       enabled={artworkDocumentationEnabled}

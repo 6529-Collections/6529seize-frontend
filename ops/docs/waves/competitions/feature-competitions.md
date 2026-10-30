@@ -16,16 +16,21 @@ wave can run at the same time with different participation and voting rules.
 
 Open **Competitions** from an eligible wave, follow a competition link, or open
 a competition notification. The wave header and navigation stay visible. The
-collection and create/edit forms open from **Competitions**.
+collection opens from **Competitions**; open an existing draft from its card.
 The **Competitions** tab shows a count of active and upcoming competitions. The
 badge is hidden when there are none; drafts and completed competitions do not count.
-**Chat** returns to the wave's existing conversation. The collection has a second
-row of tabs for **Active and upcoming**, **Completed**, and **All**;
-wave administrators can also see **Drafts**. **Add competition** sits alongside
-these tabs for users who can create competitions.
-In the app, this secondary row uses the same compact pills as **About**.
-**More** opens the remaining filters; choosing one shows its name on that pill.
-Desktop and mobile web retain the underlined tab row.
+**Chat** returns to the wave's existing conversation. The collection offers
+**Active and upcoming**, **Completed**, and **All**; wave administrators also
+see **Drafts**. In the app, compact pills show **Active and upcoming** and
+**More**. More opens the remaining filters and displays the selected filter name.
+Dismissing it keeps the selection. Desktop and mobile web show all available
+filters as compact pills. When the row is too narrow, scroll the pills
+horizontally; an edge fade shows where more controls are off-screen. Selecting
+a filter, including from **More**, scrolls its pill into view.
+To create a competition, select **+ Competition** beside the collection
+filter pills. It opens setup directly and appears only in the Competitions
+view when you have creation permission. The wave tab-row **Create** menu
+contains the eligible curation and subwave actions.
 Cards show the start date and, when set, the end date. Dates in the past use
 **Started** or **Ended**; future dates use **Starts** or **Ends**.
 
@@ -37,6 +42,9 @@ and loading or refreshing competition data does not override a deliberate Chat
 selection. Remembered competition views retain their competition identity; if
 another competition has become the default, ordinary entry falls back to Chat.
 Explicit destination links and Back/Forward retain their intended section.
+Switching waves keeps the wave list in place and opens the remembered section
+directly. If its data is still loading, the loading state stays in that section
+without opening Chat or Competitions first.
 Selecting a competition tab uses the default competition unless a link or earlier
 explicit selection supplies another competition. See [Wave Content Tabs](../chat/feature-content-tabs.md)
 for the per-wave navigation contract.
@@ -46,19 +54,23 @@ published competitions. The row starts with **Chat**, followed by the competitio
 leaderboard and results views, **Votes**, and **Settings**. **Settings** is the last
 competition tab, followed by **Competitions** when available and then named curations.
 **Votes** has **My Votes**, **All votes**, and **Activity** subtabs, all scoped to
-the selected competition. In the app, these subtabs use the shared compact pill
-style; web keeps underlined tabs. **Settings** opens its rules, access, appearance,
+the selected competition. These subtabs use the shared compact pill style on
+desktop, mobile web, and the app. **Settings** opens its rules, access, appearance,
 administration and pause history with the existing read and edit permissions.
 Chat remains shared by the whole wave.
 
 **Competitions** is hidden for non-administrators when the default is the wave's
 sole visible competition, including for signed-out viewers. The count includes
 current, past and future competitions. Administrators retain it for management.
-Unknown counts or permissions keep it available. Direct collection links remain
+Unknown counts or permissions keep it hidden until administrator access or more
+than one visible competition is established. Direct collection links remain
 readable when the tab is hidden.
 Routine background refreshes keep the established tabs in place. The collection
 tab updates when the refreshed competition data or permissions change, not merely
 because another request starts.
+Temporary refresh failures retain already loaded competition content and the
+selected section. If access is rejected or the competition is no longer
+available, that section shows an error with a retry action.
 
 Wave **About**, **REP**, and **Configuration** belong to the information panel.
 Select the wave name to open About: on desktop it opens the right sidebar; on
@@ -95,7 +107,9 @@ tabs. The collection lets you choose a different competition at any time.
    removes it. Negative votes are available only where the rules permit them.
 4. Competitions open on **Leaderboard**. Use the wave tab row for the selected competition. The leaderboard
    uses the familiar list/grid controls, sorting, rich drop cards and **Drop**
-   action. Rank competitions show the schedule; Approve competitions show
+   action. When entries are closed or your profile cannot submit, the leaderboard
+   omits the generic submission notice; submission forms still show eligibility feedback.
+   Rank competitions show the schedule; Approve competitions show
    approval thresholds, progress and approved counts. Winners use the existing
    podium or timeline for Rank and approved-drop cards for Approve. Outcomes
    use expandable reward cards; My votes shows editable vote rows and reset
@@ -105,6 +119,18 @@ tabs. The collection lets you choose a different competition at any time.
    then return through the competition collection or link.
 
 ## Common Scenarios
+
+- A competition can use **Anonymous submissions**. Other users see each
+  submission without its author identity until that submission wins. A win
+  reveals only that entry's author; the same person's other entries stay
+  anonymous, including through later draws. You can still find your own entries
+  in **My submissions**. Content and metadata remain visible as submitted, so
+  avoid including identifying information if you want to stay anonymous.
+- Unrevealed anonymous submissions remain visible even when you have blocked
+  their author's account, so blocking cannot identify the author. Hiding a
+  specific drop and platform moderation still apply. Related author
+  notifications remain visible despite account blocks and identity mutes until
+  that entry wins; ordinary notifications retain their existing filters.
 
 - After a submission is accepted, its entry opens with a confirmation naming
   the competition and **View my entry**. **My submissions** is available on the
@@ -151,6 +177,9 @@ tabs. The collection lets you choose a different competition at any time.
 
 ## Failure and Recovery
 
+- If an older upload cannot be used for an anonymous submission, upload the
+  media again and retry. The submission form keeps your other input.
+
 - If a leaderboard load fails, use **Retry**. Already loaded rows remain visible
   if a refresh fails. Entry recovery does not create another submission.
 - If a saved submission’s entry status cannot be loaded, use **Check again** or
@@ -177,6 +206,8 @@ state if the server has not enabled its support.
 The default controls navigation; it grants no participation, voting or Main
 Stage privileges. Main Stage privileges apply only to an explicitly designated
 competition, never automatically to all competitions in its wave.
+
+Original competitions and newer competitions use the same leaderboard, Votes, winners and Settings views. **My Votes** retains vote editing, selected-vote reset and **Explain vote**, which opens a reply in the shared wave chat. Main Stage retains its artwork submission wizard and artwork views; Curation retains supported-URL submissions and price sorting and filters; Quorum retains its proposal wizard. These experiences belong only to the competition with the corresponding designation.
 
 ## Related Pages
 

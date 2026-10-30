@@ -10,6 +10,7 @@ import { useWaveDiscoveryViewer } from "@/hooks/useWaveDiscoveryViewer";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { SidebarActiveVotes } from "./SidebarActiveVotes";
+import { SidebarRecommendationsSkeleton } from "./SidebarDiscoverySkeletons";
 import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
 import { waveFeatureAttributes } from "@/services/analytics/waveFeatureUsage";
 import {
@@ -43,8 +44,8 @@ function DiscoverySection({
       aria-label={label}
       className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
     >
-      <div className="tw-relative tw-mx-4 tw-flex tw-min-h-9 tw-items-center tw-gap-2">
-        <h3 id={`${id}-heading`} className="tw-m-0 tw-min-w-0 tw-flex-1">
+      <div className="tw-relative tw-mx-4 tw-flex tw-min-h-9 tw-items-center tw-gap-1.5">
+        <h3 id={`${id}-heading`} className="tw-m-0 tw-min-w-0">
           <button
             {...waveFeatureAttributes("sidebar_section", featureValue)}
             type="button"
@@ -59,31 +60,31 @@ function DiscoverySection({
               { section: label }
             )}
             onClick={onToggle}
-            className="tw-flex tw-min-h-9 tw-items-center tw-gap-2 tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-xs tw-font-medium tw-text-white before:tw-absolute before:tw-inset-0 before:tw-rounded-lg before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-primary-400"
+            className="tw-flex tw-min-h-9 tw-items-center tw-gap-2 tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-xs tw-font-medium tw-text-iron-100 before:tw-absolute before:tw-inset-0 before:tw-rounded-lg before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-primary-400"
           >
             <span>{label}</span>
             {count !== undefined && (
               <span
                 id={`${id}-count`}
-                className="tw-rounded-full tw-bg-primary-500/20 tw-px-1.5 tw-py-0.5 tw-text-primary-300"
+                className="tw-font-normal tw-tabular-nums tw-text-iron-500"
               >
                 {formatInteger(locale, count)}
               </span>
             )}
           </button>
         </h3>
+        <ChevronRightIcon
+          aria-hidden="true"
+          className={`tw-pointer-events-none tw-size-3.5 tw-shrink-0 tw-text-iron-600 tw-transition-transform tw-duration-200 tw-ease-[cubic-bezier(0.34,1.56,0.64,1)] motion-reduce:tw-transition-none ${collapsed ? "" : "tw-rotate-90"}`}
+        />
         <Link
           {...waveFeatureAttributes("sidebar_entry", `${featureValue}_all`)}
           href={viewAllHref}
           aria-label={viewAllLabel}
-          className="tw-relative tw-z-10 tw-inline-flex tw-min-h-8 tw-shrink-0 tw-items-center tw-rounded-md tw-text-[11px] tw-text-primary-300 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          className="tw-relative tw-z-10 tw-ml-auto tw-inline-flex tw-min-h-8 tw-shrink-0 tw-items-center tw-rounded-md tw-text-[11px] tw-text-iron-500 tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-200"
         >
           {t(locale, "waves.discovery.viewAll")}
         </Link>
-        <ChevronRightIcon
-          aria-hidden="true"
-          className={`tw-pointer-events-none tw-size-4 tw-shrink-0 tw-text-iron-400 tw-transition-transform tw-duration-200 tw-ease-[cubic-bezier(0.34,1.56,0.64,1)] motion-reduce:tw-transition-none ${collapsed ? "" : "tw-rotate-90"}`}
-        />
       </div>
       <div
         id={id}
@@ -101,10 +102,14 @@ function DiscoverySection({
 
 export function SidebarDiscovery({
   previewItems,
+  recommendationsStatus,
+  onRetryRecommendations,
   isTouchPreview,
   scoreDetailsDisabled = false,
 }: {
   readonly previewItems: readonly HighlyRatedWavePreviewItem[];
+  readonly recommendationsStatus: "pending" | "error" | "success";
+  readonly onRetryRecommendations: (() => void) | undefined;
   readonly isTouchPreview: boolean;
   readonly scoreDetailsDisabled?: boolean;
 }) {
@@ -139,24 +144,45 @@ export function SidebarDiscovery({
           setRecommendationsPreference(String(!recommendationsCollapsed))
         }
       >
-        <p className="tw-m-0 tw-mb-2 tw-text-[11px] tw-leading-4 tw-text-iron-400">
-          {t(
-            locale,
-            canUseCollections
-              ? "waves.discovery.recommendationsDescription"
-              : "waves.discovery.publicRecommendationsDescription"
-          )}
-        </p>
-        {previewItems.length > 0 ? (
-          <HighlyRatedWavesToggle
-            compactTouchPadding
-            isTouchPreview={isTouchPreview}
-            scoreDetailsDisabled={scoreDetailsDisabled}
-            paddingClassName="tw-px-0"
-            previewItems={[...previewItems]}
-          />
-        ) : (
-          <p className="tw-m-0 tw-py-2 tw-text-xs tw-text-iron-400">
+        {previewItems.length > 0 && (
+          <>
+            <p className="tw-m-0 tw-mb-2 tw-text-[11px] tw-leading-4 tw-text-iron-500">
+              {t(
+                locale,
+                canUseCollections
+                  ? "waves.discovery.recommendationsDescription"
+                  : "waves.discovery.publicRecommendationsDescription"
+              )}
+            </p>
+            <HighlyRatedWavesToggle
+              compactTouchPadding
+              isTouchPreview={isTouchPreview}
+              scoreDetailsDisabled={scoreDetailsDisabled}
+              paddingClassName="tw-px-0"
+              previewItems={[...previewItems]}
+            />
+          </>
+        )}
+        {previewItems.length === 0 && recommendationsStatus === "pending" && (
+          <SidebarRecommendationsSkeleton isTouchPreview={isTouchPreview} />
+        )}
+        {recommendationsStatus === "error" && (
+          <p
+            role="alert"
+            className="tw-m-0 tw-flex tw-min-h-12 tw-flex-wrap tw-items-center tw-gap-x-1 tw-py-2 tw-text-xs tw-leading-4 tw-text-iron-400"
+          >
+            <span>{t(locale, "waves.discovery.recommendationsError")}</span>
+            <button
+              type="button"
+              onClick={onRetryRecommendations}
+              className="tw-inline-flex tw-min-h-8 tw-items-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-leading-4 tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            >
+              {t(locale, "waves.discovery.retry")}
+            </button>
+          </p>
+        )}
+        {previewItems.length === 0 && recommendationsStatus === "success" && (
+          <p className="tw-m-0 tw-text-xs tw-leading-4 tw-text-iron-400">
             {t(locale, "waves.discovery.emptyRecommendations")}
           </p>
         )}
@@ -170,9 +196,6 @@ export function SidebarDiscovery({
         collapsed={activeCollapsed}
         onToggle={() => setActivePreference(String(!activeCollapsed))}
       >
-        <p className="tw-m-0 tw-mb-2 tw-text-[11px] tw-leading-4 tw-text-iron-400">
-          {t(locale, "waves.discovery.activeVotesDescription")}
-        </p>
         <SidebarActiveVotes
           votes={votes}
           collapsed={activeCollapsed}

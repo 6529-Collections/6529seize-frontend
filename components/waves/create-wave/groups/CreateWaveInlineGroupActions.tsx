@@ -4,7 +4,6 @@ import {
   PencilIcon,
   ShieldExclamationIcon,
   UserGroupIcon,
-  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -53,12 +52,29 @@ export default function CreateWaveInlineGroupActions({
       />
     );
     criteriaLabel = t(locale, "waves.create.groups.actions.editCriteria");
-  } else if (isCancel) {
-    criteriaIcon = (
-      <XMarkIcon aria-hidden="true" className="tw-size-3.5 tw-flex-shrink-0" />
-    );
-    criteriaLabel = t(locale, "waves.create.actions.cancel");
   }
+
+  if (
+    isCancel &&
+    !showChooseGroup &&
+    !(showMakeWavePublic && onMakeWavePublic) &&
+    !(showMatchWaveAccess && onMatchWaveAccess)
+  ) {
+    return null;
+  }
+
+  const criteriaAction = (
+    <ActionButton
+      icon={criteriaIcon}
+      label={criteriaLabel}
+      disabled={disabled || criteriaDisabled}
+      quiet={quiet}
+      compactVisual={quiet && !isWaveAccessEditor}
+      active={criteriaActive}
+      isToggle={true}
+      onClick={onReplaceCriteria}
+    />
+  );
 
   return (
     <div className="tw-flex tw-flex-wrap tw-gap-1.5 lg:tw-justify-end">
@@ -90,16 +106,7 @@ export default function CreateWaveInlineGroupActions({
           onClick={onMatchWaveAccess}
         />
       ) : null}
-      <ActionButton
-        icon={criteriaIcon}
-        label={criteriaLabel}
-        disabled={disabled || criteriaDisabled}
-        quiet={quiet}
-        compactVisual={quiet && !isWaveAccessEditor}
-        active={criteriaActive}
-        isToggle={true}
-        onClick={onReplaceCriteria}
-      />
+      {!isCancel && criteriaAction}
       {showChooseGroup ? (
         <ActionButton
           icon={

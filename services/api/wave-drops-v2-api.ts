@@ -203,6 +203,10 @@ const hydrateDropV2 = async ({
   const replyTo = mapReplyToDrop(drop);
 
   return {
+    collaborators: drop.collaborators ?? [],
+    ...(drop.submission_artist !== undefined
+      ? { submission_artist: drop.submission_artist }
+      : {}),
     id: drop.id,
     serial_no: drop.serial_no,
     drop_type: dropType,
@@ -234,6 +238,9 @@ const hydrateDropV2 = async ({
     is_signed: drop.is_signed,
     reactions: mapDropReactionCountersV2(drop),
     boosts: drop.boosts,
+    ...((drop.replies_count ?? 0) > 0
+      ? { replies_count: drop.replies_count }
+      : {}),
     is_additional_action_promised:
       drop.submission_context?.is_additional_action_promised ?? false,
     hide_link_preview: drop.hide_link_preview,
@@ -255,6 +262,10 @@ export const mapLeaderboardDropV2 = ({
   const replyTo = mapReplyToDrop(drop);
 
   return {
+    collaborators: drop.collaborators ?? [],
+    ...(drop.submission_artist !== undefined
+      ? { submission_artist: drop.submission_artist }
+      : {}),
     id: drop.id,
     serial_no: drop.serial_no,
     drop_type: dropType,

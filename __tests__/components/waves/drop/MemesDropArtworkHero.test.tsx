@@ -3,6 +3,22 @@ import type { ComponentProps } from "react";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { MemesDropArtworkHero } from "@/components/waves/drop/MemesDropArtworkHero";
 
+jest.mock("@/hooks/isMobileDevice", () => ({
+  useIsMobileDeviceStatus: () => ({
+    isMobileDevice: false,
+    isDeviceDetectionResolved: true,
+  }),
+}));
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: () => ({
+    isMobileDevice: false,
+    isApp: false,
+    isAppleMobile: false,
+    hasTouchScreen: false,
+  }),
+}));
+
 jest.mock(
   "@/components/drops/view/item/content/media/DropListItemContentMedia",
   () => ({

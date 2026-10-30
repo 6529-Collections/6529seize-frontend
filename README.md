@@ -64,8 +64,7 @@ Open a new shell, or activate the wrapper in the current shell:
 source <(./bin/6529 bootstrap --print-export)
 ```
 
-Dependencies, including `@6529-collections/release-request`, come from public
-npm. No package token or private-registry setup is required. Install the exact
+Dependencies come from public npm. No package token or private-registry setup is required. Install the exact
 lockfile through the existing secure wrapper:
 
 ```bash
@@ -235,3 +234,5 @@ policy, and safe handling of secrets or security-sensitive configuration.
 ## License
 
 This project is licensed under the [Apache License 2.0](LICENSE).
+
+Shared Memes calendar maintenance: [guide](shared/memes-calendar/README.md).

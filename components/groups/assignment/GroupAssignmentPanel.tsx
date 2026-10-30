@@ -1,7 +1,11 @@
 "use client";
 
 import type { ReactNode } from "react";
+import GroupCriteriaRulePanel from "@/components/groups/assignment/GroupCriteriaRulePanel";
 import { useState } from "react";
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import { ActionButton } from "@/components/waves/create-wave/groups/CreateWaveInlineGroupButtons";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
@@ -12,11 +16,7 @@ import CreateWaveInlineGroupHeader from "@/components/waves/create-wave/groups/C
 import CreateWaveInlineGroupIdentities from "@/components/waves/create-wave/groups/CreateWaveInlineGroupIdentities";
 import CreateWaveInlineGroupPrivacy from "@/components/waves/create-wave/groups/CreateWaveInlineGroupPrivacy";
 import CreateWaveInlineGroupRuleEditor from "@/components/waves/create-wave/groups/CreateWaveInlineGroupRuleEditor";
-import {
-  CreateWaveInlineGroupIdentityEditorPanel,
-  CreateWaveInlineGroupRuleEditorPanel,
-  CreateWaveInlineGroupRuleList,
-} from "@/components/waves/create-wave/groups/CreateWaveInlineGroupRules";
+import GroupCriteriaEditor from "./GroupCriteriaEditor";
 import CreateWaveInlineGroupSearch from "@/components/waves/create-wave/groups/CreateWaveInlineGroupSearch";
 import CreateWaveInlineGroupActions from "@/components/waves/create-wave/groups/CreateWaveInlineGroupActions";
 import {
@@ -30,11 +30,13 @@ import type { GroupMembersPreviewTarget } from "@/services/api/group-members-api
 type GroupAssignmentPanelStartMode = "actions" | "existing" | "criteria";
 
 type GroupAssignmentPanelProps = CreateWaveGroupInlinePanelProps & {
-  readonly presentation?: "default" | "quiet";
+  readonly presentation?: "default" | "quiet" | "embedded";
   readonly startMode?: GroupAssignmentPanelStartMode;
   readonly showChooseGroup?: boolean;
   readonly showPrivacyControl?: boolean;
   readonly isWaveAccessEditor?: boolean;
+  readonly mobileCriteriaNavigation?: boolean;
+  readonly simplifyCriteriaCopy?: boolean;
   readonly showMakeWavePublic?: boolean;
   readonly onMakeWavePublic?: (() => void) | undefined;
   readonly showMatchWaveAccess?: boolean;
@@ -101,11 +103,120 @@ interface GroupAssignmentPanelViewProps {
   readonly savedMembersPreview: ReactNode;
 }
 
+function GroupAssignmentCriteriaPanel({
+  disabled,
+  isWaveAccessEditor,
+  mobileNavigation,
+  simplifyCriteriaCopy,
+  panelState,
+}: {
+  readonly disabled: boolean;
+  readonly isWaveAccessEditor: boolean;
+  readonly mobileNavigation: boolean;
+  readonly simplifyCriteriaCopy: boolean;
+  readonly panelState: GroupAssignmentPanelState;
+}) {
+  const locale = useBrowserLocale();
+  // This view belongs to the current edit session, not the criteria draft.
+  const [showMobileCategories, setShowMobileCategories] = useState(true);
+  const {
+    addExcludedIdentity,
+    addIdentity,
+    displayedBuilder,
+    openRule,
+    removeExcludedIdentity,
+    removeIdentity,
+    setDraft,
+    togglePanel,
+    updateExcludedWalletSources,
+    updateIncludedWalletSources,
+  } = panelState;
+  const identityView =
+    displayedBuilder.panel === "identity" ? "identities" : null;
+  const desktopView =
+    displayedBuilder.panel === "rule-editor"
+      ? (displayedBuilder.activeRule ?? "identities")
+      : identityView;
+  const view = mobileNavigation && showMobileCategories ? null : desktopView;
+
+  return (
+    <GroupCriteriaEditor
+      draft={displayedBuilder.draft}
+      view={view}
+      mobileNavigation={mobileNavigation}
+      mobileActions={
+        mobileNavigation && isWaveAccessEditor ? (
+          <ActionButton
+            icon={
+              <XMarkIcon
+                aria-hidden="true"
+                className="tw-size-3.5 tw-flex-shrink-0"
+              />
+            }
+            label={t(locale, "waves.create.actions.cancel")}
+            disabled={disabled || !panelState.canReplaceCriteria}
+            active
+            onClick={panelState.onClearAll}
+          />
+        ) : undefined
+      }
+      onBack={
+        mobileNavigation ? () => setShowMobileCategories(true) : undefined
+      }
+      disabled={disabled}
+      onClose={isWaveAccessEditor ? undefined : panelState.returnToCriteria}
+      onViewChange={(next) => {
+        setShowMobileCategories(false);
+        if (next === "identities") togglePanel("identity", false);
+        else openRule(next);
+      }}
+    >
+      {view !== null &&
+        (view === "identities" ? (
+          <>
+            {mobileNavigation && (
+              <h3 className="tw-mb-4 tw-mt-0 tw-text-base tw-font-semibold tw-text-iron-100">
+                {t(locale, "waves.create.groups.identities")}
+              </h3>
+            )}
+            <CreateWaveInlineGroupIdentities
+              mobilePresentation={mobileNavigation}
+              simplifyIncludedCopy={simplifyCriteriaCopy}
+              showIdentityTotal={!simplifyCriteriaCopy}
+              includedIdentities={displayedBuilder.identities}
+              excludedIdentities={displayedBuilder.excludedIdentities}
+              includedWalletSources={displayedBuilder.includedWalletSources}
+              excludedWalletSources={displayedBuilder.excludedWalletSources}
+              onIncludedIdentitySelect={addIdentity}
+              onIncludedIdentityRemove={removeIdentity}
+              onExcludedIdentitySelect={addExcludedIdentity}
+              onExcludedIdentityRemove={removeExcludedIdentity}
+              onIncludedWalletSourcesChange={updateIncludedWalletSources}
+              onExcludedWalletSourcesChange={updateExcludedWalletSources}
+            />
+          </>
+        ) : (
+          <GroupCriteriaRulePanel mobilePresentation={mobileNavigation}>
+            <CreateWaveInlineGroupRuleEditor
+              networkPresentation
+              scrollResultsWithEditor={mobileNavigation}
+              draft={displayedBuilder.draft}
+              activeRule={view}
+              onDraftChange={setDraft}
+            />
+          </GroupCriteriaRulePanel>
+        ))}
+    </GroupCriteriaEditor>
+  );
+}
+
 function GroupAssignmentActivePanel({
   allowGroupClear,
   defaultLabel,
   disabled,
   isWaveAccessEditor,
+  mobileNavigation,
+  simplifyCriteriaCopy,
   panelState,
   quiet,
   selectedGroup,
@@ -114,109 +225,29 @@ function GroupAssignmentActivePanel({
   readonly defaultLabel: string;
   readonly disabled: boolean;
   readonly isWaveAccessEditor: boolean;
+  readonly mobileNavigation: boolean;
+  readonly simplifyCriteriaCopy: boolean;
   readonly panelState: GroupAssignmentPanelState;
   readonly quiet: boolean;
   readonly selectedGroup: ApiGroupFull | null;
 }) {
   const {
-    addExcludedIdentity,
-    addIdentity,
     displayedBuilder,
     hasUnsavedGroup,
     onCancelPanel,
-    onClearAll,
     onExistingGroupSelect,
-    openRule,
-    removeExcludedIdentity,
-    removeIdentity,
-    returnToCriteria,
-    setDraft,
-    togglePanel,
-    toggleRule,
-    updateExcludedWalletSources,
-    updateIncludedWalletSources,
   } = panelState;
-  const showEditorCancel = !isWaveAccessEditor && !quiet;
-  const onEditorClose =
-    quiet && !isWaveAccessEditor ? returnToCriteria : undefined;
-
-  if (displayedBuilder.panel === "identity") {
-    return (
-      <CreateWaveInlineGroupExpandedPanel
-        onCancel={returnToCriteria}
-        showCancel={showEditorCancel}
-        quiet={quiet}
-      >
-        <CreateWaveInlineGroupIdentityEditorPanel
-          draft={displayedBuilder.draft}
-          disabled={disabled}
-          quiet={quiet}
-          onIdentityToggle={returnToCriteria}
-          onRuleToggle={toggleRule}
-          onClose={onEditorClose}
-        >
-          <CreateWaveInlineGroupIdentities
-            includedIdentities={displayedBuilder.identities}
-            quiet={quiet}
-            excludedIdentities={displayedBuilder.excludedIdentities}
-            includedWalletSources={displayedBuilder.includedWalletSources}
-            excludedWalletSources={displayedBuilder.excludedWalletSources}
-            onIncludedIdentitySelect={addIdentity}
-            onIncludedIdentityRemove={removeIdentity}
-            onExcludedIdentitySelect={addExcludedIdentity}
-            onExcludedIdentityRemove={removeExcludedIdentity}
-            onIncludedWalletSourcesChange={updateIncludedWalletSources}
-            onExcludedWalletSourcesChange={updateExcludedWalletSources}
-          />
-        </CreateWaveInlineGroupIdentityEditorPanel>
-      </CreateWaveInlineGroupExpandedPanel>
-    );
-  }
-
-  if (displayedBuilder.panel === "rule-list") {
-    return (
-      <CreateWaveInlineGroupExpandedPanel
-        onCancel={onClearAll}
-        showCancel={false}
-        quiet={quiet}
-      >
-        <CreateWaveInlineGroupRuleList
-          draft={displayedBuilder.draft}
-          disabled={disabled}
-          quiet={quiet}
-          onIdentityOpen={() => togglePanel("identity", false)}
-          onRuleOpen={openRule}
-        />
-      </CreateWaveInlineGroupExpandedPanel>
-    );
-  }
-
   if (
-    displayedBuilder.panel === "rule-editor" &&
-    displayedBuilder.activeRule !== null
+    ["identity", "rule-list", "rule-editor"].includes(displayedBuilder.panel)
   ) {
     return (
-      <CreateWaveInlineGroupExpandedPanel
-        onCancel={returnToCriteria}
-        showCancel={showEditorCancel}
-        quiet={quiet}
-      >
-        <CreateWaveInlineGroupRuleEditorPanel
-          activeRule={displayedBuilder.activeRule}
-          draft={displayedBuilder.draft}
-          disabled={disabled}
-          quiet={quiet}
-          onIdentityToggle={() => togglePanel("identity", false)}
-          onRuleToggle={toggleRule}
-          onClose={onEditorClose}
-        >
-          <CreateWaveInlineGroupRuleEditor
-            draft={displayedBuilder.draft}
-            activeRule={displayedBuilder.activeRule}
-            onDraftChange={setDraft}
-          />
-        </CreateWaveInlineGroupRuleEditorPanel>
-      </CreateWaveInlineGroupExpandedPanel>
+      <GroupAssignmentCriteriaPanel
+        disabled={disabled}
+        isWaveAccessEditor={isWaveAccessEditor}
+        mobileNavigation={mobileNavigation}
+        simplifyCriteriaCopy={simplifyCriteriaCopy}
+        panelState={panelState}
+      />
     );
   }
 
@@ -246,16 +277,20 @@ function GroupAssignmentDraftFooter({
   disabled,
   draftMembersPreview,
   isWaveAccessEditor,
+  mobileNavigation,
   panelState,
   quiet,
   showPrivacyControl,
+  simplifyCriteriaCopy,
 }: {
   readonly disabled: boolean;
   readonly draftMembersPreview: ReactNode;
   readonly isWaveAccessEditor: boolean;
+  readonly mobileNavigation: boolean;
   readonly panelState: GroupAssignmentPanelState;
   readonly quiet: boolean;
   readonly showPrivacyControl: boolean;
+  readonly simplifyCriteriaCopy: boolean;
 }) {
   const {
     canCreateDraft,
@@ -290,6 +325,8 @@ function GroupAssignmentDraftFooter({
   return (
     <CreateWaveInlineGroupDraftSummary
       draftSummary={draftSummary}
+      simplifyCriteriaCopy={simplifyCriteriaCopy}
+      mobilePresentation={mobileNavigation}
       quiet={quiet}
       isValid={isDraftValid}
       canCreateDraft={canCreateDraft}
@@ -318,6 +355,8 @@ function SharedGroupAssignmentPanel({
     showChooseGroup = true,
     showPrivacyControl = true,
     isWaveAccessEditor = false,
+    mobileCriteriaNavigation = false,
+    simplifyCriteriaCopy = false,
     showMakeWavePublic = false,
     onMakeWavePublic,
     showMatchWaveAccess = false,
@@ -325,6 +364,10 @@ function SharedGroupAssignmentPanel({
     presentation = "default",
   } = panelProps;
   const quiet = presentation === "quiet";
+  const isDesktopViewport = useMediaQuery("(min-width: 1024px)");
+  const hasTouchPointer = useMediaQuery("(any-pointer: coarse)");
+  const mobileNavigation =
+    mobileCriteriaNavigation && (!isDesktopViewport || hasTouchPointer);
   const {
     canReplaceCriteria,
     currentGroupLabel,
@@ -338,50 +381,85 @@ function SharedGroupAssignmentPanel({
     unsavedGroupSummary,
   } = panelState;
 
+  const isEditingWaveAccess = isWaveAccessEditor && isCriteriaReplacementActive;
+  const showSummary =
+    !simplifyCriteriaCopy ||
+    !isCriteriaReplacementActive ||
+    selectedGroup !== null ||
+    savedMembersPreview !== null;
+  const showHeader =
+    showSummary ||
+    !isEditingWaveAccess ||
+    !mobileNavigation ||
+    showChooseGroup ||
+    (showMakeWavePublic && Boolean(onMakeWavePublic)) ||
+    (showMatchWaveAccess && Boolean(onMatchWaveAccess));
+
   return (
     <>
       <div
         ref={panelRef}
+        data-mobile-group-editor={
+          mobileNavigation && isEditingWaveAccess ? true : undefined
+        }
         className={
-          quiet
+          quiet || presentation === "embedded"
             ? "tw-relative tw-flex tw-min-w-0 tw-flex-col tw-gap-4"
-            : "tw-relative tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/60 tw-p-4 tw-shadow-none tw-transition-all tw-duration-300"
+            : "tw-relative tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-p-4 tw-shadow-none sm:tw-p-5"
         }
       >
         <div className="tw-relative tw-flex tw-flex-col tw-gap-4">
-          <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-4 lg:tw-flex-row lg:tw-items-start lg:tw-justify-between">
-            <CreateWaveInlineGroupHeader
-              currentGroupLabel={currentGroupLabel}
-              showCurrentGroupTitle={isCriteriaReplacementActive}
-              quiet={quiet}
-              unsavedGroupDescription={
-                showChooseGroup ? unsavedGroupDescription : null
-              }
-              unsavedGroupSummary={showChooseGroup ? unsavedGroupSummary : null}
-              membersPreview={savedMembersPreview}
-            />
-            <CreateWaveInlineGroupActions
-              disabled={disabled}
-              quiet={quiet}
-              criteriaDisabled={!canReplaceCriteria}
-              criteriaActive={isCriteriaReplacementActive}
-              searchActive={isSearchPanel}
-              showChooseGroup={showChooseGroup}
-              isWaveAccessEditor={isWaveAccessEditor}
-              showMakeWavePublic={showMakeWavePublic}
-              onMakeWavePublic={onMakeWavePublic}
-              showMatchWaveAccess={showMatchWaveAccess}
-              onMatchWaveAccess={onMatchWaveAccess}
-              onReplaceCriteria={
-                isCriteriaReplacementActive && isWaveAccessEditor
-                  ? onClearAll
-                  : onReplaceCriteria
-              }
-              onUseExistingGroup={() => togglePanel("search", isSearchPanel)}
-            />
-          </div>
+          {showHeader && (
+            <div
+              className={`tw-flex tw-min-w-0 tw-flex-col tw-gap-3 ${isEditingWaveAccess ? "tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-pb-4" : "lg:tw-flex-row lg:tw-items-start lg:tw-justify-between"}`}
+            >
+              <CreateWaveInlineGroupHeader
+                currentGroupLabel={currentGroupLabel}
+                showCurrentGroupTitle={
+                  isCriteriaReplacementActive && !simplifyCriteriaCopy
+                }
+                showSummary={showSummary}
+                quiet={quiet}
+                flat={isWaveAccessEditor}
+                onCancel={
+                  isEditingWaveAccess && !mobileNavigation
+                    ? onClearAll
+                    : undefined
+                }
+                disabled={disabled || !canReplaceCriteria}
+                unsavedGroupDescription={
+                  showChooseGroup ? unsavedGroupDescription : null
+                }
+                unsavedGroupSummary={
+                  showChooseGroup ? unsavedGroupSummary : null
+                }
+                membersPreview={savedMembersPreview}
+              />
+              <CreateWaveInlineGroupActions
+                disabled={disabled}
+                quiet={quiet}
+                criteriaDisabled={!canReplaceCriteria}
+                criteriaActive={isCriteriaReplacementActive}
+                searchActive={isSearchPanel}
+                showChooseGroup={showChooseGroup}
+                isWaveAccessEditor={isWaveAccessEditor}
+                showMakeWavePublic={showMakeWavePublic}
+                onMakeWavePublic={onMakeWavePublic}
+                showMatchWaveAccess={showMatchWaveAccess}
+                onMatchWaveAccess={onMatchWaveAccess}
+                onReplaceCriteria={
+                  isCriteriaReplacementActive && isWaveAccessEditor
+                    ? onClearAll
+                    : onReplaceCriteria
+                }
+                onUseExistingGroup={() => togglePanel("search", isSearchPanel)}
+              />
+            </div>
+          )}
 
           <GroupAssignmentActivePanel
+            mobileNavigation={mobileNavigation}
+            simplifyCriteriaCopy={simplifyCriteriaCopy}
             allowGroupClear={allowGroupClear}
             defaultLabel={defaultLabel}
             disabled={disabled}
@@ -391,12 +469,14 @@ function SharedGroupAssignmentPanel({
             selectedGroup={selectedGroup}
           />
           <GroupAssignmentDraftFooter
+            mobileNavigation={mobileNavigation}
             disabled={disabled}
             draftMembersPreview={draftMembersPreview}
             isWaveAccessEditor={isWaveAccessEditor}
             panelState={panelState}
             quiet={quiet}
             showPrivacyControl={showPrivacyControl}
+            simplifyCriteriaCopy={simplifyCriteriaCopy}
           />
         </div>
       </div>

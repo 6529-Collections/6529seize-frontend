@@ -6,6 +6,7 @@ import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { commonApiPost } from "@/services/api/common-api";
 import { CreateWaveStepStatus } from "@/types/waves.types";
+import { getWaveChatRepliesUpdate } from "@/helpers/waves/wave-chat-replies.helpers";
 
 export const getCreateWaveStepStatus = ({
   stepIndex,
@@ -90,7 +91,7 @@ export const convertWaveToUpdateWave = (
     signature_required: !!wave.voting.signature_required,
     ...getPeriodUpdate(wave.voting.period),
     ...getCreditNftsUpdate(wave),
-    forbid_negative_votes: wave.voting.forbid_negative_votes,
+    forbid_negative_votes: !!wave.voting.forbid_negative_votes,
   },
   visibility: {
     scope: {
@@ -104,6 +105,7 @@ export const convertWaveToUpdateWave = (
     enabled: wave.chat.enabled,
     links_disabled: wave.chat.links_disabled === true,
     ...getSlowModeUpdate(wave.chat.slow_mode_cooldown_ms),
+    ...getWaveChatRepliesUpdate(wave.chat),
   },
   participation: {
     scope: {

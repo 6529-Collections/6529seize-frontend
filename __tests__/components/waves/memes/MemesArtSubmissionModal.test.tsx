@@ -8,6 +8,7 @@ import {
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { fetchDropMetadataByIdV2 } from "@/services/api/wave-drops-v2-api";
@@ -17,7 +18,7 @@ jest.mock("@/services/api/wave-drops-v2-api", () => ({
 }));
 
 const mockContainer = jest.fn(
-  (_props: { readonly sourceDrop?: ExtendedDrop | undefined }) => (
+  (_props: { readonly sourceDrop?: ExtendedDrop | undefined; readonly wave: ApiWave }) => (
     <div data-testid="container" />
   )
 );
@@ -30,12 +31,17 @@ function render(ui: React.ReactElement) {
     <QueryClientProvider client={client}>{ui}</QueryClientProvider>
   );
 }
+const mockSubmissionTarget = jest.fn();
+jest.mock("@/hooks/competitions/useCompetitionSubmissionWave", () => ({
+  useCompetitionSubmissionWave: (wave: ApiWave, enabled: boolean) =>
+    mockSubmissionTarget(wave, enabled),
+}));
 
 jest.mock(
   "@/components/waves/memes/submission/MemesArtSubmissionContainer",
   () => ({
     __esModule: true,
-    default: (props: { readonly sourceDrop?: ExtendedDrop | undefined }) =>
+    default: (props: { readonly sourceDrop?: ExtendedDrop | undefined; readonly wave: ApiWave }) =>
       mockContainer(props),
   })
 );
@@ -44,6 +50,12 @@ describe("MemesArtSubmissionModal", () => {
   const wave = { id: "w", participation: { terms: "" } } as any;
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    mockSubmissionTarget.mockReturnValue({
+      wave,
+      pending: false,
+      retry: jest.fn(),
+    });
     mockContainer.mockClear();
     jest.mocked(fetchDropMetadataByIdV2).mockReset();
   });
@@ -95,6 +107,7 @@ describe("MemesArtSubmissionModal", () => {
       <MemesArtSubmissionModal isOpen={false} wave={wave} onClose={jest.fn()} />
     );
     expect(container.firstChild).toBeNull();
+    expect(mockSubmissionTarget).toHaveBeenCalledWith(wave, false);
   });
 
   it("does not call onClose on Escape when closed", () => {
@@ -155,5 +168,33 @@ describe("MemesArtSubmissionModal", () => {
     expect(panel).toHaveClass(
       "tw-max-h-[calc(100dvh-var(--native-keyboard-inset-bottom,0px))]"
     );
+  });
+
+  it("passes the resolved competition target to the submission container", () => {
+    const scopedWave = {
+      ...wave,
+      competition: { id: "selected", wave_id: wave.id },
+    };
+    mockSubmissionTarget.mockReturnValue({
+      wave: scopedWave,
+      pending: false,
+      retry: jest.fn(),
+    });
+    render(<MemesArtSubmissionModal isOpen wave={wave} onClose={jest.fn()} />);
+    expect(mockSubmissionTarget).toHaveBeenCalledWith(wave, true);
+    expect(mockContainer).toHaveBeenCalledWith(
+      expect.objectContaining({ wave: scopedWave })
+    );
+  });
+
+  it("keeps the loading state while the native target is unresolved", () => {
+    mockSubmissionTarget.mockReturnValue({
+      wave: null,
+      pending: true,
+      retry: jest.fn(),
+    });
+    render(<MemesArtSubmissionModal isOpen wave={wave} onClose={jest.fn()} />);
+    expect(mockContainer).not.toHaveBeenCalled();
+    expect(screen.getByRole("status")).toHaveTextContent("Loading");
   });
 });

@@ -27,7 +27,8 @@ Users can:
 - Open a wave thread and open the right sidebar.
 - Select `Configuration` to inspect or manage access.
 - In `Access`, select the gear on a row to open its group editor.
-- In `Curations`, use the section gear or a curation row gear.
+- In `Curations`, use the section plus button to create a curation, or a row
+  gear to manage an existing curation.
 - To view a curation, select its name in the
   [wave content tabs](../chat/feature-content-tabs.md) on desktop, mobile web,
   or the native app.
@@ -45,11 +46,14 @@ Users can:
      concise criteria summary, using `/network?page=1&group={groupId}`
 4. Follow a visible group link. Network shows the complete group criteria
    above the current filtered member list.
-5. Return with normal browser back navigation when finished inspecting.
+5. When opened from the mobile Wave information sheet, use `Back` in the app
+   header or browser Back to return to the same Wave, Configuration tab, and
+   scroll position. Network filters do not change that return destination.
+   Desktop sidebar links use normal browser back navigation.
 6. Editors can select a Configuration access-row gear to open the group editor
    directly. There is no intermediate action menu.
 7. The modal opens on `Identities` in the same criteria editor used during wave creation,
-   including the privacy row, configured criteria chips, matching
+   including the privacy row, configured criteria rows, matching
    `Before editing` and `After editing` summaries, and `Save changes`. Wave
    access editors do not offer `Choose group`. The
    selected row's rules, included and excluded identities, NFT requirements,
@@ -78,6 +82,11 @@ Users can:
 15. After success, the affected rows refresh.
 16. In `Curations`, administrators can create or delete curations, edit their
     name and group, and move them up or down.
+    On mobile and in the tablet overlay, create and edit use the existing
+    information panel at the same height. Group selection stays inside the form.
+    Back discards the draft and returns to Configuration; Close or a downward
+    header swipe dismisses the panel. Successful saves return to Configuration,
+    and failed saves keep the draft open. Desktop forms remain separate dialogs.
 
 ## Common Scenarios
 
@@ -128,7 +137,7 @@ Users can:
   validation applies.
 - Curation management is entirely hidden from viewers who cannot edit the wave.
 - Curation rows show an unavailable-group label when full group data is missing.
-- If no curations exist, administrators see the empty state and the create gear;
+- If no curations exist, administrators see the empty state and the create plus;
   other viewers see no `Curations` management section.
 - Identity suggestions start after at least 3 typed characters.
 - Identity selection supports `ArrowUp`, `ArrowDown`, and `Enter`.

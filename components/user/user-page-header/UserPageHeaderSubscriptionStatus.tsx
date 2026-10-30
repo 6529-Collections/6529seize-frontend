@@ -1,7 +1,5 @@
 "use client";
 
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import EthereumIcon from "@/components/user/utils/icons/EthereumIcon";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import { getProfileSubscriptionsHref } from "@/components/user/subscriptions/subscriptionNavigation";
@@ -16,7 +14,7 @@ import { useSubscriptionCoverage } from "@/components/user/subscriptions/coverag
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiSubscriptionCoverageStatus } from "@/generated/models/ApiSubscriptionCoverageStatus";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import useCapacitor from "@/hooks/useCapacitor";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -279,7 +277,7 @@ function SubscriptionSubtle({
           </span>
           <span
             className={clsx(
-              "tw-inline-flex tw-flex-none tw-items-center tw-gap-1 tw-text-xs tw-font-medium tw-transition-colors",
+              "tw-inline-flex tw-flex-none tw-items-center tw-gap-1 tw-text-meta tw-font-medium tw-leading-4 tw-transition-colors",
               isUrgentTopUp
                 ? "group-focus-visible:tw-text-primary-200 desktop-hover:group-hover:tw-text-primary-200 tw-text-primary-300"
                 : "tw-text-iron-500 group-focus-visible:tw-text-white desktop-hover:group-hover:tw-text-white"
@@ -302,19 +300,16 @@ export default function UserPageHeaderSubscriptionStatus({
   layout?: SubscriptionStatusLayout;
 }>) {
   const locale = useBrowserLocale();
-  const { country } = useCookieConsent();
-  const { isIos } = useCapacitor();
-  const hideSubscriptions = shouldHideSubscriptions({
-    capacitorIsIos: isIos,
-    country,
-  });
+  // Omitted from the server HTML and the first hydration render, and on iOS
+  // until the country check allows purchasing, so no request starts earlier.
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const profileKey = profile.consolidation_key.trim();
   const profileHref = getProfileSubscriptionsHref(profile);
   const coverageQuery = useSubscriptionCoverage({
-    enabled: !hideSubscriptions,
+    enabled: !hideNftPurchasing,
     profileKey,
   });
-  if (hideSubscriptions || !profileKey || !profileHref) {
+  if (hideNftPurchasing || !profileKey || !profileHref) {
     return null;
   }
 

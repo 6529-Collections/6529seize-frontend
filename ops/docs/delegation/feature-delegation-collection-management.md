@@ -2,17 +2,17 @@
 
 ## Overview
 
-`/delegation/<collection>` routes let a connected wallet review and manage
+`/safe-collecting/<collection>` routes let a connected wallet review and manage
 delegations for one collection scope.
 
 ## Location in the Site
 
-- `/delegation/any-collection`
-- `/delegation/the-memes`
-- `/delegation/meme-lab`
-- `/delegation/6529-gradient`
+- `/safe-collecting/any-collection`
+- `/safe-collecting/the-memes`
+- `/safe-collecting/meme-lab`
+- `/safe-collecting/6529-gradient`
 - Delegation Center entry: `Manage by Collection` cards on
-  `/delegation/delegation-center`
+  `/safe-collecting`
 
 ## Entry Points
 
@@ -40,11 +40,21 @@ delegations for one collection scope.
 - Review row details:
   - wallet label (ENS + address when ENS resolves)
   - token scope (`all tokens` or `token ID`)
-  - expiry (`active - non-expiring`, `active - expires YYYY-MM-DD`, `expired`)
+  - expiry (`active - non-expiring`, `active - expires <date, time and time
+    zone>` in your local time, `expired`)
 - For consolidations, check status:
   - `consolidation active`
   - `consolidation incomplete` with tooltip (`Incoming consolidation missing` or
     `Outgoing consolidation missing`)
+- Row status covers one pair of wallets. A consolidation group has up to 4
+  wallets and counts only when every pair in it is linked in both directions;
+  a fourth wallet counts only for links registered on or after
+  the activation cutoff supplied by this environment’s settings. When links conflict, the newest confirmed link wins.
+- 6529 ignores expiry for consolidations, so consolidation links do not expire.
+- To remove a wallet from a group while it still has its key, connect that
+  wallet, open the collection route where its links were registered, select its
+  outgoing consolidation rows to the other members, and use `Batch Revoke` to
+  revoke them in one transaction.
 - Revoke multiple stale outgoing rows at once with `Batch Revoke`.
 - Use outgoing `Edit` to open an inline update form:
   - standard delegations: update `New Delegate Address`, optional `Expiry Date`,
@@ -78,7 +88,7 @@ delegations for one collection scope.
 - If current collection wallet is locked, use-case controls are disabled until
   wallet unlock.
 - On scoped routes, global `Any Collection` wallet lock blocks local lock
-  controls and shows `*` notes linked to `/delegation/any-collection`.
+  controls and shows `*` notes linked to `/safe-collecting/any-collection`.
 - On scoped routes, if a use case is globally locked in `Any Collection`, local
   lock/unlock is replaced by an `Unlock use case in All Collections` note.
 
@@ -97,7 +107,7 @@ delegations for one collection scope.
 - If manager action clicks appear to do nothing, select one incoming
   `Delegation Managers` row first.
 - If `Batch Revoke` is disabled, select at least 2 outgoing rows.
-- If lock controls show `*` notes, unlock from `/delegation/any-collection`
+- If lock controls show `*` notes, unlock from `/safe-collecting/any-collection`
   first.
 - If a write fails, use toast error text, fix wallet/network/input state, and
   retry.
@@ -105,7 +115,9 @@ delegations for one collection scope.
 ## Limitations / Notes
 
 - Data is wallet/account specific.
-- Reads poll every 10 seconds; updates are not pushed in real time.
+- Reads load once and refresh when you return to the tab. After a write
+  confirms, they re-check every few seconds for about 30 seconds, then stop;
+  updates are not pushed in real time.
 - Field-level write form requirements are documented in
   [Delegation Write Action Routes](feature-delegation-action-flows.md).
 

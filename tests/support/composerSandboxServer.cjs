@@ -89,6 +89,7 @@ const CREATED_AT = 1713744000000;
 const PREVIEW_URL = "https://example.com/6529-composer-preview";
 const publicScope = { group: null };
 const requests = [];
+let publicWavePreviewReads = 0;
 // Keep created groups for the lifetime of the local sandbox process so saved
 // wave drafts remain resolvable after the request log is reset between tests.
 let sandboxDropReaction = null;
@@ -111,7 +112,7 @@ function buildSyntheticJwt() {
       sub: SANDBOX_WALLET.toLowerCase(),
       iat: 1760000000,
       exp: 2000000000,
-      role: "",
+      role: null,
     }),
     "",
   ].join(".");
@@ -133,6 +134,10 @@ const localProfile = {
   query: SANDBOX_HANDLE,
   handle: SANDBOX_HANDLE,
   normalised_handle: SANDBOX_HANDLE,
+  consolidation_key: "",
+  display: SANDBOX_HANDLE,
+  banner1: null,
+  banner2: null,
   pfp: null,
   banner1_color: null,
   banner2_color: null,
@@ -951,7 +956,7 @@ function corsHeaders() {
     "Access-Control-Allow-Credentials": "true",
     "Access-Control-Expose-Headers": "Retry-After",
     "Access-Control-Allow-Headers":
-      "authorization, content-type, x-6529-auth, x-api-key",
+      "authorization, content-type, idempotency-key, x-6529-auth, x-api-key",
     "Access-Control-Allow-Methods":
       "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS",
     "Access-Control-Max-Age": "600",
@@ -1851,6 +1856,19 @@ function isExpectedCreateWaveConfig(wave) {
   );
 }
 
+function isExpectedCreateWaveHubBody(body) {
+  if (!isPlainObject(body) || !hasOnlyAllowedKeys(body, ["idempotency_key", "name", "picture", "description_drop", "visibility", "chat", "admin_group", "admin_drop_deletion_enabled"], ["parent_wave_id"])) return false;
+  const description = body.description_drop?.parts?.[0]?.content;
+  return typeof body.idempotency_key === "string" && /^[0-9a-f-]{36}$/i.test(body.idempotency_key) &&
+    typeof body.name === "string" && body.name.startsWith("Sandbox ") && body.name.length <= 250 &&
+    body.picture === null && typeof description === "string" && description.length <= 100000 &&
+    isExpectedDescriptionDrop(body.description_drop, description) &&
+    hasKnownSandboxGroupScope(body.visibility) && isExpectedCreateWaveChatConfig(body.chat) &&
+    hasOnlyKeys(body.admin_group, ["group_id"]) && isKnownSandboxGroupId(body.admin_group.group_id) &&
+    typeof body.admin_drop_deletion_enabled === "boolean" &&
+    (body.parent_wave_id === undefined || body.parent_wave_id === SANDBOX_WAVE_ID);
+}
+
 function isExpectedResumedDraftChatWaveBody(body) {
   if (
     !hasOnlyKeys(body, [
@@ -2244,6 +2262,8 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
     return isExpectedPublishAdminGroupBody(body);
   }
 
+  if (pathname === "/api/v3/waves") return isExpectedCreateWaveHubBody(body);
+
   if (pathname === "/api/waves") {
     return (
       isExpectedCreateWaveBody(body) ||
@@ -2430,15 +2450,16 @@ function loggedRequestBody(pathname, body) {
     };
   }
 
-  if (pathname === "/api/waves") {
+  if (pathname === "/api/waves" || pathname === "/api/v3/waves") {
+    const nativeHub = pathname === "/api/v3/waves";
     const firstPart = Array.isArray(body.description_drop?.parts)
       ? body.description_drop.parts[0]
       : null;
     return {
       name: typeof body.name === "string" ? body.name : null,
-      admin_group_id: body.wave?.admin_group?.group_id ?? null,
+      admin_group_id: body.admin_group?.group_id ?? body.wave?.admin_group?.group_id ?? null,
       description: isPlainObject(firstPart) ? firstPart.content : null,
-      wave_type: body.wave?.type ?? null,
+      wave_type: nativeHub ? "CHAT" : body.wave?.type ?? null,
       decisions_strategy: body.wave?.decisions_strategy ?? null,
       voting_period_max: body.voting?.period?.max ?? null,
       participation_period_max: body.participation?.period?.max ?? null,
@@ -2467,6 +2488,15 @@ function loggedRequestBody(pathname, body) {
 
 function recordRequest(method, url, body) {
   const pathname = normalizedPath(url);
+  // The anonymous HTML preview asks for 10 + 1 drops; the streamed feed seed
+  // separately asks for 50 + 1 and must keep loading during client navigation.
+  if (
+    method === "GET" &&
+    pathname === `/api/v2/waves/${SANDBOX_WAVE_ID}/drops` &&
+    url.searchParams.get("limit") === "11"
+  ) {
+    publicWavePreviewReads += 1;
+  }
   if (pathname.startsWith("/__composer-sandbox")) {
     return undefined;
   }
@@ -2489,12 +2519,20 @@ function requestLog() {
 }
 
 function handleDiagnostics(method, pathname, res) {
+  if (
+    pathname === "/__composer-sandbox/public-preview" &&
+    isSafeReadMethod(method)
+  ) {
+    writeJson(res, 200, { reads: publicWavePreviewReads });
+    return true;
+  }
   if (pathname === "/__composer-sandbox/requests" && isSafeReadMethod(method)) {
     writeJson(res, 200, { requests: requestLog() });
     return true;
   }
   if (pathname === "/__composer-sandbox/reset" && method === "POST") {
     requests.length = 0;
+    publicWavePreviewReads = 0;
     sandboxDropReaction = null;
     sandboxWaveGuidelinesEnabled = false;
     sandboxCreatedWaveType = "CHAT";
@@ -2534,6 +2572,14 @@ const mockApiExactReadRoutes = new Map([
     () => ({ data: [localWaveOverview], page: 1, next: false }),
   ],
   ["/api/v2/official-waves", () => [localWaveOverview]],
+  [
+    "/api/v2/waves/joined",
+    () => ({
+      data: [],
+      next_cursor: null,
+      snapshot_expires_at: Date.now() + 900000,
+    }),
+  ],
   [
     `/api/v2/waves/${SANDBOX_WAVE_ID}/metadata`,
     () =>
@@ -2583,10 +2629,49 @@ const mockApiExactReadRoutes = new Map([
   ["/api/v2/boosted-drops", () => emptyPage()],
   ["/api/v2/drops", () => emptyPage()],
   ["/api/mention-aliases", () => []],
+  ["/api/content-moderation/blocked-profiles", () => []],
   ["/api/feed", () => []],
 ]);
 
 const mockApiPatternReadRoutes = [
+  // Current sandbox artworks have no managed collaboration record.
+  {
+    pattern: /^\/api\/drops\/[^/]+\/collaborations$/,
+    response: () => ({
+      managed: false,
+      closed: false,
+      artwork_hash: "",
+      terms_version: "",
+      acceptance_copy: "",
+      terms: null,
+      collaborators: [],
+      invitations: [],
+    }),
+  },
+  {
+    pattern: /^\/api\/profiles\/[^/]+\/(rep|cic)\/overview$/,
+    response: () => ({
+      total_rep: 0,
+      total_cic: 0,
+      authenticated_user_contribution: null,
+      contributor_count: 0,
+      contributors: emptyPage(),
+    }),
+  },
+  { pattern: /^\/api\/profiles\/[^/]+\/cic\/statements$/, response: () => [] },
+  {
+    pattern: /^\/api\/identities\/following-artist-0$/,
+    response: () => ({
+      ...localProfile,
+      id: "following-0",
+      handle: "following-artist-0",
+      normalised_handle: "following-artist-0",
+      query: "following-artist-0",
+      wallets: [],
+      primary_wallet: "0x0000000000000000000000000000000000000001",
+      primary_address: "0x0000000000000000000000000000000000000001",
+    }),
+  },
   { pattern: /^\/api\/waves\/[^/]+$/, response: () => localWave },
   {
     pattern: /^\/api\/v2\/waves\/[^/]+\/drops$/,
@@ -2755,6 +2840,13 @@ const mockApiKnownPostRoutes = [
       const publishedGroup = { ...group, visible: true };
       sandboxRuleGroups.set(groupId, publishedGroup);
       return writeJsonResponse(res, publishedGroup);
+    },
+  },
+  {
+    matches: (pathname) => pathname === "/api/v3/waves",
+    respond: (res, body) => {
+      sandboxCreatedWaveType = "CHAT";
+      return writeJsonResponse(res, { id: SANDBOX_CREATED_WAVE_ID, name: body.name, picture: body.picture, legacy_primary_competition_id: null, permissions: { view: true, administer: true, create_competition: true } });
     },
   },
   {
@@ -3034,8 +3126,6 @@ function buildPublicRuntime() {
       process.env.IPFS_GATEWAY_ENDPOINT || "https://ipfs.6529.io/ipfs/",
     MEDIA_RESOLVER_ENDPOINT:
       process.env.MEDIA_RESOLVER_ENDPOINT || "https://media.6529.io",
-    NEXT_PUBLIC_FEATURE_MULTI_COMPETITION:
-      process.env.NEXT_PUBLIC_FEATURE_MULTI_COMPETITION || "false",
     NODE_ENV: "development",
     PORT: String(frontendPort),
     WS_ENDPOINT: mockWsOrigin,

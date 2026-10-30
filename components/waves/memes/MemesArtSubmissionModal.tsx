@@ -1,5 +1,7 @@
 "use client";
 
+import { useCompetitionSubmissionWave } from "@/hooks/competitions/useCompetitionSubmissionWave";
+import { CompetitionState } from "@/components/competitions/CompetitionState";
 import {
   Dialog,
   DialogBackdrop,
@@ -42,6 +44,7 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
     () => (sourceDrop && metadata ? { ...sourceDrop, metadata } : undefined),
     [sourceDrop, metadata]
   );
+  const target = useCompetitionSubmissionWave(wave, isOpen);
   const dialogTitle = sourceDrop
     ? "Resubmit Work to The Memes"
     : "Submit Work to The Memes";
@@ -94,14 +97,14 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
             >
               <DialogTitle className="tw-sr-only">{dialogTitle}</DialogTitle>
               <div className="tw-flex tw-h-full tw-flex-col tw-overflow-hidden">
-                <span
+                {sourceDrop && <span
                   role="status"
                   aria-live="polite"
                   aria-atomic="true"
                   className="tw-sr-only"
                 >
                   {sourceDrop ? t(locale, metadataMessageKey) : ""}
-                </span>
+                </span>}
                 {sourceDrop && metadataState.status !== "ready" ? (
                   <div className="tw-space-y-4 tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-iron-100">
                     <p className="tw-m-0">{t(locale, metadataMessageKey)}</p>
@@ -122,12 +125,17 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
                       {t(locale, "singleDrop.close")}
                     </button>
                   </div>
-                ) : (
+                ) : target.wave ? (
                   <MemesArtSubmissionContainer
                     onClose={onClose}
-                    wave={wave}
+                    wave={target.wave}
                     sourceDrop={hydratedSourceDrop}
                     onSourceDropDeleted={onSourceDropDeleted}
+                  />
+                ) : (
+                  <CompetitionState
+                    error={!target.pending}
+                    retry={target.retry}
                   />
                 )}
               </div>

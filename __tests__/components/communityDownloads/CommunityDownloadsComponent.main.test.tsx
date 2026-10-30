@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import CommunityDownloadsComponent from "@/components/community-downloads/CommunityDownloadsComponent";
 import { fetchUrl } from "@/services/6529api";
 import { renderWithQueryClient } from "../../utils/reactQuery";
+import { withHostTimeZone } from "../../utils/timeZoneHarness";
 
 jest.mock("@/services/6529api");
 
@@ -40,6 +41,42 @@ describe("CommunityDownloadsComponent", () => {
     expect(
       await screen.findByText("https://testA.6529.io")
     ).toBeInTheDocument();
+  });
+
+  it("shows each feed's calendar-day dates as that day in a western browser", async () => {
+    mockFetch.mockResolvedValue({
+      count: 3,
+      data: [
+        // TDH and consolidated uploads
+        { date: "20261012", url: "https://tdh.example" },
+        // Royalties: a day stamped as UTC midnight
+        { date: "2026-10-11T00:00:00.000Z", url: "https://royalties.example" },
+        // Rememes: a real upload instant (02:03 UTC is still the 11th in Los Angeles)
+        { date: "2026-10-12T02:03:14.446Z", url: "https://rememes.example" },
+      ],
+    });
+
+    await withHostTimeZone("America/Los_Angeles", async () => {
+      renderWithQueryClient(
+        <CommunityDownloadsComponent
+          title="T"
+          url="https://test.6529.io/data"
+        />
+      );
+      await screen.findByText("https://tdh.example");
+
+      const rowFor = (url: string) =>
+        screen.getByText(url).closest("tr") as HTMLElement;
+      expect(rowFor("https://tdh.example")).toHaveTextContent(
+        "Mon, Oct 12, 2026"
+      );
+      expect(rowFor("https://royalties.example")).toHaveTextContent(
+        "Sun, Oct 11, 2026"
+      );
+      expect(rowFor("https://rememes.example")).toHaveTextContent(
+        "Sun, Oct 11, 2026"
+      );
+    });
   });
 
   it("shows no results when empty", async () => {

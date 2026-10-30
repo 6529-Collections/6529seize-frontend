@@ -62,6 +62,18 @@ locales.
   helper supports it.
 - Keep fallback debt visible in the page or workstream tracker.
 
+### Dictionary Loading
+
+- `en-US` ships in every client bundle. Browsers load each other locale's
+  dictionary on demand through `@/i18n/localeDictionaries`; server rendering
+  has every locale synchronously.
+- Read copy only through `t()` and `tRich()` from `@/i18n/messages`. Do not
+  import a locale dictionary such as `@/i18n/messages/de-DE` from app code:
+  that puts it back in the client baseline.
+- Until a locale's dictionary loads, `t()` returns `en-US` copy, never a key.
+  `useBrowserLocale` switches only after the dictionary arrives, and pages
+  opened with `?locale=` wait for it before hydrating.
+
 ## Formatting Policy
 
 Use native `Intl` through repo helpers before adding a larger i18n dependency.
@@ -75,6 +87,24 @@ Helpers should cover:
 
 Do not use `toLocaleString()` directly in newly touched UI when a repo helper is
 available.
+
+### Dates And Time Zones
+
+- Use IANA zones through `Intl`. Do not hard-code UTC offsets or DST rules.
+- Keep instants in UTC. Serialize with `toISOString()`.
+- A date-only value ("YYYY-MM-DD") is a calendar date, not an instant. Format it
+  with `formatDate` from `@/i18n/format`: it prints the same day in every zone
+  and ignores any `timeZone` option. Never build a `Date` from it and format
+  that in the viewer's zone, which shows the previous day west of UTC.
+- Format an instant with an explicit `timeZone` whenever the meaning needs one:
+  a UTC-published day (`formatUtcDate`), a labelled UTC time, or a named zone.
+  Server Components must always do so, because the server's zone is not the
+  viewer's and can differ between environments.
+- Without an explicit zone, an instant renders in the viewer's zone. Render that
+  only on the client after mount, or accept it on routes that are never
+  prefetched on the server.
+- Test zone-sensitive code in several zones; see
+  [CONTRIBUTING.md](../../CONTRIBUTING.md#time-zones-in-tests).
 
 ## Verification
 

@@ -331,6 +331,18 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.build.required).toBe(false);
   });
 
+  it.each([
+    "components/user/following/UserPageFollowing.tsx",
+    "hooks/useFollowingList.ts",
+  ])(
+    "selects the Following browser lane for isolated runtime changes to %s",
+    (file) => {
+      const plan = createCiPlan([file]);
+      expect(plan.risk.computed_floor).toBe(3);
+      expect(plan.checks["playwright_critical_shell"]?.required).toBe(true);
+    }
+  );
+
   it("routes guarded or build-sensitive changes through build and workflow review", () => {
     const plan = createCiPlan([
       ".github/workflows/app-pr-ci.yml",
@@ -597,7 +609,7 @@ describe("testing strategy CI plan", () => {
           needs?: string | string[];
           strategy?: { matrix?: string };
           "runs-on"?: string;
-          "timeout-minutes"?: number;
+          "timeout-minutes"?: number | string;
           container?: { image?: string; options?: string };
           defaults?: { run?: { shell?: string } };
           steps?: Array<{
@@ -641,7 +653,8 @@ describe("testing strategy CI plan", () => {
     expect(parsed.jobs["core-playwright-checks"]).toMatchObject({
       if: "needs.plan.outputs.core_playwright_required == 'true' && github.event.pull_request.head.repo.full_name == github.repository",
       "runs-on": "${{ matrix.runner }}",
-      "timeout-minutes": 20,
+      "timeout-minutes":
+        "${{ matrix.lane == 'playwright-native-competition' && 30 || 20 }}",
       container: {
         image:
           "mcr.microsoft.com/playwright:v1.61.1-noble@sha256:5b8f294aff9041b7191c34a4bab3ac270157a28774d4b0660e9743297b697e48",
@@ -778,10 +791,10 @@ describe("testing strategy CI plan", () => {
     expect(workflow).toContain("Restore Playwright browser");
     expect(workflow).toContain("node22-pr-production-nextjs");
 
-    // PR lanes retry quickly; deployed E2E allows slow downloads and waits for
-    // a timed-out apt-get before retrying.
+    // Both PR Museum lanes and deployed E2E allow slow package downloads and
+    // wait for a timed-out apt-get before retrying.
     for (const [source, installMinutes, retryMinutes] of [
-      [workflow, 3, 3],
+      [workflow, 10, 15],
       [stagingWorkflow, 10, 15],
       [productionWorkflow, 10, 15],
     ] as const) {

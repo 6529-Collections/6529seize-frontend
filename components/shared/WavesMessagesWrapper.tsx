@@ -1,11 +1,12 @@
 "use client";
+import { closeDropInCurrentUrl } from "@/helpers/waves/close-drop.helpers";
 import { useWaveInformation } from "@/contexts/WaveInformationContext";
 import { useWaveById } from "@/hooks/useWaveById";
 import WaveInformationSheet from "@/components/brain/mobile/WaveInformationSheet";
 
 import useCreateModalState from "@/hooks/useCreateModalState";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { createBreakpoint } from "react-use";
@@ -15,6 +16,7 @@ import { DropSize } from "../../helpers/waves/drop.helpers";
 import { useSidebarState } from "../../hooks/useSidebarState";
 import { useAuth } from "../auth/Auth";
 import BrainDesktopDrop from "../brain/BrainDesktopDrop";
+import SingleWaveDropLoading from "@/components/waves/drop/SingleWaveDropLoading";
 import WebBrainLeftSidebar from "../brain/left-sidebar/web/WebLeftSidebar";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import BrainRightSidebar, {
@@ -23,6 +25,7 @@ import BrainRightSidebar, {
 import CreateWaveModal from "../waves/create-wave/CreateWaveModal";
 import { isCreateWavePathname } from "@/helpers/waves/create-wave-route.helpers";
 import { WaveChatScrollProvider } from "@/contexts/wave/WaveChatScrollContext";
+import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
 import {
   DROP_DETAIL_STALE_TIME_MS,
@@ -60,6 +63,16 @@ function getValidDropId(rawDropId: string | null): string | undefined {
     : undefined;
 }
 
+function getChatLayoutTransition(
+  prefersReducedMotion: boolean | null,
+  isInlineRightOpen: boolean
+): Transition {
+  if (prefersReducedMotion) return { duration: 0 };
+  return isInlineRightOpen
+    ? BRAIN_RIGHT_SIDEBAR_ENTER_TRANSITION
+    : BRAIN_RIGHT_SIDEBAR_EXIT_TRANSITION;
+}
+
 const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   children,
   defaultPath = "/waves",
@@ -67,7 +80,6 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
 }) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const router = useRouter();
   const breakpoint = useBreakpoint();
   const prefersReducedMotion = useReducedMotion();
 
@@ -80,6 +92,18 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   const information = useWaveInformation();
   const { connectedProfile } = useAuth();
   const { isWaveModalOpen, close } = useCreateModalState();
+  const requestMainWavesList = useMyStreamOptional()?.requestMainWavesList;
+  const isWavesSurface = defaultPath === "/waves";
+
+  // Waves pages read the main list even when the sidebar is hidden (mobile
+  // web wave view), so the layout requests it. Messages pages show DMs only.
+  useEffect(() => {
+    if (!isWavesSurface) {
+      return;
+    }
+
+    return requestMainWavesList?.();
+  }, [isWavesSurface, requestMainWavesList]);
 
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
 
@@ -117,7 +141,12 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
     }
   }, [waveId, isRightSidebarOpen, closeRightSidebar]);
 
-  const { data: drop, error: dropError } = useQuery<ApiDrop>({
+  const {
+    data: drop,
+    error: dropError,
+    refetch: refetchDrop,
+    isFetching: isDropFetching,
+  } = useQuery<ApiDrop>({
     queryKey: getDropQueryKey(effectiveDropId),
     queryFn: () => {
       if (!effectiveDropId) {
@@ -135,13 +164,8 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
     if (dropId) {
       beginClosingDrop(dropId);
     }
-    const params = new URLSearchParams(searchParams.toString() || "");
-    params.delete("drop");
-    const newUrl = params.toString()
-      ? `${pathname}?${params.toString()}`
-      : pathname || defaultPath;
-    router.replace(newUrl, { scroll: false });
-  }, [dropId, beginClosingDrop, searchParams, pathname, defaultPath, router]);
+    closeDropInCurrentUrl();
+  }, [dropId, beginClosingDrop]);
 
   const isDropOpen = useMemo(
     () =>
@@ -168,20 +192,17 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   const shouldShowLeftSidebar =
     showLeftSidebar && (!isMobile || (!hasWave && !canShowMainContent));
   const shouldShowMainContent = canShowMainContent;
-  const shouldShowDropOverlay =
-    isDropOpen && drop !== undefined && shouldShowMainContent;
+  const shouldShowDropOverlay = !!effectiveDropId && shouldShowMainContent;
   const shouldShowRightSidebar = Boolean(
-    isRightSidebarOpen && waveId && !isDropOpen
+    isRightSidebarOpen && waveId && !effectiveDropId
   );
   const canInlineRight = !isMobile && (isLargeDesktop || breakpoint === "LG");
   const rightVariant = canInlineRight ? "inline" : "overlay";
   const isInlineRightOpen = shouldShowRightSidebar && rightVariant === "inline";
-  let chatLayoutTransition: Transition = { duration: 0 };
-  if (!prefersReducedMotion) {
-    chatLayoutTransition = isInlineRightOpen
-      ? BRAIN_RIGHT_SIDEBAR_ENTER_TRANSITION
-      : BRAIN_RIGHT_SIDEBAR_EXIT_TRANSITION;
-  }
+  const chatLayoutTransition = getChatLayoutTransition(
+    prefersReducedMotion,
+    isInlineRightOpen
+  );
 
   // Handle error state for drop loading
   if (dropError && effectiveDropId) {
@@ -211,20 +232,36 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
                     transition={{ layout: chatLayoutTransition }}
                     className="tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-grow tw-flex-col tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-will-change-transform"
                   >
-                    {children}
+                    <div
+                      className="tw-flex tw-h-full tw-min-h-0 tw-flex-1 tw-flex-col"
+                      aria-hidden={shouldShowDropOverlay}
+                      inert={shouldShowDropOverlay ? true : undefined}
+                    >
+                      {children}
+                    </div>
                   </m.div>
                 )}
                 {shouldShowDropOverlay && (
                   <div className="tw-fixed tw-inset-y-0 tw-left-[var(--left-rail,0px)] tw-right-0 tw-z-[1010] lg:tw-absolute lg:tw-inset-0 lg:tw-z-[1010]">
-                    <BrainDesktopDrop
-                      drop={{
-                        type: DropSize.FULL,
-                        ...drop,
-                        stableKey: drop.id,
-                        stableHash: drop.id,
-                      }}
-                      onClose={onDropClose}
-                    />
+                    {isDropOpen && drop ? (
+                      <BrainDesktopDrop
+                        drop={{
+                          type: DropSize.FULL,
+                          ...drop,
+                          stableKey: drop.id,
+                          stableHash: drop.id,
+                        }}
+                        onClose={onDropClose}
+                      />
+                    ) : (
+                      <SingleWaveDropLoading
+                        onClose={onDropClose}
+                        isError={!!dropError && !isDropFetching}
+                        onRetry={() => {
+                          void refetchDrop();
+                        }}
+                      />
+                    )}
                   </div>
                 )}
                 <BrainRightSidebar

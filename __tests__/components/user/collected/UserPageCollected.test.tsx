@@ -3,7 +3,7 @@ import UserPageCollected from "@/components/user/collected/UserPageCollected";
 import { CollectedCollectionType, CollectionSort } from "@/entities/IProfile";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   useParams,
@@ -73,7 +73,13 @@ const mockUserPageCollectedCards = jest.fn((props: any) => (
     data-show-data-row={props.showDataRow}
     data-locale={props.locale}
     data-return-to={props.returnTo}
-  />
+  >
+    <ul aria-label="Collected cards" tabIndex={-1}>
+      <li>
+        <a href="/the-memes/1">Artwork</a>
+      </li>
+    </ul>
+  </div>
 ));
 
 jest.mock("@/components/user/collected/cards/UserPageCollectedCards", () => ({
@@ -86,7 +92,9 @@ const mockUserPageCollectedNetworkCards = jest.fn((props: any) => (
     data-testid="network-cards"
     data-cards-count={props.cards.length}
     data-locale={props.locale}
-  />
+  >
+    <ul aria-label="Collected network cards" tabIndex={-1} />
+  </div>
 ));
 
 jest.mock(
@@ -209,6 +217,191 @@ describe("UserPageCollected", () => {
     jest.clearAllMocks();
     routerReplace.mockReset();
     routerPush.mockReset();
+  });
+
+  it.each([false, true])(
+    "moves to the requested page only after its data loads (network=%s)",
+    async (network) => {
+      const scroll = jest.fn();
+      const originalScroll = Element.prototype.scrollIntoView;
+      Element.prototype.scrollIntoView = scroll;
+      let query = new URLSearchParams(
+        network ? "collection=network" : "collection=memes"
+      );
+      useSearchParamsMock.mockImplementation(() => query);
+      let result = {
+        isFetching: false,
+        isLoading: false,
+        isSuccess: true,
+        isPlaceholderData: false,
+        data: { data: [{ token_id: 1 }], count: 96, page: 1, next: true },
+      };
+      useQueryMock.mockImplementation(() => result);
+      const view = renderWithTransferProvider(
+        <UserPageCollected profile={mockProfile} />
+      );
+      const rerender = () =>
+        view.rerender(
+          <TransferProvider>
+            <UserPageCollected profile={mockProfile} />
+          </TransferProvider>
+        );
+      const list = screen.getByRole("list", {
+        name: network ? "Collected network cards" : "Collected cards",
+      });
+      const cardsMock = network
+        ? mockUserPageCollectedNetworkCards
+        : mockUserPageCollectedCards;
+      expect(scroll).not.toHaveBeenCalled();
+      await act(async () => {
+        await cardsMock.mock.lastCall?.[0].setPage(2);
+      });
+      expect(scroll).not.toHaveBeenCalled();
+      query = getLastPushParams();
+      rerender();
+      expect(scroll).not.toHaveBeenCalled();
+      result = { ...result, isFetching: true, isPlaceholderData: true };
+      rerender();
+      expect(scroll).not.toHaveBeenCalled();
+      result = {
+        ...result,
+        isFetching: false,
+        isPlaceholderData: false,
+        data: { ...result.data, page: 2 },
+      };
+      rerender();
+      expect(scroll).toHaveBeenCalledTimes(1);
+      expect(
+        network ? list : screen.getByRole("link", { name: "Artwork" })
+      ).toHaveFocus();
+      expect(scroll).toHaveBeenCalledWith({ block: "start" });
+      query = new URLSearchParams(
+        network ? "collection=network" : "collection=memes"
+      );
+      rerender();
+      expect(scroll).toHaveBeenCalledTimes(1);
+      Element.prototype.scrollIntoView = originalScroll;
+    }
+  );
+
+  it.each([false, true])(
+    "clears empty-result filters within the current view (network=%s)",
+    async (network) => {
+      useSearchParamsMock.mockReturnValue(
+        new URLSearchParams(
+          `collection=${network ? "network&subcollection=0xabc" : "memes&szn=2&seized=seized"}&address=0x123&sort-direction=asc&details=open&activity=distributions&distribution-page=2&locale=fr-FR`
+        )
+      );
+      useQueryMock.mockReturnValue({
+        isSuccess: true,
+        isFetching: false,
+        isLoading: false,
+        isPlaceholderData: false,
+        data: { data: [], count: 0, page: 1, next: false },
+      });
+      renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "No artwork matches these filters."
+      );
+      await userEvent.click(
+        screen.getByRole("button", { name: "Clear filters" })
+      );
+      const query = getLastPushParams();
+      expect(query.get("collection")).toBe(network ? "network" : null);
+      for (const key of ["address", "subcollection", "szn", "seized", "page"])
+        expect(query.has(key)).toBe(false);
+      expect(query.get("sort-direction")).toBe("asc");
+      expect(query.get("details")).toBe("open");
+      expect(query.get("activity")).toBe("distributions");
+      expect(query.get("distribution-page")).toBe("2");
+      expect(query.get("locale")).toBe("fr-FR");
+      expect(routerReplace).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each([
+    "",
+    "collection=network",
+    "collection=network&page=99",
+    "sort-direction=asc",
+  ])(
+    "does not offer recovery buttons for unfiltered empty holdings: %s",
+    (query) => {
+      const searchParams = new URLSearchParams(query);
+      useSearchParamsMock.mockReturnValue(searchParams);
+      useQueryMock.mockReturnValue({
+        isSuccess: true,
+        isFetching: false,
+        isLoading: false,
+        isPlaceholderData: false,
+        data: {
+          data: [],
+          count: 0,
+          page: Number(searchParams.get("page") ?? 1),
+          next: false,
+        },
+      });
+      renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+      expect(screen.getByRole("status")).toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /Clear filters|Go to page 1/ })
+      ).toBeNull();
+    }
+  );
+
+  it.each([
+    { isSuccess: false, isPlaceholderData: false },
+    { isSuccess: true, isPlaceholderData: true },
+  ])(
+    "does not classify failed or placeholder data as empty filter results: %o",
+    (state) => {
+      useSearchParamsMock.mockReturnValue(
+        new URLSearchParams("collection=network&subcollection=0xabc&page=2")
+      );
+      useQueryMock.mockReturnValue({
+        ...state,
+        isFetching: false,
+        isLoading: false,
+        data: { data: [], page: 2, next: false },
+      });
+      renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+      expect(
+        screen.queryByRole("button", { name: /Clear filters|Go to page 1/ })
+      ).toBeNull();
+    }
+  );
+
+  it("focuses the status after clearing a genuinely empty collection without trapping keyboard navigation", async () => {
+    const scroll = jest.fn();
+    const originalScroll = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = scroll;
+    let query = new URLSearchParams("collection=gradients");
+    useSearchParamsMock.mockImplementation(() => query);
+    useQueryMock.mockReturnValue({
+      isSuccess: true,
+      isFetching: false,
+      isLoading: false,
+      isPlaceholderData: false,
+      data: { data: [], count: 0, page: 1 },
+    });
+    const view = renderWithTransferProvider(
+      <UserPageCollected profile={mockProfile} />
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "Clear filters" })
+    );
+    query = getLastPushParams();
+    view.rerender(
+      <TransferProvider>
+        <UserPageCollected profile={mockProfile} />
+      </TransferProvider>
+    );
+    expect(screen.getByRole("status")).toHaveFocus();
+    expect(screen.getByRole("status")).toHaveTextContent("No cards to display");
+    expect(scroll).toHaveBeenCalledTimes(1);
+    await userEvent.tab({ shift: true });
+    expect(screen.getByRole("button", { name: "Set The Memes" })).toHaveFocus();
+    Element.prototype.scrollIntoView = originalScroll;
   });
 
   it("shows loading state initially", () => {
