@@ -1,6 +1,7 @@
 import { ARWEAVE_GATEWAY_CSP_SOURCES } from "../lib/media/arweave-gateways";
 import { getMediaResolverSource } from "../lib/media/decentralized-media";
 import { IPFS_GATEWAY_CSP_SOURCES } from "../lib/media/ipfs-gateways";
+import { SENTRY_INGEST_HOSTNAME_PATTERN } from "./sentryIngest";
 
 function isLocalhostHostname(hostname: string): boolean {
   return (
@@ -58,12 +59,10 @@ function getConfiguredIpfsGatewaySource(
 }
 
 // The DSN key, hostname and project id are validated so a malformed DSN can
-// never inject extra directives or headers into the generated values. Keep the
-// accepted ingest hosts in sync with isSentryIngestPost in
-// tests/support/readonlyMutationGuard.ts, which lets read-only E2E runs ignore
-// the browser's CSP report POSTs.
+// never inject extra directives or headers into the generated values. Only
+// Sentry's hosted ingest hosts are accepted; the read-only E2E guard ignores
+// CSP report POSTs to exactly those hosts (see config/sentryIngest.ts).
 const SENTRY_PUBLIC_KEY_PATTERN = /^[A-Za-z0-9]{16,64}$/;
-const SENTRY_HOSTNAME_PATTERN = /^[a-z0-9.-]+$/i;
 const SENTRY_PROJECT_PATH_PATTERN = /^\/(\d+)$/;
 const CSP_REPORT_GROUP = "csp-endpoint";
 
@@ -83,7 +82,7 @@ function getSentrySecurityReportEndpoint(dsn: string | undefined): string {
       parsedUrl.port !== "" ||
       !projectId ||
       !SENTRY_PUBLIC_KEY_PATTERN.test(parsedUrl.username) ||
-      !SENTRY_HOSTNAME_PATTERN.test(parsedUrl.hostname)
+      !SENTRY_INGEST_HOSTNAME_PATTERN.test(parsedUrl.hostname)
     ) {
       return "";
     }

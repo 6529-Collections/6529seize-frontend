@@ -220,6 +220,12 @@ describe("createSecurityHeaders CSP", () => {
     `https://${SENTRY_PUBLIC_KEY};x@o123.ingest.us.sentry.io/456`,
     `https://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io;script-src/456`,
     `https://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io:8443/456`,
+    // Only Sentry's hosted ingest hosts: the read-only E2E guard ignores CSP
+    // report POSTs to those hosts and would block any other.
+    `https://${SENTRY_PUBLIC_KEY}@telemetry.example/456`,
+    `https://${SENTRY_PUBLIC_KEY}@sentry.io/456`,
+    `https://${SENTRY_PUBLIC_KEY}@o123.ingest.eu.sentry.io/456`,
+    `https://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io.example/456`,
   ])(
     "ignores a Sentry DSN that cannot form a safe report endpoint: %s",
     (dsn) => {

@@ -1,6 +1,7 @@
 import type { BrowserContext, Route } from "@playwright/test";
 
 import mutationRegistry from "../../ops/testing-strategy/mutation-endpoint-registry.json";
+import { SENTRY_INGEST_HOSTNAME_PATTERN } from "../../config/sentryIngest";
 
 type MutationEndpoint = {
   id: string;
@@ -178,7 +179,7 @@ function isSentryIngestPost(method: string, url: URL) {
     url.port === "" &&
     url.username === "" &&
     url.password === "" &&
-    /^o\d+\.ingest(?:\.(?:us|de))?\.sentry\.io$/.test(url.hostname) &&
+    SENTRY_INGEST_HOSTNAME_PATTERN.test(url.hostname) &&
     /^\/api\/\d+\/(?:envelope|security)\/$/.test(url.pathname)
   );
 }
