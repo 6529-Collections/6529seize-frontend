@@ -102,6 +102,14 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await trigger.click();
     await page.getByRole("main").click({ position: { x: 500, y: 30 } });
     await expect(inbox).not.toBeVisible();
+    const requestsAfterDismissal = await fetchSandboxRequests(baseURL);
+    expect(
+      requestsAfterDismissal.filter(
+        (request) =>
+          request.method === "POST" &&
+          /\/notifications\/(?:read|\d+\/read)$/.test(request.path)
+      )
+    ).toHaveLength(0);
     await trigger.click();
     const destination = inbox
       .getByRole("link")

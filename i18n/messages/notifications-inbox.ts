@@ -28,6 +28,7 @@ export const NOTIFICATIONS_INBOX_MESSAGES = {
   "notifications.inbox.wave": "{actor} created {wave}",
   "notifications.inbox.drop": "{actor} posted in {wave}",
   "notifications.inbox.priority": "Priority alert from {wave}",
+  "notifications.inbox.priorityFallback": "Priority alert",
   "notifications.inbox.collaboration":
     "Artwork collaboration update: {artwork}",
   "notifications.inbox.invited":

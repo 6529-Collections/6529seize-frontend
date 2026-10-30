@@ -152,6 +152,21 @@ const credits: INotificationVotingCreditsReturned = {
   },
 };
 
+it("keeps missing-context priority summaries readable", () => {
+  expect(
+    getInboxSummary(
+      {
+        ...base,
+        cause: ApiNotificationCause.PriorityAlert,
+        related_identity: actor,
+        related_drops: [],
+        additional_context: {},
+      },
+      "en-US"
+    )
+  ).toBe("Priority alert");
+});
+
 it("links deleted entries to their surviving competition and formats returned credits", () => {
   expect(getInboxDestination(credits, "viewer")).toBe(
     "/waves/wave/competitions/competition?entry=entry"

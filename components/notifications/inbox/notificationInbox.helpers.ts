@@ -168,10 +168,12 @@ export function getInboxSummary(
         ...params,
         wave: getInboxDrop(notification)?.wave.name ?? "",
       });
-    case ApiNotificationCause.PriorityAlert:
-      return t(locale, "notifications.inbox.priority", {
-        wave: getInboxDrop(notification)?.wave.name ?? "",
-      });
+    case ApiNotificationCause.PriorityAlert: {
+      const wave = getInboxDrop(notification)?.wave.name;
+      return wave
+        ? t(locale, "notifications.inbox.priority", { wave })
+        : t(locale, "notifications.inbox.priorityFallback");
+    }
     case ApiNotificationCause.SubscriptionCoverage:
       return t(locale, "subscriptions.notification.title");
     case ApiNotificationCause.MemeCollaboration: {
