@@ -3406,6 +3406,14 @@ export const EN_US_MESSAGES = {
   "auth.signModal.manualUpgrade":
     "Connection sharing and some newer features need the new secure session.",
   "auth.signModal.connectWalletPrompt": "Connect your wallet to continue.",
+  "auth.proxySwitch.connectWallet":
+    "Reconnect your wallet to switch profiles. Your current profile will stay signed in.",
+  "auth.proxySwitch.unsupportedNetwork":
+    "Switch your wallet to a supported network, then select the profile again.",
+  "auth.proxySwitch.contextChanged":
+    "Your wallet, profile, or network changed. Select the profile again to continue.",
+  "auth.proxySwitch.failed":
+    "Couldn't switch profiles. Your current profile is still selected. Please try again.",
   "auth.signModal.noGas":
     "Your signature will not cost any gas and is purely for authentication purposes.",
   "auth.signModal.connect": "Connect",
