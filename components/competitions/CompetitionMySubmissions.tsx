@@ -40,7 +40,12 @@ export default function CompetitionMySubmissions() {
   return (
     <>
       {(isOpen || hasEntries || query.isError || invalidEntries) && (
-        <MySubmissionsButton onClick={() => setOpenScope(scope)}>
+        <MySubmissionsButton
+          onClick={() => {
+            setOpenScope(scope);
+            if (query.isStale) void query.refetch();
+          }}
+        >
           {t(locale, "waves.submissions.mine")}
         </MySubmissionsButton>
       )}
