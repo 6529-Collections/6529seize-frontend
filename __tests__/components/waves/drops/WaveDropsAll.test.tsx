@@ -362,12 +362,12 @@ function setupMocks(options: MockSetupOptions = {}) {
 }
 
 interface RenderOptions {
-  waveId?: string | undefined;
-  dropId?: string | null | undefined;
-  onReply?: jest.Mock | undefined;
+  waveId?: string;
+  dropId?: string | null;
+  onReply?: jest.Mock;
   onQuote?: jest.Mock | undefined;
-  activeDrop?: ActiveDropState | null | undefined;
-  initialDrop?: number | null | undefined;
+  activeDrop?: ActiveDropState | null;
+  initialDrop?: number | null;
   unreadCount?: number | undefined;
   onDropContentClick?: jest.Mock | undefined;
   winningThreshold?: number | null | undefined;
