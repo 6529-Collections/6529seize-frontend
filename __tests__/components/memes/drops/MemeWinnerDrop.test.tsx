@@ -67,6 +67,8 @@ jest.mock(
     <div
       data-testid="media"
       data-media-url={props.media_url}
+      data-loading-layout={props.imageLoadingLayout}
+      data-auto-animation={String(Boolean(props.autoAnimateGif))}
       data-fill-video-container={String(props.fillVideoContainer)}
     />
   )
@@ -101,6 +103,14 @@ test("renders actions when desktop hover actions are active", () => {
   const onReply = jest.fn();
   render(<MemeWinnerDrop drop={drop} showReplyAndQuote onReply={onReply} />);
   expect(screen.getByTestId("identity")).toBeInTheDocument();
+  expect(screen.getByTestId("media")).toHaveAttribute(
+    "data-loading-layout",
+    "artwork"
+  );
+  expect(screen.getByTestId("media")).toHaveAttribute(
+    "data-auto-animation",
+    "false"
+  );
   fireEvent.click(screen.getByTestId("reply"));
   expect(onReply).toHaveBeenCalled();
 });

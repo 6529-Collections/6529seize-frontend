@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import {
-  isMultiCompetitionEnabled,
   isCompetitionPathname,
   getCompetitionIdFromPathname,
   getCompetitionRoute,
@@ -60,7 +59,6 @@ export function useDefaultCompetitionNavigation(
     search.get("restore") === "1";
   const resolve =
     enabled &&
-    isMultiCompetitionEnabled() &&
     Boolean(wave) &&
     matchesRoute &&
     !wave?.chat.scope.group?.is_direct_message &&
@@ -74,7 +72,6 @@ export function useDefaultCompetitionNavigation(
     !isCompetitionPathname(pathname) && !hasWaveDestination(search);
   const restore = Boolean(
     enabled &&
-    isMultiCompetitionEnabled() &&
     wave &&
     !wave.chat.scope.group?.is_direct_message &&
     ordinaryEntry &&
@@ -107,12 +104,21 @@ export function useDefaultCompetitionNavigation(
       });
       return;
     }
-    // This marker belongs to client restoration, so removing it only commits
-    // the already mounted destination without another server navigation.
+    // Use the documented external History update so Next synchronizes URL hooks.
+    // Restore app metadata afterward, keeping refreshed router state authoritative.
+    const previousState: unknown = globalThis.history.state;
+    globalThis.history.replaceState(null, "", `${pathname}?${params}`);
+    const currentState: unknown = globalThis.history.state;
     globalThis.history.replaceState(
-      globalThis.history.state,
-      "",
-      `${pathname}?${params}`
+      {
+        ...(typeof previousState === "object" && previousState !== null
+          ? previousState
+          : {}),
+        ...(typeof currentState === "object" && currentState !== null
+          ? currentState
+          : {}),
+      },
+      ""
     );
   }, [
     restoringSelection,
@@ -206,7 +212,6 @@ export function useDefaultCompetitionNavigation(
   ]);
   const explicitConfiguration = Boolean(
     enabled &&
-    isMultiCompetitionEnabled() &&
     wave &&
     !wave.chat.scope.group?.is_direct_message &&
     !isCompetitionPathname(pathname) &&

@@ -16,6 +16,14 @@ jest.mock("@/contexts/WaveInformationContext", () => ({
   useWaveInformation: () => ({ open: mockOpenInformation }),
 }));
 
+const mockOpenWaveSearch = jest.fn();
+jest.mock("@/components/brain/my-stream/tabs/MyStreamWaveSearch", () => ({
+  useOpenMyStreamWaveSearch: () => ({
+    open: mockOpenWaveSearch,
+    trigger: { current: null },
+  }),
+}));
+
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush, replace: mockReplace, back: jest.fn() }),
   useSearchParams: () => new URLSearchParams("wave=w1"),

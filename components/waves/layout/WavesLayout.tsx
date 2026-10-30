@@ -1,6 +1,9 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
+import { isCompetitionPathname } from "@/helpers/competition.helpers";
+import { getWaveIdFromPathname } from "@/helpers/navigation.helpers";
 import { useEffect, type ReactNode } from "react";
 import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
@@ -9,6 +12,7 @@ import {
   scheduleMobileLaunchFlush,
 } from "../../../utils/monitoring/mobileLaunchTiming";
 import WavesMobile from "../WavesMobile";
+import WavesRouteLoading from "../WavesRouteLoading";
 import useBodyScrollLock from "@/hooks/useBodyScrollLock";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -29,7 +33,11 @@ const WAVES_CONTENT_STATE_NEEDS_PROFILE = "needs-profile";
 const WAVES_CONTENT_STATE_NOT_AVAILABLE = "not-available";
 
 function WavesBranchLoadingFallback() {
-  return <div className="tw-flex tw-min-h-screen tw-flex-1 tw-bg-black" />;
+  return (
+    <div className="tw-flex tw-min-h-screen tw-flex-1 tw-bg-black">
+      <WavesRouteLoading showSidebar />
+    </div>
+  );
 }
 
 const WavesDesktop = dynamic<WavesBranchProps>(
@@ -133,6 +141,10 @@ function getWavesContent({
 // Main layout content that uses the Layout context
 function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   const { contentState } = useAuthenticatedContent();
+  const pathname = usePathname();
+  const hasRouteWave =
+    Boolean(getWaveIdFromPathname(pathname)) &&
+    !isCompetitionPathname(pathname);
   const { isApp } = useDeviceInfo();
 
   // The chat/feed views manage their own internal scroll, so WavesLayout locks
@@ -168,7 +180,7 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   if (shouldRenderWavesContent) {
     content = getWavesContent({
       children:
-        contentState === WAVES_CONTENT_STATE_LOADING ? (
+        contentState === WAVES_CONTENT_STATE_LOADING && !hasRouteWave ? (
           <WavesContentLoadingFallback />
         ) : (
           children

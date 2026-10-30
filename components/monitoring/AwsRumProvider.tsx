@@ -1,6 +1,7 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
+import { AWS_RUM_DISPATCH_CONFIG } from "@/utils/monitoring/awsRumDispatch";
 import { AwsRumExpectedAbortPlugin } from "@/utils/monitoring/awsRumExpectedAbort";
 import { createAwsRumPrivacyPlugin } from "@/utils/monitoring/awsRumPrivacy";
 import { getAwsRumPageId } from "@/utils/monitoring/mobileLaunchTimingSanitizers";
@@ -102,13 +103,8 @@ export default function AwsRumProvider({
           allowCookies: true,
           enableXRay: false,
           signing: false,
-          eventCacheSize: 200,
-          sessionEventLimit: 200,
-          batchLimit: 10,
-          dispatchInterval: 5000,
+          ...AWS_RUM_DISPATCH_CONFIG,
           disableAutoPageView: true,
-          retries: 2,
-          useBeacon: true,
           releaseId: APPLICATION_VERSION,
         };
 

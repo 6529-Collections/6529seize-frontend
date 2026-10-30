@@ -29,6 +29,8 @@ interface InlineWalletSourcesProps {
   readonly onChange: (update: WalletSourcesUpdate) => void;
   readonly quiet?: boolean;
   readonly networkPresentation?: boolean;
+  readonly hideEmptyMessages?: boolean;
+  readonly mobilePresentation?: boolean;
 }
 
 function RemoveSourceButton({
@@ -80,14 +82,29 @@ function SourceCount({
   );
 }
 
-function getWalletSourceClasses(quiet: boolean, networkPresentation: boolean) {
+function getWalletSourceClasses(
+  quiet: boolean,
+  networkPresentation: boolean,
+  mobilePresentation: boolean
+) {
+  if (mobilePresentation) {
+    return {
+      section: "tw-min-w-0 tw-rounded-xl tw-bg-iron-900 tw-p-4",
+      input: "[&_input]:tw-h-11 [&_input]:tw-py-0",
+      title: "tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100",
+      description:
+        "tw-mb-4 tw-mt-2 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400",
+      status: "tw-mt-3 tw-flex tw-items-start tw-justify-between tw-gap-3",
+      empty: "tw-m-0 tw-text-xs tw-font-normal tw-text-iron-500",
+    };
+  }
   if (networkPresentation) {
     return {
       section: "tw-min-w-0 lg:tw-row-span-5 lg:tw-grid lg:tw-grid-rows-subgrid",
       input: "[&_input]:tw-h-11 [&_input]:tw-py-0",
       title: "tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100",
       description:
-        "tw-mb-3 tw-mt-2 tw-text-xxs tw-font-normal tw-leading-5 tw-text-iron-350",
+        "tw-mb-3 tw-mt-2 tw-text-xxs tw-font-normal tw-leading-5 tw-text-iron-400",
       status:
         "tw-flex tw-justify-between tw-gap-3 tw-mt-2 tw-items-start lg:tw-row-start-5",
       empty: "tw-m-0 tw-text-xs tw-text-iron-500 tw-font-normal",
@@ -112,6 +129,8 @@ function EmmaWalletSource({
   onChange,
   quiet = false,
   networkPresentation = false,
+  hideEmptyMessages = false,
+  mobilePresentation = false,
 }: Omit<InlineWalletSourcesProps, "direction">) {
   const locale = useBrowserLocale();
   const { connectedProfile, requestAuth } = useAuth();
@@ -187,7 +206,11 @@ function EmmaWalletSource({
     sources.emmaWallets === null &&
     !!connectedProfile?.handle &&
     loadState === "loading";
-  const sourceClasses = getWalletSourceClasses(quiet, networkPresentation);
+  const sourceClasses = getWalletSourceClasses(
+    quiet,
+    networkPresentation,
+    mobilePresentation
+  );
 
   return (
     <section className={`${sourceClasses.section} ${sourceClasses.input}`}>
@@ -218,52 +241,28 @@ function EmmaWalletSource({
           "waves.create.groups.inlineIdentities.sources.emma.searchEmpty"
         )}
       />
-      <div className={sourceClasses.status}>
-        {selectedId === null ? (
-          <p className={sourceClasses.empty}>
-            {t(
-              locale,
-              "waves.create.groups.inlineIdentities.sources.emma.empty"
-            )}
-          </p>
-        ) : null}
-        {isLoading ? (
-          <p
-            role="status"
-            className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-400"
-          >
-            {t(
-              locale,
-              "waves.create.groups.inlineIdentities.sources.emma.loading"
-            )}
-          </p>
-        ) : null}
-        {isLoadPending ? (
-          <button
-            type="button"
-            onClick={() => {
-              if (sources.selectedAllowlist) {
-                void loadAllowlist(sources.selectedAllowlist);
-              }
-            }}
-            className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-          >
-            {t(
-              locale,
-              "waves.create.groups.inlineIdentities.sources.emma.load"
-            )}
-          </button>
-        ) : null}
-        {authenticationRequired || hasLoadError ? (
-          <div role="alert" className="tw-min-w-0">
-            <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-error">
+      {(!hideEmptyMessages || selectedId !== null) && (
+        <div className={sourceClasses.status}>
+          {selectedId === null ? (
+            <p className={sourceClasses.empty}>
               {t(
                 locale,
-                authenticationRequired
-                  ? "waves.create.groups.inlineIdentities.sources.emma.authenticationRequired"
-                  : "waves.create.groups.inlineIdentities.sources.emma.error"
+                "waves.create.groups.inlineIdentities.sources.emma.empty"
               )}
             </p>
+          ) : null}
+          {isLoading ? (
+            <p
+              role="status"
+              className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-400"
+            >
+              {t(
+                locale,
+                "waves.create.groups.inlineIdentities.sources.emma.loading"
+              )}
+            </p>
+          ) : null}
+          {isLoadPending ? (
             <button
               type="button"
               onClick={() => {
@@ -271,29 +270,58 @@ function EmmaWalletSource({
                   void loadAllowlist(sources.selectedAllowlist);
                 }
               }}
-              className="tw-mt-1 tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+              className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
             >
-              {t(locale, "waves.create.groups.inlineIdentities.sources.retry")}
+              {t(
+                locale,
+                "waves.create.groups.inlineIdentities.sources.emma.load"
+              )}
             </button>
-          </div>
-        ) : null}
-        {sources.emmaWallets !== null ? (
-          <SourceCount
-            count={sources.emmaWallets.length}
-            sourceName={sources.selectedAllowlist?.name}
-          />
-        ) : null}
-        {selectedId !== null ? (
-          <RemoveSourceButton
-            label={t(
-              locale,
-              "waves.create.groups.inlineIdentities.sources.emma.remove"
-            )}
-            onClick={onRemove}
-            quiet={quiet}
-          />
-        ) : null}
-      </div>
+          ) : null}
+          {authenticationRequired || hasLoadError ? (
+            <div role="alert" className="tw-min-w-0">
+              <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-error">
+                {t(
+                  locale,
+                  authenticationRequired
+                    ? "waves.create.groups.inlineIdentities.sources.emma.authenticationRequired"
+                    : "waves.create.groups.inlineIdentities.sources.emma.error"
+                )}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  if (sources.selectedAllowlist) {
+                    void loadAllowlist(sources.selectedAllowlist);
+                  }
+                }}
+                className="tw-mt-1 tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+              >
+                {t(
+                  locale,
+                  "waves.create.groups.inlineIdentities.sources.retry"
+                )}
+              </button>
+            </div>
+          ) : null}
+          {sources.emmaWallets !== null ? (
+            <SourceCount
+              count={sources.emmaWallets.length}
+              sourceName={sources.selectedAllowlist?.name}
+            />
+          ) : null}
+          {selectedId !== null ? (
+            <RemoveSourceButton
+              label={t(
+                locale,
+                "waves.create.groups.inlineIdentities.sources.emma.remove"
+              )}
+              onClick={onRemove}
+              quiet={quiet}
+            />
+          ) : null}
+        </div>
+      )}
     </section>
   );
 }
@@ -304,6 +332,8 @@ function CsvWalletSource({
   onChange,
   quiet = false,
   networkPresentation = false,
+  hideEmptyMessages = false,
+  mobilePresentation = false,
 }: InlineWalletSourcesProps) {
   const locale = useBrowserLocale();
   const inputId = useId();
@@ -370,10 +400,14 @@ function CsvWalletSource({
     }
   };
   let dropzoneStateClasses =
-    "desktop-hover:hover:tw-bg-iron-850 tw-border-white/10 tw-bg-iron-900 desktop-hover:hover:tw-border-white/20";
-  if (quiet) {
+    "desktop-hover:hover:tw-bg-iron-850 tw-border-iron-650 tw-bg-iron-900 desktop-hover:hover:tw-border-iron-600";
+  if (mobilePresentation) {
     dropzoneStateClasses =
-      "tw-border-iron-700 tw-bg-iron-900/30 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-900/60";
+      "tw-border-iron-650 tw-bg-iron-950 desktop-hover:hover:tw-border-iron-600";
+  }
+  if (quiet && !mobilePresentation) {
+    dropzoneStateClasses =
+      "tw-border-iron-650 tw-bg-iron-900/30 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-900/60";
   }
   if (isDragging) {
     dropzoneStateClasses = "tw-border-primary-400 tw-bg-primary-500/10";
@@ -384,7 +418,14 @@ function CsvWalletSource({
   if (networkPresentation) {
     dropzoneLayoutClasses = "tw-min-h-11 tw-flex-row tw-px-2 tw-py-2";
   }
-  const sourceClasses = getWalletSourceClasses(quiet, networkPresentation);
+  if (mobilePresentation) {
+    dropzoneLayoutClasses = "tw-min-h-14 tw-flex-row tw-px-3 tw-py-2";
+  }
+  const sourceClasses = getWalletSourceClasses(
+    quiet,
+    networkPresentation,
+    mobilePresentation
+  );
 
   return (
     <section className={sourceClasses.section}>
@@ -409,14 +450,14 @@ function CsvWalletSource({
           event.preventDefault();
           setIsDragging(false);
         }}
-        className={`tw-flex tw-cursor-pointer tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-dashed tw-text-center tw-transition focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${quiet ? "tw-border" : "tw-border-2"} ${dropzoneLayoutClasses} ${dropzoneStateClasses}`}
+        className={`tw-flex tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-xl tw-border-dashed tw-transition focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${mobilePresentation ? "tw-justify-start tw-text-left" : "tw-justify-center tw-text-center"} ${quiet ? "tw-border" : "tw-border-2"} ${dropzoneLayoutClasses} ${dropzoneStateClasses}`}
       >
         <ArrowUpTrayIcon
           aria-hidden="true"
-          className="tw-size-5 tw-text-iron-300"
+          className={`tw-flex-shrink-0 tw-text-iron-300 ${mobilePresentation ? "tw-size-9 tw-rounded-lg tw-bg-iron-800 tw-p-2" : "tw-size-5"}`}
         />
         <span
-          className={`tw-text-xs tw-font-medium tw-leading-relaxed tw-text-iron-300 ${networkPresentation ? "tw-text-balance" : ""}`}
+          className={`tw-text-xs tw-font-medium tw-leading-relaxed tw-text-iron-300 ${networkPresentation && !mobilePresentation ? "tw-text-balance" : ""}`}
         >
           {t(
             locale,
@@ -451,31 +492,33 @@ function CsvWalletSource({
           {errorMessage}
         </p>
       ) : null}
-      <div className={sourceClasses.status}>
-        {sources.uploadedWallets === null ? (
-          <p className={sourceClasses.empty}>
-            {t(
-              locale,
-              "waves.create.groups.inlineIdentities.sources.csv.empty"
-            )}
-          </p>
-        ) : (
-          <SourceCount
-            count={sources.uploadedWallets.length}
-            sourceName={sources.uploadedFileName ?? undefined}
-          />
-        )}
-        {sources.uploadedWallets !== null ? (
-          <RemoveSourceButton
-            label={t(
-              locale,
-              "waves.create.groups.inlineIdentities.sources.csv.remove"
-            )}
-            onClick={onRemove}
-            quiet={quiet}
-          />
-        ) : null}
-      </div>
+      {(!hideEmptyMessages || sources.uploadedWallets !== null) && (
+        <div className={sourceClasses.status}>
+          {sources.uploadedWallets === null ? (
+            <p className={sourceClasses.empty}>
+              {t(
+                locale,
+                "waves.create.groups.inlineIdentities.sources.csv.empty"
+              )}
+            </p>
+          ) : (
+            <SourceCount
+              count={sources.uploadedWallets.length}
+              sourceName={sources.uploadedFileName ?? undefined}
+            />
+          )}
+          {sources.uploadedWallets !== null ? (
+            <RemoveSourceButton
+              label={t(
+                locale,
+                "waves.create.groups.inlineIdentities.sources.csv.remove"
+              )}
+              onClick={onRemove}
+              quiet={quiet}
+            />
+          ) : null}
+        </div>
+      )}
     </section>
   );
 }
@@ -488,6 +531,9 @@ export default function CreateWaveInlineGroupWalletSources(
     gridClasses =
       "tw-grid tw-grid-cols-1 tw-gap-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4 lg:tw-grid-cols-2 lg:tw-gap-x-6 lg:tw-gap-y-0";
   }
+  if (props.mobilePresentation) {
+    gridClasses = "tw-grid tw-grid-cols-1 tw-gap-4";
+  }
   return (
     <div className={gridClasses}>
       <EmmaWalletSource
@@ -495,6 +541,8 @@ export default function CreateWaveInlineGroupWalletSources(
         onChange={props.onChange}
         quiet={props.quiet ?? false}
         networkPresentation={props.networkPresentation ?? false}
+        hideEmptyMessages={props.hideEmptyMessages ?? false}
+        mobilePresentation={props.mobilePresentation ?? false}
       />
       <CsvWalletSource {...props} />
     </div>

@@ -180,3 +180,8 @@ standalone row after `About`.
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
 - [Navigation Entry and Switching Flow](flow-navigation-entry-and-switching.md)
 - [Navigation and Shell Controls Troubleshooting](troubleshooting-navigation-and-shell-controls.md)
+
+## Private bookmarks
+
+The signed-in account actions include **Bookmarks** when the owner has accessible
+saved messages. It opens `/bookmarks`. See [Private Bookmarks](../waves/chat/feature-private-bookmarks.md).

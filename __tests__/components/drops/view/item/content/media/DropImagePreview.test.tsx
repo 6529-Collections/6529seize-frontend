@@ -1,6 +1,12 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import { createElement, forwardRef, type ComponentProps } from "react";
+import {
+  createElement,
+  forwardRef,
+  StrictMode,
+  type ComponentProps,
+} from "react";
 import { DropImagePreview } from "@/components/drops/view/item/content/media/DropImagePreview";
+import { LocalImagePreviewContext } from "@/components/drops/view/item/content/media/LocalImagePreviewContext";
 import { ImageScale } from "@/helpers/image.helpers";
 
 type MockImageProps = ComponentProps<"img"> & {
@@ -227,3 +233,136 @@ it("falls back from a rejected GIF animation to a legacy preview, never the orig
   fireEvent.error(screen.getByAltText("GIF"));
   expect(screen.queryByRole("img")).not.toBeInTheDocument();
 });
+
+it("reports unavailable animated previews once across legacy load and error events", () => {
+  const gif = original.replace("file.jpg", "artwork.gif");
+  const onAnimatedPreviewUnavailable = jest.fn();
+  const { rerender } = render(
+    <DropImagePreview
+      originalSrc={gif}
+      imageScale={ImageScale.AUTOx1080}
+      alt="GIF"
+      fill
+      onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
+    />
+  );
+  const image = screen.getByAltText("GIF");
+  fireEvent.error(image);
+  expect(image).toHaveAttribute(
+    "src",
+    gif.replace("artwork.gif", "AUTOx450_gifv2/artwork.gif")
+  );
+  fireEvent.load(image);
+  expect(onAnimatedPreviewUnavailable).not.toHaveBeenCalled();
+  fireEvent.error(image);
+  expect(image).toHaveAttribute(
+    "src",
+    gif.replace("artwork.gif", "AUTOx1080/artwork.gif")
+  );
+  expect(onAnimatedPreviewUnavailable).toHaveBeenCalledTimes(1);
+  fireEvent.load(image);
+  fireEvent.error(image);
+  fireEvent.load(image);
+  fireEvent.error(image);
+  expect(onAnimatedPreviewUnavailable).toHaveBeenCalledTimes(1);
+  rerender(
+    <DropImagePreview
+      originalSrc={gif.replace("artwork", "next")}
+      imageScale={ImageScale.AUTOx1080}
+      alt="GIF"
+      fill
+      onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
+    />
+  );
+  fireEvent.error(screen.getByAltText("GIF"));
+  fireEvent.error(screen.getByAltText("GIF"));
+  expect(onAnimatedPreviewUnavailable).toHaveBeenCalledTimes(2);
+});
+
+it("reports an unverified external GIF preview once without claiming it is static", () => {
+  const onAnimatedPreviewUnavailable = jest.fn();
+  render(
+    <DropImagePreview
+      originalSrc="https://external.example/art.gif"
+      imageScale={ImageScale.AUTOx1080}
+      alt="GIF"
+      fill
+      onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
+    />
+  );
+  fireEvent.load(screen.getByAltText("GIF"));
+  fireEvent.load(screen.getByAltText("GIF"));
+  fireEvent.error(screen.getByAltText("GIF"));
+  expect(onAnimatedPreviewUnavailable).toHaveBeenCalledTimes(1);
+});
+
+it("reports a missing GIF preview once across strict effects and rerenders", () => {
+  const onUnavailable = jest.fn();
+  const view = (src: string) => (
+    <StrictMode>
+      <DropImagePreview
+        originalSrc={src}
+        imageScale={ImageScale.AUTOx1080}
+        alt="GIF"
+        onAnimatedPreviewUnavailable={() => onUnavailable()}
+      />
+    </StrictMode>
+  );
+  const src = "http://external.example/art.gif";
+  const { rerender } = render(view(src));
+  expect(screen.queryByRole("img")).not.toBeInTheDocument();
+  expect(onUnavailable).toHaveBeenCalledTimes(1);
+  rerender(view(src));
+  expect(onUnavailable).toHaveBeenCalledTimes(1);
+  rerender(view(src.replace("art.gif", "next.gif")));
+  expect(onUnavailable).toHaveBeenCalledTimes(2);
+  rerender(view(src.replace("art.gif", "still.jpg")));
+  expect(onUnavailable).toHaveBeenCalledTimes(2);
+});
+
+it("renders only the opted-in local raster preview without a proxy request", () => {
+  const src = "data:image/png;base64,AAAA";
+  const { rerender } = render(
+    <LocalImagePreviewContext.Provider value={src}>
+      <DropImagePreview
+        originalSrc={src}
+        imageScale={ImageScale.AUTOx450}
+        alt="Draft"
+        fill
+      />
+    </LocalImagePreviewContext.Provider>
+  );
+  expect(screen.getByAltText("Draft")).toHaveAttribute("src", src);
+  expect(screen.getByAltText("Draft")).toHaveAttribute(
+    "data-unoptimized",
+    "true"
+  );
+  rerender(
+    <LocalImagePreviewContext.Provider value={src}>
+      <DropImagePreview
+        originalSrc="data:image/png;base64,BBBB"
+        imageScale={ImageScale.AUTOx450}
+        alt="Draft"
+        fill
+      />
+    </LocalImagePreviewContext.Provider>
+  );
+  expect(screen.queryByRole("img")).not.toBeInTheDocument();
+});
+
+it.each(["data:image/svg+xml;base64,AAAA", "https://localhost/private.png"])(
+  "does not opt non-raster or remote sources into local previews: %s",
+  (src) => {
+    render(
+      <LocalImagePreviewContext.Provider value={src}>
+        <DropImagePreview
+          originalSrc={src}
+          imageScale={ImageScale.AUTOx450}
+          alt="Draft"
+          fill
+        />
+      </LocalImagePreviewContext.Provider>
+    );
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+  }
+);

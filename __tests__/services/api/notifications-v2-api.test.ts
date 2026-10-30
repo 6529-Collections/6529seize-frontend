@@ -1,4 +1,3 @@
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdentitySubscriptionTargetAction";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
@@ -8,8 +7,9 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { fetchNotificationsV2 } from "@/services/api/notifications-v2-api";
 import type { INotificationDropReacted } from "@/types/feed.types";
 
+const mockRetiredCompetitionFlag = jest.fn(() => false);
 jest.mock("@/helpers/competition.helpers", () => ({
-  isMultiCompetitionEnabled: jest.fn(() => false),
+  isMultiCompetitionEnabled: () => mockRetiredCompetitionFlag(),
 }));
 
 jest.mock("@/services/api/common-api", () => ({
@@ -88,11 +88,83 @@ const drop = {
 describe("fetchNotificationsV2", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(isMultiCompetitionEnabled).mockReturnValue(false);
+    mockRetiredCompetitionFlag.mockReturnValue(false);
+  });
+
+  it.each(["INVITED", "ACCEPTED"])(
+    "preserves collaboration identity and artwork context for %s",
+    async (event_type) => {
+      jest.mocked(commonApiFetch).mockResolvedValue({
+        unread_count: 1,
+        notifications: [
+          {
+            id: 123,
+            cause: ApiNotificationCause.MemeCollaboration,
+            created_at: 1000,
+            read_at: null,
+            related_identity: identity("artist"),
+            related_drops: [],
+            additional_context: {
+              event_type,
+              actor_id: "artist-id",
+              artwork_name: "Test Cat",
+              wave_id: "wave",
+              drop_id: "drop",
+              invitation_id: "invite",
+            },
+          },
+        ],
+      });
+      const response = await fetchNotificationsV2({ limit: "30" });
+      expect(response.notifications).toHaveLength(1);
+      expect(response.notifications[0]).toMatchObject({
+        related_identity: {
+          id: "artist-id",
+          handle: "artist",
+          pfp: "artist.png",
+          level: 1,
+        },
+        additional_context: {
+          event_type,
+          actor_id: "artist-id",
+          artwork_name: "Test Cat",
+          wave_id: "wave",
+          drop_id: "drop",
+          invitation_id: "invite",
+        },
+      });
+    }
+  );
+
+  it("retains historical collaboration notifications without optional identity or title", async () => {
+    jest.mocked(commonApiFetch).mockResolvedValue({
+      unread_count: 1,
+      notifications: [
+        {
+          id: 123,
+          cause: ApiNotificationCause.MemeCollaboration,
+          created_at: 1000,
+          read_at: null,
+          related_identity: null,
+          related_drops: [],
+          additional_context: {
+            event_type: "INVITED",
+            wave_id: "wave",
+            drop_id: "drop",
+            invitation_id: "invite",
+          },
+        },
+      ],
+    });
+    const response = await fetchNotificationsV2({ limit: "30" });
+    expect(response.notifications[0]).toMatchObject({ related_identity: null });
+    expect(response.notifications[0]).not.toHaveProperty(
+      "additional_context.artwork_name"
+    );
   });
 
   it("opts in to native notifications only when enabled", async () => {
-    jest.mocked(isMultiCompetitionEnabled).mockReturnValue(true);
+    mockRetiredCompetitionFlag.mockReturnValue(true);
     jest
       .mocked(commonApiFetch)
       .mockResolvedValue({ unread_count: 0, notifications: [] });
@@ -140,6 +212,7 @@ describe("fetchNotificationsV2", () => {
         errorMode: "structured",
         params: {
           limit: "30",
+          include_competitions: "true",
           id_less_than: "99",
           cause: ApiNotificationCause.DropReacted,
         },
@@ -482,6 +555,104 @@ describe("fetchNotificationsV2", () => {
       consoleErrorSpy.mockRestore();
     }
   });
+  it.each([null, undefined])(
+    "ignores returned-credit rows with missing context (%s)",
+    async (additional_context) => {
+      (commonApiFetch as jest.Mock).mockResolvedValue({
+        unread_count: 1,
+        notifications: [
+          {
+            id: 100,
+            cause: ApiNotificationCause.VotingCreditsReturned,
+            created_at: 1000,
+            read_at: null,
+            related_identity: null,
+            related_drops: [],
+            additional_context,
+          },
+        ],
+      });
+      expect(
+        (await fetchNotificationsV2({ limit: "30" })).notifications
+      ).toEqual([]);
+    }
+  );
+
+  it("maps returned credits after deletion without a related drop or actor", async () => {
+    const context = {
+      event_id: "release",
+      reason: "AUTHOR_DELETED",
+      wave_id: "wave",
+      competition_id: "competition",
+      competition_title: "Main Stage",
+      entry_id: "entry",
+      drop_id: "deleted",
+      submission_title: "Freedom To Transcend",
+      credit_type: "TDH",
+      amount: 500,
+      released_at: 900,
+    };
+    (commonApiFetch as jest.Mock).mockResolvedValue({
+      unread_count: 1,
+      notifications: [
+        {
+          id: 100,
+          cause: ApiNotificationCause.VotingCreditsReturned,
+          created_at: 1000,
+          read_at: null,
+          related_identity: null,
+          related_drops: [],
+          additional_context: context,
+        },
+      ],
+    });
+    const response = await fetchNotificationsV2({ limit: "30" });
+    expect(response.notifications).toEqual([
+      {
+        id: 100,
+        cause: ApiNotificationCause.VotingCreditsReturned,
+        created_at: 1000,
+        read_at: null,
+        additional_context: context,
+      },
+    ]);
+  });
+
+  it.each([0, -5, 1.5, Number.NaN, Number.MAX_SAFE_INTEGER + 1])(
+    "ignores malformed returned credit amounts (%s)",
+    async (amount) => {
+      (commonApiFetch as jest.Mock).mockResolvedValue({
+        unread_count: 1,
+        notifications: [
+          {
+            id: 100,
+            cause: ApiNotificationCause.VotingCreditsReturned,
+            created_at: 1000,
+            read_at: null,
+            related_identity: null,
+            related_drops: [],
+            additional_context: {
+              event_id: "release",
+              reason: "WIN",
+              wave_id: "wave",
+              competition_id: "competition",
+              competition_title: "Main Stage",
+              entry_id: "entry",
+              drop_id: "drop",
+              submission_title: "Title",
+              credit_type: "TDH",
+              amount,
+              released_at: 900,
+            },
+          },
+        ],
+      });
+      expect(
+        (await fetchNotificationsV2({ limit: "30" })).notifications
+      ).toEqual([]);
+    }
+  );
+
   it("maps competition lifecycle notifications without a related identity or shared drops", async () => {
     const context = {
       event_id: "event",
