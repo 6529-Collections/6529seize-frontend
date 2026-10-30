@@ -593,7 +593,7 @@
     "__tests__/components/waves/drops/WaveDropReactions.test.tsx": 10,
     "__tests__/components/waves/drops/WaveDropReactionsDetailDialog.test.tsx": 2,
     "__tests__/components/waves/drops/WaveDropReply.test.tsx": 1,
-    "__tests__/components/waves/drops/WaveDropsAll.test.tsx": 12,
+    "__tests__/components/waves/drops/WaveDropsAll.test.tsx": 5,
     "__tests__/components/waves/drops/WaveDropsEmptyPlaceholder.test.tsx": 1,
     "__tests__/components/waves/drops/WaveDropsScrollingOverlay.test.tsx": 1,
     "__tests__/components/waves/ens/EnsLinkPreview.test.tsx": 2,
