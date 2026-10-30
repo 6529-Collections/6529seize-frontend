@@ -20,6 +20,7 @@ import { CompactWinnerAnnouncement } from "./time/CompactWinnerAnnouncement";
 import { useWave } from "@/hooks/useWave";
 import { useVisibleInterval } from "@/hooks/usePageVisibility";
 import { Time } from "@/helpers/time";
+import clsx from "clsx";
 
 interface WaveLeaderboardTimeProps {
   readonly wave: ApiWave;
@@ -183,9 +184,13 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
     >
       {multiDecision ? (
         <div
-          className={`tw-box-border tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/70 tw-@container/timeline ${withTopMargin ? "tw-mt-2 sm:tw-mt-4" : ""} ${
-            isDecisionDetailsOpen ? "" : "tw-h-[38px]"
-          }`}
+          className={clsx(
+            "tw-box-border tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/70 tw-@container/timeline",
+            {
+              "tw-mt-2 sm:tw-mt-4": withTopMargin,
+              "tw-h-[38px]": !isDecisionDetailsOpen,
+            }
+          )}
         >
           {(() => {
             const currentPause = showPause(nextDecisionTime);
