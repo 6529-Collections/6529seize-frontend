@@ -121,6 +121,7 @@ these can differ between wallets.
 - `Preview` and `Submit Artwork` also stay disabled if any `Additional Information`
   metadata value exceeds `5000` characters.
 - `Back to Edit` returns to the same draft values.
+- Selected image uploads appear in the preview cards before upload or signing.
 - Preview uses temporary drop values (ID/score/rater data) for layout checks.
 - Main preview-card click handlers are inert, so card-body clicks do not open a
   drop.

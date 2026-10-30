@@ -149,6 +149,7 @@ export const WaveDropAdditionalInfo = ({
     <section className="tw-space-y-8">
       {hasAdditionalAction && (
         <AdditionalActionSummary
+          variant="plain"
           isAdditionalActionPromised={true}
           plan={additionalActionPlan}
           metadataState={metadataState}

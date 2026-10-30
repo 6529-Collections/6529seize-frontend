@@ -11,6 +11,7 @@ interface AdditionalActionSummaryProps {
   readonly isAdditionalActionPromised: boolean;
   readonly plan?: string | undefined;
   readonly metadataState?: DropMetadataState | undefined;
+  readonly variant?: "panel" | "plain";
 }
 
 /** Review an action declaration without mistaking unavailable metadata for an absent plan. */
@@ -18,6 +19,7 @@ export function AdditionalActionSummary({
   isAdditionalActionPromised,
   plan,
   metadataState,
+  variant = "panel",
 }: AdditionalActionSummaryProps) {
   const locale = useBrowserLocale();
   const headingId = useId();
@@ -43,11 +45,17 @@ export function AdditionalActionSummary({
   return (
     <section
       aria-labelledby={headingId}
-      className="tw-min-w-0 tw-space-y-2 tw-rounded-lg tw-bg-iron-900/70 tw-p-4 tw-ring-1 tw-ring-iron-800"
+      className={`tw-min-w-0 tw-space-y-2 ${
+        variant === "panel"
+          ? "tw-rounded-lg tw-bg-iron-900/70 tw-p-4 tw-ring-1 tw-ring-iron-800"
+          : ""
+      }`}
     >
       <h3
         id={headingId}
-        className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100"
+        className={`tw-text-base tw-font-semibold tw-text-iron-100 ${
+          variant === "panel" ? "tw-m-0" : ""
+        }`}
       >
         {t(locale, "memes.additionalAction.label")}
       </h3>
@@ -59,7 +67,11 @@ export function AdditionalActionSummary({
       >
         {announcement}
       </span>
-      <p className="tw-m-0 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-leading-relaxed tw-text-iron-300">
+      <p
+        className={`tw-m-0 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-leading-relaxed ${
+          variant === "plain" ? "tw-text-iron-400" : "tw-text-iron-300"
+        }`}
+      >
         {savedPlan || t(locale, messageKey)}
       </p>
       {unavailableState?.status === "error" && (
@@ -72,7 +84,11 @@ export function AdditionalActionSummary({
         </button>
       )}
       {isAdditionalActionPromised && (
-        <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+        <p
+          className={`tw-m-0 tw-text-xs tw-leading-5 ${
+            variant === "plain" ? "tw-text-iron-500" : "tw-text-iron-400"
+          }`}
+        >
           {t(locale, "memes.additionalAction.declaration")}
         </p>
       )}

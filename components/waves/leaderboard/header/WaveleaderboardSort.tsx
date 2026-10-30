@@ -237,7 +237,9 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
   return (
     <div
       ref={featureUsageRef}
-      className="tw-min-w-0 tw-flex-shrink-0 [&_button]:tw-pl-2 [&_button]:tw-pr-6"
+      className={`tw-min-w-0 tw-flex-shrink-0 [&_button]:tw-pl-2 ${
+        isMainStage ? "[&_button]:tw-pr-8" : "[&_button]:tw-pr-6"
+      }`}
     >
       <CommonDropdown<WaveDropsLeaderboardSort>
         items={items}
