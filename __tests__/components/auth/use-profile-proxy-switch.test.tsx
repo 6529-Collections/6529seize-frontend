@@ -83,6 +83,24 @@ it("does not replay a canceled reconnect during a later connection", async () =>
   expect(initial.onSwitch).not.toHaveBeenCalled();
 });
 
+it("registers only one reconnect continuation for repeated clicks", async () => {
+  const initial = options();
+  const { result, rerender } = renderHook(useProfileProxySwitch, {
+    initialProps: initial,
+  });
+  await act(async () => {
+    await result.current(proxy);
+    await result.current(proxy);
+  });
+  expect(seizeConnect).toHaveBeenCalledTimes(1);
+  seizeConnectOpen = true;
+  rerender(initial);
+  canSignActiveWallet = true;
+  rerender({ ...initial, canSignActiveWallet });
+  expect(initial.onSwitch).toHaveBeenCalledTimes(1);
+  expect(initial.onSwitch).toHaveBeenCalledWith(proxy);
+});
+
 it("cancels recovery if the selected account changes", async () => {
   const initial = options();
   const { result, rerender } = renderHook(useProfileProxySwitch, {

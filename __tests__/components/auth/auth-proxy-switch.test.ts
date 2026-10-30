@@ -1,4 +1,5 @@
 import { createAuthRequestActions } from "@/components/auth/authActions";
+import { waitFor } from "@testing-library/react";
 import type { CreateAuthRequestActionsParams } from "@/components/auth/authActionTypes";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { createDeferredPromise } from "@/__tests__/utils/deferredPromise";
@@ -185,4 +186,29 @@ it("does not sign or persist after the active account changes", async () => {
   expect(params.signMessage).not.toHaveBeenCalled();
   expect(persistSessionResponse).not.toHaveBeenCalled();
   expect(params.setToast).toHaveBeenCalled();
+});
+
+it("does not persist a completed login after the network changes", async () => {
+  const login =
+    createDeferredPromise<Awaited<ReturnType<typeof loginWithSessionV2>>>();
+  jest.mocked(loginWithSessionV2).mockReturnValueOnce(login.promise);
+  let isSupported = true;
+  const { onActiveProfileProxy, params } = createActions({
+    isActiveChainSupported: () => isSupported,
+  });
+  const result = onActiveProfileProxy(proxy);
+  await waitFor(() => expect(loginWithSessionV2).toHaveBeenCalled());
+  isSupported = false;
+  login.resolve({
+    address: ADDRESS,
+    role: "grantor-profile",
+    access_token: "replacement-session",
+    access_token_expires_at: "2999-01-01T00:00:00Z",
+    client_type: "web",
+  });
+  await expect(result).resolves.toBe(false);
+  expect(persistSessionResponse).not.toHaveBeenCalled();
+  expect(params.setActiveProfileProxy).not.toHaveBeenCalled();
+  expect(params.setToast).toHaveBeenCalled();
+  expect(removeAuthJwt).not.toHaveBeenCalled();
 });

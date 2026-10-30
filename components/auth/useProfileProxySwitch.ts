@@ -17,6 +17,12 @@ interface ProfileProxySwitchOptions {
 }
 
 export function useProfileProxySwitch(options: ProfileProxySwitchOptions) {
+  const {
+    activeProxyId,
+    canSignActiveWallet,
+    enableWalletAuthentication,
+    setToast,
+  } = options;
   const latestOptionsRef = useRef(options);
   const switchingRef = useRef(false);
   useEffect(() => {
@@ -53,14 +59,14 @@ export function useProfileProxySwitch(options: ProfileProxySwitchOptions) {
 
   return useCallback(
     async (proxy: ApiProfileProxy | null): Promise<boolean> => {
-      if ((proxy?.id ?? null) === options.activeProxyId) {
+      if ((proxy?.id ?? null) === activeProxyId) {
         return true;
       }
-      if (!options.enableWalletAuthentication) {
+      if (!enableWalletAuthentication) {
         return await switchProfile(proxy);
       }
-      if (!options.canSignActiveWallet) {
-        options.setToast({
+      if (!canSignActiveWallet) {
+        setToast({
           message: t(DEFAULT_LOCALE, "auth.proxySwitch.connectWallet"),
           type: "info",
         });
@@ -73,6 +79,13 @@ export function useProfileProxySwitch(options: ProfileProxySwitchOptions) {
       // latest signer after reconnecting; keep the profile menu on failure.
       return result ? await result : false;
     },
-    [options, runConnectedAction, switchProfile]
+    [
+      activeProxyId,
+      canSignActiveWallet,
+      enableWalletAuthentication,
+      runConnectedAction,
+      setToast,
+      switchProfile,
+    ]
   );
 }
