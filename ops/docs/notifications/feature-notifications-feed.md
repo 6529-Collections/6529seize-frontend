@@ -11,15 +11,37 @@ with a multi-select cause filter, grouped reactions, and inline drop previews.
 ## Location in the Site
 
 - Route: `/notifications`.
-- Reached from the connected-only web sidebar `Notifications` row near the
-  account area, or from app notifications navigation.
+- Reached through `View all notifications` in the desktop sidebar inbox, or
+  directly from mobile/app notifications navigation.
 - Opened directly from URL, including `/notifications?reload=true`.
 
 ## Entry Points
 
-- Select `Notifications` from the connected web sidebar row or app navigation.
+- On desktop, select the sidebar bell to preview notifications, then choose
+  `View all notifications` for the full feed. Mobile/app navigation opens the
+  full feed directly.
 - Open `/notifications` directly.
 - Open `/notifications?reload=true` to force one refetch/read pass.
+
+## Desktop Inbox
+
+The desktop sidebar bell opens a floating inbox beside the sidebar while the
+current page stays in place. Compact rows show the actor, activity, a short drop
+preview when available, a timestamp, and an `Unread` indicator. The newest
+notifications appear first; `Load more` retrieves older rows.
+
+Opening or closing this inbox does not mark notifications read. Selecting a row
+marks that notification read and opens its destination. `Mark all as read`
+explicitly clears unread notifications. Read failures show an error and can be
+retried; loading failures offer `Try again`. The empty inbox shows
+`No notifications yet`.
+
+Close the inbox with its close button, Escape, another bell click, or a click
+outside. Escape returns focus to the bell. Changing accounts or routes closes
+it. The inbox is also available when the desktop sidebar is collapsed.
+
+The full `/notifications` page retains its automatic mark-read behavior and
+provides filters, grouped reactions, and richer drop interactions.
 
 ## Before Rows Render
 
