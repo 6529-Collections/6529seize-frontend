@@ -166,6 +166,18 @@ describe("CreateWaveVoting", () => {
     return advancedButton;
   };
 
+  it("locks historical voting credit rules while leaving vote limits and weighting editable", () => {
+    render(<CreateWaveVoting {...baseProps} lockVotingCredits />);
+    for (const input of screen.getAllByRole("radio"))
+      expect(input).toBeDisabled();
+    openAdvancedSettings();
+    expect(mockNegativeVotingToggle.mock.lastCall?.[0].isDisabled).toBe(true);
+    expect(screen.getByTestId("time-weighted")).toBeEnabled();
+    expect(
+      screen.getByRole("spinbutton", { name: "Vote cap per identity" })
+    ).toBeEnabled();
+  });
+
   it("returns null when no selected type", () => {
     const { container } = render(
       <CreateWaveVoting {...baseProps} selectedType={null} />

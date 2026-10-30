@@ -45,6 +45,7 @@ export default function MobileWrapperConfirmationDialog({
       titleClassName={titleClassName}
       isOpen={isOpen}
       onClose={onClose}
+      dismissible={!isConfirming}
       tabletModal
       maxWidthClass="md:tw-max-w-lg"
       zIndexClassName={zIndexClassName}

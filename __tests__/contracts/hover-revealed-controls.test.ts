@@ -68,14 +68,6 @@ const AUDITED_REVEAL_EXEMPTIONS: readonly AuditedRevealExemption[] = [
       "This pointer-events-none preview replaces already visible summary text as decoration; without hover the original summary remains visible.",
   },
   {
-    file: "components/home/now-minting/MemeSubscriptionAwarenessRow.tsx",
-    marker: "tw-bg-primary-400/[0.045] tw-opacity-0",
-    literalHash:
-      "0bc7f096adb69984e6ebd6ba6e6dd42070148782c663d14af10ed4401778e31d",
-    reason:
-      "This aria-hidden, pointer-events-none surface tint is decorative; the row content and actions are always visible.",
-  },
-  {
     file: "components/profile-cms/CmsArtLightbox.tsx",
     marker: "tw-uppercase tw-text-white tw-opacity-0",
     literalHash:

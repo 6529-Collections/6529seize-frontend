@@ -13,7 +13,13 @@ import {
   MEMES_COLLECTION,
 } from "@/components/delegation/delegation-constants";
 import { DelegationCenterSection } from "@/types/enums";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import {
   useReadContract,
   useReadContracts,
@@ -82,6 +88,10 @@ const defaultWaitReceiptResult = {
   isError: false,
   error: undefined,
 };
+
+// Re-read every 5 s for 30 s after a confirmed write (see usePostWritePolling).
+const POST_WRITE_POLL_INTERVAL_MS = 5_000;
+const POST_WRITE_POLL_WINDOW_MS = 30_000;
 
 describe("CollectionDelegationComponent", () => {
   const collection = {
@@ -627,5 +637,86 @@ describe("CollectionDelegationComponent", () => {
     expect(
       screen.queryByText(/Transaction Successful!/i)
     ).not.toBeInTheDocument();
+  });
+
+  describe("chain read polling", () => {
+    type ReadQuery = {
+      readonly refetchInterval?: number | false;
+      readonly refetchOnWindowFocus?: boolean;
+    };
+
+    const readQueries = (mock: jest.Mock): ReadQuery[] =>
+      mock.mock.calls.map(([params]) => params?.query as ReadQuery);
+
+    const latestInterval = (mock: jest.Mock) =>
+      readQueries(mock).at(-1)?.refetchInterval;
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it("reads delegations and locks without polling until a write is confirmed", () => {
+      render(
+        <CollectionDelegationComponent
+          collection={collection}
+          setSection={setSection}
+        />
+      );
+
+      const queries = [
+        ...readQueries(mockUseReadContracts),
+        ...readQueries(mockUseReadContract),
+      ];
+      // 4 delegation reads + 4 lock reads.
+      expect(queries.length).toBeGreaterThanOrEqual(8);
+      for (const query of queries) {
+        expect(query.refetchInterval).toBe(false);
+        expect(query.refetchOnWindowFocus).toBe(true);
+      }
+    });
+
+    it("polls the reads for a bounded window after a confirmed write", () => {
+      jest.useFakeTimers();
+      mockUseWriteContract
+        .mockReturnValueOnce(defaultWriteContractResult)
+        .mockReturnValueOnce(defaultWriteContractResult)
+        .mockReturnValueOnce({
+          ...defaultWriteContractResult,
+          data: "0xlock",
+        })
+        .mockReturnValue(defaultWriteContractResult);
+      mockUseWaitForTransactionReceipt
+        .mockReturnValueOnce(defaultWaitReceiptResult)
+        .mockReturnValueOnce(defaultWaitReceiptResult)
+        .mockReturnValueOnce({
+          isLoading: false,
+          isSuccess: true,
+          isError: false,
+          error: undefined,
+        })
+        .mockReturnValue(defaultWaitReceiptResult);
+
+      render(
+        <CollectionDelegationComponent
+          collection={collection}
+          setSection={setSection}
+        />
+      );
+
+      expect(screen.getByText(/Transaction Successful!/i)).toBeInTheDocument();
+      expect(latestInterval(mockUseReadContracts)).toBe(
+        POST_WRITE_POLL_INTERVAL_MS
+      );
+      expect(latestInterval(mockUseReadContract)).toBe(
+        POST_WRITE_POLL_INTERVAL_MS
+      );
+
+      act(() => {
+        jest.advanceTimersByTime(POST_WRITE_POLL_WINDOW_MS);
+      });
+
+      expect(latestInterval(mockUseReadContracts)).toBe(false);
+      expect(latestInterval(mockUseReadContract)).toBe(false);
+    });
   });
 });
