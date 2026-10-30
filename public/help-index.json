@@ -6935,7 +6935,7 @@
       "facts": [
         "Wave chat docs cover scroll behavior, unread dividers, unread controls, and serial jump navigation.",
         "Unread controls help users return to new content in long wave threads.",
-        "Serial jump navigation is separate from page-level browser navigation.",
+        "Serial jump navigation is separate from page-level browser navigation. Shared serial links load and highlight the selected accessible post. The one-time serialNo and divider parameters clear without reopening chat or jumping to newest messages. Scroll or use the bottom arrow to leave that position.",
         "If a drop thread cannot load, the error offers Try again instead of an empty conversation prompt. Already loaded replies remain visible during a failure."
       ],
       "canonical_path": "/waves",
