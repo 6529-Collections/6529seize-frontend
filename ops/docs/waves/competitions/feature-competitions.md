@@ -107,7 +107,9 @@ tabs. The collection lets you choose a different competition at any time.
    removes it. Negative votes are available only where the rules permit them.
 4. Competitions open on **Leaderboard**. Use the wave tab row for the selected competition. The leaderboard
    uses the familiar list/grid controls, sorting, rich drop cards and **Drop**
-   action. Rank competitions show the schedule; Approve competitions show
+   action. When entries are closed or your profile cannot submit, the leaderboard
+   omits the generic submission notice; submission forms still show eligibility feedback.
+   Rank competitions show the schedule; Approve competitions show
    approval thresholds, progress and approved counts. Winners use the existing
    podium or timeline for Rank and approved-drop cards for Approve. Outcomes
    use expandable reward cards; My votes shows editable vote rows and reset
@@ -118,9 +120,23 @@ tabs. The collection lets you choose a different competition at any time.
 
 ## Common Scenarios
 
+- A competition can use **Anonymous submissions**. Other users see each
+  submission without its author identity until that submission wins. A win
+  reveals only that entry's author; the same person's other entries stay
+  anonymous, including through later draws. You can still find your own entries
+  in **My submissions**. Content and metadata remain visible as submitted, so
+  avoid including identifying information if you want to stay anonymous.
+- Unrevealed anonymous submissions remain visible even when you have blocked
+  their author's account, so blocking cannot identify the author. Hiding a
+  specific drop and platform moderation still apply. Related author
+  notifications remain visible despite account blocks and identity mutes until
+  that entry wins; ordinary notifications retain their existing filters.
+
 - After a submission is accepted, its entry opens with a confirmation naming
   the competition and **View my entry**. **My submissions** is available on the
-  leaderboard and direct-entry view for your own signed-in profile.
+  leaderboard and direct-entry view for your own signed-in profile when you have
+  entries. It stays hidden while the initial lookup is loading or confirms no
+  entries; a failed lookup keeps the control available so you can retry.
   On the leaderboard, it is a text button beside **Drop**. When the toolbar
   needs two rows, view and sort controls occupy the top row; **My submissions**
   aligns left and **Drop** aligns right below.
@@ -163,6 +179,9 @@ tabs. The collection lets you choose a different competition at any time.
 
 ## Failure and Recovery
 
+- If an older upload cannot be used for an anonymous submission, upload the
+  media again and retry. The submission form keeps your other input.
+
 - If a leaderboard load fails, use **Retry**. Already loaded rows remain visible
   if a refresh fails. Entry recovery does not create another submission.
 - If a saved submission’s entry status cannot be loaded, use **Check again** or
@@ -189,6 +208,8 @@ state if the server has not enabled its support.
 The default controls navigation; it grants no participation, voting or Main
 Stage privileges. Main Stage privileges apply only to an explicitly designated
 competition, never automatically to all competitions in its wave.
+
+Original competitions and newer competitions use the same leaderboard, Votes, winners and Settings views. **My Votes** retains vote editing, selected-vote reset and **Explain vote**, which opens a reply in the shared wave chat. Main Stage retains its artwork submission wizard and artwork views; Curation retains supported-URL submissions and price sorting and filters; Quorum retains its proposal wizard. These experiences belong only to the competition with the corresponding designation.
 
 ## Related Pages
 

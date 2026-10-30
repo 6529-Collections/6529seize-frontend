@@ -105,12 +105,17 @@ export const reconcileIdentityFollowingAfterBlockChange = async (
   profileHandle: string | null | undefined
 ): Promise<void> => {
   if (profileHandle) {
+    // Preserve legacy eager clearing; viewer-scoped entries must only refetch.
+    // This helper has no viewer identity and must not overwrite other accounts.
     queryClient.setQueryData<ApiIdentitySubscriptionActions>(
       [QueryKey.IDENTITY_FOLLOWING_ACTIONS, profileHandle],
       { actions: [] }
     );
   }
   await Promise.allSettled([
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.IDENTITY_FOLLOWING],
+    }),
     queryClient.invalidateQueries({
       queryKey: [QueryKey.IDENTITY_FOLLOWING_ACTIONS],
     }),

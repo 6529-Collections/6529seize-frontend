@@ -144,7 +144,14 @@ export default function UserFollowBtn({
   readonly beforeFollowAction?: ReactNode | undefined;
 }) {
   const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);
-  const { setToast, requestAuth } = useContext(AuthContext);
+  const {
+    setToast,
+    requestAuth,
+    connectedProfile,
+    activeProfileProxy,
+    isAuthenticated,
+    isDirectProfileSession,
+  } = useContext(AuthContext);
   const [mutating, setMutating] = useState<boolean>(false);
   const [directMessageMutating, setDirectMessageMutating] =
     useState<boolean>(false);
@@ -152,10 +159,20 @@ export default function UserFollowBtn({
 
   const { data: subscriptions, isFetching } =
     useQuery<ApiIdentitySubscriptionActions>({
-      queryKey: [QueryKey.IDENTITY_FOLLOWING_ACTIONS, handle],
-      queryFn: async () =>
+      queryKey: [
+        QueryKey.IDENTITY_FOLLOWING_ACTIONS,
+        handle,
+        {
+          identityId: connectedProfile?.id ?? null,
+          proxyId: activeProfileProxy?.id ?? null,
+          isAuthenticated: isAuthenticated === true,
+          isDirectProfileSession: isDirectProfileSession === true,
+        },
+      ],
+      queryFn: async ({ signal }) =>
         await commonApiFetch<ApiIdentitySubscriptionActions>({
           endpoint: `/identities/${handle}/subscriptions`,
+          signal,
         }),
       enabled: !blocked && !blockStateLoading && !unblockPending,
     });
@@ -333,7 +350,9 @@ export default function UserFollowBtn({
               : "primary"
           }
           size={FOLLOW_BUTTON_SIZES[size]}
-          className="!tw-text-[13px]"
+          className={
+            size === UserFollowBtnSize.MEDIUM ? "!tw-text-[13px]" : undefined
+          }
         >
           <FollowStateIcon
             loading={actionLoading}

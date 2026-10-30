@@ -8,7 +8,13 @@ import { WaveLeaderboardRightSidebarActivityLogDrop } from "./WaveLeaderboardRig
 import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { SystemAdjustmentPill } from "@/components/common/SystemAdjustmentPill";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import {
+  AnonymousAuthorAvatar,
+  AnonymousAuthorName,
+} from "@/components/waves/drops/AnonymousDropAuthor";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import {
   ArrowRightIcon,
   ArrowTurnDownRightIcon,
@@ -19,7 +25,10 @@ import {
 } from "@/helpers/waves/wave-right-panel.helpers";
 
 interface WaveLeaderboardRightSidebarActivityLogProps {
-  readonly log: ApiWaveLog;
+  // Historical wire rows can retain SQL NULL despite the published Date model.
+  readonly log: Omit<ApiWaveLog, "created_at"> & {
+    readonly created_at: Date | null;
+  };
   readonly creditType: ApiWaveCreditType;
   readonly onDropClick: (() => void) | null;
 }
@@ -27,6 +36,7 @@ interface WaveLeaderboardRightSidebarActivityLogProps {
 export const WaveLeaderboardRightSidebarActivityLog: React.FC<
   WaveLeaderboardRightSidebarActivityLogProps
 > = ({ log, creditType, onDropClick }) => {
+  const locale = useBrowserLocale();
   const unknownProfile = waveRightPanelText(
     "waves.sidebar.rightPanel.activity.unknownProfile"
   );
@@ -45,7 +55,10 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
     log.drop_author?.primary_address,
     log.drop_author?.id,
   ]);
-  const dropCreatorLabel = dropCreatorProfile ?? unknownProfile;
+  const isAnonymousCreator = log.drop_author?.is_anonymous === true;
+  const dropCreatorLabel = isAnonymousCreator
+    ? t(locale, "competitions.anonymousAuthor")
+    : (dropCreatorProfile ?? unknownProfile);
   const oldVoteValue: unknown = log.contents["oldVote"];
   const newVoteValue: unknown = log.contents["newVote"];
   const oldVote = typeof oldVoteValue === "number" ? oldVoteValue : 0;
@@ -54,11 +67,18 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
     "waves.sidebar.rightPanel.activity.dropCreatorTitle",
     { profile: dropCreatorLabel }
   );
-  const dropCreatorContent = (
+  const dropCreatorContent = isAnonymousCreator ? (
+    <>
+      <AnonymousAuthorAvatar className="tw-h-5 tw-w-5" />
+      <span className="tw-min-w-0 tw-text-sm tw-font-medium">
+        <AnonymousAuthorName />
+      </span>
+    </>
+  ) : (
     <>
       {log.drop_author?.pfp ? (
         <Image
-          src={resolveIpfsUrlSync(log.drop_author.pfp)}
+          src={getScaledImageUri(log.drop_author.pfp, ImageScale.W_AUTO_H_50)}
           alt=""
           width={20}
           height={20}
@@ -95,7 +115,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
       >
         {log.invoker.pfp ? (
           <Image
-            src={resolveIpfsUrlSync(log.invoker.pfp)}
+            src={getScaledImageUri(log.invoker.pfp, ImageScale.W_200_H_200)}
             alt=""
             width={24}
             height={24}
@@ -114,9 +134,11 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
       </Link>
 
       <div className="tw-col-start-2 tw-row-start-1 tw-flex tw-items-center tw-justify-end tw-gap-1 md:tw-col-start-4">
-        <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-tabular-nums tw-text-iron-400">
-          {getTimeAgoShort(new Date(log.created_at).getTime())}
-        </span>
+        {log.created_at !== null && (
+          <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-tabular-nums tw-text-iron-400">
+            {getTimeAgoShort(new Date(log.created_at).getTime())}
+          </span>
+        )}
         {onDropClick && (
           <WaveLeaderboardRightSidebarActivityLogDrop
             onDropClick={onDropClick}
@@ -158,7 +180,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
             aria-hidden="true"
             className="tw-hidden tw-size-3.5 tw-flex-shrink-0 tw-text-iron-500 md:tw-block"
           />
-          {dropCreatorProfile ? (
+          {dropCreatorProfile && !isAnonymousCreator ? (
             <Link
               href={`/${dropCreatorProfile}`}
               className="tw-group tw-flex tw-min-h-6 tw-min-w-0 tw-items-center tw-gap-2 tw-no-underline tw-transition-opacity tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-opacity-80"

@@ -1,3 +1,4 @@
+import type { ApiModerationReviewCasePage } from "@/generated/models/ApiModerationReviewCasePage";
 import type { ApiModerationCheck } from "@/generated/models/ApiModerationCheck";
 import type { ApiModerationCheckDetail } from "@/generated/models/ApiModerationCheckDetail";
 import type { ApiModerationCheckPage } from "@/generated/models/ApiModerationCheckPage";
@@ -6,6 +7,7 @@ import type { ApiModerationActionRequest } from "@/generated/models/ApiModeratio
 import { commonApiFetch, commonApiPost } from "./common-api";
 
 export interface ModerationCheckFilters {
+  case_id?: string;
   subject_type?: ApiModerationCheck["subject_type"];
   outcome?: ApiModerationCheck["outcome"];
   policy_family?: ApiModerationCheck["policy_family"];
@@ -84,5 +86,17 @@ export const applyModerationAction = (
   commonApiPost({
     endpoint: `content-moderation/checks/${encodeURIComponent(id)}/actions`,
     body,
+    errorMode: "structured",
+  });
+
+export const fetchModerationReviewCases = (
+  before: string | undefined,
+  signal: AbortSignal
+): Promise<ApiModerationReviewCasePage> =>
+  commonApiFetch({
+    endpoint: "content-moderation/checks/cases",
+    params: { ...(before ? { before } : {}), limit: "50" },
+    signal,
+    cache: "no-store",
     errorMode: "structured",
   });

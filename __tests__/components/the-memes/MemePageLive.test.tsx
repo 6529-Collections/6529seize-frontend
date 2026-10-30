@@ -652,6 +652,9 @@ describe("MemePageLiveRightMenu distribution link", () => {
 
     expect(screen.getByTestId("marketplace-links")).toBeInTheDocument();
     expect(
+      screen.getByRole("button", { name: "View listings & offers" })
+    ).toBeInTheDocument();
+    expect(
       screen.getByText("Mint price").parentElement?.parentElement
     ).toHaveClass("tw-flex", "tw-flex-wrap");
   });
@@ -663,6 +666,9 @@ describe("MemePageLiveRightMenu distribution link", () => {
     render(<MemePageLiveRightMenu show nft={createNft()} />);
 
     expect(screen.queryByTestId("marketplace-links")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "View listings & offers" })
+    ).not.toBeInTheDocument();
   });
 });
 

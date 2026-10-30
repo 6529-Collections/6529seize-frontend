@@ -42,7 +42,7 @@ import {
   ReactQueryWrapperContext,
 } from "../react-query-wrapper/ReactQueryWrapper";
 import { AuthSignModal } from "./AuthSignModal";
-import { createAuthRequestActions } from "./authActions";
+import { useAuthRequestActions } from "./useAuthRequestActions";
 import { AuthContext } from "./authContext";
 import {
   getAuthSessionRole,
@@ -550,7 +550,7 @@ export default function Auth({
   });
 
   const { onActiveProfileProxy, requestAuth, requestSessionUpgrade } =
-    createAuthRequestActions({
+    useAuthRequestActions({
       activeProfileProxy,
       address,
       authRolloutSettings,
