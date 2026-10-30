@@ -242,7 +242,7 @@ const PACKS = [
   {
     ...localPack(
       "test:e2e:smoke",
-      "Fast @smoke subset of home, about, The Memes, and the local Additional Action preview.",
+      "Fast @smoke subset of home, about, and The Memes.",
       SMOKE_SPECS,
       { grep: "@smoke", projects: [DESKTOP] }
     ),
