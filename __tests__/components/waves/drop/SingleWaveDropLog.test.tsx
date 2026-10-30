@@ -34,12 +34,38 @@ jest.mock("@/components/common/SystemAdjustmentPill", () => ({
 }));
 
 describe("SingleWaveDropLog", () => {
+  beforeEach(() => {
+    mobileMock.mockReturnValue(false);
+  });
   const baseLog: any = {
     created_at: Date.now(),
     invoker: { handle: "0xabc", pfp: "" },
     contents: { oldVote: 0, newVote: 1 },
     id: "1",
   };
+  it.each([false, true])(
+    "keeps historical rows without a timestamp in compact layout %s",
+    (compact) => {
+      mobileMock.mockReturnValue(compact);
+      const { container } = render(
+        <SingleWaveDropLog
+          log={{
+            ...baseLog,
+            created_at: null,
+            invoker_proxy: { id: "original-proxy" },
+          }}
+          creditType={ApiWaveCreditType.Rep}
+        />
+      );
+      expect(screen.getByText("0xabc")).toBeInTheDocument();
+      expect(screen.getByText("voted")).toBeInTheDocument();
+      expect(
+        screen.getByText((_, element) => element?.textContent === "1 Rep")
+      ).toBeInTheDocument();
+      expect(screen.queryByText("1h")).toBeNull();
+      expect(container.querySelector("svg")).toBeNull();
+    }
+  );
   it("renders desktop layout with pill", () => {
     render(
       <SingleWaveDropLog

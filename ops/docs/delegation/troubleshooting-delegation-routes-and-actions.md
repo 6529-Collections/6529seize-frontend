@@ -76,8 +76,10 @@ collection actions stay blocked, or Wallet Checker output looks wrong.
 ## Limitations / Notes
 
 - HTML-backed delegation sections depend on external content availability.
-- Collection reads refresh on a polling cycle (about every 10 seconds), so
-  recent writes may appear stale between polls.
+- Collection reads load once, refresh when you return to the tab, and re-check
+  every few seconds for about 30 seconds after a confirmed write. A change made
+  elsewhere (another device or tab) may not show until you switch back to this
+  tab or reload.
 - Wallet Checker may show empty-result fallback text instead of a dedicated
   API-error panel.
 

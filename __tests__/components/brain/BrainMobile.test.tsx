@@ -81,13 +81,21 @@ jest.mock("@/components/navigation/ViewContext", () => ({
 }));
 
 let dropData: any = null;
+let mockDropError: Error | null = null;
+let mockDropFetching = false;
+const mockRefetchDrop = jest.fn();
 let waveData: any = null;
 let mockIsCompleted = false;
 let mockFirstDecisionDone = true;
 
 jest.mock("@tanstack/react-query", () => ({
   keepPreviousData: {},
-  useQuery: jest.fn(() => ({ data: dropData })),
+  useQuery: jest.fn(() => ({
+    data: dropData,
+    error: mockDropError,
+    isFetching: mockDropFetching,
+    refetch: mockRefetchDrop,
+  })),
 }));
 
 jest.mock("@/hooks/useWaveData", () => ({
@@ -356,6 +364,8 @@ describe("BrainMobile", () => {
     mockReplace.mockClear();
     mockCurrentWaveView = null;
     dropData = null;
+    mockDropError = null;
+    mockDropFetching = false;
     waveData = null;
     isApp = true;
     mockActiveWaveId = null;
@@ -386,6 +396,63 @@ describe("BrainMobile", () => {
   afterEach(() => {
     jest.restoreAllMocks();
     globalThis.history.replaceState(null, "", "/");
+  });
+
+  it("covers the native wave as soon as the URL requests a drop", () => {
+    mockPathname = "/waves/wave-1";
+    mockSearchParams.set("drop", "d1");
+    const { rerender } = render(<BrainMobile>child</BrainMobile>);
+    expect(
+      screen.getByRole("status", { name: "Loading…" })
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("drop")).not.toBeInTheDocument();
+    dropData = { id: "old-drop" };
+    rerender(<BrainMobile>child</BrainMobile>);
+    expect(screen.getByTestId("single-drop-loading")).toBeInTheDocument();
+    expect(screen.queryByTestId("drop")).not.toBeInTheDocument();
+    dropData = { id: "d1" };
+    rerender(<BrainMobile>child</BrainMobile>);
+    expect(screen.queryByTestId("single-drop-loading")).not.toBeInTheDocument();
+    expect(screen.getByTestId("drop")).toBeInTheDocument();
+  });
+
+  it("closes an unavailable drop immediately and preserves native route state", () => {
+    mockPathname = "/waves/wave-1";
+    mockSearchParams.set("drop", "d1");
+    mockDropError = new Error("Unavailable");
+    window.history.replaceState(
+      { savedTab: "chat" },
+      "",
+      "/waves/wave-1?drop=d1&tab=chat#message"
+    );
+    render(<BrainMobile>child</BrainMobile>);
+    fireEvent.keyDown(screen.getByRole("button", { name: "Close panel" }), {
+      key: "Escape",
+    });
+    expect(
+      window.location.pathname + window.location.search + window.location.hash
+    ).toBe("/waves/wave-1?tab=chat#message");
+    expect(window.history.state).toEqual({ savedTab: "chat" });
+    expect(mockReplace).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("single-drop-loading")).not.toBeInTheDocument();
+  });
+
+  it("shows pending feedback during a retry that retains the previous error", () => {
+    mockSearchParams.set("drop", "d1");
+    mockDropError = new Error("Unavailable");
+    const { rerender } = render(<BrainMobile>child</BrainMobile>);
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(mockRefetchDrop).toHaveBeenCalledTimes(1);
+    mockDropFetching = true;
+    rerender(<BrainMobile>child</BrainMobile>);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Try again" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("status", { name: "Loading…" })
+    ).toBeInTheDocument();
   });
 
   it("renders BrainDesktopDrop when drop is open", () => {
@@ -668,7 +735,8 @@ describe("BrainMobile", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId("myvotes")).toBeInTheDocument();
+      expect(latestTabsProps.activeView).toBe(BrainView.MY_VOTES);
+      expect(screen.getByText("child")).toBeInTheDocument();
     });
   });
 
@@ -780,7 +848,10 @@ describe("BrainMobile", () => {
     mockCurrentWaveView = { waveId: "1", view: BrainView.LEADERBOARD };
     render(<BrainMobile>child</BrainMobile>);
 
-    expect(await screen.findByTestId("leaderboard")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(latestTabsProps.activeView).toBe(BrainView.LEADERBOARD);
+      expect(screen.getByText("child")).toBeInTheDocument();
+    });
   });
 
   it.each([
@@ -951,35 +1022,44 @@ describe("BrainMobile", () => {
     });
   });
 
-  it("falls back to default when a rank-only view becomes unavailable", async () => {
-    mockSearchParams.set("wave", "1");
-    waveData = createWave(false);
+  it.each(["wave type", "outcome visibility"])(
+    "falls back to default when the outcome %s gate becomes unavailable",
+    async (gate) => {
+      mockSearchParams.set("wave", "1");
+      waveData = createWave(false);
 
-    const { rerender } = render(<BrainMobile>child</BrainMobile>);
+      const { rerender } = render(<BrainMobile>child</BrainMobile>);
 
-    await waitFor(() => expect(screen.getByTestId("tabs")).toBeInTheDocument());
+      await waitFor(() =>
+        expect(screen.getByTestId("tabs")).toBeInTheDocument()
+      );
 
-    act(() => {
-      latestTabsProps.onViewChange(BrainView.OUTCOME);
-    });
+      act(() => {
+        latestTabsProps.onViewChange(BrainView.OUTCOME);
+      });
 
-    await waitFor(() =>
-      expect(screen.getByTestId("outcome")).toBeInTheDocument()
-    );
+      await waitFor(() => {
+        expect(latestTabsProps.activeView).toBe(BrainView.OUTCOME);
+        expect(screen.getByText("child")).toBeInTheDocument();
+      });
 
-    mockUseWave.mockReturnValue({
-      isMemesWave: false,
-      isCurationWave: false,
-      isRankWave: false,
-      isDm: false,
-    });
-    rerender(<BrainMobile>child</BrainMobile>);
+      if (gate === "outcome visibility") mockOutcomesVisible = false;
+      else
+        mockUseWave.mockReturnValue({
+          isMemesWave: false,
+          isCurationWave: false,
+          isRankWave: false,
+          isDm: false,
+        });
+      rerender(<BrainMobile>child</BrainMobile>);
 
-    await waitFor(() => {
-      expect(screen.queryByTestId("outcome")).toBeNull();
-      expect(screen.getByText("child")).toBeInTheDocument();
-    });
-  });
+      await waitFor(() => {
+        expect(latestTabsProps.activeView).toBe(BrainView.DEFAULT);
+        expect(screen.queryByTestId("outcome")).toBeNull();
+        expect(screen.getByText("child")).toBeInTheDocument();
+      });
+    }
+  );
 
   it("falls back to default when winners becomes unavailable", async () => {
     mockSearchParams.set("wave", "1");
@@ -994,14 +1074,16 @@ describe("BrainMobile", () => {
       latestTabsProps.onViewChange(BrainView.WINNERS);
     });
 
-    await waitFor(() =>
-      expect(screen.getByTestId("winners")).toBeInTheDocument()
-    );
+    await waitFor(() => {
+      expect(latestTabsProps.activeView).toBe(BrainView.WINNERS);
+      expect(screen.getByText("child")).toBeInTheDocument();
+    });
 
     mockFirstDecisionDone = false;
     rerender(<BrainMobile>child</BrainMobile>);
 
     await waitFor(() => {
+      expect(latestTabsProps.activeView).toBe(BrainView.DEFAULT);
       expect(screen.queryByTestId("winners")).toBeNull();
       expect(screen.getByText("child")).toBeInTheDocument();
     });

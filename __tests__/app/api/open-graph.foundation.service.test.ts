@@ -1,3 +1,5 @@
+jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
+
 import { createFoundationPlan } from "@/app/api/open-graph/foundation/service";
 
 describe("createFoundationPlan", () => {

@@ -9,6 +9,7 @@ import {
   isUnservableDotPath,
   PUBLIC_IMAGE_DIRECTORIES,
   ROOT_PUBLIC_FILES,
+  SERVED_WELL_KNOWN_PATHS,
 } from "@/lib/proxy/publicPaths";
 
 const PUBLIC_DIR = path.join(process.cwd(), "public");
@@ -87,14 +88,39 @@ describe("public path contract", () => {
     expect(gated).toEqual([]);
   });
 
-  // Proxy answers every dot-prefixed path (/.git, /.env, /.well-known/*) with
-  // a plain 404. Adding such a file or route needs an allowlist there first.
+  // Proxy answers dot-prefixed paths (/.git, /.env, /.well-known/*) with a
+  // plain 404 unless SERVED_WELL_KNOWN_PATHS lists the exact path.
   it("has no dot-prefixed public files that the 404 rule would shadow", () => {
     expect(listDotPrefixedEntries(PUBLIC_DIR)).toEqual([]);
   });
 
-  it("has no dot-prefixed app routes that the 404 rule would shadow", () => {
-    expect(listDotPrefixedEntries(APP_DIR)).toEqual([]);
+  it("has no dot-prefixed app routes besides .well-known", () => {
+    expect(listDotPrefixedEntries(APP_DIR)).toEqual([
+      path.join(APP_DIR, ".well-known"),
+    ]);
+  });
+
+  it("allowlists exactly the routes under app/.well-known", () => {
+    const wellKnownDir = path.join(APP_DIR, ".well-known");
+    const routes = fs
+      .readdirSync(wellKnownDir, { recursive: true, withFileTypes: true })
+      .filter((entry) => entry.isFile() && /^route\.tsx?$/.test(entry.name))
+      .map(
+        (entry) =>
+          `/.well-known/${path
+            .relative(wellKnownDir, entry.parentPath)
+            .split(path.sep)
+            .join("/")}`
+      );
+    expect(routes).toHaveLength(SERVED_WELL_KNOWN_PATHS.size);
+    expect(new Set(routes)).toEqual(SERVED_WELL_KNOWN_PATHS);
+  });
+
+  it("lets the served well-known files past the staging gate", () => {
+    for (const pathname of SERVED_WELL_KNOWN_PATHS) {
+      expect(isStaticAssetPath(pathname)).toBe(true);
+    }
+    expect(isStaticAssetPath("/.well-known/security.txt")).toBe(false);
   });
 });
 
@@ -105,6 +131,10 @@ describe("isUnservableDotPath", () => {
     "/.env.local",
     "/.well-known/security.txt",
     "/.well-known/",
+    "/.well-known/assetlinks.json",
+    "/.well-known/apple-app-site-association/",
+    "/.well-known/Apple-App-Site-Association",
+    "/%2ewell-known/apple-app-site-association",
     "/%2egit/HEAD",
     "/%2Eenv",
     "/punk6529/.config",
@@ -121,6 +151,7 @@ describe("isUnservableDotPath", () => {
     "/api/version",
     "/review-data/6529-stream/index.json",
     "/a..b",
+    "/.well-known/apple-app-site-association",
   ])("leaves %s to normal routing", (pathname) => {
     expect(isUnservableDotPath(pathname)).toBe(false);
   });

@@ -42,6 +42,18 @@ jest.mock("@/components/waves/drops/DropAuthorBadges", () => ({
 }));
 
 describe("DropMinimalIdentityRow", () => {
+  it("does not instantiate badge or tooltip components for anonymous authors", () => {
+    const drop = {
+      id: "drop",
+      created_at: 1,
+      author: { is_anonymous: true, handle: "Anonymous" },
+      wave: { id: "wave" },
+    } as React.ComponentProps<typeof DropMinimalIdentityRow>["drop"];
+    render(<DropMinimalIdentityRow drop={drop} />);
+    expect(screen.getByText("Anonymous")).toBeInTheDocument();
+    expect(screen.queryByTestId("drop-author-badges")).toBeNull();
+    expect(screen.queryByTestId("tooltip-wrapper")).toBeNull();
+  });
   const createDrop = (
     handle: string | null,
     primaryAddress: string,

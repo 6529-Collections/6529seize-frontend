@@ -54,7 +54,11 @@ const expectMaxVotes = (value: string, label = "Max for wave") => {
 describe("MyStreamWaveMyVoteInput", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useQueryClientMock.mockReturnValue({ invalidateQueries, setQueriesData });
+    useQueryClientMock.mockReturnValue({
+      invalidateQueries,
+      setQueriesData,
+      getQueryData: jest.fn(),
+    });
     useMutationMock.mockImplementation((config: any) => ({
       mutateAsync: async (variables: {
         rate: number;
@@ -606,9 +610,7 @@ describe("MyStreamWaveMyVoteInput", () => {
       { wrapper }
     );
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Reply with vote rationale" })
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Explain vote" }));
 
     expect(onExplainVote).toHaveBeenCalledWith(4, 0);
   });
@@ -636,9 +638,7 @@ describe("MyStreamWaveMyVoteInput", () => {
     await waitFor(() =>
       expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("5")
     );
-    fireEvent.click(
-      screen.getByRole("button", { name: "Reply with vote rationale" })
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Explain vote" }));
 
     expect(onExplainVote).toHaveBeenCalledWith(5, 3);
   });
@@ -671,9 +671,7 @@ describe("MyStreamWaveMyVoteInput", () => {
       expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("10")
     );
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Reply with vote rationale" })
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Explain vote" }));
 
     expect(onExplainVote).toHaveBeenCalledWith(10, 2);
   });

@@ -1,4 +1,3 @@
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import type { DeviceInfo } from "@capacitor/device";
 import { registerPushNotificationWithRetry } from "@/components/notifications/notificationsPushRegistration";
 import { commonApiPost } from "@/services/api/common-api";
@@ -11,8 +10,9 @@ let mockAccounts = [
   { profileId: "A", jwt: "jwt-A" },
   { profileId: "B", jwt: "jwt-B" },
 ];
+const mockRetiredCompetitionFlag = jest.fn(() => false);
 jest.mock("@/helpers/competition.helpers", () => ({
-  isMultiCompetitionEnabled: jest.fn(() => false),
+  isMultiCompetitionEnabled: () => mockRetiredCompetitionFlag(),
 }));
 jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: () => "jwt-A",
@@ -31,7 +31,7 @@ jest.mock("@sentry/nextjs", () => ({
 const info = { platform: "ios" } as DeviceInfo;
 beforeEach(() => {
   jest.clearAllMocks();
-  jest.mocked(isMultiCompetitionEnabled).mockReturnValue(false);
+  mockRetiredCompetitionFlag.mockReturnValue(false);
   jest
     .mocked(completePushInstallationMigration)
     .mockReset()
@@ -113,9 +113,9 @@ it("preserves single-account registration and completes its migration", async ()
 });
 
 it.each([false, true])(
-  "registers native push capability only when enabled (%s)",
+  "registers competition push capability independently of retired rollout settings (%s)",
   async (enabled) => {
-    jest.mocked(isMultiCompetitionEnabled).mockReturnValue(enabled);
+    mockRetiredCompetitionFlag.mockReturnValue(enabled);
     await registerPushNotificationWithRetry(
       "new-phone",
       info,
@@ -123,9 +123,7 @@ it.each([false, true])(
       "A"
     );
     for (const [request] of jest.mocked(commonApiPost).mock.calls) {
-      if (enabled)
-        expect(request.body).toHaveProperty("include_competitions", true);
-      else expect(request.body).not.toHaveProperty("include_competitions");
+      expect(request.body).toHaveProperty("include_competitions", true);
     }
   }
 );

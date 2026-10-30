@@ -1,4 +1,5 @@
 import { buildPreviewDrop } from "@/components/waves/memes/submission/utils/buildPreviewDrop";
+import { createInitialState } from "@/components/waves/memes/submission/hooks/artworkSubmissionFormState";
 
 describe("buildPreviewDrop", () => {
   it("sets placeholder score and voter count for preview cards", () => {
@@ -42,7 +43,7 @@ describe("buildPreviewDrop", () => {
     expect(previewDrop.raters_count).toBe(69);
   });
 
-  it("copies the additional action promise flag into the preview drop", () => {
+  it("copies the additional action declaration and plan into the preview drop", () => {
     const previewDrop = buildPreviewDrop({
       wave: {
         id: "wave-1",
@@ -64,7 +65,10 @@ describe("buildPreviewDrop", () => {
         title: "Preview Title",
         description: "Preview Description",
       } as any,
-      operationalData: undefined,
+      operationalData: {
+        ...createInitialState({}).operationalData,
+        additional_action_plan: "A free exhibition if selected.",
+      },
       isAdditionalActionPromised: true,
       mediaSelection: {
         mediaSource: "url",
@@ -78,5 +82,9 @@ describe("buildPreviewDrop", () => {
     });
 
     expect(previewDrop.is_additional_action_promised).toBe(true);
+    expect(previewDrop.metadata).toContainEqual({
+      data_key: "additional_action_plan",
+      data_value: "A free exhibition if selected.",
+    });
   });
 });

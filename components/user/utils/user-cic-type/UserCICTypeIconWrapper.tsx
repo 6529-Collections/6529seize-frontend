@@ -42,7 +42,7 @@ export default function UserCICTypeIconWrapper({
           <Tooltip
             id={tooltipId}
             clickable={true}
-            className="max-sm:!tw-left-1/2 max-sm:-tw-translate-x-1/2"
+            className="!tw-bg-iron-950 max-sm:!tw-left-1/2 max-sm:-tw-translate-x-1/2"
             classNameArrow="max-sm:tw-hidden"
             place="right"
             positionStrategy="fixed"

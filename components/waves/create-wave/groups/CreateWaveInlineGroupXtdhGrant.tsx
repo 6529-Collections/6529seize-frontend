@@ -1,6 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
+import { scrollCriteriaWithinParent } from "@/components/groups/assignment/scrollCriteriaWithinParent";
+import {
+  GROUP_CREATE_TITLE_STYLES,
+  GROUP_CREATE_DESCRIPTION_STYLES,
+} from "@/components/groups/page/create/GroupCreate.styles";
 import { useDebounce } from "react-use";
 import IdentitySearch, {
   IdentitySearchSize,
@@ -14,6 +19,7 @@ import { t } from "@/i18n/messages";
 import GroupCreateXtdhGrantSelection from "@/components/groups/page/create/config/xtdh-grant/GroupCreateXtdhGrantSelection";
 import GroupCreateXtdhGrantRow from "@/components/groups/page/create/config/xtdh-grant/subcomponents/GroupCreateXtdhGrantRow";
 import Button from "@/components/utils/button/Button";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import {
   DEFAULT_BENEFICIARY_GRANT_MATCH_MODE,
   getGrantCompatibleMatchMode,
@@ -35,6 +41,12 @@ const STATUS_LABELS: Record<ApiXTdhGrantStatus, string> = {
   [ApiXTdhGrantStatus.Failed]: "Failed",
 };
 
+const STATUS_ITEMS = STATUS_OPTIONS.map((status) => ({
+  key: status,
+  value: status,
+  label: STATUS_LABELS[status],
+}));
+
 interface GrantFinderFilters {
   readonly selectedGrantor: string | null;
   readonly targetCollectionInput: string;
@@ -51,12 +63,10 @@ const INITIAL_GRANT_FINDER_FILTERS: GrantFinderFilters = {
 
 const GRANT_PRESENTATIONS = {
   network: {
-    titleWeight: "tw-font-medium",
-    description: "tw-mb-0 tw-mt-2 tw-text-xxs tw-leading-5 tw-text-iron-350",
     actionAlignment: "tw-justify-start",
     changeVariant: "secondary",
     actionSize: "sm",
-    finder: "tw-mt-6 tw-space-y-5",
+    finder: "tw-mt-4 tw-space-y-4",
     iconPosition: "tw-top-1/2 -tw-translate-y-1/2",
     filterGap: "tw-gap-x-4 tw-gap-y-2",
     filterLayout:
@@ -72,8 +82,6 @@ const GRANT_PRESENTATIONS = {
     pagination: "",
   },
   standard: {
-    titleWeight: "tw-font-semibold",
-    description: "tw-m-0 tw-mt-0.5 tw-text-sm tw-text-iron-400",
     actionAlignment: "tw-justify-end",
     changeVariant: "tertiary",
     actionSize: "md",
@@ -101,6 +109,7 @@ export default function CreateWaveInlineGroupXtdhGrant({
   beneficiaryGrantMatchMode,
   setBeneficiaryGrant,
   networkPresentation = false,
+  scrollResultsWithEditor = false,
 }: {
   readonly beneficiaryGrantId: ApiCreateGroupDescription["is_beneficiary_of_grant_id"];
   readonly beneficiaryGrantMatchMode: ApiCreateGroupDescription["is_beneficiary_of_grant_match_mode"];
@@ -109,6 +118,7 @@ export default function CreateWaveInlineGroupXtdhGrant({
     matchMode: ApiCreateGroupDescription["is_beneficiary_of_grant_match_mode"]
   ) => void;
   readonly networkPresentation?: boolean;
+  readonly scrollResultsWithEditor?: boolean;
 }) {
   const presentation = networkPresentation
     ? GRANT_PRESENTATIONS.network
@@ -118,6 +128,10 @@ export default function CreateWaveInlineGroupXtdhGrant({
   const locale = useBrowserLocale();
 
   const [isChangingGrant, setIsChangingGrant] = useState(false);
+  const statusTabsRef = useRef<HTMLDivElement>(null);
+  const selectionRef = useRef<HTMLDivElement>(null);
+  const pendingSelectionFocus = useRef<string | null>(null);
+  const titleId = useId();
   const [grantFinderFilters, setGrantFinderFilters] =
     useState<GrantFinderFilters>(INITIAL_GRANT_FINDER_FILTERS);
   const {
@@ -126,8 +140,22 @@ export default function CreateWaveInlineGroupXtdhGrant({
     targetCollectionFilter,
     targetCollectionInput,
   } = grantFinderFilters;
+  const showClearFilters =
+    selectedGrantor !== null ||
+    targetCollectionInput.length > 0 ||
+    targetCollectionFilter.length > 0;
   const showGrantFinder = !hasSelectedGrant || isChangingGrant;
   const lookupGrantId = hasSelectedGrant ? normalizedGrantId : null;
+
+  useLayoutEffect(() => {
+    if (showGrantFinder || pendingSelectionFocus.current !== normalizedGrantId)
+      return;
+    pendingSelectionFocus.current = null;
+    // The clicked row unmounts with the finder. Keep the selection in view
+    // without scrolling the outer app shell or waiting for its lookup request.
+    selectionRef.current?.focus({ preventScroll: true });
+    scrollCriteriaWithinParent(selectionRef.current, "start");
+  }, [normalizedGrantId, showGrantFinder]);
 
   useDebounce(
     () =>
@@ -186,248 +214,263 @@ export default function CreateWaveInlineGroupXtdhGrant({
   };
 
   const onResetFilters = () => {
-    setGrantFinderFilters(INITIAL_GRANT_FINDER_FILTERS);
+    setGrantFinderFilters((current) => ({
+      ...INITIAL_GRANT_FINDER_FILTERS,
+      selectedStatus: current.selectedStatus,
+    }));
+    statusTabsRef.current
+      ?.querySelector<HTMLButtonElement>('[role="tab"][aria-selected="true"]')
+      ?.focus();
   };
 
   return (
-    <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-shadow sm:tw-p-5">
-      <div>
-        <p
-          className={`tw-m-0 tw-text-base tw-text-iron-50 ${presentation.titleWeight}`}
-        >
-          xTDH Grant Beneficiary
-        </p>
-        <p className={presentation.description}>
-          Require identities to be beneficiaries of a selected xTDH grant.
-        </p>
-      </div>
-
-      <GroupCreateXtdhGrantSelection
-        quiet={networkPresentation}
-        errorMessage={errorMessage}
-        grant={grant}
-        isFetching={isFetching}
-        isLookupFresh={isLookupFresh}
-        lookupGrantId={lookupGrantId}
-        matchMode={effectiveMatchMode}
-        setMatchMode={(matchMode) =>
-          setBeneficiaryGrant(
-            hasSelectedGrant ? normalizedGrantId : null,
-            matchMode
-          )
-        }
-        showLookupError={showLookupError}
-        showNonGrantedWarning={showNonGrantedWarning}
-      />
-
-      {hasSelectedGrant && (
-        <div
-          className={`tw-mt-3 tw-flex tw-flex-wrap tw-gap-2 ${presentation.actionAlignment}`}
-        >
-          <Button
-            variant={presentation.changeVariant}
-            size={presentation.actionSize}
-            onClick={() => setIsChangingGrant((current) => !current)}
-            aria-expanded={isChangingGrant}
-            aria-controls="create-wave-inline-xtdh-grant-finder"
-          >
-            {isChangingGrant
-              ? t(locale, "waves.create.groups.xtdhGrant.cancelChange")
-              : t(locale, "waves.create.groups.xtdhGrant.change")}
-          </Button>
-          <Button
-            variant="destructiveOutline"
-            size={presentation.actionSize}
-            onClick={onRemoveGrant}
-          >
-            {t(locale, "waves.create.groups.xtdhGrant.remove")}
-          </Button>
+    <div
+      ref={selectionRef}
+      data-group-criteria-sections
+      role="group"
+      aria-labelledby={titleId}
+      tabIndex={-1}
+      className="tw-scroll-mt-4 focus:tw-outline-none"
+    >
+      <div data-grant-filter-panel>
+        <div>
+          <p id={titleId} className={GROUP_CREATE_TITLE_STYLES}>
+            xTDH Grant Beneficiary
+          </p>
+          <p className={GROUP_CREATE_DESCRIPTION_STYLES}>
+            Require identities to be beneficiaries of a selected xTDH grant.
+          </p>
         </div>
-      )}
 
-      {showGrantFinder && (
-        <div
-          id="create-wave-inline-xtdh-grant-finder"
-          className={presentation.finder}
-        >
-          <div className="tw-grid tw-grid-cols-1 tw-gap-3 lg:tw-grid-cols-2">
-            <IdentitySearch
-              label="Grantor"
-              size={IdentitySearchSize.SM}
-              iconPositionClassName={presentation.iconPosition}
-              identity={selectedGrantor}
-              setIdentity={(identity) =>
-                setGrantFinderFilters((current) => ({
-                  ...current,
-                  selectedGrantor: identity ? identity.toLowerCase() : null,
-                }))
-              }
-            />
-            <input
-              type="text"
-              value={targetCollectionInput}
-              onChange={(event) =>
-                setGrantFinderFilters((current) => ({
-                  ...current,
-                  targetCollectionInput: event.target.value,
-                }))
-              }
-              placeholder="Collection name"
-              aria-label="Collection name"
-              className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-3 tw-text-base tw-text-iron-50 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-650 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-text-sm"
-            />
-          </div>
+        <GroupCreateXtdhGrantSelection
+          quiet={networkPresentation}
+          errorMessage={errorMessage}
+          grant={grant}
+          isFetching={isFetching}
+          isLookupFresh={isLookupFresh}
+          lookupGrantId={lookupGrantId}
+          matchMode={effectiveMatchMode}
+          setMatchMode={(matchMode) =>
+            setBeneficiaryGrant(
+              hasSelectedGrant ? normalizedGrantId : null,
+              matchMode
+            )
+          }
+          showLookupError={showLookupError}
+          showNonGrantedWarning={showNonGrantedWarning}
+        />
 
+        {hasSelectedGrant && (
           <div
-            className={`tw-flex tw-flex-wrap tw-items-end tw-justify-between ${presentation.filterGap}`}
+            className={`tw-mt-4 tw-flex tw-flex-wrap tw-gap-2 ${presentation.actionAlignment}`}
           >
-            <div className={presentation.filterLayout}>
-              <span className={presentation.filterLabel}>Filter by status</span>
-              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-                {STATUS_OPTIONS.map((status) => {
-                  const isActive = selectedStatus === status;
-                  let statusClasses = isActive
-                    ? "tw-border-primary-400 tw-bg-primary-400/20 tw-text-primary-300"
-                    : "tw-border-iron-700 tw-bg-iron-900 tw-text-iron-300 desktop-hover:hover:tw-border-iron-600";
-                  if (networkPresentation) {
-                    statusClasses = isActive
-                      ? "tw-bg-white/10 tw-font-medium tw-text-iron-100"
-                      : "tw-bg-white/[0.03] tw-font-normal tw-text-iron-500 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-iron-200";
-                  }
-                  return (
-                    <button
-                      key={status}
-                      type="button"
-                      aria-pressed={isActive}
-                      onClick={() =>
-                        setGrantFinderFilters((current) => ({
-                          ...current,
-                          selectedStatus: status,
-                        }))
-                      }
-                      className={
-                        networkPresentation
-                          ? `tw-min-h-8 tw-rounded-lg tw-border-0 tw-px-3 tw-py-1.5 tw-text-xxs tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${statusClasses}`
-                          : `tw-rounded-md tw-border tw-border-solid tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-transition tw-duration-200 ${statusClasses}`
-                      }
-                    >
-                      {STATUS_LABELS[status]}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            {networkPresentation ? (
-              <button
-                type="button"
-                onClick={onResetFilters}
-                className="tw-min-h-8 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-py-1.5 tw-text-xxs tw-font-medium tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-100"
-              >
-                Clear filters
-              </button>
-            ) : (
-              <Button variant="tertiary" size="md" onClick={onResetFilters}>
-                Clear filters
-              </Button>
-            )}
+            <Button
+              variant={presentation.changeVariant}
+              size={presentation.actionSize}
+              onClick={() => setIsChangingGrant((current) => !current)}
+              aria-expanded={isChangingGrant}
+              aria-controls="create-wave-inline-xtdh-grant-finder"
+            >
+              {isChangingGrant
+                ? t(locale, "waves.create.groups.xtdhGrant.cancelChange")
+                : t(locale, "waves.create.groups.xtdhGrant.change")}
+            </Button>
+            <Button
+              variant="destructiveOutline"
+              size={presentation.actionSize}
+              onClick={onRemoveGrant}
+            >
+              {t(locale, "waves.create.groups.xtdhGrant.remove")}
+            </Button>
           </div>
+        )}
 
-          <div className={presentation.results}>
-            <div className={presentation.resultsHeader}>
-              <p className={presentation.resultsTitle}>Results</p>
-              <p className="tw-m-0 tw-text-xs tw-text-iron-500">
-                {totalCount} total
-              </p>
+        {showGrantFinder && (
+          <div
+            id="create-wave-inline-xtdh-grant-finder"
+            className={presentation.finder}
+          >
+            <div className="tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-2">
+              <IdentitySearch
+                label="Grantor"
+                size={IdentitySearchSize.SM}
+                iconPositionClassName={presentation.iconPosition}
+                identity={selectedGrantor}
+                setIdentity={(identity) =>
+                  setGrantFinderFilters((current) => ({
+                    ...current,
+                    selectedGrantor: identity ? identity.toLowerCase() : null,
+                  }))
+                }
+              />
+              <input
+                type="text"
+                value={targetCollectionInput}
+                onChange={(event) =>
+                  setGrantFinderFilters((current) => ({
+                    ...current,
+                    targetCollectionInput: event.target.value,
+                  }))
+                }
+                placeholder="Collection name"
+                aria-label="Collection name"
+                className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-3 tw-text-base tw-text-iron-50 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-650 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-text-sm"
+              />
             </div>
 
             <div
-              className={`tw-max-h-80 tw-overflow-y-auto ${presentation.resultsPadding}`}
+              className={`tw-flex tw-flex-wrap tw-items-end tw-justify-between ${presentation.filterGap}`}
             >
-              {isLoading && !grants.length && (
-                <p className="tw-m-0 tw-rounded-lg tw-bg-iron-900 tw-p-4 tw-text-sm tw-text-iron-400">
-                  Loading grants...
-                </p>
-              )}
-
-              {isSearchError && !grants.length && (
-                <div className="tw-rounded-lg tw-border tw-border-solid tw-border-red/30 tw-bg-red/10 tw-p-4">
-                  <p className="tw-m-0 tw-text-sm tw-text-red">
-                    {searchErrorMessage ?? "Unable to load grants."}
-                  </p>
-                  <Button
-                    variant="tertiary"
-                    size="xs"
-                    onClick={() => {
-                      refetch().catch(() => {
-                        // Query error state is already rendered.
-                      });
-                    }}
-                    className="tw-mt-3"
-                  >
-                    Retry
-                  </Button>
-                </div>
-              )}
-
-              {!isLoading && !isSearchError && !grants.length && (
-                <p className="tw-m-0 tw-rounded-lg tw-bg-iron-900 tw-p-4 tw-text-sm tw-text-iron-400">
-                  No grants matched the selected filters.
-                </p>
-              )}
-
-              {!!grants.length && (
-                <ul
-                  className={`tw-m-0 tw-flex tw-list-none tw-flex-col tw-p-0 ${presentation.resultsGap}`}
+              <div
+                data-group-criteria-tabs
+                className={presentation.filterLayout}
+              >
+                <span className={presentation.filterLabel}>
+                  Filter by status
+                </span>
+                <div
+                  ref={statusTabsRef}
+                  data-group-criteria-tabs
+                  className="tw-min-w-0 tw-max-w-full max-[400px]:[&_[role=tab]]:tw-px-1"
                 >
-                  {grants.map((grantItem) => (
-                    <GroupCreateXtdhGrantRow
-                      quiet={networkPresentation}
-                      key={grantItem.id}
-                      grant={grantItem}
-                      isSelected={normalizedGrantId === grantItem.id}
-                      interactive={true}
-                      asListItem={true}
-                      onSelect={(selectedGrant) => {
-                        setIsChangingGrant(false);
-                        setBeneficiaryGrant(
-                          selectedGrant.id,
-                          getGrantCompatibleMatchMode(
-                            selectedGrant,
-                            effectiveMatchMode
-                          )
-                        );
-                      }}
-                    />
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            {hasNextPage && (
-              <div className={presentation.pagination}>
-                {networkPresentation ? (
+                  <CommonTabs<ApiXTdhGrantStatus>
+                    items={STATUS_ITEMS}
+                    activeItem={selectedStatus}
+                    setSelected={(status) =>
+                      setGrantFinderFilters((current) => ({
+                        ...current,
+                        selectedStatus: status,
+                      }))
+                    }
+                    filterLabel="Filter by status"
+                    fill={false}
+                    size="sm"
+                  />
+                </div>
+              </div>
+              {showClearFilters &&
+                (networkPresentation ? (
                   <button
                     type="button"
-                    onClick={() => fetchNextPage()}
-                    disabled={isFetchingNextPage}
-                    className="tw-min-h-10 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900/50 tw-px-4 tw-py-2 tw-text-xxs tw-font-normal tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100"
+                    onClick={onResetFilters}
+                    className="tw-min-h-8 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-py-1.5 tw-text-xxs tw-font-medium tw-text-rose-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-rose-400 desktop-hover:hover:tw-text-rose-300"
                   >
-                    {isFetchingNextPage ? "Loading..." : "Load more"}
+                    {t(locale, "waves.create.groups.xtdhGrant.clearFilters")}
                   </button>
                 ) : (
-                  <Button
-                    variant="tertiary"
-                    size="md"
-                    fullWidth
-                    onClick={() => fetchNextPage()}
-                    disabled={isFetchingNextPage}
-                  >
-                    {isFetchingNextPage ? "Loading..." : "Load more"}
+                  <Button variant="tertiary" size="md" onClick={onResetFilters}>
+                    {t(locale, "waves.create.groups.xtdhGrant.clearFilters")}
                   </Button>
-                )}
+                ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {showGrantFinder && (
+        <div className={`tw-mt-4 ${presentation.results}`}>
+          <div className={presentation.resultsHeader}>
+            <p className={presentation.resultsTitle}>Results</p>
+            <p className="tw-m-0 tw-text-xs tw-text-iron-500">
+              {totalCount} total
+            </p>
+          </div>
+
+          <div
+            className={`${scrollResultsWithEditor ? "tw-overflow-visible" : "tw-max-h-80 tw-overflow-y-auto"} ${presentation.resultsPadding}`}
+          >
+            {isLoading && !grants.length && (
+              <p
+                data-group-criteria-card
+                className="tw-m-0 tw-rounded-lg tw-bg-iron-900 tw-p-4 tw-text-sm tw-text-iron-400"
+              >
+                Loading grants...
+              </p>
+            )}
+
+            {isSearchError && !grants.length && (
+              <div className="tw-rounded-lg tw-border tw-border-solid tw-border-red/30 tw-bg-red/10 tw-p-4">
+                <p className="tw-m-0 tw-text-sm tw-text-red">
+                  {searchErrorMessage ?? "Unable to load grants."}
+                </p>
+                <Button
+                  variant="tertiary"
+                  size="xs"
+                  onClick={() => {
+                    refetch().catch(() => {
+                      // Query error state is already rendered.
+                    });
+                  }}
+                  className="tw-mt-3"
+                >
+                  Retry
+                </Button>
               </div>
             )}
+
+            {!isLoading && !isSearchError && !grants.length && (
+              <p
+                data-group-criteria-card
+                className="tw-m-0 tw-rounded-lg tw-bg-iron-900 tw-p-4 tw-text-sm tw-text-iron-400"
+              >
+                No grants matched the selected filters.
+              </p>
+            )}
+
+            {!!grants.length && (
+              <ul
+                className={`tw-m-0 tw-flex tw-list-none tw-flex-col tw-p-0 ${presentation.resultsGap}`}
+              >
+                {grants.map((grantItem) => (
+                  <GroupCreateXtdhGrantRow
+                    quiet={networkPresentation}
+                    key={grantItem.id}
+                    grant={grantItem}
+                    isSelected={normalizedGrantId === grantItem.id}
+                    interactive={true}
+                    asListItem={true}
+                    onSelect={(selectedGrant) => {
+                      pendingSelectionFocus.current = selectedGrant.id;
+                      setIsChangingGrant(false);
+                      setBeneficiaryGrant(
+                        selectedGrant.id,
+                        getGrantCompatibleMatchMode(
+                          selectedGrant,
+                          effectiveMatchMode
+                        )
+                      );
+                    }}
+                  />
+                ))}
+              </ul>
+            )}
           </div>
+
+          {hasNextPage && (
+            <div className={presentation.pagination}>
+              {networkPresentation ? (
+                <button
+                  type="button"
+                  data-group-criteria-card
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                  className="tw-min-h-10 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900/50 tw-px-4 tw-py-2 tw-text-xxs tw-font-normal tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100"
+                >
+                  {isFetchingNextPage ? "Loading..." : "Load more"}
+                </button>
+              ) : (
+                <Button
+                  variant="tertiary"
+                  size="md"
+                  fullWidth
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                >
+                  {isFetchingNextPage ? "Loading..." : "Load more"}
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -82,11 +82,7 @@ describe("Footer", () => {
 
     expect(appsLink).toHaveAttribute("href", "/about/6529-apps");
     expect(appsLink).toHaveAttribute("target", "_self");
-    expect(appsLink.previousElementSibling).toHaveTextContent("|");
-    expect(appsLink.previousElementSibling?.previousElementSibling).toBe(
-      licenseLink
-    );
-    expect(appsLink.nextElementSibling).toHaveTextContent("|");
-    expect(appsLink.nextElementSibling?.nextElementSibling).toBe(apiLink);
+    expect(appsLink.previousElementSibling).toBe(licenseLink);
+    expect(appsLink.nextElementSibling).toBe(apiLink);
   });
 });

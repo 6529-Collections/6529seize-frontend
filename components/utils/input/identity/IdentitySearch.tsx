@@ -33,6 +33,38 @@ type IdentitySearchDraft = {
   readonly preservedResolvedValues: readonly (string | null)[];
 };
 
+function getIdentitySearchCriteria(
+  disabled: boolean,
+  draft: IdentitySearchDraft | null,
+  resolvedDisplayValue: string | null
+): string | null {
+  const shouldUseDraft =
+    !disabled &&
+    draft !== null &&
+    (draft.baseResolvedDisplayValue === resolvedDisplayValue ||
+      draft.preservedResolvedValues.includes(resolvedDisplayValue));
+  return shouldUseDraft ? draft.value : resolvedDisplayValue;
+}
+
+function isIdentitySearchPending({
+  searchCriteria,
+  debouncedValue,
+  isFetching,
+  isError,
+  hasData,
+}: {
+  readonly searchCriteria: string | null;
+  readonly debouncedValue: string | null;
+  readonly isFetching: boolean;
+  readonly isError: boolean;
+  readonly hasData: boolean;
+}): boolean {
+  return (
+    (searchCriteria?.length ?? 0) >= MIN_SEARCH_LENGTH &&
+    (searchCriteria !== debouncedValue || isFetching || (!hasData && !isError))
+  );
+}
+
 export default function IdentitySearch({
   identity,
   size = IdentitySearchSize.MD,
@@ -48,8 +80,12 @@ export default function IdentitySearch({
   inputClassName,
   labelClassName,
   onSelectionChange,
+  searchingLabel = "Searching…",
+  searchErrorLabel = "Couldn’t load profiles. Try searching again.",
   setIdentity,
 }: {
+  readonly searchingLabel?: string;
+  readonly searchErrorLabel?: string;
   readonly identity: string | null;
   readonly size?: IdentitySearchSize | undefined;
   readonly error?: boolean | undefined;
@@ -90,16 +126,11 @@ export default function IdentitySearch({
   const resolvedDisplayValue = selectedDisplayValue ?? identity ?? null;
   const [searchCriteriaDraft, setSearchCriteriaDraft] =
     useState<IdentitySearchDraft | null>(null);
-  const shouldUseDraft =
-    !disabled &&
-    searchCriteriaDraft !== null &&
-    (searchCriteriaDraft.baseResolvedDisplayValue === resolvedDisplayValue ||
-      searchCriteriaDraft.preservedResolvedValues.some(
-        (value) => value === resolvedDisplayValue
-      ));
-  const searchCriteria = shouldUseDraft
-    ? searchCriteriaDraft.value
-    : resolvedDisplayValue;
+  const searchCriteria = getIdentitySearchCriteria(
+    disabled,
+    searchCriteriaDraft,
+    resolvedDisplayValue
+  );
   const [debouncedValue, setDebouncedValue] = useState<string | null>(
     searchCriteria
   );
@@ -107,7 +138,7 @@ export default function IdentitySearch({
     disabled,
     searchCriteria,
   ]);
-  const { data } = useQuery<CommunityMemberMinimal[]>({
+  const { data, isFetching, isError } = useQuery<CommunityMemberMinimal[]>({
     queryKey: [
       QueryKey.PROFILE_SEARCH,
       {
@@ -128,9 +159,17 @@ export default function IdentitySearch({
       !!debouncedValue &&
       debouncedValue.length >= MIN_SEARCH_LENGTH,
   });
+  const waitingForSearch = isIdentitySearchPending({
+    searchCriteria,
+    debouncedValue,
+    isFetching,
+    isError,
+    hasData: data !== undefined,
+  });
+  const searchStatus = waitingForSearch ? searchingLabel : undefined;
   const searchResults = useMemo(
-    () => (disabled ? [] : (data ?? [])),
-    [data, disabled]
+    () => (disabled || waitingForSearch || isError ? [] : (data ?? [])),
+    [data, disabled, waitingForSearch, isError]
   );
 
   const [isOpen, setIsOpen] = useState(false);
@@ -344,7 +383,9 @@ export default function IdentitySearch({
         aria-expanded={isDropdownOpen}
         aria-controls={listboxId}
         aria-activedescendant={
-          isDropdownOpen && highlightedOptionId
+          isDropdownOpen &&
+          effectiveHighlightedIndex !== null &&
+          highlightedOptionId
             ? highlightedOptionId
             : undefined
         }
@@ -392,6 +433,8 @@ export default function IdentitySearch({
         selected={identity}
         searchCriteria={searchCriteria}
         profiles={searchResults}
+        busy={waitingForSearch}
+        statusText={searchStatus ?? (isError ? searchErrorLabel : undefined)}
         highlightedIndex={effectiveHighlightedIndex}
         listboxId={listboxId}
         listClassName={dropdownListClassName}
