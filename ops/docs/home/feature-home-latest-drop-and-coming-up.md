@@ -33,8 +33,16 @@ Use this page for visibility rules, state switches, and route targets.
   - Subscription info link: `/about/subscriptions`
   - Connected profile subscription link: `/{user}/subscriptions`
 - `Coming up` actions:
+  - Below 768px, cards stack vertically at full width with space between them.
+    Tablet uses two columns and desktop uses three.
   - Card title: `/waves/{waveId}?drop={dropId}`
   - Card author: `/{handle}` or `/{primaryAddress}`
+  - Collaborating cards combine the artist and accepted collaborators in one
+    credit block. Up to four overlapping avatars include the artist first;
+    two collaborator handles appear below the artist, with long names truncated.
+    Remaining collaborators are counted in `+N` and `+N more`; `+N more` opens
+    the drop's full credits. Visible names link to profiles, without level or
+    trophy badges in the card.
   - Section `View all`: `/waves/{waveId}`
 
 ## Entry Points
@@ -45,25 +53,43 @@ Use this page for visibility rules, state switches, and route targets.
 ## User Journey
 
 1. Open `/`.
-2. The top slot shows a loading placeholder while the latest artwork data
-   loads. The artwork appears as soon as it is available, while mint status
-   and next-winner details can continue loading.
+2. The top slot shows a loading placeholder until the initial artwork,
+   mint-status, and next-winner checks finish. It then displays the selected
+   artwork without briefly showing the previous drop first. Already loaded
+   artwork stays visible during background refreshes.
 3. The top slot then chooses one mode:
    - `Latest Drop` while the current mint is active and for the configured
      grace period after its scheduled end, or when no next winner is available.
    - `Next Drop` when the current mint is complete, its grace period has
      elapsed, and a next winner exists.
 4. `Latest Drop` groups its details beside the artwork: title and artist;
-   stats with `Edition Details` directly below; `Your allowance` followed by
-   subscription awareness; and the countdown and mint action at the bottom.
+   stats with `Edition Details` directly below; `Your allowance` when a wallet is
+   connected; subscription awareness; then the countdown and mint action.
+   `Edition`, `Status`, `Mint price`, and `Floor` share one row at 640px and
+   wider, with a two-column layout on smaller screens.
    Countdown states are `Upcoming`, `Live`, `Mint Complete`, or `Error`. When
    the card has an explicit Main Stage mapping, edition details also includes
    `Main Stage Submission` → `View`.
+   The homepage countdown keeps the complete phase heading, such as
+   `Public Phase Ends In`, beside its status pill and the existing allowlist
+   information icon when applicable. A separate dark row below centers the
+   segmented timer. The panel and timer row use background contrast without
+   outlines. Each number is zero-padded, such as `08m` and `05s`, with
+   smaller unit labels. Days appear first when at least 24 hours remain. Zero
+   days, hours, and minutes are still omitted; seconds always remain visible.
+   A four-part timer uses two balanced rows in the narrowest content slots.
+   The pill's slow ping stops under reduced motion. `Mint` remains below the
+   box. Desktop keeps the previous reserved countdown height, with any extra
+   space below the controls so the subscription row and countdown stay together.
    `Edition Details` opens and closes with a brief transition, or immediately
    when reduced motion is enabled. Collapsed links are excluded from keyboard
    navigation. File type and dimensions appear inside `Edition Details` when
    available; the artist row contains the artist identity without a media-type
-   badge.
+   badge. Multiple artists have space between their profile links and wrap onto
+   new lines on narrower screens. Long handles truncate within the card.
+   `Next Drop` shows accepted collaborators below the artist with a separate
+   `Collaborators` label and one compact profile per row, including available
+   levels and badges.
 5. `Coming up` resolves after app settings load and `memes_wave_id` is
    available.
 6. `Coming up` then shows:
@@ -71,6 +97,26 @@ Use this page for visibility rules, state switches, and route targets.
      ended, and next-winner title differs from current mint title)
    - Top leaderboard cards from the same wave, sorted by prediction rating
 7. `View all` opens `/waves/{waveId}` for that wave.
+
+On mobile below 768px, `Coming up` is a vertical list of full-width cards
+with 24px between them. Scroll the page to see the remaining cards. Tablet
+uses two columns and desktop uses three. Status and mint date or TDH have a
+dedicated row above the artwork that wraps when needed without covering it;
+the title and artist links sit below. Artwork retains its
+proportions without cropping. On phones, loaded still images use their natural
+height at the card width, like Latest Drop. Tablet and desktop keep the 3:4
+artwork frame. Keyboard users can tab through the links to
+bring each card into view.
+
+The Coming up subtitle keeps “Next in queue and current vote leaders.” and
+adds the next scheduled decision when available. Times use the viewer's device
+time zone, including daylight-saving changes, in 24-hour format. Decisions on
+the viewer's current day say “Next decision today at …”; the following day uses
+“tomorrow.” Decisions two to six calendar days away show the weekday; decisions
+seven or more days away show the short month and day, without a year. The full
+local date, time, and timezone remain available on hover. The time appears after the page loads and is omitted when the
+schedule is missing or the decision time has passed, until updated wave data
+provides another future decision. It describes the voting decision, not minting.
 
 ## Common Scenarios
 
@@ -119,7 +165,8 @@ Use this page for visibility rules, state switches, and route targets.
 - Main Stage submission and Meme card links are omitted when their explicit
   backend mapping is unavailable; home does not infer a relationship.
 - The home `Next Drop` artwork panel includes a labeled local-time `Mint Date`
-  alongside its wave, submission time, and rating details.
+  alongside its wave, submission time, and rating details. These statistics sit
+  below the title and creator, above `Your allowance` and subscriptions.
 - On phone browsers and the mobile app, still artwork fills the panel width
   at its natural aspect ratio and keeps its details below the image.
 - On iOS outside the US, the countdown `Mint` button is hidden.
@@ -140,9 +187,9 @@ Use this page for visibility rules, state switches, and route targets.
   row, and a non-US, unknown, or failed result leaves nothing. The remembered
   result only keeps the blank space; the row and its requests always wait for
   the current check. The space holds no text, icons, links, or controls.
-- Latest Drop and mapped Next Drop cards always show `Your allowance`. Before a
-  wallet is connected, the row prompts the user to connect to view it. Once
-  connected, compact wrapping pills list each nonzero Phase 0, Phase 1, Phase 2,
+- Latest Drop and mapped Next Drop cards omit `Your allowance` while no wallet
+  address is available, including during initial connection. Once connected,
+  compact wrapping pills list each nonzero Phase 0, Phase 1, Phase 2,
   or Public allocation, spelling out Airdrop and Allowlist counts; Public can
   contain Airdrop only.
 - The allowance row distinguishes loading, an unpublished distribution, a
@@ -165,7 +212,10 @@ Use this page for visibility rules, state switches, and route targets.
   blue read-only `Subscription Minting` box, a non-mutating on/off toggle,
   optional `xN` user subscribed count when already subscribed, an
   `xN subscribers` total, a contextual profile-subscriptions action, and a
-  right-edge question-mark info link.
+  question-mark info link. The toggle stays beside the title and the contextual
+  profile action is aligned at the far right. Counts, coverage, and the info
+  link use the full width below. Labels can wrap; the narrowest cards place the
+  action below the details, still aligned right, to avoid squeezing controls.
 - For a connected non-proxy profile, the awareness row can also show the
   compact runway summary, for example
   `Automatic · 0.18 ETH · 4 drops funded`. Its action follows the coverage
@@ -263,13 +313,28 @@ Use this page for visibility rules, state switches, and route targets.
   `about.subscriptions.*` message family to each partial locale dictionary and
   repeat the responsive and assistive-technology QA pass.
 
+## Homepage Presentation
+
+- The homepage Next Drop card uses the same solid surface as the Waves cards,
+  with quiet separators. The same panel on the upcoming Meme page retains its
+  existing appearance.
+- Both homepage Next Drop and Latest Drop states use the refined subscription
+  row: a subtle background and border, a neutral title, and no shadow. Its
+  controls, spacing, and behavior remain the same in both states.
+- Artwork dimensions, grid proportions, details spacing, and type sizes are
+  unchanged. Desktop image height follows the details column, so this refinement
+  changes colour and decoration without changing that column's geometry.
+- Wave, Submitted, Rating, and Mint date labels remain uppercase. All artist and
+  collaborator information, media actions, allowance information, subscription
+  controls, and existing disclosure behavior remain available.
+
 ## Related Pages
 
 - [Home Index](README.md)
 - [Home Landing and Section Navigation Flow](flow-home-landing-and-section-navigation.md)
 - [Home Route and Section Visibility Troubleshooting](troubleshooting-home-route-and-section-visibility.md)
 - [Home Header and Mission Block](feature-home-header-and-mission.md)
-- [Home Boosted Drops and Most Active Waves](feature-home-discovery-grids.md)
+- [Home Waves Discovery](feature-home-discovery-grids.md)
 - [Now Minting Countdown](../media/memes/feature-now-minting-countdown.md)
 - [Latest Drop Stats Grid](../media/memes/feature-latest-drop-stats-grid.md)
 - [Wave Sort and Price Filters](../waves/leaderboard/feature-sort-and-group-filters.md)

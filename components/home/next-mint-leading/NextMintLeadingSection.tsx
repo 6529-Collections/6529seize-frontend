@@ -12,14 +12,23 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { ComingUpNextDecision } from "./ComingUpNextDecision";
 import { LeadingCard } from "./LeadingCard";
 import { NextMintCard } from "./NextMintCard";
+import {
+  HOME_ACTION_ARROW_CLASSES,
+  HOME_TEXT_LINK_CLASSES,
+  HOME_SECTION_TITLE_CLASSES,
+} from "../homeInteractionStyles";
 
 const SKELETON_KEYS = [
   "coming-up-skeleton-1",
   "coming-up-skeleton-2",
   "coming-up-skeleton-3",
 ];
+
+const CARD_LAYOUT_CLASS_NAME =
+  "tw-grid tw-grid-cols-1 tw-gap-6 tw-py-1 md:tw-grid-cols-2 md:tw-gap-4 lg:tw-grid-cols-3 lg:tw-gap-5";
 
 export function NextMintLeadingSection() {
   const locale = useBrowserLocale();
@@ -31,6 +40,7 @@ export function NextMintLeadingSection() {
   const {
     nextMint,
     nextMintTitle,
+    nextDecisionTime,
     waveId,
     isReady,
     isFetching: isWinnersFetching,
@@ -71,18 +81,16 @@ export function NextMintLeadingSection() {
   if (!hasCards && !isFetching) return null;
 
   const sectionClassName =
-    "tw-px-4 md:tw-px-6 lg:tw-px-8 tw-relative tw-z-10 tw-@container tw-pb-10 md:tw-pb-16";
+    "tw-relative tw-z-10 tw-px-4 tw-@container md:tw-px-6 lg:tw-px-8";
   const header = (
-    <div className="tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-4 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
-      <div>
-        <h2
-          id="home-coming-up"
-          className="tw-m-0 tw-text-xl tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 md:tw-text-2xl"
-        >
+    <div className="tw-mb-7 tw-flex tw-flex-col tw-items-start tw-gap-3 md:tw-mb-8 md:tw-flex-row md:tw-items-end md:tw-justify-between md:tw-gap-6">
+      <div className="tw-min-w-0">
+        <h2 id="coming-up-heading" className={HOME_SECTION_TITLE_CLASSES}>
           {t(locale, "home.comingUp.title")}
         </h2>
-        <p className="tw-mb-0 tw-mt-3 tw-text-[11px] tw-font-normal tw-uppercase tw-leading-relaxed tw-tracking-[0.14em] tw-text-iron-500 sm:tw-text-xs">
+        <p className="tw-mb-0 tw-mt-3 tw-text-pretty tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-400 md:tw-text-[15px]">
           {t(locale, "home.comingUp.subtitle")}
+          <ComingUpNextDecision timestamp={nextDecisionTime} locale={locale} />
         </p>
       </div>
       <Link
@@ -92,28 +100,28 @@ export function NextMintLeadingSection() {
           isDirectMessage: false,
           isApp: false,
         })}
-        className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-white"
+        className={HOME_TEXT_LINK_CLASSES}
       >
         <span>{t(locale, "home.comingUp.viewAll")}</span>
-        <ArrowRightIcon className="tw-size-4 tw-flex-shrink-0" aria-hidden />
+        <ArrowRightIcon className={HOME_ACTION_ARROW_CLASSES} aria-hidden />
       </Link>
     </div>
   );
 
   return (
     <section
+      aria-labelledby="coming-up-heading"
       data-home-section="Coming up"
-      aria-labelledby="home-coming-up"
       className={sectionClassName}
     >
       <div>
         {header}
         {showLoadingCards && (
-          <p role="status" className="tw-sr-only">
+          <output className="tw-sr-only">
             {t(locale, "home.comingUp.loading")}
-          </p>
+          </output>
         )}
-        <div className="tw-grid tw-grid-cols-1 tw-gap-6 md:tw-grid-cols-2 lg:tw-grid-cols-3 lg:tw-gap-8">
+        <div data-testid="coming-up-cards" className={CARD_LAYOUT_CLASS_NAME}>
           {showNextMint && nextMint && <NextMintCard drop={nextMint} />}
           {leading.map((drop, index) => (
             <LeadingCard key={drop.id} drop={drop} rank={index + 1} />
@@ -133,17 +141,15 @@ const NextMintLeadingSkeletonCard = () => {
     <div
       aria-hidden="true"
       data-testid="coming-up-loading-card"
-      className="tw-flex tw-flex-col tw-text-left motion-reduce:[&_*]:tw-animate-none"
+      className="tw-min-w-0 tw-text-left motion-reduce:[&_*]:tw-animate-none"
     >
-      <div className="tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950">
-        <div className="tw-flex tw-items-center tw-justify-between tw-gap-2 tw-border-b tw-border-white/10 tw-bg-iron-900 tw-px-2.5 tw-py-1.5 sm:tw-px-3 sm:tw-py-2">
-          <div className="tw-h-4 tw-w-24 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
-          <div className="tw-h-3 tw-w-16 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
+      <div className="tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950">
+        <div className="tw-flex tw-shrink-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-px-4 tw-py-4">
+          <div className="tw-h-4 tw-w-20 tw-animate-pulse tw-rounded-md tw-bg-iron-800/60" />
+          <div className="tw-h-4 tw-w-24 tw-animate-pulse tw-rounded-md tw-bg-iron-800/60" />
         </div>
-        <div className="tw-relative tw-flex tw-aspect-[3/4] tw-max-h-[clamp(320px,70vw,500px)] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-iron-950">
-          <div className="tw-h-full tw-w-full tw-animate-pulse tw-rounded-lg tw-bg-iron-900/70" />
-        </div>
-        <div className="tw-flex tw-flex-col tw-gap-3 tw-border-t tw-border-white/10 tw-px-3 tw-py-3 sm:tw-px-4">
+        <div className="tw-aspect-[3/4] tw-w-full tw-shrink-0 tw-animate-pulse tw-bg-iron-900/70" />
+        <div className="tw-flex tw-flex-col tw-gap-3 tw-px-4 tw-pb-5 tw-pt-5">
           <div className="tw-flex tw-items-center tw-gap-2">
             <div className="tw-h-4 tw-w-10 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
             <div className="tw-h-4 tw-flex-1 tw-animate-pulse tw-rounded tw-bg-iron-800/60" />
