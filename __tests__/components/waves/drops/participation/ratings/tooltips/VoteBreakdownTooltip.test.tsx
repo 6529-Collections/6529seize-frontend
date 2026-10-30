@@ -12,6 +12,11 @@ jest.mock('@/components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: () => ({ address: '0xabc' }),
 }));
 
+let mockActiveProfileProxy: unknown = null;
+jest.mock('@/components/auth/Auth', () => ({
+  useAuth: () => ({ activeProfileProxy: mockActiveProfileProxy }),
+}));
+
 describe('VoteBreakdownTooltip', () => {
   const drop = {
     top_raters: [
@@ -34,6 +39,19 @@ describe('VoteBreakdownTooltip', () => {
     expect(screen.getByText('Voting Range')).toBeInTheDocument();
     expect(screen.getByText('10 Rep')).toBeInTheDocument();
     expect(screen.getByText('2 Rep')).toBeInTheDocument();
+  });
+
+  it('requests the scaled derivative for the viewer profile picture', () => {
+    mockActiveProfileProxy = { created_by: { pfp: 'mine.png' } };
+    render(
+      <VoteBreakdownTooltip
+        drop={drop}
+        ratingsData={{ hasRaters: false, userRating: 0, currentRating: 0 }}
+      />
+    );
+    mockActiveProfileProxy = null;
+    expect(getScaledImageUri).toHaveBeenCalledWith('mine.png', 'W_AUTO_H_50');
+    expect(screen.getByAltText('Profile picture')).toBeInTheDocument();
   });
 
   it('hides sections when data absent', () => {

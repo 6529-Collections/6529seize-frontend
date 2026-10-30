@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { commonApiFetch } from "@/services/api/common-api";
 import { renderWavesPageContent } from "@/app/waves/waves-page.shared";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import type { PublicWaveFeedResult } from "@/app/waves/public-wave-feed.server";
 
@@ -26,8 +26,7 @@ jest.mock("@/app/waves/wave-feed-seed.server", () => ({
 }));
 
 jest.mock("@/app/waves/public-wave-feed.server", () => ({
-  fetchPublicWaveFeed: (...args: unknown[]) =>
-    mockFetchPublicWaveFeed(...args),
+  fetchPublicWaveFeed: (...args: unknown[]) => mockFetchPublicWaveFeed(...args),
 }));
 
 jest.mock("@/components/waves/PublicWaveFeed", () => ({
@@ -36,9 +35,7 @@ jest.mock("@/components/waves/PublicWaveFeed", () => ({
     feed,
   }: {
     readonly feed: Extract<PublicWaveFeedResult, { ok: true }>;
-  }) => (
-    <div data-testid="public-wave-feed">{feed.waveName}</div>
-  ),
+  }) => <div data-testid="public-wave-feed">{feed.waveName}</div>,
 }));
 
 jest.mock("@/components/waves/WaveServerFeedSeed", () => ({
@@ -49,9 +46,11 @@ jest.mock("@/components/waves/WaveServerFeedSeed", () => ({
 
 jest.mock("@/app/waves/page.client", () => ({
   __esModule: true,
-  default: ({ publicFeedFallback }: { readonly publicFeedFallback?: ReactNode }) => (
-    <div data-testid="waves-page-client">{publicFeedFallback}</div>
-  ),
+  default: ({
+    publicFeedFallback,
+  }: {
+    readonly publicFeedFallback?: ReactNode;
+  }) => <div data-testid="waves-page-client">{publicFeedFallback}</div>,
 }));
 
 const makeWave = (
@@ -156,10 +155,12 @@ describe("renderWavesPageContent route family redirects", () => {
       searchParams: {},
       routeContext: "waves",
     });
-    render(page);
+    await act(async () => {
+      render(page);
+    });
 
     expect(mockFetchPublicWaveFeed).toHaveBeenCalledWith("regular-wave");
-    expect(screen.getByTestId("public-wave-feed")).toHaveTextContent(
+    expect(await screen.findByTestId("public-wave-feed")).toHaveTextContent(
       "Public Wave"
     );
     expect(screen.getByTestId("waves-page-client")).toContainElement(

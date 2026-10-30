@@ -14,16 +14,28 @@ export interface DelegationToastState {
   readonly transactionHash?: string | undefined;
 }
 
-export function useDelegationToast() {
+export function useDelegationToast(
+  options: {
+    /** Runs when a write's success toast is shown, i.e. its receipt is in. */
+    readonly onSuccess?: (() => void) | undefined;
+  } = {}
+) {
+  const { onSuccess } = options;
   const [toast, setToast] = useState<DelegationToastState | undefined>(
     undefined
   );
   const [showToast, setShowToast] = useState(false);
 
-  const showDelegationToast = useCallback((nextToast: DelegationToastState) => {
-    setToast(nextToast);
-    setShowToast(true);
-  }, []);
+  const showDelegationToast = useCallback(
+    (nextToast: DelegationToastState) => {
+      setToast(nextToast);
+      setShowToast(true);
+      if (nextToast.status === "success") {
+        onSuccess?.();
+      }
+    },
+    [onSuccess]
+  );
 
   const clearDelegationToast = useCallback(() => {
     setShowToast(false);

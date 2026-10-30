@@ -1,3 +1,5 @@
+jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
+
 import { createManifoldPlan } from "@/app/api/open-graph/manifold/service";
 
 describe("createManifoldPlan", () => {

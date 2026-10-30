@@ -23,7 +23,12 @@ and mobile, with natural wrapping for longer names. There is no separate
 The information button beside `ID Statements` opens a tooltip on hover, keyboard
 focus, or tap. It explains that statements are optional and permanently public,
 that social accounts are self-declared and unverified by 6529, and that the
-community rates statement accuracy. Escape or clicking outside dismisses it.
+community rates statement accuracy. Escape, clicking outside, or a page-scrolling
+gesture dismisses it. Automatic page adjustments keep the tooltip open and
+aligned with its information button; scrolling inside the tooltip also keeps it
+open.
+While the page is initially loading, the information button stays disabled until
+it can respond to hover, focus, and taps.
 
 ## Location in the Site
 

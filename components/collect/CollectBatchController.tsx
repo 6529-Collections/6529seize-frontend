@@ -444,8 +444,14 @@ function ScopedBatchController({
             .map((wallet) => [wallet.wallet.toLowerCase(), wallet.display])
         )
       : undefined;
+  const connectionAction = (reason === "collect.trade.connectSigner" ||
+    reason === "collect.trade.reconnect") && (
+    <Button variant="action" onClick={() => connection.seizeConnect()}>
+      {t(locale, "collect.connect")}
+    </Button>
+  );
   const content = (
-    <div className="tw-space-y-5">
+    <div className="tw-flex tw-min-h-full tw-flex-col tw-gap-5">
       {[error, execution.message].includes(
         t(locale, "collect.trade.purchasePending")
       ) && (
@@ -456,14 +462,13 @@ function ScopedBatchController({
           {t(locale, "collect.activity.viewOrders")}
         </Link>
       )}
-      {(reason === "collect.trade.connectSigner" ||
-        reason === "collect.trade.reconnect") && (
-        <Button variant="secondary" onClick={() => connection.seizeConnect()}>
-          {t(locale, "collect.connect")}
-        </Button>
-      )}
+      {(Boolean(initialOperation) || displayed !== null) && connectionAction}
       {!initialOperation && (
-        <div ref={formContainer} hidden={displayed !== null}>
+        <div
+          ref={formContainer}
+          hidden={displayed !== null}
+          className="tw-flex-1 [&:not([hidden])]:tw-grid"
+        >
           <CollectBatchReviewForm
             items={availableItems}
             profile={auth.connectedProfile}
@@ -474,6 +479,7 @@ function ScopedBatchController({
             loading={preparing}
             error={error}
             disabledReason={disabledReason}
+            connectionAction={connectionAction}
             maxItems={capability.data?.max_orders ?? 128}
             maxAllocations={capability.data?.max_allocations ?? 256}
             onPrepare={(draft) => {

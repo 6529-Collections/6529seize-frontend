@@ -1,12 +1,14 @@
 "use client";
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import { useCompetitionDrop } from "@/hooks/competitions/useCompetitionDrop";
 import { useWaveParticipationRendererSet } from "./participationRendererRegistry";
 import type { ParticipationDropProps } from "./participationRenderer.types";
 
 function ParticipationDropContent(props: ParticipationDropProps) {
   const { ParticipationDrop: ParticipationDropRenderer } =
-    useWaveParticipationRendererSet(props.drop.wave.id);
+    useWaveParticipationRendererSet(
+      props.drop.wave.id,
+      props.drop.competition_context?.data.competition?.capabilities
+    );
 
   return <ParticipationDropRenderer {...props} />;
 }
@@ -17,9 +19,5 @@ function CompetitionParticipationDrop(props: ParticipationDropProps) {
 }
 
 export default function ParticipationDrop(props: ParticipationDropProps) {
-  return isMultiCompetitionEnabled() ? (
-    <CompetitionParticipationDrop {...props} />
-  ) : (
-    <ParticipationDropContent {...props} />
-  );
+  return <CompetitionParticipationDrop {...props} />;
 }
