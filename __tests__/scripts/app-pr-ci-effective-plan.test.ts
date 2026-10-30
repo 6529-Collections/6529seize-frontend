@@ -171,6 +171,8 @@ describe("effective App PR CI plan", () => {
     "helpers/gif-preview.helpers.ts",
     "tests/social/wave-switch-loading.spec.ts",
     "tests/social/wave-loading-sandbox.spec.ts",
+    "components/brain/my-stream/MyStreamWaveChat.tsx",
+    "components/waves/drops/wave-drops-all/hooks/useWaveDropsSerialScroll.ts",
     "hooks/useMemesQuickVoteSessionState.ts",
     "hooks/memesQuickVote.queue.state.ts",
     "hooks/useMemesWaveFooterStats.ts",
