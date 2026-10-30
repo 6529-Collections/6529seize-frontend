@@ -456,6 +456,7 @@
         "The Profile Proxy tab exposes profile proxy relationships and actions.",
         "All, Received, and Granted filters remain visible as tabs on phone, tablet, and desktop. Arrow keys switch tabs; Home and End select the first and last tab.",
         "Proxy features help a profile allow another account to perform supported actions without handing over the primary wallet.",
+        "To act as a received proxy, open your account menu and select the profile under Proxy Profile. If the wallet is disconnected, reconnect the wallet belonging to your signed-in profile; the selected proxy resumes and asks for a sign-in signature. On an unsupported network, switch to a supported network and select the profile again. Your current session and selection stay in place until sign-in succeeds. Canceling or a failed sign-in shows an error. Select your own profile under Proxy Profile to return to the primary profile, which also requires signing in.",
         "Current proxy action creation supports Allocate Rep and Allocate NIC actions with a granted Credit amount and read-only Spent total.",
         "Proxy action availability and profile rating behavior depend on whether the active proxy has the relevant Allocate Rep or Allocate NIC permission.",
         "Proxy and delegation are related concepts but live in separate product areas."
