@@ -15,6 +15,7 @@ import {
 import { t } from "@/i18n/messages";
 import {
   getAuthJwt,
+  getWalletAddress,
   invalidateAuthSessionForAddress,
   PROFILE_SWITCHED_EVENT,
   removeAuthJwt,
@@ -81,6 +82,7 @@ export function createAuthRequestActions({
   invalidateAll,
   isActiveChainSupported,
   isAddressAuthorized,
+  seizeConnect,
   seizeDisconnect,
   resetSessionUpgradeExpiryDedupe,
   setActiveProfileProxy,
@@ -699,41 +701,53 @@ export function createAuthRequestActions({
 
   const onActiveProfileProxy = async (
     profileProxy: ApiProfileProxy | null
-  ): Promise<void> => {
+  ): Promise<boolean> => {
     const isSameSelection =
       (profileProxy?.id ?? null) === (activeProfileProxy?.id ?? null);
     if (isSameSelection) {
-      return;
+      return true;
     }
 
     if (!address) {
-      setActiveProfileProxy(null);
-      return;
+      setToast({
+        message: t(AUTH_MODAL_LOCALE, "auth.proxySwitch.connectWallet"),
+        type: "error",
+      });
+      seizeConnect();
+      return false;
     }
 
     if (!enableWalletAuthentication) {
       setActiveProfileProxy(profileProxy);
       dispatchProfileSwitchedEvent(profileProxy);
-      return;
+      return true;
+    }
+
+    if (!canSignActiveWallet) {
+      setToast({
+        message: t(AUTH_MODAL_LOCALE, "auth.proxySwitch.connectWallet"),
+        type: "info",
+      });
+      seizeConnect();
+      return false;
     }
 
     if (!isActiveChainSupported()) {
-      return;
+      setToast({
+        message: t(AUTH_MODAL_LOCALE, "auth.proxySwitch.unsupportedNetwork"),
+        type: "error",
+      });
+      seizeConnect();
+      return false;
     }
 
     const signingAuthRequestGuard = createSigningAuthRequestGuard(
-      createAuthRequestGuard({})
+      createAuthRequestGuard(
+        {},
+        () => getWalletAddress()?.toLowerCase() === address.toLowerCase()
+      )
     );
 
-    await removeAuthJwt();
-    if (!signingAuthRequestGuard.isCurrent()) {
-      setToast({
-        message:
-          "Network changed. Switch to a supported network to continue signing in.",
-        type: "error",
-      });
-      return;
-    }
     try {
       const { success } = await requestSignIn({
         signerAddress: address,
@@ -743,7 +757,16 @@ export function createAuthRequestActions({
       if (success && signingAuthRequestGuard.isCurrent()) {
         setActiveProfileProxy(profileProxy);
         dispatchProfileSwitchedEvent(profileProxy);
+        invalidateAll();
+        return true;
       }
+      if (!signingAuthRequestGuard.isCurrent()) {
+        setToast({
+          message: t(AUTH_MODAL_LOCALE, "auth.proxySwitch.contextChanged"),
+          type: "error",
+        });
+      }
+      return false;
     } catch (error) {
       if (error instanceof InvalidRoleStateError) {
         logErrorSecurely("onActiveProfileProxy_invalid_role_state", error);
@@ -751,8 +774,7 @@ export function createAuthRequestActions({
           message: "Select a valid profile and try again.",
           type: "error",
         });
-        setActiveProfileProxy(null);
-        return;
+        return false;
       }
 
       if (error instanceof MissingActiveProfileError) {
@@ -762,8 +784,7 @@ export function createAuthRequestActions({
             "Couldn't authenticate this profile. Select a profile and try again.",
           type: "error",
         });
-        setActiveProfileProxy(null);
-        return;
+        return false;
       }
 
       throw error;

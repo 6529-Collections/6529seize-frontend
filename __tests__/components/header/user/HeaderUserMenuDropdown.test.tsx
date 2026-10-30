@@ -265,7 +265,7 @@ function createAuthContext(
     requestAuth: jest.fn().mockResolvedValue({ success: true }),
     requestSessionUpgrade: jest.fn().mockResolvedValue({ success: true }),
     setToast: jest.fn(),
-    setActiveProfileProxy: jest.fn().mockResolvedValue(undefined),
+    setActiveProfileProxy: jest.fn().mockResolvedValue(true),
     ...overrides,
   };
 }
@@ -375,6 +375,20 @@ function renderDropdown(options: RenderOptions) {
 afterEach(() => jest.clearAllMocks());
 
 describe("HeaderUserMenuDropdown", () => {
+  it.each([true, false])(
+    "closes the profile menu only when switching succeeds (%s)",
+    async (success) => {
+      const { setActiveProfileProxy, onClose } = renderDropdown({});
+      jest.mocked(setActiveProfileProxy).mockResolvedValueOnce(success);
+      fireEvent.click(screen.getByRole("button", { name: /alice/ }));
+      await waitFor(() => {
+        expect(setActiveProfileProxy).toHaveBeenCalledWith(null);
+        expect(screen.getByRole("button", { name: /alice/ })).toBeEnabled();
+      });
+      expect(onClose).toHaveBeenCalledTimes(success ? 1 : 0);
+    }
+  );
+
   it("shows profile handle as label", () => {
     renderDropdown({
       profile: profileBase,

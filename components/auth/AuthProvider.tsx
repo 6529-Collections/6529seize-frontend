@@ -82,6 +82,7 @@ import {
 import { useSeizeConnectContext } from "./SeizeConnectContext";
 import { useAuthChainGuard } from "./useAuthChainGuard";
 import { useSessionRecovery } from "./useSessionRecovery";
+import { useProfileProxySwitch } from "./useProfileProxySwitch";
 
 export default function Auth({
   children,
@@ -560,6 +561,7 @@ export default function Auth({
       invalidateAll,
       isAddressAuthorized,
       isActiveChainSupported: authChainGuard.isLatestChainSupported,
+      seizeConnect,
       seizeDisconnect,
       resetSessionUpgradeExpiryDedupe,
       setActiveProfileProxy,
@@ -572,6 +574,15 @@ export default function Auth({
       signMessage,
       signModalReason,
     });
+
+  const switchActiveProfileProxy = useProfileProxySwitch({
+    activeProxyId: activeProfileProxy?.id ?? null,
+    canSignActiveWallet,
+    contextFingerprint: `${address?.toLowerCase() ?? ""}:${activeProfileProxy?.id ?? ""}`,
+    enableWalletAuthentication,
+    onSwitch: onActiveProfileProxy,
+    setToast,
+  });
 
   const navigateAfterProfileSwitchForRoute = useCallback(() => {
     navigateAfterProfileSwitch({ pathname, queryClient, router });
@@ -756,7 +767,7 @@ export default function Auth({
       requestSessionUpgrade,
       ensureActiveSessionV2WebSession:
         ensureActiveSessionV2WebSessionForActiveWallet,
-      setActiveProfileProxy: onActiveProfileProxy,
+      setActiveProfileProxy: switchActiveProfileProxy,
     }),
     [
       activeProfileProxy,
@@ -765,7 +776,7 @@ export default function Auth({
       isAddressAuthorized,
       isFetchingConnectedProfile,
       isDirectProfileSession,
-      onActiveProfileProxy,
+      switchActiveProfileProxy,
       receivedProfileProxies,
       requestAuth,
       requestSessionUpgrade,

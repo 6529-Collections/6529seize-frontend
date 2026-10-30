@@ -82,8 +82,17 @@ export default function HeaderUserMenuDropdown({
   const onActivateProfileProxy = async (
     profileProxy: ApiProfileProxy | null
   ) => {
-    await setActiveProfileProxy(profileProxy);
-    onClose();
+    if (pendingAction) {
+      return;
+    }
+    setPendingAction("switch-proxy");
+    try {
+      if (await setActiveProfileProxy(profileProxy)) {
+        onClose();
+      }
+    } finally {
+      setPendingAction(null);
+    }
   };
 
   const getLabel = (): string => {
@@ -211,6 +220,8 @@ export default function HeaderUserMenuDropdown({
                       <div className="tw-h-full">
                         <button
                           type="button"
+                          disabled={pendingAction !== null}
+                          aria-pressed={!activeProfileProxy}
                           className={`${
                             activeProfileProxy
                               ? "tw-bg-transparent hover:tw-bg-iron-700"
@@ -280,6 +291,7 @@ export default function HeaderUserMenuDropdown({
                           profileProxy={profileProxy}
                           activeProfileProxy={activeProfileProxy}
                           onActivateProfileProxy={onActivateProfileProxy}
+                          disabled={pendingAction !== null}
                         />
                       ))}
                     </li>
