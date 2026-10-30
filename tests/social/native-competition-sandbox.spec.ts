@@ -9787,10 +9787,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     );
     await page.getByRole("button", { name: "Retry", exact: true }).click();
     await expect(
-      page.getByText(
-        "No submissions marked Additional Action. Turn off the filter to see all submissions.",
-        { exact: true }
-      )
+      page.getByText("No submissions marked Additional Action.", {
+        exact: true,
+      })
     ).toBeVisible();
     await page
       .getByRole("checkbox", { name: "Additional Action", exact: true })

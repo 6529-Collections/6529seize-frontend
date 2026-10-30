@@ -73,8 +73,8 @@ UI state.
 ## Edge Cases
 
 - Some sort/price combinations validly return empty results.
-- If no submissions match `Additional Action`, the empty state explains how to
-  turn off the filter and see all submissions.
+- If no submissions match `Additional Action`, the empty state says:
+  `No submissions marked Additional Action.`
 - URL `min_price` and `max_price` values are not used by leaderboard header UI.
 - If both price bounds are set in reverse order (`min > max`), request bounds
   are normalized before fetch.
