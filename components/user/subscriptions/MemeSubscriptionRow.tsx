@@ -3,10 +3,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import type { SeasonMintRow } from "@/components/meme-calendar/meme-calendar.helpers";
-import {
-  displayedSeasonNumberFromIndex,
-  formatFullDate,
-} from "@/components/meme-calendar/meme-calendar.helpers";
+import { displayedSeasonNumberFromIndex } from "@/components/meme-calendar/meme-calendar.helpers";
 import type { NFTSubscription } from "@/generated/models/NFTSubscription";
 import { formatAddress } from "@/helpers/Helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
@@ -45,7 +42,7 @@ function MintingTodayLabel({
     <>
       <button
         type="button"
-        className={`tw-inline-flex tw-items-center tw-gap-1 tw-border-0 tw-bg-transparent tw-p-0 ${className}`}
+        className={`tw-inline-flex tw-min-h-6 tw-items-center tw-gap-1 tw-rounded-sm tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${className}`}
         data-tooltip-id={tooltipId}
         aria-describedby={tooltipId}
       >
@@ -58,6 +55,7 @@ function MintingTodayLabel({
       </button>
       <Tooltip
         id={tooltipId}
+        openEvents={{ mouseover: true, focus: true, click: true }}
         place="top"
         positionStrategy="fixed"
         offset={8}
@@ -295,10 +293,16 @@ export default function MemeSubscriptionRow(
       props.minting_today;
 
     return (
-      <span className="tw-inline-flex tw-h-10 tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/[0.03] tw-transition-shadow focus-within:tw-ring-2 focus-within:tw-ring-primary-400/25 has-[:focus-visible]:tw-ring-primary-400">
+      <span
+        className={`tw-inline-flex tw-h-11 tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-ring-1 tw-ring-inset tw-transition-shadow focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${isCompact ? "tw-bg-iron-900 tw-ring-white/[0.03]" : "tw-bg-transparent tw-ring-white/20"}`}
+      >
         <span className="tw-relative tw-inline-flex tw-items-center">
           <select
-            className={SUBSCRIPTION_COUNT_SELECT_CLASS}
+            className={
+              isCompact
+                ? SUBSCRIPTION_COUNT_SELECT_CLASS
+                : "tw-h-11 tw-w-[88px] tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-0 tw-pl-2.5 tw-pr-6 tw-text-sm tw-text-iron-200 [color-scheme:dark] focus:tw-outline-none disabled:tw-cursor-not-allowed disabled:tw-opacity-40"
+            }
             value={Math.max(0, Math.min(selectedCount, props.eligibilityCount))}
             disabled={isCountSelectDisabled}
             onChange={(e) => {
@@ -306,12 +310,28 @@ export default function MemeSubscriptionRow(
             }}
             aria-label={`Select subscription quantity for ${props.title}`}
           >
-            {props.eligibilityCount < 1 && <option value={0}>0</option>}
-            {countOptions.map((num) => (
-              <option key={num} value={num}>
-                {num}
+            {props.eligibilityCount < 1 && (
+              <option value={0}>
+                {isCompact
+                  ? "0"
+                  : t(locale, "subscriptions.row.cards.many", { count: "0" })}
               </option>
-            ))}
+            )}
+            {countOptions.map((num) => {
+              const countKey =
+                num === 1
+                  ? "subscriptions.row.cards.one"
+                  : "subscriptions.row.cards.many";
+              return (
+                <option key={num} value={num}>
+                  {isCompact
+                    ? num
+                    : t(locale, countKey, {
+                        count: formatInteger(locale, num),
+                      })}
+                </option>
+              );
+            })}
           </select>
           <ChevronDownIcon
             className={`tw-pointer-events-none tw-absolute tw-right-0.5 tw-size-4 ${
@@ -320,9 +340,11 @@ export default function MemeSubscriptionRow(
             aria-hidden="true"
           />
         </span>
-        <span className="tw-pl-1 tw-pr-3 tw-text-sm tw-leading-none tw-text-iron-500">
-          / {props.eligibilityCount}
-        </span>
+        {isCompact && (
+          <span className="tw-pl-1 tw-pr-3 tw-text-sm tw-leading-none tw-text-iron-500">
+            / {props.eligibilityCount}
+          </span>
+        )}
       </span>
     );
   };
@@ -396,12 +418,6 @@ export default function MemeSubscriptionRow(
             </span>
             {props.date && (
               <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-text-meta tw-font-normal tw-tabular-nums tw-leading-4">
-                <span className="tw-text-iron-500">
-                  SZN{displayedSeasonNumberFromIndex(props.date.seasonIndex)}
-                </span>
-                <span className="tw-text-iron-600" aria-hidden="true">
-                  /
-                </span>
                 {props.minting_today ? (
                   <MintingTodayLabel
                     tokenId={props.subscription.token_id}
@@ -410,9 +426,20 @@ export default function MemeSubscriptionRow(
                   />
                 ) : (
                   <span className="tw-text-iron-500">
-                    {formatFullDate(props.date.utcDay, "utc")}
+                    {new Intl.DateTimeFormat(locale, {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                      timeZone: "UTC",
+                    }).format(props.date.utcDay)}
                   </span>
                 )}
+                <span className="tw-text-iron-600" aria-hidden="true">
+                  /
+                </span>
+                <span className="tw-text-iron-400">
+                  SZN{displayedSeasonNumberFromIndex(props.date.seasonIndex)}
+                </span>
               </span>
             )}
           </div>

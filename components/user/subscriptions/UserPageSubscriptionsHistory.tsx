@@ -10,13 +10,13 @@ import {
   getTransactionLink,
 } from "@/helpers/Helpers";
 import type { Page } from "@/helpers/Types";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { useState, type ReactNode } from "react";
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
+import type { ReactNode } from "react";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { mainnet } from "wagmi/chains";
 import EthereumIcon from "../utils/icons/EthereumIcon";
 import EtherscanIcon from "../utils/icons/EtherscanIcon";
-import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
 
 const HISTORY_PAGE_SIZE = 10;
 const HISTORY_ENTRY_CLASS =
@@ -41,130 +41,105 @@ export default function UserPageSubscriptionsHistory(
     setLogsPage: (page: number) => void;
   }>
 ) {
+  const locale = useBrowserLocale();
+  const tabs = [
+    {
+      id: "redeemed",
+      title: t(locale, "subscriptions.history.redeemed"),
+      heading: t(locale, "subscriptions.history.redeemedTitle"),
+      loading: props.redeemedLoading,
+      empty: t(locale, "subscriptions.history.emptyRedeemed"),
+      page: props.redeemed.page,
+      count: props.redeemed.count,
+      setPage: props.setRedeemedPage,
+      rows: props.redeemed.data.map((redeem) => (
+        <RedeemedEntry key={redeem.transaction} redeem={redeem} />
+      )),
+    },
+    {
+      id: "logs",
+      title: t(locale, "subscriptions.history.logs"),
+      heading: t(locale, "subscriptions.history.logsTitle"),
+      loading: props.logsLoading,
+      empty: t(locale, "subscriptions.history.emptyLogs"),
+      page: props.logs.page,
+      count: props.logs.count,
+      setPage: props.setLogsPage,
+      rows: props.logs.data.map((log, index) => (
+        <LogEntry key={getSubscriptionLogKey(log, index)} log={log} />
+      )),
+    },
+    {
+      id: "topups",
+      title: t(locale, "subscriptions.history.topups"),
+      heading: t(locale, "subscriptions.history.topupsTitle"),
+      loading: props.topUpsLoading,
+      empty: t(locale, "subscriptions.history.emptyTopups"),
+      page: props.topups.page,
+      count: props.topups.count,
+      setPage: props.setTopUpPage,
+      rows: props.topups.data.map((topUp) => (
+        <TopUpEntry key={topUp.hash} topUp={topUp} />
+      )),
+    },
+  ];
   return (
-    <UserPageSubscriptionsSection
-      id="profile-subscriptions-history"
-      title="Subscription History"
-      className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-pt-8"
-    >
-      <div className="tw-space-y-8 max-sm:tw-space-y-0">
-        <HistoryDisclosure
-          title="Redeemed Subscriptions"
-          loading={props.redeemedLoading === true}
-          isEmpty={props.redeemed.data.length === 0}
-          emptyMessage="No Redeemed Subscriptions found"
-          pagination={
-            <HistoryPagination
-              count={props.redeemed.count}
-              page={props.redeemed.page}
-              setPage={props.setRedeemedPage}
-            />
-          }
-        >
-          {props.redeemed.data.map((redeem) => (
-            <RedeemedEntry key={redeem.transaction} redeem={redeem} />
-          ))}
-        </HistoryDisclosure>
-
-        <HistoryDisclosure
-          title="Log History"
-          loading={props.logsLoading === true}
-          isEmpty={props.logs.data.length === 0}
-          emptyMessage="No logs found"
-          pagination={
-            <HistoryPagination
-              count={props.logs.count}
-              page={props.logs.page}
-              setPage={props.setLogsPage}
-            />
-          }
-        >
-          {props.logs.data.map((log, index) => (
-            <LogEntry key={getSubscriptionLogKey(log, index)} log={log} />
-          ))}
-        </HistoryDisclosure>
-
-        <HistoryDisclosure
-          title="Top Up History"
-          loading={props.topUpsLoading === true}
-          isEmpty={props.topups.data.length === 0}
-          emptyMessage="No Top Ups found"
-          pagination={
-            <HistoryPagination
-              count={props.topups.count}
-              page={props.topups.page}
-              setPage={props.setTopUpPage}
-            />
-          }
-        >
-          {props.topups.data.map((topUp) => (
-            <TopUpEntry key={topUp.hash} topUp={topUp} />
-          ))}
-        </HistoryDisclosure>
-      </div>
-    </UserPageSubscriptionsSection>
-  );
-}
-
-function HistoryDisclosure({
-  title,
-  loading,
-  isEmpty,
-  emptyMessage,
-  pagination,
-  children,
-}: Readonly<{
-  title: string;
-  loading: boolean;
-  isEmpty: boolean;
-  emptyMessage: string;
-  pagination: ReactNode;
-  children: ReactNode;
-}>) {
-  const isDesktop = useMediaQuery("(min-width: 640px)");
-  const [userExpanded, setUserExpanded] = useState<boolean | null>(null);
-  const isExpanded = userExpanded ?? isDesktop;
-
-  let content: ReactNode = (
-    <div className="tw-flex tw-flex-col tw-rounded-xl tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-white/[0.03]">
-      {children}
-    </div>
-  );
-  if (loading) {
-    content = <HistoryLoadingState title={title} />;
-  } else if (isEmpty) {
-    content = <HistoryEmptyState>{emptyMessage}</HistoryEmptyState>;
-  }
-
-  return (
-    <details className="tw-group" aria-busy={loading} open={isExpanded}>
-      <summary
-        onClick={(event) => {
-          event.preventDefault();
-          setUserExpanded(!isExpanded);
-        }}
-        className="tw-mb-3 tw-flex tw-min-h-8 tw-w-full tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-px-1 tw-py-1 tw-text-left focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 max-sm:tw-mb-0 max-sm:tw-min-h-[52px] max-sm:tw-rounded-none max-sm:tw-border-x-0 max-sm:tw-border-b max-sm:tw-border-t-0 max-sm:tw-border-solid max-sm:tw-border-white/[0.06] max-sm:group-open:tw-mb-2 max-sm:group-open:tw-border-b-0 [&::-webkit-details-marker]:tw-hidden"
+    <TabGroup>
+      <TabList
+        aria-label={t(locale, "subscriptions.history.title")}
+        className="tw-mb-3 tw-flex tw-gap-1 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900 tw-p-1 md:tw-w-fit"
       >
-        <h3 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-500 max-sm:tw-text-[15px] max-sm:tw-text-iron-300">
-          {title}
-        </h3>
-        <ChevronDownIcon
-          className="tw-size-4 tw-flex-shrink-0 tw-text-iron-600 tw-transition-transform tw-duration-200 group-open:tw-rotate-180 motion-reduce:tw-transition-none"
-          aria-hidden="true"
-        />
-      </summary>
-      <div>
-        {content}
-        {!loading && pagination}
-      </div>
-    </details>
+        {tabs.map((tab) => (
+          <Tab
+            key={tab.id}
+            className="tw-min-h-11 tw-flex-1 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-400 data-[selected]:tw-bg-iron-700 data-[selected]:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          >
+            {tab.title}
+          </Tab>
+        ))}
+      </TabList>
+      <TabPanels>
+        {tabs.map((tab) => (
+          <TabPanel
+            key={tab.id}
+            aria-busy={tab.loading === true}
+            className="focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          >
+            <h3 className="tw-mb-2 tw-mt-4 tw-text-sm tw-font-medium tw-text-iron-300">
+              {tab.heading}
+            </h3>
+            {tab.loading ? (
+              <HistoryLoadingState title={tab.heading} />
+            ) : (
+              <>
+                {tab.rows.length ? (
+                  <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06]">
+                    {tab.rows}
+                  </div>
+                ) : (
+                  <HistoryEmptyState>{tab.empty}</HistoryEmptyState>
+                )}
+                <HistoryPagination
+                  page={tab.page}
+                  count={tab.count}
+                  setPage={tab.setPage}
+                />
+              </>
+            )}
+          </TabPanel>
+        ))}
+      </TabPanels>
+    </TabGroup>
   );
 }
 
 function HistoryLoadingState({ title }: Readonly<{ title: string }>) {
+  const locale = useBrowserLocale();
   return (
     <div className="tw-flex tw-min-h-[68px] tw-animate-pulse tw-items-center tw-rounded-xl tw-bg-iron-950/50 tw-p-6 tw-ring-1 tw-ring-white/[0.02]">
-      <output className="tw-sr-only">Loading {title}</output>
+      <output className="tw-sr-only">
+        {t(locale, "subscriptions.history.loading", { title })}
+      </output>
       <div
         aria-hidden="true"
         className="tw-h-3 tw-w-2/5 tw-rounded-full tw-bg-iron-800"
@@ -176,7 +151,9 @@ function HistoryLoadingState({ title }: Readonly<{ title: string }>) {
 function HistoryEmptyState({ children }: { readonly children: ReactNode }) {
   return (
     <div className="tw-flex tw-min-h-[68px] tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-950/50 tw-p-6 tw-text-center tw-ring-1 tw-ring-white/[0.02]">
-      <span className="tw-text-meta tw-font-normal tw-text-iron-500">{children}</span>
+      <span className="tw-text-meta tw-font-normal tw-text-iron-500">
+        {children}
+      </span>
     </div>
   );
 }
@@ -216,15 +193,14 @@ function TopUpEntry(
       <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
         <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1 sm:tw-flex-row sm:tw-items-center sm:tw-gap-3">
           <span className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap tw-text-sm tw-text-iron-100">
-            <b className="tw-font-semibold tw-tabular-nums">+ {props.topUp.amount}</b>
+            <b className="tw-font-semibold tw-tabular-nums">
+              + {props.topUp.amount}
+            </b>
             <span className="tw-flex tw-h-4 tw-w-2.5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-500">
               <EthereumIcon />
             </span>
           </span>
-          <span className="tw-break-all tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500 max-sm:tw-line-clamp-1">
-            <span aria-hidden="true" className="tw-hidden sm:tw-inline">
-              —{" "}
-            </span>
+          <span className="tw-break-all tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
             from: {props.topUp.from_wallet}
           </span>
         </div>
@@ -233,7 +209,7 @@ function TopUpEntry(
             {getDateDisplay(new Date(props.topUp.transaction_date))}
           </span>
           <a
-            className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
+            className="tw-inline-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-lg tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
             target="_blank"
             rel="noopener noreferrer"
             href={getTransactionLink(mainnet.id, props.topUp.hash)}
@@ -297,8 +273,8 @@ function RedeemedEntry(
             {props.redeem.count}
           </div>
           <div className="tw-break-words tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
-            Airdrop Address: {formatAddress(props.redeem.address)} - Balance
-            after redemption: {props.redeem.balance_after} ETH
+            Airdrop Address: {props.redeem.address} - Balance after redemption:{" "}
+            {props.redeem.balance_after} ETH
           </div>
         </div>
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-3">
@@ -308,7 +284,7 @@ function RedeemedEntry(
             </span>
           )}
           <a
-            className="tw-inline-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
+            className="tw-inline-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-lg tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
             target="_blank"
             rel="noopener noreferrer"
             href={getTransactionLink(mainnet.id, props.redeem.transaction)}

@@ -1,3 +1,4 @@
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import UserPageSubscriptionsTopUp from "@/components/user/subscriptions/UserPageSubscriptionsTopUp";
@@ -95,13 +96,20 @@ describe("UserPageSubscriptionsTopUp", () => {
     waitSendTransaction.isError = false;
     waitSendTransaction.error = undefined;
     jest.clearAllMocks();
+    jest
+      .mocked(useSeizeConnectContext)
+      .mockReturnValue({ isConnected: true } as ReturnType<
+        typeof useSeizeConnectContext
+      >);
   });
 
   it("sends transaction when 1 Card option is selected and Send is clicked", async () => {
     const user = userEvent.setup();
     render(<UserPageSubscriptionsTopUp />);
 
-    const oneCardOption = screen.getByRole("radio", { name: "1 Card" });
+    const oneCardOption = screen.getByRole("button", {
+      name: "1 Card 0.06529 ETH",
+    });
     await user.click(oneCardOption);
 
     const sendButton = screen.getByRole("button", {
@@ -191,7 +199,7 @@ describe("UserPageSubscriptionsTopUp", () => {
     const user = userEvent.setup();
     render(<UserPageSubscriptionsTopUp />);
 
-    const otherOption = screen.getByRole("radio", {
+    const otherOption = screen.getByRole("spinbutton", {
       name: "Other card count",
     });
     await user.click(otherOption);
@@ -217,7 +225,7 @@ describe("UserPageSubscriptionsTopUp", () => {
     render(<UserPageSubscriptionsTopUp />);
 
     await user.click(
-      screen.getByRole("radio", {
+      screen.getByRole("spinbutton", {
         name: "Other card count",
       })
     );
@@ -261,7 +269,7 @@ describe("UserPageSubscriptionsTopUp", () => {
     render(<UserPageSubscriptionsTopUp coverage={coverage} />);
 
     await user.click(
-      screen.getByRole("radio", { name: "Recommended - 3 Cards" })
+      screen.getByRole("button", { name: "Recommended 3 Cards, 0.17087 ETH" })
     );
     await user.click(
       screen.getByRole("button", { name: "Top up 0.17087 ETH" })
@@ -275,6 +283,73 @@ describe("UserPageSubscriptionsTopUp", () => {
       to: SUBSCRIPTIONS_ADDRESS,
       value: parseEther("0.17087"),
     });
+  });
+
+  it("keeps wallet validation before sending any ETH", async () => {
+    jest
+      .mocked(useSeizeConnectContext)
+      .mockReturnValue({ isConnected: false } as ReturnType<
+        typeof useSeizeConnectContext
+      >);
+    render(<UserPageSubscriptionsTopUp />);
+    const user = userEvent.setup();
+    await user.click(
+      screen.getByRole("button", { name: "1 Card 0.06529 ETH" })
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Top up 0.06529 ETH" })
+    );
+    expect(
+      screen.getByRole("textbox", { name: "Transaction error details" })
+    ).toHaveValue("You must have an active wallet connection to top up");
+    expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
+  });
+
+  it("sends the exact minimum for partial funding, and omits a duplicate option", async () => {
+    const point = { token_id: 571, mint_at: new Date("2026-11-06T15:40:00Z") };
+    const coverage = {
+      minimum_top_up: {
+        additional_mints: 1,
+        amount_eth: "0.01587",
+        resulting_fully_funded_drops: 1,
+        projected_through: point,
+      },
+    } as ApiSubscriptionCoverage;
+    const { rerender } = render(
+      <UserPageSubscriptionsTopUp coverage={coverage} />
+    );
+    const user = userEvent.setup();
+    await user.click(
+      screen.getByRole("button", { name: /^Minimum for next drop/ })
+    );
+    expect(
+      screen.getByText("Funds 1 intended drop through The Memes #571")
+    ).toBeVisible();
+    await user.click(
+      screen.getByRole("button", { name: "Top up 0.01587 ETH" })
+    );
+    expect(sendTransaction.sendTransaction).toHaveBeenCalledWith({
+      chainId: SUBSCRIPTIONS_CHAIN.id,
+      to: SUBSCRIPTIONS_ADDRESS,
+      value: parseEther("0.01587"),
+    });
+    rerender(
+      <UserPageSubscriptionsTopUp
+        coverage={{
+          ...coverage,
+          recommended_top_up: {
+            amount_eth: "0.01587",
+            additional_mints: 1,
+            target_fully_funded_drops: 1,
+            projected_through: point,
+          },
+        }}
+      />
+    );
+    expect(
+      screen.queryByRole("button", { name: /^Minimum for next drop/ })
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Recommended/ })).toBeVisible();
   });
 
   it("refreshes coverage after the submitted transaction is confirmed", async () => {

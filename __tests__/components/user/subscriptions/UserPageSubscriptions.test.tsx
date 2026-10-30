@@ -35,8 +35,8 @@ jest.mock('@/components/user/subscriptions/UserPageSubscriptionsTopUp', () => ({
 
 jest.mock('@/components/user/subscriptions/coverage/SubscriptionCoverageSummary', () => ({
   __esModule: true,
-  default: () => (
-    <div data-testid="subscription-coverage-summary">Coverage summary</div>
+  default: ({balance, children}: any) => (
+    <div data-testid="subscription-coverage-summary">Coverage summary{balance}{children}</div>
   ),
 }));
 
@@ -54,6 +54,7 @@ jest.mock('@/components/user/subscriptions/UserPageSubscriptionsUpcoming', () =>
   default: ({ profileKey, details, memes_subscriptions, readonly, refresh }: any) => (
     <div data-testid="subscriptions-upcoming">
       Upcoming Component - Memes: {memes_subscriptions?.length || 0}
+      <div data-testid="subscriptions-mode">Mode Component - Profile: {profileKey}, Readonly: {readonly ? 'true' : 'false'}</div>
     </div>
   ),
 }));
@@ -253,23 +254,14 @@ describe('UserPageSubscriptions', () => {
       });
     });
 
-    it('should handle API errors gracefully', async () => {
-      // First render with successful mocks
-      mockCommonApiFetch.mockResolvedValue({});
-      
-      renderWithAuth(
-        <UserPageSubscriptions profile={mockProfile} />,
-        { connectedProfile: null }
-      );
-
-      // Component should render even when API calls fail  
-      expect(screen.getByTestId('subscriptions-balance')).toBeInTheDocument();
-      
-      // Test that component handles subsequent API failures
+    it('shows a retry warning when a subscription read fails and recovers', async () => {
       mockCommonApiFetch.mockRejectedValue(new Error('API Error'));
-      
-      // Component should still be present
-      expect(screen.getByTestId('subscriptions-balance')).toBeInTheDocument();
+      renderWithAuth(<UserPageSubscriptions profile={mockProfile} />, {connectedProfile: null});
+      await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Some subscription data could not be refreshed.'));
+      expect(screen.getByTestId('subscriptions-balance')).toHaveTextContent('Fetching: false');
+      mockCommonApiFetch.mockResolvedValue({});
+      await userEvent.setup().click(screen.getByRole('button', {name: 'Retry'}));
+      await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument());
     });
   });
 
@@ -306,6 +298,7 @@ describe('UserPageSubscriptions', () => {
 
       jest.clearAllMocks();
 
+      await user.click(screen.getByRole('button', {name: 'Subscription History'}));
       await user.click(screen.getByText('Load TopUp Page 2'));
 
       await waitFor(() => {
@@ -325,6 +318,7 @@ describe('UserPageSubscriptions', () => {
 
       jest.clearAllMocks();
 
+      await user.click(screen.getByRole('button', {name: 'Subscription History'}));
       await user.click(screen.getByText('Load Redeemed Page 2'));
 
       await waitFor(() => {
@@ -344,6 +338,7 @@ describe('UserPageSubscriptions', () => {
 
       jest.clearAllMocks();
 
+      await user.click(screen.getByRole('button', {name: 'Subscription History'}));
       await user.click(screen.getByText('Load Logs Page 2'));
 
       await waitFor(() => {

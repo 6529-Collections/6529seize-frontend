@@ -151,6 +151,13 @@ reconciliation. The subscriptions overview also explains that profile history
 sections start closed on phones and preserve user toggles during resizing or
 data refreshes. The profile subscription record also explains how tapping,
 hovering, or focusing the address reveals its full value on compact layouts.
+Profile subscription facts describe the short coverage answer and balance,
+Details for the complete coverage report and mode timestamp, inline Top up with
+More for Year/Epoch/Deep Time, Upcoming Drops with the Automatic switch, and the
+closed Minting Settings and Subscription History panels. They retain all five
+section anchors, exact supplied top-up amounts, full history records, pagination,
+and the existing owner, visitor, proxy, and regional iOS rules.
+
 These remain frontend-owned facts published through the existing
 help-index sync and consumed by the existing backend loader.
 

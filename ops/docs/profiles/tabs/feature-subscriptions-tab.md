@@ -3,8 +3,8 @@
 ## Overview
 
 The `Subscriptions` tab at `/{user}/subscriptions` leads with a projected Meme
-subscription runway, then shows balance, settings, top-up options, upcoming
-drops, and subscription history.
+subscription answer and balance, followed by Upcoming Drops. Details, Top up,
+Minting Settings, and Subscription History open when needed.
 
 This page covers tab content only. Tab visibility and hidden-tab URL fallback
 are documented in
@@ -13,8 +13,8 @@ are documented in
 ## Location in the Site
 
 - Route: `/{user}/subscriptions`
-- Sections: `Subscription minting`, `Minting settings`, `Top up` (owner mode
-  only), `Upcoming Drops`, `Subscription History`
+- Sections: coverage answer and `Subscription balance`, `Upcoming Drops`,
+  `Minting Settings`, `Subscription History`, and inline `Top up` for owners
 
 ## Entry Points
 
@@ -47,8 +47,11 @@ first render.
   Where Subscriptions are hidden (the iOS app outside the US) the tab
   redirects to Identity and nothing scrolls.
 - Use the subscription-awareness action on Home or a Meme card.
-- Use `Learn more` in the `Subscription minting` section to open
-  `/about/subscriptions`.
+- Use `Learn more` below Subscription History to open `/about/subscriptions`.
+- Links to `#profile-subscriptions-overview`, `#profile-subscriptions-settings`,
+  `#profile-subscriptions-top-up`, `#profile-subscriptions-upcoming`, and
+  `#profile-subscriptions-history` scroll to and focus their section heading.
+  Settings, Top up, and History open automatically when linked to.
 
 ## Common Scenarios
 
@@ -66,40 +69,33 @@ first render.
 
 ## User Journey
 
-1. Open `/{user}/subscriptions`.
-2. Review `Subscription coverage`:
-   - status and the number of consecutive intended drops fully funded from the
-     next intended drop
-   - compact configuration: `Automatic` or `Manual`, exact ETH balance,
-     eligibility count, and edition preference
-   - `Funded through` and `Next unfunded` Meme card/date when available
-   - an authoritative `Top up by` deadline only when the backend supplies one
-   - exact recommended top-up and its projected runway when available
-3. Review `Minting settings`:
-   - `Subscription balance` (exact ETH and raw mint capacity)
-   - `Airdrop Address`; tap, hover, or focus the address to read it in full
-   - `Mode` (`Manual` or `Automatic`)
-   - `Edition Preference` (`One edition` or `All eligible`)
-4. In owner mode:
-   - refresh balance
-   - open the airdrop-address edit link (delegation registration flow)
-   - update mode and edition preference
-5. In `Top up` (owner mode only):
-   - when supplied, choose `Recommended` to restore the healthy runway or
-     `Minimum for next drop` to cover the next at-risk intended drop
-   - choose `1 Card`, remaining `SZN`, `Year`, or `Epoch`
-   - optionally expand `Show Deep Time Subscriptions` for `Period`, `Era`,
-     `Eon`
-   - or choose `Other` and enter a card count
-6. In `Upcoming Drops`, toggle subscription rows and update quantity for
-   subscribed rows.
-7. In `Subscription History`, expand accordions for redeemed records, logs, and
-   top-ups.
+1. Open `/{user}/subscriptions` and read the short coverage answer, next intended
+   drop, and Subscription balance. A funded-through date is a projection.
+2. Open `Details` for Status, Drops funded, Funded through, Next unfunded,
+   Balance capacity, Forecast use, Mode with its last-update time, Eligibility,
+   and Edition Preference. Status and mode explanations, recommendations,
+   authoritative deadlines, the projection note, and Refresh coverage remain here.
+3. Owners can open `Top up` inside the answer card. Choose Recommended or
+   Minimum for next drop when supplied, 1 Card, Remaining SZN, or Other.
+   `More` reveals Remaining Year, Remaining Epoch, and Deep Time Subscriptions
+   (Remaining Period, Era, and Eon). Only the selected coverage option shows its
+   supplied projected funding outcome. Cancel closes the panel and returns focus
+   to the Top up button.
+4. Use `Upcoming Drops` to review the first three drops, change individual
+   selections or quantities, or turn Automatic mode on or off. `Show More`
+   reveals the remaining rows. Minting Today rows are locked; focus, tap, or
+   hover the label for the explanation.
+5. Open `Minting Settings` to choose One edition or All eligible and read the
+   full Airdrop Address. Owners can use its edit link to open delegation
+   registration. Settings starts closed and summarizes the edition preference
+   and address on wider screens.
+6. Open `Subscription History` and choose Redeemed, Log, or Top Ups. Each tab
+   retains the original entry text, dates, addresses, transaction links, empty
+   state, and independent pagination.
 
 ## Current Behavior
 
-- Coverage status ramps with urgency and always pairs color with text and an
-  icon:
+- Coverage status ramps with urgency and pairs a colored dot with text:
   - `Covered`: at least 7 consecutive intended drops are fully funded
   - `Plan a top up`: 4-6 drops are fully funded
   - `Running low`: 2-3 drops are fully funded
@@ -116,8 +112,10 @@ first render.
 - Coverage uses fully funded intended drops, not raw card credits, because
   eligibility, all-editions settings, manual choices, and opt-outs can change
   consumption per drop.
-- `Mode` can show a UTC last-update timestamp.
-- `Edition Preference` shows `Eligibility xN` and uses a toggle.
+- `Mode` and its UTC last-update timestamp are in Details. The Automatic
+  switch is beside Upcoming Drops.
+- `Edition Preference` shows `Eligibility xN` and uses two radio options with
+  a visible selected state and keyboard arrow navigation.
 - `Top up`:
   - sends ETH to the configured subscriptions address on the configured chain
   - uses exact backend-provided ETH for recommended and minimum options,
@@ -134,6 +132,8 @@ first render.
   - keeps long transaction errors contained in a keyboard-focusable,
     scrollable status panel
 - `Upcoming Drops`:
+  - only the next unfunded token identified by coverage gets a `Next unfunded`
+    marker, with a Top up link for owners; stale coverage does not mark rows
   - shows first 3 rows by default; `Show More` expands the list
   - first row can show phase metadata (phase, position, airdrop address,
     subscribed count)
@@ -150,8 +150,8 @@ first render.
   - choosing a quantity saves a manual override for that card, including later
     future cards; automatic eligibility updates never overwrite it
   - a saved manual quantity above eligibility is displayed at the eligibility
-    limit without changing the saved request: manual 11 displays `10 / 10` at
-    eligibility 10, then `11 / 12` after eligibility recovers to 12 and data is
+    limit without changing the saved request: manual 11 displays `10 cards` at
+    eligibility 10, then `11 cards` after eligibility recovers to 12 and data is
     refreshed
   - final quantities are capped by eligibility and available balance; refreshing
     upcoming quantities does not change historical finalized allocations
@@ -159,9 +159,9 @@ first render.
   - `Redeemed Subscriptions`
   - `Log History`
   - `Top Up History`
-  - sections start closed on phones and open on larger screens; opening or closing
-    a section keeps that choice while data refreshes or the window is resized
-  - pagination when a section has more than 10 rows
+  - the outer disclosure starts closed at every width; the tabs retain their
+    selected state while the panel closes, data refreshes, or the window resizes
+  - pagination when a tab has more than 10 rows
 
 ## Consolidation Changes
 
@@ -202,6 +202,10 @@ processed; they do not automatically recover rows stranded by earlier failures.
 - Balance, airdrop-address, upcoming-drop, and history content use stable
   loading indicators until their requests finish; empty messages are not shown
   while those sections are still loading.
+- If a subscription read fails, a warning identifies that some data could not
+  be refreshed. Retry fetches the subscription data again.
+- A failed coverage refresh keeps the last known forecast with a visible stale
+  warning, including while Details is closed.
 - If coverage cannot be calculated or fetched, the page states that settings
   have not changed and owners can retry. It does not guess a funded-through
   date or top-up deadline.
@@ -226,10 +230,12 @@ processed; they do not automatically recover rows stranded by earlier failures.
 
 ## Responsive Behavior
 
-- The four main sections use the same panel structure and spacing.
+- The answer card, Upcoming Drops, and the bottom disclosure card keep a
+  consistent layout at each width.
 - Subscription settings wrap without clipping on narrow screens.
-- Upcoming-drop content and controls stack on mobile so dates, toggles, and
-  quantity controls do not overlap.
+- Upcoming-drop titles and dates wrap beside bordered quantity pickers and
+  toggles without horizontal scrolling. Top-up chips and segmented controls
+  expand across the available width on phones.
 - Top-up options and history rows wrap without horizontal page overflow.
 
 ## Edge Cases
