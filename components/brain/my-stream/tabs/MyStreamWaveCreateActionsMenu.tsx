@@ -13,6 +13,11 @@ import {
 } from "@heroicons/react/24/outline";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import CompactMenuMobileBottomSheet from "@/components/compact-menu/CompactMenuMobileBottomSheet";
+import {
+  ACTION_LABEL_CLASSES,
+  MOBILE_ACTION_ICON_CLASSES,
+  MOBILE_ACTION_ITEM_CLASSES,
+} from "@/components/compact-menu/constants";
 import { useAuth } from "@/components/auth/Auth";
 import CreateWaveModal from "@/components/waves/create-wave/CreateWaveModal";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -55,13 +60,16 @@ export default function MyStreamWaveCreateActionsMenu({
     Boolean(parentAdminGroupId) &&
     waveConfig?.authenticated_user_eligible_for_admin === true;
 
-  const itemClassName = `tw-group tw-flex tw-w-full tw-items-start tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-2 tw-text-left tw-transition-colors motion-reduce:tw-transition-none ${isMobile ? "tw-px-0" : "tw-px-2.5"}`;
-  const iconClassName = `tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-text-iron-400 tw-transition-colors desktop-hover:group-hover:tw-text-white motion-reduce:tw-transition-none ${isMobile ? "tw-h-6" : "tw-h-5"}`;
+  const itemClassName =
+    "tw-group tw-flex tw-w-full tw-items-start tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2.5 tw-py-2 tw-text-left tw-transition-colors motion-reduce:tw-transition-none";
+  const iconClassName = isMobile
+    ? MOBILE_ACTION_ICON_CLASSES
+    : "tw-flex tw-h-5 tw-shrink-0 tw-items-center tw-justify-center tw-text-iron-400 tw-transition-colors desktop-hover:group-hover:tw-text-white motion-reduce:tw-transition-none";
   const iconSizeClassName = isMobile ? "tw-size-5" : "tw-size-[1.125rem]";
 
   const actionLabel = (label: string, description: string) => (
     <span className="tw-flex tw-flex-col tw-gap-0.5">
-      <span className="tw-font-semibold tw-text-iron-100">{label}</span>
+      <span className={ACTION_LABEL_CLASSES}>{label}</span>
       <span className="tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-400">
         {description}
       </span>
@@ -130,7 +138,7 @@ export default function MyStreamWaveCreateActionsMenu({
             trigger={trigger}
             triggerClassName={buttonClassName}
             items={menuItems}
-            itemClassName={`${itemClassName} tw-text-base tw-font-medium tw-text-iron-200 tw-duration-200 active:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-50`}
+            itemClassName={`${MOBILE_ACTION_ITEM_CLASSES} tw-px-0`}
           />
         ) : (
           <CompactMenu

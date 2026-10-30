@@ -69,6 +69,25 @@ describe("NotificationsCauseFilter", () => {
     });
   });
 
+  it("includes collaboration invitations in the Invites filter", async () => {
+    const onChange = jest.fn();
+    render(<FilterHarness onChange={onChange} />, { wrapper: Wrapper });
+    await userEvent.click(
+      screen.getByRole("button", { name: "Filter notifications: All" })
+    );
+    await userEvent.click(
+      screen.getByRole("menuitemcheckbox", { name: "Invites" })
+    );
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cause: [
+          ApiNotificationCause.WaveCreated,
+          ApiNotificationCause.MemeCollaboration,
+        ],
+      })
+    );
+  });
+
   it("keeps the page heading visually hidden only in the native app", () => {
     mockedUseIsMobileLayoutViewport.mockReturnValue(true);
     mockedUseDeviceInfo.mockReturnValue({

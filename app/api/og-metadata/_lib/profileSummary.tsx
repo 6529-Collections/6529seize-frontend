@@ -99,6 +99,7 @@ export const ProfileBadgeRow = ({
   readonly activityIconSize: number;
   readonly gap?: number;
 }) => {
+  if (profile?.is_anonymous) return null;
   const profileWithBadges = profile as ProfileWithOptionalBadges | undefined;
   const activityBadgeType = getActivityBadgeType(profileWithBadges);
 

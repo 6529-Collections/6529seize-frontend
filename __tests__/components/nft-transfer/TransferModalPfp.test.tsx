@@ -2,6 +2,12 @@ import { render, screen, waitFor } from "@testing-library/react";
 
 import TransferModalPfp from "@/components/nft-transfer/TransferModalPfp";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
 
 const mockUseResolvedIpfsUrl = jest.fn();
 jest.mock("@/hooks/useResolvedIpfsUrl", () => ({
@@ -39,6 +45,16 @@ describe("TransferModalPfp", () => {
 
     await waitFor(() =>
       expect(screen.getByAltText("Profile")).toBeInTheDocument()
+    );
+  });
+
+  it("requests the 200x200 derivative of a CDN profile picture", () => {
+    mockUseResolvedIpfsUrl.mockReturnValue({ data: CDN_AVATAR_URL });
+
+    renderTransferModalPfp(45, CDN_AVATAR_URL);
+
+    expect(getRequestedImageSrc(screen.getByAltText("Profile"))).toContain(
+      scaledAvatarPath(ImageScale.W_200_H_200)
     );
   });
 });

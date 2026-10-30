@@ -1,5 +1,6 @@
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import Image from "next/image";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 type SelectedIdentity = Pick<
   CommunityMemberMinimal,
@@ -94,7 +95,10 @@ export default function GroupCreateIdentitySelectedItems({
                   {identity.pfp ? (
                     // Profile avatars can come from arbitrary remote hosts, so this stays unoptimized.
                     <Image
-                      src={identity.pfp}
+                      src={getScaledImageUri(
+                        identity.pfp,
+                        ImageScale.W_AUTO_H_50
+                      )}
                       alt={`Profile picture for ${identity.handle ?? "selected profile"}`}
                       fill
                       unoptimized

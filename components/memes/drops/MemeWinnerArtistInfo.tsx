@@ -8,6 +8,7 @@ import { getTimeAgoShort } from "@/helpers/Helpers";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { MemeCollaboratorCredits } from "@/components/waves/memes/collaborations/MemeCollaboratorCredits";
 
 interface MemeWinnerArtistInfoProps {
   readonly drop: ExtendedDrop;
@@ -66,6 +67,7 @@ export default function MemeWinnerArtistInfo({
             </p>
           </div>
         </div>
+        <MemeCollaboratorCredits collaborators={drop.collaborators} />
         <WinnerDropBadge rank={1} decisionTime={decisionTime ?? null} />
 
         {showWaveInfo && drop.wave && (

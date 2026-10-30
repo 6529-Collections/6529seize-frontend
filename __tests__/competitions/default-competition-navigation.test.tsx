@@ -254,10 +254,16 @@ it("waits for a fresh marked restoration and commits it without another route re
   expect(replaceState).not.toHaveBeenCalled();
   mockFetchedAfterMount = true;
   rerender();
-  expect(replaceState).toHaveBeenCalledWith(
-    { retained: "history-value" },
+  expect(replaceState).toHaveBeenNthCalledWith(
+    1,
+    null,
     "",
     "/waves/wave/competitions/alpha?tab=leaderboard&divider=42"
+  );
+  expect(replaceState).toHaveBeenNthCalledWith(
+    2,
+    { retained: "history-value" },
+    ""
   );
   expect(mockReplace).not.toHaveBeenCalled();
   replaceState.mockRestore();
@@ -332,7 +338,7 @@ it("ignores a fresh old-wave restoration after native Back commits the list URL"
   expect(mockReplace).not.toHaveBeenCalled();
 });
 
-it("does not navigate on selection errors, disabled rollout or direct messages", () => {
+it("does not navigate on selection errors or direct messages", () => {
   mockError = true;
   const { rerender } = renderHook(() =>
     useDefaultCompetitionNavigation(wave, true)
@@ -340,11 +346,7 @@ it("does not navigate on selection errors, disabled rollout or direct messages",
   expect(mockReplace).not.toHaveBeenCalled();
   mockReplace.mockClear();
   mockError = false;
-  mockEnabled = false;
   rerender();
-  expect(mockReplace).not.toHaveBeenCalled();
-  mockReplace.mockClear();
-  mockEnabled = true;
   renderHook(() =>
     useDefaultCompetitionNavigation(
       {

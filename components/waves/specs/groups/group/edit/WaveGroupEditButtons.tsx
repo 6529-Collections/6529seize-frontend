@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useContext, useMemo, useRef, useState } from "react";
+import { useCallback, useContext, useMemo, useRef } from "react";
+import { createPortal } from "react-dom";
+import { useWaveInformationPanel } from "@/components/brain/mobile/WaveInformationPanelContext";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -44,7 +46,6 @@ export default function WaveGroupEditButtons({
   const locale = useBrowserLocale();
   const { setToast, requestAuth, connectedProfile } = useContext(AuthContext);
   const { onWaveCreated, onGroupCreate } = useContext(ReactQueryWrapperContext);
-  const [isGroupChangeOpen, setIsGroupChangeOpen] = useState(false);
   const skipNextGroupChangeAuthRef = useRef(false);
   const lastCreatedGroupIdRef = useRef<string | null>(null);
   const scopedGroup = useMemo(() => getScopedGroup(wave, type), [wave, type]);
@@ -53,6 +54,10 @@ export default function WaveGroupEditButtons({
     [connectedProfile]
   );
   const groupLabel = t(locale, GROUP_LABEL_KEYS[type]);
+  const panel = useWaveInformationPanel(
+    t(locale, "waves.create.groups.editAccess.title", { groupLabel })
+  );
+  const { close: closePanel } = panel;
   const { submit: submitInlineGroup } = useGroupMutations({
     requestAuth,
     onGroupCreate,
@@ -67,14 +72,10 @@ export default function WaveGroupEditButtons({
       onWaveCreated,
     });
 
-  const handleChangeGroupOpen = useCallback(() => {
-    setIsGroupChangeOpen(true);
-  }, []);
-
   const handleChangeGroupClose = useCallback(() => {
     skipNextGroupChangeAuthRef.current = false;
-    setIsGroupChangeOpen(false);
-  }, []);
+    closePanel();
+  }, [closePanel]);
 
   const handleGroupChange = useCallback(
     async (group: ApiGroupFull | null): Promise<boolean> => {
@@ -95,7 +96,7 @@ export default function WaveGroupEditButtons({
         );
         if (updated) {
           lastCreatedGroupIdRef.current = null;
-          setIsGroupChangeOpen(false);
+          closePanel();
           return true;
         }
         if (createdGroupId) {
@@ -114,7 +115,7 @@ export default function WaveGroupEditButtons({
           if (referenceState === "attached") {
             lastCreatedGroupIdRef.current = null;
             onWaveCreated();
-            setIsGroupChangeOpen(false);
+            closePanel();
             return true;
           }
           if (referenceState === "unattached") {
@@ -129,7 +130,7 @@ export default function WaveGroupEditButtons({
       }
       return false;
     },
-    [onWaveCreated, type, updateWave, wave]
+    [closePanel, onWaveCreated, type, updateWave, wave]
   );
 
   const handleInlineGroupCreate = useCallback(
@@ -159,6 +160,21 @@ export default function WaveGroupEditButtons({
     [connectedProfile?.handle, setToast, submitInlineGroup]
   );
 
+  const editor = panel.isOpen ? (
+    <WaveGroupChangeDialog
+      wave={wave}
+      type={type}
+      currentGroup={scopedGroup}
+      defaultIncludedIdentity={defaultIncludedIdentity}
+      accessLabel={groupLabel}
+      disabled={mutating}
+      embedded={panel.isInSheet}
+      onClose={handleChangeGroupClose}
+      onGroupChange={handleGroupChange}
+      onCreateGroup={handleInlineGroupCreate}
+    />
+  ) : null;
+
   return (
     <>
       <WaveGroupEditButton
@@ -167,21 +183,16 @@ export default function WaveGroupEditButtons({
         label={t(locale, "waves.create.groups.editAccess.triggerLabel", {
           groupLabel,
         })}
-        onClick={handleChangeGroupOpen}
+        onClick={(trigger) => {
+          skipNextGroupChangeAuthRef.current = false;
+          panel.open(trigger);
+        }}
+        expanded={panel.isOpen}
+        controls={panel.isInSheet ? panel.contentId : undefined}
       />
-      {isGroupChangeOpen && (
-        <WaveGroupChangeDialog
-          wave={wave}
-          type={type}
-          currentGroup={scopedGroup}
-          defaultIncludedIdentity={defaultIncludedIdentity}
-          accessLabel={groupLabel}
-          disabled={mutating}
-          onClose={handleChangeGroupClose}
-          onGroupChange={handleGroupChange}
-          onCreateGroup={handleInlineGroupCreate}
-        />
-      )}
+      {panel.isInSheet
+        ? panel.container && createPortal(editor, panel.container)
+        : editor}
       <SubwaveAccessWarningDialog
         isOpen={subwaveAccessConfirmation.isOpen}
         onDecision={subwaveAccessConfirmation.onDecision}

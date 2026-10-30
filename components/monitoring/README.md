@@ -67,6 +67,19 @@ The AWS RUM service will automatically create:
 - **Event Limit**: 200 events per session (cost control)
 - **Session Length**: 30 minutes (AWS default)
 
+### Sending Events
+
+- Queued events are sent at most once a minute, up to 50 events per request.
+  The SDK's 5-second default sent a request every few seconds while a page sat
+  idle, which keeps a phone's mobile radio awake. The settings live in
+  `utils/monitoring/awsRumDispatch.ts`.
+- When the page becomes hidden (tab or app switch, screen lock, leaving the
+  page), the SDK sends one batch with `navigator.sendBeacon`, Core Web Vitals
+  first, and falls back to fetch if the browser refuses the beacon. The batch
+  cap keeps a typical beacon under the browser's 64 KiB limit.
+- Events beyond one batch stay queued for the next send while the page stays
+  open. Events still queued when the page is closed are lost.
+
 ### Page Tracking
 
 - The SDK's automatic page-view plugin is disabled because it derives page IDs
