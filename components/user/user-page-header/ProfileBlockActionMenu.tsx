@@ -1,5 +1,7 @@
 "use client";
 
+import { useAuth } from "@/components/auth/Auth";
+import useArtistArtworkAlert from "@/hooks/useArtistArtworkAlert";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import CompactMenuMobileBottomSheet from "@/components/compact-menu/CompactMenuMobileBottomSheet";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
@@ -18,30 +20,49 @@ import {
 const TRIGGER_CLASS_NAME =
   "tw-flex tw-size-9 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-p-0 tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-default disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100";
 
-export default function ProfileBlockActionMenu({
-  handle,
-  disabled,
-  moderationAction,
-  onBlock,
-  showPersonalActions = true,
-}: {
-  readonly handle: string;
-  readonly disabled: boolean;
-  readonly moderationAction?:
+type Props = Readonly<{
+  handle: string;
+  disabled: boolean;
+  blocked?: boolean;
+  moderationAction?:
     | {
         readonly kind: "suspend" | "reinstate";
         readonly label: string;
         readonly onSelect: () => void;
       }
     | undefined;
-  readonly onBlock: () => void;
-  readonly showPersonalActions?: boolean | undefined;
-}) {
+  onBlock: () => void;
+  showPersonalActions?: boolean | undefined;
+}>;
+
+export default function ProfileBlockActionMenu(props: Props) {
+  const auth = useAuth();
+  const scope = `${auth.connectedProfile?.id ?? "guest"}:${auth.activeProfileProxy?.id ?? "direct"}:${auth.isAuthenticated === true}:${auth.isDirectProfileSession === true}`;
+  return (
+    <ProfileActionsMenu
+      key={`${scope}:${props.handle}`}
+      {...props}
+      scope={scope}
+    />
+  );
+}
+
+function ProfileActionsMenu({
+  handle,
+  disabled,
+  blocked = false,
+  moderationAction,
+  onBlock,
+  showPersonalActions = true,
+  scope,
+}: Props & { readonly scope: string }) {
   const locale = useBrowserLocale();
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
-  const mute = useProfileMute(handle);
+  const mute = useProfileMute(showPersonalActions ? handle : "");
+  const artworkAlert = useArtistArtworkAlert(handle, scope, blocked);
   const menuLabel = t(locale, "contentModeration.profile.actionsMenu");
   const items: readonly CompactMenuItem[] = [
+    artworkAlert,
     ...(showPersonalActions
       ? ([
           {
@@ -116,7 +137,7 @@ export default function ProfileBlockActionMenu({
       trigger={trigger}
       triggerClassName={TRIGGER_CLASS_NAME}
       unstyledTrigger
-      menuWidthClassName="tw-w-56"
+      menuWidthClassName="tw-w-72"
     />
   );
 }

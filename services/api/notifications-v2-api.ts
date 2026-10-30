@@ -427,6 +427,41 @@ const mapMemeCollaborationNotification = (
   ];
 };
 
+const mapArtistArtworkNotification = (
+  base: ReturnType<typeof mapBaseNotification>,
+  relatedDrops: ApiDrop[],
+  context: ApiNotificationAdditionalContextV2
+): TypedNotification[] => {
+  if (
+    !relatedDrops[0] ||
+    !context.artist_id ||
+    !context.wave_id ||
+    !context.drop_id ||
+    !context.competition_id ||
+    !context.entry_id ||
+    !context.competition_title ||
+    typeof context.submitted_at !== "number"
+  )
+    return [];
+  return [
+    {
+      ...base,
+      cause: ApiNotificationCause.ArtistArtworkSubmitted,
+      related_drops: relatedDrops,
+      additional_context: {
+        artist_id: context.artist_id,
+        wave_id: context.wave_id,
+        drop_id: context.drop_id,
+        competition_id: context.competition_id,
+        entry_id: context.entry_id,
+        competition_title: context.competition_title,
+        artwork_title: context.artwork_title ?? null,
+        submitted_at: context.submitted_at,
+      },
+    },
+  ];
+};
+
 const mapNotificationV2 = (
   notification: ApiNotificationV2
 ): TypedNotification[] => {
@@ -456,6 +491,8 @@ const mapNotificationV2 = (
   const cause = notification.cause as NotificationCause;
 
   switch (cause) {
+    case ApiNotificationCause.ArtistArtworkSubmitted:
+      return mapArtistArtworkNotification(base, relatedDrops, context);
     case ApiNotificationCause.IdentitySubscribed:
       return [
         {

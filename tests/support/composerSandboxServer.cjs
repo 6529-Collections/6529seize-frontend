@@ -857,6 +857,25 @@ const notificationReactorTwo = notificationIdentity("sandbox-carol", "543");
 
 const sandboxNotifications = [
   {
+    id: 1005,
+    cause: "ARTIST_ARTWORK_SUBMITTED",
+    created_at: CREATED_AT + 1005,
+    read_at: null,
+    related_identity: notificationActor,
+    related_drops: [mentionDrop],
+    related_wave: notificationWaveOverview,
+    additional_context: {
+      artist_id: notificationActor.id,
+      wave_id: SANDBOX_NOTIFICATION_WAVE_ID,
+      drop_id: mentionDrop.id,
+      competition_id: "10000000-0000-4000-8000-000000000001",
+      entry_id: "20000000-0000-4000-8000-000000000001",
+      competition_title: "The Memes – Main Stage",
+      artwork_title: "Sandbox artwork",
+      submitted_at: CREATED_AT + 1005,
+    },
+  },
+  {
     id: 1000,
     cause: "ALL_DROPS",
     created_at: CREATED_AT + 1000,
