@@ -3,10 +3,12 @@
 ## Overview
 
 The `Brain` tab shows a profile's activity summary and drop feed, including
-replies.
+replies from publicly viewable waves. The feed excludes private waves and direct
+messages even when you have access to them. Subwaves appear only when both the
+subwave and its parent are publicly viewable.
 The `Activity` card above the feed is documented separately in
 [Profile Brain Activity Heatmap](feature-brain-activity-heatmap.md).
-Clicking a drop body or quote preview opens that thread in Waves or Messages.
+Clicking a drop body or quote preview opens that thread in Waves.
 The companion `Created Waves` and `Recently Active In` surfaces inside this tab
 are documented separately in
 [Profile Brain Tab Wave Sidebar](feature-brain-wave-sidebar.md).
@@ -42,9 +44,8 @@ bottom sheet and remain inline on wider screens.
 6. On your own profile, use the `Quick Tags` section beneath `Activity` to open
    the inline manager or a create/edit form. Mobile create and edit forms open
    in a bottom sheet while the Brain page stays in place.
-7. Select a drop or quote preview to open its thread:
-   - public wave drop: `/waves/{waveId}?serialNo={serialNo}`
-   - direct-message drop: `/messages/{waveId}?serialNo={serialNo}`
+7. Select a drop or quote preview to open its thread at
+   `/waves/{waveId}?serialNo={serialNo}`.
 8. Scroll to load older drops.
 
 ## Common Scenarios

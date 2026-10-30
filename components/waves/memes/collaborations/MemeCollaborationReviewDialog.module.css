@@ -1,0 +1,16 @@
+.panel {
+  container: collaboration-review / size;
+}
+
+/* Fit the actual dialog height, including native/browser keyboard insets. */
+@container collaboration-review (max-height: 540px) {
+  .panel .layout {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .panel .body {
+    flex: none;
+    overflow: visible;
+  }
+}

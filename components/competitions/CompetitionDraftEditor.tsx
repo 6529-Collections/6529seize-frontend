@@ -13,6 +13,7 @@ import type { ApiCompetition } from "@/generated/models/ApiCompetition";
 import type { ApiCompetitionDraftInput } from "@/generated/models/ApiCompetitionDraftInput";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { useWaveConfig } from "@/components/waves/create-wave/hooks/useWaveConfig";
 import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
 import { useCompetitionDraftSave } from "@/hooks/competitions/useCompetitionDraftSave";
@@ -89,12 +90,16 @@ function DraftForm({
   competition,
   initial,
   lockedRules = false,
+  preservePublishedRules = false,
+  lockVotingCredits = false,
   onClose,
 }: {
   readonly wave: ApiWave;
   readonly competition?: ApiCompetition;
   readonly initial?: ApiCompetitionDraftInput;
   readonly lockedRules?: boolean;
+  readonly preservePublishedRules?: boolean;
+  readonly lockVotingCredits?: boolean;
   readonly onClose: () => void;
 }) {
   const locale = useBrowserLocale();
@@ -107,6 +112,9 @@ function DraftForm({
     readCompetitionEditorDraft(storageKey, Boolean(competition))
   );
   const seed = restored?.input ?? initial;
+  const anonymityLocked =
+    competition !== undefined &&
+    competition.lifecycle !== ApiCompetitionLifecycle.Draft;
   const controller = useWaveConfig({
     initialViewGroupId: wave.visibility.scope.group?.id ?? null,
     initialWaveType: ApiWaveType.Rank,
@@ -125,6 +133,10 @@ function DraftForm({
   const [description, setDescription] = useState(seed?.description ?? "");
   const [voteSignature, setVoteSignature] = useState(
     seed?.voting.signature_required ?? false
+  );
+  const [anonymousSubmissions, setAnonymousSubmissions] = useState(
+    (anonymityLocked ? initial : seed)?.participation.anonymous_submissions ??
+      false
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<"conflict" | "failure" | null>(null);
@@ -149,6 +161,9 @@ function DraftForm({
   });
   const input = useMemo(() => {
     const draft = competitionFormToDraft(config, description);
+    draft.participation.anonymous_submissions = anonymityLocked
+      ? (initial?.participation.anonymous_submissions ?? false)
+      : anonymousSubmissions;
     if (lockedRules && initial)
       return {
         ...initial,
@@ -161,11 +176,49 @@ function DraftForm({
         },
         voting: { ...initial.voting, scope: draft.voting.scope },
       };
-    return {
-      ...draft,
-      voting: { ...draft.voting, signature_required: voteSignature },
-    };
-  }, [config, description, voteSignature, lockedRules, initial]);
+    const voting = { ...draft.voting, signature_required: voteSignature };
+    if (preservePublishedRules && initial)
+      return {
+        ...draft,
+        participation: {
+          ...draft.participation,
+          submission_strategy:
+            initial.participation.submission_strategy ?? null,
+        },
+        voting: lockVotingCredits
+          ? {
+              ...voting,
+              credit_type: initial.voting.credit_type,
+              credit_scope:
+                initial.voting.credit_scope ?? ApiWaveCreditScope.Wave,
+              credit_category: initial.voting.credit_category,
+              creditor_id: initial.voting.creditor_id,
+              credit_nfts: initial.voting.credit_nfts ?? [],
+              forbid_negative_votes: initial.voting.forbid_negative_votes,
+            }
+          : voting,
+        rules: {
+          ...draft.rules,
+          type: initial.rules.type,
+          max_winners:
+            config.overview.type === ApiWaveType.Rank
+              ? initial.rules.max_winners
+              : draft.rules.max_winners,
+        },
+        outcomes: initial.outcomes,
+      };
+    return { ...draft, voting };
+  }, [
+    config,
+    description,
+    voteSignature,
+    lockedRules,
+    initial,
+    preservePublishedRules,
+    lockVotingCredits,
+    anonymousSubmissions,
+    anonymityLocked,
+  ]);
   const fingerprint = JSON.stringify(input);
   const [initialFingerprint] = useState(initial ? fingerprint : "");
   const persistence = useCompetitionDraftSave({
@@ -217,14 +270,14 @@ function DraftForm({
     field?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [saveErrorFocusRequest, controller.errorFocusRequest, step]);
 
-  const close = async () => {
+  const close = async (requireSaved = false) => {
     if (inFlight.current) return;
     inFlight.current = true;
     setSubmitting(true);
     try {
       const result = await persistence.save();
       const retained = persistence.retain();
-      if (!result && !retained) {
+      if (!result && (requireSaved || !retained)) {
         setError("failure");
         return;
       }
@@ -374,6 +427,27 @@ function DraftForm({
             onChange={(event) => setDescription(event.target.value)}
           />
         </label>
+        <div className="tw-space-y-2">
+          <label className="tw-flex tw-min-h-11 tw-items-center tw-gap-3 tw-text-sm tw-font-medium tw-text-iron-200">
+            <input
+              type="checkbox"
+              checked={anonymousSubmissions}
+              onChange={(event) =>
+                setAnonymousSubmissions(event.target.checked)
+              }
+              disabled={anonymityLocked}
+              aria-describedby="competition-anonymity-description"
+              className="tw-h-4 tw-w-4 tw-accent-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+            />
+            {t(locale, "competitions.anonymousSubmissions")}
+          </label>
+          <p
+            id="competition-anonymity-description"
+            className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-400"
+          >
+            {t(locale, "competitions.anonymityDescription")}
+          </p>
+        </div>
         {!lockedRules && config.overview.type === ApiWaveType.Rank && (
           <RankScheduleModeSelector
             isCompetition
@@ -429,6 +503,9 @@ function DraftForm({
     content = (
       <CreateWaveStepContent
         isCompetition
+        lockSubmissionStrategy={preservePublishedRules}
+        lockOutcomeDefinitions={preservePublishedRules}
+        lockVotingCredits={lockVotingCredits}
         controller={{ ...controller, errors: visibleErrors }}
         descriptionSnapshot={null}
         onCriteriaReplacementChange={() => undefined}
@@ -570,6 +647,19 @@ function DraftForm({
             {t(locale, "competitions.publish")}
           </Button>
         )}
+        {index === steps.length - 1 && published && (
+          <Button
+            type="button"
+            variant="action"
+            size="md"
+            disabled={busy || displayedError === "conflict"}
+            onClick={() => {
+              if (validateVotingForSave()) void close(true);
+            }}
+          >
+            {t(locale, "competitions.save")}
+          </Button>
+        )}
       </div>
     </section>
   );
@@ -643,9 +733,17 @@ export default function CompetitionDraftEditor({
       wave={wave}
       competition={competition}
       initial={query.data}
-      lockedRules={Boolean(
-        entries.data?.pages.some((page) => page.data.length > 0)
-      )}
+      lockedRules={
+        competition.permissions.edit_rules_after_activity !== true &&
+        Boolean(entries.data?.pages.some((page) => page.data.length > 0))
+      }
+      preservePublishedRules={
+        competition.permissions.edit_rules_after_activity === true
+      }
+      lockVotingCredits={
+        competition.permissions.edit_rules_after_activity === true &&
+        competition.permissions.edit_credit_rules !== true
+      }
       onClose={onClose}
     />
   );

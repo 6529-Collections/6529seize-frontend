@@ -7,6 +7,8 @@ import { DefaultWaveLeaderboardDrop } from "./DefaultWaveLeaderboardDrop";
 interface QuorumWaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
+  readonly onOpenDrop?: (() => void) | undefined;
   readonly onVoteClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
@@ -19,6 +21,8 @@ export const QuorumWaveLeaderboardDrop: React.FC<
 > = ({
   drop,
   onDropClick,
+  onDropContentClick,
+  onOpenDrop,
   onVoteClick,
   winningThreshold,
   winningThresholdMinDurationMs,
@@ -29,6 +33,8 @@ export const QuorumWaveLeaderboardDrop: React.FC<
     <DefaultWaveLeaderboardDrop
       drop={drop}
       onDropClick={onDropClick}
+      onDropContentClick={onDropContentClick}
+      onOpenDrop={onOpenDrop}
       onVoteClick={onVoteClick}
       winningThreshold={winningThreshold}
       winningThresholdMinDurationMs={winningThresholdMinDurationMs}
