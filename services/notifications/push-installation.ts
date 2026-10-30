@@ -1,4 +1,5 @@
 import { Capacitor } from "@capacitor/core";
+import * as Sentry from "@sentry/nextjs";
 import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
@@ -17,6 +18,10 @@ import type { ApiRevokePushInstallationRequest } from "@/generated/models/ApiRev
 import type { ApiRefreshPushInstallationBadgeRequest } from "@/generated/models/ApiRefreshPushInstallationBadgeRequest";
 
 import { isConnectedPushAuth } from "./connected-push-profiles";
+import {
+  getPushLogoutFailure,
+  PushInstallationPreparationError,
+} from "./push-installation-errors";
 
 const STORAGE_KEY = "push-installation-lifecycle-v1";
 const secretSchema = z.string().regex(/^[a-f0-9]{64}$/i);
@@ -128,9 +133,9 @@ export async function preparePushInstallationRegistration(
   const credential = await serialized(async () => {
     const state = await readState();
     if (state.deviceId !== deviceId)
-      throw new Error("Push installation ID changed");
+      throw new PushInstallationPreparationError("identity_changed");
     if (state.blockedAuth.includes(getAuthTokenFingerprint(authJwt)))
-      throw new Error("Push registration belongs to a signed-out session");
+      throw new PushInstallationPreparationError("signed_out");
     state.token = token;
     // An immediate logout may precede the first native token callback.
     state.pending = state.pending.map((job) =>
@@ -147,23 +152,24 @@ export async function preparePushInstallationRegistration(
   });
   await flushPendingPushLogouts();
   // Do not register while an older revocation is still pending or auth changed.
-  const ready = await serialized(async () => {
+  await serialized(async () => {
     const state = await readState();
-    return (
-      !state.pending.some((job) => job.device_id === state.deviceId) &&
-      state.secret === credential.installation_secret &&
-      state.deviceId === deviceId &&
-      state.revision === credential.installation_revision &&
-      (connectedProfileId
-        ? isConnectedPushAuth(authJwt, connectedProfileId)
-        : getAuthJwt() === authJwt) &&
-      !state.blockedAuth.includes(getAuthTokenFingerprint(authJwt))
-    );
+    if (state.pending.some((job) => job.device_id === state.deviceId))
+      throw new PushInstallationPreparationError("logout_pending");
+    if (
+      state.secret !== credential.installation_secret ||
+      state.deviceId !== deviceId ||
+      state.revision !== credential.installation_revision
+    )
+      throw new PushInstallationPreparationError("installation_changed");
+    if (state.blockedAuth.includes(getAuthTokenFingerprint(authJwt)))
+      throw new PushInstallationPreparationError("signed_out");
+    const authCurrent = connectedProfileId
+      ? isConnectedPushAuth(authJwt, connectedProfileId)
+      : getAuthJwt() === authJwt;
+    if (!authCurrent)
+      throw new PushInstallationPreparationError("auth_changed");
   });
-  if (!ready)
-    throw new Error(
-      "Push registration deferred until logout reconciliation completes"
-    );
   return credential;
 }
 
@@ -322,10 +328,58 @@ async function sendPushLogout(
       endpoint: "push-notifications/installations/revoke",
       body: job,
       includeWalletAuth: false,
+      errorMode: "structured",
       signal: controller.signal,
     });
   } finally {
     clearTimeout(timeout);
+  }
+}
+
+async function getReconciliationSessions(
+  job: ApiRevokePushInstallationRequest
+) {
+  return serialized(async () => {
+    const state = await readState();
+    if (job.device_id !== state.deviceId || job.token_scoped) return [];
+    const candidates = getConnectedWalletAccounts().filter(
+      (account) =>
+        isAuthJwtUsable(account.jwt) &&
+        !state.blockedAuth.includes(getAuthTokenFingerprint(account.jwt))
+    );
+    const proofs = await Promise.all(
+      candidates.map(async (account) => {
+        let proof: string | null;
+        try {
+          proof = await getNativeRefreshToken(account.address);
+        } catch {
+          return null;
+        }
+        const stillConnected = getConnectedWalletAccounts().some(
+          (current) =>
+            current.address.toLowerCase() === account.address.toLowerCase() &&
+            current.jwt === account.jwt
+        );
+        return proof && stillConnected
+          ? { address: account.address, native_refresh_token: proof }
+          : null;
+      })
+    );
+    return proofs.filter((proof) => proof !== null);
+  });
+}
+
+async function reconcilePushLogout(job: ApiRevokePushInstallationRequest) {
+  try {
+    await sendPushLogout(job);
+  } catch (error) {
+    if (getPushLogoutFailure(error).reason !== "native_session_required")
+      throw error;
+    const sessions = await getReconciliationSessions(job);
+    if (!sessions.length) throw error;
+    // Authorize only the unclaimed credential's fence. Never add a fresh login
+    // to the persisted list of sessions the explicit logout intended to revoke.
+    await sendPushLogout({ ...job, reconciliation_sessions: sessions });
   }
 }
 
@@ -351,8 +405,23 @@ async function drainPushLogouts(): Promise<boolean> {
     });
     if (!job) return reconciled;
     try {
-      await sendPushLogout(job);
-    } catch {
+      await reconcilePushLogout(job);
+    } catch (error) {
+      const current = await serialized(
+        async () => (await readState()).deviceId
+      );
+      Sentry.addBreadcrumb({
+        category: "notifications",
+        level: "warning",
+        message: "Push logout reconciliation failed",
+        data: {
+          ...getPushLogoutFailure(error),
+          installation_scope:
+            job.device_id === current ? "current" : "previous",
+          job_kind: job.token_scoped ? "token_cleanup" : "logout",
+          deletion_proof_present: job.sessions.length > 0,
+        },
+      });
       // Preserve order within each installation/credential, but continue work
       // in independent namespaces. Failure never discards deletion proof.
       failed.add(jobNamespace(job));

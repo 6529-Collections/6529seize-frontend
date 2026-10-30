@@ -1,5 +1,6 @@
 "use client";
 
+import { getButtonClasses } from "@/components/utils/button/buttonStyles";
 import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
 import type { SortDirection } from "@/entities/ISort";
 import { useAnimate } from "framer-motion";
@@ -60,6 +61,24 @@ function getDefaultSizeClass(size: string) {
   return "tw-py-2.5 tw-text-xs";
 }
 
+function getContentClasses(isEditorial: boolean, isToolbar: boolean) {
+  let labelClassName = "tw-font-semibold tw-text-iron-500";
+  if (isEditorial) {
+    labelClassName =
+      "tw-shrink-0 tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-500";
+  } else if (isToolbar) {
+    labelClassName = "tw-shrink-0 tw-font-medium tw-text-iron-500";
+  }
+  let valueClassName = "";
+  if (isEditorial) {
+    valueClassName = "tw-truncate tw-text-iron-200 group-hover:tw-text-white";
+  } else if (isToolbar) {
+    valueClassName =
+      "tw-min-w-0 tw-truncate tw-font-semibold tw-text-iron-200 group-hover:tw-text-white";
+  }
+  return { labelClassName, valueClassName };
+}
+
 export default function CommonDropdown<T, U = unknown>(
   props: CommonSelectProps<T, U>
 ) {
@@ -80,13 +99,14 @@ export default function CommonDropdown<T, U = unknown>(
     menuMinWidth,
   } = props;
   const [isOpen, setIsOpen] = useState(false);
-  const [iconScope, animateIcon] = useAnimate();
+  const [iconScope, animateIcon] = useAnimate<SVGSVGElement>();
   const isEditorial = variant === "editorial";
   const isToolbar = variant === "toolbar";
-  const usesInlineContent = isEditorial || isToolbar;
+  const isFilter = variant === "filter";
+  const usesInlineContent = isEditorial || isToolbar || isFilter;
 
   useEffect(() => {
-    if (!iconScope.current) return;
+    if (isFilter) return;
     if (isEditorial) {
       animateIcon(iconScope.current, { rotate: isOpen ? 180 : 0 });
     } else if (isOpen) {
@@ -94,7 +114,7 @@ export default function CommonDropdown<T, U = unknown>(
     } else {
       animateIcon(iconScope.current, { rotate: -90 });
     }
-  }, [animateIcon, iconScope, isEditorial, isOpen]);
+  }, [animateIcon, iconScope, isEditorial, isFilter, isOpen]);
 
   const activeItemMatch = useMemo(
     () => items.find((item) => item.value === activeItem),
@@ -125,12 +145,14 @@ export default function CommonDropdown<T, U = unknown>(
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const [isMobile, setIsMobile] = useState<boolean>(false);
-  const rootClassName = isEditorial
-    ? "tailwind-scope tw-inline-flex tw-h-full tw-max-w-full"
-    : "tailwind-scope tw-h-full tw-w-full";
-  const triggerWrapperClassName = isEditorial
-    ? "tw-relative tw-inline-flex tw-max-w-full"
-    : "tw-relative tw-w-full";
+  const rootClassName =
+    isEditorial || isFilter
+      ? "tailwind-scope tw-inline-flex tw-h-full tw-max-w-full"
+      : "tailwind-scope tw-h-full tw-w-full";
+  const triggerWrapperClassName =
+    isEditorial || isFilter
+      ? "tw-relative tw-inline-flex tw-max-w-full"
+      : "tw-relative tw-w-full";
   const editorialUnderlineClass = getEditorialUnderlineClass(isOpen, disabled);
   let buttonClasses = `${getDefaultButtonStateClass(disabled)} ${getDefaultThemeClass(theme)} ${getDefaultSizeClass(size)} tw-relative tw-block tw-w-full tw-justify-between tw-truncate tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-pl-3.5 tw-pr-8 tw-text-left tw-font-semibold tw-leading-5 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400`;
   if (isEditorial) {
@@ -138,23 +160,25 @@ export default function CommonDropdown<T, U = unknown>(
   } else if (isToolbar) {
     buttonClasses = `${getToolbarButtonStateClass(disabled)} ${getDefaultSizeClass(size)} tw-group tw-relative tw-block tw-w-full tw-justify-between tw-truncate tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-pl-3.5 tw-pr-8 tw-text-left tw-leading-5 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400`;
   }
-  let labelClassName = "tw-font-semibold tw-text-iron-500";
-  if (isEditorial) {
-    labelClassName =
-      "tw-shrink-0 tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-500";
-  } else if (isToolbar) {
-    labelClassName = "tw-shrink-0 tw-font-medium tw-text-iron-500";
+  if (isFilter) {
+    buttonClasses = getButtonClasses({
+      variant: "tertiary",
+      size: null,
+      className: `${size === "sm" ? "tw-h-8" : "tw-h-9"} tw-relative tw-w-auto tw-pl-2.5 tw-pr-8 tw-text-left tw-text-xs tw-ring-0 tw-shadow-none focus-visible:tw-outline-offset-[-2px] motion-reduce:tw-transition-none`,
+    });
   }
-  let valueClassName = "";
-  if (isEditorial) {
-    valueClassName = "tw-truncate tw-text-iron-200 group-hover:tw-text-white";
-  } else if (isToolbar) {
-    valueClassName =
-      "tw-min-w-0 tw-truncate tw-font-semibold tw-text-iron-200 group-hover:tw-text-white";
-  }
-  const chevronClassName = isEditorial
+  const { labelClassName, valueClassName } = getContentClasses(
+    isEditorial,
+    isToolbar
+  );
+  let chevronClassName = isEditorial
     ? "tw-pointer-events-none tw-inline-flex tw-shrink-0 tw-items-center tw-text-iron-500 group-hover:tw-text-iron-300"
     : "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 -tw-mr-1 tw-flex tw-items-center tw-pr-3.5";
+
+  if (isFilter) {
+    chevronClassName =
+      "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-2.5 tw-flex tw-items-center";
+  }
 
   return (
     <div className={rootClassName}>
@@ -188,14 +212,15 @@ export default function CommonDropdown<T, U = unknown>(
                 <CommonTableSortIcon
                   direction={sortDirection}
                   isActive={true}
+                  activeClassName={isFilter ? "tw-text-current" : undefined}
                 />
               </span>
             )}
           </span>
           <span className={chevronClassName}>
             <svg
-              ref={iconScope}
-              className="tw-h-4 tw-w-4"
+              ref={isFilter ? undefined : iconScope}
+              className={isFilter ? "tw-size-3" : "tw-h-4 tw-w-4"}
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"

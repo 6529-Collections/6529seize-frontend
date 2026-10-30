@@ -4,18 +4,17 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import type { UserPageTabConfig, UserPageTabKey } from "./userTabs.config";
+import { useUserPageNavigation } from "./UserPageNavigation";
 
 interface UserPageTabProps {
   readonly tab: UserPageTabConfig;
   readonly activeTabId: UserPageTabKey;
 }
 
-export default function UserPageTab({
-  tab,
-  activeTabId,
-}: UserPageTabProps) {
+export default function UserPageTab({ tab, activeTabId }: UserPageTabProps) {
   const params = useParams();
   const searchParams = useSearchParams();
+  const navigation = useUserPageNavigation();
   const handleOrWallet = params["user"]?.toString() ?? "";
 
   const path = `/${handleOrWallet}/${tab.route}`;
@@ -41,6 +40,9 @@ export default function UserPageTab({
   if (localeParam) {
     tabQuery["locale"] = localeParam;
   }
+  if (tab.route === "xtdh") {
+    tabQuery["tab"] = "granted";
+  }
 
   useEffect(() => {
     const activeLink = ref.current;
@@ -58,10 +60,15 @@ export default function UserPageTab({
       linkRect.right <= containerRect.right;
 
     if (!isVisible) {
-      activeLink.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "center",
+      scrollContainer.scrollBy({
+        left:
+          linkRect.left -
+          containerRect.left -
+          (containerRect.width - linkRect.width) / 2,
+        behavior: globalThis.matchMedia("(prefers-reduced-motion: reduce)")
+          .matches
+          ? "instant"
+          : "smooth",
       });
     }
   }, [isActive]);
@@ -69,6 +76,17 @@ export default function UserPageTab({
   return (
     <Link
       ref={ref}
+      scroll={false}
+      onNavigate={(event) => {
+        if (!navigation) return;
+        event.preventDefault();
+        if (isActive) return;
+        const queryString = new URLSearchParams(tabQuery).toString();
+        navigation.navigate(
+          queryString ? `${path}?${queryString}` : path,
+          tab.id
+        );
+      }}
       href={{
         pathname: path,
         query: tabQuery,

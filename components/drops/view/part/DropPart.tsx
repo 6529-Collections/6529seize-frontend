@@ -120,7 +120,9 @@ const DropPart = memo(
         <div className="tw-relative tw-flex tw-h-full tw-gap-x-3 tw-pt-2">
           <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-self-center sm:tw-self-start">
             <div className={`${smallMenuIsShown && ""} tw-flex tw-gap-x-3`}>
-              <DropPfp pfpUrl={profile.pfp} size={size} />
+              {!profile.is_anonymous && (
+                <DropPfp pfpUrl={profile.pfp} size={size} />
+              )}
               <div
                 className={`tw-flex tw-w-full tw-flex-col ${
                   wave?.id ? "tw-justify-between" : "tw-justify-center"

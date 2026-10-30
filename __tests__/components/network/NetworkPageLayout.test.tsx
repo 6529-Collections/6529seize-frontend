@@ -1,5 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
+import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 import NetworkPageLayout from "@/components/network/NetworkPageLayout";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
@@ -8,7 +9,8 @@ import {
 } from "@/contexts/ActiveGroupContext";
 
 jest.mock("next/navigation", () => ({
-  useSearchParams: jest.fn(() => new URLSearchParams()),
+  ...jest.requireActual("next/navigation"),
+  useSearchParams: jest.fn(),
 }));
 jest.mock("@/hooks/useDeviceInfo");
 
@@ -34,11 +36,13 @@ function ActiveGroupProbe() {
 describe("NetworkPageLayout", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useSearchParams).mockReturnValue(new ReadonlyURLSearchParams());
 
     useDeviceInfoMock.mockReturnValue({
       isApp: false,
       isMobileDevice: false,
       hasTouchScreen: false,
+      isAppleMobile: false,
     });
   });
 
@@ -66,6 +70,7 @@ describe("NetworkPageLayout", () => {
       isApp: true,
       isMobileDevice: false,
       hasTouchScreen: false,
+      isAppleMobile: false,
     });
 
     renderComponent();
@@ -82,9 +87,8 @@ describe("NetworkPageLayout", () => {
   });
 
   it("initializes with group from router query", () => {
-    const { useSearchParams } = require("next/navigation");
-    useSearchParams.mockReturnValue(
-      new URLSearchParams({ group: "test-group-id" })
+    jest.mocked(useSearchParams).mockReturnValue(
+      new ReadonlyURLSearchParams({ group: "test-group-id" })
     );
 
     render(
@@ -101,4 +105,35 @@ describe("NetworkPageLayout", () => {
       "test-group-id"
     );
   });
+
+  it.each([false, true])(
+    "initializes the linked group before member effects run (isApp=%s)",
+    (isApp) => {
+      useDeviceInfoMock.mockReturnValue({
+        isApp,
+        isMobileDevice: isApp,
+        hasTouchScreen: isApp,
+        isAppleMobile: false,
+      });
+      jest
+        .mocked(useSearchParams)
+        .mockReturnValue(new ReadonlyURLSearchParams({ group: "linked-group" }));
+      const observedGroups: (string | null)[] = [];
+      function Members() {
+        const { activeGroupId } = useActiveGroup();
+        React.useEffect(() => {
+          observedGroups.push(activeGroupId);
+        }, [activeGroupId]);
+        return null;
+      }
+      render(
+        <ActiveGroupProvider>
+          <NetworkPageLayout>
+            <Members />
+          </NetworkPageLayout>
+        </ActiveGroupProvider>
+      );
+      expect(observedGroups).toEqual(["linked-group"]);
+    }
+  );
 });

@@ -38,7 +38,8 @@ function loadSandbox(apiOnly?: string) {
     },
     { resolve: jest.fn(() => "/fixture/next") }
   );
-  vm.runInNewContext(fs.readFileSync(serverPath, "utf8"), {
+  const context = {
+    readFixture: (_pathname: string): unknown => undefined,
     require: requireFixture,
     __dirname: path.dirname(serverPath),
     Buffer,
@@ -54,8 +55,13 @@ function loadSandbox(apiOnly?: string) {
       on: jest.fn(),
       exit: jest.fn(),
     },
-  });
-  return { server, spawn, spawnSync };
+  };
+  vm.runInNewContext(
+    fs.readFileSync(serverPath, "utf8") +
+      "\nglobalThis.readFixture = (pathname) => mockApiPatternReadRoutes.find((route) => route.pattern.test(pathname))?.response();",
+    context
+  );
+  return { server, spawn, spawnSync, readFixture: context.readFixture };
 }
 
 describe("composer sandbox API-only mode", () => {
@@ -87,4 +93,23 @@ describe("composer sandbox API-only mode", () => {
       );
     }
   );
+});
+
+it("returns explicit unmanaged invitation state for ordinary sandbox drops", () => {
+  const { readFixture } = loadSandbox("1");
+  expect(readFixture("/api/drops/ordinary-artwork/collaborations")).toEqual({
+    managed: false,
+    closed: false,
+    artwork_hash: "",
+    terms_version: "",
+    acceptance_copy: "",
+    terms: null,
+    collaborators: [],
+    invitations: [],
+  });
+  expect(
+    readFixture(
+      "/api/drops/ordinary-artwork/collaborations/invitation/response"
+    )
+  ).toBeUndefined();
 });

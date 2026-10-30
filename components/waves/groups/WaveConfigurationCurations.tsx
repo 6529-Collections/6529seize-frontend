@@ -1,11 +1,14 @@
 "use client";
 
-import { type ReactNode, useState } from "react";
+import type { ReactNode } from "react";
+import { useWaveInformationPanel } from "@/components/brain/mobile/WaveInformationPanelContext";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
-  Cog6ToothIcon,
+  PlusIcon,
 } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
@@ -80,7 +83,7 @@ function WaveConfigurationCurationRow({
       ));
 
   return (
-    <div className="tw-grid tw-min-h-9 tw-w-full tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)_2.75rem] tw-items-start tw-gap-x-2 tw-gap-y-1 tw-px-2 tw-py-1.5 tw-text-sm sm:tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)_1.75rem]">
+    <div className="tw-grid tw-min-h-9 tw-w-full tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)_2.75rem] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-2 tw-py-1.5 tw-text-sm sm:tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)_1.75rem]">
       <span className="tw-min-w-0 tw-break-words tw-py-0.5 tw-font-normal tw-leading-5 tw-text-iron-500">
         {curation.name}
       </span>
@@ -111,7 +114,10 @@ function WaveConfigurationCurationsAuthorizedContent({
   const router = useRouter();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense -- Wrapped by WaveConfigurationAdminSettings Suspense boundary.
   const searchParams = useSearchParams();
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const locale = useBrowserLocale();
+  const createPanel = useWaveInformationPanel(
+    t(locale, "profileCuration.editor.createTitle")
+  );
   const curationsQuery = useWaveCurations({ waveId: wave.id });
   const curations = curationsQuery.data ?? [];
   const { moveCuration, isPending } = useWaveCurationReorderMutation({
@@ -195,21 +201,24 @@ function WaveConfigurationCurationsAuthorizedContent({
             title={waveRightPanelText(
               "waves.sidebar.rightPanel.configuration.curations.create"
             )}
-            onClick={() => setIsCreateOpen(true)}
+            onClick={(event) => createPanel.open(event.currentTarget)}
             className="tw-flex tw-size-11 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-all tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-300 sm:tw-size-7"
           >
-            <Cog6ToothIcon aria-hidden="true" className="tw-size-5" />
+            <PlusIcon aria-hidden="true" className="tw-size-5" />
           </button>
         }
       >
         {content}
       </WavePanelSection>
 
-      {isCreateOpen && (
+      {createPanel.isOpen && (
         <MyStreamWaveCurationCreateDialog
           wave={wave}
-          isOpen={isCreateOpen}
-          onClose={() => setIsCreateOpen(false)}
+          isOpen
+          onClose={createPanel.close}
+          panelContainer={
+            createPanel.isInSheet ? createPanel.container : undefined
+          }
           onSaved={() => undefined}
         />
       )}

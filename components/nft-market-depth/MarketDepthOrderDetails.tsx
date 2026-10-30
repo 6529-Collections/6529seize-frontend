@@ -98,7 +98,7 @@ function IndividualOrder({
       ref={element}
       tabIndex={-1}
       data-market-order={order.order_id}
-      className="tw-min-w-0 tw-scroll-mt-24 tw-rounded-lg tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-py-4 last:tw-border-b-0 focus:tw-outline focus:tw-outline-2 focus:tw-outline-offset-4 focus:tw-outline-primary-400"
+      className="tw-min-w-0 tw-scroll-mt-24 tw-rounded-xl tw-bg-white/[0.025] tw-px-4 tw-py-4 focus:tw-outline focus:tw-outline-2 focus:tw-outline-offset-4 focus:tw-outline-primary-400"
     >
       {showPrice && (
         <p className="tw-mb-3 tw-mt-0 tw-text-meta tw-font-medium tw-tabular-nums tw-text-iron-200 [overflow-wrap:anywhere]">
@@ -211,7 +211,7 @@ export default function MarketDepthOrderDetails({
             ? "marketDepth.orders.otherListLabel"
             : "marketDepth.orders.listLabel"
         )}
-        className="tw-m-0 tw-list-none tw-p-0"
+        className="tw-my-3 tw-list-none tw-space-y-1 tw-p-0"
       >
         {visibleOrders.map((order) => (
           <IndividualOrder
@@ -274,7 +274,7 @@ export function MarketDepthOtherOrders({
   return (
     <details
       open={isOpen}
-      className="tw-group/other tw-mt-5 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-py-2"
+      className="tw-group/other tw-mt-5 tw-py-2"
       onToggle={(event) => {
         const open = event.currentTarget.open;
         setIsOpen(open);

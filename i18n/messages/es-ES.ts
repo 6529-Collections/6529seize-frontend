@@ -1,3 +1,6 @@
+import safeCollectingMessages from "@/i18n/messages/safeCollecting.es-ES.json";
+import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.es-ES.json";
+import networkTdhConsolidationMessages from "@/i18n/messages/networkTdhConsolidation.es-ES.json";
 import { ES_ES_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
 import { ES_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import { ES_ES_DROP_REQUIREMENT_MESSAGES } from "@/i18n/messages/drop-requirements";
@@ -12,6 +15,7 @@ import { ES_ES_GLOBAL_ERROR_MESSAGES } from "@/i18n/messages/global-error";
 import { ES_ES_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { ES_ES_CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
 import { ES_ES_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
+import { ES_ES_DATE_COUNTDOWN_MESSAGES } from "@/i18n/messages/date-countdown";
 import { ES_ES_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { ES_ES_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { ES_ES_THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
@@ -21,6 +25,9 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.es-ES.json";
 
 export const ES_ES_MESSAGES = {
+  ...safeCollectingMessages,
+  ...delegationTapGuideMessages,
+  ...networkTdhConsolidationMessages,
   ...ES_SUBMISSION_DISCOVERY_MESSAGES,
   ...ES_ES_DROP_REQUIREMENT_MESSAGES,
   ...ES_ES_DROP_METADATA_MESSAGES,
@@ -30,6 +37,8 @@ export const ES_ES_MESSAGES = {
   "singleDrop.shared": "Enlace compartido",
   "singleDrop.close": "Cerrar",
   "singleDrop.closeLabel": "Cerrar panel",
+  "singleDrop.loading": "Cargando…",
+  "singleDrop.loadError": "No se pudo cargar este contenido.",
   "singleDrop.showChat": "Mostrar chat",
   "singleDrop.hideChat": "Ocultar chat",
   "singleDrop.chatLabel": "Chat del drop",
@@ -638,6 +647,7 @@ export const ES_ES_MESSAGES = {
     "Inténtalo de nuevo antes de enviar tu mensaje.",
   ...stormComposerEsMessages,
   "waves.loadingStatus": "Cargando waves",
+  "waves.threadLoadError": "No se ha podido cargar este hilo.",
   "waves.gifPicker.open": "Añadir GIF",
   "waves.gifPicker.dialogTitle": "Busqueda de GIF",
   "waves.gifPicker.searchPlaceholder": "Buscar GIF",
@@ -1036,6 +1046,7 @@ export const ES_ES_MESSAGES = {
   "waves.proposalCard.tabLabels.errorReserved":
     "Las etiquetas no pueden coincidir con pestañas existentes.",
   ...ES_ES_PAGINATION_MESSAGES,
+  ...ES_ES_DATE_COUNTDOWN_MESSAGES,
   "memes.quickVote.leftThisRound": "{count} restantes esta ronda",
   "memes.quickVote.unrated": "{count} sin valorar",
   "memes.quickVote.summary": "{leftThisRound}, {unrated}",
