@@ -231,7 +231,7 @@ export default function CompetitionLeaderboard({
   let emptyState = <CompetitionState empty />;
   if (additionalActionOnly) {
     emptyState = (
-      <output className="tw-block tw-p-6 tw-text-sm tw-text-iron-300">
+      <output className="tw-block tw-p-6 tw-text-sm tw-text-iron-500">
         {t(locale, "memes.additionalAction.empty")}
       </output>
     );
@@ -314,7 +314,7 @@ export default function CompetitionLeaderboard({
           retryApprovalCount={() => void winners.refetch()}
         />
       ) : (
-        <WaveLeaderboardTime wave={presentation} />
+        <WaveLeaderboardTime wave={presentation} withTopMargin={!isMainStage} />
       )}
       <WaveLeaderboardHeader
         additionalActionOnly={additionalActionOnly}
