@@ -18,7 +18,6 @@ import {
   getWalletAddress,
   invalidateAuthSessionForAddress,
   PROFILE_SWITCHED_EVENT,
-  removeAuthJwt,
 } from "@/services/auth/auth.utils";
 import { validateJwt } from "@/services/auth/jwt-validation.utils";
 import { getSessionNonce } from "@/services/auth/session-v2.utils";
