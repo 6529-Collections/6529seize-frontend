@@ -9703,6 +9703,19 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           page.getByRole("tab", { name: "Newest", exact: true })
         ).toHaveAttribute("aria-selected", "true");
       }
+      for (const name of width >= 1024
+        ? ["Leaderboard view modes", "Sort options"]
+        : ["Leaderboard view modes"]) {
+        await expect(
+          page.getByRole("tablist", { name, exact: true })
+        ).toHaveCSS("height", "38px");
+        await expect(
+          page
+            .getByRole("tablist", { name, exact: true })
+            .getByRole("tab")
+            .first()
+        ).toHaveCSS("height", "32px");
+      }
       for (const view of ["List view", "Grid view"]) {
         await page.getByRole("tab", { name: view, exact: true }).click();
         await expect(toggle).toBeChecked();
@@ -9726,6 +9739,14 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       });
     }
     await toggle.focus();
+    await page.keyboard.press("Shift+Tab");
+    await page.keyboard.press("Tab");
+    await expect(toggle).toBeFocused();
+    await expect(
+      page
+        .getByRole("checkbox", { name: "Additional Action", exact: true })
+        .locator("..")
+    ).toHaveCSS("outline-style", "solid");
     await page.keyboard.press("Space");
     await expect(toggle).not.toBeChecked();
     await expect(list).toContainText("Ordinary artwork");
@@ -9752,7 +9773,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         return route.fallback();
       }
     );
-    await toggle.check();
+    await page
+      .getByRole("checkbox", { name: "Additional Action", exact: true })
+      .locator("..")
+      .click();
     await expect(
       page.getByRole("alert").filter({ hasText: "Couldn’t load submissions." })
     ).toBeVisible();
@@ -9768,7 +9792,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         { exact: true }
       )
     ).toBeVisible();
-    await toggle.uncheck();
+    await page
+      .getByRole("checkbox", { name: "Additional Action", exact: true })
+      .locator("..")
+      .click();
     await expect(list).toContainText("Ordinary artwork");
 
     // A late response from an abandoned filtered request cannot replace all results.
@@ -9797,9 +9824,15 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       }
     );
     try {
-      await toggle.check();
+      await page
+        .getByRole("checkbox", { name: "Additional Action", exact: true })
+        .locator("..")
+        .click();
       await expect.poll(() => held).toBe(true);
-      await toggle.uncheck();
+      await page
+        .getByRole("checkbox", { name: "Additional Action", exact: true })
+        .locator("..")
+        .click();
       await expect(list).toContainText("Ordinary artwork");
     } finally {
       releaseLate();

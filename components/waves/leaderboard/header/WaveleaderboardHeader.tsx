@@ -474,6 +474,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
           })}
         >
           <HeaderViewModeTabs
+            isMainStage={showAdditionalActionFilter}
             refObject={viewModeTabsRef}
             viewModes={viewModes}
             viewMode={viewMode}
@@ -482,6 +483,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
           />
           <div ref={sortControlRef} className="tw-flex-shrink-0">
             <WaveleaderboardSort
+              isMainStage={showAdditionalActionFilter}
               sort={sort}
               telemetryScope={wave.id}
               onSortChange={onSortChange}

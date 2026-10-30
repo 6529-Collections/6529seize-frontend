@@ -14,6 +14,10 @@ import React from "react";
 import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import type { LeaderboardViewMode } from "../types";
+import {
+  getMainStageTabClassName,
+  MAIN_STAGE_TABLIST_CLASS_NAME,
+} from "./mainStageToolbarStyles";
 
 type ActionsRemeasureVariant = "none" | "filter-only" | "with-drop";
 type LeaderboardSortItem = CommonSelectItem<WaveDropsLeaderboardSort>;
@@ -197,8 +201,12 @@ const getViewModeLabel = (mode: LeaderboardViewMode): string => {
 
 const getViewModeTabClass = (
   mode: LeaderboardViewMode,
-  activeMode: LeaderboardViewMode
+  activeMode: LeaderboardViewMode,
+  isMainStage: boolean
 ): string => {
+  if (isMainStage) {
+    return `${getMainStageTabClassName(activeMode === mode)} tw-w-8`;
+  }
   const baseClassName =
     "tw-flex tw-h-[30px] tw-w-[30px] tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-transition-[color,background-color,border-color,box-shadow] tw-duration-200 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 focus-visible:tw-ring-offset-1 focus-visible:tw-ring-offset-iron-900 motion-reduce:tw-transition-none";
 
@@ -220,6 +228,7 @@ const getViewModeIcon = (mode: LeaderboardViewMode): React.ReactNode => {
 };
 
 interface HeaderViewModeTabsProps {
+  readonly isMainStage?: boolean;
   readonly refObject: React.RefObject<HTMLDivElement | null>;
   readonly viewModes: readonly LeaderboardViewMode[];
   readonly viewMode: LeaderboardViewMode;
@@ -228,6 +237,7 @@ interface HeaderViewModeTabsProps {
 }
 
 export const HeaderViewModeTabs: React.FC<HeaderViewModeTabsProps> = ({
+  isMainStage = false,
   refObject,
   viewModes,
   viewMode,
@@ -238,7 +248,11 @@ export const HeaderViewModeTabs: React.FC<HeaderViewModeTabsProps> = ({
     ref={refObject}
     role="tablist"
     aria-label="Leaderboard view modes"
-    className="tw-box-border tw-flex tw-h-[38px] tw-flex-shrink-0 tw-items-center tw-gap-0.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900/75 tw-p-1 tw-shadow-sm tw-shadow-black/30 tw-backdrop-blur"
+    className={
+      isMainStage
+        ? MAIN_STAGE_TABLIST_CLASS_NAME
+        : "tw-box-border tw-flex tw-h-[38px] tw-flex-shrink-0 tw-items-center tw-gap-0.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900/75 tw-p-1 tw-shadow-sm tw-shadow-black/30 tw-backdrop-blur"
+    }
   >
     {viewModes.map((mode) => {
       const label = getViewModeLabel(mode);
@@ -250,7 +264,7 @@ export const HeaderViewModeTabs: React.FC<HeaderViewModeTabsProps> = ({
             aria-label={label}
             aria-selected={viewMode === mode}
             tabIndex={viewMode === mode ? 0 : -1}
-            className={getViewModeTabClass(mode, viewMode)}
+            className={getViewModeTabClass(mode, viewMode, isMainStage)}
             onClick={() => onViewModeChange(mode)}
             data-tooltip-id={`leaderboard-view-mode-${mode}-${waveId}`}
           >
