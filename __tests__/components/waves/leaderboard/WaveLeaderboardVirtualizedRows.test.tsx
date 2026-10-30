@@ -30,6 +30,7 @@ const mockVirtualizer = {
   getTotalSize: () => 500,
   measureElement: mockMeasureElement,
   scrollToIndex: mockScrollToIndex,
+  getOffsetForIndex: jest.fn(() => [100, "start"]),
 } as unknown as Virtualizer<HTMLDivElement, Element>;
 interface MockVirtualizerOptions {
   readonly count?: number;
@@ -179,7 +180,7 @@ describe("WaveLeaderboardVirtualizedRows", () => {
   it("updates mounted rows when the virtualizer range changes", () => {
     const fetchPage = jest.fn().mockResolvedValue(undefined);
 
-    function Harness() {
+    function Harness({ overscan }: { readonly overscan?: number | undefined }) {
       const scrollContainerRef = useRef<HTMLDivElement | null>(null);
       return (
         <div ref={scrollContainerRef} data-testid="scroll-container">
@@ -189,6 +190,7 @@ describe("WaveLeaderboardVirtualizedRows", () => {
             leadingItemCount={0}
             windowKey="wave-1:rank"
             layout="list"
+            overscan={overscan}
             scrollContainerRef={scrollContainerRef}
             renderItem={(item) => <div>{item}</div>}
             fetchNextPage={fetchPage}
@@ -223,6 +225,9 @@ describe("WaveLeaderboardVirtualizedRows", () => {
       screen.getByTestId("scroll-container")
     );
     expect(mockMeasureElement).toHaveBeenCalled();
+    expect(mockVirtualizerOptions?.overscan).toBe(4);
+    rerender(<Harness overscan={2} />);
+    expect(mockVirtualizerOptions?.overscan).toBe(2);
 
     mockVirtualItems = [
       { index: 3, key: "row-3", size: 100, start: 300 },

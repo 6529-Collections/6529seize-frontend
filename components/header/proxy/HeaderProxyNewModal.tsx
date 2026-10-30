@@ -4,6 +4,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 export default function HeaderProxyNewModal({
   connectedProfile,
@@ -151,7 +152,10 @@ export default function HeaderProxyNewModal({
                     <div className="tw-relative tw-px-3.5 tw-h-11 tw-inline-flex tw-items-center tw-gap-x-3 tw-text-base tw-font-semibold tw-ring-1 tw-ring-white/10 tw-border-0 tw-rounded-s-lg tw-bg-iron-800 tw-text-white">
                       {connectedProfile.pfp ? (
                         <img
-                          src={connectedProfile.pfp}
+                          src={getScaledImageUri(
+                            connectedProfile.pfp,
+                            ImageScale.W_AUTO_H_50
+                          )}
                           alt="Profile Picture"
                           className="tw-flex-shrink-0 tw-h-7 tw-w-7 tw-flex-none tw-rounded-lg tw-bg-iron-700"
                         />
@@ -191,7 +195,10 @@ export default function HeaderProxyNewModal({
                               <div className="tw-bg-iron-700 tw-group tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-white tw-rounded-lg tw-relative tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
                                 {connectedProfile?.pfp ? (
                                   <img
-                                    src={connectedProfile.pfp}
+                                    src={getScaledImageUri(
+                                      connectedProfile.pfp,
+                                      ImageScale.W_AUTO_H_50
+                                    )}
                                     alt="Profile Picture"
                                     className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800"
                                   />
@@ -227,7 +234,10 @@ export default function HeaderProxyNewModal({
                               <div className=" tw-group tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-white tw-rounded-lg tw-relative tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
                                 {proxyGrantor.pfp ? (
                                   <img
-                                    src={proxyGrantor.pfp}
+                                    src={getScaledImageUri(
+                                      proxyGrantor.pfp,
+                                      ImageScale.W_AUTO_H_50
+                                    )}
                                     alt="Profile Picture"
                                     className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800"
                                   />

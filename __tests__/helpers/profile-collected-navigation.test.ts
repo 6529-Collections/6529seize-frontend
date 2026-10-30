@@ -93,6 +93,9 @@ describe("profile collected navigation", () => {
     "//example.com/Shelby/collected",
     "/nextgen/collection/pebbles/art",
     "/Shelby/../Other/collected",
+    "/Shelby/%2e%2e/Other/collected",
+    "/%5cexample.com/collected",
+    "/%2F%2Fexample.com/collected",
     "/%2F/collected",
     "/Shelby/collected%00",
   ])("rejects an invalid return target: %s", (value) => {

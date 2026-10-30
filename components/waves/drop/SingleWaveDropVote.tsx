@@ -2,7 +2,6 @@
 
 import CompetitionAwareDropVote from "@/components/competitions/CompetitionAwareDropVote";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import dynamic from "next/dynamic";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import {
@@ -39,8 +38,7 @@ export const SingleWaveDropVote: React.FC<SingleWaveDropVoteProps> = ({
   ...props
 }) => {
   const resolvedProps = { ...props, size, submissionMode };
-  return isMultiCompetitionEnabled() &&
-    props.drop.drop_type !== ApiDropType.Chat ? (
+  return props.drop.drop_type !== ApiDropType.Chat ? (
     <CompetitionAwareDropVote
       {...resolvedProps}
       fallback={<SingleWaveDropVoteContent {...resolvedProps} />}

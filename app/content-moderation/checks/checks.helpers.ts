@@ -87,10 +87,22 @@ export function checkAuditActionLabel(
   return action === undefined ? value : t(locale, `checks.action.${action}`);
 }
 
+function readCheckDateBound(
+  value: string | null,
+  key: "from" | "to"
+): number | undefined {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return undefined;
+  const boundary = key === "from" ? "00:00:00.000" : "23:59:59.999";
+  const timestamp = Date.parse(`${value}T${boundary}Z`);
+  return Number.isFinite(timestamp) ? timestamp : undefined;
+}
+
 export function readCheckFilters(
   params: Pick<URLSearchParams, "get">
 ): ModerationCheckFilters {
   const values: Record<string, string | number> = {};
+  const caseId = params.get("case_id");
+  if (caseId && /^[a-f0-9]{64}$/.test(caseId)) values["case_id"] = caseId;
   for (const [key, options] of Object.entries(CHECK_FILTER_OPTIONS)) {
     const value = params.get(key);
     if (value && (options as readonly string[]).includes(value))
@@ -104,12 +116,8 @@ export function readCheckFilters(
     if (value) values[key] = value;
   }
   for (const key of ["from", "to"] as const) {
-    const value = params.get(key);
-    if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) continue;
-    const timestamp = Date.parse(
-      `${value}T${key === "from" ? "00:00:00.000" : "23:59:59.999"}Z`
-    );
-    if (Number.isFinite(timestamp)) values[key] = timestamp;
+    const timestamp = readCheckDateBound(params.get(key), key);
+    if (timestamp !== undefined) values[key] = timestamp;
   }
   return values as ModerationCheckFilters;
 }

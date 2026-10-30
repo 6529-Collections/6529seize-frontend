@@ -65,5 +65,8 @@ export default function useFollowersList({
     fetchNextPage();
   };
 
-  return { followers, isFetching, onBottomIntersection };
+  const isEmpty =
+    status === "success" && !isFetching && data.pages[0]?.count === 0;
+
+  return { followers, isFetching, isEmpty, onBottomIntersection };
 }

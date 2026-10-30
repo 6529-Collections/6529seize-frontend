@@ -3,10 +3,7 @@
 import type { ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { usePathname, useSearchParams } from "next/navigation";
-import {
-  isCompetitionPathname,
-  isMultiCompetitionEnabled,
-} from "@/helpers/competition.helpers";
+import { isCompetitionPathname } from "@/helpers/competition.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import BrainMobileWaves from "./BrainMobileWaves";
@@ -289,12 +286,22 @@ export default function BrainMobileViewContent({
   const isCompetitionRoute = isCompetitionPathname(usePathname());
   const search = useSearchParams();
   const isCompetitionWave = isRankWave || isApproveWave;
+  const hasIndependentContent = [
+    BrainView.ABOUT,
+    BrainView.WAVES,
+    BrainView.PROFILE_FEED,
+    BrainView.MESSAGES,
+    BrainView.NOTIFICATIONS,
+  ].includes(activeView);
+
+  // Remembered wave views must not discard the shared loading/retry shell
+  // while their permissions and availability are still unknown.
+  if (activeWaveId && !wave && !hasIndependentContent) return children;
 
   // Implicit competition sections resolve in the shared wave content. Rendering
   // a legacy mobile view here first would expose the wrong content and controls.
   if (
     !isCompetitionRoute &&
-    isMultiCompetitionEnabled() &&
     waveCompetitionTabs[activeView as unknown as MyStreamWaveTab] !== undefined
   )
     return children;
@@ -316,11 +323,7 @@ export default function BrainMobileViewContent({
         />
       );
     case BrainView.CONFIGURATION:
-      if (
-        isCompetitionRoute ||
-        (isMultiCompetitionEnabled() && search.get("competition"))
-      )
-        return children;
+      if (isCompetitionRoute || search.get("competition")) return children;
       return wave ? (
         <div className="tw-h-full tw-min-h-0 tw-overflow-y-auto">
           <BrainRightSidebarConfiguration wave={wave} />

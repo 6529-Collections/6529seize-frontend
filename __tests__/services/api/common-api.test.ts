@@ -1,7 +1,9 @@
 import {
   commonApiFetch,
   commonApiFetchWithRetry,
+  commonApiPost,
 } from "@/services/api/common-api";
+import { isReactionRequestOutcomeUncertain } from "@/utils/monitoring/dropReactionErrorClassification";
 
 const fetchMock = globalThis.fetch as jest.Mock;
 
@@ -11,6 +13,46 @@ beforeEach(() => {
 });
 
 describe("response body parsing", () => {
+  it("keeps a reaction outcome uncertain after a network failure reading HTTP 200", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: jest.fn().mockRejectedValue(new TypeError("NetworkError")),
+    });
+
+    const error = await commonApiPost({
+      endpoint: "drops/drop-1/reaction",
+      body: { reaction: ":smile:" },
+      errorMode: "structured",
+    }).catch((failure: unknown) => failure);
+
+    expect(error).toEqual(
+      new Error(
+        "Failed to parse response as JSON from https://api.test.6529.io/api/drops/drop-1/reaction: NetworkError"
+      )
+    );
+    expect(isReactionRequestOutcomeUncertain(error)).toBe(true);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("recognizes the fetch wrapper's normalized reaction network error without replay", async () => {
+    fetchMock.mockRejectedValue(new TypeError("Failed to fetch"));
+
+    const error = await commonApiPost({
+      endpoint: "drops/drop-1/reaction",
+      body: { reaction: ":smile:" },
+      errorMode: "structured",
+    }).catch((failure: unknown) => failure);
+
+    expect(error).toEqual(
+      new Error(
+        "Network request failed. Please check your connection and try again. (https://api.test.6529.io/api/drops/drop-1/reaction)"
+      )
+    );
+    expect(isReactionRequestOutcomeUncertain(error)).toBe(true);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it("preserves cancellation while reading an otherwise successful response", async () => {
     const abortError = new DOMException(
       "The user aborted a request.",
