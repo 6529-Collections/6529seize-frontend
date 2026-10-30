@@ -48,7 +48,6 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 jest.mock("framer-motion", () => ({
-  useAnimate: () => [{ current: null }, jest.fn()],
   AnimatePresence: ({ children }: any) => <>{children}</>,
   motion: {
     div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
@@ -139,9 +138,11 @@ describe("MemeSeasonGridDropdown", () => {
     await flushPromises();
 
     const button = screen.getByRole("button", { name: /Season: All Seasons/i });
-    jest.spyOn(button, "getBoundingClientRect").mockReturnValue(
-      DOMRect.fromRect({ x: 200, y: 52, width: 240, height: 48 })
-    );
+    jest
+      .spyOn(button, "getBoundingClientRect")
+      .mockReturnValue(
+        DOMRect.fromRect({ x: 200, y: 52, width: 240, height: 48 })
+      );
     jest
       .spyOn(HTMLElement.prototype, "offsetWidth", "get")
       .mockReturnValue(288);
@@ -228,9 +229,9 @@ describe("MemeSeasonGridDropdown", () => {
     const allSeasonsButton = screen.getByRole("menuitem", {
       name: /All Seasons/i,
     });
-    expect(allSeasonsButton).toHaveClass("tw-bg-primary-500/20");
-    expect(allSeasonsButton).toHaveClass("tw-border-primary-500");
-    expect(allSeasonsButton).toHaveClass("tw-text-primary-300");
+    expect(allSeasonsButton).toHaveClass("tw-bg-iron-200");
+    expect(allSeasonsButton).toHaveClass("tw-border-0");
+    expect(allSeasonsButton).toHaveClass("tw-text-iron-950");
   });
 
   it("applies selected styles to the selected season", async () => {
@@ -248,9 +249,9 @@ describe("MemeSeasonGridDropdown", () => {
     fireEvent.click(button);
 
     const szn1Button = screen.getByRole("menuitem", { name: /SZN 1/i });
-    expect(szn1Button).toHaveClass("tw-bg-primary-500/20");
-    expect(szn1Button).toHaveClass("tw-border-primary-500");
-    expect(szn1Button).toHaveClass("tw-text-primary-300");
+    expect(szn1Button).toHaveClass("tw-bg-iron-200");
+    expect(szn1Button).toHaveClass("tw-border-0");
+    expect(szn1Button).toHaveClass("tw-text-iron-950");
   });
 
   it("applies non-selected styles to unselected items", async () => {
@@ -268,9 +269,9 @@ describe("MemeSeasonGridDropdown", () => {
     fireEvent.click(button);
 
     const szn2Button = screen.getByRole("menuitem", { name: /SZN 2/i });
-    expect(szn2Button).toHaveClass("tw-bg-transparent");
-    expect(szn2Button).toHaveClass("tw-border-iron-700");
-    expect(szn2Button).toHaveClass("tw-text-iron-200");
+    expect(szn2Button).toHaveClass("tw-bg-iron-800");
+    expect(szn2Button).toHaveClass("tw-border-0");
+    expect(szn2Button).toHaveClass("tw-text-iron-300");
   });
 
   it("applies initial season from initialSeasonId prop", async () => {

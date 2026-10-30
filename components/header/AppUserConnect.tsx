@@ -1,3 +1,4 @@
+import HeaderBookmarksLink from "./user/HeaderBookmarksLink";
 import {
   faPlugCircleMinus,
   faPlugCirclePlus,
@@ -38,6 +39,7 @@ export default function AppUserConnect({
   const { setToast } = useContext(AuthContext);
   const locale = useBrowserLocale();
   const [isPushSettingsOpen, setIsPushSettingsOpen] = useState(false);
+  const [isOpeningConnection, setIsOpeningConnection] = useState(false);
   const { chains, currentChainName, nextChainName, switchToNextChain } =
     useChainSwitcher();
   const availableConnectedAccounts = connectedAccounts ?? [];
@@ -79,14 +81,17 @@ export default function AppUserConnect({
   const connectButton = (
     <Button
       onClick={() => {
+        // The first click can still be loading the wallet connection services.
+        setIsOpeningConnection(true);
         void runAsyncAndNavigate({
           action: seizeConnectFresh,
           errorMessage: "Failed to open wallet connection",
-        });
+        }).finally(() => setIsOpeningConnection(false));
       }}
       type="button"
       variant="action"
       size="lg"
+      loading={isOpeningConnection}
       fullWidth
     >
       <span>Connect</span>
@@ -131,6 +136,7 @@ export default function AppUserConnect({
 
   const authorizedButtons = (
     <>
+      <HeaderBookmarksLink onClose={onNavigate} />
       <Link
         href="/preferences"
         onClick={onNavigate}

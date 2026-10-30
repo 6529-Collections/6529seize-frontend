@@ -114,7 +114,7 @@ const buildCollectedStatsDataResult = ({
   readonly shouldFetchTdh: boolean;
   readonly statsPath: string | null;
   readonly tdh: CollectedStatsTdh | undefined;
-}): UseCollectedStatsDataResult => ({
+}): Omit<UseCollectedStatsDataResult, "isDetailsLoading"> => ({
   statsPath,
   collectedStats: shouldFetchCollectedStats
     ? collectedStats
@@ -168,7 +168,9 @@ export function useCollectedStatsData({
       }),
   });
 
-  const { data: fetchedSeasons } = useQuery<MemeSeason[]>({
+  const { data: fetchedSeasons, isLoading: seasonsLoading } = useQuery<
+    MemeSeason[]
+  >({
     queryKey: [STATS_QUERY_KEY, "seasons"],
     enabled: shouldFetchSeasons,
     retry: false,
@@ -181,58 +183,68 @@ export function useCollectedStatsData({
       }),
   });
 
-  const { data: fetchedTdh } = useQuery<CollectedStatsTdh | null>({
-    queryKey: [STATS_QUERY_KEY, "tdh", statsPath],
-    enabled: shouldFetchTdh,
-    retry: false,
-    staleTime: DETAILS_DATA_STALE_TIME,
-    queryFn: ({ signal }) =>
-      fetchStatsQuery<CollectedStatsTdh | null>({
-        endpoint: statsPath === null ? null : `tdh/${statsPath}`,
-        fallback: null,
-        signal,
-      }),
-  });
+  const { data: fetchedTdh, isLoading: tdhLoading } =
+    useQuery<CollectedStatsTdh | null>({
+      queryKey: [STATS_QUERY_KEY, "tdh", statsPath],
+      enabled: shouldFetchTdh,
+      retry: false,
+      staleTime: DETAILS_DATA_STALE_TIME,
+      queryFn: ({ signal }) =>
+        fetchStatsQuery<CollectedStatsTdh | null>({
+          endpoint: statsPath === null ? null : `tdh/${statsPath}`,
+          fallback: null,
+          signal,
+        }),
+    });
 
-  const { data: fetchedOwnerBalance } = useQuery<OwnerBalance | null>({
-    queryKey: [STATS_QUERY_KEY, "owner-balance", statsPath],
-    enabled: shouldFetchOwnerBalance,
-    retry: false,
-    staleTime: DETAILS_DATA_STALE_TIME,
-    queryFn: ({ signal }) =>
-      fetchStatsQuery<OwnerBalance | null>({
-        endpoint: statsPath === null ? null : `owners-balances/${statsPath}`,
-        fallback: null,
-        signal,
-      }),
-  });
+  const { data: fetchedOwnerBalance, isLoading: ownerBalanceLoading } =
+    useQuery<OwnerBalance | null>({
+      queryKey: [STATS_QUERY_KEY, "owner-balance", statsPath],
+      enabled: shouldFetchOwnerBalance,
+      retry: false,
+      staleTime: DETAILS_DATA_STALE_TIME,
+      queryFn: ({ signal }) =>
+        fetchStatsQuery<OwnerBalance | null>({
+          endpoint: statsPath === null ? null : `owners-balances/${statsPath}`,
+          fallback: null,
+          signal,
+        }),
+    });
 
-  const { data: fetchedBalanceMemes } = useQuery<OwnerBalanceMemes[]>({
-    queryKey: [STATS_QUERY_KEY, "balance-memes", statsPath],
-    enabled: shouldFetchBalanceMemes,
-    retry: false,
-    staleTime: DETAILS_DATA_STALE_TIME,
-    queryFn: ({ signal }) =>
-      fetchStatsQuery<OwnerBalanceMemes[]>({
-        endpoint:
-          statsPath === null ? null : `owners-balances/${statsPath}/memes`,
-        fallback: [],
-        signal,
-      }),
-  });
+  const { data: fetchedBalanceMemes, isLoading: balanceMemesLoading } =
+    useQuery<OwnerBalanceMemes[]>({
+      queryKey: [STATS_QUERY_KEY, "balance-memes", statsPath],
+      enabled: shouldFetchBalanceMemes,
+      retry: false,
+      staleTime: DETAILS_DATA_STALE_TIME,
+      queryFn: ({ signal }) =>
+        fetchStatsQuery<OwnerBalanceMemes[]>({
+          endpoint:
+            statsPath === null ? null : `owners-balances/${statsPath}/memes`,
+          fallback: [],
+          signal,
+        }),
+    });
 
-  return buildCollectedStatsDataResult({
-    balanceMemes: fetchedBalanceMemes,
-    collectedStats: fetchedCollectedStats ?? undefined,
-    initialStatsData,
-    ownerBalance: fetchedOwnerBalance ?? undefined,
-    seasons: fetchedSeasons,
-    shouldFetchBalanceMemes,
-    shouldFetchCollectedStats,
-    shouldFetchOwnerBalance,
-    shouldFetchSeasons,
-    shouldFetchTdh,
-    statsPath,
-    tdh: fetchedTdh ?? undefined,
-  });
+  return {
+    isDetailsLoading:
+      seasonsLoading ||
+      tdhLoading ||
+      ownerBalanceLoading ||
+      balanceMemesLoading,
+    ...buildCollectedStatsDataResult({
+      balanceMemes: fetchedBalanceMemes,
+      collectedStats: fetchedCollectedStats ?? undefined,
+      initialStatsData,
+      ownerBalance: fetchedOwnerBalance ?? undefined,
+      seasons: fetchedSeasons,
+      shouldFetchBalanceMemes,
+      shouldFetchCollectedStats,
+      shouldFetchOwnerBalance,
+      shouldFetchSeasons,
+      shouldFetchTdh,
+      statsPath,
+      tdh: fetchedTdh ?? undefined,
+    }),
+  };
 }

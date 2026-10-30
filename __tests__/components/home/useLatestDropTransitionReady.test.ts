@@ -39,12 +39,34 @@ describe("useLatestDropTransitionReady", () => {
       })
     );
 
+    act(() => {
+      jest.advanceTimersByTime(0);
+    });
     expect(result.current).toBe(false);
 
     act(() => {
       jest.advanceTimersByTime(1);
     });
 
+    expect(result.current).toBe(true);
+  });
+
+  it("never reports the grace period as active before checking an elapsed deadline", () => {
+    jest.setSystemTime(getLatestDropTransitionTime(MINT_NUMBER)! + 1);
+    const renders: (boolean | null)[] = [];
+    const { result } = renderHook(() => {
+      const ready = useLatestDropTransitionReady({
+        isDropComplete: true,
+        mintNumber: MINT_NUMBER,
+      });
+      renders.push(ready);
+      return ready;
+    });
+    expect(renders[0]).toBeNull();
+    act(() => {
+      jest.advanceTimersByTime(0);
+    });
+    expect(renders).not.toContain(false);
     expect(result.current).toBe(true);
   });
 
@@ -68,6 +90,9 @@ describe("useLatestDropTransitionReady", () => {
     expect(result.current).toBe(true);
 
     rerender({ mintNumber: MINT_NUMBER + 1 });
+    act(() => {
+      jest.advanceTimersByTime(0);
+    });
     expect(result.current).toBe(false);
 
     act(() => {

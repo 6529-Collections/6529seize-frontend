@@ -200,6 +200,7 @@ export default function WaveHeader({
             ·
           </span>
           <LocalDateTime
+            data-testid="wave-creation-date"
             value={wave.created_at}
             locale={WAVE_HEADER_LOCALE}
             className="tw-shrink-0 tw-text-iron-500"

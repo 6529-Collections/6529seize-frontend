@@ -109,7 +109,8 @@ verify the result in Wallet Checker.
 ## Limitations / Notes
 
 - Final state depends on onchain confirmation timing.
-- Collection route reads poll every 10 seconds.
+- Collection route reads load once, refresh when you return to the tab, and
+  re-check for about 30 seconds after a confirmed write.
 - Wallet Checker is read-only and never submits writes.
 - Some checker/API failures surface as empty-result states (`No ... found`)
   instead of a dedicated error panel.

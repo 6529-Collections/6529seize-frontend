@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useId } from "react";
+import { useEffect } from "react";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
 import { ApiGroupBeneficiaryGrantMatchMode } from "@/generated/models/ApiGroupBeneficiaryGrantMatchMode";
 import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
@@ -11,10 +12,12 @@ export const DEFAULT_BENEFICIARY_GRANT_MATCH_MODE =
 
 const MATCH_MODE_OPTIONS = [
   {
+    key: ApiGroupBeneficiaryGrantMatchMode.AnyToken,
     value: ApiGroupBeneficiaryGrantMatchMode.AnyToken,
     label: "Own any",
   },
   {
+    key: ApiGroupBeneficiaryGrantMatchMode.AllTokens,
     value: ApiGroupBeneficiaryGrantMatchMode.AllTokens,
     label: "Own all",
   },
@@ -100,7 +103,6 @@ export default function GroupCreateXtdhGrantMatchMode({
   readonly quiet?: boolean;
 }) {
   const normalizedMode = matchMode ?? DEFAULT_BENEFICIARY_GRANT_MATCH_MODE;
-  const tokenRequirementLabelId = useId();
 
   if (!grant) {
     return null;
@@ -131,42 +133,22 @@ export default function GroupCreateXtdhGrantMatchMode({
       }`.trim()}
     >
       <span
-        id={tokenRequirementLabelId}
         className={`tw-text-[11px] tw-uppercase tw-tracking-wide tw-text-iron-500 ${quiet ? "tw-font-medium" : "tw-mb-2 tw-block tw-font-semibold"}`}
       >
         Token requirement
       </span>
       <div
-        role="group"
-        aria-labelledby={tokenRequirementLabelId}
-        className="tw-flex tw-flex-wrap tw-gap-2"
+        data-group-criteria-tabs
+        className="tw-w-fit tw-min-w-0 tw-max-w-full"
       >
-        {MATCH_MODE_OPTIONS.map((option) => {
-          const isActive = normalizedMode === option.value;
-          let optionClasses = isActive
-            ? "tw-border-primary-400 tw-bg-primary-400/20 tw-text-primary-300"
-            : "tw-border-iron-700 tw-bg-iron-950 tw-text-iron-300 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-900";
-          if (quiet) {
-            optionClasses = isActive
-              ? "tw-bg-white/10 tw-font-medium tw-text-iron-100"
-              : "tw-bg-white/[0.03] tw-font-normal tw-text-iron-500 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-iron-200";
-          }
-          return (
-            <button
-              key={option.value}
-              type="button"
-              aria-pressed={isActive}
-              onClick={() => setMatchMode(option.value)}
-              className={
-                quiet
-                  ? `tw-min-h-8 tw-rounded-lg tw-border-0 tw-px-3 tw-py-1.5 tw-text-xxs tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${optionClasses}`
-                  : `tw-rounded-md tw-border tw-border-solid tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-semibold tw-outline-none tw-transition tw-duration-200 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${optionClasses}`
-              }
-            >
-              {option.label}
-            </button>
-          );
-        })}
+        <CommonTabs<ApiGroupBeneficiaryGrantMatchMode>
+          items={MATCH_MODE_OPTIONS}
+          activeItem={normalizedMode}
+          setSelected={setMatchMode}
+          filterLabel="Token requirement"
+          fill={false}
+          size="sm"
+        />
       </div>
     </div>
   );

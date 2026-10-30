@@ -8,7 +8,11 @@ package checksum, and the runtime-configuration values baked into the package.
 
 The portability scan inspects the exact extracted production bundle and records
 classifications, value digests, and bounded file evidence without exposing raw
-runtime values. Unknown inputs remain blockers. The report is descriptive:
+runtime values. The existing staging messaging flags
+`NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES` and `NEXT_PUBLIC_E2EE_DM_ENABLED` are
+classified as known environment-bound runtime inputs. Their values are still
+recorded and block cross-environment artifact reuse. Unknown inputs remain
+blockers. The report is descriptive:
 `NOT_PORTABLE` does not authorize staging-to-production reuse or promotion.
 Existing reports for older `environment-bound-v3` or dual-profile artifacts
 remain historical evidence; they are not inputs to the ordinary deployment

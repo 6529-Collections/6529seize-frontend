@@ -112,14 +112,31 @@ Mobile (`< lg`):
 - `Grant Rep` stays disabled until category is selected, amount changed, amount
   is valid, and submit is idle.
 
+### Edit an existing Rep category
+
+- In `Received`, eligible signed-in viewers can select a category's pencil to
+  edit their total contribution. The pencil is hidden on their own profile and
+  when signed out; authorized proxies act for the grantor.
+- The editor uses a centered dialog on desktop and a draggable bottom sheet on
+  mobile, with the same dismissal behavior as `Grant Rep` and `Rate NIC`.
+- Allowance loading keeps the panel size stable. The amount becomes editable
+  when the current contribution and allowance load. If loading fails, use
+  `Try again`; `Save` stays disabled until the allowance is available.
+- `Save` updates the total contribution and refreshes the profile. `Cancel`,
+  the close button, and Escape dismiss the editor and return focus to the pencil.
+
 ### Localization fallback debt
 
 - Surfaces: the Grant REP and Rate NIC dialogs under the profile Identity tab,
-  including their desktop/mobile entry points and Current / Adjustment summaries.
+  including their desktop/mobile entry points, the category editor, and Current /
+  Adjustment summaries. The category editor's title, allowance labels, input
+  label, actions, feedback, and loading/retry states use `en-US` fallback
+  messages in untranslated locales.
 - Current fallback: `rep.categories.grant.*` messages use the canonical `en-US`
   source copy in locales without translated entries, including the REP amount
-  label. Dialog titles, NIC labels and actions, unavailable-state Cancel buttons,
-  proxy labels, rating feedback, and adjustment summaries retain existing English
+  label. Outside the category editor, dialog titles, NIC labels and actions,
+  unavailable-state Cancel buttons, proxy labels, and rating feedback retain
+  existing English strings. Shared adjustment summaries also retain English
   strings. Rating summaries retain the existing comma-separated number formatting.
 - User impact: supported non-English locales can see English copy and number
   formatting while both rating flows remain functional.

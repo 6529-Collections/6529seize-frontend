@@ -1,4 +1,5 @@
 import DateCountdown from "@/components/date-countdown/DateCountdown";
+import { loadLocaleMessages } from "@/i18n/messages";
 import { act, render, screen } from "@testing-library/react";
 
 // Mock timers for consistent testing
@@ -399,6 +400,52 @@ describe("DateCountdown", () => {
       });
 
       expect(screen.getByText(/2 seconds/)).toBeInTheDocument();
+    });
+  });
+
+  describe("Localization", () => {
+    const renderInLocale = async (
+      locale: "fr-FR" | "de-DE",
+      now: Date,
+      futureDate: Date
+    ) => {
+      await loadLocaleMessages(locale);
+      const languages = jest
+        .spyOn(navigator, "languages", "get")
+        .mockReturnValue([locale]);
+      jest.setSystemTime(now);
+      render(<DateCountdown title="Mint" date={futureDate} />);
+      return languages;
+    };
+
+    it("uses the locale's plural rules and conjunction", async () => {
+      const languages = await renderInLocale(
+        "fr-FR",
+        new Date(2023, 0, 1, 12, 0, 0),
+        new Date(2023, 0, 2, 13, 0, 0)
+      );
+
+      // French treats 0 as singular.
+      expect(
+        screen.getByText("1 jour, 1 heure, 0 seconde")
+      ).toBeInTheDocument();
+      languages.mockRestore();
+    });
+
+    it("formats counts with the locale's number grouping", async () => {
+      const now = new Date(2023, 0, 1, 12, 0, 0);
+      const languages = await renderInLocale(
+        "de-DE",
+        now,
+        new Date(
+          now.getTime() + (1000 * 86_400 + 3 * 3600 + 45 * 60 + 30) * 1000
+        )
+      );
+
+      expect(
+        screen.getByText("1.000 Tage, 3 Stunden, 45 Minuten und 30 Sekunden")
+      ).toBeInTheDocument();
+      languages.mockRestore();
     });
   });
 });
