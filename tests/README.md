@@ -58,6 +58,15 @@ in `tests/packs.manifest.cjs`.
 
 ## Pack registry
 
+The native competition sandbox pack exercises Additional Action through the real
+Main Stage submission modal on desktop and phone. It checks the optional plan,
+length limit, checkbox draft preservation, review/preview and back navigation,
+keyboard exit, browser runtime errors, and horizontal overflow. Saved-artwork
+coverage checks the public plan, sidebar clearance, and restoration into the real
+resubmission modal. The isolated API fixture prevents real submissions; persistence
+payloads and resubmission metadata are also covered by focused unit tests. No
+application preview route is needed.
+
 `tests/packs.manifest.cjs` is the source of truth for Playwright package
 scripts, execution order, deployed-environment pack selection, aliases, safety
 classification, and per-pack timeouts. Run `seize run e2e-manifest:sync` after

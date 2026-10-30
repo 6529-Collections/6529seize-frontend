@@ -31,7 +31,7 @@ export function CompetitionState({
       role={error ? "alert" : "status"}
     >
       <p
-        className={`tw-m-0 tw-text-sm ${error ? "tw-text-iron-300" : "tw-text-iron-500"}`}
+        className={`tw-m-0 tw-text-sm ${empty ? "tw-font-light" : ""} ${error ? "tw-text-iron-300" : "tw-text-iron-500"}`}
       >
         {t(locale, message)}
       </p>

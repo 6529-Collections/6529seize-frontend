@@ -473,7 +473,15 @@ async function installArtworkCompetitionResources(
       const url = new URL(route.request().url());
       onRead?.(url);
       const start = Number(url.searchParams.get("cursor") ?? 0);
-      const drops = getDrops();
+      const drops = getDrops().filter(
+        (drop) =>
+          url.searchParams.get("is_additional_action_promised") !== "true" ||
+          (
+            drop["submission_context"] as
+              | { is_additional_action_promised?: boolean }
+              | undefined
+          )?.is_additional_action_promised === true
+      );
       const end = start + Number(url.searchParams.get("limit") ?? 50);
       return route.fulfill({
         json: {
@@ -1001,6 +1009,322 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  test("preserves Additional Action through the actual submission flow", async ({
+    page,
+  }, testInfo) => {
+    test.setTimeout(120000);
+    page.setDefaultTimeout(15000);
+    const runtimeErrors: string[] = [];
+    page.on("pageerror", (error) => runtimeErrors.push(error.message));
+    page.on("console", (message) => {
+      if (
+        /hydration|did not match|maximum update depth|too many re-renders/i.test(
+          message.text()
+        )
+      )
+        runtimeErrors.push(message.text());
+    });
+    const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    await page.goto(`/waves/${MEMES_WAVE}?tab=leaderboard`, {
+      waitUntil: "domcontentloaded",
+      timeout: 60000,
+    });
+    await expect(page).toHaveURL(
+      new RegExp(`/waves/${MEMES_WAVE}/competitions/alpha\\?tab=leaderboard`),
+      { timeout: 30000 }
+    );
+    // The development badge overlaps the mobile footer; runtime errors remain asserted.
+    await page.addStyleTag({
+      content: "nextjs-portal { display: none !important; }",
+    });
+    await page.getByRole("button", { name: /^Submit (Work|Meme)/ }).click();
+    const modal = page.getByRole("dialog", {
+      name: "Submit Work to The Memes",
+      exact: true,
+    });
+    await expect(modal).toBeVisible();
+    // Local sandbox only: this advances the draft, never signs or submits it.
+    await modal.getByRole("button", { name: "Check terms agreement" }).click();
+    await modal
+      .getByRole("button", { name: "I Agree & Continue", exact: true })
+      .click();
+    const checkbox = modal.getByRole("checkbox", {
+      name: "Additional Action",
+      exact: true,
+    });
+    const input = modal.getByRole("textbox", { name: "Your plan (optional)" });
+    const plan =
+      "If selected, send prints to the top five voters.\nShipping is included, within two months.";
+    await expect(input).toHaveCount(0);
+    await checkbox.check();
+    await expect(input).toHaveAccessibleDescription(/who receives it/);
+    await expect(input).toHaveAttribute("maxlength", "5000");
+    await input.fill("x".repeat(5000));
+    await expect(input).toHaveValue("x".repeat(5000));
+    await input.fill(plan);
+    await checkbox.uncheck();
+    await expect(input).toHaveCount(0);
+    await checkbox.check();
+    await expect(input).toHaveValue(plan);
+    await input.focus();
+    await page.keyboard.press("Tab");
+    await expect(input).not.toBeFocused();
+    const chooser = page.waitForEvent("filechooser");
+    await modal
+      .getByRole("button", { name: "Upload artwork", exact: true })
+      .click();
+    await (
+      await chooser
+    ).setFiles("public/artwork-documentation/examples/an-alteration.png");
+    await modal
+      .getByRole("textbox", { name: "Artwork Title", exact: true })
+      .fill("Additional Action browser review");
+    await modal
+      .getByRole("textbox", { name: "Description", exact: true })
+      .fill("Local submission flow check.");
+    await modal
+      .getByRole("combobox", { name: "Meme Name", exact: true })
+      .selectOption({ label: "Freestyle" });
+    await modal
+      .getByRole("combobox", { name: "Palette", exact: true })
+      .selectOption({ label: "Color" });
+    for (const name of [
+      "Points - Power",
+      "Points - Wisdom",
+      "Points - Loki",
+      "Points - Speed",
+    ])
+      await modal.getByRole("spinbutton", { name, exact: true }).fill("1");
+    for (const name of [
+      "Bonus",
+      "Boost",
+      "Style",
+      "Jewel",
+      "Superpower",
+      "Dharma",
+      "Gear",
+      "Clothing",
+      "Element",
+      "Mystery",
+      "Secrets",
+      "Weapon",
+      "Home",
+      "Parent",
+      "Sibling",
+      "Food",
+      "Drink",
+    ])
+      await modal.getByRole("textbox", { name, exact: true }).fill("None");
+    await modal.getByRole("button", { name: "Continue", exact: true }).click();
+    const summary = modal.getByRole("region", {
+      name: "Additional Action",
+      exact: true,
+    });
+    await expect(summary).toContainText(plan);
+    await modal
+      .getByRole("textbox", { name: "About the Artist", exact: true })
+      .fill("Local artist description.");
+    await modal
+      .getByRole("textbox", { name: "Artwork Commentary", exact: true })
+      .fill("Local artwork commentary.");
+    await modal.getByRole("button", { name: "Preview", exact: true }).click();
+    await expect(
+      modal.getByRole("heading", { name: "Submission Preview", exact: true })
+    ).toBeVisible();
+    await expect(summary).toContainText(plan);
+    await expect(
+      modal.getByText("Preview unavailable", { exact: true })
+    ).toHaveCount(0);
+    await modal
+      .getByRole("button", { name: "Open image preview", exact: true })
+      .first()
+      .scrollIntoViewIfNeeded();
+    // Card media is inert because the surrounding card owns the open action.
+    const artworkPreview = modal
+      .getByAltText("Drop media", { exact: true })
+      .first();
+    await artworkPreview.scrollIntoViewIfNeeded();
+    await expect(artworkPreview).toBeVisible();
+    await expect
+      .poll(() =>
+        artworkPreview.evaluate(
+          (image: HTMLImageElement) => image.complete && image.naturalWidth > 0
+        )
+      )
+      .toBe(true);
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("additional-action-submission-preview.png"),
+    });
+    await modal
+      .getByRole("button", { name: "Back to Edit", exact: true })
+      .click();
+    await expect(summary).toContainText(plan);
+    await modal.getByRole("button", { name: "Back", exact: true }).click();
+    await expect(input).toHaveValue(plan);
+    await checkbox.uncheck();
+    await modal.getByRole("button", { name: "Continue", exact: true }).click();
+    await expect(summary).toContainText("No additional action marked.");
+    await expect(summary).not.toContainText(plan);
+    await modal.getByRole("button", { name: "Back", exact: true }).click();
+    await checkbox.check();
+    await expect(input).toHaveValue(plan);
+    await input.fill("");
+    await modal.getByRole("button", { name: "Continue", exact: true }).click();
+    await expect(summary).toContainText(
+      "Additional Action marked. No separate plan provided."
+    );
+    await modal.getByRole("button", { name: "Preview", exact: true }).click();
+    await expect(summary).toContainText(
+      "Additional Action marked. No separate plan provided."
+    );
+    await page.keyboard.press("Escape");
+    await expect(modal).toHaveCount(0);
+    expect(runtimeErrors).toEqual([]);
+    expect(sandbox.requests).toEqual([]);
+  });
+
+  test("shows saved Additional Action details and restores them for resubmission", async ({
+    page,
+  }, testInfo) => {
+    page.setDefaultTimeout(15000);
+    const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${MEMES_WAVE}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const fixture = await response.json();
+    fixture.wave.id = MEMES_WAVE;
+    const plan = "Send prints to the top five voters.\nShipping is included.";
+    const metadata = [
+      { data_key: "title", data_value: "Saved Additional Action" },
+      { data_key: "additional_action_plan", data_value: plan },
+      { data_key: "about_artist", data_value: "Saved artist biography." },
+      {
+        data_key: "commentary",
+        data_value: "Saved artwork commentary.",
+      },
+    ];
+    const artwork = {
+      ...fixture.drops[0],
+      id: entryDropId("alpha"),
+      drop_type: "SUBMISSION",
+      title: "Saved Additional Action",
+      content: "A saved submission for browser QA.",
+      media: [
+        {
+          url: "https://d3lqz0a4bldqgf.cloudfront.net/drops/saved-action.png",
+          mime_type: "image/png",
+        },
+      ],
+      submission_context: {
+        status: "ACTIVE",
+        has_metadata: true,
+        is_additional_action_promised: true,
+        voting: {
+          is_open: true,
+          total_votes_given: 1,
+          current_calculated_vote: 1,
+          predicted_final_vote: 1,
+          voters_count: 0,
+          place: 1,
+          context_profile_context: { can_vote: false, current: 0 },
+        },
+      },
+    };
+    await installArtworkCompetitionResources(
+      page,
+      MEMES_WAVE,
+      fixture.wave,
+      () => [artwork]
+    );
+    await page.route(
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/**saved-action.png",
+      (route) =>
+        route.fulfill({
+          contentType: "image/png",
+          path: "public/artwork-documentation/examples/an-alteration.png",
+        })
+    );
+    await page.route(
+      (url) =>
+        url.pathname === "/_next/image" &&
+        (url.searchParams.get("url") ?? "").includes("saved-action.png"),
+      (route) =>
+        route.fulfill({
+          contentType: "image/png",
+          path: "public/artwork-documentation/examples/an-alteration.png",
+        })
+    );
+    await page.route(`**/api/v2/drops/${artwork.id}/metadata`, (route) =>
+      route.fulfill({ json: metadata })
+    );
+    await page.goto(
+      `/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard&drop=${artwork.id}`
+    );
+    const summary = page.getByRole("region", {
+      name: "Additional Action",
+      exact: true,
+    });
+    await expect(summary).toContainText(plan);
+    await expect(
+      page.getByText("Saved artist biography.", { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByText("Saved artwork commentary.", { exact: true })
+    ).toBeVisible();
+    await expect(summary).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    for (const width of [639, 640]) {
+      await page.setViewportSize({ width, height: 900 });
+      await summary.scrollIntoViewIfNeeded();
+      await expectNoHorizontalOverflow(page);
+      const box = await summary.boundingBox();
+      expect(box).not.toBeNull();
+      const sidebar = page.getByLabel("Primary sidebar", { exact: true });
+      const sidebarBox = (await sidebar.isVisible())
+        ? await sidebar.boundingBox()
+        : null;
+      expect(box!.x).toBeGreaterThanOrEqual(
+        sidebarBox ? sidebarBox.x + sidebarBox.width : 0
+      );
+      expect(box!.x + box!.width).toBeLessThanOrEqual(width);
+    }
+    await page.screenshot({
+      path: testInfo.outputPath("saved-additional-action-details.png"),
+    });
+    await page
+      .getByRole("button", { name: "Resubmit Drop", exact: true })
+      .click();
+    const modal = page.getByRole("dialog", {
+      name: "Resubmit Work to The Memes",
+      exact: true,
+    });
+    await expect(modal).toBeVisible();
+    await modal
+      .getByRole("button", {
+        name: "I Understand, Start Resubmission",
+        exact: true,
+      })
+      .click();
+    await modal.getByRole("button", { name: "Check terms agreement" }).click();
+    await modal
+      .getByRole("button", { name: "I Agree & Continue", exact: true })
+      .click();
+    await expect(
+      modal.getByRole("checkbox", { name: "Additional Action", exact: true })
+    ).toBeChecked();
+    await expect(
+      modal.getByRole("textbox", { name: "Your plan (optional)" })
+    ).toHaveValue(plan);
+    await page.keyboard.press("Escape");
+    await expect(modal).toHaveCount(0);
+    expect(sandbox.requests).toEqual([]);
+  });
+
   test("conceals anonymous author navigation and reveals only the selected winning entry", async ({
     page,
   }, testInfo) => {
@@ -9436,6 +9760,403 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
   }
 
+  test("hides empty personal submissions and previews saved Main Stage artwork", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page, false, false, MEMES_WAVE);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${MEMES_WAVE}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const fixture = await response.json();
+    fixture.wave.id = MEMES_WAVE;
+    const artwork = {
+      ...fixture.drops[0],
+      id: entryDropId("alpha"),
+      drop_type: "SUBMISSION",
+      title: "Sample artwork — An Alteration",
+      content: "",
+      media: [
+        {
+          url: "https://d3lqz0a4bldqgf.cloudfront.net/drops/personal-submission-preview.png",
+          mime_type: "image/png",
+        },
+      ],
+      submission_context: {
+        status: "ACTIVE",
+        has_metadata: false,
+        is_additional_action_promised: true,
+        voting: {
+          is_open: true,
+          total_votes_given: 1250,
+          current_calculated_vote: 1250,
+          predicted_final_vote: 1250,
+          voters_count: 3,
+          place: 1,
+          context_profile_context: { can_vote: false, current: 0 },
+        },
+      },
+    };
+    await page.route(
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/**personal-submission-preview.png",
+      (route) =>
+        route.fulfill({
+          contentType: "image/png",
+          path: "public/artwork-documentation/examples/an-alteration.png",
+        })
+    );
+    const resources = await installArtworkCompetitionResources(
+      page,
+      MEMES_WAVE,
+      fixture.wave,
+      () => [artwork]
+    );
+    let hasEntry = false;
+    let failRead = false;
+    let personalReads = 0;
+    await page.route(
+      `**/v3/waves/${MEMES_WAVE}/competitions/alpha/entries?**`,
+      (route) => {
+        const url = new URL(route.request().url());
+        if (url.searchParams.get("submitter") !== PROFILE)
+          return route.fallback();
+        personalReads += 1;
+        if (failRead)
+          return route.fulfill({
+            status: 503,
+            json: { message: "Temporary personal entries failure" },
+          });
+        return route.fulfill({
+          json: pageResult(hasEntry ? [resources.entry(artwork.id)] : []),
+        });
+      }
+    );
+    await page.goto(`/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard`);
+    await dismissNextDevTools(page);
+    await expect.poll(() => personalReads).toBeGreaterThan(0);
+    const trigger = page.getByRole("button", {
+      name: "My submissions",
+      exact: true,
+    });
+    await expect(trigger).toHaveCount(0);
+    failRead = true;
+    await page.reload();
+    await trigger.click();
+    const dialog = page.getByRole("dialog", {
+      name: "My submissions",
+      exact: true,
+    });
+    await expect(dialog.getByRole("alert")).toContainText(
+      "Couldn’t load submissions."
+    );
+    await expect(
+      dialog.getByText(
+        "You haven’t submitted an entry to this competition yet."
+      )
+    ).toHaveCount(0);
+    failRead = false;
+    hasEntry = true;
+    await dialog.getByRole("button", { name: "Retry", exact: true }).click();
+    await expect(
+      dialog.getByText(artwork.title, { exact: true })
+    ).toBeVisible();
+    const close = dialog.getByRole("button", {
+      name: "Close my submissions",
+      exact: true,
+    });
+    const closeBox = await close.boundingBox();
+    expect(closeBox).not.toBeNull();
+    expect(closeBox!.width).toBe(44);
+    expect(closeBox!.height).toBe(44);
+    await expectNoHorizontalOverflow(page);
+    await testInfo.attach("my-submissions-with-artwork", {
+      body: await page.screenshot({
+        path: testInfo.outputPath("my-submissions-with-artwork.png"),
+      }),
+      contentType: "image/png",
+    });
+    await close.click();
+    await expect(dialog).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+    expect(sandbox.requests).toHaveLength(0);
+  });
+
+  test("filters Additional Action across pages, views, retries and narrow layouts", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${MEMES_WAVE}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const fixture = await response.json();
+    fixture.wave.id = MEMES_WAVE;
+    let artwork = Array.from({ length: 111 }, (_, index) => ({
+      ...fixture.drops[0],
+      id: `00000000-0000-4000-8000-${String(index + 8000).padStart(12, "0")}`,
+      serial_no: index + 8000,
+      drop_type: "SUBMISSION",
+      title: `${index < 51 ? "Ordinary" : "Promised"} artwork ${index}`,
+      submission_context: {
+        status: "ACTIVE",
+        has_metadata: false,
+        is_additional_action_promised: index >= 51,
+        voting: {
+          is_open: true,
+          total_votes_given: 100,
+          current_calculated_vote: 100,
+          predicted_final_vote: 100,
+          voters_count: 1,
+          place: index + 1,
+          context_profile_context: { can_vote: false, current: 0 },
+        },
+      },
+    }));
+    const reads: URL[] = [];
+    await installArtworkCompetitionResources(
+      page,
+      MEMES_WAVE,
+      fixture.wave,
+      () => artwork,
+      (url) => reads.push(url)
+    );
+    await page.goto(`/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard`);
+    await dismissNextDevTools(page);
+    const toggle = page.getByRole("checkbox", {
+      name: "Additional Action",
+      exact: true,
+    });
+    const list = page.getByRole("list", {
+      name: "Leaderboard drops",
+      exact: true,
+    });
+    await expect(toggle).not.toBeChecked();
+    await expect(list).toContainText("Ordinary artwork 0");
+    // Clicking the label is the complete interaction, including on touch screens.
+    await page
+      .getByRole("checkbox", { name: "Additional Action", exact: true })
+      .locator("..")
+      .getByText("Additional Action", { exact: true })
+      .click();
+    await expect(toggle).toBeChecked();
+    await expect(list).toContainText("Promised artwork 51");
+    await expect(list).not.toContainText("Ordinary artwork");
+    const scroller = page
+      .getByRole("list", { name: "Leaderboard drops", exact: true })
+      .locator('xpath=ancestor::div[contains(@class,"tw-overflow-y-auto")][1]');
+    await scroller.evaluate((element) =>
+      element.scrollTo({ top: element.scrollHeight, behavior: "instant" })
+    );
+    await page
+      .getByRole("button", { name: "Load more drops", exact: true })
+      .click();
+    await expect
+      .poll(() =>
+        reads.some(
+          (url) =>
+            url.searchParams.get("cursor") === "50" &&
+            url.searchParams.get("is_additional_action_promised") === "true"
+        )
+      )
+      .toBe(true);
+    await expect(list.getByRole("listitem").first()).toHaveAttribute(
+      "aria-setsize",
+      "60"
+    );
+    await scroller.evaluate((element) =>
+      element.scrollTo({ top: 0, behavior: "instant" })
+    );
+    if (testInfo.project.name === "web-desktop-chromium") {
+      await expect(
+        page.getByRole("tab", { name: "Current Vote", exact: true })
+      ).toHaveAttribute("aria-selected", "true");
+      await page.getByRole("tab", { name: "Newest", exact: true }).click();
+    } else {
+      await page
+        .getByRole("button", { name: "Sort: Current Vote", exact: true })
+        .click();
+      await page.getByRole("menuitem", { name: "Newest", exact: true }).click();
+    }
+    await expect
+      .poll(() => reads.at(-1)?.searchParams.get("sort"))
+      .toBe("submitted_at");
+    await expect(toggle).toBeChecked();
+    for (const width of testInfo.project.name === "web-desktop-chromium"
+      ? [1440, 1024, 390, 320]
+      : [390, 320]) {
+      await page.setViewportSize({ width, height: 900 });
+      await scroller.evaluate((element) =>
+        element.scrollTo({ top: 0, behavior: "instant" })
+      );
+      const navigationTab = await page
+        .getByRole("tab", { name: "Leaderboard", exact: true })
+        .boundingBox();
+      const timeline = await page
+        .getByRole("button", { name: "Toggle decision timeline", exact: true })
+        .boundingBox();
+      expect(navigationTab).not.toBeNull();
+      expect(timeline).not.toBeNull();
+      // The page already supplies the gap below navigation; do not double it.
+      const timelineGap =
+        timeline!.y - (navigationTab!.y + navigationTab!.height);
+      expect(timelineGap).toBeGreaterThanOrEqual(16);
+      expect(timelineGap).toBeLessThanOrEqual(20);
+      if (width >= 1024) {
+        await expect(
+          page.getByRole("tablist", { name: "Sort options", exact: true })
+        ).toBeVisible();
+        await expect(
+          page.getByRole("tab", { name: "Current Vote", exact: true })
+        ).toBeVisible();
+        await expect(
+          page.getByRole("tab", { name: "Hot", exact: true })
+        ).toBeVisible();
+        await expect(
+          page.getByRole("tab", { name: "Newest", exact: true })
+        ).toHaveAttribute("aria-selected", "true");
+      }
+      for (const name of width >= 1024
+        ? ["Leaderboard view modes", "Sort options"]
+        : ["Leaderboard view modes"]) {
+        await expect(
+          page.getByRole("tablist", { name, exact: true })
+        ).toHaveCSS("height", "38px");
+        await expect(
+          page
+            .getByRole("tablist", { name, exact: true })
+            .getByRole("tab")
+            .first()
+        ).toHaveCSS("height", "32px");
+      }
+      for (const view of ["List view", "Grid view"]) {
+        await page.getByRole("tab", { name: view, exact: true }).click();
+        await expect(toggle).toBeChecked();
+        await expect(list).not.toContainText("Ordinary artwork");
+        await expectNoHorizontalOverflow(page);
+        await expect(
+          page
+            .getByRole("checkbox", { name: "Additional Action", exact: true })
+            .locator("..")
+        ).toBeInViewport({ ratio: 1 });
+        expect(
+          (await page
+            .getByRole("checkbox", { name: "Additional Action", exact: true })
+            .locator("..")
+            .boundingBox())!.height
+        ).toBe(38);
+      }
+      await testInfo.attach(`additional-action-${width}px`, {
+        body: await page.screenshot(),
+        contentType: "image/png",
+      });
+    }
+    await toggle.focus();
+    await page.keyboard.press("Shift+Tab");
+    await page.keyboard.press("Tab");
+    await expect(toggle).toBeFocused();
+    await expect(
+      page
+        .getByRole("checkbox", { name: "Additional Action", exact: true })
+        .locator("..")
+    ).toHaveCSS("outline-style", "solid");
+    await page.keyboard.press("Space");
+    await expect(toggle).not.toBeChecked();
+    await expect(list).toContainText("Ordinary artwork");
+    await expect(
+      page.getByRole("button", { name: "Sort: Newest", exact: true })
+    ).toBeVisible();
+
+    // A fresh filtered request fails; all-results cards must not masquerade as filtered results.
+    await page.reload();
+    let fail = true;
+    await page.route(
+      `**/api/v3/waves/${MEMES_WAVE}/competitions/alpha/leaderboard*`,
+      (route) => {
+        if (
+          fail &&
+          new URL(route.request().url()).searchParams.has(
+            "is_additional_action_promised"
+          )
+        )
+          return route.fulfill({
+            status: 503,
+            json: { error: "Temporarily unavailable" },
+          });
+        return route.fallback();
+      }
+    );
+    await page
+      .getByRole("checkbox", { name: "Additional Action", exact: true })
+      .locator("..")
+      .click();
+    await expect(
+      page.getByRole("alert").filter({ hasText: "Couldn’t load submissions." })
+    ).toBeVisible();
+    await expect(list).toHaveCount(0);
+    fail = false;
+    artwork = artwork.filter(
+      (drop) => !drop.submission_context.is_additional_action_promised
+    );
+    await page.getByRole("button", { name: "Retry", exact: true }).click();
+    await expect(
+      page.getByText("No submissions marked Additional Action.", {
+        exact: true,
+      })
+    ).toBeVisible();
+    await page
+      .getByRole("checkbox", { name: "Additional Action", exact: true })
+      .locator("..")
+      .click();
+    await expect(list).toContainText("Ordinary artwork");
+
+    // A late response from an abandoned filtered request cannot replace all results.
+    await page.reload();
+    let releaseLate!: () => void;
+    const lateResponse = new Promise<void>((resolve) => {
+      releaseLate = resolve;
+    });
+    let held = false;
+    let completed = false;
+    await page.route(
+      `**/api/v3/waves/${MEMES_WAVE}/competitions/alpha/leaderboard*`,
+      async (route) => {
+        if (
+          !new URL(route.request().url()).searchParams.has(
+            "is_additional_action_promised"
+          )
+        )
+          return route.fallback();
+        held = true;
+        await lateResponse;
+        await route.fulfill({
+          json: { data: [], cards: [], has_more: false, next_cursor: null },
+        });
+        completed = true;
+      }
+    );
+    try {
+      await page
+        .getByRole("checkbox", { name: "Additional Action", exact: true })
+        .locator("..")
+        .click();
+      await expect.poll(() => held).toBe(true);
+      await page
+        .getByRole("checkbox", { name: "Additional Action", exact: true })
+        .locator("..")
+        .click();
+      await expect(list).toContainText("Ordinary artwork");
+    } finally {
+      releaseLate();
+    }
+    await expect.poll(() => completed).toBe(true);
+    await expect(toggle).not.toBeChecked();
+    await expect(list).toContainText("Ordinary artwork");
+  });
+
   test("keeps Additional Action tooltips above cards and inside the viewport", async ({
     page,
   }, testInfo) => {
@@ -9493,7 +10214,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await page.setViewportSize({ width, height: 900 });
       for (const view of ["Grid view", "List view"]) {
         await page.getByRole("tab", { name: view, exact: true }).click();
-        const badge = page.getByText("Additional Action", { exact: true });
+        const badge = page
+          .getByRole("list", { name: "Leaderboard drops", exact: true })
+          .getByText("Additional Action", { exact: true });
         await expect(badge).toHaveCount(1);
         await expect
           .poll(() => badge.evaluate((element) => element.tagName))

@@ -122,6 +122,12 @@ loading announcements, section-specific loading, and destination-bound competiti
 controls. It also explains that app tabs already in view keep their position
 when selected. It does not promise instant data or a loading screen on every switch.
 
+The `waves.leaderboard.sort-group-filters` record covers Main Stage's one-tap
+Additional Action checkbox, independent sorting and view selection, complete-result
+filtering including promises without plans, reset behavior, and empty/error recovery.
+It directs readers to artwork details for the optional plan and distinguishes the
+artist's promise from verification of approval or fulfillment.
+
 The Wave discovery record describes the independent Active Votes and Worth Checking Out
 sidebar sections, their explanations and view-all destinations. It describes
 quiet loading placeholders, explanations that appear with content, empty messages

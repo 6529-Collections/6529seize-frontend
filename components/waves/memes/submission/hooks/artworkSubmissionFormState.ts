@@ -63,6 +63,7 @@ export type FormAction =
   | { type: "SET_STEP"; payload: SubmissionStep }
   | { type: "SET_AGREEMENTS"; payload: SubmissionAgreement | null }
   | { type: "SET_ADDITIONAL_ACTION_PROMISED"; payload: boolean }
+  | { type: "SET_ADDITIONAL_ACTION_PLAN"; payload: string }
   | { type: "APPLY_PROFILE_DEFAULTS"; payload: ProfileDefaults }
   | {
       type: "SET_TRAIT_FIELD";
@@ -346,6 +347,7 @@ const buildEmptyExternalMediaState = (): ExternalMediaState => ({
   isValid: false,
 });
 
+/** Initialize optional submission fields, including an empty action plan, without publishing defaults. */
 const getDefaultOperationalData = (): OperationalData => ({
   airdrop_config: [{ id: "initial", address: "", count: AIRDROP_TOTAL }],
   payment_info: {
@@ -362,6 +364,7 @@ const getDefaultOperationalData = (): OperationalData => ({
   },
   commentary: "",
   about_artist: "",
+  additional_action_plan: "",
 });
 
 export interface CreateInitialStateInput {
@@ -402,6 +405,7 @@ export const createInitialState = ({
   return reduceProfileDefaults(state, profileDefaults ?? {});
 };
 
+/** Update the draft while keeping the action plan intact when its checkbox is toggled off. */
 export function formReducer(state: FormState, action: FormAction): FormState {
   switch (action.type) {
     case "SET_COLLABORATORS":
@@ -420,6 +424,15 @@ export function formReducer(state: FormState, action: FormAction): FormState {
 
     case "SET_ADDITIONAL_ACTION_PROMISED":
       return { ...state, isAdditionalActionPromised: action.payload };
+
+    case "SET_ADDITIONAL_ACTION_PLAN":
+      return {
+        ...state,
+        operationalData: {
+          ...state.operationalData,
+          additional_action_plan: action.payload,
+        },
+      };
 
     case "APPLY_PROFILE_DEFAULTS":
       return reduceProfileDefaults(state, action.payload);

@@ -32,7 +32,17 @@ jest.mock("@/components/utils/button/PrimaryButton", () => (props: any) => (
 ));
 
 describe("MemesSubmissionPreviewScreen", () => {
-  const previewDrop = { id: "drop-1" } as any;
+  const previewDrop = {
+    id: "drop-1",
+    parts: [{ media: [] }],
+    is_additional_action_promised: true,
+    metadata: [
+      {
+        data_key: "additional_action_plan",
+        data_value: "A free exhibition if selected.",
+      },
+    ],
+  } as any;
   const identity = {
     status: "eligible",
     profileStatus: "eligible",
@@ -73,6 +83,9 @@ describe("MemesSubmissionPreviewScreen", () => {
 
     expect(screen.getByTestId("preview-list-card")).toBeInTheDocument();
     expect(screen.getByTestId("preview-gallery-card")).toBeInTheDocument();
+    expect(
+      screen.getByText("A free exhibition if selected.")
+    ).toBeInTheDocument();
   });
 
   it("shows pending invite recipients before final submission without claiming they accepted", () => {

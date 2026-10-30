@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocalImagePreviewSource } from "./LocalImagePreviewContext";
 import { isAllowedOgImageSourceUrl } from "@/app/api/og-metadata/_lib/imageProxyPolicy";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
@@ -99,14 +100,17 @@ const PreviewAttempt = forwardRef<HTMLImageElement, Props>(
     const [attempt, setAttempt] = useState(0);
     const failedAttempt = useRef<number | null>(null);
     const notifiedAnimationFallback = useRef(false);
+    const localSource = useLocalImagePreviewSource(originalSrc);
     const highQualitySrc = preferHighQuality
       ? getHighQualityArtworkImageSrc(originalSrc)
       : null;
-    const previewSources = getDropImagePreviewSources(
-      originalSrc,
-      imageScale,
-      Boolean(onAnimatedPreviewUnavailable)
-    );
+    const previewSources = localSource
+      ? [localSource]
+      : getDropImagePreviewSources(
+          originalSrc,
+          imageScale,
+          Boolean(onAnimatedPreviewUnavailable)
+        );
     const sources = highQualitySrc
       ? [highQualitySrc, ...previewSources]
       : previewSources;
