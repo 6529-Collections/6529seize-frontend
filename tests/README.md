@@ -84,6 +84,12 @@ Keep those ownership rules covered in
 `__tests__/scripts/app-pr-ci-effective-plan.test.ts`; merely registering a
 pack here does not make a product-only PR select it.
 
+Submission artwork loading, GIF original fallback and HD controls run on both
+web viewports in `test:e2e:submission-artwork-sandbox`, in a separate PR CI job
+with its own server/build output. Shared image and artwork-renderer changes select
+this pack in addition to existing competition coverage. The artwork scenarios do
+not extend the competition job's test list or timeout budget.
+
 <!-- BEGIN GENERATED: e2e-pack-table -->
 
 Generated from `tests/packs.manifest.cjs` by
@@ -91,6 +97,9 @@ Generated from `tests/packs.manifest.cjs` by
 
 | Pack                                                | Alias                         | Safety   | Environment | Triggers                  | Timeout | Description                                                                                           |
 | --------------------------------------------------- | ----------------------------- | -------- | ----------- | ------------------------- | ------- | ----------------------------------------------------------------------------------------------------- |
+| `test:e2e:bookmarks-sandbox`                        | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Private bookmark menus, account isolation, and saved-page flow.                                       |
+| `test:e2e:staging:bookmarks`                        | bookmarks                     | readonly | staging     | post-deploy, manual       | 15m     | Private bookmarks route authentication guard.                                                         |
+| `test:e2e:production:bookmarks`                     | bookmarks                     | readonly | production  | post-deploy, manual       | 15m     | Private bookmarks route authentication guard.                                                         |
 | `test:e2e`                                          | —                             | local    | local       | manual                    | 60m     | Full local suite on the desktop web shell.                                                            |
 | `test:e2e:all-projects`                             | —                             | local    | local       | manual                    | 90m     | Full local suite across every configured project.                                                     |
 | `test:e2e:ui`                                       | —                             | local    | local       | manual                    | 90m     | Playwright UI mode for local debugging.                                                               |
@@ -123,9 +132,11 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:reaction-sandbox`                         | —                             | sandbox  | local       | manual                    | 15m     | Drop reaction sandbox against the local mock API.                                                     |
 | `test:e2e:edit-drop-sandbox`                        | —                             | sandbox  | local       | manual                    | 15m     | Drop edit sandbox against the local mock API.                                                         |
 | `test:e2e:native-competition-sandbox`               | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Native competition context, parallel budgets and navigation against the local mock API.               |
+| `test:e2e:submission-artwork-sandbox`               | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Submission artwork loading, GIF animation and HD controls in an isolated media sandbox.               |
 | `test:e2e:signature-sandbox`                        | —                             | sandbox  | local       | manual                    | 15m     | Signed participation sandbox that fails closed unsigned.                                              |
 | `test:e2e:session-recovery-sandbox`                 | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Expired session cold-start and foreground recovery against the local mock API.                        |
 | `test:e2e:auth-sandbox`                             | —                             | sandbox  | local       | manual                    | 15m     | Aggregate authenticated sandbox pack.                                                                 |
+| `test:e2e:profile-following-sandbox`                | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Profile Following and REP editing dialogs, permissions and recovery.                                  |
 | `test:e2e:wave-creation-sandbox`                    | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Wave creation, permissions, and draft recovery on desktop and mobile.                                 |
 | `test:e2e:smoke:surface-matrix`                     | —                             | local    | local       | pr-ci, manual             | 15m     | @smoke subset on desktop and mobile web shells.                                                       |
 | `test:e2e:surface-matrix`                           | —                             | local    | local       | pr-ci, manual             | 15m     | Core surfaces on desktop and mobile web shells.                                                       |

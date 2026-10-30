@@ -409,6 +409,8 @@
         "rate nic",
         "rep dialog",
         "grant rep",
+        "edit rep category",
+        "rep allowance error",
         "rep category spelling",
         "memesnominee rep",
         "activity log"
@@ -422,6 +424,7 @@
         "Grant REP keeps its compact category pills and existing search and selection behavior, including similarly named categories remaining separate and selectable.",
         "The exact MemesNominee category pill is marked as counting toward the 50,000 REP submission requirement and is surfaced first when the typed value differs only by capitalization, spacing, punctuation, or Unicode width; search guidance stays neutral until a category is selected, selecting exact MemesNominee confirms the requirement in green, and selecting a subdued look-alike shows an amber note explaining that it remains a separate category.",
         "In the Grant REP and Rate NIC dialogs, type the desired rating amount. The plus/minus symbols are informational, not buttons. Use Grant REP or Rate to save, or Cancel to leave without saving.",
+        "The category pencil in Received opens an editor for the viewer's existing total Rep contribution. It is hidden when signed out or viewing the acting profile; authorized proxies use their grantor's allowance. The editor is a desktop dialog or mobile bottom sheet. Allowance loading keeps the panel stable; if it fails, Try again reloads it and Save stays disabled. Save updates the total; Cancel, Close and Escape dismiss the editor and return focus to the pencil.",
         "Owner and permission rules affect which identity actions are visible."
       ],
       "canonical_path": "/{user}",
@@ -453,6 +456,7 @@
         "The Profile Proxy tab exposes profile proxy relationships and actions.",
         "All, Received, and Granted filters remain visible as tabs on phone, tablet, and desktop. Arrow keys switch tabs; Home and End select the first and last tab.",
         "Proxy features help a profile allow another account to perform supported actions without handing over the primary wallet.",
+        "To act as a received proxy, open your account menu and select the profile under Proxy Profile. If the wallet is disconnected, reconnect the wallet belonging to your signed-in profile; the selected proxy resumes and asks for a sign-in signature. On an unsupported network, switch to a supported network and select the profile again. Your current session and selection stay in place until sign-in succeeds. Canceling or a failed sign-in shows an error. Select your own profile under Proxy Profile to return to the primary profile, which also requires signing in.",
         "Current proxy action creation supports Allocate Rep and Allocate NIC actions with a granted Credit amount and read-only Spent total.",
         "Proxy action availability and profile rating behavior depend on whether the active proxy has the relevant Allocate Rep or Allocate NIC permission.",
         "Proxy and delegation are related concepts but live in separate product areas."
@@ -541,7 +545,8 @@
       "facts": [
         "REP is peer-given reputation in categories and waves.",
         "CIC is the community interaction count signal shown on profiles and Network surfaces.",
-        "REP category analytics and category-level views live under /rep/categories."
+        "REP category analytics and category-level views live under /rep/categories.",
+        "On devices without touch, profile hover cards show up to three Top Rep categories ordered by the magnitude of their net REP total, so a large negative can appear first. Equal magnitudes use case-sensitive category-name order. Signed values and their positive, negative, or zero colors are preserved."
       ],
       "canonical_path": "/rep/categories",
       "related_paths": [
@@ -852,6 +857,7 @@
         "Every Worth Checking Out recommendation also appears in All at its recent-activity position; Joined normally includes only waves the user has joined.",
         "Joined waves load in batches without skipping entries when new activity changes their order. Recent activity includes joined, unmuted subwaves. Muting a wave removes its own activity from the ordering. More rows load near the bottom, with Load more joined waves as a fallback. Failed loads keep existing rows available and show Retry. Expired lists refresh automatically, and newly joined waves appear on refresh.",
         "Switching All and Joined preserves list position instead of jumping to the active wave; a shorter list can clamp the position. Selecting another wave reveals its active row again.",
+        "Incoming messages update badges and recent-activity ordering without moving the Waves list's scroll position, including messages in the open wave. Opening another wave reveals its row once after the list loads; later messages do not scroll to it again. Desktop pointer devices have a slim scrollbar for dragging and track clicks; touch devices keep native scrolling.",
         "A Wave opened from a direct link remains visible and highlighted in the left sidebar even when it is not followed, pinned, or present in the loaded overview; this temporary route context does not join or pin it.",
         "When a direct link opens a subwave, the sidebar surfaces its visible parent, loads and expands the subwave list, reveals the selected child row, and keeps that parent tree ahead of paginated activity rows so every sibling remains reachable.",
         "An active subwave header shows an up-left arrow and a linked parent wave name; selecting that name opens the parent wave.",

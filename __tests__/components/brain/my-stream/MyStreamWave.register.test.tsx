@@ -59,6 +59,8 @@ const mockEditingDropState: {
   setEditingDropId: jest.fn(),
 };
 
+let mockActiveContentTab = "CHAT";
+
 jest.mock("@/contexts/EditingDropContext", () => ({
   useEditingDrop: () => mockEditingDropState,
   EditingDropProvider: ({ children }: { children: React.ReactNode }) =>
@@ -165,7 +167,7 @@ jest.mock("@/components/brain/ContentTabContext", () => ({
     "@/components/brain/ContentTabContext"
   ),
   useContentTab: () => ({
-    activeContentTab: "CHAT",
+    activeContentTab: mockActiveContentTab,
     updateAvailableTabs: mockUpdateAvailableTabs,
   }),
 }));
@@ -336,6 +338,7 @@ describe("MyStreamWave registration", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockIsApp = false;
+    mockActiveContentTab = "CHAT";
     mockWaveInfo = getDefaultMockWaveInfo();
     mockResolvedWave = mockWave;
     mockSearchParams = new URLSearchParams();
@@ -520,23 +523,29 @@ describe("MyStreamWave registration", () => {
     });
   });
 
-  it("exposes the app header memes submit action", async () => {
-    mockIsApp = true;
-    mockWaveInfo = {
-      ...getDefaultMockWaveInfo(),
-      isMemesWave: true,
-    };
+  it.each(["CHAT", "LEADERBOARD"])(
+    "exposes the app header memes submit action on %s",
+    async (tab) => {
+      mockIsApp = true;
+      mockActiveContentTab = tab;
+      mockWaveInfo = {
+        ...getDefaultMockWaveInfo(),
+        isMemesWave: true,
+      };
 
-    renderWave();
+      renderWave();
 
-    await waitFor(() => {
-      expect(screen.getByTestId("header-action")).toHaveTextContent(
-        "Submit Work to The Memes"
+      await waitFor(() => {
+        expect(screen.getByTestId("header-action")).toHaveTextContent(
+          "Submit Work to The Memes"
+        );
+      });
+
+      fireEvent.click(
+        screen.getByRole("button", { name: "Open header action" })
       );
-    });
 
-    fireEvent.click(screen.getByRole("button", { name: "Open header action" }));
-
-    expect(screen.getByTestId("memes-submit-modal")).toBeInTheDocument();
-  });
+      expect(screen.getByTestId("memes-submit-modal")).toBeInTheDocument();
+    }
+  );
 });

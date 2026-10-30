@@ -128,6 +128,7 @@ export default function CommonTabsTab<T, U = unknown>(
         type="button"
         role="tab"
         aria-selected={isActive}
+        aria-controls={item.panelId}
         tabIndex={isActive ? 0 : -1}
         ref={buttonRef}
         title={tooltip}

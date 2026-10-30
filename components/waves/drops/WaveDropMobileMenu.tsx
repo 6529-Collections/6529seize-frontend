@@ -39,6 +39,7 @@ import WaveDropMobileMenuOpen from "./WaveDropMobileMenuOpen";
 import WaveDropActionsQuickReact from "./WaveDropActionsQuickReact";
 import { useWaveDropLayers } from "./WaveDropLayerContext";
 import WaveDropMobileMenuCopyLink from "./WaveDropMobileMenuCopyLink";
+import WaveDropBookmarkAction from "./WaveDropBookmarkAction";
 import WaveDropMobileMenuCopyText from "./WaveDropMobileMenuCopyText";
 import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
 import ReportDropModal from "@/components/content-moderation/ReportDropModal";
@@ -279,6 +280,7 @@ function WaveDropMobileMenuAuthenticatedActions({
         </>
       )}
 
+      <WaveDropBookmarkAction dropId={drop.id} onSelected={closeMenu} mobile />
       <WaveDropDocumentationAction drop={drop} onSelected={closeMenu} mobile />
 
       <DropSignatureMenuItem
@@ -411,18 +413,32 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
 
   const isAuthor = useMemo(
     () =>
-      connectedProfile?.handle === drop.author.handle && !activeProfileProxy,
-    [connectedProfile, activeProfileProxy, drop.author.handle]
+      !drop.author.is_anonymous &&
+      connectedProfile?.handle === drop.author.handle &&
+      !activeProfileProxy,
+    [
+      connectedProfile,
+      activeProfileProxy,
+      drop.author.handle,
+      drop.author.is_anonymous,
+    ]
   );
   const connectedProfileHandle = connectedProfile?.handle ?? null;
 
   const showOptions = useMemo(
     () =>
       connectedProfileHandle !== null &&
+      !drop.author.is_anonymous &&
       !activeProfileProxy &&
       !drop.id.startsWith("temp-") &&
       connectedProfileHandle === drop.author.handle,
-    [connectedProfileHandle, activeProfileProxy, drop.id, drop.author.handle]
+    [
+      connectedProfileHandle,
+      activeProfileProxy,
+      drop.id,
+      drop.author.handle,
+      drop.author.is_anonymous,
+    ]
   );
 
   const closeMenu = () => setOpen(false);

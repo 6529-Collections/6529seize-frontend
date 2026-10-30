@@ -906,15 +906,18 @@ describe("E2E runner CLI resolution", () => {
   });
 
   it.each([
-    ["staging", "post-deploy", 18],
+    ["staging", "post-deploy", 19],
     ["production", "cron", 12],
-    ["production", "post-deploy", 17],
+    ["production", "post-deploy", 18],
   ])(
     "lists %s/%s as a non-empty deterministic pack set",
     (env, trigger, count) => {
       const result = run(["--env", env, "--trigger", trigger, "--list"]);
       expect(result.status).toBe(0);
       expect(result.stdout).toContain(`resolved ${count} pack(s)`);
+      if (trigger === "post-deploy") {
+        expect(result.stdout).toContain(`test:e2e:${env}:bookmarks`);
+      }
     }
   );
 

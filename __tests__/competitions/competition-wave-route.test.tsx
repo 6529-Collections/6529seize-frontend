@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
-import CompetitionWaveRoute from "@/components/competitions/CompetitionWaveRoute";
+import WaveRouteShell from "@/components/waves/WaveRouteShell";
 import {
   CompetitionRouteProvider,
   useCompetitionRoute,
@@ -39,6 +39,20 @@ let mockSelectionQuery: QueryState<{ competition_id: string | null }> & {
   isFetching: boolean;
   isFetchedAfterMount: boolean;
 };
+
+jest.mock("next/dynamic", () => ({
+  __esModule: true,
+  default: () =>
+    jest.requireActual("@/components/competitions/CompetitionWaveContent")
+      .default,
+}));
+jest.mock("@/components/brain/ContentTabContext", () => ({
+  useContentTab: () => ({ activeContentTab: "LEADERBOARD" }),
+}));
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
+  useMyStream: () => ({ registerWave: mockRegisterWave }),
+}));
+const mockRegisterWave = jest.fn();
 
 jest.mock("next/navigation", () => ({
   usePathname: () => mockPathname,
@@ -111,9 +125,7 @@ function routeTree(competitionId: string | null = "alpha", waveId = "wave") {
   return (
     <CompetitionRouteProvider>
       <RouteProbe />
-      {competitionId !== null && (
-        <CompetitionWaveRoute waveId={waveId} competitionId={competitionId} />
-      )}
+      {competitionId !== null && <WaveRouteShell waveId={waveId} />}
     </CompetitionRouteProvider>
   );
 }

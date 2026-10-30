@@ -27,6 +27,7 @@ describe("Wave page", () => {
       searchParams: { serialNo: "42" },
       routeContext: "waves",
       includePublicPreview: true,
+      includeServerFeedSeed: true,
     });
     expect(result).toBe("wave-content");
   });

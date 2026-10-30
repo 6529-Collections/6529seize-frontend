@@ -1543,7 +1543,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       // Its numeric count replaces the server placeholder only after this
       // streamed section hydrates and its statement query resolves.
       await expect(statements).toHaveAccessibleName(
-        /^\d[\d,]* ID Statements$/,
+        /^ID Statements \d[\d,]*$/,
         { timeout: RESPONSE_TIMEOUT_MS }
       );
       await statements.click();

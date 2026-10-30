@@ -15,6 +15,7 @@ import {
 import { useContentTab } from "../ContentTabContext";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import MyStreamWaveChat from "./MyStreamWaveChat";
+import WaveChatActivity from "./WaveChatActivity";
 import MyStreamWavePending from "./MyStreamWavePending";
 import MyStreamWaveCurationContent from "./curations/MyStreamWaveCurationContent";
 import { useWaveData } from "@/hooks/useWaveData";
@@ -492,7 +493,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
       !isApp ||
       !loadedWaveId ||
       editingDropId !== null ||
-      activeContentTab !== MyStreamWaveTab.CHAT ||
+      (activeContentTab !== MyStreamWaveTab.CHAT && !isMemesLegacySubmission) ||
       activeCurationId !== null ||
       (!isMemesLegacySubmission && !chatSubmitDropAction.isVisible)
     ) {
@@ -704,7 +705,12 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
             : getContentTabPanelId(activeContentTab)
         }
       >
-        {activeTabContent}
+        <WaveChatActivity
+          active={activeTabContent === components[MyStreamWaveTab.CHAT]}
+          chat={components[MyStreamWaveTab.CHAT]}
+        >
+          {activeTabContent}
+        </WaveChatActivity>
       </div>
       <MemesArtSubmissionModal
         isOpen={isAppMemesSubmitModalOpen}

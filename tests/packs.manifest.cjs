@@ -57,6 +57,7 @@ const PUBLIC_REVIEW_SANDBOX_ENV = {
 };
 
 const READONLY_SPECS = {
+  bookmarks: ["tests/social/bookmarks-readonly.spec.ts"],
   social: ["tests/social/waves-profile-readonly.spec.ts"],
   inputDetection: ["tests/input/win8-touch-latch-readonly.spec.ts"],
   media: [
@@ -176,6 +177,41 @@ function museumPack(pack) {
 }
 
 const PACKS = [
+  {
+    ...sandboxPack(
+      "test:e2e:bookmarks-sandbox",
+      "Private bookmark menus, account isolation, and saved-page flow.",
+      ["tests/social/bookmarks-sandbox.spec.ts"],
+      {
+        PLAYWRIGHT_BASE_URL: "http://127.0.0.1:3307",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://127.0.0.1:3307",
+        PLAYWRIGHT_FORCE_WEB_SERVER: "1",
+        PLAYWRIGHT_WEB_SERVER_COMMAND:
+          "node tests/support/bookmarksSandboxServer.cjs",
+      },
+      [DESKTOP, MOBILE]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
+  stagingPack(
+    "bookmarks",
+    "bookmarks",
+    "Private bookmarks route authentication guard.",
+    READONLY_SPECS.bookmarks,
+    { env: { ...STAGING_READONLY_ENV, USE_DEV_AUTH: "false" } }
+  ),
+  {
+    ...productionPack(
+      "bookmarks",
+      "Private bookmarks route authentication guard.",
+      READONLY_SPECS.bookmarks,
+      ["post-deploy", "manual"],
+      15,
+      [DESKTOP, MOBILE]
+    ),
+    env: { ...PRODUCTION_READONLY_ENV, USE_DEV_AUTH: "false" },
+  },
+
   {
     scriptKey: "test:e2e",
     description: "Full local suite on the desktop web shell.",
@@ -442,6 +478,22 @@ const PACKS = [
     ),
     triggers: ["pr-ci", "manual"],
   },
+  {
+    ...sandboxPack(
+      "test:e2e:submission-artwork-sandbox",
+      "Submission artwork loading, GIF animation and HD controls in an isolated media sandbox.",
+      ["tests/media/submission-artwork-sandbox.spec.ts"],
+      {
+        ...AUTH_SANDBOX_ENV,
+        PLAYWRIGHT_BASE_URL: "http://localhost:3297",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3297",
+        PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4297",
+        NEXT_DEV_DIST_DIR: ".next-playwright-submission-artwork",
+      },
+      [DESKTOP, MOBILE]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
   sandboxPack(
     "test:e2e:signature-sandbox",
     "Signed participation sandbox that fails closed unsigned.",
@@ -476,6 +528,23 @@ const PACKS = [
     ],
     AUTH_SANDBOX_ENV
   ),
+  {
+    ...sandboxPack(
+      "test:e2e:profile-following-sandbox",
+      "Profile Following and REP editing dialogs, permissions and recovery.",
+      [
+        "tests/social/profile-following-sandbox.spec.ts",
+        "tests/social/profile-rep-edit-sandbox.spec.ts",
+      ],
+      {
+        ...AUTH_SANDBOX_ENV,
+        USE_DEV_AUTH: "false",
+        NEXT_DEV_DIST_DIR: ".next-playwright-following",
+      },
+      [DESKTOP, MOBILE, "capacitor-ios-sim", "capacitor-android-sim"]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
   {
     ...sandboxPack(
       "test:e2e:wave-creation-sandbox",
@@ -800,6 +869,7 @@ const PACKS = [
     "Combined production-safe release validation.",
     [
       "tests/home/home.spec.ts",
+      ...READONLY_SPECS.bookmarks,
       ...READONLY_SPECS.social,
       ...READONLY_SPECS.media,
       ...READONLY_SPECS.delegation,

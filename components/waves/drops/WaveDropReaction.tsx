@@ -10,10 +10,7 @@ import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import { formatLargeNumber } from "@/helpers/Helpers";
 import { recordReaction } from "@/helpers/reactions/reactionHistory";
-import {
-  enqueueDropReactionRequest,
-  isDropReactionRequestTimeout,
-} from "@/helpers/reactions/dropReactionRequestQueue";
+import { enqueueDropReactionRequest } from "@/helpers/reactions/dropReactionRequestQueue";
 import { buildTooltipId } from "@/helpers/tooltip.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import {
@@ -62,7 +59,10 @@ import {
   recordReactionRequestSucceeded,
   recordReactionRollbackApplied,
 } from "@/utils/monitoring/dropReactionMonitoring";
-import { isExpectedWaveReactionDisabledError } from "@/utils/monitoring/dropReactionErrorClassification";
+import {
+  isExpectedWaveReactionDisabledError,
+  isReactionRequestOutcomeUncertain,
+} from "@/utils/monitoring/dropReactionErrorClassification";
 import styles from "./WaveDropReactions.module.css";
 
 type OptimisticRollback = (() => void) | null;
@@ -524,7 +524,7 @@ function WaveDropReaction({
     captureOwner,
     isCurrentMutation,
     refreshAfterFailure,
-    reconcileTimeout,
+    reconcileRequestFailure,
   } = useDropReactionRecovery({
     activeProfileProxy,
     applyOptimisticDropUpdate,
@@ -581,8 +581,8 @@ function WaveDropReaction({
       void recordReaction(reaction.reaction);
     }
 
-    const handleTimeout = async () => {
-      const reconciliation = await reconcileTimeout(
+    const handleUncertainOutcome = async () => {
+      const reconciliation = await reconcileRequestFailure(
         mutation,
         intendedReaction,
         isCurrent
@@ -615,8 +615,8 @@ function WaveDropReaction({
         return;
       }
 
-      if (isDropReactionRequestTimeout(error)) {
-        await handleTimeout();
+      if (isReactionRequestOutcomeUncertain(error)) {
+        await handleUncertainOutcome();
         return;
       }
 
@@ -672,7 +672,7 @@ function WaveDropReaction({
     captureOwner,
     isCurrentMutation,
     refreshAfterFailure,
-    reconcileTimeout,
+    reconcileRequestFailure,
     selected,
     setToast,
     updateEligibilityAfterExpectedDisabledReaction,

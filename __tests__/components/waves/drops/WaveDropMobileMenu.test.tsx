@@ -127,7 +127,7 @@ const unauthenticatedAuth: AuthProviderValue = {
   requestSessionUpgrade: jest.fn(async () => ({ success: false })),
   ensureActiveSessionV2WebSession: jest.fn(async () => false),
   setToast: jest.fn(),
-  setActiveProfileProxy: jest.fn(async () => {}),
+  setActiveProfileProxy: jest.fn(() => Promise.resolve(false)),
 };
 
 const dropFixture = {

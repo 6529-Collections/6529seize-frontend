@@ -1,3 +1,4 @@
+import { BOOKMARK_MESSAGES } from "@/i18n/messages/bookmarks";
 import { VOTING_CREDIT_RETURN_MESSAGES } from "@/i18n/messages/voting-credit-returns";
 import { MEME_COLLABORATION_MESSAGES } from "@/i18n/messages/meme-collaborations";
 import emmaMessages from "@/i18n/messages/emma.en-US.json";
@@ -267,6 +268,20 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "search.placeholder": "Type a category name",
   "search.resultsLabel": "REP category search results",
   "helpBotReserved.error": "{category} is managed by help6529.",
+  "edit.loading": "Loading your Rep allowance…",
+  "edit.loadError": "Couldn't load your Rep allowance.",
+  "edit.retry": "Try again",
+  "edit.title": "Add Rep to {name}",
+  "edit.totalLabel": "Your total Rep for {category}:",
+  "edit.save": "Save",
+  "edit.cancel": "Cancel",
+  "edit.availableRep": "Your available Rep:",
+  "edit.ratingLimit": "Your max/min Rep Rating to {category}:",
+  "edit.proxy": "You are acting as proxy for: {name}",
+  "edit.updated": "Rep updated.",
+  "edit.updateError": "Couldn't update this Rep rating.",
+  "edit.tryAgain": "Please try again.",
+  "edit.loginRequired": "Log in to continue.",
   "grant.searchPlaceholder": "Category to grant REP for",
   "grant.minimumCharacters": "Type at least {min} characters.",
   "grant.maximumCharacters": "Type at most {max} characters.",
@@ -833,15 +848,19 @@ const WAVE_COMPETITION_BADGE_MESSAGES = objectMessages(
 );
 
 const WAVE_VOTE_RATIONALE_MESSAGES = objectMessages("waves.voteRationale", {
-  explain: "Explain",
-  explainAriaLabel: "Reply with vote rationale",
+  explain: "Explain vote",
+  explainAriaLabel: "Explain vote",
+  savedDescription: "Post a public reply in the wave about your saved vote.",
+  publicReplyDescription:
+    "Posts a public reply in the wave after your vote is saved.",
   fieldLabel: "Optional rationale reply",
+  fieldPlaceholder: "Why this vote? (optional)",
   fieldDescription:
-    "Editing this text turns on Vote with reply until you choose the switch setting yourself.",
-  switchLabel: "Vote with reply",
+    "Posts a public reply in the wave after your vote is saved. Editing this text turns on Explain vote until you choose the switch setting yourself.",
+  switchLabel: "Explain vote",
   stateOn: "On",
   stateOff: "Off",
-  emptyBlockReason: "Add rationale text or turn Vote with reply off.",
+  emptyBlockReason: "Add rationale text or turn Explain vote off.",
   submitLabel: "Vote + reply",
   postErrorTitle: "Vote saved, but couldn't post your rationale reply.",
   postErrorRetry: "Please try posting the reply again.",
@@ -1351,9 +1370,19 @@ const USER_CIC_TYPE_MESSAGES = objectMessages("user.cicType", {
 } as const);
 
 const FOLLOWERS_MESSAGES = objectMessages("followers", {
+  "following.title": "Following",
+  "following.open": "Open your following list: {count}",
+  "following.loadingCount": "…",
+  "following.unavailableCount": "Unavailable",
+  "following.loading": "Loading following list…",
+  "following.empty": "You aren't following anyone yet.",
+  "following.error": "Couldn't load your following list. Please try again.",
+  "following.retry": "Retry",
+  "following.loadMore": "Load more",
   "modal.title": "Followers",
   "list.label": "Followers",
   "list.loading": "Loading followers",
+  "list.empty": "No followers yet.",
   "profile.linkAriaLabel": "View {handle}'s profile",
   "profile.avatarAlt": "{handle}'s profile image",
 } as const);
@@ -2924,6 +2953,7 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   "category.pages": "Pages",
   "category.profiles": "Profiles",
   "category.waves": "Waves",
+  "category.messages": "Messages",
   "category.error": "Some results could not be loaded",
   "category.loading": "Loading {category} results",
   clear: "Clear search",
@@ -2931,7 +2961,7 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   close: "Close search",
   "dialogTitle.site": "Search 6529",
   "dialogTitle.wave": "Search this Wave",
-  "dialogDescription.site": "Find pages, NFTs, profiles, and Waves.",
+  "dialogDescription.site": "Find pages, NFTs, profiles, Waves, and messages.",
   error: "Something went wrong while searching. Please try again.",
   "error.partial.one": "{category} results could not be loaded.",
   "error.partial.other": "Some result types could not be loaded: {categories}.",
@@ -3282,6 +3312,7 @@ export const EN_US_MESSAGES = {
   "notifications.filter.selected": "{count} selected",
   "notifications.filter.sheetTitle": "Filter notifications",
   "notifications.status.unread": "Unread",
+  "notifications.unknownProfile": "Unknown profile",
   "notifications.preview.expand": "Show full drop",
   "notifications.filter.option.mentions": "Mentions",
   "notifications.filter.option.replies": "Replies",
@@ -3365,6 +3396,14 @@ export const EN_US_MESSAGES = {
   "auth.signModal.manualUpgrade":
     "Connection sharing and some newer features need the new secure session.",
   "auth.signModal.connectWalletPrompt": "Connect your wallet to continue.",
+  "auth.proxySwitch.connectWallet":
+    "Reconnect your wallet to switch profiles. Your current profile will stay signed in.",
+  "auth.proxySwitch.unsupportedNetwork":
+    "Switch your wallet to a supported network, then select the profile again.",
+  "auth.proxySwitch.contextChanged":
+    "Your wallet, profile, or network changed. Select the profile again to continue.",
+  "auth.proxySwitch.failed":
+    "Couldn't switch profiles. Your current profile is still selected. Please try again.",
   "auth.signModal.noGas":
     "Your signature will not cost any gas and is purely for authentication purposes.",
   "auth.signModal.connect": "Connect",
@@ -3480,11 +3519,15 @@ export const EN_US_MESSAGES = {
   "headerShare.connectionNotice.loadingMessage":
     "Creating a one-time connection code.",
   "headerShare.connectionNotice.errorMessage":
-    "We couldn't prepare this device connection. Close this dialog and try again.",
+    "We couldn't prepare this device connection. Use Generate new code to try again.",
   "headerShare.connectionNotice.unauthenticatedMessage":
     "Connect and authenticate your wallet before connecting a device.",
   "headerShare.connectionNotice.cancel": "Cancel",
   "headerShare.connectionNotice.update": "Update",
+  "headerShare.connectionRefresh.ready": "Connection ready",
+  "headerShare.connectionRefresh.action": "Generate new code",
+  "headerShare.connectionRefresh.loading": "Preparing connection…",
+  "headerShare.connectionRefresh.unavailable": "Connection unavailable",
   "headerShare.invalidConnectTarget": "Invalid connection target",
   "headerShare.copy.ariaLabel": "Copy link",
   "headerShare.copy.default": "Copy Link",
@@ -3745,7 +3788,7 @@ export const EN_US_MESSAGES = {
   "home.comingUp.credits.moreNames": "+{count} more",
   "home.comingUp.credits.viewAllCredits": "View all collaborators on this drop",
   "home.comingUp.credits.anonymousArtist": "Anonymous",
-  "home.comingUp.subtitle": "Next in queue and current vote leaders",
+  "home.comingUp.subtitle": "Next in queue and current vote leaders.",
   "home.comingUp.viewAll": "View all",
   "home.comingUp.loading": "Loading upcoming artwork…",
   "home.nowMinting.stats.unavailable": "Unavailable",
@@ -3823,6 +3866,10 @@ export const EN_US_MESSAGES = {
   "theMemes.card.metric.marketCapUnavailable": "Market Cap: N/A",
   "theMemes.card.metric.volume": "Volume ({volumeType}): {value}",
   "theMemes.card.metric.ethValue": "{value} ETH",
+  "theMemes.detail.mobile.readMore": "Read more",
+  "theMemes.detail.mobile.showLess": "Show less",
+  "theMemes.detail.mobile.showProperties": "Show all {count} properties",
+  "theMemes.detail.mobile.fewerProperties": "Show fewer",
   "theMemes.detail.backLink.ariaLabel": "Back to The Memes",
   "theMemes.detail.heading.card": "Card {tokenId}",
   "theMemes.detail.heading.ariaLabel": "Card {tokenId} - {name}",
@@ -4557,6 +4604,7 @@ export const EN_US_MESSAGES = {
   ...MY_STREAM_CURATION_MESSAGES,
   ...PROFILE_CURATION_MESSAGES,
   ...ARTWORK_DOCUMENTATION_MESSAGES,
+  ...BOOKMARK_MESSAGES,
   ...ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
@@ -4570,6 +4618,9 @@ export const EN_US_MESSAGES = {
   ...WAVE_DROP_ACTIONS_MESSAGES,
   ...WAVE_PROPOSAL_CARD_MESSAGES,
   ...WAVE_COMPETITION_BADGE_MESSAGES,
+  "waves.artistPreview.submissionCategories": "Submission categories",
+  "waves.artistPreview.activeSubmissions": "Active Submissions",
+  "waves.artistPreview.mintedMemes": "Minted to Memes",
   ...WAVE_VOTE_RATIONALE_MESSAGES,
   ...WAVE_VOTE_MODE_MESSAGES,
   ...WAVE_VOTE_MESSAGES,

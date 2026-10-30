@@ -368,6 +368,7 @@ export * from '../models/ApiDrop';
 export * from '../models/ApiDropAndDropVote';
 export * from '../models/ApiDropAndWave';
 export * from '../models/ApiDropAttachmentReference';
+export * from '../models/ApiDropBookmarksStatus';
 export * from '../models/ApiDropBoost';
 export * from '../models/ApiDropBoostV2';
 export * from '../models/ApiDropBoostsPage';
@@ -741,6 +742,7 @@ export * from '../models/ApiTokenTdhRank';
 export * from '../models/ApiTransaction';
 export * from '../models/ApiTransactionPage';
 export * from '../models/ApiUndiscoveredDrop';
+export * from '../models/ApiUndiscoveredDrops';
 export * from '../models/ApiUnpublishProfileCmsPackageRequest';
 export * from '../models/ApiUpcomingMemeSubscriptionStatus';
 export * from '../models/ApiUpdateCompetitionRequest';
@@ -1175,7 +1177,7 @@ import { ApiCompetitionMyVotePage } from '../models/ApiCompetitionMyVotePage';
 import { ApiCompetitionOutcome } from '../models/ApiCompetitionOutcome';
 import { ApiCompetitionOutcomePage } from '../models/ApiCompetitionOutcomePage';
 import { ApiCompetitionPage } from '../models/ApiCompetitionPage';
-import { ApiCompetitionParticipationConfig    , ApiCompetitionParticipationConfigRequiredMediaEnum         } from '../models/ApiCompetitionParticipationConfig';
+import { ApiCompetitionParticipationConfig     , ApiCompetitionParticipationConfigRequiredMediaEnum         } from '../models/ApiCompetitionParticipationConfig';
 import { ApiCompetitionPause } from '../models/ApiCompetitionPause';
 import { ApiCompetitionPausePage } from '../models/ApiCompetitionPausePage';
 import { ApiCompetitionPermissions } from '../models/ApiCompetitionPermissions';
@@ -1288,6 +1290,7 @@ import { ApiDrop                                      } from '../models/ApiDrop'
 import { ApiDropAndDropVote } from '../models/ApiDropAndDropVote';
 import { ApiDropAndWave } from '../models/ApiDropAndWave';
 import { ApiDropAttachmentReference } from '../models/ApiDropAttachmentReference';
+import { ApiDropBookmarksStatus } from '../models/ApiDropBookmarksStatus';
 import { ApiDropBoost } from '../models/ApiDropBoost';
 import { ApiDropBoostV2 } from '../models/ApiDropBoostV2';
 import { ApiDropBoostsPage } from '../models/ApiDropBoostsPage';
@@ -1322,8 +1325,8 @@ import { ApiDropReaction } from '../models/ApiDropReaction';
 import { ApiDropReactionCounter } from '../models/ApiDropReactionCounter';
 import { ApiDropReactionV2 } from '../models/ApiDropReactionV2';
 import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
-import { ApiDropResolvedIdentityProfile                         } from '../models/ApiDropResolvedIdentityProfile';
-import { ApiDropResolvedIdentityProfileV2            } from '../models/ApiDropResolvedIdentityProfileV2';
+import { ApiDropResolvedIdentityProfile                          } from '../models/ApiDropResolvedIdentityProfile';
+import { ApiDropResolvedIdentityProfileV2             } from '../models/ApiDropResolvedIdentityProfileV2';
 import { ApiDropSearchPage } from '../models/ApiDropSearchPage';
 import { ApiDropSearchStrategy } from '../models/ApiDropSearchStrategy';
 import { ApiDropSignedEvents } from '../models/ApiDropSignedEvents';
@@ -1380,11 +1383,11 @@ import { ApiGroupOwnsNft, ApiGroupOwnsNftNameEnum     } from '../models/ApiGroup
 import { ApiGroupRepFilter      } from '../models/ApiGroupRepFilter';
 import { ApiGroupTdhFilter    } from '../models/ApiGroupTdhFilter';
 import { ApiGroupTdhInclusionStrategy } from '../models/ApiGroupTdhInclusionStrategy';
-import { ApiIdentity                          } from '../models/ApiIdentity';
+import { ApiIdentity                           } from '../models/ApiIdentity';
 import { ApiIdentityActivity } from '../models/ApiIdentityActivity';
 import { ApiIdentityAndSubscriptionActions } from '../models/ApiIdentityAndSubscriptionActions';
 import { ApiIdentityMuteState } from '../models/ApiIdentityMuteState';
-import { ApiIdentityOverview          } from '../models/ApiIdentityOverview';
+import { ApiIdentityOverview           } from '../models/ApiIdentityOverview';
 import { ApiIdentityOverviewBadges } from '../models/ApiIdentityOverviewBadges';
 import { ApiIdentityOverviewContextProfileContext } from '../models/ApiIdentityOverviewContextProfileContext';
 import { ApiIdentitySubscriptionActions } from '../models/ApiIdentitySubscriptionActions';
@@ -1511,7 +1514,7 @@ import { ApiOgMediaAsset } from '../models/ApiOgMediaAsset';
 import { ApiOgMetadata       } from '../models/ApiOgMetadata';
 import { ApiOgMetadataDrop               } from '../models/ApiOgMetadataDrop';
 import { ApiOgMetadataEntityType } from '../models/ApiOgMetadataEntityType';
-import { ApiOgMetadataProfile                  } from '../models/ApiOgMetadataProfile';
+import { ApiOgMetadataProfile                   } from '../models/ApiOgMetadataProfile';
 import { ApiOgMetadataProfileBanner } from '../models/ApiOgMetadataProfileBanner';
 import { ApiOgMetadataWave } from '../models/ApiOgMetadataWave';
 import { ApiOutgoingIdentitySubscriptionsPage } from '../models/ApiOutgoingIdentitySubscriptionsPage';
@@ -1560,7 +1563,7 @@ import { ApiProfileCmsWalletGalleryMedia } from '../models/ApiProfileCmsWalletGa
 import { ApiProfileCmsWalletGallerySnapshot , ApiProfileCmsWalletGallerySnapshotSourceEnum        } from '../models/ApiProfileCmsWalletGallerySnapshot';
 import { ApiProfileCmsWalletGalleryTotals } from '../models/ApiProfileCmsWalletGalleryTotals';
 import { ApiProfileCmsWalletGalleryWallet    , ApiProfileCmsWalletGalleryWalletStatusEnum    } from '../models/ApiProfileCmsWalletGalleryWallet';
-import { ApiProfileMin                       } from '../models/ApiProfileMin';
+import { ApiProfileMin                        } from '../models/ApiProfileMin';
 import { ApiProfileMinsPage } from '../models/ApiProfileMinsPage';
 import { ApiProfileNotificationCategories } from '../models/ApiProfileNotificationCategories';
 import { ApiProfilePreferences, ApiProfilePreferencesDirectMessagePolicyEnum  , ApiProfilePreferencesNotificationLevelEnum    } from '../models/ApiProfilePreferences';
@@ -1661,6 +1664,7 @@ import { ApiTokenTdhRank } from '../models/ApiTokenTdhRank';
 import { ApiTransaction } from '../models/ApiTransaction';
 import { ApiTransactionPage } from '../models/ApiTransactionPage';
 import { ApiUndiscoveredDrop } from '../models/ApiUndiscoveredDrop';
+import { ApiUndiscoveredDrops } from '../models/ApiUndiscoveredDrops';
 import { ApiUnpublishProfileCmsPackageRequest } from '../models/ApiUnpublishProfileCmsPackageRequest';
 import { ApiUpcomingMemeSubscriptionStatus   , ApiUpcomingMemeSubscriptionStatusSourceEnum   } from '../models/ApiUpcomingMemeSubscriptionStatus';
 import { ApiUpdateCompetitionRequest } from '../models/ApiUpdateCompetitionRequest';
@@ -1713,7 +1717,7 @@ import { ApiWaveMentionSearchResult } from '../models/ApiWaveMentionSearchResult
 import { ApiWaveMetadata } from '../models/ApiWaveMetadata';
 import { ApiWaveMetadataType } from '../models/ApiWaveMetadataType';
 import { ApiWaveMetrics } from '../models/ApiWaveMetrics';
-import { ApiWaveMin                           } from '../models/ApiWaveMin';
+import { ApiWaveMin                            } from '../models/ApiWaveMin';
 import { ApiWaveNotificationPreferences } from '../models/ApiWaveNotificationPreferences';
 import { ApiWaveOutcome        } from '../models/ApiWaveOutcome';
 import { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
@@ -2476,6 +2480,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDropAndDropVote": ApiDropAndDropVote,
     "ApiDropAndWave": ApiDropAndWave,
     "ApiDropAttachmentReference": ApiDropAttachmentReference,
+    "ApiDropBookmarksStatus": ApiDropBookmarksStatus,
     "ApiDropBoost": ApiDropBoost,
     "ApiDropBoostV2": ApiDropBoostV2,
     "ApiDropBoostsPage": ApiDropBoostsPage,
@@ -2811,6 +2816,7 @@ let typeMap: {[index: string]: any} = {
     "ApiTransaction": ApiTransaction,
     "ApiTransactionPage": ApiTransactionPage,
     "ApiUndiscoveredDrop": ApiUndiscoveredDrop,
+    "ApiUndiscoveredDrops": ApiUndiscoveredDrops,
     "ApiUnpublishProfileCmsPackageRequest": ApiUnpublishProfileCmsPackageRequest,
     "ApiUpcomingMemeSubscriptionStatus": ApiUpcomingMemeSubscriptionStatus,
     "ApiUpdateCompetitionRequest": ApiUpdateCompetitionRequest,

@@ -149,6 +149,53 @@ beforeEach(() => {
 });
 afterEach(() => jest.useRealTimers());
 
+it("defaults anonymous submissions off and saves the creator's explicit choice", async () => {
+  render(<CompetitionDraftEditor wave={wave} onClose={jest.fn()} />);
+  const anonymity = screen.getByRole("checkbox", {
+    name: "Anonymous submissions",
+  });
+  expect(anonymity).not.toBeChecked();
+  fireEvent.click(anonymity);
+  expect(anonymity).toBeChecked();
+  fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
+    target: { value: "Anonymous art" },
+  });
+  await waitFor(() =>
+    expect(createCompetition).toHaveBeenCalledWith(
+      "wave",
+      expect.objectContaining({
+        config: expect.objectContaining({
+          participation: expect.objectContaining({
+            anonymous_submissions: true,
+          }),
+        }),
+      })
+    )
+  );
+});
+
+it("keeps anonymity fixed after publication even before the first entry", () => {
+  const form = renderHook(() =>
+    useWaveConfig({ initialWaveType: ApiWaveType.Rank })
+  );
+  mockConfiguration = competitionFormToDraft(form.result.current.config, "");
+  mockConfiguration.participation.anonymous_submissions = true;
+  form.unmount();
+  render(
+    <CompetitionDraftEditor
+      wave={wave}
+      competition={{ ...draft, lifecycle: "PUBLISHED" } as ApiCompetition}
+      onClose={jest.fn()}
+    />
+  );
+  expect(
+    screen.getByRole("checkbox", { name: "Anonymous submissions" })
+  ).toBeChecked();
+  expect(
+    screen.getByRole("checkbox", { name: "Anonymous submissions" })
+  ).toBeDisabled();
+});
+
 it.each([false, true])(
   "retains published original rule editing and protects credits when permitted=%s",
   (editCredits) => {

@@ -68,6 +68,13 @@ The **Competitions** tab follows the selected competition's **Settings** tab and
 
 ## Edge Cases
 
+- **Anonymous submissions** is off by default. Enable it in the competition
+  setup overview to hide each submitter's identity from other users until that
+  submission wins. The setting is fixed after publication, even before the
+  first entry. Winning reveals only the winning entry's author; other entries
+  remain anonymous across later draws. Submitters are responsible for any
+  identifying information they include in their content or metadata.
+
 - A published competition cannot change between Rank and Approve.
 - For newer competitions, after the first accepted entry, credit, signing, submission, timing, decision
   and outcome rules are fixed. Approve threshold and hold duration remain editable in Settings. Participation and voting access, title, description

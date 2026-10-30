@@ -5,15 +5,15 @@
 Header search opens in a modal over the current page.
 The search control opens one of two clearly scoped experiences:
 
-- `Search 6529` for `Pages`, `NFTs`, `Profiles`, and `Waves`.
+- `Search 6529` for `Pages`, `NFTs`, `Profiles`, `Waves`, and `Messages`.
 - `Search messages` when opened from an active Wave. This view names the Wave
   and includes `Search all 6529` for switching scope.
 
 ## Advanced message search
 
-When advanced search is enabled for your profile, message search has removable
-`in:` and `from:` chips alongside the text query. It opens with `in:` set to the
-current Wave. Remove that chip to search across every Wave you can read,
+Message search is available to everyone and has removable `in:` and `from:`
+chips alongside the text query. The global `Messages` tab starts across all Waves.
+When opened inside a Wave, it opens with `in:` set to that Wave. Remove that chip to search across every Wave you can read,
 including private Waves and conversations you have access to. Results outside
 the selected Wave show their Wave name and open the matching message there.
 
@@ -26,13 +26,29 @@ combined with text. An unfinished filter waits for a selection before searching.
 To search for literal `from:` or `in:` text, prefix the keyword with a backslash
 (for example, `\in: progress`).
 
-Availability is controlled by the build-time `ADVANCED_SEARCH_ENABLED_FOR_USERS`
-environment variable. Unset or empty enables it for everyone; otherwise it is a
-comma-separated, case-insensitive list of profile handles. Deployment builds
-read `STAGING_ADVANCED_SEARCH_ENABLED_FOR_USERS` and
-`PRODUCTION_ADVANCED_SEARCH_ENABLED_FOR_USERS` repository variables respectively.
-Changing them requires a new deployment. Other profiles retain the existing
-Wave search and its Filters panel.
+## Wave name matching
+
+Wave names match regardless of letter case, spaces, and separator punctuation
+such as dashes and apostrophes. In wave-name search, `%`, `_`, and backslashes
+remain literal characters, not search wildcards.
+For example, `memes chat`, `memeschat`, and `memes-chat` find `Memes-Chat`;
+`maybes dive bar` finds `maybe's dive bar`. Every typed word must match, in any
+order, and partial words work: `chat memes` and `meme chat` also find
+`Memes-Chat`.
+
+Exact names appear first, followed by names equivalent after punctuation is
+removed under these rules, full-phrase matches, and then matches containing
+every term. A full-phrase match contains the normalized query contiguously.
+Shorter names after that same normalization rank ahead within each group;
+equally relevant names use newest first. A query containing only punctuation
+returns no matches.
+
+These rules apply to the `Waves` results, the `in:` Wave picker, sidebar
+`Find a wave…`, and composer `#` mentions. The `in:` picker has no minimum name
+length and shows newest-first suggestions when no name is entered. The `Waves`
+results, sidebar, and mentions keep their existing minimum query lengths.
+Access rules are unchanged: the `Waves` results, sidebar, and mentions exclude
+DMs; the `in:` picker can include conversations you can read.
 
 ## Location in the Site
 
@@ -55,7 +71,7 @@ Wave search and its Filters panel.
    active Wave.
 4. Type a query and review the visible query and loaded-result count.
 5. In site search, switch between the always-visible `All`, `Pages`, `NFTs`,
-   `Profiles`, and `Waves` result types.
+   `Profiles`, `Waves`, and `Messages` result types.
 6. Use mouse or keyboard (`ArrowUp`, `ArrowDown`, `Home`, `End`, `Enter`) to
    open a result. Matching text is highlighted.
 7. Close with `Go back` (mobile), `Close search` (desktop), `Escape`, or outside click.
@@ -65,6 +81,10 @@ Wave search and its Filters panel.
 - Site-wide browse:
   - In `All`, each category shows a 3-result preview.
   - `View all <Category>` opens the full list for that category.
+- Message results:
+  - Open `Messages` for message text and author/Wave filters.
+  - Message matches appear only in `Messages`; `All` previews the other categories.
+  - Global results show the Wave name and open the matching message.
 - Profile results:
   - Exact, prefix, and substring profile-handle matches appear in that order,
     before results that match only by ENS.
@@ -83,7 +103,8 @@ Wave search and its Filters panel.
     or `Launch Claims`, subject to the current route catalog.
 - Category persistence:
   - Selected category is remembered between openings.
-  - `Clear` resets category to `All`.
+  - `Clear` in site search resets category to `All`. In `Messages`, clearing text
+    keeps the category and selected filter chips.
 - Query recovery:
   - The last site query is kept for the current browser tab session.
   - Queries that opened a result appear as recent-search shortcuts after clear.
@@ -93,11 +114,9 @@ Wave search and its Filters panel.
   - Links, mentions, tags, and Markdown remain visual-only inside a result; the
     result card is the single action that jumps to the message. Mention and tag
     labels are shown without their internal serialization brackets.
-  - Filters support one author from the Wave's actual message authors plus
-    inclusive `After` and exclusive `Before` local-date boundaries.
-  - Selecting an author replaces the author picker with a compact profile row;
-    clearing that row restores the picker.
-  - Selecting a message result jumps to that drop in the current thread.
+  - Use `from:` to choose an author and `in:` to change or remove the Wave scope.
+  - Selecting a result in the originating Wave jumps to that message. Results
+    in other Waves open the matching Wave and message.
   - `Load more` appears when more matches are available.
 
 ## Edge Cases
@@ -106,13 +125,11 @@ Wave search and its Filters panel.
   - `Pages` starts at 3 characters and uses the local route catalog.
   - `Profiles` and `Waves` start at 3 characters with a short debounce.
   - `NFTs` uses the same debounce and starts at 3 characters, or shorter numeric input.
-- In-wave query rules:
-  - Available only when search opens with active wave context.
+- Message query rules:
   - Text search starts at 3 characters with ~250ms debounce and matches word
     prefixes, so `loo` can match `looks`.
-  - A valid author or date filter can be searched without text.
-  - `After` must precede `Before`; impossible dates and inverted ranges are not
-    searched.
+  - An author filter can be searched without text.
+  - A Wave filter alone needs text or an author before searching.
 - Result-type controls keep the same space before, during, and after search so
   the result panel does not shift horizontally.
 - A selected result type remains selected even when it has no matches, making
@@ -120,6 +137,8 @@ Wave search and its Filters panel.
 - Results from an earlier query are hidden immediately while the next query is
   settling.
 - Background page scroll is locked while the modal is open.
+- In-wave search keeps its query, filters, and input focus when competition
+  details finish loading in the background.
 - When opened from a header search button, focus returns to that button on close.
 
 ## Failure and Recovery
@@ -136,10 +155,10 @@ Wave search and its Filters panel.
   - `All`: retries `Profiles`, `NFTs`, and `Waves` requests that are in scope.
   - `Profiles`/`NFTs`/`Waves`: retries only that category.
   - `Pages`: no retry request (local catalog search).
-- In-wave states:
-  - Loading: `Loading…`
+- Message states:
+  - Loading: `Searching messages`
   - Threshold hint: type at least 3 characters or add a filter.
-  - Empty: `No matches found.`
+  - Empty: `No messages found`.
   - Error: `Couldn't load results` with a `Try again` action.
 
 ## Limitations / Notes

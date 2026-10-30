@@ -84,10 +84,15 @@ If the connected profile has a primary wallet, the form pre-fills:
   - each batch contract must be a strict `0x` address
   - token ID text must match supported list/range formats
 - Required text checks:
-  - `About the Artist` must be non-empty
-  - `Artwork Commentary` must be non-empty
+  - `About the Artist` and `Artwork Commentary` must contain text beyond spaces,
+    tabs, or blank lines
+  - leading and trailing whitespace is removed before signing and submitting;
+    this includes non-breaking spaces, tabs, and blank lines; spaces and
+    paragraph breaks within the text are preserved
 - Metadata size checks:
   - each stored metadata value must stay at or below `5000` characters
+  - text counters and limits use the value after removing leading and trailing
+    whitespace
   - `About the Artist` and `Artwork Commentary` show inline over-limit errors
   - any over-limit metadata value blocks `Preview` and `Submit Artwork`
 - Media checks:

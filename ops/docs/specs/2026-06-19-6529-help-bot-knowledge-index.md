@@ -7,6 +7,28 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The `waves.native-competitions` record covers optional anonymous submissions,
+their default-off creation setting, publication lock, per-entry winner reveal,
+continued anonymity across later draws, own-entry access, and submitters'
+responsibility for identifying information in authored content or metadata.
+Unrevealed entries bypass account blocks to prevent author identification;
+related author notifications also bypass account blocks and identity mutes
+until that entry wins. Explicit drop hiding, platform moderation, and ordinary
+notification filters remain effective.
+
+The `profiles.identity-tab` record covers the existing-category Rep editor,
+its permission rules, stable allowance loading, retry action, and dismissal.
+
+The search record covers punctuation-tolerant Wave names across site search,
+sidebar search, composer mentions and the message-search Wave picker. It explains
+all-term matching, partial names, relevance ordering, literal wildcard characters,
+and each surface's existing minimum-length and access rules.
+
+The `profiles.followers-tab` record points to the profile header's Followers
+dialog and private Following list. It covers own-profile authentication and
+proxy restrictions, total counts, pagination, profile navigation, unfollowing,
+and error recovery. The legacy followers URL remains a redirect.
+
 The `content-moderation.controls` record covers WatchTower's red Deleted pills,
 reasoned and confirmed resolution of open reports for a deleted post, retained
 evidence and history, and the distinction from Mark reviewed. Live originals
@@ -25,9 +47,55 @@ individual check history. Back to list appears on mobile; desktop uses the
 visible list without a redundant back button. Automated outcome is distinct
 from deletion and manual review status.
 
+The `home.overview` record also describes the shared hero artwork and copy, with
+Connect wallet followed by Start here for logged-out visitors. The hero uses a
+fixed selection of Meme cards #1–5, with #1 at the front, independent of mint state. The visitor-only
+What is 6529? section explains art, Waves, and participation, linking to
+`/the-memes`, `/waves`, and The Memes - Main Stage Wave respectively.
+
+The `home.overview` record describes the shared discovery cards on the homepage:
+covers beside the content on mobile and filling the card behind a dark, image-tinted text
+fade on larger screens. Homepage
+cards retain wave descriptions and activity rather than showing latest chat
+messages or message authors. Explore Waves keeps its existing layout.
+
+The `home.overview` record describes the typography-only hero without artwork,
+while preserving the original copy, onboarding actions, and authentication rules.
+
+The `home.overview` record maps the first three How to start headings to the
+wallet flow, profile guide, and Waves. Collect or create has a plain heading and
+two inline links within its existing sentence: “Hold Meme Cards” opens
+`/the-memes` and “submit your own art” opens `/about/apply`, explaining submission
+eligibility and nominations for new artists. Restricted iOS visitors keep the
+browsing/community description without those links. The record includes the
+“Four steps into 6529.” introduction, the “Read the full guide” link, and
+“Explore Main Stage” as the A real say card's link to
+`/waves/b6128077-ea78-4dd9-b381-52c4eadb2077`.
+
 The `home.overview` record explains the Coming up full-width vertical card
 list below 768px, keyboard navigation through card links, tablet/desktop grid,
-and drop, profile and wave destinations.
+and drop, profile and wave destinations. It also explains the optional next
+voting-decision time in the visitor's local time zone, including daylight-saving
+adjustments, and omission when no future scheduled decision is available. The
+label uses today, tomorrow, a weekday for two to six days ahead, or a short
+month/day for later dates. Its hover title retains the full local timestamp.
+
+The `home.overview` record also describes the homepage-only two-row countdown,
+with the complete phase heading above a dark timer row, zero-padded segments,
+and responsive wrapping. The countdown uses background contrast without outlines.
+Subscription awareness appears above the Latest Drop countdown. It keeps its
+toggle beside the title and its contextual action aligned right, with details
+below and a stacked fallback in narrow cards.
+The shared phase-selection and mint-action rules are unchanged.
+
+The `the-memes.minting` record explains that Latest Drop and mapped Next Drop
+cards omit Your allowance until a wallet address is available. Connected wallets
+retain allocation pills and distinct loading, unpublished, empty, and unavailable
+states; an allocation does not guarantee that it remains mintable.
+
+The `waves.artist-submissions-popup` record explains the artist activity icon,
+Active Submissions promise badges, and the distinction between reading a badge,
+opening artwork, and casting a vote.
 
 The `waves.drop.editing` record covers author-only editing, the normal edit
 window, and unlimited editing of the wave's current pinned description drop.
@@ -181,6 +249,17 @@ wider use the sortable table.
 Compact values are presentation only.
 The Listings and Offers record distinguishes direct **Collect** and **Sell**
 actions for one order from the explicit choice among multiple orders at a price.
+The Meme card record places connection guidance first when needed, then Collect
+and Make an offer beside the more-actions menu. Collect keeps its complete label
+and price; Make an offer can shrink. Very narrow panels place Collect on its own
+row above the other controls. When Collect is present, the available List action moves into the menu; without
+Collect it takes the second slot, or Make an offer spans both slots if List is
+unavailable. Review offers remains available in the menu. Delivery controls appear
+below the actions once the required wallet is connected. View listings & offers
+has a separate navigation row below Supply details & rankings. Labels, action
+availability and wallet requirements stay unchanged.
+Tabs and the off-screen action replacement stay sticky below 1024px, matching
+the single-column card layout; selected-listing review retains bottom-bar priority.
 Market browsing facts describe quiet periodic updates while visible and idle,
 paused for expanded order details, a chosen listing or open review as applicable.
 Healthy and empty states have no routine Refresh action; retrieval failures retain
@@ -325,6 +404,17 @@ environment; the help runtime continues to consume `/help-index.json`.
   prerequisite, and result.
 
 ## Source Ownership
+
+The artwork Review offers guidance places that action in the more-actions menu
+on artwork pages. It includes
+the responsive review layout: when a connection is required, wallet guidance and
+Connect wallet share the same top card as Make an offer, before the order list.
+The order list scrolls above quantity and Review exact terms, which remain visible
+at the bottom of the phone sheet and desktop dialog. Connected wallet details remain beside those bottom
+controls. The Meme trading block uses one initial loading placeholder before revealing its controls, without replacing them during background listing refreshes. Order selection and wallet authority remain unchanged.
+
+The NFT activity record describes both wide-screen columns and stacked rows on
+narrow screens, with the same activity information, links, filters and pagination.
 
 The Collect workflow record owns `/collect` and `/collect/orders`, profile-wide
 set scope, direct gift recipients, marketplace review and recovery, observed
@@ -800,3 +890,5 @@ Create Wave and Network Filter omit empty-selection sentences in both tabs while
 preserving limits, errors, warnings, and the bottom criteria summary.
 
 Competition list corrections: My Votes includes only active nonzero votes; archived winner votes remain retained. Winners paginate by win time newest first.
+
+Voting help records use **Explain vote** for public rationale replies in My Votes and voting dialogs. They distinguish sending a reply about a saved vote from posting one after a successful vote, and cover Slider / Numeric entry in competition submission popups. The My Votes record also describes compact phone and tablet rows, 16-pixel side padding, single-line titles and action labels, compact controls with unchanged labels on smaller rows, styled public-reply tooltips, controls that adapt to the available width, and Explain vote beside the amount control on tablet and desktop with the range hint underneath. Desktop controls stay to the right of the artwork and details.

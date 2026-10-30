@@ -4,13 +4,12 @@ import React, { useCallback, useEffect, useRef } from "react";
 import { useLayout } from "../layout/LayoutContext";
 import { useWave } from "@/hooks/useWave";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { MyStreamWaveSearch } from "./MyStreamWaveSearch";
 import MyStreamWaveTabsMeme from "./MyStreamWaveTabsMeme";
 import MyStreamWaveTabsDefault from "./MyStreamWaveTabsDefault";
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
 import type { ChatSubmitDropAction } from "../chatSubmitDrop.types";
-import { usePathname } from "next/navigation";
-import { isCompetitionPathname } from "@/helpers/competition.helpers";
 
 interface MyStreamWaveTabsProps {
   readonly wave: ApiWave;
@@ -34,7 +33,6 @@ export const MyStreamWaveTabs: React.FC<MyStreamWaveTabsProps> = ({
   competitionSubmissionReady = false,
 }) => {
   const { isMemesWave } = useWave(wave);
-  const pathname = usePathname();
   const { registerRef } = useLayout();
   const { isApp } = useDeviceInfo();
 
@@ -64,30 +62,34 @@ export const MyStreamWaveTabs: React.FC<MyStreamWaveTabsProps> = ({
   }
 
   return (
-    <div className="tw-flex-shrink-0" ref={setTabsRef} id="tabs-container">
-      <div className="tw-w-full tw-bg-iron-950">
-        <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-3">
-          {competitionSubmissionReady &&
-          isMemesWave &&
-          !isCompetitionPathname(pathname) ? (
-            <MyStreamWaveTabsMeme
-              wave={wave}
-              activeCurationId={activeCurationId}
-              onSelectCuration={onSelectCuration}
-            />
-          ) : (
-            <MyStreamWaveTabsDefault
-              wave={wave}
-              viewMode={viewMode}
-              onToggleViewMode={onToggleViewMode}
-              showGalleryToggle={showGalleryToggle}
-              activeCurationId={activeCurationId}
-              onSelectCuration={onSelectCuration}
-              chatSubmitDropAction={chatSubmitDropAction}
-            />
-          )}
+    <MyStreamWaveSearch
+      key={wave.id}
+      wave={wave}
+      onSelectCuration={onSelectCuration}
+    >
+      <div className="tw-flex-shrink-0" ref={setTabsRef} id="tabs-container">
+        <div className="tw-w-full tw-bg-iron-950">
+          <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-3">
+            {competitionSubmissionReady && isMemesWave ? (
+              <MyStreamWaveTabsMeme
+                wave={wave}
+                activeCurationId={activeCurationId}
+                onSelectCuration={onSelectCuration}
+              />
+            ) : (
+              <MyStreamWaveTabsDefault
+                wave={wave}
+                viewMode={viewMode}
+                onToggleViewMode={onToggleViewMode}
+                showGalleryToggle={showGalleryToggle}
+                activeCurationId={activeCurationId}
+                onSelectCuration={onSelectCuration}
+                chatSubmitDropAction={chatSubmitDropAction}
+              />
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </MyStreamWaveSearch>
   );
 };
