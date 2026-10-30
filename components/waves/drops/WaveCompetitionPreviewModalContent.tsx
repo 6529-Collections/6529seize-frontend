@@ -1,7 +1,7 @@
 "use client";
 
 import { useCompactMode } from "@/contexts/CompactModeContext";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
@@ -153,7 +153,7 @@ export const WaveCompetitionPreviewModalContent = ({
           >
             {user.pfp && (
               <Image
-                src={resolveIpfsUrlSync(user.pfp)}
+                src={getScaledImageUri(user.pfp, ImageScale.W_AUTO_H_50)}
                 alt=""
                 fill
                 sizes="48px"

@@ -173,6 +173,52 @@ describe("touch-first helpers", () => {
       expect(isTouchFirstEnvironment()).toBe(false);
     });
 
+    describe("inside 6529 Mobile, which appends 6529Mobile/<version> to the UA", () => {
+      // Touch plus a paired trackpad: only the phone override keeps a device
+      // touch-first, so the UA fallback decides.
+      beforeEach(() => {
+        defineMaxTouchPoints(5);
+        defineMatchMedia({
+          "(any-pointer: fine)": true,
+          "(any-hover: hover)": true,
+          "(any-pointer: coarse)": true,
+        });
+        defineUserAgentData(undefined);
+      });
+
+      it.each([
+        [
+          "Android tablet",
+          "Mozilla/5.0 (Linux; Android 14; Pixel Tablet Build/AP2A.240805.005; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/127.0.6533.103 Safari/537.36",
+          false,
+        ],
+        [
+          "Android phone",
+          "Mozilla/5.0 (Linux; Android 14; Pixel 8 Build/AP2A.240805.005; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/127.0.6533.103 Mobile Safari/537.36",
+          true,
+        ],
+        [
+          "iPhone",
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 17_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+          true,
+        ],
+        [
+          "iPad",
+          "Mozilla/5.0 (iPad; CPU OS 17_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+          false,
+        ],
+      ])(
+        "classifies an %s the same with and without the token",
+        (_device, userAgent, touchFirst) => {
+          defineUserAgent(userAgent);
+          expect(isTouchFirstEnvironment()).toBe(touchFirst);
+
+          defineUserAgent(`${userAgent} 6529Mobile/1.3`);
+          expect(isTouchFirstEnvironment()).toBe(touchFirst);
+        }
+      );
+    });
+
     it("keeps tablets with a trackpad on desktop when client hints say not mobile", () => {
       // Android tablet UAs still contain "Android", but client hints report
       // mobile=false — the tablet+trackpad combo must stay desktop.

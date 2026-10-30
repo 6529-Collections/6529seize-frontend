@@ -8,9 +8,21 @@ import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 
 jest.mock("@/hooks/useDeviceInfo");
 jest.mock("@/hooks/useShowFollowingWaves");
+let mockConnectionState: "initializing" | "connecting" | "disconnected" =
+  "disconnected";
+let mockFetchingProfile = false;
+let mockHasProfile = true;
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => ({
+    address: undefined,
+    connectionState: mockConnectionState,
+  }),
+}));
+
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(() => ({
-    connectedProfile: { handle: "alice" },
+    connectedProfile: mockHasProfile ? { handle: "alice" } : null,
+    fetchingProfile: mockFetchingProfile,
     activeProfileProxy: null,
   })),
 }));
@@ -31,8 +43,10 @@ jest.mock(
   "@/components/brain/left-sidebar/waves/UnifiedWavesListEmpty",
   () => ({
     __esModule: true,
-    default: ({ emptyMessage, sortedWaves }: any) => (
-      <div data-testid="empty">{emptyMessage ?? sortedWaves.length}</div>
+    default: ({ emptyMessage, sortedWaves, isFetching }: any) => (
+      <div data-testid="empty" data-fetching={String(isFetching)}>
+        {emptyMessage ?? sortedWaves.length}
+      </div>
     ),
   })
 );
@@ -70,6 +84,9 @@ const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
 const mockUseShowFollowingWaves = useShowFollowingWaves as jest.Mock;
 
 beforeEach(() => {
+  mockConnectionState = "disconnected";
+  mockFetchingProfile = false;
+  mockHasProfile = true;
   sentinel = null;
   mockOpenWave.mockClear();
   mockUseShowFollowingWaves.mockReturnValue([false, jest.fn()]);
@@ -86,6 +103,47 @@ afterEach(() => {
 });
 
 describe("UnifiedWavesList", () => {
+  it.each(["initializing", "connecting"] as const)(
+    "waits for an address-less wallet in %s, then allows an empty guest list",
+    (connectionState) => {
+      mockConnectionState = connectionState;
+      mockHasProfile = false;
+      const props = {
+        waves: [],
+        fetchNextPage: jest.fn(),
+        hasNextPage: false,
+        isFetching: false,
+        isFetchingNextPage: false,
+        onHover: jest.fn(),
+        scrollContainerRef: React.createRef<HTMLDivElement>(),
+      };
+      const { rerender } = render(<UnifiedWavesList {...props} />);
+      expect(screen.getByTestId("empty")).toHaveAttribute(
+        "data-fetching",
+        "true"
+      );
+      mockConnectionState = "disconnected";
+      rerender(<UnifiedWavesList {...props} />);
+      expect(screen.getByTestId("empty")).toHaveAttribute(
+        "data-fetching",
+        "false"
+      );
+      // Profile refresh can occur again in the same session; the list must
+      // recover its real empty state each time resolution settles.
+      mockFetchingProfile = true;
+      rerender(<UnifiedWavesList {...props} />);
+      expect(screen.getByTestId("empty")).toHaveAttribute(
+        "data-fetching",
+        "true"
+      );
+      mockFetchingProfile = false;
+      rerender(<UnifiedWavesList {...props} />);
+      expect(screen.getByTestId("empty")).toHaveAttribute(
+        "data-fetching",
+        "false"
+      );
+    }
+  );
   it("opens create wave locally when not in app", async () => {
     render(
       <UnifiedWavesList

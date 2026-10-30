@@ -17,6 +17,10 @@ import { ApiProfileRepCategorySummary } from '../models/ApiProfileRepCategorySum
 import { HttpFile } from '../http/http';
 
 export class ApiDropResolvedIdentityProfile {
+    /**
+    * True for an anonymous competition author. Identity details and profile links are unavailable.
+    */
+    'is_anonymous'?: boolean;
     'id': string;
     'handle': string | null;
     'pfp': string | null;
@@ -47,6 +51,12 @@ export class ApiDropResolvedIdentityProfile {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "is_anonymous",
+            "baseName": "is_anonymous",
+            "type": "boolean",
+            "format": ""
+        },
         {
             "name": "id",
             "baseName": "id",
