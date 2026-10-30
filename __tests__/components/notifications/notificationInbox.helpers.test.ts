@@ -79,6 +79,9 @@ it("falls back safely when the related reply is unavailable", () => {
   expect(getInboxDestination({ ...replied, related_drops: [] }, "viewer")).toBe(
     "/notifications"
   );
+  expect(
+    getInboxDestination({ ...replied, related_drops: [original] }, "viewer")
+  ).toBe("/waves/public-wave?serialNo=42");
 });
 
 it("does not expose an anonymous actor's handle in copy or profile links", () => {
@@ -111,6 +114,18 @@ it("sends REP and NIC updates to the recipient rather than the actor", () => {
       "viewer"
     )
   ).toBe("/viewer/nic");
+  expect(
+    getInboxDestination(
+      { ...rating, cause: ApiNotificationCause.IdentityRep },
+      ""
+    )
+  ).toBe("/notifications");
+  expect(
+    getInboxDestination(
+      { ...rating, cause: ApiNotificationCause.IdentityNic },
+      ""
+    )
+  ).toBe("/notifications");
   expect(
     getInboxSummary(
       { ...rating, cause: ApiNotificationCause.IdentityRep },

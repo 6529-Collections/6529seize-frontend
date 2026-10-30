@@ -108,6 +108,11 @@ export default function NotificationsInbox({
           </button>
         </div>
       </div>
+      <output className="tw-sr-only">
+        {query.isFetchingNextPage
+          ? t(locale, "notifications.inbox.loading")
+          : ""}
+      </output>
       <div
         className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-py-1"
         aria-busy={query.isFetching}
@@ -118,12 +123,9 @@ export default function NotificationsInbox({
           </p>
         )}
         {message ? (
-          <p
-            role="status"
-            className="tw-m-0 tw-p-6 tw-text-center tw-text-sm tw-text-iron-300"
-          >
+          <output className="tw-block tw-p-6 tw-text-center tw-text-sm tw-text-iron-300">
             {message}
-          </p>
+          </output>
         ) : (
           <ul className="tw-m-0 tw-list-none tw-p-0">
             {notifications.map((notification) => (

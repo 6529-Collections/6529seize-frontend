@@ -7,7 +7,11 @@ import { t } from "@/i18n/messages";
 import {
   DROP_POLL_VOTED_NOTIFICATION_CAUSE,
   type TypedNotification,
+  type INotificationVotingCreditsReturned,
+  type INotificationCompetitionLifecycle,
 } from "@/types/feed.types";
+
+const NOTIFICATIONS_ROUTE = "/notifications";
 
 export function getInboxDrop(notification: TypedNotification) {
   if (!("related_drops" in notification)) return undefined;
@@ -16,7 +20,9 @@ export function getInboxDrop(notification: TypedNotification) {
     return (
       drops.find(
         (drop) => drop.id === notification.additional_context.reply_drop_id
-      ) ?? drops[1]
+      ) ??
+      drops[1] ??
+      drops[0]
     );
   }
   if (notification.cause === ApiNotificationCause.DropQuoted) {
@@ -27,6 +33,22 @@ export function getInboxDrop(notification: TypedNotification) {
     );
   }
   return drops[0];
+}
+
+function getInboxCompetitionDestination(
+  notification:
+    | INotificationVotingCreditsReturned
+    | INotificationCompetitionLifecycle
+): string {
+  const context = notification.additional_context;
+  const route = getCompetitionRoute(context.wave_id, context.competition_id);
+  const entry = context.entry_id;
+  const deleted =
+    notification.cause === ApiNotificationCause.VotingCreditsReturned &&
+    notification.additional_context.reason === "AUTHOR_DELETED";
+  return entry && !deleted
+    ? `${route}?entry=${encodeURIComponent(entry)}`
+    : route;
 }
 
 export function getInboxDestination(
@@ -47,11 +69,15 @@ export function getInboxDestination(
       return notification.related_identity.handle &&
         !notification.related_identity.is_anonymous
         ? `/${encodeURIComponent(notification.related_identity.handle)}`
-        : "/notifications";
+        : NOTIFICATIONS_ROUTE;
     case ApiNotificationCause.IdentityRep:
-      return `/${encodeURIComponent(handle)}/rep`;
+      return handle
+        ? `/${encodeURIComponent(handle)}/rep`
+        : NOTIFICATIONS_ROUTE;
     case ApiNotificationCause.IdentityNic:
-      return `/${encodeURIComponent(handle)}/nic`;
+      return handle
+        ? `/${encodeURIComponent(handle)}/nic`
+        : NOTIFICATIONS_ROUTE;
     case ApiNotificationCause.WaveCreated:
       return getWaveRoute({
         waveId: notification.additional_context.wave_id,
@@ -64,25 +90,13 @@ export function getInboxDestination(
     case ApiNotificationCause.SubscriptionCoverage:
       return `/${encodeURIComponent(notification.additional_context.profile_handle)}/subscriptions#profile-subscriptions-top-up`;
     case ApiNotificationCause.VotingCreditsReturned:
-    case ApiNotificationCause.CompetitionLifecycle: {
-      const context = notification.additional_context;
-      const route = getCompetitionRoute(
-        context.wave_id,
-        context.competition_id
-      );
-      const entry = context.entry_id;
-      const deleted =
-        notification.cause === ApiNotificationCause.VotingCreditsReturned &&
-        notification.additional_context.reason === "AUTHOR_DELETED";
-      return entry && !deleted
-        ? `${route}?entry=${encodeURIComponent(entry)}`
-        : route;
-    }
+    case ApiNotificationCause.CompetitionLifecycle:
+      return getInboxCompetitionDestination(notification);
     case ApiNotificationCause.MemeCollaboration: {
       const context = notification.additional_context;
       return context.wave_id && context.drop_id
         ? `/waves/${encodeURIComponent(context.wave_id)}?drop=${encodeURIComponent(context.drop_id)}`
-        : "/notifications";
+        : NOTIFICATIONS_ROUTE;
     }
     case ApiNotificationCause.IdentityMentioned:
     case ApiNotificationCause.DropReplied:
@@ -94,7 +108,7 @@ export function getInboxDestination(
     case ApiNotificationCause.AllDrops:
     case ApiNotificationCause.PriorityAlert:
     default:
-      return "/notifications";
+      return NOTIFICATIONS_ROUTE;
   }
 }
 

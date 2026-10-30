@@ -24,6 +24,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     page,
     baseURL,
   }, testInfo) => {
+    // The shared pack runs both projects; the mobile scenario below covers its full-page bell.
     test.skip(
       testInfo.project.name !== "web-desktop-chromium",
       "Desktop sidebar inbox"
@@ -39,7 +40,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     });
     const route = page.url();
     await trigger.click();
-    const inbox = page.getByRole("dialog", {
+    const inbox = page.getByRole("region", {
       name: "Notifications",
       exact: true,
     });
@@ -58,7 +59,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     ).toHaveLength(0);
     await expectNoHorizontalOverflow(page);
     const accessibility = await new AxeBuilder({ page })
-      .include('[role="dialog"]')
+      .include('[role="region"][aria-label="Notifications"]')
       .analyze();
     expect(accessibility.violations).toEqual([]);
     const box = await inbox.boundingBox();
@@ -66,6 +67,25 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     expect(box!.y).toBeGreaterThanOrEqual(0);
     expect(box!.x + box!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
     await captureSafeScreenshot(page, testInfo, "desktop-notifications-inbox");
+    await page.setViewportSize({ width: 1100, height: 540 });
+    await expect(inbox).toBeVisible();
+    await expect
+      .poll(async () => {
+        const bounds = await inbox.boundingBox();
+        return (
+          bounds !== null &&
+          bounds.x >= 0 &&
+          bounds.y >= 0 &&
+          bounds.x + bounds.width <= 1100 &&
+          bounds.y + bounds.height <= 540
+        );
+      })
+      .toBe(true);
+    await captureSafeScreenshot(
+      page,
+      testInfo,
+      "narrow-desktop-notifications-inbox"
+    );
     await page.keyboard.press("Escape");
     await expect(inbox).not.toBeVisible();
     await expect(trigger).toBeFocused();
@@ -74,6 +94,10 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await expect(inbox).not.toBeVisible();
     await trigger.click();
     await trigger.click();
+    await expect(inbox).not.toBeVisible();
+    await trigger.click();
+    await inbox.getByRole("link", { name: "View all notifications" }).focus();
+    await page.keyboard.press("Tab");
     await expect(inbox).not.toBeVisible();
     await trigger.click();
     await page.getByRole("main").click({ position: { x: 500, y: 30 } });
@@ -113,6 +137,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     page,
     baseURL,
   }, testInfo) => {
+    // This desktop-only action is intentionally absent from mobile's full-page navigation.
     test.skip(
       testInfo.project.name !== "web-desktop-chromium",
       "Desktop sidebar inbox"
@@ -124,7 +149,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
       exact: true,
     });
     await trigger.click();
-    const inbox = page.getByRole("dialog", {
+    const inbox = page.getByRole("region", {
       name: "Notifications",
       exact: true,
     });
@@ -153,6 +178,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
   });
 
   test("mobile bell keeps full-page navigation", async ({ page }, testInfo) => {
+    // Desktop navigation and read actions are exercised by the two scenarios above.
     test.skip(
       testInfo.project.name !== "web-mobile-chromium",
       "Mobile navigation"
@@ -174,7 +200,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
       page.getByText("mentioned you", { exact: true }).first()
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
     await expect(
-      page.getByRole("dialog", { name: "Notifications", exact: true })
+      page.getByRole("region", { name: "Notifications", exact: true })
     ).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
     await captureSafeScreenshot(page, testInfo, "mobile-notifications-page");

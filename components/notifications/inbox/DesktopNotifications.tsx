@@ -10,9 +10,9 @@ import { t } from "@/i18n/messages";
 function InboxLoading() {
   const locale = useBrowserLocale();
   return (
-    <p role="status" className="tw-m-0 tw-p-6 tw-text-sm tw-text-iron-300">
+    <output className="tw-block tw-p-6 tw-text-sm tw-text-iron-300">
       {t(locale, "notifications.inbox.loading")}
-    </p>
+    </output>
   );
 }
 
@@ -37,7 +37,6 @@ export default function DesktopNotifications({
           <PopoverButton
             aria-label={title}
             aria-describedby={unread ? unreadDescriptionId : undefined}
-            aria-haspopup="dialog"
             data-tooltip-id="sidebar-tooltip"
             data-tooltip-content={title}
             data-tooltip-hidden={!collapsed || open}
@@ -64,9 +63,9 @@ export default function DesktopNotifications({
           <PopoverPanel
             focus
             anchor={{ to: "right end", gap: 12, padding: 16 }}
-            role="dialog"
+            role="region"
             aria-label={title}
-            className="tailwind-scope tw-z-[100] tw-flex tw-max-h-[min(36rem,calc(100dvh-2rem))] tw-w-[26rem] tw-max-w-[calc(100vw-2rem)] tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-shadow-2xl focus:tw-outline-none"
+            className="tailwind-scope tw-z-[100] tw-flex tw-max-h-[min(36rem,calc(100dvh-2rem))] tw-w-[26rem] tw-max-w-[calc(100vw-2rem)] tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-shadow-2xl focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
           >
             {open && <Inbox onClose={() => close()} />}
           </PopoverPanel>
