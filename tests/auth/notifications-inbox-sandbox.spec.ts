@@ -115,11 +115,21 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
       .getByRole("link")
       .filter({ hasText: "sandbox-alice mentioned you" });
     const href = await destination.getAttribute("href");
+    expect(href).toBe("/waves/00000000-0000-4000-8000-000000000533?serialNo=2");
     await destination.click();
-    expect(href).toBeTruthy();
-    await expect(page).toHaveURL(new URL(href ?? "", route).href, {
+    // Shared-post navigation consumes serialNo; the target must remain in view.
+    const targetPath = new URL(href ?? "", route).pathname;
+    await expect(page).toHaveURL((url) => url.pathname === targetPath, {
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
+    await expect(
+      page
+        .getByText(
+          "Mentioned @playwright inside the sandbox notification flow.",
+          { exact: true }
+        )
+        .last()
+    ).toBeInViewport({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
     await expect(inbox).not.toBeVisible();
     await expect
       .poll(async () =>
