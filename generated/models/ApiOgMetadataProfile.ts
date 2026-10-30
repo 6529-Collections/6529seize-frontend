@@ -17,6 +17,10 @@ import { ApiProfileClassification } from '../models/ApiProfileClassification';
 import { HttpFile } from '../http/http';
 
 export class ApiOgMetadataProfile {
+    /**
+    * True for an anonymous competition author. Identity details and profile links are unavailable.
+    */
+    'is_anonymous'?: boolean;
     'id': string;
     'handle'?: string | null;
     'primary_address'?: string | null;
@@ -40,6 +44,12 @@ export class ApiOgMetadataProfile {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "is_anonymous",
+            "baseName": "is_anonymous",
+            "type": "boolean",
+            "format": ""
+        },
         {
             "name": "id",
             "baseName": "id",

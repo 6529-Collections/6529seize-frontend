@@ -12,8 +12,19 @@ import {
   type AppKitBootstrapContextValue,
   type AppKitBootstrapStatus,
 } from "@/components/providers/AppKitBootstrapContext";
-import { AppKitAdapterManager } from "@/components/providers/AppKitAdapterManager";
+import type { AppKitAdapterManager } from "@/components/providers/AppKitAdapterManager";
 import { createPublicWagmiConfig } from "@/components/providers/createPublicWagmiConfig";
+import { installSafeEthereumProxy } from "@/components/providers/safeEthereumProxy";
+import {
+  hasPersistedWalletSession,
+  subscribeToWalletSessionChanges,
+} from "@/components/providers/walletSessionGate";
+import {
+  hasWalletChunkLoadFailed,
+  noteWalletChunkFailure,
+  reloadToRetryWalletChunks,
+  setWalletStackWagmiConfig,
+} from "@/components/providers/walletChunkRecovery";
 import type { AppToastInput } from "@/components/utils/toast/AppToast";
 import { publicEnv } from "@/config/env";
 import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
@@ -21,8 +32,6 @@ import { AppKitValidationError } from "@/errors/appkit-initialization";
 import type {
   AppKitAdapterConfig,
   AppKitInitializationConfig,
-} from "@/utils/appkit-initialization.utils";
-import {
   createAppKitAdapter,
   initializeAppKit,
 } from "@/utils/appkit-initialization.utils";
@@ -54,6 +63,15 @@ type WagmiAppKitFastPathSnapshot = {
   readonly initializationPromise: Promise<void> | null;
   readonly isCreated: boolean;
   readonly status: AppKitBootstrapStatus;
+  readonly walletStackRequested: boolean;
+};
+
+// Reown AppKit, WalletConnect and the Coinbase connector are only fetched once
+// a returning wallet session or a connect intent needs them.
+type WalletStackModules = {
+  readonly AppKitAdapterManager: typeof AppKitAdapterManager;
+  readonly createAppKitAdapter: typeof createAppKitAdapter;
+  readonly initializeAppKit: typeof initializeAppKit;
 };
 
 type WagmiAppKitFastPathStore = {
@@ -64,6 +82,7 @@ type WagmiAppKitFastPathStore = {
     | ((address: string, addressHashed: string) => Promise<string>)
     | null;
   toastDelegate: ((toast: AppToastInput) => void) | null;
+  walletStackModules?: Promise<WalletStackModules> | null | undefined;
 };
 
 const WAGMI_APPKIT_FAST_PATH_STORE_KEY = Symbol.for(
@@ -76,6 +95,8 @@ const APPKIT_READY_WAIT_TIMEOUT_MS = 15_000;
 const APPKIT_READY_TIMEOUT_MESSAGE =
   "Timed out waiting for wallet connection services to become ready";
 
+// Server HTML and the hydration render cannot read stored sessions, so the
+// stack is "initializing" until the mount effect resolves the session gate.
 const EMPTY_FAST_PATH_SNAPSHOT: WagmiAppKitFastPathSnapshot = Object.freeze({
   adapter: null,
   adapterInitializationStarted: false,
@@ -84,7 +105,37 @@ const EMPTY_FAST_PATH_SNAPSHOT: WagmiAppKitFastPathSnapshot = Object.freeze({
   initializationPromise: null,
   isCreated: false,
   status: "initializing",
+  walletStackRequested: false,
 });
+
+function upgradeFastPathSnapshot(
+  snapshot: WagmiAppKitFastPathSnapshot
+): WagmiAppKitFastPathSnapshot {
+  const hasTerminalError: unknown = Reflect.get(snapshot, "hasTerminalError");
+  const walletStackRequested: unknown = Reflect.get(
+    snapshot,
+    "walletStackRequested"
+  );
+  if (
+    typeof hasTerminalError === "boolean" &&
+    typeof walletStackRequested === "boolean"
+  ) {
+    return snapshot;
+  }
+
+  return {
+    ...snapshot,
+    hasTerminalError:
+      typeof hasTerminalError === "boolean"
+        ? hasTerminalError
+        : snapshot.status === "error",
+    walletStackRequested:
+      typeof walletStackRequested === "boolean"
+        ? walletStackRequested
+        : snapshot.adapterInitializationStarted ||
+          snapshot.initializationPromise !== null,
+  };
+}
 
 function getWagmiAppKitFastPathStore(): WagmiAppKitFastPathStore {
   const existingStore = Reflect.get(
@@ -94,15 +145,7 @@ function getWagmiAppKitFastPathStore(): WagmiAppKitFastPathStore {
   if (existingStore) {
     // Preserve the retained adapter across HMR while safely upgrading stores
     // created by an earlier module version.
-    if (
-      typeof Reflect.get(existingStore.snapshot, "hasTerminalError") !==
-      "boolean"
-    ) {
-      existingStore.snapshot = {
-        ...existingStore.snapshot,
-        hasTerminalError: existingStore.snapshot.status === "error",
-      };
-    }
+    existingStore.snapshot = upgradeFastPathSnapshot(existingStore.snapshot);
     return existingStore;
   }
 
@@ -203,6 +246,111 @@ function createWagmiAdapterOnce(
   }
 }
 
+async function importWalletStackModules(): Promise<WalletStackModules> {
+  const [adapterManagerModule, appKitModule] = await Promise.all([
+    import("@/components/providers/AppKitAdapterManager"),
+    import("@/utils/appkit-initialization.utils"),
+  ]);
+  return {
+    AppKitAdapterManager: adapterManagerModule.AppKitAdapterManager,
+    createAppKitAdapter: appKitModule.createAppKitAdapter,
+    initializeAppKit: appKitModule.initializeAppKit,
+  };
+}
+
+function loadWalletStackModules(): Promise<WalletStackModules> {
+  const store = getWagmiAppKitFastPathStore();
+  if (store.walletStackModules) {
+    return store.walletStackModules;
+  }
+
+  const walletStackModules = importWalletStackModules();
+  store.walletStackModules = walletStackModules;
+  // Forget a failed load; a failed chunk makes the next connect intent reload.
+  void (async () => {
+    try {
+      await walletStackModules;
+    } catch (error) {
+      noteWalletChunkFailure(error);
+      if (store.walletStackModules === walletStackModules) {
+        store.walletStackModules = null;
+      }
+    }
+  })();
+  return walletStackModules;
+}
+
+function markWalletStackRequested(): void {
+  const snapshot = getWagmiAppKitFastPathSnapshot();
+  const status = snapshot.hasTerminalError ? "error" : "initializing";
+  if (snapshot.walletStackRequested && snapshot.status === status) {
+    return;
+  }
+  updateWagmiAppKitFastPathSnapshot({ status, walletStackRequested: true });
+}
+
+// Loading failures stay retryable: the next connect intent fetches again.
+function markWalletStackLoadFailed(): void {
+  const snapshot = getWagmiAppKitFastPathSnapshot();
+  if (snapshot.adapter === null && !snapshot.hasTerminalError) {
+    updateWagmiAppKitFastPathSnapshot({ status: "error" });
+  }
+}
+
+async function requestWalletStackAdapter(
+  configurationKey: string,
+  createAdapter: (modules: WalletStackModules) => WagmiAdapter
+): Promise<WagmiAdapter> {
+  assertFastPathConfiguration(configurationKey);
+  const { adapter } = getWagmiAppKitFastPathSnapshot();
+  if (adapter) {
+    return adapter;
+  }
+
+  markWalletStackRequested();
+  let modules: WalletStackModules;
+  try {
+    modules = await loadWalletStackModules();
+  } catch (error) {
+    markWalletStackLoadFailed();
+    throw error;
+  }
+  return createWagmiAdapterOnce(configurationKey, () => createAdapter(modules));
+}
+
+function reportWalletStackFailure(error: unknown): void {
+  logErrorSecurely("[WagmiSetup] AppKit initialization failed", error);
+  showAppKitToast({
+    message: sanitizeErrorForUser(error),
+    type: "error",
+  });
+}
+
+// Bounds how long a connect intent waits for the wallet stack. A late chunk
+// still creates the adapter, so the next intent can use it immediately.
+function waitForWalletStackAdapter(
+  adapterRequest: Promise<WagmiAdapter>
+): Promise<WagmiAdapter> {
+  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<never>((_resolve, reject) => {
+    timeoutHandle = setTimeout(() => {
+      markWalletStackLoadFailed();
+      reject(new Error(APPKIT_READY_TIMEOUT_MESSAGE));
+    }, APPKIT_READY_WAIT_TIMEOUT_MS);
+  });
+
+  return Promise.race([adapterRequest, timeoutPromise]).finally(() => {
+    clearTimeout(timeoutHandle);
+  });
+}
+
+function markWalletStackIdle(): void {
+  const snapshot = getWagmiAppKitFastPathSnapshot();
+  if (!snapshot.walletStackRequested && snapshot.status === "initializing") {
+    updateWagmiAppKitFastPathSnapshot({ status: "idle" });
+  }
+}
+
 async function runAppKitInitialization(
   initialize: () => Promise<void>
 ): Promise<void> {
@@ -292,113 +440,6 @@ type AppKitAdapterManagerPublicShape = Pick<
   AppKitAdapterManager,
   "cleanup" | "createAdapterWithCache" | "shouldRecreateAdapter"
 >;
-
-/**
- * Installs a defensive wrapper around `window.ethereum` (EIP-1193 provider).
- *
- * Why this exists:
- * - Some injected providers expose methods (e.g. `request`, `on`) that rely on `this`
- *   being the provider object. If a consumer reads a method and calls it later, the
- *   binding can be lost (often surfacing as "Illegal invocation" / broken requests).
- * - Some providers can throw during property access (early initialization, unusual
- *   getters). The proxy catches these reads to avoid crashing app initialization.
- *
- * What the proxy does:
- * - Binds function properties to the underlying provider so `this` is preserved.
- * - Returns `undefined` for properties whose access throws.
- *
- * This runs once per page load and only touches `window.ethereum`.
- */
-function installSafeEthereumProxy(): void {
-  if (typeof window === "undefined") return;
-
-  const w = globalThis as unknown as {
-    ethereum?: unknown;
-    __6529_safeEthereumProxyInstalled?: boolean | undefined;
-  };
-
-  if (w.__6529_safeEthereumProxyInstalled === true) return;
-
-  const ethereum = w.ethereum;
-  if (
-    ethereum === undefined ||
-    ethereum === null ||
-    (typeof ethereum !== "object" && typeof ethereum !== "function")
-  ) {
-    w.__6529_safeEthereumProxyInstalled = true;
-    return;
-  }
-
-  const ownEthereumDescriptor = Object.getOwnPropertyDescriptor(w, "ethereum");
-  if (
-    ownEthereumDescriptor?.configurable === false &&
-    !canAssignProperty(ownEthereumDescriptor)
-  ) {
-    logErrorSecurely(
-      "[WagmiSetup] Skipping safe ethereum proxy install for read-only window.ethereum",
-      new Error("window.ethereum cannot be reassigned")
-    );
-    w.__6529_safeEthereumProxyInstalled = true;
-    return;
-  }
-
-  try {
-    let hasLoggedProxyGetError = false;
-    const ethereumTarget = ethereum;
-    const proxy = new Proxy(ethereumTarget, {
-      get(target, prop): unknown {
-        try {
-          const value: unknown = Reflect.get(target, prop, target);
-          if (typeof value === "function") {
-            const method = value as (
-              this: unknown,
-              ...args: unknown[]
-            ) => unknown;
-            return method.bind(target);
-          }
-          return value;
-        } catch (error) {
-          if (!hasLoggedProxyGetError) {
-            hasLoggedProxyGetError = true;
-            const propLabel =
-              typeof prop === "symbol" ? prop.toString() : String(prop);
-            logErrorSecurely(
-              `[WagmiSetup] ethereum proxy getter failed (prop: ${propLabel})`,
-              error
-            );
-          }
-          return undefined;
-        }
-      },
-    });
-
-    if (ownEthereumDescriptor?.configurable === false) {
-      w.ethereum = proxy;
-    } else {
-      Object.defineProperty(w, "ethereum", {
-        configurable: true,
-        enumerable: ownEthereumDescriptor?.enumerable ?? true,
-        writable: true,
-        value: proxy,
-      });
-    }
-    w.__6529_safeEthereumProxyInstalled = true;
-  } catch (error) {
-    logErrorSecurely(
-      "[WagmiSetup] Failed to install safe ethereum proxy",
-      error
-    );
-    w.__6529_safeEthereumProxyInstalled = true;
-  }
-}
-
-function canAssignProperty(descriptor: PropertyDescriptor): boolean {
-  if ("get" in descriptor || "set" in descriptor) {
-    return typeof descriptor.set === "function";
-  }
-
-  return descriptor.writable !== false;
-}
 
 function assertAppKitAdapterManager(value: unknown): AppKitAdapterManager {
   if (!isAppKitAdapterManager(value)) {
@@ -587,34 +628,38 @@ export default function WagmiSetup({
     });
   }, [fastPathSnapshot.status, hasFastPathConfigurationMismatch]);
 
-  const createWagmiAdapter = useCallback((): WagmiAdapter => {
-    installSafeEthereumProxy();
-    markMobileLaunchStep("wagmi_init_start");
-    const adapterManager = new AppKitAdapterManager(requestAppWalletPassword);
+  const createWagmiAdapter = useCallback(
+    (modules: WalletStackModules): WagmiAdapter => {
+      installSafeEthereumProxy();
+      markMobileLaunchStep("wagmi_init_start");
+      const adapterManager = new modules.AppKitAdapterManager(
+        requestAppWalletPassword
+      );
 
-    const config: AppKitAdapterConfig = {
-      wallets: [],
-      adapterManager: assertAppKitAdapterManager(adapterManager),
-      isCapacitor,
-      chains,
-    };
+      const config: AppKitAdapterConfig = {
+        wallets: [],
+        adapterManager: assertAppKitAdapterManager(adapterManager),
+        isCapacitor,
+        chains,
+      };
 
-    const adapter = createAppKitAdapter(config);
-    markMobileLaunchStep("wagmi_adapter_created");
-    return adapter;
-  }, [chains, isCapacitor]);
+      const adapter = modules.createAppKitAdapter(config);
+      markMobileLaunchStep("wagmi_adapter_created");
+      return adapter;
+    },
+    [chains, isCapacitor]
+  );
 
-  const startAppKitInitialization = useCallback((): Promise<void> => {
-    let adapter: WagmiAdapter;
-    try {
-      // Hydration can replay connect intent before the passive mount effect.
-      // Use the same singleton creation path so the first click is not lost.
-      adapter =
-        currentAdapter ??
-        createWagmiAdapterOnce(bootstrapConfigurationKey, createWagmiAdapter);
-    } catch (error) {
-      return Promise.reject(error);
-    }
+  const requestWalletStack = useCallback(
+    (): Promise<WagmiAdapter> =>
+      requestWalletStackAdapter(bootstrapConfigurationKey, createWagmiAdapter),
+    [bootstrapConfigurationKey, createWagmiAdapter]
+  );
+
+  const startAppKitInitialization = useCallback(async (): Promise<void> => {
+    // Hydration can replay connect intent before the passive mount effect.
+    // Use the same singleton creation path so the first click is not lost.
+    const adapter = await waitForWalletStackAdapter(requestWalletStack());
 
     return startAppKitInitializationOnce(
       bootstrapConfigurationKey,
@@ -622,13 +667,14 @@ export default function WagmiSetup({
         let result: ReturnType<typeof initializeAppKit>;
 
         try {
+          const modules = await loadWalletStackModules();
           const config: AppKitInitializationConfig = {
             adapter,
             isCapacitor,
             chains,
           };
           result = await measureMobileLaunchAsync("wagmi_appkit_init", () =>
-            initializeAppKit(config)
+            modules.initializeAppKit(config)
           );
           updateWagmiAppKitFastPathSnapshot({ isCreated: true });
         } catch (error) {
@@ -658,18 +704,15 @@ export default function WagmiSetup({
         }
       }
     );
-  }, [
-    bootstrapConfigurationKey,
-    chains,
-    createWagmiAdapter,
-    currentAdapter,
-    isCapacitor,
-  ]);
+  }, [bootstrapConfigurationKey, chains, isCapacitor, requestWalletStack]);
 
-  const waitForAppKitReady = useCallback(
-    () => startAppKitInitialization(),
-    [startAppKitInitialization]
-  );
+  const waitForAppKitReady = useCallback((): Promise<void> => {
+    if (hasWalletChunkLoadFailed() && reloadToRetryWalletChunks()) {
+      // The page is reloading; keep the connect intent pending until then.
+      return new Promise<void>(() => undefined);
+    }
+    return startAppKitInitialization();
+  }, [startAppKitInitialization]);
 
   const appKitBootstrapValue = useMemo(
     (): AppKitBootstrapContextValue => ({
@@ -683,30 +726,38 @@ export default function WagmiSetup({
     [fastPathSnapshot, waitForAppKitReady]
   );
 
-  // Replace the wallet-free config after mount, preserving the provider tree,
-  // before AppKit performs its heavier initialization.
+  // A stored wallet session restores its connection after mount, replacing
+  // the wallet-free config while preserving the provider tree. The native app
+  // and the desktop app always load (App Wallet connectors live in the
+  // adapter). Other visitors fetch the wallet stack only when they connect.
   useEffect(() => {
-    if (fastPathSnapshot.adapterInitializationStarted) {
+    if (fastPathSnapshot.walletStackRequested) {
       return;
     }
 
-    try {
-      createWagmiAdapterOnce(bootstrapConfigurationKey, createWagmiAdapter);
-    } catch (error) {
-      logErrorSecurely("[WagmiSetup] AppKit initialization failed", error);
-      showAppKitToast({
-        message: sanitizeErrorForUser(error),
-        type: "error",
-      });
+    const isDesktopApp = navigator.userAgent.includes("Electron");
+    const loadForStoredSession = (): boolean => {
+      if (!isCapacitor && !isDesktopApp && !hasPersistedWalletSession()) {
+        return false;
+      }
+
+      requestWalletStack().catch(reportWalletStackFailure);
+      return true;
+    };
+
+    if (loadForStoredSession()) {
+      return;
     }
-  }, [
-    bootstrapConfigurationKey,
-    createWagmiAdapter,
-    fastPathSnapshot.adapterInitializationStarted,
-  ]);
+
+    markWalletStackIdle();
+    return subscribeToWalletSessionChanges(() => {
+      loadForStoredSession();
+    });
+  }, [fastPathSnapshot.walletStackRequested, isCapacitor, requestWalletStack]);
 
   useEffect(() => {
     markAdapterReadyForLaunchTiming(currentAdapter);
+    setWalletStackWagmiConfig(currentAdapter?.wagmiConfig ?? null);
   }, [currentAdapter]);
 
   // Inject wallet connectors dynamically using hooks (simplified approach)

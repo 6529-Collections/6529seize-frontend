@@ -31,6 +31,10 @@ export class ApiCreateWaveHubRequest {
     'visibility': ApiCreateNewWaveVisibilityConfig;
     'chat': ApiCreateNewWaveChatConfig;
     'admin_group': ApiCreateNewWaveScope;
+    /**
+    * Allow wave administrators to delete drops.
+    */
+    'admin_drop_deletion_enabled'?: boolean;
     'parent_wave_id'?: string | null;
 
     static readonly discriminator: string | undefined = undefined;
@@ -78,6 +82,12 @@ export class ApiCreateWaveHubRequest {
             "name": "admin_group",
             "baseName": "admin_group",
             "type": "ApiCreateNewWaveScope",
+            "format": ""
+        },
+        {
+            "name": "admin_drop_deletion_enabled",
+            "baseName": "admin_drop_deletion_enabled",
+            "type": "boolean",
             "format": ""
         },
         {

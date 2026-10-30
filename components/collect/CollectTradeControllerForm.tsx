@@ -8,9 +8,16 @@ import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
-import type { ReactNode } from "react";
+import { useContext, type ReactNode } from "react";
+import CollectDetailLoading from "./CollectDetailLoading";
 import CollectInlineBuyForm from "./CollectInlineBuyForm";
+import CollectConnectionPrompt from "./CollectConnectionPrompt";
+import CollectTradeWalletSummary from "./CollectTradeWalletSummary";
 import CollectTradeForm from "./CollectTradeForm";
+import CollectDetailActionRow, {
+  CollectDetailLayout,
+  CollectDetailHeader,
+} from "./CollectDetailActionRow";
 import { CollectOrderBook } from "./CollectOrderPicker";
 import type { CollectTradeAction, CollectTradeDraft } from "./collect.types";
 import {
@@ -36,6 +43,7 @@ interface CollectTradeControllerFormProps {
   readonly orders: readonly ApiMarketTradeOrder[];
   readonly buyOrders: readonly ApiMarketTradeOrder[];
   readonly ordersUpdatedAt?: number;
+  readonly initialLoading?: boolean;
   readonly ordersLoading: boolean;
   readonly ordersFailed: boolean;
   readonly makerLabel: string;
@@ -45,6 +53,7 @@ interface CollectTradeControllerFormProps {
   readonly preparing: boolean;
   readonly error: string | undefined;
   readonly secondaryActions?: ReactNode;
+  readonly supportingActions?: ReactNode;
   readonly onChange: (draft: CollectTradeDraft) => void;
   readonly onQuantityEdited: () => void;
   readonly onClearSelectedOrder: () => void;
@@ -77,7 +86,7 @@ function StandardOrderBook({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <div className="tw-mb-4">
+    <div data-collect-order-book className="tw-mb-4">
       <CollectOrderBook
         loading={loading}
         failed={failed}
@@ -120,8 +129,10 @@ function getNoInlineOrderMessage({
 
 function InlineTradeForm({
   props,
+  connectionHeader,
 }: {
   readonly props: CollectTradeControllerFormProps;
+  readonly connectionHeader: boolean;
 }) {
   const noInlineOrder = getNoInlineOrderMessage(props);
   // An eligible alternative supplies edit bounds only, never a selected price or request.
@@ -169,18 +180,21 @@ function InlineTradeForm({
   )
     return (
       <div className="tw-space-y-3">
-        <p
-          role={props.ordersFailed ? "alert" : "status"}
-          className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-300"
-        >
-          {noInlineOrder}
-        </p>
-        {props.secondaryActions !== undefined &&
-          props.secondaryActions !== null && (
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-              {props.secondaryActions}
-            </div>
-          )}
+        <CollectDetailHeader>
+          <p
+            role={props.ordersFailed ? "alert" : "status"}
+            className="tw-m-0 tw-text-xs tw-text-iron-500"
+          >
+            {noInlineOrder}
+          </p>
+        </CollectDetailHeader>
+        {((props.secondaryActions !== undefined &&
+          props.secondaryActions !== null) ||
+          Boolean(props.supportingActions)) && (
+          <CollectDetailActionRow supportingActions={props.supportingActions}>
+            {props.secondaryActions}
+          </CollectDetailActionRow>
+        )}
       </div>
     );
 
@@ -205,9 +219,12 @@ function InlineTradeForm({
           : null
       }
       disabledReason={noInlineOrder ?? props.disabledReason}
+      connectionHeader={connectionHeader && noInlineOrder === undefined}
+      showDelivery={!connectionHeader}
       loading={props.preparing}
       error={props.error}
       secondaryActions={props.secondaryActions}
+      supportingActions={props.supportingActions}
       onChange={inlineDraftChange}
       onPrepare={props.onPrepare}
       onSplitDelivery={props.onSplitDelivery}
@@ -218,8 +235,12 @@ function InlineTradeForm({
 
 function StandardTradeForm({
   props,
+  connectWalletAction,
+  connectionHeader,
 }: {
   readonly props: CollectTradeControllerFormProps;
+  readonly connectWalletAction: ReactNode;
+  readonly connectionHeader: boolean;
 }) {
   return (
     <CollectTradeForm
@@ -251,52 +272,160 @@ function StandardTradeForm({
       }
       loading={props.preparing}
       error={props.error}
+      connectWalletAction={connectWalletAction}
+      connectionHeader={connectionHeader}
       onChange={props.onChange}
       onPrepare={props.onPrepare}
     />
   );
 }
 
+function OfferOrdersLoading({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <div role="status" className="tw-space-y-4">
+      <p className="tw-m-0 tw-text-sm tw-text-iron-400">
+        {t(locale, "collect.loading")}
+      </p>
+      <div
+        aria-hidden="true"
+        className="tw-animate-pulse tw-space-y-2 motion-reduce:tw-animate-none"
+      >
+        {[0, 1, 2, 3].map((row) => (
+          <div
+            key={row}
+            className="tw-flex tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/50 tw-p-4"
+          >
+            <div className="tw-mt-1 tw-size-4 tw-shrink-0 tw-rounded-full tw-bg-iron-800" />
+            <div className="tw-min-w-0 tw-flex-1 tw-space-y-3">
+              <div className="tw-h-4 tw-w-24 tw-rounded tw-bg-iron-800" />
+              <div className="tw-h-3 tw-w-20 tw-rounded tw-bg-iron-800" />
+              <div className="tw-h-3 tw-w-4/5 tw-rounded tw-bg-iron-800" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function CollectTradeControllerForm(
   props: CollectTradeControllerFormProps
 ) {
+  const detailLayout = useContext(CollectDetailLayout);
+  const loadingDetail =
+    Boolean(detailLayout) && props.inlineBuy && props.initialLoading === true;
+  // The controller retains draft/query state; do not mount action portals until ready.
+  if (loadingDetail) return <CollectDetailLoading locale={props.locale} />;
+  const loadingOfferOrders =
+    props.action === "accept" &&
+    props.needsOrder &&
+    !props.inlineBuy &&
+    !props.fixedOrder &&
+    props.ordersLoading;
+  const connectionHeader =
+    Boolean(detailLayout) && props.inlineBuy && props.showConnect;
+  const connectInsideOffer = !props.inlineBuy && props.action === "offer";
+  const connectAboveOrders = !props.inlineBuy && props.action === "accept";
+  const orderConnectionHeader = connectAboveOrders && props.showConnect;
+  let connectClassName: string | undefined;
+  if (connectInsideOffer || connectAboveOrders) {
+    connectClassName = "tw-min-h-11 tw-w-full";
+  }
+  const connectWalletAction = props.showConnect ? (
+    <Button
+      data-collect-connect-wallet
+      variant={
+        connectInsideOffer || connectAboveOrders || connectionHeader
+          ? "primary"
+          : "secondary"
+      }
+      size={
+        connectInsideOffer || connectAboveOrders || connectionHeader
+          ? "lg"
+          : "md"
+      }
+      className={connectClassName}
+      onClick={props.onConnect}
+    >
+      {t(props.locale, "collect.connect")}
+    </Button>
+  ) : null;
   const tradeForm = props.inlineBuy ? (
-    <InlineTradeForm props={props} />
+    <InlineTradeForm props={props} connectionHeader={connectionHeader} />
   ) : (
-    <StandardTradeForm props={props} />
+    <StandardTradeForm
+      props={props}
+      connectWalletAction={connectInsideOffer ? connectWalletAction : null}
+      connectionHeader={orderConnectionHeader}
+    />
   );
+
+  const formContent =
+    Boolean(detailLayout) && props.inlineBuy ? (
+      <div className="tw-space-y-4">
+        {connectionHeader && (
+          <CollectConnectionPrompt message={props.disabledReason}>
+            {connectWalletAction}
+          </CollectConnectionPrompt>
+        )}
+        {tradeForm}
+      </div>
+    ) : (
+      tradeForm
+    );
 
   return (
     <>
-      {props.needsOrder && !props.inlineBuy && !props.fixedOrder && (
-        <StandardOrderBook
-          loading={props.ordersLoading}
-          failed={props.ordersFailed}
-          preparationFailed={props.error !== undefined && !props.preparing}
-          orders={props.orders}
-          selectedOrder={props.selectedOrder}
-          onSelectOrder={(order) => {
-            props.onSelectOrder(order);
-            props.onChange({ ...props.draft, quantity: "1" });
-          }}
-          onRefreshOrders={props.onRefreshOrders}
-          locale={props.locale}
-        />
-      )}
-      {tradeForm}
-      {props.inlineBuy &&
-        !props.fixedOrder &&
-        !props.ordersLoading &&
-        props.ordersFailed && (
-          <Button variant="secondary" size="sm" onClick={props.onRefreshOrders}>
-            {t(props.locale, "collect.retry")}
-          </Button>
+      {loadingOfferOrders && <OfferOrdersLoading locale={props.locale} />}
+      {/* Keep form state mounted while the initial order list is loading. */}
+      <div
+        data-collect-order-form
+        hidden={loadingOfferOrders}
+        className="tw-space-y-6"
+      >
+        {orderConnectionHeader && (
+          <CollectTradeWalletSummary
+            action={props.action}
+            makerLabel={props.makerLabel}
+            message={props.disabledReason}
+            connectWalletAction={connectWalletAction}
+          />
         )}
-      {props.showConnect && (
-        <Button variant="secondary" onClick={props.onConnect}>
-          {t(props.locale, "collect.connect")}
-        </Button>
-      )}
+        {props.needsOrder && !props.inlineBuy && !props.fixedOrder && (
+          <StandardOrderBook
+            loading={props.ordersLoading}
+            failed={props.ordersFailed}
+            preparationFailed={props.error !== undefined && !props.preparing}
+            orders={props.orders}
+            selectedOrder={props.selectedOrder}
+            onSelectOrder={(order) => {
+              props.onSelectOrder(order);
+              props.onChange({ ...props.draft, quantity: "1" });
+            }}
+            onRefreshOrders={props.onRefreshOrders}
+            locale={props.locale}
+          />
+        )}
+        <div data-collect-order-footer className="tw-space-y-6">
+          {formContent}
+          {props.inlineBuy &&
+            !props.fixedOrder &&
+            !props.ordersLoading &&
+            props.ordersFailed && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={props.onRefreshOrders}
+              >
+                {t(props.locale, "collect.retry")}
+              </Button>
+            )}
+          {!connectInsideOffer &&
+            !connectAboveOrders &&
+            !connectionHeader &&
+            connectWalletAction}
+        </div>
+      </div>
     </>
   );
 }

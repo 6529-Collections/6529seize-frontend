@@ -2,6 +2,12 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AppSidebarUserInfo from "@/components/header/AppSidebarUserInfo";
 import React from "react";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -117,6 +123,17 @@ describe("AppSidebarUserInfo", () => {
     expect(stats.rep).toBe(5);
     expect(stats.profileId).toBe("p1");
     expect(screen.getByRole("link")).toHaveAttribute("href", "/bob");
+  });
+
+  it("requests the AUTOx50 derivative of a CDN profile picture", () => {
+    setup({
+      address: "0xabc",
+      activeProfileProxy: null,
+      profile: { id: "p1", handle: "bob", pfp: CDN_AVATAR_URL },
+    });
+    expect(
+      getRequestedImageSrc(screen.getByAltText("bob's profile picture"))
+    ).toContain(scaledAvatarPath(ImageScale.W_AUTO_H_50));
   });
 
   it("uses address when no profile data", () => {

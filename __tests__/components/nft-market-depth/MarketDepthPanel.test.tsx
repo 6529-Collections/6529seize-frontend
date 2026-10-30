@@ -493,6 +493,51 @@ describe("MarketDepthPanel", () => {
     );
   });
 
+  it("retains non-primary currency sides and their addresses with the paired summaries", async () => {
+    const base = depth();
+    const eth = base.books[0]!;
+    const weth = base.books[1]!;
+    const other = {
+      ...eth,
+      currency: {
+        ...eth.currency,
+        symbol: "USDC",
+        address: "0xother-currency",
+      },
+    };
+    fetchMock.mockResolvedValue(
+      depth({
+        books: [
+          { ...eth, bids: weth.bids, best_bid: "1.1", bid_order_count: 1 },
+          { ...weth, asks: eth.asks, best_ask: "1.25", ask_order_count: 1 },
+          other,
+        ],
+      })
+    );
+    renderOpenDepth(<MarketDepthPanel contract="0x1" tokenId="7" />);
+    for (const name of [
+      "Listings for ETH",
+      "Offers for WETH",
+      "Offers for ETH",
+      "Listings for WETH",
+      "Listings for USDC",
+    ]) {
+      expect(await screen.findByRole("table", { name })).toBeVisible();
+    }
+    expect(screen.getByText("0xother-currency")).toBeVisible();
+    const toggle = screen.getByRole("button", { name: "Listings & offers" });
+    fireEvent.click(toggle);
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
+    expect(screen.getByText("Lowest listing · ETH")).toBeVisible();
+    expect(screen.getByText("Highest offer · WETH")).toBeVisible();
+    for (const target of toggle.getAttribute("aria-controls")!.split(" ")) {
+      expect(document.getElementById(target)).not.toBeVisible();
+    }
+    fireEvent.click(toggle);
+    expect(screen.getAllByRole("table")).toHaveLength(5);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it("shows a live relative update time and backed stale and unpriced states", async () => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date("2026-09-10T12:05:00.000Z"));

@@ -30,6 +30,8 @@ export interface HeaderShareModalViewProps {
     Map<string, TerminalConnectionShareStatus>
   >;
   readonly requestSessionUpgrade: (() => Promise<unknown>) | undefined;
+  readonly refreshConnectionShare: () => void;
+  readonly isConnectionShareLoading: boolean;
   readonly urlCopied: boolean;
   readonly setUrlCopied: (copied: boolean) => void;
   readonly isMobile: boolean;

@@ -1,0 +1,18 @@
+{
+  "version": "2026-10-23.4",
+  "source": "6529-Collections/6529seize-frontend:shared/memes-calendar",
+  "files": {
+    ".prettierrc.json": "71694fe5a20964e6836cf1748edc2c36fac42f5e0234b6681334298c93bee046",
+    "calendar.ts": "4a4782e9e41e5bbfa1aa3b9dc6530c6bd535527ce819a99772e68a103ee096b6",
+    "history.ts": "bfd31f7f86364ea972f6147351a30742297c821fa092d12ac3a7fd5c0a453630",
+    "index.ts": "0275c682ccc01fbdab90439fac3afc8d773b0441a8c8bb9d8628856cd183b5bc",
+    "overrides.extra.ts": "e7df522f8628005e60b3c6ebab2b580499ff5dd163f66dfdaddbb975c72af0c5",
+    "overrides.rescheduled.ts": "3af6c56d57d467da0851a0997007d5868984d533d1e1b72ec3e5081388f1b725",
+    "overrides.skipped.ts": "742b8238b9c82aebd3387efb9bf68a56991fb9d2b700160ae78fd65803c2b3f3",
+    "overrides.ts": "b2bceefd9b560e724fff1ac61799a357845dc69a093394e4f447d71360bd5b6e",
+    "phases.ts": "172c556c9170c0137db7c37ccfd8f52c66fa0cceeb8132bdd4dec6f1c6eb7c2e",
+    "queries.ts": "8623c0b42c59840ff2f0e7fee11b2ff91c01dd3e16acc8a84c32a1870ca966da",
+    "upcoming.ts": "4d0c06ccf74c227d320c2a29b94a3fd2ab1ad5f20d7300d7678cad028789f92e",
+    "zone.ts": "a5bc191a4e8671c25eb8220805d7023887389c5f8489fc1c6ec0a19ce422ffff"
+  }
+}

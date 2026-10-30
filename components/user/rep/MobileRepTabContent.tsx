@@ -284,7 +284,7 @@ export default function MobileRepTabContent({
               </div>
             )}
           </div>
-          <div className="tw-mt-3 tw-w-full sm:tw-w-fit">
+          <div className="tw-mt-3 tw-w-fit [&_[role=tablist]>div]:tw-min-w-0 [&_[role=tablist]>div]:tw-gap-4 [&_[role=tablist]>div]:tw-bg-transparent [&_[role=tablist]>div]:tw-p-0 [&_[role=tablist]>div]:tw-ring-0 [&_[role=tablist]>div>div]:tw-flex-none [&_[role=tablist]>div>div]:tw-p-0 [&_[role=tab]]:tw-flex-none [&_[role=tab]]:tw-bg-transparent [&_[role=tab]]:tw-px-0 [&_[role=tab]]:tw-text-[13px] [&_[role=tab][aria-selected=false]]:tw-text-iron-400 [&_[role=tab]:focus-visible]:tw-outline-offset-[-2px] motion-reduce:[&_[role=tab]]:tw-transition-none">
             <RepDirectionToggle
               repDirection={repDirection}
               onRepDirectionChange={onRepDirectionChange}
