@@ -3077,6 +3077,23 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  "artworkAlerts.label": "Artwork alerts",
+  "artworkAlerts.mainStage":
+    "Notify me when this artist submits new artwork to The Memes – Main Stage.",
+  "artworkAlerts.accessibleName":
+    "Artwork alerts: notify me about new artwork on Main Stage",
+  "artworkAlerts.turnOff": "Turn off alerts for this artist’s new artwork",
+  "artworkAlerts.enabled": "Artwork alerts are on.",
+  "artworkAlerts.disabled": "Artwork alerts are off.",
+  "artworkAlerts.ownProfile":
+    "Switch to your own profile to manage artwork alerts.",
+  "artworkAlerts.retry": "Retry artwork alerts",
+  "artworkAlerts.saveFailed": "Couldn’t save artwork alerts.",
+  "artworkAlerts.tryAgain": "Please try again.",
+  "artworkAlerts.sessionChanged": "Your session changed. Please try again.",
+  "artworkAlerts.notification":
+    "{artist} submitted {artwork} to {competition}.",
+  "artworkAlerts.untitled": "untitled artwork",
   ...MEME_COLLABORATION_MESSAGES,
   ...VOTING_CREDIT_RETURN_MESSAGES,
   "network.prenodes.title": "Prenodes",

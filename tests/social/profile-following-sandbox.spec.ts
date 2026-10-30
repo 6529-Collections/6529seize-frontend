@@ -124,6 +124,87 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
     );
   });
 
+  test("keeps artist artwork alerts separate from Follow and persists toggles", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    // Keep wallet balance reads deterministic; the sandbox blocks external RPC.
+    await page.route("https://rpc.walletconnect.org/v1/**", async route => {
+      const payload = route.request().postDataJSON() as { id: number; method: string } | { id: number; method: string }[];
+      const results: Record<string, string> = { eth_chainId: "0x1", eth_blockNumber: "0x1", eth_getBalance: "0x0" };
+      const respond = (call: { id: number; method: string }) => {
+        if (call.method === "eth_call") return { jsonrpc: "2.0", id: call.id, error: { code: -32000, message: "Contract reads are unavailable in this profile fixture" } };
+        expect(Object.keys(results)).toContain(call.method);
+        return { jsonrpc: "2.0", id: call.id, result: results[call.method] };
+      };
+      await route.fulfill({ json: Array.isArray(payload) ? payload.map(respond) : respond(payload) });
+    });
+    const api = getSandboxApiOrigin(baseURL);
+    let enabled = false;
+    let following = false;
+    let followWrites = 0;
+    let alertWrites = 0;
+    await page.route(
+      `${api}/api/identities/following-artist-0/artwork-alerts`,
+      (route) => {
+        const method = route.request().method();
+        if (method !== "GET") {
+          enabled = method === "POST";
+          alertWrites++;
+        }
+        return route.fulfill({ json: { enabled } });
+      }
+    );
+    await page.route(
+      `${api}/api/**identities/following-artist-0/subscriptions`,
+      (route) => {
+        const method = route.request().method();
+        if (method !== "GET") {
+          following = method === "POST";
+          followWrites++;
+        }
+        return route.fulfill({
+          json: { actions: following ? ["DROP_CREATED"] : [] },
+        });
+      }
+    );
+    await openOwnProfile(page);
+    const preferenceLoaded = page.waitForResponse(response => response.url().endsWith("/identities/following-artist-0/artwork-alerts") && response.request().method() === "GET");
+    await page.goto("/following-artist-0");
+    await preferenceLoaded;
+    const alert = page.getByRole("button", {
+      name: "Artwork alerts: notify me about new artwork on Main Stage",
+    });
+    await expect(alert).toBeEnabled({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(alert).toHaveAttribute("aria-pressed", "false");
+    await expect(
+      page.getByRole("button", { name: "Follow", exact: true })
+    ).toBeVisible();
+    await alert.press("Enter");
+    await expect(alert).toHaveAttribute("aria-pressed", "true");
+    expect(followWrites).toBe(0);
+    await expectNoHorizontalOverflow(page);
+    await expectAxeClean(page, { include: ['[aria-labelledby="profile-heading"]'] });
+    await page.screenshot({
+      path: testInfo.outputPath("artwork-alerts-enabled.png"),
+    });
+    await page.getByRole("button", { name: "Follow", exact: true }).click();
+    await page.getByRole("button", { name: "Unfollow", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "Follow", exact: true })
+    ).toBeVisible();
+    expect(alertWrites).toBe(1);
+    await page.reload();
+    await expect(alert).toHaveAttribute("aria-pressed", "true");
+    await expect(alert).toBeEnabled();
+    await alert.click();
+    await expect(alert).toHaveAttribute("aria-pressed", "false");
+    expect(alertWrites).toBe(2);
+    expect(followWrites).toBe(2);
+  });
+
   test("opens the responsive list, paginates, unfollows and navigates using existing rows", async ({
     page,
     baseURL,

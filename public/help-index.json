@@ -11050,6 +11050,43 @@
       "canonical_path": "/bookmarks",
       "tags": ["waves", "privacy", "navigation"],
       "source_refs": ["ops/docs/waves/chat/feature-private-bookmarks.md"]
+    },
+    {
+      "id": "notifications.artist-artwork-alerts",
+      "kind": "ui_affordance",
+      "title": "Artist artwork alerts",
+      "aliases": [
+        "artwork alerts",
+        "artist notifications",
+        "notify me when an artist submits",
+        "Main Stage alerts"
+      ],
+      "keywords": [
+        "artist",
+        "artwork",
+        "bell",
+        "Main Stage",
+        "follow",
+        "notifications"
+      ],
+      "facts": [
+        "Use Artwork alerts beside Follow on another artist's profile to opt into notifications for their new non-anonymous submissions to The Memes – Main Stage.",
+        "The bell shows a check mark when enabled. Select it again to turn alerts off. Sign in with your own profile; proxies cannot manage artwork alerts.",
+        "Artwork alerts and Follow are independent. Enabling alerts does not follow the artist, and following or unfollowing does not change alerts. Existing followers are not opted in.",
+        "Only new confirmed Main Stage entries submitted after opt-in qualify. Existing work, other competitions, chat, edits, votes, reactions, proposals and curation do not generate artwork alerts. A new dedicated resubmission can qualify; retries of the same submission do not duplicate alerts.",
+        "Anonymous entries never generate artist-specific alerts, even after identity disclosure. Private access, blocks, mutes and moderation still apply.",
+        "Find alerts under the Artwork alerts filter in /notifications. The artwork title, or untitled artwork, opens the exact submission.",
+        "Profile preferences including Essential only and Direct messages and wave activity apply. App push also requires device permission and the Wave Invites setting.",
+        "Retry artwork alerts reloads a failed preference request. A failed save displays an error and rechecks saved state before another toggle."
+      ],
+      "canonical_path": "/notifications",
+      "related_paths": ["/waves"],
+      "tags": ["notifications", "profiles"],
+      "source_refs": [
+        "components/user/utils/ArtistArtworkAlertButton.tsx",
+        "components/brain/notifications/NotificationArtistArtwork.tsx",
+        "ops/docs/notifications/feature-artist-artwork-alerts.md"
+      ]
     }
   ]
 }

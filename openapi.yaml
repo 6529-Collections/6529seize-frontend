@@ -10445,6 +10445,115 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiIdentitySubscriptionActions"
+  /identities/{id}/artwork-alerts:
+    get:
+      tags:
+        - Identities
+      summary: Read your independent artwork-alert preference for an artist.
+      operationId: getArtistArtworkAlert
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: artist-artwork-alerts
+        handler:
+          import: "@/api/identity-subscriptions/artist-artwork-alerts.handlers"
+          name: handleGetArtistArtworkAlert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Current preference
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiArtistArtworkAlert"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Own profile required or artist is blocked
+        "404":
+          description: Identity not found
+    post:
+      tags:
+        - Identities
+      summary: Enable future artwork alerts without following the artist.
+      operationId: enableArtistArtworkAlert
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: artist-artwork-alerts
+        handler:
+          import: "@/api/identity-subscriptions/artist-artwork-alerts.handlers"
+          name: handleEnableArtistArtworkAlert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Current preference
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiArtistArtworkAlert"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Own profile required or artist is blocked
+        "404":
+          description: Identity not found
+    delete:
+      tags:
+        - Identities
+      summary: Disable artwork alerts without changing feed subscriptions.
+      operationId: disableArtistArtworkAlert
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: artist-artwork-alerts
+        handler:
+          import: "@/api/identity-subscriptions/artist-artwork-alerts.handlers"
+          name: handleDisableArtistArtworkAlert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Current preference
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiArtistArtworkAlert"
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Own profile required or artist is blocked
+        "404":
+          description: Identity not found
   /identities/{id}/mute:
     get:
       tags:
@@ -20348,6 +20457,50 @@ components:
       properties:
         expected_package_hash:
           type: string
+    ApiArtistArtworkAlert:
+      type: object
+      required:
+        - enabled
+      properties:
+        enabled:
+          type: boolean
+          description: >-
+            Explicit opt-in for new non-anonymous Main Stage artwork
+            submissions, independent of feed following. Defaults to false.
+            Existing submissions are never backfilled.
+    ApiArtistArtworkNotificationContext:
+      type: object
+      description: Additional context for ARTIST_ARTWORK_SUBMITTED notifications.
+      required:
+        - artist_id
+        - drop_id
+        - wave_id
+        - competition_id
+        - entry_id
+        - competition_title
+        - artwork_title
+        - submitted_at
+      properties:
+        artist_id:
+          type: string
+        drop_id:
+          type: string
+        wave_id:
+          type: string
+        competition_id:
+          type: string
+          format: uuid
+        entry_id:
+          type: string
+          format: uuid
+        competition_title:
+          type: string
+        artwork_title:
+          type: string
+          nullable: true
+        submitted_at:
+          type: integer
+          format: int64
     ApiArtistNameItem:
       type: object
       required:
@@ -34472,9 +34625,21 @@ components:
             $ref: "#/components/schemas/ApiDrop"
         additional_context:
           type: object
+          description: >-
+            For ARTIST_ARTWORK_SUBMITTED, follows
+            ApiArtistArtworkNotificationContext.
     ApiNotificationAdditionalContextV2:
       type: object
       properties:
+        artist_id:
+          type: string
+        artwork_title:
+          type: string
+          nullable: true
+          description: Title for an ARTIST_ARTWORK_SUBMITTED notification.
+        submitted_at:
+          type: integer
+          format: int64
         reason:
           $ref: "#/components/schemas/ApiVotingCreditReleaseReason"
         submission_title:
@@ -34630,6 +34795,7 @@ components:
         - ALL_DROPS
         - PRIORITY_ALERT
         - SUBSCRIPTION_COVERAGE
+        - ARTIST_ARTWORK_SUBMITTED
         - COMPETITION_LIFECYCLE
         - MEME_COLLABORATION
         - VOTING_CREDITS_RETURNED

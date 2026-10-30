@@ -1,3 +1,5 @@
+import { useAuth } from "@/components/auth/Auth";
+import ArtistArtworkAlertButton from "../utils/ArtistArtworkAlertButton";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -29,6 +31,7 @@ export default function ProfileHeaderRelationshipActions({
   onCreateDirectMessage: (primaryWallet: string | undefined) => void;
   profile: ApiIdentity;
 }>) {
+  const { connectedProfile } = useAuth();
   if (!profile.handle) {
     return null;
   }
@@ -58,31 +61,43 @@ export default function ProfileHeaderRelationshipActions({
     : undefined;
 
   return (
-    <UserFollowBtn
-      handle={profile.handle}
-      blocked={moderationControls.isBlocked}
-      blockStateLoading={
-        moderationControls.isLoading || moderationControls.isBlocking
-      }
-      showFollowButton
-      showMuteButton={false}
-      unblockPending={moderationControls.isUnblocking}
-      onUnblock={() => moderationControls.onSelectAction("unblock")}
-      onDirectMessage={directMessageAction}
-      directMessageLoading={directMessageLoading}
-      beforeFollowAction={
-        showActionMenu ? (
-          <ProfileBlockActionMenu
-            handle={profile.handle}
-            disabled={
-              moderationControls.isLoading || moderationControls.isActionPending
-            }
-            showPersonalActions={!moderationControls.isBlocked}
-            moderationAction={moderationAction}
-            onBlock={() => moderationControls.onSelectAction("block")}
-          />
-        ) : null
-      }
-    />
+    <>
+      {connectedProfile?.handle ? (
+        <UserFollowBtn
+          handle={profile.handle}
+          blocked={moderationControls.isBlocked}
+          blockStateLoading={
+            moderationControls.isLoading || moderationControls.isBlocking
+          }
+          showFollowButton
+          showMuteButton={false}
+          unblockPending={moderationControls.isUnblocking}
+          onUnblock={() => moderationControls.onSelectAction("unblock")}
+          onDirectMessage={directMessageAction}
+          directMessageLoading={directMessageLoading}
+          beforeFollowAction={
+            showActionMenu ? (
+              <ProfileBlockActionMenu
+                handle={profile.handle}
+                disabled={
+                  moderationControls.isLoading ||
+                  moderationControls.isActionPending
+                }
+                showPersonalActions={!moderationControls.isBlocked}
+                moderationAction={moderationAction}
+                onBlock={() => moderationControls.onSelectAction("block")}
+              />
+            ) : null
+          }
+        />
+      ) : null}
+      <ArtistArtworkAlertButton
+        handle={profile.handle}
+        blocked={moderationControls.isBlocked}
+        blockStateLoading={
+          moderationControls.isLoading || moderationControls.isActionPending
+        }
+      />
+    </>
   );
 }

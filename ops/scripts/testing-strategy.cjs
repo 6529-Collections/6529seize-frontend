@@ -156,6 +156,8 @@ const RISK_RULES = [
     name: "profile-following-runtime",
     patterns: [
       /^components\/user\/following\//,
+      /^components\/user\/utils\/artistartworkalertbutton\.tsx$/,
+      /^components\/brain\/notifications\/notificationartistartwork\.tsx$/,
       /^hooks\/usefollowinglist\.ts$/,
     ],
     reason:

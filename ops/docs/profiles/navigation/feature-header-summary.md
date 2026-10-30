@@ -5,7 +5,7 @@
 The profile header appears on profile routes under `/{user}` and shows:
 
 - identity and profile metadata
-- profile actions (edit, follow, direct message)
+- profile actions (edit, follow, direct message, artwork alerts)
 - a **Website** link when a published profile website is available
 - quick stats links (`TDH`, `xTDH`, `NIC`, `Rep`, `Followers`)
 - a `Following` count beside `Followers` on your own signed-in profile
@@ -71,6 +71,9 @@ The profile header appears on profile routes under `/{user}` and shows:
      subtle row below the identity block on smaller layouts
    - other profile, signed-in viewer with handle, and target profile with
      handle: follow/unfollow button
+   - **Artwork alerts** beside Follow independently opts into new Main Stage
+     artwork submissions by that artist; the bell has a check mark when enabled.
+     See [Artist Artwork Alerts](../../notifications/feature-artist-artwork-alerts.md).
    - if that target also has a primary wallet: direct-message button appears
      beside follow/unfollow immediately; it is not gated on existing follow
      state

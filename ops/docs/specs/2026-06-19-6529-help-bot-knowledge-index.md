@@ -93,6 +93,8 @@ cards omit Your allowance until a wallet address is available. Connected wallets
 retain allocation pills and distinct loading, unpublished, empty, and unavailable
 states; an allocation does not guarantee that it remains mintable.
 
+The `notifications.artist-artwork-alerts` record describes the profile bell, its independent opt-in, Main Stage-only scope, no-backfill boundary, anonymous-entry exclusion, delivery preferences, and recovery states. It links to the canonical artist artwork alerts guide and the Notifications route.
+
 The `waves.artist-submissions-popup` record explains the artist activity icon,
 Active Submissions promise badges, and the distinction between reading a badge,
 opening artwork, and casting a vote.

@@ -70,6 +70,58 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     "Notifications sandbox requires the local mock API runner."
   );
 
+  test("shows artist artwork alerts and preserves the specific submission link", async ({
+    page,
+  }, testInfo) => {
+    await page.goto("/notifications", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    const artwork = page.getByRole("link", {
+      name: "Sandbox artwork",
+      exact: true,
+    });
+    await expect(artwork).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(artwork).toHaveAttribute(
+      "href",
+      /\/competitions\/10000000-0000-4000-8000-000000000001\?entry=20000000-0000-4000-8000-000000000001$/
+    );
+    const trigger = page.getByRole("button", {
+      name: /^Filter notifications:/,
+    });
+    const mobile = (page.viewportSize()?.width ?? 0) < 1024;
+    await expect(trigger).toHaveAttribute(
+      "aria-haspopup",
+      mobile ? "dialog" : "menu"
+    );
+    await trigger.click();
+    if (mobile) {
+      const dialog = page.getByRole("dialog", { name: "Filter notifications" });
+      await dialog.getByText("Artwork alerts", { exact: true }).click();
+      await expect(
+        dialog.getByRole("checkbox", { name: "Artwork alerts", exact: true })
+      ).toBeChecked();
+      await dialog.getByRole("button", { name: "Close", exact: true }).click();
+      await expect(dialog).toHaveCount(0);
+    } else {
+      const option = page.getByRole("menuitemcheckbox", {
+        name: "Artwork alerts",
+        exact: true,
+      });
+      await option.click();
+      await expect(option).toHaveAttribute("aria-checked", "true");
+      await option.press("Escape");
+      await expect(page.getByRole("menu")).toHaveCount(0);
+    }
+    await expect(trigger).toHaveAccessibleName(
+      "Filter notifications: Artwork alerts"
+    );
+    await expect(artwork).toBeVisible();
+    await expect(page.getByText("mentioned you")).toHaveCount(0);
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(page, testInfo, "artist-artwork-notification");
+  });
+
   test("renders positive notification states and keeps mark-read local", async ({
     baseURL,
     page,

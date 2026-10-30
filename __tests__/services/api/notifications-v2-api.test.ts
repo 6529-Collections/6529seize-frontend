@@ -91,6 +91,51 @@ describe("fetchNotificationsV2", () => {
     mockRetiredCompetitionFlag.mockReturnValue(false);
   });
 
+  it("retains artwork submission context and drops malformed artist alerts", async () => {
+    const context = {
+      artist_id: "artist-id",
+      wave_id: "wave-1",
+      drop_id: "drop-1",
+      competition_id: "competition",
+      entry_id: "entry",
+      competition_title: "Main Stage",
+      artwork_title: null,
+      submitted_at: 1000,
+    };
+    const notification = {
+      id: 123,
+      cause: ApiNotificationCause.ArtistArtworkSubmitted,
+      created_at: 1000,
+      read_at: null,
+      related_identity: identity("artist"),
+      related_drops: [drop],
+      related_wave: wave,
+      additional_context: context,
+    };
+    jest
+      .mocked(commonApiFetch)
+      .mockResolvedValue({
+        unread_count: 1,
+        notifications: [
+          notification,
+          {
+            ...notification,
+            id: 124,
+            additional_context: { ...context, entry_id: undefined },
+          },
+        ],
+      });
+    const result = await fetchNotificationsV2({});
+    expect(result.notifications).toHaveLength(1);
+    expect(result.notifications[0]).toMatchObject({
+      id: 123,
+      cause: ApiNotificationCause.ArtistArtworkSubmitted,
+      additional_context: context,
+      related_identity: { handle: "artist" },
+      related_drops: [{ id: "drop-1" }],
+    });
+  });
+
   it.each(["INVITED", "ACCEPTED"])(
     "preserves collaboration identity and artwork context for %s",
     async (event_type) => {
