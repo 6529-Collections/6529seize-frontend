@@ -72,6 +72,8 @@ export function useProfileProxySwitch(options: ProfileProxySwitchOptions) {
         });
       }
       let result: Promise<boolean> | undefined;
+      // Connected actions run synchronously with an available signer. A
+      // reconnect resumes later from useConnectedAction's effect instead.
       runConnectedAction(() => {
         result = switchProfile(proxy);
       });

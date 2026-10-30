@@ -1,5 +1,6 @@
 import { createAuthRequestActions } from "@/components/auth/authActions";
-import { waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
+import { useAuthRequestActions } from "@/components/auth/useAuthRequestActions";
 import type { CreateAuthRequestActionsParams } from "@/components/auth/authActionTypes";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { createDeferredPromise } from "@/__tests__/utils/deferredPromise";
@@ -12,6 +13,18 @@ import {
 
 const ADDRESS = "0x1111111111111111111111111111111111111111";
 let mockWalletAddress: string | null = ADDRESS;
+let mockCanSignActiveWallet = true;
+let mockSeizeConnectOpen = false;
+const mockSeizeConnect = jest.fn();
+
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => ({
+    canSignActiveWallet: mockCanSignActiveWallet,
+    seizeConnect: mockSeizeConnect,
+    seizeConnectOpen: mockSeizeConnectOpen,
+    connectedAccounts: [],
+  }),
+}));
 
 jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: jest.fn(() => "existing-session"),
@@ -89,6 +102,8 @@ function createActions(
 beforeEach(() => {
   jest.clearAllMocks();
   mockWalletAddress = ADDRESS;
+  mockCanSignActiveWallet = true;
+  mockSeizeConnectOpen = false;
   jest.mocked(getSessionNonce).mockResolvedValue(nonce);
   jest.mocked(loginWithSessionV2).mockResolvedValue({
     address: ADDRESS,
@@ -212,3 +227,48 @@ it("does not persist a completed login after the network changes", async () => {
   expect(params.setToast).toHaveBeenCalled();
   expect(removeAuthJwt).not.toHaveBeenCalled();
 });
+
+it("reconnects and resumes through the real auth action without reopening the wallet modal", async () => {
+  mockCanSignActiveWallet = false;
+  const { params } = createActions({ canSignActiveWallet: false });
+  const { result, rerender } = renderHook(useAuthRequestActions, {
+    initialProps: params,
+  });
+  await act(async () => {
+    expect(await result.current.onActiveProfileProxy(proxy)).toBe(false);
+  });
+  expect(mockSeizeConnect).toHaveBeenCalledTimes(1);
+  expect(params.signMessage).not.toHaveBeenCalled();
+  mockSeizeConnectOpen = true;
+  rerender(params);
+  mockCanSignActiveWallet = true;
+  mockSeizeConnectOpen = false;
+  rerender({ ...params, canSignActiveWallet: true });
+  await waitFor(() =>
+    expect(params.setActiveProfileProxy).toHaveBeenCalledWith(proxy)
+  );
+  expect(mockSeizeConnect).toHaveBeenCalledTimes(1);
+  expect(params.signMessage).toHaveBeenCalledTimes(1);
+  expect(loginWithSessionV2).toHaveBeenCalledTimes(1);
+  expect(persistSessionResponse).toHaveBeenCalledTimes(1);
+});
+
+it.each([true, false])(
+  "returns the real connected sign-in result (%s)",
+  async (success) => {
+    const { params } = createActions({
+      signMessage: jest.fn(async () => ({
+        signature: success ? "client-signature" : null,
+        userRejected: !success,
+      })),
+    });
+    const { result } = renderHook(useAuthRequestActions, {
+      initialProps: params,
+    });
+    await act(async () => {
+      expect(await result.current.onActiveProfileProxy(proxy)).toBe(success);
+    });
+    expect(params.signMessage).toHaveBeenCalledTimes(1);
+    expect(mockSeizeConnect).not.toHaveBeenCalled();
+  }
+);
