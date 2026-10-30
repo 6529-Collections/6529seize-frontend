@@ -1541,17 +1541,22 @@ describe("WaveDropsAll", () => {
     it.each(["wheel", "touchstart", "pointerdown", "keydown"])(
       "keeps a settled target visible through layout changes until %s input",
       async (event) => {
-        const resizeCallbacks: (() => void)[] = [];
+        const visibilityCallbacks: (() => void)[] = [];
         const disconnect = jest.fn();
-        const observer = jest
-          .spyOn(globalThis, "ResizeObserver")
-          .mockImplementation((callback) => {
+        const originalObserver = globalThis.IntersectionObserver;
+        globalThis.IntersectionObserver = jest
+          .fn()
+          .mockImplementation((callback: IntersectionObserverCallback) => {
             const instance = {
+              root: null,
+              rootMargin: "0px",
+              thresholds: [0, 1],
+              takeRecords: () => [],
               observe: jest.fn(),
               unobserve: jest.fn(),
               disconnect,
             };
-            resizeCallbacks.push(() => callback([], instance));
+            visibilityCallbacks.push(() => callback([], instance));
             return instance;
           });
         try {
@@ -1595,14 +1600,14 @@ describe("WaveDropsAll", () => {
           expect(dropsProps.suspendLightDropHydration).toBe(false);
           scrollTo.mockClear();
 
-          act(() => resizeCallbacks.forEach((callback) => callback()));
+          act(() => visibilityCallbacks.forEach((callback) => callback()));
           expect(scrollTo).not.toHaveBeenCalled();
-          scrollHeight = 1200;
+          // A selected row can move even when the total list height is unchanged.
           targetTop = -500;
-          act(() => resizeCallbacks.forEach((callback) => callback()));
+          act(() => visibilityCallbacks.forEach((callback) => callback()));
           expect(scrollTo).toHaveBeenCalledWith({
             behavior: "auto",
-            top: -770,
+            top: -600,
           });
 
           scrollTo.mockClear();
@@ -1611,10 +1616,10 @@ describe("WaveDropsAll", () => {
           );
           expect(disconnect).toHaveBeenCalled();
           scrollHeight = 1400;
-          act(() => resizeCallbacks.forEach((callback) => callback()));
+          act(() => visibilityCallbacks.forEach((callback) => callback()));
           expect(scrollTo).not.toHaveBeenCalled();
         } finally {
-          observer.mockRestore();
+          globalThis.IntersectionObserver = originalObserver;
         }
       }
     );

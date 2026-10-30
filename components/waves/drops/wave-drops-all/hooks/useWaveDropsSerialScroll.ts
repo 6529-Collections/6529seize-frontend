@@ -142,38 +142,30 @@ export const useWaveDropsSerialScroll = ({
       if (scrollAnchorRef.current?.target === target)
         return scrollAnchorRef.current;
       scrollAnchorRef.current?.release();
-      const content = target.parentElement;
       const controls = container.parentElement ?? container;
       let active = true;
-      let height = container.scrollHeight;
-      let viewportHeight = container.clientHeight;
       // Placeholder hydration and media loading can move a settled target. Keep
       // it visible until the reader interacts; never hold ordinary wave entry.
       const observer =
-        typeof ResizeObserver === "undefined"
+        typeof IntersectionObserver === "undefined"
           ? null
-          : new ResizeObserver(() => {
-              if (!active) return;
-              if (!container.contains(target)) {
-                release();
-                return;
-              }
-              const resized =
-                height !== container.scrollHeight ||
-                viewportHeight !== container.clientHeight;
-              height = container.scrollHeight;
-              viewportHeight = container.clientHeight;
-              if (
-                resized &&
-                !isElementVisibleInContainer({ container, target })
-              ) {
-                scrollElementIntoContainerCenter({
-                  behavior: "auto",
-                  container,
-                  target,
-                });
-              }
-            });
+          : new IntersectionObserver(
+              () => {
+                if (!active) return;
+                if (!container.contains(target)) {
+                  release();
+                  return;
+                }
+                if (!isElementVisibleInContainer({ container, target })) {
+                  scrollElementIntoContainerCenter({
+                    behavior: "auto",
+                    container,
+                    target,
+                  });
+                }
+              },
+              { root: container, threshold: [0, 1] }
+            );
       function release() {
         active = false;
         observer?.disconnect();
@@ -185,8 +177,7 @@ export const useWaveDropsSerialScroll = ({
       }
       const anchor = { target, release, isActive: () => active };
       scrollAnchorRef.current = anchor;
-      if (content) observer?.observe(content);
-      observer?.observe(container);
+      observer?.observe(target);
       for (const event of ["wheel", "touchstart", "pointerdown", "keydown"]) {
         controls.addEventListener(event, release, {
           capture: true,
