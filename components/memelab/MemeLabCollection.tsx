@@ -31,14 +31,21 @@ const COLLECTION_GRID_CLASS =
   "tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] xl:tw-gap-5";
 const COLLECTION_GRID_LIST_CLASS = `${COLLECTION_GRID_CLASS} tw-m-0 tw-list-none tw-px-0 tw-pb-0`;
 
+// A card's website field may hold several space-separated sites. The header
+// renders one link per site, so keep each distinct site once, space-separated.
 function getCollectionWebsites(nftMetas: LabExtendedData[]): string {
-  let websites = "";
+  const websites = new Set<string>();
   for (const nftMeta of nftMetas) {
-    if (nftMeta.website && !websites.includes(nftMeta.website)) {
-      websites += nftMeta.website;
+    if (!nftMeta.website) {
+      continue;
+    }
+    for (const website of nftMeta.website.split(/\s+/)) {
+      if (website) {
+        websites.add(website);
+      }
     }
   }
-  return websites;
+  return Array.from(websites).join(" ");
 }
 
 export default function LabCollection({

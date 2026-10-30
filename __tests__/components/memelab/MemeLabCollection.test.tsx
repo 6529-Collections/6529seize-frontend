@@ -199,6 +199,27 @@ describe("MemeLabCollection", () => {
     );
   });
 
+  it("links each distinct website from the collection's cards once", async () => {
+    (fetchAllPages as jest.Mock)
+      .mockResolvedValueOnce([
+        { id: 1, website: "first.example second.example", name: "meta 1" },
+        { id: 2, website: "second.example", name: "meta 2" },
+        { id: 3, website: "third.example", name: "meta 3" },
+      ])
+      .mockResolvedValueOnce([
+        { id: 1, contract: "0x", name: "NFT", artist: "artist" },
+      ]);
+    renderComponent();
+    await waitFor(() => expect(fetchAllPages).toHaveBeenCalledTimes(2));
+    for (const site of ["first.example", "second.example", "third.example"]) {
+      expect(screen.getByRole("link", { name: site })).toHaveAttribute(
+        "href",
+        `https://${site}`
+      );
+    }
+    expect(screen.getAllByRole("link", { name: /\.example$/ })).toHaveLength(3);
+  });
+
   it("preserves locale on card links and falls back to source list labels", async () => {
     (fetchAllPages as jest.Mock)
       .mockResolvedValueOnce([{ id: 1, website: "", name: "meta" }])
