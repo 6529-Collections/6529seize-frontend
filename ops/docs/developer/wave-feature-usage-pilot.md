@@ -106,7 +106,11 @@ so batch senders start only after the final guard is installed. This narrow SDK 
 must be checked when upgrading Mixpanel. The app imports the SDK's
 recorder-free core build (`mixpanel-browser/dist/mixpanel-core.cjs.js`), so the
 bundled session recorder is not shipped and recording cannot start; keep that
-entry when upgrading. The pinned SDK creates batchers
+entry when upgrading. `services/analytics/mixpanelSdk.ts` loads it with a
+dynamic import the first time consented initialization runs, so the SDK is not
+in first-load JavaScript; initialization completes when it arrives unless
+consent was withdrawn meanwhile, and recovery listeners then retry identity
+and page-view work. The pinned SDK creates batchers
 synchronously; an unexpected missing batcher keeps delivery closed. The SDK's
 explicit XHR/storage fallback uses direct delivery through the send-time hook.
 Failure to scrub persisted private properties also keeps delivery closed rather

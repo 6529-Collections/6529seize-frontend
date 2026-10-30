@@ -29,6 +29,7 @@ it("excludes coverage server-side without narrowing All, including subsequent pa
         endpoint: "v2/notifications",
         params: {
           limit: "30",
+          include_competitions: "true",
           cause_exclude: "SUBSCRIPTION_COVERAGE",
           ...(pageParam === null ? {} : { id_less_than: "42" }),
         },
@@ -51,6 +52,7 @@ it("keeps inclusion filters alongside exclusion and separates restricted caches"
     expect.objectContaining({
       params: {
         limit: "30",
+        include_competitions: "true",
         cause: "IDENTITY_SUBSCRIBED",
         cause_exclude: "SUBSCRIPTION_COVERAGE",
       },

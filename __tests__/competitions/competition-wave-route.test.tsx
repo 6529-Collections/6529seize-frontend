@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
-import CompetitionWaveRoute from "@/components/competitions/CompetitionWaveRoute";
+import WaveRouteShell from "@/components/waves/WaveRouteShell";
 import {
   CompetitionRouteProvider,
   useCompetitionRoute,
@@ -39,6 +39,20 @@ let mockSelectionQuery: QueryState<{ competition_id: string | null }> & {
   isFetching: boolean;
   isFetchedAfterMount: boolean;
 };
+
+jest.mock("next/dynamic", () => ({
+  __esModule: true,
+  default: () =>
+    jest.requireActual("@/components/competitions/CompetitionWaveContent")
+      .default,
+}));
+jest.mock("@/components/brain/ContentTabContext", () => ({
+  useContentTab: () => ({ activeContentTab: "LEADERBOARD" }),
+}));
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
+  useMyStream: () => ({ registerWave: mockRegisterWave }),
+}));
+const mockRegisterWave = jest.fn();
 
 jest.mock("next/navigation", () => ({
   usePathname: () => mockPathname,
@@ -111,9 +125,7 @@ function routeTree(competitionId: string | null = "alpha", waveId = "wave") {
   return (
     <CompetitionRouteProvider>
       <RouteProbe />
-      {competitionId !== null && (
-        <CompetitionWaveRoute waveId={waveId} competitionId={competitionId} />
-      )}
+      {competitionId !== null && <WaveRouteShell waveId={waveId} />}
     </CompetitionRouteProvider>
   );
 }
@@ -149,11 +161,12 @@ it("renders a native selection directly in the wave without another shell", () =
   expect(screen.getAllByTestId("persistent-shell")).toHaveLength(1);
 });
 
-it("uses direct legacy content when the selected competition is the legacy primary", () => {
+it("uses competition resources when the selected competition is the original primary", () => {
   mockHubQuery.data!.legacy_primary_competition_id = "alpha";
   render(routeTree());
   expect(screen.getAllByTestId("wave")).toHaveLength(1);
-  expect(screen.getByText("Direct legacy content")).toBeVisible();
+  expect(screen.queryByText("Direct legacy content")).toBeNull();
+  expect(screen.getByTestId("native")).toBeVisible();
   expect(screen.queryByTestId("detail")).toBeNull();
 });
 
@@ -298,6 +311,8 @@ it("resets the previous viewer's form while retaining the persistent shell", () 
 it("does not reuse cached selected data when the wave or competition changes", () => {
   const { rerender } = render(routeTree());
   const shell = screen.getByTestId("persistent-shell");
+  const input = screen.getByLabelText("Entry text");
+  fireEvent.change(input, { target: { value: "Previous wave submission" } });
   mockPathname = "/waves/other-wave/competitions/beta";
   rerender(routeTree("beta", "other-wave"));
   expect(screen.getByTestId("persistent-shell")).toBe(shell);
@@ -316,6 +331,8 @@ it("does not reuse cached selected data when the wave or competition changes", (
   };
   rerender(routeTree("beta", "other-wave"));
   expect(screen.getByTestId("native")).toBeVisible();
+  expect(screen.getByLabelText("Entry text")).not.toBe(input);
+  expect(screen.getByLabelText("Entry text")).toHaveValue("");
 });
 
 it("preserves draft presentation after publication until leaving the visit", () => {

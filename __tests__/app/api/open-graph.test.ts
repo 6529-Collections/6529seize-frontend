@@ -1,3 +1,5 @@
+jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
+
 jest.mock("node:dns/promises", () => ({
   lookup: jest.fn(),
 }));

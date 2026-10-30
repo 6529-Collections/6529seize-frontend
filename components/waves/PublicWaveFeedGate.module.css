@@ -1,0 +1,30 @@
+.loading {
+  display: none;
+  height: 100%;
+}
+
+.publicFeed {
+  height: 100%;
+}
+
+/* Choose before JavaScript executes, so the server preview never flashes in
+   an interactive browser. With scripting disabled, the semantic feed stays
+   readable. No user-agent detection or alternate crawler response is needed. */
+@media (scripting: enabled) {
+  .loading {
+    display: flex;
+  }
+
+  .publicFeed {
+    display: none;
+  }
+}
+
+/* Progressive fallback for browsers without the scripting media feature. */
+.enhanced .loading {
+  display: flex;
+}
+
+.enhanced .publicFeed {
+  display: none;
+}

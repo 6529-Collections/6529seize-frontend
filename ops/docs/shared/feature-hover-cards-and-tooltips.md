@@ -55,9 +55,11 @@ reposition to stay visible in the viewport.
 - Profile hover cards can also surface artist-activity and wave-creator badges
   that open the matching modal viewers.
 - `Top Rep` appears only when rep-category data exists. It shows up to 3
-  categories, sorted by rating then contributor count.
-- `Top Rep` rating color is green for positive values and red for zero/negative
-  values.
+  categories, ordered by the size of their net REP total regardless of sign.
+  For example, `-1,000` appears before `+100`. Equal-sized totals use case-sensitive
+  category-name order.
+- `Top Rep` keeps the signed rating: green for positive values, red for negative
+  values, and neutral gray for zero.
 - Wave mention hover cards show wave name, picture, author handle/address,
   drops count, joined count, and last-drop recency.
 - If wave data is partial, the card falls back to mention name, then

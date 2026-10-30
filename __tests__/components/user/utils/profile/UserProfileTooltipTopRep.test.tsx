@@ -66,6 +66,93 @@ describe("UserProfileTooltipTopRep", () => {
     );
   });
 
+  it.each([
+    {
+      name: "mixed signs",
+      ratings: [1, 10, -50_000, -900],
+      categories: ["Small", "Positive", "Large negative", "Other negative"],
+      expected: ["Large negative", "Other negative", "Positive"],
+    },
+    {
+      name: "positive values",
+      ratings: [1, 100, 10, 5],
+      categories: ["Small", "Large", "Medium", "Extra"],
+      expected: ["Large", "Medium", "Extra"],
+    },
+    {
+      name: "negative values",
+      ratings: [-1, -100, -10, -5],
+      categories: ["Small", "Large", "Medium", "Extra"],
+      expected: ["Large", "Medium", "Extra"],
+    },
+    {
+      name: "equal magnitudes regardless of sign or contributor count",
+      ratings: [50, -50, -50, 50],
+      categories: ["Zulu", "alpha", "Alpha", "Beta"],
+      expected: ["Alpha", "Beta", "Zulu"],
+    },
+    {
+      name: "zero totals after nonzero values",
+      ratings: [0, -1, 0],
+      categories: ["Zulu", "Negative", "Alpha"],
+      expected: ["Negative", "Alpha", "Zulu"],
+    },
+  ])(
+    "orders $name without changing the source data",
+    ({ ratings, categories, expected }) => {
+      const data = {
+        ...repRates,
+        rating_stats: categories.map((category, index) => ({
+          category,
+          rating: ratings[index]!,
+          contributor_count: 10 - index,
+          rater_contribution: 0,
+        })),
+      };
+      const original = [...data.rating_stats];
+      Object.freeze(data.rating_stats);
+
+      const { container } = render(
+        <UserProfileTooltipTopRep repRates={data} />
+      );
+
+      expect(
+        Array.from(
+          container.querySelectorAll("span.tw-truncate"),
+          (tag) => tag.textContent
+        )
+      ).toEqual(expected);
+      expect(data.rating_stats).toEqual(original);
+    }
+  );
+
+  it("preserves negative and zero score formatting and colors", () => {
+    render(
+      <UserProfileTooltipTopRep
+        repRates={{
+          ...repRates,
+          rating_stats: [
+            {
+              category: "Negative",
+              rating: -50_000,
+              contributor_count: 1,
+              rater_contribution: 0,
+            },
+            {
+              category: "Zero",
+              rating: 0,
+              contributor_count: 2,
+              rater_contribution: 0,
+            },
+          ],
+        }}
+      />
+    );
+
+    expect(screen.getByText("-50,000")).toHaveClass("tw-text-red");
+    expect(screen.getByText("0")).toHaveClass("tw-text-iron-400");
+  });
+
   it("renders nothing when there are no rep categories", () => {
     const { container } = render(
       <UserProfileTooltipTopRep

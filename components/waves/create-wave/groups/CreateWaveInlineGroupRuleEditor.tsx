@@ -15,11 +15,13 @@ export default function CreateWaveInlineGroupRuleEditor({
   activeRule,
   onDraftChange,
   networkPresentation = false,
+  scrollResultsWithEditor = false,
 }: {
   readonly draft: ApiCreateGroup;
   readonly activeRule: CreateWaveInlineGroupRuleType | null;
   readonly onDraftChange: (draft: ApiCreateGroup) => void;
   readonly networkPresentation?: boolean;
+  readonly scrollResultsWithEditor?: boolean;
 }) {
   if (activeRule === null) {
     return null;
@@ -103,6 +105,7 @@ export default function CreateWaveInlineGroupRuleEditor({
       return (
         <CreateWaveInlineGroupXtdhGrant
           networkPresentation={networkPresentation}
+          scrollResultsWithEditor={scrollResultsWithEditor}
           beneficiaryGrantId={draft.group.is_beneficiary_of_grant_id}
           beneficiaryGrantMatchMode={
             draft.group.is_beneficiary_of_grant_match_mode
