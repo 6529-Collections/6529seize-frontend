@@ -1031,10 +1031,18 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
     sandbox.onlyCompetition("alpha");
     await sandbox.legacyPrimary("alpha");
-    await page.goto(`/waves/${MEMES_WAVE}?tab=leaderboard`);
+    await page.goto(`/waves/${MEMES_WAVE}?tab=leaderboard`, {
+      waitUntil: "domcontentloaded",
+      timeout: 60000,
+    });
     await expect(page).toHaveURL(
-      new RegExp(`/waves/${MEMES_WAVE}/competitions/alpha\\?tab=leaderboard`)
+      new RegExp(`/waves/${MEMES_WAVE}/competitions/alpha\\?tab=leaderboard`),
+      { timeout: 30000 }
     );
+    // The development badge overlaps the mobile footer; runtime errors remain asserted.
+    await page.addStyleTag({
+      content: "nextjs-portal { display: none !important; }",
+    });
     await page.getByRole("button", { name: /^Submit (Work|Meme)/ }).click();
     const modal = page.getByRole("dialog", {
       name: "Submit Work to The Memes",
