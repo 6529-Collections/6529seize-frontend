@@ -134,7 +134,9 @@ tabs. The collection lets you choose a different competition at any time.
 
 - After a submission is accepted, its entry opens with a confirmation naming
   the competition and **View my entry**. **My submissions** is available on the
-  leaderboard and direct-entry view for your own signed-in profile.
+  leaderboard and direct-entry view for your own signed-in profile when you have
+  entries. It stays hidden while the initial lookup is loading or confirms no
+  entries; a failed lookup keeps the control available so you can retry.
   On the leaderboard, it is a text button beside **Drop**. When the toolbar
   needs two rows, view and sort controls occupy the top row; **My submissions**
   aligns left and **Drop** aligns right below.

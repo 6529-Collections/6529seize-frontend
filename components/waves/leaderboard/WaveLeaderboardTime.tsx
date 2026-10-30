@@ -25,6 +25,7 @@ interface WaveLeaderboardTimeProps {
   readonly wave: ApiWave;
   readonly className?: string | undefined;
   readonly fullBleed?: boolean | undefined;
+  readonly withTopMargin?: boolean | undefined;
 }
 
 const AUTO_EXPAND_LIMIT = 5;
@@ -39,6 +40,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   wave,
   className,
   fullBleed = false,
+  withTopMargin = true,
 }) => {
   const {
     allDecisions,
@@ -181,7 +183,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
     >
       {multiDecision ? (
         <div
-          className={`tw-mt-2 tw-box-border tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/70 tw-@container/timeline sm:tw-mt-4 ${
+          className={`tw-box-border tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/70 tw-@container/timeline ${withTopMargin ? "tw-mt-2 sm:tw-mt-4" : ""} ${
             isDecisionDetailsOpen ? "" : "tw-h-[38px]"
           }`}
         >

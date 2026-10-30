@@ -9448,6 +9448,129 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
   }
 
+  test("hides empty personal submissions and previews saved Main Stage artwork", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page, false, false, MEMES_WAVE);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${MEMES_WAVE}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const fixture = await response.json();
+    fixture.wave.id = MEMES_WAVE;
+    const artwork = {
+      ...fixture.drops[0],
+      id: entryDropId("alpha"),
+      drop_type: "SUBMISSION",
+      title: "Sample artwork — An Alteration",
+      content: "",
+      media: [
+        {
+          url: "https://d3lqz0a4bldqgf.cloudfront.net/drops/personal-submission-preview.png",
+          mime_type: "image/png",
+        },
+      ],
+      submission_context: {
+        status: "ACTIVE",
+        has_metadata: false,
+        is_additional_action_promised: true,
+        voting: {
+          is_open: true,
+          total_votes_given: 1250,
+          current_calculated_vote: 1250,
+          predicted_final_vote: 1250,
+          voters_count: 3,
+          place: 1,
+          context_profile_context: { can_vote: false, current: 0 },
+        },
+      },
+    };
+    await page.route(
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/**personal-submission-preview.png",
+      (route) =>
+        route.fulfill({
+          contentType: "image/png",
+          path: "public/artwork-documentation/examples/an-alteration.png",
+        })
+    );
+    const resources = await installArtworkCompetitionResources(
+      page,
+      MEMES_WAVE,
+      fixture.wave,
+      () => [artwork]
+    );
+    let hasEntry = false;
+    let failRead = false;
+    let personalReads = 0;
+    await page.route(
+      `**/v3/waves/${MEMES_WAVE}/competitions/alpha/entries?**`,
+      (route) => {
+        const url = new URL(route.request().url());
+        if (url.searchParams.get("submitter") !== PROFILE)
+          return route.fallback();
+        personalReads += 1;
+        if (failRead)
+          return route.fulfill({
+            status: 503,
+            json: { message: "Temporary personal entries failure" },
+          });
+        return route.fulfill({
+          json: pageResult(hasEntry ? [resources.entry(artwork.id)] : []),
+        });
+      }
+    );
+    await page.goto(`/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard`);
+    await dismissNextDevTools(page);
+    await expect.poll(() => personalReads).toBeGreaterThan(0);
+    const trigger = page.getByRole("button", {
+      name: "My submissions",
+      exact: true,
+    });
+    await expect(trigger).toHaveCount(0);
+    failRead = true;
+    await page.reload();
+    await trigger.click();
+    const dialog = page.getByRole("dialog", {
+      name: "My submissions",
+      exact: true,
+    });
+    await expect(dialog.getByRole("alert")).toContainText(
+      "Couldn’t load submissions."
+    );
+    await expect(
+      dialog.getByText(
+        "You haven’t submitted an entry to this competition yet."
+      )
+    ).toHaveCount(0);
+    failRead = false;
+    hasEntry = true;
+    await dialog.getByRole("button", { name: "Retry", exact: true }).click();
+    await expect(
+      dialog.getByText(artwork.title, { exact: true })
+    ).toBeVisible();
+    const close = dialog.getByRole("button", {
+      name: "Close my submissions",
+      exact: true,
+    });
+    const closeBox = await close.boundingBox();
+    expect(closeBox).not.toBeNull();
+    expect(closeBox!.width).toBe(44);
+    expect(closeBox!.height).toBe(44);
+    await expectNoHorizontalOverflow(page);
+    await testInfo.attach("my-submissions-with-artwork", {
+      body: await page.screenshot({
+        path: testInfo.outputPath("my-submissions-with-artwork.png"),
+      }),
+      contentType: "image/png",
+    });
+    await close.click();
+    await expect(dialog).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+    expect(sandbox.requests).toHaveLength(0);
+  });
+
   test("filters Additional Action across pages, views, retries and narrow layouts", async ({
     page,
   }, testInfo) => {
@@ -9554,6 +9677,22 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       ? [1440, 1024, 390, 320]
       : [390, 320]) {
       await page.setViewportSize({ width, height: 900 });
+      await scroller.evaluate((element) =>
+        element.scrollTo({ top: 0, behavior: "instant" })
+      );
+      const navigationTab = await page
+        .getByRole("tab", { name: "Leaderboard", exact: true })
+        .boundingBox();
+      const timeline = await page
+        .getByRole("button", { name: "Toggle decision timeline", exact: true })
+        .boundingBox();
+      expect(navigationTab).not.toBeNull();
+      expect(timeline).not.toBeNull();
+      // The page already supplies the gap below navigation; do not double it.
+      const timelineGap =
+        timeline!.y - (navigationTab!.y + navigationTab!.height);
+      expect(timelineGap).toBeGreaterThanOrEqual(16);
+      expect(timelineGap).toBeLessThanOrEqual(20);
       if (width >= 1024) {
         await expect(
           page.getByRole("tablist", { name: "Sort options", exact: true })
@@ -9579,12 +9718,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             .locator("..")
         ).toBeInViewport({ ratio: 1 });
         expect(
-          (
-            await page
-              .getByRole("checkbox", { name: "Additional Action", exact: true })
-              .locator("..")
-              .boundingBox()
-          )!.height
+          (await page
+            .getByRole("checkbox", { name: "Additional Action", exact: true })
+            .locator("..")
+            .boundingBox())!.height
         ).toBeGreaterThanOrEqual(44);
       }
       await testInfo.attach(`additional-action-${width}px`, {
