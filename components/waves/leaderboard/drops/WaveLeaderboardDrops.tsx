@@ -116,7 +116,7 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
       );
     }
     return additionalActionOnly ? (
-      <output className="tw-block tw-p-6 tw-text-sm tw-text-iron-300">
+      <output className="tw-block tw-p-6 tw-text-sm tw-font-light tw-text-iron-500">
         {t(locale, "memes.additionalAction.empty")}
       </output>
     ) : (

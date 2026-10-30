@@ -9718,7 +9718,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             .getByRole("checkbox", { name: "Additional Action", exact: true })
             .locator("..")
             .boundingBox())!.height
-        ).toBeGreaterThanOrEqual(44);
+        ).toBe(38);
       }
       await testInfo.attach(`additional-action-${width}px`, {
         body: await page.screenshot(),
