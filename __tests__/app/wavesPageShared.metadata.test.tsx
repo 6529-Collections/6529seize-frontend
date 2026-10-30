@@ -1,3 +1,6 @@
+jest.mock("@/app/waves/public-wave-drop.server", () => ({
+  fetchPublicWaveDrop: jest.fn().mockResolvedValue(null),
+}));
 import { commonApiFetch } from "@/services/api/common-api";
 import { buildWavesMetadata } from "@/app/waves/waves-page.shared";
 
@@ -40,6 +43,25 @@ describe("buildWavesMetadata", () => {
     jest.clearAllMocks();
   });
 
+  it.each([
+    [{ divider: "42" }, "/waves/wave-1"],
+    [{ drop: "old-drop", divider: "42" }, "/waves/wave-1?drop=old-drop"],
+    [{ serialNo: "7", divider: "42" }, "/waves/wave-1?serialNo=7"],
+  ] as const)(
+    "excludes the unread divider from canonical URLs for %p",
+    async (params, path) => {
+      (commonApiFetch as jest.Mock).mockResolvedValue({
+        id: "wave-1",
+        name: "Public Wave",
+        author: { handle: "artist", primary_address: "0x123" },
+      });
+      const metadata = await buildWavesMetadata("wave-1", params);
+      expect(metadata.alternates?.canonical?.toString()).toBe(
+        `https://6529.io${path}`
+      );
+    }
+  );
+
   it("uses the wave OG image endpoint for wave metadata", async () => {
     (commonApiFetch as jest.Mock).mockResolvedValue({
       id: "wave-1",
@@ -65,9 +87,7 @@ describe("buildWavesMetadata", () => {
     const metadata = await buildWavesMetadata("wave-1");
 
     expect(metadata.title).toBe("The Memes - Main Stage | Brain");
-    expect(metadata.description).toBe(
-      "A public Wave for The Memes. | 6529.io"
-    );
+    expect(metadata.description).toBe("A public Wave for The Memes. | 6529.io");
     expect(metadata.openGraph).toMatchObject({
       title: "The Memes - Main Stage | Brain",
       description: "A public Wave for The Memes. | 6529.io",
@@ -109,9 +129,7 @@ describe("buildWavesMetadata", () => {
 
     const privateMetadata = await buildWavesMetadata("private-wave");
     expect(privateMetadata.robots).toEqual({ index: false, follow: true });
-    expect(privateMetadata.description).toBe(
-      "Explore this Wave. | 6529.io"
-    );
+    expect(privateMetadata.description).toBe("Explore this Wave. | 6529.io");
     expect(privateMetadata.description).not.toContain("private description");
     expect(privateMetadata.openGraph?.description).not.toContain(
       "private description"

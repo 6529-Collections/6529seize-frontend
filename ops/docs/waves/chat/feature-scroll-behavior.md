@@ -74,6 +74,22 @@ On Apple mobile only, new drops can stay pending until you return to bottom.
 - Keyboard and app-shell spacing behavior is documented in
   [Mobile Keyboard and Bottom Navigation Layout](../../navigation/feature-android-keyboard-layout.md).
 
+## Direct Post Links Without JavaScript
+
+A public `/waves/{waveId}?drop={dropId}` or `?serialNo={number}` link includes
+that selected post in the initial page HTML, even when it is older than the
+latest ten posts. The preview includes the author, publication date in UTC,
+plain-text content, images, and links to other attached media. A storm includes
+up to ten parts; longer storms offer guidance to connect and read the rest.
+Private, direct-message, moderated, inaccessible, and wrong-wave posts do not
+produce a public post preview. An unavailable selection does not substitute
+unrelated latest posts. Links without a post selection retain the recent feed.
+
+Browser loading states, the signed-out connect-wallet gate, and the interactive
+post overlay apply to these links as described in the User Journey section.
+Supported `locale` query values format the publication day for that locale;
+preview labels currently fall back to English where translations are missing.
+
 ## Related Pages
 
 - [Wave Chat Index](README.md)
