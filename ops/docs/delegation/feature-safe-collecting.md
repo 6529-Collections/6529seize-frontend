@@ -56,7 +56,7 @@ subscriptions keep working as if every wallet were one.
    - `Already collecting`: combine the wallets you use (up to four, including
      old addresses); move your best NFTs to a vault; appoint a manager for the
      vault; review who can act for your wallets in the Wallet Checker.
-   Every step links to the tool that does it.
+     Every step links to the tool that does it.
 6. **Common tasks** (`#safe-tasks`): combine wallets, appoint a manager, let a
    wallet mint for another, choose where airdrops go, set the primary address,
    lock or unlock a wallet, remove a wallet or delegation, check any wallet.
@@ -99,11 +99,16 @@ airdrops benefit switch to versions without subscriptions.
 - Copy is message-backed in `i18n/messages/safeCollecting.en-US.json` and
   `i18n/messages/delegationTapGuide.en-US.json`, including the All tools cards,
   the menu labels and the page metadata.
-- Only `en-US` exists. Readers using `en-GB`, `fr-FR`, `es-ES` or `de-DE` see
-  English text on Safe Collecting and the TAP Guide; numbers, lists and dates
-  still use their locale's formatting.
-- Follow-up: translate `safeCollecting.*` and `delegation.tapGuide.*` with the
-  other delegation pages, tracked in 6529-Collections/6529seize-frontend#4214.
+- Safe Collecting and the TAP Guide have complete dictionaries for `en-US`,
+  `en-GB`, `fr-FR`, `es-ES` and `de-DE`, including safety warnings and metadata.
+- The collector guide, design explanation and signing-order simulator at
+  `/network/tdh/consolidation` use the same five locales. Dynamic wallet limits,
+  activation dates and simulator values still come from the existing settings
+  and interpolation paths.
+- Other delegation tools and legacy FAQ articles retain their existing locale
+  coverage; these dictionaries do not translate all delegation forms.
+- Guided consolidation instructions wrap full wallet addresses inside their
+  cards on narrow screens, including a 375px viewport.
 
 ## Source
 

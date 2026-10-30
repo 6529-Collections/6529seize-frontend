@@ -14,7 +14,7 @@
 
 :global(
   .layout-root[data-mobile="false"][data-narrow="true"][data-offcanvas="true"][data-right-open="false"]
-) {
+):has(.root) {
   overflow-x: clip;
 }
 
@@ -23,7 +23,7 @@
      sidebar shift so the route's right edge stays anchored during transition. */
   :global(
     .layout-root[data-mobile="false"][data-narrow="true"][data-offcanvas="true"][data-right-open="false"]
-  ) {
+  ):has(.root) {
     --about-route-width: calc(
       100% - (var(--expanded-width) - var(--collapsed-width))
     );

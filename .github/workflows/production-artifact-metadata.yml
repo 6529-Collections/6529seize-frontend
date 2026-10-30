@@ -20,7 +20,7 @@ jobs:
   resolve:
     name: Resolve uploaded production artifact
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 12
     outputs:
       artifact_id: ${{ steps.resolve.outputs.artifact_id }}
       artifact_digest: ${{ steps.resolve.outputs.artifact_digest }}
@@ -43,9 +43,6 @@ jobs:
           gh api --paginate \
             "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts?per_page=100" \
             --jq '.artifacts' | jq -s 'add' > "$metadata_root/artifacts.json"
-          gh api --paginate \
-            "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs?filter=all&per_page=100" \
-            --jq '.jobs' | jq -s 'add' > "$metadata_root/jobs.json"
           jq -e \
             --arg name "production-frontend-${GITHUB_SHA}-${GITHUB_RUN_ID}" \
             --arg sha "$GITHUB_SHA" \
@@ -62,9 +59,13 @@ jobs:
                 .workflow_run.head_sha == $sha
               )
             ' "$metadata_root/artifacts.json" > "$metadata_root/artifact.json"
-          # Failed-job reruns retain the earlier successful builder and its
-          # artifact. Bind the artifact to that attempt, not the current one.
-          producer_attempt="$(jq -er \
+          # GitHub can publish the artifact before its jobs API reflects the
+          # completed builder. Retry only that incomplete metadata state.
+          for producer_poll in {1..48}; do
+            gh api --paginate \
+              "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs?filter=all&per_page=100" \
+              --jq '.jobs' | jq -s 'add' > "$metadata_root/jobs.json"
+            producer_attempt="$(jq -er \
             --slurpfile artifact "$metadata_root/artifact.json" \
             --arg sha "$GITHUB_SHA" \
             --arg run_id "$GITHUB_RUN_ID" \
@@ -72,16 +73,39 @@ jobs:
               [.[] | select(
                 .name == "Build exact production artifact / Build exact production artifact" and
                 (.run_id | tostring) == $run_id and .head_sha == $sha and
-                .status == "completed" and .conclusion == "success" and
                 (.run_attempt | type) == "number" and
                 .run_attempt >= 1 and .run_attempt <= $current_attempt and
                 (.started_at | type) == "string" and
+                .started_at <= $artifact[0].created_at
+              )] as $builders |
+              [$builders[] | select(
+                .status == "completed" and .conclusion == "success" and
                 (.completed_at | type) == "string" and
-                .started_at <= $artifact[0].created_at and
                 .completed_at >= $artifact[0].created_at
-              )] |
-              if length != 1 then error("Expected one successful artifact producer") else .[0].run_attempt end
+              )] as $producers |
+              if ($producers | length) == 0 then
+                if any($builders[]; .status == "in_progress" and .conclusion == null and .completed_at == null)
+                then "pending"
+                else error("Expected one successful artifact producer") end
+              # Reruns copy successful jobs, including their original lifetime,
+              # into later attempts. Accept those copies only when each attempt
+              # occurs once and every lifetime is identical. Preserve the actual
+              # earliest producer attempt for independent artifact verification.
+              elif ($producers | map([.started_at, .completed_at]) | unique | length) == 1 and
+                   ($producers | map(.run_attempt) | unique | length) == ($producers | length)
+              then $producers | min_by(.run_attempt) | .run_attempt
+              else error("Expected one successful artifact producer") end
             ' "$metadata_root/jobs.json")"
+            if [ "$producer_attempt" != pending ]; then
+              break
+            fi
+            if [ "$producer_poll" -eq 48 ]; then
+              echo "::error::Successful builder completion did not become visible."
+              exit 1
+            fi
+            echo "Waiting for successful builder completion metadata ($producer_poll/48)."
+            sleep 10
+          done
           [[ "$producer_attempt" =~ ^[1-9][0-9]{0,8}$ ]]
           {
             echo "artifact_id=$(jq -r .id "$metadata_root/artifact.json")"

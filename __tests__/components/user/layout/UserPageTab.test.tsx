@@ -78,5 +78,9 @@ describe("UserPageTab", () => {
     );
 
     expect(screen.getByRole("link", { name: "xTDH Beta" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "xTDH Beta" })).toHaveAttribute(
+      "href",
+      "/bob/xtdh?address=0x1&locale=DE-de&tab=granted"
+    );
   });
 });

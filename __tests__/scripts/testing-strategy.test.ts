@@ -331,6 +331,18 @@ describe("testing strategy CI plan", () => {
     expect(plan.checks.build.required).toBe(false);
   });
 
+  it.each([
+    "components/user/following/UserPageFollowing.tsx",
+    "hooks/useFollowingList.ts",
+  ])(
+    "selects the Following browser lane for isolated runtime changes to %s",
+    (file) => {
+      const plan = createCiPlan([file]);
+      expect(plan.risk.computed_floor).toBe(3);
+      expect(plan.checks["playwright_critical_shell"]?.required).toBe(true);
+    }
+  );
+
   it("routes guarded or build-sensitive changes through build and workflow review", () => {
     const plan = createCiPlan([
       ".github/workflows/app-pr-ci.yml",
@@ -779,10 +791,10 @@ describe("testing strategy CI plan", () => {
     expect(workflow).toContain("Restore Playwright browser");
     expect(workflow).toContain("node22-pr-production-nextjs");
 
-    // PR lanes retry quickly; deployed E2E allows slow downloads and waits for
-    // a timed-out apt-get before retrying.
+    // Both PR Museum lanes and deployed E2E allow slow package downloads and
+    // wait for a timed-out apt-get before retrying.
     for (const [source, installMinutes, retryMinutes] of [
-      [workflow, 3, 3],
+      [workflow, 10, 15],
       [stagingWorkflow, 10, 15],
       [productionWorkflow, 10, 15],
     ] as const) {

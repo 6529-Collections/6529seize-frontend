@@ -2,7 +2,9 @@
 
 import { useContext } from "react";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
-import CommunityMembersFilterPanel from "./CommunityMembersFilterPanel";
+import CommunityMembersFilterPanel, {
+  type CommunityMembersFilterNavigation,
+} from "./CommunityMembersFilterPanel";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
@@ -16,7 +18,8 @@ import { t } from "@/i18n/messages";
 export default function CommunityMembersGroupFilter({
   activeGroupId,
   onGroupChange,
-}: {
+  ...navigation
+}: CommunityMembersFilterNavigation & {
   readonly activeGroupId: string | null;
   readonly onGroupChange: (group: ApiGroupFull | null) => void;
 }) {
@@ -88,6 +91,7 @@ export default function CommunityMembersGroupFilter({
 
   return (
     <CommunityMembersFilterPanel
+      {...navigation}
       key={currentCriteria.criteria.group?.id ?? "all-network-members"}
       suggestedName={t(locale, "network.groupFilter.suggestedName")}
       defaultLabel={t(locale, "network.groupFilter.defaultLabel")}

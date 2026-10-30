@@ -50,6 +50,11 @@ jest.mock("@/wagmiConfig/wagmiAppWalletConnector", () => ({
   APP_WALLET_CONNECTOR_TYPE: "app-wallet",
   createAppWalletConnector: jest.fn(),
 }));
+// A returning wallet user: the stack loads after hydration to reconnect.
+jest.mock("@/components/providers/walletSessionGate", () => ({
+  hasPersistedWalletSession: () => true,
+  subscribeToWalletSessionChanges: () => () => undefined,
+}));
 
 const walletAddress = "0x0000000000000000000000000000000000000529";
 
@@ -162,7 +167,7 @@ describe("WagmiSetup server rendering", () => {
     }
   });
 
-  it("keeps public content usable when adapter creation fails", () => {
+  it("keeps public content usable when adapter creation fails", async () => {
     jest.mocked(createAppKitAdapter).mockImplementation(() => {
       throw new Error("Wallet unavailable");
     });
@@ -171,6 +176,8 @@ describe("WagmiSetup server rendering", () => {
         <PublicContent />
       </WagmiSetup>
     );
+    // The stored session loads the wallet stack, then adapter creation fails.
+    await waitFor(() => expect(createAppKitAdapter).toHaveBeenCalledTimes(1));
     expect(
       view.getByRole("heading", { name: "Public collection" })
     ).toBeVisible();

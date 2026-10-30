@@ -23,6 +23,7 @@ import {
 import { useRef, useState } from "react";
 import DropActionTooltip from "./DropActionTooltip";
 import WaveDropActionsCopyLink from "./WaveDropActionsCopyLink";
+import WaveDropBookmarkAction from "./WaveDropBookmarkAction";
 import WaveDropActionsCopyText from "./WaveDropActionsCopyText";
 import WaveDropCurationsActionIcon from "./WaveDropCurationsActionIcon";
 import WaveDropCurationsDialog from "./WaveDropCurationsDialog";
@@ -87,7 +88,10 @@ export default function WaveDropActionsMore({
     onOpenChange?.(newIsOpen);
   };
 
-  const closeDropdown = () => handleOpenChange(false);
+  const closeDropdown = () => {
+    handleOpenChange(false);
+    buttonRef.current?.focus({ preventScroll: true });
+  };
 
   const handleDeleteClick = () => {
     handleOpenChange(false);
@@ -176,6 +180,10 @@ export default function WaveDropActionsMore({
                   onCopy={closeDropdown}
                 />
                 <WaveDropActionsCopyText drop={drop} onCopy={closeDropdown} />
+                <WaveDropBookmarkAction
+                  dropId={drop.id}
+                  onSelected={closeDropdown}
+                />
                 {quickAddCuration && (
                   <button
                     type="button"

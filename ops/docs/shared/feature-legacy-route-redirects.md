@@ -135,6 +135,9 @@ Rules:
 - Other middleware failures redirect to `/error`.
 - Paths with a dot-prefixed segment (for example `/.env` or `/.well-known/*`)
   and missing `/_next/*` files return a plain-text `404` instead of a page.
+  The one exception is `/.well-known/apple-app-site-association`, which returns
+  the 6529 Mobile iOS app association JSON on every deployment, including
+  staging without an access cookie.
 - If the destination route fails, use
   [Route Error and Not-Found Screens](feature-route-error-and-not-found.md).
 - External redirect targets can fail independently; retry from another network
