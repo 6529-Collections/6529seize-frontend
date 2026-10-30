@@ -12,6 +12,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
 
 const mockSetToast = jest.fn();
 
@@ -91,6 +97,20 @@ describe("ContentPreferencesSettings", () => {
     expect(
       await screen.findByRole("link", { name: "Open alice's profile" })
     ).toHaveAttribute("href", "/alice");
+  });
+
+  it("requests the 200x200 derivative of a blocked profile picture", async () => {
+    jest
+      .mocked(fetchBlockedProfiles)
+      .mockResolvedValue([{ ...blockedProfile, pfp: CDN_AVATAR_URL }]);
+    renderSettings();
+
+    const profileLink = await screen.findByRole("link", {
+      name: "Open alice's profile",
+    });
+    expect(getRequestedImageSrc(profileLink.querySelector("img"))).toContain(
+      scaledAvatarPath(ImageScale.W_200_H_200)
+    );
   });
 
   it("restores the profile and viewer state when unblocking fails", async () => {

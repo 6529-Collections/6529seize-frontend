@@ -49,16 +49,16 @@ const getStateClasses = (
   quiet: boolean
 ): string => {
   if (quiet && !isSelected) {
-    return `tw-border-transparent tw-bg-iron-800/60 ${interactive ? "tw-cursor-pointer desktop-hover:hover:tw-bg-iron-800" : ""}`;
+    return `tw-border-transparent tw-bg-iron-900 ${interactive ? "tw-cursor-pointer desktop-hover:hover:tw-bg-iron-800" : ""}`;
   }
   if (interactive && isSelected) {
-    return "tw-cursor-pointer tw-border-primary-400 tw-bg-primary-500/10";
+    return "tw-cursor-pointer tw-border-primary-400 tw-bg-iron-900";
   }
   if (interactive) {
     return "tw-cursor-pointer tw-border-iron-800 tw-bg-iron-900/70 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900";
   }
   if (isSelected) {
-    return "tw-border-primary-400 tw-bg-primary-500/10";
+    return "tw-border-primary-400 tw-bg-iron-900";
   }
   return "tw-border-iron-800 tw-bg-iron-900/60";
 };
@@ -148,7 +148,7 @@ export default function GroupCreateXtdhGrantRow({
       level={grantor.level}
       cicType={cicToType(grantor.cic)}
       size={ProfileBadgeSize.SMALL}
-      className={`tw-min-w-0 ${quiet ? "desktop-hover:[&_a:hover]:tw-text-iron-200 [&_a]:tw-text-iron-350 [&_p]:tw-m-0 [&_p]:tw-text-xxs [&_p]:tw-font-normal [&_p]:tw-text-iron-350" : ""} ${
+      className={`tw-min-w-0 ${quiet ? "desktop-hover:[&_a:hover]:tw-text-iron-200 [&_a]:tw-text-iron-300 [&_p]:tw-m-0 [&_p]:tw-text-xxs [&_p]:tw-font-normal [&_p]:tw-text-iron-300" : ""} ${
         shouldTruncateGrantor
           ? "[&>div>div]:tw-min-w-0 [&>div]:tw-min-w-0 [&_p]:tw-truncate"
           : ""
@@ -256,7 +256,11 @@ export default function GroupCreateXtdhGrantRow({
   );
 
   return (
-    <ContainerTag className={rowClasses} {...interactiveProps}>
+    <ContainerTag
+      data-group-criteria-card
+      className={rowClasses}
+      {...interactiveProps}
+    >
       {rowContent}
     </ContainerTag>
   );
