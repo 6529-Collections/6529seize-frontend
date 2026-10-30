@@ -228,9 +228,12 @@ it("does not persist a completed login after the network changes", async () => {
   expect(removeAuthJwt).not.toHaveBeenCalled();
 });
 
-it("reconnects and resumes through the real auth action without reopening the wallet modal", async () => {
+it("resumes the signed-in wallet when its live address returns without reopening the modal", async () => {
   mockCanSignActiveWallet = false;
-  const { params } = createActions({ canSignActiveWallet: false });
+  const { params } = createActions({
+    canSignActiveWallet: false,
+    address: undefined,
+  });
   const { result, rerender } = renderHook(useAuthRequestActions, {
     initialProps: params,
   });
@@ -243,7 +246,7 @@ it("reconnects and resumes through the real auth action without reopening the wa
   rerender(params);
   mockCanSignActiveWallet = true;
   mockSeizeConnectOpen = false;
-  rerender({ ...params, canSignActiveWallet: true });
+  rerender({ ...params, address: ADDRESS, canSignActiveWallet: true });
   await waitFor(() =>
     expect(params.setActiveProfileProxy).toHaveBeenCalledWith(proxy)
   );
@@ -272,3 +275,28 @@ it.each([true, false])(
     expect(mockSeizeConnect).not.toHaveBeenCalled();
   }
 );
+
+it("cancels a queued proxy switch when the saved signed-in wallet changes", async () => {
+  mockCanSignActiveWallet = false;
+  const { params } = createActions({ canSignActiveWallet: false });
+  const { result, rerender } = renderHook(useAuthRequestActions, {
+    initialProps: params,
+  });
+  await act(async () => {
+    await result.current.onActiveProfileProxy(proxy);
+  });
+  mockSeizeConnectOpen = true;
+  rerender(params);
+  mockWalletAddress = "0x2222222222222222222222222222222222222222";
+  mockCanSignActiveWallet = true;
+  rerender({
+    ...params,
+    address: mockWalletAddress,
+    canSignActiveWallet: true,
+  });
+  expect(params.signMessage).not.toHaveBeenCalled();
+  expect(persistSessionResponse).not.toHaveBeenCalled();
+  expect(params.setToast).toHaveBeenLastCalledWith(
+    expect.objectContaining({ type: "error" })
+  );
+});
