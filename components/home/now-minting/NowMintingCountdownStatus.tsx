@@ -34,7 +34,7 @@ const STATUS_CONFIGS: Record<StatusType, StatusConfig> = {
     blackDivText: "All editions have been minted!",
   },
   finalized: {
-    icon: <ClockIcon className="tw-size-7 tw-text-iron-300" />,
+    icon: <ClockIcon className="tw-size-5 tw-text-iron-300 sm:tw-size-7" />,
     iconBg: "tw-bg-white/5",
     iconRing: "tw-ring-white/10",
     topLeftText: "Mint Complete",
@@ -68,11 +68,13 @@ export default function NowMintingCountdownStatus({
       </div>
       <div className="tw-flex tw-h-14 tw-items-center tw-justify-center tw-gap-3 tw-rounded-md tw-border tw-border-white/10 tw-bg-iron-950 tw-shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]">
         <div
-          className={`tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-ring-1 ${config.iconBg} ${config.iconRing}`}
+          className={`tw-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-ring-1 ${type === "finalized" ? "tw-size-6 sm:tw-size-8" : "tw-size-8"} ${config.iconBg} ${config.iconRing}`}
         >
           {config.icon}
         </div>
-        <span className="tw-text-sm tw-font-medium tw-text-iron-100">
+        <span
+          className={`tw-font-medium tw-text-iron-100 ${type === "finalized" ? "tw-text-xs sm:tw-text-sm" : "tw-text-sm"}`}
+        >
           {config.blackDivText}
         </span>
       </div>

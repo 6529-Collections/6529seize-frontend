@@ -17,6 +17,38 @@ Frontend staging retains its existing `ops/**`-only push exclusion. Dispatch
 `deploy-staging.yml` on `1a-staging` when an authorized ops-only change needs an
 actual deployment.
 
+The staging build first verifies that the committed help artifacts match the
+production publication profile. It then generates the staging profile, including
+staging-only help records, and verifies that those generated files remain unchanged
+through packaging. Staging-generated help data does not belong in the production
+source snapshot.
+
+### Shared staging queue
+
+Frontend staging serializes whole deployment runs with `staging-deploy` and
+`cancel-in-progress: false`. An active run finishes its pinned source and verified
+artifact even if a newer `1a-staging` push queues during its build. The server
+fetches complete history when its checkout is shallow, requires that source to
+remain in staging history, prepares the run's exact SHA in a temporary detached
+worktree, and retains artifact checksums and exact local and HTTP version checks.
+It does not substitute the latest branch head or rebuild on the server.
+
+Under the instance deployment lock, the healthy running app's SHA must be an
+ancestor of, or equal to, the candidate SHA. Older or divergent reruns, unavailable
+history, and an unhealthy or unknown running version fail before activation.
+The live checkout remains unchanged, including on rejection, so a legacy PM2
+restart or rollback continues to use its original files. The temporary source
+worktree is removed after the deployment attempt; the immutable app release
+remains independent of it. A fresh host with no existing app can deploy normally.
+Intentional rollbacks use a new reviewed revert commit through the normal
+workflow; automatic recovery to the previous healthy runtime after failed
+activation remains unchanged.
+
+The default queue retains one pending run. A later push can replace that pending
+run while preserving the active run, so shared staging pushes must preserve all
+previous integration changes. Separate staging E2E can overlap a later deployment
+and does not block the deployment queue.
+
 ## AWS deployment credentials
 
 Frontend deployment jobs use GitHub OIDC and separate scoped IAM roles. Set

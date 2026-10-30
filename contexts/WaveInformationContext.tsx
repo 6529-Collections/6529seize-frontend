@@ -11,24 +11,35 @@ import {
   type ReactNode,
 } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import type { SidebarTab } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
 
 interface WaveInformationRequest {
   readonly waveId: string;
   readonly overlay: boolean;
   readonly id: string;
   readonly route: string;
-  readonly view: "about" | "notifications";
+  readonly view: string;
+  readonly viewTitle?: string;
+  readonly tab?: SidebarTab;
+  readonly scrollTop?: number;
 }
 interface WaveInformationHistoryState {
   readonly waveInformation?: unknown;
   readonly waveInformationView?: unknown;
+  readonly waveInformationViewTitle?: unknown;
 }
 interface WaveInformationState {
   readonly request: WaveInformationRequest | null;
   readonly open: (waveId: string, overlay?: boolean) => void;
   readonly close: () => void;
-  readonly openNotifications: () => void;
+  readonly openSubview: (view: string, title: string) => void;
   readonly back: () => void;
+  readonly prepareNavigation: (
+    destination: string,
+    tab: SidebarTab,
+    scrollTop: number
+  ) => void;
+  readonly returnFromNavigation: (() => void) | null;
   readonly registerDesktopHandler: (
     handler: (waveId: string) => void
   ) => () => void;
@@ -61,12 +72,48 @@ export function WaveInformationProvider({
   );
   const [storedRequest, setStoredRequest] =
     useState<WaveInformationRequest | null>(null);
+  const navigationReturn = useRef<{
+    request: WaveInformationRequest;
+    destination: string;
+  } | null>(null);
+  const [returnDestination, setReturnDestination] = useState<string | null>(
+    null
+  );
   const [lastRoute, setLastRoute] = useState(route);
   if (lastRoute !== route) {
     setLastRoute(route);
-    setStoredRequest(null);
+    setStoredRequest((current) => (current?.route === route ? current : null));
   }
   const request = storedRequest?.route === route ? storedRequest : null;
+  useEffect(() => {
+    const saved = navigationReturn.current;
+    if (
+      saved &&
+      route !== saved.request.route &&
+      pathname !== saved.destination
+    ) {
+      navigationReturn.current = null;
+      setReturnDestination(null);
+    }
+  }, [pathname, route]);
+  const prepareNavigation = useCallback(
+    (destination: string, tab: SidebarTab, scrollTop: number) => {
+      if (!request?.overlay || request.view !== "about") return;
+      const next = new URL(destination, window.location.href);
+      if (next.origin !== window.location.origin) return;
+      navigationReturn.current = {
+        request: { ...request, tab, scrollTop },
+        destination: next.pathname,
+      };
+      setReturnDestination(next.pathname);
+    },
+    [request]
+  );
+  const returnFromNavigation = useCallback(() => {
+    if (traversing.current) return;
+    traversing.current = true;
+    window.history.back();
+  }, []);
   const open = useCallback(
     (waveId: string, overlay = true) => {
       if (traversing.current) return;
@@ -91,28 +138,37 @@ export function WaveInformationProvider({
     },
     [route]
   );
-  const openNotifications = useCallback(() => {
-    if (!request?.overlay || traversing.current) return;
-    const state = window.history.state as WaveInformationHistoryState | null;
-    if (
-      state?.waveInformation !== request.id ||
-      state.waveInformationView === "notifications"
-    )
-      return;
-    window.history.pushState(
-      { ...state, waveInformationView: "notifications" },
-      "",
-      window.location.href
-    );
-    setStoredRequest({ ...request, view: "notifications" });
-  }, [request]);
+  const openSubview = useCallback(
+    (view: string, title: string) => {
+      if (!request?.overlay || traversing.current) return;
+      const state = window.history.state as WaveInformationHistoryState | null;
+      if (
+        state?.waveInformation !== request.id ||
+        state.waveInformationView !== "about" ||
+        view === "about"
+      )
+        return;
+      window.history.pushState(
+        {
+          ...state,
+          waveInformationView: view,
+          waveInformationViewTitle: title,
+        },
+        "",
+        window.location.href
+      );
+      setStoredRequest({ ...request, view, viewTitle: title });
+    },
+    [request]
+  );
   const back = useCallback(() => {
     const state = window.history.state as WaveInformationHistoryState | null;
     if (
       traversing.current ||
       !request?.overlay ||
       state?.waveInformation !== request.id ||
-      state.waveInformationView !== "notifications"
+      request.view === "about" ||
+      state.waveInformationView !== request.view
     )
       return;
     traversing.current = true;
@@ -120,13 +176,13 @@ export function WaveInformationProvider({
   }, [request]);
   const close = useCallback(() => {
     if (traversing.current) return;
+    navigationReturn.current = null;
+    setReturnDestination(null);
     const state = window.history.state as WaveInformationHistoryState | null;
     if (request?.overlay && state?.waveInformation === request.id) {
       traversing.current = true;
       // Close dismisses the whole sheet, including its optional subview entry.
-      window.history.go(
-        state.waveInformationView === "notifications" ? -2 : -1
-      );
+      window.history.go(state.waveInformationView !== "about" ? -2 : -1);
     }
     setStoredRequest(null);
   }, [request]);
@@ -150,8 +206,8 @@ export function WaveInformationProvider({
         (history.state as { waveInformation?: unknown } | null)
           ?.waveInformation === request.id;
       if (leavingView && ownsEntry) {
-        // Navigation from About replaces its temporary entry, so Back returns
-        // directly to the original view. Keep Next's state and history wrapper.
+        // Keep Next's state and history wrapper while removing sheet metadata
+        // from the destination. Ordinary links replace the temporary entry.
         let nextState = data;
         if (
           data !== null &&
@@ -165,9 +221,21 @@ export function WaveInformationProvider({
             stateWithoutInformation,
             "waveInformationView"
           );
+          Reflect.deleteProperty(
+            stateWithoutInformation,
+            "waveInformationViewTitle"
+          );
           nextState = stateWithoutInformation;
         }
-        originalReplace(nextState, unused, url);
+        if (
+          navigationReturn.current?.request.id === request.id &&
+          navigationReturn.current.destination === next.pathname
+        ) {
+          // Group inspection retains the sheet visit for app/browser Back.
+          originalPush(nextState, unused, url);
+        } else {
+          originalReplace(nextState, unused, url);
+        }
         return;
       }
       originalPush(data, unused, url);
@@ -184,18 +252,38 @@ export function WaveInformationProvider({
       const state = event.state as {
         waveInformation?: unknown;
         waveInformationView?: unknown;
+        waveInformationViewTitle?: unknown;
       } | null;
-      setStoredRequest((current) =>
-        current && state?.waveInformation === current.id
+      const saved = navigationReturn.current?.request;
+      const currentRoute = `${window.location.pathname}?${new URLSearchParams(window.location.search).toString()}`;
+      if (
+        saved?.route === currentRoute &&
+        state?.waveInformation !== saved.id
+      ) {
+        navigationReturn.current = null;
+        setReturnDestination(null);
+      }
+      setStoredRequest((current) => {
+        const restored =
+          saved &&
+          state?.waveInformation === saved.id &&
+          currentRoute === saved.route
+            ? saved
+            : current;
+        return restored && state?.waveInformation === restored.id
           ? {
-              ...current,
+              ...restored,
               view:
-                state.waveInformationView === "notifications"
-                  ? "notifications"
+                typeof state.waveInformationView === "string"
+                  ? state.waveInformationView
                   : "about",
+              viewTitle:
+                typeof state.waveInformationViewTitle === "string"
+                  ? state.waveInformationViewTitle
+                  : "",
             }
-          : null
-      );
+          : null;
+      });
     };
     window.addEventListener("popstate", onBack);
     return () => window.removeEventListener("popstate", onBack);
@@ -205,11 +293,25 @@ export function WaveInformationProvider({
       request,
       open,
       close,
-      openNotifications,
+      openSubview,
       back,
+      prepareNavigation,
+      returnFromNavigation:
+        pathname === returnDestination ? returnFromNavigation : null,
       registerDesktopHandler,
     }),
-    [request, open, close, openNotifications, back, registerDesktopHandler]
+    [
+      request,
+      open,
+      close,
+      openSubview,
+      back,
+      prepareNavigation,
+      returnFromNavigation,
+      returnDestination,
+      pathname,
+      registerDesktopHandler,
+    ]
   );
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }

@@ -48,8 +48,10 @@ export function useCollectionDelegationReads(options: {
   readonly address: string | undefined;
   readonly isConnected: boolean;
   readonly collection: DelegationCollection;
+  /** Poll cadence for the reads: `false` unless a write was just confirmed. */
+  readonly refetchInterval: number | false;
 }) {
-  const { address, isConnected, collection } = options;
+  const { address, isConnected, collection, refetchInterval } = options;
 
   const [outgoingDelegations, setOutgoingDelegations] = useState<
     ContractDelegation[]
@@ -75,7 +77,8 @@ export function useCollectionDelegationReads(options: {
     ),
     query: {
       enabled: isConnected,
-      refetchInterval: 10000,
+      refetchInterval,
+      refetchOnWindowFocus: true,
     },
   });
 
@@ -103,7 +106,8 @@ export function useCollectionDelegationReads(options: {
     ),
     query: {
       enabled: isConnected && outgoingDelegations.length > 0,
-      refetchInterval: 10000,
+      refetchInterval,
+      refetchOnWindowFocus: true,
     },
   });
 
@@ -136,7 +140,8 @@ export function useCollectionDelegationReads(options: {
     ),
     query: {
       enabled: isConnected,
-      refetchInterval: 10000,
+      refetchInterval,
+      refetchOnWindowFocus: true,
     },
   });
 
@@ -164,7 +169,8 @@ export function useCollectionDelegationReads(options: {
     ),
     query: {
       enabled: isConnected && incomingDelegations.length > 0,
-      refetchInterval: 10000,
+      refetchInterval,
+      refetchOnWindowFocus: true,
     },
   });
 

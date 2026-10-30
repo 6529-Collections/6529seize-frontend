@@ -34,7 +34,7 @@ function toDayIndex(year: number, month: number, day: number): number {
 
 // Index of the calendar day an instant falls on. Differences between indexes
 // are calendar days, so a 23h or 25h DST day still counts as exactly one day.
-function getCalendarDayIndex(
+export function getCalendarDayIndex(
   milliseconds: number,
   timeZone: string | undefined
 ): number {

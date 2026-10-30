@@ -1,6 +1,9 @@
 import { act, renderHook } from "@testing-library/react";
 import { useCompetitionEvents } from "@/hooks/competitions/useCompetitionEvents";
-import { invalidateCompetitionWave } from "@/services/api/competitions-api";
+import {
+  invalidateCompetitionAuthors,
+  invalidateCompetitionWave,
+} from "@/services/api/competitions-api";
 
 let listener: (data: unknown) => void;
 const mockUnsubscribe = jest.fn();
@@ -17,6 +20,7 @@ jest.mock("@tanstack/react-query", () => ({
 }));
 jest.mock("@/services/api/competitions-api", () => ({
   invalidateCompetitionWave: jest.fn().mockResolvedValue(undefined),
+  invalidateCompetitionAuthors: jest.fn().mockResolvedValue(undefined),
 }));
 const event = (id: string, wave = "wave") => ({
   event_id: id,
@@ -80,4 +84,29 @@ it("cancels queued refreshes when changing waves or unmounting", () => {
 it("does not subscribe when explicitly disabled", () => {
   renderHook(() => useCompetitionEvents("wave", false));
   expect(mockSubscribe).not.toHaveBeenCalled();
+});
+
+it("refreshes public authors once for a decision burst while ordinary updates leave them alone", () => {
+  renderHook(() => useCompetitionEvents("wave"));
+  act(() => {
+    listener({
+      ...event("vote"),
+      event_type: "COMPETITION_ENTRY_VOTE_CHANGED",
+    });
+    jest.advanceTimersByTime(1000);
+  });
+  expect(invalidateCompetitionAuthors).not.toHaveBeenCalled();
+  act(() => {
+    listener({
+      ...event("winner-status"),
+      event_type: "COMPETITION_ENTRY_STATUS_CHANGED",
+    });
+    listener({
+      ...event("decision"),
+      event_type: "COMPETITION_DECISION_COMPLETED",
+    });
+    jest.advanceTimersByTime(1000);
+  });
+  expect(invalidateCompetitionAuthors).toHaveBeenCalledTimes(1);
+  expect(invalidateCompetitionAuthors).toHaveBeenCalledWith(mockClient, "wave");
 });

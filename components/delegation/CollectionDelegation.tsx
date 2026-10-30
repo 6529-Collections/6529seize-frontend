@@ -24,6 +24,7 @@ import type { SubDelegationForm } from "./collection-delegation/IncomingDelegati
 import { useCollectionDelegationReads } from "./collection-delegation/useCollectionDelegationReads";
 import { useCollectionLocks } from "./collection-delegation/useCollectionLocks";
 import { useDelegationRevocation } from "./collection-delegation/useDelegationRevocation";
+import { usePostWritePolling } from "./collection-delegation/usePostWritePolling";
 import type { DelegationCollection } from "./delegation-constants";
 import {
   DELEGATION_PAGE_DESCRIPTION_CLASS_NAME,
@@ -97,10 +98,15 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     return networkResolution === DELEGATION_CONTRACT.chain_id;
   }
 
+  // Reads are fetched once and again when the tab is shown; they only poll for
+  // a short window after one of the writes below is confirmed.
+  const { refetchInterval, startPostWritePolling } = usePostWritePolling();
+
   const delegationReads = useCollectionDelegationReads({
     address: accountResolution.address,
     isConnected: accountResolution.isConnected,
     collection: props.collection,
+    refetchInterval,
   });
 
   const {
@@ -109,7 +115,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     showDelegationToast,
     clearDelegationToast,
     setToastVisibility,
-  } = useDelegationToast();
+  } = useDelegationToast({ onSuccess: startPostWritePolling });
 
   const revocation = useDelegationRevocation({ showDelegationToast });
 
@@ -126,6 +132,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     address: accountResolution.address,
     isConnected: accountResolution.isConnected,
     collection: props.collection,
+    refetchInterval,
     showDelegationToast,
   });
 
