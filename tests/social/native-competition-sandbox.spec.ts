@@ -9498,16 +9498,17 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(toggle).not.toBeChecked();
     await expect(list).toContainText("Ordinary artwork 0");
     // Clicking the label is the complete interaction, including on touch screens.
-    await toggle
+    await page
+      .getByRole("checkbox", { name: "Additional Action", exact: true })
       .locator("..")
       .getByText("Additional Action", { exact: true })
       .click();
     await expect(toggle).toBeChecked();
     await expect(list).toContainText("Promised artwork 51");
     await expect(list).not.toContainText("Ordinary artwork");
-    const scroller = list.locator(
-      'xpath=ancestor::div[contains(@class,"tw-overflow-y-auto")][1]'
-    );
+    const scroller = page
+      .getByRole("list", { name: "Leaderboard drops", exact: true })
+      .locator('xpath=ancestor::div[contains(@class,"tw-overflow-y-auto")][1]');
     await scroller.evaluate((element) =>
       element.scrollTo({ top: element.scrollHeight, behavior: "instant" })
     );
@@ -9547,9 +9548,18 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(toggle).toBeChecked();
         await expect(list).not.toContainText("Ordinary artwork");
         await expectNoHorizontalOverflow(page);
-        await expect(toggle.locator("..")).toBeInViewport({ ratio: 1 });
+        await expect(
+          page
+            .getByRole("checkbox", { name: "Additional Action", exact: true })
+            .locator("..")
+        ).toBeInViewport({ ratio: 1 });
         expect(
-          (await toggle.locator("..").boundingBox())!.height
+          (
+            await page
+              .getByRole("checkbox", { name: "Additional Action", exact: true })
+              .locator("..")
+              .boundingBox()
+          )!.height
         ).toBeGreaterThanOrEqual(44);
       }
       await testInfo.attach(`additional-action-${width}px`, {

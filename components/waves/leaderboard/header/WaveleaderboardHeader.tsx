@@ -26,6 +26,7 @@ import {
   getActionsRemeasureVariant,
   getHeaderRowFlexClass,
   getHeaderControlsRowClass,
+  getHeaderSortMode,
   getLeaderboardViewModes,
   HeaderViewModeTabs,
   MeasurementProbes,
@@ -401,8 +402,10 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
     [measurements, showPriceActions]
   );
   const showAdditionalActionFilter = isMemesWave && !!onAdditionalActionChange;
-  const sortMode =
-    isLargeScreen && !showAdditionalActionFilter ? "tabs" : "dropdown";
+  const sortMode = getHeaderSortMode({
+    isLargeScreen,
+    showAdditionalActionFilter,
+  });
 
   const onTogglePriceFilters = () => {
     if (hasActivePriceFilters) {
@@ -462,17 +465,14 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
         <div
           ref={controlsRowRef}
           data-testid="leaderboard-header-controls-row"
-          className={
-            showAdditionalActionFilter
-              ? "tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-2"
-              : getHeaderControlsRowClass({
-                  flexClass: controlsRowFlexClass,
-                  basisClass: controlsRowBasisClass,
-                  compactSubmissionControls,
-                  balanceSubmissionRows,
-                  enableControlsScroll: layout.enableControlsScroll,
-                })
-          }
+          className={getHeaderControlsRowClass({
+            flexClass: controlsRowFlexClass,
+            basisClass: controlsRowBasisClass,
+            compactSubmissionControls,
+            balanceSubmissionRows,
+            enableControlsScroll: layout.enableControlsScroll,
+            showAdditionalActionFilter,
+          })}
         >
           <HeaderViewModeTabs
             refObject={viewModeTabsRef}
