@@ -843,6 +843,9 @@ test("shared post stays in view after URL cleanup and delayed loading", async ({
     await expect.poll(() => held).toBeGreaterThan(0);
     await expect(post(20)).not.toBeVisible();
     await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
+    // Keep data unavailable beyond the old three-second reveal deadline.
+    // The jump must survive a slow response, not only a delayed render.
+    await page.waitForTimeout(4500);
   } finally {
     target.release();
   }

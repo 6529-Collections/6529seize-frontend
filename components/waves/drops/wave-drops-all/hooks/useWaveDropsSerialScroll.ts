@@ -458,7 +458,12 @@ export const useWaveDropsSerialScroll = ({
         return;
       }
 
-      const didReveal = await waitAndRevealDrop(activeSerialTarget);
+      // An existing page request can still be filling the cache. Give target
+      // data the same readiness window as its rendered row.
+      const didReveal = await waitAndRevealDrop(
+        activeSerialTarget,
+        TARGET_RENDER_TIMEOUT
+      );
 
       if (signal.aborted) {
         scrollOperationLockRef.current = false;

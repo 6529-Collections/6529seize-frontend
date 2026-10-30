@@ -995,12 +995,12 @@ describe("WaveDropsAll", () => {
       const { rerender, props } = renderComponent();
       rerender(<WaveDropsAll {...props} initialDrop={10} />);
       await waitFor(() =>
-        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10)
+        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10, 15000)
       );
       rerender(<WaveDropsAll {...props} initialDrop={null} />);
       rerender(<WaveDropsAll {...props} initialDrop={20} />);
       await waitFor(() =>
-        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(20)
+        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(20, 15000)
       );
     });
 
@@ -1442,7 +1442,7 @@ describe("WaveDropsAll", () => {
       expect(dropsProps.suspendLightDropHydration).toBe(true);
 
       await waitFor(() => {
-        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10);
+        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10, 15000);
       });
 
       await waitFor(() => {
@@ -1511,7 +1511,7 @@ describe("WaveDropsAll", () => {
         expect(dropsProps.suspendLightDropHydration).toBe(true);
 
         await waitFor(() => {
-          expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10);
+          expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10, 15000);
         });
 
         await waitFor(() => {
@@ -1663,7 +1663,7 @@ describe("WaveDropsAll", () => {
       );
 
       await waitFor(() => {
-        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10);
+        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10, 15000);
       });
 
       await act(async () => {
@@ -1780,7 +1780,7 @@ describe("WaveDropsAll", () => {
       dropsProps.targetDropRef.current = targetElement;
 
       await waitFor(() => {
-        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10);
+        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10, 15000);
       });
 
       await waitFor(() => {
