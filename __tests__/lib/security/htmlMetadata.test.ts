@@ -1,6 +1,8 @@
 /**
  * @jest-environment node
  */
+jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
+
 import { loadHtmlMetadata } from "@/lib/security/htmlMetadata";
 
 const MIB = 1024 * 1024;

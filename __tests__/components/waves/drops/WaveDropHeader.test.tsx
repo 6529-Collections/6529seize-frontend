@@ -100,6 +100,25 @@ describe("WaveDropHeader", () => {
     ).toBeInTheDocument();
   });
 
+  it("does not render an author profile link, tooltip or level for anonymous submissions", () => {
+    const drop = createDrop("alice", "0xabc", ApiProfileClassification.Ai);
+    drop.author.is_anonymous = true;
+    render(
+      <WaveDropHeader
+        drop={drop}
+        isStorm={false}
+        currentPartIndex={0}
+        partsCount={1}
+        showWaveInfo={false}
+      />
+    );
+    expect(screen.getByText("Anonymous")).toBeInTheDocument();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("tooltip-wrapper")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("user-cic-level")).not.toBeInTheDocument();
+    expect(screen.queryByText("🤖")).not.toBeInTheDocument();
+  });
+
   it("does not render a robot emoji for non-AI profiles", () => {
     render(
       <WaveDropHeader

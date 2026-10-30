@@ -1,3 +1,5 @@
+jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
+
 import type { NextRequest } from "next/server";
 import { ReadableStream as NodeReadableStream } from "node:stream/web";
 import { MessagePort as NodeMessagePort } from "node:worker_threads";

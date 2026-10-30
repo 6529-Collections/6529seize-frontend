@@ -30,6 +30,10 @@ export class ApiCreateDropRequest {
     'mentioned_groups'?: Array<ApiDropGroupMention>;
     'poll'?: ApiCreateDropPollRequest;
     /**
+    * Profile IDs invited to collaborate. Included in the signed payload. An empty array opts into managed artist credits.
+    */
+    'collaborator_ids'?: Array<string>;
+    /**
     * When true, create the drop with generated external link previews hidden. Omit or set to false to leave previews visible. Signature-required drops must include this field in the signed payload when present.
     */
     'hide_link_preview'?: boolean;
@@ -92,6 +96,12 @@ export class ApiCreateDropRequest {
             "name": "poll",
             "baseName": "poll",
             "type": "ApiCreateDropPollRequest",
+            "format": ""
+        },
+        {
+            "name": "collaborator_ids",
+            "baseName": "collaborator_ids",
+            "type": "Array<string>",
             "format": ""
         },
         {

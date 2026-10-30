@@ -329,6 +329,10 @@ export const MemesWaveFooterView: React.FC<MemesWaveFooterViewProps> = ({
 
 const MemesWaveFooter: React.FC<MemesWaveFooterProps> = (props) => {
   const stats = useMemesWaveFooterStats();
+  const { onPrefetchQuickVote } = props;
+  React.useEffect(() => {
+    if (stats.isAvailable) onPrefetchQuickVote?.();
+  }, [onPrefetchQuickVote, stats.isAvailable]);
 
   return <MemesWaveFooterView {...props} stats={stats} />;
 };

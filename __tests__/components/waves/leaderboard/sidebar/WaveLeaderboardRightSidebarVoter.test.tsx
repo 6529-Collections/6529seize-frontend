@@ -1,6 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import { WaveLeaderboardRightSidebarVoter } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoter";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
 
 const baseVoter = {
   voter: { handle: "alice", pfp: "" },
@@ -21,6 +27,23 @@ describe("WaveLeaderboardRightSidebarVoter", () => {
     expect(screen.getByText("+2")).toHaveClass("tw-text-green");
     expect(screen.getByText("+2").closest("a")).toBeNull();
     expect(screen.queryByText("-1")).not.toBeInTheDocument();
+  });
+
+  it("requests the 200x200 derivative of a CDN profile picture", () => {
+    const voter = {
+      ...baseVoter,
+      voter: { handle: "alice", pfp: CDN_AVATAR_URL },
+    };
+    const { container } = render(
+      <WaveLeaderboardRightSidebarVoter
+        voter={voter as any}
+        position={1}
+        creditType={ApiWaveCreditType.Rep}
+      />
+    );
+    expect(getRequestedImageSrc(container.querySelector("img"))).toContain(
+      scaledAvatarPath(ImageScale.W_200_H_200)
+    );
   });
 
   it("shows negative indicator when negative votes exist", () => {

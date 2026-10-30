@@ -27,6 +27,33 @@
   - `/the-memes?sort=meme&sort_dir=asc&szn=12`
   - `/the-memes?sort=age&sort_dir=asc&year=4`
 
+## Phone Layout
+
+- Below 640px, Year and Season sit side by side above a sticky sort bar.
+- The slideshow button sits beside the title and collection link when there is
+  room, and wraps below them with a small gap on narrow screens.
+- The sort label, direction control, and options stay on one row at every screen
+  size. When the options do not fit, scroll them horizontally to reach every sort.
+  The active option moves into view when selected, without scrolling the page
+  vertically.
+- Cards use square, contained artwork previews in two columns. Each card keeps
+  its name, active sort metric, token number, media badge, and signed-in ownership
+  status. Long names show up to two lines; open the card for its full name.
+- Below 1024px, Collection, Year, Season, and Volume open bottom sheets with
+  an in-sheet close button. Select an option, tap outside, press Escape, or drag
+  the sheet header down to dismiss. Focus returns to the trigger on dismissal.
+- Tablet and desktop grids retain their existing layout. Desktop Year and Season
+  dropdowns use the same light fill for selected options as the mobile sheets,
+  and their triggers use equal widths and the same compact styling as a profile’s
+  Collected view at every screen size.
+- At 1024px and wider on the web, the sort options, including Volume, use the
+  editorial text style: white text and a blue underline for the selected
+  option, with gray inactive text. The options spread across the available row
+  width. Sort direction uses up/down arrows with an unframed desktop toggle.
+  The sort label stays visible at every screen size. Smaller screens and the
+  native app keep the shared soft gray pills and light selected pill. Year and
+  Season keep their framed dropdown triggers.
+
 ## URL Query Model
 
 - `sort` accepts these normalized values:
@@ -79,8 +106,8 @@
    from page one. When controls change quickly, only results for the latest
    selection appear; earlier requests cannot append cards or change pagination.
 10. When sorting by `Meme`, cards are grouped under meme headings. Heading order
-   follows `sort_dir`; cards inside each heading are ordered by card id
-   ascending.
+    follows `sort_dir`; cards inside each heading are ordered by card id
+    ascending.
 11. Scroll near the page bottom to load more pages.
 12. Open a card to navigate to `/the-memes/{id}`.
 

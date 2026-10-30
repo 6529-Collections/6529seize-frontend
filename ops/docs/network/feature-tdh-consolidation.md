@@ -101,12 +101,9 @@ Two pages explain wallet consolidation:
 
 ## Localization
 
-- Copy is message-backed in `en-US` only. Other supported locales fall back
-  to `en-US` for these pages, as they do for the rest of the TDH pages.
-- Impact: readers using another locale see English text; dates and numbers
-  still use their locale's formatting.
-- Follow-up: translate `network.tdhConsolidation.*` with the other TDH pages
-  (tracked in 6529-Collections/6529seize-frontend#4214).
+- The collector guide, design explanation and simulator have complete message
+  dictionaries for `en-US`, `en-GB`, `fr-FR`, `es-ES` and `de-DE`. Other TDH
+  pages retain their existing locale coverage.
 
 ## Source
 
