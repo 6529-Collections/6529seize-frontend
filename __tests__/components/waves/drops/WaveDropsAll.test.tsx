@@ -1538,6 +1538,87 @@ describe("WaveDropsAll", () => {
       }
     );
 
+    it.each(["wheel", "touchstart", "pointerdown", "keydown"])(
+      "keeps a settled target visible through layout changes until %s input",
+      async (event) => {
+        const resizeCallbacks: (() => void)[] = [];
+        const disconnect = jest.fn();
+        const observer = jest
+          .spyOn(globalThis, "ResizeObserver")
+          .mockImplementation((callback) => {
+            const instance = {
+              observe: jest.fn(),
+              unobserve: jest.fn(),
+              disconnect,
+            };
+            resizeCallbacks.push(() => callback([], instance));
+            return instance;
+          });
+        try {
+          setupMocks({
+            waveMessages: {
+              drops: [createMockDrop({ id: "drop-50", serial_no: 50 })],
+              hasNextPage: true,
+              isLoading: false,
+              isLoadingNextPage: false,
+            },
+          });
+          mockFetchNextPage.mockResolvedValueOnce([]);
+          mockWaitAndRevealDrop.mockResolvedValueOnce(true);
+          renderComponent({ initialDrop: 10 });
+
+          const container = mockScrollContainerRef.current;
+          const target = document.createElement("div");
+          const content = document.createElement("div");
+          content.appendChild(target);
+          container.appendChild(content);
+          container.style.flexDirection = "column-reverse";
+          let scrollHeight = 1000;
+          let targetTop = 150;
+          Object.defineProperties(container, {
+            clientHeight: { configurable: true, value: 400 },
+            scrollHeight: { configurable: true, get: () => scrollHeight },
+            getBoundingClientRect: {
+              configurable: true,
+              value: () => ({ top: 100, bottom: 500, height: 400 }),
+            },
+          });
+          target.getBoundingClientRect = () =>
+            ({ top: targetTop, bottom: targetTop + 60, height: 60 }) as DOMRect;
+          const scrollTo = jest.fn();
+          container.scrollTo = scrollTo;
+          dropsProps.targetDropRef.current = target;
+          await waitFor(() => expect(scrollTo).toHaveBeenCalled());
+          await act(async () => {
+            await jest.advanceTimersByTimeAsync(600);
+          });
+          expect(dropsProps.suspendLightDropHydration).toBe(false);
+          scrollTo.mockClear();
+
+          act(() => resizeCallbacks.forEach((callback) => callback()));
+          expect(scrollTo).not.toHaveBeenCalled();
+          scrollHeight = 1200;
+          targetTop = -500;
+          act(() => resizeCallbacks.forEach((callback) => callback()));
+          expect(scrollTo).toHaveBeenCalledWith({
+            behavior: "auto",
+            top: -770,
+          });
+
+          scrollTo.mockClear();
+          act(() =>
+            container.dispatchEvent(new Event(event, { bubbles: true }))
+          );
+          expect(disconnect).toHaveBeenCalled();
+          scrollHeight = 1400;
+          act(() => resizeCallbacks.forEach((callback) => callback()));
+          expect(scrollTo).not.toHaveBeenCalled();
+        } finally {
+          observer.mockRestore();
+        }
+      }
+    );
+
     it("waits beyond three seconds for a delayed target row to render", async () => {
       setupMocks({
         waveMessages: {

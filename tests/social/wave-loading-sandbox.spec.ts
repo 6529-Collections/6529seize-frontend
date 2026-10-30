@@ -231,6 +231,7 @@ test("wave list reveals a direct link after loading without following its later 
 
 const WAVE = "00000000-0000-4000-8000-000000000529";
 const ANNOUNCEMENTS = "00000000-0000-4000-8000-000000000599";
+const SHARED_POST_GUEST = process.env["USE_DEV_AUTH"] === "false";
 
 useLocalSandboxMutationGuard(
   test,
@@ -705,6 +706,10 @@ for (const width of [375, 390, 768, 1024, 1440]) {
 }
 
 async function sharedPostFixture(page: Page, baseURL: string | undefined) {
+  // Keep the copied tab as isolated from telemetry as the original fixture.
+  await page.route("https://www.googletagmanager.com/gtag/js?**", (route) =>
+    route.fulfill({ contentType: "application/javascript", body: "" })
+  );
   await page.route("**/api/drops/*/curations", (route) =>
     route.fulfill({ json: [] })
   );
@@ -849,9 +854,16 @@ test("shared post stays in view after URL cleanup and delayed loading", async ({
     await page.waitForTimeout(1000);
     await expect(post(20)).toBeInViewport();
   }
-  await incoming();
-  // The update must reach the rendered list before checking preservation.
-  await expect(post(152)).toBeAttached();
+  const composer = page.getByRole("textbox", { name: "Write a chat message" });
+  if (SHARED_POST_GUEST) {
+    await expect(composer).toBeHidden();
+  } else {
+    await expect(composer).toBeVisible();
+    await incoming();
+    // Live updates require the authenticated subscription. Check delivery before
+    // asserting position, so a missing event cannot make this test pass.
+    await expect(post(152)).toBeAttached();
+  }
   await expect(post(20)).toBeInViewport();
   await expectNoHorizontalOverflow(page);
   await page.screenshot({
@@ -860,7 +872,7 @@ test("shared post stays in view after URL cleanup and delayed loading", async ({
   await page
     .getByRole("button", { name: "Scroll to bottom", exact: true })
     .click();
-  await expect(post(152)).toBeInViewport();
+  await expect(post(SHARED_POST_GUEST ? 151 : 152)).toBeInViewport();
   await expect(post(20)).not.toBeInViewport();
 });
 
@@ -880,7 +892,9 @@ test("copied shared post links settle in a separate tab and when reopened", asyn
     waitUntil: "domcontentloaded",
   });
   await expect(post(20)).toBeInViewport({ timeout: 30000 });
-  const row = page.locator("#drop-20");
+  const row = page
+    .getByRole("region", { name: "Wave chat file upload area", exact: true })
+    .locator("#drop-20");
   if (testInfo.project.use.hasTouch) {
     await post(20).tap({ trial: true });
     const box = await post(20).boundingBox();
@@ -891,7 +905,9 @@ test("copied shared post links settle in a separate tab and when reopened", asyn
         type: "touchStart",
         touchPoints: [{ x: box.x + 15, y: box.y + 10 }],
       });
-      await page.waitForTimeout(750);
+      await expect(
+        page.getByRole("dialog", { name: "Drop actions", exact: true })
+      ).toBeAttached();
       await touch.send("Input.dispatchTouchEvent", {
         type: "touchCancel",
         touchPoints: [],
@@ -905,10 +921,14 @@ test("copied shared post links settle in a separate tab and when reopened", asyn
       .tap();
   } else {
     await row.hover();
-    await row
-      .getByRole("button", { name: "More actions", exact: true })
+    if (!SHARED_POST_GUEST) {
+      await row
+        .getByRole("button", { name: "More actions", exact: true })
+        .click();
+    }
+    await (SHARED_POST_GUEST ? row : page)
+      .getByRole("button", { name: "Copy link", exact: true })
       .click();
-    await page.getByRole("button", { name: "Copy link", exact: true }).click();
   }
   const copied = await page.evaluate(() => navigator.clipboard.readText());
   expect(copied).toBe(`${baseURL}/waves/${WAVE}?serialNo=20`);

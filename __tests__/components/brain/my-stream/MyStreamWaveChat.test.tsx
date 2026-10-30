@@ -411,8 +411,14 @@ describe("MyStreamWaveChat", () => {
     globalThis.location.hash = "message";
     const historyState = jest
       .spyOn(globalThis.history, "state", "get")
-      .mockReturnValue({
+      .mockReturnValueOnce({
         waveTabSelection: { waveId: "10", value: "CHAT" },
+        __NA: true,
+        __PRIVATE_NEXTJS_INTERNALS_TREE: "previous-tree",
+      })
+      .mockReturnValue({
+        __NA: true,
+        __PRIVATE_NEXTJS_INTERNALS_TREE: "updated-tree",
       });
     try {
       await act(async () => {
@@ -434,6 +440,8 @@ describe("MyStreamWaveChat", () => {
       expect(replaceMock).toHaveBeenLastCalledWith(
         {
           waveTabSelection: { waveId: "10", value: "CHAT" },
+          __NA: true,
+          __PRIVATE_NEXTJS_INTERNALS_TREE: "updated-tree",
         },
         ""
       );
