@@ -1,6 +1,6 @@
 "use client";
 
-import SpinnerLoader from "@/components/common/SpinnerLoader";
+import NotificationsLoading from "@/components/notifications/NotificationsLoading";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { NotificationDisplayItem } from "@/types/feed.types";
 import type { ReactNode } from "react";
@@ -40,11 +40,7 @@ export default function NotificationsContent({
   markNotificationIdsAsRead,
 }: NotificationsContentProps): ReactNode {
   if (isLoadingProfile) {
-    return (
-      <div className="tw-flex tw-min-h-full tw-flex-1 tw-flex-col tw-items-center tw-justify-center tw-py-8">
-        <SpinnerLoader text="Loading profile..." />
-      </div>
-    );
+    return <NotificationsLoading />;
   }
 
   if (showProxyDisabledState) {
@@ -69,11 +65,7 @@ export default function NotificationsContent({
   }
 
   if (showLoader) {
-    return (
-      <div className="tw-flex tw-min-h-full tw-flex-1 tw-flex-col tw-items-center tw-justify-center tw-py-8">
-        <SpinnerLoader text="Loading notifications..." />
-      </div>
-    );
+    return <NotificationsLoading />;
   }
 
   if (showNoItems) {

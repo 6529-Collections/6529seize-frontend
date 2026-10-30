@@ -27,6 +27,17 @@ interface Props {
 }
 
 const TOKEN_METADATA_FETCH_TIMEOUT_MS = 10_000;
+// Read once and refresh when the tab is shown again, instead of polling. The
+// stale time skips focus refetches within a minute of the last read.
+const ON_CHAIN_READ_QUERY = {
+  refetchOnWindowFocus: true,
+  staleTime: 60_000,
+} as const;
+// This view shows tokens the API has not indexed yet, often one just minted
+// and opened in a new tab while the read RPC is a block behind. Until the
+// token URI arrives, retry every 10 s for up to two minutes.
+const MISSING_TOKEN_RETRY_INTERVAL_MS = 10_000;
+const MISSING_TOKEN_RETRY_LIMIT = 12;
 
 export default function NextGenTokenOnChain(props: Readonly<Props>) {
   const capacitor = useCapacitor();
@@ -50,7 +61,13 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "tokenURI",
     query: {
-      refetchInterval: 10000,
+      ...ON_CHAIN_READ_QUERY,
+      refetchInterval: (query) =>
+        query.state.data === undefined &&
+        query.state.dataUpdateCount + query.state.errorUpdateCount <
+          MISSING_TOKEN_RETRY_LIMIT
+          ? MISSING_TOKEN_RETRY_INTERVAL_MS
+          : false,
     },
     args: [props.token_id],
   });
@@ -125,9 +142,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
     abi: NEXTGEN_CORE.abi,
     chainId: NEXTGEN_CHAIN_ID,
     functionName: "ownerOf",
-    query: {
-      refetchInterval: 10000,
-    },
+    query: ON_CHAIN_READ_QUERY,
     args: [props.token_id],
   });
 

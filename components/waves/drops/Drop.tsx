@@ -26,7 +26,6 @@ import type {
 import ParticipationDrop from "./participation/ParticipationDrop";
 import WaveDrop from "./WaveDrop";
 import WinnerDrop from "./winner/WinnerDrop";
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import { useCompetitionDrop } from "@/hooks/competitions/useCompetitionDrop";
 export type { DropInteractionParams } from "./drop.types";
 export { DropLocation } from "./drop.types";
@@ -78,11 +77,7 @@ function CompetitionDrop(props: DropProps) {
 }
 
 export default function Drop(props: DropProps) {
-  return isMultiCompetitionEnabled() ? (
-    <CompetitionDrop {...props} />
-  ) : (
-    <DropContent {...props} />
-  );
+  return <CompetitionDrop {...props} />;
 }
 
 function DropContent({

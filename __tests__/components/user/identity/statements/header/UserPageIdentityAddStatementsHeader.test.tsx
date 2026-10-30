@@ -149,7 +149,16 @@ describe("UserPageIdentityAddStatementsHeader", () => {
     const container = document.createElement("div");
     container.innerHTML = renderToString(header);
     document.body.appendChild(container);
+    const serverButton = within(container).getByRole("button", {
+      name: "About identity statements",
+    });
+    expect(serverButton).toBeDisabled();
     render(header, { container, hydrate: true });
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "About identity statements" })
+      ).toBeEnabled()
+    );
     const user = userEvent.setup();
     const button = screen.getByRole("button", {
       name: "About identity statements",
@@ -195,7 +204,7 @@ describe("UserPageIdentityAddStatementsHeader", () => {
     }
   });
 
-  it("closes on page scroll and can open again", () => {
+  it("keeps guidance open through automatic scroll adjustments after activation", () => {
     mockedUseSeize.mockReturnValue({ address: undefined });
     render(<UserPageIdentityAddStatementsHeader profile={profile} />);
     const button = screen.getByRole("button", {
@@ -204,13 +213,75 @@ describe("UserPageIdentityAddStatementsHeader", () => {
     const bounds = jest
       .spyOn(button, "getBoundingClientRect")
       .mockReturnValue(new DOMRect(200, 300, 32, 32));
+    try {
+      fireEvent.click(button);
+      bounds.mockReturnValue(new DOMRect(200, 297, 32, 32));
+      fireEvent.scroll(document);
+      expect(button).toHaveAttribute("aria-expanded", "true");
+      expect(screen.getByRole("tooltip")).toBeVisible();
+    } finally {
+      bounds.mockRestore();
+    }
+  });
+
+  it("closes on a wheel scroll gesture and can open again", () => {
+    mockedUseSeize.mockReturnValue({ address: undefined });
+    render(<UserPageIdentityAddStatementsHeader profile={profile} />);
+    const button = screen.getByRole("button", {
+      name: "About identity statements",
+    });
     fireEvent.click(button);
-    bounds.mockReturnValue(new DOMRect(200, 200, 32, 32));
-    fireEvent.scroll(window);
+    fireEvent.wheel(window);
     expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
     fireEvent.click(button);
     expect(screen.getByRole("tooltip")).toBeVisible();
-    bounds.mockRestore();
+  });
+
+  it.each([
+    "ArrowDown",
+    "ArrowUp",
+    "ArrowLeft",
+    "ArrowRight",
+    "PageDown",
+    "PageUp",
+    "Home",
+    "End",
+    " ",
+  ])("dismisses guidance for the page-scroll key %s", (key) => {
+    mockedUseSeize.mockReturnValue({ address: undefined });
+    render(<UserPageIdentityAddStatementsHeader profile={profile} />);
+    fireEvent.click(
+      screen.getByRole("button", { name: "About identity statements" })
+    );
+    fireEvent.keyDown(window, { key });
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+  });
+
+  it("dismisses on a touch scroll gesture outside the guidance", () => {
+    mockedUseSeize.mockReturnValue({ address: undefined });
+    render(<UserPageIdentityAddStatementsHeader profile={profile} />);
+    fireEvent.click(
+      screen.getByRole("button", { name: "About identity statements" })
+    );
+    fireEvent.touchMove(document.body);
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+  });
+
+  it("keeps guidance open for Space activation and gestures within the tooltip", async () => {
+    mockedUseSeize.mockReturnValue({ address: undefined });
+    const user = userEvent.setup();
+    render(<UserPageIdentityAddStatementsHeader profile={profile} />);
+    const button = screen.getByRole("button", {
+      name: "About identity statements",
+    });
+    await user.click(button);
+    await user.keyboard(" ");
+    const tooltip = screen.getByRole("tooltip");
+    fireEvent.wheel(tooltip);
+    fireEvent.touchMove(tooltip);
+    fireEvent.keyDown(tooltip, { key: "PageDown" });
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    expect(tooltip).toBeVisible();
   });
 
   it("ignores a queued scroll-into-view event and unrelated scrollers after a click", () => {

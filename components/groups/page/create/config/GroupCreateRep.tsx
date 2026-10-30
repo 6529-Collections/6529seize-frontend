@@ -1,6 +1,10 @@
 "use client";
 
-import { GROUP_CREATE_PANEL_STYLES } from "../GroupCreate.styles";
+import {
+  GROUP_CREATE_PANEL_STYLES,
+  GROUP_CREATE_TITLE_STYLES,
+  GROUP_CREATE_DESCRIPTION_STYLES,
+} from "../GroupCreate.styles";
 import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
 import GroupCreateDirection from "./common/GroupCreateDirection";
 import IdentitySearch, {
@@ -37,10 +41,8 @@ export default function GroupCreateRep({
         <div className="tw-flex tw-flex-col">
           <div className="tw-mb-4 tw-flex tw-items-center tw-justify-between">
             <div>
-              <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
-                Rep
-              </p>
-              <p className="tw-m-0 tw-mt-0.5 tw-text-sm tw-text-iron-400">
+              <p className={GROUP_CREATE_TITLE_STYLES}>Rep</p>
+              <p className={GROUP_CREATE_DESCRIPTION_STYLES}>
                 Set the giver, rep category, and minimum rep.
               </p>
             </div>

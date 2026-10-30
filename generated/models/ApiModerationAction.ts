@@ -19,6 +19,7 @@ export enum ApiModerationAction {
     Block = 'BLOCK',
     RevokeOverride = 'REVOKE_OVERRIDE',
     MarkReviewed = 'MARK_REVIEWED',
+    ResolveDeletedReport = 'RESOLVE_DELETED_REPORT',
     Suppress = 'SUPPRESS',
     Restore = 'RESTORE',
     Quarantine = 'QUARANTINE',
