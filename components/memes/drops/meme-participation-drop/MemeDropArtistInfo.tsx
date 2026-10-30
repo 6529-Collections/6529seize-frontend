@@ -1,4 +1,5 @@
 "use client";
+import { MemeCollaboratorCredits } from "@/components/waves/memes/collaborations/MemeCollaboratorCredits";
 
 import Link from "next/link";
 import UserCICAndLevel, {
@@ -67,6 +68,9 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
         >
           {drop.wave.name}
         </Link>
+        <div className="tw-w-full">
+          <MemeCollaboratorCredits collaborators={drop.collaborators} />
+        </div>
       </div>
     </div>
   );

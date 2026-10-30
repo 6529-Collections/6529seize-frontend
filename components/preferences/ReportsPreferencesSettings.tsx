@@ -39,6 +39,8 @@ const getReportStatusLabel = (
       return t(locale, "contentModeration.report.contentRemoved");
     case ApiContentModerationReportStatus.Withdrawn:
       return t(locale, "contentModeration.preferences.reports.withdrawn");
+    case ApiContentModerationReportStatus.ResolvedDeleted:
+      return t(locale, "contentModeration.report.contentDeleted");
     case ApiContentModerationReportStatus.ResolvedAllowed:
       return t(locale, "contentModeration.report.noActionTaken");
   }

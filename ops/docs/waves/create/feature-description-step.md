@@ -3,26 +3,20 @@
 ## Overview
 
 For standalone Chat waves, First post appears beside the name on the first
-screen. Click Review wave, then Confirm and create. Rank, Approve, and
-subwaves keep a Description step before their final read-only Overview.
+screen. Click Review wave, then Confirm and create. Subwaves keep a Description
+step before their final read-only Overview.
 
 ## Location in the Site
 
 - Full-page flow: `/waves/create`
 - Desktop modal flow: `?create=wave` (same step sequence)
 - Step label: `Description`
-- Available for `Chat`, `Rank`, and `Approve`
+- Available for new chat waves and subwaves
 
 ## Step Paths
 
 - Standalone `Chat`: `Start a chat wave` -> `Review`
 - Chat subwave: `Setup` -> `Access` -> `Guidelines` -> `Description` -> `Overview`
-- Scheduled `Rank`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
-  `Guidelines` -> `Description` -> `Overview`
-- `Perpetual Ranking`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` ->
-  `Guidelines` -> `Description` -> `Overview`
-- `Approve`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
-  `Guidelines` -> `Description` -> `Overview`
 
 ## What You Can Add
 
@@ -91,7 +85,7 @@ subwaves keep a Description step before their final read-only Overview.
 - [Wave Create Modal Entry Points](feature-modal-entry-points.md)
 - [Wave Creation Setup Step](feature-overview-step.md)
 - [Wave Creation Guidelines Step](feature-rules-step.md)
-- [Wave Creation Outcomes Setup](feature-outcomes-step.md)
+- [Wave Creation Outcomes Setup](../competitions/setup/feature-outcomes-step.md)
 - [Wave Drop Composer Metadata Submissions](../composer/feature-metadata-submissions.md)
 - [Wave Participation Flow](../flow-wave-participation.md)
 - [Docs Home](../../README.md)

@@ -65,7 +65,9 @@ export function AdditionalDetailsSection({
   title,
   icon,
   children,
+  compactMobile = false,
 }: {
+  readonly compactMobile?: boolean;
   readonly title: string;
   readonly icon: ComponentType<SVGProps<SVGSVGElement>>;
   readonly children: ReactNode;
@@ -82,7 +84,9 @@ export function AdditionalDetailsSection({
         <h3 className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
           {title}
         </h3>
-        <div className="tw-h-px tw-min-w-10 tw-flex-grow tw-bg-gradient-to-r tw-from-iron-700 tw-to-transparent" />
+        <div
+          className={`tw-h-px tw-min-w-10 tw-flex-grow tw-bg-gradient-to-r tw-from-iron-700 tw-to-transparent ${compactMobile ? "tw-hidden sm:tw-block" : ""}`}
+        />
       </div>
       {children}
     </section>
@@ -91,7 +95,9 @@ export function AdditionalDetailsSection({
 
 export function ArweaveLinkRow({
   row,
+  compactMobile = false,
 }: {
+  readonly compactMobile?: boolean;
   readonly row: AdditionalDetailsMediaRow;
 }) {
   const safeExternalUrl = getSafeExternalUrl(row.url);
@@ -111,14 +117,14 @@ export function ArweaveLinkRow({
           target="_blank"
           rel="noopener noreferrer"
           title={row.url}
-          className="tw-block tw-min-w-0 tw-max-w-full tw-break-all tw-font-mono tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400 tw-no-underline hover:tw-text-iron-100 md:tw-truncate md:tw-break-normal"
+          className={`tw-block tw-min-w-0 tw-max-w-full tw-break-all tw-font-medium tw-no-underline hover:tw-text-iron-100 md:tw-truncate md:tw-break-normal ${compactMobile ? "tw-font-sans tw-text-xs tw-leading-[18px] tw-text-iron-500 sm:tw-font-mono sm:tw-text-sm sm:tw-leading-5 sm:tw-text-iron-400" : "tw-font-mono tw-text-sm tw-leading-5 tw-text-iron-400"}`}
         >
           {row.url}
         </Link>
       ) : (
         <span
           title={row.url}
-          className="tw-block tw-min-w-0 tw-max-w-full tw-break-all tw-font-mono tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-500 md:tw-truncate md:tw-break-normal"
+          className={`tw-block tw-min-w-0 tw-max-w-full tw-break-all tw-font-medium tw-text-iron-500 md:tw-truncate md:tw-break-normal ${compactMobile ? "tw-font-sans tw-text-xs tw-leading-[18px] sm:tw-font-mono sm:tw-text-sm sm:tw-leading-5" : "tw-font-mono tw-text-sm tw-leading-5"}`}
         >
           {row.url}
         </span>
@@ -154,7 +160,11 @@ export function ArweaveLinkRow({
 export function MetadataCard({
   label,
   value,
+  compactMobile = false,
+  className = "",
 }: {
+  readonly compactMobile?: boolean;
+  readonly className?: string;
   readonly label: string;
   readonly value: string | number;
 }) {
@@ -162,12 +172,16 @@ export function MetadataCard({
   const tooltipId = buildTooltipId("meme-property", label, displayValue);
 
   return (
-    <div className="tw-flex tw-min-w-24 tw-flex-1 tw-flex-col tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-3 tw-py-2">
-      <span className="tw-mb-1 tw-block tw-truncate tw-text-xs tw-font-normal tw-uppercase tw-leading-4 tw-tracking-wide tw-text-iron-500">
+    <div
+      className={`tw-min-w-24 tw-flex-1 tw-flex-col tw-rounded-lg tw-border tw-border-solid tw-bg-iron-900 tw-px-3 ${compactMobile ? "tw-border-transparent tw-py-2.5 sm:tw-border-iron-800 sm:tw-py-2" : "tw-border-iron-800 tw-py-2"} ${className || "tw-flex"}`}
+    >
+      <span
+        className={`tw-mb-1 tw-block tw-font-normal tw-uppercase tw-leading-4 tw-text-iron-500 ${compactMobile ? "tw-break-words tw-text-[10px] tw-tracking-[0.06em] sm:tw-truncate sm:tw-text-xs sm:tw-tracking-wide" : "tw-truncate tw-text-xs tw-tracking-wide"}`}
+      >
         {label}
       </span>
       <span
-        className="tw-truncate tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-200"
+        className={`tw-font-medium tw-text-iron-200 ${compactMobile ? "tw-break-words tw-text-[13px] tw-leading-[18px] sm:tw-truncate sm:tw-text-xs sm:tw-leading-4" : "tw-truncate tw-text-xs tw-leading-4"}`}
         data-tooltip-id={tooltipId}
       >
         {displayValue}

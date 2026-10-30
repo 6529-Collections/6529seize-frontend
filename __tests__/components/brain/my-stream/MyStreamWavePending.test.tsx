@@ -57,6 +57,7 @@ it.each<SupportedLocale>(["en-US", "en-GB", "fr-FR", "es-ES", "de-DE"])(
     mockLocale = locale;
     render(<MyStreamWavePending waveId="next" />);
     expect(screen.getByRole("heading")).toHaveTextContent("Next Wave");
+    expect(screen.getAllByRole("status")).toHaveLength(1);
     expect(screen.getByRole("status")).toHaveTextContent("Loading Next Wave…");
     expect(screen.queryByRole("tab")).not.toBeInTheDocument();
     expect(screen.getByRole("heading")).toHaveAccessibleName("Next Wave");

@@ -7,6 +7,7 @@ import NowMintingCountdownLoading from "./NowMintingCountdownLoading";
 import NowMintingCountdownStatus from "./NowMintingCountdownStatus";
 
 interface NowMintingCountdownProps {
+  readonly variant?: "default" | "home";
   readonly nftId: number;
   readonly contract: string;
   readonly chainId: number;
@@ -16,6 +17,7 @@ interface NowMintingCountdownProps {
 }
 
 export default function NowMintingCountdown({
+  variant = "default",
   nftId,
   contract,
   chainId,
@@ -35,6 +37,7 @@ export default function NowMintingCountdown({
     >
       <NowMintingCountdownContent
         state={state}
+        variant={variant}
         {...(hideNextDrop !== undefined && { hideNextDrop })}
       />
     </div>
@@ -43,9 +46,11 @@ export default function NowMintingCountdown({
 
 function NowMintingCountdownContent({
   state,
+  variant,
   hideNextDrop,
 }: {
   readonly state: MintCountdownState;
+  readonly variant: "default" | "home";
   readonly hideNextDrop?: boolean;
 }) {
   switch (state.type) {
@@ -61,6 +66,11 @@ function NowMintingCountdownContent({
         />
       );
     case "countdown":
-      return <NowMintingCountdownActive countdown={state.countdown} />;
+      return (
+        <NowMintingCountdownActive
+          countdown={state.countdown}
+          variant={variant}
+        />
+      );
   }
 }
