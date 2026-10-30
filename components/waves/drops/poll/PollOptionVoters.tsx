@@ -1,6 +1,6 @@
 "use client";
 
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import Button from "@/components/utils/button/Button";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import type { ApiDropPollOption } from "@/generated/models/ApiDropPollOption";
@@ -30,7 +30,7 @@ function PollVoterAvatar({
   return (
     <Image
       unoptimized
-      src={resolveIpfsUrlSync(identity.pfp)}
+      src={getScaledImageUri(identity.pfp, ImageScale.W_AUTO_H_50)}
       alt={`${label}'s avatar`}
       width={16}
       height={16}

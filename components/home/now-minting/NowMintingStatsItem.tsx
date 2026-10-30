@@ -22,7 +22,7 @@ export default function NowMintingStatsItem({
   const getValueColor = () => {
     if (status === "active") return "tw-text-emerald-400";
     if (status === "ended") return "tw-text-iron-400";
-    return appearance === "compact" ? "tw-text-iron-200" : "tw-text-iron-100";
+    return appearance === "compact" ? "tw-text-iron-50" : "tw-text-iron-100";
   };
   const compactLabelSizeClassName =
     compactLabelSize === "large" ? "tw-text-[11px]" : "tw-text-[10.5px]";
@@ -36,14 +36,14 @@ export default function NowMintingStatsItem({
       <span
         className={
           appearance === "compact"
-            ? `tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500 ${compactLabelSizeClassName}`
+            ? `tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-500 ${compactLabelSizeClassName}`
             : "tw-text-xs tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-400"
         }
       >
         {label}
       </span>
       {isLoading ? (
-        <span className="tw-h-6 tw-w-20 tw-animate-pulse tw-rounded tw-bg-iron-800" />
+        <span className="tw-h-6 tw-w-20 tw-rounded tw-bg-iron-800 motion-safe:tw-animate-pulse" />
       ) : (
         <span
           className={`${getValueColor()} ${

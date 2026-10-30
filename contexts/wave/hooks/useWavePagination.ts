@@ -341,11 +341,8 @@ export function useWavePagination({
       cancelAbort(`${waveId}-around`, "pagination_cancelled");
       delete aroundSerialNoStates.current[waveId];
 
-      // Clear pagination state
-      if (paginationStates.current[waveId]) {
-        paginationStates.current[waveId].isLoading = false;
-        paginationStates.current[waveId].promise = null;
-      }
+      // Forget pagination state; the next page request starts a fresh one
+      delete paginationStates.current[waveId];
 
       // Reset loading indicator in store
       const currentData = getData(waveId);

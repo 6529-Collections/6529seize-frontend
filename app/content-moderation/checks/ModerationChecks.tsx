@@ -2,6 +2,7 @@
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
+import { ApiModerationCheckReviewStatusEnum } from "@/generated/models/ApiModerationCheck";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate } from "@/i18n/format";
 import { t } from "@/i18n/messages";
@@ -16,15 +17,59 @@ import {
 } from "./checks.helpers";
 import CheckFilters from "./CheckFilters";
 import CheckDetail from "./CheckDetail";
+import CaseReports from "./CaseReports";
+import ModerationReviewWorkspace from "./ModerationReviewWorkspace";
 
 export default function ModerationChecks({
   profileId,
 }: {
   readonly profileId: string;
 }) {
-  const locale = useBrowserLocale();
   const search = useSearchParams();
   const params = new URLSearchParams(search.toString());
+  const filters = readCheckFilters(params);
+  const manualQueue =
+    filters.review_status === ApiModerationCheckReviewStatusEnum.NeedsReview &&
+    Object.keys(filters).every(
+      (key) => key === "review_status" || key === "case_id"
+    );
+  const locale = useBrowserLocale();
+  const selection =
+    safeCheckId(params.get("check")) ??
+    safeCheckId(params.get("report")) ??
+    safeCheckId(params.get("profile"));
+  return (
+    <div className="tw-mt-6 tw-min-w-0">
+      {!manualQueue && (
+        <>
+          <p className="tw-text-sm tw-leading-6 tw-text-iron-300">
+            {t(locale, "checks.policyNotice")}
+          </p>
+          <p className="tw-text-sm tw-leading-6 tw-text-iron-400">
+            {t(locale, "checks.privateNotice")}
+          </p>
+        </>
+      )}
+      <div className={selection ? "tw-hidden lg:tw-block" : ""}>
+        <CheckFilters params={params} onApply={navigateChecks} />
+      </div>
+      {manualQueue ? (
+        <ModerationReviewWorkspace profileId={profileId} params={params} />
+      ) : (
+        <ModerationCheckHistory profileId={profileId} params={params} />
+      )}
+    </div>
+  );
+}
+
+function ModerationCheckHistory({
+  profileId,
+  params,
+}: {
+  readonly profileId: string;
+  readonly params: URLSearchParams;
+}) {
+  const locale = useBrowserLocale();
   const filters = readCheckFilters(params);
   const selection =
     safeCheckId(params.get("check")) ??
@@ -64,20 +109,15 @@ export default function ModerationChecks({
     });
   }
   return (
-    <div className="tw-mt-6 tw-min-w-0">
-      <p className="tw-text-sm tw-leading-6 tw-text-iron-300">
-        {t(locale, "checks.policyNotice")}
-      </p>
-      <p className="tw-text-sm tw-leading-6 tw-text-iron-400">
-        {t(locale, "checks.privateNotice")}
-      </p>
-      <div className={selection ? "tw-hidden lg:tw-block" : ""}>
-        <CheckFilters
-          key={params.toString()}
-          params={params}
-          onApply={navigateChecks}
+    <div className="tw-min-w-0">
+      {filters.case_id && (
+        <CaseReports
+          key={`${profileId}:${filters.case_id}`}
+          caseId={filters.case_id}
+          profileId={profileId}
+          initiallyOpen={source === "report"}
         />
-      </div>
+      )}
       <div
         className={`tw-mt-6 tw-grid tw-min-w-0 tw-gap-5 ${selection ? "lg:tw-grid-cols-[minmax(16rem,2fr)_minmax(0,3fr)]" : ""}`}
       >
@@ -140,7 +180,9 @@ export default function ModerationChecks({
                   <span className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-text-sm tw-font-semibold tw-text-iron-100">
                     <span>{checkValueLabel(locale, item.subject_type)}</span>
                     <span className="tw-rounded-md tw-bg-iron-800 tw-px-2 tw-py-1 tw-text-xs tw-text-iron-200">
-                      {checkValueLabel(locale, item.outcome)}
+                      {t(locale, "checks.automatedOutcome", {
+                        outcome: checkValueLabel(locale, item.outcome),
+                      })}
                     </span>
                   </span>
                   <span className="tw-mt-2 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
@@ -189,6 +231,8 @@ export default function ModerationChecks({
             id={selection}
             source={source}
             profileId={profileId}
+            mobileBackOnly
+            backLabel="checks.backToList"
             onClose={closeCheck}
           />
         )}

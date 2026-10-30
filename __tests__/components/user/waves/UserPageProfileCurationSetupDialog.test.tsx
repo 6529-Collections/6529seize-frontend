@@ -6,6 +6,8 @@ import { getAdminGroupId } from "@/components/waves/create-wave/services/waveGro
 import { useProfileWaveMutation } from "@/hooks/useProfileWaveMutation";
 import { commonApiPost } from "@/services/api/common-api";
 import { useQueryClient } from "@tanstack/react-query";
+import type { ComponentProps } from "react";
+import type MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 
 jest.mock("@/components/auth/Auth", () => ({ useAuth: jest.fn() }));
 jest.mock("@/components/waves/create-wave/services/waveGroupService", () => ({
@@ -19,8 +21,21 @@ jest.mock("@/services/api/common-api", () => ({ commonApiPost: jest.fn() }));
 jest.mock("@tanstack/react-query", () => ({ useQueryClient: jest.fn() }));
 jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
   __esModule: true,
-  default: ({ isOpen, title, children }: any) =>
-    isOpen ? <section aria-label={title}>{children}</section> : null,
+  default: ({
+    isOpen,
+    title,
+    children,
+    dismissible = true,
+    onClose,
+  }: ComponentProps<typeof MobileWrapperDialog>) =>
+    isOpen ? (
+      <section aria-label={title}>
+        <button disabled={!dismissible} onClick={onClose}>
+          Close
+        </button>
+        {children}
+      </section>
+    ) : null,
 }));
 
 const useAuthMock = useAuth as jest.Mock;
@@ -126,5 +141,24 @@ describe("UserPageProfileCurationSetupDialog", () => {
     ).toHaveLength(1);
     expect(commonApiPostMock).toHaveBeenCalledTimes(3);
     expect(onReady).toHaveBeenCalledWith({ wave, curation });
+  });
+
+  it("disables dismissal during setup and restores it after a failure", async () => {
+    let rejectGroup!: (reason: Error) => void;
+    getAdminGroupIdMock.mockReturnValueOnce(
+      new Promise<string>((_resolve, reject) => {
+        rejectGroup = reject;
+      })
+    );
+    renderSetup();
+    const close = screen.getByRole("button", { name: "Close" });
+    expect(close).toBeEnabled();
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Create Curation" }));
+    });
+    expect(close).toBeDisabled();
+    await act(async () => rejectGroup(new Error("Permissions unavailable")));
+    expect(screen.getByRole("alert")).toBeVisible();
+    expect(close).toBeEnabled();
   });
 });

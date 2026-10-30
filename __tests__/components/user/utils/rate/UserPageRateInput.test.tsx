@@ -29,7 +29,7 @@ function Harness({
 }
 const amount = () => screen.getByRole("textbox", { name: "Rating amount" });
 
-it.each(["compact", "form"] as const)(
+it.each(["compact", "form", "tooltip"] as const)(
   "keeps the %s signs informational and out of the tab order",
   async (variant) => {
     const user = userEvent.setup();

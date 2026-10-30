@@ -444,7 +444,7 @@ describe("MemesWaveFooter", () => {
     fireEvent.mouseEnter(button);
     fireEvent.focus(button);
 
-    expect(onPrefetchQuickVote).toHaveBeenCalledTimes(2);
+    expect(onPrefetchQuickVote).toHaveBeenCalledTimes(3);
   });
 
   it("renders the compact collapsed pill", () => {
@@ -555,7 +555,7 @@ describe("MemesWaveFooter", () => {
     fireEvent.mouseEnter(button);
     fireEvent.focus(button);
 
-    expect(onPrefetchQuickVote).toHaveBeenCalledTimes(2);
+    expect(onPrefetchQuickVote).toHaveBeenCalledTimes(3);
   });
 
   it("ignores expanded-card clicks when no submissions remain", () => {

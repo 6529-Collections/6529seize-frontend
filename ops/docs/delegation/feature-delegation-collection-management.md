@@ -115,7 +115,9 @@ delegations for one collection scope.
 ## Limitations / Notes
 
 - Data is wallet/account specific.
-- Reads poll every 10 seconds; updates are not pushed in real time.
+- Reads load once and refresh when you return to the tab. After a write
+  confirms, they re-check every few seconds for about 30 seconds, then stop;
+  updates are not pushed in real time.
 - Field-level write form requirements are documented in
   [Delegation Write Action Routes](feature-delegation-action-flows.md).
 
