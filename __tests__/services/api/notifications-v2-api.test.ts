@@ -112,20 +112,19 @@ describe("fetchNotificationsV2", () => {
       related_wave: wave,
       additional_context: context,
     };
-    jest
-      .mocked(commonApiFetch)
-      .mockResolvedValue({
-        unread_count: 1,
-        notifications: [
-          notification,
-          {
-            ...notification,
-            id: 124,
-            additional_context: { ...context, entry_id: undefined },
-          },
-        ],
-      });
-    const result = await fetchNotificationsV2({});
+    jest.mocked(commonApiFetch).mockResolvedValue({
+      unread_count: 1,
+      notifications: [
+        notification,
+        { ...notification, id: 125, related_drops: [] },
+        {
+          ...notification,
+          id: 124,
+          additional_context: { ...context, entry_id: undefined },
+        },
+      ],
+    });
+    const result = await fetchNotificationsV2({ limit: "30" });
     expect(result.notifications).toHaveLength(1);
     expect(result.notifications[0]).toMatchObject({
       id: 123,

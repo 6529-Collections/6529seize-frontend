@@ -11087,8 +11087,8 @@
         "notifications"
       ],
       "facts": [
-        "Use Artwork alerts beside Follow on another artist's profile to opt into notifications for their new non-anonymous submissions to The Memes – Main Stage.",
-        "The bell shows a check mark when enabled. Select it again to turn alerts off. Sign in with your own profile; proxies cannot manage artwork alerts.",
+        "Open Profile actions and select Artwork alerts on another artist's profile to opt into notifications for their new non-anonymous submissions to The Memes – Main Stage.",
+        "The menu shows On with a check mark when enabled, or Off. Select Artwork alerts again to turn alerts off. Sign in with your own profile; proxies cannot manage artwork alerts.",
         "Artwork alerts and Follow are independent. Enabling alerts does not follow the artist, and following or unfollowing does not change alerts. Existing followers are not opted in.",
         "Only new confirmed Main Stage entries submitted after opt-in qualify. Existing work, other competitions, chat, edits, votes, reactions, proposals and curation do not generate artwork alerts. A new dedicated resubmission can qualify; retries of the same submission do not duplicate alerts.",
         "Anonymous entries never generate artist-specific alerts, even after identity disclosure. Private access, blocks, mutes and moderation still apply.",
@@ -11100,7 +11100,7 @@
       "related_paths": ["/waves"],
       "tags": ["notifications", "profiles"],
       "source_refs": [
-        "components/user/utils/ArtistArtworkAlertButton.tsx",
+        "hooks/useArtistArtworkAlert.tsx",
         "components/brain/notifications/NotificationArtistArtwork.tsx",
         "ops/docs/notifications/feature-artist-artwork-alerts.md"
       ]

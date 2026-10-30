@@ -2,13 +2,13 @@
 
 ## Overview
 
-Use **Artwork alerts** on an artist’s profile to be notified when they submit
-new artwork to **The Memes – Main Stage**. The bell has a check mark when alerts
-are on. This preference is separate from following the artist in your feed.
+Use **Profile actions → Artwork alerts** on an artist’s profile to be notified
+when they submit new artwork to **The Memes – Main Stage**. The menu shows
+**On** with a check mark when enabled, or **Off**. This preference is separate from following the artist in your feed.
 
 ## Location in the Site
 
-- Another identity’s profile, beside **Follow**.
+- Another identity’s profile, inside **Profile actions** beside **Follow**.
 - New alerts appear in [Notifications](feature-notifications-feed.md), where the
   **Artwork alerts** filter shows these rows.
 
@@ -19,10 +19,10 @@ Open the artist’s profile from a submission, search result, or profile link.
 ## User Journey
 
 1. Sign in with your own profile and open the artist’s profile.
-2. Select **Artwork alerts**. Wait for the saved-state confirmation.
+2. Open **Profile actions** and select **Artwork alerts**. Wait for the saved-state confirmation.
 3. New Main Stage submissions by that artist can appear in Notifications.
 4. Open the artwork title in the notification to view the specific submission.
-5. Select **Artwork alerts** again on the profile to turn future alerts off.
+5. Open **Profile actions** and select **Artwork alerts** again to turn future alerts off.
 
 ## Common Scenarios
 

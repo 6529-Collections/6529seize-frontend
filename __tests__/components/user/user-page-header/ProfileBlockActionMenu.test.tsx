@@ -7,6 +7,11 @@ import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import useProfileMute from "@/hooks/useProfileMute";
 
 jest.mock("@/hooks/useIsMobileLayoutViewport", () => jest.fn());
+jest.mock("@/hooks/useArtistArtworkAlert", () => () => ({
+  id: "artwork-alerts",
+  label: "Artwork alerts Off",
+  onSelect: jest.fn(),
+}));
 jest.mock("@/hooks/useProfileMute", () => jest.fn());
 jest.mock("@/components/compact-menu", () => ({
   CompactMenu: ({

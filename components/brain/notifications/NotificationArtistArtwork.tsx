@@ -13,11 +13,12 @@ export default function NotificationArtistArtwork({
 }) {
   const locale = useBrowserLocale();
   const context = notification.additional_context;
-  const title = context.artwork_title?.trim();
-  const artworkLabel = title ? title : t(locale, "artworkAlerts.untitled");
+  const title = context.artwork_title?.trim() ?? "";
+  const artworkLabel =
+    title.length > 0 ? title : t(locale, "artworkAlerts.untitled");
   const href = `${getCompetitionRoute(context.wave_id, context.competition_id)}?entry=${encodeURIComponent(context.entry_id)}`;
   const linkClass =
-    "tw-rounded-sm tw-font-semibold tw-text-iron-50 tw-no-underline tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-underline";
+    "tw-rounded-sm tw-font-semibold tw-text-iron-50 tw-underline tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
   return (
     <div className="tailwind-scope tw-flex tw-min-w-0 tw-items-center tw-gap-3 tw-py-3">
       <BellIcon

@@ -129,15 +129,31 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
     baseURL,
   }, testInfo) => {
     // Keep wallet balance reads deterministic; the sandbox blocks external RPC.
-    await page.route("https://rpc.walletconnect.org/v1/**", async route => {
-      const payload = route.request().postDataJSON() as { id: number; method: string } | { id: number; method: string }[];
-      const results: Record<string, string> = { eth_chainId: "0x1", eth_blockNumber: "0x1", eth_getBalance: "0x0" };
+    await page.route("https://rpc.walletconnect.org/v1/**", async (route) => {
+      const payload = route.request().postDataJSON() as
+        | { id: number; method: string }
+        | { id: number; method: string }[];
+      const results: Record<string, string> = {
+        eth_chainId: "0x1",
+        eth_blockNumber: "0x1",
+        eth_getBalance: "0x0",
+      };
       const respond = (call: { id: number; method: string }) => {
-        if (call.method === "eth_call") return { jsonrpc: "2.0", id: call.id, error: { code: -32000, message: "Contract reads are unavailable in this profile fixture" } };
+        if (call.method === "eth_call")
+          return {
+            jsonrpc: "2.0",
+            id: call.id,
+            error: {
+              code: -32000,
+              message: "Contract reads are unavailable in this profile fixture",
+            },
+          };
         expect(Object.keys(results)).toContain(call.method);
         return { jsonrpc: "2.0", id: call.id, result: results[call.method] };
       };
-      await route.fulfill({ json: Array.isArray(payload) ? payload.map(respond) : respond(payload) });
+      await route.fulfill({
+        json: Array.isArray(payload) ? payload.map(respond) : respond(payload),
+      });
     });
     const api = getSandboxApiOrigin(baseURL);
     let enabled = false;
@@ -169,26 +185,64 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
       }
     );
     await openOwnProfile(page);
-    const preferenceLoaded = page.waitForResponse(response => response.url().endsWith("/identities/following-artist-0/artwork-alerts") && response.request().method() === "GET");
+    const preferenceLoaded = page.waitForResponse(
+      (response) =>
+        response
+          .url()
+          .endsWith("/identities/following-artist-0/artwork-alerts") &&
+        response.request().method() === "GET"
+    );
     await page.goto("/following-artist-0");
     await preferenceLoaded;
-    const alert = page.getByRole("button", {
-      name: "Artwork alerts: notify me about new artwork on Main Stage",
-    });
-    await expect(alert).toBeEnabled({
-      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
-    });
-    await expect(alert).toHaveAttribute("aria-pressed", "false");
+    const mobile = (page.viewportSize()?.width ?? 0) < 1024;
+    const openAlerts = async (state: "On" | "Off") => {
+      await page
+        .getByRole("button", { name: "Profile actions", exact: true })
+        .click();
+      const alert = page.getByRole(mobile ? "button" : "menuitem", {
+        name: new RegExp(`^Artwork alerts.*${state}`),
+      });
+      await expect(alert).toBeEnabled({
+        timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+      });
+      return alert;
+    };
+    const closeActions = async () => {
+      if (mobile) {
+        const dialog = page.getByRole("dialog", {
+          name: "Profile actions",
+          exact: true,
+        });
+        await dialog
+          .getByRole("button", { name: "Close", exact: true })
+          .click();
+        await expect(dialog).toHaveCount(0);
+      } else {
+        await page.keyboard.press("Escape");
+        await expect(page.getByRole("menu")).toHaveCount(0);
+      }
+    };
     await expect(
       page.getByRole("button", { name: "Follow", exact: true })
     ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /^Artwork alerts/ })
+    ).toHaveCount(0);
+    const alert = await openAlerts("Off");
     await alert.press("Enter");
-    await expect(alert).toHaveAttribute("aria-pressed", "true");
+    await expect.poll(() => enabled).toBe(true);
     expect(followWrites).toBe(0);
+    await openAlerts("On");
     await expectNoHorizontalOverflow(page);
-    await expectAxeClean(page, { include: ['[aria-labelledby="profile-heading"]'] });
+    await expectAxeClean(page, {
+      include: [mobile ? '[role="dialog"]' : '[role="menu"]'],
+    });
     await page.screenshot({
       path: testInfo.outputPath("artwork-alerts-enabled.png"),
+    });
+    await closeActions();
+    await page.screenshot({
+      path: testInfo.outputPath("artwork-alerts-profile-header.png"),
     });
     await page.getByRole("button", { name: "Follow", exact: true }).click();
     await page.getByRole("button", { name: "Unfollow", exact: true }).click();
@@ -197,10 +251,10 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
     ).toBeVisible();
     expect(alertWrites).toBe(1);
     await page.reload();
-    await expect(alert).toHaveAttribute("aria-pressed", "true");
-    await expect(alert).toBeEnabled();
-    await alert.click();
-    await expect(alert).toHaveAttribute("aria-pressed", "false");
+    await (await openAlerts("On")).click();
+    await expect.poll(() => enabled).toBe(false);
+    await openAlerts("Off");
+    await closeActions();
     expect(alertWrites).toBe(2);
     expect(followWrites).toBe(2);
   });

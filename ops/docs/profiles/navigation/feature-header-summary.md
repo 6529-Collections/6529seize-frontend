@@ -71,8 +71,8 @@ The profile header appears on profile routes under `/{user}` and shows:
      subtle row below the identity block on smaller layouts
    - other profile, signed-in viewer with handle, and target profile with
      handle: follow/unfollow button
-   - **Artwork alerts** beside Follow independently opts into new Main Stage
-     artwork submissions by that artist; the bell has a check mark when enabled.
+   - **Profile actions → Artwork alerts** independently opts into new Main Stage
+     artwork submissions by that artist; the menu shows On with a check mark when enabled.
      See [Artist Artwork Alerts](../../notifications/feature-artist-artwork-alerts.md).
    - if that target also has a primary wallet: direct-message button appears
      beside follow/unfollow immediately; it is not gated on existing follow

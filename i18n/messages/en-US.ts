@@ -3078,11 +3078,11 @@ const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
   "artworkAlerts.label": "Artwork alerts",
+  "artworkAlerts.on": "On",
+  "artworkAlerts.off": "Off",
+  "artworkAlerts.saving": "Please wait…",
   "artworkAlerts.mainStage":
     "Notify me when this artist submits new artwork to The Memes – Main Stage.",
-  "artworkAlerts.accessibleName":
-    "Artwork alerts: notify me about new artwork on Main Stage",
-  "artworkAlerts.turnOff": "Turn off alerts for this artist’s new artwork",
   "artworkAlerts.enabled": "Artwork alerts are on.",
   "artworkAlerts.disabled": "Artwork alerts are off.",
   "artworkAlerts.ownProfile":

@@ -1,5 +1,4 @@
 import { useAuth } from "@/components/auth/Auth";
-import ArtistArtworkAlertButton from "../utils/ArtistArtworkAlertButton";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -39,65 +38,55 @@ export default function ProfileHeaderRelationshipActions({
   const directMessageAction = profile.primary_wallet
     ? () => onCreateDirectMessage(profile.primary_wallet)
     : undefined;
-  const showActionMenu =
-    moderationControls.canManageBlock &&
-    (!moderationControls.isBlocked || moderationControls.canModerate);
+  const moderationKind = moderationControls.isSuspended
+    ? ("reinstate" as const)
+    : ("suspend" as const);
+  const moderationLabel = t(
+    DEFAULT_LOCALE,
+    moderationControls.isSuspended
+      ? "contentModeration.moderator.reinstate"
+      : "contentModeration.moderator.suspend"
+  );
   const moderationAction = moderationControls.canModerate
     ? {
-        kind: moderationControls.isSuspended
-          ? ("reinstate" as const)
-          : ("suspend" as const),
-        label: t(
-          DEFAULT_LOCALE,
-          moderationControls.isSuspended
-            ? "contentModeration.moderator.reinstate"
-            : "contentModeration.moderator.suspend"
-        ),
-        onSelect: () =>
-          moderationControls.onSelectAction(
-            moderationControls.isSuspended ? "reinstate" : "suspend"
-          ),
+        kind: moderationKind,
+        label: moderationLabel,
+        onSelect: () => moderationControls.onSelectAction(moderationKind),
       }
     : undefined;
 
+  const actionMenu = (
+    <ProfileBlockActionMenu
+      handle={profile.handle}
+      blocked={moderationControls.isBlocked}
+      disabled={
+        moderationControls.isLoading || moderationControls.isActionPending
+      }
+      showPersonalActions={
+        !!connectedProfile?.handle &&
+        moderationControls.canManageBlock &&
+        !moderationControls.isBlocked
+      }
+      moderationAction={moderationAction}
+      onBlock={() => moderationControls.onSelectAction("block")}
+    />
+  );
+  if (!connectedProfile?.handle) return actionMenu;
+
   return (
-    <>
-      {connectedProfile?.handle ? (
-        <UserFollowBtn
-          handle={profile.handle}
-          blocked={moderationControls.isBlocked}
-          blockStateLoading={
-            moderationControls.isLoading || moderationControls.isBlocking
-          }
-          showFollowButton
-          showMuteButton={false}
-          unblockPending={moderationControls.isUnblocking}
-          onUnblock={() => moderationControls.onSelectAction("unblock")}
-          onDirectMessage={directMessageAction}
-          directMessageLoading={directMessageLoading}
-          beforeFollowAction={
-            showActionMenu ? (
-              <ProfileBlockActionMenu
-                handle={profile.handle}
-                disabled={
-                  moderationControls.isLoading ||
-                  moderationControls.isActionPending
-                }
-                showPersonalActions={!moderationControls.isBlocked}
-                moderationAction={moderationAction}
-                onBlock={() => moderationControls.onSelectAction("block")}
-              />
-            ) : null
-          }
-        />
-      ) : null}
-      <ArtistArtworkAlertButton
-        handle={profile.handle}
-        blocked={moderationControls.isBlocked}
-        blockStateLoading={
-          moderationControls.isLoading || moderationControls.isActionPending
-        }
-      />
-    </>
+    <UserFollowBtn
+      handle={profile.handle}
+      blocked={moderationControls.isBlocked}
+      blockStateLoading={
+        moderationControls.isLoading || moderationControls.isBlocking
+      }
+      showFollowButton
+      showMuteButton={false}
+      unblockPending={moderationControls.isUnblocking}
+      onUnblock={() => moderationControls.onSelectAction("unblock")}
+      onDirectMessage={directMessageAction}
+      directMessageLoading={directMessageLoading}
+      beforeFollowAction={actionMenu}
+    />
   );
 }
