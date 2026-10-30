@@ -158,6 +158,7 @@ export const PUBLIC_IMAGE_DIRECTORIES: ReadonlySet<string> = new Set([
   "artwork-documentation",
   "delegation-content",
   "emojis",
+  "home",
   "museum",
   "nextgen",
   "pebbles",
