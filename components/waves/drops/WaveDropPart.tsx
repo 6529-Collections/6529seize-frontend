@@ -187,7 +187,9 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
     };
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (!isInteractive) return;
+      // Nested media, link, and quote controls own their keys, as they own
+      // their clicks; only the focused post itself opens the drop.
+      if (!isInteractive || event.target !== event.currentTarget) return;
       const isActivationKey =
         event.key === "Enter" || event.key === " " || event.key === "Space";
 
