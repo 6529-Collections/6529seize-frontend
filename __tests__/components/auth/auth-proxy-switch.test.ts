@@ -27,13 +27,13 @@ jest.mock("@/services/auth/session-v2.utils", () => ({
 }));
 jest.mock("@/hooks/useSecureSign", () => ({
   ConnectionMismatchError: class extends Error {
-    readonly name = "ConnectionMismatchError";
+    override readonly name = "ConnectionMismatchError";
   },
   MobileSigningError: class extends Error {
-    readonly name = "MobileSigningError";
+    override readonly name = "MobileSigningError";
   },
   SigningProviderError: class extends Error {
-    readonly name = "SigningProviderError";
+    override readonly name = "SigningProviderError";
   },
 }));
 jest.mock("@/utils/error-sanitizer", () => ({

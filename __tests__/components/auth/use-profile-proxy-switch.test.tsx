@@ -19,15 +19,35 @@ beforeEach(() => {
   jest.useFakeTimers();
   canSignActiveWallet = false;
   seizeConnectOpen = false;
-  jest.mocked(useSeizeConnectContext).mockImplementation(
-    () =>
-      ({
-        canSignActiveWallet,
-        seizeConnect,
-        seizeConnectOpen,
-        connectedAccounts: [],
-      }) as ReturnType<typeof useSeizeConnectContext>
-  );
+  jest.mocked(useSeizeConnectContext).mockImplementation(() => ({
+    address: "0x1111111111111111111111111111111111111111",
+    walletName: undefined,
+    walletIcon: undefined,
+    isSafeWallet: false,
+    canSignActiveWallet,
+    seizeConnect,
+    seizeConnectOpen,
+    connectedAccounts: [],
+    seizeConnectFresh: () => Promise.resolve(),
+    seizeDisconnect: () => Promise.resolve(),
+    seizeDisconnectAndLogout: () => Promise.resolve(),
+    seizeDisconnectAndLogoutAll: () => Promise.resolve(),
+    seizeAcceptConnection: jest.fn(),
+    isConnected: canSignActiveWallet,
+    isWalletConnectionPending: false,
+    hasActiveWalletAddress: true,
+    hasValidWalletAuth: true,
+    isSigningOutAll: false,
+    isAuthenticated: true,
+    connectionState: canSignActiveWallet ? "connected" : "disconnected",
+    walletState: { status: "disconnected" },
+    hasInitializationError: false,
+    initializationError: undefined,
+    seizeSwitchConnectedAccount: jest.fn(),
+    seizeAddConnectedAccount: jest.fn(),
+    canAddConnectedAccount: true,
+    connectedAccountUnreadNotifications: {},
+  }));
 });
 afterEach(() => jest.useRealTimers());
 
