@@ -4,7 +4,10 @@ import { useCallback, useMemo, useState } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
+import {
+  getDefaultQueryRetry,
+  getQueryErrorStatus,
+} from "@/components/react-query-wrapper/utils/query-utils";
 import { refetchQueryIfStale } from "@/components/react-query-wrapper/utils/refetchQueryIfStale";
 import type { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import type { ApiWaveVisibilityTier } from "@/generated/models/ApiWaveVisibilityTier";
@@ -12,6 +15,7 @@ import type { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewTy
 import type { ApiWavesPinFilter } from "@/generated/models/ApiWavesPinFilter";
 import {
   fetchWavesV2Page,
+  fetchJoinedWavesPage,
   getWavesV2OverviewQueryKeyParams,
 } from "@/services/api/waves-v2-api";
 
@@ -20,6 +24,7 @@ export { mapApiWaveToSidebarWave } from "@/services/api/waves-v2-api";
 const RETRY_FAILURE_COOLDOWN_MS = 30000;
 
 interface UseWavesV2Props {
+  readonly joinedSnapshot?: boolean | undefined;
   readonly overviewType: ApiWavesOverviewType;
   readonly pageSize?: number | undefined;
   readonly following?: boolean | undefined;
@@ -39,6 +44,7 @@ interface UseWavesV2Props {
 }
 
 export const useWavesV2 = ({
+  joinedSnapshot = false,
   overviewType,
   pageSize = 20,
   following = false,
@@ -92,8 +98,15 @@ export const useWavesV2 = ({
 
   const queryClient = useQueryClient();
   const queryKey = useMemo(
-    () => [QueryKey.WAVES_V2, queryKeyParams] as const,
-    [queryKeyParams]
+    () =>
+      [
+        QueryKey.WAVES_V2,
+        {
+          ...queryKeyParams,
+          ...(joinedSnapshot ? { pagination: "snapshot" } : {}),
+        },
+      ] as const,
+    [queryKeyParams, joinedSnapshot]
   );
   const [lastErrorTimestamp, setLastErrorTimestamp] = useState<number | null>(
     null
@@ -104,9 +117,16 @@ export const useWavesV2 = ({
 
   const query = useInfiniteQuery({
     queryKey,
-    queryFn: async ({ pageParam }: { pageParam: number }) =>
-      await fetchWavesV2Page({
-        page: pageParam,
+    queryFn: async ({ pageParam, signal }) => {
+      if (joinedSnapshot) {
+        return await fetchJoinedWavesPage({
+          cursor: typeof pageParam === "string" ? pageParam : undefined,
+          pageSize,
+          signal,
+        });
+      }
+      return await fetchWavesV2Page({
+        page: Number(pageParam),
         pageSize,
         overviewType,
         following,
@@ -119,9 +139,13 @@ export const useWavesV2 = ({
         minHotnessScore,
         minRepSortScore,
         visibilityTier,
-      }),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => (lastPage.next ? lastPage.page + 1 : null),
+      });
+    },
+    initialPageParam: 1 as number | string,
+    getNextPageParam: (lastPage) => {
+      if (joinedSnapshot) return lastPage.nextCursor ?? null;
+      return lastPage.next ? lastPage.page + 1 : null;
+    },
     placeholderData: (previousData, previousQuery) => {
       const previousParams =
         previousQuery === undefined
@@ -135,7 +159,7 @@ export const useWavesV2 = ({
           : null;
       const currentViewerIdentity = queryKeyParams.viewer_identity ?? null;
 
-      if (previousViewerIdentity === currentViewerIdentity) {
+      if (!joinedSnapshot && previousViewerIdentity === currentViewerIdentity) {
         return previousData;
       }
 
@@ -168,10 +192,43 @@ export const useWavesV2 = ({
   );
 
   const fetchNextPage = useCallback(() => {
+    if (joinedSnapshot) {
+      if (query.isFetching) return;
+      void query
+        .fetchNextPage({ cancelRefetch: false })
+        .then(async (result) => {
+          // Refetch starts at page one and atomically replaces all loaded pages.
+          // Never append a fresh first page to the expired snapshot's pages.
+          if (getQueryErrorStatus(result.error) === 410) {
+            const refreshed = await query.refetch({ cancelRefetch: false });
+            if (
+              !refreshed.isError &&
+              typeof refreshed.data?.pages.at(-1)?.nextCursor === "string"
+            ) {
+              // Preserve the request to advance after rebuilding the loaded chain.
+              await query.fetchNextPage({ cancelRefetch: false });
+            }
+          }
+        })
+        .catch(() => undefined);
+      return;
+    }
     runAfterRetryFailureCooldown(() => {
       query.fetchNextPage().catch(() => undefined);
     });
-  }, [runAfterRetryFailureCooldown, query]);
+  }, [runAfterRetryFailureCooldown, query, joinedSnapshot]);
+
+  const retryLoading = useCallback(() => {
+    if (query.isFetching) return;
+    if (
+      query.isFetchNextPageError &&
+      getQueryErrorStatus(query.error) !== 410
+    ) {
+      fetchNextPage();
+    } else {
+      void query.refetch({ cancelRefetch: false }).catch(() => undefined);
+    }
+  }, [query, fetchNextPage]);
 
   const refetch = useCallback(() => {
     runAfterRetryFailureCooldown(() => {
@@ -195,9 +252,11 @@ export const useWavesV2 = ({
       hasNextPage: query.hasNextPage,
       fetchNextPage,
       status: query.status,
+      hasLoadingError: query.isError,
+      retryLoading,
       refetch,
       refetchIfStale,
     }),
-    [waves, query, fetchNextPage, refetch, refetchIfStale]
+    [waves, query, fetchNextPage, refetch, refetchIfStale, retryLoading]
   );
 };

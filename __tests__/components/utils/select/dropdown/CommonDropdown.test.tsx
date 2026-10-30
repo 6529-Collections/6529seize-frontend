@@ -242,20 +242,23 @@ describe("CommonDropdown", () => {
       expect(screen.queryByTestId("dropdown-items")).not.toBeInTheDocument();
     });
 
-    it("should call setSelected when item is selected", () => {
-      const mockSetSelected = jest.fn();
-      const props = { ...defaultProps, setSelected: mockSetSelected };
+    it.each(["default", "filter"] as const)(
+      "should call setSelected when item is selected (%s)",
+      (variant) => {
+        const mockSetSelected = jest.fn();
+        const props = { ...defaultProps, setSelected: mockSetSelected };
 
-      render(<CommonDropdown {...props} />);
+        render(<CommonDropdown {...props} variant={variant} />);
 
-      // Open dropdown
-      fireEvent.click(screen.getByRole("button"));
+        // Open dropdown
+        fireEvent.click(screen.getByRole("button"));
 
-      // Select item
-      fireEvent.click(screen.getByTestId("dropdown-item-item2"));
+        // Select item
+        fireEvent.click(screen.getByTestId("dropdown-item-item2"));
 
-      expect(mockSetSelected).toHaveBeenCalledWith("value2");
-    });
+        expect(mockSetSelected).toHaveBeenCalledWith("value2");
+      }
+    );
 
     it("should close dropdown after item selection", () => {
       render(<CommonDropdown {...defaultProps} />);

@@ -1,5 +1,6 @@
 "use client";
 
+import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
@@ -68,6 +69,7 @@ export function useApprovalWaveStatus({
   decisionPoints,
 }: UseApprovalWaveStatusParams): ApprovalWaveStatus {
   const approveWave = isApproveWave(wave);
+  const nativeCompetition = presentationCompetition(wave);
   const [, setStatusClockTick] = useState(0);
   const currentMillis = Time.currentMillis();
   const hasCallerOwnedDecisionPoints = decisionPoints !== undefined;
@@ -101,6 +103,7 @@ export function useApprovalWaveStatus({
 
   const shouldLoadCompleteDecisionPoints = useMemo(() => {
     if (
+      nativeCompetition ||
       !approveWave ||
       !wave ||
       areDecisionPointsComplete ||
@@ -126,6 +129,7 @@ export function useApprovalWaveStatus({
   }, [
     areDecisionPointsComplete,
     approveWave,
+    nativeCompetition,
     currentMillis,
     hasCallerOwnedDecisionPoints,
     providedApprovedCount,
@@ -251,6 +255,19 @@ export function useApprovalWaveStatus({
       globalThis.clearTimeout(timeoutId);
     };
   }, [approveWave, closeStatus, currentMillis, wave]);
+
+  if (nativeCompetition)
+    return {
+      winningThreshold,
+      winningThresholdMinDurationMs,
+      approvedCount: null,
+      closeStatus: nativeCompetition.permissions.vote ? null : "ended",
+      isApprovalStatusLoading: false,
+      isApprovalStatusError: false,
+      isVotingClosed: !nativeCompetition.permissions.vote,
+      isVotingControlsLocked: !nativeCompetition.permissions.vote,
+      retryApprovalStatus: null,
+    };
 
   return {
     winningThreshold,

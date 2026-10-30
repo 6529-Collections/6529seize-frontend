@@ -13,6 +13,7 @@ import { installLocalMuseumCountryCheck } from "../support/localMuseumCountryChe
 import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
 import { expectMuseumPath } from "../support/museumNavigation";
 import {
+  expectNoUnresolvedMuseumMedia,
   expectAcquisitionsAcceptance,
   expectCollectionAcceptance,
   expectMuseumGeometryAcceptance,
@@ -171,6 +172,45 @@ async function expectUniformMediaStageRatio(
 
 test.beforeEach(async ({ page, baseURL }) => {
   await installLocalMuseumCountryCheck(page, baseURL);
+});
+
+test("settles an offscreen lazy image remounted with the same source @surface @readonly", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 820, height: 1000 });
+  await page.route("https://museum-lazy-fixture.invalid/**", (route) =>
+    route.fulfill({
+      contentType: "image/webp",
+      path: "public/museum/research/editorial/magnum/6529NM-W-0026-1280.webp",
+    })
+  );
+  await page.setContent(
+    `<main>${Array.from(
+      { length: 10 },
+      (_, index) =>
+        `<article style="height:1500px"><img loading="lazy" width="400" height="300" alt="Work ${index}" src="https://museum-lazy-fixture.invalid/image.webp?index=${index}"></article>`
+    ).join("")}</main>`
+  );
+  await page
+    .getByRole("img")
+    .last()
+    .evaluate((last) => {
+      last.addEventListener(
+        "load",
+        () => {
+          const first = document.querySelector("img");
+          if (first === null) throw new Error("Missing initial lazy image");
+          // Hydration/remounts may replace a node without changing alt or src.
+          first.replaceWith(first.cloneNode());
+          document.body.dataset["museumImageRemounted"] = "true";
+        },
+        { once: true }
+      );
+    });
+  await expectNoUnresolvedMuseumMedia(page);
+  expect(
+    await page.evaluate(() => document.body.dataset["museumImageRemounted"])
+  ).toBe("true");
 });
 
 test.describe("Museum public IA rendered contract @surface @readonly", () => {
@@ -491,9 +531,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       testInfo,
       "museum-acquisition-conflict-at-its-edges"
     );
-    await expect(
-      conflictWorksRegion.getByRole("figure").first()
-    ).toContainText(
+    await expect(conflictWorksRegion.getByRole("figure").first()).toContainText(
       "Patrolling the border between the Negev Desert and Jordan"
     );
     await expectImageLoadedAfterScroll(

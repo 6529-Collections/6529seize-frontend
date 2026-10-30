@@ -54,7 +54,8 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
   const { isApp } = useDeviceInfo();
   const isMobileViewport = useIsMobileLayoutViewport();
   const buttonClassName = `${COMPACT_ACTION_BUTTON_CLASS} ${isApp || isMobileViewport ? "tw-min-h-11" : "tw-h-8"}`;
-  const { setToast } = useContext(AuthContext);
+  const { setToast, connectedProfile, activeProfileProxy } =
+    useContext(AuthContext);
   const queryClient = useQueryClient();
   // State for reset progress
   const [isResetting, setIsResetting] = useState(false);
@@ -80,6 +81,9 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
     onSuccess: (response: ApiDrop | null, { dropId }) => {
       if (response)
         applyWaveDropVoteUpdate(queryClient, response, waveId, {
+          contextProfile: activeProfileProxy
+            ? undefined
+            : connectedProfile?.handle,
           invalidateWaveSummary: false,
         });
       removeSelected(dropId);

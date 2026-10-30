@@ -56,6 +56,7 @@ interface CreateDropUiState {
 }
 
 interface LeaderboardContentProps {
+  readonly additionalActionOnly: boolean;
   readonly wave: ApiWave;
   readonly viewMode: LeaderboardViewMode;
   readonly sort: WaveDropsLeaderboardSort;
@@ -180,6 +181,7 @@ const ApproveListStickyLeaderboardControls: React.FC<
 };
 
 const LeaderboardContent: React.FC<LeaderboardContentProps> = ({
+  additionalActionOnly,
   wave,
   viewMode,
   sort,
@@ -196,6 +198,7 @@ const LeaderboardContent: React.FC<LeaderboardContentProps> = ({
   if (viewMode === "list") {
     return (
       <WaveLeaderboardDrops
+        additionalActionOnly={additionalActionOnly}
         wave={wave}
         sort={sort}
         isVotingClosed={isVotingClosed}
@@ -229,6 +232,7 @@ const LeaderboardContent: React.FC<LeaderboardContentProps> = ({
 
   return (
     <WaveLeaderboardGallery
+      additionalActionOnly={additionalActionOnly}
       wave={wave}
       sort={sort}
       isVotingClosed={isVotingClosed}
@@ -276,6 +280,11 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   }, []);
 
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
+  const [additionalActionWaveId, setAdditionalActionWaveId] = useState<
+    string | null
+  >(null);
+  const additionalActionOnly =
+    isMemesWave && additionalActionWaveId === wave.id;
   const [receiptDrop, setReceiptDrop] = useState<ApiDrop | null>(null);
   const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
 
@@ -490,6 +499,12 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     isApproveWave && effectiveViewMode === "list";
   const renderLeaderboardHeader = (additionalActions?: React.ReactNode) => (
     <WaveLeaderboardHeader
+      additionalActionOnly={additionalActionOnly}
+      onAdditionalActionChange={
+        isMemesWave
+          ? (checked) => setAdditionalActionWaveId(checked ? wave.id : null)
+          : undefined
+      }
       wave={wave}
       viewMode={effectiveViewMode}
       sort={effectiveSort}
@@ -624,6 +639,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
           )}
 
           <LeaderboardContent
+            additionalActionOnly={additionalActionOnly}
             wave={wave}
             viewMode={effectiveViewMode}
             sort={effectiveSort}

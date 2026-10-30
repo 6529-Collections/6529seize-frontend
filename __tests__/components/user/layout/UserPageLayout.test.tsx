@@ -1,10 +1,11 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import UserPageLayout from "@/components/user/layout/UserPageLayout";
+import UserPageClientHydrator from "@/components/user/layout/UserPageClientHydrator";
 import { TitleProvider } from "@/contexts/TitleContext";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import {
   useParams,
   usePathname,
@@ -61,6 +62,7 @@ const mockUseSearchParams = useSearchParams as jest.Mock;
 describe("UserPageLayout", () => {
   beforeEach(() => {
     mockUseSetTitle.mockClear();
+    mockReactQueryContext.setProfile.mockClear();
     mockUseParams.mockReturnValue({ user: "testuser" });
     mockUsePathname.mockReturnValue("/testuser");
     mockUseRouter.mockReturnValue({ push: jest.fn(), replace: jest.fn() });
@@ -79,11 +81,8 @@ describe("UserPageLayout", () => {
         <QueryClientProvider client={queryClient}>
           <AuthContext.Provider value={mockAuthContext}>
             <ReactQueryWrapperContext.Provider value={mockReactQueryContext}>
-              <UserPageLayout
-                profile={profile}
-                handleOrWallet={handleOrWallet}
-                pageTitle="testuser - Collected | 6529.io"
-              >
+              <UserPageLayout profile={profile} handleOrWallet={handleOrWallet}>
+                <UserPageClientHydrator pageTitle="testuser - Collected | 6529.io" />
                 <div>Content</div>
               </UserPageLayout>
             </ReactQueryWrapperContext.Provider>
@@ -98,13 +97,7 @@ describe("UserPageLayout", () => {
     expect(screen.getByTestId("user-page-header")).toBeInTheDocument();
     expect(screen.getByTestId("user-page-tabs")).toBeInTheDocument();
     expect(screen.getByText("Content")).toBeInTheDocument();
-  });
-
-  it("sets profile in context when not cached", async () => {
-    renderComponent();
-    await waitFor(() =>
-      expect(mockReactQueryContext.setProfile).toHaveBeenCalledWith(mockProfile)
-    );
+    expect(mockReactQueryContext.setProfile).not.toHaveBeenCalled();
   });
 
   it("uses the complete server title unchanged during hydration", () => {

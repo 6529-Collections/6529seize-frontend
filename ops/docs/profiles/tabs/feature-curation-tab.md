@@ -48,6 +48,8 @@ moving a post to a destination farther down the Curation.
 
 The setup dialog exposes source Wave and Group details under `Advanced setup
 details`. Existing public Waves remain available as an advanced alternative.
+Mobile Curation setup and edit sheets use Close or a downward header swipe to
+leave without submitting. Their desktop dialogs also offer Cancel.
 
 ## Common Scenarios
 

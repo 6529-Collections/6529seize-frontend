@@ -3,7 +3,6 @@
 import { runWaveNavigationTransition } from "@/helpers/waves/wave-navigation-transition";
 import {
   getCompetitionRoute,
-  isMultiCompetitionEnabled,
   isCompetitionPathname,
 } from "@/helpers/competition.helpers";
 import { waveCompetitionTabs } from "@/helpers/default-competition.helpers";
@@ -85,7 +84,6 @@ export function useActiveWaveManager() {
         waveId &&
         !isDirectMessage &&
         serialNo === undefined &&
-        isMultiCompetitionEnabled() &&
         typeof remembered === "object"
       ) {
         const selection = queryClient.getQueryData<ApiDefaultCompetition>(

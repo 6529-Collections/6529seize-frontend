@@ -40,12 +40,18 @@ These surfaces show the tile even when Announcements has a saved wave picture.
 3. Use header controls near the wave title, avatar, and metadata.
 4. Open the owner options menu (`⋮`) when available.
 
-On phones, select the wave name to open `About`. Use `Close`, tap outside,
-press Escape, or use the device’s Back action to return to the thread.
+On phones, select the wave name to open `About`. Swipe down from the sheet's
+handle or header, use `Close`, tap outside, press Escape, or use the device’s
+Back action to return to the thread.
 The main `About` sheet has a Close control; Back controls inside subviews return
 to their parent view.
 
 ## Conversation Header
+
+In the native app's compact header, the parent-wave link sits directly above
+the wave name beside the avatar. Long names truncate within the available space
+so they do not overlap the header actions. A hidden or absent description leaves
+no extra row in this identity block.
 
 At desktop and tablet widths (768px and above), the conversation header groups
 its avatar, parent-wave link, name, and a short one-line description preview into a compact
@@ -116,7 +122,10 @@ helper keeps its desktop label and opens nomination guidance.
 10. Open the wave name to go to `/waves/{waveId}`.
 11. If edit-eligible on a non-DM wave, use pencil actions to rename or update
     picture.
-12. If author, open `⋮` for profile-wave actions and `Delete`.
+12. If author, open `⋮` for profile-wave actions and `Delete`. In the mobile
+    sheet or tablet overlay, `Wave options` opens inside the same panel. The
+    mobile sheet keeps its height as you enter options or return to About. Use
+    `Back` to return to `About`; `Close` dismisses the whole panel.
 13. For `Delete`, confirm in modal. Success redirects to `/waves`.
 
 ## Common Scenarios
@@ -125,6 +134,8 @@ helper keeps its desktop label and opens nomination guidance.
 - Open followers, then use `Back` or `Joined` again to return to `About`.
 - Pin active waves for faster return.
 - Rename a wave without leaving the thread (`Save` stays disabled until the name changes).
+- Mobile Wave REP and picture editors use Close or a downward header swipe to
+  dismiss; their desktop dialogs also offer Cancel.
 - On direct-message waves, the name link stays available but rename/picture
   pencils stay hidden.
 - Open the canonical wave route from the header name link.
@@ -155,7 +166,8 @@ helper keeps its desktop label and opens nomination guidance.
 - If pin/unpin fails, keep the current pin state and retry from the same button.
 - If rename or picture update fails, keep the modal open, fix auth/session issues,
   and retry.
-- If delete modal is canceled or closed, nothing is deleted.
+- If delete modal is canceled or closed, nothing is deleted. When opened from
+  the information sheet, cancellation returns to `Wave options`.
 
 ## Limitations / Notes
 
