@@ -1972,7 +1972,7 @@ test.describe("Home Page @smoke @medium @large", () => {
       await expect(
         // Wave names and ordering differ between deployed environments.
         // Keep checking the hovered card's actual title color.
-        waveLink.locator("span.tw-font-semibold")
+        waveLink.locator("span.tw-break-words.tw-font-semibold")
       ).toHaveCSS("color", "rgb(255, 255, 255)");
       const after = await waveLink.boundingBox();
       expect(after!.y).toBeCloseTo(before!.y - 4, 0);
