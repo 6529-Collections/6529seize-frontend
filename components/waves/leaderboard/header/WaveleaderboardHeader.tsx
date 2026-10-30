@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
+import { AdditionalActionFilter } from "./AdditionalActionFilter";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { resolveWaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
@@ -43,6 +44,8 @@ import {
 } from "./waveLeaderboardHeaderLayout";
 
 interface WaveLeaderboardHeaderProps {
+  readonly additionalActionOnly?: boolean | undefined;
+  readonly onAdditionalActionChange?: ((checked: boolean) => void) | undefined;
   readonly wave: ApiWave;
   readonly onCreateDrop?: (() => void) | undefined;
   readonly additionalActions?: React.ReactNode | undefined;
@@ -294,6 +297,8 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   minPrice,
   maxPrice,
   onPriceRangeChange,
+  additionalActionOnly = false,
+  onAdditionalActionChange,
 }) => {
   const isLargeScreen = useMediaQuery("(min-width: 1024px)");
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
@@ -395,7 +400,9 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
       }),
     [measurements, showPriceActions]
   );
-  const sortMode = isLargeScreen ? "tabs" : "dropdown";
+  const showAdditionalActionFilter = isMemesWave && !!onAdditionalActionChange;
+  const sortMode =
+    isLargeScreen && !showAdditionalActionFilter ? "tabs" : "dropdown";
 
   const onTogglePriceFilters = () => {
     if (hasActivePriceFilters) {
@@ -455,13 +462,17 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
         <div
           ref={controlsRowRef}
           data-testid="leaderboard-header-controls-row"
-          className={getHeaderControlsRowClass({
-            flexClass: controlsRowFlexClass,
-            basisClass: controlsRowBasisClass,
-            compactSubmissionControls,
-            balanceSubmissionRows,
-            enableControlsScroll: layout.enableControlsScroll,
-          })}
+          className={
+            showAdditionalActionFilter
+              ? "tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-2"
+              : getHeaderControlsRowClass({
+                  flexClass: controlsRowFlexClass,
+                  basisClass: controlsRowBasisClass,
+                  compactSubmissionControls,
+                  balanceSubmissionRows,
+                  enableControlsScroll: layout.enableControlsScroll,
+                })
+          }
         >
           <HeaderViewModeTabs
             refObject={viewModeTabsRef}
@@ -479,6 +490,12 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
               items={sortItems}
             />
           </div>
+          {showAdditionalActionFilter && (
+            <AdditionalActionFilter
+              checked={additionalActionOnly}
+              onChange={onAdditionalActionChange}
+            />
+          )}
         </div>
         <PriceActionsRow
           isVisible={showHeaderActions}

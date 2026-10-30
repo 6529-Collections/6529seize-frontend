@@ -57,6 +57,40 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
 
   if (typeof document === "undefined") return null;
 
+  let submissionContent = target.wave ? (
+    <MemesArtSubmissionContainer
+      onClose={onClose}
+      wave={target.wave}
+      sourceDrop={hydratedSourceDrop}
+      onSourceDropDeleted={onSourceDropDeleted}
+    />
+  ) : (
+    <CompetitionState error={!target.pending} retry={target.retry} />
+  );
+  if (sourceDrop && metadataState.status !== "ready") {
+    submissionContent = (
+      <div className="tw-space-y-4 tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-iron-100">
+        <p className="tw-m-0">{t(locale, metadataMessageKey)}</p>
+        {metadataState.status === "error" && (
+          <button
+            type="button"
+            onClick={metadataState.retry}
+            className="tw-min-h-11 tw-rounded-lg tw-bg-iron-800 tw-px-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          >
+            {t(locale, "memes.submission.resubmit.retry")}
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={onClose}
+          className="tw-min-h-11 tw-rounded-lg tw-bg-iron-800 tw-px-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        >
+          {t(locale, "singleDrop.close")}
+        </button>
+      </div>
+    );
+  }
+
   return createPortal(
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog
@@ -97,47 +131,17 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
             >
               <DialogTitle className="tw-sr-only">{dialogTitle}</DialogTitle>
               <div className="tw-flex tw-h-full tw-flex-col tw-overflow-hidden">
-                {sourceDrop && <span
-                  role="status"
-                  aria-live="polite"
-                  aria-atomic="true"
-                  className="tw-sr-only"
-                >
-                  {sourceDrop ? t(locale, metadataMessageKey) : ""}
-                </span>}
-                {sourceDrop && metadataState.status !== "ready" ? (
-                  <div className="tw-space-y-4 tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-iron-100">
-                    <p className="tw-m-0">{t(locale, metadataMessageKey)}</p>
-                    {metadataState.status === "error" && (
-                      <button
-                        type="button"
-                        onClick={metadataState.retry}
-                        className="tw-min-h-11 tw-rounded-lg tw-bg-iron-800 tw-px-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-                      >
-                        {t(locale, "memes.submission.resubmit.retry")}
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={onClose}
-                      className="tw-min-h-11 tw-rounded-lg tw-bg-iron-800 tw-px-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-                    >
-                      {t(locale, "singleDrop.close")}
-                    </button>
-                  </div>
-                ) : target.wave ? (
-                  <MemesArtSubmissionContainer
-                    onClose={onClose}
-                    wave={target.wave}
-                    sourceDrop={hydratedSourceDrop}
-                    onSourceDropDeleted={onSourceDropDeleted}
-                  />
-                ) : (
-                  <CompetitionState
-                    error={!target.pending}
-                    retry={target.retry}
-                  />
+                {sourceDrop && (
+                  <span
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
+                    className="tw-sr-only"
+                  >
+                    {t(locale, metadataMessageKey)}
+                  </span>
                 )}
+                {submissionContent}
               </div>
             </DialogPanel>
           </TransitionChild>
