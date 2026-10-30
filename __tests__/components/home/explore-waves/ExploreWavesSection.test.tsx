@@ -10,8 +10,21 @@ jest.mock("@/components/auth/Auth", () => ({
 }));
 
 jest.mock("@/components/home/explore-waves/ExploreWaveCard", () => ({
-  ExploreWaveCard: ({ wave }: { readonly wave: { readonly name: string } }) => (
-    <div>{wave.name}</div>
+  ExploreWaveCard: ({
+    wave,
+    horizontalOnMobile,
+    artworkOverlay,
+  }: {
+    readonly wave: { readonly name: string };
+    readonly horizontalOnMobile?: boolean;
+    readonly artworkOverlay?: boolean;
+  }) => (
+    <div
+      data-horizontal-on-mobile={horizontalOnMobile}
+      data-artwork-overlay={artworkOverlay}
+    >
+      {wave.name}
+    </div>
   ),
 }));
 
@@ -35,6 +48,31 @@ describe("ExploreWavesSection", () => {
       next: null,
     });
   });
+
+  it.each([
+    ["default", "true"],
+    ["page", "false"],
+  ] as const)(
+    "selects the %s card presentation without changing the query",
+    async (headingVariant, horizontalOnMobile) => {
+      useAuthMock.mockReturnValue({ connectedProfile: null });
+      renderWithQueryClient(
+        <ExploreWavesSection headingVariant={headingVariant} />
+      );
+      expect(await screen.findByText("Scored wave")).toHaveAttribute(
+        "data-horizontal-on-mobile",
+        horizontalOnMobile
+      );
+      expect(screen.getByText("Scored wave")).toHaveAttribute(
+        "data-artwork-overlay",
+        String(headingVariant === "page")
+      );
+      expect(fetchWavesV2PageMock).toHaveBeenCalledTimes(1);
+      expect(fetchWavesV2PageMock).toHaveBeenCalledWith(
+        expect.objectContaining({ pageSize: 6 })
+      );
+    }
+  );
 
   it("does not request followed-wave exclusion for anonymous discovery", async () => {
     useAuthMock.mockReturnValue({ connectedProfile: null });

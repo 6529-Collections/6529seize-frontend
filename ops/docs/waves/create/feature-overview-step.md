@@ -5,7 +5,7 @@
 `Setup` is the first step in wave creation.
 A standalone Chat wave starts with its name and first post on one screen.
 Use Optional settings for access, picture, and guidelines, then Review wave.
-Rank, Approve, and subwaves use the guided steps below.
+Subwaves use the guided steps. Rank and Approve are configured separately in [competition setup](../competitions/feature-manage-competitions.md).
 
 ## Location in the Site
 
@@ -17,58 +17,24 @@ Rank, Approve, and subwaves use the guided steps below.
 - Content heading: `Create Wave` for a standalone wave.
 - For a subwave, both the modal header and Setup heading say
   `Create subwave of "parent wave name"`. The fields are labeled
-  `Subwave Name`, `Subwave Profile Picture`, and `Subwave Type`.
+  `Subwave Name` and `Subwave Profile Picture`.
 - The `Saved Drafts` list is hidden during subwave creation.
 - Create form renders only when a connected profile is available.
 
-## Step Paths
-
-- Standalone `Chat`: `Start a chat wave` -> `Review`
-- Chat subwave: `Setup` -> `Access` -> `Guidelines` -> `Description` -> `Overview`
-- `Rank`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
-  `Guidelines` -> `Description` -> `Overview`
-- `Approve`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
-  `Guidelines` -> `Description` -> `Overview`
-
 ## What You Can Set
 
-- `Name` (required)
-- `Wave Profile Picture` (optional)
-  - upload by click
-  - or drag and drop
-- `Wave Type`
-  - `Chat`
-  - `Rank`
-  - `Approve`
-- `Ranking mode` for `Rank` waves:
-  - `Announce Winners`
-  - `Perpetual Ranking`
-- `Display settings` inside `Appearance and labels` for `Rank` and `Approve`
-  waves:
-  - submission-button label
-  - proposal-card appearance
-  - Approve tab labels for `Approve` waves
-- `Proposal card appearance` for `Rank` and `Approve` waves:
-  - open `Appearance and labels` to change the proposal-card presentation
-  - `Summary card` is the default for new waves and applies a reusable compact
-    presentation in chat and list views
-  - `Full proposal` keeps the previous full-content presentation
-  - `Text preview limit` accepts a whole-number proposal-text limit from `120`
-    to `1000` characters and controls excerpt length
-  - `Image on summary card` controls whether the first ready still image
-    appears beside the summary
-- Approve tab labels:
-  - appear in their own `Tab labels` group under `Appearance and labels`
-  - proposals tab defaults to `Proposals`
-  - approved tab defaults to `Approved`
-- Uploaded image shows a preview; `Delete` removes it.
-- File input and drag-drop both use the first selected file.
+- Name (required).
+- First post (required), with optional media.
+- Wave profile picture, access, chat permissions and guidelines in Optional settings.
+- For subwaves, the guided setup retains the parent access and administrator defaults.
+
+Wave creation opens shared chat. To add Rank or Approve rules, open the created wave's **Competitions**, then **+ Competition**. Competition type, schedule, entry requirements, voting, outcomes and appearance are configured there.
 
 ## Navigation Behavior
 
 - `Setup` always opens first.
 - Chat: `Review wave` validates the name, first post, and restricted permissions.
-- Rank, Approve, and subwaves: `Next` moves to `Access` when setup validation passes.
+- For subwaves, `Next` moves to `Access` when setup validation passes.
 - `Next` stays enabled; validation runs when clicked.
 - `Previous` is not shown on `Setup`.
 - On large screens, the step rail can reopen completed steps, including
@@ -79,29 +45,15 @@ Rank, Approve, and subwaves use the guided steps below.
 
 - Empty name blocks forward navigation and shows `Name is required`.
 - Name length above `250` characters blocks forward navigation.
-- A Summary card proposal-text limit outside `120`–`1000`, or a value that is
-  not a whole number, blocks forward navigation and focuses the invalid field.
 - Image upload accepts `JPEG`, `JPG`, `PNG`, `GIF`, and `WEBP` only.
 - Unsupported image formats show toast: `Invalid file type`.
 - Images larger than `10MB` show toast: `File size must be less than 10MB`.
-- Changing wave type asks for confirmation before resetting all non-overview settings to that type's defaults
-  (`groups`, `chat`, `dates`, `drops`, `voting`, `outcomes`).
-- Outcome visibility is configured on the `Outcomes` step for scheduled `Rank`
-  and `Approve` waves.
-- `Proposal card appearance` is inside `Appearance and labels` and defaults to
-  `Summary card` for newly created Waves. The default stores a versioned
-  Wave-level display recipe when the Wave is created. Existing Waves and older
-  drafts without this setting keep the `Full proposal` presentation. The 6529
-  Network Museum compatibility fallback uses `Summary card` until an explicit
-  setting is saved. The setting does not alter Chat messages or specialized
-  Memes, Curation, and Quorum presentations.
+- Restoring an older saved draft keeps its wave name, permissions and first post. Wave creation always opens shared chat; competition rules are configured separately.
 
 ## Failure and Recovery
 
 - If `Next` does not advance, confirm name is present and `<= 250` characters.
 - If upload validation fails, pick a supported file under `10MB` and retry.
-- Cancel the type-change confirmation to keep your existing settings. Confirming
-  keeps the name, picture, and first post, and resets type-specific settings.
 - Named standalone waves save settings and first-post text under Saved Drafts
   for the current wallet and profile on this device. Add media again after restoring.
 - If stale modal state appears, close create-wave to clear the `create` query,

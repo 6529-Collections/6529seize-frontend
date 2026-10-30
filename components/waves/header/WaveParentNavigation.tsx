@@ -37,8 +37,8 @@ export default function WaveParentNavigation({
         DEFAULT_LOCALE,
         "waves.header.parentNavigation.regionLabel"
       )}
-      className={`tw-flex tw-min-w-0 tw-items-center tw-gap-x-1.5 tw-text-xs tw-leading-4 ${
-        isHeader ? "tw-mb-0.5 md:tw-mb-0" : ""
+      className={`tw-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-x-1.5 tw-text-xs tw-leading-4 ${
+        variant === "header" ? "tw-mb-0.5 md:tw-mb-0" : ""
       }`}
     >
       <span

@@ -245,6 +245,9 @@
         "web-desktop-chromium"
       ]
     },
+    "/bookmarks": {
+      "classification": "auth"
+    },
     "/buidl": {
       "classification": "crawlable",
       "family": "info"
@@ -323,17 +326,13 @@
       "classification": "crawlable",
       "family": "tools"
     },
-    "/safe-collecting/[...section]": {
+    "/delegation/[...section]": {
       "classification": "fixture",
       "family": "tools",
       "fixture": {
-        "staging": "/safe-collecting/tap-guide",
-        "production": "/safe-collecting/tap-guide"
+        "staging": "/delegation/wallet-architecture",
+        "production": "/delegation/wallet-architecture"
       }
-    },
-    "/safe-collecting": {
-      "classification": "crawlable",
-      "family": "tools"
     },
     "/discover": {
       "classification": "crawlable",
@@ -2224,6 +2223,18 @@
       },
       "family": "public-review"
     },
+    "/safe-collecting": {
+      "classification": "crawlable",
+      "family": "tools"
+    },
+    "/safe-collecting/[...section]": {
+      "classification": "fixture",
+      "family": "tools",
+      "fixture": {
+        "staging": "/safe-collecting/tap-guide",
+        "production": "/safe-collecting/tap-guide"
+      }
+    },
     "/sentry-example-page": {
       "classification": "exempt",
       "exemptReason": "Sentry integration test page; intentionally throws."
@@ -2320,13 +2331,6 @@
         "staging": "The production Releases wave ID is not a qualified staging fixture."
       }
     },
-    "/waves/create": {
-      "classification": "auth"
-    },
-    "/xtdh": {
-      "classification": "crawlable",
-      "family": "info"
-    },
     "/waves/[wave]/competitions": {
       "classification": "exempt",
       "family": "social",
@@ -2337,13 +2341,12 @@
       "family": "social",
       "exemptReason": "Native competition rollout requires scoped competition fixtures."
     },
-    "/delegation/[...section]": {
-      "classification": "fixture",
-      "family": "tools",
-      "fixture": {
-        "staging": "/delegation/wallet-architecture",
-        "production": "/delegation/wallet-architecture"
-      }
+    "/waves/create": {
+      "classification": "auth"
+    },
+    "/xtdh": {
+      "classification": "crawlable",
+      "family": "info"
     }
   }
 }

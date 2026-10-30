@@ -17,5 +17,5 @@ export default function FooterWrapper() {
 
   if (hideFooter) return null;
 
-  return <Footer />;
+  return <Footer homeGallery={pathname === "/"} />;
 }
