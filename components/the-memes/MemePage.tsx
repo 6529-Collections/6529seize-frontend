@@ -429,7 +429,7 @@ export default function MemePage({
 
     const hasMintingBox = isLastCard;
     const artworkColumnBaseClassName =
-      "tw-relative lg:tw-flex lg:tw-flex-col lg:tw-self-stretch";
+      "tw-relative lg:tw-sticky lg:tw-top-6 lg:tw-flex lg:tw-flex-col lg:tw-self-start";
     const cardHeaderClassName = hasMintingBox
       ? "tw-mb-6 tw-grid tw-grid-cols-1 tw-gap-y-0 lg:tw-grid-cols-[minmax(0,11fr)_minmax(0,9fr)] lg:tw-items-center lg:tw-gap-x-16"
       : "tw-mb-6 tw-grid tw-grid-cols-1 tw-gap-x-10 lg:tw-grid-cols-[minmax(0,11fr)_minmax(0,9fr)] xl:tw-gap-x-16";
@@ -442,11 +442,15 @@ export default function MemePage({
 
     return (
       <div className={cardHeaderClassName}>
-        <div className={artworkColumnClassName}>
+        <div
+          data-testid="meme-artwork-column"
+          className={artworkColumnClassName}
+        >
           <div
-            className={`${styles["nftImageWrapper"] ?? ""} tw-relative lg:tw-flex-1`}
+            className={`${styles["nftImageWrapper"] ?? ""} tw-relative -tw-mx-4 sm:tw-mx-0 lg:tw-flex-1`}
           >
             <MemePageArtViewer
+              mobileControls
               key={`${nft.contract}-${nft.id}`}
               nft={nft}
               showBalance={true}
@@ -504,10 +508,10 @@ export default function MemePage({
     return (
       <nav
         aria-label={t(locale, "theMemes.detail.sections.ariaLabel")}
-        className="tw-relative tw-mb-8 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
+        className="tw-sticky tw-top-0 tw-z-30 -tw-mx-4 tw-mb-6 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-bg-[#0D0D0F] tw-px-4 sm:tw-mx-0 sm:tw-mb-8 sm:tw-overflow-hidden sm:tw-px-0 lg:tw-relative lg:tw-top-auto lg:tw-z-auto"
       >
-        <div className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:tw-hidden">
-          <div className="-tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4">
+        <div className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [mask-image:linear-gradient(to_right,#000_calc(100%-32px),transparent)] [scrollbar-width:none] sm:[mask-image:none] [&::-webkit-scrollbar]:tw-hidden">
+          <div className="-tw-mb-px tw-flex tw-min-w-max tw-gap-x-5 tw-pr-8 sm:tw-pr-0 lg:tw-gap-x-6">
             {VISIBLE_MEME_TABS.map((tab) => (
               <MemePageTabButton
                 key={`${nft.id}-${tab.focus}-tab`}
@@ -534,6 +538,7 @@ export default function MemePage({
       >
         <div className="tw-w-fit tw-max-w-full">
           <CommonTabs<MEME_HISTORY_TAB>
+            variant="sub-view"
             items={visibleHistoryTabItems}
             activeItem={activeHistoryTab}
             filterLabel={t(locale, "theMemes.detail.history.ariaLabel")}
@@ -567,7 +572,13 @@ export default function MemePage({
             />
           )}
           {activeTab === MEME_FOCUS.LIVE && nft && nftMeta && (
-            <MemePageArt show nft={nft} nftMeta={nftMeta} locale={locale} />
+            <MemePageArt
+              key={`art-${nft.id}`}
+              show
+              nft={nft}
+              nftMeta={nftMeta}
+              locale={locale}
+            />
           )}
           {userLoaded && (
             <MemePageYourCardsSubMenu
@@ -616,10 +627,11 @@ export default function MemePage({
   return (
     <div
       lang={locale}
-      className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white"
+      data-meme-card-page
+      className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-[calc(84px+env(safe-area-inset-bottom))] tw-text-white lg:tw-pb-5"
     >
       <div className="tw-px-4 tw-py-4 md:tw-px-6 md:tw-pb-10 lg:tw-px-8">
-        <header className="tw-pb-8">
+        <header className="tw-pb-4 sm:tw-pb-8">
           <div className="tw-flex tw-flex-col tw-gap-4">
             <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-justify-start">
               <ProfileCollectedReturnLink
@@ -674,6 +686,7 @@ export default function MemePage({
               <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-3 md:tw-flex-wrap md:tw-justify-start">
                 <div className="tw-order-2 tw-flex tw-shrink-0 tw-justify-end md:tw-order-1">
                   <NftNavigation
+                    square
                     nftId={nft.id}
                     path="/the-memes"
                     startIndex={1}
@@ -683,22 +696,22 @@ export default function MemePage({
                 </div>
                 <div className="tw-order-1 tw-min-w-0 tw-flex-1 md:tw-order-2">
                   <h1
-                    className="tw-m-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-y-1 md:tw-flex-nowrap"
+                    className="tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-flex-wrap tw-items-baseline tw-gap-y-1 sm:tw-flex-row md:tw-flex-nowrap"
                     aria-label={t(locale, "theMemes.detail.heading.ariaLabel", {
                       tokenId: formatInteger(locale, nft.id),
                       name: nft.name,
                     })}
                   >
-                    <span className="tw-mb-0 tw-shrink-0 tw-text-lg tw-font-normal tw-leading-tight tw-text-iron-400 sm:tw-text-2xl">
+                    <span className="tw-mb-0 tw-shrink-0 tw-text-[13px] tw-font-medium tw-leading-[18px] tw-text-iron-500 sm:tw-text-2xl sm:tw-font-normal sm:tw-text-iron-400">
                       {t(locale, "theMemes.detail.heading.card", {
                         tokenId: formatInteger(locale, nft.id),
                       })}
                     </span>
                     <span
                       aria-hidden="true"
-                      className="tw-mx-2.5 tw-h-5 tw-w-px tw-self-center tw-bg-white/[0.16] sm:tw-h-6 md:tw-mx-3"
+                      className="tw-mx-2.5 tw-hidden tw-h-5 tw-w-px tw-self-center tw-bg-white/[0.16] sm:tw-block sm:tw-h-6 md:tw-mx-3"
                     />
-                    <span className="tw-mb-0 tw-min-w-0 tw-whitespace-normal tw-break-words tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-100 sm:tw-text-2xl md:tw-truncate">
+                    <span className="tw-mb-0 tw-min-w-0 tw-whitespace-normal tw-break-words tw-text-[22px] tw-font-semibold tw-leading-7 tw-tracking-[-0.01em] tw-text-iron-50 sm:tw-text-2xl sm:tw-tracking-normal sm:tw-text-iron-100 md:tw-truncate">
                       {nft.name}
                     </span>
                   </h1>

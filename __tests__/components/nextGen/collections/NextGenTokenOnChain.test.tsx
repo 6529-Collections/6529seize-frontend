@@ -163,6 +163,40 @@ describe("NextGenTokenOnChain", () => {
     expect(screen.getByText("Test Artist")).toBeInTheDocument();
   });
 
+  it("reads ownerOf once and retries tokenURI only while the token is missing", () => {
+    render(<NextGenTokenOnChain {...baseProps} />);
+
+    const reads = mockUseReadContract.mock.calls.map(([params]) => params);
+    expect(new Set(reads.map((read) => read.functionName))).toEqual(
+      new Set(["ownerOf", "tokenURI"])
+    );
+    const ownerRead = reads.find((read) => read.functionName === "ownerOf");
+    expect(ownerRead.query).toEqual({
+      refetchOnWindowFocus: true,
+      staleTime: 60_000,
+    });
+
+    const tokenUriQuery = reads.find(
+      (read) => read.functionName === "tokenURI"
+    ).query;
+    expect(tokenUriQuery).toMatchObject({
+      refetchOnWindowFocus: true,
+      staleTime: 60_000,
+    });
+    const intervalFor = (state: object) =>
+      tokenUriQuery.refetchInterval({
+        state: { dataUpdateCount: 0, errorUpdateCount: 0, ...state },
+      });
+    // Missing (not yet visible to the read RPC): retry every 10 s.
+    expect(intervalFor({ data: undefined, errorUpdateCount: 3 })).toBe(10_000);
+    // Found: stop.
+    expect(intervalFor({ data: "ipfs://token", dataUpdateCount: 1 })).toBe(
+      false
+    );
+    // Still missing after two minutes of retries: stop.
+    expect(intervalFor({ data: undefined, errorUpdateCount: 12 })).toBe(false);
+  });
+
   it("calculates normalized token ID correctly", async () => {
     mockUseReadContract.mockImplementation(({ functionName }) => {
       if (functionName === "tokenURI") {

@@ -49,6 +49,7 @@ export const mapIdentityOverviewToProfileMin = (
 
   return {
     id: identity.id,
+    ...(identity.is_anonymous ? { is_anonymous: true } : {}),
     handle: identity.handle ?? null,
     pfp: identity.pfp ?? null,
     banner1_color: null,
@@ -216,6 +217,7 @@ const mapReplyToDropPreview = (
   rank: null,
   author: {
     id: replyToDrop.author?.handle ?? "",
+    ...(replyToDrop.author?.is_anonymous ? { is_anonymous: true } : {}),
     handle: replyToDrop.author?.handle ?? null,
     pfp: replyToDrop.author?.pfp ?? null,
     banner1_color: null,
