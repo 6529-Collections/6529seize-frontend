@@ -1,5 +1,5 @@
 export const MODERATION_TAB_SLUGS = {
-  OPEN: "open-reports",
+  REVIEW: "needs-review",
   CHECKS: "checks",
   RESOLVED: "resolved-reports",
   SUSPENDED: "suspended-profiles",
@@ -9,8 +9,8 @@ export const MODERATION_TAB_SLUGS = {
 export type ModerationTab = keyof typeof MODERATION_TAB_SLUGS;
 
 export function getModerationTab(slug?: string): ModerationTab | null {
-  if (slug === undefined) {
-    return "OPEN";
+  if (slug === undefined || slug === "open-reports") {
+    return "REVIEW";
   }
   return (
     (Object.keys(MODERATION_TAB_SLUGS) as ModerationTab[]).find(

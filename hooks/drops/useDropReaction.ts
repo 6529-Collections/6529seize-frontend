@@ -10,10 +10,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import { recordReaction } from "@/helpers/reactions/reactionHistory";
-import {
-  enqueueDropReactionRequest,
-  isDropReactionRequestTimeout,
-} from "@/helpers/reactions/dropReactionRequestQueue";
+import { enqueueDropReactionRequest } from "@/helpers/reactions/dropReactionRequestQueue";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { COMMUNITY_CURATIONS_DROPS_QUERY_KEY } from "@/hooks/useCommunityCurationsDrops";
@@ -49,7 +46,10 @@ import {
   recordReactionRollbackApplied,
   type ReactionSource,
 } from "@/utils/monitoring/dropReactionMonitoring";
-import { isExpectedWaveReactionDisabledError } from "@/utils/monitoring/dropReactionErrorClassification";
+import {
+  isExpectedWaveReactionDisabledError,
+  isReactionRequestOutcomeUncertain,
+} from "@/utils/monitoring/dropReactionErrorClassification";
 import {
   getDropReactionAuthStateFingerprint,
   isDropReactionAuthRecoveryPending,
@@ -485,7 +485,7 @@ export function useDropReaction(
     captureOwner,
     isCurrentMutation,
     refreshAfterFailure,
-    reconcileTimeout,
+    reconcileRequestFailure,
   } = useDropReactionRecovery({
     activeProfileProxy,
     applyOptimisticDropUpdate,
@@ -539,8 +539,8 @@ export function useDropReaction(
         void recordReaction(reactionCode);
       }
 
-      const handleTimeout = async () => {
-        const reconciliation = await reconcileTimeout(
+      const handleUncertainOutcome = async () => {
+        const reconciliation = await reconcileRequestFailure(
           mutation,
           intendedReaction,
           isCurrent
@@ -568,8 +568,8 @@ export function useDropReaction(
           return;
         }
 
-        if (isDropReactionRequestTimeout(error)) {
-          await handleTimeout();
+        if (isReactionRequestOutcomeUncertain(error)) {
+          await handleUncertainOutcome();
           return;
         }
 
@@ -648,7 +648,7 @@ export function useDropReaction(
       captureOwner,
       isCurrentMutation,
       refreshAfterFailure,
-      reconcileTimeout,
+      reconcileRequestFailure,
       recoverFromUnauthorized,
       source,
       updateEligibility,

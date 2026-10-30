@@ -1,8 +1,28 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
+import type { HighlyRatedWavePreviewItem } from "@/components/brain/left-sidebar/waves/HighlyRatedWavesToggle";
 import { SidebarDiscovery } from "@/components/brain/left-sidebar/waves/SidebarDiscovery";
 const mockSetActive = jest.fn();
 let mockActiveWaveId: string | null = null;
 const mockRefetch = jest.fn();
+const mockRetryRecommendations = jest.fn();
+const previewItems: HighlyRatedWavePreviewItem[] = [
+  {
+    wave: createMockMinimalWave({
+      id: "recommendation",
+      name: "Recommended wave",
+    }),
+    href: "/waves/recommendation",
+    isActive: false,
+    onClick: jest.fn(),
+  },
+];
+const discoveryProps = {
+  previewItems,
+  isTouchPreview: false,
+  recommendationsStatus: "success" as const,
+  onRetryRecommendations: mockRetryRecommendations,
+};
 const mockNext = jest.fn();
 const vote = (id: string) => ({
   wave: { id, name: id, pfp: null },
@@ -59,8 +79,7 @@ jest.mock("@/components/waves/WavePicture", () => ({
   __esModule: true,
   default: () => <span />,
 }));
-const renderDiscovery = () =>
-  render(<SidebarDiscovery previewItems={[]} isTouchPreview={false} />);
+const renderDiscovery = () => render(<SidebarDiscovery {...discoveryProps} />);
 beforeEach(() => {
   sessionStorage.clear();
   localStorage.clear();
@@ -95,7 +114,9 @@ it("shows both sections in order with both view-all links", () => {
   ).toBeTruthy();
   expect(active).toHaveTextContent("23");
   expect(screen.getByText("Rare Pepe acquisition")).toBeVisible();
-  expect(screen.getByText("Highly rated waves.")).toBeVisible();
+  expect(
+    screen.getByText("Highly rated waves you don’t follow.")
+  ).toBeVisible();
   expect(
     screen.getByRole("link", { name: "View all active votes" })
   ).toHaveAttribute("href", "/discover?view=active-votes");
@@ -216,7 +237,7 @@ it("uses the vote scroll area for pagination, guards duplicate loads, and render
   });
   expect(mockNext).toHaveBeenCalledTimes(1);
   mockVotes.data!.pages.push({ count: 23, data: [vote("Later page vote")] });
-  rerender(<SidebarDiscovery previewItems={[]} isTouchPreview={false} />);
+  rerender(<SidebarDiscovery {...discoveryProps} />);
   expect(
     within(list).getByRole("link", { name: /Later page vote/ })
   ).toBeVisible();
@@ -242,7 +263,7 @@ it("updates the active-votes fade on scroll without measuring layout for unrelat
   readHeight.mockClear();
 
   mockActiveWaveId = "QUORUM";
-  rerender(<SidebarDiscovery previewItems={[]} isTouchPreview={false} />);
+  rerender(<SidebarDiscovery {...discoveryProps} />);
   expect(readHeight).not.toHaveBeenCalled();
   expect(fade()).toBeInTheDocument();
 
@@ -255,8 +276,8 @@ it("provides a keyboard-accessible load-more fallback and disables it while fetc
   fireEvent.click(screen.getByRole("button", { name: "Load more" }));
   expect(mockNext).toHaveBeenCalledTimes(1);
   mockVotes.isFetchingNextPage = true;
-  rerender(<SidebarDiscovery previewItems={[]} isTouchPreview={false} />);
-  expect(screen.getByRole("button", { name: "Loading waves…" })).toBeDisabled();
+  rerender(<SidebarDiscovery {...discoveryProps} />);
+  expect(screen.getByRole("button", { name: "Loading votes…" })).toBeDisabled();
 });
 it("opens a vote in the existing navigation but preserves modified clicks", () => {
   renderDiscovery();
@@ -279,13 +300,104 @@ it("tracks the current wave in Active Votes when selection changes elsewhere", (
   expect(rarePepe).not.toHaveAttribute("aria-current");
 
   mockActiveWaveId = "Rare Pepe acquisition";
-  rerender(<SidebarDiscovery previewItems={[]} isTouchPreview={false} />);
+  rerender(<SidebarDiscovery {...discoveryProps} />);
   expect(rarePepe).toHaveAttribute("aria-current", "page");
   expect(quorum).not.toHaveAttribute("aria-current");
   expect(quorum.parentElement).not.toHaveClass("tw-bg-iron-800/70");
 
   mockActiveWaveId = null;
-  rerender(<SidebarDiscovery previewItems={[]} isTouchPreview={false} />);
+  rerender(<SidebarDiscovery {...discoveryProps} />);
   expect(rarePepe).not.toHaveAttribute("aria-current");
   expect(rarePepe.parentElement).not.toHaveClass("tw-bg-iron-800/70");
+});
+
+it("shows a quiet recommendation placeholder until the request succeeds, then reveals the description with previews", () => {
+  const { rerender } = render(
+    <SidebarDiscovery
+      {...discoveryProps}
+      previewItems={[]}
+      recommendationsStatus="pending"
+    />
+  );
+  expect(screen.getByText("Loading recommendations…")).toBeInTheDocument();
+  expect(
+    screen.queryByText("Highly rated waves you don’t follow.")
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("No recommendations right now.")
+  ).not.toBeInTheDocument();
+  rerender(<SidebarDiscovery {...discoveryProps} />);
+  expect(
+    screen.queryByText("Loading recommendations…")
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByText("Highly rated waves you don’t follow.")
+  ).toBeVisible();
+  expect(
+    screen.getByRole("link", { name: "Open Recommended wave" })
+  ).toBeVisible();
+});
+it("shows only the recommendation empty message after a successful empty response", () => {
+  render(<SidebarDiscovery {...discoveryProps} previewItems={[]} />);
+  expect(screen.getByText("No recommendations right now.")).toBeVisible();
+  expect(
+    screen.queryByText("Highly rated waves you don’t follow.")
+  ).not.toBeInTheDocument();
+});
+it("offers retry for recommendations instead of presenting a failed request as empty", () => {
+  render(
+    <SidebarDiscovery
+      {...discoveryProps}
+      previewItems={[]}
+      recommendationsStatus="error"
+    />
+  );
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    "Couldn’t load recommendations."
+  );
+  expect(
+    screen.queryByText("No recommendations right now.")
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("Highly rated waves you don’t follow.")
+  ).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+  expect(mockRetryRecommendations).toHaveBeenCalledTimes(1);
+});
+it("keeps successful previews visible when a background recommendation refresh fails", () => {
+  render(
+    <SidebarDiscovery {...discoveryProps} recommendationsStatus="error" />
+  );
+  expect(
+    screen.getByRole("link", { name: "Open Recommended wave" })
+  ).toBeVisible();
+  expect(
+    screen.getByText("Highly rated waves you don’t follow.")
+  ).toBeVisible();
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    "Couldn’t load recommendations."
+  );
+});
+it("withholds the vote description during loading and empty states but preserves it while paginating", () => {
+  mockVotes.data = undefined;
+  mockVotes.isPending = true;
+  const { rerender } = renderDiscovery();
+  expect(screen.getByText("Loading votes…")).toBeInTheDocument();
+  expect(
+    screen.queryByText("Community decisions powered by TDH.")
+  ).not.toBeInTheDocument();
+  expect(screen.queryByText("Loading waves…")).not.toBeInTheDocument();
+  mockVotes = makeVotes();
+  mockVotes.isFetchingNextPage = true;
+  rerender(<SidebarDiscovery {...discoveryProps} />);
+  expect(screen.getByText("Community decisions powered by TDH.")).toBeVisible();
+  expect(screen.getByText("Rare Pepe acquisition")).toBeVisible();
+  mockVotes.data = { pages: [{ count: 0, data: [] }] };
+  mockVotes.hasNextPage = false;
+  mockVotes.isFetchingNextPage = false;
+  rerender(<SidebarDiscovery {...discoveryProps} />);
+  expect(screen.getByText("No active TDH votes right now.")).toBeVisible();
+  expect(
+    screen.queryByText("Community decisions powered by TDH.")
+  ).not.toBeInTheDocument();
 });

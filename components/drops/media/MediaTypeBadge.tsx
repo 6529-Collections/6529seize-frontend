@@ -1,5 +1,7 @@
 "use client";
 
+import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
+import { useId } from "react";
 import { getMediaTypeInfo, type MediaCategory } from "@/helpers/file.helpers";
 import { useControlledTooltip } from "@/hooks/useControlledTooltip";
 import { Tooltip } from "react-tooltip";
@@ -24,6 +26,8 @@ interface MediaTypeBadgeProps {
   readonly dropId?: string;
   readonly size?: "xs" | "sm" | "md" | "lg";
   readonly showTooltip?: boolean;
+  readonly tooltipPortal?: boolean;
+  readonly tooltipZIndex?: number;
   readonly showLabel?: boolean;
   readonly tone?: "muted" | "color";
   readonly className?: string;
@@ -50,6 +54,8 @@ export default function MediaTypeBadge({
   dropId,
   size = "sm",
   showTooltip = true,
+  tooltipPortal = false,
+  tooltipZIndex = 9999,
   showLabel = false,
   tone = "muted",
   className = "",
@@ -57,7 +63,11 @@ export default function MediaTypeBadge({
   labelClassName = "",
 }: MediaTypeBadgeProps) {
   const mediaInfo = getMediaTypeInfo(mimeType);
-  const tooltipId = dropId ? `format-badge-${dropId}` : undefined;
+  const portalId = useId();
+  const tooltipAnchorId = tooltipPortal ? portalId : dropId;
+  const tooltipId = tooltipAnchorId
+    ? `format-badge-${tooltipAnchorId}`
+    : undefined;
   const shouldRenderTooltip = showTooltip && Boolean(tooltipId);
   const { isOpen, setIsOpen, triggerProps } = useControlledTooltip();
   const iconClasses = [
@@ -83,6 +93,8 @@ export default function MediaTypeBadge({
       "desktop-hover:hover:tw-grayscale-0"
     );
   }
+
+  const TooltipComponent = tooltipPortal ? BodyPortalTooltip : Tooltip;
 
   const icon = (
     <div
@@ -120,7 +132,7 @@ export default function MediaTypeBadge({
         <span className={labelClassName.trim()}>{mediaInfo.label}</span>
       )}
       {shouldRenderTooltip && tooltipId && (
-        <Tooltip
+        <TooltipComponent
           id={tooltipId}
           place="top"
           opacity={1}
@@ -133,7 +145,7 @@ export default function MediaTypeBadge({
             color: "white",
             fontSize: "12px",
             borderRadius: "6px",
-            zIndex: 9999,
+            zIndex: tooltipZIndex,
           }}
         />
       )}

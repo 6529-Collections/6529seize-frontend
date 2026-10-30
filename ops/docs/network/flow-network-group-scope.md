@@ -39,10 +39,12 @@ no standalone Network Groups page.
 1. Open `/network` and select `Filter`.
 2. Choose `Identities`, `Level`, `TDH`, `NIC`, `Rep`, `Required NFTs`,
    `Collection Access`, or `xTDH Grant` from the left-side list on desktop.
-   On smaller screens, the controls stay in one row above the fields and scroll
-   sideways when they do not fit. Navigation remains beside or above the
-   vertically scrolling editor. `Close` dismisses the sheet.
-   Check the criteria tags under `After editing`
+   On phones and touch tablets, the sheet opens with a vertical list of all
+   eight criteria. Scroll down the list if needed, then select a row to open
+   its editor. `Back` returns to the list and preserves the draft; configured
+   rows have a checkmark. The editor scrolls independently above the summary
+   and primary action. `Close` dismisses the sheet.
+   Check the criteria tags in the footer
    and `View members`, then select `Create and use new group`. Network's
    criteria editor does not offer saved-group search or the
    `Hide criteria and members` setting.

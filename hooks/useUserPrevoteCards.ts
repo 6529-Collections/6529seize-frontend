@@ -8,6 +8,7 @@ import type { ApiNft } from "@/generated/models/ApiNft";
 import type { ApiNftsPage } from "@/generated/models/ApiNftsPage";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { commonApiFetch } from "@/services/api/common-api";
+import { getNftMimeType } from "@/helpers/nft.helpers";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -16,11 +17,21 @@ interface UseUserPrevoteCardsProps {
   readonly enabled?: boolean | undefined;
 }
 
-const toCollectedCard = (nft: ApiNft): CollectedCard => ({
+export interface ArtistPrevoteCard extends CollectedCard {
+  readonly mediaMimeType?: string | undefined;
+}
+
+const toCollectedCard = (nft: ApiNft): ArtistPrevoteCard => ({
   collection: CollectedCollectionType.MEMES,
   token_id: nft.id,
   token_name: nft.name || `The Memes #${nft.id}`,
   img: nft.scaled,
+  mediaMimeType:
+    getNftMimeType({
+      ...nft,
+      image: nft.image ?? "",
+      animation: nft.animation ?? "",
+    }) ?? undefined,
   tdh: typeof nft.tdh === "number" ? nft.tdh : null,
   rank: typeof nft.tdh_rank === "number" ? nft.tdh_rank : null,
   seized_count: null,
@@ -66,14 +77,14 @@ export const useUserPrevoteCards = ({
       return [];
     }
 
-    const cardsById = new Map<number, CollectedCard>();
+    const cardsById = new Map<number, ArtistPrevoteCard>();
     for (const nft of data.data) {
       cardsById.set(nft.id, toCollectedCard(nft));
     }
 
     return prevoteCardIds
       .map((id) => cardsById.get(id))
-      .filter((card): card is CollectedCard => !!card);
+      .filter((card): card is ArtistPrevoteCard => !!card);
   }, [data, prevoteCardIds]);
 
   return {

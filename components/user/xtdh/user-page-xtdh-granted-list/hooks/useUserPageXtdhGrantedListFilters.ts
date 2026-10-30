@@ -30,7 +30,7 @@ const DEFAULT_SUB_FILTER: GrantedActiveFilter = "ALL";
 const applyTabUpdate = (params: URLSearchParams, tab?: GrantedTab) => {
   if (!tab) return;
   if (tab === DEFAULT_TAB) {
-    params.delete(TAB_PARAM);
+    params.set(TAB_PARAM, "granted");
     // Reset sub filter when switching to default tab (though only Active has sub filters)
     params.delete(SUB_FILTER_PARAM);
     return;
@@ -86,9 +86,7 @@ type SearchParams = ReturnType<typeof useSearchParams>;
 const useGrantedListFiltersFromSearchParams = (searchParams: SearchParams) => {
   const activeTab = useMemo<GrantedTab>(() => {
     const param = searchParams?.get(TAB_PARAM)?.toUpperCase();
-    return (
-      GRANTED_TABS.find((t) => t.value === param)?.value ?? DEFAULT_TAB
-    );
+    return GRANTED_TABS.find((t) => t.value === param)?.value ?? DEFAULT_TAB;
   }, [searchParams]);
 
   const activeSubFilter = useMemo<GrantedActiveFilter>(() => {
@@ -100,8 +98,7 @@ const useGrantedListFiltersFromSearchParams = (searchParams: SearchParams) => {
   }, [searchParams]);
 
   const activeSortField = useMemo(
-    () =>
-      parseUserPageXtdhGrantedListSortField(searchParams?.get(SORT_PARAM) ?? null),
+    () => parseUserPageXtdhGrantedListSortField(searchParams.get(SORT_PARAM)),
     [searchParams]
   );
   const activeSortDirection = useMemo(

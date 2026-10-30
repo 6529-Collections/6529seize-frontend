@@ -1,6 +1,7 @@
 import { ProfileProxyActionStatus, ProfileProxySide } from "@/entities/IProxy";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { Tooltip } from "react-tooltip";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 const STATUS_CLASSES: Record<ProfileProxyActionStatus, string> = {
   [ProfileProxyActionStatus.ACTIVE]:
@@ -47,7 +48,10 @@ export default function ProxyActionRowStatus({
       >
         {statusOwnerProfile.pfp ? (
           <img
-            src={statusOwnerProfile.pfp}
+            src={getScaledImageUri(
+              statusOwnerProfile.pfp,
+              ImageScale.W_AUTO_H_50
+            )}
             alt="Profile picture"
             className="tw-h-[22px] tw-w-[22px] tw-flex-none tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/[0.08]"
           />

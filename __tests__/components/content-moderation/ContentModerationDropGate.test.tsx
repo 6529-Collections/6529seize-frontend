@@ -24,6 +24,12 @@ import {
   waitFor,
 } from "@testing-library/react";
 import type { ReactElement, ReactNode } from "react";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
 
 let mockConnectedProfileId: string | null = "viewer-1";
 
@@ -346,39 +352,51 @@ describe("ContentModerationDropGate", () => {
     expect(unhideDrop).not.toHaveBeenCalled();
   });
 
-  it("shows the resolved no-action outcome before and after reveal", () => {
-    renderGate(
-      <ContentModerationDropGate
-        drop={createDrop({
-          viewer_context: {
-            author_blocked: false,
-            drop_hidden: true,
-            report_status: ApiContentModerationReportStatus.ResolvedAllowed,
-          },
-          moderation: {
-            status: ApiDropModerationStatus.Visible,
-            can_view: true,
-          },
-        })}
-      >
-        <div>
-          <ContentModerationDropStatusControls />
-          <p>Reviewed post</p>
-        </div>
-      </ContentModerationDropGate>
-    );
+  it.each([
+    [
+      ApiContentModerationReportStatus.ResolvedAllowed,
+      "Reviewed · No action taken",
+    ],
+    [
+      ApiContentModerationReportStatus.ResolvedDeleted,
+      "Resolved · Post deleted",
+    ],
+  ])(
+    "shows the resolved %s outcome before and after reveal",
+    (status, label) => {
+      renderGate(
+        <ContentModerationDropGate
+          drop={createDrop({
+            viewer_context: {
+              author_blocked: false,
+              drop_hidden: true,
+              report_status: status,
+            },
+            moderation: {
+              status: ApiDropModerationStatus.Visible,
+              can_view: true,
+            },
+          })}
+        >
+          <div>
+            <ContentModerationDropStatusControls />
+            <p>Reviewed post</p>
+          </div>
+        </ContentModerationDropGate>
+      );
 
-    expect(
-      screen.getByRole("button", { name: "Reviewed · No action taken" })
-    ).toHaveTextContent("Reviewed · No action taken");
+      expect(screen.getByRole("button", { name: label })).toHaveTextContent(
+        label
+      );
 
-    fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
+      fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
 
-    expect(
-      screen.getByRole("button", { name: "Reviewed · No action taken" })
-    ).toHaveTextContent("Reviewed · No action taken");
-    expect(screen.getByRole("button", { name: "Hide again" })).toBeVisible();
-  });
+      expect(screen.getByRole("button", { name: label })).toHaveTextContent(
+        label
+      );
+      expect(screen.getByRole("button", { name: "Hide again" })).toBeVisible();
+    }
+  );
 
   it("does not repeat Hidden when a hidden post already has report status", () => {
     renderGate(
@@ -494,6 +512,30 @@ describe("ContentModerationDropGate", () => {
     expect(
       screen.getByTestId("content-moderation-tombstone-blocked")
     ).toBeInTheDocument();
+  });
+
+  it("requests the AUTOx50 derivative of a blocked author's profile picture", () => {
+    setProfileBlockedOverride("viewer-1", "author-1", true);
+    const drop = createDrop({
+      moderation: {
+        status: ApiDropModerationStatus.Visible,
+        can_view: true,
+      },
+    });
+    renderGate(
+      <ContentModerationDropGate
+        drop={{ ...drop, author: { ...drop.author, pfp: CDN_AVATAR_URL } }}
+      >
+        <p>Blocked post</p>
+      </ContentModerationDropGate>
+    );
+
+    const tombstone = screen.getByTestId(
+      "content-moderation-tombstone-blocked"
+    );
+    expect(getRequestedImageSrc(tombstone.querySelector("img"))).toContain(
+      scaledAvatarPath(ImageScale.W_AUTO_H_50)
+    );
   });
 
   it("unblocks every mounted post by an author immediately", async () => {

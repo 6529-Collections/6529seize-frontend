@@ -41,7 +41,7 @@ const createWrapper = (authContextOverrides: Partial<TestAuthContext> = {}) => {
     activeProfileProxy: null,
     requestAuth: jest.fn(async () => ({ success: false })),
     setToast: jest.fn(),
-    setActiveProfileProxy: jest.fn(async () => undefined),
+    setActiveProfileProxy: jest.fn(() => Promise.resolve(false)),
     fetchingProfile: false,
     connectionStatus: ProfileConnectedStatus.NOT_CONNECTED,
     receivedProfileProxies: [],

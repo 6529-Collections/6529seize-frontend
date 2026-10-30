@@ -113,10 +113,7 @@ export function CompetitionRouteProvider({
     (presentation.visit === visit
       ? (presentation.flat ?? resolvedFlat)
       : resolvedFlat);
-  const nativeCompetition =
-    value && value.hub.legacy_primary_competition_id !== competitionId
-      ? value.competition
-      : null;
+  const nativeCompetition = value?.competition ?? null;
   const error =
     value === null &&
     (wave.isError ||

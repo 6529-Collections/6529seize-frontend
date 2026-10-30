@@ -1,5 +1,9 @@
 "use client";
 
+import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -217,6 +221,14 @@ export default function QuorumProposalDropModal({
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const onCloseRef = useRef(onClose);
   const { isApp } = useDeviceInfo();
+  const locale = useBrowserLocale();
+  const nativeCompetition = presentationCompetition(wave);
+  const [acceptedTermsVersion, setAcceptedTermsVersion] = useState<
+    number | null
+  >(null);
+  const nativeTerms = nativeCompetition?.participation.terms ?? null;
+  const termsAccepted =
+    !nativeTerms || acceptedTermsVersion === nativeCompetition?.config_version;
   const { isSafeWallet, address } = useSeizeConnectContext();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
@@ -311,7 +323,7 @@ export default function QuorumProposalDropModal({
     async (
       requestBody: ApiCreateDropRequest
     ): Promise<ApiCreateDropRequest | null> => {
-      if (!wave.participation.signature_required) {
+      if (nativeCompetition || !wave.participation.signature_required) {
         return requestBody;
       }
 
@@ -362,7 +374,12 @@ export default function QuorumProposalDropModal({
         document.dispatchEvent(event);
       });
     },
-    [wave.participation.signature_required, wave.participation.terms, signDrop]
+    [
+      nativeCompetition,
+      wave.participation.signature_required,
+      wave.participation.terms,
+      signDrop,
+    ]
   );
 
   const hideMobileKeyboard = useCallback(() => {
@@ -393,7 +410,7 @@ export default function QuorumProposalDropModal({
   }, [onClose]);
 
   const submitQuorumProposalDrop = useCallback(async () => {
-    if (submitting) {
+    if (submitting || !termsAccepted) {
       return;
     }
 
@@ -497,6 +514,7 @@ export default function QuorumProposalDropModal({
     }
   }, [
     submitting,
+    termsAccepted,
     hasProposalContent,
     requestAuth,
     activeDrop,
@@ -658,6 +676,26 @@ export default function QuorumProposalDropModal({
                 </div>
               )}
 
+              {nativeTerms && isLastStep && (
+                <div className="tw-mt-4 tw-space-y-3 tw-text-sm tw-text-iron-300">
+                  <p className="tw-whitespace-pre-wrap">{nativeTerms}</p>
+                  <label className="tw-flex tw-items-start tw-gap-3">
+                    <input
+                      type="checkbox"
+                      checked={termsAccepted}
+                      disabled={submitting}
+                      onChange={(event) =>
+                        setAcceptedTermsVersion(
+                          event.target.checked
+                            ? (nativeCompetition?.config_version ?? null)
+                            : null
+                        )
+                      }
+                    />
+                    <span>{t(locale, "competitions.terms")}</span>
+                  </label>
+                </div>
+              )}
               {showValidation && !hasProposalContent && (
                 <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-font-medium tw-text-error">
                   Add at least one proposal field before submitting.
@@ -681,7 +719,9 @@ export default function QuorumProposalDropModal({
                   <Button
                     onClick={onSubmitClick}
                     loading={submitting}
-                    disabled={submitting || !hasProposalContent}
+                    disabled={
+                      submitting || !hasProposalContent || !termsAccepted
+                    }
                     variant="primary"
                     size="md"
                     className="tw-px-5"

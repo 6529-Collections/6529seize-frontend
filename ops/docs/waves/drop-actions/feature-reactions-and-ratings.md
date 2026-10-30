@@ -87,7 +87,8 @@ rolls back if the request fails.
   recovery attempt for that session and temporarily disables reaction actions.
   The failed reaction is not automatically replayed; retry after authentication
   succeeds.
-- If a reaction request times out, the app briefly checks the saved state. A
+- If a reaction request times out or its response is lost to a network error,
+  the app briefly checks the saved state. A
   saved reaction that matches your latest choice stays in
   place without an error or rollback. The app does not automatically retry the
   write.
@@ -95,7 +96,7 @@ rolls back if the request fails.
   and asks you to refresh and check before trying again. The original request may
   still have changed your reaction; repeating the same choice can undo that change.
 - If rating submit fails, optimistic rating state rolls back and users can retry.
-- Failures surface as toast errors; an unconfirmed timeout shows a warning.
+- Failures surface as toast errors; an unconfirmed timeout or network error shows a warning.
   Users stay in the same thread.
 
 ## Limitations / Notes

@@ -7,7 +7,11 @@ import {
   waitFor,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { DropMutationBody } from "@/components/waves/create-drop-content/drop-submission.types";
+import { ApiCompetition } from "@/generated/models/ApiCompetition";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import CreateDrop from "@/components/waves/CreateDrop";
 import { DropMode } from "@/components/waves/dropComposer.types";
 import { AuthContext } from "@/components/auth/Auth";
@@ -34,25 +38,44 @@ const mockInvalidateQueries = jest.fn(() => Promise.resolve());
 const mockProcessDropRemoved = jest.fn();
 const mockProcessIncomingDrop = jest.fn();
 const mockApplyOptimisticDropUpdate = jest.fn();
+const mockSubmitCompetitionEntry = jest.fn();
+const mockUseCompetitionEntrySubmit = jest.fn(
+  (_competition: ApiCompetition | null) => mockSubmitCompetitionEntry
+);
+let mockUseRealMutation = false;
 
-jest.mock("@tanstack/react-query", () => ({
-  useQueryClient: () => ({
-    setQueryData: mockSetQueryData,
-    invalidateQueries: mockInvalidateQueries,
-  }),
-  useMutation: (options: any) => ({
-    mutateAsync: jest.fn(async (variables: any) => {
-      try {
-        const result = await options.mutationFn(variables);
-        options.onSuccess?.(result, variables, undefined);
-        return result;
-      } catch (error) {
-        options.onError?.(error, variables, undefined);
-        throw error;
-      }
-    }),
-  }),
+jest.mock("@/hooks/competitions/useCompetitionEntrySubmit", () => ({
+  useCompetitionEntrySubmit: (competition: ApiCompetition | null) =>
+    mockUseCompetitionEntrySubmit(competition),
 }));
+
+jest.mock("@tanstack/react-query", () => {
+  const actual = jest.requireActual<typeof import("@tanstack/react-query")>(
+    "@tanstack/react-query"
+  );
+  return {
+    ...actual,
+    useQueryClient: () => ({
+      setQueryData: mockSetQueryData,
+      invalidateQueries: mockInvalidateQueries,
+    }),
+    useMutation: (options: any) => {
+      if (mockUseRealMutation) return actual.useMutation(options);
+      return {
+        mutateAsync: jest.fn(async (variables: any) => {
+          try {
+            const result = await options.mutationFn(variables);
+            options.onSuccess?.(result, variables, undefined);
+            return result;
+          } catch (error) {
+            options.onError?.(error, variables, undefined);
+            throw error;
+          }
+        }),
+      };
+    },
+  };
+});
 jest.mock("@/hooks/useWave", () => ({ useWave: jest.fn() }));
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
@@ -251,12 +274,20 @@ const mockPendingPosts = () => {
 describe("CreateDrop", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseRealMutation = false;
+    mockUseCompetitionEntrySubmit.mockImplementation(
+      () => mockSubmitCompetitionEntry
+    );
     mockApplyOptimisticDropUpdate.mockReturnValue(null);
     useWaveMock.mockReturnValue({
       isMemesWave: false,
       isCurationWave: false,
     } as any);
     commonApiPostMock.mockResolvedValue({ id: "server-drop", wave_id: "1" });
+    mockSubmitCompetitionEntry.mockResolvedValue({
+      id: "native-drop",
+      wave_id: "1",
+    });
     fetchWaveMetadataMock.mockResolvedValue([]);
   });
 
@@ -289,6 +320,159 @@ describe("CreateDrop", () => {
     await waitFor(() => expect(waitAndInvalidateDrops).toHaveBeenCalled());
     await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
   });
+
+  it.each([DropMode.CHAT, DropMode.PARTICIPATION])(
+    "routes %s submissions from a projected competition to the correct adapter",
+    async (mode) => {
+      const competition = Object.assign(new ApiCompetition(), {
+        id: "selected",
+        wave_id: wave.id,
+      });
+      render(
+        <CreateDrop
+          activeDrop={null}
+          onCancelReplyQuote={jest.fn()}
+          onDropAddedToQueue={jest.fn()}
+          wave={{ ...wave, competition }}
+          dropId={null}
+          fixedDropMode={mode}
+          privileges={{ chatRestriction: null, submissionRestriction: null }}
+        />
+      );
+
+      await userEvent.click(screen.getByText("submit current mode"));
+      await waitFor(() => expect(mockProcessIncomingDrop).toHaveBeenCalled());
+      expect(mockUseCompetitionEntrySubmit).toHaveBeenCalledWith(competition);
+      if (mode === DropMode.CHAT) {
+        expect(commonApiPostMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            endpoint: "drops",
+            body: expect.objectContaining({
+              wave_id: wave.id,
+              drop_type: "CHAT",
+            }),
+          })
+        );
+        expect(mockSubmitCompetitionEntry).not.toHaveBeenCalled();
+      } else {
+        expect(mockSubmitCompetitionEntry).toHaveBeenCalledWith(
+          expect.objectContaining({
+            wave_id: wave.id,
+            drop_type: "PARTICIPATORY",
+          })
+        );
+        expect(commonApiPostMock).not.toHaveBeenCalled();
+      }
+    }
+  );
+
+  it.each([
+    ["sibling", 7],
+    ["selected", 8],
+  ])(
+    "keeps queued native submissions bound before selecting %s version %s with the real mutation observer",
+    async (id, version) => {
+      mockUseRealMutation = true;
+      const original = Object.assign(new ApiCompetition(), {
+        id: "selected",
+        wave_id: wave.id,
+        config_version: 7,
+      });
+      const selected = Object.assign(new ApiCompetition(), {
+        ...original,
+        id,
+        config_version: version,
+      });
+      const firstDrop = Object.assign(new ApiDrop(), { id: "first-native" });
+      let releaseFirst!: (drop: ApiDrop) => void;
+      const firstPending = new Promise<ApiDrop>((resolve) => {
+        releaseFirst = resolve;
+      });
+      const submitOriginal = jest
+        .fn<Promise<ApiDrop>, [ApiCreateDropRequest]>()
+        .mockResolvedValue(
+          Object.assign(new ApiDrop(), { id: "queued-native" })
+        )
+        .mockImplementationOnce(() => firstPending);
+      const submitSelected = jest
+        .fn<Promise<ApiDrop>, [ApiCreateDropRequest]>()
+        .mockResolvedValue(
+          Object.assign(new ApiDrop(), { id: "selected-native" })
+        );
+      mockUseCompetitionEntrySubmit.mockImplementation((competition) =>
+        competition?.id === original.id &&
+        competition.config_version === original.config_version
+          ? submitOriginal
+          : submitSelected
+      );
+      const client = new QueryClient({
+        defaultOptions: { mutations: { retry: false } },
+      });
+      const onQueued = jest.fn();
+      const onDrained = jest.fn();
+      const composer = (competition: ApiCompetition) => (
+        <QueryClientProvider client={client}>
+          <ReactQueryWrapperContext.Consumer>
+            {(context) => (
+              <ReactQueryWrapperContext.Provider
+                value={{ ...context, waitAndInvalidateDrops: jest.fn() }}
+              >
+                <CreateDrop
+                  activeDrop={null}
+                  onCancelReplyQuote={jest.fn()}
+                  onDropAddedToQueue={onQueued}
+                  onAllDropsAdded={onDrained}
+                  wave={{ ...wave, competition }}
+                  dropId={null}
+                  fixedDropMode={DropMode.PARTICIPATION}
+                  privileges={{
+                    chatRestriction: null,
+                    submissionRestriction: null,
+                  }}
+                />
+              </ReactQueryWrapperContext.Provider>
+            )}
+          </ReactQueryWrapperContext.Consumer>
+        </QueryClientProvider>
+      );
+      const view = render(composer(original));
+      try {
+        await userEvent.click(screen.getByText("submit current mode"));
+        await waitFor(() => expect(submitOriginal).toHaveBeenCalledTimes(1));
+        await userEvent.click(screen.getByText("submit current mode"));
+        expect(onQueued).toHaveBeenCalledTimes(2);
+        expect(submitOriginal).toHaveBeenCalledTimes(1);
+        expect(onDrained).not.toHaveBeenCalled();
+        view.rerender(composer(selected));
+        expect(mockUseCompetitionEntrySubmit).toHaveBeenLastCalledWith(
+          selected
+        );
+        await act(async () => {
+          releaseFirst(firstDrop);
+          await firstPending;
+        });
+        await waitFor(() => expect(onDrained).toHaveBeenCalledTimes(1));
+        expect(submitOriginal).toHaveBeenCalledTimes(2);
+        expect(submitSelected).not.toHaveBeenCalled();
+        expect(commonApiPostMock).not.toHaveBeenCalled();
+        await userEvent.click(screen.getByText("submit current mode"));
+        await waitFor(() => expect(onDrained).toHaveBeenCalledTimes(2));
+        expect(submitOriginal).toHaveBeenCalledTimes(2);
+        expect(submitSelected).toHaveBeenCalledTimes(1);
+        expect(submitSelected).toHaveBeenCalledWith(
+          expect.objectContaining({
+            wave_id: wave.id,
+            drop_type: "PARTICIPATORY",
+          })
+        );
+        expect(commonApiPostMock).not.toHaveBeenCalled();
+      } finally {
+        releaseFirst(firstDrop);
+        view.unmount();
+        client.clear();
+      }
+    }
+  );
 
   it("reports a caught submission failure and retains the error toast", async () => {
     const error = new TypeError("Failed to fetch");

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
 import { formatAddress } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -61,7 +61,7 @@ export default function AppSidebarUserInfo({
     return profile?.pfp ?? null;
   })();
 
-  const resolvedPfp = pfp && resolveIpfsUrlSync(pfp);
+  const resolvedPfp = pfp && getScaledImageUri(pfp, ImageScale.W_AUTO_H_50);
   const shouldShowFallbackPfp = Boolean(address ?? activeProfileProxy);
   const avatarSrc =
     resolvedPfp ??
