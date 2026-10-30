@@ -254,9 +254,7 @@ export function ExploreWavesSection({
   return (
     <section
       data-home-section={
-        !isLoading && !hasNoWaves && !hasLoadError
-          ? "Explore waves"
-          : undefined
+        !isLoading && !hasNoWaves && !hasLoadError ? "Explore waves" : undefined
       }
       className={
         headingVariant === "page"

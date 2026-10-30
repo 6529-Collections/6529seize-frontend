@@ -1,7 +1,13 @@
 import { renderWithQueryClient } from "../../../utils/reactQuery";
 import { ExploreWavesSection } from "@/components/home/explore-waves/ExploreWavesSection";
 import { fetchWavesV2Page } from "@/services/api/waves-v2-api";
-import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 
