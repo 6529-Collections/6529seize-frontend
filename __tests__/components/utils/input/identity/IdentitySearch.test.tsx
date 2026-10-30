@@ -1,7 +1,10 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import IdentitySearch from "@/components/utils/input/identity/IdentitySearch";
 import { useQuery } from "@tanstack/react-query";
+
+// Exercise the real debounce; the shared mock never invokes its callback.
+jest.unmock("react-use");
 
 let receivedProps: any;
 
@@ -346,4 +349,55 @@ describe("IdentitySearch", () => {
 
     expect(screen.getByRole("combobox", { name: "Identity" })).toHaveValue("");
   });
+});
+
+it("waits through debounce and fetch before reporting an empty current search", () => {
+  jest.useFakeTimers();
+  try {
+    const query = jest.mocked(useQuery);
+    query.mockReturnValue({
+      data: undefined,
+      isFetching: false,
+      isError: false,
+    } as ReturnType<typeof useQuery>);
+    const { rerender } = render(
+      <IdentitySearch identity={null} setIdentity={jest.fn()} />
+    );
+    const input = screen.getByRole("combobox", { name: "Identity" });
+    fireEvent.change(input, { target: { value: "abc" } });
+    expect(receivedProps.statusText).toBe("Searching…");
+    expect(receivedProps.profiles).toEqual([]);
+    query.mockReturnValue({
+      data: undefined,
+      isFetching: true,
+      isError: false,
+    } as ReturnType<typeof useQuery>);
+    act(() => {
+      jest.advanceTimersByTime(200);
+    });
+    expect(receivedProps.statusText).toBe("Searching…");
+    query.mockReturnValue({
+      data: [],
+      isFetching: false,
+      isError: false,
+    } as unknown as ReturnType<typeof useQuery>);
+    rerender(<IdentitySearch identity={null} setIdentity={jest.fn()} />);
+    expect(receivedProps.statusText).toBeUndefined();
+    expect(receivedProps.busy).toBe(false);
+    fireEvent.change(input, { target: { value: "abcd" } });
+    expect(receivedProps.statusText).toBe("Searching…");
+    query.mockReturnValue({
+      data: undefined,
+      isFetching: false,
+      isError: true,
+    } as ReturnType<typeof useQuery>);
+    act(() => {
+      jest.advanceTimersByTime(200);
+    });
+    expect(receivedProps.statusText).toBe(
+      "Couldn’t load profiles. Try searching again."
+    );
+  } finally {
+    jest.useRealTimers();
+  }
 });

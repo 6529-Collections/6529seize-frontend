@@ -1,12 +1,13 @@
 import { publicEnv } from "@/config/env";
-// The default entry bundles the rrweb session recorder (~85 KB gzip). Recording
-// is off (record_sessions_percent: 0), so use the recorder-free core build; it
-// is the same SDK without the recorder bundle. The sibling .d.ts supplies types.
-import mixpanel from "mixpanel-browser/dist/mixpanel-core.cjs.js";
 import type { BeforeSendHookPayload } from "mixpanel-browser";
 import Cookies from "js-cookie";
 import { CONSENT_PERFORMANCE_COOKIE } from "@/constants/constants";
 import { guardMixpanelBatching, type BatchSdk } from "./mixpanelBatching";
+import {
+  getLoadedMixpanelSdk,
+  loadMixpanelSdk,
+  type MixpanelSdk,
+} from "./mixpanelSdk";
 import {
   MIXPANEL_PRIVATE_PROPERTIES,
   MIXPANEL_PRIVACY_CONFIG,
@@ -78,6 +79,8 @@ export type AuthImpactProperties = {
 
 const MIXPANEL_TOKEN = publicEnv.NEXT_PUBLIC_MIXPANEL_TOKEN;
 
+// Set by the first successful initialization; every SDK call happens after it.
+let mixpanel: MixpanelSdk | undefined;
 let hasInitialized = false;
 let identifiedDistinctId: string | null = null;
 let identityResetPending = false;
@@ -86,6 +89,8 @@ let analyticsGeneration = 0;
 let batchGuard: ReturnType<typeof guardMixpanelBatching> | undefined;
 let queueClearState: "ready" | "pending" | "failed" = "ready";
 let resumeRequested = false;
+let sdkInitRequested = false;
+let sdkDownloadPending = false;
 const recoveryListeners = new Set<() => void>();
 
 export const subscribeAnalyticsRecovery = (
@@ -95,6 +100,16 @@ export const subscribeAnalyticsRecovery = (
   return () => {
     recoveryListeners.delete(listener);
   };
+};
+
+const notifyAnalyticsRecovery = (): void => {
+  for (const listener of recoveryListeners) {
+    try {
+      listener();
+    } catch {
+      /* Optional telemetry recovery. */
+    }
+  }
 };
 
 const clearAnalyticsQueues = (): void => {
@@ -109,13 +124,7 @@ const clearAnalyticsQueues = (): void => {
       queueClearState = "ready";
       if (!resumeRequested) return;
       resumeRequested = false;
-      for (const listener of recoveryListeners) {
-        try {
-          listener();
-        } catch {
-          /* Optional telemetry recovery. */
-        }
-      }
+      notifyAnalyticsRecovery();
     },
     () => {
       queueClearState = "failed";
@@ -127,7 +136,7 @@ export const getAnalyticsGeneration = (): number => analyticsGeneration;
 export const isAnalyticsTrackingAllowed = (): boolean => isAnalyticsReady();
 
 const clearPrivateSuperProperties = (
-  sdk: Pick<typeof mixpanel, "unregister"> = mixpanel
+  sdk: Pick<MixpanelSdk, "unregister">
 ): void => {
   // Exported by the pinned SDK; read once rather than rereading storage for every absent key.
   const persistenceSdk = sdk as typeof sdk & {
@@ -180,11 +189,38 @@ const isAnalyticsReady = (): boolean => {
 const guardIdentityDelivery = (payload: Record<string, unknown>) =>
   isAnalyticsReady() ? sanitizeMixpanelIdentityEnvelope(payload) : null;
 
+// Callers reach initAnalytics only once consent allows analytics, so this is
+// the first point where the SDK download is permitted. Initialization finishes
+// when it arrives unless consent was withdrawn meanwhile; recovery listeners
+// then retry the identity and page-view work that found analytics not ready.
+// One continuation serves every request made while a download is pending. A
+// failed download releases it, so the next request downloads again. An SDK
+// that arrives after withdrawal stays loaded and initializes synchronously on
+// the next consented initAnalytics call.
+const initializeWhenSdkLoads = (): void => {
+  sdkInitRequested = true;
+  if (sdkDownloadPending) return;
+  sdkDownloadPending = true;
+  const finish = (sdk: MixpanelSdk | undefined): void => {
+    sdkDownloadPending = false;
+    if (!sdk || !sdkInitRequested) return;
+    sdkInitRequested = false;
+    if (initAnalytics()) notifyAnalyticsRecovery();
+  };
+  void loadMixpanelSdk().then(finish, () => finish(undefined));
+};
+
 export const initAnalytics = (): boolean => {
   const token = MIXPANEL_TOKEN;
   if (!isAnalyticsEnvironmentSupported() || !token) {
     return false;
   }
+  const sdk = mixpanel ?? getLoadedMixpanelSdk();
+  if (!sdk) {
+    initializeWhenSdkLoads();
+    return false;
+  }
+  mixpanel = sdk;
   if (queueClearState !== "ready") {
     resumeRequested = true;
     if (queueClearState === "failed") clearAnalyticsQueues();
@@ -192,13 +228,13 @@ export const initAnalytics = (): boolean => {
   }
   try {
     if (identityResetPending) {
-      mixpanel.reset();
+      sdk.reset();
       identityResetPending = false;
     }
     if (!isTrackingAllowed) analyticsGeneration += 1;
     isTrackingAllowed = true;
     if (hasInitialized) {
-      mixpanel.start_batch_senders();
+      sdk.start_batch_senders();
       return false;
     }
     // Runtime People/groups hooks are supported in 2.76.0 but omitted from its types.
@@ -208,22 +244,22 @@ export const initAnalytics = (): boolean => {
       before_send_people: guardIdentityDelivery,
       before_send_groups: guardIdentityDelivery,
     };
-    mixpanel.init(token, {
+    sdk.init(token, {
       ...MIXPANEL_PRIVACY_CONFIG,
       batch_autostart: false,
       persistence: "localStorage",
-      loaded: (sdk) => {
-        clearPrivateSuperProperties(sdk);
+      loaded: (loadedSdk) => {
+        clearPrivateSuperProperties(loadedSdk);
       },
       hooks,
     });
-    clearPrivateSuperProperties();
+    clearPrivateSuperProperties(sdk);
     batchGuard = guardMixpanelBatching(
-      mixpanel as typeof mixpanel & BatchSdk,
+      sdk as MixpanelSdk & BatchSdk,
       isAnalyticsReady
     );
     hasInitialized = true;
-    mixpanel.start_batch_senders();
+    sdk.start_batch_senders();
     return true;
   } catch {
     isTrackingAllowed = false;
@@ -235,20 +271,21 @@ const track = (
   eventName: string,
   properties?: AnalyticsProperties
 ): boolean => {
-  if (!isAnalyticsReady()) {
+  const sdk = mixpanel;
+  if (!sdk || !isAnalyticsReady()) {
     return false;
   }
 
   try {
-    clearPrivateSuperProperties();
+    clearPrivateSuperProperties(sdk);
     // 2.76.0 documents an acceptance result, omitted from its bundled types.
-    const sdkTrack = mixpanel.track.bind(mixpanel) as (
+    const sdkTrack = sdk.track.bind(sdk) as (
       name: string,
       properties: ReturnType<typeof sanitizeProperties>
     ) => unknown;
     const accepted = sdkTrack(eventName, sanitizeProperties(properties));
     // The SDK can repopulate search attribution while building an event.
-    clearPrivateSuperProperties();
+    clearPrivateSuperProperties(sdk);
     return Boolean(accepted);
   } catch {
     // Telemetry must never interrupt a product action.
@@ -267,23 +304,24 @@ export const identify = (
   profileId: number | string,
   traits?: AnalyticsProperties
 ): boolean => {
-  if (!isAnalyticsReady()) {
+  const sdk = mixpanel;
+  if (!sdk || !isAnalyticsReady()) {
     return false;
   }
 
   const distinctId = String(profileId);
   try {
-    clearPrivateSuperProperties();
+    clearPrivateSuperProperties(sdk);
     if (identifiedDistinctId !== distinctId) {
-      mixpanel.identify(distinctId);
+      sdk.identify(distinctId);
       identifiedDistinctId = distinctId;
       analyticsGeneration += 1;
     }
     const sanitizedTraits = sanitizeProperties(traits);
     if (Object.keys(sanitizedTraits).length > 0) {
-      mixpanel.people.set(sanitizedTraits);
+      sdk.people.set(sanitizedTraits);
     }
-    clearPrivateSuperProperties();
+    clearPrivateSuperProperties(sdk);
     return true;
   } catch {
     // A failed profile transition must never deliver under the previous identity.
@@ -297,13 +335,14 @@ export const clearIdentity = (): void => {
   identifiedDistinctId = null;
 
   // Logout must clear local identity even while the delivery gate is closed.
-  if (!hasInitialized || !isAnalyticsEnvironmentSupported()) {
+  const sdk = mixpanel;
+  if (!sdk || !hasInitialized || !isAnalyticsEnvironmentSupported()) {
     return;
   }
 
   identityResetPending = true;
   try {
-    mixpanel.reset();
+    sdk.reset();
     identityResetPending = false;
   } catch {
     isTrackingAllowed = false;
@@ -315,15 +354,18 @@ export const disableAnalytics = (): void => {
   isTrackingAllowed = false;
   identifiedDistinctId = null;
   resumeRequested = false;
+  // Withdrawal during the SDK download keeps it from initializing on arrival.
+  sdkInitRequested = false;
 
-  if (!hasInitialized || !isAnalyticsEnvironmentSupported()) {
+  const sdk = mixpanel;
+  if (!sdk || !hasInitialized || !isAnalyticsEnvironmentSupported()) {
     return;
   }
 
   identityResetPending = true;
   clearAnalyticsQueues();
   try {
-    mixpanel.reset();
+    sdk.reset();
     identityResetPending = false;
   } catch {
     /* Delivery stays closed until queues clear and initialization resets identity. */

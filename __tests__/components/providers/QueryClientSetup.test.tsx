@@ -1,6 +1,7 @@
 import QueryClientSetup from "@/components/providers/QueryClientSetup";
 import {
   environmentManager,
+  QueryClientProvider,
   useInfiniteQuery,
   useQuery,
   useQueryClient,
@@ -63,6 +64,94 @@ describe("QueryClientSetup", () => {
     expect(clients[0]).toBe(clients[1]);
     expect(clients[1]!.getQueryData(["public-data"])).toBe("cached");
     clients[0]!.clear();
+  });
+
+  describe("browser garbage collection", () => {
+    const FIVE_MINUTES = 5 * 60 * 1000;
+    const ONE_HOUR = 60 * 60 * 1000;
+
+    const mountClientWithFakeTimers = () => {
+      jest.useFakeTimers();
+      let client: QueryClient | undefined;
+      function CaptureClient() {
+        client = useQueryClient();
+        return null;
+      }
+      render(
+        <QueryClientSetup>
+          <CaptureClient />
+        </QueryClientSetup>
+      );
+      return client!;
+    };
+
+    // Mounts one fresh-forever observer of `queryKey`; returns its unmount.
+    const observe = (
+      client: QueryClient,
+      queryKey: readonly string[],
+      gcTime?: number
+    ) => {
+      const wrapper = ({ children }: { readonly children: React.ReactNode }) => (
+        <QueryClientProvider client={client}>{children}</QueryClientProvider>
+      );
+      return renderHook(
+        () =>
+          useQuery({
+            queryKey,
+            queryFn: () => "fresh",
+            initialData: "cached",
+            staleTime: Infinity,
+            ...(gcTime === undefined ? {} : { gcTime }),
+          }),
+        { wrapper }
+      ).unmount;
+    };
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it("defaults to five minutes in the browser", () => {
+      const client = mountClientWithFakeTimers();
+
+      expect(client.getDefaultOptions().queries?.gcTime).toBe(FIVE_MINUTES);
+      client.clear();
+    });
+
+    it("drops unused query data five minutes after it was last used", () => {
+      const client = mountClientWithFakeTimers();
+      client.setQueryData(["unused"], "cached");
+
+      jest.advanceTimersByTime(FIVE_MINUTES - 1);
+      expect(client.getQueryData(["unused"])).toBe("cached");
+
+      jest.advanceTimersByTime(1);
+      expect(client.getQueryData(["unused"])).toBeUndefined();
+    });
+
+    it("keeps data while a component still uses it", () => {
+      const client = mountClientWithFakeTimers();
+      const unmount = observe(client, ["observed-gc"]);
+
+      jest.advanceTimersByTime(FIVE_MINUTES * 3);
+      expect(client.getQueryData(["observed-gc"])).toBe("cached");
+
+      unmount();
+      jest.advanceTimersByTime(FIVE_MINUTES);
+      expect(client.getQueryData(["observed-gc"])).toBeUndefined();
+    });
+
+    it("lets a per-query gcTime keep data longer", () => {
+      const client = mountClientWithFakeTimers();
+      const unmount = observe(client, ["long-lived"], ONE_HOUR);
+
+      unmount();
+      jest.advanceTimersByTime(FIVE_MINUTES);
+      expect(client.getQueryData(["long-lived"])).toBe("cached");
+
+      jest.advanceTimersByTime(ONE_HOUR - FIVE_MINUTES);
+      expect(client.getQueryData(["long-lived"])).toBeUndefined();
+    });
   });
 
   describe("default retry policy", () => {

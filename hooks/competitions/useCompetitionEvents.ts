@@ -3,11 +3,19 @@ import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useWebSocket } from "@/services/websocket/useWebSocket";
 import { WsMessageType } from "@/helpers/Types";
-import { invalidateCompetitionWave } from "@/services/api/competitions-api";
+import {
+  invalidateCompetitionAuthors,
+  invalidateCompetitionWave,
+} from "@/services/api/competitions-api";
 
 function parseCompetitionEvent(
   value: unknown
-): { event_id: string; wave_id: string; competition_id: string } | null {
+): {
+  event_id: string;
+  wave_id: string;
+  competition_id: string;
+  event_type?: string | undefined;
+} | null {
   if (value === null || typeof value !== "object") return null;
   const event = value as Record<string, unknown>;
   if (
@@ -21,6 +29,8 @@ function parseCompetitionEvent(
     event_id: event["event_id"],
     wave_id: event["wave_id"],
     competition_id: event["competition_id"],
+    event_type:
+      typeof event["event_type"] === "string" ? event["event_type"] : undefined,
   };
 }
 
@@ -31,6 +41,7 @@ export function useCompetitionEvents(waveId: string, enabled = true) {
   useEffect(() => {
     if (!enabled) return;
     let refresh: ReturnType<typeof setTimeout> | undefined;
+    let revealAuthors = false;
     const unsubscribe = subscribe(
       WsMessageType.COMPETITION_UPDATE,
       (data: unknown) => {
@@ -38,6 +49,7 @@ export function useCompetitionEvents(waveId: string, enabled = true) {
         if (event?.wave_id !== waveId || seen.current.has(event.event_id))
           return;
         seen.current.add(event.event_id);
+        revealAuthors ||= event.event_type === "COMPETITION_DECISION_COMPLETED";
         if (seen.current.size > 500)
           seen.current.delete(seen.current.values().next().value!);
         // The decision loop sends a burst for every competition in the wave.
@@ -45,6 +57,10 @@ export function useCompetitionEvents(waveId: string, enabled = true) {
         refresh ??= setTimeout(() => {
           refresh = undefined;
           void invalidateCompetitionWave(client, waveId);
+          if (revealAuthors) {
+            revealAuthors = false;
+            void invalidateCompetitionAuthors(client, waveId);
+          }
         }, 1_000);
       }
     );

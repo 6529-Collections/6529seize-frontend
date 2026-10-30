@@ -10,6 +10,7 @@ import CommonChangeAnimation from "@/components/utils/animation/CommonChangeAnim
 import { PROFILE_PROXY_AVAILABLE_ACTIONS } from "@/entities/IProxy";
 import Link from "next/link";
 import Button from "@/components/utils/button/Button";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 enum VIEW_TYPE {
   LIST = "LIST",
@@ -82,7 +83,10 @@ export default function ProxyListItem({
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-2">
             {profileProxy.created_by.pfp ? (
               <img
-                src={profileProxy.created_by.pfp}
+                src={getScaledImageUri(
+                  profileProxy.created_by.pfp,
+                  ImageScale.W_AUTO_H_50
+                )}
                 alt="Profile picture"
                 className="tw-h-[22px] tw-w-[22px] tw-flex-none tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/[0.08]"
               />
@@ -118,7 +122,10 @@ export default function ProxyListItem({
             <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-2">
               {profileProxy.granted_to.pfp ? (
                 <img
-                  src={profileProxy.granted_to.pfp}
+                  src={getScaledImageUri(
+                    profileProxy.granted_to.pfp,
+                    ImageScale.W_AUTO_H_50
+                  )}
                   alt="Profile picture"
                   className="tw-h-[22px] tw-w-[22px] tw-flex-none tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/[0.08]"
                 />

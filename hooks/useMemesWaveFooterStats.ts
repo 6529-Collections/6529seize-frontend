@@ -8,6 +8,7 @@ import {
   type MemesQuickVoteStats,
 } from "@/hooks/memesQuickVote.helpers";
 import {
+  MEMES_QUICK_VOTE_CACHE_TIME_MS,
   fetchMemesQuickVoteUndiscoveredDrop,
   getMemesQuickVoteUndiscoveredDropQueryKey,
 } from "@/hooks/memesQuickVote.query";
@@ -51,7 +52,7 @@ export const useMemesWaveFooterStats = (): MemesWaveFooterStats => {
         signal,
         waveId,
       }),
-    staleTime: 60_000,
+    staleTime: MEMES_QUICK_VOTE_CACHE_TIME_MS,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
     ...getDefaultQueryRetry(),
@@ -63,11 +64,12 @@ export const useMemesWaveFooterStats = (): MemesWaveFooterStats => {
   const isAvailable =
     isEnabled &&
     waveId !== null &&
-    query.isSuccess &&
+    query.data !== undefined &&
     isMemesQuickVoteVoteableDrop(activeDrop);
 
   if (
-    !query.isSuccess ||
+    !isEnabled ||
+    !query.data ||
     !activeDrop ||
     !isMemesQuickVoteVoteableDrop(activeDrop) ||
     typeof uncastPower !== "number"
