@@ -58,14 +58,14 @@ in `tests/packs.manifest.cjs`.
 
 ## Pack registry
 
-The PR CI smoke pack includes a local-development-only Additional Action
-component-preview case in `tests/pages/additional-action-preview.spec.ts`, tagged
-`@smoke` and registered in `SMOKE_SPECS`. It checks
-the conditional optional plan, preserved checkbox draft, review text, keyboard
-exit, and horizontal overflow at desktop and phone widths. It skips deployed
-hosts because `/tools/additional-action-preview` is guarded to development and
-loopback hosts. This case does not prove authenticated signing or API persistence;
-metadata/resubmission contracts are covered by focused unit tests.
+The native competition sandbox pack exercises Additional Action through the real
+Main Stage submission modal on desktop and phone. It checks the optional plan,
+length limit, checkbox draft preservation, review/preview and back navigation,
+keyboard exit, browser runtime errors, and horizontal overflow. Saved-artwork
+coverage checks the public plan, sidebar clearance, and restoration into the real
+resubmission modal. The isolated API fixture prevents real submissions; persistence
+payloads and resubmission metadata are also covered by focused unit tests. No
+application preview route is needed.
 
 `tests/packs.manifest.cjs` is the source of truth for Playwright package
 scripts, execution order, deployed-environment pack selection, aliases, safety

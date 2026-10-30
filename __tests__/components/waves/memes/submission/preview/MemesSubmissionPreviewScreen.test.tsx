@@ -34,6 +34,7 @@ jest.mock("@/components/utils/button/PrimaryButton", () => (props: any) => (
 describe("MemesSubmissionPreviewScreen", () => {
   const previewDrop = {
     id: "drop-1",
+    parts: [{ media: [] }],
     is_additional_action_promised: true,
     metadata: [
       {

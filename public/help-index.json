@@ -7843,7 +7843,7 @@
         "Wave leaderboard sorting and price filters are documented controls.",
         "These controls affect leaderboard result ordering and curation-wave price filtering.",
         "On The Memes Main Stage, select the Additional Action checkbox or its label beside the sorting control to show only marked submissions. Select it again to restore all results. The checkmark and amber styling indicate the active filter. It includes promises without a separate plan and filters the complete result set across pages; sorting and grid/list view remain independent.",
-        "The Additional Action filter resets on page refresh or leaderboard remount and does not affect other waves. If no submissions match, turn it off to see all submissions. Failed requests offer Retry. Open artwork details to read the optional public plan; the badge is an artist promise, not verification of approval or fulfillment.",
+        "The Additional Action filter resets on page refresh or leaderboard remount and does not affect other waves. If no submissions match, the list says \"No submissions marked Additional Action.\" Turn off the filter to see all submissions. Failed requests offer Retry. Open artwork details to read the optional public plan; the badge is an artist promise, not verification of approval or fulfillment.",
         "Availability depends on leaderboard tab and wave data."
       ],
       "canonical_path": "/waves",

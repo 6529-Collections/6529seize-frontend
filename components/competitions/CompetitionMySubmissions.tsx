@@ -70,7 +70,7 @@ export default function CompetitionMySubmissions() {
               !query.isError &&
               !invalidEntries &&
               !hasEntries && (
-                <output className="tw-block tw-text-sm tw-text-iron-500">
+                <output className="tw-block tw-text-sm tw-font-light tw-text-iron-500">
                   {t(locale, "waves.submissions.empty")}
                 </output>
               )}

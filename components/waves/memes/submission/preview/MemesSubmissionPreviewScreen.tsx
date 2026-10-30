@@ -1,5 +1,6 @@
 "use client";
 
+import { LocalImagePreviewContext } from "@/components/drops/view/item/content/media/LocalImagePreviewContext";
 import Button from "@/components/utils/button/Button";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -111,14 +112,18 @@ export function MemesSubmissionPreviewScreen({
             </div>
           </div>
         )}
-        <PreviewLeaderboardListCase
-          drop={previewDrop}
-          onDropClick={onDropClick}
-        />
-        <PreviewLeaderboardGalleryCase
-          drop={previewDrop}
-          onDropClick={onDropClick}
-        />
+        <LocalImagePreviewContext.Provider
+          value={previewDrop.parts[0]?.media[0]?.url ?? null}
+        >
+          <PreviewLeaderboardListCase
+            drop={previewDrop}
+            onDropClick={onDropClick}
+          />
+          <PreviewLeaderboardGalleryCase
+            drop={previewDrop}
+            onDropClick={onDropClick}
+          />
+        </LocalImagePreviewContext.Provider>
       </div>
 
       <div className="tw-mt-auto tw-space-y-2 tw-border-t tw-border-iron-800 tw-px-4 tw-pt-3">

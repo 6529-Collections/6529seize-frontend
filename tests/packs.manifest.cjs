@@ -19,7 +19,6 @@ const SMOKE_SPECS = [
   "tests/home/home.spec.ts",
   "tests/pages/about.spec.ts",
   "tests/pages/the-memes.spec.ts",
-  "tests/pages/additional-action-preview.spec.ts",
 ];
 
 const STAGING_READONLY_ENV = {
