@@ -58,6 +58,15 @@ in `tests/packs.manifest.cjs`.
 
 ## Pack registry
 
+The native competition sandbox pack exercises Additional Action through the real
+Main Stage submission modal on desktop and phone. It checks the optional plan,
+length limit, checkbox draft preservation, review/preview and back navigation,
+keyboard exit, browser runtime errors, and horizontal overflow. Saved-artwork
+coverage checks the public plan, sidebar clearance, and restoration into the real
+resubmission modal. The isolated API fixture prevents real submissions; persistence
+payloads and resubmission metadata are also covered by focused unit tests. No
+application preview route is needed.
+
 `tests/packs.manifest.cjs` is the source of truth for Playwright package
 scripts, execution order, deployed-environment pack selection, aliases, safety
 classification, and per-pack timeouts. Run `seize run e2e-manifest:sync` after
@@ -136,6 +145,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:signature-sandbox`                        | —                             | sandbox  | local       | manual                    | 15m     | Signed participation sandbox that fails closed unsigned.                                              |
 | `test:e2e:session-recovery-sandbox`                 | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Expired session cold-start and foreground recovery against the local mock API.                        |
 | `test:e2e:auth-sandbox`                             | —                             | sandbox  | local       | manual                    | 15m     | Aggregate authenticated sandbox pack.                                                                 |
+| `test:e2e:notifications-inbox-sandbox`              | —                             | sandbox  | local       | manual                    | 15m     | Desktop notification preview, explicit read actions, and mobile navigation.                           |
 | `test:e2e:profile-following-sandbox`                | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Profile Following and REP editing dialogs, permissions and recovery.                                  |
 | `test:e2e:wave-creation-sandbox`                    | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Wave creation, permissions, and draft recovery on desktop and mobile.                                 |
 | `test:e2e:smoke:surface-matrix`                     | —                             | local    | local       | pr-ci, manual             | 15m     | @smoke subset on desktop and mobile web shells.                                                       |

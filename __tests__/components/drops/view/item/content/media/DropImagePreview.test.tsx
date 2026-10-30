@@ -6,6 +6,7 @@ import {
   type ComponentProps,
 } from "react";
 import { DropImagePreview } from "@/components/drops/view/item/content/media/DropImagePreview";
+import { LocalImagePreviewContext } from "@/components/drops/view/item/content/media/LocalImagePreviewContext";
 import { ImageScale } from "@/helpers/image.helpers";
 
 type MockImageProps = ComponentProps<"img"> & {
@@ -318,3 +319,50 @@ it("reports a missing GIF preview once across strict effects and rerenders", () 
   rerender(view(src.replace("art.gif", "still.jpg")));
   expect(onUnavailable).toHaveBeenCalledTimes(2);
 });
+
+it("renders only the opted-in local raster preview without a proxy request", () => {
+  const src = "data:image/png;base64,AAAA";
+  const { rerender } = render(
+    <LocalImagePreviewContext.Provider value={src}>
+      <DropImagePreview
+        originalSrc={src}
+        imageScale={ImageScale.AUTOx450}
+        alt="Draft"
+        fill
+      />
+    </LocalImagePreviewContext.Provider>
+  );
+  expect(screen.getByAltText("Draft")).toHaveAttribute("src", src);
+  expect(screen.getByAltText("Draft")).toHaveAttribute(
+    "data-unoptimized",
+    "true"
+  );
+  rerender(
+    <LocalImagePreviewContext.Provider value={src}>
+      <DropImagePreview
+        originalSrc="data:image/png;base64,BBBB"
+        imageScale={ImageScale.AUTOx450}
+        alt="Draft"
+        fill
+      />
+    </LocalImagePreviewContext.Provider>
+  );
+  expect(screen.queryByRole("img")).not.toBeInTheDocument();
+});
+
+it.each(["data:image/svg+xml;base64,AAAA", "https://localhost/private.png"])(
+  "does not opt non-raster or remote sources into local previews: %s",
+  (src) => {
+    render(
+      <LocalImagePreviewContext.Provider value={src}>
+        <DropImagePreview
+          originalSrc={src}
+          imageScale={ImageScale.AUTOx450}
+          alt="Draft"
+          fill
+        />
+      </LocalImagePreviewContext.Provider>
+    );
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+  }
+);

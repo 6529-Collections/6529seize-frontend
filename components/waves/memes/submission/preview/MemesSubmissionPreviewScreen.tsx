@@ -1,5 +1,6 @@
 "use client";
 
+import { LocalImagePreviewContext } from "@/components/drops/view/item/content/media/LocalImagePreviewContext";
 import Button from "@/components/utils/button/Button";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -15,6 +16,8 @@ import { PreviewLeaderboardGalleryCase } from "./components/PreviewLeaderboardGa
 import { PreviewLeaderboardListCase } from "./components/PreviewLeaderboardListCase";
 import { ProposalCardPreview } from "../components/ProposalCardPreview";
 import type { ProposalCardDocumentInput } from "@/lib/proposal-card/document";
+import { AdditionalActionSummary } from "../components/AdditionalActionSummary";
+import { MemesSubmissionAdditionalInfoKey } from "../types/OperationalData";
 
 import type { ApiMemeCollaboratorProfile } from "@/generated/models/ApiMemeCollaboratorProfile";
 
@@ -31,6 +34,7 @@ interface MemesSubmissionPreviewScreenProps {
   readonly submitLabel?: string | undefined;
 }
 
+/** Review the metadata-backed drop and its operational information before submitting. */
 export function MemesSubmissionPreviewScreen({
   proposalCard,
   collaborators,
@@ -65,6 +69,18 @@ export function MemesSubmissionPreviewScreen({
           </p>
         </div>
 
+        <AdditionalActionSummary
+          isAdditionalActionPromised={
+            previewDrop.is_additional_action_promised === true
+          }
+          plan={
+            previewDrop.metadata.find(
+              (item) =>
+                item.data_key ===
+                String(MemesSubmissionAdditionalInfoKey.ADDITIONAL_ACTION_PLAN)
+            )?.data_value
+          }
+        />
         {(collaborators?.length ?? 0) > 0 && (
           <div className="tw-space-y-2 tw-text-sm tw-text-iron-300">
             <p className="tw-m-0 tw-font-medium">
@@ -96,14 +112,18 @@ export function MemesSubmissionPreviewScreen({
             </div>
           </div>
         )}
-        <PreviewLeaderboardListCase
-          drop={previewDrop}
-          onDropClick={onDropClick}
-        />
-        <PreviewLeaderboardGalleryCase
-          drop={previewDrop}
-          onDropClick={onDropClick}
-        />
+        <LocalImagePreviewContext.Provider
+          value={previewDrop.parts[0]?.media[0]?.url ?? null}
+        >
+          <PreviewLeaderboardListCase
+            drop={previewDrop}
+            onDropClick={onDropClick}
+          />
+          <PreviewLeaderboardGalleryCase
+            drop={previewDrop}
+            onDropClick={onDropClick}
+          />
+        </LocalImagePreviewContext.Provider>
       </div>
 
       <div className="tw-mt-auto tw-space-y-2 tw-border-t tw-border-iron-800 tw-px-4 tw-pt-3">

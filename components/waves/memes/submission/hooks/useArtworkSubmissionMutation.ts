@@ -154,6 +154,7 @@ function getArtworkValidationError(data: ArtworkSubmissionData): string | null {
   const validation = getSubmissionMetadataLengthValidation({
     traits: data.traits,
     operationalData: data.operationalData,
+    isAdditionalActionPromised: data.isAdditionalActionPromised,
   });
   if (!validation.hasErrors) return null;
   const fields = validation.errors

@@ -1,7 +1,9 @@
 import { BOOKMARK_MESSAGES } from "@/i18n/messages/bookmarks";
+import { NOTIFICATIONS_INBOX_MESSAGES } from "@/i18n/messages/notifications-inbox";
 import { VOTING_CREDIT_RETURN_MESSAGES } from "@/i18n/messages/voting-credit-returns";
 import { MEME_COLLABORATION_MESSAGES } from "@/i18n/messages/meme-collaborations";
 import emmaMessages from "@/i18n/messages/emma.en-US.json";
+import additionalActionMessages from "@/i18n/messages/additionalAction.en-US.json";
 import { EN_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import waveCreationMessages from "@/i18n/messages/wave-creation.en-US.json";
 import { COMPETITION_MESSAGES } from "@/i18n/messages/competitions";
@@ -3078,6 +3080,7 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  ...NOTIFICATIONS_INBOX_MESSAGES,
   ...MEME_COLLABORATION_MESSAGES,
   ...VOTING_CREDIT_RETURN_MESSAGES,
   "network.prenodes.title": "Prenodes",
@@ -3094,6 +3097,7 @@ export const EN_US_MESSAGES = {
   "header.navigation.loading": "Loading navigation…",
   "waves.information.open": "About {name}",
   ...EN_SUBMISSION_DISCOVERY_MESSAGES,
+  ...additionalActionMessages,
   ...waveCreationMessages,
   ...COMPETITION_MESSAGES,
   ...EN_DROP_REQUIREMENT_MESSAGES,
