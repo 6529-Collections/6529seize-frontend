@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { DiscoverWaveExplorer } from "@/components/waves/discovery/DiscoverWaveExplorer";
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
@@ -22,7 +28,12 @@ jest.mock("next/navigation", () => ({
 jest.mock("@/components/home/explore-waves/ExploreWavesSection", () => ({
   ExploreWavesSection: (props: Record<string, any>) => {
     latestExploreProps = props;
-    return <div>{props.headerControls}</div>;
+    return (
+      <div>
+        {props["headerActions"]}
+        {props["headerControls"]}
+      </div>
+    );
   },
 }));
 
@@ -117,6 +128,85 @@ describe("DiscoverWaveExplorer", () => {
       minVisibilityScore: undefined,
       statusLabel: "Newest waves",
     });
+  });
+
+  it.each(["", "filter=REP_60&sort=QUALITY&locale=en-GB"])(
+    "keeps the formula link outside the controls and preserves its origin: %s",
+    (query) => {
+      searchParams = query;
+      render(<DiscoverWaveExplorer />);
+      const formula = screen.getByRole("link", { name: "Score formula" });
+      const href = new URL(formula.getAttribute("href")!, "https://6529.io");
+      expect(href.pathname).toBe("/network/wave-score");
+      expect(href.searchParams.get("returnTo")).toBe(
+        query ? `/discover?${query}` : "/discover"
+      );
+      expect(
+        screen.getByRole("group", { name: "Discovery controls" })
+      ).not.toContainElement(formula);
+    }
+  );
+
+  it("keeps the current threshold and unrelated URL parameters when choosing a score sort", () => {
+    searchParams = "filter=SCORE_50&locale=en-GB";
+    render(<DiscoverWaveExplorer />);
+    fireEvent.click(screen.getByRole("tab", { name: "Quality" }));
+    expect(replaceMock).toHaveBeenLastCalledWith(
+      "/discover?filter=SCORE_50&locale=en-GB&sort=QUALITY",
+      { scroll: false }
+    );
+  });
+
+  it("updates thresholds with the keyboard while keeping the selected sort", async () => {
+    searchParams = "sort=QUALITY";
+    render(<DiscoverWaveExplorer />);
+    fireEvent.keyDown(screen.getByRole("radio", { name: "All" }), {
+      key: "End",
+    });
+    await waitFor(() =>
+      expect(screen.getByRole("radio", { name: "REP 60+" })).toHaveFocus()
+    );
+    expect(replaceMock).toHaveBeenLastCalledWith(
+      "/discover?sort=QUALITY&filter=REP_60",
+      { scroll: false }
+    );
+  });
+
+  it("lists all sorts in the sheet and clears thresholds when a chronology sort is chosen", async () => {
+    searchParams = "sort=QUALITY&filter=HOT_60";
+    render(<DiscoverWaveExplorer />);
+    const trigger = screen.getByRole("button", {
+      name: "Wave discovery sort: Quality",
+    });
+    trigger.focus();
+    fireEvent.click(trigger);
+    const sheet = await screen.findByRole("dialog", {
+      name: "Wave discovery sort",
+    });
+    for (const name of [
+      "Balanced",
+      "Quality",
+      "Hot",
+      "REP",
+      "Newest",
+      "Latest Posts",
+    ]) {
+      expect(within(sheet).getByRole("button", { name })).toHaveAttribute(
+        "aria-pressed",
+        String(name === "Quality")
+      );
+    }
+    fireEvent.click(
+      within(sheet).getByRole("button", { name: "Latest Posts" })
+    );
+    expect(replaceMock).toHaveBeenLastCalledWith(
+      "/discover?sort=LATEST_POSTS",
+      { scroll: false }
+    );
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    await waitFor(() => expect(trigger).toHaveFocus());
   });
 });
 

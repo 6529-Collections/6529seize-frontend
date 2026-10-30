@@ -1,12 +1,11 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useState } from "react";
+import GroupCriteriaRulePanel from "@/components/groups/assignment/GroupCriteriaRulePanel";
 import GroupCriteriaEditor, {
   type GroupCriteriaView,
 } from "@/components/groups/assignment/GroupCriteriaEditor";
-import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
-import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
-import { InformationCircleIcon } from "@heroicons/react/24/outline";
+import GroupCriteriaReadinessHint from "@/components/groups/assignment/GroupCriteriaReadinessHint";
 import GroupMembersPreviewDialog from "@/components/groups/members/GroupMembersPreviewDialog";
 import GroupCriteriaTags from "@/components/groups/members/GroupCriteriaTags";
 import GroupMembersPreviewTrigger from "@/components/groups/members/GroupMembersPreviewTrigger";
@@ -32,10 +31,6 @@ export default function CommunityMembersFilterPanel(
   props: CreateWaveGroupInlinePanelProps & CommunityMembersFilterNavigation
 ) {
   const locale = useBrowserLocale();
-  const readinessTooltipId = buildTooltipId(
-    "network-filter-readiness",
-    useId()
-  );
   const { view, onViewChange, mobileNavigation } = props;
   const { isVisible: isKeyboardVisible } = useNativeKeyboard();
   const {
@@ -82,11 +77,42 @@ export default function CommunityMembersFilterPanel(
     </p>
   );
 
+  const keyboardSummaryClassName = isKeyboardVisible
+    ? "tw-sr-only focus-within:tw-not-sr-only [&_ul]:tw-overflow-visible focus-within:[&_ul]:tw-overflow-y-auto"
+    : "";
+  const draftCriteriaSummary = (
+    <div
+      data-group-criteria-summary
+      className={
+        mobileNavigation
+          ? "tw-min-w-0 tw-rounded-xl tw-bg-iron-900 tw-p-4 [&_ul]:tw-max-h-none [&_ul]:tw-overflow-visible"
+          : `tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 lg:tw-flex-1 ${keyboardSummaryClassName} [[data-mobile-dialog-keyboard-visible=true]_&]:tw-sr-only [[data-mobile-dialog-keyboard-visible=true]_&]:focus-within:tw-not-sr-only [[data-mobile-dialog-keyboard-visible=true]_&]:[&_ul]:tw-overflow-visible [[data-mobile-dialog-keyboard-visible=true]_&]:focus-within:[&_ul]:tw-overflow-y-auto`
+      }
+    >
+      <div className="tw-flex tw-w-full tw-items-center">
+        <div className={`tw-min-w-0 ${draftTarget ? "tw-flex-1" : ""}`}>
+          {draftTarget ? (
+            <GroupMembersPreviewTrigger
+              target={draftTarget}
+              appearance="inline"
+              inlineCriteriaItems={draftSummaryParts}
+              disabled={(props.disabled ?? false) || isCreating}
+              onOpen={() => setPreviewTarget(draftTarget)}
+            />
+          ) : (
+            draftCriteriaContent
+          )}
+        </div>
+        {!isDraftValid && <GroupCriteriaReadinessHint />}
+      </div>
+    </div>
+  );
+
   return (
     <>
       <div
         ref={panelRef}
-        className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-hidden tw-bg-black/30"
+        className={`tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-hidden ${mobileNavigation ? "" : "tw-bg-black/30"}`}
       >
         {savedTarget && (
           <div
@@ -116,6 +142,7 @@ export default function CommunityMembersFilterPanel(
           mobileNavigation={mobileNavigation}
           disabled={props.disabled ?? false}
           scrollWithin
+          mobileSummary={mobileNavigation ? draftCriteriaSummary : undefined}
         >
           {view === "identities" ? (
             <>
@@ -125,7 +152,9 @@ export default function CommunityMembersFilterPanel(
                 {t(locale, "waves.create.groups.identities")}
               </h2>
               <CreateWaveInlineGroupIdentities
+                mobilePresentation={mobileNavigation}
                 simplifyIncludedCopy
+                showIdentityTotal={false}
                 includedIdentities={displayedBuilder.identities}
                 excludedIdentities={displayedBuilder.excludedIdentities}
                 includedWalletSources={displayedBuilder.includedWalletSources}
@@ -139,7 +168,7 @@ export default function CommunityMembersFilterPanel(
               />
             </>
           ) : (
-            <div className="[&>div]:tw-border-0 [&>div]:tw-bg-transparent [&>div]:tw-p-0 [&>div]:tw-shadow-none">
+            <GroupCriteriaRulePanel mobilePresentation={mobileNavigation}>
               <CreateWaveInlineGroupRuleEditor
                 scrollResultsWithEditor={mobileNavigation}
                 networkPresentation
@@ -147,75 +176,13 @@ export default function CommunityMembersFilterPanel(
                 activeRule={view}
                 onDraftChange={setDraft}
               />
-            </div>
+            </GroupCriteriaRulePanel>
           )}
         </GroupCriteriaEditor>
         <div
-          className={`tw-flex tw-shrink-0 tw-flex-col tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-px-4 tw-py-3 sm:tw-px-6 ${mobileNavigation ? "[&_ul]:tw-max-h-24" : "lg:tw-flex-row lg:tw-items-center lg:tw-gap-4"}`}
+          className={`tw-flex tw-shrink-0 tw-flex-col tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-px-4 tw-py-3 sm:tw-px-6 ${mobileNavigation ? "" : "lg:tw-flex-row lg:tw-items-center lg:tw-gap-4"}`}
         >
-          <div
-            className={`tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 ${mobileNavigation ? "" : "lg:tw-flex-1"} ${isKeyboardVisible ? "tw-sr-only focus-within:tw-not-sr-only [&_ul]:tw-overflow-visible focus-within:[&_ul]:tw-overflow-y-auto" : ""} [[data-mobile-dialog-keyboard-visible=true]_&]:tw-sr-only [[data-mobile-dialog-keyboard-visible=true]_&]:focus-within:tw-not-sr-only [[data-mobile-dialog-keyboard-visible=true]_&]:[&_ul]:tw-overflow-visible [[data-mobile-dialog-keyboard-visible=true]_&]:focus-within:[&_ul]:tw-overflow-y-auto`}
-          >
-            <div className="tw-flex tw-w-full tw-items-center">
-              <div className={`tw-min-w-0 ${draftTarget ? "tw-flex-1" : ""}`}>
-                {draftTarget ? (
-                  <GroupMembersPreviewTrigger
-                    target={draftTarget}
-                    appearance="inline"
-                    inlineCriteriaItems={draftSummaryParts}
-                    disabled={(props.disabled ?? false) || isCreating}
-                    onOpen={() => setPreviewTarget(draftTarget)}
-                  />
-                ) : (
-                  draftCriteriaContent
-                )}
-              </div>
-              {!isDraftValid && (
-                <>
-                  <button
-                    type="button"
-                    data-tooltip-id={readinessTooltipId}
-                    aria-label={t(
-                      locale,
-                      "waves.create.groups.draft.notReadyTitle"
-                    )}
-                    className="-tw-my-2 tw-flex tw-size-10 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-                  >
-                    <InformationCircleIcon
-                      aria-hidden="true"
-                      className="tw-size-5"
-                    />
-                  </button>
-                  <BodyPortalTooltip
-                    id={readinessTooltipId}
-                    place="top-end"
-                    className="tailwind-scope"
-                    opacity={1}
-                    clickable
-                    style={{ ...TOOLTIP_STYLES, pointerEvents: "auto" }}
-                    openEvents={{ mouseenter: true, focus: true, click: true }}
-                    closeEvents={{ mouseleave: true, blur: true }}
-                    globalCloseEvents={{
-                      escape: true,
-                      clickOutsideAnchor: true,
-                    }}
-                  >
-                    <div className="tw-w-64 tw-max-w-[calc(100vw-3rem)] tw-space-y-1 tw-p-2 tw-text-left tw-leading-5">
-                      <p className="tw-m-0 tw-font-semibold">
-                        {t(locale, "waves.create.groups.draft.notReadyTitle")}
-                      </p>
-                      <p className="tw-m-0 tw-font-normal">
-                        {t(
-                          locale,
-                          "waves.create.groups.draft.notReadyDescription"
-                        )}
-                      </p>
-                    </div>
-                  </BodyPortalTooltip>
-                </>
-              )}
-            </div>
-          </div>
+          {!mobileNavigation && draftCriteriaSummary}
           <Button
             variant="action"
             size="md"

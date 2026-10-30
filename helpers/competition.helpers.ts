@@ -1,8 +1,4 @@
 import { getStructuredApiErrorStatus } from "@/services/api/common-api";
-import { publicEnv } from "@/config/env";
-
-export const isMultiCompetitionEnabled = () =>
-  publicEnv.NEXT_PUBLIC_FEATURE_MULTI_COMPETITION === "true";
 
 export const getCompetitionsRoute = (waveId: string) =>
   `/waves/${encodeURIComponent(waveId)}/competitions`;

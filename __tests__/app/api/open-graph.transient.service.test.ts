@@ -2,6 +2,7 @@ jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
 
 import { createTransientPlan } from "@/app/api/open-graph/transient/service";
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
+import { publicEnv } from "@/config/env";
 
 jest.mock("@/config/alchemyEnv", () => ({
   getAlchemyApiKey: jest.fn(),
@@ -227,6 +228,51 @@ describe("createTransientPlan", () => {
     expect(warnSpy).not.toHaveBeenCalled();
   });
 
+  it("uses the backend proxy for Ethereum when the API key is unavailable", async () => {
+    mockedGetAlchemyApiKey.mockImplementation(() => {
+      throw new Error("ALCHEMY_API_KEY missing");
+    });
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        tokens: [
+          {
+            name: "Transient token",
+            description: "From the proxy",
+            image: {
+              originalUrl: "ipfs://QmExampleHash/transient.png",
+              contentType: "image/png",
+            },
+          },
+        ],
+      }),
+    });
+    const url =
+      "https://www.transient.xyz/nfts/ethereum/0xda48f4db41415fc2873efb487eec1068626fad60/8";
+
+    const plan = createTransientPlan(new URL(url), {
+      fetchHtml,
+      assertPublicUrl,
+      fetchTokenMetadata,
+    });
+    const result = await plan?.execute();
+
+    expect(result?.data).toEqual(
+      expect.objectContaining({
+        type: "transient.nft",
+        title: "Transient token",
+        image: expect.objectContaining({
+          url: "ipfs://QmExampleHash/transient.png",
+        }),
+      })
+    );
+    expect(mockFetch).toHaveBeenCalledWith(
+      `${publicEnv.API_ENDPOINT}/alchemy-proxy/token-metadata`,
+      expect.objectContaining({ method: "POST" })
+    );
+    expect(fetchHtml).not.toHaveBeenCalled();
+  });
+
   it("falls back to OpenGraph preview when API key is unavailable", async () => {
     mockedGetAlchemyApiKey.mockImplementation(() => {
       throw new Error("ALCHEMY_API_KEY missing");
@@ -242,11 +288,11 @@ describe("createTransientPlan", () => {
       `,
       contentType: "text/html",
       finalUrl:
-        "https://www.transient.xyz/nfts/ethereum/0xda48f4db41415fc2873efb487eec1068626fad60/8",
+        "https://www.transient.xyz/nfts/base/0xda48f4db41415fc2873efb487eec1068626fad60/8",
     });
 
     const url =
-      "https://www.transient.xyz/nfts/ethereum/0xda48f4db41415fc2873efb487eec1068626fad60/8";
+      "https://www.transient.xyz/nfts/base/0xda48f4db41415fc2873efb487eec1068626fad60/8";
     const plan = createTransientPlan(new URL(url), {
       fetchHtml,
       assertPublicUrl,

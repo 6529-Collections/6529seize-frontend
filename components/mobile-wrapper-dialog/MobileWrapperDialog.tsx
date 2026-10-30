@@ -25,10 +25,11 @@ const MOBILE_DIALOG_KEYBOARD_INSET =
   "var(--mobile-wrapper-dialog-keyboard-inset, 0px)";
 const NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION =
   "var(--native-keyboard-layout-transition-duration, 0ms)";
+// Animate layout offset with the surface height. A compositor transform can
+// outrun height layout on iOS, briefly pushing the sheet offscreen.
 const MOBILE_DIALOG_CONTAINER_STYLE: CSSProperties = {
-  bottom: 0,
-  transform: `translate3d(0, calc(0px - ${MOBILE_DIALOG_KEYBOARD_INSET}), 0)`,
-  transition: `transform ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
+  bottom: MOBILE_DIALOG_KEYBOARD_INSET,
+  transition: `bottom ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
 };
 
 type MobileWrapperDialogProps = {

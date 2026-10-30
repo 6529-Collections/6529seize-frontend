@@ -102,9 +102,9 @@ jest.mock("@/components/waves/create-wave/CreateWaveStepContent", () => ({
         </label>
         <button
           type="button"
-          onClick={() => controller.onChatEnabledChange(false)}
+          onClick={() => controller.setDropsAdminCanDelete(false)}
         >
-          Disable chat
+          Disable admin deletion
         </button>
         <button
           type="button"
@@ -336,7 +336,9 @@ describe.each([undefined, "parent-wave"])(
 
     it("protects changed settings without requiring a name", async () => {
       const { user } = await openForm();
-      await user.click(screen.getByRole("button", { name: "Disable chat" }));
+      await user.click(
+        screen.getByRole("button", { name: "Disable admin deletion" })
+      );
       await leave(user, "Close");
       expect(confirmation()).toBeVisible();
     });

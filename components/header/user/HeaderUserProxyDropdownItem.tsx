@@ -5,9 +5,11 @@ export default function HeaderUserProxyDropdownItem({
   profileProxy,
   activeProfileProxy,
   onActivateProfileProxy,
+  disabled = false,
 }: {
   readonly profileProxy: ApiProfileProxy;
   readonly activeProfileProxy: ApiProfileProxy | null;
+  readonly disabled?: boolean;
   readonly onActivateProfileProxy: (
     profileProxy: ApiProfileProxy | null
   ) => void;
@@ -18,9 +20,11 @@ export default function HeaderUserProxyDropdownItem({
     <div className="tw-h-full">
       <button
         type="button"
+        disabled={disabled}
+        aria-pressed={isActive}
         className={`${
           isActive ? "tw-bg-iron-700" : "tw-bg-transparent hover:tw-bg-iron-700"
-        } tw-group tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-px-3 tw-py-2.5 tw-text-left tw-text-white tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400`}
+        } tw-group tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-px-3 tw-py-2.5 tw-text-left tw-text-white tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60`}
         onClick={() => onActivateProfileProxy(isActive ? null : profileProxy)}
       >
         {profileProxy.created_by.pfp ? (

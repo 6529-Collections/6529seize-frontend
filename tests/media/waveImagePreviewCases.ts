@@ -1,8 +1,11 @@
 import path from "node:path";
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import type { ApiDropV2 } from "../../generated/models/ApiDropV2";
 import { ApiDropMainType } from "../../generated/models/ApiDropMainType";
 import type { ApiWaveOverview } from "../../generated/models/ApiWaveOverview";
+import type { ApiWave } from "../../generated/models/ApiWave";
+import composerSandboxConstants from "../support/composerSandboxConstants.json";
+import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import {
   expect,
   expectNoHorizontalOverflow,
@@ -34,22 +37,122 @@ async function fetchSandboxDrop(page: Page, baseURL: string | undefined) {
   return { apiOrigin, feed, source };
 }
 
-// The parent composer suite supplies the local-only mutation guard and both
-// desktop/touch projects. Browser requests, decoding and gallery resets are the
-// regression risk here; pixel-budget arithmetic belongs in the resizer tests.
-export function defineWaveImagePreviewTests() {
-  for (const extension of ["jpg", "gif"] as const) {
-    test(`shows artwork HD in both views and preserves description lines for ${extension}`, async ({
+async function expectSubmissionGifLoadingLayout(
+  hero: Locator,
+  qualityLabel = "View original"
+) {
+  const loader = hero.getByRole("status", {
+    name: "Loading image",
+    exact: true,
+  });
+  await expect(loader).toBeVisible();
+  const frame = hero
+    .getByRole("img", { name: "Drop media", exact: true, includeHidden: true })
+    .locator("xpath=ancestor::*[@data-artwork-image-frame]");
+  const frameBox = await frame.boundingBox();
+  const loaderBox = await loader.boundingBox();
+  const spinnerBox = await hero
+    .getByRole("status", { name: "Loading image", exact: true })
+    .locator('[aria-hidden="true"]')
+    .boundingBox();
+  expect(frameBox).not.toBeNull();
+  expect(loaderBox).not.toBeNull();
+  expect(spinnerBox).not.toBeNull();
+  for (const axis of ["x", "y", "width", "height"] as const) {
+    expect(Math.abs(loaderBox![axis] - frameBox![axis])).toBeLessThanOrEqual(1);
+  }
+  expect(
+    Math.abs(
+      spinnerBox!.x +
+        spinnerBox!.width / 2 -
+        (loaderBox!.x + loaderBox!.width / 2)
+    )
+  ).toBeLessThanOrEqual(1);
+  expect(
+    Math.abs(
+      spinnerBox!.y +
+        spinnerBox!.height / 2 -
+        (loaderBox!.y + loaderBox!.height / 2)
+    )
+  ).toBeLessThanOrEqual(1);
+  await expect(
+    hero.getByRole("button", { name: qualityLabel, exact: true })
+  ).toBeEnabled();
+}
+
+async function selectSubmissionOriginal(
+  hero: Locator,
+  {
+    automaticOriginal,
+    animationUnavailable,
+    directOriginalRequests,
+    releaseOriginal,
+  }: {
+    automaticOriginal: boolean;
+    animationUnavailable: boolean;
+    directOriginalRequests: readonly string[];
+    releaseOriginal: () => void;
+  }
+) {
+  if (automaticOriginal) return;
+
+  await hero
+    .getByRole("button", { name: "View original", exact: true })
+    .click();
+  if (!animationUnavailable) return;
+
+  try {
+    await expect.poll(() => directOriginalRequests.length).toBeGreaterThan(0);
+    await expectSubmissionGifLoadingLayout(hero, "View optimized");
+    await expect(
+      hero.getByRole("status", {
+        name: "Loading original GIF",
+        exact: true,
+      })
+    ).toHaveCount(0);
+  } finally {
+    releaseOriginal();
+  }
+}
+
+// Parent suites supply the local-only mutation guard and desktop/touch projects.
+// Pixel-budget arithmetic belongs in the resizer tests.
+export function defineSubmissionArtworkPreviewTests() {
+  for (const { extension, animationUnavailable, nativeApp } of [
+    { extension: "jpg", animationUnavailable: false, nativeApp: false },
+    { extension: "gif", animationUnavailable: false, nativeApp: false },
+    { extension: "gif", animationUnavailable: true, nativeApp: false },
+    { extension: "gif", animationUnavailable: true, nativeApp: true },
+  ] as const) {
+    test(`shows artwork HD in both views and preserves description lines for ${extension}${animationUnavailable ? " with unavailable animated previews" : ""}${nativeApp ? " in the native mobile app" : ""}`, async ({
       page,
       baseURL,
+      isMobile,
+      hasTouch,
     }) => {
+      const automaticOriginal =
+        animationUnavailable && !nativeApp && !isMobile && !hasTouch;
+      if (nativeApp)
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          baseURL
+        );
       const { apiOrigin, feed, source } = await fetchSandboxDrop(page, baseURL);
+      const memesWaveId = composerSandboxConstants.linkedDropMemesWaveId;
+      const waveResponse = await page.request.get(
+        `${apiOrigin}/api/waves/${WAVE_ID}`
+      );
+      expect(waveResponse.ok()).toBe(true);
+      const wave = (await waveResponse.json()) as ApiWave;
+      const submissionWave = { ...feed.wave, id: memesWaveId };
       const original = `${MEDIA_ROOT}artwork.${extension}`;
       const description =
         "First photographic line\nSecond photographic line\n\nA separate paragraph";
       const metadata = [{ data_key: "description", data_value: description }];
       const drop: ApiDropV2 = {
         ...source,
+        wave: submissionWave,
         title: "Artwork quality fixture",
         content: "",
         drop_type: ApiDropMainType.Submission,
@@ -62,11 +165,32 @@ export function defineWaveImagePreviewTests() {
         ],
       };
       const headers = { "access-control-allow-origin": "*" };
+      await page.route("**/api/open-graph**", (route) =>
+        route.fulfill({ headers, json: { results: {} } })
+      );
       await page.route(`${apiOrigin}/api/settings`, (route) =>
-        route.fulfill({ headers, json: { memes_wave_id: WAVE_ID } })
+        route.fulfill({ headers, json: { memes_wave_id: memesWaveId } })
+      );
+      await page.route(`${apiOrigin}/api/waves/${memesWaveId}`, (route) =>
+        route.fulfill({ headers, json: { ...wave, id: memesWaveId } })
+      );
+      await page.route(`${apiOrigin}/api/v2/drops?**`, (route) => {
+        const ids =
+          new URL(route.request().url()).searchParams.get("ids")?.split(",") ??
+          [];
+        if (!ids.includes(DROP_ID)) return route.fallback();
+        return route.fulfill({
+          headers,
+          json: { data: [drop], page: 1, next: false },
+        });
+      });
+      await page.route(
+        `${apiOrigin}/api/v3/waves/${memesWaveId}/drops/${DROP_ID}/competition-context`,
+        (route) =>
+          route.fulfill({ headers, json: { competition: null, entry: null } })
       );
       await page.route(`${apiOrigin}/api/v2/drops/${DROP_ID}`, (route) =>
-        route.fulfill({ headers, json: { drop, wave: feed.wave } })
+        route.fulfill({ headers, json: { drop, wave: submissionWave } })
       );
       await page.route(
         `${apiOrigin}/api/v2/drops/${DROP_ID}/metadata`,
@@ -88,9 +212,27 @@ export function defineWaveImagePreviewTests() {
         });
       });
       const directOriginalRequests: string[] = [];
-      await page.route(`${MEDIA_ROOT}**`, (route) => {
+      const rejectedAnimatedPreviews: string[] = [];
+      let releaseOriginal: () => void = () => undefined;
+      const originalGate = new Promise<void>((resolve) => {
+        releaseOriginal = resolve;
+      });
+      let releaseGifPreviews: () => void = () => undefined;
+      const gifPreviewGate = new Promise<void>((resolve) => {
+        releaseGifPreviews = resolve;
+      });
+      await page.route(`${MEDIA_ROOT}**`, async (route) => {
+        if (extension === "gif") await gifPreviewGate;
+        if (animationUnavailable && route.request().url().includes("_gifv2/")) {
+          rejectedAnimatedPreviews.push(route.request().url());
+          return route.fulfill({
+            status: 422,
+            json: { error: "DECODED_IMAGE_TOO_LARGE" },
+          });
+        }
         const isOriginal = route.request().url() === original;
         if (isOriginal) directOriginalRequests.push(original);
+        if (isOriginal && animationUnavailable) await originalGate;
         const animation = isOriginal && extension === "gif";
         return route.fulfill({
           contentType: animation ? "image/gif" : "image/png",
@@ -117,8 +259,47 @@ export function defineWaveImagePreviewTests() {
       const preview = hero.getByRole("img", {
         name: "Drop media",
         exact: true,
+        includeHidden: true,
       });
-      await expect(preview).toBeVisible();
+      // Route readiness covers the shell; the submission panel fetches separately.
+      // Keep previews gated until its artwork frame has mounted.
+      try {
+        await expect(hero).toBeVisible({ timeout: 30000 });
+        if (extension === "gif") {
+          await expectSubmissionGifLoadingLayout(hero);
+        }
+      } finally {
+        releaseGifPreviews();
+      }
+      if (automaticOriginal) {
+        try {
+          await expect
+            .poll(() => directOriginalRequests.length)
+            .toBeGreaterThan(0);
+          await expect(preview).toBeVisible();
+          await expectSubmissionGifLoadingLayout(hero, "View optimized");
+          await expect(
+            hero.getByRole("status", {
+              name: "Loading original GIF",
+              exact: true,
+            })
+          ).toHaveCount(0);
+        } finally {
+          releaseOriginal();
+        }
+        await expect(
+          hero.getByRole("img", { name: "Original GIF animation", exact: true })
+        ).toBeVisible();
+        await expect(preview).toBeHidden();
+        expect(rejectedAnimatedPreviews).toEqual(
+          expect.arrayContaining([
+            `${MEDIA_ROOT}AUTOx1080_gifv2/artwork.gif`,
+            `${MEDIA_ROOT}AUTOx450_gifv2/artwork.gif`,
+          ])
+        );
+      } else {
+        await expect(preview).toBeVisible();
+      }
       await expect
         .poll(() =>
           preview.evaluate((img: HTMLImageElement) => img.naturalWidth)
@@ -133,28 +314,44 @@ export function defineWaveImagePreviewTests() {
         expect(previewUrl.searchParams.get("url")).toBe(original);
         expect(previewUrl.searchParams.get("q")).toBe("100");
         await expect(preview).toHaveAttribute("srcset", /w=1920/);
-      } else {
+      } else if (!animationUnavailable) {
         await expect(preview).toHaveAttribute("src", /AUTOx1080_gifv2/);
       }
-      expect(directOriginalRequests).toEqual([]);
-      const paragraph = page.getByText("First photographic line", {
-        exact: false,
-      });
+      if (automaticOriginal)
+        expect(directOriginalRequests.length).toBeGreaterThan(0);
+      else expect(directOriginalRequests).toEqual([]);
+      await expect(
+        hero.getByRole("status", { name: "Loading image", exact: true })
+      ).toHaveCount(0);
+      const paragraph = page
+        .getByRole("paragraph")
+        .filter({ hasText: "First photographic line" });
       await expect(paragraph).toHaveCSS("white-space", "pre-wrap");
       expect(await paragraph.textContent()).toBe(description);
+      const qualityLabel = automaticOriginal
+        ? "View optimized"
+        : "View original";
       const inlineToggle = hero.getByRole("button", {
-        name: "View original",
+        name: qualityLabel,
         exact: true,
       });
       await expect(inlineToggle).toBeVisible();
       await expect(
         hero
-          .getByRole("button", { name: "View original", exact: true })
+          .getByRole("button", {
+            name: qualityLabel,
+            exact: true,
+          })
           .locator("..")
           .getByRole("button")
           .first()
-      ).toHaveAccessibleName("View original");
-      await inlineToggle.click();
+      ).toHaveAccessibleName(qualityLabel);
+      await selectSubmissionOriginal(hero, {
+        automaticOriginal,
+        animationUnavailable,
+        directOriginalRequests,
+        releaseOriginal,
+      });
       const originalAlt =
         extension === "gif" ? "Original GIF animation" : "Original image";
       const inlineOriginal = hero.getByRole("img", {
@@ -207,6 +404,10 @@ export function defineWaveImagePreviewTests() {
       await expectNoHorizontalOverflow(page);
     });
   }
+}
+
+export function defineWaveImagePreviewTests() {
+  defineSubmissionArtworkPreviewTests();
 
   test("opens preview and additional images above the Memes drop detail view", async ({
     page,

@@ -1,89 +1,60 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
-import type { RatingStats } from "@/entities/IProfile";
+import { useContext } from "react";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { AuthContext } from "@/components/auth/Auth";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t, tRich } from "@/i18n/messages";
 import Link from "next/link";
-import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 
 export default function UserPageRepModifyModalRaterStats({
-  repState,
+  category,
   minMaxValues,
   heroAvailableCredit,
+  isLoading = false,
 }: {
-  readonly repState: RatingStats;
-  readonly minMaxValues: {
-    readonly min: number;
-    readonly max: number;
-  };
+  readonly category: string;
+  readonly minMaxValues: { readonly min: number; readonly max: number };
   readonly heroAvailableCredit: number;
+  readonly isLoading?: boolean;
 }) {
+  const locale = useBrowserLocale();
   const { activeProfileProxy } = useContext(AuthContext);
-  const getProxyAvailableCredit = (): number | null => {
-    const repProxy = activeProfileProxy?.actions.find(
-      (action) => action.action_type === ApiProfileProxyActionType.AllocateRep
+  if (activeProfileProxy) {
+    return (
+      <p className="tw-m-0 tw-break-words tw-text-base tw-font-normal tw-text-iron-300">
+        {tRich(locale, "rep.categories.edit.proxy", {
+          name: (
+            <Link
+              key="proxy"
+              className="tw-font-semibold tw-text-iron-50"
+              href={`/${activeProfileProxy.created_by.handle ?? activeProfileProxy.created_by.id}`}
+            >
+              {activeProfileProxy.created_by.handle}
+            </Link>
+          ),
+        })}
+      </p>
     );
-    if (!repProxy) {
-      return null;
-    }
-    return Math.max(
-      0,
-      (repProxy.credit_amount ?? 0) - (repProxy.credit_spent ?? 0)
-    );
-  };
-  const [proxyAvailableCredit, setProxyAvailableCredit] = useState<
-    number | null
-  >(getProxyAvailableCredit());
+  }
 
-  useEffect(
-    () => setProxyAvailableCredit(getProxyAvailableCredit()),
-    [activeProfileProxy]
-  );
-
-  const getAvailableCredit = (): number => {
-    if (!activeProfileProxy) {
-      return heroAvailableCredit;
-    }
-    return Math.abs(heroAvailableCredit) < Math.abs(proxyAvailableCredit ?? 0)
-      ? heroAvailableCredit
-      : proxyAvailableCredit ?? 0;
-  };
-
-  const [availableCredit, setAvailableCredit] = useState(getAvailableCredit());
-  useEffect(
-    () => setAvailableCredit(getAvailableCredit()),
-    [heroAvailableCredit, proxyAvailableCredit]
-  );
   return (
-    <div className="tw-mt-6 sm:tw-mt-8">
-      <div className="tw-flex tw-flex-col tw-space-y-1">
-        {!!activeProfileProxy && (
-          <span className="tw-text-base tw-block tw-text-iron-300 tw-font-normal">
-            <span>You are acting as proxy for:</span>
-            <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
-              <Link href={`/${activeProfileProxy.created_by.handle}`}>
-                {activeProfileProxy.created_by.handle}
-              </Link>
-            </span>
-          </span>
-        )}
-        {!activeProfileProxy && (
-          <span className="tw-text-sm tw-block tw-text-iron-500 tw-font-medium">
-            <span>Your available Rep:</span>
-            <span className="tw-ml-1 tw-font-semibold tw-text-iron-300">
-              {formatNumberWithCommas(availableCredit)}
-            </span>
-          </span>
-        )}
-        {!activeProfileProxy && (
-          <span className="tw-text-sm tw-block tw-text-iron-500 tw-font-medium">
-            <span>Your max/min Rep Rating to {repState.category}:</span>
-            <span className="tw-ml-1 tw-font-semibold tw-text-iron-300">
-              +/- {formatNumberWithCommas(minMaxValues.max)}
-            </span>
-          </span>
-        )}
+    <div className="tw-flex tw-flex-col tw-gap-2 tw-text-xs tw-font-normal tw-text-iron-400">
+      <div className="tw-flex tw-items-baseline tw-justify-between tw-gap-4">
+        <span className="tw-min-w-0 tw-break-words">
+          {t(locale, "rep.categories.edit.availableRep")}
+        </span>
+        <span className="tw-w-32 tw-shrink-0 tw-text-right tw-font-medium tw-tabular-nums tw-text-iron-300">
+          {isLoading ? "…" : formatNumberWithCommas(heroAvailableCredit)}
+        </span>
+      </div>
+      <div className="tw-flex tw-items-baseline tw-justify-between tw-gap-4">
+        <span className="tw-min-w-0 tw-break-words">
+          {t(locale, "rep.categories.edit.ratingLimit", { category })}
+        </span>
+        <span className="tw-w-32 tw-shrink-0 tw-text-right tw-font-medium tw-tabular-nums tw-text-iron-300">
+          {isLoading ? "…" : `+/- ${formatNumberWithCommas(minMaxValues.max)}`}
+        </span>
       </div>
     </div>
   );

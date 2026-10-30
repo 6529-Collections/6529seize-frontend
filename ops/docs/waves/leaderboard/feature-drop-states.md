@@ -35,8 +35,15 @@ This page covers:
 
 - Completed submission cards retain their score and voter summary. Select the
   voter count to inspect voters or the vote log; voting remains closed.
+- Cards appear with each competition leaderboard page. Background score
+  refreshes keep loaded artwork visible; opening a card loads its full drop.
 - List first load shows `Loading drops...`.
 - Grid first load shows skeleton cards.
+- Non-Memes `Grid view` and `Content only` cards show artwork previews for
+  supported NFT marketplace links when the drop has no uploaded media.
+  `Content only` hides the text summary for those previews. Unsupported links
+  remain readable as text; unavailable NFT previews show the marketplace
+  fallback card.
 - Memes gallery first load shows `Loading drops...` while first media results
   are pending.
 - Standard list empty state shows `No drops to show`.
@@ -47,6 +54,10 @@ This page covers:
   after loading completes with zero rows.
 - List and sidebar pagination auto-loads on scroll and shows a thin loading bar.
 - Grid and gallery pagination uses `Load more drops` and `Loading more...`.
+- Live competition updates refresh scores and ranks while keeping the visible
+  artwork in place in full list, grid, and Memes gallery views.
+- During touch or momentum scrolling, scores keep updating and card reordering
+  waits until scrolling settles. Loaded pages stay available.
 
 ## Edge Cases
 
@@ -72,6 +83,8 @@ This page covers:
 - The compact sidebar has separate failure presentation.
 - If pagination fails, already rendered entries remain visible and users can
   retry with scroll/load-more actions.
+- When an update removes the artwork you were viewing, the view keeps a
+  surviving visible neighbour in place when one is available.
 - Reloading the thread restarts loading and attempts a fresh fetch.
 
 ## Limitations / Notes

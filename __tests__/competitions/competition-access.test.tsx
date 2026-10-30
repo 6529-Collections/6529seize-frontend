@@ -16,6 +16,7 @@ const mockCompetition = {
   title: "Test competition",
   type: "RANK",
   lifecycle: "PUBLISHED",
+  capabilities: [],
   config_version: 4,
   permissions: { administer: true },
   participation: { group_id: null },
