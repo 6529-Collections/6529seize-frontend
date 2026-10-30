@@ -1,4 +1,3 @@
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { fetchNotificationsV2 } from "@/services/api/notifications-v2-api";
 import {
@@ -6,8 +5,9 @@ import {
   getIdentityNotificationsQueryKey,
 } from "@/services/api/notifications-query";
 
+const mockRetiredCompetitionFlag = jest.fn(() => false);
 jest.mock("@/helpers/competition.helpers", () => ({
-  isMultiCompetitionEnabled: jest.fn(() => false),
+  isMultiCompetitionEnabled: () => mockRetiredCompetitionFlag(),
 }));
 
 jest.mock("@/services/api/notifications-v2-api", () => ({
@@ -16,13 +16,13 @@ jest.mock("@/services/api/notifications-v2-api", () => ({
 
 describe("notifications query options", () => {
   beforeEach(() => {
-    jest.mocked(isMultiCompetitionEnabled).mockReturnValue(false);
+    mockRetiredCompetitionFlag.mockReturnValue(false);
   });
-  it("separates native notification pages from the legacy cache", () => {
+  it("always scopes notification pages to competition-capable responses", () => {
     const legacy = getIdentityNotificationsQueryKey({ identity: "alice" });
-    jest.mocked(isMultiCompetitionEnabled).mockReturnValue(true);
+    mockRetiredCompetitionFlag.mockReturnValue(true);
     const native = getIdentityNotificationsQueryKey({ identity: "alice" });
-    expect(native).not.toEqual(legacy);
+    expect(native).toEqual(legacy);
     expect(native[1]).toMatchObject({ includeCompetitions: true });
   });
   it("builds the exact identity, limit, cause, and version key", () => {
@@ -42,6 +42,7 @@ describe("notifications query options", () => {
         limit: "30",
         cause: "DROP_REPLIED,IDENTITY_MENTIONED",
         version: "v2",
+        includeCompetitions: true,
       },
     ]);
   });

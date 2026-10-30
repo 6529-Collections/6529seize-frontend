@@ -3,6 +3,12 @@ import userEvent from "@testing-library/user-event";
 import WaveDropQuote from "@/components/waves/drops/WaveDropQuote";
 import { LinkPreviewProvider } from "@/components/waves/LinkPreviewContext";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
 
 let markdownProps: any;
 let mockProposalCardPresentation = "default";
@@ -114,6 +120,23 @@ test("does not bubble not-found quote clicks to parent", async () => {
   await userEvent.click(screen.getByText("Drop not found"));
 
   expect(onParentClick).not.toHaveBeenCalled();
+});
+
+test("requests the 200x200 derivative of the quoted author's profile picture", () => {
+  const drop = {
+    id: "d1",
+    wave: { id: "w1", name: "wave" },
+    author: { handle: "a", level: 1, cic: "BRONZE", pfp: CDN_AVATAR_URL },
+    parts: [{ part_id: 1, content: "hello" }],
+    created_at: "2020-01-01",
+    mentioned_users: [],
+    referenced_nfts: [],
+    moderation: visibleModeration,
+  } as any;
+  render(<WaveDropQuote drop={drop} partId={1} onQuoteClick={jest.fn()} />);
+  expect(
+    getRequestedImageSrc(screen.getByAltText("a's profile picture"))
+  ).toContain(scaledAvatarPath(ImageScale.W_200_H_200));
 });
 
 test("calls onQuoteClick on interaction", async () => {

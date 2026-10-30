@@ -3,6 +3,7 @@ import {
   useWaveRealtimeUpdater,
   ProcessIncomingDropType,
 } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { WsMessageType } from "@/helpers/Types";
 
@@ -99,6 +100,15 @@ const getAuthJwtMock = getAuthJwt as jest.Mock;
 
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
 
+// The updater reads only these fields from a realtime drop.
+const makeRealtimeDrop = (id: string, waveId: string, serialNo = 1): ApiDrop =>
+  ({
+    id,
+    serial_no: serialNo,
+    wave: { id: waveId },
+    author: {},
+  }) as unknown as ApiDrop;
+
 const emitWebSocketMessage = (
   messageType: WsMessageType,
   messageData: unknown
@@ -154,6 +164,7 @@ describe("useWaveRealtimeUpdater", () => {
       store[update.key] = { ...store[update.key], ...update };
     }),
     hasServerFeedSeed: jest.fn().mockReturnValue(false),
+    isWaveInUse: jest.fn((_waveId: string) => false),
     registerWave: jest.fn(),
     syncNewestMessages: jest
       .fn()
@@ -609,7 +620,7 @@ describe("useWaveRealtimeUpdater", () => {
     await flushPromises();
 
     expect(props.syncNewestMessages).not.toHaveBeenCalled();
-    expect(props.registerWave).toHaveBeenCalledWith("wave2");
+    expect(props.registerWave).not.toHaveBeenCalled();
   });
 
   it("optimistically adds drop and syncs newest messages", async () => {
@@ -1159,16 +1170,35 @@ describe("useWaveRealtimeUpdater", () => {
     expect(props.registerWave).not.toHaveBeenCalled();
   });
 
-  it("registers wave when currentData is undefined", async () => {
+  it("does not load or sync a wave without cached messages that is not in use", async () => {
     const props = baseProps({});
     const { result } = renderHook(() => useWaveRealtimeUpdater(props));
-    const drop: any = { id: "d6", wave: { id: "wave2" }, author: {} };
+
     await act(async () =>
       result.current.processIncomingDrop(
-        drop,
+        makeRealtimeDrop("d6", "wave2"),
         ProcessIncomingDropType.DROP_INSERT
       )
     );
+
+    expect(props.isWaveInUse).toHaveBeenCalledWith("wave2");
+    expect(props.registerWave).not.toHaveBeenCalled();
+    expect(props.syncNewestMessages).not.toHaveBeenCalled();
+    expect(props.updateData).not.toHaveBeenCalled();
+  });
+
+  it("registers an in-use wave whose cached messages are missing", async () => {
+    const props = baseProps({});
+    props.isWaveInUse.mockImplementation((waveId) => waveId === "wave2");
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        makeRealtimeDrop("d6", "wave2"),
+        ProcessIncomingDropType.DROP_INSERT
+      )
+    );
+
     expect(props.registerWave).toHaveBeenCalledWith("wave2");
   });
 

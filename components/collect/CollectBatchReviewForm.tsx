@@ -5,7 +5,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatNumber } from "@/i18n/format";
 import { t } from "@/i18n/messages";
-import { useId, useState } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { compactCollectReviewAmount } from "./collect-review-presentation";
 import CollectBatchDestination from "./CollectBatchDestination";
@@ -34,6 +34,7 @@ interface Props {
   readonly loading?: boolean;
   readonly error?: string | null | undefined;
   readonly disabledReason?: string | null | undefined;
+  readonly connectionAction?: ReactNode;
   readonly maxItems?: number;
   readonly maxAllocations?: number;
   readonly onPrepare: (draft: CollectBatchDraft) => void;
@@ -52,6 +53,7 @@ function BatchReviewDraft({
   loading = false,
   error,
   disabledReason,
+  connectionAction,
   maxItems = 128,
   maxAllocations = 256,
   onPrepare,
@@ -117,7 +119,7 @@ function BatchReviewDraft({
   return (
     <form
       aria-label={t(locale, "collect.batchReview.title")}
-      className="tw-space-y-4"
+      className="tw-flex tw-min-w-0 tw-flex-col tw-gap-6"
       onSubmit={(event) => {
         event.preventDefault();
         setSubmitted(true);
@@ -128,21 +130,33 @@ function BatchReviewDraft({
       <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
         {t(locale, "collect.batchReview.description")}
       </p>
-      <fieldset
-        disabled={loading}
-        className="tw-m-0 tw-min-w-0 tw-space-y-1 tw-border-0 tw-p-0"
-      >
-        <legend className="tw-mb-1 tw-text-xs tw-font-medium tw-text-iron-200">
-          {t(locale, "collect.batchReview.defaultDelivery")}
-        </legend>
-        <CollectBatchDestination
-          allocation={delivery}
-          profile={profile}
-          payingWallet={payingWallet}
+      <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.025]">
+        {(Boolean(disabledReason) || Boolean(connectionAction)) && (
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-p-4">
+            {disabledReason && (
+              <p className="tw-m-0 tw-min-w-0 tw-flex-1 tw-basis-56 tw-text-xs tw-leading-5 tw-text-iron-300">
+                {disabledReason}
+              </p>
+            )}
+            {connectionAction}
+          </div>
+        )}
+        <fieldset
           disabled={loading}
-          onChange={setDelivery}
-        />
-      </fieldset>
+          className="tw-m-0 tw-min-w-0 tw-border-0 tw-px-4 tw-pb-4 tw-pt-3 [&>div]:tw-clear-both [&_[data-collect-delivery-change]]:tw-ml-auto [&_[data-collect-delivery-change]]:tw-border [&_[data-collect-delivery-change]]:tw-border-solid [&_[data-collect-delivery-change]]:tw-border-white/15 [&_[data-collect-delivery-change]]:tw-px-4 [&_[data-collect-delivery-change]]:tw-no-underline [&_[data-collect-delivery-separator]]:tw-hidden"
+        >
+          <legend className="tw-float-left tw-mb-1 tw-w-full tw-text-xs tw-font-medium tw-text-iron-400">
+            {t(locale, "collect.batchReview.defaultDelivery")}
+          </legend>
+          <CollectBatchDestination
+            allocation={delivery}
+            profile={profile}
+            payingWallet={payingWallet}
+            disabled={loading}
+            onChange={setDelivery}
+          />
+        </fieldset>
+      </div>
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-pb-2">
         <label className="tw-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-gap-3 tw-text-xs tw-text-iron-200">
           <input
@@ -173,7 +187,7 @@ function BatchReviewDraft({
           })}
         </span>
       </div>
-      <ul className="tw-m-0 tw-list-none tw-p-0">
+      <ul className="-tw-mt-6 tw-mb-0 tw-list-none tw-p-0">
         {items.map((item) => {
           const key = collectListingKey(item.order);
           return (
@@ -218,13 +232,11 @@ function BatchReviewDraft({
           {issueText ?? error}
         </p>
       )}
-      {disabledReason && (
-        <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-300">
-          {disabledReason}
-        </p>
-      )}
-      <div className="tw-sticky tw-bottom-0 tw-z-20 tw-space-y-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-py-3">
-        <div aria-live="polite" className="tw-space-y-1">
+      <div className="tw-sticky tw-bottom-0 tw-z-20 tw-mt-auto tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-py-4">
+        <div
+          aria-live="polite"
+          className="tw-min-w-0 tw-flex-1 tw-basis-64 tw-space-y-1"
+        >
           {total !== null && compactTotal?.approximate ? (
             <details className="tw-group/total tw-min-w-0">
               <summary
@@ -251,15 +263,16 @@ function BatchReviewDraft({
               {estimatedTotal}
             </p>
           )}
-          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+          <p className="tw-m-0 tw-text-pretty tw-text-xs tw-leading-5 tw-text-iron-400">
             {t(locale, "collect.batchReview.nextStep")}
           </p>
         </div>
-        <div className="tw-flex tw-flex-wrap tw-gap-2">
+        <div className="tw-flex tw-w-full tw-flex-wrap tw-gap-2 sm:tw-w-auto">
           <Button
             type="submit"
             variant="action"
             size="lg"
+            className="tw-flex-1 sm:tw-flex-none"
             loading={loading}
             disabled={
               issue !== null || total === null || Boolean(disabledReason)
@@ -271,6 +284,7 @@ function BatchReviewDraft({
           <Button
             variant="secondary"
             size="lg"
+            className="tw-flex-1 sm:tw-flex-none"
             disabled={loading}
             onClick={onClose}
           >

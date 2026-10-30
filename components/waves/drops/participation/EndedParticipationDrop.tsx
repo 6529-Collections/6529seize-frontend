@@ -19,6 +19,7 @@ import DropMinimalIdentityRow from "../DropMinimalIdentityRow";
 import { DropAuthorBadges } from "../DropAuthorBadges";
 import WaveDropActions from "../WaveDropActions";
 import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
+import { AnonymousAuthorName } from "../AnonymousDropAuthor";
 import WaveDropContent from "../WaveDropContent";
 import WaveDropMetadata from "../WaveDropMetadata";
 import {
@@ -193,24 +194,30 @@ function EndedParticipationDropInner({
         >
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
             <p className="tw-m-0 tw-inline-flex tw-h-5 tw-items-center tw-text-md tw-font-semibold tw-leading-5">
-              <Link
-                onClick={(e) =>
-                  handleNavigation(
-                    e,
-                    `/${drop.author.handle ?? drop.author.primary_address}`
-                  )
-                }
-                href={`/${drop.author.handle ?? drop.author.primary_address}`}
-                className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
-              >
-                {drop.author.handle ?? drop.author.primary_address}
-              </Link>
+              {drop.author.is_anonymous ? (
+                <AnonymousAuthorName />
+              ) : (
+                <Link
+                  onClick={(e) =>
+                    handleNavigation(
+                      e,
+                      `/${drop.author.handle ?? drop.author.primary_address}`
+                    )
+                  }
+                  href={`/${drop.author.handle ?? drop.author.primary_address}`}
+                  className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
+                >
+                  {drop.author.handle ?? drop.author.primary_address}
+                </Link>
+              )}
             </p>
 
-            <UserCICAndLevel
-              level={drop.author.level}
-              size={UserCICAndLevelSize.SMALL}
-            />
+            {!drop.author.is_anonymous && (
+              <UserCICAndLevel
+                level={drop.author.level}
+                size={UserCICAndLevelSize.SMALL}
+              />
+            )}
 
             <DropAuthorBadges
               profile={drop.author}

@@ -188,7 +188,9 @@ describe("WebSocketProvider", () => {
       });
 
       expect(result.current.status).toBe(WebSocketStatus.CONNECTING);
-      expect(globalThis.WebSocket).toHaveBeenCalledWith("ws://test");
+      expect(globalThis.WebSocket).toHaveBeenCalledWith(
+        "ws://test/?recovery_capability=resync_v1"
+      );
 
       const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
         .mock.results[0]?.value as MockWebSocket;
@@ -210,7 +212,9 @@ describe("WebSocketProvider", () => {
         result.current.connect();
       });
 
-      expect(globalThis.WebSocket).toHaveBeenCalledWith("ws://test");
+      expect(globalThis.WebSocket).toHaveBeenCalledWith(
+        "ws://test/?recovery_capability=resync_v1"
+      );
     });
 
     it("uses message-based authentication when a token is provided", () => {
@@ -226,7 +230,9 @@ describe("WebSocketProvider", () => {
         result.current.connect("test-token");
       });
 
-      expect(globalThis.WebSocket).toHaveBeenCalledWith("ws://test");
+      expect(globalThis.WebSocket).toHaveBeenCalledWith(
+        "ws://test/?recovery_capability=resync_v1"
+      );
 
       const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
         .mock.results[0]?.value as MockWebSocket;
@@ -259,7 +265,9 @@ describe("WebSocketProvider", () => {
       });
 
       expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
-      expect(globalThis.WebSocket).toHaveBeenLastCalledWith("ws://test");
+      expect(globalThis.WebSocket).toHaveBeenLastCalledWith(
+        "ws://test/?recovery_capability=resync_v1"
+      );
 
       const reconnectedWs = (
         globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>
@@ -384,7 +392,9 @@ describe("WebSocketProvider", () => {
       });
 
       expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
-      expect(globalThis.WebSocket).toHaveBeenLastCalledWith("ws://test");
+      expect(globalThis.WebSocket).toHaveBeenLastCalledWith(
+        "ws://test/?recovery_capability=resync_v1"
+      );
     });
 
     it("disconnects intentionally and prevents reconnection", () => {
@@ -702,7 +712,9 @@ describe("WebSocketProvider", () => {
       });
 
       expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
-      expect(globalThis.WebSocket).toHaveBeenLastCalledWith("ws://test");
+      expect(globalThis.WebSocket).toHaveBeenLastCalledWith(
+        "ws://test/?recovery_capability=resync_v1"
+      );
 
       const ws2 = (
         globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>
@@ -931,6 +943,15 @@ describe("WebSocketProvider", () => {
   });
 
   describe("Error Handling - Security & Edge Cases", () => {
+    it("handles an invalid connection URL without throwing", () => {
+      const wrapper = createWrapper({ url: "invalid-url" });
+      const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
+        wrapper,
+      });
+      expect(() => act(() => result.current.connect("token"))).not.toThrow();
+      expect(result.current.status).toBe(WebSocketStatus.DISCONNECTED);
+      expect(globalThis.WebSocket).not.toHaveBeenCalled();
+    });
     it("handles WebSocket constructor errors", () => {
       jest.useFakeTimers();
 
@@ -1011,7 +1032,9 @@ describe("WebSocketProvider", () => {
 
       expect(ws1.close).toHaveBeenCalled();
       expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
-      expect(globalThis.WebSocket).toHaveBeenLastCalledWith("ws://test");
+      expect(globalThis.WebSocket).toHaveBeenLastCalledWith(
+        "ws://test/?recovery_capability=resync_v1"
+      );
 
       expect(result.current.status).toBe(WebSocketStatus.CONNECTING);
 
@@ -1349,7 +1372,9 @@ describe("WebSocketProvider", () => {
 
       expect(result.current.status).toBe(WebSocketStatus.CONNECTED);
       expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
-      expect(globalThis.WebSocket).toHaveBeenLastCalledWith("ws://test");
+      expect(globalThis.WebSocket).toHaveBeenLastCalledWith(
+        "ws://test/?recovery_capability=resync_v1"
+      );
     });
   });
 

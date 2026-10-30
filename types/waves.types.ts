@@ -259,4 +259,5 @@ export interface SidebarWavesPage {
   readonly waves: SidebarWave[];
   readonly page: number;
   readonly next: boolean;
+  readonly nextCursor?: string | null;
 }

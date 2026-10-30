@@ -8,6 +8,7 @@ The profile header appears on profile routes under `/{user}` and shows:
 - profile actions (edit, follow, direct message)
 - a **Website** link when a published profile website is available
 - quick stats links (`TDH`, `xTDH`, `NIC`, `Rep`, `Followers`)
+- a `Following` count beside `Followers` on your own signed-in profile
 - artist activity entry when available
 
 ## Location in the Site
@@ -45,6 +46,7 @@ The profile header appears on profile routes under `/{user}` and shows:
    - `xTDH` -> `/{user}/xtdh`
    - `NIC` and `Rep` -> `/{user}`
    - `Followers` -> opens the followers modal (no route change)
+   - `Following` -> opens the identities you follow, on your own signed-in profile
 5. If artist activity exists, a badge appears:
    - palette icon: active submissions only
    - trophy icon: winning artworks only
@@ -97,6 +99,14 @@ at `/{user}`. To create or edit a website, open `/{user}/cms/builder`.
 - Touch-first layouts use the profile editing hub; fine-pointer desktop layouts
   retain the field-level editing controls.
 - `Followers` opens a modal list; it does not navigate to a followers tab.
+- `Following` shows the total number of identities you follow, including rows
+  not yet loaded. The list loads when you open it and shows profile images,
+  handles, levels, profile links, and follow/unfollow controls. Scroll down or
+  choose `Load more` for more rows.
+- Both lists use a dialog on desktop and a sheet on phones and in the app.
+  Short lists fit their content with a modest minimum height; longer lists
+  scroll inside a bounded panel.
+- Unfollowing from the Following list removes that row and refreshes the total.
 - On non-touch desktop devices, the artist badge shows a tooltip with activity
   counts.
 
@@ -113,6 +123,15 @@ at `/{user}`. To create or edit a website, open `/{user}/cms/builder`.
 - If header-side fetches fail (BIO statement, profile-enabled date, followers
   count), the profile route still loads and missing header fields are omitted.
 - Followers count falls back to `0` if the count request fails.
+- The Followers dialog or mobile sheet says `No followers yet.` after a
+  successful request confirms zero followers. Loading or failed list requests
+  do not show this empty-state message.
+- Following shows a loading indicator while its first request runs. A failed
+  count request shows `Unavailable`, not `0`. Opening the list retries the count.
+  If the list fails to load, choose `Retry`.
+- If a later page fails, already loaded identities remain visible with `Retry`.
+  An empty Following list says `You aren't following anyone yet.` only after a
+  successful request.
 - If the published website cannot be loaded, its header link is omitted; other
   profile actions remain available.
 - If direct-message creation fails, users get an error toast, the paper-plane
@@ -126,6 +145,11 @@ at `/{user}`. To create or edit a website, open `/{user}/cms/builder`.
 ## Limitations / Notes
 
 - Followers count in the header is a load-time snapshot.
+- Following is private to your own authenticated profile. It is hidden when
+  signed out, viewing another profile, or acting through a profile proxy.
+- Switching accounts or entering a proxy session closes the Following list.
+- New Following and empty Followers copy falls back to English in locales
+  without translations.
 - Direct-message action requires a signed-in viewer with a handle, a viewed
   profile with a handle, and a target primary wallet.
 - Artist badge and modal tabs depend on loaded

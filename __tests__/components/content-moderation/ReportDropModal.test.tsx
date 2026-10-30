@@ -423,14 +423,21 @@ describe("ReportDropModal", () => {
     [
       ApiContentModerationReportStatus.ResolvedAllowed,
       "Reviewed · No action taken",
+      "No action taken",
     ],
     [
       ApiContentModerationReportStatus.ResolvedRemoved,
       "Reviewed · Content removed",
+      "Content removed",
+    ],
+    [
+      ApiContentModerationReportStatus.ResolvedDeleted,
+      "Resolved · Post deleted",
+      "Post deleted",
     ],
   ])(
     "shows a dedicated outcome for a %s report",
-    (reportStatus, statusLabel) => {
+    (reportStatus, statusLabel, outcomeLabel) => {
       const drop = createDrop("drop-1");
       drop.viewer_context = {
         author_blocked: false,
@@ -443,13 +450,7 @@ describe("ReportDropModal", () => {
         screen.getByRole("heading", { name: "Report outcome" })
       ).toBeInTheDocument();
       expect(screen.getByText("Report reviewed")).toBeInTheDocument();
-      expect(
-        screen.getByText(
-          reportStatus === ApiContentModerationReportStatus.ResolvedAllowed
-            ? "No action taken"
-            : "Content removed"
-        )
-      ).toBeInTheDocument();
+      expect(screen.getByText(outcomeLabel)).toBeInTheDocument();
       expect(screen.queryByText(statusLabel)).not.toBeInTheDocument();
       expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
       expect(

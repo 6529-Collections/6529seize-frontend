@@ -5,10 +5,16 @@ import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/React
 
 jest.mock("@tanstack/react-query", () => {
   const actual = jest.requireActual("@tanstack/react-query");
+  const data = { rep_rates_left_for_rater: 0, rating_stats: [] };
   return {
     ...actual,
-    useQuery: jest.fn(() => ({ data: null })),
-    useMutation: jest.fn(() => ({ mutateAsync: jest.fn(), reset: jest.fn() })),
+    // Input editing starts after allowance loading completes.
+    useQuery: jest.fn(() => ({
+      data,
+      isError: false,
+      isFetching: false,
+    })),
+    useMutation: jest.fn(() => ({ mutate: jest.fn(), reset: jest.fn() })),
   };
 });
 

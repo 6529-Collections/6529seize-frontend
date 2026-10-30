@@ -2,7 +2,9 @@ import { defineMobileVideoBatteryTest } from "../media/mobileVideoBatteryCases";
 import type { Locator, Page } from "@playwright/test";
 
 import { expect, test } from "../testHelpers";
-import { gotoReady } from "../support/routeReadiness";
+import { gotoReady, RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
+import { PROFILE_HANDLE } from "../social/profileReadonlyHelpers";
+import { expectUrlState } from "../support/urlState";
 import {
   isCapacitorSimulationProject,
   isElectronSimulationProject,
@@ -238,6 +240,119 @@ async function readNotificationHistoryPushCount(page: Page) {
 }
 
 test.describe("Native and Electron simulated shell read-only coverage @surface @medium @readonly", () => {
+  test("Collect Back restores the Collected filters and source action", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "Native app Back contract"
+    );
+    for (const action of ["Manage orders", "Complete my set"]) {
+      await gotoReady(
+        page,
+        `/${PROFILE_HANDLE}/collected?collection=memes&szn=1&details=closed`
+      );
+      await expect(
+        page.getByRole("main").locator('[data-profile-section="Filters"]')
+      ).toBeVisible({
+        timeout: RESPONSE_TIMEOUT_MS,
+      });
+      const source = new URL(page.url());
+      const link = page.getByRole("link", { name: action, exact: true });
+      await link.scrollIntoViewIfNeeded();
+      const destination = new URL(
+        (await link.getAttribute("href"))!,
+        page.url()
+      );
+      expect(destination.searchParams.has("returnTo")).toBe(true);
+      await link.click();
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname ===
+          (action === "Manage orders" ? "/collect/orders" : "/collect")
+      );
+      await page.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(page).toHaveURL((url) => url.pathname === source.pathname);
+      await expectUrlState(page, (url) =>
+        ["collection", "szn", "details"].every(
+          (key) => url.searchParams.get(key) === source.searchParams.get(key)
+        )
+      );
+      await expect(
+        page.getByRole("link", { name: action, exact: true })
+      ).toBeFocused();
+      await expect(
+        page.getByRole("link", { name: action, exact: true })
+      ).toBeInViewport();
+    }
+  });
+
+  for (const path of ["/collect", "/collect/orders"]) {
+    test(`fresh ${path} does not offer a false Back destination`, async ({
+      page,
+    }, testInfo) => {
+      test.skip(
+        !isCapacitorSimulationProject(testInfo.project.name),
+        "Native app Back contract"
+      );
+      // A document navigation starts a fresh app history for each deep link.
+      await gotoReady(page, path);
+      await expect(
+        page.getByRole("navigation", { name: "Primary navigation", exact: true })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Back", exact: true })
+      ).toHaveCount(0);
+    });
+  }
+
+  test("Back remains usable after returning from Orders to a profile", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "Native app Back contract"
+    );
+    await gotoReady(page, "/about");
+    await expect(
+      page.getByRole("navigation", { name: "Primary navigation", exact: true })
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Search 6529", exact: true })
+      .click();
+    await page
+      .getByRole("combobox", { name: "Search 6529", exact: true })
+      .fill(PROFILE_HANDLE);
+    await page
+      .getByRole("option")
+      .filter({ hasText: PROFILE_HANDLE })
+      .first()
+      .click();
+    await page
+      .getByRole("navigation", { name: "Profile sections" })
+      .getByRole("link", { name: "Collected", exact: true })
+      .click();
+    await expect(
+      page.getByRole("main").locator('[data-profile-section="Filters"]')
+    ).toBeVisible({
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
+    await page
+      .getByRole("link", { name: "Manage orders", exact: true })
+      .click();
+    await expectUrlState(page, (url) => url.pathname === "/collect/orders");
+    await page.getByRole("button", { name: "Back", exact: true }).click();
+    await expectUrlState(
+      page,
+      (url) => url.pathname === `/${PROFILE_HANDLE}/collected`
+    );
+    await expect(
+      page.getByRole("button", { name: "Back", exact: true })
+    ).toBeEnabled();
+    await page.getByRole("button", { name: "Back", exact: true }).click();
+    await expectUrlState(page, (url) => url.pathname === "/about");
+  });
+
   test("native profile artwork opens above the app header and closes back to the profile", async ({
     page,
   }, testInfo) => {
@@ -669,8 +784,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       name: "Level at least",
       exact: true,
     });
-    const summary = filter.getByText("After editing", { exact: true });
-    const currentSummary = filter.getByText("Before editing", { exact: true });
+    const summary = filter.getByText("Level at least 10", { exact: true });
     const action = filter.getByRole("button", {
       name: "Create and use new group",
       exact: true,
@@ -740,29 +854,19 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         "true"
       );
     }
-    const summaryIsCompact = (target = summary) =>
-      target.evaluate((element) => {
-        for (
-          let parent = element.parentElement;
-          parent;
-          parent = parent.parentElement
-        ) {
-          const style = getComputedStyle(parent);
-          if (
-            style.position === "absolute" &&
-            style.clip !== "auto" &&
-            parent.getBoundingClientRect().width <= 1
-          )
-            return true;
-        }
-        return false;
-      });
-    await expect.poll(summaryIsCompact).toBe(true);
-    await expect.poll(() => summaryIsCompact(currentSummary)).toBe(true);
-    // Compact the visual footer without removing its summary from the
-    // accessibility tree; preview actions become visible when focused.
-    await expect.poll(() => filter.ariaSnapshot()).toContain("After editing");
-    await expect.poll(() => filter.ariaSnapshot()).toContain("Before editing");
+    // The mobile summary scrolls after the editor, as requested, instead of
+    // occupying or being visually hidden within the fixed action footer.
+    const summaryCard = filter
+      .getByRole("region", { name: "Level", exact: true })
+      .locator("[data-group-criteria-summary]");
+    await expect(summaryCard).toContainText("Level at least 10");
+    await expect
+      .poll(() => summaryCard.evaluate((element) => element.clientHeight))
+      .toBeGreaterThan(1);
+    await expect(summary).toBeVisible();
+    await expect
+      .poll(() => filter.ariaSnapshot())
+      .toContain("Level at least 10");
     await expect
       .poll(() =>
         input.evaluate((element) => {
@@ -810,7 +914,8 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await expect(preview).toBeFocused();
     await expect(preview).toBeInViewport({ ratio: 1 });
     await input.focus();
-    await expect.poll(summaryIsCompact).toBe(true);
+    await expect(summary).toBeVisible();
+    await filter.getByRole("button", { name: "Back", exact: true }).click();
     await filter
       .getByRole("group", { name: "Filter Network", exact: true })
       .getByRole("button", { name: "Identities", exact: true })
@@ -839,18 +944,18 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         })
       )
       .toBe(true);
-    const criteria = filter.getByRole("group", {
-      name: "Filter Network",
-      exact: true,
-    });
-    await expect(criteria).toBeInViewport({ ratio: 1 });
-    const criteriaBounds = await criteria.boundingBox();
+    const back = filter.getByRole("button", { name: "Back", exact: true });
+    await expect(back).toBeInViewport({ ratio: 1 });
+    await expect(
+      filter.getByRole("group", { name: "Filter Network", exact: true })
+    ).toBeHidden();
+    const backBounds = await back.boundingBox();
     const editorTop = await allowlists.evaluate(
       (element) =>
         element.closest("[tabindex='-1']")?.getBoundingClientRect().top
     );
     expect(
-      (criteriaBounds?.y ?? 0) + (criteriaBounds?.height ?? 0)
+      (backBounds?.y ?? 0) + (backBounds?.height ?? 0)
     ).toBeLessThanOrEqual(editorTop ?? 0);
     await page.screenshot({
       path: testInfo.outputPath("network-keyboard.png"),
@@ -867,10 +972,16 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       "true"
     );
     await expect(summary).toBeVisible();
-    await expect.poll(() => summaryIsCompact(currentSummary)).toBe(false);
+    await expect(
+      filter.getByText("Before editing", { exact: true })
+    ).toHaveCount(0);
     await allowlists.blur();
     await allowlists.focus();
     await expect(allowlists).toHaveValue("keyboard-test-no-match");
+    await back.click();
+    await expect(
+      filter.getByText("Before editing", { exact: true })
+    ).toHaveCount(0);
     await filter
       .getByRole("group", { name: "Filter Network", exact: true })
       .getByRole("button", { name: /^Level(?: Configured)?$/, exact: true })
