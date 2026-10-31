@@ -1,11 +1,21 @@
 import type { LegacyDmItem } from "@/components/e2ee/legacy/legacyDmExport";
 import {
   chunkText,
+  fitsEncryptedAttachment,
   IMPORT_TEXT_CHUNK,
+  pauseReason,
   planLegacyImport,
   runLegacyDmImport,
   type LegacyImportDeps,
 } from "@/components/e2ee/legacy/legacyDmImport";
+import { E2eeApiError } from "@/lib/e2ee/api";
+import { E2eeError } from "@/lib/e2ee/engine/errors";
+import {
+  ciphertextSize,
+  encryptMedia,
+  MAX_BLOB_BYTES,
+  PLAINTEXT_CHUNK_BYTES,
+} from "@/lib/e2ee/media";
 import type { E2eeImported, E2eeMessage } from "@/lib/e2ee/types";
 
 const CDN = "https://d3lqz0a4bldqgf.cloudfront.net/drops/u1";
@@ -91,6 +101,60 @@ const run = (
   d: LegacyImportDeps,
   signal = new AbortController().signal
 ) => runLegacyDmImport({ g: "g1", waveId: "wave-1", items, deps: d, signal });
+
+/** The largest file whose ciphertext fits one encrypted attachment. */
+function largestMovableBytes(): number {
+  let low = 0;
+  let high = MAX_BLOB_BYTES;
+  while (low < high) {
+    const mid = Math.ceil((low + high) / 2);
+    if (ciphertextSize(mid) <= MAX_BLOB_BYTES) {
+      low = mid;
+    } else {
+      high = mid - 1;
+    }
+  }
+  return low;
+}
+
+describe("encrypted attachment size", () => {
+  it("uses the engine's exact overhead: 16 bytes per encrypted chunk", () => {
+    const limit = largestMovableBytes();
+    const chunks = Math.ceil(limit / PLAINTEXT_CHUNK_BYTES);
+    expect(limit + chunks * 16).toBeLessThanOrEqual(MAX_BLOB_BYTES);
+    expect(fitsEncryptedAttachment(limit)).toBe(true);
+    expect(fitsEncryptedAttachment(limit + 1)).toBe(false);
+  });
+
+  it("agrees with the engine's own refusal", async () => {
+    const limit = largestMovableBytes();
+    await expect(encryptMedia(new Uint8Array(limit + 1))).rejects.toMatchObject(
+      { code: "E2EE_TOO_LARGE" }
+    );
+  });
+
+  it("classifies pauses by the error the engine propagates", () => {
+    expect(
+      pauseReason(
+        new E2eeApiError({
+          message: "",
+          status: 429,
+          code: "E2EE_RATE_LIMITED",
+        })
+      )
+    ).toBe("rate");
+    expect(
+      pauseReason(new E2eeApiError({ message: "", status: 429, code: null }))
+    ).toBe("rate");
+    expect(
+      pauseReason(
+        new E2eeApiError({ message: "", status: 413, code: "E2EE_TOO_LARGE" })
+      )
+    ).toBe("storage");
+    expect(pauseReason(new E2eeError("E2EE_ATTACHMENTS_DISABLED"))).toBeNull();
+    expect(pauseReason(new Error("boom"))).toBeNull();
+  });
+});
 
 describe("planLegacyImport", () => {
   it("splits long text without breaking characters", () => {
@@ -262,6 +326,42 @@ describe("runLegacyDmImport", () => {
     expect(sent[0]!.imported.mediaNotImported).toBe(2);
   });
 
+  it("counts media too large to encrypt apart from other misses", async () => {
+    const limit = largestMovableBytes();
+    const { value, sent } = deps({
+      media: (url) =>
+        ({
+          size: url.endsWith("edge.png") ? limit : limit + 1,
+          type: "image/png",
+        }) as Blob,
+    });
+    const result = await run(
+      [
+        item(1, {
+          parts: [
+            {
+              text: "x",
+              quoted_drop_id: null,
+              media: [
+                { url: `${CDN}/edge.png`, mime_type: "image/png" },
+                { url: `${CDN}/over.png`, mime_type: "image/png" },
+              ],
+              attachments: [],
+            },
+          ],
+        }),
+      ],
+      value
+    );
+    expect(sent[0]!.files.map((file) => file.name)).toEqual(["edge.png"]);
+    expect(result).toMatchObject({
+      mediaMoved: 1,
+      mediaTooLarge: 1,
+      mediaNotMoved: 0,
+    });
+    expect(sent[0]!.imported.mediaNotImported).toBe(1);
+  });
+
   it("pauses when the upload quota is used up, then resumes later", async () => {
     let quota = true;
     const { value, sent } = deps({
@@ -271,7 +371,7 @@ describe("runLegacyDmImport", () => {
           : null,
     });
     const first = await run([item(1), item(2), item(3)], value);
-    expect(first).toMatchObject({ outcome: "paused", sent: 1 });
+    expect(first).toMatchObject({ outcome: "paused", pause: "rate", sent: 1 });
     quota = false;
     const second = await run([item(1), item(2), item(3)], value);
     expect(second).toMatchObject({ outcome: "done", sent: 2, skipped: 1 });
@@ -282,11 +382,76 @@ describe("runLegacyDmImport", () => {
     ]);
   });
 
-  it("still sends the text when the attachments are refused", async () => {
+  it("pauses, without dropping media, when the blob store refuses an upload", async () => {
+    const withImage = item(1, {
+      parts: [
+        {
+          text: "hi",
+          quoted_drop_id: null,
+          media: [{ url: `${CDN}/a.png`, mime_type: "image/png" }],
+          attachments: [],
+        },
+      ],
+    });
+    // The real shape: blob API errors reach sendImported's caller unchanged.
+    const rate = new E2eeApiError({
+      message: "rate",
+      status: 429,
+      code: "E2EE_RATE_LIMITED",
+    });
+    const full = new E2eeApiError({
+      message: "full",
+      status: 413,
+      code: "E2EE_TOO_LARGE",
+    });
+    for (const [error, pause] of [
+      [rate, "rate"],
+      [full, "storage"],
+    ] as const) {
+      const { value, sent } = deps({
+        failOn: (input) => (input.files.length > 0 ? error : null),
+      });
+      const result = await run([withImage], value);
+      expect(result).toMatchObject({ outcome: "paused", pause, sent: 0 });
+      expect(sent).toEqual([]);
+    }
+  });
+
+  it("moves text only when asked to skip media after the storage filled", async () => {
+    const { value, sent } = deps();
+    const result = await runLegacyDmImport({
+      g: "g1",
+      waveId: "wave-1",
+      items: [
+        item(1, {
+          parts: [
+            {
+              text: "hi",
+              quoted_drop_id: null,
+              media: [{ url: `${CDN}/a.png`, mime_type: "image/png" }],
+              attachments: [],
+            },
+          ],
+        }),
+      ],
+      deps: value,
+      signal: new AbortController().signal,
+      skipMedia: true,
+    });
+    expect(value.fetchMedia).not.toHaveBeenCalled();
+    expect(sent[0]!.files).toEqual([]);
+    expect(result).toMatchObject({ outcome: "done", mediaNotMoved: 1 });
+  });
+
+  it("still sends the text when the attachments are refused otherwise", async () => {
     const { value, sent } = deps({
       failOn: (input) =>
         input.files.length > 0
-          ? Object.assign(new Error("full"), { code: "E2EE_TOO_LARGE" })
+          ? new E2eeApiError({
+              message: "nope",
+              status: 400,
+              code: "E2EE_BAD_SIGNATURE",
+            })
           : null,
     });
     const result = await run(

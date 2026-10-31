@@ -48,7 +48,7 @@ export function LegacyDmImportDialog({
 
   useEffect(() => () => controllerRef.current?.abort(), []);
 
-  const start = async () => {
+  const start = async (skipMedia = false) => {
     controllerRef.current?.abort();
     const controller = new AbortController();
     controllerRef.current = controller;
@@ -66,6 +66,7 @@ export function LegacyDmImportDialog({
         deps: { engine, ...browserImportIo },
         signal: controller.signal,
         onProgress: (progress) => setPhase({ kind: "moving", progress }),
+        skipMedia,
       });
       setPhase({ kind: "finished", result });
     } catch {
@@ -82,6 +83,10 @@ export function LegacyDmImportDialog({
   };
   const running = phase.kind === "reading" || phase.kind === "moving";
   const date = formatLegacyDmDeletionDate(locale);
+  const storageFull =
+    phase.kind === "finished" &&
+    phase.result.outcome === "paused" &&
+    phase.result.pause === "storage";
 
   return (
     <E2eeDialog
@@ -97,11 +102,22 @@ export function LegacyDmImportDialog({
             {t(locale, "e2ee.legacy.import.stop")}
           </Button>
         ) : (
-          <Button variant="primary" size="sm" onClick={() => void start()}>
-            {phase.kind === "idle"
-              ? t(locale, "e2ee.legacy.import.start")
-              : t(locale, "e2ee.legacy.import.continue")}
-          </Button>
+          <>
+            {storageFull ? (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => void start(true)}
+              >
+                {t(locale, "e2ee.legacy.import.continueWithoutMedia")}
+              </Button>
+            ) : null}
+            <Button variant="primary" size="sm" onClick={() => void start()}>
+              {phase.kind === "idle"
+                ? t(locale, "e2ee.legacy.import.start")
+                : t(locale, "e2ee.legacy.import.continue")}
+            </Button>
+          </>
         )
       }
     >
@@ -174,6 +190,7 @@ function ImportStatus({ phase }: { readonly phase: Phase }) {
           <p className="tw-m-0">
             {t(locale, "e2ee.legacy.import.media", {
               moved: n(progress.mediaMoved),
+              tooLarge: n(progress.mediaTooLarge),
               notMoved: n(progress.mediaNotMoved),
             })}
           </p>
@@ -205,7 +222,9 @@ function finishedLine(
   result: LegacyImportResult
 ): string {
   if (result.outcome === "paused") {
-    return t(locale, "e2ee.legacy.import.paused");
+    return result.pause === "storage"
+      ? t(locale, "e2ee.legacy.import.pausedStorage")
+      : t(locale, "e2ee.legacy.import.paused");
   }
   if (result.outcome === "cancelled") {
     return t(locale, "e2ee.legacy.import.cancelled");

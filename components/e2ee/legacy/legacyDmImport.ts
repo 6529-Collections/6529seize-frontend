@@ -1,5 +1,5 @@
 import { getE2eeErrorCode } from "@/components/e2ee/e2eeErrors";
-import { MAX_BLOB_BYTES } from "@/lib/e2ee/media";
+import { ciphertextSize, MAX_BLOB_BYTES } from "@/lib/e2ee/media";
 import type { E2eeEngine, E2eeImported } from "@/lib/e2ee/types";
 import type { LegacyDmItem } from "./legacyDmExport";
 
@@ -37,18 +37,24 @@ export interface LegacyImportProgress {
   readonly skipped: number;
   readonly failed: number;
   readonly mediaMoved: number;
+  /** Larger than one encrypted attachment can be, after encryption. */
+  readonly mediaTooLarge: number;
+  /** Could not be fetched, attachments are off, or the upload was refused. */
   readonly mediaNotMoved: number;
 }
 
-type LegacyImportOutcome =
-  | "done"
-  | "cancelled"
-  /** The blob upload quota is used up; continue later. */
-  | "paused";
+/**
+ * Why a run stopped before the end. `rate`: the blob store's daily upload
+ * limit (continue later). `storage`: the encrypted attachment storage is
+ * full (continue later or without media).
+ */
+export type LegacyImportPause = "rate" | "storage";
 
-export interface LegacyImportResult extends LegacyImportProgress {
-  readonly outcome: LegacyImportOutcome;
-}
+export type LegacyImportResult = LegacyImportProgress &
+  (
+    | { readonly outcome: "done" | "cancelled" }
+    | { readonly outcome: "paused"; readonly pause: LegacyImportPause }
+  );
 
 export interface LegacyImportDeps {
   readonly engine: Pick<
@@ -137,21 +143,55 @@ function missingAttachments(item: LegacyDmItem): number {
 
 const unitKey = (dropId: string, part: number): string => `${dropId}#${part}`;
 
-const isQuotaError = (error: unknown): boolean =>
-  getE2eeErrorCode(error) === "E2EE_RATE_LIMITED" ||
-  (typeof error === "object" &&
-    error !== null &&
-    (error as { status?: unknown }).status === 429);
+/**
+ * Whether a file fits one encrypted attachment. The engine encrypts the
+ * file's exact bytes (no re-encoding) in AES-GCM chunks, adding a 16-byte
+ * tag per chunk, and the store caps the ciphertext at MAX_BLOB_BYTES; this
+ * is the same `ciphertextSize` check the engine applies, so nothing that
+ * passes here is refused for size.
+ */
+export const fitsEncryptedAttachment = (plaintextBytes: number): boolean =>
+  ciphertextSize(plaintextBytes) <= MAX_BLOB_BYTES;
+
+/**
+ * Upload failures that stop the run instead of dropping media. Blob API
+ * errors reach the caller unchanged from `sendImported` (E2eeApiError with
+ * the server's code and status): the daily upload limit is
+ * `E2EE_RATE_LIMITED` / 429, and a full attachment store is a server
+ * `E2EE_TOO_LARGE` (413) for a file that already passed the size check.
+ */
+export function pauseReason(error: unknown): LegacyImportPause | null {
+  const code = getE2eeErrorCode(error);
+  const status =
+    typeof error === "object" && error !== null
+      ? (error as { status?: unknown }).status
+      : undefined;
+  if (code === "E2EE_RATE_LIMITED" || status === 429) {
+    return "rate";
+  }
+  if (code === "E2EE_TOO_LARGE" || status === 413) {
+    return "storage";
+  }
+  return null;
+}
+
+interface CollectedFiles {
+  readonly files: File[];
+  readonly tooLarge: number;
+  readonly notMoved: number;
+}
 
 async function collectFiles(
   unit: LegacyImportUnit,
   deps: LegacyImportDeps,
+  skipMedia: boolean,
   signal: AbortSignal
-): Promise<{ files: File[]; notMoved: number }> {
-  if (!deps.engine.getAttachmentsEnabled()) {
-    return { files: [], notMoved: unit.media.length };
+): Promise<CollectedFiles> {
+  if (skipMedia || !deps.engine.getAttachmentsEnabled()) {
+    return { files: [], tooLarge: 0, notMoved: unit.media.length };
   }
   const files: File[] = [];
+  let tooLarge = 0;
   let notMoved = 0;
   for (const media of unit.media) {
     if (files.length >= MAX_FILES_PER_MESSAGE) {
@@ -160,8 +200,8 @@ async function collectFiles(
     }
     try {
       const blob = await deps.fetchMedia(media.url, signal);
-      if (blob.size > MAX_BLOB_BYTES - 64 * 1024) {
-        notMoved += 1;
+      if (!fitsEncryptedAttachment(blob.size)) {
+        tooLarge += 1;
         continue;
       }
       files.push(
@@ -174,13 +214,13 @@ async function collectFiles(
       notMoved += 1;
     }
   }
-  return { files, notMoved };
+  return { files, tooLarge, notMoved };
 }
 
 function importedFor(
   waveId: string,
   unit: LegacyImportUnit,
-  notMoved: number
+  notImported: number
 ): E2eeImported {
   const { item } = unit;
   return {
@@ -194,7 +234,7 @@ function importedFor(
     editedAt: item.updated_at,
     replyToDropId: item.reply_to,
     mediaNotImported:
-      notMoved + (unit.part === 0 ? missingAttachments(item) : 0),
+      notImported + (unit.part === 0 ? missingAttachments(item) : 0),
     reactions:
       unit.part === 0
         ? item.reactions
@@ -204,12 +244,14 @@ function importedFor(
   };
 }
 
-type SendStep = "sent" | "sentWithoutMedia" | "failed" | "paused";
+type SendStep =
+  | { readonly kind: "sent" | "sentWithoutMedia" | "failed" }
+  | { readonly kind: "paused"; readonly pause: LegacyImportPause };
 
 /**
- * Sends one message. If its attachments are refused (other than by the
- * daily quota, which pauses the run), the text still goes, with the media
- * counted as not moved.
+ * Sends one message. Quota and storage refusals pause the run so no media
+ * is dropped; any other refusal of the attachments still sends the text,
+ * with the media counted as not moved.
  */
 async function sendUnit(
   deps: LegacyImportDeps,
@@ -230,20 +272,22 @@ async function sendUnit(
     });
   try {
     await attempt(input.files);
-    return "sent";
+    return { kind: "sent" };
   } catch (error) {
-    if (isQuotaError(error)) {
-      return "paused";
+    const pause = pauseReason(error);
+    if (pause) {
+      return { kind: "paused", pause };
     }
     if (input.files.length === 0) {
-      return "failed";
+      return { kind: "failed" };
     }
   }
   try {
     await attempt([]);
-    return "sentWithoutMedia";
+    return { kind: "sentWithoutMedia" };
   } catch (error) {
-    return isQuotaError(error) ? "paused" : "failed";
+    const pause = pauseReason(error);
+    return pause ? { kind: "paused", pause } : { kind: "failed" };
   }
 }
 
@@ -255,6 +299,8 @@ export async function runLegacyDmImport(input: {
   readonly signal: AbortSignal;
   readonly onProgress?: ((progress: LegacyImportProgress) => void) | undefined;
   readonly pacingMs?: number | undefined;
+  /** Move text only (after the attachment storage filled up). */
+  readonly skipMedia?: boolean | undefined;
 }): Promise<LegacyImportResult> {
   const { g, waveId, deps, signal } = input;
   const units = planLegacyImport(input.items);
@@ -288,6 +334,7 @@ export async function runLegacyDmImport(input: {
     skipped: 0,
     failed: 0,
     mediaMoved: 0,
+    mediaTooLarge: 0,
     mediaNotMoved: 0,
   };
   const report = () => input.onProgress?.({ ...progress });
@@ -301,25 +348,37 @@ export async function runLegacyDmImport(input: {
       report();
       continue;
     }
-    const { files, notMoved } = await collectFiles(unit, deps, signal);
+    const collected = await collectFiles(
+      unit,
+      deps,
+      input.skipMedia === true,
+      signal
+    );
+    const { files } = collected;
     const reply = unit.part === 0 ? replyFor(unit.item.reply_to) : null;
     const step = await sendUnit(deps, g, {
       text: unit.text,
       reply,
       files,
-      imported: (missing) => importedFor(waveId, unit, notMoved + missing),
+      imported: (missing) =>
+        importedFor(
+          waveId,
+          unit,
+          collected.tooLarge + collected.notMoved + missing
+        ),
     });
-    if (step === "paused") {
+    if (step.kind === "paused") {
       report();
-      return { ...progress, outcome: "paused" };
+      return { ...progress, outcome: "paused", pause: step.pause };
     }
-    if (step === "failed") {
+    if (step.kind === "failed") {
       progress.failed += 1;
     } else {
       progress.sent += 1;
-      const moved = step === "sent" ? files.length : 0;
+      const moved = step.kind === "sent" ? files.length : 0;
       progress.mediaMoved += moved;
-      progress.mediaNotMoved += notMoved + files.length - moved;
+      progress.mediaTooLarge += collected.tooLarge;
+      progress.mediaNotMoved += collected.notMoved + files.length - moved;
     }
     report();
     await deps

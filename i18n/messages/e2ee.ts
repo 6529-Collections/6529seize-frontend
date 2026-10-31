@@ -382,7 +382,7 @@ export const E2EE_MESSAGES = {
   "e2ee.legacy.import.progressLabel": "Moving history",
   "e2ee.legacy.import.progress": "{done} of {total} moved",
   "e2ee.legacy.import.media":
-    "Images and files moved: {moved}. Not moved: {notMoved}.",
+    "Images and files moved: {moved}. Too large to move: {tooLarge}. Not moved: {notMoved}.",
   "e2ee.legacy.import.done":
     "Done. {sent} moved, {skipped} were already in the encrypted chat.",
   "e2ee.legacy.import.failedSome.one":
@@ -391,6 +391,9 @@ export const E2EE_MESSAGES = {
     "{count} messages couldn’t be moved. Continue to try them again.",
   "e2ee.legacy.import.paused":
     "Paused: today’s limit for encrypted uploads is reached. Continue tomorrow to move the rest with their images.",
+  "e2ee.legacy.import.pausedStorage":
+    "Paused: your space for encrypted images and files is full. Continue later, or move the rest without images and files.",
+  "e2ee.legacy.import.continueWithoutMedia": "Continue without images",
   "e2ee.legacy.import.cancelled":
     "Stopped. Continue any time; what was moved stays.",
   "e2ee.legacy.import.error":

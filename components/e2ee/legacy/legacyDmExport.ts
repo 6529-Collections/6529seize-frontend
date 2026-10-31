@@ -176,7 +176,10 @@ export async function fetchLegacyDmDrops(input: {
     if (!fresh.length) break;
     drops.push(...fresh);
     input.onProgress?.(drops.length);
-    before = Math.min(...fresh.map((drop) => drop.serial_no));
+    before = fresh.reduce(
+      (lowest, drop) => Math.min(lowest, drop.serial_no),
+      Number.POSITIVE_INFINITY
+    );
   }
   return drops;
 }
