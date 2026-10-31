@@ -205,6 +205,52 @@ describe("verifyGrant: combined sign-in grants (NC8)", () => {
     });
   });
 
+  it("never verifies a contract-wallet grant whose check cannot run (unverifiable)", async () => {
+    const message = buildMessage();
+    const verifyContractSignature = jest
+      .fn()
+      .mockRejectedValue(new Error("E2EE_NO_RPC"));
+    const record = await recordFor(message, {
+      wallet_signature: "0x1234",
+      verified_via: "eip1271",
+    });
+    // Accepted only on the server's word (D109 2.2 residual), never verified.
+    await expect(
+      verifyGrant(record, { atMs, verifyContractSignature })
+    ).resolves.toEqual({
+      ok: true,
+      verified: false,
+      via: "server",
+      reason: null,
+    });
+    // Without that word it is not a grant at all.
+    await expect(
+      verifyGrant(
+        { ...record, verified_via: "eoa" },
+        { atMs, verifyContractSignature }
+      )
+    ).resolves.toMatchObject({ ok: false, reason: "bad-signature" });
+  });
+
+  it("does not contract-verify a sign-in made on another chain", async () => {
+    const message = buildMessage().replace("Chain ID: 1", "Chain ID: 10");
+    const verifyContractSignature = jest.fn().mockResolvedValue(true);
+    const result = await verifyGrant(
+      await recordFor(message, {
+        wallet_signature: "0x1234",
+        verified_via: "eip1271",
+      }),
+      { atMs, verifyContractSignature }
+    );
+    expect(result).toEqual({
+      ok: true,
+      verified: false,
+      via: "server",
+      reason: null,
+    });
+    expect(verifyContractSignature).not.toHaveBeenCalled();
+  });
+
   it("verifies contract wallets with EIP-1271 over the message hash", async () => {
     const message = buildMessage();
     const verifyContractSignature = jest.fn().mockResolvedValue(true);

@@ -25,6 +25,7 @@ import {
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import { sendDropReaction } from "@/services/api/signed-drop-writes";
+import { isSignedWriteCancelled } from "@/lib/device-signing/signing-decision";
 import { useDropReactionRecovery } from "@/hooks/drops/useDropReactionRecovery";
 import { t } from "@/i18n/messages";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
@@ -629,7 +630,9 @@ function WaveDropReaction({
         selected ? "Error removing reaction" : "Error adding reaction",
         locale
       );
-      if (owner.isVisible()) {
+      // A reaction cancelled at the signing prompt was never sent: roll back
+      // without reporting a failure.
+      if (owner.isVisible() && !isSignedWriteCancelled(error)) {
         setToast({ message: msg, type: "error" });
       }
       if (owner.isMounted()) {
