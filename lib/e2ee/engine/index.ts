@@ -1,6 +1,7 @@
 import { downloadMedia, localBlobType } from "../media";
 import { MlsClient } from "../mls-adapter";
 import { getDefaultE2eeStorage, isIndexedDbAvailable } from "../storage";
+import type { BackupHistory } from "../backup/format";
 import type {
   E2eeEngineExt,
   E2eeEngineOptions,
@@ -24,6 +25,7 @@ import {
   renewGrant,
   submitRevocation,
 } from "./enroll";
+import { backupHistory, importBackupHistory } from "./backup";
 import { E2eeError, errorMessage } from "./errors";
 import { newRuntime } from "./groups";
 import {
@@ -647,6 +649,19 @@ class E2eeEngineImpl implements E2eeEngineExt {
     return new Blob([bytes.slice().buffer], {
       type: localBlobType(attachment.mime),
     });
+  }
+
+  // -- encrypted history backup ---------------------------------------------
+
+  backupHistory = () => backupHistory(this.ctx);
+
+  async importBackupHistory(history: BackupHistory) {
+    this.requireReady();
+    const result = await this.ctx.queue.run(() =>
+      importBackupHistory(this.ctx, history)
+    );
+    await resolveProfiles(this.ctx, memberProfileIds(this.ctx));
+    return result;
   }
 
   // -- devices ----------------------------------------------------------------

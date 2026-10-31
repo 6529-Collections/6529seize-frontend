@@ -22,6 +22,7 @@ const STATUS_KEYS: Partial<Record<E2eeConversation["status"], MessageKey>> = {
   invalid: "e2ee.list.status.invalid",
   left: "e2ee.list.status.left",
   removed: "e2ee.list.status.removed",
+  restored: "e2ee.list.status.restored",
 };
 
 function ConversationAvatar({
