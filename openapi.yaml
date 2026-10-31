@@ -32530,7 +32530,7 @@ components:
           description: 0x + 64 hex
         ciphersuite:
           type: integer
-          description: 1 (MLS_128_DHKEMX25519_AES128GCM_SHA256_Ed25519)
+          description: 79 (0x004F, MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519, a draft code point)
         issued_at:
           type: integer
           format: int64

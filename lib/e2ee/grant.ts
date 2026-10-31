@@ -21,8 +21,14 @@ import { isHex } from "./bytes";
 export const E2EE_SALT = keccak256(
   toBytes("6529 Network pre-genesis interim 1")
 );
-/** The MLS ciphersuite of every grant, EIP-712 or combined sign-in grant. */
-export const E2EE_CIPHERSUITE = 1;
+/**
+ * MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519 (0x004F, contract 3.6):
+ * X-Wing hybrid ML-KEM-768 + X25519. The only suite; it must equal the WASM
+ * module's `ciphersuite`, and it is also the suite a combined sign-in grant
+ * (NC8) names. A draft code point: if it changes, devices stored
+ * under the old value re-enroll (engine/enroll.ts).
+ */
+export const E2EE_CIPHERSUITE = 0x004f;
 const GRANT_LIFETIME_SECONDS = 15_552_000; // 180 days
 const GRANT_MAX_LIFETIME_SECONDS = 181 * 86_400;
 const CREDENTIAL_PREFIX = "6529-e2ee-v1";

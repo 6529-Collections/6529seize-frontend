@@ -9,7 +9,15 @@ data and orders group changes, but it cannot read messages, group names or the
 member list inside a chat, and it cannot add a device to a chat.
 
 Chats use the MLS protocol (RFC 9420) through a WebAssembly build of OpenMLS
-that runs in the browser or app.
+that runs in the browser or app. Keys are agreed with a hybrid post-quantum
+method: the MLS ciphersuite is 0x004F (X-Wing, which combines ML-KEM-768 with
+X25519). Recorded messages stay confidential as long as either part holds,
+so a future quantum computer that breaks X25519 alone cannot read them.
+Messages use AES-128-GCM. Device signatures use Ed25519, which is not
+post-quantum; they protect who sent a message, not its secrecy. 0x004F is a
+draft code point; if it changes before it is final, each device sets up
+encrypted messages again (one more wallet signature) and chats are started
+again.
 
 Existing direct messages are not changed. They stay where they are, are not
 moved into encrypted chats, and their header now says **Not end-to-end
@@ -95,10 +103,10 @@ the same people already chosen. Earlier messages are not copied.
 
 - Write in the composer and press Enter to send; Shift+Enter starts a new line.
 - Type `@` to mention a member.
-- Attachments depend on the server: where they are on (staging), attach up to
-  10 files of up to 25 MB each; images show inline and other files are
-  downloads. Where they are off (production at launch), there is no attach
-  control and chats are text only.
+- Attach up to 10 files of up to 25 MB each; they are encrypted on your
+  device like messages. Images show inline and other files are downloads.
+  The server can switch attachments off as a kill switch; while it is off
+  there is no attach control and chats are text only.
 - Open a message's menu to react, reply, or edit or delete your own messages.
   On someone else's message the menu also offers **Mute this chat** (on this
   device: the chat stops counting toward the Messages badge and shows a muted

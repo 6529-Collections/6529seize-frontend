@@ -19,9 +19,12 @@ use zeroize::Zeroizing;
 use crate::codec::{self, Word, ENTRY_BUCKETS, KIND_COMMIT, KIND_PROPOSAL, MESSAGE_BUCKETS};
 use crate::error::{Code, MlsError, Result};
 
-/// The single MLS ciphersuite in use (contract 3.6). Kept in one place so a
-/// later post-quantum hybrid suite is a one-line change plus migration.
-pub const CIPHERSUITE: Ciphersuite = Ciphersuite::MLS_128_DHKEMX25519_AES128GCM_SHA256_Ed25519;
+/// The single MLS ciphersuite in use (contract 3.6): 0x004F, X-Wing hybrid
+/// post-quantum key exchange (ML-KEM-768 + X25519), AES-128-GCM, SHA-256 and
+/// Ed25519 signatures. No other suite is offered or accepted. 0x004F is a
+/// draft code point (draft-ietf-mls-pq-ciphersuites): if it changes, every
+/// device re-enrolls and every group is re-created.
+pub const CIPHERSUITE: Ciphersuite = Ciphersuite::MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519;
 /// Private-use GroupContext extension carrying the 3.5 metadata JSON.
 pub const METADATA_EXTENSION: u16 = 0xF529;
 /// Exporter labels (contract 3.1).

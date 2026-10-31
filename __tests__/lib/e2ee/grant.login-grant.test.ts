@@ -9,7 +9,11 @@ import {
   renderCombinedGrantStatement,
 } from "@/lib/device-signing/grant-message";
 import type { ApiE2eeDevice } from "@/lib/e2ee/api-types";
-import { credentialIdentity, verifyGrant } from "@/lib/e2ee/grant";
+import {
+  credentialIdentity,
+  E2EE_CIPHERSUITE,
+  verifyGrant,
+} from "@/lib/e2ee/grant";
 
 // NC8: a device record whose grant is a combined sign-in grant.
 const account = privateKeyToAccount(
@@ -25,7 +29,7 @@ const atMs = (ISSUED_AT + 3600) * 1000;
 
 const buildMessage = ({
   mlsKey = MLS_KEY,
-  ciphersuite = 1,
+  ciphersuite = E2EE_CIPHERSUITE,
   expiresAt = EXPIRES_AT,
 }: {
   mlsKey?: string;
@@ -69,7 +73,7 @@ const recordFor = async (
   grant: {
     wallet: account.address.toLowerCase(),
     device_key: MLS_KEY,
-    ciphersuite: 1,
+    ciphersuite: E2EE_CIPHERSUITE,
     issued_at: ISSUED_AT,
     expires_at: EXPIRES_AT,
     origin: "staging.6529.io",
@@ -158,10 +162,11 @@ describe("verifyGrant: combined sign-in grants (NC8)", () => {
   });
 
   it("rejects a sign-in message for another ciphersuite", async () => {
-    const message = buildMessage({ ciphersuite: 79 });
+    // The classical suite 0x0001 the launch moved away from.
+    const message = buildMessage({ ciphersuite: 1 });
     const base = await recordFor(message);
     const result = await verifyGrant(
-      { ...base, grant: { ...base.grant, ciphersuite: 79 } },
+      { ...base, grant: { ...base.grant, ciphersuite: 1 } },
       { atMs }
     );
     expect(result).toMatchObject({ ok: false, reason: "ciphersuite" });

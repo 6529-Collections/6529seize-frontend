@@ -576,7 +576,9 @@ fn bucket_sizes_exact() {
     let data = codec::unb64(res["entry"]["data"].as_str().unwrap(), "d").unwrap();
     assert_eq!(data.len(), len);
     assert!(ENTRY_BUCKETS.contains(&len));
-    assert_eq!(len, 2048); // a 2-member self-update fits the smallest bucket
+    // A 2-member self-update carries an X-Wing leaf key (1216 bytes) and one
+    // X-Wing ciphertext (1120 bytes), so it fills the 8 KiB bucket.
+    assert_eq!(len, 8192);
     a.dev.discard_pending(&g).unwrap();
 
     for (body_len, bucket) in [
@@ -877,6 +879,14 @@ fn last_resort_key_package_reusable() {
         a.send(&mut ds, &g, "lr");
         assert_eq!(body_text(&b.sync(&ds, &g)[0]), "lr");
     }
+}
+
+#[test]
+fn uses_only_the_x_wing_ciphersuite() {
+    // 0x004F: MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519 (contract 3.6).
+    assert_eq!(u16::from(mls_wasm::device::CIPHERSUITE), 0x004F);
+    let info: Value = serde_json::from_str(&mls_wasm::module_info()).unwrap();
+    assert_eq!(info["ciphersuite"], 0x004F);
 }
 
 #[test]
