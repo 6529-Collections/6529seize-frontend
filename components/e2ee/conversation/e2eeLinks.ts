@@ -7,7 +7,7 @@
 const URL_PATTERN = /https?:\/\/[^\s<]+/gu;
 const TRAILING_PUNCTUATION = /[.,;:!?\]"'’”]$/u;
 
-export type E2eeLinkSegment =
+type E2eeLinkSegment =
   | { readonly kind: "text"; readonly start: number; readonly value: string }
   | {
       readonly kind: "link";
