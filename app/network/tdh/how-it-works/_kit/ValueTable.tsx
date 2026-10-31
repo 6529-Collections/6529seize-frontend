@@ -9,7 +9,7 @@ import type { ReactNode } from "react";
  * Built for How it works (counterexample I, the totals); a candidate for
  * the kit's lens parts.
  */
-export interface ValueRow {
+interface ValueRow {
   readonly key: string;
   readonly label: ReactNode;
   readonly values: readonly ReactNode[];

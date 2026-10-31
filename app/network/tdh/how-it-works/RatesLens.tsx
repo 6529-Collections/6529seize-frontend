@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { REGISTRY_V14 } from "@/components/explained/engine/tdh";
-import { useFact } from "@/components/explained/facts/FactsProvider";
+import {
+  useFact,
+  useFactSnapshot,
+} from "@/components/explained/facts/FactsProvider";
 import RateFigure from "@/components/explained/figures/RateFigure";
 import BreakIt, { breakItLabel } from "@/components/explained/lens/BreakIt";
 import { Seg } from "@/components/explained/lens/controls";
@@ -12,7 +15,7 @@ import StampLine from "@/components/explained/marks/StampLine";
 import { EX_LINK } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { ENGINE } from "@/lib/explained/engine";
-import type { FactId } from "@/lib/explained/facts";
+import { factFromSnapshot, type FactId } from "@/lib/explained/facts";
 import { formatCents, formatCount } from "@/lib/explained/format";
 import { rich } from "./_kit/rich";
 import { ht } from "./copy";
@@ -36,19 +39,42 @@ function useNumber(id: FactId): number | null {
  */
 export default function RatesLens({
   locale,
-  newest,
+  floorCard,
 }: {
   readonly locale: SupportedLocale;
-  /** The newest Meme's id: the card still minting. */
-  readonly newest: number;
+  /**
+   * The newest card still below the threshold, still minting: the Break
+   * it's card. Null when every card is at or above it; the Break it is then
+   * a what-if one copy below the threshold, counted with the floor's cap.
+   */
+  readonly floorCard: number | null;
 }) {
   const h = useNumber("engine.H");
   const cap = useNumber("rules.editionFloorCap");
   const threshold = useNumber("rules.editionThreshold");
   const mintedCard = useNumber(`meme.${EXAMPLE_CARD}.minted`);
   const mintedFirstGM = useNumber(`meme.${FIRST_GM}.minted`);
-  const mintedNewest = useNumber(`meme.${newest}.minted`);
-  const editionNewest = useNumber(`meme.${newest}.edition`);
+  const snapshot = useFactSnapshot();
+  const real =
+    floorCard === null
+      ? null
+      : {
+          minted: factFromSnapshot<number>(
+            snapshot,
+            `meme.${floorCard}.minted`
+          ),
+          edition: factFromSnapshot<number>(
+            snapshot,
+            `meme.${floorCard}.edition`
+          ),
+        };
+  const whatIf = real === null && threshold !== null && cap !== null;
+  const mintedNewest = whatIf
+    ? (threshold ?? 0) - 1
+    : (real?.minted?.value ?? null);
+  const editionNewest = whatIf
+    ? ENGINE.effectiveEdition((threshold ?? 0) - 1, cap ?? 0).edition
+    : (real?.edition?.value ?? null);
   const editions = useFact<number[][]>("memes.editions");
   const model = useBreakable<{ pick: Pick }>({ pick: "cap" }, (state) => ({
     ...state,
@@ -71,18 +97,21 @@ export default function RatesLens({
     );
   }
   const n = (value: number) => formatCount(locale, value);
+  const burned = REGISTRY_V14.firstgm_edition_adjustment;
+  // FirstGM's minted count as P26 §5.2 writes it: its edition before the
+  // adjustment (6529.io's API gives the edition after it).
   const minted: Record<Pick, number> = {
     cap,
     card: mintedCard,
-    firstgm: mintedFirstGM,
+    firstgm: mintedFirstGM - burned,
     newest: mintedNewest,
   };
   const pick = model.state.pick;
   const floorApplied = pick === "newest" && mintedNewest < threshold;
-  const E =
-    pick === "newest"
-      ? editionNewest
-      : ENGINE.effectiveEdition(minted[pick], minted[pick]).edition;
+  let E = editionNewest;
+  if (pick === "firstgm") E = mintedFirstGM;
+  else if (pick !== "newest")
+    E = ENGINE.effectiveEdition(minted[pick], minted[pick]).edition;
   const cents = ENGINE.rateCents(h, E);
   const rate = formatCents(locale, cents / 100);
   const area = n(Math.round((E * cents) / 100));
@@ -92,7 +121,14 @@ export default function RatesLens({
       card: EXAMPLE_CARD,
     }),
     firstgm: ht(locale, "explained.tdh.how.rates.nameFirstGM"),
-    newest: ht(locale, "explained.tdh.how.rates.nameNewest", { card: newest }),
+    newest:
+      floorCard === null
+        ? ht(locale, "explained.tdh.how.rates.nameWhatIf", {
+            minted: n(mintedNewest),
+          })
+        : ht(locale, "explained.tdh.how.rates.nameNewest", {
+            card: floorCard,
+          }),
   };
   const B = "tw-font-semibold tw-text-iron-50";
   const say = floorApplied ? (
@@ -124,7 +160,6 @@ export default function RatesLens({
     h,
     ENGINE.effectiveEdition(mintedCard, mintedCard).edition
   );
-  const burned = REGISTRY_V14.firstgm_edition_adjustment;
 
   return (
     <Lens
@@ -281,10 +316,17 @@ export default function RatesLens({
               refText: `${n(threshold)}, D89`,
             },
           ]}
-          tag={{
-            kind: "real",
-            text: ht(locale, "explained.tdh.how.rates.tag"),
-          }}
+          tag={
+            model.broken && whatIf
+              ? {
+                  kind: "whatIf",
+                  text: ht(locale, "explained.tdh.how.rates.tagWhatIf"),
+                }
+              : {
+                  kind: "real",
+                  text: ht(locale, "explained.tdh.how.rates.tag"),
+                }
+          }
         />
       }
     />

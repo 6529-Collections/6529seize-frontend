@@ -63,15 +63,24 @@ export default async function TdhHowItWorksPage({
   const editions = book.maybe<number[][]>("memes.editions");
   const ids = editions ? editions.value.map((row) => row[0] ?? 0) : [];
   const newest = ids.length > 0 ? Math.max(...ids) : null;
+  const threshold = book.maybe<number>("rules.editionThreshold");
+  // The newest card still below the threshold, if any: the floor's Break it.
+  const below =
+    editions && threshold
+      ? editions.value
+          .filter((row) => (row[2] ?? 0) < threshold.value)
+          .map((row) => row[0] ?? 0)
+      : [];
+  const floorCard = below.length > 0 ? Math.max(...below) : null;
+  if (floorCard !== null) {
+    book.maybe(`meme.${floorCard}.minted`);
+    book.maybe(`meme.${floorCard}.edition`);
+  }
   // The newest cards whose first mints the eligibility model places.
   const recent = [...ids].sort((a, b) => a - b).slice(-RECENT_CARDS);
   // The family facts the models read on the client.
   book.maybe(`meme.${EXAMPLE_CARD}.minted`);
   book.maybe(`meme.${FIRST_GM}.minted`);
-  if (newest !== null) {
-    book.maybe(`meme.${newest}.minted`);
-    book.maybe(`meme.${newest}.edition`);
-  }
   const recentCards = recent.filter(
     (id) => book.maybe<string>(`meme.${id}.firstMint`) !== null
   );
@@ -125,7 +134,12 @@ export default async function TdhHowItWorksPage({
         </div>
 
         <PartA book={book} locale={locale} recentCards={recentCards} />
-        <PartB book={book} locale={locale} newest={newest} />
+        <PartB
+          book={book}
+          locale={locale}
+          ready={newest !== null}
+          floorCard={floorCard}
+        />
 
         <Section id="part-c">
           <span id="step-9" />
@@ -264,11 +278,15 @@ function PartA({
 function PartB({
   book,
   locale,
-  newest,
+  ready,
+  floorCard,
 }: {
   readonly book: FactBook;
   readonly locale: SupportedLocale;
-  readonly newest: number | null;
+  /** Whether the Meme editions could be read. */
+  readonly ready: boolean;
+  /** The newest card still below the threshold, or null. */
+  readonly floorCard: number | null;
 }) {
   const v = (id: Parameters<FactBook["maybe"]>[0]) => (
     <FactValue fact={book.maybe(id)} locale={locale} />
@@ -299,13 +317,12 @@ function PartB({
         </Para>
       </Statement>
       <div className="tw-mt-12">
-        {newest === null ? (
+        {ready ? null : (
           <p className="tw-m-0 tw-rounded-xl tw-border tw-border-dashed tw-border-iron-700 tw-p-5 tw-text-[15px] tw-leading-6 tw-text-iron-400">
             {ht(locale, "explained.tdh.how.model.unavailable")}
           </p>
-        ) : (
-          <RatesLens locale={locale} newest={newest} />
         )}
+        {ready && <RatesLens locale={locale} floorCard={floorCard} />}
       </div>
       <EdRow
         no="8"

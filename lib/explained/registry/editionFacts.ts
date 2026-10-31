@@ -23,7 +23,12 @@ function card(inputs: FactInputs, id: number): EditionCard | undefined {
 
 /** E for one card (P26 §5.2): the floor from its claim below 300 minted. */
 function effectiveOf(inputs: FactInputs, entry: EditionCard): number {
-  const claim = inputs.editions?.claimLimits[String(entry.id)] ?? entry.minted;
+  // A recorded claim limit first; else 6529.io's own counted edition, which
+  // below 300 minted is the claim's floor; else the minted count.
+  const claim =
+    inputs.editions?.claimLimits[String(entry.id)] ??
+    entry.edition ??
+    entry.minted;
   return inputs.engine.effectiveEdition(entry.minted, claim).edition;
 }
 

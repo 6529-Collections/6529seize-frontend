@@ -50,6 +50,12 @@ export interface EditionCard {
   readonly minted: number;
   /** The first mint, UTC, when the source gives it. */
   readonly firstMint: string | null;
+  /**
+   * The edition 6529.io's own TDH counts (its `edition_size_floor`): the
+   * minted count, or the claim's floor below 300 minted. It stands in for a
+   * claim limit the facts layer has not recorded (P26 §5.2).
+   */
+  readonly edition?: number | null;
 }
 
 export interface EditionsInput {

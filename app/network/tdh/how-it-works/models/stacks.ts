@@ -39,7 +39,7 @@ export const STACK_ACTIONS: readonly Exclude<StackAction, "moveThenSell">[] = [
 /** The example: days each copy has been held at the cutoff. */
 export const STACKS = { oldDays: 300, newDays: 10, card: 1 } as const;
 
-export interface StackValues {
+interface StackValues {
   /** Days of A's copies, first in to last in. */
   readonly a: readonly number[];
   /** Days of B's copies, first in to last in. */

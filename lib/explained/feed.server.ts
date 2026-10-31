@@ -103,6 +103,7 @@ interface EditionsPage {
     readonly id?: unknown;
     readonly season?: unknown;
     readonly edition_size?: unknown;
+    readonly edition_size_floor?: unknown;
   }[];
 }
 
@@ -158,6 +159,29 @@ export async function loadFirstMints(): Promise<ReadonlyMap<number, string>> {
   return mints;
 }
 
+/**
+ * One card from 6529.io's `memes_extended_data`. `edition_size` counts the
+ * copies that exist now; `edition_size_floor` is the edition 6529.io's TDH
+ * counts (P26 §5.2's E): the minted count, burns included, or the claim's
+ * floor while fewer than 300 are minted. So from 300 on the floor field is
+ * the minted count, and below 300 the size is.
+ */
+function editionCard(
+  id: number,
+  season: number,
+  size: number,
+  floor: unknown
+): EditionCard {
+  if (typeof floor !== "number" || !Number.isInteger(floor) || floor <= 0) {
+    return { id, season, minted: size, firstMint: null };
+  }
+  const minted =
+    size < REGISTRY_V14.edition_floor_threshold && floor > size
+      ? size
+      : Math.max(size, floor);
+  return { id, season, minted, firstMint: null, edition: floor };
+}
+
 /** 6529.io's `memes_extended_data`, every page: each card's id, season and edition. */
 async function loadEditions(now: string): Promise<EditionsInput | null> {
   const cards: EditionCard[] = [];
@@ -180,12 +204,14 @@ async function loadEditions(now: string): Promise<EditionsInput | null> {
           typeof row.season === "number" &&
           typeof row.edition_size === "number"
         ) {
-          cards.push({
-            id: row.id,
-            season: row.season,
-            minted: row.edition_size,
-            firstMint: null,
-          });
+          cards.push(
+            editionCard(
+              row.id,
+              row.season,
+              row.edition_size,
+              row.edition_size_floor
+            )
+          );
         }
       }
       if (!body.next) {

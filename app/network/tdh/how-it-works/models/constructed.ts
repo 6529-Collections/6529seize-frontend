@@ -35,7 +35,7 @@ function txHash(block: number, tx: number): string {
 }
 
 /** A transfer's position, time, token, parties and amount. */
-export interface Move {
+interface Move {
   readonly block: number;
   readonly tx: number;
   readonly log: number;

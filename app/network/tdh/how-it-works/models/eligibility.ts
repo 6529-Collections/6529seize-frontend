@@ -42,7 +42,7 @@ export const CASE_I = {
   inserted: 1,
 } as const;
 
-export interface CaseIValues {
+interface CaseIValues {
   /** Whether the late card is eligible. */
   readonly lateCounts: boolean;
   readonly eligible: number;
