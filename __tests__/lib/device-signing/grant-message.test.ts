@@ -1,12 +1,18 @@
 import {
   formatGrantExpiryDate,
   getDeviceKeyFingerprint,
+  isAllowedGrantDomain,
   isExpectedDeviceGrantMessage,
   parseDeviceGrantMessage,
   renderDeviceGrantStatement,
   renderLegacyDeviceGrantStatement,
 } from "@/lib/device-signing/grant-message";
 import { buildVectorGrantMessage, VECTORS } from "./device-signing-test-utils";
+
+let mockDevLike = true;
+jest.mock("@/config/devAuth", () => ({
+  isDevLikeEnv: () => mockDevLike,
+}));
 
 const SIGNER = "0x1111111111111111111111111111111111111111";
 const SCOPES = ["post", "edit", "delete", "react"];
@@ -97,6 +103,18 @@ describe("device grant sign-in message check", () => {
     ).toBe(false);
   });
 
+  it.each(["https://ipfs.6529.io", "https://media.6529.io", "evil.example"])(
+    "never signs a challenge for %s",
+    (origin) => {
+      const message = buildVectorGrantMessage().replace(
+        "https://staging.6529.io wants you",
+        `${origin} wants you`
+      );
+      expect(parseDeviceGrantMessage(message)).not.toBeNull();
+      expect(check(message)).toBe(false);
+    }
+  );
+
   it("rejects ordinary challenges, extra resources and reordered scopes", () => {
     expect(check(buildVectorGrantMessage({ resources: [] }))).toBe(false);
     expect(
@@ -112,6 +130,48 @@ describe("device grant sign-in message check", () => {
         VECTORS.grantResource.replace("post.edit", "edit.post")
       )
     ).toBeNull();
+  });
+});
+
+describe("device grant domains", () => {
+  afterEach(() => {
+    mockDevLike = true;
+  });
+
+  it.each(["6529.io", "staging.6529.io", "STAGING.6529.io"])(
+    "accepts the app host %s in every build",
+    (domain) => {
+      mockDevLike = false;
+      expect(isAllowedGrantDomain(domain)).toBe(true);
+    }
+  );
+
+  it.each([
+    "ipfs.6529.io",
+    "media.6529.io",
+    "www.6529.io",
+    "x.staging.6529.io",
+    "6529.io:8443",
+    "evil.example",
+    "evil.example/6529.io",
+    "user@6529.io",
+    "6529.io.",
+  ])("rejects %s", (domain) => {
+    expect(isAllowedGrantDomain(domain)).toBe(false);
+  });
+
+  it.each(["localhost", "localhost:3001", "127.0.0.1:3000", "[::1]:3001", "dev.localhost"])(
+    "accepts the local host %s only outside production builds",
+    (domain) => {
+      expect(isAllowedGrantDomain(domain)).toBe(true);
+      mockDevLike = false;
+      expect(isAllowedGrantDomain(domain)).toBe(false);
+    }
+  );
+
+  it("rejects look-alike local hosts", () => {
+    expect(isAllowedGrantDomain("localhost.evil.example")).toBe(false);
+    expect(isAllowedGrantDomain("evillocalhost")).toBe(false);
   });
 });
 

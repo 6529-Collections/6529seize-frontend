@@ -8,8 +8,9 @@ import { computeInterimEventId } from "@/lib/device-signing/interim-event";
 import {
   verifyDropSignedEvents,
   toDisplayedDropContent,
+  type ContractWalletReader,
 } from "@/lib/device-signing/verify-signed-events";
-import { hashMessage } from "viem";
+import { hashMessage, type Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import {
   buildVectorGrantMessage,
@@ -17,6 +18,11 @@ import {
   installNodeWebCrypto,
   VECTORS,
 } from "./device-signing-test-utils";
+
+let mockDevLike = true;
+jest.mock("@/config/devAuth", () => ({
+  isDevLikeEnv: () => mockDevLike,
+}));
 
 const wallet = privateKeyToAccount(`0x${"42".repeat(32)}`);
 const otherWallet = privateKeyToAccount(`0x${"43".repeat(32)}`);
@@ -106,6 +112,9 @@ const signedEvents = (
 
 describe("drop signature verification in the browser", () => {
   beforeAll(installNodeWebCrypto);
+  beforeEach(() => {
+    mockDevLike = true;
+  });
 
   it("reports legacy drops as not signed", async () => {
     await expect(
@@ -334,18 +343,45 @@ describe("drop signature verification in the browser", () => {
 
     it.each([
       "6529.io",
-      "www.6529.io",
       "staging.6529.io",
       "Staging.6529.io",
-      // The site this check runs on (jsdom), for local builds and mirrors.
+      // Development and test runtimes also accept local hosts.
       "localhost",
+      "localhost:3001",
+      "127.0.0.1:3001",
     ])("counts grants signed on %s", async (domain) => {
       await expect(verdictFor(domain)).resolves.toMatchObject({
         status: "signed",
       });
     });
 
+    it.each(["6529.io", "staging.6529.io"])(
+      "counts grants signed on %s in a production build",
+      async (domain) => {
+        mockDevLike = false;
+        await expect(verdictFor(domain)).resolves.toMatchObject({
+          status: "signed",
+        });
+      }
+    );
+
+    it.each(["localhost", "localhost:3001", "127.0.0.1:3001", "app.localhost"])(
+      "never counts a grant signed on %s in a production build",
+      async (domain) => {
+        mockDevLike = false;
+        await expect(verdictFor(domain)).resolves.toEqual({
+          status: "invalid",
+        });
+      }
+    );
+
     it.each([
+      // 6529.io hosts other than the app serve user-published pages.
+      "ipfs.6529.io",
+      "media.6529.io",
+      "www.6529.io",
+      "evil.staging.6529.io",
+      "6529.io:443",
       "evil.example/x.6529.io",
       "evil.example/.6529.io",
       "evil.example?x=.6529.io",
@@ -469,51 +505,153 @@ describe("drop signature verification in the browser", () => {
     ).resolves.toEqual({ status: "invalid" });
   });
 
-  it("checks a contract-wallet signature on Ethereum when a client is available", async () => {
-    const grant = await createGrant(otherWallet);
-    const post = await createEvent(grant, {
-      kind: 1,
-      seq: 1_760_000_000_000,
-      body: { parts: [{ content: "gm" }] },
-    });
-    const data = signedEvents([post], [grant], post.id);
-    const valid = jest.fn().mockResolvedValue(true);
-    await expect(
-      verifyDropSignedEvents(data, { verifyContractSignature: valid })
-    ).resolves.toMatchObject({
-      status: "signed",
-      signature: { walletSignature: "verified" },
-    });
-    expect(valid).toHaveBeenCalledWith(
-      expect.objectContaining({ address: grant.wallet, chainId: 1 })
-    );
-    await expect(
-      verifyDropSignedEvents(data, {
-        verifyContractSignature: jest.fn().mockResolvedValue(false),
-      })
-    ).resolves.toEqual({ status: "invalid" });
-    await expect(
-      verifyDropSignedEvents(data, {
-        verifyContractSignature: jest.fn().mockRejectedValue(new Error("rpc")),
-      })
-    ).resolves.toMatchObject({
-      status: "signed",
-      signature: { walletSignature: "contract-wallet" },
-    });
-  });
+  describe("wallet signatures that do not recover to the wallet", () => {
+    const MAGIC_VALUE: Hex = "0x1626ba7e";
 
-  it("defers to 6529.io for a wallet signature that does not recover (contract wallet)", async () => {
-    const grant = await createGrant(otherWallet);
-    const post = await createEvent(grant, {
-      kind: 1,
-      seq: 1_760_000_000_000,
-      body: { parts: [{ content: "gm" }] },
+    const reader = ({
+      hasCode = jest.fn().mockResolvedValue(true),
+      isValidSignature = jest.fn().mockResolvedValue(MAGIC_VALUE),
+    }: Partial<Record<keyof ContractWalletReader, jest.Mock>> = {}) => ({
+      hasCode,
+      isValidSignature,
     });
-    await expect(
-      verifyDropSignedEvents(signedEvents([post], [grant], post.id))
-    ).resolves.toMatchObject({
-      status: "signed",
-      signature: { walletSignature: "contract-wallet" },
+
+    /** A post under a grant whose wallet signature is not the wallet's ECDSA one. */
+    const notRecovering = async (chainId = 1) => {
+      const grant = await createGrant(otherWallet);
+      const message = grant.message.replace(
+        "\nChain ID: 1\n",
+        `\nChain ID: ${chainId}\n`
+      );
+      const chainGrant: ApiDeviceGrantProof = {
+        ...grant,
+        message,
+        id: hashMessage(message),
+        chain_id: chainId,
+        wallet_signature: await otherWallet.signMessage({ message }),
+      };
+      const post = await createEvent(chainGrant, {
+        kind: 1,
+        seq: 1_760_000_000_000,
+        body: { parts: [{ content: "gm" }] },
+      });
+      return {
+        grant: chainGrant,
+        data: signedEvents([post], [chainGrant], post.id),
+      };
+    };
+
+    it("never counts an ordinary wallet's (EOA) bad signature", async () => {
+      const { grant, data } = await notRecovering();
+      const contractWallets = reader({
+        hasCode: jest.fn().mockResolvedValue(false),
+      });
+
+      await expect(
+        verifyDropSignedEvents(data, { contractWallets })
+      ).resolves.toEqual({ status: "invalid" });
+      expect(contractWallets.hasCode).toHaveBeenCalledWith(grant.wallet);
+      expect(contractWallets.isValidSignature).not.toHaveBeenCalled();
+    });
+
+    it("counts a contract wallet whose EIP-1271 check returns the magic value", async () => {
+      const { grant, data } = await notRecovering();
+      const contractWallets = reader();
+
+      await expect(
+        verifyDropSignedEvents(data, { contractWallets })
+      ).resolves.toMatchObject({
+        status: "signed",
+        signature: { walletSignature: "contract-verified" },
+      });
+      expect(contractWallets.isValidSignature).toHaveBeenCalledWith({
+        address: grant.wallet,
+        hash: hashMessage(grant.message),
+        signature: grant.wallet_signature,
+      });
+    });
+
+    it.each([
+      ["another value", "0xffffffff"],
+      ["a revert", null],
+    ])(
+      "never counts a contract wallet whose EIP-1271 check returns %s",
+      async (_name, result) => {
+        const { data } = await notRecovering();
+        await expect(
+          verifyDropSignedEvents(data, {
+            contractWallets: reader({
+              isValidSignature: jest.fn().mockResolvedValue(result),
+            }),
+          })
+        ).resolves.toEqual({ status: "invalid" });
+      }
+    );
+
+    it.each([
+      [
+        "the code read fails",
+        () => reader({ hasCode: jest.fn().mockRejectedValue(new Error("rpc")) }),
+      ],
+      [
+        "the EIP-1271 read fails",
+        () =>
+          reader({
+            isValidSignature: jest.fn().mockRejectedValue(new Error("rpc")),
+          }),
+      ],
+      ["there is no Ethereum client", () => undefined],
+    ])(
+      "reports couldn't verify, never signed, when %s",
+      async (_name, contractWallets) => {
+        const { data } = await notRecovering();
+        await expect(
+          verifyDropSignedEvents(data, { contractWallets: contractWallets() })
+        ).resolves.toEqual({ status: "unverifiable" });
+      }
+    );
+
+    it("reports couldn't verify for a grant on another chain, without reading Ethereum", async () => {
+      const { data } = await notRecovering(137);
+      const contractWallets = reader();
+
+      await expect(
+        verifyDropSignedEvents(data, { contractWallets })
+      ).resolves.toEqual({ status: "unverifiable" });
+      expect(contractWallets.hasCode).not.toHaveBeenCalled();
+      expect(contractWallets.isValidSignature).not.toHaveBeenCalled();
+    });
+
+    it("still reports changed content as invalid when the wallet check cannot run", async () => {
+      const { data } = await notRecovering();
+      await expect(
+        verifyDropSignedEvents(data, {
+          displayed: {
+            title: null,
+            parts: [{ content: "swapped", mediaCount: 0, attachmentCount: 0 }],
+          },
+        })
+      ).resolves.toEqual({ status: "invalid" });
+    });
+
+    it("needs no Ethereum read for a signature that recovers to the wallet", async () => {
+      const grant = await createGrant();
+      const post = await createEvent(grant, {
+        kind: 1,
+        seq: 1_760_000_000_000,
+        body: { parts: [{ content: "gm" }] },
+      });
+      const contractWallets = reader();
+
+      await expect(
+        verifyDropSignedEvents(signedEvents([post], [grant], post.id), {
+          contractWallets,
+        })
+      ).resolves.toMatchObject({
+        status: "signed",
+        signature: { walletSignature: "verified" },
+      });
+      expect(contractWallets.hasCode).not.toHaveBeenCalled();
     });
   });
 });
