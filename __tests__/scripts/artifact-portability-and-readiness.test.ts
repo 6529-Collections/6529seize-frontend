@@ -768,7 +768,7 @@ describe("artifact-portability.v1", () => {
       fixtures.push(fixture);
       const inventory = fixture.build();
 
-      expect(inventory.environment).toBe(environment);
+      expect(inventory).toMatchObject({ environment });
       expect(inventory.unclassified_runtime_keys).toEqual([]);
       for (const name of flags) {
         expect(inventory.baked_inputs).toEqual(
