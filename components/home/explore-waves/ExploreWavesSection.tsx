@@ -4,6 +4,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { WAVE_SCORE_DISCOVERY_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import type { ApiWaveVisibilityTier } from "@/generated/models/ApiWaveVisibilityTier";
+import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
@@ -15,7 +16,7 @@ import { fetchWavesV2Page } from "@/services/api/waves-v2-api";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import { ExploreWaveCard } from "./ExploreWaveCard";
 import { ExploreWaveCardSkeleton } from "./ExploreWaveCardSkeleton";
 import {
@@ -100,10 +101,14 @@ export function ExploreWavesSection({
   const shouldServerExcludeFollowed =
     effectiveExcludeFollowed && view !== ApiWavesV2ListType.Search;
 
+  const resultsRef = useRef<HTMLDivElement>(null);
+
   const {
     data: waves,
     isLoading,
     isError,
+    isFetching,
+    refetch,
   } = useQuery({
     queryKey: [
       "explore-waves",
@@ -141,11 +146,16 @@ export function ExploreWavesSection({
     ...(effectiveExcludeFollowed ? { gcTime: 0 } : {}),
   });
 
-  if (isError) {
+  // A failed refetch keeps the waves already loaded on screen; only a failure
+  // with nothing to show becomes an error state.
+  const hasLoadError = isError && (waves?.length ?? 0) === 0;
+
+  if (hasLoadError && !showEmptyState) {
     return null;
   }
 
-  const hasNoWaves = !isLoading && (!waves || waves.length === 0);
+  const hasNoWaves =
+    !isLoading && !hasLoadError && (!waves || waves.length === 0);
 
   if (hasNoWaves && !showEmptyState) {
     return null;
@@ -179,10 +189,72 @@ export function ExploreWavesSection({
       ? "tw-w-full tw-min-w-0 tw-text-left"
       : "tw-min-w-0 tw-text-left";
 
+  let content: ReactNode;
+  if (hasLoadError) {
+    content = (
+      <div
+        role="alert"
+        className="tw-flex tw-flex-col tw-items-center tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-8 tw-text-center"
+      >
+        <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-300">
+          {t(locale, "home.exploreWaves.error.message", {
+            label: effectiveStatusLabel,
+          })}
+        </p>
+        <Button
+          variant="secondary"
+          loading={isFetching}
+          onClick={() => {
+            resultsRef.current?.focus({ preventScroll: true });
+            void refetch();
+          }}
+        >
+          {t(locale, "home.exploreWaves.error.retry")}
+        </Button>
+      </div>
+    );
+  } else if (hasNoWaves) {
+    content = (
+      <div
+        role="status"
+        className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-8 tw-text-center tw-text-sm tw-font-medium tw-text-iron-400"
+      >
+        {emptyStateLabel ??
+          t(locale, "home.exploreWaves.status.empty", {
+            label: effectiveStatusLabel,
+          })}
+      </div>
+    );
+  } else {
+    content = (
+      <div className="tw-grid tw-grid-cols-1 tw-gap-x-3 tw-gap-y-4 sm:tw-grid-cols-2 sm:tw-gap-6 lg:tw-grid-cols-3">
+        {isLoading
+          ? Array.from({ length: limit }).map((_, index) => (
+              <div key={`skeleton-${index}`} className="tw-h-full tw-w-full">
+                <ExploreWaveCardSkeleton
+                  horizontalOnMobile={headingVariant === "default"}
+                  artworkOverlay={headingVariant === "page"}
+                />
+              </div>
+            ))
+          : waves?.map((wave) => (
+              <div key={wave.id} className="tw-h-full tw-w-full">
+                <ExploreWaveCard
+                  wave={wave}
+                  horizontalOnMobile={headingVariant === "default"}
+                  artworkOverlay={headingVariant === "page"}
+                  subtleHover
+                />
+              </div>
+            ))}
+      </div>
+    );
+  }
+
   return (
     <section
       data-home-section={
-        !isLoading && !hasNoWaves ? "Explore waves" : undefined
+        !isLoading && !hasNoWaves && !hasLoadError ? "Explore waves" : undefined
       }
       className={
         headingVariant === "page"
@@ -240,46 +312,15 @@ export function ExploreWavesSection({
           )}
           {headerControls}
         </div>
-        <p role="status" className="tw-sr-only">
-          {resultStatus}
-        </p>
-
-        {hasNoWaves ? (
-          <div
-            role="status"
-            className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-8 tw-text-center tw-text-sm tw-font-medium tw-text-iron-400"
-          >
-            {emptyStateLabel ??
-              t(locale, "home.exploreWaves.status.empty", {
-                label: effectiveStatusLabel,
-              })}
-          </div>
-        ) : (
-          <div className="tw-grid tw-grid-cols-1 tw-gap-x-3 tw-gap-y-4 sm:tw-grid-cols-2 sm:tw-gap-6 lg:tw-grid-cols-3">
-            {isLoading
-              ? Array.from({ length: limit }).map((_, index) => (
-                  <div
-                    key={`skeleton-${index}`}
-                    className="tw-h-full tw-w-full"
-                  >
-                    <ExploreWaveCardSkeleton
-                      horizontalOnMobile={headingVariant === "default"}
-                      artworkOverlay={headingVariant === "page"}
-                    />
-                  </div>
-                ))
-              : waves?.map((wave) => (
-                  <div key={wave.id} className="tw-h-full tw-w-full">
-                    <ExploreWaveCard
-                      wave={wave}
-                      horizontalOnMobile={headingVariant === "default"}
-                      artworkOverlay={headingVariant === "page"}
-                      subtleHover
-                    />
-                  </div>
-                ))}
-          </div>
+        {!hasLoadError && (
+          <p role="status" className="tw-sr-only">
+            {resultStatus}
+          </p>
         )}
+
+        <div ref={resultsRef} tabIndex={-1} className="focus:tw-outline-none">
+          {content}
+        </div>
       </div>
     </section>
   );
