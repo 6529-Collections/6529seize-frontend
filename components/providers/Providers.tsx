@@ -10,6 +10,7 @@ import { AppWalletsProvider } from "@/components/app-wallets/AppWalletsContext";
 import Auth from "@/components/auth/Auth";
 import AuthLaunchTimingReporter from "@/components/auth/AuthLaunchTimingReporter";
 import MarketActivityTracker from "@/components/collect/MarketActivityTracker";
+import SignedWriteDecisionHost from "@/components/device-signing/SignedWriteDecisionHost";
 import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
 import { NftPurchasingServerRenderProvider } from "@/components/common/NftPurchasingServerRender";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
@@ -30,6 +31,7 @@ import { TitleProvider } from "@/contexts/TitleContext";
 import { MyStreamProvider } from "@/contexts/wave/MyStreamContext";
 import { WaveEligibilityProvider } from "@/contexts/wave/WaveEligibilityContext";
 import { AppWebSocketProvider } from "@/services/websocket/AppWebSocketProvider";
+import { isSignedMessagesEnabled } from "@/lib/device-signing/feature";
 import { SeizeSettingsMode } from "@/types/enums";
 import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import { ViewProvider } from "../navigation/ViewContext";
@@ -104,6 +106,10 @@ export default function Providers({
                           {enableWalletAuthentication && (
                             <MarketActivityTracker />
                           )}
+                          {enableWalletAuthentication &&
+                            isSignedMessagesEnabled() && (
+                              <SignedWriteDecisionHost />
+                            )}
                           <WaveEligibilityProvider>
                             <NotificationsProvider>
                               <CookieConsentProvider

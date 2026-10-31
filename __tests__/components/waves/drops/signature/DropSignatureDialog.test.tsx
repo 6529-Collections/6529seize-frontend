@@ -1,8 +1,16 @@
+import { WithDropAuthorSignedMarker } from "@/components/waves/drops/signature/DropAuthorSignedMarker";
 import DropSignatureDialog from "@/components/waves/drops/signature/DropSignatureDialog";
+import userEvent from "@testing-library/user-event";
 import DropSignatureMenuItem from "@/components/waves/drops/signature/DropSignatureMenuItem";
 import type { DropSignatureVerdict } from "@/lib/device-signing/verify-signed-events";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import type { ComponentProps, ReactElement } from "react";
 
 let mockEnabled = true;
@@ -95,7 +103,7 @@ describe("drop signature details", () => {
       expect.any(AbortSignal)
     );
     expect(mockVerify).toHaveBeenCalledWith(signedEvents, {
-      verifyContractSignature: undefined,
+      contractWallets: undefined,
       displayed: undefined,
       expected: undefined,
     });
@@ -105,7 +113,7 @@ describe("drop signature details", () => {
     expect(screen.getByText("The signed version")).toBeVisible();
   });
 
-  it("explains contract wallets and content changed after signing", async () => {
+  it("names a contract wallet verified on Ethereum and content changed after signing", async () => {
     mockVerify.mockResolvedValue(
       signedVerdict({
         currentContentSigned: false,
@@ -116,7 +124,7 @@ describe("drop signature details", () => {
               { status: "signed" }
             >
           ).signature,
-          walletSignature: "contract-wallet",
+          walletSignature: "contract-verified",
         },
       })
     );
@@ -125,20 +133,67 @@ describe("drop signature details", () => {
     );
 
     expect(
-      await screen.findByText("Contract wallet: verified by 6529.io at sign-in")
+      await screen.findByText(
+        "Contract wallet: verified on Ethereum in your browser"
+      )
     ).toBeVisible();
-    // The browser did not check this wallet signature, so it must not claim to.
+    expect(screen.getByText("Signed by its author")).toBeVisible();
     expect(
       screen.getByText(
-        "Your browser checked the device signature itself. This contract wallet's sign-in signature was checked by 6529.io at sign-in, not by your browser."
-      )
-    ).toBeVisible();
-    expect(
-      screen.queryByText(
         "Your browser checked this signature itself, without relying on 6529.io."
       )
-    ).toBeNull();
+    ).toBeVisible();
     expect(screen.getByText("Changed without a signature")).toBeVisible();
+  });
+
+  it.each([
+    ["verified", "Verified in your browser"],
+    ["contract-verified", "Contract wallet: verified on Ethereum in your browser"],
+  ] as const)(
+    "labels the %s wallet signature check with its own text",
+    async (walletSignature, label) => {
+      const base = signedVerdict() as Extract<
+        DropSignatureVerdict,
+        { status: "signed" }
+      >;
+      mockVerify.mockResolvedValue({
+        ...base,
+        signature: { ...base.signature, walletSignature },
+      });
+      renderWithQueryClient(
+        <DropSignatureDialog dropId={DROP_ID} isOpen onClose={jest.fn()} />
+      );
+
+      expect(await screen.findByText(label)).toBeVisible();
+      const otherLabels = [
+        "Verified in your browser",
+        "Contract wallet: verified on Ethereum in your browser",
+      ].filter((text) => text !== label);
+      for (const text of otherLabels) {
+        expect(screen.queryByText(text)).toBeNull();
+      }
+    }
+  );
+
+  it("never shows the signed seal when the signature could not be verified", async () => {
+    mockVerify.mockResolvedValue({ status: "unverifiable" });
+    renderWithQueryClient(
+      <DropSignatureDialog dropId={DROP_ID} isOpen onClose={jest.fn()} />
+    );
+
+    expect(
+      await screen.findByText("Couldn't verify this signature right now")
+    ).toBeVisible();
+    expect(
+      screen.getByText(
+        "This signature couldn't be checked right now, so this post isn't shown as signed. Try again later."
+      )
+    ).toBeVisible();
+    expect(screen.queryByText("Signed by its author")).toBeNull();
+    expect(screen.queryByText("Wallet signature")).toBeNull();
+    expect(
+      screen.queryByText("The signature could not be verified")
+    ).toBeNull();
   });
 
   it.each([
@@ -298,6 +353,59 @@ describe("drop signature details", () => {
     );
     await waitFor(() =>
       expect(screen.queryByRole("button", { name: "Signature" })).toBeNull()
+    );
+  });
+
+  it("closes on Escape and keeps Tab inside the real dialog opened from a seal in a clickable card", async () => {
+    mockVerify.mockResolvedValue(signedVerdict());
+    const user = userEvent.setup();
+    const onCardKeyDown = jest.fn();
+    const onCardClick = jest.fn();
+    renderWithQueryClient(
+      <div
+        role="button"
+        tabIndex={0}
+        onKeyDown={onCardKeyDown}
+        onClick={onCardClick}
+      >
+        <WithDropAuthorSignedMarker
+          drop={
+            {
+              ...shownDrop,
+              id: DROP_ID,
+              is_author_signed: true,
+            } as never
+          }
+        >
+          <span>12:30</span>
+        </WithDropAuthorSignedMarker>
+      </div>
+    );
+
+    const seal = screen.getByRole("button", { name: "Signed by its author" });
+    seal.focus();
+    await user.keyboard("{Enter}");
+    const dialog = await screen.findByRole("dialog", { name: "Signature" });
+    await within(dialog).findByText("Signed by its author");
+
+    await user.tab();
+    expect(dialog).toContainElement(document.activeElement as HTMLElement);
+    await user.tab();
+    expect(dialog).toContainElement(document.activeElement as HTMLElement);
+
+    // Clicks and Enter inside the portalled dialog never reach the card.
+    const heading = within(dialog).getByRole("heading", { name: "Signature" });
+    await user.click(heading);
+    fireEvent.keyDown(heading, { key: "Enter" });
+    expect(onCardClick).not.toHaveBeenCalled();
+
+    await user.keyboard("{Escape}");
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    expect(onCardClick).not.toHaveBeenCalled();
+    expect(onCardKeyDown).not.toHaveBeenCalledWith(
+      expect.objectContaining({ key: "Enter" })
     );
   });
 });

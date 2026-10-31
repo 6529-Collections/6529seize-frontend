@@ -52,6 +52,7 @@ jest.mock("@/components/waves/drops/time/WaveDropTime", () => ({
 
 jest.mock("@heroicons/react/24/outline", () => ({
   EllipsisVerticalIcon: () => <div data-testid="ellipsis-icon" />,
+  ShieldCheckIcon: () => <svg data-testid="outlined-seal" />,
 }));
 
 jest.mock("@/contexts/CompactModeContext", () => ({
@@ -67,6 +68,13 @@ jest.mock("@/components/waves/drops/signature/DropSignatureDialog", () => ({
   __esModule: true,
   default: () => null,
 }));
+jest.mock(
+  "@/components/waves/drops/signature/DropGroupSignatureDialog",
+  () => ({
+    __esModule: true,
+    default: () => null,
+  })
+);
 
 describe("WaveDropHeader", () => {
   const createDrop = (
@@ -272,6 +280,32 @@ describe("WaveDropHeader", () => {
       );
       expect(seal()).not.toBeInTheDocument();
       expect(screen.getByTestId("wave-drop-time")).toBeInTheDocument();
+    });
+
+    it("stands for the whole group of posts under a chat header", () => {
+      const header = signedDrop();
+      const unsigned = {
+        ...signedDrop(),
+        id: "drop-2",
+        is_author_signed: false,
+      };
+      render(
+        <WaveDropHeader
+          drop={header}
+          signatureGroup={[header, unsigned, { ...header, id: "drop-3" }]}
+          isStorm={false}
+          currentPartIndex={0}
+          partsCount={1}
+          showWaveInfo={false}
+        />
+      );
+
+      expect(seal()).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", {
+          name: "2 of 3 posts signed by their author",
+        })
+      ).toBeInTheDocument();
     });
   });
 });

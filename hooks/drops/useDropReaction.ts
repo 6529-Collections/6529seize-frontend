@@ -22,6 +22,7 @@ import {
 } from "@/hooks/drops/optimisticReactionQueryCache";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { sendDropReaction } from "@/services/api/signed-drop-writes";
+import { isSignedWriteCancelled } from "@/lib/device-signing/signing-decision";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
 import type { InfiniteData } from "@tanstack/react-query";
 import { useDropReactionRecovery } from "@/hooks/drops/useDropReactionRecovery";
@@ -584,7 +585,9 @@ export function useDropReaction(
           isRemoving ? "Error removing reaction" : "Error adding reaction",
           locale
         );
-        if (owner.isVisible())
+        // A reaction cancelled at the signing prompt was never sent: roll
+        // back without reporting a failure.
+        if (owner.isVisible() && !isSignedWriteCancelled(error))
           setToast({ message: errorMessage, type: "error" });
         if (runRollbackForMutation(rollbackRef, mutation.mutationId)) {
           recordReactionRollbackApplied(mutation);

@@ -4,14 +4,28 @@ import type { StoredDeviceKey } from "@/lib/device-signing/device-key-storage";
 import { installNodeWebCrypto, VECTORS } from "./device-signing-test-utils";
 
 const mockRecords = new Map<string, StoredDeviceKey>();
+/** When set, record reads wait for (or fail with) this promise. */
+let mockReadGate: Promise<void> | null = null;
 jest.mock("@/lib/device-signing/device-key-storage", () => ({
   deviceKeyStorage: {
-    read: async (address: string) => mockRecords.get(address),
+    read: async (address: string) => {
+      if (mockReadGate) {
+        await mockReadGate;
+      }
+      return mockRecords.get(address);
+    },
     write: async (record: StoredDeviceKey) => {
       mockRecords.set(record.address, record);
     },
     readAll: async () => [...mockRecords.values()],
   },
+}));
+
+const mockReportFallback = jest.fn();
+jest.mock("@/utils/monitoring/deviceSigningMonitoring", () => ({
+  reportSignedWriteFallback: (...args: unknown[]) =>
+    mockReportFallback(...args),
+  recordDeviceSigningEvent: jest.fn(),
 }));
 
 let mockEnabled = true;
@@ -51,7 +65,20 @@ import {
 } from "@/lib/device-signing/device-key-store";
 import { verifyEventIdSignature } from "@/lib/device-signing/ed25519";
 import { computeInterimEventId } from "@/lib/device-signing/interim-event";
-import { getInvalidDeviceSignatureReason } from "@/lib/device-signing/sign-write";
+import { readDeviceGrantHint } from "@/lib/device-signing/grant-hint";
+import {
+  getInvalidDeviceSignatureReason,
+  prewarmDeviceSigning,
+} from "@/lib/device-signing/sign-write";
+import {
+  getCurrentSigningDecision,
+  registerSigningDecisionHost,
+  resolveSigningDecision,
+  subscribeToSigningDecisions,
+  SigningDecisionUnavailableError,
+  type PendingSigningDecision,
+  type SigningDecision,
+} from "@/lib/device-signing/signing-decision";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import {
   deleteDrop,
@@ -107,6 +134,79 @@ async function setUpGrant(
   return { record, grant };
 }
 
+/** A stand-in for SignedWriteDecisionHost that answers prompts in order. */
+const prompts: PendingSigningDecision[] = [];
+let answers: SigningDecision[] = [];
+let unregisterHost: (() => void) | null = null;
+let unsubscribeHost: (() => void) | null = null;
+
+function mountDecisionHost() {
+  unregisterHost = registerSigningDecisionHost("test-host");
+  unsubscribeHost = subscribeToSigningDecisions(() => {
+    const current = getCurrentSigningDecision();
+    if (!current || prompts.some((prompt) => prompt.id === current.id)) {
+      return;
+    }
+    prompts.push(current);
+    const answer = answers.shift();
+    if (answer) {
+      queueMicrotask(() => resolveSigningDecision(current.id, answer));
+    }
+  });
+}
+
+function unmountDecisionHost() {
+  unsubscribeHost?.();
+  unregisterHost?.();
+  unsubscribeHost = null;
+  unregisterHost = null;
+}
+
+/** Holds record reads until the returned release is called. */
+function holdRecordReads(): () => void {
+  let release!: () => void;
+  mockReadGate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  return () => {
+    mockReadGate = null;
+    release();
+  };
+}
+
+/** Makes record reads fail like a broken IndexedDB. */
+function failRecordReads() {
+  const failure = Promise.reject(new Error("UnknownError"));
+  failure.catch(() => undefined);
+  mockReadGate = failure;
+}
+
+/** Waits (with real timers) until the condition holds; WebCrypto is truly async. */
+const waitUntil = async (condition: () => boolean) => {
+  for (let attempt = 0; attempt < 200 && !condition(); attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+  expect(condition()).toBe(true);
+};
+
+/** Cancels prompts a test left open, so no write leaks into the next test. */
+function cancelOpenPrompts() {
+  for (
+    let current = getCurrentSigningDecision();
+    current;
+    current = getCurrentSigningDecision()
+  ) {
+    resolveSigningDecision(current.id, "cancel");
+  }
+}
+
+const storageReadSpy = () =>
+  jest.spyOn(
+    jest.requireMock("@/lib/device-signing/device-key-storage")
+      .deviceKeyStorage as { read: (address: string) => Promise<unknown> },
+    "read"
+  );
+
 const sentSignature = (
   mock: jest.Mock,
   call = 0
@@ -158,12 +258,23 @@ describe("device-signed drop writes", () => {
   beforeAll(installNodeWebCrypto);
   beforeEach(() => {
     mockRecords.clear();
+    mockReadGate = null;
+    globalThis.localStorage.clear();
     mockEnabled = true;
     mockWalletAddress = ADDRESS;
     mockWalletRole = OWN_PROFILE_ID;
     mockProfileId = OWN_PROFILE_ID;
     postMock.mockReset().mockResolvedValue({ id: "drop" });
     deleteMock.mockReset().mockResolvedValue(undefined);
+    mockReportFallback.mockReset();
+    prompts.length = 0;
+    answers = [];
+    mountDecisionHost();
+  });
+  afterEach(() => {
+    cancelOpenPrompts();
+    unmountDecisionHost();
+    jest.useRealTimers();
   });
 
   it("signs a new drop over exactly the body it sends", async () => {
@@ -335,51 +446,82 @@ describe("device-signed drop writes", () => {
     "grant wallet does not belong to the acting profile",
     "signature does not verify",
   ])(
-    "drops the local grant and resends once unsigned when rejected with: %s",
+    "drops the local grant and waits for the user's choice when rejected with: %s",
     async (reason) => {
       await setUpGrant();
+      answers = ["unsigned"];
       postMock
         .mockRejectedValueOnce(invalidSignatureError(reason))
         .mockResolvedValueOnce({ id: "drop" });
 
       await expect(postDrop(createBody())).resolves.toEqual({ id: "drop" });
+      expect(prompts).toEqual([
+        expect.objectContaining({ action: "post", reason: "grant-unusable" }),
+      ]);
       expect(postMock).toHaveBeenCalledTimes(2);
       expect(sentSignature(postMock, 0)).toBeDefined();
+      // Sent unsigned only because the user chose it.
       expect(sentSignature(postMock, 1)).toBeUndefined();
       expect(mockRecords.get(ADDRESS)?.grant).toBeNull();
+      expect(readDeviceGrantHint(ADDRESS)).toBeNull();
+      expect(mockReportFallback).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: "post",
+          reason: "grant-unusable",
+          phase: "send",
+        })
+      );
     }
   );
+
+  it("never resends a rejected write by itself while the user has not chosen", async () => {
+    await setUpGrant();
+    postMock.mockRejectedValueOnce(invalidSignatureError("grant expired"));
+
+    const pending = postDrop(createBody());
+    await waitUntil(() => prompts.length === 1);
+
+    expect(postMock).toHaveBeenCalledTimes(1);
+    resolveSigningDecision(prompts[0]!.id, "cancel");
+    await expect(pending).rejects.toMatchObject({ name: "AbortError" });
+    expect(postMock).toHaveBeenCalledTimes(1);
+  });
 
   it.each([
     "event or sequence number was already used",
     "claimed_time is more than 10 minutes from server time",
   ])(
-    "keeps the grant, resends once unsigned and re-signs the next write with a fresh sequence after: %s",
+    "keeps the grant and signs again with a fresh sequence on Try again after: %s",
     async (reason) => {
       await setUpGrant();
+      answers = ["retry"];
       postMock
         .mockRejectedValueOnce(invalidSignatureError(reason))
         .mockResolvedValue({ id: "drop" });
 
       await postDrop(createBody());
-      expect(sentSignature(postMock, 1)).toBeUndefined();
+      expect(prompts).toEqual([
+        expect.objectContaining({ action: "post", reason: "rejected" }),
+      ]);
       expect(mockRecords.get(ADDRESS)?.grant).not.toBeNull();
-
-      await postDrop(createBody());
       const first = sentSignature(postMock, 0)!;
-      const next = sentSignature(postMock, 2)!;
-      expect(next.seq).toBeGreaterThan(first.seq);
-      expect(next.signature).not.toBe(first.signature);
+      const retried = sentSignature(postMock, 1)!;
+      expect(retried.seq).toBeGreaterThan(first.seq);
+      expect(retried.signature).not.toBe(first.signature);
     }
   );
 
-  it("resends a legacy-string rejection unsigned as well", async () => {
+  it("asks before resending a legacy-string rejection unsigned", async () => {
     await setUpGrant();
+    answers = ["unsigned"];
     deleteMock
       .mockRejectedValueOnce("Invalid device signature: grant expired")
       .mockResolvedValueOnce(undefined);
 
     await deleteDrop({ dropId: DROP_ID, waveId: WAVE_ID });
+    expect(prompts).toEqual([
+      expect.objectContaining({ action: "delete", reason: "grant-unusable" }),
+    ]);
     expect(deleteMock).toHaveBeenCalledTimes(2);
     expect(deleteMock.mock.calls[1]![0]).toEqual({
       endpoint: `drops/${DROP_ID}`,
@@ -387,27 +529,215 @@ describe("device-signed drop writes", () => {
     expect(mockRecords.get(ADDRESS)?.grant).toBeNull();
   });
 
-  it("resends unsigned and keeps the grant when the server does not accept device signatures", async () => {
+  it("asks again instead of sending unsigned when the grant is gone on Try again", async () => {
     await setUpGrant();
-    const unsupported = Object.assign(
-      new Error('"device_signature" is not allowed'),
-      { status: 400 }
-    );
+    answers = ["retry", "unsigned"];
     postMock
-      .mockRejectedValueOnce(unsupported)
+      .mockRejectedValueOnce(invalidSignatureError("grant was revoked"))
       .mockResolvedValueOnce({ id: "drop" });
-    deleteMock
-      .mockRejectedValueOnce('"device_signature" is not allowed')
-      .mockResolvedValueOnce(undefined);
 
-    await expect(postDrop(createBody())).resolves.toEqual({ id: "drop" });
-    expect(sentSignature(postMock, 0)).toBeDefined();
+    await postDrop(createBody());
+    expect(prompts.map((prompt) => prompt.reason)).toEqual([
+      "grant-unusable",
+      "grant-unusable",
+    ]);
+    expect(postMock).toHaveBeenCalledTimes(2);
     expect(sentSignature(postMock, 1)).toBeUndefined();
-    await deleteDrop({ dropId: DROP_ID, waveId: WAVE_ID });
-    expect(deleteMock.mock.calls[1]![0]).toEqual({
-      endpoint: `drops/${DROP_ID}`,
+  });
+
+  describe("when the server does not accept device signatures", () => {
+    const unsupported = () =>
+      Object.assign(new Error('"device_signature" is not allowed'), {
+        status: 400,
+      });
+
+    it("never resends unsigned by itself while the user has not chosen", async () => {
+      await setUpGrant();
+      postMock.mockRejectedValueOnce(unsupported());
+
+      const pending = postDrop(createBody());
+      await waitUntil(() => prompts.length === 1);
+
+      expect(prompts).toEqual([
+        expect.objectContaining({ action: "post", reason: "unsupported" }),
+      ]);
+      expect(postMock).toHaveBeenCalledTimes(1);
+      expect(sentSignature(postMock, 0)).toBeDefined();
+      resolveSigningDecision(prompts[0]!.id, "cancel");
+      await expect(pending).rejects.toMatchObject({ name: "AbortError" });
+      expect(postMock).toHaveBeenCalledTimes(1);
+      expect(mockReportFallback).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: "post",
+          reason: "unsupported",
+          phase: "send",
+        })
+      );
     });
-    expect(mockRecords.get(ADDRESS)?.grant).not.toBeNull();
+
+    it("sends unsigned only on Send unsigned and keeps the grant", async () => {
+      await setUpGrant();
+      answers = ["unsigned", "unsigned"];
+      postMock
+        .mockRejectedValueOnce(unsupported())
+        .mockResolvedValueOnce({ id: "drop" });
+      deleteMock
+        .mockRejectedValueOnce('"device_signature" is not allowed')
+        .mockResolvedValueOnce(undefined);
+
+      await expect(postDrop(createBody())).resolves.toEqual({ id: "drop" });
+      expect(sentSignature(postMock, 0)).toBeDefined();
+      expect(sentSignature(postMock, 1)).toBeUndefined();
+      await deleteDrop({ dropId: DROP_ID, waveId: WAVE_ID });
+      expect(deleteMock.mock.calls[1]![0]).toEqual({
+        endpoint: `drops/${DROP_ID}`,
+      });
+      expect(prompts).toEqual([
+        expect.objectContaining({ action: "post", reason: "unsupported" }),
+        expect.objectContaining({ action: "delete", reason: "unsupported" }),
+      ]);
+      expect(mockRecords.get(ADDRESS)?.grant).not.toBeNull();
+    });
+
+    it("signs again with a fresh sequence on Try again", async () => {
+      await setUpGrant();
+      answers = ["retry"];
+      postMock
+        .mockRejectedValueOnce(unsupported())
+        .mockResolvedValueOnce({ id: "drop" });
+
+      await expect(postDrop(createBody())).resolves.toEqual({ id: "drop" });
+      const first = sentSignature(postMock, 0)!;
+      const retried = sentSignature(postMock, 1)!;
+      expect(retried.seq).toBeGreaterThan(first.seq);
+    });
+  });
+
+  describe("with a grant, a write that cannot be signed in time", () => {
+    it("waits up to 10 seconds, then asks instead of sending unsigned", async () => {
+      await setUpGrant();
+      jest.useFakeTimers();
+      const release = holdRecordReads();
+      const pending = postDrop(createBody());
+
+      await jest.advanceTimersByTimeAsync(9_000);
+      expect(postMock).not.toHaveBeenCalled();
+      expect(prompts).toEqual([]);
+
+      await jest.advanceTimersByTimeAsync(1_100);
+      expect(postMock).not.toHaveBeenCalled();
+      expect(prompts).toEqual([
+        expect.objectContaining({ action: "post", reason: "timeout" }),
+      ]);
+      expect(mockReportFallback).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: "post",
+          reason: "timeout",
+          phase: "storage",
+        })
+      );
+
+      resolveSigningDecision(prompts[0]!.id, "unsigned");
+      await expect(pending).resolves.toEqual({ id: "drop" });
+      expect(postMock).toHaveBeenCalledTimes(1);
+      expect(sentSignature(postMock)).toBeUndefined();
+      release();
+    });
+
+    it("signs on Try again once the key store answers", async () => {
+      await setUpGrant();
+      jest.useFakeTimers();
+      const release = holdRecordReads();
+      const pending = postDrop(createBody());
+      await jest.advanceTimersByTimeAsync(10_100);
+      expect(prompts).toHaveLength(1);
+      expect(postMock).not.toHaveBeenCalled();
+
+      jest.useRealTimers();
+      release();
+      resolveSigningDecision(prompts[0]!.id, "retry");
+      await expect(pending).resolves.toEqual({ id: "drop" });
+      expect(postMock).toHaveBeenCalledTimes(1);
+      expect(sentSignature(postMock)).toBeDefined();
+    });
+
+    it("asks with a storage reason when IndexedDB fails", async () => {
+      await setUpGrant();
+      answers = ["unsigned"];
+      failRecordReads();
+
+      await postDrop(createBody());
+      expect(prompts).toEqual([
+        expect.objectContaining({ reason: "storage-error" }),
+      ]);
+      expect(sentSignature(postMock)).toBeUndefined();
+    });
+
+    it("cancels a waiting write when its request is aborted", async () => {
+      await setUpGrant();
+      postMock.mockRejectedValueOnce(invalidSignatureError("grant expired"));
+      const controller = new AbortController();
+
+      const pending = sendDropReaction(
+        { dropId: DROP_ID, waveId: WAVE_ID, reaction: ":+1:" },
+        { signal: controller.signal }
+      );
+      await waitUntil(() => getCurrentSigningDecision() !== null);
+
+      controller.abort();
+      await expect(pending).rejects.toMatchObject({ name: "AbortError" });
+      expect(getCurrentSigningDecision()).toBeNull();
+      expect(postMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("fails visibly, without sending, when no prompt can be shown", async () => {
+      await setUpGrant();
+      unmountDecisionHost();
+      postMock.mockRejectedValueOnce(invalidSignatureError("grant expired"));
+
+      await expect(postDrop(createBody())).rejects.toBeInstanceOf(
+        SigningDecisionUnavailableError
+      );
+      expect(postMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("sends unsigned without asking when IndexedDB fails for a wallet that never had a grant", async () => {
+    failRecordReads();
+
+    await postDrop(createBody());
+    expect(prompts).toEqual([]);
+    expect(sentSignature(postMock)).toBeUndefined();
+    expect(mockReportFallback).not.toHaveBeenCalled();
+  });
+
+  describe("prewarmDeviceSigning", () => {
+    it("loads the key record and notes the grant, at most every 30 seconds", async () => {
+      const { grant } = await setUpGrant();
+      globalThis.localStorage.clear();
+      const readSpy = storageReadSpy();
+
+      await prewarmDeviceSigning();
+      expect(readSpy).toHaveBeenCalledTimes(1);
+      expect(readDeviceGrantHint(ADDRESS)).toEqual(
+        expect.objectContaining({ grantId: grant.id })
+      );
+
+      await prewarmDeviceSigning();
+      expect(readSpy).toHaveBeenCalledTimes(1);
+      readSpy.mockRestore();
+    });
+
+    it("does nothing while signed messages are off or signed out", async () => {
+      const readSpy = storageReadSpy();
+      mockEnabled = false;
+      await prewarmDeviceSigning();
+      mockEnabled = true;
+      mockWalletAddress = null;
+      await prewarmDeviceSigning();
+      expect(readSpy).not.toHaveBeenCalled();
+      readSpy.mockRestore();
+    });
   });
 
   it("keeps the grant and surfaces any other failure without resending", async () => {

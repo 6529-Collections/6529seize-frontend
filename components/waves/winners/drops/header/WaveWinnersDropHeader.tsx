@@ -1,6 +1,7 @@
 import ApprovalStatusBadge from "@/components/waves/approval/ApprovalStatusBadge";
 import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
+import { WithDropAuthorSignedMarker } from "@/components/waves/drops/signature/DropAuthorSignedMarker";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import React from "react";
@@ -46,7 +47,9 @@ export const WaveWinnersDropHeader: React.FC<WaveWinnersDropHeaderProps> = ({
           />
         )}
         <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></div>
-        <WaveDropTime timestamp={winner.drop.created_at} />
+        <WithDropAuthorSignedMarker drop={winner.drop}>
+          <WaveDropTime timestamp={winner.drop.created_at} />
+        </WithDropAuthorSignedMarker>
       </div>
 
       {showVotingInfo && (

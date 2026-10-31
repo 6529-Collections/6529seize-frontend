@@ -11,6 +11,7 @@ import type {
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { useDeviceSigningPrewarm } from "@/hooks/device-signing/useDeviceSigningPrewarm";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
@@ -162,6 +163,7 @@ export default function CreateDropLayout(props: CreateDropLayoutProps) {
     suppressInitialHeightAnimation = false,
   } = props;
   const { setToast } = useAuth();
+  const prewarmSigning = useDeviceSigningPrewarm();
   const { initialDraftJson } = useWaveDraftPersistence({
     waveId: wave.id,
     activeDrop,
@@ -206,7 +208,10 @@ export default function CreateDropLayout(props: CreateDropLayoutProps) {
     !props.hasCurrentDraft && (props.drop?.parts.length ?? 0) === 0;
 
   return (
-    <div className="tw-flex tw-min-h-0 tw-flex-grow tw-flex-col">
+    <div
+      className="tw-flex tw-min-h-0 tw-flex-grow tw-flex-col"
+      onFocusCapture={prewarmSigning}
+    >
       {showComposer && <SignedMessagesNotice composerEmpty={isComposerEmpty} />}
       <CreateDropReplyingWrapper
         activeDrop={activeDrop}

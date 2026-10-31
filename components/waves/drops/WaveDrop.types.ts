@@ -15,6 +15,11 @@ export interface WaveDropProps {
   readonly drop: ExtendedDrop;
   readonly previousDrop: ExtendedDrop | null;
   readonly nextDrop: ExtendedDrop | null;
+  /**
+   * For a chat header followed by grouped posts by the same author: every
+   * post the header stands for, header first. Its seal then covers them all.
+   */
+  readonly signatureGroup?: readonly ExtendedDrop[] | undefined;
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;
