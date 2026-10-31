@@ -1,6 +1,7 @@
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
 import { generateDeviceKeyPair } from "./ed25519";
 import { deviceKeyStorage, type StoredDeviceKey } from "./device-key-storage";
+import { writeDeviceGrantHint } from "./grant-hint";
 
 const DEVICE_GRANT_CHANGED_EVENT = "6529-device-grant-changed";
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -82,6 +83,25 @@ export async function readDeviceKey(
   return (await deviceKeyStorage.read(normalizeAddress(address))) ?? null;
 }
 
+/**
+ * Reads the record without the cross-tab lock (a read never changes it) and
+ * refreshes the grant note. Used to warm IndexedDB and the key before a
+ * write, so signing at send time is fast.
+ */
+export async function readUsableDeviceGrant(
+  address: string,
+  nowMs: number
+): Promise<{
+  readonly record: StoredDeviceKey;
+  readonly grant: ApiDeviceGrant;
+} | null> {
+  const normalized = normalizeAddress(address);
+  const record = await deviceKeyStorage.read(normalized);
+  const grant = record ? getUsableGrant(record, nowMs) : null;
+  writeDeviceGrantHint(normalized, grant, record?.ownProfileId);
+  return record && grant ? { record, grant } : null;
+}
+
 /** Returns this device's key for the wallet, creating it on first use. */
 export async function ensureDeviceKey(
   address: string
@@ -120,11 +140,13 @@ export async function saveDeviceGrant(
     if (!record || !grantsThisKey) {
       return false;
     }
+    const nextOwnProfileId = ownProfileId ?? record.ownProfileId ?? null;
     await deviceKeyStorage.write({
       ...record,
       grant,
-      ownProfileId: ownProfileId ?? record.ownProfileId ?? null,
+      ownProfileId: nextOwnProfileId,
     });
+    writeDeviceGrantHint(normalized, grant, nextOwnProfileId);
     return true;
   });
   if (saved) {
@@ -148,6 +170,7 @@ export async function forgetDeviceGrant(
       return false;
     }
     await deviceKeyStorage.write({ ...record, grant: null });
+    writeDeviceGrantHint(normalized, null, null);
     return true;
   });
   if (forgotten) {
@@ -161,7 +184,9 @@ export async function forgetDeviceGrant(
  */
 export async function allocateDeviceSeq(
   address: string,
-  nowMs: number
+  nowMs: number,
+  /** Called once the cross-tab lock is held, for timing diagnostics. */
+  onLocked?: () => void
 ): Promise<{
   readonly record: StoredDeviceKey;
   readonly grant: ApiDeviceGrant;
@@ -169,8 +194,10 @@ export async function allocateDeviceSeq(
 } | null> {
   const normalized = normalizeAddress(address);
   return await withDeviceKeyLock(normalized, async () => {
+    onLocked?.();
     const record = await deviceKeyStorage.read(normalized);
     const grant = record ? getUsableGrant(record, nowMs) : null;
+    writeDeviceGrantHint(normalized, grant, record?.ownProfileId);
     if (!record || !grant) {
       return null;
     }

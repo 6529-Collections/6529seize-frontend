@@ -8,6 +8,7 @@ import UserCICAndLevel, {
 import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
+import { WithDropAuthorSignedMarker } from "@/components/waves/drops/signature/DropAuthorSignedMarker";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
 import MemesLeaderboardDropRank from "./MemesLeaderboardDropRank";
@@ -72,7 +73,9 @@ const MemesLeaderboardDropArtistInfo = ({
 
         <span className="tw-inline-flex tw-items-center tw-gap-x-1.5 tw-whitespace-nowrap">
           <span className="tw-text-sm tw-text-iron-500">•</span>
-          <WaveDropTime timestamp={drop.created_at} />
+          <WithDropAuthorSignedMarker drop={drop}>
+            <WaveDropTime timestamp={drop.created_at} />
+          </WithDropAuthorSignedMarker>
         </span>
         <div className="tw-w-full">
           <MemeCollaboratorCredits collaborators={drop.collaborators} />
