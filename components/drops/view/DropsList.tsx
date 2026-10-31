@@ -17,6 +17,7 @@ import BoostedDropCardHome from "@/components/home/boosted/BoostedDropCardHome";
 import BoostedDropCompactChatItem from "@/components/home/boosted/BoostedDropCompactChatItem";
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 import HighlightDropWrapper from "./HighlightDropWrapper";
+import { getDropSignatureGroups } from "@/components/waves/drops/signature/dropSignatureGroups";
 import UnreadDivider from "./UnreadDivider";
 import {
   DEFAULT_BOOSTED_DROPS_DISPLAY_PREFERENCE,
@@ -111,6 +112,12 @@ const DropsList = memo(
 
       return drops;
     }, [drops, location]);
+
+    // Chat headers seal their whole group of consecutive posts.
+    const signatureGroups = useMemo(
+      () => getDropSignatureGroups(orderedDrops),
+      [orderedDrops]
+    );
 
     // Memoize the props passed to each MemoizedDrop to prevent unnecessary renders
     const getItemData = useMemo(() => {
@@ -307,6 +314,7 @@ const DropsList = memo(
               isVotingClosed={getItemData.isVotingClosed}
               isVotingControlsLocked={getItemData.isVotingControlsLocked}
               moderationPresentation={moderationPresentation}
+              signatureGroup={signatureGroups.get(drop.id)}
             />
           ) : (
             <MemoizedLightDrop drop={drop} />
@@ -356,6 +364,7 @@ const DropsList = memo(
       suspendLightDropHydration,
       virtualScrollRootMargin,
       moderationPresentation,
+      signatureGroups,
     ]);
 
     return (
