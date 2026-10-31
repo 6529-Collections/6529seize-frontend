@@ -11,10 +11,10 @@ browser sign for you for 180 days. Chat does not change: messages still
 appear at once, there is no wallet prompt per message, and anything that
 cannot be signed is sent unsigned exactly as before.
 
-Signed messages are currently staged behind the
-`NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES` flag (on for staging, off in
-production). With the flag off none of the controls below are shown and
-writes are unchanged.
+Signed messages are on for the website in production and staging. They
+are controlled by the `NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES` build flag; a
+build with the flag off shows none of the controls below and leaves writes
+unchanged.
 
 ## Location in the Site
 
@@ -142,8 +142,8 @@ signature itself; the seal only reflects what 6529.io reports.
 ## Limitations / Notes
 
 - Votes and ratings are not signed in this step.
-- Copy is available in en-US; other locales fall back to en-US while the
-  feature is staged.
+- Copy is available in en-US; other locales fall back to en-US until
+  translations are added.
 
 ## Localization exceptions
 
@@ -165,8 +165,8 @@ signature itself; the seal only reflects what 6529.io reports.
 | Route or component        | `components/device-signing/SignedMessagesNotice.tsx`, Preferences Devices tab (`/preferences?tab=devices`), `components/waves/drops/signature/DropSignatureDialog.tsx`, `components/waves/drops/signature/DropAuthorSignedMarker.tsx` |
 | Untranslated surface      | All copy in `i18n/messages/signed-messages.ts` (notice, Devices tab, signature dialog, signed-by-author seal)                                                           |
 | Current fallback behavior | Keys exist only in `en-US`; other locales fall back to `en-US`. Dates and lists already use `formatDate` and `formatList`                                              |
-| User impact               | Users of other locales see English copy for this staging-flagged feature                                                                                               |
-| Owner or follow-up        | Frontend localization maintainers; translate before the signed messages flag is enabled in production                                                                  |
+| User impact               | Users of other locales see English copy for this feature                                                                                                               |
+| Owner or follow-up        | Frontend localization maintainers; translations are outstanding now that the feature is on in production                                                               |
 | Expected remediation      | Add en-GB, fr-FR, es-ES and de-DE entries for the `signedMessages.*` and `preferences.tabs.devices` keys with fallback tests                                           |
 
 ## Related Pages
