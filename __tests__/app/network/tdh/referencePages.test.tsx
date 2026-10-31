@@ -116,8 +116,12 @@ describe("How sure", () => {
       })
     ).toBeInTheDocument();
     // The bundled manifest is about TDH v1.4, at the record's Lean commit.
-    expect(container.querySelector("[data-drift-by]")).toBeNull();
+    expect(container.querySelector('[data-drift-by="D136 D137"]')).toBeNull();
     expect(container.textContent).not.toMatch(/A newer model/);
+    // D148 takes the network-held accounts out of the cap claim 5a states.
+    expect(container.querySelector('[data-drift-by="D148"]')).toHaveTextContent(
+      "D148 exempts the network’s two accounts from the 19.99% cap"
+    );
     const board = container.querySelector("[data-scoreboard]");
     expect(
       [...(board?.querySelectorAll("dd > [data-fact]:first-child") ?? [])].map(

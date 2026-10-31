@@ -5,6 +5,7 @@ import {
   type ClaimRow,
 } from "@/components/explained/evidence/claims";
 import type { FactEntry } from "@/lib/explained/facts";
+import DriftNote from "@/components/explained/marks/DriftNote";
 import { Caption, EdSection } from "@/components/explained/reference/parts";
 import { FactScope } from "@/components/explained/facts/FactText";
 import { isMessageKey } from "@/components/explained/rich";
@@ -106,6 +107,15 @@ export default function ClaimsSection({ ctx }: { readonly ctx: SureContext }) {
             <ClaimTable rows={rows} locale={locale} />
           </FactScope>
           <Caption className="tw-mt-4">{byKind}</Caption>
+          {/* D148 exempts the network-held accounts from the cap claim 5a
+              states for every party; the Lean model predates it. */}
+          <div className="tw-mt-6">
+            <DriftNote by={["D148"]} locale={locale}>
+              {m("explained.tdh.sure.claims.capDrift", {
+                cap: p.v("validators.cap"),
+              })}
+            </DriftNote>
+          </div>
         </>
       }
     />
