@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { LegacyDmComposerGate } from "@/components/e2ee/legacy/LegacyDmBanner";
-import { findEncryptedEquivalent } from "@/components/e2ee/legacy/useEncryptedEquivalent";
+import { findEncryptedEquivalent } from "@/components/e2ee/legacy/encryptedEquivalent";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { E2eeConversation } from "@/lib/e2ee/types";
@@ -23,7 +23,6 @@ jest.mock("@/components/e2ee/useE2eeNow", () => ({
 }));
 jest.mock("@/hooks/e2ee/useE2ee", () => ({ useE2ee: () => mockE2ee }));
 jest.mock("@/components/e2ee/legacy/useEncryptedEquivalent", () => ({
-  ...jest.requireActual("@/components/e2ee/legacy/useEncryptedEquivalent"),
   useEncryptedEquivalent: () => mockEquivalent,
 }));
 jest.mock("@/components/e2ee/plaintext/PlaintextDmEncryptionNotice", () => ({

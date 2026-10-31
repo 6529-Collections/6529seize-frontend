@@ -20,7 +20,7 @@ import {
   isLegacyDmClosed,
 } from "./legacyDmRetention";
 
-export function toPrefillPeople(
+function toPrefillPeople(
   members: readonly CommunityMemberMinimal[]
 ): E2eePrefillPerson[] {
   return members.flatMap((member) =>

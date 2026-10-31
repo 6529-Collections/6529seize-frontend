@@ -3,10 +3,7 @@ import {
   clearE2eeComposePrefill,
   peekE2eeComposePrefill,
 } from "@/components/e2ee/e2eeComposePrefill";
-import {
-  EncryptedFirstDmActions,
-  toPrefillPeople,
-} from "@/components/e2ee/legacy/EncryptedFirstDmActions";
+import { EncryptedFirstDmActions } from "@/components/e2ee/legacy/EncryptedFirstDmActions";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 
@@ -117,7 +114,6 @@ describe("EncryptedFirstDmActions", () => {
     expect(
       screen.getByRole("button", { name: "Start encrypted chat" })
     ).toBeDisabled();
-    expect(toPrefillPeople([walletOnly])).toEqual([]);
   });
 
   it("hides the encrypted choice from proxies", () => {
