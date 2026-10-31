@@ -28,12 +28,14 @@ const POINTS: readonly {
   { key: "e2ee.enroll.point.noBackup", Icon: ArchiveBoxXMarkIcon },
 ];
 
+const ENROLL_REJECTED_KEY: MessageKey = "e2ee.enroll.rejected";
+
 const subscribeNever = () => () => undefined;
 
 const getEnrollErrorKey = (error: unknown): MessageKey =>
   isE2eeSignatureRejection(error) ||
   getE2eeErrorCode(error) === E2EE_SIGNATURE_REJECTED
-    ? "e2ee.enroll.rejected"
+    ? ENROLL_REJECTED_KEY
     : "e2ee.enroll.failed";
 
 interface E2eeEnrollmentCardProps {
@@ -67,16 +69,16 @@ export function E2eeEnrollmentCard({
   const visibleErrorKey =
     errorKey ??
     (!waiting && engineError === E2EE_SIGNATURE_REJECTED
-      ? "e2ee.enroll.rejected"
+      ? ENROLL_REJECTED_KEY
       : null);
 
-  const declined = visibleErrorKey === "e2ee.enroll.rejected";
+  const declined = visibleErrorKey === ENROLL_REJECTED_KEY;
   const failureKey = declined ? null : visibleErrorKey;
   let statusKey: MessageKey | null = null;
   if (waiting) {
     statusKey = "e2ee.enroll.waiting";
   } else if (declined) {
-    statusKey = "e2ee.enroll.rejected";
+    statusKey = ENROLL_REJECTED_KEY;
   }
 
   const enroll = async () => {
