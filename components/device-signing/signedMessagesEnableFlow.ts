@@ -285,18 +285,20 @@ export class SignedMessagesEnableFlow {
       void this.sign(step.source);
       return;
     }
-    if (step.stage === "connecting") {
-      this.syncConnection(step, current.isConnectOpen);
+    if (step.stage !== "connecting") {
+      return;
     }
-  }
-
-  private syncConnection(step: PendingStep, isConnectOpen: boolean) {
-    if (isConnectOpen) {
-      step.modalOpened = true;
-      this.closeTimer = clearTimer(this.closeTimer);
+    if (current.isConnectOpen) {
+      this.markConnectionOpen(step);
     } else if (step.modalOpened) {
       this.scheduleCloseCheck(step);
     }
+  }
+
+  /** The connection surface is showing: it has not been closed yet. */
+  private markConnectionOpen(step: PendingStep) {
+    step.modalOpened = true;
+    this.closeTimer = clearTimer(this.closeTimer);
   }
 
   private proceed(

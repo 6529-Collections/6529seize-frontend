@@ -346,6 +346,22 @@ describe("SignedMessagesNotice", () => {
       );
     });
 
+    it("never shows phone pairing to a browser wallet whose error mentions WebSocket", async () => {
+      // The grant names a "WebSocket ..." wallet error walletconnect-session.
+      const answer = waitForSignature();
+      renderNotice();
+      await turnOn();
+      await answer({ success: false, reason: "walletconnect-session" });
+
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Your wallet couldn't sign. Unlock it and try again."
+      );
+      expect(screen.queryByText(/on your phone/)).toBeNull();
+      expect(
+        screen.queryByRole("button", { name: "Reconnect wallet" })
+      ).toBeNull();
+    });
+
     it("reports the renew prompt as its own source", async () => {
       mockLocal = { ...mockLocal, grant: grant({ expires_at: NOW + 5 * DAY }) };
       renderNotice();

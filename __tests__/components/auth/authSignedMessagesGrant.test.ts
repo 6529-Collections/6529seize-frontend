@@ -232,6 +232,22 @@ describe("turn on signed messages", () => {
     });
   });
 
+  it("classifies a WebSocket relay error as a WalletConnect session problem", async () => {
+    // The enable flow shows phone pairing only for WalletConnect wallets.
+    const { request } = createSubject({
+      signatureResult: {
+        signature: null,
+        userRejected: false,
+        failureToastShown: true,
+        error: new Error("WebSocket connection closed abnormally"),
+      },
+    });
+    await expect(request({ silent: true })).resolves.toEqual({
+      success: false,
+      reason: "walletconnect-session",
+    });
+  });
+
   it("names a challenge request failure", async () => {
     const { request } = createSubject({
       getNonce: jest.fn(async () => {

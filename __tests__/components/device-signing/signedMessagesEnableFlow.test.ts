@@ -386,7 +386,7 @@ describe("turn on signed messages flow", () => {
     expect(harness.report).toHaveBeenCalledWith("notice", reason, "browser");
   });
 
-  it("never offers phone pairing to a browser wallet", async () => {
+  it("never offers phone pairing to a browser wallet, even for a relay-like error", async () => {
     const harness = createHarness();
     harness.flow.enable("notice");
     await flush();
