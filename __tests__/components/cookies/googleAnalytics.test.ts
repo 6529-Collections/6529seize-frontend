@@ -1,4 +1,7 @@
-import { scheduleGoogleAnalytics } from "@/components/cookies/googleAnalytics";
+import {
+  normalizeAnalyticsUrl,
+  scheduleGoogleAnalytics,
+} from "@/components/cookies/googleAnalytics";
 
 type AnalyticsWindow = typeof globalThis & {
   dataLayer?: unknown[];
@@ -367,6 +370,71 @@ describe("scheduleGoogleAnalytics", () => {
     const queued = JSON.stringify(queuedCommands());
     expect(queued).not.toContain(linkValue);
     expect(queued).not.toContain("other-value");
+  });
+
+  it("reports encrypted chat pages without the chat id", () => {
+    const chat = `0x${"c".repeat(64)}`;
+    window.history.replaceState(null, "", `/messages/encrypted/${chat}`);
+    jest
+      .spyOn(document, "referrer", "get")
+      .mockReturnValue(`https://6529.io/messages/encrypted/${chat}?q=1`);
+    cancel = scheduleGoogleAnalytics(hasConsent);
+    window.dispatchEvent(new Event("pointerdown"));
+    window.history.pushState(
+      null,
+      "",
+      `/messages/encrypted/0x${"d".repeat(64)}`
+    );
+    window.history.pushState(null, "", "/messages/encrypted/new?to=alice");
+    window.history.pushState(null, "", "/network");
+
+    const chatUrl = "http://localhost/messages/encrypted/[chat]";
+    expect(queuedCommands()).toEqual([
+      [
+        "config",
+        "G-71NLVV3KY3",
+        {
+          cookie_expires: 31_536_000,
+          send_page_view: false,
+          page_location: chatUrl,
+          page_referrer: "https://6529.io/messages/encrypted/[chat]",
+        },
+      ],
+      ["event", "page_view", { page_location: chatUrl, page_title: "Landing" }],
+      [
+        "set",
+        {
+          page_location: "http://localhost/messages/encrypted/new",
+          page_referrer: chatUrl,
+        },
+      ],
+      [
+        "set",
+        {
+          page_location: "http://localhost/network",
+          page_referrer: "http://localhost/messages/encrypted/new",
+        },
+      ],
+    ]);
+    expect(JSON.stringify(queuedCommands())).not.toMatch(/0x[cd]{8}|alice/u);
+  });
+
+  it("normalizes only encrypted chat paths", () => {
+    expect(
+      normalizeAnalyticsUrl(
+        `https://6529.io/messages/encrypted/0x${"e".repeat(64)}/info?x=1#top`
+      )
+    ).toBe("https://6529.io/messages/encrypted/[chat]");
+    expect(normalizeAnalyticsUrl("https://6529.io/messages/encrypted")).toBe(
+      "https://6529.io/messages/encrypted"
+    );
+    expect(
+      normalizeAnalyticsUrl("https://6529.io/messages/encrypted/devices")
+    ).toBe("https://6529.io/messages/encrypted/devices");
+    expect(normalizeAnalyticsUrl("https://6529.io/messages/abc?x=1")).toBe(
+      "https://6529.io/messages/abc?x=1"
+    );
+    expect(normalizeAnalyticsUrl("")).toBe("");
   });
 
   it("keeps page URLs and titles out of script source", () => {

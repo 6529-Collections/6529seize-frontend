@@ -7,6 +7,7 @@ import {
 } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import { safeAttachmentName } from "@/lib/e2ee/attachment-name";
 import type {
   E2eeConversation,
   E2eeMember,
@@ -108,6 +109,13 @@ export function findMember(
   }
   return members.find((member) => member.profileId === profileId) ?? null;
 }
+
+/** The sender's file name made safe to show and save as (no bidi, paths). */
+export const attachmentDisplayName = (
+  locale: SupportedLocale,
+  name: string
+): string =>
+  safeAttachmentName(name, t(locale, "e2ee.message.attachment.unnamed"));
 
 /** Display name for a profile in a chat ("You" for the viewer). */
 export function getMemberName(

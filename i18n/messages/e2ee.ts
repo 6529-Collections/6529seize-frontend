@@ -264,6 +264,8 @@ export const E2EE_MESSAGES = {
   "e2ee.message.attachment.loading": "Loading attachment…",
   "e2ee.message.attachment.failed": "Couldn’t load {name}",
   "e2ee.message.attachment.imageAlt": "Image: {name}",
+  "e2ee.message.attachment.unnamed": "file",
+  "e2ee.message.attachment.tooLarge": "Too large to preview",
 
   "e2ee.notice.created": "{actor} started this encrypted chat",
   "e2ee.notice.joined": "{targets} joined",
@@ -361,6 +363,17 @@ export const E2EE_MESSAGES = {
   "e2ee.report.title": "Report illegal or severe harm",
   "e2ee.report.description":
     "Only this message is shared, with proof that its sender sent it. It goes to 6529’s trust and safety team. Nothing else in the conversation is revealed.",
+  "e2ee.report.preview.heading": "What this report sends",
+  "e2ee.report.preview.message": "The message",
+  "e2ee.report.preview.edited": "The message as edited, the version you see",
+  "e2ee.report.preview.original": "The original, before it was edited",
+  "e2ee.report.preview.noText": "No text",
+  "e2ee.report.preview.attachments": "Attachments: {names}",
+  "e2ee.report.preview.unavailable":
+    "This message can’t be reported from this device.",
+  "e2ee.report.includeOriginal": "Also send the original message",
+  "e2ee.report.includeOriginalHint":
+    "This message was edited, and its attachments belong to the original. Include the original if it or its attachments showed the harm.",
   "e2ee.report.categoryLegend": "What does this message contain?",
   "e2ee.report.category.CHILD_SEXUAL_ABUSE_MATERIAL":
     "Child sexual abuse material",
@@ -465,10 +478,12 @@ export const E2EE_MESSAGES = {
 
   "e2ee.imported.badge": "Imported, not verified",
   "e2ee.imported.detail":
-    "Moved from an unencrypted DM by {name}. The author and time come from 6529’s server copy and can’t be verified.",
+    "Moved from an unencrypted DM. The author and time come from 6529’s server copy and can’t be verified.",
   "e2ee.imported.mediaMissing.one": "{count} image or file wasn’t moved.",
   "e2ee.imported.mediaMissing.other": "{count} images or files weren’t moved.",
   "e2ee.imported.reactions": "Reactions on the original: {reactions}",
+  "e2ee.imported.movedBy": "Moved by {name}",
+  "e2ee.imported.unknownAuthor": "Unknown",
 
   // Unencrypted DMs are deleted from 6529's servers on a fixed date (D146).
   "e2ee.legacy.banner.label": "Not end-to-end encrypted.",

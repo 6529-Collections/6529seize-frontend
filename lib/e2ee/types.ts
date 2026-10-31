@@ -100,6 +100,19 @@ export interface E2eeImported {
   reactions: [string, number][];
 }
 
+/** One signed payload a report would send, as its reader would see it. */
+export interface E2eeReportVersion {
+  text: string;
+  attachmentNames: string[];
+}
+
+export interface E2eeReportPreview {
+  /** The version shown now (the latest edit); null when it can't be sent. */
+  latest: E2eeReportVersion | null;
+  /** The original of an edited message; null when not edited or unavailable. */
+  original: E2eeReportVersion | null;
+}
+
 export interface E2eeConversation {
   g: string;
   kind: "dm" | "group";
@@ -191,7 +204,19 @@ export interface E2eeEngine {
   setAdmin(g: string, profileId: string, admin: boolean): Promise<void>;
   leave(g: string): Promise<void>;
   restart(g: string): Promise<string>; // new group, same people
-  report(g: string, id: string, reason: string, notes?: string): Promise<void>;
+  /**
+   * Reports the message as the reader sees it (its latest edit, signed);
+   * `includeOriginal` also sends the original of an edited message.
+   */
+  report(
+    g: string,
+    id: string,
+    reason: string,
+    notes?: string,
+    options?: { includeOriginal?: boolean }
+  ): Promise<void>;
+  /** Exactly what `report` would send, decoded from the signed payloads. */
+  reportPreview(g: string, id: string): E2eeReportPreview;
   search(query: string, g?: string): Promise<E2eeMessage[]>; // local only
   getAttachment(g: string, id: string, blob: string): Promise<Blob>;
 

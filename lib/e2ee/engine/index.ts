@@ -9,6 +9,7 @@ import type {
   E2eeEngineStatus,
   E2eeImported,
   E2eeMessage,
+  E2eeReportPreview,
 } from "../types";
 import {
   checkpoint,
@@ -51,6 +52,7 @@ import {
   TaskTracker,
   TimerSet,
 } from "./runtime";
+import { previewReport, sendReport } from "./report";
 import { queueImported, queueMessage, queueTargeted } from "./send";
 import { EngineStore, toE2eeMessage } from "./store";
 
@@ -699,28 +701,19 @@ class E2eeEngineImpl implements E2eeEngineExt {
     g: string,
     id: string,
     reason: string,
-    notes?: string
+    notes?: string,
+    options?: { includeOriginal?: boolean }
   ): Promise<void> {
     this.requireReady();
-    const message = this.ownMessage(g, id);
-    if (
-      message.body === null ||
-      message.sig === null ||
-      message.epoch === null ||
-      message.senderDeviceKey === null
-    ) {
-      throw new E2eeError("E2EE_REPORT_UNAVAILABLE");
-    }
-    await this.ctx.api.report({
-      group: g.toLowerCase(),
-      epoch: message.epoch,
-      body: message.body,
-      signature: message.sig,
-      sender_device_key: message.senderDeviceKey,
-      reporter_device_key: requireMls(this.ctx).deviceKey(),
+    await sendReport(this.ctx, g, this.ownMessage(g, id), {
       reason,
-      ...(notes ? { notes: notes.slice(0, 1000) } : {}),
+      notes,
+      includeOriginal: options?.includeOriginal,
     });
+  }
+
+  reportPreview(g: string, id: string): E2eeReportPreview {
+    return previewReport(this.ownMessage(g, id));
   }
 
   search(query: string, g?: string): Promise<E2eeMessage[]> {

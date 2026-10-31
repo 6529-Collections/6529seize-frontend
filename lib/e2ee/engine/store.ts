@@ -74,7 +74,7 @@ export function toE2eeMessage(stored: StoredMessage): E2eeMessage {
     pending: stored.pending,
   };
   if (stored.imported) {
-    message.imported = fromImportedPayload(stored.imported);
+    message.imported = fromImportedPayload(stored.imported, stored.serverTs);
   }
   if (stored.notice) {
     message.notice = {

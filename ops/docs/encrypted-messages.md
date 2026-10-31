@@ -122,6 +122,10 @@ the same people already chosen. Earlier messages are not copied.
 - Type `@` to mention a member.
 - Attach up to 10 files of up to 25 MB each; they are encrypted on your
   device like messages. Images show inline and other files are downloads.
+  An image larger than about 50 megapixels shows as a file to download
+  (**Too large to preview**) instead, and only a few images load at once.
+  File names are shown and saved without path separators, control or
+  right-to-left override characters, and at most 120 characters long.
   The server can switch attachments off as a kill switch; while it is off
   there is no attach control and chats are text only.
 - Open a message's menu to react, reply, or edit or delete your own messages.
@@ -258,7 +262,12 @@ doxxing (exposed personal data). The dialog requires one of these and explains
 what is shared:
 
 - Only the selected message is shared, with proof that its sender's device sent
-  it.
+  it. Under **What this report sends** the dialog shows that message's text
+  and attachment names.
+- For an edited message, the report sends the edited version you see. The
+  original goes along only if you tick **Also send the original message**.
+  An edit changes only the text, so attachments belong to the original and
+  are shared only with it.
 - It goes to 6529's trust and safety team, not to wave moderators or the
   moderation queue, and never to an AI service.
 - Nothing else in the conversation is revealed.
@@ -284,8 +293,11 @@ offers:
   exactly the same people exists on this device. **Move history** copies the
   messages you can see, oldest first, into that chat, with their images and
   files when they can be moved. Each copied message shows its original
-  author and time with the label **Imported, not verified**: 6529 held these
-  messages unencrypted, so the encrypted chat cannot prove who wrote them.
+  author and time with the label **Imported, not verified** and **Moved by**
+  the member who moved it: 6529 held these messages unencrypted, so the
+  encrypted chat cannot prove who wrote them. The author is named from the
+  chat's members; one who is not a member shows as **Unknown**, and the
+  original time is never shown as later than the move.
   Keep the page open while it runs; you can stop and continue later, and
   nothing is copied twice, even if another member also moves the history.
   Copied messages reach only the people and devices in the encrypted chat at

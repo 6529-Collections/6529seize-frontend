@@ -183,6 +183,18 @@ export function createFakeE2eeEngine(
     leave: jest.fn(async () => undefined),
     restart: jest.fn(async () => DM_G),
     report: jest.fn(async () => undefined),
+    reportPreview: jest.fn((g: string, id: string) => {
+      const message = (state.messages[g] ?? []).find((item) => item.id === id);
+      return {
+        latest: message
+          ? {
+              text: message.text,
+              attachmentNames: message.attachments.map((att) => att.name),
+            }
+          : null,
+        original: null,
+      };
+    }),
     search: jest.fn(async () => []),
     getAttachment: jest.fn(async () => new Blob(["x"], { type: "image/png" })),
     revokeDevice: jest.fn(async () => undefined),
