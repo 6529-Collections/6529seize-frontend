@@ -173,7 +173,7 @@ function Actions({
           {t(locale, "e2ee.backup.action.retry")}
         </Button>
       );
-    default:
+    case "loading":
       return null;
   }
 }

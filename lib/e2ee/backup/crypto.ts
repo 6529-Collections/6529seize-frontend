@@ -39,7 +39,7 @@ const LENGTH_BYTES = 4;
 const OVERHEAD = NONCE_BYTES + TAG_BYTES + LENGTH_BYTES;
 /** Largest segment JSON (bytes) that fits the largest bucket. */
 export const MAX_SEGMENT_BYTES = CHUNK_BUCKETS.at(-1)! - OVERHEAD;
-export const BACKUP_KEY_BYTES = 32;
+const BACKUP_KEY_BYTES = 32;
 
 const WRAP_INFO = "6529 e2ee backup wrap v1";
 const CHUNK_INFO = "6529 e2ee backup chunk v1";
@@ -158,20 +158,23 @@ export async function sealEnvelope(input: {
 
 function parseEnvelope(envelope: string): EnvelopeMethod {
   try {
-    const parsed = JSON.parse(
-      utf8Decode(base64ToBytes(envelope))
-    ) as Partial<EnvelopeJson> | null;
-    const method = parsed?.methods?.find(
-      (entry) => entry?.type === "recovery_code"
+    const parsed: unknown = JSON.parse(utf8Decode(base64ToBytes(envelope)));
+    const json = (parsed ?? {}) as { v?: unknown; methods?: unknown };
+    const methods: unknown[] = Array.isArray(json.methods) ? json.methods : [];
+    const method = methods.find(
+      (entry): entry is Partial<EnvelopeMethod> =>
+        typeof entry === "object" &&
+        entry !== null &&
+        (entry as { type?: unknown }).type === "recovery_code"
     );
     if (
-      parsed?.v !== 1 ||
+      json.v !== 1 ||
       typeof method?.nonce !== "string" ||
       typeof method.ct !== "string"
     ) {
       throw new Error("bad envelope");
     }
-    return method;
+    return { type: "recovery_code", nonce: method.nonce, ct: method.ct };
   } catch {
     throw new BackupError("E2EE_BACKUP_CORRUPT");
   }
@@ -214,7 +217,7 @@ export async function openEnvelope(input: {
 const chunkAad = (backupId: string) => `${CHUNK_AAD}|${backupId.toLowerCase()}`;
 
 /** Smallest bucket that holds `jsonBytes` bytes of segment JSON. */
-export function chunkBucketFor(jsonBytes: number): number | null {
+function chunkBucketFor(jsonBytes: number): number | null {
   return CHUNK_BUCKETS.find((bucket) => bucket >= jsonBytes + OVERHEAD) ?? null;
 }
 

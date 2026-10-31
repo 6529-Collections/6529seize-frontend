@@ -7,7 +7,7 @@ import type { E2eeBackupManager, E2eeBackupSnapshot } from "@/lib/e2ee/backup";
 const noopSubscribe = () => () => undefined;
 const getNullSnapshot = () => null;
 
-export interface UseE2eeBackupResult {
+interface UseE2eeBackupResult {
   readonly manager: E2eeBackupManager | null;
   readonly snapshot: E2eeBackupSnapshot | null;
 }

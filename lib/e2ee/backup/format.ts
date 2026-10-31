@@ -12,7 +12,7 @@ import { BackupError } from "./errors";
  * the device.
  */
 
-export interface BackupMember {
+interface BackupMember {
   deviceKey: string;
   profileId: string | null;
   leaf: number;
@@ -64,7 +64,7 @@ export function fingerprint(value: unknown): string {
   return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
 }
 
-export interface EncodedSegment {
+interface EncodedSegment {
   json: Uint8Array;
   groups: BackupGroupRecord[];
   messages: BackupMessageRecord[];

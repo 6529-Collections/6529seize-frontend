@@ -2,15 +2,14 @@
  * Backup error codes (the UI maps them to copy; the backup module never
  * returns user-visible strings).
  */
-export type BackupErrorCode =
+type BackupErrorCode =
   | "E2EE_BACKUP_CODE_FORMAT" // malformed or mistyped recovery code
   | "E2EE_BACKUP_WRONG_CODE" // well formed, but does not open this backup
   | "E2EE_BACKUP_NONE" // no backup to restore
   | "E2EE_BACKUP_CORRUPT" // undecryptable or malformed backup data
   | "E2EE_BACKUP_SEGMENT_TOO_LARGE"
   | "E2EE_BACKUP_NOT_READY" // encrypted messages are not set up here
-  | "E2EE_BACKUP_REPLACED" // turned off or replaced on another device
-  | "E2EE_BACKUP_BUSY"; // another backup operation is running
+  | "E2EE_BACKUP_REPLACED"; // turned off or replaced on another device
 
 export class BackupError extends Error {
   readonly code: BackupErrorCode;

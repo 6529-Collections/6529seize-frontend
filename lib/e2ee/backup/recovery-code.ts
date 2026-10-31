@@ -8,11 +8,11 @@ import { randomBytes, toArrayBuffer } from "../bytes";
  * says nothing about whether the code opens a particular backup.
  */
 
-export const RECOVERY_SECRET_BYTES = 32;
+const RECOVERY_SECRET_BYTES = 32;
 const ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
 const DATA_CHARS = 52; // ceil(256 / 5)
 const CHECK_CHARS = 4; // 20 bits of SHA-256(secret)
-export const RECOVERY_CODE_CHARS = DATA_CHARS + CHECK_CHARS;
+const RECOVERY_CODE_CHARS = DATA_CHARS + CHECK_CHARS;
 const GROUP = 4;
 
 /** Big-endian bit stream to base32; the final character is zero padded. */
@@ -72,7 +72,7 @@ async function checksum(secret: Uint8Array): Promise<string> {
 }
 
 /** Groups the 56 characters for display: `ABCD-EFGH-…`. */
-export function formatRecoveryCode(raw: string): string {
+function formatRecoveryCode(raw: string): string {
   const groups: string[] = [];
   for (let start = 0; start < raw.length; start += GROUP) {
     groups.push(raw.slice(start, start + GROUP));
@@ -89,7 +89,7 @@ export function normalizeRecoveryCode(input: string): string {
     .replaceAll(/[IL]/g, "1");
 }
 
-export interface RecoveryCode {
+interface RecoveryCode {
   /** Display form (14 groups of 4). */
   readonly code: string;
   /** The 32-byte secret the backup key is wrapped with. */

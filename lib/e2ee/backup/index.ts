@@ -3,14 +3,11 @@ import { type BackupEngine, E2eeBackupManager } from "./manager";
 import { getDefaultBackupStateStore } from "./state";
 
 export type {
-  BackupEngine,
-  E2eeBackupPhase,
   E2eeBackupSnapshot,
   PreparedBackup,
   RestoreResult,
 } from "./manager";
 export { E2eeBackupManager } from "./manager";
-export { backupErrorCode } from "./errors";
 
 const isBackupEngine = (engine: object): engine is BackupEngine =>
   "backupHistory" in engine && "importBackupHistory" in engine;

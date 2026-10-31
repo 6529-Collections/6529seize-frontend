@@ -88,12 +88,12 @@ export interface RestoreResult {
   readonly messages: number;
 }
 
-export interface BackupScheduler {
+interface BackupScheduler {
   setTimeout(callback: () => void, ms: number): unknown;
   clearTimeout(handle: unknown): void;
 }
 
-export interface E2eeBackupManagerDeps {
+interface E2eeBackupManagerDeps {
   readonly profileId: string;
   readonly engine: BackupEngine;
   readonly api: E2eeBackupApi;
@@ -255,7 +255,7 @@ export class E2eeBackupManager {
     }
     this.local = local;
     this.update({
-      phase: local ? "on" : active ? "available" : "off",
+      phase: phaseOf(local !== null, active !== null),
       backupCreatedAt: active?.created_at ?? null,
       backupUpdatedAt: active?.updated_at ?? null,
       usedBytes: status.used_bytes,
@@ -418,8 +418,8 @@ export class E2eeBackupManager {
         lastError: null,
         usedBytes: status.used_bytes,
         quotaBytes: status.quota_bytes,
-        backupCreatedAt: status.backup?.created_at ?? null,
-        backupUpdatedAt: status.backup?.updated_at ?? null,
+        backupCreatedAt: status.backup.created_at,
+        backupUpdatedAt: status.backup.updated_at,
       });
     } finally {
       this.update({ busy: false });
@@ -549,6 +549,13 @@ export class E2eeBackupManager {
       this.update({ lastError: null, uploading: false });
     });
   }
+}
+
+function phaseOf(connected: boolean, serverHasBackup: boolean): E2eeBackupPhase {
+  if (connected) {
+    return "on";
+  }
+  return serverHasBackup ? "available" : "off";
 }
 
 /** Records whose fingerprint differs from what this device uploaded. */

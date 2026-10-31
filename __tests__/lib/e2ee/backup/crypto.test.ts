@@ -13,6 +13,7 @@ import {
   sealEnvelope,
 } from "@/lib/e2ee/backup/crypto";
 import { BackupError } from "@/lib/e2ee/backup/errors";
+import { startE2eeBackup } from "@/lib/e2ee/backup";
 import {
   decodeSegment,
   mergeSegments,
@@ -32,6 +33,12 @@ const codeOf = async (promise: Promise<unknown>) => {
   }
   return null;
 };
+
+describe("startE2eeBackup", () => {
+  it("does nothing for an engine without backup support", () => {
+    expect(startE2eeBackup({}, "profile-1")).toBeNull();
+  });
+});
 
 describe("E2EE backup recovery codes", () => {
   it("generates 256-bit codes in 14 groups of 4 that parse back", async () => {
