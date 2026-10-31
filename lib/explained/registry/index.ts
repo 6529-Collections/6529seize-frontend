@@ -1,7 +1,9 @@
 import { EDITION_FACTS, MEME_FAMILY } from "./editionFacts";
 import { FEED_FACTS } from "./feedFacts";
+import { FORMAL_FACTS, MANIFEST_SECTION_FAMILY } from "./formalFacts";
 import { MANIFEST_FACTS } from "./manifestFacts";
 import { DECISION_FAMILY, RECORD_FACTS } from "./recordFacts";
+import { REFERENCE_FACTS } from "./referenceFacts";
 import { SITE_FACTS } from "./siteFacts";
 import type { FactFamily } from "./types";
 
@@ -16,16 +18,20 @@ export const FACT_REGISTRY = {
   ...RECORD_FACTS,
   ...SITE_FACTS,
   ...EDITION_FACTS,
+  ...FORMAL_FACTS,
+  ...REFERENCE_FACTS,
 } as const;
 
 export type StaticFactId = keyof typeof FACT_REGISTRY;
 
-/** Facts keyed by a card or a decision number. */
+/** Facts keyed by a card, a decision number or a manifest section. */
 export type FactFamilyId =
   | `meme.${number}.${"minted" | "edition" | "season" | "rate" | "firstMint"}`
-  | `decision.D${number}`;
+  | `decision.D${number}`
+  | `manifest.section.${string}`;
 
 export const FACT_FAMILIES: readonly FactFamily[] = [
   MEME_FAMILY,
   DECISION_FAMILY,
+  MANIFEST_SECTION_FAMILY,
 ];

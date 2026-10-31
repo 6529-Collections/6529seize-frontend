@@ -59,9 +59,6 @@ export const TDH_TH =
   "tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-px-4 tw-py-2.5 tw-text-xs tw-font-medium tw-text-iron-400";
 export const TDH_TD =
   "tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.05] tw-px-4 tw-py-3 tw-align-top tw-text-iron-200";
-/** A cell that stacks as a block on phones and becomes a bordered table cell from md. */
-export const TDH_TD_STACK_MD =
-  "tw-border-0 tw-p-0 tw-align-top tw-text-iron-200 md:tw-border-b md:tw-border-solid md:tw-border-white/[0.05] md:tw-px-4 md:tw-py-3";
 export const TDH_TD_NUM = `${TDH_TD} tw-text-right tw-tabular-nums`;
 export const TDH_TH_NUM = `${TDH_TH} tw-text-right`;
 
@@ -71,7 +68,6 @@ export function tdhNarrowCell(cell: string): string {
 }
 
 export const TDH_BUTTON = `tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3.5 tw-text-sm tw-font-medium tw-text-iron-100 tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 motion-reduce:tw-transition-none ${TDH_FOCUS_RING}`;
-export const TDH_SELECT = `tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-text-sm tw-font-normal tw-text-iron-100 ${TDH_FOCUS_RING}`;
 export const TDH_CHIP_BUTTON = `tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-px-3.5 tw-text-sm tw-font-medium tw-transition-colors motion-reduce:tw-transition-none ${TDH_FOCUS_RING}`;
 export const TDH_CHIP_ON =
   "tw-border-primary-400/70 tw-bg-primary-500/15 tw-text-iron-50";

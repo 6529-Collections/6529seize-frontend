@@ -7,16 +7,9 @@ import {
   PROGRAM_CONFORMANCE,
   VALIDATOR_DEVELOPMENT,
 } from "@/app/network/tdh/shared/tdhFacts";
-import {
-  VECTOR_COUNT,
-  VECTOR_SET,
-  VECTORS,
-} from "@/app/network/tdh/implementations/vectors";
 import explainer from "@/i18n/messages/networkTdhExplainer.en-US.json";
-import formal from "@/i18n/messages/networkTdhFormal.en-US.json";
 import how from "@/i18n/messages/networkTdhHow.en-US.json";
 import impl from "@/i18n/messages/networkTdhImpl.en-US.json";
-import spec from "@/i18n/messages/networkTdhSpec.en-US.json";
 import verify from "@/i18n/messages/networkTdhVerify.en-US.json";
 import consolidation from "@/i18n/messages/networkTdhConsolidation.en-US.json";
 import shared from "@/i18n/messages/networkTdhShared.en-US.json";
@@ -32,10 +25,8 @@ import historic from "@/i18n/messages/networkTdh.en-US.json";
  */
 const MESSAGES: Record<string, string> = {
   ...explainer,
-  ...formal,
   ...how,
   ...impl,
-  ...spec,
   ...verify,
   ...consolidation,
   ...shared,
@@ -49,17 +40,7 @@ function noMessageMatches(pattern: RegExp) {
 }
 
 describe("TDH page facts", () => {
-  it("lists P26's 89 conformance vectors, from one set of facts", () => {
-    expect(VECTOR_COUNT).toBe(89);
-    expect(VECTOR_COUNT).toBe(P26.vectorCount);
-    expect(VECTOR_SET.specCommit).toBe(P26.commit);
-    expect(VECTORS.at(-1)?.id.startsWith(String(P26.lastVector))).toBe(true);
-    expect(new Set(VECTORS.map((vector) => vector.id)).size).toBe(89);
-    for (const vector of VECTORS) {
-      expect(
-        (impl as Record<string, string>)[`network.tdh.impl.v.${vector.id}`]
-      ).toEqual(expect.any(String));
-    }
+  it("states the programs' conformance to P26's 89 vectors from one set of facts", () => {
     expect(PROGRAM_CONFORMANCE.python.vectors).toBe(P26.vectorCount);
     expect(PROGRAM_CONFORMANCE.rustReference.vectors).toBe(P26.vectorCount);
     // The validator's development branch (30bf8f9) follows P26's fifth
@@ -120,12 +101,6 @@ describe("TDH page facts", () => {
     noMessageMatches(
       /\bfindings became rules in P26\b|\ball settled in P26\b/i
     );
-    expect(spec["network.tdh.spec.evidence.difftest.body"]).toMatch(
-      /\bE8\b[^.]*vector format and the references/
-    );
-    expect(spec["network.tdh.spec.evidence.difftest.body"]).toMatch(
-      /still open \(E13\)/
-    );
     noMessageMatches(
       /\bthree rounds of (differential|generated)|in three rounds\b/
     );
@@ -168,14 +143,6 @@ describe("TDH page facts", () => {
       deferred: 9,
       audited: 85,
     });
-    for (const [key, text] of Object.entries(formal)) {
-      expect([key, text]).not.toEqual([
-        key,
-        expect.stringMatching(
-          /\b(61|68) (conformance )?vectors\b|\b1,190\b|\b16 (numeric )?checks\b/
-        ),
-      ]);
-    }
   });
 
   it("never promises per-holder detail or calls every difference explained", () => {
@@ -264,21 +231,11 @@ describe("TDH page facts", () => {
     const text = (key: string) => MESSAGES[key] ?? "";
     // D116 covers the validator code only (with the Rust core, program B
     // and the vectors), never P26, the references or the Lean model.
-    for (const key of [
-      "network.tdh.formal.lede",
-      "network.tdh.formal.check.body",
-      "network.tdh.spec.versionRow.shaNote",
-    ]) {
-      expect(text(key)).not.toMatch(/D116/);
-    }
     expect(text("network.tdh.impl.programs.intro")).toMatch(
       /The Rust core and program B are to be published with the validator code \(D116\); the references and the Lean model are in 6529’s private design repository/
     );
     // The Rust core against program B before signing is decided (D125,
     // P53 §4.5), not built in; nothing signs today.
-    expect(text("network.tdh.formal.layers.desc")).toMatch(
-      /As decided \(D125\), every validator is to check the Rust core against program B before it signs; program B is not in the validator yet, and nothing signs today/
-    );
     expect(text("network.tdh.explainer.glossary.programs.def")).toMatch(
       /is to be the validators’ built-in second check \(D125, decided, not yet built in\)/
     );
@@ -309,34 +266,14 @@ describe("TDH page facts", () => {
     const text = (key: string) => MESSAGES[key] ?? "";
     // Round 5 proves the one-log rule (canonicalTransfers_oneLog); only the
     // strict reader is checked by vectors alone.
-    for (const key of [
-      "network.tdh.formal.not.inputs.body",
-      "network.tdh.formal.not.inputs.bodyRaw",
-    ]) {
-      expect(text(key)).toMatch(/canonicalTransfers_oneLog/);
-      expect(text(key)).toMatch(/checked by vectors only/);
-    }
     noMessageMatches(/one-log rule and the strict reader; vectors and runs/);
     // Counterexamples are not claims.
-    expect(text("network.tdh.formal.summary.false")).toBe("counterexamples");
-    expect(text("network.tdh.formal.summary.falseBody")).toMatch(
-      /Counterexamples are not claims/
-    );
     // Not every first-rule value is a total; case G is an evaluation.
     noMessageMatches(/^Totals from the model/);
-    expect(text("network.tdh.formal.st.firstRule.scope")).toMatch(
-      /ZERO’s record in case B under the first rule; and identity \{A, B\}’s final in case C/
-    );
-    expect(text("network.tdh.formal.st.minted.scope")).toMatch(
-      /^False by evaluation/
-    );
     // The Lean model ran one real day; the 85 are the documented theorems,
     // the audit covers every theorem and definition.
     noMessageMatches(/on whole real days/);
     noMessageMatches(/audited at every build/);
-    expect(text("network.tdh.formal.summary.provedBodyWhole")).toMatch(
-      /every theorem and every definition of the model/
-    );
     noMessageMatches(/adds no content/);
     noMessageMatches(/^Found by the model, and/);
     // Overview: E8 was settled in the vector format; the floors were

@@ -2370,15 +2370,18 @@
     {
       "id": "network.tdh-specification",
       "kind": "route",
-      "title": "The TDH-v1 specification",
+      "title": "The TDH v1.4 specification",
       "aliases": [
-        "tdh-v1",
-        "what is tdh-v1",
+        "tdh v1.4",
+        "tdh-v1.4",
         "tdh specification",
         "p26",
-        "tdh v1.0",
         "tdh exact rule",
-        "tdh deviations"
+        "tdh deviations",
+        "tdh registry",
+        "half-cent trap",
+        "firstgm adjustment",
+        "tdh-v1.0"
       ],
       "keywords": [
         "tdh",
@@ -2388,63 +2391,86 @@
         "deviation",
         "parameters",
         "registry",
-        "decision"
+        "p26",
+        "conformance",
+        "roots"
       ],
       "facts": [
-        "TDH-v1 is the written rule behind TDH, specification P26 (a proposal), rule version tdh-v1.0, written so that independent programs produce identical results. It restates the formula 6529.io's backend uses today; where it departs from the backend, it removes a dependence on timing, database order, editable data or floating-point evaluation.",
-        "The specification page at /network/tdh/specification restates specification P26 at commit f840096 (its latest change, October 16, 2026) section by section. Beside its status pill a quiet line gives the version (P26 at f840096, October 16, 2026) and P26's SHA-256, shortened, with a copy button; under the lede it says what is not public yet (P26, its vectors and the Lean model) and what can be tested today (the registry hash, vector 28, and vectors 04, 06, 23 and 36, restated in full on the Implementations page), with a Version details disclosure (rule version, the P26 commit, P26's SHA-256 with a copy button, where the text is, its status); a map of how the sections fit together shows from tablet width up. Each section gives the rule in plain words, then the exact rule or P26's prose rules line for line, with its sources in one closed Sources disclosure; the long reference tables (symbols, decisions cited, changes since October 15) are collapsed, and the 19 deviations and 15 old-backend issues show their first three rows with a Show all button. Sections 4 and 5.2 give a one-sentence summary, the exact rule and a list of short details; section 7.1's transaction netting, which P26 writes in English, is a numbered list in body type with its names in mono. Its evidence links 6529.io's published identities and wallets files for 2026-10-11 on Arweave and its list of daily uploads. On phones, rule blocks whose lines are aligned in columns scroll sideways instead of wrapping. It covers the input rules (log positions, logs given raw or decoded but never both, transfers at one log position sharing contract, sender and recipient, logs marked removed, value types and how values are written in JSON, the claim limit's type, cycle dates, header order with the snapshot block, ZERO to ZERO is not a mint, sinks never consolidated, the balance bound), the parameter registry with its types, constraints and hash, the 19 deviations from the old backend with their decisions, the 15 old-backend issues, the decisions cited and the evidence, including five rounds of four-way differential tests: the first four rounds' findings were settled and pinned by new vectors, in P26 or, for E8 (an event's default use case), in the vector format and the references, and the fifth round's E13 is still open for the vector format.",
-        "P26 §7.1 contains transaction netting (decision D131): every transaction is netted, a sink like any other address, with sources and destinations paired in ascending address order. The property holds for the holding stacks only: §5's mint facts (each card's first mint and minted counts), the underflow test and §3.1's log-position checks read the transfers before netting, so a mint and its burn in one transaction can change eligibility and other holders' TDH (counterexamples H and I). The Lean model proves that the stacks depend only on each transaction's net movements, for two replays whose transactions correspond one to one and in order, when both have a result; adding or removing a whole transaction is not covered, and no theorem yet goes through the canonical sort. Section 4.2 adds that decoded transfers' timestamps may differ within a block, fall as the block number rises or differ from the header set, and that an implementation must not refuse an input for these.",
-        "On the replayed October 11, 2026 cycle no deviation changes a value: with D131's netting TDH-v1 equals 6529.io's live values on October 11, 14 and 15. Before D131, DEV-2 changed two identities by −241 TDH on October 11, each a token sent out and back in one transaction. Of P26's seven changes on October 15 and 16, two concern a real day's values: D131's netting, and the edition-floor correction of October 15, which fixed a text that would have lowered 285 identities by 111,494 TDH on October 11. Over those changes the conformance vectors grew from 35 to 89. Under section 6.3 the specification page says that 6529.io accepts four consolidated wallets since October 15, 2026, and that tdh-v1.0 allows three; whether it allows four is pending an owner decision.",
-        "TDH-v1 is a proposal, not yet adopted as a consensus rule. By the owner's decisions 6529.io computes it from the cutover, about October 23, 2026, and every validator computes it once validators run. tdh-v1.0 is not frozen until launch; from launch on a rule or parameter change is a new rule version.",
-        "A program conforms when it reproduces all 89 conformance vectors (01 to 88 and 12b, as of P26 f840096); when several rules make an input invalid, any of them may reject it. The Python reference and the Rust reference pass all 89, and so do the Rust core and program B on the validator's development branch (30bf8f9, October 16, 2026); the build the daily comparison runs is the one each day's file names, and the vectors added in the later rounds change no value of the October 11, 2026 cycle (P26 §13). The specification page gives how the registry hash is computed (P28's TAG, its tagged hash and abi.encode, §10; the page writes the tagged hash TH, which P28 writes H, so H stays the largest edition) and quotes the cycle root validators are to sign (P53 §4.2, §9); it defines TH and NETWORK_ID (P53 §3.1) where the cycle root uses them, and restates the leaves of the wallet and per-token trees the cycle root binds (P28 §4.3, §4.4, §4.12), cid being the hash of the identity's wallets; its For implementers box is a checklist (values and records, sections 4 to 8; the day's output, section 9; the registry hash, section 10; testable today, vector 28, and vectors 04, 06, 23 and 36 in full on the Implementations page), says that no vector checks a root, that the rest of P28 is not needed to conform and that the other vectors are to be published with the validator code (D116), and gives the SHA-256 of P28 and P53 at f840096. Section 5.2 restates the edition-floor read set from P53 §11.3: the adapter contract, its code hash, the storage slots read and the protocol rules. P26's text, its vectors, P28, P38, P52, P53 and the Lean model are in 6529's private design repository; the validator source, which carries a copy of the vectors, is to be published when the owner decides (D116).",
-        "Boost schedules 1.1 to 1.4 are 6529.io's versions of the boost, shown under Current boosts and Historic boosts; TDH-v1 (rule version tdh-v1.0) restates the live rule, schedule 1.4, exactly."
+        "The specification page at /network/tdh/specification restates P26, the TDH v1.4 deterministic specification, in full: every section in prose with the rule's own formulas and pseudocode, every registry number read from the registry the TDH v1.4 engine computes on.",
+        "Its 'This version' panel gives the rule version tdh-v1.4, the registry hash, the rule ID (each copyable), P26's vector count and commit, and two marks that are both true: P26 is proposed as the consensus rule, and live as 6529.io's rules (D137).",
+        "Until October 18, 2026 the rules were called tdh-v1.0, with three wallets; that name is retired (D136, D137). The page says whether the daily comparison's files still report the old name.",
+        "Section 5.2 gives a Meme's effective edition exactly, with FirstGM's -2,588 adjustment; section 8.1 the rate with the half-cent trap; section 9 the cycle and wallet roots an implementation should aim for; section 10 the registry, with D136's two consolidation fields; sections 11 and 12 P26's deviations from 6529.io's old code and its legacy issues by ID; section 13 conformance.",
+        "Old anchors still land: sections keep #s1 to #s13 and ids such as #s5-2, deviations #dev-2, issues #bug-15, and #evidence-replay the replayed day."
       ],
       "canonical_path": "/network/tdh/specification",
       "related_paths": [
-        "/network/tdh/how-it-works",
         "/network/tdh/implementations",
-        "/network/tdh/formal"
+        "/network/tdh/formal",
+        "/network/tdh/historic-boosts",
+        "/network/tdh/glossary"
       ],
       "tags": ["network", "tdh", "specification"],
-      "source_refs": ["ops/docs/network/feature-tdh-specification.md"]
+      "source_refs": [
+        "app/network/tdh/specification/page.tsx",
+        "ops/docs/network/feature-tdh-specification.md"
+      ]
     },
     {
       "id": "network.tdh-formal-model",
       "kind": "route",
-      "title": "TDH formal model",
+      "title": "How sure: what is proved about TDH",
       "aliases": [
         "tdh lean",
         "lean 4 tdh",
-        "formally verified tdh",
         "tdh proofs",
-        "tdh formal model"
+        "tdh formal model",
+        "how sure",
+        "is tdh proved",
+        "what is proved about tdh",
+        "tdh counterexamples"
       ],
-      "keywords": ["tdh", "lean", "formal", "proof", "model", "verification"],
+      "keywords": [
+        "tdh",
+        "lean",
+        "formal",
+        "proof",
+        "model",
+        "verification",
+        "manifest",
+        "limits",
+        "counterexample"
+      ],
       "facts": [
-        "The Formal model page at /network/tdh/formal explains the Lean 4 model of TDH-v1, a proposal not yet adopted: P26 stays the rule, and making the model the normative definition is proposed to the owner, not decided. Its statuses and its figures row come from the model's proof manifest, which the build writes and the public TDH feed serves as formal/manifest.json; the page reads the feed's manifest at run time and says when it shows the copy bundled with it instead. On October 16, 2026 the feed publishes round 5, the model at 6529chain 6b32f3f, on P26 as of f840096. The page reads every count from that manifest, each with its unit: theorems proved, counterexamples (split into those a kernel-checked theorem establishes and those the build evaluates, which trusts Lean's compiler) and the claims they show false (counterexamples are not claims: the first netting rule's five cases refute one claim, so at round 5 its 11 counterexamples show 7 claims false), limits not proved here, and the conformance vectors; the first three carry the colour of their outcome. The details give the arithmetic that relates the proved theorems to the 85 that PROOFS.md documents, and say that the build's audit covers every theorem and definition of the model, 1,068 theorems and 1,538 definitions at round 5; its filters count statements, each row says how many manifest entries it groups, and every manifest entry is listed by status under the tables. Statuses come in three colours, what holds, what was shown false and what is not covered, and each method has a shape of its own (proved a dot, by definition a square, checked at build a diamond, not proved here a hollow ring, false by evaluation a hollow rose ring); the filters count statements in those three groups and say so, while the figures at the top count manifest entries, and the theorems-proved figure adds the counterexample theorems up to the documented count and says how many restate a definition (only the totals' row adds anything beyond the definition: its range check). Every manifest entry is listed by status with its unit (theorems, counterexamples against claims, limits). A proved statement that bundles a limit PROOFS.md leaves open, such as netting invariance and the canonical sort, says so beside its pill. The runs (the vectors, the October 11, 2026 day and random inputs) are a small table. Times use the 24-hour clock. The model's source is in 6529's private design repository.",
-        "Since round 4 (6529chain f854661, October 15, 2026) the model computes from raw Ethereum logs: selecting and decoding logs are definitions inside the model. Vectors and runs check that those rules say what P26 says; no theorem does. Round 5 adds the one-log rule (transfers at one log position share contract, sender and recipient) and proves that the model's check of it is enough: in the canonical transfers, any two at one log position share them (canonicalTransfers_oneLog, oneLog_of_neighbours). It also makes the vector runner's JSON reader strict; that reader is test tooling outside the model, checked by vectors only. The model computes the October 11, 2026 cycle, the one real day it has run, from its 414,254 raw logs with every one of its 21,410 records equal to the Python reference's; that is evidence by evaluation, which trusts Lean's compiler, not a proof. It matched the Python reference on 6,000 random inputs, and in CI 6529chain's tdh-formal workflow runs 1,000 seeded random inputs through the Lean model, the Python reference and the Rust reference on every change.",
-        "Proved in Lean and audited to Lean's standard axioms, with each theorem's axioms listed in the manifest: netting invariance for the acquisition stacks only (any two transfer sequences whose transactions correspond one to one and in order, when both replays have a result; P26 applies it to the canonically ordered transfers; adding or removing a whole transaction and the canonical sort are not covered), that the replay succeeds on valid input, conservation of copies, identity records as sums of wallet records, order independence (with the header timestamps and the claims' mint limits taken as fixed when raw logs are included), that any two canonical transfers at one log position share its contract, sender and recipient (the one-log rule, since round 5), last in, first out (the model's compact stack is P26's list), and two validator rules (the 19.99% cap and exclusions for nodes that keep incident records). The totals hold by definition, with a range check.",
-        "Shown false with counterexamples: that steps inside a transaction never change TDH (a mint and its burn in one transaction change no stack but can make a token eligible, give a wallet a balance it did not have, and change another holder's final; counterexamples H and I), held copies equal minted minus burned (a transfer from 0x…dead creates a copy; false by evaluation, a #guard, not a kernel theorem), the network total equals the sum of wallet TDH (boosts are per record), and D131's first netting rule, which steps inside a transaction could change: program B found that flaw, and the model then refuted the rule in five kernel-checked cases, which together refute one claim. Case I came from a review of the model; the other counterexamples from the model itself. The model also caught flaws in two validator rules: the cap's loop needs up to six passes where P53 said five, and a party whose accounts keep no valid key could count more than 19.99% (P53 §6.2 and §6.3 now say six passes and make a valid key part of being live); and a node that recomputes exclusions from pruned evidence could end one 298 cycles early.",
-        "The proofs do not guarantee that the English text says the same thing, that the programs match the model on every input (they share the conformance vectors, the Lean model matched the Python reference on one real day, October 11, 2026, and on random inputs, and five rounds of differential tests ran across four programs, summarised in a table, but no proof links their code to the model; the Rust core and the Python reference check each other in the daily comparison, and the Rust core against program B before every validator signs is decided, D125, but not yet built in, and nothing signs today), that the inputs are right (a node's own reads are outside the model; checked reads, D118, are built and every daily run checks the snapshot block's headers and the edition floors, while the history before the snapshot is taken as reported; proofs A and B, D119, are being built), or that the rule is the right rule. By the model's PROOFS.md every question the model and its reviews raised is settled except one flagged for the owner: whether mints inside a transaction should count toward editions."
+        "How sure, at /network/tdh/formal, is page 4 of the TDH chapter of 6529 Explained: what is proved about the TDH rules, what is tested every day, and what is not. Every count on it is read from the Lean proof manifest that 6529's public TDH feed serves (formal/manifest.json).",
+        "While the served manifest is about the rules before D136 (four wallets) and D137 (the name TDH v1.4), a note under the title says so and gives the updated model's own counts; when the feed serves the manifest built for TDH v1.4, the note goes away.",
+        "Its sections: two questions (is the rule what it claims; did the day follow it), each a ladder with the line where today's evidence stops; one claim to the end (P26's netting sentence, refuted twice on October 15, 2026, then narrowed to what is proved); each claim with its limit beside it; what you still have to trust (the assumption ledger and every limit the manifest names); and every manifest entry with its Lean name, result, checker and file.",
+        "A proof moves trust; it does not remove it: Lean's kernel and compiler are assumed, the model is tested against P26's vectors, and no proof yet links the programs' code to the model."
       ],
       "canonical_path": "/network/tdh/formal",
       "related_paths": [
         "/network/tdh/specification",
-        "/network/tdh/implementations"
+        "/network/tdh/implementations",
+        "/network/tdh/verification"
       ],
       "tags": ["network", "tdh", "formal"],
-      "source_refs": ["ops/docs/network/feature-tdh-formal-model.md"]
+      "source_refs": [
+        "app/network/tdh/formal/page.tsx",
+        "ops/docs/network/feature-tdh-formal-model.md"
+      ]
     },
     {
       "id": "network.tdh-implementations",
       "kind": "route",
-      "title": "TDH implementations",
+      "title": "Implementations and vectors",
       "aliases": [
         "tdh rust core",
         "tdh python reference",
+        "program a",
         "program b",
         "tdh conformance vectors",
-        "who computes tdh"
+        "public vectors",
+        "who computes tdh",
+        "run a tdh vector"
       ],
       "keywords": [
         "tdh",
@@ -2453,22 +2479,25 @@
         "implementation",
         "vectors",
         "conformance",
-        "validator"
+        "validator",
+        "roots"
       ],
       "facts": [
-        "The Implementations page at /network/tdh/implementations compares the Rust core, the Rust reference, program B, the Python reference, the Lean model and 6529.io's current backend in one table: status, one conformance vectors figure each (P26's vectors at f840096, named once under the table), the build that ran on the latest published day for the two programs the daily comparison runs (or 'a build not yet described here' for an unknown one), and compute time only (reading Ethereum excluded; each day's page gives the daily run's whole time). Each program's name opens its details: how it was written, where it runs, its conformance and its time. Each program is marked by a neutral shape, never a status colour; a lineage graph, and one matrix of where each runs and which checks cover it (the vectors, a whole real day, generated inputs, the daily comparison, validator signing, 6529.io's published TDH and the proof programs; planned uses say so). None of their source is public yet: the validator code is to be published when the owner decides (D116), and the references and the Lean model are in 6529's private design repository. Program B is also the TDH code of proof program B; proof program A runs the validators' own code. The vector files cannot be downloaded yet.",
-        "A program conforms to TDH-v1 when it reproduces all 89 conformance vectors of P26 f840096. The Python reference (1,257 checks) and the Rust reference (1,253 checks) pass all 89, and so does the Lean model by its proof manifest, published with the feed (round 5, 6529chain 6b32f3f), whose check count the page reads from it. The Rust core (1,253 checks) and program B (1,184 checks by its own count) pass all 89 on the validator's development branch (30bf8f9, October 16, 2026). The daily comparison's builds are read from each day's file: the Implementations and Verification pages name the ones the latest day ran. Before it signs, a validator is to compute TDH with the Rust core and with program B and not sign if they disagree (decision D125, P53 §4.5), with the Python reference as an optional third check; none of that is built yet: program B does not yet run inside the validator, and nothing signs today. The Lean model uses Lean 4.35.0's core and standard library only. Program B was written from the specifications, the vectors and the design record, without opening any other implementation's code.",
-        "6529's daily comparison runs the Rust core and the Python reference beside 6529.io's backend (decision D132): days are compared from October 14, 2026; the scheduled job runs every day since October 16, and October 14 and 15 were first computed on October 15, then recomputed on October 16; each day's file says when it was written and by which builds; the Python reference computes from the Rust run's own input, so the two compare computation. Five rounds of differential tests on October 15 and 16 ran generated cycles through the Lean model, the Python reference, the Rust core and program B; a table gives each round's findings in one line and the 6529chain round that settled them with the findings' codes (each in P26, except E8, an event's default use case, settled in the vector format and the references), the generated inputs in its caption and each round's findings in full in a disclosure; E13, from the fifth round, is open for the vector format. In CI, 6529chain's tdh-formal workflow runs 1,000 seeded random inputs through the Lean model, the Python reference and the Rust reference on every change, and the validator's CI runs the Rust core against program B. The vector anatomy example is vector 36, with synthetic addresses, transactions and tokens; it shows each transfer's age before the snapshot time, that decoded timestamps need not rise with the block number (P26 §4.2), every expected value (H, the editions, the rates, the address with no record, the totals, and each record and token) and where its boost of 1.08 comes from. Under it, a closed disclosure restates three more vectors in full for checking by hand, generated from their files: 04 (last in, first out), 06 (the age carried inside an identity) and 23 (identity sums and their rounding), each with its transfers and their days before T, its consolidation registrations, its expected records and why. Check counts are each runner's own: 1,257 in the Python reference and 1,253 in the Rust reference for the same 89 vectors, and the Lean model's as its proof manifest gives it. The How they are checked list gives each check in two lines, with the detail under More. The vector browser's No result filter lists the 37 vectors whose whole expected output is no result.",
-        "After the cutover, 6529.io runs the Rust core itself, so comparing the two checks publication; the independent check of the published day is then the Python reference, in the daily comparison, and program B joins once it runs inside validators (D125, planned). The Rust core is ported from the Rust reference, with no rule changed."
+        "Implementations and vectors, at /network/tdh/implementations, lists the programs that compute TDH: program A (the Rust core) and program B, written separately and each also run inside a zero-knowledge prover (proof A is program A in SP1, proof B is program B in RISC Zero), and the Python reference, the Rust reference, the Lean model and 6529.io.",
+        "It labels P26's vector count and the count the served Lean manifest checks separately, offers the five public vectors as /network/tdh/public-vectors.json, and says how to run one: expected blocks are normative, legacy_expected is not, and a vector with expected_invalid passes when the input is rejected.",
+        "Its pin block gives everything that produced the latest day (rule version, registry hash, rule ID, cutoff block, contracts, cycle and wallet roots, input hash) with a Copy button; hit the two roots and your records equal the day's."
       ],
       "canonical_path": "/network/tdh/implementations",
       "related_paths": [
+        "/network/tdh/specification",
         "/network/tdh/verification",
-        "/network/tdh/formal",
-        "/network/tdh/specification"
+        "/network/tdh/formal"
       ],
       "tags": ["network", "tdh", "implementations"],
-      "source_refs": ["ops/docs/network/feature-tdh-implementations.md"]
+      "source_refs": [
+        "app/network/tdh/implementations/page.tsx",
+        "ops/docs/network/feature-tdh-implementations.md"
+      ]
     },
     {
       "id": "network.tdh-verification",
@@ -7851,19 +7880,28 @@
     {
       "id": "network.tdh-historic-boosts",
       "kind": "route",
-      "title": "TDH historic boosts",
+      "title": "Versions and boosts",
       "aliases": [
         "historic boosts",
         "tdh historic boosts",
+        "tdh versions",
+        "versions and boosts",
         "old tdh rules",
-        "tdh 1.3"
+        "tdh 1.3",
+        "tdh v1.4 since when"
       ],
-      "keywords": ["tdh", "historic", "boosts", "rules", "versions"],
+      "keywords": [
+        "tdh",
+        "historic",
+        "boosts",
+        "rules",
+        "versions",
+        "schedule"
+      ],
       "facts": [
-        "Historic TDH boost rules live at /network/tdh/historic-boosts.",
-        "The page compares the schedules in a table on desktop and in summary cards below that: the current schedule, 1.4 (from October 10, 2025; 1.80× for one full set on the latest cycle, 2.00× once seasons 1 to 20 all pay), linking to Current boosts, then the archived 1.3, 1.2 and 1.1. It draws the four boost figures the TDH pages quote on one scale (#boost-figures): a full set on the rules' latest cycle, a full set once seasons 1 to 20 pay, the highest on that cycle and the schedule's highest. A chart draws each schedule's full-set boost on the same scale, 1.00× to 2.24× (full-set boosts only), with the current value and its dashed reach labelled in words; the sources, linked at pinned commits, are in one Sources disclosure, which also says that the backend's rule file is unchanged on its main branch as of October 16, 2026 (c2f4020) and that live snapshots before November 14, 2024 could not be reproduced (DEV-3). Schedule 1.4 is checked by the replay of the October 11, 2026 cycle and on every day compared since October 14.",
-        "Use the row details control or Show rules button to expand the complete Category A, B, and C rules for a version.",
-        "Use the main TDH page for the current TDH explanation."
+        "Versions and boosts, at /network/tdh/historic-boosts (also /network/tdh/versions), lists every TDH version 6529.io has run: TDH v1.4 since October 10, 2025, and the archived 1.3, 1.2 and 1.1, each with its dates, full-set boost and the seasons that can pay.",
+        "The current row's values are computed by the TDH v1.4 engine on the real editions, with the date they were read: the full-set boost today and at most, and how many seasons pay today (#boost-figures).",
+        "It also names the specification's two rule versions: tdh-v1.4 (D137, with D136's four-wallet consolidation) and the retired tdh-v1.0."
       ],
       "canonical_path": "/network/tdh/historic-boosts",
       "related_paths": [
@@ -7875,8 +7913,43 @@
       "tags": ["network", "tdh", "historic"],
       "source_refs": [
         "app/network/tdh/historic-boosts/page.tsx",
-        "app/network/tdh/historic-boosts/page.client.tsx",
         "ops/docs/network/feature-tdh-historic-boosts.md"
+      ]
+    },
+    {
+      "id": "network.tdh-glossary",
+      "kind": "route",
+      "title": "TDH glossary",
+      "aliases": [
+        "tdh glossary",
+        "tdh terms",
+        "what does known cause mean",
+        "what is a cycle root",
+        "what is an identity in tdh",
+        "tdh definitions"
+      ],
+      "keywords": [
+        "tdh",
+        "glossary",
+        "terms",
+        "definitions",
+        "status",
+        "source"
+      ],
+      "facts": [
+        "The TDH glossary, at /network/tdh/glossary, gives every term the TDH chapter uses with one meaning, its status mark and its source: TDH, TDH v1.4, P26, editions, rates, boosts, seasons, cycles, identities, consolidation, netting, the registry, vectors, roots, the daily comparison, Known cause, programs A and B, the validator and more.",
+        "Each term's anchor is its name in the overview's old glossary (#tdh, #cycle, #firstgm); a term merged into another keeps its anchor in that row (#sink, #rust, #versions)."
+      ],
+      "canonical_path": "/network/tdh/glossary",
+      "related_paths": [
+        "/network/tdh",
+        "/network/tdh/specification",
+        "/network/definitions"
+      ],
+      "tags": ["network", "tdh", "glossary"],
+      "source_refs": [
+        "app/network/tdh/glossary/page.tsx",
+        "ops/docs/network/feature-tdh-glossary.md"
       ]
     },
     {

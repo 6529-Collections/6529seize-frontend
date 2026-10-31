@@ -2,7 +2,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import type { PillTone } from "@/lib/tdh/verification/states";
 
-export type TdhPill =
+type TdhPill =
   | "equal"
   | "explained"
   | "investigating"
@@ -34,7 +34,7 @@ export type TdhPill =
   | "underTest";
 
 /** A status tone: the pill's dot, and its row in the legend. */
-export type TdhTone = PillTone | "refuted";
+type TdhTone = PillTone | "refuted";
 
 /**
  * One palette for every TDH status (plan §4.5), so a colour means the same
@@ -78,7 +78,7 @@ const PILL_TONE: Record<TdhPill, TdhTone> = {
   underTest: "warning",
 };
 
-export const TDH_TONE_DOT: Record<TdhTone, string> = {
+const TDH_TONE_DOT: Record<TdhTone, string> = {
   success: "tw-bg-success",
   primary: "tw-bg-primary-400",
   warning: "tw-bg-amber-400",
@@ -168,42 +168,5 @@ export default function TdhStatusPill({
         {tdhPillLabel(locale, pill)}
       </span>
     </span>
-  );
-}
-
-const LEGEND_TONES = [
-  "success",
-  "primary",
-  "warning",
-  "refuted",
-  "neutral",
-] as const;
-
-/**
- * The status palette, in one line: what each dot colour means on every TDH
- * page. Pass the tones a section uses.
- */
-export function TdhStatusLegend({
-  locale,
-  tones = LEGEND_TONES,
-}: {
-  readonly locale: SupportedLocale;
-  readonly tones?: readonly TdhTone[];
-}) {
-  return (
-    <ul
-      className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-x-4 tw-gap-y-1.5 tw-p-0 tw-text-xs tw-leading-5 tw-text-iron-400"
-      aria-label={t(locale, "network.tdh.shared.legend.label")}
-    >
-      {tones.map((tone) => (
-        <li key={tone} className="tw-inline-flex tw-items-center tw-gap-1.5">
-          <span
-            aria-hidden="true"
-            className={`tw-size-2 tw-shrink-0 tw-rounded-full ${TDH_TONE_DOT[tone]}`}
-          />
-          {t(locale, `network.tdh.shared.legend.${tone}` as MessageKey)}
-        </li>
-      ))}
-    </ul>
   );
 }

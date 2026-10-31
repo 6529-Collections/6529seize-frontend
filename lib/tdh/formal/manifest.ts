@@ -17,12 +17,11 @@ import { z } from "zod";
  */
 
 const FORMAL_MANIFEST_FORMAT = "6529chain.tdh-lean-manifest.v1";
-export const FORMAL_STATUSES = [
+const FORMAL_STATUSES = [
   "proved",
   "counterexample",
   "deferred",
 ] as const;
-export type FormalStatus = (typeof FORMAL_STATUSES)[number];
 
 /** Lean's three standard axioms, the only ones the audit allows. */
 const STANDARD_AXIOMS = ["propext", "Classical.choice", "Quot.sound"] as const;
@@ -73,6 +72,12 @@ const vectorRun = z
   })
   .refine((run) => run.passed <= run.total, "more passed than total");
 
+/** A PROOFS.md section as the manifest titles it; its prose is not read. */
+const manifestSection = z.object({
+  id: z.string().min(1).max(20),
+  title: z.string().min(1).max(200),
+});
+
 const documentChange = z.object({
   path: z.string().max(200),
   lastChange: fullCommit,
@@ -109,6 +114,7 @@ export const formalManifestSchema = z
       }),
     }),
     vectors: z.array(vectorRun).max(32),
+    sections: nullish(z.array(manifestSection).max(64)),
     facts: z.object({ checks: count }),
     summary: z.object({
       proved: count,
@@ -162,7 +168,7 @@ export function parseFormalManifest(value: unknown) {
  * Lean name.
  */
 /** Whether a manifest entry is the one a name gives: its id, or its Lean name in full or short. */
-export function formalEntryMatches(
+function formalEntryMatches(
   entry: FormalTheorem,
   name: string
 ): boolean {

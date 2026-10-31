@@ -34,6 +34,8 @@ export interface BoostQuery {
 export interface EngineAdapter {
   /** Which engine computed the values, for the facts' source lines. */
   readonly name: string;
+  /** The rule registry it computes on (P26 §10), for the values pages print. */
+  readonly registry: Registry;
   /** RATE(H, E) in cents (P26 §8.1); `minimumOne` for Gradients. */
   rateCents(numerator: number, edition: number, minimumOne?: boolean): number;
   /** E = max(minted + adj, floor) (P26 §5.2). */
@@ -56,6 +58,7 @@ const REGISTRY: Registry = REGISTRY_V14;
 
 export const ENGINE: EngineAdapter = {
   name: `the ${REGISTRY.rule_version} engine (components/explained/engine/tdh.ts)`,
+  registry: REGISTRY,
   rateCents(numerator, edition, minimumOne = false) {
     const cents = rateCents(
       numerator,

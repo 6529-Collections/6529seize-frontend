@@ -116,6 +116,7 @@ const DEFAULT_ROUTES = [
   "/network/tdh/consolidation",
   "/network/tdh/consolidation/design",
   "/network/tdh/historic-boosts",
+  "/network/tdh/glossary",
   ...NOT_FOUND_ROUTES,
 ];
 

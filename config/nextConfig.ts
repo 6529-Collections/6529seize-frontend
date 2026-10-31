@@ -105,6 +105,13 @@ export function sharedConfig(
           destination: "/safe-collecting",
           permanent: true,
         },
+        // Versions and boosts, 6529 Explained's TDH shelf page, keeps the
+        // Historic boosts route; its own name leads there too.
+        {
+          source: "/network/tdh/versions",
+          destination: "/network/tdh/historic-boosts",
+          permanent: true,
+        },
       ]);
     },
     logging: {

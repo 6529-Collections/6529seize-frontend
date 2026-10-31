@@ -5,16 +5,24 @@
  * at `origin/main` with `git show` after a fetch. Run it at ship time (the
  * fact gate, PLAYBOOK.md §8), then run the drift check:
  *
- *   node scripts/explained/sync-record.mjs --chain <path to 6529chain> [--no-fetch] [--check]
+ *   node scripts/explained/sync-record.mjs --chain <path to 6529chain> [--no-fetch] [--check] [--ref <commit>]
  *
  * It records, with the commit each came from:
  * - the record's head (commit, date, the newest D-number);
  * - every decision's D-number and the D-numbers its text cites, so the
  *   drift check can find a newer decision that touches a page's;
  * - a one-line summary for the decisions the pages cite (CITED below);
- * - P26: its commit, rule version, registry hash, rule ID, vector count
- *   and the registry values the kit's facts print (§10);
- * - the Lean model's commit.
+ * - P26: its commit, rule version, registry hash, rule ID, vector count,
+ *   the registry values the kit's facts print (§10), and the IDs of its
+ *   deviations (§11, each marked when a decision settled it) and legacy
+ *   issues (§12);
+ * - the Lean model's commit, and the counts of its committed proof manifest
+ *   (`design/tdh-lean/proof-manifest.json`): what the model proves at that
+ *   commit, before the public feed republishes its manifest.
+ *
+ * `--ref` reads a reviewed commit instead of `origin/main`, so the snapshot
+ * can be regenerated where the pages were checked without moving to a newer
+ * head.
  *
  * Nothing private beyond what the pages already restate is copied: no
  * person, no handle, no account or host name, no address. `--check` exits
@@ -75,16 +83,17 @@ const REGISTRY_KEYS = [
 ];
 
 function args() {
-  const out = { chain: null, fetch: true, check: false };
+  const out = { chain: null, fetch: true, check: false, ref: "origin/main" };
   const argv = process.argv.slice(2);
   for (let i = 0; i < argv.length; i += 1) {
     if (argv[i] === "--chain") out.chain = argv[++i];
     else if (argv[i] === "--no-fetch") out.fetch = false;
     else if (argv[i] === "--check") out.check = true;
+    else if (argv[i] === "--ref") out.ref = argv[++i];
   }
   if (!out.chain) {
     console.error(
-      "usage: sync-record.mjs --chain <path to 6529chain> [--no-fetch] [--check]"
+      "usage: sync-record.mjs --chain <path to 6529chain> [--no-fetch] [--check] [--ref <commit>]"
     );
     process.exit(2);
   }
@@ -175,10 +184,52 @@ export function parseRegistry(spec) {
   );
 }
 
+/**
+ * P26 §11's deviations and §12's legacy issues, by ID, in table order: a
+ * deviation a decision settled says so in its last column ("Settled by").
+ */
+export function parseItems(spec) {
+  const deviations = [];
+  const issues = [];
+  for (const line of spec.split(/\r?\n/)) {
+    const dev = /^\| (DEV-\d+) \|.*\| ([^|]*) \|\s*$/.exec(line);
+    if (dev) {
+      deviations.push({ id: dev[1], settled: /^Settled\b/.test(dev[2]) });
+      continue;
+    }
+    const bug = /^\| (BUG-\d+) \|/.exec(line);
+    if (bug) issues.push(bug[1]);
+  }
+  return { deviations, issues };
+}
+
+/**
+ * The counts of the Lean model's committed proof manifest at its commit:
+ * proved, shown false, named limits, entries, and P26's vectors it runs.
+ */
+export function leanManifestCounts(text) {
+  const manifest = JSON.parse(text);
+  const p26 = (manifest.vectors ?? []).find((run) => run.id === "p26");
+  const { summary } = manifest;
+  if (!summary || !p26) {
+    throw new Error(
+      "the Lean model's proof manifest has no summary or no P26 run"
+    );
+  }
+  return {
+    proved: summary.proved,
+    shownFalse: summary.counterexample,
+    limits: summary.deferred,
+    entries: summary.entries,
+    vectorsPassed: p26.passed,
+    vectorsTotal: p26.total,
+  };
+}
+
 async function main() {
   const opts = args();
   if (opts.fetch) git(opts.chain, ["fetch", "--quiet", "origin"]);
-  const ref = "origin/main";
+  const { ref } = opts;
   const head = git(opts.chain, ["log", "-1", "--format=%H %cI", ref])
     .trim()
     .split(" ");
@@ -251,8 +302,18 @@ async function main() {
       ruleId,
       vectors,
       registry: parseRegistry(spec),
+      ...parseItems(spec),
     },
-    lean: { commit: lean[0], date: lean[1] },
+    lean: {
+      commit: lean[0],
+      date: lean[1],
+      manifest: leanManifestCounts(
+        git(opts.chain, [
+          "show",
+          `${lean[0]}:design/tdh-lean/proof-manifest.json`,
+        ])
+      ),
+    },
     decisions: decisions.map((d) => ({
       id: d.id,
       refs: d.refs,

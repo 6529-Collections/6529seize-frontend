@@ -28,11 +28,114 @@
       "gradient_bonus": 0.02,
       "gradient_max_count": 5,
       "gradient_rate_minimum": 1
-    }
+    },
+    "deviations": [
+      {
+        "id": "DEV-1",
+        "settled": false
+      },
+      {
+        "id": "DEV-2",
+        "settled": false
+      },
+      {
+        "id": "DEV-3",
+        "settled": false
+      },
+      {
+        "id": "DEV-4",
+        "settled": false
+      },
+      {
+        "id": "DEV-5",
+        "settled": false
+      },
+      {
+        "id": "DEV-6",
+        "settled": false
+      },
+      {
+        "id": "DEV-7",
+        "settled": false
+      },
+      {
+        "id": "DEV-8",
+        "settled": false
+      },
+      {
+        "id": "DEV-9",
+        "settled": false
+      },
+      {
+        "id": "DEV-10",
+        "settled": false
+      },
+      {
+        "id": "DEV-11",
+        "settled": true
+      },
+      {
+        "id": "DEV-12",
+        "settled": false
+      },
+      {
+        "id": "DEV-13",
+        "settled": false
+      },
+      {
+        "id": "DEV-14",
+        "settled": false
+      },
+      {
+        "id": "DEV-15",
+        "settled": false
+      },
+      {
+        "id": "DEV-16",
+        "settled": false
+      },
+      {
+        "id": "DEV-17",
+        "settled": false
+      },
+      {
+        "id": "DEV-18",
+        "settled": false
+      },
+      {
+        "id": "DEV-19",
+        "settled": false
+      }
+    ],
+    "issues": [
+      "BUG-1",
+      "BUG-2",
+      "BUG-3",
+      "BUG-4",
+      "BUG-5",
+      "BUG-6",
+      "BUG-7",
+      "BUG-8",
+      "BUG-9",
+      "BUG-10",
+      "BUG-11",
+      "BUG-12",
+      "BUG-13",
+      "BUG-14",
+      "BUG-15"
+    ]
   },
   "lean": {
     "commit": "2694e72e1493e6ce70c267207c45282d5ef1b922",
-    "date": "2026-10-18T07:57:33Z"
+    "date": "2026-10-18T07:57:33Z",
+    "manifest": {
+      "proved": 84,
+      "shownFalse": 11,
+      "limits": 12,
+      "entries": 107,
+      "vectorsPassed": 104,
+      "vectorsTotal": 104
+    }
   },
   "decisions": [
     {
