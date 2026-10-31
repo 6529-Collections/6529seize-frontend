@@ -1,6 +1,10 @@
 @import "react-toggle/style.css";
 @import "react-tooltip/dist/react-tooltip.css";
 @import "highlight.js/styles/vs2015.css";
+/* Font Awesome otherwise adds its base icon styles from JavaScript in the
+   browser, so server-rendered icons paint unsized until hydration. Load them
+   here, before the Tailwind layers, so utility classes on icons still win. */
+@import "@fortawesome/fontawesome-svg-core/styles.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
