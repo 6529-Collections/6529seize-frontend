@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useId, useMemo, useState } from "react";
+import { useAuth } from "@/components/auth/Auth";
+import Button from "@/components/utils/button/Button";
 import { getEncryptedMessagesRoute } from "@/helpers/navigation.helpers";
 import { useE2eeConversation, type UseE2eeResult } from "@/hooks/e2ee/useE2ee";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -18,6 +20,7 @@ import { setE2eeChatMuted, useMutedE2eeChats } from "../e2eeMutedChats";
 import { getScrollBehavior } from "../e2eeMotion";
 import { E2eeLoadingState, E2eeRouteGate } from "../gate/E2eeRouteGate";
 import { E2eeConversationInfo } from "../info/E2eeConversationInfo";
+import { E2eeBanner } from "../ui/E2eeBanner";
 import { E2eeConfirmDialog } from "../ui/E2eeConfirmDialog";
 import {
   E2eeCenteredMessage,
@@ -32,6 +35,10 @@ import { type E2eeMessageActions, getMessageDomId } from "./E2eeMessageItem";
 import { E2eeReportDialog } from "./E2eeReportDialog";
 import { E2eeSearchPanel } from "./E2eeSearchPanel";
 import { E2eeTimeline } from "./E2eeTimeline";
+import {
+  type E2eeDroppedMessage,
+  useE2eeDroppedMessage,
+} from "./useE2eeDroppedMessage";
 
 const hasOpenConversationHint = (
   engine: E2eeEngine
@@ -126,12 +133,18 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
   const [deleteTarget, setDeleteTarget] = useState<E2eeMessage | null>(null);
   const [reportTarget, setReportTarget] = useState<E2eeMessage | null>(null);
   const [blockSender, setBlockSender] = useState<E2eeMessage | null>(null);
-  const [blockedName, setBlockedName] = useState<string | null>(null);
+  const { setToast } = useAuth();
+  const { dropped, dismiss: dismissDropped } = useE2eeDroppedMessage(
+    messages,
+    profileId
+  );
+  const [restoredDraft, setRestoredDraft] = useState<E2eeDroppedMessage | null>(
+    null
+  );
   const muted = useMutedE2eeChats(profileId).has(g);
   const [infoOpen, setInfoOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [actionErrorKey, setActionErrorKey] = useState<MessageKey | null>(null);
-  const [reported, setReported] = useState(false);
 
   const actions = useMemo<E2eeMessageActions>(() => {
     const react = async (
@@ -249,12 +262,6 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         canAct={canAct}
         actions={actions}
       />
-      <div role="status" className="tw-sr-only">
-        {reported ? t(locale, "e2ee.report.success") : null}
-        {blockedName
-          ? t(locale, "e2ee.block.done", { name: blockedName })
-          : null}
-      </div>
       {actionErrorKey ? (
         <p
           role="alert"
@@ -263,7 +270,43 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
           {t(locale, actionErrorKey)}
         </p>
       ) : null}
+      {dropped ? (
+        <div className="tw-flex-shrink-0 tw-px-4 tw-pb-2">
+          <E2eeBanner
+            tone="danger"
+            action={
+              <>
+                {dropped.text ? (
+                  <Button
+                    variant="secondary"
+                    size="xs"
+                    onClick={() => {
+                      setRestoredDraft(dropped);
+                      dismissDropped();
+                    }}
+                  >
+                    {t(locale, "e2ee.composer.dropped.restore")}
+                  </Button>
+                ) : null}
+                <Button variant="secondary" size="xs" onClick={dismissDropped}>
+                  {t(locale, "e2ee.action.dismiss")}
+                </Button>
+              </>
+            }
+          >
+            <span>{t(locale, "e2ee.composer.dropped.body")}</span>
+            {dropped.text ? (
+              <span className="tw-mt-0.5 tw-block tw-truncate tw-text-rose-200/80">
+                {t(locale, "e2ee.composer.dropped.quote", {
+                  text: dropped.text.replaceAll(/\s+/g, " ").trim(),
+                })}
+              </span>
+            ) : null}
+          </E2eeBanner>
+        </div>
+      ) : null}
       <E2eeComposer
+        restoredDraft={restoredDraft}
         conversation={conversation}
         engine={engine}
         selfProfileId={profileId}
@@ -287,7 +330,12 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         g={conversation.g}
         message={reportTarget}
         onClose={() => setReportTarget(null)}
-        onReported={() => setReported(true)}
+        onReported={() =>
+          setToast({
+            type: "success",
+            message: t(locale, "e2ee.report.success"),
+          })
+        }
       />
       <E2eeBlockDialog
         target={
@@ -307,7 +355,12 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
             : null
         }
         onClose={() => setBlockSender(null)}
-        onBlocked={setBlockedName}
+        onBlocked={(name) =>
+          setToast({
+            type: "success",
+            message: t(locale, "e2ee.block.done", { name }),
+          })
+        }
       />
       <E2eeConfirmDialog
         open={deleteTarget !== null}

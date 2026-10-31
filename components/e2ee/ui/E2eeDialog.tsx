@@ -24,7 +24,8 @@ interface E2eeDialogProps {
 
 /**
  * Modal dialog for encrypted-chat flows. Headless UI traps focus, closes on
- * Escape and returns focus to the trigger when it closes.
+ * Escape and returns focus to the trigger when it closes. It eases in with
+ * the shared 125 ms sidebar motion, and appears instantly with reduced motion.
  */
 export function E2eeDialog({
   open,
@@ -43,11 +44,11 @@ export function E2eeDialog({
       onClose={onClose}
       className="tailwind-scope tw-relative tw-z-[1000]"
     >
-      <DialogBackdrop className="tw-fixed tw-inset-0 tw-bg-iron-950/80" />
+      <DialogBackdrop className="tw-fixed tw-inset-0 tw-bg-iron-950/80 motion-safe:tw-animate-sidebar-account-fade-in" />
       <div className="tw-fixed tw-inset-0 tw-overflow-y-auto tw-p-4">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center sm:tw-items-center">
           <DialogPanel
-            className={`tw-w-full ${widthClass} tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5 tw-shadow-2xl`}
+            className={`tw-w-full ${widthClass} tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5 tw-shadow-2xl motion-safe:tw-animate-sidebar-control-in`}
           >
             <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
               <DialogTitle className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">

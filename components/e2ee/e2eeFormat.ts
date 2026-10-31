@@ -52,6 +52,49 @@ export function formatE2eeTimestamp(
   return formatDate(locale, ms);
 }
 
+/** Local calendar day of `ms`, for grouping a timeline by day. */
+export function getE2eeDayKey(ms: number): string {
+  const date = new Date(ms);
+  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+}
+
+const startOfLocalDay = (ms: number): number => {
+  const date = new Date(ms);
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate()
+  ).getTime();
+};
+
+/** Day separator label: Today, Yesterday, a weekday this week, else a date. */
+export function getE2eeDayLabel(
+  locale: SupportedLocale,
+  ms: number,
+  now: number = Date.now()
+): string {
+  const days = Math.round(
+    (startOfLocalDay(now) - startOfLocalDay(ms)) / DAY_MS
+  );
+  if (days === 0) {
+    return t(locale, "e2ee.conversation.day.today");
+  }
+  if (days === 1) {
+    return t(locale, "e2ee.conversation.day.yesterday");
+  }
+  if (days > 1 && days < 7) {
+    return formatDate(locale, ms, { weekday: "long" });
+  }
+  if (new Date(ms).getFullYear() === new Date(now).getFullYear()) {
+    return formatDate(locale, ms, {
+      weekday: "short",
+      day: "numeric",
+      month: "long",
+    });
+  }
+  return formatDate(locale, ms, { dateStyle: "long" });
+}
+
 export function formatE2eeDateTime(
   locale: SupportedLocale,
   ms: number
@@ -135,14 +178,20 @@ function noticeNames(
   locale: SupportedLocale,
   members: readonly E2eeMember[],
   profileIds: readonly string[],
-  selfProfileId: string | null
+  selfProfileId: string | null,
+  /** Mid-sentence objects read "alice removed you", not "removed You". */
+  asObject = false
 ): string {
   if (profileIds.length === 0) {
     return t(locale, NOTICE_NAME_FALLBACK);
   }
   return formatList(
     locale,
-    profileIds.map((id) => getMemberName(locale, members, id, selfProfileId))
+    profileIds.map((id) =>
+      asObject && id === selfProfileId
+        ? t(locale, "e2ee.youObject")
+        : getMemberName(locale, members, id, selfProfileId)
+    )
   );
 }
 
@@ -167,6 +216,13 @@ export function getNoticeText(
     notice.targetProfileIds,
     selfProfileId
   );
+  const objects = noticeNames(
+    locale,
+    members,
+    notice.targetProfileIds,
+    selfProfileId,
+    true
+  );
   const owner = notice.targetProfileIds[0] ?? actorId;
   const ownerName = owner
     ? getMemberName(locale, members, owner, selfProfileId)
@@ -177,7 +233,7 @@ export function getNoticeText(
       return t(locale, "e2ee.notice.created", { actor });
     case "joined":
       return actorId && !notice.targetProfileIds.includes(actorId)
-        ? t(locale, "e2ee.notice.added", { actor, targets })
+        ? t(locale, "e2ee.notice.added", { actor, targets: objects })
         : t(locale, "e2ee.notice.joined", { targets });
     case "left":
       return t(locale, "e2ee.notice.left", {
@@ -185,7 +241,7 @@ export function getNoticeText(
       });
     case "removed":
       return actorId
-        ? t(locale, "e2ee.notice.removed", { actor, targets })
+        ? t(locale, "e2ee.notice.removed", { actor, targets: objects })
         : t(locale, "e2ee.notice.removedNoActor", { targets });
     case "device_added":
       return t(locale, "e2ee.notice.deviceAdded", { name: ownerName });

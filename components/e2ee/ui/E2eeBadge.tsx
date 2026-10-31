@@ -2,8 +2,28 @@ import { LockClosedIcon, LockOpenIcon } from "@heroicons/react/24/outline";
 
 interface E2eeBadgeProps {
   readonly label: string;
+  /** Shown instead of `label` below the `sm` breakpoint, where space is tight. */
+  readonly shortLabel?: string | undefined;
   readonly variant?: "encrypted" | "plaintext" | undefined;
   readonly className?: string | undefined;
+}
+
+function BadgeText({
+  label,
+  shortLabel,
+}: {
+  readonly label: string;
+  readonly shortLabel?: string | undefined;
+}) {
+  if (!shortLabel) {
+    return <span className="tw-truncate">{label}</span>;
+  }
+  return (
+    <>
+      <span className="tw-truncate sm:tw-hidden">{shortLabel}</span>
+      <span className="tw-hidden tw-truncate sm:tw-inline">{label}</span>
+    </>
+  );
 }
 
 /**
@@ -12,6 +32,7 @@ interface E2eeBadgeProps {
  */
 export function E2eeBadge({
   label,
+  shortLabel,
   variant = "encrypted",
   className = "",
 }: E2eeBadgeProps) {
@@ -24,7 +45,7 @@ export function E2eeBadge({
           aria-hidden="true"
           className="tw-size-3.5 tw-flex-shrink-0"
         />
-        <span className="tw-truncate">{label}</span>
+        <BadgeText label={label} shortLabel={shortLabel} />
       </span>
     );
   }
@@ -36,7 +57,7 @@ export function E2eeBadge({
         aria-hidden="true"
         className="tw-size-3.5 tw-flex-shrink-0"
       />
-      <span className="tw-truncate">{label}</span>
+      <BadgeText label={label} shortLabel={shortLabel} />
     </span>
   );
 }

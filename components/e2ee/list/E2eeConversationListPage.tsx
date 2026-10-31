@@ -1,7 +1,12 @@
 "use client";
 
-import { DevicePhoneMobileIcon, PlusIcon } from "@heroicons/react/24/outline";
+import {
+  DevicePhoneMobileIcon,
+  LockClosedIcon,
+  PlusIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { useE2ee } from "@/hooks/e2ee/useE2ee";
 import {
   getEncryptedDevicesRoute,
   getMessagesBaseRoute,
@@ -21,8 +26,11 @@ const ACTION_LINK_CLASS =
 
 export function E2eeNewChatLink({
   compact = false,
+  iconOnlyOnMobile = false,
 }: {
   readonly compact?: boolean | undefined;
+  /** Header use: the label shows from `sm` up, the icon alone below it. */
+  readonly iconOnlyOnMobile?: boolean | undefined;
 }) {
   const locale = useBrowserLocale();
   const label = t(locale, "e2ee.action.newChat");
@@ -30,11 +38,17 @@ export function E2eeNewChatLink({
     <Link
       href={getNewEncryptedChatRoute()}
       aria-label={compact ? label : undefined}
-      title={compact ? label : undefined}
+      title={compact || iconOnlyOnMobile ? label : undefined}
       className={`${ACTION_LINK_CLASS} tw-border-primary-500 tw-bg-primary-500 tw-text-white desktop-hover:hover:tw-bg-primary-600`}
     >
       <PlusIcon aria-hidden="true" className="tw-size-4" />
-      {compact ? null : <span>{label}</span>}
+      {compact ? null : (
+        <span
+          className={iconOnlyOnMobile ? "tw-sr-only sm:tw-not-sr-only" : ""}
+        >
+          {label}
+        </span>
+      )}
     </Link>
   );
 }
@@ -58,6 +72,8 @@ function DevicesLink() {
 /** `/messages/encrypted`: the encrypted chats on this device. */
 export function E2eeConversationListPage() {
   const locale = useBrowserLocale();
+  // Devices and new chats only make sense once this device is turned on.
+  const ready = useE2ee().status === "ready";
   return (
     <E2eePageShell
       title={t(locale, "e2ee.title")}
@@ -66,10 +82,12 @@ export function E2eeConversationListPage() {
       backLabel={t(locale, "e2ee.section.plaintext")}
       backOnSmallScreensOnly
       actions={
-        <>
-          <DevicesLink />
-          <E2eeNewChatLink />
-        </>
+        ready ? (
+          <>
+            <DevicesLink />
+            <E2eeNewChatLink iconOnlyOnMobile />
+          </>
+        ) : null
       }
     >
       <E2eeRouteGate>
@@ -79,6 +97,7 @@ export function E2eeConversationListPage() {
             <E2eeRenewalBanner className="tw-mx-2" />
             {conversations.length === 0 ? (
               <E2eeCenteredMessage
+                icon={<LockClosedIcon className="tw-size-6" />}
                 title={t(locale, "e2ee.list.empty.title")}
                 body={t(locale, "e2ee.list.empty.body")}
               >
