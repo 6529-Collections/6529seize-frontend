@@ -142,7 +142,7 @@ export default async function ReMeme({
   if ((await lookupRememe(contract, id)).status === "missing") notFound();
 
   return (
-    <main className={styles["main"]}>
+    <main className={styles["main"]} lang={locale}>
       <RememePage contract={contract} id={id} locale={locale} />
     </main>
   );

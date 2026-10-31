@@ -64,7 +64,7 @@ export default async function MemeLabCollectionPage({
   }
 
   return (
-    <main className={styles["main"]}>
+    <main className={styles["main"]} lang={locale}>
       <MemeLabCollection
         collectionName={collectionName}
         initialSort={getSearchParamValue(resolvedSearchParams.sort)}

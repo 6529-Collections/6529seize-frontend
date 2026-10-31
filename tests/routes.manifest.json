@@ -2313,6 +2313,10 @@
       "classification": "crawlable",
       "family": "tools"
     },
+    "/wave-not-found": {
+      "classification": "exempt",
+      "exemptReason": "Internal rewrite target for malformed wave ids; always answers 404."
+    },
     "/waves": {
       "classification": "crawlable",
       "family": "social"
