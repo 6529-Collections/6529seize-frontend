@@ -89,6 +89,8 @@ export function editionPhase(input: PhaseInput): EditionAuctionPhase {
     case "SETTLED":
       return settledPhase(input.settledCount);
     case "OPEN":
+    case "CLOSED":
+    case "SETTLING":
       return openPhase(input);
   }
 }

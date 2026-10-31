@@ -255,7 +255,7 @@ function YourBids({
         : source.editionBids(edition, account)
   );
   const { data: lowest } = useStreamQuery("lowest-in", [edition, 1], (source) =>
-    source.lowestWinningStep(edition, 1)
+    source.lowestStepFullyIn(edition, 1)
   );
   const { data: prices } = useStreamQuery("ladder", [edition], (source) =>
     source.ladder(edition)

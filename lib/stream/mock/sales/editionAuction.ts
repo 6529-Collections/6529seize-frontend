@@ -38,6 +38,7 @@ import type {
   Address,
   EditionAuction,
   EditionAuctionPhase,
+  EditionAuctionStatus,
   EditionAuctionTimes,
   EditionBidView,
   EditionCandidate,
@@ -73,7 +74,7 @@ export function findEditionAuction(
 ): MockEditionAuction {
   const auction = engine.state.editionAuctions.get(edition);
   if (!auction) {
-    revert("UnknownSale", { edition });
+    revert("UnknownAuction", { edition });
   }
   return auction;
 }
@@ -106,7 +107,7 @@ export function prepareEditionAuction(
       base: EDITION_AUCTION_CONFIG.base,
       perDecade: EDITION_AUCTION_CONFIG.perDecade,
       steps: EDITION_AUCTION_CONFIG.steps,
-      marginBps: EDITION_AUCTION_CONFIG.marginBps,
+      marginShare: EDITION_AUCTION_CONFIG.marginShare,
       offset: EDITION_AUCTION_CONFIG.offset,
       softWindow: EDITION_AUCTION_CONFIG.softWindow,
       maxExtension: EDITION_AUCTION_CONFIG.maxExtension,
@@ -137,12 +138,12 @@ export function openPreparedAuction(
   at: number = engine.now()
 ): void {
   if (auction.status !== "NONE") {
-    revert("InvalidAuctionState", { status: auction.status });
+    revert("AuctionExists", { saleId: auction.saleId });
   }
   if (auction.oneOfOneSaleId !== null) {
     const state = oneOfOneState(engine, auction);
     if (state === "NONE" || state === "CANCELLED") {
-      revert("InvalidAuctionState", { oneOfOne: state });
+      revert("NoOneOfOneAuction", { master: auction.master ?? "" });
     }
   }
   auction.status = "OPEN";
@@ -211,7 +212,7 @@ function totalUnits(auction: MockEditionAuction): number {
 function currentResult(auction: MockEditionAuction): BookResult {
   return (
     auction.result ??
-    clearBook(auction.book, auctionPrices(auction), auction.terms.marginBps)
+    clearBook(auction.book, auctionPrices(auction), auction.terms.marginShare)
   );
 }
 
@@ -232,8 +233,9 @@ function clearingView(
     sellerShare: revenue - networkShare,
     rationed: result.rationed,
     cutStepUnits: result.cutStepUnits,
+    cutoff: result.cutoff,
     bestRevenue: result.bestRevenue,
-    threshold: revenueThreshold(result.bestRevenue, auction.terms.marginBps),
+    threshold: revenueThreshold(result.bestRevenue, auction.terms.marginShare),
   };
 }
 
@@ -254,13 +256,14 @@ export function editionAuctionView(
   const used = usedSteps(auction);
   const state = oneOfOneState(engine, auction);
   const token = engine.token(auction.edition);
+  const phase = auctionPhase(engine, auction);
   return {
     saleId: auction.saleId,
     edition: auction.edition,
     master: auction.master,
     program: auction.program,
-    status: auction.status,
-    phase: auctionPhase(engine, auction),
+    status: viewStatus(auction, phase),
+    phase,
     terms: auction.terms,
     times: auctionTimes(engine, auction),
     totalUnits: totalUnits(auction),
@@ -280,8 +283,21 @@ export function editionAuctionView(
         ? null
         : { saleId: auction.oneOfOneSaleId, state },
     settled: auction.status === "SETTLED",
+    biddingOpen: acceptsBids(phase),
+    withdrawalsOpen: phase === "disputed",
     editionCreated: token.created,
   };
+}
+
+/** `AuctionStatus` as the contract reports it: CLOSED is OPEN past its end. */
+function viewStatus(
+  auction: MockEditionAuction,
+  phase: EditionAuctionPhase
+): EditionAuctionStatus {
+  if (auction.status !== "OPEN") {
+    return auction.status;
+  }
+  return phase === "closed" || phase === "noBids" ? "CLOSED" : "OPEN";
 }
 
 export function stepTotalsView(
@@ -304,7 +320,7 @@ export function candidatesView(
   return candidateRows(
     currentResult(auction),
     auctionPrices(auction),
-    auction.terms.marginBps
+    auction.terms.marginShare
   );
 }
 
@@ -346,7 +362,7 @@ export function bidView(
     refund: bid.withdrawn ? 0n : escrow - BigInt(won) * clearingPrice,
     unitsAhead: unitsAhead(auction.book, bid),
     raiseToGetIn: canRaise
-      ? raiseToGetIn(auction.book, bid, prices, auction.terms.marginBps)
+      ? raiseToGetIn(auction.book, bid, prices, auction.terms.marginShare)
       : null,
     withdrawn: bid.withdrawn,
     claimed: bid.claimed,
@@ -364,7 +380,7 @@ export function quoteBid(
     step,
     qty,
     prices,
-    auction.terms.marginBps
+    auction.terms.marginShare
   );
   return {
     step,
@@ -373,13 +389,17 @@ export function quoteBid(
     after: clearingView(auction, whatIf.result),
     won: whatIf.won,
     pushedOut: whatIf.pushedOut,
+    pulledIn: whatIf.pulledIn,
   };
 }
 
 function assertBidding(engine: MockStreamEngine, auction: MockEditionAuction) {
   const phase = auctionPhase(engine, auction);
   if (!acceptsBids(phase)) {
-    revert("InvalidAuctionState", { phase });
+    revert("BiddingClosed", {
+      saleId: auction.saleId,
+      endTime: auctionTimes(engine, auction).editionEnd,
+    });
   }
   assertListed(engine, auction.edition);
 }
@@ -401,7 +421,7 @@ function applySoftClose(engine: MockStreamEngine, auction: MockEditionAuction) {
 function ownBid(auction: MockEditionAuction, from: Address, bidId: number) {
   const bid = findBid(auction.book, bidId);
   if (!bid) {
-    revert("UnknownBid", { bidId });
+    revert("UnknownBid", { saleId: auction.saleId, bidId });
   }
   if (bid.bidder !== from) {
     revert("NotBidder", { caller: from });
@@ -419,7 +439,7 @@ export function placeEditionBid(
   assertBidding(engine, auction);
   assertStep(auction, step);
   if (!Number.isInteger(qty) || qty < 1 || qty > MAX_EDITION_BID_QTY) {
-    revert("InvalidQuantity", { qty });
+    revert("InvalidQuantity", { quantity: qty });
   }
   const price = auctionPrices(auction)[step] ?? 0n;
   engine.debit(from, BigInt(qty) * price);
@@ -438,7 +458,7 @@ export function raiseEditionBid(
   assertStep(auction, newStep);
   const bid = ownBid(auction, from, bidId);
   if (bid.withdrawn || newStep <= bid.step) {
-    revert("InvalidRaise", { step: bid.step, newStep });
+    revert("InvalidStep", { step: newStep });
   }
   const prices = auctionPrices(auction);
   const difference =
@@ -461,16 +481,16 @@ export function settleEditionAuction(
     auction.status = "VOID";
     return;
   }
-  if (engine.now() < times.editionEnd) {
-    revert("AuctionNotEnded", { editionEnd: times.editionEnd });
-  }
-  if (state !== null && state !== "SETTLED") {
-    revert("OneOfOneNotFinal", { state });
+  if (
+    engine.now() < times.editionEnd ||
+    (state !== null && state !== "SETTLED")
+  ) {
+    revert("SettlementNotReady", { saleId: auction.saleId });
   }
   const result = clearBook(
     auction.book,
     auctionPrices(auction),
-    auction.terms.marginBps
+    auction.terms.marginShare
   );
   if (result.count > 0) {
     if (!engine.token(auction.edition).created) {
@@ -499,7 +519,8 @@ export function claimEditionBid(
   }
   const bid = ownBid(auction, from, bidId);
   if (bid.claimed || bid.withdrawn) {
-    revert("AlreadyClaimed", { bidId });
+    // A claim or withdrawal deletes the bid record on-chain.
+    revert("UnknownBid", { saleId: auction.saleId, bidId });
   }
   const view = bidView(engine, auction, bid);
   bid.claimed = true;
@@ -555,11 +576,11 @@ export function createEditionActions(
         engine.tx(null, () => {
           const auction = findEditionAuction(engine, edition);
           if (oneOfOneState(engine, auction) !== "PAUSED") {
-            revert("WithdrawNotAllowed", { edition });
+            revert("WithdrawalsClosed", { saleId: auction.saleId });
           }
           const bid = ownBid(auction, from, bidId);
           if (bid.withdrawn) {
-            revert("AlreadyClaimed", { bidId });
+            revert("UnknownBid", { saleId: auction.saleId, bidId });
           }
           const escrow = bidView(engine, auction, bid).escrow;
           removeBid(auction.book, bid);

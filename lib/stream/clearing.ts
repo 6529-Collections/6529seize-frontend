@@ -12,7 +12,8 @@ import type { Wei } from "@/lib/stream/types";
  * everyone pays P(k).
  */
 
-const BPS = 10_000n;
+/** `marginShare` is out of 100,000, as `IUniformEditionAuction.AuctionConfig`. */
+const SHARE = 100_000n;
 
 /** One possible result per used step, scanned from the top (PLAN Appendix B). */
 export interface ClearCandidate {
@@ -97,13 +98,13 @@ function collectCandidates(
  * @param totals live units per step, ascending price (index = step)
  * @param prices every step's price
  * @param cap the creator cap; 0 means no cap
- * @param marginBps the breadth margin in basis points (1,000 = 10%)
+ * @param marginShare the breadth margin out of 100,000 (10,000 = 10%)
  */
 export function clear(
   totals: readonly number[],
   prices: readonly Wei[],
   cap = 0,
-  marginBps = 1_000
+  marginShare = 10_000
 ): ClearOutcome {
   const candidates = collectCandidates(totals, prices, cap);
   if (candidates.length === 0) {
@@ -117,11 +118,11 @@ export function clear(
       bestIndex = index;
     }
   });
-  const floor = best * (BPS - BigInt(marginBps));
+  const floor = best * (SHARE - BigInt(marginShare));
   let chosen = -1;
   // Candidates run from the top step down: the last match is the lowest step.
   candidates.forEach((candidate, index) => {
-    if (candidate.revenue * BPS >= floor) {
+    if (candidate.revenue * SHARE >= floor) {
       chosen = index;
     }
   });
@@ -141,9 +142,9 @@ export function clear(
   };
 }
 
-/** The 90% threshold the result must reach: R* × (10,000 − margin) / 10,000. */
-export function revenueThreshold(bestRevenue: Wei, marginBps: number): Wei {
-  return (bestRevenue * (BPS - BigInt(marginBps))) / BPS;
+/** The 90% threshold the result must reach: R* × (100,000 − margin) / 100,000. */
+export function revenueThreshold(bestRevenue: Wei, marginShare: number): Wei {
+  return (bestRevenue * (SHARE - BigInt(marginShare))) / SHARE;
 }
 
 /**
@@ -154,7 +155,7 @@ export function bruteClear(
   totals: readonly number[],
   prices: readonly Wei[],
   cap = 0,
-  marginBps = 1_000
+  marginShare = 10_000
 ): { readonly count: number; readonly price: Wei | null } {
   const units: Wei[] = [];
   for (let step = totals.length - 1; step >= 0; step -= 1) {
@@ -169,10 +170,10 @@ export function bruteClear(
   }
   const revenues = book.map((price, index) => BigInt(index + 1) * price);
   const best = revenues.reduce((max, value) => (value > max ? value : max), 0n);
-  const floor = best * (BPS - BigInt(marginBps));
+  const floor = best * (SHARE - BigInt(marginShare));
   let count = 0;
   revenues.forEach((revenue, index) => {
-    if (revenue * BPS >= floor) {
+    if (revenue * SHARE >= floor) {
       count = index + 1;
     }
   });

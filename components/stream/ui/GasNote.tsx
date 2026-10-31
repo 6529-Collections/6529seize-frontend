@@ -13,10 +13,7 @@ function compactGas(locale: SupportedLocale, gas: number): string {
 }
 
 /** "About 169K gas · Sepolia r2, Glamsterdam, measured 11 Oct 2026". Always labelled. */
-function formatGas(
-  locale: SupportedLocale,
-  estimate: GasEstimate
-): string {
+function formatGas(locale: SupportedLocale, estimate: GasEstimate): string {
   const low = compactGas(locale, estimate.low);
   const high = compactGas(locale, estimate.high);
   return t(locale, "stream.gas.about", {
@@ -53,15 +50,17 @@ const TX_ERRORS: Readonly<Record<string, MessageKey>> = {
   TargetNotAllowed: "stream.tx.error.targetNotAllowed",
   UnpauseTooEarly: "stream.tx.error.unpauseTooEarly",
   PauseExhausted: "stream.tx.error.pauseExhausted",
-  WithdrawNotAllowed: "stream.tx.error.withdrawNotAllowed",
-  OneOfOneNotFinal: "stream.tx.error.oneOfOneNotFinal",
+  BiddingClosed: "stream.tx.error.biddingClosed",
+  WithdrawalsClosed: "stream.tx.error.withdrawalsClosed",
+  SettlementNotReady: "stream.tx.error.settlementNotReady",
   EditionNotCreated: "stream.tx.error.editionNotCreated",
-  AuctionNotEnded: "stream.tx.error.auctionNotEnded",
-  AlreadyClaimed: "stream.tx.error.alreadyClaimed",
+  UnknownBid: "stream.tx.error.unknownBid",
   NotBidder: "stream.tx.error.notBidder",
-  InvalidRaise: "stream.tx.error.invalidRaise",
   InvalidStep: "stream.tx.error.invalidStep",
   InvalidQuantity: "stream.tx.error.invalidQuantity",
+  IncorrectPayment: "stream.tx.error.incorrectPayment",
+  AuctionExists: "stream.tx.error.auctionExists",
+  NoOneOfOneAuction: "stream.tx.error.noOneOfOneAuction",
   NotWorkArtist: "stream.tx.error.notWorkArtist",
   MoveNotSigned: "stream.tx.error.moveNotSigned",
   PartiesNotAccepted: "stream.tx.error.partiesNotAccepted",

@@ -14,6 +14,7 @@ import {
   cloneBook,
   createBook,
   findBid,
+  lowestStepFullyIn,
   lowestWinningStep,
   moveBid,
   raiseToGetIn,
@@ -84,7 +85,12 @@ describe("uniform-price clearing (D138)", () => {
       const prices = vector.totals.map((__, step) =>
         stepPrice(step, { base: 10n ** 14n, perDecade: vector.perDecade })
       );
-      const result = clear(vector.totals, prices, vector.cap, vector.marginBps);
+      const result = clear(
+        vector.totals,
+        prices,
+        vector.cap,
+        vector.marginBps * 10
+      );
       expect({
         k: result.count,
         step: result.step,
@@ -100,7 +106,7 @@ describe("uniform-price clearing (D138)", () => {
         vector.totals,
         prices,
         vector.cap,
-        vector.marginBps
+        vector.marginBps * 10
       );
       expect(brute.count).toBe(vector.k);
       expect(brute.price === null ? null : String(brute.price)).toBe(
@@ -114,9 +120,9 @@ describe("uniform-price clearing (D138)", () => {
       const prices = vector.totals.map((_, step) =>
         stepPrice(step, { base: 10n ** 14n, perDecade: vector.perDecade })
       );
-      expect(clear(vector.totals, prices, 0, vector.marginBps).rationed).toBe(
-        false
-      );
+      expect(
+        clear(vector.totals, prices, 0, vector.marginBps * 10).rationed
+      ).toBe(false);
     }
   });
 
@@ -169,8 +175,8 @@ describe("the owner's worked example (PLAN Appendix C)", () => {
         at: 0,
       });
     }
-    expect(lowestWinningStep(book, 1, prices, 1_000)).toBe(128);
-    expect(whatIfBid(book, 127, 1, prices, 1_000).won).toBe(0);
+    expect(lowestWinningStep(book, 1, prices, 10_000)).toBe(128);
+    expect(whatIfBid(book, 127, 1, prices, 10_000).won).toBe(0);
   });
 
   it("matches the model's unsnapped example at margins 0, 10% and 30%", () => {
@@ -178,7 +184,7 @@ describe("the owner's worked example (PLAN Appendix C)", () => {
     const milli = [10n, 50n, 100n, 200n, 1_000n];
     const totals = [200, 50, 20, 9, 1];
     expect(
-      [0, 1_000, 3_000].map((margin) => clear(totals, milli, 0, margin))
+      [0, 10_000, 30_000].map((margin) => clear(totals, milli, 0, margin))
     ).toMatchObject([
       {
         count: 80,
@@ -227,7 +233,7 @@ describe("the owner's worked example (PLAN Appendix C)", () => {
     const b3 = addBid(book, { bidder: who(3), step: 130, qty: 10, at: 0 });
     const b4 = addBid(book, { bidder: who(4), step: 130, qty: 20, at: 0 });
     moveBid(book, b2, 144);
-    const result = clearBook(book, prices, 1_000);
+    const result = clearBook(book, prices, 10_000);
     expect([result.count, result.step, result.rationed]).toEqual([
       60,
       130,
@@ -271,7 +277,7 @@ describe("FIFO at the cut step (owner decision 1)", () => {
         }
       }
       expect(book.bids.map((bid) => bid.pos)).toEqual(vector.positions);
-      const result = clearBook(book, prices, 1_000);
+      const result = clearBook(book, prices, 10_000);
       expect([
         result.count,
         result.step,
@@ -304,7 +310,7 @@ describe("what-if reads", () => {
     addBid(book, { bidder, step: 140, qty: 10, at: 0 });
     addBid(book, { bidder, step: 100, qty: 300, at: 0 });
     const low = addBid(book, { bidder, step: 60, qty: 2, at: 0 });
-    const found = raiseToGetIn(book, low, prices, 1_000);
+    const found = raiseToGetIn(book, low, prices, 10_000);
     let linear: number | null = null;
     for (let step = low.step + 1; step < 336 && linear === null; step += 1) {
       const copy = cloneBook(book);
@@ -312,8 +318,8 @@ describe("what-if reads", () => {
       if (moved) {
         moveBid(copy, moved, step);
         if (
-          (allocation(copy, clearBook(copy, prices, 1_000)).get(low.id) ?? 0) >=
-          low.qty
+          (allocation(copy, clearBook(copy, prices, 10_000)).get(low.id) ??
+            0) >= low.qty
         ) {
           linear = step;
         }
@@ -327,7 +333,7 @@ describe("what-if reads", () => {
     const book = createBook(336, 5);
     const bidder = "0x00000000000000000000000000000000000000cc" as const;
     addBid(book, { bidder, step: 100, qty: 5, at: 0 });
-    const result = whatIfBid(book, 110, 3, prices, 1_000);
+    const result = whatIfBid(book, 110, 3, prices, 10_000);
     expect(result.won).toBe(3);
     expect(result.pushedOut).toBe(3);
   });
@@ -363,11 +369,18 @@ describe("binary searches match a linear scan", () => {
       const qty = 1 + Math.floor(random() * 5);
       let linear: number | null = null;
       for (let step = 0; step < steps && linear === null; step += 1) {
-        if (whatIfBid(book, step, qty, prices, 1_000).won >= qty) {
+        if (whatIfBid(book, step, qty, prices, 10_000).won >= qty) {
           linear = step;
         }
       }
-      expect(lowestWinningStep(book, qty, prices, 1_000)).toBe(linear);
+      expect(lowestStepFullyIn(book, qty, prices, 10_000)).toBe(linear);
+      let anyWin: number | null = null;
+      for (let step = 0; step < steps && anyWin === null; step += 1) {
+        if (whatIfBid(book, step, qty, prices, 10_000).won > 0) {
+          anyWin = step;
+        }
+      }
+      expect(lowestWinningStep(book, qty, prices, 10_000)).toBe(anyWin);
     }
   });
 });

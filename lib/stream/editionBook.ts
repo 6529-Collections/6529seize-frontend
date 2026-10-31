@@ -135,9 +135,9 @@ export interface BookResult extends ClearOutcome {
 export function clearBook(
   book: EditionBook,
   prices: readonly Wei[],
-  marginBps: number
+  marginShare: number
 ): BookResult {
-  const outcome = clear(book.live, prices, book.cap, marginBps);
+  const outcome = clear(book.live, prices, book.cap, marginShare);
   if (outcome.step === null || !outcome.rationed) {
     return { ...outcome, cutoff: outcome.cutStepUnits };
   }
@@ -205,7 +205,7 @@ export function raiseToGetIn(
   book: EditionBook,
   bid: BookBid,
   prices: readonly Wei[],
-  marginBps: number
+  marginShare: number
 ): number | null {
   return lowestStepWhere(bid.step + 1, book.steps, (step) => {
     const copy = cloneBook(book);
@@ -214,7 +214,7 @@ export function raiseToGetIn(
       return false;
     }
     moveBid(copy, moved, step);
-    return wonBy(moved, clearBook(copy, prices, marginBps)) >= moved.qty;
+    return wonBy(moved, clearBook(copy, prices, marginShare)) >= moved.qty;
   });
 }
 
@@ -222,6 +222,7 @@ interface WhatIf {
   readonly result: BookResult;
   readonly won: number;
   readonly pushedOut: number;
+  readonly pulledIn: number;
 }
 
 /** `quote(step, qty)`: what a new bid would do to the book. */
@@ -230,9 +231,9 @@ export function whatIfBid(
   step: number,
   qty: number,
   prices: readonly Wei[],
-  marginBps: number
+  marginShare: number
 ): WhatIf {
-  const before = allocation(book, clearBook(book, prices, marginBps));
+  const before = allocation(book, clearBook(book, prices, marginShare));
   const copy = cloneBook(book);
   const added = addBid(copy, {
     bidder: "0x0000000000000000000000000000000000000000",
@@ -240,29 +241,50 @@ export function whatIfBid(
     qty,
     at: 0,
   });
-  const result = clearBook(copy, prices, marginBps);
+  const result = clearBook(copy, prices, marginShare);
   let pushedOut = 0;
+  let pulledIn = 0;
   for (const bid of copy.bids) {
-    const was = before.get(bid.id) ?? 0;
-    pushedOut += Math.max(0, was - wonBy(bid, result));
+    if (bid.id !== added.id) {
+      const change = wonBy(bid, result) - (before.get(bid.id) ?? 0);
+      pushedOut += Math.max(0, -change);
+      pulledIn += Math.max(0, change);
+    }
   }
-  return { result, won: wonBy(added, result), pushedOut };
+  return { result, won: wonBy(added, result), pushedOut, pulledIn };
 }
 
 /**
- * `lowestWinningStep(qty)`: the lowest step where a new bid of `qty` is fully
- * in. It can sit below the current price: under the breadth rule a bid there
- * lowers everyone's price.
+ * `lowestWinningStep(qty)`, as the contract defines it: the lowest step where
+ * a new bid of `qty` wins at least one copy if the sale closed now.
  */
 export function lowestWinningStep(
   book: EditionBook,
   qty: number,
   prices: readonly Wei[],
-  marginBps: number
+  marginShare: number
 ): number | null {
   return lowestStepWhere(
     0,
     book.steps,
-    (step) => whatIfBid(book, step, qty, prices, marginBps).won >= qty
+    (step) => whatIfBid(book, step, qty, prices, marginShare).won > 0
+  );
+}
+
+/**
+ * The lowest step where a new bid of `qty` gets every unit in. It can sit
+ * below the current price: under the breadth rule a bid there lowers
+ * everyone's price.
+ */
+export function lowestStepFullyIn(
+  book: EditionBook,
+  qty: number,
+  prices: readonly Wei[],
+  marginShare: number
+): number | null {
+  return lowestStepWhere(
+    0,
+    book.steps,
+    (step) => whatIfBid(book, step, qty, prices, marginShare).won >= qty
   );
 }

@@ -61,9 +61,9 @@ export function stepTotalRows(
 export function candidateRows(
   result: ClearOutcome,
   prices: readonly Wei[],
-  marginBps: number
+  marginShare: number
 ): EditionCandidate[] {
-  const threshold = revenueThreshold(result.bestRevenue, marginBps);
+  const threshold = revenueThreshold(result.bestRevenue, marginShare);
   return result.candidates.map((candidate, index) => ({
     step: candidate.step,
     price: prices[candidate.step] ?? 0n,

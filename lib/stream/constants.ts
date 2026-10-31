@@ -55,8 +55,8 @@ export const DISPUTE_DECISION_DELAY = 2 * SECONDS_PER_DAY;
 
 /** Governed edition-auction parameters (D86, PLAN section 1.10), launch defaults. */
 export const EDITION_AUCTION_CONFIG = {
-  /** Breadth margin (D138): 10%, in basis points. */
-  marginBps: 1_000,
+  /** Breadth margin (D138): 10%, out of 100,000 (`marginShare`). */
+  marginShare: 10_000,
   /** Steps per decade: 48 (about 4.9% apart). */
   perDecade: 48,
   /** Base price: 0.0001 ETH. */

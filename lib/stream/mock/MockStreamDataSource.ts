@@ -1,5 +1,5 @@
 import type { StreamDataSource } from "@/lib/stream/dataSource";
-import { lowestWinningStep } from "@/lib/stream/editionBook";
+import { lowestStepFullyIn, lowestWinningStep } from "@/lib/stream/editionBook";
 import {
   accountOverview,
   artistIdForAccount,
@@ -254,6 +254,21 @@ export class MockStreamDataSource implements StreamDataSource {
     });
   }
 
+  lowestStepFullyIn(edition: WorkKey, qty: number) {
+    return later(() => {
+      const auction = this.engine.state.editionAuctions.get(edition);
+      if (!auction || !Number.isInteger(qty) || qty < 1) {
+        return null;
+      }
+      return lowestStepFullyIn(
+        auction.book,
+        qty,
+        auctionPrices(auction),
+        auction.terms.marginShare
+      );
+    });
+  }
+
   lowestWinningStep(edition: WorkKey, qty: number) {
     return later(() => {
       const auction = this.engine.state.editionAuctions.get(edition);
@@ -264,7 +279,7 @@ export class MockStreamDataSource implements StreamDataSource {
         auction.book,
         qty,
         auctionPrices(auction),
-        auction.terms.marginBps
+        auction.terms.marginShare
       );
     });
   }

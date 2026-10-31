@@ -261,9 +261,12 @@ describe("disputes", () => {
 
     const edition = work.linked.edition ?? "";
     const editions = stream.actions.sale("UNIFORM_EDITION_AUCTION");
-    expect((await stream.dataSource.getEditionAuction(edition))?.phase).toBe(
-      "disputed"
-    );
+    const disputed = await stream.dataSource.getEditionAuction(edition);
+    expect([
+      disputed?.phase,
+      disputed?.biddingOpen,
+      disputed?.withdrawalsOpen,
+    ]).toEqual(["disputed", true, true]);
     expectOk(await editions.bid(A, edition, 120, 1));
     const [mine] = await stream.dataSource.editionBids(edition, B);
     expectOk(await editions.withdraw(B, edition, mine?.bidId ?? 0));
@@ -300,6 +303,7 @@ describe("the uniform-price edition auction", () => {
     const edition = work.linked.edition ?? "";
     const auction = await stream.dataSource.getEditionAuction(edition);
     expect(auction?.phase).toBe("closed");
+    expect([auction?.status, auction?.biddingOpen]).toEqual(["CLOSED", false]);
     expect(auction?.clearing.count).toBe(80);
     expect(auction?.clearing.price).toBe(eth("0.0511"));
     expect(auction?.clearing.revenue).toBe(eth("4.088"));
@@ -403,7 +407,7 @@ describe("the uniform-price edition auction", () => {
     expect((await stream.dataSource.getEditionAuction(edition))?.phase).toBe(
       "opening"
     );
-    expectRevert(await editions.bid(A, edition, 100, 1), "InvalidAuctionState");
+    expectRevert(await editions.bid(A, edition, 100, 1), "BiddingClosed");
     expectOk(await editions.open(B, edition));
     expect((await stream.dataSource.getEditionAuction(edition))?.phase).toBe(
       "open"
@@ -413,7 +417,7 @@ describe("the uniform-price edition auction", () => {
     expect((await stream.dataSource.getEditionAuction(edition))?.phase).toBe(
       "noBids"
     );
-    expectRevert(await editions.settle(A, edition), "OneOfOneNotFinal");
+    expectRevert(await editions.settle(A, edition), "SettlementNotReady");
     expectOk(
       await stream.actions.sale("ENGLISH_AUCTION").settle(A, oneOfOne.saleId)
     );
@@ -452,7 +456,7 @@ describe("the uniform-price edition auction", () => {
       await stream.actions
         .sale("UNIFORM_EDITION_AUCTION")
         .withdraw(A, edition, mine?.bidId ?? 0),
-      "WithdrawNotAllowed"
+      "WithdrawalsClosed"
     );
   });
 });

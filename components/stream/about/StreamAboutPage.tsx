@@ -141,7 +141,7 @@ function exampleBook() {
   return {
     result,
     rows: stepTotalRows(live, prices, 0, result),
-    candidates: candidateRows(result, prices, 1_000),
+    candidates: candidateRows(result, prices, 10_000),
   };
 }
 

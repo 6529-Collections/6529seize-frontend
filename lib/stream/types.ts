@@ -296,11 +296,7 @@ export interface StreamWorkSummary {
 // ---------------------------------------------------------------------------
 
 /** `IdentityTypes.ChangeKind`. */
-type IdentityChangeKind =
-  | "STANDARD"
-  | "CONTESTED"
-  | "ESTATE"
-  | "LOST_KEY";
+type IdentityChangeKind = "STANDARD" | "CONTESTED" | "ESTATE" | "LOST_KEY";
 
 /** `IArtistRegistry.pendingChange`, summarized. */
 export interface PendingIdentityChange {
@@ -466,8 +462,17 @@ export interface OneOfOneAuction {
 // The uniform-price edition auction (D138-D141; IUniformEditionAuction)
 // ---------------------------------------------------------------------------
 
-/** The stored status. */
-export type EditionAuctionStatus = "NONE" | "OPEN" | "SETTLED" | "VOID";
+/**
+ * `IUniformEditionAuction.AuctionStatus`. CLOSED is derived (OPEN past its
+ * end); SETTLING is cleared and paid with the departure sweep unfinished.
+ */
+export type EditionAuctionStatus =
+  | "NONE"
+  | "OPEN"
+  | "CLOSED"
+  | "SETTLING"
+  | "SETTLED"
+  | "VOID";
 
 /** The UX state (PLAN section 6 "States"), derived from status, clocks and the 1/1. */
 export type EditionAuctionPhase =
@@ -486,7 +491,8 @@ export interface EditionAuctionTerms {
   readonly base: Wei;
   readonly perDecade: number;
   readonly steps: number;
-  readonly marginBps: number;
+  /** The breadth margin, out of 100,000. */
+  readonly marginShare: number;
   readonly offset: number;
   readonly softWindow: number;
   readonly maxExtension: number;
@@ -528,6 +534,8 @@ export interface EditionClearing {
   readonly rationed: boolean;
   /** A: units the cut step wins. */
   readonly cutStepUnits: number;
+  /** X: the swept cutoff at the cut step (PLAN section 1.6). */
+  readonly cutoff: number;
   /** The best revenue R* and the 90% threshold the result clears. */
   readonly bestRevenue: Wei;
   readonly threshold: Wei;
@@ -601,8 +609,10 @@ export interface EditionQuote {
   readonly cost: Wei;
   readonly after: EditionClearing;
   readonly won: number;
-  /** Editions that were winning before and would not be after. */
+  /** Net existing winning units it would push out. */
   readonly pushedOut: number;
+  /** Net existing units it would pull in (the breadth rule). */
+  readonly pulledIn: number;
 }
 
 /** The edition auction of one master (or one standalone federated 1155 edition). */
@@ -629,6 +639,10 @@ export interface EditionAuction {
   } | null;
   /** True once `settle` stored the result. */
   readonly settled: boolean;
+  /** `EndTimes.biddingOpen`: a bid would be accepted now. */
+  readonly biddingOpen: boolean;
+  /** `EndTimes.withdrawalsOpen`: bidders may withdraw now (the 1/1 is paused). */
+  readonly withdrawalsOpen: boolean;
   /** Settlement needs `Editions.createEdition` first when k > 0. */
   readonly editionCreated: boolean;
 }

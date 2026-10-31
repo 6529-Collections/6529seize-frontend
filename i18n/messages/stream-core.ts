@@ -108,20 +108,24 @@ export const STREAM_CORE_MESSAGES = {
   "stream.tx.error.unpauseTooEarly":
     "Too early: wait 48 hours after the pause.",
   "stream.tx.error.pauseExhausted": "This auction was already paused once.",
-  "stream.tx.error.withdrawNotAllowed":
-    "You can withdraw only while the 1/1 is disputed.",
-  "stream.tx.error.oneOfOneNotFinal": "The 1/1 must settle first.",
   "stream.tx.error.editionNotCreated": "Create the edition first.",
-  "stream.tx.error.auctionNotEnded": "The auction hasn't closed yet.",
-  "stream.tx.error.alreadyClaimed": "Already claimed.",
   "stream.tx.error.notBidder": "Only the bidder can do this.",
-  "stream.tx.error.invalidRaise": "A raise must go to a higher price.",
-  "stream.tx.error.invalidStep": "Pick a price on the ladder.",
+  "stream.tx.error.invalidStep": "Pick a higher price on the ladder.",
   "stream.tx.error.invalidQuantity": "Bid at least one edition.",
   "stream.tx.error.notWorkArtist": "Only the contract's artist can do this.",
   "stream.tx.error.moveNotSigned": "The artist hasn't signed the move yet.",
   "stream.tx.error.partiesNotAccepted": "Not every party has signed.",
   "stream.tx.error.nothingToRelease": "Nothing to pay out yet.",
+  "stream.tx.error.biddingClosed": "Bidding has closed.",
+  "stream.tx.error.withdrawalsClosed":
+    "You can withdraw only while the 1/1 is disputed.",
+  "stream.tx.error.settlementNotReady":
+    "Not ready to settle: the auction or its 1/1 is still open.",
+  "stream.tx.error.unknownBid":
+    "That bid is gone: already claimed or withdrawn.",
+  "stream.tx.error.incorrectPayment": "The payment doesn't match the bid.",
+  "stream.tx.error.auctionExists": "This edition auction is already open.",
+  "stream.tx.error.noOneOfOneAuction": "The 1/1 auction hasn't started.",
 
   "stream.sale.kind.english": "1/1 auction",
   "stream.sale.kind.edition": "Edition auction",

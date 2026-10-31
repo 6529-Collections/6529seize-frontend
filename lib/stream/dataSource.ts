@@ -84,8 +84,10 @@ export interface StreamDataSource {
     step: number,
     qty: number
   ): Promise<EditionQuote | null>;
-  /** The lowest step where a new bid of `qty` is fully in, or null. */
+  /** `lowestWinningStep(qty)`: the lowest step where a new bid wins at least one copy. */
   lowestWinningStep(edition: WorkKey, qty: number): Promise<number | null>;
+  /** The lowest step where a new bid of `qty` gets every unit in (client-side search). */
+  lowestStepFullyIn(edition: WorkKey, qty: number): Promise<number | null>;
   /** Every step's price for an auction's locked ladder. */
   ladder(edition: WorkKey): Promise<readonly Wei[]>;
 
@@ -146,7 +148,11 @@ export interface EnglishAuctionActions {
   claimCredits(from: Address, to: Address): Promise<TxResult<Wei>>;
 }
 
-/** `IUniformEditionAuction` writes (names follow PLAN section 1; reconcile with L0's frozen interface). */
+/**
+ * `IUniformEditionAuction` writes (6529-works ADR 0005). The chain source maps
+ * the edition key to `saleIdOf(token, id)`; `settle` supplies the departure
+ * order from `settlementOrder(saleId)` and repeats until it returns true.
+ */
 export interface EditionAuctionActions {
   /** Permissionless from the 1/1's start; the keeper batches it with `start`. */
   open(from: Address, edition: WorkKey): Promise<TxResult>;
@@ -163,11 +169,11 @@ export interface EditionAuctionActions {
     bidId: number,
     newStep: number
   ): Promise<TxResult>;
-  /** Only while the coupled 1/1 is paused for a dispute. */
+  /** `withdrawBid(saleId, bidId, to)`: only while the coupled 1/1 is paused for a dispute. */
   withdraw(from: Address, edition: WorkKey, bidId: number): Promise<TxResult>;
   /** Permissionless after the edition end once the 1/1 is settled or cancelled. */
   settle(from: Address, edition: WorkKey): Promise<TxResult>;
-  /** Mints the editions won and sends the refund. */
+  /** `claimBid(saleId, bidId, to)`: mints the editions won and sends the refund. */
   claim(
     from: Address,
     edition: WorkKey,
