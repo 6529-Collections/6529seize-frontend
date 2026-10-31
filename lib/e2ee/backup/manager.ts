@@ -7,6 +7,7 @@ import {
   chainAt,
   type ChainTip,
   type LinkedChunk,
+  type LinkMode,
   isChainState,
   linkChunk,
   newChainState,
@@ -473,7 +474,6 @@ export class E2eeBackupManager {
    * continue this device's chain (a fork).
    */
   private async catchUp(local: BackupLocalState): Promise<boolean> {
-    let tip = tipOf(local.chain);
     let forked = false;
     let after = local.chain.seq;
     for (;;) {
@@ -484,36 +484,15 @@ export class E2eeBackupManager {
       );
       const items = page.items.filter((item) => item.seq > after);
       for (const item of items) {
-        const chunk = await this.deps.api.getChunk(local.backupId, item.seq);
-        const linked: LinkedChunk | null =
-          chunk.seq === item.seq
-            ? await linkChunk(
-                local.chunkKey,
-                local.backupId,
-                tip,
-                decodeChunk(chunk.data),
-                "adopt"
-              )
-            : null;
-        if (linked) {
-          const started = tip !== null && linked.tip.epoch > tip.epoch;
-          if (started && local.chain.restart) {
-            // A newer chain already exists (another device's, or ours whose
-            // response was lost): follow it instead of starting another one.
-            // This run still uploads the full history into it, so the
-            // chunks before it can be compacted at the end of the run.
-            local.compactThroughSeq = Math.max(
-              local.compactThroughSeq ?? 0,
-              item.seq - 1
-            );
-          }
-          tip = linked.tip;
-          forked = false;
-          local.chain = chainAt(tip, item.seq, local.chain.restart && !started);
-        } else {
-          forked = true;
-          local.chain = { ...local.chain, seq: item.seq };
-        }
+        const linked = await this.linkListed(
+          local.backupId,
+          local.chunkKey,
+          tipOf(local.chain),
+          item.seq,
+          "adopt"
+        );
+        forked = linked === null;
+        followChunk(local, item.seq, linked);
         after = item.seq;
       }
       if (page.next_after_seq === null || items.length === 0) {
@@ -522,6 +501,21 @@ export class E2eeBackupManager {
     }
     await this.deps.state.put(local);
     return forked;
+  }
+
+  /** Fetches the listed chunk `seq` and links it after `tip` (or null). */
+  private async linkListed(
+    backupId: string,
+    chunkKey: CryptoKey,
+    tip: ChainTip | null,
+    seq: number,
+    mode: LinkMode
+  ): Promise<LinkedChunk | null> {
+    const chunk = await this.deps.api.getChunk(backupId, seq);
+    if (chunk.seq !== seq) {
+      return null;
+    }
+    return linkChunk(chunkKey, backupId, tip, decodeChunk(chunk.data), mode);
   }
 
   /** Seals and uploads one segment; true when the chain forked at it. */
@@ -673,17 +667,14 @@ export class E2eeBackupManager {
     for (;;) {
       const page = await this.deps.api.listChunks(backupId, after, LIST_PAGE);
       for (const item of page.items) {
-        if (item.seq <= after) {
-          throw new BackupError("E2EE_BACKUP_CORRUPT");
-        }
-        const chunk = await this.deps.api.getChunk(backupId, item.seq);
+        // Seqs must strictly increase; then the chunk must link.
         const linked: LinkedChunk | null =
-          chunk.seq === item.seq
-            ? await linkChunk(
-                chunkKey,
+          item.seq > after
+            ? await this.linkListed(
                 backupId,
+                chunkKey,
                 tip,
-                decodeChunk(chunk.data),
+                item.seq,
                 "restore"
               )
             : null;
@@ -742,6 +733,29 @@ function decodeChunk(data: string): Uint8Array {
   } catch {
     return new Uint8Array(0);
   }
+}
+
+/** Moves a writer's chain state past one chunk it found on the server. */
+function followChunk(
+  local: BackupLocalState,
+  seq: number,
+  linked: LinkedChunk | null
+): void {
+  if (!linked) {
+    // Does not continue this device's chain: remember it was seen.
+    local.chain = { ...local.chain, seq };
+    return;
+  }
+  const started =
+    local.chain.index >= 0 && linked.tip.epoch > local.chain.epoch;
+  if (started && local.chain.restart) {
+    // A newer chain already exists (another device's, or ours whose
+    // response was lost): follow it instead of starting another one. This
+    // run still uploads the full history into it, so the chunks before it
+    // can be compacted at the end of the run.
+    local.compactThroughSeq = Math.max(local.compactThroughSeq ?? 0, seq - 1);
+  }
+  local.chain = chainAt(linked.tip, seq, local.chain.restart && !started);
 }
 
 /**

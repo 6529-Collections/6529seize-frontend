@@ -142,7 +142,7 @@ async function tryOpen(
  *   lost requests) appended; any higher epoch is followed, because the
  *   device that started it may have seen a different fork branch.
  */
-type LinkMode = "restore" | "adopt";
+export type LinkMode = "restore" | "adopt";
 
 /**
  * Accepts `data` as the chunk after `tip` (null: the first chunk) and
