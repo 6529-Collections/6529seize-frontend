@@ -119,6 +119,12 @@ async function start() {
               };
             if (args.path === "./useDeviceInfo")
               return { path: "@/hooks/useDeviceInfo", namespace: "fixture" };
+            // config/devAuth.ts reads the env module through a relative path.
+            if (
+              args.path === "./env" &&
+              path.dirname(args.importer) === path.join(root, "config")
+            )
+              return { path: "@/config/env", namespace: "fixture" };
             if (stubs.has(args.path))
               return { path: args.path, namespace: "fixture" };
             if (
