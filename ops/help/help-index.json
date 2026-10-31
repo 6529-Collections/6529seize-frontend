@@ -57,7 +57,7 @@
         "video"
       ],
       "facts": [
-        "On ordinary wave leaderboards, My submissions opens your active and winning entries in that wave. Native competition leaderboards and direct-entry views show My submissions for the selected competition, including each entry's recorded status. On leaderboards it is a text button beside the entry action. On leaderboards without price controls, the controls stay on one row when they fit. Otherwise, view controls align left and the selected sort aligns right on the top row, with My submissions on the left and the entry action on the right below. Curation leaderboards retain their price-control layout. The sort button shows the selected sort without a visible Sort prefix. The control is available on your own signed-in profile and hidden in proxy mode. It does not change leaderboard sort or filters. The Memes retains its specialized submission flow.",
+        "On ordinary wave leaderboards, My submissions opens your active and winning entries in that wave. Native competition leaderboards and direct-entry views show My submissions for the selected competition, including each entry's recorded status. In native competitions it appears when you have entries, stays hidden during an initial lookup or after an empty result, and remains available after a failed lookup so you can retry. On leaderboards it is a text button beside the entry action. On leaderboards without price controls, the controls stay on one row when they fit. Otherwise, view controls align left and the selected sort aligns right on the top row, with My submissions on the left and the entry action on the right below. Curation leaderboards retain their price-control layout. The sort button shows the selected sort without a visible Sort prefix. The control is available on your own signed-in profile and hidden in proxy mode. It does not change leaderboard sort or filters. The Memes retains its specialized submission flow.",
         "After a standard or Quorum drop is saved, the confirmation checks that saved drop's competition entry directly. A confirmed entry offers View my entry. If the artwork is saved but entry membership cannot be confirmed, use Check again or View artwork before submitting another copy. Check again only reads the saved entry; it never submits another drop.",
         "A native competition submission opens its saved entry and checks its status. A confirmed entry names the competition. If entry status cannot be loaded, use Check again or View artwork before submitting another copy. A failed artwork load does not undo a confirmed entry; retry the read or use My submissions.",
         "Full list, grid and gallery leaderboards offer Couldn't load submissions and Retry after a failed first load. A refresh failure retains already loaded entries with a retry message. Failed loads do not establish that there are no entries."
@@ -4129,6 +4129,8 @@
         "submit meme",
         "memes submission",
         "proposal card frame",
+        "additional action plan",
+        "your plan",
         "ceci n'est pas une carte meme",
         "submit to memes wave",
         "submit to the memes main stage",
@@ -4168,6 +4170,12 @@
       ],
       "facts": [
         "Memes wave docs cover submission, preview/submit states, additional info fields, and quick voting.",
+        "In Artwork Details, checking Additional Action opens Your plan (optional). Describe what you will do if selected, who receives it, timing, and any costs or conditions. The plan is public with the submission and supports up to 5000 characters; a blank plan is allowed.",
+        "Unchecking Additional Action keeps the plan draft during the current modal session but excludes it from the submitted metadata. Rechecking restores it. Closing the modal discards the unsaved draft.",
+        "Additional Information and optional Preview both show the Additional Action summary before submission. Use Back to edit the action and plan in Artwork. A marked action with no plan says no separate plan was provided.",
+        "Submitted Memes drops show a marked action and its plan in a separate Additional Action section. Resubmitting restores the saved plan and checkbox; artist bio and commentary remain separate. The marker is an artist commitment and does not confirm approval or delivery.",
+        "A saved Additional Action plan shows a loading message while metadata loads. If loading fails, use Retry loading plan; a failed request does not mean no plan exists.",
+        "Resubmission waits for the saved submission to load before opening its fields, so saved plans and other metadata are preserved. If loading fails, select Retry loading submission or Close and try later.",
         "In the Artwork step, Add a proposal card frame (optional) is off by default. Select it and choose Vertical or Horizontal to add a thin animated border with four black-and-white 6529 logos around an image, video, or interactive HTML. It is unavailable for GLB models.",
         "The proposal frame says this is a proposal to do something and the artwork may change. Submitting publishes HTML that embeds the original media and creates a framed still for gallery views. Video and HTML submissions still require a preview image in Additional Information. Select the top-right logo to pause the animation; reduced-motion preferences stop it automatically.",
         "Resubmitting a framed submission restores the original artwork and orientation. Uncheck the proposal frame option to remove it or change orientation without nesting another frame. A preview or frame-publishing failure stops submission and can be retried.",
@@ -4179,7 +4187,7 @@
         "Video artwork in Quick Vote starts automatically, muted and inline, on web and in the native app. Reduced-motion preferences keep autoplay off, and playback controls remain available.",
         "The Memes - Main Stage is a Memes wave context, not the /the-memes collection browse or mint route.",
         "Submission availability depends on login, proxy mode, participation eligibility, the submission window, and per-user submission limits.",
-        "On The Memes Main Stage, Chat and Leaderboard keep the same submission control in the top wave header above the tabs. On web it shows Submit Work to The Memes or the compact Submit Work label when available; How to Submit opens nomination guidance when participation eligibility is missing. Timing and submission-limit restrictions stay in that header. The native app uses the equivalent submit or lock icon in its top header in both views. My submissions remains in the leaderboard toolbar for signed-in users on their own profile; Main Stage has no separate Drop button beside the leaderboard sort controls.",
+        "On The Memes Main Stage, Chat and Leaderboard keep the same submission control in the top wave header above the tabs. On web it shows Submit Work to The Memes or the compact Submit Work label when available; How to Submit opens nomination guidance when participation eligibility is missing. Timing and submission-limit restrictions stay in that header. The native app uses the equivalent submit or lock icon in its top header in both views. My submissions appears in the leaderboard toolbar for signed-in users on their own profile when they have entries; a failed lookup still allows retry; Main Stage has no separate Drop button beside the leaderboard sort controls.",
         "Unavailable conversation-header submission actions show a lock icon on desktop, tablet, and phone. Hover, focus, or select the lock to read the full restriction reason, including opening or closing dates and submission limits. Recover by logging in, disabling proxy mode, waiting for the submission window, or freeing submission capacity. The desktop How to Submit helper keeps its label.",
         "In the Artwork step, Continue remains available before required fields are complete, except while an interactive artwork hash is being verified; selecting Continue turns every missing or invalid field and the missing media control red, shows inline recovery messages, and focuses the first missing item in form order.",
         "Memes submission text metadata, including About the Artist and Artwork Commentary, removes leading and trailing whitespace, including non-breaking spaces, tabs and blank lines, before signing and submitting. Internal spaces and paragraph breaks are preserved. Required fields containing only whitespace still block progress, and text length limits use the trimmed value.",
@@ -5940,7 +5948,7 @@
       ],
       "facts": [
         "The notifications feed lives at /notifications.",
-        "Opening Notifications marks notifications read. Rows still reported as unread display an Unread label and dot; grouped reactions are unread while any notification in the group is unread. The label disappears when refreshed data confirms the notifications are read.",
+        "Opening the desktop sidebar bell previews notifications without leaving the current page or marking them read. The newest rows appear first with compact previews and Load more for older items. Clicking a row marks that notification read and opens its destination; Mark all as read explicitly clears unread notifications. Close with Escape, the close button, the bell, or a click outside. View all notifications opens /notifications. Mobile and app bells still open the full page directly. Opening the full /notifications page marks notifications read. Rows still reported as unread display an Unread label and dot; grouped reactions are unread while any notification in the group is unread. The label disappears when refreshed data confirms the notifications are read.",
         "A connected wallet without a profile sees the profile setup prompt and can open its profile setup route with Create profile.",
         "It supports a responsive multi-select feed filter, row actions, read state, paging, and navigation to related app content.",
         "The notification filter opens as a bottom sheet in the mobile layout and as an anchored dropdown on wider viewports.",
@@ -6051,6 +6059,7 @@
         "Push notification behavior depends on mobile app support and notification permissions.",
         "After a phone transfer, push registration uses a separate native-device identity. Old cleanup retries stay saved but cannot block the replacement phone. Migration removes only old registrations matching this phone’s current push token; other phones remain connected and notification preferences carry forward.",
         "If only some connected profiles finish push registration, returning to the active app or reconnecting retries registration while preserving successful profiles and old delivery targets. Reconnect a profile whose saved session has expired.",
+        "If signing out before the phone first registered for push left cleanup waiting for a missing or expired session, connecting a fresh account session lets the app reconcile it without signing out the fresh login. Push registration resumes after cleanup succeeds; failed cleanup stays saved.",
         "Push settings include toggles for Identity - REP, Identity - NIC, New Follows, Mentions, Drops - Quoted, Drops - Replied, Drops - Voted, Drops - Reacted, Drops - Boosted, Wave Invites, and Subscription Coverage.",
         "Running-low and action-required subscription coverage can send mobile push; the earlier plan-a-top-up alert remains in the in-app feed without a push.",
         "Tapping a subscription coverage push opens the matching profile's Subscriptions tab.",
@@ -6741,7 +6750,7 @@
       "facts": [
         "Wave chat docs cover scroll behavior, unread dividers, unread controls, and serial jump navigation.",
         "Unread controls help users return to new content in long wave threads.",
-        "Serial jump navigation is separate from page-level browser navigation.",
+        "Serial jump navigation is separate from page-level browser navigation. Shared serial links load and highlight the selected accessible post. The one-time serialNo and divider parameters clear without reopening chat or jumping to newest messages. Scroll or use the bottom arrow to leave that position.",
         "If a drop thread cannot load, the error offers Try again instead of an empty conversation prompt. Already loaded replies remain visible during a failure."
       ],
       "canonical_path": "/waves",
@@ -7620,12 +7629,27 @@
     {
       "id": "waves.leaderboard.sort-group-filters",
       "kind": "ui_affordance",
-      "title": "Wave leaderboard sort and price filters",
-      "aliases": ["leaderboard filters", "sort leaderboard", "price filter"],
-      "keywords": ["waves", "leaderboard", "sort", "filters", "price"],
+      "title": "Wave leaderboard sort and filters",
+      "aliases": [
+        "leaderboard filters",
+        "sort leaderboard",
+        "price filter",
+        "Additional Action filter"
+      ],
+      "keywords": [
+        "waves",
+        "leaderboard",
+        "sort",
+        "filters",
+        "price",
+        "additional action",
+        "promises"
+      ],
       "facts": [
         "Wave leaderboard sorting and price filters are documented controls.",
         "These controls affect leaderboard result ordering and curation-wave price filtering.",
+        "On The Memes Main Stage, select the Additional Action checkbox or its label beside the sorting control to show only marked submissions. Select it again to restore all results. The checkmark and amber styling indicate the active filter. It includes promises without a separate plan and filters the complete result set across pages; sorting and grid/list view remain independent.",
+        "The Additional Action filter resets on page refresh or leaderboard remount and does not affect other waves. If no submissions match, the list says \"No submissions marked Additional Action.\" Turn off the filter to see all submissions. Failed requests offer Retry. Open artwork details to read the optional public plan; the badge is an artist promise, not verification of approval or fulfillment.",
         "Availability depends on leaderboard tab and wave data."
       ],
       "canonical_path": "/waves",
@@ -11037,7 +11061,7 @@
       ],
       "facts": [
         "Signed messages are staged behind a flag (on for staging, off in production). With them on, a web browser holds a non-extractable Ed25519 key per wallet; one wallet signature grants it the right to sign your posts, edits, deletes and reactions for 180 days. There is no wallet prompt per message and chat behaves as before.",
-        "The grant rides on the ordinary web sign-in. A logged-in user without a grant in this browser sees Turn on signed messages (one signature) above the empty wave composer; Turn on asks for one signature and the notice can be dismissed for 30 days. In a grant's last 14 days the notice offers Renew; after expiry writes go unsigned until renewed.",
+        "The grant rides on the ordinary web sign-in; if the wallet declines or cannot sign that message, the next sign-in on the page uses the ordinary message. A logged-in user without a grant in this browser sees Turn on signed messages (one signature) above the empty wave composer; Turn on asks for one signature and the notice can be dismissed for 30 days. In a grant's last 14 days the notice offers Renew; after expiry writes go unsigned until renewed.",
         "Signing never blocks or delays a write. If signing fails or a signature is rejected, the drop, edit, delete or reaction is sent unsigned exactly as before.",
         "Preferences > Devices at /preferences?tab=devices lists every browser that can post as you with its label, This device marker, scopes, wallet, added, expiry and last-used dates and status (Active, Expired, Revoked). Revoke asks for confirmation; earlier signatures stay verifiable. Proxies cannot manage devices.",
         "When a new browser gains a grant for your profile, other browsers show {label} can now post as you. Not you? with Revoke above the composer. The check runs when a wave opens and at most every 10 minutes while the tab is visible.",
@@ -11051,12 +11075,7 @@
       "tags": ["waves", "privacy", "security", "preferences"],
       "source_refs": [
         "ops/docs/waves/drop-actions/feature-signed-messages.md",
-        "ops/docs/notifications/feature-profile-preferences.md",
-        "components/device-signing/SignedMessagesNotice.tsx",
-        "components/preferences/DevicesPreferencesSettings.tsx",
-        "components/waves/drops/signature/DropSignatureDialog.tsx",
-        "components/waves/drops/signature/DropAuthorSignedMarker.tsx",
-        "lib/device-signing/sign-write.ts"
+        "ops/docs/notifications/feature-profile-preferences.md"
       ]
     },
     {

@@ -6146,6 +6146,15 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: is_additional_action_promised
+          in: query
+          required: false
+          description: >-
+            Filter entries by the artist's Additional Action promise, including
+            promises without plan text. False returns entries without a promise
+            (including unset flags). Omit to include all entries.
+          schema:
+            type: boolean
         - name: sort
           in: query
           required: false
@@ -37592,6 +37601,18 @@ components:
           maxItems: 50
           items:
             $ref: "#/components/schemas/ApiPushLogoutSession"
+        reconciliation_sessions:
+          type: array
+          maxItems: 50
+          items:
+            $ref: "#/components/schemas/ApiPushLogoutSession"
+          description: >-
+            Optional native session proofs authorizing a credential-scoped fence
+            when logout preceded the first push registration and its original
+            sessions are missing or no longer live. At least one must be live.
+            These sessions are not revoked unless also listed in sessions. They
+            never prove installation ownership or bypasses an existing
+            installation credential.
     ApiRevokePushInstallationResponse:
       type: object
       required:
