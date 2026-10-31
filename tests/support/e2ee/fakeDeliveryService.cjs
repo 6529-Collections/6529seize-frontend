@@ -30,6 +30,8 @@ const MAX_DEVICES = 10;
 const MAX_ONE_TIME = 100;
 const MAX_KEY_PACKAGE_BYTES = 4096;
 const MAX_WELCOME_BYTES = 3.5 * 1024 * 1024;
+/** 0x004F, X-Wing (contract 3.6); the backend accepts no other suite. */
+const E2EE_CIPHERSUITE = 0x004f;
 const MAX_CHUNK_BYTES = 1024 * 1024;
 const MAX_BLOB_BYTES = 25 * 1024 * 1024;
 const MAX_PROPOSALS_PER_EPOCH = 64;
@@ -275,7 +277,7 @@ function createFakeDeliveryService(options = {}) {
     const lifetime = grant.expires_at - grant.issued_at;
     const aligned = grant.expires_at % 60 === 0;
     if (
-      grant.ciphersuite !== 1 ||
+      grant.ciphersuite !== E2EE_CIPHERSUITE ||
       lifetime <= 0 ||
       lifetime > GRANT_MAX_LIFETIME_S ||
       !aligned

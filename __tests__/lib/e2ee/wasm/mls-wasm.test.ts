@@ -10,6 +10,7 @@ import { join } from "node:path";
 
 import { encodeAbiParameters, keccak256, toBytes } from "viem";
 
+import { E2EE_CIPHERSUITE } from "@/lib/e2ee/grant";
 import type { MsgPayload } from "@/lib/e2ee/payload";
 import type {
   GroupMetadata,
@@ -291,7 +292,9 @@ describe("mls wasm module", () => {
     expect(typeof asEngineModule.MlsDevice.create).toBe("function");
     const info = parse<ModuleInfo>(mls.moduleInfo());
     expect(info.openmls).toBe("0.9.1");
-    expect(info.ciphersuite).toBe(1);
+    // The module and the grant must agree on the one suite (0x004F, X-Wing).
+    expect(info.ciphersuite).toBe(E2EE_CIPHERSUITE);
+    expect(info.ciphersuite).toBe(0x004f);
     expect(info.metadata_extension).toBe(0xf529);
   });
 

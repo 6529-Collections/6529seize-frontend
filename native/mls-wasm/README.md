@@ -17,6 +17,16 @@ All cryptography comes from libraries: OpenMLS 0.9.1 with
 `openmls_rust_crypto` 0.6.0 for MLS, `ed25519-dalek` (K_n and inner message
 signatures), `aes-gcm` (wraps) and `sha3` (keccak256).
 
+The only ciphersuite is 0x004F,
+`MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519` (`device::CIPHERSUITE`):
+X-Wing hybrid post-quantum key exchange (ML-KEM-768 with X25519) through the
+OpenMLS cargo feature `draft-ietf-mls-pq-ciphersuites`, AES-128-GCM, SHA-256
+and Ed25519 signatures. It must equal `E2EE_CIPHERSUITE` in
+`lib/e2ee/grant.ts` (the grant signs it) and the backend's pinned value.
+0x004F is a draft code point: if it changes, every device re-enrolls and every
+group is re-created; the engine drops a stored device whose grant names
+another suite.
+
 ## Build
 
 Prerequisites, all pinned:

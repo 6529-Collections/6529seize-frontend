@@ -19,6 +19,7 @@ import {
   enrollDevice,
   ensureWasm,
   grantExpired,
+  loadCurrentSuiteDevice,
   refreshMe,
   renewalDue,
   renewGrant,
@@ -174,7 +175,7 @@ async function resolveProfiles(
 
 /** Loads an enrolled device from storage; false when enrollment is needed. */
 async function restore(ctx: EngineContext): Promise<boolean> {
-  const device = await ctx.storage.getDevice(ctx.profileId);
+  const device = await loadCurrentSuiteDevice(ctx);
   if (!device?.registered || !device.provisioned) {
     return false;
   }
