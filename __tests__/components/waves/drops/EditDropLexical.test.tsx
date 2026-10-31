@@ -74,9 +74,10 @@ jest.mock("@lexical/react/LexicalRichTextPlugin", () => ({
   ),
 }));
 jest.mock("@lexical/react/LexicalContentEditable", () => ({
-  ContentEditable: ({ className, style }: any) => (
+  ContentEditable: ({ ariaLabel, className, style }: any) => (
     <div
       data-testid="content-editable"
+      aria-label={ariaLabel}
       className={className}
       style={style}
       contentEditable="true"
@@ -335,6 +336,13 @@ describe("EditDropLexical", () => {
     render(<EditDropLexical {...defaultProps} />);
     expect(screen.getByText("Edit message...")).toBeInTheDocument();
     expect(screen.getByTestId("emoji-picker")).toBeInTheDocument();
+  });
+
+  it("gives the editable region an accessible name", () => {
+    render(<EditDropLexical {...defaultProps} />);
+    expect(screen.getByLabelText("Edit message")).toBe(
+      screen.getByTestId("content-editable")
+    );
   });
 
   it("focuses its own editor when another editable appears first on the page", async () => {

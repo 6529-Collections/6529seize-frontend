@@ -263,6 +263,68 @@ it("exposes the current recommendation to accessibility and telemetry across sel
   });
 });
 
+it("runs the highly rated preview hover prefetch only after hover intent", () => {
+  jest.useFakeTimers();
+  try {
+    const item = {
+      ...createPreviewItem({ id: "hover-recommendation" }),
+      onMouseEnter: jest.fn(),
+    };
+    render(
+      <HighlyRatedWavesToggle
+        previewItems={[item]}
+        paddingClassName="tw-px-0"
+        scoreDetailsDisabled
+      />
+    );
+    const link = screen.getByRole("link");
+
+    fireEvent.mouseEnter(link);
+    act(() => {
+      jest.advanceTimersByTime(149);
+    });
+    expect(item.onMouseEnter).not.toHaveBeenCalled();
+
+    act(() => {
+      jest.advanceTimersByTime(1);
+    });
+    expect(item.onMouseEnter).toHaveBeenCalledTimes(1);
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+it("drops the highly rated preview hover prefetch when the pointer leaves or the preview is clicked", () => {
+  jest.useFakeTimers();
+  try {
+    const item = {
+      ...createPreviewItem({ id: "hover-recommendation" }),
+      onMouseEnter: jest.fn(),
+    };
+    render(
+      <HighlyRatedWavesToggle
+        previewItems={[item]}
+        paddingClassName="tw-px-0"
+        scoreDetailsDisabled
+      />
+    );
+    const link = screen.getByRole("link");
+
+    fireEvent.mouseEnter(link);
+    fireEvent.mouseLeave(link);
+    fireEvent.mouseEnter(link);
+    fireEvent.click(link);
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    expect(item.onMouseEnter).not.toHaveBeenCalled();
+    expect(item.onClick).toHaveBeenCalledTimes(1);
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
 it("keeps the active highly rated preview visible within the capped strip", () => {
   const previewItems = Array.from({ length: 11 }, (_, index) =>
     createPreviewItem({

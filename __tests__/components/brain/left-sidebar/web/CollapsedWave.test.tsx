@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { CollapsedWave } from "@/components/brain/left-sidebar/web/WebBrainLeftSidebarWave/subcomponents/CollapsedWave";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 
@@ -9,6 +9,7 @@ jest.mock("next/link", () => ({
     href,
     children,
     onMouseEnter,
+    onMouseLeave,
     onClick,
     className,
     "aria-label": ariaLabel,
@@ -17,6 +18,7 @@ jest.mock("next/link", () => ({
     <a
       href={href}
       onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       onClick={onClick}
       className={className}
       aria-label={ariaLabel}
@@ -61,6 +63,19 @@ const renderCollapsedWave = (
 };
 
 describe("CollapsedWave", () => {
+  it("forwards hover enter and leave to the wave link", () => {
+    const onMouseEnter = jest.fn();
+    const onMouseLeave = jest.fn();
+    renderCollapsedWave({ onMouseEnter, onMouseLeave });
+
+    const link = screen.getByRole("link");
+    fireEvent.mouseEnter(link);
+    fireEvent.mouseLeave(link);
+
+    expect(onMouseEnter).toHaveBeenCalledTimes(1);
+    expect(onMouseLeave).toHaveBeenCalledTimes(1);
+  });
+
   it("exposes unread subwaves in the collapsed link name", () => {
     renderCollapsedWave({
       hasUnreadSubwaves: true,

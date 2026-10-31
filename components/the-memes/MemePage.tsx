@@ -626,6 +626,7 @@ export default function MemePage({
 
   return (
     <div
+      lang={locale}
       data-meme-card-page
       className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-[calc(84px+env(safe-area-inset-bottom))] tw-text-white lg:tw-pb-5"
     >
