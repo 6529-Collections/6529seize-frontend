@@ -1,7 +1,7 @@
 /**
  * Five of P26's conformance vectors, restated in full and served as
  * /network/tdh/public-vectors.json (TDH-DESIGN §4.7), as their files state
- * them at 6529chain 3bfa7b0:
+ * them at 6529chain a731bca:
  * - 04-mid-period-transfer
  * - 06-consolidation-age-carry
  * - 23-identity-sums
@@ -14,7 +14,7 @@
 export const PUBLIC_VECTORS_JSON = String.raw`{
   "format": "6529.tdh-public-vectors.v1",
   "ruleVersion": "tdh-v1.4",
-  "source": {"repository": "6529chain", "commit": "3bfa7b052202e40b0f178ee6de7f75f86ba5261c", "path": "design/tdh-reference/vectors"},
+  "source": {"repository": "6529chain", "commit": "a731bca37981708d2160dbaf4aca7e7acb1c4b6a", "path": "design/tdh-reference/vectors"},
   "vectors": {
     "04-mid-period-transfer": {
       "description": "Last-in-first-out removal on a mid-period sale.",

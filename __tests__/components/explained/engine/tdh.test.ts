@@ -632,6 +632,47 @@ describe("pair state (P26 §6.2)", () => {
     ).toMatchObject({ position: [13n, 0n, 0n], t1: 100n, t2: 130n });
   });
 
+  it("keeps the first registrant's time on a re-registration without one; the second's moves the row and clears its own (vector 104)", () => {
+    expect(
+      row(pairState([...linked, event("REGISTER", "A", "B", 12)]))
+    ).toEqual({
+      w1: "A",
+      w2: "B",
+      position: [11n, 0n, 0n],
+      confirmed: true,
+      t1: 100n,
+      t2: 110n,
+    });
+    expect(
+      row(pairState([...linked, event("REGISTER", "B", "A", 13)]))
+    ).toEqual({
+      w1: "A",
+      w2: "B",
+      position: [13n, 0n, 0n],
+      confirmed: true,
+      t1: 100n,
+      t2: null,
+    });
+    // A later timed registration gives the direction its time again.
+    expect(
+      row(
+        pairState([
+          ...linked,
+          event("REGISTER", "A", "B", 12),
+          event("REGISTER", "A", "B", 14, 140),
+        ])
+      )
+    ).toMatchObject({ position: [11n, 0n, 0n], t1: 140n });
+  });
+
+  it("refuses a time of null: an event has a uint64 time or none", () => {
+    const untyped = {
+      ...event("REGISTER", "A", "B", 12),
+      timestamp: null,
+    } as unknown as DelegationEvent;
+    expect(() => pairState([...linked, untyped])).toThrow(TdhInputInvalid);
+  });
+
   it("turns the row round on a revocation, keeping the remaining direction's time (vector 93)", () => {
     expect(row(pairState([...linked, event("REVOKE", "A", "B", 12)]))).toEqual({
       w1: "B",

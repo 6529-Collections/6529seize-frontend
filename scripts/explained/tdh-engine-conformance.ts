@@ -5,13 +5,15 @@
  *     --chain <6529chain checkout> [--ref origin/main] [--check]
  *
  * Reads every vector with `git show <ref>:design/tdh-reference/vectors/<id>.json`,
- * runs it through the engine (`components/explained/engine/vectors.ts`), and
- * writes two files: the conformance record (`conformance.json`: each
- * vector's id, content digest, scope, status and check count, and the
- * digest of the engine sources that produced them) and the five public
- * vectors (`publicVectors.ts`, restated in full). Nothing else is copied
- * from the private repository. `--check` writes nothing and fails when
- * either file differs from what the vectors give.
+ * as bytes, and every file of `design/tdh-reference/no-vector`, runs them
+ * through the engine (`components/explained/engine/vectors.ts`), and writes
+ * two files: the conformance record (`conformance.json`: each vector's id,
+ * content digest, scope, status and check count; each no-vector file's id,
+ * byte digest and the reason it was refused; and the digest of the engine
+ * sources that produced them) and the five public vectors
+ * (`publicVectors.ts`, restated in full). Nothing else is copied from the
+ * private repository. `--check` writes nothing and fails when either file
+ * differs from what the vectors give.
  *
  * Jest checks the record against the engine on every run, and reruns the
  * whole set when `TDH_6529CHAIN` names a checkout.
@@ -24,6 +26,7 @@ import path from "node:path";
 
 import {
   canonicalJson,
+  decodeVectorText,
   isObject,
   parseJsonExact,
   type JsonObject,
@@ -38,6 +41,8 @@ const ENGINE_DIR = "components/explained/engine";
 const RECORD_PATH = `${ENGINE_DIR}/conformance.json`;
 const PUBLIC_VECTORS_PATH = `${ENGINE_DIR}/publicVectors.ts`;
 const VECTORS_PATH = "design/tdh-reference/vectors";
+/** Files that are no vector, which every implementation must fail (P26 §13). */
+const NO_VECTOR_PATH = "design/tdh-reference/no-vector";
 /** The vectors restated in full on the Implementations page (TDH-DESIGN §4.7). */
 export const PUBLIC_VECTOR_IDS = [
   "04-mid-period-transfer",
@@ -52,8 +57,8 @@ function lf(text: string): string {
   return text.replaceAll("\r\n", "\n");
 }
 
-function sha256(text: string): string {
-  return createHash("sha256").update(text, "utf8").digest("hex");
+function sha256(data: string | Uint8Array): string {
+  return createHash("sha256").update(data).digest("hex");
 }
 
 /** The engine's source files that the record vouches for. */
@@ -73,54 +78,70 @@ export function engineDigest(root: string): string {
   );
 }
 
-/** SHA-256 of a vector's content, read exactly and serialized canonically. */
-export function contentDigest(text: string): string {
+/**
+ * SHA-256 of a vector's content, read exactly and serialized canonically: the
+ * same for the file's bytes and for the same values laid out again.
+ */
+export function contentDigest(file: string | Uint8Array): string {
+  const text = typeof file === "string" ? file : decodeVectorText(file);
   return sha256(canonicalJson(parseJsonExact(text)));
 }
 
-interface ChainVectors {
-  /** The commit that last changed the vectors, as of the ref read. */
-  readonly commit: string;
-  readonly vectors: readonly { readonly id: string; readonly text: string }[];
+/** One file of the set, as git stores it. */
+interface ChainFile {
+  readonly id: string;
+  readonly bytes: Uint8Array;
 }
 
-function git(chain: string, args: readonly string[]): string {
+interface ChainVectors {
+  /** The commit that last changed the vectors or the no-vector files. */
+  readonly commit: string;
+  readonly vectors: readonly ChainFile[];
+  readonly noVectors: readonly ChainFile[];
+}
+
+function git(chain: string, args: readonly string[]): Buffer {
   return execFileSync("git", ["-C", chain, ...args], {
-    encoding: "utf8",
     maxBuffer: 64 * 1024 * 1024,
   });
 }
 
+function gitText(chain: string, args: readonly string[]): string {
+  return git(chain, args).toString("utf8");
+}
+
+function filesAt(chain: string, commit: string, dir: string): ChainFile[] {
+  return gitText(chain, ["ls-tree", "--name-only", commit, `${dir}/`])
+    .split("\n")
+    .filter((f) => f.endsWith(".json"))
+    .sort()
+    .map((f) => ({
+      id: path.posix.basename(f, ".json"),
+      bytes: new Uint8Array(git(chain, ["show", `${commit}:${f}`])),
+    }));
+}
+
 /**
- * Every vector at `ref` of a 6529chain checkout, read with `git show`, and
- * the commit that last changed them: a later commit that leaves the vectors
- * alone (a new decision record, say) leaves the record as it is.
+ * Every vector and every file that is no vector at `ref` of a 6529chain
+ * checkout, read as bytes with `git show`, and the commit that last changed
+ * them: a later commit that leaves them alone (a new decision record, say)
+ * leaves the record as it is.
  */
 export function readChainVectors(chain: string, ref: string): ChainVectors {
-  const head = git(chain, ["rev-parse", `${ref}^{commit}`]).trim();
-  const commit = git(chain, [
+  const head = gitText(chain, ["rev-parse", `${ref}^{commit}`]).trim();
+  const commit = gitText(chain, [
     "log",
     "-1",
     "--format=%H",
     head,
     "--",
     `${VECTORS_PATH}/`,
+    `${NO_VECTOR_PATH}/`,
   ]).trim();
-  const files = git(chain, [
-    "ls-tree",
-    "--name-only",
-    commit,
-    `${VECTORS_PATH}/`,
-  ])
-    .split("\n")
-    .filter((f) => f.endsWith(".json"))
-    .sort();
   return {
     commit,
-    vectors: files.map((f) => ({
-      id: path.posix.basename(f, ".json"),
-      text: git(chain, ["show", `${commit}:${f}`]),
-    })),
+    vectors: filesAt(chain, commit, VECTORS_PATH),
+    noVectors: filesAt(chain, commit, NO_VECTOR_PATH),
   };
 }
 
@@ -133,12 +154,22 @@ interface RecordEntry {
   readonly note?: string;
 }
 
+/** A file that is no vector, and why the engine refused it, if it did. */
+interface NoVectorEntry {
+  readonly id: string;
+  /** SHA-256 of the file's bytes: no JSON reading applies to it. */
+  readonly sha256: string;
+  readonly refused: boolean;
+  readonly reason?: string;
+}
+
 interface ConformanceRecord {
-  readonly format: "6529.explained.tdh-engine-conformance.v1";
+  readonly format: "6529.explained.tdh-engine-conformance.v2";
   readonly specification: {
     readonly repository: "6529chain";
     readonly commit: string;
     readonly path: string;
+    readonly noVectorPath: string;
   };
   readonly engine: {
     readonly sha256: string;
@@ -151,14 +182,21 @@ interface ConformanceRecord {
     readonly fail: number;
     readonly outOfScope: number;
     readonly checks: number;
+    /** Files that are no vector, and how many the engine refused as such. */
+    readonly noVectors: number;
+    readonly noVectorsRefused: number;
   };
   readonly vectors: readonly RecordEntry[];
+  readonly noVectors: readonly NoVectorEntry[];
 }
 
-export function entryOf(run: VectorRun, text: string): RecordEntry {
+export function entryOf(
+  run: VectorRun,
+  file: string | Uint8Array
+): RecordEntry {
   return {
     id: run.id,
-    digest: contentDigest(text),
+    digest: contentDigest(file),
     scope: run.scope,
     status: run.status,
     checks: run.checks,
@@ -166,18 +204,34 @@ export function entryOf(run: VectorRun, text: string): RecordEntry {
   };
 }
 
+/**
+ * A file that is no vector: refused when the engine read it or checked its
+ * format, before any value was read as an input (P26 §13).
+ */
+export function noVectorEntryOf(file: ChainFile): NoVectorEntry {
+  const run = runVector(file.id, file.bytes);
+  return {
+    id: file.id,
+    sha256: sha256(file.bytes),
+    refused: run.noVector !== undefined,
+    ...(run.noVector === undefined ? {} : { reason: run.noVector }),
+  };
+}
+
 function buildRecord(root: string, chain: ChainVectors): ConformanceRecord {
   const entries = chain.vectors.map((v) =>
-    entryOf(runVector(v.id, v.text), v.text)
+    entryOf(runVector(v.id, v.bytes), v.bytes)
   );
+  const noVectors = chain.noVectors.map(noVectorEntryOf);
   const count = (status: VectorRun["status"]) =>
     entries.filter((e) => e.status === status).length;
   return {
-    format: "6529.explained.tdh-engine-conformance.v1",
+    format: "6529.explained.tdh-engine-conformance.v2",
     specification: {
       repository: "6529chain",
       commit: chain.commit,
       path: VECTORS_PATH,
+      noVectorPath: NO_VECTOR_PATH,
     },
     engine: { sha256: engineDigest(root), files: engineFiles(root) },
     summary: {
@@ -187,9 +241,20 @@ function buildRecord(root: string, chain: ChainVectors): ConformanceRecord {
       fail: count("fail"),
       outOfScope: count("out-of-scope"),
       checks: entries.reduce((sum, e) => sum + e.checks, 0),
+      noVectors: noVectors.length,
+      noVectorsRefused: noVectors.filter((e) => e.refused).length,
     },
     vectors: entries,
+    noVectors,
   };
+}
+
+/** Every vector passes and every file that is no vector is refused. */
+function conforms(record: ConformanceRecord): boolean {
+  return (
+    record.summary.fail === 0 &&
+    record.summary.noVectorsRefused === record.summary.noVectors
+  );
 }
 
 /**
@@ -242,7 +307,7 @@ function publicVectorsJson(chain: ChainVectors): string {
     if (!vector) {
       throw new Error(`vector ${id} is missing at ${chain.commit}`);
     }
-    vectors[id] = parseJsonExact(vector.text);
+    vectors[id] = parseJsonExact(decodeVectorText(vector.bytes));
   }
   return layout({
     format: "6529.tdh-public-vectors.v1",
@@ -325,12 +390,12 @@ async function main(
     for (const [file] of stale) {
       process.stderr.write(`${file} is not what the vectors give\n`);
     }
-    return stale.length > 0 || record.summary.fail > 0 ? 1 : 0;
+    return stale.length > 0 || !conforms(record) ? 1 : 0;
   }
   for (const [file, text] of outputs) {
     writeFileSync(path.join(root, file), text, "utf8");
   }
-  return record.summary.fail > 0 ? 1 : 0;
+  return conforms(record) ? 0 : 1;
 }
 
 const invokedPath = process.argv[1]?.replaceAll("\\", "/");
