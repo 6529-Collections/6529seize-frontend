@@ -16,10 +16,16 @@ interface AddressNoticeState {
 
 type NoticeState = Readonly<Record<string, AddressNoticeState>>;
 
-// Used only when localStorage itself is unavailable.
+// The state of this page session. Read instead of localStorage when it is
+// unavailable or the last write to it failed (quota, some private modes),
+// so a dismissal or a seen alert still takes effect until a write succeeds.
 let memorySnapshot = "";
+let lastWriteFailed = false;
 
 function readRaw(): string {
+  if (lastWriteFailed) {
+    return memorySnapshot;
+  }
   try {
     return globalThis.localStorage.getItem(STORAGE_KEY) ?? "";
   } catch {
@@ -55,8 +61,10 @@ function updateAddressState(
   memorySnapshot = raw;
   try {
     globalThis.localStorage.setItem(STORAGE_KEY, raw);
+    lastWriteFailed = false;
   } catch {
-    // Blocked storage keeps the in-memory state for this page session.
+    // Keep the in-memory state for this page session.
+    lastWriteFailed = true;
   }
   globalThis.dispatchEvent(new Event(CHANGE_EVENT));
 }
