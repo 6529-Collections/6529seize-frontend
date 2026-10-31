@@ -65,6 +65,21 @@ in your wallet. Cancelling the signature changes nothing.
 On Safari, the site's data can be deleted if you do not open 6529 for 7 days;
 the card says so on Safari.
 
+Selecting the button also asks the browser to keep this site's data
+(Firefox may ask you to allow it). If the browser does not agree, the card
+says that it may delete your encrypted history.
+
+Some browsers are set to delete cookies and site data whenever they close,
+and some privacy tools do the same. Then every visit needs a new signature
+and a new device slot, and starts without history. When this browser has no
+encrypted messages of its own but your profile already has two or more
+devices with this browser's name that were added in the last 30 days and not
+used for more than a day, the card warns about this before the signature. It
+shows where to let the site keep its data in Chrome or Brave (On-device site
+data, "Allowed to save data on your device"), Edge (the "Don't clear" list
+for data cleared on close) and Firefox (Cookies and Site Data, Manage
+Exceptions, Allow), and suggests turning on encrypted backup in Devices.
+
 In the last 14 days of a device's 180 days, a **Renew (one signature)** prompt
 appears on the chats list and above an empty composer. Encrypted messages
 never ask for a signature per message.
@@ -154,6 +169,11 @@ browser or app and OS family (for example "Chrome on Windows" or "6529 app on
 iPhone"); devices added earlier keep their name. A profile can have up to 10
 active devices; at the limit, the new device lists the profile's devices and
 asks you to revoke one from a device you already use, then turn it on.
+
+A device that has not been used for 30 days is marked **Inactive: doesn’t
+count toward your limit**. It does not count toward the 10 devices and is not
+added to new chats, but it stays in the chats it is already in. Using it
+again makes it active.
 
 When another device of yours is turned on, your other devices show which
 device was added and when, that it can read your encrypted messages, and

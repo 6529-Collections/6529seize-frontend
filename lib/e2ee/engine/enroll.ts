@@ -307,6 +307,7 @@ function toDeviceInfo(
     platform,
     createdAt: record.created_at,
     lastSeenAt: record.last_seen_at,
+    inactive: record.inactive === true,
     expiresAt: record.grant.expires_at * 1000,
     revokedAt: record.revoked_at,
     isThisDevice: own,

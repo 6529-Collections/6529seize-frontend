@@ -17,6 +17,12 @@ import {
   isE2eeSignatureRejection,
 } from "../e2eeErrors";
 import { isSafariBrowser } from "../e2eePlatform";
+import { E2eeEnrollmentStorageNotice } from "./E2eeEnrollmentStorageNotice";
+import {
+  type E2eeStoragePersistence,
+  requestE2eePersistentStorage,
+} from "./e2eeStorageDurability";
+import { useE2eeClearOnExitWarning } from "./useE2eeClearOnExitWarning";
 
 const POINTS: readonly {
   readonly key: MessageKey;
@@ -42,6 +48,11 @@ interface E2eeEnrollmentCardProps {
   readonly engineError: string | null;
   /** Extra context under the points (who signs, where to turn it off). */
   readonly details?: ReactNode | undefined;
+  /**
+   * The profile to check for a browser that deletes its data on close, set
+   * only while this browser has no encrypted-messages state; null skips it.
+   */
+  readonly clearOnExitProfileId?: string | null | undefined;
 }
 
 /**
@@ -53,11 +64,16 @@ export function E2eeEnrollmentCard({
   enrolling,
   engineError,
   details,
+  clearOnExitProfileId = null,
 }: E2eeEnrollmentCardProps) {
   const locale = useBrowserLocale();
   const headingId = useId();
   const [pending, setPending] = useState(false);
   const [errorKey, setErrorKey] = useState<MessageKey | null>(null);
+  const [persistence, setPersistence] = useState<E2eeStoragePersistence | null>(
+    null
+  );
+  const clearOnExit = useE2eeClearOnExitWarning(clearOnExitProfileId);
   const isSafari = useSyncExternalStore(
     subscribeNever,
     isSafariBrowser,
@@ -83,6 +99,9 @@ export function E2eeEnrollmentCard({
     if (!engine || waiting) {
       return;
     }
+    // Still inside the click: browsers only grant (or ask about) keeping
+    // this site's data during a user gesture.
+    void requestE2eePersistentStorage().then(setPersistence);
     setPending(true);
     setErrorKey(null);
     try {
@@ -128,6 +147,10 @@ export function E2eeEnrollmentCard({
             {t(locale, "e2ee.enroll.safari")}
           </p>
         ) : null}
+        <E2eeEnrollmentStorageNotice
+          clearOnExit={clearOnExit}
+          notPersisted={persistence === "not-persisted"}
+        />
         <div className="tw-mt-5 tw-flex tw-flex-col tw-gap-3">
           <Button
             variant="action"

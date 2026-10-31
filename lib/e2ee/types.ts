@@ -25,6 +25,8 @@ export interface E2eeDeviceInfo {
   platform: "web" | "desktop" | "phone";
   createdAt: number;
   lastSeenAt: number | null;
+  /** Unused for 30 days (server): doesn't count toward the device limit. */
+  inactive?: boolean;
   expiresAt: number; // ms
   revokedAt: number | null;
   isThisDevice: boolean;

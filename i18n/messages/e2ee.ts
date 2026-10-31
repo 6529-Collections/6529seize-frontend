@@ -56,6 +56,22 @@ export const E2EE_MESSAGES = {
   "e2ee.enroll.waiting": "Waiting for your wallet signature…",
   "e2ee.enroll.rejected": "You cancelled the signature. Nothing was turned on.",
   "e2ee.enroll.failed": "Couldn’t turn on encrypted messages. Try again.",
+  "e2ee.enroll.clearOnExit.title":
+    "This browser seems to delete its data when it closes",
+  "e2ee.enroll.clearOnExit.body":
+    "Each time, it needs a new signature and a new device slot, and loses its encrypted history.",
+  "e2ee.enroll.clearOnExit.stepsIntro":
+    "To keep encrypted messages here, let {site} save data in your browser’s settings:",
+  "e2ee.enroll.clearOnExit.chrome":
+    "Chrome or Brave: Settings → Privacy and security → Site settings (Brave: Site and Shields Settings) → On-device site data. Add {site} under “Allowed to save data on your device”.",
+  "e2ee.enroll.clearOnExit.edge":
+    "Edge: Settings → Privacy, search, and services → Clear browsing data → Choose what to clear every time you close the browser. Add {site} under “Don’t clear”.",
+  "e2ee.enroll.clearOnExit.firefox":
+    "Firefox: Settings → Privacy & Security → Cookies and Site Data → Manage Exceptions. Enter {site}, choose Allow, then Save Changes.",
+  "e2ee.enroll.clearOnExit.backup":
+    "Also turn on encrypted backup in Devices, so you can get your history back if this browser deletes it again.",
+  "e2ee.enroll.notPersisted":
+    "This browser didn’t confirm that it will keep this site’s data. It may delete your encrypted history to free up space or when its data is cleared.",
 
   "e2ee.deviceLimit.title": "Too many devices",
   "e2ee.deviceLimit.body":
@@ -85,6 +101,7 @@ export const E2EE_MESSAGES = {
   "e2ee.devices.expires": "Expires {date}",
   "e2ee.devices.expired": "Expired {date}",
   "e2ee.devices.revokedOn": "Revoked {date}",
+  "e2ee.devices.inactive": "Inactive: doesn’t count toward your limit",
   "e2ee.devices.verified": "Verified",
   "e2ee.devices.unverified": "Not verified",
   "e2ee.devices.verifiedHint":
