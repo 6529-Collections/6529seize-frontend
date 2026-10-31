@@ -80,9 +80,12 @@ describe("E2EE encrypted history backup", () => {
     const world = await createWorld();
     const server = createFakeBackupServer(world.clock.now);
     const alice = await addUser(world, "alice");
-    const bob = await addUser(world, "bob");
+    const bob = await addUser(world, "bobbackuppeer");
     const a = alice.primary.engine;
-    const g = await a.createConversation({ profileIds: ["bob"], kind: "dm" });
+    const g = await a.createConversation({
+      profileIds: ["bobbackuppeer"],
+      kind: "dm",
+    });
     await settle(world);
     await a.send(g, { text: "secret alpha" });
     await bob.primary.engine.send(g, { text: "secret bravo" });
@@ -118,7 +121,13 @@ describe("E2EE encrypted history backup", () => {
 
     // No plaintext ever leaves the client.
     const sent = requestText(server);
-    for (const secret of ["secret", "alpha", "bravo", "charlie", "bob"]) {
+    for (const secret of [
+      "secret",
+      "alpha",
+      "bravo",
+      "charlie",
+      "bobbackuppeer",
+    ]) {
       expect(sent).not.toContain(secret);
     }
     expect(sent).not.toContain(prepared.code);
@@ -174,7 +183,7 @@ describe("E2EE encrypted history backup", () => {
 
     // Bob comes back; his device adds the new device through a normal MLS
     // device add. The restored history stays and new messages arrive.
-    const bobAgain = await startDevice(world, "bob", bob.account, {
+    const bobAgain = await startDevice(world, "bobbackuppeer", bob.account, {
       storage: bob.primary.storage,
     });
     bob.devices.push(bobAgain);

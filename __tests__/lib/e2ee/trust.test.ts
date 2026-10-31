@@ -69,6 +69,11 @@ function fakeCtx(verifications: Map<string, GrantVerification>) {
     device: ownDevice,
     mls: null,
     storage,
+    // persist() serialises writes and versions them (single-tab engine).
+    persistChain: Promise.resolve(),
+    stateVersion: 0,
+    disposed: false,
+    options: {},
     directory: {
       verify: async (record: ApiE2eeDevice) =>
         verifications.get(record.device_key) ?? VERIFIED,
