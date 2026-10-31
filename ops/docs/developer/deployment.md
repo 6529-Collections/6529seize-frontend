@@ -209,6 +209,18 @@ metadata and final signal. Per-deploy frontend and backend notes post to the
 digest plus individual Desktop and mobile app release notes. CI wave
 notifications are best effort and use deploy run IDs to correlate E2E replies.
 
+## Sitemap generation
+
+The `postbuild` step (`next-sitemap.build.cjs`) builds the sitemap from live
+public API feeds. Each feed gets up to three attempts with jittered backoff. If a
+feed is still unavailable or fails its minimum-size floor, production deploy
+builds (GitHub Actions with `VERSION` set to the exact commit) fail rather than
+publish a truncated sitemap; rerun the build once the API is healthy. Pull
+request and local builds skip only that section, print a loud warning (and a
+GitHub annotation in CI), and still emit the static pages. The optional profile
+sample never fails a build. Set `SITEMAP_FAILURE_POLICY=fail` or `fallback` to
+override the detection.
+
 ## Failure and rollback
 
 Inspect the failing job and logs. Fix attributable failures on the development
