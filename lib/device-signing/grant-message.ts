@@ -13,8 +13,10 @@ const CANONICAL_SCOPE_ORDER: readonly DeviceScope[] = [
 ];
 const SIWE_HEADER_SUFFIX = " wants you to sign in with your Ethereum account:";
 const RESOURCES_LINE = "Resources:";
+// Same expiry grammar as the backend parser (no leading zeros, at most 16
+// digits), so both sides accept exactly the same grant messages.
 const URN_PATTERN =
-  /^urn:6529:device-grant:v1:ed25519:([0-9a-f]{64}):([a-z.]+):(\d+)$/;
+  /^urn:6529:device-grant:v1:ed25519:([0-9a-f]{64}):([a-z.]+):([1-9]\d{0,15})$/;
 const MLS_URN_PATTERN =
   /^urn:6529:mls-device-grant:v1:([1-9]\d{0,4}):([0-9a-f]{64}):([1-9]\d{0,15})$/;
 const MAX_MLS_CIPHERSUITE = 0xffff;

@@ -158,6 +158,15 @@ describe("NC8 combined grant shared vectors", () => {
       { resources: [SIGNING_URN, MLS_URN.replace(":v1:1:", ":v1:0:")] },
     ],
     [
+      "a signing expiry with a leading zero (the backend rejects it too)",
+      {
+        resources: [
+          SIGNING_URN.replace(":1807876800", ":01807876800"),
+          MLS_URN,
+        ],
+      },
+    ],
+    [
       "a ciphersuite above uint16",
       { resources: [SIGNING_URN, MLS_URN.replace(":v1:1:", ":v1:65536:")] },
     ],
