@@ -78,18 +78,74 @@ export function chunkText(text: string, size: number): string[] {
   return out;
 }
 
-function fileName(url: string, fallback: string): string {
+/** Longest attachment name the import writes (the payload allows 255). */
+const MAX_IMPORT_NAME_CHARS = 120;
+/** C0/C1 controls and bidirectional marks or overrides, which can disguise a name. */
+function isUnsafeNameChar(char: string): boolean {
+  const code = char.codePointAt(0) ?? 0;
+  return (
+    code < 0x20 ||
+    (code >= 0x7f && code <= 0x9f) ||
+    code === 0x200e ||
+    code === 0x200f ||
+    (code >= 0x202a && code <= 0x202e) ||
+    (code >= 0x2066 && code <= 0x2069)
+  );
+}
+
+/**
+ * Attachment names come from the legacy record or the CDN path and end up
+ * in the encrypted metadata every receiver shows and saves as. Keep them a
+ * plain file name: no path separators or control characters, no leading
+ * dots, at most 120 characters with the extension kept, or the fallback.
+ */
+export function safeAttachmentName(raw: string, fallback: string): string {
+  const cleaned = [...raw.normalize("NFC")]
+    .filter((char) => !isUnsafeNameChar(char))
+    .join("")
+    .replaceAll(/[/\\]+/gu, "_")
+    .replaceAll(/\s+/gu, " ")
+    .trim()
+    .replace(/^[.\s]+/u, "")
+    .replace(/[.\s]+$/u, "");
+  const chars = [...cleaned];
+  if (chars.length === 0) {
+    return fallback;
+  }
+  if (chars.length <= MAX_IMPORT_NAME_CHARS) {
+    return cleaned;
+  }
+  const dot = cleaned.lastIndexOf(".");
+  const extension = dot > 0 ? [...cleaned.slice(dot)] : [];
+  const keep = extension.length > 0 && extension.length <= 16 ? extension : [];
+  return (
+    chars.slice(0, MAX_IMPORT_NAME_CHARS - keep.length).join("") + keep.join("")
+  );
+}
+
+function nameFromUrl(url: string, fallback: string): string {
   try {
-    const last = new URL(url).pathname.split("/").pop();
-    return last ? decodeURIComponent(last).slice(0, 200) : fallback;
+    const last = new URL(url).pathname.split("/").pop() ?? "";
+    return safeAttachmentName(decodeURIComponent(last), fallback);
   } catch {
     return fallback;
   }
 }
 
+/** Groups of at most `size`, at least one (possibly empty) group. */
+function groupsOf<T>(values: readonly T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < values.length; i += size) {
+    out.push(values.slice(i, i + size));
+  }
+  return out.length > 0 ? out : [[]];
+}
+
 /**
  * One original drop becomes one message per part, more when a part's text
- * is long. Media ride on the first message of their part.
+ * is long or it has more than 10 images and files (the per-message limit):
+ * the extra media ride on follow-up messages of the same part, so none is
+ * left behind for the count alone.
  */
 export function planLegacyImport(
   items: readonly LegacyDmItem[]
@@ -105,26 +161,33 @@ export function planLegacyImport(
       const media = [
         ...legacyPart.media.map((m) => ({
           url: m.url,
-          name: fileName(m.url, "image"),
+          name: nameFromUrl(m.url, "image"),
           mime: m.mime_type,
         })),
-        ...legacyPart.attachments
-          .filter((a) => a.url !== null)
-          .map((a) => ({
-            url: a.url as string,
-            name: a.file_name,
-            mime: a.mime_type,
-          })),
+        ...legacyPart.attachments.flatMap((a) =>
+          a.url === null
+            ? []
+            : [
+                {
+                  url: a.url,
+                  name: safeAttachmentName(a.file_name, "file"),
+                  mime: a.mime_type,
+                },
+              ]
+        ),
       ];
-      chunkText(titled, IMPORT_TEXT_CHUNK).forEach((text, chunkIndex) => {
+      const texts = chunkText(titled, IMPORT_TEXT_CHUNK);
+      const mediaGroups = groupsOf(media, MAX_FILES_PER_MESSAGE);
+      const count = Math.max(texts.length, mediaGroups.length);
+      for (let i = 0; i < count; i += 1) {
         units.push({
           item,
           part,
-          text,
-          media: chunkIndex === 0 ? media : [],
+          text: texts[i] ?? "",
+          media: mediaGroups[i] ?? [],
         });
         part += 1;
-      });
+      }
     });
     if (part === 0) {
       units.push({ item, part: 0, text: item.title ?? "", media: [] });
@@ -193,11 +256,8 @@ async function collectFiles(
   const files: File[] = [];
   let tooLarge = 0;
   let notMoved = 0;
+  // planLegacyImport keeps every unit within MAX_FILES_PER_MESSAGE.
   for (const media of unit.media) {
-    if (files.length >= MAX_FILES_PER_MESSAGE) {
-      notMoved += 1;
-      continue;
-    }
     try {
       const blob = await deps.fetchMedia(media.url, signal);
       if (!fitsEncryptedAttachment(blob.size)) {
@@ -278,6 +338,12 @@ async function sendUnit(
     if (pause) {
       return { kind: "paused", pause };
     }
+    // Codes only: never the message text or file names.
+    console.warn(
+      "Legacy DM import: send refused",
+      getE2eeErrorCode(error) ?? "unknown",
+      input.files.length > 0 ? "retrying without attachments" : ""
+    );
     if (input.files.length === 0) {
       return { kind: "failed" };
     }

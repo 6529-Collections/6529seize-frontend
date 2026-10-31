@@ -6,6 +6,7 @@ import {
   pauseReason,
   planLegacyImport,
   runLegacyDmImport,
+  safeAttachmentName,
   type LegacyImportDeps,
 } from "@/components/e2ee/legacy/legacyDmImport";
 import { E2eeApiError } from "@/lib/e2ee/api";
@@ -157,6 +158,46 @@ describe("encrypted attachment size", () => {
 });
 
 describe("planLegacyImport", () => {
+  it.each([
+    ["holiday.png", "holiday.png"],
+    ["../../etc/passwd", "_.._etc_passwd"],
+    ["a\\b/c.pdf", "a_b_c.pdf"],
+    ["evil‮gnp.exe", "evilgnp.exe"],
+    ["line\nbreak\u0000.txt", "linebreak.txt"],
+    ["  ...  ", "file"],
+    ["", "file"],
+  ])("normalizes the attachment name %j", (raw, expected) => {
+    expect(safeAttachmentName(raw, "file")).toBe(expected);
+  });
+
+  it("caps long names and keeps the extension", () => {
+    const name = safeAttachmentName(`${"x".repeat(300)}.jpeg`, "file");
+    expect([...name]).toHaveLength(120);
+    expect(name.endsWith(".jpeg")).toBe(true);
+  });
+
+  it("normalizes names taken from the CDN path and the legacy record", () => {
+    const [unit] = planLegacyImport([
+      item(1, {
+        parts: [
+          {
+            text: "x",
+            quoted_drop_id: null,
+            media: [{ url: `${CDN}/a%2Fb%0A.png`, mime_type: "image/png" }],
+            attachments: [
+              {
+                file_name: "../secret‮.pdf",
+                mime_type: "application/pdf",
+                url: "https://cdn.example/f.pdf",
+              },
+            ],
+          },
+        ],
+      }),
+    ]);
+    expect(unit!.media.map((m) => m.name)).toEqual(["a_b.png", "_secret.pdf"]);
+  });
+
   it("splits long text without breaking characters", () => {
     const text = "😀".repeat(IMPORT_TEXT_CHUNK + 5);
     const chunks = chunkText(text, IMPORT_TEXT_CHUNK);
@@ -198,6 +239,12 @@ describe("planLegacyImport", () => {
 });
 
 describe("runLegacyDmImport", () => {
+  let warn: jest.SpyInstance;
+  beforeEach(() => {
+    warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+  });
+  afterEach(() => warn.mockRestore());
+
   it("sends every message oldest first, labelled with its origin", async () => {
     const { value, sent } = deps();
     const result = await run(
@@ -477,6 +524,12 @@ describe("runLegacyDmImport", () => {
     });
     expect(sent[0]!.files).toEqual([]);
     expect(sent[0]!.imported.mediaNotImported).toBe(1);
+    // The refusal is logged by code only, never with text or file names.
+    expect(warn).toHaveBeenCalledWith(
+      "Legacy DM import: send refused",
+      "E2EE_BAD_SIGNATURE",
+      "retrying without attachments"
+    );
   });
 
   it("counts other failures and carries on", async () => {
@@ -486,6 +539,29 @@ describe("runLegacyDmImport", () => {
     });
     const result = await run([item(1), item(2)], value);
     expect(result).toMatchObject({ outcome: "done", sent: 1, failed: 1 });
+  });
+
+  it("carries more than 10 images on follow-up messages of the same part", async () => {
+    const media = Array.from({ length: 12 }, (_, i) => ({
+      url: `${CDN}/img-${i}.png`,
+      mime_type: "image/png",
+    }));
+    const { value, sent } = deps();
+    const result = await run(
+      [
+        item(1, {
+          parts: [
+            { text: "album", quoted_drop_id: null, media, attachments: [] },
+          ],
+        }),
+      ],
+      value
+    );
+    expect(sent.map((s) => [s.imported.part, s.text, s.files.length])).toEqual([
+      [0, "album", 10],
+      [1, "", 2],
+    ]);
+    expect(result).toMatchObject({ sent: 2, mediaMoved: 12, mediaNotMoved: 0 });
   });
 
   it("stops when cancelled", async () => {
