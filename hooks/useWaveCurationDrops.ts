@@ -1,11 +1,7 @@
 "use client";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import {
-  updateAttachmentInCachedDrops,
-  updateDropInCachedDrops,
-} from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
-import type { ApiAttachment } from "@/generated/models/ApiAttachment";
+import { updateDropInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import type { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { WsDropUpdateMessage } from "@/helpers/Types";
@@ -164,16 +160,6 @@ export function useWaveCurationDrops({
         requestRefetch();
       },
       [queryClient, requestRefetch, waveId]
-    )
-  );
-
-  useWebSocketMessage<ApiAttachment>(
-    WsMessageType.ATTACHMENT_STATUS_UPDATE,
-    useCallback(
-      (attachment) => {
-        updateAttachmentInCachedDrops(queryClient, attachment);
-      },
-      [queryClient]
     )
   );
 

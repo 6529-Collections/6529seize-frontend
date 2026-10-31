@@ -35,7 +35,7 @@ export default async function TheMemesPage({
   const initialData = await getTheMemesInitialData(resolvedSearchParams);
 
   return (
-    <main className={styles["main"]}>
+    <main className={styles["main"]} lang={locale}>
       <JsonLdScript
         data={buildCollectionPageJsonLd({
           path: "/the-memes",

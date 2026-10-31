@@ -4,11 +4,7 @@ import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { upsertDropIntoMatchingDropsQueries } from "@/components/react-query-wrapper/utils/addDropsToDrops";
-import {
-  updateAttachmentInCachedDrops,
-  updateDropInCachedDrops,
-} from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
-import type { ApiAttachment } from "@/generated/models/ApiAttachment";
+import { updateDropInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropSearchStrategy } from "@/generated/models/ApiDropSearchStrategy";
 import type { ApiDropType } from "@/generated/models/ApiDropType";
@@ -252,16 +248,6 @@ export function useWaveDrops({
         requestRefetch();
       },
       [queryClient, requestRefetch, waveId]
-    )
-  );
-
-  useWebSocketMessage<ApiAttachment>(
-    WsMessageType.ATTACHMENT_STATUS_UPDATE,
-    useCallback(
-      (attachment) => {
-        updateAttachmentInCachedDrops(queryClient, attachment);
-      },
-      [queryClient]
     )
   );
 
