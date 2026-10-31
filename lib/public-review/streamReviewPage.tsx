@@ -22,6 +22,7 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 import {
   loadStreamEditorialContent,
   PublicReviewEditorialContentError,
@@ -63,9 +64,9 @@ import {
   STREAM_REVIEW_CURRENT_PAGES,
   STREAM_REVIEW_ENTRY_PAGES,
   STREAM_REVIEW_ENTRY_GUIDE_VERSION,
-  getStreamReviewEntryMarkdown,
   getStreamReviewRelatedPages,
 } from "./streamReviewEntryGuides";
+import { getStreamReviewEntryMarkdown } from "./streamReviewEntryMarkdown";
 
 function getStreamReviewMetadata({
   baseEndpoint,

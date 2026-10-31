@@ -8,6 +8,7 @@ import type { ReactNode } from "react";
 
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 
 type PublicReviewSurface = "reference" | "feedback";
 
