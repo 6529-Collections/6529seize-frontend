@@ -1,4 +1,5 @@
 import type { E2eeApiClient } from "./api";
+import type { BackupHistory } from "./backup/format";
 import type { E2eeNoticeType } from "./notice-types";
 import type { E2eeStorage } from "./storage";
 import type { WasmModule } from "./wasm-types";
@@ -85,7 +86,8 @@ export interface E2eeConversation {
   createdBy: string;
   epoch: number;
   safetyCode: string; // "abcd efgh ijkl mnop"
-  status: "active" | "invalid" | "left" | "removed";
+  /** "restored": from a history backup, read-only until this device joins. */
+  status: "active" | "invalid" | "left" | "removed" | "restored";
   delayed: boolean; // 8.3 stall banner
   splitView: boolean; // 8.6 alarm
   lastMessage: E2eeMessage | null;
@@ -214,6 +216,12 @@ export interface E2eeEngineExtraDeps {
 export type E2eeEngineOptions = E2eeEngineDeps & E2eeEngineExtraDeps;
 
 export interface E2eeEngineExt extends E2eeEngine {
+  /** Copies of the decrypted history for the encrypted backup (no MLS state). */
+  backupHistory(): BackupHistory;
+  /** Merges restored history; unknown chats are added read-only. */
+  importBackupHistory(
+    history: BackupHistory
+  ): Promise<{ conversations: number; messages: number }>;
   /** Tells the engine which conversation is on screen (5 s polling). */
   setOpenConversation(g: string | null): void;
   /** Resolves when no operation or background task is in flight. */

@@ -5,7 +5,7 @@ import Button from "@/components/utils/button/Button";
 import { useE2ee } from "@/hooks/e2ee/useE2ee";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
-import { E2eeBanner } from "../ui/E2eeBanner";
+import { E2eeBackupPanel } from "../backup/E2eeBackupPanel";
 import { E2eeDeviceList } from "./E2eeDeviceList";
 import { E2eeNewDeviceNotice } from "./E2eeNewDeviceNotice";
 
@@ -97,9 +97,7 @@ export function E2eeDevicesPanel() {
         {t(locale, "e2ee.devices.description")}
       </p>
       <E2eeNewDeviceNotice />
-      <E2eeBanner tone="warning" live={false}>
-        {t(locale, "e2ee.enroll.point.noBackup")}
-      </E2eeBanner>
+      <E2eeBackupPanel />
       <RenameThisDevice />
       <E2eeDeviceList
         devices={devices}

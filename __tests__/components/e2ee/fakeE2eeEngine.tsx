@@ -202,6 +202,7 @@ export function contextFor(
     profileId: SELF_ID,
     engine,
     store,
+    backup: null,
     loadError: null,
     restart: jest.fn(),
     ...overrides,

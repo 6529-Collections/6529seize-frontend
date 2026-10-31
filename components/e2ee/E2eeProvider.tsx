@@ -13,6 +13,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
 import { isEncryptedMessagesPathname } from "@/helpers/navigation.helpers";
+import type { E2eeBackupManager } from "@/lib/e2ee/backup";
 import type { E2eeEngine } from "@/lib/e2ee/types";
 import {
   E2eeContext,
@@ -47,6 +48,7 @@ type LoadState =
       readonly phase: "loaded";
       readonly engine: E2eeEngine;
       readonly store: E2eeEngineStore;
+      readonly backup: E2eeBackupManager | null;
     }
   | { readonly key: string; readonly phase: "failed"; readonly error: string };
 
@@ -183,6 +185,7 @@ function E2eeProviderEnabled({
     const isCancelled = () => run.cancelled;
     let engine: E2eeEngine | null = null;
     let store: E2eeEngineStore | null = null;
+    let backup: E2eeBackupManager | null = null;
 
     const start = async () => {
       try {
@@ -206,7 +209,14 @@ function E2eeProviderEnabled({
           updateEnrollmentMarker(profileId, snapshot)
         );
         updateEnrollmentMarker(profileId, store.getSnapshot());
-        setLoadState({ key: activeKey, phase: "loaded", engine, store });
+        backup = modules.startE2eeBackup?.(created, profileId) ?? null;
+        setLoadState({
+          key: activeKey,
+          phase: "loaded",
+          engine,
+          store,
+          backup,
+        });
       } catch (error) {
         if (!isCancelled()) {
           setLoadState({
@@ -222,6 +232,7 @@ function E2eeProviderEnabled({
 
     return () => {
       run.cancelled = true;
+      backup?.dispose();
       store?.dispose();
       engine?.dispose();
     };
@@ -245,6 +256,7 @@ function E2eeProviderEnabled({
       profileId: isProxy ? null : profileId,
       engine: loaded?.engine ?? null,
       store: loaded?.store ?? null,
+      backup: loaded?.backup ?? null,
       loadError:
         availability === "failed" && loadState?.phase === "failed"
           ? loadState.error

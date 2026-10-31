@@ -56,8 +56,9 @@ happens:
 - The signature cannot move funds, change your profile or act as an admin. It
   creates no transaction and costs no gas.
 - 6529 cannot read your encrypted messages.
-- There is no backup in this version. If you lose all your devices or clear
-  this browser's data, you lose this history.
+- Your history is stored on your devices. If you lose all of them or clear
+  this browser's data, you lose it, unless you turn on encrypted backup in
+  Devices (see [Encrypted backup](#encrypted-backup)).
 
 Select **Turn on encrypted messages (one signature)** and approve the signature
 in your wallet. Cancelling the signature changes nothing.
@@ -127,6 +128,10 @@ hybrid post-quantum key exchange) and has **Mute on this device**.
 - **Security check needed: this device may not see the same chat as everyone
   else.** Members may be seeing different versions of the chat. Compare
   safety codes before sharing anything sensitive.
+- **Restored from your backup. New messages appear here once someone in this
+  chat adds this device.** The chat came from your encrypted backup and is
+  read-only until a member's device adds this device (this happens
+  automatically when the other people in the chat are online).
 - **This chat is paused because of an invalid change.** A change failed
   validation, so the chat stops. Select **Start a new encrypted chat with the
   same people** to continue in a fresh chat.
@@ -157,6 +162,48 @@ device was added and when, that it can read your encrypted messages, and
 **Revoke** or **This was me**. Your own device changes are not repeated in
 each chat's timeline.
 
+## Encrypted backup
+
+The **Encrypted backup** section on `/messages/encrypted/devices` keeps an
+encrypted copy of your message history so you can restore it on a new device.
+
+- **Turn on backup** shows a recovery code once: 14 groups of 4 letters and
+  numbers. Select **Copy code** or **Download as text file**, store it
+  somewhere safe (for example a password manager), tick **I saved my recovery
+  code somewhere safe**, then select **Turn on backup**. Closing the dialog
+  before that turns nothing on and discards the code.
+- What is backed up: messages you have on this device (text, edits,
+  deletions, reactions, notices), the chat names and members needed to show
+  them, and references to attachments with their keys. Never the device's
+  encryption state; a new device always joins chats as a new device.
+- Backups are incremental: after a change the device uploads only what
+  changed, about 30 seconds later. **Back up now** uploads immediately. The
+  section shows when the device last backed up and how much of the 256 MB
+  backup storage is used.
+- 6529 stores only encrypted data. It cannot read your messages, contact
+  list or chat names, and cannot recover your recovery code. It can see that
+  you have a backup, its size and when it changes.
+- **Restore messages** appears on a device that has encrypted messages turned
+  on while a backup from another device exists. Enter the recovery code
+  (spaces, dashes and lowercase are fine). A mistyped code says
+  "That doesn't look like a recovery code"; a valid code that belongs to
+  another backup says "That recovery code doesn't open this backup" and
+  restores nothing. Restored chats show **From backup** in the list and are
+  read-only until someone in the chat adds this device; then new messages
+  continue below the restored ones. After a restore the device also keeps the
+  same backup up to date.
+- **Create new recovery code** shows a new code and uploads a fresh copy of
+  your history. Your old code stops working once the new backup finishes
+  uploading. Do this after you revoke a device that had backup on: the
+  section reminds you when a device was revoked after the backup was set up.
+- **Turn off backup** deletes the encrypted backup from 6529. Your recovery
+  code stops working; messages on your devices stay.
+- Attachments themselves are not copied into the backup. A restored
+  attachment downloads only after this device has been added back to the
+  chat, and only while the encrypted file is still stored (one year).
+- Only one recovery method exists today (the recovery code). Passkeys and
+  other methods may come later.
+
 ## Notifications
 
 - Unread and mention counts appear on encrypted chats and count toward the
@@ -185,8 +232,10 @@ setting. Reports are kept for 180 days unless trust and safety holds them.
 
 ## Limitations
 
-- No backup or history transfer: a new device sees only messages sent after
-  it joins a chat.
+- Without encrypted backup a new device sees only messages sent after it
+  joins a chat. With backup on, restore past history with the recovery code.
+- Losing every device and the recovery code loses the history; 6529 cannot
+  recover it.
 - Retention on the delivery service is limited (messages 90 days); history
   lives on your devices.
 - Search is local to the device.
@@ -201,5 +250,12 @@ setting. Reports are kept for 180 days unless trust and safety holds them.
   your new device (it is added automatically after you turn it on).
 - **You cancelled the signature**: select the button again and approve the
   wallet signature.
+- **That recovery code doesn't open this backup**: the code is from an older
+  backup or another profile. Use the code shown when backup was last turned
+  on or when the current recovery code was created.
+- **Backup was turned off or replaced on another device**: restore with the
+  current recovery code to back up this device too, or start a new backup.
+- **Your backup storage is full**: select **Create new recovery code** to
+  replace the backup with a compact copy.
 - **Too many devices**: revoke a device you no longer use, then select
   **Turn on this device**.

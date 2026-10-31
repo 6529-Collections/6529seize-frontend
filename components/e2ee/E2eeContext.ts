@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext } from "react";
+import type { E2eeBackupManager } from "@/lib/e2ee/backup";
 import type { E2eeEngine } from "@/lib/e2ee/types";
 import type { E2eeEngineStore } from "./e2eeEngineStore";
 
@@ -26,6 +27,8 @@ export interface E2eeContextValue {
   readonly profileId: string | null;
   readonly engine: E2eeEngine | null;
   readonly store: E2eeEngineStore | null;
+  /** Encrypted history backup for the loaded engine, when supported. */
+  readonly backup: E2eeBackupManager | null;
   /** Error code when the engine module or instance failed to load. */
   readonly loadError: string | null;
   /** Dispose and recreate the engine (after an error). */
@@ -39,6 +42,7 @@ const DISABLED_E2EE_CONTEXT: E2eeContextValue = {
   profileId: null,
   engine: null,
   store: null,
+  backup: null,
   loadError: null,
   restart: noop,
 };
