@@ -41,6 +41,13 @@ const SIGNING_BUDGET_MS = 1500;
 const INVALID_DEVICE_SIGNATURE_PREFIX = "Invalid device signature:";
 const INVALID_DEVICE_SIGNATURE_CODE = "INVALID_DEVICE_SIGNATURE";
 /**
+ * A server without signed writes (for example after a backend rollback)
+ * rejects the field itself; the write is then resent unsigned like any
+ * other rejected signature, and the grant is kept.
+ */
+const UNSUPPORTED_DEVICE_SIGNATURE_MESSAGE =
+  '"device_signature" is not allowed';
+/**
  * Reasons that mean the grant itself can no longer sign. Others (a reused
  * sequence, clock skew, a malformed envelope) keep the grant; the write is
  * still resent once unsigned and the next write signs with a fresh sequence.
@@ -150,6 +157,9 @@ export function getInvalidDeviceSignatureReason(error: unknown): string | null {
   const message = getErrorMessage(error) ?? "";
   if (message.startsWith(INVALID_DEVICE_SIGNATURE_PREFIX)) {
     return message.slice(INVALID_DEVICE_SIGNATURE_PREFIX.length).trim();
+  }
+  if (message.includes(UNSUPPORTED_DEVICE_SIGNATURE_MESSAGE)) {
+    return "";
   }
   return getStructuredApiErrorCode(error) === INVALID_DEVICE_SIGNATURE_CODE
     ? ""
