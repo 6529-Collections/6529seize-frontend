@@ -189,6 +189,41 @@ describe("ssrFetch", () => {
       );
     });
 
+    it("never follows a redirect while carrying the server staging key", async () => {
+      mockServerStagingApiKey = "server-staging-key";
+      mockGetAppCommonHeaders.mockResolvedValue({});
+      const { ssrFetch } = await loadSsrFetch();
+
+      await ssrFetch(API_URL);
+
+      expect(sentRequest().headers.get("x-6529-auth")).toBe(
+        "server-staging-key"
+      );
+      expect(sentRequest().redirect).toBe("error");
+    });
+
+    it("keeps a caller's manual redirect handling with the server staging key", async () => {
+      mockServerStagingApiKey = "server-staging-key";
+      mockGetAppCommonHeaders.mockResolvedValue({});
+      const { ssrFetch } = await loadSsrFetch();
+
+      await ssrFetch(API_URL, { redirect: "manual" });
+
+      expect(sentRequest().redirect).toBe("manual");
+    });
+
+    it("leaves redirects alone when the visitor's access value is sent", async () => {
+      mockServerStagingApiKey = "server-staging-key";
+      const { ssrFetch } = await loadSsrFetch();
+
+      await ssrFetch(API_URL);
+
+      expect(sentRequest().headers.get("x-6529-auth")).toBe(
+        "environment-access"
+      );
+      expect(sentRequest().redirect).toBe("follow");
+    });
+
     it("never sends the server staging key to another origin", async () => {
       mockServerStagingApiKey = "server-staging-key";
       const { ssrFetch } = await loadSsrFetch();

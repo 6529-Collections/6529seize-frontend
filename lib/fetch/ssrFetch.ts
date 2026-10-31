@@ -150,6 +150,25 @@ const applyServerStagingAccess = (headers: Headers): void => {
   }
 };
 
+// fetch keeps custom headers across redirects, including cross-origin ones, so
+// a request that still carries the server staging key never follows one.
+const withServerKeyRedirectGuard = (
+  init: RequestInit | undefined,
+  headers: Headers
+): RequestInit => {
+  const stagingApiKey = getStagingApiKey();
+  const carriesServerKey =
+    stagingApiKey !== undefined &&
+    headers.get(API_AUTH_COOKIE) === stagingApiKey;
+  return {
+    ...init,
+    headers,
+    ...(carriesServerKey && init?.redirect !== "manual"
+      ? { redirect: "error" as const }
+      : {}),
+  };
+};
+
 const createSsrFetch =
   (includeWalletAuth: boolean): typeof fetch =>
   async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
@@ -206,7 +225,7 @@ const createSsrFetch =
       );
       return fetchApiWithDeadline(
         input,
-        { ...init, headers: enhancedHeaders },
+        withServerKeyRedirectGuard(init, enhancedHeaders),
         method,
         path
       );
@@ -246,7 +265,7 @@ const createSsrFetch =
 
     return fetchApiWithDeadline(
       input,
-      { ...init, headers: enhancedHeaders },
+      withServerKeyRedirectGuard(init, enhancedHeaders),
       method,
       path
     );
