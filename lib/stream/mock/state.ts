@@ -177,6 +177,8 @@ export interface WorkSpec {
   readonly seedPolicy?: SeedPolicy;
   readonly collection?: { readonly id: number; readonly name: string };
   readonly storage?: Partial<MockStorage>;
+  /** The approved package item this work mints from (`IStream.work(id)`), when it has one. */
+  readonly item?: { readonly packageRoot: Hex32; readonly itemHash: Hex32 };
 }
 
 /** An approved item waiting in curation, with what `start` will mint. */
