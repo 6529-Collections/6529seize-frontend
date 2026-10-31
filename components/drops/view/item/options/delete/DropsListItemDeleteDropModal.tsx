@@ -7,7 +7,7 @@ import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { commonApiDelete } from "@/services/api/common-api";
+import { deleteDrop } from "@/services/api/signed-drop-writes";
 import {
   Description,
   Dialog,
@@ -42,9 +42,7 @@ export default function DropsListItemDeleteDropModal({
   const [mutating, setMutating] = useState(false);
   const deleteDropMutation = useMutation({
     mutationFn: async () =>
-      await commonApiDelete({
-        endpoint: `drops/${drop.id}`,
-      }),
+      await deleteDrop({ dropId: drop.id, waveId: drop.wave.id }),
     onSuccess: () => {
       setToast({
         message: `${contentType} deleted.`,
