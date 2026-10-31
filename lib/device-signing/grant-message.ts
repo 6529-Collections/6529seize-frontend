@@ -75,15 +75,73 @@ const formatUtcMinute = (expiresAtSeconds: number): string =>
     .slice(0, 16)
     .replace("T", " ");
 
+// Fixed English abbreviations, never Intl: the date is part of signed bytes.
+const UTC_MONTH_ABBREVIATIONS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+] as const;
+
+/** The grant expiry as a UTC calendar date, e.g. "29 Apr 2027" or "5 Nov 2026". */
+export const formatGrantExpiryDate = (expiresAtSeconds: number): string => {
+  const date = new Date(expiresAtSeconds * 1000);
+  const month = UTC_MONTH_ABBREVIATIONS[date.getUTCMonth()] ?? "";
+  return `${date.getUTCDate()} ${month} ${date.getUTCFullYear()}`;
+};
+
+/** What the statement says the device will sign for each scope. */
+const SCOPE_NOUNS: Readonly<Record<DeviceScope, string>> = {
+  post: "posts",
+  edit: "edits",
+  delete: "deletes",
+  react: "reactions",
+  vote: "votes",
+};
+
+const toScopeNoun = (scope: string): string =>
+  Object.hasOwn(SCOPE_NOUNS, scope) ? SCOPE_NOUNS[scope as DeviceScope] : scope;
+
 /**
- * The wallet-signed grant statement. Intentionally not localized: the server
- * renders the same bytes into the Sign-In with Ethereum challenge, the wallet
- * signs them, and both sides compare them byte for byte, so this text is a
- * signed commitment, not UI copy. Changing it needs a coordinated backend and
- * frontend rule change (see the i18n exception in
- * ops/docs/waves/drop-actions/feature-signed-messages.md).
+ * The wallet-signed grant statement the server renders into new challenges.
+ * Intentionally not localized: the server renders the same bytes into the
+ * Sign-In with Ethereum challenge, the wallet signs them, and both sides
+ * compare them byte for byte, so this text is a signed commitment, not UI
+ * copy. Changing it needs a coordinated backend and frontend rule change (see
+ * the i18n exception in ops/docs/waves/drop-actions/feature-signed-messages.md).
+ * The URN alone carries the exact expiry time; the statement names its UTC date.
  */
 export function renderDeviceGrantStatement({
+  deviceKeyHex,
+  scopes,
+  expiresAtSeconds,
+}: DeviceGrantTerms): string {
+  return (
+    `Sign in to 6529 and turn on signed messages on this device until ` +
+    `${formatGrantExpiryDate(expiresAtSeconds)}. ` +
+    `This device will sign your ${formatEnglishList(scopes.map(toScopeNoun))} ` +
+    `so anyone can verify they came from your wallet. ` +
+    `It can't move funds, change your handle, add devices or act as an admin. ` +
+    `No transaction, no gas, no token approvals. ` +
+    `(Device key ${getDeviceKeyFingerprint(deviceKeyHex)})`
+  );
+}
+
+/**
+ * The statement of grants issued before the current wording. Wallets signed
+ * those grants over these exact bytes, so they must keep parsing for as long
+ * as their signatures are shown, and a challenge from a server still on this
+ * wording must stay signable. Never render it for anything new.
+ */
+export function renderLegacyDeviceGrantStatement({
   deviceKeyHex,
   scopes,
   expiresAtSeconds,
@@ -97,6 +155,14 @@ export function renderDeviceGrantStatement({
     `This request does not create a blockchain transaction, cost gas, or approve tokens.`
   );
 }
+
+/** Exactly the current or the legacy statement rendered from these terms. */
+const isDeviceGrantStatement = (
+  statement: string,
+  terms: DeviceGrantTerms
+): boolean =>
+  statement === renderDeviceGrantStatement(terms) ||
+  statement === renderLegacyDeviceGrantStatement(terms);
 
 export function buildDeviceGrantUrn({
   deviceKeyHex,
@@ -160,7 +226,8 @@ const parseGrantResource = (
 
 /**
  * Parses an ERC-4361 message that carries exactly one device-grant resource
- * and whose statement is exactly the statement rendered from that resource.
+ * and whose statement is exactly the current or the legacy statement rendered
+ * from that resource.
  */
 export function parseDeviceGrantMessage(
   message: string
@@ -183,7 +250,8 @@ export function parseDeviceGrantMessage(
     !terms ||
     domain === null ||
     chainId === null ||
-    statement !== renderDeviceGrantStatement(terms)
+    statement === undefined ||
+    !isDeviceGrantStatement(statement, terms)
   ) {
     return null;
   }
