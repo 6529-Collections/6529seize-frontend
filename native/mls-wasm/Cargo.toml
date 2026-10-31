@@ -16,11 +16,16 @@ name = "bench"
 path = "src/bin/bench.rs"
 
 [dependencies]
-openmls = { version = "=0.9.1" }
-openmls_rust_crypto = "=0.6.0"
-openmls_basic_credential = "=0.6.0"
-openmls_traits = "=0.6.0"
-openmls_memory_storage = "=0.6.0"
+# draft-ietf-mls-pq-ciphersuites enables MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519
+# (0x004F, X-Wing), the only suite this device uses (src/device.rs CIPHERSUITE).
+# Cargo.lock also lists the optional OpenMLS storage and provider crates that
+# this feature names as weak features (sqlite storage, libcrux provider,
+# openmls_test); they are not built for either target (`cargo tree`).
+openmls = { version = "=0.9.1", features = ["draft-ietf-mls-pq-ciphersuites"] }
+openmls_rust_crypto = { version = "=0.6.0", features = ["draft-ietf-mls-pq-ciphersuites"] }
+openmls_basic_credential = { version = "=0.6.0", features = ["draft-ietf-mls-pq-ciphersuites"] }
+openmls_traits = { version = "=0.6.0", features = ["draft-ietf-mls-pq-ciphersuites"] }
+openmls_memory_storage = { version = "=0.6.0", features = ["draft-ietf-mls-pq-ciphersuites"] }
 tls_codec = { version = "0.5", features = ["derive", "serde", "mls"] }
 wasm-bindgen = "=0.2.129"
 js-sys = "0.3"
@@ -35,7 +40,7 @@ zeroize = "1"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 # Browser entropy (crypto.getRandomValues) and clock (Date.now) for wasm32.
-openmls = { version = "=0.9.1", features = ["js"] }
+openmls = { version = "=0.9.1", features = ["js", "draft-ietf-mls-pq-ciphersuites"] }
 getrandom = { version = "0.2", features = ["js"] }
 
 [profile.release]

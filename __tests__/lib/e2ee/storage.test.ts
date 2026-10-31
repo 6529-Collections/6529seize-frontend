@@ -23,7 +23,7 @@ const device = (profileId: string): StoredDevice => ({
   grant: {
     wallet: `0x${"22".repeat(20)}`,
     device_key: `0x${"11".repeat(32)}`,
-    ciphersuite: 1,
+    ciphersuite: 79,
     issued_at: 1,
     expires_at: 60,
     origin: "localhost:3001",
