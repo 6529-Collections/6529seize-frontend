@@ -291,6 +291,24 @@ async function sendUnit(
   }
 }
 
+type MutableProgress = { -readonly [K in keyof LegacyImportProgress]: number };
+
+function recordStep(
+  progress: MutableProgress,
+  kind: "sent" | "sentWithoutMedia" | "failed",
+  collected: CollectedFiles
+): void {
+  if (kind === "failed") {
+    progress.failed += 1;
+    return;
+  }
+  const moved = kind === "sent" ? collected.files.length : 0;
+  progress.sent += 1;
+  progress.mediaMoved += moved;
+  progress.mediaTooLarge += collected.tooLarge;
+  progress.mediaNotMoved += collected.notMoved + collected.files.length - moved;
+}
+
 export async function runLegacyDmImport(input: {
   readonly g: string;
   readonly waveId: string;
@@ -354,12 +372,10 @@ export async function runLegacyDmImport(input: {
       input.skipMedia === true,
       signal
     );
-    const { files } = collected;
-    const reply = unit.part === 0 ? replyFor(unit.item.reply_to) : null;
     const step = await sendUnit(deps, g, {
       text: unit.text,
-      reply,
-      files,
+      reply: unit.part === 0 ? replyFor(unit.item.reply_to) : null,
+      files: collected.files,
       imported: (missing) =>
         importedFor(
           waveId,
@@ -371,15 +387,7 @@ export async function runLegacyDmImport(input: {
       report();
       return { ...progress, outcome: "paused", pause: step.pause };
     }
-    if (step.kind === "failed") {
-      progress.failed += 1;
-    } else {
-      progress.sent += 1;
-      const moved = step.kind === "sent" ? files.length : 0;
-      progress.mediaMoved += moved;
-      progress.mediaTooLarge += collected.tooLarge;
-      progress.mediaNotMoved += collected.notMoved + files.length - moved;
-    }
+    recordStep(progress, step.kind, collected);
     report();
     await deps
       .sleep(input.pacingMs ?? IMPORT_PACING_MS, signal)

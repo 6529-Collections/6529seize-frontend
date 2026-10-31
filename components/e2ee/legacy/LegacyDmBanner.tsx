@@ -105,7 +105,7 @@ function LegacyDmBanner({
         loading={start.pending}
         onClick={() => void start.start()}
       >
-        {t(locale, "e2ee.legacy.action.startEncrypted")}
+        {t(locale, "e2ee.plaintext.startShort")}
       </Button>
     );
   }

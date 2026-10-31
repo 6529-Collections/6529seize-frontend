@@ -342,7 +342,6 @@ export const E2EE_MESSAGES = {
   "e2ee.legacy.region": "Unencrypted chat notice",
   "e2ee.legacy.action.export": "Export history",
   "e2ee.legacy.action.openEncrypted": "Open encrypted chat",
-  "e2ee.legacy.action.startEncrypted": "Start encrypted chat",
   "e2ee.legacy.readOnly":
     "This chat is read-only. Your new messages go to the encrypted chat.",
 
@@ -362,7 +361,6 @@ export const E2EE_MESSAGES = {
     "Couldn’t read the whole chat. Check your connection and try again.",
   "e2ee.legacy.export.retry": "Try again",
 
-  "e2ee.legacy.create.encrypted": "Start encrypted chat",
   "e2ee.legacy.create.unencrypted": "Send unencrypted instead",
   "e2ee.legacy.create.warning":
     "An unencrypted DM isn’t end-to-end encrypted, and 6529 deletes it from its servers on {date}.",

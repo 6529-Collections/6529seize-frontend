@@ -104,7 +104,7 @@ function hasValidIdentity(value: Json): boolean {
     isId(value["w"]) &&
     isId(value["d"]) &&
     isCount(value["p"]) &&
-    (value["p"] as number) < MAX_PARTS &&
+    value["p"] < MAX_PARTS &&
     isCount(value["n"]) &&
     isId(value["a"]) &&
     isOptional(value["ah"], isHandle) &&
@@ -117,7 +117,7 @@ function hasValidDetails(value: Json, text: string): boolean {
     isOptional(value["e"], isCount) &&
     isOptional(value["r"], isId) &&
     isCount(value["hl"]) &&
-    (value["hl"] as number) <= text.length &&
+    value["hl"] <= text.length &&
     isCount(value["mx"])
   );
 }

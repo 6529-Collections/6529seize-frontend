@@ -200,7 +200,10 @@ own exports, push notification previews already delivered to phones, and
 attachments that were published to public IPFS.
 
 Encrypted uploads are limited per day, so moving a long history with many
-images may pause; continue the next day to move the rest.
+images may pause; continue the next day to move the rest. If your space for
+encrypted images and files is full, it also pauses, and offers **Continue
+without images**. Images and files too large for one encrypted attachment
+(about 25 MB) are listed as too large to move.
 
 ## Limitations
 

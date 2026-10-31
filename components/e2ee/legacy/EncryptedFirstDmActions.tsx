@@ -83,7 +83,7 @@ export function EncryptedFirstDmActions({
           onClick={startEncrypted}
           className="tw-min-h-[50px]"
         >
-          {t(locale, "e2ee.legacy.create.encrypted")}
+          {t(locale, "e2ee.new.create")}
         </Button>
       ) : null}
       {closed ? null : (

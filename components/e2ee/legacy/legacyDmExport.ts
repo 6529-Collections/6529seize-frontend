@@ -86,7 +86,7 @@ export function toLegacyDmItem(drop: FeedDrop): LegacyDmItem {
         url: media.url,
         mime_type: media.mime_type,
       })),
-      attachments: (part.attachments ?? []).map((attachment) => ({
+      attachments: part.attachments.map((attachment) => ({
         file_name: attachment.file_name,
         mime_type: String(attachment.mime_type),
         url: attachment.url ?? null,
@@ -168,19 +168,22 @@ export async function fetchLegacyDmDrops(input: {
   const fetchPage = input.fetchPage ?? fetchFeedPage;
   const drops: ApiDropWithoutWave[] = [];
   let before: number | null = null;
-  while (true) {
-    const page = await fetchPage(input.waveId, before, input.signal);
-    const fresh = page.drops.filter(
-      (drop) => before === null || drop.serial_no < before
+  let fresh: ApiDropWithoutWave[];
+  do {
+    const after: number | null = before;
+    const page = await fetchPage(input.waveId, after, input.signal);
+    fresh = page.drops.filter(
+      (drop) => after === null || drop.serial_no < after
     );
-    if (!fresh.length) break;
-    drops.push(...fresh);
-    input.onProgress?.(drops.length);
-    before = fresh.reduce(
-      (lowest, drop) => Math.min(lowest, drop.serial_no),
-      Number.POSITIVE_INFINITY
-    );
-  }
+    if (fresh.length > 0) {
+      drops.push(...fresh);
+      input.onProgress?.(drops.length);
+      before = fresh.reduce(
+        (lowest, drop) => Math.min(lowest, drop.serial_no),
+        Number.POSITIVE_INFINITY
+      );
+    }
+  } while (fresh.length > 0);
   return drops;
 }
 
@@ -255,7 +258,7 @@ function renderItem(item: LegacyDmItem, labels: LegacyDmHtmlLabels): string {
   const meta = [
     `<strong>${escapeHtml(author)}</strong>`,
     `<time datetime="${new Date(item.created_at).toISOString()}">${escapeHtml(labels.formatTime(item.created_at))}</time>`,
-    item.updated_at ? `<span>${escapeHtml(labels.edited)}</span>` : "",
+    item.updated_at === null ? "" : `<span>${escapeHtml(labels.edited)}</span>`,
     item.reply_to
       ? `<a href="#m-${escapeHtml(item.reply_to)}">${escapeHtml(labels.replyTo)}</a>`
       : "",
