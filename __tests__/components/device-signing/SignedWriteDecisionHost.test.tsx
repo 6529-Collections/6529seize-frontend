@@ -119,6 +119,21 @@ describe("SignedWriteDecisionHost", () => {
     await expect(decision).resolves.toBe("retry");
   });
 
+  it("explains a server that does not accept device signatures as a rejection", async () => {
+    const user = userEvent.setup();
+    render(<SignedWriteDecisionHost />);
+    const decision = ask({ action: "post", reason: "unsupported" });
+
+    const dialog = await screen.findByRole("alertdialog", {
+      name: "Couldn't sign this post",
+    });
+    expect(dialog).toHaveTextContent(
+      "6529.io didn't accept this browser's signature."
+    );
+    await user.click(screen.getByRole("button", { name: "Send unsigned" }));
+    await expect(decision).resolves.toBe("unsigned");
+  });
+
   it("offers Cancel for reactions and deletes, and Escape cancels", async () => {
     const user = userEvent.setup();
     render(<SignedWriteDecisionHost />);

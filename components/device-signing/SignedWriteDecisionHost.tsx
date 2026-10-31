@@ -64,7 +64,9 @@ const getReasonGroup = (reason: SigningFailureReason): ReasonGroup => {
   if (reason === "grant-unusable") {
     return "grantUnusable";
   }
-  return reason === "rejected" ? "rejected" : "failed";
+  return reason === "rejected" || reason === "unsupported"
+    ? "rejected"
+    : "failed";
 };
 
 /** Posts and edits get a dialog; deletes and reactions a compact prompt. */

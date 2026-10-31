@@ -100,9 +100,10 @@ Ed25519, writes are sent unsigned exactly as before.
   sent) and **Send unsigned**. If turning them on fails, the prompt stays
   with **Couldn't turn on signed messages. Try again, or continue
   unsigned.**
-- If 6529.io does not accept device signatures at all (a backend rollback
-  to a version without signed writes), the write is resent unsigned
-  automatically and the grant is kept.
+- If 6529.io does not accept device signatures at all (for example a
+  backend rollback to a version without signed writes), the write is still
+  never resent unsigned by itself: the same prompt says 6529.io didn't
+  accept the signature, and the grant is kept.
 - Several prompts are shown one at a time, oldest first.
 - Each fallback is recorded for monitoring with a reason code (timeout,
   lock, storage-error, crypto-error, rejected, grant-unusable or
