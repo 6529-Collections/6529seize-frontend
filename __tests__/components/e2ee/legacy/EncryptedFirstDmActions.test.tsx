@@ -72,7 +72,7 @@ describe("EncryptedFirstDmActions", () => {
     );
     expect(
       screen.getByText(
-        "An unencrypted DM isn’t end-to-end encrypted, and 6529 deletes it from its servers on Dec 1, 2026."
+        "An unencrypted DM isn’t end-to-end encrypted, and 6529 deletes it from its servers on Dec 1, 2026, unless we’re legally required to keep it."
       )
     ).toBeInTheDocument();
     fireEvent.click(

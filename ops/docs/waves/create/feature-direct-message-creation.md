@@ -10,7 +10,8 @@ identities.
   and grows with search results. Resizing preserves the query and selected people.
 - App mode uses `/messages/create`.
 - These direct messages are not end-to-end encrypted. 6529 deletes their
-  content from its servers on 1 December 2026
+  content from its servers on 1 December 2026, except anything 6529 is
+  legally required to keep
   ([Encrypted Messages](../../encrypted-messages.md#unencrypted-direct-messages)).
 - On builds with encrypted chats, the main action is **Start encrypted chat**,
   which opens `/messages/encrypted/new` with the selected people. **Send

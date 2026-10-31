@@ -336,9 +336,9 @@ export const E2EE_MESSAGES = {
   // Unencrypted DMs are deleted from 6529's servers on a fixed date (D146).
   "e2ee.legacy.banner.label": "Not end-to-end encrypted.",
   "e2ee.legacy.banner.deletion":
-    "This history will be deleted from 6529’s servers on {date}.",
+    "This history will be deleted from 6529’s servers on {date}, unless we’re legally required to keep it.",
   "e2ee.legacy.banner.closed":
-    "This unencrypted chat is closed. Its history was deleted from 6529’s servers on {date}.",
+    "This unencrypted chat is closed. Its history was deleted from 6529’s servers on {date}, except anything we’re legally required to keep.",
   "e2ee.legacy.region": "Unencrypted chat notice",
   "e2ee.legacy.action.export": "Export history",
   "e2ee.legacy.action.openEncrypted": "Open encrypted chat",
@@ -363,7 +363,7 @@ export const E2EE_MESSAGES = {
 
   "e2ee.legacy.create.unencrypted": "Send unencrypted instead",
   "e2ee.legacy.create.warning":
-    "An unencrypted DM isn’t end-to-end encrypted, and 6529 deletes it from its servers on {date}.",
+    "An unencrypted DM isn’t end-to-end encrypted, and 6529 deletes it from its servers on {date}, unless we’re legally required to keep it.",
   "e2ee.legacy.action.move": "Move history",
   "e2ee.legacy.import.title": "Move history to the encrypted chat",
   "e2ee.legacy.import.intro":
@@ -371,7 +371,7 @@ export const E2EE_MESSAGES = {
   "e2ee.legacy.import.label":
     "Each copied message shows who wrote it and when, marked “Imported, not verified”. 6529 held these messages unencrypted, so the encrypted chat can’t prove who wrote them.",
   "e2ee.legacy.import.audience":
-    "Only the people and devices in the encrypted chat now will see them. 6529’s unencrypted copy is still deleted on {date}.",
+    "Only the people and devices in the encrypted chat now will see them. 6529’s unencrypted copy is still deleted on {date}, unless we’re legally required to keep it.",
   "e2ee.legacy.import.keepOpen":
     "Keep this page open while it runs. You can stop and continue later; nothing is copied twice.",
   "e2ee.legacy.import.start": "Start moving",
@@ -399,7 +399,7 @@ export const E2EE_MESSAGES = {
 
   "e2ee.legacy.file.title": "6529 DM: {name}",
   "e2ee.legacy.file.notice":
-    "Copied from an unencrypted 6529.io DM by {handle} on {date}. 6529 deletes its server copies on {deletionDate}. This copy is not encrypted and not authenticated: anyone with the file can read it, and it does not prove who wrote what.",
+    "Copied from an unencrypted 6529.io DM by {handle} on {date}. 6529 deletes its server copies on {deletionDate}, except anything it is legally required to keep. This copy is not encrypted and not authenticated: anyone with the file can read it, and it does not prove who wrote what.",
   "e2ee.legacy.file.participants": "People",
   "e2ee.legacy.file.exportedAt": "Exported {date}",
   "e2ee.legacy.file.replyTo": "reply",

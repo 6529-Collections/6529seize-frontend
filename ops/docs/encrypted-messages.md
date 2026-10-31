@@ -20,7 +20,8 @@ encrypted messages again (one more wallet signature) and chats are started
 again.
 
 Existing direct messages are not end-to-end encrypted, and 6529 deletes
-them from its servers, backups included, on **1 December 2026** (see
+them from its servers, backups included, on **1 December 2026**, except
+anything 6529 is legally required to keep (see
 [Unencrypted direct messages](#unencrypted-direct-messages)). Until then you
 can export them or move them into an encrypted chat.
 
@@ -180,7 +181,8 @@ setting. Reports are kept for 180 days unless trust and safety holds them.
 Direct messages started before encrypted chats are stored by 6529 in plain
 text. Every such conversation shows a notice above the message box:
 **Not end-to-end encrypted. This history will be deleted from 6529’s servers
-on Dec 1, 2026.** (the date follows your language settings). The notice
+on Dec 1, 2026, unless we’re legally required to keep it.** (the date follows
+your language settings). The notice
 offers:
 
 - **Export history**: reads every message you can see in the conversation
@@ -203,7 +205,8 @@ offers:
 The conversation becomes read-only once an encrypted chat with the same
 people exists on your device; new messages go to the encrypted chat. From
 1 December 2026 every unencrypted conversation is closed and its history is
-gone from 6529's servers. Copies 6529 cannot recall stay where they are: your
+deleted from 6529's servers, except anything 6529 is legally required to
+keep. Copies 6529 cannot recall stay where they are: your
 own exports, push notification previews already delivered to phones, and
 attachments that were published to public IPFS.
 
