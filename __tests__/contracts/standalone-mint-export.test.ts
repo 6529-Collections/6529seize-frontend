@@ -28,6 +28,7 @@ const standaloneSrc = path.join(
 const SOURCE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".cjs", ".mjs"];
 const SERVER_ACTION_DIRECTIVE = "use server";
 const REAL_GATE = "components/messages/quick-dms/QuickDirectMessagesGate.tsx";
+const SINGLE_DROP_VIEW = "components/waves/drop/SingleWaveDrop.tsx";
 const SERVER_ACTION_MODULE =
   "components/waves/memes/submission/actions/validateInteractivePreview.ts";
 
@@ -228,6 +229,10 @@ function collectGraph(
   return reachable;
 }
 
+function toProjectPath(file: string): string {
+  return path.relative(projectRoot, file).replaceAll("\\", "/");
+}
+
 function serverActionModulesIn(graph: ReadonlySet<string>): string[] {
   return [...graph]
     .filter(
@@ -235,7 +240,7 @@ function serverActionModulesIn(graph: ReadonlySet<string>): string[] {
         SOURCE_EXTENSIONS.includes(path.extname(file)) &&
         parseModule(file).hasServerActionDirective
     )
-    .map((file) => path.relative(projectRoot, file).replaceAll("\\", "/"))
+    .map(toProjectPath)
     .sort();
 }
 
@@ -261,11 +266,7 @@ describe("standalone mint static export", () => {
 
     // Sanity check: the walk follows the layout through `Providers` into the
     // mapped stub, and the page into the mint UI, instead of stopping early.
-    const relativeGraph = new Set(
-      [...graph].map((file) =>
-        path.relative(projectRoot, file).replaceAll("\\", "/")
-      )
-    );
+    const relativeGraph = new Set([...graph].map(toProjectPath));
     expect(relativeGraph).toContain("components/providers/Providers.tsx");
     expect(relativeGraph).toContain(
       "standalone/standalone-memes-mint/src/components/NoQuickDirectMessagesGate.tsx"
@@ -275,11 +276,25 @@ describe("standalone mint static export", () => {
     expect(serverActionModulesIn(graph)).toEqual([]);
   });
 
-  it("would reach the Server Action through the real Quick Direct Messages gate", () => {
-    // Negative control. It proves the walker follows lazy imports, relative
-    // imports and `@/` aliases down to the action, and that the standalone
-    // tsconfig mapping (not luck) keeps the gate out of the export.
-    const graph = collectGraph([REAL_GATE], rootMappings);
+  it("would pull the wave chat UI in through the real Quick Direct Messages gate", () => {
+    // Negative control for the mapping. The walker follows the gate's lazy
+    // import and relative imports into the wave chat UI, which the standalone
+    // tsconfig mapping (not luck) keeps out of the export.
+    const graph = new Set(
+      [...collectGraph([REAL_GATE], rootMappings)].map(toProjectPath)
+    );
+
+    expect(graph).toContain(
+      "components/messages/quick-dms/QuickDirectMessages.tsx"
+    );
+    expect(graph).toContain("components/brain/my-stream/MyStreamWaveChat.tsx");
+  });
+
+  it("detects a Server Action reached through `@/` aliases", () => {
+    // Negative control for the walker. The single drop view reaches the Memes
+    // submission form's action, which the wave chat UI also reached until the
+    // single drop renderers moved out of the list renderer registry.
+    const graph = collectGraph([SINGLE_DROP_VIEW], rootMappings);
 
     expect(serverActionModulesIn(graph)).toEqual([SERVER_ACTION_MODULE]);
   });
