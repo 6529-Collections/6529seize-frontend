@@ -37,10 +37,15 @@ unchanged.
 - **Sign in.** On a web browser that supports Ed25519 keys, the ordinary
   wallet sign-in also turns on signed messages for that wallet when the
   browser has no grant (or its grant ends within 14 days). The sign-in
-  message then says the browser may post as you until a date, names the
-  device key, and lists what it may do. If the wallet declines or cannot
-  sign that message, or the sign-in fails, the next sign-in on the same page
-  uses the ordinary message without a grant.
+  message then reads, for the default scopes: "Sign in to 6529 and turn on
+  signed messages on this device until 29 Apr 2027. This device will sign
+  your posts, edits, deletes and reactions so anyone can verify they came
+  from your wallet. It can't move funds, change your handle, add devices or
+  act as an admin. No transaction, no gas, no token approvals. (Device key
+  65942d9f...d8128d49)". The date is the grant's expiry as a UTC calendar
+  date; the exact expiry time is only in the device-grant resource line. If
+  the wallet declines or cannot sign that message, or the sign-in fails, the
+  next sign-in on the same page uses the ordinary message without a grant.
 - **Turn on signed messages (one signature).** A logged-in user without a
   grant in this browser sees this notice above the composer while the
   composer is empty. **Turn on** asks for one wallet signature. The notice
@@ -53,8 +58,11 @@ unchanged.
 1. The browser creates a non-extractable Ed25519 key for the wallet and keeps
    it in IndexedDB.
 2. The sign-in message carries a device-grant resource for exactly that key.
-   The browser checks the wallet and key in the message before the wallet is
-   asked to sign; otherwise it signs in without a grant.
+   The browser checks the wallet, key, scopes, expiry and exact statement in
+   the message before the wallet is asked to sign; otherwise it signs in
+   without a grant. Grants signed over the earlier statement ("Sign in to
+   6529 and let this device post as you until ...") still verify, and a
+   challenge that still uses it is still signed.
 3. After sign-in, each drop create, edit, delete, and reaction from this
    browser carries a device signature. The key and grant are loaded ahead of
    time (when a composer or the editor opens or gains focus, and when the tab
@@ -229,14 +237,14 @@ chat's usual grouping), the header's seal stands for the whole group:
 
 ### Wallet-signed grant statement
 
-| Field                     | Current exception                                                                                                                                                                |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Route or component        | Sign-in challenge built by the backend and checked in `lib/device-signing/grant-message.ts` (`renderDeviceGrantStatement`, `buildDeviceGrantUrn`)                                |
-| Untranslated surface      | The statement the wallet shows ("Sign in to 6529 and let this device post as you until ...") and the device-grant resource line                                                  |
-| Current fallback behavior | Always English, with a fixed UTC date format, in every locale                                                                                                                    |
-| User impact               | Wallet users in other locales read the grant statement in English                                                                                                                |
-| Owner or follow-up        | Frontend and backend maintainers jointly; the text is a signed commitment that both sides render and compare byte for byte, so it is not translatable through the message system |
-| Expected remediation      | If localized statements are wanted, add them as new versioned statement templates on both sides (with vectors), never by interpolating translated copy into the current one      |
+| Field                     | Current exception                                                                                                                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Route or component        | Sign-in challenge built by the backend and checked in `lib/device-signing/grant-message.ts` (`renderDeviceGrantStatement`, `renderLegacyDeviceGrantStatement`, `buildDeviceGrantUrn`) |
+| Untranslated surface      | The statement the wallet shows ("Sign in to 6529 and turn on signed messages on this device until ...", or the earlier "let this device post as you" wording) and the resource line   |
+| Current fallback behavior | Always English, with a fixed UTC date in the form `29 Apr 2027` (earlier wording: `2027-04-29 00:30 UTC`), in every locale                                                            |
+| User impact               | Wallet users in other locales read the grant statement in English                                                                                                                     |
+| Owner or follow-up        | Frontend and backend maintainers jointly; the text is a signed commitment that both sides render and compare byte for byte, so it is not translatable through the message system      |
+| Expected remediation      | If localized statements are wanted, add them as new versioned statement templates on both sides (with vectors), never by interpolating translated copy into the current one           |
 
 ### Signed messages UI
 
