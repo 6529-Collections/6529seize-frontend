@@ -69,7 +69,7 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
       name: "Unencrypted chat notice",
     });
     await expect(notice).toContainText(
-      "This history will be deleted from 6529’s servers on Dec 1, 2026."
+      "This history will be deleted from 6529’s servers on Dec 1, 2026, unless we’re legally required to keep it."
     );
     await expect(
       notice.getByRole("button", { name: "Export history" })
