@@ -35,6 +35,14 @@ const PRODUCTION_READONLY_ENV = {
   PLAYWRIGHT_READONLY: "1",
 };
 
+// Writes throwaway QA data to staging, so the read-only guard is off.
+const STAGING_STATEFUL_ENV = {
+  PLAYWRIGHT_BASE_URL: "https://staging.6529.io",
+  PLAYWRIGHT_SKIP_WEB_SERVER: "1",
+  PLAYWRIGHT_ENV: "staging",
+  PLAYWRIGHT_READONLY: "0",
+};
+
 const COMPOSER_SANDBOX_ENV = {
   PLAYWRIGHT_ENV: "local",
   PLAYWRIGHT_COMPOSER_SANDBOX: "1",
@@ -759,6 +767,24 @@ const PACKS = [
       READONLY_SPECS.museumRights
     )
   ),
+  // Opt-in and stateful: throwaway QA wallets sign in, create test-only
+  // profiles and exchange encrypted messages (D109). Manual trigger only, so
+  // the post-deploy `all` selection never runs it; dispatch it by alias.
+  {
+    scriptKey: "test:e2e:staging:e2ee",
+    alias: "e2ee-staging",
+    description:
+      "Encrypted DMs, attachments, groups and device revocation between throwaway users (writes QA data).",
+    safety: "stateful",
+    environments: ["staging"],
+    triggers: ["manual"],
+    env: { ...STAGING_STATEFUL_ENV, PLAYWRIGHT_E2EE_STAGING: "1" },
+    specs: ["tests/staging-e2ee/encrypted-dm-staging.spec.ts"],
+    projects: [DESKTOP],
+    workers: 1,
+    traceOff: true,
+    timeoutMinutes: 60,
+  },
 
   productionPack(
     "home-readonly",
