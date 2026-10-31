@@ -62,12 +62,14 @@ jobs:
           echo "account_id=$account_id" >> "$GITHUB_OUTPUT"
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
 
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: "22"
+          node-version: "22.17.1"
 
       - name: Activate pinned pnpm
         run: |
@@ -115,21 +117,24 @@ jobs:
           DELEGATION_DOCS_IPFS_API_ENDPOINT: ${{ secrets.DELEGATION_DOCS_IPFS_API_ENDPOINT }}
           DELEGATION_DOCS_IPFS_API_BEARER_TOKEN: ${{ secrets.DELEGATION_DOCS_IPFS_API_BEARER_TOKEN }}
           DELEGATION_DOCS_IPFS_API_AUTH_HEADER: ${{ secrets.DELEGATION_DOCS_IPFS_API_AUTH_HEADER }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run }}
+          INPUT_SKIP_GATEWAY_VERIFY: ${{ inputs.skip_gateway_verify }}
+          INPUT_SKIP_CDN_SYNC: ${{ inputs.skip_cdn_sync }}
         run: |
           args=()
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
+          if [ "$INPUT_DRY_RUN" = "true" ]; then
             args+=(--dry-run)
           fi
-          if [ "${{ inputs.skip_gateway_verify }}" = "true" ]; then
+          if [ "$INPUT_SKIP_GATEWAY_VERIFY" = "true" ]; then
             args+=(--skip-gateway-verify)
           fi
-          if [ "${{ inputs.skip_cdn_sync }}" = "true" ]; then
+          if [ "$INPUT_SKIP_CDN_SYNC" = "true" ]; then
             args+=(--skip-cdn-sync)
           fi
           node ops/scripts/publish-delegation-docs-content.mjs "${args[@]}"
 
       - name: Upload publish receipt
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: delegation-docs-ipfs-receipt
           path: tmp/delegation-docs-publish/*.json

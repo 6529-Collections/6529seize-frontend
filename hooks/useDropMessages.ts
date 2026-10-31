@@ -33,7 +33,21 @@ import {
   fetchDropRepliesV2,
   type ApiWaveDropsV2PageFeed,
 } from "@/services/api/wave-drops-v2-api";
+import { useInfiniteHeadRefetch } from "./useInfiniteHeadRefetch";
 import { useWaveDropUpdateRefetch } from "./useWaveDropUpdateRefetch";
+import type { InfinitePageAdapter } from "@/components/react-query-wrapper/utils/refreshInfiniteQueryHead";
+import type { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
+
+type DropMessagesPage = ApiWaveDropsFeed | ApiWaveDropsV2PageFeed;
+
+const dropMessagesPageAdapter: InfinitePageAdapter<
+  DropMessagesPage,
+  ApiDropWithoutWave
+> = {
+  getItems: (page) => page.drops,
+  withItems: (page, drops) => ({ ...page, drops }),
+  getKey: (drop) => drop.id,
+};
 
 export function useDropMessages(
   waveId: string,
@@ -119,8 +133,14 @@ export function useDropMessages(
     setInit(true);
   }, [data]);
 
-  const requestRefetch = useDebouncedQueryRefetch({
+  const refetchHead = useInfiniteHeadRefetch({
+    queryKey,
     refetch,
+    strategy: "aligned",
+    adapter: dropMessagesPageAdapter,
+  });
+  const requestRefetch = useDebouncedQueryRefetch({
+    refetch: refetchHead,
     isFetching,
     isFetchingNextPage,
   });

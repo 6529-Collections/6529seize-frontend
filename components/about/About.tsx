@@ -1,6 +1,3 @@
-"use client";
-
-import { useSetTitle } from "@/contexts/TitleContext";
 import { AboutSection } from "@/types/enums";
 import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 
@@ -33,6 +30,7 @@ import AboutSubscriptions from "./AboutSubscriptions";
 import AboutTech from "./tech/AboutTech";
 import AboutTermsOfService from "./AboutTermsOfService";
 import { AboutContentsDropdown } from "./AboutContentsDropdown";
+import AboutDocumentTitle from "./AboutDocumentTitle";
 import {
   getAboutSectionDocumentTitle,
   isAboutFeatureSection,
@@ -51,6 +49,11 @@ const ABOUT_LEGAL_CONTENT_CLASS = [
   "[&_ol]:tw-my-5 [&_ol]:tw-pl-6 [&_p]:tw-mb-5 [&_p]:tw-text-base [&_p]:tw-leading-7 [&_p]:tw-text-iron-300 [&_ul]:tw-my-5 [&_ul]:tw-pl-6",
 ].join(" ");
 
+// Server Component: static sections (legal, FAQ, tech, ...) render on the server
+// and ship no client JS. Only sections that need hooks, effects or browser APIs
+// are client leaves ("use client" in their own file). Minting and Subscriptions
+// stay client leaves so their restricted copy never appears in server output;
+// NftPurchasingGate decides on the client whether to mount them.
 export default function About({ section }: { readonly section: AboutSection }) {
   if (
     section === AboutSection.MINTING ||
@@ -71,13 +74,14 @@ function AboutContent({ section }: { readonly section: AboutSection }) {
   const usesFeatureLayout = isAboutFeatureSection(section);
   const usesLegalLayout = isAboutLegalSection(section);
   const usesFullWidthLayout = usesFeatureLayout || usesLegalLayout;
-  useSetTitle(
-    t(locale, "about.contents.documentTitle", { section: sectionTitle })
-  );
+  const documentTitle = t(locale, "about.contents.documentTitle", {
+    section: sectionTitle,
+  });
 
   if (section === AboutSection.MEMES) {
     return (
       <div className="tw-min-h-[calc(100dvh-100px)]">
+        <AboutDocumentTitle title={documentTitle} />
         <AboutContentsDropdown
           className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 sm:tw-px-6 lg:tw-px-8"
           currentSection={section}
@@ -94,6 +98,7 @@ function AboutContent({ section }: { readonly section: AboutSection }) {
       fluid={section === AboutSection.TECH || usesFullWidthLayout}
       className="tw-pt-2"
     >
+      <AboutDocumentTitle title={documentTitle} />
       <Row>
         <Col>
           <AboutContentsDropdown

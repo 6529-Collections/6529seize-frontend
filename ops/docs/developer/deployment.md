@@ -116,6 +116,14 @@ operations can queue unrelated requests. The variable must be present when the
 process starts, so it lives in the launch configuration rather than in
 application code. Keep the three launch paths in step when changing it.
 
+## Staging crawler cards
+
+Open Graph and crawler cards on staging intentionally require the visitor's
+staging access cookie, so they do not render without it. The deploy does not
+give the staging server its own access key: `/api` routes bypass the staging
+access gate, so a server-held key would let anyone without staging access render
+pre-release data through `/api/og-metadata/*`.
+
 ## Order and completion
 
 - Fetch shared refs before merging; preserve other developers' staging changes

@@ -102,7 +102,7 @@ describe('useDropMessages', () => {
     expect(fetchNextPage).toHaveBeenCalled();
   });
 
-  it('websocket callback debounces refetch', () => {
+  it('websocket callback debounces refetch', async () => {
     jest.useFakeTimers();
     const refetch = jest.fn().mockResolvedValue(undefined);
     useInfiniteQueryMock.mockReturnValue({
@@ -128,7 +128,11 @@ describe('useDropMessages', () => {
     });
 
     wsCallback({ wave: { id: 'wave-x' } });
-    jest.advanceTimersByTime(1000);
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(1000);
+    });
+    // Nothing is cached for the thread yet, so the first-page refresh falls
+    // back to the full refetch.
     expect(refetch).toHaveBeenCalled();
     unmount();
     jest.useRealTimers();

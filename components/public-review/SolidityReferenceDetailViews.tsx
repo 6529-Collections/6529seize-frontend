@@ -8,6 +8,7 @@ import { SolidityDefinitionView } from "@/components/public-review/SolidityRefer
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 import {
   getSolidityDefinitionHref,
   getSolidityInterfaceHref,
