@@ -280,6 +280,31 @@ aws() {
     );
   });
 
+  it("starts every standalone launch path with the same libuv threadpool size", () => {
+    const procfile = fs.readFileSync(path.join(ROOT, "Procfile"), "utf8");
+    const configured = procfile.match(/\bUV_THREADPOOL_SIZE=(\d+)\b/);
+    expect(configured).not.toBeNull();
+    // Node's default of four threads is shared by DNS, fs, zlib, crypto and
+    // sharp image transforms.
+    expect(Number(configured?.[1])).toBeGreaterThan(4);
+    expect(procfile).toMatch(/\bnode server\.js\s*$/);
+
+    const stagingScript = fs.readFileSync(
+      path.join(ROOT, "ops", "scripts", "deploy-staging-artifact.sh"),
+      "utf8"
+    );
+    expect(stagingScript).toContain(
+      `UV_THREADPOOL_SIZE: '${configured?.[1]}'`
+    );
+    const standaloneLauncher = fs.readFileSync(
+      path.join(ROOT, "scripts", "start-standalone.cjs"),
+      "utf8"
+    );
+    expect(standaloneLauncher).toContain(
+      `runtimeEnv["UV_THREADPOOL_SIZE"] || "${configured?.[1]}"`
+    );
+  });
+
   it("keeps canonical names and makes main merges non-deploying", () => {
     const staging = readWorkflow("deploy-staging.yml").workflow;
     const production = readWorkflow("build-upload-deploy-prod.yml").workflow;

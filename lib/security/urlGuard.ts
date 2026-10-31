@@ -133,6 +133,38 @@ const PRIVATE_IPV4_RANGES: ReadonlyArray<[number, number]> = [
   [ipv4ToInt("240.0.0.0"), ipv4ToInt("255.255.255.255")],
 ];
 
+const IPV6_GROUP_COUNT = 8;
+const IPV6_GROUP_PATTERN = /^[0-9a-f]{1,4}$/i;
+
+/** An IPv6 range: its leading 16-bit groups and the prefix length in bits. */
+interface Ipv6Prefix {
+  readonly groups: readonly number[];
+  readonly bits: number;
+}
+
+/** ::/96: the unspecified address, loopback and deprecated IPv4-compatible forms. */
+const IPV6_ZERO_PREFIX: Ipv6Prefix = { groups: [0, 0, 0, 0, 0, 0], bits: 96 };
+/** ::ffff:0:0/96: IPv4-mapped addresses, which reach the embedded IPv4 host. */
+const IPV4_MAPPED_PREFIX: Ipv6Prefix = {
+  groups: [0, 0, 0, 0, 0, 0xffff],
+  bits: 96,
+};
+/** 64:ff9b::/96: NAT64, whose translators also reach the embedded IPv4 host. */
+const NAT64_PREFIX: Ipv6Prefix = {
+  groups: [0x64, 0xff9b, 0, 0, 0, 0],
+  bits: 96,
+};
+/** IPv6 ranges that are never public, whatever they embed. */
+const BLOCKED_IPV6_PREFIXES: readonly Ipv6Prefix[] = [
+  IPV6_ZERO_PREFIX,
+  { groups: [0x2001, 0x0db8], bits: 32 }, // documentation
+  { groups: [0x2002], bits: 16 }, // 6to4, deprecated by RFC 7526
+  { groups: [0xfc00], bits: 7 }, // unique local
+  { groups: [0xfe80], bits: 10 }, // link-local
+  { groups: [0xfec0], bits: 10 }, // site-local, deprecated by RFC 3879
+  { groups: [0xff00], bits: 8 }, // multicast
+];
+
 const pinnedLookupContext = new AsyncLocalStorage<ValidatedPublicUrl>();
 const publicUrlFetchDispatcher = new Agent({
   connect: {
@@ -170,42 +202,97 @@ function isPrivateIpv4(address: string): boolean {
   );
 }
 
-function isPrivateIpv6(address: string): boolean {
-  const normalized = address.toLowerCase();
-
-  if (
-    normalized === "::1" ||
-    normalized === "0:0:0:0:0:0:0:1" ||
-    normalized === "::" ||
-    normalized === "0:0:0:0:0:0:0:0"
-  ) {
-    return true;
+function parseIpv6Part(
+  part: string,
+  allowIpv4Tail: boolean
+): number[] | null {
+  if (part === "") {
+    return [];
   }
 
-  const segments = normalized.split(":");
-  const firstBlock = segments.find((segment) => segment.length > 0) ?? "";
-
-  if (firstBlock.startsWith("fc") || firstBlock.startsWith("fd")) {
-    return true;
-  }
-
-  if (
-    firstBlock.startsWith("fe8") ||
-    firstBlock.startsWith("fe9") ||
-    firstBlock.startsWith("fea") ||
-    firstBlock.startsWith("feb")
-  ) {
-    return true;
-  }
-
-  if (normalized.startsWith("::ffff:")) {
-    const mappedIpv4 = normalized.split("::ffff:")[1];
-    if (mappedIpv4) {
-      return isPrivateIpv4(mappedIpv4);
+  const tokens = part.split(":");
+  const last = tokens.at(-1) ?? "";
+  if (last.includes(".")) {
+    if (!allowIpv4Tail || isIP(last) !== 4) {
+      return null;
     }
+    const ipv4 = ipv4ToInt(last);
+    tokens.splice(
+      -1,
+      1,
+      (ipv4 >>> 16).toString(16),
+      (ipv4 & 0xffff).toString(16)
+    );
   }
 
-  return false;
+  if (!tokens.every((token) => IPV6_GROUP_PATTERN.test(token))) {
+    return null;
+  }
+  return tokens.map((token) => Number.parseInt(token, 16));
+}
+
+/**
+ * Expands a textual IPv6 address into its eight 16-bit groups, or null when it
+ * is malformed. Scoped addresses (`%zone`) are not accepted.
+ */
+export function parseIpv6Groups(address: string): number[] | null {
+  const halves = address.split("::");
+  if (halves.length > 2) {
+    return null;
+  }
+
+  // A dotted quad is only valid as the final 32 bits of the whole address.
+  const head = parseIpv6Part(halves[0] ?? "", halves.length === 1);
+  if (!head) {
+    return null;
+  }
+  if (halves.length === 1) {
+    return head.length === IPV6_GROUP_COUNT ? head : null;
+  }
+
+  const tail = parseIpv6Part(halves[1] ?? "", true);
+  const missing = IPV6_GROUP_COUNT - head.length - (tail?.length ?? 0);
+  if (!tail || missing < 1) {
+    return null;
+  }
+  return [...head, ...new Array<number>(missing).fill(0), ...tail];
+}
+
+function matchesIpv6Prefix(
+  groups: readonly number[],
+  prefix: Ipv6Prefix
+): boolean {
+  return prefix.groups.every((expected, index) => {
+    const bitsInGroup = Math.min(16, prefix.bits - index * 16);
+    const mask = (0xffff << (16 - bitsInGroup)) & 0xffff;
+    return ((groups[index] ?? 0) & mask) === (expected & mask);
+  });
+}
+
+function embeddedIpv4(groups: readonly number[]): string {
+  const [high = 0, low = 0] = groups.slice(6);
+  return [high >> 8, high & 0xff, low >> 8, low & 0xff].join(".");
+}
+
+function isPrivateIpv6(address: string): boolean {
+  const groups = parseIpv6Groups(address);
+  if (!groups) {
+    return true;
+  }
+
+  // IPv4-mapped and NAT64 addresses are routed to the embedded IPv4 host, so
+  // the IPv4 rules decide. Treating NAT64 this way keeps DNS64 networks
+  // working while still refusing loopback, private and metadata targets.
+  if (
+    matchesIpv6Prefix(groups, IPV4_MAPPED_PREFIX) ||
+    matchesIpv6Prefix(groups, NAT64_PREFIX)
+  ) {
+    return isPrivateIpv4(embeddedIpv4(groups));
+  }
+
+  return BLOCKED_IPV6_PREFIXES.some((prefix) =>
+    matchesIpv6Prefix(groups, prefix)
+  );
 }
 
 function isSuspiciousIpFormat(host: string): boolean {

@@ -1,14 +1,12 @@
 import { isIP } from "node:net";
 import { NextResponse } from "next/server";
 
-import { isForbiddenAddress } from "@/lib/security/urlGuard";
+import { isForbiddenAddress, parseIpv6Groups } from "@/lib/security/urlGuard";
 
 const DEFAULT_MAX_BUCKETS = 10_000;
 const UNIDENTIFIED_CLIENT_KEY = "unidentified";
 const UNIDENTIFIED_LIMIT_MULTIPLIER = 10;
-const IPV6_GROUPS = 8;
 const IPV6_PREFIX_GROUPS = 4;
-const IPV6_GROUP_PATTERN = /^[\da-f]{1,4}$/;
 
 type RateLimitBucket = {
   count: number;
@@ -29,48 +27,6 @@ type ForwardedAddress = {
   /** The rate-limit bucket key for this address. */
   readonly key: string;
 };
-
-/** Replaces a dotted IPv4 tail (as in `::ffff:1.2.3.4`) with two hex groups. */
-function expandEmbeddedIpv4(address: string): string | null {
-  const tailStart = address.lastIndexOf(":") + 1;
-  const tail = address.slice(tailStart);
-  if (!tail.includes(".")) {
-    return address;
-  }
-  if (isIP(tail) !== 4) {
-    return null;
-  }
-  const [a = 0, b = 0, c = 0, d = 0] = tail.split(".").map(Number);
-  const high = ((a << 8) | b).toString(16);
-  const low = ((c << 8) | d).toString(16);
-  return `${address.slice(0, tailStart)}${high}:${low}`;
-}
-
-/** Expands an IPv6 address to its eight 16-bit groups, or null if malformed. */
-function parseIpv6Groups(address: string): number[] | null {
-  const expanded = expandEmbeddedIpv4(address);
-  const halves = expanded?.split("::");
-  if (!halves || halves.length > 2) {
-    return null;
-  }
-  const [head = "", tail = ""] = halves;
-  const headGroups = head ? head.split(":") : [];
-  const tailGroups = tail ? tail.split(":") : [];
-  const missingGroups = IPV6_GROUPS - headGroups.length - tailGroups.length;
-  const isCompressed = halves.length === 2;
-  if (isCompressed ? missingGroups < 1 : missingGroups !== 0) {
-    return null;
-  }
-  const groups = [
-    ...headGroups,
-    ...Array.from({ length: isCompressed ? missingGroups : 0 }, () => "0"),
-    ...tailGroups,
-  ];
-  if (!groups.every((group) => IPV6_GROUP_PATTERN.test(group))) {
-    return null;
-  }
-  return groups.map((group) => Number.parseInt(group, 16));
-}
 
 function isIpv4MappedIpv6(groups: readonly number[]): boolean {
   return (
