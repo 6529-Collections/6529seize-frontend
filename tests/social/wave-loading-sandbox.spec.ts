@@ -12,6 +12,7 @@ import {
   LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
+import { CHROMIUM_SANDBOX } from "../support/chromiumSandbox";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import {
   installWaveListScrollFixture,
@@ -20,7 +21,13 @@ import {
 } from "../support/waveListScroll";
 
 // Headless Chromium otherwise hides the native scrollbar we need to exercise.
-test.use({ launchOptions: { ignoreDefaultArgs: ["--hide-scrollbars"] } });
+// launchOptions replaces the config value, so keep the sandbox setting too.
+test.use({
+  launchOptions: {
+    chromiumSandbox: CHROMIUM_SANDBOX,
+    ignoreDefaultArgs: ["--hide-scrollbars"],
+  },
+});
 
 for (const collection of ["All", "Pinned", "Joined"]) {
   test(`wave list stops automatic scrolling during incoming activity in ${collection}`, async ({

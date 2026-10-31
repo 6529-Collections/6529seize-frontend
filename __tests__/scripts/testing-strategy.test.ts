@@ -657,7 +657,7 @@ describe("testing strategy CI plan", () => {
         "${{ matrix.lane == 'playwright-native-competition' && 30 || 20 }}",
       container: {
         image:
-          "mcr.microsoft.com/playwright:v1.61.1-noble@sha256:5b8f294aff9041b7191c34a4bab3ac270157a28774d4b0660e9743297b697e48",
+          "mcr.microsoft.com/playwright:v1.64.1-noble@sha256:47b510dd9230bf0b9bfc9b20102241e577ea7a99334ab4c3ca19f19770e9b8ea",
         options: "--ipc=host",
       },
       defaults: { run: { shell: "bash" } },
