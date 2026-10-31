@@ -8,11 +8,12 @@ import {
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { formatWaveName } from "@/helpers/waves/wave-name.helpers";
+import { useHoverIntent } from "@/hooks/useHoverIntent";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { faBellSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useMemo } from "react";
 import {
   getWaveHomeRoute,
   getWaveRoute,
@@ -30,8 +31,6 @@ import {
   SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES,
 } from "./sidebarWaveRowLayout";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
-
-const SUBWAVE_PREFETCH_HOVER_INTENT_MS = 150;
 
 interface BrainLeftSidebarWaveProps {
   readonly scoreDetailsDisabled?: boolean | undefined;
@@ -157,45 +156,29 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   }, [activeWaveId, onHover, prefetchWaveData, wave.id]);
 
   const isActive = wave.id === activeWaveId;
-  const subwavePrefetchTimerRef = useRef<ReturnType<
-    typeof globalThis.setTimeout
-  > | null>(null);
   const shouldPrefetchSubwaves = Boolean(
     canExpand && depth === 0 && !hasTouchScreen && onPrefetchSubwaves
   );
 
-  const cancelSubwavePrefetch = useCallback(() => {
-    if (subwavePrefetchTimerRef.current === null) {
-      return;
-    }
+  // Prefetch only once the pointer has rested on the row, not while it sweeps
+  // across the list.
+  const { schedule: scheduleHoverIntent, cancel: cancelHoverIntent } =
+    useHoverIntent();
 
-    globalThis.clearTimeout(subwavePrefetchTimerRef.current);
-    subwavePrefetchTimerRef.current = null;
-  }, []);
-
-  const scheduleSubwavePrefetch = useCallback(() => {
-    if (!shouldPrefetchSubwaves) {
-      return;
-    }
-
-    cancelSubwavePrefetch();
-    subwavePrefetchTimerRef.current = globalThis.setTimeout(() => {
-      subwavePrefetchTimerRef.current = null;
-      onPrefetchSubwaves?.(wave.id);
-    }, SUBWAVE_PREFETCH_HOVER_INTENT_MS);
+  const handleRowMouseEnter = useCallback(() => {
+    scheduleHoverIntent(() => {
+      if (shouldPrefetchSubwaves) {
+        onPrefetchSubwaves?.(wave.id);
+      }
+      onWaveHover();
+    });
   }, [
-    cancelSubwavePrefetch,
     onPrefetchSubwaves,
+    onWaveHover,
+    scheduleHoverIntent,
     shouldPrefetchSubwaves,
     wave.id,
   ]);
-
-  const handleRowMouseEnter = useCallback(() => {
-    scheduleSubwavePrefetch();
-    onWaveHover();
-  }, [onWaveHover, scheduleSubwavePrefetch]);
-
-  useEffect(() => cancelSubwavePrefetch, [cancelSubwavePrefetch]);
 
   const handleWaveClick = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement>) => {
@@ -204,6 +187,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
         return;
       }
       event.preventDefault();
+      cancelHoverIntent();
       onWaveHover();
       const nextWaveId = wave.id === activeWaveId ? null : wave.id;
       setActiveWave(nextWaveId, {
@@ -214,6 +198,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     [
       setActiveWave,
       activeWaveId,
+      cancelHoverIntent,
       isDirectMessage,
       onWaveHover,
       wave.id,
@@ -253,7 +238,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     <div
       {...(!hasTouchScreen && {
         onMouseEnter: handleRowMouseEnter,
-        onMouseLeave: cancelSubwavePrefetch,
+        onMouseLeave: cancelHoverIntent,
       })}
       className={`tw-group tw-relative tw-flex tw-items-center ${rowHeightClasses} ${rowGapClasses} ${rowPaddingClasses} ${rowVerticalPaddingClasses} tw-transition-colors tw-duration-200 tw-ease-out ${
         isActive
