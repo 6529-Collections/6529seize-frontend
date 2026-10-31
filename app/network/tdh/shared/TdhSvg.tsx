@@ -27,7 +27,7 @@ export const WIDE_WIDTH = 560;
 const MAX_SVG_SCALE = 1.15;
 
 /** The largest on-screen width of a drawing `width` units wide. */
-export function svgMaxWidth(width: number, maxWidth?: number): number {
+function svgMaxWidth(width: number, maxWidth?: number): number {
   const cap = Math.round(width * MAX_SVG_SCALE);
   return maxWidth === undefined ? cap : Math.min(maxWidth, cap);
 }

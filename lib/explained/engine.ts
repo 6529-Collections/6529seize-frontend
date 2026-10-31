@@ -12,8 +12,9 @@ import {
 /**
  * The one seam between the facts layer and the TDH engine. Release 1's
  * engine is `components/explained/engine/tdh.ts` (lane E: the
- * registry-driven port of P26, which passes P26's in-scope conformance
- * vectors and the D136 checks). This adapter computes on that engine with
+ * registry-driven port of P26, which passes every one of P26's conformance
+ * vectors, log decoding included, refuses every file that is no vector, and
+ * passes the D136 checks). This adapter computes on that engine with
  * the TDH v1.4 registry; swapping engines or registries changes this file
  * only. `__tests__/explained/engineSeam.test.ts` checks that the engine's
  * registry, registry hash, rule ID and vector count agree with the record

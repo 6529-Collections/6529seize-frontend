@@ -1,5 +1,8 @@
+import { Fragment, type ReactNode } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
-import { fmt, isFact, type FactEntry } from "@/lib/explained/facts";
+import { tRich } from "@/i18n/messages";
+import { isFact, type FactEntry } from "@/lib/explained/facts";
+import FactValue from "../facts/FactValue";
 import { kt } from "../i18n";
 
 /**
@@ -40,17 +43,21 @@ export default function AgreementBars({
         const total = numberOf(pair.total);
         const share =
           equal !== null && total !== null && total > 0 ? equal / total : 0;
+        // Each count is printed through its fact, so it carries its source.
         const count =
           pair.equal && isFact(pair.equal) && pair.total && isFact(pair.total)
-            ? kt(locale, "explained.kit.agree.of", {
-                equal: fmt(pair.equal, locale),
-                total: fmt(pair.total, locale),
-              })
+            ? tRich<ReactNode>(locale, "explained.kit.agree.of", {
+                equal: <FactValue fact={pair.equal} locale={locale} />,
+                total: <FactValue fact={pair.total} locale={locale} />,
+              }).map((part, index) => (
+                // The parts are the message's fixed segments, in order.
+                <Fragment key={index}>{part}</Fragment>
+              ))
             : kt(locale, "explained.kit.facts.unavailable");
         return (
           <li
             key={`${pair.who}-${pair.sub}`}
-            className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-3 tw-gap-y-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 tw-text-base lg:tw-grid-cols-[250px_minmax(0,1fr)_190px] lg:tw-gap-[18px]"
+            className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-3 tw-gap-y-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 tw-text-base max-[359px]:tw-grid-cols-1 lg:tw-grid-cols-[250px_minmax(0,1fr)_190px] lg:tw-gap-[18px]"
             data-agree-share={share.toFixed(4)}
           >
             <span className="tw-font-semibold tw-text-iron-50">
@@ -60,7 +67,7 @@ export default function AgreementBars({
               </span>
             </span>
             <span
-              className="tw-col-span-2 tw-row-start-2 tw-flex tw-h-2.5 tw-overflow-hidden tw-rounded-[5px] tw-bg-iron-800 lg:tw-col-span-1 lg:tw-row-start-auto"
+              className="tw-col-span-2 tw-row-start-2 tw-flex tw-h-2.5 tw-overflow-hidden tw-rounded-[5px] tw-bg-iron-800 max-[359px]:tw-col-span-1 max-[359px]:tw-row-start-3 lg:tw-col-span-1 lg:tw-row-start-auto"
               aria-hidden="true"
             >
               <span
@@ -71,7 +78,7 @@ export default function AgreementBars({
                 <span className="tw-h-full tw-flex-1 tw-bg-error" />
               )}
             </span>
-            <span className="tw-text-right tw-font-semibold tw-text-iron-50 lg:tw-col-start-3">
+            <span className="tw-text-right tw-font-semibold tw-text-iron-50 max-[359px]:tw-text-left lg:tw-col-start-3">
               {count}
               <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-400">
                 {pair.unit}

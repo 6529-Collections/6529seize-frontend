@@ -28,7 +28,7 @@ export function LimitNote({
       : "tw-border-dashed tw-border-iron-700";
   return (
     <div
-      className={`tw-grid tw-grid-cols-[18px_minmax(0,1fr)] tw-gap-2.5 tw-rounded-lg tw-border tw-px-4 tw-py-3.5 tw-text-base tw-leading-[25px] tw-text-iron-300 ${frame}`}
+      className={`tw-grid tw-grid-cols-[18px_minmax(0,1fr)] tw-gap-2.5 tw-rounded-lg tw-border tw-px-4 tw-py-3.5 tw-text-base tw-leading-[25px] tw-text-iron-300 max-[359px]:tw-grid-cols-1 max-[359px]:tw-px-3 ${frame}`}
       data-limit={tone}
     >
       <Glyph

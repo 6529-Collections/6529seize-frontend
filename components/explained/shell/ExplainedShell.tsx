@@ -61,7 +61,10 @@ export default function ExplainedShell({
         data-tdh-check-ignore="h1-offset"
       >
         <div className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-900">
-          <div className="tw-mx-auto tw-flex tw-h-[50px] tw-max-w-[1244px] tw-items-center tw-justify-between tw-gap-4 tw-px-5 md:tw-h-16 md:tw-px-12">
+          {/* One row; when the page's name and the live pill do not both
+              fit (a long German name beside "vor 1 Std. 1 Min."), the pill
+              wraps under the name instead of cutting it. */}
+          <div className="tw-mx-auto tw-flex tw-min-h-[50px] tw-max-w-[1244px] tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-1.5 tw-px-5 tw-py-2 md:tw-min-h-16 md:tw-px-12">
             <Breadcrumb crumbs={crumbs} locale={locale} />
             <div className="tw-flex tw-flex-none tw-items-center tw-gap-2.5">
               {live && (

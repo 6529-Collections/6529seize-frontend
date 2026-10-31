@@ -53,6 +53,8 @@ import networkTdhImplMessages from "@/i18n/messages/networkTdhImpl.en-US.json";
 import explainedKitMessages from "@/i18n/messages/explainedKit.en-US.json";
 import explainedHubMessages from "@/i18n/messages/explainedHub.en-US.json";
 import explainedTdhOverviewMessages from "@/i18n/messages/explainedTdhOverview.en-US.json";
+import explainedTdhCheckMessages from "@/i18n/messages/explainedTdhCheck.en-US.json";
+import explainedTdhDayMessages from "@/i18n/messages/explainedTdhDay.en-US.json";
 import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US.json";
 import pageMetadataMessages from "@/i18n/messages/pageMetadata.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
@@ -4612,6 +4614,8 @@ export const EN_US_MESSAGES = {
   ...explainedKitMessages,
   ...explainedHubMessages,
   ...explainedTdhOverviewMessages,
+  ...explainedTdhCheckMessages,
+  ...explainedTdhDayMessages,
   ...delegationTapGuideMessages,
   ...pageMetadataMessages,
   ...toolsMessages,

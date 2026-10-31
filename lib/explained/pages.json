@@ -140,13 +140,18 @@
         "app/network/tdh/verification/components/**"
       ],
       "dependsOn": ["D116", "D121", "D131", "D132"],
-      "checkedThrough": "D141",
+      "checkedThrough": "D145",
       "budget": { "words": 1000, "firstScreenMin": 150, "firstScreen": 285 },
       "states": [
         {
           "name": "break-fail",
           "clicks": ["[data-break=\"fail\"]"],
           "el": "[data-lens=\"failday\"]"
+        },
+        {
+          "name": "all-results",
+          "clicks": ["[data-all-results] > summary"],
+          "el": "[data-all-results]"
         }
       ]
     },
@@ -157,9 +162,12 @@
       "genre": "V",
       "mockup": "tdh-day-20744.html",
       "lane": "P3",
-      "sources": ["app/network/tdh/verification/[cycleDay]/**"],
-      "dependsOn": ["D116", "D136", "D137"],
-      "checkedThrough": "D141",
+      "sources": [
+        "app/network/tdh/verification/[cycleDay]/**",
+        "app/network/tdh/verification/day-not-found/**"
+      ],
+      "dependsOn": ["D116", "D136", "D137", "D144"],
+      "checkedThrough": "D145",
       "budget": { "words": 450, "firstScreenMin": 150, "firstScreen": 285 },
       "states": []
     },

@@ -1,3 +1,4 @@
+import { DAY_FAMILY, type DayField } from "./dayFacts";
 import { EDITION_FACTS, MEME_FAMILY } from "./editionFacts";
 import { FEED_FACTS } from "./feedFacts";
 import { MANIFEST_FACTS } from "./manifestFacts";
@@ -20,12 +21,14 @@ export const FACT_REGISTRY = {
 
 export type StaticFactId = keyof typeof FACT_REGISTRY;
 
-/** Facts keyed by a card or a decision number. */
+/** Facts keyed by a card, a decision or a published day. */
 export type FactFamilyId =
   | `meme.${number}.${"minted" | "edition" | "season" | "rate" | "firstMint"}`
-  | `decision.D${number}`;
+  | `decision.D${number}`
+  | `tdh.day.${number}.${DayField}`;
 
 export const FACT_FAMILIES: readonly FactFamily[] = [
   MEME_FAMILY,
   DECISION_FAMILY,
+  DAY_FAMILY,
 ];

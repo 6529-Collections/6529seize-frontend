@@ -9,7 +9,7 @@ import { t, type MessageKey } from "@/i18n/messages";
  * repository, so their chips have no link.
  */
 
-export const SPECIFICATION_PATH = "/network/tdh/specification";
+const SPECIFICATION_PATH = "/network/tdh/specification";
 
 const PRIVATE_DOCUMENTS = new Set(["P53", "P38", "P52", "P28"]);
 const EVIDENCE: Record<string, { anchor: string; key: MessageKey }> = {

@@ -70,8 +70,15 @@ export default function Verdict({
   actions,
   incident,
   locale,
+  word,
 }: {
   readonly state: VerdictState;
+  /**
+   * The verdict's word when the state's own does not say it: a day whose
+   * 6529.io upload was not compared shows the Not guaranteed frame with
+   * "Not compared", not "No file for this day".
+   */
+  readonly word?: string;
   /** The result's date and cycle, from the facts. */
   readonly date: FactEntry | null;
   readonly cycle: FactEntry | null;
@@ -91,11 +98,12 @@ export default function Verdict({
   readonly locale: SupportedLocale;
 }) {
   const simulated = state === "simulated";
+  const shownWord = word ?? kt(locale, WORD[state]);
   return (
     <section
-      className={`tw-grid tw-grid-cols-1 tw-gap-[22px] tw-rounded-xl tw-border tw-border-solid tw-px-[18px] tw-py-5 md:tw-px-[30px] md:tw-pb-[26px] md:tw-pt-[30px] lg:tw-grid-cols-[minmax(0,1fr)_380px] lg:tw-gap-11 ${FRAME[state]}`}
+      className={`tw-grid tw-grid-cols-1 tw-gap-[22px] tw-rounded-xl tw-border tw-border-solid tw-px-[18px] tw-py-5 max-[359px]:tw-px-3 md:tw-px-[30px] md:tw-pb-[26px] md:tw-pt-[30px] lg:tw-grid-cols-[minmax(0,1fr)_380px] lg:tw-gap-11 ${FRAME[state]}`}
       data-verdict={state}
-      aria-label={kt(locale, WORD[state])}
+      aria-label={shownWord}
     >
       <div>
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3.5">
@@ -103,7 +111,7 @@ export default function Verdict({
           <span
             className={`tw-text-[15px] tw-font-bold tw-uppercase tw-tracking-[0.02em] ${WORD_TONE[state]}`}
           >
-            {kt(locale, WORD[state])}
+            {shownWord}
           </span>
           {simulated ? (
             <>
@@ -123,7 +131,7 @@ export default function Verdict({
             </span>
           )}
         </div>
-        <h2 className="tw-m-0 tw-mb-3 tw-mt-4 tw-text-2xl tw-font-semibold tw-leading-[31px] tw-tracking-[-0.02em] tw-text-iron-50 md:tw-text-[32px] md:tw-leading-10">
+        <h2 className="tw-m-0 tw-mb-3 tw-mt-4 tw-text-2xl tw-font-semibold tw-leading-[31px] tw-tracking-[-0.02em] tw-text-iron-50 max-[359px]:tw-hyphens-auto max-[359px]:tw-text-xl max-[359px]:tw-leading-[27px] md:tw-text-[32px] md:tw-leading-10">
           {headline}
         </h2>
         {children}

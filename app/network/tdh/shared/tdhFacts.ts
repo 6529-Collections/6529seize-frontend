@@ -99,11 +99,6 @@ export function knownBuild(
   return KNOWN_BUILDS[commit.slice(0, 7)] ?? null;
 }
 
-/** The P26 commit a validator commit's Rust core follows, when known. */
-export function rustCoreSpec(commit: string): string | null {
-  return knownBuild(commit)?.spec ?? null;
-}
-
 /**
  * The four-way differential tests of 15 and 16 October 2026 (the validator's
  * tools/difftest/README.md): the 6529chain commit that settled each round's

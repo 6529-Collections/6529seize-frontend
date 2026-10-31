@@ -8,6 +8,8 @@ import artworkShareMessages from "@/i18n/messages/artworkShare.de-DE.json";
 import explainedKitMessages from "@/i18n/messages/explainedKit.de-DE.json";
 import explainedHubMessages from "@/i18n/messages/explainedHub.de-DE.json";
 import explainedTdhOverviewMessages from "@/i18n/messages/explainedTdhOverview.de-DE.json";
+import explainedTdhCheckMessages from "@/i18n/messages/explainedTdhCheck.de-DE.json";
+import explainedTdhDayMessages from "@/i18n/messages/explainedTdhDay.de-DE.json";
 import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.de-DE.json";
 import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.de-DE.json";
 import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.de-DE.json";
@@ -53,6 +55,8 @@ export const DE_DE_MESSAGES = {
   ...explainedKitMessages,
   ...explainedHubMessages,
   ...explainedTdhOverviewMessages,
+  ...explainedTdhCheckMessages,
+  ...explainedTdhDayMessages,
   ...profileCmsStudioMessages,
   ...profileCmsAgentMessages,
   ...studioTemplateDescriptions,
