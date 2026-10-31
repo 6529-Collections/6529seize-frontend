@@ -11066,6 +11066,41 @@
       ]
     },
     {
+      "id": "waves.signed-messages-turn-on-wallet",
+      "kind": "workflow",
+      "title": "Turn on signed messages: connecting and signing",
+      "aliases": [
+        "turn on signed messages does nothing",
+        "turn on button not working",
+        "signed messages button nothing happens",
+        "check your wallet to sign",
+        "reconnect wallet",
+        "walletconnect signed messages",
+        "unlock wallet signed messages",
+        "renew signed messages not working"
+      ],
+      "keywords": [
+        "waves",
+        "signature",
+        "wallet",
+        "walletconnect",
+        "locked",
+        "reconnect",
+        "grant"
+      ],
+      "facts": [
+        "Turn on, Renew and Turn on signed messages in this browser take one click and show a status line under the button. If the wallet is not live (locked, an expired WalletConnect session, or not reconnected after a reload), the click opens the wallet connection; once the same wallet connects, the signature request follows without another click. Logging out and in again is not needed.",
+        "While waiting the status reads Check your wallet to sign, then after 8 seconds Open your wallet to finish signing. It may be locked. If the wallet is on a different signed-in account, the status names the account to switch to and offers Reconnect wallet; switching accounts in the wallet within 2 minutes continues by itself. An unsupported network is switched to Ethereum first, or the status names the network to switch to.",
+        "With WalletConnect (a wallet app on a phone) there is nothing to unlock in the browser: the status reads Open your wallet app on your phone and approve the signature, then after 8 seconds suggests opening the app, and after 20 seconds offers Reconnect wallet, which pairs the wallet again with a QR code or deep link and asks for the signature again once connected. A WalletConnect session or relay error also offers Reconnect wallet.",
+        "A declined signature shows Signature canceled. Nothing changed, and you can try again any time. Other failures name the cause, such as Couldn't reach 6529.io to start signing or This browser couldn't prepare its signing key."
+      ],
+      "canonical_path": "/preferences?tab=devices",
+      "link_label": "Devices",
+      "related_paths": ["/waves"],
+      "tags": ["waves", "security", "preferences"],
+      "source_refs": ["ops/docs/waves/drop-actions/feature-signed-messages.md"]
+    },
+    {
       "id": "desktop.delegation-index-upgrade",
       "kind": "workflow",
       "title": "Desktop delegation index upgrade and replay",
