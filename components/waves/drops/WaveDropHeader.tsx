@@ -21,6 +21,8 @@ import { AnonymousAuthorName } from "./AnonymousDropAuthor";
 
 interface WaveDropHeaderProps {
   readonly drop: ApiDrop;
+  /** The grouped chat posts this header stands for, header first. */
+  readonly signatureGroup?: readonly ApiDrop[] | undefined;
   readonly isStorm: boolean;
   readonly currentPartIndex: number;
   readonly partsCount: number;
@@ -37,6 +39,7 @@ interface WaveDropHeaderProps {
 
 const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
   drop,
+  signatureGroup,
   isStorm,
   currentPartIndex,
   partsCount,
@@ -114,13 +117,13 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
                 <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></div>
               )}
               {!isStackedTimestamp && (
-                <WithDropAuthorSignedMarker drop={drop}>
+                <WithDropAuthorSignedMarker drop={drop} group={signatureGroup}>
                   <WaveDropTime timestamp={drop.created_at} />
                 </WithDropAuthorSignedMarker>
               )}
             </div>
             {isStackedTimestamp && (
-              <WithDropAuthorSignedMarker drop={drop}>
+              <WithDropAuthorSignedMarker drop={drop} group={signatureGroup}>
                 <WaveDropTime timestamp={drop.created_at} />
               </WithDropAuthorSignedMarker>
             )}

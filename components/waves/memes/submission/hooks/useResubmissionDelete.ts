@@ -6,6 +6,7 @@ import { useMyStreamActionsOptional } from "@/contexts/wave/MyStreamContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { deleteDrop } from "@/services/api/signed-drop-writes";
+import { isSignedWriteCancelled } from "@/lib/device-signing/signing-decision";
 import { useCallback, useContext, useState } from "react";
 
 interface UseResubmissionDeleteParams {
@@ -80,6 +81,11 @@ export function useResubmissionDelete({
     } catch (error) {
       if (didClose) {
         throw error;
+      }
+      // Cancelled at the signing prompt: nothing was sent.
+      if (isSignedWriteCancelled(error)) {
+        setIsDeletingOriginal(false);
+        return;
       }
 
       let message = "Unable to delete the original submission.";

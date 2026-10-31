@@ -497,6 +497,7 @@ const getAuthorHeader = ({
   showAuthorInfo,
   identityMode,
   drop,
+  signatureGroup,
   showWaveInfo,
   isStorm,
   activePartIndex,
@@ -509,6 +510,7 @@ const getAuthorHeader = ({
   readonly showAuthorInfo: boolean;
   readonly identityMode: DropIdentityMode;
   readonly drop: ExtendedDrop;
+  readonly signatureGroup?: readonly ExtendedDrop[] | undefined;
   readonly showWaveInfo: boolean;
   readonly isStorm: boolean;
   readonly activePartIndex: number;
@@ -528,6 +530,7 @@ const getAuthorHeader = ({
     return (
       <WaveDropHeader
         drop={drop}
+        signatureGroup={signatureGroup}
         showWaveInfo={showWaveInfo}
         isStorm={isStorm}
         currentPartIndex={activePartIndex}
