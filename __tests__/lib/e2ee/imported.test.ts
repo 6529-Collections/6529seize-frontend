@@ -52,7 +52,8 @@ function importedMsg(n: number, original = IMPORTED): MsgPayload {
 const meta = (profile: string, seq: number): PayloadMeta => ({
   g: "g",
   seq,
-  serverTs: seq * 1000,
+  // Imports happen after the original was written (2026, not 1970).
+  serverTs: Date.UTC(2026, 9, 1) + seq * 1000,
   senderProfileId: profile,
   senderDeviceKey: `${profile}-device`,
   sigOk: true,
@@ -80,8 +81,22 @@ describe("imported payload (D146 extension of contract 6)", () => {
     const payload = importedMsg(1);
     const decoded = decodePayload(encodePayload(payload)) as MsgPayload;
     expect(decoded.imp).toEqual(payload.imp);
-    expect(fromImportedPayload(decoded.imp as ImportedPayload)).toEqual(
-      IMPORTED
+    expect(
+      fromImportedPayload(decoded.imp as ImportedPayload, Date.now())
+    ).toEqual(IMPORTED);
+  });
+
+  it("never shows an original time later than the import itself", () => {
+    const imp = importedMsg(1).imp as ImportedPayload;
+    const importedAt = imp.at - 60_000;
+    const shown = fromImportedPayload(
+      { ...imp, e: imp.at + 5_000 },
+      importedAt
+    );
+    expect(shown.createdAt).toBe(importedAt);
+    expect(shown.editedAt).toBe(importedAt);
+    expect(fromImportedPayload({ ...imp, e: null }, importedAt).editedAt).toBe(
+      null
     );
   });
 

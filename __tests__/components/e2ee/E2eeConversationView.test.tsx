@@ -273,7 +273,8 @@ describe("E2eeConversationView", () => {
         GROUP_G,
         "m1",
         "CREDIBLE_THREAT_OF_VIOLENCE",
-        undefined
+        undefined,
+        { includeOriginal: false }
       )
     );
   });

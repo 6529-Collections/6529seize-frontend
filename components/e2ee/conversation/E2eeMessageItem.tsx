@@ -35,7 +35,11 @@ import {
 import { E2eeAvatar } from "../ui/E2eeAvatar";
 import { E2eeAttachmentView } from "./E2eeAttachmentView";
 import { splitLinks } from "./e2eeLinks";
-import { E2eeImportedNote, importedAuthorName } from "./E2eeImportedNote";
+import {
+  E2eeImportedNote,
+  importedAuthor,
+  importedAuthorName,
+} from "./E2eeImportedNote";
 import { splitMentions } from "./e2eeMentions";
 
 const QUICK_REACTIONS = ["👍", "❤️", "😂", "🔥", "👀", "🎉"] as const;
@@ -582,8 +586,8 @@ function getMessageRowClassName(
 
 /**
  * Who a message row names. Imported history keeps its original author (the
- * importer is the sender); an unreadable message still names its sender when
- * the chat makes it clear.
+ * importer is the sender) when that author is in this chat, else "Unknown";
+ * an unreadable message still names its sender when the chat makes it clear.
  */
 function getMessageNames(
   locale: SupportedLocale,
@@ -591,24 +595,33 @@ function getMessageNames(
   message: E2eeMessage,
   selfProfileId: string | null
 ) {
-  const authorProfileId =
-    message.imported?.authorProfileId ?? message.senderProfileId;
-  const sender = findMember(conversation.members, authorProfileId);
+  const author = message.imported
+    ? importedAuthor(conversation.members, message.imported, selfProfileId)
+    : undefined;
+  const sender =
+    author === undefined
+      ? findMember(conversation.members, message.senderProfileId)
+      : (author?.member ?? null);
   const senderName = getMemberName(
     locale,
     conversation.members,
     message.senderProfileId,
     selfProfileId
   );
-  const name = message.imported
-    ? importedAuthorName(locale, message.imported, selfProfileId)
-    : senderName;
+  const name =
+    author === undefined
+      ? senderName
+      : importedAuthorName(locale, author, selfProfileId);
   const shownName =
     message.undecryptable && !sender
       ? (getDmPeer(conversation, selfProfileId)?.handle ??
         t(locale, "e2ee.message.undecryptableSender"))
       : name;
-  return { sender, senderName, shownName };
+  const importerName =
+    selfProfileId !== null && message.senderProfileId === selfProfileId
+      ? t(locale, "e2ee.youObject")
+      : senderName;
+  return { sender, senderName, shownName, importerName };
 }
 
 function E2eeMessageItemComponent({
@@ -632,7 +645,7 @@ function E2eeMessageItemComponent({
       />
     );
   }
-  const { sender, senderName, shownName } = getMessageNames(
+  const { sender, senderName, shownName, importerName } = getMessageNames(
     locale,
     conversation,
     message,
@@ -676,7 +689,7 @@ function E2eeMessageItemComponent({
         {message.imported && !message.deleted ? (
           <E2eeImportedNote
             imported={message.imported}
-            importerName={senderName}
+            importerName={importerName}
             showDetail={!compact}
           />
         ) : null}

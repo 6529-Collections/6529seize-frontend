@@ -54,6 +54,49 @@ describe("sentry-sanitizer", () => {
     expect(JSON.stringify(event)).not.toContain(SYNTHETIC_WAVE_ID);
   });
 
+  it("drops click and input breadcrumbs on encrypted-chat pages", () => {
+    const click = {
+      category: "ui.click",
+      message: 'button[aria-label="Download passport-scan.pdf"]',
+    };
+    const input = { category: "ui.input", message: "textarea.composer" };
+    const chat = `/messages/encrypted/0x${"a".repeat(64)}`;
+
+    expect(sanitizeSentryBreadcrumb(click, chat)).toBeNull();
+    expect(sanitizeSentryBreadcrumb(input, chat)).toBeNull();
+    expect(sanitizeSentryBreadcrumb(click, "/messages/encrypted")).toBeNull();
+    expect(
+      sanitizeSentryBreadcrumb(click, "/messages/encrypted/devices")
+    ).toBeNull();
+    expect(
+      sanitizeSentryBreadcrumb({ category: "navigation" }, chat)
+    ).not.toBeNull();
+    expect(sanitizeSentryBreadcrumb(click, "/messages")).toEqual(
+      expect.objectContaining({ category: "ui.click" })
+    );
+    expect(
+      sanitizeSentryBreadcrumb(click, "/messages/encrypted-notes")
+    ).not.toBeNull();
+  });
+
+  it("reads the current page when no path is given", () => {
+    window.history.replaceState(
+      null,
+      "",
+      `/messages/encrypted/0x${"b".repeat(64)}`
+    );
+    try {
+      expect(
+        sanitizeSentryBreadcrumb({ category: "ui.click", message: "img" })
+      ).toBeNull();
+    } finally {
+      window.history.replaceState(null, "", "/");
+    }
+    expect(
+      sanitizeSentryBreadcrumb({ category: "ui.click", message: "img" })
+    ).not.toBeNull();
+  });
+
   it("redacts secrets from breadcrumb text fields", () => {
     const breadcrumb = sanitizeSentryBreadcrumb({
       message: "request failed Bearer abc123",

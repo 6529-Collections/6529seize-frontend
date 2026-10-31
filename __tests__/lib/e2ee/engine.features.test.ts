@@ -280,6 +280,48 @@ describe("E2EE engine: features", () => {
     ).toBe(false);
   });
 
+  it("reports an edited message as its signed edit, the original only on request", async () => {
+    const { world, a, b, g } = await trio();
+    await a.send(g, { text: "see you at noon" });
+    await settle(world);
+    const sent = b.getMessages(g).find((m) => m.text === "see you at noon")!;
+    await a.edit(g, sent.id, "a threat edited in");
+    await settle(world);
+    expect(b.getMessages(g).find((m) => m.id === sent.id)!.text).toBe(
+      "a threat edited in"
+    );
+    expect(b.reportPreview(g, sent.id)).toEqual({
+      latest: { text: "a threat edited in", attachmentNames: [] },
+      original: { text: "see you at noon", attachmentNames: [] },
+    });
+
+    const decode = (body: string) =>
+      JSON.parse(new TextDecoder().decode(base64ToBytes(body)));
+    await b.report(g, sent.id, "CREDIBLE_THREAT_OF_VIOLENCE");
+    expect(world.ds.state.reports).toHaveLength(1);
+    const [latest] = world.ds.state.reports;
+    expect(latest).toMatchObject({
+      verified: true,
+      sender_profile_id: "alice",
+    });
+    expect(decode(latest!.body)).toMatchObject({
+      t: "edit",
+      target: sent.id,
+      text: "a threat edited in",
+    });
+
+    await b.report(g, sent.id, "CREDIBLE_THREAT_OF_VIOLENCE", undefined, {
+      includeOriginal: true,
+    });
+    const [, edited, original] = world.ds.state.reports;
+    expect(decode(edited!.body)).toMatchObject({ t: "edit" });
+    expect(original).toMatchObject({ verified: true });
+    expect(decode(original!.body)).toMatchObject({
+      t: "msg",
+      text: "see you at noon",
+    });
+  });
+
   it("searches locally", async () => {
     const { world, a, b, g } = await trio();
     await a.send(g, { text: "The quick brown fox" });

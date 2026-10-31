@@ -106,6 +106,14 @@ export interface StoredNotice {
   detail?: string;
 }
 
+/** One signed payload exactly as received, enough for a verifiable report. */
+export interface SignedVersion {
+  epoch: number;
+  body: string;
+  sig: string;
+  senderDeviceKey: string;
+}
+
 export interface StoredMessage {
   id: string;
   g: string;
@@ -131,6 +139,13 @@ export interface StoredMessage {
   epoch: number | null;
   body: string | null;
   sig: string | null;
+  /**
+   * The latest applied edit's own signed `edit` payload, the version the
+   * reader sees. Null when that edit has no signed copy (this device's own
+   * edit). Absent on messages never edited, and on ones edited before this
+   * field existed.
+   */
+  latestEdit?: SignedVersion | null;
   /** Set when the message was moved from an unencrypted DM (D146). */
   imported?: ImportedPayload;
 }
