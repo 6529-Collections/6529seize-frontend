@@ -166,6 +166,8 @@ export type EditionAuctionPhase =
   | "extended"
   | "disputed"
   | "closed"
+  /** SETTLING: settle runs in calls of bounded gas and has more to do. */
+  | "settling"
   | "settled"
   | "void"
   | "noBids";
@@ -299,6 +301,25 @@ export interface EditionQuote {
   readonly pulledIn: number;
 }
 
+/**
+ * Settlement progress: `settlement(saleId)` and the latest `SettlementScanned`.
+ * Settle is permissionless and runs in calls of bounded gas (rc.2): the first
+ * call checks the close and starts scanning the book, each call scans up to 24
+ * of its words (eight steps each), the call that finishes the scan clears and
+ * pays (`AuctionCleared`), and later calls sweep the clearing step's
+ * departures (`DeparturesSwept`). Typical sales settle in one call.
+ */
+export interface EditionSettlement {
+  /** The scan finished: the result is stored and paid. */
+  readonly cleared: boolean;
+  /** `SettlementScanned.wordsLeft`: book words still to scan; 0 once cleared. */
+  readonly wordsLeft: number;
+  /** Departures at the clearing step swept so far (rationed sales). */
+  readonly departuresSwept: number;
+  /** Departures logged at the clearing step (zero unless rationed). */
+  readonly departures: number;
+}
+
 /** The edition auction of one master (or one standalone federated 1155 edition). */
 export interface EditionAuction {
   readonly saleId: string;
@@ -329,4 +350,73 @@ export interface EditionAuction {
   readonly withdrawalsOpen: boolean;
   /** Settlement needs `Editions.createEdition` first when k > 0. */
   readonly editionCreated: boolean;
+  /** Null before the first settle call, and for a void sale. */
+  readonly settlement: EditionSettlement | null;
 }
+
+interface EditionActivityBase {
+  readonly at: UnixSeconds;
+  readonly txHash: Hex32;
+  /** The contract event the line comes from. */
+  readonly source: string;
+}
+
+/**
+ * One line of an edition auction's history, from `IUniformEditionAuction`
+ * events (indexed per sale). `extended` is derived: the bid's `endTime` is
+ * later than the end before it.
+ */
+export type EditionActivity = EditionActivityBase &
+  (
+    | { readonly kind: "opened" }
+    | {
+        readonly kind: "bid";
+        readonly bidder: Address;
+        readonly bidId: number;
+        readonly step: number;
+        readonly quantity: number;
+        readonly endTime: UnixSeconds;
+        readonly extended: boolean;
+      }
+    | {
+        readonly kind: "raised";
+        readonly bidder: Address;
+        readonly bidId: number;
+        readonly fromStep: number;
+        readonly step: number;
+        readonly quantity: number;
+        readonly paid: Wei;
+        readonly endTime: UnixSeconds;
+        readonly extended: boolean;
+      }
+    | {
+        readonly kind: "withdrawn";
+        readonly bidder: Address;
+        readonly bidId: number;
+        readonly amount: Wei;
+      }
+    | { readonly kind: "scanned"; readonly wordsLeft: number }
+    | {
+        readonly kind: "cleared";
+        readonly count: number;
+        readonly step: number;
+        readonly price: Wei;
+        readonly revenue: Wei;
+        readonly networkFee: Wei;
+      }
+    | {
+        readonly kind: "swept";
+        readonly swept: number;
+        readonly total: number;
+      }
+    | { readonly kind: "settled"; readonly count: number }
+    | { readonly kind: "voided" }
+    | {
+        readonly kind: "claimed";
+        readonly bidder: Address;
+        readonly bidId: number;
+        readonly to: Address;
+        readonly unitsWon: number;
+        readonly refund: Wei;
+      }
+  );

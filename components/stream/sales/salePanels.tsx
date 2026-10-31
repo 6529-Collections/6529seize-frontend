@@ -6,11 +6,11 @@ import {
   useStreamNow,
   useStreamQuery,
 } from "@/components/stream/data/StreamProvider";
+import EditionAuctionPanel from "@/components/stream/editions/EditionAuctionPanel";
 import Countdown from "@/components/stream/ui/Countdown";
 import EthAmount from "@/components/stream/ui/EthAmount";
 import {
   auctionStateBadge,
-  editionPhaseBadge,
   SpecBadge,
 } from "@/components/stream/ui/StatusBadge";
 import { formatInteger } from "@/i18n/format";
@@ -23,7 +23,6 @@ import {
   STREAM_LABEL,
 } from "@/components/stream/ui/styles";
 import type {
-  EditionAuction,
   KnownSaleKind,
   OneOfOneAuction,
   SaleRef,
@@ -102,65 +101,11 @@ function EnglishAuctionSummary({
   );
 }
 
-function EditionAuctionSummary({
-  sale,
-  locale,
-  now,
-}: SalePanelProps<"UNIFORM_AUCTION">) {
-  const auction: EditionAuction = sale;
-  const { clearing } = auction;
-  return (
-    <section
-      className={PANEL}
-      aria-label={t(locale, "stream.sale.edition.title")}
-    >
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2">
-        <h2 className={`${STREAM_HEADING} tw-text-base`}>
-          {t(locale, "stream.sale.edition.title")}
-        </h2>
-        <SpecBadge spec={editionPhaseBadge(auction.phase)} locale={locale} />
-      </div>
-      <p className="tw-m-0 tw-mt-3 tw-text-sm tw-text-iron-200">
-        {clearing.count === 0
-          ? t(locale, "stream.sale.edition.noneYet")
-          : t(locale, "stream.sale.edition.rightNow", {
-              count: formatInteger(locale, clearing.count),
-            })}{" "}
-        {clearing.count === 0 ? null : (
-          <EthAmount wei={clearing.price} locale={locale} />
-        )}
-      </p>
-      <dl className="tw-m-0 tw-mt-3 tw-grid tw-grid-cols-2 tw-gap-3">
-        <Fact label={t(locale, "stream.sale.edition.raised")}>
-          <EthAmount wei={clearing.revenue} locale={locale} />
-        </Fact>
-        <Fact label={t(locale, "stream.sale.edition.cap")}>
-          {auction.terms.cap === 0
-            ? t(locale, "stream.sale.edition.noCap")
-            : formatInteger(locale, auction.terms.cap)}
-        </Fact>
-        <Fact label={t(locale, "stream.sale.edition.end")}>
-          <Countdown
-            endTime={auction.times.editionEnd}
-            now={now}
-            locale={locale}
-            closeWindow={auction.terms.softWindow}
-            extended={auction.phase === "extended"}
-          />
-        </Fact>
-        <Fact label={t(locale, "stream.sale.edition.bids")}>
-          {formatInteger(locale, auction.bidCount)}
-        </Fact>
-      </dl>
-    </section>
-  );
-}
-
 const SALE_PANELS: {
   readonly [K in KnownSaleKind]: ComponentType<SalePanelProps<K>>;
 } = {
   ENGLISH_AUCTION: EnglishAuctionSummary,
-  UNIFORM_AUCTION: EditionAuctionSummary,
+  UNIFORM_AUCTION: EditionAuctionPanel,
 };
 
 /** Reads a sale of any kind and renders its registered panel. */

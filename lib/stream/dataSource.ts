@@ -4,10 +4,12 @@ import type {
   Address,
   CurationPackage,
   DisputeView,
+  EditionActivity,
   EditionAuction,
   EditionBalance,
   EditionBidView,
   EditionCandidate,
+  EditionHolder,
   EditionQuote,
   EditionStepTotal,
   FederatedContract,
@@ -88,6 +90,19 @@ export interface StreamDataSource {
   lowestWinningStep(edition: WorkKey, qty: number): Promise<number | null>;
   /** The lowest step where a new bid of `qty` gets every unit in (client-side search). */
   lowestStepFullyIn(edition: WorkKey, qty: number): Promise<number | null>;
+  /**
+   * What raising bid `bidId` to `newStep` would do (client-side, like
+   * `lowestStepFullyIn`): it rejoins the back of `newStep`, leaving a hole.
+   */
+  quoteEditionRaise(
+    edition: WorkKey,
+    bidId: number,
+    newStep: number
+  ): Promise<EditionQuote | null>;
+  /** The sale's history from its events, oldest first. */
+  editionActivity(edition: WorkKey): Promise<readonly EditionActivity[]>;
+  /** The edition's holders, largest first. */
+  editionHolders(edition: WorkKey): Promise<readonly EditionHolder[]>;
   /** Every step's price for an auction's locked ladder. */
   ladder(edition: WorkKey): Promise<readonly Wei[]>;
 
@@ -150,8 +165,9 @@ export interface EnglishAuctionActions {
 
 /**
  * `IUniformEditionAuction` writes (6529-works ADR 0005). The chain source maps
- * the edition key to `saleIdOf(token, id)`; `settle` supplies the departure
- * order from `settlementOrder(saleId)` and repeats until it returns true.
+ * the edition key to `saleIdOf(token, id)`; `settle` sends one call with the
+ * remaining departure order from `settlementOrder(saleId)`, and the UI offers
+ * the next call while it returns false.
  */
 export interface EditionAuctionActions {
   /** Permissionless from the 1/1's start; the keeper batches it with `start`. */
@@ -171,8 +187,15 @@ export interface EditionAuctionActions {
   ): Promise<TxResult>;
   /** `withdrawBid(saleId, bidId, to)`: only while the coupled 1/1 is paused for a dispute. */
   withdraw(from: Address, edition: WorkKey, bidId: number): Promise<TxResult>;
-  /** Permissionless after the edition end once the 1/1 is settled or cancelled. */
-  settle(from: Address, edition: WorkKey): Promise<TxResult>;
+  /**
+   * One permissionless settle call, after the edition end once the 1/1 is
+   * settled or cancelled. Settlement runs in calls of bounded gas: `settled`
+   * is false while more calls are needed (the sale stays SETTLING).
+   */
+  settle(
+    from: Address,
+    edition: WorkKey
+  ): Promise<TxResult<{ readonly settled: boolean }>>;
   /** `claimBid(saleId, bidId, to)`: mints the editions won and sends the refund. */
   claim(
     from: Address,
@@ -263,6 +286,8 @@ export interface StreamDevControls {
   pauseForDispute(work: WorkKey): TxResult;
   /** The TDH vote outcome: upheld cancels and burns; rejected resumes. */
   resolveDispute(work: WorkKey, upheld: boolean): TxResult;
+  /** Other bidders bid near the current price, `count` times (edition auctions). */
+  simulateEditionBids(edition: WorkKey, count: number): TxResult;
   /** A TDH vote delists or relists a federated contract. */
   setFederatedStatus(contract: Address, delisted: boolean): TxResult;
   reset(): void;

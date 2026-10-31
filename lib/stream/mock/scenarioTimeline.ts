@@ -12,8 +12,8 @@ import {
   placeEditionBid,
   prepareEditionAuction,
   raiseEditionBid,
-  settleEditionAuction,
 } from "@/lib/stream/mock/sales/editionAuction";
+import { settleEditionAuction } from "@/lib/stream/mock/sales/editionSettlement";
 import {
   pauseEnglishAuction,
   resolveEnglishDispute,
@@ -670,6 +670,80 @@ function dayThreeEveningSteps(): Step[] {
   ];
 }
 
+/**
+ * A wide book, from 0.000105 to 1.96 ETH: 26 words of the ladder, so settling
+ * takes two calls (rc.2 scans 24 words per call). Typical sales take one.
+ */
+const TIDE_TABLE_BOOK: readonly (readonly [number, number, number])[] = [
+  [5, 206, 1],
+  [1, 168, 3],
+  [6, 144, 10],
+  [0, 120, 4],
+  [7, 120, 56],
+  [8, 110, 90],
+  [0, 1, 5],
+  [9, 6, 40],
+  [2, 1, 25],
+];
+
+/**
+ * Tide Table: its 1/1 drew no bids (it goes to the museum) and its editions
+ * still sold, 164 at 0.0196 ETH. The first settle call scanned 24 words and
+ * stopped, so the sale is SETTLING with 2 words left: anyone can continue.
+ */
+function tideTableSteps(): Step[] {
+  const S = SEED_START + 2 * D + 23 * H + 40 * M;
+  const pool = [
+    MOCK_ACCOUNTS.collectorA,
+    MOCK_ACCOUNTS.collectorB,
+    ...OTHER_BIDDERS,
+  ];
+  const bids = (from: number, to: number) => (c: SeedContext) =>
+    editionBids(
+      c,
+      "tideTable",
+      TIDE_TABLE_BOOK.slice(from, to).map(([who, step, qty]) => [
+        pool[who] ?? MOCK_ACCOUNTS.guardian,
+        step,
+        qty,
+      ])
+    );
+  return [
+    {
+      at: S,
+      run: (c) =>
+        launch(
+          c,
+          "tideTable",
+          spec(c, "ines", {
+            title: "Tide Table",
+            description: "A year of tide heights, one glaze band per day.",
+            medium: "Generative glaze",
+            style: "field",
+            seed: 89,
+            kind: "EDITION_MASTER",
+            collection: COLLECTIONS.tidewater,
+          }),
+          0
+        ),
+    },
+    { at: S + 20 * M, run: bids(0, 3) },
+    { at: S + 9 * H, run: bids(3, 6) },
+    { at: S + 17 * H, run: bids(6, 9) },
+    {
+      at: S + D + 16 * M,
+      run: (c) => {
+        settleEnglishAuction(c.engine, saleOf(c, "tideTable"));
+        createEditionFor(c.engine, work(c, "tideTable").key);
+      },
+    },
+    {
+      at: S + D + 17 * M,
+      run: (c) => settleEditionAuction(c.engine, editionOf(c, "tideTable")),
+    },
+  ];
+}
+
 /** Every seeded step, in time order. */
 export function seedTimeline(): Step[] {
   return [
@@ -678,5 +752,6 @@ export function seedTimeline(): Step[] {
     ...dayTwoSteps(),
     ...dayThreeMorningSteps(),
     ...dayThreeEveningSteps(),
+    ...tideTableSteps(),
   ].sort((left, right) => left.at - right.at);
 }

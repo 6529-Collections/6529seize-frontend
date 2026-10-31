@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { EditionPage } from "@/components/stream/pages/EditionPages";
+import { EditionPage } from "@/components/stream/editions/EditionPages";
 import {
   assertStreamProduct,
   streamPageMetadata,
