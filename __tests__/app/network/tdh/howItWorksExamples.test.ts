@@ -6,12 +6,31 @@ import {
   RATE_EXAMPLES,
   householdScenario,
 } from "@/app/network/tdh/how-it-works/examples";
-import { replayStacks } from "@/app/network/tdh/how-it-works/explorables/StackSimulator";
 import { EXAMPLE_NETWORK } from "@/app/network/tdh/how-it-works/exampleNetwork";
 import {
   REGISTRY_V14,
   boostOfHoldings,
 } from "@/components/explained/engine/tdh";
+
+import {
+  BOOST_START,
+  boostOf,
+  extraSetsLimit,
+  gradientLimit,
+  payingSeasons,
+} from "@/app/network/tdh/how-it-works/models/boost";
+import {
+  firstDay,
+  hoursAndMinutes,
+  type FirstDayWorld,
+} from "@/app/network/tdh/how-it-works/models/firstDay";
+import { identityValues } from "@/app/network/tdh/how-it-works/models/identity";
+import {
+  ROUND_TRIP,
+  caseH,
+  roundTripDays,
+} from "@/app/network/tdh/how-it-works/models/netting";
+import { ENGINE } from "@/lib/explained/engine";
 
 // The worked examples of How TDH is calculated, checked against the numbers
 // the P26 Python reference printed (plan, Appendix A).
@@ -136,36 +155,122 @@ describe("How TDH is calculated: worked examples", () => {
   });
 });
 
-describe("stack simulator replay (P26 §7.1, §6.4)", () => {
-  const events = [
-    { kind: "buy", day: 0 },
-    { kind: "buy", day: 10 },
-    { kind: "move", day: 30 },
-    { kind: "buy", day: 40 },
-    { kind: "sell", day: 50 },
-  ] as const;
+/**
+ * The How it works models (TDH-DESIGN.md §5.3 to §5.7) against the values
+ * the design and the Lean manifest give, computed by the TDH v1.4 engine.
+ */
+const WORLD: FirstDayWorld = {
+  example: Date.parse("2026-10-17T19:05:00Z") / 1000,
+  dayS: 86_400,
+};
+const iso = (seconds: number | null) =>
+  seconds === null ? null : new Date(seconds * 1000).toISOString();
 
-  it("keeps a moved copy's age when the wallets are consolidated", () => {
-    expect(replayStacks(events, true)).toEqual({ a: [0], b: [10] });
+describe("A card ages", () => {
+  it("counts a copy that arrived Oct 17 19:05 from the result of Oct 19", () => {
+    const result = firstDay(WORLD, "example", false);
+    expect(iso(result.first)).toBe("2026-10-19T00:00:00.000Z");
+    expect(hoursAndMinutes(result.heldAtFirst ?? 0)).toEqual({
+      hours: 28,
+      minutes: 55,
+    });
+    expect(hoursAndMinutes(result.heldBefore ?? 0)).toEqual({
+      hours: 4,
+      minutes: 55,
+    });
   });
 
-  it("restarts a moved copy's age when they are not, for the whole history", () => {
-    expect(replayStacks(events, false)).toEqual({ a: [0], b: [30] });
+  it("answers the guess: 23:59 counts Oct 19, 00:01 counts Oct 20", () => {
+    expect(iso(firstDay(WORLD, "beforeMidnight", false).first)).toBe(
+      "2026-10-19T00:00:00.000Z"
+    );
+    expect(iso(firstDay(WORLD, "afterMidnight", false).first)).toBe(
+      "2026-10-20T00:00:00.000Z"
+    );
   });
 
-  it("sells the newest copy first", () => {
-    expect(
-      replayStacks(
-        [
-          { kind: "buy", day: 0 },
-          { kind: "buy", day: 5 },
-          { kind: "sell", day: 9 },
-        ],
-        true
-      )
-    ).toEqual({
-      a: [0],
-      b: [],
+  it("Break it: sold before a whole day, no result counts it", () => {
+    const result = firstDay(WORLD, "example", true);
+    expect(result.first).toBeNull();
+    expect(iso(result.sold)).toBe("2026-10-18T12:05:00.000Z");
+  });
+});
+
+describe("Inside one transaction", () => {
+  it("keeps the days when the round trip is one transaction", () => {
+    expect(roundTripDays(true)).toBe(ROUND_TRIP.heldDays);
+    expect(roundTripDays(false)).toBe(0);
+  });
+
+  it("reproduces counterexample H", () => {
+    expect(caseH(false)).toEqual({
+      minted1: 10,
+      H: 10,
+      rate2: 200,
+      bFinal: 800,
+      total: 1710,
+    });
+    expect(caseH(true)).toEqual({
+      minted1: 20,
+      H: 20,
+      rate2: 400,
+      bFinal: 1600,
+      total: 2510,
+    });
+  });
+});
+
+describe("The boost ladder", () => {
+  const n = 562;
+  it("starts at one Gradient, 1.02", () => {
+    expect(boostOf(BOOST_START, n).beta).toBe(102);
+  });
+
+  it("agrees with the facts layer's seam", () => {
+    expect(boostOf({ ...BOOST_START, sets: 1, gradients: 0 }, n).beta).toBe(
+      ENGINE.boostCents({
+        fullSets: 1,
+        gradients: 0,
+        completeSeasons: [],
+        genesis: false,
+        nakamoto: false,
+        nMemes: n,
+      })
+    );
+  });
+
+  it("pays sixteen seasons today, and a sixth Gradient adds nothing", () => {
+    expect(payingSeasons(n)).toBe(16);
+    expect(gradientLimit()).toBe(5);
+    const five = boostOf({ ...BOOST_START, gradients: 5 }, n).beta;
+    expect(boostOf({ ...BOOST_START, gradients: 6 }, n).beta).toBe(five);
+    expect(extraSetsLimit()).toBeCloseTo(0.144051, 6);
+  });
+
+  it("counts Genesis and Nakamoto only before the first season completes", () => {
+    const singles = {
+      ...BOOST_START,
+      gradients: 0,
+      genesis: true,
+      nakamoto: true,
+    };
+    expect(boostOf(singles, n).beta).toBe(102);
+    expect(boostOf({ ...singles, seasons: 1 }, n).beta).toBe(105);
+  });
+});
+
+describe("An identity", () => {
+  it("gives 42,720 linked and 35,588 and 5,084 apart", () => {
+    const values = identityValues(1271, 562);
+    expect(values).toEqual({
+      season: 13,
+      cards: 32,
+      inA: 28,
+      inB: 4,
+      boostCents: 105,
+      linkedTdh: 42_720,
+      aTdh: 35_588,
+      bTdh: 5_084,
     });
   });
 });

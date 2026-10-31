@@ -141,7 +141,7 @@ const HOUSEHOLD_RATES: Record<HouseholdCardId, number> = {
   nextgen: rateCents(H, EXAMPLE_NETWORK.nextgenCollectionSize) ?? 0,
 };
 
-export const HOUSEHOLD_HOLDINGS: readonly HouseholdCopy[] = [
+const HOUSEHOLD_HOLDINGS: readonly HouseholdCopy[] = [
   { wallet: "A", card: "firstgm", days: [200, 120] },
   { wallet: "A", card: "meme310", days: [0] },
   { wallet: "A", card: "gradient1", days: [400] },
@@ -150,14 +150,7 @@ export const HOUSEHOLD_HOLDINGS: readonly HouseholdCopy[] = [
   { wallet: "B", card: "nextgen", days: [365] },
 ];
 
-export type HouseholdScenario = "identity" | "wallets" | "tomorrow" | "sell";
-
-export const HOUSEHOLD_SCENARIOS: readonly HouseholdScenario[] = [
-  "identity",
-  "wallets",
-  "tomorrow",
-  "sell",
-];
+type HouseholdScenario = "identity" | "wallets" | "tomorrow" | "sell";
 
 interface HouseholdRow {
   readonly card: HouseholdCardId;

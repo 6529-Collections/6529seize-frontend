@@ -13,14 +13,6 @@ import tableStyles from "./tdhTable.module.css";
  */
 export const TDH_PAGE = `${NETWORK_REFERENCE_PAGE_CLASSES} max-md:tw-pt-1`;
 export const TDH_DROPDOWN_ROW = `${NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES} max-md:tw-hidden`;
-/**
- * The two widths a block of a TDH page snaps to: the reading measure, for
- * prose, notes, callouts, examples and small tables (34rem, the same in px
- * at every text size, so a 14 px note lines up with 16 px prose), and the
- * full column, for wide tables, explorables and rule blocks.
- */
-export const TDH_MEASURE = "tw-max-w-[34rem]";
-
 /** The header under the section tabs, above a page's H1. */
 export const TDH_PAGE_HEADER_TOP = "tw-pt-2 sm:tw-pt-8";
 
@@ -40,13 +32,6 @@ export const TDH_FOCUS_RING =
   "focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 export const TDH_LINK = `tw-font-medium tw-text-primary-300 tw-underline tw-decoration-primary-300/40 tw-underline-offset-4 hover:tw-text-primary-400 hover:tw-decoration-primary-400 ${TDH_FOCUS_RING}`;
 
-/**
- * A table frame that scrolls sideways: pair it with tabIndex 0, role region
- * and a label. It is positioned, so screen-reader-only text and tooltips
- * inside it are clipped with it instead of widening the page.
- */
-export const TDH_TABLE_WRAP =
-  "tw-relative tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07]";
 /** A table frame for tables whose cells wrap to fit, so it never scrolls. */
 export const TDH_TABLE_FRAME =
   "tw-relative tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07]";

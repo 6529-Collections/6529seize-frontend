@@ -75,12 +75,12 @@
         },
         {
           "name": "rates-break-152",
-          "clicks": ["[data-break=\"mint152\"]"],
+          "clicks": ["[data-break=\"floor\"]"],
           "el": "[data-lens=\"rates\"]"
         },
         {
           "name": "boost-break-sixth",
-          "clicks": ["[data-break=\"grad6\"]"],
+          "clicks": ["[data-break=\"gradient\"]"],
           "el": "[data-lens=\"boost\"]"
         },
         {
@@ -211,7 +211,18 @@
       "sources": ["app/network/tdh/consolidation/design/**"],
       "dependsOn": ["D136"],
       "checkedThrough": "D141",
-      "states": []
+      "states": [
+        {
+          "name": "order-step1-split",
+          "clicks": ["[data-preset=\"step1\"]"],
+          "el": "[data-lens=\"wallets\"]"
+        },
+        {
+          "name": "order-break-five",
+          "clicks": ["[data-break=\"five\"]"],
+          "el": "[data-lens=\"wallets\"]"
+        }
+      ]
     },
     {
       "id": "tdh-versions",

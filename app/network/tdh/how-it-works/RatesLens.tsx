@@ -1,0 +1,292 @@
+"use client";
+
+import Link from "next/link";
+import { REGISTRY_V14 } from "@/components/explained/engine/tdh";
+import { useFact } from "@/components/explained/facts/FactsProvider";
+import RateFigure from "@/components/explained/figures/RateFigure";
+import BreakIt, { breakItLabel } from "@/components/explained/lens/BreakIt";
+import { Seg } from "@/components/explained/lens/controls";
+import Lens, { Readout, RuleValue } from "@/components/explained/lens/Lens";
+import { useBreakable } from "@/components/explained/lens/useBreakable";
+import StampLine from "@/components/explained/marks/StampLine";
+import { EX_LINK } from "@/components/explained/tokens";
+import type { SupportedLocale } from "@/i18n/locales";
+import { ENGINE } from "@/lib/explained/engine";
+import type { FactId } from "@/lib/explained/facts";
+import { formatCents, formatCount } from "@/lib/explained/format";
+import { rich } from "./_kit/rich";
+import { ht } from "./copy";
+import { EXAMPLE_CARD, FIRST_GM } from "./models/rates";
+
+type Pick = "cap" | "card" | "firstgm" | "newest";
+
+/** P26 §8.1's rate, in the specification's own notation. */
+const RATE_RULE = "rate = HALFUP(B64(B64(H ÷ E) × 100))";
+
+function useNumber(id: FactId): number | null {
+  const fact = useFact<number>(id);
+  return fact ? fact.value : null;
+}
+
+/**
+ * Model B: the rate and the edition floor (TDH-DESIGN.md §5.5). Each card's
+ * minted count is the facts layer's (6529.io's API); its effective edition
+ * and its rate are the engine's (P26 §5.2, §8.1). The Break it picks the
+ * newest card, still minting, below the threshold.
+ */
+export default function RatesLens({
+  locale,
+  newest,
+}: {
+  readonly locale: SupportedLocale;
+  /** The newest Meme's id: the card still minting. */
+  readonly newest: number;
+}) {
+  const h = useNumber("engine.H");
+  const cap = useNumber("rules.editionFloorCap");
+  const threshold = useNumber("rules.editionThreshold");
+  const mintedCard = useNumber(`meme.${EXAMPLE_CARD}.minted`);
+  const mintedFirstGM = useNumber(`meme.${FIRST_GM}.minted`);
+  const mintedNewest = useNumber(`meme.${newest}.minted`);
+  const editionNewest = useNumber(`meme.${newest}.edition`);
+  const editions = useFact<number[][]>("memes.editions");
+  const model = useBreakable<{ pick: Pick }>({ pick: "cap" }, (state) => ({
+    ...state,
+    pick: "newest",
+  }));
+  if (
+    h === null ||
+    cap === null ||
+    threshold === null ||
+    mintedCard === null ||
+    mintedFirstGM === null ||
+    mintedNewest === null ||
+    editionNewest === null ||
+    !editions
+  ) {
+    return (
+      <p className="tw-m-0 tw-rounded-xl tw-border tw-border-dashed tw-border-iron-700 tw-p-5 tw-text-[15px] tw-leading-6 tw-text-iron-400">
+        {ht(locale, "explained.tdh.how.model.unavailable")}
+      </p>
+    );
+  }
+  const n = (value: number) => formatCount(locale, value);
+  const minted: Record<Pick, number> = {
+    cap,
+    card: mintedCard,
+    firstgm: mintedFirstGM,
+    newest: mintedNewest,
+  };
+  const pick = model.state.pick;
+  const floorApplied = pick === "newest" && mintedNewest < threshold;
+  const E =
+    pick === "newest"
+      ? editionNewest
+      : ENGINE.effectiveEdition(minted[pick], minted[pick]).edition;
+  const cents = ENGINE.rateCents(h, E);
+  const rate = formatCents(locale, cents / 100);
+  const area = n(Math.round((E * cents) / 100));
+  const names: Record<Pick, string> = {
+    cap: ht(locale, "explained.tdh.how.rates.nameCap", { cap: n(cap) }),
+    card: ht(locale, "explained.tdh.how.rates.nameCard", {
+      card: EXAMPLE_CARD,
+    }),
+    firstgm: ht(locale, "explained.tdh.how.rates.nameFirstGM"),
+    newest: ht(locale, "explained.tdh.how.rates.nameNewest", { card: newest }),
+  };
+  const B = "tw-font-semibold tw-text-iron-50";
+  const say = floorApplied ? (
+    <>
+      <b className={B}>
+        {ht(locale, "explained.tdh.how.rates.sayFloorLead", {
+          minted: n(mintedNewest),
+          E: n(E),
+        })}
+      </b>{" "}
+      {ht(locale, "explained.tdh.how.rates.sayFloor", {
+        threshold: n(threshold),
+        cap: n(cap),
+        rate,
+        E: n(E),
+        area,
+      })}
+    </>
+  ) : (
+    <>
+      <b className={B}>
+        {ht(locale, "explained.tdh.how.rates.sayLead", { name: names[pick] })}
+      </b>{" "}
+      {ht(locale, "explained.tdh.how.rates.say", { rate, E: n(E), area })}
+    </>
+  );
+  const firstGMCents = ENGINE.rateCents(h, h);
+  const cardCents = ENGINE.rateCents(
+    h,
+    ENGINE.effectiveEdition(mintedCard, mintedCard).edition
+  );
+  const burned = REGISTRY_V14.firstgm_edition_adjustment;
+
+  return (
+    <Lens
+      id="rates"
+      label={ht(locale, "explained.tdh.how.rates.label")}
+      question={ht(locale, "explained.tdh.how.rates.question")}
+      broken={model.broken}
+      locale={locale}
+      stage={
+        <>
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2">
+            <span className="tw-text-sm tw-font-semibold tw-text-iron-400">
+              {ht(locale, "explained.tdh.how.rates.with")}
+            </span>
+            <Seg
+              label={ht(locale, "explained.tdh.how.rates.group")}
+              attr="ed"
+              value={pick === "newest" ? null : pick}
+              onChange={(value) => model.set({ pick: value })}
+              options={[
+                {
+                  value: "cap",
+                  label: ht(locale, "explained.tdh.how.rates.optionCap", {
+                    copies: n(cap),
+                  }),
+                },
+                {
+                  value: "card",
+                  label: ht(locale, "explained.tdh.how.rates.optionCard", {
+                    copies: n(mintedCard),
+                    card: EXAMPLE_CARD,
+                  }),
+                },
+                {
+                  value: "firstgm",
+                  label: ht(locale, "explained.tdh.how.rates.optionFirstGM", {
+                    copies: n(mintedFirstGM),
+                  }),
+                },
+              ]}
+            />
+          </div>
+          <div className="tw-mt-4">
+            <RateFigure
+              h={h}
+              threshold={threshold}
+              lockedRef="D89"
+              references={[
+                {
+                  copies: h,
+                  rateCents: firstGMCents,
+                  label: ht(locale, "explained.tdh.how.rates.refFirstGM"),
+                },
+                {
+                  copies: ENGINE.effectiveEdition(mintedCard, mintedCard)
+                    .edition,
+                  rateCents: cardCents,
+                  label: ht(locale, "explained.tdh.how.rates.refCard", {
+                    card: EXAMPLE_CARD,
+                  }),
+                },
+              ]}
+              selected={{ copies: E, rateCents: cents }}
+              rug={editions.value.map((row) => row[3] ?? 0)}
+              locale={locale}
+            />
+          </div>
+        </>
+      }
+      rule={{
+        lines: [
+          {
+            text: rich(locale, "explained.tdh.how.rates.ruleMinted", {
+              minted: <RuleValue>{n(minted[pick])}</RuleValue>,
+            }),
+          },
+          {
+            on: floorApplied,
+            text: rich(locale, "explained.tdh.how.rates.ruleFloor", {
+              floor: (
+                <RuleValue>
+                  {floorApplied
+                    ? ht(locale, "explained.tdh.how.rates.ruleFloorApplied", {
+                        cap: n(cap),
+                        E: n(E),
+                      })
+                    : ht(locale, "explained.tdh.how.rates.ruleFloorNone", {
+                        zero: n(0),
+                        threshold: n(threshold),
+                      })}
+                </RuleValue>
+              ),
+            }),
+          },
+          {
+            text: rich(locale, "explained.tdh.how.rates.ruleE", {
+              E: <RuleValue>{n(E)}</RuleValue>,
+            }),
+            on: true,
+          },
+          {
+            text: ht(locale, "explained.tdh.how.rates.ruleH", {
+              H: n(h),
+              gross: n(h - burned),
+              burned: n(-burned),
+            }),
+          },
+          {
+            // P26 §8.1's notation, as the specification writes it.
+            text: RATE_RULE,
+            on: true,
+          },
+          {
+            text: rich(locale, "explained.tdh.how.rates.ruleCents", {
+              cents: <RuleValue>{n(cents)}</RuleValue>,
+            }),
+          },
+        ],
+        source: rich(locale, "explained.tdh.how.rates.ruleSource", {
+          threshold: n(threshold),
+          link: (
+            <Link className={EX_LINK} href="/network/tdh/specification#s8">
+              {ht(locale, "explained.tdh.how.rates.ruleLink")}
+            </Link>
+          ),
+        }),
+      }}
+      readout={
+        <Readout
+          big={<span data-o="rate">{rate}</span>}
+          unit={ht(locale, "explained.tdh.how.rates.unit")}
+          say={say}
+        />
+      }
+      breakIt={
+        <BreakIt
+          id="floor"
+          pressed={model.broken}
+          onToggle={model.toggleBreak}
+          label={breakItLabel(
+            locale,
+            ht(locale, "explained.tdh.how.rates.break", {
+              minted: n(mintedNewest),
+            })
+          )}
+        />
+      }
+      stamp={
+        <StampLine
+          locale={locale}
+          marks={[
+            {
+              kind: "absolute",
+              refText: `${n(threshold)}, D89`,
+            },
+          ]}
+          tag={{
+            kind: "real",
+            text: ht(locale, "explained.tdh.how.rates.tag"),
+          }}
+        />
+      }
+    />
+  );
+}

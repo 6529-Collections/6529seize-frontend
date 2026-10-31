@@ -113,7 +113,7 @@ export function LensHead({
 }) {
   return (
     <div className="tw-px-4 tw-pt-[18px] md:tw-px-[26px] md:tw-pt-6">
-      <span className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-400">
+      <span className="tw-block tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-400">
         {`${kt(locale, "explained.kit.lens.model")} · ${label}`}
       </span>
       <h3 className="tw-m-0 tw-mt-2 tw-max-w-[760px] tw-text-xl tw-font-semibold tw-leading-[27px] tw-tracking-[-0.012em] tw-text-iron-50 md:tw-text-2xl md:tw-leading-8">

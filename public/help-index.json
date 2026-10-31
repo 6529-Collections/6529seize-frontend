@@ -2332,7 +2332,12 @@
         "tdh step by step",
         "why is my tdh this number",
         "tdh worked example",
-        "exact tdh calculation"
+        "exact tdh calculation",
+        "a card ages",
+        "when does my card start to count",
+        "edition floor",
+        "boost ladder",
+        "tdh models"
       ],
       "keywords": [
         "tdh",
@@ -2346,16 +2351,15 @@
         "snapshot"
       ],
       "facts": [
-        "How TDH is calculated at /network/tdh/how-it-works follows one day's calculation in fourteen steps: one snapshot a day, whole days, which cards count, acquisition timestamps (last in, first out), ownership read between transactions, edition sizes and floors, rates, base per card, the boost, consolidation, final TDH, a two-wallet worked example, network totals and what changes at the cutover.",
-        "TDH is computed once a day from the last Ethereum block before 00:00 UTC, after Ethereum has finalized the next block, normally a quarter of an hour or so after midnight. A copy's age is its whole days to that block's time; partial days do not count.",
-        "A Meme's rate is the largest eligible Meme edition (FirstGM's, which counts as 3,941, on the October 11, 2026 cycle) divided by its own edition, rounded to cents; a Gradient's divides it by the number of Gradients (101), and a NextGen token's by the number of tokens in its collection. Below 300 copies minted, a Meme counts at its claim's mint limit, up to 310, when that is more than it minted; otherwise, and with no claim, at its minted count (149 minted under a limit of 200 counts as 200, rate 19.70). From 300 copies on, the minted count is the edition. A Gradient's rate never falls below 1.00.",
-        "Base TDH per card is whole days times rate, rounded per wallet; final TDH multiplies each card's base by the boost and rounds; TDH is the sum over every card held. Example: one 310-copy Meme held 100 days by a collector with one Gradient gives 100 × 12.71 = 1,271, then × 1.02 = 1,296 from that card; the Gradient adds TDH of its own.",
-        "Within one transaction, each wallet's movements of each card are netted (decision D131, in specification P26 §7.1), so a copy that leaves and returns in one transaction keeps its age, and A to B to C in one transaction counts as A to C. Netting fixes the holding stacks only: the mint facts (each card's first mint and minted counts) still read every step, so a mint and its burn inside one transaction move no copy but can make a card eligible and change editions, rates and other collectors' TDH (counterexamples H and I); the underflow test and the log-position checks also read every step, and an input that fails either has no result.",
-        "With 17 seasons listed on the October 11, 2026 cycle, the highest boost is 2.04 (8 or more full sets and 5 Gradients); the schedule's 2.24 ceiling needs more paying seasons.",
-        "Under rule version tdh-v1.0 an identity holds at most three consolidated wallets (P26 §6.3). 6529.io accepts a fourth consolidated wallet since October 15, 2026. TDH-v1 allows three; whether it allows four is pending an owner decision. Step 14 gives the cutover changes in three lines (inputs read as of the snapshot block on the finalized chain, netting within a transaction and on-chain order across transactions, consolidation changes counting from the next cycle), names the fourth wallet as the one open question, and links all 19 differences in the specification.",
-        "On the 2026-10-11 cycle TDH-v1 gives 10,280 identities, 11,130 wallets and 2,061,888,816 TDH, the total 6529.io published; the two sink records hold 1,085,953 of it.",
-        "The page has five explorables, the only examples computed in the browser, for illustration (the tables are computed on 6529.io's server when it renders the page), each titled under a Try it eyebrow: Count the whole days of one copy (a day counter), Send and receive copies, and watch the stack (a stack simulator), Change an edition and see its rate (a rate explorer whose chart draws the 300-copy threshold and the floor, and the jump where the floor stops; below 300 copies the floor applies only with a claim, its limit capped at 310, and the edition is the larger of the minted count and the floor; the minted count stops at 3,941, the network's largest eligible edition), Build a collection and see its boost (a boost builder) and Change the household and see its TDH (a household walkthrough). Their worked examples are tested against values the Python reference printed. The computation of record is 6529.io's backend until the cutover and the validators' Rust core from then on.",
-        "From about October 23, 2026, 6529.io shows the result of the validators' Rust core (decision D132)."
+        "How TDH is calculated at /network/tdh/how-it-works is page 1 of the TDH chapter of 6529 Explained. It explains TDH v1.4 as four ideas, time, rarity, collections and you, each with a model the reader can move, then the network's total. The models run the TDH v1.4 engine in the browser on the real Meme editions.",
+        "A: a day counts only when it is whole. Once a day TDH takes a snapshot of Ethereum, the last block before 00:00 UTC; a result is dated by its snapshot and counts the day before it, and a copy adds one day for every whole 24 hours it has been held at that snapshot. The model A card ages shows that a copy arriving at 19:05 UTC on one day is first counted by the result two days later; Break it sells it before a whole day.",
+        "A card counts once its first mint is a whole day old; Meme cards, 6529 Gradients and NextGen tokens count. A sale takes the sold copy's days with it, the copy received last goes first, and a move between your own linked wallets keeps its age.",
+        "Within one transaction only the net movement is replayed (decision D131), so a copy that leaves and comes back in one transaction keeps its days. Netting is proved for the holding stacks only: the model's Break it shows the Lean manifest's counterexample H, where a mint and its burn inside one transaction change another holder's TDH.",
+        "B: a card's rate is the largest edition (FirstGM's) divided by its own edition, so every card adds about the same each day. Below 300 copies minted a card counts at its claim's limit, up to 310; no edition goes below 300 (decision D89). The model The rate and the edition floor shows the exact rule with the values used.",
+        "C: one boost multiplies everything a collector holds: each complete season, full sets, Genesis and Nakamoto while season 1 is incomplete, and up to five Gradients. The model The boost ladder shows today's highest boost and the rule's ceiling; a sixth Gradient adds nothing.",
+        "D: up to four wallets linked both ways count as one collector, with one boost on everything they hold together (decision D136). The page links to Your wallets at /network/tdh/consolidation.",
+        "The network section gives the latest day's total TDH, identities and wallets from the daily comparison, with links to the daily check and the day's receipt. About October 23, 2026, 6529.io moves to computing TDH with the Rust core (decision D132).",
+        "The old step anchors #step-1 to #step-14 still land inside the four parts and the network section."
       ],
       "canonical_path": "/network/tdh/how-it-works",
       "related_paths": [
@@ -2515,7 +2519,7 @@
     {
       "id": "network.tdh-consolidation",
       "kind": "route",
-      "title": "Combine Your Wallets",
+      "title": "Your wallets",
       "aliases": [
         "combine your wallets",
         "combine wallets",
@@ -2527,7 +2531,12 @@
         "why consolidate",
         "consolidation benefits",
         "which wallets to consolidate",
-        "old wallet tdh"
+        "old wallet tdh",
+        "your wallets",
+        "why did my tdh change",
+        "why did my number change",
+        "tdh changed after a move",
+        "fifth wallet"
       ],
       "keywords": [
         "consolidation",
@@ -2541,14 +2550,13 @@
         "guided setup"
       ],
       "facts": [
-        "The Combine Your Wallets page at /network/tdh/consolidation is the collector's guide to wallet consolidation: why to combine wallets, which ones, how to set it up with the guided setup, and what to know before starting.",
-        "Combining (consolidating) up to four wallets a collector owns makes them count as one collector on 6529.io today: TDH adds up, cards spread over several wallets count toward full sets, seasons and the Genesis, Nakamoto and Gradient boosts, and moving a card between combined wallets keeps its holding time. A fourth wallet counts only with links signed from the activation date, October 15, 2026. TDH-v1 (P26, a proposal), the rule 6529.io is to move to about October 23, 2026, allows three; whether it allows four is pending an owner decision. The page says so in one status line under its heading, and guided setup asks the collector to tick that they have read it before it opens a fourth wallet's signing steps.",
-        "Combined wallets share one profile; any of them can sign in. Cards are counted together on the profile, on the collector leaderboards and for Meme Card subscriptions. Nothing moves: NFTs stay in the wallets they are in.",
-        "The recommended safe collecting setup gives each wallet one job: a vault (ideally a SAFE or hardware wallet) that holds NFTs and never connects, a transaction wallet for buying, selling and trading, and a hot social wallet that signs in to 6529, votes, posts, mints and pays for subscriptions. Three are enough for most collectors; the optional fourth is usually a burned or exposed old address combined only so its TDH keeps counting.",
-        "The guided setup at /safe-collecting/build-consolidation accepts Ethereum addresses or ENS names and shows which wallet signs next. ENS names resolve to mainnet addresses before planning; unresolved names and duplicate wallets block the plan. Each wallet signing for itself can register its links in one transaction; a Delegation Manager signs one transaction per link while the vault stays disconnected. The guide shows the current environment’s activation cutoff from backend settings. Guided signing opens ten minutes later; staging can open before production.",
-        "Every combined wallet can sign in as the profile, change the primary address and choose where airdrops go, so only a collector's own wallets should be combined. Profiles merge permanently; the handle and picture come from the profile with the highest CIC.",
-        "Signing out of order, renewing old return links or sending a joining wallet's links as separate manager transactions can temporarily split the wallets and reduce TDH-wave votes. The guided setup enforces signing order but cannot make separate manager transactions atomic.",
-        "The technical rules and the analysis behind the four-wallet design are on a separate page, /network/tdh/consolidation/design."
+        "Your wallets at /network/tdh/consolidation is page 2 of the TDH chapter of 6529 Explained: up to four wallets count as one collector. Wallets linked both ways count their copies, days and one boost together; a fourth needs fresh links, made from October 15, 2026 (decision D136, live on 6529.io since that date).",
+        "Its first section, Why did my number change? Pick what happened, answers five causes one at a time: a copy moved between your own wallets keeps its age only inside one identity (the usual cause of a restart is a pair not linked both ways); adding a wallet can split your wallets until its last link confirms; a sold or sent copy takes its days; unlinking regroups the past too; a new card makes a full set wait for it.",
+        "The rule: every pair links both ways and the newest confirmed link leads. Up to three wallets group as before; a fourth joins only when one wallet has links both ways with each of the other three, all registered from October 15, 2026, 00:00 UTC. The model Four wallets, one identity groups example wallets with the TDH v1.4 engine; linking a fifth wallet can push an older one out.",
+        "To add a fourth wallet safely, your three wallets each link to the new wallet, then the new wallet signs last, with one batch to all three, so no snapshot sees a split. That is four transactions, each with a normal network fee; a vault whose links are sent by a delegation manager takes one transaction per link. Your three wallets' links to each other do not need re-signing.",
+        "Before you start: every linked wallet can sign in as your profile; wave votes cut by a split are not restored; a delegation manager acting for all your wallets can change your consolidation on its own.",
+        "The guided setup at /safe-collecting/build-consolidation shows which wallet signs next; Explain my TDH at /network/tdh#explain shows which wallets counted in the latest result.",
+        "The technical page, /network/tdh/consolidation/design, explains why every pair must link both ways."
       ],
       "canonical_path": "/network/tdh/consolidation",
       "related_paths": [
@@ -2564,7 +2572,7 @@
     {
       "id": "network.tdh-consolidation-design",
       "kind": "route",
-      "title": "How Wallet Consolidation Works",
+      "title": "Consolidation design",
       "aliases": [
         "how consolidation works",
         "consolidation rules",
@@ -2573,7 +2581,8 @@
         "why every pair",
         "consolidation signing order",
         "consolidation simulator",
-        "full mesh consolidation"
+        "full mesh consolidation",
+        "why every pair of wallets links both ways"
       ],
       "keywords": [
         "consolidation",
@@ -2586,11 +2595,11 @@
         "simulator"
       ],
       "facts": [
-        "The How Wallet Consolidation Works page at /network/tdh/consolidation/design sets out the exact rules behind 6529 wallet consolidation, an interactive signing-order simulator and the tested security analysis of the four-wallet design. The simulator models transactions after the displayed environment cutoff, uses the backend wallet limits, and waits when those limits are unavailable.",
-        "Every pair of wallets in a consolidation registers a Consolidation (use case 999) in both directions on the NFTDelegation contract, on Any Collection or The Memes. Two wallets need 2 registrations, three need 6 and four need 12; with batchDelegations each wallet signing for itself signs one transaction; managers send one transaction per link.",
-        "A fourth wallet counts only when its links to the other three were registered in both directions on or after the activation cutoff supplied by this environment’s backend settings. Wallets are grouped from confirmed links, newest first, so completing a link with a new wallet moves a member out of its group.",
-        "The page compares the full-mesh rule with cheaper alternatives and shows that only full mesh stops any smaller group of a collector's wallets from adding an outside wallet.",
-        "The page carries the TDH section navigation and the same status line as the guide: 6529.io accepts up to four consolidated wallets, a fourth for links signed from the activation date; TDH-v1 allows three, and whether it allows four is pending an owner decision. The signing-order simulator follows 6529.io's grouping rule, not TDH-v1's. The rules are six cards in a grid, each sized to its content; removing or replacing a wallet is a table of four cases; the attack matrix names its columns (your wallets the attacker controls), tints each Yes red and marks the chosen rule; How it was tested gives its three figures (673 live consolidations, 500 random graphs, 1,000 random sequences) and says that TDH-v1's grouping rule, with three wallets, reproduces the October 11, 2026 identities; and a pager leads back to the guide and on to Historic boosts."
+        "Consolidation design at /network/tdh/consolidation/design is a shelf page of the TDH chapter of 6529 Explained: why every pair of wallets links both ways. It is the only rule tested where no smaller group of your wallets can add an outside wallet.",
+        "Each pair of wallets registers a consolidation (use case 999) in both directions on Any Collection or The Memes: two wallets need 2 registrations, three need 6 and four need 12. Registrations do not expire; a link lasts until one of its wallets revokes it.",
+        "The signing-order model starts on D signing last, in one batch, which no snapshot sees as a split; adding D one link at a time splits the wallets for a while. Linking a fifth wallet leaves one wallet out.",
+        "The rule protects against a smaller group of your wallets adding an outside wallet, and old registrations from before October 15, 2026 never form a group of four. It does not make any one wallet safer, and it does not protect against one delegation manager acting for all your wallets.",
+        "Each candidate rule was checked exhaustively, and P26's rule was checked against 6529.io's own grouping code on 100,000 random link graphs and the real rows."
       ],
       "canonical_path": "/network/tdh/consolidation/design",
       "related_paths": [

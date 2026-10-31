@@ -85,9 +85,6 @@ a transfer from DEAD credits fresh timestamps and is not a mint
 the FirstGM burn transaction is not credited to ZERO
 burns do not reduce edition sizes`;
 
-export const RULE_CUTOFF = `B = the block b on the finalized chain with ts(b) < M <= ts(b + 1)
-T = ts(B)        M = N * 86400`;
-
 /** P26 §4.1-§4.3: the cutoff verbatim, then its header-order rule. */
 export const RULE_CUTOFF_SPEC = `B = the block b on the finalized canonical chain with ts(b) < M <= ts(b + 1)
 T = ts(B)
@@ -111,8 +108,6 @@ a decoded transfer in a block <= B stamped after T: input invalid  # vector 54
 no other order of decoded timestamps is checked: two of one block may differ,
     they may fall as the block number rises, and one need not carry the
     header set's timestamp for its block; MUST NOT refuse an input for these`;
-
-export const RULE_DAYS = "days(a) = (T - a) div day_s";
 
 /**
  * P53 §11.3 (at 6529chain f840096): which Memes' claim limits are read for
@@ -149,26 +144,6 @@ if from not in SINKS:
     count[from] -= amount
 count[to] += amount`;
 
-/** P26 §7.1: transaction netting (D131), every transaction, sinks included. */
-export const RULE_NETTING = `A transaction is the set of transfers with one (block, txIndex).
-For each transaction and (contract, tokenId), M = its transfers with
-amount > 0 and from != to. Every non-empty M is netted.
-(Here M is a set of transfers, P26's own name; it is not the cycle
-boundary M of section 4.)
-
-- For every address w in M, a sink included,
-  net(w) = the amount w receives in M - the amount it sends in M.
-- Sources: the w with net(w) < 0, each with amount -net(w).
-  Destinations: the w with net(w) > 0, each with amount net(w).
-  Both lists are in ascending address order.
-- Pairing: repeatedly emit (head source, head destination, k), where k
-  is the smaller of their remaining amounts, subtract k from both,
-  and drop any head that reaches 0.
-- M is replaced by the emitted pairs, in order: each a transfer of k
-  copies with the transaction's block, timestamp and txHash, at the
-  position of M's first transfer.
-- Every |net(w)| MUST be below 2^64.`;
-
 /** P26 §7.1: the replay, after netting, in canonical order. */
 export const RULE_REPLAY = `# SINKS: the zero address and 0x…dead (§3.4); cluster(w): the identity
 # of wallet w (§6.3); firstgm_burn_tx: FirstGM's recorded burn (§10)
@@ -199,8 +174,6 @@ beta and final:  computed for each record; an identity's are not the sums
                  of its wallets' (e.g. two wallets, one Gradient each with
                  base 100: 102 each, and the identity 208)
 totals (§8.5):   sums over identity records, never over wallet records`;
-
-export const RULE_RATE = "RATE(n, d) = HALFUP( B64( B64(n / d) * 100 ) )";
 
 /** P26 §8.1 with its Gradient minimum, read from the registry. */
 export const RULE_RATE_SPEC = `RATE(n, d) = HALFUP( B64( B64(n / d) * 100 ) )
