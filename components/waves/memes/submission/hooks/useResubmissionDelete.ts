@@ -5,7 +5,7 @@ import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/React
 import { useMyStreamActionsOptional } from "@/contexts/wave/MyStreamContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { commonApiDelete } from "@/services/api/common-api";
+import { deleteDrop } from "@/services/api/signed-drop-writes";
 import { useCallback, useContext, useState } from "react";
 
 interface UseResubmissionDeleteParams {
@@ -65,9 +65,7 @@ export function useResubmissionDelete({
     let didClose = false;
 
     try {
-      await commonApiDelete({
-        endpoint: `drops/${sourceDrop.id}`,
-      });
+      await deleteDrop({ dropId: sourceDrop.id, waveId: sourceDrop.wave.id });
 
       setToast({
         message: "Original submission deleted.",
