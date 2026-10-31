@@ -84,17 +84,23 @@ function SourceLink({
 }) {
   const source = SOURCES[id];
   const text = sourceText(source, locale);
+  // A source and its day are a fact of the page, like a price.
+  const fact = `hw.source.${id}`;
   return "url" in source ? (
     <a
       className={EX_LINK}
       href={source.url}
       rel="noopener noreferrer"
       target="_blank"
+      data-fact={fact}
+      title={sourceTitle(id, locale)}
     >
       {text}
     </a>
   ) : (
-    <>{text}</>
+    <span data-fact={fact} title={sourceTitle(id, locale)}>
+      {text}
+    </span>
   );
 }
 
