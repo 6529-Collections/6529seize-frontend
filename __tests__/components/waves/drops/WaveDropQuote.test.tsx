@@ -51,13 +51,7 @@ jest.mock("@/lib/device-signing/feature", () => ({
 jest.mock("@/components/waves/drops/signature/DropSignatureDialog", () => ({
   __esModule: true,
   default: (props: any) =>
-    props.isOpen ? (
-      <div role="dialog" aria-label="Signature">
-        <button type="button" onClick={props.onClose}>
-          Close signature
-        </button>
-      </div>
-    ) : null,
+    props.isOpen ? <div role="dialog" aria-label="Signature"></div> : null,
 }));
 
 beforeEach(() => {
@@ -453,31 +447,34 @@ describe("signed-by-author seal on a quoted or previewed drop", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("opens the Signature dialog without opening the quoted drop, by click or keyboard", async () => {
-    mockSignedMessagesEnabled = true;
-    const user = userEvent.setup();
-    const onQuoteClick = jest.fn();
-    render(
-      <WaveDropQuote
-        drop={signedDrop()}
-        partId={1}
-        onQuoteClick={onQuoteClick}
-      />
-    );
+  it.each(["click", "keyboard"] as const)(
+    "opens the Signature dialog by %s without opening the quoted drop",
+    async (activation) => {
+      mockSignedMessagesEnabled = true;
+      const user = userEvent.setup();
+      const onQuoteClick = jest.fn();
+      render(
+        <WaveDropQuote
+          drop={signedDrop()}
+          partId={1}
+          onQuoteClick={onQuoteClick}
+        />
+      );
 
-    await user.click(
-      screen.getByRole("button", { name: "Signed by its author" })
-    );
-    expect(
-      screen.getByRole("dialog", { name: "Signature" })
-    ).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Close signature" }));
-
-    screen.getByRole("button", { name: "Signed by its author" }).focus();
-    await user.keyboard("{Enter}");
-    expect(
-      screen.getByRole("dialog", { name: "Signature" })
-    ).toBeInTheDocument();
-    expect(onQuoteClick).not.toHaveBeenCalled();
-  });
+      const seal = screen.getByRole("button", {
+        name: "Signed by its author",
+      });
+      if (activation === "click") {
+        await user.click(seal);
+      } else {
+        seal.focus();
+        await user.keyboard("{Enter}");
+      }
+      expect(
+        screen.getByRole("dialog", { name: "Signature" })
+      ).toBeInTheDocument();
+      // Events inside the real dialog are covered by DropSignatureDialog.test.
+      expect(onQuoteClick).not.toHaveBeenCalled();
+    }
+  );
 });

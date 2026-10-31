@@ -33,7 +33,7 @@ import {
 } from "@heroicons/react/24/outline";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useQuery } from "@tanstack/react-query";
-import type { ReactNode } from "react";
+import type { KeyboardEvent, ReactNode, SyntheticEvent } from "react";
 import { usePublicClient } from "wagmi";
 
 interface DropSignatureDialogProps {
@@ -254,6 +254,19 @@ export function DropSignatureVerification({
   );
 }
 
+// The dialog renders in a portal, but React still bubbles its events through
+// the component tree: through drop rows (long press, swipe) and through
+// clickable cards such as quoted drops and link previews, whose click and
+// Enter handlers would otherwise act. Escape and other keys still bubble, so
+// Headless UI's window listener closes the dialog.
+const stopBubbling = (event: SyntheticEvent) => event.stopPropagation();
+
+const stopActivationKeys = (event: KeyboardEvent) => {
+  if (event.key === "Enter" || event.key === " ") {
+    event.stopPropagation();
+  }
+};
+
 /** The dialog frame shared by the single-drop and group signature dialogs. */
 export function SignatureDialogFrame({
   isOpen,
@@ -273,6 +286,10 @@ export function SignatureDialogFrame({
       onClose={onClose}
       // Above the dialogs a seal can appear in, such as the single-drop view.
       className="tailwind-scope tw-relative tw-z-[1000002]"
+      onClick={stopBubbling}
+      onKeyDown={stopActivationKeys}
+      onPointerDown={stopBubbling}
+      onTouchStart={stopBubbling}
     >
       <DialogBackdrop className="tw-fixed tw-inset-0 tw-bg-iron-950/80" />
       <div className="tw-fixed tw-inset-0 tw-overflow-y-auto tw-p-4">

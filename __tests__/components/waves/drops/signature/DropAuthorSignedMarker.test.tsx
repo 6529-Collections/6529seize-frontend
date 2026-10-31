@@ -195,24 +195,9 @@ describe("drop author signed marker", () => {
     ).toBeInTheDocument();
     expect(onCardKeyDown).not.toHaveBeenCalled();
 
-    // Enter and clicks on the dialog's own controls stay inside the dialog,
-    // while Escape still bubbles to window listeners (Headless UI closes on
-    // it there).
-    const close = screen.getByRole("button", { name: "Close" });
-    const onWindowKeyDown = jest.fn();
-    globalThis.addEventListener("keydown", onWindowKeyDown);
-    close.focus();
-    await user.keyboard("{Escape}");
-    globalThis.removeEventListener("keydown", onWindowKeyDown);
-    expect(onWindowKeyDown).toHaveBeenCalledWith(
-      expect.objectContaining({ key: "Escape" })
-    );
-    close.focus();
-    await user.keyboard("{Enter}");
-    expect(onCardKeyDown).not.toHaveBeenCalledWith(
-      expect.objectContaining({ key: "Enter" })
-    );
     expect(onCardClick).not.toHaveBeenCalled();
+    // The real dialog keeps its own events inside; see the keyboard test in
+    // DropSignatureDialog.test.tsx.
   });
 
   it("names a signed drop inside a single-button card", () => {

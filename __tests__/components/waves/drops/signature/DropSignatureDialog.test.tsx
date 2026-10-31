@@ -346,6 +346,12 @@ describe("drop signature details", () => {
     await user.tab();
     expect(dialog).toContainElement(document.activeElement as HTMLElement);
 
+    // Clicks and Enter inside the portalled dialog never reach the card.
+    const heading = within(dialog).getByRole("heading", { name: "Signature" });
+    await user.click(heading);
+    fireEvent.keyDown(heading, { key: "Enter" });
+    expect(onCardClick).not.toHaveBeenCalled();
+
     await user.keyboard("{Escape}");
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument()

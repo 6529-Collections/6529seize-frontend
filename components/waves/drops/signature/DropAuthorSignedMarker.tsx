@@ -9,13 +9,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { ShieldCheckIcon } from "@heroicons/react/16/solid";
 import { ShieldCheckIcon as ShieldCheckOutlineIcon } from "@heroicons/react/24/outline";
-import {
-  useId,
-  useState,
-  type KeyboardEvent,
-  type ReactNode,
-  type SyntheticEvent,
-} from "react";
+import { useId, useState, type KeyboardEvent, type ReactNode } from "react";
 import { Tooltip } from "react-tooltip";
 import DropGroupSignatureDialog, {
   type GroupSignatureDrop,
@@ -28,14 +22,9 @@ type MarkedDrop = Pick<
   "id" | "is_author_signed" | "title" | "parts" | "wave" | "author"
 >;
 
-// The dialog renders in a portal, but React still bubbles its events through
-// the component tree: through drop rows (long press, swipe) and through
-// clickable cards such as quoted drops and link previews, whose click and
-// Enter handlers would otherwise navigate away.
-const stopBubbling = (event: SyntheticEvent) => event.stopPropagation();
-
 // Enter and Space activate the seal itself; a clickable card around it must
-// not treat them as its own activation.
+// not treat them as its own activation. (The Signature dialogs keep their own
+// events inside, see SignatureDialogFrame.)
 const stopActivationKeys = (event: KeyboardEvent) => {
   if (event.key === "Enter" || event.key === " ") {
     event.stopPropagation();
@@ -100,18 +89,7 @@ function SignedSealButton({
           <span className="tw-text-xs">{label}</span>
         </Tooltip>
       )}
-      {/* Not a control: it only keeps the dialog's events inside. Escape
-          and other keys still bubble, so the dialog's own listeners work. */}
-      <span
-        role="presentation"
-        className="tw-contents"
-        onClick={stopBubbling}
-        onKeyDown={stopActivationKeys}
-        onPointerDown={stopBubbling}
-        onTouchStart={stopBubbling}
-      >
-        {dialog}
-      </span>
+      {dialog}
     </>
   );
 }
