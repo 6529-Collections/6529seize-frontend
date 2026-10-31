@@ -52,8 +52,9 @@ const ABOUT_LEGAL_CONTENT_CLASS = [
 // Server Component: static sections (legal, FAQ, tech, ...) render on the server
 // and ship no client JS. Only sections that need hooks, effects or browser APIs
 // are client leaves ("use client" in their own file). Minting and Subscriptions
-// stay client leaves so their restricted copy never appears in server output;
-// NftPurchasingGate decides on the client whether to mount them.
+// stay client leaves behind NftPurchasingGate: their copy is server-rendered
+// only for requests that are clearly not the native iOS app, and the gate
+// checks again before hydration and on the client.
 export default function About({ section }: { readonly section: AboutSection }) {
   if (
     section === AboutSection.MINTING ||
