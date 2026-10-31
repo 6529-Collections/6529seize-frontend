@@ -7,7 +7,7 @@ type Pack = {
   scriptKey: string;
   alias?: string;
   description: string;
-  safety: "local" | "readonly" | "sandbox";
+  safety: "local" | "readonly" | "sandbox" | "stateful";
   environments: string[];
   triggers: string[];
   env?: Record<string, string>;
@@ -283,7 +283,10 @@ describe("E2E pack manifest", () => {
   });
 
   it("makes deployed packs explicitly read-only and non-empty", () => {
-    const staging = packs.filter((pack) => pack.environments[0] === "staging");
+    // Opt-in stateful packs have their own contract (next test).
+    const staging = packs.filter(
+      (pack) => pack.environments[0] === "staging" && pack.safety !== "stateful"
+    );
     const production = packs.filter(
       (pack) => pack.environments[0] === "production"
     );
@@ -332,6 +335,58 @@ describe("E2E pack manifest", () => {
         workers: environment === "local" ? 1 : 2,
       });
     }
+  });
+
+  it("keeps the staging E2EE pack opt-in, single-worker and off every automatic lane", () => {
+    const stateful = packs.filter((pack) => pack.safety === "stateful");
+    expect(stateful).toEqual([
+      expect.objectContaining({
+        scriptKey: "test:e2e:staging:e2ee",
+        alias: "e2ee-staging",
+        environments: ["staging"],
+        triggers: ["manual"],
+        specs: ["tests/staging-e2ee/encrypted-dm-staging.spec.ts"],
+        projects: ["web-desktop-chromium"],
+        workers: 1,
+        env: {
+          PLAYWRIGHT_BASE_URL: "https://staging.6529.io",
+          PLAYWRIGHT_SKIP_WEB_SERVER: "1",
+          PLAYWRIGHT_ENV: "staging",
+          PLAYWRIGHT_READONLY: "0",
+          PLAYWRIGHT_E2EE_STAGING: "1",
+        },
+      }),
+    ]);
+    expect((stateful[0] as Pack & { traceOff?: boolean }).traceOff).toBe(true);
+
+    const misconfigured = clonePack(stateful[0]!);
+    misconfigured.triggers = ["post-deploy", "manual"];
+    misconfigured.workers = 2;
+    misconfigured.env = {
+      ...misconfigured.env,
+      PLAYWRIGHT_BASE_URL: "https://6529.io",
+    };
+    delete (misconfigured as Pack & { traceOff?: boolean }).traceOff;
+    expect(manifestTools.validateManifest([misconfigured])).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "stateful packs must use only the manual trigger"
+        ),
+        expect.stringContaining("stateful packs must set workers to 1"),
+        expect.stringContaining("stateful packs must turn traces off"),
+        expect.stringContaining(
+          "stateful packs must set PLAYWRIGHT_BASE_URL=https://staging.6529.io"
+        ),
+      ])
+    );
+
+    const production = clonePack(stateful[0]!);
+    production.environments = ["production"];
+    expect(manifestTools.validateManifest([production])).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("stateful packs must target staging"),
+      ])
+    );
   });
 
   it("rejects unsafe production and ambiguous aliases", () => {
