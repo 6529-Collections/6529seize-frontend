@@ -148,6 +148,50 @@ function DetailRow({
   );
 }
 
+/**
+ * Loading, results and errors are shown in the panel's always-mounted live
+ * regions. An error is set again only after a retry settles, so a repeated
+ * failure is announced.
+ */
+function getDetailAnnouncement(
+  locale: ReturnType<typeof useBrowserLocale>,
+  state: {
+    readonly loading: boolean;
+    /** Defined only after a successful hold change. */
+    readonly onHold: boolean | undefined;
+    readonly loadFailed: boolean;
+    readonly holdFailed: boolean;
+  }
+): E2eeReportAnnouncement {
+  let status = "";
+  if (state.loading) {
+    status = t(
+      locale,
+      "contentModeration.moderator.encryptedReports.detailLoading"
+    );
+  } else if (state.onHold !== undefined) {
+    status = t(
+      locale,
+      state.onHold
+        ? "contentModeration.moderator.encryptedReports.heldStatus"
+        : "contentModeration.moderator.encryptedReports.releasedStatus"
+    );
+  }
+  let alert = "";
+  if (state.loadFailed) {
+    alert = t(
+      locale,
+      "contentModeration.moderator.encryptedReports.detailError"
+    );
+  } else if (state.holdFailed) {
+    alert = t(
+      locale,
+      "contentModeration.moderator.encryptedReports.holdFailed"
+    );
+  }
+  return { status, alert };
+}
+
 export default function E2eeReportDetail({
   profileId,
   reportId,
@@ -193,35 +237,12 @@ export default function E2eeReportDetail({
     headingRef.current?.focus();
   }, []);
 
-  // Loading, results and errors are shown in the panel's always-mounted live
-  // regions. An error is set again only after a retry settles, so a repeated
-  // failure is announced.
-  let status = "";
-  if (query.isLoading) {
-    status = t(
-      locale,
-      "contentModeration.moderator.encryptedReports.detailLoading"
-    );
-  } else if (hold.isSuccess && query.data) {
-    status = t(
-      locale,
-      query.data.on_hold
-        ? "contentModeration.moderator.encryptedReports.heldStatus"
-        : "contentModeration.moderator.encryptedReports.releasedStatus"
-    );
-  }
-  let alert = "";
-  if (query.isError && !query.isFetching) {
-    alert = t(
-      locale,
-      "contentModeration.moderator.encryptedReports.detailError"
-    );
-  } else if (hold.isError && !hold.isPending) {
-    alert = t(
-      locale,
-      "contentModeration.moderator.encryptedReports.holdFailed"
-    );
-  }
+  const { status, alert } = getDetailAnnouncement(locale, {
+    loading: query.isLoading,
+    onHold: hold.isSuccess ? query.data?.on_hold : undefined,
+    loadFailed: query.isError && !query.isFetching,
+    holdFailed: hold.isError && !hold.isPending,
+  });
   useEffect(() => {
     onAnnounce({ status, alert });
   }, [onAnnounce, status, alert]);
