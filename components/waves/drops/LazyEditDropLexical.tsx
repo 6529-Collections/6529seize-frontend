@@ -2,6 +2,7 @@
 
 import { CancelOnEscapeWhileLoading } from "@/components/utils/lazy-load/EscapeWhileLoading";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useDeviceSigningPrewarm } from "@/hooks/device-signing/useDeviceSigningPrewarm";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
@@ -48,6 +49,8 @@ export default function LazyEditDropLexical(
   const isReady = editDropLexicalLoader.useIsReady({
     onError: props.onCancel,
   });
+  // A signed edit should not wait on IndexedDB or WebCrypto at save time.
+  useDeviceSigningPrewarm();
 
   if (!isReady) {
     return <EditDropLexicalPlaceholder onCancel={props.onCancel} />;

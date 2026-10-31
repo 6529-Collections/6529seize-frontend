@@ -13,8 +13,22 @@ let mockAuth: Record<string, unknown>;
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => mockAuth,
 }));
+const mockSeizeConnectFresh = jest.fn(async () => undefined);
+let mockConnection: Record<string, unknown>;
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: () => ({ address: ADDRESS }),
+  useSeizeConnectContext: () => mockConnection,
+}));
+jest.mock("@/hooks/device-signing/useSignedMessagesWallet", () => ({
+  useSignedMessagesWallet: () => ({
+    isRemoteWallet: false,
+    networkName: "Ethereum",
+    isNetworkSupported: () => true,
+    switchNetwork: async () => "switched",
+  }),
+}));
+const mockReport = jest.fn();
+jest.mock("@/utils/monitoring/signedMessagesEnableMonitoring", () => ({
+  reportSignedMessagesEnable: (...args: unknown[]) => mockReport(...args),
 }));
 
 let mockAccount: string | null = ADDRESS;
@@ -124,6 +138,16 @@ describe("DevicesPreferencesSettings", () => {
     mockSetToast.mockReset();
     mockRevoke.mockReset();
     mockRequestGrant.mockReset().mockResolvedValue({ success: true });
+    mockReport.mockReset();
+    mockSeizeConnectFresh.mockClear();
+    mockConnection = {
+      address: ADDRESS,
+      canSignActiveWallet: true,
+      connectedAccounts: [],
+      isWalletConnectionPending: false,
+      seizeConnectFresh: mockSeizeConnectFresh,
+      seizeConnectOpen: false,
+    };
   });
 
   it("lists every grant with this device, scopes, dates and status", () => {
@@ -207,6 +231,57 @@ describe("DevicesPreferencesSettings", () => {
       );
     });
     expect(mockRequestGrant).toHaveBeenCalledTimes(1);
+    expect(mockReport).toHaveBeenCalledWith("devices", "start");
+  });
+
+  it("connects a wallet that is not live before signing, and says so", async () => {
+    mockConnection = { ...mockConnection, canSignActiveWallet: false };
+    const { rerender } = render(<DevicesPreferencesSettings />);
+
+    await act(async () => {
+      fireEvent.click(
+        screen.getByRole("button", {
+          name: "Turn on signed messages in this browser",
+        })
+      );
+    });
+    expect(mockSeizeConnectFresh).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Connect your wallet to continue. If it's locked, unlock it first."
+    );
+
+    mockConnection = { ...mockConnection, seizeConnectOpen: true };
+    await act(async () => {
+      rerender(<DevicesPreferencesSettings />);
+    });
+    mockConnection = {
+      ...mockConnection,
+      seizeConnectOpen: false,
+      canSignActiveWallet: true,
+    };
+    await act(async () => {
+      rerender(<DevicesPreferencesSettings />);
+    });
+    expect(mockRequestGrant).toHaveBeenCalledTimes(1);
+  });
+
+  it("explains a failure next to the turn-on action", async () => {
+    mockRequestGrant.mockResolvedValue({
+      success: false,
+      reason: "device-key",
+    });
+    render(<DevicesPreferencesSettings />);
+    await act(async () => {
+      fireEvent.click(
+        screen.getByRole("button", {
+          name: "Turn on signed messages in this browser",
+        })
+      );
+    });
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "This browser couldn't prepare its signing key. Please try again."
+    );
   });
 
   it("hides the turn-on action when this browser already has a grant or cannot hold a key", () => {

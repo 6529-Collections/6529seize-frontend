@@ -1,8 +1,16 @@
+import { WithDropAuthorSignedMarker } from "@/components/waves/drops/signature/DropAuthorSignedMarker";
 import DropSignatureDialog from "@/components/waves/drops/signature/DropSignatureDialog";
+import userEvent from "@testing-library/user-event";
 import DropSignatureMenuItem from "@/components/waves/drops/signature/DropSignatureMenuItem";
 import type { DropSignatureVerdict } from "@/lib/device-signing/verify-signed-events";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import type { ComponentProps, ReactElement } from "react";
 
 let mockEnabled = true;
@@ -314,6 +322,59 @@ describe("drop signature details", () => {
     );
     await waitFor(() =>
       expect(screen.queryByRole("button", { name: "Signature" })).toBeNull()
+    );
+  });
+
+  it("closes on Escape and keeps Tab inside the real dialog opened from a seal in a clickable card", async () => {
+    mockVerify.mockResolvedValue(signedVerdict());
+    const user = userEvent.setup();
+    const onCardKeyDown = jest.fn();
+    const onCardClick = jest.fn();
+    renderWithQueryClient(
+      <div
+        role="button"
+        tabIndex={0}
+        onKeyDown={onCardKeyDown}
+        onClick={onCardClick}
+      >
+        <WithDropAuthorSignedMarker
+          drop={
+            {
+              ...shownDrop,
+              id: DROP_ID,
+              is_author_signed: true,
+            } as never
+          }
+        >
+          <span>12:30</span>
+        </WithDropAuthorSignedMarker>
+      </div>
+    );
+
+    const seal = screen.getByRole("button", { name: "Signed by its author" });
+    seal.focus();
+    await user.keyboard("{Enter}");
+    const dialog = await screen.findByRole("dialog", { name: "Signature" });
+    await within(dialog).findByText("Signed by its author");
+
+    await user.tab();
+    expect(dialog).toContainElement(document.activeElement as HTMLElement);
+    await user.tab();
+    expect(dialog).toContainElement(document.activeElement as HTMLElement);
+
+    // Clicks and Enter inside the portalled dialog never reach the card.
+    const heading = within(dialog).getByRole("heading", { name: "Signature" });
+    await user.click(heading);
+    fireEvent.keyDown(heading, { key: "Enter" });
+    expect(onCardClick).not.toHaveBeenCalled();
+
+    await user.keyboard("{Escape}");
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    expect(onCardClick).not.toHaveBeenCalled();
+    expect(onCardKeyDown).not.toHaveBeenCalledWith(
+      expect.objectContaining({ key: "Enter" })
     );
   });
 });
