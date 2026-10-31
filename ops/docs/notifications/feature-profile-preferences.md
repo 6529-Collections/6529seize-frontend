@@ -9,7 +9,9 @@ profiles, and submitted report history.
 ## Location in the Site
 
 Preferences is a dedicated page at `/preferences`. It contains three tabs:
-**Notifications & messages**, **Blocked Profiles**, and **Reports**.
+**Notifications & messages**, **Blocked Profiles**, and **Reports**. Where
+signed messages are enabled (currently staging), a fourth **Devices** tab at
+`/preferences?tab=devices` lists the browsers that can post as you.
 
 ## Entry Points
 
@@ -78,6 +80,12 @@ Device-level push settings remain separate. Push delivery can only happen after
 an in-app notification is created, so a notification suppressed by these
 profile preferences cannot trigger a push.
 
+### Devices
+
+**Devices** lists every browser key granted to sign your posts, edits,
+deletes, and reactions, marks **This device**, and lets you revoke a device.
+See [Signed Messages](../waves/drop-actions/feature-signed-messages.md).
+
 ### Blocks and Reports
 
 **Blocked Profiles** manages personal blocks. **Reports** tracks reports
@@ -114,3 +122,4 @@ deployed before the frontend.
 - [Notifications](README.md)
 - [Mobile Push Notifications](feature-mobile-push-notifications.md)
 - [Direct Message Creation](../waves/create/feature-direct-message-creation.md)
+- [Signed Messages](../waves/drop-actions/feature-signed-messages.md)

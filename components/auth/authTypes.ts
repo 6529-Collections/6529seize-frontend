@@ -18,6 +18,8 @@ export type AuthContextType = {
     options?: RequestAuthOptions
   ) => Promise<{ success: boolean }>;
   readonly requestSessionUpgrade?: () => Promise<{ success: boolean }>;
+  /** Signs in again so the challenge also grants this device's key. */
+  readonly requestSignedMessagesGrant?: () => Promise<{ success: boolean }>;
   readonly ensureActiveSessionV2WebSession?: (params?: {
     readonly address?: string | undefined;
     readonly abortSignal?: AbortSignal | undefined;
