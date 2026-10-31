@@ -160,23 +160,36 @@ const users: StackUser[] = enabled
 const devices: StackDevice[] = [];
 const sockets: WebSocket[] = [];
 
-/** WebSocket hints from the API, authenticated like the web client does. */
+const authenticatedSockets = new Set<WebSocket>();
+
+/**
+ * WebSocket hints from the API, authenticated with the web client's
+ * AUTHENTICATE message. The local API attaches its message handler only
+ * after it has registered the connection and then sends a `$connect` frame
+ * (API Gateway orders this itself), so authenticate on that frame rather
+ * than on `open`, or the message can arrive before the handler exists.
+ */
 function wsWake(
   token: string
 ): (listener: (event: { type: string; data: unknown }) => void) => () => void {
   return (listener) => {
     const socket = new WebSocket(WS);
     sockets.push(socket);
-    socket.addEventListener("open", () => {
-      socket.send(
-        JSON.stringify({ type: "AUTHENTICATE", access_token: token })
-      );
-    });
     socket.addEventListener("message", (event) => {
       const message = JSON.parse(String(event.data)) as {
         type?: string;
         data?: unknown;
+        routeKey?: string;
       };
+      if (message.routeKey === "$connect") {
+        socket.send(
+          JSON.stringify({ type: "AUTHENTICATE", access_token: token })
+        );
+        return;
+      }
+      if (message.type === "AUTHENTICATED") {
+        authenticatedSockets.add(socket);
+      }
       if (typeof message.type === "string") {
         if (process.env.E2EE_REAL_STACK_DEBUG === "1") {
           process.stderr.write(`[ws ${token.slice(-6)}] ${message.type}
@@ -281,6 +294,17 @@ describeStack("E2EE engine against a real backend", () => {
     for (const device of [a, b, c, d]) {
       expect(device.engine.getStatus()).toBe("ready");
       expect(device.signCalls).toBe(1);
+    }
+    if (WS !== "") {
+      // Hints must reach every device, as they do in browsers.
+      for (
+        let i = 0;
+        i < 50 && authenticatedSockets.size < sockets.length;
+        i++
+      ) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      expect(authenticatedSockets.size).toBe(sockets.length);
     }
 
     // Story 1: DM with send, edit, react, delete.
