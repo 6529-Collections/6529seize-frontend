@@ -3681,7 +3681,9 @@
         "You can attach up to 10 files of up to 25 MB each; they are encrypted on your device like messages. If attachments are switched off, the attach control is hidden.",
         "Keys are agreed with a hybrid post-quantum method (MLS ciphersuite 0x004F, X-Wing: ML-KEM-768 combined with X25519), so messages stay confidential even if one of the two is broken, for example by a future quantum computer.",
         "Open a message's menu to mute the chat on this device, block its sender (they cannot start new chats with you or add you to encrypted chats), or choose who can message you in Preferences.",
-        "Reporting is for illegal or severe harm only: child sexual abuse material, a credible threat of violence, intimate images shared without consent, or doxxing. Only the selected message is shared, with proof its sender sent it, and it goes to 6529's trust and safety team, not to wave moderators. Nothing else in the conversation is revealed."
+        "Reporting is for illegal or severe harm only: child sexual abuse material, a credible threat of violence, intimate images shared without consent, or doxxing. Only the selected message is shared, with proof its sender sent it, and it goes to 6529's trust and safety team, not to wave moderators. Nothing else in the conversation is revealed.",
+        "Encrypted messages run in one browser tab at a time per profile. Other tabs show Encrypted messages are open in another tab. with Use here, which moves them to that tab and pauses the first one.",
+        "When this browser holds encrypted messages, Sign out and Sign Out All Profiles offer Remove encrypted messages from this browser (on by default for Sign Out All Profiles). It deletes the chats, attachment keys, unsent messages and encryption keys saved in this browser; without encrypted backup that history cannot be recovered."
       ],
       "canonical_path": "/messages/encrypted",
       "related_paths": [

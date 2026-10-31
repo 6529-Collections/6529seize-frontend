@@ -26,6 +26,7 @@ import { useMutedE2eeChats } from "@/components/e2ee/e2eeMutedChats";
  * - proxy: acting as a proxy (encrypted chat is not available)
  * - idle: allowed but the engine has not been loaded
  * - load-failed: the engine module or instance failed to load
+ * - elsewhere: encrypted messages are open in another tab
  */
 export type E2eeUiStatus =
   | "disabled"
@@ -33,6 +34,7 @@ export type E2eeUiStatus =
   | "proxy"
   | "idle"
   | "load-failed"
+  | "elsewhere"
   | E2eeEngineStatus;
 
 export interface UseE2eeResult {
@@ -48,6 +50,8 @@ export interface UseE2eeResult {
   /** Server switch; attaching is hidden while false (and until it is known). */
   readonly attachmentsEnabled: boolean;
   readonly restart: () => void;
+  /** "Use here": take the engine over from the tab that holds it. */
+  readonly takeOverHere: () => void;
 }
 
 const EMPTY_DEVICES: readonly E2eeDeviceInfo[] = [];
@@ -76,6 +80,8 @@ function resolveStatus(
       return snapshot?.status ?? "loading";
     case "failed":
       return "load-failed";
+    case "elsewhere":
+      return "elsewhere";
     case "disabled":
     case "unavailable":
     case "proxy":
@@ -102,6 +108,7 @@ export function useE2ee(): UseE2eeResult {
       conversations: snapshot?.conversations ?? EMPTY_CONVERSATIONS,
       attachmentsEnabled: snapshot?.attachmentsEnabled ?? false,
       restart: context.restart,
+      takeOverHere: context.takeOverHere,
     }),
     [context, snapshot]
   );

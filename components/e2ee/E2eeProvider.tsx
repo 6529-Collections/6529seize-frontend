@@ -6,6 +6,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -24,16 +25,13 @@ import {
   type LoadE2eeEngineModules,
   loadE2eeEngineModules,
 } from "./e2eeEngineLoader";
-import {
-  createE2eeEngineStore,
-  type E2eeEngineSnapshot,
-  type E2eeEngineStore,
-} from "./e2eeEngineStore";
-import { getE2eeErrorCode } from "./e2eeErrors";
+import type { E2eeEngineSnapshot, E2eeEngineStore } from "./e2eeEngineStore";
+import { type E2eeEngineRun, startE2eeEngineRun } from "./e2eeEngineRun";
 import {
   hasE2eeEnrollmentMarker,
   setE2eeEnrollmentMarker,
 } from "./e2eeLocalState";
+import { E2eeSignOutPromptHost } from "./signout/E2eeSignOutPromptHost";
 import { useE2eeEngineDeps } from "./useE2eeEngineDeps";
 
 interface E2eeProviderProps {
@@ -50,7 +48,14 @@ type LoadState =
       readonly store: E2eeEngineStore;
       readonly backup: E2eeBackupManager | null;
     }
-  | { readonly key: string; readonly phase: "failed"; readonly error: string };
+  | { readonly key: string; readonly phase: "failed"; readonly error: string }
+  | { readonly key: string; readonly phase: "elsewhere" };
+
+interface Attempt {
+  readonly count: number;
+  /** Set by "Use here": take the engine from the tab that holds it. */
+  readonly takeOver: boolean;
+}
 
 // Same-tab marker changes do not fire "storage" events; notify directly.
 const markerListeners = new Set<() => void>();
@@ -152,7 +157,10 @@ function E2eeProviderEnabled({
   const sessionKey =
     profileId && wallet && !isProxy ? `${profileId}:${wallet}` : null;
 
-  const [attempt, setAttempt] = useState(0);
+  const [attempt, setAttempt] = useState<Attempt>({
+    count: 0,
+    takeOver: false,
+  });
   const hasMarker = useEnrollmentMarker(profileId);
   const wantsEngine = isEncryptedMessagesPathname(pathname) || hasMarker;
 
@@ -171,74 +179,68 @@ function E2eeProviderEnabled({
   }
   const activeKey =
     sessionKey !== null && nextSession.wanted
-      ? `${sessionKey}:${nextSession.generation}:${attempt}`
+      ? `${sessionKey}:${nextSession.generation}:${attempt.count}`
       : null;
 
   const [loadState, setLoadState] = useState<LoadState | null>(null);
+
+  // Runs in this tab, by profile id; a new run waits for the previous one
+  // to stop so this tab never holds two engines (or its own lock) at once.
+  const runs = useRef(new Map<string, E2eeEngineRun>());
+  const stopped = useRef<Promise<void>>(Promise.resolve());
+  const takeOver = attempt.takeOver;
 
   useEffect(() => {
     if (activeKey === null || profileId === null || wallet === null) {
       return;
     }
-    const run = { cancelled: false };
-    // A function, so the check is re-read after each await.
-    const isCancelled = () => run.cancelled;
-    let engine: E2eeEngine | null = null;
-    let store: E2eeEngineStore | null = null;
-    let backup: E2eeBackupManager | null = null;
-
-    const start = async () => {
-      try {
-        const modules = await loadModules();
-        if (isCancelled()) {
-          return;
-        }
-        const created = await modules.createE2eeEngine(
-          buildDeps({
-            profileId,
-            wallet,
-            api: modules.createE2eeApiClient(),
-          })
-        );
-        if (isCancelled()) {
-          created.dispose();
-          return;
-        }
-        engine = created;
-        store = createE2eeEngineStore(created, (snapshot) =>
-          updateEnrollmentMarker(profileId, snapshot)
-        );
-        updateEnrollmentMarker(profileId, store.getSnapshot());
-        backup = modules.startE2eeBackup?.(created, profileId) ?? null;
-        setLoadState({
-          key: activeKey,
-          phase: "loaded",
-          engine,
-          store,
-          backup,
-        });
-      } catch (error) {
-        if (!isCancelled()) {
-          setLoadState({
-            key: activeKey,
-            phase: "failed",
-            error: getE2eeErrorCode(error) ?? "E2EE_LOAD_FAILED",
-          });
-        }
+    let active = true;
+    const update = (next: LoadState | null) => {
+      if (active) {
+        setLoadState(next);
       }
     };
-
-    void start();
+    const run = startE2eeEngineRun({
+      profileId,
+      wallet,
+      takeOver,
+      after: stopped.current,
+      loadModules,
+      buildDeps,
+      onSnapshot: (snapshot) => updateEnrollmentMarker(profileId, snapshot),
+      onElsewhere: () => update({ key: activeKey, phase: "elsewhere" }),
+      onAcquired: () => update(null),
+      onLoaded: ({ engine, store, backup }) =>
+        update({ key: activeKey, phase: "loaded", engine, store, backup }),
+      onFailed: (error) => update({ key: activeKey, phase: "failed", error }),
+    });
+    const tracked = runs.current;
+    tracked.set(profileId, run);
 
     return () => {
-      run.cancelled = true;
-      backup?.dispose();
-      store?.dispose();
-      engine?.dispose();
+      active = false;
+      if (tracked.get(profileId) === run) {
+        tracked.delete(profileId);
+      }
+      stopped.current = run.stop();
     };
-  }, [activeKey, buildDeps, loadModules, profileId, wallet]);
+  }, [activeKey, buildDeps, loadModules, profileId, takeOver, wallet]);
 
-  const restart = useCallback(() => setAttempt((value) => value + 1), []);
+  /** Hands every engine in this tab over (before removing local data). */
+  const releaseEngines = useCallback(async () => {
+    await Promise.all(
+      [...runs.current.values()].map((run) => run.yieldToOtherTab())
+    );
+  }, []);
+
+  const restart = useCallback(
+    () => setAttempt((value) => ({ count: value.count + 1, takeOver: false })),
+    []
+  );
+  const takeOverHere = useCallback(
+    () => setAttempt((value) => ({ count: value.count + 1, takeOver: true })),
+    []
+  );
 
   const value = useMemo<E2eeContextValue>(() => {
     const availability = getAvailability({
@@ -262,10 +264,27 @@ function E2eeProviderEnabled({
           ? loadState.error
           : null,
       restart,
+      takeOverHere,
     };
-  }, [activeKey, isProxy, loadState, profileId, restart, sessionKey]);
+  }, [
+    activeKey,
+    isProxy,
+    loadState,
+    profileId,
+    restart,
+    sessionKey,
+    takeOverHere,
+  ]);
 
-  return <E2eeContext.Provider value={value}>{children}</E2eeContext.Provider>;
+  return (
+    <E2eeContext.Provider value={value}>
+      {children}
+      <E2eeSignOutPromptHost
+        profileId={isProxy ? null : profileId}
+        releaseEngines={releaseEngines}
+      />
+    </E2eeContext.Provider>
+  );
 }
 
 /**

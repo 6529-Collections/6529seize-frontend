@@ -15,6 +15,7 @@ import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { signOutWithE2eeChoice } from "@/components/e2ee/signout/e2eeSignOut";
 import { useChainSwitcher } from "@/components/header/useChainSwitcher";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
@@ -202,7 +203,11 @@ export default function HeaderUserMenuDropdown({
                         }}
                         onSignOutAll={() => {
                           void runMenuAction({
-                            action: seizeDisconnectAndLogoutAll,
+                            action: () =>
+                              signOutWithE2eeChoice(
+                                "all",
+                                seizeDisconnectAndLogoutAll
+                              ),
                             pendingKey: "logout-all",
                             errorMessage:
                               "Failed to sign out all profiles. Please try again.",
@@ -465,7 +470,11 @@ export default function HeaderUserMenuDropdown({
                     <button
                       onClick={() => {
                         void runMenuAction({
-                          action: seizeDisconnectAndLogout,
+                          action: () =>
+                            signOutWithE2eeChoice(
+                              "profile",
+                              seizeDisconnectAndLogout
+                            ),
                           pendingKey: "logout",
                           errorMessage: "Failed to sign out. Please try again.",
                         });

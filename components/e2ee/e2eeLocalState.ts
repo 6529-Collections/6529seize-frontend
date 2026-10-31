@@ -66,3 +66,40 @@ export function writeKnownE2eeDevices(
   const values = [...new Set(deviceKeys)].slice(-MAX_KNOWN_DEVICES);
   writeItem(`${KNOWN_DEVICES_KEY_PREFIX}${profileId}`, JSON.stringify(values));
 }
+
+const E2EE_KEY_PREFIX = "6529:e2ee:";
+
+const listE2eeKeys = (): string[] => {
+  try {
+    const storage = globalThis.localStorage;
+    const keys: string[] = [];
+    for (let index = 0; index < storage.length; index += 1) {
+      const key = storage.key(index);
+      if (key?.startsWith(E2EE_KEY_PREFIX)) {
+        keys.push(key);
+      }
+    }
+    return keys;
+  } catch {
+    return [];
+  }
+};
+
+/** True when this browser enrolled an encrypted-messages device for any profile. */
+export function hasAnyE2eeEnrollmentMarker(): boolean {
+  return listE2eeKeys().some(
+    (key) => key.startsWith(ENROLLED_KEY_PREFIX) && readItem(key) === "1"
+  );
+}
+
+/**
+ * Forgets this browser's encrypted-messages markers (enrollment, seen
+ * devices, muted chats) for one profile, or for every profile with null.
+ */
+export function clearE2eeLocalMarkers(profileId: string | null): void {
+  for (const key of listE2eeKeys()) {
+    if (profileId === null || key.endsWith(`:${profileId}`)) {
+      writeItem(key, null);
+    }
+  }
+}

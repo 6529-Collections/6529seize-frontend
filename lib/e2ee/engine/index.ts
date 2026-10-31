@@ -1,6 +1,7 @@
 import { downloadMedia, localBlobType } from "../media";
 import { MlsClient } from "../mls-adapter";
 import { getDefaultE2eeStorage, isIndexedDbAvailable } from "../storage";
+import { getDefaultBackupStateStore } from "../backup/state";
 import type { BackupHistory } from "../backup/format";
 import type {
   E2eeEngineExt,
@@ -11,6 +12,7 @@ import type {
 } from "../types";
 import {
   checkpoint,
+  clearStoredState,
   requireGroup,
   requireMls,
   type EngineContext,
@@ -97,6 +99,8 @@ function createContext(options: E2eeEngineOptions): EngineContext {
     mls: null,
     device: null,
     lastState: null,
+    stateVersion: 0,
+    persistChain: Promise.resolve(),
     disposed: false,
     lastMeAt: 0,
     lastWakeAt: 0,
@@ -222,6 +226,11 @@ class E2eeEngineImpl implements E2eeEngineExt {
       return;
     }
     try {
+      // Read the version before the state: if another tab writes in
+      // between, this engine is the stale one and its first write is refused.
+      this.ctx.stateVersion = await this.ctx.storage.getStateVersion(
+        this.ctx.profileId
+      );
       const restored = await restore(this.ctx);
       if (!restored) {
         setStatus(this.ctx, NEEDS_ENROLLMENT);
@@ -319,7 +328,11 @@ class E2eeEngineImpl implements E2eeEngineExt {
     await this.wipe();
   }
 
-  /** This device was revoked: local state is useless; back to enrollment. */
+  /**
+   * This device was revoked: local state is useless; back to enrollment. The
+   * encrypted-backup state for the profile goes too (its chunk key belongs
+   * to this device).
+   */
   private async wipe(): Promise<void> {
     await this.ctx.queue.run(async () => {
       this.ctx.timers.dispose();
@@ -329,7 +342,15 @@ class E2eeEngineImpl implements E2eeEngineExt {
       this.ctx.lastState = null;
       this.ctx.store.groups.clear();
       this.ctx.store.thisDevice = null;
-      await this.ctx.storage.clearProfile(this.ctx.profileId);
+      await clearStoredState(this.ctx);
+      try {
+        await (
+          this.ctx.options.backupState ?? getDefaultBackupStateStore()
+        ).delete(this.ctx.profileId);
+      } catch {
+        // Best effort: a stale backup state is dropped on the next start
+        // anyway (its device key no longer matches).
+      }
       setStatus(this.ctx, NEEDS_ENROLLMENT);
     });
   }

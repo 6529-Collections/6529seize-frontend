@@ -12,8 +12,33 @@ import type {
  * non-extractable AES-GCM CryptoKey that itself lives in IndexedDB.
  */
 
+/**
+ * Another engine (another tab) wrote this profile's state after this engine
+ * loaded it, or the state was cleared. Writing would put older state over
+ * newer state, so the write is refused and the engine must stop.
+ */
+class E2eeStateConflictError extends Error {
+  readonly code = "E2EE_STATE_CONFLICT";
+
+  constructor() {
+    super("E2EE_STATE_CONFLICT");
+    this.name = "E2eeStateConflictError";
+  }
+}
+
+export const isE2eeStateConflict = (error: unknown): boolean =>
+  error instanceof E2eeStateConflictError;
+
 /** Writes applied atomically (one IndexedDB transaction). */
 export interface E2eeStorageBatch {
+  /**
+   * Compare-and-swap on the persisted state version. When set, the batch is
+   * applied only if the stored version equals it, and the version becomes
+   * `expectedVersion + 1`; otherwise it throws E2eeStateConflictError and
+   * nothing is written. Unset (sign-in key adoption) skips the check and
+   * keeps the version.
+   */
+  expectedVersion?: number;
   device?: StoredDevice;
   wasmState?: Uint8Array;
   groups?: StoredGroup[];
@@ -33,10 +58,36 @@ export interface E2eeStorage {
   writeBatch(profileId: string, batch: E2eeStorageBatch): Promise<void>;
   getDevice(profileId: string): Promise<StoredDevice | null>;
   getWasmState(profileId: string): Promise<Uint8Array | null>;
+  /**
+   * Monotonic version of the persisted engine state (0 when never written).
+   * An engine reads it before its state and writes with it as
+   * `expectedVersion`, so a stale tab can never overwrite newer state.
+   */
+  getStateVersion(profileId: string): Promise<number>;
   listGroups(profileId: string): Promise<StoredGroup[]>;
   listMessages(profileId: string, g: string): Promise<StoredMessage[]>;
   listOutbox(profileId: string): Promise<StoredOutboxItem[]>;
-  clearProfile(profileId: string): Promise<void>;
+  /**
+   * Deletes the profile's records. The state version survives and goes up by
+   * one, so an engine that loaded the old state cannot write it back. With
+   * `expectedVersion`, the clear is a compare-and-swap like writeBatch.
+   */
+  clearProfile(profileId: string, expectedVersion?: number): Promise<void>;
+}
+
+/** The version a write stores; throws on a failed compare-and-swap. */
+function nextVersion(
+  stored: number,
+  expectedVersion: number | undefined,
+  bump: boolean
+): number {
+  if (expectedVersion === undefined) {
+    return bump ? stored + 1 : stored;
+  }
+  if (stored !== expectedVersion) {
+    throw new E2eeStateConflictError();
+  }
+  return expectedVersion + 1;
 }
 
 const clone = <T>(value: T): T => structuredClone(value);
@@ -47,12 +98,24 @@ class MemoryE2eeStorage implements E2eeStorage {
   readonly kind = "memory" as const;
   private readonly devices = new Map<string, StoredDevice>();
   private readonly wasm = new Map<string, Uint8Array>();
+  private readonly versions = new Map<string, number>();
   private readonly groups = new Map<string, StoredGroup>();
   private readonly messages = new Map<string, StoredMessage>();
   private readonly outbox = new Map<string, StoredOutboxItem>();
 
   writeBatch(profileId: string, batch: E2eeStorageBatch): Promise<void> {
     const k = joinKey;
+    let version: number;
+    try {
+      version = nextVersion(
+        this.versions.get(profileId) ?? 0,
+        batch.expectedVersion,
+        false
+      );
+    } catch (error) {
+      return Promise.reject(error as Error);
+    }
+    this.versions.set(profileId, version);
     if (batch.device) {
       this.devices.set(profileId, clone(batch.device));
     }
@@ -99,6 +162,10 @@ class MemoryE2eeStorage implements E2eeStorage {
     return Promise.resolve(state ? new Uint8Array(state) : null);
   }
 
+  getStateVersion(profileId: string): Promise<number> {
+    return Promise.resolve(this.versions.get(profileId) ?? 0);
+  }
+
   private listByPrefix<T>(map: Map<string, T>, prefix: string): T[] {
     const out: T[] = [];
     for (const [key, value] of map) {
@@ -123,7 +190,15 @@ class MemoryE2eeStorage implements E2eeStorage {
     return Promise.resolve(this.listByPrefix(this.outbox, `${profileId}|`));
   }
 
-  clearProfile(profileId: string): Promise<void> {
+  clearProfile(profileId: string, expectedVersion?: number): Promise<void> {
+    try {
+      this.versions.set(
+        profileId,
+        nextVersion(this.versions.get(profileId) ?? 0, expectedVersion, true)
+      );
+    } catch (error) {
+      return Promise.reject(error as Error);
+    }
     this.devices.delete(profileId);
     this.wasm.delete(profileId);
     for (const map of [this.groups, this.messages, this.outbox] as Map<
@@ -160,8 +235,19 @@ const IDX_PROFILE = "profile";
 const IDX_GROUP = "group";
 const ALL_STORES = [S_DEVICES, S_WASM, S_KEYS, S_GROUPS, S_MESSAGES, S_OUTBOX];
 
+/**
+ * The sealed WASM state plus its version. A cleared profile keeps a record
+ * with only the version (no key material), so the counter never goes back.
+ * Records written before versioning read as version 0.
+ */
 interface WasmRecord {
   profileId: string;
+  version?: number;
+  iv?: Uint8Array;
+  ciphertext?: ArrayBuffer;
+}
+
+interface SealedState {
   iv: Uint8Array;
   ciphertext: ArrayBuffer;
 }
@@ -231,14 +317,24 @@ function upgrade(db: IDBDatabase): void {
 export const isIndexedDbAvailable = (): boolean =>
   typeof globalThis.indexedDB !== "undefined";
 
-function openDatabase(factory: IDBFactory): Promise<IDBDatabase> {
+function openDatabase(
+  factory: IDBFactory,
+  onClosed: () => void
+): Promise<IDBDatabase> {
   return new Promise<IDBDatabase>((resolve, reject) => {
     const req = factory.open(E2EE_DB_NAME, DB_VERSION);
     req.onupgradeneeded = () => {
       upgrade(req.result);
     };
     req.onsuccess = () => {
-      resolve(req.result);
+      const db = req.result;
+      // "Remove encrypted messages from this browser" deletes the database:
+      // close when asked, and reopen on next use.
+      db.onversionchange = () => {
+        db.close();
+        onClosed();
+      };
+      resolve(db);
     };
     req.onerror = () => {
       reject(req.error ?? new Error("IndexedDB open failed"));
@@ -278,14 +374,12 @@ function applyBatch(
   tx: IDBTransaction,
   profileId: string,
   batch: E2eeStorageBatch,
-  wasmRecord: WasmRecord | null
+  wasmRecord: WasmRecord
 ): void {
   if (batch.device) {
     tx.objectStore(S_DEVICES).put(batch.device);
   }
-  if (wasmRecord) {
-    tx.objectStore(S_WASM).put(wasmRecord);
-  }
+  tx.objectStore(S_WASM).put(wasmRecord);
   for (const g of batch.deleteGroups ?? []) {
     tx.objectStore(S_GROUPS).delete([profileId, g]);
     deleteByIndex(tx, S_MESSAGES, IDX_GROUP, IDBKeyRange.only([profileId, g]));
@@ -307,20 +401,77 @@ function applyBatch(
   }
 }
 
+const versionOf = (record: WasmRecord | undefined): number =>
+  record?.version ?? 0;
+
+/**
+ * One readwrite transaction that first reads the profile's state record,
+ * then writes. `next` computes the new record and throws on a version
+ * conflict, which aborts the transaction before anything is written.
+ */
+function versionedWrite(
+  db: IDBDatabase,
+  profileId: string,
+  next: (stored: WasmRecord | undefined) => WasmRecord,
+  apply: (tx: IDBTransaction, record: WasmRecord) => void
+): Promise<void> {
+  const tx = db.transaction(ALL_STORES, "readwrite");
+  const finished = done(tx);
+  let conflict: Error | null = null;
+  const read = tx.objectStore(S_WASM).get(profileId) as IDBRequest<
+    WasmRecord | undefined
+  >;
+  read.onsuccess = () => {
+    let record: WasmRecord;
+    try {
+      record = next(read.result);
+    } catch (error) {
+      conflict = error as Error;
+      tx.abort();
+      return;
+    }
+    apply(tx, record);
+  };
+  return finished.catch((error: unknown) => {
+    throw conflict ?? error;
+  });
+}
+
 class IndexedDbE2eeStorage implements E2eeStorage {
   readonly kind = "indexeddb" as const;
-  private readonly db: Promise<IDBDatabase>;
+  private readonly factory: IDBFactory;
+  private connection: Promise<IDBDatabase> | null = null;
   private readonly keys = new Map<string, Promise<CryptoKey>>();
 
   constructor(factory: IDBFactory) {
-    this.db = openDatabase(factory);
+    this.factory = factory;
+  }
+
+  /** Opens on first use, and again after a failed open or a delete. */
+  private open(): Promise<IDBDatabase> {
+    if (!this.connection) {
+      const opening = openDatabase(this.factory, () => {
+        if (this.connection === opening) {
+          this.connection = null;
+        }
+        // The keys went with the database; never seal with a stale one.
+        this.keys.clear();
+      });
+      opening.catch(() => {
+        if (this.connection === opening) {
+          this.connection = null;
+        }
+      });
+      this.connection = opening;
+    }
+    return this.connection;
   }
 
   private async read<T>(
     store: string,
     run: (os: IDBObjectStore) => IDBRequest
   ): Promise<T> {
-    const db = await this.db;
+    const db = await this.open();
     const tx = db.transaction(store, "readonly");
     return (await request(run(tx.objectStore(store)))) as T;
   }
@@ -349,7 +500,7 @@ class IndexedDbE2eeStorage implements E2eeStorage {
       false,
       ["encrypt", "decrypt"]
     );
-    const db = await this.db;
+    const db = await this.open();
     const tx = db.transaction(S_KEYS, "readwrite");
     const finished = done(tx);
     tx.objectStore(S_KEYS).put({ profileId, key } satisfies KeyRecord);
@@ -360,7 +511,7 @@ class IndexedDbE2eeStorage implements E2eeStorage {
   private async sealState(
     profileId: string,
     state: Uint8Array
-  ): Promise<WasmRecord> {
+  ): Promise<SealedState> {
     const key = await this.stateKey(profileId);
     const iv = randomBytes(12);
     const ciphertext = await globalThis.crypto.subtle.encrypt(
@@ -372,19 +523,28 @@ class IndexedDbE2eeStorage implements E2eeStorage {
       key,
       toArrayBuffer(state)
     );
-    return { profileId, iv, ciphertext };
+    return { iv, ciphertext };
   }
 
   async writeBatch(profileId: string, batch: E2eeStorageBatch): Promise<void> {
     // Encrypt first: a transaction must not span non-IndexedDB awaits.
-    const wasmRecord = batch.wasmState
+    const sealed = batch.wasmState
       ? await this.sealState(profileId, batch.wasmState)
       : null;
-    const db = await this.db;
-    const tx = db.transaction(ALL_STORES, "readwrite");
-    const finished = done(tx);
-    applyBatch(tx, profileId, batch, wasmRecord);
-    await finished;
+    const db = await this.open();
+    await versionedWrite(
+      db,
+      profileId,
+      (stored) => ({
+        ...stored,
+        ...sealed,
+        profileId,
+        version: nextVersion(versionOf(stored), batch.expectedVersion, false),
+      }),
+      (tx, record) => {
+        applyBatch(tx, profileId, batch, record);
+      }
+    );
   }
 
   async getDevice(profileId: string): Promise<StoredDevice | null> {
@@ -399,7 +559,7 @@ class IndexedDbE2eeStorage implements E2eeStorage {
     const record = await this.read<WasmRecord | undefined>(S_WASM, (os) =>
       os.get(profileId)
     );
-    if (!record) {
+    if (!record?.iv || !record.ciphertext) {
       return null;
     }
     const key = await this.stateKey(profileId);
@@ -413,6 +573,13 @@ class IndexedDbE2eeStorage implements E2eeStorage {
       record.ciphertext
     );
     return new Uint8Array(plaintext);
+  }
+
+  async getStateVersion(profileId: string): Promise<number> {
+    const record = await this.read<WasmRecord | undefined>(S_WASM, (os) =>
+      os.get(profileId)
+    );
+    return versionOf(record);
   }
 
   async listGroups(profileId: string): Promise<StoredGroup[]> {
@@ -438,17 +605,28 @@ class IndexedDbE2eeStorage implements E2eeStorage {
     return rows.map((row) => strip(row));
   }
 
-  async clearProfile(profileId: string): Promise<void> {
-    const db = await this.db;
-    const tx = db.transaction(ALL_STORES, "readwrite");
-    const finished = done(tx);
-    tx.objectStore(S_DEVICES).delete(profileId);
-    tx.objectStore(S_WASM).delete(profileId);
-    tx.objectStore(S_KEYS).delete(profileId);
-    for (const name of [S_GROUPS, S_MESSAGES, S_OUTBOX]) {
-      deleteByIndex(tx, name, IDX_PROFILE, profileRange(profileId));
-    }
-    await finished;
+  async clearProfile(
+    profileId: string,
+    expectedVersion?: number
+  ): Promise<void> {
+    const db = await this.open();
+    await versionedWrite(
+      db,
+      profileId,
+      (stored) => ({
+        profileId,
+        version: nextVersion(versionOf(stored), expectedVersion, true),
+      }),
+      (tx, record) => {
+        tx.objectStore(S_DEVICES).delete(profileId);
+        // Version only: no key material survives the clear.
+        tx.objectStore(S_WASM).put(record);
+        tx.objectStore(S_KEYS).delete(profileId);
+        for (const name of [S_GROUPS, S_MESSAGES, S_OUTBOX]) {
+          deleteByIndex(tx, name, IDX_PROFILE, profileRange(profileId));
+        }
+      }
+    );
     this.keys.delete(profileId);
   }
 }

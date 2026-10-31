@@ -1,5 +1,6 @@
 import type { E2eeApiClient } from "./api";
 import type { BackupHistory } from "./backup/format";
+import type { BackupStateStore } from "./backup/state";
 import type { E2eeNoticeType } from "./notice-types";
 import type { E2eeStorage } from "./storage";
 import type { WasmModule } from "./wasm-types";
@@ -257,6 +258,13 @@ export interface E2eeEngineExtraDeps {
   isBlocked?: (profileId: string) => boolean | Promise<boolean>;
   /** Disable the polling fallback (tests drive sync explicitly). */
   polling?: boolean;
+  /**
+   * Called once when a write is refused because another engine (another tab)
+   * persisted newer state. The engine has stopped; the host should dispose it.
+   */
+  onStateConflict?: () => void;
+  /** Encrypted-backup local state; wiped with the device (default IndexedDB). */
+  backupState?: BackupStateStore;
 }
 
 export type E2eeEngineOptions = E2eeEngineDeps & E2eeEngineExtraDeps;

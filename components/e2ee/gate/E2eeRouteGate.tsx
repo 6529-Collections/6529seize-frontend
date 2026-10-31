@@ -32,8 +32,9 @@ interface E2eeRouteGateProps {
 
 /**
  * Shows the state that stands between the user and encrypted chats: proxy
- * sessions, unsupported browsers, loading, enrollment, the device limit and
- * load errors. Children render only when the engine is ready.
+ * sessions, unsupported browsers, another tab holding the engine, loading,
+ * enrollment, the device limit and load errors. Children render only when
+ * the engine is ready.
  */
 export function E2eeRouteGate({ children, shell }: E2eeRouteGateProps) {
   const e2ee = useE2ee();
@@ -63,6 +64,17 @@ function E2eeGateState({ e2ee }: { readonly e2ee: UseE2eeResult }) {
           title={t(locale, "e2ee.title")}
           body={t(locale, "e2ee.gate.noWallet")}
         />
+      );
+    case "elsewhere":
+      return (
+        <E2eeCenteredMessage
+          title={t(locale, "e2ee.gate.elsewhere.title")}
+          body={t(locale, "e2ee.gate.elsewhere.body")}
+        >
+          <Button variant="secondary" size="md" onClick={e2ee.takeOverHere}>
+            {t(locale, "e2ee.gate.elsewhere.action")}
+          </Button>
+        </E2eeCenteredMessage>
       );
     case "unsupported":
       return (

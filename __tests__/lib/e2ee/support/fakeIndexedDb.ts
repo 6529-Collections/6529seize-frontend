@@ -1,8 +1,9 @@
 /**
  * Minimal in-memory IndexedDB (just the surface lib/e2ee/storage.ts uses):
  * open + upgrade, object stores with key paths and indexes, readwrite
- * transactions that commit after their last request, get/put/delete,
- * index getAll and key cursors, IDBKeyRange.only/bound.
+ * transactions that commit after their last request (or abort before any
+ * write), get/put/delete, index getAll and key cursors,
+ * IDBKeyRange.only/bound, deleteDatabase with versionchange.
  */
 
 type Key = string | number | Key[];
@@ -77,6 +78,7 @@ class FakeTransaction {
   error: Error | null = null;
   private pending = 0;
   private scheduled = false;
+  private aborted = false;
 
   constructor(
     private readonly db: FakeDatabase,
@@ -92,10 +94,22 @@ class FakeTransaction {
     return new FakeObjectStore(this, this.db.store(name));
   }
 
+  /** Callers abort before their first write, so nothing to roll back. */
+  abort(): void {
+    this.aborted = true;
+    setTimeout(() => {
+      this.onabort?.();
+    }, 0);
+  }
+
   run<T>(work: () => T): FakeRequest<T> {
     const request = new FakeRequest<T>();
     this.pending += 1;
     setTimeout(() => {
+      if (this.aborted) {
+        this.pending -= 1;
+        return;
+      }
       try {
         request.result = work();
         request.onsuccess?.();
@@ -116,6 +130,9 @@ class FakeTransaction {
     this.scheduled = true;
     setTimeout(() => {
       this.scheduled = false;
+      if (this.aborted) {
+        return;
+      }
       if (this.pending === 0) {
         this.oncomplete?.();
       } else {
@@ -240,6 +257,12 @@ function cloneValue(value: Record<string, unknown>): Record<string, unknown> {
 
 class FakeDatabase {
   readonly stores = new Map<string, StoreData>();
+  onversionchange: (() => void) | null = null;
+  closed = false;
+
+  close(): void {
+    this.closed = true;
+  }
   readonly objectStoreNames = {
     contains: (name: string) => this.stores.has(name),
   };
@@ -273,6 +296,7 @@ class FakeDatabase {
 export function createFakeIndexedDb(): {
   factory: IDBFactory;
   install(): () => void;
+  has(name: string): boolean;
 } {
   const databases = new Map<string, FakeDatabase>();
   const factory = {
@@ -297,9 +321,19 @@ export function createFakeIndexedDb(): {
       }, 0);
       return request;
     },
+    deleteDatabase(name: string) {
+      const request = new FakeRequest<undefined>();
+      setTimeout(() => {
+        databases.get(name)?.onversionchange?.();
+        databases.delete(name);
+        request.onsuccess?.();
+      }, 0);
+      return request;
+    },
   } as unknown as IDBFactory;
   return {
     factory,
+    has: (name: string) => databases.has(name),
     install() {
       const previous = (globalThis as { IDBKeyRange?: unknown }).IDBKeyRange;
       (globalThis as { IDBKeyRange?: unknown }).IDBKeyRange = FakeKeyRange;

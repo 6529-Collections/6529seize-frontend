@@ -12,6 +12,7 @@ import type { E2eeEngineStore } from "./e2eeEngineStore";
  * - proxy: acting as a proxy; encrypted chat belongs to the own profile
  * - idle: allowed, but nothing has asked for the engine yet
  * - loading / loaded / failed: engine module and instance lifecycle
+ * - elsewhere: another tab runs this profile's engine (one per profile)
  */
 export type E2eeAvailability =
   | "disabled"
@@ -20,7 +21,8 @@ export type E2eeAvailability =
   | "idle"
   | "loading"
   | "loaded"
-  | "failed";
+  | "failed"
+  | "elsewhere";
 
 export interface E2eeContextValue {
   readonly availability: E2eeAvailability;
@@ -33,6 +35,8 @@ export interface E2eeContextValue {
   readonly loadError: string | null;
   /** Dispose and recreate the engine (after an error). */
   readonly restart: () => void;
+  /** "Use here": ask the tab that holds the engine to hand it to this one. */
+  readonly takeOverHere: () => void;
 }
 
 const noop = () => undefined;
@@ -45,6 +49,7 @@ const DISABLED_E2EE_CONTEXT: E2eeContextValue = {
   backup: null,
   loadError: null,
   restart: noop,
+  takeOverHere: noop,
 };
 
 export const E2eeContext = createContext<E2eeContextValue>(
