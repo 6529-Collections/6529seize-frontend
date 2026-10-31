@@ -6,7 +6,7 @@
  */
 
 /** About 200 MB of RGBA; larger images show as a file to download. */
-export const MAX_INLINE_IMAGE_PIXELS = 50_000_000;
+const MAX_INLINE_IMAGE_PIXELS = 50_000_000;
 /** Inline images fetched, decrypted and decoded at the same time. */
 const MAX_CONCURRENT_INLINE_IMAGES = 3;
 
