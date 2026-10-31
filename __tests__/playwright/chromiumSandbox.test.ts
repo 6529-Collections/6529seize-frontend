@@ -4,6 +4,8 @@ import path from "node:path";
 const repoRoot = path.resolve(__dirname, "../..");
 const LAUNCH_SITE_PATTERN =
   /\blaunchOptions\s*:\s*|\blaunchPersistentContext\(|\.launch\(/g;
+// Literal values such as `chromiumSandbox: false` must not satisfy the guard.
+const SHARED_SANDBOX_OPTION = /\bchromiumSandbox\s*:\s*CHROMIUM_SANDBOX\b/;
 
 function listSourceFiles(dir: string): string[] {
   return fs
@@ -32,7 +34,7 @@ function launchSitesWithoutSandbox(source: string): number[] {
     const matchEnd = match.index + match[0].length;
     const start = match[0].endsWith("(") ? matchEnd - 1 : matchEnd;
     const expression = bracketedExpression(source, start);
-    if (!expression?.includes("chromiumSandbox")) {
+    if (!expression || !SHARED_SANDBOX_OPTION.test(expression)) {
       lines.push(source.slice(0, match.index).split("\n").length);
     }
   }
@@ -71,8 +73,9 @@ describe("Playwright Chromium sandbox", () => {
       "await chromium.launch();",
       "await chromium.launch({ chromiumSandbox: CHROMIUM_SANDBOX });",
       "test.use({ launchOptions: sharedOptions });",
+      "test.use({ launchOptions: { chromiumSandbox: false } });",
     ].join("\n");
 
-    expect(launchSitesWithoutSandbox(source)).toEqual([2, 3, 5]);
+    expect(launchSitesWithoutSandbox(source)).toEqual([2, 3, 5, 6]);
   });
 });
