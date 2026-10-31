@@ -58,7 +58,13 @@ export interface PendingCommitRecord {
   createdAt: number;
 }
 
-export type StoredGroupStatus = "active" | "invalid" | "left" | "removed";
+/** "restored": known only from a history backup, read-only until joined. */
+export type StoredGroupStatus =
+  | "active"
+  | "invalid"
+  | "left"
+  | "removed"
+  | "restored";
 
 export interface StoredGroup {
   g: string;

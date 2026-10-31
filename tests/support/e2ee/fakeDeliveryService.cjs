@@ -1340,6 +1340,20 @@ function createFakeDeliveryService(options = {}) {
         getChunk(c.profileId, blob, Number(index), lower(c.query.device_key)),
     ],
     ["POST", /^e2ee\/reports$/, (c) => report(c.profileId, c.body)],
+    // History backup: the sandbox reports "no backup", so the devices page
+    // shows backup as off. Backup writes and restores are covered by the
+    // real-WASM Jest integration test and are not simulated here.
+    [
+      "GET",
+      /^e2ee\/backup$/,
+      () => ({
+        backup: null,
+        used_bytes: 0,
+        quota_bytes: 256 * 1024 * 1024,
+        max_chunk_bytes: 1048576,
+        chunk_buckets: [4096, 16384, 65536, 262144, 1048576],
+      }),
+    ],
   ];
 
   function takeFault(method, path) {

@@ -67,7 +67,7 @@ describe("E2eeRouteGate", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /If you lose all your devices or clear this browser’s data, you lose this history/
+        /If you lose all of them or clear this browser’s data, you lose it, unless you turn on encrypted backup in Devices/
       )
     ).toBeInTheDocument();
 
