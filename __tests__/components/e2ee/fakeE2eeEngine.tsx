@@ -206,6 +206,7 @@ export function contextFor(
     backup: null,
     loadError: null,
     restart: jest.fn(),
+    takeOverHere: jest.fn(),
     ...overrides,
   };
 }

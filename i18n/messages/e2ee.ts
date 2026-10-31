@@ -31,6 +31,22 @@ export const E2EE_MESSAGES = {
   "e2ee.gate.error.body":
     "Something went wrong while loading encrypted messages on this device.",
   "e2ee.gate.error.code": "Error code: {code}",
+  "e2ee.gate.elsewhere.title": "Encrypted messages are open in another tab.",
+  "e2ee.gate.elsewhere.body":
+    "They run in one tab at a time so your chats stay in sync. Use them here and the other tab will pause.",
+  "e2ee.gate.elsewhere.action": "Use here",
+  "e2ee.signOut.title": "Sign out",
+  "e2ee.signOut.titleAll": "Sign out of all profiles",
+  "e2ee.signOut.body":
+    "Your encrypted messages stay saved in this browser unless you remove them.",
+  "e2ee.signOut.remove.label": "Remove encrypted messages from this browser",
+  "e2ee.signOut.remove.help":
+    "Deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved here for this profile. Your history is lost unless backup is on.",
+  "e2ee.signOut.remove.helpAll":
+    "Recommended on a shared computer. Deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved here for every profile. Your history is lost unless backup is on.",
+  "e2ee.signOut.confirm": "Sign out",
+  "e2ee.signOut.removeFailed":
+    "Couldn’t remove encrypted messages from this browser. You’re still signed in.",
   "e2ee.enroll.identity": "You’ll sign as {name} with {wallet}.",
   "e2ee.enroll.identityUnknown":
     "You’ll sign with the wallet connected to this profile.",

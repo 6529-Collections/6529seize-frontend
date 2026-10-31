@@ -35,6 +35,20 @@ can export them or move them into an encrypted chat.
   profile; the pages explain this and show nothing else.
 - The browser needs WebAssembly, IndexedDB and Web Crypto. Browsers without
   them see "This browser can’t use encrypted messages".
+- Encrypted messages run in one tab at a time per profile. Other tabs show
+  "Encrypted messages are open in another tab." with **Use here**, which moves
+  them to that tab and pauses the first one. Closing the tab that has them
+  lets a waiting tab take over.
+
+## Signing out
+
+When this browser holds encrypted messages, **Sign out** and **Sign Out All
+Profiles** ask first whether to **Remove encrypted messages from this
+browser**. It deletes the chats, attachment keys, unsent messages and
+encryption keys saved here: for the profile you sign out of, or for every
+profile with Sign Out All Profiles (where it is on by default). Without
+encrypted backup that history cannot be recovered. If you keep them, they
+stay saved in this browser for the next sign-in.
 
 ## Location in the site
 
@@ -322,3 +336,5 @@ without images**. Images and files too large for one encrypted attachment
   replace the backup with a compact copy.
 - **Too many devices**: revoke a device you no longer use, then select
   **Turn on this device**.
+- **Encrypted messages are open in another tab.**: select **Use here** to move
+  them to this tab, or keep using the other tab.
