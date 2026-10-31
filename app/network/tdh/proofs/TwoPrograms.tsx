@@ -125,13 +125,16 @@ function ProgramsTable({
       a: (
         <>
           <Mark kind="proved" locale={locale} size="sm" />{" "}
-          {rich(locale, k("table.pairA"))}
+          {rich(locale, k("table.pairA"), {
+            steps: facts.print("proofs.pair.stepsA"),
+          })}
         </>
       ),
       b: (
         <>
           <Mark kind="proved" locale={locale} size="sm" />{" "}
           {rich(locale, k("table.pairB"), {
+            steps: facts.print("proofs.pair.stepsB"),
             words: facts.print("proofs.statement.words"),
           })}
         </>
