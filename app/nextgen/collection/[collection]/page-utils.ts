@@ -93,23 +93,22 @@ export function getNextgenCollectionMetadata({
   collection,
   documentTitle,
   canonicalPath,
-  subtitle,
   title,
+  view,
 }: {
   readonly collection: NextGenCollection;
   readonly canonicalPath: string;
   readonly documentTitle?: string | undefined;
-  readonly subtitle?: string | undefined;
   readonly title: string;
+  readonly view?: string | undefined;
 }): Metadata {
   return getAppMetadata(
     getLargeSocialCardMetadata({
       title: documentTitle ?? title,
       description: "NextGen",
       ogImage: getCollectionSocialCardImagePath("nextgen", {
-        image: collection.banner || collection.image,
-        subtitle: subtitle ?? `${collection.name} | NextGen`,
-        title,
+        collectionId: collection.id,
+        view,
       }),
       ogImageAlt: `${title} social card`,
     }),
@@ -143,8 +142,8 @@ export async function generateNextgenCollectionMetadata({
       canonicalQuery
     ),
     documentTitle: title,
-    subtitle: `${resolvedCollection.name} | NextGen`,
     title,
+    view: page,
   });
 }
 

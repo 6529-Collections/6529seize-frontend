@@ -14,25 +14,15 @@ import { t } from "@/i18n/messages";
 export interface ArtworkShareDetails {
   readonly kind: "memes" | "gradient" | "nextgen";
   readonly tokenId: number;
-  readonly displayId?: number | undefined;
   readonly title: string;
   readonly artist?: string | undefined;
   readonly collection: string;
-  readonly imageUrl: string;
 }
 
 const COLLECTIONS = {
-  memes: { contract: MEMES_CONTRACT, path: "/the-memes", badge: "The Memes" },
-  gradient: {
-    contract: GRADIENT_CONTRACT,
-    path: "/6529-gradient",
-    badge: "6529 Gradient",
-  },
-  nextgen: {
-    contract: NEXTGEN_CONTRACT,
-    path: "/nextgen/token",
-    badge: "NextGen",
-  },
+  memes: { contract: MEMES_CONTRACT, path: "/the-memes" },
+  gradient: { contract: GRADIENT_CONTRACT, path: "/6529-gradient" },
+  nextgen: { contract: NEXTGEN_CONTRACT, path: "/nextgen/token" },
 } as const;
 
 export function getArtworkShareUrl(artwork: ArtworkShareDetails): string {
@@ -44,17 +34,11 @@ export function getArtworkExportUrl(
   artwork: ArtworkShareDetails,
   format: NftSocialCardFormat
 ): string {
-  const collection = COLLECTIONS[artwork.kind];
+  // The card is rendered from backend data for this token, not from display text.
   return getAbsoluteOgImageUrl(
     getNftSocialCardImagePath({
-      contract: collection.contract,
+      contract: COLLECTIONS[artwork.kind].contract,
       id: artwork.tokenId,
-      displayId: artwork.displayId,
-      title: artwork.title,
-      artist: artwork.artist,
-      collection: artwork.collection,
-      badge: collection.badge,
-      image: artwork.imageUrl,
       format,
     })
   );
