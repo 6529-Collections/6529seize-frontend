@@ -293,7 +293,7 @@ export function E2eeTimeline({
       <div
         ref={scrollRef}
         onScroll={onScroll}
-        className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-y-contain tw-pb-3 tw-[overflow-anchor:none] tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500"
+        className="tw-[overflow-anchor:none] tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-y-contain tw-pb-3 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500"
       >
         <div>
           <E2eeConversationIntro
