@@ -12,6 +12,7 @@ import { usePublicReviewCommentPanelOpen } from "@/components/public-review/Publ
 import { formatDate, formatInteger, formatTime } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 import type { PublicReviewSectionDefinition } from "@/lib/public-review/publicReviewTypes";
 import {
   dedupePublicReviewLedgerRecords,

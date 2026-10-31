@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActionsOptional } from "@/contexts/wave/MyStreamContext";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -28,7 +28,7 @@ interface UseDropBoostMutationReturn {
 
 export const useDropBoostMutation = (): UseDropBoostMutationReturn => {
   const { setToast, connectedProfile } = useAuth();
-  const myStreamContext = useMyStreamOptional();
+  const myStreamContext = useMyStreamActionsOptional();
   const queryClient = useQueryClient();
   const rollbackRef = useRef<(() => void) | null>(null);
   const pendingDropIdRef = useRef<string | null>(null);

@@ -20,7 +20,20 @@ Defaults are aligned so **one hostname drives both** the baked-in app URL and th
 
 `next.config.ts` reads `STANDALONE_BASE_ENDPOINT` during `next build`. The export script sets it to `https://<bucket>` so WalletConnect / AppKit `metadata.url` matches the site origin.
 
-The standalone layout mounts a **document-level anchor interceptor**: any normal click on an `http(s)` link opens a **new tab** and never performs in-place navigation in the mint shell. Relative links and same-origin URLs (the mint host) are rewritten to **`https://6529.io`** (`STANDALONE_MAIN_SITE_BASE` in `standalone-memes-mint/src/next.config.ts`). **`BASE_ENDPOINT`** stays the mint origin for WalletConnect / metadata (`STANDALONE_BASE_ENDPOINT` / bucket URL). To opt out for a specific anchor, set `data-standalone-skip-intercept="true"`.
+**`BASE_ENDPOINT`** stays the mint origin for WalletConnect / metadata (`STANDALONE_BASE_ENDPOINT` / bucket URL).
+
+### Links to 6529.io
+
+There is no link interceptor or document-level click handler. Links to the main site are ordinary anchors that the standalone branches hardcode as absolute `https://6529.io/...` URLs:
+
+- `components/manifold-minting/ManifoldMinting.tsx`: the artist name link, the Distribution Plan link and the profile link in `ArtistInfoStrip`.
+- `components/nft-marketplace-links/NFTMarketplaceLinks.tsx`: the 6529.io collection link (`https://6529.io/the-memes/<id>`) in the marketplace list.
+
+The artist, distribution and 6529.io links open in a new tab (`target="_blank" rel="noopener noreferrer"`), and so do the marketplace links. `STANDALONE_MAIN_SITE_BASE` (`next.config.ts`) is written to the runtime config (`PUBLIC_RUNTIME`) and to `version.json` as `main_site_base`, but no code reads it to build links, so changing it does not change where those links point.
+
+### Search indexing
+
+Test exports are non-indexable. `scripts/export-mint-page.cjs` sets `STANDALONE_TEST_BUILD=true` for `--test` and `false` otherwise. `src/next.config.ts` bakes that value into the runtime config as `STANDALONE_TEST_BUILD` (`publicEnv`, from `config/env.schema.ts`). When it is `true`, `src/app/layout.tsx` sets `robots: { index: false, follow: false }`, which Next renders as `<meta name="robots" content="noindex, nofollow">` on every page, including the page itself. The export checks each HTML file in the test output and fails before writing `dist/` if one lacks that tag. Production exports get no robots meta, as before. The export does not produce a `robots.txt` or response headers, so it adds neither. Response headers for the CloudFront distributions are configured outside this repo.
 
 Override buckets only if needed:
 
