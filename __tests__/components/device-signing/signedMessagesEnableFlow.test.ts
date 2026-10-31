@@ -386,6 +386,20 @@ describe("turn on signed messages flow", () => {
     expect(harness.report).toHaveBeenCalledWith("notice", reason, "browser");
   });
 
+  it("never offers phone pairing to a browser wallet", async () => {
+    const harness = createHarness();
+    harness.flow.enable("notice");
+    await flush();
+    harness.askWallet();
+    await harness.answer({ success: false, reason: "walletconnect-session" });
+
+    expect(harness.status()).toEqual({
+      kind: "error",
+      reason: "signature-failed",
+    });
+    expect(isReconnectStatus(harness.status())).toBe(false);
+  });
+
   it("reports only reason codes, never the wallet address", async () => {
     const harness = createHarness({
       canSignActiveWallet: false,

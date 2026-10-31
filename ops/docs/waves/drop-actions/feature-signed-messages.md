@@ -160,8 +160,7 @@ same steps from one click and show a status line under the button.
   follows without another click. Closing the connection without connecting
   shows "Your wallet didn't connect. Unlock it and try again." While the wallet
   is still reconnecting after a page load, "Reconnecting your wallet…" shows
-  for up to 8 seconds first. Before this, the button did nothing in this state
-  and logging out and in again was the only way through.
+  for up to 8 seconds first.
 - **Another account.** If the wallet is connected to a different signed-in
   account, the status names the account to switch to (for example "Switch it
   to 0x1234…abcd to continue.") and offers **Reconnect wallet**. Switching the

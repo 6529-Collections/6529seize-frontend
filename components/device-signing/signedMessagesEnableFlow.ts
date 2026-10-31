@@ -138,9 +138,15 @@ const toFailureStatus = (
   if (reason === WRONG_NETWORK) {
     return { kind: WRONG_NETWORK, network, canceled: false };
   }
-  // A phone wallet has nothing to unlock here; pairing again is the fix.
-  if (reason === "signature-failed" && isRemoteWallet) {
-    return { kind: "error", reason: WALLET_CONNECT_SESSION };
+  const isPairingProblem =
+    reason === WALLET_CONNECT_SESSION || reason === "signature-failed";
+  if (isPairingProblem) {
+    // A phone wallet has nothing to unlock here; pairing again is the fix. A
+    // browser wallet has no WalletConnect pairing to renew.
+    return {
+      kind: "error",
+      reason: isRemoteWallet ? WALLET_CONNECT_SESSION : "signature-failed",
+    };
   }
   return { kind: "error", reason };
 };
