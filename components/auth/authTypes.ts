@@ -2,6 +2,7 @@ import type { AppToastInput } from "@/components/utils/toast/AppToast";
 import { ProfileConnectedStatus } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { RequestSignedMessagesGrant } from "./authSignedMessagesGrant";
 
 export type AuthContextType = {
   readonly connectedProfile: ApiIdentity | null;
@@ -19,7 +20,7 @@ export type AuthContextType = {
   ) => Promise<{ success: boolean }>;
   readonly requestSessionUpgrade?: () => Promise<{ success: boolean }>;
   /** Signs in again so the challenge also grants this device's key. */
-  readonly requestSignedMessagesGrant?: () => Promise<{ success: boolean }>;
+  readonly requestSignedMessagesGrant?: RequestSignedMessagesGrant;
   readonly ensureActiveSessionV2WebSession?: (params?: {
     readonly address?: string | undefined;
     readonly abortSignal?: AbortSignal | undefined;
