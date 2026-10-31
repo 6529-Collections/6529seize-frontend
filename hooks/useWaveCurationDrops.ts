@@ -17,6 +17,9 @@ import {
   mapToExtendedDrops,
 } from "@/helpers/waves/wave-drops.helpers";
 import { fetchWaveCurationDropsV2 } from "@/services/api/wave-curation-drops-v2-api";
+import type { InfinitePageAdapter } from "@/components/react-query-wrapper/utils/refreshInfiniteQueryHead";
+import type { ApiCurationDrop } from "@/generated/models/ApiCurationDrop";
+import type { ApiCurationDropsPage } from "@/generated/models/ApiCurationDropsPage";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import {
   keepPreviousData,
@@ -25,9 +28,19 @@ import {
 } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import { useDebouncedQueryRefetch } from "./useDebouncedQueryRefetch";
+import { useInfiniteHeadRefetch } from "./useInfiniteHeadRefetch";
 import { useWaveDropUpdateRefetch } from "./useWaveDropUpdateRefetch";
 
 const DEFAULT_WAVE_CURATION_DROPS_PAGE_SIZE = 20;
+
+const curationDropsPageAdapter: InfinitePageAdapter<
+  ApiCurationDropsPage,
+  ApiCurationDrop
+> = {
+  getItems: (page) => page.data,
+  withItems: (page, data) => ({ ...page, data }),
+  getKey: (drop) => drop.id,
+};
 
 export function useWaveCurationDrops({
   wave,
@@ -123,8 +136,14 @@ export function useWaveCurationDrops({
     return generateUniqueKeys(mapToExtendedDrops(pages, [], false), []);
   }, [data?.pages, waveMin]);
 
-  const requestRefetch = useDebouncedQueryRefetch({
+  const refetchHead = useInfiniteHeadRefetch({
+    queryKey,
     refetch,
+    strategy: "aligned",
+    adapter: curationDropsPageAdapter,
+  });
+  const requestRefetch = useDebouncedQueryRefetch({
+    refetch: refetchHead,
     isFetching,
     isFetchingNextPage,
   });

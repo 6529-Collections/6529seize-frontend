@@ -29,6 +29,7 @@ import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 import { fetchWaveById } from "@/services/api/waves-v2-api";
 import {
   encodePublicReviewFeedback,
