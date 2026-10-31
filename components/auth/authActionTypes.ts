@@ -54,4 +54,5 @@ export interface AuthRequestActions {
     options?: RequestAuthOptions
   ) => Promise<{ success: boolean }>;
   readonly requestSessionUpgrade: () => Promise<{ success: boolean }>;
+  readonly requestSignedMessagesGrant: () => Promise<{ success: boolean }>;
 }

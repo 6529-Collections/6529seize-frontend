@@ -9,6 +9,7 @@ import UserCICAndLevel, {
 } from "@/components/user/utils/UserCICAndLevel";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropTime from "./time/WaveDropTime";
+import { WithDropAuthorSignedMarker } from "./signature/DropAuthorSignedMarker";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { DropAuthorBadges } from "./DropAuthorBadges";
 import { useCallback } from "react";
@@ -113,10 +114,16 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
                 <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></div>
               )}
               {!isStackedTimestamp && (
-                <WaveDropTime timestamp={drop.created_at} />
+                <WithDropAuthorSignedMarker drop={drop}>
+                  <WaveDropTime timestamp={drop.created_at} />
+                </WithDropAuthorSignedMarker>
               )}
             </div>
-            {isStackedTimestamp && <WaveDropTime timestamp={drop.created_at} />}
+            {isStackedTimestamp && (
+              <WithDropAuthorSignedMarker drop={drop}>
+                <WaveDropTime timestamp={drop.created_at} />
+              </WithDropAuthorSignedMarker>
+            )}
           </div>
           {Boolean(badge) && <div className="tw-ml-2">{badge}</div>}
         </div>
