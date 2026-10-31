@@ -125,8 +125,8 @@ describe("device grant statement tampering", () => {
     ["trailing period", "f707511a)", "f707511a)."],
     ["leading text", "Sign in to 6529", "Hi. Sign in to 6529"],
     ["trailing space", "f707511a)", "f707511a) "],
-    ["curly apostrophe", "can't", "can’t"],
-    ["Unicode ellipsis", "d75a9801...f707511a", "d75a9801…f707511a"],
+    ["curly apostrophe", "can't", "can\u2019t"],
+    ["Unicode ellipsis", "d75a9801...f707511a", "d75a9801\u2026f707511a"],
     ["lowercase key label", "(Device key", "(device key"],
     [
       "legacy minute format",
