@@ -7,6 +7,7 @@ import {
   isDeviceGrantChallenge,
   isDeviceGrantPossible,
   prepareLoginDeviceGrant,
+  skipAutoDeviceGrant,
   storeLoginDeviceGrant,
   toDeviceGrantNonceParams,
   type DeviceGrantMode,
@@ -153,10 +154,20 @@ const createSignInSession = async ({
     return null;
   }
   const { signable_message, server_signature } = nonceResponse;
+  // A grant sign-in that does not finish must never lock the wallet out:
+  // its next automatic sign-in uses the ordinary challenge.
+  const skipGrantNextTime = () => {
+    if (deviceGrant && deviceGrantMode === "auto") {
+      skipAutoDeviceGrant(signerAddress);
+    }
+  };
 
   const clientSignature = await getSignature({ message: signable_message });
   if (isAuthRequestStale(authRequestGuard)) {
     return null;
+  }
+  if (clientSignature.userRejected || !clientSignature.signature) {
+    skipGrantNextTime();
   }
   if (clientSignature.userRejected) {
     setToast({
@@ -182,6 +193,9 @@ const createSignInSession = async ({
     signerAddress,
     role,
     ...(deviceGrant ? { deviceLabel: deviceGrant.label } : {}),
+  }).catch((error: unknown) => {
+    skipGrantNextTime();
+    throw error;
   });
   if (deviceGrant && sessionResponse.client_type === "web") {
     // The server stored the grant once the login signature verified; keeping

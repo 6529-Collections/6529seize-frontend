@@ -27,7 +27,9 @@ writes are unchanged.
   wallet sign-in also turns on signed messages for that wallet when the
   browser has no grant (or its grant ends within 14 days). The sign-in
   message then says the browser may post as you until a date, names the
-  device key, and lists what it may do.
+  device key, and lists what it may do. If the wallet declines or cannot
+  sign that message, or the sign-in fails, the next sign-in on the same page
+  uses the ordinary message without a grant.
 - **Turn on signed messages (one signature).** A logged-in user without a
   grant in this browser sees this notice above the composer while the
   composer is empty. **Turn on** asks for one wallet signature. The notice
@@ -94,7 +96,9 @@ Signed drops carry no badge in the feed.
 
 ## Availability and Edge Cases
 
-- Web only. The native and desktop apps sign in exactly as before.
+- Web only. 6529 Mobile and 6529 Desktop sign in exactly as before.
+- Turning signed messages on never blocks sign-in: a wallet that declines or
+  cannot sign the grant message can sign in again with the ordinary message.
 - Proxy sessions never sign and never request a grant.
 - Browsers without Ed25519 support in WebCrypto never request a grant.
 - Grants are per wallet and per browser; each wallet signed in on a browser
