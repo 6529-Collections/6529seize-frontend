@@ -271,7 +271,8 @@ export function SignatureDialogFrame({
     <Dialog
       open={isOpen}
       onClose={onClose}
-      className="tailwind-scope tw-relative tw-z-[1000]"
+      // Above the dialogs a seal can appear in, such as the single-drop view.
+      className="tailwind-scope tw-relative tw-z-[1000002]"
     >
       <DialogBackdrop className="tw-fixed tw-inset-0 tw-bg-iron-950/80" />
       <div className="tw-fixed tw-inset-0 tw-overflow-y-auto tw-p-4">

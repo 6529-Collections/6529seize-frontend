@@ -58,6 +58,28 @@ describe("SignedWriteDecisionHost", () => {
     warn.mockRestore();
   });
 
+  it("stacks above the dialogs a signed write can start from", async () => {
+    render(<SignedWriteDecisionHost />);
+    void ask({ action: "delete", reason: "timeout" });
+    const prompt = await screen.findByRole("alertdialog");
+
+    const zIndexOf = (element: Element | null): number => {
+      for (let node = element; node; node = node.parentElement) {
+        const match = /tw-z-\[(\d+)\]/.exec(node.className);
+        if (match) {
+          return Number(match[1]);
+        }
+      }
+      return 0;
+    };
+    // The delete confirmation (1020), the touch drop menu (1010), the
+    // single-drop view (1030) and the guidelines and preview shells (1000001).
+    expect(zIndexOf(prompt)).toBeGreaterThan(1_000_001);
+    act(() => {
+      screen.getByRole("button", { name: "Cancel" }).click();
+    });
+  });
+
   it("asks before a post goes unsigned and resolves the user's choice", async () => {
     const user = userEvent.setup();
     render(<SignedWriteDecisionHost />);

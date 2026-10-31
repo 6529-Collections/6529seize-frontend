@@ -203,7 +203,10 @@ function SigningDecisionPrompt({ locale, request }: PromptProps) {
           resolveSigningDecision(request.id, "cancel");
         }
       }}
-      className="tailwind-scope tw-relative tw-z-[1000]"
+      // Above every dialog a signed write can start from (the delete
+      // confirmation, the touch drop menu, the single-drop view, the wave
+      // guidelines and preview shells), so their backdrops never cover it.
+      className="tailwind-scope tw-relative tw-z-[1000002]"
     >
       <DialogBackdrop
         className={`tw-fixed tw-inset-0 ${compact ? "tw-bg-iron-950/40" : "tw-bg-iron-950/80"}`}
