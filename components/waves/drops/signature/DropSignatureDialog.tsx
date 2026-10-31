@@ -33,6 +33,7 @@ import {
 } from "@heroicons/react/24/outline";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useQuery } from "@tanstack/react-query";
+import type { KeyboardEvent, ReactNode, SyntheticEvent } from "react";
 import { usePublicClient } from "wagmi";
 
 interface DropSignatureDialogProps {
@@ -158,13 +159,19 @@ function VerdictView({
   );
 }
 
-function DropSignatureDialogContent({
+type SignatureDrop = NonNullable<DropSignatureDialogProps["drop"]>;
+
+/**
+ * Fetches a drop's signed events and verifies them in the browser. Mounted
+ * only when shown, so the group dialog checks a post only once it is opened.
+ */
+function useDropSignatureVerdict({
   dropId,
   drop,
-  isOpen,
-  onClose,
-}: DropSignatureDialogProps) {
-  const locale = useBrowserLocale();
+}: {
+  readonly dropId: string;
+  readonly drop: SignatureDrop | undefined;
+}) {
   const publicClient = usePublicClient({ chainId: 1 });
   // Contract-wallet grants (EIP-1271) are checked on Ethereum from the browser.
   const verifyContractSignature: ContractSignatureVerifier | undefined =
@@ -182,7 +189,7 @@ function DropSignatureDialogContent({
         }
       : undefined;
   const content = drop ? toDisplayedDropContent(drop) : undefined;
-  const query = useQuery({
+  return useQuery({
     queryKey: [QueryKey.DROP_SIGNED_EVENTS, dropId, content ?? null],
     queryFn: async ({ signal }) => {
       const signedEvents = await fetchDropSignedEvents(dropId, signal);
@@ -202,16 +209,87 @@ function DropSignatureDialogContent({
           : undefined,
       });
     },
-    enabled: isOpen,
     staleTime: 60_000,
     retry: 1,
   });
+}
 
+/** Loading, error (with Try again) and verdict states for one drop. */
+export function DropSignatureVerification({
+  dropId,
+  drop,
+}: {
+  readonly dropId: string;
+  readonly drop?: SignatureDrop | undefined;
+}) {
+  const locale = useBrowserLocale();
+  const query = useDropSignatureVerdict({ dropId, drop });
+  return (
+    <div aria-live="polite">
+      {query.isPending && (
+        <output className="tw-flex tw-items-center tw-gap-3 tw-text-sm tw-text-iron-300">
+          <span
+            aria-hidden="true"
+            className="tw-size-5 tw-animate-spin tw-rounded-full tw-border-2 tw-border-iron-600 tw-border-t-primary-400 motion-reduce:tw-animate-none"
+          />
+          {t(locale, "signedMessages.signature.loading")}
+        </output>
+      )}
+      {query.isError && (
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+          <p role="alert" className="tw-m-0 tw-text-sm tw-text-iron-300">
+            {t(locale, "signedMessages.signature.error")}
+          </p>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => void query.refetch()}
+          >
+            {t(locale, "signedMessages.signature.retry")}
+          </Button>
+        </div>
+      )}
+      {query.data && <VerdictView locale={locale} verdict={query.data} />}
+    </div>
+  );
+}
+
+// The dialog renders in a portal, but React still bubbles its events through
+// the component tree: through drop rows (long press, swipe) and through
+// clickable cards such as quoted drops and link previews, whose click and
+// Enter handlers would otherwise act. Escape and other keys still bubble, so
+// Headless UI's window listener closes the dialog.
+const stopBubbling = (event: SyntheticEvent) => event.stopPropagation();
+
+const stopActivationKeys = (event: KeyboardEvent) => {
+  if (event.key === "Enter" || event.key === " ") {
+    event.stopPropagation();
+  }
+};
+
+/** The dialog frame shared by the single-drop and group signature dialogs. */
+export function SignatureDialogFrame({
+  isOpen,
+  onClose,
+  title,
+  children,
+}: {
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly title: string;
+  readonly children: ReactNode;
+}) {
+  const locale = useBrowserLocale();
   return (
     <Dialog
       open={isOpen}
       onClose={onClose}
-      className="tailwind-scope tw-relative tw-z-[1000]"
+      // Above the dialogs a seal can appear in, such as the single-drop view.
+      className="tailwind-scope tw-relative tw-z-[1000002]"
+      onClick={stopBubbling}
+      onKeyDown={stopActivationKeys}
+      onPointerDown={stopBubbling}
+      onTouchStart={stopBubbling}
     >
       <DialogBackdrop className="tw-fixed tw-inset-0 tw-bg-iron-950/80" />
       <div className="tw-fixed tw-inset-0 tw-overflow-y-auto tw-p-4">
@@ -219,7 +297,7 @@ function DropSignatureDialogContent({
           <DialogPanel className="tw-w-full tw-max-w-lg tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5 tw-shadow-2xl sm:tw-p-6">
             <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
               <DialogTitle className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">
-                {t(locale, "signedMessages.signature.title")}
+                {title}
               </DialogTitle>
               <button
                 type="button"
@@ -230,41 +308,31 @@ function DropSignatureDialogContent({
                 <XMarkIcon aria-hidden="true" className="tw-size-5" />
               </button>
             </div>
-            <div className="tw-mt-4" aria-live="polite">
-              {query.isPending && (
-                <output className="tw-flex tw-items-center tw-gap-3 tw-text-sm tw-text-iron-300">
-                  <span
-                    aria-hidden="true"
-                    className="tw-size-5 tw-animate-spin tw-rounded-full tw-border-2 tw-border-iron-600 tw-border-t-primary-400 motion-reduce:tw-animate-none"
-                  />
-                  {t(locale, "signedMessages.signature.loading")}
-                </output>
-              )}
-              {query.isError && (
-                <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-                  <p
-                    role="alert"
-                    className="tw-m-0 tw-text-sm tw-text-iron-300"
-                  >
-                    {t(locale, "signedMessages.signature.error")}
-                  </p>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => void query.refetch()}
-                  >
-                    {t(locale, "signedMessages.signature.retry")}
-                  </Button>
-                </div>
-              )}
-              {query.data && (
-                <VerdictView locale={locale} verdict={query.data} />
-              )}
-            </div>
+            {children}
           </DialogPanel>
         </div>
       </div>
     </Dialog>
+  );
+}
+
+function DropSignatureDialogContent({
+  dropId,
+  drop,
+  isOpen,
+  onClose,
+}: DropSignatureDialogProps) {
+  const locale = useBrowserLocale();
+  return (
+    <SignatureDialogFrame
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t(locale, "signedMessages.signature.title")}
+    >
+      <div className="tw-mt-4">
+        <DropSignatureVerification dropId={dropId} drop={drop} />
+      </div>
+    </SignatureDialogFrame>
   );
 }
 

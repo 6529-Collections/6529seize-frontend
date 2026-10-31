@@ -58,7 +58,7 @@ import {
 import type { WaveDropProps } from "./WaveDrop.types";
 import { ModerationRejectedDeliveryStatus } from "./ModerationRejectedDeliveryStatus";
 import { useWaveDropModerationPresentation } from "./useWaveDropModerationPresentation";
-import { isDropAuthorSigned } from "./signature/DropAuthorSignedMarker";
+import { isDropAuthorSigned } from "./signature/dropAuthorSigned";
 import GroupedDropTimestamp from "./GroupedDropTimestamp";
 
 const WaveDropInner = ({
@@ -89,6 +89,7 @@ const WaveDropInner = ({
   quotePath,
   embedDepth,
   maxEmbedDepth,
+  signatureGroup,
 }: WaveDropProps) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
@@ -484,6 +485,8 @@ const WaveDropInner = ({
     showAuthorInfo,
     identityMode,
     drop,
+    // Profile views show a header on every post; each keeps its own seal.
+    signatureGroup: isProfileView ? undefined : signatureGroup,
     showWaveInfo,
     isStorm,
     activePartIndex,
