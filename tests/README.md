@@ -175,6 +175,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:staging:museum-about`                     | museum-about                  | readonly | staging     | post-deploy, manual       | 15m     | Staging Network Museum About proposition route smoke.                                                 |
 | `test:e2e:staging:museum-inside-system`             | museum-inside-system          | readonly | staging     | post-deploy, manual       | 30m     | Staging Network Museum Inside the System project and comparison sweep.                                |
 | `test:e2e:staging:museum-rights`                    | museum-rights                 | readonly | staging     | post-deploy, manual       | 15m     | Staging Network Museum rights education and object-license route sweep.                               |
+| `test:e2e:staging:e2ee`                             | e2ee-staging                  | stateful | staging     | manual                    | 60m     | Encrypted DMs, attachments, groups and device revocation between throwaway users (writes QA data).    |
 | `test:e2e:production:home-readonly`                 | home-readonly                 | readonly | production  | post-deploy, manual       | 15m     | Production home-page read-only canary.                                                                |
 | `test:e2e:production:social-readonly`               | social-readonly               | readonly | production  | cron, manual, post-deploy | 15m     | Production waves and profile read-only canary.                                                        |
 | `test:e2e:production:media-readonly`                | media-readonly                | readonly | production  | cron, manual, post-deploy | 15m     | Production media and mint detail read-only canary.                                                    |
@@ -239,6 +240,35 @@ Remote read-only defaults:
   gate uses safe GET requests plus a browser cookie.
 - Traces are disabled for staging and production by default because they can
   retain credentials or private page state.
+
+Opt-in stateful staging packs:
+
+- Safety `stateful` is the only exception to the read-only default. The
+  manifest validator allows it only for staging, with
+  `PLAYWRIGHT_READONLY=0`, the manual trigger alone, one worker and traces off,
+  so post-deploy (`all`), cron and PR lanes never select it. The runner never
+  parallelizes it.
+- `test:e2e:staging:e2ee` (alias `e2ee-staging`) proves encrypted DMs (D109)
+  between real users on staging. Each run generates throwaway wallets with
+  `ethers`; `tests/support/scriptedWallet.ts` injects them as an EIP-1193
+  wallet (announced through EIP-6963 and as `window.ethereum`) that answers in
+  the test process, so the private keys never enter the page, logs or
+  artifacts. Each user signs in through the real wallet modal, gets a
+  test-only `e2eeqa_*` profile and turns on encrypted messages with one
+  `MlsDeviceGrant` signature. The spec covers a DM in both directions, an image
+  attachment through the blob store, a group with a third user and a revoked
+  second device that can no longer read new messages. It also asserts that no
+  request URL, body or sent WebSocket frame contains any plaintext (raw, hex
+  or base64 at any alignment), that the MLS WebAssembly module loads under the
+  served CSP (`'wasm-unsafe-eval'` without `'unsafe-eval'`) and that the
+  engine logs no errors. A route guard drops writes aimed at production 6529
+  hosts and fails the run if any occur.
+- The spec skips unless `PLAYWRIGHT_E2EE_STAGING=1` targets
+  `https://staging.6529.io`, and skips with a message when the deployed build
+  does not serve `/messages/encrypted` (built without
+  `NEXT_PUBLIC_E2EE_DM_ENABLED`). Dispatch it with the Staging E2E workflow's
+  `pack=e2ee-staging` input; the workflow runs it in its own step with the
+  repository staging access secret.
 
 Readiness checks must follow the behavior under test. A visible `main` can
 precede hydration, wallet restoration, and API-backed content. Give the
@@ -649,6 +679,11 @@ Large-pack ownership:
   native visibility, app-wallet fallback behavior, or viewport assumptions. Add
   new specs to the allowlist intentionally after verifying skip behavior across
   all three simulation projects.
+- `test:e2e:staging:e2ee` is owned by the encrypted messages owner and the
+  release coordinator, who dispatch it after a staging deploy that changes
+  encrypted messages, the wallet sign-in flow, the CSP or the delivery
+  service. It writes throwaway QA data to staging and must never be pointed at
+  production.
 - Large-pack failures belong to the PR or train owner until they are diagnosed
   as unrelated infrastructure. Do not quarantine, skip, or downgrade a failing
   large pack without recording the reason in the PR or release report.
