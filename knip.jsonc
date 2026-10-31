@@ -24,6 +24,8 @@
       "app/**/route.{ts,tsx}",         // Next App Router route handlers (if used)
       "standalone/standalone-memes-mint/src/app/layout.tsx",
       "standalone/standalone-memes-mint/src/app/page.tsx",
+      // Reached only through the standalone tsconfig `paths` mapping.
+      "standalone/standalone-memes-mint/src/components/NoQuickDirectMessagesGate.tsx",
       "standalone/standalone-memes-mint/src/next.config.ts",
       "standalone/standalone-memes-mint/src/postcss.config.js",
       "standalone/standalone-memes-mint/src/tailwind.config.cjs",
@@ -120,7 +122,9 @@
       "services/api/public-review/feedback-codec.ts": ["exports", "types"],
       "services/api/public-review/ledger.ts": ["exports"],
       "services/**": ["files"],
-      "lib/storage/idb-keyval.ts": ["files"],
+      // In-repo idb-keyval clone behind the bundler alias: it keeps the full
+      // package API for aliased third-party consumers knip cannot see.
+      "lib/storage/idb-keyval.ts": ["files", "exports"],
       "playwright.config.ts": ["exports"],
       "next-sitemap.build.cjs": ["exports"],
       "next-sitemap.config.ts": ["exports"],
@@ -131,6 +135,7 @@
       "eslint.config.single.mjs": ["exports"],
       "standalone/standalone-memes-mint/src/app/layout.tsx": ["exports"],
       "standalone/standalone-memes-mint/src/app/page.tsx": ["exports"],
+      "standalone/standalone-memes-mint/src/components/NoQuickDirectMessagesGate.tsx": ["exports"],
       "standalone/standalone-memes-mint/src/next.config.ts": ["exports"],
       "standalone/standalone-memes-mint/src/postcss.config.js": ["exports"],
       "standalone/standalone-memes-mint/src/tailwind.config.cjs": ["exports"],

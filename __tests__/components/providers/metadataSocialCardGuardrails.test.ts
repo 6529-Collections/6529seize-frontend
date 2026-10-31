@@ -9,7 +9,7 @@ type MetadataSourceGuardrail = {
 // Manually enrolled routes: add new standardized metadata surfaces here.
 const standardizedMetadataSources: readonly MetadataSourceGuardrail[] = [
   {
-    routePath: "app/the-memes/page.tsx",
+    routePath: "app/the-memes/(index)/page.tsx",
     requiredSnippets: [
       "getLargeSocialCardMetadata(",
       "getCollectionSocialCardImagePath(",

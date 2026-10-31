@@ -1,6 +1,7 @@
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 import type { PublicReviewLedgerWarning } from "@/services/api/public-review/types";
 
 export function PublicReviewLedgerWarnings({

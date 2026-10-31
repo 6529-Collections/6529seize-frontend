@@ -146,10 +146,9 @@ export default function Address(props: Readonly<Props>) {
               className={`tw-whitespace-break-spaces tw-font-bold tw-text-white ${
                 props.isUserPage ? "tw-text-3xl" : ""
               }`}
-              dangerouslySetInnerHTML={{
-                __html: props.display ? parseEmojis(props.display) : ``,
-              }}
-            ></span>
+            >
+              {props.display ? parseEmojis(props.display) : ""}
+            </span>
           </Link>
         </span>
       )}

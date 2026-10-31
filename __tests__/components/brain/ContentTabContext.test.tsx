@@ -8,7 +8,6 @@ import {
 import { MyStreamWaveTab } from "@/types/waves.types";
 import { CompetitionNavigationContext } from "@/contexts/CompetitionNavigationContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import * as competitionHelpers from "@/helpers/competition.helpers";
 import { useDefaultCompetitionNavigation } from "@/hooks/competitions/useDefaultCompetitionNavigation";
 
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
@@ -399,6 +398,18 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.COMPETITIONS
     );
     act(() => result.current.setActiveContentTab(MyStreamWaveTab.COMPETITIONS));
+    expect(mockPush).toHaveBeenCalledWith("/waves/hub/competitions", {
+      scroll: false,
+    });
+  });
+
+  it("routes the collection from the explicit competition URL before wave registration", () => {
+    mockPathname = "/waves/hub/competitions/older";
+    mockSearch = new URLSearchParams("tab=decisions");
+    const { result } = setup();
+
+    act(() => result.current.setActiveContentTab(MyStreamWaveTab.COMPETITIONS));
+
     expect(mockPush).toHaveBeenCalledWith("/waves/hub/competitions", {
       scroll: false,
     });
@@ -1279,9 +1290,6 @@ describe("remembered wave entries", () => {
   });
 
   it("shows a remembered competition section on the first destination render before tabs register", () => {
-    jest
-      .spyOn(competitionHelpers, "isMultiCompetitionEnabled")
-      .mockReturnValue(true);
     localStorage.setItem(
       "memes_wave_last_tab_by_id",
       JSON.stringify({
@@ -1316,9 +1324,6 @@ describe("remembered wave entries", () => {
   });
 
   it("honors a deliberate Chat selection while the destination tabs are still registering", () => {
-    jest
-      .spyOn(competitionHelpers, "isMultiCompetitionEnabled")
-      .mockReturnValue(true);
     localStorage.setItem(
       "memes_wave_last_tab_by_id",
       JSON.stringify({
@@ -1518,9 +1523,6 @@ describe("remembered wave entries", () => {
   });
 
   it("keeps a serial-message visit in Chat after URL cleanup without losing remembered Leaderboard", () => {
-    const enabled = jest
-      .spyOn(competitionHelpers, "isMultiCompetitionEnabled")
-      .mockReturnValue(true);
     try {
       const saved = {
         "main-stage": {
@@ -1568,7 +1570,7 @@ describe("remembered wave entries", () => {
         JSON.parse(localStorage.getItem("memes_wave_last_tab_by_id")!)
       ).toEqual(saved);
     } finally {
-      enabled.mockRestore();
+      localStorage.clear();
     }
   });
 });

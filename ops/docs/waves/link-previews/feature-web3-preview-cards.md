@@ -149,7 +149,8 @@ Only `https://` URLs match. Host must be apex or `www`.
 - Large previews can still be returned, but previews exceeding the in-memory
   cache budget are fetched again on subsequent requests.
 - Art Blocks cards show project/token context with `View live` and
-  `Open on Art Blocks`.
+  `Open on Art Blocks`. `View live` opens the token's Art Blocks generator page
+  in a dialog, sandboxed so the work's script runs isolated from the site.
 - Etherscan transaction cards show status, inferred action, participants,
   block/finality context, fee, and timestamp when bounded RPC reads succeed.
 - Etherscan address cards distinguish EOAs, contracts, and delegated EOAs and

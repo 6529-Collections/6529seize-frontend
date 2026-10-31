@@ -82,7 +82,7 @@ const baseProps = {
     max_purchases: 1,
   } as any,
   available_supply: 1,
-  mint_price: 1,
+  mint_price: BigInt(1),
   mint_counts: { allowlist: 0, public: 0, airdrop: 0, total: 0 },
   delegators: [],
   mintForAddress: jest.fn(),

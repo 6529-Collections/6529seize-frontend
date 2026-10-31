@@ -1,9 +1,39 @@
 @import "react-toggle/style.css";
 @import "react-tooltip/dist/react-tooltip.css";
 @import "highlight.js/styles/vs2015.css";
+/* Font Awesome otherwise adds its base icon styles from JavaScript in the
+   browser, so server-rendered icons paint unsized until hydration. Load them
+   here, before the Tailwind layers, so utility classes on icons still win. */
+@import "@fortawesome/fontawesome-svg-core/styles.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@property --fade-l {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --fade-r {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+/* Unsupported browsers keep both edges unfaded. */
+@supports (animation-timeline: scroll(self inline)) {
+  @keyframes scroll-edge-fade {
+    from {
+      --fade-l: 0px;
+      --fade-r: 32px;
+    }
+    to {
+      --fade-l: 32px;
+      --fade-r: 0px;
+    }
+  }
+}
 
 .drop-markdown-ordered-list-paren > li::marker {
   content: counter(list-item) ") ";
@@ -473,32 +503,6 @@ h5:not(.tailwind-scope h5) {
 .-cbwsdk-try-extension-cta {
   background-color: #0052ff !important;
   padding: 10px !important;
-}
-
-#footer {
-  font-size: 14px;
-  background-color: black;
-  padding: 2rem;
-  line-height: 18px;
-}
-#footer img {
-  height: 18px;
-  vertical-align: bottom;
-}
-@media only screen and (max-width: 800px) {
-  #footer img {
-    height: 14px;
-    vertical-align: middle;
-  }
-}
-#footer a {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  text-decoration: none;
-  white-space: nowrap;
-}
-#footer a:hover {
-  opacity: 0.75;
 }
 
 .twitter-share-button {

@@ -57,6 +57,12 @@ is blocked.
 - Legacy link uses `/waves?wave={waveId}`:
   expected behavior is redirect to `/waves/{waveId}` while preserving other
   query values. Save the normalized URL after load.
+- Link shows `404 | PAGE NOT FOUND` instead of the wave:
+  the id in `/waves/{waveId}`, `/messages/{waveId}` or `?wave=` is not a wave
+  id. Wave ids are UUIDs such as `5f207393-5418-4a75-8738-e40edb44a94d`, so a
+  link cut short when copied or pasted ends here. Copy a fresh link from the
+  wave. See
+  [Legacy Route Redirects](../shared/feature-legacy-route-redirects.md#malformed-wave-ids-404).
 - Thread URL opens, then returns to `/waves` or `/messages`:
   the selected wave id is unavailable or stale. Reopen from sidebar/list and
   copy a fresh link.

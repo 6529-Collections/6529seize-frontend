@@ -18,6 +18,14 @@ export class ApiCompetitionPermissions {
     'submit': boolean;
     'vote': boolean;
     'administer': boolean;
+    /**
+    * Whether this administrator may update established competition rules after entries or votes exist. Individual rule protections still apply.
+    */
+    'edit_rules_after_activity'?: boolean;
+    /**
+    * Whether this administrator may edit established voting credit rules. Historical votes permanently lock those rules.
+    */
+    'edit_credit_rules'?: boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -45,6 +53,18 @@ export class ApiCompetitionPermissions {
         {
             "name": "administer",
             "baseName": "administer",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "edit_rules_after_activity",
+            "baseName": "edit_rules_after_activity",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "edit_credit_rules",
+            "baseName": "edit_credit_rules",
             "type": "boolean",
             "format": ""
         }    ];

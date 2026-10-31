@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import LevelsClient from "@/app/network/levels/page.client";
 import { render, screen } from "@testing-library/react";
 import React from "react";
@@ -144,13 +146,14 @@ describe("LevelsPage (App Router)", () => {
   it("exports correct metadata", async () => {
     const { generateMetadata } = require("@/app/network/levels/page");
     const metadata = await generateMetadata();
+    const description = `${t(DEFAULT_LOCALE, "pageMetadata.networkLevels.description")} | test.6529.io`;
     expect(metadata).toMatchObject({
       title: "Levels | Network",
-      description: expect.stringContaining("Network"),
+      description,
       twitter: { card: "summary" },
       openGraph: {
         title: "Levels | Network",
-        description: expect.stringContaining("Network"),
+        description,
         images: ["https://test.6529.io/6529io.png"],
       },
     });

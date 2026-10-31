@@ -21,10 +21,7 @@ import {
   useCompetitionHub,
   useCompetitionList,
 } from "@/hooks/competitions/useCompetitionQueries";
-import {
-  getCompetitionRoute,
-  isMultiCompetitionEnabled,
-} from "@/helpers/competition.helpers";
+import { getCompetitionRoute } from "@/helpers/competition.helpers";
 import { getWavePathRoute } from "@/helpers/navigation.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -131,8 +128,7 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
   const locale = useBrowserLocale();
   const { isApp } = useDeviceInfo();
   const isMobileViewport = useIsMobileLayoutViewport();
-  const canCreateCompetition =
-    isMultiCompetitionEnabled() && hub.permissions.create_competition;
+  const canCreateCompetition = hub.permissions.create_competition;
   const createClassName = `${COMPACT_ACTION_BUTTON_CLASS} tw-no-underline hover:tw-no-underline ${isApp || isMobileViewport ? "tw-min-h-11" : "tw-h-8"}`;
   const createContent = (
     <span className={COMPACT_ACTION_CONTENT_CLASS}>

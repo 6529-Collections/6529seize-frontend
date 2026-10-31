@@ -6,6 +6,9 @@
  * `__tests__/lib/proxy/publicPaths.test.ts` fails when they drift.
  */
 
+// Relative import, like other modules reachable from next.config.
+import { VERSION_RELOAD_IMAGE_SRC } from "../../components/version-update/versionReloadImage";
+
 /** Every committed root-level file in `public/`. */
 export const ROOT_PUBLIC_FILES: ReadonlySet<string> = new Set([
   "/6529-black.svg",
@@ -72,6 +75,9 @@ export const ROOT_PUBLIC_FILES: ReadonlySet<string> = new Set([
   "/help-index.json",
   "/home.png",
   "/home.svg",
+  "/icon-192.png",
+  "/icon-512-maskable.png",
+  "/icon-512.png",
   "/intern-no-bg.png",
   "/intern.png",
   "/jump.svg",
@@ -121,6 +127,9 @@ export const ROOT_PUBLIC_FILES: ReadonlySet<string> = new Set([
   "/watermark.png",
   "/windows.png",
   "/x_black.png",
+  // Content-hashed reload cover artwork; the generator renames it, so the
+  // entry follows its constant instead of a hand-copied file name.
+  VERSION_RELOAD_IMAGE_SRC,
 ]);
 
 /**
@@ -133,9 +142,15 @@ export const SERVED_WELL_KNOWN_PATHS: ReadonlySet<string> = new Set([
   "/.well-known/apple-app-site-association",
 ]);
 
-/** Root-level paths kept ungated although no committed `public/` file backs them. */
+/**
+ * Root-level paths kept ungated although no committed `public/` file backs
+ * them: the generated favicon and Next's `app/apple-icon.png` and
+ * `app/manifest.ts` metadata routes. All three carry public branding only.
+ */
 const GENERATED_ROOT_STATIC_PATHS: ReadonlySet<string> = new Set([
+  "/apple-icon.png",
   "/favicon.ico",
+  "/manifest.webmanifest",
 ]);
 
 const SITEMAP_PREFIX = "/sitemap";
@@ -152,6 +167,7 @@ export const PUBLIC_IMAGE_DIRECTORIES: ReadonlySet<string> = new Set([
   "artwork-documentation",
   "delegation-content",
   "emojis",
+  "home",
   "museum",
   "nextgen",
   "pebbles",

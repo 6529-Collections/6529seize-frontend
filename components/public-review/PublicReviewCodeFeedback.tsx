@@ -7,6 +7,7 @@ import { PublicReviewTechnicalFeedback } from "@/components/public-review/Public
 import { usePublicReviewCodeSelection } from "@/components/public-review/SoliditySourceReview";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 import type {
   PublicReviewDiscussionDestination,
   PublicReviewFeedbackConfig,

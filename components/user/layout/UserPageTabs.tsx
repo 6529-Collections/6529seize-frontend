@@ -36,6 +36,7 @@ import {
 import { getUserProfileTabsMessage } from "./user-tabs.messages";
 import { useUserPageTabFallbackRedirect } from "./useUserPageTabFallbackRedirect";
 import { useUserPageTabIndicator } from "./useUserPageTabIndicator";
+import { useUserPageNavigation } from "./UserPageNavigation";
 
 const DEFAULT_TAB = DEFAULT_USER_PAGE_TAB;
 const subscribeToClientRender = () => () => undefined;
@@ -55,6 +56,7 @@ export default function UserPageTabs({
   readonly initialProfile: ApiIdentity;
 }) {
   const pathname = usePathname();
+  const navigation = useUserPageNavigation();
   const params = useParams();
   const handleOrWallet = params["user"]?.toString() ?? "";
   const searchParams = useSearchParams();
@@ -169,7 +171,7 @@ export default function UserPageTabs({
     [resolvedTabFromPath, visibleTabs]
   );
 
-  const activeTab = useMemo<UserPageTabKey>(() => {
+  const resolvedActiveTab = useMemo<UserPageTabKey>(() => {
     // While the redirect is deferred the URL stays on the hidden tab, so no
     // other tab is highlighted as current.
     if (resolvedTabIsVisible || shouldSuppressSubscriptionsRedirect) {
@@ -186,6 +188,7 @@ export default function UserPageTabs({
     shouldSuppressSubscriptionsRedirect,
     visibleTabs,
   ]);
+  const activeTab = navigation?.pendingTab ?? resolvedActiveTab;
 
   useUserPageTabFallbackRedirect({
     handleOrWallet,
@@ -253,13 +256,25 @@ export default function UserPageTabs({
   const scrollLeft = () => {
     const container = scrollContainerRef.current;
     if (!container) return;
-    container.scrollBy({ left: -150, behavior: "smooth" });
+    container.scrollBy({
+      left: -150,
+      behavior: globalThis.matchMedia("(prefers-reduced-motion: reduce)")
+        .matches
+        ? "instant"
+        : "smooth",
+    });
   };
 
   const scrollRight = () => {
     const container = scrollContainerRef.current;
     if (!container) return;
-    container.scrollBy({ left: 150, behavior: "smooth" });
+    container.scrollBy({
+      left: 150,
+      behavior: globalThis.matchMedia("(prefers-reduced-motion: reduce)")
+        .matches
+        ? "instant"
+        : "smooth",
+    });
   };
 
   return (

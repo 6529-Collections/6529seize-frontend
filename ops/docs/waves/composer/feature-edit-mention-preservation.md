@@ -39,6 +39,12 @@ rebuilding them.
    request.
 7. After success, the updated content appears and the drop shows `(edited)`.
 
+## Common Scenarios
+
+- You can save multiple edits while the drop remains within its edit window.
+- Editing text keeps existing images and videos attached, including when you
+  reopen the editor after saving. You do not need to reload the page between edits.
+
 ## Edge Cases
 
 - Mentions split across editor text nodes are reconstructed into mention tokens.

@@ -7,6 +7,7 @@ import { t } from "@/i18n/messages";
 import { motion } from "framer-motion";
 import { useMemo, type FC } from "react";
 import AdditionalMediaUpload from "../components/AdditionalMediaUpload";
+import { AdditionalActionSummary } from "../components/AdditionalActionSummary";
 import AirdropConfig from "../components/AirdropConfig";
 import AllowlistBatchManager, {
   type AllowlistBatchRaw,
@@ -32,6 +33,8 @@ import type { SubmissionPhase } from "../ui/SubmissionProgress";
 
 interface AdditionalInfoStepProps {
   readonly traits: TraitsData;
+  readonly isAdditionalActionPromised?: boolean | undefined;
+  readonly additionalActionPlan?: string | undefined;
   readonly airdropEntries: AirdropEntry[];
   readonly onAirdropEntriesChange: (entries: AirdropEntry[]) => void;
   readonly paymentInfo: PaymentInfo;
@@ -61,8 +64,11 @@ interface AdditionalInfoStepProps {
   readonly submitLabel?: string | undefined;
 }
 
+/** Validate operational fields and review the public plan before preview or submission. */
 const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
   traits,
+  isAdditionalActionPromised = false,
+  additionalActionPlan = "",
   airdropEntries,
   onAirdropEntriesChange,
   paymentInfo,
@@ -98,6 +104,7 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
     () =>
       getSubmissionMetadataLengthValidation({
         traits,
+        isAdditionalActionPromised,
         operationalData: {
           airdrop_config: airdropEntries,
           payment_info: paymentInfo,
@@ -110,10 +117,13 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
           },
           commentary: artworkCommentary,
           about_artist: aboutArtist,
+          additional_action_plan: additionalActionPlan,
         },
       }),
     [
       traits,
+      isAdditionalActionPromised,
+      additionalActionPlan,
       airdropEntries,
       paymentInfo,
       allowlistBatches,
@@ -233,6 +243,10 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
         </p>
 
         <div className="tw-flex tw-flex-col tw-gap-y-10">
+          <AdditionalActionSummary
+            isAdditionalActionPromised={isAdditionalActionPromised}
+            plan={additionalActionPlan}
+          />
           <AirdropConfig
             entries={airdropEntries}
             onEntriesChange={onAirdropEntriesChange}

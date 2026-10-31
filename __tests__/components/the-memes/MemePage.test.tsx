@@ -598,7 +598,7 @@ describe("MemePage search params handling", () => {
     expect(detailsColumn?.className).toContain("[&>*:first-child]:tw-order-1");
     expect(detailsColumn?.className).toContain("[&>*:nth-child(2)]:tw-order-3");
     expect(artworkColumn).toHaveClass("tw-order-2");
-    expect(artworkColumn).toHaveClass("lg:tw-self-stretch");
+    expect(artworkColumn).toHaveClass("lg:tw-sticky", "lg:tw-self-start");
   });
 
   it("passes active locale into the art viewer", async () => {
@@ -612,6 +612,21 @@ describe("MemePage search params handling", () => {
       );
     });
   });
+
+  it.each([
+    ["fr-FR", "fr-FR"],
+    [null, "en-US"],
+    ["unsupported-LC", "en-US"],
+  ])(
+    "declares the route locale %s as the language of the card page",
+    async (routeLocale, lang) => {
+      currentLocale = routeLocale;
+      renderPage();
+
+      const artViewer = await screen.findByTestId("art-viewer");
+      expect(artViewer.closest("[lang]")).toHaveAttribute("lang", lang);
+    }
+  );
 
   it("sets focus from valid search param", async () => {
     currentFocus = MEME_FOCUS.ACTIVITY;

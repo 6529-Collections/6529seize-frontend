@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import DistributionPlanTool, { generateMetadata } from "@/app/emma/page";
 import { publicEnv } from "@/config/env";
 import { TitleProvider } from "@/contexts/TitleContext";
@@ -34,6 +36,8 @@ describe("EMMA page", () => {
   it("exports metadata", async () => {
     const metadata = await generateMetadata();
     expect(metadata.title).toBe("EMMA | Tools");
-    expect(metadata.description).toBe(`Tools | ${domain}`);
+    expect(metadata.description).toBe(
+      `${t(DEFAULT_LOCALE, "emma.metadata.description")} | ${domain}`
+    );
   });
 });
