@@ -32,7 +32,7 @@ describe("GroupCreateCollections", () => {
     );
 
     const memes = screen.getByRole("button", { name: "Memes" });
-    expect(memes).toHaveClass("tw-bg-primary-500/10");
+    expect(memes).toHaveClass("tw-bg-iron-900", "tw-border-primary-500/50");
     await userEvent.click(memes);
     expect(setNfts).toHaveBeenCalledWith([]);
   });

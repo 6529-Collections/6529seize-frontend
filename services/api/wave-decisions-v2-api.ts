@@ -65,6 +65,10 @@ const mapDecisionDropV2 = ({
   const replyTo = mapReplyToDrop(drop);
 
   return {
+    collaborators: drop.collaborators ?? [],
+    ...(drop.submission_artist !== undefined
+      ? { submission_artist: drop.submission_artist }
+      : {}),
     id: drop.id,
     serial_no: drop.serial_no,
     drop_type: ApiDropType.Winner,

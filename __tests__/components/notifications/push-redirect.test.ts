@@ -1,9 +1,31 @@
+import type { DevicePushData } from "@/components/notifications/device-push.types";
 import { resolvePushRedirectUrl } from "@/components/notifications/push-redirect";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
 
 jest.mock("@/config/e2eeEnv", () => ({ isE2eeEnabled: jest.fn() }));
 
 const isE2eeEnabledMock = isE2eeEnabled as jest.Mock;
+
+const creditReturn: DevicePushData = {
+  notification_id: "1",
+  redirect: "waves",
+  target_profile_id: "voter",
+  target_profile_handle: "voter",
+  wave_id: "wave",
+  competition_id: "competition",
+};
+
+it("opens the surviving competition for deleted-entry credit-return pushes without a drop id", () => {
+  expect(resolvePushRedirectUrl(creditReturn)).toBe(
+    "/waves/wave/competitions/competition"
+  );
+});
+
+it("opens the winning entry when the push includes its competition entry id", () => {
+  expect(
+    resolvePushRedirectUrl({ ...creditReturn, competition_entry_id: "entry" })
+  ).toBe("/waves/wave/competitions/competition?entry=entry");
+});
 
 const e2eeWake = {
   notification_id: "e2ee",

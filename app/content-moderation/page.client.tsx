@@ -3,6 +3,7 @@
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { isAuthResolving } from "@/components/auth/authResolution";
 import { useAuth } from "@/components/auth/Auth";
+import ModerationOriginalPostLink from "@/components/content-moderation/ModerationOriginalPostLink";
 import ContentModerationAccessError from "@/components/content-moderation/ContentModerationAccessError";
 import ContentModerationNoAccess from "@/components/content-moderation/ContentModerationNoAccess";
 import type { ApiContentModerationQueueItem } from "@/generated/models/ApiContentModerationQueueItem";
@@ -29,6 +30,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense, useMemo } from "react";
 import ModerationChecks from "./checks/ModerationChecks";
+import ModerationReviewCases from "./checks/ModerationReviewCases";
+import { useModerationReviewCounts } from "@/hooks/content-moderation/useModerationReviewCounts";
 import ModerationCheckCounts from "./checks/ModerationCheckCounts";
 import {
   formatEvidence,
@@ -58,8 +61,8 @@ function normalizePathname(pathname: string | null): string {
   return pathname ?? "";
 }
 
-function isReportsTab(tab: ModerationTab): tab is "OPEN" | "RESOLVED" {
-  return tab === "OPEN" || tab === "RESOLVED";
+function isReportsTab(tab: ModerationTab): tab is "RESOLVED" {
+  return tab === "RESOLVED";
 }
 
 function getModeratorPermissions(
@@ -85,7 +88,12 @@ function getActiveDataState(
   suspendedState: ModerationDataState,
   enabled: boolean
 ): ModerationDataState {
-  if (!enabled || tab === "BLOCK_ACTIVITY" || tab === "CHECKS") {
+  if (
+    !enabled ||
+    tab === "BLOCK_ACTIVITY" ||
+    tab === "CHECKS" ||
+    tab === "REVIEW"
+  ) {
     return { isLoading: false, isError: false };
   }
   if (tab === "SUSPENDED") {
@@ -112,10 +120,16 @@ function ModerationQueueCard({
   const reporterPfp = getSafeAssetUrl(item.reporter_pfp);
   const reporterLabel = item.reporter_handle ?? item.reporter_profile_id;
 
+  const originalWaveId: unknown = item.content_snapshot["wave_id"];
   const isResolved = item.status !== ApiContentModerationReportStatus.Open;
 
   return (
     <article className="tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5">
+      {!isResolved && (
+        <p className="tw-mb-3 tw-mt-0 tw-text-xs tw-font-semibold tw-text-iron-400">
+          {t(locale, "checks.queue.userReport")}
+        </p>
+      )}
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 tw-text-xs tw-text-iron-200">
         <span className="tw-inline-flex tw-items-center tw-gap-2">
           {authorPfp ? (
@@ -207,10 +221,18 @@ function ModerationQueueCard({
         <span aria-hidden="true">·</span>
         <span>
           {t(locale, "contentModeration.moderator.currentState", {
-            state: formatContentModerationEnum(item.moderation.status),
+            state: item.drop_deleted
+              ? t(locale, "contentModeration.originalPost.deleted")
+              : formatContentModerationEnum(item.moderation.status),
           })}
         </span>
       </div>
+      <ModerationOriginalPostLink
+        dropId={item.drop_id}
+        waveId={originalWaveId}
+        deleted={item.drop_deleted}
+        evidenceRetained={item.content_snapshot["evidence_expired"] !== true}
+      />
       <pre className="tw-mb-0 tw-mt-4 tw-max-h-72 tw-overflow-auto tw-whitespace-pre-wrap tw-break-words tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-font-sans tw-text-base tw-leading-7 tw-text-iron-50">
         {content || t(locale, "contentModeration.moderator.noTextContent")}
       </pre>
@@ -295,7 +317,10 @@ function ModerationQueueCard({
         <div className="tw-mt-5 tw-rounded-xl tw-bg-iron-900/55 tw-p-4">
           <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
             {t(locale, "contentModeration.moderator.resolvedAs", {
-              decision: formatContentModerationEnum(item.status),
+              decision:
+                item.status === ApiContentModerationReportStatus.ResolvedDeleted
+                  ? t(locale, "contentModeration.report.outcomeDeleted")
+                  : formatContentModerationEnum(item.status),
             })}
           </p>
           {item.resolution_reason && (
@@ -328,7 +353,7 @@ export default function ContentModerationPageClient() {
   const profileId = connectedProfile?.id;
   const pathname = usePathname();
   const activeTab =
-    getModerationTab(normalizePathname(pathname).split("/")[2]) ?? "OPEN";
+    getModerationTab(normalizePathname(pathname).split("/")[2]) ?? "REVIEW";
   const accessQuery = useContentModeratorAccess();
   const hasModeratorIdentity =
     Boolean(connectedProfile?.id) &&
@@ -340,6 +365,11 @@ export default function ContentModerationPageClient() {
       hasModeratorIdentity,
       isAuthResolving(connectionState, fetchingProfile)
     );
+  const countsQuery = useModerationReviewCounts(
+    profileId,
+    moderatorContentReady,
+    accessQuery.isSuccess ? accessQuery.data?.needs_review_count : undefined
+  );
   const reportsTabActive = isReportsTab(activeTab);
   const reportsView = activeTab === "RESOLVED" ? "RESOLVED" : "OPEN";
   const queueQuery = useInfiniteQuery({
@@ -428,12 +458,12 @@ export default function ContentModerationPageClient() {
           />
         )}
       {moderatorContentReady && profileId && (
-        <ModerationCheckCounts key={profileId} profileId={profileId} />
+        <ModerationCheckCounts query={countsQuery} />
       )}
       {moderatorContentReady && (
         <ContentModerationTabs
           activeTab={activeTab}
-          openCount={accessQuery.data?.open_report_count ?? 0}
+          reviewCount={countsQuery.needsReviewCount}
           resolvedCount={accessQuery.data?.resolved_report_count ?? 0}
           suspendedCount={accessQuery.data?.suspended_profile_count ?? 0}
         />
@@ -464,21 +494,26 @@ export default function ContentModerationPageClient() {
           </output>
         )}
         {moderatorContentReady && activeDataState.isError && (
-          <p role="alert" className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-red">
-            {t(locale, "contentModeration.moderator.loadError")}
-          </p>
+          <div role="alert" className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-red">
+            <p>{t(locale, "contentModeration.moderator.loadError")}</p>
+            {reportsTabActive && (
+              <button
+                type="button"
+                className="tw-min-h-11 tw-rounded-lg tw-bg-iron-900 tw-px-4 tw-text-iron-100 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                disabled={queueQuery.isFetching}
+                onClick={() => void queueQuery.refetch()}
+              >
+                {t(locale, "checks.retry")}
+              </button>
+            )}
+          </div>
         )}
         {moderatorContentReady &&
-          reportsTabActive &&
-          queueItems.length === 0 &&
-          !queueQuery.isLoading && (
+          activeTab === "RESOLVED" &&
+          queueQuery.isSuccess &&
+          queueItems.length === 0 && (
             <p className="tw-mb-0 tw-mt-8 tw-text-sm tw-text-iron-400">
-              {t(
-                locale,
-                activeTab === "OPEN"
-                  ? "contentModeration.moderator.empty"
-                  : "contentModeration.moderator.emptyResolved"
-              )}
+              {t(locale, "contentModeration.moderator.emptyResolved")}
             </p>
           )}
         {moderatorContentReady && reportsTabActive && queueItems.length > 0 && (
@@ -504,6 +539,9 @@ export default function ContentModerationPageClient() {
               </div>
             )}
           </div>
+        )}
+        {moderatorContentReady && profileId && activeTab === "REVIEW" && (
+          <ModerationReviewCases key={profileId} profileId={profileId} />
         )}
         {moderatorContentReady &&
           activeTab === "SUSPENDED" &&

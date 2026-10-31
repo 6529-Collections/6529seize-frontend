@@ -3,6 +3,8 @@ import "next/dist/compiled/server-only";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
+import { getFrontendRoot } from "@/config/frontendRoot.server";
+
 import {
   getSolidityManifestOutputSha256,
   toSha256Urn,
@@ -44,7 +46,22 @@ const REVIEW_DATA_ROOT = "/review-data";
 interface SolidityReferenceReaderOptions {
   readonly identity: SolidityReferenceReviewIdentity;
   readonly publicRoot?: string | undefined;
+  /**
+   * The site to load reference files from when they are not in the public
+   * folder. Hosts that ship only the active version (the desktop app) load
+   * the others from the site; every file is still checked against its
+   * SHA-256 before use.
+   */
+  readonly remoteOrigin?: string | undefined;
 }
+
+/** Where reference files come from: the public folder, then the site. */
+interface PublicFileSource {
+  readonly root: string;
+  readonly remoteOrigin?: string | undefined;
+}
+
+const REMOTE_FETCH_TIMEOUT_MS = 15_000;
 
 export class SolidityReferenceNotFoundError extends Error {
   constructor(message: string) {
@@ -109,16 +126,63 @@ function resolveContainedPublicPath(
   return resolvedPath;
 }
 
+function isMissingFile(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    (error as { code?: unknown }).code === "ENOENT"
+  );
+}
+
+async function fetchPublicFile(
+  remoteOrigin: string,
+  publicPath: string
+): Promise<Buffer> {
+  const origin = new URL(remoteOrigin).origin;
+  const url = new URL(publicPath, origin);
+  if (url.origin !== origin) {
+    throw new Error("The Solidity reference path leaves the site.");
+  }
+  const response = await fetch(url, {
+    signal: AbortSignal.timeout(REMOTE_FETCH_TIMEOUT_MS),
+  });
+  if (!response.ok) {
+    throw new Error(
+      `The Solidity reference file is unavailable (HTTP ${response.status}).`
+    );
+  }
+  return Buffer.from(await response.arrayBuffer());
+}
+
+/**
+ * Reads a file below the public folder; when it is not there and a site is
+ * configured, loads the same path from the site. Callers verify checksums.
+ */
+async function readPublicFile(
+  files: PublicFileSource,
+  publicPath: string,
+  suffix: ".json" | ".sol"
+): Promise<Buffer> {
+  const filePath = resolveContainedPublicPath(files.root, publicPath, suffix);
+  try {
+    // The path is constrained beneath the configured public root above.
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
+    return await readFile(filePath);
+  } catch (error) {
+    if (!files.remoteOrigin || !isMissingFile(error)) {
+      throw error;
+    }
+    return fetchPublicFile(files.remoteOrigin, publicPath);
+  }
+}
+
 async function readChecksummedJson(
-  publicRoot: string,
+  files: PublicFileSource,
   publicPath: string,
   expectedSha256?: string,
   checksumKind: "file" | "manifest-output" = "file"
 ): Promise<unknown> {
-  const filePath = resolveContainedPublicPath(publicRoot, publicPath, ".json");
-  // The path is constrained beneath the configured public root above.
-  // eslint-disable-next-line security/detect-non-literal-fs-filename
-  const source = await readFile(filePath);
+  const source = await readPublicFile(files, publicPath, ".json");
   let value: unknown;
   try {
     value = JSON.parse(source.toString("utf8")) as unknown;
@@ -157,7 +221,7 @@ type SourceBufferLoader = (
   file: SoliditySourceFileReference
 ) => Promise<Buffer>;
 
-function createSourceBufferLoader(publicRoot: string): SourceBufferLoader {
+function createSourceBufferLoader(files: PublicFileSource): SourceBufferLoader {
   const cache = new Map<string, Promise<Buffer>>();
   return (file) => {
     const cacheKey = file.publicPath;
@@ -165,14 +229,8 @@ function createSourceBufferLoader(publicRoot: string): SourceBufferLoader {
     if (!pending) {
       pending = (async () => {
         try {
-          const filePath = resolveContainedPublicPath(
-            publicRoot,
-            file.publicPath,
-            ".sol"
-          );
-          // The manifest allowlists the path and containment is checked above.
-          // eslint-disable-next-line security/detect-non-literal-fs-filename
-          const source = await readFile(filePath);
+          // The manifest allowlists the path; readPublicFile checks containment.
+          const source = await readPublicFile(files, file.publicPath, ".sol");
           if (
             toSha256Urn(source) !== file.sha256 ||
             source.byteLength !== file.byteLength
@@ -193,17 +251,17 @@ function createSourceBufferLoader(publicRoot: string): SourceBufferLoader {
 
 function createIndexLoader({
   identity,
-  publicRoot,
+  files,
 }: {
   readonly identity: SolidityReferenceReviewIdentity;
-  readonly publicRoot: string;
+  readonly files: PublicFileSource;
 }): SolidityReferenceReader["loadIndex"] {
   let indexPromise: Promise<SolidityReferenceIndex> | undefined;
   return () => {
     indexPromise ??= (async () => {
       try {
         const value = await readChecksummedJson(
-          publicRoot,
+          files,
           `${REVIEW_DATA_ROOT}/${identity.reviewId}/index.json`
         );
         assertSolidityReferenceIndex(value, identity);
@@ -220,11 +278,11 @@ function createIndexLoader({
 function createManifestLoader({
   identity,
   loadIndex,
-  publicRoot,
+  files,
 }: {
   readonly identity: SolidityReferenceReviewIdentity;
   readonly loadIndex: SolidityReferenceReader["loadIndex"];
-  readonly publicRoot: string;
+  readonly files: PublicFileSource;
 }): SolidityReferenceReader["loadManifest"] {
   const cache = new Map<string, Promise<LoadedManifest>>();
   return (requestedVersion) => {
@@ -250,7 +308,7 @@ function createManifestLoader({
           );
         }
         const value = await readChecksummedJson(
-          publicRoot,
+          files,
           versionEntry.bundlePath,
           versionEntry.bundleSha256,
           "manifest-output"
@@ -274,11 +332,11 @@ function createManifestLoader({
 function createDefinitionLoader({
   loadSourceBuffer,
   loadManifest,
-  publicRoot,
+  files,
 }: {
   readonly loadSourceBuffer: SourceBufferLoader;
   readonly loadManifest: SolidityReferenceReader["loadManifest"];
-  readonly publicRoot: string;
+  readonly files: PublicFileSource;
 }): SolidityReferenceReader["loadDefinition"] {
   const cache = new Map<string, Promise<SolidityDefinitionShard>>();
   return async (version, definitionKey) => {
@@ -296,7 +354,7 @@ function createDefinitionLoader({
       shardPromise = (async () => {
         try {
           const value = await readChecksummedJson(
-            publicRoot,
+            files,
             indexEntry.shardPath,
             indexEntry.shardSha256
           );
@@ -426,21 +484,27 @@ function createRouteInventoryLoader({
   };
 }
 
+function defaultPublicRoot(): string {
+  return path.resolve(getFrontendRoot(), "public");
+}
+
 export function createSolidityReferenceReader({
   identity,
-  publicRoot = path.resolve(process.cwd(), "public"),
+  publicRoot = defaultPublicRoot(),
+  remoteOrigin,
 }: SolidityReferenceReaderOptions): SolidityReferenceReader {
-  const loadIndex = createIndexLoader({ identity, publicRoot });
-  const loadSourceBuffer = createSourceBufferLoader(publicRoot);
+  const files: PublicFileSource = { root: publicRoot, remoteOrigin };
+  const loadIndex = createIndexLoader({ identity, files });
+  const loadSourceBuffer = createSourceBufferLoader(files);
   const loadManifest = createManifestLoader({
     identity,
     loadIndex,
-    publicRoot,
+    files,
   });
   const loadDefinition = createDefinitionLoader({
     loadSourceBuffer,
     loadManifest,
-    publicRoot,
+    files,
   });
   return {
     loadDefinition,

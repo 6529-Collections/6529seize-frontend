@@ -84,10 +84,11 @@ it("groups all three views under Votes and preserves the chosen competition and 
     { scroll: false }
   );
 });
-it("uses legacy controls, resolves voter links and explicit subtabs, and scopes panel IDs", () => {
+it("uses competition controls for the original primary and preserves voter deep links and panel IDs", () => {
   mockLegacy = "alpha";
   const { rerender } = render(<CompetitionVotes />);
-  expect(screen.getByText("Legacy votes")).toBeVisible();
+  expect(screen.queryByText("Legacy votes")).toBeNull();
+  expect(screen.getByText("Native votes")).toBeVisible();
   mockSearch = "tab=voters";
   rerender(<CompetitionVotes />);
   expect(screen.getByRole("tab", { name: "All votes" })).toHaveAttribute(

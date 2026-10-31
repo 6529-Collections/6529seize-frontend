@@ -1,4 +1,4 @@
-import type { Locator } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import { expect, test, waitForRouteReady } from "../testHelpers";
 import { installImageArtworkSandbox } from "../support/videoArtworkSandbox";
 
@@ -40,6 +40,57 @@ export async function expectContainedImage(image: Locator) {
   ).toBeLessThanOrEqual(2);
   expect(Math.abs(geometry.x)).toBeLessThanOrEqual(2);
   expect(Math.abs(geometry.y)).toBeLessThanOrEqual(2);
+}
+
+export async function expectMemeArtworkScrolling(page: Page) {
+  const column = page.getByTestId("meme-artwork-column");
+  const scrolling = await column.evaluate(async (element: HTMLElement) => {
+    const details = element.nextElementSibling as HTMLElement;
+    const originalStyle = details.getAttribute("style");
+    const scrollTo = async (top: number) => {
+      window.scrollTo({ top, behavior: "instant" });
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+      );
+    };
+    try {
+      await scrollTo(0);
+      // Keep a deterministic scroll range when market data changes height.
+      details.style.minHeight = `${element.offsetHeight + 400}px`;
+      const start = element.getBoundingClientRect().top;
+      await scrollTo(start + 48);
+      const firstTop = element.getBoundingClientRect().top;
+      await scrollTo(start + 128);
+      const secondTop = element.getBoundingClientRect().top;
+      const grid = element.parentElement!;
+      await scrollTo(grid.getBoundingClientRect().bottom + window.scrollY - 50);
+      const end = element.getBoundingClientRect();
+      return {
+        desktop: window.matchMedia("(min-width: 1024px)").matches,
+        position: getComputedStyle(element).position,
+        firstTop,
+        secondTop,
+        endTop: end.top,
+        bottomGap: grid.getBoundingClientRect().bottom - end.bottom,
+      };
+    } finally {
+      if (originalStyle === null) details.removeAttribute("style");
+      else details.setAttribute("style", originalStyle);
+      await scrollTo(0);
+    }
+  });
+  if (scrolling.desktop) {
+    expect(scrolling.position).toBe("sticky");
+    expect(Math.abs(scrolling.firstTop - 24)).toBeLessThanOrEqual(2);
+    expect(Math.abs(scrolling.secondTop - 24)).toBeLessThanOrEqual(2);
+  } else {
+    expect(scrolling.position).toBe("relative");
+    expect(
+      Math.abs(scrolling.secondTop - scrolling.firstTop + 80)
+    ).toBeLessThanOrEqual(2);
+  }
+  expect(scrolling.endTop).toBeLessThan(24);
+  expect(scrolling.bottomGap).toBeGreaterThanOrEqual(-2);
 }
 
 export function defineNftImageLayoutTests() {
@@ -153,6 +204,8 @@ export function defineNftImageLayoutTests() {
       });
       for (const delta of Object.values(shift))
         expect(Math.abs(delta)).toBeLessThanOrEqual(2);
+
+      await expectMemeArtworkScrolling(page);
     });
   }
 

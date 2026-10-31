@@ -166,6 +166,7 @@ export function useSidebarWaveNavigation({
       : [],
     queryEnabled,
     scrollKey,
+    viewKey,
   };
 }
 

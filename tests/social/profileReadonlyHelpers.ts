@@ -47,5 +47,5 @@ export async function expectProfileTabLinks(page: Page) {
   ).toHaveAttribute("href", `/${PROFILE_HANDLE}/collected`);
   await expect(
     profileSections.getByRole("link", { name: /xTDH/ })
-  ).toHaveAttribute("href", `/${PROFILE_HANDLE}/xtdh`);
+  ).toHaveAttribute("href", `/${PROFILE_HANDLE}/xtdh?tab=granted`);
 }

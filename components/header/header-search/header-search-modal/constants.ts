@@ -25,9 +25,13 @@ export enum CATEGORY {
   NFTS = "NFTS",
   WAVES = "WAVES",
   PAGES = "PAGES",
+  MESSAGES = "MESSAGES",
 }
 
-export type FilterableCategory = Exclude<CATEGORY, CATEGORY.ALL>;
+export type FilterableCategory = Exclude<
+  CATEGORY,
+  CATEGORY.ALL | CATEGORY.MESSAGES
+>;
 
 export const FILTERABLE_CATEGORIES: FilterableCategory[] = [
   CATEGORY.PAGES,
@@ -38,7 +42,8 @@ export const FILTERABLE_CATEGORIES: FilterableCategory[] = [
 
 export const isFilterableCategory = (
   category: CATEGORY
-): category is FilterableCategory => category !== CATEGORY.ALL;
+): category is FilterableCategory =>
+  category !== CATEGORY.ALL && category !== CATEGORY.MESSAGES;
 
 export const HEADER_SEARCH_LABELS = {
   about: t(DEFAULT_LOCALE, "navigation.primary.about"),

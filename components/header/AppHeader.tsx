@@ -29,6 +29,10 @@ import { useAuth } from "../auth/Auth";
 import { getConnectionProfileIndicator } from "../auth/connection-state-indicator";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import BackButton from "../navigation/BackButton";
+import {
+  DEFAULT_BACK_HREF,
+  sanitizeReturnTo,
+} from "@/components/waves/discovery/wave-score-transparency/scoreUtils";
 import Spinner from "../utils/Spinner";
 import AppSidebar from "./AppSidebar";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
@@ -44,6 +48,7 @@ import { t } from "@/i18n/messages";
 import WavePicture from "@/components/waves/WavePicture";
 import { getDirectMessageProfileHref } from "@/helpers/waves/direct-message-profile.helpers";
 import {
+  getProfileCollectedReturnContext,
   getProfileCollectedTokenReturnContext,
   PROFILE_COLLECTED_RETURN_PARAM,
 } from "@/helpers/profile-collected-navigation";
@@ -278,7 +283,7 @@ const HeaderTitleContent = ({
                 aria-label={t(locale, "waves.information.open", {
                   name: displayWave.name,
                 })}
-                className="tw-flex tw-min-h-8 tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-justify-center tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                className="tw-flex tw-min-h-6 tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
               >
                 <span className="tw-w-full tw-truncate tw-text-sm tw-font-semibold">
                   {displayWave.name}
@@ -498,6 +503,7 @@ export default function AppHeader() {
   const pathname = usePathname();
   const params = useParams();
   const { canGoBack } = useNavigationHistoryContext();
+  const information = useWaveInformation();
   const { profile } = useIdentity({
     handleOrWallet: address ?? null,
     initialProfile: null,
@@ -589,19 +595,36 @@ export default function AppHeader() {
     connectedProfile?.handle
       ? `/${encodeURIComponent(connectedProfile.handle)}`
       : null;
+  const isNativeCollectRoute =
+    isCapacitor && (pathname === "/collect" || pathname === "/collect/orders");
   const profileCollectedReturnContext = isCapacitor
     ? getProfileCollectedTokenReturnContext({
         pathname,
         returnTo: searchParams.get(PROFILE_COLLECTED_RETURN_PARAM),
       })
     : null;
+  const collectProfileReturnContext = isNativeCollectRoute
+    ? getProfileCollectedReturnContext(
+        searchParams.get(PROFILE_COLLECTED_RETURN_PARAM)
+      )
+    : null;
+
+  const isWaveScorePage = isCapacitor && pathname === "/network/wave-score";
+  const waveScoreFallbackHref = canGoBack ? undefined : DEFAULT_BACK_HREF;
+  const waveScoreReturnTo = isWaveScorePage
+    ? (sanitizeReturnTo(searchParams.get("returnTo")) ?? waveScoreFallbackHref)
+    : undefined;
 
   const showBackButton =
+    Boolean(information?.returnFromNavigation) ||
     isInsideWave ||
     isCreateRoute ||
     isProfileWavesFeedView ||
+    isWaveScorePage ||
     preferencesProfileReturnTo !== null ||
     profileCollectedReturnContext !== null ||
+    collectProfileReturnContext !== null ||
+    (isNativeCollectRoute && canGoBack) ||
     (isProfilePage && canGoBack);
   const pfpImage = (
     <div className="tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0">
@@ -689,6 +712,8 @@ export default function AppHeader() {
               returnTo={
                 preferencesProfileReturnTo ??
                 profileCollectedReturnContext?.href ??
+                collectProfileReturnContext?.href ??
+                waveScoreReturnTo ??
                 (isProfileWavesFeedView ? "/waves" : undefined)
               }
             />
