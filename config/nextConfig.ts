@@ -2,6 +2,7 @@ import { createSecurityHeaders } from "./securityHeaders";
 import { isE2eeFlagEnabled } from "./e2eeFlag";
 import { meebits445Headers } from "./meebits445Headers";
 import { staticAssetCacheHeaders } from "./staticAssetCacheHeaders";
+import { versionReloadImageHeaders } from "./versionReloadImageHeaders";
 import { PublicEnv } from "./env.schema";
 import { NextConfig } from "next";
 import { HTML_LIMITED_BOT_UA_RE } from "next/dist/shared/lib/router/utils/html-bots";
@@ -156,6 +157,7 @@ export function sharedConfig(
           ],
         },
         meebits445Headers,
+        versionReloadImageHeaders,
       ];
     },
     turbopack: {
