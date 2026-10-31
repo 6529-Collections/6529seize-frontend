@@ -5,6 +5,7 @@ import type {
   E2eeEngineExt,
   E2eeEngineOptions,
   E2eeEngineStatus,
+  E2eeImported,
   E2eeMessage,
 } from "../types";
 import {
@@ -45,7 +46,7 @@ import {
   TaskTracker,
   TimerSet,
 } from "./runtime";
-import { queueMessage, queueTargeted } from "./send";
+import { queueImported, queueMessage, queueTargeted } from "./send";
 import { EngineStore, toE2eeMessage } from "./store";
 
 /** Contract section 12 engine: framework-agnostic, one instance per profile. */
@@ -454,6 +455,24 @@ class E2eeEngineImpl implements E2eeEngineExt {
     }
     await queueMessage(this.ctx, g.toLowerCase(), input);
     await this.controller.flush(g.toLowerCase());
+  }
+
+  async sendImported(
+    g: string,
+    input: {
+      text: string;
+      imported: E2eeImported;
+      reply?: string | null;
+      files?: File[];
+    }
+  ): Promise<void> {
+    this.requireReady();
+    if ((input.files?.length ?? 0) > 0 && !this.ctx.store.attachmentsEnabled) {
+      throw new E2eeError("E2EE_ATTACHMENTS_DISABLED");
+    }
+    if (await queueImported(this.ctx, g.toLowerCase(), input)) {
+      await this.controller.flush(g.toLowerCase());
+    }
   }
 
   private ownMessage(g: string, id: string) {

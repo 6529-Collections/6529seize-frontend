@@ -1,4 +1,5 @@
 import { isHex, randomBytes, utf8Decode, utf8Encode } from "./bytes";
+import { parseImported, type ImportedPayload } from "./imported-payload";
 
 /** Contract section 6: the JSON payload inside MLS application messages. */
 
@@ -41,6 +42,8 @@ export interface MsgPayload extends PayloadBase {
   mentions: string[];
   reply?: string;
   att?: PayloadAttachment[];
+  /** History moved from an unencrypted DM (imported-payload.ts). */
+  imp?: ImportedPayload;
 }
 
 export interface EditPayload extends PayloadBase {
@@ -187,6 +190,13 @@ function parseMsg(base: PayloadBase, json: Json): MsgPayload | null {
   }
   if (att.length > 0) {
     out.att = att;
+  }
+  // A malformed `imp` is dropped, not fatal: the text (with its plain
+  // header) still renders, as it does on clients that predate imports.
+  const imp =
+    json["imp"] === undefined ? null : parseImported(json["imp"], text);
+  if (imp) {
+    out.imp = imp;
   }
   return out;
 }

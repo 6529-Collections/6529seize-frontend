@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
+import { LegacyDmComposerGate } from "@/components/e2ee/legacy/LegacyDmBanner";
 import { CreateDropWaveWrapper } from "@/components/waves/CreateDropWaveWrapper";
 import { WaveDropsAllWithoutProvider } from "@/components/waves/drops/wave-drops-all";
 import {
@@ -694,27 +695,29 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
             className={composerContainerClassName}
             style={composerContainerStyle}
           >
-            <CreateDropWaveWrapper composerDensity={composerDensity}>
-              <PrivilegedDropCreator
-                activeDrop={activeDrop}
-                onCancelReplyQuote={onCancelReplyQuote}
-                onReplyTargetUnavailable={onCancelReplyQuote}
-                onDropAddedToQueue={onDropAddedToQueue}
-                wave={wave}
-                dropId={null}
-                fixedDropMode={fixedDropMode}
-                externalAttachmentDrop={externalAttachmentDrop}
-                onExternalAttachmentDropConsumed={() =>
-                  setExternalAttachmentDrop(null)
-                }
-                onSubmitCurationUrl={chatCurationUrlSubmitHandler}
-                canSubmitCurationUrl={canSubmitChatCurationUrl}
-                curationUrlSubmitRestrictionMessage={
-                  chatCurationUrlSubmitRestrictionMessage
-                }
-                termsSignatureFlowEnabled={!isChatSubmitFlowOpen}
-              />
-            </CreateDropWaveWrapper>
+            <LegacyDmComposerGate wave={wave} enabled={isDirectMessage}>
+              <CreateDropWaveWrapper composerDensity={composerDensity}>
+                <PrivilegedDropCreator
+                  activeDrop={activeDrop}
+                  onCancelReplyQuote={onCancelReplyQuote}
+                  onReplyTargetUnavailable={onCancelReplyQuote}
+                  onDropAddedToQueue={onDropAddedToQueue}
+                  wave={wave}
+                  dropId={null}
+                  fixedDropMode={fixedDropMode}
+                  externalAttachmentDrop={externalAttachmentDrop}
+                  onExternalAttachmentDropConsumed={() =>
+                    setExternalAttachmentDrop(null)
+                  }
+                  onSubmitCurationUrl={chatCurationUrlSubmitHandler}
+                  canSubmitCurationUrl={canSubmitChatCurationUrl}
+                  curationUrlSubmitRestrictionMessage={
+                    chatCurationUrlSubmitRestrictionMessage
+                  }
+                  termsSignatureFlowEnabled={!isChatSubmitFlowOpen}
+                />
+              </CreateDropWaveWrapper>
+            </LegacyDmComposerGate>
           </div>
         )}
         {showFixedParticipationSubmit && (

@@ -1,4 +1,5 @@
 import type { Payload } from "../payload";
+import { isDuplicateImport } from "./imported";
 import type { StoredMessage } from "../records";
 import type { GroupRuntime } from "./store";
 
@@ -64,6 +65,9 @@ function applyMsg(
   if (existing && !existing.pending) {
     return false;
   }
+  if (payload.imp && isDuplicateImport(runtime, payload.id, payload.imp)) {
+    return false;
+  }
   put(runtime, {
     id: payload.id,
     g: meta.g,
@@ -86,6 +90,7 @@ function applyMsg(
     epoch: meta.epoch,
     body: meta.body,
     sig: meta.sig,
+    ...(payload.imp ? { imported: payload.imp } : {}),
   });
   return true;
 }

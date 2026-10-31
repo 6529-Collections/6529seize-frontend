@@ -325,4 +325,85 @@ export const E2EE_MESSAGES = {
   "e2ee.plaintext.iconAction":
     "Not end-to-end encrypted. Start an encrypted chat with the same people",
   "e2ee.plaintext.failed": "Couldn’t load the people in this chat. Try again.",
+
+  "e2ee.imported.badge": "Imported, not verified",
+  "e2ee.imported.detail":
+    "Moved from an unencrypted DM by {name}. The author and time come from 6529’s server copy and can’t be verified.",
+  "e2ee.imported.mediaMissing.one": "{count} image or file wasn’t moved.",
+  "e2ee.imported.mediaMissing.other": "{count} images or files weren’t moved.",
+  "e2ee.imported.reactions": "Reactions on the original: {reactions}",
+
+  // Unencrypted DMs are deleted from 6529's servers on a fixed date (D146).
+  "e2ee.legacy.banner.label": "Not end-to-end encrypted.",
+  "e2ee.legacy.banner.deletion":
+    "This history will be deleted from 6529’s servers on {date}, unless we’re legally required to keep it.",
+  "e2ee.legacy.banner.closed":
+    "This unencrypted chat is closed. Its history was deleted from 6529’s servers on {date}, except anything we’re legally required to keep.",
+  "e2ee.legacy.region": "Unencrypted chat notice",
+  "e2ee.legacy.action.export": "Export history",
+  "e2ee.legacy.action.openEncrypted": "Open encrypted chat",
+  "e2ee.legacy.readOnly":
+    "This chat is read-only. Your new messages go to the encrypted chat.",
+
+  "e2ee.legacy.export.title": "Export this chat",
+  "e2ee.legacy.export.description":
+    "Download the messages you can see here, with who sent them and when. The file is made in your browser and stays on your device.",
+  "e2ee.legacy.export.media":
+    "Images and files are listed as links. The links stop working on {date}, so save anything you want to keep before then.",
+  "e2ee.legacy.export.start": "Prepare export",
+  "e2ee.legacy.export.progress.one": "Read {count} message…",
+  "e2ee.legacy.export.progress.other": "Read {count} messages…",
+  "e2ee.legacy.export.ready.one": "{count} message ready.",
+  "e2ee.legacy.export.ready.other": "{count} messages ready.",
+  "e2ee.legacy.export.html": "Download readable page (HTML)",
+  "e2ee.legacy.export.json": "Download data (JSON)",
+  "e2ee.legacy.export.failed":
+    "Couldn’t read the whole chat. Check your connection and try again.",
+  "e2ee.legacy.export.retry": "Try again",
+
+  "e2ee.legacy.create.unencrypted": "Send unencrypted instead",
+  "e2ee.legacy.create.warning":
+    "An unencrypted DM isn’t end-to-end encrypted, and 6529 deletes it from its servers on {date}, unless we’re legally required to keep it.",
+  "e2ee.legacy.action.move": "Move history",
+  "e2ee.legacy.import.title": "Move history to the encrypted chat",
+  "e2ee.legacy.import.intro":
+    "This copies the messages you can see here into your encrypted chat with the same people, oldest first, with their images and files when they can be moved.",
+  "e2ee.legacy.import.label":
+    "Each copied message shows who wrote it and when, marked “Imported, not verified”. 6529 held these messages unencrypted, so the encrypted chat can’t prove who wrote them.",
+  "e2ee.legacy.import.audience":
+    "Only the people and devices in the encrypted chat now will see them. 6529’s unencrypted copy is still deleted on {date}, unless we’re legally required to keep it.",
+  "e2ee.legacy.import.keepOpen":
+    "Keep this page open while it runs. You can stop and continue later; nothing is copied twice.",
+  "e2ee.legacy.import.start": "Start moving",
+  "e2ee.legacy.import.continue": "Continue",
+  "e2ee.legacy.import.stop": "Stop",
+  "e2ee.legacy.import.progressLabel": "Moving history",
+  "e2ee.legacy.import.progress": "{done} of {total} moved",
+  "e2ee.legacy.import.media":
+    "Images and files moved: {moved}. Too large to move: {tooLarge}. Not moved: {notMoved}.",
+  "e2ee.legacy.import.done":
+    "Done. {sent} moved, {skipped} were already in the encrypted chat.",
+  "e2ee.legacy.import.failedSome.one":
+    "{count} message couldn’t be moved. Continue to try it again.",
+  "e2ee.legacy.import.failedSome.other":
+    "{count} messages couldn’t be moved. Continue to try them again.",
+  "e2ee.legacy.import.paused":
+    "Paused: today’s limit for encrypted uploads is reached. Continue tomorrow to move the rest with their images.",
+  "e2ee.legacy.import.pausedStorage":
+    "Paused: your space for encrypted images and files is full. Continue later, or move the rest without images and files.",
+  "e2ee.legacy.import.continueWithoutMedia": "Continue without images",
+  "e2ee.legacy.import.cancelled":
+    "Stopped. Continue any time; what was moved stays.",
+  "e2ee.legacy.import.error":
+    "Couldn’t read this chat. Check your connection and try again.",
+
+  "e2ee.legacy.file.title": "6529 DM: {name}",
+  "e2ee.legacy.file.notice":
+    "Copied from an unencrypted 6529.io DM by {handle} on {date}. 6529 deletes its server copies on {deletionDate}, except anything it is legally required to keep. This copy is not encrypted and not authenticated: anyone with the file can read it, and it does not prove who wrote what.",
+  "e2ee.legacy.file.participants": "People",
+  "e2ee.legacy.file.exportedAt": "Exported {date}",
+  "e2ee.legacy.file.replyTo": "reply",
+  "e2ee.legacy.file.edited": "edited",
+  "e2ee.legacy.file.media": "Files",
+  "e2ee.legacy.file.unknownAuthor": "Unknown",
 } as const;
