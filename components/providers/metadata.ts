@@ -2,6 +2,11 @@ import { publicEnv } from "@/config/env";
 import { getAppEnvironment } from "@/config/appEnvironment";
 import type { PageSSRMetadata } from "@/helpers/Types";
 import type { Metadata } from "next";
+import {
+  COLLECTION_CARD_VIEW_LABELS,
+  findClosedCardValue,
+  type CollectionCardVariant,
+} from "./socialCardVariants";
 
 export const SOCIAL_CARD_IMAGE_WIDTH = 1200;
 export const SOCIAL_CARD_IMAGE_HEIGHT = 630;
@@ -86,55 +91,42 @@ export function getDefaultOgImageUrl(
 export function getCollectionSocialCardImagePath(
   collection: string,
   options: {
-    readonly badge?: SocialCardQueryValue;
-    readonly image?: SocialCardQueryValue;
-    readonly subtitle?: SocialCardQueryValue;
-    readonly title?: SocialCardQueryValue;
+    /** A NextGen collection ID: the card shows its backend name and artwork. */
+    readonly collectionId?: string | number | undefined;
+    /** One of a few fixed card layouts for the collection. */
+    readonly variant?: CollectionCardVariant | undefined;
+    /** A fixed page label shown before the card title, such as "Mint". */
+    readonly view?: string | null | undefined;
   } = {}
 ): string {
   return getSocialCardImagePath(
     `/api/og-metadata/collections/${encodeURIComponent(collection)}`,
-    options
+    {
+      collection: options.collectionId,
+      variant: options.variant,
+      view: findClosedCardValue(COLLECTION_CARD_VIEW_LABELS, options.view),
+    }
   );
 }
 
+/**
+ * NFT cards render only backend data for the token identity. The path carries
+ * the identity and the optional `format`; no display text is accepted.
+ */
 export function getNftSocialCardImagePath({
-  artist,
-  badge,
-  collection,
   contract,
-  displayId,
   format,
   id,
-  image,
-  subtitle,
-  title,
 }: {
-  readonly artist?: SocialCardQueryValue;
-  readonly badge?: SocialCardQueryValue;
-  readonly collection?: SocialCardQueryValue;
   readonly contract: string;
-  readonly displayId?: SocialCardQueryValue;
   readonly format?: NftSocialCardFormat | undefined;
   readonly id: string | number;
-  readonly image?: SocialCardQueryValue;
-  readonly subtitle?: SocialCardQueryValue;
-  readonly title?: SocialCardQueryValue;
 }): string {
   return getSocialCardImagePath(
     `/api/og-metadata/nfts/${encodeURIComponent(contract)}/${encodeURIComponent(
       String(id)
     )}`,
-    {
-      artist,
-      badge,
-      collection,
-      displayId,
-      format,
-      image,
-      subtitle,
-      title,
-    }
+    { format }
   );
 }
 

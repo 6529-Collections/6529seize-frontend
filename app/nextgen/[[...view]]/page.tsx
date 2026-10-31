@@ -40,8 +40,7 @@ export async function generateMetadata({
       title,
       description: "Generative art collections from 6529",
       ogImage: getCollectionSocialCardImagePath("nextgen", {
-        subtitle: "Generative art collections from 6529",
-        title,
+        view: nextgenView,
       }),
       ogImageAlt: `${title} social card`,
     }),

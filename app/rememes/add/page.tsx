@@ -21,8 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "Add ReMemes | Collections",
       description: "Collections",
       ogImage: getCollectionSocialCardImagePath("rememes", {
-        subtitle: "Submit a community remix or derivative",
-        title: "Add a ReMeme",
+        variant: "add",
       }),
       ogImageAlt: "Add ReMeme social card",
     })
