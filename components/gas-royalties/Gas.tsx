@@ -4,6 +4,7 @@ import { useTitle } from "@/contexts/TitleContext";
 import type { Gas } from "@/entities/IGas";
 import { capitalizeEveryWord, displayDecimal } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useLatestRequestSignal } from "@/hooks/useLatestRequestSignal";
 import { t } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
 import { GasRoyaltiesCollectionFocus } from "@/types/enums";
@@ -46,6 +47,7 @@ export default function GasComponent() {
   const [gas, setGas] = useState<Gas[]>([]);
   const [sumGas, setSumGas] = useState(0);
   const [fetchError, setFetchError] = useState(false);
+  const startRequest = useLatestRequestSignal();
 
   const {
     dateSelection,
@@ -72,22 +74,31 @@ export default function GasComponent() {
   }
 
   async function fetchGas() {
+    const signal = startRequest();
     setFetching(true);
     setFetchError(false);
     try {
-      const res = await fetchUrl<Gas[]>(getUrlWithParams());
+      const res = await fetchUrl<Gas[]>(getUrlWithParams(), { signal });
+      if (signal.aborted) {
+        return;
+      }
       res.forEach((r) => {
         r.gas = Math.round(r.gas * 100000) / 100000;
       });
       setGas(res);
       setSumGas(res.map((g) => g.gas).reduce((a, b) => a + b, 0));
     } catch (error) {
+      if (signal.aborted) {
+        return;
+      }
       console.error("Failed to fetch gas data", error);
       setGas([]);
       setSumGas(0);
       setFetchError(true);
     } finally {
-      setFetching(false);
+      if (!signal.aborted) {
+        setFetching(false);
+      }
     }
   }
 

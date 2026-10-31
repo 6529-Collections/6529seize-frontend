@@ -71,6 +71,23 @@ describe("Meme Lab detail page", () => {
     );
   });
 
+  it.each([
+    [{ locale: "de-DE" }, "de-DE"],
+    [{}, "en-US"],
+  ])(
+    "declares the language of the page content for search params %j",
+    async (searchParams, lang) => {
+      const page = await MemeLabPage({
+        params: Promise.resolve({ id: "123" }),
+        searchParams: Promise.resolve(searchParams),
+      });
+
+      render(page);
+
+      expect(await screen.findByRole("main")).toHaveAttribute("lang", lang);
+    }
+  );
+
   it("passes locale and focus to shared metadata generation", async () => {
     mockGetSharedAppServerSideProps.mockResolvedValue({
       title: "Metadata title",

@@ -2168,7 +2168,7 @@
       ],
       "facts": [
         "A user's Meme Card subscription controls and history live under /{user}/subscriptions.",
-        "On native iOS when the detected country is not US or is unknown, subscription controls stay hidden and direct or deep-linked visits return to the profile Identity tab without showing subscription content once the country check settles (a failed check counts as unknown); US iOS deep links wait for the check and then keep the Subscriptions tab, and web and Android never wait for the country check. On every platform the Subscriptions tab and the profile-header subscription status are added just after the page loads rather than in the first render.",
+        "On native iOS when the detected country is not US or is unknown, subscription controls stay hidden and direct or deep-linked visits return to the profile Identity tab without showing subscription content once the country check settles (a failed check counts as unknown); US iOS deep links wait for the check and then keep the Subscriptions tab, and web and Android never wait for the country check. On web and Android the Subscriptions tab and the profile-header subscription status are part of the first page load; in the iOS app and in iPhone or iPad browsers they are added just after the page loads.",
         "The tab leads with subscription coverage: status, consecutive intended drops funded, funded-through and next-unfunded Meme context, and an authoritative top-up deadline only when one is available.",
         "The tab also shows exact ETH balance, raw mint capacity, airdrop address, manual or automatic mode, edition preference, upcoming drops, and history when subscriptions are available.",
         "Tap, hover, or focus the Airdrop Address to read its full value when the phone layout truncates it.",
@@ -2710,7 +2710,7 @@
         "The Network Definitions page lists transfers as a core Network activity metric."
       ],
       "canonical_path": "/network/definitions",
-      "related_paths": ["/network/activity", "/feed"],
+      "related_paths": ["/network/activity"],
       "tags": ["network", "glossary", "concept", "activity"],
       "source_refs": ["ops/docs/network/feature-network-definitions.md"]
     },
@@ -3022,7 +3022,7 @@
         "Profile-specific activity belongs on profile tabs rather than the global Network feed."
       ],
       "canonical_path": "/network/activity",
-      "related_paths": ["/feed", "/network"],
+      "related_paths": ["/network"],
       "tags": ["network", "activity"],
       "source_refs": ["ops/docs/network/feature-network-activity-feed.md"]
     },
@@ -6162,22 +6162,6 @@
       ]
     },
     {
-      "id": "feed.overview",
-      "kind": "route",
-      "title": "Feed",
-      "aliases": ["feed", "global feed", "activity feed"],
-      "keywords": ["feed", "activity", "global", "updates"],
-      "facts": [
-        "The /feed route is a general feed entry point.",
-        "Network-specific activity lives under /network/activity.",
-        "Wave conversation activity lives under /waves and /messages."
-      ],
-      "canonical_path": "/feed",
-      "related_paths": ["/waves", "/network/activity"],
-      "tags": ["feed", "navigation"],
-      "source_refs": ["app/feed/page.tsx"]
-    },
-    {
       "id": "profiles.identity-tab",
       "kind": "route",
       "title": "Profile Identity tab",
@@ -8973,7 +8957,7 @@
         "retry"
       ],
       "facts": [
-        "The native iOS app requires acceptance of the current EULA before application content starts.",
+        "The native iOS app requires acceptance of the current EULA before application content is shown.",
         "EULA acceptance is versioned and valid for 365 days; stale, unversioned, expired, or differently versioned consent requires acceptance again.",
         "A current unexpired device acceptance can restore consent after an iOS reinstall.",
         "If the consent check fails, the iOS app remains blocked and offers Retry. If saving fails, the agreement stays visible so the user can try again.",
@@ -8985,6 +8969,7 @@
       "source_refs": [
         "components/eula/EULAConsentContext.tsx",
         "components/eula/EULAModal.tsx",
+        "components/providers/EULAConsentStartup.tsx",
         "ops/docs/shared/feature-ios-eula-consent.md"
       ]
     },

@@ -39,7 +39,7 @@ export default function RootLayout({
   readonly children: React.ReactNode;
 }) {
   return (
-    <html lang="en" data-scroll-behavior="smooth">
+    <html lang="en-US" data-scroll-behavior="smooth">
       <head>
         {/* The PNG goes first so browsers that support SVG prefer it. */}
         <link

@@ -28,7 +28,10 @@ export default async function MemesMintingCalendarPage({
   const resolvedLocale = normalizeLocale(getFirstSearchParamValue(locale));
 
   return (
-    <div className="tailwind-scope tw-min-h-screen tw-overflow-x-hidden tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-700">
+    <div
+      lang={resolvedLocale}
+      className="tailwind-scope tw-min-h-screen tw-overflow-x-hidden tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-700"
+    >
       <div className={`${PAGE_CONTAINER_CLASS_NAME} tw-pb-8 tw-pt-6`}>
         <MemesMintingCalendar locale={resolvedLocale} />
       </div>

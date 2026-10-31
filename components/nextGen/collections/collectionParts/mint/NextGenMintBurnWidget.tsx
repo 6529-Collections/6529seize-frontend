@@ -4,6 +4,7 @@ import { isWalletConnectionResolving } from "@/components/auth/authResolution";
 import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import NextGenContractWriteStatus from "@/components/nextGen/NextGenContractWriteStatus";
+import NextGenLoadError from "@/components/nextGen/NextGenLoadError";
 import Button from "@/components/utils/button/Button";
 import {
   NEXTGEN_CHAIN_ID,
@@ -40,7 +41,7 @@ interface Props {
   collection: NextGenCollection;
   collection_merkle: CollectionWithMerkle;
   available_supply: number;
-  mint_price: number;
+  mint_price: bigint;
   mint_counts: TokensPerAddress;
   delegators: string[];
   mintForAddress: (mintForAddress: string) => void;
@@ -78,6 +79,10 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
     errors,
     setErrors,
   } = useMintSharedState();
+
+  const [burnProofFailedFor, setBurnProofFailedFor] = useState<string>();
+  const burnProofFailed =
+    !fetchingProofs && tokenId !== "" && burnProofFailedFor === tokenId;
 
   const [tokensOwnedForBurnAddressLoaded, setTokensOwnedForBurnAddressLoaded] =
     useState(false);
@@ -146,16 +151,37 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
     props.mintForAddress(mintForAddress);
   }, [mintForAddress]);
 
+  // A burn proof belongs to one token. When the token changes (or on unmount)
+  // the in-flight request is aborted and the previous token's proof is dropped,
+  // so a late response can never be applied to (or used for) a different token.
   useEffect(() => {
     mintWrite.reset();
     if (tokenId) {
+      const controller = new AbortController();
       setFetchingProofs(true);
       const url = `${publicEnv.API_ENDPOINT}/api/nextgen/burn_proofs/${props.collection_merkle.merkle_root}/${tokenId}`;
-      fetchUrl<ProofResponse>(url).then((response: ProofResponse) => {
-        setBurnProofResponse(response);
+      fetchUrl<ProofResponse>(url, { signal: controller.signal })
+        .then((response: ProofResponse) => {
+          if (controller.signal.aborted) {
+            return;
+          }
+          setBurnProofResponse(response);
+          setBurnProofFailedFor(undefined);
+          setFetchingProofs(false);
+        })
+        .catch(() => {
+          if (!controller.signal.aborted) {
+            setBurnProofFailedFor(tokenId);
+            setFetchingProofs(false);
+          }
+        });
+      return () => {
+        controller.abort();
+        setBurnProofResponse(undefined);
         setFetchingProofs(false);
-      });
+      };
     }
+    return undefined;
   }, [tokenId]);
 
   const mintWrite = useWriteContract();
@@ -217,7 +243,7 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
         address: NEXTGEN_MINTER[NEXTGEN_CHAIN_ID] as `0x${string}`,
         abi: NEXTGEN_MINTER.abi,
         chainId: NEXTGEN_CHAIN_ID,
-        value: BigInt(props.mint_price ? props.mint_price : 0),
+        value: props.mint_price > 0n ? props.mint_price : 0n,
         functionName: "burnOrSwapExternalToMint",
         args: [
           props.collection_merkle.burn_collection,
@@ -356,6 +382,9 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
             ))}
           </select>
         </div>
+        {burnProofFailed && (
+          <NextGenLoadError message="nextgen.loadError.burnProof" />
+        )}
         <div>
           <Button
             type="button"
