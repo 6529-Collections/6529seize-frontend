@@ -6,6 +6,9 @@
  * `__tests__/lib/proxy/publicPaths.test.ts` fails when they drift.
  */
 
+// Relative import, like other modules reachable from next.config.
+import { VERSION_RELOAD_IMAGE_SRC } from "../../components/version-update/versionReloadImage";
+
 /** Every committed root-level file in `public/`. */
 export const ROOT_PUBLIC_FILES: ReadonlySet<string> = new Set([
   "/6529-black.svg",
@@ -121,6 +124,9 @@ export const ROOT_PUBLIC_FILES: ReadonlySet<string> = new Set([
   "/watermark.png",
   "/windows.png",
   "/x_black.png",
+  // Content-hashed reload cover artwork; the generator renames it, so the
+  // entry follows its constant instead of a hand-copied file name.
+  VERSION_RELOAD_IMAGE_SRC,
 ]);
 
 /**
