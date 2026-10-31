@@ -332,6 +332,9 @@ describe("parseEmojis", () => {
   test("leaves code points that are not Unicode scalar values as written", () => {
     expect(parseEmojis("U+110000")).toBe("U+110000");
     expect(parseEmojis("U+D800")).toBe("U+D800");
+    // Over-long tokens stay whole, not a converted prefix plus leftover digits.
+    expect(parseEmojis("U+1000000")).toBe("U+1000000");
+    expect(parseEmojis("U+0001F431")).toBe("U+0001F431");
   });
 
   test("returns markup-like input as plain text", () => {
