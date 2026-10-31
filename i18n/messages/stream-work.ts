@@ -1,6 +1,11 @@
 /**
  * 6529 Stream copy for the work page and the 1/1 English auction panel.
  * Placeholder until the owner approves the copy document.
+ *
+ * Fallback debt: `/stream/works/[id]` (the work page, the 1/1 panel and the
+ * dev controls) has en-US copy only. Every other locale renders this en-US
+ * text, as the whole `stream.*` namespace does (`lib/stream/README.md`,
+ * "Localization"). Translations follow once the owner approves the copy.
  */
 export const STREAM_WORK_MESSAGES = {
   "stream.workTime.utc": "{time} UTC",
@@ -9,6 +14,8 @@ export const STREAM_WORK_MESSAGES = {
   "stream.workAddress.you": "You",
   "stream.workAddress.youAs": "You ({name})",
 
+  "stream.workPage.federated":
+    "Federated · artist-owned · not curated by the network",
   "stream.workPage.burned":
     "Burned after an upheld dispute. Every bid was refunded.",
 
@@ -85,7 +92,7 @@ export const STREAM_WORK_MESSAGES = {
   "stream.workSales.none": "No sale for this token.",
   "stream.workSales.master": "The 1/1",
   "stream.workSales.masterRule":
-    "These editions close {minutes} min after the 1/1's final end:",
+    "These editions close {minutes} min after the 1/1's final end: {time}.",
 
   "stream.workHistory.caption": "History of {title}, newest first",
   "stream.workHistory.when": "When",
@@ -97,11 +104,16 @@ export const STREAM_WORK_MESSAGES = {
   "stream.workStatements.role.OWNER": "Owner",
   "stream.workStatements.role.CURATOR": "Curator",
   "stream.workStatements.role.PLATFORM": "Platform",
+  "stream.workStatements.kind.DISPUTE_OUTCOME": "Dispute outcome",
+  "stream.workStatements.kind.DELISTING": "Delisting",
+  "stream.workStatements.kind.RELISTING": "Relisting",
   "stream.provenance.bid-withdrawn": "Bid withdrawn",
 
   "stream.english.currentBid": "Current bid",
   "stream.english.finalBid": "Final bid",
   "stream.english.noBid": "No bids yet",
+  "stream.english.noHighBid": "No high bid",
+  "stream.english.noBids": "No bids",
   "stream.english.leader": "High bidder",
   "stream.english.winner": "Winner",
   "stream.english.nextBid": "Next bid from",
@@ -131,9 +143,11 @@ export const STREAM_WORK_MESSAGES = {
   "stream.english.delivery.to": "Send the work to",
   "stream.english.delivery.submit": "Claim delivery",
   "stream.english.delivery.help": "Use a wallet that accepts ERC-721 tokens.",
+  "stream.english.delivery.invalid":
+    "Enter a full address: 0x and 40 hex characters.",
   "stream.english.delivery.waiting":
     "Waiting for {name} to claim it, to any address.",
-  "stream.english.credits.label": "Your credits:",
+  "stream.english.credits.label": "Your credits: {amount}",
   "stream.english.credits.help": "From outbid and refunded 1/1 bids.",
   "stream.english.credits.submit": "Claim credits",
 
@@ -147,7 +161,7 @@ export const STREAM_WORK_MESSAGES = {
   "stream.english.paused.editions":
     "Edition bidding continues, and edition bidders can withdraw.",
   "stream.english.paused.reserve":
-    "The high bid was withdrawn. The next bid must reach",
+    "The high bid was withdrawn. The next bid must reach {amount}.",
   "stream.english.paused.since": "Paused",
   "stream.english.paused.decisionFrom": "Decision from",
   "stream.english.paused.expires": "Resumes by itself",
@@ -160,8 +174,8 @@ export const STREAM_WORK_MESSAGES = {
     "No bids. Settling sends the work to the 6529 Network Museum.",
   "stream.english.ended.toArtist":
     "No bids. Settling returns the work to its artist.",
-  "stream.english.sold.title": "Sold to {name} for",
-  "stream.english.sold.delivered": "Delivered at settlement.",
+  "stream.english.sold.title": "Sold to {name} for {price}",
+  "stream.english.sold.delivered": "Delivered to the winner.",
   "stream.english.sold.refused": "The winner's wallet refused the token.",
   "stream.english.sold.pending": "It waits here until the winner claims it.",
   "stream.english.sold.artistSide": "Artist side ({share})",
@@ -187,16 +201,19 @@ export const STREAM_WORK_MESSAGES = {
   "stream.english.times.end": "End",
   "stream.english.times.endPaused": "Set when the auction resumes",
   "stream.english.times.moved": "Moved by late bids",
+  "stream.english.times.movedByResume": "Set when the auction resumed",
   "stream.english.times.editions": "Editions close",
   "stream.english.times.editionsAfter":
     "{minutes} min after the 1/1's final end",
   "stream.english.times.editionsAfterResume":
     "{minutes} min after the 1/1's end, once it resumes",
-  "stream.english.times.editionsSoft": "· extended by late edition bids",
+  "stream.english.times.editionsAfterSoft":
+    "{minutes} min after the 1/1's final end, extended by late edition bids",
   "stream.english.times.editionsVoid": "Void: refunded in full.",
   "stream.english.times.editionsLink": "Edition bidding →",
   "stream.english.history.title": "Bid history",
   "stream.english.history.empty": "No bids yet.",
+  "stream.english.history.none": "No bids.",
   "stream.english.history.bidder": "Bidder",
   "stream.english.history.amount": "Bid",
   "stream.english.history.placed": "Placed",

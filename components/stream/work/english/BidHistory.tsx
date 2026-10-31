@@ -1,5 +1,6 @@
 import EthAmount from "@/components/stream/ui/EthAmount";
 import { STREAM_HELP, STREAM_LABEL } from "@/components/stream/ui/styles";
+import { TABLE_RESET } from "@/components/stream/work/FactTable";
 import KnownAddress from "@/components/stream/work/KnownAddress";
 import StreamTime from "@/components/stream/work/StreamTime";
 import type { EnglishPanelContext } from "@/components/stream/work/english/context";
@@ -17,10 +18,7 @@ function bidStatus(context: EnglishPanelContext, isLast: boolean): MessageKey {
   if (!isLast) {
     return "stream.english.history.outbid";
   }
-  if (auction.highBidder === null) {
-    return "stream.english.history.refunded";
-  }
-  if (auction.state === "CANCELLED") {
+  if (auction.highBidder === null || auction.state === "CANCELLED") {
     return "stream.english.history.refunded";
   }
   return auction.settlement?.outcome === "collector"
@@ -77,7 +75,12 @@ export default function BidHistory({
           {t(locale, "stream.english.history.title")}
         </p>
         <p className={`${STREAM_HELP} tw-mt-1`}>
-          {t(locale, "stream.english.history.empty")}
+          {t(
+            locale,
+            auction.state === "ACTIVE"
+              ? "stream.english.history.empty"
+              : "stream.english.history.none"
+          )}
         </p>
       </div>
     );
@@ -87,7 +90,9 @@ export default function BidHistory({
     .reverse();
   return (
     <div className="tw-mt-5 tw-overflow-x-auto">
-      <table className="tw-w-full tw-min-w-[18rem] tw-border-collapse tw-text-sm">
+      <table
+        className={`tw-w-full tw-min-w-[18rem] tw-border-collapse tw-text-sm ${TABLE_RESET}`}
+      >
         <caption className={`${STREAM_LABEL} tw-pb-2 tw-text-left`}>
           {t(locale, "stream.english.history.title")}
         </caption>

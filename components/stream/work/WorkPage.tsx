@@ -31,7 +31,9 @@ function WorkBody({
     <article>
       <WorkHeader work={work} locale={locale} />
       <div className="tw-grid tw-items-start tw-gap-6 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <MediaViewer media={work.media} title={work.title} locale={locale} />
+        <div className="lg:tw-sticky lg:tw-top-24">
+          <MediaViewer media={work.media} title={work.title} locale={locale} />
+        </div>
         <WorkSales work={work} locale={locale} />
       </div>
       <div className="tw-mt-6">

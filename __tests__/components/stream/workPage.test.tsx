@@ -148,7 +148,7 @@ describe("the work page variants", () => {
     expect(await fact("Royalty")).toHaveTextContent("6.529% of resales");
     expect(await fact("Dispute statement")).not.toHaveTextContent("None");
     expect(await screen.findByText(/^Sold to/)).toBeInTheDocument();
-    expect(screen.getByText("Delivered at settlement.")).toBeInTheDocument();
+    expect(screen.getByText("Delivered to the winner.")).toBeInTheDocument();
     expect(screen.getAllByText("Won").length).toBeGreaterThan(0);
   });
 

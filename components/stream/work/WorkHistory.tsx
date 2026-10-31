@@ -4,10 +4,11 @@ import { useStreamQuery } from "@/components/stream/data/StreamProvider";
 import { Empty, Loading } from "@/components/stream/pages/common";
 import EthAmount from "@/components/stream/ui/EthAmount";
 import StreamTime from "@/components/stream/work/StreamTime";
+import { TABLE_RESET } from "@/components/stream/work/FactTable";
 import KnownAddress from "@/components/stream/work/KnownAddress";
 import { useAddressLabels } from "@/components/stream/work/useAddressLabels";
 import type { SupportedLocale } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { type MessageKey, t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream";
 import type { StatementView, StreamWork } from "@/lib/stream/types";
 
@@ -43,13 +44,15 @@ export function WorkHistory({
     .reverse();
   return (
     <div className="tw-overflow-x-auto">
-      <table className="tw-w-full tw-min-w-[20rem] tw-border-collapse tw-text-sm">
+      <table
+        className={`tw-w-full tw-min-w-[20rem] tw-border-collapse tw-text-sm ${TABLE_RESET}`}
+      >
         <caption className="tw-sr-only">
           {t(locale, "stream.workHistory.caption", { title: work.title })}
         </caption>
         <thead>
           <tr>
-            <th scope="col" className={HEAD}>
+            <th scope="col" className={`${HEAD} tw-w-2/5 sm:tw-w-60`}>
               {t(locale, "stream.workHistory.when")}
             </th>
             <th scope="col" className={HEAD}>
@@ -93,6 +96,20 @@ export function WorkHistory({
   );
 }
 
+const STATEMENT_KINDS: Readonly<Record<string, MessageKey>> = {
+  DISPUTE_OUTCOME: "stream.workStatements.kind.DISPUTE_OUTCOME",
+  DELISTING: "stream.workStatements.kind.DELISTING",
+  RELISTING: "stream.workStatements.kind.RELISTING",
+};
+
+/** A statement kind in words; a kind this version does not know shows its label. */
+function statementKind(locale: SupportedLocale, kind: string): string {
+  const key = Object.hasOwn(STATEMENT_KINDS, kind)
+    ? STATEMENT_KINDS[kind]
+    : undefined;
+  return key === undefined ? kind : t(locale, key);
+}
+
 /** `StatementAppended` entries about the work: dispute outcomes and other statements. */
 export function WorkStatements({
   statements,
@@ -103,7 +120,9 @@ export function WorkStatements({
 }) {
   return (
     <div className="tw-overflow-x-auto">
-      <table className="tw-w-full tw-min-w-[20rem] tw-border-collapse tw-text-sm">
+      <table
+        className={`tw-w-full tw-min-w-[20rem] tw-border-collapse tw-text-sm ${TABLE_RESET}`}
+      >
         <caption className="tw-sr-only">
           {t(locale, "stream.work.statements")}
         </caption>
@@ -133,7 +152,7 @@ export function WorkStatements({
                       locale,
                       `stream.workStatements.role.${statement.role}`
                     ),
-                    kind: statement.kind,
+                    kind: statementKind(locale, statement.kind),
                   })}
                 </span>
               </td>

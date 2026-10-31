@@ -15,6 +15,7 @@ import {
 } from "@/components/stream/ui/StatusBadge";
 import { STREAM_FOCUS } from "@/components/stream/ui/styles";
 import FactTable, { type FactRow } from "@/components/stream/work/FactTable";
+import { sameAddress } from "@/components/stream/work/english/context";
 import KnownAddress from "@/components/stream/work/KnownAddress";
 import StreamTime from "@/components/stream/work/StreamTime";
 import {
@@ -49,6 +50,8 @@ interface FactsContext {
   readonly locale: SupportedLocale;
   readonly label: AddressLabeler;
   readonly contracts: StreamContracts | null;
+  /** The data is the mock's generated sample art. */
+  readonly mock: boolean;
   readonly auction: OneOfOneAuction | null;
   readonly editionAuction: EditionAuction | null;
   readonly federated: FederatedContract | null;
@@ -57,10 +60,6 @@ interface FactsContext {
 
 function short(hex: string): string {
   return hex.length > 14 ? `${hex.slice(0, 8)}…${hex.slice(-6)}` : hex;
-}
-
-function sameAddress(left: string, right: string): boolean {
-  return left.toLowerCase() === right.toLowerCase();
 }
 
 function Line({ children }: { readonly children: ReactNode }) {
@@ -420,7 +419,9 @@ function mediaRows(context: FactsContext): FactRow[] {
         ) : (
           <>
             {fileText(locale, primary)}
-            <Line>{t(locale, "stream.workFacts.generated")}</Line>
+            {context.mock ? (
+              <Line>{t(locale, "stream.workFacts.generated")}</Line>
+            ) : null}
           </>
         ),
     },
@@ -537,7 +538,7 @@ function rightsRows(context: FactsContext): FactRow[] {
       label: t(locale, "stream.workFacts.splitLabel"),
       value: (
         <>
-          {splitText(context)}
+          <span className="tw-block">{splitText(context)}</span>
           <KnownAddress
             address={economics.seller}
             label={label}
@@ -591,7 +592,8 @@ export default function WorkFacts({
   readonly locale: SupportedLocale;
 }) {
   const { client } = useStream();
-  const contracts = client?.dataSource.source().contracts ?? null;
+  const deployment = client?.dataSource.source() ?? null;
+  const contracts = deployment?.contracts ?? null;
   const label = useAddressLabels(locale, work.parties);
   const isEdition = work.standard === "ERC1155";
   const linkedKey = work.linked.edition ?? work.linked.master;
@@ -627,13 +629,14 @@ export default function WorkFacts({
     locale,
     label,
     contracts,
+    mock: deployment?.kind === "mock",
     auction,
     editionAuction,
     federated,
     linked,
   };
   return (
-    <div className="tw-grid tw-gap-6 lg:tw-grid-cols-2">
+    <div className="tw-grid tw-items-start tw-gap-6 lg:tw-grid-cols-2">
       <FactTable
         caption={t(locale, "stream.workFacts.token")}
         rows={tokenRows(context)}

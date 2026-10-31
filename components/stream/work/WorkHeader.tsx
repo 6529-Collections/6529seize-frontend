@@ -54,8 +54,7 @@ export default function WorkHeader({
       </div>
       {work.program === "federated" ? (
         <p className={`${STREAM_LABEL} tw-mt-3 tw-text-amber-200`}>
-          {t(locale, "stream.status.federated")} ·{" "}
-          {t(locale, "stream.federated.notCurated")}
+          {t(locale, "stream.workPage.federated")}
         </p>
       ) : null}
       {work.burned ? (

@@ -5,7 +5,7 @@ import "@/i18n/namespaces/stream";
 import type { UnixSeconds } from "@/lib/stream/types";
 
 /** "3 Nov 2026, 17:15 UTC": an instant from the data source, always in UTC. */
-function formatStreamTime(
+export function formatStreamTime(
   locale: SupportedLocale,
   seconds: UnixSeconds
 ): string {

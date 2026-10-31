@@ -19,6 +19,7 @@ import type { Address, StreamContracts, WorkKey } from "@/lib/stream/types";
 import { parseWorkKey, workKeyFor } from "@/lib/stream/workKey";
 
 const CONTRACT = /^0x[0-9a-f]{40}$/;
+const BUTTON = `${STREAM_BUTTON_SMALL} disabled:tw-cursor-not-allowed disabled:tw-opacity-40`;
 
 interface DevTarget {
   readonly key: WorkKey | null;
@@ -95,14 +96,13 @@ function DisputeButtons({
   const decisionFrom =
     pausedAt === null ? null : pausedAt + DISPUTE_DECISION_DELAY;
   return (
-    <div
-      className="tw-flex tw-flex-wrap tw-gap-1"
-      role="group"
-      aria-label={t(locale, "stream.devWork.dispute")}
-    >
+    <fieldset className="tw-m-0 tw-flex tw-min-w-0 tw-flex-wrap tw-gap-1 tw-border-0 tw-p-0">
+      <legend className="tw-sr-only">
+        {t(locale, "stream.devWork.dispute")}
+      </legend>
       <button
         type="button"
-        className={STREAM_BUTTON_SMALL}
+        className={BUTTON}
         disabled={auction.state !== "ACTIVE" || auction.pause.used}
         onClick={() => report(dev.pauseForDispute(workKey))}
       >
@@ -111,7 +111,7 @@ function DisputeButtons({
       {decisionFrom !== null && now < decisionFrom ? (
         <button
           type="button"
-          className={STREAM_BUTTON_SMALL}
+          className={BUTTON}
           onClick={() => dev.advance(decisionFrom - now + 1)}
         >
           {t(locale, "stream.devWork.toDecision")}
@@ -119,7 +119,7 @@ function DisputeButtons({
       ) : null}
       <button
         type="button"
-        className={STREAM_BUTTON_SMALL}
+        className={BUTTON}
         disabled={!paused}
         onClick={() => report(dev.resolveDispute(workKey, true))}
       >
@@ -127,13 +127,13 @@ function DisputeButtons({
       </button>
       <button
         type="button"
-        className={STREAM_BUTTON_SMALL}
+        className={BUTTON}
         disabled={!paused}
         onClick={() => report(dev.resolveDispute(workKey, false))}
       >
         {t(locale, "stream.devWork.reject")}
       </button>
-    </div>
+    </fieldset>
   );
 }
 
@@ -160,7 +160,7 @@ function DelistButton({
   return (
     <button
       type="button"
-      className={STREAM_BUTTON_SMALL}
+      className={BUTTON}
       onClick={() => report(dev.setFederatedStatus(entry.address, !delisted))}
     >
       {t(locale, delisted ? "stream.devWork.relist" : "stream.devWork.delist")}

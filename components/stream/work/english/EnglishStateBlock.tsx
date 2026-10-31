@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { formatDuration } from "@/components/stream/ui/Countdown";
-import EthAmount from "@/components/stream/ui/EthAmount";
+import EthAmount, { formatEth } from "@/components/stream/ui/EthAmount";
 import {
   STREAM_FOCUS,
   STREAM_HELP,
@@ -116,10 +116,9 @@ function PausedBlock({ context }: { readonly context: EnglishPanelContext }) {
     lines.push(
       line(
         "reserve",
-        <>
-          {t(locale, "stream.english.paused.reserve")}{" "}
-          <EthAmount wei={auction.highBid} locale={locale} />
-        </>
+        t(locale, "stream.english.paused.reserve", {
+          amount: formatEth(locale, auction.highBid),
+        })
       )
     );
   }
@@ -200,14 +199,10 @@ function SoldBlock({ context }: { readonly context: EnglishPanelContext }) {
   return (
     <Notice
       tone={pending === null ? "success" : "warning"}
-      title={
-        <>
-          {t(locale, "stream.english.sold.title", {
-            name: label(winner) ?? winner,
-          })}{" "}
-          <EthAmount wei={settlement.price} locale={locale} />
-        </>
-      }
+      title={t(locale, "stream.english.sold.title", {
+        name: label(winner) ?? winner,
+        price: formatEth(locale, settlement.price),
+      })}
       lines={
         pending === null
           ? [line("delivered", t(locale, "stream.english.sold.delivered"))]
@@ -280,9 +275,9 @@ function CancelledBlock({
   readonly context: EnglishPanelContext;
 }) {
   const { locale, editions, work } = context;
-  const outcome = work?.dispute.statements
-    .filter((statement) => statement.kind === "DISPUTE_OUTCOME")
-    .at(-1);
+  const outcome = work?.dispute.statements.findLast(
+    (statement) => statement.kind === "DISPUTE_OUTCOME"
+  );
   const lines: NoticeLine[] = [
     line("refunded", t(locale, "stream.english.cancelled.refunded")),
   ];

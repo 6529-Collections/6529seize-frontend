@@ -34,7 +34,7 @@ import {
 } from "@/components/stream/work/english/EnglishStateBlock";
 import { formatInteger, formatPercent } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { type MessageKey, t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream";
 import { SPLITS_DENOMINATOR } from "@/lib/stream/constants";
 import type { OneOfOneAuction } from "@/lib/stream/types";
@@ -82,6 +82,16 @@ function EndFact({ context }: { readonly context: EnglishPanelContext }) {
   }
 }
 
+/** What the current bid says when nobody leads. */
+function noBidKey(auction: OneOfOneAuction): MessageKey {
+  if (auction.bids.length > 0) {
+    return "stream.english.noHighBid";
+  }
+  return auction.state === "ACTIVE"
+    ? "stream.english.noBid"
+    : "stream.english.noBids";
+}
+
 /** The four numbers a bidder looks at first. */
 function KeyFacts({ context }: { readonly context: EnglishPanelContext }) {
   const { auction, locale, label } = context;
@@ -97,7 +107,7 @@ function KeyFacts({ context }: { readonly context: EnglishPanelContext }) {
         )}
       >
         {leader === null ? (
-          t(locale, "stream.english.noBid")
+          t(locale, noBidKey(auction))
         ) : (
           <EthAmount
             wei={auction.highBid}
@@ -126,7 +136,7 @@ function KeyFacts({ context }: { readonly context: EnglishPanelContext }) {
       <Fact
         label={t(
           locale,
-          auction.state === "ACTIVE"
+          auction.state === "ACTIVE" || auction.state === "PAUSED"
             ? "stream.english.ends"
             : "stream.english.endedAt"
         )}
@@ -191,18 +201,17 @@ function EditionsClose({ context }: { readonly context: EnglishPanelContext }) {
   const extended =
     editions.times.softEnd !== null &&
     editions.times.softEnd > editions.times.baseEnd;
+  let rule: MessageKey = "stream.english.times.editionsAfter";
+  if (context.auction.state === "PAUSED") {
+    rule = "stream.english.times.editionsAfterResume";
+  } else if (extended) {
+    rule = "stream.english.times.editionsAfterSoft";
+  }
   return (
     <>
       <StreamTime seconds={editions.times.editionEnd} locale={locale} />
       <span className="tw-block tw-text-xs tw-text-iron-400">
-        {t(
-          locale,
-          context.auction.state === "PAUSED"
-            ? "stream.english.times.editionsAfterResume"
-            : "stream.english.times.editionsAfter",
-          { minutes }
-        )}
-        {extended ? ` ${t(locale, "stream.english.times.editionsSoft")}` : ""}
+        {t(locale, rule, { minutes })}
       </span>
       {link}
     </>
@@ -212,7 +221,16 @@ function EditionsClose({ context }: { readonly context: EnglishPanelContext }) {
 /** Start, scheduled end, final end, and the editions' close after it. */
 function TimesTable({ context }: { readonly context: EnglishPanelContext }) {
   const { auction, editions, locale } = context;
-  const extended = auction.endTime > auction.scheduledEnd;
+  const resumed =
+    auction.pause.used &&
+    auction.pause.pausedAt === null &&
+    auction.state !== "CANCELLED";
+  let moved: MessageKey | null = null;
+  if (resumed) {
+    moved = "stream.english.times.movedByResume";
+  } else if (auction.bids.some((bid) => bid.extended)) {
+    moved = "stream.english.times.moved";
+  }
   const rows: FactRow[] = [
     {
       key: "start",
@@ -233,11 +251,11 @@ function TimesTable({ context }: { readonly context: EnglishPanelContext }) {
         ) : (
           <>
             <StreamTime seconds={auction.endTime} locale={locale} />
-            {extended ? (
+            {moved === null ? null : (
               <span className="tw-block tw-text-xs tw-text-primary-300">
-                {t(locale, "stream.english.times.moved")}
+                {t(locale, moved)}
               </span>
-            ) : null}
+            )}
           </>
         ),
     },

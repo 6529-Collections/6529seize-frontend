@@ -38,7 +38,8 @@ describe("1/1 auction credits and withdrawals", () => {
         .sale("ENGLISH_AUCTION")
         .withdrawBid(B, auction?.saleId ?? "")
     );
-    const withdrawn = parseEthToWei("0.3") ?? 0n;
+    const withdrawn = auction?.highBid ?? 0n;
+    expect(withdrawn).toBe(parseEthToWei("0.3"));
     expect(await stream.dataSource.claimableCredits(B)).toBe(
       before + withdrawn
     );

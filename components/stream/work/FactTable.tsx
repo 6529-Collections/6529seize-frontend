@@ -2,6 +2,14 @@ import type { ReactNode } from "react";
 
 import { STREAM_LABEL } from "@/components/stream/ui/styles";
 
+/**
+ * The app's global `::before, ::after { content: "" }` rule gives table rows
+ * pseudo-elements that a fixed table layout counts as columns; this removes
+ * them, as other tables in the app do.
+ */
+export const TABLE_RESET =
+  "before:tw-content-none after:tw-content-none [&_:is(thead,tbody,tr)]:before:tw-content-none [&_:is(thead,tbody,tr)]:after:tw-content-none";
+
 export interface FactRow {
   readonly key: string;
   readonly label: string;
@@ -17,7 +25,9 @@ export default function FactTable({
   readonly rows: readonly FactRow[];
 }) {
   return (
-    <table className="tw-w-full tw-table-fixed tw-border-collapse tw-text-left tw-text-sm">
+    <table
+      className={`tw-w-full tw-table-fixed tw-border-collapse tw-text-left tw-text-sm ${TABLE_RESET}`}
+    >
       <caption className={`${STREAM_LABEL} tw-pb-2 tw-text-left`}>
         {caption}
       </caption>
@@ -29,7 +39,7 @@ export default function FactTable({
           >
             <th
               scope="row"
-              className="tw-w-2/5 tw-py-2 tw-pr-3 tw-align-top tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400 sm:tw-w-1/3"
+              className="tw-w-2/5 tw-py-2 tw-pr-3 tw-text-left tw-align-top tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400 sm:tw-w-1/3"
             >
               {row.label}
             </th>

@@ -20,7 +20,7 @@ import {
   STREAM_LABEL,
   STREAM_TEXT,
 } from "@/components/stream/ui/styles";
-import StreamTime from "@/components/stream/work/StreamTime";
+import { formatStreamTime } from "@/components/stream/work/StreamTime";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -104,8 +104,8 @@ function MasterRelation({
               locale,
               Math.round(editions.terms.offset / 60)
             ),
-          })}{" "}
-          <StreamTime seconds={editions.times.editionEnd} locale={locale} />
+            time: formatStreamTime(locale, editions.times.editionEnd),
+          })}
         </p>
       ) : null}
       <Link

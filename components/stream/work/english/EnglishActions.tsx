@@ -4,7 +4,7 @@ import { useId, useState } from "react";
 import { isAddress } from "viem";
 
 import { useStreamQuery } from "@/components/stream/data/StreamProvider";
-import EthAmount, { formatEth } from "@/components/stream/ui/EthAmount";
+import { formatEth } from "@/components/stream/ui/EthAmount";
 import GasNote from "@/components/stream/ui/GasNote";
 import {
   STREAM_BUTTON_PRIMARY,
@@ -108,7 +108,7 @@ export function BidForm({
           {t(locale, "stream.english.bid.submit")}
         </button>
       </div>
-      <p id={helpId} className={STREAM_HELP}>
+      <p id={helpId} className={STREAM_HELP} aria-live="polite">
         {bidHelp(context, wei, leading)}
       </p>
       <GasNote estimate={GAS_ESTIMATES.auctionBid} locale={locale} />
@@ -240,8 +240,13 @@ export function ClaimDelivery({
           {t(locale, "stream.english.delivery.submit")}
         </button>
       </div>
-      <p id={helpId} className={STREAM_HELP}>
-        {t(locale, "stream.english.delivery.help")}
+      <p id={helpId} className={STREAM_HELP} aria-live="polite">
+        {t(
+          locale,
+          to === null
+            ? "stream.english.delivery.invalid"
+            : "stream.english.delivery.help"
+        )}
       </p>
     </form>
   );
@@ -268,8 +273,9 @@ export function Credits({
     <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-900 tw-p-3">
       <div className="tw-min-w-0">
         <p className="tw-m-0 tw-text-sm tw-text-iron-100">
-          {t(locale, "stream.english.credits.label")}{" "}
-          <EthAmount wei={credit} locale={locale} className="tw-font-medium" />
+          {t(locale, "stream.english.credits.label", {
+            amount: formatEth(locale, credit),
+          })}
         </p>
         <p className={STREAM_HELP}>
           {t(locale, "stream.english.credits.help")}
