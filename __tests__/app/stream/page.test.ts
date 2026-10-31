@@ -1,11 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
 
-jest.mock("@/config/env", () => ({
-  publicEnv: {
-    BASE_ENDPOINT: "https://6529.io",
-  },
-}));
-
 import StreamPage, { generateMetadata } from "@/app/stream/page";
 
 describe("/stream placeholder", () => {

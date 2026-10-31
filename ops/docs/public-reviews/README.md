@@ -32,7 +32,6 @@ files are no longer served; the review pages read them from disk.
 The complete public boundary applies while the review lifecycle is `DRAFT`.
 In that state:
 
-- the NFT navigation does not show the review
 - all editorial, technical-reference, source, declaration-search, and
   feedback-ledger routes return the standard not-found behavior
 - review pages are excluded from the sitemap
@@ -263,7 +262,7 @@ feedback, and the security-reporting policy:
 - `DEPLOYED` changes security reporting to the configured post-deployment
   disclosure policy
 
-In `DRAFT`, the same gate hides the review from navigation, returns not-found
+In `DRAFT`, the same gate returns not-found
 for editorial, technical-reference, source, declaration-search, and ledger
 routes, and omits raw generated evidence plus editorial files from staging
 packages. Review-tagged Help Bot records and the agent artifacts generated from
