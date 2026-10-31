@@ -125,17 +125,14 @@ export function reportsAreLate(now: Date): boolean {
 }
 
 /** How the page shows a day's verdict. */
-const VERDICT_STATES = [
-  "equal",
-  "explained",
-  "investigating",
-  "mismatch",
-  "liveUnavailable",
-  "pending",
-  "unknown",
-] as const;
-
-type VerdictState = (typeof VERDICT_STATES)[number];
+type VerdictState =
+  | "equal"
+  | "explained"
+  | "investigating"
+  | "mismatch"
+  | "liveUnavailable"
+  | "pending"
+  | "unknown";
 
 /**
  * The daily job's verdict as a page state. `OK` is "equal" when no record
