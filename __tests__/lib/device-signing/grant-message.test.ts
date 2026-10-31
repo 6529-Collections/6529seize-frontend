@@ -12,8 +12,9 @@ const SIGNER = "0x1111111111111111111111111111111111111111";
 const SCOPES = ["post", "edit", "delete", "react"];
 // One day before the vector grant expires.
 const NOW_MS = (VECTORS.grantExpiresAtSeconds - 24 * 60 * 60) * 1000;
-// The ERC-4361 statement charset (siwe-parser ABNF): no newline, no non-ASCII.
-const ERC_4361_STATEMENT = /^[a-zA-Z0-9 !#$&-;=?@[\]_~]+$/;
+// The ERC-4361 statement charset (siwe-parser ABNF, RFC 3986 reserved and
+// unreserved characters plus space): no newline, no non-ASCII.
+const ERC_4361_STATEMENT = /^[a-zA-Z0-9 !#$&'()*+,./:;=?@[\]_~-]+$/;
 
 const SHAPES = [
   ["current", VECTORS.grantStatement],
@@ -43,7 +44,7 @@ const parseWith = (
 
 const render = (
   scopes: string[],
-  expiresAtSeconds = VECTORS.grantExpiresAtSeconds
+  expiresAtSeconds: number = VECTORS.grantExpiresAtSeconds
 ) =>
   renderDeviceGrantStatement({
     deviceKeyHex: VECTORS.deviceKey,
