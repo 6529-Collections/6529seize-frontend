@@ -328,7 +328,7 @@ jest.mock("@/components/auth/Auth", () => ({
 }));
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: jest.fn(() => ({
+  useMyStreamActions: jest.fn(() => ({
     processIncomingDrop: jest.fn(),
   })),
 }));

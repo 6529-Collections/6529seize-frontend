@@ -95,7 +95,7 @@ jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
 }));
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStreamOptional: () => ({
+  useMyStreamActionsOptional: () => ({
     requestMainWavesList: mockRequestMainWavesList,
   }),
 }));

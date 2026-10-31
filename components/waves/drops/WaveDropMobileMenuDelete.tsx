@@ -7,7 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import { deleteDrop } from "@/services/api/signed-drop-writes";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "@/components/auth/Auth";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import Button from "@/components/utils/button/Button";
 
@@ -23,7 +23,7 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
   const [isDeleteMode, setIsDeleteMode] = useState<boolean>(false);
   const { requestAuth, setToast } = useContext(AuthContext);
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
-  const { processDropRemoved } = useMyStream();
+  const { processDropRemoved } = useMyStreamActions();
   const [mutating, setMutating] = useState<boolean>(false);
   const deleteDropMutation = useMutation({
     mutationFn: async () =>
