@@ -83,6 +83,58 @@ describe("shared Next config", () => {
     ).toContain("'wasm-unsafe-eval'");
   });
 
+  describe("security headers", () => {
+    const sentryDsn =
+      "https://0123456789abcdef0123456789abcdef@o123.ingest.us.sentry.io/456";
+
+    async function getContentSecurityPolicies(
+      env: PublicEnv
+    ): Promise<{ site: string; viewer: string }> {
+      const rules = (await sharedConfig(env, "").headers?.()) ?? [];
+      const policyFor = (source: string) =>
+        rules
+          .find((rule) => rule.source === source)
+          ?.headers.find((header) => header.key === "Content-Security-Policy")
+          ?.value ?? "";
+      return {
+        site: policyFor("/:path*"),
+        viewer: policyFor("/artwork/the-memes/445.html"),
+      };
+    }
+
+    it("reports site CSP violations to Sentry for deployed builds only", async () => {
+      const deployed = await getContentSecurityPolicies({
+        ...publicEnv,
+        NODE_ENV: "production",
+        SENTRY_DSN: sentryDsn,
+      });
+      expect(deployed.site).toContain(
+        "report-uri https://o123.ingest.us.sentry.io/api/456/security/?sentry_key=0123456789abcdef0123456789abcdef;"
+      );
+      expect(deployed.site).toContain("report-to csp-endpoint;");
+
+      for (const NODE_ENV of ["development", "local"] as const) {
+        const local = await getContentSecurityPolicies({
+          ...publicEnv,
+          NODE_ENV,
+          SENTRY_DSN: sentryDsn,
+        });
+        expect(local.site).not.toContain("report-uri");
+      }
+    });
+
+    it("keeps the isolated artwork viewer on its own same-origin framing policy", async () => {
+      const { viewer } = await getContentSecurityPolicies({
+        ...publicEnv,
+        NODE_ENV: "production",
+        SENTRY_DSN: sentryDsn,
+      });
+
+      expect(viewer).toContain("frame-ancestors 'self'");
+      expect(viewer).not.toContain("report-uri");
+    });
+  });
+
   describe("htmlLimitedBots", () => {
     const CHROME_USER_AGENT =
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";

@@ -121,6 +121,8 @@ export function sharedConfig(
       "/api/og-metadata/image": OG_IMAGE_SHARP_TRACE_INCLUDES,
     },
     async headers() {
+      const isLocalTooling =
+        publicEnv.NODE_ENV === "development" || publicEnv.NODE_ENV === "local";
       return [
         // Development keeps `public/` files uncached so edited assets show up
         // on the next reload.
@@ -136,16 +138,15 @@ export function sharedConfig(
               publicEnv["IPFS_GATEWAY_ENDPOINT"],
               publicEnv["MEDIA_RESOLVER_ENDPOINT"],
               {
-                allowInsecureLocalhostConnectSrc:
-                  publicEnv.NODE_ENV === "development" ||
-                  publicEnv.NODE_ENV === "local",
-                allowUnsafeEval:
-                  publicEnv.NODE_ENV === "development" ||
-                  publicEnv.NODE_ENV === "local",
+                allowInsecureLocalhostConnectSrc: isLocalTooling,
+                allowUnsafeEval: isLocalTooling,
                 allowWasmUnsafeEval: isE2eeFlagEnabled(
                   publicEnv.NEXT_PUBLIC_E2EE_DM_ENABLED
                 ),
                 webSocketEndpoint: publicEnv["WS_ENDPOINT"],
+                // Local development violations are expected noise; only
+                // deployed builds report CSP violations to Sentry.
+                sentryDsn: isLocalTooling ? undefined : publicEnv.SENTRY_DSN,
               }
             ),
             // Environment-wide, including /access, redirects and public files.
