@@ -1,4 +1,4 @@
-import TheMemesPage, { generateMetadata } from "@/app/the-memes/page";
+import TheMemesPage, { generateMetadata } from "@/app/the-memes/(index)/page";
 import { getTheMemesInitialData } from "@/app/the-memes/theMemesInitialData";
 import { render, screen } from "@testing-library/react";
 
