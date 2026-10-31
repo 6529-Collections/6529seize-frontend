@@ -21,7 +21,9 @@ interface ValidateInteractivePreviewArgs {
 }
 
 type GatewayOutcome =
-  | { readonly ok: true; readonly response: Response }
+  // `url` is the approved address that produced `response`, after any
+  // redirects were followed.
+  | { readonly ok: true; readonly response: Response; readonly url: string }
   | { readonly ok: false; readonly reason: string };
 
 const MAX_BYTES_TO_PEEK = 1024;
@@ -140,7 +142,7 @@ const requestGateway = async (
   for (;;) {
     const response = await performGatewayRequest(currentUrl, method);
     if (!REDIRECT_STATUS_CODES.has(response.status)) {
-      return { ok: true, response };
+      return { ok: true, response, url: currentUrl };
     }
 
     discardResponse(response);
@@ -256,8 +258,9 @@ export async function validateInteractivePreview({
     redirectBudget
   );
   if (outcome.ok && HEAD_FALLBACK_STATUS_CODES.has(outcome.response.status)) {
+    // Start where HEAD ended: its redirects were already checked and counted.
     outcome = await attemptGatewayRequest(
-      targetUrl,
+      outcome.url,
       "GET",
       logContext,
       redirectBudget
