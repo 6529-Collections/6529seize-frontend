@@ -23,6 +23,7 @@ import { E2eeApiError, type E2eeApiClient } from "@/lib/e2ee/api";
 import { createE2eeEngine } from "@/lib/e2ee/engine";
 import { createMemoryE2eeStorage } from "@/lib/e2ee/storage";
 import type { E2eeEngineExt, E2eeMessage } from "@/lib/e2ee/types";
+import type { ApiE2eeReport } from "@/generated/models/ApiE2eeReport";
 
 import { loadTestWasm } from "./support/harness";
 
@@ -34,6 +35,9 @@ const enabled = API !== "" && SECRET !== "" && USERS_JSON !== "";
 const describeStack = enabled ? describe : describe.skip;
 
 jest.setTimeout(900_000);
+
+/** Every report response the API returned, as the engine does not expose it. */
+const reportResults: ApiE2eeReport[] = [];
 
 const b64url = (input: Buffer | string) =>
   Buffer.from(input).toString("base64url");
@@ -129,7 +133,11 @@ function httpClient(token: string): E2eeApiClient {
     completeBlob: (id) => post(`e2ee/blobs/${enc(id)}/complete`, {}),
     getBlobChunk: (id, index, key) =>
       get(`e2ee/blobs/${enc(id)}/chunks/${index}`, { device_key: key }),
-    report: (body) => post("e2ee/reports", body),
+    report: async (body) => {
+      const result = await post<ApiE2eeReport>("e2ee/reports", body);
+      reportResults.push(result);
+      return result;
+    },
   };
 }
 
@@ -432,6 +440,56 @@ describeStack("E2EE engine against a real backend", () => {
     expect(texts(b2.engine.getMessages(dm))).not.toContain(
       "after the revocation"
     );
+  });
+
+  it("carries an encrypted attachment and a verifiable report through the API", async () => {
+    const alice = at(takeUsers(2), 0);
+    const bob = at(users, 1);
+    const a = devices.find((d) => d.user === alice)!;
+    const b = devices.find(
+      (d) => d.user === bob && d.engine.getStatus() === "ready"
+    )!;
+    const dm = a.engine.findDm(bob.profileId)!;
+    // Two 1 MiB chunks; the bytes are a pattern a server copy would show.
+    const bytes = new Uint8Array(1_500_000).map((_, i) => i % 251);
+    const file = new File([bytes], "photo.png", { type: "image/png" });
+    await a.engine.send(dm, { text: "see attached", files: [file] });
+    await settle();
+    const message = b.engine
+      .getMessages(dm)
+      .find((m) => m.kind === "message" && m.text === "see attached");
+    expect(message?.attachments).toEqual([
+      {
+        blob: expect.stringMatching(/^0x[0-9a-f]{32}$/),
+        mime: "image/png",
+        size: bytes.length,
+        name: "photo.png",
+      },
+    ]);
+    const blobId = at(message!.attachments, 0).blob;
+    const received = await b.engine.getAttachment(dm, message!.id, blobId);
+    expect(new Uint8Array(await received.arrayBuffer())).toEqual(bytes);
+
+    // The API holds ciphertext only.
+    const chunk = await httpClient(bob.token).getBlobChunk(
+      blobId,
+      0,
+      b.engine.getThisDevice()!.deviceKey
+    );
+    const stored = Buffer.from(chunk.data, "base64");
+    expect(stored.subarray(0, 4096)).not.toEqual(
+      Buffer.from(bytes.subarray(0, 4096))
+    );
+
+    // Bob reports Alice's message; the API verifies her device signature.
+    reportResults.length = 0;
+    await b.engine.report(dm, message!.id, "SPAM", "real-stack check");
+    expect(reportResults).toEqual([
+      expect.objectContaining({
+        verified: true,
+        sender_profile_id: alice.profileId,
+      }),
+    ]);
   });
 
   it("respects the recipient's DM policy", async () => {
