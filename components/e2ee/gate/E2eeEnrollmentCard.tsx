@@ -6,7 +6,7 @@ import {
   FingerPrintIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
-import { useId, useState, useSyncExternalStore } from "react";
+import { type ReactNode, useId, useState, useSyncExternalStore } from "react";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
@@ -40,6 +40,8 @@ interface E2eeEnrollmentCardProps {
   readonly engine: E2eeEngine | null;
   readonly enrolling: boolean;
   readonly engineError: string | null;
+  /** Extra context under the points (who signs, where to turn it off). */
+  readonly details?: ReactNode | undefined;
 }
 
 /**
@@ -50,6 +52,7 @@ export function E2eeEnrollmentCard({
   engine,
   enrolling,
   engineError,
+  details,
 }: E2eeEnrollmentCardProps) {
   const locale = useBrowserLocale();
   const headingId = useId();
@@ -110,6 +113,7 @@ export function E2eeEnrollmentCard({
             </li>
           ))}
         </ul>
+        {details}
         {isSafari ? (
           <p className="tw-mb-0 tw-mt-4 tw-rounded-lg tw-bg-amber-500/10 tw-p-3 tw-text-sm tw-leading-6 tw-text-amber-100">
             {t(locale, "e2ee.enroll.safari")}
@@ -122,19 +126,26 @@ export function E2eeEnrollmentCard({
             onClick={() => void enroll()}
             loading={waiting}
             disabled={!engine}
+            className="!tw-whitespace-normal tw-text-center"
           >
             {t(locale, "e2ee.enroll.button")}
           </Button>
           <p
             role="status"
-            className="tw-m-0 tw-min-h-5 tw-text-center tw-text-sm tw-text-iron-400"
+            className={`tw-m-0 tw-text-center tw-text-sm tw-text-iron-400 ${
+              waiting ? "" : "tw-sr-only"
+            }`}
           >
             {waiting ? t(locale, "e2ee.enroll.waiting") : null}
           </p>
           {visibleErrorKey ? (
             <p
               role="alert"
-              className="tw-m-0 tw-text-center tw-text-sm tw-text-rose-300"
+              className={`tw-m-0 tw-text-center tw-text-sm ${
+                visibleErrorKey === "e2ee.enroll.rejected"
+                  ? "tw-text-iron-300"
+                  : "tw-text-rose-300"
+              }`}
             >
               {t(locale, visibleErrorKey)}
             </p>

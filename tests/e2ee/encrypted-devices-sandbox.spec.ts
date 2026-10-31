@@ -94,7 +94,7 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
     await openConversation(bobPhone.page, g);
     await expect(
       bobPhone.page.getByText(
-        "Device can now read your encrypted messages. Not you? Revoke."
+        /It can read your encrypted messages\. If this wasn’t you, revoke it\.$/u
       )
     ).toBeVisible({ timeout: E2EE_SYNC_TIMEOUT_MS });
     await openConversationFromList(bobLaptop.page, "alice");

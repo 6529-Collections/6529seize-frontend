@@ -3,12 +3,19 @@
 import { useState } from "react";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 import type { E2eeDeviceInfo } from "@/lib/e2ee/types";
 import { useE2ee } from "@/hooks/e2ee/useE2ee";
+import { formatE2eeDateTime } from "../e2eeFormat";
 import { E2eeBanner } from "../ui/E2eeBanner";
 import { E2eeConfirmDialog } from "../ui/E2eeConfirmDialog";
 import { useE2eeNewDevices } from "./useE2eeNewDevices";
+
+const PLATFORM_KEYS: Record<E2eeDeviceInfo["platform"], MessageKey> = {
+  web: "e2ee.devices.platform.web",
+  desktop: "e2ee.devices.platform.desktop",
+  phone: "e2ee.devices.platform.phone",
+};
 
 /**
  * "{label} can now read your encrypted messages. Not you? Revoke." for each
@@ -55,12 +62,16 @@ export function E2eeNewDeviceNotice({
                 size="xs"
                 onClick={() => acknowledge(device.deviceKey)}
               >
-                {t(locale, "e2ee.action.dismiss")}
+                {t(locale, "e2ee.devices.newDeviceConfirm")}
               </Button>
             </>
           }
         >
-          {t(locale, "e2ee.devices.newDevice", { label: device.label })}
+          {t(locale, "e2ee.devices.newDevice", {
+            label: device.label,
+            platform: t(locale, PLATFORM_KEYS[device.platform]),
+            date: formatE2eeDateTime(locale, device.createdAt),
+          })}
         </E2eeBanner>
       ))}
       <E2eeConfirmDialog

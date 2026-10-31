@@ -6,7 +6,7 @@ import { useE2ee } from "@/hooks/e2ee/useE2ee";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate } from "@/i18n/format";
 import { t, type MessageKey } from "@/i18n/messages";
-import { getE2eeActionErrorKey } from "../e2eeErrors";
+import { getE2eeActionErrorKey, isE2eeSignatureRejection } from "../e2eeErrors";
 import { E2eeBanner } from "../ui/E2eeBanner";
 import { useE2eeNow } from "../useE2eeNow";
 
@@ -32,6 +32,7 @@ export function E2eeRenewalBanner({
     return null;
   }
   const remaining = thisDevice.expiresAt - now;
+  const expiryDate = formatDate(locale, thisDevice.expiresAt);
   if (remaining > E2EE_RENEWAL_WINDOW_MS) {
     return null;
   }
@@ -42,7 +43,12 @@ export function E2eeRenewalBanner({
     try {
       await engine.enroll();
     } catch (error) {
-      setErrorKey(getE2eeActionErrorKey(error, "e2ee.enroll.failed"));
+      // Declining is a choice: access simply continues until it ends.
+      setErrorKey(
+        isE2eeSignatureRejection(error)
+          ? "e2ee.renew.rejected"
+          : getE2eeActionErrorKey(error, "e2ee.renew.failed")
+      );
     } finally {
       setPending(false);
     }
@@ -64,14 +70,17 @@ export function E2eeRenewalBanner({
         </Button>
       }
     >
-      <span>
-        {t(locale, "e2ee.renew.body", {
-          date: formatDate(locale, thisDevice.expiresAt),
-        })}
-      </span>
+      <span>{t(locale, "e2ee.renew.body", { date: expiryDate })}</span>
       {errorKey ? (
-        <span role="alert" className="tw-mt-1 tw-block tw-text-rose-300">
-          {t(locale, errorKey)}
+        <span
+          role={errorKey === "e2ee.renew.rejected" ? "status" : "alert"}
+          className={`tw-mt-1 tw-block ${
+            errorKey === "e2ee.renew.rejected"
+              ? "tw-text-iron-300"
+              : "tw-text-rose-300"
+          }`}
+        >
+          {t(locale, errorKey, { date: expiryDate })}
         </span>
       ) : null}
     </E2eeBanner>

@@ -106,26 +106,33 @@ the same people already chosen. Earlier messages are not copied.
 ### Safety code
 
 The safety code in **Chat info** is the same for everyone who sees the same
-chat. Compare it with the others in the chat; if it matches, nobody is
-intercepting.
+chat. Compare it with the other members in person or in another app you
+trust. If everyone sees the same code, no one has been added to the chat
+without your knowledge. **Chat info** also explains the encryption (MLS with
+hybrid post-quantum key exchange) and has **Mute on this device**.
 
 ### Banners
 
 - **Group changes are delayed. Messages will send once the change goes
   through.** A required change (for example removing a revoked device) has not
   been accepted yet. Sending resumes on its own.
-- **Possible split view detected: compare safety codes.** Members may be seeing
-  different versions of the chat. Compare safety codes.
+- **Security check needed: this device may not see the same chat as everyone
+  else.** Members may be seeing different versions of the chat. Compare
+  safety codes before sharing anything sensitive.
 - **This chat is paused because of an invalid change.** A change failed
   validation, so the chat stops. Select **Start a new encrypted chat with the
   same people** to continue in a fresh chat.
 
 ### Message states
 
-- **Sending…**: not yet delivered.
+- **Sending…**: not yet delivered. After about 10 seconds without a
+  connection it reads **Waiting for connection. Will keep trying.**
+- **This message couldn’t be sent.**: the delivery service refused it. A
+  banner above the composer offers **Edit and resend**.
 - **(edited)**: changed by its sender.
 - **Message deleted**: removed by its sender.
-- **Couldn’t decrypt this message**: this device could not read it.
+- **Couldn’t decrypt this message**: this device could not read it; ask the
+  sender to send it again.
 - **Signature not verified**: the sender's signature did not check out.
 
 ## Devices
@@ -137,8 +144,10 @@ wallet signature was verified on this device. You can rename this device and
 revoke any device, including this one. A profile can have up to 10 active
 devices; at the limit, revoke one before turning on a new device.
 
-When another device of yours is turned on, your other devices show
-"{device} can now read your encrypted messages. Not you? Revoke."
+When another device of yours is turned on, your other devices show which
+device was added and when, that it can read your encrypted messages, and
+**Revoke** or **This was me**. Your own device changes are not repeated in
+each chat's timeline.
 
 ## Notifications
 

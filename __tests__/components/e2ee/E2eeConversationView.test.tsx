@@ -349,7 +349,9 @@ describe("E2eeConversationView", () => {
   it("alerts on a possible split view and opens safety codes", async () => {
     renderView(conversation({ splitView: true }));
     expect(
-      screen.getByText("Possible split view detected: compare safety codes.")
+      screen.getByText(
+        "Security check needed: this device may not see the same chat as everyone else. Compare safety codes before sharing anything sensitive."
+      )
     ).toBeInTheDocument();
     fireEvent.click(
       screen.getByRole("button", { name: "Compare safety codes" })
@@ -360,7 +362,7 @@ describe("E2eeConversationView", () => {
     ).toBeInTheDocument();
     expect(
       within(dialog).getByText(
-        "Compare this code with the others in the chat; if it matches, nobody is intercepting."
+        "Compare this code with the other members in person or in another app you trust. If everyone sees the same code, no one has been added to this chat without your knowledge."
       )
     ).toBeInTheDocument();
   });
