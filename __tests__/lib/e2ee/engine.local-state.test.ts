@@ -48,21 +48,28 @@ describe("E2EE engine: local state", () => {
 
   it("wiping a revoked device also deletes its encrypted-backup state", async () => {
     const world = await createWorld();
+    const alice = await addUser(world, "alice");
     const backupState = createMemoryBackupStateStore();
-    const alice = await addUser(world, "alice", { backupState });
+    const laptop = await startDevice(world, "alice", alice.account, {
+      noWake: true,
+      extra: { backupState },
+    });
+    alice.devices.push(laptop);
     await settle(world);
-    const deviceKey = alice.primary.engine.getThisDevice()?.deviceKey ?? "";
+    const laptopKey =
+      (await laptop.storage.getDevice("alice"))?.deviceKey ?? "";
     await backupState.put({
       profileId: "alice",
-      deviceKey,
+      deviceKey: laptopKey,
       backupId: "backup-1",
     } as BackupLocalState);
 
-    await alice.primary.engine.revokeDevice(deviceKey);
+    await alice.primary.engine.revokeDevice(laptopKey);
+    await laptop.engine.sync();
 
-    expect(alice.primary.engine.getStatus()).toBe("needs-enrollment");
+    expect(laptop.engine.getStatus()).toBe("needs-enrollment");
     expect(await backupState.get("alice")).toBeNull();
-    expect(await alice.primary.storage.getWasmState("alice")).toBeNull();
-    expect(await alice.primary.storage.getDevice("alice")).toBeNull();
+    expect(await laptop.storage.getWasmState("alice")).toBeNull();
+    expect(await laptop.storage.getDevice("alice")).toBeNull();
   });
 });
