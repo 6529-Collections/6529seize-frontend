@@ -1,4 +1,5 @@
 import { safetyCodeFromFp } from "../digests";
+import { parseCredentialIdentity } from "../grant";
 import type { PayloadAttachment } from "../payload";
 import type { StoredGroup, StoredMessage, StoredOutboxItem } from "../records";
 import type {
@@ -8,6 +9,7 @@ import type {
   E2eeEngineStatus,
   E2eeMember,
   E2eeMessage,
+  E2eeUntrustedDevice,
 } from "../types";
 import type { DeviceDirectory } from "./directory";
 import { displayText, fromImportedPayload } from "./imported";
@@ -121,6 +123,8 @@ export class EngineStore {
   attachmentsEnabled = false;
   readonly groups = new Map<string, GroupRuntime>();
   readonly profiles = new Map<string, ProfileInfo>();
+  /** profile id -> devices waiting for "Add device" (engine/trust.ts). */
+  private readonly untrusted = new Map<string, E2eeUntrustedDevice[]>();
   private readonly listeners = new Set<() => void>();
   private conversationsCache: E2eeConversation[] | null = null;
   private readonly conversationCache = new Map<string, E2eeConversation>();
@@ -166,6 +170,60 @@ export class EngineStore {
         }
       }
     });
+  }
+
+  /** Replaces the untrusted devices found for `profileId`. */
+  setUntrusted(profileId: string, devices: E2eeUntrustedDevice[]): void {
+    const signature = (list: readonly E2eeUntrustedDevice[]) =>
+      list.map((item) => `${item.deviceKey}:${item.reason}`).join(",");
+    const previous = this.untrusted.get(profileId) ?? [];
+    if (signature(previous) === signature(devices)) {
+      return;
+    }
+    if (devices.length === 0) {
+      this.untrusted.delete(profileId);
+    } else {
+      this.untrusted.set(profileId, devices);
+    }
+    this.touch();
+  }
+
+  findUntrusted(deviceKey: string): E2eeUntrustedDevice | null {
+    const key = deviceKey.toLowerCase();
+    for (const list of this.untrusted.values()) {
+      const found = list.find((item) => item.deviceKey === key);
+      if (found) {
+        return found;
+      }
+    }
+    return null;
+  }
+
+  dropUntrusted(deviceKey: string): void {
+    const found = this.findUntrusted(deviceKey);
+    if (!found) {
+      return;
+    }
+    this.setUntrusted(
+      found.profileId,
+      (this.untrusted.get(found.profileId) ?? []).filter(
+        (item) => item.deviceKey !== found.deviceKey
+      )
+    );
+  }
+
+  private untrustedFor(record: StoredGroup): E2eeUntrustedDevice[] {
+    if (record.status !== "active") {
+      return [];
+    }
+    const principals = new Set(
+      record.members
+        .filter((member) => !record.leaving.includes(member.deviceKey))
+        .map((member) => member.profileId)
+    );
+    return [...principals].flatMap((profileId) =>
+      profileId === null ? [] : [...(this.untrusted.get(profileId) ?? [])]
+    );
   }
 
   private syncDirectoryVersion(): void {
@@ -240,10 +298,15 @@ export class EngineStore {
         };
         byProfile.set(member.profileId, entry);
       }
+      const cached = this.directory.cached(member.deviceKey);
       entry.devices.push({
         deviceKey: member.deviceKey,
-        label: this.directory.cached(member.deviceKey)?.label ?? "Device",
+        label: cached?.label ?? "Device",
         verified: this.directory.isVerified(member.deviceKey),
+        wallet:
+          parseCredentialIdentity(member.identity)?.wallet ??
+          cached?.grant.wallet.toLowerCase() ??
+          null,
       });
     }
     return [...byProfile.values()];
@@ -281,6 +344,7 @@ export class EngineStore {
       status: record.status,
       delayed: record.delayed,
       splitView: record.splitView,
+      untrustedDevices: this.untrustedFor(record),
       lastMessage: last ? toE2eeMessage(last) : null,
       unread,
       mentions,

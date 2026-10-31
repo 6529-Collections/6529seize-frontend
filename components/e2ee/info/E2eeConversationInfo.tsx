@@ -20,7 +20,12 @@ import type {
   E2eeMember,
 } from "@/lib/e2ee/types";
 import { getE2eeActionErrorKey } from "../e2eeErrors";
-import { formatSafetyCode, getMemberName, tCount } from "../e2eeFormat";
+import {
+  formatE2eeWallet,
+  formatSafetyCode,
+  getMemberName,
+  tCount,
+} from "../e2eeFormat";
 import { setE2eeChatMuted, useMutedE2eeChats } from "../e2eeMutedChats";
 import { E2eeAvatar } from "../ui/E2eeAvatar";
 import { E2eeConfirmDialog } from "../ui/E2eeConfirmDialog";
@@ -259,7 +264,7 @@ function MemberRow({
           {member.devices.map((device) => (
             <li
               key={device.deviceKey}
-              className="tw-flex tw-items-center tw-gap-1.5"
+              className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-0.5"
             >
               {device.verified ? (
                 <CheckBadgeIcon
@@ -281,6 +286,13 @@ function MemberRow({
                     : "e2ee.devices.unverified"
                 )}
               </span>
+              {formatE2eeWallet(device.wallet) ? (
+                <span title={device.wallet ?? undefined}>
+                  {t(locale, "e2ee.info.deviceWallet", {
+                    wallet: formatE2eeWallet(device.wallet),
+                  })}
+                </span>
+              ) : null}
             </li>
           ))}
         </ul>

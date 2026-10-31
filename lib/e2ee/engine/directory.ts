@@ -41,6 +41,13 @@ interface DirectoryDeps {
   verifyContractSignature?:
     | ((wallet: string, hash: string, sig: string) => Promise<boolean>)
     | undefined;
+  /**
+   * Whether `wallet` is pinned for `profileId` (engine/trust.ts); null while
+   * this profile has pinned no wallet for that person yet.
+   */
+  pinnedWallet?:
+    | ((profileId: string, wallet: string) => boolean | null)
+    | undefined;
 }
 
 const isNotFound = (error: unknown): boolean => {
@@ -202,6 +209,43 @@ export class DeviceDirectory {
     return this.verifications.get(key)?.verified === true;
   }
 
+  /** Forgets revocation verdicts (the pinned wallets changed). */
+  resetRevocations(): void {
+    if (this.revocations.size > 0) {
+      this.revocations.clear();
+      this.version += 1;
+    }
+  }
+
+  /**
+   * A device revokes itself, or another device of the same person whose
+   * grant was signed by a wallet pinned for that person and verifies at the
+   * revocation time. Before anything is pinned for the person (first
+   * sighting), the listed owner is all there is to go on.
+   */
+  private async trustedRevoker(
+    revoker: ApiE2eeDevice,
+    record: ApiE2eeDevice,
+    revokedAtSeconds: number
+  ): Promise<boolean> {
+    if (revoker.device_key.toLowerCase() === record.device_key.toLowerCase()) {
+      return true;
+    }
+    if (revoker.profile_id !== record.profile_id) {
+      return false;
+    }
+    const pinned =
+      this.deps.pinnedWallet?.(record.profile_id, revoker.grant.wallet) ?? null;
+    if (pinned === null) {
+      return true;
+    }
+    if (!pinned) {
+      return false;
+    }
+    const verification = await this.verify(revoker, revokedAtSeconds * 1000);
+    return verification.ok && verification.verified;
+  }
+
   /** A revocation counts only when its signature verifies (2.4). */
   async revocationState(record: ApiE2eeDevice): Promise<RevocationState> {
     if (record.revoked_at === null || !record.revocation) {
@@ -230,7 +274,10 @@ export class DeviceDirectory {
         revocation.revoker_device_key.toLowerCase() === key
           ? record
           : await this.getDevice(revocation.revoker_device_key);
-      if (revoker?.profile_id === record.profile_id) {
+      if (
+        revoker &&
+        (await this.trustedRevoker(revoker, record, revocation.revoked_at))
+      ) {
         state = "verified";
       }
     }
