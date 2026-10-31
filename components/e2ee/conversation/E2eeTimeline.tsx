@@ -253,6 +253,8 @@ export function E2eeTimeline({
       }
     });
     observer.observe(content);
+    // Banners and the composer growing also shrink the visible area.
+    observer.observe(element);
     return () => observer.disconnect();
   }, []);
 
@@ -291,13 +293,13 @@ export function E2eeTimeline({
       <div
         ref={scrollRef}
         onScroll={onScroll}
-        className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-y-contain tw-pb-3 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500"
+        className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-y-contain tw-pb-3 tw-[overflow-anchor:none] tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500"
       >
         <div>
           <E2eeConversationIntro
             conversation={displayConversation}
             selfProfileId={selfProfileId}
-            empty={messages.length === 0}
+            empty={!messages.some((message) => message.kind === "message")}
           />
           {messages.length > 0 ? (
             <ol
