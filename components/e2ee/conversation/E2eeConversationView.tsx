@@ -122,6 +122,7 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
   const locale = useBrowserLocale();
   const style = useE2eeViewStyle();
   const searchPanelId = useId();
+  const composerInputId = useId();
   const { engine, profileId } = e2ee;
   const { conversation, messages } = useE2eeConversation(g);
   const lastSeq = messages.at(-1)?.seq ?? 0;
@@ -254,6 +255,16 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         onCompareSafetyCodes={() => setInfoOpen(true)}
       />
       <E2eeNewDeviceNotice className="tw-flex-shrink-0 tw-px-4 tw-pt-2" />
+      {getDisabledReasonKey(conversation) === null ? (
+        // One stop past the whole timeline for keyboard users.
+        <button
+          type="button"
+          onClick={() => document.getElementById(composerInputId)?.focus()}
+          className="tw-sr-only focus:tw-not-sr-only focus:tw-mx-4 focus:tw-my-1 focus:tw-self-start focus:tw-rounded-lg focus:tw-border-0 focus:tw-bg-iron-900 focus:tw-px-3 focus:tw-py-1.5 focus:tw-text-xs focus:tw-font-semibold focus:tw-text-iron-100 focus:tw-outline focus:tw-outline-2 focus:tw-outline-primary-400"
+        >
+          {t(locale, "e2ee.conversation.skipToComposer")}
+        </button>
+      ) : null}
       <E2eeTimeline
         conversation={conversation}
         messages={messages}
@@ -307,6 +318,7 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
       ) : null}
       <E2eeComposer
         restoredDraft={restoredDraft}
+        inputId={composerInputId}
         conversation={conversation}
         engine={engine}
         selfProfileId={profileId}

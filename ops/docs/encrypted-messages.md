@@ -98,8 +98,8 @@ the same people already chosen. Earlier messages are not copied.
   The server can switch attachments off as a kill switch; while it is off
   there is no attach control and chats are text only.
 - Open a message's menu to react, reply, or edit or delete your own messages.
-  On someone else's message the menu also offers **Mute this chat** (on this
-  device: the chat stops counting toward the Messages badge and shows a muted
+  On someone else's message the menu also offers **Mute on this device** (the
+  same switch as in **Chat info**: the chat stops counting toward the Messages badge and shows a muted
   mark), **Block** the sender (they can't start new chats with you or add you
   to encrypted chats; chats you already share stay until you leave them),
   **Choose who can message you** (Preferences) and, last, **Report illegal or

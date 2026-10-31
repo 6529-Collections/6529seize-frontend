@@ -81,6 +81,46 @@ describe("E2eeMessageItem polish", () => {
     expect(screen.getByText("Sending…")).toBeInTheDocument();
   });
 
+  it("clears the slow-send note after sending and on a new send with the same id", () => {
+    jest.useFakeTimers();
+    const first = message({
+      id: "m9",
+      senderProfileId: SELF_ID,
+      pending: true,
+      ts: Date.now(),
+      text: "Retry me",
+    });
+    const view = (item: ReturnType<typeof message>) => (
+      <ul>
+        <E2eeMessageItem
+          message={item}
+          conversation={conversation()}
+          engine={createFakeE2eeEngine()}
+          selfProfileId={SELF_ID}
+          replyTarget={null}
+          compact={false}
+          canAct
+          actions={actions}
+        />
+      </ul>
+    );
+    const { rerender } = render(view(first));
+    act(() => {
+      jest.advanceTimersByTime(10_000);
+    });
+    expect(
+      screen.getByText("Waiting for connection. Will keep trying.")
+    ).toBeInTheDocument();
+
+    rerender(view({ ...first, pending: false, seq: 4 }));
+    expect(screen.queryByText(/Waiting for connection/u)).toBeNull();
+    expect(screen.queryByText("Sending…")).toBeNull();
+
+    rerender(view({ ...first, pending: true, seq: 0, ts: Date.now() }));
+    expect(screen.getByText("Sending…")).toBeInTheDocument();
+    expect(screen.queryByText(/Waiting for connection/u)).toBeNull();
+  });
+
   it("links http(s) URLs safely and leaves other text alone", () => {
     renderItem(
       message({ id: "m2", text: "Card: https://6529.io/the-memes/400." })

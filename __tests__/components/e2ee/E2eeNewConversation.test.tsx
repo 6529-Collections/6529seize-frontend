@@ -149,6 +149,15 @@ describe("E2eeNewConversation", () => {
     expect(mockPush).toHaveBeenCalledWith(`/messages/encrypted/${GROUP_G}`);
   });
 
+  it("asks for a group name only once a second person is chosen", () => {
+    renderNew();
+    fireEvent.click(screen.getByRole("button", { name: "pick alice" }));
+    fireEvent.click(screen.getByRole("radio", { name: /^Group/u }));
+    expect(screen.queryByLabelText("Group name (optional)")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "pick bob" }));
+    expect(screen.getByLabelText("Group name (optional)")).toBeInTheDocument();
+  });
+
   it("makes several people a named group", async () => {
     const engine = renderNew();
     fireEvent.click(screen.getByRole("button", { name: "pick alice" }));
