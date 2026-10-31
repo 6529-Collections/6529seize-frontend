@@ -1,8 +1,13 @@
 "use client";
 
 import {
+  BellIcon,
+  BellSlashIcon,
   CheckBadgeIcon,
+  DevicePhoneMobileIcon,
   ExclamationTriangleIcon,
+  KeyIcon,
+  LockClosedIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
 import { type FormEvent, useId, useState } from "react";
@@ -16,6 +21,7 @@ import type {
 } from "@/lib/e2ee/types";
 import { getE2eeActionErrorKey } from "../e2eeErrors";
 import { formatSafetyCode, getMemberName, tCount } from "../e2eeFormat";
+import { setE2eeChatMuted, useMutedE2eeChats } from "../e2eeMutedChats";
 import { E2eeAvatar } from "../ui/E2eeAvatar";
 import { E2eeConfirmDialog } from "../ui/E2eeConfirmDialog";
 import { E2eeDialog } from "../ui/E2eeDialog";
@@ -54,6 +60,75 @@ function SafetyCode({ code }: { readonly code: string }) {
       </p>
       <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400">
         {t(locale, "e2ee.info.safetyCodeHelp")}
+      </p>
+    </section>
+  );
+}
+
+const ENCRYPTION_POINTS: readonly {
+  readonly key: MessageKey;
+  readonly Icon: typeof LockClosedIcon;
+}[] = [
+  { key: "e2ee.info.encryption.mls", Icon: LockClosedIcon },
+  { key: "e2ee.info.encryption.postQuantum", Icon: KeyIcon },
+  { key: "e2ee.info.encryption.devices", Icon: DevicePhoneMobileIcon },
+];
+
+/** What protects this chat, in plain words, without overclaiming. */
+function EncryptionDetails() {
+  const locale = useBrowserLocale();
+  return (
+    <section>
+      <h3 className={SECTION_HEADING}>
+        {t(locale, "e2ee.info.encryption.title")}
+      </h3>
+      <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-2 tw-p-0">
+        {ENCRYPTION_POINTS.map(({ key, Icon }) => (
+          <li
+            key={key}
+            className="tw-flex tw-items-start tw-gap-2 tw-text-xs tw-leading-5 tw-text-iron-400"
+          >
+            <Icon
+              aria-hidden="true"
+              className="tw-mt-0.5 tw-size-4 tw-flex-shrink-0 tw-text-iron-500"
+            />
+            <span>{t(locale, key)}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/** Mute is a device-local setting, so the label says so. */
+function MuteSetting({
+  g,
+  selfProfileId,
+}: {
+  readonly g: string;
+  readonly selfProfileId: string | null;
+}) {
+  const locale = useBrowserLocale();
+  const muted = useMutedE2eeChats(selfProfileId).has(g);
+  if (!selfProfileId) {
+    return null;
+  }
+  const Icon = muted ? BellIcon : BellSlashIcon;
+  return (
+    <section>
+      <h3 className={SECTION_HEADING}>
+        {t(locale, "e2ee.info.notifications")}
+      </h3>
+      <Button
+        variant="secondary"
+        size="sm"
+        onClick={() => setE2eeChatMuted(selfProfileId, g, !muted)}
+      >
+        <Icon aria-hidden="true" className="tw-size-4" />
+        {t(locale, muted ? "e2ee.info.unmute" : "e2ee.info.mute")}
+      </Button>
+      <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400">
+        {t(locale, "e2ee.info.muteHelp")}
       </p>
     </section>
   );
@@ -366,7 +441,11 @@ export function E2eeConversationInfo({
           </section>
         ) : null}
 
+        <MuteSetting g={conversation.g} selfProfileId={selfProfileId} />
+
         <SafetyCode code={conversation.safetyCode} />
+
+        <EncryptionDetails />
 
         <section>
           <h3 className={SECTION_HEADING}>{t(locale, "e2ee.info.report")}</h3>

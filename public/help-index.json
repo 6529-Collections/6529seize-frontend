@@ -3646,7 +3646,10 @@
         "end-to-end encrypted messages",
         "e2ee",
         "encrypted dm",
-        "report encrypted message"
+        "report encrypted message",
+        "encrypted backup",
+        "recovery code",
+        "restore encrypted messages"
       ],
       "keywords": [
         "encrypted",
@@ -3656,12 +3659,18 @@
         "block",
         "mute",
         "devices",
-        "trust and safety"
+        "trust and safety",
+        "backup",
+        "restore",
+        "recovery code"
       ],
       "facts": [
         "Encrypted chats are rolling out. Where they are available they appear under Messages as an Encrypted section at /messages/encrypted, with new chats at /messages/encrypted/new and this browser's devices at /messages/encrypted/devices.",
         "Messages are end-to-end encrypted on your devices; 6529 delivers them but cannot read them. Each browser or app signs once with your wallet to become a device; there is no prompt per message.",
-        "There is no history backup yet: if you lose all your devices or clear this browser's data, that chat history is gone. A new device sees messages from when it joined.",
+        "Where it is offered, the wallet sign-in on a web browser can turn on signed messages and encrypted messages with the same single signature; that browser then becomes an encrypted-messages device without a second prompt. Revoking that device, from Devices that can post as you or from encrypted devices, turns off both.",
+        "Encrypted backup is optional. In /messages/encrypted/devices select Turn on backup to get a recovery code (shown once; copy or download it). Your history is then backed up encrypted and incrementally; 6529 cannot read it or recover the code.",
+        "On a new device turn on encrypted messages, then in Devices select Restore messages and enter the recovery code. Restored chats show From backup and are read-only until someone in the chat adds the new device. Without backup, losing all devices or clearing browser data loses that history.",
+        "Create new recovery code replaces the backup and makes the old code stop working (do this after revoking a device that had backup on). Turn off backup deletes the encrypted backup from 6529.",
         "You can attach up to 10 files of up to 25 MB each; they are encrypted on your device like messages. If attachments are switched off, the attach control is hidden.",
         "Keys are agreed with a hybrid post-quantum method (MLS ciphersuite 0x004F, X-Wing: ML-KEM-768 combined with X25519), so messages stay confidential even if one of the two is broken, for example by a future quantum computer.",
         "Open a message's menu to mute the chat on this device, block its sender (they cannot start new chats with you or add you to encrypted chats), or choose who can message you in Preferences.",
@@ -3676,7 +3685,46 @@
       "tags": ["messages", "encryption", "safety"],
       "source_refs": [
         "ops/docs/encrypted-messages.md",
-        "components/e2ee/conversation/E2eeReportDialog.tsx"
+        "components/e2ee/conversation/E2eeReportDialog.tsx",
+        "components/e2ee/backup/E2eeBackupPanel.tsx"
+      ]
+    },
+    {
+      "id": "messages.unencrypted-dm-deletion",
+      "kind": "workflow",
+      "title": "Unencrypted direct messages: export, move and the 1 December 2026 deletion",
+      "aliases": [
+        "old dms",
+        "unencrypted dm",
+        "dm history",
+        "export dms",
+        "move dm history",
+        "dm deletion"
+      ],
+      "keywords": [
+        "unencrypted",
+        "export",
+        "move history",
+        "import",
+        "deletion",
+        "december",
+        "dm"
+      ],
+      "facts": [
+        "Direct messages started before encrypted chats are not end-to-end encrypted. 6529 deletes their content from its servers, backups included, on 1 December 2026, except anything 6529 is legally required to keep; from then they are closed and no new unencrypted DM can be started.",
+        "When you start a new direct message on a build with encrypted chats, Start encrypted chat is the main action; Send unencrypted instead is a second choice, under a warning, until 1 December 2026.",
+        "Each unencrypted conversation shows a notice with Export history, which downloads the messages you can see as a readable HTML page or as JSON data. The file is made in your browser; images and files are listed as links that stop working on the deletion date.",
+        "Once an encrypted chat with exactly the same people exists on your device, the old conversation becomes read-only and offers Move history, which copies the messages you can see into the encrypted chat, oldest first, with their images and files where possible.",
+        "Moved messages show the original author and time labelled Imported, not verified, because 6529 held them unencrypted. Only the people and devices in the encrypted chat at that time see them, and nobody is notified.",
+        "Moving can be stopped and continued later without duplicates, even if another member moves the same history. A long history with many images may pause at the daily encrypted upload limit; continue the next day.",
+        "6529 cannot recall copies outside its servers: your own exports, push notification previews already delivered to phones, and attachments already published to public IPFS."
+      ],
+      "canonical_path": "/messages",
+      "related_paths": ["/messages/encrypted", "/messages/encrypted/new"],
+      "tags": ["messages", "encryption", "privacy"],
+      "source_refs": [
+        "ops/docs/encrypted-messages.md",
+        "components/e2ee/legacy/LegacyDmBanner.tsx"
       ]
     },
     {

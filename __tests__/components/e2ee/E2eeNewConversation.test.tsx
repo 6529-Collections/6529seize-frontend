@@ -94,8 +94,16 @@ describe("E2eeNewConversation", () => {
   it("explains why each person can't receive encrypted messages", async () => {
     const engine = createFakeE2eeEngine();
     (engine.checkEligibility as jest.Mock).mockResolvedValue([
-      { profileId: ALICE_ID, status: "POLICY" },
-      { profileId: BOB_ID, status: "BLOCKED" },
+      {
+        profileId: ALICE_ID,
+        status: "POLICY",
+        reason: "DM_RECIPIENT_GROUP_MEMBERS_ONLY",
+      },
+      {
+        profileId: BOB_ID,
+        status: "BLOCKED",
+        reason: "DM_SENDER_BLOCKED_RECIPIENT",
+      },
       { profileId: "profile-carol", status: "NO_DEVICES" },
     ]);
     renderNew(engine);
@@ -104,9 +112,13 @@ describe("E2eeNewConversation", () => {
     fireEvent.click(screen.getByRole("button", { name: "pick carol" }));
 
     expect(
-      await screen.findByText("Doesn’t accept messages from you")
+      await screen.findByText(
+        "Only accepts messages from members of a group they chose"
+      )
     ).toBeInTheDocument();
-    expect(screen.getByText("Blocked")).toBeInTheDocument();
+    expect(
+      screen.getByText("You blocked them. Unblock to message.")
+    ).toBeInTheDocument();
     expect(
       screen.getByText("Hasn’t turned on encrypted messages yet")
     ).toBeInTheDocument();
@@ -147,6 +159,15 @@ describe("E2eeNewConversation", () => {
       })
     );
     expect(mockPush).toHaveBeenCalledWith(`/messages/encrypted/${GROUP_G}`);
+  });
+
+  it("asks for a group name only once a second person is chosen", () => {
+    renderNew();
+    fireEvent.click(screen.getByRole("button", { name: "pick alice" }));
+    fireEvent.click(screen.getByRole("radio", { name: /^Group/u }));
+    expect(screen.queryByLabelText("Group name (optional)")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "pick bob" }));
+    expect(screen.getByLabelText("Group name (optional)")).toBeInTheDocument();
   });
 
   it("makes several people a named group", async () => {

@@ -53,11 +53,11 @@ export function E2eePageShell({
           </Link>
         ) : null}
         <div className="tw-min-w-0 tw-flex-1">
-          <h1 className="tw-m-0 tw-truncate tw-text-lg tw-font-semibold tw-text-iron-50">
+          <h1 className="tw-m-0 tw-line-clamp-2 tw-break-words tw-text-lg tw-font-semibold tw-leading-snug tw-text-iron-50 sm:tw-truncate">
             {title}
           </h1>
           {hasContent(subtitle) ? (
-            <div className="tw-mt-0.5 tw-text-xs tw-text-iron-400">
+            <div className="tw-mt-0.5 tw-flex tw-min-w-0 tw-text-xs tw-text-iron-400">
               {subtitle}
             </div>
           ) : null}
@@ -80,16 +80,27 @@ export function E2eeCenteredMessage({
   title,
   body,
   children,
+  icon,
   headingLevel = 2,
 }: {
   readonly title: string;
   readonly body?: ReactNode | undefined;
   readonly children?: ReactNode | undefined;
+  /** Decorative icon above the title. */
+  readonly icon?: ReactNode | undefined;
   readonly headingLevel?: 1 | 2 | undefined;
 }) {
   const Heading = headingLevel === 1 ? "h1" : "h2";
   return (
     <div className="tw-mx-auto tw-flex tw-max-w-lg tw-flex-col tw-items-center tw-gap-3 tw-px-6 tw-py-12 tw-text-center">
+      {hasContent(icon) ? (
+        <span
+          aria-hidden="true"
+          className="tw-mb-1 tw-flex tw-size-12 tw-items-center tw-justify-center tw-rounded-full tw-bg-emerald-500/10 tw-text-emerald-300 tw-ring-1 tw-ring-inset tw-ring-emerald-400/20"
+        >
+          {icon}
+        </span>
+      ) : null}
       <Heading className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">
         {title}
       </Heading>

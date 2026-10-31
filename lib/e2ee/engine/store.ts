@@ -10,6 +10,7 @@ import type {
   E2eeMessage,
 } from "../types";
 import type { DeviceDirectory } from "./directory";
+import { displayText, fromImportedPayload } from "./imported";
 
 /** In-memory engine state plus immutable snapshots for the UI. */
 
@@ -57,7 +58,7 @@ export function toE2eeMessage(stored: StoredMessage): E2eeMessage {
     senderDeviceKey: stored.senderDeviceKey,
     ts: stored.ts,
     serverTs: stored.serverTs,
-    text: stored.deleted ? "" : stored.text,
+    text: stored.deleted ? "" : displayText(stored),
     mentions: [...stored.mentions],
     reply: stored.reply,
     attachments: stored.deleted ? [] : stored.attachments.map(toAttachment),
@@ -72,6 +73,9 @@ export function toE2eeMessage(stored: StoredMessage): E2eeMessage {
     undecryptable: stored.undecryptable,
     pending: stored.pending,
   };
+  if (stored.imported) {
+    message.imported = fromImportedPayload(stored.imported);
+  }
   if (stored.notice) {
     message.notice = {
       type: stored.notice.type,

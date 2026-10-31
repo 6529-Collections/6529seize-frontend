@@ -119,7 +119,10 @@ function NewConversationForm({ e2ee }: { readonly e2ee: UseE2eeResult }) {
 
   const engine = e2ee.engine;
   const profileIds = selected.map((person) => person.profileId);
-  const { statusFor, retry } = useE2eeEligibility(engine, profileIds);
+  const { statusFor, reasonFor, retry } = useE2eeEligibility(
+    engine,
+    profileIds
+  );
   const kind = resolveChatKind(selected.length, chosenKind);
   const allEligible =
     selected.length > 0 &&
@@ -168,7 +171,10 @@ function NewConversationForm({ e2ee }: { readonly e2ee: UseE2eeResult }) {
       const g = await engine.createConversation({
         profileIds,
         kind,
-        name: kind === "group" && trimmedName ? trimmedName : null,
+        name:
+          kind === "group" && selected.length > 1 && trimmedName
+            ? trimmedName
+            : null,
       });
       router.push(getEncryptedConversationRoute(g));
     } catch (error) {
@@ -197,6 +203,7 @@ function NewConversationForm({ e2ee }: { readonly e2ee: UseE2eeResult }) {
       <E2eePeoplePicker
         selected={selected}
         statusFor={statusFor}
+        reasonFor={reasonFor}
         onRetry={retry}
         onAdd={onAdd}
         onRemove={onRemove}
@@ -234,7 +241,8 @@ function NewConversationForm({ e2ee }: { readonly e2ee: UseE2eeResult }) {
         ) : null}
       </fieldset>
 
-      {kind === "group" ? (
+      {/* A name only makes sense once there is a group to name. */}
+      {kind === "group" && selected.length > 1 ? (
         <div>
           <label
             htmlFor={nameId}

@@ -2,8 +2,10 @@ import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 const SIZE_CLASSES = {
   xs: "tw-size-6 tw-text-[10px]",
+  duo: "tw-size-7 tw-text-[11px]",
   sm: "tw-size-8 tw-text-xs",
   md: "tw-size-10 tw-text-sm",
+  lg: "tw-size-14 tw-text-lg",
 } as const;
 
 interface E2eeAvatarProps {

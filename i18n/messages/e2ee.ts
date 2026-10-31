@@ -5,6 +5,7 @@
  */
 export const E2EE_MESSAGES = {
   "e2ee.badge.encrypted": "End-to-end encrypted",
+  "e2ee.badge.encryptedShort": "Encrypted",
   "e2ee.title": "Encrypted messages",
   "e2ee.section.encrypted": "Encrypted",
   "e2ee.section.plaintext": "Direct messages",
@@ -16,6 +17,7 @@ export const E2EE_MESSAGES = {
   "e2ee.action.dismiss": "Dismiss",
   "e2ee.loading": "Loading encrypted messages…",
   "e2ee.you": "You",
+  "e2ee.youObject": "you",
   "e2ee.someone": "Someone",
   "e2ee.unknownMember": "Unknown member",
 
@@ -29,6 +31,11 @@ export const E2EE_MESSAGES = {
   "e2ee.gate.error.body":
     "Something went wrong while loading encrypted messages on this device.",
   "e2ee.gate.error.code": "Error code: {code}",
+  "e2ee.enroll.identity": "You’ll sign as {name} with {wallet}.",
+  "e2ee.enroll.identityUnknown":
+    "You’ll sign with the wallet connected to this profile.",
+  "e2ee.enroll.manage":
+    "You can turn this device off at any time from the Devices page in encrypted messages.",
   "e2ee.gate.noWallet":
     "Connect the wallet for this profile to use encrypted messages.",
 
@@ -42,7 +49,7 @@ export const E2EE_MESSAGES = {
   "e2ee.enroll.point.privacy":
     "6529 cannot read your encrypted messages. It only delivers them.",
   "e2ee.enroll.point.noBackup":
-    "There is no backup in this version. If you lose all your devices or clear this browser’s data, you lose this history.",
+    "Your history is stored on your devices. If you lose all of them or clear this browser’s data, you lose it, unless you turn on encrypted backup in Devices.",
   "e2ee.enroll.safari":
     "Safari can delete this site’s data if you don’t open 6529 for 7 days. Visit regularly, or use another browser or the 6529 app, to keep your history.",
   "e2ee.enroll.button": "Turn on encrypted messages (one signature)",
@@ -52,12 +59,18 @@ export const E2EE_MESSAGES = {
 
   "e2ee.deviceLimit.title": "Too many devices",
   "e2ee.deviceLimit.body":
-    "Your profile already has the maximum number of devices for encrypted messages. Revoke one you no longer use, then turn on this device.",
+    "Your profile already has the maximum of {max} devices for encrypted messages. On a device you already use, open Devices and revoke one you no longer need, then turn on this device.",
+  "e2ee.deviceLimit.listTitle": "Devices on your profile",
+  "e2ee.deviceLimit.signature":
+    "Turning on this device is one wallet signature. It moves no funds and costs nothing.",
   "e2ee.deviceLimit.retry": "Turn on this device",
 
   "e2ee.renew.body":
-    "This device’s access to encrypted messages ends on {date}.",
+    "This device’s access to encrypted messages ends on {date}. After that it can’t send or read them until you renew. Renewing is one wallet signature; it moves no funds and costs nothing.",
   "e2ee.renew.button": "Renew (one signature)",
+  "e2ee.renew.rejected":
+    "You cancelled the signature. This device keeps access until {date}.",
+  "e2ee.renew.failed": "Couldn’t renew access. Try again.",
 
   "e2ee.devices.title": "Devices for encrypted messages",
   "e2ee.devices.description":
@@ -95,7 +108,8 @@ export const E2EE_MESSAGES = {
   "e2ee.devices.rename.saved": "Device name saved.",
   "e2ee.devices.rename.failed": "Couldn’t save the name. Try again.",
   "e2ee.devices.newDevice":
-    "{label} can now read your encrypted messages. Not you? Revoke.",
+    "New device added {date}: {label} ({platform}). It can read your encrypted messages. If this wasn’t you, revoke it.",
+  "e2ee.devices.newDeviceConfirm": "This was me",
   "e2ee.devices.newDeviceRevoke": "Revoke {label}",
   "e2ee.devices.open": "Devices for encrypted messages",
 
@@ -107,6 +121,7 @@ export const E2EE_MESSAGES = {
   "e2ee.list.preview.deleted": "Message deleted",
   "e2ee.list.preview.undecryptable": "Couldn’t decrypt",
   "e2ee.list.preview.none": "No messages yet",
+  "e2ee.list.preview.from": "{name}: {text}",
   "e2ee.list.unread.one": "{count} unread message",
   "e2ee.list.unread.other": "{count} unread messages",
   "e2ee.list.mentions.one": "{count} mention",
@@ -115,6 +130,7 @@ export const E2EE_MESSAGES = {
   "e2ee.list.muted": "Muted",
   "e2ee.list.status.left": "You left",
   "e2ee.list.status.removed": "Removed",
+  "e2ee.list.status.restored": "From backup",
   "e2ee.list.entry": "Encrypted messages",
   "e2ee.list.entryHint": "End-to-end encrypted chats",
   "e2ee.list.viewAll": "All encrypted chats",
@@ -139,7 +155,11 @@ export const E2EE_MESSAGES = {
   "e2ee.new.eligibility.checking": "Checking…",
   "e2ee.new.eligibility.OK": "Can receive encrypted messages",
   "e2ee.new.eligibility.POLICY": "Doesn’t accept messages from you",
-  "e2ee.new.eligibility.BLOCKED": "Blocked",
+  "e2ee.new.eligibility.POLICY.peopleIFollowOnly":
+    "Only accepts messages from people they follow",
+  "e2ee.new.eligibility.POLICY.groupMembersOnly":
+    "Only accepts messages from members of a group they chose",
+  "e2ee.new.eligibility.BLOCKED": "You blocked them. Unblock to message.",
   "e2ee.new.eligibility.NO_DEVICES": "Hasn’t turned on encrypted messages yet",
   "e2ee.new.eligibility.error": "Couldn’t check. Try again.",
   "e2ee.new.notEligibleSummary":
@@ -169,6 +189,14 @@ export const E2EE_MESSAGES = {
   "e2ee.conversation.search.localNote": "Search runs only on this device.",
   "e2ee.conversation.search.failed": "Search failed. Try again.",
   "e2ee.conversation.empty": "No messages yet. Say hello.",
+  "e2ee.conversation.intro.encrypted":
+    "Messages in this chat are end-to-end encrypted. Only the people in it can read them.",
+  "e2ee.conversation.intro.deviceHistory":
+    "This device shows messages from when it joined the chat. There’s no message backup yet, so earlier messages stay on the devices that received them.",
+  "e2ee.conversation.day.today": "Today",
+  "e2ee.conversation.day.yesterday": "Yesterday",
+  "e2ee.conversation.jumpToLatest": "New messages",
+  "e2ee.conversation.skipToComposer": "Skip to message composer",
   "e2ee.conversation.timelineLabel": "Messages",
   "e2ee.conversation.newMessage": "New message from {name}",
   "e2ee.conversation.titleMore": "{names} and {count} more",
@@ -178,18 +206,24 @@ export const E2EE_MESSAGES = {
   "e2ee.banner.delayed":
     "Group changes are delayed. Messages will send once the change goes through.",
   "e2ee.banner.splitView":
-    "Possible split view detected: compare safety codes.",
+    "Security check needed: this device may not see the same chat as everyone else. Compare safety codes before sharing anything sensitive.",
   "e2ee.banner.splitViewAction": "Compare safety codes",
   "e2ee.banner.invalid": "This chat is paused because of an invalid change.",
   "e2ee.banner.restart": "Start a new encrypted chat with the same people",
   "e2ee.banner.restartFailed": "Couldn’t start a new chat. Try again.",
   "e2ee.banner.left": "You left this chat.",
   "e2ee.banner.removed": "You were removed from this chat.",
+  "e2ee.banner.restored":
+    "Restored from your backup. New messages appear here once someone in this chat adds this device.",
 
   "e2ee.message.undecryptable": "Couldn’t decrypt this message",
+  "e2ee.message.undecryptableHint":
+    "It couldn’t be read on this device. Ask {name} to send it again if you need it.",
+  "e2ee.message.undecryptableSender": "A member",
   "e2ee.message.deleted": "Message deleted",
   "e2ee.message.edited": "edited",
   "e2ee.message.pending": "Sending…",
+  "e2ee.message.pendingSlow": "Waiting for connection. Will keep trying.",
   "e2ee.message.unverified": "Signature not verified",
   "e2ee.message.replyTo": "Reply to {name}",
   "e2ee.message.replyUnavailable": "Original message unavailable",
@@ -201,8 +235,8 @@ export const E2EE_MESSAGES = {
   "e2ee.message.edit": "Edit",
   "e2ee.message.delete": "Delete",
   "e2ee.message.report": "Report illegal or severe harm",
-  "e2ee.message.mute": "Mute this chat",
-  "e2ee.message.unmute": "Unmute this chat",
+  "e2ee.message.mute": "Mute on this device",
+  "e2ee.message.unmute": "Unmute on this device",
   "e2ee.message.block": "Block {name}",
   "e2ee.message.messageSettings": "Choose who can message you",
   "e2ee.message.deleteConfirmTitle": "Delete this message?",
@@ -246,6 +280,11 @@ export const E2EE_MESSAGES = {
     "Sending is paused until the group change goes through.",
   "e2ee.composer.unavailable": "You can’t send messages in this chat.",
   "e2ee.composer.sendFailed": "Couldn’t send. Try again.",
+  "e2ee.composer.uploading.one": "Encrypting and sending {count} file…",
+  "e2ee.composer.uploading.other": "Encrypting and sending {count} files…",
+  "e2ee.composer.dropped.body": "This message couldn’t be sent.",
+  "e2ee.composer.dropped.quote": "“{text}”",
+  "e2ee.composer.dropped.restore": "Edit and resend",
   "e2ee.composer.hint": "Enter to send, Shift+Enter for a new line",
   "e2ee.composer.mentions.label": "Mention someone",
 
@@ -281,10 +320,22 @@ export const E2EE_MESSAGES = {
   "e2ee.info.safetyCode": "Safety code",
   "e2ee.info.safetyCodeAria": "Safety code: {code}",
   "e2ee.info.safetyCodeHelp":
-    "Compare this code with the others in the chat; if it matches, nobody is intercepting.",
+    "Compare this code with the other members in person or in another app you trust. If everyone sees the same code, no one has been added to this chat without your knowledge.",
+  "e2ee.info.mute": "Mute on this device",
+  "e2ee.info.unmute": "Unmute on this device",
+  "e2ee.info.muteHelp":
+    "Muted chats don’t show unread counts or notify you here.",
+  "e2ee.info.notifications": "Notifications",
   "e2ee.info.report": "Report",
   "e2ee.info.reportHelp":
-    "To report a message, open its menu and choose Report. The report includes that message so moderators can verify who sent it.",
+    "Reports are only for illegal or severe harm. Open the message’s menu and choose Report: only that message goes to 6529’s trust and safety team, with proof of who sent it. For anything else, block or mute instead.",
+  "e2ee.info.encryption.title": "About this encryption",
+  "e2ee.info.encryption.mls":
+    "Built on Messaging Layer Security (MLS), the IETF standard for end-to-end encrypted group chats.",
+  "e2ee.info.encryption.postQuantum":
+    "Keys are agreed with hybrid post-quantum key exchange, designed to keep messages private even if quantum computers can one day break today’s classical encryption.",
+  "e2ee.info.encryption.devices":
+    "Each of your devices holds its own keys. A new device sees only messages sent after it joins; there’s no history backup yet.",
   "e2ee.info.actionFailed": "Couldn’t complete that. Try again.",
   "e2ee.info.kind.dm": "Direct message",
   "e2ee.info.kind.group": "Group",
@@ -325,4 +376,155 @@ export const E2EE_MESSAGES = {
   "e2ee.plaintext.iconAction":
     "Not end-to-end encrypted. Start an encrypted chat with the same people",
   "e2ee.plaintext.failed": "Couldn’t load the people in this chat. Try again.",
+  "e2ee.backup.title": "Encrypted backup",
+  "e2ee.backup.description":
+    "Keep an encrypted copy of your message history so you can restore it on a new device with a recovery code. 6529 stores only encrypted data: it can’t read your messages or recover your code.",
+  "e2ee.backup.status.loading": "Checking your backup…",
+  "e2ee.backup.status.off":
+    "Backup is off. If you lose all your devices or clear this browser’s data, you lose this history.",
+  "e2ee.backup.status.available":
+    "You have an encrypted backup from another device. Enter its recovery code to restore your messages here and back up this device too.",
+  "e2ee.backup.status.on": "Backup is on.",
+  "e2ee.backup.status.uploading": "Backing up your history…",
+  "e2ee.backup.status.lastBackup": "Last backed up {time}.",
+  "e2ee.backup.status.usage": "{used} of {quota} used",
+  "e2ee.backup.status.error": "Couldn’t check your backup.",
+  "e2ee.backup.action.turnOn": "Turn on backup",
+  "e2ee.backup.action.restore": "Restore messages",
+  "e2ee.backup.action.replace": "Start a new backup",
+  "e2ee.backup.action.backupNow": "Back up now",
+  "e2ee.backup.action.newCode": "Create new recovery code",
+  "e2ee.backup.action.turnOff": "Turn off backup",
+  "e2ee.backup.action.retry": "Try again",
+  "e2ee.backup.backedUp": "Backed up",
+  "e2ee.backup.revokedWarning":
+    "You removed a device after this backup was set up. Create a new recovery code so the backup key that device held stops working.",
+  "e2ee.backup.code.title": "Save your recovery code",
+  "e2ee.backup.code.newTitle": "Save your new recovery code",
+  "e2ee.backup.code.description":
+    "This code is the only way to restore your messages on a new device. Store it somewhere safe, like a password manager. It’s shown only once, and 6529 can’t recover it for you.",
+  "e2ee.backup.code.replaceNote":
+    "Your current recovery code stops working once the new backup finishes uploading.",
+  "e2ee.backup.code.label": "Recovery code",
+  "e2ee.backup.code.copy": "Copy code",
+  "e2ee.backup.code.copied": "Recovery code copied.",
+  "e2ee.backup.code.copyFailed":
+    "Couldn’t copy. Select the code and copy it, or download it.",
+  "e2ee.backup.code.download": "Download as text file",
+  "e2ee.backup.code.fileName": "6529-encrypted-messages-recovery-code.txt",
+  "e2ee.backup.code.fileHeading": "6529 encrypted messages: recovery code",
+  "e2ee.backup.code.fileNote":
+    "Keep this private. With this code, anyone who can sign in to your 6529 profile can read your backed-up messages.",
+  "e2ee.backup.code.saved": "I saved my recovery code somewhere safe",
+  "e2ee.backup.code.confirm": "Turn on backup",
+  "e2ee.backup.code.confirmNew": "Use the new code",
+  "e2ee.backup.restore.title": "Restore messages",
+  "e2ee.backup.restore.description":
+    "Enter the recovery code you saved when you turned on backup. Restored chats are read-only until someone in each chat adds this device.",
+  "e2ee.backup.restore.label": "Recovery code",
+  "e2ee.backup.restore.submit": "Restore",
+  "e2ee.backup.restore.done.one": "Restored {count} message from your backup.",
+  "e2ee.backup.restore.done.other":
+    "Restored {count} messages from your backup.",
+  "e2ee.backup.restore.doneNothing":
+    "Restore finished. This device already had every message in the backup.",
+  "e2ee.backup.turnOff.title": "Turn off backup?",
+  "e2ee.backup.turnOff.body":
+    "This deletes your encrypted backup from 6529 and your recovery code stops working. Messages on your devices stay.",
+  "e2ee.backup.error.codeFormat":
+    "That doesn’t look like a recovery code. Check for typos and try again.",
+  "e2ee.backup.error.wrongCode": "That recovery code doesn’t open this backup.",
+  "e2ee.backup.error.none": "There’s no backup to restore.",
+  "e2ee.backup.error.corrupt":
+    "Part of the backup couldn’t be read. Nothing was restored.",
+  "e2ee.backup.error.replaced":
+    "Backup was turned off or replaced on another device. To back up this device too, restore with the current recovery code.",
+  "e2ee.backup.error.quota":
+    "Your backup storage is full. Create a new recovery code to start a compact backup.",
+  "e2ee.backup.error.notReady":
+    "Set up encrypted messages on this device first.",
+  "e2ee.backup.error.rateLimited": "Too many backup requests. Try again later.",
+  "e2ee.backup.error.generic":
+    "Something went wrong with your backup. Try again.",
+
+  "e2ee.imported.badge": "Imported, not verified",
+  "e2ee.imported.detail":
+    "Moved from an unencrypted DM by {name}. The author and time come from 6529’s server copy and can’t be verified.",
+  "e2ee.imported.mediaMissing.one": "{count} image or file wasn’t moved.",
+  "e2ee.imported.mediaMissing.other": "{count} images or files weren’t moved.",
+  "e2ee.imported.reactions": "Reactions on the original: {reactions}",
+
+  // Unencrypted DMs are deleted from 6529's servers on a fixed date (D146).
+  "e2ee.legacy.banner.label": "Not end-to-end encrypted.",
+  "e2ee.legacy.banner.deletion":
+    "This history will be deleted from 6529’s servers on {date}, unless we’re legally required to keep it.",
+  "e2ee.legacy.banner.closed":
+    "This unencrypted chat is closed. Its history was deleted from 6529’s servers on {date}, except anything we’re legally required to keep.",
+  "e2ee.legacy.region": "Unencrypted chat notice",
+  "e2ee.legacy.action.export": "Export history",
+  "e2ee.legacy.action.openEncrypted": "Open encrypted chat",
+  "e2ee.legacy.readOnly":
+    "This chat is read-only. Your new messages go to the encrypted chat.",
+
+  "e2ee.legacy.export.title": "Export this chat",
+  "e2ee.legacy.export.description":
+    "Download the messages you can see here, with who sent them and when. The file is made in your browser and stays on your device.",
+  "e2ee.legacy.export.media":
+    "Images and files are listed as links. The links stop working on {date}, so save anything you want to keep before then.",
+  "e2ee.legacy.export.start": "Prepare export",
+  "e2ee.legacy.export.progress.one": "Read {count} message…",
+  "e2ee.legacy.export.progress.other": "Read {count} messages…",
+  "e2ee.legacy.export.ready.one": "{count} message ready.",
+  "e2ee.legacy.export.ready.other": "{count} messages ready.",
+  "e2ee.legacy.export.html": "Download readable page (HTML)",
+  "e2ee.legacy.export.json": "Download data (JSON)",
+  "e2ee.legacy.export.failed":
+    "Couldn’t read the whole chat. Check your connection and try again.",
+  "e2ee.legacy.export.retry": "Try again",
+
+  "e2ee.legacy.create.unencrypted": "Send unencrypted instead",
+  "e2ee.legacy.create.warning":
+    "An unencrypted DM isn’t end-to-end encrypted, and 6529 deletes it from its servers on {date}, unless we’re legally required to keep it.",
+  "e2ee.legacy.action.move": "Move history",
+  "e2ee.legacy.import.title": "Move history to the encrypted chat",
+  "e2ee.legacy.import.intro":
+    "This copies the messages you can see here into your encrypted chat with the same people, oldest first, with their images and files when they can be moved.",
+  "e2ee.legacy.import.label":
+    "Each copied message shows who wrote it and when, marked “Imported, not verified”. 6529 held these messages unencrypted, so the encrypted chat can’t prove who wrote them.",
+  "e2ee.legacy.import.audience":
+    "Only the people and devices in the encrypted chat now will see them. 6529’s unencrypted copy is still deleted on {date}, unless we’re legally required to keep it.",
+  "e2ee.legacy.import.keepOpen":
+    "Keep this page open while it runs. You can stop and continue later; nothing is copied twice.",
+  "e2ee.legacy.import.start": "Start moving",
+  "e2ee.legacy.import.continue": "Continue",
+  "e2ee.legacy.import.stop": "Stop",
+  "e2ee.legacy.import.progressLabel": "Moving history",
+  "e2ee.legacy.import.progress": "{done} of {total} moved",
+  "e2ee.legacy.import.media":
+    "Images and files moved: {moved}. Too large to move: {tooLarge}. Not moved: {notMoved}.",
+  "e2ee.legacy.import.done":
+    "Done. {sent} moved, {skipped} were already in the encrypted chat.",
+  "e2ee.legacy.import.failedSome.one":
+    "{count} message couldn’t be moved. Continue to try it again.",
+  "e2ee.legacy.import.failedSome.other":
+    "{count} messages couldn’t be moved. Continue to try them again.",
+  "e2ee.legacy.import.paused":
+    "Paused: today’s limit for encrypted uploads is reached. Continue tomorrow to move the rest with their images.",
+  "e2ee.legacy.import.pausedStorage":
+    "Paused: your space for encrypted images and files is full. Continue later, or move the rest without images and files.",
+  "e2ee.legacy.import.continueWithoutMedia": "Continue without images",
+  "e2ee.legacy.import.cancelled":
+    "Stopped. Continue any time; what was moved stays.",
+  "e2ee.legacy.import.error":
+    "Couldn’t read this chat. Check your connection and try again.",
+
+  "e2ee.legacy.file.title": "6529 DM: {name}",
+  "e2ee.legacy.file.notice":
+    "Copied from an unencrypted 6529.io DM by {handle} on {date}. 6529 deletes its server copies on {deletionDate}, except anything it is legally required to keep. This copy is not encrypted and not authenticated: anyone with the file can read it, and it does not prove who wrote what.",
+  "e2ee.legacy.file.participants": "People",
+  "e2ee.legacy.file.exportedAt": "Exported {date}",
+  "e2ee.legacy.file.replyTo": "reply",
+  "e2ee.legacy.file.edited": "edited",
+  "e2ee.legacy.file.media": "Files",
+  "e2ee.legacy.file.unknownAuthor": "Unknown",
 } as const;

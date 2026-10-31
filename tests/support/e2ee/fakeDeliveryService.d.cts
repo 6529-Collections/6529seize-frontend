@@ -62,6 +62,12 @@ export interface FakeDeliveryService {
   block(blocker: string, blocked: string): void;
   unblock(blocker: string, blocked: string): void;
   setWallets(profileId: string, wallets: string[]): void;
+  storeLoginGrant(input: {
+    message: string;
+    signature: string;
+    wallet: string;
+  }): string;
+  revokeLoginGrant(grantId: string): void;
   subscribe(
     profileId: string,
     listener: (event: { type: string; data: unknown }) => void

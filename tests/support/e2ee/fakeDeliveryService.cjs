@@ -16,8 +16,10 @@ const crypto = require("node:crypto");
 const {
   encodeAbiParameters,
   getAddress,
+  hashMessage,
   hashTypedData,
   keccak256,
+  recoverMessageAddress,
   recoverTypedDataAddress,
   toBytes,
 } = require("viem");
@@ -222,9 +224,13 @@ function createFakeDeliveryService(options = {}) {
     notifyLog: [],
     wakes: [],
     dmPolicy: new Map(),
+    /** GROUP_MEMBERS policy: profileId -> { members: Set, allowFollowed }. */
+    dmGroups: new Map(),
     follows: new Set(),
     blocks: new Set(),
     wallets: new Map(),
+    // NC8: combined sign-in grants the login stored, by grant id.
+    loginGrants: new Map(),
     subscribers: new Map(),
     faults: [],
     tamper: null,
@@ -322,12 +328,86 @@ function createFakeDeliveryService(options = {}) {
     return [...profiles];
   }
 
+  const MLS_RESOURCE =
+    /^- urn:6529:mls-device-grant:v1:(\d+):([0-9a-f]{64}):(\d+)$/m;
+
+  /** NC8: the MLS terms of a stored combined sign-in grant. */
+  async function verifyLoginGrant(profileId, grantId) {
+    const stored = s.loginGrants.get(lower(grantId || ""));
+    if (!stored || stored.revoked) {
+      fail(400, "E2EE_BAD_GRANT");
+    }
+    const match = MLS_RESOURCE.exec(stored.message);
+    const issuedAt = /^Issued At: (.+)$/m.exec(stored.message);
+    const domain = /^(?:https?:\/\/)?([^ ]+) wants you to sign in/.exec(
+      stored.message
+    );
+    if (!match || !issuedAt || !domain) {
+      fail(400, "E2EE_BAD_GRANT");
+    }
+    const grant = {
+      wallet: lower(stored.wallet),
+      device_key: `0x${match[2]}`,
+      ciphersuite: Number(match[1]),
+      issued_at: Math.floor(Date.parse(issuedAt[1]) / 1000),
+      expires_at: Number(match[3]),
+      origin: domain[1],
+    };
+    if (
+      grant.ciphersuite !== E2EE_CIPHERSUITE ||
+      grant.expires_at * 1000 <= now() ||
+      hashMessage(stored.message) !== lower(grantId)
+    ) {
+      fail(400, "E2EE_BAD_GRANT");
+    }
+    const allowed = s.wallets.get(profileId);
+    if (allowed && !allowed.has(grant.wallet)) {
+      fail(400, "E2EE_BAD_GRANT");
+    }
+    const signer = await recoverMessageAddress({
+      message: stored.message,
+      signature: stored.signature,
+    }).catch(() => null);
+    if (!signer || lower(signer) !== grant.wallet) {
+      fail(400, "E2EE_BAD_SIGNATURE");
+    }
+    return { grant, message: stored.message, signature: stored.signature };
+  }
+
+  async function registerLoginGrantDevice(profileId, body) {
+    const verified = await verifyLoginGrant(profileId, body.grant_id);
+    return storeDevice(profileId, {
+      grant: verified.grant,
+      grantId: lower(body.grant_id),
+      signature: verified.signature,
+      grantMessage: verified.message,
+      label: body.label,
+      platform: body.platform,
+    });
+  }
+
   async function registerDevice(profileId, body) {
     const grantId = await verifyGrant(
       profileId,
       body.grant,
       body.wallet_signature
     );
+    return storeDevice(profileId, {
+      grant: body.grant,
+      grantId,
+      signature: body.wallet_signature,
+      grantMessage: null,
+      label: body.label,
+      platform: body.platform,
+    });
+  }
+
+  function storeDevice(profileId, input) {
+    const body = {
+      grant: input.grant,
+      label: input.label,
+      platform: input.platform,
+    };
     const key = lower(body.grant.device_key);
     const existing = s.devices.get(key);
     if (
@@ -351,8 +431,9 @@ function createFakeDeliveryService(options = {}) {
         wallet: lower(body.grant.wallet),
         device_key: key,
       },
-      grant_id: lower(grantId),
-      wallet_signature: lower(body.wallet_signature),
+      grant_id: lower(input.grantId),
+      wallet_signature: lower(input.signature),
+      grant_message: input.grantMessage,
       verified_via: "eoa",
       label,
       platform: ["web", "desktop", "phone"].includes(body.platform)
@@ -499,27 +580,59 @@ function createFakeDeliveryService(options = {}) {
 
   // -- policy (7.1) -------------------------------------------------------------
 
-  function policy(callerProfileId, targetProfileId) {
-    if (callerProfileId === targetProfileId) {
-      return activeDevicesOf(targetProfileId).length > 0 ? "OK" : "NO_DEVICES";
+  /**
+   * Mirrors the backend's shared DM admission (DirectMessageAdmissionService):
+   * the caller's own block is BLOCKED; the target's block of the caller is
+   * POLICY with the same reason as NOBODY, so it is never disclosed.
+   */
+  function admissionReason(callerProfileId, targetProfileId) {
+    if (s.blocks.has(`${callerProfileId}>${targetProfileId}`)) {
+      return "DM_SENDER_BLOCKED_RECIPIENT";
     }
-    if (
-      s.blocks.has(`${targetProfileId}>${callerProfileId}`) ||
-      s.blocks.has(`${callerProfileId}>${targetProfileId}`)
-    ) {
-      return "BLOCKED";
+    if (s.blocks.has(`${targetProfileId}>${callerProfileId}`)) {
+      return "DM_RECIPIENT_NOT_ACCEPTING";
     }
+    const follows = s.follows.has(`${targetProfileId}>${callerProfileId}`);
     const dm = s.dmPolicy.get(targetProfileId) || "EVERYONE";
     if (dm === "NOBODY") {
-      return "POLICY";
+      return "DM_RECIPIENT_NOT_ACCEPTING";
     }
-    if (
-      dm === "PEOPLE_I_FOLLOW" &&
-      !s.follows.has(`${targetProfileId}>${callerProfileId}`)
-    ) {
-      return "POLICY";
+    if (dm === "PEOPLE_I_FOLLOW" && !follows) {
+      return "DM_RECIPIENT_PEOPLE_I_FOLLOW_ONLY";
     }
-    return activeDevicesOf(targetProfileId).length > 0 ? "OK" : "NO_DEVICES";
+    if (dm === "GROUP_MEMBERS") {
+      const group = s.dmGroups.get(targetProfileId);
+      if (!group) {
+        // A missing group fails closed to people the target follows.
+        return follows ? null : "DM_RECIPIENT_PEOPLE_I_FOLLOW_ONLY";
+      }
+      if (group.members.has(callerProfileId)) return null;
+      if (group.allowFollowed && follows) return null;
+      return "DM_RECIPIENT_GROUP_MEMBERS_ONLY";
+    }
+    return null;
+  }
+
+  function decide(callerProfileId, targetProfileId) {
+    const reason =
+      callerProfileId === targetProfileId
+        ? null
+        : admissionReason(callerProfileId, targetProfileId);
+    if (reason) {
+      return {
+        status:
+          reason === "DM_SENDER_BLOCKED_RECIPIENT" ? "BLOCKED" : "POLICY",
+        reason,
+      };
+    }
+    return {
+      status: activeDevicesOf(targetProfileId).length > 0 ? "OK" : "NO_DEVICES",
+      reason: null,
+    };
+  }
+
+  function policy(callerProfileId, targetProfileId) {
+    return decide(callerProfileId, targetProfileId).status;
   }
 
   function popKeyPackage(deviceKey) {
@@ -588,11 +701,15 @@ function createFakeDeliveryService(options = {}) {
 
   function eligibility(profileId, body) {
     return {
-      results: (body.profile_ids || []).map((target) => ({
-        profile_id: target,
-        status: policy(profileId, target),
-        active_devices: activeDevicesOf(target).length,
-      })),
+      results: (body.profile_ids || []).map((target) => {
+        const { status, reason } = decide(profileId, target);
+        return {
+          profile_id: target,
+          status,
+          active_devices: activeDevicesOf(target).length,
+          ...(reason ? { reason } : {}),
+        };
+      }),
     };
   }
 
@@ -1170,6 +1287,11 @@ function createFakeDeliveryService(options = {}) {
     ["GET", /^e2ee\/me$/, (c) => getMe(c.profileId)],
     ["POST", /^e2ee\/devices$/, (c) => registerDevice(c.profileId, c.body)],
     [
+      "POST",
+      /^e2ee\/devices\/login-grant$/,
+      (c) => registerLoginGrantDevice(c.profileId, c.body),
+    ],
+    [
       "GET",
       /^e2ee\/devices\/(0x[0-9a-f]+)$/,
       (c, [key]) => s.devices.get(key) || fail(404, "E2EE_NOT_FOUND"),
@@ -1256,6 +1378,20 @@ function createFakeDeliveryService(options = {}) {
         getChunk(c.profileId, blob, Number(index), lower(c.query.device_key)),
     ],
     ["POST", /^e2ee\/reports$/, (c) => report(c.profileId, c.body)],
+    // History backup: the sandbox reports "no backup", so the devices page
+    // shows backup as off. Backup writes and restores are covered by the
+    // real-WASM Jest integration test and are not simulated here.
+    [
+      "GET",
+      /^e2ee\/backup$/,
+      () => ({
+        backup: null,
+        used_bytes: 0,
+        quota_bytes: 256 * 1024 * 1024,
+        max_chunk_bytes: 1048576,
+        chunk_buckets: [4096, 16384, 65536, 262144, 1048576],
+      }),
+    ],
   ];
 
   function takeFault(method, path) {
@@ -1333,9 +1469,17 @@ function createFakeDeliveryService(options = {}) {
   return {
     handle,
     state: s,
-    /** dmPolicy: "EVERYONE" | "PEOPLE_I_FOLLOW" | "NOBODY". */
+    /** dmPolicy: "EVERYONE" | "PEOPLE_I_FOLLOW" | "NOBODY" | "GROUP_MEMBERS". */
     setDmPolicy(profileId, value) {
       s.dmPolicy.set(profileId, value);
+    },
+    /** GROUP_MEMBERS with the given members; followed profiles bypass by default. */
+    setDmGroup(profileId, memberProfileIds, allowFollowed = true) {
+      s.dmPolicy.set(profileId, "GROUP_MEMBERS");
+      s.dmGroups.set(profileId, {
+        members: new Set(memberProfileIds),
+        allowFollowed,
+      });
     },
     /** The server attachment switch (E2EE_ATTACHMENTS_ENABLED). */
     setAttachmentsEnabled(enabled) {
@@ -1354,6 +1498,19 @@ function createFakeDeliveryService(options = {}) {
     /** Restricts which wallets may sign grants for a profile (2.2 step 4). */
     setWallets(profileId, wallets) {
       s.wallets.set(profileId, new Set(wallets.map(lower)));
+    },
+    /** NC8: what session-login stores for a combined sign-in grant. */
+    storeLoginGrant({ message, signature, wallet }) {
+      const id = lower(hashMessage(message));
+      s.loginGrants.set(id, { message, signature, wallet, revoked: false });
+      return id;
+    },
+    /** NC8: the wallet's session revoked the grant (DN1 device list). */
+    revokeLoginGrant(grantId) {
+      const stored = s.loginGrants.get(lower(grantId));
+      if (stored) {
+        stored.revoked = true;
+      }
     },
     subscribe(profileId, listener) {
       const set = s.subscribers.get(profileId) || new Set();
@@ -1432,6 +1589,8 @@ function createFakeApiClient(ds, profileId) {
   return {
     getMe: () => call("GET", "e2ee/me"),
     registerDevice: (body) => call("POST", "e2ee/devices", body),
+    registerLoginGrantDevice: (body) =>
+      call("POST", "e2ee/devices/login-grant", body),
     getDevice: (key) => call("GET", `e2ee/devices/${enc(key)}`),
     getProfileDevices: (pid) =>
       call("GET", `e2ee/profiles/${enc(pid)}/devices`),

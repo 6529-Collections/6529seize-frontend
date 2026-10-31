@@ -458,6 +458,7 @@ export * from '../models/ApiE2eeLogPage';
 export * from '../models/ApiE2eeMe';
 export * from '../models/ApiE2eeNotifyHint';
 export * from '../models/ApiE2eeRegisterDeviceRequest';
+export * from '../models/ApiE2eeRegisterLoginGrantDeviceRequest';
 export * from '../models/ApiE2eeReport';
 export * from '../models/ApiE2eeReportCategory';
 export * from '../models/ApiE2eeReportHoldRequest';
@@ -1405,14 +1406,14 @@ import { ApiE2eeClaimTarget } from '../models/ApiE2eeClaimTarget';
 import { ApiE2eeClaimedKeyPackage } from '../models/ApiE2eeClaimedKeyPackage';
 import { ApiE2eeCreateBlobRequest } from '../models/ApiE2eeCreateBlobRequest';
 import { ApiE2eeCreateGroupRequest } from '../models/ApiE2eeCreateGroupRequest';
-import { ApiE2eeDevice     , ApiE2eeDeviceVerifiedViaEnum         } from '../models/ApiE2eeDevice';
+import { ApiE2eeDevice     , ApiE2eeDeviceVerifiedViaEnum          } from '../models/ApiE2eeDevice';
 import { ApiE2eeDeviceGrant } from '../models/ApiE2eeDeviceGrant';
 import { ApiE2eeDeviceGroup } from '../models/ApiE2eeDeviceGroup';
 import { ApiE2eeDeviceLookupRequest } from '../models/ApiE2eeDeviceLookupRequest';
 import { ApiE2eeDeviceLookupResponse } from '../models/ApiE2eeDeviceLookupResponse';
 import { ApiE2eeDevicePlatform } from '../models/ApiE2eeDevicePlatform';
 import { ApiE2eeDeviceRevocation } from '../models/ApiE2eeDeviceRevocation';
-import { ApiE2eeEligibility    } from '../models/ApiE2eeEligibility';
+import { ApiE2eeEligibility   , ApiE2eeEligibilityReasonEnum   } from '../models/ApiE2eeEligibility';
 import { ApiE2eeEligibilityRequest } from '../models/ApiE2eeEligibilityRequest';
 import { ApiE2eeEligibilityResponse } from '../models/ApiE2eeEligibilityResponse';
 import { ApiE2eeEligibilityStatus } from '../models/ApiE2eeEligibilityStatus';
@@ -1424,6 +1425,7 @@ import { ApiE2eeLogPage } from '../models/ApiE2eeLogPage';
 import { ApiE2eeMe } from '../models/ApiE2eeMe';
 import { ApiE2eeNotifyHint , ApiE2eeNotifyHintKindEnum   } from '../models/ApiE2eeNotifyHint';
 import { ApiE2eeRegisterDeviceRequest     } from '../models/ApiE2eeRegisterDeviceRequest';
+import { ApiE2eeRegisterLoginGrantDeviceRequest    } from '../models/ApiE2eeRegisterLoginGrantDeviceRequest';
 import { ApiE2eeReport } from '../models/ApiE2eeReport';
 import { ApiE2eeReportCategory } from '../models/ApiE2eeReportCategory';
 import { ApiE2eeReportHoldRequest } from '../models/ApiE2eeReportHoldRequest';
@@ -1705,7 +1707,7 @@ import { ApiSessionLoginRequest, ApiSessionLoginRequestClientTypeEnum      , Api
 import { ApiSessionLogoutNativeRequest, ApiSessionLogoutNativeRequestClientTypeEnum      } from '../models/ApiSessionLogoutNativeRequest';
 import { ApiSessionLogoutWebRequest, ApiSessionLogoutWebRequestClientTypeEnum     } from '../models/ApiSessionLogoutWebRequest';
 import { ApiSessionNativeResponse    , ApiSessionNativeResponseClientTypeEnum     } from '../models/ApiSessionNativeResponse';
-import { ApiSessionNonceQuery , ApiSessionNonceQueryClientTypeEnum    , ApiSessionNonceQueryDeviceKeyTypeEnum    } from '../models/ApiSessionNonceQuery';
+import { ApiSessionNonceQuery , ApiSessionNonceQueryClientTypeEnum    , ApiSessionNonceQueryDeviceKeyTypeEnum      } from '../models/ApiSessionNonceQuery';
 import { ApiSessionNonceResponse } from '../models/ApiSessionNonceResponse';
 import { ApiSessionRefreshNativeRequest, ApiSessionRefreshNativeRequestClientTypeEnum      } from '../models/ApiSessionRefreshNativeRequest';
 import { ApiSessionRefreshWebRequest, ApiSessionRefreshWebRequestClientTypeEnum    } from '../models/ApiSessionRefreshWebRequest';
@@ -2061,6 +2063,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiDropType",
     "ApiE2eeDeviceVerifiedViaEnum",
     "ApiE2eeDevicePlatform",
+    "ApiE2eeEligibilityReasonEnum",
     "ApiE2eeEligibilityStatus",
     "ApiE2eeLogItemTypeEnum",
     "ApiE2eeLogItemKindEnum",
@@ -2657,6 +2660,7 @@ let typeMap: {[index: string]: any} = {
     "ApiE2eeMe": ApiE2eeMe,
     "ApiE2eeNotifyHint": ApiE2eeNotifyHint,
     "ApiE2eeRegisterDeviceRequest": ApiE2eeRegisterDeviceRequest,
+    "ApiE2eeRegisterLoginGrantDeviceRequest": ApiE2eeRegisterLoginGrantDeviceRequest,
     "ApiE2eeReport": ApiE2eeReport,
     "ApiE2eeReportHoldRequest": ApiE2eeReportHoldRequest,
     "ApiE2eeReportRequest": ApiE2eeReportRequest,

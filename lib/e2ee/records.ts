@@ -3,6 +3,7 @@ import type {
   ApiE2eeNotifyHint,
   ApiE2eePlatform,
 } from "./api-types";
+import type { ImportedPayload } from "./imported-payload";
 import type { Payload, PayloadAttachment } from "./payload";
 import type { E2eeNoticeType } from "./notice-types";
 import type { GroupMetadata, WasmLeaf } from "./wasm-types";
@@ -18,6 +19,12 @@ export interface StoredDevice {
   walletSignature: string;
   /** False until POST /e2ee/devices succeeded (the signature is kept). */
   registered: boolean;
+  /**
+   * NC8: set when a combined sign-in grant also granted this device's MLS
+   * key; registration then goes through POST /e2ee/devices/login-grant with
+   * this grant id, and no wallet prompt. `walletSignature` is the SIWE one.
+   */
+  loginGrantId?: string;
   /** True once the MLS credential is set and the first KeyPackages uploaded. */
   provisioned: boolean;
   label: string;
@@ -52,7 +59,13 @@ export interface PendingCommitRecord {
   createdAt: number;
 }
 
-export type StoredGroupStatus = "active" | "invalid" | "left" | "removed";
+/** "restored": known only from a history backup, read-only until joined. */
+export type StoredGroupStatus =
+  | "active"
+  | "invalid"
+  | "left"
+  | "removed"
+  | "restored";
 
 export interface StoredGroup {
   g: string;
@@ -118,6 +131,8 @@ export interface StoredMessage {
   epoch: number | null;
   body: string | null;
   sig: string | null;
+  /** Set when the message was moved from an unencrypted DM (D146). */
+  imported?: ImportedPayload;
 }
 
 export interface SealedOutboxMessage {

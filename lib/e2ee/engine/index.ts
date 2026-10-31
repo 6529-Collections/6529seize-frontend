@@ -1,10 +1,12 @@
 import { downloadMedia, localBlobType } from "../media";
 import { MlsClient } from "../mls-adapter";
 import { getDefaultE2eeStorage, isIndexedDbAvailable } from "../storage";
+import type { BackupHistory } from "../backup/format";
 import type {
   E2eeEngineExt,
   E2eeEngineOptions,
   E2eeEngineStatus,
+  E2eeImported,
   E2eeMessage,
 } from "../types";
 import {
@@ -17,6 +19,7 @@ import { EngineController } from "./controller";
 import { DeviceDirectory } from "./directory";
 import {
   enrollDevice,
+  hasLoginGrant,
   ensureWasm,
   grantExpired,
   loadCurrentSuiteDevice,
@@ -25,6 +28,7 @@ import {
   renewGrant,
   submitRevocation,
 } from "./enroll";
+import { backupHistory, importBackupHistory } from "./backup";
 import { E2eeError, errorMessage } from "./errors";
 import { newRuntime } from "./groups";
 import {
@@ -45,7 +49,7 @@ import {
   TaskTracker,
   TimerSet,
 } from "./runtime";
-import { queueMessage, queueTargeted } from "./send";
+import { queueImported, queueMessage, queueTargeted } from "./send";
 import { EngineStore, toE2eeMessage } from "./store";
 
 /** Contract section 12 engine: framework-agnostic, one instance per profile. */
@@ -221,12 +225,42 @@ class E2eeEngineImpl implements E2eeEngineExt {
       const restored = await restore(this.ctx);
       if (!restored) {
         setStatus(this.ctx, NEEDS_ENROLLMENT);
+        await this.startEnrollmentFromLoginGrant();
         return;
       }
       setStatus(this.ctx, "ready");
       this.start();
     } catch (error) {
       setStatus(this.ctx, "error", errorMessage(error));
+    }
+  }
+
+  /**
+   * NC8: the sign-in signature already granted this browser's MLS key, so
+   * enrollment needs no wallet prompt; finish it now. If the server refuses
+   * the sign-in grant, drop that device: enroll() then falls back to the
+   * separate grant prompt with a fresh key.
+   */
+  private async startEnrollmentFromLoginGrant(): Promise<void> {
+    const stored = await this.ctx.storage.getDevice(this.ctx.profileId);
+    if (!hasLoginGrant(stored) || stored.registered) {
+      return;
+    }
+    // Runs in the background so engine start never waits on the network;
+    // the status is "enrolling" from here until it settles.
+    void this.ctx.tasks.track(this.enrollFromLoginGrant());
+  }
+
+  private async enrollFromLoginGrant(): Promise<void> {
+    try {
+      await this.runEnrollment(false);
+    } catch {
+      // A rejected sign-in grant was dropped: enroll() asks for the separate
+      // grant signature. Any other failure leaves the pending device, and
+      // enroll() retries it without a prompt.
+      if (!this.ctx.disposed && this.ctx.store.status === "error") {
+        setStatus(this.ctx, NEEDS_ENROLLMENT, this.ctx.store.error);
+      }
     }
   }
 
@@ -250,6 +284,15 @@ class E2eeEngineImpl implements E2eeEngineExt {
       }
     };
     void this.ctx.tasks.track(run());
+  }
+
+  /** GET /e2ee/me needs no registered device; failures keep the limit screen. */
+  private async loadDevicesAtLimit(): Promise<void> {
+    try {
+      await refreshMe(this.ctx);
+    } catch {
+      // The device-limit screen still explains what to do without the list.
+    }
   }
 
   private async refreshMe(): Promise<void> {
@@ -319,9 +362,15 @@ class E2eeEngineImpl implements E2eeEngineExt {
   // -- lifecycle --------------------------------------------------------------
 
   async enroll(): Promise<void> {
+    await this.runEnrollment(true);
+  }
+
+  private async runEnrollment(allowPrompt: boolean): Promise<void> {
     const status = this.ctx.store.status;
     if (status === "ready") {
-      await this.renew();
+      if (allowPrompt) {
+        await this.renew();
+      }
       return;
     }
     if (status === "enrolling" || status === "unsupported") {
@@ -329,9 +378,18 @@ class E2eeEngineImpl implements E2eeEngineExt {
     }
     setStatus(this.ctx, "enrolling");
     try {
-      const ready = await this.ctx.queue.run(() => enrollDevice(this.ctx));
+      const ready = await this.ctx.queue.run(() =>
+        enrollDevice(this.ctx, { allowPrompt })
+      );
       if (!ready) {
-        return; // device-limit
+        if (this.ctx.store.status === "enrolling") {
+          // Nothing to enroll without a prompt (sign-in grant path).
+          setStatus(this.ctx, NEEDS_ENROLLMENT);
+          return;
+        }
+        // device-limit: list the profile's devices so the screen can show them.
+        await this.loadDevicesAtLimit();
+        return;
       }
       await loadGroups(this.ctx);
       setStatus(this.ctx, "ready");
@@ -345,7 +403,10 @@ class E2eeEngineImpl implements E2eeEngineExt {
       const code = errorMessage(error);
       setStatus(
         this.ctx,
-        code === "E2EE_SIGNATURE_REJECTED" ? NEEDS_ENROLLMENT : "error",
+        code === "E2EE_SIGNATURE_REJECTED" ||
+          code === "E2EE_LOGIN_GRANT_REJECTED"
+          ? NEEDS_ENROLLMENT
+          : "error",
         code
       );
       throw error;
@@ -454,6 +515,24 @@ class E2eeEngineImpl implements E2eeEngineExt {
     }
     await queueMessage(this.ctx, g.toLowerCase(), input);
     await this.controller.flush(g.toLowerCase());
+  }
+
+  async sendImported(
+    g: string,
+    input: {
+      text: string;
+      imported: E2eeImported;
+      reply?: string | null;
+      files?: File[];
+    }
+  ): Promise<void> {
+    this.requireReady();
+    if ((input.files?.length ?? 0) > 0 && !this.ctx.store.attachmentsEnabled) {
+      throw new E2eeError("E2EE_ATTACHMENTS_DISABLED");
+    }
+    if (await queueImported(this.ctx, g.toLowerCase(), input)) {
+      await this.controller.flush(g.toLowerCase());
+    }
   }
 
   private ownMessage(g: string, id: string) {
@@ -648,6 +727,19 @@ class E2eeEngineImpl implements E2eeEngineExt {
     return new Blob([bytes.slice().buffer], {
       type: localBlobType(attachment.mime),
     });
+  }
+
+  // -- encrypted history backup ---------------------------------------------
+
+  backupHistory = () => backupHistory(this.ctx);
+
+  async importBackupHistory(history: BackupHistory) {
+    this.requireReady();
+    const result = await this.ctx.queue.run(() =>
+      importBackupHistory(this.ctx, history)
+    );
+    await resolveProfiles(this.ctx, memberProfileIds(this.ctx));
+    return result;
   }
 
   // -- devices ----------------------------------------------------------------

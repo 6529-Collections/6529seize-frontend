@@ -14,9 +14,10 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { memo, type ReactNode } from "react";
+import { memo, type ReactNode, useEffect, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger, formatList } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type {
   E2eeConversation,
@@ -27,11 +28,14 @@ import {
   findMember,
   formatE2eeDateTime,
   formatE2eeTimestamp,
+  getDmPeer,
   getMemberName,
   getNoticeText,
 } from "../e2eeFormat";
 import { E2eeAvatar } from "../ui/E2eeAvatar";
 import { E2eeAttachmentView } from "./E2eeAttachmentView";
+import { splitLinks } from "./e2eeLinks";
+import { E2eeImportedNote, importedAuthorName } from "./E2eeImportedNote";
 import { splitMentions } from "./e2eeMentions";
 
 const QUICK_REACTIONS = ["👍", "❤️", "😂", "🔥", "👀", "🎉"] as const;
@@ -67,24 +71,38 @@ interface E2eeMessageItemProps {
   readonly compact: boolean;
   readonly canAct: boolean;
   readonly actions: E2eeMessageActions;
+  /** Arrived after the chat was opened: ease in (respects reduced motion). */
+  readonly appear?: boolean | undefined;
 }
 
 function MessageBody({
   message,
   conversation,
   selfProfileId,
+  senderName,
 }: {
   readonly message: E2eeMessage;
   readonly conversation: E2eeConversation;
   readonly selfProfileId: string | null;
+  readonly senderName: string;
 }) {
   const locale = useBrowserLocale();
   if (message.undecryptable) {
     return (
-      <p className="tw-m-0 tw-inline-flex tw-items-center tw-gap-1.5 tw-text-sm tw-italic tw-text-iron-400">
-        <ExclamationTriangleIcon aria-hidden="true" className="tw-size-4" />
-        {t(locale, "e2ee.message.undecryptable")}
-      </p>
+      <div className="tw-inline-flex tw-max-w-md tw-items-start tw-gap-2 tw-rounded-lg tw-border tw-border-dashed tw-border-iron-700 tw-px-3 tw-py-2">
+        <ExclamationTriangleIcon
+          aria-hidden="true"
+          className="tw-mt-0.5 tw-size-4 tw-flex-shrink-0 tw-text-iron-400"
+        />
+        <div className="tw-min-w-0">
+          <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+            {t(locale, "e2ee.message.undecryptable")}
+          </p>
+          <p className="tw-m-0 tw-mt-0.5 tw-text-xs tw-text-iron-500">
+            {t(locale, "e2ee.message.undecryptableHint", { name: senderName })}
+          </p>
+        </div>
+      </div>
     );
   }
   if (message.deleted) {
@@ -104,7 +122,7 @@ function MessageBody({
   );
   return (
     <p className="tw-m-0 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-leading-6 tw-text-iron-100">
-      {segments.map((segment) =>
+      {segments.flatMap((segment) =>
         segment.kind === "mention" ? (
           <span
             key={segment.start}
@@ -117,7 +135,21 @@ function MessageBody({
             {segment.value}
           </span>
         ) : (
-          <span key={segment.start}>{segment.value}</span>
+          splitLinks(segment.value, segment.start).map((part) =>
+            part.kind === "link" ? (
+              <a
+                key={part.start}
+                href={part.href}
+                target="_blank"
+                rel="noopener noreferrer nofollow ugc"
+                className="tw-break-all tw-text-primary-300 tw-underline tw-decoration-primary-300/40 tw-underline-offset-2 hover:tw-decoration-primary-300 focus-visible:tw-rounded focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              >
+                {part.value}
+              </a>
+            ) : (
+              <span key={part.start}>{part.value}</span>
+            )
+          )
         )
       )}
     </p>
@@ -346,7 +378,7 @@ function MessageActionsMenu({
     <Menu>
       <MenuButton
         aria-label={t(locale, "e2ee.message.actions")}
-        className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-300 tw-opacity-100 tw-transition-opacity data-[open]:tw-opacity-100 hover:tw-text-iron-50 focus-visible:tw-opacity-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:tw-opacity-0 desktop-hover:group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100 touch-only:tw-opacity-100"
+        className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-300 tw-opacity-100 tw-transition-opacity data-[open]:tw-opacity-100 hover:tw-text-iron-50 focus-visible:tw-opacity-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:tw-opacity-0 desktop-hover:group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100 touch-only:-tw-mr-2 touch-only:-tw-mt-2 touch-only:tw-size-11 touch-only:tw-bg-transparent touch-only:tw-text-iron-500 touch-only:tw-opacity-100"
       >
         <EllipsisHorizontalIcon aria-hidden="true" className="tw-size-5" />
       </MenuButton>
@@ -439,18 +471,48 @@ function NoticeItem({
   );
 }
 
+/** After this long unsequenced, "Sending…" says the engine is still retrying. */
+const SLOW_SEND_MS = 10_000;
+
+/**
+ * True once a pending message has waited longer than SLOW_SEND_MS. `ts` is
+ * the sender's own clock at send time (the local echo), so no server skew
+ * applies. The latch is keyed by id and send time: a new send, or the
+ * message leaving the outbox, resets it.
+ */
+function useSlowPending(message: E2eeMessage): boolean {
+  const sendKey = `${message.id}:${message.ts}`;
+  const [slowKey, setSlowKey] = useState<string | null>(null);
+  useEffect(() => {
+    if (!message.pending) {
+      return;
+    }
+    const wait = Math.max(0, SLOW_SEND_MS - (Date.now() - message.ts));
+    const timer = globalThis.setTimeout(() => setSlowKey(sendKey), wait);
+    return () => globalThis.clearTimeout(timer);
+  }, [message.pending, message.ts, sendKey]);
+  return message.pending && slowKey === sendKey;
+}
+
 function MessageMarkers({ message }: { readonly message: E2eeMessage }) {
   const locale = useBrowserLocale();
+  const slow = useSlowPending(message);
   return (
     <>
+      {message.imported ? <E2eeImportedNote.Badge /> : null}
       {message.editedAt !== null && !message.deleted ? (
         <span className="tw-text-xs tw-text-iron-500">
           ({t(locale, "e2ee.message.edited")})
         </span>
       ) : null}
       {message.pending ? (
-        <span className="tw-text-xs tw-text-iron-400">
-          {t(locale, "e2ee.message.pending")}
+        <span
+          className={`tw-text-xs ${slow ? "tw-text-amber-200" : "tw-text-iron-400"}`}
+        >
+          {t(
+            locale,
+            slow ? "e2ee.message.pendingSlow" : "e2ee.message.pending"
+          )}
         </span>
       ) : null}
       {!message.sigOk && !message.undecryptable && !message.pending ? (
@@ -464,13 +526,15 @@ function MessageMarkers({ message }: { readonly message: E2eeMessage }) {
 }
 
 const hasMarkers = (message: E2eeMessage) =>
+  message.imported !== undefined ||
   (message.editedAt !== null && !message.deleted) ||
   message.pending ||
   (!message.sigOk && !message.undecryptable);
 
 /**
  * Sender, time and state markers. Grouped (compact) rows keep the sender
- * for screen readers and still show edited / sending / unverified states.
+ * for screen readers; their edited / sending / unverified states render
+ * under the text instead (CompactMarkers), next to what they describe.
  */
 function MessageMeta({
   message,
@@ -482,17 +546,10 @@ function MessageMeta({
   readonly compact: boolean;
 }) {
   const locale = useBrowserLocale();
+  // Imported history shows its original time (claimed by the server copy).
+  const shownTs = message.imported?.createdAt ?? message.ts;
   if (compact) {
-    return (
-      <>
-        <span className="tw-sr-only">{name}</span>
-        {hasMarkers(message) ? (
-          <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2">
-            <MessageMarkers message={message} />
-          </div>
-        ) : null}
-      </>
-    );
+    return <span className="tw-sr-only">{name}</span>;
   }
   return (
     <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2">
@@ -500,15 +557,58 @@ function MessageMeta({
         {name}
       </span>
       <time
-        dateTime={new Date(message.ts).toISOString()}
-        title={formatE2eeDateTime(locale, message.ts)}
+        dateTime={new Date(shownTs).toISOString()}
+        title={formatE2eeDateTime(locale, shownTs)}
         className="tw-text-xs tw-text-iron-500"
       >
-        {formatE2eeTimestamp(locale, message.ts)}
+        {formatE2eeTimestamp(locale, shownTs)}
       </time>
       <MessageMarkers message={message} />
     </div>
   );
+}
+
+function getMessageRowClassName(
+  compact: boolean,
+  pending: boolean,
+  appear: boolean
+): string {
+  return `tw-group tw-relative tw-flex tw-gap-3 tw-px-4 focus:tw-bg-iron-900/60 focus:tw-outline-none desktop-hover:hover:tw-bg-iron-950 ${
+    compact ? "tw-py-0.5" : "tw-pb-0.5 tw-pt-3"
+  } ${pending ? "tw-opacity-70" : ""} ${
+    appear ? "motion-safe:tw-animate-sidebar-account-menu-in" : ""
+  }`;
+}
+
+/**
+ * Who a message row names. Imported history keeps its original author (the
+ * importer is the sender); an unreadable message still names its sender when
+ * the chat makes it clear.
+ */
+function getMessageNames(
+  locale: SupportedLocale,
+  conversation: E2eeConversation,
+  message: E2eeMessage,
+  selfProfileId: string | null
+) {
+  const authorProfileId =
+    message.imported?.authorProfileId ?? message.senderProfileId;
+  const sender = findMember(conversation.members, authorProfileId);
+  const senderName = getMemberName(
+    locale,
+    conversation.members,
+    message.senderProfileId,
+    selfProfileId
+  );
+  const name = message.imported
+    ? importedAuthorName(locale, message.imported, selfProfileId)
+    : senderName;
+  const shownName =
+    message.undecryptable && !sender
+      ? (getDmPeer(conversation, selfProfileId)?.handle ??
+        t(locale, "e2ee.message.undecryptableSender"))
+      : name;
+  return { sender, senderName, shownName };
 }
 
 function E2eeMessageItemComponent({
@@ -520,6 +620,7 @@ function E2eeMessageItemComponent({
   compact,
   canAct,
   actions,
+  appear = false,
 }: E2eeMessageItemProps) {
   const locale = useBrowserLocale();
   if (message.kind === "notice") {
@@ -531,11 +632,10 @@ function E2eeMessageItemComponent({
       />
     );
   }
-  const sender = findMember(conversation.members, message.senderProfileId);
-  const name = getMemberName(
+  const { sender, senderName, shownName } = getMessageNames(
     locale,
-    conversation.members,
-    message.senderProfileId,
+    conversation,
+    message,
     selfProfileId
   );
   const isOwn =
@@ -547,17 +647,17 @@ function E2eeMessageItemComponent({
     <li
       id={getMessageDomId(message.id)}
       tabIndex={-1}
-      className={`tw-group tw-relative tw-flex tw-gap-3 tw-px-4 focus:tw-bg-iron-900/60 focus:tw-outline-none desktop-hover:hover:tw-bg-iron-950 ${
-        compact ? "tw-py-0.5" : "tw-pb-0.5 tw-pt-3"
-      } ${message.pending ? "tw-opacity-70" : ""}`}
+      className={getMessageRowClassName(compact, message.pending, appear)}
     >
       <div className="tw-w-9 tw-flex-shrink-0">
         {compact ? null : (
-          <E2eeAvatar pfp={sender?.pfp ?? null} name={name} size="sm" />
+          <E2eeAvatar pfp={sender?.pfp ?? null} name={shownName} size="sm" />
         )}
       </div>
-      <div className="tw-min-w-0 tw-flex-1">
-        <MessageMeta message={message} name={name} compact={compact} />
+      <div
+        className={`tw-min-w-0 tw-flex-1 ${showActions ? "touch-only:tw-pr-8" : ""}`}
+      >
+        <MessageMeta message={message} name={shownName} compact={compact} />
         {message.reply ? (
           <ReplyPreview
             replyId={message.reply}
@@ -571,7 +671,15 @@ function E2eeMessageItemComponent({
           message={message}
           conversation={conversation}
           selfProfileId={selfProfileId}
+          senderName={shownName}
         />
+        {message.imported && !message.deleted ? (
+          <E2eeImportedNote
+            imported={message.imported}
+            importerName={senderName}
+            showDetail={!compact}
+          />
+        ) : null}
         {!message.deleted &&
         !message.undecryptable &&
         message.attachments.length > 0 ? (
@@ -585,6 +693,11 @@ function E2eeMessageItemComponent({
                 attachment={attachment}
               />
             ))}
+          </div>
+        ) : null}
+        {compact && hasMarkers(message) ? (
+          <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2">
+            <MessageMarkers message={message} />
           </div>
         ) : null}
         <Reactions
@@ -601,7 +714,7 @@ function E2eeMessageItemComponent({
             message={message}
             isOwn={isOwn}
             selfProfileId={selfProfileId}
-            senderName={name}
+            senderName={senderName}
             actions={actions}
           />
         </div>
