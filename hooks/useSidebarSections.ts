@@ -9,7 +9,7 @@ import {
   getVisibleAboutNavGroups,
 } from "@/components/about/about.routes";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 import {
   BuildingLibraryIcon,
   DocumentTextIcon,
@@ -78,47 +78,28 @@ function getMuseumSection(): SidebarSection {
   };
 }
 
+// NFTs rows that also stay active on their nested pages, in menu order.
+const NFT_SECTION_ROUTES: ReadonlyArray<readonly [MessageKey, string]> = [
+  ["collect.menuLabel", "/collect"],
+  ["navigation.nfts.theMemes", "/the-memes"],
+  ["navigation.nfts.gradient", "/6529-gradient"],
+  ["navigation.nfts.nextGen", "/nextgen"],
+  ["navigation.nfts.memeLab", "/meme-lab"],
+  ["navigation.nfts.rememes", "/rememes"],
+  ["navigation.nfts.stream", "/stream"],
+];
+
 function getNftsSection(): SidebarSection {
   return {
     key: "nfts",
     name: t(DEFAULT_LOCALE, "navigation.primary.nfts"),
     icon: CollectionsMenuIcon,
     items: [
-      {
-        name: t(DEFAULT_LOCALE, "collect.menuLabel"),
-        href: "/collect",
-        activePathPrefixes: ["/collect/"],
-      },
-      {
-        name: t(DEFAULT_LOCALE, "navigation.nfts.theMemes"),
-        href: "/the-memes",
-        activePathPrefixes: ["/the-memes/"],
-      },
-      {
-        name: t(DEFAULT_LOCALE, "navigation.nfts.gradient"),
-        href: "/6529-gradient",
-        activePathPrefixes: ["/6529-gradient/"],
-      },
-      {
-        name: t(DEFAULT_LOCALE, "navigation.nfts.nextGen"),
-        href: "/nextgen",
-        activePathPrefixes: ["/nextgen/"],
-      },
-      {
-        name: t(DEFAULT_LOCALE, "navigation.nfts.memeLab"),
-        href: "/meme-lab",
-        activePathPrefixes: ["/meme-lab/"],
-      },
-      {
-        name: t(DEFAULT_LOCALE, "navigation.nfts.rememes"),
-        href: "/rememes",
-        activePathPrefixes: ["/rememes/"],
-      },
-      {
-        name: t(DEFAULT_LOCALE, "navigation.nfts.stream"),
-        href: "/stream",
-        activePathPrefixes: ["/stream/"],
-      },
+      ...NFT_SECTION_ROUTES.map(([nameKey, href]) => ({
+        name: t(DEFAULT_LOCALE, nameKey),
+        href,
+        activePathPrefixes: [`${href}/`],
+      })),
       {
         name: t(DEFAULT_LOCALE, "navigation.nfts.activity"),
         href: "/nft-activity",
