@@ -1057,7 +1057,7 @@
       "facts": [
         "/stream shows a short notice that 6529 Stream is being rebuilt. NFTs > 6529 Stream in the sidebar opens it.",
         "The work on 6529 Stream is public in the 6529-works repository on GitHub, linked from /stream.",
-        "The earlier 6529 Stream public contract review is no longer published on 6529.io."
+        "The earlier 6529 Stream public contract review has been removed from 6529.io. Its old /reviews/6529-stream links redirect to /stream."
       ],
       "canonical_path": "/stream",
       "tags": ["stream", "nfts"],
