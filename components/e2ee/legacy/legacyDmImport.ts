@@ -93,33 +93,35 @@ function isUnsafeNameChar(char: string): boolean {
   );
 }
 
+/** A separator becomes "_", any whitespace one space, the rest itself. */
+function mapNameChar(char: string): string {
+  if (char === "/" || char === "\\") {
+    return "_";
+  }
+  return /\s/u.test(char) ? " " : char;
+}
+
 /**
- * Attachment names come from the legacy record or the CDN path and end up
- * in the encrypted metadata every receiver shows and saves as. Keep them a
- * plain file name: no path separators or control characters, no leading
- * dots, at most 120 characters with the extension kept, or the fallback.
+ * One linear pass (no backtracking regexes over attacker-chosen names):
+ * drop unsafe characters and collapse runs of "_" or spaces they map to.
  */
-export function safeAttachmentName(raw: string, fallback: string): string {
-  // One linear pass (no backtracking regexes over attacker-chosen names):
-  // drop unsafe characters, turn separator runs into "_" and whitespace
-  // runs into one space.
+function nameChars(raw: string): string[] {
   const chars: string[] = [];
   for (const char of raw.normalize("NFC")) {
     if (isUnsafeNameChar(char)) {
       continue;
     }
-    let mapped = char;
-    if (char === "/" || char === "\\") {
-      mapped = "_";
-    } else if (/\s/u.test(char)) {
-      mapped = " ";
-    }
-    const previous = chars.at(-1);
-    const isRun = (mapped === "_" || mapped === " ") && previous === mapped;
+    const mapped = mapNameChar(char);
+    const isRun = (mapped === "_" || mapped === " ") && chars.at(-1) === mapped;
     if (!isRun) {
       chars.push(mapped);
     }
   }
+  return chars;
+}
+
+/** Without leading or trailing dots and spaces. */
+function trimNameEdges(chars: readonly string[]): string[] {
   const isEdge = (char: string | undefined) => char === "." || char === " ";
   let start = 0;
   let end = chars.length;
@@ -129,7 +131,17 @@ export function safeAttachmentName(raw: string, fallback: string): string {
   while (end > start && isEdge(chars[end - 1])) {
     end -= 1;
   }
-  const name = chars.slice(start, end);
+  return chars.slice(start, end);
+}
+
+/**
+ * Attachment names come from the legacy record or the CDN path and end up
+ * in the encrypted metadata every receiver shows and saves as. Keep them a
+ * plain file name: no path separators or control characters, no leading
+ * dots, at most 120 characters with the extension kept, or the fallback.
+ */
+export function safeAttachmentName(raw: string, fallback: string): string {
+  const name = trimNameEdges(nameChars(raw));
   if (name.length === 0) {
     return fallback;
   }
