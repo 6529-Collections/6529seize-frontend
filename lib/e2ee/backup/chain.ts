@@ -72,6 +72,8 @@ export function isChainState(value: unknown): value is BackupChainState {
     Number.isInteger(chain.epoch) &&
     Number.isInteger(chain.index) &&
     typeof chain.hash === "string" &&
+    // A tip's hash is 32 bytes of base64 (44 characters).
+    (chain.index! < 0 || chain.hash.length === 44) &&
     Number.isInteger(chain.seq) &&
     typeof chain.restart === "boolean"
   );
