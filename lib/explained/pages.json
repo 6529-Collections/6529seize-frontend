@@ -14,7 +14,7 @@
         "app/explained/_lib/**"
       ],
       "dependsOn": ["D89", "D116", "D142"],
-      "checkedThrough": "D142",
+      "checkedThrough": "D145",
       "states": [
         {
           "name": "loop-votes",
@@ -32,7 +32,7 @@
       "lane": "P1",
       "sources": ["app/network/tdh/*", "app/network/tdh/overview/**"],
       "dependsOn": ["D112", "D119", "D125", "D128", "D136", "D137", "D142"],
-      "checkedThrough": "D142",
+      "checkedThrough": "D145",
       "budget": { "words": 900, "firstScreen": 120, "figuresPer1000": 6 },
       "states": [
         {
@@ -64,7 +64,7 @@
       "lane": "P2",
       "sources": ["app/network/tdh/how-it-works/**"],
       "dependsOn": ["D89", "D131", "D132", "D136"],
-      "checkedThrough": "D142",
+      "checkedThrough": "D145",
       "budget": { "words": 1800, "firstScreen": 120, "figuresPer1000": 6 },
       "states": [
         {
@@ -128,7 +128,7 @@
       "lane": "P2",
       "sources": ["app/network/tdh/consolidation/*"],
       "dependsOn": ["D136"],
-      "checkedThrough": "D142",
+      "checkedThrough": "D145",
       "budget": { "words": 900, "firstScreen": 130, "figuresPer1000": 3 },
       "states": [
         {
@@ -239,7 +239,7 @@
       "lane": "P5",
       "sources": ["app/network/tdh/proofs/**"],
       "dependsOn": ["D119", "D123", "D128", "D136", "D137"],
-      "checkedThrough": "D142",
+      "checkedThrough": "D145",
       "budget": {
         "words": 2400,
         "firstScreenMin": 150,
@@ -318,7 +318,7 @@
       "lane": "P2",
       "sources": ["app/network/tdh/consolidation/design/**"],
       "dependsOn": ["D136"],
-      "checkedThrough": "D142",
+      "checkedThrough": "D145",
       "states": [
         {
           "name": "order-step1-split",

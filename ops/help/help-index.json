@@ -2552,6 +2552,48 @@
       ]
     },
     {
+      "id": "network.tdh-proofs",
+      "kind": "route",
+      "title": "Proven on Ethereum",
+      "aliases": [
+        "tdh zero knowledge proof",
+        "tdh zk proof",
+        "proven on ethereum",
+        "sp1 proof tdh",
+        "risc zero tdh",
+        "tdh result contract",
+        "half pair"
+      ],
+      "keywords": [
+        "tdh",
+        "zero-knowledge",
+        "proof",
+        "sp1",
+        "risc zero",
+        "contract",
+        "verifier",
+        "program a",
+        "program b"
+      ],
+      "facts": [
+        "Proven on Ethereum, at /network/tdh/proofs, is page 5 of the TDH chapter of 6529 Explained: what a zero-knowledge proof of a TDH day is, how one is made, why there are two programs, what the result contract checks and where the work stands.",
+        "Program A's proof of one real day is accepted by mainnet's SP1 verifier in a read-only call; program B (RISC Zero) has no real day proved yet, so the pair is half done, and nothing is recorded on Ethereum: the result contract needs both proofs and is not deployed (D128).",
+        "Show a pair that fails, marked Simulated, sets two proofs that disagree and shows the contract refusing them at its second check.",
+        "Every proof so far is under the rules before D136 and D137 (TDH v1.4)."
+      ],
+      "canonical_path": "/network/tdh/proofs",
+      "related_paths": [
+        "/network/tdh/formal",
+        "/network/tdh/verification",
+        "/network/tdh/implementations"
+      ],
+      "tags": ["network", "tdh", "proofs"],
+      "source_refs": [
+        "app/network/tdh/proofs/page.tsx",
+        "ops/docs/network/feature-tdh-proofs.md"
+      ]
+    },
+    {
       "id": "network.tdh-implementations",
       "kind": "route",
       "title": "Implementations and vectors",
@@ -3048,17 +3090,18 @@
       "facts": [
         "Nakamoto Set is a SZN1 Category B TDH boost term.",
         "Under current TDH 1.4 rules, SZN1 can use a complete set boost or the Genesis Set and Nakamoto Set boosts.",
-        "Holding Nakamoto (Meme #4) adds the configured Nakamoto partial-set bonus when SZN1 is boostable and incomplete. The complete SZN1 boost replaces its partial-set bonuses. See /network/tdh/historic-boosts for the current API-derived amount."
+        "Holding Nakamoto (Meme #4) adds the configured Nakamoto partial-set bonus when SZN1 is boostable and incomplete. The complete SZN1 boost replaces its partial-set bonuses. How it works, part C (/network/tdh/how-it-works#part-c), computes the current amount from the TDH v1.4 registry."
       ],
       "canonical_path": "/network/tdh",
       "related_paths": [
         "/network/definitions",
+        "/network/tdh/how-it-works",
         "/network/tdh/historic-boosts",
         "/about/nakamoto-threshold"
       ],
       "tags": ["network", "glossary", "concept", "tdh", "boost"],
       "source_refs": [
-        "app/network/tdh/historic-boosts/HistoricBoostsCurrent.tsx",
+        "app/network/tdh/how-it-works/BoostLens.tsx",
         "ops/docs/network/feature-tdh-boost-rules.md"
       ]
     },
