@@ -1,6 +1,6 @@
 import { VERSION_RELOAD_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { VERSION_RELOAD_SCREEN_ID } from "./versionReload";
-import { VERSION_RELOAD_IMAGE_DATA } from "./versionReloadImage";
+import { VERSION_RELOAD_IMAGE_SRC } from "./versionReloadImage";
 
 // Inline styles keep reload feedback independent of the incoming CSS/JS bundles.
 export const VERSION_RELOAD_STYLES = `
@@ -32,14 +32,16 @@ export default function VersionReloadScreen() {
       aria-live="polite"
       tabIndex={-1}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element -- Inline artwork must arrive with the cover HTML, without a separate request or client bundle. */}
+      {/* Low priority stops React hoisting a preload for this hidden image into every page; the immutable cache is warm by the time an update reloads. */}
+      {/* eslint-disable-next-line @next/next/no-img-element -- The cover must render without client image code, using a hash-named public file. */}
       <img
-        src={VERSION_RELOAD_IMAGE_DATA}
+        src={VERSION_RELOAD_IMAGE_SRC}
         alt=""
         width={60}
         height={60}
         loading="eager"
         decoding="sync"
+        fetchPriority="low"
       />
       {Object.entries(VERSION_RELOAD_MESSAGES).map(([locale, label]) => (
         <p key={locale} data-reload-locale={locale} lang={locale}>
