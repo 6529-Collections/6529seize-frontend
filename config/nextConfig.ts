@@ -1,5 +1,7 @@
 import { createSecurityHeaders } from "./securityHeaders";
 import { meebits445Headers } from "./meebits445Headers";
+import { staticAssetCacheHeaders } from "./staticAssetCacheHeaders";
+import { versionReloadImageHeaders } from "./versionReloadImageHeaders";
 import { PublicEnv } from "./env.schema";
 import { NextConfig } from "next";
 import type { RemotePattern } from "next/dist/shared/lib/image-config";
@@ -169,6 +171,12 @@ export function sharedConfig(
     },
     async headers() {
       return [
+        // Development keeps `public/` files uncached so edited assets show up
+        // on the next reload.
+        ...(publicEnv.NODE_ENV === "development" ||
+        publicEnv.NODE_ENV === "local"
+          ? []
+          : staticAssetCacheHeaders),
         {
           source: "/:path*",
           headers: [
@@ -195,6 +203,7 @@ export function sharedConfig(
           ],
         },
         meebits445Headers,
+        versionReloadImageHeaders,
       ];
     },
     turbopack: {

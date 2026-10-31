@@ -22,6 +22,7 @@ import { SortDirection } from "@/entities/ISort";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import DotLoader from "@/components/dotLoader/DotLoader";
+import NextGenLoadError from "@/components/nextGen/NextGenLoadError";
 import CollectEntryLink from "@/components/collect/CollectEntryLink";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
@@ -54,6 +55,9 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
 
   const [traits, setTraits] = useState<TraitValues[]>([]);
   const [traitsLoaded, setTraitsLoaded] = useState(false);
+  const [traitsFailed, setTraitsFailed] = useState(false);
+  const [traitsAttempt, setTraitsAttempt] = useState(0);
+  const [tokenListFailed, setTokenListFailed] = useState(false);
   const [routerLoaded, setRouterLoaded] = useState(false);
   const [selectedTraitValues, setSelectedTraitValues] = useState<
     TraitValuePair[]
@@ -152,13 +156,30 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
   }, [searchParams, traitsLoaded, routerLoaded]);
 
   useEffect(() => {
-    commonApiFetch<TraitValues[]>({
-      endpoint: `nextgen/collections/${props.collection.id}/traits`,
-    }).then((response) => {
+    const controller = new AbortController();
+    const loadTraits = async () => {
+      setTraitsFailed(false);
+      let response: TraitValues[];
+      try {
+        response = await commonApiFetch<TraitValues[]>({
+          endpoint: `nextgen/collections/${props.collection.id}/traits`,
+          signal: controller.signal,
+        });
+      } catch {
+        if (!controller.signal.aborted) {
+          setTraitsFailed(true);
+        }
+        return;
+      }
+      if (controller.signal.aborted) {
+        return;
+      }
       setTraits(response.filter((t) => t.trait !== "Collection Name"));
       setTraitsLoaded(true);
-    });
-  }, [props.collection.id]);
+    };
+    void loadTraits();
+    return () => controller.abort();
+  }, [props.collection.id, traitsAttempt]);
 
   useEffect(() => {
     if (!props.show_view_all && routerLoaded) {
@@ -301,11 +322,12 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
           <h2 className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-3xl">
             The Art
           </h2>
-          {totalResultsSet ? (
+          {totalResultsSet && (
             <span className="tw-inline-flex tw-rounded-full tw-bg-white/5 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-white/10">
               x{formatInteger(locale, totalResults)}
             </span>
-          ) : (
+          )}
+          {!totalResultsSet && !traitsFailed && !tokenListFailed && (
             <DotLoader />
           )}
         </div>
@@ -602,6 +624,13 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
             </div>
           </aside>
         )}
+        {traitsFailed && !routerLoaded && (
+          <NextGenLoadError
+            className="tw-min-w-0"
+            message="nextgen.loadError.traits"
+            onRetry={() => setTraitsAttempt((current) => current + 1)}
+          />
+        )}
         {(routerLoaded || totalResultsSet) && (
           <div className="tw-min-w-0">
             <NextGenTokenList
@@ -617,6 +646,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                 setTotalResults(totalResults);
                 setTotalResultsSet(true);
               }}
+              setLoadFailed={setTokenListFailed}
               show_pagination={!props.show_view_all}
             />
           </div>

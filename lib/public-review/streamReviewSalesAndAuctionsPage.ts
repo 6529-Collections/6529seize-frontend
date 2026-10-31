@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 
 const EXPECTED_EDITORIAL_SHA256 =
   "fc636691b34e4e45e49d0015400d27539c81c1bd27570766411d4a488782d4b4";

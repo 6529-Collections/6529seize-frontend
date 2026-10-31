@@ -46,6 +46,7 @@ import networkTdhExampleMessages from "@/i18n/messages/networkTdhExample.en-US.j
 import networkTdhProfileMessages from "@/i18n/messages/networkTdhProfile.en-US.json";
 import networkTdhRulesMessages from "@/i18n/messages/networkTdhRules.en-US.json";
 import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US.json";
+import pageMetadataMessages from "@/i18n/messages/pageMetadata.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import utcScheduleMessages from "@/i18n/messages/utcSchedule.en-US.json";
 import worldTimeZonesMessages from "@/i18n/messages/worldTimeZones.en-US.json";
@@ -59,7 +60,7 @@ import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-c
 import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
 import { THE_MEMES_MINT_PROGRESS_MESSAGES } from "@/i18n/messages/the-memes-mint-progress";
-import { PUBLIC_REVIEW_MESSAGES } from "@/i18n/messages/public-review";
+import type { PUBLIC_REVIEW_MESSAGES } from "@/i18n/messages/public-review";
 import { EN_US_RECEIPT_MESSAGES } from "@/i18n/messages/collect-receipts";
 import { CONTENT_MODERATION_MESSAGES } from "@/i18n/messages/content-moderation";
 import { MODERATION_CHECK_MESSAGES } from "@/i18n/messages/moderation-checks";
@@ -2266,6 +2267,11 @@ const WAVE_COMPOSER_PLACEHOLDER_MESSAGES = objectMessages(
   } as const
 );
 
+const WAVE_DROP_EDITOR_MESSAGES = objectMessages("waves.dropEditor", {
+  label: "Edit message",
+  placeholder: "Edit message...",
+} as const);
+
 const WAVE_STORM_COMPOSER_MESSAGES = objectMessages("waves.stormComposer", {
   draftTitle: "Storm draft",
   emptyDraft: "Your storm parts will appear here.",
@@ -3364,6 +3370,12 @@ export const EN_US_MESSAGES = {
   "nextgen.about.sections.libraries": "On-Chain Libraries",
   "nextgen.about.sections.moreInformation": "More Information",
   "nextgen.about.sections.collectionsModel": "NextGen Collections Model",
+  "nextgen.loadError.tokens": "Tokens could not be loaded.",
+  "nextgen.loadError.traits": "Collection traits could not be loaded.",
+  "nextgen.loadError.mintOptions": "Mint options could not be loaded.",
+  "nextgen.loadError.allowlistProofs": "Allowlist proofs could not be loaded.",
+  "nextgen.loadError.burnProof": "The burn proof could not be loaded.",
+  "nextgen.loadError.retry": "Try again",
   "auth.sessionUpgrade.action": "Upgrade Authentication",
   "auth.signModal.connectionUpdateRequired": "Connection Update Required",
   "auth.signModal.upgradeAuthentication": "Upgrade Authentication",
@@ -3808,6 +3820,9 @@ export const EN_US_MESSAGES = {
   "home.exploreWaves.status.loading": "Loading {label}",
   "home.exploreWaves.status.empty": "No {label}",
   "home.exploreWaves.status.showing": "Showing {count} {label}",
+  "home.exploreWaves.error.message":
+    "Could not load {label}. Please try again.",
+  "home.exploreWaves.error.retry": "Try again",
   "home.exploreWaves.viewAll": "View all",
   "waveChat.boostedDrops.display.description":
     "How boosted-drop cards show in chat.",
@@ -4517,6 +4532,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_CHAT_MESSAGES,
   ...WAVE_COMPOSER_ACTION_MESSAGES,
   ...WAVE_COMPOSER_PLACEHOLDER_MESSAGES,
+  ...WAVE_DROP_EDITOR_MESSAGES,
   ...WAVE_STORM_COMPOSER_MESSAGES,
   ...WAVE_CHAT_SETTINGS_MESSAGES,
   ...NETWORK_GROUP_INSPECTION_MESSAGES,
@@ -4577,6 +4593,7 @@ export const EN_US_MESSAGES = {
   ...networkTdhProfileMessages,
   ...networkTdhRulesMessages,
   ...delegationTapGuideMessages,
+  ...pageMetadataMessages,
   ...toolsMessages,
   ...utcScheduleMessages,
   ...worldTimeZonesMessages,
@@ -4599,7 +4616,14 @@ export const EN_US_MESSAGES = {
   ...HEADER_SEARCH_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,
-  ...PUBLIC_REVIEW_MESSAGES,
+  "navigation.nfts.theMemes": "The Memes",
+  "navigation.nfts.gradient": "6529 Gradient",
+  "navigation.nfts.nextGen": "NextGen",
+  "navigation.nfts.memeLab": "Meme Lab",
+  "navigation.nfts.rememes": "ReMemes",
+  "navigation.nfts.streamReview": "6529 Stream — Review",
+  "navigation.nfts.activity": "NFT Activity",
+  "navigation.nfts.memesCalendar": "Memes Calendar",
   ...EULA_MESSAGES,
   ...GLOBAL_ERROR_MESSAGES,
   ...TITLE_CONTEXT_MESSAGES,
@@ -4729,4 +4753,9 @@ export const EN_US_MESSAGES = {
   "waves.sidebar.byCreator": "by {creator}",
 } as const;
 
-export type MessageKey = keyof typeof EN_US_MESSAGES;
+// Route namespaces are en-US source copy that ships only with its route. Each
+// module that reads one imports `@/i18n/namespaces/<name>`, which registers
+// the copy. The keys stay valid message keys everywhere.
+export type MessageKey =
+  | keyof typeof EN_US_MESSAGES
+  | keyof typeof PUBLIC_REVIEW_MESSAGES;

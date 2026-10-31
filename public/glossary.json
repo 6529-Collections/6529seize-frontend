@@ -797,8 +797,7 @@
       ],
       "canonical_path": "/network/definitions",
       "related_paths": [
-        "/network/activity",
-        "/feed"
+        "/network/activity"
       ],
       "tags": [
         "network",

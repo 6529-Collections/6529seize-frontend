@@ -105,6 +105,14 @@ an installed nginx proxy does not protect connections that bypass it.
 
 See [AWS connection-timeout guidance](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-load-balancer-attributes.html#connection-idle-timeout).
 
+## Staging crawler cards
+
+Open Graph and crawler cards on staging intentionally require the visitor's
+staging access cookie, so they do not render without it. The deploy does not
+give the staging server its own access key: `/api` routes bypass the staging
+access gate, so a server-held key would let anyone without staging access render
+pre-release data through `/api/og-metadata/*`.
+
 ## Order and completion
 
 - Fetch shared refs before merging; preserve other developers' staging changes
@@ -200,6 +208,18 @@ metadata and final signal. Per-deploy frontend and backend notes post to the
 `Deploys · Production` wave; `6529 Releases` receives one AI-written daily
 digest plus individual Desktop and mobile app release notes. CI wave
 notifications are best effort and use deploy run IDs to correlate E2E replies.
+
+## Sitemap generation
+
+The `postbuild` step (`next-sitemap.build.cjs`) builds the sitemap from live
+public API feeds. Each feed gets up to three attempts with jittered backoff. If a
+feed is still unavailable or fails its minimum-size floor, production deploy
+builds (GitHub Actions with `VERSION` set to the exact commit) fail rather than
+publish a truncated sitemap; rerun the build once the API is healthy. Pull
+request and local builds skip only that section, print a loud warning (and a
+GitHub annotation in CI), and still emit the static pages. The optional profile
+sample never fails a build. Set `SITEMAP_FAILURE_POLICY=fail` or `fallback` to
+override the detection.
 
 ## Failure and rollback
 

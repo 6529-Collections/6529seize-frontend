@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActionsOptional } from "@/contexts/wave/MyStreamContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { commonApiDelete } from "@/services/api/common-api";
@@ -23,7 +23,7 @@ export function useResubmissionDelete({
   const { addOptimisticDrop, invalidateDrops } = useContext(
     ReactQueryWrapperContext
   );
-  const myStream = useMyStreamOptional();
+  const myStream = useMyStreamActionsOptional();
   const [replacementDrop, setReplacementDrop] = useState<ApiDrop | null>(null);
   const [isDeletingOriginal, setIsDeletingOriginal] = useState(false);
   const [deleteOriginalError, setDeleteOriginalError] = useState<string | null>(

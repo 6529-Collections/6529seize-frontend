@@ -4,6 +4,8 @@ import DistributionPlanWarnings from "@/components/distribution-plan-tool/common
 import DistributionPlanToolSidebar from "@/components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanToolSidebar";
 import DistributionPlanToolWrapper from "@/components/distribution-plan-tool/wrapper/DistributionPlanToolWrapper";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type { Metadata } from "next";
 
 export default async function DistributionPlanToolPlan({
@@ -28,5 +30,8 @@ export default async function DistributionPlanToolPlan({
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({ title: "EMMA | Plans", description: "Tools" });
+  return getAppMetadata({
+    title: "EMMA | Plans",
+    description: t(DEFAULT_LOCALE, "emma.plan.metadata.description"),
+  });
 }
