@@ -562,6 +562,18 @@ function MessageMeta({
   );
 }
 
+function getMessageRowClassName(
+  compact: boolean,
+  pending: boolean,
+  appear: boolean
+): string {
+  return `tw-group tw-relative tw-flex tw-gap-3 tw-px-4 focus:tw-bg-iron-900/60 focus:tw-outline-none desktop-hover:hover:tw-bg-iron-950 ${
+    compact ? "tw-py-0.5" : "tw-pb-0.5 tw-pt-3"
+  } ${pending ? "tw-opacity-70" : ""} ${
+    appear ? "motion-safe:tw-animate-sidebar-account-menu-in" : ""
+  }`;
+}
+
 function E2eeMessageItemComponent({
   message,
   conversation,
@@ -605,11 +617,7 @@ function E2eeMessageItemComponent({
     <li
       id={getMessageDomId(message.id)}
       tabIndex={-1}
-      className={`tw-group tw-relative tw-flex tw-gap-3 tw-px-4 focus:tw-bg-iron-900/60 focus:tw-outline-none desktop-hover:hover:tw-bg-iron-950 ${
-        compact ? "tw-py-0.5" : "tw-pb-0.5 tw-pt-3"
-      } ${message.pending ? "tw-opacity-70" : ""} ${
-        appear ? "motion-safe:tw-animate-sidebar-account-menu-in" : ""
-      }`}
+      className={getMessageRowClassName(compact, message.pending, appear)}
     >
       <div className="tw-w-9 tw-flex-shrink-0">
         {compact ? null : (
