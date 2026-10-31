@@ -1,5 +1,7 @@
 import { generateMetadata as generateArtMetadata } from "@/app/nextgen/collection/[collection]/art/page";
-import { generateMetadata as generateNextGenCollectionMetadata } from "@/app/nextgen/collection/[collection]/[[...view]]/page";
+import NextGenCollectionPage, {
+  generateMetadata as generateNextGenCollectionMetadata,
+} from "@/app/nextgen/collection/[collection]/[[...view]]/page";
 import { generateNextgenCollectionMetadata } from "@/app/nextgen/collection/[collection]/page-utils";
 import { generateMetadata as generateNextGenMetadata } from "@/app/nextgen/[[...view]]/page";
 import { generateMetadata as generateNextGenAdminMetadata } from "@/app/nextgen/manager/page";
@@ -11,6 +13,7 @@ import { NEXTGEN_CONTRACT } from "@/constants/constants";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 jest.mock(
   "@/components/nextGen/collections/collectionParts/art/NextGenCollectionArtPage",
@@ -21,11 +24,23 @@ jest.mock("@/app/nextgen/collection/[collection]/CollectionPageShell", () => ({
   default: () => null,
 }));
 
+// A stable stand-in for Next's not-found signal, so these tests do not depend
+// on the framework's internal error digest format.
+jest.mock("next/navigation", () => ({
+  ...jest.requireActual("next/navigation"),
+  notFound: jest.fn(() => {
+    throw new Error("NEXT_NOT_FOUND");
+  }),
+}));
+
 jest.mock("@/helpers/server.app.helpers", () => ({
   getAppCommonHeaders: jest.fn().mockResolvedValue({ "x-test": "1" }),
 }));
 
-jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
+jest.mock("@/services/api/common-api", () => ({
+  ...jest.requireActual("@/services/api/common-api"),
+  commonApiFetch: jest.fn(),
+}));
 
 jest.mock("@/app/nextgen/[[...view]]/NextGenPageClient", () => ({
   __esModule: true,
@@ -143,6 +158,9 @@ const token: NextGenToken = {
   thumbnail_url: "https://cdn.test/thumb.png",
   updated_at: "2024-01-01T00:00:00Z",
 };
+
+const apiError = (status: number) =>
+  Object.assign(new Error(`HTTP ${status}`), { status });
 
 const getSocialImage = (metadata: Metadata) => {
   const [image] = metadata.openGraph?.images as {
@@ -343,7 +361,7 @@ describe("NextGen metadata", () => {
   });
 
   it("falls back to a branded NextGen token card when token data is missing", async () => {
-    (commonApiFetch as jest.Mock).mockRejectedValue(new Error("missing"));
+    (commonApiFetch as jest.Mock).mockRejectedValue(apiError(404));
 
     const metadata = await generateNextGenTokenMetadata({
       params: Promise.resolve({ token: "999" }),
@@ -357,6 +375,57 @@ describe("NextGen metadata", () => {
     expect(url.searchParams.get("collection")).toBe("NextGen");
     expect(url.searchParams.get("image")).toBeNull();
     expect(url.searchParams.get("title")).toBe("NextGen #999");
+  });
+
+  it("does not turn a backend failure into the missing-token card", async () => {
+    const error = apiError(503);
+    (commonApiFetch as jest.Mock).mockRejectedValue(error);
+
+    await expect(
+      generateNextGenTokenMetadata({
+        params: Promise.resolve({ token: "10000000042" }),
+      })
+    ).rejects.toBe(error);
+  });
+
+  it("renders not found for a token that is a real 404", async () => {
+    (commonApiFetch as jest.Mock).mockRejectedValue(apiError(404));
+
+    await expect(
+      NextGenTokenPage({
+        params: Promise.resolve({ token: "10000000042" }),
+        searchParams: Promise.resolve({}),
+      })
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+    expect(notFound).toHaveBeenCalledTimes(1);
+  });
+
+  it("lets a token page backend failure reach the error boundary", async () => {
+    const error = apiError(500);
+    (commonApiFetch as jest.Mock).mockRejectedValue(error);
+
+    await expect(
+      NextGenTokenPage({
+        params: Promise.resolve({ token: "10000000042" }),
+        searchParams: Promise.resolve({}),
+      })
+    ).rejects.toBe(error);
+    expect(notFound).not.toHaveBeenCalled();
+  });
+
+  it("renders not found only for a real 404 on the collection page", async () => {
+    (commonApiFetch as jest.Mock).mockRejectedValue(apiError(404));
+    await expect(
+      NextGenCollectionPage({ params: Promise.resolve({ collection: "nope" }) })
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+    expect(notFound).toHaveBeenCalledTimes(1);
+
+    const error = apiError(502);
+    (commonApiFetch as jest.Mock).mockRejectedValue(error);
+    await expect(
+      NextGenCollectionPage({ params: Promise.resolve({ collection: "nope" }) })
+    ).rejects.toBe(error);
+    expect(notFound).toHaveBeenCalledTimes(1);
   });
 
   it("normalizes short token links to the indexed token identity", async () => {
