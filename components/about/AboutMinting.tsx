@@ -1,3 +1,5 @@
+"use client";
+
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import {
   faArrowUpRightFromSquare,

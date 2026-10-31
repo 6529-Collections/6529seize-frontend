@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { DropSize } from "@/helpers/waves/drop.helpers";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { VideoPlaybackMemoryProvider } from "@/components/drops/view/item/content/media/VideoPlaybackMemory";
 import {
   clearWaveDropNearViewport,
@@ -122,7 +122,7 @@ export default function VirtualScrollWrapper({
   suspendLightDropHydration = false,
   rootMargin = "5000px 0px 5000px 0px",
 }: VirtualScrollWrapperProps) {
-  const { fetchAroundSerialNo } = useMyStream();
+  const { fetchAroundSerialNo } = useMyStreamActions();
 
   /**
    * isInView: Tracks if the component is currently in the viewport.

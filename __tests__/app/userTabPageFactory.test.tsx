@@ -2,7 +2,13 @@ jest.mock("@/contexts/TitleContext", () => ({ useSetTitle: jest.fn() }));
 jest.mock("@/components/user/layout/UserPageDropModal", () => () => (
   <div data-testid="drop-modal" />
 ));
-import { fireEvent, render, screen } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useSetTitle } from "@/contexts/TitleContext";
@@ -11,6 +17,28 @@ import {
   useTransfer,
 } from "@/components/nft-transfer/TransferState";
 import { ContractType } from "@/types/enums";
+
+// Outside a React server render `cache` is a pass-through, so model its
+// per-request memoization to verify the page and metadata share loads.
+jest.mock("react", () => {
+  const actual = jest.requireActual("react");
+  const memoStores: Array<Map<string, unknown>> = [];
+  return {
+    ...actual,
+    __memoStores: memoStores,
+    cache: <Args extends unknown[], Result>(fn: (...args: Args) => Result) => {
+      const store = new Map<string, Result>();
+      memoStores.push(store);
+      return (...args: Args): Result => {
+        const key = JSON.stringify(args);
+        if (!store.has(key)) {
+          store.set(key, fn(...args));
+        }
+        return store.get(key) as Result;
+      };
+    },
+  };
+});
 
 jest.mock("@/helpers/server.app.helpers", () => ({
   getAppCommonHeaders: jest.fn(async () => ({ "x-test": "1" })),
@@ -51,6 +79,13 @@ jest.mock("@/components/user/layout/UserPageTabTransition", () => ({
   ),
 }));
 
+jest.mock("@/components/user/layout/UserPageLayout", () => ({
+  __esModule: true,
+  default: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="profile-layout">{children}</div>
+  ),
+}));
+
 const redirectMock = jest.fn();
 jest.mock("next/navigation", () => ({
   redirect: (url: string) => redirectMock(url),
@@ -59,7 +94,10 @@ jest.mock("next/navigation", () => ({
   },
 }));
 
+import ProfileLayout from "@/app/[user]/(profile)/layout";
 import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
+import { getUserPageHeaderState } from "@/components/user/user-page-header/UserPageHeader";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { commonApiFetch } from "@/services/api/common-api";
 import {
@@ -71,6 +109,15 @@ function DummyCollectedTab({ profile }: { readonly profile: any }) {
   return <div data-testid="collected">COLLECTED:{profile.handle}</div>;
 }
 
+const memoStores = (
+  jest.requireMock("react") as { __memoStores: Array<Map<string, unknown>> }
+).__memoStores;
+
+const statementsRequestCount = () =>
+  (commonApiFetch as jest.Mock).mock.calls.filter(([request]) =>
+    String(request.endpoint).endsWith("/cic/statements")
+  ).length;
+
 const buildFactory = () =>
   createUserTabPage({
     subroute: "collected",
@@ -80,7 +127,9 @@ const buildFactory = () =>
 describe("user tab page via createUserTabPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    memoStores.forEach((store) => store.clear());
     redirectMock.mockClear();
+    (commonApiFetch as jest.Mock).mockResolvedValue([]);
     (getUserProfile as jest.Mock).mockImplementation(
       async ({ user }: { user: string }) => ({
         handle: user,
@@ -385,9 +434,145 @@ describe("user tab page via createUserTabPage", () => {
     });
 
     expect(commonApiFetch).toHaveBeenCalledWith({
-      endpoint: "profiles/alice%252fadmin/cic/statements",
+      endpoint: "profiles/alice%2Fadmin/cic/statements",
       headers: { "x-test": "1" },
     });
+  });
+
+  it("loads the identity once when the layout, page and metadata render together", async () => {
+    const { Page, generateMetadata } = buildFactory();
+    const params = Promise.resolve({ user: "Alice" });
+
+    await Promise.all([
+      ProfileLayout({ params, children: null }),
+      Page({ params, searchParams: Promise.resolve({}) } as any),
+      generateMetadata({ params } as any),
+    ]);
+
+    expect(getUserProfile).toHaveBeenCalledTimes(1);
+    expect(statementsRequestCount()).toBe(1);
+  });
+
+  it.each([
+    ["Dave", "dave", "profiles/dave/cic/statements"],
+    ["Br%C3%9Cder", "br%c3%9cder", "profiles/br%C3%BCder/cic/statements"],
+  ])(
+    "shares one public bio request between metadata and the header for %s",
+    async (routeUser, headerIdentity, endpoint) => {
+      const { generateMetadata } = buildFactory();
+
+      await generateMetadata({ params: Promise.resolve({ user: routeUser }) });
+      // The header passes the lowercased route identity it was rendered with.
+      await getUserPageHeaderState(headerIdentity, null, null);
+
+      expect(statementsRequestCount()).toBe(1);
+      expect(commonApiFetch).toHaveBeenCalledWith({
+        endpoint,
+        headers: { "x-test": "1" },
+      });
+    }
+  );
+
+  it("renders the tab before the header requests finish, then applies the header snapshot", async () => {
+    let resolveStatements: (statements: unknown) => void = () => undefined;
+    (commonApiFetch as jest.Mock).mockImplementation(
+      ({ endpoint }: { endpoint: string }) =>
+        endpoint.endsWith("/cic/statements")
+          ? new Promise((resolve) => {
+              resolveStatements = resolve;
+            })
+          : Promise.resolve(null)
+    );
+    const client = new QueryClient();
+    const { Page } = buildFactory();
+
+    const element = await Page({ params: Promise.resolve({ user: "Alice" }) });
+    render(
+      <QueryClientProvider client={client}>{element}</QueryClientProvider>
+    );
+
+    expect(screen.getByTestId("collected")).toHaveTextContent(
+      "COLLECTED:alice"
+    );
+    const statementsKey = [QueryKey.PROFILE_CIC_STATEMENTS, "alice"];
+    expect(client.getQueryData(statementsKey)).toBeUndefined();
+
+    await waitFor(() => expect(statementsRequestCount()).toBe(1));
+    const statements = [{ statement_type: "BIO", statement_value: "Bio" }];
+    await act(async () => {
+      resolveStatements(statements);
+    });
+
+    await waitFor(() =>
+      expect(client.getQueryData(statementsKey)).toEqual(statements)
+    );
+    client.clear();
+  });
+
+  it("requests the public bio while the identity request is still pending", async () => {
+    let resolveProfile: (profile: unknown) => void = () => undefined;
+    (getUserProfile as jest.Mock).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveProfile = resolve;
+        })
+    );
+    const { generateMetadata } = buildFactory();
+
+    const metadata = generateMetadata({
+      params: Promise.resolve({ user: "Dave" }),
+    });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(commonApiFetch).toHaveBeenCalledWith({
+      endpoint: "profiles/dave/cic/statements",
+      headers: { "x-test": "1" },
+    });
+
+    resolveProfile({ handle: "dave" });
+    await expect(metadata).resolves.toEqual(
+      expect.objectContaining({ alternates: { canonical: "/dave/collected" } })
+    );
+  });
+
+  it("requests the identity while the search params are still pending", async () => {
+    let resolveSearchParams: (query: Record<string, string>) => void = () =>
+      undefined;
+    const searchParams = new Promise<Record<string, string>>((resolve) => {
+      resolveSearchParams = resolve;
+    });
+    const { Page } = buildFactory();
+
+    const page = Page({
+      params: Promise.resolve({ user: "Alice" }),
+      searchParams,
+    } as any);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(getUserProfile).toHaveBeenCalledTimes(1);
+
+    resolveSearchParams({ address: "0x1" });
+    render(await page);
+    expect(await screen.findByTestId("collected")).toBeInTheDocument();
+  });
+
+  it("returns a route 404 for an unknown profile without touching the tab", async () => {
+    (getUserProfile as jest.Mock).mockRejectedValueOnce(
+      Object.assign(new Error("missing identity"), { status: 404 })
+    );
+    const tab = jest.fn(() => <div data-testid="tab" />);
+    const getTabProps = jest.fn(async () => ({}));
+    const { Page } = createUserTabPage({
+      subroute: "collected",
+      Tab: tab,
+      getTabProps,
+    });
+
+    await expect(
+      Page({ params: Promise.resolve({ user: "ghost" }) } as any)
+    ).rejects.toThrow("NEXT_HTTP_ERROR_FALLBACK;404");
+    expect(getTabProps).not.toHaveBeenCalled();
+    expect(tab).not.toHaveBeenCalled();
   });
 
   it("noindexes profile utility tabs and temporary profile failures", async () => {
@@ -400,6 +585,8 @@ describe("user tab page via createUserTabPage", () => {
     });
     expect(utilityMetadata.robots).toEqual({ index: false, follow: true });
 
+    // A new request starts with an empty per-request memo.
+    memoStores.forEach((store) => store.clear());
     (getUserProfile as jest.Mock).mockRejectedValueOnce(
       Object.assign(new Error("upstream failed"), { status: 503 })
     );
