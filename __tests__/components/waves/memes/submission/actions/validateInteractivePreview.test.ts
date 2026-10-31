@@ -391,6 +391,56 @@ describe("validateInteractivePreview", () => {
       expect(global.fetch).toHaveBeenCalledTimes(4);
     });
 
+    it("starts the GET fallback at the approved address HEAD reached", async () => {
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce(createResponse(302, { location: REDIRECT_TARGET }))
+        .mockResolvedValueOnce(
+          createResponse(405, { "content-type": "text/plain" }, REDIRECT_TARGET)
+        )
+        .mockResolvedValueOnce(
+          createResponse(206, { "content-type": "text/html" }, REDIRECT_TARGET)
+        );
+
+      const result = await validateInteractivePreview({
+        provider: "ipfs",
+        path: CID_V1,
+      });
+
+      expect(result.ok).toBe(true);
+      expect(global.fetch).toHaveBeenCalledTimes(3);
+      expect(global.fetch).toHaveBeenNthCalledWith(
+        3,
+        REDIRECT_TARGET,
+        expect.objectContaining({ method: "GET", redirect: "manual" })
+      );
+    });
+
+    it("shares one redirect cap between HEAD and the ranged GET fallback", async () => {
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce(createResponse(302, { location: REDIRECT_TARGET }))
+        .mockResolvedValueOnce(createResponse(302, { location: REDIRECT_TARGET }))
+        .mockResolvedValueOnce(createResponse(302, { location: REDIRECT_TARGET }))
+        .mockResolvedValueOnce(createResponse(405, {}, REDIRECT_TARGET))
+        .mockResolvedValueOnce(createResponse(302, { location: REDIRECT_TARGET }));
+
+      const result = await validateInteractivePreview({
+        provider: "ipfs",
+        path: CID_V1,
+      });
+
+      expect(result.ok).toBe(false);
+      expect(result.reason).toBe("Gateway redirected too many times.");
+      // HEAD used the whole budget (initial request plus three redirects), so
+      // the fallback GET, which starts at HEAD's final address, cannot follow
+      // another redirect.
+      expect(global.fetch).toHaveBeenCalledTimes(5);
+      expect(global.fetch).toHaveBeenNthCalledWith(
+        5,
+        REDIRECT_TARGET,
+        expect.objectContaining({ method: "GET" })
+      );
+    });
+
     it("applies the redirect guard to the ranged GET fallback as well", async () => {
       (global.fetch as jest.Mock)
         .mockResolvedValueOnce(createResponse(405, {}))

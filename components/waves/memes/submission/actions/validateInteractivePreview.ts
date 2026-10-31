@@ -21,7 +21,9 @@ interface ValidateInteractivePreviewArgs {
 }
 
 type GatewayOutcome =
-  | { readonly ok: true; readonly response: Response }
+  // `url` is the approved address that produced `response`, after any
+  // redirects were followed.
+  | { readonly ok: true; readonly response: Response; readonly url: string }
   | { readonly ok: false; readonly reason: string };
 
 const MAX_BYTES_TO_PEEK = 1024;
@@ -121,18 +123,26 @@ const resolveRedirectTarget = (
   }
 };
 
+// Redirects followed so far in one validation. The HEAD request and its
+// ranged GET fallback share it, so together they follow at most
+// MAX_GATEWAY_REDIRECTS redirects.
+interface RedirectBudget {
+  followed: number;
+}
+
 // Redirects are never followed implicitly: every hop must pass the same host
 // and path guard as the initial URL before another request is made.
 const requestGateway = async (
   url: string,
-  method: GatewayRequestMethod
+  method: GatewayRequestMethod,
+  redirectBudget: RedirectBudget
 ): Promise<GatewayOutcome> => {
   let currentUrl = url;
 
-  for (let redirects = 0; ; redirects += 1) {
+  for (;;) {
     const response = await performGatewayRequest(currentUrl, method);
     if (!REDIRECT_STATUS_CODES.has(response.status)) {
-      return { ok: true, response };
+      return { ok: true, response, url: currentUrl };
     }
 
     discardResponse(response);
@@ -147,10 +157,11 @@ const requestGateway = async (
         reason: "Gateway redirected to an unapproved host.",
       };
     }
-    if (redirects >= MAX_GATEWAY_REDIRECTS) {
+    if (redirectBudget.followed >= MAX_GATEWAY_REDIRECTS) {
       return { ok: false, reason: "Gateway redirected too many times." };
     }
 
+    redirectBudget.followed += 1;
     currentUrl = nextUrl;
   }
 };
@@ -158,10 +169,11 @@ const requestGateway = async (
 const attemptGatewayRequest = async (
   url: string,
   method: GatewayRequestMethod,
-  logContext: Record<string, unknown>
+  logContext: Record<string, unknown>,
+  redirectBudget: RedirectBudget
 ): Promise<GatewayOutcome> => {
   try {
-    return await requestGateway(url, method);
+    return await requestGateway(url, method, redirectBudget);
   } catch (error) {
     const label = method === "HEAD" ? "HEAD" : "Fallback GET";
     console.error(`[validateInteractivePreview] ${label} request failed`, {
@@ -238,9 +250,21 @@ export async function validateInteractivePreview({
   }
 
   const logContext = { provider, path };
-  let outcome = await attemptGatewayRequest(targetUrl, "HEAD", logContext);
+  const redirectBudget: RedirectBudget = { followed: 0 };
+  let outcome = await attemptGatewayRequest(
+    targetUrl,
+    "HEAD",
+    logContext,
+    redirectBudget
+  );
   if (outcome.ok && HEAD_FALLBACK_STATUS_CODES.has(outcome.response.status)) {
-    outcome = await attemptGatewayRequest(targetUrl, "GET", logContext);
+    // Start where HEAD ended: its redirects were already checked and counted.
+    outcome = await attemptGatewayRequest(
+      outcome.url,
+      "GET",
+      logContext,
+      redirectBudget
+    );
   }
   if (!outcome.ok) {
     return { ok: false, reason: outcome.reason };
