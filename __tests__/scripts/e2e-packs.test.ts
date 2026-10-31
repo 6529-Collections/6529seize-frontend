@@ -906,17 +906,63 @@ describe("E2E runner CLI resolution", () => {
   });
 
   it.each([
-    ["staging", "post-deploy", 18],
+    ["staging", "post-deploy", 19],
     ["production", "cron", 12],
-    ["production", "post-deploy", 17],
+    ["production", "post-deploy", 18],
   ])(
     "lists %s/%s as a non-empty deterministic pack set",
     (env, trigger, count) => {
       const result = run(["--env", env, "--trigger", trigger, "--list"]);
       expect(result.status).toBe(0);
       expect(result.stdout).toContain(`resolved ${count} pack(s)`);
+      if (trigger === "post-deploy") {
+        expect(result.stdout).toContain(`test:e2e:${env}:bookmarks`);
+      }
     }
   );
+
+  it("runs the stateful staging E2EE pack only when selected by alias, serially", () => {
+    const postDeploy = run([
+      "--env",
+      "staging",
+      "--trigger",
+      "post-deploy",
+      "--list",
+    ]);
+    expect(postDeploy.status).toBe(0);
+    expect(postDeploy.stdout).not.toContain("test:e2e:staging:e2ee");
+
+    const selected = run([
+      "--env",
+      "staging",
+      "--trigger",
+      "manual",
+      "--pack",
+      "e2ee-staging",
+      "--list",
+    ]);
+    expect(selected.status).toBe(0);
+    expect(selected.stdout).toContain("resolved 1 pack(s)");
+    expect(selected.stdout).toContain(
+      "test:e2e:staging:e2ee (alias: e2ee-staging)"
+    );
+
+    const parallel = run([
+      "--env",
+      "staging",
+      "--trigger",
+      "manual",
+      "--pack",
+      "e2ee-staging",
+      "--parallel",
+      "3",
+      "--list",
+    ]);
+    expect(parallel.status).toBe(1);
+    expect(parallel.stderr).toContain(
+      "parallel execution is restricted to manifest-declared readonly packs"
+    );
+  });
 
   it.each(["staging", "production"])(
     "uses disjoint readonly %s post-deploy packs",

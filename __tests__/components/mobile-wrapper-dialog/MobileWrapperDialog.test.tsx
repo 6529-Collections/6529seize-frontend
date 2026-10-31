@@ -254,12 +254,12 @@ describe("MobileWrapperDialog", () => {
       expect(container).toHaveClass(
         "[--mobile-wrapper-dialog-keyboard-inset:var(--native-keyboard-inset-bottom,0px)]"
       );
-      expect(container?.style.bottom).toBe("0px");
-      expect(container?.style.transform).toBe(
-        "translate3d(0, calc(0px - var(--mobile-wrapper-dialog-keyboard-inset, 0px)), 0)"
+      expect(container?.style.bottom).toBe(
+        "var(--mobile-wrapper-dialog-keyboard-inset, 0px)"
       );
+      expect(container?.style.transform).toBe("");
       expect(container?.style.transition).toBe(
-        "transform var(--native-keyboard-layout-transition-duration, 0ms) ease-out"
+        "bottom var(--native-keyboard-layout-transition-duration, 0ms) ease-out"
       );
       expect(surface?.style.maxHeight).toBe(
         "min(var(--mobile-wrapper-dialog-resting-height, calc(min(100vh, 100svh) - 10rem)), var(--mobile-wrapper-dialog-available-height, max(0px, calc(min(100vh, 100svh) - 4rem - var(--mobile-wrapper-dialog-keyboard-inset, 0px)))))"

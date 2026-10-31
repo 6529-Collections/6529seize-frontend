@@ -12,8 +12,179 @@ import {
 
 import { RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
 import { expectUrlState } from "../support/urlState";
+import { isCapacitorSimulationProject } from "../support/surfaceSimulation";
 
 test.describe("Profile deep-link read-only coverage @surface @medium @large @readonly", () => {
+  test("toggles Details without a route fetch while its own data is loading", async ({
+    page,
+  }) => {
+    await gotoReady(
+      page,
+      `/${PROFILE_HANDLE}/collected?collection=memes&details=closed`
+    );
+    // Filters mount after the profile has hydrated and its initial cards load.
+    await expect(
+      page.getByRole("main").locator('[data-profile-section="Filters"]')
+    ).toBeVisible({
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
+    let releaseDetails!: () => void;
+    const pendingDetails = new Promise<void>((resolve) => {
+      releaseDetails = resolve;
+    });
+    await page.route(
+      /\/(?:new_memes_seasons|tdh\/consolidation\/|owners-balances\/consolidation\/)/,
+      async (route) => {
+        await pendingDetails;
+        await route.continue();
+      }
+    );
+    const routeFetches: string[] = [];
+    page.on("request", (request) => {
+      const url = new URL(request.url());
+      const headers = request.headers();
+      // Visible profile tabs can prefetch this route independently of Details.
+      // Count navigation fetches so the toggle must still avoid a server round trip.
+      if (
+        url.pathname === `/${PROFILE_HANDLE}/collected` &&
+        headers["rsc"] === "1" &&
+        !headers["next-router-prefetch"]
+      ) {
+        routeFetches.push(url.pathname + url.search);
+      }
+    });
+    try {
+      await page.getByRole("button", { name: "Details", exact: true }).click();
+      await expect(
+        page.getByRole("button", { name: "Hide Details", exact: true })
+      ).toHaveAttribute("aria-expanded", "true");
+      await expect(
+        page
+          .getByRole("status")
+          .filter({ hasText: "Loading collection details" })
+      ).toBeVisible();
+      await page
+        .getByRole("button", { name: "Hide Details", exact: true })
+        .click();
+      await expect(
+        page.getByRole("button", { name: "Details", exact: true })
+      ).toHaveAttribute("aria-expanded", "false");
+      await expect(
+        page.getByText("Loading collection details…", { exact: true })
+      ).toHaveCount(0);
+      // One event-loop turn catches stale render state during fast repeated activation.
+      await page
+        .getByRole("button", { name: "Details", exact: true })
+        .evaluate((button) => {
+          for (let i = 0; i < 3; i++) (button as HTMLButtonElement).click();
+        });
+      await expect(
+        page.getByRole("button", { name: "Hide Details", exact: true })
+      ).toHaveAttribute("aria-expanded", "true");
+      await expectUrlState(
+        page,
+        (url) =>
+          url.searchParams.get("details") === "open" &&
+          url.searchParams.get("collection") === "memes"
+      );
+      expect(routeFetches).toEqual([]);
+    } finally {
+      releaseDetails();
+    }
+    const clippedHeight = await page
+      .getByRole("main")
+      .locator('[data-profile-section="Collection details"]')
+      .evaluate(async (panel) => {
+        while (!panel.querySelector("#collected-details-heading")) {
+          await new Promise<void>((resolve) =>
+            requestAnimationFrame(() => resolve())
+          );
+        }
+        // Loaded content must fit immediately, without restarting an outer
+        // height animation each time another section receives its data.
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => resolve())
+        );
+        let clipped = 0;
+        for (
+          let ancestor = panel.parentElement;
+          ancestor;
+          ancestor = ancestor.parentElement
+        ) {
+          if (getComputedStyle(ancestor).overflowY === "hidden") {
+            clipped = Math.max(
+              clipped,
+              panel.getBoundingClientRect().bottom -
+                ancestor.getBoundingClientRect().bottom
+            );
+          }
+        }
+        return clipped;
+      });
+    expect(clippedHeight).toBeLessThanOrEqual(1);
+    await expect(
+      page.getByRole("region", { name: "Collected", exact: true })
+    ).toBeVisible();
+  });
+
+  test("browser Back from Collect actions keeps the Collected filters", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      isCapacitorSimulationProject(testInfo.project.name),
+      "Web history contract; native app Back is covered in native-shell-readonly"
+    );
+    for (const action of ["Manage orders", "Complete my set"]) {
+      await gotoReady(
+        page,
+        `/${PROFILE_HANDLE}/collected?collection=memes&szn=1&details=closed`
+      );
+      await expect(
+        page.getByRole("main").locator('[data-profile-section="Filters"]')
+      ).toBeVisible({
+        timeout: RESPONSE_TIMEOUT_MS,
+      });
+      const source = new URL(page.url());
+      const link = page.getByRole("link", { name: action, exact: true });
+      // Record the position after Playwright's click preparation scrolls the
+      // target clear of the mobile browser's viewport edge.
+      await link.click({ trial: true });
+      const sourceTop = await link.evaluate(
+        (element) => element.getBoundingClientRect().top
+      );
+      const destination = new URL(
+        (await link.getAttribute("href"))!,
+        page.url()
+      );
+      expect(destination.searchParams.has("returnTo")).toBe(false);
+      await link.click();
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname ===
+          (action === "Manage orders" ? "/collect/orders" : "/collect")
+      );
+      await expect(
+        page.getByRole("button", { name: "Back", exact: true })
+      ).toHaveCount(0);
+      await page.goBack();
+      await expect(page).toHaveURL((url) => url.pathname === source.pathname);
+      await expectUrlState(page, (url) =>
+        ["collection", "szn", "details"].every(
+          (key) => url.searchParams.get(key) === source.searchParams.get(key)
+        )
+      );
+      await expect
+        .poll(() =>
+          link.evaluate(
+            (element, top) =>
+              Math.abs(element.getBoundingClientRect().top - top),
+            sourceTop
+          )
+        )
+        .toBeLessThanOrEqual(2);
+    }
+  });
+
   test("keeps Collected statistics, tabs and tables readable on compact screens", async ({
     page,
   }) => {
@@ -34,8 +205,12 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       .locator(":scope > div[aria-hidden='true']");
 
     await expect(details).toBeVisible();
-    await expect(metrics.getByRole("button").first()).toBeVisible();
-    await expect(fade).toBeVisible();
+    // The shell precedes the API-backed statistics, so those controls get the
+    // bounded data-readiness budget. The layout checks below stay strict.
+    await expect(metrics.getByRole("button").first()).toBeVisible({
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
+    await expect(fade).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     for (const width of [430, 520, 640, 767, 390]) {
       await page.setViewportSize({ width, height: 844 });
       await expect
@@ -291,8 +466,12 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       exact: true,
     });
     const history = activityTabs.getByRole("tab", { name: "TDH History" });
+    // Tab selection is URL state: it commits after a client navigation, which
+    // slower runners can take longer than the default assertion timeout.
     await walletActivity.press("End");
-    await expect(history).toHaveAttribute("aria-selected", "true");
+    await expect(history).toHaveAttribute("aria-selected", "true", {
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
     await expect(history).toBeFocused();
     await expect
       .poll(() =>
@@ -306,7 +485,9 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       )
       .toBe(true);
     await history.press("Home");
-    await expect(walletActivity).toHaveAttribute("aria-selected", "true");
+    await expect(walletActivity).toHaveAttribute("aria-selected", "true", {
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
     await expect(walletActivity).toBeFocused();
 
     await page.setViewportSize({ width: 1280, height: 900 });
@@ -345,7 +526,7 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       name: "Collected network cards",
     });
     const networkCount = page.getByText(/^Page 1 of \d+$/, { exact: true });
-    await expect(networkCards).toBeVisible();
+    await expect(networkCards).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await expect(networkCount).toBeVisible();
 
     for (const width of [320, 390, 768, 1280]) {
@@ -452,13 +633,31 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
   test("keeps Native Collected page counts and pagination readable", async ({
     page,
   }) => {
+    // The initial load and both page changes each get the full data budget
+    // (RESPONSE_TIMEOUT_MS), which together can exceed the default test timeout.
+    test.setTimeout(120000);
     await page.setViewportSize({ width: 390, height: 844 });
     await gotoReady(
       page,
       `/${PROFILE_HANDLE}/collected?collection=memes&page=2`
     );
     const nativeCount = page.getByText(/^Page 2 of \d+$/, { exact: true });
-    await expect(nativeCount).toBeVisible();
+    await expect(nativeCount).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    const cards = page.getByRole("list", {
+      name: "Collected cards",
+      exact: true,
+    });
+    const firstCard = cards.getByRole("link").first();
+    // The count only renders with the page's cards, so the first card exists.
+    const pageTwoFirstArtwork = new URL(
+      (await firstCard.getAttribute("href")) ?? "",
+      page.url()
+    ).pathname;
+    // Match the path literally: artwork paths may contain regex metacharacters.
+    const pageTwoFirstArtworkPattern = pageTwoFirstArtwork.replaceAll(
+      /[.*+?^${}()|[\]\\]/g,
+      String.raw`\$&`
+    );
     const previous = page.getByRole("button", {
       name: "Previous",
       exact: true,
@@ -490,17 +689,27 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     );
     await expect(
       page.getByText(/^Page 3 of \d+$/, { exact: true })
-    ).toBeVisible();
-    const cards = page.getByRole("list", {
-      name: "Collected cards",
-      exact: true,
-    });
-    await expect(cards.getByRole("link").first()).toBeFocused();
-    await expect(cards.getByRole("link").first()).toBeInViewport();
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    // The page count follows the URL, so the cards can still be the previous
+    // page's. Focus moves only after the requested page's cards render, so
+    // wait for those with the data budget, then assert focus strictly with the
+    // default timeout: late focus after the cards exist is a regression.
+    await expect(firstCard).toHaveAttribute(
+      "href",
+      new RegExp(`^(?!${pageTwoFirstArtworkPattern}(?:[?#]|$)).+`),
+      { timeout: RESPONSE_TIMEOUT_MS }
+    );
+    await expect(firstCard).toBeFocused();
+    await expect(firstCard).toBeInViewport();
     await previous.click();
-    await expect(cards.getByRole("link").first()).toBeFocused();
-    await expect(cards.getByRole("link").first()).toBeInViewport();
-    await expect(nativeCount).toBeVisible();
+    await expect(nativeCount).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    await expect(firstCard).toHaveAttribute(
+      "href",
+      new RegExp(`^${pageTwoFirstArtworkPattern}(?:[?#]|$)`),
+      { timeout: RESPONSE_TIMEOUT_MS }
+    );
+    await expect(firstCard).toBeFocused();
+    await expect(firstCard).toBeInViewport();
     await expectUrlState(
       page,
       (url) =>
@@ -703,7 +912,7 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       await expect(filter).toHaveCSS("font-size", "12px");
       await expect(filter).toHaveCSS("white-space", "nowrap");
       const bounds = await filter.boundingBox();
-      expect(bounds?.height).toBeGreaterThanOrEqual(40);
+      expect(bounds?.height).toBe(32);
       expect(bounds?.width).toBeGreaterThanOrEqual(40);
     }
     await sort.focus();
@@ -734,7 +943,8 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     }
     await sortPanel.press("Escape");
     await expect(sort).toBeFocused();
-    await expect(sort).toHaveCSS("box-shadow", /rgba?\(82[, ]+139[, ]+255/);
+    await expect(sort).toHaveCSS("outline-color", "rgb(82, 139, 255)");
+    await expect(sort).toHaveCSS("outline-width", "2px");
     await expectAxeClean(page, { include: ["main button[aria-haspopup]"] });
     await sort.click();
     await page.getByRole("menuitem", { name: "Token ID", exact: true }).click();

@@ -322,6 +322,53 @@ describe("scheduleGoogleAnalytics", () => {
     ]);
   });
 
+  it("redacts link credentials from the page and referrer URLs it reports", () => {
+    const linkValue = "synthetic-link-value";
+    window.history.replaceState(
+      null,
+      "",
+      `/accept-connection-sharing?token=${linkValue}&address=0x1#intro`
+    );
+    jest
+      .spyOn(document, "referrer", "get")
+      .mockReturnValue(
+        `https://6529.io/accept-connection-sharing?connection_share_code=${linkValue}`
+      );
+    cancel = scheduleGoogleAnalytics(hasConsent);
+    window.history.replaceState(null, "", "/second?session=other-value");
+    window.dispatchEvent(new Event("pointerdown"));
+
+    const redactedLanding =
+      "http://localhost/accept-connection-sharing?token=[Filtered]&address=0x1";
+    const redactedSecond = "http://localhost/second?session=[Filtered]";
+    expect(queuedCommands()).toEqual([
+      [
+        "config",
+        "G-71NLVV3KY3",
+        {
+          cookie_expires: 31_536_000,
+          send_page_view: false,
+          page_location: redactedSecond,
+          page_referrer:
+            "https://6529.io/accept-connection-sharing?connection_share_code=[Filtered]",
+        },
+      ],
+      [
+        "event",
+        "page_view",
+        { page_location: redactedLanding, page_title: "Landing" },
+      ],
+      [
+        "event",
+        "page_view",
+        { page_location: redactedSecond, page_referrer: redactedLanding },
+      ],
+    ]);
+    const queued = JSON.stringify(queuedCommands());
+    expect(queued).not.toContain(linkValue);
+    expect(queued).not.toContain("other-value");
+  });
+
   it("keeps page URLs and titles out of script source", () => {
     window.history.replaceState(null, "", "/landing?token=private-link-value");
     document.title = "Private title";

@@ -1,0 +1,142 @@
+{
+  "base": "http://localhost",
+  "measuredAt": "2026-10-15T14:39:31.780Z",
+  "note": "status with a desktop Chrome user agent and redirects not followed; ttfbMs = time to response headers, totalMs = full document, warm, median of 5",
+  "routes": {
+    "/museum/network": {
+      "status": 200,
+      "ttfbMs": 29,
+      "totalMs": 42
+    },
+    "/museum/network/works": {
+      "status": 200,
+      "ttfbMs": 52,
+      "totalMs": 66
+    },
+    "/museum/network/artists": {
+      "status": 200,
+      "ttfbMs": 32,
+      "totalMs": 55
+    },
+    "/museum/network/acquisitions": {
+      "status": 200,
+      "ttfbMs": 27,
+      "totalMs": 39
+    },
+    "/museum/network/collections": {
+      "status": 200,
+      "ttfbMs": 26,
+      "totalMs": 37
+    },
+    "/museum/network/works/6529NM-W-0008": {
+      "status": 200,
+      "ttfbMs": 38,
+      "totalMs": 47
+    },
+    "/museum/network/artists/casey-reas": {
+      "status": 200,
+      "ttfbMs": 154,
+      "totalMs": 774
+    },
+    "/museum/network/acquisitions/keys-and-gates": {
+      "status": 200,
+      "ttfbMs": 306,
+      "totalMs": 389
+    },
+    "/museum/network/objects/6529NM.2026.001.01": {
+      "status": 200,
+      "ttfbMs": 26,
+      "totalMs": 33
+    },
+    "/museum/network/projects/century/system": {
+      "status": 200,
+      "ttfbMs": 67,
+      "totalMs": 209
+    },
+    "/museum/network/research/institutional-practice/tate": {
+      "status": 200,
+      "ttfbMs": 36,
+      "totalMs": 42
+    },
+    "/museum/network/works/does-not-exist": {
+      "status": 200,
+      "ttfbMs": 25,
+      "totalMs": 31
+    },
+    "/museum/network/artists/does-not-exist": {
+      "status": 200,
+      "ttfbMs": 26,
+      "totalMs": 32
+    },
+    "/museum/network/acquisitions/does-not-exist": {
+      "status": 200,
+      "ttfbMs": 25,
+      "totalMs": 32
+    },
+    "/museum/network/objects/does-not-exist": {
+      "status": 200,
+      "ttfbMs": 25,
+      "totalMs": 31
+    },
+    "/museum/network/collections/does-not-exist": {
+      "status": 200,
+      "ttfbMs": 25,
+      "totalMs": 31
+    },
+    "/museum/network/projects/does-not-exist": {
+      "status": 200,
+      "ttfbMs": 23,
+      "totalMs": 30
+    },
+    "/museum/network/research/institutional-practice/does-not-exist": {
+      "status": 200,
+      "ttfbMs": 25,
+      "totalMs": 32
+    },
+    "/museum/network/accessions/does-not-exist": {
+      "status": 200,
+      "ttfbMs": 25,
+      "totalMs": 32
+    },
+    "/museum/network/programs/does-not-exist": {
+      "status": 200,
+      "ttfbMs": 26,
+      "totalMs": 33
+    },
+    "/museum/network/organizations/does-not-exist": {
+      "status": 200,
+      "ttfbMs": 26,
+      "totalMs": 32
+    },
+    "/museum/network/governance/does-not-exist": {
+      "status": 200,
+      "ttfbMs": 49,
+      "totalMs": 56
+    },
+    "/museum/network/acquisition-programs/does-not-exist": {
+      "status": 200,
+      "ttfbMs": 26,
+      "totalMs": 32
+    },
+    "/museum/network/gifts/does-not-exist": {
+      "status": 200,
+      "ttfbMs": 26,
+      "totalMs": 33
+    },
+    "/museum/network/rights/does-not-exist": {
+      "status": 200,
+      "ttfbMs": 26,
+      "totalMs": 35
+    },
+    "/museum/network/methodology/data-architecture/does-not-exist": {
+      "status": 200,
+      "ttfbMs": 25,
+      "totalMs": 31
+    },
+    "/museum/network/stories/a-field-of-practice/does-not-exist": {
+      "status": 200,
+      "ttfbMs": 25,
+      "totalMs": 36
+    }
+  }
+}

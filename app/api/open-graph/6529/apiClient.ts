@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 
 import { publicEnv } from "@/config/env";
+import { getStagingApiKey } from "@/config/serverEnv";
 
 const PUBLIC_API_BASE = "https://api.6529.io";
 
@@ -82,9 +83,7 @@ function getCallerApiAuth(context?: ApiContext): string | undefined {
 }
 
 function getApiAuth(context?: ApiContext): string | undefined {
-  return (
-    getCallerApiAuth(context) ?? publicEnv.STAGING_API_KEY?.trim() ?? undefined
-  );
+  return getCallerApiAuth(context) ?? getStagingApiKey();
 }
 
 function hashCacheToken(token: string): string {
@@ -97,7 +96,7 @@ export function getCacheAuthScope(context?: ApiContext): string {
     return `auth:${hashCacheToken(callerAuth)}`;
   }
 
-  return publicEnv.STAGING_API_KEY?.trim() ? "staging" : "public";
+  return getStagingApiKey() ? "staging" : "public";
 }
 
 function createApiHeaders(context?: ApiContext): HeadersInit {

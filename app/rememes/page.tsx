@@ -37,7 +37,7 @@ export default async function ReMemesPage({
   }
 
   return (
-    <main className={styles["main"]}>
+    <main className={styles["main"]} lang={locale}>
       <Rememes
         initialMemeId={initialMemeId}
         locale={locale}

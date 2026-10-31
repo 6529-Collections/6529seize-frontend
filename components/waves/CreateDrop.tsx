@@ -1,5 +1,8 @@
 "use client";
 
+import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
+import { useCompetitionEntrySubmit } from "@/hooks/competitions/useCompetitionEntrySubmit";
+
 import { useRef, useState, useCallback, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
 import type { CreateDropConfig } from "@/entities/IDrop";
@@ -13,10 +16,10 @@ import {
   ReactQueryWrapperContext,
 } from "../react-query-wrapper/ReactQueryWrapper";
 import {
-  commonApiPost,
   getStructuredApiErrorCode,
   getStructuredApiErrorStatus,
 } from "@/services/api/common-api";
+import { postDrop } from "@/services/api/signed-drop-writes";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiContentModerationProfileStatusResponse } from "@/generated/models/ApiContentModerationProfileStatusResponse";
@@ -26,7 +29,7 @@ import { useAuth } from "../auth/Auth";
 import { useKeyPressEvent } from "react-use";
 import { DropMode } from "./dropComposer.types";
 import { ChatRestriction } from "@/hooks/useDropPriviledges";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useUnreadDividerOptional } from "@/contexts/wave/UnreadDividerContext";
 import { useWave } from "@/hooks/useWave";
@@ -100,7 +103,7 @@ export default function CreateDrop({
   const [dismissedQuorumProposalScope, setDismissedQuorumProposalScope] =
     useState<string | null>(null);
   const { applyOptimisticDropUpdate, processDropRemoved, processIncomingDrop } =
-    useMyStream();
+    useMyStreamActions();
   const retainModerationRejectedDrop = useModerationRejectedDropDelivery({
     applyOptimisticDropUpdate,
     processDropRemoved,
@@ -117,6 +120,8 @@ export default function CreateDrop({
     wave,
   });
   const { isMemesWave, isCurationWave, isQuorumWave } = useWave(wave);
+  const nativeCompetition = presentationCompetition(wave);
+  const submitCompetitionEntry = useCompetitionEntrySubmit(nativeCompetition);
   const resolvedSubmissionExperience = resolveWaveSubmissionExperience({
     isMemesWave,
     isCurationWave,
@@ -443,11 +448,8 @@ export default function CreateDrop({
 
   const addDropMutation = useMutation({
     mutationFn: async (body: QueuedDropMutationBody) => {
-      return commonApiPost<ApiCreateDropRequest, ApiDrop>({
-        endpoint: `drops`,
-        body: body.drop,
-        errorMode: "structured",
-      });
+      if (body.nativeEntrySubmit) return body.nativeEntrySubmit(body.drop);
+      return await postDrop(body.drop, { errorMode: "structured" });
     },
     onSuccess: (serverDrop, body) => {
       if (body.dropId) {
@@ -604,13 +606,16 @@ export default function CreateDrop({
         return false;
       }
 
-      const queuedDropRequest: QueuedDropMutationBody =
-        slowModeChatReservation === null
-          ? dropRequest
-          : {
-              ...dropRequest,
-              slowModeChatReservation,
-            };
+      const queuedDropRequest: QueuedDropMutationBody = {
+        ...dropRequest,
+        ...(slowModeChatReservation === null
+          ? {}
+          : { slowModeChatReservation }),
+        nativeEntrySubmit:
+          nativeCompetition && dropRequest.drop.drop_type !== ApiDropType.Chat
+            ? submitCompetitionEntry
+            : undefined,
+      };
 
       // Add to queue
       queueRef.current.push(queuedDropRequest);
@@ -642,9 +647,11 @@ export default function CreateDrop({
     },
     [
       markChatSubmitted,
+      nativeCompetition,
       onDropAddedToQueue,
       processNextDrop,
       reserveSlowModeChatQueueSlot,
+      submitCompetitionEntry,
       unreadDividerContext,
     ]
   );

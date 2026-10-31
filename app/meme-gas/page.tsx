@@ -2,6 +2,8 @@ import { ABOUT_PAGE_SURFACE_CLASS_NAME } from "@/components/about/AboutLayout";
 import Gas from "@/components/gas-royalties/Gas";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { capitalizeEveryWord } from "@/helpers/Helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import styles from "@/styles/Home.module.css";
 import { GasRoyaltiesCollectionFocus } from "@/types/enums";
 import clsx from "clsx";
@@ -36,6 +38,6 @@ export async function generateMetadata({
   }`;
   return getAppMetadata({
     title,
-    description: "Tools",
+    description: t(DEFAULT_LOCALE, "pageMetadata.memeGas.description"),
   });
 }

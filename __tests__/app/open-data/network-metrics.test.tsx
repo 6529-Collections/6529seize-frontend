@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import React from "react";
 import { screen } from "@testing-library/react";
 import NetworkMetrics, {
@@ -40,7 +42,10 @@ describe("Open Data network metrics page", () => {
   it("exposes metadata", async () => {
     await expect(generateMetadata()).resolves.toEqual({
       title: "Consolidated Network Metrics | Open Data",
-      description: "Open Data",
+      description: t(
+        DEFAULT_LOCALE,
+        "pageMetadata.openDataNetworkMetrics.description"
+      ),
     });
   });
 });

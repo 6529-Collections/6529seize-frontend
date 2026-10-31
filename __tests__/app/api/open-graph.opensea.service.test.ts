@@ -2,9 +2,15 @@ jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
 
 import { createOpenSeaPlan } from "@/app/api/open-graph/opensea/service";
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
+import { publicEnv } from "@/config/env";
+import { getStagingApiKey } from "@/config/serverEnv";
 
 jest.mock("@/config/alchemyEnv", () => ({
   getAlchemyApiKey: jest.fn(),
+}));
+
+jest.mock("@/config/serverEnv", () => ({
+  getStagingApiKey: jest.fn(),
 }));
 
 describe("createOpenSeaPlan", () => {
@@ -33,6 +39,7 @@ describe("createOpenSeaPlan", () => {
       return response.json();
     });
     mockedGetAlchemyApiKey.mockReturnValue("test-alchemy-key");
+    jest.mocked(getStagingApiKey).mockReturnValue(undefined);
     global.fetch = mockFetch as unknown as typeof fetch;
   });
 
@@ -357,6 +364,92 @@ describe("createOpenSeaPlan", () => {
     expect(warnSpy).not.toHaveBeenCalled();
   });
 
+  it("uses the backend proxy for Ethereum when the API key is unavailable", async () => {
+    mockedGetAlchemyApiKey.mockImplementation(() => {
+      throw new Error("ALCHEMY_API_KEY missing");
+    });
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        tokens: [
+          {
+            name: "Radar dome",
+            description: "A clear sky",
+            image: {
+              originalUrl: "ipfs://QmExampleHash/radar.png",
+              contentType: "image/png",
+            },
+          },
+        ],
+      }),
+    });
+    const url =
+      "https://opensea.io/item/ethereum/0x495f947276749ce646f68ac8c248420045cb7b5e/2";
+
+    const plan = createOpenSeaPlan(new URL(url), {
+      fetchHtml,
+      assertPublicUrl,
+      fetchTokenMetadata,
+    });
+    const result = await plan?.execute();
+
+    expect(result?.data).toEqual(
+      expect.objectContaining({
+        type: "opensea.nft",
+        title: "Radar dome",
+        image: expect.objectContaining({
+          url: "ipfs://QmExampleHash/radar.png",
+        }),
+      })
+    );
+    expect(mockFetch).toHaveBeenCalledWith(
+      `${publicEnv.API_ENDPOINT}/alchemy-proxy/token-metadata`,
+      expect.objectContaining({ method: "POST" })
+    );
+    const request = mockFetch.mock.calls[0]?.[1] as {
+      body: string;
+      headers: Record<string, string>;
+    };
+    expect(JSON.parse(request.body)).toEqual({
+      address: "0x495f947276749ce646f68ac8c248420045cb7b5e",
+      tokenIds: ["2"],
+      chain: "ethereum",
+    });
+    expect(request.headers).not.toHaveProperty("x-6529-auth");
+    expect(fetchHtml).not.toHaveBeenCalled();
+  });
+
+  it("authenticates the backend proxy with the server-only staging key", async () => {
+    mockedGetAlchemyApiKey.mockImplementation(() => {
+      throw new Error("ALCHEMY_API_KEY missing");
+    });
+    jest.mocked(getStagingApiKey).mockReturnValue("server-staging-key");
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        tokens: [
+          {
+            name: "Radar dome",
+            image: { originalUrl: "ipfs://QmExampleHash/radar.png" },
+          },
+        ],
+      }),
+    });
+
+    const plan = createOpenSeaPlan(
+      new URL(
+        "https://opensea.io/item/ethereum/0x495f947276749ce646f68ac8c248420045cb7b5e/2"
+      ),
+      { fetchHtml, assertPublicUrl, fetchTokenMetadata }
+    );
+    await plan?.execute();
+
+    const request = mockFetch.mock.calls[0]?.[1] as {
+      headers: Record<string, string>;
+    };
+    expect(request.headers["x-6529-auth"]).toBe("server-staging-key");
+  });
+
   it("falls back to OpenGraph preview when API key is unavailable", async () => {
     mockedGetAlchemyApiKey.mockImplementation(() => {
       throw new Error("ALCHEMY_API_KEY missing");
@@ -372,12 +465,12 @@ describe("createOpenSeaPlan", () => {
       `,
       contentType: "text/html",
       finalUrl:
-        "https://opensea.io/item/ethereum/0x495f947276749ce646f68ac8c248420045cb7b5e/2",
+        "https://opensea.io/item/base/0x495f947276749ce646f68ac8c248420045cb7b5e/2",
     });
 
     const plan = createOpenSeaPlan(
       new URL(
-        "https://opensea.io/item/ethereum/0x495f947276749ce646f68ac8c248420045cb7b5e/2"
+        "https://opensea.io/item/base/0x495f947276749ce646f68ac8c248420045cb7b5e/2"
       ),
       {
         fetchHtml,
@@ -410,7 +503,7 @@ describe("createOpenSeaPlan", () => {
       ),
       expect.objectContaining({
         requestUrl:
-          "https://opensea.io/item/ethereum/0x495f947276749ce646f68ac8c248420045cb7b5e/2",
+          "https://opensea.io/item/base/0x495f947276749ce646f68ac8c248420045cb7b5e/2",
         reason: "missing_api_key",
       })
     );

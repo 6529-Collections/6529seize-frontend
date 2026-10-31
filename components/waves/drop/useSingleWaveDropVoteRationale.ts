@@ -12,7 +12,7 @@ import { getVoteRationaleReplyMarkdown } from "@/helpers/waves/vote-rationale.he
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { commonApiPost } from "@/services/api/common-api";
+import { postDrop } from "@/services/api/signed-drop-writes";
 
 interface UseSingleWaveDropVoteRationaleParams {
   readonly drop: ApiDrop;
@@ -119,10 +119,7 @@ export const useSingleWaveDropVoteRationale = (
 
   const { mutateAsync: createRationaleReply } = useMutation({
     mutationFn: async (requestBody: ApiCreateDropRequest) =>
-      await commonApiPost<ApiCreateDropRequest, ApiDrop>({
-        endpoint: "drops",
-        body: requestBody,
-      }),
+      await postDrop(requestBody),
     onSuccess: (createdReply) => {
       addOptimisticDrop({ drop: createdReply }).catch(() => undefined);
     },

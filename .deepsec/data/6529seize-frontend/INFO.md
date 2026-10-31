@@ -65,8 +65,6 @@ DeepSec prompt context for this repo. Keep this short; built-in matchers handle 
   including placeholder private keys and bearer-token examples.
 - `app/access/page.client.tsx`, `app/restricted/page.client.tsx`, and `proxy.ts`
   intentionally use the `x-6529-auth` staging/team gate; it is separate from wallet authorization.
-- `app/api/sentry-example-api/route.ts` and `app/sentry-example-page/page.tsx`
-  intentionally throw sample Sentry errors.
 - Static marketing/content pages use hardcoded `dangerouslySetInnerHTML` for
   imported markup; treat as risky only if the source becomes user-controlled.
 - Public helper routes such as `app/api/open-graph/*`, `app/api/tiktok/route.ts`,

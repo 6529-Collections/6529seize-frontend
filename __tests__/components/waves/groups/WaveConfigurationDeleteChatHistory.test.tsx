@@ -34,7 +34,7 @@ jest.mock("@/components/react-query-wrapper/ReactQueryWrapper", () => {
   };
 });
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: () => ({
+  useMyStreamActions: () => ({
     processDropsRemoved: mockProcessDropsRemoved,
     refreshWaveMessages: mockRefreshWaveMessages,
   }),

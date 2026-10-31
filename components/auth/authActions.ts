@@ -1,11 +1,9 @@
-import { isAddress } from "viem";
-import { getNodeEnv, publicEnv } from "@/config/env";
+import { isDevAuthEnabled } from "@/config/devAuth";
 import {
   InvalidRoleStateError,
   MissingActiveProfileError,
 } from "@/errors/authentication";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import type { ApiSessionNonceResponse } from "@/generated/models/ApiSessionNonceResponse";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import {
   ConnectionMismatchError,
@@ -15,12 +13,11 @@ import {
 import { t } from "@/i18n/messages";
 import {
   getAuthJwt,
+  getWalletAddress,
   invalidateAuthSessionForAddress,
   PROFILE_SWITCHED_EVENT,
-  removeAuthJwt,
 } from "@/services/auth/auth.utils";
 import { validateJwt } from "@/services/auth/jwt-validation.utils";
-import { getSessionNonce } from "@/services/auth/session-v2.utils";
 import { logErrorSecurely } from "@/utils/error-sanitizer";
 import { validateRoleForAuthentication } from "@/utils/role-validation";
 import {
@@ -35,29 +32,19 @@ import type {
   RequestAuthOptions,
 } from "./authTypes";
 import {
-  AuthenticationNonceError,
-  InvalidSignerAddressError,
-  NonceResponseValidationError,
-} from "./authErrors";
-import {
   createAuthRequestGuard,
   type AuthRequestGuard,
 } from "./authRequestGuard";
 import { createTimedAbortSignal } from "./authRequestAbortSignal";
+import { getAuthNonce } from "./authNonce";
 import { createAuthRequestSignIn } from "./authRequestSignIn";
+import { createSignedMessagesGrantRequest } from "./authSignedMessagesGrant";
 import type {
   AuthRequestActions,
   CreateAuthRequestActionsParams,
 } from "./authActionTypes";
 
 const MANUAL_AUTH_VALIDATION_TIMEOUT_MS = 30_000;
-
-const isDevAuthenticationEnabled = (): boolean => {
-  const nodeEnv = getNodeEnv();
-  const isDevLikeEnv = nodeEnv === "development" || nodeEnv === "test";
-
-  return publicEnv.USE_DEV_AUTH === "true" && isDevLikeEnv;
-};
 
 const dispatchProfileSwitchedEvent = (profileProxy: ApiProfileProxy | null) => {
   if (globalThis.window === undefined) {
@@ -81,6 +68,7 @@ export function createAuthRequestActions({
   invalidateAll,
   isActiveChainSupported,
   isAddressAuthorized,
+  seizeConnect,
   seizeDisconnect,
   resetSessionUpgradeExpiryDedupe,
   setActiveProfileProxy,
@@ -93,66 +81,6 @@ export function createAuthRequestActions({
   signMessage,
   signModalReason,
 }: CreateAuthRequestActionsParams): AuthRequestActions {
-  const getNonce = async ({
-    signerAddress,
-  }: {
-    signerAddress: string;
-  }): Promise<ApiSessionNonceResponse> => {
-    if (!signerAddress || typeof signerAddress !== "string") {
-      throw new InvalidSignerAddressError(signerAddress);
-    }
-
-    if (!isAddress(signerAddress)) {
-      throw new InvalidSignerAddressError(signerAddress);
-    }
-
-    try {
-      const response = await getSessionNonce({ signerAddress });
-
-      if (!response) {
-        throw new NonceResponseValidationError(
-          "Nonce API returned null or undefined response"
-        );
-      }
-
-      if (
-        !response.signable_message ||
-        typeof response.signable_message !== "string" ||
-        response.signable_message.length === 0
-      ) {
-        throw new NonceResponseValidationError(
-          "Invalid signable_message in API response",
-          response
-        );
-      }
-
-      if (
-        !response.server_signature ||
-        typeof response.server_signature !== "string" ||
-        response.server_signature.trim().length === 0
-      ) {
-        throw new NonceResponseValidationError(
-          "Invalid server_signature in API response",
-          response
-        );
-      }
-
-      return response;
-    } catch (error) {
-      if (
-        error instanceof NonceResponseValidationError ||
-        error instanceof InvalidSignerAddressError
-      ) {
-        throw error;
-      }
-
-      throw new AuthenticationNonceError(
-        "Failed to obtain authentication nonce from server",
-        error
-      );
-    }
-  };
-
   const getSignature = async ({
     message,
   }: {
@@ -224,7 +152,7 @@ export function createAuthRequestActions({
   };
 
   const requestSignIn = createAuthRequestSignIn({
-    getNonce,
+    getNonce: getAuthNonce,
     getSignature,
     setToast,
   });
@@ -590,7 +518,7 @@ export function createAuthRequestActions({
       return { success: false };
     }
 
-    if (!enableWalletAuthentication || isDevAuthenticationEnabled()) {
+    if (!enableWalletAuthentication || isDevAuthEnabled()) {
       return { success: true };
     }
 
@@ -697,43 +625,70 @@ export function createAuthRequestActions({
     }
   };
 
+  const requestSignedMessagesGrant = createSignedMessagesGrantRequest({
+    address,
+    canAuthenticate:
+      !activeProfileProxy &&
+      enableWalletAuthentication &&
+      !isDevAuthEnabled(),
+    canSignActiveWallet,
+    createSigningAuthRequestGuard: () =>
+      createSigningAuthRequestGuard(createAuthRequestGuard({})),
+    isActiveChainSupported,
+    requestSignIn,
+    setAuthLoadingState,
+    setToast,
+  });
+
   const onActiveProfileProxy = async (
     profileProxy: ApiProfileProxy | null
-  ): Promise<void> => {
+  ): Promise<boolean> => {
     const isSameSelection =
       (profileProxy?.id ?? null) === (activeProfileProxy?.id ?? null);
     if (isSameSelection) {
-      return;
+      return true;
     }
 
     if (!address) {
-      setActiveProfileProxy(null);
-      return;
+      setToast({
+        message: t(AUTH_MODAL_LOCALE, "auth.proxySwitch.connectWallet"),
+        type: "error",
+      });
+      seizeConnect();
+      return false;
     }
 
     if (!enableWalletAuthentication) {
       setActiveProfileProxy(profileProxy);
       dispatchProfileSwitchedEvent(profileProxy);
-      return;
+      return true;
+    }
+
+    if (!canSignActiveWallet) {
+      setToast({
+        message: t(AUTH_MODAL_LOCALE, "auth.proxySwitch.connectWallet"),
+        type: "info",
+      });
+      seizeConnect();
+      return false;
     }
 
     if (!isActiveChainSupported()) {
-      return;
+      setToast({
+        message: t(AUTH_MODAL_LOCALE, "auth.proxySwitch.unsupportedNetwork"),
+        type: "error",
+      });
+      seizeConnect();
+      return false;
     }
 
     const signingAuthRequestGuard = createSigningAuthRequestGuard(
-      createAuthRequestGuard({})
+      createAuthRequestGuard(
+        {},
+        () => getWalletAddress()?.toLowerCase() === address.toLowerCase()
+      )
     );
 
-    await removeAuthJwt();
-    if (!signingAuthRequestGuard.isCurrent()) {
-      setToast({
-        message:
-          "Network changed. Switch to a supported network to continue signing in.",
-        type: "error",
-      });
-      return;
-    }
     try {
       const { success } = await requestSignIn({
         signerAddress: address,
@@ -743,7 +698,16 @@ export function createAuthRequestActions({
       if (success && signingAuthRequestGuard.isCurrent()) {
         setActiveProfileProxy(profileProxy);
         dispatchProfileSwitchedEvent(profileProxy);
+        invalidateAll();
+        return true;
       }
+      if (!signingAuthRequestGuard.isCurrent()) {
+        setToast({
+          message: t(AUTH_MODAL_LOCALE, "auth.proxySwitch.contextChanged"),
+          type: "error",
+        });
+      }
+      return false;
     } catch (error) {
       if (error instanceof InvalidRoleStateError) {
         logErrorSecurely("onActiveProfileProxy_invalid_role_state", error);
@@ -751,8 +715,7 @@ export function createAuthRequestActions({
           message: "Select a valid profile and try again.",
           type: "error",
         });
-        setActiveProfileProxy(null);
-        return;
+        return false;
       }
 
       if (error instanceof MissingActiveProfileError) {
@@ -762,8 +725,7 @@ export function createAuthRequestActions({
             "Couldn't authenticate this profile. Select a profile and try again.",
           type: "error",
         });
-        setActiveProfileProxy(null);
-        return;
+        return false;
       }
 
       throw error;
@@ -774,5 +736,6 @@ export function createAuthRequestActions({
     onActiveProfileProxy,
     requestAuth,
     requestSessionUpgrade,
+    requestSignedMessagesGrant,
   };
 }

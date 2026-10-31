@@ -1,0 +1,932 @@
+{
+  "ignoreTopPx": 0,
+  "cells": {
+    "/museum/network · 1440x1000": {
+      "status": {
+        "candidate": 200,
+        "main": 200
+      },
+      "title": {
+        "candidate": "6529 Network Museum",
+        "main": "6529 Network Museum"
+      },
+      "robots": {
+        "candidate": null,
+        "main": null
+      },
+      "mainTextIdentical": true,
+      "pageHeight": {
+        "candidate": 3877,
+        "main": 3877
+      },
+      "consoleErrors": {
+        "candidate": [],
+        "main": []
+      },
+      "iframes": {
+        "candidate": [],
+        "main": []
+      },
+      "frameProbes": {
+        "candidate": [],
+        "main": []
+      },
+      "checks": {
+        "horizontalOverflowPx": [
+          -30,
+          -30
+        ],
+        "brokenImages": [
+          0,
+          0
+        ],
+        "clippedText": [
+          0,
+          0
+        ],
+        "fallbackHits": [
+          0,
+          0
+        ]
+      },
+      "pixels": {
+        "candidateSize": "1440x3877",
+        "mainSize": "1440x3877",
+        "sameSize": true,
+        "differingPixels": 60,
+        "differingRatio": 0.000011,
+        "differingPixelsBelowHeader": 60,
+        "differingRowRange": [
+          81,
+          87
+        ]
+      }
+    },
+    "/museum/network · 820x1000": {
+      "status": {
+        "candidate": 200,
+        "main": 200
+      },
+      "title": {
+        "candidate": "6529 Network Museum",
+        "main": "6529 Network Museum"
+      },
+      "robots": {
+        "candidate": null,
+        "main": null
+      },
+      "mainTextIdentical": true,
+      "pageHeight": {
+        "candidate": 5807,
+        "main": 5807
+      },
+      "consoleErrors": {
+        "candidate": [],
+        "main": []
+      },
+      "iframes": {
+        "candidate": [],
+        "main": []
+      },
+      "frameProbes": {
+        "candidate": [],
+        "main": []
+      },
+      "checks": {
+        "horizontalOverflowPx": [
+          0,
+          0
+        ],
+        "brokenImages": [
+          0,
+          0
+        ],
+        "clippedText": [
+          0,
+          0
+        ],
+        "fallbackHits": [
+          0,
+          0
+        ]
+      },
+      "pixels": {
+        "candidateSize": "820x5807",
+        "mainSize": "820x5807",
+        "sameSize": true,
+        "differingPixels": 60,
+        "differingRatio": 0.000013,
+        "differingPixelsBelowHeader": 60,
+        "differingRowRange": [
+          81,
+          87
+        ]
+      }
+    },
+    "/museum/network · 390x844": {
+      "status": {
+        "candidate": 200,
+        "main": 200
+      },
+      "title": {
+        "candidate": "6529 Network Museum",
+        "main": "6529 Network Museum"
+      },
+      "robots": {
+        "candidate": null,
+        "main": null
+      },
+      "mainTextIdentical": true,
+      "pageHeight": {
+        "candidate": 7620,
+        "main": 7620
+      },
+      "consoleErrors": {
+        "candidate": [],
+        "main": []
+      },
+      "iframes": {
+        "candidate": [],
+        "main": []
+      },
+      "frameProbes": {
+        "candidate": [],
+        "main": []
+      },
+      "checks": {
+        "horizontalOverflowPx": [
+          0,
+          0
+        ],
+        "brokenImages": [
+          0,
+          0
+        ],
+        "clippedText": [
+          0,
+          0
+        ],
+        "fallbackHits": [
+          0,
+          0
+        ]
+      },
+      "pixels": {
+        "candidateSize": "390x7620",
+        "mainSize": "390x7620",
+        "sameSize": true,
+        "differingPixels": 57,
+        "differingRatio": 0.000019,
+        "differingPixelsBelowHeader": 57,
+        "differingRowRange": [
+          93,
+          99
+        ]
+      }
+    },
+    "/museum/network/artists · 1440x1000": {
+      "status": {
+        "candidate": 200,
+        "main": 200
+      },
+      "title": {
+        "candidate": "Artists",
+        "main": "Artists"
+      },
+      "robots": {
+        "candidate": null,
+        "main": null
+      },
+      "mainTextIdentical": true,
+      "pageHeight": {
+        "candidate": 4446,
+        "main": 4446
+      },
+      "consoleErrors": {
+        "candidate": [],
+        "main": []
+      },
+      "iframes": {
+        "candidate": [],
+        "main": []
+      },
+      "frameProbes": {
+        "candidate": [],
+        "main": []
+      },
+      "checks": {
+        "horizontalOverflowPx": [
+          -30,
+          -30
+        ],
+        "brokenImages": [
+          0,
+          0
+        ],
+        "clippedText": [
+          0,
+          0
+        ],
+        "fallbackHits": [
+          0,
+          0
+        ]
+      },
+      "pixels": {
+        "candidateSize": "1440x4446",
+        "mainSize": "1440x4446",
+        "sameSize": true,
+        "differingPixels": 60,
+        "differingRatio": 0.000009,
+        "differingPixelsBelowHeader": 60,
+        "differingRowRange": [
+          81,
+          87
+        ]
+      }
+    },
+    "/museum/network/artists · 820x1000": {
+      "status": {
+        "candidate": 200,
+        "main": 200
+      },
+      "title": {
+        "candidate": "Artists",
+        "main": "Artists"
+      },
+      "robots": {
+        "candidate": null,
+        "main": null
+      },
+      "mainTextIdentical": true,
+      "pageHeight": {
+        "candidate": 5938,
+        "main": 5938
+      },
+      "consoleErrors": {
+        "candidate": [],
+        "main": []
+      },
+      "iframes": {
+        "candidate": [],
+        "main": []
+      },
+      "frameProbes": {
+        "candidate": [],
+        "main": []
+      },
+      "checks": {
+        "horizontalOverflowPx": [
+          0,
+          0
+        ],
+        "brokenImages": [
+          0,
+          0
+        ],
+        "clippedText": [
+          0,
+          0
+        ],
+        "fallbackHits": [
+          0,
+          0
+        ]
+      },
+      "pixels": {
+        "candidateSize": "820x5938",
+        "mainSize": "820x5938",
+        "sameSize": true,
+        "differingPixels": 60,
+        "differingRatio": 0.000012,
+        "differingPixelsBelowHeader": 60,
+        "differingRowRange": [
+          81,
+          87
+        ]
+      }
+    },
+    "/museum/network/artists · 390x844": {
+      "status": {
+        "candidate": 200,
+        "main": 200
+      },
+      "title": {
+        "candidate": "Artists",
+        "main": "Artists"
+      },
+      "robots": {
+        "candidate": null,
+        "main": null
+      },
+      "mainTextIdentical": true,
+      "pageHeight": {
+        "candidate": 11233,
+        "main": 11233
+      },
+      "consoleErrors": {
+        "candidate": [],
+        "main": []
+      },
+      "iframes": {
+        "candidate": [],
+        "main": []
+      },
+      "frameProbes": {
+        "candidate": [],
+        "main": []
+      },
+      "checks": {
+        "horizontalOverflowPx": [
+          0,
+          0
+        ],
+        "brokenImages": [
+          0,
+          0
+        ],
+        "clippedText": [
+          0,
+          0
+        ],
+        "fallbackHits": [
+          0,
+          0
+        ]
+      },
+      "pixels": {
+        "candidateSize": "390x11233",
+        "mainSize": "390x11233",
+        "sameSize": true,
+        "differingPixels": 57,
+        "differingRatio": 0.000013,
+        "differingPixelsBelowHeader": 57,
+        "differingRowRange": [
+          93,
+          99
+        ]
+      }
+    },
+    "/museum/network/acquisitions · 1440x1000": {
+      "status": {
+        "candidate": 200,
+        "main": 200
+      },
+      "title": {
+        "candidate": "Acquisitions",
+        "main": "Acquisitions"
+      },
+      "robots": {
+        "candidate": null,
+        "main": null
+      },
+      "mainTextIdentical": true,
+      "pageHeight": {
+        "candidate": 3443,
+        "main": 3443
+      },
+      "consoleErrors": {
+        "candidate": [],
+        "main": []
+      },
+      "iframes": {
+        "candidate": [],
+        "main": []
+      },
+      "frameProbes": {
+        "candidate": [],
+        "main": []
+      },
+      "checks": {
+        "horizontalOverflowPx": [
+          -30,
+          -30
+        ],
+        "brokenImages": [
+          0,
+          0
+        ],
+        "clippedText": [
+          0,
+          0
+        ],
+        "fallbackHits": [
+          0,
+          0
+        ]
+      },
+      "pixels": {
+        "candidateSize": "1440x3443",
+        "mainSize": "1440x3443",
+        "sameSize": true,
+        "differingPixels": 60,
+        "differingRatio": 0.000012,
+        "differingPixelsBelowHeader": 60,
+        "differingRowRange": [
+          81,
+          87
+        ]
+      }
+    },
+    "/museum/network/acquisitions · 820x1000": {
+      "status": {
+        "candidate": 200,
+        "main": 200
+      },
+      "title": {
+        "candidate": "Acquisitions",
+        "main": "Acquisitions"
+      },
+      "robots": {
+        "candidate": null,
+        "main": null
+      },
+      "mainTextIdentical": true,
+      "pageHeight": {
+        "candidate": 5373,
+        "main": 5373
+      },
+      "consoleErrors": {
+        "candidate": [],
+        "main": []
+      },
+      "iframes": {
+        "candidate": [],
+        "main": []
+      },
+      "frameProbes": {
+        "candidate": [],
+        "main": []
+      },
+      "checks": {
+        "horizontalOverflowPx": [
+          0,
+          0
+        ],
+        "brokenImages": [
+          0,
+          0
+        ],
+        "clippedText": [
+          0,
+          0
+        ],
+        "fallbackHits": [
+          0,
+          0
+        ]
+      },
+      "pixels": {
+        "candidateSize": "820x5373",
+        "mainSize": "820x5373",
+        "sameSize": true,
+        "differingPixels": 60,
+        "differingRatio": 0.000014,
+        "differingPixelsBelowHeader": 60,
+        "differingRowRange": [
+          81,
+          87
+        ]
+      }
+    },
+    "/museum/network/acquisitions · 390x844": {
+      "status": {
+        "candidate": 200,
+        "main": 200
+      },
+      "title": {
+        "candidate": "Acquisitions",
+        "main": "Acquisitions"
+      },
+      "robots": {
+        "candidate": null,
+        "main": null
+      },
+      "mainTextIdentical": true,
+      "pageHeight": {
+        "candidate": 5123,
+        "main": 5123
+      },
+      "consoleErrors": {
+        "candidate": [],
+        "main": []
+      },
+      "iframes": {
+        "candidate": [],
+        "main": []
+      },
+      "frameProbes": {
+        "candidate": [],
+        "main": []
+      },
+      "checks": {
+        "horizontalOverflowPx": [
+          0,
+          0
+        ],
+        "brokenImages": [
+          0,
+          0
+        ],
+        "clippedText": [
+          0,
+          0
+        ],
+        "fallbackHits": [
+          0,
+          0
+        ]
+      },
+      "pixels": {
+        "candidateSize": "390x5123",
+        "mainSize": "390x5123",
+        "sameSize": true,
+        "differingPixels": 57,
+        "differingRatio": 0.000029,
+        "differingPixelsBelowHeader": 57,
+        "differingRowRange": [
+          93,
+          99
+        ]
+      }
+    },
+    "/museum/network/works/6529NM-W-0008 · 1440x1000": {
+      "status": {
+        "candidate": 200,
+        "main": 200
+      },
+      "title": {
+        "candidate": "Take the Key! by GulYildiz — 6529 Network Museum",
+        "main": "Take the Key! by GulYildiz — 6529 Network Museum"
+      },
+      "robots": {
+        "candidate": "index, follow",
+        "main": "index, follow"
+      },
+      "mainTextIdentical": true,
+      "pageHeight": {
+        "candidate": 4329,
+        "main": 4329
+      },
+      "consoleErrors": {
+        "candidate": [],
+        "main": []
+      },
+      "iframes": {
+        "candidate": [],
+        "main": []
+      },
+      "frameProbes": {
+        "candidate": [],
+        "main": []
+      },
+      "checks": {
+        "horizontalOverflowPx": [
+          -30,
+          -30
+        ],
+        "brokenImages": [
+          0,
+          0
+        ],
+        "clippedText": [
+          0,
+          0
+        ],
+        "fallbackHits": [
+          0,
+          0
+        ]
+      },
+      "pixels": {
+        "candidateSize": "1440x4329",
+        "mainSize": "1440x4329",
+        "sameSize": true,
+        "differingPixels": 60,
+        "differingRatio": 0.00001,
+        "differingPixelsBelowHeader": 60,
+        "differingRowRange": [
+          81,
+          87
+        ]
+      }
+    },
+    "/museum/network/works/6529NM-W-0008 · 820x1000": {
+      "status": {
+        "candidate": 200,
+        "main": 200
+      },
+      "title": {
+        "candidate": "Take the Key! by GulYildiz — 6529 Network Museum",
+        "main": "Take the Key! by GulYildiz — 6529 Network Museum"
+      },
+      "robots": {
+        "candidate": "index, follow",
+        "main": "index, follow"
+      },
+      "mainTextIdentical": true,
+      "pageHeight": {
+        "candidate": 3972,
+        "main": 3972
+      },
+      "consoleErrors": {
+        "candidate": [],
+        "main": []
+      },
+      "iframes": {
+        "candidate": [],
+        "main": []
+      },
+      "frameProbes": {
+        "candidate": [],
+        "main": []
+      },
+      "checks": {
+        "horizontalOverflowPx": [
+          0,
+          0
+        ],
+        "brokenImages": [
+          0,
+          0
+        ],
+        "clippedText": [
+          0,
+          0
+        ],
+        "fallbackHits": [
+          0,
+          0
+        ]
+      },
+      "pixels": {
+        "candidateSize": "820x3972",
+        "mainSize": "820x3972",
+        "sameSize": true,
+        "differingPixels": 60,
+        "differingRatio": 0.000018,
+        "differingPixelsBelowHeader": 60,
+        "differingRowRange": [
+          81,
+          87
+        ]
+      }
+    },
+    "/museum/network/works/6529NM-W-0008 · 390x844": {
+      "status": {
+        "candidate": 200,
+        "main": 200
+      },
+      "title": {
+        "candidate": "Take the Key! by GulYildiz — 6529 Network Museum",
+        "main": "Take the Key! by GulYildiz — 6529 Network Museum"
+      },
+      "robots": {
+        "candidate": "index, follow",
+        "main": "index, follow"
+      },
+      "mainTextIdentical": true,
+      "pageHeight": {
+        "candidate": 4594,
+        "main": 4594
+      },
+      "consoleErrors": {
+        "candidate": [],
+        "main": []
+      },
+      "iframes": {
+        "candidate": [],
+        "main": []
+      },
+      "frameProbes": {
+        "candidate": [],
+        "main": []
+      },
+      "checks": {
+        "horizontalOverflowPx": [
+          0,
+          0
+        ],
+        "brokenImages": [
+          0,
+          0
+        ],
+        "clippedText": [
+          0,
+          0
+        ],
+        "fallbackHits": [
+          0,
+          0
+        ]
+      },
+      "pixels": {
+        "candidateSize": "390x4594",
+        "mainSize": "390x4594",
+        "sameSize": true,
+        "differingPixels": 57,
+        "differingRatio": 0.000032,
+        "differingPixelsBelowHeader": 57,
+        "differingRowRange": [
+          93,
+          99
+        ]
+      }
+    },
+    "/museum/network/works/does-not-exist · 1440x1000": {
+      "status": {
+        "candidate": 404,
+        "main": 200
+      },
+      "title": {
+        "candidate": "Museum object record",
+        "main": "Museum object record"
+      },
+      "robots": {
+        "candidate": "noindex, follow",
+        "main": "noindex, follow"
+      },
+      "mainTextIdentical": true,
+      "pageHeight": {
+        "candidate": 1140,
+        "main": 1140
+      },
+      "consoleErrors": {
+        "candidate": [
+          "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "Error checking Cross-Origin-Opener-Policy: HTTP error! status: 404"
+        ],
+        "main": []
+      },
+      "iframes": {
+        "candidate": [],
+        "main": []
+      },
+      "frameProbes": {
+        "candidate": [],
+        "main": []
+      },
+      "checks": {
+        "horizontalOverflowPx": [
+          -30,
+          -30
+        ],
+        "brokenImages": [
+          0,
+          0
+        ],
+        "clippedText": [
+          0,
+          0
+        ],
+        "fallbackHits": [
+          0,
+          0
+        ]
+      },
+      "pixels": {
+        "candidateSize": "1440x1140",
+        "mainSize": "1440x1140",
+        "sameSize": true,
+        "differingPixels": 60,
+        "differingRatio": 0.000037,
+        "differingPixelsBelowHeader": 60,
+        "differingRowRange": [
+          81,
+          87
+        ]
+      }
+    },
+    "/museum/network/works/does-not-exist · 820x1000": {
+      "status": {
+        "candidate": 404,
+        "main": 200
+      },
+      "title": {
+        "candidate": "Museum object record",
+        "main": "Museum object record"
+      },
+      "robots": {
+        "candidate": "noindex, follow",
+        "main": "noindex, follow"
+      },
+      "mainTextIdentical": true,
+      "pageHeight": {
+        "candidate": 1182,
+        "main": 1182
+      },
+      "consoleErrors": {
+        "candidate": [
+          "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "Error checking Cross-Origin-Opener-Policy: HTTP error! status: 404"
+        ],
+        "main": []
+      },
+      "iframes": {
+        "candidate": [],
+        "main": []
+      },
+      "frameProbes": {
+        "candidate": [],
+        "main": []
+      },
+      "checks": {
+        "horizontalOverflowPx": [
+          0,
+          0
+        ],
+        "brokenImages": [
+          0,
+          0
+        ],
+        "clippedText": [
+          0,
+          0
+        ],
+        "fallbackHits": [
+          0,
+          0
+        ]
+      },
+      "pixels": {
+        "candidateSize": "820x1182",
+        "mainSize": "820x1182",
+        "sameSize": true,
+        "differingPixels": 60,
+        "differingRatio": 0.000062,
+        "differingPixelsBelowHeader": 60,
+        "differingRowRange": [
+          81,
+          87
+        ]
+      }
+    },
+    "/museum/network/works/does-not-exist · 390x844": {
+      "status": {
+        "candidate": 404,
+        "main": 200
+      },
+      "title": {
+        "candidate": "Museum object record",
+        "main": "Museum object record"
+      },
+      "robots": {
+        "candidate": "noindex, follow",
+        "main": "noindex, follow"
+      },
+      "mainTextIdentical": true,
+      "pageHeight": {
+        "candidate": 1243,
+        "main": 1243
+      },
+      "consoleErrors": {
+        "candidate": [
+          "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "Error checking Cross-Origin-Opener-Policy: HTTP error! status: 404"
+        ],
+        "main": []
+      },
+      "iframes": {
+        "candidate": [],
+        "main": []
+      },
+      "frameProbes": {
+        "candidate": [],
+        "main": []
+      },
+      "checks": {
+        "horizontalOverflowPx": [
+          0,
+          0
+        ],
+        "brokenImages": [
+          0,
+          0
+        ],
+        "clippedText": [
+          0,
+          0
+        ],
+        "fallbackHits": [
+          0,
+          0
+        ]
+      },
+      "pixels": {
+        "candidateSize": "390x1243",
+        "mainSize": "390x1243",
+        "sameSize": true,
+        "differingPixels": 57,
+        "differingRatio": 0.000118,
+        "differingPixelsBelowHeader": 57,
+        "differingRowRange": [
+          93,
+          99
+        ]
+      }
+    }
+  }
+}

@@ -11,15 +11,37 @@ with a multi-select cause filter, grouped reactions, and inline drop previews.
 ## Location in the Site
 
 - Route: `/notifications`.
-- Reached from the connected-only web sidebar `Notifications` row near the
-  account area, or from app notifications navigation.
+- Reached through `View all notifications` in the desktop sidebar inbox, or
+  directly from mobile/app notifications navigation.
 - Opened directly from URL, including `/notifications?reload=true`.
 
 ## Entry Points
 
-- Select `Notifications` from the connected web sidebar row or app navigation.
+- On desktop, select the sidebar bell to preview notifications, then choose
+  `View all notifications` for the full feed. Mobile/app navigation opens the
+  full feed directly.
 - Open `/notifications` directly.
 - Open `/notifications?reload=true` to force one refetch/read pass.
+
+## Desktop Inbox
+
+The desktop sidebar bell opens a floating inbox beside the sidebar while the
+current page stays in place. Compact rows show the actor, activity, a short drop
+preview when available, a timestamp, and an `Unread` indicator. The newest
+notifications appear first; `Load more` retrieves older rows.
+
+Opening or closing this inbox does not mark notifications read. Selecting a row
+marks that notification read and opens its destination. `Mark all as read`
+explicitly clears unread notifications. Read failures show an error and can be
+retried; loading failures offer `Try again`. The empty inbox shows
+`No notifications yet`.
+
+Close the inbox with its close button, Escape, another bell click, or a click
+outside. Escape returns focus to the bell. Changing accounts or routes closes
+it. The inbox is also available when the desktop sidebar is collapsed.
+
+The full `/notifications` page retains its automatic mark-read behavior and
+provides filters, grouped reactions, and richer drop interactions.
 
 ## Before Rows Render
 
@@ -33,11 +55,11 @@ with a multi-select cause filter, grouped reactions, and inline drop previews.
   `You need to set up a profile to continue.` with
   `Create a profile to access notifications.` and `Create profile`. The action
   opens the connected wallet's profile setup route.
-- Profile loading: `Loading profile...`.
+- Profile loading: the same `Loading notifications` indicator used during route preparation and wallet restoration.
 - Proxy profile active:
   `Notifications are not available while you are using a profile proxy.` with
   `Switch to primary profile`.
-- Initial feed load: `Loading notifications...`.
+- Route preparation, wallet restoration, profile loading, and the initial feed fetch use one consistent `Loading notifications` indicator. There is no separate route shimmer before the feed loader.
 - First-load failure: error copy with `Try again`.
 - First-load timeout:
   `Loading notifications is taking longer than expected. Please try again.`
@@ -83,13 +105,31 @@ Browser realtime notification delivery remains connected while the tab is hidden
   - `Mentions`: mention and quote (`quoted you`) rows.
   - `Replies`: reply notifications.
   - `Identity`: new followers and REP/NIC updates.
-  - `Reactions`: voted, reacted, and boosted drop notifications.
+  - `Reactions`: voted, reacted, and boosted drop notifications, plus returned voting credits.
   - `Invites`: wave-created notifications, including standard waves the user
     can access and direct-message waves started with the user.
   - `Subscriptions`: coverage alerts as a profile moves into plan-a-top-up,
     running-low, or action-required state.
 
 ## Row and Action Behavior
+
+- Competition result notifications show a trophy beside “Results are in for”
+  and the linked competition name, followed by a timestamp. The row wraps long
+  names on mobile and desktop. The name opens the relevant competition or entry.
+
+- Returned voting credit notifications name the submission and competition and
+  show the amount released when a submission wins or its author permanently
+  deletes it. They apply to competitions with a shared (`WAVE`) credit budget.
+  Credits are reusable immediately in the same competition; notifications can
+  arrive shortly afterward. The amount is the current allocation when released,
+  including the absolute value of negative votes, rather than a time-weighted
+  winning score or the sum of historical votes.
+- A winning submission title opens its competition entry. After author deletion,
+  the saved title stays visible as text and the competition name remains linked.
+  Removing an already-winning entry does not return credits or notify a second
+  time. Zero votes, submission edits, admin deletion and system cleanup do not
+  create returned-credit notifications. Existing vote notification preferences
+  apply to the feed and push delivery.
 
 - Notifications are separated by spacing, and timestamps use secondary emphasis.
 - Long profile names, wave names, rating categories, and fallback details wrap
@@ -154,6 +194,10 @@ Browser realtime notification delivery remains connected while the tab is hidden
   events refresh the active notification feed and unread indicators without
   waiting for the previous 30-second poll. The event contains only the target
   profile ID; notification rows remain REST-authoritative.
+- An open feed reloads only its newest page for these events and keeps the older
+  pages you already scrolled through; if the newest page does not connect to the
+  loaded rows, for example after many new notifications at once, every loaded
+  page is reloaded.
 - Connected secondary accounts subscribe with their own stored JWTs and refresh
   only when the backend acknowledges those profile subscriptions.
 - REST polling remains as a 30-second active-profile / 15-second
@@ -164,19 +208,6 @@ Browser realtime notification delivery remains connected while the tab is hidden
 - Cause filters only affect `/notifications` results.
 - If auth expires, the page can trigger one re-auth request automatically after
   an unauthorized notifications error.
-
-### Localization fallback debt
-
-- Route or component: `/notifications` wallet connection loader.
-- Untranslated surface: the loader's accessible status label.
-- Current fallback behavior: all supported locales use the canonical `en-US`
-  `Loading notifications` status while this route has no local message family.
-- User impact: the loading state remains accessible and functional, but its
-  announcement is English-only.
-- Owner or follow-up issue: frontend i18n backlog.
-- Expected remediation path: move the notifications loading and recovery copy,
-  including accessible names, into one shared message family and verify its
-  fallback behavior across all supported locales.
 
 ## Related Pages
 
