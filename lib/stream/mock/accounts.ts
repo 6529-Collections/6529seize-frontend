@@ -29,7 +29,8 @@ function releasable(wallet: MockSplitWallet, index: number): Wei {
   }
   const entitled =
     (wallet.received * BigInt(payee.share)) / BigInt(SPLITS_DENOMINATOR);
-  return entitled - (wallet.released[index] ?? 0n);
+  const owed = entitled - (wallet.released[index] ?? 0n);
+  return owed > 0n ? owed : 0n;
 }
 
 export function splitWalletView(wallet: MockSplitWallet): SplitWalletView {
