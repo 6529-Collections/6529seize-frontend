@@ -44,8 +44,6 @@ describe("production exact-artifact deployment contract", () => {
     expect(installStep.env).not.toHaveProperty("NODE_AUTH_TOKEN");
     expect(serialized).not.toContain("AWS_ACCESS_KEY_ID");
     expect(serialized).not.toContain("configure-aws-credentials");
-    // Encrypted DMs (D109) stay off in production builds.
-    expect(buildSource).not.toContain("NEXT_PUBLIC_E2EE_DM_ENABLED");
     expect(buildSource).toContain(
       'git merge-base --is-ancestor "$TARGET_SHA" "$main_sha"'
     );
@@ -129,6 +127,12 @@ describe("production exact-artifact deployment contract", () => {
 
   it("bakes signed messages on into production builds", () => {
     expect(build.env.NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES).toBe("true");
+  });
+
+  it("names the encrypted messages flag in production builds, switched off", () => {
+    // Encrypted DMs (D109) stay off until the owner authorizes production;
+    // turning them on is a one-line change to "true" here.
+    expect(build.env.NEXT_PUBLIC_E2EE_DM_ENABLED).toBe("false");
   });
 
   it("generates the production sitemap under the fail-closed policy", () => {

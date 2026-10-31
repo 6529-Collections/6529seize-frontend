@@ -101,7 +101,7 @@ describe("media (contract 6)", () => {
     const api = createFakeApiClient(ds, "p1");
     // Minimal fixtures: a device and a group so the blob routes accept us.
     const deviceKey = `0x${"ab".repeat(32)}`;
-    ds.state.devices.set(deviceKey, {
+    ds.state["devices"].set(deviceKey, {
       device_key: deviceKey,
       profile_id: "p1",
       grant: { expires_at: Math.floor(Date.now() / 1000) + 3600 },

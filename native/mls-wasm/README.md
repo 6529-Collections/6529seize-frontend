@@ -39,9 +39,9 @@ From the repository root:
    with `--remap-path-prefix` for the home, cargo, rustup, repository and crate
    directories, so no local path is embedded;
 2. runs `wasm-bindgen --target web` into `lib/e2ee/wasm/generated/` and
-   replaces the glue's default `new URL(..., import.meta.url)` with an error
-   (the loader always passes verified bytes, and bundlers must not ship a
-   second copy);
+   replaces both the glue's default `new URL(..., import.meta.url)` and its
+   fetch of a URL or Request with an error (the loader always passes
+   verified bytes, and bundlers must not ship a second copy);
 3. writes the binary to `public/e2ee/mls-wasm-<first 16 hex of sha256>.wasm`,
    deletes older hashed files, and writes `lib/e2ee/wasm/manifest.ts`
    (`file`, `sha256`, `bytes`);

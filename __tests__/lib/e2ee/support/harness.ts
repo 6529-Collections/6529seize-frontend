@@ -33,7 +33,10 @@ import {
 export class TestClock {
   private t: number;
 
-  constructor(start = Date.parse("2026-10-12T12:00:00Z")) {
+  // Starts at the real time (minute aligned, like grants): OpenMLS stamps
+  // KeyPackage lifetimes from the real clock, so a fixed start date drifts
+  // further from those lifetimes every day and expiry stops lining up.
+  constructor(start = Math.floor(Date.now() / 60_000) * 60_000) {
     this.t = start;
   }
 
@@ -168,7 +171,7 @@ export async function startDevice(
     storage,
     loadWasm: async () => world.wasm,
     polling: false,
-    isBlocked: (other) => world.ds.state.blocks.has(`${profileId}>${other}`),
+    isBlocked: (other) => world.ds.state["blocks"].has(`${profileId}>${other}`),
     ...options.extra,
   };
   if (options.noWake === true) {

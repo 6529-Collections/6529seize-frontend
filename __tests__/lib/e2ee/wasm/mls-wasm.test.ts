@@ -503,6 +503,23 @@ describe("mls wasm module", () => {
     ).toBe(true);
   });
 
+  it("never fetches a module itself: init takes verified bytes only", async () => {
+    await jest.isolateModulesAsync(async () => {
+      const { default: init } =
+        await import("@/lib/e2ee/wasm/generated/mls_wasm");
+      const fetchSpy = jest.spyOn(globalThis, "fetch");
+      try {
+        await expect(
+          init({ module_or_path: "https://example.invalid/mls.wasm" })
+        ).rejects.toThrow(/^E2EE_WASM:BAD_INPUT:/);
+        await expect(init()).rejects.toThrow(/^E2EE_WASM:BAD_INPUT:/);
+        expect(fetchSpy).not.toHaveBeenCalled();
+      } finally {
+        fetchSpy.mockRestore();
+      }
+    });
+  });
+
   it("refuses a module whose hash does not match the manifest", async () => {
     await jest.isolateModulesAsync(async () => {
       const { loadMlsWasm: freshLoad } = await import("@/lib/e2ee/wasm");

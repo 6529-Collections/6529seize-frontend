@@ -159,10 +159,10 @@ describe("IndexedDB storage", () => {
     // The raw record holds ciphertext under a non-extractable key.
     const raw = await rawRecord(factory, "wasm", "p1");
     expect(
-      Buffer.from(new Uint8Array(raw.ciphertext as ArrayBuffer)).toString()
+      Buffer.from(new Uint8Array(raw["ciphertext"] as ArrayBuffer)).toString()
     ).not.toContain("secret");
     const keyRecord = await rawRecord(factory, "keys", "p1");
-    expect((keyRecord.key as CryptoKey).extractable).toBe(false);
+    expect((keyRecord["key"] as CryptoKey).extractable).toBe(false);
   });
 
   it("deletes groups with their messages and clears a profile", async () => {

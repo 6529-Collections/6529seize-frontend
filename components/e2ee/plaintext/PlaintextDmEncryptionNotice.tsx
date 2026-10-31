@@ -59,6 +59,8 @@ interface PlaintextDmEncryptionNoticeProps {
   readonly wave: ApiWave;
   /** inline: label plus a text action; icon: one compact button. */
   readonly variant?: "inline" | "icon" | undefined;
+  /** Use the icon variant regardless of `variant` (compact headers). */
+  readonly compact?: boolean | undefined;
   /**
    * Render only in the native app shell, where the wave tabs header (which
    * carries this notice on web) is not shown.
@@ -74,6 +76,7 @@ interface PlaintextDmEncryptionNoticeProps {
 export function PlaintextDmEncryptionNotice({
   wave,
   variant = "inline",
+  compact = false,
   appOnly = false,
 }: PlaintextDmEncryptionNoticeProps) {
   const locale = useBrowserLocale();
@@ -84,7 +87,7 @@ export function PlaintextDmEncryptionNotice({
   }
   const label = t(locale, "e2ee.plaintext.label");
 
-  if (variant === "icon") {
+  if (compact || variant === "icon") {
     return (
       <button
         type="button"

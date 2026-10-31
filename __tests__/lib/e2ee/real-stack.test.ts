@@ -23,17 +23,21 @@ import { E2eeApiError, type E2eeApiClient } from "@/lib/e2ee/api";
 import { createE2eeEngine } from "@/lib/e2ee/engine";
 import { createMemoryE2eeStorage } from "@/lib/e2ee/storage";
 import type { E2eeEngineExt, E2eeMessage } from "@/lib/e2ee/types";
+import type { ApiE2eeReport } from "@/generated/models/ApiE2eeReport";
 
 import { loadTestWasm } from "./support/harness";
 
-const API = process.env.E2EE_REAL_STACK_API ?? "";
-const SECRET = process.env.E2EE_REAL_STACK_JWT_SECRET ?? "";
-const USERS_JSON = process.env.E2EE_REAL_STACK_USERS ?? "";
-const WS = process.env.E2EE_REAL_STACK_WS ?? "";
+const API = process.env["E2EE_REAL_STACK_API"] ?? "";
+const SECRET = process.env["E2EE_REAL_STACK_JWT_SECRET"] ?? "";
+const USERS_JSON = process.env["E2EE_REAL_STACK_USERS"] ?? "";
+const WS = process.env["E2EE_REAL_STACK_WS"] ?? "";
 const enabled = API !== "" && SECRET !== "" && USERS_JSON !== "";
 const describeStack = enabled ? describe : describe.skip;
 
 jest.setTimeout(900_000);
+
+/** Every report response the API returned, as the engine does not expose it. */
+const reportResults: ApiE2eeReport[] = [];
 
 const b64url = (input: Buffer | string) =>
   Buffer.from(input).toString("base64url");
@@ -129,7 +133,11 @@ function httpClient(token: string): E2eeApiClient {
     completeBlob: (id) => post(`e2ee/blobs/${enc(id)}/complete`, {}),
     getBlobChunk: (id, index, key) =>
       get(`e2ee/blobs/${enc(id)}/chunks/${index}`, { device_key: key }),
-    report: (body) => post("e2ee/reports", body),
+    report: async (body) => {
+      const result = await post<ApiE2eeReport>("e2ee/reports", body);
+      reportResults.push(result);
+      return result;
+    },
   };
 }
 
@@ -157,28 +165,55 @@ const users: StackUser[] = enabled
     })
   : [];
 
+/** The first `count` stack users; fails the test when fewer are configured. */
+function takeUsers(count: number): StackUser[] {
+  expect(users.length).toBeGreaterThanOrEqual(count);
+  return users.slice(0, count);
+}
+
+function at<T>(items: readonly T[], index: number): T {
+  const item = items[index];
+  if (item === undefined) {
+    throw new Error(`missing item ${index}`);
+  }
+  return item;
+}
+
 const devices: StackDevice[] = [];
 const sockets: WebSocket[] = [];
 
-/** WebSocket hints from the API, authenticated like the web client does. */
+const authenticatedSockets = new Set<WebSocket>();
+
+/**
+ * WebSocket hints from the API, authenticated with the web client's
+ * AUTHENTICATE message. The local API attaches its message handler only
+ * after it has registered the connection and then sends a `$connect` frame
+ * (API Gateway orders this itself), so authenticate on that frame rather
+ * than on `open`, or the message can arrive before the handler exists.
+ */
 function wsWake(
   token: string
 ): (listener: (event: { type: string; data: unknown }) => void) => () => void {
   return (listener) => {
     const socket = new WebSocket(WS);
     sockets.push(socket);
-    socket.addEventListener("open", () => {
-      socket.send(
-        JSON.stringify({ type: "AUTHENTICATE", access_token: token })
-      );
-    });
     socket.addEventListener("message", (event) => {
       const message = JSON.parse(String(event.data)) as {
         type?: string;
         data?: unknown;
+        routeKey?: string;
       };
+      if (message.routeKey === "$connect") {
+        socket.send(
+          JSON.stringify({ type: "AUTHENTICATE", access_token: token })
+        );
+        return;
+      }
+      if (message.type === "AUTHENTICATED") {
+        authenticatedSockets.add(socket);
+      }
       if (typeof message.type === "string") {
-        if (process.env.E2EE_REAL_STACK_DEBUG === "1") {
+        if (process.env["E2EE_REAL_STACK_DEBUG"] === "1") {
           process.stderr.write(`[ws ${token.slice(-6)}] ${message.type}
 `);
         }
@@ -272,8 +307,12 @@ describeStack("E2EE engine against a real backend", () => {
   });
 
   it("enrolls, runs a DM and a group, and keeps removed and new members out", async () => {
-    expect(users.length).toBeGreaterThanOrEqual(4);
-    const [alice, bob, carol, dave] = users;
+    const [alice, bob, carol, dave] = takeUsers(4) as [
+      StackUser,
+      StackUser,
+      StackUser,
+      StackUser,
+    ];
     const a = await startDevice(alice);
     const b = await startDevice(bob);
     const c = await startDevice(carol);
@@ -281,6 +320,17 @@ describeStack("E2EE engine against a real backend", () => {
     for (const device of [a, b, c, d]) {
       expect(device.engine.getStatus()).toBe("ready");
       expect(device.signCalls).toBe(1);
+    }
+    if (WS !== "") {
+      // Hints must reach every device, as they do in browsers.
+      for (
+        let i = 0;
+        i < 50 && authenticatedSockets.size < sockets.length;
+        i++
+      ) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      expect(authenticatedSockets.size).toBe(sockets.length);
     }
 
     // Story 1: DM with send, edit, react, delete.
@@ -360,7 +410,8 @@ describeStack("E2EE engine against a real backend", () => {
   });
 
   it("adds a second device automatically and revokes it from the first", async () => {
-    const [alice, bob] = users;
+    const alice = at(takeUsers(2), 0);
+    const bob = at(users, 1);
     const a = devices.find((d) => d.user === alice)!;
     const b1 = devices.find((d) => d.user === bob)!;
     const dm = a.engine.findDm(bob.profileId)!;
@@ -391,13 +442,64 @@ describeStack("E2EE engine against a real backend", () => {
     );
   });
 
+  it("carries an encrypted attachment and a verifiable report through the API", async () => {
+    const alice = at(takeUsers(2), 0);
+    const bob = at(users, 1);
+    const a = devices.find((d) => d.user === alice)!;
+    const b = devices.find(
+      (d) => d.user === bob && d.engine.getStatus() === "ready"
+    )!;
+    const dm = a.engine.findDm(bob.profileId)!;
+    // Two 1 MiB chunks; the bytes are a pattern a server copy would show.
+    const bytes = new Uint8Array(1_500_000).map((_, i) => i % 251);
+    const file = new File([bytes], "photo.png", { type: "image/png" });
+    await a.engine.send(dm, { text: "see attached", files: [file] });
+    await settle();
+    const message = b.engine
+      .getMessages(dm)
+      .find((m) => m.kind === "message" && m.text === "see attached");
+    expect(message?.attachments).toEqual([
+      {
+        blob: expect.stringMatching(/^0x[0-9a-f]{32}$/),
+        mime: "image/png",
+        size: bytes.length,
+        name: "photo.png",
+      },
+    ]);
+    const blobId = at(message!.attachments, 0).blob;
+    const received = await b.engine.getAttachment(dm, message!.id, blobId);
+    expect(new Uint8Array(await received.arrayBuffer())).toEqual(bytes);
+
+    // The API holds ciphertext only.
+    const chunk = await httpClient(bob.token).getBlobChunk(
+      blobId,
+      0,
+      b.engine.getThisDevice()!.deviceKey
+    );
+    const stored = Buffer.from(chunk.data, "base64");
+    expect(stored.subarray(0, 4096)).not.toEqual(
+      Buffer.from(bytes.subarray(0, 4096))
+    );
+
+    // Bob reports Alice's message; the API verifies her device signature.
+    reportResults.length = 0;
+    await b.engine.report(dm, message!.id, "SPAM", "real-stack check");
+    expect(reportResults).toEqual([
+      expect.objectContaining({
+        verified: true,
+        sender_profile_id: alice.profileId,
+      }),
+    ]);
+  });
+
   it("respects the recipient's DM policy", async () => {
-    const [alice, , carol] = users;
+    const alice = at(takeUsers(3), 0);
+    const carol = at(users, 2);
     const a = devices.find((d) => d.user === alice)!;
     await setDmPolicy(carol, "NOBODY");
     try {
-      const [result] = await a.engine.checkEligibility([carol.profileId]);
-      expect(result.status).toBe("POLICY");
+      const results = await a.engine.checkEligibility([carol.profileId]);
+      expect(at(results, 0).status).toBe("POLICY");
       await expect(
         a.engine.createConversation({
           profileIds: [carol.profileId],
@@ -410,12 +512,12 @@ describeStack("E2EE engine against a real backend", () => {
   });
 
   const itLarge =
-    process.env.E2EE_REAL_STACK_LARGE === "1" && users.length >= 90
+    process.env["E2EE_REAL_STACK_LARGE"] === "1" && users.length >= 90
       ? it
       : it.skip;
 
   itLarge("runs 15- and 87-person groups", async () => {
-    const alice = users[0];
+    const alice = at(users, 0);
     const a = devices.find((d) => d.user === alice)!;
     const members: StackDevice[] = [];
     for (const user of users.slice(4, 90)) {
@@ -436,13 +538,13 @@ describeStack("E2EE engine against a real backend", () => {
         expect(texts(device.engine.getMessages(g))).toContain(`hello ${size}`);
       }
       // One member leaves, the creator removes another; the rest still talk.
-      await others[0].engine.leave(g);
-      await a.engine.removeMember(g, others[1].user.profileId);
+      await at(others, 0).engine.leave(g);
+      await a.engine.removeMember(g, at(others, 1).user.profileId);
       await settle(3);
-      await others[2].engine.send(g, { text: `after changes ${size}` });
+      await at(others, 2).engine.send(g, { text: `after changes ${size}` });
       await settle(3);
       expect(texts(a.engine.getMessages(g))).toContain(`after changes ${size}`);
-      expect(texts(others[1].engine.getMessages(g))).not.toContain(
+      expect(texts(at(others, 1).engine.getMessages(g))).not.toContain(
         `after changes ${size}`
       );
       expect(a.engine.getConversation(g)?.safetyCode).toBe(
