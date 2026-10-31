@@ -3653,7 +3653,10 @@
         "end-to-end encrypted messages",
         "e2ee",
         "encrypted dm",
-        "report encrypted message"
+        "report encrypted message",
+        "encrypted backup",
+        "recovery code",
+        "restore encrypted messages"
       ],
       "keywords": [
         "encrypted",
@@ -3663,12 +3666,17 @@
         "block",
         "mute",
         "devices",
-        "trust and safety"
+        "trust and safety",
+        "backup",
+        "restore",
+        "recovery code"
       ],
       "facts": [
         "Encrypted chats are rolling out. Where they are available they appear under Messages as an Encrypted section at /messages/encrypted, with new chats at /messages/encrypted/new and this browser's devices at /messages/encrypted/devices.",
         "Messages are end-to-end encrypted on your devices; 6529 delivers them but cannot read them. Each browser or app signs once with your wallet to become a device; there is no prompt per message.",
-        "There is no history backup yet: if you lose all your devices or clear this browser's data, that chat history is gone. A new device sees messages from when it joined.",
+        "Encrypted backup is optional. In /messages/encrypted/devices select Turn on backup to get a recovery code (shown once; copy or download it). Your history is then backed up encrypted and incrementally; 6529 cannot read it or recover the code.",
+        "On a new device turn on encrypted messages, then in Devices select Restore messages and enter the recovery code. Restored chats show From backup and are read-only until someone in the chat adds the new device. Without backup, losing all devices or clearing browser data loses that history.",
+        "Create new recovery code replaces the backup and makes the old code stop working (do this after revoking a device that had backup on). Turn off backup deletes the encrypted backup from 6529.",
         "You can attach up to 10 files of up to 25 MB each; they are encrypted on your device like messages. If attachments are switched off, the attach control is hidden.",
         "Keys are agreed with a hybrid post-quantum method (MLS ciphersuite 0x004F, X-Wing: ML-KEM-768 combined with X25519), so messages stay confidential even if one of the two is broken, for example by a future quantum computer.",
         "Open a message's menu to mute the chat on this device, block its sender (they cannot start new chats with you or add you to encrypted chats), or choose who can message you in Preferences.",
@@ -3683,7 +3691,8 @@
       "tags": ["messages", "encryption", "safety"],
       "source_refs": [
         "ops/docs/encrypted-messages.md",
-        "components/e2ee/conversation/E2eeReportDialog.tsx"
+        "components/e2ee/conversation/E2eeReportDialog.tsx",
+        "components/e2ee/backup/E2eeBackupPanel.tsx"
       ]
     },
     {

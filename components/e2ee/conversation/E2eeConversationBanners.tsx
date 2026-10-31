@@ -104,6 +104,14 @@ export function E2eeConversationBanners({
     );
   }
 
+  if (conversation.status === "restored") {
+    banners.push(
+      <E2eeBanner key="restored" tone="info">
+        {t(locale, "e2ee.banner.restored")}
+      </E2eeBanner>
+    );
+  }
+
   if (banners.length === 0) {
     return null;
   }

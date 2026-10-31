@@ -17,8 +17,9 @@ const CONVERSATION_URL = /\/messages\/encrypted\/(0x[0-9a-f]{64})$/u;
 /** First visit compiles routes and loads the MLS WebAssembly module. */
 const FIRST_LOAD_TIMEOUT_MS = 120_000;
 
+/** The enrollment card point about history living on devices (and backup). */
 export const NO_BACKUP_WARNING =
-  "There is no backup in this version. If you lose all your devices or clear this browser’s data, you lose this history.";
+  "Your history is stored on your devices. If you lose all of them or clear this browser’s data, you lose it, unless you turn on encrypted backup in Devices.";
 
 export async function gotoPath(page: Page, path: string) {
   await page.goto(path, { waitUntil: "domcontentloaded" });

@@ -42,7 +42,7 @@ export const E2EE_MESSAGES = {
   "e2ee.enroll.point.privacy":
     "6529 cannot read your encrypted messages. It only delivers them.",
   "e2ee.enroll.point.noBackup":
-    "There is no backup in this version. If you lose all your devices or clear this browser’s data, you lose this history.",
+    "Your history is stored on your devices. If you lose all of them or clear this browser’s data, you lose it, unless you turn on encrypted backup in Devices.",
   "e2ee.enroll.safari":
     "Safari can delete this site’s data if you don’t open 6529 for 7 days. Visit regularly, or use another browser or the 6529 app, to keep your history.",
   "e2ee.enroll.button": "Turn on encrypted messages (one signature)",
@@ -115,6 +115,7 @@ export const E2EE_MESSAGES = {
   "e2ee.list.muted": "Muted",
   "e2ee.list.status.left": "You left",
   "e2ee.list.status.removed": "Removed",
+  "e2ee.list.status.restored": "From backup",
   "e2ee.list.entry": "Encrypted messages",
   "e2ee.list.entryHint": "End-to-end encrypted chats",
   "e2ee.list.viewAll": "All encrypted chats",
@@ -185,6 +186,8 @@ export const E2EE_MESSAGES = {
   "e2ee.banner.restartFailed": "Couldn’t start a new chat. Try again.",
   "e2ee.banner.left": "You left this chat.",
   "e2ee.banner.removed": "You were removed from this chat.",
+  "e2ee.banner.restored":
+    "Restored from your backup. New messages appear here once someone in this chat adds this device.",
 
   "e2ee.message.undecryptable": "Couldn’t decrypt this message",
   "e2ee.message.deleted": "Message deleted",
@@ -325,4 +328,74 @@ export const E2EE_MESSAGES = {
   "e2ee.plaintext.iconAction":
     "Not end-to-end encrypted. Start an encrypted chat with the same people",
   "e2ee.plaintext.failed": "Couldn’t load the people in this chat. Try again.",
+  "e2ee.backup.title": "Encrypted backup",
+  "e2ee.backup.description":
+    "Keep an encrypted copy of your message history so you can restore it on a new device with a recovery code. 6529 stores only encrypted data: it can’t read your messages or recover your code.",
+  "e2ee.backup.status.loading": "Checking your backup…",
+  "e2ee.backup.status.off":
+    "Backup is off. If you lose all your devices or clear this browser’s data, you lose this history.",
+  "e2ee.backup.status.available":
+    "You have an encrypted backup from another device. Enter its recovery code to restore your messages here and back up this device too.",
+  "e2ee.backup.status.on": "Backup is on.",
+  "e2ee.backup.status.uploading": "Backing up your history…",
+  "e2ee.backup.status.lastBackup": "Last backed up {time}.",
+  "e2ee.backup.status.usage": "{used} of {quota} used",
+  "e2ee.backup.status.error": "Couldn’t check your backup.",
+  "e2ee.backup.action.turnOn": "Turn on backup",
+  "e2ee.backup.action.restore": "Restore messages",
+  "e2ee.backup.action.replace": "Start a new backup",
+  "e2ee.backup.action.backupNow": "Back up now",
+  "e2ee.backup.action.newCode": "Create new recovery code",
+  "e2ee.backup.action.turnOff": "Turn off backup",
+  "e2ee.backup.action.retry": "Try again",
+  "e2ee.backup.backedUp": "Backed up",
+  "e2ee.backup.revokedWarning":
+    "You removed a device after this backup was set up. Create a new recovery code so the backup key that device held stops working.",
+  "e2ee.backup.code.title": "Save your recovery code",
+  "e2ee.backup.code.newTitle": "Save your new recovery code",
+  "e2ee.backup.code.description":
+    "This code is the only way to restore your messages on a new device. Store it somewhere safe, like a password manager. It’s shown only once, and 6529 can’t recover it for you.",
+  "e2ee.backup.code.replaceNote":
+    "Your current recovery code stops working once the new backup finishes uploading.",
+  "e2ee.backup.code.label": "Recovery code",
+  "e2ee.backup.code.copy": "Copy code",
+  "e2ee.backup.code.copied": "Recovery code copied.",
+  "e2ee.backup.code.copyFailed":
+    "Couldn’t copy. Select the code and copy it, or download it.",
+  "e2ee.backup.code.download": "Download as text file",
+  "e2ee.backup.code.fileName": "6529-encrypted-messages-recovery-code.txt",
+  "e2ee.backup.code.fileHeading": "6529 encrypted messages: recovery code",
+  "e2ee.backup.code.fileNote":
+    "Keep this private. With this code, anyone who can sign in to your 6529 profile can read your backed-up messages.",
+  "e2ee.backup.code.saved": "I saved my recovery code somewhere safe",
+  "e2ee.backup.code.confirm": "Turn on backup",
+  "e2ee.backup.code.confirmNew": "Use the new code",
+  "e2ee.backup.restore.title": "Restore messages",
+  "e2ee.backup.restore.description":
+    "Enter the recovery code you saved when you turned on backup. Restored chats are read-only until someone in each chat adds this device.",
+  "e2ee.backup.restore.label": "Recovery code",
+  "e2ee.backup.restore.submit": "Restore",
+  "e2ee.backup.restore.done.one": "Restored {count} message from your backup.",
+  "e2ee.backup.restore.done.other":
+    "Restored {count} messages from your backup.",
+  "e2ee.backup.restore.doneNothing":
+    "Restore finished. This device already had every message in the backup.",
+  "e2ee.backup.turnOff.title": "Turn off backup?",
+  "e2ee.backup.turnOff.body":
+    "This deletes your encrypted backup from 6529 and your recovery code stops working. Messages on your devices stay.",
+  "e2ee.backup.error.codeFormat":
+    "That doesn’t look like a recovery code. Check for typos and try again.",
+  "e2ee.backup.error.wrongCode": "That recovery code doesn’t open this backup.",
+  "e2ee.backup.error.none": "There’s no backup to restore.",
+  "e2ee.backup.error.corrupt":
+    "Part of the backup couldn’t be read. Nothing was restored.",
+  "e2ee.backup.error.replaced":
+    "Backup was turned off or replaced on another device. To back up this device too, restore with the current recovery code.",
+  "e2ee.backup.error.quota":
+    "Your backup storage is full. Create a new recovery code to start a compact backup.",
+  "e2ee.backup.error.notReady":
+    "Set up encrypted messages on this device first.",
+  "e2ee.backup.error.rateLimited": "Too many backup requests. Try again later.",
+  "e2ee.backup.error.generic":
+    "Something went wrong with your backup. Try again.",
 } as const;
