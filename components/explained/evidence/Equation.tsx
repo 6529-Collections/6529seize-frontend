@@ -61,7 +61,7 @@ export default function Equation({
                   {row.sub}
                 </span>
               </div>
-              <div className="tw-whitespace-nowrap tw-text-[22px] tw-font-semibold tw-leading-[30px] tw-tracking-[-0.02em] tw-text-iron-50 md:tw-text-[26px]">
+              <div className="tw-whitespace-nowrap tw-text-[22px] tw-font-semibold tw-leading-[30px] tw-tracking-[-0.02em] tw-text-iron-50 max-[359px]:tw-text-lg md:tw-text-[26px]">
                 {index > 0 && (
                   <span
                     className={`tw-mr-2 ${differs ? "tw-text-error" : "tw-text-green"}`}

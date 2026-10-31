@@ -5,7 +5,7 @@
  * B a triangle, the Python reference a diamond, the Lean model a circle and
  * 6529.io's backend a ring. Each path fills a 10 by 10 box.
  */
-export type TdhProgram = "rust" | "programB" | "python" | "lean" | "live";
+type TdhProgram = "rust" | "programB" | "python" | "lean" | "live";
 
 const PROGRAM_GLYPH: Readonly<Record<TdhProgram, string>> = {
   rust: "M1 1H9V9H1Z",
@@ -40,24 +40,5 @@ export function ProgramGlyph({
       transform={`translate(${cx - size / 2} ${cy - size / 2}) scale(${scale})`}
       className="tw-fill-iron-200"
     />
-  );
-}
-
-/** A program's mark in running text or a table header. */
-export default function TdhProgramMark({
-  program,
-  className = "",
-}: {
-  readonly program: TdhProgram;
-  readonly className?: string;
-}) {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 10 10"
-      className={`tw-size-2.5 tw-shrink-0 tw-fill-iron-200 ${className}`}
-    >
-      <path d={PROGRAM_GLYPH[program]} fillRule="evenodd" />
-    </svg>
   );
 }

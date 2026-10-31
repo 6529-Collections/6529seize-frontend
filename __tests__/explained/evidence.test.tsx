@@ -265,7 +265,12 @@ describe("agreement, the ladder and the failing case", () => {
       "data-agree-share",
       "1.0000"
     );
-    expect(screen.getByText("10,273 of 10,273")).toBeInTheDocument();
+    const row = container.querySelector("[data-agree-share]");
+    expect(row).toHaveTextContent("10,273 of 10,273");
+    // Each count is printed through its fact, so it carries its source.
+    expect(
+      row?.querySelector('[data-fact="tdh.latest.agree.live.identities.equal"]')
+    ).toHaveTextContent("10,273");
   });
 
   it("puts today's line after the rung the evidence reaches", () => {

@@ -206,7 +206,7 @@ describe("TDH sub-pages", () => {
       render(await HowItWorksPage()),
       render(await ImplementationsPage()),
       render(await FormalPage()),
-      render(await VerificationPage()),
+      render(await VerificationPage({ searchParams: Promise.resolve({}) })),
     ];
     const cited = new Set(
       pages.flatMap(({ container }) => sourceAnchors(container))
@@ -594,42 +594,47 @@ describe("TDH sub-pages", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the dashboard page and its permalinks, and 404s an unknown day", async () => {
-    renderPage(await VerificationPage());
+  it("renders the daily check and its receipts, and 404s an unknown day", async () => {
+    const { unmount } = renderPage(
+      await VerificationPage({ searchParams: Promise.resolve({}) })
+    );
     expect(
-      screen.getByRole("heading", { level: 1, name: "TDH verification" })
+      screen.getByRole("heading", { level: 1, name: "The daily check" })
     ).toBeInTheDocument();
     expect(screen.queryByText(/sample/i)).toBeNull();
     expect(screen.getAllByText("Equal").length).toBeGreaterThan(0);
-    expect(
-      screen.getByText(
-        "The Rust core, the Python reference and 6529.io agree to the last unit of TDH, the two burn addresses included."
-      )
-    ).toBeInTheDocument();
+    unmount();
 
     renderPage(
       await VerificationDayPage({
         params: Promise.resolve({ cycleDay: "20740" }),
+        searchParams: Promise.resolve({}),
       })
     );
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: "TDH verification, October 14, 2026",
+        name: "The result dated October 14, 2026",
       })
     ).toBeInTheDocument();
 
     await expect(
-      VerificationDayPage({ params: Promise.resolve({ cycleDay: "1" }) })
+      VerificationDayPage({
+        params: Promise.resolve({ cycleDay: "1" }),
+        searchParams: Promise.resolve({}),
+      })
     ).rejects.toThrow("NEXT_NOT_FOUND");
     await expect(
-      VerificationDayPage({ params: Promise.resolve({ cycleDay: "abc" }) })
+      VerificationDayPage({
+        params: Promise.resolve({ cycleDay: "abc" }),
+        searchParams: Promise.resolve({}),
+      })
     ).rejects.toThrow("NEXT_NOT_FOUND");
   });
 
-  it("sets the dashboard metadata", async () => {
-    const metadata = await generateVerificationMetadata();
-    expect(metadata.title).toBe("TDH verification | Network");
+  it("sets the daily check's metadata", () => {
+    const metadata = generateVerificationMetadata();
+    expect(metadata.title).toBe("The daily check · 6529 Explained");
   });
 
   it("names the day asked for on the not-found view, and when a future cycle closes", async () => {
@@ -639,44 +644,32 @@ describe("TDH sub-pages", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "No published day 20,739" })
     ).toBeInTheDocument();
-    // No eyebrow at any width: the TDH tabs already say where the view
-    // belongs, and the heading starts high on a phone.
+    // A cycle before the feed's first day says so, with its date, and
+    // points to 6529.io's own uploads for the days before the comparison.
+    expect(document.querySelector("[data-ex-lede]")).toHaveTextContent(
+      "Cycle 20,739 (October 13, 2026) is before the first published day, October 14, 2026 (cycle 20,740)."
+    );
     expect(
-      within(document.getElementById("top") as HTMLElement).queryByText(
-        "TDH verification"
-      )
-    ).not.toBeInTheDocument();
-    // A cycle before the feed's first day says so, with its date; the
-    // days before the comparison point to 6529.io's uploads and the
-    // October 11 replay, never "not computed under TDH-v1".
-    expect(
-      screen.getByText(
-        "Cycle 20,739 (October 13, 2026) is before the first published day, October 14, 2026 (cycle 20,740)."
-      )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/The days compared start with October 14, 2026/)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", {
-        name: "the replay, in the specification’s evidence",
-      })
-    ).toHaveAttribute("href", "/network/tdh/specification#evidence-replay");
-    expect(document.body.textContent).not.toMatch(/not computed under TDH-v1/);
+      screen.getByRole("link", { name: "6529.io's consolidated uploads" })
+    ).toHaveAttribute("href", "https://api.6529.io/api/consolidated_uploads");
+    expect(document.body.textContent).not.toMatch(/TDH-v1/);
+    // The way on: the latest result and the daily check, in the site's frame.
+    const back = screen.getAllByRole("link", { name: "The daily check" });
+    expect(back.length).toBeGreaterThan(0);
+    for (const link of back) {
+      expect(link).toHaveAttribute("href", "/network/tdh/verification");
+    }
     unmount();
 
     const { unmount: unmount2 } = renderPage(
       await DayNotFoundPage({ searchParams: Promise.resolve({ day: "99999" }) })
     );
+    expect(document.querySelector("[data-ex-lede]")?.textContent).toMatch(
+      /Cycle 99,999 closes at 00:00 UTC on .*, so it has no result yet\. Each result is published about .* after its snapshot\./
+    );
+    // The days before the comparison are only a question for a day before it.
     expect(
-      screen.getByText(
-        /Cycle 99,999 closes at 00:00 UTC on .*, so it has no report yet; a day’s report appears after its run at 00:40 UTC/
-      )
-    ).toBeInTheDocument();
-    // The days before the comparison are only a future day's question
-    // when it is before the feed: not here.
-    expect(
-      screen.queryByText(/The days compared start with/)
+      screen.queryByRole("link", { name: "6529.io's consolidated uploads" })
     ).not.toBeInTheDocument();
     unmount2();
 

@@ -44,9 +44,9 @@ export function isNotPublishedStatus(status: number | undefined): boolean {
   return status !== undefined && NOT_PUBLISHED_STATUSES.has(status);
 }
 
-export type VerificationErrorReason = "config" | "network" | "http" | "invalid";
+type VerificationErrorReason = "config" | "network" | "http" | "invalid";
 
-export type IndexLoad =
+type IndexLoad =
   | {
       readonly status: "ok";
       readonly source: "remote";
@@ -57,13 +57,18 @@ export type IndexLoad =
   | { readonly status: "awaiting" }
   | { readonly status: "error"; readonly reason: VerificationErrorReason };
 
-export type DayLoad =
+type DayLoad =
   | {
       readonly status: "ok";
       readonly day: VerificationDay;
       readonly dayUrl: string;
       /** SHA-256 of the day file's bytes; null when they were not read. */
       readonly sha256: string | null;
+      /**
+       * The file exactly as read, for a browser to hash again (a day's
+       * receipt); null when its bytes were not read as text.
+       */
+      readonly text: string | null;
     }
   | { readonly status: "not-found" }
   | { readonly status: "error"; readonly reason: VerificationErrorReason };
@@ -80,12 +85,29 @@ type FeedFetchResult =
       readonly json: unknown;
       /** SHA-256 of the body's bytes; null when they could not be read. */
       readonly sha256: string | null;
+      /** The body as text that encodes back to the same bytes, or null. */
+      readonly text: string | null;
     }
   | {
       readonly ok: false;
       readonly reason: VerificationErrorReason;
       readonly status?: number;
     };
+
+/**
+ * The bytes as UTF-8 text that encodes back to exactly these bytes (a
+ * byte-order mark kept), so a browser can hash the file a page was built
+ * from; null when they are not valid UTF-8.
+ */
+function exactText(bytes: Uint8Array): string | null {
+  try {
+    return new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(
+      bytes
+    );
+  } catch {
+    return null;
+  }
+}
 
 export async function fetchFeedJson(
   fetchImpl: typeof fetch,
@@ -114,9 +136,15 @@ export async function fetchFeedJson(
         ok: true,
         json: JSON.parse(new TextDecoder().decode(bytes)) as unknown,
         sha256: createHash("sha256").update(bytes).digest("hex"),
+        text: exactText(bytes),
       };
     }
-    return { ok: true, json: (await response.json()) as unknown, sha256: null };
+    return {
+      ok: true,
+      json: (await response.json()) as unknown,
+      sha256: null,
+      text: null,
+    };
   } catch {
     return { ok: false, reason: "invalid" };
   }
@@ -183,6 +211,7 @@ export function createVerificationLoader(options: VerificationLoaderOptions) {
       day: parsed.data,
       dayUrl: url.toString(),
       sha256: result.sha256,
+      text: result.text,
     };
   }
 
@@ -206,35 +235,3 @@ export const loadVerificationDay = cache(
   (cycleDay: number, revalidate?: number): Promise<DayLoad> =>
     environmentLoader().loadDay(cycleDay, revalidate)
 );
-
-/**
- * The day before a published day, with its file's SHA-256 as the server read
- * it and the one the index states, so a day's page can name the one before
- * it and show the two match; null for the first day.
- */
-export async function loadPreviousDay(
-  index: VerificationIndex,
-  cycleDay: number
-): Promise<{
-  readonly cycleDay: number;
-  readonly date: string;
-  readonly sha256: string | null;
-  readonly stated: string | null;
-} | null> {
-  const earlier = index.days
-    .filter((day) => day.cycleDay < cycleDay)
-    .sort((left, right) => right.cycleDay - left.cycleDay)[0];
-  if (!earlier) {
-    return null;
-  }
-  const load = await loadVerificationDay(
-    earlier.cycleDay,
-    OLDER_DAY_REVALIDATE_SECONDS
-  );
-  return {
-    cycleDay: earlier.cycleDay,
-    date: earlier.date,
-    sha256: load.status === "ok" ? load.sha256 : null,
-    stated: earlier.sha256 ?? null,
-  };
-}

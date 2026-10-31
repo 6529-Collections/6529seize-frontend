@@ -1,0 +1,11 @@
+{
+  "note": "The constructed failing day of the daily check's Break it (TDH-DESIGN.md §5.10): the latest real day's file, with 6529.io short on two identities and their two wallets, every sum kept valid against the feed's schema. It is shown only marked Simulated, as a constructed day, not a real one.",
+  "verdict": "LIVE_UNEXPLAINED",
+  "identities": 2,
+  "wallets": 2,
+  "liveLowerBy": 118,
+  "class": "D",
+  "cause": "unexplained",
+  "detectedAfterMinutes": 52,
+  "incidentStepsReached": 3
+}

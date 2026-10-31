@@ -9,7 +9,8 @@ import { kt } from "../i18n";
  * run side by side share one box, one above the other.
  */
 export interface LaneStep {
-  readonly kicker: string;
+  /** Set in capitals: a name whose case matters (6529.io) keeps it in a `tw-normal-case` span. */
+  readonly kicker: ReactNode;
   readonly title: string;
   readonly cap?: ReactNode;
 }

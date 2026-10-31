@@ -50,6 +50,16 @@ function useSimulation() {
   return context;
 }
 
+/**
+ * Whether the switch shows the failing state. For a component that keeps
+ * one tree in both states (a verdict whose Break it must keep its focus
+ * when pressed), instead of swapping two trees with WhenReal and
+ * WhenSimulated.
+ */
+export function useSimulating(): boolean {
+  return useSimulation().on;
+}
+
 export function WhenReal({ children }: { readonly children: ReactNode }) {
   return useSimulation().on ? null : <>{children}</>;
 }
