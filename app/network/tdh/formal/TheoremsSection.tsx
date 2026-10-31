@@ -35,6 +35,11 @@ const MAIN_THEOREM: Readonly<Record<string, string>> = {
 
 /** A label in the theorem's facts list. */
 const TERM = "tw-font-semibold tw-text-iron-400";
+/** A note under the Lean, at most about 75 characters a line. */
+const NOTE =
+  "tw-m-0 tw-mt-3 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-300";
+/** The validator cap a claim's words print (P53 §6.3). */
+const CAP = "validators.cap";
 
 function key(id: string, part: string): SureKey | null {
   const name = `explained.tdh.sure.${part.replace("{id}", id)}`;
@@ -85,7 +90,7 @@ function Panel({
   const limit = key(section.id, "claim.{id}.limit");
   const values = {
     six: <CodeName>h6</CodeName>,
-    cap: p.v("validators.cap"),
+    cap: p.v(CAP),
     ungated: p.v("rules.ungatedMaxWallets"),
     wallet: p.v("cases.F.wallet"),
     identity: p.v("cases.F.identity"),
@@ -99,7 +104,7 @@ function Panel({
         <span className={`${EX_TEXT.label} tw-block`}>
           {m("explained.tdh.sure.theorems.claim", {
             what: what
-              ? s(what, { cap: p.f("validators.cap") })
+              ? s(what, { cap: p.f(CAP) })
               : (section.title ?? section.id),
           })}
         </span>
@@ -110,21 +115,15 @@ function Panel({
           {words ? m(words, values) : entry.statement}
         </p>
         <dl className="tw-m-0 tw-mt-5 tw-grid tw-grid-cols-1 tw-gap-x-3 tw-text-sm tw-leading-[21px] sm:tw-grid-cols-[96px_minmax(0,1fr)] sm:tw-gap-y-2 [&>dd]:tw-mb-2 sm:[&>dd]:tw-mb-0">
-          <dt className={TERM}>
-            {s("explained.tdh.sure.theorems.rules")}
-          </dt>
+          <dt className={TERM}>{s("explained.tdh.sure.theorems.rules")}</dt>
           <dd className="tw-m-0 tw-text-iron-300" data-fact={section.fact.id}>
             {section.refs.length > 0 ? formatList(locale, section.refs) : "–"}
           </dd>
-          <dt className={TERM}>
-            {s("explained.tdh.sure.theorems.name")}
-          </dt>
+          <dt className={TERM}>{s("explained.tdh.sure.theorems.name")}</dt>
           <dd className="tw-m-0 tw-min-w-0">
             <CodeName wrap>{breakAfter(entry.name ?? entry.id, ".")}</CodeName>
           </dd>
-          <dt className={TERM}>
-            {s("explained.tdh.sure.theorems.where")}
-          </dt>
+          <dt className={TERM}>{s("explained.tdh.sure.theorems.where")}</dt>
           <dd
             className="tw-m-0 tw-min-w-0 tw-text-iron-300 [overflow-wrap:anywhere]"
             data-fact={section.fact.id}
@@ -134,9 +133,7 @@ function Panel({
               commit: <CodeName>{p.v("manifest.commit")}</CodeName>,
             })}
           </dd>
-          <dt className={TERM}>
-            {s("explained.tdh.sure.theorems.axioms")}
-          </dt>
+          <dt className={TERM}>{s("explained.tdh.sure.theorems.axioms")}</dt>
           <dd className="tw-m-0 tw-text-iron-300">
             {entry.axioms && entry.axioms.length > 0
               ? entry.axioms
@@ -167,24 +164,16 @@ function Panel({
               })}
             />
             {read && (
-              <p
-                className="tw-m-0 tw-mt-3 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-300"
-                data-fact={section.fact.id}
-              >
+              <p className={NOTE} data-fact={section.fact.id}>
                 {m(read, values)}
               </p>
             )}
           </>
         ) : (
-          <p className="tw-m-0 tw-mt-3 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
-            {m("explained.tdh.sure.theorems.noLean")}
-          </p>
+          <p className={NOTE}>{m("explained.tdh.sure.theorems.noLean")}</p>
         )}
         {limit && (
-          <p
-            className="tw-m-0 tw-mt-3 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-300"
-            data-fact={section.fact.id}
-          >
+          <p className={NOTE} data-fact={section.fact.id}>
             <b className="tw-font-semibold tw-text-iron-50">
               {s("explained.tdh.sure.theorems.notCovered")}
             </b>{" "}
@@ -212,7 +201,7 @@ export default function TheoremsSection({
       {
         value: section.id,
         label: short
-          ? s(short, { cap: p.f("validators.cap") })
+          ? s(short, { cap: p.f(CAP) })
           : (section.title ?? section.id),
         panel: <Panel ctx={ctx} section={section} entry={entry} />,
       },
@@ -229,7 +218,7 @@ export default function TheoremsSection({
       label={m("explained.tdh.sure.theorems.label")}
       title={m("explained.tdh.sure.theorems.title")}
       full={
-        <FactScope className="tw-mt-8" ids={["validators.cap"]}>
+        <FactScope className="tw-mt-8" ids={[CAP]}>
           <TheoremPicker
             label={s("explained.tdh.sure.theorems.pick")}
             panels={panels}
