@@ -204,13 +204,13 @@ describe("NextGen metadata", () => {
   });
 
   it.each([
-    [undefined, "NextGen"],
-    ["collections", "Collections | NextGen"],
-    ["artists", "Artists | NextGen"],
-    ["about", "About | NextGen"],
+    [undefined, "NextGen", ""],
+    ["collections", "Collections | NextGen", "?view=Collections"],
+    ["artists", "Artists | NextGen", "?view=Artists"],
+    ["about", "About | NextGen", "?view=About"],
   ])(
     "uses consistent metadata for the %s landing view",
-    async (view, title) => {
+    async (view, title, cardQuery) => {
       const metadata = await generateNextGenMetadata({
         params: Promise.resolve({ view: view ? [view] : undefined }),
       });
@@ -226,10 +226,8 @@ describe("NextGen metadata", () => {
         width: 1200,
       });
       expect(url.pathname).toBe("/api/og-metadata/collections/nextgen");
-      expect(url.searchParams.get("subtitle")).toBe(
-        "Generative art collections from 6529"
-      );
-      expect(url.searchParams.get("title")).toBe(title);
+      // The card selects a fixed page label; its text is never in the query.
+      expect(url.search).toBe(cardQuery);
     }
   );
 
@@ -241,19 +239,33 @@ describe("NextGen metadata", () => {
     expect(metadata.title).toBe("NextGen Admin");
     expect(metadata.twitter?.card).toBe("summary_large_image");
     expect(url.pathname).toBe("/api/og-metadata/collections/nextgen");
-    expect(url.searchParams.get("subtitle")).toBe("Manage NextGen collections");
-    expect(url.searchParams.get("title")).toBe("NextGen Admin");
+    expect(url.search).toBe("?variant=admin");
   });
 
   it.each([
-    [undefined, "Pebbles | NextGen", "Pebbles"],
-    ["about", "About | Pebbles", "About | Pebbles"],
-    ["provenance", "Provenance | Pebbles", "Provenance | Pebbles"],
-    ["rarity", "Rarity | Pebbles", "Rarity | Pebbles"],
-    ["top-trait-sets", "Trait Sets | Pebbles", "Trait Sets | Pebbles"],
+    [undefined, "Pebbles | NextGen", "Pebbles", "?collection=1"],
+    ["about", "About | Pebbles", "About | Pebbles", "?collection=1&view=About"],
+    [
+      "provenance",
+      "Provenance | Pebbles",
+      "Provenance | Pebbles",
+      "?collection=1&view=Provenance",
+    ],
+    [
+      "rarity",
+      "Rarity | Pebbles",
+      "Rarity | Pebbles",
+      "?collection=1&view=Rarity",
+    ],
+    [
+      "top-trait-sets",
+      "Trait Sets | Pebbles",
+      "Trait Sets | Pebbles",
+      "?collection=1&view=Trait+Sets",
+    ],
   ])(
     "uses collection facts in the %s collection view card",
-    async (view, documentTitle, cardTitle) => {
+    async (view, documentTitle, cardTitle, cardQuery) => {
       mockNextgenFetches();
 
       const metadata = await generateNextGenCollectionMetadata({
@@ -277,11 +289,8 @@ describe("NextGen metadata", () => {
         width: 1200,
       });
       expect(url.pathname).toBe("/api/og-metadata/collections/nextgen");
-      expect(url.searchParams.get("image")).toBe(
-        "https://cdn.test/pebbles-banner.png"
-      );
-      expect(url.searchParams.get("subtitle")).toBe("Pebbles | NextGen");
-      expect(url.searchParams.get("title")).toBe(cardTitle);
+      // The card resolves the collection name and artwork from the backend.
+      expect(url.search).toBe(cardQuery);
     }
   );
 
@@ -312,10 +321,12 @@ describe("NextGen metadata", () => {
       expect(metadata.openGraph?.title).toBe(title);
       expect(image.alt).toBe(`${title} social card`);
       expect(url.pathname).toBe("/api/og-metadata/collections/nextgen");
-      expect(url.searchParams.get("image")).toBe(
-        "https://cdn.test/pebbles-banner.png"
-      );
-      expect(url.searchParams.get("title")).toBe(title);
+      expect(url.searchParams.get("collection")).toBe("1");
+      expect(url.searchParams.get("view")).toBe(page);
+      expect([...url.searchParams.keys()].sort()).toEqual([
+        "collection",
+        "view",
+      ]);
     }
   );
 
@@ -348,16 +359,12 @@ describe("NextGen metadata", () => {
     expect(url.pathname).toBe(
       `/api/og-metadata/nfts/${NEXTGEN_CONTRACT}/10000000042`
     );
-    expect(url.searchParams.get("artist")).toBe("6529er");
-    expect(url.searchParams.get("badge")).toBe("NextGen");
-    expect(url.searchParams.get("collection")).toBe("Pebbles");
-    expect(url.searchParams.get("displayId")).toBe("42");
-    expect(url.searchParams.get("image")).toBe("https://cdn.test/token.png");
+    // Card text and artwork are resolved from backend data, never the query.
+    expect(url.search).toBe("");
     expect(metadata.description).toContain("Pebble #42 · 6529er · NextGen");
     const canonical = `https://test.6529.io/nextgen/token/10000000042${view ? `/${view}` : ""}`;
     expect(metadata.alternates?.canonical).toBe(canonical);
     expect(metadata.openGraph?.url).toBe(canonical);
-    expect(url.searchParams.get("title")).toBe(title);
   });
 
   it("falls back to a branded NextGen token card when token data is missing", async () => {
@@ -371,10 +378,7 @@ describe("NextGen metadata", () => {
 
     expect(metadata.title).toBe("NextGen Token");
     expect(url.pathname).toBe(`/api/og-metadata/nfts/${NEXTGEN_CONTRACT}/999`);
-    expect(url.searchParams.get("badge")).toBe("NextGen");
-    expect(url.searchParams.get("collection")).toBe("NextGen");
-    expect(url.searchParams.get("image")).toBeNull();
-    expect(url.searchParams.get("title")).toBe("NextGen #999");
+    expect(url.search).toBe("");
   });
 
   it("does not turn a backend failure into the missing-token card", async () => {

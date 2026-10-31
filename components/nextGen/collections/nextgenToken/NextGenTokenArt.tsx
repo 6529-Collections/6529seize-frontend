@@ -414,11 +414,9 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
             artwork={{
               kind: "nextgen",
               tokenId: props.token.id,
-              displayId: props.token.normalised_id,
               title: props.token.name,
               artist: props.collection.artist,
               collection: props.collection.name,
-              imageUrl: props.token.image_url || props.token.thumbnail_url,
             }}
           />
         </div>

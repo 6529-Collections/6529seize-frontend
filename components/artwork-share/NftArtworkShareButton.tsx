@@ -20,7 +20,6 @@ export default function NftArtworkShareButton({
         title: nft.name,
         artist: nft.artist,
         collection: kind === "memes" ? "The Memes" : "6529 Gradient",
-        imageUrl: nft.scaled || nft.image || nft.thumbnail,
       }}
     />
   );

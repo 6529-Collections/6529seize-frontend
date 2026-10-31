@@ -88,23 +88,14 @@ export async function generateMetadata({
   if (lookup.status === "missing") notFound();
   const nft = lookup.status === "found" ? lookup.nft : null;
   const artist = getUsableText(nft?.artist);
-  const image =
-    getUsableText(nft?.scaled) ??
-    getUsableText(nft?.image) ??
-    getUsableText(nft?.thumbnail);
   const description = [title, artist].filter(Boolean).join(" · ");
   return getAppMetadata(
     getLargeSocialCardMetadata({
       title,
       description,
       ogImage: getNftSocialCardImagePath({
-        artist,
-        badge: "6529 Gradient",
-        collection: "6529 Gradient",
         contract: GRADIENT_CONTRACT,
         id,
-        image,
-        title,
       }),
       ogImageAlt: `${title} social card`,
     }),
