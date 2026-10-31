@@ -175,6 +175,73 @@ function Bands({ items }: { readonly items: readonly Share[] }) {
   );
 }
 
+/**
+ * Every share in words: a table from 640 px up; below that each group is a
+ * row of its own, its two shares on one line with their labels, as the
+ * design stacks numeric tables on a phone (TDH-DESIGN.md §6). The column
+ * headers stay for screen readers at every width.
+ */
+function ShareTable({
+  items,
+  locale,
+}: {
+  readonly items: readonly Share[];
+  readonly locale: SupportedLocale;
+}) {
+  const head = "tw-pb-2 tw-text-right tw-font-semibold";
+  const cell =
+    "tw-tabular-nums max-sm:tw-inline sm:tw-border-0 sm:tw-border-t sm:tw-border-solid sm:tw-border-iron-900 sm:tw-py-1.5 sm:tw-text-right";
+  const inlineLabel =
+    "tw-mr-1.5 tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400 sm:tw-hidden";
+  const shareCell = (label: string, value: number) => (
+    <td className={cell}>
+      <span className={inlineLabel} aria-hidden="true">
+        {label}
+      </span>
+      {percent(locale, value)}
+    </td>
+  );
+  return (
+    <table className="tw-w-full tw-max-w-[560px] tw-border-collapse tw-text-[15px] tw-leading-[23px] tw-text-iron-300 max-sm:tw-block">
+      <thead className="max-sm:tw-sr-only">
+        <tr className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-400">
+          <th scope="col" className="tw-pb-2 tw-text-left tw-font-semibold">
+            <span className="tw-sr-only">{ot(locale, "network.colGroup")}</span>
+          </th>
+          <th scope="col" className={head}>
+            {ot(locale, "network.colTdh")}
+          </th>
+          <th scope="col" className={head}>
+            {ot(locale, "network.colPeople")}
+          </th>
+        </tr>
+      </thead>
+      <tbody className="max-sm:tw-block">
+        {items.map((share) => (
+          <tr
+            key={share.group.key}
+            className="max-sm:tw-flex max-sm:tw-flex-wrap max-sm:tw-gap-x-4 max-sm:tw-border-0 max-sm:tw-border-t max-sm:tw-border-solid max-sm:tw-border-iron-900 max-sm:tw-py-2"
+          >
+            <th
+              scope="row"
+              className="tw-text-left tw-font-semibold tw-text-iron-50 max-sm:tw-block max-sm:tw-w-full sm:tw-whitespace-nowrap sm:tw-border-0 sm:tw-border-t sm:tw-border-solid sm:tw-border-iron-900 sm:tw-py-1.5 sm:tw-pr-3"
+            >
+              <span
+                className="tw-mr-2.5 tw-inline-block tw-size-3 tw-rounded-sm tw-align-[-1px]"
+                style={{ background: TONES[share.group.key].fill }}
+                aria-hidden="true"
+              />
+              {groupName(locale, share.group)}
+            </th>
+            {shareCell(ot(locale, "network.colTdh"), share.tdh)}
+            {shareCell(ot(locale, "network.colPeople"), share.people)}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
 /** When 6529.io answered, as "Oct 31, 09:12 UTC". */
 function readTime(locale: SupportedLocale, readAt: string | null): string {
   if (readAt === null) {
@@ -202,8 +269,6 @@ export default function NetworkDistribution({
     );
   const rowLabel =
     "tw-mb-1.5 tw-block tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-300";
-  const cell =
-    "tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-py-1.5 tw-text-right tw-tabular-nums";
   return (
     <figure className="tw-m-0 tw-mt-14 md:tw-mt-16" data-fig="network">
       <span className={EX_TEXT.label}>{ot(locale, "network.label")}</span>
@@ -221,48 +286,7 @@ export default function NetworkDistribution({
             {ot(locale, "network.peopleRow")}
           </span>
         </div>
-        <table className="tw-w-full tw-max-w-[560px] tw-border-collapse tw-text-sm tw-leading-[23px] tw-text-iron-300 sm:tw-text-[15px]">
-          <thead>
-            <tr className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-normal tw-text-iron-400 sm:tw-tracking-[0.12em]">
-              <th scope="col" className="tw-pb-2 tw-text-left tw-font-semibold">
-                <span className="tw-sr-only">
-                  {ot(locale, "network.colGroup")}
-                </span>
-              </th>
-              <th
-                scope="col"
-                className="tw-pb-2 tw-text-right tw-font-semibold"
-              >
-                {ot(locale, "network.colTdh")}
-              </th>
-              <th
-                scope="col"
-                className="tw-pb-2 tw-text-right tw-font-semibold"
-              >
-                {ot(locale, "network.colPeople")}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((share) => (
-              <tr key={share.group.key}>
-                <th
-                  scope="row"
-                  className="tw-whitespace-nowrap tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-py-1.5 tw-pr-3 tw-text-left tw-font-semibold tw-text-iron-50"
-                >
-                  <span
-                    className="tw-mr-2.5 tw-inline-block tw-size-3 tw-rounded-sm tw-align-[-1px]"
-                    style={{ background: TONES[share.group.key].fill }}
-                    aria-hidden="true"
-                  />
-                  {groupName(locale, share.group)}
-                </th>
-                <td className={cell}>{percent(locale, share.tdh)}</td>
-                <td className={cell}>{percent(locale, share.people)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <ShareTable items={items} locale={locale} />
       </div>
       <figcaption className={`${EX_TEXT.cap} tw-mt-5 tw-max-w-[760px]`}>
         {ot(locale, "network.caption", {
