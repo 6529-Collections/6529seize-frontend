@@ -4,9 +4,9 @@
 
 Signed messages let a browser sign your drops so anyone can check that a post,
 edit, delete, or reaction came from your wallet, without trusting 6529.io.
-The one exception is a contract wallet whose sign-in signature the reader's
-browser cannot check on Ethereum: that step rests on 6529.io's check at
-sign-in. Your wallet signs once; that signature lets a key held only by this
+A contract wallet's sign-in signature is checked on Ethereum by the reader's
+browser; when that check cannot run, the drop is not shown as signed. Your
+wallet signs once; that signature lets a key held only by this
 browser sign for you for 180 days. Chat does not change: messages still
 appear at once, there is no wallet prompt per message, and anything that
 cannot be signed is sent unsigned exactly as before.
@@ -101,15 +101,23 @@ and checks the wallet's sign-in signature on the grant. The dialog shows:
 
 - **Signed by its author** with the wallet, device key fingerprint, grant
   expiry, the wallet-signature check, and whether the current content is the
-  signed version. A contract wallet whose sign-in signature the browser
-  cannot check on Ethereum shows **Contract wallet: verified by 6529.io at
-  sign-in**, and the description says 6529.io, not the browser, checked that
-  wallet signature.
+  signed version. A contract wallet's sign-in signature counts only when
+  the wallet has contract code on Ethereum and its EIP-1271 check accepts
+  the signature; the row then reads **Contract wallet: verified on Ethereum
+  in your browser**.
+- **Couldn't verify this signature right now** with a neutral icon, never
+  the signed seal, when the sign-in signature needs that contract-wallet
+  check on Ethereum and it cannot run (no Ethereum connection, a failed
+  read, or a grant signed on another chain). An ordinary wallet whose
+  signature does not match reads **The signature could not be verified**.
 - **Not signed by its author** for drops sent without a device signature.
   Drops whose content moderation hides from you and anonymous competition
   entries also read this way: their signed events are not shared.
 - **The signature could not be verified** when stored signatures do not
-  match.
+  match, or when the wallet signed the grant anywhere but the 6529 app
+  (exactly 6529.io or staging.6529.io; other 6529.io hosts, such as the IPFS
+  and media gateways, never count). Signed messages are not turned on from a
+  sign-in challenge for any other host.
 - **Couldn't check the signature right now.** with **Try again** when the
   signed events or the author's wallets cannot be loaded. A temporary failure
   is never reported as **The signature could not be verified**.

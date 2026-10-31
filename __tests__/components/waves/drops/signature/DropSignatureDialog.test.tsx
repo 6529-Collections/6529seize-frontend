@@ -95,7 +95,7 @@ describe("drop signature details", () => {
       expect.any(AbortSignal)
     );
     expect(mockVerify).toHaveBeenCalledWith(signedEvents, {
-      verifyContractSignature: undefined,
+      contractWallets: undefined,
       displayed: undefined,
       expected: undefined,
     });
@@ -105,7 +105,7 @@ describe("drop signature details", () => {
     expect(screen.getByText("The signed version")).toBeVisible();
   });
 
-  it("explains contract wallets and content changed after signing", async () => {
+  it("names a contract wallet verified on Ethereum and content changed after signing", async () => {
     mockVerify.mockResolvedValue(
       signedVerdict({
         currentContentSigned: false,
@@ -116,7 +116,7 @@ describe("drop signature details", () => {
               { status: "signed" }
             >
           ).signature,
-          walletSignature: "contract-wallet",
+          walletSignature: "contract-verified",
         },
       })
     );
@@ -125,20 +125,36 @@ describe("drop signature details", () => {
     );
 
     expect(
-      await screen.findByText("Contract wallet: verified by 6529.io at sign-in")
+      await screen.findByText(
+        "Contract wallet: verified on Ethereum in your browser"
+      )
     ).toBeVisible();
-    // The browser did not check this wallet signature, so it must not claim to.
+    expect(screen.getByText("Signed by its author")).toBeVisible();
     expect(
       screen.getByText(
-        "Your browser checked the device signature itself. This contract wallet's sign-in signature was checked by 6529.io at sign-in, not by your browser."
-      )
-    ).toBeVisible();
-    expect(
-      screen.queryByText(
         "Your browser checked this signature itself, without relying on 6529.io."
       )
-    ).toBeNull();
+    ).toBeVisible();
     expect(screen.getByText("Changed without a signature")).toBeVisible();
+  });
+
+  it("never shows the signed seal when the signature could not be verified", async () => {
+    mockVerify.mockResolvedValue({ status: "unverifiable" });
+    renderWithQueryClient(
+      <DropSignatureDialog dropId={DROP_ID} isOpen onClose={jest.fn()} />
+    );
+
+    expect(
+      await screen.findByText("Couldn't verify this signature right now")
+    ).toBeVisible();
+    expect(
+      screen.getByText(/couldn't complete, so this post is not shown as signed/)
+    ).toBeVisible();
+    expect(screen.queryByText("Signed by its author")).toBeNull();
+    expect(screen.queryByText("Wallet signature")).toBeNull();
+    expect(
+      screen.queryByText("The signature could not be verified")
+    ).toBeNull();
   });
 
   it.each([
