@@ -4,7 +4,10 @@ import { useEffect, useRef, useState } from "react";
 
 import { useAuth } from "@/components/auth/Auth";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
-import { EncryptedFirstDmActions } from "@/components/e2ee/legacy/EncryptedFirstDmActions";
+import {
+  EncryptedFirstDmActions,
+  unencryptedDmButtonStyle,
+} from "@/components/e2ee/legacy/EncryptedFirstDmActions";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
 import Button from "@/components/utils/button/Button";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
@@ -193,12 +196,10 @@ export default function CreateDirectMessage({
           unencryptedButton={
             <Button
               type="submit"
-              variant={encryptedFirst ? "secondary" : "action"}
-              size={encryptedFirst ? "md" : "lg"}
+              {...unencryptedDmButtonStyle(encryptedFirst)}
               fullWidth
               loading={isCreating}
               disabled={selectedIdentities.length === 0}
-              className={encryptedFirst ? undefined : "tw-min-h-[50px]"}
             >
               <span className="tw-min-w-0 tw-whitespace-normal tw-break-all">
                 {buttonLabel}

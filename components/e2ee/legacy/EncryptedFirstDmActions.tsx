@@ -38,6 +38,20 @@ function toPrefillPeople(
 }
 
 /**
+ * The new-DM form's own submit button: the main action without encrypted
+ * chats, a smaller second choice when the encrypted chat leads.
+ */
+export function unencryptedDmButtonStyle(encryptedFirst: boolean): {
+  readonly variant: "secondary" | "action";
+  readonly size: "md" | "lg";
+  readonly className?: string;
+} {
+  return encryptedFirst
+    ? { variant: "secondary", size: "md" }
+    : { variant: "action", size: "lg", className: "tw-min-h-[50px]" };
+}
+
+/**
  * Footer of the new-DM form while encrypted chats exist (D146): the
  * encrypted chat is the default action, and an unencrypted DM is an explicit
  * second choice that says it is deleted on the deletion date. Nothing is

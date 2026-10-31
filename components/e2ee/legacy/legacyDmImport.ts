@@ -100,27 +100,48 @@ function isUnsafeNameChar(char: string): boolean {
  * dots, at most 120 characters with the extension kept, or the fallback.
  */
 export function safeAttachmentName(raw: string, fallback: string): string {
-  const cleaned = [...raw.normalize("NFC")]
-    .filter((char) => !isUnsafeNameChar(char))
-    .join("")
-    .replaceAll(/[/\\]+/gu, "_")
-    .replaceAll(/\s+/gu, " ")
-    .trim()
-    .replace(/^[.\s]+/u, "")
-    .replace(/[.\s]+$/u, "");
-  const chars = [...cleaned];
-  if (chars.length === 0) {
+  // One linear pass (no backtracking regexes over attacker-chosen names):
+  // drop unsafe characters, turn separator runs into "_" and whitespace
+  // runs into one space.
+  const chars: string[] = [];
+  for (const char of raw.normalize("NFC")) {
+    if (isUnsafeNameChar(char)) {
+      continue;
+    }
+    let mapped = char;
+    if (char === "/" || char === "\\") {
+      mapped = "_";
+    } else if (/\s/u.test(char)) {
+      mapped = " ";
+    }
+    const previous = chars.at(-1);
+    const isRun = (mapped === "_" || mapped === " ") && previous === mapped;
+    if (!isRun) {
+      chars.push(mapped);
+    }
+  }
+  const isEdge = (char: string | undefined) => char === "." || char === " ";
+  let start = 0;
+  let end = chars.length;
+  while (start < end && isEdge(chars[start])) {
+    start += 1;
+  }
+  while (end > start && isEdge(chars[end - 1])) {
+    end -= 1;
+  }
+  const name = chars.slice(start, end);
+  if (name.length === 0) {
     return fallback;
   }
-  if (chars.length <= MAX_IMPORT_NAME_CHARS) {
-    return cleaned;
+  if (name.length <= MAX_IMPORT_NAME_CHARS) {
+    return name.join("");
   }
-  const dot = cleaned.lastIndexOf(".");
-  const extension = dot > 0 ? [...cleaned.slice(dot)] : [];
-  const keep = extension.length > 0 && extension.length <= 16 ? extension : [];
-  return (
-    chars.slice(0, MAX_IMPORT_NAME_CHARS - keep.length).join("") + keep.join("")
-  );
+  const dot = name.lastIndexOf(".");
+  const extension = dot > 0 && name.length - dot <= 16 ? name.slice(dot) : [];
+  return name
+    .slice(0, MAX_IMPORT_NAME_CHARS - extension.length)
+    .concat(extension)
+    .join("");
 }
 
 function nameFromUrl(url: string, fallback: string): string {

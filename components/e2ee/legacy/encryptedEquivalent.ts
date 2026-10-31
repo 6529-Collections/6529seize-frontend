@@ -13,12 +13,16 @@ export function findEncryptedEquivalent(
   if (wanted.size < 2) {
     return null;
   }
-  const matches = conversations.filter(
-    (conversation) =>
+  // The most recently active match, without sorting in place.
+  let best: E2eeConversation | null = null;
+  for (const conversation of conversations) {
+    const matches =
       conversation.status === "active" &&
       conversation.members.length === wanted.size &&
-      conversation.members.every((member) => wanted.has(member.profileId))
-  );
-  // Prefer the most recently active match.
-  return matches.sort((a, b) => b.updatedAt - a.updatedAt)[0] ?? null;
+      conversation.members.every((member) => wanted.has(member.profileId));
+    if (matches && (best === null || conversation.updatedAt > best.updatedAt)) {
+      best = conversation;
+    }
+  }
+  return best;
 }

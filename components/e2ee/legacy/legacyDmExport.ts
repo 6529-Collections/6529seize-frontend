@@ -329,13 +329,18 @@ export function legacyDmExportFileName(
   exportedAt: Date,
   extension: "json" | "html"
 ): string {
+  // Linear: one replace with a single character class, then a trim loop.
+  const dashed = name.normalize("NFKD").replace(/[^\w-]+/g, "-");
+  let start = 0;
+  let end = dashed.length;
+  while (start < end && dashed[start] === "-") {
+    start += 1;
+  }
+  while (end > start && dashed[end - 1] === "-") {
+    end -= 1;
+  }
   const slug =
-    name
-      .normalize("NFKD")
-      .replace(/[^\w-]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .slice(0, 60)
-      .toLowerCase() || "conversation";
+    dashed.slice(start, end).slice(0, 60).toLowerCase() || "conversation";
   return `6529-dm-${slug}-${exportedAt.toISOString().slice(0, 10)}.${extension}`;
 }
 
