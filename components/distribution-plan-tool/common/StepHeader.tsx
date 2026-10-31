@@ -3,6 +3,7 @@
 import {
     AllowlistOperationCode,
 } from "@/components/allowlist-tool/allowlist-tool.types";
+import { downloadJsonFile } from "@/helpers/json-download.helpers";
 import { useContext, useState } from "react";
 import {
     DistributionPlanToolContext,
@@ -86,12 +87,7 @@ export default function StepHeader({
         params: operation.params,
       })),
     ]);
-    const blob = new Blob([data], { type: "application/json" });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "operations.json";
-    link.click();
+    downloadJsonFile(data, "operations.json");
   };
   const downloadOperations = async () => {
     if (loading) {

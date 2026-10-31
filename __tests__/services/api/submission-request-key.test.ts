@@ -73,6 +73,40 @@ it("forgets unresolved request keys on identity scope reset", () => {
     prepareSubmissionRequestKey("drops", {}, () => "wallet:profile")?.key
   ).not.toBe(first?.key);
 });
+it("keeps the request key when only the device signature changes", () => {
+  const unsigned = prepareSubmissionRequestKey(
+    "drops",
+    { text: "same" },
+    () => "wallet:profile"
+  );
+  const signature = (seq: number) => ({
+    grant_id: `0x${"1".repeat(64)}`,
+    seq,
+    claimed_time: seq,
+    signature: `0x${"2".repeat(128)}`,
+  });
+  expect(
+    prepareSubmissionRequestKey(
+      "drops",
+      { text: "same", device_signature: signature(1) },
+      () => "wallet:profile"
+    )?.key
+  ).toBe(unsigned?.key);
+  expect(
+    prepareSubmissionRequestKey(
+      "drops",
+      { text: "same", device_signature: signature(2) },
+      () => "wallet:profile"
+    )?.key
+  ).toBe(unsigned?.key);
+  expect(
+    prepareSubmissionRequestKey(
+      "drops",
+      { text: "other", device_signature: signature(2) },
+      () => "wallet:profile"
+    )?.key
+  ).not.toBe(unsigned?.key);
+});
 
 it("creates retry-safe v4 keys when randomUUID is unavailable on an HTTP device origin", () => {
   const descriptor = Object.getOwnPropertyDescriptor(

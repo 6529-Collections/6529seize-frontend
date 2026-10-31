@@ -10,6 +10,9 @@ export default function Definitions() {
 export const generateMetadata = async () => {
   return getAppMetadata({
     title: t(DEFAULT_LOCALE, "network.definitions.metadata.title"),
-    description: "Network",
+    description: t(
+      DEFAULT_LOCALE,
+      "pageMetadata.networkDefinitions.description"
+    ),
   });
 };

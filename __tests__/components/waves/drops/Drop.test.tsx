@@ -30,6 +30,7 @@ jest.mock("@/components/waves/drops/WaveDrop", () => {
 
 const base = {
   id: "1",
+  wave: { id: "wave-1" },
   author: { id: "author-1" },
   drop_type: ApiDropType.Chat,
   moderation: {

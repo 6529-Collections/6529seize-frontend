@@ -21,6 +21,7 @@ import { publicEnv } from "@/config/env";
 import { isPublicReviewEnabled } from "@/config/publicReviews";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 import {
   createSolidityReferenceReader,
   SolidityReferenceNotFoundError,
@@ -94,6 +95,7 @@ export function getStreamSolidityReferenceReader({
   }
   defaultReader ??= createSolidityReferenceReader({
     identity: STREAM_SOLIDITY_REFERENCE_IDENTITY,
+    remoteOrigin: publicEnv.BASE_ENDPOINT,
   });
   return defaultReader;
 }

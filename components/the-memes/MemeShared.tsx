@@ -103,19 +103,16 @@ async function getMetadataProps(
   let urlPath = "nfts";
   let collectionRoute: NftCollectionRoute = "the-memes";
   const idDisplay = idStringToDisplay(id);
-  let collection = "The Memes";
   let name = `The Memes #${idDisplay}`;
   if (areEqualAddresses(contract, MEMELAB_CONTRACT)) {
     urlPath = "nfts_memelab";
     collectionRoute = "meme-lab";
-    collection = "Meme Lab";
     name = `Meme Lab #${idDisplay}`;
   }
   const collectionLabel = name;
   let description = collectionLabel;
   const query = new URLSearchParams({ contract, id }).toString();
   let artist: string | null = null;
-  let image: string | null = null;
   try {
     let nft = prefetchedNft ?? undefined;
     if (prefetchedNft === undefined) {
@@ -141,10 +138,6 @@ async function getMetadataProps(
             name: nftName,
             collection: collectionLabel,
           });
-      image =
-        getUsableText(nft.scaled) ??
-        getUsableText(nft.image) ??
-        getUsableText(nft.thumbnail);
     }
   } catch (error) {
     console.warn("Failed to fetch NFT metadata for social card", {
@@ -167,15 +160,7 @@ async function getMetadataProps(
   return {
     title: name,
     description: description,
-    ogImage: getNftSocialCardImagePath({
-      artist,
-      badge: collection,
-      collection,
-      contract,
-      id,
-      image,
-      title: name,
-    }),
+    ogImage: getNftSocialCardImagePath({ contract, id }),
     ogImageAlt: `${name} social card`,
   };
 }

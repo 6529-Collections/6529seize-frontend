@@ -2,19 +2,15 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import type { useEmoji } from "@/contexts/EmojiContext";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
-import type { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReactionToDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import { formatLargeNumber } from "@/helpers/Helpers";
 import { recordReaction } from "@/helpers/reactions/reactionHistory";
-import {
-  enqueueDropReactionRequest,
-  isDropReactionRequestTimeout,
-} from "@/helpers/reactions/dropReactionRequestQueue";
+import { enqueueDropReactionRequest } from "@/helpers/reactions/dropReactionRequestQueue";
 import { buildTooltipId } from "@/helpers/tooltip.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import {
@@ -28,7 +24,7 @@ import {
 } from "@/hooks/drops/useDropReactionAuthRecovery";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
-import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
+import { sendDropReaction } from "@/services/api/signed-drop-writes";
 import { useDropReactionRecovery } from "@/hooks/drops/useDropReactionRecovery";
 import { t } from "@/i18n/messages";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
@@ -63,7 +59,10 @@ import {
   recordReactionRequestSucceeded,
   recordReactionRollbackApplied,
 } from "@/utils/monitoring/dropReactionMonitoring";
-import { isExpectedWaveReactionDisabledError } from "@/utils/monitoring/dropReactionErrorClassification";
+import {
+  isExpectedWaveReactionDisabledError,
+  isReactionRequestOutcomeUncertain,
+} from "@/utils/monitoring/dropReactionErrorClassification";
 import styles from "./WaveDropReactions.module.css";
 
 type OptimisticRollback = (() => void) | null;
@@ -241,7 +240,7 @@ function WaveDropReaction({
     () => false
   );
   const { setToast, connectedProfile, activeProfileProxy } = useAuth();
-  const { applyOptimisticDropUpdate } = useMyStream();
+  const { applyOptimisticDropUpdate } = useMyStreamActions();
   const { getEligibility, updateEligibility } = useWaveEligibility();
   const queryClient = useQueryClient();
   const websocketStatus = useWebsocketStatus();
@@ -525,7 +524,7 @@ function WaveDropReaction({
     captureOwner,
     isCurrentMutation,
     refreshAfterFailure,
-    reconcileTimeout,
+    reconcileRequestFailure,
   } = useDropReactionRecovery({
     activeProfileProxy,
     applyOptimisticDropUpdate,
@@ -582,8 +581,8 @@ function WaveDropReaction({
       void recordReaction(reaction.reaction);
     }
 
-    const handleTimeout = async () => {
-      const reconciliation = await reconcileTimeout(
+    const handleUncertainOutcome = async () => {
+      const reconciliation = await reconcileRequestFailure(
         mutation,
         intendedReaction,
         isCurrent
@@ -616,8 +615,8 @@ function WaveDropReaction({
         return;
       }
 
-      if (isDropReactionRequestTimeout(error)) {
-        await handleTimeout();
+      if (isReactionRequestOutcomeUncertain(error)) {
+        await handleUncertainOutcome();
         return;
       }
 
@@ -647,30 +646,11 @@ function WaveDropReaction({
     try {
       await enqueueDropReactionRequest(drop.id, async (signal) => {
         if (!owner.isCurrent()) return;
-        const body = { reaction: reaction.reaction };
-        if (selected) {
-          recordReactionRequestSent(mutation, {
-            endpoint,
-            method: "DELETE",
-          });
-          await commonApiDelete({
-            endpoint,
-            errorMode: "structured",
-            signal,
-          });
-          return;
-        }
-
-        recordReactionRequestSent(mutation, {
-          endpoint,
-          method: "POST",
-        });
-        await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
-          endpoint,
-          body,
-          errorMode: "structured",
-          signal,
-        });
+        recordReactionRequestSent(mutation, { endpoint, method });
+        await sendDropReaction(
+          { dropId: drop.id, waveId, reaction: intendedReaction },
+          { errorMode: "structured", signal }
+        );
       });
       const result = recordReactionRequestSucceeded(mutation);
       if (result.isLatestMutation && isCurrent()) {
@@ -692,7 +672,7 @@ function WaveDropReaction({
     captureOwner,
     isCurrentMutation,
     refreshAfterFailure,
-    reconcileTimeout,
+    reconcileRequestFailure,
     selected,
     setToast,
     updateEligibilityAfterExpectedDisabledReaction,

@@ -821,3 +821,44 @@ it("filters saved moderation evidence from telemetry context", () => {
   expect(JSON.stringify(event)).not.toContain("synthetic private material");
   expect(event.extra?.["error_code"]).toBe("MODERATION_STORAGE_UNAVAILABLE");
 });
+
+it("redacts connection-link credentials from messages and stack frames", () => {
+  const pageUrl =
+    "https://6529.io/accept-connection-sharing?token=synthetic-link-secret&address=0x1";
+  const event = sanitizeSentryEvent({
+    message: `Unhandled error on ${pageUrl}`,
+    exception: {
+      values: [
+        {
+          type: "Error",
+          value: `Failed at ${pageUrl}`,
+          stacktrace: {
+            frames: [
+              { filename: pageUrl, abs_path: pageUrl, lineno: 1, colno: 2 },
+              {
+                filename: "https://6529.io/_next/static/chunks/app.js?dpl=1",
+                function: "render",
+              },
+            ],
+          },
+        },
+      ],
+    },
+    extra: { detail: `navigated from ${pageUrl}` },
+  });
+
+  expect(JSON.stringify(event)).not.toContain("synthetic-link-secret");
+  const frames = event.exception?.values?.[0]?.stacktrace?.frames;
+  expect(frames?.[0]).toEqual({
+    filename:
+      "https://6529.io/accept-connection-sharing?token=[Filtered]&address=0x1",
+    abs_path:
+      "https://6529.io/accept-connection-sharing?token=[Filtered]&address=0x1",
+    lineno: 1,
+    colno: 2,
+  });
+  expect(frames?.[1]).toEqual({
+    filename: "https://6529.io/_next/static/chunks/app.js?dpl=1",
+    function: "render",
+  });
+});

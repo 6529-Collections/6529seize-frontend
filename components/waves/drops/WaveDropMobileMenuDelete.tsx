@@ -4,10 +4,10 @@ import React, { useContext, useState } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMutation } from "@tanstack/react-query";
-import { commonApiDelete } from "@/services/api/common-api";
+import { deleteDrop } from "@/services/api/signed-drop-writes";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "@/components/auth/Auth";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import Button from "@/components/utils/button/Button";
 
@@ -23,13 +23,11 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
   const [isDeleteMode, setIsDeleteMode] = useState<boolean>(false);
   const { requestAuth, setToast } = useContext(AuthContext);
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
-  const { processDropRemoved } = useMyStream();
+  const { processDropRemoved } = useMyStreamActions();
   const [mutating, setMutating] = useState<boolean>(false);
   const deleteDropMutation = useMutation({
     mutationFn: async () =>
-      await commonApiDelete({
-        endpoint: `drops/${drop.id}`,
-      }),
+      await deleteDrop({ dropId: drop.id, waveId: drop.wave.id }),
     onSuccess: () => {
       setToast({
         message: "Drop deleted.",

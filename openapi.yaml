@@ -3248,6 +3248,35 @@ paths:
           description: >-
             Backward-compatible request field. Session challenges are issued for
             the backend-configured auth chain, not this client-supplied value.
+        - name: device_key
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+          description: >-
+            Web only. Raw 32-byte Ed25519 public key of a browser-held device
+            key, as 0x + 64 lowercase hex. When present, the SIWE message also
+            grants this key the right to sign drop writes for 180 days (one
+            device-grant URN resource and a matching statement). Sending any
+            device parameter with a native or desktop client type returns 400.
+        - name: device_key_type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ed25519
+          description: Required when device_key is present.
+        - name: device_scopes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: >-
+            Optional comma separated list from post, edit, delete, react, vote.
+            Defaults to post,edit,delete,react. Must include post; duplicates
+            are rejected. The grant stores the scopes in canonical order.
       x-6529-query-schema:
         $ref: "#/components/schemas/ApiSessionNonceQuery"
       responses:
@@ -3259,6 +3288,79 @@ paths:
                 $ref: "#/components/schemas/ApiSessionNonceResponse"
         "400":
           description: Invalid request
+  /device-grants:
+    get:
+      tags:
+        - Authentication
+      summary: List the device signing grants of the authenticated profile
+      description: >-
+        Returns active, expired and revoked device grants (newest first, at most
+        100) whose wallet belongs to the authenticated profile, or to the
+        authenticated wallet when it has no profile. Not available to proxies.
+      operationId: getDeviceGrants
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: device-signing
+        handler:
+          import: "@/api/device-signing/device-signing.handlers"
+          name: handleGetDeviceGrants
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiDeviceGrant"
+        "401":
+          description: Authentication required
+        "403":
+          description: Not available to proxies
+  /device-grants/{grantId}/revoke:
+    post:
+      tags:
+        - Authentication
+      summary: Revoke a device signing grant
+      description: >-
+        Revokes a grant whose wallet belongs to the authenticated profile (or
+        equals the authenticated wallet when it has no profile). Idempotent:
+        revoking an already revoked grant keeps the first revocation time and
+        returns the grant. Not available to proxies.
+      operationId: revokeDeviceGrant
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: device-signing
+        handler:
+          import: "@/api/device-signing/device-signing.handlers"
+          name: handleRevokeDeviceGrant
+      parameters:
+        - name: grantId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDeviceGrant"
+        "401":
+          description: Authentication required
+        "403":
+          description: Not available to proxies
+        "404":
+          description: Grant not found
   /auth/session-login:
     post:
       tags:
@@ -4776,6 +4878,14 @@ paths:
           required: false
           schema:
             type: string
+        - name: include
+          in: query
+          required: false
+          description: Include lightweight entry cards with native voting summaries.
+          schema:
+            type: string
+            enum:
+              - cards
         - name: limit
           in: query
           required: false
@@ -4795,7 +4905,10 @@ paths:
           name: handleListCompetitionMyVotesV3
       responses:
         "200":
-          description: Command result or identical idempotent replay.
+          description: >-
+            Paged active nonzero personal votes, ordered by vote value
+            descending and vote time ascending; include=cards adds authorized
+            lightweight entry content and summaries.
           content:
             application/json:
               schema:
@@ -5801,6 +5914,75 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}/competitions/{competition_id}/entry-contexts:
+    get:
+      tags:
+        - CompetitionsV3
+      summary: Read up to 50 visible entry contexts and their awards in one batch
+      operationId: getCompetitionEntryContextsV3
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        typeImportGroup: competitions-v3
+        handler:
+          import: "@/api/competitions/competition-entry-contexts.handler"
+          name: handleGetCompetitionEntryContextsV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: entry_ids
+          in: query
+          required: true
+          description: >-
+            Comma-separated entry UUIDs, at most 50. Invisible entries are
+            omitted.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1849
+        - name: include
+          in: query
+          required: false
+          description: Include renderable cards without legacy voting enrichment.
+          schema:
+            type: string
+            enum:
+              - cards
+      responses:
+        "200":
+          description: >-
+            Visible entries with current voting summaries and scoped awards;
+            include=cards also returns optional first-part content and metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionEntryContextPage"
+        "400":
+          description: Invalid identifiers or more than 50 entries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+        "404":
+          description: Competition is not visible in this wave
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
   /v3/waves/{wave_id}/competitions/{competition_id}/entries/{entry_id}:
     get:
       tags:
@@ -5964,6 +6146,15 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: is_additional_action_promised
+          in: query
+          required: false
+          description: >-
+            Filter entries by the artist's Additional Action promise, including
+            promises without plan text. False returns entries without a promise
+            (including unset flags). Omit to include all entries.
+          schema:
+            type: boolean
         - name: sort
           in: query
           required: false
@@ -5974,7 +6165,27 @@ paths:
               - real_time_rating
               - submitted_at
               - trend
+              - price
             default: rating
+        - name: price_currency
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: min_price
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 0
+        - name: max_price
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 0
         - name: direction
           in: query
           required: false
@@ -5998,6 +6209,14 @@ paths:
             minimum: 1
             maximum: 100
             default: 50
+        - name: include
+          in: query
+          required: false
+          description: Include renderable cards without legacy voting enrichment.
+          schema:
+            type: string
+            enum:
+              - cards
       responses:
         "200":
           description: Rating order with current legacy tie rules and stable ID tie breaker
@@ -6179,7 +6398,7 @@ paths:
     get:
       tags:
         - CompetitionsV3
-      summary: List winner entries with stable competition context
+      summary: List winner entries by win time, newest first by default
       operationId: listCompetitionWinnersV3
       security:
         - bearerAuth: []
@@ -6211,7 +6430,7 @@ paths:
           schema:
             allOf:
               - $ref: "#/components/schemas/ApiCompetitionSortDirection"
-            default: ASC
+            default: DESC
         - name: cursor
           in: query
           required: false
@@ -6228,6 +6447,14 @@ paths:
             minimum: 1
             maximum: 100
             default: 50
+        - name: include
+          in: query
+          required: false
+          description: Include renderable cards without legacy voting enrichment.
+          schema:
+            type: string
+            enum:
+              - cards
       responses:
         "200":
           description: Winner entry page
@@ -6573,6 +6800,13 @@ paths:
       security:
         - bearerAuth: []
       parameters:
+        - name: case_id
+          in: query
+          required: false
+          description: Opaque review case ID; groups all revisions of the same subject.
+          schema:
+            type: string
+            pattern: ^[a-f0-9]{64}$
         - name: subject_type
           in: query
           required: false
@@ -6674,6 +6908,48 @@ paths:
           description: Developer access required; proxies are not allowed
         "409":
           description: Reviewed revision changed or action key conflicts
+  /content-moderation/checks/cases:
+    get:
+      tags:
+        - Content moderation
+      summary: getModerationReviewCases
+      operationId: getModerationReviewCases
+      description: >-
+        One case per subject with open reports or checks requiring manual
+        review. Grouping happens before pagination.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: before
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: moderation-review
+        handler:
+          import: "@/api/content-moderation/moderation-review.handlers"
+          name: handleGetModerationReviewCases
+      responses:
+        "200":
+          description: Private developer case queue
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiModerationReviewCasePage"
+        "403":
+          description: Developer access required; proxies are not allowed
   /content-moderation/checks/counts:
     get:
       tags:
@@ -7030,6 +7306,13 @@ paths:
       security:
         - bearerAuth: []
       parameters:
+        - name: case_id
+          in: query
+          required: false
+          description: Scope reports to one opaque review case, before pagination.
+          schema:
+            type: string
+            pattern: ^[a-f0-9]{64}$
         - name: limit
           in: query
           required: false
@@ -7825,6 +8108,94 @@ paths:
           description: Invalid request
         "403":
           description: Forbidden - not a Subscription Admin
+  /drops/{drop_id}/collaborations:
+    get:
+      operationId: getMemeCollaborationState
+      tags:
+        - Drops
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/meme-collaborations/meme-collaborations.handlers"
+          name: getMemeCollaborationState
+      parameters:
+        - in: path
+          name: drop_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Public accepted artists and viewer-scoped invitations.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMemeCollaborationState"
+    post:
+      operationId: inviteMemeCollaborators
+      tags:
+        - Drops
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/meme-collaborations/meme-collaborations.handlers"
+          name: inviteMemeCollaborators
+      parameters:
+        - in: path
+          name: drop_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMemeCollaborationInviteRequest"
+      responses:
+        "200":
+          description: Invitations appended to the active Main Stage submission.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMemeCollaborationState"
+  /drops/{drop_id}/collaborations/{invitation_id}/response:
+    post:
+      operationId: respondToMemeCollaboration
+      tags:
+        - Drops
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/meme-collaborations/meme-collaborations.handlers"
+          name: respondToMemeCollaboration
+      parameters:
+        - in: path
+          name: drop_id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: invitation_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMemeCollaborationResponseRequest"
+      responses:
+        "200":
+          description: Public accepted artists and viewer-scoped invitations.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMemeCollaborationState"
   /light-drops:
     get:
       tags:
@@ -7926,6 +8297,16 @@ paths:
       description: Deprecated. Use GET /v2/drops instead.
       operationId: getLatestDrops
       parameters:
+        - name: public_only
+          in: query
+          description: >-
+            Only return drops from publicly viewable waves, excluding direct
+            messages and subwaves with private parents. Authentication still
+            supplies viewer-specific drop context. Defaults to false.
+          required: false
+          schema:
+            type: boolean
+            default: false
         - name: limit
           in: query
           description: How many drops to return (10 by default)
@@ -8303,6 +8684,38 @@ paths:
                 $ref: "#/components/schemas/ApiDrop"
         "404":
           description: Drop not found
+  /drops-bookmarked/status:
+    get:
+      tags:
+        - Drops
+      summary: Get the signed-in owner's accessible bookmark count
+      description: >-
+        Private to the authenticated owner, independently of the active proxy
+        profile.
+      operationId: getDropBookmarksStatus
+      parameters:
+        - name: drop_id
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drops/drop-bookmarks-status.handler"
+          name: getDropBookmarksStatus
+      responses:
+        "200":
+          description: Accessible bookmark count for the authenticated owner
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropBookmarksStatus"
+        "403":
+          description: Authentication with a profile required
   /drops-bookmarked/:
     get:
       tags:
@@ -8310,7 +8723,8 @@ paths:
       summary: Get bookmarked drops for authenticated user
       description: >-
         Requires the user to be authenticated. Returns drops bookmarked by the
-        current user, sorted by bookmark time.
+        authenticated owner, independently of the active proxy profile, sorted
+        by bookmark time.
       operationId: getBookmarkedDrops
       parameters:
         - name: wave_id
@@ -8409,9 +8823,19 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDeviceSignedWriteRequest"
       responses:
         "201":
           description: successful operation
+        "400":
+          description: >-
+            Invalid request. A rejected device_signature returns a message
+            starting with "Invalid device signature:".
         "404":
           description: Drop not found
   /drops/{dropId}/ratings:
@@ -8548,6 +8972,48 @@ paths:
       responses:
         "201":
           description: successful operation
+  /drops/{dropId}/signed-events:
+    get:
+      tags:
+        - Drops
+      summary: Get the device signed events of a drop
+      description: >-
+        Returns every stored device signed event that authorized a write to this
+        drop (oldest first), together with the wallet signed grants they
+        reference, so anyone can verify them without trusting 6529.io.
+        current_event_id is the event whose body is the drop's current content,
+        or null when the current content is not author signed. Returns 404 when
+        the caller cannot read the drop. When moderation hides the drop's
+        content from the caller or its author is anonymous to the caller, returns
+        the empty result of an unsigned drop (no events, no grants,
+        current_event_id null).
+      operationId: getDropSignedEvents
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        cache: false
+        typeImportGroup: device-signing
+        handler:
+          import: "@/api/device-signing/device-signing.handlers"
+          name: handleGetDropSignedEvents
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropSignedEvents"
+        "404":
+          description: Drop not found
   /drops/{dropId}/subscriptions:
     post:
       tags:
@@ -9676,6 +10142,75 @@ paths:
           description: User cannot vote
         "404":
           description: Drop or poll not found
+  /v2/drops/search:
+    get:
+      tags:
+        - DropsV2
+      summary: Search messages across all waves visible to the caller
+      operationId: searchDropsV2
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/waves-v2.handlers"
+          name: handleSearchDropsV2
+      parameters:
+        - name: term
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 200
+        - name: author_id
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: cursor
+          in: query
+          description: >-
+            Opaque continuation cursor from the previous response; required
+            after page one.
+          required: false
+          schema:
+            type: string
+            maxLength: 300
+            pattern: ^[A-Za-z0-9_-]+$
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 1
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            maximum: 100
+            minimum: 1
+            default: 20
+      responses:
+        "200":
+          description: >-
+            Messages ordered newest first. Follow cursor while next is true,
+            even if data is empty after a concurrent visibility change. Searches
+            are limited to 100 pages and a 3-second SQL execution budget.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropSearchPage"
+        "400":
+          description: >-
+            At least one of term or author_id is required; term must contain 3
+            to 200 characters
   /feed:
     get:
       tags:
@@ -17334,6 +17869,51 @@ paths:
           description: User is not eligible to quick vote in this wave
         "404":
           description: Wave not found
+  /waves/{id}/undiscovered-drops:
+    get:
+      tags:
+        - Waves
+      summary: Get an ordered quick vote preview window with shared counts
+      operationId: getWaveUndiscoveredDrops
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/waves/wave-quick-vote.handler"
+          name: handleGetWaveUndiscoveredDrops
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Maximum number of previews, ordered by unskipped then skipped drops.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 4
+            default: 4
+        - name: skip
+          in: query
+          description: Zero-based offset within the four-preview quick vote window.
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 3
+            default: 0
+      responses:
+        "200":
+          description: Ordered previews and exact counts for the acting profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiUndiscoveredDrops"
+        "403":
+          description: User is not eligible to quick vote in this wave
+        "404":
+          description: Wave not found
   /waves/{id}/pinned-drop:
     post:
       tags:
@@ -18065,6 +18645,57 @@ paths:
                 $ref: "#/components/schemas/ApiWaveOverviewPage"
         "400":
           description: Invalid request
+  /v2/waves/joined:
+    get:
+      tags:
+        - WavesV2
+      summary: List joined waves using a stable snapshot
+      description: >-
+        Freezes the activity-ordered IDs of joined non-DM root waves, including
+        parents of joined subwaves, for 15 minutes. Continue with next_cursor;
+        activity changes cannot skip waves between pages. Each page rechecks
+        current membership and visibility. New memberships appear on refresh.
+        Cursors are bound to the authenticated non-proxy profile and page size.
+        Existing page-number pagination at /v2/waves is unchanged.
+      operationId: getJoinedWaves
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/waves/joined-waves.handler"
+          name: handleGetJoinedWaves
+      parameters:
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: cursor
+          in: query
+          description: Opaque next_cursor from the preceding page; omit to refresh.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: Joined waves from one stable snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiJoinedWavesPage"
+        "400":
+          description: Invalid cursor or page size
+        "401":
+          description: Authentication required
+        "403":
+          description: A non-proxy profile is required
+        "410":
+          description: Snapshot expired or unavailable; restart without a cursor
+        "503":
+          description: Snapshot storage unavailable; retry without losing loaded waves
   /v2/waves/active-votes:
     get:
       tags:
@@ -19533,6 +20164,8 @@ components:
       properties:
         reaction:
           type: string
+        device_signature:
+          $ref: "#/components/schemas/ApiDeviceSignature"
     ApiAggregatedActivity:
       type: object
       required:
@@ -25861,6 +26494,44 @@ components:
           type: string
           format: uuid
           nullable: true
+    ApiCompetitionEntryContext:
+      type: object
+      additionalProperties: false
+      required:
+        - entry
+        - vote_summary
+        - awards
+      properties:
+        drop:
+          description: First-part card content, present when include=cards.
+          allOf:
+            - $ref: "#/components/schemas/ApiDropV2"
+        metadata:
+          description: Complete card metadata, present when include=cards.
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropMetadataV2"
+        entry:
+          $ref: "#/components/schemas/ApiCompetitionEntry"
+        vote_summary:
+          $ref: "#/components/schemas/ApiCompetitionDropVoteSummary"
+        awards:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionAward"
+    ApiCompetitionEntryContextPage:
+      type: object
+      additionalProperties: false
+      required:
+        - competition
+        - data
+      properties:
+        competition:
+          $ref: "#/components/schemas/ApiCompetition"
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionEntryContext"
     ApiCompetitionEntryPage:
       type: object
       additionalProperties: false
@@ -25869,6 +26540,14 @@ components:
         - next_cursor
         - has_more
       properties:
+        cards:
+          description: >-
+            Authorized card content and native summaries when include=cards. May
+            be a sparse subset in a different order than data; join by entry.id,
+            never by array position.
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionEntryContext"
         data:
           type: array
           items:
@@ -25983,6 +26662,14 @@ components:
         - next_cursor
         - has_more
       properties:
+        cards:
+          description: >-
+            Authorized card content and native summaries when include=cards. May
+            be a sparse subset in a different order than data; join by entry.id,
+            never by array position.
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionEntryContext"
         data:
           type: array
           items:
@@ -26031,6 +26718,13 @@ components:
         - next_cursor
         - has_more
       properties:
+        cards:
+          description: >-
+            Authorized card content and native summaries when include=cards. May
+            be sparse or differently ordered; join by entry.id.
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionEntryContext"
         data:
           type: array
           items:
@@ -26142,6 +26836,13 @@ components:
         - ends_at
         - terms
       properties:
+        anonymous_submissions:
+          type: boolean
+          default: false
+          description: >-
+            Competition creation option. Conceal each submission author from
+            other users until that entry wins. Fixed when published; defaults to
+            false.
         group_id:
           type: string
           nullable: true
@@ -26244,6 +26945,17 @@ components:
           type: boolean
         administer:
           type: boolean
+        edit_rules_after_activity:
+          type: boolean
+          description: >-
+            Whether this administrator may update established competition rules
+            after entries or votes exist. Individual rule protections still
+            apply.
+        edit_credit_rules:
+          type: boolean
+          description: >-
+            Whether this administrator may edit established voting credit rules.
+            Historical votes permanently lock those rules.
     ApiCompetitionRulesInput:
       type: object
       additionalProperties: false
@@ -26332,6 +27044,13 @@ components:
         credit_spent:
           type: integer
           format: int64
+        voter:
+          description: >-
+            Public profile summary of the voter, resolved for the whole page in
+            one batched lookup. Omitted when the profile cannot be resolved;
+            clients can then look up the identity by profile_id.
+          allOf:
+            - $ref: "#/components/schemas/ApiProfileMin"
     ApiCompetitionVoterPage:
       type: object
       additionalProperties: false
@@ -26912,6 +27631,7 @@ components:
       required:
         - id
         - drop_id
+        - drop_deleted
         - reporter_profile_id
         - reporter_handle
         - reporter_pfp
@@ -26933,6 +27653,11 @@ components:
           format: uuid
         drop_id:
           type: string
+        drop_deleted:
+          type: boolean
+          description: >-
+            Whether the original reported post no longer exists. Saved evidence
+            remains available.
         reporter_profile_id:
           type: string
         reporter_handle:
@@ -27154,6 +27879,7 @@ components:
         - OPEN
         - RESOLVED_ALLOWED
         - RESOLVED_REMOVED
+        - RESOLVED_DELETED
         - WITHDRAWN
     ApiContentModerationReportWithdrawalResponse:
       type: object
@@ -27228,6 +27954,13 @@ components:
         - resolved_report_count
         - suspended_profile_count
       properties:
+        needs_review_count:
+          type: integer
+          format: int64
+          description: >-
+            Unique cases requiring manual review, including open reports and
+            pending checks. Optional for rolling compatibility; current servers
+            always return it.
         moderator:
           type: boolean
         has_open_reports:
@@ -27450,6 +28183,14 @@ components:
             $ref: "#/components/schemas/ApiDropGroupMention"
         poll:
           $ref: "#/components/schemas/ApiCreateDropPollRequest"
+        collaborator_ids:
+          type: array
+          maxItems: 5
+          description: >-
+            Profile IDs invited to collaborate. Included in the signed payload.
+            An empty array opts into managed artist credits.
+          items:
+            type: string
         hide_link_preview:
           type: boolean
           description: >-
@@ -27457,6 +28198,8 @@ components:
             hidden. Omit or set to false to leave previews visible.
             Signature-required drops must include this field in the signed
             payload when present.
+        device_signature:
+          $ref: "#/components/schemas/ApiDeviceSignature"
     ApiCreateGroup:
       type: object
       required:
@@ -27798,6 +28541,13 @@ components:
         - required_media
         - terms
       properties:
+        anonymous_submissions:
+          type: boolean
+          default: false
+          description: >-
+            Competition creation option. Conceal each submission author from
+            other users until that entry wins. Fixed when published; defaults to
+            false.
         scope:
           $ref: "#/components/schemas/ApiCreateNewWaveScope"
         no_of_applications_allowed_per_participant:
@@ -28191,6 +28941,10 @@ components:
           $ref: "#/components/schemas/ApiCreateNewWaveChatConfig"
         admin_group:
           $ref: "#/components/schemas/ApiCreateNewWaveScope"
+        admin_drop_deletion_enabled:
+          type: boolean
+          default: false
+          description: Allow wave administrators to delete drops.
         parent_wave_id:
           type: string
           nullable: true
@@ -28373,6 +29127,192 @@ components:
             null when the pinned drop was not authored by the caller.
           type: string
           nullable: true
+    ApiDeviceGrant:
+      type: object
+      description: >-
+        A wallet signed grant that lets a browser-held Ed25519 device key sign
+        drop writes. Its id is the EIP-191 hash of the exact SIWE message the
+        wallet signed.
+      required:
+        - id
+        - wallet
+        - key_type
+        - device_key
+        - scopes
+        - device_label
+        - domain
+        - issued_at
+        - expires_at
+        - created_at
+        - revoked_at
+        - last_used_at
+      properties:
+        id:
+          type: string
+          pattern: ^0x[0-9a-f]{64}$
+        wallet:
+          type: string
+          description: Lowercase 0x address that signed the grant.
+        key_type:
+          type: string
+          example: ed25519
+        device_key:
+          type: string
+          pattern: ^0x[0-9a-f]{64}$
+        scopes:
+          type: array
+          description: Canonical order post, edit, delete, react, vote.
+          items:
+            type: string
+        device_label:
+          type: string
+        domain:
+          type: string
+          description: SIWE domain the grant was signed for, e.g. 6529.io.
+        issued_at:
+          type: integer
+          format: int64
+          description: SIWE Issued At, epoch milliseconds.
+        expires_at:
+          type: integer
+          format: int64
+          description: Grant expiry, epoch milliseconds.
+        created_at:
+          type: integer
+          format: int64
+        revoked_at:
+          type: integer
+          format: int64
+          nullable: true
+        last_used_at:
+          type: integer
+          format: int64
+          nullable: true
+    ApiDeviceGrantProof:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/ApiDeviceGrant"
+      required:
+        - message
+        - wallet_signature
+        - chain_id
+      properties:
+        message:
+          type: string
+          description: Exact SIWE message signed by the wallet.
+        wallet_signature:
+          type: string
+        chain_id:
+          type: integer
+          format: int64
+    ApiDeviceSignature:
+      type: object
+      additionalProperties: false
+      description: >-
+        Ed25519 signature by a granted device key over the EIP-712 event id of
+        the write. A rejected signature returns 400 with a message starting with
+        "Invalid device signature:"; the write is then not performed.
+      required:
+        - grant_id
+        - seq
+        - claimed_time
+        - signature
+      properties:
+        grant_id:
+          type: string
+          pattern: ^0x[0-9a-f]{64}$
+        seq:
+          type: integer
+          format: int64
+          minimum: 1
+          maximum: 9007199254740991
+          description: Unique per device key; a reused value is rejected.
+        claimed_time:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 9007199254740991
+          description: >-
+            Author clock in epoch milliseconds, within 10 minutes of server
+            time.
+        signature:
+          type: string
+          pattern: ^0x[0-9a-f]{128}$
+    ApiDeviceSignedEvent:
+      type: object
+      required:
+        - id
+        - kind
+        - kind_version
+        - wave
+        - author
+        - key_type
+        - device_key
+        - auth_ref
+        - seq
+        - anchor
+        - claimed_time
+        - refs
+        - body
+        - body_hash
+        - body_size
+        - signature
+        - created_at
+      properties:
+        id:
+          type: string
+          description: EIP-712 event id, 0x + 64 hex.
+        kind:
+          type: integer
+          description: 1 POST, 2 EDIT, 3 TOMBSTONE, 4 REACT.
+        kind_version:
+          type: integer
+        wave:
+          type: string
+        author:
+          type: string
+          description: Lowercase grant wallet.
+        key_type:
+          type: integer
+          description: 2 for Ed25519.
+        device_key:
+          type: string
+        auth_ref:
+          type: string
+          description: Grant id.
+        seq:
+          type: integer
+          format: int64
+        anchor:
+          type: integer
+          format: int64
+        claimed_time:
+          type: integer
+          format: int64
+        refs:
+          type: array
+          items:
+            type: string
+        body:
+          type: string
+          nullable: true
+          description: Canonical JSON exactly as hashed, null when the event has no body.
+        body_hash:
+          type: string
+        body_size:
+          type: integer
+        signature:
+          type: string
+          description: 0x + 128 hex, the 64-byte Ed25519 signature.
+        created_at:
+          type: integer
+          format: int64
+          description: Server receive time, epoch milliseconds.
+    ApiDeviceSignedWriteRequest:
+      type: object
+      properties:
+        device_signature:
+          $ref: "#/components/schemas/ApiDeviceSignature"
     ApiDistributionAirdropsCsvUploadRequest:
       type: object
       required:
@@ -28481,6 +29421,16 @@ components:
         - is_additional_action_promised
         - hide_link_preview
       properties:
+        submission_artist:
+          type: string
+          description: >-
+            Original submitter artist credit before accepted collaborator
+            credits are appended.
+        collaborators:
+          type: array
+          description: Accepted collaborators only. Pending invitations are private.
+          items:
+            $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
         voters_count_available:
           type: boolean
           description: >-
@@ -28581,6 +29531,14 @@ components:
             $ref: "#/components/schemas/ApiDropSubscriptionTargetAction"
         is_signed:
           type: boolean
+        is_author_signed:
+          type: boolean
+          description: >-
+            True when the drop's current content is the body of an author's
+            device signed create or edit event, the same state as a non-null
+            current_event_id from GET /drops/{dropId}/signed-events. False
+            otherwise, including when the viewer cannot see the drop's content
+            or its author is anonymous. Treat a missing value as false.
         reactions:
           type: array
           items:
@@ -28628,6 +29586,19 @@ components:
         attachment_id:
           type: string
           maxLength: 100
+    ApiDropBookmarksStatus:
+      type: object
+      required:
+        - count
+      properties:
+        count:
+          type: integer
+          minimum: 0
+        bookmarked:
+          type: boolean
+          description: >-
+            Whether the optional drop_id is accessible and bookmarked by this
+            owner.
     ApiDropBoost:
       type: object
       required:
@@ -29154,12 +30125,46 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/ApiProfileRepCategorySummary"
+    ApiDropSearchPage:
+      allOf:
+        - $ref: "#/components/schemas/ApiDropV2PageWithoutCount"
+        - type: object
+          properties:
+            cursor:
+              type: string
+              description: >-
+                Opaque continuation cursor. Present when next is true, including
+                for an empty filtered page.
     ApiDropSearchStrategy:
       type: string
       enum:
         - FIND_OLDER
         - FIND_NEWER
         - FIND_BOTH
+    ApiDropSignedEvents:
+      type: object
+      required:
+        - drop_id
+        - current_event_id
+        - events
+        - grants
+      properties:
+        drop_id:
+          type: string
+        current_event_id:
+          type: string
+          nullable: true
+          description: >-
+            Event whose body is the drop's current content, or null when the
+            current content is not author signed.
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDeviceSignedEvent"
+        grants:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDeviceGrantProof"
     ApiDropsLeaderboardPage:
       type: object
       required:
@@ -29242,6 +30247,16 @@ components:
         - drop_type
         - hide_link_preview
       properties:
+        submission_artist:
+          type: string
+          description: >-
+            Original submitter artist credit before accepted collaborator
+            credits are appended.
+        collaborators:
+          type: array
+          description: Accepted collaborators only. Pending invitations are private.
+          items:
+            $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
         id:
           type: string
         serial_no:
@@ -29255,6 +30270,14 @@ components:
           format: int64
         is_signed:
           type: boolean
+        is_author_signed:
+          type: boolean
+          description: >-
+            True when the drop's current content is the body of an author's
+            device signed create or edit event, the same state as a non-null
+            current_event_id from GET /drops/{dropId}/signed-events. False
+            otherwise, including when the viewer cannot see the drop's content
+            or its author is anonymous. Treat a missing value as false.
         hide_link_preview:
           type: boolean
         title:
@@ -29535,6 +30558,15 @@ components:
         - is_additional_action_promised
         - hide_link_preview
       properties:
+        submission_artist:
+          type: string
+          description: >-
+            Original submitter artist credit before accepted collaborator
+            credits are appended.
+        collaborators:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
         voters_count_available:
           type: boolean
           description: >-
@@ -29633,6 +30665,14 @@ components:
             $ref: "#/components/schemas/ApiDropSubscriptionTargetAction"
         is_signed:
           type: boolean
+        is_author_signed:
+          type: boolean
+          description: >-
+            True when the drop's current content is the body of an author's
+            device signed create or edit event, the same state as a non-null
+            current_event_id from GET /drops/{dropId}/signed-events. False
+            otherwise, including when the viewer cannot see the drop's content
+            or its author is anonymous. Treat a missing value as false.
         reactions:
           type: array
           items:
@@ -30236,6 +31276,11 @@ components:
         - profile_wave_id
         - is_wave_creator
       properties:
+        is_anonymous:
+          type: boolean
+          description: >-
+            True for an anonymous competition author. Identity details and
+            profile links are unavailable.
         id:
           type: string
           nullable: true
@@ -30356,6 +31401,11 @@ components:
         - classification
         - badges
       properties:
+        is_anonymous:
+          type: boolean
+          description: >-
+            True for an anonymous competition author. Identity details and
+            profile links are unavailable.
         id:
           type: string
         handle:
@@ -30464,6 +31514,25 @@ components:
           type: number
           format: int64
           nullable: true
+    ApiJoinedWavesPage:
+      type: object
+      required:
+        - data
+        - next_cursor
+        - snapshot_expires_at
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveOverview"
+        next_cursor:
+          type: string
+          nullable: true
+          description: Continue this snapshot, or null when all IDs have been scanned.
+        snapshot_expires_at:
+          type: integer
+          format: int64
+          description: Snapshot expiry as Unix epoch milliseconds.
     ApiLightDrop:
       type: object
       required:
@@ -32230,6 +33299,158 @@ components:
           minimum: 1
         drop_id:
           type: string
+    ApiMemeCollaborationArtwork:
+      type: object
+      required:
+        - name
+        - description
+        - image_url
+        - animation_url
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        image_url:
+          type: string
+          nullable: true
+        animation_url:
+          type: string
+          nullable: true
+    ApiMemeCollaborationCredit:
+      type: object
+      required:
+        - artist
+        - artist_profiles
+        - collab
+      properties:
+        artist:
+          type: string
+        artist_profiles:
+          type: string
+        collab:
+          type: boolean
+    ApiMemeCollaborationInvitation:
+      type: object
+      required:
+        - id
+        - profile
+        - status
+      properties:
+        id:
+          type: string
+        profile:
+          $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
+        artist_name:
+          type: string
+          nullable: true
+          description: >-
+            Artist credit name confirmed on acceptance; null for legacy
+            invitations.
+        status:
+          type: string
+          enum:
+            - PENDING
+            - ACCEPTED
+            - DECLINED
+            - CANCELLED
+            - CLOSED
+    ApiMemeCollaborationInviteRequest:
+      type: object
+      required:
+        - collaborator_ids
+      properties:
+        collaborator_ids:
+          type: array
+          minItems: 1
+          maxItems: 5
+          items:
+            type: string
+    ApiMemeCollaborationResponseRequest:
+      type: object
+      required:
+        - action
+        - artwork_hash
+        - terms_version
+      properties:
+        action:
+          type: string
+          enum:
+            - ACCEPT
+            - DECLINE
+            - CANCEL
+        artwork_hash:
+          type: string
+        terms_version:
+          type: string
+        artist_name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: >-
+            Artist credit name confirmed when accepting. Only valid for ACCEPT.
+            Older clients may omit it, in which case the accepting profile
+            handle is saved.
+    ApiMemeCollaborationState:
+      type: object
+      required:
+        - managed
+        - closed
+        - artwork_hash
+        - terms_version
+        - acceptance_copy
+        - terms
+        - collaborators
+        - invitations
+      properties:
+        can_invite:
+          type: boolean
+          description: >-
+            Whether this viewer can append invitations to this active Memes Main
+            Stage artwork.
+        artwork:
+          $ref: "#/components/schemas/ApiMemeCollaborationArtwork"
+        managed:
+          type: boolean
+        closed:
+          type: boolean
+        artwork_hash:
+          type: string
+        terms_version:
+          type: string
+        acceptance_copy:
+          type: string
+        terms:
+          type: string
+          nullable: true
+        collaborators:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
+        invitations:
+          type: array
+          description: >-
+            Current invitation per profile for the submitter, otherwise only the
+            viewer's current invitation. Cancelled attempts remain in internal
+            history.
+          items:
+            $ref: "#/components/schemas/ApiMemeCollaborationInvitation"
+    ApiMemeCollaboratorProfile:
+      type: object
+      required:
+        - id
+        - handle
+        - display
+      properties:
+        id:
+          type: string
+        handle:
+          type: string
+        display:
+          type: string
+        pfp:
+          type: string
+          nullable: true
     ApiMemesExtendedData:
       type: object
       description: >-
@@ -32767,6 +33988,7 @@ components:
         - BLOCK
         - REVOKE_OVERRIDE
         - MARK_REVIEWED
+        - RESOLVE_DELETED_REPORT
         - SUPPRESS
         - RESTORE
         - QUARANTINE
@@ -33021,6 +34243,8 @@ components:
         - profile_status
         - drop_status
         - published
+        - deleted
+        - open_report_count
         - suppressed
         - revision
       properties:
@@ -33041,6 +34265,17 @@ components:
             - null
         published:
           type: boolean
+        deleted:
+          type: boolean
+          description: >-
+            A previously published post no longer exists. This does not
+            represent a moderation removal.
+        open_report_count:
+          type: integer
+          minimum: 0
+          description: >-
+            Number of open reports for this published post, including reports of
+            earlier revisions.
         suppressed:
           type: boolean
         revision:
@@ -33102,6 +34337,81 @@ components:
         completed_at:
           type: integer
           format: int64
+          nullable: true
+    ApiModerationReviewCase:
+      type: object
+      required:
+        - id
+        - subject_type
+        - open_report_count
+        - pending_check_count
+        - check_id
+        - report_id
+        - created_at
+        - preview
+        - drop_id
+        - wave_id
+        - drop_deleted
+      properties:
+        check_outcome:
+          type: string
+          nullable: true
+          enum:
+            - ALLOW
+            - REJECT
+            - ERROR
+            - PENDING
+            - null
+        report_reason:
+          type: string
+          nullable: true
+        id:
+          type: string
+          description: Opaque subject-based case ID shared across revisions and reports.
+        subject_type:
+          type: string
+          enum:
+            - REP_CATEGORY
+            - PROFILE_BIO
+            - GROUP_NAME
+            - DROP
+        open_report_count:
+          type: integer
+        pending_check_count:
+          type: integer
+        check_id:
+          type: string
+          nullable: true
+        report_id:
+          type: string
+          nullable: true
+        created_at:
+          type: integer
+          format: int64
+          description: Creation time of the most recent outstanding requirement.
+        preview:
+          type: string
+          nullable: true
+        drop_id:
+          type: string
+          nullable: true
+        wave_id:
+          type: string
+          nullable: true
+        drop_deleted:
+          type: boolean
+    ApiModerationReviewCasePage:
+      type: object
+      required:
+        - items
+        - next_cursor
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiModerationReviewCase"
+        next_cursor:
+          type: string
           nullable: true
     ApiNft:
       type: object
@@ -33573,6 +34883,27 @@ components:
     ApiNotificationAdditionalContextV2:
       type: object
       properties:
+        reason:
+          $ref: "#/components/schemas/ApiVotingCreditReleaseReason"
+        submission_title:
+          type: string
+          description: Submission title saved before winning or deletion.
+        credit_type:
+          type: string
+          description: Credit type at the time of release.
+        released_at:
+          type: integer
+          format: int64
+          description: Release timestamp in Unix milliseconds.
+        artwork_name:
+          type: string
+          description: >-
+            Artwork name saved when a MEME_COLLABORATION invitation is sent or
+            accepted. Absent for older notifications.
+        invitation_id:
+          type: string
+        actor_id:
+          type: string
         event_id:
           type: string
           description: Stable idempotency identifier for COMPETITION_LIFECYCLE.
@@ -33685,6 +35016,11 @@ components:
         event_type, wave_id, competition_id and competition_title; winner events
         also include entry_id and drop_id. These identify the native competition
         destination independently of the shared drop's legacy projection.
+        VOTING_CREDITS_RETURNED includes event_id, reason, wave_id,
+        competition_id, competition_title, entry_id, drop_id, submission_title,
+        credit_type, amount and released_at. Amount is the positive released
+        allocation, independent of time-weighted winning scores. Related drops
+        are not required.
     ApiNotificationCause:
       type: string
       enum:
@@ -33703,6 +35039,8 @@ components:
         - PRIORITY_ALERT
         - SUBSCRIPTION_COVERAGE
         - COMPETITION_LIFECYCLE
+        - MEME_COLLABORATION
+        - VOTING_CREDITS_RETURNED
     ApiNotificationDropReactedReactor:
       type: object
       required:
@@ -33888,6 +35226,11 @@ components:
       required:
         - id
       properties:
+        is_anonymous:
+          type: boolean
+          description: >-
+            True for an anonymous competition author. Identity details and
+            profile links are unavailable.
         id:
           type: string
         handle:
@@ -35333,6 +36676,11 @@ components:
         - profile_wave_id
         - is_wave_creator
       properties:
+        is_anonymous:
+          type: boolean
+          description: >-
+            True for an anonymous competition author. Identity details and
+            profile links are unavailable.
         id:
           type: string
           format: uuid
@@ -36112,8 +37460,12 @@ components:
       type: object
       required:
         - handle
-        - pfp
       properties:
+        is_anonymous:
+          type: boolean
+          description: >-
+            True for an anonymous competition author. Identity details and
+            profile links are unavailable.
         handle:
           type: string
         pfp:
@@ -36259,6 +37611,18 @@ components:
           maxItems: 50
           items:
             $ref: "#/components/schemas/ApiPushLogoutSession"
+        reconciliation_sessions:
+          type: array
+          maxItems: 50
+          items:
+            $ref: "#/components/schemas/ApiPushLogoutSession"
+          description: >-
+            Optional native session proofs authorizing a credential-scoped fence
+            when logout preceded the first push registration and its original
+            sessions are missing or no longer live. At least one must be live.
+            These sessions are not revoked unless also listed in sessions. They
+            never prove installation ownership or bypasses an existing
+            installation credential.
     ApiRevokePushInstallationResponse:
       type: object
       required:
@@ -36406,6 +37770,15 @@ components:
             Optional 6529 session-signature protocol compatibility field. This
             is not the ERC-4361 SIWE Version field; SIWE messages always use
             Version 1.
+        device_label:
+          type: string
+          maxLength: 64
+          description: >-
+            Optional human readable name for the device key granted by a web
+            SIWE message, for example "Chrome on macOS". The server keeps only
+            letters, digits, spaces and ._()- characters, collapses spaces,
+            trims, truncates to 48 characters and uses "Browser" when empty.
+            Ignored when the signed message carries no device grant.
     ApiSessionLogoutNativeRequest:
       type: object
       required:
@@ -36496,6 +37869,22 @@ components:
           description: >-
             Backward-compatible request field. Session challenges are issued for
             the backend-configured auth chain, not this client-supplied value.
+        device_key:
+          type: string
+          pattern: ^0x[0-9a-f]{64}$
+          description: >-
+            Web only. Raw 32-byte Ed25519 public key (0x + 64 lowercase hex) to
+            grant signing rights to in the SIWE message.
+        device_key_type:
+          type: string
+          enum:
+            - ed25519
+          description: Required when device_key is present.
+        device_scopes:
+          type: string
+          description: >-
+            Optional comma separated list from post, edit, delete, react, vote.
+            Defaults to post,edit,delete,react. Must include post.
     ApiSessionNonceResponse:
       type: object
       required:
@@ -36572,6 +37961,8 @@ components:
           type: string
           enum:
             - web
+        device_grant:
+          $ref: "#/components/schemas/ApiDeviceGrant"
     ApiSetCompetitionVoteRequest:
       type: object
       additionalProperties: false
@@ -37424,6 +38815,24 @@ components:
         total_count:
           type: integer
           format: int64
+    ApiUndiscoveredDrops:
+      type: object
+      required:
+        - drops
+        - left_to_vote_in_current_round
+        - total_count
+      properties:
+        drops:
+          type: array
+          maxItems: 4
+          items:
+            $ref: "#/components/schemas/ApiDrop"
+        left_to_vote_in_current_round:
+          type: integer
+          format: int64
+        total_count:
+          type: integer
+          format: int64
     ApiUnpublishProfileCmsPackageRequest:
       type: object
       additionalProperties: false
@@ -37471,6 +38880,9 @@ components:
       type: object
       allOf:
         - $ref: "#/components/schemas/ApiCreateWaveDropRequest"
+      properties:
+        device_signature:
+          $ref: "#/components/schemas/ApiDeviceSignature"
     ApiUpdateProfileNotificationCategories:
       type: object
       additionalProperties: false
@@ -37729,6 +39141,12 @@ components:
           type: boolean
         enforce_hashes:
           type: boolean
+    ApiVotingCreditReleaseReason:
+      type: string
+      description: Why an active WAVE-scoped voting allocation was released.
+      enum:
+        - WIN
+        - AUTHOR_DELETED
     ApiWallet:
       type: object
       required:
@@ -38473,6 +39891,9 @@ components:
         - pinned
         - identity_wave
       properties:
+        is_direct_message:
+          type: boolean
+          description: Whether conversation links should open in Messages.
         id:
           type: string
         name:
@@ -40133,6 +41554,8 @@ components:
         - name
         - attributes
       properties:
+        collaboration_credit:
+          $ref: "#/components/schemas/ApiMemeCollaborationCredit"
         drop_id:
           type: string
         contract:

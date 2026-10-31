@@ -27,7 +27,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { t } from "@/i18n/messages";
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
@@ -45,7 +45,7 @@ import {
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { useDmUnreadConversation } from "@/services/dm-unread/DmUnreadStateProvider";
 import dynamic from "next/dynamic";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import React, {
   useCallback,
   useEffect,
@@ -208,10 +208,9 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   waveViewStyleOverride,
   composerDensity = "default",
 }) => {
-  const router = useRouter();
   const dmUnreadConversation = useDmUnreadConversation(wave.id);
   const isDirectMessage = isWaveDirectMessage(wave.id, wave);
-  const { fetchAroundSerialNo } = useMyStream();
+  const { fetchAroundSerialNo } = useMyStreamActions();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by MyStreamWave Suspense wrapper
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -354,8 +353,24 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     const href = params.toString()
       ? `${pathname}?${params.toString()}`
       : pathname || getHomeRoute();
-    router.replace(href, { scroll: false });
-  }, [initialDropState, pathname, router, searchParams, viewMode]);
+    // This is one-time URL cleanup, not navigation. A router replacement
+    // removes the document-only feed wrappers and remounts the chat at latest.
+    const previousState: unknown = globalThis.history.state;
+    globalThis.history.replaceState(null, "", href + globalThis.location.hash);
+    // Preserve visit-specific tab metadata, keeping Next's updated state.
+    const currentState: unknown = globalThis.history.state;
+    globalThis.history.replaceState(
+      {
+        ...(typeof previousState === "object" && previousState !== null
+          ? previousState
+          : {}),
+        ...(typeof currentState === "object" && currentState !== null
+          ? currentState
+          : {}),
+      },
+      ""
+    );
+  }, [initialDropState, pathname, searchParams, viewMode]);
 
   const { waveViewStyle } = useLayout();
   const effectiveWaveViewStyle = waveViewStyleOverride ?? waveViewStyle;

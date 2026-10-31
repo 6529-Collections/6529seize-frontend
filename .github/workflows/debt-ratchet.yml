@@ -36,7 +36,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: "22"
+          node-version: "22.17.1"
 
       - name: Activate pinned pnpm
         run: |
@@ -68,6 +68,12 @@ jobs:
 
       - name: Check routes manifest classification
         run: ./bin/6529 run routes-manifest:check
+
+      # The main ESLint config keeps rules-of-hooks off and lint:changed only
+      # reports it on changed lines, so this repo-wide, non-type-aware check
+      # (eslint.config.hooks.mjs) catches a violation anywhere in the tree.
+      - name: Check Rules of Hooks across the repo
+        run: ./bin/6529 run lint:hooks
 
   debt-ratchet:
     name: Debt ratchet

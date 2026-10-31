@@ -14,6 +14,7 @@ import { formatAddress, getRoyaltyImage } from "@/helpers/Helpers";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate, formatNumber } from "@/i18n/format";
+import { NEXTGEN_HTML_IFRAME_SANDBOX } from "@/lib/media/nft-html-sandbox";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
@@ -303,6 +304,7 @@ export function NextGenTokenImage(
           className={`-tw-mb-2 tw-w-full ${animationHeightClassName}`}
           src={props.token.animation_url ?? props.token.generator?.html}
           title={props.token.name}
+          sandbox={NEXTGEN_HTML_IFRAME_SANDBOX}
         />
       );
     } else {

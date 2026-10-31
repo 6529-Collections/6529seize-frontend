@@ -1,4 +1,6 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { loadTdhRules } from "../loadTdhRules.server";
 import TDHHistoricBoostsPage from "./page.client";
 
@@ -12,8 +14,10 @@ export default async function TDHHistory() {
 
 export const generateMetadata = async () => {
   return getAppMetadata({
-    title: "TDH historic boosts | Network",
-    description:
-      "Every TDH boost schedule 6529.io has used, the current one first, with the values each paid.",
+    title: "TDH Historic Boosts | Network",
+    description: t(
+      DEFAULT_LOCALE,
+      "pageMetadata.networkTdhHistoricBoosts.description"
+    ),
   });
 };

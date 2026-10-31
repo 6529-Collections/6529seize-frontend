@@ -1,3 +1,4 @@
+import HeaderBookmarksLink from "./user/HeaderBookmarksLink";
 import {
   faPlugCircleMinus,
   faPlugCirclePlus,
@@ -135,6 +136,7 @@ export default function AppUserConnect({
 
   const authorizedButtons = (
     <>
+      <HeaderBookmarksLink onClose={onNavigate} />
       <Link
         href="/preferences"
         onClick={onNavigate}

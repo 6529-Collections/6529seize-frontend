@@ -93,6 +93,14 @@ Useful commands:
 reporting only lines changed from the branch's merge base with `origin/main`.
 Legacy violations on untouched lines do not block a focused contribution.
 
+The one exception is the Rules of Hooks. The main config keeps
+`react-hooks/rules-of-hooks` off, so `6529 run lint:hooks` runs it across the
+whole repo with the minimal, non-type-aware `eslint.config.hooks.mjs` and the
+main config's ignore list. The Debt ratchet workflow runs it on every PR. Inline
+`eslint-disable` comments do not apply to it: rename a non-hook helper that
+starts with `use`, or restructure the component, instead of suppressing the
+finding.
+
 Changed-file lint and format commands use a Node runner to select files and
 split large lists into bounded chunks before invoking the installed tools.
 Paths with spaces, brackets, and parentheses stay intact, including when pnpm

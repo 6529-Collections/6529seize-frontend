@@ -11,7 +11,9 @@ import type { ReactNode } from "react";
 import type { DropTimestampLayout } from "../drop.types";
 import { DropAuthorBadges } from "../DropAuthorBadges";
 import WaveDropTime from "../time/WaveDropTime";
+import { WithDropAuthorSignedMarker } from "../signature/DropAuthorSignedMarker";
 import WinnerDropBadge from "../winner/WinnerDropBadge";
+import { AnonymousAuthorName } from "../AnonymousDropAuthor";
 
 interface ParticipationDropHeaderProps {
   readonly drop: ExtendedDrop;
@@ -62,18 +64,24 @@ export default function ParticipationDropHeader({
       >
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
           <p className="tw-m-0 tw-text-md tw-font-semibold tw-leading-none">
-            <Link
-              onClick={(e) => e.stopPropagation()}
-              href={`/${authorIdentity}`}
-              className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
-            >
-              {authorIdentity}
-            </Link>
+            {drop.author.is_anonymous ? (
+              <AnonymousAuthorName />
+            ) : (
+              <Link
+                onClick={(e) => e.stopPropagation()}
+                href={`/${authorIdentity}`}
+                className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
+              >
+                {authorIdentity}
+              </Link>
+            )}
           </p>
-          <UserCICAndLevel
-            level={drop.author.level}
-            size={UserCICAndLevelSize.SMALL}
-          />
+          {!drop.author.is_anonymous && (
+            <UserCICAndLevel
+              level={drop.author.level}
+              size={UserCICAndLevelSize.SMALL}
+            />
+          )}
           <DropAuthorBadges
             profile={drop.author}
             wave={drop.wave}
@@ -83,9 +91,17 @@ export default function ParticipationDropHeader({
           {!isStackedTimestamp && (
             <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></div>
           )}
-          {!isStackedTimestamp && <WaveDropTime timestamp={drop.created_at} />}
+          {!isStackedTimestamp && (
+            <WithDropAuthorSignedMarker drop={drop}>
+              <WaveDropTime timestamp={drop.created_at} />
+            </WithDropAuthorSignedMarker>
+          )}
         </div>
-        {isStackedTimestamp && <WaveDropTime timestamp={drop.created_at} />}
+        {isStackedTimestamp && (
+          <WithDropAuthorSignedMarker drop={drop}>
+            <WaveDropTime timestamp={drop.created_at} />
+          </WithDropAuthorSignedMarker>
+        )}
       </div>
       {drop.competition_id && drop.competition_title && (
         <Link

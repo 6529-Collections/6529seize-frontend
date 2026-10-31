@@ -17,6 +17,7 @@ import {
   formatTime,
 } from "@/i18n/format";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 import {
   createPublicReviewLedgerCsv,
   createPublicReviewLedgerMarkdown,

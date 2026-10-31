@@ -2,18 +2,13 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey as AppQueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
-import type { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReactionToDropRequest";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import { recordReaction } from "@/helpers/reactions/reactionHistory";
-import {
-  enqueueDropReactionRequest,
-  isDropReactionRequestTimeout,
-} from "@/helpers/reactions/dropReactionRequestQueue";
+import { enqueueDropReactionRequest } from "@/helpers/reactions/dropReactionRequestQueue";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { COMMUNITY_CURATIONS_DROPS_QUERY_KEY } from "@/hooks/useCommunityCurationsDrops";
@@ -26,7 +21,7 @@ import {
   EMPTY_DROP_CONTEXT_PROFILE_CONTEXT,
 } from "@/hooks/drops/optimisticReactionQueryCache";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
+import { sendDropReaction } from "@/services/api/signed-drop-writes";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
 import type { InfiniteData } from "@tanstack/react-query";
 import { useDropReactionRecovery } from "@/hooks/drops/useDropReactionRecovery";
@@ -49,7 +44,10 @@ import {
   recordReactionRollbackApplied,
   type ReactionSource,
 } from "@/utils/monitoring/dropReactionMonitoring";
-import { isExpectedWaveReactionDisabledError } from "@/utils/monitoring/dropReactionErrorClassification";
+import {
+  isExpectedWaveReactionDisabledError,
+  isReactionRequestOutcomeUncertain,
+} from "@/utils/monitoring/dropReactionErrorClassification";
 import {
   getDropReactionAuthStateFingerprint,
   isDropReactionAuthRecoveryPending,
@@ -274,7 +272,7 @@ const useOptimisticStreamDropReaction = ({
   waveId,
 }: {
   readonly applyOptimisticDropUpdate: ReturnType<
-    typeof useMyStream
+    typeof useMyStreamActions
   >["applyOptimisticDropUpdate"];
   readonly connectedProfile: ReturnType<typeof useAuth>["connectedProfile"];
   readonly contextProfileContext:
@@ -370,41 +368,30 @@ const useOptimisticCurationDropReaction = ({
 };
 
 const sendReactionRequest = async ({
+  dropId,
   endpoint,
   isRemoving,
   mutation,
   reactionCode,
   signal,
+  waveId,
 }: {
+  readonly dropId: string;
   readonly endpoint: string;
   readonly isRemoving: boolean;
   readonly mutation: ReactionMutation;
   readonly reactionCode: string;
   readonly signal: AbortSignal;
+  readonly waveId: string;
 }): Promise<void> => {
-  if (isRemoving) {
-    recordReactionRequestSent(mutation, {
-      endpoint,
-      method: "DELETE",
-    });
-    await commonApiDelete({
-      endpoint,
-      errorMode: "structured",
-      signal,
-    });
-    return;
-  }
-
   recordReactionRequestSent(mutation, {
     endpoint,
-    method: "POST",
+    method: isRemoving ? "DELETE" : "POST",
   });
-  await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
-    endpoint,
-    body: { reaction: reactionCode },
-    errorMode: "structured",
-    signal,
-  });
+  await sendDropReaction(
+    { dropId, waveId, reaction: isRemoving ? null : reactionCode },
+    { errorMode: "structured", signal }
+  );
 };
 
 const runReactionSuccessCallback = (
@@ -426,7 +413,7 @@ export function useDropReaction(
   options?: UseDropReactionOptions
 ): UseDropReactionResult {
   const { setToast, connectedProfile, activeProfileProxy } = useAuth();
-  const { applyOptimisticDropUpdate } = useMyStream();
+  const { applyOptimisticDropUpdate } = useMyStreamActions();
   const { getEligibility, updateEligibility } = useWaveEligibility();
   const queryClient = useQueryClient();
   const websocketStatus = useWebsocketStatus();
@@ -485,7 +472,7 @@ export function useDropReaction(
     captureOwner,
     isCurrentMutation,
     refreshAfterFailure,
-    reconcileTimeout,
+    reconcileRequestFailure,
   } = useDropReactionRecovery({
     activeProfileProxy,
     applyOptimisticDropUpdate,
@@ -539,8 +526,8 @@ export function useDropReaction(
         void recordReaction(reactionCode);
       }
 
-      const handleTimeout = async () => {
-        const reconciliation = await reconcileTimeout(
+      const handleUncertainOutcome = async () => {
+        const reconciliation = await reconcileRequestFailure(
           mutation,
           intendedReaction,
           isCurrent
@@ -568,8 +555,8 @@ export function useDropReaction(
           return;
         }
 
-        if (isDropReactionRequestTimeout(error)) {
-          await handleTimeout();
+        if (isReactionRequestOutcomeUncertain(error)) {
+          await handleUncertainOutcome();
           return;
         }
 
@@ -612,11 +599,13 @@ export function useDropReaction(
         await enqueueDropReactionRequest(dropId, async (signal) => {
           if (!owner.isCurrent()) return;
           await sendReactionRequest({
+            dropId,
             endpoint,
             isRemoving,
             mutation,
             reactionCode,
             signal,
+            waveId,
           });
         });
         const result = recordReactionRequestSucceeded(mutation);
@@ -648,7 +637,7 @@ export function useDropReaction(
       captureOwner,
       isCurrentMutation,
       refreshAfterFailure,
-      reconcileTimeout,
+      reconcileRequestFailure,
       recoverFromUnauthorized,
       source,
       updateEligibility,

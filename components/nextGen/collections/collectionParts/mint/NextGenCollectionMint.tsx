@@ -23,6 +23,21 @@ function getReadNumber(value: unknown) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+// Contract amounts (wei) stay bigint: a Number round trip silently drops
+// precision above 2^53 wei (about 0.009 ETH), which includes ordinary prices.
+function getReadBigInt(value: unknown): bigint {
+  if (typeof value === "bigint") {
+    return value > 0n ? value : 0n;
+  }
+  if (typeof value === "number") {
+    return Number.isSafeInteger(value) && value > 0 ? BigInt(value) : 0n;
+  }
+  if (typeof value === "string" && /^\d+$/.test(value.trim())) {
+    return BigInt(value.trim());
+  }
+  return 0n;
+}
+
 export default function NextGenCollectionMint(props: Readonly<Props>) {
   return (
     <NftPurchasingGate
@@ -96,7 +111,7 @@ function NextGenCollectionMintContent(props: Readonly<Props>) {
           mintPriceRead.isSuccess && (
             <NextGenMint
               collection={props.collection}
-              mint_price={getReadNumber(mintPriceRead.data)}
+              mint_price={getReadBigInt(mintPriceRead.data)}
               burn_amount={getReadNumber(burnAmountRead.data)}
             />
           )}
