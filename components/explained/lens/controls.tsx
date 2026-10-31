@@ -36,7 +36,7 @@ export function Seg<V extends string>({
 }) {
   return (
     <div
-      className="tw-inline-flex tw-flex-wrap tw-gap-0.5 tw-rounded-2xl tw-border tw-border-solid tw-border-iron-700 tw-p-[3px] md:tw-rounded-full"
+      className="tw-inline-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-gap-0.5 tw-rounded-2xl tw-border tw-border-solid tw-border-iron-700 tw-p-[3px] md:tw-rounded-full"
       role="group"
       aria-label={label}
     >
@@ -81,7 +81,7 @@ export function Stepper({
 }) {
   const button = `tw-size-11 tw-cursor-pointer tw-rounded-full tw-border-0 tw-bg-transparent tw-text-lg tw-font-semibold tw-text-iron-50 disabled:tw-cursor-not-allowed disabled:tw-text-iron-400 md:tw-size-[38px] ${EX_FOCUS}`;
   return (
-    <span className="tw-inline-flex tw-items-center tw-gap-2">
+    <span className="tw-inline-flex tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
       <span
         className="tw-text-sm tw-font-semibold tw-text-iron-400"
         aria-hidden="true"
@@ -89,7 +89,7 @@ export function Stepper({
         {label}
       </span>
       <span
-        className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700"
+        className="tw-inline-flex tw-shrink-0 tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700"
         role="group"
         aria-label={label}
         {...(attr ? { "data-stepper": attr } : {})}

@@ -78,12 +78,12 @@ export function Readout({
       data-readout=""
     >
       <span
-        className="tw-whitespace-nowrap tw-text-[30px] tw-font-semibold tw-leading-[34px] tw-tracking-[-0.02em] tw-text-iron-50 md:tw-text-4xl md:tw-leading-10"
+        className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-1.5 tw-text-[30px] tw-font-semibold tw-leading-[34px] tw-tracking-[-0.02em] tw-text-iron-50 md:tw-text-4xl md:tw-leading-10"
         aria-live="polite"
       >
-        {big}
+        <span className="tw-whitespace-nowrap">{big}</span>
         {unit && (
-          <small className="tw-ml-1.5 tw-text-[15px] tw-font-semibold tw-tracking-normal tw-text-iron-400">
+          <small className="tw-text-[15px] tw-font-semibold tw-leading-6 tw-tracking-normal tw-text-iron-400">
             {unit}
           </small>
         )}

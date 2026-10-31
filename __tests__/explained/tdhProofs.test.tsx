@@ -287,7 +287,12 @@ describe("the words model", () => {
       fireEvent(details, new Event("toggle"));
     });
     const pre = container.querySelector("pre") as HTMLElement;
-    expect(pre.textContent?.split(String.fromCharCode(10))).toHaveLength(25);
+    // One line per word, each a 64-digit hash.
+    const lines = [...pre.querySelectorAll("span")].map(
+      (line) => line.textContent
+    );
+    expect(lines).toHaveLength(25);
+    for (const line of lines) expect(line).toMatch(/^[0-9a-f]{64}$/);
     expect(pre.getAttribute("data-hash")).toHaveLength(2 + 64 * 25);
   });
 });

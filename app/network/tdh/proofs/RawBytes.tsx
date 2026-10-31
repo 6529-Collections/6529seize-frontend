@@ -67,7 +67,14 @@ export default function RawBytes({
             className="tw-m-0 tw-mt-3 tw-whitespace-pre-wrap tw-break-all tw-rounded-md tw-bg-black/40 tw-p-3 tw-font-mono tw-text-[12px] tw-leading-5 tw-text-iron-300 md:tw-text-[13px]"
             data-hash={whole}
           >
-            {words.join("\n")}
+            {/* One line per word: each is a hash, which may break anywhere;
+                the block holds no sentence to break. The words are fixed in
+                number and order. */}
+            {words.map((word, index) => (
+              <span key={index} className="tw-block">
+                {word}
+              </span>
+            ))}
           </pre>
           <button
             type="button"

@@ -59,9 +59,9 @@ export default function RateFigure({
     curve += `${curve ? "L" : "M"}${xAt(edition).toFixed(1)} ${yAt(h / edition).toFixed(1)}`;
   }
   // On a phone, "3,000" and "4,000" would touch: the last tick is the axis's end.
-  const xTicks = narrow
-    ? [0, 1000, 2000, 4000]
-    : [0, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000];
+  // At 400% zoom "1,000" and "2,000" would touch too.
+  let xTicks = [0, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000];
+  if (narrow) xTicks = width < 360 ? [0, 2000, 4000] : [0, 1000, 2000, 4000];
   const selectedRate = selected.rateCents / 100;
   const bins = new Map<number, number>();
   for (const edition of rug) {
@@ -82,7 +82,8 @@ export default function RateFigure({
   const curveTopUnder = (reference: RateReference) =>
     aboveCurve(
       xAt(reference.copies) - 4,
-      referenceText(reference).length * LABEL_CHAR_PX,
+      // A margin over the estimate: the curve rises to the left of it.
+      referenceText(reference).length * LABEL_CHAR_PX + 16,
       yAt(reference.rateCents / 100) - 6
     );
   const selectedText = `${formatCount(locale, selected.copies)} × ${formatCents(locale, selectedRate)}`;

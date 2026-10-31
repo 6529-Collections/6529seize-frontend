@@ -302,7 +302,7 @@ export function AssumptionLedger({
           >
             <th
               scope="row"
-              className={`${cell} tw-text-left tw-font-semibold tw-text-iron-50`}
+              className={`${cell} tw-text-left tw-font-semibold tw-text-iron-50 md:tw-w-[34%] md:tw-min-w-[200px]`}
             >
               {row.assumption}
             </th>

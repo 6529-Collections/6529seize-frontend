@@ -178,7 +178,7 @@ export default function StatementWords({
           />
           {decoded.a ? (
             <table
-              className="tw-mt-5 tw-w-full tw-border-collapse"
+              className="tw-mt-5 tw-w-full tw-border-collapse max-md:tw-block md:tw-table-fixed"
               aria-label={fill(locale, k("words.aria"), { date: dateText })}
               data-words=""
             >
@@ -212,7 +212,7 @@ export default function StatementWords({
                   )}
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="max-md:tw-block">
                 {decoded.a.map((word) => {
                   const on = lit(word);
                   return (

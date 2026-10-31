@@ -154,10 +154,13 @@ function ProgramsTable({
     </span>
   );
   return (
-    <table className="tw-w-full tw-border-collapse" data-programs="">
-      <caption className="tw-sr-only">
-        {fill(locale, k("table.caption"))}
-      </caption>
+    // Named by aria-label: an absolutely positioned sr-only caption adds an
+    // anonymous column to the table's layout.
+    <table
+      className="tw-w-full tw-border-collapse"
+      data-programs=""
+      aria-label={fill(locale, k("table.caption"))}
+    >
       <thead className="tw-hidden md:tw-table-header-group">
         <tr>
           <th scope="col" className={`${head} tw-w-[22%]`}>

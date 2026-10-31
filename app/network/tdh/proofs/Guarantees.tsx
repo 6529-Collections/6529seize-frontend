@@ -120,7 +120,7 @@ function Layers({
         return (
           <li
             key={layer}
-            className={`tw-relative tw-grid tw-grid-cols-[minmax(0,1fr)] tw-items-center tw-gap-x-4 tw-gap-y-1.5 tw-rounded-xl tw-border tw-px-4 tw-py-3 sm:tw-grid-cols-[minmax(0,1fr)_auto] ${BOX[state]} ${EX_MOTION.model}`}
+            className={`tw-relative tw-grid tw-grid-cols-[minmax(0,1fr)] tw-items-center tw-gap-x-4 tw-gap-y-1.5 tw-rounded-xl tw-border tw-px-4 tw-py-3 xl:tw-grid-cols-[minmax(0,1fr)_auto] ${BOX[state]} ${EX_MOTION.model}`}
             data-layer={layer}
             data-state={state}
           >
@@ -143,7 +143,7 @@ function Layers({
               </span>
             </span>
             <span
-              className={`tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-pl-7 tw-text-[13px] tw-font-semibold sm:tw-pl-0 ${STATE_TONE[state]}`}
+              className={`tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-pl-7 tw-text-[13px] tw-font-semibold xl:tw-pl-0 ${STATE_TONE[state]}`}
             >
               <StateGlyph state={state} evidence={evidence} />
               {fill(locale, k(STATE_WORD[state]))}

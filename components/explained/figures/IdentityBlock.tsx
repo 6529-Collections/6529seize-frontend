@@ -39,12 +39,15 @@ export default function IdentityBlock({
 }) {
   const [ref, width] = useMeasuredWidth<HTMLDivElement>(800);
   const narrow = width < 560;
-  const height = narrow ? 214 : 204;
+  // At 400% zoom the short title does not fit one line: it takes two.
+  const tiny = width < 300;
+  let height = narrow ? 214 : 204;
+  if (tiny) height = 232;
   const gap = narrow ? 18 : 40;
   const total = wallets.reduce((sum, wallet) => sum + wallet.cards, 0);
   const tile = (width - gap * (wallets.length - 1) - 24) / total;
   const tileH = narrow ? 64 : 76;
-  const y0 = 70;
+  const y0 = tiny ? 88 : 70;
   const bandH = linked ? ((tileH * (boostCents - 100)) / 100) * bandFactor : 0;
   const boost = formatCents(locale, boostCents / 100);
   const tdhText = formatCount(locale, tdh);
@@ -143,16 +146,19 @@ export default function IdentityBlock({
             </g>
           );
         })}
-        <Label
-          x={width - 12}
-          y={22}
-          anchor="end"
-          size={14}
-          weight={600}
-          tone={linked ? "you" : "ink2"}
-        >
-          {title}
-        </Label>
+        {(tiny ? title.split(" · ") : [title]).map((line, index) => (
+          <Label
+            key={line}
+            x={width - 12}
+            y={22 + index * 18}
+            anchor="end"
+            size={14}
+            weight={600}
+            tone={linked ? "you" : "ink2"}
+          >
+            {line}
+          </Label>
+        ))}
         {linked && !narrow && (
           <Label x={14} y={22}>
             {kt(locale, "explained.kit.identity.band", {
