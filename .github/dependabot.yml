@@ -47,3 +47,25 @@ updates:
           - "@lexical/*"
         update-types:
           - "minor"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "dependabot"
+      - "github-actions"
+    # Workflow pins are full commit SHAs with a version comment; Dependabot
+    # updates both together. Minor and patch bumps share one PR. Major bumps
+    # stay separate so each one gets its own review.
+    groups:
+      github-actions-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"

@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import React from "react";
 import { screen } from "@testing-library/react";
 import RoyaltiesDownloads, {
@@ -26,10 +28,7 @@ jest.mock("@/services/6529api", () => ({
 }));
 
 jest.mock("@/components/providers/metadata", () => ({
-  getAppMetadata: jest.fn().mockReturnValue({
-    title: "Royalties",
-    description: "Open Data",
-  }),
+  getAppMetadata: jest.fn((customMetadata: unknown) => customMetadata),
 }));
 
 describe("Open Data royalties page", () => {
@@ -42,8 +41,11 @@ describe("Open Data royalties page", () => {
 
   it("exposes metadata", async () => {
     await expect(generateMetadata()).resolves.toEqual({
-      title: "Royalties",
-      description: "Open Data",
+      title: "Royalties | Open Data",
+      description: t(
+        DEFAULT_LOCALE,
+        "pageMetadata.openDataRoyalties.description"
+      ),
     });
   });
 });

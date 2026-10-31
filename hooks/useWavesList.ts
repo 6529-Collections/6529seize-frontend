@@ -29,6 +29,8 @@ import {
   buildMainWaves,
   getActiveSidebarContext,
   getConnectedIdentity,
+  getFirstUnreadSerialNo,
+  getLatestKnownActivityTimestamp,
   getHasAuthenticatedProfile,
   getMainWavesFetching,
   getModeValue,
@@ -60,32 +62,6 @@ const HIGHLY_RATED_QUERY_PAGE_SIZE = 10;
 const isExpectedRootSidebarWave = (wave: SidebarWave) =>
   wave.parentWaveId === null;
 
-const getLatestKnownActivityTimestamp = (
-  wave: Pick<
-    SidebarWave,
-    "latestDropTimestamp" | "latestFollowedSubwaveDropTimestamp"
-  >
-) =>
-  Math.max(
-    wave.latestDropTimestamp ?? 0,
-    wave.latestFollowedSubwaveDropTimestamp ?? 0
-  );
-
-const getFirstUnreadSerialNo = (
-  left: number | null,
-  right: number | null
-): number | null => {
-  if (left === null) {
-    return right;
-  }
-
-  if (right === null) {
-    return left;
-  }
-
-  return Math.min(left, right);
-};
-
 const noopWaveAction = (_waveId: string) => {};
 const noopListAction = () => {};
 
@@ -107,7 +83,12 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     isAuthenticated,
   } = useAuth();
   const { address, hasValidWalletAuth } = useSeizeConnectContext();
-  const { seizeSettings, isAnnouncementsWave } = useSeizeSettings();
+  const {
+    seizeSettings,
+    isAnnouncementsWave,
+    isLoaded: settingsLoaded,
+    loadError: settingsError,
+  } = useSeizeSettings();
   const isEnabled = options.enabled !== false;
   const activeWave = options.activeWave ?? null;
   const activeSidebarContext = useMemo(
@@ -161,6 +142,8 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
   const {
     waves: highlyRatedWaves,
     isFetching: isHighlyRatedWavesFetching,
+    status: recommendationsStatus,
+    retryLoading: retryRecommendations,
     refetch: highlyRatedWavesRefetch,
     refetchIfStale: highlyRatedWavesRefetchIfStale,
   } = useWavesV2({
@@ -209,7 +192,10 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     status: followedActivityWavesStatus,
     refetch: followedActivityWavesRefetch,
     refetchIfStale: followedActivityWavesRefetchIfStale,
+    hasLoadingError: hasFollowedActivityWavesError,
+    retryLoading: retryFollowedActivityWaves,
   } = useWavesV2({
+    joinedSnapshot: true,
     overviewType: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
     pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
     following: isConnectedIdentity,
@@ -725,6 +711,20 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       hasNextPage: hasMainWavesNextPage,
       fetchNextPage: fetchNextPageStable,
       status: mainWavesStatus,
+      hasLoadingError: isJoinedMode && hasFollowedActivityWavesError,
+      retryLoading: retryFollowedActivityWaves,
+
+      recommendationsStatus: shouldLoadMainWaves
+        ? recommendationsStatus
+        : ("pending" as const),
+      retryRecommendations,
+      isAnnouncementsLoading:
+        (!settingsLoaded && !settingsError) ||
+        Boolean(
+          announcementsWaveId &&
+          !announcementWave &&
+          (!shouldLoadMainWaves || announcementQueryLoading)
+        ),
 
       // Pinned waves metadata - now includes ALL pinned waves with isPinned flag
       pinnedWaves: allPinnedWaves,
@@ -753,11 +753,19 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     }),
     [
       allWaves,
+      recommendationsStatus,
+      retryRecommendations,
+      settingsLoaded,
+      settingsError,
+      announcementsWaveId,
       isMainWavesFetching,
       isMainWavesFetchingNextPage,
       hasMainWavesNextPage,
       fetchNextPageStable,
       mainWavesStatus,
+      isJoinedMode,
+      hasFollowedActivityWavesError,
+      retryFollowedActivityWaves,
       mainWaves,
       allPinnedWaves,
       isPinnedWavesLoading,

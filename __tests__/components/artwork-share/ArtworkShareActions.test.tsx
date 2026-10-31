@@ -34,7 +34,6 @@ const artwork: ArtworkShareDetails = {
   title: "Meme #7",
   artist: "Artist",
   collection: "The Memes",
-  imageUrl: "https://images.test/7.png",
 };
 const url = "https://6529.io/the-memes/7";
 const webShare = jest.fn();

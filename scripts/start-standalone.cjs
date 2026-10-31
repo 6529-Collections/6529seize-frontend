@@ -103,6 +103,8 @@ const result = spawnSync(process.execPath, [serverEntry], {
     ...runtimeEnv,
     PORT: runtimeEnv["PORT"] || "3001",
     HOSTNAME: runtimeEnv["HOSTNAME"] || "0.0.0.0",
+    // Keep in sync with Procfile and the staging PM2 environment.
+    UV_THREADPOOL_SIZE: runtimeEnv["UV_THREADPOOL_SIZE"] || "16",
   },
   stdio: "inherit",
 });

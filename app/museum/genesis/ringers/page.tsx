@@ -1,6 +1,8 @@
 import { createMigratedWordPressStaticPage } from "@/components/migrated-wordpress/createMigratedWordPressStaticPage";
 import { museumGenesisRingersMigratedWordPressPage as content } from "./content";
 
+export const dynamic = "force-static";
+
 const migratedPage = createMigratedWordPressStaticPage(content);
 
 export default migratedPage.Page;

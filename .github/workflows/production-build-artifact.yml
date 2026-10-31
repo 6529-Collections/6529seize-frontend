@@ -72,10 +72,10 @@ concurrency:
 
 env:
   API_ENDPOINT: "https://api.6529.io"
-  NEXT_PUBLIC_FEATURE_MULTI_COMPETITION: "true"
   WS_ENDPOINT: "wss://ws.6529.io"
   ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io"
   BASE_ENDPOINT: "https://6529.io"
+  NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: "true"
   NEXTGEN_CHAIN_ID: "1"
   MOBILE_APP_SCHEME: "mobile6529"
   CORE_SCHEME: "core6529"
@@ -232,6 +232,9 @@ jobs:
         env:
           NODE_ENV: "production"
           VERSION: ${{ inputs.target_sha }}
+          # Never publish a truncated sitemap from a deploy build, whatever the
+          # sitemap's own build detection concludes.
+          SITEMAP_FAILURE_POLICY: fail
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
           GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY || secrets.GIPHY_API_KEY }}

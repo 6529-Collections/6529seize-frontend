@@ -9,7 +9,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { DropVoteState } from "@/hooks/drops/types";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 
 jest.useFakeTimers();
 
@@ -43,7 +43,7 @@ jest.mock("@tanstack/react-query", () => ({
 }));
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: jest.fn(() => ({
+  useMyStreamActions: jest.fn(() => ({
     applyOptimisticDropUpdate: jest.fn(() => ({ rollback: jest.fn() })),
   })),
 }));
@@ -56,7 +56,7 @@ const setQueriesData = jest.fn();
 (useDropInteractionRules as jest.Mock).mockReturnValue({
   voteState: DropVoteState.CAN_VOTE,
 });
-(useMyStream as jest.Mock).mockReturnValue({
+(useMyStreamActions as jest.Mock).mockReturnValue({
   applyOptimisticDropUpdate: jest.fn(() => ({ rollback: jest.fn() })),
 });
 
@@ -83,7 +83,11 @@ describe("DropListItemRateGiveSubmit", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     auth.requestAuth.mockResolvedValue({ success: true });
-    useQueryClientMock.mockReturnValue({ invalidateQueries, setQueriesData });
+    useQueryClientMock.mockReturnValue({
+      invalidateQueries,
+      setQueriesData,
+      getQueryData: jest.fn(),
+    });
     useMutationMock.mockImplementation((config: any) => ({
       mutateAsync: async (variables: any) => {
         mutateAsync(variables);

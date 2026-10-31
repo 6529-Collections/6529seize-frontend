@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       pack:
-        description: Post-deploy pack alias; use all for the full set
+        description: Post-deploy pack alias; use all for the full set. e2ee-staging is opt-in, never in all, and writes throwaway QA data.
         type: choice
         required: true
         default: all
@@ -28,6 +28,7 @@ on:
           - museum-inside-system
           - museum-rights
           - museum-network-ia
+          - e2ee-staging
       automatic_deploy_run_id:
         description: Successful Web Deploy - STAGING run ID; supplied automatically, required for a manual rerun
         type: string
@@ -267,6 +268,24 @@ jobs:
             echo "publication_commit=$(jq -r .publication_commit "$identity_file")"
           } >> "$GITHUB_OUTPUT"
 
+      - name: Use HTTPS Ubuntu archive for browser dependencies
+        run: |
+          # The hosted runner's Azure HTTP mirror can stall apt while the
+          # official HTTPS archive remains reachable. Preserve mirror metadata
+          # and all other configured sources. This is inline because deployed
+          # source may predate a repository-owned setup helper.
+          sudo "$(command -v node)" - /etc/apt/apt-mirrors.txt <<'NODE'
+          const fs = require("node:fs");
+          const mirrorListPath = process.argv[2];
+          if (!fs.existsSync(mirrorListPath)) process.exit(0);
+          const before = fs.readFileSync(mirrorListPath, "utf8");
+          const after = before.replace(
+            /^([ \t]*)http:\/\/azure\.archive\.ubuntu\.com\/ubuntu(\/?)(?=[ \t\r]|$)/gm,
+            "$1https://archive.ubuntu.com/ubuntu$2"
+          );
+          if (after !== before) fs.writeFileSync(mirrorListPath, after);
+          NODE
+
       - name: Install Playwright dependencies
         id: playwright_dependencies_primary
         timeout-minutes: 10
@@ -305,6 +324,7 @@ jobs:
         run: ./bin/6529 exec playwright install chromium
 
       - name: Run read-only staging packs
+        if: env.SELECTED_PACK != 'e2ee-staging'
         env:
           MUSEUM_SELECTED_PACKS_JSON: ${{ steps.museum-selection.outputs.selected_packs }}
           MUSEUM_AVAILABLE_PACKS_JSON: ${{ steps.museum-selection.outputs.museum_packs }}
@@ -333,6 +353,26 @@ jobs:
           fi
           DEPLOYMENT_E2E_SOURCE_SHA="$DEPLOYED_SHA" \
             ./bin/6529 run e2e:packs -- "${args[@]}"
+
+      # Opt-in only: the pack writes throwaway QA data (wallets, test-only
+      # profiles, encrypted chats) to staging. Its manifest trigger is manual,
+      # so `all` above never selects it. The runner parallelizes readonly
+      # packs only, and a stateful run is never retried automatically.
+      - name: Run opt-in stateful staging pack
+        if: env.SELECTED_PACK == 'e2ee-staging'
+        env:
+          DEPLOYED_SHA: ${{ steps.source.outputs.sha }}
+          PLAYWRIGHT_STAGING_ACCESS_CODE: ${{ secrets.PLAYWRIGHT_STAGING_ACCESS_CODE }}
+        run: |
+          set -euo pipefail
+          DEPLOYMENT_E2E_SOURCE_SHA="$DEPLOYED_SHA" \
+            ./bin/6529 run e2e:packs -- \
+              --env staging \
+              --trigger manual \
+              --pack "$SELECTED_PACK" \
+              --artifact-root staging-e2e-artifacts \
+              --parallel 1 \
+              --retry-failed-packs 0
 
       - name: Preserve Museum selection and publication evidence
         if: always()

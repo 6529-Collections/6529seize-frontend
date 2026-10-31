@@ -17,14 +17,6 @@ import { PUBLIC_REVIEW_STREAM_CONCEPT_PREVIEW_MESSAGES } from "@/i18n/messages/p
 export const PUBLIC_REVIEW_MESSAGES = {
   ...PUBLIC_REVIEW_ENTRY_GUIDE_MESSAGES,
   ...PUBLIC_REVIEW_STREAM_DIAGRAM_MESSAGES,
-  "navigation.nfts.theMemes": "The Memes",
-  "navigation.nfts.gradient": "6529 Gradient",
-  "navigation.nfts.nextGen": "NextGen",
-  "navigation.nfts.memeLab": "Meme Lab",
-  "navigation.nfts.rememes": "ReMemes",
-  "navigation.nfts.streamReview": "6529 Stream — Review",
-  "navigation.nfts.activity": "NFT Activity",
-  "navigation.nfts.memesCalendar": "Memes Calendar",
   "publicReview.metadata.title": "{page} | 6529 Stream Contract Review",
   "publicReview.metadata.description":
     "Review the proposed 6529 Stream contract before finalization and deployment.",

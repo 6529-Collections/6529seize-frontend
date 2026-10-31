@@ -39,11 +39,14 @@ import WaveDropMobileMenuOpen from "./WaveDropMobileMenuOpen";
 import WaveDropActionsQuickReact from "./WaveDropActionsQuickReact";
 import { useWaveDropLayers } from "./WaveDropLayerContext";
 import WaveDropMobileMenuCopyLink from "./WaveDropMobileMenuCopyLink";
+import WaveDropBookmarkAction from "./WaveDropBookmarkAction";
 import WaveDropMobileMenuCopyText from "./WaveDropMobileMenuCopyText";
 import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
 import ReportDropModal from "@/components/content-moderation/ReportDropModal";
 import WaveDropMobileMenuReactionPicker from "./WaveDropMobileMenuReactionPicker";
 import WaveDropDocumentationAction from "./WaveDropDocumentationAction";
+import DropSignatureDialog from "./signature/DropSignatureDialog";
+import DropSignatureMenuItem from "./signature/DropSignatureMenuItem";
 
 export interface WaveDropMobileMenuProps {
   readonly drop: ApiDrop;
@@ -120,6 +123,7 @@ function WaveDropMobileMenuAuthenticatedActions({
   closeMenu,
   showVoting,
   onReport,
+  onShowSignature,
   showOnlyQuickRemove,
 }: {
   readonly extendedDrop: ExtendedDrop;
@@ -146,6 +150,7 @@ function WaveDropMobileMenuAuthenticatedActions({
   readonly closeMenu: () => void;
   readonly showVoting: boolean;
   readonly onReport: () => void;
+  readonly onShowSignature: () => void;
   readonly showOnlyQuickRemove: boolean;
 }) {
   const locale = useBrowserLocale();
@@ -275,7 +280,14 @@ function WaveDropMobileMenuAuthenticatedActions({
         </>
       )}
 
+      <WaveDropBookmarkAction dropId={drop.id} onSelected={closeMenu} mobile />
       <WaveDropDocumentationAction drop={drop} onSelected={closeMenu} mobile />
+
+      <DropSignatureMenuItem
+        dropId={drop.id}
+        onSelect={onShowSignature}
+        mobile
+      />
 
       {quickAddCuration && (
         <button
@@ -388,6 +400,7 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
     useState<WaveDropMobileMenuView>("actions");
   const reactionButtonRef = useRef<HTMLButtonElement>(null);
   const [isReportOpen, setIsReportOpen] = useState(false);
+  const [isSignatureOpen, setIsSignatureOpen] = useState(false);
   const curationsDialogTimeoutRef = useRef<ReturnType<
     typeof setTimeout
   > | null>(null);
@@ -400,18 +413,32 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
 
   const isAuthor = useMemo(
     () =>
-      connectedProfile?.handle === drop.author.handle && !activeProfileProxy,
-    [connectedProfile, activeProfileProxy, drop.author.handle]
+      !drop.author.is_anonymous &&
+      connectedProfile?.handle === drop.author.handle &&
+      !activeProfileProxy,
+    [
+      connectedProfile,
+      activeProfileProxy,
+      drop.author.handle,
+      drop.author.is_anonymous,
+    ]
   );
   const connectedProfileHandle = connectedProfile?.handle ?? null;
 
   const showOptions = useMemo(
     () =>
       connectedProfileHandle !== null &&
+      !drop.author.is_anonymous &&
       !activeProfileProxy &&
       !drop.id.startsWith("temp-") &&
       connectedProfileHandle === drop.author.handle,
-    [connectedProfileHandle, activeProfileProxy, drop.id, drop.author.handle]
+    [
+      connectedProfileHandle,
+      activeProfileProxy,
+      drop.id,
+      drop.author.handle,
+      drop.author.is_anonymous,
+    ]
   );
 
   const closeMenu = () => setOpen(false);
@@ -518,18 +545,29 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
               }`}
             >
               {showGuestCopyOnly ? (
-                showCopyOption && (
-                  <>
-                    <WaveDropMobileMenuCopyText
-                      drop={drop}
-                      onCopy={closeMenu}
-                    />
-                    <WaveDropMobileMenuCopyLink
-                      drop={drop}
-                      onCopy={closeMenu}
-                    />
-                  </>
-                )
+                <>
+                  {showCopyOption && (
+                    <>
+                      <WaveDropMobileMenuCopyText
+                        drop={drop}
+                        onCopy={closeMenu}
+                      />
+                      <WaveDropMobileMenuCopyLink
+                        drop={drop}
+                        onCopy={closeMenu}
+                      />
+                    </>
+                  )}
+                  {/* Anyone can check a signature; reading needs no sign-in. */}
+                  <DropSignatureMenuItem
+                    dropId={drop.id}
+                    onSelect={() => {
+                      closeMenu();
+                      setIsSignatureOpen(true);
+                    }}
+                    mobile
+                  />
+                </>
               ) : (
                 <WaveDropMobileMenuAuthenticatedActions
                   extendedDrop={extendedDrop}
@@ -559,6 +597,10 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
                     closeMenu();
                     setIsReportOpen(true);
                   }}
+                  onShowSignature={() => {
+                    closeMenu();
+                    setIsSignatureOpen(true);
+                  }}
                   showOnlyQuickRemove={showOnlyQuickRemove}
                 />
               )}
@@ -584,6 +626,12 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
         drop={drop}
         isOpen={isReportOpen}
         onClose={() => setIsReportOpen(false)}
+      />
+      <DropSignatureDialog
+        dropId={drop.id}
+        drop={drop}
+        isOpen={isSignatureOpen}
+        onClose={() => setIsSignatureOpen(false)}
       />
     </>
   );

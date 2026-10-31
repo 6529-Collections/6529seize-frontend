@@ -1,4 +1,8 @@
-import { GROUP_CREATE_PANEL_STYLES } from "../GroupCreate.styles";
+import {
+  GROUP_CREATE_PANEL_STYLES,
+  GROUP_CREATE_TITLE_STYLES,
+  GROUP_CREATE_DESCRIPTION_STYLES,
+} from "../GroupCreate.styles";
 import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
 import GroupCreateNumericValue from "./common/GroupCreateNumericValue";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
@@ -28,14 +32,17 @@ export default function GroupCreateTDH({
   return (
     <div className={GROUP_CREATE_PANEL_STYLES}>
       <div className="tw-mb-4">
-        <div className="tw-flex tw-flex-col tw-items-start tw-justify-between tw-gap-4 sm:tw-flex-row sm:tw-items-center">
+        <div
+          data-group-criteria-tabs-row
+          className="tw-flex tw-flex-col tw-items-start tw-justify-between tw-gap-4 sm:tw-flex-row sm:tw-items-center"
+        >
           <div>
-            <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
+            <p className={GROUP_CREATE_TITLE_STYLES}>
               {tdh.inclusion_strategy === ApiGroupTdhInclusionStrategy.Both
                 ? "TDH + xTDH"
                 : tdh.inclusion_strategy}
             </p>
-            <p className="tw-m-0 tw-mt-0.5 tw-text-sm tw-text-iron-400">
+            <p className={GROUP_CREATE_DESCRIPTION_STYLES}>
               Set the group&apos;s minimum{" "}
               {tdh.inclusion_strategy === ApiGroupTdhInclusionStrategy.Both
                 ? "TDH + xTDH"
@@ -43,7 +50,7 @@ export default function GroupCreateTDH({
               requirement.
             </p>
           </div>
-          <div>
+          <div data-group-criteria-tabs>
             <CommonTabs
               items={modes}
               activeItem={tdh.inclusion_strategy}

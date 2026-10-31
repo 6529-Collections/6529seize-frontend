@@ -24,6 +24,10 @@ import {
 } from "@/lib/proxy/tdhVerificationDay";
 import { getAppEnvironment } from "@/config/appEnvironment";
 import { resolveVerificationSource } from "@/lib/tdh/verification/feedSource";
+import {
+  hasMalformedWaveId,
+  MALFORMED_WAVE_ROUTE,
+} from "@/lib/proxy/waveRoutes";
 import { publicEnv } from "./config/env";
 import { API_AUTH_COOKIE } from "./constants/constants";
 
@@ -339,8 +343,9 @@ async function accessDenial(
     return null;
   }
 
-  const authValue =
-    req.cookies.get(API_AUTH_COOKIE)?.value ?? publicEnv.STAGING_API_KEY ?? "";
+  // Only the visitor's own access cookie decides the gate; no server-held
+  // credential stands in for it.
+  const authValue = req.cookies.get(API_AUTH_COOKIE)?.value ?? "";
   const verdict = await getAccessVerdict({
     apiEndpoint: publicEnv.API_ENDPOINT,
     authValue,
@@ -400,6 +405,18 @@ export default async function proxy(req: NextRequest) {
           { status: 404 }
         )
       );
+    }
+
+    // Wave routes stream their shell with a 200 before a page can call
+    // notFound(), so an id that cannot be a wave id is answered here: a
+    // rewrite to a route outside those boundaries renders the branded
+    // not-found page with a real 404 and keeps the visitor's URL. The query
+    // stays on the rewritten URL so Next's `_rsc` cache-busting check still
+    // matches on client navigations.
+    if (hasMalformedWaveId(normalizedPathname, req.nextUrl.searchParams)) {
+      const notFoundUrl = req.nextUrl.clone();
+      notFoundUrl.pathname = MALFORMED_WAVE_ROUTE;
+      return NextResponse.rewrite(notFoundUrl);
     }
 
     const redirectTarget = normalizedPathname.startsWith("/my-stream")

@@ -24,6 +24,7 @@ export interface CreateAuthRequestActionsParams {
   readonly invalidateAll: () => void;
   readonly isActiveChainSupported: () => boolean;
   readonly isAddressAuthorized: boolean;
+  readonly seizeConnect: () => void;
   readonly seizeDisconnect: () => Promise<void>;
   readonly resetSessionUpgradeExpiryDedupe: (walletAddress: string) => void;
   readonly setActiveProfileProxy: (
@@ -48,9 +49,10 @@ export interface CreateAuthRequestActionsParams {
 export interface AuthRequestActions {
   readonly onActiveProfileProxy: (
     profileProxy: ApiProfileProxy | null
-  ) => Promise<void>;
+  ) => Promise<boolean>;
   readonly requestAuth: (
     options?: RequestAuthOptions
   ) => Promise<{ success: boolean }>;
   readonly requestSessionUpgrade: () => Promise<{ success: boolean }>;
+  readonly requestSignedMessagesGrant: () => Promise<{ success: boolean }>;
 }

@@ -13,6 +13,8 @@ import {
 } from "@/helpers/waves/collapsed-replies.helpers";
 
 interface VirtualizedWaveMessages extends Omit<WaveMessages, "drops"> {
+  readonly isError?: boolean;
+  readonly retryDropMessages?: DropMessagesResult["refetch"];
   readonly drops: Drop[];
   readonly allDropsCount: number;
   readonly loadMoreLocally: () => void;
@@ -344,6 +346,8 @@ export function useVirtualizedWaveMessages(
 
   if (activeDropMessages) {
     return {
+      isError: activeDropMessages.isError,
+      retryDropMessages: activeDropMessages.refetch,
       hasNextPage: activeDropMessages.hasNextPage,
       id: waveId,
       isLoading: activeDropMessages.isFetching,

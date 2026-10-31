@@ -140,3 +140,79 @@ it("encodes reserved route params before fetching the rememe", async () => {
     "contract=collection%2Falpha&id=token%231"
   );
 });
+
+describe("external links", () => {
+  function renderRememe({
+    externalUrl = null,
+    tokenUri = rememe.token_uri,
+  }: {
+    readonly externalUrl?: string | null;
+    readonly tokenUri?: string;
+  } = {}) {
+    fetchUrl.mockResolvedValue({
+      data: [
+        {
+          ...rememe,
+          token_uri: tokenUri,
+          contract_opensea_data: {
+            ...rememe.contract_opensea_data,
+            externalUrl,
+          },
+        },
+      ],
+    });
+    fetchAllPages.mockResolvedValue([]);
+    return render(
+      <CookieConsentProvider>
+        <TitleProvider>
+          <RememePage contract="0xabc" id="1" locale="de-DE" />
+        </TitleProvider>
+      </CookieConsentProvider>
+    );
+  }
+
+  it("renders a javascript: external URL as plain text, not a link", async () => {
+    const { container } = renderRememe({
+      externalUrl: "javascript:alert(1)",
+    });
+    await screen.findByText("Meme Name");
+
+    expect(screen.getByText("javascript:alert(1)")).toBeInTheDocument();
+    expect(container.querySelector('a[href^="javascript:"]')).toBeNull();
+  });
+
+  it("renders a data: token URI as plain text, not a link", async () => {
+    const dataUri = "data:text/html,<script>alert(2)</script>";
+    const { container } = renderRememe({ tokenUri: dataUri });
+    await screen.findByText("Meme Name");
+
+    await userEvent.click(screen.getByRole("button", { name: "Metadata" }));
+    await screen.findByText("Token URI");
+
+    expect(screen.getByText(dataUri)).toBeInTheDocument();
+    expect(container.querySelector('a[href^="data:"]')).toBeNull();
+  });
+
+  it("resolves an ipfs token URI through the media resolver", async () => {
+    const ipfsUri = "ipfs://QmYwAPJzv5CZsnAzt8auVZRnG1R8n4wqxW48UUfZo59SyY";
+    renderRememe({ tokenUri: ipfsUri });
+    await screen.findByText("Meme Name");
+
+    await userEvent.click(screen.getByRole("button", { name: "Metadata" }));
+    await screen.findByText("Token URI");
+
+    const href = screen.getByText(ipfsUri).closest("a")?.getAttribute("href");
+    expect(href).toContain(
+      "/ipfs/QmYwAPJzv5CZsnAzt8auVZRnG1R8n4wqxW48UUfZo59SyY"
+    );
+  });
+
+  it("keeps https external URLs as links", async () => {
+    renderRememe({ externalUrl: "https://example.com/collection" });
+    await screen.findByText("Meme Name");
+
+    expect(
+      screen.getByText("https://example.com/collection").closest("a")
+    ).toHaveAttribute("href", "https://example.com/collection");
+  });
+});

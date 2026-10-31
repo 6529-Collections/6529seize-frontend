@@ -18,6 +18,7 @@ import {
 import { registerWaveComposerDock } from "@/components/waves/WaveComposerDockVisibility";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 import type { PublicReviewSectionDefinition } from "@/lib/public-review/publicReviewTypes";
 import type {
   PublicReviewDiscussionDestination,

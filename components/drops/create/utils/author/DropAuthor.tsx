@@ -35,13 +35,15 @@ export default function DropAuthor({
 
   const textClasses = getTextClasses();
   return (
-    <div className="tw-flex tw-items-center tw-w-full tw-gap-x-2">
+    <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2">
       <div className="tw-flex tw-items-center">
         <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-center">
-          <UserCICAndLevel
-            level={profile.level}
-            size={UserCICAndLevelSize.SMALL}
-          />
+          {!profile.is_anonymous && (
+            <UserCICAndLevel
+              level={profile.level}
+              size={UserCICAndLevelSize.SMALL}
+            />
+          )}
           <DropAuthorHandle profile={profile} size={size} />
         </div>
         {children}

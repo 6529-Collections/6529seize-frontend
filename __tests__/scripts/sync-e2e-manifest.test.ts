@@ -7,7 +7,7 @@ type Pack = {
   scriptKey: string;
   alias?: string;
   description: string;
-  safety: "local" | "readonly" | "sandbox";
+  safety: "local" | "readonly" | "sandbox" | "stateful";
   environments: string[];
   triggers: string[];
   env?: Record<string, string>;
@@ -44,7 +44,16 @@ describe("E2E pack manifest", () => {
 
   it("defines every package pack once and satisfies the safety contract", () => {
     expect(manifestTools.validateManifest(packs, { root: ROOT })).toEqual([]);
-    expect(packs).toHaveLength(80);
+    // Independent sandbox packs can land together on the staging branch.
+    // Validate the complete checked-in inventory below instead of a fixed count.
+    expect(packs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          scriptKey: "test:e2e:notifications-inbox-sandbox",
+          specs: ["tests/auth/notifications-inbox-sandbox.spec.ts"],
+        }),
+      ])
+    );
 
     const rendered = manifestTools.renderPackageJsonScripts(packs);
     const packageScripts = JSON.parse(
@@ -95,10 +104,10 @@ describe("E2E pack manifest", () => {
         "tests/social/native-competition-sandbox.spec.ts",
         "tests/social/wave-notification-settings-sandbox.spec.ts",
         "tests/social/wave-switch-loading.spec.ts",
+        "tests/social/wave-loading-sandbox.spec.ts",
       ],
       projects: ["web-desktop-chromium", "web-mobile-chromium"],
       env: {
-        NEXT_PUBLIC_FEATURE_MULTI_COMPETITION: "true",
         PLAYWRIGHT_BASE_URL: "http://localhost:3297",
       },
     });
@@ -114,6 +123,39 @@ describe("E2E pack manifest", () => {
     );
     expect(workflow).toContain(
       "run: ./bin/6529 run test:e2e:native-competition-sandbox"
+    );
+  });
+
+  it("isolates submission artwork from the complete competition pack", () => {
+    expect(
+      packs.find(
+        (pack) => pack.scriptKey === "test:e2e:submission-artwork-sandbox"
+      )
+    ).toMatchObject({
+      safety: "sandbox",
+      environments: ["local"],
+      triggers: ["pr-ci", "manual"],
+      specs: ["tests/media/submission-artwork-sandbox.spec.ts"],
+      projects: ["web-desktop-chromium", "web-mobile-chromium"],
+      env: {
+        PLAYWRIGHT_AUTH_SANDBOX: "1",
+        NEXT_DEV_DIST_DIR: ".next-playwright-submission-artwork",
+      },
+    });
+    const nativeSpec = fs.readFileSync(
+      path.join(ROOT, "tests/social/native-competition-sandbox.spec.ts"),
+      "utf8"
+    );
+    expect(nativeSpec).not.toContain("defineSubmissionArtworkPreviewTests");
+    const workflow = fs.readFileSync(
+      path.join(ROOT, ".github/workflows/app-pr-ci.yml"),
+      "utf8"
+    );
+    expect(workflow).toContain(
+      "if: matrix.lane == 'playwright-submission-artwork'"
+    );
+    expect(workflow).toContain(
+      "run: ./bin/6529 run test:e2e:submission-artwork-sandbox"
     );
   });
 
@@ -241,22 +283,25 @@ describe("E2E pack manifest", () => {
   });
 
   it("makes deployed packs explicitly read-only and non-empty", () => {
-    const staging = packs.filter((pack) => pack.environments[0] === "staging");
+    // Opt-in stateful packs have their own contract (next test).
+    const staging = packs.filter(
+      (pack) => pack.environments[0] === "staging" && pack.safety !== "stateful"
+    );
     const production = packs.filter(
       (pack) => pack.environments[0] === "production"
     );
 
-    expect(staging).toHaveLength(19);
+    expect(staging).toHaveLength(20);
     expect(
       staging.filter((pack) => pack.triggers.includes("post-deploy"))
-    ).toHaveLength(18);
-    expect(production).toHaveLength(18);
+    ).toHaveLength(19);
+    expect(production).toHaveLength(19);
     expect(
       production.filter((pack) => pack.triggers.includes("cron"))
     ).toHaveLength(12);
     expect(
       production.filter((pack) => pack.triggers.includes("post-deploy"))
-    ).toHaveLength(17);
+    ).toHaveLength(18);
 
     for (const environmentPacks of [staging, production]) {
       const specs = environmentPacks
@@ -292,6 +337,58 @@ describe("E2E pack manifest", () => {
     }
   });
 
+  it("keeps the staging E2EE pack opt-in, single-worker and off every automatic lane", () => {
+    const stateful = packs.filter((pack) => pack.safety === "stateful");
+    expect(stateful).toEqual([
+      expect.objectContaining({
+        scriptKey: "test:e2e:staging:e2ee",
+        alias: "e2ee-staging",
+        environments: ["staging"],
+        triggers: ["manual"],
+        specs: ["tests/staging-e2ee/encrypted-dm-staging.spec.ts"],
+        projects: ["web-desktop-chromium"],
+        workers: 1,
+        env: {
+          PLAYWRIGHT_BASE_URL: "https://staging.6529.io",
+          PLAYWRIGHT_SKIP_WEB_SERVER: "1",
+          PLAYWRIGHT_ENV: "staging",
+          PLAYWRIGHT_READONLY: "0",
+          PLAYWRIGHT_E2EE_STAGING: "1",
+        },
+      }),
+    ]);
+    expect((stateful[0] as Pack & { traceOff?: boolean }).traceOff).toBe(true);
+
+    const misconfigured = clonePack(stateful[0]!);
+    misconfigured.triggers = ["post-deploy", "manual"];
+    misconfigured.workers = 2;
+    misconfigured.env = {
+      ...misconfigured.env,
+      PLAYWRIGHT_BASE_URL: "https://6529.io",
+    };
+    delete (misconfigured as Pack & { traceOff?: boolean }).traceOff;
+    expect(manifestTools.validateManifest([misconfigured])).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "stateful packs must use only the manual trigger"
+        ),
+        expect.stringContaining("stateful packs must set workers to 1"),
+        expect.stringContaining("stateful packs must turn traces off"),
+        expect.stringContaining(
+          "stateful packs must set PLAYWRIGHT_BASE_URL=https://staging.6529.io"
+        ),
+      ])
+    );
+
+    const production = clonePack(stateful[0]!);
+    production.environments = ["production"];
+    expect(manifestTools.validateManifest([production])).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("stateful packs must target staging"),
+      ])
+    );
+  });
+
   it("rejects unsafe production and ambiguous aliases", () => {
     const production = clonePack(
       packs.find((pack) => pack.environments[0] === "production") as Pack
@@ -316,8 +413,12 @@ describe("E2E pack manifest", () => {
       ])
     );
 
-    const first = clonePack(packs[0]!);
-    const second = clonePack(packs[1]!);
+    const first = clonePack(
+      packs.find((pack) => pack.scriptKey === "test:e2e") as Pack
+    );
+    const second = clonePack(
+      packs.find((pack) => pack.scriptKey === "test:e2e:all-projects") as Pack
+    );
     first.alias = "duplicate";
     second.alias = "duplicate";
     expect(manifestTools.validateManifest([first, second])).toEqual(

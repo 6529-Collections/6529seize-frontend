@@ -251,3 +251,9 @@ On web layouts, route switching is sidebar-first.
 - [6529 Apps Page](feature-6529-apps-page.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
 - [Network Index](../network/README.md)
+
+## Private bookmarks
+
+The account menu places **Bookmarks** below **Profile** and above **My artwork
+documentation** when the owner has accessible saved messages. See
+[Private Bookmarks](../waves/chat/feature-private-bookmarks.md).

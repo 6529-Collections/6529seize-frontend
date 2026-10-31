@@ -23,6 +23,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import ProposalCardContent from "./proposal/ProposalCardContent";
 import { useWaveProposalCardPresentation } from "@/hooks/waves/useWaveProposalCardPresentation";
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
+import { AnonymousAuthorName } from "./AnonymousDropAuthor";
 
 interface WaveDropQuoteProps {
   readonly drop: ApiDrop | null;
@@ -120,9 +121,10 @@ const WaveDropQuoteProfilePicture: React.FC<
     );
   }
 
-  const resolvedPfp = drop.author.pfp
-    ? getScaledImageUri(drop.author.pfp, ImageScale.W_200_H_200)
-    : null;
+  const resolvedPfp =
+    drop.author.pfp && !drop.author.is_anonymous
+      ? getScaledImageUri(drop.author.pfp, ImageScale.W_200_H_200)
+      : null;
 
   if (resolvedPfp) {
     return (
@@ -167,16 +169,20 @@ function WaveDropQuoteBody({
             <div className="tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
               {quoteAuthorLabel && (
                 <p className="tw-m-0 tw-min-w-0 tw-max-w-full tw-text-md tw-font-semibold tw-leading-5 [overflow-wrap:anywhere]">
-                  <Link
-                    href={`/${quoteAuthorLabel}`}
-                    className="tw-rounded-sm tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-                  >
-                    {quoteAuthorLabel}
-                  </Link>
+                  {drop?.author.is_anonymous ? (
+                    <AnonymousAuthorName />
+                  ) : (
+                    <Link
+                      href={`/${quoteAuthorLabel}`}
+                      className="tw-rounded-sm tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                    >
+                      {quoteAuthorLabel}
+                    </Link>
+                  )}
                 </p>
               )}
 
-              {!!drop && (
+              {!!drop && !drop.author.is_anonymous && (
                 <UserCICAndLevel
                   level={drop.author.level}
                   size={UserCICAndLevelSize.SMALL}

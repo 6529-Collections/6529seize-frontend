@@ -87,6 +87,7 @@ describe("UserPageFollowersModal", () => {
         },
       ],
       isFetching: false,
+      isEmpty: false,
       onBottomIntersection: jest.fn(),
     });
   });
@@ -106,6 +107,35 @@ describe("UserPageFollowersModal", () => {
       enabled: true,
     });
   });
+
+  it("shows a message when the followers request confirms an empty list", () => {
+    mockedUseFollowersList.mockReturnValue({
+      followers: [],
+      isFetching: false,
+      isEmpty: true,
+      onBottomIntersection: jest.fn(),
+    });
+
+    renderModal();
+
+    expect(screen.getByText("No followers yet.")).toBeInTheDocument();
+  });
+
+  it.each([true, false])(
+    "does not call an unconfirmed empty list empty (fetching: %s)",
+    (isFetching) => {
+      mockedUseFollowersList.mockReturnValue({
+        followers: [],
+        isFetching,
+        isEmpty: false,
+        onBottomIntersection: jest.fn(),
+      });
+
+      renderModal();
+
+      expect(screen.queryByText("No followers yet.")).not.toBeInTheDocument();
+    }
+  );
 
   it.each([
     ["null", null],
