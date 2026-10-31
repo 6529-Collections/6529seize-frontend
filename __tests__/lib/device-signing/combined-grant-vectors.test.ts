@@ -22,9 +22,9 @@ const SIGNING_URN =
 const MLS_URN =
   "urn:6529:mls-device-grant:v1:1:3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c:1807876800";
 const COMBINED_STATEMENT =
-  "Sign in to 6529 and turn on signed messages on this device until 16 Apr 2027. This device will sign your posts, edits, deletes and reactions so anyone can verify they came from your wallet. It will also send and read your end-to-end encrypted messages, which 6529 cannot read. It can't move funds, change your handle, add devices or act as an admin. No transaction, no gas, no token approvals. (Device key d75a9801...f707511a, encrypted messages key 3d4017c3...2af4660c)";
+  "Sign in to 6529 and turn on signed messages on this device until 16 Apr 2027. This device will sign your posts, edits, deletes and reactions so anyone can verify they came from your wallet. It will also encrypt (send) and decrypt (read) your end-to-end encrypted messages, which 6529.io cannot read. It can't move funds, change your handle, add devices or act as an admin. No transaction, no gas, no token approvals. (Device key d75a9801...f707511a, encrypted messages key 3d4017c3...2af4660c)";
 const COMBINED_GRANT_ID =
-  "0x6aee792a1bc44547ed42fba60b21c58c9c2f06a12c5278b950d3272642fd97ea";
+  "0xca11c99bc2a1f2b66548938658527f5f38ca468e948688f5c779a29dc94b5053";
 
 const SIGNING = {
   deviceKeyHex: SIGNING_KEY,
@@ -82,7 +82,7 @@ describe("NC8 combined grant shared vectors", () => {
   it("keeps the approved signed-messages wording around one added clause", () => {
     expect(
       COMBINED_STATEMENT.replace(
-        " It will also send and read your end-to-end encrypted messages, which 6529 cannot read.",
+        " It will also encrypt (send) and decrypt (read) your end-to-end encrypted messages, which 6529.io cannot read.",
         ""
       ).replace(", encrypted messages key 3d4017c3...2af4660c)", ")")
     ).toBe(renderDeviceGrantStatement(SIGNING));
@@ -148,8 +148,8 @@ describe("NC8 combined grant shared vectors", () => {
       "an edited encrypted-messages clause",
       {
         statement: COMBINED_STATEMENT.replace(
-          "which 6529 cannot read",
-          "which 6529 can read"
+          "which 6529.io cannot read",
+          "which 6529.io can read"
         ),
       },
     ],

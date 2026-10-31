@@ -175,8 +175,9 @@ type CombinedStatementRenderer = (
 ) => string;
 
 /**
- * v1 combined wording (pending owner approval): the approved signed-messages
- * statement plus one clause for encrypted messages and the second key.
+ * v1 combined wording (owner-approved 2026-10-31): the approved
+ * signed-messages statement plus one sentence for encrypted messages and the
+ * second key.
  */
 const renderCombinedGrantStatementV1: CombinedStatementRenderer = (
   signing,
@@ -186,8 +187,8 @@ const renderCombinedGrantStatementV1: CombinedStatementRenderer = (
   `${formatGrantExpiryDate(signing.expiresAtSeconds)}. ` +
   `This device will sign your ${describeScopes(signing.scopes)} ` +
   `so anyone can verify they came from your wallet. ` +
-  `It will also send and read your end-to-end encrypted messages, ` +
-  `which 6529 cannot read. ` +
+  `It will also encrypt (send) and decrypt (read) your end-to-end encrypted ` +
+  `messages, which 6529.io cannot read. ` +
   `It can't move funds, change your handle, add devices or act as an admin. ` +
   `No transaction, no gas, no token approvals. ` +
   `(Device key ${getDeviceKeyFingerprint(signing.deviceKeyHex)}, ` +

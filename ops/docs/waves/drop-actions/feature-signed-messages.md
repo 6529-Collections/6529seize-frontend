@@ -42,10 +42,10 @@ unchanged.
 - **Sign in with encrypted messages (staging).** Where encrypted messages are
   on, the same signature can also turn them on for this browser: the
   message then grants a second key (the browser's encrypted-messages key)
-  with the same expiry, adds "It will also send and read your end-to-end
-  encrypted messages, which 6529 cannot read." after the sentence about
-  signing, and ends "(Device key ..., encrypted messages key ...)". This
-  combined wording is pending owner approval. The browser checks that the
+  with the same expiry, adds "It will also encrypt (send) and decrypt (read)
+  your end-to-end encrypted messages, which 6529.io cannot read." after the
+  sentence about signing, and ends "(Device key ..., encrypted messages key
+  ...)". The browser checks that the
   message grants exactly its two keys before the wallet is asked. If the
   server does not offer the combined message, or the browser cannot prepare
   the second key within two seconds, the sign-in grants signed messages only
