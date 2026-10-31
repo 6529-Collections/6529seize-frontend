@@ -5,6 +5,7 @@ import type { RefObject } from "react";
 import DropPartMarkdown from "@/components/drops/view/part/DropPartMarkdown";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 
 export type PublicReviewReferenceIntegrityStatus =
   | "pending"
