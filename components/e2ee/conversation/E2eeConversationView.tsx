@@ -30,6 +30,7 @@ import {
 import { E2eeBlockDialog } from "./E2eeBlockDialog";
 import { E2eeComposer } from "./E2eeComposer";
 import { E2eeConversationBanners } from "./E2eeConversationBanners";
+import { E2eeUntrustedDeviceBanners } from "./E2eeUntrustedDeviceBanners";
 import { E2eeConversationHeader } from "./E2eeConversationHeader";
 import { type E2eeMessageActions, getMessageDomId } from "./E2eeMessageItem";
 import { E2eeReportDialog } from "./E2eeReportDialog";
@@ -253,6 +254,11 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         conversation={conversation}
         engine={engine}
         onCompareSafetyCodes={() => setInfoOpen(true)}
+      />
+      <E2eeUntrustedDeviceBanners
+        conversation={conversation}
+        engine={engine}
+        selfProfileId={profileId}
       />
       <E2eeNewDeviceNotice className="tw-flex-shrink-0 tw-px-4 tw-pt-2" />
       {getDisabledReasonKey(conversation) === null ? (

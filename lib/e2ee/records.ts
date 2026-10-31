@@ -32,6 +32,23 @@ export interface StoredDevice {
   createdAt: number;
   /** When the current last-resort KeyPackage was uploaded (ms). */
   lastResortAt: number | null;
+  /** Which wallets this profile trusts for each person (engine/trust.ts). */
+  trust?: StoredTrust;
+}
+
+/**
+ * Trust on first use for device owners. The server says which profile a
+ * device belongs to; only the wallet signature on its grant is checked, so
+ * each person's wallets are pinned when first seen and a device signed by any
+ * other wallet waits for the user's explicit "Add device".
+ */
+export interface StoredTrust {
+  /** profile id -> lowercase wallets pinned for that person. */
+  wallets: Record<string, string[]>;
+  /** Device keys the user added explicitly (new or unverified wallet). */
+  approved: string[];
+  /** Device keys whose new-wallet notice the user dismissed. */
+  ignored: string[];
 }
 
 export interface StoredMember {

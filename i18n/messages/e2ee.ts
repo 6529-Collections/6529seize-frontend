@@ -225,6 +225,21 @@ export const E2EE_MESSAGES = {
     "Security check needed: this device may not see the same chat as everyone else. Compare safety codes before sharing anything sensitive.",
   "e2ee.banner.splitViewAction": "Compare safety codes",
   "e2ee.banner.invalid": "This chat is paused because of an invalid change.",
+  "e2ee.banner.untrustedNewWallet":
+    "{name} has a device signed by a new wallet {wallet}.",
+  "e2ee.banner.untrustedNewWalletSelf":
+    "You have a device signed by a new wallet {wallet}.",
+  "e2ee.banner.untrustedUnverified":
+    "{name} has a device signed by wallet {wallet}, and this device couldn’t check that signature.",
+  "e2ee.banner.untrustedUnverifiedSelf":
+    "You have a device signed by wallet {wallet}, and this device couldn’t check that signature.",
+  "e2ee.banner.untrustedHelp":
+    "It can’t read this chat unless you add it. Add it only if you know whose wallet this is.",
+  "e2ee.banner.addDevice": "Add device",
+  "e2ee.banner.addDeviceAria": "Add device signed by wallet {wallet}",
+  "e2ee.banner.ignoreDevice": "Ignore",
+  "e2ee.banner.ignoreDeviceAria": "Ignore device signed by wallet {wallet}",
+  "e2ee.banner.deviceActionFailed": "Couldn’t update the device. Try again.",
   "e2ee.banner.restart": "Start a new encrypted chat with the same people",
   "e2ee.banner.restartFailed": "Couldn’t start a new chat. Try again.",
   "e2ee.banner.left": "You left this chat.",
@@ -274,6 +289,8 @@ export const E2EE_MESSAGES = {
   "e2ee.notice.removed": "{actor} removed {targets}",
   "e2ee.notice.removedNoActor": "{targets} is no longer in the chat",
   "e2ee.notice.deviceAdded": "{name} added a device",
+  "e2ee.notice.deviceAddedWallet":
+    "{name} added a device signed by wallet {wallet}",
   "e2ee.notice.deviceRemoved": "{name} removed a device",
   "e2ee.notice.renamed": "{actor} renamed the chat to “{name}”",
   "e2ee.notice.renamedNoName": "{actor} renamed the chat",
@@ -313,6 +330,8 @@ export const E2EE_MESSAGES = {
   "e2ee.info.devices.one": "{count} device",
   "e2ee.info.devices.other": "{count} devices",
   "e2ee.info.memberDevices": "Devices of {name}",
+  "e2ee.info.deviceLine": "{device} · {status} · signed by wallet {wallet}",
+  "e2ee.info.deviceLineNoWallet": "{device} · {status}",
   "e2ee.info.addPeople": "Add people",
   "e2ee.info.addSearch": "Search people to add",
   "e2ee.info.addSubmit": "Add to chat",
@@ -338,7 +357,7 @@ export const E2EE_MESSAGES = {
   "e2ee.info.safetyCode": "Safety code",
   "e2ee.info.safetyCodeAria": "Safety code: {code}",
   "e2ee.info.safetyCodeHelp":
-    "Compare this code with the other members in person or in another app you trust. If everyone sees the same code, no one has been added to this chat without your knowledge.",
+    "Compare this code with the other members in person or in another app you trust. If everyone sees the same code, everyone sees the same people and devices in this chat. Check the wallet shown with each device to know whose it is.",
   "e2ee.info.mute": "Mute on this device",
   "e2ee.info.unmute": "Unmute on this device",
   "e2ee.info.muteHelp":

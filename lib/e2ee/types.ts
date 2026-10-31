@@ -39,7 +39,25 @@ export interface E2eeMember {
   pfp: string | null;
   wallets: string[];
   isAdmin: boolean;
-  devices: { deviceKey: string; label: string; verified: boolean }[];
+  /** `wallet`: the lowercase wallet that signed the device's grant. */
+  devices: {
+    deviceKey: string;
+    label: string;
+    verified: boolean;
+    wallet: string | null;
+  }[];
+}
+
+/**
+ * A device of a chat member that is not added automatically: its grant is
+ * signed by a wallet not yet trusted for that person ("new-wallet"), or by a
+ * contract wallet whose signature this device could not check ("unverified").
+ */
+export interface E2eeUntrustedDevice {
+  profileId: string;
+  deviceKey: string;
+  wallet: string; // lowercase
+  reason: "new-wallet" | "unverified";
 }
 
 export interface E2eeAttachment {
@@ -126,6 +144,8 @@ export interface E2eeConversation {
   status: "active" | "invalid" | "left" | "removed" | "restored";
   delayed: boolean; // 8.3 stall banner
   splitView: boolean; // 8.6 alarm
+  /** Members' devices waiting for "Add device" or "Ignore". */
+  untrustedDevices: E2eeUntrustedDevice[];
   lastMessage: E2eeMessage | null;
   unread: number;
   mentions: number;
@@ -221,6 +241,10 @@ export interface E2eeEngine {
   getAttachment(g: string, id: string, blob: string): Promise<Blob>;
 
   // devices
+  /** Trusts the device's wallet for its owner, then adds it to their chats. */
+  trustDevice(deviceKey: string): Promise<void>;
+  /** Dismisses the untrusted-device notice; the device stays out. */
+  ignoreDevice(deviceKey: string): Promise<void>;
   revokeDevice(deviceKey: string): Promise<void>;
   renameThisDevice(label: string): Promise<void>; // local label only is fine
 }

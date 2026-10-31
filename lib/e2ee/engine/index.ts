@@ -55,6 +55,12 @@ import {
 import { previewReport, sendReport } from "./report";
 import { queueImported, queueMessage, queueTargeted } from "./send";
 import { EngineStore, toE2eeMessage } from "./store";
+import {
+  approveDevice,
+  hasPinnedWallets,
+  ignoreUntrustedDevice,
+  isPinnedWallet,
+} from "./trust";
 
 /** Contract section 12 engine: framework-agnostic, one instance per profile. */
 
@@ -83,6 +89,16 @@ function createContext(options: E2eeEngineOptions): EngineContext {
     verifyContractSignature: options.verifyContractSignature,
     verifyEd25519: (pub, digest, sig) =>
       holder.ctx?.mls?.verifyEd25519(pub, digest, sig) ?? false,
+    pinnedWallet: (profileId, wallet) => {
+      const current = holder.ctx;
+      if (!current) {
+        return null;
+      }
+      if (isPinnedWallet(current, profileId, wallet)) {
+        return true;
+      }
+      return hasPinnedWallets(current, profileId) ? false : null;
+    },
   });
   const ctx: EngineContext = {
     options,
@@ -757,6 +773,44 @@ class E2eeEngineImpl implements E2eeEngineExt {
   }
 
   // -- devices ----------------------------------------------------------------
+
+  /**
+   * "Add device": trusts the wallet for its owner and approves the device,
+   * clears its notice from every chat, then adds it to each active chat the
+   * owner is in (the only chats that listed it).
+   */
+  async trustDevice(deviceKey: string): Promise<void> {
+    this.requireReady();
+    const target = this.ctx.store.findUntrusted(deviceKey.toLowerCase());
+    if (!target) {
+      return;
+    }
+    await this.ctx.queue.run(() => approveDevice(this.ctx, target));
+    this.ctx.store.dropUntrusted(target.deviceKey);
+    const chats = [...this.ctx.store.groups].filter(
+      ([, runtime]) =>
+        runtime.record.status === "active" &&
+        runtime.record.members.some(
+          (leaf) => leaf.profileId === target.profileId
+        )
+    );
+    for (const [g] of chats) {
+      await this.controller.addOtherDevices(g);
+    }
+  }
+
+  /** "Ignore": the device stays out and its notice goes away. */
+  async ignoreDevice(deviceKey: string): Promise<void> {
+    this.requireReady();
+    const target = this.ctx.store.findUntrusted(deviceKey.toLowerCase());
+    if (!target) {
+      return;
+    }
+    await this.ctx.queue.run(() =>
+      ignoreUntrustedDevice(this.ctx, target.deviceKey)
+    );
+    this.ctx.store.dropUntrusted(target.deviceKey);
+  }
 
   async revokeDevice(deviceKey: string): Promise<void> {
     this.requireReady();

@@ -369,7 +369,7 @@ describe("E2eeConversationView", () => {
     ).toBeInTheDocument();
     expect(
       within(dialog).getByText(
-        "Compare this code with the other members in person or in another app you trust. If everyone sees the same code, no one has been added to this chat without your knowledge."
+        "Compare this code with the other members in person or in another app you trust. If everyone sees the same code, everyone sees the same people and devices in this chat. Check the wallet shown with each device to know whose it is."
       )
     ).toBeInTheDocument();
   });

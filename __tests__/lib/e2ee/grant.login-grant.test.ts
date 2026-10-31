@@ -140,6 +140,19 @@ describe("verifyGrant: combined sign-in grants (NC8)", () => {
     expect(result).toMatchObject({ ok: false, reason: "login-grant-domain" });
   });
 
+  it.each(["ipfs.6529.io", "media.6529.io"])(
+    "rejects a sign-in grant signed on the %s gateway",
+    async (host) => {
+      const message = buildMessage().replaceAll("staging.6529.io", host);
+      const base = await recordFor(message);
+      const result = await verifyGrant(
+        { ...base, grant: { ...base.grant, origin: host } },
+        { atMs }
+      );
+      expect(result).toMatchObject({ ok: false, reason: "login-grant-domain" });
+    }
+  );
+
   it("rejects a grant id that is not the message hash", async () => {
     const message = buildMessage();
     const result = await verifyGrant(

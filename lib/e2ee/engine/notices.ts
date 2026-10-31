@@ -1,3 +1,4 @@
+import { parseCredentialIdentity } from "../grant";
 import type { StoredMessage, StoredNotice } from "../records";
 import type { GroupMetadata } from "../wasm-types";
 import type { MemberRef } from "./required-changes";
@@ -15,6 +16,22 @@ export interface CommitChange {
   leaving: ReadonlySet<string>;
   /** The epoch-0 creation commit by the creator. */
   creation: boolean;
+  /** device key -> lowercase wallet in the added leaf's credential. */
+  addedWallets?: ReadonlyMap<string, string>;
+}
+
+/** Wallets that signed the added leaves' grants, for the notice. */
+export function credentialWallets(
+  leaves: readonly { device_key: string; identity: string }[]
+): Map<string, string> {
+  const out = new Map<string, string>();
+  for (const leaf of leaves) {
+    const credential = parseCredentialIdentity(leaf.identity);
+    if (credential) {
+      out.set(leaf.device_key.toLowerCase(), credential.wallet);
+    }
+  }
+  return out;
 }
 
 const principalsOf = (members: readonly MemberRef[]): Map<string, number> => {
@@ -76,10 +93,15 @@ function deviceNotices(
   after: Map<string, number>
 ): StoredNotice[] {
   const addedFor = new Set<string>();
+  const addedWallets = new Set<string>();
   const removedFor = new Set<string>();
   for (const member of change.added) {
     if (member.profileId !== null && before.has(member.profileId)) {
       addedFor.add(member.profileId);
+      const wallet = change.addedWallets?.get(member.deviceKey);
+      if (wallet) {
+        addedWallets.add(wallet);
+      }
     }
   }
   for (const member of change.removed) {
@@ -93,6 +115,8 @@ function deviceNotices(
       type: "device_added",
       actorProfileId: change.committerProfileId,
       targetProfileIds: [...addedFor],
+      // The signing wallets, comma separated (shown with the notice).
+      ...(addedWallets.size > 0 ? { detail: [...addedWallets].join(",") } : {}),
     });
   }
   if (removedFor.size > 0) {

@@ -21,7 +21,7 @@ import {
   memberRefs,
   touchActivity,
 } from "./groups";
-import { deriveCommitNotices } from "./notices";
+import { credentialWallets, deriveCommitNotices } from "./notices";
 import type { GroupRuntime } from "./store";
 
 /** Own commits: persist before submit, merge on 200, discard on 409 (8.7). */
@@ -125,6 +125,7 @@ export async function finalizeOwnCommit(
     leaving: new Set(record.leaving),
     creation:
       input.pending.epoch === 0 && metadataBefore.created_by === ctx.profileId,
+    addedWallets: credentialWallets(input.pending.added),
   });
   record.pendingCommit = null;
   touchActivity(

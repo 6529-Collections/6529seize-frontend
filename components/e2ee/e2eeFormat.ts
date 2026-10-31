@@ -1,3 +1,5 @@
+import { getAddress, isAddress } from "viem";
+import { shortenAddress } from "@/helpers/address.helpers";
 import {
   formatDate,
   formatInteger,
@@ -32,6 +34,30 @@ export function tCount(
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Short checksummed wallet ("0xAbCd…1234"); empty for a non-address. */
+export function formatE2eeWallet(wallet: string | null | undefined): string {
+  if (!wallet || !isAddress(wallet, { strict: false })) {
+    return "";
+  }
+  return shortenAddress(getAddress(wallet));
+}
+
+/** The signing wallets a device notice carries (comma separated). */
+function formatNoticeWallets(
+  locale: SupportedLocale,
+  detail: string | undefined
+): string {
+  const wallets = [
+    ...new Set(
+      (detail ?? "")
+        .split(",")
+        .map((wallet) => formatE2eeWallet(wallet.trim()))
+        .filter((wallet) => wallet.length > 0)
+    ),
+  ];
+  return wallets.length > 0 ? formatList(locale, wallets) : "";
+}
 
 /** Compact timestamp: time today, day and month this year, full date otherwise. */
 export function formatE2eeTimestamp(
@@ -248,8 +274,15 @@ export function getNoticeText(
       return actorId
         ? t(locale, "e2ee.notice.removed", { actor, targets: objects })
         : t(locale, "e2ee.notice.removedNoActor", { targets });
-    case "device_added":
-      return t(locale, "e2ee.notice.deviceAdded", { name: ownerName });
+    case "device_added": {
+      const wallet = formatNoticeWallets(locale, notice.detail);
+      return wallet
+        ? t(locale, "e2ee.notice.deviceAddedWallet", {
+            name: ownerName,
+            wallet,
+          })
+        : t(locale, "e2ee.notice.deviceAdded", { name: ownerName });
+    }
     case "device_removed":
       return t(locale, "e2ee.notice.deviceRemoved", { name: ownerName });
     case "renamed":

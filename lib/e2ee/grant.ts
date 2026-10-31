@@ -8,11 +8,11 @@ import {
   recoverTypedDataAddress,
   toBytes,
 } from "viem";
+import { getNodeEnv } from "@/config/env";
 import {
   parseDeviceGrantMessage,
   parseSiweIssuedAtSeconds,
 } from "@/lib/device-signing/grant-message";
-import { isAllowedGrantDomain } from "@/lib/device-signing/verify-signed-events";
 import type { ApiE2eeDevice, ApiE2eeDeviceGrant } from "./api-types";
 import { isHex } from "./bytes";
 
@@ -52,6 +52,73 @@ const GRANT_TYPES = {
 } as const;
 
 const GRANT_PRIMARY_TYPE = "MlsDeviceGrant";
+
+/** The app hosts a combined sign-in grant (NC8) may name, exactly. */
+const APP_GRANT_HOSTS: ReadonlySet<string> = new Set([
+  "6529.io",
+  "staging.6529.io",
+]);
+
+/** Builds that may accept local hosts; anything else fails closed. */
+const DEV_BUILD_ENVS: ReadonlySet<string> = new Set([
+  "development",
+  "test",
+  "local",
+]);
+
+/** Local development host names (dev builds only), any port. */
+const DEV_GRANT_HOSTNAMES: ReadonlySet<string> = new Set([
+  "localhost",
+  "127.0.0.1",
+  "[::1]",
+]);
+
+const isDevGrantHost = (host: string): boolean => {
+  let hostname: string;
+  try {
+    hostname = new URL(`https://${host}`).hostname;
+  } catch {
+    return false;
+  }
+  return (
+    DEV_GRANT_HOSTNAMES.has(hostname) ||
+    hostname.endsWith(".localhost") ||
+    hostname.endsWith(".test")
+  );
+};
+
+/**
+ * The host a SIWE domain names, or null unless it is exactly one bare host
+ * (no scheme, path, query, fragment, user info, whitespace or empty label).
+ */
+function toExactHost(domain: string): string | null {
+  const value = domain.toLowerCase();
+  if (value.split(".").includes("")) {
+    return null;
+  }
+  try {
+    return new URL(`https://${value}`).host === value ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Sign-in grants count only when signed on the app itself: exactly 6529.io
+ * or staging.6529.io, never another 6529.io subdomain (IPFS or media
+ * gateways serve content others control). Development builds also accept
+ * local hosts.
+ */
+export function isAllowedE2eeGrantDomain(domain: string): boolean {
+  const host = toExactHost(domain);
+  if (host === null) {
+    return false;
+  }
+  if (APP_GRANT_HOSTS.has(host)) {
+    return true;
+  }
+  return DEV_BUILD_ENVS.has(getNodeEnv() ?? "") && isDevGrantHost(host);
+}
 
 interface GrantMessage {
   statement: string;
@@ -279,7 +346,7 @@ function checkLoginGrantTerms(
   if (!parsed || !mls) {
     return "login-grant-malformed";
   }
-  if (!isAllowedGrantDomain(parsed.domain)) {
+  if (!isAllowedE2eeGrantDomain(parsed.domain)) {
     return "login-grant-domain";
   }
   const grant = device.grant;

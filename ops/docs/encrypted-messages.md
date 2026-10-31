@@ -6,7 +6,10 @@ Encrypted messages are end-to-end encrypted direct messages and group chats.
 Only the people in a chat can read it: messages are encrypted on the sender's
 device and decrypted on each member's device. 6529.io delivers the encrypted
 data and orders group changes, but it cannot read messages, group names or the
-member list inside a chat, and it cannot add a device to a chat.
+member list inside a chat. It does say which profile a device belongs to, so
+members' devices add a person's new device on their own only when a wallet
+already trusted for that person signed it and the signature checks out on
+their device (see [Device trust](#device-trust)).
 
 Chats use the MLS protocol (RFC 9420) through a WebAssembly build of OpenMLS
 that runs in the browser or app. Keys are agreed with a hybrid post-quantum
@@ -136,19 +139,50 @@ the same people already chosen. Earlier messages are not copied.
   **Choose who can message you** (Preferences) and, last, **Report illegal or
   severe harm**.
 - Search in the header looks only through messages on this device.
-- **Chat info** lists members (with admin badges and their devices), the
-  safety code, report help and **Leave chat**. In groups, admins can add and
+- **Chat info** lists members (with admin badges and their devices, each with
+  the short wallet address that signed it), the safety code, report help and
+  **Leave chat**. In groups, admins can add and
   remove people, make or remove admins, and rename the group.
 - The timeline shows notices such as people joining, leaving or being removed,
-  new or removed devices, renames, admin changes and safety-code changes.
+  new devices (with the wallet that signed them) or removed devices, renames,
+  admin changes and safety-code changes.
 
 ### Safety code
 
 The safety code in **Chat info** is the same for everyone who sees the same
 chat. Compare it with the other members in person or in another app you
-trust. If everyone sees the same code, no one has been added to the chat
-without your knowledge. **Chat info** also explains the encryption (MLS with
-hybrid post-quantum key exchange) and has **Mute on this device**.
+trust. If everyone sees the same code, everyone sees the same people and
+devices in the chat. It cannot show whether each device really belongs to the
+person it is listed under: that rests on [device trust](#device-trust) and the
+wallets shown in **Chat info**. **Chat info** also explains the encryption
+(MLS with hybrid post-quantum key exchange) and has **Mute on this device**.
+
+### Device trust
+
+A device's own proof is a wallet signature, and that signature does not name a
+profile; 6529.io says which profile the device belongs to. So encrypted
+messages use trust on first use. The first time your device sees a person (you
+start or join a chat with them, or, for chats from before this check, the next
+time the chat is maintained), it remembers the wallets that signed that
+person's devices. Later devices of that person are added automatically only
+when one of those wallets signed them and this device could check the
+signature.
+
+When a member has a device signed by a wallet your device has not seen for
+them, it is not added and the chat shows **{name} has a device signed by a new
+wallet 0x1234…abcd.** (for your own profile: **You have a device signed by a
+new wallet …**). A device whose contract-wallet signature (for example a Safe)
+this device could not check shows a similar notice. **Add device** trusts that
+wallet for the person and adds the device; **Ignore** keeps it out and hides
+the notice. Add it only if you know whose wallet it is, for example because
+they told you they set up a new one.
+
+A revoked device is removed only when the revocation comes from that device
+itself or from a device signed by a wallet trusted for its owner.
+
+Trust on first use cannot catch a wrong device that is already there the first
+time your device sees someone. Compare safety codes and check the wallets in
+**Chat info** when that matters.
 
 ### Banners
 
