@@ -1,7 +1,6 @@
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import { commonApiPost } from "@/services/api/common-api";
+import { postDrop } from "@/services/api/signed-drop-writes";
 import { getAddress, isAddress } from "viem";
 import { PUBLIC_REVIEW_METADATA_KEYS } from "./feedback-codec";
 import type {
@@ -54,12 +53,7 @@ export const submitPublicReviewFeedback: PublicReviewFeedbackSubmitter =
   async ({ destination, payload, signal }) => {
     assertCanonicalChatPayload({ destination, payload });
 
-    const drop = await commonApiPost<ApiCreateDropRequest, ApiDrop>({
-      endpoint: "drops",
-      body: payload,
-      signal,
-      errorMode: "structured",
-    });
+    const drop = await postDrop(payload, { signal, errorMode: "structured" });
 
     if (
       !drop.id ||
