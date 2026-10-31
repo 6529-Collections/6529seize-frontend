@@ -6,6 +6,7 @@ import {
   buildGrantTypedData,
   computeGrantId,
   credentialIdentity,
+  E2EE_CIPHERSUITE,
 } from "../grant";
 import { MlsClient } from "../mls-adapter";
 import type { StoredDevice } from "../records";
@@ -40,6 +41,23 @@ export const grantExpired = (
   ctx: EngineContext,
   device: StoredDevice
 ): boolean => device.grant.expires_at * 1000 <= ctx.now();
+
+/**
+ * The stored device, unless it was granted under another ciphersuite (the
+ * classical 0x0001 build, or an earlier value of the draft 0x004F code
+ * point). Such a device cannot take part in groups on the current suite, so
+ * its MLS state, groups and messages are dropped and it enrolls again.
+ */
+export async function loadCurrentSuiteDevice(
+  ctx: EngineContext
+): Promise<StoredDevice | null> {
+  const stored = await ctx.storage.getDevice(ctx.profileId);
+  if (stored && stored.grant.ciphersuite !== E2EE_CIPHERSUITE) {
+    await ctx.storage.clearProfile(ctx.profileId);
+    return null;
+  }
+  return stored;
+}
 
 export async function ensureWasm(ctx: EngineContext): Promise<void> {
   if (ctx.wasm) {
@@ -238,7 +256,7 @@ export async function renewGrant(ctx: EngineContext): Promise<void> {
  */
 export async function enrollDevice(ctx: EngineContext): Promise<boolean> {
   await ensureWasm(ctx);
-  const stored = await ctx.storage.getDevice(ctx.profileId);
+  const stored = await loadCurrentSuiteDevice(ctx);
   let device: StoredDevice;
   if (stored && (stored.registered || reusablePending(ctx, stored))) {
     device = stored;

@@ -42,6 +42,7 @@ import { createAuthRequestSignIn } from "@/components/auth/authRequestSignIn";
 import {
   buildDeviceGrantUrn,
   renderDeviceGrantStatement,
+  renderLegacyDeviceGrantStatement,
 } from "@/lib/device-signing/grant-message";
 import { loginWithSessionV2 } from "@/services/auth/session-v2.utils";
 
@@ -63,7 +64,11 @@ const ordinaryMessage = [
   "Expiration Time: 2026-10-12T12:05:00.000Z",
 ].join("\n");
 
-const grantMessage = (deviceKeyHex: string, signer = SIGNER): string => {
+const grantMessage = (
+  deviceKeyHex: string,
+  signer = SIGNER,
+  renderStatement = renderDeviceGrantStatement
+): string => {
   const terms = {
     deviceKeyHex,
     scopes: SCOPES.split(","),
@@ -73,7 +78,7 @@ const grantMessage = (deviceKeyHex: string, signer = SIGNER): string => {
     ...ordinaryMessage.split("\n").slice(0, 1),
     signer,
     "",
-    renderDeviceGrantStatement(terms),
+    renderStatement(terms),
     ...ordinaryMessage.split("\n").slice(4),
     "Resources:",
     `- ${buildDeviceGrantUrn(terms)}`,
@@ -180,6 +185,36 @@ describe("sign-in with a device grant", () => {
     expect(loginMock).toHaveBeenCalledWith(
       expect.objectContaining({ deviceLabel: expect.any(String) })
     );
+    await flushPromises();
+    expect(mockRecords.get(SIGNER)?.grant?.device_key).toBe(
+      record?.publicKeyHex
+    );
+  });
+
+  it("signs a grant challenge from a server still on the legacy statement", async () => {
+    const { getSignature, signIn } = createSubject((params) =>
+      params.deviceGrant
+        ? grantMessage(
+            params.deviceGrant.device_key,
+            params.signerAddress,
+            renderLegacyDeviceGrantStatement
+          )
+        : ordinaryMessage
+    );
+
+    await expect(
+      signIn({ signerAddress: SIGNER, role: null })
+    ).resolves.toEqual({ success: true });
+
+    const record = mockRecords.get(SIGNER);
+    expect(getSignature).toHaveBeenCalledTimes(1);
+    expect(getSignature).toHaveBeenCalledWith({
+      message: grantMessage(
+        record!.publicKeyHex,
+        SIGNER,
+        renderLegacyDeviceGrantStatement
+      ),
+    });
     await flushPromises();
     expect(mockRecords.get(SIGNER)?.grant?.device_key).toBe(
       record?.publicKeyHex

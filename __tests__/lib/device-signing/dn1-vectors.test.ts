@@ -11,6 +11,7 @@ import {
   buildDeviceGrantUrn,
   parseDeviceGrantMessage,
   renderDeviceGrantStatement,
+  renderLegacyDeviceGrantStatement,
 } from "@/lib/device-signing/grant-message";
 import { computeInterimEventId } from "@/lib/device-signing/interim-event";
 import {
@@ -131,26 +132,35 @@ describe("DN1 shared contract vectors", () => {
     ).resolves.toBe(false);
   });
 
-  it("renders the grant statement and resource", () => {
+  it("renders the current and legacy grant statements and the resource", () => {
     const terms = {
       deviceKeyHex: VECTORS.deviceKey,
       scopes: ["post", "edit", "delete", "react"],
       expiresAtSeconds: VECTORS.grantExpiresAtSeconds,
     };
     expect(renderDeviceGrantStatement(terms)).toBe(VECTORS.grantStatement);
+    expect(renderLegacyDeviceGrantStatement(terms)).toBe(
+      VECTORS.legacyGrantStatement
+    );
     expect(buildDeviceGrantUrn(terms)).toBe(VECTORS.grantResource);
   });
 
-  it("parses the full grant SIWE message and reproduces its grant id", () => {
-    const message = buildVectorGrantMessage();
-    expect(hashMessage(message)).toBe(VECTORS.grantId);
-    expect(parseDeviceGrantMessage(message)).toEqual({
-      address: "0x1111111111111111111111111111111111111111",
-      deviceKeyHex: VECTORS.deviceKey,
-      scopes: ["post", "edit", "delete", "react"],
-      expiresAtSeconds: VECTORS.grantExpiresAtSeconds,
-      domain: "staging.6529.io",
-      chainId: 1,
-    });
-  });
+  it.each([
+    ["current", VECTORS.grantStatement, VECTORS.grantId],
+    ["legacy", VECTORS.legacyGrantStatement, VECTORS.legacyGrantId],
+  ])(
+    "parses the full %s grant SIWE message and reproduces its grant id",
+    (_name, statement, grantId) => {
+      const message = buildVectorGrantMessage({ statement });
+      expect(hashMessage(message)).toBe(grantId);
+      expect(parseDeviceGrantMessage(message)).toEqual({
+        address: "0x1111111111111111111111111111111111111111",
+        deviceKeyHex: VECTORS.deviceKey,
+        scopes: ["post", "edit", "delete", "react"],
+        expiresAtSeconds: VECTORS.grantExpiresAtSeconds,
+        domain: "staging.6529.io",
+        chainId: 1,
+      });
+    }
+  );
 });
