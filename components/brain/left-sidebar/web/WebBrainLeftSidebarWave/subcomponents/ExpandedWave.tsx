@@ -34,6 +34,7 @@ interface ExpandedWaveProps {
   readonly latestDropTimestamp?: number | null | undefined;
   readonly nameRef: RefObject<HTMLDivElement | null>;
   readonly onMouseEnter?: (() => void) | undefined;
+  readonly onMouseLeave?: (() => void) | undefined;
   readonly onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   readonly showExpandedTooltip: boolean;
   readonly showPin: boolean;
@@ -62,6 +63,7 @@ export const ExpandedWave = ({
   latestDropTimestamp,
   nameRef,
   onMouseEnter,
+  onMouseLeave,
   onClick,
   showExpandedTooltip,
   showPin,
@@ -148,12 +150,17 @@ export const ExpandedWave = ({
     onMouseEnter?.();
   }, [onMouseEnter, scheduleSubwavePrefetch]);
 
+  const handleRowMouseLeave = useCallback(() => {
+    cancelSubwavePrefetch();
+    onMouseLeave?.();
+  }, [cancelSubwavePrefetch, onMouseLeave]);
+
   useEffect(() => cancelSubwavePrefetch, [cancelSubwavePrefetch]);
 
   return (
     <div
       onMouseEnter={handleRowMouseEnter}
-      onMouseLeave={cancelSubwavePrefetch}
+      onMouseLeave={handleRowMouseLeave}
       role="group"
       className={`tw-group tw-relative tw-flex tw-items-center ${rowHeightClasses} ${rowGapClasses} ${rowPaddingClasses} ${rowVerticalPaddingClasses} tw-transition-colors tw-duration-200 tw-ease-out ${
         isActive
