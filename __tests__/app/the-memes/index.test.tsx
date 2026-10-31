@@ -1,4 +1,4 @@
-import TheMemesPage, { generateMetadata } from "@/app/the-memes/page";
+import TheMemesPage, { generateMetadata } from "@/app/the-memes/(index)/page";
 import { getTheMemesInitialData } from "@/app/the-memes/theMemesInitialData";
 import { render, screen } from "@testing-library/react";
 
@@ -99,6 +99,23 @@ describe("The Memes page", () => {
       "en-US"
     );
   });
+
+  it.each([
+    [{ locale: "fr-FR" }, "fr-FR"],
+    [{}, "en-US"],
+    [{ locale: "unsupported-LC" }, "en-US"],
+  ])(
+    "declares the language of the page content for search params %j",
+    async (searchParams, lang) => {
+      const page = await TheMemesPage({
+        searchParams: Promise.resolve(searchParams),
+      });
+
+      render(page);
+
+      expect(screen.getByRole("main")).toHaveAttribute("lang", lang);
+    }
+  );
 
   it("localizes metadata from supported locale search params", async () => {
     const metadata = await generateMetadata({

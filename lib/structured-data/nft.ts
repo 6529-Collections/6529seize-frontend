@@ -19,30 +19,42 @@ import {
 
 type NftStructuredDataApiPath = "nfts" | "nfts_memelab";
 
-const fetchNftForStructuredDataCached = cache(
+type NftLookupResult =
+  | { readonly status: "found"; readonly nft: BaseNFT }
+  | { readonly status: "missing" }
+  | { readonly status: "unavailable" };
+
+const lookupNftCached = cache(
   async (
     contract: string,
     id: string,
     apiPath: NftStructuredDataApiPath
-  ): Promise<BaseNFT | null> => {
+  ): Promise<NftLookupResult> => {
     try {
       const params = new URLSearchParams({ contract, id });
       const response = await fetchUrl<DBResponse<BaseNFT>>(
         `${publicEnv.API_ENDPOINT}/api/${apiPath}?${params.toString()}`
       );
-      return response.data[0] ?? null;
+      const nft = response.data[0];
+      return nft === undefined
+        ? { status: "missing" }
+        : { status: "found", nft };
     } catch (error) {
       console.error("Failed to fetch NFT structured data", {
         contract,
         id,
         error,
       });
-      return null;
+      return { status: "unavailable" };
     }
   }
 );
 
-export async function fetchNftForStructuredData({
+/**
+ * Looks an NFT up once per request and tells a token the API does not know
+ * ("missing") apart from a failed request ("unavailable").
+ */
+export function lookupNft({
   contract,
   id,
   apiPath = "nfts",
@@ -50,8 +62,8 @@ export async function fetchNftForStructuredData({
   readonly contract: string;
   readonly id: string;
   readonly apiPath?: NftStructuredDataApiPath | undefined;
-}): Promise<BaseNFT | null> {
-  return fetchNftForStructuredDataCached(contract, id, apiPath);
+}): Promise<NftLookupResult> {
+  return lookupNftCached(contract, id, apiPath);
 }
 
 export function buildNftPageJsonLd({

@@ -18,7 +18,7 @@ const mockApplyOptimisticDropUpdate = jest.fn();
 const mockWaveMessages = jest.fn();
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStreamWaveMessages: () => mockWaveMessages(),
-  useMyStream: () => ({
+  useMyStreamActions: () => ({
     applyOptimisticDropUpdate: mockApplyOptimisticDropUpdate,
   }),
 }));

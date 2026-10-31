@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import type { useEmoji } from "@/contexts/EmojiContext";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import type { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReactionToDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -241,7 +241,7 @@ function WaveDropReaction({
     () => false
   );
   const { setToast, connectedProfile, activeProfileProxy } = useAuth();
-  const { applyOptimisticDropUpdate } = useMyStream();
+  const { applyOptimisticDropUpdate } = useMyStreamActions();
   const { getEligibility, updateEligibility } = useWaveEligibility();
   const queryClient = useQueryClient();
   const websocketStatus = useWebsocketStatus();

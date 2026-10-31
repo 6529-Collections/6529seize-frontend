@@ -6,6 +6,7 @@ import PublicReviewFeedbackComposer from "@/components/public-review/PublicRevie
 import { PublicReviewPageComments } from "@/components/public-review/PublicReviewPageComments";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 import type {
   PublicReviewDiscussionDestination,
   PublicReviewFeedbackConfig,

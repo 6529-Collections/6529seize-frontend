@@ -24,6 +24,6 @@ export default async function DistributionPlanTool({
 export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({
     title: t(DEFAULT_LOCALE, "emma.entryTitle"),
-    description: t(DEFAULT_LOCALE, "emma.tools"),
+    description: t(DEFAULT_LOCALE, "emma.metadata.description"),
   });
 }
