@@ -75,6 +75,9 @@ export const ROOT_PUBLIC_FILES: ReadonlySet<string> = new Set([
   "/help-index.json",
   "/home.png",
   "/home.svg",
+  "/icon-192.png",
+  "/icon-512-maskable.png",
+  "/icon-512.png",
   "/intern-no-bg.png",
   "/intern.png",
   "/jump.svg",
@@ -139,9 +142,15 @@ export const SERVED_WELL_KNOWN_PATHS: ReadonlySet<string> = new Set([
   "/.well-known/apple-app-site-association",
 ]);
 
-/** Root-level paths kept ungated although no committed `public/` file backs them. */
+/**
+ * Root-level paths kept ungated although no committed `public/` file backs
+ * them: the generated favicon and Next's `app/apple-icon.png` and
+ * `app/manifest.ts` metadata routes. All three carry public branding only.
+ */
 const GENERATED_ROOT_STATIC_PATHS: ReadonlySet<string> = new Set([
+  "/apple-icon.png",
   "/favicon.ico",
+  "/manifest.webmanifest",
 ]);
 
 const SITEMAP_PREFIX = "/sitemap";

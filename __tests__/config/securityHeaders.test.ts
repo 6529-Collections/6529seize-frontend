@@ -118,6 +118,12 @@ describe("createSecurityHeaders CSP", () => {
     ).toEqual(["'none'"]);
   });
 
+  it("lets the page load its own web app manifest and nothing else", () => {
+    expect(
+      getDirectiveSources(getContentSecurityPolicy(), "manifest-src")
+    ).toEqual(["'self'"]);
+  });
+
   it("allows passive artwork previews only from the two archive buckets without broadening active content", () => {
     const policy = getContentSecurityPolicy();
     const mediaSrc = getDirectiveSources(policy, "media-src");
