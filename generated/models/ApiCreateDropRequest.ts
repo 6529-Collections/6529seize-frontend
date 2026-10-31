@@ -14,6 +14,7 @@
 import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
 import { ApiCreateDropPollRequest } from '../models/ApiCreateDropPollRequest';
 import { ApiCreateMentionedWave } from '../models/ApiCreateMentionedWave';
+import { ApiDeviceSignature } from '../models/ApiDeviceSignature';
 import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadata } from '../models/ApiDropMetadata';
@@ -37,6 +38,7 @@ export class ApiCreateDropRequest {
     * When true, create the drop with generated external link previews hidden. Omit or set to false to leave previews visible. Signature-required drops must include this field in the signed payload when present.
     */
     'hide_link_preview'?: boolean;
+    'device_signature'?: ApiDeviceSignature;
     'title'?: string | null;
     /**
     * Across all parts, runtime validation allows at most 50,000 JavaScript UTF-16 code units. Each part is also subject to the per-part UTF-16 and UTF-8 limits documented on ApiCreateDropPart. A drop may have at most 250 parts, and at most 100 media items and 100 attachments in total across all parts.
@@ -108,6 +110,12 @@ export class ApiCreateDropRequest {
             "name": "hide_link_preview",
             "baseName": "hide_link_preview",
             "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "device_signature",
+            "baseName": "device_signature",
+            "type": "ApiDeviceSignature",
             "format": ""
         },
         {

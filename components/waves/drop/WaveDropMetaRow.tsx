@@ -4,6 +4,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { type ReactNode } from "react";
 import WaveDropTime from "../drops/time/WaveDropTime";
+import { WithDropAuthorSignedMarker } from "../drops/signature/DropAuthorSignedMarker";
 import { SingleWaveDropInfoAuthorSection } from "./SingleWaveDropInfoAuthorSection";
 import { SingleWaveDropPosition } from "./SingleWaveDropPosition";
 import { WinnerBadge } from "./WinnerBadge";
@@ -25,7 +26,9 @@ export const WaveDropMetaRow = ({
     <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
       <SingleWaveDropInfoAuthorSection drop={drop} />
       <span className="tw-text-white/40">{"\u00b7"}</span>
-      <WaveDropTime timestamp={drop.created_at} size="sm" />
+      <WithDropAuthorSignedMarker drop={drop}>
+        <WaveDropTime timestamp={drop.created_at} size="sm" />
+      </WithDropAuthorSignedMarker>
       {mimeType && (
         <>
           <span className="tw-text-white/40">{"\u00b7"}</span>

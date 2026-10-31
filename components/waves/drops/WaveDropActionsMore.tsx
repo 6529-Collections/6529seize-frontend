@@ -35,6 +35,8 @@ import WaveDropActionsSetPinnedDrop from "./WaveDropActionsSetPinnedDrop";
 import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
 import ReportDropModal from "@/components/content-moderation/ReportDropModal";
 import WaveDropDocumentationAction from "./WaveDropDocumentationAction";
+import DropSignatureDialog from "./signature/DropSignatureDialog";
+import DropSignatureMenuItem from "./signature/DropSignatureMenuItem";
 
 interface WaveDropActionsMoreProps {
   readonly drop: ExtendedDrop;
@@ -58,6 +60,7 @@ export default function WaveDropActionsMore({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCurationsDialogOpen, setIsCurationsDialogOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
+  const [isSignatureOpen, setIsSignatureOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { canDelete, canSetPinnedDrop } = useDropInteractionRules(drop);
   const {
@@ -253,6 +256,13 @@ export default function WaveDropActionsMore({
                   isDropdownItem={true}
                   onOpen={closeDropdown}
                 />
+                <DropSignatureMenuItem
+                  dropId={drop.id}
+                  onSelect={() => {
+                    closeDropdown();
+                    setIsSignatureOpen(true);
+                  }}
+                />
                 {isOpen && (
                   <WaveDropDocumentationAction
                     drop={drop}
@@ -313,6 +323,12 @@ export default function WaveDropActionsMore({
         drop={drop}
         isOpen={isReportOpen}
         onClose={() => setIsReportOpen(false)}
+      />
+      <DropSignatureDialog
+        dropId={drop.id}
+        drop={drop}
+        isOpen={isSignatureOpen}
+        onClose={() => setIsSignatureOpen(false)}
       />
     </>
   );
