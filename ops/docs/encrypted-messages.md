@@ -207,6 +207,13 @@ encrypted copy of your message history so you can restore it on a new device.
   read-only until someone in the chat adds this device; then new messages
   continue below the restored ones. After a restore the device also keeps the
   same backup up to date.
+- The backup's encrypted pieces are linked in order, so 6529 cannot reorder,
+  replay or remove pieces from the middle of your history. If the restore
+  finds a piece missing, out of place or altered, it says "Part of the backup
+  couldn’t be read. Nothing was restored." and imports nothing. If two
+  devices back up at exactly the same moment, the next backup run uploads a
+  fresh full copy and removes the overlapping pieces; a restore attempted in
+  between also stops without importing anything.
 - **Create new recovery code** shows a new code and uploads a fresh copy of
   your history. Your old code stops working once the new backup finishes
   uploading. Do this after you revoke a device that had backup on: the

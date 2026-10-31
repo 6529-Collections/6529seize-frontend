@@ -1,3 +1,5 @@
+import type { BackupChainState } from "./chain";
+
 /**
  * Local backup state per profile. Lives in its own IndexedDB database so it
  * never touches the engine's schema. The chunk key is a non-extractable
@@ -15,6 +17,8 @@ export interface BackupLocalState {
   lastBackupAt: number | null;
   /** Compaction in progress: delete chunks <= this seq once re-uploaded. */
   compactThroughSeq: number | null;
+  /** Hash chain position, so a restarted device continues the chain. */
+  chain: BackupChainState;
   /** Fingerprints of what this device already uploaded. */
   groupPrints: Record<string, string>;
   messagePrints: Record<string, string>;
@@ -35,6 +39,7 @@ class MemoryBackupStateStore implements BackupStateStore {
       state
         ? {
             ...state,
+            chain: { ...state.chain },
             groupPrints: { ...state.groupPrints },
             messagePrints: { ...state.messagePrints },
           }
@@ -45,6 +50,7 @@ class MemoryBackupStateStore implements BackupStateStore {
   put(state: BackupLocalState): Promise<void> {
     this.states.set(state.profileId, {
       ...state,
+      chain: { ...state.chain },
       groupPrints: { ...state.groupPrints },
       messagePrints: { ...state.messagePrints },
     });
