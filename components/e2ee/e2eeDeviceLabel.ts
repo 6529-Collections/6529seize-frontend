@@ -40,7 +40,9 @@ const UA_BROWSERS: readonly (readonly [RegExp, string])[] = [
   [/\b(?:OPR|Opera)\//u, "Opera"],
   [/\b(?:Firefox|FxiOS)\//u, "Firefox"],
   [/\b(?:CriOS|Chrome|Chromium)\//u, "Chrome"],
-  [/\bVersion\/[\d.]+.*\bSafari\//u, "Safari"],
+  // Every browser above also says "Safari/", so this only matches when none
+  // of them did.
+  [/\bSafari\//u, "Safari"],
 ];
 
 const PLATFORM_NAMES: Readonly<Record<string, string>> = {

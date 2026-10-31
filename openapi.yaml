@@ -3277,6 +3277,28 @@ paths:
             Optional comma separated list from post, edit, delete, react, vote.
             Defaults to post,edit,delete,react. Must include post; duplicates
             are rejected. The grant stores the scopes in canonical order.
+        - name: mls_device_key
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+          description: >-
+            Web only, with device_key and mls_ciphersuite. The device's MLS
+            Ed25519 signature public key (0x + 64 lowercase hex), different
+            from device_key. When encrypted messages are on and mls_ciphersuite
+            is the server's ciphersuite, the SIWE message is a combined grant:
+            it also grants this key for end-to-end encrypted messages with the
+            same expiry (a second urn:6529:mls-device-grant:v1 resource and a
+            combined statement). Otherwise the challenge grants device_key only.
+        - name: mls_ciphersuite
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 65535
+          description: The MLS ciphersuite of mls_device_key; required with it.
       x-6529-query-schema:
         $ref: "#/components/schemas/ApiSessionNonceQuery"
       responses:
@@ -10317,6 +10339,53 @@ paths:
           description: Payload too large (E2EE_TOO_LARGE)
         "429":
           description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/devices/login-grant:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Register or renew an encrypted-messaging device from a sign-in grant
+      description: >-
+        Registers the MLS device key that a combined sign-in grant (NC8) also
+        granted, without a separate wallet signature. The grant must be one
+        this server stored at a Sign-In with Ethereum login, unrevoked and
+        unexpired, carrying an urn:6529:mls-device-grant:v1 resource for the
+        current ciphersuite, and its wallet must belong to the caller's
+        profile. Same device limit and renewal rules as POST /e2ee/devices.
+        Requires a profile; proxies are rejected; 404 E2EE_DISABLED while the
+        feature flag is off.
+      operationId: e2eeRegisterLoginGrantDevice
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeRegisterLoginGrantDevice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeRegisterLoginGrantDeviceRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeDevice"
+        "400":
+          description: Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT)
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN)
+        "404":
+          description: Not found or disabled (E2EE_DISABLED)
+        "409":
+          description: Conflict (E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS)
   /e2ee/devices/lookup:
     post:
       tags:
@@ -32441,6 +32510,16 @@ components:
           nullable: true
           allOf:
             - $ref: "#/components/schemas/ApiE2eeDeviceRevocation"
+        grant_message:
+          type: string
+          nullable: true
+          description: >-
+            Set when the device was granted by a combined sign-in grant: the
+            exact Sign-In with Ethereum message the wallet signed. Then
+            wallet_signature is the EIP-191 signature over it, grant_id is its
+            EIP-191 hash, and grant holds the terms of its
+            urn:6529:mls-device-grant:v1 resource (origin = the SIWE domain,
+            issued_at = its Issued At). Null for EIP-712 MlsDeviceGrant grants.
     ApiE2eeDeviceGrant:
       type: object
       description: >-
@@ -32797,6 +32876,25 @@ components:
           $ref: "#/components/schemas/ApiE2eeDeviceGrant"
         wallet_signature:
           type: string
+        label:
+          type: string
+          description: >-
+            Sanitized to at most 48 characters of [A-Za-z0-9 ._()-]; default
+            "Device"
+        platform:
+          $ref: "#/components/schemas/ApiE2eeDevicePlatform"
+    ApiE2eeRegisterLoginGrantDeviceRequest:
+      type: object
+      required:
+        - grant_id
+        - platform
+      properties:
+        grant_id:
+          type: string
+          pattern: ^0x[0-9a-f]{64}$
+          description: >-
+            Id of a combined grant this profile stored at sign-in (the
+            device_grant.id the session login returned)
         label:
           type: string
           description: >-
@@ -40353,6 +40451,16 @@ components:
           description: >-
             Optional comma separated list from post, edit, delete, react, vote.
             Defaults to post,edit,delete,react. Must include post.
+        mls_device_key:
+          type: string
+          pattern: ^0x[0-9a-f]{64}$
+          description: >-
+            Combined grant: the MLS device key to grant for encrypted messages.
+        mls_ciphersuite:
+          type: integer
+          minimum: 1
+          maximum: 65535
+          description: Required when mls_device_key is present.
     ApiSessionNonceResponse:
       type: object
       required:

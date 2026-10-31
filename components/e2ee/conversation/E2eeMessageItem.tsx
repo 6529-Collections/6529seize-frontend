@@ -17,6 +17,7 @@ import Link from "next/link";
 import { memo, type ReactNode, useEffect, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger, formatList } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type {
   E2eeConversation,
@@ -567,6 +568,49 @@ function MessageMeta({
   );
 }
 
+function getMessageRowClassName(
+  compact: boolean,
+  pending: boolean,
+  appear: boolean
+): string {
+  return `tw-group tw-relative tw-flex tw-gap-3 tw-px-4 focus:tw-bg-iron-900/60 focus:tw-outline-none desktop-hover:hover:tw-bg-iron-950 ${
+    compact ? "tw-py-0.5" : "tw-pb-0.5 tw-pt-3"
+  } ${pending ? "tw-opacity-70" : ""} ${
+    appear ? "motion-safe:tw-animate-sidebar-account-menu-in" : ""
+  }`;
+}
+
+/**
+ * Who a message row names. Imported history keeps its original author (the
+ * importer is the sender); an unreadable message still names its sender when
+ * the chat makes it clear.
+ */
+function getMessageNames(
+  locale: SupportedLocale,
+  conversation: E2eeConversation,
+  message: E2eeMessage,
+  selfProfileId: string | null
+) {
+  const authorProfileId =
+    message.imported?.authorProfileId ?? message.senderProfileId;
+  const sender = findMember(conversation.members, authorProfileId);
+  const senderName = getMemberName(
+    locale,
+    conversation.members,
+    message.senderProfileId,
+    selfProfileId
+  );
+  const name = message.imported
+    ? importedAuthorName(locale, message.imported, selfProfileId)
+    : senderName;
+  const shownName =
+    message.undecryptable && !sender
+      ? (getDmPeer(conversation, selfProfileId)?.handle ??
+        t(locale, "e2ee.message.undecryptableSender"))
+      : name;
+  return { sender, senderName, shownName };
+}
+
 function E2eeMessageItemComponent({
   message,
   conversation,
@@ -588,38 +632,22 @@ function E2eeMessageItemComponent({
       />
     );
   }
-  const authorProfileId =
-    message.imported?.authorProfileId ?? message.senderProfileId;
-  const sender = findMember(conversation.members, authorProfileId);
-  const senderName = getMemberName(
+  const { sender, senderName, shownName } = getMessageNames(
     locale,
-    conversation.members,
-    message.senderProfileId,
+    conversation,
+    message,
     selfProfileId
   );
-  const name = message.imported
-    ? importedAuthorName(locale, message.imported, selfProfileId)
-    : senderName;
   const isOwn =
     selfProfileId !== null && message.senderProfileId === selfProfileId;
   const showActions =
     canAct && !message.deleted && !message.undecryptable && !message.pending;
-  // An unreadable message still names its sender when the chat makes it clear.
-  const shownName =
-    message.undecryptable && !sender
-      ? (getDmPeer(conversation, selfProfileId)?.handle ??
-        t(locale, "e2ee.message.undecryptableSender"))
-      : name;
 
   return (
     <li
       id={getMessageDomId(message.id)}
       tabIndex={-1}
-      className={`tw-group tw-relative tw-flex tw-gap-3 tw-px-4 focus:tw-bg-iron-900/60 focus:tw-outline-none desktop-hover:hover:tw-bg-iron-950 ${
-        compact ? "tw-py-0.5" : "tw-pb-0.5 tw-pt-3"
-      } ${message.pending ? "tw-opacity-70" : ""} ${
-        appear ? "motion-safe:tw-animate-sidebar-account-menu-in" : ""
-      }`}
+      className={getMessageRowClassName(compact, message.pending, appear)}
     >
       <div className="tw-w-9 tw-flex-shrink-0">
         {compact ? null : (

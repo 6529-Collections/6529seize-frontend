@@ -1,11 +1,18 @@
 import {
   getAddress,
+  hashMessage,
   hashTypedData,
   isAddress,
   keccak256,
+  recoverMessageAddress,
   recoverTypedDataAddress,
   toBytes,
 } from "viem";
+import {
+  parseDeviceGrantMessage,
+  parseSiweIssuedAtSeconds,
+} from "@/lib/device-signing/grant-message";
+import { isAllowedGrantDomain } from "@/lib/device-signing/verify-signed-events";
 import type { ApiE2eeDevice, ApiE2eeDeviceGrant } from "./api-types";
 import { isHex } from "./bytes";
 
@@ -17,7 +24,8 @@ export const E2EE_SALT = keccak256(
 /**
  * MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519 (0x004F, contract 3.6):
  * X-Wing hybrid ML-KEM-768 + X25519. The only suite; it must equal the WASM
- * module's `ciphersuite`. A draft code point: if it changes, devices stored
+ * module's `ciphersuite`, and it is also the suite a combined sign-in grant
+ * (NC8) names. A draft code point: if it changes, devices stored
  * under the old value re-enroll (engine/enroll.ts).
  */
 export const E2EE_CIPHERSUITE = 0x004f;
@@ -239,10 +247,101 @@ async function verifyContract(
   }
 }
 
+async function recoverMessageSigner(
+  message: string,
+  signature: string
+): Promise<string | null> {
+  if (!isHex(signature, 65)) {
+    return null;
+  }
+  try {
+    const signer = await recoverMessageAddress({
+      message,
+      signature: signature as `0x${string}`,
+    });
+    return signer.toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * NC8: the record's grant fields must be exactly the MLS resource of the
+ * signed sign-in message (key, ciphersuite, expiry), its wallet, domain and
+ * Issued At, so a server cannot attach a sign-in grant to another key.
+ */
+function checkLoginGrantTerms(
+  device: ApiE2eeDevice,
+  message: string
+): string | null {
+  const parsed = parseDeviceGrantMessage(message);
+  const mls = parsed?.mls;
+  if (!parsed || !mls) {
+    return "login-grant-malformed";
+  }
+  if (!isAllowedGrantDomain(parsed.domain)) {
+    return "login-grant-domain";
+  }
+  const grant = device.grant;
+  const matches =
+    mls.deviceKeyHex === grant.device_key.toLowerCase() &&
+    mls.ciphersuite === grant.ciphersuite &&
+    mls.expiresAtSeconds === grant.expires_at &&
+    parsed.address.toLowerCase() === grant.wallet.toLowerCase() &&
+    parsed.domain === grant.origin.toLowerCase() &&
+    parseSiweIssuedAtSeconds(message) === grant.issued_at;
+  return matches ? null : "login-grant-mismatch";
+}
+
+/** Combined sign-in grant (NC8): EIP-191 over the exact SIWE message. */
+async function verifyLoginGrant(
+  device: ApiE2eeDevice,
+  message: string,
+  options: VerifyGrantOptions
+): Promise<GrantVerification> {
+  const termsError = checkLoginGrantTerms(device, message);
+  if (termsError) {
+    return failed(termsError);
+  }
+  const grantId = hashMessage(message);
+  if (grantId !== device.grant_id.toLowerCase()) {
+    return failed("grant-id-mismatch");
+  }
+  const wallet = device.grant.wallet.toLowerCase();
+  const signer = await recoverMessageSigner(message, device.wallet_signature);
+  if (signer === wallet) {
+    return { ok: true, verified: true, via: "eoa", reason: null };
+  }
+  return await verifyContractOrServer(device, options, wallet, grantId);
+}
+
+async function verifyContractOrServer(
+  device: ApiE2eeDevice,
+  options: VerifyGrantOptions,
+  wallet: string,
+  grantId: string
+): Promise<GrantVerification> {
+  const contractResult = await verifyContract(
+    options,
+    wallet,
+    grantId,
+    device.wallet_signature
+  );
+  if (contractResult === true) {
+    return { ok: true, verified: true, via: "eip1271", reason: null };
+  }
+  if (contractResult === null && device.verified_via === "eip1271") {
+    return { ok: true, verified: false, via: "server", reason: null };
+  }
+  return failed("bad-signature");
+}
+
 /**
  * Contract 2.2 verification of a device record as a client. Contract wallets
  * without an available verifier are accepted on the server's `verified_via`
- * word and reported as `verified: false` (the documented residual).
+ * word and reported as `verified: false` (the documented residual). A device
+ * enrolled by a combined sign-in grant (NC8) carries the signed SIWE message
+ * instead of an EIP-712 grant and is verified against it.
  */
 export async function verifyGrant(
   device: ApiE2eeDevice,
@@ -262,6 +361,9 @@ export async function verifyGrant(
   if (fieldError) {
     return failed(fieldError);
   }
+  if (typeof device.grant_message === "string") {
+    return await verifyLoginGrant(device, device.grant_message, options);
+  }
   let typedData: GrantTypedData;
   try {
     typedData = buildGrantTypedData(grant);
@@ -277,17 +379,5 @@ export async function verifyGrant(
   if (signer === wallet) {
     return { ok: true, verified: true, via: "eoa", reason: null };
   }
-  const contractResult = await verifyContract(
-    options,
-    wallet,
-    grantId,
-    device.wallet_signature
-  );
-  if (contractResult === true) {
-    return { ok: true, verified: true, via: "eip1271", reason: null };
-  }
-  if (contractResult === null && device.verified_via === "eip1271") {
-    return { ok: true, verified: false, via: "server", reason: null };
-  }
-  return failed("bad-signature");
+  return await verifyContractOrServer(device, options, wallet, grantId);
 }

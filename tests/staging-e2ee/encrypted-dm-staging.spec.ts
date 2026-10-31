@@ -23,6 +23,7 @@ import {
   hasStagingAccessCode,
   prepareEnrolledSession,
   probeEncryptedRoute,
+  signedInWithCombinedGrant,
   stagingE2eeOptInProblem,
   type StagingE2eeSession,
   type StagingE2eeUser,
@@ -231,10 +232,12 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
   test("each device signs one grant and loads OpenMLS WebAssembly under the staging CSP", () => {
     const { a, b } = requireWorld();
     for (const session of [a, b]) {
+      // NC8: a combined sign-in grant is the device's one grant signature;
+      // otherwise the device signs one EIP-712 MlsDeviceGrant.
       expect(
         session.wallet.typedDataSignatures("MlsDeviceGrant"),
         `${session.label}: device grant signatures`
-      ).toHaveLength(1);
+      ).toHaveLength(signedInWithCombinedGrant(session) ? 0 : 1);
       expect(
         session.evidence.wasmResponses.length,
         `${session.label} never fetched the MLS WebAssembly module`

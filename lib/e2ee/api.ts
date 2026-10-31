@@ -22,6 +22,7 @@ import type {
   ApiE2eeLogPage,
   ApiE2eeMe,
   ApiE2eeRegisterDeviceRequest,
+  ApiE2eeRegisterLoginGrantDeviceRequest,
   ApiE2eeReport,
   ApiE2eeReportRequest,
   ApiE2eeRevokeDeviceRequest,
@@ -91,6 +92,9 @@ export const e2eeErrorCode = (error: unknown): string | null =>
 export interface E2eeApiClient {
   getMe(): Promise<ApiE2eeMe>;
   registerDevice(body: ApiE2eeRegisterDeviceRequest): Promise<ApiE2eeDevice>;
+  registerLoginGrantDevice(
+    body: ApiE2eeRegisterLoginGrantDeviceRequest
+  ): Promise<ApiE2eeDevice>;
   getDevice(deviceKey: string): Promise<ApiE2eeDevice>;
   getProfileDevices(profileId: string): Promise<ApiE2eeDevice[]>;
   revokeDevice(
@@ -216,6 +220,7 @@ export function createE2eeApiClient(): E2eeApiClient {
   return {
     getMe: () => get<ApiE2eeMe>("e2ee/me"),
     registerDevice: (body) => post(`e2ee/devices`, body),
+    registerLoginGrantDevice: (body) => post(`e2ee/devices/login-grant`, body),
     getDevice: (deviceKey) => get(`e2ee/devices/${enc(deviceKey)}`),
     getProfileDevices: (profileId) =>
       get(`e2ee/profiles/${enc(profileId)}/devices`),

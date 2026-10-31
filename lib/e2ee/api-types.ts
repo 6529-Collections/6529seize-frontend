@@ -36,11 +36,24 @@ export interface ApiE2eeDevice {
   last_seen_at: number | null;
   revoked_at: number | null;
   revocation: ApiE2eeDeviceRevocation | null;
+  /**
+   * Combined sign-in grant (NC8): the exact SIWE message the wallet signed.
+   * Then wallet_signature is its EIP-191 signature and grant_id its EIP-191
+   * hash. Absent or null for EIP-712 MlsDeviceGrant grants.
+   */
+  grant_message?: string | null;
 }
 
 export interface ApiE2eeRegisterDeviceRequest {
   grant: ApiE2eeDeviceGrant;
   wallet_signature: string;
+  label?: string;
+  platform: string;
+}
+
+/** Registers the MLS key a combined sign-in grant also granted (NC8). */
+export interface ApiE2eeRegisterLoginGrantDeviceRequest {
+  grant_id: string;
   label?: string;
   platform: string;
 }

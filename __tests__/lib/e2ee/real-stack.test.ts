@@ -104,6 +104,7 @@ function httpClient(token: string): E2eeApiClient {
   return {
     getMe: () => get("e2ee/me"),
     registerDevice: (body) => post("e2ee/devices", body),
+    registerLoginGrantDevice: (body) => post("e2ee/devices/login-grant", body),
     getDevice: (key) => get(`e2ee/devices/${enc(key)}`),
     getProfileDevices: (id) => get(`e2ee/profiles/${enc(id)}/devices`),
     revokeDevice: (key, body) => post(`e2ee/devices/${enc(key)}/revoke`, body),
