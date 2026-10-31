@@ -168,16 +168,53 @@ async function ensureKeyPackages(
   }
 }
 
+/** A pending device enrolled by a combined sign-in grant (NC8). */
+export const hasLoginGrant = (
+  device: StoredDevice | null
+): device is StoredDevice & { loginGrantId: string } =>
+  typeof device?.loginGrantId === "string";
+
+const submitRegistration = async (
+  ctx: EngineContext,
+  device: StoredDevice
+): Promise<ApiE2eeDevice> => {
+  if (!hasLoginGrant(device)) {
+    return await ctx.api.registerDevice({
+      grant: device.grant,
+      wallet_signature: device.walletSignature,
+      platform: device.platform,
+    });
+  }
+  try {
+    return await ctx.api.registerLoginGrantDevice({
+      grant_id: device.loginGrantId,
+      platform: device.platform,
+    });
+  } catch (error) {
+    const apiError = asE2eeApiError(error);
+    // The server cannot use the sign-in grant (revoked, expired, another
+    // ciphersuite, or a server without the route): fall back to the separate
+    // grant prompt with a fresh device.
+    if (
+      apiError?.code === "E2EE_BAD_GRANT" ||
+      apiError?.code === "E2EE_DEVICE_EXISTS" ||
+      (apiError?.status === 404 && apiError.code !== "E2EE_DISABLED")
+    ) {
+      throw new E2eeError(
+        "E2EE_LOGIN_GRANT_REJECTED",
+        apiError.code ?? undefined
+      );
+    }
+    throw error;
+  }
+};
+
 async function register(
   ctx: EngineContext,
   device: StoredDevice
 ): Promise<boolean> {
   try {
-    const record = await ctx.api.registerDevice({
-      grant: device.grant,
-      wallet_signature: device.walletSignature,
-      platform: device.platform,
-    });
+    const record = await submitRegistration(ctx, device);
     ctx.directory.seed([record]);
   } catch (error) {
     if (asE2eeApiError(error)?.code === "E2EE_DEVICE_LIMIT") {
@@ -225,18 +262,62 @@ export async function renewGrant(ctx: EngineContext): Promise<void> {
   device.grant = grant;
   device.grantId = computeGrantId(grant);
   device.walletSignature = signature;
+  delete device.loginGrantId;
   mls.setCredential(credentialIdentity(device.wallet, device.grantId));
   await checkpoint(ctx, { device });
   await uploadKeyPackages(ctx, ONE_TIME_POOL, false);
   await uploadKeyPackages(ctx, 1, true);
 }
 
+/** Forgets a pending device whose grant the server will not accept. */
+async function discardPendingDevice(ctx: EngineContext): Promise<void> {
+  ctx.mls?.dispose();
+  ctx.mls = null;
+  ctx.device = null;
+  ctx.lastState = null;
+  await ctx.storage.clearProfile(ctx.profileId);
+}
+
+const isLoginGrantRejection = (error: unknown): boolean =>
+  error instanceof E2eeError && error.code === "E2EE_LOGIN_GRANT_REJECTED";
+
+/**
+ * Registers a pending device. When the server refuses a combined sign-in
+ * grant (NC8), the device is dropped and, if a prompt is allowed, a fresh one
+ * enrolls with the separate grant signature; otherwise the rejection is
+ * rethrown for the caller to fall back later.
+ */
+async function registerPending(
+  ctx: EngineContext,
+  device: StoredDevice,
+  allowPrompt: boolean
+): Promise<StoredDevice | null> {
+  try {
+    return (await register(ctx, device)) ? device : null;
+  } catch (error) {
+    if (!isLoginGrantRejection(error)) {
+      throw error;
+    }
+    await discardPendingDevice(ctx);
+    if (!allowPrompt) {
+      throw error;
+    }
+    const fresh = await createDevice(ctx);
+    return (await register(ctx, fresh)) ? fresh : null;
+  }
+}
+
 /**
  * Enrollment: device key in WASM, ONE signTypedData, register, credential,
- * KeyPackages. Resumable: a stored grant is reused instead of re-prompting.
+ * KeyPackages. Resumable: a stored grant is reused instead of re-prompting,
+ * including the MLS key a combined sign-in grant already granted (NC8), which
+ * needs no prompt at all. `allowPrompt: false` never asks the wallet.
  * Returns true when the device is ready. Runs inside the queue.
  */
-export async function enrollDevice(ctx: EngineContext): Promise<boolean> {
+export async function enrollDevice(
+  ctx: EngineContext,
+  { allowPrompt = true }: { readonly allowPrompt?: boolean } = {}
+): Promise<boolean> {
   await ensureWasm(ctx);
   const stored = await ctx.storage.getDevice(ctx.profileId);
   let device: StoredDevice;
@@ -251,11 +332,17 @@ export async function enrollDevice(ctx: EngineContext): Promise<boolean> {
       ctx.lastState = state;
     }
     ctx.device = device;
-  } else {
+  } else if (allowPrompt) {
     device = await createDevice(ctx);
-  }
-  if (!device.registered && !(await register(ctx, device))) {
+  } else {
     return false;
+  }
+  if (!device.registered) {
+    const registered = await registerPending(ctx, device, allowPrompt);
+    if (!registered) {
+      return false;
+    }
+    device = registered;
   }
   if (!device.provisioned) {
     await provision(ctx, device);

@@ -47,6 +47,10 @@ export class ApiE2eeDevice {
     */
     'revoked_at': number | null;
     'revocation': ApiE2eeDeviceRevocation | null;
+    /**
+    * Set when the device was granted by a combined sign-in grant: the exact Sign-In with Ethereum message the wallet signed. Then wallet_signature is the EIP-191 signature over it, grant_id is its EIP-191 hash, and grant holds the terms of its urn:6529:mls-device-grant:v1 resource (origin = the SIWE domain, issued_at = its Issued At). Null for EIP-712 MlsDeviceGrant grants.
+    */
+    'grant_message'?: string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -123,6 +127,12 @@ export class ApiE2eeDevice {
             "name": "revocation",
             "baseName": "revocation",
             "type": "ApiE2eeDeviceRevocation",
+            "format": ""
+        },
+        {
+            "name": "grant_message",
+            "baseName": "grant_message",
+            "type": "string",
             "format": ""
         }    ];
 

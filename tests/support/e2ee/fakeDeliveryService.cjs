@@ -16,8 +16,10 @@ const crypto = require("node:crypto");
 const {
   encodeAbiParameters,
   getAddress,
+  hashMessage,
   hashTypedData,
   keccak256,
+  recoverMessageAddress,
   recoverTypedDataAddress,
   toBytes,
 } = require("viem");
@@ -223,6 +225,8 @@ function createFakeDeliveryService(options = {}) {
     follows: new Set(),
     blocks: new Set(),
     wallets: new Map(),
+    // NC8: combined sign-in grants the login stored, by grant id.
+    loginGrants: new Map(),
     subscribers: new Map(),
     faults: [],
     tamper: null,
@@ -320,12 +324,86 @@ function createFakeDeliveryService(options = {}) {
     return [...profiles];
   }
 
+  const MLS_RESOURCE =
+    /^- urn:6529:mls-device-grant:v1:(\d+):([0-9a-f]{64}):(\d+)$/m;
+
+  /** NC8: the MLS terms of a stored combined sign-in grant. */
+  async function verifyLoginGrant(profileId, grantId) {
+    const stored = s.loginGrants.get(lower(grantId || ""));
+    if (!stored || stored.revoked) {
+      fail(400, "E2EE_BAD_GRANT");
+    }
+    const match = MLS_RESOURCE.exec(stored.message);
+    const issuedAt = /^Issued At: (.+)$/m.exec(stored.message);
+    const domain = /^(?:https?:\/\/)?([^ ]+) wants you to sign in/.exec(
+      stored.message
+    );
+    if (!match || !issuedAt || !domain) {
+      fail(400, "E2EE_BAD_GRANT");
+    }
+    const grant = {
+      wallet: lower(stored.wallet),
+      device_key: `0x${match[2]}`,
+      ciphersuite: Number(match[1]),
+      issued_at: Math.floor(Date.parse(issuedAt[1]) / 1000),
+      expires_at: Number(match[3]),
+      origin: domain[1],
+    };
+    if (
+      grant.ciphersuite !== 1 ||
+      grant.expires_at * 1000 <= now() ||
+      hashMessage(stored.message) !== lower(grantId)
+    ) {
+      fail(400, "E2EE_BAD_GRANT");
+    }
+    const allowed = s.wallets.get(profileId);
+    if (allowed && !allowed.has(grant.wallet)) {
+      fail(400, "E2EE_BAD_GRANT");
+    }
+    const signer = await recoverMessageAddress({
+      message: stored.message,
+      signature: stored.signature,
+    }).catch(() => null);
+    if (!signer || lower(signer) !== grant.wallet) {
+      fail(400, "E2EE_BAD_SIGNATURE");
+    }
+    return { grant, message: stored.message, signature: stored.signature };
+  }
+
+  async function registerLoginGrantDevice(profileId, body) {
+    const verified = await verifyLoginGrant(profileId, body.grant_id);
+    return storeDevice(profileId, {
+      grant: verified.grant,
+      grantId: lower(body.grant_id),
+      signature: verified.signature,
+      grantMessage: verified.message,
+      label: body.label,
+      platform: body.platform,
+    });
+  }
+
   async function registerDevice(profileId, body) {
     const grantId = await verifyGrant(
       profileId,
       body.grant,
       body.wallet_signature
     );
+    return storeDevice(profileId, {
+      grant: body.grant,
+      grantId,
+      signature: body.wallet_signature,
+      grantMessage: null,
+      label: body.label,
+      platform: body.platform,
+    });
+  }
+
+  function storeDevice(profileId, input) {
+    const body = {
+      grant: input.grant,
+      label: input.label,
+      platform: input.platform,
+    };
     const key = lower(body.grant.device_key);
     const existing = s.devices.get(key);
     if (
@@ -349,8 +427,9 @@ function createFakeDeliveryService(options = {}) {
         wallet: lower(body.grant.wallet),
         device_key: key,
       },
-      grant_id: lower(grantId),
-      wallet_signature: lower(body.wallet_signature),
+      grant_id: lower(input.grantId),
+      wallet_signature: lower(input.signature),
+      grant_message: input.grantMessage,
       verified_via: "eoa",
       label,
       platform: ["web", "desktop", "phone"].includes(body.platform)
@@ -1168,6 +1247,11 @@ function createFakeDeliveryService(options = {}) {
     ["GET", /^e2ee\/me$/, (c) => getMe(c.profileId)],
     ["POST", /^e2ee\/devices$/, (c) => registerDevice(c.profileId, c.body)],
     [
+      "POST",
+      /^e2ee\/devices\/login-grant$/,
+      (c) => registerLoginGrantDevice(c.profileId, c.body),
+    ],
+    [
       "GET",
       /^e2ee\/devices\/(0x[0-9a-f]+)$/,
       (c, [key]) => s.devices.get(key) || fail(404, "E2EE_NOT_FOUND"),
@@ -1353,6 +1437,19 @@ function createFakeDeliveryService(options = {}) {
     setWallets(profileId, wallets) {
       s.wallets.set(profileId, new Set(wallets.map(lower)));
     },
+    /** NC8: what session-login stores for a combined sign-in grant. */
+    storeLoginGrant({ message, signature, wallet }) {
+      const id = lower(hashMessage(message));
+      s.loginGrants.set(id, { message, signature, wallet, revoked: false });
+      return id;
+    },
+    /** NC8: the wallet's session revoked the grant (DN1 device list). */
+    revokeLoginGrant(grantId) {
+      const stored = s.loginGrants.get(lower(grantId));
+      if (stored) {
+        stored.revoked = true;
+      }
+    },
     subscribe(profileId, listener) {
       const set = s.subscribers.get(profileId) || new Set();
       set.add(listener);
@@ -1430,6 +1527,8 @@ function createFakeApiClient(ds, profileId) {
   return {
     getMe: () => call("GET", "e2ee/me"),
     registerDevice: (body) => call("POST", "e2ee/devices", body),
+    registerLoginGrantDevice: (body) =>
+      call("POST", "e2ee/devices/login-grant", body),
     getDevice: (key) => call("GET", `e2ee/devices/${enc(key)}`),
     getProfileDevices: (pid) =>
       call("GET", `e2ee/profiles/${enc(pid)}/devices`),

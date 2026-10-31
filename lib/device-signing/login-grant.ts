@@ -126,10 +126,18 @@ export const toDeviceGrantNonceParams = (
 export const carriesDeviceGrant = (message: string): boolean =>
   message.includes(DEVICE_GRANT_URN_MARKER);
 
-/** The wallet is asked to sign only a challenge that grants exactly this key. */
+/**
+ * The wallet is asked to sign only a challenge that grants exactly this key,
+ * plus exactly this MLS key when `mls` is given (a combined grant) and no MLS
+ * key otherwise.
+ */
 export const isDeviceGrantChallenge = (
   message: string,
-  grant: LoginDeviceGrant
+  grant: LoginDeviceGrant,
+  mls: {
+    readonly deviceKeyHex: string;
+    readonly ciphersuite: number;
+  } | null = null
 ): boolean =>
   isExpectedDeviceGrantMessage({
     message,
@@ -137,6 +145,7 @@ export const isDeviceGrantChallenge = (
     deviceKeyHex: grant.deviceKeyHex,
     scopes: grant.scopes,
     nowMs: Date.now(),
+    mls,
   });
 
 /** Stores the grant returned by session-login. Never throws. */

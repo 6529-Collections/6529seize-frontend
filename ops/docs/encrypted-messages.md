@@ -54,6 +54,16 @@ happens:
 Select **Turn on encrypted messages (one signature)** and approve the signature
 in your wallet. Cancelling the signature changes nothing.
 
+If you signed in on this browser with the combined sign-in message (it
+mentions end-to-end encrypted messages and an encrypted messages key; see
+[Signed messages](waves/drop-actions/feature-signed-messages.md)), that one
+sign-in signature already turned encrypted messages on: this device finishes
+setting up in the background and the card does not ask again. If 6529 cannot
+use that sign-in grant (for example it was revoked), the card asks for the
+separate signature as usual. Revoking the device under **Devices that can
+post as you** also revokes it for encrypted messages, and revoking it here
+also stops its signed messages.
+
 On Safari, the site's data can be deleted if you do not open 6529 for 7 days;
 the card says so on Safari.
 

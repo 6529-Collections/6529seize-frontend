@@ -6,6 +6,7 @@ import type {
   BrowserContextOptions,
   ConsoleMessage,
   Page,
+  Response,
   TestInfo,
 } from "@playwright/test";
 import { expect } from "@playwright/test";
@@ -105,6 +106,12 @@ export interface StagingE2eeSession {
   readonly productionWrites: string[];
   /** Third-party writes the guard dropped (telemetry and the like). */
   readonly droppedWrites: string[];
+  /**
+   * The sign-in challenge the wallet signed (the last session-nonce answer
+   * before login), or null before signing in. NC8: when it is a combined
+   * grant it also enrolled this browser for encrypted messages.
+   */
+  signInMessage: string | null;
   close(): Promise<void>;
 }
 
@@ -230,6 +237,7 @@ export async function openStagingSession(
       pageErrors,
       productionWrites,
       droppedWrites,
+      signInMessage: null,
       close: () => context.close(),
     };
   } catch (error) {
@@ -312,6 +320,21 @@ export async function signInThroughWalletModal(session: StagingE2eeSession) {
   );
   // Awaited below; keep an earlier failure from leaving it unhandled.
   login.catch(() => undefined);
+  let lastChallenge: string | null = null;
+  const onNonce = (response: Response) => {
+    if (new URL(response.url()).pathname !== "/api/auth/session-nonce") {
+      return;
+    }
+    response
+      .json()
+      .then((body: { signable_message?: unknown }) => {
+        if (typeof body.signable_message === "string") {
+          lastChallenge = body.signable_message;
+        }
+      })
+      .catch(() => undefined);
+  };
+  page.on("response", onNonce);
   await page.waitForLoadState("load");
   // Collapsed sidebars and the mobile header label it "Connect".
   const connect = page
@@ -361,6 +384,8 @@ export async function signInThroughWalletModal(session: StagingE2eeSession) {
   }
 
   const loginResponse = await login;
+  page.off("response", onNonce);
+  session.signInMessage = lastChallenge;
   expect(
     loginResponse.ok(),
     `${session.label}: session-v2 login answered HTTP ${loginResponse.status()}`
@@ -562,12 +587,64 @@ export async function expectEnrollmentCard(session: StagingE2eeSession) {
   });
 }
 
+const COMBINED_GRANT_RESOURCE = "- urn:6529:mls-device-grant:v1:";
+
+/** NC8: the sign-in challenge also granted an encrypted-messages key. */
+export const signedInWithCombinedGrant = (
+  session: StagingE2eeSession
+): boolean => session.signInMessage?.includes(COMBINED_GRANT_RESOURCE) === true;
+
 /**
- * Turns on encrypted messages for this device: exactly one EIP-712
- * `MlsDeviceGrant` signature by the user's own wallet, registered with the
- * delivery service.
+ * NC8: a combined sign-in already enrolled this device. Encrypted messages
+ * open without the enrollment card, the device registers through
+ * POST /api/e2ee/devices/login-grant, and the wallet signs no
+ * `MlsDeviceGrant`: one signature in total.
+ */
+async function expectEnrolledBySignIn(session: StagingE2eeSession) {
+  const { page, wallet } = session;
+  const registration = page.waitForResponse(
+    (response) =>
+      response.request().method() === "POST" &&
+      new URL(response.url()).pathname === "/api/e2ee/devices/login-grant",
+    { timeout: UI_TIMEOUT_MS }
+  );
+  registration.catch(() => undefined);
+  await gotoStaging(page, ENCRYPTED_ROUTE);
+  // The engine may have registered before this navigation; the device link
+  // and the absent card are the contract, the response is extra evidence.
+  await expect(
+    page.getByRole("link", { name: "Devices for encrypted messages" }).first()
+  ).toBeVisible({ timeout: FIRST_LOAD_TIMEOUT_MS });
+  await expect(enrollmentHeading(page)).toHaveCount(0);
+  const response = await registration.catch(() => null);
+  if (response) {
+    expect(
+      response.ok(),
+      `${session.label}: sign-in grant registration answered HTTP ${response.status()}`
+    ).toBe(true);
+  }
+  expect(
+    wallet.typedDataSignatures("MlsDeviceGrant"),
+    `${session.label}: a combined sign-in must not ask for a second grant signature`
+  ).toHaveLength(0);
+  expect(wallet.count("personal_sign")).toBe(1);
+}
+
+/**
+ * Turns on encrypted messages for this device. After a combined sign-in
+ * (NC8) that already happened with the sign-in signature; otherwise it takes
+ * exactly one EIP-712 `MlsDeviceGrant` signature by the user's own wallet,
+ * registered with the delivery service.
  */
 export async function enrollDevice(session: StagingE2eeSession) {
+  if (signedInWithCombinedGrant(session)) {
+    await expectEnrolledBySignIn(session);
+    return;
+  }
+  await enrollWithGrantPrompt(session);
+}
+
+async function enrollWithGrantPrompt(session: StagingE2eeSession) {
   const { page, wallet } = session;
   await gotoStaging(page, ENCRYPTED_ROUTE);
   await expectEnrollmentCard(session);
@@ -688,6 +765,7 @@ function sessionReport(session: StagingE2eeSession): string {
     `== ${session.label} (${session.user.handle}, ${session.wallet.address}) ==`,
     `Page: ${sanitizeReadonlyRequestUrl(session.page.url())}`,
     `Wallet signatures: personal_sign=${session.wallet.count("personal_sign")}, eth_signTypedData_v4=${session.wallet.count("eth_signTypedData_v4")}`,
+    `Combined sign-in grant (NC8): ${signedInWithCombinedGrant(session) ? "yes" : "no"}`,
     `MLS WebAssembly responses: ${JSON.stringify(session.evidence.wasmResponses)}`,
     `CSP violations: ${JSON.stringify(session.evidence.cspViolations)}`,
     "E2EE API responses >= 400:",

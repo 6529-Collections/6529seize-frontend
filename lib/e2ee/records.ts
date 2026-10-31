@@ -18,6 +18,12 @@ export interface StoredDevice {
   walletSignature: string;
   /** False until POST /e2ee/devices succeeded (the signature is kept). */
   registered: boolean;
+  /**
+   * NC8: set when a combined sign-in grant also granted this device's MLS
+   * key; registration then goes through POST /e2ee/devices/login-grant with
+   * this grant id, and no wallet prompt. `walletSignature` is the SIWE one.
+   */
+  loginGrantId?: string;
   /** True once the MLS credential is set and the first KeyPackages uploaded. */
   provisioned: boolean;
   label: string;

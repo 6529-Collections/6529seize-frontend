@@ -17,6 +17,7 @@ import { EngineController } from "./controller";
 import { DeviceDirectory } from "./directory";
 import {
   enrollDevice,
+  hasLoginGrant,
   ensureWasm,
   grantExpired,
   refreshMe,
@@ -220,12 +221,32 @@ class E2eeEngineImpl implements E2eeEngineExt {
       const restored = await restore(this.ctx);
       if (!restored) {
         setStatus(this.ctx, NEEDS_ENROLLMENT);
+        await this.enrollFromLoginGrant();
         return;
       }
       setStatus(this.ctx, "ready");
       this.start();
     } catch (error) {
       setStatus(this.ctx, "error", errorMessage(error));
+    }
+  }
+
+  /**
+   * NC8: the sign-in signature already granted this browser's MLS key, so
+   * enrollment needs no wallet prompt; finish it now. If the server refuses
+   * the sign-in grant, drop that device: enroll() then falls back to the
+   * separate grant prompt with a fresh key.
+   */
+  private async enrollFromLoginGrant(): Promise<void> {
+    const stored = await this.ctx.storage.getDevice(this.ctx.profileId);
+    if (!hasLoginGrant(stored) || stored.registered) {
+      return;
+    }
+    try {
+      await this.runEnrollment(false);
+    } catch {
+      // Reported through the status; a rejected sign-in grant was dropped,
+      // so the next enroll() asks for the separate grant signature.
     }
   }
 
@@ -318,9 +339,15 @@ class E2eeEngineImpl implements E2eeEngineExt {
   // -- lifecycle --------------------------------------------------------------
 
   async enroll(): Promise<void> {
+    await this.runEnrollment(true);
+  }
+
+  private async runEnrollment(allowPrompt: boolean): Promise<void> {
     const status = this.ctx.store.status;
     if (status === "ready") {
-      await this.renew();
+      if (allowPrompt) {
+        await this.renew();
+      }
       return;
     }
     if (status === "enrolling" || status === "unsupported") {
@@ -328,9 +355,14 @@ class E2eeEngineImpl implements E2eeEngineExt {
     }
     setStatus(this.ctx, "enrolling");
     try {
-      const ready = await this.ctx.queue.run(() => enrollDevice(this.ctx));
+      const ready = await this.ctx.queue.run(() =>
+        enrollDevice(this.ctx, { allowPrompt })
+      );
       if (!ready) {
-        return; // device-limit
+        if (this.ctx.store.status === "enrolling") {
+          setStatus(this.ctx, NEEDS_ENROLLMENT);
+        }
+        return; // device-limit, or nothing to enroll without a prompt
       }
       await loadGroups(this.ctx);
       setStatus(this.ctx, "ready");
@@ -344,7 +376,10 @@ class E2eeEngineImpl implements E2eeEngineExt {
       const code = errorMessage(error);
       setStatus(
         this.ctx,
-        code === "E2EE_SIGNATURE_REJECTED" ? NEEDS_ENROLLMENT : "error",
+        code === "E2EE_SIGNATURE_REJECTED" ||
+          code === "E2EE_LOGIN_GRANT_REJECTED"
+          ? NEEDS_ENROLLMENT
+          : "error",
         code
       );
       throw error;
