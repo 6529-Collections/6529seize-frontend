@@ -137,6 +137,29 @@ describe("ReMeme page", () => {
   });
 });
 
+describe("ReMeme page existence check", () => {
+  const params = Promise.resolve({ contract: "0x123abc", id: "456" });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("answers not found when the API does not know the token", async () => {
+    (commonApiFetch as jest.Mock).mockResolvedValue({ data: [] });
+
+    await expect(ReMeme({ params })).rejects.toMatchObject({
+      digest: "NEXT_HTTP_ERROR_FALLBACK;404",
+    });
+  });
+
+  it("keeps rendering when the API request fails so the client can retry", async () => {
+    (commonApiFetch as jest.Mock).mockRejectedValue("HTTP 503");
+    jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(ReMeme({ params })).resolves.toBeDefined();
+  });
+});
+
 describe("ReMeme generateMetadata", () => {
   const mockFormatAddress = formatAddress as jest.MockedFunction<
     typeof formatAddress
@@ -192,7 +215,7 @@ describe("ReMeme generateMetadata", () => {
   });
 
   it("encodes reserved route params before fetching metadata", async () => {
-    mockCommonApiFetch.mockResolvedValue({ data: [] });
+    mockCommonApiFetch.mockResolvedValue({ data: [{ metadata: {} }] });
 
     await generateMetadata({
       params: Promise.resolve({
@@ -208,9 +231,19 @@ describe("ReMeme generateMetadata", () => {
     });
   });
 
-  it("returns metadata with default name and image when API returns empty data", async () => {
-    const mockResponse = { data: [] };
-    mockCommonApiFetch.mockResolvedValue(mockResponse);
+  it("answers not found when the API returns empty data", async () => {
+    mockCommonApiFetch.mockResolvedValue({ data: [] });
+
+    await expect(
+      generateMetadata({
+        params: Promise.resolve({ contract: "0x123abc", id: "456" }),
+      })
+    ).rejects.toMatchObject({ digest: "NEXT_HTTP_ERROR_FALLBACK;404" });
+  });
+
+  it("returns default metadata when the API request fails", async () => {
+    mockCommonApiFetch.mockRejectedValue("HTTP 503");
+    jest.spyOn(console, "error").mockImplementation(() => undefined);
 
     const result = await generateMetadata({
       params: Promise.resolve({ contract: "0x123abc", id: "456" }),

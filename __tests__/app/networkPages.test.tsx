@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import DefinitionsPage, {
   generateMetadata as generateDefinitionsMetadata,
 } from "@/app/network/definitions/page";
@@ -139,7 +141,9 @@ describe("network pages render", () => {
   it("generates metadata for Definitions page", async () => {
     const metadata = await generateDefinitionsMetadata();
     expect(metadata.title).toEqual("Definitions | Network");
-    expect(metadata.description).toEqual(`Network | ${domain}`);
+    expect(metadata.description).toEqual(
+      `${t(DEFAULT_LOCALE, "pageMetadata.networkDefinitions.description")} | ${domain}`
+    );
   });
 
   it("generates metadata for Wave Score page", async () => {

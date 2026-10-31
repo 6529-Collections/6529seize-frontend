@@ -1,4 +1,4 @@
-import { generateMetadata } from "@/app/6529-gradient/[id]/page";
+import GradientPage, { generateMetadata } from "@/app/6529-gradient/[id]/page";
 import { GRADIENT_CONTRACT } from "@/constants/constants";
 import { fetchUrl } from "@/services/6529api";
 
@@ -95,8 +95,11 @@ describe("generateMetadata", () => {
     expect(url.searchParams.get("image")).toBe("https://example.com/image.png");
   });
 
-  it("uses branded card without raw image if no data", async () => {
-    (fetchUrl as jest.Mock).mockResolvedValue({ data: [] });
+  it("uses branded card without raw image if the API is unavailable", async () => {
+    (fetchUrl as jest.Mock).mockRejectedValue(
+      new Error("HTTP error! status: 503")
+    );
+    jest.spyOn(console, "error").mockImplementation(() => undefined);
 
     const metadata = await generateMetadata({
       params: Promise.resolve({ id: "30" }),
@@ -130,5 +133,55 @@ describe("generateMetadata", () => {
     expect(new URL(image.url).searchParams.get("image")).toBe(
       "https://example.com/scaled.png"
     );
+  });
+});
+
+// === Missing token handling ===
+describe("missing gradient tokens", () => {
+  const NOT_FOUND_ERROR = { digest: "NEXT_HTTP_ERROR_FALLBACK;404" };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("answers not found when the API does not know the token", async () => {
+    (fetchUrl as jest.Mock).mockResolvedValue({ data: [] });
+
+    await expect(
+      GradientPage({ params: Promise.resolve({ id: "999999" }) })
+    ).rejects.toMatchObject(NOT_FOUND_ERROR);
+    await expect(
+      generateMetadata({ params: Promise.resolve({ id: "999999" }) })
+    ).rejects.toMatchObject(NOT_FOUND_ERROR);
+  });
+
+  it.each(["abc", "1,2", "-1", "1.5", "99999999999999999999"])(
+    "answers not found for the invalid id %s without calling the API",
+    async (id) => {
+      await expect(
+        GradientPage({ params: Promise.resolve({ id }) })
+      ).rejects.toMatchObject(NOT_FOUND_ERROR);
+
+      expect(fetchUrl).not.toHaveBeenCalled();
+    }
+  );
+
+  it("keeps token 0 reachable", async () => {
+    (fetchUrl as jest.Mock).mockResolvedValue({ data: [{ id: 0 }] });
+
+    await expect(
+      GradientPage({ params: Promise.resolve({ id: "0" }) })
+    ).resolves.toBeDefined();
+  });
+
+  it("keeps rendering when the API is unavailable so the client can retry", async () => {
+    (fetchUrl as jest.Mock).mockRejectedValue(
+      new Error("HTTP error! status: 503")
+    );
+    jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(
+      GradientPage({ params: Promise.resolve({ id: "10" }) })
+    ).resolves.toBeDefined();
   });
 });

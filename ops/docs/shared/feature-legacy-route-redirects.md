@@ -90,7 +90,6 @@ Common outcomes:
 - `/city/6529-museum-district` -> `/om/6529-museum-district/`
 - `/element_category/columns` -> `/`
 - `/element_category/sections` -> `/`
-- `/feed` -> `/index.xml`
 - `/gm-or-die-small-mp4` ->
   `https://videos.files.wordpress.com/Pr49XLee/gm-or-die-small.mp4`
 - `/om/partnership-request` -> `/om/join-om/`
