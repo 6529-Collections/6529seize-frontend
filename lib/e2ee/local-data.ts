@@ -53,19 +53,35 @@ export async function removeE2eeProfileLocalData(
   }
 }
 
+/** How long a delete may stay blocked by another tab before it counts as failed. */
+const BLOCKED_DELETE_TIMEOUT_MS = 4000;
+
 function deleteDatabase(factory: IDBFactory, name: string): Promise<void> {
   return new Promise<void>((resolve, reject) => {
+    let blockedTimer: ReturnType<typeof setTimeout> | null = null;
+    const settle = (finish: () => void) => {
+      if (blockedTimer !== null) {
+        clearTimeout(blockedTimer);
+        blockedTimer = null;
+      }
+      finish();
+    };
     const req = factory.deleteDatabase(name);
     req.onsuccess = () => {
-      resolve();
+      settle(resolve);
     };
     req.onerror = () => {
-      reject(req.error ?? new Error("IndexedDB delete failed"));
+      settle(() => reject(req.error ?? new Error("IndexedDB delete failed")));
     };
-    // A tab running an older build may still hold a connection; the delete
-    // stays queued and completes as soon as that tab closes it.
+    // A tab running an older build may still hold a connection. The delete
+    // stays queued until that tab closes it, so only report success once it
+    // actually completes; if it stays blocked, fail so sign-out never claims
+    // the data is gone.
     req.onblocked = () => {
-      resolve();
+      blockedTimer ??= setTimeout(() => {
+        blockedTimer = null;
+        reject(new Error("IndexedDB delete blocked by another tab"));
+      }, BLOCKED_DELETE_TIMEOUT_MS);
     };
   });
 }
