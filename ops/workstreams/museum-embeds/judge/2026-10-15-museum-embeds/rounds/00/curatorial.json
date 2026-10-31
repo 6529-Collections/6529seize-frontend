@@ -1,0 +1,146 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "5a826f65056ae64cb5f6c789699d8533c98baaa4",
+  "coverage": [
+    {
+      "route": "/museum/6529-fund-szn1/gazers",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/gazers-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/6529-fund-szn1/gazers",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/gazers-820x1000-full.png"
+    },
+    {
+      "route": "/museum/6529-fund-szn1/gazers",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/gazers-390x844-full.png"
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 9.0,
+      "evidence": [
+        "evidence/candidate/gazers-1440x1000-full.png",
+        "evidence/candidate/gazers-820x1000-full.png",
+        "evidence/candidate/gazers-390x844-full.png",
+        "evidence/candidate/gazers-1440x1000-frame-1.png",
+        "evidence/candidate/gazers-1440x1000-frame-2.png",
+        "evidence/candidate/gazers-1440x1000-frame-3.png",
+        "evidence/candidate/automated-checks.json",
+        "evidence/diff-candidate-vs-main.json"
+      ],
+      "findings": [],
+      "note": "The visitor's task, seeing the three Gazers run live and reading the essay, is fully served: all three sandboxed frames (opaque origin, localStorage blocked) still draw an animated square canvas at the same size and position as main (544 px at 1440 and 820, 358 px at 390), and the essay follows unchanged. Static full-page tiles show works 2 and 3 as black squares on both candidate and main because the frames are loading=\"lazy\"; scrolled into view in the live candidate at all three widths they render (see frame captures). Pre-existing caption-proximity debt is filed as P3 and does not lower the score."
+    },
+    "J14": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/contact-sheet-1440x1000.png",
+        "evidence/candidate/contact-sheet-820x1000.png",
+        "evidence/candidate/contact-sheet-390x844.png",
+        "evidence/candidate/gazers-1440x1000-02.png",
+        "evidence/candidate/gazers-1440x1000-03.png",
+        "evidence/main/contact-sheet-1440x1000.png"
+      ],
+      "findings": ["C-001", "C-002", "C-003", "C-004", "C-005"],
+      "note": "Candidate reads exactly as the baseline: art-first single column, works shown square and whole, then a long essay. Scored relative to main per the run record; thin captioning, off-by-one label proximity, unattributed essay and modest art scale are identical on main and recorded as P3 Museum backlog."
+    }
+  },
+  "checks": {
+    "M1": "pass",
+    "M2": "pass",
+    "M3": "pass",
+    "M4": "pass"
+  },
+  "findings": [
+    {
+      "id": "C-001",
+      "targets": ["J14", "M2"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/6529-fund-szn1/gazers · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/candidate/gazers-1440x1000-02.png",
+      "observation": "Pre-existing on main: the page order is work, heading, work, heading, work, plain caption, so each label follows the work it names, but the heading sits closer to the next work than to its own. At 1440 the #788 work (frame src 215000788) ends at y 994, the heading \"GAZERS #788\" occupies about y 1035-1063, and the #566 work starts at y 1094: roughly 41 px below its own work and 31 px above the neighbour. The first work has only the \"Gazers / Matt Kane\" lead-in above it and no adjacent title. Read top to bottom the labels slip one place, so the work that is #566 appears under the heading \"GAZERS #788\". The same rhythm repeats at 820 and 390. Frame order, essay colour descriptions (788 pale green with burnt orange moon, 566 orange, pink and neon green) and token ids confirm the captions are correct; only the proximity misleads.",
+      "consequence": "A visitor skimming the page can attach the wrong title to a work, which undermines record accuracy on a page whose job is to identify three specific tokens.",
+      "change": "Place each caption directly under its frame with a small gap (about 12-16 px) and keep the gap to the next frame clearly larger (about 48 px or more), or put each title above its frame, including the first. Apply the same treatment to all three works.",
+      "acceptance_check": "At 1440, 820 and 390, each work's label is nearer to its own frame than to any neighbouring frame, and the order of labels matches the frame src token ids 788, 566, 403.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-002",
+      "targets": ["J14"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/6529-fund-szn1/gazers · default · 1440x1000 · en-US",
+      "evidence": "evidence/candidate/gazers-1440x1000-03.png",
+      "observation": "Pre-existing on main: \"GAZERS #788\" and \"GAZERS #566\" are bold headings, while \"GAZERS #403\" is a plain-weight paragraph directly after the third work and immediately above the bold \"Description\" label. The three captions do not share a style, and the third reads like body text.",
+      "consequence": "The set of three works reads as two titled works and one trailing line, weakening the sense of a deliberate series.",
+      "change": "Give all three captions the same element and style, for example the same heading level or caption style used for #788 and #566.",
+      "acceptance_check": "All three work labels share one computed font weight and size at all viewports and none is a plain body paragraph.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-003",
+      "targets": ["J14", "M2"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/6529-fund-szn1/gazers · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/candidate/gazers-1440x1000-full.png",
+      "observation": "Pre-existing on main: the only record shown for the works is the lead-in \"Gazers / Matt Kane\" and the three labels \"GAZERS #nnn\". There is no year, medium, edition or platform line, no credit line, no statement of the 6529 Fund holding or acquisition, and no rights statement. The \"6529 FUND SZN1\" appears only in the breadcrumb.",
+      "consequence": "The page is credible as a showcase but thin as a museum record: a visitor cannot tell what the works are made of, when they were made, or how the museum came to hold them.",
+      "change": "Add a one-line caption per work from the acquisition record (artist, title and token number, year, medium, platform, holding status) and a rights or credit line. Only include fields the record supports and omit any that it does not.",
+      "acceptance_check": "Each of the three works has a caption whose fields all trace to the collection record, and a credit line is present on the page.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-004",
+      "targets": ["J14", "M2"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/6529-fund-szn1/gazers · default · 1440x1000 · en-US",
+      "evidence": "evidence/candidate/gazers-1440x1000-04.png",
+      "observation": "Pre-existing on main: the \"Description\" essay is a third-person, five-paragraph appreciation of Kane (for example a Chicago-born oil painter and coder \"extraordinaire\") with no author, source or date, and it does not say whether it is the artist's statement, platform text or 6529 writing. Some of its colour claims describe the works at particular times of day, which the page does not tell the reader.",
+      "consequence": "Scholarship and descriptive claims are unattributed, so the reader cannot judge their authority, and a visitor who sees different colours than the text describes has no explanation on the page.",
+      "change": "Add a source or byline line under the \"Description\" label naming who wrote the text, and one sentence noting that the works change with the time of day and so may differ from the colours described.",
+      "acceptance_check": "The essay carries a named source or author line, and the page states that the colours vary with the time of day.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-005",
+      "targets": ["J14", "J01"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/6529-fund-szn1/gazers · default · 1440x1000 · en-US",
+      "evidence": "evidence/candidate/contact-sheet-1440x1000.png",
+      "observation": "Pre-existing on main: each work is a 544 px square held to the left of a 1,300 px content area, with about 700 px of empty black beside it. The three works are stacked, so the essay starts only after roughly 1,900 px of scroll (works span y 450 to 2282), and the lead work is no larger than the other two.",
+      "consequence": "The art, the subject of the page, has less presence than the text beneath it on a wide screen, and no work leads the section.",
+      "change": "At wide widths, show the works larger or in a deliberate arrangement (for example one lead work with the other two beside or below it), keeping each square and whole.",
+      "acceptance_check": "At 1440 the works are shown at a larger or intentionally composed scale with no unused half-width void beside them, and each remains square and unobstructed.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "The three Art Blocks frames still render live and animated under sandbox=\"allow-scripts\": each draws a square canvas (542 px in a 544 px frame at 1440 and 820, 356 px in a 358 px frame at 390) with the same size and top position as main",
+    "Frame order and token ids (215000788, 215000566, 215000403) match the labels #788, #566, #403 and the essay's colour descriptions of 788 and 566",
+    "Works are square and unobstructed, with no overlay, letterboxing or fallback panel standing in for any principal work",
+    "Page title, standfirst, \"Gazers / Matt Kane\" lead-in and the full essay are identical to main (mainTextIdentical true at all three viewports); page height is unchanged at 3734, 4440 and 4863",
+    "No horizontal overflow, no clipped text and no new console messages; the six accelerometer permissions-policy messages are identical on main",
+    "Comfortable essay measure and line height at all three widths, with the footer links intact"
+  ]
+}

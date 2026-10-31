@@ -1,4 +1,5 @@
 import { useAuth } from "@/components/auth/Auth";
+import SignedMessagesNotice from "@/components/device-signing/SignedMessagesNotice";
 import type { SelectableIdentityOption } from "@/components/utils/input/profile-search/getSelectableIdentity";
 import type { MissingRequirements } from "@/components/waves/utils/getMissingRequirements";
 import type {
@@ -201,8 +202,12 @@ export default function CreateDropLayout(props: CreateDropLayoutProps) {
     );
   }
 
+  const isComposerEmpty =
+    !props.hasCurrentDraft && (props.drop?.parts.length ?? 0) === 0;
+
   return (
     <div className="tw-flex tw-min-h-0 tw-flex-grow tw-flex-col">
+      {showComposer && <SignedMessagesNotice composerEmpty={isComposerEmpty} />}
       <CreateDropReplyingWrapper
         activeDrop={activeDrop}
         submitting={submitting}

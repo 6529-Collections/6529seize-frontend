@@ -1,6 +1,13 @@
 import { migratedWordPressTrustedHtml } from "@/components/migrated-wordpress/trusted-html";
 import type { MigratedWordPressStaticPageContent } from "@/components/migrated-wordpress/types";
 
+// Art Blocks generator pages only need to run the work's own script, so the
+// frames get an opaque origin and no other capability. This is the same
+// generator-frame policy as NEXTGEN_HTML_IFRAME_SANDBOX in the shared
+// lib/media/nft-html-sandbox.ts proposed by #4320; use that constant once it
+// lands. The other Museum Art Blocks embeds inline the same value.
+const ART_BLOCKS_GENERATOR_SANDBOX = "allow-scripts";
+
 export const museum_6529FundSzn1GazersMigratedWordPressPage = {
   source: "migrated-wordpress",
   path: "/museum/6529-fund-szn1/gazers",
@@ -18,7 +25,7 @@ export const museum_6529FundSzn1GazersMigratedWordPressPage = {
     {
       type: "html",
       html: migratedWordPressTrustedHtml(
-        '<p><iframe src="https://generator.artblocks.io/215000788" title="Museum artwork embed" allow="autoplay" loading="lazy" allowfullscreen></iframe></p>'
+        `<p><iframe src="https://generator.artblocks.io/215000788" title="Museum artwork embed" allow="autoplay" sandbox="${ART_BLOCKS_GENERATOR_SANDBOX}" loading="lazy" allowfullscreen></iframe></p>`
       ),
     },
     {
@@ -28,7 +35,7 @@ export const museum_6529FundSzn1GazersMigratedWordPressPage = {
     {
       type: "html",
       html: migratedWordPressTrustedHtml(
-        '<p><iframe src="https://generator.artblocks.io/215000566" title="Museum artwork embed" allow="autoplay" loading="lazy" allowfullscreen></iframe></p>'
+        `<p><iframe src="https://generator.artblocks.io/215000566" title="Museum artwork embed" allow="autoplay" sandbox="${ART_BLOCKS_GENERATOR_SANDBOX}" loading="lazy" allowfullscreen></iframe></p>`
       ),
     },
     {
@@ -38,7 +45,7 @@ export const museum_6529FundSzn1GazersMigratedWordPressPage = {
     {
       type: "html",
       html: migratedWordPressTrustedHtml(
-        '<p><iframe src="https://generator.artblocks.io/215000403" title="Museum artwork embed" allow="autoplay" loading="lazy" allowfullscreen></iframe></p>'
+        `<p><iframe src="https://generator.artblocks.io/215000403" title="Museum artwork embed" allow="autoplay" sandbox="${ART_BLOCKS_GENERATOR_SANDBOX}" loading="lazy" allowfullscreen></iframe></p>`
       ),
     },
     {

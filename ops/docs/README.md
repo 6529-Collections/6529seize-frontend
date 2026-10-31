@@ -41,6 +41,7 @@ March 19, 2026.
 - Flag, hide, or reveal a post; block a profile; understand posting checks or
   suspension; or review reported content: [Content Moderation](content-moderation.md)
 - Follow live NFT activity and socket behavior: [Realtime](realtime/README.md)
+- Read how 6529 works and how to check it: [6529 Explained](explained/README.md)
 - Check metrics, scores, and TDH/xTDH behavior: [Network](network/README.md)
 - Create groups inline and manage scoped network views:
   [Wave Creation Groups Step](waves/create/feature-groups-step.md),
@@ -79,6 +80,7 @@ March 19, 2026.
 - [Content Moderation](content-moderation.md): `/preferences`,
   `/content-preferences`, and authorized `/content-moderation`
 - [Realtime](realtime/README.md): `/nft-activity`
+- [6529 Explained](explained/README.md): `/explained`
 - [Network](network/README.md): `/network/*`, `/network/xtdh`, `/xtdh`
 - [Safe Collecting](delegation/README.md): `/safe-collecting` and `/safe-collecting/{param+}`
 - [NextGen](nextgen/README.md): `/nextgen` and `/nextgen/{param*}`
@@ -165,6 +167,8 @@ Route patterns use normalized placeholders: `{param}` for one segment,
 - Education:
   `/education`, `/education/tweetstorms`, `/education/podcasts`, and
   `/education/education-collaboration-form`
+- 6529 Explained:
+  `/explained`
 
 ### Out of Scope
 
@@ -181,9 +185,8 @@ Route patterns use normalized placeholders: `{param}` for one segment,
   `/consolidation-mapping-tool`, `/delegation-mapping-tool`,
   `/meme-accounting`, `/meme-gas`
 - Legacy and diagnostics routes:
-  `/feed` (redirects to `/index.xml`), `/slide-page/*`, `/element_category/*`,
-  `/gm-or-die-small-mp4`, `/cdn-cgi/l/email-protection`, `/error`,
-  `/sentry-example-page`
+  `/slide-page/*`, `/element_category/*`, `/gm-or-die-small-mp4`,
+  `/cdn-cgi/l/email-protection`, `/error`
 
 ## Subarea Indexes
 

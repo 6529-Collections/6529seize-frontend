@@ -245,6 +245,9 @@
         "web-desktop-chromium"
       ]
     },
+    "/bookmarks": {
+      "classification": "auth"
+    },
     "/buidl": {
       "classification": "crawlable",
       "family": "info"
@@ -323,17 +326,13 @@
       "classification": "crawlable",
       "family": "tools"
     },
-    "/safe-collecting/[...section]": {
+    "/delegation/[...section]": {
       "classification": "fixture",
       "family": "tools",
       "fixture": {
-        "staging": "/safe-collecting/tap-guide",
-        "production": "/safe-collecting/tap-guide"
+        "staging": "/delegation/wallet-architecture",
+        "production": "/delegation/wallet-architecture"
       }
-    },
-    "/safe-collecting": {
-      "classification": "crawlable",
-      "family": "tools"
     },
     "/discover": {
       "classification": "crawlable",
@@ -421,12 +420,13 @@
       "classification": "exempt",
       "exemptReason": "Error-boundary demonstration page; crawling it asserts a crash by design."
     },
+    "/explained": {
+      "classification": "crawlable",
+      "family": "info"
+    },
     "/explained/kit": {
       "classification": "exempt",
       "exemptReason": "Development-only 6529 Explained kit gallery; production answers 404 and the explained gates render it."
-    },
-    "/feed": {
-      "classification": "auth"
     },
     "/gm-or-die-small-mp4": {
       "classification": "exempt",
@@ -2259,9 +2259,17 @@
       },
       "family": "public-review"
     },
-    "/sentry-example-page": {
-      "classification": "exempt",
-      "exemptReason": "Sentry integration test page; intentionally throws."
+    "/safe-collecting": {
+      "classification": "crawlable",
+      "family": "tools"
+    },
+    "/safe-collecting/[...section]": {
+      "classification": "fixture",
+      "family": "tools",
+      "fixture": {
+        "staging": "/safe-collecting/tap-guide",
+        "production": "/safe-collecting/tap-guide"
+      }
     },
     "/slide-page/6529-initiatives": {
       "classification": "exempt",
@@ -2341,6 +2349,10 @@
       "classification": "crawlable",
       "family": "tools"
     },
+    "/wave-not-found": {
+      "classification": "exempt",
+      "exemptReason": "Internal rewrite target for malformed wave ids; always answers 404."
+    },
     "/waves": {
       "classification": "crawlable",
       "family": "social"
@@ -2355,13 +2367,6 @@
         "staging": "The production Releases wave ID is not a qualified staging fixture."
       }
     },
-    "/waves/create": {
-      "classification": "auth"
-    },
-    "/xtdh": {
-      "classification": "crawlable",
-      "family": "info"
-    },
     "/waves/[wave]/competitions": {
       "classification": "exempt",
       "family": "social",
@@ -2372,13 +2377,12 @@
       "family": "social",
       "exemptReason": "Native competition rollout requires scoped competition fixtures."
     },
-    "/delegation/[...section]": {
-      "classification": "fixture",
-      "family": "tools",
-      "fixture": {
-        "staging": "/delegation/wallet-architecture",
-        "production": "/delegation/wallet-architecture"
-      }
+    "/waves/create": {
+      "classification": "auth"
+    },
+    "/xtdh": {
+      "classification": "crawlable",
+      "family": "info"
     }
   }
 }

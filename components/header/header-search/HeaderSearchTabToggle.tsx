@@ -26,6 +26,13 @@ export const HeaderSearchTabToggle: React.FC<HeaderSearchTabToggleProps> = ({
   orientation = "horizontal",
 }) => {
   const isVertical = orientation === "vertical";
+  const activeTabRef = React.useRef<HTMLButtonElement>(null);
+  React.useEffect(() => {
+    const tab = activeTabRef.current;
+    if (!isVertical && tab !== null && tab.getClientRects().length > 0) {
+      tab.scrollIntoView({ block: "nearest", inline: "nearest" });
+    }
+  }, [activeKey, isVertical, options]);
   const baseClasses = "tw-flex tw-min-w-0";
   const directionClasses = isVertical
     ? "tw-flex-col tw-gap-y-1"
@@ -112,6 +119,7 @@ export const HeaderSearchTabToggle: React.FC<HeaderSearchTabToggleProps> = ({
         return (
           <button
             key={option.key}
+            ref={activeKey === option.key ? activeTabRef : undefined}
             type="button"
             onClick={() => onSelect(option.key)}
             onKeyDown={(event) => handleKeyDown(event, index)}

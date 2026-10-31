@@ -8,7 +8,7 @@ let headerProps: any = null;
 let connectProps: any = null;
 let mockDropForgePermissions = { ...DEFAULT_DROP_FORGE_PERMISSIONS };
 let mockModeratorAccess = {
-  data: { moderator: false, has_open_reports: false },
+  data: { moderator: false, has_open_reports: false, needs_review_count: 0 },
 };
 
 type AppSidebarMenuItemsProps = Parameters<typeof AppSidebarMenuItems>[0];
@@ -115,7 +115,11 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
       headerProps = menuProps = connectProps = null;
       mockDropForgePermissions = { ...DEFAULT_DROP_FORGE_PERMISSIONS };
       mockModeratorAccess = {
-        data: { moderator: false, has_open_reports: false },
+        data: {
+          moderator: false,
+          has_open_reports: false,
+          needs_review_count: 0,
+        },
       };
       setCookieCountry("US");
     });
@@ -185,7 +189,9 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
           expect.objectContaining({ label: "Legal", section: true }),
         ])
       );
-      expect(aboutChildren.slice(0, 3)).toEqual([
+      // 6529 Explained is the About flyout's first row (MAP.md 1.1).
+      expect(aboutChildren.slice(0, 4)).toEqual([
+        { label: "6529 Explained", path: "/explained" },
         { label: "Overview", path: "/about" },
         expect.objectContaining({ label: "Overview", section: true }),
         expect.objectContaining({
@@ -280,7 +286,11 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 
     it("adds WatchTower with the open-report indicator for moderators", () => {
       mockModeratorAccess = {
-        data: { moderator: true, has_open_reports: true },
+        data: {
+          moderator: true,
+          has_open_reports: false,
+          needs_review_count: 1,
+        },
       };
       (useAppWallets as jest.Mock).mockReturnValue({
         appWalletsSupported: false,
@@ -292,7 +302,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         expect.objectContaining({
           path: "/content-moderation",
           hasIndicator: true,
-          indicatorLabel: "Open reports need review",
+          indicatorLabel: "Cases need manual review",
         })
       );
     });
@@ -303,7 +313,11 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         canAccessLanding: true,
       };
       mockModeratorAccess = {
-        data: { moderator: true, has_open_reports: false },
+        data: {
+          moderator: true,
+          has_open_reports: false,
+          needs_review_count: 0,
+        },
       };
       (useAppWallets as jest.Mock).mockReturnValue({
         appWalletsSupported: false,

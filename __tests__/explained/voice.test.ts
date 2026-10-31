@@ -107,7 +107,10 @@ describe("the voice lint", () => {
       "explained-verdict",
     ]);
     expect(hit("6529 Explained")).toEqual([]);
-    expect(hit("Network Identity Check")).toEqual(["nic-expanded"]);
+    // D142 named NIC: the name is allowed, the credit never.
+    expect(hit("Network Identity Check")).toEqual([]);
+    expect(hit("Network Identity Credits")).toEqual(["nic-credit"]);
+    expect(hit("a Network Identity Credit")).toEqual(["nic-credit"]);
     expect(hit("CCO art")).toEqual(["cco"]);
     expect(hit("CC0 art")).toEqual([]);
     expect(hit("a DAO")).toEqual(["dao"]);

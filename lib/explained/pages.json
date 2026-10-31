@@ -8,9 +8,13 @@
       "genre": "H",
       "mockup": "hub.html",
       "lane": "P1",
-      "sources": ["app/explained/page.tsx", "app/explained/hub/**"],
-      "dependsOn": ["D89", "D116"],
-      "checkedThrough": "D141",
+      "sources": [
+        "app/explained/page.tsx",
+        "app/explained/hub/**",
+        "app/explained/_lib/**"
+      ],
+      "dependsOn": ["D89", "D116", "D142"],
+      "checkedThrough": "D142",
       "states": [
         {
           "name": "loop-votes",
@@ -26,9 +30,9 @@
       "genre": "E",
       "mockup": "tdh-overview.html",
       "lane": "P1",
-      "sources": ["app/network/tdh/*"],
-      "dependsOn": ["D112", "D119", "D128", "D136", "D137"],
-      "checkedThrough": "D141",
+      "sources": ["app/network/tdh/*", "app/network/tdh/overview/**"],
+      "dependsOn": ["D112", "D119", "D125", "D128", "D136", "D137", "D142"],
+      "checkedThrough": "D142",
       "budget": { "words": 900, "firstScreen": 120, "figuresPer1000": 6 },
       "states": [
         {

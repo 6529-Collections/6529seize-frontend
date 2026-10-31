@@ -1,3 +1,5 @@
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import CircleLoader, {
@@ -31,6 +33,7 @@ export default function MetadataSection({
   onPendingChange: (dirty: boolean) => void;
 }>) {
   const { setToast } = useAuth();
+  const locale = useBrowserLocale();
   const initialTraits = useMemo(() => claimToTraitsData(claim), [claim]);
   const [traits, setTraits] = useState<TraitsData>(initialTraits);
   const [externalUrl, setExternalUrl] = useState(claim.external_url ?? "");
@@ -143,6 +146,11 @@ export default function MetadataSection({
       noValidate
       className="tw-flex tw-flex-col tw-gap-4"
     >
+      {claim.collaboration_credit && (
+        <p className="tw-m-0 tw-text-sm tw-text-iron-200">
+          {t(locale, "memes.collaborations.forge")}
+        </p>
+      )}
       <ArtworkDetails
         title={traits.title}
         description={traits.description}
@@ -151,7 +159,6 @@ export default function MetadataSection({
           setTraits((prev) => ({ ...prev, description }))
         }
       />
-
       <div className="tw-group tw-relative tw-mt-2">
         <div className="tw-relative">
           <label

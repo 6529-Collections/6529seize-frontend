@@ -97,18 +97,89 @@ describe("createClientRateLimiter", () => {
     ).toBe(1);
   });
 
+  it("buckets every spelling of an IPv4-mapped address with its IPv4 address", () => {
+    const enforce = createLimiter(1);
+
+    expect(
+      allowedCount(enforce, [
+        "8.8.8.8",
+        "::ffff:8.8.8.8",
+        "0:0:0:0:0:ffff:8.8.8.8",
+        "0000:0000:0000:0000:0000:ffff:8.8.8.8",
+        "::FFFF:8.8.8.8",
+        "0:0:0:0:0:FfFf:8.8.8.8",
+        "0000:0000:0000:0000:0000:FFFF:0808:0808",
+        "0:0::ffff:8.8.8.8",
+      ])
+    ).toBe(1);
+  });
+
+  it("does not merge distinct IPv4 addresses behind mapped spellings", () => {
+    const enforce = createLimiter(1);
+
+    expect(
+      allowedCount(enforce, [
+        "::ffff:8.8.8.8",
+        "0:0:0:0:0:ffff:8.8.4.4",
+        "0000:0000:0000:0000:0000:ffff:0101:0101",
+      ])
+    ).toBe(3);
+  });
+
+  it("skips mapped private and loopback IPv4 hops in every spelling", () => {
+    const enforce = createLimiter(1);
+
+    expect(
+      allowedCount(enforce, [
+        "8.8.8.8, ::ffff:10.0.0.1",
+        "8.8.8.8, 0:0:0:0:0:ffff:127.0.0.1",
+        "8.8.8.8, 0000:0000:0000:0000:0000:ffff:c0a8:0101",
+        "8.8.8.8, ::FFFF:169.254.169.254",
+      ])
+    ).toBe(1);
+  });
+
+  it("buckets IPv6 addresses with a dotted tail by their /64", () => {
+    const enforce = createLimiter(1);
+
+    expect(
+      allowedCount(enforce, [
+        "2a00:1450:0:0:0:0:8.8.8.8",
+        "2A00:1450::808:808",
+        "2a00:1450:0000:0000:ffff:ffff:1.2.3.4",
+      ])
+    ).toBe(1);
+  });
+
+  it("treats a dotted quad anywhere but the final group as unidentified", () => {
+    const enforce = createLimiter(1);
+    const malformed = [
+      "1.2.3.4::1",
+      "::1.2.3.4:5",
+      "1:2:3:4:1.2.3.4:6:7",
+      "::ffff:1.2.3",
+      "::ffff:01.2.3.4",
+    ];
+
+    // Malformed spellings share the larger unidentified budget (10x) rather
+    // than getting a bucket of their own, and they never reach a public one.
+    expect(allowedCount(enforce, [...malformed, ...malformed])).toBe(10);
+    expect(enforce(requestFrom(malformed[0]))?.status).toBe(429);
+    expect(enforce(requestFrom("8.8.8.8"))).toBeNull();
+  });
+
   it("buckets IPv6 clients by /64 across compressed spellings", () => {
     const enforce = createLimiter(1);
 
     expect(
       allowedCount(enforce, [
-        "2001:db8::abcd:1",
-        "2001:db8:0:0:1::",
-        "2001:0DB8:0000:0000:ffff:ffff:ffff:ffff",
+        "2a00:1450::abcd:1",
+        "2a00:1450:0:0:1::",
+        "2A00:1450:0000:0000:ffff:ffff:ffff:ffff",
       ])
     ).toBe(1);
     expect(
-      allowedCount(enforce, ["2001:db8:0:1::1", "2001:db8:1::1", "2001:db9::"])
+      allowedCount(enforce, ["2a00:1450:0:1::1", "2a00:1450:1::1", "2a00:1451::"])
     ).toBe(3);
   });
 
@@ -129,10 +200,10 @@ describe("createClientRateLimiter", () => {
 
     expect(
       allowedCount(enforce, [
-        "2001:db8:5::1, ::1",
-        "2001:db8:5::2, 0000:0000:0000:0000:0000:0000:0000:0001",
-        "2001:db8:5::3, fe80::1",
-        "2001:db8:5::4, fd00::1",
+        "2a00:1450:5::1, ::1",
+        "2a00:1450:5::2, 0000:0000:0000:0000:0000:0000:0000:0001",
+        "2a00:1450:5::3, fe80::1",
+        "2a00:1450:5::4, fd00::1",
       ])
     ).toBe(1);
   });
@@ -145,7 +216,7 @@ describe("createClientRateLimiter", () => {
       "::1",
       "10.0.0.1, 192.168.1.10",
       "8.8.8.8, not-an-address",
-      "2001:db8::1%eth0",
+      "2a00:1450::1%eth0",
     ];
 
     expect(

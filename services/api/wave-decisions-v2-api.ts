@@ -65,6 +65,10 @@ const mapDecisionDropV2 = ({
   const replyTo = mapReplyToDrop(drop);
 
   return {
+    collaborators: drop.collaborators ?? [],
+    ...(drop.submission_artist !== undefined
+      ? { submission_artist: drop.submission_artist }
+      : {}),
     id: drop.id,
     serial_no: drop.serial_no,
     drop_type: ApiDropType.Winner,
@@ -97,6 +101,7 @@ const mapDecisionDropV2 = ({
     ...(drop.moderation ? { moderation: drop.moderation } : {}),
     subscribed_actions: [],
     is_signed: drop.is_signed,
+    ...(drop.is_author_signed ? { is_author_signed: true } : {}),
     reactions: mapDropReactionCountersV2(drop),
     boosts: drop.boosts,
     is_additional_action_promised:

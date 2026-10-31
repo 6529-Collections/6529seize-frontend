@@ -1,4 +1,5 @@
 import { publicEnv } from "@/config/env";
+import { getStagingApiKey } from "@/config/serverEnv";
 import { API_AUTH_COOKIE } from "@/constants/constants";
 import type { ApiOgMetadata } from "@/generated/models/ApiOgMetadata";
 import { MetadataNotFoundError } from "@/app/api/og-metadata/_lib/metadataNotFoundError";
@@ -66,7 +67,8 @@ export async function GET(
     const cookieStore = await cookies();
     const apiAuth =
       getUsableText(cookieStore.get(API_AUTH_COOKIE)?.value) ??
-      getUsableText(publicEnv.STAGING_API_KEY);
+      getStagingApiKey() ??
+      null;
     const metadata = await fetchProfileMetadata(normalizedIdentity, apiAuth);
     const montserratFonts = await loadMontserratFonts();
 

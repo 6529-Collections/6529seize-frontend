@@ -68,14 +68,6 @@ const AUDITED_REVEAL_EXEMPTIONS: readonly AuditedRevealExemption[] = [
       "This pointer-events-none preview replaces already visible summary text as decoration; without hover the original summary remains visible.",
   },
   {
-    file: "components/home/now-minting/MemeSubscriptionAwarenessRow.tsx",
-    marker: "tw-bg-primary-400/[0.045] tw-opacity-0",
-    literalHash:
-      "0bc7f096adb69984e6ebd6ba6e6dd42070148782c663d14af10ed4401778e31d",
-    reason:
-      "This aria-hidden, pointer-events-none surface tint is decorative; the row content and actions are always visible.",
-  },
-  {
     file: "components/profile-cms/CmsArtLightbox.tsx",
     marker: "tw-uppercase tw-text-white tw-opacity-0",
     literalHash:
@@ -132,7 +124,7 @@ const AUDITED_REVEAL_EXEMPTIONS: readonly AuditedRevealExemption[] = [
       "WaveDrop passes forceVisible from mouse pointerover/out even when CSS hover is unavailable; focus-within also reveals the toolbar for keyboard users, and touch mode has its own action sheet.",
   },
   {
-    file: "components/waves/drops/WaveDrop.helpers.tsx",
+    file: "components/waves/drops/GroupedDropTimestamp.tsx",
     marker: "tw-opacity-0 desktop-hover:group-hover:tw-opacity-100",
     literalHash:
       "dc415d6ed3f1074154a978fff7bea616f299625cfe95d3b0ab2197cefb2768df",

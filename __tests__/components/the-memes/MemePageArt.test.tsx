@@ -1,7 +1,7 @@
 import { MemePageArt } from "@/components/the-memes/MemePageArt";
 import { formatNumber, roundTo } from "@/i18n/format";
 import { t } from "@/i18n/messages";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -89,6 +89,38 @@ beforeEach(() => {
 });
 
 describe("MemePageArt", () => {
+  it("reveals every property and can restore the six-property phone preview", () => {
+    const manyProperties = {
+      ...nft,
+      metadata: {
+        ...nft.metadata,
+        attributes: Array.from({ length: 8 }, (_, index) => ({
+          trait_type: `Property ${index + 1}`,
+          value: `Value ${index + 1}`,
+        })),
+      },
+    };
+    render(
+      <MemePageArt show nft={manyProperties as any} nftMeta={nftMeta as any} />
+    );
+    const toggle = screen.getByRole("button", {
+      name: "Show all 8 properties",
+    });
+    const lastTile = screen.getByText("Property 8").parentElement;
+    expect(lastTile).toHaveClass("tw-hidden", "sm:tw-flex");
+    fireEvent.click(toggle);
+    expect(lastTile).not.toHaveClass("tw-hidden");
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    fireEvent.click(toggle);
+    expect(lastTile).toHaveClass("tw-hidden");
+  });
+
+  it("does not add a disclosure for a short property list", () => {
+    render(<MemePageArt show nft={nft as any} nftMeta={nftMeta as any} />);
+    expect(
+      screen.queryByRole("button", { name: /Show all.*properties/ })
+    ).toBeNull();
+  });
   it("returns empty when missing data", () => {
     const { container } = render(
       <MemePageArt show={false} nft={undefined} nftMeta={undefined} />

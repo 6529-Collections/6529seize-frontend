@@ -1,6 +1,8 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
+
+import { skipToken, useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useContext, useMemo, useState } from "react";
 
@@ -22,9 +24,11 @@ import { useContentModeratorAccess } from "@/hooks/content-moderation/useContent
 import { useProfileBlockState } from "@/hooks/content-moderation/useProfileBlockState";
 import { usePublicProfileModerationStatus } from "@/hooks/content-moderation/usePublicProfileModerationStatus";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { useIdentity } from "@/hooks/useIdentity";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { toProfileIdentitySegment } from "@/helpers/profile-identity-segment";
 import { commonApiFetch } from "@/services/api/common-api";
 
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
@@ -378,6 +382,86 @@ function ProfileHeaderContent({
   );
 }
 
+/**
+ * Reads the header's shared queries. This header streams in after the rest of
+ * the profile page, which can fill these queries first, so until it has
+ * hydrated it renders the server snapshot it was given. That keeps the
+ * hydration render identical to the server HTML.
+ */
+function useProfileHeaderData({
+  handleOrWallet,
+  profileId,
+  initialStatements,
+  initialProfileEnabledAt,
+  initialCmsWebsiteHref,
+  initialFollowersCount,
+}: {
+  readonly handleOrWallet: string;
+  readonly profileId: string | null | undefined;
+  readonly initialStatements: CicStatement[];
+  readonly initialProfileEnabledAt: string | null;
+  readonly initialCmsWebsiteHref: string | null | undefined;
+  readonly initialFollowersCount: number | null;
+}) {
+  const hasHydrated = useHasHydrated();
+  // Same endpoint as the server loader that primed this query, so a refresh
+  // never requests a differently encoded path for the same identity.
+  const statementsSegment = toProfileIdentitySegment(handleOrWallet);
+  // No initialData: an empty server snapshot (for example after a failed
+  // request) must not count as fresh data, or the client would skip its own
+  // fetch. Until data arrives the server snapshot below is shown instead.
+  const { data: statements } = useQuery<CicStatement[]>({
+    queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, handleOrWallet],
+    queryFn:
+      statementsSegment === null
+        ? skipToken
+        : async () =>
+            await commonApiFetch<CicStatement[]>({
+              endpoint: `profiles/${statementsSegment}/cic/statements`,
+            }),
+    staleTime: 60_000,
+  });
+  const { data: enabledAt } = useQuery<string | null>({
+    queryKey: [QueryKey.PROFILE_HEADER, handleOrWallet, "enabledAt"],
+    queryFn: skipToken,
+  });
+  const { data: websiteHref } = useQuery<string | null>({
+    queryKey: [QueryKey.PROFILE_HEADER, handleOrWallet, "cmsWebsiteHref"],
+    queryFn: skipToken,
+  });
+  const { data: followers } = useQuery<ApiIncomingIdentitySubscriptionsPage>({
+    queryKey: [
+      QueryKey.IDENTITY_FOLLOWERS,
+      { profile_id: profileId, page_size: 1 },
+    ],
+    queryFn: () => {
+      if (!profileId) throw new Error("Missing profile ID for followers");
+      return commonApiFetch<ApiIncomingIdentitySubscriptionsPage>({
+        endpoint: `identity-subscriptions/incoming/IDENTITY/${profileId}`,
+        params: { page_size: "1" },
+      });
+    },
+    enabled: !!profileId,
+    staleTime: 60_000,
+  });
+
+  return {
+    // Before hydration, and until the client has statements of its own, show
+    // exactly what the server rendered.
+    statements: (hasHydrated ? statements : undefined) ?? initialStatements,
+    profileEnabledAt:
+      hasHydrated && enabledAt !== undefined
+        ? enabledAt
+        : initialProfileEnabledAt,
+    cmsWebsiteHref:
+      hasHydrated && websiteHref !== undefined
+        ? websiteHref
+        : initialCmsWebsiteHref,
+    followersCount:
+      (hasHydrated ? followers?.count : undefined) ?? initialFollowersCount,
+  };
+}
+
 export default function UserPageHeaderClient({
   profile: initialProfile,
   handleOrWallet,
@@ -385,9 +469,9 @@ export default function UserPageHeaderClient({
   defaultBanner1,
   defaultBanner2,
   initialStatements,
-  profileEnabledAt,
-  followersCount,
-  cmsWebsiteHref,
+  profileEnabledAt: initialProfileEnabledAt,
+  followersCount: initialFollowersCount,
+  cmsWebsiteHref: initialCmsWebsiteHref,
 }: Readonly<Props>) {
   const params = useParams();
   const router = useRouter();
@@ -446,16 +530,15 @@ export default function UserPageHeaderClient({
   );
   const canInlineEdit = canEdit && !hasTouchScreen;
 
-  const { data: statements } = useQuery<CicStatement[]>({
-    queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, normalizedHandleOrWallet],
-    queryFn: async () =>
-      await commonApiFetch<CicStatement[]>({
-        endpoint: `profiles/${normalizedHandleOrWallet}/cic/statements`,
-      }),
-    enabled: !!normalizedHandleOrWallet,
-    initialData: initialStatements,
-    staleTime: 60_000,
-  });
+  const { statements, profileEnabledAt, cmsWebsiteHref, followersCount } =
+    useProfileHeaderData({
+      handleOrWallet: normalizedHandleOrWallet,
+      profileId: profile.id,
+      initialStatements,
+      initialProfileEnabledAt,
+      initialCmsWebsiteHref,
+      initialFollowersCount,
+    });
 
   const aboutStatement = useMemo(
     () => getAboutStatement(statements),

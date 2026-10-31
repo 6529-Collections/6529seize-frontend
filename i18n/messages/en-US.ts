@@ -1,4 +1,9 @@
+import { BOOKMARK_MESSAGES } from "@/i18n/messages/bookmarks";
+import { NOTIFICATIONS_INBOX_MESSAGES } from "@/i18n/messages/notifications-inbox";
+import { VOTING_CREDIT_RETURN_MESSAGES } from "@/i18n/messages/voting-credit-returns";
+import { MEME_COLLABORATION_MESSAGES } from "@/i18n/messages/meme-collaborations";
 import emmaMessages from "@/i18n/messages/emma.en-US.json";
+import additionalActionMessages from "@/i18n/messages/additionalAction.en-US.json";
 import { EN_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import waveCreationMessages from "@/i18n/messages/wave-creation.en-US.json";
 import { COMPETITION_MESSAGES } from "@/i18n/messages/competitions";
@@ -46,7 +51,10 @@ import networkTdhSpecMessages from "@/i18n/messages/networkTdhSpec.en-US.json";
 import networkTdhFormalMessages from "@/i18n/messages/networkTdhFormal.en-US.json";
 import networkTdhImplMessages from "@/i18n/messages/networkTdhImpl.en-US.json";
 import explainedKitMessages from "@/i18n/messages/explainedKit.en-US.json";
+import explainedHubMessages from "@/i18n/messages/explainedHub.en-US.json";
+import explainedTdhOverviewMessages from "@/i18n/messages/explainedTdhOverview.en-US.json";
 import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US.json";
+import pageMetadataMessages from "@/i18n/messages/pageMetadata.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import utcScheduleMessages from "@/i18n/messages/utcSchedule.en-US.json";
 import worldTimeZonesMessages from "@/i18n/messages/worldTimeZones.en-US.json";
@@ -60,12 +68,14 @@ import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-c
 import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
 import { THE_MEMES_MINT_PROGRESS_MESSAGES } from "@/i18n/messages/the-memes-mint-progress";
-import { PUBLIC_REVIEW_MESSAGES } from "@/i18n/messages/public-review";
+import type { PUBLIC_REVIEW_MESSAGES } from "@/i18n/messages/public-review";
 import { EN_US_RECEIPT_MESSAGES } from "@/i18n/messages/collect-receipts";
 import { CONTENT_MODERATION_MESSAGES } from "@/i18n/messages/content-moderation";
+import { SIGNED_MESSAGES_MESSAGES } from "@/i18n/messages/signed-messages";
 import { MODERATION_CHECK_MESSAGES } from "@/i18n/messages/moderation-checks";
 import { EULA_MESSAGES } from "@/i18n/messages/eula";
 import { GLOBAL_ERROR_MESSAGES } from "@/i18n/messages/global-error";
+import { MAPPING_TOOL_MESSAGES } from "@/i18n/messages/mapping-tools";
 import { PROFILE_CURATION_MESSAGES } from "@/i18n/messages/profile-curation";
 import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-documentation";
 import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artwork-documentation-integration";
@@ -153,6 +163,7 @@ const USER_COLLECTED_STATS_MESSAGES = namespaceMessages(
     ["details.show", "Details"],
     ["details.hide", "Hide Details"],
     ["details.unavailable", "Stats are unavailable for this profile."],
+    ["details.loading", "Loading collection details…"],
     ["seasons.title", "Seasons"],
     ["seasons.startedCount", "{started}/{total} started"],
     ["seasons.showLess", "Show less"],
@@ -269,6 +280,20 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "search.placeholder": "Type a category name",
   "search.resultsLabel": "REP category search results",
   "helpBotReserved.error": "{category} is managed by help6529.",
+  "edit.loading": "Loading your Rep allowance…",
+  "edit.loadError": "Couldn't load your Rep allowance.",
+  "edit.retry": "Try again",
+  "edit.title": "Add Rep to {name}",
+  "edit.totalLabel": "Your total Rep for {category}:",
+  "edit.save": "Save",
+  "edit.cancel": "Cancel",
+  "edit.availableRep": "Your available Rep:",
+  "edit.ratingLimit": "Your max/min Rep Rating to {category}:",
+  "edit.proxy": "You are acting as proxy for: {name}",
+  "edit.updated": "Rep updated.",
+  "edit.updateError": "Couldn't update this Rep rating.",
+  "edit.tryAgain": "Please try again.",
+  "edit.loginRequired": "Log in to continue.",
   "grant.searchPlaceholder": "Category to grant REP for",
   "grant.minimumCharacters": "Type at least {min} characters.",
   "grant.maximumCharacters": "Type at most {max} characters.",
@@ -835,15 +860,19 @@ const WAVE_COMPETITION_BADGE_MESSAGES = objectMessages(
 );
 
 const WAVE_VOTE_RATIONALE_MESSAGES = objectMessages("waves.voteRationale", {
-  explain: "Explain",
-  explainAriaLabel: "Reply with vote rationale",
+  explain: "Explain vote",
+  explainAriaLabel: "Explain vote",
+  savedDescription: "Post a public reply in the wave about your saved vote.",
+  publicReplyDescription:
+    "Posts a public reply in the wave after your vote is saved.",
   fieldLabel: "Optional rationale reply",
+  fieldPlaceholder: "Why this vote? (optional)",
   fieldDescription:
-    "Editing this text turns on Vote with reply until you choose the switch setting yourself.",
-  switchLabel: "Vote with reply",
+    "Posts a public reply in the wave after your vote is saved. Editing this text turns on Explain vote until you choose the switch setting yourself.",
+  switchLabel: "Explain vote",
   stateOn: "On",
   stateOff: "Off",
-  emptyBlockReason: "Add rationale text or turn Vote with reply off.",
+  emptyBlockReason: "Add rationale text or turn Explain vote off.",
   submitLabel: "Vote + reply",
   postErrorTitle: "Vote saved, but couldn't post your rationale reply.",
   postErrorRetry: "Please try posting the reply again.",
@@ -1070,6 +1099,7 @@ const USER_COLLECTED_STATS_TDH_HISTORY_MESSAGES = objectMessages(
 
 const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
   navigationLabel: "Profile sections",
+  loading: "Loading profile section…",
   scrollLeft: "Scroll profile sections left",
   scrollRight: "Scroll profile sections right",
   identity: "Identity",
@@ -1346,12 +1376,25 @@ const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
 
 const USER_CIC_TYPE_MESSAGES = objectMessages("user.cicType", {
   details: "Network ID Check details",
+  title: "Network ID Check",
+  description:
+    "Does the community believe this profile accurately represents its identity?",
 } as const);
 
 const FOLLOWERS_MESSAGES = objectMessages("followers", {
+  "following.title": "Following",
+  "following.open": "Open your following list: {count}",
+  "following.loadingCount": "…",
+  "following.unavailableCount": "Unavailable",
+  "following.loading": "Loading following list…",
+  "following.empty": "You aren't following anyone yet.",
+  "following.error": "Couldn't load your following list. Please try again.",
+  "following.retry": "Retry",
+  "following.loadMore": "Load more",
   "modal.title": "Followers",
   "list.label": "Followers",
   "list.loading": "Loading followers",
+  "list.empty": "No followers yet.",
   "profile.linkAriaLabel": "View {handle}'s profile",
   "profile.avatarAlt": "{handle}'s profile image",
 } as const);
@@ -1380,6 +1423,10 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   filterAll: "All",
   filterJoined: "Joined",
   joinedEmptyMessage: "No joined waves to display",
+  joinedLoadError: "Some joined waves could not be loaded.",
+  joinedRetry: "Retry",
+  joinedRetryLabel: "Retry loading joined waves",
+  joinedLoadMore: "Load more joined waves",
   announcementWavesAriaLabel: "Announcement waves",
   highlyRatedAriaLabel: "Worth checking out waves",
   pinnedAriaLabel: "Pinned waves",
@@ -2230,6 +2277,11 @@ const WAVE_COMPOSER_PLACEHOLDER_MESSAGES = objectMessages(
   } as const
 );
 
+const WAVE_DROP_EDITOR_MESSAGES = objectMessages("waves.dropEditor", {
+  label: "Edit message",
+  placeholder: "Edit message...",
+} as const);
+
 const WAVE_STORM_COMPOSER_MESSAGES = objectMessages("waves.stormComposer", {
   draftTitle: "Storm draft",
   emptyDraft: "Your storm parts will appear here.",
@@ -2345,6 +2397,7 @@ const WAVE_LOADING_MESSAGES = objectMessages("waves", {
   loadingWave: "Loading {name}…",
   loadingWaveUnknown: "Loading wave…",
   loadingError: "This wave could not be loaded.",
+  threadLoadError: "This thread could not be loaded.",
   loadingRetry: "Try again",
   loadingBack: "Back to wave list",
   loadingBackMessages: "Back to messages",
@@ -2355,6 +2408,19 @@ const WAVE_LOADING_MESSAGES = objectMessages("waves", {
 const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
   "waves.drops.searchModal",
   {
+    "advanced.allWaves": "all waves",
+    "advanced.filters": "Search filters",
+    "advanced.from": "From a specific user",
+    "advanced.in": "In a specific wave",
+    "advanced.removeFrom": "Remove author filter {name}",
+    "advanced.removeIn": "Remove wave filter {name}",
+    "advanced.idleAll":
+      "Type at least {minLength} characters or add an author filter to search all waves.",
+    "advanced.help":
+      "Type from: to choose an author or in: to choose a wave. Use arrow keys and Enter to select. Remove the wave filter to search all waves. Prefix from: or in: with a backslash to search for that text literally.",
+    "advanced.empty": "No matches found",
+    "advanced.loading": "Loading suggestions…",
+    "advanced.error": "Couldn't load suggestions. Try again.",
     authorFallback: "unknown author",
     clear: "Clear search",
     clearShort: "Clear",
@@ -2377,6 +2443,7 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
     "loading.description": "Looking through {waveName}.",
     "loading.title": "Searching messages",
     placeholder: "Search messages",
+    "result.openInWave": "Open message {serialNo} by {author} in {wave}",
     "result.open": "Open message {serialNo} by {author}",
     "result.checked": "Checked task",
     "result.imageFallback": "image",
@@ -2563,6 +2630,8 @@ const PROFILE_ACTIVITY_RATE_MESSAGES = objectMessages("profileActivity.rate", {
 
 const USER_RATE_MESSAGES = objectMessages("user.rate", {
   "subtitle.waveRep": "give Wave REP for",
+  "nic.label": "Your total NIC Rating of {profile}:",
+  submit: "Rate",
 } as const);
 
 const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
@@ -2901,6 +2970,7 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   "category.pages": "Pages",
   "category.profiles": "Profiles",
   "category.waves": "Waves",
+  "category.messages": "Messages",
   "category.error": "Some results could not be loaded",
   "category.loading": "Loading {category} results",
   clear: "Clear search",
@@ -2908,7 +2978,7 @@ const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
   close: "Close search",
   "dialogTitle.site": "Search 6529",
   "dialogTitle.wave": "Search this Wave",
-  "dialogDescription.site": "Find pages, NFTs, profiles, and Waves.",
+  "dialogDescription.site": "Find pages, NFTs, profiles, Waves, and messages.",
   error: "Something went wrong while searching. Please try again.",
   "error.partial.one": "{category} results could not be loaded.",
   "error.partial.other": "Some result types could not be loaded: {categories}.",
@@ -3025,6 +3095,9 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  ...NOTIFICATIONS_INBOX_MESSAGES,
+  ...MEME_COLLABORATION_MESSAGES,
+  ...VOTING_CREDIT_RETURN_MESSAGES,
   "network.prenodes.title": "Prenodes",
   "network.prenodes.pageTitle": "Prenodes | Network",
   "network.prenodes.deprecation":
@@ -3039,6 +3112,7 @@ export const EN_US_MESSAGES = {
   "header.navigation.loading": "Loading navigation…",
   "waves.information.open": "About {name}",
   ...EN_SUBMISSION_DISCOVERY_MESSAGES,
+  ...additionalActionMessages,
   ...waveCreationMessages,
   ...COMPETITION_MESSAGES,
   ...EN_DROP_REQUIREMENT_MESSAGES,
@@ -3116,7 +3190,8 @@ export const EN_US_MESSAGES = {
   "singleDrop.shared": "Link shared",
   "singleDrop.close": "Close",
   "singleDrop.closeLabel": "Close panel",
-  "singleDrop.loading": "Loading drop",
+  "singleDrop.loading": "Loading…",
+  "singleDrop.loadError": "This content could not be loaded.",
   "singleDrop.showChat": "Show chat",
   "singleDrop.hideChat": "Hide chat",
   "singleDrop.chatLabel": "Drop chat",
@@ -3256,6 +3331,7 @@ export const EN_US_MESSAGES = {
   "notifications.filter.selected": "{count} selected",
   "notifications.filter.sheetTitle": "Filter notifications",
   "notifications.status.unread": "Unread",
+  "notifications.unknownProfile": "Unknown profile",
   "notifications.preview.expand": "Show full drop",
   "notifications.filter.option.mentions": "Mentions",
   "notifications.filter.option.replies": "Replies",
@@ -3304,6 +3380,12 @@ export const EN_US_MESSAGES = {
   "nextgen.about.sections.libraries": "On-Chain Libraries",
   "nextgen.about.sections.moreInformation": "More Information",
   "nextgen.about.sections.collectionsModel": "NextGen Collections Model",
+  "nextgen.loadError.tokens": "Tokens could not be loaded.",
+  "nextgen.loadError.traits": "Collection traits could not be loaded.",
+  "nextgen.loadError.mintOptions": "Mint options could not be loaded.",
+  "nextgen.loadError.allowlistProofs": "Allowlist proofs could not be loaded.",
+  "nextgen.loadError.burnProof": "The burn proof could not be loaded.",
+  "nextgen.loadError.retry": "Try again",
   "auth.sessionUpgrade.action": "Upgrade Authentication",
   "auth.signModal.connectionUpdateRequired": "Connection Update Required",
   "auth.signModal.upgradeAuthentication": "Upgrade Authentication",
@@ -3339,6 +3421,14 @@ export const EN_US_MESSAGES = {
   "auth.signModal.manualUpgrade":
     "Connection sharing and some newer features need the new secure session.",
   "auth.signModal.connectWalletPrompt": "Connect your wallet to continue.",
+  "auth.proxySwitch.connectWallet":
+    "Reconnect your wallet to switch profiles. Your current profile will stay signed in.",
+  "auth.proxySwitch.unsupportedNetwork":
+    "Switch your wallet to a supported network, then select the profile again.",
+  "auth.proxySwitch.contextChanged":
+    "Your wallet, profile, or network changed. Select the profile again to continue.",
+  "auth.proxySwitch.failed":
+    "Couldn't switch profiles. Your current profile is still selected. Please try again.",
   "auth.signModal.noGas":
     "Your signature will not cost any gas and is purely for authentication purposes.",
   "auth.signModal.connect": "Connect",
@@ -3363,6 +3453,8 @@ export const EN_US_MESSAGES = {
   "acceptConnection.action.accept": "Accept connection",
   "acceptConnection.unsupportedWeb":
     "Open this connection link in the 6529 mobile app.",
+  "acceptConnection.unsupportedLegacyDesktop":
+    "This connection link can only be accepted in the 6529 Desktop app.",
   "acceptConnection.missingParameters": "Missing required parameters",
   "acceptConnection.toast.maxProfiles": "Maximum connected profiles reached",
   "acceptConnection.toast.invalidResponse": "Invalid connection response",
@@ -3454,11 +3546,15 @@ export const EN_US_MESSAGES = {
   "headerShare.connectionNotice.loadingMessage":
     "Creating a one-time connection code.",
   "headerShare.connectionNotice.errorMessage":
-    "We couldn't prepare this device connection. Close this dialog and try again.",
+    "We couldn't prepare this device connection. Use Generate new code to try again.",
   "headerShare.connectionNotice.unauthenticatedMessage":
     "Connect and authenticate your wallet before connecting a device.",
   "headerShare.connectionNotice.cancel": "Cancel",
   "headerShare.connectionNotice.update": "Update",
+  "headerShare.connectionRefresh.ready": "Connection ready",
+  "headerShare.connectionRefresh.action": "Generate new code",
+  "headerShare.connectionRefresh.loading": "Preparing connection…",
+  "headerShare.connectionRefresh.unavailable": "Connection unavailable",
   "headerShare.invalidConnectTarget": "Invalid connection target",
   "headerShare.copy.ariaLabel": "Copy link",
   "headerShare.copy.default": "Copy Link",
@@ -3710,6 +3806,19 @@ export const EN_US_MESSAGES = {
   "home.nowMinting.editionDetails.season": "Season",
   "home.nowMinting.editionDetails.distributionPlan": "Distribution Plan",
   "home.nowMinting.editionDetails.view": "View",
+  "home.latestDrop.error":
+    "We couldn’t load the latest artwork. Please try again.",
+  "home.latestDrop.retry": "Try again",
+  "home.latestDrop.retrying": "Trying again…",
+  "home.comingUp.title": "Coming up",
+  "home.comingUp.credits.withNames": "with {names}",
+  "home.comingUp.credits.moreNames": "+{count} more",
+  "home.comingUp.credits.viewAllCredits": "View all collaborators on this drop",
+  "home.comingUp.credits.anonymousArtist": "Anonymous",
+  "home.comingUp.subtitle": "Next in queue and current vote leaders.",
+  "home.comingUp.viewAll": "View all",
+  "home.comingUp.loading": "Loading upcoming artwork…",
+  "home.nowMinting.stats.unavailable": "Unavailable",
   "home.nowMinting.stats.edition": "Edition",
   "home.nowMinting.stats.status": "Status",
   "home.nowMinting.stats.mintPrice": "Mint price",
@@ -3723,6 +3832,9 @@ export const EN_US_MESSAGES = {
   "home.exploreWaves.status.loading": "Loading {label}",
   "home.exploreWaves.status.empty": "No {label}",
   "home.exploreWaves.status.showing": "Showing {count} {label}",
+  "home.exploreWaves.error.message":
+    "Could not load {label}. Please try again.",
+  "home.exploreWaves.error.retry": "Try again",
   "home.exploreWaves.viewAll": "View all",
   "waveChat.boostedDrops.display.description":
     "How boosted-drop cards show in chat.",
@@ -3784,6 +3896,10 @@ export const EN_US_MESSAGES = {
   "theMemes.card.metric.marketCapUnavailable": "Market Cap: N/A",
   "theMemes.card.metric.volume": "Volume ({volumeType}): {value}",
   "theMemes.card.metric.ethValue": "{value} ETH",
+  "theMemes.detail.mobile.readMore": "Read more",
+  "theMemes.detail.mobile.showLess": "Show less",
+  "theMemes.detail.mobile.showProperties": "Show all {count} properties",
+  "theMemes.detail.mobile.fewerProperties": "Show fewer",
   "theMemes.detail.backLink.ariaLabel": "Back to The Memes",
   "theMemes.detail.heading.card": "Card {tokenId}",
   "theMemes.detail.heading.ariaLabel": "Card {tokenId} - {name}",
@@ -4428,6 +4544,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_CHAT_MESSAGES,
   ...WAVE_COMPOSER_ACTION_MESSAGES,
   ...WAVE_COMPOSER_PLACEHOLDER_MESSAGES,
+  ...WAVE_DROP_EDITOR_MESSAGES,
   ...WAVE_STORM_COMPOSER_MESSAGES,
   ...WAVE_CHAT_SETTINGS_MESSAGES,
   ...NETWORK_GROUP_INSPECTION_MESSAGES,
@@ -4493,7 +4610,10 @@ export const EN_US_MESSAGES = {
   ...networkTdhFormalMessages,
   ...networkTdhImplMessages,
   ...explainedKitMessages,
+  ...explainedHubMessages,
+  ...explainedTdhOverviewMessages,
   ...delegationTapGuideMessages,
+  ...pageMetadataMessages,
   ...toolsMessages,
   ...utcScheduleMessages,
   ...worldTimeZonesMessages,
@@ -4516,14 +4636,23 @@ export const EN_US_MESSAGES = {
   ...HEADER_SEARCH_MESSAGES,
   ...NEW_VERSION_TOAST_MESSAGES,
   ...NAVIGATION_MESSAGES,
-  ...PUBLIC_REVIEW_MESSAGES,
+  "navigation.nfts.theMemes": "The Memes",
+  "navigation.nfts.gradient": "6529 Gradient",
+  "navigation.nfts.nextGen": "NextGen",
+  "navigation.nfts.memeLab": "Meme Lab",
+  "navigation.nfts.rememes": "ReMemes",
+  "navigation.nfts.streamReview": "6529 Stream — Review",
+  "navigation.nfts.activity": "NFT Activity",
+  "navigation.nfts.memesCalendar": "Memes Calendar",
   ...EULA_MESSAGES,
   ...GLOBAL_ERROR_MESSAGES,
+  ...MAPPING_TOOL_MESSAGES,
   ...TITLE_CONTEXT_MESSAGES,
   ...WAVE_NAVIGATION_MESSAGES,
   ...MY_STREAM_CURATION_MESSAGES,
   ...PROFILE_CURATION_MESSAGES,
   ...ARTWORK_DOCUMENTATION_MESSAGES,
+  ...BOOKMARK_MESSAGES,
   ...ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES,
   ...WAVE_SCORE_NAVIGATION_MESSAGES,
   ...MEMES_QUICK_VOTE_MESSAGES,
@@ -4537,6 +4666,9 @@ export const EN_US_MESSAGES = {
   ...WAVE_DROP_ACTIONS_MESSAGES,
   ...WAVE_PROPOSAL_CARD_MESSAGES,
   ...WAVE_COMPETITION_BADGE_MESSAGES,
+  "waves.artistPreview.submissionCategories": "Submission categories",
+  "waves.artistPreview.activeSubmissions": "Active Submissions",
+  "waves.artistPreview.mintedMemes": "Minted to Memes",
   ...WAVE_VOTE_RATIONALE_MESSAGES,
   ...WAVE_VOTE_MODE_MESSAGES,
   ...WAVE_VOTE_MESSAGES,
@@ -4548,6 +4680,7 @@ export const EN_US_MESSAGES = {
   ...THE_MEMES_MINT_SUCCESS_MESSAGES,
   ...THE_MEMES_MINT_PROGRESS_MESSAGES,
   ...CONTENT_MODERATION_MESSAGES,
+  ...SIGNED_MESSAGES_MESSAGES,
   ...MODERATION_CHECK_MESSAGES,
   ...EN_US_RECEIPT_MESSAGES,
   "collect.selection.processing": "Processing",
@@ -4578,7 +4711,8 @@ export const EN_US_MESSAGES = {
     "Community decisions powered by TDH.",
   "waves.discovery.recommendationsDescription":
     "Highly rated waves you don’t follow.",
-  "waves.discovery.publicRecommendationsDescription": "Highly rated waves.",
+  "waves.discovery.publicRecommendationsDescription":
+    "Highly rated waves you don’t follow.",
   "waves.discovery.activeDiscussions": "Active discussions",
   "waves.discovery.unfollowedDiscussions":
     "Active discussions you are not yet following",
@@ -4596,6 +4730,30 @@ export const EN_US_MESSAGES = {
   "waves.discovery.nextDecision": "Next decision {date}",
   "waves.discovery.emptyVotes": "No active TDH votes right now.",
   "waves.discovery.emptyRecommendations": "No recommendations right now.",
+  "waves.discovery.loadingRecommendations": "Loading recommendations…",
+  "waves.discovery.loadingVotes": "Loading votes…",
+  "waves.discovery.loadingAnnouncements": "Loading announcements…",
+  "waves.discovery.recommendationsError": "Couldn’t load recommendations.",
+  "waves.discovery.votesError": "Couldn’t load votes.",
+  "memes.quickVote.loading":
+    "Loading your next meme and your recent quick-vote amounts.",
+  "waves.discovery.controls": "Discovery controls",
+  "waves.discovery.scoreFormula": "Score formula",
+  "waves.discovery.sort.label": "Wave discovery sort",
+  "waves.discovery.sort.open": "Wave discovery sort: {sort}",
+  "waves.discovery.sort.balanced": "Balanced",
+  "waves.discovery.sort.quality": "Quality",
+  "waves.discovery.sort.hot": "Hot",
+  "waves.discovery.sort.rep": "REP",
+  "waves.discovery.sort.newest": "Newest",
+  "waves.discovery.sort.latestPosts": "Latest Posts",
+  "waves.discovery.sort.status": "{sort} waves",
+  "waves.discovery.filter.label": "Wave score threshold",
+  "waves.discovery.filter.all": "All",
+  "waves.discovery.filter.score": "Score 50+",
+  "waves.discovery.filter.hot": "Hot 60+",
+  "waves.discovery.filter.rep": "REP 60+",
+  "waves.discovery.filter.empty": "No waves match these filters.",
   "waves.discovery.loading": "Loading waves…",
   "waves.discovery.error": "Couldn’t load waves.",
   "waves.discovery.retry": "Try again",
@@ -4617,4 +4775,9 @@ export const EN_US_MESSAGES = {
   "waves.sidebar.byCreator": "by {creator}",
 } as const;
 
-export type MessageKey = keyof typeof EN_US_MESSAGES;
+// Route namespaces are en-US source copy that ships only with its route. Each
+// module that reads one imports `@/i18n/namespaces/<name>`, which registers
+// the copy. The keys stay valid message keys everywhere.
+export type MessageKey =
+  | keyof typeof EN_US_MESSAGES
+  | keyof typeof PUBLIC_REVIEW_MESSAGES;

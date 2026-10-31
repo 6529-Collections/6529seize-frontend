@@ -1200,6 +1200,9 @@ function inspectPage(limits) {
     const cards = [];
     for (const el of root.querySelectorAll("div, section, article, aside, figure, li, a, details, ul, ol, dl")) {
       if (!isShown(el) || el.closest("table, svg, pre")) continue;
+      // A card that opts out (an open menu floating over the page) is not
+      // measured against the cards around it, whichever comes first.
+      if (ignored(el, "card-gap")) continue;
       const cs = style(el);
       const sides = ["Top", "Right", "Bottom", "Left"];
       const bordered = sides.every(
