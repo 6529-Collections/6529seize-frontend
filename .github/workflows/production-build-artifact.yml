@@ -76,7 +76,7 @@ env:
   ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io"
   BASE_ENDPOINT: "https://6529.io"
   NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: "true"
-  # Encrypted DMs and groups (D109): off until the owner authorizes production.
+  # Encrypted DMs and groups (D109): on in production (owner decision, 2026-10-31).
   NEXT_PUBLIC_E2EE_DM_ENABLED: "true"
   NEXTGEN_CHAIN_ID: "1"
   MOBILE_APP_SCHEME: "mobile6529"
