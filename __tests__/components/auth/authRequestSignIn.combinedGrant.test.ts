@@ -374,6 +374,23 @@ describe("sign-in with a combined signing + encrypted messages grant (NC8)", () 
     expect(mockAdopt).not.toHaveBeenCalled();
   });
 
+  it("never signs an ordinary challenge that carries a grant it did not ask for", async () => {
+    const { getSignature, signIn, setToast } = createSubject((params) =>
+      params.deviceGrant
+        ? combinedServer(params)
+        : combinedMessage(`0x${"d7".repeat(32)}`, MLS_KEY)
+    );
+
+    await expect(
+      signIn({ signerAddress: SIGNER, role: "proxy-role" })
+    ).resolves.toEqual({ success: false });
+
+    expect(getSignature).not.toHaveBeenCalled();
+    expect(setToast).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "error" })
+    );
+  });
+
   it("does not prepare an MLS key when no signing grant is requested", async () => {
     const { signIn } = createSubject();
     await signIn({ signerAddress: SIGNER, role: "proxy-role" });

@@ -194,7 +194,7 @@ function toExactHost(domain: string): string | null {
  * one of its subdomains (production, staging, previews), without a port, or
  * exactly the site this check runs on (local builds and mirrors).
  */
-function isAllowedGrantDomain(domain: string): boolean {
+export function isAllowedGrantDomain(domain: string): boolean {
   const host = toExactHost(domain);
   if (host === null) {
     return false;

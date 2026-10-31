@@ -123,6 +123,19 @@ describe("verifyGrant: combined sign-in grants (NC8)", () => {
     expect(result.ok).toBe(false);
   });
 
+  it("rejects a sign-in grant signed for a site other than 6529", async () => {
+    const message = buildMessage().replaceAll(
+      "staging.6529.io",
+      "evil.example"
+    );
+    const base = await recordFor(message);
+    const result = await verifyGrant(
+      { ...base, grant: { ...base.grant, origin: "evil.example" } },
+      { atMs }
+    );
+    expect(result).toMatchObject({ ok: false, reason: "login-grant-domain" });
+  });
+
   it("rejects a grant id that is not the message hash", async () => {
     const message = buildMessage();
     const result = await verifyGrant(

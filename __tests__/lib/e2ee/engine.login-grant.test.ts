@@ -19,6 +19,7 @@ import { createMemoryE2eeStorage } from "@/lib/e2ee/storage";
 import {
   addUser,
   createWorld,
+  realSleep,
   settle,
   startDevice,
   texts,
@@ -28,6 +29,22 @@ import {
 jest.setTimeout(180_000);
 
 const SIGNING_KEY = `0x${"d7".repeat(32)}`;
+// Sign-in grants verify only for 6529 domains (as signed drops do).
+const ORIGIN = "staging.6529.io";
+
+/** Enrollment from a sign-in grant runs in the background after start. */
+async function waitForStatus(
+  engine: { getStatus(): string },
+  status: string
+): Promise<void> {
+  for (let attempt = 0; attempt < 400; attempt += 1) {
+    if (engine.getStatus() === status) {
+      return;
+    }
+    await realSleep(10);
+  }
+  throw new Error(`engine stayed ${engine.getStatus()}, expected ${status}`);
+}
 
 /** What the backend issues for a combined request, signed by the wallet. */
 async function signCombinedSignIn(
@@ -49,12 +66,12 @@ async function signCombinedSignIn(
   };
   const issuedAt = new Date(issuedAtSeconds * 1000).toISOString();
   const message = [
-    "http://localhost:3001 wants you to sign in with your Ethereum account:",
+    `https://${ORIGIN} wants you to sign in with your Ethereum account:`,
     account.address,
     "",
     renderCombinedGrantStatement(signing, mls),
     "",
-    "URI: http://localhost:3001",
+    `URI: https://${ORIGIN}`,
     "Version: 1",
     "Chain ID: 1",
     "Nonce: a1b2c3d4e5f60718293a4b5c6d7e8f90",
@@ -95,7 +112,7 @@ async function combinedSignIn(
     wallet: account.address,
     grantId,
     walletSignature: signature,
-    origin: "localhost:3001",
+    origin: ORIGIN,
     issuedAtSeconds,
     expiresAtSeconds: grantExpiresAt(issuedAtSeconds),
   });
@@ -114,9 +131,12 @@ describe("E2EE engine: combined sign-in grant (NC8)", () => {
     const alice = await startDevice(world, "alice", account, {
       storage: signIn.storage,
       enroll: false,
+      extra: { origin: ORIGIN },
     });
 
-    expect(alice.engine.getStatus()).toBe("ready");
+    // Engine start does not wait for the network: it reports "enrolling".
+    expect(alice.engine.getStatus()).not.toBe("needs-enrollment");
+    await waitForStatus(alice.engine, "ready");
     expect(alice.signCalls).toBe(0);
     const [record] = world.ds.devicesOf("alice");
     expect(record).toMatchObject({
@@ -154,9 +174,11 @@ describe("E2EE engine: combined sign-in grant (NC8)", () => {
     const alice = await startDevice(world, "alice", account, {
       storage: signIn.storage,
       enroll: false,
+      extra: { origin: ORIGIN },
     });
     // No prompt on its own: the rejected key is dropped, enrollment waits.
-    expect(alice.engine.getStatus()).toBe("needs-enrollment");
+    await waitForStatus(alice.engine, "needs-enrollment");
+    await settle(world);
     expect(alice.signCalls).toBe(0);
     expect(world.ds.devicesOf("alice")).toEqual([]);
     expect(await signIn.storage.getDevice("alice")).toBeNull();

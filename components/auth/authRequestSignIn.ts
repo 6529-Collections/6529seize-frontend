@@ -221,12 +221,26 @@ const getSignInChallenge = async ({
     throw new DeviceGrantUnavailableError();
   }
   return (
-    grantChallenge ?? {
-      nonceResponse: await getNonce({ signerAddress }),
-      deviceGrant: null,
-      e2eeDevice: null,
-    }
+    grantChallenge ?? (await getOrdinaryChallenge(getNonce, signerAddress))
   );
+};
+
+/**
+ * The ordinary challenge must grant nothing: the wallet never signs a device
+ * or encrypted-messages grant that this browser did not ask for and check,
+ * so the server cannot have a key of its choosing granted.
+ */
+const getOrdinaryChallenge = async (
+  getNonce: GetNonce,
+  signerAddress: string
+): Promise<SignInChallenge> => {
+  const nonceResponse = await getNonce({ signerAddress });
+  if (carriesDeviceGrant(nonceResponse.signable_message)) {
+    throw new NonceResponseValidationError(
+      "Unrequested device grant in the sign-in challenge"
+    );
+  }
+  return { nonceResponse, deviceGrant: null, e2eeDevice: null };
 };
 
 const createSignInSession = async ({

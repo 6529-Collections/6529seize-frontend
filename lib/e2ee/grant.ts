@@ -12,6 +12,7 @@ import {
   parseDeviceGrantMessage,
   parseSiweIssuedAtSeconds,
 } from "@/lib/device-signing/grant-message";
+import { isAllowedGrantDomain } from "@/lib/device-signing/verify-signed-events";
 import type { ApiE2eeDevice, ApiE2eeDeviceGrant } from "./api-types";
 import { isHex } from "./bytes";
 
@@ -271,6 +272,9 @@ function checkLoginGrantTerms(
   const mls = parsed?.mls;
   if (!parsed || !mls) {
     return "login-grant-malformed";
+  }
+  if (!isAllowedGrantDomain(parsed.domain)) {
+    return "login-grant-domain";
   }
   const grant = device.grant;
   const matches =

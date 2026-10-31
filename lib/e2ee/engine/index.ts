@@ -221,7 +221,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
       const restored = await restore(this.ctx);
       if (!restored) {
         setStatus(this.ctx, NEEDS_ENROLLMENT);
-        await this.enrollFromLoginGrant();
+        await this.startEnrollmentFromLoginGrant();
         return;
       }
       setStatus(this.ctx, "ready");
@@ -237,16 +237,26 @@ class E2eeEngineImpl implements E2eeEngineExt {
    * the sign-in grant, drop that device: enroll() then falls back to the
    * separate grant prompt with a fresh key.
    */
-  private async enrollFromLoginGrant(): Promise<void> {
+  private async startEnrollmentFromLoginGrant(): Promise<void> {
     const stored = await this.ctx.storage.getDevice(this.ctx.profileId);
     if (!hasLoginGrant(stored) || stored.registered) {
       return;
     }
+    // Runs in the background so engine start never waits on the network;
+    // the status is "enrolling" from here until it settles.
+    void this.ctx.tasks.track(this.enrollFromLoginGrant());
+  }
+
+  private async enrollFromLoginGrant(): Promise<void> {
     try {
       await this.runEnrollment(false);
     } catch {
-      // Reported through the status; a rejected sign-in grant was dropped,
-      // so the next enroll() asks for the separate grant signature.
+      // A rejected sign-in grant was dropped: enroll() asks for the separate
+      // grant signature. Any other failure leaves the pending device, and
+      // enroll() retries it without a prompt.
+      if (!this.ctx.disposed && this.ctx.store.status === "error") {
+        setStatus(this.ctx, NEEDS_ENROLLMENT, this.ctx.store.error);
+      }
     }
   }
 

@@ -18,10 +18,14 @@ interface AdoptLoginE2eeDeviceParams {
   readonly signerAddress: string;
 }
 
-/** The encrypted-messages provider re-reads its marker on storage events. */
+/**
+ * The encrypted-messages provider re-reads its marker on any "storage" event
+ * (same-tab writes fire none). A plain Event carries no key, so listeners
+ * that filter by key, or treat a null key as "storage cleared", ignore it.
+ */
 const announceEnrollmentMarker = (): void => {
   try {
-    globalThis.dispatchEvent(new StorageEvent("storage"));
+    globalThis.dispatchEvent(new Event("storage"));
   } catch {
     // Markers are optional; the provider re-reads them on its next render.
   }
