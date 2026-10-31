@@ -19,14 +19,22 @@ The Stream review is published on:
 
 - local development at `localhost` or `127.0.0.1`
 - the shared `staging.6529.io` host
-- the production `6529.io` host
+
+It is switched off in production (`productionEnabled: false` in
+`config/public-reviews/6529-stream.publication.json`). On `6529.io` the review
+routes return the standard not-found page, the production artifact omits the
+review data and editorial content, and help records for the review are not
+published. `/stream` shows a short notice that 6529 Stream is being rebuilt,
+with a link to the 6529-works repository, on every host. Proxy answers every
+`/review-data/` path with a plain 404 on every host, so the generated source
+files are no longer served; the review pages read them from disk.
 
 The complete public boundary applies while the review lifecycle is `DRAFT`.
 In that state:
 
 - the NFT navigation does not show the review
-- `/stream` and all editorial, technical-reference, source, declaration-search,
-  and feedback-ledger routes return the standard not-found behavior
+- all editorial, technical-reference, source, declaration-search, and
+  feedback-ledger routes return the standard not-found behavior
 - review pages are excluded from the sitemap
 - review content is excluded from server tracing
 - review records are omitted from help and agent corpora
@@ -51,10 +59,9 @@ Publication also requires the environment and lifecycle gates to agree.
 - `/reviews/6529-stream/feedback`: searchable public feedback ledger
 - `/reviews/6529-stream/versions/{version}/feedback`: immutable,
   version-filtered public feedback ledger
-- `/stream`: gated convenience redirect to the active overview
 
-When enabled, **NFTs > 6529 Stream — Review** appears after the live collection
-links and before NFT Activity.
+The NFT navigation no longer links to the review. **NFTs > 6529 Stream** opens
+the `/stream` rebuild notice instead.
 
 ## What Readers See
 

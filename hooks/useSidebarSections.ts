@@ -10,8 +10,6 @@ import {
 } from "@/components/about/about.routes";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { publicEnv } from "@/config/env";
-import { isStreamReviewPubliclyAvailable } from "@/lib/public-review/streamReviewRoutes";
 import {
   BuildingLibraryIcon,
   DocumentTextIcon,
@@ -80,17 +78,7 @@ function getMuseumSection(): SidebarSection {
   };
 }
 
-function getNftsSection(publicReviewsEnabled: boolean): SidebarSection {
-  const streamReviewItem: SidebarNavItem[] = publicReviewsEnabled
-    ? [
-        {
-          name: t(DEFAULT_LOCALE, "navigation.nfts.streamReview"),
-          href: "/reviews/6529-stream",
-          activePathPrefixes: ["/reviews/6529-stream/"],
-        },
-      ]
-    : [];
-
+function getNftsSection(): SidebarSection {
   return {
     key: "nfts",
     name: t(DEFAULT_LOCALE, "navigation.primary.nfts"),
@@ -126,7 +114,11 @@ function getNftsSection(publicReviewsEnabled: boolean): SidebarSection {
         href: "/rememes",
         activePathPrefixes: ["/rememes/"],
       },
-      ...streamReviewItem,
+      {
+        name: t(DEFAULT_LOCALE, "navigation.nfts.stream"),
+        href: "/stream",
+        activePathPrefixes: ["/stream/"],
+      },
       {
         name: t(DEFAULT_LOCALE, "navigation.nfts.activity"),
         href: "/nft-activity",
@@ -166,11 +158,10 @@ function getAboutSection(
 
 function buildSidebarSections(
   appWalletsSupported: boolean,
-  hideSubscriptions: boolean,
-  publicReviewsEnabled: boolean
+  hideSubscriptions: boolean
 ): SidebarSection[] {
   return [
-    getNftsSection(publicReviewsEnabled),
+    getNftsSection(),
     getMuseumSection(),
     getWavesSection(),
     getAboutSection(appWalletsSupported, hideSubscriptions),
@@ -180,10 +171,7 @@ function buildSidebarSections(
 export function useSidebarSections(
   appWalletsSupported: boolean,
   isIos: boolean,
-  country: string | null,
-  publicReviewsEnabled = isStreamReviewPubliclyAvailable(
-    publicEnv.BASE_ENDPOINT
-  )
+  country: string | null
 ): SidebarSection[] {
   const hideSubscriptions = shouldHideSubscriptions({
     capacitorIsIos: isIos,
@@ -192,12 +180,8 @@ export function useSidebarSections(
 
   return useMemo(
     () =>
-      buildSidebarSections(
-        appWalletsSupported,
-        hideSubscriptions,
-        publicReviewsEnabled
-      ),
-    [appWalletsSupported, hideSubscriptions, publicReviewsEnabled]
+      buildSidebarSections(appWalletsSupported, hideSubscriptions),
+    [appWalletsSupported, hideSubscriptions]
   );
 }
 
