@@ -697,6 +697,7 @@ export default function UserPageCollected({
       ref={rootRef}
       onClickCapture={onClickCapture}
       onAuxClickCapture={onClickCapture}
+      lang={locale}
       className="tailwind-scope"
     >
       <UserPageCollectedStats

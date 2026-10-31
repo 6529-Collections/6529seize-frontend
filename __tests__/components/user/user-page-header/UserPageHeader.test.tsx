@@ -1,17 +1,23 @@
 import React from "react";
 import {
+  act,
   fireEvent,
   render,
   screen,
   waitFor,
   within,
 } from "@testing-library/react";
+import { hydrateRoot, type Root } from "react-dom/client";
+import { renderToString } from "react-dom/server";
+import type { CicStatement } from "@/entities/IProfile";
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import UserPageHeaderClient from "@/components/user/user-page-header/UserPageHeaderClient";
 import { AuthContext } from "@/components/auth/Auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useIdentity } from "@/hooks/useIdentity";
+import { commonApiFetch } from "@/services/api/common-api";
 import { useProfileBlockState } from "@/hooks/content-moderation/useProfileBlockState";
 import { useContentModeratorAccess } from "@/hooks/content-moderation/useContentModeratorAccess";
 
@@ -179,6 +185,10 @@ jest.mock("@/hooks/content-moderation/useContentModeratorAccess", () => ({
   useContentModeratorAccess: jest.fn(),
 }));
 jest.mock("@/hooks/useIdentity", () => ({ useIdentity: jest.fn() }));
+jest.mock("@/services/api/common-api", () => ({
+  ...jest.requireActual("@/services/api/common-api"),
+  commonApiFetch: jest.fn(),
+}));
 jest.mock("next/navigation", () => ({
   useParams: jest.fn(),
   useRouter: jest.fn(),
@@ -295,6 +305,45 @@ describe("UserPageHeader", () => {
     );
     expect(block).not.toHaveBeenCalled();
     expect(unblock).not.toHaveBeenCalled();
+  });
+
+  it("refreshes statements from the canonical identity segment without seeding empty data", async () => {
+    useParamsMock.mockReturnValue({ user: "Br%C3%9Cder" });
+    try {
+      render(
+        <AuthContext.Provider value={auth}>
+          <UserPageHeaderClient
+            profile={{ ...profile, id: "profile-bruder" }}
+            handleOrWallet="br%c3%9cder"
+            fallbackMainAddress="0x1"
+            defaultBanner1="#000000"
+            defaultBanner2="#111111"
+            initialStatements={[]}
+            profileEnabledAt={null}
+            followersCount={null}
+            cmsWebsiteHref={null}
+          />
+        </AuthContext.Provider>
+      );
+
+      const statementsQuery = (useQuery as jest.Mock).mock.calls
+        .map(([options]) => options)
+        .findLast(
+          (options) => options.queryKey[0] === "PROFILE_CIC_STATEMENTS"
+        );
+      expect(statementsQuery).toBeDefined();
+      // An empty server snapshot must not count as fresh client data.
+      expect(statementsQuery).not.toHaveProperty("initialData");
+      expect(typeof statementsQuery.queryFn).toBe("function");
+
+      await statementsQuery.queryFn();
+      // The same segment the server loader requests for this identity.
+      expect(commonApiFetch).toHaveBeenLastCalledWith({
+        endpoint: "profiles/br%C3%BCder/cic/statements",
+      });
+    } finally {
+      useParamsMock.mockReturnValue({ user: "bob" });
+    }
   });
 
   it("does not expose profile suspension controls to non-moderators", () => {
@@ -677,5 +726,85 @@ describe("UserPageHeader", () => {
     expect(
       screen.queryByRole("link", { name: "Open bob website" })
     ).not.toBeInTheDocument();
+  });
+
+  it("hydrates the streamed header from its server snapshot when the shared cache filled first", async () => {
+    const bio = [
+      {
+        statement_type: STATEMENT_TYPE.BIO,
+        statement_group: STATEMENT_GROUP.GENERAL,
+      } as CicStatement,
+    ];
+    let cachedStatements: CicStatement[] | undefined;
+    (useQuery as jest.Mock).mockImplementation(({ queryKey }) => ({
+      isFetched: true,
+      data:
+        queryKey[0] === "PROFILE_CIC_STATEMENTS" ? cachedStatements : undefined,
+    }));
+    // The server snapshot has no statements, e.g. because its request failed.
+    const header = () => (
+      <AuthContext.Provider value={auth}>
+        <UserPageHeaderClient
+          profile={profile}
+          handleOrWallet="bob"
+          fallbackMainAddress="0x1"
+          defaultBanner1="#000000"
+          defaultBanner2="#111111"
+          initialStatements={[]}
+          profileEnabledAt={null}
+          followersCount={null}
+          cmsWebsiteHref={null}
+        />
+      </AuthContext.Provider>
+    );
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    container.innerHTML = renderToString(header());
+    expect(within(container).queryByTestId("about")).not.toBeInTheDocument();
+
+    // Another part of the profile page fetched the statements in the browser
+    // before the streamed header hydrated.
+    cachedStatements = bio;
+    const onRecoverableError = jest.fn();
+    let root: Root | undefined;
+    await act(async () => {
+      root = hydrateRoot(container, header(), { onRecoverableError });
+    });
+
+    expect(onRecoverableError).not.toHaveBeenCalled();
+    expect(within(container).getByTestId("about")).toBeInTheDocument();
+    act(() => root?.unmount());
+    container.remove();
+  });
+
+  it("server-renders the snapshot bio while the shared statements query is still empty", () => {
+    // The page's own statements section creates this query before the
+    // streamed header renders, so the server cache has no data for it yet.
+    (useQuery as jest.Mock).mockImplementation(() => ({
+      isFetched: false,
+      data: undefined,
+    }));
+    const html = renderToString(
+      <AuthContext.Provider value={auth}>
+        <UserPageHeaderClient
+          profile={profile}
+          handleOrWallet="bob"
+          fallbackMainAddress="0x1"
+          defaultBanner1="#000000"
+          defaultBanner2="#111111"
+          initialStatements={[
+            {
+              statement_type: STATEMENT_TYPE.BIO,
+              statement_group: STATEMENT_GROUP.GENERAL,
+            } as CicStatement,
+          ]}
+          profileEnabledAt={null}
+          followersCount={null}
+          cmsWebsiteHref={null}
+        />
+      </AuthContext.Provider>
+    );
+
+    expect(html).toContain('data-testid="about"');
   });
 });

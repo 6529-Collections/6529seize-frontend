@@ -29,7 +29,7 @@ import { useAuth } from "../auth/Auth";
 import { useKeyPressEvent } from "react-use";
 import { DropMode } from "./dropComposer.types";
 import { ChatRestriction } from "@/hooks/useDropPriviledges";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useUnreadDividerOptional } from "@/contexts/wave/UnreadDividerContext";
 import { useWave } from "@/hooks/useWave";
@@ -103,7 +103,7 @@ export default function CreateDrop({
   const [dismissedQuorumProposalScope, setDismissedQuorumProposalScope] =
     useState<string | null>(null);
   const { applyOptimisticDropUpdate, processDropRemoved, processIncomingDrop } =
-    useMyStream();
+    useMyStreamActions();
   const retainModerationRejectedDrop = useModerationRejectedDropDelivery({
     applyOptimisticDropUpdate,
     processDropRemoved,

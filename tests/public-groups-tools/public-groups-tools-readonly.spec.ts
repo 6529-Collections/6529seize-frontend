@@ -11,6 +11,7 @@ import {
   waitForRouteReady,
 } from "../testHelpers";
 import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
+import { expectUrlState } from "../support/urlState";
 
 async function gotoReady(
   page: Page,
@@ -183,7 +184,9 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     }) => {
       await gotoDocumentWithTransientRetry(page, path);
 
-      await expect(page).toHaveURL((url) => url.href.endsWith(path));
+      // Predicate-based toHaveURL also waits for the load event, which pending
+      // media can delay after the URL already matches; see tests/README.md.
+      await expectUrlState(page, (url) => url.pathname + url.search === path);
       await expect(page).toHaveTitle(/404/i);
       await expect(
         page.getByRole("heading", { name: /404.*PAGE NOT FOUND/i })

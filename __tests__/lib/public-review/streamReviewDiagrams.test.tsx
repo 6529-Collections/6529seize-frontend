@@ -5,7 +5,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { PublicReviewMarkdown } from "@/components/public-review/PublicReviewMarkdown";
 import { extractPublicReviewSections } from "@/lib/public-review/editorialSections";
 import { getStreamReviewDiagramPresentation } from "@/lib/public-review/streamReviewDiagrams";
-import { getStreamReviewEntryMarkdown } from "@/lib/public-review/streamReviewEntryGuides";
+import { getStreamReviewEntryMarkdown } from "@/lib/public-review/streamReviewEntryMarkdown";
 
 const version = "2026-09-09.1";
 const source = {

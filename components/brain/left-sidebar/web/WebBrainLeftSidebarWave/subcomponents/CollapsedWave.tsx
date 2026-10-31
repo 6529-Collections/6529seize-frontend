@@ -12,6 +12,7 @@ interface CollapsedWaveProps {
   readonly isAnnouncement?: boolean | undefined;
   readonly isDropWave: boolean;
   readonly onMouseEnter?: (() => void) | undefined;
+  readonly onMouseLeave?: (() => void) | undefined;
   readonly onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   readonly showTooltip: boolean;
   readonly tooltipId: string;
@@ -64,6 +65,7 @@ export const CollapsedWave = ({
   isAnnouncement = false,
   isDropWave,
   onMouseEnter,
+  onMouseLeave,
   onClick,
   showTooltip,
   tooltipId,
@@ -92,6 +94,7 @@ export const CollapsedWave = ({
         prefetch={false}
         aria-label={linkLabel}
         {...(onMouseEnter ? { onMouseEnter } : {})}
+        {...(onMouseLeave ? { onMouseLeave } : {})}
         onClick={onClick}
         className="tw-flex tw-items-center tw-justify-center tw-no-underline"
         {...(showTooltip ? { "data-tooltip-id": tooltipId } : {})}

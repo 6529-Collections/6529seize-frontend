@@ -24,7 +24,7 @@ jest.mock("@/components/auth/Auth", () => ({
 }));
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStreamOptional: () => ({
+  useMyStreamActionsOptional: () => ({
     processIncomingDrop: mockProcessIncomingDrop,
   }),
 }));

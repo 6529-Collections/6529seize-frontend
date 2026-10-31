@@ -31,9 +31,11 @@ const ALLOWED_COMMANDS = new Set([
   "remove",
   "update",
 ]);
+// `pnpm audit --ignore` and `--ignore-unfixable` write auditConfig into
+// pnpm-workspace.yaml, which validateWorkspace forbids, so they stay blocked.
 const ALLOWED_OPTIONS_BY_COMMAND = new Map([
   ["add", new Set(["-D", "--save-dev"])],
-  ["audit", new Set(["--fix"])],
+  ["audit", new Set(["--fix", "--prod", "--audit-level=high", "--json"])],
   ["install", new Set(["--frozen-lockfile", "--prod"])],
 ]);
 

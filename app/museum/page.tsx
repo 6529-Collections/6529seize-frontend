@@ -2,6 +2,8 @@ import { createMigratedWordPressStaticPage } from "@/components/migrated-wordpre
 import MuseumLegacyEntryPoint from "@/components/museum/MuseumLegacyEntryPoint";
 import { museumMigratedWordPressPage as content } from "./content";
 
+export const dynamic = "force-static";
+
 const migratedPage = createMigratedWordPressStaticPage(content);
 
 export default function MuseumPage() {
