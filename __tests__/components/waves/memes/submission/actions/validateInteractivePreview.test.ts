@@ -391,6 +391,26 @@ describe("validateInteractivePreview", () => {
       expect(global.fetch).toHaveBeenCalledTimes(4);
     });
 
+    it("shares one redirect cap between HEAD and the ranged GET fallback", async () => {
+      (global.fetch as jest.Mock)
+        .mockResolvedValueOnce(createResponse(302, { location: REDIRECT_TARGET }))
+        .mockResolvedValueOnce(createResponse(302, { location: REDIRECT_TARGET }))
+        .mockResolvedValueOnce(createResponse(302, { location: REDIRECT_TARGET }))
+        .mockResolvedValueOnce(createResponse(405, {}))
+        .mockResolvedValueOnce(createResponse(302, { location: REDIRECT_TARGET }));
+
+      const result = await validateInteractivePreview({
+        provider: "ipfs",
+        path: CID_V1,
+      });
+
+      expect(result.ok).toBe(false);
+      expect(result.reason).toBe("Gateway redirected too many times.");
+      // HEAD used the whole budget (initial request plus three redirects), so
+      // the fallback GET cannot follow its first redirect.
+      expect(global.fetch).toHaveBeenCalledTimes(5);
+    });
+
     it("applies the redirect guard to the ranged GET fallback as well", async () => {
       (global.fetch as jest.Mock)
         .mockResolvedValueOnce(createResponse(405, {}))

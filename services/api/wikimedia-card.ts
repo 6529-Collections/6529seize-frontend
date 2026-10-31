@@ -146,7 +146,10 @@ export const fetchWikimediaCard = async (
       return card;
     })
     .catch((error) => {
-      wikimediaCache.delete(normalizedUrl);
+      // An expired or evicted request may have been replaced by a newer one.
+      if (wikimediaCache.get(normalizedUrl) === requestPromise) {
+        wikimediaCache.delete(normalizedUrl);
+      }
       throw error;
     });
 
