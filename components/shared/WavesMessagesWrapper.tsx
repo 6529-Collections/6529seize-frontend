@@ -10,7 +10,10 @@ import { usePathname, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { createBreakpoint } from "react-use";
-import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import {
+  getActiveWaveIdFromUrl,
+  isEncryptedMessagesPathname,
+} from "@/helpers/navigation.helpers";
 import type { ApiDrop } from "../../generated/models/ApiDrop";
 import { DropSize } from "../../helpers/waves/drop.helpers";
 import { useSidebarState } from "../../hooks/useSidebarState";
@@ -188,8 +191,14 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   // Trailing slashes are tolerated so a normalization change upstream cannot
   // silently re-break mobile reachability.
   const isCreateRoute = isCreateWavePathname(pathname);
+  // Encrypted chats (D109) have no wave id but are always the main content.
+  const isEncryptedRoute = isEncryptedMessagesPathname(pathname);
   const canShowMainContent =
-    !isMobile || hasWave || isCreateRoute || isProfileFeedView;
+    !isMobile ||
+    hasWave ||
+    isCreateRoute ||
+    isProfileFeedView ||
+    isEncryptedRoute;
   const shouldShowLeftSidebar =
     showLeftSidebar && (!isMobile || (!hasWave && !canShowMainContent));
   const shouldShowMainContent = canShowMainContent;

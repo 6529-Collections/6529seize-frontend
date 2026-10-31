@@ -129,6 +129,12 @@ describe("production exact-artifact deployment contract", () => {
     expect(build.env.NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES).toBe("true");
   });
 
+  it("names the encrypted messages flag in production builds, switched off", () => {
+    // Encrypted DMs (D109) stay off until the owner authorizes production;
+    // turning them on is a one-line change to "true" here.
+    expect(build.env.NEXT_PUBLIC_E2EE_DM_ENABLED).toBe("false");
+  });
+
   it("generates the production sitemap under the fail-closed policy", () => {
     const buildStep = build.jobs["build-production-artifact"].steps.find(
       (step: { name?: string }) => step.name === "Build exact production bytes"

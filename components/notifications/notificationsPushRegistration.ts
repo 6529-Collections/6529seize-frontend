@@ -39,7 +39,8 @@ function parseDevicePushData(raw: unknown): DevicePushData | null {
     typeof target_profile_handle !== "string"
   )
     return null;
-  if (redirect !== "profile" && redirect !== "waves") return null;
+  if (redirect !== "profile" && redirect !== "waves" && redirect !== "e2ee")
+    return null;
   const data: DevicePushData = {
     notification_id,
     redirect: redirect as PushRedirect,

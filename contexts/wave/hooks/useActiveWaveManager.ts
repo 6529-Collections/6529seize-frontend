@@ -15,6 +15,7 @@ import {
   getActiveWaveIdFromUrl,
   getWaveHomeRoute,
   getWaveRoute,
+  isEncryptedMessagesPathname,
 } from "@/helpers/navigation.helpers";
 import { useClientNavigation } from "@/hooks/useClientNavigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -48,7 +49,11 @@ const getRouteContext = (): { isOnWaves: boolean; isOnMessages: boolean } => {
     isOnWaves:
       !isCompetitionPathname(pathname) &&
       (pathname === "/waves" || pathname.startsWith("/waves/")),
-    isOnMessages: pathname === "/messages" || pathname.startsWith("/messages/"),
+    // Encrypted chats are separate routes: leaving them for a plaintext DM
+    // needs a router navigation, not a history-only wave switch.
+    isOnMessages:
+      (pathname === "/messages" || pathname.startsWith("/messages/")) &&
+      !isEncryptedMessagesPathname(pathname),
   };
 };
 

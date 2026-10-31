@@ -1,4 +1,5 @@
 import { createSecurityHeaders } from "./securityHeaders";
+import { isE2eeFlagEnabled } from "./e2eeFlag";
 import { meebits445Headers } from "./meebits445Headers";
 import { staticAssetCacheHeaders } from "./staticAssetCacheHeaders";
 import { versionReloadImageHeaders } from "./versionReloadImageHeaders";
@@ -189,6 +190,9 @@ export function sharedConfig(
               {
                 allowInsecureLocalhostConnectSrc: isLocalTooling,
                 allowUnsafeEval: isLocalTooling,
+                allowWasmUnsafeEval: isE2eeFlagEnabled(
+                  publicEnv.NEXT_PUBLIC_E2EE_DM_ENABLED
+                ),
                 webSocketEndpoint: publicEnv["WS_ENDPOINT"],
                 // Local development violations are expected noise; only
                 // deployed builds report CSP violations to Sentry.

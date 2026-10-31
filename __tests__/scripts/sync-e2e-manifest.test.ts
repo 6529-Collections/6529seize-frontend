@@ -126,6 +126,31 @@ describe("E2E pack manifest", () => {
     );
   });
 
+  it("keeps the encrypted messages pack on loopback with its own ports and dist dir", () => {
+    const e2ee = packs.filter(
+      (pack) => pack.scriptKey === "test:e2e:e2ee-sandbox"
+    );
+    expect(e2ee).toHaveLength(1);
+    expect(e2ee[0]).toMatchObject({
+      safety: "sandbox",
+      environments: ["local"],
+      specs: ["tests/e2ee"],
+      projects: ["web-desktop-chromium", "web-mobile-chromium"],
+      workers: 1,
+      env: {
+        PLAYWRIGHT_ENV: "local",
+        PLAYWRIGHT_E2EE_SANDBOX: "1",
+        USE_DEV_AUTH: "true",
+        PLAYWRIGHT_BASE_URL: "http://localhost:3299",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3299",
+        PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4299",
+        NEXT_DEV_DIST_DIR: ".next-playwright-e2ee",
+        PLAYWRIGHT_WEB_SERVER_COMMAND:
+          "node tests/support/composerSandboxServer.cjs",
+      },
+    });
+  });
+
   it("isolates submission artwork from the complete competition pack", () => {
     expect(
       packs.find(

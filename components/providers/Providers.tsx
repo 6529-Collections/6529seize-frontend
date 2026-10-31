@@ -13,6 +13,7 @@ import MarketActivityTracker from "@/components/collect/MarketActivityTracker";
 import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
 import { NftPurchasingServerRenderProvider } from "@/components/common/NftPurchasingServerRender";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
+import E2eeProvider from "@/components/e2ee/E2eeProvider";
 import { IpfsProvider } from "@/components/ipfs/IPFSContext";
 import QuickDirectMessagesGate from "@/components/messages/quick-dms/QuickDirectMessagesGate";
 import { NotificationsProvider } from "@/components/notifications/NotificationsContext";
@@ -111,16 +112,19 @@ export default function Providers({
                               >
                                 <MixpanelSetup />
                                 <AppWebSocketProvider>
-                                  <LayoutProvider>
-                                    {enableMyStream ? (
-                                      <MyStreamProvider>
-                                        {sharedProviders}
-                                        <QuickDirectMessagesGate />
-                                      </MyStreamProvider>
-                                    ) : (
-                                      sharedProviders
-                                    )}
-                                  </LayoutProvider>
+                                  {/* Encrypted chats (D109): inert unless the flag is on. */}
+                                  <E2eeProvider>
+                                    <LayoutProvider>
+                                      {enableMyStream ? (
+                                        <MyStreamProvider>
+                                          {sharedProviders}
+                                          <QuickDirectMessagesGate />
+                                        </MyStreamProvider>
+                                      ) : (
+                                        sharedProviders
+                                      )}
+                                    </LayoutProvider>
+                                  </E2eeProvider>
                                   {enableVersionCheck && <NewVersionToast />}
                                 </AppWebSocketProvider>
                               </CookieConsentProvider>
