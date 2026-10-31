@@ -178,11 +178,11 @@ export default function StatementWords({
           />
           {decoded.a ? (
             <table
-              className="tw-mt-5 tw-w-full tw-border-collapse max-md:tw-block md:tw-table-fixed"
+              className="tw-mt-5 tw-w-full tw-border-collapse max-lg:tw-block"
               aria-label={fill(locale, k("words.aria"), { date: dateText })}
               data-words=""
             >
-              <thead className="tw-sr-only md:tw-not-sr-only">
+              <thead className="tw-sr-only lg:tw-not-sr-only">
                 <tr>
                   <th
                     scope="col"
@@ -212,30 +212,30 @@ export default function StatementWords({
                   )}
                 </tr>
               </thead>
-              <tbody className="max-md:tw-block">
+              <tbody className="max-lg:tw-block">
                 {decoded.a.map((word) => {
                   const on = lit(word);
                   return (
                     <tr
                       key={word.word.name}
-                      className={`tw-grid tw-grid-cols-[28px_minmax(0,1fr)] tw-gap-x-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-1.5 md:tw-table-row md:tw-py-0 ${on ? "tw-bg-primary-400/[0.08]" : "max-md:tw-hidden"}`}
+                      className={`tw-grid tw-grid-cols-[28px_minmax(0,1fr)] tw-gap-x-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-1.5 lg:tw-table-row lg:tw-py-0 ${on ? "tw-bg-primary-400/[0.08]" : "max-lg:tw-hidden"}`}
                       data-word={word.index}
                       data-lit={on ? "1" : "0"}
                     >
                       <td
-                        className={`tw-py-0 tw-align-top tw-text-[13px] tw-font-semibold md:tw-border-0 md:tw-border-l-2 md:tw-border-solid md:tw-py-[5px] md:tw-pl-2 ${on ? "tw-text-primary-300 md:tw-border-primary-400" : "tw-text-iron-400 md:tw-border-transparent"}`}
+                        className={`tw-py-0 tw-align-top tw-text-[13px] tw-font-semibold lg:tw-border-0 lg:tw-border-l-2 lg:tw-border-solid lg:tw-py-[5px] lg:tw-pl-2 ${on ? "tw-text-primary-300 lg:tw-border-primary-400" : "tw-text-iron-400 lg:tw-border-transparent"}`}
                       >
                         {word.index}
                       </td>
                       <td
-                        className={`tw-py-0 tw-font-mono tw-text-[13px] md:tw-py-[5px] md:tw-text-sm ${on ? "tw-text-iron-50" : "tw-text-iron-400"}`}
+                        className={`tw-py-0 tw-font-mono tw-text-[13px] lg:tw-py-[5px] lg:tw-text-sm ${on ? "tw-text-iron-50" : "tw-text-iron-400"}`}
                       >
                         {word.word.name}
                       </td>
-                      <td className="tw-col-start-2 tw-py-0 md:tw-py-[5px]">
+                      <td className="tw-col-start-2 tw-py-0 lg:tw-py-[5px]">
                         {compare && (
                           <span
-                            className="tw-mr-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-400 md:tw-hidden"
+                            className="tw-mr-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-400 lg:tw-hidden"
                             aria-hidden="true"
                           >
                             {fill(locale, k("words.colA"))}
@@ -244,9 +244,9 @@ export default function StatementWords({
                         <WordValue word={word} locale={locale} />
                       </td>
                       {compare && (
-                        <td className="tw-col-start-2 tw-py-0 md:tw-py-[5px]">
+                        <td className="tw-col-start-2 tw-py-0 lg:tw-py-[5px]">
                           <span
-                            className="tw-mr-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-400 md:tw-hidden"
+                            className="tw-mr-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-400 lg:tw-hidden"
                             aria-hidden="true"
                           >
                             {fill(locale, k("words.colB"))}
@@ -266,7 +266,7 @@ export default function StatementWords({
           ) : null}
           {decoded.a ? (
             <p
-              className="tw-m-0 tw-mt-3 tw-text-[15px] tw-leading-[22px] tw-text-iron-400 md:tw-hidden"
+              className="tw-m-0 tw-mt-3 tw-text-[15px] tw-leading-[22px] tw-text-iron-400 lg:tw-hidden"
               data-words-more=""
             >
               {fill(locale, k(compare ? "words.moreSame" : "words.more"), {

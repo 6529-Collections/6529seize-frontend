@@ -177,7 +177,7 @@ export default function WalletsLens({
       locale={locale}
       stage={
         <>
-          <div className="tw-grid tw-gap-3">
+          <div className="tw-grid tw-grid-cols-[minmax(0,1fr)] tw-gap-3">
             {groups.map((group) => {
               const value = group.options.some((o) => o.value === preset)
                 ? preset

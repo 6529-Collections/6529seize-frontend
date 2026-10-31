@@ -78,7 +78,7 @@
   "explained.tdh.sure.claims.label": "The claims",
   "explained.tdh.sure.claims.title": "Each claim, with its limit beside it.",
   "explained.tdh.sure.claims.falseByKind": "The {count} statements shown false, by kind: {firstRule} against the first netting rule, replaced on {day} after program B found the flaw; {netting} that narrowed the netting sentence ({nettingCases}); {never} properties the rules never had ({neverCases}); and {p53} about validator rules.",
-  "explained.tdh.sure.claims.capDrift": "D148 exempts the network’s two accounts from the {cap} cap; the cap claim above, like the Lean model before D148, caps every party.",
+  "explained.tdh.sure.claims.capDrift": "D148 exempts the network’s two accounts from the {cap} cap; the claim above, like the Lean model, caps every party.",
   "explained.tdh.sure.claim.1.what": "Netting",
   "explained.tdh.sure.claim.1.detail": "Steps inside one transaction change no holding stack, when only net movements are equal.",
   "explained.tdh.sure.claim.1.limit": "Not for two cycle inputs; not for values beyond the stacks (cases H and I).",

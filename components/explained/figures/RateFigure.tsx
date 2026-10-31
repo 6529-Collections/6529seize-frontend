@@ -86,6 +86,13 @@ export default function RateFigure({
       referenceText(reference).length * LABEL_CHAR_PX + 16,
       yAt(reference.rateCents / 100) - 6
     );
+  // In a very small figure the largest edition's label would reach the
+  // 300 line and the steep end of the curve: it is left out.
+  const largestLabelFits = (reference: RateReference) =>
+    xAt(reference.copies) -
+      4 -
+      (referenceText(reference).length * LABEL_CHAR_PX + 16) >
+    xAt(threshold) + 8;
   const selectedText = `${formatCount(locale, selected.copies)} × ${formatCents(locale, selectedRate)}`;
   const selectedX = xAt(Math.max(selected.copies, threshold)) + 10;
   // A wide edition's label would leave the figure: it ends at its corner instead.
@@ -189,7 +196,8 @@ export default function RateFigure({
         </Label>
         {references.map((reference, index) =>
           (narrow && index > 0) ||
-          reference.copies === selected.copies ? null : (
+          reference.copies === selected.copies ||
+          (index === 0 && !largestLabelFits(reference)) ? null : (
             <Label
               key={`label-${reference.label}`}
               x={
