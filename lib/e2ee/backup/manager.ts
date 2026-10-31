@@ -556,7 +556,10 @@ export class E2eeBackupManager {
       // A new chain: everything before it is superseded once the snapshot
       // that follows is uploaded (compacted at the end of the run).
       if (appended.seq > 1) {
-        local.compactThroughSeq = appended.seq - 1;
+        local.compactThroughSeq = Math.max(
+          local.compactThroughSeq ?? 0,
+          appended.seq - 1
+        );
       }
     } else if (appended.seq !== expectedSeq) {
       forked = true;
