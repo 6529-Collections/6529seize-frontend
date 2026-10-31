@@ -79,7 +79,7 @@ export default function WhatItIsFor({
           {USES.map((use, index) => (
             <li
               key={use.title}
-              className={`tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-p-4 last:tw-border-b-0 md:tw-px-6 md:tw-py-5 ${cellFrame(index)}`}
+              className={`tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-p-4 last:tw-border-b-0 md:tw-px-6 md:tw-py-4 ${cellFrame(index)}`}
             >
               <h3 className={`${EX_TEXT.h4} md:tw-text-lg`}>
                 {ot(locale, use.title)}

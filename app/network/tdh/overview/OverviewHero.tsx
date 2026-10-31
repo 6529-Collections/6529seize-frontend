@@ -33,6 +33,9 @@ function equalEverywhere(book: FactBook): boolean {
   );
 }
 
+/** The mini ribbon shows the last five results, then the open day (TDH-DESIGN.md §4.1). */
+const MINI_RIBBON_RESULTS = 5;
+
 function TodayOnTheNetwork({
   book,
   locale,
@@ -40,7 +43,9 @@ function TodayOnTheNetwork({
   readonly book: FactBook;
   readonly locale: SupportedLocale;
 }) {
-  const days = book.maybe<ResultDay[]>("tdh.days")?.value ?? [];
+  const days = (book.maybe<ResultDay[]>("tdh.days")?.value ?? []).slice(
+    -MINI_RIBBON_RESULTS
+  );
   const open = book.maybe<string>("tdh.open.date")?.value;
   const equation = (
     <b className="tw-font-semibold tw-text-iron-50">

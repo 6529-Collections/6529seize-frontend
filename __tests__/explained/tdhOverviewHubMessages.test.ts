@@ -52,14 +52,20 @@ describe("the owner's items in the copy", () => {
     }
   });
 
-  it("does not expand NIC, and does not say the chapter waits on its name", () => {
+  it("names NIC as D142 does, never as a credit, and no chapter waits on its name", () => {
     for (const file of FILES) {
       for (const locale of LOCALES) {
         const text = Object.values(load(file, locale)).join("\n");
-        expect(text).not.toMatch(/Network Identity/i);
+        expect(text).not.toMatch(/Network Identity Credit/i);
         expect(text).not.toMatch(/NIC's full name/i);
       }
     }
+    // The English overview defines NIC where it first uses it.
+    expect(
+      load("explainedTdhOverview", "en-US")[
+        "explained.tdh.overview.uses.ratingsBody"
+      ]
+    ).toContain("Network Identity Check");
   });
 
   it("calls the verdict Known cause, never Explained, and the rules TDH v1.4", () => {

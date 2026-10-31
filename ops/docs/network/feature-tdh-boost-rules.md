@@ -38,9 +38,9 @@ the 6529 Explained facts layer: the daily comparison feed, the Lean manifest,
    card you hold adds its rate for each whole day held, one boost multiplies
    the total, and the result weighs your votes on the next Meme card), two
    marks (`Live on 6529.io` TDH v1.4; `Recomputed daily`, equal on so many of
-   the compared days), `Explain my TDH` and `How it is calculated`, and
+   the published results), `Explain my TDH` and `How it is calculated`, and
    `Today on the network`: the latest total TDH, the identities, `Rust core =
-Python reference = 6529.io`, and the published days with today open.
+Python reference = 6529.io`, and the last five results with today open.
 2. Use the machine beside it: pick a card (Meme #2, #4, #3, or the newest card,
    counted at its claim limit while it is still minting), move the whole days
    held, and choose no boost, one Gradient or a full set. The rows show the
@@ -50,11 +50,16 @@ adds n.` `Break it: sell it` takes the days with the copy; pressing it again
    restores them.
 3. Read 01 `A copy's TDH is an area.` and its figure: four real editions
    drawn to scale on one baseline (a rare card, a 310-copy card, Meme #2 and
-   FirstGM), each about 3,941 TDH a day before boosts.
+   FirstGM), each about 3,941 TDH a day before boosts. Under it, `Everyone's
+   TDH` draws the whole network as one area split by rank (the top 10, the
+   next 90, the next 900 and everyone else), against each group's share of
+   the identities, with a table of the same shares and the time 6529.io's API
+   was read. It streams in after the page; if the API does not answer, one
+   line says so. `?distribution=off` hides it for a review.
 4. Read 02 `Your TDH is your weight here.`: TDH is not money; it weighs votes
-   on the next card, the Rep and NIC ratings you can give, your Level, and
-   later validators (decided, D112; the software is at 0.1.0 and nothing
-   signs yet). The art itself is CC0, with a link to the hub's one-minute
+   on the next card, the Rep and NIC (Network Identity Check) ratings you
+   can give, your Level, and later validators (decided, D112; the software,
+   0.1.0, is built and being tested, and nothing signs yet). The art itself is CC0, with a link to the hub's one-minute
    answer.
 5. Use 03 `Explain my TDH`: enter a profile, ENS name or address. 6529.io's
    stored calculation is shown card by card (copies × whole days × rate =
@@ -69,12 +74,19 @@ adds n.` `Break it: sell it` takes the days with the copy; pressing it again
 change? Pick what happened` opens Your wallets' first section.
 6. Read 04 `Checked every day, and published with the files to check it.`:
    seven rungs from written down to signed by validators, each with its
-   marks, and a blue line after the third where today's evidence stops;
-   `This number would be wrong if` with what would close each gap; and the
-   candour line with a link to the daily check.
-7. Use 05 `In this chapter` to open the four spine pages or the shelf, and How
-   we know to copy the page as Markdown, cite it, report an error, open the
-   corrections log, or download every number's source as JSON.
+   marks, and a blue line after the third where today's evidence stops. The
+   daily rung counts the published results since the first, and names any day
+   inside that range with no result yet. Rung 5 shows the zero-knowledge
+   proofs in full: program A (the Rust core) in SP1, with the day it proved
+   and mainnet's read-only acceptance, and program B in RISC Zero, not yet;
+   rung 6 the D128 contract, built and not deployed; rung 7 the validator
+   software, built and being tested. Then `This number would be wrong if`
+   with what would close each gap, and the candour line with links to the
+   daily check and How sure.
+7. Use 05 `In this chapter` to open the four spine pages or the shelf (side
+   by side on a desktop), and How we know to copy the page as Markdown, cite
+   it, report an error, open the corrections log, or download every number's
+   source as JSON.
 
 ## Calculation Timing and Eligibility
 

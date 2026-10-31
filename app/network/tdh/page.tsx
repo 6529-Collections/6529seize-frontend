@@ -21,7 +21,6 @@ import { ot } from "./overview/copy";
 import ExplainedOverview from "./overview/ExplainedOverview";
 import { showNetworkDistribution } from "./overview/flags";
 import type { MachineCard } from "./overview/Machine";
-import { loadNetworkDistribution } from "./overview/networkDistribution.server";
 
 /**
  * 01 TDH, the overview (TDH-DESIGN.md §4.1), on the 6529 Explained kit.
@@ -84,9 +83,6 @@ export default async function TdhOverviewPage({
     book.maybe(id);
   }
   const network = showNetworkDistribution(firstParam(params["distribution"]));
-  const distribution = network
-    ? ((await loadNetworkDistribution()) ?? "unavailable")
-    : null;
   return (
     <ExplainedShell
       chapter={CHAPTER.id}
@@ -108,7 +104,7 @@ export default async function TdhOverviewPage({
         book={book}
         locale={locale}
         cards={cards}
-        distribution={distribution}
+        network={network}
       />
     </ExplainedShell>
   );

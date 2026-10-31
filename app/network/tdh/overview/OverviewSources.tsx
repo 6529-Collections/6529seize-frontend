@@ -8,8 +8,9 @@ import { orich, ot } from "./copy";
 
 /**
  * How we know, for the overview (TDH-DESIGN.md §4.1): the daily
- * comparison, the Lean manifest, the editions, the rules, the decisions and
- * the figures, each with its time.
+ * comparison, the Lean manifest, 6529.io's API (the editions and, with the
+ * network figure, everyone's TDH), the rules and decisions, the figures and
+ * the proofs, each with its time.
  */
 const RECORD_REPOSITORY = "6529chain";
 
@@ -44,21 +45,20 @@ export default function OverviewSources({
       }),
     },
     {
-      title: ot(locale, "hwk.editions"),
-      body: orich(locale, "hwk.editionsBody", {
-        read: fact("memes.readAt"),
-      }),
+      title: ot(locale, "hwk.site"),
+      body: orich(
+        locale,
+        withNetwork ? "hwk.siteNetworkBody" : "hwk.siteBody",
+        {
+          read: fact("memes.readAt"),
+        }
+      ),
     },
     {
       title: ot(locale, "hwk.rules"),
       body: orich(locale, "hwk.rulesBody", {
         repo: RECORD_REPOSITORY,
         commit: fact("rules.p26Commit"),
-      }),
-    },
-    {
-      title: ot(locale, "hwk.decisions"),
-      body: orich(locale, "hwk.decisionsBody", {
         newest: fact("rules.newestDecision"),
       }),
     },
@@ -68,14 +68,13 @@ export default function OverviewSources({
         vectors: fact("rules.vectors"),
       }),
     },
-    ...(withNetwork
-      ? [
-          {
-            title: ot(locale, "hwk.network"),
-            body: ot(locale, "hwk.networkBody"),
-          },
-        ]
-      : []),
+    {
+      title: ot(locale, "hwk.proofs"),
+      body: orich(locale, "hwk.proofsBody", {
+        cycle: fact("site.proofA.cycle"),
+        block: fact("site.proofA.ethCallBlock"),
+      }),
+    },
   ];
   return (
     <HowWeKnow rows={rows} locale={locale} title={title} slug="tdh-overview" />

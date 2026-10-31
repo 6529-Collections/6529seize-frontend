@@ -1,7 +1,11 @@
 import { EX_TEXT } from "@/components/explained/tokens";
 import { formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
-import { formatCount } from "@/lib/explained/format";
+import {
+  formatCount,
+  formatUtcClock,
+  formatUtcDay,
+} from "@/lib/explained/format";
 import { ot } from "./copy";
 import type {
   NetworkDistribution as Distribution,
@@ -13,7 +17,8 @@ import type {
  * zoom): the top bar splits today's TDH by rank group, the bottom bar
  * splits the identities the same way, and a band joins each group's two
  * shares, so the concentration is drawn, not described. The bars are HTML
- * so their labels reflow; the bands are shapes only.
+ * so their labels reflow; the bands are shapes only. The table under it is
+ * the figure's text: every share in words.
  */
 interface Tone {
   readonly fill: string;
@@ -25,30 +30,30 @@ interface Tone {
 
 const TONES: Record<RankGroup["key"], Tone> = {
   top: {
-    fill: "rgba(206, 207, 212, 0.86)",
-    band: "rgba(206, 207, 212, 0.4)",
+    fill: "rgba(206, 207, 212, 0.9)",
+    band: "rgba(206, 207, 212, 0.34)",
     ink: "tw-text-[#0D0D0F]",
   },
   next: {
-    fill: "rgba(206, 207, 212, 0.6)",
-    band: "rgba(206, 207, 212, 0.26)",
+    fill: "rgba(206, 207, 212, 0.62)",
+    band: "rgba(206, 207, 212, 0.24)",
     ink: "tw-text-[#0D0D0F]",
   },
   next2: {
-    fill: "rgba(206, 207, 212, 0.34)",
+    fill: "rgba(206, 207, 212, 0.36)",
     band: "rgba(206, 207, 212, 0.15)",
     ink: "tw-text-iron-50",
   },
   rest: {
-    fill: "repeating-linear-gradient(45deg, rgba(206, 207, 212, 0.26) 0 3px, rgba(206, 207, 212, 0.08) 3px 8px)",
-    band: "rgba(206, 207, 212, 0.05)",
+    fill: "repeating-linear-gradient(45deg, rgba(206, 207, 212, 0.3) 0 3px, rgba(206, 207, 212, 0.1) 3px 8px)",
+    band: "rgba(206, 207, 212, 0.07)",
     ink: "tw-text-iron-50",
   },
 };
 
 /** A share below this is too narrow to carry its label inside the bar. */
 const LABEL_MIN_SHARE = 0.08;
-const BAND_HEIGHT = 56;
+const BAND_HEIGHT = 48;
 
 function percent(locale: SupportedLocale, share: number): string {
   return formatNumber(locale, share, {
@@ -90,7 +95,7 @@ function Bar({
 }) {
   return (
     <div
-      className="tw-flex tw-h-8 tw-w-full tw-overflow-hidden tw-rounded-md"
+      className="tw-flex tw-h-9 tw-w-full tw-overflow-hidden tw-rounded-md"
       aria-hidden="true"
     >
       {items.map((share) => {
@@ -99,7 +104,7 @@ function Bar({
         return (
           <span
             key={share.group.key}
-            className={`tw-grid tw-min-w-0 tw-place-items-center tw-border-0 tw-border-r-2 tw-border-solid tw-border-[#0D0D0F] tw-text-xs tw-font-semibold last:tw-border-r-0 ${tone.ink}`}
+            className={`tw-grid tw-min-w-0 tw-place-items-center tw-border-0 tw-border-r-2 tw-border-solid tw-border-[#0D0D0F] tw-text-[13px] tw-font-semibold last:tw-border-r-0 ${tone.ink}`}
             style={{ width: `${value * 100}%`, background: tone.fill }}
           >
             {value >= LABEL_MIN_SHARE ? percent(locale, value) : ""}
@@ -140,7 +145,7 @@ function Bands({ items }: { readonly items: readonly Share[] }) {
     <svg
       viewBox={`0 0 1000 ${BAND_HEIGHT}`}
       preserveAspectRatio="none"
-      className="tw-block tw-h-14 tw-w-full"
+      className="tw-block tw-h-12 tw-w-full"
       aria-hidden="true"
     >
       {bandShapes(items).map(({ key, top, bottom }) => (
@@ -148,13 +153,21 @@ function Bands({ items }: { readonly items: readonly Share[] }) {
           key={key}
           points={`${top[0]},0 ${top[1]},0 ${bottom[1]},${BAND_HEIGHT} ${bottom[0]},${BAND_HEIGHT}`}
           fill={TONES[key].band}
-          stroke="rgba(206, 207, 212, 0.35)"
+          stroke="rgba(206, 207, 212, 0.45)"
           strokeWidth={1}
           vectorEffect="non-scaling-stroke"
         />
       ))}
     </svg>
   );
+}
+
+/** When 6529.io answered, as "Oct 31, 09:12 UTC". */
+function readTime(locale: SupportedLocale, readAt: string | null): string {
+  if (readAt === null) {
+    return ot(locale, "network.readUnknown");
+  }
+  return `${formatUtcDay(locale, readAt)}, ${formatUtcClock(locale, readAt)}`;
 }
 
 export default function NetworkDistribution({
@@ -176,51 +189,73 @@ export default function NetworkDistribution({
     );
   const rowLabel =
     "tw-mb-1.5 tw-block tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-300";
+  const cell =
+    "tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-py-1.5 tw-text-right tw-tabular-nums";
   return (
-    <figure className="tw-m-0 tw-mt-16 md:tw-mt-24" data-fig="network">
+    <figure className="tw-m-0 tw-mt-14 md:tw-mt-16" data-fig="network">
       <span className={EX_TEXT.label}>{ot(locale, "network.label")}</span>
       <h3 className={`${EX_TEXT.h3} tw-mt-2`}>{ot(locale, "network.title")}</h3>
-      <div
-        className="tw-mt-6"
-        role="img"
-        aria-label={ot(locale, "network.aria")}
-      >
-        <span className={rowLabel}>{ot(locale, "network.tdhRow")}</span>
-        <Bar items={items} pick={(share) => share.tdh} locale={locale} />
-        <Bands items={items} />
-        <Bar items={items} pick={(share) => share.people} locale={locale} />
-        <span className={`${rowLabel} tw-mb-0 tw-mt-1.5`}>
-          {ot(locale, "network.peopleRow")}
-        </span>
+      <div className="tw-mt-6 tw-grid tw-grid-cols-1 tw-items-center tw-gap-x-12 tw-gap-y-6 lg:tw-grid-cols-[minmax(0,1fr)_340px]">
+        <div role="img" aria-label={ot(locale, "network.aria")}>
+          {/* The role="img" names the figure; its labels are drawing, as an SVG's would be. */}
+          <span className={rowLabel} aria-hidden="true">
+            {ot(locale, "network.tdhRow")}
+          </span>
+          <Bar items={items} pick={(share) => share.tdh} locale={locale} />
+          <Bands items={items} />
+          <Bar items={items} pick={(share) => share.people} locale={locale} />
+          <span className={`${rowLabel} tw-mb-0 tw-mt-1.5`} aria-hidden="true">
+            {ot(locale, "network.peopleRow")}
+          </span>
+        </div>
+        <table className="tw-w-full tw-max-w-[560px] tw-border-collapse tw-text-[15px] tw-leading-[23px] tw-text-iron-300">
+          <thead>
+            <tr className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-400">
+              <th scope="col" className="tw-pb-2 tw-text-left tw-font-semibold">
+                <span className="tw-sr-only">
+                  {ot(locale, "network.colGroup")}
+                </span>
+              </th>
+              <th
+                scope="col"
+                className="tw-pb-2 tw-text-right tw-font-semibold"
+              >
+                {ot(locale, "network.colTdh")}
+              </th>
+              <th
+                scope="col"
+                className="tw-pb-2 tw-text-right tw-font-semibold"
+              >
+                {ot(locale, "network.colPeople")}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((share) => (
+              <tr key={share.group.key}>
+                <th
+                  scope="row"
+                  className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-py-1.5 tw-text-left tw-font-semibold tw-text-iron-50"
+                >
+                  <span
+                    className="tw-mr-2.5 tw-inline-block tw-size-3 tw-rounded-sm tw-align-[-1px]"
+                    style={{ background: TONES[share.group.key].fill }}
+                    aria-hidden="true"
+                  />
+                  {groupName(locale, share.group)}
+                </th>
+                <td className={cell}>{percent(locale, share.tdh)}</td>
+                <td className={cell}>{percent(locale, share.people)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-      <ul className="tw-m-0 tw-mt-5 tw-grid tw-list-none tw-grid-cols-1 tw-gap-x-8 tw-gap-y-2.5 tw-p-0 md:tw-grid-cols-2 lg:tw-grid-cols-4">
-        {items.map((share) => (
-          <li
-            key={share.group.key}
-            className="tw-grid tw-grid-cols-[14px_minmax(0,1fr)] tw-gap-x-2.5 tw-text-[15px] tw-leading-[23px] tw-text-iron-400"
-          >
-            <span
-              className="tw-mt-[5px] tw-size-3 tw-rounded-sm"
-              style={{ background: TONES[share.group.key].fill }}
-              aria-hidden="true"
-            />
-            <span>
-              <b className="tw-block tw-font-semibold tw-text-iron-50">
-                {groupName(locale, share.group)}
-              </b>
-              {ot(locale, "network.legend", {
-                tdh: percent(locale, share.tdh),
-                people: percent(locale, share.people),
-              })}
-            </span>
-          </li>
-        ))}
-      </ul>
       <figcaption className={`${EX_TEXT.cap} tw-mt-5 tw-max-w-[760px]`}>
         {ot(locale, "network.caption", {
           count: formatCount(locale, top100.count),
           share: percent(locale, top100.tdh / data.total),
-          sum: formatCount(locale, data.total),
+          read: readTime(locale, data.readAt),
         })}
       </figcaption>
     </figure>

@@ -61,12 +61,14 @@ describe("the hub, first version", () => {
     const { container } = render(<CheckableToday book={book} locale="en-US" />);
     const panel = container.querySelector("[data-ex-checkable]");
     expect(panel).toHaveTextContent(
-      "10,273 of 10,273 identities: 6529.io's TDH equals two separately written recomputations, on each of the last 5 days."
+      "10,273 of 10,273 identities: 6529.io's TDH equals two separately written recomputations, in each of the 5 results since Oct 14."
     );
     expect(panel).toHaveTextContent(
       "78 Lean theorems about the rules, with 11 earlier claims shown false and kept on record."
     );
-    expect(panel).toHaveTextContent("The second proof is not done.");
+    expect(panel).toHaveTextContent(
+      "program A ran inside SP1, and mainnet's SP1 verifier accepts its proof in a read-only call. Proof B is not done."
+    );
     expect(panel).toHaveTextContent(
       "For now the checks are run by 6529 and read by everyone."
     );
@@ -83,7 +85,7 @@ describe("the hub, first version", () => {
       "waits on: how cards were chosen before Main Stage"
     );
     expect(rows[3]).toHaveTextContent(
-      'software 0.1.0; "run one" waits on the code (D116)'
+      'software 0.1.0, being tested; "run one" waits on the code (D116)'
     );
     expect(rows[6]).toHaveTextContent("6529 Stream Editions");
     expect(list).not.toHaveTextContent("NIC's full name");

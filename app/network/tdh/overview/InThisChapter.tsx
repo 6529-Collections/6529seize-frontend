@@ -1,10 +1,9 @@
 import { kt } from "@/components/explained/i18n";
 import { chapterById } from "@/components/explained/shell/chapters";
-import PageIndex, {
-  type PageIndexRow,
-} from "@/components/explained/shell/PageIndex";
+import type { PageIndexRow } from "@/components/explained/shell/PageIndex";
 import { EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
+import ChapterPages from "./ChapterPages";
 import { orich, ot, type OverviewKey } from "./copy";
 
 /**
@@ -48,7 +47,7 @@ export default function InThisChapter({
   return (
     <section
       id="tdh-deeper"
-      className={EX_LAYOUT.section}
+      className={EX_LAYOUT.sectionTight}
       aria-labelledby="tdh-deeper-title"
     >
       <div className={EX_LAYOUT.ed}>
@@ -70,7 +69,7 @@ export default function InThisChapter({
         </div>
       </div>
       <div className="tw-mt-6" id="tdh-explore">
-        <PageIndex rows={rows} locale={locale} />
+        <ChapterPages rows={rows} locale={locale} />
       </div>
     </section>
   );

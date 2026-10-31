@@ -5,7 +5,6 @@ import HowWeKnowLadder from "./HowWeKnowLadder";
 import InThisChapter from "./InThisChapter";
 import LegacyAnchors from "./LegacyAnchors";
 import type { MachineCard } from "./Machine";
-import type { NetworkDistribution } from "./networkDistribution.server";
 import OverviewHero from "./OverviewHero";
 import OverviewSources from "./OverviewSources";
 import ThePicture from "./ThePicture";
@@ -21,18 +20,19 @@ export default function ExplainedOverview({
   book,
   locale,
   cards,
-  distribution,
+  network,
 }: {
   readonly book: FactBook;
   readonly locale: SupportedLocale;
   readonly cards: readonly MachineCard[];
-  readonly distribution: NetworkDistribution | "unavailable" | null;
+  /** Show the network's TDH by rank (the owner's flag). */
+  readonly network: boolean;
 }) {
   return (
     <article data-ex-article="" lang={locale}>
       <LegacyAnchors />
       <OverviewHero book={book} locale={locale} cards={cards} />
-      <ThePicture book={book} locale={locale} distribution={distribution} />
+      <ThePicture book={book} locale={locale} network={network} />
       <WhatItIsFor book={book} locale={locale} />
       <YourNumber locale={locale} />
       <HowWeKnowLadder book={book} locale={locale} />
@@ -41,7 +41,7 @@ export default function ExplainedOverview({
         book={book}
         locale={locale}
         title={ot(locale, "title")}
-        withNetwork={distribution !== null}
+        withNetwork={network}
       />
     </article>
   );

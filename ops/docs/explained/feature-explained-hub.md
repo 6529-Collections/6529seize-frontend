@@ -33,14 +33,16 @@ as coming.
    the station's number and one sentence, and links to chapter 01, TDH. On a
    phone and a tablet the loop is a list.
 3. Read `Three things you can check today`: every identity equal in today's
-   comparison, the Lean theorems with the earlier claims shown false, and the
-   one day proved in zero knowledge with the second proof not done.
+   comparison and in every result since the first, the Lean theorems with the
+   earlier claims shown false, and the one day proved in zero knowledge (proof
+   A, program A run inside SP1) with proof B not done.
 4. Pick a reading path under `Who are you reading as?`, each with its pages
    and the time it takes.
 5. Read `The chapters`: TDH live with its link, then The Memes and CC0, Waves
    and decisions, Validators, NextGen, Rep, NIC and Level, 6529 Works, and Why
    6529 and the network, each with its question, whether its subject runs
-   today, and what it waits on. Coming chapters have no link.
+   today, and what it waits on. Validators shows its software as built and
+   being tested. Coming chapters have no link.
 6. Read `CC0, in one minute` (`#cc0`): the art is free to copy, remix and sell,
    holding is what earns TDH, and where CC0 stops (Meme Card #1's CryptoPunk;
    6529 Gradients). `Download Meme #2` opens the original file.

@@ -6,16 +6,15 @@ import type { SupportedLocale } from "@/i18n/locales";
 import type { FactBook, FactId } from "@/lib/explained/facts";
 import { Fact } from "@/app/explained/_lib/facts";
 import { orich, ot } from "./copy";
-import NetworkDistribution from "./NetworkDistribution";
-import type { NetworkDistribution as Distribution } from "./networkDistribution.server";
+import NetworkSection from "./NetworkSection";
 import SectionLabel from "./SectionLabel";
 
 /**
  * §01 The picture (TDH-DESIGN.md §4.1, §5.2): a copy's TDH is an area, and
  * every edition has the same area. Four real editions drawn to scale on one
  * baseline: a rare card, the edition floor (in blue), a large card and
- * FirstGM, the unit. When the owner switches it on, the network's TDH
- * follows as one area too.
+ * FirstGM, the unit. Then the network's TDH as one area too, split by rank,
+ * which the owner asked to show (flags.ts).
  */
 const FIRST_GM = 8;
 const RARE = 4;
@@ -75,15 +74,12 @@ function editions(
 export default function ThePicture({
   book,
   locale,
-  distribution,
+  network,
 }: {
   readonly book: FactBook;
   readonly locale: SupportedLocale;
-  /**
-   * The network's TDH by rank when the owner's flag is on: the data, or
-   * "unavailable" when the API did not answer; null while the flag is off.
-   */
-  readonly distribution: Distribution | "unavailable" | null;
+  /** The network's TDH by rank, streamed in (the owner's flag, on by default). */
+  readonly network: boolean;
 }) {
   const items = editions(book, locale);
   const bold = (text: string) => (
@@ -121,14 +117,7 @@ export default function ThePicture({
           })}
         </figcaption>
       </figure>
-      {distribution === "unavailable" && (
-        <p className={`${EX_TEXT.cap} tw-mt-16`} data-fig="network">
-          {ot(locale, "network.unavailable")}
-        </p>
-      )}
-      {distribution !== null && distribution !== "unavailable" && (
-        <NetworkDistribution data={distribution} locale={locale} />
-      )}
+      {network && <NetworkSection locale={locale} />}
     </section>
   );
 }

@@ -29,7 +29,7 @@ function Item({
   );
 }
 
-/** Every day compared was equal: "on each of the last n days". */
+/** Every result so far was equal: "in each of the n results since Oct 14". */
 function everyDayEqual(book: FactBook): boolean {
   const equal = book.maybe<number>("tdh.days.equal");
   const compared = book.maybe<number>("tdh.days.compared");
@@ -47,6 +47,7 @@ export default function CheckableToday({
     <Fact book={book} id={id} locale={locale} />
   );
   const days = fact("tdh.days.compared");
+  const first = fact("tdh.days.first");
   return (
     <div
       className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-p-6"
@@ -62,9 +63,10 @@ export default function CheckableToday({
             })}
           </b>{" "}
           {everyDayEqual(book)
-            ? hrich(locale, "check.identitiesBody", { days })
+            ? hrich(locale, "check.identitiesBody", { days, first })
             : hrich(locale, "check.identitiesSome", {
                 days,
+                first,
                 equal: fact("tdh.days.equal"),
               })}
         </Item>

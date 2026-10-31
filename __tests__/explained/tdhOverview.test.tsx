@@ -248,7 +248,7 @@ describe("the overview", () => {
         book={book}
         locale="en-US"
         cards={CARDS}
-        distribution={null}
+        network={false}
       />
     );
     for (const id of [
@@ -306,6 +306,7 @@ describe("the overview", () => {
           total: 1000,
           identities: 1100,
           source: "test",
+          readAt: "2026-10-31T09:12:00Z",
           groups: [
             { key: "top", count: 10, tdh: 400 },
             { key: "next", count: 90, tdh: 300 },
@@ -320,6 +321,93 @@ describe("the overview", () => {
     expect(screen.getByText("the other 100")).toBeInTheDocument();
     expect(
       screen.getByText(/The top 100 identities hold 70\.0% of today's TDH/)
+    ).toHaveTextContent("6529.io's API, read Oct 31, 09:12 UTC.");
+    const table = screen.getByRole("table");
+    expect(within(table).getAllByRole("row")).toHaveLength(5);
+    expect(
+      within(table).getByRole("rowheader", { name: "next 900" })
     ).toBeInTheDocument();
+    expect(screen.getByRole("img")).toHaveAccessibleName(
+      "Today's TDH as one area, split by rank: the top identities' share of the total, and their share of the identities."
+    );
+  });
+});
+
+describe("how we know, on the overview", () => {
+  it("draws rung 5 as programs A and B in their provers, and rung 7 as built, being tested", () => {
+    const { container } = withFacts(
+      <ExplainedOverview
+        book={fixtureBook()}
+        locale="en-US"
+        cards={CARDS}
+        network={false}
+      />
+    );
+    const zk = container.querySelector('[data-rung="5"]');
+    expect(zk).toHaveTextContent(
+      "Program A, the Rust core, in SP1: proved the day of Oct 11; mainnet's SP1 verifier accepts it in a read-only call."
+    );
+    expect(zk).toHaveTextContent(
+      "Program B, written separately, in RISC Zero: no day proved yet."
+    );
+    expect(zk?.querySelector('[data-proof="A"]')).toHaveAttribute(
+      "data-proved",
+      "1"
+    );
+    expect(zk?.querySelector('[data-proof="B"]')).toHaveAttribute(
+      "data-proved",
+      "0"
+    );
+    expect(container.querySelector('[data-rung="6"]')).toHaveTextContent(
+      "A contract records a day only with both proofs. Tested on a copy of mainnet; not deployed."
+    );
+    expect(container.querySelector('[data-rung="7"]')).toHaveTextContent(
+      /Built\s*0\.1\.0, being tested/
+    );
+    expect(
+      screen.getByRole("link", { name: /What is proved, and what is not/ })
+    ).toHaveAttribute("href", "/network/tdh/formal");
+  });
+
+  it("names NIC where it first uses it, and the hero's ribbon shows the last five results and the open day", () => {
+    const { container } = withFacts(
+      <ExplainedOverview
+        book={fixtureBook()}
+        locale="en-US"
+        cards={CARDS}
+        network={false}
+      />
+    );
+    expect(container.querySelector("#tdh-weight")).toHaveTextContent(
+      "Rep and NIC (Network Identity Check) are ratings collectors give each other"
+    );
+    const ribbon = container.querySelector("[data-livestrip] ol");
+    expect(ribbon?.querySelectorAll("li")).toHaveLength(6);
+  });
+
+  it("lists the spine and the shelf in one list, spine first", () => {
+    withFacts(
+      <ExplainedOverview
+        book={fixtureBook()}
+        locale="en-US"
+        cards={CARDS}
+        network={false}
+      />
+    );
+    const index = screen.getByRole("list", {
+      name: "The pages of this chapter",
+    });
+    const links = within(index).getAllByRole("link");
+    expect(links.map((link) => link.getAttribute("href"))).toEqual([
+      "/network/tdh/how-it-works",
+      "/network/tdh/consolidation",
+      "/network/tdh/verification",
+      "/network/tdh/formal",
+      "/network/tdh/specification",
+      "/network/tdh/implementations",
+      "/network/tdh/consolidation/design",
+      "/network/tdh/historic-boosts",
+      "/network/tdh/glossary",
+    ]);
   });
 });

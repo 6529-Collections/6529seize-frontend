@@ -5,7 +5,8 @@ import { publicEnv } from "@/config/env";
  * every identity sorted by boosted TDH), and summed by rank: the top ten,
  * the next ninety, the next nine hundred, and everyone else with any TDH.
  * Only the numbers are kept; no identity, wallet or name leaves this file.
- * Read only when the figure is switched on (flags.ts), at most hourly.
+ * Read only when the figure is on (flags.ts), at most hourly; the API's own
+ * Date header says when the numbers were read.
  */
 export interface RankGroup {
   readonly key: "top" | "next" | "next2" | "rest";
@@ -20,6 +21,8 @@ export interface NetworkDistribution {
   readonly identities: number;
   readonly groups: readonly RankGroup[];
   readonly source: string;
+  /** When 6529.io answered (its Date header, ISO 8601 UTC), if it said. */
+  readonly readAt: string | null;
 }
 
 const PAGE_SIZE = 1000;
@@ -34,7 +37,19 @@ interface MetricsPage {
   readonly data?: readonly { readonly boosted_tdh?: unknown }[];
 }
 
-async function readPage(page: number): Promise<MetricsPage | null> {
+interface ReadPage {
+  readonly body: MetricsPage;
+  readonly date: string | null;
+}
+
+function isoDate(header: string | null): string | null {
+  const time = header === null ? Number.NaN : Date.parse(header);
+  return Number.isNaN(time)
+    ? null
+    : new Date(time).toISOString().replace(".000Z", "Z");
+}
+
+async function readPage(page: number): Promise<ReadPage | null> {
   const url = `${publicEnv.API_ENDPOINT}/api/tdh/consolidated_metrics?page_size=${PAGE_SIZE}&page=${page}&sort=boosted_tdh&sort_direction=DESC`;
   try {
     const response = await fetch(url, {
@@ -42,27 +57,42 @@ async function readPage(page: number): Promise<MetricsPage | null> {
       signal: AbortSignal.timeout(TIMEOUT_MS),
       next: { revalidate: REVALIDATE_SECONDS },
     } as RequestInit);
-    return response.ok ? ((await response.json()) as MetricsPage) : null;
+    if (!response.ok) {
+      return null;
+    }
+    return {
+      body: (await response.json()) as MetricsPage,
+      date: isoDate(response.headers.get("date")),
+    };
   } catch {
     return null;
   }
 }
 
+interface ReadValues {
+  readonly values: number[];
+  /** When the first page was read. */
+  readonly readAt: string | null;
+}
+
 /** Every identity's TDH above zero, largest first, or null if the API fails. */
-async function readValues(): Promise<number[] | null> {
+async function readValues(): Promise<ReadValues | null> {
   const values: number[] = [];
+  let readAt: string | null = null;
   for (let page = 1; page <= MAX_PAGES; page += 1) {
-    const body = await readPage(page);
-    if (body === null) {
+    const read = await readPage(page);
+    if (read === null) {
       return null;
     }
+    const body = read.body;
+    readAt ??= read.date;
     const rows = (body.data ?? []).map((row) =>
       typeof row.boosted_tdh === "number" ? row.boosted_tdh : 0
     );
     values.push(...rows.filter((value) => value > 0));
     const more = typeof body.next === "string" && body.next.length > 0;
     if (!more || rows.length === 0 || (rows.at(-1) ?? 0) <= 0) {
-      return values.sort((a, b) => b - a);
+      return { values: values.sort((a, b) => b - a), readAt };
     }
   }
   return null;
@@ -87,14 +117,16 @@ export function rankGroups(sorted: readonly number[]): RankGroup[] {
 }
 
 export async function loadNetworkDistribution(): Promise<NetworkDistribution | null> {
-  const values = await readValues();
-  if (values === null || values.length === 0) {
+  const read = await readValues();
+  if (read === null || read.values.length === 0) {
     return null;
   }
+  const { values, readAt } = read;
   return {
     total: values.reduce((sum, value) => sum + value, 0),
     identities: values.length,
     groups: rankGroups(values),
     source: "6529.io API tdh/consolidated_metrics",
+    readAt,
   };
 }

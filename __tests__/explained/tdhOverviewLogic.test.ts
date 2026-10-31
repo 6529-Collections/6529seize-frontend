@@ -6,6 +6,7 @@ import {
   summarizeProfile,
 } from "@/app/network/tdh/overview/explain";
 import { showNetworkDistribution } from "@/app/network/tdh/overview/flags";
+import { missingResultDays } from "@/app/network/tdh/overview/HowWeKnowLadder";
 import { movedAnchor } from "@/app/network/tdh/overview/LegacyAnchors";
 import {
   loadNetworkDistribution,
@@ -132,6 +133,21 @@ describe("Explain my TDH: the arithmetic", () => {
   });
 });
 
+describe("days without a result", () => {
+  it("names the days inside the comparison's range that have no result yet", () => {
+    const days = [20740, 20741, 20742, 20744, 20747].map((cycle) => ({
+      cycle,
+    }));
+    expect(missingResultDays(days, "en-US")).toEqual([
+      "Oct 17",
+      "Oct 19",
+      "Oct 20",
+    ]);
+    expect(missingResultDays([{ cycle: 20740 }], "en-US")).toEqual([]);
+    expect(missingResultDays([], "en-US")).toEqual([]);
+  });
+});
+
 describe("the network's distribution", () => {
   const originalFetch = global.fetch;
   afterEach(() => {
@@ -155,6 +171,7 @@ describe("the network's distribution", () => {
   function page(values: number[], next: string | null) {
     return {
       ok: true,
+      headers: { get: () => null },
       json: () =>
         Promise.resolve({
           next,
@@ -179,6 +196,7 @@ describe("the network's distribution", () => {
       identities: 3,
       groups: [{ key: "top", count: 3, tdh: 980 }],
       source: "6529.io API tdh/consolidated_metrics",
+      readAt: null,
     });
   });
 
@@ -193,11 +211,22 @@ describe("the network's distribution", () => {
     await expect(loadNetworkDistribution()).resolves.toBeNull();
   });
 
-  it("is off by default, and a review link can switch it on or off", () => {
-    expect(showNetworkDistribution(undefined)).toBe(false);
+  it("says when 6529.io answered, from the API's own Date header", async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ...page([7, 0], null),
+      headers: { get: () => "Sat, 31 Oct 2026 09:12:00 GMT" },
+    }) as unknown as typeof fetch;
+    await expect(loadNetworkDistribution()).resolves.toMatchObject({
+      total: 7,
+      readAt: "2026-10-31T09:12:00Z",
+    });
+  });
+
+  it("is on by default (the owner's decision), and a review link can switch it off", () => {
+    expect(showNetworkDistribution(undefined)).toBe(true);
     expect(showNetworkDistribution("on")).toBe(true);
     expect(showNetworkDistribution("off")).toBe(false);
-    expect(showNetworkDistribution("yes")).toBe(false);
+    expect(showNetworkDistribution("yes")).toBe(true);
   });
 });
 
