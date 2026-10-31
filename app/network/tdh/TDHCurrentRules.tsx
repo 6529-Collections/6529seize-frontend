@@ -45,7 +45,7 @@ const formatMultiplier = (locale: SupportedLocale, value: number) =>
  * A page that read them on the server passes them in, so they render at once
  * and a failed refresh in the browser keeps them on screen.
  */
-export function useTdhRules(initialRules: TdhRules | null = null) {
+function useTdhRules(initialRules: TdhRules | null = null) {
   return useQuery({
     queryKey: [QueryKey.TDH_RULES],
     queryFn: async ({ signal }) =>

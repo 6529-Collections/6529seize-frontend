@@ -54,7 +54,7 @@ function LeanBlock({
       : kt(locale, "explained.kit.claim.noAxioms");
   return (
     <div
-      className="tw-my-3 tw-whitespace-pre-wrap tw-break-all tw-rounded-md tw-bg-black/40 tw-p-3 tw-font-mono tw-text-[13px] tw-leading-[21px] tw-text-iron-50"
+      className="tw-my-3 tw-whitespace-pre-wrap tw-rounded-md tw-bg-black/40 tw-p-3 tw-font-mono tw-text-[13px] tw-leading-[21px] tw-text-iron-50 [overflow-wrap:anywhere]"
       data-fact={lean.name?.id ?? ""}
     >
       {`${text(lean.name)}\n${text(lean.file)}:${text(lean.line)}\n${axioms}`}
@@ -232,7 +232,7 @@ export function Scoreboard({
 }) {
   return (
     <dl
-      className="tw-m-0 tw-grid tw-grid-cols-1 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 md:[grid-template-columns:repeat(var(--ex-score),minmax(0,1fr))]"
+      className="tw-m-0 tw-grid tw-grid-cols-1 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 lg:[grid-template-columns:repeat(var(--ex-score),minmax(0,1fr))]"
       style={{ ["--ex-score" as string]: String(cells.length) }}
       aria-label={label}
       data-scoreboard=""
@@ -240,7 +240,7 @@ export function Scoreboard({
       {cells.map((cell, index) => (
         <div
           key={cell.value?.id ?? index}
-          className={`tw-px-[22px] tw-py-5 ${index > 0 ? "tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 md:tw-border-l md:tw-border-t-0" : ""}`}
+          className={`tw-px-[22px] tw-py-5 ${index > 0 ? "tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 lg:tw-border-l lg:tw-border-t-0" : ""}`}
         >
           <dt className="tw-sr-only">
             {typeof cell.caption === "string" ? cell.caption : ""}

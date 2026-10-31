@@ -1,214 +1,84 @@
-# TDH Formal Model
+# TDH How Sure (Formal Model)
 
 Parent: [Network Index](README.md)
 
 ## Overview
 
-`/network/tdh/formal` explains the Lean 4 model of TDH-v1: what it
-reproduces, which properties of the rule are machine-checked proofs, which
-claims were shown false with counterexamples, and what the proofs do not
-cover. Every status and every count comes from the model's proof manifest
-(below), read from the feed at run time. Since October 16, 2026 the feed
-serves round 5, the model at commit `6b32f3f` of 6529's design repository
-(Lean 4.35.0), beside P26 as of `f840096`; the copy bundled with the page is
-that same file. The model's source is in 6529's private design repository.
-A `Proposal, not adopted` pill
-and a status line say that P26 stays the rule: it is proposed to the owner
-that the model become the normative definition of TDH-v1, which has not been
-decided.
+`/network/tdh/formal` is page 4 of the TDH chapter of 6529 Explained, "How
+sure": what is proved about the TDH rules, how Lean checks it, what is tested
+every day, and what is not. It is driven by the Lean proof manifest that
+6529's public TDH feed serves (`formal/manifest.json`); every count on the
+page is read from it, and a new manifest changes the page by itself.
+
+The feed's manifest today is the one built for TDH v1.4 (the model's round
+7). If the feed ever serves a manifest about the rules before decisions D136
+(four wallets) and D137 (the name TDH v1.4), a note under the title names
+both. If 6529's design record has the model at a newer commit than the
+manifest, a note says the counts are the manifest's until the feed serves the
+new one.
 
 ## Location in the Site
 
 - Route: `/network/tdh/formal`
-- Page heading: `Formal model`
-- Browser title: `TDH formal model | Network`
-- About contents menu: `TDH formal model` under Network & Reputation
-- TDH section navigation: `Formal model`
+- Page heading: `What is proved, what is tested, and what is not.`
+- Browser title: `How sure: what is proved about TDH | 6529 Explained`
+- Chapter bar: `4 How sure`, under Check
 
 ## Content
 
-- One row of four figures, every one read from the manifest the page
-  loaded and each with its unit: theorems proved, counterexamples (with the
-  claims they show false: the first netting rule's five cases refute one
-  claim, so 11 counterexamples refute 7 claims), limits not proved here,
-  and conformance vectors passed out of P26's. The first three carry the
-  colour of their outcome (holds, shown false, not covered). Under the
-  theorems figure, one line adds the theorems that establish
-  counterexamples up to the 85 that PROOFS.md documents and says how many
-  proved theorems restate a definition; its details add that the build's
-  audit covers every theorem and definition of the model (1,068 theorems
-  and 1,538 definitions at round 5). What each counts, and the manifest's
-  commit and generation time (24-hour clock), are in one disclosure under
-  them.
-  A new build changes them by itself; nothing in the page fixes a count the
-  manifest gives.
-- The builds behind the page, in one panel: the published build (model
-  commit and date, Lean version, P26's last change, its vectors and checks,
-  theorems and fact checks, where its statuses were read from, when the
-  manifest was generated, the link to the manifest JSON and the SHA-256 of
-  the file served). Only when the feed serves an earlier round than the one
-  the page knows is committed does a second column show that round under a
-  `Not yet published` pill (its commit and date, figures, the SHA-256 of its
-  committed manifest and, in a disclosure, what it changes); with round 5
-  published there is none.
-- Why write the rule again (the 23 choices a clean-room implementation had to
-  make, two rated high, and the first netting rule the proofs refuted), and
-  `Found by the model, by program B and by a review, and settled in the
-  specifications`: the first netting rule (found by program B, five cases
-  then proved by the model), cases H (the model) and I (a review), F, G,
-  the 19.99% cap (six passes where P53
-  said five, a valid key as part of being live, the level as one floor) and
-  the exclusions recomputation finding.
-- What the netting theorem proves, and where it stops: netting invariance in
-  plain words with its hypotheses (any two transfer sequences, transactions
-  corresponding one to one and in order, one registry, both replays with a
-  result; P26 applies it to the canonically ordered transfers), its two
-  limits (whole transactions added or removed, and the canonical sort, are
-  not covered), what it means
-  (within those limits no holding stack can change), where it stops
-  (mint facts read the steps, so eligibility, and with it balances, raw days,
-  rates and TDH, can change; the underflow test reads the steps too), a
-  figure of two inputs with one net movement (across the column, under the
-  text), and the Lean statement with the definitions it uses. The netting
-  row adds that a reordered or inserted round trip changes no stack as long
-  as both versions still pass the underflow test.
-- What is proved, and what is not, across the whole width: a legend in
-  three colours (holds, shown false, not covered), each listing its
-  methods by label and shape (kernel, definition, evaluation that trusts
-  the compiler; a kernel or an evaluated counterexample; outside these
-  proofs), then one table for TDH-v1 and one for two validator rules. The
-  filters count statements, in the same three groups, and say that the
-  figures at the top count manifest entries. Each row has a status
-  (`Proved`, `By definition`, `Checked at build`, `Shown false`, `False by
-  evaluation`, `Not proved here`, or `Not confirmed` when the manifest
-  does not confirm it), and a proved row that bundles a limit PROOFS.md
-  leaves open (netting invariance and the canonical sort) says so beside
-  its pill. Its references name a document once (`P26 §3.1, 3.2, 6.1`).
-  The netting row's claim states the theorem's hypotheses (transfers
-  already in canonical order, transactions corresponding one to one), and
-  the cap row says which inputs are taken as given. A row opens to its scope, the Lean
-  statement and the manifest's entries: each theorem with its status, the
-  axioms Lean reports for it, its file and line and the manifest's reading
-  of it, each `#guard` case with its number of checks. Lean code keeps its
-  lines, and a long line wraps with a hanging indent. The replay row is
-  `The replay succeeds on valid input`, with the transaction rules it
-  assumes. Four statements of the TDH-v1 table are shown false, among them that
-  steps inside a transaction never matter (counterexamples H and I); that a
-  token's balance and raw days stay the same while its eligibility does is
-  marked not proved here (it follows from P26 §7.2's definitions); the first
-  netting rule's row shows its five counterexamples, each with what its
-  values measure (the network total, ZERO's record in case B under the
-  first rule, identity {A, B}'s final in case C); held = minted − burned
-  is `False by evaluation` (counterexample G is a `#guard`).
-- What the model contains, across the whole width: what it covers, its
-  runs as a small table (the vectors; the 2026-10-11 cycle from raw logs;
-  the random inputs against the Python reference locally and, in CI, 1,000
-  seeded random inputs through Lean, the Python reference and the Rust
-  reference), one line calling the day and the random inputs evidence by
-  evaluation, which trusts Lean's compiler, not proof, what it leaves out
-  (since round 4, `f854661`, selecting and decoding logs are definitions of
-  the model, checked by vectors and runs, not by a theorem; round 5 adds the
-  one-log rule, whose check a theorem proves enough,
-  `canonicalTransfers_oneLog`, and the strict reader, test tooling checked
-  by vectors only), and its modules by P26 section (`Tdh.Inputs` at round 5:
-  §2, §3, §5.2, §6.1). The day's log counts are given both ways: 414,007
-  through the snapshot block, of 414,254 in the day's file.
-- What the proofs do not guarantee, with a link to the five rounds of
-  differential tests on the Implementations page, which lists what each
-  round found. The Rust core is checked against the Python reference on
-  each day of the daily comparison; the Lean model matched it on one real
-  day, the October 11, 2026 cycle.
-- Three layers of assurance across the section: the specification, the
-  model and the programs as bands, each labelled with its layer, and the
-  inputs under them, drawn dashed as partly in place (checked reads, D118,
-  are built: every daily run checks the snapshot block's headers and the
-  edition floors, while the history before the snapshot is taken as
-  reported until the full check runs; proofs A and B, D119, are being
-  built). Each check is named on the arrow between the layers it joins,
-  with a legend for each border. Its text alternative says that the Rust
-  core and the Python reference check each other in the daily comparison,
-  and that the Rust core against program B before every validator signs is
-  decided (D125) but not built in, with nothing signing today. Then how
-  the model is checked (`lake build`, `lake exe tdh-vectors`; it is in
-  6529's private design repository), with the published build's figures.
-
-## Rounds of the model
-
-The page knows three rounds of the model and shows the one its manifest
-records (`leanRound` in `formalStatus.ts`):
-
-- Round 3 (`7bf579a`, the feed's manifest until October 16, 2026): the model
-  starts from decoded inputs; order independence covers the decoded items,
-  and raw log order is marked not covered.
-- Round 4 (a manifest that proves `computeCycleFromSource_perm`): the model
-  starts from raw `eth_getLogs` entries. Order independence covers raw logs
-  too, a row `The model from raw logs` adds the decoded-input special case
-  and typed inputs, the netting and identity-sum rows also cite the claims
-  PROOFS.md names as not proved (the canonical sort, the identity record's
-  `wallets` field), the module table adds `Tdh.Logs`, and the runs are those
-  of the README at `f854661` (all 414,254 logs at their types, 56 to 72
-  seconds, 1,182,188 random checks).
-- Round 5 (a manifest that proves `canonicalTransfers_oneLog`, 6529chain
-  `6b32f3f`, October 16, 2026): follows P26's fifth round. The order row
-  adds that transfers at one log position share contract, sender and
-  recipient, and that the header and claims maps are taken as fixed; the
-  runs are the README's at `6b32f3f` (about 20 seconds from raw logs,
-  1,127,150 random checks).
-
-The feed has published round 5's manifest since October 16, 2026, and the
-bundled copy is that file (SHA-256 `24e2f16b…`); every count the page shows
-is read from the manifest it loads, never written into the page. The
-summary splits the counterexamples by how each is checked (a kernel-checked
-theorem or an evaluation, #guard) and counts the claims they show false
-(`refutedClaimCount`), its details give the
-arithmetic of proved and audited theorems, the statements table's filters
-count statements (each row says how many manifest entries it groups, and
-shows a one-line claim with the plain words behind its chevron), and every
-manifest entry is listed by status under the tables, each group with its
-unit and colour (`Proved: 78 theorems`, `Counterexamples: 11, against 7
-claims`, `Not proved here: 9 limits`). A statement refuted
-only by evaluated counterexamples has its own status, `False by
-evaluation`; each status has a shape as well as a colour. Every section uses
-the heading rail, and `What the proofs do not guarantee` gives each item in
-two lines with the rest under `More`. Should the feed serve an earlier
-round again, the builds panel shows round 5 in a column of its own, under a
-`Not yet published` pill, and says every status on the page is the published
-build's. Round 5's fact-check row lists the facts it adds (an amount's type,
-`totalMax`'s, the one-log rule). The Implementations page's Lean card
-follows the same switch for its compute time.
-
-The summary counts every proved statement of the TDH-v1 table, as the
-filter does; its card names last in, first out, a lemma about how the model
-stores a stack.
+- A scoreboard, once: the claims (one per section of the manifest), the Lean
+  theorems with their worked examples, the statements shown false (in Lean's
+  kernel or by evaluation) and the limits named, with the manifest's own
+  record under it (Lean version, the file's SHA-256, what the audit covers,
+  P26's vectors in the manifest).
+- 01 Two questions: two ladders, the rule and a day, each with the line where
+  today's evidence stops. Proof A's mainnet day and proof B's missing one
+  show as a half pair, with a link to the chapter's page on the proofs.
+- 02 One claim, to the end: the netting sentence of P26 §7.1 as first
+  written, narrowed and as it stands, each quoted with its commit and time,
+  the two refutations with their numbers, and how long each stood.
+- 03 The claims: one row per section, each with its limit beside it and its
+  counts; then the counterexamples by kind.
+- 04 In words and in Lean: pick a claim to read its main theorem, in plain
+  words beside the statement Lean's kernel checked (the proof left out), with
+  a key to reading it, the rules it is about, its file and line at the
+  manifest's commit, its axioms and what it does not cover.
+- 05 How Lean checks it: what one build establishes, from the manifest's
+  record of it: the kernel checks every proof, the axiom audit, the two kinds
+  of counterexample (and which trusts Lean's compiler), the vectors the model
+  runs, and the record's CI.
+- 06 What you still have to trust: the assumption ledger, then every limit
+  the manifest names, each in a sentence.
+- 07 Check it yourself: the manifest's SHA-256 computed in the reader's
+  browser, the commands that print its counts, where to read a theorem, and
+  rerunning the proofs, which waits for the model's source. Each step says who
+  can repeat it.
+- 08 Every statement: every manifest entry in one closed group per section,
+  each with its result, Lean name, file and line, what checked it, the
+  manifest's sentence in plain words and, for a theorem, its Lean statement
+  behind one more disclosure.
 
 ## Data
 
-- The proof manifest, `formal/manifest.json` on 6529's public TDH feed
-  (`https://d379duzqnomz3w.cloudfront.net`, or `NEXT_PUBLIC_TDH_VERIFICATION_BASE`
-  when set).
-  6529's design repository writes it with `design/tdh-lean/tools/manifest.py`,
-  which builds the model at one commit, runs the vectors and asks Lean for
-  every audited theorem's axioms; it is published from there. The page
-  rechecks it hourly and accepts only a clean, passing build whose theorems
-  use Lean's standard axioms alone.
-- When the manifest is not published (403 or 404), cannot be loaded, fails
-  validation or the base is misconfigured, the page shows the copy bundled with it
-  (`lib/tdh/formal/bundledManifest.json`, the published round-5 file, read
-  through `bundledManifest.ts`) and says so. Refresh the copy after each new build of the model.
-- Each statement (`app/network/tdh/formal/leanResults.ts`) names the manifest
-  entries it rests on; its status stands only when the manifest confirms
-  every one of them. The plain-English text, the quoted Lean statements and
-  the runs the manifest does not repeat (the 2026-10-11 cycle, the random
-  inputs) are bundled and change with a reviewed update.
-- `__tests__/app/network/tdh/formalStatus.test.ts` checks every round: every
-  statement of a round is confirmed by a manifest of that round (round 5's
-  from the theorem entries of its committed manifest,
-  `__tests__/app/network/tdh/fixtures/roundFiveManifest.json`; round 3's
-  from `roundThreeManifest.json`, the feed's earlier file), every
-  audited theorem belongs to exactly one statement, and a manifest of an
-  earlier round cannot confirm a later round's statements.
+- The manifest comes from the feed, read again every hour; when it cannot be
+  read the page shows the copy bundled with the site
+  (`lib/tdh/formal/bundledManifest.json`) and says so in How we know.
+- Section titles, references, entries and counts come from the manifest; the
+  netting history, the counterexamples' numbers and the model's random-input
+  count come from `lib/explained/data/reference.json`, each with its source.
+- Each theorem's Lean statement comes from `lib/explained/data/lean.json`,
+  copied from the model at the manifest's commit by
+  `scripts/explained/sync-lean.mjs` (`6529 run explained:sync-lean -- --chain
+  <6529chain>`). The page prints a statement only beside a manifest of the
+  same commit. After refreshing the bundled manifest, run it again.
+- The Lean model's commit in the record snapshot
+  (`lib/explained/data/record.json`, synced by
+  `scripts/explained/sync-record.mjs`) is compared with the manifest's.
+- Old anchors (`#why`, `#layers`, `#featured`, `#statements`, `#not`,
+  `#contains`, `#check`) land where their content now is.
 
 ## Related Pages
 
-- [TDH-v1 Specification](feature-tdh-specification.md)
-- [TDH Implementations](feature-tdh-implementations.md)
+- [TDH v1.4 Specification](feature-tdh-specification.md)
+- [TDH Implementations and Vectors](feature-tdh-implementations.md)
+- [TDH Glossary](feature-tdh-glossary.md)

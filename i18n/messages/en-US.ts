@@ -47,14 +47,17 @@ import networkTdhRulesMessages from "@/i18n/messages/networkTdhRules.en-US.json"
 import networkTdhSharedMessages from "@/i18n/messages/networkTdhShared.en-US.json";
 import networkTdhVerifyMessages from "@/i18n/messages/networkTdhVerify.en-US.json";
 import networkTdhHowMessages from "@/i18n/messages/networkTdhHow.en-US.json";
-import networkTdhSpecMessages from "@/i18n/messages/networkTdhSpec.en-US.json";
-import networkTdhFormalMessages from "@/i18n/messages/networkTdhFormal.en-US.json";
 import networkTdhImplMessages from "@/i18n/messages/networkTdhImpl.en-US.json";
 import explainedKitMessages from "@/i18n/messages/explainedKit.en-US.json";
 import explainedHubMessages from "@/i18n/messages/explainedHub.en-US.json";
 import explainedTdhOverviewMessages from "@/i18n/messages/explainedTdhOverview.en-US.json";
 import explainedTdhCheckMessages from "@/i18n/messages/explainedTdhCheck.en-US.json";
 import explainedTdhDayMessages from "@/i18n/messages/explainedTdhDay.en-US.json";
+import explainedTdhSureMessages from "@/i18n/messages/explainedTdhSure.en-US.json";
+import explainedTdhSpecMessages from "@/i18n/messages/explainedTdhSpec.en-US.json";
+import explainedTdhImplMessages from "@/i18n/messages/explainedTdhImpl.en-US.json";
+import explainedTdhVersionsMessages from "@/i18n/messages/explainedTdhVersions.en-US.json";
+import explainedTdhGlossaryMessages from "@/i18n/messages/explainedTdhGlossary.en-US.json";
 import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US.json";
 import pageMetadataMessages from "@/i18n/messages/pageMetadata.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
@@ -4608,14 +4611,17 @@ export const EN_US_MESSAGES = {
   ...networkTdhSharedMessages,
   ...networkTdhVerifyMessages,
   ...networkTdhHowMessages,
-  ...networkTdhSpecMessages,
-  ...networkTdhFormalMessages,
   ...networkTdhImplMessages,
   ...explainedKitMessages,
   ...explainedHubMessages,
   ...explainedTdhOverviewMessages,
   ...explainedTdhCheckMessages,
   ...explainedTdhDayMessages,
+  ...explainedTdhSureMessages,
+  ...explainedTdhSpecMessages,
+  ...explainedTdhImplMessages,
+  ...explainedTdhVersionsMessages,
+  ...explainedTdhGlossaryMessages,
   ...delegationTapGuideMessages,
   ...pageMetadataMessages,
   ...toolsMessages,

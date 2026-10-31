@@ -178,16 +178,32 @@
       "genre": "V",
       "mockup": "tdh-how-sure.html",
       "lane": "P4",
-      "sources": ["app/network/tdh/formal/**"],
-      "dependsOn": ["D128", "D136", "D137"],
-      "checkedThrough": "D141",
+      "sources": ["app/network/tdh/formal/**", "app/network/tdh/_reference/**"],
+      "dependsOn": ["D96", "D112", "D128", "D131", "D136", "D137"],
+      "checkedThrough": "D145",
       "budget": {
         "words": 2100,
         "firstScreenMin": 150,
         "firstScreen": 285,
         "wordsPerScreen": 300
       },
-      "states": []
+      "states": [
+        {
+          "name": "theorem-groups",
+          "clicks": ["[data-claim=\"7\"]"],
+          "el": "[data-theorems]"
+        },
+        {
+          "name": "theorem-cap",
+          "clicks": ["[data-claim=\"5a\"]"],
+          "el": "[data-theorems]"
+        },
+        {
+          "name": "group-open",
+          "clicks": ["#contains details > summary"],
+          "el": "#contains"
+        }
+      ]
     },
     {
       "id": "tdh-specification",
@@ -196,9 +212,12 @@
       "genre": "R",
       "mockup": "tdh-specification.html",
       "lane": "P4",
-      "sources": ["app/network/tdh/specification/**"],
-      "dependsOn": ["D89", "D116", "D136", "D137"],
-      "checkedThrough": "D141",
+      "sources": [
+        "app/network/tdh/specification/**",
+        "app/network/tdh/_reference/**"
+      ],
+      "dependsOn": ["D30", "D89", "D116", "D121", "D131", "D136", "D137"],
+      "checkedThrough": "D145",
       "states": []
     },
     {
@@ -208,9 +227,12 @@
       "genre": "R",
       "mockup": "tdh-implementations.html",
       "lane": "P4",
-      "sources": ["app/network/tdh/implementations/**"],
-      "dependsOn": ["D116", "D125"],
-      "checkedThrough": "D141",
+      "sources": [
+        "app/network/tdh/implementations/**",
+        "app/network/tdh/_reference/**"
+      ],
+      "dependsOn": ["D116", "D119", "D125", "D132"],
+      "checkedThrough": "D145",
       "states": []
     },
     {
@@ -232,9 +254,12 @@
       "genre": "R",
       "mockup": "tdh-versions.html",
       "lane": "P4",
-      "sources": ["app/network/tdh/historic-boosts/**"],
+      "sources": [
+        "app/network/tdh/historic-boosts/**",
+        "app/network/tdh/_reference/**"
+      ],
       "dependsOn": ["D136", "D137"],
-      "checkedThrough": "D141",
+      "checkedThrough": "D145",
       "states": []
     },
     {
@@ -244,7 +269,10 @@
       "genre": "R",
       "mockup": "tdh-glossary.html",
       "lane": "P4",
-      "sources": ["app/network/tdh/glossary/**"],
+      "sources": [
+        "app/network/tdh/glossary/**",
+        "app/network/tdh/_reference/**"
+      ],
       "dependsOn": [
         "D30",
         "D41",
@@ -253,11 +281,12 @@
         "D119",
         "D121",
         "D125",
+        "D131",
         "D132",
         "D136",
         "D137"
       ],
-      "checkedThrough": "D141",
+      "checkedThrough": "D145",
       "states": []
     },
     {

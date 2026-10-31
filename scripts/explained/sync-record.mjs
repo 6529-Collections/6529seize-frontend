@@ -5,16 +5,23 @@
  * at `origin/main` with `git show` after a fetch. Run it at ship time (the
  * fact gate, PLAYBOOK.md §8), then run the drift check:
  *
- *   node scripts/explained/sync-record.mjs --chain <path to 6529chain> [--no-fetch] [--check]
+ *   node scripts/explained/sync-record.mjs --chain <path to 6529chain> [--no-fetch] [--check] [--ref <commit>]
  *
  * It records, with the commit each came from:
  * - the record's head (commit, date, the newest D-number);
  * - every decision's D-number and the D-numbers its text cites, so the
  *   drift check can find a newer decision that touches a page's;
  * - a one-line summary for the decisions the pages cite (CITED below);
- * - P26: its commit, rule version, registry hash, rule ID, vector count
- *   and the registry values the kit's facts print (§10);
- * - the Lean model's commit.
+ * - P26: its commit, rule version, registry hash, rule ID, vector count,
+ *   the registry values the kit's facts print (§10), and the IDs of its
+ *   deviations (§11, each marked when a decision settled it) and legacy
+ *   issues (§12);
+ * - the Lean model's commit (its counts are read from the manifest the
+ *   public feed serves, which names the commit it was built from).
+ *
+ * `--ref` reads a reviewed commit instead of `origin/main`, so the snapshot
+ * can be regenerated where the pages were checked without moving to a newer
+ * head.
  *
  * Nothing private beyond what the pages already restate is copied: no
  * person, no handle, no account or host name, no address. `--check` exits
@@ -75,16 +82,17 @@ const REGISTRY_KEYS = [
 ];
 
 function args() {
-  const out = { chain: null, fetch: true, check: false };
+  const out = { chain: null, fetch: true, check: false, ref: "origin/main" };
   const argv = process.argv.slice(2);
   for (let i = 0; i < argv.length; i += 1) {
     if (argv[i] === "--chain") out.chain = argv[++i];
     else if (argv[i] === "--no-fetch") out.fetch = false;
     else if (argv[i] === "--check") out.check = true;
+    else if (argv[i] === "--ref") out.ref = argv[++i];
   }
   if (!out.chain) {
     console.error(
-      "usage: sync-record.mjs --chain <path to 6529chain> [--no-fetch] [--check]"
+      "usage: sync-record.mjs --chain <path to 6529chain> [--no-fetch] [--check] [--ref <commit>]"
     );
     process.exit(2);
   }
@@ -175,10 +183,29 @@ export function parseRegistry(spec) {
   );
 }
 
+/**
+ * P26 §11's deviations and §12's legacy issues, by ID, in table order: a
+ * deviation a decision settled says so in its last column ("Settled by").
+ */
+export function parseItems(spec) {
+  const deviations = [];
+  const issues = [];
+  for (const line of spec.split(/\r?\n/)) {
+    const dev = /^\| (DEV-\d+) \|.*\| ([^|]*) \|\s*$/.exec(line);
+    if (dev) {
+      deviations.push({ id: dev[1], settled: /^Settled\b/.test(dev[2]) });
+      continue;
+    }
+    const bug = /^\| (BUG-\d+) \|/.exec(line);
+    if (bug) issues.push(bug[1]);
+  }
+  return { deviations, issues };
+}
+
 async function main() {
   const opts = args();
   if (opts.fetch) git(opts.chain, ["fetch", "--quiet", "origin"]);
-  const ref = "origin/main";
+  const { ref } = opts;
   const head = git(opts.chain, ["log", "-1", "--format=%H %cI", ref])
     .trim()
     .split(" ");
@@ -251,6 +278,7 @@ async function main() {
       ruleId,
       vectors,
       registry: parseRegistry(spec),
+      ...parseItems(spec),
     },
     lean: { commit: lean[0], date: lean[1] },
     decisions: decisions.map((d) => ({

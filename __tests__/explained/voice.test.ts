@@ -111,6 +111,8 @@ describe("the voice lint", () => {
     expect(hit("Network Identity Check")).toEqual([]);
     expect(hit("Network Identity Credits")).toEqual(["nic-credit"]);
     expect(hit("a Network Identity Credit")).toEqual(["nic-credit"]);
+    expect(hit("Network Identity Credit")).toEqual(["nic-credit"]);
+    expect(hit("NIC is Network Identity Check (D142)")).toEqual([]);
     expect(hit("CCO art")).toEqual(["cco"]);
     expect(hit("CC0 art")).toEqual([]);
     expect(hit("a DAO")).toEqual(["dao"]);

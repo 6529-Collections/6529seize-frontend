@@ -1,34 +1,34 @@
 {
   "format": "6529chain.tdh-lean-manifest.v1",
-  "generatedAt": "2026-10-16T01:27:29Z",
+  "generatedAt": "2026-10-18T15:05:01Z",
   "generator": "design/tdh-lean/tools/manifest.py",
   "source": {
     "repository": "6529chain",
-    "commit": "6b32f3f63a348eb6c1c694a18a215f4ddca3c752",
-    "commitDate": "2026-10-16T01:24:24Z",
+    "commit": "e252d5f021aeee66c2d6acecc101e98ab55f436b",
+    "commitDate": "2026-10-18T15:03:52Z",
     "path": "design/tdh-lean",
     "dirty": false
   },
   "documents": {
     "specification": {
       "path": "design/tdh-v1-specification.md",
-      "lastChange": "f8400962310de6636b256c3b53bbfddbdec8f329",
-      "lastChangeDate": "2026-10-16T00:43:19Z"
+      "lastChange": "a731bca37981708d2160dbaf4aca7e7acb1c4b6a",
+      "lastChangeDate": "2026-10-18T14:31:07Z"
     },
     "validatorProposal": {
       "path": "design/validator-v1.md",
-      "lastChange": "f8400962310de6636b256c3b53bbfddbdec8f329",
-      "lastChangeDate": "2026-10-16T00:43:19Z"
+      "lastChange": "3bfa7b052202e40b0f178ee6de7f75f86ba5261c",
+      "lastChangeDate": "2026-10-18T07:04:34Z"
     },
     "proofs": {
       "path": "design/tdh-lean/PROOFS.md",
-      "lastChange": "6b32f3f63a348eb6c1c694a18a215f4ddca3c752",
-      "lastChangeDate": "2026-10-16T01:24:24Z"
+      "lastChange": "e252d5f021aeee66c2d6acecc101e98ab55f436b",
+      "lastChangeDate": "2026-10-18T15:03:52Z"
     },
     "readme": {
       "path": "design/tdh-lean/README.md",
-      "lastChange": "6b32f3f63a348eb6c1c694a18a215f4ddca3c752",
-      "lastChangeDate": "2026-10-16T01:24:24Z"
+      "lastChange": "e252d5f021aeee66c2d6acecc101e98ab55f436b",
+      "lastChangeDate": "2026-10-18T15:03:52Z"
     }
   },
   "lean": {
@@ -41,12 +41,12 @@
   "build": {
     "command": "lake build",
     "ok": true,
-    "jobs": 70,
+    "jobs": 71,
     "checks": "the model compiles; every #guard of the facts, counterexamples and examples holds; every proof is checked by Lean's kernel; the axiom audit passes",
     "howChecked": [
       "lake build checks every proof. The build fails if any proof is wrong or missing.",
-      "The Audit library runs #assert_standard_axioms on every theorem named below (55 about TDH, 30 about P53). It fails the build unless the theorem depends only on Lean's three standard axioms (propext, Classical.choice, Quot.sound). A sorry fails it, and so does native_decide, which trusts the compiler.",
-      "The same library audits the whole model (Audit/All.lean): every theorem and every definition of every module of the model, the P53 models and the vector runner (1,068 theorems and 1,538 definitions, generated ones included) depends only on those three axioms, and none of those modules declares an axiom or an opaque constant. The runner's JSON parser is written without partial so that the audit covers it too.",
+      "The Audit library runs #assert_standard_axioms on every theorem named below (61 about TDH, 30 about P53). It fails the build unless the theorem depends only on Lean's three standard axioms (propext, Classical.choice, Quot.sound). A sorry fails it, and so does native_decide, which trusts the compiler.",
+      "The same library audits the whole model (Audit/All.lean): every theorem and every definition of every module of the model, the P53 models and the vector runner (1,153 theorems and 1,584 definitions, generated ones included) depends only on those three axioms, and none of those modules declares an axiom or an opaque constant. The runner's JSON parser is written without partial so that the audit covers it too.",
       "Counterexamples and examples are checked at every build too. Some are theorems proved in the kernel by decide. The rest are #guard evaluations of the model, which trust Lean's compiler, as the checks of P26's stated facts in Tdh/Facts.lean do.",
       "Lean 4.35.0, no dependencies. The 6529chain workflow .github/workflows/tdh-formal.yml runs the build, the audit, the vectors and both references on every change to them or to P26, and fails if the committed proof manifest (proof-manifest.json) is not the one the tree gives."
     ],
@@ -54,7 +54,7 @@
       "library": "Audit",
       "ok": true,
       "allowedAxioms": ["propext", "Classical.choice", "Quot.sound"],
-      "theorems": 85
+      "theorems": 91
     }
   },
   "vectors": [
@@ -63,20 +63,20 @@
       "description": "P26's conformance vectors, P26 as amended (transaction netting on)",
       "path": "design/tdh-reference/vectors",
       "options": [],
-      "passed": 89,
-      "total": 89,
+      "passed": 108,
+      "total": 108,
       "failed": 0,
-      "checks": 1253
+      "checks": 1336
     },
     {
       "id": "p26-reasons",
       "description": "The same vectors; every rejected input must cite the P26 section its vector names",
       "path": "design/tdh-reference/vectors",
       "options": ["--reasons"],
-      "passed": 89,
-      "total": 89,
+      "passed": 108,
+      "total": 108,
       "failed": 0,
-      "checks": 1287
+      "checks": 1372
     },
     {
       "id": "netting",
@@ -91,16 +91,16 @@
   ],
   "facts": {
     "file": "Tdh/Facts.lean",
-    "checks": 46,
+    "checks": 57,
     "checkedBy": "evaluation"
   },
   "summary": {
-    "proved": 78,
+    "proved": 84,
     "counterexample": 11,
-    "deferred": 9,
-    "entries": 98,
-    "audited": 85,
-    "auditedTdh": 55,
+    "deferred": 12,
+    "entries": 107,
+    "audited": 91,
+    "auditedTdh": 61,
     "auditedP53": 30,
     "counterexampleTheorems": 7,
     "counterexampleEvaluations": 4
@@ -173,9 +173,18 @@
         "P26 §10"
       ],
       "asked": "The model from raw logs: selection, decoding, header order and typed inputs as definitions of the model, the decoded-input model as its special case",
-      "result": "Proved: the model on decoded inputs is the model on raw logs when no log is raw, and a cycle with a result has every input value at its type. The rules themselves (§3.1, §3.2, §4.2, §6.1, §10's types) are definitions, checked by P26's vectors 13, 15, 25-27, 34, 42, 52-55, 61-64 and 67-88 and by #guard",
+      "result": "Proved: the model on decoded inputs is the model on raw logs when no log is raw, and a cycle with a result has every input value at its type. The rules themselves (§3.1, §3.2, §4.2, §6.1, §10's types) are definitions, checked by P26's vectors 13, 15, 25-27, 34, 42, 52-55, 61-64, 67-88 and 98-100 and by #guard",
       "guarantees": null,
-      "limits": "What it does not cover. The rules of §3.1, §3.2, §4.2, §5.2's type, §6.1 and §10's types are definitions, not theorems: that they say what P26 says is checked by P26's vectors 13, 15, 25-27, 34, 42, 52-55, 61-64 and 67-88, the 2026-10-11 cycle from its 414,254 raw logs, and random inputs against the Python reference, not proved. The vector runner's JSON reading is test tooling and is not proved: TdhVectors/Json.lean parses each file strictly (a text that is not JSON, or an object that names a member twice, is no vector; a number with a fraction or an exponent, or -0, is no integer), TdhVectors/Format.lean checks the whole file's format before any value is read, and TdhVectors/Input.lean maps each value to the model's without cutting any and refuses a JSON value of the wrong kind (a string for an integer, whatever it spells; a map key that is not the canonical decimal of its integer; a removed that is not a boolean). These are the rules of how values are written in JSON, and they stay outside the model's boundary, where P26's prose governs them (the proposal, below). A node's own reads stay outside the model too: which chain is canonical and finalized, that its log set is complete for [deployment, B] (§3.1), the headers its search for B reads (§4.2), and totalMax at B (§5.2, P27 §5)."
+      "limits": "What it does not cover. The rules of §3.1, §3.2, §4.2, §5.2's type, §6.1 and §10's types are definitions, not theorems: that they say what P26 says is checked by P26's vectors 13, 15, 25-27, 34, 42, 52-55, 61-64, 67-88 and 98-100, the 2026-10-11 cycle from its 414,254 raw logs, and random inputs against the Python reference, not proved. The vector runner's JSON reading is test tooling and is not proved: TdhVectors/Json.lean parses each file strictly (a text that is not JSON, or an object that names a member twice, is no vector; a number with a fraction or an exponent, or -0, is no integer), TdhVectors/Format.lean checks the whole file's format before any value is read, and TdhVectors/Input.lean maps each value to the model's without cutting any and refuses a JSON value of the wrong kind (a string for an integer, whatever it spells; a map key that is not the canonical decimal of its integer; a removed that is not a boolean). These are the rules of how values are written in JSON, and they stay outside the model's boundary, where P26's prose governs them (the proposal, below). A node's own reads stay outside the model too: which chain is canonical and finalized, that its log set is complete for [deployment, B] (§3.1), the headers its search for B reads (§4.2), and totalMax at B (§5.2, P27 §5)."
+    },
+    {
+      "id": "7",
+      "title": "Clusters and the four-wallet gate",
+      "refs": ["P26 §6.2", "P26 §6.3", "D136"],
+      "asked": "Clusters (D136): no cluster larger than the registry allows, its wallets pairwise confirmed, a fourth wallet only through the gate; registrations before activation never form a group of four",
+      "result": "Proved, for every cycle with a result: every cluster holds at most consolidation_max_wallets distinct wallets, any two with a confirmed row, and past consolidation_ungated_max_wallets a member whose rows with all the others were registered both ways at or after the activation time; on a cycle whose T is before it, no cluster has more than consolidation_ungated_max_wallets wallets. Which of several possible clusters the greedy order picks is P26's vectors' to pin, not a theorem",
+      "guarantees": "What it guarantees. No cycle result holds a cluster larger than its registry allows, a cluster with two wallets that have no confirmed link, or a cluster past the ungated size without a member whose links with all the others are fresh, whatever the events and their times; and no cycle before the activation time has a cluster of more than three wallets under tdh-v1.4.",
+      "limits": "What it does not cover. The theorems are about which wallets may share a cluster, not about which of several possible clusters the greedy order picks: that is the order of §6.3's queue (newest block first, then ascending pair key), which P26's vectors 89-99 pin, and which P26 §6.3 reports equal to 6529.io's own code on 100,000 random link graphs. That pairKey's string order is the order of the sorted pairs of addresses is checked by #guard on examples (Tdh/Facts.lean), not proved. That §6.2 and §6.3 are 6529.io's planConsolidationEvent and extractConsolidations is a statement about P26's text, which the vectors and the references' runs test; no theorem here relates the model to 6529.io's code."
     },
     {
       "id": "stack",
@@ -563,7 +572,7 @@
       "axioms": ["propext", "Classical.choice", "Quot.sound"],
       "checkedBy": "kernel",
       "file": "Tdh/Proofs/Order.lean",
-      "line": 159
+      "line": 160
     },
     {
       "id": "4.oneLog_of_neighbours",
@@ -576,7 +585,7 @@
       "axioms": ["propext", "Classical.choice", "Quot.sound"],
       "checkedBy": "kernel",
       "file": "Tdh/Proofs/Order.lean",
-      "line": 211
+      "line": 212
     },
     {
       "id": "4.canonicalTransfers_oneLog",
@@ -589,7 +598,7 @@
       "axioms": ["propext", "Classical.choice", "Quot.sound"],
       "checkedBy": "kernel",
       "file": "Tdh/Proofs/Order.lean",
-      "line": 269
+      "line": 270
     },
     {
       "id": "4.keptEvents_perm",
@@ -597,12 +606,12 @@
       "library": "tdh",
       "section": "4",
       "status": "proved",
-      "statement": "The same kept events for any reordering of the delegation events.",
+      "statement": "The same kept events, or the same error, for any reordering of the delegation events, the rule that none in a block ≤ B is stamped after T (§4.2, D136) included.",
       "doesNotGuarantee": "What it does not cover. When several raw logs are malformed, which one the error names can depend on their order (decodeLogs decodes the selected logs in input order), so computeCycleFromSource_perm compares results, not error messages. A transfer's position fields are part of the input: changing them changes the canonical order, as it should. The theorems take the header map and the claims map as fixed: decode_perm and computeCycleFromSource_perm assume that both sources have the same headers (block number to header timestamp) and the same claimTotalMax, and computeCycle_perm and checkInputTypes_perm keep the claims. How a reader builds those maps from JSON (each key the canonical decimal of its integer, no member named twice, so that no two keys name one block or one Meme) is outside them: P26 §3.2's \"Values written in JSON\" says it, and the vector reader implements it (section 6).",
       "axioms": ["propext", "Classical.choice", "Quot.sound"],
       "checkedBy": "kernel",
       "file": "Tdh/Proofs/Order.lean",
-      "line": 289
+      "line": 299
     },
     {
       "id": "4.checkPositions_perm",
@@ -615,7 +624,7 @@
       "axioms": ["propext", "Classical.choice", "Quot.sound"],
       "checkedBy": "kernel",
       "file": "Tdh/Proofs/Order.lean",
-      "line": 369
+      "line": 379
     },
     {
       "id": "4.checkInputTypes_perm",
@@ -628,7 +637,7 @@
       "axioms": ["propext", "Quot.sound"],
       "checkedBy": "kernel",
       "file": "Tdh/Proofs/Order.lean",
-      "line": 410
+      "line": 420
     },
     {
       "id": "4.computeCycle_perm",
@@ -641,7 +650,7 @@
       "axioms": ["propext", "Classical.choice", "Quot.sound"],
       "checkedBy": "kernel",
       "file": "Tdh/Proofs/Order.lean",
-      "line": 428
+      "line": 438
     },
     {
       "id": "4.mapM_perm",
@@ -767,7 +776,7 @@
       "section": "6",
       "status": "proved",
       "statement": "A source with no raw logs, whose header timestamps (if any) have their types, gives exactly computeCycle on its decoded items. So the model on decoded inputs, and every theorem above about computeCycle, is the special case of the model on raw logs in which every log is given decoded.",
-      "doesNotGuarantee": "What it does not cover. The rules of §3.1, §3.2, §4.2, §5.2's type, §6.1 and §10's types are definitions, not theorems: that they say what P26 says is checked by P26's vectors 13, 15, 25-27, 34, 42, 52-55, 61-64 and 67-88, the 2026-10-11 cycle from its 414,254 raw logs, and random inputs against the Python reference, not proved. The vector runner's JSON reading is test tooling and is not proved: TdhVectors/Json.lean parses each file strictly (a text that is not JSON, or an object that names a member twice, is no vector; a number with a fraction or an exponent, or -0, is no integer), TdhVectors/Format.lean checks the whole file's format before any value is read, and TdhVectors/Input.lean maps each value to the model's without cutting any and refuses a JSON value of the wrong kind (a string for an integer, whatever it spells; a map key that is not the canonical decimal of its integer; a removed that is not a boolean). These are the rules of how values are written in JSON, and they stay outside the model's boundary, where P26's prose governs them (the proposal, below). A node's own reads stay outside the model too: which chain is canonical and finalized, that its log set is complete for [deployment, B] (§3.1), the headers its search for B reads (§4.2), and totalMax at B (§5.2, P27 §5).",
+      "doesNotGuarantee": "What it does not cover. The rules of §3.1, §3.2, §4.2, §5.2's type, §6.1 and §10's types are definitions, not theorems: that they say what P26 says is checked by P26's vectors 13, 15, 25-27, 34, 42, 52-55, 61-64, 67-88 and 98-100, the 2026-10-11 cycle from its 414,254 raw logs, and random inputs against the Python reference, not proved. The vector runner's JSON reading is test tooling and is not proved: TdhVectors/Json.lean parses each file strictly (a text that is not JSON, or an object that names a member twice, is no vector; a number with a fraction or an exponent, or -0, is no integer), TdhVectors/Format.lean checks the whole file's format before any value is read, and TdhVectors/Input.lean maps each value to the model's without cutting any and refuses a JSON value of the wrong kind (a string for an integer, whatever it spells; a map key that is not the canonical decimal of its integer; a removed that is not a boolean). These are the rules of how values are written in JSON, and they stay outside the model's boundary, where P26's prose governs them (the proposal, below). A node's own reads stay outside the model too: which chain is canonical and finalized, that its log set is complete for [deployment, B] (§3.1), the headers its search for B reads (§4.2), and totalMax at B (§5.2, P27 §5).",
       "axioms": ["propext", "Classical.choice", "Quot.sound"],
       "checkedBy": "kernel",
       "file": "Tdh/Proofs/Decoding.lean",
@@ -780,7 +789,7 @@
       "section": "6",
       "status": "proved",
       "statement": "A cycle with a result has a registry whose every field has its §10 type, and B, T, every transfer (its amount included), delegation event, ignored log's position and claim at its type, in every block.",
-      "doesNotGuarantee": "What it does not cover. The rules of §3.1, §3.2, §4.2, §5.2's type, §6.1 and §10's types are definitions, not theorems: that they say what P26 says is checked by P26's vectors 13, 15, 25-27, 34, 42, 52-55, 61-64 and 67-88, the 2026-10-11 cycle from its 414,254 raw logs, and random inputs against the Python reference, not proved. The vector runner's JSON reading is test tooling and is not proved: TdhVectors/Json.lean parses each file strictly (a text that is not JSON, or an object that names a member twice, is no vector; a number with a fraction or an exponent, or -0, is no integer), TdhVectors/Format.lean checks the whole file's format before any value is read, and TdhVectors/Input.lean maps each value to the model's without cutting any and refuses a JSON value of the wrong kind (a string for an integer, whatever it spells; a map key that is not the canonical decimal of its integer; a removed that is not a boolean). These are the rules of how values are written in JSON, and they stay outside the model's boundary, where P26's prose governs them (the proposal, below). A node's own reads stay outside the model too: which chain is canonical and finalized, that its log set is complete for [deployment, B] (§3.1), the headers its search for B reads (§4.2), and totalMax at B (§5.2, P27 §5).",
+      "doesNotGuarantee": "What it does not cover. The rules of §3.1, §3.2, §4.2, §5.2's type, §6.1 and §10's types are definitions, not theorems: that they say what P26 says is checked by P26's vectors 13, 15, 25-27, 34, 42, 52-55, 61-64, 67-88 and 98-100, the 2026-10-11 cycle from its 414,254 raw logs, and random inputs against the Python reference, not proved. The vector runner's JSON reading is test tooling and is not proved: TdhVectors/Json.lean parses each file strictly (a text that is not JSON, or an object that names a member twice, is no vector; a number with a fraction or an exponent, or -0, is no integer), TdhVectors/Format.lean checks the whole file's format before any value is read, and TdhVectors/Input.lean maps each value to the model's without cutting any and refuses a JSON value of the wrong kind (a string for an integer, whatever it spells; a map key that is not the canonical decimal of its integer; a removed that is not a boolean). These are the rules of how values are written in JSON, and they stay outside the model's boundary, where P26's prose governs them (the proposal, below). A node's own reads stay outside the model too: which chain is canonical and finalized, that its log set is complete for [deployment, B] (§3.1), the headers its search for B reads (§4.2), and totalMax at B (§5.2, P27 §5).",
       "axioms": ["propext", "Classical.choice", "Quot.sound"],
       "checkedBy": "kernel",
       "file": "Tdh/Proofs/Decoding.lean",
@@ -793,11 +802,89 @@
       "section": "6",
       "status": "proved",
       "statement": "A cycle computed from a source with a result also has every raw log, after B or marked removed included, and every header timestamp at its type.",
-      "doesNotGuarantee": "What it does not cover. The rules of §3.1, §3.2, §4.2, §5.2's type, §6.1 and §10's types are definitions, not theorems: that they say what P26 says is checked by P26's vectors 13, 15, 25-27, 34, 42, 52-55, 61-64 and 67-88, the 2026-10-11 cycle from its 414,254 raw logs, and random inputs against the Python reference, not proved. The vector runner's JSON reading is test tooling and is not proved: TdhVectors/Json.lean parses each file strictly (a text that is not JSON, or an object that names a member twice, is no vector; a number with a fraction or an exponent, or -0, is no integer), TdhVectors/Format.lean checks the whole file's format before any value is read, and TdhVectors/Input.lean maps each value to the model's without cutting any and refuses a JSON value of the wrong kind (a string for an integer, whatever it spells; a map key that is not the canonical decimal of its integer; a removed that is not a boolean). These are the rules of how values are written in JSON, and they stay outside the model's boundary, where P26's prose governs them (the proposal, below). A node's own reads stay outside the model too: which chain is canonical and finalized, that its log set is complete for [deployment, B] (§3.1), the headers its search for B reads (§4.2), and totalMax at B (§5.2, P27 §5).",
+      "doesNotGuarantee": "What it does not cover. The rules of §3.1, §3.2, §4.2, §5.2's type, §6.1 and §10's types are definitions, not theorems: that they say what P26 says is checked by P26's vectors 13, 15, 25-27, 34, 42, 52-55, 61-64, 67-88 and 98-100, the 2026-10-11 cycle from its 414,254 raw logs, and random inputs against the Python reference, not proved. The vector runner's JSON reading is test tooling and is not proved: TdhVectors/Json.lean parses each file strictly (a text that is not JSON, or an object that names a member twice, is no vector; a number with a fraction or an exponent, or -0, is no integer), TdhVectors/Format.lean checks the whole file's format before any value is read, and TdhVectors/Input.lean maps each value to the model's without cutting any and refuses a JSON value of the wrong kind (a string for an integer, whatever it spells; a map key that is not the canonical decimal of its integer; a removed that is not a boolean). These are the rules of how values are written in JSON, and they stay outside the model's boundary, where P26's prose governs them (the proposal, below). A node's own reads stay outside the model too: which chain is canonical and finalized, that its log set is complete for [deployment, B] (§3.1), the headers its search for B reads (§4.2), and totalMax at B (§5.2, P27 §5).",
       "axioms": ["propext", "Classical.choice", "Quot.sound"],
       "checkedBy": "kernel",
       "file": "Tdh/Proofs/Decoding.lean",
       "line": 342
+    },
+    {
+      "id": "7.clusters_spec",
+      "leanName": "Tdh.Proofs.clusters_spec",
+      "library": "tdh",
+      "section": "7",
+      "status": "proved",
+      "statement": "Under a registry whose consolidation_max_wallets and consolidation_ungated_max_wallets are at least 2, and pair rows that each link two different wallets, every cluster of §6.3's loop holds distinct wallets, at most consolidation_max_wallets of them; any two of its wallets have a confirmed row; and a cluster of more than consolidation_ungated_max_wallets wallets has a member m whose confirmed rows with all the others have both times at or after the activation time.",
+      "doesNotGuarantee": "What it does not cover. The theorems are about which wallets may share a cluster, not about which of several possible clusters the greedy order picks: that is the order of §6.3's queue (newest block first, then ascending pair key), which P26's vectors 89-99 pin, and which P26 §6.3 reports equal to 6529.io's own code on 100,000 random link graphs. That pairKey's string order is the order of the sorted pairs of addresses is checked by #guard on examples (Tdh/Facts.lean), not proved. That §6.2 and §6.3 are 6529.io's planConsolidationEvent and extractConsolidations is a statement about P26's text, which the vectors and the references' runs test; no theorem here relates the model to 6529.io's code.",
+      "axioms": ["propext", "Classical.choice", "Quot.sound"],
+      "checkedBy": "kernel",
+      "file": "Tdh/Proofs/Clusters.lean",
+      "line": 338
+    },
+    {
+      "id": "7.pairState_rows",
+      "leanName": "Tdh.Proofs.pairState_rows",
+      "library": "tdh",
+      "section": "7",
+      "status": "proved",
+      "statement": "Every row of §6.2's pair state is stored under its unordered pair, links two different wallets, and holds only times of kept events: a direction's time is always a registration's time, or none. A first registrant's re-registration without a time keeps its earlier time (a731bca, vector 104), which is again a kept event's time.",
+      "doesNotGuarantee": "What it does not cover. The theorems are about which wallets may share a cluster, not about which of several possible clusters the greedy order picks: that is the order of §6.3's queue (newest block first, then ascending pair key), which P26's vectors 89-99 pin, and which P26 §6.3 reports equal to 6529.io's own code on 100,000 random link graphs. That pairKey's string order is the order of the sorted pairs of addresses is checked by #guard on examples (Tdh/Facts.lean), not proved. That §6.2 and §6.3 are 6529.io's planConsolidationEvent and extractConsolidations is a statement about P26's text, which the vectors and the references' runs test; no theorem here relates the model to 6529.io's code.",
+      "axioms": ["propext", "Classical.choice", "Quot.sound"],
+      "checkedBy": "kernel",
+      "file": "Tdh/Proofs/Clusters.lean",
+      "line": 447
+    },
+    {
+      "id": "7.keptEvents_ok",
+      "leanName": "Tdh.Proofs.keptEvents_ok",
+      "library": "tdh",
+      "section": "7",
+      "status": "proved",
+      "statement": "Each kept event is one of the input's events, in a block ≤ B, kept by §6.1's filter, and stamped at or before T (§4.2).",
+      "doesNotGuarantee": "What it does not cover. The theorems are about which wallets may share a cluster, not about which of several possible clusters the greedy order picks: that is the order of §6.3's queue (newest block first, then ascending pair key), which P26's vectors 89-99 pin, and which P26 §6.3 reports equal to 6529.io's own code on 100,000 random link graphs. That pairKey's string order is the order of the sorted pairs of addresses is checked by #guard on examples (Tdh/Facts.lean), not proved. That §6.2 and §6.3 are 6529.io's planConsolidationEvent and extractConsolidations is a statement about P26's text, which the vectors and the references' runs test; no theorem here relates the model to 6529.io's code.",
+      "axioms": ["propext", "Quot.sound"],
+      "checkedBy": "kernel",
+      "file": "Tdh/Proofs/Clusters.lean",
+      "line": 460
+    },
+    {
+      "id": "7.buildClusterMap_spec",
+      "leanName": "Tdh.Proofs.buildClusterMap_spec",
+      "library": "tdh",
+      "section": "7",
+      "status": "proved",
+      "statement": "What clusters_spec states, for the clusters of the cluster map, with the rows of the pair state of the kept events, under a registry whose two sizes are at least 2.",
+      "doesNotGuarantee": "What it does not cover. The theorems are about which wallets may share a cluster, not about which of several possible clusters the greedy order picks: that is the order of §6.3's queue (newest block first, then ascending pair key), which P26's vectors 89-99 pin, and which P26 §6.3 reports equal to 6529.io's own code on 100,000 random link graphs. That pairKey's string order is the order of the sorted pairs of addresses is checked by #guard on examples (Tdh/Facts.lean), not proved. That §6.2 and §6.3 are 6529.io's planConsolidationEvent and extractConsolidations is a statement about P26's text, which the vectors and the references' runs test; no theorem here relates the model to 6529.io's code.",
+      "axioms": ["propext", "Classical.choice", "Quot.sound"],
+      "checkedBy": "kernel",
+      "file": "Tdh/Proofs/Clusters.lean",
+      "line": 504
+    },
+    {
+      "id": "7.computeCycle_clusters",
+      "leanName": "Tdh.Proofs.computeCycle_clusters",
+      "library": "tdh",
+      "section": "7",
+      "status": "proved",
+      "statement": "What clusters_spec states, for the clusters of every cycle result, with no hypothesis left: §10's constraints give the two sizes (Params.check), §6.1's filter gives two different wallets, and no kept event is stamped after T.",
+      "doesNotGuarantee": "What it does not cover. The theorems are about which wallets may share a cluster, not about which of several possible clusters the greedy order picks: that is the order of §6.3's queue (newest block first, then ascending pair key), which P26's vectors 89-99 pin, and which P26 §6.3 reports equal to 6529.io's own code on 100,000 random link graphs. That pairKey's string order is the order of the sorted pairs of addresses is checked by #guard on examples (Tdh/Facts.lean), not proved. That §6.2 and §6.3 are 6529.io's planConsolidationEvent and extractConsolidations is a statement about P26's text, which the vectors and the references' runs test; no theorem here relates the model to 6529.io's code.",
+      "axioms": ["propext", "Classical.choice", "Quot.sound"],
+      "checkedBy": "kernel",
+      "file": "Tdh/Proofs/Clusters.lean",
+      "line": 567
+    },
+    {
+      "id": "7.computeCycle_before_activation",
+      "leanName": "Tdh.Proofs.computeCycle_before_activation",
+      "library": "tdh",
+      "section": "7",
+      "status": "proved",
+      "statement": "In every result of a cycle whose T is before consolidation_gate_activation_s, every cluster has at most consolidation_ungated_max_wallets wallets, three under tdh-v1.4: a registration's time is at most T, so no link is fresh.",
+      "doesNotGuarantee": "What it does not cover. The theorems are about which wallets may share a cluster, not about which of several possible clusters the greedy order picks: that is the order of §6.3's queue (newest block first, then ascending pair key), which P26's vectors 89-99 pin, and which P26 §6.3 reports equal to 6529.io's own code on 100,000 random link graphs. That pairKey's string order is the order of the sorted pairs of addresses is checked by #guard on examples (Tdh/Facts.lean), not proved. That §6.2 and §6.3 are 6529.io's planConsolidationEvent and extractConsolidations is a statement about P26's text, which the vectors and the references' runs test; no theorem here relates the model to 6529.io's code.",
+      "axioms": ["propext", "Classical.choice", "Quot.sound"],
+      "checkedBy": "kernel",
+      "file": "Tdh/Proofs/Clusters.lean",
+      "line": 599
     },
     {
       "id": "1.firstRule_reorder",
@@ -1437,7 +1524,7 @@
       "library": "tdh",
       "section": "6",
       "status": "deferred",
-      "statement": "The rules of §3.1, §3.2, §4.2, §5.2's type, §6.1 and §10's types are definitions, not theorems: that they say what P26 says is checked by P26's vectors 13, 15, 25-27, 34, 42, 52-55, 61-64 and 67-88, the 2026-10-11 cycle from its 414,254 raw logs, and random inputs against the Python reference, not proved.",
+      "statement": "The rules of §3.1, §3.2, §4.2, §5.2's type, §6.1 and §10's types are definitions, not theorems: that they say what P26 says is checked by P26's vectors 13, 15, 25-27, 34, 42, 52-55, 61-64, 67-88 and 98-100, the 2026-10-11 cycle from its 414,254 raw logs, and random inputs against the Python reference, not proved.",
       "doesNotGuarantee": "Not a theorem of this model: PROOFS.md names it as outside what is proved.",
       "axioms": null,
       "checkedBy": null,
@@ -1464,6 +1551,45 @@
       "section": "4",
       "status": "deferred",
       "statement": "The theorems take the header map and the claims map as fixed: decode_perm and computeCycleFromSource_perm assume that both sources have the same headers (block number to header timestamp) and the same claimTotalMax, and computeCycle_perm and checkInputTypes_perm keep the claims.",
+      "doesNotGuarantee": "Not a theorem of this model: PROOFS.md names it as outside what is proved.",
+      "axioms": null,
+      "checkedBy": null,
+      "file": "PROOFS.md",
+      "line": null
+    },
+    {
+      "id": "7.greedy-order",
+      "leanName": null,
+      "library": "tdh",
+      "section": "7",
+      "status": "deferred",
+      "statement": "The theorems are about which wallets may share a cluster, not about which of several possible clusters the greedy order picks: that is the order of §6.3's queue (newest block first, then ascending pair key), which P26's vectors 89-99 pin, and which P26 §6.3 reports equal to 6529.io's own code on 100,000 random link graphs.",
+      "doesNotGuarantee": "Not a theorem of this model: PROOFS.md names it as outside what is proved.",
+      "axioms": null,
+      "checkedBy": null,
+      "file": "PROOFS.md",
+      "line": null
+    },
+    {
+      "id": "7.pair-key-order",
+      "leanName": null,
+      "library": "tdh",
+      "section": "7",
+      "status": "deferred",
+      "statement": "That pairKey's string order is the order of the sorted pairs of addresses is checked by #guard on examples (Tdh/Facts.lean), not proved.",
+      "doesNotGuarantee": "Not a theorem of this model: PROOFS.md names it as outside what is proved.",
+      "axioms": null,
+      "checkedBy": null,
+      "file": "PROOFS.md",
+      "line": null
+    },
+    {
+      "id": "7.backend-code",
+      "leanName": null,
+      "library": "tdh",
+      "section": "7",
+      "status": "deferred",
+      "statement": "That §6.2 and §6.3 are 6529.io's planConsolidationEvent and extractConsolidations is a statement about P26's text, which the vectors and the references' runs test; no theorem here relates the model to 6529.io's code.",
       "doesNotGuarantee": "Not a theorem of this model: PROOFS.md names it as outside what is proved.",
       "axioms": null,
       "checkedBy": null,

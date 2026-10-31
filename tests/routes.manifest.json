@@ -1850,6 +1850,10 @@
       "classification": "crawlable",
       "family": "network"
     },
+    "/network/tdh/glossary": {
+      "classification": "crawlable",
+      "family": "network"
+    },
     "/network/tdh/historic-boosts": {
       "classification": "crawlable",
       "family": "network"

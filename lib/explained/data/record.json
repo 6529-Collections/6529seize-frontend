@@ -28,7 +28,115 @@
       "gradient_bonus": 0.02,
       "gradient_max_count": 5,
       "gradient_rate_minimum": 1
-    }
+    },
+    "deviations": [
+      {
+        "id": "DEV-1",
+        "settled": false
+      },
+      {
+        "id": "DEV-2",
+        "settled": false
+      },
+      {
+        "id": "DEV-3",
+        "settled": false
+      },
+      {
+        "id": "DEV-4",
+        "settled": false
+      },
+      {
+        "id": "DEV-5",
+        "settled": false
+      },
+      {
+        "id": "DEV-6",
+        "settled": false
+      },
+      {
+        "id": "DEV-7",
+        "settled": false
+      },
+      {
+        "id": "DEV-8",
+        "settled": false
+      },
+      {
+        "id": "DEV-9",
+        "settled": false
+      },
+      {
+        "id": "DEV-10",
+        "settled": false
+      },
+      {
+        "id": "DEV-11",
+        "settled": true
+      },
+      {
+        "id": "DEV-12",
+        "settled": false
+      },
+      {
+        "id": "DEV-13",
+        "settled": false
+      },
+      {
+        "id": "DEV-14",
+        "settled": false
+      },
+      {
+        "id": "DEV-15",
+        "settled": false
+      },
+      {
+        "id": "DEV-16",
+        "settled": false
+      },
+      {
+        "id": "DEV-17",
+        "settled": false
+      },
+      {
+        "id": "DEV-18",
+        "settled": false
+      },
+      {
+        "id": "DEV-19",
+        "settled": false
+      },
+      {
+        "id": "DEV-20",
+        "settled": false
+      },
+      {
+        "id": "DEV-21",
+        "settled": false
+      },
+      {
+        "id": "DEV-22",
+        "settled": false
+      }
+    ],
+    "issues": [
+      "BUG-1",
+      "BUG-2",
+      "BUG-3",
+      "BUG-4",
+      "BUG-5",
+      "BUG-6",
+      "BUG-7",
+      "BUG-8",
+      "BUG-9",
+      "BUG-10",
+      "BUG-11",
+      "BUG-12",
+      "BUG-13",
+      "BUG-14",
+      "BUG-15",
+      "BUG-16"
+    ]
   },
   "lean": {
     "commit": "e252d5f021aeee66c2d6acecc101e98ab55f436b",
