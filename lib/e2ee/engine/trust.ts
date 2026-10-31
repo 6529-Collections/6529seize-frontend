@@ -15,7 +15,7 @@ import { checkpoint, type EngineContext } from "./context";
  * not be checked here, waits for the user's explicit "Add device".
  */
 
-export type DeviceTrust = "trusted" | E2eeUntrustedDevice["reason"];
+type DeviceTrust = "trusted" | E2eeUntrustedDevice["reason"];
 
 /** Bounds the explicit approve/ignore lists kept per profile. */
 const MAX_DEVICE_DECISIONS = 500;
