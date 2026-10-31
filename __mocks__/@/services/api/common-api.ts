@@ -26,3 +26,4 @@ export const commonApiPatch = makeMock(actual.commonApiPatch);
 export const commonApiPostForm = makeMock(actual.commonApiPostForm);
 export const getStructuredApiErrorStatus = actual.getStructuredApiErrorStatus;
 export const getStructuredApiErrorCode = actual.getStructuredApiErrorCode;
+export const getStructuredApiErrorBody = actual.getStructuredApiErrorBody;

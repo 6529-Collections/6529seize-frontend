@@ -33,9 +33,10 @@ export const getStructuredApiErrorStatus = (
   return typeof status === "number" ? status : undefined;
 };
 
-export const getStructuredApiErrorCode = (
+/** The parsed JSON body of a structured API error, when it is an object. */
+export const getStructuredApiErrorBody = (
   error: unknown
-): string | undefined => {
+): Readonly<Record<string, unknown>> | undefined => {
   if (typeof error !== "object" || error === null || !("response" in error)) {
     return undefined;
   }
@@ -56,10 +57,15 @@ export const getStructuredApiErrorCode = (
       return undefined;
     }
   }
-  if (typeof body !== "object" || body === null || !("code" in body)) {
-    return undefined;
-  }
-  const code = (body as { readonly code?: unknown }).code;
+  return typeof body === "object" && body !== null && !Array.isArray(body)
+    ? (body as Readonly<Record<string, unknown>>)
+    : undefined;
+};
+
+export const getStructuredApiErrorCode = (
+  error: unknown
+): string | undefined => {
+  const code = getStructuredApiErrorBody(error)?.["code"];
   return typeof code === "string" && code.trim().length > 0 ? code : undefined;
 };
 
