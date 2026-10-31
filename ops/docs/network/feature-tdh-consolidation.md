@@ -67,6 +67,21 @@ The old anchors (`#consolidation-status`, `-benefits`, `-wallets`,
 The old anchors (`#consolidation-rules`, `-add`, `-order`, `-remove`,
 `-why`, `-protects`, `-start`, `-tested`) land in these sections.
 
+## States
+
+- Both pages render on the server; the dates and counts come from the facts
+  layer, which shows "not available" for a fact whose source is down.
+- `Pick what happened` starts on the move between your own wallets. The
+  wallet model starts on one pair missing (the guide) or D signing last in
+  one batch (the design page); a polite live region announces each case's
+  groups, and `Break it` toggles the fifth wallet on and off.
+
+## Localization
+
+- Both pages have complete message dictionaries for `en-US`, `en-GB`,
+  `fr-FR`, `es-ES` and `de-DE`, under `explained.tdh.wallets.*` and
+  `explained.tdh.design.*`.
+
 ## Source
 
 - Routes: `app/network/tdh/consolidation/` and

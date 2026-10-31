@@ -1,6 +1,7 @@
 import type { NextRequest} from "next/server";
 import { NextResponse } from "next/server";
 
+import { discardResponse } from "@/lib/fetch/fetchDeadline";
 import {
   UrlGuardError,
   fetchPublicUrl,
@@ -13,6 +14,21 @@ const ALLOWED_HOST_SUFFIXES = ["sinaimg.cn"] as const;
 const IMAGE_ACCEPT_HEADER = "image/avif,image/webp,image/png,image/jpeg;q=0.8,*/*;q=0.5";
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
+
+const IMAGE_TYPE_PREFIX = "image/";
+const SVG_TYPE_PREFIX = "image/svg";
+
+// Raster and other non-scriptable image types only: SVG can carry script.
+function isProxyableImageType(
+  contentType: string | null
+): contentType is string {
+  const mediaType = contentType?.split(";")[0]?.trim().toLowerCase() ?? "";
+  return (
+    mediaType.length > IMAGE_TYPE_PREFIX.length &&
+    mediaType.startsWith(IMAGE_TYPE_PREFIX) &&
+    !mediaType.startsWith(SVG_TYPE_PREFIX)
+  );
+}
 
 function ensureHttpsDefaultPort(url: URL): void {
   if (url.protocol !== "https:") {
@@ -127,18 +143,29 @@ async function proxyImage(remoteUrl: URL): Promise<NextResponse> {
     }
 
     if (!response.ok || !response.body) {
+      discardResponse(response);
       return NextResponse.json(
         { error: `Failed to fetch image (${response.status})` },
         { status: 502 }
       );
     }
 
-    const headers = new Headers();
     const contentType = response.headers.get("content-type");
-    if (contentType) {
-      headers.set("content-type", contentType);
+    if (!isProxyableImageType(contentType)) {
+      discardResponse(response);
+      return NextResponse.json(
+        { error: "Unsupported image type" },
+        { status: 415 }
+      );
     }
-    headers.set("Cache-Control", "public, max-age=86400");
+
+    // Defense in depth for anything that opens the proxied URL directly.
+    const headers = new Headers({
+      "content-type": contentType,
+      "Cache-Control": "public, max-age=86400",
+      "Content-Security-Policy": "sandbox",
+      "X-Content-Type-Options": "nosniff",
+    });
 
     return new NextResponse(response.body, {
       status: response.status,

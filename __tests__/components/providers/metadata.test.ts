@@ -247,32 +247,59 @@ describe("Metadata functionality (migrated from _document.tsx)", () => {
 
       expect(
         getCollectionSocialCardImagePath("the memes", {
-          badge: "6529",
-          image: "/memes-preview.png",
-          subtitle: "The Memes by 6529",
-          title: "The Memes",
+          collectionId: 7,
+          variant: "mint",
+          view: "Trait Sets",
         })
       ).toBe(
-        "/api/og-metadata/collections/the%20memes?badge=6529&image=%2Fmemes-preview.png&subtitle=The+Memes+by+6529&title=The+Memes"
+        "/api/og-metadata/collections/the%20memes?collection=7&variant=mint&view=Trait+Sets"
       );
     });
 
-    it("builds NFT social-card image paths", () => {
+    it("drops collection card views outside the fixed label set", () => {
+      expect(
+        getCollectionSocialCardImagePath("nextgen", {
+          view: "Overview",
+        })
+      ).toBe("/api/og-metadata/collections/nextgen");
+      expect(
+        getCollectionSocialCardImagePath("nextgen", {
+          view: "Send funds to attacker.test",
+        })
+      ).toBe("/api/og-metadata/collections/nextgen");
+    });
+
+    it("does not accept display text or artwork for collection cards", () => {
+      expect(
+        getCollectionSocialCardImagePath("the-memes", {
+          title: "Injected",
+          subtitle: "Injected",
+          badge: "Injected",
+          image: "https://attacker.test/image.png",
+        } as never)
+      ).toBe("/api/og-metadata/collections/the-memes");
+    });
+
+    it("builds NFT social-card image paths from the token identity only", () => {
       expect(
         getNftSocialCardImagePath({
-          artist: "6529er",
-          badge: "The Memes",
-          collection: "The Memes",
           contract: "0xabc/def",
-          displayId: 42,
           id: "1/2",
-          image: "https://cdn.test/image.png",
-          subtitle: "The Memes #1 | Collections",
-          title: "Seize the Memes",
         })
-      ).toBe(
-        "/api/og-metadata/nfts/0xabc%2Fdef/1%2F2?artist=6529er&badge=The+Memes&collection=The+Memes&displayId=42&image=https%3A%2F%2Fcdn.test%2Fimage.png&subtitle=The+Memes+%231+%7C+Collections&title=Seize+the+Memes"
-      );
+      ).toBe("/api/og-metadata/nfts/0xabc%2Fdef/1%2F2");
+    });
+
+    it("does not accept display text or artwork for NFT cards", () => {
+      expect(
+        getNftSocialCardImagePath({
+          contract: "0xabc",
+          id: 1,
+          title: "Injected",
+          badge: "Injected",
+          subtitle: "Injected",
+          image: "https://attacker.test/image.png",
+        } as never)
+      ).toBe("/api/og-metadata/nfts/0xabc/1");
     });
 
     it.each(["landscape", "square", "portrait", "story"] as const)(

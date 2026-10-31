@@ -147,11 +147,11 @@ describe("useConnectedAccountsUnreadNotifications", () => {
     ).toEqual([
       [
         QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS,
-        { account: ADDRESS_A, version: "v2" },
+        { account: ADDRESS_A, version: "v2-native-competitions" },
       ],
       [
         QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS,
-        { account: ADDRESS_B, version: "v2" },
+        { account: ADDRESS_B, version: "v2-native-competitions" },
       ],
     ]);
     expect(
@@ -228,7 +228,7 @@ describe("useConnectedAccountsUnreadNotifications", () => {
     expect(requestA).toEqual(
       expect.objectContaining({
         endpoint: "v2/notifications",
-        params: { limit: "1" },
+        params: { limit: "1", include_competitions: "true" },
         cache: "no-store",
       })
     );

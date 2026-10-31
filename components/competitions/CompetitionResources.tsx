@@ -1,5 +1,5 @@
 "use client";
-import type { ReactNode } from "react";
+import type { ReactNode, RefObject } from "react";
 import { skipToken, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import { ApiCompetitionEntryStatus } from "@/generated/models/ApiCompetitionEntryStatus";
@@ -126,18 +126,25 @@ export default function CompetitionResources({
   onCreateDrop,
   embedded = false,
   children,
+  scrollContainerRef,
 }: {
   readonly onCreateDrop?: (() => void) | undefined;
   readonly tab: CompetitionTab;
   readonly embedded?: boolean;
   readonly children?: ReactNode;
+  readonly scrollContainerRef?: RefObject<HTMLDivElement | null> | undefined;
 }) {
   const search = useSearchParams();
   const entryId = search.get("entry");
   if (entryId) return <EntryFocus key={entryId} entryId={entryId} />;
   switch (tab) {
     case "leaderboard":
-      return <CompetitionLeaderboard onCreateDrop={onCreateDrop} />;
+      return (
+        <CompetitionLeaderboard
+          onCreateDrop={onCreateDrop}
+          scrollContainerRef={scrollContainerRef}
+        />
+      );
     case "votes":
       return (
         <CompetitionVotes embedded={embedded}>{children}</CompetitionVotes>

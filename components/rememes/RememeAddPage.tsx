@@ -90,6 +90,7 @@ export default function RememeAddPage() {
     null
   );
   const signerAddressRef = useRef<string | null>(null);
+  const submissionInFlightRef = useRef(false);
   const [memes, setMemes] = useState<NFT[]>([]);
   const [userTDH, setUserTDH] = useState<ConsolidatedTDH>();
 
@@ -196,6 +197,7 @@ export default function RememeAddPage() {
         setSignErrors(["Error: Connect a wallet before signing"]);
         return;
       }
+      submissionInFlightRef.current = true;
       setSubmitting(true);
       postRememeSubmission({
         address: signerAddress,
@@ -244,6 +246,7 @@ export default function RememeAddPage() {
           });
         })
         .finally(() => {
+          submissionInFlightRef.current = false;
           setSubmitting(false);
         });
     }
@@ -257,6 +260,8 @@ export default function RememeAddPage() {
     };
   }
 
+  const isSigningOrSubmitting = signMessage.isPending || submitting;
+
   const verifiedAction = (
     <AuthLoadingBoundary
       loading={isWalletConnectionResolving(connection)}
@@ -267,6 +272,7 @@ export default function RememeAddPage() {
           type="button"
           variant="action"
           size="lg"
+          loading={isSigningOrSubmitting}
           disabled={
             !addRememe ||
             !addRememe.valid ||
@@ -279,6 +285,9 @@ export default function RememeAddPage() {
             submissionResult?.success
           }
           onClick={() => {
+            if (isSigningOrSubmitting || submissionInFlightRef.current) {
+              return;
+            }
             setSignErrors([]);
             setSubmissionResult(undefined);
             if (addRememe) {

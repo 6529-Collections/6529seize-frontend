@@ -1,3 +1,5 @@
+import { redactSensitiveQueryParams } from "@/utils/monitoring/sensitiveQueryParams";
+
 const GOOGLE_ANALYTICS_ID = "G-71NLVV3KY3";
 const GOOGLE_ANALYTICS_SCRIPT_URL = `https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ANALYTICS_ID}`;
 const GOOGLE_ANALYTICS_COOKIE_EXPIRES_SECONDS = 31_536_000;
@@ -39,11 +41,35 @@ type PageSnapshot = {
 };
 
 // Google Analytics leaves the fragment out of page_location, so page URLs are
-// compared and reported without it.
+// compared and reported without it. One-time link credentials in the query
+// (connection-sharing links, for example) are redacted before any URL reaches
+// gtag().
 const getPageUrl = (): string => {
   const url = new URL(globalThis.location.href);
   url.hash = "";
-  return url.href;
+  return redactSensitiveQueryParams(url.href);
+};
+
+/**
+ * gtag.js reads the address bar and the referrer itself for the events it
+ * sends on its own. When either still carries a link credential as gtag.js
+ * loads, the config pins the redacted value, so no event reports the
+ * credential. Ordinary URLs keep gtag.js' default page tracking. A session
+ * that loads on such a URL may keep reporting the redacted landing URL, which
+ * is preferable to sending the credential.
+ */
+const getCredentialSafeConfig = (): Record<string, string> => {
+  const config: Record<string, string> = {};
+  const { href } = globalThis.location;
+  if (redactSensitiveQueryParams(href) !== href) {
+    config["page_location"] = getPageUrl();
+  }
+  const { referrer } = globalThis.document;
+  const redactedReferrer = redactSensitiveQueryParams(referrer);
+  if (redactedReferrer !== referrer) {
+    config["page_referrer"] = redactedReferrer;
+  }
+  return config;
 };
 
 const capturePage = (): PageSnapshot => ({
@@ -149,6 +175,7 @@ function loadGoogleAnalytics(landing: PageSnapshot): void {
   gtag("config", GOOGLE_ANALYTICS_ID, {
     cookie_expires: GOOGLE_ANALYTICS_COOKIE_EXPIRES_SECONDS,
     send_page_view: false,
+    ...getCredentialSafeConfig(),
   });
   gtag("event", "page_view", {
     page_location: landing.url,

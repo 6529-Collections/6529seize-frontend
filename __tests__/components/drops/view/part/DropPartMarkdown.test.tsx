@@ -1455,6 +1455,119 @@ describe("DropPartMarkdown", () => {
       screen.queryByRole("button", { name: "Show link previews" })
     ).toBeNull();
   });
+
+  // Characterizes the sanitize schema that existing drops render with, so a
+  // narrower schema shows up as a deliberate test change.
+  describe("sanitize schema", () => {
+    const renderPart = (partContent: string) =>
+      render(
+        <DropPartMarkdown
+          mentionedUsers={[]}
+          mentionedWaves={[]}
+          referencedNfts={[]}
+          partContent={partContent}
+          onQuoteClick={jest.fn()}
+        />
+      ).container;
+
+    it("keeps GFM tables with cell alignment", () => {
+      renderPart("| Left | Right |\n|:--|--:|\n| one | two |");
+
+      expect(screen.getByRole("table")).toBeInTheDocument();
+      expect(
+        screen.getAllByRole("columnheader").map((cell) => cell.textContent)
+      ).toEqual(["Left", "Right"]);
+      expect(screen.getByRole("cell", { name: "one" }).style.textAlign).toBe(
+        "left"
+      );
+      expect(screen.getByRole("cell", { name: "two" }).style.textAlign).toBe(
+        "right"
+      );
+    });
+
+    it("keeps strikethrough, rules, list start numbers and code languages", () => {
+      const container = renderPart(
+        "~~gone~~ text\n\n---\n\n3. three\n4. four\n\n```js\nconst a = 1;\n```"
+      );
+
+      expect(container.querySelector("del")).toHaveTextContent("gone");
+      expect(container.querySelector("hr")).not.toBeNull();
+      expect(screen.getByRole("list")).toHaveAttribute("start", "3");
+      expect(container.querySelector("pre code")).toHaveClass("language-js");
+    });
+
+    it("keeps GFM task list checkboxes read-only", () => {
+      renderPart("- [x] done\n- [ ] todo");
+
+      const checkboxes = screen.getAllByRole("checkbox");
+      expect(checkboxes).toHaveLength(2);
+      expect(checkboxes[0]).toBeChecked();
+      expect(checkboxes[0]).toBeDisabled();
+      expect(checkboxes[1]).not.toBeChecked();
+      expect(checkboxes[1]).toBeDisabled();
+    });
+
+    it("keeps footnotes and prefixes their ids", () => {
+      const container = renderPart("Note[^1]\n\n[^1]: The footnote.");
+
+      expect(container.querySelector("section[data-footnotes]")).not.toBeNull();
+      const ids = Array.from(container.querySelectorAll("[id]"), (el) => el.id);
+      expect(ids.length).toBeGreaterThan(0);
+      expect(ids.every((id) => id.startsWith("user-content-"))).toBe(true);
+    });
+
+    it("drops raw HTML while keeping the surrounding markdown", () => {
+      const container = renderPart(
+        [
+          "<script>alert(1)</script>",
+          "<img src=x onerror=alert(1)>",
+          '<iframe src="https://example.com"></iframe>',
+          "<details><summary>Sum</summary>\n\nBody\n\n</details>",
+          '<h2 id="custom">Raw heading</h2>',
+          '<span style="color:red">styled</span> inline',
+          "# Heading {#custom-id}",
+        ].join("\n\n")
+      );
+
+      for (const selector of [
+        "script",
+        "img",
+        "iframe",
+        "details",
+        "summary",
+        "h2",
+        "[onerror]",
+        "[style*='color']",
+        "[id]",
+      ]) {
+        expect(container.querySelector(selector)).toBeNull();
+      }
+      expect(screen.queryByText(/alert/)).toBeNull();
+      expect(screen.getByText("Body")).toBeInTheDocument();
+      expect(screen.getByText("styled")).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { level: 1, name: "Heading {#custom-id}" })
+      ).toBeInTheDocument();
+    });
+
+    it("renders links only for allowed protocols", () => {
+      renderPart(
+        "[web](https://example.com) [mail](mailto:a@b.co) [js](javascript:alert(1)) [data](data:text/html;base64,PHA+) [vb](vbscript:x) [tel](tel:+123)"
+      );
+
+      expect(screen.getByRole("link", { name: "web" })).toHaveAttribute(
+        "href",
+        "https://example.com"
+      );
+      expect(screen.getByRole("link", { name: "mail" })).toHaveAttribute(
+        "href",
+        "mailto:a@b.co"
+      );
+      for (const name of ["js", "data", "vb", "tel"]) {
+        expect(screen.queryByRole("link", { name })).toBeNull();
+      }
+    });
+  });
 });
 
 jest.mock("@/helpers/image.helpers", () => ({

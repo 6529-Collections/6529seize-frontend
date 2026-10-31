@@ -13,6 +13,7 @@ import { useCompetitionResource } from "@/hooks/competitions/useCompetitionQueri
 import { getIdentityQueryOptions } from "@/services/api/identity-query";
 import { WaveLeaderboardRightSidebarVoter } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoter";
 import type { ApiCompetitionVoter } from "@/generated/models/ApiCompetitionVoter";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { CompetitionLoadMore } from "./CompetitionLoadMore";
 import { CompetitionState } from "./CompetitionState";
@@ -20,6 +21,22 @@ import {
   CompetitionVoterSkeleton,
   CompetitionVotesSkeleton,
 } from "./CompetitionVotesSkeleton";
+
+type VoterIdentity = Pick<ApiProfileMin, "handle" | "pfp" | "primary_address">;
+
+function toSidebarVoter(voter: ApiCompetitionVoter, identity: VoterIdentity) {
+  return {
+    voter: {
+      id: voter.profile_id,
+      handle: identity.handle,
+      pfp: identity.pfp,
+      primary_address: identity.primary_address,
+    },
+    absolute_votes_summed: voter.credit_spent,
+    positive_votes_summed: (voter.credit_spent + voter.votes) / 2,
+    negative_votes_summed: (voter.credit_spent - voter.votes) / 2,
+  };
+}
 
 function Voter({
   voter,
@@ -48,17 +65,11 @@ function Voter({
       <WaveLeaderboardRightSidebarVoter
         position={position}
         creditType={creditType}
-        voter={{
-          voter: {
-            id: voter.profile_id,
-            handle: profile.handle,
-            pfp: profile.pfp,
-            primary_address: profile.primary_wallet,
-          },
-          absolute_votes_summed: voter.credit_spent,
-          positive_votes_summed: (voter.credit_spent + voter.votes) / 2,
-          negative_votes_summed: (voter.credit_spent - voter.votes) / 2,
-        }}
+        voter={toSidebarVoter(voter, {
+          handle: profile.handle,
+          pfp: profile.pfp,
+          primary_address: profile.primary_wallet,
+        })}
       />
     );
   else if (query.isError)
@@ -109,17 +120,29 @@ export default function CompetitionVoters() {
   if (query.isError)
     return <CompetitionState error retry={() => void query.refetch()} />;
   const voters = query.data.pages.flatMap((page) => page.data);
+  const creditType = competition.voting.credit_type as ApiWaveCreditType;
   return (
     <div className="tw-w-full tw-max-w-6xl">
       {!voters.length && <CompetitionState empty />}
-      {voters.map((voter, index) => (
-        <Voter
-          key={voter.profile_id}
-          voter={voter}
-          position={index + 1}
-          creditType={competition.voting.credit_type as ApiWaveCreditType}
-        />
-      ))}
+      {voters.map((voter, index) =>
+        // Newer APIs embed the voter profile in the page; older responses
+        // only carry profile_id, so those rows look the identity up.
+        voter.voter ? (
+          <WaveLeaderboardRightSidebarVoter
+            key={voter.profile_id}
+            position={index + 1}
+            creditType={creditType}
+            voter={toSidebarVoter(voter, voter.voter)}
+          />
+        ) : (
+          <Voter
+            key={voter.profile_id}
+            voter={voter}
+            position={index + 1}
+            creditType={creditType}
+          />
+        )
+      )}
       <div className="tw-pt-4">
         <CompetitionLoadMore query={query} />
       </div>

@@ -40,6 +40,27 @@ The main metadata integration points are:
   values, but many currently use raw thumbnails or fixed images rather than a
   branded 1200x630 card contract.
 
+## Page Descriptions, Manifest, and Home-Screen Icon
+
+- Route descriptions are message-backed. Network, Open Data, Tools, and EMMA
+  routes read their description from `i18n/messages/pageMetadata.en-US.json`
+  (EMMA keeps its own `emma.*.metadata.description` keys) through
+  `t(DEFAULT_LOCALE, ...)`. `getAppMetadata` appends the host name. Keep each
+  description a specific sentence of at most 150 characters;
+  `__tests__/app/pageMetadataDescriptions.test.ts` rejects bare section labels.
+- `app/manifest.ts` serves `/manifest.webmanifest`. Its display mode is
+  `browser`, so adding a shortcut never removes browser chrome. The Capacitor
+  native shell ignores web manifests. Colors are the black brand surface, and
+  the name follows the environment title from `config/appEnvironment.ts`.
+- `app/apple-icon.png` (180x180) adds the `apple-touch-icon` link.
+  `public/icon-192.png`, `public/icon-512.png`, and
+  `public/icon-512-maskable.png` are the manifest icons, all resized from
+  `public/6529io.png`. The favicon links stay in `app/layout.tsx` and
+  `RuntimeFavicon`.
+- The CSP sets `manifest-src 'self'` because `default-src` is `'none'`. The
+  manifest and icon paths are listed in `lib/proxy/publicPaths.ts` so the
+  staging access gate does not redirect them.
+
 ## Missing Profile and Drop Previews
 
 Profile and drop image endpoints preserve backend `404 Not Found` responses.
@@ -49,10 +70,11 @@ drops that the backend hides behind a 404 receive the same response as missing
 drops; preview requests do not bypass the backend's access checks.
 
 When staging access is present, profile and drop preview requests forward the
-`x-6529-auth` cookie to the configured API, falling back to `STAGING_API_KEY`
-when the cookie is missing or blank. Credential-bearing requests reject redirects
-and their successful images use `private, no-store`. Requests without credentials
-retain the public image cache policy. No staging password is embedded in the route.
+`x-6529-auth` cookie to the configured API, falling back to the server-only
+`STAGING_API_KEY` runtime variable when the cookie is missing or blank.
+Credential-bearing requests reject redirects and their successful images use
+`private, no-store`. Requests without credentials retain the public image cache
+policy. No staging password is embedded in the route or the browser bundle.
 
 Other upstream errors (including explicit 401/403 responses), network failures,
 and caught metadata or rendering failures retain the existing logged `502`
@@ -71,7 +93,7 @@ policy.
 | The Memes, Meme Lab, ReMemes, 6529 Gradient             | Token routes fetch/use entity images, often with `summary` Twitter cards or raw token aspect ratios.                       | Add branded NFT social cards that frame token art in 1200x630 images and standardize `summary_large_image` where appropriate.       |
 | NextGen collections and tokens                          | Collection/token routes set entity images when available.                                                                  | Add branded collection and token cards with a consistent visual contract and fallback chain.                                        |
 | Blog, museum, about, author, and legacy editorial pages | Many pages still contain inline Yoast-style `<meta>` fragments while `generateMetadata` often returns title-only metadata. | Move social metadata into route metadata builders and migrate inline fragments out in batches.                                      |
-| Tools and admin-style pages                             | Mostly generic shared metadata.                                                                                            | Keep generic where sharing is not meaningful; add route-specific descriptions only for public utility pages.                        |
+| Tools and admin-style pages                             | Network, Open Data, and Tools routes have route-specific descriptions; admin-style pages stay generic.                     | Keep generic where sharing is not meaningful; add route-specific descriptions only for public utility pages.                        |
 
 ## Standard Contract
 

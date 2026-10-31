@@ -41,7 +41,12 @@ export const buildDropUpdateRequest = ({
     const requestPart: ApiCreateDropPart = {
       content: index === activePartIndex ? newContent : part.content,
       quoted_drop: part.quoted_drop ?? null,
-      media: part.media,
+      // Save responses include display-only media fields that updates reject.
+      media: part.media.map(({ url, mime_type, media_upload_id }) => ({
+        url,
+        mime_type,
+        ...(media_upload_id !== undefined ? { media_upload_id } : {}),
+      })),
     };
 
     if (attachments.length) {

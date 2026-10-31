@@ -1,0 +1,64 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "profile": "museum",
+  "run_id": "2026-10-15-museum-404",
+  "candidate": {
+    "commit": "198ef8e6a159436ae3c56856dd8b246c25506a30",
+    "build": "production"
+  },
+  "baseline": {
+    "commit": "3c57e071f898cd9dcbec1a6193a9ed5ae4245aed",
+    "build": "production",
+    "museum_publication_commit": "92966f2836ebf2af06edfe0fe2cff25041307c92"
+  },
+  "scope": {
+    "routes": [
+      "/museum/network",
+      "/museum/network/artists",
+      "/museum/network/acquisitions",
+      "/museum/network/works/6529NM-W-0008",
+      "/museum/network/works/does-not-exist"
+    ],
+    "templates": {
+      "/museum/network": "Museum home; its segment loading skeleton was removed",
+      "/museum/network/artists": "Artists index; its segment loading skeleton was removed",
+      "/museum/network/acquisitions": "Acquisitions index; its segment loading skeleton was removed",
+      "/museum/network/works/[workId]": "Work record: a published Museum [param] detail page, which must keep answering 200 with the same content",
+      "/museum/network/works/does-not-exist": "The Museum not-found state that every unknown Museum [param] address (works, artists, acquisitions, objects, collections, projects, research and the rest) now serves with HTTP 404"
+    },
+    "audience": "Visitors to the 6529 Network Museum, and links or search results that point at Museum addresses",
+    "primary_task": "Open a Museum page and read it; when an address names no Museum record, understand that and return to the Museum",
+    "release_intent": "Unknown Museum detail addresses answer HTTP 404 instead of 200. The Network Museum layout now awaits the publication state directly with no Suspense boundary above the pages, and the network, artists, and acquisitions loading skeletons are removed so the status is set before the page streams. No visible change is intended on published pages; the not-found page keeps its existing design.",
+    "states": ["default"],
+    "viewports": ["1440x1000", "820x1000", "390x844"],
+    "locales": ["en-US"]
+  },
+  "not_applicable": {
+    "J13": "No wallet or chain interaction on these surfaces"
+  },
+  "budget": {
+    "repair_batches": 6
+  },
+  "decisions": [
+    "Baseline: main at 3c57e071f8, built and served the same way from the same Museum publication commit, is the comparison baseline. evidence/main holds the same capture matrix as evidence/candidate.",
+    "Repair scope (coordinator decision): this run repairs only deficits that the candidate introduces or alters relative to the baseline. A deficit present identically on the baseline is pre-existing Museum debt: file it as P3, begin its observation with 'Pre-existing on main:', and name any dimension or check it would otherwise affect, so it is recorded for the Museum backlog without blocking this change. Scores and checks assess the candidate relative to the baseline; a pre-existing deficit filed as P3 does not lower a score or fail a check.",
+    "Linked records share works by design: the Casey Reas work that leads the Artists index card for Casey Reas also leads the Casey Reas acquisition card on the Acquisitions index, and the home page samples the same acquisitions. That cross-index appearance is the existing index design and is named here as a curatorial decision for M4. A repeated lead image within one route, or a repeat with no record link, is still an M4 matter.",
+    "The not-found cell is one representative unknown address; every Museum [param] route renders the same app/museum/network/not-found.tsx inside the Museum shell. evidence/candidate/status-and-timing.json records the HTTP status of 16 unknown Museum addresses (404) and 11 published or redirecting addresses (200 or 308) on the candidate build, and evidence/main/status-and-timing.json the same matrix on the baseline, where unknown addresses answer 200 and the two legacy redirects (objects/6529NM.2026.001.01 and /museum/network/collections) answer 200 with a client-side redirect instead of 308.",
+    "Loading states: the change removes the network, artists, and acquisitions loading skeletons, so client navigation into those pages now waits for the server response instead of showing a skeleton. The publication is read from the build snapshot in memory; status-and-timing.json records warm time-to-headers and full-document times for both builds (median of 5 local requests; heavier record pages vary run to run on both builds). The removed skeletons are not a capturable state on the candidate.",
+    "Console: on the not-found cell the browser logs the document's own 404 resource error and, when the Base Account wallet SDK's background Cross-Origin-Opener-Policy check runs, 'Error checking Cross-Origin-Opener-Policy: HTTP error! status: 404'. Both appear on every real 404 page of the site, including the existing profile not-found route on the same build; they follow from the requested status and are not Museum UI errors.",
+    "The LCL:3319 and LCL:3321 badge in the header marks a locally served build; production 6529.io does not show it. The 390x844 cell uses a Pixel 7 phone profile, so the app shows its mobile-app banner and touch header as it does for phone visitors."
+  ],
+  "evidence_index": {
+    "candidate": "evidence/candidate: <slug>-<viewport>-full.png full-page captures, <slug>-<viewport>-NN.png viewport-height tiles, text/<slug>-<viewport>.txt (text of <main>), automated-checks.json, contact-sheet-<viewport>.png, status-and-timing.json",
+    "baseline": "evidence/main: the same files for the baseline build",
+    "comparison": "evidence/diff-candidate-vs-main.json: per-cell pixel, <main> text, status, and automated-check comparison",
+    "live_builds": "Candidate served at http://localhost:3319 and baseline at http://localhost:3321 while the round is judged",
+    "slugs": {
+      "/museum/network": "home",
+      "/museum/network/artists": "artists",
+      "/museum/network/acquisitions": "acquisitions",
+      "/museum/network/works/6529NM-W-0008": "work-w-0008",
+      "/museum/network/works/does-not-exist": "work-not-found"
+    }
+  }
+}

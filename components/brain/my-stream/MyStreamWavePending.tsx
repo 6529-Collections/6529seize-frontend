@@ -1,5 +1,8 @@
 "use client";
 
+import WaveChatLoading from "@/components/waves/WaveChatLoading";
+import { usePublicWaveFeedReady } from "@/components/waves/PublicWaveFeedReady";
+
 import type { ReactNode } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { getDirectMessageProfileHref } from "@/helpers/waves/direct-message-profile.helpers";
@@ -26,6 +29,7 @@ export default function MyStreamWavePending({
   onRetry,
   children,
 }: MyStreamWavePendingProps) {
+  usePublicWaveFeedReady(isError);
   const { waves, directMessages, activeWave } = useMyStream();
   const { isApp } = useDeviceInfo();
   const { connectedProfile, activeProfileProxy } = useAuth();
@@ -130,15 +134,12 @@ export default function MyStreamWavePending({
           </div>
         </div>
       )}
-      {children ?? (
-        <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-hidden tw-p-4 sm:tw-px-6">
-          <p
-            role={isError ? "alert" : "status"}
-            className="tw-m-0 tw-text-sm tw-text-iron-400"
-          >
-            {isError ? t(locale, "waves.loadingError") : status}
-          </p>
-          {isError ? (
+      {children ??
+        (isError ? (
+          <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-p-4 sm:tw-px-6">
+            <p role="alert" className="tw-m-0 tw-text-sm tw-text-iron-400">
+              {t(locale, "waves.loadingError")}
+            </p>
             <button
               type="button"
               onClick={onRetry}
@@ -146,24 +147,14 @@ export default function MyStreamWavePending({
             >
               {t(locale, "waves.loadingRetry")}
             </button>
-          ) : (
-            <div aria-hidden="true" className="tw-mt-6 tw-space-y-7">
-              {["tw-w-3/4", "tw-w-1/2", "tw-w-2/3"].map((width) => (
-                <div key={width} className="tw-flex tw-gap-3">
-                  <div className="tw-size-9 tw-shrink-0 tw-rounded-full tw-bg-iron-900" />
-                  <div className="tw-min-w-0 tw-flex-1 tw-space-y-3 tw-pt-1">
-                    <div className="tw-h-2.5 tw-w-24 tw-rounded-md tw-bg-iron-800" />
-                    <div
-                      className={`tw-h-3 tw-rounded-md tw-bg-iron-900 ${width}`}
-                    />
-                    <div className="tw-h-3 tw-w-1/3 tw-rounded-md tw-bg-iron-900" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+          </div>
+        ) : (
+          <WaveChatLoading
+            showHeader={false}
+            showTabs={!isDirectMessage}
+            status={status}
+          />
+        ))}
     </div>
   );
 }

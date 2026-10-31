@@ -1,5 +1,7 @@
 "use client";
 
+import { ApiCompetitionCapability } from "@/generated/models/ApiCompetitionCapability";
+import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
 import { useMemo } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -239,7 +241,10 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
   );
 
   const identityDropsCount = useMemo(
-    () => wave?.metrics.your_participation_drops_count ?? null,
+    () =>
+      presentationCompetition(wave)
+        ? null
+        : (wave?.metrics.your_participation_drops_count ?? null),
     [wave]
   );
 
@@ -386,9 +391,18 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
     isChatWave: wave?.wave.type === ApiWaveType.Chat,
     isRankWave: wave?.wave.type === ApiWaveType.Rank,
     isApproveWave: wave?.wave.type === ApiWaveType.Approve,
-    isMemesWave: isMemesWave(wave?.id.toLowerCase()),
-    isCurationWave: isCurationWave(wave?.id.toLowerCase()),
-    isQuorumWave: isQuorumWave(wave?.id.toLowerCase()),
+    isMemesWave:
+      presentationCompetition(wave)?.capabilities.includes(
+        ApiCompetitionCapability.MainStage
+      ) ?? isMemesWave(wave?.id.toLowerCase()),
+    isCurationWave:
+      presentationCompetition(wave)?.capabilities.includes(
+        ApiCompetitionCapability.Curation
+      ) ?? isCurationWave(wave?.id.toLowerCase()),
+    isQuorumWave:
+      presentationCompetition(wave)?.capabilities.includes(
+        ApiCompetitionCapability.Quorum
+      ) ?? isQuorumWave(wave?.id.toLowerCase()),
     isDm: !!wave?.chat?.scope?.group?.is_direct_message,
   };
 }

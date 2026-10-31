@@ -18,6 +18,10 @@ import { ApiWaveParticipationSubmissionStrategyType } from '../models/ApiWavePar
 import { HttpFile } from '../http/http';
 
 export class ApiWaveMin {
+    /**
+    * Whether conversation links should open in Messages.
+    */
+    'is_direct_message'?: boolean;
     'id': string;
     'name': string;
     'picture': string | null;
@@ -59,6 +63,12 @@ export class ApiWaveMin {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "is_direct_message",
+            "baseName": "is_direct_message",
+            "type": "boolean",
+            "format": ""
+        },
         {
             "name": "id",
             "baseName": "id",

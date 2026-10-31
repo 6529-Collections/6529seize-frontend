@@ -1,3 +1,6 @@
+import safeCollectingMessages from "@/i18n/messages/safeCollecting.en-GB.json";
+import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-GB.json";
+import networkTdhConsolidationMessages from "@/i18n/messages/networkTdhConsolidation.en-GB.json";
 import { EN_US_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
 import { EN_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import { EN_DROP_REQUIREMENT_MESSAGES } from "@/i18n/messages/drop-requirements";
@@ -22,6 +25,9 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-GB.json";
 
 export const EN_GB_MESSAGES = {
+  ...safeCollectingMessages,
+  ...delegationTapGuideMessages,
+  ...networkTdhConsolidationMessages,
   "network.groupFilter.filter": "Filter",
   "network.groupFilter.all": "All filters",
   "network.groupFilter.level": "Level",
@@ -40,6 +46,8 @@ export const EN_GB_MESSAGES = {
   "singleDrop.shared": "Link shared",
   "singleDrop.close": "Close",
   "singleDrop.closeLabel": "Close panel",
+  "singleDrop.loading": "Loading…",
+  "singleDrop.loadError": "This content could not be loaded.",
   "singleDrop.showChat": "Show chat",
   "singleDrop.hideChat": "Hide chat",
   "singleDrop.chatLabel": "Drop chat",
@@ -637,6 +645,7 @@ export const EN_GB_MESSAGES = {
   "waves.chat.guidelinesDialog.loadErrorDescription":
     "Please try again before sending your message.",
   "waves.loadingStatus": "Loading waves",
+  "waves.threadLoadError": "This thread could not be loaded.",
   "waves.gifPicker.open": "Add GIF",
   "waves.gifPicker.dialogTitle": "GIF search",
   "waves.gifPicker.searchPlaceholder": "Search GIFs",

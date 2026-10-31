@@ -29,11 +29,27 @@ states are explicit. Select
 
 Open `/discover?view=recommendations&sort=QUALITY` from the sidebar's
 `View all` link in the Worth Checking Out sidebar heading. The existing discovery grid, sort options,
-score filters and pagination remain available. Switching views preserves those
+and score filters remain available. Switching views preserves those
 URL settings. Recommendations focus on waves outside the viewer's followed set.
 Signed-out visitors see the heading `Active discussions`, without following
 language. Signed-in personal views say `Active discussions you are not yet
 following`. The Newest sort uses `Newest waves` for everyone.
+
+Use Balanced, Quality, Hot, REP, Newest, or Latest Posts to choose the order.
+On compact layouts, select the current sort button to open all six choices in a
+bottom sheet. Selecting a choice closes the sheet. Escape, the close button, or
+the backdrop closes it without changing the sort. Wider content areas show the
+six choices inline.
+
+The same control row includes All, Score 50+, Hot 60+, and REP 60+ threshold
+buttons. Swipe or scroll the row when it does not fit the available width.
+Newest and Latest Posts disable score thresholds and reset them to All.
+Sort and threshold choices remain in the URL when switching between discovery
+tabs. Use `Score formula` beside the heading to open the score explanation; on
+compact layouts, the calculator icon has the same accessible name and tooltip.
+The score page keeps the originating Discover view, including its sort and
+threshold. In the app, use Back in the header to return to that view. The page's
+`Back to previous page` link provides the same return path on the web.
 
 Selecting a wave opens its thread. Existing auth and access rules still apply
 when interacting there.

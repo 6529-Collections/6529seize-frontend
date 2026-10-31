@@ -28,7 +28,6 @@ route/layout render boundary fails.
 - Trigger a route, layout, or global render exception.
 - Trigger an app-shell client exception inside the layout error boundary.
 - Open `/error` directly, with or without `?stack=...`.
-- Open `/sentry-example-page` and press `Throw Sample Error`.
 
 ## User Journey
 
@@ -43,6 +42,10 @@ route/layout render boundary fails.
 ## Common Scenarios
 
 - Unknown app route: `404 | PAGE NOT FOUND`.
+- Wave link whose id is not a wave id (a `/waves/{id}`, `/messages/{id}` or
+  `?wave=` value that is not a UUID): the same `404 | PAGE NOT FOUND` screen
+  with a `404` status, shown at the original address. See
+  [Legacy Route Redirects](feature-legacy-route-redirects.md#malformed-wave-ids-404).
 - Unknown profile route (`/{user}` miss): `404 | USER OR PAGE NOT FOUND`.
 - Runtime failure screen:
   - title: `Welcome to the 6529 Page of Doom`
@@ -83,7 +86,6 @@ route/layout render boundary fails.
 - Payload sanitization removes request cookies/body/query data, strips URL query/hash, and redacts sensitive headers and secret-like fields.
 - Session Replay is enabled only when `NODE_ENV=production` and `SENTRY_REPLAY_ENABLED=true`. The flag is read at build time: builds without it do not ship the Replay SDK, so changing it requires a new build.
 - If Sentry is blocked by network/policy, fallback screens still render.
-- On `/sentry-example-page`, `Throw Sample Error` is disabled when Sentry connectivity reports `sentry-unreachable`.
 
 ## Limitations / Notes
 
