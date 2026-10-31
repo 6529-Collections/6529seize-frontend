@@ -39,9 +39,7 @@ const REVIEW_CODE =
 const SHARED_REVIEW_IMPORTERS = [
   "app/api/public-reviews/[review]/declarations/route.ts",
   "app/api/public-reviews/[review]/destination/route.ts",
-  "app/stream/page.tsx",
   "config/publicReviews.ts",
-  "hooks/useSidebarSections.ts",
 ];
 // Server-only API routes: they may load review copy, which stays out of
 // client bundles.
@@ -189,7 +187,7 @@ describe("public-review message namespace", () => {
     expect(
       Object.keys(shared).filter((key) => key.startsWith("publicReview."))
     ).toEqual([]);
-    expect(shared["navigation.nfts.streamReview"]).toBe("6529 Stream — Review");
+    expect(shared["navigation.nfts.stream"]).toBe("6529 Stream");
   });
 
   it("adds only review keys and never replaces shared copy", () => {

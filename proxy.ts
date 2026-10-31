@@ -13,6 +13,7 @@ import {
   plainServiceUnavailableResponse,
 } from "@/lib/proxy/plainResponses";
 import {
+  isRetiredReviewDataPath,
   isStaticAssetPath,
   isUnservableDotPath,
 } from "@/lib/proxy/publicPaths";
@@ -96,8 +97,6 @@ const redirectMappings = [
   { url: "/om/bug/report/", target: "/about/contact-us" },
 ];
 
-const STREAM_REVIEW_DATA_PREFIX = "/review-data/6529-stream/";
-
 // The access gate runs only on staging deployments, decided from the baked
 // BASE_ENDPOINT so request headers such as Host cannot switch it off.
 // Production and local development never call the API from proxy.
@@ -132,10 +131,13 @@ export const config = {
   matcher: ["/((?!_next/static|_next/image).*)"],
 };
 
-function isPublicStreamReviewDataPath(req: NextRequest, pathname: string) {
-  const rawPathname = new URL(req.url).pathname;
+// The retired Stream review's files stay in `public/review-data` until the
+// review is removed, but no host serves them: proxy runs before Next serves
+// `public/`, so it answers them with a plain 404 on every deployment.
+function isRetiredReviewDataRequest(req: NextRequest): boolean {
   return (
-    rawPathname === pathname && pathname.startsWith(STREAM_REVIEW_DATA_PREFIX)
+    isRetiredReviewDataPath(req.nextUrl.pathname) ||
+    isRetiredReviewDataPath(new URL(req.url).pathname)
   );
 }
 
@@ -373,7 +375,10 @@ async function accessDenial(
 
 export default async function proxy(req: NextRequest) {
   try {
-    if (isUnservableDotPath(req.nextUrl.pathname)) {
+    if (
+      isUnservableDotPath(req.nextUrl.pathname) ||
+      isRetiredReviewDataRequest(req)
+    ) {
       return plainNotFoundResponse();
     }
 
@@ -431,10 +436,7 @@ export default async function proxy(req: NextRequest) {
       return NextResponse.redirect(clone, 301);
     }
 
-    if (
-      isStaticAssetPath(normalizedPathname) ||
-      isPublicStreamReviewDataPath(req, pathname)
-    ) {
+    if (isStaticAssetPath(normalizedPathname)) {
       return NextResponse.next();
     }
 

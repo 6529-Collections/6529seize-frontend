@@ -159,6 +159,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         { label: "NextGen", path: "/nextgen" },
         { label: "Meme Lab", path: "/meme-lab" },
         { label: "ReMemes", path: "/rememes" },
+        { label: "6529 Stream", path: "/stream" },
         { label: "NFT Activity", path: "/nft-activity" },
         { label: "Memes Calendar", path: "/meme-calendar" },
       ]);
