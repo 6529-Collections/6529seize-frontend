@@ -119,8 +119,20 @@ let stopDataTicks: (() => void) | null = null;
 let cachedNow = 0;
 
 function sampleNow(): void {
+  watchData();
   cachedNow = browserStream?.dataSource.now() ?? 0;
   tickListeners.forEach((notify) => notify());
+}
+
+/**
+ * Samples on data changes too, once the client exists. On a hydrated load the
+ * pages subscribe before the provider builds the client, so the first
+ * subscription and every tick retry until it is attached.
+ */
+function watchData(): void {
+  if (stopDataTicks === null && browserStream !== null) {
+    stopDataTicks = browserStream.dataSource.subscribe(sampleNow);
+  }
 }
 
 function subscribeTick(listener: () => void): () => void {
@@ -128,8 +140,8 @@ function subscribeTick(listener: () => void): () => void {
   if (tickTimer === null) {
     cachedNow = browserStream?.dataSource.now() ?? 0;
     tickTimer = setInterval(sampleNow, 1_000);
-    stopDataTicks = browserStream?.dataSource.subscribe(sampleNow) ?? null;
   }
+  watchData();
   return () => {
     tickListeners.delete(listener);
     if (tickListeners.size === 0 && tickTimer !== null) {
