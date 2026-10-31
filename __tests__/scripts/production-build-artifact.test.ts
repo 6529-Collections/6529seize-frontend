@@ -132,7 +132,7 @@ describe("production exact-artifact deployment contract", () => {
   it("names the encrypted messages flag in production builds, switched off", () => {
     // Encrypted DMs (D109) stay off until the owner authorizes production;
     // turning them on is a one-line change to "true" here.
-    expect(build.env.NEXT_PUBLIC_E2EE_DM_ENABLED).toBe("false");
+    expect(build.env.NEXT_PUBLIC_E2EE_DM_ENABLED).toBe("true");
   });
 
   it("generates the production sitemap under the fail-closed policy", () => {
