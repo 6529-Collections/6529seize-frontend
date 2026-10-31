@@ -12,6 +12,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useId } from "react";
+import SignedMessagesEnableStatus from "./SignedMessagesEnableStatus";
 import {
   useSignedMessagesNotice,
   type SignedMessagesNoticeModel,
@@ -69,8 +70,17 @@ function SignedMessagesNoticeContent({
 }: SignedMessagesNoticeProps) {
   const locale = useBrowserLocale();
   const titleId = useId();
-  const { model, canEnable, enable, isEnabling, dismiss, revoke, isRevoking } =
-    useSignedMessagesNotice({ composerEmpty });
+  const {
+    model,
+    canEnable,
+    enable,
+    enableStatus,
+    reconnect,
+    isEnabling,
+    dismiss,
+    revoke,
+    isRevoking,
+  } = useSignedMessagesNotice({ composerEmpty });
 
   if (!model) {
     return null;
@@ -86,7 +96,7 @@ function SignedMessagesNoticeContent({
       void revoke(model.grant);
       return;
     }
-    void enable();
+    enable(model.kind === "enable" ? "notice" : "renew");
   };
 
   return (
@@ -116,6 +126,13 @@ function SignedMessagesNoticeContent({
           <p className="tw-m-0 tw-mt-0.5 tw-text-pretty tw-text-xs tw-leading-5 tw-text-iron-400">
             {copy.body}
           </p>
+        )}
+        {!isAlert && (
+          <SignedMessagesEnableStatus
+            status={enableStatus}
+            onReconnect={reconnect}
+            className="tw-mt-1"
+          />
         )}
       </div>
       <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-1">

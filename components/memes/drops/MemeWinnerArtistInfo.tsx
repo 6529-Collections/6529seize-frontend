@@ -5,6 +5,7 @@ import UserCICAndLevel, {
 import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { getTimeAgoShort } from "@/helpers/Helpers";
+import { WithDropAuthorSignedMarker } from "@/components/waves/drops/signature/DropAuthorSignedMarker";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
@@ -63,7 +64,9 @@ export default function MemeWinnerArtistInfo({
               className="tw-size-[3px] tw-shrink-0 tw-rounded-full tw-bg-iron-700"
             />
             <p className="tw-m-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-400">
-              {getTimeAgoShort(drop.created_at)}
+              <WithDropAuthorSignedMarker drop={drop}>
+                {getTimeAgoShort(drop.created_at)}
+              </WithDropAuthorSignedMarker>
             </p>
           </div>
         </div>
