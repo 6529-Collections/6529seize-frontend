@@ -19,6 +19,7 @@ import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
+import { getDirectMessageAdmissionErrorMessage } from "@/helpers/waves/direct-message-admission.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useIdentity } from "@/hooks/useIdentity";
@@ -141,7 +142,9 @@ export default function UserProfileTooltip({
       navigateToDirectMessage({ waveId: wave.id, router, isApp });
     } catch (error) {
       console.error(error);
-      const errorMessage = getToastErrorDetails(error);
+      const errorMessage =
+        getDirectMessageAdmissionErrorMessage(locale, error) ??
+        getToastErrorDetails(error);
       setToast({
         type: "error",
         title: "Couldn't create this direct message.",
