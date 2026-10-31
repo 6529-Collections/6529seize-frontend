@@ -13,6 +13,8 @@ import type {
 } from "@/lib/e2ee/types";
 import { E2eeNewDeviceNotice } from "../devices/E2eeNewDeviceNotice";
 import { getE2eeActionErrorKey } from "../e2eeErrors";
+import { findMember, getMemberName } from "../e2eeFormat";
+import { setE2eeChatMuted, useMutedE2eeChats } from "../e2eeMutedChats";
 import { getScrollBehavior } from "../e2eeMotion";
 import { E2eeLoadingState, E2eeRouteGate } from "../gate/E2eeRouteGate";
 import { E2eeConversationInfo } from "../info/E2eeConversationInfo";
@@ -22,6 +24,7 @@ import {
   E2eePageShell,
   useE2eeViewStyle,
 } from "../ui/E2eePageShell";
+import { E2eeBlockDialog } from "./E2eeBlockDialog";
 import { E2eeComposer } from "./E2eeComposer";
 import { E2eeConversationBanners } from "./E2eeConversationBanners";
 import { E2eeConversationHeader } from "./E2eeConversationHeader";
@@ -122,6 +125,9 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<E2eeMessage | null>(null);
   const [reportTarget, setReportTarget] = useState<E2eeMessage | null>(null);
+  const [blockSender, setBlockSender] = useState<E2eeMessage | null>(null);
+  const [blockedName, setBlockedName] = useState<string | null>(null);
+  const muted = useMutedE2eeChats(profileId).has(g);
   const [infoOpen, setInfoOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [actionErrorKey, setActionErrorKey] = useState<MessageKey | null>(null);
@@ -154,6 +160,13 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
       },
       onDelete: (message) => setDeleteTarget(message),
       onReport: (message) => setReportTarget(message),
+      onBlock: (message) => setBlockSender(message),
+      onToggleMute: () => {
+        if (profileId) {
+          setE2eeChatMuted(profileId, g, !muted);
+        }
+      },
+      muted,
       onReact: (message, reaction, on) => {
         void react(message, reaction, on);
       },
@@ -169,7 +182,7 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         element.focus({ preventScroll: true });
       },
     };
-  }, [engine]);
+  }, [engine, g, muted, profileId]);
 
   if (!conversation) {
     return (
@@ -238,6 +251,9 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
       />
       <div role="status" className="tw-sr-only">
         {reported ? t(locale, "e2ee.report.success") : null}
+        {blockedName
+          ? t(locale, "e2ee.block.done", { name: blockedName })
+          : null}
       </div>
       {actionErrorKey ? (
         <p
@@ -256,6 +272,7 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         editing={editing}
         onCancelEdit={() => setEditingId(null)}
         disabledReasonKey={getDisabledReasonKey(conversation)}
+        attachmentsEnabled={e2ee.attachmentsEnabled}
       />
 
       <E2eeConversationInfo
@@ -271,6 +288,26 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         message={reportTarget}
         onClose={() => setReportTarget(null)}
         onReported={() => setReported(true)}
+      />
+      <E2eeBlockDialog
+        target={
+          blockSender?.senderProfileId
+            ? {
+                profileId: blockSender.senderProfileId,
+                handle:
+                  findMember(conversation.members, blockSender.senderProfileId)
+                    ?.handle ?? null,
+                name: getMemberName(
+                  locale,
+                  conversation.members,
+                  blockSender.senderProfileId,
+                  profileId
+                ),
+              }
+            : null
+        }
+        onClose={() => setBlockSender(null)}
+        onBlocked={setBlockedName}
       />
       <E2eeConfirmDialog
         open={deleteTarget !== null}

@@ -70,6 +70,8 @@ export interface ApiE2eeMe {
   devices: ApiE2eeDevice[];
   key_packages: ApiE2eeKeyPackageStatus[];
   max_devices: number;
+  /** Absent from servers older than the attachment switch (they accept them). */
+  attachments_enabled?: boolean;
 }
 
 export interface ApiE2eeClaimTarget {

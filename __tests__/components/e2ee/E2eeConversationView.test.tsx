@@ -26,6 +26,14 @@ Element.prototype.scrollTo = jest.fn();
 Element.prototype.scrollIntoView = jest.fn();
 
 const mockPush = jest.fn();
+const mockBlock = jest.fn(async () => undefined);
+const mutedChats = (): string[] =>
+  JSON.parse(
+    globalThis.localStorage.getItem(`6529:e2ee:muted:${SELF_ID}`) ?? "[]"
+  ) as string[];
+jest.mock("@/hooks/content-moderation/useProfileBlockState", () => ({
+  useProfileBlockState: () => ({ block: mockBlock }),
+}));
 jest.mock("next/navigation", () => ({
   usePathname: () => "/messages/encrypted/0x",
   useRouter: () => ({
@@ -219,13 +227,34 @@ describe("E2eeConversationView", () => {
     fireEvent.click(
       screen.getAllByRole("button", { name: "Message actions" })[0]!
     );
-    fireEvent.click(await screen.findByRole("menuitem", { name: "Report" }));
+    fireEvent.click(
+      await screen.findByRole("menuitem", {
+        name: "Report illegal or severe harm",
+      })
+    );
     const dialog = await screen.findByRole("dialog", {
-      name: "Report message",
+      name: "Report illegal or severe harm",
     });
-    fireEvent.change(within(dialog).getByLabelText("Reason"), {
-      target: { value: "SPAM" },
+    expect(
+      within(dialog).getByText(/Only this message is shared/)
+    ).toBeInTheDocument();
+    const categories = within(dialog).getByRole("group", {
+      name: "What does this message contain?",
     });
+    expect(within(categories).getAllByRole("radio")).toHaveLength(4);
+    // A category is required.
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Send report" })
+    );
+    expect(
+      await within(dialog).findByText("Choose what the message contains.")
+    ).toBeInTheDocument();
+    expect(engine.report).not.toHaveBeenCalled();
+    fireEvent.click(
+      within(categories).getByRole("radio", {
+        name: "A credible threat of violence",
+      })
+    );
     fireEvent.click(
       within(dialog).getByRole("button", { name: "Send report" })
     );
@@ -233,10 +262,73 @@ describe("E2eeConversationView", () => {
       expect(engine.report).toHaveBeenCalledWith(
         GROUP_G,
         "m1",
-        "SPAM",
+        "CREDIBLE_THREAT_OF_VIOLENCE",
         undefined
       )
     );
+  });
+
+  it("puts mute, block and message settings before reporting", async () => {
+    renderView();
+    fireEvent.click(
+      screen.getAllByRole("button", { name: "Message actions" })[0]!
+    );
+    const items = (await screen.findAllByRole("menuitem")).map(
+      (item) => item.textContent
+    );
+    const at = (label: string) =>
+      items.findIndex((text) => text?.includes(label));
+    expect(at("Mute this chat")).toBeGreaterThanOrEqual(0);
+    expect(at("Block alice")).toBeGreaterThan(at("Mute this chat"));
+    expect(at("Choose who can message you")).toBeGreaterThan(at("Block alice"));
+    expect(at("Report illegal or severe harm")).toBeGreaterThan(
+      at("Choose who can message you")
+    );
+    expect(
+      screen.getByRole("menuitem", { name: "Choose who can message you" })
+    ).toHaveAttribute("href", "/preferences");
+
+    fireEvent.click(screen.getByRole("menuitem", { name: "Block alice" }));
+    const dialog = await screen.findByRole("dialog", {
+      name: "Block alice?",
+    });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Block" }));
+    await waitFor(() => expect(mockBlock).toHaveBeenCalledTimes(1));
+  });
+
+  it("mutes the chat on this device from the message menu", async () => {
+    renderView();
+    fireEvent.click(
+      screen.getAllByRole("button", { name: "Message actions" })[0]!
+    );
+    fireEvent.click(
+      await screen.findByRole("menuitem", { name: "Mute this chat" })
+    );
+    expect(mutedChats()).toEqual([GROUP_G]);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: "Message actions" })[0]!
+    );
+    fireEvent.click(
+      await screen.findByRole("menuitem", { name: "Unmute this chat" })
+    );
+    expect(mutedChats()).toEqual([]);
+  });
+
+  it("has no attach control while the server has attachments off", () => {
+    const engine = createFakeE2eeEngine({
+      conversations: [conversation()],
+      messages: { [GROUP_G]: timeline },
+      attachmentsEnabled: false,
+    });
+    render(
+      <E2eeTestProvider value={contextFor(engine)}>
+        <E2eeConversationView g={GROUP_G} />
+      </E2eeTestProvider>
+    );
+    expect(
+      screen.queryByRole("button", { name: "Attach files" })
+    ).not.toBeInTheDocument();
+    expect(document.querySelector('input[type="file"]')).toBeNull();
   });
 
   it("shows the delayed-change banner and blocks the composer", () => {

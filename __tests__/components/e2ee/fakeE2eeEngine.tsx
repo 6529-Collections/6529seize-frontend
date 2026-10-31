@@ -112,6 +112,7 @@ export interface FakeEngineState {
   devices: E2eeDeviceInfo[];
   conversations: E2eeConversation[];
   messages: Record<string, E2eeMessage[]>;
+  attachmentsEnabled: boolean;
 }
 
 export type FakeE2eeEngine = E2eeEngine & {
@@ -132,6 +133,7 @@ export function createFakeE2eeEngine(
     devices: [],
     conversations: [],
     messages: {},
+    attachmentsEnabled: true,
     ...initial,
   };
   const notify = () => {
@@ -149,6 +151,7 @@ export function createFakeE2eeEngine(
     getError: () => state.error,
     getThisDevice: () => state.thisDevice,
     getDevices: () => state.devices,
+    getAttachmentsEnabled: () => state.attachmentsEnabled,
     getConversations: () => state.conversations,
     getConversation: (g) =>
       state.conversations.find((item) => item.g === g) ?? null,

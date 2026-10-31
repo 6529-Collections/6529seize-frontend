@@ -301,6 +301,7 @@ export async function refreshMe(
     infos.push(toDeviceInfo(ctx, record, verification.verified));
   }
   ctx.store.devices = infos;
+  ctx.store.attachmentsEnabled = me.attachments_enabled !== false;
   const ownKey = ctx.device?.deviceKey;
   const own = me.devices.find(
     (record) => record.device_key.toLowerCase() === ownKey

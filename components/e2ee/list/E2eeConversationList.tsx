@@ -1,5 +1,6 @@
 "use client";
 
+import { BellSlashIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { getEncryptedConversationRoute } from "@/helpers/navigation.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -14,6 +15,7 @@ import {
   getMessagePreview,
   tCount,
 } from "../e2eeFormat";
+import { useMutedE2eeChats } from "../e2eeMutedChats";
 import { E2eeAvatar, E2eeAvatarStack } from "../ui/E2eeAvatar";
 
 const STATUS_KEYS: Partial<Record<E2eeConversation["status"], MessageKey>> = {
@@ -101,6 +103,17 @@ interface E2eeConversationRowProps {
   readonly selfProfileId: string | null;
   readonly active: boolean;
   readonly collapsed: boolean;
+  /** Muted on this device: a muted mark instead of unread badges. */
+  readonly muted: boolean;
+}
+
+function MutedMark({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <span className="tw-flex tw-flex-shrink-0 tw-items-center tw-text-iron-500">
+      <BellSlashIcon aria-hidden="true" className="tw-size-4" />
+      <span className="tw-sr-only">{t(locale, "e2ee.list.muted")}</span>
+    </span>
+  );
 }
 
 function E2eeConversationRow({
@@ -108,6 +121,7 @@ function E2eeConversationRow({
   selfProfileId,
   active,
   collapsed,
+  muted,
 }: E2eeConversationRowProps) {
   const locale = useBrowserLocale();
   const title = getConversationTitle(locale, conversation, selfProfileId);
@@ -132,7 +146,7 @@ function E2eeConversationRow({
             selfProfileId={selfProfileId}
             title={title}
           />
-          {conversation.unread > 0 || conversation.mentions > 0 ? (
+          {!muted && (conversation.unread > 0 || conversation.mentions > 0) ? (
             <span
               aria-hidden="true"
               className="tw-absolute tw-right-1.5 tw-top-1.5 tw-size-2.5 tw-rounded-full tw-bg-primary-400"
@@ -178,7 +192,11 @@ function E2eeConversationRow({
                 {t(locale, statusKey)}
               </span>
             ) : null}
-            <UnreadBadges locale={locale} conversation={conversation} />
+            {muted ? (
+              <MutedMark locale={locale} />
+            ) : (
+              <UnreadBadges locale={locale} conversation={conversation} />
+            )}
           </span>
         </span>
       </Link>
@@ -203,6 +221,7 @@ export function E2eeConversationList({
   limit,
   label,
 }: E2eeConversationListProps) {
+  const muted = useMutedE2eeChats(selfProfileId);
   const visible =
     limit === undefined ? conversations : conversations.slice(0, limit);
   return (
@@ -217,6 +236,7 @@ export function E2eeConversationList({
           selfProfileId={selfProfileId}
           active={conversation.g === activeGroup}
           collapsed={collapsed}
+          muted={muted.has(conversation.g)}
         />
       ))}
     </ul>

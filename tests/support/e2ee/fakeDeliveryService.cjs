@@ -228,6 +228,7 @@ function createFakeDeliveryService(options = {}) {
     tamper: null,
     requests: [],
     nextId: 1,
+    attachmentsEnabled: options.attachmentsEnabled !== false,
   };
 
   const id = (prefix) => `${prefix}${s.nextId++}`;
@@ -485,7 +486,13 @@ function createFakeDeliveryService(options = {}) {
         .filter(isActive)
         .map((d) => keyPackageStatus(d.device_key)),
       max_devices: MAX_DEVICES,
+      attachments_enabled: s.attachmentsEnabled,
     };
+  }
+
+  /** Mirrors E2EE_ATTACHMENTS_ENABLED: blob routes refuse before any state. */
+  function requireAttachments() {
+    if (!s.attachmentsEnabled) fail(404, "E2EE_ATTACHMENTS_DISABLED");
   }
 
   // -- policy (7.1) -------------------------------------------------------------
@@ -1033,6 +1040,7 @@ function createFakeDeliveryService(options = {}) {
   // -- blobs --------------------------------------------------------------------
 
   function createBlob(profileId, body) {
+    requireAttachments();
     const uploader = requireOwnDevice(
       profileId,
       body.uploader_device_key
@@ -1076,6 +1084,7 @@ function createFakeDeliveryService(options = {}) {
   }
 
   function putChunk(profileId, blobId, index, body) {
+    requireAttachments();
     const blob = requireBlob(blobId);
     requireOwnDevice(profileId, blob.uploader);
     if (blob.complete || index < 0 || index >= blob.chunk_count) {
@@ -1090,6 +1099,7 @@ function createFakeDeliveryService(options = {}) {
   }
 
   function completeBlob(profileId, blobId) {
+    requireAttachments();
     const blob = requireBlob(blobId);
     requireOwnDevice(profileId, blob.uploader);
     const total = [...blob.chunks.values()].reduce(
@@ -1104,6 +1114,7 @@ function createFakeDeliveryService(options = {}) {
   }
 
   function getChunk(profileId, blobId, index, deviceKey) {
+    requireAttachments();
     const device = requireOwnDevice(profileId, deviceKey);
     const blob = requireBlob(blobId);
     const group = requireGroup(blob.group);
@@ -1323,6 +1334,10 @@ function createFakeDeliveryService(options = {}) {
     /** dmPolicy: "EVERYONE" | "PEOPLE_I_FOLLOW" | "NOBODY". */
     setDmPolicy(profileId, value) {
       s.dmPolicy.set(profileId, value);
+    },
+    /** The server attachment switch (E2EE_ATTACHMENTS_ENABLED). */
+    setAttachmentsEnabled(enabled) {
+      s.attachmentsEnabled = enabled;
     },
     /** `subscriber` follows `target`. */
     follow(subscriber, target) {

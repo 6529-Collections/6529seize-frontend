@@ -85,10 +85,17 @@ the same people already chosen. Earlier messages are not copied.
 
 - Write in the composer and press Enter to send; Shift+Enter starts a new line.
 - Type `@` to mention a member.
-- Attach up to 10 files of up to 25 MB each. Images show inline; other files
-  are downloads.
-- Open a message's menu to react, reply, edit or delete your own messages, or
-  report someone else's message.
+- Attachments depend on the server: where they are on (staging), attach up to
+  10 files of up to 25 MB each; images show inline and other files are
+  downloads. Where they are off (production at launch), there is no attach
+  control and chats are text only.
+- Open a message's menu to react, reply, or edit or delete your own messages.
+  On someone else's message the menu also offers **Mute this chat** (on this
+  device: the chat stops counting toward the Messages badge and shows a muted
+  mark), **Block** the sender (they can't start new chats with you or add you
+  to encrypted chats; chats you already share stay until you leave them),
+  **Choose who can message you** (Preferences) and, last, **Report illegal or
+  severe harm**.
 - Search in the header looks only through messages on this device.
 - **Chat info** lists members (with admin badges and their devices), the
   safety code, report help and **Leave chat**. In groups, admins can add and
@@ -142,6 +149,22 @@ When another device of yours is turned on, your other devices show
   `/messages/encrypted`.
 - The desktop app does not show a local notification for encrypted messages
   yet.
+
+## Reporting
+
+Reporting is for illegal or severe harm only: child sexual abuse material, a
+credible threat of violence, intimate images shared without consent, or
+doxxing (exposed personal data). The dialog requires one of these and explains
+what is shared:
+
+- Only the selected message is shared, with proof that its sender's device sent
+  it.
+- It goes to 6529's trust and safety team, not to wave moderators or the
+  moderation queue, and never to an AI service.
+- Nothing else in the conversation is revealed.
+
+Everything else is handled with blocking, muting and the "who can message you"
+setting. Reports are kept for 180 days unless trust and safety holds them.
 
 ## Limitations
 

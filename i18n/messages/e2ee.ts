@@ -112,6 +112,7 @@ export const E2EE_MESSAGES = {
   "e2ee.list.mentions.one": "{count} mention",
   "e2ee.list.mentions.other": "{count} mentions",
   "e2ee.list.status.invalid": "Paused",
+  "e2ee.list.muted": "Muted",
   "e2ee.list.status.left": "You left",
   "e2ee.list.status.removed": "Removed",
   "e2ee.list.entry": "Encrypted messages",
@@ -199,7 +200,11 @@ export const E2EE_MESSAGES = {
   "e2ee.message.reply": "Reply",
   "e2ee.message.edit": "Edit",
   "e2ee.message.delete": "Delete",
-  "e2ee.message.report": "Report",
+  "e2ee.message.report": "Report illegal or severe harm",
+  "e2ee.message.mute": "Mute this chat",
+  "e2ee.message.unmute": "Unmute this chat",
+  "e2ee.message.block": "Block {name}",
+  "e2ee.message.messageSettings": "Choose who can message you",
   "e2ee.message.deleteConfirmTitle": "Delete this message?",
   "e2ee.message.deleteConfirmBody":
     "It will show as “Message deleted” for everyone in the chat.",
@@ -286,12 +291,33 @@ export const E2EE_MESSAGES = {
   "e2ee.info.encryptedNote":
     "Messages in this chat are end-to-end encrypted. 6529 delivers them but can’t read them.",
 
-  "e2ee.report.title": "Report message",
+  "e2ee.report.title": "Report illegal or severe harm",
   "e2ee.report.description":
-    "The message and its signature are sent to moderators so they can verify who sent it. Nothing else from this chat is shared.",
+    "Only this message is shared, with proof that its sender sent it. It goes to 6529’s trust and safety team. Nothing else in the conversation is revealed.",
+  "e2ee.report.categoryLegend": "What does this message contain?",
+  "e2ee.report.category.CHILD_SEXUAL_ABUSE_MATERIAL":
+    "Child sexual abuse material",
+  "e2ee.report.category.CREDIBLE_THREAT_OF_VIOLENCE":
+    "A credible threat of violence",
+  "e2ee.report.category.NON_CONSENSUAL_INTIMATE_IMAGERY":
+    "Intimate images shared without consent",
+  "e2ee.report.category.DOXXING": "Doxxing or exposed personal data",
+  "e2ee.report.chooseCategory": "Choose what the message contains.",
+  "e2ee.report.otherTools":
+    "For anything else, block the sender, mute the chat or choose who can message you from the message menu.",
   "e2ee.report.submit": "Send report",
-  "e2ee.report.success": "Report sent.",
+  "e2ee.report.success": "Report sent to 6529’s trust and safety team.",
   "e2ee.report.failed": "Couldn’t send the report. Try again.",
+
+  "e2ee.block.title": "Block {name}?",
+  "e2ee.block.description":
+    "They won’t be able to start new chats with you or add you to encrypted chats. Chats you’re already in together stay until you leave them. You can unblock them in Preferences.",
+  "e2ee.block.confirm": "Block",
+  "e2ee.block.done": "{name} is blocked.",
+  "e2ee.block.failed": "Couldn’t block. Try again.",
+
+  "e2ee.composer.attachmentsUnavailable":
+    "Attachments aren’t available in encrypted chats yet.",
 
   "e2ee.plaintext.label": "Not end-to-end encrypted",
   "e2ee.plaintext.start": "Start an encrypted chat with the same people",

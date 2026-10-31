@@ -483,7 +483,12 @@ describeStack("E2EE engine against a real backend", () => {
 
     // Bob reports Alice's message; the API verifies her device signature.
     reportResults.length = 0;
-    await b.engine.report(dm, message!.id, "SPAM", "real-stack check");
+    await b.engine.report(
+      dm,
+      message!.id,
+      "CREDIBLE_THREAT_OF_VIOLENCE",
+      "real-stack check"
+    );
     expect(reportResults).toEqual([
       expect.objectContaining({
         verified: true,

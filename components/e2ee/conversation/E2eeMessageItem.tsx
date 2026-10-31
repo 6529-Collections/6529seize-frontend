@@ -3,12 +3,17 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import {
   ArrowUturnLeftIcon,
+  BellIcon,
+  BellSlashIcon,
+  ChatBubbleLeftEllipsisIcon,
   EllipsisHorizontalIcon,
   ExclamationTriangleIcon,
   FlagIcon,
+  NoSymbolIcon,
   PencilSquareIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
+import Link from "next/link";
 import { memo, type ReactNode } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger, formatList } from "@/i18n/format";
@@ -40,6 +45,11 @@ export interface E2eeMessageActions {
   readonly onEdit: (message: E2eeMessage) => void;
   readonly onDelete: (message: E2eeMessage) => void;
   readonly onReport: (message: E2eeMessage) => void;
+  /** Block the sender (Block, mute and DM settings come before Report). */
+  readonly onBlock: (message: E2eeMessage) => void;
+  readonly onToggleMute: () => void;
+  /** Whether this chat is muted on this device. */
+  readonly muted: boolean;
   readonly onReact: (
     message: E2eeMessage,
     reaction: string,
@@ -256,15 +266,78 @@ function ActionMenuItem({
   );
 }
 
+const MENU_ITEM_CLASS =
+  "tw-flex tw-w-full tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-text-iron-100 tw-no-underline data-[focus]:tw-bg-iron-800 data-[focus]:tw-ring-2 data-[focus]:tw-ring-inset data-[focus]:tw-ring-primary-400";
+
+/**
+ * Everyday tools for someone else's message: mute, block and who can
+ * message you come first; reporting is for severe or illegal harm only.
+ */
+function SafetyMenuItems({
+  message,
+  senderName,
+  actions,
+  iconClass,
+}: {
+  readonly message: E2eeMessage;
+  readonly senderName: string;
+  readonly actions: E2eeMessageActions;
+  readonly iconClass: string;
+}) {
+  const locale = useBrowserLocale();
+  return (
+    <>
+      <ActionMenuItem
+        onClick={actions.onToggleMute}
+        icon={
+          actions.muted ? (
+            <BellIcon aria-hidden="true" className={iconClass} />
+          ) : (
+            <BellSlashIcon aria-hidden="true" className={iconClass} />
+          )
+        }
+      >
+        {t(locale, actions.muted ? "e2ee.message.unmute" : "e2ee.message.mute")}
+      </ActionMenuItem>
+      {message.senderProfileId ? (
+        <ActionMenuItem
+          onClick={() => actions.onBlock(message)}
+          icon={<NoSymbolIcon aria-hidden="true" className={iconClass} />}
+        >
+          {t(locale, "e2ee.message.block", { name: senderName })}
+        </ActionMenuItem>
+      ) : null}
+      <MenuItem>
+        <Link href="/preferences" className={MENU_ITEM_CLASS}>
+          <ChatBubbleLeftEllipsisIcon
+            aria-hidden="true"
+            className={iconClass}
+          />
+          {t(locale, "e2ee.message.messageSettings")}
+        </Link>
+      </MenuItem>
+      <ActionMenuItem
+        tone="danger"
+        onClick={() => actions.onReport(message)}
+        icon={<FlagIcon aria-hidden="true" className={iconClass} />}
+      >
+        {t(locale, "e2ee.message.report")}
+      </ActionMenuItem>
+    </>
+  );
+}
+
 function MessageActionsMenu({
   message,
   isOwn,
   selfProfileId,
+  senderName,
   actions,
 }: {
   readonly message: E2eeMessage;
   readonly isOwn: boolean;
   readonly selfProfileId: string | null;
+  readonly senderName: string;
   readonly actions: E2eeMessageActions;
 }) {
   const locale = useBrowserLocale();
@@ -328,13 +401,12 @@ function MessageActionsMenu({
             </ActionMenuItem>
           </>
         ) : (
-          <ActionMenuItem
-            tone="danger"
-            onClick={() => actions.onReport(message)}
-            icon={<FlagIcon aria-hidden="true" className={iconClass} />}
-          >
-            {t(locale, "e2ee.message.report")}
-          </ActionMenuItem>
+          <SafetyMenuItems
+            message={message}
+            senderName={senderName}
+            actions={actions}
+            iconClass={iconClass}
+          />
         )}
       </MenuItems>
     </Menu>
@@ -529,6 +601,7 @@ function E2eeMessageItemComponent({
             message={message}
             isOwn={isOwn}
             selfProfileId={selfProfileId}
+            senderName={name}
             actions={actions}
           />
         </div>

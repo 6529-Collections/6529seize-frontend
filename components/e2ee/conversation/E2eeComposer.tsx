@@ -313,6 +313,8 @@ interface E2eeComposerProps {
   readonly onCancelEdit: () => void;
   /** Why sending is blocked (paused change, inactive chat), if it is. */
   readonly disabledReasonKey: MessageKey | null;
+  /** Server switch: without it there is no attach control at all. */
+  readonly attachmentsEnabled: boolean;
 }
 
 /**
@@ -329,6 +331,7 @@ export function E2eeComposer({
   editing,
   onCancelEdit,
   disabledReasonKey,
+  attachmentsEnabled,
 }: E2eeComposerProps) {
   const locale = useBrowserLocale();
   const listboxId = useId();
@@ -340,6 +343,11 @@ export function E2eeComposer({
   const [error, setError] = useState<ComposerError | null>(null);
   const [loadedEditId, setLoadedEditId] = useState<string | null>(null);
   const mentions = useMentionPicker(conversation.members, selfProfileId);
+
+  // Attachments switched off server-side drop anything already picked.
+  if (!attachmentsEnabled && files.length > 0) {
+    setFiles([]);
+  }
 
   // Entering edit mode loads the message text once per edited message.
   const editId = editing?.id ?? null;
@@ -512,7 +520,7 @@ export function E2eeComposer({
             label={t(locale, "e2ee.composer.mentions.label")}
           />
         ) : null}
-        {editing ? null : (
+        {editing || !attachmentsEnabled ? null : (
           <>
             <input
               ref={fileInputRef}

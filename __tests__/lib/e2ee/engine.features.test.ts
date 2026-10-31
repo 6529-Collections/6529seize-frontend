@@ -113,6 +113,29 @@ describe("E2EE engine: features", () => {
     expect(new Uint8Array(await blob.arrayBuffer())).toEqual(bytes);
   });
 
+  it("refuses attachments while the server switch is off", async () => {
+    const { world, a, b, g } = await trio();
+    expect(a.getAttachmentsEnabled()).toBe(true);
+    world.ds.setAttachmentsEnabled(false);
+    // The engine re-reads GET /e2ee/me on its 10-minute maintenance pass.
+    world.clock.advance(11 * 60_000);
+    await a.sync();
+    await settle(world);
+    expect(a.getAttachmentsEnabled()).toBe(false);
+    const file = new File([new Uint8Array(10)], "photo.png", {
+      type: "image/png",
+    });
+    await expect(
+      a.send(g, { text: "with a file", files: [file] })
+    ).rejects.toMatchObject({ code: "E2EE_ATTACHMENTS_DISABLED" });
+    await a.send(g, { text: "text only" });
+    await settle(world);
+    expect(
+      b.getMessages(g).some((message) => message.text === "text only")
+    ).toBe(true);
+    expect(world.ds.state["blobs"].size).toBe(0);
+  });
+
   it("refuses DMs to profiles with policy NOBODY or blocks (eligibility and claim)", async () => {
     const world = await createWorld();
     const alice = await addUser(world, "alice");
@@ -167,12 +190,12 @@ describe("E2EE engine: features", () => {
     await a.send(g, { text: "report me" });
     await settle(world);
     const message = b.getMessages(g).find((m) => m.text === "report me")!;
-    await b.report(g, message.id, "SPAM", "notes");
+    await b.report(g, message.id, "CREDIBLE_THREAT_OF_VIOLENCE", "notes");
     const [report] = world.ds.state.reports;
     expect(report).toMatchObject({
       verified: true,
       sender_profile_id: "alice",
-      reason: "SPAM",
+      reason: "CREDIBLE_THREAT_OF_VIOLENCE",
     });
     const body = base64ToBytes(report!.body);
     expect(JSON.parse(new TextDecoder().decode(body))).toMatchObject({

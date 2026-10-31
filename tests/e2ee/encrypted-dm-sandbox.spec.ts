@@ -122,13 +122,17 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     });
     await bob.page.getByRole("button", { name: "Close search" }).click();
 
-    // Story 10 (report): the delivery service verifies the sender signature.
+    // Story 10 (report, severe harm only): the delivery service verifies the
+    // sender signature.
     await (await openMessageActions(bob.page, messageRow(bob.page, hello)))
-      .getByRole("menuitem", { name: "Report" })
+      .getByRole("menuitem", { name: "Report illegal or severe harm" })
       .click();
     const reportDialog = bob.page.getByRole("dialog", {
-      name: "Report message",
+      name: "Report illegal or severe harm",
     });
+    await reportDialog
+      .getByRole("radio", { name: "A credible threat of violence" })
+      .check();
     await reportDialog.getByRole("button", { name: "Send report" }).click();
     await expect(reportDialog).toHaveCount(0, { timeout: E2EE_UI_TIMEOUT_MS });
 
@@ -138,6 +142,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
       verified: true,
       sender_profile_id: users.alice.profileId,
       reporter_profile_id: users.bob.profileId,
+      reason: "CREDIBLE_THREAT_OF_VIOLENCE",
     });
 
     // Invariant 1: the server never saw plaintext (reports aside, by design).

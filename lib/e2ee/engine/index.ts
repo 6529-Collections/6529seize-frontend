@@ -307,6 +307,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
   getStatus = () => this.ctx.store.status;
   getError = () => this.ctx.store.error;
   getThisDevice = () => this.ctx.store.thisDevice;
+  getAttachmentsEnabled = () => this.ctx.store.attachmentsEnabled;
   getDevices = () => this.ctx.store.devices;
   getConversations = () => this.ctx.store.getConversations();
   getConversation = (g: string) =>
@@ -447,6 +448,9 @@ class E2eeEngineImpl implements E2eeEngineExt {
     }
   ): Promise<void> {
     this.requireReady();
+    if ((input.files?.length ?? 0) > 0 && !this.ctx.store.attachmentsEnabled) {
+      throw new E2eeError("E2EE_ATTACHMENTS_DISABLED");
+    }
     await queueMessage(this.ctx, g.toLowerCase(), input);
     await this.controller.flush(g.toLowerCase());
   }
