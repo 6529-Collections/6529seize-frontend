@@ -97,6 +97,23 @@ describe("ReMeme page", () => {
     );
   });
 
+  it.each([
+    [{ locale: "fr-FR" }, "fr-FR"],
+    [{}, "en-US"],
+  ])(
+    "declares the language of the page content for search params %j",
+    async (searchParams, lang) => {
+      const resolved = await ReMeme({
+        params: Promise.resolve({ contract: "0x123abc", id: "456" }),
+        searchParams: Promise.resolve(searchParams),
+      });
+
+      render(<TestProvider>{resolved}</TestProvider>);
+
+      expect(await screen.findByRole("main")).toHaveAttribute("lang", lang);
+    }
+  );
+
   it("sets page title on mount", () => {
     const pageProps = {
       contract: "0x123abc",
