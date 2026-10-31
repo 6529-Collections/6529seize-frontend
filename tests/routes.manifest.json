@@ -428,6 +428,10 @@
       "classification": "exempt",
       "exemptReason": "Development-only 6529 Explained kit gallery; production answers 404 and the explained gates render it."
     },
+    "/explained/validators/hardware": {
+      "classification": "crawlable",
+      "family": "info"
+    },
     "/gm-or-die-small-mp4": {
       "classification": "exempt",
       "exemptReason": "Bare media-asset wrapper page, not a user surface."

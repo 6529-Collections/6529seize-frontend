@@ -126,7 +126,17 @@ export const CHAPTERS: readonly ChapterDef[] = [
   TDH,
   coming("memes", "explained.kit.map.memes", "live"),
   coming("waves", "explained.kit.map.waves", "live"),
-  coming("validators", "explained.kit.map.validators", "built"),
+  {
+    // Coming, with one page live: the hardware guide.
+    ...coming("validators", "explained.kit.map.validators", "built"),
+    read: [
+      {
+        id: "hardware",
+        title: "explained.kit.map.validators.hardware",
+        href: "/explained/validators/hardware",
+      },
+    ],
+  },
   coming("nextgen", "explained.kit.map.nextgen", "live"),
   coming("standing", "explained.kit.map.standing", "live"),
   coming("works", "explained.kit.map.works", "built"),
