@@ -164,12 +164,9 @@ export function E2eeRecoveryCodeDialog({
             {t(locale, "e2ee.backup.code.download")}
           </Button>
         </div>
-        <p
-          role="status"
-          className="tw-m-0 tw-min-h-5 tw-text-xs tw-text-iron-400"
-        >
+        <output className="tw-block tw-min-h-5 tw-text-xs tw-text-iron-400">
           {copyKey ? t(locale, copyKey) : null}
-        </p>
+        </output>
         <div className="tw-flex tw-items-start tw-gap-3">
           <input
             id={savedId}

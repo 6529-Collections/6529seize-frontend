@@ -335,9 +335,7 @@ export function E2eeBackupPanel() {
           {t(locale, errorKey)}
         </p>
       ) : null}
-      <p role="status" className="tw-m-0 tw-text-sm tw-text-iron-300">
-        {result}
-      </p>
+      <output className="tw-block tw-text-sm tw-text-iron-300">{result}</output>
       <BackupDialogs
         dialog={dialog}
         manager={manager}

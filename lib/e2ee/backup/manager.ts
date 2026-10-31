@@ -169,7 +169,7 @@ export class E2eeBackupManager {
 
   private update(patch: Partial<E2eeBackupSnapshot>): void {
     this.snapshot = { ...this.snapshot, ...patch };
-    for (const listener of [...this.listeners]) {
+    for (const listener of this.listeners) {
       try {
         listener();
       } catch {

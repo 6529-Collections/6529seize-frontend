@@ -96,17 +96,32 @@ function openDb(factory: IDBFactory): Promise<IDBDatabase> {
 }
 
 class IndexedDbBackupStateStore implements BackupStateStore {
-  private readonly db: Promise<IDBDatabase>;
+  private readonly factory: IDBFactory;
+  private db: Promise<IDBDatabase> | null = null;
 
   constructor(factory: IDBFactory) {
-    this.db = openDb(factory);
+    this.factory = factory;
+  }
+
+  /** Opens the database on first use (and again after a failed open). */
+  private open(): Promise<IDBDatabase> {
+    if (!this.db) {
+      const opening = openDb(this.factory);
+      opening.catch(() => {
+        if (this.db === opening) {
+          this.db = null;
+        }
+      });
+      this.db = opening;
+    }
+    return this.db;
   }
 
   private async run<T>(
     mode: IDBTransactionMode,
     fn: (store: IDBObjectStore) => IDBRequest<T>
   ): Promise<T> {
-    const db = await this.db;
+    const db = await this.open();
     return promisify(fn(db.transaction(STORE, mode).objectStore(STORE)));
   }
 
@@ -133,7 +148,7 @@ let shared: BackupStateStore | null = null;
 /** IndexedDB when available, otherwise memory (state then lasts a session). */
 export function getDefaultBackupStateStore(): BackupStateStore {
   shared ??=
-    typeof globalThis.indexedDB === "undefined"
+    (globalThis.indexedDB as IDBFactory | undefined) === undefined
       ? createMemoryBackupStateStore()
       : new IndexedDbBackupStateStore(globalThis.indexedDB);
   return shared;

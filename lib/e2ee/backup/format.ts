@@ -52,6 +52,8 @@ export function fingerprint(value: unknown): string {
   const text = JSON.stringify(value);
   let h1 = 0xdeadbeef;
   let h2 = 0x41c6ce57;
+  // Hashes UTF-16 code units on purpose: it only has to be deterministic
+  // for the same JSON string, and code units cover every character.
   for (let i = 0; i < text.length; i += 1) {
     const ch = text.charCodeAt(i);
     h1 = Math.imul(h1 ^ ch, 2654435761);
