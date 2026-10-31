@@ -125,6 +125,10 @@ describe("production exact-artifact deployment contract", () => {
     expect(deploySource).not.toContain("NEXT_PUBLIC_ETHEREUM_RPC_URL");
   });
 
+  it("bakes signed messages on into production builds", () => {
+    expect(build.env.NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES).toBe("true");
+  });
+
   it("keeps production manual and deploys only the independently verified artifact", () => {
     expect(deploy.name).toBe("Web Deploy - PROD");
     expect(deploy.on.push).toBeUndefined();
