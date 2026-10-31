@@ -1,11 +1,9 @@
-import { isAddress } from "viem";
 import { getNodeEnv, publicEnv } from "@/config/env";
 import {
   InvalidRoleStateError,
   MissingActiveProfileError,
 } from "@/errors/authentication";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import type { ApiSessionNonceResponse } from "@/generated/models/ApiSessionNonceResponse";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import {
   ConnectionMismatchError,
@@ -20,7 +18,6 @@ import {
   PROFILE_SWITCHED_EVENT,
 } from "@/services/auth/auth.utils";
 import { validateJwt } from "@/services/auth/jwt-validation.utils";
-import { getSessionNonce } from "@/services/auth/session-v2.utils";
 import { logErrorSecurely } from "@/utils/error-sanitizer";
 import { validateRoleForAuthentication } from "@/utils/role-validation";
 import {
@@ -35,15 +32,11 @@ import type {
   RequestAuthOptions,
 } from "./authTypes";
 import {
-  AuthenticationNonceError,
-  InvalidSignerAddressError,
-  NonceResponseValidationError,
-} from "./authErrors";
-import {
   createAuthRequestGuard,
   type AuthRequestGuard,
 } from "./authRequestGuard";
 import { createTimedAbortSignal } from "./authRequestAbortSignal";
+import { getAuthNonce } from "./authNonce";
 import { createAuthRequestSignIn } from "./authRequestSignIn";
 import { createSignedMessagesGrantRequest } from "./authSignedMessagesGrant";
 import type {
@@ -95,67 +88,6 @@ export function createAuthRequestActions({
   signMessage,
   signModalReason,
 }: CreateAuthRequestActionsParams): AuthRequestActions {
-  const getNonce = async ({
-    signerAddress,
-    deviceGrant,
-  }: Parameters<
-    typeof getSessionNonce
-  >[0]): Promise<ApiSessionNonceResponse> => {
-    if (!signerAddress || typeof signerAddress !== "string") {
-      throw new InvalidSignerAddressError(signerAddress);
-    }
-
-    if (!isAddress(signerAddress)) {
-      throw new InvalidSignerAddressError(signerAddress);
-    }
-
-    try {
-      const response = await getSessionNonce({ signerAddress, deviceGrant });
-
-      if (!response) {
-        throw new NonceResponseValidationError(
-          "Nonce API returned null or undefined response"
-        );
-      }
-
-      if (
-        !response.signable_message ||
-        typeof response.signable_message !== "string" ||
-        response.signable_message.length === 0
-      ) {
-        throw new NonceResponseValidationError(
-          "Invalid signable_message in API response",
-          response
-        );
-      }
-
-      if (
-        !response.server_signature ||
-        typeof response.server_signature !== "string" ||
-        response.server_signature.trim().length === 0
-      ) {
-        throw new NonceResponseValidationError(
-          "Invalid server_signature in API response",
-          response
-        );
-      }
-
-      return response;
-    } catch (error) {
-      if (
-        error instanceof NonceResponseValidationError ||
-        error instanceof InvalidSignerAddressError
-      ) {
-        throw error;
-      }
-
-      throw new AuthenticationNonceError(
-        "Failed to obtain authentication nonce from server",
-        error
-      );
-    }
-  };
-
   const getSignature = async ({
     message,
   }: {
@@ -227,7 +159,7 @@ export function createAuthRequestActions({
   };
 
   const requestSignIn = createAuthRequestSignIn({
-    getNonce,
+    getNonce: getAuthNonce,
     getSignature,
     setToast,
   });

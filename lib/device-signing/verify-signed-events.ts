@@ -39,7 +39,7 @@ export type ContractSignatureVerifier = (args: {
  * and attachments are compared by count: requests may reference uploads by id
  * while the drop shows their resolved URLs.
  */
-export interface DisplayedDropContent {
+interface DisplayedDropContent {
   readonly title: string | null;
   readonly parts: readonly {
     readonly content: string | null;
@@ -170,22 +170,48 @@ const CONTENT_KINDS: ReadonlySet<number> = new Set([
   DeviceEventKind.EDIT,
 ]);
 
-/** The grant message commits to exactly the key, scopes and expiry stored. */
+const SITE_DOMAIN = "6529.io";
+
 /**
- * Grants count only when the wallet signed them on a 6529 site: 6529.io, a
- * subdomain, or the site this check runs on (local builds and mirrors).
+ * The host a SIWE domain names, or null unless it is exactly one bare host
+ * (no scheme, path, query, fragment, user info, whitespace or empty label),
+ * so a value such as "evil.example/x.6529.io" can never pass for a 6529 host.
+ */
+function toExactHost(domain: string): string | null {
+  const value = domain.toLowerCase();
+  if (value.split(".").includes("")) {
+    return null;
+  }
+  try {
+    return new URL(`https://${value}`).host === value ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Grants count only when the wallet signed them on a 6529 site: 6529.io or
+ * one of its subdomains (production, staging, previews), without a port, or
+ * exactly the site this check runs on (local builds and mirrors).
  */
 function isAllowedGrantDomain(domain: string): boolean {
-  const host = domain.toLowerCase();
+  const host = toExactHost(domain);
+  if (host === null) {
+    return false;
+  }
   const currentHost =
     typeof globalThis.location === "object"
       ? globalThis.location.host.toLowerCase()
       : "";
+  // An exact host has no path, so a port would end it with ":<port>".
   return (
-    host === "6529.io" || host.endsWith(".6529.io") || host === currentHost
+    host === SITE_DOMAIN ||
+    host.endsWith(`.${SITE_DOMAIN}`) ||
+    host === currentHost
   );
 }
 
+/** The grant message commits to exactly the key, scopes and expiry stored. */
 const isGrantMessageConsistent = (grant: ApiDeviceGrantProof): boolean => {
   if (!same(hashMessage(grant.message), grant.id)) {
     return false;

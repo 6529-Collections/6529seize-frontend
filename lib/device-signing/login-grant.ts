@@ -32,11 +32,35 @@ export interface LoginDeviceGrant {
 const PREPARE_BUDGET_MS = 1500;
 const DEVICE_GRANT_URN_MARKER = "urn:6529:device-grant:";
 
-/** Synchronous gate: flag on, web client and the wallet's own (non-proxy) session. */
+/**
+ * 6529 Desktop runs the site in Electron, which the session client type
+ * reports as web; like 6529 Mobile it keeps the ordinary sign-in.
+ */
+const isDesktopApp = (): boolean =>
+  (globalThis.navigator as Partial<Navigator> | undefined)?.userAgent?.includes(
+    "Electron"
+  ) === true;
+
+/**
+ * Wallets whose automatic grant sign-in did not finish on this page: the
+ * wallet declined or could not sign the grant challenge, or the login failed.
+ * Their next automatic sign-in uses the ordinary challenge, so a wallet that
+ * cannot or will not sign a grant can still sign in. "Turn on signed
+ * messages" (required mode) still asks for a grant.
+ */
+const autoGrantSkippedWallets = new Set<string>();
+
+/** Makes the next automatic sign-in of this wallet an ordinary one. */
+export function skipAutoDeviceGrant(signerAddress: string): void {
+  autoGrantSkippedWallets.add(signerAddress.toLowerCase());
+}
+
+/** Synchronous gate: flag on, the website (not an app) and the wallet's own (non-proxy) session. */
 export const isDeviceGrantPossible = (role: string | null): boolean =>
   role === null &&
   isSignedMessagesEnabled() &&
-  getSessionClientType() === "web";
+  getSessionClientType() === "web" &&
+  !isDesktopApp();
 
 /** Whether this browser session can hold a device key at all. */
 export async function canUseDeviceSigning(): Promise<boolean> {
@@ -74,6 +98,12 @@ export async function prepareLoginDeviceGrant({
   readonly signerAddress: string;
   readonly mode: DeviceGrantMode;
 }): Promise<LoginDeviceGrant | null> {
+  if (
+    mode === "auto" &&
+    autoGrantSkippedWallets.has(signerAddress.toLowerCase())
+  ) {
+    return null;
+  }
   try {
     return await withinTimeBudget(
       prepare(signerAddress, mode),

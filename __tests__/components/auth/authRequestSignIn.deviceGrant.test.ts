@@ -34,6 +34,7 @@ jest.mock("@/services/auth/auth.utils", () => ({
 }));
 
 jest.mock("@/utils/error-sanitizer", () => ({
+  ...jest.requireActual("@/utils/error-sanitizer"),
   logErrorSecurely: jest.fn(),
 }));
 
@@ -62,14 +63,16 @@ const ordinaryMessage = [
   "Expiration Time: 2026-10-12T12:05:00.000Z",
 ].join("\n");
 
-const grantMessage = (deviceKeyHex: string): string => {
+const grantMessage = (deviceKeyHex: string, signer = SIGNER): string => {
   const terms = {
     deviceKeyHex,
     scopes: SCOPES.split(","),
     expiresAtSeconds: Math.floor(Date.now() / 60_000) * 60 + 180 * 24 * 60 * 60,
   };
   return [
-    ...ordinaryMessage.split("\n").slice(0, 3),
+    ...ordinaryMessage.split("\n").slice(0, 1),
+    signer,
+    "",
     renderDeviceGrantStatement(terms),
     ...ordinaryMessage.split("\n").slice(4),
     "Resources:",
@@ -85,18 +88,24 @@ type NonceParams = {
 const createSubject = (
   nonceFor: (params: NonceParams) => string | Promise<string> = (params) =>
     params.deviceGrant
-      ? grantMessage(params.deviceGrant.device_key)
+      ? grantMessage(params.deviceGrant.device_key, params.signerAddress)
       : ordinaryMessage
 ) => {
   const getNonce = jest.fn(async (params: NonceParams) => ({
     signable_message: await nonceFor(params),
     server_signature: "server-signature",
   }));
-  const getSignature = jest.fn(async () => ({
-    signature: "0xsigned",
-    userRejected: false,
-    failureToastShown: false,
-  }));
+  const getSignature = jest.fn(
+    async (): Promise<{
+      signature: string | null;
+      userRejected: boolean;
+      failureToastShown: boolean;
+    }> => ({
+      signature: "0xsigned",
+      userRejected: false,
+      failureToastShown: false,
+    })
+  );
   const setToast = jest.fn();
   const signIn = createAuthRequestSignIn({ getNonce, getSignature, setToast });
   return { getNonce, getSignature, setToast, signIn };
@@ -108,8 +117,16 @@ const flushPromises = async () => {
   }
 };
 
+const ELECTRON_USER_AGENT =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) 6529/1.0.0 Chrome/138.0.0.0 Electron/37.2.0 Safari/537.36";
+
 describe("sign-in with a device grant", () => {
+  let userAgentSpy: jest.SpyInstance | null = null;
   beforeAll(installNodeWebCrypto);
+  afterEach(() => {
+    userAgentSpy?.mockRestore();
+    userAgentSpy = null;
+  });
   beforeEach(() => {
     mockRecords.clear();
     mockEnabled = true;
@@ -172,6 +189,15 @@ describe("sign-in with a device grant", () => {
   it.each([
     ["the flag is off", () => (mockEnabled = false), null],
     ["the client is native", () => (mockClientType = "native"), null],
+    [
+      "running in 6529 Desktop (Electron)",
+      () => {
+        userAgentSpy = jest
+          .spyOn(globalThis.navigator, "userAgent", "get")
+          .mockReturnValue(ELECTRON_USER_AGENT);
+      },
+      null,
+    ],
     ["acting through a proxy role", () => undefined, "proxy-role"],
   ])("signs in exactly as before when %s", async (_case, arrange, role) => {
     arrange();
@@ -275,5 +301,94 @@ describe("sign-in with a device grant", () => {
     expect(renewal.getNonce).toHaveBeenCalledWith(
       expect.objectContaining({ deviceGrant: expect.any(Object) })
     );
+  });
+
+  describe("when a grant sign-in does not finish", () => {
+    // Each case uses its own wallet: the fallback lasts for the page.
+    const walletOf = (digit: string) => `0x${digit.repeat(40)}`;
+    const declined = {
+      signature: null,
+      userRejected: true,
+      failureToastShown: false,
+    };
+
+    const expectOrdinaryNextSignIn = async (
+      subject: ReturnType<typeof createSubject>,
+      signer: string
+    ) => {
+      subject.getNonce.mockClear();
+      subject.getSignature.mockClear();
+      await expect(
+        subject.signIn({ signerAddress: signer, role: null })
+      ).resolves.toEqual({ success: true });
+      expect(subject.getNonce).toHaveBeenCalledTimes(1);
+      expect(subject.getNonce).toHaveBeenCalledWith({ signerAddress: signer });
+      expect(subject.getSignature).toHaveBeenCalledWith({
+        message: ordinaryMessage,
+      });
+      expect(loginMock.mock.calls.at(-1)![0]).not.toHaveProperty("deviceLabel");
+    };
+
+    it.each([
+      ["the wallet declines it", "2", declined],
+      [
+        "the wallet cannot sign it",
+        "3",
+        { signature: null, userRejected: false, failureToastShown: true },
+      ],
+    ])(
+      "signs in with the ordinary challenge next time when %s",
+      async (_case, digit, failure) => {
+        const signer = walletOf(digit);
+        const subject = createSubject();
+        subject.getSignature.mockResolvedValueOnce(failure);
+
+        await expect(
+          subject.signIn({ signerAddress: signer, role: null })
+        ).resolves.toEqual({ success: false });
+        expect(subject.getSignature).toHaveBeenCalledWith({
+          message: grantMessage(mockRecords.get(signer)!.publicKeyHex, signer),
+        });
+
+        await expectOrdinaryNextSignIn(subject, signer);
+      }
+    );
+
+    it("signs in with the ordinary challenge next time when the grant login fails", async () => {
+      const signer = walletOf("4");
+      const subject = createSubject();
+      loginMock.mockRejectedValueOnce(new Error("500 Internal Server Error"));
+
+      await expect(
+        subject.signIn({ signerAddress: signer, role: null })
+      ).resolves.toEqual({ success: false });
+      expect(loginMock).toHaveBeenCalledWith(
+        expect.objectContaining({ deviceLabel: expect.any(String) })
+      );
+
+      await expectOrdinaryNextSignIn(subject, signer);
+    });
+
+    it("still asks for a grant when signed messages are turned on", async () => {
+      const signer = walletOf("5");
+      const subject = createSubject();
+      subject.getSignature.mockResolvedValueOnce(declined);
+      await subject.signIn({ signerAddress: signer, role: null });
+      subject.getNonce.mockClear();
+
+      await expect(
+        subject.signIn({
+          signerAddress: signer,
+          role: null,
+          deviceGrantMode: "required",
+        })
+      ).resolves.toEqual({ success: true });
+      expect(subject.getNonce).toHaveBeenCalledWith(
+        expect.objectContaining({
+          signerAddress: signer,
+          deviceGrant: expect.any(Object),
+        })
+      );
+    });
   });
 });

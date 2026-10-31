@@ -449,7 +449,7 @@ export default function CreateDrop({
   const addDropMutation = useMutation({
     mutationFn: async (body: QueuedDropMutationBody) => {
       if (body.nativeEntrySubmit) return body.nativeEntrySubmit(body.drop);
-      return postDrop(body.drop, { errorMode: "structured" });
+      return await postDrop(body.drop, { errorMode: "structured" });
     },
     onSuccess: (serverDrop, body) => {
       if (body.dropId) {

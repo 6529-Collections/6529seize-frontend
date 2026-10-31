@@ -4,10 +4,12 @@
 
 Signed messages let a browser sign your drops so anyone can check that a post,
 edit, delete, or reaction came from your wallet, without trusting 6529.io.
-Your wallet signs once; that signature lets a key held only by this browser
-sign for you for 180 days. Chat does not change: messages still appear at
-once, there is no wallet prompt per message, and anything that cannot be
-signed is sent unsigned exactly as before.
+The one exception is a contract wallet whose sign-in signature the reader's
+browser cannot check on Ethereum: that step rests on 6529.io's check at
+sign-in. Your wallet signs once; that signature lets a key held only by this
+browser sign for you for 180 days. Chat does not change: messages still
+appear at once, there is no wallet prompt per message, and anything that
+cannot be signed is sent unsigned exactly as before.
 
 Signed messages are currently staged behind the
 `NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES` flag (on for staging, off in
@@ -27,7 +29,9 @@ writes are unchanged.
   wallet sign-in also turns on signed messages for that wallet when the
   browser has no grant (or its grant ends within 14 days). The sign-in
   message then says the browser may post as you until a date, names the
-  device key, and lists what it may do.
+  device key, and lists what it may do. If the wallet declines or cannot
+  sign that message, or the sign-in fails, the next sign-in on the same page
+  uses the ordinary message without a grant.
 - **Turn on signed messages (one signature).** A logged-in user without a
   grant in this browser sees this notice above the composer while the
   composer is empty. **Turn on** asks for one wallet signature. The notice
@@ -57,9 +61,11 @@ writes are unchanged.
 
 ## Devices Tab
 
-**Devices that can post as you** lists every grant of the profile's wallets:
-device label (for example "Chrome on macOS"), a **This device** marker,
-scopes, wallet, when it was added, when it expires (or expired or was
+**Devices that can post as you** lists the grants of the profile's wallets,
+newest first. It shows at most the 100 newest grants, including expired and
+revoked ones, so an older grant can be missing from a long list. Each row
+shows the device label (for example "Chrome on macOS"), a **This device**
+marker, scopes, wallet, when it was added, when it expires (or expired or was
 revoked), when it was last used, and its status (**Active**, **Expired**,
 **Revoked**). **Revoke** asks for confirmation; earlier signatures stay
 verifiable. The tab shows loading, empty (**No device can post as you yet.**)
@@ -72,8 +78,9 @@ The browser checks the profile's grants when a wave opens and at most every
 10 minutes while the tab is visible. When an active grant appears that this
 browser has not seen and that is not one of its own keys, the composer notice
 shows **{label} can now post as you. Not you?** with **Revoke** and a dismiss
-control. The first list a browser sees for a wallet is its baseline, so older
-devices do not raise the alert.
+control. The first list a browser sees for a wallet is its baseline, so a
+grant that already exists then never raises the alert; review the **Devices**
+tab for existing grants.
 
 ## Checking a Drop's Signature
 
@@ -84,17 +91,26 @@ and checks the wallet's sign-in signature on the grant. The dialog shows:
 
 - **Signed by its author** with the wallet, device key fingerprint, grant
   expiry, the wallet-signature check, and whether the current content is the
-  signed version. Contract wallets that cannot be recovered in the browser
-  show **Contract wallet: verified by 6529.io at sign-in**.
+  signed version. A contract wallet whose sign-in signature the browser
+  cannot check on Ethereum shows **Contract wallet: verified by 6529.io at
+  sign-in**, and the description says 6529.io, not the browser, checked that
+  wallet signature.
 - **Not signed by its author** for drops sent without a device signature.
+  Drops whose content moderation hides from you and anonymous competition
+  entries also read this way: their signed events are not shared.
 - **The signature could not be verified** when stored signatures do not
   match.
+- **Couldn't check the signature right now.** with **Try again** when the
+  signed events or the author's wallets cannot be loaded. A temporary failure
+  is never reported as **The signature could not be verified**.
 
 Signed drops carry no badge in the feed.
 
 ## Availability and Edge Cases
 
-- Web only. The native and desktop apps sign in exactly as before.
+- Web only. 6529 Mobile and 6529 Desktop sign in exactly as before.
+- Turning signed messages on never blocks sign-in: a wallet that declines or
+  cannot sign the grant message can sign in again with the ordinary message.
 - Proxy sessions never sign and never request a grant.
 - Browsers without Ed25519 support in WebCrypto never request a grant.
 - Grants are per wallet and per browser; each wallet signed in on a browser
