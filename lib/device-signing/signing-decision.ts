@@ -1,3 +1,5 @@
+import { getNodeEnv } from "@/config/env";
+
 /**
  * When a write that this browser is expected to sign cannot be signed, the
  * write waits here for the user's explicit choice. A single host component
@@ -37,6 +39,21 @@ interface QueuedDecision extends PendingSigningDecision {
   readonly resolve: (decision: SigningDecision) => void;
 }
 
+/**
+ * Thrown when the user cancels a write at a signing prompt, or its request is
+ * aborted while it waits. Nothing was sent, so callers roll back quietly
+ * instead of reporting a failure. Named like a DOM AbortError.
+ */
+export class SignedWriteCancelledError extends Error {
+  constructor() {
+    super("The signed write was cancelled");
+    this.name = "AbortError";
+  }
+}
+
+export const isSignedWriteCancelled = (error: unknown): boolean =>
+  error instanceof SignedWriteCancelledError;
+
 /** Thrown when no prompt host is mounted, so a write never goes unsigned silently. */
 export class SigningDecisionUnavailableError extends Error {
   constructor() {
@@ -49,7 +66,8 @@ let queue: readonly QueuedDecision[] = [];
 /** Stable snapshot of the head of the queue, for useSyncExternalStore. */
 let current: PendingSigningDecision | null = null;
 let nextId = 1;
-let hostCount = 0;
+/** The one host that shows prompts; later hosts stay inert. */
+let activeHostId: string | null = null;
 const listeners = new Set<() => void>();
 
 const emit = () => {
@@ -82,7 +100,7 @@ export function requestSigningDecision(
   request: SigningDecisionRequest,
   signal?: AbortSignal
 ): Promise<SigningDecision> {
-  if (hostCount === 0) {
+  if (activeHostId === null) {
     return Promise.reject(new SigningDecisionUnavailableError());
   }
   if (signal?.aborted) {
@@ -118,15 +136,31 @@ export function subscribeToSigningDecisions(listener: () => void): () => void {
   };
 }
 
-/** Marks a prompt host as mounted for as long as the returned cleanup is not called. */
-export function registerSigningDecisionHost(): () => void {
-  hostCount += 1;
-  let registered = true;
-  return () => {
-    if (!registered) {
-      return;
+/** The id of the host that shows prompts, or null when none is mounted. */
+export function getActiveSigningDecisionHost(): string | null {
+  return activeHostId;
+}
+
+/**
+ * Makes this host the one that shows prompts until the returned cleanup
+ * runs. The first registered host wins: a second host stays inert, so a
+ * prompt never renders in two dialogs.
+ */
+export function registerSigningDecisionHost(hostId: string): () => void {
+  if (activeHostId !== null && activeHostId !== hostId) {
+    if (getNodeEnv() !== "production") {
+      console.warn(
+        "A signed-write prompt host is already mounted; this one stays inert."
+      );
     }
-    registered = false;
-    hostCount -= 1;
+    return () => undefined;
+  }
+  activeHostId = hostId;
+  emit();
+  return () => {
+    if (activeHostId === hostId) {
+      activeHostId = null;
+      emit();
+    }
   };
 }

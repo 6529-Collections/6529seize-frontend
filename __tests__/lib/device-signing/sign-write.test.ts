@@ -141,7 +141,7 @@ let unregisterHost: (() => void) | null = null;
 let unsubscribeHost: (() => void) | null = null;
 
 function mountDecisionHost() {
-  unregisterHost = registerSigningDecisionHost();
+  unregisterHost = registerSigningDecisionHost("test-host");
   unsubscribeHost = subscribeToSigningDecisions(() => {
     const current = getCurrentSigningDecision();
     if (!current || prompts.some((prompt) => prompt.id === current.id)) {

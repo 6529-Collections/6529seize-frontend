@@ -154,6 +154,12 @@ describe("post excerpts in the group list", () => {
     expect(row).not.toHaveTextContent("second");
   });
 
+  it("keeps unclosed brackets as text", () => {
+    expect(
+      excerptOf({ parts: [{ content: "[[a] ![b] [c](d" }] })
+    ).toHaveTextContent("[[a] ![b] [c](d");
+  });
+
   it("shortens long lines", () => {
     const row = excerptOf({ parts: [{ content: "x".repeat(200) }] });
     expect(row).toHaveTextContent(`${"x".repeat(79)}…`);

@@ -22,10 +22,37 @@ export type GroupSignatureDrop = Pick<
   Partial<Pick<ApiDrop, "created_at">>;
 
 const EXCERPT_MAX_LENGTH = 80;
+/** Only the start of a long line can reach the excerpt. */
+const MAX_SCANNED_LINE_LENGTH = 400;
 const TIME_FORMAT: Intl.DateTimeFormatOptions = {
   hour: "numeric",
   minute: "2-digit",
 };
+
+/** Replaces Markdown links with their text and drops images, in one pass. */
+function stripMarkdownLinks(line: string): string {
+  let result = "";
+  let index = 0;
+  while (index < line.length) {
+    const isImage = line.startsWith("![", index);
+    const open = isImage ? index + 1 : index;
+    const close = line[open] === "[" ? line.indexOf("]", open + 1) : -1;
+    const end =
+      close !== -1 && line[close + 1] === "("
+        ? line.indexOf(")", close + 2)
+        : -1;
+    if (end === -1) {
+      result += line.charAt(index);
+      index += 1;
+      continue;
+    }
+    if (!isImage) {
+      result += line.slice(open + 1, close);
+    }
+    index = end + 1;
+  }
+  return result;
+}
 
 /** The first line of a post's title or text, without Markdown syntax. */
 function getDropExcerpt(drop: GroupSignatureDrop): string | null {
@@ -39,9 +66,7 @@ function getDropExcerpt(drop: GroupSignatureDrop): string | null {
   if (!firstLine) {
     return null;
   }
-  const plain = firstLine
-    .replaceAll(/!\[[^\]]*\]\([^)]*\)/g, "")
-    .replaceAll(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+  const plain = stripMarkdownLinks(firstLine.slice(0, MAX_SCANNED_LINE_LENGTH))
     .replaceAll(/^[#>\-*\s]+/g, "")
     .replaceAll(/[*_`~]/g, "")
     .trim();

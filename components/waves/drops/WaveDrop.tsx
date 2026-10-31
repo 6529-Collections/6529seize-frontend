@@ -485,7 +485,8 @@ const WaveDropInner = ({
     showAuthorInfo,
     identityMode,
     drop,
-    signatureGroup,
+    // Profile views show a header on every post; each keeps its own seal.
+    signatureGroup: isProfileView ? undefined : signatureGroup,
     showWaveInfo,
     isStorm,
     activePartIndex,

@@ -7,6 +7,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
+  getActiveSigningDecisionHost,
   getCurrentSigningDecision,
   registerSigningDecisionHost,
   resolveSigningDecision,
@@ -23,7 +24,13 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 const TITLE_KEYS = {
   post: "signedMessages.prompt.title.post",
@@ -112,6 +119,8 @@ function PromptActions({
   readonly compact: boolean;
 }) {
   const grantUnusable = request.reason === "grant-unusable";
+  // Without "Turn on signed messages", sending unsigned is the only way on.
+  const unsignedIsDefault = grantUnusable && !enableThenRetry.canEnable;
   const size = compact ? "sm" : "md";
   return (
     <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">
@@ -127,6 +136,7 @@ function PromptActions({
       <Button
         size={size}
         variant="secondary"
+        data-autofocus={unsignedIsDefault ? true : undefined}
         onClick={() => resolveSigningDecision(request.id, "unsigned")}
       >
         {t(locale, UNSIGNED_KEYS[request.action])}
@@ -254,14 +264,21 @@ function SigningDecisionPrompt({ locale, request }: PromptProps) {
  */
 export default function SignedWriteDecisionHost() {
   const locale = useBrowserLocale();
+  const hostId = useId();
   useDeviceSigningPrewarm();
-  useEffect(() => registerSigningDecisionHost(), []);
+  useEffect(() => registerSigningDecisionHost(hostId), [hostId]);
+  const activeHostId = useSyncExternalStore(
+    subscribeToSigningDecisions,
+    getActiveSigningDecisionHost,
+    () => null
+  );
   const request = useSyncExternalStore(
     subscribeToSigningDecisions,
     getCurrentSigningDecision,
     () => null
   );
-  if (!request) {
+  // Only the first mounted host shows prompts.
+  if (activeHostId !== hostId || !request) {
     return null;
   }
   return (

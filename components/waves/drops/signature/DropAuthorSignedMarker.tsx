@@ -100,10 +100,13 @@ function SignedSealButton({
           <span className="tw-text-xs">{label}</span>
         </Tooltip>
       )}
+      {/* Not a control: it only keeps the dialog's events inside. Escape
+          and other keys still bubble, so the dialog's own listeners work. */}
       <span
+        role="presentation"
         className="tw-contents"
         onClick={stopBubbling}
-        onKeyDown={stopBubbling}
+        onKeyDown={stopActivationKeys}
         onPointerDown={stopBubbling}
         onTouchStart={stopBubbling}
       >

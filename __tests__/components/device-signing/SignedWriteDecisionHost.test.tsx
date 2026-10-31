@@ -40,6 +40,24 @@ describe("SignedWriteDecisionHost", () => {
     expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
   });
 
+  it("renders prompts in only one host when two are mounted", async () => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+    const user = userEvent.setup();
+    render(
+      <>
+        <SignedWriteDecisionHost />
+        <SignedWriteDecisionHost />
+      </>
+    );
+    expect(warn).toHaveBeenCalledTimes(1);
+    const decision = ask({ action: "post", reason: "timeout" });
+
+    expect(await screen.findAllByRole("alertdialog")).toHaveLength(1);
+    await user.click(screen.getByRole("button", { name: "Try again" }));
+    await expect(decision).resolves.toBe("retry");
+    warn.mockRestore();
+  });
+
   it("asks before a post goes unsigned and resolves the user's choice", async () => {
     const user = userEvent.setup();
     render(<SignedWriteDecisionHost />);
@@ -155,7 +173,7 @@ describe("SignedWriteDecisionHost", () => {
     await expect(decision).resolves.toBe("unsigned");
   });
 
-  it("offers only the unsigned choice when signed messages cannot be turned on here", async () => {
+  it("offers only the unsigned choice, focused, when signed messages cannot be turned on here", async () => {
     mockCanEnable = false;
     render(<SignedWriteDecisionHost />);
     void ask({ action: "post", reason: "grant-unusable" });
@@ -164,7 +182,11 @@ describe("SignedWriteDecisionHost", () => {
     expect(
       screen.queryByRole("button", { name: "Turn on signed messages" })
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Send unsigned" })).toBeVisible();
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Send unsigned" })
+      ).toHaveFocus()
+    );
     act(() => {
       screen.getByRole("button", { name: "Send unsigned" }).click();
     });

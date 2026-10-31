@@ -32,6 +32,7 @@ import {
 } from "./interim-event";
 import {
   requestSigningDecision,
+  SignedWriteCancelledError,
   type SignedWriteAction,
   type SigningFailureReason,
 } from "./signing-decision";
@@ -370,8 +371,8 @@ function getSignatureRejection(error: unknown): SignatureRejection | null {
   return { kind: "rejected", grantUnusable: isGrantUnusable(reason) };
 }
 
-const abortError = (): DOMException =>
-  new DOMException("The signed write was cancelled", "AbortError");
+const abortError = (): SignedWriteCancelledError =>
+  new SignedWriteCancelledError();
 
 /**
  * Asks the user how to continue after a signing failure. Resolves true to

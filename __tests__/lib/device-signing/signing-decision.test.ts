@@ -4,6 +4,7 @@ import {
   writeDeviceGrantHint,
 } from "@/lib/device-signing/grant-hint";
 import {
+  getActiveSigningDecisionHost,
   getCurrentSigningDecision,
   registerSigningDecisionHost,
   requestSigningDecision,
@@ -15,7 +16,7 @@ import {
 describe("signing decisions", () => {
   let unregister: () => void = () => undefined;
   beforeEach(() => {
-    unregister = registerSigningDecisionHost();
+    unregister = registerSigningDecisionHost("host-1");
   });
   afterEach(() => {
     for (
@@ -35,7 +36,30 @@ describe("signing decisions", () => {
     ).rejects.toBeInstanceOf(SigningDecisionUnavailableError);
     // Unregistering twice is harmless.
     unregister();
-    unregister = registerSigningDecisionHost();
+    unregister = registerSigningDecisionHost("host-1");
+  });
+
+  it("lets only the first host show prompts; later hosts stay inert", async () => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+    const unregisterSecond = registerSigningDecisionHost("host-2");
+
+    expect(getActiveSigningDecisionHost()).toBe("host-1");
+    expect(warn).toHaveBeenCalledTimes(1);
+    // The inert host's cleanup does not unregister the active one.
+    unregisterSecond();
+    expect(getActiveSigningDecisionHost()).toBe("host-1");
+
+    // Registering the active host again (React StrictMode) is harmless.
+    registerSigningDecisionHost("host-1");
+    expect(warn).toHaveBeenCalledTimes(1);
+
+    unregister();
+    expect(getActiveSigningDecisionHost()).toBeNull();
+    await expect(
+      requestSigningDecision({ action: "react", reason: "timeout" })
+    ).rejects.toBeInstanceOf(SigningDecisionUnavailableError);
+    unregister = registerSigningDecisionHost("host-1");
+    warn.mockRestore();
   });
 
   it("queues prompts in order with a stable snapshot and notifies listeners", async () => {

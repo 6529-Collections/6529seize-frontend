@@ -65,6 +65,9 @@ interface DropsListProps {
   readonly moderationPresentation?: "default" | "profile-activity" | undefined;
 }
 
+const NO_SIGNATURE_GROUPS: ReturnType<typeof getDropSignatureGroups> =
+  new Map();
+
 const MemoizedDrop = memo(Drop);
 const MemoizedLightDrop = memo(LightDrop);
 const DropsList = memo(
@@ -113,10 +116,14 @@ const DropsList = memo(
       return drops;
     }, [drops, location]);
 
-    // Chat headers seal their whole group of consecutive posts.
+    // Chat headers seal their whole group of consecutive posts. Profile views
+    // show a header on every post, so each keeps its own seal there.
     const signatureGroups = useMemo(
-      () => getDropSignatureGroups(orderedDrops),
-      [orderedDrops]
+      () =>
+        location === DropLocation.PROFILE
+          ? NO_SIGNATURE_GROUPS
+          : getDropSignatureGroups(orderedDrops),
+      [location, orderedDrops]
     );
 
     // Memoize the props passed to each MemoizedDrop to prevent unnecessary renders

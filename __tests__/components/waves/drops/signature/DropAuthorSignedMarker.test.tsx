@@ -193,9 +193,25 @@ describe("drop author signed marker", () => {
     expect(
       screen.getByRole("dialog", { name: "Signature" })
     ).toBeInTheDocument();
-    // Activating the dialog's own controls does not reach the card either.
-    await user.click(screen.getByRole("button", { name: "Close" }));
     expect(onCardKeyDown).not.toHaveBeenCalled();
+
+    // Enter and clicks on the dialog's own controls stay inside the dialog,
+    // while Escape still bubbles to window listeners (Headless UI closes on
+    // it there).
+    const close = screen.getByRole("button", { name: "Close" });
+    const onWindowKeyDown = jest.fn();
+    globalThis.addEventListener("keydown", onWindowKeyDown);
+    close.focus();
+    await user.keyboard("{Escape}");
+    globalThis.removeEventListener("keydown", onWindowKeyDown);
+    expect(onWindowKeyDown).toHaveBeenCalledWith(
+      expect.objectContaining({ key: "Escape" })
+    );
+    close.focus();
+    await user.keyboard("{Enter}");
+    expect(onCardKeyDown).not.toHaveBeenCalledWith(
+      expect.objectContaining({ key: "Enter" })
+    );
     expect(onCardClick).not.toHaveBeenCalled();
   });
 
