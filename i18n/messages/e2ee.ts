@@ -32,6 +32,8 @@ export const E2EE_MESSAGES = {
     "Something went wrong while loading encrypted messages on this device.",
   "e2ee.gate.error.code": "Error code: {code}",
   "e2ee.enroll.identity": "You’ll sign as {name} with {wallet}.",
+  "e2ee.enroll.identityUnknown":
+    "You’ll sign with the wallet connected to this profile.",
   "e2ee.enroll.manage":
     "You can turn this device off at any time from the Devices page in encrypted messages.",
   "e2ee.gate.noWallet":
@@ -58,6 +60,7 @@ export const E2EE_MESSAGES = {
   "e2ee.deviceLimit.title": "Too many devices",
   "e2ee.deviceLimit.body":
     "Your profile already has the maximum of {max} devices for encrypted messages. On a device you already use, open Devices and revoke one you no longer need, then turn on this device.",
+  "e2ee.deviceLimit.listTitle": "Devices on your profile",
   "e2ee.deviceLimit.signature":
     "Turning on this device is one wallet signature. It moves no funds and costs nothing.",
   "e2ee.deviceLimit.retry": "Turn on this device",
@@ -193,6 +196,7 @@ export const E2EE_MESSAGES = {
   "e2ee.conversation.day.today": "Today",
   "e2ee.conversation.day.yesterday": "Yesterday",
   "e2ee.conversation.jumpToLatest": "New messages",
+  "e2ee.conversation.skipToComposer": "Skip to message composer",
   "e2ee.conversation.timelineLabel": "Messages",
   "e2ee.conversation.newMessage": "New message from {name}",
   "e2ee.conversation.titleMore": "{names} and {count} more",
@@ -231,8 +235,8 @@ export const E2EE_MESSAGES = {
   "e2ee.message.edit": "Edit",
   "e2ee.message.delete": "Delete",
   "e2ee.message.report": "Report illegal or severe harm",
-  "e2ee.message.mute": "Mute this chat",
-  "e2ee.message.unmute": "Unmute this chat",
+  "e2ee.message.mute": "Mute on this device",
+  "e2ee.message.unmute": "Unmute on this device",
   "e2ee.message.block": "Block {name}",
   "e2ee.message.messageSettings": "Choose who can message you",
   "e2ee.message.deleteConfirmTitle": "Delete this message?",

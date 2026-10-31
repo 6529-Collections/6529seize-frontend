@@ -357,6 +357,8 @@ interface E2eeComposerProps {
   /** Server switch: without it there is no attach control at all. */
   readonly attachmentsEnabled: boolean;
   /** A refused message whose text goes back into the box once. */
+  /** Id for the textarea, so a skip link can move focus to it. */
+  readonly inputId?: string | undefined;
   readonly restoredDraft?:
     | { readonly id: string; readonly text: string }
     | null
@@ -407,9 +409,11 @@ export function E2eeComposer({
   disabledReasonKey,
   attachmentsEnabled,
   restoredDraft = null,
+  inputId,
 }: E2eeComposerProps) {
   const locale = useBrowserLocale();
   const listboxId = useId();
+  const textareaId = inputId ?? `${listboxId}-input`;
   const hintId = useId();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -624,11 +628,11 @@ export function E2eeComposer({
             </button>
           </>
         )}
-        <label className="tw-sr-only" htmlFor={`${listboxId}-input`}>
+        <label className="tw-sr-only" htmlFor={textareaId}>
           {t(locale, "e2ee.composer.label")}
         </label>
         <textarea
-          id={`${listboxId}-input`}
+          id={textareaId}
           ref={textareaRef}
           rows={1}
           value={text}

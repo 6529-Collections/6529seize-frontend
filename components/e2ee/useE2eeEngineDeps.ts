@@ -12,6 +12,7 @@ import {
   createE2eeSignatureRejectedError,
   isE2eeSignatureRejection,
 } from "./e2eeErrors";
+import { getE2eeDeviceLabel } from "./e2eeDeviceLabel";
 import { detectE2eePlatform, getE2eeGrantOrigin } from "./e2eePlatform";
 import { resolveE2eeProfiles } from "./e2eeProfiles";
 import { getE2eeTestSigner } from "./e2eeTestSigner";
@@ -135,6 +136,7 @@ export function useE2eeEngineDeps(): (
       wallet,
       origin: getE2eeGrantOrigin(platform),
       platform,
+      deviceLabel: getE2eeDeviceLabel(platform),
       api,
       signTypedData: (typedData) =>
         signE2eeTypedData(latest.current.signTypedDataAsync, typedData),

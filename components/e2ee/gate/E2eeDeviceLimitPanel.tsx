@@ -57,9 +57,14 @@ export function E2eeDeviceLimitPanel({
           })}
         </p>
       </div>
-      {/* Without a loaded list, the body copy points to another device. */}
       {devices.length > 0 ? (
-        <E2eeDeviceList devices={devices} engine={engine} />
+        <section className="tw-flex tw-flex-col tw-gap-2">
+          <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-200">
+            {t(locale, "e2ee.deviceLimit.listTitle")}
+          </h3>
+          {/* Revoking is signed by an active device, so it happens there. */}
+          <E2eeDeviceList devices={devices} engine={null} />
+        </section>
       ) : null}
       <p className="tw-m-0 tw-text-xs tw-text-iron-400">
         {t(locale, "e2ee.deviceLimit.signature")}

@@ -25,19 +25,30 @@ export function E2eeEnrollmentIdentity() {
   if (!address) {
     return null;
   }
-  const checksummed = isAddress(address) ? getAddress(address) : address;
-  const shortWallet = shortenAddress(checksummed);
-  const name = connectedProfile?.handle ?? shortWallet;
+  // Never echo unvalidated input: an unexpected value gets neutral copy.
+  const checksummed = isAddress(address) ? getAddress(address) : null;
+  const shortWallet = checksummed ? shortenAddress(checksummed) : null;
+  const handle = connectedProfile?.handle ?? null;
+  let identity: string;
+  if (shortWallet) {
+    identity = t(locale, "e2ee.enroll.identity", {
+      name: handle ?? shortWallet,
+      wallet: shortWallet,
+    });
+  } else {
+    identity = t(locale, "e2ee.enroll.identityUnknown");
+  }
   return (
     <ul className="tw-m-0 tw-mt-4 tw-flex tw-list-none tw-flex-col tw-gap-2 tw-rounded-lg tw-bg-white/[0.03] tw-p-3 tw-text-xs tw-leading-5 tw-text-iron-300">
-      <li className="tw-flex tw-items-start tw-gap-2" title={checksummed}>
+      <li
+        className="tw-flex tw-items-start tw-gap-2"
+        title={checksummed ?? undefined}
+      >
         <UserCircleIcon
           aria-hidden="true"
           className="tw-mt-0.5 tw-size-4 tw-flex-shrink-0 tw-text-iron-400"
         />
-        <span>
-          {t(locale, "e2ee.enroll.identity", { name, wallet: shortWallet })}
-        </span>
+        <span>{identity}</span>
       </li>
       <li className="tw-flex tw-items-start tw-gap-2">
         <WrenchScrewdriverIcon

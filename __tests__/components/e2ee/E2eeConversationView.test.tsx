@@ -20,6 +20,7 @@ import {
   message,
   SELF_ID,
 } from "./fakeE2eeEngine";
+import { SPLIT_VIEW_BANNER } from "../../../tests/support/e2ee/e2eeCopy";
 
 // jsdom has no element scrolling.
 Element.prototype.scrollTo = jest.fn();
@@ -113,6 +114,15 @@ describe("E2eeConversationView", () => {
     expect(
       screen.getByRole("button", { name: "Chat info" })
     ).toBeInTheDocument();
+  });
+
+  it("offers one keyboard stop from above the timeline to the composer", () => {
+    renderView();
+    const skip = screen.getByRole("button", {
+      name: "Skip to message composer",
+    });
+    fireEvent.click(skip);
+    expect(screen.getByLabelText("Encrypted message")).toHaveFocus();
   });
 
   it("renders messages, notices and message states", () => {
@@ -278,8 +288,8 @@ describe("E2eeConversationView", () => {
     );
     const at = (label: string) =>
       items.findIndex((text) => text?.includes(label));
-    expect(at("Mute this chat")).toBeGreaterThanOrEqual(0);
-    expect(at("Block alice")).toBeGreaterThan(at("Mute this chat"));
+    expect(at("Mute on this device")).toBeGreaterThanOrEqual(0);
+    expect(at("Block alice")).toBeGreaterThan(at("Mute on this device"));
     expect(at("Choose who can message you")).toBeGreaterThan(at("Block alice"));
     expect(at("Report illegal or severe harm")).toBeGreaterThan(
       at("Choose who can message you")
@@ -302,14 +312,14 @@ describe("E2eeConversationView", () => {
       screen.getAllByRole("button", { name: "Message actions" })[0]!
     );
     fireEvent.click(
-      await screen.findByRole("menuitem", { name: "Mute this chat" })
+      await screen.findByRole("menuitem", { name: "Mute on this device" })
     );
     expect(mutedChats()).toEqual([GROUP_G]);
     fireEvent.click(
       screen.getAllByRole("button", { name: "Message actions" })[0]!
     );
     fireEvent.click(
-      await screen.findByRole("menuitem", { name: "Unmute this chat" })
+      await screen.findByRole("menuitem", { name: "Unmute on this device" })
     );
     expect(mutedChats()).toEqual([]);
   });
@@ -348,11 +358,7 @@ describe("E2eeConversationView", () => {
 
   it("alerts on a possible split view and opens safety codes", async () => {
     renderView(conversation({ splitView: true }));
-    expect(
-      screen.getByText(
-        "Security check needed: this device may not see the same chat as everyone else. Compare safety codes before sharing anything sensitive."
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByText(SPLIT_VIEW_BANNER)).toBeInTheDocument();
     fireEvent.click(
       screen.getByRole("button", { name: "Compare safety codes" })
     );

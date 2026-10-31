@@ -204,6 +204,8 @@ export interface E2eeEngineDeps {
   wallet: string; // active profile + its connected wallet
   origin: string; // grant origin (2.1)
   platform: "web" | "desktop" | "phone";
+  /** Name for a new device, e.g. "Chrome on Windows" (default "Device"). */
+  deviceLabel?: string;
   signTypedData: (td: {
     domain: object;
     types: object;
