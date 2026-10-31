@@ -10,6 +10,9 @@ import explainedHubMessages from "@/i18n/messages/explainedHub.fr-FR.json";
 import explainedTdhOverviewMessages from "@/i18n/messages/explainedTdhOverview.fr-FR.json";
 import explainedTdhCheckMessages from "@/i18n/messages/explainedTdhCheck.fr-FR.json";
 import explainedTdhDayMessages from "@/i18n/messages/explainedTdhDay.fr-FR.json";
+import explainedTdhHowMessages from "@/i18n/messages/explainedTdhHow.fr-FR.json";
+import explainedTdhWalletsMessages from "@/i18n/messages/explainedTdhWallets.fr-FR.json";
+import explainedTdhDesignMessages from "@/i18n/messages/explainedTdhDesign.fr-FR.json";
 import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.fr-FR.json";
 import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.fr-FR.json";
 import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.fr-FR.json";
@@ -57,6 +60,9 @@ export const FR_FR_MESSAGES = {
   ...explainedTdhOverviewMessages,
   ...explainedTdhCheckMessages,
   ...explainedTdhDayMessages,
+  ...explainedTdhHowMessages,
+  ...explainedTdhWalletsMessages,
+  ...explainedTdhDesignMessages,
   ...profileCmsStudioMessages,
   ...profileCmsAgentMessages,
   ...studioTemplateDescriptions,

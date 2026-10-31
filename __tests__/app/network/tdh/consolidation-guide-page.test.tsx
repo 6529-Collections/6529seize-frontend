@@ -1,88 +1,155 @@
-jest.mock("@/hooks/useConsolidationPolicy", () => ({
-  useConsolidationPolicy: () => ({
-    limits: { maxWallets: 4, ungatedMaxWallets: 3 },
-    policy: {
-      activationMs: Date.parse("2026-10-12T00:00:00Z"),
-      signingOpensMs: Date.parse("2026-10-12T00:10:00Z"),
-    },
-  }),
-}));
-import TDHConsolidationPage from "@/app/network/tdh/consolidation/page.client";
-import { generateMetadata } from "@/app/network/tdh/consolidation/page";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import TdhYourWalletsPage, {
+  generateMetadata,
+} from "@/app/network/tdh/consolidation/page";
+import { createFactBook } from "@/lib/explained/facts";
+import { fixtureFactInputs } from "@/lib/explained/fixtureInputs";
 
-jest.mock("@/components/about/AboutContentsDropdown", () => ({
-  AboutContentsDropdown: () => <div data-testid="contents-dropdown" />,
-}));
-
-jest.mock("@/contexts/TitleContext", () => ({
-  useSetTitle: jest.fn(),
+/**
+ * 2 Your wallets (TDH-DESIGN.md §4.3, §5.8, §5.9): why a number changed
+ * first, the four-wallet rule with its model, the safe way to add a fourth
+ * wallet, and every anchor of the old consolidation guide.
+ */
+jest.mock("@/lib/explained/feed.server", () => ({
+  loadFactBook: async () => createFactBook(fixtureFactInputs()),
 }));
 
-describe("TDHConsolidationPage (collector's guide)", () => {
-  it("leads with the benefit and the guided setup", () => {
-    render(<TDHConsolidationPage />);
+async function renderPage(locale?: string) {
+  return render(
+    await TdhYourWalletsPage({
+      searchParams: Promise.resolve(locale ? { locale } : {}),
+    })
+  );
+}
 
+describe("Your wallets", () => {
+  it("opens on the rule, decided and live, with the guided setup", async () => {
+    await renderPage();
     expect(
-      screen.getByRole("heading", { level: 1, name: "Combine your wallets" })
-    ).toBeInTheDocument();
-    const setupLinks = screen.getAllByRole("link", {
-      name: /Start guided setup/,
-    });
-    expect(setupLinks.length).toBeGreaterThan(0);
-    for (const link of setupLinks) {
-      expect(link).toHaveAttribute(
-        "href",
-        "/safe-collecting/build-consolidation"
-      );
-    }
-    expect(
-      screen.getByRole("figure", {
-        name: "Your wallets count as one collector",
+      screen.getByRole("heading", {
+        level: 1,
+        name: "Up to four wallets count as one collector.",
       })
     ).toBeInTheDocument();
-    // One plain status line: what 6529.io accepts and what TDH-v1 allows,
-    // pending the owner's decision; nothing more.
+    expect(document.querySelector("[data-ex-lede]")).toHaveTextContent(
+      "a fourth needs fresh links, made from October 15, 2026."
+    );
     expect(
-      screen.getByText(
-        /a fourth for links signed from October 12, 2026.*TDH-v1 allows three; whether it allows four is pending an owner decision/
-      )
-    ).toBeInTheDocument();
-  });
-
-  it("explains the benefits, the wallet roles and the steps in plain words", () => {
-    render(<TDHConsolidationPage />);
-
-    for (const heading of [
-      "Your vault stays cold",
-      "Your TDH adds up",
-      "Sets count across wallets",
-      "Keep the TDH of old wallets",
-      "List your wallets",
-      "Follow the signing steps",
+      screen.getByRole("link", { name: "Start guided setup" })
+    ).toHaveAttribute("href", "/safe-collecting/build-consolidation");
+    expect(
+      screen.getAllByRole("link", { name: "Explain my TDH" })[0]
+    ).toHaveAttribute("href", "/network/tdh#explain");
+    for (const id of [
+      "why",
+      "four",
+      "add",
+      "before",
+      "faq",
+      "consolidation-status",
+      "consolidation-benefits",
+      "consolidation-wallets",
+      "consolidation-steps",
+      "consolidation-before",
+      "consolidation-change",
+      "consolidation-faq",
+      "consolidation-under",
     ]) {
-      expect(
-        screen.getByRole("heading", { level: 3, name: heading })
-      ).toBeInTheDocument();
+      expect(document.getElementById(id)).not.toBeNull();
     }
-    expect(screen.getAllByText("Transaction wallet").length).toBeGreaterThan(0);
-    expect(screen.queryByText(/use case 999/)).not.toBeInTheDocument();
-    expect(screen.queryByText(/batchDelegations/)).not.toBeInTheDocument();
   });
 
-  it("links to the technical design page", () => {
-    render(<TDHConsolidationPage />);
-
+  it("answers one cause at a time: a move, by default, with its picture", async () => {
+    const user = userEvent.setup();
+    await renderPage();
+    const why = document.getElementById("why")!;
+    const answer = (key: string) =>
+      why.querySelector<HTMLElement>(`[data-ans="${key}"]`)!;
+    expect(answer("moved")).toBeVisible();
+    expect(answer("added")).not.toBeVisible();
     expect(
-      screen.getByRole("link", {
-        name: /^How consolidation works(?! in TDH-v1)/,
+      within(answer("moved")).getByRole("img", {
+        name: "A linked with B, B linked with C, but A and C not linked: B + C; A alone.",
+      })
+    ).toBeInTheDocument();
+    await user.click(
+      within(why).getByRole("button", { name: "I added a wallet" })
+    );
+    expect(answer("added")).toBeVisible();
+    expect(answer("moved")).not.toBeVisible();
+    expect(
+      within(answer("added")).getByRole("link", { name: "how" })
+    ).toHaveAttribute("href", "#add");
+  });
+
+  it("groups wallets with the engine, and Break it links a fifth", async () => {
+    const user = userEvent.setup();
+    await renderPage();
+    const model = document.querySelector<HTMLElement>('[data-lens="wallets"]')!;
+    const groups = () =>
+      model.querySelector("[data-readout-groups]")?.textContent;
+    expect(groups()).toBe("B + C; A alone");
+    const preset = (value: string) =>
+      model.querySelector<HTMLElement>(`[data-preset="${value}"]`)!;
+    await user.click(preset("step1"));
+    expect(groups()).toBe("A + D, B + C");
+    expect(model).toHaveTextContent("The three are split");
+    await user.click(preset("step2"));
+    expect(groups()).toBe("A + B + D; C alone");
+    await user.click(preset("batch"));
+    expect(groups()).toBe("A + B + C + D");
+    expect(model).toHaveTextContent("No split.");
+    await user.click(preset("oldfour"));
+    expect(model).toHaveTextContent("Only three count together.");
+    const breakIt = model.querySelector<HTMLElement>('[data-break="five"]')!;
+    await user.click(breakIt);
+    expect(groups()).toBe("B + C + D + E; A alone");
+    expect(model).toHaveAttribute("data-broken", "1");
+    expect(
+      model.querySelector('[data-wallet="A"] circle')?.getAttribute("stroke")
+    ).toBe("#F97066");
+    await user.click(breakIt);
+    expect(model).toHaveAttribute("data-broken", "0");
+    expect(model).toHaveTextContent("Only three count together.");
+  });
+
+  it("shows the safe order and the cost, and keeps closed answers out of view", async () => {
+    await renderPage();
+    const add = document.getElementById("add")!;
+    expect(
+      within(add).getByRole("figure", { name: "The safe signing order" })
+    ).toHaveTextContent("D → A, B, C");
+    expect(add).toHaveTextContent(
+      "Four transactions, each with a normal network fee"
+    );
+    const faq = document.getElementById("faq")!;
+    const details = faq.querySelectorAll("details");
+    expect(details).toHaveLength(5);
+    expect(details[0]).toHaveAttribute("open");
+    expect(details[2]).toHaveTextContent(
+      "I set up four wallets before Oct 15."
+    );
+    expect(
+      within(faq).getByRole("link", {
+        name: "Under the hood: why every pair must link both ways",
       })
     ).toHaveAttribute("href", "/network/tdh/consolidation/design");
   });
 
-  it("describes the guide in its metadata", () => {
-    const metadata = generateMetadata();
-    expect(metadata.title).toContain("Combine your wallets");
-    expect(JSON.stringify(metadata)).toContain("/network/tdh/consolidation");
+  it("renders in French", async () => {
+    await renderPage("fr-FR");
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: "Jusqu'à quatre wallets comptent pour un seul collectionneur.",
+      })
+    ).toBeInTheDocument();
+  });
+
+  it("sets its metadata", () => {
+    expect(generateMetadata()).toMatchObject({
+      title: expect.stringContaining("Your wallets"),
+    });
   });
 });

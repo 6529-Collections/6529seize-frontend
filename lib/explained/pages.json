@@ -64,8 +64,8 @@
       "lane": "P2",
       "sources": ["app/network/tdh/how-it-works/**"],
       "dependsOn": ["D89", "D131", "D132", "D136"],
-      "checkedThrough": "D141",
-      "budget": { "words": 1100, "firstScreen": 120, "figuresPer1000": 6 },
+      "checkedThrough": "D142",
+      "budget": { "words": 1800, "firstScreen": 120, "figuresPer1000": 6 },
       "states": [
         {
           "name": "firstday-2359",
@@ -79,18 +79,43 @@
         },
         {
           "name": "rates-break-152",
-          "clicks": ["[data-break=\"mint152\"]"],
+          "clicks": ["[data-break=\"floor\"]"],
           "el": "[data-lens=\"rates\"]"
         },
         {
           "name": "boost-break-sixth",
-          "clicks": ["[data-break=\"grad6\"]"],
+          "clicks": ["[data-break=\"gradient\"]"],
           "el": "[data-lens=\"boost\"]"
         },
         {
           "name": "netting-break-mintburn",
           "clicks": ["[data-break=\"mintburn\"]"],
           "el": "[data-lens=\"netting\"]"
+        },
+        {
+          "name": "eligible-break-mintearly",
+          "clicks": ["[data-break=\"mintearly\"]"],
+          "el": "[data-lens=\"eligible\"]"
+        },
+        {
+          "name": "stacks-sell",
+          "clicks": ["[data-act=\"sell\"]"],
+          "el": "[data-lens=\"stacks\"]"
+        },
+        {
+          "name": "stacks-break-movesell",
+          "clicks": ["[data-break=\"movesell\"]"],
+          "el": "[data-lens=\"stacks\"]"
+        },
+        {
+          "name": "identity-break-oneway",
+          "clicks": ["[data-break=\"oneway\"]"],
+          "el": "[data-lens=\"identity\"]"
+        },
+        {
+          "name": "totals-break-wallets",
+          "clicks": ["[data-break=\"wallets\"]"],
+          "el": "[data-lens=\"totals\"]"
         }
       ]
     },
@@ -103,7 +128,7 @@
       "lane": "P2",
       "sources": ["app/network/tdh/consolidation/*"],
       "dependsOn": ["D136"],
-      "checkedThrough": "D141",
+      "checkedThrough": "D142",
       "budget": { "words": 900, "firstScreen": 130, "figuresPer1000": 3 },
       "states": [
         {
@@ -244,8 +269,19 @@
       "lane": "P2",
       "sources": ["app/network/tdh/consolidation/design/**"],
       "dependsOn": ["D136"],
-      "checkedThrough": "D141",
-      "states": []
+      "checkedThrough": "D142",
+      "states": [
+        {
+          "name": "order-step1-split",
+          "clicks": ["[data-preset=\"step1\"]"],
+          "el": "[data-lens=\"wallets\"]"
+        },
+        {
+          "name": "order-break-five",
+          "clicks": ["[data-break=\"five\"]"],
+          "el": "[data-lens=\"wallets\"]"
+        }
+      ]
     },
     {
       "id": "tdh-versions",

@@ -7,6 +7,7 @@ import {
   loadVerificationDay,
   loadVerificationIndex,
 } from "@/lib/tdh/verification/loadVerification.server";
+import { REGISTRY_V14 } from "@/components/explained/engine/tdh";
 import { ENGINE } from "./engine";
 import {
   RECORD,
@@ -102,12 +103,89 @@ interface EditionsPage {
     readonly id?: unknown;
     readonly season?: unknown;
     readonly edition_size?: unknown;
+    readonly edition_size_floor?: unknown;
   }[];
+}
+
+interface NftsPage {
+  readonly next?: string | null;
+  readonly data?: readonly {
+    readonly id?: unknown;
+    readonly mint_date?: unknown;
+  }[];
+}
+
+/** "2026-10-16T09:06:23Z": an instant as the facts layer writes it. */
+function isoSeconds(value: string): string | null {
+  const time = Date.parse(value);
+  return Number.isNaN(time)
+    ? null
+    : new Date(time).toISOString().replace(/\.\d{3}Z$/, "Z");
+}
+
+/**
+ * Each Meme's first mint (`meme.N.firstMint`), from 6529.io's `nfts` for
+ * The Memes' contract. A page that cannot be read leaves the rest unknown:
+ * those cards' first mints are unavailable, never guessed.
+ */
+export async function loadFirstMints(): Promise<ReadonlyMap<number, string>> {
+  const mints = new Map<number, string>();
+  try {
+    for (let page = 1; page <= EDITIONS_MAX_PAGES; page += 1) {
+      const url = `${publicEnv.API_ENDPOINT}/api/nfts?contract=${REGISTRY_V14.memes}&page_size=${EDITIONS_PAGE_SIZE}&page=${page}`;
+      const response = await fetch(url, {
+        headers: { accept: "application/json" },
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+        next: { revalidate: EDITIONS_REVALIDATE_SECONDS },
+      } as RequestInit);
+      if (!response.ok) {
+        break;
+      }
+      const body = (await response.json()) as NftsPage;
+      for (const row of body.data ?? []) {
+        const at =
+          typeof row.mint_date === "string" ? isoSeconds(row.mint_date) : null;
+        if (typeof row.id === "number" && at !== null) {
+          mints.set(row.id, at);
+        }
+      }
+      if (!body.next) {
+        break;
+      }
+    }
+  } catch {
+    // Whatever was read stands; the rest stays unknown.
+  }
+  return mints;
+}
+
+/**
+ * One card from 6529.io's `memes_extended_data`. `edition_size` counts the
+ * copies that exist now; `edition_size_floor` is the edition 6529.io's TDH
+ * counts (P26 §5.2's E): the minted count, burns included, or the claim's
+ * floor while fewer than 300 are minted. So from 300 on the floor field is
+ * the minted count, and below 300 the size is.
+ */
+function editionCard(
+  id: number,
+  season: number,
+  size: number,
+  floor: unknown
+): EditionCard {
+  if (typeof floor !== "number" || !Number.isInteger(floor) || floor <= 0) {
+    return { id, season, minted: size, firstMint: null };
+  }
+  const minted =
+    size < REGISTRY_V14.edition_floor_threshold && floor > size
+      ? size
+      : Math.max(size, floor);
+  return { id, season, minted, firstMint: null, edition: floor };
 }
 
 /** 6529.io's `memes_extended_data`, every page: each card's id, season and edition. */
 async function loadEditions(now: string): Promise<EditionsInput | null> {
   const cards: EditionCard[] = [];
+  const firstMints = loadFirstMints();
   try {
     for (let page = 1; page <= EDITIONS_MAX_PAGES; page += 1) {
       const url = `${publicEnv.API_ENDPOINT}/api/memes_extended_data?page_size=${EDITIONS_PAGE_SIZE}&page=${page}`;
@@ -126,12 +204,14 @@ async function loadEditions(now: string): Promise<EditionsInput | null> {
           typeof row.season === "number" &&
           typeof row.edition_size === "number"
         ) {
-          cards.push({
-            id: row.id,
-            season: row.season,
-            minted: row.edition_size,
-            firstMint: null,
-          });
+          cards.push(
+            editionCard(
+              row.id,
+              row.season,
+              row.edition_size,
+              row.edition_size_floor
+            )
+          );
         }
       }
       if (!body.next) {
@@ -144,8 +224,11 @@ async function loadEditions(now: string): Promise<EditionsInput | null> {
   if (cards.length === 0) {
     return null;
   }
+  const mints = await firstMints;
   return {
-    cards: cards.sort((a, b) => a.id - b.id),
+    cards: cards
+      .map((card) => ({ ...card, firstMint: mints.get(card.id) ?? null }))
+      .sort((a, b) => a.id - b.id),
     readAt: now,
     source: "6529.io API memes_extended_data",
     claimLimits: SITE.claimLimits.values,

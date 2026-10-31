@@ -1,7 +1,5 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
-import HowItWorksPage from "@/app/network/tdh/how-it-works/page";
 import VerificationDayPage from "@/app/network/tdh/verification/[cycleDay]/page";
 import DayNotFoundPage from "@/app/network/tdh/verification/day-not-found/page";
 import VerificationPage, {
@@ -81,112 +79,6 @@ describe("TDH sub-pages", () => {
   });
   afterAll(() => {
     globalThis.fetch = realFetch;
-  });
-
-  it("renders How TDH is calculated with fourteen steps and live explorables", async () => {
-    const user = userEvent.setup();
-    renderPage(await HowItWorksPage());
-    expect(
-      screen.getByRole("heading", { level: 1, name: "How TDH is calculated" })
-    ).toBeInTheDocument();
-    for (let step = 1; step <= 14; step += 1) {
-      expect(document.getElementById(`step-${step}`)).not.toBeNull();
-    }
-    expect(
-      screen.getByRole("navigation", { name: "TDH pages" })
-    ).toBeInTheDocument();
-    expect(
-      within(screen.getByRole("navigation", { name: "TDH pages" })).getByRole(
-        "link",
-        { name: "How it works" }
-      )
-    ).toHaveAttribute("aria-current", "page");
-
-    const builder = screen.getByRole("region", {
-      name: "Build a collection and see its boost",
-    });
-    expect(within(builder).getByText("Boost 1.02")).toBeInTheDocument();
-    await user.click(
-      within(builder).getByRole("button", { name: "Increase Gradients" })
-    );
-    expect(within(builder).getByText("Boost 1.04")).toBeInTheDocument();
-    await user.click(
-      within(builder).getByRole("button", { name: "Increase Full sets" })
-    );
-    expect(within(builder).getByText("Boost 1.84")).toBeInTheDocument();
-    expect(
-      within(builder).getByRole("button", { name: "Season 2" })
-    ).toBeDisabled();
-    expect(
-      within(builder).getByRole("button", { name: "Season 2" })
-    ).toHaveAttribute("aria-pressed", "true");
-
-    const household = screen.getByRole("region", {
-      name: "Change the household and see its TDH",
-    });
-    expect(
-      within(household).getByText(/tomorrow it rises by 114/)
-    ).toBeInTheDocument();
-    await user.click(
-      within(household).getByRole("button", { name: "As two wallets" })
-    );
-    expect(
-      within(household).getByText(/16,246 and 3,828, together 20,074/)
-    ).toBeInTheDocument();
-    await user.click(
-      within(household).getByRole("button", { name: "Sell Gradient 2" })
-    );
-    expect(
-      within(household).getByText(/18,880, down 1,589/)
-    ).toBeInTheDocument();
-
-    const rate = screen.getByRole("region", {
-      name: "Change an edition and see its rate",
-    });
-    // The exact and the rounded rate, and the same rate at the edition's
-    // point on the chart, in its phone and its wide drawing.
-    expect(within(rate).getAllByText("12.71")).toHaveLength(4);
-    // The chart draws the 300 threshold and names the floor in its key.
-    expect(
-      within(rate).getByText("300 copies: floors end")
-    ).toBeInTheDocument();
-    // The key says what the floor does in every state: the edition is the
-    // larger of the minted count and the floor, and only with a claim.
-    expect(
-      within(rate).getByText(
-        "Rate used: below 300 copies, the larger of the minted count and the floor, 310"
-      )
-    ).toBeInTheDocument();
-    const [minted, claim] = within(rate).getAllByRole("spinbutton");
-    if (!minted || !claim) {
-      throw new Error("the rate explorer has two fields");
-    }
-    // No claim: no floor, and the key and the chart say so.
-    fireEvent.change(claim, { target: { value: "0" } });
-    expect(
-      within(rate).getByText("Rate used: no claim limit, so no floor")
-    ).toBeInTheDocument();
-    // A minted count never passes the network's largest edition, H.
-    expect(minted).toHaveAttribute("max", "3941");
-    fireEvent.change(minted, { target: { value: "5000" } });
-    expect(minted).toHaveValue(3941);
-    expect(
-      within(rate).getByText(/a larger edition would itself become H/)
-    ).toBeInTheDocument();
-
-    const stack = screen.getByRole("region", {
-      name: "Send and receive copies, and watch the stack",
-    });
-    expect(within(stack).getByText("Whole days: 30")).toBeInTheDocument();
-    expect(
-      within(stack).getByRole("switch", { name: /consolidated/ })
-    ).not.toBeChecked();
-
-    expect(screen.queryByText("Rule text being finalised")).toBeNull();
-    expect(screen.queryByText("In the specification")).toBeNull();
-    expect(
-      screen.getByRole("link", { name: /Next Specification/ })
-    ).toHaveAttribute("href", "/network/tdh/specification");
   });
 
   it("renders the daily check and its receipts, and 404s an unknown day", async () => {

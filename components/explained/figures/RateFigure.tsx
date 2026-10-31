@@ -22,6 +22,8 @@ export interface RateReference {
 const MAX_EDITION = 4000;
 const MAX_RATE = 14;
 const RUG_BIN = 25;
+/** A 12 px figure label's average character width, to keep it clear of the curve. */
+const LABEL_CHAR_PX = 6.8;
 
 export default function RateFigure({
   h,
@@ -56,8 +58,9 @@ export default function RateFigure({
   for (let edition = threshold - 18; edition <= MAX_EDITION; edition += 8) {
     curve += `${curve ? "L" : "M"}${xAt(edition).toFixed(1)} ${yAt(h / edition).toFixed(1)}`;
   }
+  // On a phone, "3,000" and "4,000" would touch: the last tick is the axis's end.
   const xTicks = narrow
-    ? [0, 1000, 2000, 3000, 4000]
+    ? [0, 1000, 2000, 4000]
     : [0, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000];
   const selectedRate = selected.rateCents / 100;
   const bins = new Map<number, number>();
@@ -66,6 +69,27 @@ export default function RateFigure({
     bins.set(bin, (bins.get(bin) ?? 0) + 1);
   }
   const selectedBin = Math.round(selected.copies / RUG_BIN) * RUG_BIN;
+  const referenceText = (reference: RateReference) =>
+    `${reference.label} ${formatCount(locale, reference.copies)} × ${formatCents(locale, reference.rateCents / 100)}`;
+  /** A label's baseline just above the hyperbola, over the label's width. */
+  const aboveCurve = (right: number, textWidth: number, fallback: number) => {
+    const edition = Math.max(
+      threshold,
+      ((right - textWidth - pad.left) / innerW) * MAX_EDITION
+    );
+    return Math.min(fallback, yAt(h / edition) - 4);
+  };
+  const curveTopUnder = (reference: RateReference) =>
+    aboveCurve(
+      xAt(reference.copies) - 4,
+      referenceText(reference).length * LABEL_CHAR_PX,
+      yAt(reference.rateCents / 100) - 6
+    );
+  const selectedText = `${formatCount(locale, selected.copies)} × ${formatCents(locale, selectedRate)}`;
+  const selectedX = xAt(Math.max(selected.copies, threshold)) + 10;
+  // A wide edition's label would leave the figure: it ends at its corner instead.
+  const selectedFits =
+    selectedX + selectedText.length * 7.6 <= width - pad.right;
   const rugY = height - 22;
 
   return (
@@ -163,7 +187,8 @@ export default function RateFigure({
               })}
         </Label>
         {references.map((reference, index) =>
-          narrow && index > 0 ? null : (
+          (narrow && index > 0) ||
+          reference.copies === selected.copies ? null : (
             <Label
               key={`label-${reference.label}`}
               x={
@@ -171,21 +196,37 @@ export default function RateFigure({
                   ? xAt(reference.copies) - 4
                   : xAt(reference.copies) + 6
               }
-              y={yAt(reference.rateCents / 100) - 6}
+              // The largest edition's label ends at its corner, where the
+              // hyperbola meets the rectangle: it sits above the curve at
+              // the label's left end, so the curve never runs through it.
+              y={
+                index === 0
+                  ? curveTopUnder(reference)
+                  : yAt(reference.rateCents / 100) - 6
+              }
               anchor={index === 0 ? "end" : "start"}
             >
-              {`${reference.label} ${formatCount(locale, reference.copies)} × ${formatCents(locale, reference.rateCents / 100)}`}
+              {referenceText(reference)}
             </Label>
           )
         )}
         <Label
-          x={xAt(Math.max(selected.copies, threshold)) + 10}
-          y={Math.max(pad.top + 16, yAt(selectedRate) + 16)}
+          x={selectedFits ? selectedX : xAt(selected.copies) - 4}
+          y={
+            selectedFits
+              ? Math.max(pad.top + 16, yAt(selectedRate) + 16)
+              : aboveCurve(
+                  xAt(selected.copies) - 4,
+                  selectedText.length * 7.6,
+                  yAt(selectedRate) - 6
+                )
+          }
+          anchor={selectedFits ? "start" : "end"}
           size={13}
           weight={600}
           tone="you"
         >
-          {`${formatCount(locale, selected.copies)} × ${formatCents(locale, selectedRate)}`}
+          {selectedText}
         </Label>
         <Label x={xAt(0)} y={rugY - 6}>
           {kt(locale, "explained.kit.rate.cards", {

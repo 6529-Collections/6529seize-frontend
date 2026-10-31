@@ -213,6 +213,7 @@
   "explained.kit.boost.today": "le plus haut aujourd'hui, {value}",
   "explained.kit.boost.todayShort": "{value} le plus haut aujourd'hui",
   "explained.kit.boost.ceiling": "le plafond de la règle, {value}",
+  "explained.kit.boost.ceilingShort": "plafond {value}",
   "explained.kit.boost.none": "rien de détenu qui augmente le boost",
   "explained.kit.lanes.aria": "{label} : les étapes dans l'ordre",
   "explained.kit.converge.aria": "Des programmes écrits séparément, tour après tour : vert là où ils s'accordent, rose là où l'un s'écarte.",

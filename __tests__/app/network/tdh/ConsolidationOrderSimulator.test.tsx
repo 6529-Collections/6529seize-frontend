@@ -1,117 +1,108 @@
-import { limits } from "@/__tests__/helpers/consolidation-policy.fixture";
-import ConsolidationOrderSimulator from "@/app/network/tdh/consolidation/ConsolidationOrderSimulator";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import WalletsLens from "@/app/network/tdh/consolidation/WalletsLens";
+import FactsProvider from "@/components/explained/facts/FactsProvider";
+import { createFactBook } from "@/lib/explained/facts";
+import { fixtureFactInputs } from "@/lib/explained/fixtureInputs";
 
-describe("ConsolidationOrderSimulator", () => {
-  it("shows that signing with D last never splits the group", async () => {
-    const user = userEvent.setup();
-    render(
-      <ConsolidationOrderSimulator
-        limits={limits}
-        activationDate="12 October 2026, 00:00 UTC"
+/**
+ * The signing-order model (TDH-DESIGN.md §5.9) on its own: the engine's
+ * groups drawn and read out, the exact rule with the gate's values, the
+ * phone's rule button, and Break it restoring what the reader had.
+ */
+const book = createFactBook(fixtureFactInputs());
+
+function renderLens(withRule: boolean) {
+  return render(
+    <FactsProvider snapshot={book.snapshot()}>
+      <WalletsLens
         locale="en-US"
+        start="missing"
+        label="Four wallets, one identity"
+        question="How do wallets become one identity?"
+        withRule={withRule}
+        caption="A dashed wallet counts alone."
+        groups={[
+          {
+            label: "Cases",
+            options: [
+              { value: "three", label: "Three, all linked" },
+              { value: "missing", label: "One pair missing" },
+            ],
+          },
+          {
+            label: "Adding a fourth wallet",
+            lead: "Add D",
+            options: [
+              { value: "step1", label: "one link at a time: 1" },
+              { value: "batch", label: "D signs last, one batch" },
+            ],
+          },
+        ]}
       />
-    );
+    </FactsProvider>
+  );
+}
 
-    await user.click(screen.getByRole("button", { name: "D signs last" }));
-
-    // The final step is announced along with the verdict.
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "After D signs, the groups are A + B + C + D. A, B and C together."
-    );
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "No temporary split. A, B and C stay together"
-    );
-    expect(screen.getAllByText("A, B and C together")).toHaveLength(4);
-    expect(screen.queryByText("Split")).not.toBeInTheDocument();
-  });
-
-  it("counts the temporary splits when D signs first", async () => {
+describe("the signing-order model", () => {
+  it("draws the engine's groups, a dashed wallet alone", async () => {
     const user = userEvent.setup();
-    render(
-      <ConsolidationOrderSimulator
-        limits={limits}
-        activationDate="12 October 2026, 00:00 UTC"
-        locale="en-US"
-      />
-    );
-
-    await user.click(screen.getByRole("button", { name: "D signs first" }));
-
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "The group split in 2 of 4 steps before D joined."
-    );
-    expect(screen.getAllByText("Split")).toHaveLength(2);
-    expect(screen.getByText("Groups: A + D and B + C")).toBeInTheDocument();
-    expect(
-      screen.getByText("Signing order so far: D, A, B, C")
-    ).toBeInTheDocument();
-  });
-
-  it("builds an order one signer at a time and can start again", async () => {
-    const user = userEvent.setup();
-    render(
-      <ConsolidationOrderSimulator
-        limits={limits}
-        activationDate="12 October 2026, 00:00 UTC"
-        locale="en-US"
-      />
-    );
-
-    const picker = screen.getByRole("group", {
-      name: "Choose the next wallet to sign",
+    renderLens(true);
+    const figure = screen.getByRole("img", {
+      name: /Wallets and the identities/,
     });
-    await user.click(
-      within(picker).getByRole("button", { name: "Wallet A: one link to D" })
+    expect(figure).toHaveAccessibleName(
+      "Wallets and the identities they form: B + C; A alone."
     );
-
-    expect(screen.getByText(/Signing order so far: A/)).toBeInTheDocument();
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "After A signs, the groups are A + B + C and D. A, B and C together."
+    const lens = document.querySelector<HTMLElement>('[data-lens="wallets"]')!;
+    expect(lens.querySelector('[data-wallet="A"]')).toHaveAttribute(
+      "data-alone",
+      "1"
+    );
+    await user.click(screen.getByRole("button", { name: "Three, all linked" }));
+    expect(lens.querySelector("[data-readout-groups]")).toHaveTextContent(
+      "A + B + C"
+    );
+    expect(lens).toHaveTextContent(
+      "One identity: one TDH, one boost, one vote."
     );
     expect(
-      within(picker).queryByRole("button", { name: "Wallet A: one link to D" })
-    ).not.toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Start again" }));
-    expect(screen.getByText("Signing order so far: none")).toBeInTheDocument();
-    // Nothing to undo: the control is gone until the first step.
-    expect(screen.queryByRole("button", { name: "Start again" })).toBeNull();
-    expect(screen.getByText("Before anyone signs:")).toBeInTheDocument();
+      screen.getByRole("button", { name: "Three, all linked" })
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(
+      screen.getByRole("button", { name: "one link at a time: 1" })
+    ).toHaveAttribute("aria-pressed", "false");
   });
-});
 
-test("does not simulate groups before backend limits are available", () => {
-  render(
-    <ConsolidationOrderSimulator
-      locale="en-US"
-      activationDate="pending"
-      limits={null}
-    />
-  );
-  expect(
-    screen.queryByRole("button", { name: "D signs last" })
-  ).not.toBeInTheDocument();
-  expect(screen.getByRole("status")).toHaveTextContent(
-    "Wallet limits are loading"
-  );
-});
+  it("prints the exact rule with the gate, and opens it on a phone", async () => {
+    const user = userEvent.setup();
+    renderLens(true);
+    const rail = document.querySelector<HTMLElement>("[data-rule-rail]")!;
+    expect(rail).toHaveTextContent(
+      "past 3 only if one member links both ways with each other member, every link registered at or after 1,792,022,400"
+    );
+    expect(rail).toHaveTextContent("1,792,022,400 is Oct 15, 2026, 00:00 UTC.");
+    const toggle = screen.getByRole("button", { name: "The exact rule" });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+  });
 
-test("explains the hidden walkthrough when the limits do not match its four-wallet scenario", () => {
-  render(
-    <ConsolidationOrderSimulator
-      locale="en-US"
-      activationDate="12 October 2026, 00:00 UTC"
-      limits={{ maxWallets: 5, ungatedMaxWallets: 4 }}
-    />
-  );
-  expect(
-    screen.queryByRole("button", { name: "D signs last" })
-  ).not.toBeInTheDocument();
-  expect(
-    screen.getByText(
-      /This walkthrough shows a fourth wallet joining a group of three/
-    )
-  ).toBeInTheDocument();
+  it("Break it links a fifth wallet, and restores the case the reader had", async () => {
+    const user = userEvent.setup();
+    renderLens(false);
+    expect(document.querySelector("[data-rule-rail]")).toBeNull();
+    await user.click(
+      screen.getByRole("button", { name: "D signs last, one batch" })
+    );
+    const breakIt = screen.getByRole("button", {
+      name: "Break it: link a fifth wallet",
+    });
+    await user.click(breakIt);
+    const lens = document.querySelector<HTMLElement>('[data-lens="wallets"]')!;
+    expect(lens).toHaveTextContent("Four at most. A counts on its own.");
+    expect(breakIt).toHaveAttribute("aria-pressed", "true");
+    await user.click(breakIt);
+    expect(within(lens).getByText("A + B + C + D")).toBeInTheDocument();
+  });
 });

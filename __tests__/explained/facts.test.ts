@@ -199,6 +199,34 @@ describe("the facts layer", () => {
     expect(show("engine.machine.default")).toBe("394");
   });
 
+  it("counts a card still minting at 6529.io's own edition when its claim is not recorded", () => {
+    const inputs = fixtureFactInputs();
+    const editions = inputs.editions!;
+    const live = createFactBook({
+      ...inputs,
+      editions: {
+        ...editions,
+        claimLimits: {},
+        cards: [
+          ...editions.cards,
+          {
+            id: 563,
+            season: 17,
+            minted: 155,
+            firstMint: null,
+            edition: 310,
+          },
+        ],
+      },
+    });
+    const said = (id: FactId) => fmt(live.get(id), "en-US", "short");
+    expect(said("meme.563.minted")).toBe("155");
+    expect(said("meme.563.edition")).toBe("310");
+    expect(said("meme.563.rate")).toBe("12.71");
+    // Without a recorded claim or 6529.io's edition, the minted count stands.
+    expect(said("meme.562.edition")).toBe("152");
+  });
+
   it("reads 6529.io's values with their sources", () => {
     expect(show("site.mainStage.decisions")).toBe("221");
     expect(show("site.mainStage.through")).toBe("Oct 16");

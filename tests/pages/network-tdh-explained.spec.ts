@@ -13,7 +13,7 @@ const HOW_IT_WORKS_ROUTE = "/network/tdh/how-it-works";
 const VERIFICATION_ROUTE = "/network/tdh/verification";
 
 test.describe("TDH explained and verified @network @wcag @medium @large", () => {
-  test("How TDH is calculated renders its steps without sideways scroll and updates the boost builder", async ({
+  test("How TDH is calculated renders its parts without sideways scroll and updates the boost ladder", async ({
     page,
   }) => {
     await page.goto(HOW_IT_WORKS_ROUTE, { waitUntil: "domcontentloaded" });
@@ -24,13 +24,14 @@ test.describe("TDH explained and verified @network @wcag @medium @large", () => 
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
-    const builder = page.getByRole("region", {
-      name: "Build a collection and see its boost",
-    });
-    await builder.scrollIntoViewIfNeeded();
-    await expect(builder.getByText("Boost 1.02")).toBeVisible();
-    await builder.getByRole("button", { name: "Increase Gradients" }).click();
-    await expect(builder.getByText("Boost 1.04")).toBeVisible();
+    // The boost ladder runs the TDH v1.4 engine in the browser: one more
+    // Gradient moves the readout from 1.02 to 1.04.
+    const ladder = page.getByRole("region", { name: "The boost ladder" });
+    await ladder.scrollIntoViewIfNeeded();
+    const readout = ladder.locator("[data-readout]");
+    await expect(readout).toContainText("1.02");
+    await ladder.getByRole("button", { name: "One more: Gradients" }).click();
+    await expect(readout).toContainText("1.04");
 
     await expectAxeClean(page, { route: HOW_IT_WORKS_ROUTE });
   });
