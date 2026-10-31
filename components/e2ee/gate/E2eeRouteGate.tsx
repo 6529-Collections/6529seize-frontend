@@ -9,6 +9,7 @@ import { t } from "@/i18n/messages";
 import { E2eeCenteredMessage } from "../ui/E2eePageShell";
 import { E2eeDeviceLimitPanel } from "./E2eeDeviceLimitPanel";
 import { E2eeEnrollmentCard } from "./E2eeEnrollmentCard";
+import { E2eeEnrollmentIdentity } from "./E2eeEnrollmentIdentity";
 
 export function E2eeLoadingState({ label }: { readonly label: string }) {
   return (
@@ -98,6 +99,7 @@ function E2eeGateState({ e2ee }: { readonly e2ee: UseE2eeResult }) {
           engine={e2ee.engine}
           enrolling={e2ee.status === "enrolling"}
           engineError={e2ee.error}
+          details={<E2eeEnrollmentIdentity />}
         />
       );
     case "device-limit":

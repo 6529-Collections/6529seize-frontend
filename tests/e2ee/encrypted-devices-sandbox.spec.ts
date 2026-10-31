@@ -25,6 +25,7 @@ import {
   sendMessage,
   startChat,
 } from "../support/e2ee/e2eeUi";
+import { NEW_DEVICE_NOTICE } from "../support/e2ee/e2eeCopy";
 import { isMobileWebProject } from "../support/surfaceSimulation";
 
 /** Other members add a new device after a random 5-30 s delay (8.4). */
@@ -92,11 +93,9 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
     // Bob's phone adds his own new device when it reconciles the open chat,
     // and tells him a new device can read his messages.
     await openConversation(bobPhone.page, g);
-    await expect(
-      bobPhone.page.getByText(
-        "Device can now read your encrypted messages. Not you? Revoke."
-      )
-    ).toBeVisible({ timeout: E2EE_SYNC_TIMEOUT_MS });
+    await expect(bobPhone.page.getByText(NEW_DEVICE_NOTICE)).toBeVisible({
+      timeout: E2EE_SYNC_TIMEOUT_MS,
+    });
     await openConversationFromList(bobLaptop.page, "alice");
     await expect(notice(alice.page, "bob added a device")).toBeVisible({
       timeout: E2EE_SYNC_TIMEOUT_MS,

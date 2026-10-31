@@ -5,6 +5,7 @@
  */
 export const E2EE_MESSAGES = {
   "e2ee.badge.encrypted": "End-to-end encrypted",
+  "e2ee.badge.encryptedShort": "Encrypted",
   "e2ee.title": "Encrypted messages",
   "e2ee.section.encrypted": "Encrypted",
   "e2ee.section.plaintext": "Direct messages",
@@ -16,6 +17,7 @@ export const E2EE_MESSAGES = {
   "e2ee.action.dismiss": "Dismiss",
   "e2ee.loading": "Loading encrypted messages…",
   "e2ee.you": "You",
+  "e2ee.youObject": "you",
   "e2ee.someone": "Someone",
   "e2ee.unknownMember": "Unknown member",
 
@@ -29,6 +31,11 @@ export const E2EE_MESSAGES = {
   "e2ee.gate.error.body":
     "Something went wrong while loading encrypted messages on this device.",
   "e2ee.gate.error.code": "Error code: {code}",
+  "e2ee.enroll.identity": "You’ll sign as {name} with {wallet}.",
+  "e2ee.enroll.identityUnknown":
+    "You’ll sign with the wallet connected to this profile.",
+  "e2ee.enroll.manage":
+    "You can turn this device off at any time from the Devices page in encrypted messages.",
   "e2ee.gate.noWallet":
     "Connect the wallet for this profile to use encrypted messages.",
 
@@ -52,12 +59,18 @@ export const E2EE_MESSAGES = {
 
   "e2ee.deviceLimit.title": "Too many devices",
   "e2ee.deviceLimit.body":
-    "Your profile already has the maximum number of devices for encrypted messages. Revoke one you no longer use, then turn on this device.",
+    "Your profile already has the maximum of {max} devices for encrypted messages. On a device you already use, open Devices and revoke one you no longer need, then turn on this device.",
+  "e2ee.deviceLimit.listTitle": "Devices on your profile",
+  "e2ee.deviceLimit.signature":
+    "Turning on this device is one wallet signature. It moves no funds and costs nothing.",
   "e2ee.deviceLimit.retry": "Turn on this device",
 
   "e2ee.renew.body":
-    "This device’s access to encrypted messages ends on {date}.",
+    "This device’s access to encrypted messages ends on {date}. After that it can’t send or read them until you renew. Renewing is one wallet signature; it moves no funds and costs nothing.",
   "e2ee.renew.button": "Renew (one signature)",
+  "e2ee.renew.rejected":
+    "You cancelled the signature. This device keeps access until {date}.",
+  "e2ee.renew.failed": "Couldn’t renew access. Try again.",
 
   "e2ee.devices.title": "Devices for encrypted messages",
   "e2ee.devices.description":
@@ -95,7 +108,8 @@ export const E2EE_MESSAGES = {
   "e2ee.devices.rename.saved": "Device name saved.",
   "e2ee.devices.rename.failed": "Couldn’t save the name. Try again.",
   "e2ee.devices.newDevice":
-    "{label} can now read your encrypted messages. Not you? Revoke.",
+    "New device added {date}: {label} ({platform}). It can read your encrypted messages. If this wasn’t you, revoke it.",
+  "e2ee.devices.newDeviceConfirm": "This was me",
   "e2ee.devices.newDeviceRevoke": "Revoke {label}",
   "e2ee.devices.open": "Devices for encrypted messages",
 
@@ -107,6 +121,7 @@ export const E2EE_MESSAGES = {
   "e2ee.list.preview.deleted": "Message deleted",
   "e2ee.list.preview.undecryptable": "Couldn’t decrypt",
   "e2ee.list.preview.none": "No messages yet",
+  "e2ee.list.preview.from": "{name}: {text}",
   "e2ee.list.unread.one": "{count} unread message",
   "e2ee.list.unread.other": "{count} unread messages",
   "e2ee.list.mentions.one": "{count} mention",
@@ -169,6 +184,14 @@ export const E2EE_MESSAGES = {
   "e2ee.conversation.search.localNote": "Search runs only on this device.",
   "e2ee.conversation.search.failed": "Search failed. Try again.",
   "e2ee.conversation.empty": "No messages yet. Say hello.",
+  "e2ee.conversation.intro.encrypted":
+    "Messages in this chat are end-to-end encrypted. Only the people in it can read them.",
+  "e2ee.conversation.intro.deviceHistory":
+    "This device shows messages from when it joined the chat. There’s no message backup yet, so earlier messages stay on the devices that received them.",
+  "e2ee.conversation.day.today": "Today",
+  "e2ee.conversation.day.yesterday": "Yesterday",
+  "e2ee.conversation.jumpToLatest": "New messages",
+  "e2ee.conversation.skipToComposer": "Skip to message composer",
   "e2ee.conversation.timelineLabel": "Messages",
   "e2ee.conversation.newMessage": "New message from {name}",
   "e2ee.conversation.titleMore": "{names} and {count} more",
@@ -178,7 +201,7 @@ export const E2EE_MESSAGES = {
   "e2ee.banner.delayed":
     "Group changes are delayed. Messages will send once the change goes through.",
   "e2ee.banner.splitView":
-    "Possible split view detected: compare safety codes.",
+    "Security check needed: this device may not see the same chat as everyone else. Compare safety codes before sharing anything sensitive.",
   "e2ee.banner.splitViewAction": "Compare safety codes",
   "e2ee.banner.invalid": "This chat is paused because of an invalid change.",
   "e2ee.banner.restart": "Start a new encrypted chat with the same people",
@@ -187,9 +210,13 @@ export const E2EE_MESSAGES = {
   "e2ee.banner.removed": "You were removed from this chat.",
 
   "e2ee.message.undecryptable": "Couldn’t decrypt this message",
+  "e2ee.message.undecryptableHint":
+    "It couldn’t be read on this device. Ask {name} to send it again if you need it.",
+  "e2ee.message.undecryptableSender": "A member",
   "e2ee.message.deleted": "Message deleted",
   "e2ee.message.edited": "edited",
   "e2ee.message.pending": "Sending…",
+  "e2ee.message.pendingSlow": "Waiting for connection. Will keep trying.",
   "e2ee.message.unverified": "Signature not verified",
   "e2ee.message.replyTo": "Reply to {name}",
   "e2ee.message.replyUnavailable": "Original message unavailable",
@@ -201,8 +228,8 @@ export const E2EE_MESSAGES = {
   "e2ee.message.edit": "Edit",
   "e2ee.message.delete": "Delete",
   "e2ee.message.report": "Report illegal or severe harm",
-  "e2ee.message.mute": "Mute this chat",
-  "e2ee.message.unmute": "Unmute this chat",
+  "e2ee.message.mute": "Mute on this device",
+  "e2ee.message.unmute": "Unmute on this device",
   "e2ee.message.block": "Block {name}",
   "e2ee.message.messageSettings": "Choose who can message you",
   "e2ee.message.deleteConfirmTitle": "Delete this message?",
@@ -246,6 +273,11 @@ export const E2EE_MESSAGES = {
     "Sending is paused until the group change goes through.",
   "e2ee.composer.unavailable": "You can’t send messages in this chat.",
   "e2ee.composer.sendFailed": "Couldn’t send. Try again.",
+  "e2ee.composer.uploading.one": "Encrypting and sending {count} file…",
+  "e2ee.composer.uploading.other": "Encrypting and sending {count} files…",
+  "e2ee.composer.dropped.body": "This message couldn’t be sent.",
+  "e2ee.composer.dropped.quote": "“{text}”",
+  "e2ee.composer.dropped.restore": "Edit and resend",
   "e2ee.composer.hint": "Enter to send, Shift+Enter for a new line",
   "e2ee.composer.mentions.label": "Mention someone",
 
@@ -281,10 +313,22 @@ export const E2EE_MESSAGES = {
   "e2ee.info.safetyCode": "Safety code",
   "e2ee.info.safetyCodeAria": "Safety code: {code}",
   "e2ee.info.safetyCodeHelp":
-    "Compare this code with the others in the chat; if it matches, nobody is intercepting.",
+    "Compare this code with the other members in person or in another app you trust. If everyone sees the same code, no one has been added to this chat without your knowledge.",
+  "e2ee.info.mute": "Mute on this device",
+  "e2ee.info.unmute": "Unmute on this device",
+  "e2ee.info.muteHelp":
+    "Muted chats don’t show unread counts or notify you here.",
+  "e2ee.info.notifications": "Notifications",
   "e2ee.info.report": "Report",
   "e2ee.info.reportHelp":
-    "To report a message, open its menu and choose Report. The report includes that message so moderators can verify who sent it.",
+    "Reports are only for illegal or severe harm. Open the message’s menu and choose Report: only that message goes to 6529’s trust and safety team, with proof of who sent it. For anything else, block or mute instead.",
+  "e2ee.info.encryption.title": "About this encryption",
+  "e2ee.info.encryption.mls":
+    "Built on Messaging Layer Security (MLS), the IETF standard for end-to-end encrypted group chats.",
+  "e2ee.info.encryption.postQuantum":
+    "Keys are agreed with hybrid post-quantum key exchange, designed to keep messages private even if quantum computers can one day break today’s classical encryption.",
+  "e2ee.info.encryption.devices":
+    "Each of your devices holds its own keys. A new device sees only messages sent after it joins; there’s no history backup yet.",
   "e2ee.info.actionFailed": "Couldn’t complete that. Try again.",
   "e2ee.info.kind.dm": "Direct message",
   "e2ee.info.kind.group": "Group",

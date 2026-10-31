@@ -98,8 +98,8 @@ the same people already chosen. Earlier messages are not copied.
   The server can switch attachments off as a kill switch; while it is off
   there is no attach control and chats are text only.
 - Open a message's menu to react, reply, or edit or delete your own messages.
-  On someone else's message the menu also offers **Mute this chat** (on this
-  device: the chat stops counting toward the Messages badge and shows a muted
+  On someone else's message the menu also offers **Mute on this device** (the
+  same switch as in **Chat info**: the chat stops counting toward the Messages badge and shows a muted
   mark), **Block** the sender (they can't start new chats with you or add you
   to encrypted chats; chats you already share stay until you leave them),
   **Choose who can message you** (Preferences) and, last, **Report illegal or
@@ -114,26 +114,33 @@ the same people already chosen. Earlier messages are not copied.
 ### Safety code
 
 The safety code in **Chat info** is the same for everyone who sees the same
-chat. Compare it with the others in the chat; if it matches, nobody is
-intercepting.
+chat. Compare it with the other members in person or in another app you
+trust. If everyone sees the same code, no one has been added to the chat
+without your knowledge. **Chat info** also explains the encryption (MLS with
+hybrid post-quantum key exchange) and has **Mute on this device**.
 
 ### Banners
 
 - **Group changes are delayed. Messages will send once the change goes
   through.** A required change (for example removing a revoked device) has not
   been accepted yet. Sending resumes on its own.
-- **Possible split view detected: compare safety codes.** Members may be seeing
-  different versions of the chat. Compare safety codes.
+- **Security check needed: this device may not see the same chat as everyone
+  else.** Members may be seeing different versions of the chat. Compare
+  safety codes before sharing anything sensitive.
 - **This chat is paused because of an invalid change.** A change failed
   validation, so the chat stops. Select **Start a new encrypted chat with the
   same people** to continue in a fresh chat.
 
 ### Message states
 
-- **Sending…**: not yet delivered.
+- **Sending…**: not yet delivered. After about 10 seconds without a
+  connection it reads **Waiting for connection. Will keep trying.**
+- **This message couldn’t be sent.**: the delivery service refused it. A
+  banner above the composer offers **Edit and resend**.
 - **(edited)**: changed by its sender.
 - **Message deleted**: removed by its sender.
-- **Couldn’t decrypt this message**: this device could not read it.
+- **Couldn’t decrypt this message**: this device could not read it; ask the
+  sender to send it again.
 - **Signature not verified**: the sender's signature did not check out.
 
 ## Devices
@@ -142,11 +149,16 @@ intercepting.
 your encrypted messages, marks **This device**, and shows each device's
 platform, when it was added, last seen and when it expires, and whether its
 wallet signature was verified on this device. You can rename this device and
-revoke any device, including this one. A profile can have up to 10 active
-devices; at the limit, revoke one before turning on a new device.
+revoke any device, including this one. A new device is named after its
+browser or app and OS family (for example "Chrome on Windows" or "6529 app on
+iPhone"); devices added earlier keep their name. A profile can have up to 10
+active devices; at the limit, the new device lists the profile's devices and
+asks you to revoke one from a device you already use, then turn it on.
 
-When another device of yours is turned on, your other devices show
-"{device} can now read your encrypted messages. Not you? Revoke."
+When another device of yours is turned on, your other devices show which
+device was added and when, that it can read your encrypted messages, and
+**Revoke** or **This was me**. Your own device changes are not repeated in
+each chat's timeline.
 
 ## Notifications
 
