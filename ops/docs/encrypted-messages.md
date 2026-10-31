@@ -167,12 +167,14 @@ what is shared:
 
 - Only the selected message is shared, with proof that its sender's device sent
   it.
-- It goes to 6529's trust and safety team, not to wave moderators or the
-  moderation queue, and never to an AI service.
+- It goes to 6529's moderators, who review it in the **Encrypted reports** tab
+  of WatchTower (`/content-moderation/encrypted-reports`). It never goes to
+  wave moderators or to an AI service.
 - Nothing else in the conversation is revealed.
 
 Everything else is handled with blocking, muting and the "who can message you"
-setting. Reports are kept for 180 days unless trust and safety holds them.
+setting. Reports are kept for 180 days unless a moderator places them on
+hold.
 
 ## Limitations
 
