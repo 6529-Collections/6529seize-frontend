@@ -128,19 +128,19 @@ function TotalLine({
   );
 }
 
+// Shown only when the record is the latest result's, whose date the total
+// line above already gives.
 function Included({
-  date,
   cycle,
   locale,
 }: {
-  readonly date: string;
   readonly cycle: number | null;
   readonly locale: SupportedLocale;
 }) {
   return (
     <div className="tw-mt-4">
       <LimitNote tone="holds" title={ot(locale, "explain.includedTitle")}>
-        {ot(locale, "explain.included", { date })}{" "}
+        {ot(locale, "explain.included")}{" "}
         {cycle !== null && (
           <Link className={EX_LINK} href={`/network/tdh/verification/${cycle}`}>
             {ot(locale, "explain.includedLink")}
@@ -161,11 +161,7 @@ function FoundExample({ locale }: { readonly locale: SupportedLocale }) {
     <div data-ans="found" data-ex-allow-number="">
       <RecordTable rows={summary.rows} locale={locale} />
       <TotalLine summary={summary} date={date} locale={locale} />
-      <Included
-        date={date}
-        cycle={num(snapshot, "tdh.latest.cycle")}
-        locale={locale}
-      />
+      <Included cycle={num(snapshot, "tdh.latest.cycle")} locale={locale} />
     </div>
   );
 }
@@ -225,11 +221,7 @@ function RealRecord({
       )}
       <TotalLine summary={summary} date={date} locale={locale} />
       {includedIn(profile, latest) && latestDate !== null ? (
-        <Included
-          date={formatUtcDay(locale, latestDate)}
-          cycle={num(snapshot, "tdh.latest.cycle")}
-          locale={locale}
-        />
+        <Included cycle={num(snapshot, "tdh.latest.cycle")} locale={locale} />
       ) : (
         <div className="tw-mt-4">
           <LimitNote title={ot(locale, "explain.notCheckedTitle")}>
