@@ -5,11 +5,12 @@ import type { GroupMetadata } from "../wasm-types";
 import { BackupError } from "./errors";
 
 /**
- * Plaintext layout of a backup segment (one chunk). Only what is needed to
- * display past history: conversation metadata and member list, messages with
- * their display fields, attachment references with their keys, and the
- * report evidence (body + signature). Never MLS state, ratchets or keys of
- * the device.
+ * Plaintext layout of a backup segment (the JSON inside one chunk, history
+ * backup v2; the chunk header with its hash-chain link is in crypto.ts).
+ * Only what is needed to display past history: conversation metadata and
+ * member list, messages with their display fields, attachment references
+ * with their keys, and the report evidence (body + signature). Never MLS
+ * state, ratchets or keys of the device.
  */
 
 interface BackupMember {
@@ -33,7 +34,7 @@ export interface BackupGroupRecord {
 export type BackupMessageRecord = Omit<StoredMessage, "pending">;
 
 export interface BackupSegment {
-  v: 1;
+  v: 2;
   at: number;
   groups: BackupGroupRecord[];
   messages: BackupMessageRecord[];
@@ -66,7 +67,7 @@ export function fingerprint(value: unknown): string {
   return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
 }
 
-interface EncodedSegment {
+export interface EncodedSegment {
   json: Uint8Array;
   groups: BackupGroupRecord[];
   messages: BackupMessageRecord[];
@@ -81,9 +82,9 @@ export function packSegments(
   const out: EncodedSegment[] = [];
   let groups: BackupGroupRecord[] = [];
   let messages: BackupMessageRecord[] = [];
-  // Fixed overhead of `{"v":1,"at":…,"groups":[],"messages":[]}`.
+  // Fixed overhead of `{"v":2,"at":…,"groups":[],"messages":[]}`.
   const base = utf8Encode(
-    JSON.stringify({ v: 1, at, groups: [], messages: [] })
+    JSON.stringify({ v: 2, at, groups: [], messages: [] })
   ).length;
   let size = base;
 
@@ -91,7 +92,7 @@ export function packSegments(
     if (groups.length === 0 && messages.length === 0) {
       return;
     }
-    const segment: BackupSegment = { v: 1, at, groups, messages };
+    const segment: BackupSegment = { v: 2, at, groups, messages };
     out.push({ json: utf8Encode(JSON.stringify(segment)), groups, messages });
     groups = [];
     messages = [];
@@ -245,21 +246,25 @@ export function decodeSegment(json: Uint8Array): BackupSegment {
   }
   if (
     !isObject(parsed) ||
-    parsed["v"] !== 1 ||
+    parsed["v"] !== 2 ||
     !Array.isArray(parsed["groups"]) ||
     !Array.isArray(parsed["messages"])
   ) {
     throw new BackupError("E2EE_BACKUP_CORRUPT");
   }
   return {
-    v: 1,
+    v: 2,
     at: isNumber(parsed["at"]) ? parsed["at"] : 0,
     groups: parsed["groups"].filter(isGroupRecord),
     messages: parsed["messages"].filter(isMessageRecord),
   };
 }
 
-/** Later segments win: a record seen again is a newer version of it. */
+/**
+ * Later segments win: a record seen again is a newer version of it. The
+ * order is the verified hash-chain order (chain.ts), so the server cannot
+ * reorder, replay or drop segments to bring back an older version.
+ */
 export function mergeSegments(
   segments: readonly BackupSegment[]
 ): BackupHistory {
