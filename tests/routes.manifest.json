@@ -2278,10 +2278,6 @@
         "production": "/safe-collecting/tap-guide"
       }
     },
-    "/sentry-example-page": {
-      "classification": "exempt",
-      "exemptReason": "Sentry integration test page; intentionally throws."
-    },
     "/slide-page/6529-initiatives": {
       "classification": "exempt",
       "exemptReason": "Slide fragment embedded by other surfaces; not standalone."

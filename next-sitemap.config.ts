@@ -100,7 +100,6 @@ const EXACT_EXCLUDED_PATHS = new Set([
   "/preferences",
   "/restricted",
   "/stream",
-  "/sentry-example-page",
   "/tools/app-wallets",
   "/tools/app-wallets/import-wallet",
   "/waves/create",
