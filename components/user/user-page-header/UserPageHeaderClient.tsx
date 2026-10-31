@@ -19,6 +19,7 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { PROFILE_PREFERENCES_HREF } from "@/helpers/preferences-navigation";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
+import { getDirectMessageAdmissionErrorMessage } from "@/helpers/waves/direct-message-admission.helpers";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 import { useContentModeratorAccess } from "@/hooks/content-moderation/useContentModeratorAccess";
 import { useProfileBlockState } from "@/hooks/content-moderation/useProfileBlockState";
@@ -586,7 +587,9 @@ export default function UserPageHeaderClient({
       navigateToDirectMessage({ waveId: wave.id, router, isApp });
     } catch (error) {
       console.error(error);
-      const errorMessage = getToastErrorDetails(error);
+      const errorMessage =
+        getDirectMessageAdmissionErrorMessage(DEFAULT_LOCALE, error) ??
+        getToastErrorDetails(error);
       setToast({
         type: "error",
         title: getUserProfileHeaderMessage(

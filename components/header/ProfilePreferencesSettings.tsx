@@ -29,6 +29,8 @@ import {
   useReducedMotion,
 } from "framer-motion";
 import { useContext, useState } from "react";
+import PreferenceToggle from "./PreferenceToggle";
+import ProfilePreferencesDirectMessageGroup from "./ProfilePreferencesDirectMessageGroup";
 
 const CATEGORY_KEYS = [
   "direct_messages",
@@ -42,6 +44,7 @@ const CATEGORY_KEYS = [
 const DM_OPTIONS = [
   DirectMessagePolicy.Everyone,
   DirectMessagePolicy.PeopleIFollow,
+  DirectMessagePolicy.GroupMembers,
   DirectMessagePolicy.Nobody,
 ] as const;
 
@@ -126,7 +129,40 @@ const UPDATE_DM_POLICY: Record<DirectMessagePolicy, UpdateDirectMessagePolicy> =
     [DirectMessagePolicy.PeopleIFollow]:
       UpdateDirectMessagePolicy.PeopleIFollow,
     [DirectMessagePolicy.Nobody]: UpdateDirectMessagePolicy.Nobody,
+    [DirectMessagePolicy.GroupMembers]: UpdateDirectMessagePolicy.GroupMembers,
   };
+
+/**
+ * Group-policy fields for the save request. They are sent only when the group
+ * policy is selected or the values changed, so saving the existing policies
+ * sends the same request shape as before.
+ */
+function getDirectMessageGroupUpdate(
+  original: ApiProfilePreferences,
+  current: ApiProfilePreferences
+): Pick<
+  ApiUpdateProfilePreferences,
+  "direct_message_group_id" | "direct_message_allow_people_i_follow"
+> {
+  const isGroupPolicy =
+    current.direct_message_policy === DirectMessagePolicy.GroupMembers;
+  const groupChanged =
+    current.direct_message_group_id !== original.direct_message_group_id;
+  const allowChanged =
+    current.direct_message_allow_people_i_follow !==
+    original.direct_message_allow_people_i_follow;
+  return {
+    ...((isGroupPolicy || groupChanged) && current.direct_message_group_id
+      ? { direct_message_group_id: current.direct_message_group_id }
+      : {}),
+    ...(isGroupPolicy || allowChanged
+      ? {
+          direct_message_allow_people_i_follow:
+            current.direct_message_allow_people_i_follow,
+        }
+      : {}),
+  };
+}
 
 const UPDATE_NOTIFICATION_LEVEL: Record<
   NotificationLevel,
@@ -200,11 +236,16 @@ function ProfilePreferencesForm({
   const prefersReducedMotion = useReducedMotion() ?? false;
 
   const hasChanges = JSON.stringify(original) !== JSON.stringify(current);
+  const isGroupPolicy =
+    current.direct_message_policy === DirectMessagePolicy.GroupMembers;
+  const isMissingRequiredGroup =
+    isGroupPolicy && !current.direct_message_group_id;
 
   const { mutateAsync: save, isPending: isSaving } = useMutation({
     mutationFn: async () => {
       const body: ApiUpdateProfilePreferences = {
         direct_message_policy: UPDATE_DM_POLICY[current.direct_message_policy],
+        ...getDirectMessageGroupUpdate(original, current),
         notification_level:
           UPDATE_NOTIFICATION_LEVEL[current.notification_level],
         notifications: current.notifications,
@@ -320,43 +361,16 @@ function ProfilePreferencesForm({
                 >
                   <div className="tw-mt-6 tw-space-y-1">
                     {CATEGORY_KEYS.map((key) => (
-                      <label
+                      <PreferenceToggle
                         key={key}
-                        htmlFor={`profile-notification-${key}`}
-                        className="tw-group tw-relative tw-flex tw-min-h-12 tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-800/30 motion-reduce:tw-transition-none"
-                      >
-                        <span className="tw-min-w-0 tw-text-sm tw-font-medium tw-text-iron-300">
-                          {t(
-                            locale,
-                            `profilePreferences.notifications.category.${key}`
-                          )}
-                        </span>
-                        <input
-                          id={`profile-notification-${key}`}
-                          type="checkbox"
-                          checked={current.notifications[key]}
-                          onChange={(event) =>
-                            updateCategory(key, event.target.checked)
-                          }
-                          className="tw-peer tw-sr-only"
-                        />
-                        <span
-                          aria-hidden="true"
-                          className={`tw-relative tw-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-items-center tw-rounded-full tw-border tw-border-solid tw-p-0.5 tw-transition-colors tw-duration-200 peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-900 peer-disabled:tw-opacity-50 motion-reduce:tw-transition-none ${
-                            current.notifications[key]
-                              ? "tw-border-emerald-400/60 tw-bg-emerald-500"
-                              : "tw-border-iron-600 tw-bg-iron-700"
-                          }`}
-                        >
-                          <span
-                            className={`tw-size-5 tw-rounded-full tw-bg-iron-50 tw-shadow-sm tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${
-                              current.notifications[key]
-                                ? "tw-translate-x-5"
-                                : "tw-translate-x-0"
-                            }`}
-                          />
-                        </span>
-                      </label>
+                        id={`profile-notification-${key}`}
+                        checked={current.notifications[key]}
+                        label={t(
+                          locale,
+                          `profilePreferences.notifications.category.${key}`
+                        )}
+                        onChange={(checked) => updateCategory(key, checked)}
+                      />
                     ))}
                   </div>
                 </m.div>
@@ -394,7 +408,7 @@ function ProfilePreferencesForm({
                   `profilePreferences.dm.${option}.label`
                 );
 
-                return (
+                const radio = (
                   <PreferenceRadioOption
                     key={option}
                     name="direct-message-policy"
@@ -413,16 +427,52 @@ function ProfilePreferencesForm({
                     }
                   />
                 );
+                if (
+                  option !== DirectMessagePolicy.GroupMembers ||
+                  !isGroupPolicy
+                ) {
+                  return radio;
+                }
+                return (
+                  <div key={option}>
+                    {radio}
+                    <ProfilePreferencesDirectMessageGroup
+                      groupId={current.direct_message_group_id}
+                      savedGroupUnavailable={
+                        current.direct_message_group_unavailable
+                      }
+                      allowPeopleIFollow={
+                        current.direct_message_allow_people_i_follow
+                      }
+                      onGroupChange={(group) =>
+                        setCurrent({
+                          ...current,
+                          direct_message_group_id: group.id,
+                          direct_message_group_unavailable: false,
+                        })
+                      }
+                      onAllowPeopleIFollowChange={(allow) =>
+                        setCurrent({
+                          ...current,
+                          direct_message_allow_people_i_follow: allow,
+                        })
+                      }
+                    />
+                  </div>
+                );
               })}
             </div>
           </fieldset>
+          <p className="tw-mb-0 tw-mt-4 tw-px-4 tw-text-xs tw-leading-5 tw-text-iron-500">
+            {t(locale, "profilePreferences.dm.blockNote")}
+          </p>
         </section>
       </div>
       <div className="tw-mx-4 tw-flex tw-justify-end tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-6 sm:tw-mx-6 lg:tw-mx-8">
         <Button
           type="button"
           onClick={() => void save()}
-          disabled={!hasChanges}
+          disabled={!hasChanges || isMissingRequiredGroup}
           loading={isSaving}
           variant="action"
           size="md"
