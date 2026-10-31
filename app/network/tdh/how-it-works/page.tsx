@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import conformance from "@/components/explained/engine/conformance.json";
 import FactValue from "@/components/explained/facts/FactValue";
 import { kt } from "@/components/explained/i18n";
@@ -7,15 +6,15 @@ import { chapterById, HUB_HREF } from "@/components/explained/shell/chapters";
 import ExplainedShell from "@/components/explained/shell/ExplainedShell";
 import HowWeKnow from "@/components/explained/shell/HowWeKnow";
 import PrevNext from "@/components/explained/shell/PrevNext";
-import { EX_LINK } from "@/components/explained/tokens";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { loadFactBook } from "@/lib/explained/feed.server";
-import type { Fact, FactBook, FactEntry } from "@/lib/explained/facts";
+import type { FactBook, FactEntry } from "@/lib/explained/facts";
 import { ENGINE } from "@/lib/explained/engine";
 import { formatCents, formatCount, formatUtcDay } from "@/lib/explained/format";
 import BoostLens from "./BoostLens";
 import { ht } from "./copy";
+import EligibilityLens from "./EligibilityLens";
 import FirstDayLens from "./FirstDayLens";
 import HowParts from "./HowParts";
 import IdentityModel from "./IdentityModel";
@@ -23,6 +22,8 @@ import NettingLens from "./NettingLens";
 import NetworkSection from "./NetworkSection";
 import { EXAMPLE_CARD, FIRST_GM } from "./models/rates";
 import RatesLens from "./RatesLens";
+import StacksLens from "./StacksLens";
+import StepsInOrder from "./StepsInOrder";
 import FactDerived, { RecordValue } from "./_kit/FactDerived";
 import {
   EdRow,
@@ -38,11 +39,13 @@ import {
 import { pageLocale, type LocaleSearchParams } from "./_kit/pageLocale";
 import { rich } from "./_kit/rich";
 import { formatDecimal } from "./_kit/numbers";
-import { utcClock, utcDay } from "./_kit/time";
+import { utcClock } from "./_kit/time";
 
 const ROUTE = "/network/tdh/how-it-works";
 /** The base TDH example: two copies of a 310-copy card held thirty days. */
 const BASE_EXAMPLE = { copies: 2, days: 30 } as const;
+/** How many of the newest cards the eligibility model offers. */
+const RECENT_CARDS = 3;
 
 /**
  * 1 How it works (TDH-DESIGN.md §4.2): four ideas, each with a model that
@@ -58,10 +61,10 @@ export default async function TdhHowItWorksPage({
   const locale = await pageLocale(searchParams);
   const book = await loadFactBook();
   const editions = book.maybe<number[][]>("memes.editions");
-  const newest =
-    editions && editions.value.length > 0
-      ? Math.max(...editions.value.map((row) => row[0] ?? 0))
-      : null;
+  const ids = editions ? editions.value.map((row) => row[0] ?? 0) : [];
+  const newest = ids.length > 0 ? Math.max(...ids) : null;
+  // The newest cards whose first mints the eligibility model places.
+  const recent = [...ids].sort((a, b) => a - b).slice(-RECENT_CARDS);
   // The family facts the models read on the client.
   book.maybe(`meme.${EXAMPLE_CARD}.minted`);
   book.maybe(`meme.${FIRST_GM}.minted`);
@@ -69,8 +72,9 @@ export default async function TdhHowItWorksPage({
     book.maybe(`meme.${newest}.minted`);
     book.maybe(`meme.${newest}.edition`);
   }
-  const firstMint =
-    newest === null ? null : book.maybe<string>(`meme.${newest}.firstMint`);
+  const recentCards = recent.filter(
+    (id) => book.maybe<string>(`meme.${id}.firstMint`) !== null
+  );
 
   const chapter = chapterById("tdh");
   const page = chapter.read.find((entry) => entry.id === "how");
@@ -113,14 +117,14 @@ export default async function TdhHowItWorksPage({
             lede={ht(locale, "explained.tdh.how.lede")}
           />
           <HowParts locale={locale} />
+          <p className="tw-m-0 tw-mt-5">
+            <GoLink href="#steps">
+              {ht(locale, "explained.tdh.how.order.jump")}
+            </GoLink>
+          </p>
         </div>
 
-        <PartA
-          book={book}
-          locale={locale}
-          newest={newest}
-          firstMint={firstMint}
-        />
+        <PartA book={book} locale={locale} recentCards={recentCards} />
         <PartB book={book} locale={locale} newest={newest} />
 
         <Section id="part-c">
@@ -170,12 +174,14 @@ export default async function TdhHowItWorksPage({
               </GoLink>
             </p>
           </Statement>
-          <figure className="tw-m-0 tw-mt-12">
+          <div className="tw-mt-12">
             <IdentityModel locale={locale} />
-          </figure>
+          </div>
         </Section>
 
         <NetworkSection book={book} locale={locale} />
+
+        <StepsInOrder locale={locale} />
 
         <PrevNext
           locale={locale}
@@ -203,22 +209,13 @@ export default async function TdhHowItWorksPage({
 function PartA({
   book,
   locale,
-  newest,
-  firstMint,
+  recentCards,
 }: {
   readonly book: FactBook;
   readonly locale: SupportedLocale;
-  readonly newest: number | null;
-  readonly firstMint: Fact<string> | null;
+  readonly recentCards: readonly number[];
 }) {
   const day = book.maybe<number>("rules.daySeconds");
-  const mint =
-    firstMint === null ? null : Math.floor(Date.parse(firstMint.value) / 1000);
-  // The first result that counts a card: the first boundary a whole day after its first mint.
-  const from =
-    mint !== null && day !== null
-      ? Math.ceil((mint + day.value) / day.value) * day.value
-      : null;
   return (
     <Section id="part-a">
       <span id="step-1" />
@@ -251,58 +248,12 @@ function PartA({
       <div className="tw-mt-12">
         <FirstDayLens locale={locale} />
       </div>
-      <EdRow
-        no="3"
-        label={ht(locale, "explained.tdh.how.cards.label")}
-        className="tw-mt-16"
-      >
-        <Para>
-          <span id="step-3" />
-          {ht(locale, "explained.tdh.how.cards.lead")}{" "}
-          {firstMint !== null &&
-            mint !== null &&
-            from !== null &&
-            newest !== null && (
-              <>
-                {rich(locale, "explained.tdh.how.cards.example", {
-                  card: `Meme #${newest}`,
-                  date: (
-                    <FactDerived fact={firstMint} locale={locale}>
-                      {utcDay(locale, mint)}
-                    </FactDerived>
-                  ),
-                  time: (
-                    <FactDerived fact={firstMint} locale={locale}>
-                      {`${utcClock(locale, mint)} UTC`}
-                    </FactDerived>
-                  ),
-                  from: (
-                    <FactDerived fact={firstMint} locale={locale}>
-                      {utcDay(locale, from)}
-                    </FactDerived>
-                  ),
-                })}{" "}
-              </>
-            )}
-          {ht(locale, "explained.tdh.how.cards.tail")}
-        </Para>
-      </EdRow>
-      <EdRow
-        no="4"
-        label={ht(locale, "explained.tdh.how.moves.label")}
-        className="tw-mt-8"
-      >
-        <Para>
-          <span id="step-4" />
-          {rich(locale, "explained.tdh.how.moves.body", {
-            link: (
-              <Link className={EX_LINK} href="/network/tdh/consolidation">
-                {ht(locale, "explained.tdh.how.moves.link")}
-              </Link>
-            ),
-          })}
-        </Para>
-      </EdRow>
+      <div id="step-3" className="tw-mt-16 tw-scroll-mt-24">
+        <EligibilityLens locale={locale} cards={recentCards} />
+      </div>
+      <div id="step-4" className="tw-mt-16 tw-scroll-mt-24">
+        <StacksLens locale={locale} />
+      </div>
       <div id="step-5" className="tw-mt-16 tw-scroll-mt-24">
         <NettingLens locale={locale} />
       </div>
@@ -389,6 +340,21 @@ function PartB({
               })
             : null}
         </Para>
+        {rate !== null && cents !== null && (
+          <p className="tw-m-0 tw-mt-4">
+            <code
+              className="tw-inline-block tw-max-w-full tw-whitespace-pre-wrap tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-black/20 tw-px-3 tw-py-2 tw-font-mono tw-text-[13.5px] tw-leading-[21px] tw-text-iron-300"
+              data-fact={rate.id}
+              data-fact-derived=""
+            >
+              {`BASE(r, raw) = (r × raw + 50) div 100
+= (${formatCount(locale, cents)} × ${formatCount(locale, copies * days)} + 50) div 100 = ${formatCount(locale, ENGINE.baseTdh(cents, copies * days))}`}
+            </code>
+            <span className="tw-mt-2 tw-block tw-text-[13px] tw-leading-5 tw-text-iron-400">
+              {ht(locale, "explained.tdh.how.base.ruleSource")}
+            </span>
+          </p>
+        )}
       </EdRow>
     </Section>
   );

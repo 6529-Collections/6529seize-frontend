@@ -20,6 +20,8 @@ export interface BoostPart {
 }
 
 const SPAN = 1.3;
+/** Room the ceiling's long label needs between the two lines. */
+const CEILING_LONG_PX = 170;
 
 export default function BoostFigure({
   parts,
@@ -42,6 +44,14 @@ export default function BoostFigure({
   const innerW = width - 16;
   const xAt = (boost: number) => left + ((boost - 1) / SPAN) * innerW;
   const wide = width > 520;
+  // The ceiling's label sits between the two lines: its long form needs
+  // about 170 px there, its short form about 95 (a figure beside a rule
+  // rail is narrower than a full-width one).
+  const gap = xAt(ceilingCents / 100) - xAt(todayMaxCents / 100);
+  const ceilingKey =
+    gap >= CEILING_LONG_PX
+      ? "explained.kit.boost.ceiling"
+      : "explained.kit.boost.ceilingShort";
   const markers = [
     {
       value: todayMaxCents / 100,
@@ -57,7 +67,7 @@ export default function BoostFigure({
     {
       value: ceilingCents / 100,
       solid: false,
-      text: kt(locale, "explained.kit.boost.ceiling", {
+      text: kt(locale, ceilingKey, {
         value: formatCents(locale, ceilingCents / 100),
       }),
     },

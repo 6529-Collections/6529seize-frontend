@@ -16,6 +16,7 @@ import {
 } from "./_kit/layout";
 import { rich } from "./_kit/rich";
 import { ht } from "./copy";
+import TotalsLens from "./TotalsLens";
 
 /**
  * Then, the network (steps 13 and 14): every identity's TDH added up, from
@@ -181,6 +182,9 @@ export default function NetworkSection({
           </figcaption>
         </figure>
       )}
+      <div className="tw-mt-16">
+        <TotalsLens locale={locale} />
+      </div>
     </Section>
   );
 }

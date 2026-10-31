@@ -64,3 +64,27 @@ export function boostOf(state: BoostState, nMemes: number): BoostResult {
 export function extraSetsLimit(): number {
   return additionalSetsLimit(R).micro / 1_000_000;
 }
+
+/**
+ * The registry's boost values, as the rule rail prints them: each bonus and
+ * the extra sets' first step as a multiplier, the ratio q as a fraction.
+ */
+export function boostRuleValues(): {
+  readonly season: number;
+  readonly first: number;
+  readonly q: number;
+  readonly genesis: number;
+  readonly nakamoto: number;
+  readonly gradient: number;
+  readonly gradientMax: number;
+} {
+  return {
+    season: R.season_bonus / 1_000_000,
+    first: R.additional_set_first / 1_000_000,
+    q: R.additional_set_ratio / 10_000,
+    genesis: R.genesis_bonus / 1_000_000,
+    nakamoto: R.nakamoto_bonus / 1_000_000,
+    gradient: R.gradient_bonus / 1_000_000,
+    gradientMax: R.gradient_max_count,
+  };
+}

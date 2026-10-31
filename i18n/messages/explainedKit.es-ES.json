@@ -213,6 +213,7 @@
   "explained.kit.boost.today": "el más alto hoy, {value}",
   "explained.kit.boost.todayShort": "{value} el más alto hoy",
   "explained.kit.boost.ceiling": "el techo de la regla, {value}",
+  "explained.kit.boost.ceilingShort": "techo {value}",
   "explained.kit.boost.none": "nada en posesión que aumente el boost",
   "explained.kit.lanes.aria": "{label}: los pasos en orden",
   "explained.kit.converge.aria": "Programas escritos por separado, ronda a ronda: verde donde coinciden, rosa donde uno se aparta.",

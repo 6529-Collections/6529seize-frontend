@@ -139,17 +139,77 @@ describe("How TDH is calculated", () => {
     );
   });
 
-  it("An identity: one band of 1.05, or two collectors", async () => {
+  it("Which cards count: #562 from Oct 18, and counterexample I", async () => {
+    const user = userEvent.setup();
+    await renderPage();
+    const model = lens("eligible");
+    expect(model).toHaveTextContent(
+      "Meme #562 was first minted Oct 16, 09:06 UTC. The result dated Sunday, Oct 18 is the first whose snapshot finds that a whole day old"
+    );
+    expect(model).toHaveTextContent("#562: firstMint = Oct 16, 09:06 UTC");
+    await user.click(model.querySelector<HTMLElement>('[data-card="561"]')!);
+    expect(model).toHaveTextContent("The result dated Friday, Oct 16");
+    await user.click(breakIt("mintearly"));
+    expect(model).toHaveAttribute("data-broken", "1");
+    expect(model).toHaveTextContent("32 → 60");
+    expect(model).toHaveTextContent("Where the rule reads every mint.");
+    await user.click(breakIt("mintearly"));
+    expect(model).toHaveAttribute("data-broken", "0");
+  });
+
+  it("Sales and moves: last in, first out", async () => {
+    const user = userEvent.setup();
+    await renderPage();
+    const model = lens("stacks");
+    expect(model).toHaveTextContent("310 days");
+    await user.click(
+      within(model).getByRole("button", { name: "A sells one" })
+    );
+    expect(model).toHaveTextContent("A's 10-day copy leaves");
+    expect(model).toHaveTextContent("300 days");
+    await user.click(breakIt("movesell"));
+    expect(model).toHaveAttribute("data-broken", "1");
+    expect(model).toHaveTextContent("The old copy left first.");
+    expect(model).toHaveTextContent("300 days leave, not 10");
+  });
+
+  it("An identity: one band of 1.05, two collectors, or one way only", async () => {
     const user = userEvent.setup();
     await renderPage();
     const model = lens("identity");
     expect(model).toHaveTextContent(
-      "Linked, A and B together hold all 32 cards of season 13, so one boost of 1.05 applies to every card: 42,720 TDH."
+      "Linked, A and B together hold all 32 cards of season 13, so one boost of 1.05 applies to every card."
     );
+    expect(model).toHaveTextContent("42,720TDH");
     await user.click(within(model).getByRole("button", { name: "Not linked" }));
     expect(model).toHaveTextContent(
       "35,588 and 5,084, two separate collectors"
     );
+    await user.click(breakIt("oneway"));
+    expect(model).toHaveAttribute("data-broken", "1");
+    expect(model).toHaveTextContent("One way is no link.");
+  });
+
+  it("Adding it up: identity finals, never the wallets'", async () => {
+    const user = userEvent.setup();
+    await renderPage();
+    const model = lens("totals");
+    expect(model).toHaveTextContent("42,720TDH");
+    await user.click(breakIt("wallets"));
+    expect(model).toHaveTextContent("40,672TDH");
+    expect(model).toHaveTextContent("Short by 2,048.");
+  });
+
+  it("lists every step in P26's order, each linked to its model", async () => {
+    await renderPage();
+    const steps = document.querySelectorAll("[data-step]");
+    expect(steps).toHaveLength(12);
+    expect(
+      within(steps[steps.length - 1] as HTMLElement).getByRole("link", {
+        name: "Totals",
+      })
+    ).toHaveAttribute("href", "#part-n");
+    expect(steps[1]).toHaveTextContent("firstMint ≤ T − 86,400");
   });
 
   it("prints the network from the latest day, every number a fact", async () => {

@@ -24,7 +24,12 @@ import {
   hoursAndMinutes,
   type FirstDayWorld,
 } from "@/app/network/tdh/how-it-works/models/firstDay";
+import {
+  caseI,
+  firstCountingResult,
+} from "@/app/network/tdh/how-it-works/models/eligibility";
 import { identityValues } from "@/app/network/tdh/how-it-works/models/identity";
+import { stackValues } from "@/app/network/tdh/how-it-works/models/stacks";
 import {
   ROUND_TRIP,
   caseH,
@@ -268,9 +273,77 @@ describe("An identity", () => {
       inA: 28,
       inB: 4,
       boostCents: 105,
+      apartBoostCents: 100,
       linkedTdh: 42_720,
       aTdh: 35_588,
       bTdh: 5_084,
+    });
+  });
+});
+
+describe("Which cards count", () => {
+  it("counts a card from the first result a whole day after its first mint", () => {
+    const day = REGISTRY_V14.day_s;
+    // Meme #562: first minted 2026-10-16 09:06 UTC, counted from Oct 18.
+    const mint = Date.parse("2026-10-16T09:06:00Z") / 1000;
+    expect(firstCountingResult(mint, day)).toBe(
+      Date.parse("2026-10-18T00:00:00Z") / 1000
+    );
+    // A first mint at exactly midnight still misses the next result: T is
+    // the last block before the boundary.
+    const midnight = Date.parse("2026-10-16T00:00:00Z") / 1000;
+    expect(firstCountingResult(midnight, day)).toBe(
+      Date.parse("2026-10-18T00:00:00Z") / 1000
+    );
+  });
+
+  it("reproduces counterexample I as P26 §7.1 writes it", () => {
+    expect(caseI(false)).toEqual({
+      lateCounts: false,
+      eligible: 1,
+      H: 3,
+      aBalance: 0,
+      yFinal: 32,
+    });
+    expect(caseI(true)).toEqual({
+      lateCounts: true,
+      eligible: 2,
+      H: 6,
+      aBalance: 5,
+      yFinal: 60,
+    });
+  });
+});
+
+describe("Sales and moves", () => {
+  it("adds both copies' days while nothing happens", () => {
+    expect(stackValues("hold")).toEqual({
+      a: [10],
+      b: [300],
+      sold: null,
+      raw: 310,
+    });
+  });
+
+  it("sells the copy received last", () => {
+    expect(stackValues("sell")).toEqual({ a: [], b: [300], sold: 10, raw: 300 });
+  });
+
+  it("keeps a copy's age on a move inside the identity", () => {
+    expect(stackValues("move")).toEqual({
+      a: [10, 300],
+      b: [],
+      sold: null,
+      raw: 310,
+    });
+  });
+
+  it("Break it: the moved copy is last in, so it is sold first", () => {
+    expect(stackValues("moveThenSell")).toEqual({
+      a: [10],
+      b: [],
+      sold: 300,
+      raw: 10,
     });
   });
 });

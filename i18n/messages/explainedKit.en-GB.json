@@ -213,6 +213,7 @@
   "explained.kit.boost.today": "today's highest, {value}",
   "explained.kit.boost.todayShort": "{value} today's highest",
   "explained.kit.boost.ceiling": "the rule's ceiling, {value}",
+  "explained.kit.boost.ceilingShort": "ceiling {value}",
   "explained.kit.boost.none": "nothing held that boosts",
   "explained.kit.lanes.aria": "{label}: the steps in order",
   "explained.kit.converge.aria": "Separately written programs, round by round: green where they agree, rose where one leaves.",

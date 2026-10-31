@@ -171,6 +171,25 @@ export default function NettingLens({
           <div className="tw-mt-4">{stage}</div>
         </>
       }
+      rule={{
+        lines: [
+          {
+            text: ht(locale, "explained.tdh.how.netting.ruleNet"),
+            on: net && !caseOn,
+          },
+          { text: ht(locale, "explained.tdh.how.netting.ruleSides") },
+          { text: ht(locale, "explained.tdh.how.netting.rulePairs") },
+          {
+            text: ht(locale, "explained.tdh.how.netting.ruleReplay"),
+            on: !net && !caseOn,
+          },
+          {
+            text: ht(locale, "explained.tdh.how.netting.ruleMinted"),
+            on: caseOn,
+          },
+        ],
+        source: ht(locale, "explained.tdh.how.netting.ruleSource"),
+      }}
       readout={<Readout big={big} say={say} />}
       breakIt={
         <BreakIt

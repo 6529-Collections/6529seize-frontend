@@ -213,6 +213,7 @@
   "explained.kit.boost.today": "heute höchster, {value}",
   "explained.kit.boost.todayShort": "{value} heute höchster",
   "explained.kit.boost.ceiling": "Obergrenze der Regel, {value}",
+  "explained.kit.boost.ceilingShort": "Obergrenze {value}",
   "explained.kit.boost.none": "nichts gehalten, das den Boost erhöht",
   "explained.kit.lanes.aria": "{label}: die Schritte der Reihe nach",
   "explained.kit.converge.aria": "Getrennt geschriebene Programme, Runde für Runde: grün, wo sie übereinstimmen, rosa, wo eines abweicht.",

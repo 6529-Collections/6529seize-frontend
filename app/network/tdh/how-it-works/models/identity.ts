@@ -31,6 +31,8 @@ interface IdentityValues {
   readonly inB: number;
   /** The linked identity's boost, in cents. */
   readonly boostCents: number;
+  /** Either wallet's boost on its own, in cents: no season complete. */
+  readonly apartBoostCents: number;
   readonly linkedTdh: number;
   readonly aTdh: number;
   readonly bTdh: number;
@@ -61,6 +63,17 @@ export function identityValues(
     nMemes,
     R
   ).beta;
+  const apartBoostCents = boostOfHoldings(
+    {
+      fullSets: 0,
+      completeSeasons: [],
+      genesis: false,
+      nakamoto: false,
+      gradients: 0,
+    },
+    nMemes,
+    R
+  ).beta;
   // P26 §8.2, §8.4: base and final per card, then summed.
   const base = baseTdh(rateCents, days);
   return {
@@ -69,8 +82,9 @@ export function identityValues(
     inA,
     inB,
     boostCents,
+    apartBoostCents,
     linkedTdh: cards * finalTdh(base, boostCents),
-    aTdh: inA * finalTdh(base, 100),
-    bTdh: inB * finalTdh(base, 100),
+    aTdh: inA * finalTdh(base, apartBoostCents),
+    bTdh: inB * finalTdh(base, apartBoostCents),
   };
 }

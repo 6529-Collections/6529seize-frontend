@@ -2,8 +2,8 @@ import {
   REGISTRY_V14,
   ZERO,
   computeCycle,
-  type Transfer,
 } from "@/components/explained/engine/tdh";
+import { B0, DAY, T0, WALLET, transfer } from "./constructed";
 
 /**
  * "Inside one transaction" (TDH-DESIGN.md §5.4), computed by the TDH v1.4
@@ -19,53 +19,9 @@ import {
  */
 
 const R = REGISTRY_V14;
-const DAY = R.day_s;
-/** Lettered example wallets, never real addresses. */
-const WALLET = {
-  A: "0x000000000000000000000000000000000000000a",
-  B: "0x000000000000000000000000000000000000000b",
-  C: "0x000000000000000000000000000000000000000c",
-  M: "0x000000000000000000000000000000000000004d",
-  X: "0x0000000000000000000000000000000000000099",
-} as const;
-
-function txHash(block: number, tx: number): string {
-  return `0x${(block * 1000 + tx).toString(16).padStart(64, "0")}`;
-}
-
-/** A transfer's position, time, token, parties and amount. */
-interface Move {
-  readonly block: number;
-  readonly tx: number;
-  readonly log: number;
-  readonly at: number;
-  readonly token: number;
-  readonly from: string;
-  readonly to: string;
-  readonly amount: number;
-}
-
-function transfer(move: Move): Transfer {
-  return {
-    block: move.block,
-    txIndex: move.tx,
-    logIndex: move.log,
-    batchPos: 0,
-    timestamp: move.at,
-    tx: txHash(move.block, move.tx),
-    contract: R.memes,
-    token: move.token,
-    from: move.from,
-    to: move.to,
-    amount: move.amount,
-  };
-}
 
 /** The round trip's example: days held before it, and its distance from T. */
 export const ROUND_TRIP = { heldDays: 300, hoursBeforeT: 2, card: 1 } as const;
-/** A cutoff time for the constructed inputs: 2026-10-10 23:59:59 UTC. */
-const T0 = 1_791_676_799;
-
 /** Whole days A's copy has at T after the round trip. */
 export function roundTripDays(asOneTransaction: boolean): number {
   const { heldDays, hoursBeforeT, card } = ROUND_TRIP;
@@ -103,7 +59,7 @@ export function roundTripDays(asOneTransaction: boolean): number {
       amount: 1,
     }),
   ];
-  const result = computeCycle({ block: 100, timestamp: T0, transfers }, R);
+  const result = computeCycle({ block: B0, timestamp: T0, transfers }, R);
   return result.wallets[WALLET.A]?.memes[String(card)]?.raw ?? 0;
 }
 
@@ -185,7 +141,7 @@ export function caseH(mintAndBurn: boolean): CaseHValues {
         ]
       : []),
   ];
-  const result = computeCycle({ block: 100, timestamp: T0, transfers }, R);
+  const result = computeCycle({ block: B0, timestamp: T0, transfers }, R);
   const rateKey = Object.keys(result.rates).find((key) =>
     key.endsWith(`#${meme2}`)
   );

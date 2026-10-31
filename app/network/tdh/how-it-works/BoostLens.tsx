@@ -6,7 +6,7 @@ import { useFact } from "@/components/explained/facts/FactsProvider";
 import BoostFigure from "@/components/explained/figures/BoostFigure";
 import BreakIt, { breakItLabel } from "@/components/explained/lens/BreakIt";
 import { Stepper } from "@/components/explained/lens/controls";
-import Lens, { Readout } from "@/components/explained/lens/Lens";
+import Lens, { Readout, RuleValue } from "@/components/explained/lens/Lens";
 import { useBreakable } from "@/components/explained/lens/useBreakable";
 import StampLine from "@/components/explained/marks/StampLine";
 import { EX_LINK } from "@/components/explained/tokens";
@@ -19,6 +19,7 @@ import {
   BOOST_START,
   MAX_SETS,
   boostOf,
+  boostRuleValues,
   extraSetsLimit,
   gradientLimit,
   payingSeasons,
@@ -92,6 +93,62 @@ export default function BoostLens({
     },
   ].map((part) => ({ ...part, value: part.value / MICRO }));
   const B = "tw-font-semibold tw-text-iron-50";
+  const rv = boostRuleValues();
+  const dec = (value: number, digits = 2) =>
+    formatDecimal(locale, value, digits);
+  const singles =
+    state.sets === 0 && state.seasons < 1 && (state.genesis || state.nakamoto);
+  const ruleLines = [
+    {
+      text: (
+        <>
+          {ht(locale, "explained.tdh.how.boost.ruleSets")}
+          {" = "}
+          <RuleValue>{formatCount(locale, state.sets)}</RuleValue>
+        </>
+      ),
+    },
+    {
+      text: ht(locale, "explained.tdh.how.boost.ruleSetsOn", {
+        season: dec(rv.season),
+      }),
+      on: state.sets > 0,
+    },
+    {
+      // P26 §8.3's notation, the same in every language.
+      text: `ADD(s) = ${dec(rv.first)} × (1 − q^(s−1)) ÷ (1 − q), q = ${dec(rv.q, 4)}`,
+    },
+    {
+      text: ht(locale, "explained.tdh.how.boost.ruleSeasons", {
+        season: dec(rv.season),
+      }),
+      on: state.sets === 0 && state.seasons > 0,
+    },
+    {
+      text: ht(locale, "explained.tdh.how.boost.ruleSingles", {
+        genesis: dec(rv.genesis),
+        nakamoto: dec(rv.nakamoto),
+      }),
+      on: singles,
+    },
+    {
+      text: ht(locale, "explained.tdh.how.boost.ruleGradients", {
+        gradient: dec(rv.gradient),
+        max: formatCount(locale, rv.gradientMax),
+      }),
+      on: state.gradients > 0,
+    },
+    {
+      text: (
+        <>
+          {ht(locale, "explained.tdh.how.boost.ruleBeta")}
+          {" = "}
+          <RuleValue>{formatCents(locale, result.beta / 100)}</RuleValue>
+        </>
+      ),
+      on: true,
+    },
+  ];
 
   let say;
   if (broken) {
@@ -186,6 +243,10 @@ export default function BoostLens({
           </div>
         </>
       }
+      rule={{
+        lines: ruleLines,
+        source: ht(locale, "explained.tdh.how.boost.ruleSource"),
+      }}
       readout={
         <Readout
           big={formatCents(locale, result.beta / 100)}

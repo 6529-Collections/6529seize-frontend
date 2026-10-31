@@ -9,7 +9,7 @@ import type { FirstDayResult } from "./models/firstDay";
 /**
  * The timeline of "A card ages" (TDH-DESIGN.md §5.3): the daily snapshots
  * as lines with their dates (the first that counts the copy in blue), the
- * arrival as a dot and the span it is held as a bar. HTML, not SVG
+ * arrival (or a card's first mint) as a dot and the span after it as a bar. HTML, not SVG
  * (EXPLAINED.md §7 rule 8): it is boxes and text, and it reflows. Built for
  * this page; a candidate for the kit's figures (a `Timeline`).
  */
@@ -19,11 +19,14 @@ export default function FirstDayTimeline({
   result,
   label,
   locale,
+  startText,
 }: {
   readonly result: FirstDayResult;
   /** What the figure shows, for a screen reader. */
   readonly label: string;
   readonly locale: SupportedLocale;
+  /** The dot's words, given its instant ("first minted Oct 30, 12:07 UTC"). */
+  readonly startText?: (when: string) => string;
 }) {
   const [ref, width] = useMeasuredWidth<HTMLDivElement>(640);
   const narrow = width < NARROW;
@@ -85,7 +88,9 @@ export default function FirstDayTimeline({
         className={`tw-absolute tw-top-[84px] tw-whitespace-nowrap tw-text-[13px] tw-leading-[18px] tw-text-iron-400 ${arrivalAlign}`}
         style={{ left: `${arrivedAt}%` }}
       >
-        {ht(locale, "explained.tdh.how.firstday.arrivesAt", { when })}
+        {startText
+          ? startText(when)
+          : ht(locale, "explained.tdh.how.firstday.arrivesAt", { when })}
       </span>
     </div>
   );

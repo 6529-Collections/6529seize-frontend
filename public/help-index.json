@@ -2411,7 +2411,10 @@
         "when does my card start to count",
         "edition floor",
         "boost ladder",
-        "tdh models"
+        "tdh models",
+        "last in first out tdh",
+        "which copy is sold first",
+        "when does a new card count"
       ],
       "keywords": [
         "tdh",
@@ -2425,14 +2428,14 @@
         "snapshot"
       ],
       "facts": [
-        "How TDH is calculated at /network/tdh/how-it-works is page 1 of the TDH chapter of 6529 Explained. It explains TDH v1.4 as four ideas, time, rarity, collections and you, each with a model the reader can move, then the network's total. The models run the TDH v1.4 engine in the browser on the real Meme editions.",
+        "How TDH is calculated at /network/tdh/how-it-works is page 1 of the TDH chapter of 6529 Explained. It explains every step of TDH v1.4 (P26) as four ideas, time, rarity, collections and you, then the network's total, each step with a model the reader can move, the exact rule beside it and a Break it. The models run the TDH v1.4 engine in the browser on the real Meme editions. A closing section, Every step in P26's order (#steps), lists each step with its rule and section.",
         "A: a day counts only when it is whole. Once a day TDH takes a snapshot of Ethereum, the last block before 00:00 UTC; a result is dated by its snapshot and counts the day before it, and a copy adds one day for every whole 24 hours it has been held at that snapshot. The model A card ages shows that a copy arriving at 19:05 UTC on one day is first counted by the result two days later; Break it sells it before a whole day.",
-        "A card counts once its first mint is a whole day old; Meme cards, 6529 Gradients and NextGen tokens count. A sale takes the sold copy's days with it, the copy received last goes first, and a move between your own linked wallets keeps its age.",
+        "A card counts once its first mint is a whole day old; Meme cards, 6529 Gradients and NextGen tokens count. The model Which cards count places the newest cards' first mints on the timeline; its Break it shows the Lean model's counterexample I, where a mint and its burn inserted ten days early make a card count. A sale takes the sold copy's days with it, the copy received last goes first, and a move between your own linked wallets keeps its age; the model Sales and moves shows that a copy moved in last is also the first one sold.",
         "Within one transaction only the net movement is replayed (decision D131), so a copy that leaves and comes back in one transaction keeps its days. Netting is proved for the holding stacks only: the model's Break it shows the Lean manifest's counterexample H, where a mint and its burn inside one transaction change another holder's TDH.",
         "B: a card's rate is the largest edition (FirstGM's) divided by its own edition, so every card adds about the same each day. Below 300 copies minted a card counts at its claim's limit, up to 310; no edition goes below 300 (decision D89). The model The rate and the edition floor shows the exact rule with the values used.",
         "C: one boost multiplies everything a collector holds: each complete season, full sets, Genesis and Nakamoto while season 1 is incomplete, and up to five Gradients. The model The boost ladder shows today's highest boost and the rule's ceiling; a sixth Gradient adds nothing.",
-        "D: up to four wallets linked both ways count as one collector, with one boost on everything they hold together (decision D136). The page links to Your wallets at /network/tdh/consolidation.",
-        "The network section gives the latest day's total TDH, identities and wallets from the daily comparison, with links to the daily check and the day's receipt. About October 23, 2026, 6529.io moves to computing TDH with the Rust core (decision D132).",
+        "D: up to four wallets linked both ways count as one collector, with one boost on everything they hold together (decision D136); a link registered one way only is no link. The page links to Your wallets at /network/tdh/consolidation.",
+        "The network section gives the latest day's total TDH, identities and wallets from the daily comparison, with links to the daily check and the day's receipt. The total adds each identity's final TDH, never its wallets' finals, because each wallet record has its own boost (the model Adding it up). About October 23, 2026, 6529.io moves to computing TDH with the Rust core (decision D132).",
         "The old step anchors #step-1 to #step-14 still land inside the four parts and the network section."
       ],
       "canonical_path": "/network/tdh/how-it-works",
