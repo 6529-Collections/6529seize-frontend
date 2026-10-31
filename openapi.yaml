@@ -32544,6 +32544,19 @@ components:
           $ref: "#/components/schemas/ApiE2eeEligibilityStatus"
         active_devices:
           type: integer
+        reason:
+          type: string
+          description: |
+            The shared DM admission code behind POLICY or BLOCKED, the same
+            codes legacy direct messages return. A target's block of the
+            caller is DM_RECIPIENT_NOT_ACCEPTING with status POLICY, so it is
+            never disclosed; BLOCKED with DM_SENDER_BLOCKED_RECIPIENT is the
+            caller's own block. Absent for OK and NO_DEVICES.
+          enum:
+            - DM_RECIPIENT_NOT_ACCEPTING
+            - DM_RECIPIENT_PEOPLE_I_FOLLOW_ONLY
+            - DM_RECIPIENT_GROUP_MEMBERS_ONLY
+            - DM_SENDER_BLOCKED_RECIPIENT
     ApiE2eeEligibilityRequest:
       type: object
       required:

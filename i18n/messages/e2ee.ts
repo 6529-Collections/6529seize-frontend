@@ -139,7 +139,11 @@ export const E2EE_MESSAGES = {
   "e2ee.new.eligibility.checking": "Checking…",
   "e2ee.new.eligibility.OK": "Can receive encrypted messages",
   "e2ee.new.eligibility.POLICY": "Doesn’t accept messages from you",
-  "e2ee.new.eligibility.BLOCKED": "Blocked",
+  "e2ee.new.eligibility.POLICY.peopleIFollowOnly":
+    "Only accepts messages from people they follow",
+  "e2ee.new.eligibility.POLICY.groupMembersOnly":
+    "Only accepts messages from members of a group they chose",
+  "e2ee.new.eligibility.BLOCKED": "You blocked them. Unblock to message.",
   "e2ee.new.eligibility.NO_DEVICES": "Hasn’t turned on encrypted messages yet",
   "e2ee.new.eligibility.error": "Couldn’t check. Try again.",
   "e2ee.new.notEligibleSummary":

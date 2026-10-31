@@ -1,14 +1,23 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { E2eeEligibility, E2eeEngine } from "@/lib/e2ee/types";
+import type {
+  E2eeEligibility,
+  E2eeEligibilityReason,
+  E2eeEngine,
+} from "@/lib/e2ee/types";
 
 export type E2eeEligibilityState =
   | E2eeEligibility["status"]
   | "checking"
   | "error";
 
-type EligibilityResults = Readonly<Record<string, E2eeEligibilityState>>;
+interface EligibilityResult {
+  readonly status: E2eeEligibilityState;
+  readonly reason: E2eeEligibilityReason | null;
+}
+
+type EligibilityResults = Readonly<Record<string, EligibilityResult>>;
 
 /** Fills every requested id: engine results first, the fallback for the rest. */
 function mergeResults(
@@ -17,12 +26,12 @@ function mergeResults(
   eligibility: readonly E2eeEligibility[],
   fallback: E2eeEligibilityState
 ): EligibilityResults {
-  const next: Record<string, E2eeEligibilityState> = { ...previous };
+  const next: Record<string, EligibilityResult> = { ...previous };
   for (const item of eligibility) {
-    next[item.profileId] = item.status;
+    next[item.profileId] = { status: item.status, reason: item.reason ?? null };
   }
   for (const id of ids) {
-    next[id] ??= fallback;
+    next[id] ??= { status: fallback, reason: null };
   }
   return next;
 }
@@ -48,6 +57,8 @@ export function useE2eeEligibility(
   profileIds: readonly string[]
 ): {
   readonly statusFor: (profileId: string) => E2eeEligibilityState;
+  /** Why POLICY or BLOCKED, when the API says (shared DM admission codes). */
+  readonly reasonFor: (profileId: string) => E2eeEligibilityReason | null;
   readonly retry: (profileId: string) => void;
 } {
   const [results, setResults] = useState<EligibilityResults>({});
@@ -78,7 +89,13 @@ export function useE2eeEligibility(
 
   const statusFor = useCallback(
     (profileId: string): E2eeEligibilityState =>
-      results[profileId] ?? "checking",
+      results[profileId]?.status ?? "checking",
+    [results]
+  );
+
+  const reasonFor = useCallback(
+    (profileId: string): E2eeEligibilityReason | null =>
+      results[profileId]?.reason ?? null,
     [results]
   );
 
@@ -90,5 +107,5 @@ export function useE2eeEligibility(
     );
   }, []);
 
-  return { statusFor, retry };
+  return { statusFor, reasonFor, retry };
 }

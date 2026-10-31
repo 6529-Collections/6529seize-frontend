@@ -112,7 +112,11 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
     await pickPerson(page, "carol", {
       expectedStatus: "Doesn’t accept messages from you",
     });
-    await pickPerson(page, "dave", { expectedStatus: "Blocked" });
+    // Dave blocked alice: alice sees the same notice as a closed inbox, so
+    // the block is never disclosed.
+    await pickPerson(page, "dave", {
+      expectedStatus: "Doesn’t accept messages from you",
+    });
     const start = page.getByRole("button", { name: "Start encrypted chat" });
     await expect(start).toBeDisabled();
     await expect(
