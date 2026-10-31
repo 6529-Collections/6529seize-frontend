@@ -11,7 +11,7 @@ export interface PageLink {
   readonly id: string;
   readonly title: KitKey;
   readonly href: string;
-  /** The number in the chapter bar: 1 to 4 for the spine. */
+  /** The number in the chapter bar: 1 to 5 for the spine. */
   readonly n?: string;
   /** A page listed before it ships: shown at 55%, never a link. */
   readonly soon?: boolean;
@@ -71,6 +71,12 @@ const TDH: ChapterDef = {
       title: "explained.kit.map.tdh.sure",
       href: "/network/tdh/formal",
       n: "4",
+    },
+    {
+      id: "proofs",
+      title: "explained.kit.map.tdh.proofs",
+      href: "/network/tdh/proofs",
+      n: "5",
     },
   ],
   shelf: [

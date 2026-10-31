@@ -306,7 +306,7 @@ export function AssumptionLedger({
             >
               {row.assumption}
             </th>
-            <td className={cell}>
+            <td className={`${cell} md:tw-min-w-[136px]`}>
               <Mark kind={row.mark} locale={locale} size="sm" />
             </td>
             <td className={cell}>{row.covers}</td>

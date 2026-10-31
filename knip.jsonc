@@ -147,7 +147,11 @@
       // most of it; the rest is the kit's public API for the chapter lanes.
       // Remove these exemptions as the chapter pages land and import them.
       "components/explained/**": ["exports", "types"],
-      "lib/explained/**": ["exports", "types"]
+      "lib/explained/**": ["exports", "types"],
+      // The door to Proven on Ethereum, placed by the 6529 Explained
+      // integration on How sure, the daily check and the overview's How we
+      // know. Remove once one of them imports it.
+      "app/network/tdh/proofs/ProofsDoor.tsx": ["files"]
     },
     "ignoreFiles": [
       "__mocks__/**",

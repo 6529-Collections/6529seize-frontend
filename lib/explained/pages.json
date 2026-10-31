@@ -178,6 +178,55 @@
       "states": []
     },
     {
+      "id": "tdh-proofs",
+      "route": "/network/tdh/proofs",
+      "title": "Proven on Ethereum",
+      "genre": "V",
+      "mockup": null,
+      "lane": "P5",
+      "sources": ["app/network/tdh/proofs/**"],
+      "dependsOn": ["D119", "D123", "D128", "D136", "D137"],
+      "checkedThrough": "D142",
+      "budget": {
+        "words": 2400,
+        "firstScreenMin": 150,
+        "firstScreen": 285,
+        "wordsPerScreen": 300
+      },
+      "states": [
+        {
+          "name": "pair-fails",
+          "clicks": ["[data-break=\"pairfails\"]"],
+          "el": "[data-lens=\"pairfails\"]"
+        },
+        {
+          "name": "words-start",
+          "clicks": ["[data-group=\"start\"]"],
+          "el": "[data-lens=\"words\"]"
+        },
+        {
+          "name": "words-break-anchors",
+          "clicks": ["[data-break=\"anchors\"]"],
+          "el": "[data-lens=\"words\"]"
+        },
+        {
+          "name": "guard-blocks",
+          "clicks": ["[data-scenario=\"blocks\"]"],
+          "el": "[data-lens=\"guard\"]"
+        },
+        {
+          "name": "guard-flaw",
+          "clicks": ["[data-scenario=\"flaw\"]"],
+          "el": "[data-lens=\"guard\"]"
+        },
+        {
+          "name": "guard-break-rules",
+          "clicks": ["[data-break=\"rules\"]"],
+          "el": "[data-lens=\"guard\"]"
+        }
+      ]
+    },
+    {
       "id": "tdh-specification",
       "route": "/network/tdh/specification",
       "title": "Specification",
