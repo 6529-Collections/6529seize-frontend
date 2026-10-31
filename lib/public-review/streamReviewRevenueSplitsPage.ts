@@ -2,6 +2,7 @@ import "next/dist/compiled/server-only";
 
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 import { getRequiredEditorialMatch } from "@/lib/public-review/editorialReplacement";
 
 const REVENUE_EDITORIAL_TITLE = /^# Revenue, splits, and royalties$/m;

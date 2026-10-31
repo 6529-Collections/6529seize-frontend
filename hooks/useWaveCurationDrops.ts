@@ -1,11 +1,7 @@
 "use client";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import {
-  updateAttachmentInCachedDrops,
-  updateDropInCachedDrops,
-} from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
-import type { ApiAttachment } from "@/generated/models/ApiAttachment";
+import { updateDropInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import type { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { WsDropUpdateMessage } from "@/helpers/Types";
@@ -17,6 +13,9 @@ import {
   mapToExtendedDrops,
 } from "@/helpers/waves/wave-drops.helpers";
 import { fetchWaveCurationDropsV2 } from "@/services/api/wave-curation-drops-v2-api";
+import type { InfinitePageAdapter } from "@/components/react-query-wrapper/utils/refreshInfiniteQueryHead";
+import type { ApiCurationDrop } from "@/generated/models/ApiCurationDrop";
+import type { ApiCurationDropsPage } from "@/generated/models/ApiCurationDropsPage";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import {
   keepPreviousData,
@@ -25,9 +24,19 @@ import {
 } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import { useDebouncedQueryRefetch } from "./useDebouncedQueryRefetch";
+import { useInfiniteHeadRefetch } from "./useInfiniteHeadRefetch";
 import { useWaveDropUpdateRefetch } from "./useWaveDropUpdateRefetch";
 
 const DEFAULT_WAVE_CURATION_DROPS_PAGE_SIZE = 20;
+
+const curationDropsPageAdapter: InfinitePageAdapter<
+  ApiCurationDropsPage,
+  ApiCurationDrop
+> = {
+  getItems: (page) => page.data,
+  withItems: (page, data) => ({ ...page, data }),
+  getKey: (drop) => drop.id,
+};
 
 export function useWaveCurationDrops({
   wave,
@@ -123,8 +132,14 @@ export function useWaveCurationDrops({
     return generateUniqueKeys(mapToExtendedDrops(pages, [], false), []);
   }, [data?.pages, waveMin]);
 
-  const requestRefetch = useDebouncedQueryRefetch({
+  const refetchHead = useInfiniteHeadRefetch({
+    queryKey,
     refetch,
+    strategy: "aligned",
+    adapter: curationDropsPageAdapter,
+  });
+  const requestRefetch = useDebouncedQueryRefetch({
+    refetch: refetchHead,
     isFetching,
     isFetchingNextPage,
   });
@@ -145,16 +160,6 @@ export function useWaveCurationDrops({
         requestRefetch();
       },
       [queryClient, requestRefetch, waveId]
-    )
-  );
-
-  useWebSocketMessage<ApiAttachment>(
-    WsMessageType.ATTACHMENT_STATUS_UPDATE,
-    useCallback(
-      (attachment) => {
-        updateAttachmentInCachedDrops(queryClient, attachment);
-      },
-      [queryClient]
     )
   );
 

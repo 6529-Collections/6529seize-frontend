@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 import { replaceRequiredEditorialMarkdown } from "./editorialReplacement";
 import type { PublicReviewSource } from "./publicReviewTypes";
 

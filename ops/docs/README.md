@@ -182,7 +182,7 @@ Route patterns use normalized placeholders: `{param}` for one segment,
   `/meme-accounting`, `/meme-gas`
 - Legacy and diagnostics routes:
   `/slide-page/*`, `/element_category/*`, `/gm-or-die-small-mp4`,
-  `/cdn-cgi/l/email-protection`, `/error`, `/sentry-example-page`
+  `/cdn-cgi/l/email-protection`, `/error`
 
 ## Subarea Indexes
 
