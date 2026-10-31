@@ -232,7 +232,7 @@ describe("sync-agent-files", () => {
         source.records.find(
           (record: { id: string }) => record.id === "public-reviews.stream"
         )?.environments
-      ).toEqual(["local", "staging", "production"]);
+      ).toEqual(["local", "staging"]);
       expect(published).toEqual(expectedProduction);
     });
 

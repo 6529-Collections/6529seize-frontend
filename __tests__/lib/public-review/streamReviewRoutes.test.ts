@@ -57,9 +57,18 @@ describe("6529 Stream public review routes", () => {
     ).toBeUndefined();
   });
 
-  it("resolves the production route without exposing source or discussion identifiers", () => {
+  it("does not resolve the review on the production host", () => {
+    expect(
+      resolveStreamReviewRoute({
+        baseEndpoint: "https://6529.io",
+        params: ACTIVE_REVIEW,
+      })
+    ).toBeUndefined();
+  });
+
+  it("resolves the staging route without exposing source or discussion identifiers", () => {
     const model = resolveStreamReviewRoute({
-      baseEndpoint: "https://6529.io",
+      baseEndpoint: "https://staging.6529.io",
       params: ACTIVE_REVIEW,
     });
 
