@@ -3,6 +3,7 @@ import type { ApiDeviceSignedEvent } from "@/generated/models/ApiDeviceSignedEve
 import type { ApiDropSignedEvents } from "@/generated/models/ApiDropSignedEvents";
 import { canonicalizeBody } from "@/lib/device-signing/canonical-json";
 import { signEventId } from "@/lib/device-signing/ed25519";
+import { parseDeviceGrantMessage } from "@/lib/device-signing/grant-message";
 import { computeInterimEventId } from "@/lib/device-signing/interim-event";
 import {
   verifyDropSignedEvents,
@@ -256,6 +257,70 @@ describe("drop signature verification in the browser", () => {
         wallet_signature: await wallet.signMessage({ message: foreign }),
       })
     ).resolves.toEqual({ status: "invalid" });
+  });
+
+  describe("grant domains", () => {
+    /** A grant whose sign-in message names exactly this domain. */
+    const grantSignedFor = async (
+      domain: string
+    ): Promise<ApiDeviceGrantProof> => {
+      const grant = await createGrant();
+      const message = buildVectorGrantMessage({
+        address: wallet.address,
+      }).replace("https://staging.6529.io wants you", `${domain} wants you`);
+      // The message itself parses: only the domain check can reject it.
+      expect(parseDeviceGrantMessage(message)?.domain).toBe(
+        domain.toLowerCase()
+      );
+      return {
+        ...grant,
+        domain: domain.toLowerCase(),
+        message,
+        id: hashMessage(message),
+        wallet_signature: await wallet.signMessage({ message }),
+      };
+    };
+    const verdictFor = async (domain: string) => {
+      const grant = await grantSignedFor(domain);
+      const post = await createEvent(grant, {
+        kind: 1,
+        seq: 1_760_000_000_000,
+        body: { parts: [{ content: "gm" }] },
+      });
+      return verifyDropSignedEvents(signedEvents([post], [grant], post.id));
+    };
+
+    it.each([
+      "6529.io",
+      "www.6529.io",
+      "staging.6529.io",
+      "Staging.6529.io",
+      // The site this check runs on (jsdom), for local builds and mirrors.
+      "localhost",
+    ])("counts grants signed on %s", async (domain) => {
+      await expect(verdictFor(domain)).resolves.toMatchObject({
+        status: "signed",
+      });
+    });
+
+    it.each([
+      "evil.example/x.6529.io",
+      "evil.example/.6529.io",
+      "evil.example?x=.6529.io",
+      "evil.example#.6529.io",
+      String.raw`evil.example\.6529.io`,
+      "user@staging.6529.io",
+      "evil.example%2f.6529.io",
+      "evil.example .6529.io",
+      "6529.io.evil.example",
+      "evil6529.io",
+      "a..6529.io",
+      "6529.io.",
+      "staging.6529.io:8443",
+      "localhost.evil.example",
+    ])("never counts a grant signed for %s", async (domain) => {
+      await expect(verdictFor(domain)).resolves.toEqual({ status: "invalid" });
+    });
   });
 
   it("builds the shown content from a drop", () => {
