@@ -11021,7 +11021,9 @@
         "can now post as you",
         "revoke device",
         "signed by its author",
-        "not signed by its author"
+        "not signed by its author",
+        "signed seal",
+        "verified post badge"
       ],
       "keywords": [
         "waves",
@@ -11039,7 +11041,8 @@
         "Signing never blocks or delays a write. If signing fails or a signature is rejected, the drop, edit, delete or reaction is sent unsigned exactly as before.",
         "Preferences > Devices at /preferences?tab=devices lists every browser that can post as you with its label, This device marker, scopes, wallet, added, expiry and last-used dates and status (Active, Expired, Revoked). Revoke asks for confirmation; earlier signatures stay verifiable. Proxies cannot manage devices.",
         "When a new browser gains a grant for your profile, other browsers show {label} can now post as you. Not you? with Revoke above the composer. The check runs when a wave opens and at most every 10 minutes while the tab is visible.",
-        "The Signature item in a drop's More menu (or touch menu) verifies the drop in your browser and reports Signed by its author, Not signed by its author, or The signature could not be verified, with wallet, device key fingerprint, grant expiry and whether the current content is the signed version. Contract wallets show Contract wallet: verified by 6529.io at sign-in. Signed drops carry no badge.",
+        "The Signature item in a drop's More menu (or touch menu) verifies the drop in your browser and reports Signed by its author, Not signed by its author, or The signature could not be verified, with wallet, device key fingerprint, grant expiry and whether the current content is the signed version. Contract wallets show Contract wallet: verified by 6529.io at sign-in.",
+        "A drop whose current content is the version its author signed shows a small shield-check seal named Signed by its author right after its timestamp, in chat rows, feed cards, participation drops and the single-drop view. Clicking it or pressing Enter opens the same Signature dialog. Unsigned drops show nothing, so posts from the apps, older posts and drops edited without a signature look as before. Grouped chat rows show a static seal beside the hover or swipe timestamp; use the drop menu's Signature item there. An unsigned edit or a delete removes the seal, and it is hidden for moderated content and anonymous authors.",
         "Signed messages are web only: the mobile and desktop apps, proxy sessions and browsers without Ed25519 support sign in and post exactly as before. Votes and ratings are not signed yet."
       ],
       "canonical_path": "/preferences?tab=devices",
@@ -11052,6 +11055,7 @@
         "components/device-signing/SignedMessagesNotice.tsx",
         "components/preferences/DevicesPreferencesSettings.tsx",
         "components/waves/drops/signature/DropSignatureDialog.tsx",
+        "components/waves/drops/signature/DropAuthorSignedMarker.tsx",
         "lib/device-signing/sign-write.ts"
       ]
     },

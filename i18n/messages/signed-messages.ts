@@ -59,6 +59,7 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.devices.enable": "Turn on signed messages in this browser",
   "signedMessages.devices.proxy":
     "Switch to your own profile to manage devices.",
+  "signedMessages.marker.label": "Signed by its author",
   "signedMessages.signature.menuItem": "Signature",
   "signedMessages.signature.title": "Signature",
   "signedMessages.signature.close": "Close",

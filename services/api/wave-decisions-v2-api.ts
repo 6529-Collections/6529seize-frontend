@@ -101,6 +101,7 @@ const mapDecisionDropV2 = ({
     ...(drop.moderation ? { moderation: drop.moderation } : {}),
     subscribed_actions: [],
     is_signed: drop.is_signed,
+    ...(drop.is_author_signed ? { is_author_signed: true } : {}),
     reactions: mapDropReactionCountersV2(drop),
     boosts: drop.boosts,
     is_additional_action_promised:

@@ -59,6 +59,7 @@ import {
 import type { WaveDropProps } from "./WaveDrop.types";
 import { ModerationRejectedDeliveryStatus } from "./ModerationRejectedDeliveryStatus";
 import { useWaveDropModerationPresentation } from "./useWaveDropModerationPresentation";
+import { isDropAuthorSigned } from "./signature/DropAuthorSignedMarker";
 
 const WaveDropInner = ({
   drop,
@@ -726,6 +727,7 @@ const WaveDropInner = ({
             timestamp={drop.created_at}
             variant={canUseTouchActionSheet ? "swipe" : "hover"}
             forceVisible={isRowPointerHovered}
+            authorSigned={isDropAuthorSigned(drop)}
           />
         )}
         <div
