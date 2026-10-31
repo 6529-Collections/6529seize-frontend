@@ -3,13 +3,37 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { formatUtcDay } from "@/lib/explained/format";
 import { kt } from "../i18n";
 import Pulse from "../marks/Pulse";
-import type { ResultDay } from "./DayRibbon";
+import { dayKindOf, type ResultDay } from "./DayRibbon";
 
 /**
  * Today on the network (EXPLAINED.md §6.4): under a hero, today's total and
  * identities with the verdict in words, and a mini ribbon of the results
- * with the open day.
+ * with the open day. Each tile takes its day's verdict (green for equal or a
+ * known cause, red for a day that differs), and the strip is green only
+ * while the newest result is.
  */
+const TILE = {
+  equal: "tw-border-green/45 tw-bg-green/[0.08]",
+  knownCause: "tw-border-green/45 tw-bg-green/[0.08]",
+  differs: "tw-border-error/60 tw-bg-error/[0.09]",
+} as const;
+const BAR = {
+  equal: "tw-bg-green",
+  knownCause: "tw-bg-green",
+  differs: "tw-bg-error",
+} as const;
+const WORD = {
+  equal: "explained.kit.verdict.equal",
+  knownCause: "explained.kit.verdict.knownCause",
+  differs: "explained.kit.verdict.differs",
+} as const;
+
+type StripKind = keyof typeof TILE;
+
+function stripKind(verdict: string): StripKind {
+  const kind = dayKindOf(verdict);
+  return kind === "equal" || kind === "knownCause" ? kind : "differs";
+}
 export default function LiveStrip({
   headline,
   children,
@@ -27,9 +51,11 @@ export default function LiveStrip({
 }) {
   const dayNumber = (date: string) =>
     String(new Date(`${date}T00:00:00Z`).getUTCDate());
+  const newest = days.at(-1);
+  const holds = newest === undefined || stripKind(newest.verdict) !== "differs";
   return (
     <section
-      className="tw-grid tw-grid-cols-1 tw-gap-3.5 tw-rounded-xl tw-border tw-border-solid tw-border-green/30 tw-bg-[linear-gradient(90deg,rgba(60,203,127,0.09),transparent_70%)] tw-p-4 md:tw-gap-4 md:tw-px-[22px] md:tw-py-[18px]"
+      className={`tw-grid tw-grid-cols-1 tw-gap-3.5 tw-rounded-xl tw-border tw-border-solid tw-p-4 md:tw-gap-4 md:tw-px-[22px] md:tw-py-[18px] ${holds ? "tw-border-green/30 tw-bg-[linear-gradient(90deg,rgba(60,203,127,0.09),transparent_70%)]" : "tw-border-error/40 tw-bg-[linear-gradient(90deg,rgba(249,112,102,0.09),transparent_70%)]"}`}
       aria-label={kt(locale, "explained.kit.liveStrip.today")}
       data-livestrip=""
     >
@@ -47,29 +73,28 @@ export default function LiveStrip({
         className="tw-m-0 tw-grid tw-list-none tw-grid-cols-6 tw-gap-[5px] tw-p-0 md:tw-flex"
         aria-label={kt(locale, "explained.kit.day.ribbon")}
       >
-        {days.map((day) => (
-          <li
-            key={day.cycle}
-            className="tw-relative tw-grid tw-h-11 tw-place-items-center tw-rounded-md tw-border tw-border-solid tw-border-green/45 tw-bg-green/[0.08] tw-text-[13px] tw-font-semibold tw-text-iron-50 md:tw-w-[46px]"
-            title={formatUtcDay(locale, day.date)}
-            aria-label={kt(locale, "explained.kit.day.name", {
-              date: formatUtcDay(locale, day.date),
-              cycle: String(day.cycle),
-              verdict: kt(
-                locale,
-                day.verdict === "OK"
-                  ? "explained.kit.verdict.equal"
-                  : "explained.kit.verdict.differs"
-              ),
-            })}
-          >
-            <span aria-hidden="true">{dayNumber(day.date)}</span>
-            <span
-              className="tw-absolute -tw-right-px tw-bottom-2 tw-top-2 tw-w-0.5 tw-rounded-sm tw-bg-green"
-              aria-hidden="true"
-            />
-          </li>
-        ))}
+        {days.map((day) => {
+          const kind = stripKind(day.verdict);
+          return (
+            <li
+              key={day.cycle}
+              className={`tw-relative tw-grid tw-h-11 tw-place-items-center tw-rounded-md tw-border tw-border-solid tw-text-[13px] tw-font-semibold tw-text-iron-50 md:tw-w-[46px] ${TILE[kind]}`}
+              title={formatUtcDay(locale, day.date)}
+              aria-label={kt(locale, "explained.kit.day.name", {
+                date: formatUtcDay(locale, day.date),
+                cycle: String(day.cycle),
+                verdict: kt(locale, WORD[kind]),
+              })}
+              data-day-kind={kind}
+            >
+              <span aria-hidden="true">{dayNumber(day.date)}</span>
+              <span
+                className={`tw-absolute -tw-right-px tw-bottom-2 tw-top-2 tw-w-0.5 tw-rounded-sm ${BAR[kind]}`}
+                aria-hidden="true"
+              />
+            </li>
+          );
+        })}
         {openDate && (
           <li
             className="tw-relative tw-grid tw-h-11 tw-place-items-center tw-rounded-md tw-border tw-border-dashed tw-border-primary-400/70 tw-bg-primary-400/[0.12] tw-text-[13px] tw-font-semibold tw-text-primary-300 md:tw-w-[46px]"

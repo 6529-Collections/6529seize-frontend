@@ -53,6 +53,10 @@ const VIEWS = {
     deviceScaleFactor: 1,
     isMobile: false,
     hasTouch: false,
+    // A desktop browser's agent: the art CDN refuses headless Chromium's,
+    // which left the cards' art out of the 1440 screenshots.
+    userAgent:
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
   },
   390: {
     label: "390",

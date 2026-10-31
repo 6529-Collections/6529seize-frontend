@@ -13,6 +13,7 @@ import DayRibbon, {
   type ResultDay,
 } from "@/components/explained/evidence/DayRibbon";
 import Equation from "@/components/explained/evidence/Equation";
+import LiveStrip from "@/components/explained/evidence/LiveStrip";
 import Receipt from "@/components/explained/evidence/Receipt";
 import {
   SimulationButton,
@@ -164,6 +165,31 @@ describe("the ribbon", () => {
         name: "Oct 11, cycle 20,737: No file for this day",
       })
     ).toBeInTheDocument();
+  });
+
+  it("colours each tile of the live strip by its day's verdict", () => {
+    const [first, second] = days;
+    if (!first || !second) throw new Error("the fixture has days");
+    const { container } = render(
+      <LiveStrip
+        headline="total"
+        days={[first, { ...second, verdict: "LIVE_UNEXPLAINED" }]}
+        locale="en-US"
+      >
+        line
+      </LiveStrip>
+    );
+    const tiles = [...container.querySelectorAll("[data-day-kind]")];
+    expect(tiles.map((tile) => tile.getAttribute("data-day-kind"))).toEqual([
+      "equal",
+      "differs",
+    ]);
+    expect(tiles[1]?.className).toContain("tw-border-error/60");
+    expect(tiles[1]?.getAttribute("aria-label")).toMatch(/Differs/i);
+    // The newest result differs, so the strip is not green.
+    expect(container.querySelector("[data-livestrip]")?.className).toContain(
+      "tw-border-error/40"
+    );
   });
 });
 
