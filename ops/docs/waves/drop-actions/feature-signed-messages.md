@@ -5,8 +5,8 @@
 Signed messages let a browser sign your drops so anyone can check that a post,
 edit, delete, or reaction came from your wallet, without trusting 6529.io
 (except for contract wallets, whose wallet signature is checked by 6529.io at
-sign-in). Your wallet signs once; that signature lets a key held only by this browser
-sign for you for 180 days. Chat does not change: messages still appear at
+sign-in). Your wallet signs once; that signature lets a key held only by this
+browser sign for you for 180 days. Chat does not change: messages still appear at
 once, there is no wallet prompt per message, and anything that cannot be
 signed is sent unsigned exactly as before.
 
