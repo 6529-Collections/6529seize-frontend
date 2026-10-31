@@ -11,6 +11,7 @@ import {
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 import {
   SOLIDITY_DECLARATION_MAX_QUERY_LENGTH,
   SOLIDITY_DECLARATION_PAGE_SIZE,

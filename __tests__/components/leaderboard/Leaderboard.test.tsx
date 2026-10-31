@@ -160,3 +160,31 @@ test("shows zero daily change without a loader when selected network TDH is zero
   expect(await screen.findByText("(n/a)")).toBeInTheDocument();
   await waitFor(() => expect(screen.queryByTestId("loader")).toBeNull());
 });
+
+test("logs a failed seasons request and keeps the leaderboard usable", async () => {
+  usePathnameMock.mockReturnValue("/network/nerd/cards-collected");
+  const failure = new Error("seasons unavailable");
+  commonApiFetch.mockRejectedValue(failure);
+  const consoleError = jest
+    .spyOn(console, "error")
+    .mockImplementation(() => undefined);
+
+  render(
+    <Leaderboard
+      focus={LeaderboardFocus.TDH}
+      setFocus={jest.fn()}
+      tdhView={ApiConsolidatedTdhView.Boosted}
+      setTdhView={jest.fn()}
+    />
+  );
+
+  await waitFor(() =>
+    expect(consoleError).toHaveBeenCalledWith(
+      "Failed to fetch Meme seasons",
+      failure
+    )
+  );
+  expect(screen.getByRole("button", { name: "SZN: All" })).toBeInTheDocument();
+  expect(screen.getByTestId("cards")).toBeInTheDocument();
+  consoleError.mockRestore();
+});

@@ -1,0 +1,457 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "198ef8e6a159436ae3c56856dd8b246c25506a30",
+  "coverage": [
+    {
+      "route": "/museum/network",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/home-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/home-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/home-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/artists",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/artists-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/artists",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/artists-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/artists",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/artists-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/acquisitions",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/acquisitions-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/acquisitions",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/acquisitions-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/acquisitions",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/acquisitions-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/works/6529NM-W-0008",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/work-w-0008-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/works/6529NM-W-0008",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/work-w-0008-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/works/6529NM-W-0008",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/work-w-0008-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/works/does-not-exist",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/work-not-found-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/works/does-not-exist",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/work-not-found-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/works/does-not-exist",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/work-not-found-390x844-full.png"
+    }
+  ],
+  "dimensions": {
+    "J02": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/contact-sheet-1440x1000.png",
+        "evidence/candidate/contact-sheet-820x1000.png",
+        "evidence/candidate/artists-390x844-01.png"
+      ],
+      "findings": [
+        "V-008",
+        "V-012"
+      ],
+      "note": "Header nav, active state, breadcrumb, and section sequence are the same as main and work at all three widths; only long mobile lists and a low-key footer disclosure remain."
+    },
+    "J03": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/home-1440x1000-01.png",
+        "evidence/candidate/acquisitions-1440x1000-03.png",
+        "evidence/candidate/work-w-0008-1440x1000-02.png"
+      ],
+      "findings": [
+        "V-002",
+        "V-005"
+      ],
+      "note": "Art and the page title lead on every route and the not-found card is the clear focus of its page; two layout-level imbalances are identical on main."
+    },
+    "J04": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/home-1440x1000-02.png",
+        "evidence/candidate/artists-1440x1000-01.png",
+        "evidence/candidate/work-not-found-1440x1000-01.png"
+      ],
+      "findings": [
+        "V-003",
+        "V-006",
+        "V-011"
+      ],
+      "note": "Dark, content-led museum register with no casino, SaaS, or faux-science treatment; a few accidental boxes and borders remain, unchanged from main."
+    },
+    "J05": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/home-1440x1000-02.png",
+        "evidence/candidate/work-w-0008-1440x1000-04.png",
+        "evidence/candidate/acquisitions-1440x1000-03.png"
+      ],
+      "findings": [
+        "V-001",
+        "V-002",
+        "V-004"
+      ],
+      "note": "Dense and scannable list pages; ragged card starts, an orphaned card, and empty rule bands on the work record are pre-existing."
+    },
+    "J06": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/home-1440x1000-02.png",
+        "evidence/candidate/artists-1440x1000-03.png",
+        "evidence/candidate/work-w-0008-1440x1000-04.png",
+        "evidence/candidate/home-820x1000-03.png"
+      ],
+      "findings": [
+        "V-001",
+        "V-004",
+        "V-009",
+        "V-010",
+        "V-011"
+      ],
+      "note": "Consistent type roles and line lengths; small wrapping and upscaling details are identical on main."
+    },
+    "J08": {
+      "score": 9,
+      "evidence": [
+        "evidence/candidate/home-1440x1000-01.png",
+        "evidence/candidate/work-not-found-1440x1000-01.png",
+        "evidence/candidate/work-w-0008-1440x1000-04.png"
+      ],
+      "findings": [],
+      "note": "Exercised live at 1440 and 390 (touch): all five header links navigate and set the active state, the Related works disclosure opens, and Return to the Museum goes back to the Museum home from the 404."
+    },
+    "J09": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/work-not-found-1440x1000-01.png",
+        "evidence/candidate/work-not-found-820x1000-01.png",
+        "evidence/candidate/work-not-found-390x844-01.png"
+      ],
+      "findings": [
+        "V-006",
+        "V-007"
+      ],
+      "note": "Unknown address now answers 404 inside the Museum shell with a named state, one working recovery link, and unchanged layout; the framing and tab title are pre-existing."
+    },
+    "J10": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/contact-sheet-820x1000.png",
+        "evidence/candidate/contact-sheet-390x844.png",
+        "evidence/candidate/work-w-0008-390x844-01.png"
+      ],
+      "findings": [
+        "V-005",
+        "V-008",
+        "V-010"
+      ],
+      "note": "No horizontal overflow at 1440, 820, or 390; nav row fits at 390 with 44 px targets; layout is pixel-identical to main outside the local-build badge."
+    },
+    "J11": {
+      "score": 9,
+      "evidence": [
+        "evidence/candidate/automated-checks.json",
+        "evidence/candidate/status-and-timing.json"
+      ],
+      "findings": [],
+      "note": "Layout shift is 0 to 0.001 on the four published cells and the not-found cell improved from 0.019-0.038 on main to 0-0.010; soft navigation between Museum pages took the same time as main, and neither build showed a skeleton while navigation was delayed."
+    }
+  },
+  "checks": {},
+  "findings": [
+    {
+      "id": "V-001",
+      "targets": [
+        "J05",
+        "J06"
+      ],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network · default · 1440x1000 · en-US",
+      "evidence": "evidence/candidate/home-1440x1000-02.png",
+      "observation": "Pre-existing on main: In the four-up Acquisitions row, the titles below the artwork start at different heights (The System in Seven States and Keys and Gates on one line, Conflict at Its Edges about 95 px lower, A Gift of Themes about 20 px lower), and the portrait Take the Key! image is centered in its column while its caption is left-aligned.",
+      "consequence": "The row reads as ragged, and the eye has to re-find the start of each card.",
+      "change": "Give the card media a fixed-ratio frame with the image aligned consistently, and align the text blocks to a shared top line.",
+      "acceptance_check": "At 1440 the four card titles share one baseline and each image shares its left edge with its caption.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-002",
+      "targets": [
+        "J03",
+        "J05"
+      ],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/acquisitions · default · 1440x1000 · en-US",
+      "evidence": "evidence/candidate/acquisitions-1440x1000-03.png",
+      "observation": "Pre-existing on main: The three-column grid places Keys and Gates alone in the first column of a second row, leaving two thirds of the row empty beside a 465 px tall image.",
+      "consequence": "The longest, still-in-progress program looks like an afterthought and the section ends unbalanced.",
+      "change": "Let a single trailing card span the row or lay the fourth card out as a wide feature.",
+      "acceptance_check": "No row of the acquisitions grid at 1440 holds a single card in a three-column track.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-003",
+      "targets": [
+        "J04"
+      ],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/artists · default · 1440x1000 · en-US",
+      "evidence": "evidence/candidate/artists-1440x1000-01.png",
+      "observation": "Pre-existing on main: The three count tiles (13, 16, 23) are drawn with a 2 px bright blue border, the treatment the design standard reserves for active or selected state, though the tiles are not interactive.",
+      "consequence": "They read as selected or focused controls and are the heaviest boxes on the page.",
+      "change": "Use the neutral hairline border (tw-border-white/10) or drop the box and set the figures inline.",
+      "acceptance_check": "The count tiles use a neutral border, and no element on the page shows a blue frame unless it is focused or selected.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-004",
+      "targets": [
+        "J05",
+        "J06"
+      ],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/works/6529NM-W-0008 · default · 1440x1000 · en-US",
+      "evidence": "evidence/candidate/work-w-0008-1440x1000-04.png",
+      "observation": "Pre-existing on main: Below Browse, the status row, the medium and credit row, and the status sentence are separated by stacked hairlines with empty 40 px bands between them; the Status and source note paragraph is indented about 16 px relative to its heading.",
+      "consequence": "The closing block of the record looks unfinished and the double rules read as a layout fault.",
+      "change": "Collapse empty row wrappers so each rule is followed by content, and remove the stray indent on the status paragraph.",
+      "acceptance_check": "No two horizontal rules sit within 48 px of each other without content between them, and the status paragraph aligns with its heading.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-005",
+      "targets": [
+        "J03",
+        "J10"
+      ],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/works/6529NM-W-0008 · default · 1440x1000 · en-US",
+      "evidence": "evidence/candidate/work-w-0008-1440x1000-02.png",
+      "observation": "Pre-existing on main: The portrait photograph is drawn at the full 1180 px measure, so it is 1770 px tall; at a 1000 px viewport only the top crop shows, with no way to see the whole work at once.",
+      "consequence": "A visitor cannot take in the principal work in one view on desktop, and the object data sits two screens below it.",
+      "change": "Cap the principal image height to the viewport (for example max-height 85vh, centered, object-contain) so the whole work shows at once.",
+      "acceptance_check": "At 1440x1000 the whole principal image is visible without scrolling and keeps its aspect ratio.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-006",
+      "targets": [
+        "J04",
+        "J09"
+      ],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/works/does-not-exist · default · 1440x1000 · en-US",
+      "evidence": "evidence/candidate/work-not-found-1440x1000-01.png",
+      "observation": "Pre-existing on main: The not-found state is a rounded card inside a flat full-width panel that is at least 60vh tall, leaving about 210 px of empty panel above and below a 180 px card; the card is rounded-2xl where the design standard sets rounded-xl for cards.",
+      "consequence": "A one-line message sits in a box within a box, and the state looks heavier and emptier than it is.",
+      "change": "Drop the outer panel fill and min-height or drop the card chrome, and use tw-rounded-xl.",
+      "acceptance_check": "The not-found content shows a single framed surface at 1440, 820, and 390 with no empty fixed-height band.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-007",
+      "targets": [
+        "J09"
+      ],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/works/does-not-exist · default · 1440x1000 · en-US",
+      "evidence": "evidence/candidate/work-not-found-1440x1000-01.png",
+      "observation": "Pre-existing on main: The browser tab title on this 404 reads Museum object record, and on /museum/network/artists/does-not-exist it reads Artists, while the page heading says Record not found.",
+      "consequence": "Tabs, history, and shared links label the error page as an ordinary record.",
+      "change": "Export metadata from the not-found segment with its own title, for example Record not found | 6529 Network Museum.",
+      "acceptance_check": "The document title of every Museum 404 contains Record not found.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-008",
+      "targets": [
+        "J02",
+        "J10"
+      ],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/artists · default · 390x844 · en-US",
+      "evidence": "evidence/candidate/artists-390x844-full.png",
+      "observation": "Pre-existing on main: Twenty-three artist cards stack in one column over an 11,233 px page, in two sections, with no in-page jump between Artists in the Collection and Artists in current acquisitions.",
+      "consequence": "Reaching the second group or the footer on a phone takes a long scroll.",
+      "change": "Use a two-column card grid from 360 px or add a short in-page link to the second section.",
+      "acceptance_check": "At 390 the artists page is under 8,000 px tall or offers a link to each section.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-009",
+      "targets": [
+        "J06"
+      ],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/artists · default · 1440x1000 · en-US",
+      "evidence": "evidence/candidate/artists-1440x1000-03.png",
+      "observation": "Pre-existing on main: In the Artists in current acquisitions cards the caption wraps so the second line begins with a stray middle dot (HugoFaz card: \"· Keys and Gates\").",
+      "consequence": "A separator at the start of a line looks like a typo.",
+      "change": "Put the program name on its own line or keep the separator with the preceding text.",
+      "acceptance_check": "No card caption starts a line with a separator at 1440, 820, or 390.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-010",
+      "targets": [
+        "J06",
+        "J10"
+      ],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/acquisitions · default · 390x844 · en-US",
+      "evidence": "evidence/candidate/acquisitions-390x844-06.png",
+      "observation": "Pre-existing on main: The site footer (outside Museum content) wraps its pipe separators to the start of lines at 390 and 820 (| Cookie Policy, | Contact Us | Status).",
+      "consequence": "The footer looks broken on phones and tablets.",
+      "change": "Render the footer links as a wrapping list with each separator attached to the end of its item.",
+      "acceptance_check": "No footer line starts with a separator at 390 and 820.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-011",
+      "targets": [
+        "J04",
+        "J06"
+      ],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network · default · 1440x1000 · en-US",
+      "evidence": "evidence/candidate/home-1440x1000-01.png",
+      "observation": "Pre-existing on main: The lead artwork arrives as a 432 px wide bitmap (410 px at 820) and is drawn at 679 px (692 px), so its edges are soft and show compression noise on the home hero.",
+      "consequence": "The first artwork a visitor sees is not as sharp as the rest of the collection.",
+      "change": "Request the 1280 px rendition for the hero image so it is not upscaled.",
+      "acceptance_check": "Hero natural width is at least its rendered width at 1x on all three viewports.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-012",
+      "targets": [
+        "J02"
+      ],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/works/6529NM-W-0008 · default · 1440x1000 · en-US",
+      "evidence": "evidence/candidate/work-w-0008-1440x1000-05.png",
+      "observation": "Pre-existing on main: Related works and context is a 12 px grey disclosure right-aligned under the source links in the footer; opening it reveals a single Supporting record link.",
+      "consequence": "The only route from a work to its related records is easy to miss and holds one link.",
+      "change": "Move the related records into the page body under Collection context, or label the disclosure with what it holds.",
+      "acceptance_check": "Related records for a work are reachable from the body of the page without opening a footer disclosure.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "The Museum shell on the not-found state: the header nav, left rail, and footer stay in place so a visitor can leave by any Museum link, and the page keeps its noindex robots tag.",
+    "Header nav with an underlined active state on Artists and Acquisitions and 44 px targets at 390, plus the breadcrumb on the work record.",
+    "Artwork shown whole with object-contain at its own proportions in the index cards and on the work record; no fallback panels and no distorted images on any cell.",
+    "Stable layout at 1440, 820, and 390: no horizontal overflow, no clipped text, and layout shift of 0 to 0.001 on the published cells.",
+    "Unminted, selected, and accessioned status pills that set the program apart from the permanent Collection.",
+    "The single, plain recovery action on the 404 (Return to the Museum) and its calm one-sentence explanation.",
+    "Removal of the segment loading skeletons causes no visible difference in the captured pages: all four published cells are pixel-identical to main outside the local-build badge."
+  ]
+}

@@ -4,6 +4,8 @@ import MigratedWordPressStaticPage from "@/components/migrated-wordpress/Migrate
 import { getMigratedWordPressPageMetadata } from "@/components/migrated-wordpress/metadata";
 import { educationEducationCollaborationFormMigratedWordPressPage as content } from "./content";
 
+export const dynamic = "force-static";
+
 export default function EducationEducationCollaborationFormPage() {
   return <MigratedWordPressStaticPage content={content} />;
 }

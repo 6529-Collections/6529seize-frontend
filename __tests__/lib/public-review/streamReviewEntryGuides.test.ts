@@ -11,8 +11,8 @@ import {
 import {
   STREAM_REVIEW_CURRENT_PAGES,
   STREAM_REVIEW_ENTRY_PAGES,
-  getStreamReviewEntryMarkdown,
 } from "@/lib/public-review/streamReviewEntryGuides";
+import { getStreamReviewEntryMarkdown } from "@/lib/public-review/streamReviewEntryMarkdown";
 import { resolveStreamReviewRoute } from "@/lib/public-review/streamReviewRoutes";
 
 const source = {

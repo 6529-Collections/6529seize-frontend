@@ -191,6 +191,23 @@ describe("additional static pages", () => {
     expect(mainElement).toHaveClass("main");
   });
 
+  it.each([
+    [{ locale: "es-ES" }, "es-ES"],
+    [{}, "en-US"],
+  ])(
+    "declares the language of the collection content for search params %j",
+    async (searchParams, lang) => {
+      const Page = await MemeLabCollectionPage({
+        params: Promise.resolve({ collection: "test-collection" }),
+        searchParams: Promise.resolve(searchParams),
+      });
+
+      render(Page);
+
+      expect(screen.getByRole("main")).toHaveAttribute("lang", lang);
+    }
+  );
+
   it("handles different collection name formats correctly", async () => {
     const Page = await MemeLabCollectionPage({
       params: Promise.resolve({ collection: "multi-word-collection-name" }),

@@ -7,6 +7,7 @@ import RoundedJsonIconButton from "@/components/distribution-plan-tool/common/Ro
 import RoundedManifoldIconButton from "@/components/distribution-plan-tool/common/RoundedManifoldIconButton";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { downloadJsonFile } from "@/helpers/json-download.helpers";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 import { useContext, useEffect, useState } from "react";
 import type {
@@ -49,12 +50,7 @@ export default function ReviewDistributionPlanTableHeader({
 
   const downloadJson = (results: AllowlistResult[]) => {
     const data = JSON.stringify(getFullResults(results));
-    const blob = new Blob([data], { type: "application/json" });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "results.json";
-    link.click();
+    downloadJsonFile(data, "results.json");
   };
 
   const downloadCsv = (results: AllowlistResult[]) => {

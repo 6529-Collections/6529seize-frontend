@@ -6,6 +6,7 @@ import { isDesktopRenderer } from "@/config/frontendRoot.server";
 import { getPublicReviewEnvironment } from "@/config/publicReviews";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 import { loadStreamEditorialContent } from "@/lib/public-review/editorialContent";
 import { extractPublicReviewSections } from "@/lib/public-review/editorialSections";
 import {
@@ -15,8 +16,8 @@ import {
 import {
   STREAM_REVIEW_ENTRY_PAGES,
   STREAM_REVIEW_ENTRY_GUIDE_VERSION,
-  getStreamReviewEntryMarkdown,
 } from "./streamReviewEntryGuides";
+import { getStreamReviewEntryMarkdown } from "./streamReviewEntryMarkdown";
 import type {
   PublicReviewPageDefinition,
   PublicReviewSectionDefinition,

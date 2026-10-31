@@ -61,6 +61,10 @@ records.
 - The [failure and recovery section](feature-institutional-practice.md#failure-and-recovery)
   explains source refreshes, unavailable publications, and external source
   failures.
+- A Museum address that the current edition does not contain, such as an
+  unknown work, artist, acquisition, object, or collection, shows the Museum
+  not-found page and answers with HTTP status 404, so links and search results
+  can tell it apart from a real page.
 
 ## Stubs
 
