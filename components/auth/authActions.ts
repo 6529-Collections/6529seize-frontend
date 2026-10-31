@@ -1,4 +1,4 @@
-import { getNodeEnv, publicEnv } from "@/config/env";
+import { isDevAuthEnabled } from "@/config/devAuth";
 import {
   InvalidRoleStateError,
   MissingActiveProfileError,
@@ -45,13 +45,6 @@ import type {
 } from "./authActionTypes";
 
 const MANUAL_AUTH_VALIDATION_TIMEOUT_MS = 30_000;
-
-const isDevAuthenticationEnabled = (): boolean => {
-  const nodeEnv = getNodeEnv();
-  const isDevLikeEnv = nodeEnv === "development" || nodeEnv === "test";
-
-  return publicEnv.USE_DEV_AUTH === "true" && isDevLikeEnv;
-};
 
 const dispatchProfileSwitchedEvent = (profileProxy: ApiProfileProxy | null) => {
   if (globalThis.window === undefined) {
@@ -525,7 +518,7 @@ export function createAuthRequestActions({
       return { success: false };
     }
 
-    if (!enableWalletAuthentication || isDevAuthenticationEnabled()) {
+    if (!enableWalletAuthentication || isDevAuthEnabled()) {
       return { success: true };
     }
 
@@ -637,7 +630,7 @@ export function createAuthRequestActions({
     canAuthenticate:
       !activeProfileProxy &&
       enableWalletAuthentication &&
-      !isDevAuthenticationEnabled(),
+      !isDevAuthEnabled(),
     canSignActiveWallet,
     createSigningAuthRequestGuard: () =>
       createSigningAuthRequestGuard(createAuthRequestGuard({})),

@@ -1,4 +1,5 @@
 import { publicEnv } from "@/config/env";
+import { getStagingApiKey } from "@/config/serverEnv";
 import { getUsableText } from "@/app/api/og-metadata/_lib/imageUtils";
 import {
   assertContentType,
@@ -100,7 +101,7 @@ export async function withOgApiJson<T>(
     abort,
     options.timeoutMs ?? DEFAULT_METADATA_TIMEOUT_MS
   );
-  const apiAuth = getUsableText(publicEnv.STAGING_API_KEY);
+  const apiAuth = getStagingApiKey() ?? null;
   const mayUsePublicApi =
     new URL(publicEnv.API_ENDPOINT).origin === STAGING_API_ORIGIN;
   let usePublicApi = false;

@@ -424,6 +424,26 @@ describe("proxy", () => {
       );
     });
 
+    it("probes with the visitor's cookie only, never a server-held key", async () => {
+      process.env["STAGING_API_KEY"] = "server-staging-key";
+      try {
+        const fetchMock = mockFetchStatus(401);
+
+        const response = await proxy(createRequest("/waves"));
+
+        expect(fetchMock).toHaveBeenCalledWith(
+          "https://api.staging.example/api/",
+          expect.objectContaining({ headers: { "x-6529-auth": "" } })
+        );
+        expect(response).toEqual({
+          kind: "redirect",
+          url: "https://staging.6529.io/access",
+        });
+      } finally {
+        delete process.env["STAGING_API_KEY"];
+      }
+    });
+
     it("redirects to /access when the API answers 401", async () => {
       mockFetchStatus(401);
       const request = createRequest("/waves");

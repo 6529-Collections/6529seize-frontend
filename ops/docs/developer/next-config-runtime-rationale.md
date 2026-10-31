@@ -28,6 +28,28 @@ build. The Sentry config also deletes uploaded source maps from the build output
 so stack traces stay readable in Sentry without making browser-served maps part
 of the deployed static asset surface.
 
+## Public Runtime Config And Server-Only Values
+
+Everything in `publicEnvSchema` (`config/env.schema.ts`) is serialized into
+`PUBLIC_RUNTIME`, which `next.config.ts` inlines into browser bundles. The same
+applies to every key in the `env` block. Neither may hold a credential.
+
+Server-only values are read at request time through `config/serverEnv.ts`:
+
+- `STAGING_API_KEY`: the `x-6529-auth` value server-side requests send to a
+  staging API when the visitor has no access cookie. `lib/fetch/ssrFetch.ts`
+  adds it to first-party API requests that carry no access value, and the OG
+  image routes use it for crawlers. Browser requests and the staging access
+  gate in `proxy.ts` use only the visitor's access cookie.
+- `FARCASTER_WARPCAST_API_KEY`: used by the Farcaster preview route.
+
+Dev auth (`USE_DEV_AUTH`, `DEV_MODE_AUTH_JWT`, `DEV_MODE_WALLET_ADDRESS`) must
+reach the browser in local development, so it stays in the public schema with
+two guards. `config/devAuth.ts` ignores it outside development and test
+runtimes, and `config/devAuthBuildGuard.ts` fails any production build whose
+`BASE_ENDPOINT` is not `localhost` or `127.0.0.1` while one of those values is
+set.
+
 ## Public File Cache Policy
 
 Next.js serves files from `public/` with `Cache-Control: public, max-age=0`

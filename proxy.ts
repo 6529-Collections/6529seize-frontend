@@ -343,8 +343,9 @@ async function accessDenial(
     return null;
   }
 
-  const authValue =
-    req.cookies.get(API_AUTH_COOKIE)?.value ?? publicEnv.STAGING_API_KEY ?? "";
+  // Only the visitor's own access cookie decides the gate; no server-held
+  // credential stands in for it.
+  const authValue = req.cookies.get(API_AUTH_COOKIE)?.value ?? "";
   const verdict = await getAccessVerdict({
     apiEndpoint: publicEnv.API_ENDPOINT,
     authValue,

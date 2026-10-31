@@ -3,8 +3,11 @@ import { ReadableStream } from "node:stream/web";
 jest.mock("@/config/env", () => ({
   publicEnv: {
     API_ENDPOINT: "https://api.6529.test",
-    STAGING_API_KEY: void 0,
   },
+}));
+
+jest.mock("@/config/serverEnv", () => ({
+  getStagingApiKey: jest.fn(),
 }));
 
 import {
