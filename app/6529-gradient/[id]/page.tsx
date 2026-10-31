@@ -8,12 +8,10 @@ import {
 import { GRADIENT_CONTRACT } from "@/constants/constants";
 import { PROFILE_COLLECTED_RETURN_PARAM } from "@/helpers/profile-collected-navigation";
 import JsonLdScript from "@/lib/structured-data/json-ld";
-import {
-  buildNftPageJsonLd,
-  fetchNftForStructuredData,
-} from "@/lib/structured-data/nft";
+import { buildNftPageJsonLd, lookupNft } from "@/lib/structured-data/nft";
 import styles from "@/styles/Home.module.css";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { cache } from "react";
 
 type GradientDetailSearchParams = Record<string, string | string[] | undefined>;
@@ -32,12 +30,16 @@ const serializeSearchParams = (
   return serialized.toString();
 };
 
-const loadGradientNft = cache((id: string) =>
-  fetchNftForStructuredData({
-    contract: GRADIENT_CONTRACT,
-    id,
-  })
-);
+// The API reads a non-numeric id as token 0, so only plain integers are asked.
+const isGradientTokenId = (id: string): boolean =>
+  /^\d+$/u.test(id) && Number.isSafeInteger(Number(id));
+
+const loadGradientNft = cache(async (id: string) => {
+  if (!isGradientTokenId(id)) {
+    return { status: "missing" } as const;
+  }
+  return lookupNft({ contract: GRADIENT_CONTRACT, id });
+});
 
 export default async function GradientPage({
   params,
@@ -48,7 +50,9 @@ export default async function GradientPage({
 }) {
   const { id } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
-  const nft = await loadGradientNft(id);
+  const lookup = await loadGradientNft(id);
+  if (lookup.status === "missing") notFound();
+  const nft = lookup.status === "found" ? lookup.nft : null;
 
   return (
     <main className={styles["main"]}>
@@ -80,7 +84,9 @@ export async function generateMetadata({
   const { id } = await params;
 
   const title = `6529 Gradient #${id}`;
-  const nft = await loadGradientNft(id);
+  const lookup = await loadGradientNft(id);
+  if (lookup.status === "missing") notFound();
+  const nft = lookup.status === "found" ? lookup.nft : null;
   const artist = getUsableText(nft?.artist);
   const description = [title, artist].filter(Boolean).join(" · ");
   return getAppMetadata(

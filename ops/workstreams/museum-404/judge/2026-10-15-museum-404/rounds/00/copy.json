@@ -1,0 +1,157 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "198ef8e6a159436ae3c56856dd8b246c25506a30",
+  "coverage": [
+    { "route": "/museum/network", "state": "default", "viewport": "1440x1000", "locale": "en-US", "status": "verified", "evidence": "evidence/candidate/home-1440x1000-full.png" },
+    { "route": "/museum/network", "state": "default", "viewport": "820x1000", "locale": "en-US", "status": "verified", "evidence": "evidence/candidate/home-820x1000-full.png" },
+    { "route": "/museum/network", "state": "default", "viewport": "390x844", "locale": "en-US", "status": "verified", "evidence": "evidence/candidate/home-390x844-full.png" },
+    { "route": "/museum/network/artists", "state": "default", "viewport": "1440x1000", "locale": "en-US", "status": "verified", "evidence": "evidence/candidate/artists-1440x1000-full.png" },
+    { "route": "/museum/network/artists", "state": "default", "viewport": "820x1000", "locale": "en-US", "status": "verified", "evidence": "evidence/candidate/artists-820x1000-full.png" },
+    { "route": "/museum/network/artists", "state": "default", "viewport": "390x844", "locale": "en-US", "status": "verified", "evidence": "evidence/candidate/artists-390x844-full.png" },
+    { "route": "/museum/network/acquisitions", "state": "default", "viewport": "1440x1000", "locale": "en-US", "status": "verified", "evidence": "evidence/candidate/acquisitions-1440x1000-full.png" },
+    { "route": "/museum/network/acquisitions", "state": "default", "viewport": "820x1000", "locale": "en-US", "status": "verified", "evidence": "evidence/candidate/acquisitions-820x1000-full.png" },
+    { "route": "/museum/network/acquisitions", "state": "default", "viewport": "390x844", "locale": "en-US", "status": "verified", "evidence": "evidence/candidate/acquisitions-390x844-full.png" },
+    { "route": "/museum/network/works/6529NM-W-0008", "state": "default", "viewport": "1440x1000", "locale": "en-US", "status": "verified", "evidence": "evidence/candidate/work-w-0008-1440x1000-full.png" },
+    { "route": "/museum/network/works/6529NM-W-0008", "state": "default", "viewport": "820x1000", "locale": "en-US", "status": "verified", "evidence": "evidence/candidate/work-w-0008-820x1000-full.png" },
+    { "route": "/museum/network/works/6529NM-W-0008", "state": "default", "viewport": "390x844", "locale": "en-US", "status": "verified", "evidence": "evidence/candidate/work-w-0008-390x844-full.png" },
+    { "route": "/museum/network/works/does-not-exist", "state": "default", "viewport": "1440x1000", "locale": "en-US", "status": "verified", "evidence": "evidence/candidate/work-not-found-1440x1000-full.png" },
+    { "route": "/museum/network/works/does-not-exist", "state": "default", "viewport": "820x1000", "locale": "en-US", "status": "verified", "evidence": "evidence/candidate/work-not-found-820x1000-full.png" },
+    { "route": "/museum/network/works/does-not-exist", "state": "default", "viewport": "390x844", "locale": "en-US", "status": "verified", "evidence": "evidence/candidate/work-not-found-390x844-full.png" }
+  ],
+  "dimensions": {
+    "J07": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/text/work-not-found-1440x1000.txt",
+        "evidence/candidate/text/acquisitions-1440x1000.txt",
+        "evidence/candidate/text/work-w-0008-1440x1000.txt",
+        "evidence/diff-candidate-vs-main.json"
+      ],
+      "findings": ["E-001", "E-002", "E-003", "E-004", "E-005", "E-006", "E-007"],
+      "note": "The copy the change touches (not-found: 'Record not found', one plain sentence, one action) is specific and correct, and the <main> text of all 15 cells is byte-identical to the baseline; every copy deficit found (a wrong program count, run-on and repeated labels, machine identifiers, abstract interpretive prose, a tab title) is pre-existing on main and filed P3 under the run-record repair-scope rule."
+    },
+    "J12": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/work-not-found-390x844-full.png",
+        "evidence/candidate/home-390x844-full.png",
+        "evidence/candidate/automated-checks.json"
+      ],
+      "findings": [],
+      "note": "Only en-US is pinned. The not-found copy is message-backed (museum.network.notFound.*), dates read in en-US form ('Aug 1, 2026'), text wraps at 390 and 820 with no clipped text or overflow in automated-checks.json; no translation coverage is claimed because no other locale is pinned."
+    }
+  },
+  "checks": {
+    "I1": "pass",
+    "I2": "pass",
+    "I3": "pass"
+  },
+  "findings": [
+    {
+      "id": "E-001",
+      "targets": ["I1", "J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/acquisitions · default · 1440x1000 · en-US (same text at 820x1000 and 390x844)",
+      "evidence": "evidence/candidate/text/acquisitions-1440x1000.txt",
+      "observation": "Pre-existing on main: the Acquisitions intro says 'Keys and Gates comprises twenty-three photographs selected for minting and acquisition.' The 'Keys and Gates' card on the same page says '16 works', the Museum home says 'its sixteen selected photographs', and the program record on the live build records sixteen selected works. The figure 23 matches the Artists index's '23 ARTISTS' tile, not the program. The text is identical on the baseline (evidence/main/text/acquisitions-1440x1000.txt).",
+      "consequence": "A visitor reading the index meets two different counts for the same program on one screen, and the larger one is not in the public record.",
+      "change": "Edit message museum.network.acquisitions.description to match the record: 'Keys and Gates comprises sixteen photographs selected for minting and acquisition.' (existing home wording: 'its sixteen selected photographs await minting and accession').",
+      "acceptance_check": "The Acquisitions intro and the Keys and Gates card both state 16 photographs, matching the home page and the program record, at 1440x1000, 820x1000 and 390x844.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-002",
+      "targets": ["J07"],
+      "severity": "P3",
+      "where": "/museum/network/works/does-not-exist · default · 1440x1000 · en-US (all viewports)",
+      "status": "open",
+      "evidence": "evidence/diff-candidate-vs-main.json",
+      "observation": "Pre-existing on main: after load, document.title of the unknown-work address is 'Museum object record' (and 'Artists' for an unknown artist address, checked on the live candidate), identical on the baseline. The raw HTML title is '6529 Network Museum' with robots noindex; the page body says 'Record not found'.",
+      "consequence": "Now that the address answers 404, the browser tab and history entry still read as a normal record page instead of saying the record was not found.",
+      "change": "Give the Museum not-found state its own title, for example 'Record not found | 6529 Network Museum', through the existing title helper and a message key.",
+      "acceptance_check": "document.title on an unknown Museum work, artist and acquisition address names the not-found state, and published records keep their current titles.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-003",
+      "targets": ["I2", "J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/works/6529NM-W-0008 · default · 1440x1000 · en-US (all viewports)",
+      "evidence": "evidence/candidate/work-w-0008-1440x1000-03.png",
+      "observation": "Pre-existing on main: the Object data list shows the machine identifiers 'serial 1085874' (in a code chip) and 'Source alias: OUT-001', and two labelled fields run together on one line ('Source alias: OUT-001 Submitted location/date: Cologne, Germany'). The byline under the title reads 'GulYildiz · not established' with no noun for what is not established.",
+      "consequence": "Visitors read submission-system identifiers as if they were museum record data, and cannot tell what 'not established' refers to.",
+      "change": "Put each Object data field on its own line; move serial and alias to the linked source record; change the byline to 'GulYildiz · Date not established' or omit the clause.",
+      "acceptance_check": "Each Object data field sits on its own line, no submission serial or OUT- alias appears in the public headline fields, and the byline names what is unestablished.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-004",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/works/6529NM-W-0008, /museum/network/acquisitions, /museum/network · default · 1440x1000 · en-US",
+      "evidence": "evidence/candidate/work-w-0008-1440x1000-04.png",
+      "observation": "Pre-existing on main: the work record states its status five times (Status line, Status chip, 'Selected and unminted. Acquisition and accession remain pending.', and STATUS twice under Collection context) and the credit line twice. Each Acquisitions card repeats 'Gift' three times ('Gift acquisition', 'METHOD Gift', 'Gift Acquisitions' link). The home page says the collection is held by the 6529 Network, governed through TDH and moving on-chain in both the strip and the 'How the Network Museum works' section.",
+      "consequence": "Repeated lines make the pages longer and weaken the one place the status is stated most clearly.",
+      "change": "Keep the Status and source note and the status chip on the work record and drop the other restatements; drop the second 'Gift' label on each card; state the TDH and on-chain sentence once on the home page.",
+      "acceptance_check": "Each status fact and each home institution claim appears once per page, and the work record's status reads the same wherever it remains.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-005",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/artists · default · 1440x1000 · en-US (all viewports)",
+      "evidence": "evidence/candidate/artists-1440x1000-03.png",
+      "observation": "Pre-existing on main: the 15 'Artists in current acquisitions' cards read '1 work Selected through an acquisition program; unminted · Keys and Gates', with the count and the status joined with no separator and the same 36-character status repeated 15 times. The first stat tile reads '13 PERMANENT COLLECTION' with no noun for what is counted.",
+      "consequence": "The index reads as a run-on string and the first count has no unit, so it is unclear it counts works.",
+      "change": "Separate the count from the status ('1 work · Keys and Gates'), state the unminted status once in the section intro, and label the tile '13 works in the permanent Collection'.",
+      "acceptance_check": "Each artist card shows the count and program as separate items, the section states the unminted status once, and all three stat tiles name what they count.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-006",
+      "targets": ["I3", "J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network · default · 1440x1000 · en-US (all viewports)",
+      "evidence": "evidence/candidate/home-1440x1000-03.png",
+      "observation": "Pre-existing on main: the home strip says 'Governed through TDH' and 'Open worldwide' as four-word labels, and the 'How the Network Museum works' section repeats 'governed through TDH', without saying what TDH is or who decides. 'Wave submission' and 'View Wave publication' also use 'Wave' with no gloss. The strip does sit beside real mechanisms (Museum Safe, Decisions, Public repository links), so I3 is not failed.",
+      "consequence": "A first-time visitor reads network vocabulary as atmosphere and has to leave the page to learn what the claim means.",
+      "change": "Spell out the term once where it first appears (for example 'Governed by TDH holders') or link 'TDH' and 'Wave' to the existing explanation; keep the Decisions link adjacent.",
+      "acceptance_check": "TDH and Wave are defined or linked at first use on the home and acquisition pages, and the governance claim sits next to the Decisions record.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-007",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/works/6529NM-W-0008 · default · 1440x1000 · en-US (all viewports)",
+      "evidence": "evidence/candidate/work-w-0008-1440x1000-03.png",
+      "observation": "Pre-existing on main: the Close looking and Curatorial interpretation paragraphs make the same point twice (the screen brightens the hall and filters the view beyond) in abstract phrasing: 'stillness gives architecture time to become authority, while the bright field beyond stays possible and undefined' and 'light made abundant and vision made partial'.",
+      "consequence": "The interpretive text reads as generated abstraction rather than a curator's observation, and duplicates itself.",
+      "change": "Merge the two paragraphs into one concrete description of what the photograph shows, and cut the 'possible and undefined' and 'abundant/partial' phrases.",
+      "acceptance_check": "The work record carries one non-repeating interpretive paragraph that names what is visible in the photograph.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "Not-found copy: 'Record not found', 'No record at this address appears in the current Museum release.' and the single 'Return to the Museum' action; plain, specific, message-backed (museum.network.notFound.*), and consistent with the Museum's existing 'current Museum release' vocabulary",
+    "The <main> text of all 15 cells is identical to the baseline, so the status change and the loading-skeleton removal introduced no copy change on published pages",
+    "Status language on the work record: 'Status: Selected; not yet minted or accessioned; not in the permanent Collection.' and 'Selected and unminted'",
+    "Attribution in 'Artist's account' ('Those meanings remain the artist's account.') that separates the artist's reading from the Museum's",
+    "Home hero copy ('A public museum for a network state' with the plain description beneath) and the 'Public record' links (Museum Safe, Decisions, Public repository) that sit beside the governance wording",
+    "No debug text, file paths, or brief-style phrases visible on any pinned cell"
+  ]
+}

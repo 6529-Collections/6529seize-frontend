@@ -5,6 +5,7 @@ import path from "node:path";
 
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 import { getFrontendRoot } from "@/config/frontendRoot.server";
 import type { PublicReviewPageDefinition } from "@/lib/public-review/publicReviewTypes";
 import {

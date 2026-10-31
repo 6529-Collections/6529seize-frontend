@@ -8,7 +8,6 @@ import {
   getProfileCollectedReturnContext,
   PROFILE_COLLECTED_RETURN_PARAM,
 } from "@/helpers/profile-collected-navigation";
-import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import JsonLdScript from "@/lib/structured-data/json-ld";
 import { canonicalUrl } from "@/lib/structured-data/utils";
 import { buildNextgenTokenPageJsonLd } from "@/lib/structured-data/nextgen";
@@ -19,6 +18,7 @@ import { getNextgenTitle } from "../../../title-utils";
 import NextGenTokenPageClient from "./NextGenTokenPageClient";
 import { fetchTokenData, getContentView } from "./page-utils";
 import { getNextgenTokenViewSegment } from "@/components/nextGen/collections/nextgenToken/nextgen-token-view.helpers";
+import { getNextgenRequestHeaders } from "@/app/nextgen/request-headers";
 
 const getTokenPath = (tokenId: number, view: NextgenCollectionView): string => {
   const viewSegment = getNextgenTokenViewSegment(view);
@@ -32,7 +32,7 @@ export async function generateMetadata({
   readonly params: Promise<{ token: string; view?: string[] | undefined }>;
 }): Promise<Metadata> {
   const { token, view } = await params;
-  const headers = await getAppCommonHeaders();
+  const headers = await getNextgenRequestHeaders();
   const data = await fetchTokenData(token, headers);
   if (!data) {
     return getAppMetadata(
@@ -92,7 +92,7 @@ export default async function NextGenTokenPage({
     : rawReturnTo;
   const returnTo =
     getProfileCollectedReturnContext(returnToValue)?.href ?? null;
-  const headers = await getAppCommonHeaders();
+  const headers = await getNextgenRequestHeaders();
   const data = await fetchTokenData(token, headers);
   if (!data) {
     notFound();

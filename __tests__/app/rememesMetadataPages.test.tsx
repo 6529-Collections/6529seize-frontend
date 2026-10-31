@@ -158,8 +158,9 @@ describe("ReMemes metadata", () => {
     expect(url.search).toBe("");
   });
 
-  it("falls back to a branded ReMeme NFT card when API data is missing", async () => {
-    (commonApiFetch as jest.Mock).mockResolvedValue({ data: [] });
+  it("falls back to a branded ReMeme NFT card when the API request fails", async () => {
+    (commonApiFetch as jest.Mock).mockRejectedValue("HTTP 503");
+    jest.spyOn(console, "error").mockImplementation(() => undefined);
 
     const metadata = await generateRememeDetailMetadata({
       params: Promise.resolve({ contract: "0xabc", id: "8" }),
@@ -184,7 +185,7 @@ describe("ReMemes metadata", () => {
 describe("ReMeme detail canonicals", () => {
   const contract = "0xe63f4e6ce4110a2fad3de9ed38e7ea5858eb953b";
   beforeEach(() => {
-    jest.mocked(commonApiFetch).mockResolvedValue({ data: [] });
+    jest.mocked(commonApiFetch).mockResolvedValue({ data: [{ metadata: {} }] });
   });
 
   it.each([
@@ -221,6 +222,19 @@ describe("ReMeme detail canonicals", () => {
         params: Promise.resolve({ contract, id }),
       });
       expect(metadata.alternates).toBeUndefined();
+    }
+  );
+
+  it.each(["-1", "1.5", "12oops", ""])(
+    "answers not found for invalid token %s when the API returns nothing",
+    async (id) => {
+      jest.mocked(commonApiFetch).mockResolvedValue({ data: [] });
+
+      await expect(
+        generateRememeDetailMetadata({
+          params: Promise.resolve({ contract, id }),
+        })
+      ).rejects.toMatchObject({ digest: "NEXT_HTTP_ERROR_FALLBACK;404" });
     }
   );
 });

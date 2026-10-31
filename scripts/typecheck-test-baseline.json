@@ -3,7 +3,7 @@
   "config": "tsconfig.jest.json",
   "toolchain": {
     "typescript_version": "5.9.3",
-    "pnpm_lock_sha256": "44a6c769d0b5951a5304e8d3f67b8dafaf98829c05574203123088f78aa71b22",
+    "pnpm_lock_sha256": "0dbc21f06d787470d3af59d57a4e19c1191374e9900ed6d83bf874da98a7eeed",
     "jest_tsconfig_sha256": "feda509a89cdd90cbcd9da6eecae28759c34c7aaae3725593ec2b1c022017062",
     "base_tsconfig_sha256": "fdbd8e548aed634324fd228e74d541ea702c1311597aa938741651e50de59c5f"
   },
@@ -25,7 +25,6 @@
     "__tests__/app/messagesPage.test.tsx": 1,
     "__tests__/app/messageWavePage.test.tsx": 1,
     "__tests__/app/nextgen/page.test.tsx": 1,
-    "__tests__/app/nextgen/token/page-utils.test.tsx": 1,
     "__tests__/app/nextgenMetadataPages.test.tsx": 4,
     "__tests__/app/omPages.test.tsx": 1,
     "__tests__/app/rememes/contract-id.test.tsx": 1,
@@ -425,7 +424,7 @@
     "__tests__/components/user/stats/activity/wallet/table/row/UserPageStatsActivityWalletTableRowMainAddress.test.tsx": 1,
     "__tests__/components/user/stats/UserPageStatsCollected.test.tsx": 4,
     "__tests__/components/user/stats/UserPageStatsTableShared.test.tsx": 1,
-    "__tests__/components/user/subscriptions/UserPageSubscriptions.test.tsx": 11,
+    "__tests__/components/user/subscriptions/UserPageSubscriptions.test.tsx": 8,
     "__tests__/components/user/subscriptions/UserPageSubscriptionsUpcoming.test.tsx": 2,
     "__tests__/components/user/user-page-header/banner/UserPageHeaderBanner.test.tsx": 1,
     "__tests__/components/user/user-page-header/name/ProfileCurationBadge.test.tsx": 1,
