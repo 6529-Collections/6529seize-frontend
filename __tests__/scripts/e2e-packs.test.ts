@@ -921,6 +921,49 @@ describe("E2E runner CLI resolution", () => {
     }
   );
 
+  it("runs the stateful staging E2EE pack only when selected by alias, serially", () => {
+    const postDeploy = run([
+      "--env",
+      "staging",
+      "--trigger",
+      "post-deploy",
+      "--list",
+    ]);
+    expect(postDeploy.status).toBe(0);
+    expect(postDeploy.stdout).not.toContain("test:e2e:staging:e2ee");
+
+    const selected = run([
+      "--env",
+      "staging",
+      "--trigger",
+      "manual",
+      "--pack",
+      "e2ee-staging",
+      "--list",
+    ]);
+    expect(selected.status).toBe(0);
+    expect(selected.stdout).toContain("resolved 1 pack(s)");
+    expect(selected.stdout).toContain(
+      "test:e2e:staging:e2ee (alias: e2ee-staging)"
+    );
+
+    const parallel = run([
+      "--env",
+      "staging",
+      "--trigger",
+      "manual",
+      "--pack",
+      "e2ee-staging",
+      "--parallel",
+      "3",
+      "--list",
+    ]);
+    expect(parallel.status).toBe(1);
+    expect(parallel.stderr).toContain(
+      "parallel execution is restricted to manifest-declared readonly packs"
+    );
+  });
+
   it.each(["staging", "production"])(
     "uses disjoint readonly %s post-deploy packs",
     (environment) => {

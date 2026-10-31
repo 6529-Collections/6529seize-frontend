@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       pack:
-        description: Post-deploy pack alias; use all for the full set
+        description: Post-deploy pack alias; use all for the full set. e2ee-staging is opt-in, never in all, and writes throwaway QA data.
         type: choice
         required: true
         default: all
@@ -28,6 +28,7 @@ on:
           - museum-inside-system
           - museum-rights
           - museum-network-ia
+          - e2ee-staging
       automatic_deploy_run_id:
         description: Successful Web Deploy - STAGING run ID; supplied automatically, required for a manual rerun
         type: string
@@ -323,6 +324,7 @@ jobs:
         run: ./bin/6529 exec playwright install chromium
 
       - name: Run read-only staging packs
+        if: env.SELECTED_PACK != 'e2ee-staging'
         env:
           MUSEUM_SELECTED_PACKS_JSON: ${{ steps.museum-selection.outputs.selected_packs }}
           MUSEUM_AVAILABLE_PACKS_JSON: ${{ steps.museum-selection.outputs.museum_packs }}
@@ -351,6 +353,26 @@ jobs:
           fi
           DEPLOYMENT_E2E_SOURCE_SHA="$DEPLOYED_SHA" \
             ./bin/6529 run e2e:packs -- "${args[@]}"
+
+      # Opt-in only: the pack writes throwaway QA data (wallets, test-only
+      # profiles, encrypted chats) to staging. Its manifest trigger is manual,
+      # so `all` above never selects it. The runner parallelizes readonly
+      # packs only, and a stateful run is never retried automatically.
+      - name: Run opt-in stateful staging pack
+        if: env.SELECTED_PACK == 'e2ee-staging'
+        env:
+          DEPLOYED_SHA: ${{ steps.source.outputs.sha }}
+          PLAYWRIGHT_STAGING_ACCESS_CODE: ${{ secrets.PLAYWRIGHT_STAGING_ACCESS_CODE }}
+        run: |
+          set -euo pipefail
+          DEPLOYMENT_E2E_SOURCE_SHA="$DEPLOYED_SHA" \
+            ./bin/6529 run e2e:packs -- \
+              --env staging \
+              --trigger manual \
+              --pack "$SELECTED_PACK" \
+              --artifact-root staging-e2e-artifacts \
+              --parallel 1 \
+              --retry-failed-packs 0
 
       - name: Preserve Museum selection and publication evidence
         if: always()
