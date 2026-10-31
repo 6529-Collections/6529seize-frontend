@@ -119,7 +119,10 @@ function NewConversationForm({ e2ee }: { readonly e2ee: UseE2eeResult }) {
 
   const engine = e2ee.engine;
   const profileIds = selected.map((person) => person.profileId);
-  const { statusFor, retry } = useE2eeEligibility(engine, profileIds);
+  const { statusFor, reasonFor, retry } = useE2eeEligibility(
+    engine,
+    profileIds
+  );
   const kind = resolveChatKind(selected.length, chosenKind);
   const allEligible =
     selected.length > 0 &&
@@ -197,6 +200,7 @@ function NewConversationForm({ e2ee }: { readonly e2ee: UseE2eeResult }) {
       <E2eePeoplePicker
         selected={selected}
         statusFor={statusFor}
+        reasonFor={reasonFor}
         onRetry={retry}
         onAdd={onAdd}
         onRemove={onRemove}

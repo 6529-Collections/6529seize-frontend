@@ -222,6 +222,8 @@ function createFakeDeliveryService(options = {}) {
     notifyLog: [],
     wakes: [],
     dmPolicy: new Map(),
+    /** GROUP_MEMBERS policy: profileId -> { members: Set, allowFollowed }. */
+    dmGroups: new Map(),
     follows: new Set(),
     blocks: new Set(),
     wallets: new Map(),
@@ -499,27 +501,59 @@ function createFakeDeliveryService(options = {}) {
 
   // -- policy (7.1) -------------------------------------------------------------
 
-  function policy(callerProfileId, targetProfileId) {
-    if (callerProfileId === targetProfileId) {
-      return activeDevicesOf(targetProfileId).length > 0 ? "OK" : "NO_DEVICES";
+  /**
+   * Mirrors the backend's shared DM admission (DirectMessageAdmissionService):
+   * the caller's own block is BLOCKED; the target's block of the caller is
+   * POLICY with the same reason as NOBODY, so it is never disclosed.
+   */
+  function admissionReason(callerProfileId, targetProfileId) {
+    if (s.blocks.has(`${callerProfileId}>${targetProfileId}`)) {
+      return "DM_SENDER_BLOCKED_RECIPIENT";
     }
-    if (
-      s.blocks.has(`${targetProfileId}>${callerProfileId}`) ||
-      s.blocks.has(`${callerProfileId}>${targetProfileId}`)
-    ) {
-      return "BLOCKED";
+    if (s.blocks.has(`${targetProfileId}>${callerProfileId}`)) {
+      return "DM_RECIPIENT_NOT_ACCEPTING";
     }
+    const follows = s.follows.has(`${targetProfileId}>${callerProfileId}`);
     const dm = s.dmPolicy.get(targetProfileId) || "EVERYONE";
     if (dm === "NOBODY") {
-      return "POLICY";
+      return "DM_RECIPIENT_NOT_ACCEPTING";
     }
-    if (
-      dm === "PEOPLE_I_FOLLOW" &&
-      !s.follows.has(`${targetProfileId}>${callerProfileId}`)
-    ) {
-      return "POLICY";
+    if (dm === "PEOPLE_I_FOLLOW" && !follows) {
+      return "DM_RECIPIENT_PEOPLE_I_FOLLOW_ONLY";
     }
-    return activeDevicesOf(targetProfileId).length > 0 ? "OK" : "NO_DEVICES";
+    if (dm === "GROUP_MEMBERS") {
+      const group = s.dmGroups.get(targetProfileId);
+      if (!group) {
+        // A missing group fails closed to people the target follows.
+        return follows ? null : "DM_RECIPIENT_PEOPLE_I_FOLLOW_ONLY";
+      }
+      if (group.members.has(callerProfileId)) return null;
+      if (group.allowFollowed && follows) return null;
+      return "DM_RECIPIENT_GROUP_MEMBERS_ONLY";
+    }
+    return null;
+  }
+
+  function decide(callerProfileId, targetProfileId) {
+    const reason =
+      callerProfileId === targetProfileId
+        ? null
+        : admissionReason(callerProfileId, targetProfileId);
+    if (reason) {
+      return {
+        status:
+          reason === "DM_SENDER_BLOCKED_RECIPIENT" ? "BLOCKED" : "POLICY",
+        reason,
+      };
+    }
+    return {
+      status: activeDevicesOf(targetProfileId).length > 0 ? "OK" : "NO_DEVICES",
+      reason: null,
+    };
+  }
+
+  function policy(callerProfileId, targetProfileId) {
+    return decide(callerProfileId, targetProfileId).status;
   }
 
   function popKeyPackage(deviceKey) {
@@ -588,11 +622,15 @@ function createFakeDeliveryService(options = {}) {
 
   function eligibility(profileId, body) {
     return {
-      results: (body.profile_ids || []).map((target) => ({
-        profile_id: target,
-        status: policy(profileId, target),
-        active_devices: activeDevicesOf(target).length,
-      })),
+      results: (body.profile_ids || []).map((target) => {
+        const { status, reason } = decide(profileId, target);
+        return {
+          profile_id: target,
+          status,
+          active_devices: activeDevicesOf(target).length,
+          ...(reason ? { reason } : {}),
+        };
+      }),
     };
   }
 
@@ -1347,9 +1385,17 @@ function createFakeDeliveryService(options = {}) {
   return {
     handle,
     state: s,
-    /** dmPolicy: "EVERYONE" | "PEOPLE_I_FOLLOW" | "NOBODY". */
+    /** dmPolicy: "EVERYONE" | "PEOPLE_I_FOLLOW" | "NOBODY" | "GROUP_MEMBERS". */
     setDmPolicy(profileId, value) {
       s.dmPolicy.set(profileId, value);
+    },
+    /** GROUP_MEMBERS with the given members; followed profiles bypass by default. */
+    setDmGroup(profileId, memberProfileIds, allowFollowed = true) {
+      s.dmPolicy.set(profileId, "GROUP_MEMBERS");
+      s.dmGroups.set(profileId, {
+        members: new Set(memberProfileIds),
+        allowFollowed,
+      });
     },
     /** The server attachment switch (E2EE_ATTACHMENTS_ENABLED). */
     setAttachmentsEnabled(enabled) {

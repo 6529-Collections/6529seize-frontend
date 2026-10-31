@@ -1412,7 +1412,7 @@ import { ApiE2eeDeviceLookupRequest } from '../models/ApiE2eeDeviceLookupRequest
 import { ApiE2eeDeviceLookupResponse } from '../models/ApiE2eeDeviceLookupResponse';
 import { ApiE2eeDevicePlatform } from '../models/ApiE2eeDevicePlatform';
 import { ApiE2eeDeviceRevocation } from '../models/ApiE2eeDeviceRevocation';
-import { ApiE2eeEligibility    } from '../models/ApiE2eeEligibility';
+import { ApiE2eeEligibility   , ApiE2eeEligibilityReasonEnum   } from '../models/ApiE2eeEligibility';
 import { ApiE2eeEligibilityRequest } from '../models/ApiE2eeEligibilityRequest';
 import { ApiE2eeEligibilityResponse } from '../models/ApiE2eeEligibilityResponse';
 import { ApiE2eeEligibilityStatus } from '../models/ApiE2eeEligibilityStatus';
@@ -2061,6 +2061,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiDropType",
     "ApiE2eeDeviceVerifiedViaEnum",
     "ApiE2eeDevicePlatform",
+    "ApiE2eeEligibilityReasonEnum",
     "ApiE2eeEligibilityStatus",
     "ApiE2eeLogItemTypeEnum",
     "ApiE2eeLogItemKindEnum",

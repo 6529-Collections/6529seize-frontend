@@ -48,7 +48,11 @@ export async function checkEligibility(
       profile_ids: unique.slice(offset, offset + MAX_ELIGIBILITY),
     });
     for (const result of response.results) {
-      out.push({ profileId: result.profile_id, status: result.status });
+      out.push({
+        profileId: result.profile_id,
+        status: result.status,
+        reason: result.reason ?? null,
+      });
     }
   }
   return out;
