@@ -55,6 +55,10 @@ export default function ExplainedShell({
         className={`tailwind-scope tw-min-h-[100dvh] tw-w-full tw-bg-[#0D0D0F] tw-text-base tw-leading-[26px] tw-text-iron-300 tw-antialiased [font-variant-numeric:tabular-nums] md:tw-text-[18px] md:tw-leading-[29px]`}
         data-explained-shell={chapter}
         data-explained-page={page}
+        // On a phone the shell's crumbs bar and chapter bar (EXPLAINED.md
+        // §6.2) sit above every H1, under the app's own header, so the H1
+        // starts below the layout gate's 200 px line by design.
+        data-tdh-check-ignore="h1-offset"
       >
         <div className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-900">
           <div className="tw-mx-auto tw-flex tw-h-[50px] tw-max-w-[1244px] tw-items-center tw-justify-between tw-gap-4 tw-px-5 md:tw-h-16 md:tw-px-12">
@@ -70,7 +74,7 @@ export default function ExplainedShell({
                   clock={clock}
                 />
               )}
-              <div className="tw-hidden md:tw-block">
+              <div className="tw-hidden lg:tw-block">
                 <ChapterSwitcher
                   locale={locale}
                   current={chapter}

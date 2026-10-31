@@ -32,7 +32,7 @@ export default function Breadcrumb({
           return (
             <li
               key={`${crumb.label}-${crumb.href ?? ""}`}
-              className={`tw-items-center tw-gap-2.5 ${last ? "tw-flex tw-min-w-0" : "tw-hidden md:tw-flex"}`}
+              className={`tw-items-center tw-gap-2.5 ${last ? "tw-flex tw-min-w-0" : "tw-hidden lg:tw-flex"}`}
             >
               {last || crumb.href === undefined ? (
                 <span className={`tw-truncate ${here}`} {...current}>

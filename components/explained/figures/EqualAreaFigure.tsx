@@ -66,7 +66,7 @@ function texts(items: readonly EditionArea[], locale: SupportedLocale) {
   };
 }
 
-/** From `md` up: one baseline, each edition to scale, all about the same area. */
+/** From `lg` up: one baseline, each edition to scale, all about the same area. */
 function EqualWide({ items, locale }: EqualProps) {
   const [ref, width] = useMeasuredWidth<HTMLDivElement>(900);
   const t = texts(items, locale);
@@ -123,6 +123,9 @@ function EqualWide({ items, locale }: EqualProps) {
   );
 }
 
+/** Below this width the per-day area moves under the copies, off the name's line. */
+const ROWS_STACK_WIDTH = 320;
+
 /** On a phone: one row per edition, the widest edition the full width. */
 function EqualRows({ items, locale }: EqualProps) {
   const [ref, width] = useMeasuredWidth<HTMLDivElement>(350);
@@ -130,11 +133,15 @@ function EqualRows({ items, locale }: EqualProps) {
   const maxCopies = Math.max(...items.map((item) => item.copies));
   const scaleX = (width - 4) / maxCopies;
   const scaleY = 150 / t.maxRate;
+  const stack = width < ROWS_STACK_WIDTH;
+  const head = stack ? 65 : 46;
   const height =
-    items.reduce((sum, item) => sum + (item.rateCents / 100) * scaleY + 64, 0) +
-    20;
+    items.reduce(
+      (sum, item) => sum + (item.rateCents / 100) * scaleY + head + 18,
+      0
+    ) + 20;
   const tops = offsets(
-    items.map((item) => (item.rateCents / 100) * scaleY + 64)
+    items.map((item) => (item.rateCents / 100) * scaleY + head + 18)
   );
   return (
     <div ref={ref} className="tw-w-full tw-min-w-0" data-fig="equal">
@@ -148,9 +155,9 @@ function EqualRows({ items, locale }: EqualProps) {
                 {item.name}
               </Label>
               <Label
-                x={width}
-                y={at + 16}
-                anchor="end"
+                x={stack ? 0 : width}
+                y={stack ? at + 54 : at + 16}
+                anchor={stack ? "start" : "end"}
                 size={13}
                 weight={600}
                 tone={item.you ? "you" : "ink2"}
@@ -162,7 +169,7 @@ function EqualRows({ items, locale }: EqualProps) {
               </Label>
               <rect
                 x={0}
-                y={at + 46}
+                y={at + head}
                 width={Math.max(2, item.copies * scaleX)}
                 height={h}
                 fill={t.fill(item)}
@@ -184,10 +191,10 @@ function EqualRows({ items, locale }: EqualProps) {
 export default function EqualAreaFigure(props: EqualProps) {
   return (
     <>
-      <div className="md:tw-hidden">
+      <div className="lg:tw-hidden">
         <EqualRows {...props} />
       </div>
-      <div className="max-md:tw-hidden">
+      <div className="max-lg:tw-hidden">
         <EqualWide {...props} />
       </div>
     </>

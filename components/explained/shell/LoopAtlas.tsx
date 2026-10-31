@@ -86,7 +86,7 @@ export default function LoopAtlas({
               {station.name}
             </span>
             <span
-              className="tw-mt-2 tw-block tw-text-[26px] tw-font-semibold tw-leading-8 tw-tracking-[-0.02em] tw-text-primary-300"
+              className="tw-mt-2 tw-block tw-text-[26px] tw-font-semibold tw-leading-8 tw-tracking-[-0.02em] tw-text-primary-300 max-[359px]:tw-text-xl"
               {...(station.fact ? { "data-fact": station.fact } : {})}
             >
               {station.num}

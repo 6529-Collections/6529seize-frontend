@@ -56,7 +56,7 @@ function LoopList({ stations, focus, verify, locale }: LoopProps) {
           return (
             <li
               key={station.key}
-              className={`tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-gap-x-3 tw-gap-y-0.5 tw-rounded-[10px] tw-border tw-border-solid tw-px-3.5 tw-py-3 ${on ? "tw-border-primary-400 tw-bg-primary-400/10" : "tw-border-iron-800 tw-bg-iron-950"}`}
+              className={`tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-gap-x-3 max-[359px]:tw-grid-cols-1 tw-gap-y-0.5 tw-rounded-[10px] tw-border tw-border-solid tw-px-3.5 tw-py-3 ${on ? "tw-border-primary-400 tw-bg-primary-400/10" : "tw-border-iron-800 tw-bg-iron-950"}`}
               data-station={station.key}
               {...(on ? { "aria-current": "step" as const } : {})}
             >
@@ -69,7 +69,7 @@ function LoopList({ stations, focus, verify, locale }: LoopProps) {
               >
                 {station.num}
               </span>
-              <span className="tw-col-span-2 tw-text-[15px] tw-leading-[23px] tw-text-iron-400">
+              <span className="tw-col-span-2 tw-text-[15px] tw-leading-[23px] tw-text-iron-400 max-[359px]:tw-col-span-1">
                 {station.sub}
               </span>
             </li>
@@ -309,17 +309,17 @@ function LoopCircle({ stations, focus, verify, locale }: LoopProps) {
 }
 
 /**
- * The loop, drawn for the width it gets: a list on a phone, the circle from
- * `md` up. Both are in the page and CSS shows one, so nothing moves when
+ * The loop, drawn for the width it gets: a list until the circle has room
+ * for its labels (about 560 px), the circle from `xl` up. Both are in the page and CSS shows one, so nothing moves when
  * the page hydrates.
  */
 export default function LoopFigure(props: LoopProps) {
   return (
     <>
-      <div className="md:tw-hidden">
+      <div className="xl:tw-hidden">
         <LoopList {...props} />
       </div>
-      <div className="max-md:tw-hidden">
+      <div className="max-xl:tw-hidden">
         <LoopCircle {...props} />
       </div>
     </>

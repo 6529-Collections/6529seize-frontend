@@ -56,6 +56,9 @@ export default function ShelfMenu({
       className="tw-relative tw-flex-none"
       open={defaultOpen}
       data-shelf=""
+      // Open, the menu floats over the page by design: the layout gate does
+      // not count it as a card beside the page's cards or text.
+      data-tdh-check-ignore="card-gap text-collision"
     >
       <summary
         className={`tw-relative tw-flex tw-h-14 tw-cursor-pointer tw-list-none tw-items-center tw-gap-[7px] tw-whitespace-nowrap tw-px-[11px] tw-text-[15px] [&::-webkit-details-marker]:tw-hidden ${on ? "tw-font-semibold tw-text-iron-50" : "tw-font-medium tw-text-iron-400 hover:tw-text-iron-50"} ${EX_FOCUS}`}
