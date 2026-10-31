@@ -32,6 +32,7 @@ import {
 } from "../e2eeFormat";
 import { E2eeAvatar } from "../ui/E2eeAvatar";
 import { E2eeAttachmentView } from "./E2eeAttachmentView";
+import { E2eeImportedNote, importedAuthorName } from "./E2eeImportedNote";
 import { splitMentions } from "./e2eeMentions";
 
 const QUICK_REACTIONS = ["👍", "❤️", "😂", "🔥", "👀", "🎉"] as const;
@@ -443,6 +444,7 @@ function MessageMarkers({ message }: { readonly message: E2eeMessage }) {
   const locale = useBrowserLocale();
   return (
     <>
+      {message.imported ? <E2eeImportedNote.Badge /> : null}
       {message.editedAt !== null && !message.deleted ? (
         <span className="tw-text-xs tw-text-iron-500">
           ({t(locale, "e2ee.message.edited")})
@@ -464,6 +466,7 @@ function MessageMarkers({ message }: { readonly message: E2eeMessage }) {
 }
 
 const hasMarkers = (message: E2eeMessage) =>
+  message.imported !== undefined ||
   (message.editedAt !== null && !message.deleted) ||
   message.pending ||
   (!message.sigOk && !message.undecryptable);
@@ -482,6 +485,8 @@ function MessageMeta({
   readonly compact: boolean;
 }) {
   const locale = useBrowserLocale();
+  // Imported history shows its original time (claimed by the server copy).
+  const shownTs = message.imported?.createdAt ?? message.ts;
   if (compact) {
     return (
       <>
@@ -500,11 +505,11 @@ function MessageMeta({
         {name}
       </span>
       <time
-        dateTime={new Date(message.ts).toISOString()}
-        title={formatE2eeDateTime(locale, message.ts)}
+        dateTime={new Date(shownTs).toISOString()}
+        title={formatE2eeDateTime(locale, shownTs)}
         className="tw-text-xs tw-text-iron-500"
       >
-        {formatE2eeTimestamp(locale, message.ts)}
+        {formatE2eeTimestamp(locale, shownTs)}
       </time>
       <MessageMarkers message={message} />
     </div>
@@ -531,13 +536,18 @@ function E2eeMessageItemComponent({
       />
     );
   }
-  const sender = findMember(conversation.members, message.senderProfileId);
-  const name = getMemberName(
+  const authorProfileId =
+    message.imported?.authorProfileId ?? message.senderProfileId;
+  const sender = findMember(conversation.members, authorProfileId);
+  const senderName = getMemberName(
     locale,
     conversation.members,
     message.senderProfileId,
     selfProfileId
   );
+  const name = message.imported
+    ? importedAuthorName(locale, message.imported, selfProfileId)
+    : senderName;
   const isOwn =
     selfProfileId !== null && message.senderProfileId === selfProfileId;
   const showActions =
@@ -572,6 +582,13 @@ function E2eeMessageItemComponent({
           conversation={conversation}
           selfProfileId={selfProfileId}
         />
+        {message.imported && !message.deleted ? (
+          <E2eeImportedNote
+            imported={message.imported}
+            importerName={senderName}
+            showDetail={!compact}
+          />
+        ) : null}
         {!message.deleted &&
         !message.undecryptable &&
         message.attachments.length > 0 ? (
@@ -601,7 +618,7 @@ function E2eeMessageItemComponent({
             message={message}
             isOwn={isOwn}
             selfProfileId={selfProfileId}
-            senderName={name}
+            senderName={senderName}
             actions={actions}
           />
         </div>

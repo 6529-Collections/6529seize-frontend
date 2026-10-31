@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { useAuth } from "@/components/auth/Auth";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
+import { EncryptedFirstDmActions } from "@/components/e2ee/legacy/EncryptedFirstDmActions";
+import { isE2eeEnabled } from "@/config/e2eeEnv";
 import Button from "@/components/utils/button/Button";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -131,6 +133,7 @@ export default function CreateDirectMessage({
     }
   };
 
+  const encryptedFirst = isE2eeEnabled();
   let buttonLabel = t(locale, "quickDm.createMessage");
   if (isCreating) {
     buttonLabel = t(locale, "quickDm.creating");
@@ -142,6 +145,9 @@ export default function CreateDirectMessage({
     buttonLabel = t(locale, "quickDm.createMessagePeople", {
       count: formatNumber(locale, selectedIdentities.length),
     });
+  }
+  if (encryptedFirst && !isCreating) {
+    buttonLabel = t(locale, "e2ee.legacy.create.unencrypted");
   }
 
   return (
@@ -181,19 +187,25 @@ export default function CreateDirectMessage({
       <div
         className={`tw-flex-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-900 tw-px-4 tw-pt-3 ${isNativePage && !isKeyboardVisible ? "tw-pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]" : "tw-pb-3"}`}
       >
-        <Button
-          type="submit"
-          variant="action"
-          size="lg"
-          fullWidth
-          loading={isCreating}
-          disabled={selectedIdentities.length === 0}
-          className="tw-min-h-[50px]"
-        >
-          <span className="tw-min-w-0 tw-whitespace-normal tw-break-all">
-            {buttonLabel}
-          </span>
-        </Button>
+        <EncryptedFirstDmActions
+          selected={selectedIdentities}
+          onEncrypted={onSuccess}
+          unencryptedButton={
+            <Button
+              type="submit"
+              variant={encryptedFirst ? "secondary" : "action"}
+              size={encryptedFirst ? "md" : "lg"}
+              fullWidth
+              loading={isCreating}
+              disabled={selectedIdentities.length === 0}
+              className={encryptedFirst ? undefined : "tw-min-h-[50px]"}
+            >
+              <span className="tw-min-w-0 tw-whitespace-normal tw-break-all">
+                {buttonLabel}
+              </span>
+            </Button>
+          }
+        />
       </div>
     </form>
   );

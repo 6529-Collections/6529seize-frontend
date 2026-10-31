@@ -11,9 +11,10 @@ member list inside a chat, and it cannot add a device to a chat.
 Chats use the MLS protocol (RFC 9420) through a WebAssembly build of OpenMLS
 that runs in the browser or app.
 
-Existing direct messages are not changed. They stay where they are, are not
-moved into encrypted chats, and their header now says **Not end-to-end
-encrypted**.
+Existing direct messages are not end-to-end encrypted, and 6529 deletes
+them from its servers, backups included, on **1 December 2026** (see
+[Unencrypted direct messages](#unencrypted-direct-messages)). Until then you
+can export them or move them into an encrypted chat.
 
 ## Availability
 
@@ -166,6 +167,41 @@ what is shared:
 Everything else is handled with blocking, muting and the "who can message you"
 setting. Reports are kept for 180 days unless trust and safety holds them.
 
+## Unencrypted direct messages
+
+Direct messages started before encrypted chats are stored by 6529 in plain
+text. Every such conversation shows a notice above the message box:
+**Not end-to-end encrypted. This history will be deleted from 6529’s servers
+on Dec 1, 2026.** (the date follows your language settings). The notice
+offers:
+
+- **Export history**: reads every message you can see in the conversation
+  and downloads it from your browser as a readable page (HTML) or as data
+  (JSON). Images and files are listed as links, which stop working on the
+  deletion date. The file is made on your device and is not encrypted.
+- **Start encrypted chat**: opens a new encrypted chat with the same people.
+- **Open encrypted chat** and **Move history**, once an encrypted chat with
+  exactly the same people exists on this device. **Move history** copies the
+  messages you can see, oldest first, into that chat, with their images and
+  files when they can be moved. Each copied message shows its original
+  author and time with the label **Imported, not verified**: 6529 held these
+  messages unencrypted, so the encrypted chat cannot prove who wrote them.
+  Keep the page open while it runs; you can stop and continue later, and
+  nothing is copied twice, even if another member also moves the history.
+  Copied messages reach only the people and devices in the encrypted chat at
+  that time, and do not notify anyone. They appear in their original order,
+  after anything already sent in the encrypted chat.
+
+The conversation becomes read-only once an encrypted chat with the same
+people exists on your device; new messages go to the encrypted chat. From
+1 December 2026 every unencrypted conversation is closed and its history is
+gone from 6529's servers. Copies 6529 cannot recall stay where they are: your
+own exports, push notification previews already delivered to phones, and
+attachments that were published to public IPFS.
+
+Encrypted uploads are limited per day, so moving a long history with many
+images may pause; continue the next day to move the rest.
+
 ## Limitations
 
 - No backup or history transfer: a new device sees only messages sent after
@@ -173,7 +209,8 @@ setting. Reports are kept for 180 days unless trust and safety holds them.
 - Retention on the delivery service is limited (messages 90 days); history
   lives on your devices.
 - Search is local to the device.
-- Plaintext direct messages are not migrated.
+- Moved history is labelled as imported and is not verified. Members and
+  devices that join the encrypted chat later do not see it.
 
 ## Troubleshooting
 

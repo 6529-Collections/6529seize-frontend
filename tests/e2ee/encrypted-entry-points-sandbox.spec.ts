@@ -63,9 +63,18 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
     await expect(
       alice.page.getByText("Not end-to-end encrypted").first()
     ).toBeVisible({ timeout: 120_000 });
-    await alice.page
-      .getByRole("button", { name: "Start encrypted chat" })
-      .click();
+    // D146: the thread states when 6529 deletes its unencrypted copy, and
+    // its notice starts the encrypted chat (the header offers the same).
+    const notice = alice.page.getByRole("region", {
+      name: "Unencrypted chat notice",
+    });
+    await expect(notice).toContainText(
+      "This history will be deleted from 6529’s servers on Dec 1, 2026."
+    );
+    await expect(
+      notice.getByRole("button", { name: "Export history" })
+    ).toBeVisible();
+    await notice.getByRole("button", { name: "Start encrypted chat" }).click();
 
     await expect(alice.page).toHaveURL(new RegExp(`${ENCRYPTED_ROUTE}/new$`), {
       timeout: E2EE_UI_TIMEOUT_MS,

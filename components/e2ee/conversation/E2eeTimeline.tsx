@@ -24,8 +24,12 @@ const isGroupedWith = (
   previous?.kind === "message" &&
   message.kind === "message" &&
   previous.senderProfileId === message.senderProfileId &&
+  previous.imported?.authorProfileId === message.imported?.authorProfileId &&
   message.reply === null &&
-  Math.abs(message.ts - previous.ts) < GROUP_WINDOW_MS;
+  Math.abs(
+    (message.imported?.createdAt ?? message.ts) -
+      (previous.imported?.createdAt ?? previous.ts)
+  ) < GROUP_WINDOW_MS;
 
 const getSequencedMax = (messages: readonly E2eeMessage[]): number => {
   let max = 0;
