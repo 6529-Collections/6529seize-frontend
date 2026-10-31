@@ -12,6 +12,10 @@ import {
   sanitizeSentryText as sanitizeString,
 } from "./monitoring/sentryTextSanitizer";
 
+// Free-text redaction (credentials and sensitive query values), shared with
+// the Sentry log sanitizer.
+export { sanitizeString };
+
 const REDACTED = "[Filtered]";
 const THIRD_PARTY = "third-party";
 const URL_IS_FIRST_PARTY_KEY = "url.is_first_party";
@@ -35,9 +39,9 @@ const SENTRY_IDENTIFIER_PARENT_SEGMENTS = new Set(
 const SENTRY_IDENTIFIER_CONTAINER_PATTERN = /^(?:author|media)[_-]/;
 const SENTRY_ROUTE_PLACEHOLDER_PATTERN =
   /^(?::[a-z][a-z0-9_-]*|\[\[?(?:\.\.\.)?[a-z][a-z0-9_-]*\]?\])$/i;
-const URL_VALUE_KEY_PATTERN =
+export const URL_VALUE_KEY_PATTERN =
   /^(?:from|http\.target|http\.url|request_path|targetUrl|to|url|url\.full|url\.path)$/i;
-const URL_DETAIL_KEY_PATTERN =
+export const URL_DETAIL_KEY_PATTERN =
   /^(?:http\.(?:fragment|query)|url\.(?:fragment|query))$/i;
 const HOST_VALUE_KEY_PATTERN = /^(?:http\.host|server\.address|url\.domain)$/i;
 const HOST_ATTRIBUTION_VALUES = new Set(
