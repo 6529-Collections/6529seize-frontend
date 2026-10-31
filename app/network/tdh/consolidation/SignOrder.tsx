@@ -25,7 +25,7 @@ export default function SignOrder({
 }) {
   return (
     <figure
-      className="tw-m-0 tw-mt-8 tw-grid tw-grid-cols-2 tw-gap-2.5 md:tw-grid-cols-4"
+      className="tw-m-0 tw-mt-8 tw-grid tw-grid-cols-1 tw-gap-2.5 min-[360px]:tw-grid-cols-2 md:tw-grid-cols-4"
       aria-label={wt(locale, "explained.tdh.wallets.add.orderAria")}
       data-signorder=""
     >

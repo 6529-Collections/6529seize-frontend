@@ -18,6 +18,9 @@ import { rich } from "./_kit/rich";
 import { ht } from "./copy";
 import TotalsLens from "./TotalsLens";
 
+/** The stat row's numbers on the narrowest screens, so ten digits fit. */
+const NUM_NARROW = "max-[379px]:tw-text-[24px] max-[379px]:tw-leading-8";
+
 /**
  * Then, the network (steps 13 and 14): every identity's TDH added up, from
  * the latest result of the daily comparison, and the cutover (D132). Every
@@ -109,7 +112,9 @@ export default function NetworkSection({
         <figure className="tw-m-0 tw-mt-12">
           <div className="tw-grid tw-grid-cols-2 tw-gap-x-3 tw-gap-y-[18px] lg:tw-grid-cols-[minmax(0,1.45fr)_repeat(3,minmax(0,1fr))] lg:tw-gap-4">
             <div className="tw-col-span-2 lg:tw-col-span-1">
-              <span className={`tw-block ${EX_TEXT.numL}`}>{v(total)}</span>
+              <span className={`tw-block ${EX_TEXT.numL} ${NUM_NARROW}`}>
+                {v(total)}
+              </span>
               <span className={`tw-mt-1 tw-block ${EX_TEXT.cap}`}>
                 {rich(locale, "explained.tdh.how.n.statTotal", {
                   cycle: v(cycle),
@@ -117,7 +122,7 @@ export default function NetworkSection({
               </span>
             </div>
             <div>
-              <span className={`tw-block ${EX_TEXT.numL}`}>
+              <span className={`tw-block ${EX_TEXT.numL} ${NUM_NARROW}`}>
                 {v(identities)}
               </span>
               <span className={`tw-mt-1 tw-block ${EX_TEXT.cap}`}>
@@ -125,13 +130,17 @@ export default function NetworkSection({
               </span>
             </div>
             <div>
-              <span className={`tw-block ${EX_TEXT.numL}`}>{v(wallets)}</span>
+              <span className={`tw-block ${EX_TEXT.numL} ${NUM_NARROW}`}>
+                {v(wallets)}
+              </span>
               <span className={`tw-mt-1 tw-block ${EX_TEXT.cap}`}>
                 {ht(locale, "explained.tdh.how.n.statWallets")}
               </span>
             </div>
             <div className="tw-col-span-2 lg:tw-col-span-1">
-              <span className={`tw-block ${EX_TEXT.numL}`}>{v(delta)}</span>
+              <span className={`tw-block ${EX_TEXT.numL} ${NUM_NARROW}`}>
+                {v(delta)}
+              </span>
               {previous && days && (
                 <span className={`tw-mt-1 tw-block ${EX_TEXT.cap}`}>
                   {rich(locale, "explained.tdh.how.n.statDelta", {

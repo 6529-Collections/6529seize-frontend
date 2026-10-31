@@ -45,6 +45,24 @@ export default function TotalsLens({
   const cents = (value: number) => formatCents(locale, value / 100);
   const wallets = model.broken;
   const walletSum = values.aTdh + values.bTdh;
+  /** A record's name, with its cards and its boost on a second line. */
+  const record = (
+    name: "walletA" | "walletB" | "identity",
+    cards: number,
+    boostCents: number
+  ) => (
+    <>
+      <span className="tw-block">
+        {ht(locale, `explained.tdh.how.totals.${name}`)}
+      </span>
+      <span className="tw-block tw-text-[13px] tw-leading-5 tw-text-iron-400">
+        {ht(locale, "explained.tdh.how.totals.recordLine", {
+          count: n(cards),
+          boost: cents(boostCents),
+        })}
+      </span>
+    </>
+  );
   const short = values.linkedTdh - walletSum;
 
   return (
@@ -59,39 +77,25 @@ export default function TotalsLens({
           caption={ht(locale, "explained.tdh.how.totals.caption")}
           head={[
             ht(locale, "explained.tdh.how.totals.record"),
-            ht(locale, "explained.tdh.how.totals.cards"),
-            ht(locale, "explained.tdh.how.totals.boost"),
             ht(locale, "explained.tdh.how.totals.tdh"),
           ]}
           rows={[
             {
               key: "a",
-              label: ht(locale, "explained.tdh.how.totals.walletA"),
-              values: [
-                n(values.inA),
-                cents(values.apartBoostCents),
-                n(values.aTdh),
-              ],
+              label: record("walletA", values.inA, values.apartBoostCents),
+              values: [n(values.aTdh)],
               tone: wallets ? "on" : "off",
             },
             {
               key: "b",
-              label: ht(locale, "explained.tdh.how.totals.walletB"),
-              values: [
-                n(values.inB),
-                cents(values.apartBoostCents),
-                n(values.bTdh),
-              ],
+              label: record("walletB", values.inB, values.apartBoostCents),
+              values: [n(values.bTdh)],
               tone: wallets ? "on" : "off",
             },
             {
               key: "identity",
-              label: ht(locale, "explained.tdh.how.totals.identity"),
-              values: [
-                n(values.cards),
-                cents(values.boostCents),
-                n(values.linkedTdh),
-              ],
+              label: record("identity", values.cards, values.boostCents),
+              values: [n(values.linkedTdh)],
               tone: wallets ? "off" : "on",
             },
           ]}

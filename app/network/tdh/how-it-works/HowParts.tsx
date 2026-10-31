@@ -99,7 +99,7 @@ export default function HowParts({
     <figure className="tw-m-0 tw-mt-10 md:tw-mt-12">
       <nav
         aria-label={ht(locale, "explained.tdh.how.parts.label")}
-        className="tw-grid tw-grid-cols-2 tw-gap-2.5 lg:tw-grid-cols-4 lg:tw-gap-3.5"
+        className="tw-grid tw-grid-cols-1 tw-gap-2.5 min-[360px]:tw-grid-cols-2 lg:tw-grid-cols-4 lg:tw-gap-3.5"
       >
         {PARTS.map((part) => (
           <a

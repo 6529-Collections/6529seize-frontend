@@ -50,8 +50,8 @@ export default function EligibilityLens({
     () => ({ before: caseI(false), after: caseI(true) }),
     []
   );
-  const picked = mints.find((entry) => entry.id === model.state.card);
-  if (!day || !picked?.fact) {
+  const found = mints.find((entry) => entry.id === model.state.card);
+  if (!day) {
     return (
       <p className="tw-m-0 tw-rounded-xl tw-border tw-border-dashed tw-border-iron-700 tw-p-5 tw-text-[15px] tw-leading-6 tw-text-iron-400">
         {ht(locale, "explained.tdh.how.model.unavailable")}
@@ -59,11 +59,25 @@ export default function EligibilityLens({
     );
   }
   const n = (value: number) => formatCount(locale, value);
-  const mint = secondsOf(picked.fact.value);
-  const result = firstDay({ example: mint, dayS: day.value }, "example", false);
-  const from = result.first ?? firstCountingResult(mint, day.value);
-  const card = `Meme #${picked.id}`;
-  const when = `${utcDay(locale, mint)}, ${utcClock(locale, mint)} UTC`;
+  // The real part needs the newest cards' first mints; when 6529.io could
+  // not give them, the lens says so and its Break it still runs.
+  const real = found?.fact
+    ? (() => {
+        const mint = secondsOf(found.fact.value);
+        const result = firstDay(
+          { example: mint, dayS: day.value },
+          "example",
+          false
+        );
+        return {
+          id: found.id,
+          result,
+          from: result.first ?? firstCountingResult(mint, day.value),
+          card: `Meme #${found.id}`,
+          when: `${utcDay(locale, mint)}, ${utcClock(locale, mint)} UTC`,
+        };
+      })()
+    : null;
   const dayText = formatCount(locale, day.value);
   const broken = model.broken;
   const { before, after } = cases;
@@ -73,7 +87,7 @@ export default function EligibilityLens({
       value ? "explained.tdh.how.eligible.yes" : "explained.tdh.how.eligible.no"
     );
 
-  const stage = broken ? (
+  const caseStage = (
     <div className="tw-grid tw-gap-4">
       <p className="tw-m-0 tw-text-[15px] tw-leading-6 tw-text-iron-300">
         <b className={B}>{ht(locale, "explained.tdh.how.eligible.iLead")}</b>{" "}
@@ -122,7 +136,13 @@ export default function EligibilityLens({
         ]}
       />
     </div>
-  ) : (
+  );
+  const missingStage = (
+    <p className="tw-m-0 tw-rounded-xl tw-border tw-border-dashed tw-border-iron-700 tw-p-5 tw-text-[15px] tw-leading-6 tw-text-iron-400">
+      {ht(locale, "explained.tdh.how.eligible.unavailable")}
+    </p>
+  );
+  const realStage = real && (
     <>
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2">
         <span className="tw-text-sm tw-font-semibold tw-text-iron-400">
@@ -131,7 +151,7 @@ export default function EligibilityLens({
         <Seg
           label={ht(locale, "explained.tdh.how.eligible.pickGroup")}
           attr="card"
-          value={String(picked.id)}
+          value={String(real.id)}
           onChange={(value) => model.set({ card: Number(value) })}
           options={mints.map((entry) => ({
             value: String(entry.id),
@@ -140,12 +160,12 @@ export default function EligibilityLens({
         />
       </div>
       <FirstDayTimeline
-        result={result}
+        result={real.result}
         locale={locale}
         label={ht(locale, "explained.tdh.how.eligible.aria", {
-          card,
-          when,
-          date: utcDay(locale, from),
+          card: real.card,
+          when: real.when,
+          date: utcDay(locale, real.from),
         })}
         startText={(at) =>
           ht(locale, "explained.tdh.how.eligible.mintedAt", { when: at })
@@ -153,6 +173,8 @@ export default function EligibilityLens({
       />
     </>
   );
+  let stage = realStage ?? missingStage;
+  if (broken) stage = caseStage;
 
   return (
     <Lens
@@ -175,14 +197,14 @@ export default function EligibilityLens({
             text: ht(locale, "explained.tdh.how.eligible.ruleFirstMint"),
             on: broken,
           },
-          ...(broken
+          ...(broken || real === null
             ? []
             : [
                 {
                   text: (
                     <>
-                      {`#${picked.id}: firstMint = `}
-                      <RuleValue>{when}</RuleValue>
+                      {`#${real.id}: firstMint = `}
+                      <RuleValue>{real.when}</RuleValue>
                     </>
                   ),
                 },
@@ -211,12 +233,20 @@ export default function EligibilityLens({
           />
         ) : (
           <Readout
-            big={utcDay(locale, from)}
-            say={ht(locale, "explained.tdh.how.eligible.say", {
-              card,
-              when,
-              date: utcLongWeekday(locale, from),
-            })}
+            big={
+              real === null
+                ? ht(locale, "explained.tdh.how.firstday.none")
+                : utcDay(locale, real.from)
+            }
+            say={
+              real === null
+                ? ht(locale, "explained.tdh.how.eligible.sayUnavailable")
+                : ht(locale, "explained.tdh.how.eligible.say", {
+                    card: real.card,
+                    when: real.when,
+                    date: utcLongWeekday(locale, real.from),
+                  })
+            }
           />
         )
       }
@@ -243,7 +273,7 @@ export default function EligibilityLens({
             },
           ]}
           tag={
-            broken
+            broken || real === null
               ? {
                   kind: "example",
                   text: ht(locale, "explained.tdh.how.eligible.tagCase"),

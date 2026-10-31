@@ -12,8 +12,10 @@ import { fixtureFactInputs } from "@/lib/explained/fixtureInputs";
  * example and its Break it reaches the rule's edge, with the readouts the
  * design and the Lean manifest give.
  */
+const mockInputs = jest.fn(fixtureFactInputs);
+
 jest.mock("@/lib/explained/feed.server", () => ({
-  loadFactBook: async () => createFactBook(fixtureFactInputs()),
+  loadFactBook: async () => createFactBook(mockInputs()),
 }));
 
 async function renderPage(locale?: string) {
@@ -155,6 +157,26 @@ describe("How TDH is calculated", () => {
     expect(model).toHaveTextContent("Where the rule reads every mint.");
     await user.click(breakIt("mintearly"));
     expect(model).toHaveAttribute("data-broken", "0");
+  });
+
+  it("Which cards count: says so when the first mints are missing, and still breaks", async () => {
+    const user = userEvent.setup();
+    mockInputs.mockImplementationOnce(() => {
+      const inputs = fixtureFactInputs();
+      const editions = inputs.editions!;
+      return {
+        ...inputs,
+        editions: {
+          ...editions,
+          cards: editions.cards.map((card) => ({ ...card, firstMint: null })),
+        },
+      };
+    });
+    await renderPage();
+    const model = lens("eligible");
+    expect(model).toHaveTextContent("First mints not available.");
+    await user.click(breakIt("mintearly"));
+    expect(model).toHaveTextContent("32 → 60");
   });
 
   it("Sales and moves: last in, first out", async () => {

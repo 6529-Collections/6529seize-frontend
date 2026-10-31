@@ -26,6 +26,11 @@ export function utcDay(locale: SupportedLocale, seconds: number): string {
   });
 }
 
+/** "17": the day of the month, after a first label that names the month. */
+export function utcDate(locale: SupportedLocale, seconds: number): string {
+  return formatUtcDate(locale, toMs(seconds), { day: "numeric" });
+}
+
 /** "Sat, Oct 17" */
 export function utcWeekday(locale: SupportedLocale, seconds: number): string {
   return formatUtcDate(locale, toMs(seconds), {

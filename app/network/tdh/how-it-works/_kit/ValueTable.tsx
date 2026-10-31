@@ -28,8 +28,10 @@ export default function ValueTable({
   readonly rows: readonly ValueRow[];
 }) {
   return (
-    <table className="tw-w-full tw-border-collapse tw-text-[15px] tw-leading-6">
-      <caption className="tw-sr-only">{caption}</caption>
+    <table
+      className="tw-w-full tw-border-collapse tw-text-[15px] tw-leading-6 max-[399px]:tw-text-sm"
+      aria-label={caption}
+    >
       <thead>
         <tr>
           {head.map((cell, index) => (
@@ -37,7 +39,7 @@ export default function ValueTable({
               // The heads are a fixed sequence.
               key={index}
               scope="col"
-              className={`tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.1em] tw-text-iron-400 ${index === 0 ? "tw-text-left" : "tw-pl-3 tw-text-right"}`}
+              className={`tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-400 ${index === 0 ? "tw-text-left" : "tw-whitespace-nowrap tw-pl-2 tw-text-right min-[400px]:tw-pl-3"}`}
             >
               {cell}
             </th>
@@ -53,7 +55,7 @@ export default function ValueTable({
             <tr key={row.key} data-row-tone={row.tone ?? "plain"}>
               <th
                 scope="row"
-                className={`tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-2 tw-pr-2 tw-text-left tw-font-normal ${tone} ${row.tone === "on" ? "tw-border-l-2 tw-border-l-primary-400 tw-pl-2.5" : "tw-pl-3"}`}
+                className={`tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-2 tw-pr-2 tw-text-left tw-font-normal ${tone} ${row.tone === "on" ? "tw-shadow-[inset_2px_0_0_0_rgb(82,139,255)]" : ""} tw-pl-3`}
               >
                 {row.label}
               </th>
@@ -61,7 +63,7 @@ export default function ValueTable({
                 <td
                   // The values are a fixed sequence of columns.
                   key={index}
-                  className={`tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-2 tw-pl-3 tw-text-right tw-tabular-nums ${tone} ${row.tone === "on" ? "tw-font-semibold" : ""}`}
+                  className={`tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-2 tw-pl-2 tw-text-right tw-tabular-nums min-[400px]:tw-pl-3 ${tone} ${row.tone === "on" ? "tw-font-semibold" : ""}`}
                 >
                   {value}
                 </td>

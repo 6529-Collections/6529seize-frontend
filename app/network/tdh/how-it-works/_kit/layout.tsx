@@ -24,6 +24,9 @@ export function You({ children }: { readonly children: ReactNode }) {
   return <span className="tw-text-primary-300">{children}</span>;
 }
 
+/** The H1 at 400% zoom (320 px): two lines, not one word to a line. */
+const H1_NARROW = "max-[359px]:tw-text-[30px] max-[359px]:tw-leading-9";
+
 export function PageHead({
   eyebrow,
   title,
@@ -44,7 +47,7 @@ export function PageHead({
     <header className="tw-pt-[30px] md:tw-pt-[52px]">
       <Eyebrow>{eyebrow}</Eyebrow>
       <h1
-        className={`${reference ? EX_TEXT.h1r : EX_TEXT.h1} ${titleClassName}`}
+        className={`${reference ? EX_TEXT.h1r : EX_TEXT.h1} ${H1_NARROW} ${titleClassName}`}
       >
         {title}
       </h1>

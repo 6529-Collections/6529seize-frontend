@@ -69,11 +69,9 @@ export default function RatesLens({
           ),
         };
   const whatIf = real === null && threshold !== null && cap !== null;
-  const mintedNewest = whatIf
-    ? (threshold ?? 0) - 1
-    : (real?.minted?.value ?? null);
+  const mintedNewest = whatIf ? threshold - 1 : (real?.minted?.value ?? null);
   const editionNewest = whatIf
-    ? ENGINE.effectiveEdition((threshold ?? 0) - 1, cap ?? 0).edition
+    ? ENGINE.effectiveEdition(threshold - 1, cap).edition
     : (real?.edition?.value ?? null);
   const editions = useFact<number[][]>("memes.editions");
   const model = useBreakable<{ pick: Pick }>({ pick: "cap" }, (state) => ({
