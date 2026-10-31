@@ -120,7 +120,7 @@
   "explained.tdh.overview.explain.newTitle": "Votre carte compte à partir du {date}.",
   "explained.tdh.overview.explain.newBody": "Aucun résultat n'a encore compté ce wallet, et c'est normal. Votre copie de #{card} est arrivée le {arrived}. Le résultat daté du {gapDate} a trouvé {gap} : pas un jour entier. Le résultat daté du {firstDate}, publié vers {publish}, compte son premier jour entier et ajoute {rate} ; chaque jour suivant ajoute {rate} de plus.",
   "explained.tdh.overview.explain.arrives": "arrivée le {time}",
-  "explained.tdh.overview.explain.timeline": "Chaque trait est un instantané quotidien à minuit UTC. Une copie ne compte un jour que si elle a été détenue un jour entier à un instantané.",
+  "explained.tdh.overview.explain.timeline": "Chaque trait est un instantané quotidien à minuit UTC ; une copie ne compte que les jours entiers où elle a été détenue.",
   "explained.tdh.overview.explain.timelineAria": "Une frise des instantanés quotidiens, l'arrivée de la copie, et le premier instantané qui compte un jour entier.",
   "explained.tdh.overview.explain.noneTitle": "Aucun wallet trouvé sous ce nom.",
   "explained.tdh.overview.explain.noneBody": "Vérifiez l'orthographe, ou collez l'adresse. Si le wallet a reçu sa première carte aujourd'hui, il apparaît dans un résultat une fois qu'il l'a détenue un jour entier.",
@@ -165,6 +165,7 @@
   "explained.tdh.overview.index.wallets": "Pourquoi votre nombre a changé ; quatre wallets comme un seul.",
   "explained.tdh.overview.index.check": "Le résultat du jour, ses limites, et un reçu pour chaque jour.",
   "explained.tdh.overview.index.sure": "Ce qui est prouvé, ce qui est testé, et ce qui ne l'est pas.",
+  "explained.tdh.overview.index.proofs": "Des preuves d'un jour qu'Ethereum peut vérifier lui-même.",
   "explained.tdh.overview.hwk.feed": "La comparaison quotidienne",
   "explained.tdh.overview.hwk.feedBody": "index.json, écrit le {written} ; lu à {read}. Le SHA-256 de chaque fichier de jour est vérifié contre l'index.",
   "explained.tdh.overview.hwk.manifest": "Le manifeste Lean",
@@ -175,7 +176,7 @@
   "explained.tdh.overview.hwk.rules": "Les règles et les décisions",
   "explained.tdh.overview.hwk.rulesBody": "P26, TDH v1.4 ({repo} {commit}), privée, reprise sur la page Spécification ; D112, D119, D125, D128, D136, D137 et D142, du registre jusqu'à {newest}.",
   "explained.tdh.overview.hwk.figures": "Les figures",
-  "explained.tdh.overview.hwk.figuresBody": "Calculées dans votre navigateur par le moteur TDH v1.4, qui passe chaque vecteur concerné parmi les {vectors} de P26 ; la CI les relance à chaque changement.",
+  "explained.tdh.overview.hwk.figuresBody": "Calculées dans votre navigateur par le moteur TDH v1.4, qui passe chaque vecteur concerné parmi les {vectors} de P26.",
   "explained.tdh.overview.hwk.proofs": "Les preuves",
   "explained.tdh.overview.hwk.proofsBody": "La preuve A du cycle {cycle}, acceptée par le vérificateur SP1 du mainnet dans un appel en lecture seule au bloc {block}, d'après le registre des contrats du validateur."
 }

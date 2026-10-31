@@ -15,6 +15,7 @@ const SPINE_DESC: Readonly<Record<string, OverviewKey>> = {
   wallets: "index.wallets",
   check: "index.check",
   sure: "index.sure",
+  proofs: "index.proofs",
 };
 
 export default function InThisChapter({

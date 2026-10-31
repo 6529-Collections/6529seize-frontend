@@ -5,7 +5,6 @@ import { kt } from "@/components/explained/i18n";
 import { chapterById, HUB_HREF } from "@/components/explained/shell/chapters";
 import ExplainedShell from "@/components/explained/shell/ExplainedShell";
 import HowWeKnow from "@/components/explained/shell/HowWeKnow";
-import { PlaceLinks, pagePlace } from "@/components/explained/shell/place";
 import { EX_TEXT } from "@/components/explained/tokens";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
@@ -250,10 +249,6 @@ export default async function TdhConsolidationDesignPage({
             </Para>
           </EdRow>
         </Section>
-        <PlaceLinks
-          place={pagePlace("tdh", "design", locale)}
-          locale={locale}
-        />
       </article>
       <HowWeKnow
         locale={locale}

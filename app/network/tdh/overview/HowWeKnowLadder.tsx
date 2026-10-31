@@ -5,7 +5,6 @@ import AssuranceLadder, {
 import { FailureSentence } from "@/components/explained/evidence/notes";
 import type { ResultDay } from "@/components/explained/evidence/DayRibbon";
 import { dateOfCycleDay } from "@/components/explained/engine/tdh";
-import { kt } from "@/components/explained/i18n";
 import { Icon } from "@/components/explained/marks/glyphs";
 import { EX_BUTTON, EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -200,10 +199,6 @@ export default function HowWeKnowLadder({
             </Link>
             <Link className={EX_BUTTON.link} href="/network/tdh/formal">
               {ot(locale, "know.linkSure")}
-              <Icon kind="arrow" className="tw-size-4" />
-            </Link>
-            <Link className={EX_BUTTON.link} href="/network/tdh/proofs">
-              {kt(locale, "explained.kit.map.tdh.proofs")}
               <Icon kind="arrow" className="tw-size-4" />
             </Link>
           </p>

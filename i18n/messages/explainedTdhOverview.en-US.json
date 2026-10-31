@@ -120,7 +120,7 @@
   "explained.tdh.overview.explain.newTitle": "Your card counts from {date}.",
   "explained.tdh.overview.explain.newBody": "No result has counted this wallet yet, and that is expected. Your copy of #{card} arrived {arrived}. The result dated {gapDate} found {gap}: not a whole day. The result dated {firstDate}, published about {publish}, counts its first whole day and adds {rate}; each day after adds {rate} more.",
   "explained.tdh.overview.explain.arrives": "arrives {time}",
-  "explained.tdh.overview.explain.timeline": "Each line is a daily snapshot at midnight UTC. A copy counts a day only when it has been held a whole day at a snapshot.",
+  "explained.tdh.overview.explain.timeline": "Each line is a daily snapshot at midnight UTC; a copy counts only the whole days it has been held.",
   "explained.tdh.overview.explain.timelineAria": "A timeline of daily snapshots, the copy's arrival, and the first snapshot that counts a whole day.",
   "explained.tdh.overview.explain.noneTitle": "No wallet found by that name.",
   "explained.tdh.overview.explain.noneBody": "Check the spelling, or paste the address. If the wallet received its first card today, it appears in a result once it has held the card for a whole day.",
@@ -165,6 +165,7 @@
   "explained.tdh.overview.index.wallets": "Why your number changed; four wallets as one.",
   "explained.tdh.overview.index.check": "Today's result, its limits, and a receipt for every day.",
   "explained.tdh.overview.index.sure": "What is proved, what is tested, and what is not.",
+  "explained.tdh.overview.index.proofs": "Proofs of a day that Ethereum itself can check.",
   "explained.tdh.overview.hwk.feed": "The daily comparison",
   "explained.tdh.overview.hwk.feedBody": "index.json, written {written}; read {read}. Each day file's SHA-256 is checked against the index.",
   "explained.tdh.overview.hwk.manifest": "The Lean manifest",
@@ -175,7 +176,7 @@
   "explained.tdh.overview.hwk.rules": "The rules and decisions",
   "explained.tdh.overview.hwk.rulesBody": "P26, TDH v1.4 ({repo} {commit}), private, restated on the Specification page; D112, D119, D125, D128, D136, D137 and D142, from the record through {newest}.",
   "explained.tdh.overview.hwk.figures": "The figures",
-  "explained.tdh.overview.hwk.figuresBody": "Computed in your browser by the TDH v1.4 engine, which passes every in-scope vector of P26's {vectors}; CI reruns them on every change.",
+  "explained.tdh.overview.hwk.figuresBody": "Computed in your browser by the TDH v1.4 engine, which passes every in-scope vector of P26's {vectors}.",
   "explained.tdh.overview.hwk.proofs": "The proofs",
   "explained.tdh.overview.hwk.proofsBody": "Proof A of cycle {cycle}, accepted by mainnet's SP1 verifier in a read-only call at block {block}, from the validator's contracts record."
 }

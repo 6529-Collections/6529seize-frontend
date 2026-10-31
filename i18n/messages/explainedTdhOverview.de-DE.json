@@ -120,7 +120,7 @@
   "explained.tdh.overview.explain.newTitle": "Ihre Karte zählt ab {date}.",
   "explained.tdh.overview.explain.newBody": "Noch kein Ergebnis hat dieses Wallet gezählt, und das ist zu erwarten. Ihre Kopie von #{card} kam am {arrived} an. Das Ergebnis vom {gapDate} fand {gap}: keinen ganzen Tag. Das Ergebnis vom {firstDate}, veröffentlicht gegen {publish}, zählt ihren ersten ganzen Tag und fügt {rate} hinzu; jeder weitere Tag fügt {rate} mehr hinzu.",
   "explained.tdh.overview.explain.arrives": "kommt am {time} an",
-  "explained.tdh.overview.explain.timeline": "Jede Linie ist ein täglicher Snapshot um Mitternacht UTC. Eine Kopie zählt einen Tag nur, wenn sie bei einem Snapshot einen ganzen Tag gehalten wurde.",
+  "explained.tdh.overview.explain.timeline": "Jede Linie ist ein täglicher Snapshot um Mitternacht UTC; eine Kopie zählt nur die ganzen Tage, die sie gehalten wurde.",
   "explained.tdh.overview.explain.timelineAria": "Eine Zeitleiste der täglichen Snapshots, der Ankunft der Kopie und des ersten Snapshots, der einen ganzen Tag zählt.",
   "explained.tdh.overview.explain.noneTitle": "Kein Wallet unter diesem Namen gefunden.",
   "explained.tdh.overview.explain.noneBody": "Prüfen Sie die Schreibweise oder fügen Sie die Adresse ein. Hat das Wallet heute seine erste Karte erhalten, erscheint es in einem Ergebnis, sobald es die Karte einen ganzen Tag gehalten hat.",
@@ -165,6 +165,7 @@
   "explained.tdh.overview.index.wallets": "Warum sich Ihre Zahl geändert hat; vier Wallets als eines.",
   "explained.tdh.overview.index.check": "Das heutige Ergebnis, seine Grenzen und ein Beleg für jeden Tag.",
   "explained.tdh.overview.index.sure": "Was bewiesen ist, was getestet ist und was nicht.",
+  "explained.tdh.overview.index.proofs": "Beweise eines Tages, die Ethereum selbst prüfen kann.",
   "explained.tdh.overview.hwk.feed": "Der tägliche Vergleich",
   "explained.tdh.overview.hwk.feedBody": "index.json, geschrieben {written}; gelesen {read}. Der SHA-256 jeder Tagesdatei wird gegen den Index geprüft.",
   "explained.tdh.overview.hwk.manifest": "Das Lean-Manifest",
@@ -175,7 +176,7 @@
   "explained.tdh.overview.hwk.rules": "Die Regeln und Beschlüsse",
   "explained.tdh.overview.hwk.rulesBody": "P26, TDH v1.4 ({repo} {commit}), privat, auf der Seite Spezifikation wiedergegeben; D112, D119, D125, D128, D136, D137 und D142, aus dem Protokoll bis {newest}.",
   "explained.tdh.overview.hwk.figures": "Die Abbildungen",
-  "explained.tdh.overview.hwk.figuresBody": "In Ihrem Browser von der Engine für TDH v1.4 berechnet, die jeden zutreffenden Vektor der {vectors} von P26 besteht; die CI führt sie bei jeder Änderung erneut aus.",
+  "explained.tdh.overview.hwk.figuresBody": "In Ihrem Browser von der Engine für TDH v1.4 berechnet, die jeden zutreffenden Vektor der {vectors} von P26 besteht.",
   "explained.tdh.overview.hwk.proofs": "Die Beweise",
   "explained.tdh.overview.hwk.proofsBody": "Beweis A für Zyklus {cycle}, vom SP1-Verifier im Mainnet in einem schreibgeschützten Aufruf bei Block {block} akzeptiert, laut dem Vertragsprotokoll des Validators."
 }
