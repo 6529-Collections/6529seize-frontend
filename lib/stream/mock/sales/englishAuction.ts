@@ -439,6 +439,12 @@ export function createEnglishActions(
           engine.addCredit(from, auction.bid);
           auction.bidder = null;
           auction.recipient = null;
+          engine.record(auction.work, {
+            kind: "bid-withdrawn",
+            actor: from,
+            amount: auction.bid,
+            source: "IEnglishAuction.BidWithdrawn",
+          });
         })
       ),
     claimCredits: (from, to) =>

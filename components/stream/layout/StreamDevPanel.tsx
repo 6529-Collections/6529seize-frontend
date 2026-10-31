@@ -11,6 +11,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream";
 import { STREAM_BUTTON_SMALL } from "@/components/stream/ui/styles";
+import DevWorkControls from "@/components/stream/work/DevWorkControls";
 import type { Address } from "@/lib/stream/types";
 
 const SPEEDS = [1, 60, 600, 3_600] as const;
@@ -26,8 +27,8 @@ const NOT_CONNECTED = "none";
 
 /**
  * Mock-only controls: the simulated clock (speed, pause, jumps), the dev
- * account switcher and a scenario reset. Hidden when the data source has no
- * dev controls (the chain).
+ * account switcher, the page's dispute and delisting actors, and a scenario
+ * reset. Hidden when the data source has no dev controls (the chain).
  */
 export default function StreamDevPanel({
   locale,
@@ -143,6 +144,7 @@ export default function StreamDevPanel({
             </p>
           )}
         </div>
+        <DevWorkControls dev={dev} locale={locale} />
         <button type="button" className={BUTTON} onClick={() => dev.reset()}>
           {t(locale, "stream.dev.reset")}
         </button>
