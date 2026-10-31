@@ -8,6 +8,10 @@ jest.mock("@/config/alchemyEnv", () => ({
   getAlchemyApiKey: jest.fn(),
 }));
 
+jest.mock("@/config/serverEnv", () => ({
+  getStagingApiKey: jest.fn(),
+}));
+
 describe("createTransientPlan", () => {
   const fetchHtml = jest.fn();
   const assertPublicUrl = jest.fn();

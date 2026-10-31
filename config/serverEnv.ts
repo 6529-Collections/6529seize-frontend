@@ -35,3 +35,22 @@ export const getServerEnvOrThrow = (): ServerEnv => {
 };
 
 export const serverEnv: ServerEnv | null = getServerEnv();
+
+// Optional server-only values. They are read at request time and are never
+// part of the public runtime config, so no browser bundle can contain them.
+const getOptionalServerValue = (
+  value: string | undefined
+): string | undefined => {
+  const normalized = value?.trim();
+  return normalized || undefined;
+};
+
+/**
+ * `x-6529-auth` value for server-side requests to a gated (staging) API when
+ * the incoming request carries no visitor access cookie.
+ */
+export const getStagingApiKey = (): string | undefined =>
+  getOptionalServerValue(process.env["STAGING_API_KEY"]);
+
+export const getFarcasterWarpcastApiKey = (): string | undefined =>
+  getOptionalServerValue(process.env["FARCASTER_WARPCAST_API_KEY"]);

@@ -3,12 +3,16 @@ import { ReadableStream } from "node:stream/web";
 jest.mock("@/config/env", () => ({
   publicEnv: {
     API_ENDPOINT: "https://api.6529.test",
-    STAGING_API_KEY: void 0,
   },
+}));
+
+jest.mock("@/config/serverEnv", () => ({
+  getStagingApiKey: jest.fn(),
 }));
 
 import { withOgApiJson } from "@/app/api/og-metadata/_lib/apiMetadata";
 import { publicEnv } from "@/config/env";
+import { getStagingApiKey } from "@/config/serverEnv";
 
 const mockFetch = jest.fn();
 const originalFetch = globalThis.fetch;
@@ -44,6 +48,7 @@ describe("withOgApiJson", () => {
     globalThis.fetch = mockFetch;
     mockFetch.mockReset();
     mockFetch.mockImplementation(async () => jsonResponse({ ok: true }));
+    jest.mocked(getStagingApiKey).mockReset();
   });
   afterEach(() => {
     jest.useRealTimers();
@@ -116,7 +121,7 @@ describe("withOgApiJson", () => {
     });
 
     it("never sends staging access to a rejected request", async () => {
-      jest.replaceProperty(publicEnv, "STAGING_API_KEY", "test-staging-key");
+      jest.mocked(getStagingApiKey).mockReturnValue("test-staging-key");
 
       await expect(read(["https://evil.test"])).rejects.toThrow();
 
