@@ -1,5 +1,7 @@
 import { createSecurityHeaders } from "./securityHeaders";
 import { meebits445Headers } from "./meebits445Headers";
+import { staticAssetCacheHeaders } from "./staticAssetCacheHeaders";
+import { versionReloadImageHeaders } from "./versionReloadImageHeaders";
 import { PublicEnv } from "./env.schema";
 import { NextConfig } from "next";
 import { HTML_LIMITED_BOT_UA_RE } from "next/dist/shared/lib/router/utils/html-bots";
@@ -119,6 +121,12 @@ export function sharedConfig(
     },
     async headers() {
       return [
+        // Development keeps `public/` files uncached so edited assets show up
+        // on the next reload.
+        ...(publicEnv.NODE_ENV === "development" ||
+        publicEnv.NODE_ENV === "local"
+          ? []
+          : staticAssetCacheHeaders),
         {
           source: "/:path*",
           headers: [
@@ -145,6 +153,7 @@ export function sharedConfig(
           ],
         },
         meebits445Headers,
+        versionReloadImageHeaders,
         {
           // Connection links carry one-time credentials in the query string.
           // Later entries override the site-wide same-origin policy above.
