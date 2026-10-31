@@ -68,6 +68,7 @@ import { SIGNED_MESSAGES_MESSAGES } from "@/i18n/messages/signed-messages";
 import { MODERATION_CHECK_MESSAGES } from "@/i18n/messages/moderation-checks";
 import { EULA_MESSAGES } from "@/i18n/messages/eula";
 import { GLOBAL_ERROR_MESSAGES } from "@/i18n/messages/global-error";
+import { MAPPING_TOOL_MESSAGES } from "@/i18n/messages/mapping-tools";
 import { PROFILE_CURATION_MESSAGES } from "@/i18n/messages/profile-curation";
 import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-documentation";
 import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artwork-documentation-integration";
@@ -3445,6 +3446,8 @@ export const EN_US_MESSAGES = {
   "acceptConnection.action.accept": "Accept connection",
   "acceptConnection.unsupportedWeb":
     "Open this connection link in the 6529 mobile app.",
+  "acceptConnection.unsupportedLegacyDesktop":
+    "This connection link can only be accepted in the 6529 Desktop app.",
   "acceptConnection.missingParameters": "Missing required parameters",
   "acceptConnection.toast.maxProfiles": "Maximum connected profiles reached",
   "acceptConnection.toast.invalidResponse": "Invalid connection response",
@@ -4629,6 +4632,7 @@ export const EN_US_MESSAGES = {
   "navigation.nfts.memesCalendar": "Memes Calendar",
   ...EULA_MESSAGES,
   ...GLOBAL_ERROR_MESSAGES,
+  ...MAPPING_TOOL_MESSAGES,
   ...TITLE_CONTEXT_MESSAGES,
   ...WAVE_NAVIGATION_MESSAGES,
   ...MY_STREAM_CURATION_MESSAGES,

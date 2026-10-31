@@ -1,6 +1,11 @@
 import { createFirstParty6529Plan } from "@/app/api/open-graph/6529/service";
 import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "@/constants/constants";
 import { publicEnv } from "@/config/env";
+import { getStagingApiKey } from "@/config/serverEnv";
+
+jest.mock("@/config/serverEnv", () => ({
+  getStagingApiKey: jest.fn(),
+}));
 
 jest.mock("viem", () => {
   const readContract = jest.fn();
@@ -56,7 +61,7 @@ function readFetchHeaders(
 }
 
 function setStagingApiKeyForTest(value: string | undefined): void {
-  publicEnv["STAGING_API_KEY"] = value;
+  jest.mocked(getStagingApiKey).mockReturnValue(value);
 }
 
 function mockLiveTheMemesApis(): void {
@@ -167,7 +172,6 @@ function productionTheMemesResponse(url: URL): Response | null {
 describe("createFirstParty6529Plan", () => {
   const originalApiEndpoint = publicEnv.API_ENDPOINT;
   const originalBaseEndpoint = publicEnv.BASE_ENDPOINT;
-  const originalStagingApiKey = publicEnv.STAGING_API_KEY;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -183,7 +187,6 @@ describe("createFirstParty6529Plan", () => {
   afterEach(() => {
     publicEnv.API_ENDPOINT = originalApiEndpoint;
     publicEnv.BASE_ENDPOINT = originalBaseEndpoint;
-    setStagingApiKeyForTest(originalStagingApiKey);
   });
 
   afterAll(() => {

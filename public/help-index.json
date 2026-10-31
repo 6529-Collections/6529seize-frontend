@@ -1993,6 +1993,8 @@
         "Connection sharing shows a QR code for Mobile or a clickable 6529 Desktop handoff card and deep link for Desktop.",
         "In either connection target tab, copy stays inside the link field and the separate refresh button to its right (Generate new code) prepares the connection again without closing the dialog. Copy and refresh are disabled while preparing; refresh can retry a preparation error.",
         "Connection sharing creates an additional session on the target client; it does not transfer, move, or disconnect the current session.",
+        "Mobile connection links are accepted only in 6529 Mobile and Desktop connection links only in 6529 Desktop; opened in a web browser or the other app, Accept Connection Sharing shows a message instead of an Accept connection button.",
+        "Accept Connection Sharing removes the link's one-time credential from the address bar when it loads, so reloading the page does not reopen the connection; open the original link or QR code again.",
         "If the connection dialog says Sign In Required, connect and authenticate your wallet first; if it says Update Authentication, sign again with the active wallet.",
         "Page sharing is a separate navigation action and never appears in the connection dialog.",
         "On supported pages, mobile web and the native app use a header Share page button that opens the platform system share sheet directly without a 6529 Share dialog."
@@ -2005,6 +2007,7 @@
         "components/header/share/header-share/HeaderQRModal.tsx",
         "components/header/share/header-share/HeaderShareModalView.tsx",
         "components/layout/sidebar/WebSidebarUser.tsx",
+        "app/accept-connection-sharing/page.client.tsx",
         "ops/docs/navigation/feature-share-modal.md",
         "ops/contracts/wallet-auth-session-v2.md"
       ]
@@ -11000,6 +11003,51 @@
       "brief_answer": "For the **{{percentage}}%** recovery range in **6529 Desktop**, check the TDH worker **Logs** and share the redacted error. Let any active work finish; do not widen reconciliation or start a reset because calculation failed. Once calculation completes successfully, do TDH and Merkle Root now match 6529.io at the same Last Block?\n\nRange: {{percentage}}% of blocks {{minimum_block}}–{{checkpoint}}.",
       "reconciliation_min_block": 13360860,
       "answer_links": []
+    },
+    {
+      "id": "waves.signed-messages",
+      "kind": "workflow",
+      "title": "Signed messages and the Devices tab",
+      "aliases": [
+        "signed messages",
+        "turn on signed messages",
+        "device signature",
+        "devices tab",
+        "can now post as you",
+        "revoke device",
+        "signed by its author",
+        "not signed by its author",
+        "signed seal",
+        "verified post badge"
+      ],
+      "keywords": [
+        "waves",
+        "signature",
+        "device",
+        "grant",
+        "revoke",
+        "verify",
+        "ed25519",
+        "preferences"
+      ],
+      "facts": [
+        "Signed messages are on for the 6529.io website. A web browser holds a non-extractable Ed25519 key per wallet; one wallet signature grants it the right to sign your posts, edits, deletes and reactions for 180 days. There is no wallet prompt per message and chat behaves as before.",
+        "The grant rides on the ordinary web sign-in; if the wallet declines or cannot sign that message, the next sign-in on the page uses the ordinary message. A logged-in user without a grant in this browser sees Turn on signed messages (one signature) above the empty wave composer; Turn on asks for one signature and the notice can be dismissed for 30 days. In a grant's last 14 days the notice offers Renew; after expiry writes go unsigned until renewed.",
+        "Signing never blocks or delays a write. If signing fails or a signature is rejected, the drop, edit, delete or reaction is sent unsigned exactly as before.",
+        "Preferences > Devices at /preferences?tab=devices lists the browsers that can post as you, newest first (at most the 100 newest grants, including expired and revoked ones), each with its label, This device marker, scopes, wallet, added, expiry and last-used dates and status (Active, Expired, Revoked). Revoke asks for confirmation; earlier signatures stay verifiable. Proxies cannot manage devices.",
+        "When a new browser gains a grant for your profile, other browsers show {label} can now post as you. Not you? with Revoke above the composer. The check runs when a wave opens and at most every 10 minutes while the tab is visible. The first grant list a browser loads is its baseline, so a grant that already exists then raises no alert; check Preferences > Devices for existing grants.",
+        "The Signature item in a drop's More menu (or touch menu) verifies the drop in your browser and reports Signed by its author, Not signed by its author, or The signature could not be verified, with wallet, device key fingerprint, grant expiry and whether the current content is the signed version. A contract wallet whose sign-in signature the browser cannot check on Ethereum shows Contract wallet: verified by 6529.io at sign-in. If the check cannot run right now it shows Couldn't check the signature right now. with Try again, never an invalid verdict. Drops hidden by moderation and anonymous competition entries read Not signed by its author.",
+        "A drop whose current content is the version its author signed shows a small shield-check seal named Signed by its author right after its timestamp, in chat rows, feed cards, participation drops and the single-drop view. Clicking it or pressing Enter opens the same Signature dialog. Unsigned drops show nothing, so posts from the apps, older posts and drops edited without a signature look as before. Grouped chat rows show a static seal beside the hover or swipe timestamp; use the drop menu's Signature item there. An unsigned edit or a delete removes the seal, and it is hidden for moderated content and anonymous authors.",
+        "Signed messages are web only: the mobile and desktop apps, proxy sessions and browsers without Ed25519 support sign in and post exactly as before. Votes and ratings are not signed yet."
+      ],
+      "canonical_path": "/preferences?tab=devices",
+      "link_label": "Devices",
+      "related_paths": ["/preferences", "/waves"],
+      "tags": ["waves", "privacy", "security", "preferences"],
+      "source_refs": [
+        "ops/docs/waves/drop-actions/feature-signed-messages.md",
+        "ops/docs/notifications/feature-profile-preferences.md"
+      ]
     },
     {
       "id": "desktop.delegation-index-upgrade",

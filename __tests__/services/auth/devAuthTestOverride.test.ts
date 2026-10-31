@@ -105,9 +105,10 @@ describe("dev-auth test override", () => {
     (nodeEnv) => {
       mockGetNodeEnv.mockReturnValue(nodeEnv);
       expect(getDevAuthTestOverride()).toBeNull();
-      // Dev auth itself still reads only the configured values.
-      expect(getAuthJwt()).toBe("configured-dev-jwt");
-      expect(getWalletAddress()).toBe(
+      // Outside dev-like runtimes dev auth is off entirely (#4337), so neither
+      // the override nor the configured dev values are used.
+      expect(getAuthJwt()).not.toBe("configured-dev-jwt");
+      expect(getWalletAddress()).not.toBe(
         "0x0000000000000000000000000000000000000529"
       );
     }

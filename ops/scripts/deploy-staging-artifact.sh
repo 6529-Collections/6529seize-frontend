@@ -413,6 +413,7 @@ module.exports = {
       PORT: '3001',
       HOSTNAME: '0.0.0.0',
       KEEP_ALIVE_TIMEOUT: '65000',
+      UV_THREADPOOL_SIZE: '16',
       NODE_ENV: 'production',
       ['SSR_CLIENT_ID']: requireRuntimeEnv('SSR_CLIENT_ID'),
       ['SSR_CLIENT_SECRET']: requireRuntimeEnv('SSR_CLIENT_SECRET'),

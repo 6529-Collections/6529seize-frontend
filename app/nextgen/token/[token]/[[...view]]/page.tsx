@@ -20,15 +20,6 @@ import { fetchTokenData, getContentView } from "./page-utils";
 import { getNextgenTokenViewSegment } from "@/components/nextGen/collections/nextgenToken/nextgen-token-view.helpers";
 import { getNextgenRequestHeaders } from "@/app/nextgen/request-headers";
 
-const isUsableImageSource = (
-  source: string | null | undefined
-): source is string =>
-  source !== null && source !== undefined && source.trim().length > 0;
-
-const getFirstUsableImage = (
-  ...sources: readonly (string | null | undefined)[]
-): string | undefined => sources.find(isUsableImageSource);
-
 const getTokenPath = (tokenId: number, view: NextgenCollectionView): string => {
   const viewSegment = getNextgenTokenViewSegment(view);
   const viewPath = viewSegment ? `/${viewSegment}` : "";
@@ -49,12 +40,8 @@ export async function generateMetadata({
         title: "NextGen Token",
         description: "NextGen",
         ogImage: getNftSocialCardImagePath({
-          badge: "NextGen",
-          collection: "NextGen",
           contract: NEXTGEN_CONTRACT,
           id: token,
-          subtitle: "NextGen",
-          title: `NextGen #${token}`,
         }),
         ogImageAlt: "NextGen Token social card",
       })
@@ -63,7 +50,6 @@ export async function generateMetadata({
   const resolvedView = getContentView(view?.[0] ?? "");
   const viewDisplay =
     resolvedView !== NextgenCollectionView.ABOUT ? resolvedView : "";
-  const displayId = data.token?.normalised_id;
   const baseTitle =
     data.token?.name ?? `${data.collection.name} - #${data.tokenId}`;
   const title = getNextgenTitle(viewDisplay, baseTitle);
@@ -78,19 +64,8 @@ export async function generateMetadata({
       title,
       description,
       ogImage: getNftSocialCardImagePath({
-        artist: data.collection.artist,
-        badge: "NextGen",
-        collection: data.collection.name,
         contract: NEXTGEN_CONTRACT,
-        displayId,
         id: data.token?.id ?? data.tokenId,
-        image: getFirstUsableImage(
-          data.token?.image_url,
-          data.token?.thumbnail_url,
-          data.collection.banner,
-          data.collection.image
-        ),
-        title,
       }),
       ogImageAlt: `${title} social card`,
     })

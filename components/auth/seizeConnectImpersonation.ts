@@ -1,4 +1,5 @@
-import { getNodeEnv, publicEnv } from "@/config/env";
+import { isDevLikeEnv } from "@/config/devAuth";
+import { publicEnv } from "@/config/env";
 import { getAgentLoginActiveAddress } from "@/services/auth/auth.utils";
 import { getDevAuthTestOverride } from "@/services/auth/devAuthTestOverride";
 import { getAddress, isAddress } from "viem";
@@ -44,9 +45,7 @@ const isLocalDevelopmentHost = (hostname: string): boolean =>
   isPrivateIpv4Host(hostname);
 
 export const getSeizeConnectImpersonation = () => {
-  const nodeEnv = getNodeEnv();
-  const isDevLikeEnv =
-    nodeEnv === "development" || nodeEnv === "test" || nodeEnv === "local";
+  const devLikeEnv = isDevLikeEnv();
   const isLocalHost =
     globalThis.window !== undefined &&
     isLocalDevelopmentHost(globalThis.window.location.hostname);
@@ -55,7 +54,7 @@ export const getSeizeConnectImpersonation = () => {
   const devAuthWallet =
     getDevAuthTestOverride()?.wallet ?? publicEnv.DEV_MODE_WALLET_ADDRESS;
   const devAuthImpersonatedAddress =
-    isDevLikeEnv &&
+    devLikeEnv &&
     isLocalHost &&
     publicEnv.USE_DEV_AUTH === "true" &&
     devAuthWallet &&
@@ -63,7 +62,7 @@ export const getSeizeConnectImpersonation = () => {
       ? getAddress(devAuthWallet)
       : undefined;
   const canUseAgentLoginImpersonation =
-    isDevLikeEnv && isLocalHost && publicEnv.USE_DEV_AUTH !== "true";
+    devLikeEnv && isLocalHost && publicEnv.USE_DEV_AUTH !== "true";
   const agentLoginActiveAddress = canUseAgentLoginImpersonation
     ? getAgentLoginActiveAddress()
     : null;

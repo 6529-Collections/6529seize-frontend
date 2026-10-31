@@ -22,6 +22,7 @@ import {
   persistBakedArtifacts,
 } from "@/config/runtimeConfig";
 import { sharedConfig } from "@/config/nextConfig";
+import { assertNoDevAuthInDeployableBuild } from "@/config/devAuthBuildGuard";
 import { getMissingNextAssetRewriteConfig } from "@/lib/proxy/plainResponses";
 const require = createRequire(import.meta.url);
 const sentryEnabled = Boolean(process.env["SENTRY_DSN"]);
@@ -65,6 +66,9 @@ const nextConfigFactory = (phase: string): NextConfig => {
     const parsed = publicEnvSchema.safeParse(publicRuntime);
     if (!parsed.success) throw parsed.error; // FAIL-FAST at build
     const publicEnv = parsed.data;
+    if (phase === PHASE_PRODUCTION_BUILD) {
+      assertNoDevAuthInDeployableBuild(publicEnv); // FAIL-FAST at build
+    }
 
     // Persist baked artifacts for runtime
     persistBakedArtifacts(publicEnv, ASSETS_FROM_S3);
@@ -129,10 +133,6 @@ const nextConfigFactory = (phase: string): NextConfig => {
         DEV_MODE_MEMES_WAVE_ID: publicEnv.DEV_MODE_MEMES_WAVE_ID,
         DEV_MODE_CURATION_WAVE_ID: publicEnv.DEV_MODE_CURATION_WAVE_ID,
         DEV_MODE_QUORUM_WAVE_ID: publicEnv.DEV_MODE_QUORUM_WAVE_ID,
-        DEV_MODE_WALLET_ADDRESS: publicEnv.DEV_MODE_WALLET_ADDRESS,
-        DEV_MODE_AUTH_JWT: publicEnv.DEV_MODE_AUTH_JWT,
-        USE_DEV_AUTH: publicEnv.USE_DEV_AUTH,
-        STAGING_API_KEY: publicEnv.STAGING_API_KEY,
         AWS_RUM_APP_ID: publicEnv.AWS_RUM_APP_ID,
         AWS_RUM_REGION: publicEnv.AWS_RUM_REGION,
         AWS_RUM_SAMPLE_RATE: publicEnv.AWS_RUM_SAMPLE_RATE,
@@ -147,7 +147,6 @@ const nextConfigFactory = (phase: string): NextConfig => {
         PEPE_CACHE_TTL_MINUTES: publicEnv.PEPE_CACHE_TTL_MINUTES,
         PEPE_CACHE_MAX_ITEMS: publicEnv.PEPE_CACHE_MAX_ITEMS,
         FARCASTER_WARPCAST_API_BASE: publicEnv.FARCASTER_WARPCAST_API_BASE,
-        FARCASTER_WARPCAST_API_KEY: publicEnv.FARCASTER_WARPCAST_API_KEY,
         // Inlined into the client bundle so Sentry Replay is compiled out unless opted in.
         SENTRY_REPLAY_ENABLED:
           publicEnv.SENTRY_REPLAY_ENABLED === "true" ? "true" : "false",

@@ -5,9 +5,14 @@ import { staticAssetCacheHeaders } from "./staticAssetCacheHeaders";
 import { versionReloadImageHeaders } from "./versionReloadImageHeaders";
 import { PublicEnv } from "./env.schema";
 import { NextConfig } from "next";
+import type { RemotePattern } from "next/dist/shared/lib/image-config";
 import { HTML_LIMITED_BOT_UA_RE } from "next/dist/shared/lib/router/utils/html-bots";
 import { ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/arweave-gateways";
-import { getMediaResolverHostname } from "../lib/media/decentralized-media";
+import {
+  DEFAULT_MEDIA_RESOLVER_ENDPOINT,
+  IPFS_PATH_GATEWAY_HOSTS,
+  getMediaResolverHostname,
+} from "../lib/media/decentralized-media";
 import { IPFS_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/ipfs-gateways";
 import { STATIC_ALLOWED_IMAGE_HOSTNAMES } from "../lib/media/static-image-hosts";
 
@@ -27,6 +32,58 @@ const OG_IMAGE_SHARP_TRACE_INCLUDES = [
   "node_modules/.pnpm/@img+sharp-libvips-*/node_modules/@img/sharp-libvips-*/**/*",
 ];
 const MUSEUM_PUBLICATION_TRACE_INCLUDES = [".museum-publication/current.json"];
+
+// Upstream size ceiling for the built-in image optimizer. This equals the Next
+// 16.3.8 default and is pinned so an upgrade cannot change it silently. It stays
+// well above 10 MB because the Memes artwork preview optimizes full-resolution
+// uploads (DropImagePreview `preferHighQuality`); a lower ceiling makes the
+// optimizer reject those sources and fall back to the downscaled CDN copy.
+const IMAGE_MAXIMUM_RESPONSE_BODY_BYTES = 50_000_000;
+
+// URL shapes come from lib/media/decentralized-media.ts: IPFS path gateways
+// serve /ipfs/<cid> and /ipns/<name>, the 6529 media resolver also serves
+// /arweave/<id>, and subdomain gateways use exactly one label (<id>.<gateway>).
+const IPFS_GATEWAY_PATHNAME = "/{ipfs,ipns}/**";
+const MEDIA_RESOLVER_PATHNAME = "/{arweave,ipfs,ipns}/**";
+const IPFS_PATH_GATEWAY_HOSTNAMES = new Set<string>(IPFS_PATH_GATEWAY_HOSTS);
+// Next 16.3.8 matches both `*` and `**` across dots, so a `*.<gateway>` pattern
+// would also allow `a.b.<gateway>`. This picomatch extglob matches one label.
+const SINGLE_LABEL_WILDCARD = "+([^.])";
+// An omitted port matches any port, so pin the default HTTPS port explicitly.
+const HTTPS_DEFAULT_PORT = { protocol: "https" as const, port: "" };
+
+function getImageRemotePatterns(publicEnv: PublicEnv): RemotePattern[] {
+  const resolverHostnames = new Set([
+    getMediaResolverHostname(DEFAULT_MEDIA_RESOLVER_ENDPOINT),
+    getMediaResolverHostname(publicEnv.MEDIA_RESOLVER_ENDPOINT),
+  ]);
+  const gatewayHostnames = new Set([
+    ...ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES,
+    ...IPFS_GATEWAY_REMOTE_PATTERN_HOSTNAMES,
+  ]);
+
+  return [
+    ...STATIC_ALLOWED_IMAGE_HOSTNAMES.filter(
+      (hostname) => !IPFS_PATH_GATEWAY_HOSTNAMES.has(hostname)
+    ).map((hostname) => ({ ...HTTPS_DEFAULT_PORT, hostname })),
+    ...Array.from(resolverHostnames, (hostname) => ({
+      ...HTTPS_DEFAULT_PORT,
+      hostname,
+      pathname: MEDIA_RESOLVER_PATHNAME,
+    })),
+    ...Array.from(gatewayHostnames)
+      .filter((hostname) => !resolverHostnames.has(hostname))
+      .map((hostname) => ({
+        ...HTTPS_DEFAULT_PORT,
+        hostname: hostname.startsWith("**.")
+          ? `${SINGLE_LABEL_WILDCARD}${hostname.slice(2)}`
+          : hostname,
+        ...(IPFS_PATH_GATEWAY_HOSTNAMES.has(hostname)
+          ? { pathname: IPFS_GATEWAY_PATHNAME }
+          : {}),
+      })),
+  ];
+}
 
 function getAllowedDevOrigins(): string[] {
   return (
@@ -58,27 +115,20 @@ export function sharedConfig(
           pathname: "/cdn-cgi/image/*/eth-mainnet/*",
           search: "",
         },
-        ...STATIC_ALLOWED_IMAGE_HOSTNAMES.map((hostname) => ({
-          protocol: "https" as const,
-          hostname,
-        })),
-        {
-          protocol: "https",
-          hostname: getMediaResolverHostname(publicEnv.MEDIA_RESOLVER_ENDPOINT),
-        },
-        ...ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES.map((hostname) => ({
-          protocol: "https" as const,
-          hostname,
-        })),
-        ...IPFS_GATEWAY_REMOTE_PATTERN_HOSTNAMES.map((hostname) => ({
-          protocol: "https" as const,
-          hostname,
-        })),
-        { protocol: "http", hostname: "localhost" },
+        ...getImageRemotePatterns(publicEnv),
+        // Only meaningful against a local backend; never part of a production
+        // build.
+        ...(publicEnv.NODE_ENV === "development" ||
+        publicEnv.NODE_ENV === "local"
+          ? [{ protocol: "http" as const, hostname: "localhost" }]
+          : []),
       ],
       minimumCacheTTL: 86400,
       formats: ["image/avif", "image/webp"],
+      // 100: high-quality Memes artwork preview, and the nearest match for the
+      // quality={90} thumbnails. 75: the default.
       qualities: [100, 75],
+      maximumResponseBody: IMAGE_MAXIMUM_RESPONSE_BODY_BYTES,
     },
     poweredByHeader: false,
     redirects() {
@@ -121,6 +171,8 @@ export function sharedConfig(
       "/api/og-metadata/image": OG_IMAGE_SHARP_TRACE_INCLUDES,
     },
     async headers() {
+      const isLocalTooling =
+        publicEnv.NODE_ENV === "development" || publicEnv.NODE_ENV === "local";
       return [
         // Development keeps `public/` files uncached so edited assets show up
         // on the next reload.
@@ -136,16 +188,15 @@ export function sharedConfig(
               publicEnv["IPFS_GATEWAY_ENDPOINT"],
               publicEnv["MEDIA_RESOLVER_ENDPOINT"],
               {
-                allowInsecureLocalhostConnectSrc:
-                  publicEnv.NODE_ENV === "development" ||
-                  publicEnv.NODE_ENV === "local",
-                allowUnsafeEval:
-                  publicEnv.NODE_ENV === "development" ||
-                  publicEnv.NODE_ENV === "local",
+                allowInsecureLocalhostConnectSrc: isLocalTooling,
+                allowUnsafeEval: isLocalTooling,
                 allowWasmUnsafeEval: isE2eeFlagEnabled(
                   publicEnv.NEXT_PUBLIC_E2EE_DM_ENABLED
                 ),
                 webSocketEndpoint: publicEnv["WS_ENDPOINT"],
+                // Local development violations are expected noise; only
+                // deployed builds report CSP violations to Sentry.
+                sentryDsn: isLocalTooling ? undefined : publicEnv.SENTRY_DSN,
               }
             ),
             // Environment-wide, including /access, redirects and public files.
@@ -158,6 +209,12 @@ export function sharedConfig(
         },
         meebits445Headers,
         versionReloadImageHeaders,
+        {
+          // Connection links carry one-time credentials in the query string.
+          // Later entries override the site-wide same-origin policy above.
+          source: "/accept-connection-sharing",
+          headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
+        },
       ];
     },
     turbopack: {

@@ -9,9 +9,9 @@ profiles, and submitted report history.
 ## Location in the Site
 
 Preferences is a dedicated page at `/preferences`. It contains three tabs:
-**Notifications & messages**, **Blocked Profiles**, and **Reports**. Where
-signed messages are enabled (currently staging), a fourth **Devices** tab at
-`/preferences?tab=devices` lists the browsers that can post as you.
+**Notifications & messages**, **Blocked Profiles**, and **Reports**. A
+fourth **Devices** tab at `/preferences?tab=devices` lists the browsers that
+can post as you with signed messages.
 
 ## Entry Points
 

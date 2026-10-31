@@ -109,10 +109,8 @@ describe("TheMemesMintPage", () => {
       width: 1200,
     });
     expect(url.pathname).toBe("/api/og-metadata/collections/the-memes");
-    expect(url.searchParams.get("subtitle")).toBe(
-      "Latest The Memes mint on 6529.io"
-    );
-    expect(url.searchParams.get("title")).toBe("Mint #1 | Meme | The Memes");
+    // The card resolves the latest mint from the backend; no text is passed.
+    expect(url.search).toBe("?variant=mint");
   });
 
   it("falls back safely when a partial response omits the name", () => {

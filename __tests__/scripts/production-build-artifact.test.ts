@@ -127,6 +127,10 @@ describe("production exact-artifact deployment contract", () => {
     expect(deploySource).not.toContain("NEXT_PUBLIC_ETHEREUM_RPC_URL");
   });
 
+  it("bakes signed messages on into production builds", () => {
+    expect(build.env.NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES).toBe("true");
+  });
+
   it("generates the production sitemap under the fail-closed policy", () => {
     const buildStep = build.jobs["build-production-artifact"].steps.find(
       (step: { name?: string }) => step.name === "Build exact production bytes"
