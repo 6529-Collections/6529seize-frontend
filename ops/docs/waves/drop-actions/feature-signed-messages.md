@@ -21,6 +21,8 @@ writes are unchanged.
 - Wave composer on `/waves/{waveId}` and `/messages/{waveId}`: the
   signed-messages notice.
 - Drop menus (desktop `More`, touch drop menu): `Signature`.
+- Drop headers in chat, feed cards, participation drops and the single-drop
+  view: the **Signed by its author** seal beside the timestamp.
 - Preferences: `/preferences?tab=devices` (the **Devices** tab).
 
 ## Entry Points
@@ -104,7 +106,28 @@ and checks the wallet's sign-in signature on the grant. The dialog shows:
   signed events or the author's wallets cannot be loaded. A temporary failure
   is never reported as **The signature could not be verified**.
 
-Signed drops carry no badge in the feed.
+## Signed-By-Author Seal
+
+A drop whose current content is the version its author signed shows a small
+shield-check seal right after its timestamp. Its accessible name and tooltip
+are **Signed by its author**. Clicking it, or focusing it and pressing Enter
+or Space, opens the same **Signature** dialog, so the browser checks the
+signature itself; the seal only reflects what 6529.io reports.
+
+- The seal is positive only. Unsigned drops show nothing: posts from the
+  native and desktop apps, older posts, and any drop edited without a
+  signature look exactly as before.
+- It appears in the drop header of chat rows, feed cards, participation
+  drops, the minimal identity row and the single-drop view. On grouped chat
+  rows, which have no header, a static seal appears beside the timestamp
+  revealed on hover or swipe; use the drop menu's **Signature** item there.
+- A signed edit keeps the seal; an unsigned edit or a delete removes it.
+- The seal is hidden while the signed messages flag is off, for drops still
+  being sent, and when the content is hidden by moderation or the author is
+  anonymous.
+- Other viewers' open chats may show the seal on a freshly signed post only
+  after that post is next loaded; the author's own view shows it when the
+  post is confirmed.
 
 ## Availability and Edge Cases
 
@@ -139,8 +162,8 @@ Signed drops carry no badge in the feed.
 
 | Field                     | Current exception                                                                                                                                                      |
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Route or component        | `components/device-signing/SignedMessagesNotice.tsx`, Preferences Devices tab (`/preferences?tab=devices`), `components/waves/drops/signature/DropSignatureDialog.tsx` |
-| Untranslated surface      | All copy in `i18n/messages/signed-messages.ts` (notice, Devices tab, signature dialog)                                                                                 |
+| Route or component        | `components/device-signing/SignedMessagesNotice.tsx`, Preferences Devices tab (`/preferences?tab=devices`), `components/waves/drops/signature/DropSignatureDialog.tsx`, `components/waves/drops/signature/DropAuthorSignedMarker.tsx` |
+| Untranslated surface      | All copy in `i18n/messages/signed-messages.ts` (notice, Devices tab, signature dialog, signed-by-author seal)                                                           |
 | Current fallback behavior | Keys exist only in `en-US`; other locales fall back to `en-US`. Dates and lists already use `formatDate` and `formatList`                                              |
 | User impact               | Users of other locales see English copy for this staging-flagged feature                                                                                               |
 | Owner or follow-up        | Frontend localization maintainers; translate before the signed messages flag is enabled in production                                                                  |
