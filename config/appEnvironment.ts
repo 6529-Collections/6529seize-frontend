@@ -135,6 +135,11 @@ export function getAppEnvironment(baseEndpoint: string): AppEnvironment {
   };
 }
 
+/** Origin of a configured base URL, such as the build's `BASE_ENDPOINT`. */
+export function getConfiguredAppOrigin(baseUrl: string): string {
+  return parseEnvironmentUrl(baseUrl)?.origin ?? PRODUCTION_APP_ORIGIN;
+}
+
 export function getBrowserOrigin(
   browserOriginReader: BrowserOriginReader = readBrowserOrigin
 ): string {

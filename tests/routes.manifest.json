@@ -420,9 +420,6 @@
       "classification": "exempt",
       "exemptReason": "Error-boundary demonstration page; crawling it asserts a crash by design."
     },
-    "/feed": {
-      "classification": "auth"
-    },
     "/gm-or-die-small-mp4": {
       "classification": "exempt",
       "exemptReason": "Bare media-asset wrapper page, not a user surface."
@@ -2238,10 +2235,6 @@
         "production": "/safe-collecting/tap-guide"
       }
     },
-    "/sentry-example-page": {
-      "classification": "exempt",
-      "exemptReason": "Sentry integration test page; intentionally throws."
-    },
     "/slide-page/6529-initiatives": {
       "classification": "exempt",
       "exemptReason": "Slide fragment embedded by other surfaces; not standalone."
@@ -2319,6 +2312,10 @@
     "/tools/time-zones": {
       "classification": "crawlable",
       "family": "tools"
+    },
+    "/wave-not-found": {
+      "classification": "exempt",
+      "exemptReason": "Internal rewrite target for malformed wave ids; always answers 404."
     },
     "/waves": {
       "classification": "crawlable",
