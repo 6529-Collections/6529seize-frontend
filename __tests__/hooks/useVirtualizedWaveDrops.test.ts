@@ -6,14 +6,14 @@ jest.mock("@/hooks/useVirtualizedWaveMessages");
 jest.mock("@/contexts/wave/MyStreamContext");
 
 import { useVirtualizedWaveMessages } from "@/hooks/useVirtualizedWaveMessages";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 
 const fetchNextPageForWave = jest.fn();
 const fetchNextPageForDrop = jest.fn().mockResolvedValue(undefined);
 const waitAndRevealDrop = jest.fn();
 const loadMoreLocally = jest.fn();
 
-(useMyStream as jest.Mock).mockReturnValue({ fetchNextPageForWave });
+(useMyStreamActions as jest.Mock).mockReturnValue({ fetchNextPageForWave });
 (useVirtualizedWaveMessages as jest.Mock).mockReturnValue({
   loadMoreLocally,
   hasMoreLocal: true,

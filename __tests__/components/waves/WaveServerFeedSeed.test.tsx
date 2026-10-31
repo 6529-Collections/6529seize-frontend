@@ -48,7 +48,7 @@ const useDefaultMockMyStreamValue = () => {
 };
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: () => mockMyStreamValue,
+  useMyStreamActions: () => mockMyStreamValue,
 }));
 
 jest.mock("@/hooks/useCapacitor", () => ({
