@@ -236,6 +236,8 @@ export function createSecurityHeaders(
     ]),
     cspDirective("img-src", imgSrc),
     cspDirective("media-src", mediaSrc),
+    // default-src is 'none', which would otherwise block the web app manifest.
+    cspDirective("manifest-src", ["'self'"]),
     cspDirective("frame-src", frameSrc),
     cspDirective("style-src", [
       "'self'",

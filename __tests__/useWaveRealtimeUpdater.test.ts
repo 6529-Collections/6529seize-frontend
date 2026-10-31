@@ -1622,4 +1622,78 @@ describe("useWaveRealtimeUpdater", () => {
     act(() => jest.advanceTimersByTime(100));
     expect(props.removeDrops).toHaveBeenCalledTimes(1);
   });
+
+  describe("ATTACHMENT_STATUS_UPDATE", () => {
+    const processingAttachment = {
+      attachment_id: "att-1",
+      file_name: "report.pdf",
+      mime_type: "application/pdf",
+      kind: "pdf",
+      status: "processing",
+    };
+    const readyAttachment = { ...processingAttachment, status: "ready" };
+    const buildStore = () => ({
+      wave1: {
+        drops: [
+          {
+            id: "d1",
+            type: DropSize.FULL,
+            stableKey: "d1",
+            stableHash: "d1",
+            parts: [{ part_id: 1, attachments: [processingAttachment] }],
+          },
+        ],
+        latestFetchedSerialNo: 1,
+      },
+    });
+
+    it("updates every cached drop query once and the active wave store", () => {
+      const store = buildStore();
+      const props = { ...baseProps(store), activeWaveId: "wave1" };
+      renderHook(() => useWaveRealtimeUpdater(props));
+      mockSetQueriesData.mockClear();
+
+      emitWebSocketMessage(
+        WsMessageType.ATTACHMENT_STATUS_UPDATE,
+        readyAttachment
+      );
+
+      expect(mockSetQueriesData).toHaveBeenCalledTimes(6);
+      expect(props.updateData).toHaveBeenCalledTimes(1);
+      expect(props.updateData).toHaveBeenCalledWith({
+        key: "wave1",
+        drops: [
+          expect.objectContaining({
+            parts: [{ part_id: 1, attachments: [readyAttachment] }],
+          }),
+        ],
+      });
+    });
+
+    it("still refreshes cached queries when no wave is active", () => {
+      const props = baseProps(buildStore());
+      renderHook(() => useWaveRealtimeUpdater(props));
+      mockSetQueriesData.mockClear();
+
+      emitWebSocketMessage(
+        WsMessageType.ATTACHMENT_STATUS_UPDATE,
+        readyAttachment
+      );
+
+      expect(mockSetQueriesData).toHaveBeenCalledTimes(6);
+      expect(props.updateData).not.toHaveBeenCalled();
+    });
+
+    it("does not touch the wave store when the attachment is not in it", () => {
+      const props = { ...baseProps(buildStore()), activeWaveId: "wave1" };
+      renderHook(() => useWaveRealtimeUpdater(props));
+
+      emitWebSocketMessage(WsMessageType.ATTACHMENT_STATUS_UPDATE, {
+        ...readyAttachment,
+        attachment_id: "other",
+      });
+
+      expect(props.updateData).not.toHaveBeenCalled();
+    });
+  });
 });
