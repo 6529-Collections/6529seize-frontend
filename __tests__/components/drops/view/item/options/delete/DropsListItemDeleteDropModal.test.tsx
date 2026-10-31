@@ -9,7 +9,7 @@ import { useMutation } from "@tanstack/react-query";
 
 jest.mock("@tanstack/react-query");
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: () => ({ processDropRemoved: jest.fn() }),
+  useMyStreamActions: () => ({ processDropRemoved: jest.fn() }),
 }));
 
 // Mock fetch
