@@ -73,7 +73,7 @@ jobs:
           test "$GITHUB_RUN_ATTEMPT" = "1"
 
       - name: Check out trusted benchmark tool
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
         with:
           ref: ${{ github.workflow_sha }}
           sparse-checkout: |
@@ -167,7 +167,7 @@ jobs:
       CONTROLLER_RUN_ATTEMPT: ${{ github.run_attempt }}
     steps:
       - name: Check out trusted benchmark tool
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
         with:
           ref: ${{ github.workflow_sha }}
           sparse-checkout: |
