@@ -283,6 +283,15 @@ class E2eeEngineImpl implements E2eeEngineExt {
     void this.ctx.tasks.track(run());
   }
 
+  /** GET /e2ee/me needs no registered device; failures keep the limit screen. */
+  private async loadDevicesAtLimit(): Promise<void> {
+    try {
+      await refreshMe(this.ctx);
+    } catch {
+      // The device-limit screen still explains what to do without the list.
+    }
+  }
+
   private async refreshMe(): Promise<void> {
     if (!this.ctx.device?.registered || this.ctx.disposed) {
       return;
@@ -371,9 +380,13 @@ class E2eeEngineImpl implements E2eeEngineExt {
       );
       if (!ready) {
         if (this.ctx.store.status === "enrolling") {
+          // Nothing to enroll without a prompt (sign-in grant path).
           setStatus(this.ctx, NEEDS_ENROLLMENT);
+          return;
         }
-        return; // device-limit, or nothing to enroll without a prompt
+        // device-limit: list the profile's devices so the screen can show them.
+        await this.loadDevicesAtLimit();
+        return;
       }
       await loadGroups(this.ctx);
       setStatus(this.ctx, "ready");

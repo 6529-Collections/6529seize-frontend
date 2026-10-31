@@ -168,7 +168,10 @@ function NewConversationForm({ e2ee }: { readonly e2ee: UseE2eeResult }) {
       const g = await engine.createConversation({
         profileIds,
         kind,
-        name: kind === "group" && trimmedName ? trimmedName : null,
+        name:
+          kind === "group" && selected.length > 1 && trimmedName
+            ? trimmedName
+            : null,
       });
       router.push(getEncryptedConversationRoute(g));
     } catch (error) {
@@ -234,7 +237,8 @@ function NewConversationForm({ e2ee }: { readonly e2ee: UseE2eeResult }) {
         ) : null}
       </fieldset>
 
-      {kind === "group" ? (
+      {/* A name only makes sense once there is a group to name. */}
+      {kind === "group" && selected.length > 1 ? (
         <div>
           <label
             htmlFor={nameId}

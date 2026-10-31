@@ -68,7 +68,10 @@ export function E2eeConversationHeader({
           {title}
         </h1>
         <div className="tw-mt-0.5 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-          <E2eeBadge label={t(locale, "e2ee.badge.encrypted")} />
+          <E2eeBadge
+            label={t(locale, "e2ee.badge.encrypted")}
+            shortLabel={t(locale, "e2ee.badge.encryptedShort")}
+          />
           {conversation.kind === "group" ? (
             <span className="tw-text-xs tw-text-iron-400">
               {tCount(

@@ -14,6 +14,7 @@ import {
   useRef,
   useState,
 } from "react";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -25,7 +26,7 @@ import type {
   E2eeMessage,
 } from "@/lib/e2ee/types";
 import { getE2eeActionErrorKey } from "../e2eeErrors";
-import { getMemberName } from "../e2eeFormat";
+import { getMemberName, tCount } from "../e2eeFormat";
 import { E2eeRenewalBanner } from "../gate/E2eeRenewalBanner";
 import { E2eeAvatar } from "../ui/E2eeAvatar";
 import { collectMentionIds } from "./e2eeMentions";
@@ -72,7 +73,8 @@ function FilePreview({
   onRemove,
 }: {
   readonly file: File;
-  readonly onRemove: () => void;
+  /** Absent while the file is being encrypted and uploaded. */
+  readonly onRemove?: (() => void) | undefined;
 }) {
   const locale = useBrowserLocale();
   // Raster images only, the same rule as received attachments. The preview
@@ -102,7 +104,11 @@ function FilePreview({
   }, [file, isImage]);
 
   return (
-    <li className="tw-relative tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-1.5 tw-pr-9">
+    <li
+      className={`tw-relative tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-1.5 ${
+        onRemove ? "tw-pr-9" : "tw-pr-3 tw-opacity-70"
+      }`}
+    >
       {isImage ? (
         <canvas
           ref={canvasRef}
@@ -115,17 +121,52 @@ function FilePreview({
       <span className="tw-max-w-[10rem] tw-truncate tw-text-xs tw-text-iron-200">
         {file.name}
       </span>
-      <button
-        type="button"
-        onClick={onRemove}
-        aria-label={t(locale, "e2ee.composer.removeAttachment", {
-          name: file.name,
-        })}
-        className="tw-absolute tw-right-1 tw-top-1/2 tw-flex tw-size-7 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-      >
-        <XMarkIcon aria-hidden="true" className="tw-size-4" />
-      </button>
+      {onRemove ? (
+        <button
+          type="button"
+          onClick={onRemove}
+          aria-label={t(locale, "e2ee.composer.removeAttachment", {
+            name: file.name,
+          })}
+          className="tw-absolute tw-right-1 tw-top-1/2 tw-flex tw-size-7 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        >
+          <XMarkIcon aria-hidden="true" className="tw-size-4" />
+        </button>
+      ) : null}
     </li>
+  );
+}
+
+/** The files of a message being encrypted and uploaded, before it appears. */
+function UploadingFiles({
+  locale,
+  files,
+}: {
+  readonly locale: SupportedLocale;
+  readonly files: readonly File[];
+}) {
+  return (
+    <div className="tw-px-3 tw-pt-2">
+      <output className="tw-mb-1.5 tw-flex tw-items-center tw-gap-2 tw-text-xs tw-text-iron-300">
+        <CircleLoader />
+        {tCount(
+          locale,
+          {
+            one: "e2ee.composer.uploading.one",
+            other: "e2ee.composer.uploading.other",
+          },
+          files.length
+        )}
+      </output>
+      <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-2 tw-p-0">
+        {files.map((file) => (
+          <FilePreview
+            key={`${file.name}:${file.size}:${file.lastModified}`}
+            file={file}
+          />
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -315,6 +356,41 @@ interface E2eeComposerProps {
   readonly disabledReasonKey: MessageKey | null;
   /** Server switch: without it there is no attach control at all. */
   readonly attachmentsEnabled: boolean;
+  /** A refused message whose text goes back into the box once. */
+  /** Id for the textarea, so a skip link can move focus to it. */
+  readonly inputId?: string | undefined;
+  readonly restoredDraft?:
+    | { readonly id: string; readonly text: string }
+    | null
+    | undefined;
+}
+
+/**
+ * Loads text into the box once per source: the message being edited (which
+ * also clears picked files) or a refused message coming back to resend.
+ */
+function useLoadedComposerText(
+  editing: E2eeMessage | null,
+  restoredDraft: { readonly id: string; readonly text: string } | null,
+  setText: (text: string) => void,
+  clearFiles: () => void
+): { readonly editId: string | null; readonly draftId: string | null } {
+  const [loadedEditId, setLoadedEditId] = useState<string | null>(null);
+  const [loadedDraftId, setLoadedDraftId] = useState<string | null>(null);
+  const editId = editing?.id ?? null;
+  if (editId !== loadedEditId) {
+    setLoadedEditId(editId);
+    setText(editing ? editing.text : "");
+    clearFiles();
+  }
+  const draftId = restoredDraft?.id ?? null;
+  if (draftId !== loadedDraftId) {
+    setLoadedDraftId(draftId);
+    if (restoredDraft) {
+      setText(restoredDraft.text);
+    }
+  }
+  return { editId, draftId };
 }
 
 /**
@@ -332,16 +408,20 @@ export function E2eeComposer({
   onCancelEdit,
   disabledReasonKey,
   attachmentsEnabled,
+  restoredDraft = null,
+  inputId,
 }: E2eeComposerProps) {
   const locale = useBrowserLocale();
   const listboxId = useId();
+  const textareaId = inputId ?? `${listboxId}-input`;
   const hintId = useId();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [text, setText] = useState("");
   const [files, setFiles] = useState<readonly File[]>([]);
   const [error, setError] = useState<ComposerError | null>(null);
-  const [loadedEditId, setLoadedEditId] = useState<string | null>(null);
+  // Files of the message being encrypted and uploaded right now.
+  const [uploading, setUploading] = useState<readonly File[]>([]);
   const mentions = useMentionPicker(conversation.members, selfProfileId);
 
   // Attachments switched off server-side drop anything already picked.
@@ -349,16 +429,15 @@ export function E2eeComposer({
     setFiles([]);
   }
 
-  // Entering edit mode loads the message text once per edited message.
-  const editId = editing?.id ?? null;
-  if (editId !== loadedEditId) {
-    setLoadedEditId(editId);
-    setText(editing ? editing.text : "");
-    setFiles([]);
-  }
+  const { editId, draftId } = useLoadedComposerText(
+    editing,
+    restoredDraft,
+    setText,
+    () => setFiles([])
+  );
 
-  // Reply and edit move focus to the composer.
-  const focusKey = editId ?? replyTo?.id ?? null;
+  // Reply, edit and a restored draft move focus to the composer.
+  const focusKey = editId ?? replyTo?.id ?? draftId ?? null;
   useEffect(() => {
     if (focusKey !== null) {
       textareaRef.current?.focus();
@@ -375,6 +454,7 @@ export function E2eeComposer({
   }, [text]);
 
   const isEmpty = text.trim().length === 0 && files.length === 0;
+  const isUploading = uploading.length > 0;
   const tooLong = text.length > E2EE_MAX_TEXT_LENGTH;
 
   const pickMention = (member: E2eeMember) => {
@@ -413,6 +493,7 @@ export function E2eeComposer({
     setText("");
     setFiles([]);
     onCancelReply();
+    setUploading(pendingFiles);
     try {
       await engine.send(conversation.g, {
         text: trimmed,
@@ -427,6 +508,8 @@ export function E2eeComposer({
         key: getE2eeActionErrorKey(caught, "e2ee.composer.sendFailed"),
         params: {},
       });
+    } finally {
+      setUploading([]);
     }
   };
 
@@ -441,7 +524,7 @@ export function E2eeComposer({
     }
     if (editing) {
       await submitEdit(editing, trimmed);
-    } else if (!isEmpty) {
+    } else if (!isEmpty && !isUploading) {
       await submitNew(trimmed);
     }
   };
@@ -499,7 +582,7 @@ export function E2eeComposer({
     <div className="tw-flex-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-pb-[env(safe-area-inset-bottom,0px)]">
       <ComposerTopBars
         locale={locale}
-        showRenewal={isEmpty && !editing}
+        showRenewal={isEmpty && !editing && !isUploading}
         replyTo={editing ? null : replyTo}
         replyName={replyName}
         onCancelReply={onCancelReply}
@@ -510,6 +593,9 @@ export function E2eeComposer({
           setFiles((current) => current.filter((_, i) => i !== index))
         }
       />
+      {isUploading ? (
+        <UploadingFiles locale={locale} files={uploading} />
+      ) : null}
       <div className="tw-relative tw-flex tw-items-end tw-gap-2 tw-px-3 tw-py-2">
         {mentions.open ? (
           <MentionList
@@ -542,11 +628,11 @@ export function E2eeComposer({
             </button>
           </>
         )}
-        <label className="tw-sr-only" htmlFor={`${listboxId}-input`}>
+        <label className="tw-sr-only" htmlFor={textareaId}>
           {t(locale, "e2ee.composer.label")}
         </label>
         <textarea
-          id={`${listboxId}-input`}
+          id={textareaId}
           ref={textareaRef}
           rows={1}
           value={text}
@@ -572,7 +658,7 @@ export function E2eeComposer({
         <button
           type="button"
           onClick={() => void submit()}
-          disabled={isEmpty || tooLong}
+          disabled={isEmpty || tooLong || isUploading}
           aria-label={t(
             locale,
             editing ? "e2ee.composer.saveEdit" : "e2ee.composer.send"

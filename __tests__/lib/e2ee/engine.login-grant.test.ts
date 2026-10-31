@@ -131,7 +131,7 @@ describe("E2EE engine: combined sign-in grant (NC8)", () => {
     const alice = await startDevice(world, "alice", account, {
       storage: signIn.storage,
       enroll: false,
-      extra: { origin: ORIGIN },
+      extra: { origin: ORIGIN, deviceLabel: "Chrome on Windows" },
     });
 
     // Engine start does not wait for the network: it reports "enrolling".
@@ -142,6 +142,8 @@ describe("E2EE engine: combined sign-in grant (NC8)", () => {
     expect(record).toMatchObject({
       device_key: signIn.deviceKey,
       grant_id: signIn.grantId,
+      // Named like a device enrolled with the grant prompt.
+      label: "Chrome on Windows",
     });
     expect(typeof record.grant_message).toBe("string");
 

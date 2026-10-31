@@ -99,6 +99,14 @@ async function signGrant(
   }
 }
 
+const DEFAULT_DEVICE_LABEL = "Device";
+
+/** The caller's coarse name for a new device ("Chrome on Windows"). */
+const deviceLabel = (ctx: EngineContext): string => {
+  const label = ctx.options.deviceLabel?.trim().slice(0, 48) ?? "";
+  return label.length > 0 ? label : DEFAULT_DEVICE_LABEL;
+};
+
 /** Creates the device key and obtains the single wallet signature. */
 async function createDevice(ctx: EngineContext): Promise<StoredDevice> {
   if (!ctx.wasm) {
@@ -125,7 +133,7 @@ async function createDevice(ctx: EngineContext): Promise<StoredDevice> {
     walletSignature: signature,
     registered: false,
     provisioned: false,
-    label: "Device",
+    label: deviceLabel(ctx),
     platform: ctx.options.platform,
     createdAt: ctx.now(),
     lastResortAt: null,
@@ -200,12 +208,19 @@ const submitRegistration = async (
     return await ctx.api.registerDevice({
       grant: device.grant,
       wallet_signature: device.walletSignature,
+      label: device.label,
       platform: device.platform,
     });
+  }
+  // The sign-in flow stores the key before the engine knows this browser's
+  // name; name it now, as a device enrolled with the grant prompt would be.
+  if (device.label === DEFAULT_DEVICE_LABEL) {
+    device.label = deviceLabel(ctx);
   }
   try {
     return await ctx.api.registerLoginGrantDevice({
       grant_id: device.loginGrantId,
+      label: device.label,
       platform: device.platform,
     });
   } catch (error) {
@@ -273,6 +288,7 @@ export async function renewGrant(ctx: EngineContext): Promise<void> {
   const record = await ctx.api.registerDevice({
     grant,
     wallet_signature: signature,
+    label: device.label,
     platform: device.platform,
   });
   ctx.directory.seed([record]);
