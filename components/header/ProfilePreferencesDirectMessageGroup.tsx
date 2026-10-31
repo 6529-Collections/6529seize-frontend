@@ -86,12 +86,15 @@ function SelectedGroupSummary({
  */
 export default function ProfilePreferencesDirectMessageGroup({
   groupId,
+  requiredHintId,
   savedGroupUnavailable,
   allowPeopleIFollow,
   onGroupChange,
   onAllowPeopleIFollowChange,
 }: {
   readonly groupId: string | null;
+  /** Id for the "choose a group" hint, which also describes the Save button. */
+  readonly requiredHintId: string;
   /** The API reports the saved group as missing or hidden. */
   readonly savedGroupUnavailable: boolean;
   readonly allowPeopleIFollow: boolean;
@@ -145,9 +148,11 @@ export default function ProfilePreferencesDirectMessageGroup({
   return (
     <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/40 tw-p-4">
       {isUnavailable && (
+        // An alert, not a status: the warning is already present when the
+        // panel mounts and asks the user to act, so it must be announced.
         <div
           id={warningId}
-          role="status"
+          role="alert"
           className="tw-flex tw-items-start tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-amber-500/40 tw-bg-amber-500/10 tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 tw-text-amber-200"
         >
           <ExclamationTriangleIcon
@@ -178,7 +183,10 @@ export default function ProfilePreferencesDirectMessageGroup({
         </Button>
       </div>
       {groupId === null && (
-        <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+        <p
+          id={requiredHintId}
+          className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400"
+        >
           {t(locale, "profilePreferences.dm.group.required")}
         </p>
       )}

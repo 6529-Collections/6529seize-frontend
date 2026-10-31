@@ -245,7 +245,11 @@ describe("ProfilePreferencesSettings", () => {
     expect(
       screen.getByText("Choose a group to save this option.")
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Save Changes" })).toBeDisabled();
+    const saveButton = screen.getByRole("button", { name: "Save Changes" });
+    expect(saveButton).toBeDisabled();
+    expect(saveButton).toHaveAccessibleDescription(
+      "Choose a group to save this option."
+    );
     const followToggle = screen.getByRole("checkbox", {
       name: /People I follow can always message me/i,
     });
@@ -286,11 +290,9 @@ describe("ProfilePreferencesSettings", () => {
     const user = userEvent.setup();
     render(<ProfilePreferencesSettings />);
 
-    expect(
-      await screen.findByText(
-        /until you choose another group, only people you follow can start a new conversation/i
-      )
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /until you choose another group, only people you follow can start a new conversation/i
+    );
     expect(screen.getByText("Group no longer available")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Change group" }));
@@ -347,5 +349,39 @@ describe("ProfilePreferencesSettings", () => {
     expect(
       screen.getByText(/profiles you block can never start a new conversation/i)
     ).toBeInTheDocument();
+  });
+
+  it("keeps the policy radios one keyboard group around the group controls", async () => {
+    const user = userEvent.setup();
+    render(<ProfilePreferencesSettings />);
+    await screen.findByText("Subscription coverage");
+
+    const groupRadio = screen.getByRole("radio", {
+      name: "Members of a group I choose",
+    });
+    await user.click(groupRadio);
+    // Opening the group panel must not remount the radio (that drops focus).
+    expect(groupRadio).toBeInTheDocument();
+    groupRadio.focus();
+
+    // Tab leaves the radio group for the group controls in reading order.
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Choose group" })).toHaveFocus();
+    await user.tab();
+    expect(
+      screen.getByRole("checkbox", {
+        name: /People I follow can always message me/i,
+      })
+    ).toHaveFocus();
+
+    // Arrow keys still move between the policy radios, past the controls.
+    groupRadio.focus();
+    await user.keyboard("{ArrowDown}");
+    const nobodyRadio = screen.getByRole("radio", { name: /^Nobody/i });
+    expect(nobodyRadio).toBeChecked();
+    expect(nobodyRadio).toHaveFocus();
+    expect(
+      screen.queryByRole("button", { name: "Choose group" })
+    ).not.toBeInTheDocument();
   });
 });

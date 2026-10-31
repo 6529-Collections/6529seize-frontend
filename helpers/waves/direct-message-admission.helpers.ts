@@ -43,7 +43,7 @@ export function getDirectMessageAdmissionErrorMessage(
   }
   const groupName = readText(body?.["group_name"]);
   if (code === "DM_RECIPIENT_GROUP_MEMBERS_ONLY" && groupName !== null) {
-    return t(locale, "directMessageAdmission.groupMembersOnlyNamed", {
+    return t(locale, "directMessageAdmission.groupMembersOnlyWithGroup", {
       handle,
       groupName,
     });

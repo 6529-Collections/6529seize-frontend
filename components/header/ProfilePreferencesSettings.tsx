@@ -28,7 +28,7 @@ import {
   m,
   useReducedMotion,
 } from "framer-motion";
-import { useContext, useState } from "react";
+import { useContext, useId, useState } from "react";
 import PreferenceToggle from "./PreferenceToggle";
 import ProfilePreferencesDirectMessageGroup from "./ProfilePreferencesDirectMessageGroup";
 
@@ -240,6 +240,7 @@ function ProfilePreferencesForm({
     current.direct_message_policy === DirectMessagePolicy.GroupMembers;
   const isMissingRequiredGroup =
     isGroupPolicy && !current.direct_message_group_id;
+  const requiredGroupHintId = useId();
 
   const { mutateAsync: save, isPending: isSaving } = useMutation({
     mutationFn: async () => {
@@ -408,56 +409,52 @@ function ProfilePreferencesForm({
                   `profilePreferences.dm.${option}.label`
                 );
 
-                const radio = (
-                  <PreferenceRadioOption
-                    key={option}
-                    name="direct-message-policy"
-                    value={option}
-                    checked={current.direct_message_policy === option}
-                    label={label}
-                    description={t(
-                      locale,
-                      `profilePreferences.dm.${option}.description`
-                    )}
-                    onChange={() =>
-                      setCurrent({
-                        ...current,
-                        direct_message_policy: option,
-                      })
-                    }
-                  />
-                );
-                if (
-                  option !== DirectMessagePolicy.GroupMembers ||
-                  !isGroupPolicy
-                ) {
-                  return radio;
-                }
+                // Every option keeps the same wrapper so the radio input is not
+                // remounted (and keyboard focus lost) when the group panel opens.
                 return (
                   <div key={option}>
-                    {radio}
-                    <ProfilePreferencesDirectMessageGroup
-                      groupId={current.direct_message_group_id}
-                      savedGroupUnavailable={
-                        current.direct_message_group_unavailable
-                      }
-                      allowPeopleIFollow={
-                        current.direct_message_allow_people_i_follow
-                      }
-                      onGroupChange={(group) =>
+                    <PreferenceRadioOption
+                      name="direct-message-policy"
+                      value={option}
+                      checked={current.direct_message_policy === option}
+                      label={label}
+                      description={t(
+                        locale,
+                        `profilePreferences.dm.${option}.description`
+                      )}
+                      onChange={() =>
                         setCurrent({
                           ...current,
-                          direct_message_group_id: group.id,
-                          direct_message_group_unavailable: false,
-                        })
-                      }
-                      onAllowPeopleIFollowChange={(allow) =>
-                        setCurrent({
-                          ...current,
-                          direct_message_allow_people_i_follow: allow,
+                          direct_message_policy: option,
                         })
                       }
                     />
+                    {option === DirectMessagePolicy.GroupMembers &&
+                      isGroupPolicy && (
+                        <ProfilePreferencesDirectMessageGroup
+                          groupId={current.direct_message_group_id}
+                          requiredHintId={requiredGroupHintId}
+                          savedGroupUnavailable={
+                            current.direct_message_group_unavailable
+                          }
+                          allowPeopleIFollow={
+                            current.direct_message_allow_people_i_follow
+                          }
+                          onGroupChange={(group) =>
+                            setCurrent({
+                              ...current,
+                              direct_message_group_id: group.id,
+                              direct_message_group_unavailable: false,
+                            })
+                          }
+                          onAllowPeopleIFollowChange={(allow) =>
+                            setCurrent({
+                              ...current,
+                              direct_message_allow_people_i_follow: allow,
+                            })
+                          }
+                        />
+                      )}
                   </div>
                 );
               })}
@@ -473,6 +470,9 @@ function ProfilePreferencesForm({
           type="button"
           onClick={() => void save()}
           disabled={!hasChanges || isMissingRequiredGroup}
+          aria-describedby={
+            isMissingRequiredGroup ? requiredGroupHintId : undefined
+          }
           loading={isSaving}
           variant="action"
           size="md"
