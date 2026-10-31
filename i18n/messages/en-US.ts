@@ -73,6 +73,7 @@ import { SIGNED_MESSAGES_MESSAGES } from "@/i18n/messages/signed-messages";
 import { MODERATION_CHECK_MESSAGES } from "@/i18n/messages/moderation-checks";
 import { EULA_MESSAGES } from "@/i18n/messages/eula";
 import { GLOBAL_ERROR_MESSAGES } from "@/i18n/messages/global-error";
+import { MAPPING_TOOL_MESSAGES } from "@/i18n/messages/mapping-tools";
 import { PROFILE_CURATION_MESSAGES } from "@/i18n/messages/profile-curation";
 import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-documentation";
 import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artwork-documentation-integration";
@@ -4641,6 +4642,7 @@ export const EN_US_MESSAGES = {
   "navigation.nfts.memesCalendar": "Memes Calendar",
   ...EULA_MESSAGES,
   ...GLOBAL_ERROR_MESSAGES,
+  ...MAPPING_TOOL_MESSAGES,
   ...TITLE_CONTEXT_MESSAGES,
   ...WAVE_NAVIGATION_MESSAGES,
   ...MY_STREAM_CURATION_MESSAGES,
