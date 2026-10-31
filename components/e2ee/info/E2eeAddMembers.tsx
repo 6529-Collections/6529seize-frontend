@@ -5,27 +5,15 @@ import Button from "@/components/utils/button/Button";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
-import type {
-  E2eeConversation,
-  E2eeEligibility,
-  E2eeEngine,
-} from "@/lib/e2ee/types";
+import type { E2eeConversation, E2eeEngine } from "@/lib/e2ee/types";
 import { getE2eeActionErrorKey } from "../e2eeErrors";
 import {
   E2eePeoplePicker,
   type E2eeSelectedPerson,
   toSelectedPerson,
 } from "../new/E2eePeoplePicker";
+import { getE2eeEligibilityKey } from "../new/eligibilityCopy";
 import { useE2eeEligibility } from "../new/useE2eeEligibility";
-
-const SKIPPED_KEYS: Record<
-  Exclude<E2eeEligibility["status"], "OK">,
-  MessageKey
-> = {
-  POLICY: "e2ee.new.eligibility.POLICY",
-  BLOCKED: "e2ee.new.eligibility.BLOCKED",
-  NO_DEVICES: "e2ee.new.eligibility.NO_DEVICES",
-};
 
 interface E2eeAddMembersProps {
   readonly engine: E2eeEngine;
@@ -42,7 +30,10 @@ export function E2eeAddMembers({ engine, conversation }: E2eeAddMembersProps) {
     readonly { readonly name: string; readonly key: MessageKey }[]
   >([]);
   const profileIds = selected.map((person) => person.profileId);
-  const { statusFor, retry } = useE2eeEligibility(engine, profileIds);
+  const { statusFor, reasonFor, retry } = useE2eeEligibility(
+    engine,
+    profileIds
+  );
   const memberIds = new Set(
     conversation.members.map((member) => member.profileId)
   );
@@ -74,10 +65,7 @@ export function E2eeAddMembers({ engine, conversation }: E2eeAddMembersProps) {
           name:
             selected.find((person) => person.profileId === result.profileId)
               ?.handle ?? t(locale, "e2ee.unknownMember"),
-          key:
-            result.status === "OK"
-              ? "e2ee.new.eligibility.OK"
-              : SKIPPED_KEYS[result.status],
+          key: getE2eeEligibilityKey(result.status, result.reason),
         }))
       );
       setSelected([]);
@@ -93,6 +81,7 @@ export function E2eeAddMembers({ engine, conversation }: E2eeAddMembersProps) {
       <E2eePeoplePicker
         selected={selected}
         statusFor={statusFor}
+        reasonFor={reasonFor}
         onRetry={retry}
         onAdd={onAdd}
         onRemove={(profileId) =>

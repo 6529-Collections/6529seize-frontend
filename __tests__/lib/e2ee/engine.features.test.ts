@@ -141,29 +141,97 @@ describe("E2EE engine: features", () => {
     const alice = await addUser(world, "alice");
     await addUser(world, "nobody");
     await addUser(world, "blocker");
+    await addUser(world, "blocked");
     await addUser(world, "follower-only");
     world.ds.setDmPolicy("nobody", "NOBODY");
     world.ds.block("blocker", "alice");
+    world.ds.block("alice", "blocked");
     world.ds.setDmPolicy("follower-only", "PEOPLE_I_FOLLOW");
     const a = alice.primary.engine;
     await expect(
-      a.checkEligibility(["nobody", "blocker", "follower-only", "ghost"])
+      a.checkEligibility([
+        "nobody",
+        "blocker",
+        "blocked",
+        "follower-only",
+        "ghost",
+      ])
     ).resolves.toEqual([
-      { profileId: "nobody", status: "POLICY" },
-      { profileId: "blocker", status: "BLOCKED" },
-      { profileId: "follower-only", status: "POLICY" },
-      { profileId: "ghost", status: "NO_DEVICES" },
+      {
+        profileId: "nobody",
+        status: "POLICY",
+        reason: "DM_RECIPIENT_NOT_ACCEPTING",
+      },
+      // The target's block looks exactly like a closed inbox.
+      {
+        profileId: "blocker",
+        status: "POLICY",
+        reason: "DM_RECIPIENT_NOT_ACCEPTING",
+      },
+      // Only the viewer's own block is reported as BLOCKED.
+      {
+        profileId: "blocked",
+        status: "BLOCKED",
+        reason: "DM_SENDER_BLOCKED_RECIPIENT",
+      },
+      {
+        profileId: "follower-only",
+        status: "POLICY",
+        reason: "DM_RECIPIENT_PEOPLE_I_FOLLOW_ONLY",
+      },
+      { profileId: "ghost", status: "NO_DEVICES", reason: null },
     ]);
     await expect(
       a.createConversation({ profileIds: ["nobody"], kind: "dm" })
     ).rejects.toThrow("E2EE_POLICY");
     await expect(
       a.createConversation({ profileIds: ["blocker"], kind: "dm" })
+    ).rejects.toThrow("E2EE_POLICY");
+    await expect(
+      a.createConversation({ profileIds: ["blocked"], kind: "dm" })
     ).rejects.toThrow("E2EE_BLOCKED");
     expect(a.getConversations()).toEqual([]);
     world.ds.follow("follower-only", "alice");
     await expect(
       a.createConversation({ profileIds: ["follower-only"], kind: "dm" })
+    ).resolves.toMatch(/^0x/);
+  });
+
+  it("admits members of the recipient's chosen group (and people they follow)", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    await addUser(world, "member-only");
+    await addUser(world, "outsider-only");
+    await addUser(world, "strict");
+    world.ds.setDmGroup("member-only", ["alice"]);
+    world.ds.setDmGroup("outsider-only", ["someone-else"]);
+    world.ds.setDmGroup("strict", ["someone-else"], false);
+    world.ds.follow("strict", "alice");
+    const a = alice.primary.engine;
+    await expect(
+      a.checkEligibility(["member-only", "outsider-only", "strict"])
+    ).resolves.toEqual([
+      { profileId: "member-only", status: "OK", reason: null },
+      {
+        profileId: "outsider-only",
+        status: "POLICY",
+        reason: "DM_RECIPIENT_GROUP_MEMBERS_ONLY",
+      },
+      {
+        profileId: "strict",
+        status: "POLICY",
+        reason: "DM_RECIPIENT_GROUP_MEMBERS_ONLY",
+      },
+    ]);
+    world.ds.follow("outsider-only", "alice");
+    await expect(a.checkEligibility(["outsider-only"])).resolves.toEqual([
+      { profileId: "outsider-only", status: "OK", reason: null },
+    ]);
+    await expect(
+      a.createConversation({ profileIds: ["strict"], kind: "dm" })
+    ).rejects.toThrow("E2EE_POLICY");
+    await expect(
+      a.createConversation({ profileIds: ["member-only"], kind: "dm" })
     ).resolves.toMatch(/^0x/);
   });
 

@@ -94,9 +94,18 @@ export interface E2eeConversation {
   updatedAt: number;
 }
 
+/** The shared DM admission code behind POLICY or BLOCKED (legacy DM codes). */
+export type E2eeEligibilityReason =
+  | "DM_RECIPIENT_NOT_ACCEPTING"
+  | "DM_RECIPIENT_PEOPLE_I_FOLLOW_ONLY"
+  | "DM_RECIPIENT_GROUP_MEMBERS_ONLY"
+  | "DM_SENDER_BLOCKED_RECIPIENT";
+
 export interface E2eeEligibility {
   profileId: string;
+  /** BLOCKED is only the viewer's own block; a recipient's block is POLICY. */
   status: "OK" | "POLICY" | "BLOCKED" | "NO_DEVICES";
+  reason?: E2eeEligibilityReason | null;
 }
 
 export interface E2eeEngine {

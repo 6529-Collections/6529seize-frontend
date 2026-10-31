@@ -10,9 +10,11 @@ import GroupCreateIdentitiesSearch from "@/components/groups/page/create/config/
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t, type MessageKey } from "@/i18n/messages";
+import { t } from "@/i18n/messages";
+import type { E2eeEligibilityReason } from "@/lib/e2ee/types";
 import type { E2eePrefillPerson } from "../e2eeComposePrefill";
 import { E2eeAvatar } from "../ui/E2eeAvatar";
+import { getE2eeEligibilityKey } from "./eligibilityCopy";
 import type { E2eeEligibilityState } from "./useE2eeEligibility";
 
 export type E2eeSelectedPerson = E2eePrefillPerson;
@@ -29,24 +31,17 @@ export const toSelectedPerson = (
       }
     : null;
 
-const STATUS_KEYS: Record<E2eeEligibilityState, MessageKey> = {
-  OK: "e2ee.new.eligibility.OK",
-  POLICY: "e2ee.new.eligibility.POLICY",
-  BLOCKED: "e2ee.new.eligibility.BLOCKED",
-  NO_DEVICES: "e2ee.new.eligibility.NO_DEVICES",
-  checking: "e2ee.new.eligibility.checking",
-  error: "e2ee.new.eligibility.error",
-};
-
 function EligibilityStatus({
   status,
+  reason,
   onRetry,
 }: {
   readonly status: E2eeEligibilityState;
+  readonly reason: E2eeEligibilityReason | null;
   readonly onRetry: () => void;
 }) {
   const locale = useBrowserLocale();
-  const label = t(locale, STATUS_KEYS[status]);
+  const label = t(locale, getE2eeEligibilityKey(status, reason));
   if (status === "checking") {
     return (
       <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-xs tw-text-iron-400">
@@ -87,6 +82,9 @@ function EligibilityStatus({
 interface E2eePeoplePickerProps {
   readonly selected: readonly E2eeSelectedPerson[];
   readonly statusFor: (profileId: string) => E2eeEligibilityState;
+  readonly reasonFor?:
+    | ((profileId: string) => E2eeEligibilityReason | null)
+    | undefined;
   readonly onRetry: (profileId: string) => void;
   readonly onAdd: (identity: CommunityMemberMinimal) => void;
   readonly onRemove: (profileId: string) => void;
@@ -98,6 +96,7 @@ interface E2eePeoplePickerProps {
 export function E2eePeoplePicker({
   selected,
   statusFor,
+  reasonFor,
   onRetry,
   onAdd,
   onRemove,
@@ -144,6 +143,7 @@ export function E2eePeoplePicker({
                   </span>
                   <EligibilityStatus
                     status={statusFor(person.profileId)}
+                    reason={reasonFor?.(person.profileId) ?? null}
                     onRetry={() => onRetry(person.profileId)}
                   />
                 </div>
