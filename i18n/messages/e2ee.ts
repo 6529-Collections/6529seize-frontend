@@ -31,6 +31,22 @@ export const E2EE_MESSAGES = {
   "e2ee.gate.error.body":
     "Something went wrong while loading encrypted messages on this device.",
   "e2ee.gate.error.code": "Error code: {code}",
+  "e2ee.gate.elsewhere.title": "Encrypted messages are open in another tab.",
+  "e2ee.gate.elsewhere.body":
+    "They run in one tab at a time so your chats stay in sync. Use them here and the other tab will pause.",
+  "e2ee.gate.elsewhere.action": "Use here",
+  "e2ee.signOut.title": "Sign out",
+  "e2ee.signOut.titleAll": "Sign out of all profiles",
+  "e2ee.signOut.body":
+    "Your encrypted messages stay saved in this browser unless you remove them.",
+  "e2ee.signOut.remove.label": "Remove encrypted messages from this browser",
+  "e2ee.signOut.remove.help":
+    "Deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved here for this profile. Your history is lost unless backup is on.",
+  "e2ee.signOut.remove.helpAll":
+    "Recommended on a shared computer. Deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved here for every profile. Your history is lost unless backup is on.",
+  "e2ee.signOut.confirm": "Sign out",
+  "e2ee.signOut.removeFailed":
+    "Couldn’t remove encrypted messages from this browser. You’re still signed in.",
   "e2ee.enroll.identity": "You’ll sign as {name} with {wallet}.",
   "e2ee.enroll.identityUnknown":
     "You’ll sign with the wallet connected to this profile.",
@@ -209,6 +225,21 @@ export const E2EE_MESSAGES = {
     "Security check needed: this device may not see the same chat as everyone else. Compare safety codes before sharing anything sensitive.",
   "e2ee.banner.splitViewAction": "Compare safety codes",
   "e2ee.banner.invalid": "This chat is paused because of an invalid change.",
+  "e2ee.banner.untrustedNewWallet":
+    "{name} has a device signed by a new wallet {wallet}.",
+  "e2ee.banner.untrustedNewWalletSelf":
+    "You have a device signed by a new wallet {wallet}.",
+  "e2ee.banner.untrustedUnverified":
+    "{name} has a device signed by wallet {wallet}, and this device couldn’t check that signature.",
+  "e2ee.banner.untrustedUnverifiedSelf":
+    "You have a device signed by wallet {wallet}, and this device couldn’t check that signature.",
+  "e2ee.banner.untrustedHelp":
+    "It can’t read this chat unless you add it. Add it only if you know whose wallet this is.",
+  "e2ee.banner.addDevice": "Add device",
+  "e2ee.banner.addDeviceAria": "Add device signed by wallet {wallet}",
+  "e2ee.banner.ignoreDevice": "Ignore",
+  "e2ee.banner.ignoreDeviceAria": "Ignore device signed by wallet {wallet}",
+  "e2ee.banner.deviceActionFailed": "Couldn’t update the device. Try again.",
   "e2ee.banner.restart": "Start a new encrypted chat with the same people",
   "e2ee.banner.restartFailed": "Couldn’t start a new chat. Try again.",
   "e2ee.banner.left": "You left this chat.",
@@ -248,6 +279,8 @@ export const E2EE_MESSAGES = {
   "e2ee.message.attachment.loading": "Loading attachment…",
   "e2ee.message.attachment.failed": "Couldn’t load {name}",
   "e2ee.message.attachment.imageAlt": "Image: {name}",
+  "e2ee.message.attachment.unnamed": "file",
+  "e2ee.message.attachment.tooLarge": "Too large to preview",
 
   "e2ee.notice.created": "{actor} started this encrypted chat",
   "e2ee.notice.joined": "{targets} joined",
@@ -256,6 +289,8 @@ export const E2EE_MESSAGES = {
   "e2ee.notice.removed": "{actor} removed {targets}",
   "e2ee.notice.removedNoActor": "{targets} is no longer in the chat",
   "e2ee.notice.deviceAdded": "{name} added a device",
+  "e2ee.notice.deviceAddedWallet":
+    "{name} added a device signed by wallet {wallet}",
   "e2ee.notice.deviceRemoved": "{name} removed a device",
   "e2ee.notice.renamed": "{actor} renamed the chat to “{name}”",
   "e2ee.notice.renamedNoName": "{actor} renamed the chat",
@@ -295,6 +330,8 @@ export const E2EE_MESSAGES = {
   "e2ee.info.devices.one": "{count} device",
   "e2ee.info.devices.other": "{count} devices",
   "e2ee.info.memberDevices": "Devices of {name}",
+  "e2ee.info.deviceLine": "{device} · {status} · signed by wallet {wallet}",
+  "e2ee.info.deviceLineNoWallet": "{device} · {status}",
   "e2ee.info.addPeople": "Add people",
   "e2ee.info.addSearch": "Search people to add",
   "e2ee.info.addSubmit": "Add to chat",
@@ -320,7 +357,7 @@ export const E2EE_MESSAGES = {
   "e2ee.info.safetyCode": "Safety code",
   "e2ee.info.safetyCodeAria": "Safety code: {code}",
   "e2ee.info.safetyCodeHelp":
-    "Compare this code with the other members in person or in another app you trust. If everyone sees the same code, no one has been added to this chat without your knowledge.",
+    "Compare this code with the other members in person or in another app you trust. If everyone sees the same code, everyone sees the same people and devices in this chat. Check the wallet shown with each device to know whose it is.",
   "e2ee.info.mute": "Mute on this device",
   "e2ee.info.unmute": "Unmute on this device",
   "e2ee.info.muteHelp":
@@ -345,6 +382,17 @@ export const E2EE_MESSAGES = {
   "e2ee.report.title": "Report illegal or severe harm",
   "e2ee.report.description":
     "Only this message is shared, with proof that its sender sent it. It goes to 6529’s trust and safety team. Nothing else in the conversation is revealed.",
+  "e2ee.report.preview.heading": "What this report sends",
+  "e2ee.report.preview.message": "The message",
+  "e2ee.report.preview.edited": "The message as edited, the version you see",
+  "e2ee.report.preview.original": "The original, before it was edited",
+  "e2ee.report.preview.noText": "No text",
+  "e2ee.report.preview.attachments": "Attachments: {names}",
+  "e2ee.report.preview.unavailable":
+    "This message can’t be reported from this device.",
+  "e2ee.report.includeOriginal": "Also send the original message",
+  "e2ee.report.includeOriginalHint":
+    "This message was edited, and its attachments belong to the original. Include the original if it or its attachments showed the harm.",
   "e2ee.report.categoryLegend": "What does this message contain?",
   "e2ee.report.category.CHILD_SEXUAL_ABUSE_MATERIAL":
     "Child sexual abuse material",
@@ -449,10 +497,12 @@ export const E2EE_MESSAGES = {
 
   "e2ee.imported.badge": "Imported, not verified",
   "e2ee.imported.detail":
-    "Moved from an unencrypted DM by {name}. The author and time come from 6529’s server copy and can’t be verified.",
+    "Moved from an unencrypted DM. The author and time come from 6529’s server copy and can’t be verified.",
   "e2ee.imported.mediaMissing.one": "{count} image or file wasn’t moved.",
   "e2ee.imported.mediaMissing.other": "{count} images or files weren’t moved.",
   "e2ee.imported.reactions": "Reactions on the original: {reactions}",
+  "e2ee.imported.movedBy": "Moved by {name}",
+  "e2ee.imported.unknownAuthor": "Unknown",
 
   // Unencrypted DMs are deleted from 6529's servers on a fixed date (D146).
   "e2ee.legacy.banner.label": "Not end-to-end encrypted.",

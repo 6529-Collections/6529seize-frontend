@@ -1,6 +1,7 @@
 import { downloadMedia, localBlobType } from "../media";
 import { MlsClient } from "../mls-adapter";
 import { getDefaultE2eeStorage, isIndexedDbAvailable } from "../storage";
+import { getDefaultBackupStateStore } from "../backup/state";
 import type { BackupHistory } from "../backup/format";
 import type {
   E2eeEngineExt,
@@ -8,9 +9,11 @@ import type {
   E2eeEngineStatus,
   E2eeImported,
   E2eeMessage,
+  E2eeReportPreview,
 } from "../types";
 import {
   checkpoint,
+  clearStoredState,
   requireGroup,
   requireMls,
   type EngineContext,
@@ -49,8 +52,15 @@ import {
   TaskTracker,
   TimerSet,
 } from "./runtime";
+import { previewReport, sendReport } from "./report";
 import { queueImported, queueMessage, queueTargeted } from "./send";
 import { EngineStore, toE2eeMessage } from "./store";
+import {
+  approveDevice,
+  hasPinnedWallets,
+  ignoreUntrustedDevice,
+  isPinnedWallet,
+} from "./trust";
 
 /** Contract section 12 engine: framework-agnostic, one instance per profile. */
 
@@ -79,6 +89,16 @@ function createContext(options: E2eeEngineOptions): EngineContext {
     verifyContractSignature: options.verifyContractSignature,
     verifyEd25519: (pub, digest, sig) =>
       holder.ctx?.mls?.verifyEd25519(pub, digest, sig) ?? false,
+    pinnedWallet: (profileId, wallet) => {
+      const current = holder.ctx;
+      if (!current) {
+        return null;
+      }
+      if (isPinnedWallet(current, profileId, wallet)) {
+        return true;
+      }
+      return hasPinnedWallets(current, profileId) ? false : null;
+    },
   });
   const ctx: EngineContext = {
     options,
@@ -97,6 +117,8 @@ function createContext(options: E2eeEngineOptions): EngineContext {
     mls: null,
     device: null,
     lastState: null,
+    stateVersion: 0,
+    persistChain: Promise.resolve(),
     disposed: false,
     lastMeAt: 0,
     lastWakeAt: 0,
@@ -222,6 +244,11 @@ class E2eeEngineImpl implements E2eeEngineExt {
       return;
     }
     try {
+      // Read the version before the state: if another tab writes in
+      // between, this engine is the stale one and its first write is refused.
+      this.ctx.stateVersion = await this.ctx.storage.getStateVersion(
+        this.ctx.profileId
+      );
       const restored = await restore(this.ctx);
       if (!restored) {
         setStatus(this.ctx, NEEDS_ENROLLMENT);
@@ -319,7 +346,11 @@ class E2eeEngineImpl implements E2eeEngineExt {
     await this.wipe();
   }
 
-  /** This device was revoked: local state is useless; back to enrollment. */
+  /**
+   * This device was revoked: local state is useless; back to enrollment. The
+   * encrypted-backup state for the profile goes too (its chunk key belongs
+   * to this device).
+   */
   private async wipe(): Promise<void> {
     await this.ctx.queue.run(async () => {
       this.ctx.timers.dispose();
@@ -329,7 +360,15 @@ class E2eeEngineImpl implements E2eeEngineExt {
       this.ctx.lastState = null;
       this.ctx.store.groups.clear();
       this.ctx.store.thisDevice = null;
-      await this.ctx.storage.clearProfile(this.ctx.profileId);
+      await clearStoredState(this.ctx);
+      try {
+        await (
+          this.ctx.options.backupState ?? getDefaultBackupStateStore()
+        ).delete(this.ctx.profileId);
+      } catch {
+        // Best effort: a stale backup state is dropped on the next start
+        // anyway (its device key no longer matches).
+      }
       setStatus(this.ctx, NEEDS_ENROLLMENT);
     });
   }
@@ -678,28 +717,19 @@ class E2eeEngineImpl implements E2eeEngineExt {
     g: string,
     id: string,
     reason: string,
-    notes?: string
+    notes?: string,
+    options?: { includeOriginal?: boolean }
   ): Promise<void> {
     this.requireReady();
-    const message = this.ownMessage(g, id);
-    if (
-      message.body === null ||
-      message.sig === null ||
-      message.epoch === null ||
-      message.senderDeviceKey === null
-    ) {
-      throw new E2eeError("E2EE_REPORT_UNAVAILABLE");
-    }
-    await this.ctx.api.report({
-      group: g.toLowerCase(),
-      epoch: message.epoch,
-      body: message.body,
-      signature: message.sig,
-      sender_device_key: message.senderDeviceKey,
-      reporter_device_key: requireMls(this.ctx).deviceKey(),
+    await sendReport(this.ctx, g, this.ownMessage(g, id), {
       reason,
-      ...(notes ? { notes: notes.slice(0, 1000) } : {}),
+      notes,
+      includeOriginal: options?.includeOriginal,
     });
+  }
+
+  reportPreview(g: string, id: string): E2eeReportPreview {
+    return previewReport(this.ownMessage(g, id));
   }
 
   search(query: string, g?: string): Promise<E2eeMessage[]> {
@@ -743,6 +773,44 @@ class E2eeEngineImpl implements E2eeEngineExt {
   }
 
   // -- devices ----------------------------------------------------------------
+
+  /**
+   * "Add device": trusts the wallet for its owner and approves the device,
+   * clears its notice from every chat, then adds it to each active chat the
+   * owner is in (the only chats that listed it).
+   */
+  async trustDevice(deviceKey: string): Promise<void> {
+    this.requireReady();
+    const target = this.ctx.store.findUntrusted(deviceKey.toLowerCase());
+    if (!target) {
+      return;
+    }
+    await this.ctx.queue.run(() => approveDevice(this.ctx, target));
+    this.ctx.store.dropUntrusted(target.deviceKey);
+    const chats = [...this.ctx.store.groups].filter(
+      ([, runtime]) =>
+        runtime.record.status === "active" &&
+        runtime.record.members.some(
+          (leaf) => leaf.profileId === target.profileId
+        )
+    );
+    for (const [g] of chats) {
+      await this.controller.addOtherDevices(g);
+    }
+  }
+
+  /** "Ignore": the device stays out and its notice goes away. */
+  async ignoreDevice(deviceKey: string): Promise<void> {
+    this.requireReady();
+    const target = this.ctx.store.findUntrusted(deviceKey.toLowerCase());
+    if (!target) {
+      return;
+    }
+    await this.ctx.queue.run(() =>
+      ignoreUntrustedDevice(this.ctx, target.deviceKey)
+    );
+    this.ctx.store.dropUntrusted(target.deviceKey);
+  }
 
   async revokeDevice(deviceKey: string): Promise<void> {
     this.requireReady();

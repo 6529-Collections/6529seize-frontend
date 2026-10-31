@@ -6,7 +6,11 @@ import type {
   StoredMessage,
   StoredOutboxItem,
 } from "../records";
-import type { E2eeStorage, E2eeStorageBatch } from "../storage";
+import {
+  type E2eeStorage,
+  type E2eeStorageBatch,
+  isE2eeStateConflict,
+} from "../storage";
 import type { E2eeEngineOptions, E2eeScheduler, WasmModule } from "../types";
 import type { DeviceDirectory } from "./directory";
 import { E2eeError } from "./errors";
@@ -33,6 +37,14 @@ export interface EngineContext {
   device: StoredDevice | null;
   /** WASM state as of the last checkpoint (rollback target). */
   lastState: Uint8Array | null;
+  /**
+   * Version of the persisted state this engine last loaded or wrote. Every
+   * write is a compare-and-swap on it, so a stale tab never overwrites newer
+   * state (and never brings deleted epoch secrets back to disk).
+   */
+  stateVersion: number;
+  /** Serialises storage writes so each one sees the previous version. */
+  persistChain: Promise<void>;
   disposed: boolean;
   lastMeAt: number;
   lastWakeAt: number;
@@ -138,6 +150,38 @@ function compact(batch: E2eeStorageBatch): E2eeStorageBatch {
 }
 
 /**
+ * Runs one storage write with this engine's state version. On success the
+ * version moves on; on a conflict another engine owns newer state, so this
+ * one stops (and tells its host) instead of writing anything else.
+ */
+function persist(
+  ctx: EngineContext,
+  write: (expectedVersion: number) => Promise<void>
+): Promise<void> {
+  const run = ctx.persistChain.then(async () => {
+    try {
+      await write(ctx.stateVersion);
+    } catch (error) {
+      if (isE2eeStateConflict(error) && !ctx.disposed) {
+        ctx.disposed = true;
+        ctx.options.onStateConflict?.();
+      }
+      throw error;
+    }
+    ctx.stateVersion += 1;
+  });
+  ctx.persistChain = run.catch(() => undefined);
+  return run;
+}
+
+/** Clears this profile's local state under the engine's state version. */
+export function clearStoredState(ctx: EngineContext): Promise<void> {
+  return persist(ctx, (expectedVersion) =>
+    ctx.storage.clearProfile(ctx.profileId, expectedVersion)
+  );
+}
+
+/**
  * Persists the WASM state together with the given group records and their
  * changed messages in one atomic write. Called BEFORE submitting anything the
  * WASM produced (8.7) and after processing log items.
@@ -159,7 +203,9 @@ export async function checkpoint(
     ...(extra.outbox ? { outbox: extra.outbox } : {}),
     ...(extra.deleteOutbox ? { deleteOutbox: extra.deleteOutbox } : {}),
   });
-  await ctx.storage.writeBatch(ctx.profileId, batch);
+  await persist(ctx, (expectedVersion) =>
+    ctx.storage.writeBatch(ctx.profileId, { ...batch, expectedVersion })
+  );
   if (state) {
     ctx.lastState = state;
   }

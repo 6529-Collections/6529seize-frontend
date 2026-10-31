@@ -32,6 +32,23 @@ export interface StoredDevice {
   createdAt: number;
   /** When the current last-resort KeyPackage was uploaded (ms). */
   lastResortAt: number | null;
+  /** Which wallets this profile trusts for each person (engine/trust.ts). */
+  trust?: StoredTrust;
+}
+
+/**
+ * Trust on first use for device owners. The server says which profile a
+ * device belongs to; only the wallet signature on its grant is checked, so
+ * each person's wallets are pinned when first seen and a device signed by any
+ * other wallet waits for the user's explicit "Add device".
+ */
+export interface StoredTrust {
+  /** profile id -> lowercase wallets pinned for that person. */
+  wallets: Record<string, string[]>;
+  /** Device keys the user added explicitly (new or unverified wallet). */
+  approved: string[];
+  /** Device keys whose new-wallet notice the user dismissed. */
+  ignored: string[];
 }
 
 export interface StoredMember {
@@ -106,6 +123,14 @@ export interface StoredNotice {
   detail?: string;
 }
 
+/** One signed payload exactly as received, enough for a verifiable report. */
+export interface SignedVersion {
+  epoch: number;
+  body: string;
+  sig: string;
+  senderDeviceKey: string;
+}
+
 export interface StoredMessage {
   id: string;
   g: string;
@@ -131,6 +156,13 @@ export interface StoredMessage {
   epoch: number | null;
   body: string | null;
   sig: string | null;
+  /**
+   * The latest applied edit's own signed `edit` payload, the version the
+   * reader sees. Null when that edit has no signed copy (this device's own
+   * edit). Absent on messages never edited, and on ones edited before this
+   * field existed.
+   */
+  latestEdit?: SignedVersion | null;
   /** Set when the message was moved from an unencrypted DM (D146). */
   imported?: ImportedPayload;
 }

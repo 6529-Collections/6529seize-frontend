@@ -6,7 +6,10 @@ Encrypted messages are end-to-end encrypted direct messages and group chats.
 Only the people in a chat can read it: messages are encrypted on the sender's
 device and decrypted on each member's device. 6529.io delivers the encrypted
 data and orders group changes, but it cannot read messages, group names or the
-member list inside a chat, and it cannot add a device to a chat.
+member list inside a chat. It does say which profile a device belongs to, so
+members' devices add a person's new device on their own only when a wallet
+already trusted for that person signed it and the signature checks out on
+their device (see [Device trust](#device-trust)).
 
 Chats use the MLS protocol (RFC 9420) through a WebAssembly build of OpenMLS
 that runs in the browser or app. Keys are agreed with a hybrid post-quantum
@@ -35,6 +38,20 @@ can export them or move them into an encrypted chat.
   profile; the pages explain this and show nothing else.
 - The browser needs WebAssembly, IndexedDB and Web Crypto. Browsers without
   them see "This browser can’t use encrypted messages".
+- Encrypted messages run in one tab at a time per profile. Other tabs show
+  "Encrypted messages are open in another tab." with **Use here**, which moves
+  them to that tab and pauses the first one. Closing the tab that has them
+  lets a waiting tab take over.
+
+## Signing out
+
+When this browser holds encrypted messages, **Sign out** and **Sign Out All
+Profiles** ask first whether to **Remove encrypted messages from this
+browser**. It deletes the chats, attachment keys, unsent messages and
+encryption keys saved here: for the profile you sign out of, or for every
+profile with Sign Out All Profiles (where it is on by default). Without
+encrypted backup that history cannot be recovered. If you keep them, they
+stay saved in this browser for the next sign-in.
 
 ## Location in the site
 
@@ -108,6 +125,10 @@ the same people already chosen. Earlier messages are not copied.
 - Type `@` to mention a member.
 - Attach up to 10 files of up to 25 MB each; they are encrypted on your
   device like messages. Images show inline and other files are downloads.
+  An image larger than about 50 megapixels shows as a file to download
+  (**Too large to preview**) instead, and only a few images load at once.
+  File names are shown and saved without path separators, control or
+  right-to-left override characters, and at most 120 characters long.
   The server can switch attachments off as a kill switch; while it is off
   there is no attach control and chats are text only.
 - Open a message's menu to react, reply, or edit or delete your own messages.
@@ -118,19 +139,50 @@ the same people already chosen. Earlier messages are not copied.
   **Choose who can message you** (Preferences) and, last, **Report illegal or
   severe harm**.
 - Search in the header looks only through messages on this device.
-- **Chat info** lists members (with admin badges and their devices), the
-  safety code, report help and **Leave chat**. In groups, admins can add and
+- **Chat info** lists members (with admin badges and their devices, each with
+  the short wallet address that signed it), the safety code, report help and
+  **Leave chat**. In groups, admins can add and
   remove people, make or remove admins, and rename the group.
 - The timeline shows notices such as people joining, leaving or being removed,
-  new or removed devices, renames, admin changes and safety-code changes.
+  new devices (with the wallet that signed them) or removed devices, renames,
+  admin changes and safety-code changes.
 
 ### Safety code
 
 The safety code in **Chat info** is the same for everyone who sees the same
 chat. Compare it with the other members in person or in another app you
-trust. If everyone sees the same code, no one has been added to the chat
-without your knowledge. **Chat info** also explains the encryption (MLS with
-hybrid post-quantum key exchange) and has **Mute on this device**.
+trust. If everyone sees the same code, everyone sees the same people and
+devices in the chat. It cannot show whether each device really belongs to the
+person it is listed under: that rests on [device trust](#device-trust) and the
+wallets shown in **Chat info**. **Chat info** also explains the encryption
+(MLS with hybrid post-quantum key exchange) and has **Mute on this device**.
+
+### Device trust
+
+A device's own proof is a wallet signature, and that signature does not name a
+profile; 6529.io says which profile the device belongs to. So encrypted
+messages use trust on first use. The first time your device sees a person (you
+start or join a chat with them, or, for chats from before this check, the next
+time the chat is maintained), it remembers the wallets that signed that
+person's devices. Later devices of that person are added automatically only
+when one of those wallets signed them and this device could check the
+signature.
+
+When a member has a device signed by a wallet your device has not seen for
+them, it is not added and the chat shows **{name} has a device signed by a new
+wallet 0x1234…abcd.** (for your own profile: **You have a device signed by a
+new wallet …**). A device whose contract-wallet signature (for example a Safe)
+this device could not check shows a similar notice. **Add device** trusts that
+wallet for the person and adds the device; **Ignore** keeps it out and hides
+the notice. Add it only if you know whose wallet it is, for example because
+they told you they set up a new one.
+
+A revoked device is removed only when the revocation comes from that device
+itself or from a device signed by a wallet trusted for its owner.
+
+Trust on first use cannot catch a wrong device that is already there the first
+time your device sees someone. Compare safety codes and check the wallets in
+**Chat info** when that matters.
 
 ### Banners
 
@@ -207,6 +259,13 @@ encrypted copy of your message history so you can restore it on a new device.
   read-only until someone in the chat adds this device; then new messages
   continue below the restored ones. After a restore the device also keeps the
   same backup up to date.
+- The backup's encrypted pieces are linked in order, so 6529 cannot reorder,
+  replay or remove pieces from the middle of your history. If the restore
+  finds a piece missing, out of place or altered, it says "Part of the backup
+  couldn’t be read. Nothing was restored." and imports nothing. If two
+  devices back up at exactly the same moment, the next backup run uploads a
+  fresh full copy and removes the overlapping pieces; a restore attempted in
+  between also stops without importing anything.
 - **Create new recovery code** shows a new code and uploads a fresh copy of
   your history. Your old code stops working once the new backup finishes
   uploading. Do this after you revoke a device that had backup on: the
@@ -237,7 +296,12 @@ doxxing (exposed personal data). The dialog requires one of these and explains
 what is shared:
 
 - Only the selected message is shared, with proof that its sender's device sent
-  it.
+  it. Under **What this report sends** the dialog shows that message's text
+  and attachment names.
+- For an edited message, the report sends the edited version you see. The
+  original goes along only if you tick **Also send the original message**.
+  An edit changes only the text, so attachments belong to the original and
+  are shared only with it.
 - It goes to 6529's trust and safety team, not to wave moderators or the
   moderation queue, and never to an AI service.
 - Nothing else in the conversation is revealed.
@@ -263,8 +327,11 @@ offers:
   exactly the same people exists on this device. **Move history** copies the
   messages you can see, oldest first, into that chat, with their images and
   files when they can be moved. Each copied message shows its original
-  author and time with the label **Imported, not verified**: 6529 held these
-  messages unencrypted, so the encrypted chat cannot prove who wrote them.
+  author and time with the label **Imported, not verified** and **Moved by**
+  the member who moved it: 6529 held these messages unencrypted, so the
+  encrypted chat cannot prove who wrote them. The author is named from the
+  chat's members; one who is not a member shows as **Unknown**, and the
+  original time is never shown as later than the move.
   Keep the page open while it runs; you can stop and continue later, and
   nothing is copied twice, even if another member also moves the history.
   Copied messages reach only the people and devices in the encrypted chat at
@@ -315,3 +382,5 @@ without images**. Images and files too large for one encrypted attachment
   replace the backup with a compact copy.
 - **Too many devices**: revoke a device you no longer use, then select
   **Turn on this device**.
+- **Encrypted messages are open in another tab.**: select **Use here** to move
+  them to this tab, or keep using the other tab.

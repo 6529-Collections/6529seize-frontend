@@ -40,37 +40,120 @@ type PageSnapshot = {
   readonly title: string;
 };
 
+// Encrypted chat URLs name the chat (/messages/encrypted/0x<group>), and the
+// new-chat page can carry who it is for in its query.
+const ENCRYPTED_MESSAGES_PATH_PATTERN = /^\/messages\/encrypted(?:\/|$)/;
+const ENCRYPTED_STATIC_SEGMENTS: ReadonlySet<string> = new Set([
+  "devices",
+  "new",
+]);
+const ENCRYPTED_CHAT_PATH = "/messages/encrypted/[chat]";
+
+const isEncryptedMessagesPath = (pathname: string): boolean =>
+  ENCRYPTED_MESSAGES_PATH_PATTERN.test(pathname);
+
+/**
+ * Any encrypted-chat path is reported as /messages/encrypted/[chat], without
+ * its query; the list, devices and new-chat pages keep their path. Other
+ * URLs are returned unchanged.
+ */
+export function normalizeAnalyticsUrl(href: string): string {
+  let url: URL;
+  try {
+    url = new URL(href);
+  } catch {
+    return href;
+  }
+  if (!isEncryptedMessagesPath(url.pathname)) {
+    return href;
+  }
+  const segment = url.pathname.split("/")[3] ?? "";
+  if (segment !== "" && !ENCRYPTED_STATIC_SEGMENTS.has(segment)) {
+    url.pathname = ENCRYPTED_CHAT_PATH;
+  }
+  url.search = "";
+  url.hash = "";
+  return url.href;
+}
+
 // Google Analytics leaves the fragment out of page_location, so page URLs are
 // compared and reported without it. One-time link credentials in the query
-// (connection-sharing links, for example) are redacted before any URL reaches
-// gtag().
+// (connection-sharing links, for example) are redacted, and encrypted chat
+// paths normalized, before any URL reaches gtag().
 const getPageUrl = (): string => {
   const url = new URL(globalThis.location.href);
   url.hash = "";
-  return redactSensitiveQueryParams(url.href);
+  return normalizeAnalyticsUrl(redactSensitiveQueryParams(url.href));
 };
+
+const sanitizeReferrer = (referrer: string): string =>
+  normalizeAnalyticsUrl(redactSensitiveQueryParams(referrer));
 
 /**
  * gtag.js reads the address bar and the referrer itself for the events it
- * sends on its own. When either still carries a link credential as gtag.js
- * loads, the config pins the redacted value, so no event reports the
- * credential. Ordinary URLs keep gtag.js' default page tracking. A session
- * that loads on such a URL may keep reporting the redacted landing URL, which
- * is preferable to sending the credential.
+ * sends on its own. When either still carries a link credential or names an
+ * encrypted chat as gtag.js loads, the config pins the sanitized value, so no
+ * event reports it. Ordinary URLs keep gtag.js' default page tracking.
  */
 const getCredentialSafeConfig = (): Record<string, string> => {
   const config: Record<string, string> = {};
-  const { href } = globalThis.location;
-  if (redactSensitiveQueryParams(href) !== href) {
+  const { href, pathname } = globalThis.location;
+  if (
+    redactSensitiveQueryParams(href) !== href ||
+    isEncryptedMessagesPath(pathname)
+  ) {
     config["page_location"] = getPageUrl();
   }
   const { referrer } = globalThis.document;
-  const redactedReferrer = redactSensitiveQueryParams(referrer);
-  if (redactedReferrer !== referrer) {
-    config["page_referrer"] = redactedReferrer;
+  const sanitizedReferrer = sanitizeReferrer(referrer);
+  if (sanitizedReferrer !== referrer) {
+    config["page_referrer"] = sanitizedReferrer;
   }
   return config;
 };
+
+let navigationPinInstalled = false;
+let pinnedUrl = "";
+
+/**
+ * gtag.js reports client navigations itself, reading the address bar. The
+ * history methods are wrapped before gtag.js loads (gtag.js then wraps these
+ * wrappers), so each navigation first sets the sanitized page_location and
+ * page_referrer that gtag.js' own page view uses. popstate listeners run in
+ * the order added, so this one also runs before gtag.js'.
+ */
+function pinSanitizedPageOnNavigation(currentUrl: string): void {
+  pinnedUrl = currentUrl;
+  if (navigationPinInstalled) {
+    return;
+  }
+  navigationPinInstalled = true;
+  const pin = () => {
+    try {
+      const gtag = getGtag();
+      const url = getPageUrl();
+      if (!gtag || url === pinnedUrl) {
+        return;
+      }
+      gtag("set", { page_location: url, page_referrer: pinnedUrl });
+      pinnedUrl = url;
+    } catch {
+      // Analytics never breaks navigation.
+    }
+  };
+  const { history } = globalThis;
+  for (const method of ["pushState", "replaceState"] as const) {
+    const original = history[method];
+    history[method] = function (
+      this: History,
+      ...args: Parameters<History["pushState"]>
+    ): void {
+      original.apply(this, args);
+      pin();
+    };
+  }
+  globalThis.addEventListener("popstate", pin);
+}
 
 const capturePage = (): PageSnapshot => ({
   url: getPageUrl(),
@@ -195,6 +278,7 @@ function loadGoogleAnalytics(landing: PageSnapshot): void {
     reportedUrl = currentUrl;
   };
   reportNavigationBeforeReady();
+  pinSanitizedPageOnNavigation(reportedUrl);
 
   const script = globalThis.document.createElement("script");
   script.src = GOOGLE_ANALYTICS_SCRIPT_URL;

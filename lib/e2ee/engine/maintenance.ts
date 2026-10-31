@@ -1,5 +1,7 @@
 import { asE2eeApiError } from "../api";
 import { digestBytes, rosterDigest } from "../digests";
+import type { ApiE2eeDevice } from "../api-types";
+import type { E2eeUntrustedDevice } from "../types";
 import type { WasmCommitOps } from "../wasm-types";
 import { claimedDevices, claimKeyPackages, isUsableDevice } from "./claims";
 import { submitCommit, type CommitIntent, type CommitOutcome } from "./commit";
@@ -18,6 +20,12 @@ import {
 import { sleep } from "./runtime";
 import type { GroupRuntime } from "./store";
 import { catchUpGroup } from "./sync";
+import {
+  deviceTrust,
+  isIgnoredDevice,
+  onlyTrustedPackages,
+  pinLeavesOnFirstSighting,
+} from "./trust";
 
 /** 8.2-8.5: required changes, stalls, self-updates, device adds, roster repair. */
 
@@ -66,6 +74,20 @@ async function deviceStatuses(
   return statuses;
 }
 
+const untrustedEntry = (
+  device: ApiE2eeDevice,
+  reason: E2eeUntrustedDevice["reason"]
+): E2eeUntrustedDevice => ({
+  profileId: device.profile_id,
+  deviceKey: device.device_key.toLowerCase(),
+  wallet: device.grant.wallet.toLowerCase(),
+  reason,
+});
+
+/**
+ * Trusted active devices per member principal (engine/trust.ts); the others
+ * are listed for "Add device" unless they are leaves already or ignored.
+ */
 async function activeDevices(
   ctx: EngineContext,
   runtime: GroupRuntime,
@@ -79,14 +101,33 @@ async function activeDevices(
         (id): id is string => id !== null && (!onlyOwn || id === ctx.profileId)
       )
   );
+  const leaves = new Set(runtime.record.members.map((m) => m.deviceKey));
+  await pinLeavesOnFirstSighting(
+    ctx,
+    runtime.record.members.filter(
+      (member) => member.profileId !== null && principals.has(member.profileId)
+    )
+  );
   for (const profileId of principals) {
     const keys: string[] = [];
+    const untrusted: E2eeUntrustedDevice[] = [];
     for (const device of await ctx.directory.getProfileDevices(profileId)) {
-      if (await isUsableDevice(ctx, device)) {
-        keys.push(device.device_key.toLowerCase());
+      const key = device.device_key.toLowerCase();
+      if (
+        device.profile_id !== profileId ||
+        !(await isUsableDevice(ctx, device))
+      ) {
+        continue;
+      }
+      const trust = await deviceTrust(ctx, device);
+      if (trust === "trusted") {
+        keys.push(key);
+      } else if (!leaves.has(key) && !isIgnoredDevice(ctx, key)) {
+        untrusted.push(untrustedEntry(device, trust));
       }
     }
     out.set(profileId, keys);
+    ctx.store.setUntrusted(profileId, untrusted);
   }
   return out;
 }
@@ -162,7 +203,8 @@ export function requiredChangesPlanner(options: {
       // Leave proposals ride along by reference (the store is then empty).
       ops.include_pending_proposals = runtime.record.leaving.length > 0;
     }
-    const packages = claimed?.packages ?? [];
+    // The claimed record must still be trusted, not just the listed one.
+    const packages = await onlyTrustedPackages(ctx, claimed?.packages ?? []);
     if (packages.length > 0) {
       ops.add_key_packages = packages.map((item) => item.keyPackage);
     }

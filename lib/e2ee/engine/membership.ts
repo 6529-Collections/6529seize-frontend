@@ -31,6 +31,7 @@ import {
 } from "./maintenance";
 import type { GroupRuntime } from "./store";
 import { catchUpGroup } from "./sync";
+import { trustedPackages } from "./trust";
 import { MAX_GROUP_NAME } from "./validate";
 
 /** Conversations: create, add/remove, rename, admins, leave (8.1 roles). */
@@ -95,6 +96,33 @@ const policyCode = (status: ApiE2eePolicyStatus) => {
   }
   return status === "NO_DEVICES" ? "E2EE_NO_DEVICES" : "E2EE_POLICY";
 };
+
+/**
+ * Keeps only trusted devices (engine/trust.ts); a person the server reported
+ * as reachable whose devices are all untrusted counts as having none.
+ */
+async function trustedClaim(
+  ctx: EngineContext,
+  claim: {
+    status: Map<string, ApiE2eePolicyStatus>;
+    packages: ClaimedPackage[];
+  }
+): Promise<{
+  status: Map<string, ApiE2eePolicyStatus>;
+  packages: ClaimedPackage[];
+}> {
+  const packages = await trustedPackages(ctx, claim.packages);
+  const status = new Map(claim.status);
+  for (const [profileId, value] of status) {
+    const reachable = packages.some(
+      (item) => item.device.profile_id === profileId
+    );
+    if (value === "OK" && !reachable && profileId !== ctx.profileId) {
+      status.set(profileId, "NO_DEVICES");
+    }
+  }
+  return { status, packages };
+}
 
 /** Adds claimed KeyPackages in commits of at most 200 leaves (3.3). */
 async function commitAdds(
@@ -214,12 +242,15 @@ async function claimForCreation(
   kind: "dm" | "group"
 ): Promise<ClaimedPackage[]> {
   const siblings = await ownSiblingDevices(ctx);
-  const claim = await claimKeyPackages(ctx, [
-    ...targets.map((profile_id) => ({ profile_id })),
-    ...(siblings.length > 0
-      ? [{ profile_id: ctx.profileId, device_keys: siblings }]
-      : []),
-  ]);
+  const claim = await trustedClaim(
+    ctx,
+    await claimKeyPackages(ctx, [
+      ...targets.map((profile_id) => ({ profile_id })),
+      ...(siblings.length > 0
+        ? [{ profile_id: ctx.profileId, device_keys: siblings }]
+        : []),
+    ])
+  );
   const statuses = targets.map((id) => claim.status.get(id) ?? "NO_DEVICES");
   const refused = statuses.find((status) => status !== "OK");
   const allRefused =
@@ -293,10 +324,13 @@ export async function addMembers(
   );
   const claim =
     fresh.length > 0
-      ? await claimKeyPackages(
+      ? await trustedClaim(
           ctx,
-          fresh.map((profile_id) => ({ profile_id })),
-          runtime.record.g
+          await claimKeyPackages(
+            ctx,
+            fresh.map((profile_id) => ({ profile_id })),
+            runtime.record.g
+          )
         )
       : null;
   const failure = claim

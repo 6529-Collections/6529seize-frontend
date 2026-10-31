@@ -4,6 +4,7 @@
 import { randomHex, utf8Encode } from "@/lib/e2ee/bytes";
 import {
   CHUNK_BUCKETS,
+  chunkHash,
   deriveChunkKey,
   MAX_SEGMENT_BYTES,
   newBackupKey,
@@ -11,6 +12,7 @@ import {
   openEnvelope,
   sealChunk,
   sealEnvelope,
+  ZERO_CHAIN_HASH,
 } from "@/lib/e2ee/backup/crypto";
 import { BackupError } from "@/lib/e2ee/backup/errors";
 import { startE2eeBackup } from "@/lib/e2ee/backup";
@@ -132,31 +134,74 @@ describe("E2EE backup envelope and chunks", () => {
     ).resolves.toBe("E2EE_BACKUP_CORRUPT");
   });
 
-  it("pads chunks to buckets and decrypts only with the right key and backup", async () => {
+  it("pads chunks to buckets and decrypts only with the right key, backup and chain position", async () => {
     const backupId = randomHex(16);
     const key = await deriveChunkKey(newBackupKey(), backupId);
-    const json = utf8Encode(JSON.stringify({ v: 1, hello: "world" }));
-    const sealed = await sealChunk(key, backupId, json);
+    const json = utf8Encode(JSON.stringify({ v: 2, hello: "world" }));
+    const first = { epoch: 0, index: 0, prev: ZERO_CHAIN_HASH, base: null };
+    const at0 = { index: 0, prev: ZERO_CHAIN_HASH };
+    const sealed = await sealChunk(key, backupId, first, json);
     expect(sealed.length).toBe(CHUNK_BUCKETS[0]);
-    await expect(openChunk(key, backupId, sealed)).resolves.toEqual(json);
+    await expect(openChunk(key, backupId, at0, sealed)).resolves.toEqual({
+      link: first,
+      json,
+    });
     const large = new Uint8Array(MAX_SEGMENT_BYTES).fill(0x61);
-    expect((await sealChunk(key, backupId, large)).length).toBe(1_048_576);
+    expect((await sealChunk(key, backupId, first, large)).length).toBe(
+      1_048_576
+    );
     await expect(
-      codeOf(sealChunk(key, backupId, new Uint8Array(MAX_SEGMENT_BYTES + 1)))
+      codeOf(
+        sealChunk(key, backupId, first, new Uint8Array(MAX_SEGMENT_BYTES + 1))
+      )
     ).resolves.toBe("E2EE_BACKUP_SEGMENT_TOO_LARGE");
 
     const otherKey = await deriveChunkKey(newBackupKey(), backupId);
-    await expect(codeOf(openChunk(otherKey, backupId, sealed))).resolves.toBe(
-      "E2EE_BACKUP_CORRUPT"
-    );
-    await expect(codeOf(openChunk(key, randomHex(16), sealed))).resolves.toBe(
-      "E2EE_BACKUP_CORRUPT"
-    );
+    await expect(
+      codeOf(openChunk(otherKey, backupId, at0, sealed))
+    ).resolves.toBe("E2EE_BACKUP_CORRUPT");
+    await expect(
+      codeOf(openChunk(key, randomHex(16), at0, sealed))
+    ).resolves.toBe("E2EE_BACKUP_CORRUPT");
     const tampered = sealed.slice();
     tampered[100] = tampered[100]! ^ 1;
-    await expect(codeOf(openChunk(key, backupId, tampered))).resolves.toBe(
+    await expect(codeOf(openChunk(key, backupId, at0, tampered))).resolves.toBe(
       "E2EE_BACKUP_CORRUPT"
     );
+
+    // The aad binds the index and the previous chunk's hash.
+    const prev = await chunkHash(sealed);
+    const second = { epoch: 0, index: 1, prev, base: null };
+    const next = await sealChunk(key, backupId, second, json);
+    await expect(
+      openChunk(key, backupId, { index: 1, prev }, next)
+    ).resolves.toMatchObject({ link: second });
+    await expect(
+      codeOf(openChunk(key, backupId, { index: 2, prev }, next))
+    ).resolves.toBe("E2EE_BACKUP_CORRUPT");
+    const wrongPrev = prev.slice();
+    wrongPrev[0] = wrongPrev[0]! ^ 1;
+    await expect(
+      codeOf(openChunk(key, backupId, { index: 1, prev: wrongPrev }, next))
+    ).resolves.toBe("E2EE_BACKUP_CORRUPT");
+    await expect(codeOf(openChunk(key, backupId, at0, next))).resolves.toBe(
+      "E2EE_BACKUP_CORRUPT"
+    );
+
+    // Writers cannot seal malformed links.
+    await expect(
+      codeOf(sealChunk(key, backupId, { ...first, prev }, json))
+    ).resolves.toBe("E2EE_BACKUP_CORRUPT");
+    await expect(
+      codeOf(
+        sealChunk(
+          key,
+          backupId,
+          { ...second, base: { index: 0, hash: prev } },
+          json
+        )
+      )
+    ).resolves.toBe("E2EE_BACKUP_CORRUPT");
   });
 
   it("packs records into bounded segments and later segments win on merge", () => {
@@ -205,7 +250,7 @@ describe("E2EE backup envelope and chunks", () => {
     expect(merged.messages.find((m) => m.id === "m0")?.text).toBe("edited");
     // Malformed records are dropped, not fatal.
     const bad = decodeSegment(
-      utf8Encode(JSON.stringify({ v: 1, groups: [{}], messages: [{ id: 1 }] }))
+      utf8Encode(JSON.stringify({ v: 2, groups: [{}], messages: [{ id: 1 }] }))
     );
     expect(bad).toMatchObject({ groups: [], messages: [] });
   });

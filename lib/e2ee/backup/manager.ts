@@ -3,10 +3,22 @@ import { base64ToBytes, bytesToBase64, randomHex } from "../bytes";
 import type { E2eeDeviceInfo, E2eeEngineStatus } from "../types";
 import type { E2eeBackupApi, ApiE2eeBackup } from "./api";
 import {
+  type BackupChainState,
+  chainAt,
+  type ChainTip,
+  type LinkedChunk,
+  type LinkMode,
+  isChainState,
+  linkChunk,
+  newChainState,
+  nextLink,
+  tipOf,
+} from "./chain";
+import {
+  chunkHash,
   deriveChunkKey,
   MAX_SEGMENT_BYTES,
   newBackupKey,
-  openChunk,
   openEnvelope,
   sealChunk,
   sealEnvelope,
@@ -21,6 +33,7 @@ import {
   type BackupHistory,
   type BackupSegment,
   decodeSegment,
+  type EncodedSegment,
   fingerprint,
   mergeSegments,
   messageKey,
@@ -30,16 +43,24 @@ import { generateRecoveryCode, parseRecoveryCode } from "./recovery-code";
 import type { BackupLocalState, BackupStateStore } from "./state";
 
 /**
- * Encrypted message-history backup (history backup v1, design P35 8).
+ * Encrypted message-history backup (history backup v2, design P35 8).
  *
  * - Turning backup on creates a random backup key K_b and a recovery code,
  *   uploads K_b wrapped by the code (the envelope) and then the whole local
  *   history as encrypted, padded chunks. Later runs append only records that
  *   changed (incremental). MLS state is never part of it.
+ * - Chunks form a hash chain (chain.ts). Before appending, a device follows
+ *   whatever the server has after its last seen chunk (its own appends whose
+ *   response was lost, other devices' appends) so it continues the same
+ *   chain. If two devices append at the same moment the chain forks; the
+ *   device that notices starts a new chain with a full snapshot and compacts
+ *   everything before it, exactly like a regular compaction.
  * - Restoring on another device unwraps K_b with the code, downloads and
- *   decrypts every chunk, merges them (later chunks win) and imports the
- *   result into local history. The device still joins groups through normal
- *   MLS device adds; a restored chat is read-only until then.
+ *   verifies the whole chain, merges the segments (later chunks win) and
+ *   imports the result into local history. Any gap, reorder, replay or
+ *   broken link fails the restore with E2EE_BACKUP_CORRUPT and imports
+ *   nothing. The device still joins groups through normal MLS device adds;
+ *   a restored chat is read-only until then.
  * - A new recovery code means a new K_b and a new generation that replaces
  *   the old one only once fully uploaded. Turning backup off deletes
  *   everything on the server.
@@ -245,8 +266,13 @@ export class E2eeBackupManager {
   private async loadState(): Promise<ApiE2eeBackup | null> {
     let local = await this.deps.state.get(this.deps.profileId);
     const device = this.deps.engine.getThisDevice();
-    if (local && device && local.deviceKey !== device.deviceKey) {
-      // Re-enrolled (or revoked and wiped): the old device's state is stale.
+    if (
+      local &&
+      ((device && local.deviceKey !== device.deviceKey) ||
+        !isChainState(local.chain))
+    ) {
+      // Re-enrolled (or revoked and wiped), or saved before the v2 chain
+      // format: the old state is stale.
       await this.deps.state.delete(this.deps.profileId);
       local = null;
     }
@@ -312,6 +338,7 @@ export class E2eeBackupManager {
         createdAt: this.now(),
         lastBackupAt: null,
         compactThroughSeq: null,
+        chain: newChainState(),
         groupPrints: {},
         messagePrints: {},
       };
@@ -351,29 +378,14 @@ export class E2eeBackupManager {
     const deviceKey = this.deviceKey();
     this.update({ busy: true });
     try {
-      const history = this.deps.engine.backupHistory();
-      const changed = changedHistory(history, local);
-      const segments = packSegments(changed, MAX_SEGMENT_BYTES, this.now());
+      const segments = await this.pendingSegments(local);
       for (const segment of segments) {
-        const data = await sealChunk(
-          local.chunkKey,
-          local.backupId,
-          segment.json
-        );
-        await this.withBackup(() =>
-          this.deps.api.appendChunk(local.backupId, {
-            device_key: deviceKey,
-            data: bytesToBase64(data),
-          })
-        );
-        for (const group of segment.groups) {
-          local.groupPrints[group.g] = fingerprint(group);
+        if (await this.appendSegment(local, deviceKey, segment)) {
+          // Another device appended at the same moment: the next run starts
+          // a new chain with a full snapshot and compacts the fork away.
+          this.schedule(0);
+          return;
         }
-        for (const message of segment.messages) {
-          local.messagePrints[messageKey(message.g, message.id)] =
-            fingerprint(message);
-        }
-        await this.deps.state.put(local);
       }
       let backup: ApiE2eeBackup | null = null;
       if (!local.activated) {
@@ -399,12 +411,11 @@ export class E2eeBackupManager {
           : null;
       if (
         backup &&
+        !local.chain.restart &&
         backup.chunk_count >= (this.deps.compactAtChunks ?? DEFAULT_COMPACT_AT)
       ) {
-        // Re-upload everything, then drop the chunks it supersedes.
-        local.compactThroughSeq = backup.next_seq - 1;
-        local.groupPrints = {};
-        local.messagePrints = {};
+        // Re-upload everything as a new chain, then drop the chunks before it.
+        startNewChain(local);
         await this.deps.state.put(local);
         this.schedule(0);
       }
@@ -430,6 +441,129 @@ export class E2eeBackupManager {
     } finally {
       this.update({ busy: false });
     }
+  }
+
+  /** What to upload this run, after catching up with the server's chain. */
+  private async pendingSegments(
+    local: BackupLocalState
+  ): Promise<EncodedSegment[]> {
+    const history = this.deps.engine.backupHistory();
+    const pack = () =>
+      packSegments(
+        changedHistory(history, local),
+        MAX_SEGMENT_BYTES,
+        this.now()
+      );
+    const segments = pack();
+    if (segments.length === 0) {
+      return segments;
+    }
+    const forked = await this.withBackup(() => this.catchUp(local));
+    if (!forked) {
+      return segments;
+    }
+    startNewChain(local);
+    await this.deps.state.put(local);
+    return pack();
+  }
+
+  /**
+   * Follows the chunks the server has after this device's last seen seq:
+   * its own appends whose response was lost and other devices' appends.
+   * Returns true when the server's chain ends on a chunk that does not
+   * continue this device's chain (a fork).
+   */
+  private async catchUp(local: BackupLocalState): Promise<boolean> {
+    let forked = false;
+    let after = local.chain.seq;
+    for (;;) {
+      const page = await this.deps.api.listChunks(
+        local.backupId,
+        after,
+        LIST_PAGE
+      );
+      const items = page.items.filter((item) => item.seq > after);
+      for (const item of items) {
+        const linked = await this.linkListed(
+          local.backupId,
+          local.chunkKey,
+          tipOf(local.chain),
+          item.seq,
+          "adopt"
+        );
+        forked = linked === null;
+        followChunk(local, item.seq, linked);
+        after = item.seq;
+      }
+      if (page.next_after_seq === null || items.length === 0) {
+        break;
+      }
+    }
+    await this.deps.state.put(local);
+    return forked;
+  }
+
+  /** Fetches the listed chunk `seq` and links it after `tip` (or null). */
+  private async linkListed(
+    backupId: string,
+    chunkKey: CryptoKey,
+    tip: ChainTip | null,
+    seq: number,
+    mode: LinkMode
+  ): Promise<LinkedChunk | null> {
+    const chunk = await this.deps.api.getChunk(backupId, seq);
+    if (chunk.seq !== seq) {
+      return null;
+    }
+    return linkChunk(chunkKey, backupId, tip, decodeChunk(chunk.data), mode);
+  }
+
+  /** Seals and uploads one segment; true when the chain forked at it. */
+  private async appendSegment(
+    local: BackupLocalState,
+    deviceKey: string,
+    segment: EncodedSegment
+  ): Promise<boolean> {
+    const link = nextLink(local.chain);
+    const data = await sealChunk(
+      local.chunkKey,
+      local.backupId,
+      link,
+      segment.json
+    );
+    const expectedSeq = local.chain.seq + 1;
+    const appended = await this.withBackup(() =>
+      this.deps.api.appendChunk(local.backupId, {
+        device_key: deviceKey,
+        data: bytesToBase64(data),
+      })
+    );
+    const tip: ChainTip = {
+      epoch: link.epoch,
+      index: link.index,
+      hash: await chunkHash(data),
+    };
+    local.chain = chainAt(tip, appended.seq);
+    for (const group of segment.groups) {
+      local.groupPrints[group.g] = fingerprint(group);
+    }
+    for (const message of segment.messages) {
+      local.messagePrints[messageKey(message.g, message.id)] =
+        fingerprint(message);
+    }
+    let forked = false;
+    if (link.index === 0) {
+      // A new chain: everything before it is superseded once the snapshot
+      // that follows is uploaded (compacted at the end of the run).
+      if (appended.seq > 1) {
+        local.compactThroughSeq = appended.seq - 1;
+      }
+    } else if (appended.seq !== expectedSeq) {
+      forked = true;
+      startNewChain(local);
+    }
+    await this.deps.state.put(local);
+    return forked;
   }
 
   /** A 404 on our generation means it was deleted or replaced elsewhere. */
@@ -477,7 +611,10 @@ export class E2eeBackupManager {
         });
         const chunkKey = await deriveChunkKey(backupKey, active.backup_id);
         backupKey.fill(0);
-        const segments = await this.download(active.backup_id, chunkKey);
+        const { segments, chain } = await this.download(
+          active.backup_id,
+          chunkKey
+        );
         const history = mergeSegments(segments);
         const result = await this.deps.engine.importBackupHistory(history);
         // Already in the backup: only later changes need uploading.
@@ -490,6 +627,7 @@ export class E2eeBackupManager {
           createdAt: this.now(),
           lastBackupAt: this.now(),
           compactThroughSeq: null,
+          chain,
           groupPrints: Object.fromEntries(
             history.groups.map((group) => [group.g, fingerprint(group)])
           ),
@@ -515,28 +653,49 @@ export class E2eeBackupManager {
     });
   }
 
+  /**
+   * Downloads and verifies the whole chain (chain.ts) before anything is
+   * imported; any break throws E2EE_BACKUP_CORRUPT.
+   */
   private async download(
     backupId: string,
     chunkKey: CryptoKey
-  ): Promise<BackupSegment[]> {
+  ): Promise<{ segments: BackupSegment[]; chain: BackupChainState }> {
     const segments: BackupSegment[] = [];
+    let tip: ChainTip | null = null;
     let after = 0;
     for (;;) {
       const page = await this.deps.api.listChunks(backupId, after, LIST_PAGE);
       for (const item of page.items) {
-        const chunk = await this.deps.api.getChunk(backupId, item.seq);
-        const json = await openChunk(
-          chunkKey,
-          backupId,
-          base64ToBytes(chunk.data)
-        );
-        segments.push(decodeSegment(json));
+        // Seqs must strictly increase; then the chunk must link.
+        const linked: LinkedChunk | null =
+          item.seq > after
+            ? await this.linkListed(
+                backupId,
+                chunkKey,
+                tip,
+                item.seq,
+                "restore"
+              )
+            : null;
+        if (!linked) {
+          throw new BackupError("E2EE_BACKUP_CORRUPT");
+        }
+        tip = linked.tip;
+        after = item.seq;
+        segments.push(decodeSegment(linked.json));
       }
       if (page.next_after_seq === null) {
-        return segments;
+        break;
       }
-      after = page.next_after_seq;
+      if (page.items.length === 0) {
+        throw new BackupError("E2EE_BACKUP_CORRUPT");
+      }
     }
+    return {
+      segments,
+      chain: tip ? chainAt(tip, after) : { ...newChainState(), seq: after },
+    };
   }
 
   // -- turn off -------------------------------------------------------------------
@@ -565,6 +724,49 @@ function phaseOf(
     return "on";
   }
   return serverHasBackup ? "available" : "off";
+}
+
+/** Chunk bytes from the API; malformed base64 never links. */
+function decodeChunk(data: string): Uint8Array {
+  try {
+    return base64ToBytes(data);
+  } catch {
+    return new Uint8Array(0);
+  }
+}
+
+/** Moves a writer's chain state past one chunk it found on the server. */
+function followChunk(
+  local: BackupLocalState,
+  seq: number,
+  linked: LinkedChunk | null
+): void {
+  if (!linked) {
+    // Does not continue this device's chain: remember it was seen.
+    local.chain = { ...local.chain, seq };
+    return;
+  }
+  const started =
+    local.chain.index >= 0 && linked.tip.epoch > local.chain.epoch;
+  if (started && local.chain.restart) {
+    // A newer chain already exists (another device's, or ours whose
+    // response was lost): follow it instead of starting another one. This
+    // run still uploads the full history into it, so the chunks before it
+    // can be compacted at the end of the run.
+    local.compactThroughSeq = Math.max(local.compactThroughSeq ?? 0, seq - 1);
+  }
+  local.chain = chainAt(linked.tip, seq, local.chain.restart && !started);
+}
+
+/**
+ * The next chunk starts a new chain and the whole history is uploaded again
+ * after it (compaction, or repairing a fork). The chunks before it are
+ * compacted once that upload finishes.
+ */
+function startNewChain(local: BackupLocalState): void {
+  local.chain = { ...local.chain, restart: true };
+  local.groupPrints = {};
+  local.messagePrints = {};
 }
 
 /** Records whose fingerprint differs from what this device uploaded. */

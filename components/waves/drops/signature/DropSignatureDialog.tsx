@@ -8,11 +8,12 @@ import { formatDate } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { isSignedMessagesEnabled } from "@/lib/device-signing/feature";
+import { createContractWalletReader } from "@/lib/device-signing/contract-wallet-reader";
 import { getDeviceKeyFingerprint } from "@/lib/device-signing/grant-message";
 import {
   verifyDropSignedEvents,
   type DropSignatureVerdict,
-  type ContractSignatureVerifier,
+  type WalletSignatureCheck,
   toDisplayedDropContent,
 } from "@/lib/device-signing/verify-signed-events";
 import {
@@ -28,6 +29,7 @@ import {
 import {
   ExclamationTriangleIcon,
   MinusCircleIcon,
+  QuestionMarkCircleIcon,
   ShieldCheckIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
@@ -45,6 +47,12 @@ interface DropSignatureDialogProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
 }
+
+/** How the wallet's sign-in signature was verified, one label per check. */
+const WALLET_SIGNATURE_KEYS = {
+  verified: "signedMessages.signature.walletVerified",
+  "contract-verified": "signedMessages.signature.contractWalletVerified",
+} as const satisfies Record<WalletSignatureCheck, string>;
 
 function SignedDetails({
   locale,
@@ -69,12 +77,7 @@ function SignedDetails({
     ],
     [
       t(locale, "signedMessages.signature.walletSignature"),
-      t(
-        locale,
-        signature.walletSignature === "verified"
-          ? "signedMessages.signature.walletVerified"
-          : "signedMessages.signature.contractWallet"
-      ),
+      t(locale, WALLET_SIGNATURE_KEYS[signature.walletSignature]),
     ],
     [
       t(locale, "signedMessages.signature.currentContent"),
@@ -121,6 +124,13 @@ const VERDICT_PRESENTATION = {
     titleKey: "signedMessages.signature.invalid",
     descriptionKey: "signedMessages.signature.invalidDescription",
   },
+  // Neutral, never the signed seal: nothing was verified.
+  unverifiable: {
+    Icon: QuestionMarkCircleIcon,
+    iconClassName: "tw-text-iron-400",
+    titleKey: "signedMessages.signature.unverifiable",
+    descriptionKey: "signedMessages.signature.unverifiableDescription",
+  },
 } as const;
 
 function VerdictView({
@@ -132,14 +142,6 @@ function VerdictView({
 }) {
   const { Icon, iconClassName, titleKey, descriptionKey } =
     VERDICT_PRESENTATION[verdict.status];
-  // A contract wallet's sign-in signature that the browser could not check
-  // rests on 6529.io's check at sign-in, so the browser-only claim would
-  // overstate it.
-  const shownDescriptionKey =
-    verdict.status === "signed" &&
-    verdict.signature.walletSignature === "contract-wallet"
-      ? "signedMessages.signature.contractWalletDescription"
-      : descriptionKey;
   return (
     <div>
       <p className="tw-m-0 tw-flex tw-items-center tw-gap-2 tw-text-base tw-font-semibold tw-text-iron-50">
@@ -150,7 +152,7 @@ function VerdictView({
         <span>{t(locale, titleKey)}</span>
       </p>
       <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
-        {t(locale, shownDescriptionKey)}
+        {t(locale, descriptionKey)}
       </p>
       {verdict.status === "signed" && (
         <SignedDetails locale={locale} verdict={verdict} />
@@ -174,20 +176,9 @@ function useDropSignatureVerdict({
 }) {
   const publicClient = usePublicClient({ chainId: 1 });
   // Contract-wallet grants (EIP-1271) are checked on Ethereum from the browser.
-  const verifyContractSignature: ContractSignatureVerifier | undefined =
-    publicClient
-      ? async ({ address, message, signature, chainId }) => {
-          if (chainId !== 1) {
-            // No client for this chain: keep the labelled sign-in check.
-            throw new Error(`No Ethereum client for chain ${chainId}`);
-          }
-          return await publicClient.verifyMessage({
-            address,
-            message,
-            signature,
-          });
-        }
-      : undefined;
+  const contractWallets = publicClient
+    ? createContractWalletReader(publicClient)
+    : undefined;
   const content = drop ? toDisplayedDropContent(drop) : undefined;
   return useQuery({
     queryKey: [QueryKey.DROP_SIGNED_EVENTS, dropId, content ?? null],
@@ -202,7 +193,7 @@ function useDropSignatureVerdict({
           ? await fetchAuthorWallets(authorAddress, signal)
           : [];
       return await verifyDropSignedEvents(signedEvents, {
-        verifyContractSignature,
+        contractWallets,
         displayed: content,
         expected: drop
           ? { dropId, waveId: drop.wave.id, authorWallets }

@@ -1,4 +1,5 @@
 import { safetyCodeFromFp } from "../digests";
+import { parseCredentialIdentity } from "../grant";
 import type { PayloadAttachment } from "../payload";
 import type { StoredGroup, StoredMessage, StoredOutboxItem } from "../records";
 import type {
@@ -8,6 +9,7 @@ import type {
   E2eeEngineStatus,
   E2eeMember,
   E2eeMessage,
+  E2eeUntrustedDevice,
 } from "../types";
 import type { DeviceDirectory } from "./directory";
 import { displayText, fromImportedPayload } from "./imported";
@@ -74,7 +76,7 @@ export function toE2eeMessage(stored: StoredMessage): E2eeMessage {
     pending: stored.pending,
   };
   if (stored.imported) {
-    message.imported = fromImportedPayload(stored.imported);
+    message.imported = fromImportedPayload(stored.imported, stored.serverTs);
   }
   if (stored.notice) {
     message.notice = {
@@ -121,6 +123,8 @@ export class EngineStore {
   attachmentsEnabled = false;
   readonly groups = new Map<string, GroupRuntime>();
   readonly profiles = new Map<string, ProfileInfo>();
+  /** profile id -> devices waiting for "Add device" (engine/trust.ts). */
+  private readonly untrusted = new Map<string, E2eeUntrustedDevice[]>();
   private readonly listeners = new Set<() => void>();
   private conversationsCache: E2eeConversation[] | null = null;
   private readonly conversationCache = new Map<string, E2eeConversation>();
@@ -166,6 +170,68 @@ export class EngineStore {
         }
       }
     });
+  }
+
+  /**
+   * Replaces the untrusted devices found for `profileId`. Entries are kept
+   * per person, so every chat with that person shows the same list.
+   */
+  setUntrusted(profileId: string, devices: E2eeUntrustedDevice[]): void {
+    const normalized = devices.map((item) => ({
+      ...item,
+      deviceKey: item.deviceKey.toLowerCase(),
+      wallet: item.wallet.toLowerCase(),
+    }));
+    const signature = (list: readonly E2eeUntrustedDevice[]) =>
+      list.map((item) => `${item.deviceKey}:${item.reason}`).join(",");
+    const previous = this.untrusted.get(profileId) ?? [];
+    if (signature(previous) === signature(normalized)) {
+      return;
+    }
+    if (normalized.length === 0) {
+      this.untrusted.delete(profileId);
+    } else {
+      this.untrusted.set(profileId, normalized);
+    }
+    this.touch();
+  }
+
+  findUntrusted(deviceKey: string): E2eeUntrustedDevice | null {
+    const key = deviceKey.toLowerCase();
+    for (const list of this.untrusted.values()) {
+      const found = list.find((item) => item.deviceKey === key);
+      if (found) {
+        return found;
+      }
+    }
+    return null;
+  }
+
+  /** Clears the device from every person's list, hence from every chat. */
+  dropUntrusted(deviceKey: string): void {
+    const key = deviceKey.toLowerCase();
+    for (const [profileId, list] of [...this.untrusted]) {
+      if (list.some((item) => item.deviceKey === key)) {
+        this.setUntrusted(
+          profileId,
+          list.filter((item) => item.deviceKey !== key)
+        );
+      }
+    }
+  }
+
+  private untrustedFor(record: StoredGroup): E2eeUntrustedDevice[] {
+    if (record.status !== "active") {
+      return [];
+    }
+    const principals = new Set(
+      record.members
+        .filter((member) => !record.leaving.includes(member.deviceKey))
+        .map((member) => member.profileId)
+    );
+    return [...principals].flatMap((profileId) =>
+      profileId === null ? [] : [...(this.untrusted.get(profileId) ?? [])]
+    );
   }
 
   private syncDirectoryVersion(): void {
@@ -240,10 +306,15 @@ export class EngineStore {
         };
         byProfile.set(member.profileId, entry);
       }
+      const cached = this.directory.cached(member.deviceKey);
       entry.devices.push({
         deviceKey: member.deviceKey,
-        label: this.directory.cached(member.deviceKey)?.label ?? "Device",
+        label: cached?.label ?? "Device",
         verified: this.directory.isVerified(member.deviceKey),
+        wallet:
+          parseCredentialIdentity(member.identity)?.wallet ??
+          cached?.grant.wallet.toLowerCase() ??
+          null,
       });
     }
     return [...byProfile.values()];
@@ -281,6 +352,7 @@ export class EngineStore {
       status: record.status,
       delayed: record.delayed,
       splitView: record.splitView,
+      untrustedDevices: this.untrustedFor(record),
       lastMessage: last ? toE2eeMessage(last) : null,
       unread,
       mentions,

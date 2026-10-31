@@ -1,3 +1,5 @@
+import { getAddress, isAddress } from "viem";
+import { shortenAddress } from "@/helpers/address.helpers";
 import {
   formatDate,
   formatInteger,
@@ -7,6 +9,7 @@ import {
 } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import { safeAttachmentName } from "@/lib/e2ee/attachment-name";
 import type {
   E2eeConversation,
   E2eeMember,
@@ -31,6 +34,30 @@ export function tCount(
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Short checksummed wallet ("0xAbCd…1234"); empty for a non-address. */
+export function formatE2eeWallet(wallet: string | null | undefined): string {
+  if (!wallet || !isAddress(wallet, { strict: false })) {
+    return "";
+  }
+  return shortenAddress(getAddress(wallet));
+}
+
+/** The signing wallets a device notice carries (comma separated). */
+function formatNoticeWallets(
+  locale: SupportedLocale,
+  detail: string | undefined
+): string {
+  const wallets = [
+    ...new Set(
+      (detail ?? "")
+        .split(",")
+        .map((wallet) => formatE2eeWallet(wallet.trim()))
+        .filter((wallet) => wallet.length > 0)
+    ),
+  ];
+  return wallets.length > 0 ? formatList(locale, wallets) : "";
+}
 
 /** Compact timestamp: time today, day and month this year, full date otherwise. */
 export function formatE2eeTimestamp(
@@ -108,6 +135,13 @@ export function findMember(
   }
   return members.find((member) => member.profileId === profileId) ?? null;
 }
+
+/** The sender's file name made safe to show and save as (no bidi, paths). */
+export const attachmentDisplayName = (
+  locale: SupportedLocale,
+  name: string
+): string =>
+  safeAttachmentName(name, t(locale, "e2ee.message.attachment.unnamed"));
 
 /** Display name for a profile in a chat ("You" for the viewer). */
 export function getMemberName(
@@ -240,8 +274,15 @@ export function getNoticeText(
       return actorId
         ? t(locale, "e2ee.notice.removed", { actor, targets: objects })
         : t(locale, "e2ee.notice.removedNoActor", { targets });
-    case "device_added":
-      return t(locale, "e2ee.notice.deviceAdded", { name: ownerName });
+    case "device_added": {
+      const wallet = formatNoticeWallets(locale, notice.detail);
+      return wallet
+        ? t(locale, "e2ee.notice.deviceAddedWallet", {
+            name: ownerName,
+            wallet,
+          })
+        : t(locale, "e2ee.notice.deviceAdded", { name: ownerName });
+    }
     case "device_removed":
       return t(locale, "e2ee.notice.deviceRemoved", { name: ownerName });
     case "renamed":

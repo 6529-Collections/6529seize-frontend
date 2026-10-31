@@ -1,6 +1,6 @@
 import type { Payload } from "../payload";
 import { isDuplicateImport } from "./imported";
-import type { StoredMessage } from "../records";
+import type { SignedVersion, StoredMessage } from "../records";
 import type { GroupRuntime } from "./store";
 
 /** Contract section 6 receiver rules applied to the local timeline. */
@@ -82,6 +82,9 @@ function applyMsg(
     reply: payload.reply ?? null,
     attachments: payload.att ? payload.att.map((att) => ({ ...att })) : [],
     editedAt: existing?.editedAt ?? null,
+    ...(existing?.latestEdit === undefined
+      ? {}
+      : { latestEdit: existing.latestEdit }),
     deleted: existing?.deleted ?? false,
     reactions: existing?.reactions ?? {},
     sigOk: meta.sigOk,
@@ -93,6 +96,24 @@ function applyMsg(
     ...(payload.imp ? { imported: payload.imp } : {}),
   });
   return true;
+}
+
+/** The applied payload's own signed copy, or null when there is none. */
+function signedVersion(meta: PayloadMeta): SignedVersion | null {
+  if (
+    meta.body === null ||
+    meta.sig === null ||
+    meta.epoch === null ||
+    meta.senderDeviceKey === null
+  ) {
+    return null;
+  }
+  return {
+    epoch: meta.epoch,
+    body: meta.body,
+    sig: meta.sig,
+    senderDeviceKey: meta.senderDeviceKey,
+  };
 }
 
 /** Edit and delete only by a device of the original sender's profile. */
@@ -147,11 +168,13 @@ function applyTargeted(
       target.text = payload.text;
       target.mentions = [...payload.mentions];
       target.editedAt = payload.ts;
+      target.latestEdit = signedVersion(meta);
     } else {
       target.deleted = true;
       target.text = "";
       target.attachments = [];
       target.mentions = [];
+      target.latestEdit = null;
     }
     changed = true;
   } else if (meta.senderProfileId !== null) {

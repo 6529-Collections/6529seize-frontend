@@ -14,6 +14,7 @@ import type { E2eeDeviceInfo } from "../types";
 import { loadDefaultWasm } from "../wasm-loader";
 import {
   checkpoint,
+  clearStoredState,
   DAY_MS,
   requireDevice,
   requireMls,
@@ -53,7 +54,7 @@ export async function loadCurrentSuiteDevice(
 ): Promise<StoredDevice | null> {
   const stored = await ctx.storage.getDevice(ctx.profileId);
   if (stored && stored.grant.ciphersuite !== E2EE_CIPHERSUITE) {
-    await ctx.storage.clearProfile(ctx.profileId);
+    await clearStoredState(ctx);
     return null;
   }
   return stored;
@@ -309,7 +310,7 @@ async function discardPendingDevice(ctx: EngineContext): Promise<void> {
   ctx.mls = null;
   ctx.device = null;
   ctx.lastState = null;
-  await ctx.storage.clearProfile(ctx.profileId);
+  await clearStoredState(ctx);
 }
 
 const isLoginGrantRejection = (error: unknown): boolean =>

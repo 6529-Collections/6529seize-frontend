@@ -38,6 +38,7 @@ export const member = (
       deviceKey: `0x${profileId}`,
       label: `${handle ?? "x"} laptop`,
       verified: true,
+      wallet: null,
     },
   ],
   ...overrides,
@@ -84,6 +85,7 @@ export const conversation = (
   status: "active",
   delayed: false,
   splitView: false,
+  untrustedDevices: [],
   lastMessage: null,
   unread: 0,
   mentions: 0,
@@ -183,8 +185,22 @@ export function createFakeE2eeEngine(
     leave: jest.fn(async () => undefined),
     restart: jest.fn(async () => DM_G),
     report: jest.fn(async () => undefined),
+    reportPreview: jest.fn((g: string, id: string) => {
+      const message = (state.messages[g] ?? []).find((item) => item.id === id);
+      return {
+        latest: message
+          ? {
+              text: message.text,
+              attachmentNames: message.attachments.map((att) => att.name),
+            }
+          : null,
+        original: null,
+      };
+    }),
     search: jest.fn(async () => []),
     getAttachment: jest.fn(async () => new Blob(["x"], { type: "image/png" })),
+    trustDevice: jest.fn(async () => undefined),
+    ignoreDevice: jest.fn(async () => undefined),
     revokeDevice: jest.fn(async () => undefined),
     renameThisDevice: jest.fn(async () => undefined),
   };
@@ -206,6 +222,7 @@ export function contextFor(
     backup: null,
     loadError: null,
     restart: jest.fn(),
+    takeOverHere: jest.fn(),
     ...overrides,
   };
 }

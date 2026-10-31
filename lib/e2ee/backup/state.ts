@@ -1,3 +1,5 @@
+import type { BackupChainState } from "./chain";
+
 /**
  * Local backup state per profile. Lives in its own IndexedDB database so it
  * never touches the engine's schema. The chunk key is a non-extractable
@@ -15,6 +17,8 @@ export interface BackupLocalState {
   lastBackupAt: number | null;
   /** Compaction in progress: delete chunks <= this seq once re-uploaded. */
   compactThroughSeq: number | null;
+  /** Hash chain position, so a restarted device continues the chain. */
+  chain: BackupChainState;
   /** Fingerprints of what this device already uploaded. */
   groupPrints: Record<string, string>;
   messagePrints: Record<string, string>;
@@ -35,6 +39,7 @@ class MemoryBackupStateStore implements BackupStateStore {
       state
         ? {
             ...state,
+            chain: { ...state.chain },
             groupPrints: { ...state.groupPrints },
             messagePrints: { ...state.messagePrints },
           }
@@ -45,6 +50,7 @@ class MemoryBackupStateStore implements BackupStateStore {
   put(state: BackupLocalState): Promise<void> {
     this.states.set(state.profileId, {
       ...state,
+      chain: { ...state.chain },
       groupPrints: { ...state.groupPrints },
       messagePrints: { ...state.messagePrints },
     });
@@ -60,7 +66,8 @@ class MemoryBackupStateStore implements BackupStateStore {
 export const createMemoryBackupStateStore = (): BackupStateStore =>
   new MemoryBackupStateStore();
 
-const DB_NAME = "6529-e2ee-backup";
+export const E2EE_BACKUP_DB_NAME = "6529-e2ee-backup";
+const DB_NAME = E2EE_BACKUP_DB_NAME;
 const DB_VERSION = 1;
 const STORE = "state";
 
@@ -75,7 +82,10 @@ function promisify<T>(req: IDBRequest<T>): Promise<T> {
   });
 }
 
-function openDb(factory: IDBFactory): Promise<IDBDatabase> {
+function openDb(
+  factory: IDBFactory,
+  onClosed: () => void
+): Promise<IDBDatabase> {
   return new Promise<IDBDatabase>((resolve, reject) => {
     const req = factory.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = () => {
@@ -84,7 +94,13 @@ function openDb(factory: IDBFactory): Promise<IDBDatabase> {
       }
     };
     req.onsuccess = () => {
-      resolve(req.result);
+      const db = req.result;
+      // Close when the database is deleted (sign-out removal); reopen later.
+      db.onversionchange = () => {
+        db.close();
+        onClosed();
+      };
+      resolve(db);
     };
     req.onerror = () => {
       reject(req.error ?? new Error("IndexedDB open failed"));
@@ -103,10 +119,14 @@ class IndexedDbBackupStateStore implements BackupStateStore {
     this.factory = factory;
   }
 
-  /** Opens the database on first use (and again after a failed open). */
+  /** Opens the database on first use (and again after a failed open or delete). */
   private open(): Promise<IDBDatabase> {
     if (!this.db) {
-      const opening = openDb(this.factory);
+      const opening = openDb(this.factory, () => {
+        if (this.db === opening) {
+          this.db = null;
+        }
+      });
       opening.catch(() => {
         if (this.db === opening) {
           this.db = null;

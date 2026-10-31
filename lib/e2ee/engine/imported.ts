@@ -32,7 +32,14 @@ export function toImportedPayload(
   };
 }
 
-export function fromImportedPayload(imp: ImportedPayload): E2eeImported {
+/**
+ * The importer chooses `at` and `e`, so neither may claim a time after the
+ * import message itself (`importedAt`, its server time).
+ */
+export function fromImportedPayload(
+  imp: ImportedPayload,
+  importedAt: number
+): E2eeImported {
   return {
     waveId: imp.w,
     dropId: imp.d,
@@ -40,8 +47,8 @@ export function fromImportedPayload(imp: ImportedPayload): E2eeImported {
     serialNo: imp.n,
     authorProfileId: imp.a,
     authorHandle: imp.ah,
-    createdAt: imp.at,
-    editedAt: imp.e,
+    createdAt: Math.min(imp.at, importedAt),
+    editedAt: imp.e === null ? null : Math.min(imp.e, importedAt),
     replyToDropId: imp.r,
     mediaNotImported: imp.mx,
     reactions: imp.rx.map(([reaction, count]) => [reaction, count]),

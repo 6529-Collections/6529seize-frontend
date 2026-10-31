@@ -26,6 +26,53 @@ const meta = (profile: string, seq: number, sigOk = true): PayloadMeta => ({
 const id = (n: number) => n.toString(16).padStart(32, "0");
 
 describe("message rules (contract 6)", () => {
+  it("keeps the latest edit's own signed copy for reports", () => {
+    const rt = runtime();
+    applyPayload(
+      rt,
+      { v: 1, t: "msg", id: ID, ts: 1, text: "hello", mentions: [] },
+      meta("alice", 1)
+    );
+    expect(rt.messages.get(ID)?.latestEdit).toBeUndefined();
+    const edit = (n: number, text: string) =>
+      ({
+        v: 1,
+        t: "edit",
+        id: id(n),
+        ts: n,
+        target: ID,
+        text,
+        mentions: [],
+      }) as const;
+    applyPayload(rt, edit(2, "first edit"), {
+      ...meta("alice", 2),
+      epoch: 2,
+      body: "ZWRpdDE=",
+      sig: "0xedit1",
+      senderDeviceKey: "alice-phone",
+    });
+    expect(rt.messages.get(ID)).toMatchObject({
+      text: "first edit",
+      body: "Ym9keQ==",
+      sig: "0xsig",
+      latestEdit: {
+        epoch: 2,
+        body: "ZWRpdDE=",
+        sig: "0xedit1",
+        senderDeviceKey: "alice-phone",
+      },
+    });
+    // An edit without a signed copy (this device's own) leaves none to send.
+    applyPayload(rt, edit(3, "own edit"), {
+      ...meta("alice", 0),
+      body: null,
+      sig: null,
+      epoch: null,
+      pending: true,
+    });
+    expect(rt.messages.get(ID)?.latestEdit).toBeNull();
+  });
+
   it("applies msg once; edit and del only by the same profile", () => {
     const rt = runtime();
     expect(

@@ -73,9 +73,9 @@ const INVALID_DEVICE_SIGNATURE_PREFIX = "Invalid device signature:";
 const INVALID_DEVICE_SIGNATURE_CODE = "INVALID_DEVICE_SIGNATURE";
 /**
  * A server without signed writes (for example after a backend rollback)
- * rejects the field itself. That is an infrastructure rollback, not a
- * signing failure: the write is resent unsigned automatically and the grant
- * is kept.
+ * rejects the field itself. The grant is kept, but the write is never resent
+ * unsigned by itself: a hostile server could strip signatures this way, so
+ * the user chooses to try again or send it unsigned.
  */
 const UNSUPPORTED_DEVICE_SIGNATURE_MESSAGE =
   '"device_signature" is not allowed';
@@ -457,7 +457,7 @@ async function sendSigned<T>(
     }
     if (rejection.kind === "unsupported") {
       reportFallback(write, "unsupported");
-      return await finish(send(null));
+      return await continueAfterFailure(write, send, "unsupported");
     }
     if (rejection.grantUnusable) {
       await forgetGrantQuietly(envelope);
@@ -512,11 +512,10 @@ async function sendWithSignature<T>(
  * an active grant for the active wallet. Without a grant (and in proxy
  * sessions, the apps and browsers without Ed25519) the write is sent
  * unsigned exactly as before. With a grant the write waits for its
- * signature; if signing fails or 6529.io rejects the signature, the write
- * stays pending until the user chooses to try again or send it unsigned.
- * Only a server that does not accept device signatures at all (a backend
- * rollback) gets an automatic unsigned resend. Every attempt signs with a
- * newly allocated sequence number.
+ * signature; if signing fails or 6529.io rejects the signature, even by not
+ * accepting device signatures at all, the write stays pending until the user
+ * chooses to try again or send it unsigned. Every attempt signs with a newly
+ * allocated sequence number.
  */
 export function sendDeviceSignedWrite<T>(
   write: DeviceSignedWrite,

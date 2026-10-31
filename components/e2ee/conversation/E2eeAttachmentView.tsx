@@ -5,19 +5,29 @@ import { useEffect, useState } from "react";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatNumber } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { isSafeInlineImageMime } from "@/lib/e2ee/media";
 import type { E2eeAttachment, E2eeEngine } from "@/lib/e2ee/types";
+import { attachmentDisplayName } from "../e2eeFormat";
+import {
+  fitsInline,
+  prepareInlineImage,
+  withInlineImageSlot,
+} from "./e2eeInlineImage";
 
 const MAX_IMAGE_HEIGHT_PX = 320;
 
 const isInlineImage = (attachment: E2eeAttachment) =>
   isSafeInlineImageMime(attachment.mime);
 
-function formatFileSize(
-  locale: ReturnType<typeof useBrowserLocale>,
-  bytes: number
-) {
+/** A size the sender claims that is already too large skips the download. */
+const claimsTooLarge = (attachment: E2eeAttachment): boolean =>
+  attachment.width !== undefined &&
+  attachment.height !== undefined &&
+  !fitsInline(attachment.width, attachment.height);
+
+function formatFileSize(locale: SupportedLocale, bytes: number) {
   if (bytes >= 1024 * 1024) {
     return formatNumber(locale, bytes / (1024 * 1024), {
       style: "unit",
@@ -38,36 +48,64 @@ interface AttachmentProps {
   readonly attachment: E2eeAttachment;
 }
 
-/** Decrypted image, loaded through the engine into a local object URL. */
-function InlineImage({ engine, g, messageId, attachment }: AttachmentProps) {
+type InlineState = "loading" | "ready" | "failed" | "tooLarge";
+
+/**
+ * Decrypted image, loaded through the engine into a local object URL. Its
+ * real dimensions are checked before it decodes; one above the pixel cap
+ * shows as a file to download instead.
+ */
+function InlineImage(props: AttachmentProps) {
+  const { engine, g, messageId, attachment } = props;
   const locale = useBrowserLocale();
+  const name = attachmentDisplayName(locale, attachment.name);
+  const tooLargeClaim = claimsTooLarge(attachment);
   const [url, setUrl] = useState<string | null>(null);
-  const [failed, setFailed] = useState(false);
+  const [state, setState] = useState<InlineState>("loading");
 
   useEffect(() => {
+    if (tooLargeClaim) {
+      return;
+    }
     let cancelled = false;
     let objectUrl: string | null = null;
-    engine
-      .getAttachment(g, messageId, attachment.blob)
-      .then((blob) => {
-        if (cancelled) {
-          return;
-        }
-        objectUrl = URL.createObjectURL(blob);
-        setUrl(objectUrl);
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setFailed(true);
-        }
-      });
-    return () => {
-      cancelled = true;
+    const release = () => {
       if (objectUrl) {
         URL.revokeObjectURL(objectUrl);
+        objectUrl = null;
       }
     };
-  }, [engine, g, messageId, attachment.blob]);
+    withInlineImageSlot(async () => {
+      if (cancelled) {
+        return;
+      }
+      const blob = await engine.getAttachment(g, messageId, attachment.blob);
+      if (cancelled) {
+        return;
+      }
+      objectUrl = URL.createObjectURL(blob);
+      const fits = await prepareInlineImage(objectUrl);
+      if (cancelled) {
+        return;
+      }
+      if (!fits) {
+        release();
+        setState("tooLarge");
+        return;
+      }
+      setUrl(objectUrl);
+      setState("ready");
+    }).catch(() => {
+      if (!cancelled) {
+        release();
+        setState("failed");
+      }
+    });
+    return () => {
+      cancelled = true;
+      release();
+    };
+  }, [engine, g, messageId, attachment.blob, tooLargeClaim]);
 
   const aspectStyle =
     attachment.width !== undefined &&
@@ -77,14 +115,22 @@ function InlineImage({ engine, g, messageId, attachment }: AttachmentProps) {
       ? { aspectRatio: `${attachment.width} / ${attachment.height}` }
       : undefined;
 
-  if (failed) {
+  if (tooLargeClaim || state === "tooLarge") {
+    return (
+      <DownloadableFile
+        {...props}
+        note={t(locale, "e2ee.message.attachment.tooLarge")}
+      />
+    );
+  }
+  if (state === "failed") {
     return (
       <span className="tw-text-xs tw-text-rose-300">
-        {t(locale, "e2ee.message.attachment.failed", { name: attachment.name })}
+        {t(locale, "e2ee.message.attachment.failed", { name })}
       </span>
     );
   }
-  if (!url) {
+  if (state === "loading" || !url) {
     return (
       <span
         role="status"
@@ -102,9 +148,7 @@ function InlineImage({ engine, g, messageId, attachment }: AttachmentProps) {
     // eslint-disable-next-line @next/next/no-img-element -- decrypted locally into a blob: URL; next/image cannot optimize it.
     <img
       src={url}
-      alt={t(locale, "e2ee.message.attachment.imageAlt", {
-        name: attachment.name,
-      })}
+      alt={t(locale, "e2ee.message.attachment.imageAlt", { name })}
       width={attachment.width}
       height={attachment.height}
       style={{ ...aspectStyle, maxHeight: MAX_IMAGE_HEIGHT_PX }}
@@ -119,8 +163,10 @@ function DownloadableFile({
   g,
   messageId,
   attachment,
-}: AttachmentProps) {
+  note,
+}: AttachmentProps & { readonly note?: string }) {
   const locale = useBrowserLocale();
+  const name = attachmentDisplayName(locale, attachment.name);
   const [pending, setPending] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -132,7 +178,7 @@ function DownloadableFile({
       const objectUrl = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = objectUrl;
-      anchor.download = attachment.name;
+      anchor.download = name;
       anchor.rel = "noopener";
       document.body.appendChild(anchor);
       anchor.click();
@@ -152,17 +198,16 @@ function DownloadableFile({
         className="tw-size-5 tw-flex-shrink-0 tw-text-iron-400"
       />
       <span className="tw-flex tw-min-w-0 tw-flex-col">
-        <span className="tw-truncate tw-text-sm tw-text-iron-100">
-          {attachment.name}
-        </span>
+        <span className="tw-truncate tw-text-sm tw-text-iron-100">{name}</span>
         <span className="tw-text-xs tw-text-iron-500">
           {formatFileSize(locale, attachment.size)}
         </span>
+        {note ? (
+          <span className="tw-text-xs tw-text-iron-400">{note}</span>
+        ) : null}
         {failed ? (
           <span role="alert" className="tw-text-xs tw-text-rose-300">
-            {t(locale, "e2ee.message.attachment.failed", {
-              name: attachment.name,
-            })}
+            {t(locale, "e2ee.message.attachment.failed", { name })}
           </span>
         ) : null}
       </span>
@@ -170,9 +215,7 @@ function DownloadableFile({
         type="button"
         onClick={() => void download()}
         disabled={pending}
-        aria-label={t(locale, "e2ee.message.attachment.download", {
-          name: attachment.name,
-        })}
+        aria-label={t(locale, "e2ee.message.attachment.download", { name })}
         className="tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50"
       >
         {pending ? (

@@ -1,5 +1,6 @@
 import type { E2eeApiClient } from "./api";
 import type { BackupHistory } from "./backup/format";
+import type { BackupStateStore } from "./backup/state";
 import type { E2eeNoticeType } from "./notice-types";
 import type { E2eeStorage } from "./storage";
 import type { WasmModule } from "./wasm-types";
@@ -38,7 +39,25 @@ export interface E2eeMember {
   pfp: string | null;
   wallets: string[];
   isAdmin: boolean;
-  devices: { deviceKey: string; label: string; verified: boolean }[];
+  /** `wallet`: the lowercase wallet that signed the device's grant. */
+  devices: {
+    deviceKey: string;
+    label: string;
+    verified: boolean;
+    wallet: string | null;
+  }[];
+}
+
+/**
+ * A device of a chat member that is not added automatically: its grant is
+ * signed by a wallet not yet trusted for that person ("new-wallet"), or by a
+ * contract wallet whose signature this device could not check ("unverified").
+ */
+export interface E2eeUntrustedDevice {
+  profileId: string;
+  deviceKey: string;
+  wallet: string; // lowercase
+  reason: "new-wallet" | "unverified";
 }
 
 export interface E2eeAttachment {
@@ -99,6 +118,19 @@ export interface E2eeImported {
   reactions: [string, number][];
 }
 
+/** One signed payload a report would send, as its reader would see it. */
+export interface E2eeReportVersion {
+  text: string;
+  attachmentNames: string[];
+}
+
+export interface E2eeReportPreview {
+  /** The version shown now (the latest edit); null when it can't be sent. */
+  latest: E2eeReportVersion | null;
+  /** The original of an edited message; null when not edited or unavailable. */
+  original: E2eeReportVersion | null;
+}
+
 export interface E2eeConversation {
   g: string;
   kind: "dm" | "group";
@@ -112,6 +144,8 @@ export interface E2eeConversation {
   status: "active" | "invalid" | "left" | "removed" | "restored";
   delayed: boolean; // 8.3 stall banner
   splitView: boolean; // 8.6 alarm
+  /** Members' devices waiting for "Add device" or "Ignore". */
+  untrustedDevices: E2eeUntrustedDevice[];
   lastMessage: E2eeMessage | null;
   unread: number;
   mentions: number;
@@ -190,11 +224,27 @@ export interface E2eeEngine {
   setAdmin(g: string, profileId: string, admin: boolean): Promise<void>;
   leave(g: string): Promise<void>;
   restart(g: string): Promise<string>; // new group, same people
-  report(g: string, id: string, reason: string, notes?: string): Promise<void>;
+  /**
+   * Reports the message as the reader sees it (its latest edit, signed);
+   * `includeOriginal` also sends the original of an edited message.
+   */
+  report(
+    g: string,
+    id: string,
+    reason: string,
+    notes?: string,
+    options?: { includeOriginal?: boolean }
+  ): Promise<void>;
+  /** Exactly what `report` would send, decoded from the signed payloads. */
+  reportPreview(g: string, id: string): E2eeReportPreview;
   search(query: string, g?: string): Promise<E2eeMessage[]>; // local only
   getAttachment(g: string, id: string, blob: string): Promise<Blob>;
 
   // devices
+  /** Trusts the device's wallet for its owner, then adds it to their chats. */
+  trustDevice(deviceKey: string): Promise<void>;
+  /** Dismisses the untrusted-device notice; the device stays out. */
+  ignoreDevice(deviceKey: string): Promise<void>;
   revokeDevice(deviceKey: string): Promise<void>;
   renameThisDevice(label: string): Promise<void>; // local label only is fine
 }
@@ -257,6 +307,13 @@ export interface E2eeEngineExtraDeps {
   isBlocked?: (profileId: string) => boolean | Promise<boolean>;
   /** Disable the polling fallback (tests drive sync explicitly). */
   polling?: boolean;
+  /**
+   * Called once when a write is refused because another engine (another tab)
+   * persisted newer state. The engine has stopped; the host should dispose it.
+   */
+  onStateConflict?: () => void;
+  /** Encrypted-backup local state; wiped with the device (default IndexedDB). */
+  backupState?: BackupStateStore;
 }
 
 export type E2eeEngineOptions = E2eeEngineDeps & E2eeEngineExtraDeps;

@@ -6,9 +6,9 @@ import {
   pauseReason,
   planLegacyImport,
   runLegacyDmImport,
-  safeAttachmentName,
   type LegacyImportDeps,
 } from "@/components/e2ee/legacy/legacyDmImport";
+import { safeAttachmentName } from "@/lib/e2ee/attachment-name";
 import { E2eeApiError } from "@/lib/e2ee/api";
 import { E2eeError } from "@/lib/e2ee/engine/errors";
 import {

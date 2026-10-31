@@ -17,7 +17,7 @@ import {
   touchActivity,
 } from "./groups";
 import { applyPayload, placeholderMessage, undecryptableId } from "./messages";
-import { deriveCommitNotices } from "./notices";
+import { credentialWallets, deriveCommitNotices } from "./notices";
 import { isStrictRemoval, mayBeIdle, type MemberRef } from "./required-changes";
 import type { GroupRuntime } from "./store";
 import { validateCommit, type AddedLeafRef } from "./validate";
@@ -254,6 +254,7 @@ async function handleStagedCommit(
     creation:
       item.epoch === 0 &&
       committer.profileId === staged.metadata_before.created_by,
+    addedWallets: credentialWallets(staged.added),
   });
   touchActivity(
     record,
