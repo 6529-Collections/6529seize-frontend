@@ -18,6 +18,10 @@ export class ApiE2eeEligibility {
     'profile_id': string;
     'status': ApiE2eeEligibilityStatus;
     'active_devices': number;
+    /**
+    * The shared DM admission code behind POLICY or BLOCKED, the same codes legacy direct messages return. A target\'s block of the caller is DM_RECIPIENT_NOT_ACCEPTING with status POLICY, so it is never disclosed; BLOCKED with DM_SENDER_BLOCKED_RECIPIENT is the caller\'s own block. Absent for OK and NO_DEVICES. 
+    */
+    'reason'?: ApiE2eeEligibilityReasonEnum;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -41,6 +45,12 @@ export class ApiE2eeEligibility {
             "baseName": "active_devices",
             "type": "number",
             "format": ""
+        },
+        {
+            "name": "reason",
+            "baseName": "reason",
+            "type": "ApiE2eeEligibilityReasonEnum",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
@@ -51,4 +61,10 @@ export class ApiE2eeEligibility {
     }
 }
 
+export enum ApiE2eeEligibilityReasonEnum {
+    RecipientNotAccepting = 'DM_RECIPIENT_NOT_ACCEPTING',
+    RecipientPeopleIFollowOnly = 'DM_RECIPIENT_PEOPLE_I_FOLLOW_ONLY',
+    RecipientGroupMembersOnly = 'DM_RECIPIENT_GROUP_MEMBERS_ONLY',
+    SenderBlockedRecipient = 'DM_SENDER_BLOCKED_RECIPIENT'
+}
 

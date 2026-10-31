@@ -4,6 +4,8 @@
  * generated models (when present) are structurally identical.
  */
 
+import type { E2eeEligibilityReason } from "./types";
+
 export type ApiE2eePlatform = "web" | "desktop" | "phone";
 
 export interface ApiE2eeDeviceGrant {
@@ -124,6 +126,8 @@ export interface ApiE2eeEligibilityItem {
   profile_id: string;
   status: ApiE2eePolicyStatus;
   active_devices: number;
+  /** Shared DM admission code behind POLICY or BLOCKED; absent otherwise. */
+  reason?: E2eeEligibilityReason | null;
 }
 
 export interface ApiE2eeEligibilityResponse {
