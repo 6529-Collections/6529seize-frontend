@@ -333,6 +333,118 @@ describe("ProfilePreferencesSettings", () => {
     expect(body).not.toHaveProperty("direct_message_group_id");
   });
 
+  it("saves the group this form shows, even if another session changed it", async () => {
+    // The form loaded group-1; another session may since have saved another
+    // group. Saving any change keeps what this form shows.
+    mockFetch({
+      ...preferences,
+      direct_message_policy: DirectMessagePolicy.GroupMembers,
+      direct_message_group_id: "group-1",
+    });
+    const user = userEvent.setup();
+    render(<ProfilePreferencesSettings />);
+    await screen.findByRole("link", { name: "View members of Level 20+" });
+
+    await user.click(
+      screen.getByRole("checkbox", {
+        name: /People I follow can always message me/i,
+      })
+    );
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() =>
+      expect(commonApiPut).toHaveBeenCalledWith({
+        endpoint: "profile-preferences",
+        body: expect.objectContaining({
+          direct_message_policy: DirectMessagePolicy.GroupMembers,
+          direct_message_group_id: "group-1",
+          direct_message_allow_people_i_follow: false,
+        }),
+      })
+    );
+  });
+
+  it("sends the saved group when the save turns the group policy on", async () => {
+    mockFetch({ ...preferences, direct_message_group_id: "group-1" });
+    const user = userEvent.setup();
+    render(<ProfilePreferencesSettings />);
+    await screen.findByText("Subscription coverage");
+
+    await user.click(
+      screen.getByRole("radio", { name: "Members of a group I choose" })
+    );
+    await screen.findByRole("link", { name: "View members of Level 20+" });
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() =>
+      expect(commonApiPut).toHaveBeenCalledWith({
+        endpoint: "profile-preferences",
+        body: expect.objectContaining({
+          direct_message_policy: DirectMessagePolicy.GroupMembers,
+          direct_message_group_id: "group-1",
+        }),
+      })
+    );
+  });
+
+  it("does not resend an untouched saved group the API reports as unavailable", async () => {
+    mockFetch({
+      ...preferences,
+      direct_message_policy: DirectMessagePolicy.GroupMembers,
+      direct_message_group_id: "deleted-group",
+      direct_message_group_unavailable: true,
+    });
+    const user = userEvent.setup();
+    render(<ProfilePreferencesSettings />);
+    await screen.findByRole("alert");
+
+    await user.click(
+      screen.getByRole("checkbox", {
+        name: /People I follow can always message me/i,
+      })
+    );
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() => expect(commonApiPut).toHaveBeenCalledTimes(1));
+    const [{ body }] = (commonApiPut as jest.Mock).mock.calls[0];
+    expect(body).toEqual(
+      expect.objectContaining({
+        direct_message_policy: DirectMessagePolicy.GroupMembers,
+        direct_message_allow_people_i_follow: false,
+      })
+    );
+    expect(body).not.toHaveProperty("direct_message_group_id");
+  });
+
+  it("treats a failed group lookup as retryable, not as a deleted group", async () => {
+    mockFetch({
+      ...preferences,
+      direct_message_policy: DirectMessagePolicy.GroupMembers,
+      direct_message_group_id: "flaky-group",
+    });
+    const user = userEvent.setup();
+    render(<ProfilePreferencesSettings />);
+
+    expect(
+      await screen.findByText("Couldn’t load the group details.")
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/until you choose another group/i)
+    ).not.toBeInTheDocument();
+
+    groups["flaky-group"] = {
+      id: "flaky-group",
+      name: "Back online",
+      group: {},
+    };
+    await user.click(screen.getByRole("button", { name: "Try again" }));
+    expect(
+      await screen.findByRole("link", { name: "View members of Back online" })
+    ).toBeInTheDocument();
+    delete groups["flaky-group"];
+  });
+
   it("does not send a group for the existing policies", async () => {
     const user = userEvent.setup();
     render(<ProfilePreferencesSettings />);

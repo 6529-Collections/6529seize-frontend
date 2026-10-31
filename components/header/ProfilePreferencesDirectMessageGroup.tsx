@@ -23,11 +23,15 @@ function SelectedGroupSummary({
   group,
   isLoading,
   isUnavailable,
+  isLoadError,
+  onRetry,
 }: {
   readonly groupId: string | null;
   readonly group: ApiGroupFull | null;
   readonly isLoading: boolean;
   readonly isUnavailable: boolean;
+  readonly isLoadError: boolean;
+  readonly onRetry: () => void;
 }) {
   const locale = useBrowserLocale();
   let content: ReactNode;
@@ -41,6 +45,19 @@ function SelectedGroupSummary({
     content = (
       <span className="tw-text-iron-400">
         {t(locale, "profilePreferences.dm.group.unavailableName")}
+      </span>
+    );
+  } else if (isLoadError) {
+    content = (
+      <span className="tw-text-iron-400">
+        {t(locale, "profilePreferences.dm.group.loadError")}{" "}
+        <button
+          type="button"
+          onClick={onRetry}
+          className="desktop-hover:hover:tw-text-primary-200 tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-font-medium tw-text-primary-300 tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        >
+          {t(locale, "profilePreferences.dm.group.retry")}
+        </button>
       </span>
     );
   } else if (isLoading || group === null) {
@@ -113,8 +130,10 @@ export default function ProfilePreferencesDirectMessageGroup({
   const criteria = useGroupCriteria(savedGroupUnavailable ? null : groupId);
   const toggleId = useId();
   const warningId = useId();
-  const isUnavailable =
-    savedGroupUnavailable || (groupId !== null && criteria.isError);
+  // Only the API decides that the saved group is gone (admission then falls
+  // back to people you follow). A failed details request is just retryable.
+  const isUnavailable = savedGroupUnavailable;
+  const isLoadError = !isUnavailable && groupId !== null && criteria.isError;
 
   const createGroup = async (
     payload: ApiCreateGroup
@@ -168,6 +187,8 @@ export default function ProfilePreferencesDirectMessageGroup({
           group={criteria.criteria?.group ?? null}
           isLoading={criteria.isLoading}
           isUnavailable={isUnavailable}
+          isLoadError={isLoadError}
+          onRetry={criteria.retry}
         />
         <Button
           type="button"

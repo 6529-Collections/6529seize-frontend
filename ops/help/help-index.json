@@ -572,7 +572,7 @@
         "Blocking hides the profile's content, treats its activity as muted, automatically unfollows it, and prevents following again until it is unblocked. It does not notify the blocked profile or remove that profile's subscription to the blocker.",
         "Unblocked profile headers place icon-labelled Mute notifications or Unmute notifications and Block profile in one responsive profile-actions menu instead of showing a standalone mute button. Desktop uses an overflow menu, while mobile browsers and the mobile app use a bottom sheet. Blocking still requires confirmation.",
         "Blocked public profiles remain reachable. Public profile and Brain summary metadata stays visible, while each Brain activity post keeps its normal height under a blur with visible Wave information. Reveal is temporary and changes to Hide again without resizing the card.",
-        "A blocked profile can never start a new direct message, one-to-one or group, with the blocker, whatever the blocker's direct-message setting and even if the blocker follows it. It sees the same doesn't-accept-new-direct-messages notice as the Nobody setting, so the block is never disclosed. Existing conversations stay available; for the blocker they are muted and deprioritized and blocked-author messages stay hidden until individually revealed.",
+        "A blocked profile can never start a new direct message, one-to-one or group, with the blocker, whatever the blocker's direct-message setting and even if the blocker follows it. It sees the same doesn't-accept-new-direct-messages notice as the Nobody setting, so the block is never disclosed. Existing conversations stay available. For the blocker, an existing one-to-one conversation is muted and deprioritized; in any conversation, blocked-author messages stay hidden until individually revealed.",
         "Group direct messages and shared Waves remain usable and are not muted as a whole. Blocked-author posts stay hidden and do not create ordinary notifications, push notifications, or direct-message unread counts for the blocker; other members behave normally.",
         "Globally quarantined or moderator-removed posts cannot be revealed. Primary Wave chat keeps author, time, and Wave context while replacing only the body; compact secondary surfaces use a redacted tombstone.",
         "The author can still see their own globally moderated post and its moderation state; other viewers receive redacted content.",
@@ -6253,7 +6253,7 @@
         "With Members of a group I choose, People I follow can always message me is on by default and also admits followed profiles outside the group. Membership is checked when a conversation starts, so daily TDH and REP changes apply.",
         "If the chosen group is deleted or hidden, Preferences warns about it and new conversations fall back to People I follow until another group is chosen.",
         "Profiles you block can never start a new direct message with you under any setting, including people you follow. The refused profile sees the generic doesn't-accept-new-direct-messages notice, never a block disclosure.",
-        "When a new conversation is refused, the creator sees a notice naming the recipient's rule, such as only accepting messages from people they follow or from members of a group they chose. The group is named only when it is public.",
+        "When the recipient's direct-message setting refuses a new conversation, the creator sees a notice naming that rule, such as only accepting messages from people they follow or from members of a group they chose; the group is named only when it is public. A refusal caused by the recipient blocking the creator never names a rule or group and shows only the generic doesn't-accept-new-direct-messages notice.",
         "An authenticated wallet without a profile is directed to Create profile from /preferences; profile-scoped controls become available after setup.",
         "Direct-message admission preferences apply only to new exact participant sets; existing one-to-one and group conversations remain available.",
         "Every recipient must allow the creator before a new group direct message can be created.",
@@ -6263,7 +6263,7 @@
         "Profile Preferences is available from the app sidebar, the desktop profile menu, and the Preferences action in the authenticated user's own profile header.",
         "When Preferences is opened from the active profile, desktop users can select Back to profile and mobile-app users can use the standard app-header back arrow. Sidebar, desktop profile-menu, and direct entries omit that profile-return control."
       ],
-      "canonical_path": "/notifications",
+      "canonical_path": "/preferences",
       "related_paths": ["/messages", "/notifications"],
       "tags": ["profile", "privacy", "direct messages", "notifications"],
       "source_refs": [
