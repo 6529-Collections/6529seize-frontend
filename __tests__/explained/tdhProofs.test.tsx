@@ -28,6 +28,7 @@ import ContractSection from "@/app/network/tdh/proofs/ContractSection";
 import Guarantees from "@/app/network/tdh/proofs/Guarantees";
 import ProofsDoor from "@/app/network/tdh/proofs/ProofsDoor";
 import ProofsHero from "@/app/network/tdh/proofs/ProofsHero";
+import ProofsSources from "@/app/network/tdh/proofs/ProofsSources";
 import RawBytes from "@/app/network/tdh/proofs/RawBytes";
 import StatementWords from "@/app/network/tdh/proofs/StatementWords";
 import StillTrust from "@/app/network/tdh/proofs/StillTrust";
@@ -373,6 +374,23 @@ describe("the page's sections", () => {
     for (const id of ["made", "two", "contract", "status", "trust"]) {
       expect(container.querySelector(`#${id}`)).not.toBeNull();
     }
+  });
+
+  it("names its records by commit in How we know, never linking them", () => {
+    const { container } = withFacts(
+      <ProofsSources locale="en-US" facts={facts} title="Proven on Ethereum" />
+    );
+    const footer = container.querySelector("[data-ex-hwk]") as HTMLElement;
+    expect(footer).not.toBeNull();
+    for (const commit of ["a92983d", "1a89f27", "0015ad3"]) {
+      expect(footer.textContent).toContain(commit);
+    }
+    expect(within(footer).getByText("Private records")).toBeInTheDocument();
+    expect(
+      [...footer.querySelectorAll("a")].filter((a) =>
+        (a.getAttribute("href") ?? "").includes("6529validator")
+      )
+    ).toHaveLength(0);
   });
 
   it("has a door the pages that link it can place", () => {
