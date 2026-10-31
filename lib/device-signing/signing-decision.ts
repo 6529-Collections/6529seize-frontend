@@ -21,6 +21,11 @@ export type SigningFailureReason =
   | "crypto-error"
   /** 6529.io rejected the signature; the grant can still sign. */
   | "rejected"
+  /**
+   * 6529.io did not accept device signatures at all (for example after a
+   * backend rollback); the grant can still sign.
+   */
+  | "unsupported"
   /** The grant can no longer sign (revoked, expired, unknown or gone). */
   | "grant-unusable";
 

@@ -111,21 +111,23 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.signature.signed": "Signed by its author",
   "signedMessages.signature.unsigned": "Not signed by its author",
   "signedMessages.signature.invalid": "The signature could not be verified",
+  "signedMessages.signature.unverifiable":
+    "Couldn't verify this signature right now",
   "signedMessages.signature.signedDescription":
     "Your browser checked this signature itself, without relying on 6529.io.",
-  "signedMessages.signature.contractWalletDescription":
-    "Your browser checked the device signature itself. This contract wallet's sign-in signature was checked by 6529.io at sign-in, not by your browser.",
   "signedMessages.signature.unsignedDescription":
     "This post was sent without a device signature.",
   "signedMessages.signature.invalidDescription":
     "The stored signature does not match this post. Treat its authorship with caution.",
+  "signedMessages.signature.unverifiableDescription":
+    "This signature couldn't be checked right now, so this post isn't shown as signed. Try again later.",
   "signedMessages.signature.wallet": "Wallet",
   "signedMessages.signature.deviceKey": "Device key",
   "signedMessages.signature.grantExpires": "Grant expires",
   "signedMessages.signature.walletSignature": "Wallet signature",
   "signedMessages.signature.walletVerified": "Verified in your browser",
-  "signedMessages.signature.contractWallet":
-    "Contract wallet: verified by 6529.io at sign-in",
+  "signedMessages.signature.contractWalletVerified":
+    "Contract wallet: verified on Ethereum in your browser",
   "signedMessages.signature.currentContent": "Current content",
   "signedMessages.signature.currentSigned": "The signed version",
   "signedMessages.signature.currentUnsigned": "Changed without a signature",

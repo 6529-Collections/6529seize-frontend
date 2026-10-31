@@ -9,7 +9,7 @@ import {
   hashCanonicalString,
 } from "./canonical-json";
 import { verifyEventIdSignature } from "./ed25519";
-import { parseDeviceGrantMessage } from "./grant-message";
+import { isAllowedGrantDomain, parseDeviceGrantMessage } from "./grant-message";
 import {
   computeInterimEventId,
   DEVICE_EVENT_KIND_SCOPE,
@@ -18,21 +18,41 @@ import {
 } from "./interim-event";
 
 /**
- * "verified": the wallet's sign-in signature was checked in this browser,
- * either by ECDSA recovery or, for a contract wallet, by its EIP-1271 check
- * read from Ethereum.
- * "contract-wallet": it does not recover to the wallet and no Ethereum read
- * was available, so the grant rests on 6529.io's sign-in check.
+ * How this browser verified the wallet's sign-in signature on a grant:
+ * "verified": it recovers (ECDSA) to the wallet.
+ * "contract-verified": the wallet has contract code on Ethereum and its
+ * EIP-1271 check returned the magic value for this signature.
  */
-type WalletSignatureCheck = "verified" | "contract-wallet";
+export type WalletSignatureCheck = "verified" | "contract-verified";
 
-/** Checks a contract wallet's signature on Ethereum (EIP-1271), if available. */
-export type ContractSignatureVerifier = (args: {
-  readonly address: Hex;
-  readonly message: string;
-  readonly signature: Hex;
-  readonly chainId: number;
-}) => Promise<boolean>;
+/**
+ * A grant's wallet signature: verified, "unverifiable" when only a contract
+ * check on Ethereum could decide it and that check could not run, or null
+ * when it is invalid.
+ */
+type GrantCheck = WalletSignatureCheck | "unverifiable" | null;
+
+/**
+ * Reads contract wallets on Ethereum mainnet. Each method throws when
+ * Ethereum cannot be read, which makes the verdict "unverifiable".
+ */
+export interface ContractWalletReader {
+  /** Whether the address has contract code. */
+  readonly hasCode: (address: Hex) => Promise<boolean>;
+  /**
+   * The contract's EIP-1271 isValidSignature(hash, signature) result, or
+   * null when the call reverts or returns no data.
+   */
+  readonly isValidSignature: (args: {
+    readonly address: Hex;
+    readonly hash: Hex;
+    readonly signature: Hex;
+  }) => Promise<Hex | null>;
+}
+
+const ETHEREUM_MAINNET_CHAIN_ID = 1;
+/** bytes4(keccak256("isValidSignature(bytes32,bytes)")) */
+const EIP1271_MAGIC_VALUE = "0x1626ba7e";
 
 /**
  * What the reader is shown for the drop, compared with the signed body. Media
@@ -63,7 +83,8 @@ interface ExpectedDrop {
 }
 
 interface VerifyOptions {
-  readonly verifyContractSignature?: ContractSignatureVerifier | undefined;
+  /** Without it, a grant only a contract wallet could have signed is "unverifiable". */
+  readonly contractWallets?: ContractWalletReader | undefined;
   /** When given, the current content is "signed" only if it matches. */
   readonly displayed?: DisplayedDropContent | undefined;
   /** When given, only events of this drop, wave and author count. */
@@ -152,6 +173,12 @@ interface VerifiedDropSignature {
 export type DropSignatureVerdict =
   | { readonly status: "unsigned" }
   | { readonly status: "invalid" }
+  /**
+   * The signed events verify, but the grant's wallet signature needs a
+   * contract-wallet check on Ethereum that could not run (no client, an
+   * unreachable node or another chain). Never shown as signed.
+   */
+  | { readonly status: "unverifiable" }
   | {
       readonly status: "signed";
       readonly signature: VerifiedDropSignature;
@@ -162,54 +189,13 @@ export type DropSignatureVerdict =
 interface VerifiedEvent {
   readonly event: ApiDeviceSignedEvent;
   readonly grant: ApiDeviceGrantProof;
-  readonly walletSignature: WalletSignatureCheck;
+  readonly walletSignature: WalletSignatureCheck | "unverifiable";
 }
 
 const CONTENT_KINDS: ReadonlySet<number> = new Set([
   DeviceEventKind.POST,
   DeviceEventKind.EDIT,
 ]);
-
-const SITE_DOMAIN = "6529.io";
-
-/**
- * The host a SIWE domain names, or null unless it is exactly one bare host
- * (no scheme, path, query, fragment, user info, whitespace or empty label),
- * so a value such as "evil.example/x.6529.io" can never pass for a 6529 host.
- */
-function toExactHost(domain: string): string | null {
-  const value = domain.toLowerCase();
-  if (value.split(".").includes("")) {
-    return null;
-  }
-  try {
-    return new URL(`https://${value}`).host === value ? value : null;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Grants count only when the wallet signed them on a 6529 site: 6529.io or
- * one of its subdomains (production, staging, previews), without a port, or
- * exactly the site this check runs on (local builds and mirrors).
- */
-function isAllowedGrantDomain(domain: string): boolean {
-  const host = toExactHost(domain);
-  if (host === null) {
-    return false;
-  }
-  const currentHost =
-    typeof globalThis.location === "object"
-      ? globalThis.location.host.toLowerCase()
-      : "";
-  // An exact host has no path, so a port would end it with ":<port>".
-  return (
-    host === SITE_DOMAIN ||
-    host.endsWith(`.${SITE_DOMAIN}`) ||
-    host === currentHost
-  );
-}
 
 /** The grant message commits to exactly the key, scopes and expiry stored. */
 const isGrantMessageConsistent = (grant: ApiDeviceGrantProof): boolean => {
@@ -241,31 +227,42 @@ async function recoversToWallet(grant: ApiDeviceGrantProof): Promise<boolean> {
   }
 }
 
+/**
+ * A signature that does not recover to the wallet is valid only if the
+ * wallet is a contract on Ethereum whose EIP-1271 check accepts it. Without
+ * code at the address it is invalid; when that cannot be read it is
+ * "unverifiable", never trusted.
+ */
 async function checkContractWalletSignature(
   grant: ApiDeviceGrantProof,
-  verifyContractSignature: ContractSignatureVerifier | undefined
-): Promise<WalletSignatureCheck | null> {
-  if (!verifyContractSignature) {
-    return "contract-wallet";
+  contractWallets: ContractWalletReader | undefined
+): Promise<GrantCheck> {
+  // Contract code is only read on Ethereum mainnet.
+  if (!contractWallets || grant.chain_id !== ETHEREUM_MAINNET_CHAIN_ID) {
+    return "unverifiable";
   }
+  const address = grant.wallet as Hex;
   try {
-    const valid = await verifyContractSignature({
-      address: grant.wallet as Hex,
-      message: grant.message,
+    if (!(await contractWallets.hasCode(address))) {
+      return null;
+    }
+    const result = await contractWallets.isValidSignature({
+      address,
+      hash: hashMessage(grant.message),
       signature: grant.wallet_signature as Hex,
-      chainId: grant.chain_id,
     });
-    return valid ? "verified" : null;
+    return result !== null && same(result, EIP1271_MAGIC_VALUE)
+      ? "contract-verified"
+      : null;
   } catch {
-    // Ethereum unreachable: fall back to the labelled sign-in check.
-    return "contract-wallet";
+    return "unverifiable";
   }
 }
 
 async function checkGrant(
   grant: ApiDeviceGrantProof,
-  { verifyContractSignature }: VerifyOptions
-): Promise<WalletSignatureCheck | null> {
+  { contractWallets }: VerifyOptions
+): Promise<GrantCheck> {
   let consistent = false;
   try {
     consistent = isGrantMessageConsistent(grant);
@@ -287,8 +284,8 @@ async function checkGrant(
     return "verified";
   }
   // Not the wallet's own ECDSA signature: only a contract wallet (EIP-1271)
-  // can have signed it, so check that on Ethereum where possible.
-  return await checkContractWalletSignature(grant, verifyContractSignature);
+  // can have signed it.
+  return await checkContractWalletSignature(grant, contractWallets);
 }
 
 const isBodyConsistent = (event: ApiDeviceSignedEvent): boolean => {
@@ -364,7 +361,7 @@ async function verifyContentEvents(
   const grants = new Map(
     data.grants.map((grant) => [grant.id.toLowerCase(), grant])
   );
-  const grantChecks = new Map<string, Promise<WalletSignatureCheck | null>>();
+  const grantChecks = new Map<string, Promise<GrantCheck>>();
   const results = await Promise.all(
     data.events
       .filter((event) => CONTENT_KINDS.has(event.kind))
@@ -434,6 +431,9 @@ export async function verifyDropSignedEvents(
   const shown = current ?? verified.at(-1);
   if (!shown) {
     return { status: "invalid" };
+  }
+  if (shown.walletSignature === "unverifiable") {
+    return { status: "unverifiable" };
   }
   return {
     status: "signed",
