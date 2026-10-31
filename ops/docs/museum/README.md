@@ -73,5 +73,4 @@ There are no Museum documentation stubs in this area.
 ## Related Areas
 
 - [Navigation](../navigation/README.md)
-- [Public Contract Reviews](../public-reviews/README.md)
 - [Documentation home](../README.md)

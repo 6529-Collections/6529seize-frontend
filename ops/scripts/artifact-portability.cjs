@@ -447,7 +447,7 @@ function getArtifactContractVersion(manifest) {
   return manifest.artifact_contract || "unknown";
 }
 
-function buildBakedInputs({ runtimeConfig, assetsFromS3, environment }) {
+function buildBakedInputs({ runtimeConfig, assetsFromS3 }) {
   const unknownRuntimeKeys = Object.keys(runtimeConfig)
     .filter((key) => !KNOWN_RUNTIME_KEYS.has(key))
     .sort(compareStrings);
@@ -470,10 +470,7 @@ function buildBakedInputs({ runtimeConfig, assetsFromS3, environment }) {
     } = descriptor;
     let value;
     let source = "PUBLIC_RUNTIME.json";
-    if (name === "PUBLIC_REVIEW_PROFILE") {
-      value = environment;
-      source = "artifact manifest environment";
-    } else if (name === "ASSETS_FROM_S3") {
+    if (name === "ASSETS_FROM_S3") {
       value = assetsFromS3;
       source = ".next/ASSETS_FROM_S3";
     } else {
@@ -570,11 +567,7 @@ function buildInventory(options) {
     assets_from_s3: assetsFromS3,
   };
   const runtimeConfigSha256 = digestJson(runtimeConfigWithAssets);
-  const baked = buildBakedInputs({
-    runtimeConfig,
-    assetsFromS3,
-    environment,
-  });
+  const baked = buildBakedInputs({ runtimeConfig, assetsFromS3 });
   const extractedRoot = path.resolve(options.extractedRoot || "");
   invariant(options.extractedRoot, "extracted-root is required");
   const packageScan = scanExtractedPackage(extractedRoot, baked);

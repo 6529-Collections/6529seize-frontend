@@ -289,31 +289,22 @@ jobs:
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
           GITHUB_LINK_STATUS_PREVIEW_TOKEN: ${{ secrets.LINK_STATUS_PREVIEW_GITHUB_TOKEN }}
-          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_PRODUCTION_DISCUSSION_DESTINATIONS }}
         run: |
           set -euo pipefail
           printf '%s' "$ETHEREUM_RPC_URL" |
             node ops/scripts/validate-ethereum-rpc-url.cjs
-          jq -e '
-            type == "object" and
-            keys == ["production"] and
-            (.production | type == "object") and
-            (.production["stream-review"] | type == "string" and test("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"))
-          ' <<< "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" >/dev/null
           option_settings="$(jq -cn \
             --arg ssr_client_id "$SSR_CLIENT_ID" \
             --arg ssr_client_secret "$SSR_CLIENT_SECRET" \
             --arg alchemy_api_key "$ALCHEMY_API_KEY" \
             --arg ethereum_rpc_url "$ETHEREUM_RPC_URL" \
-            --arg github_link_status_preview_token "$GITHUB_LINK_STATUS_PREVIEW_TOKEN" \
-            --arg public_review_discussion_destinations "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" '
+            --arg github_link_status_preview_token "$GITHUB_LINK_STATUS_PREVIEW_TOKEN" '
               [
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"SSR_CLIENT_ID",Value:$ssr_client_id},
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"SSR_CLIENT_SECRET",Value:$ssr_client_secret},
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"ALCHEMY_API_KEY",Value:$alchemy_api_key},
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"ETHEREUM_RPC_URL",Value:$ethereum_rpc_url},
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"GITHUB_LINK_STATUS_PREVIEW_TOKEN",Value:$github_link_status_preview_token},
-                {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"PUBLIC_REVIEW_DISCUSSION_DESTINATIONS",Value:$public_review_discussion_destinations},
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"SENTRY_SERVER_INSTRUMENTATION",Value:"true"}
               ]')"
           aws elasticbeanstalk update-environment \

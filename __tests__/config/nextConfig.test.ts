@@ -34,10 +34,18 @@ describe("shared Next config", () => {
     ).toBeUndefined();
   });
 
-  it("excludes public-review inputs from production traces", () => {
-    expect(sharedConfig(publicEnv, "").outputFileTracingExcludes).toEqual({
-      "/*": ["content/public-reviews/**/*", "public/review-data/**/*"],
+  it("sends every former Stream review link to /stream", async () => {
+    expect(await sharedConfig(publicEnv, "").redirects?.()).toContainEqual({
+      source: "/reviews/6529-stream/:path*",
+      destination: "/stream",
+      permanent: true,
     });
+  });
+
+  it("sets no trace exclusions", () => {
+    expect(
+      sharedConfig(publicEnv, "").outputFileTracingExcludes
+    ).toBeUndefined();
   });
 
   it("includes Sharp libvips assets in the OG image route trace", () => {
@@ -47,17 +55,6 @@ describe("shared Next config", () => {
         "node_modules/@img/sharp-libvips-*/**/*",
         "node_modules/.pnpm/@img+sharp-libvips-*/node_modules/@img/sharp-libvips-*/**/*",
       ],
-    });
-  });
-
-  it("lets staging packaging inject canonical public-review inputs", () => {
-    const stagingEnv = {
-      ...publicEnv,
-      BASE_ENDPOINT: "https://staging.6529.io",
-    };
-
-    expect(sharedConfig(stagingEnv, "").outputFileTracingExcludes).toEqual({
-      "/*": ["content/public-reviews/**/*", "public/review-data/**/*"],
     });
   });
 

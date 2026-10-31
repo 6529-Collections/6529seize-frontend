@@ -59,11 +59,6 @@ const AUTH_SANDBOX_ENV = {
   ...COMPOSER_SANDBOX_ENV,
 };
 
-const PUBLIC_REVIEW_SANDBOX_ENV = {
-  PLAYWRIGHT_PUBLIC_REVIEW_SANDBOX: "1",
-  ...COMPOSER_SANDBOX_ENV,
-};
-
 const READONLY_SPECS = {
   bookmarks: ["tests/social/bookmarks-readonly.spec.ts"],
   social: ["tests/social/waves-profile-readonly.spec.ts"],
@@ -443,13 +438,6 @@ const PACKS = [
     "Waves composer sandbox against the local mock API.",
     ["tests/social/waves-composer-sandbox.spec.ts"],
     COMPOSER_SANDBOX_ENV,
-    [DESKTOP, MOBILE]
-  ),
-  sandboxPack(
-    "test:e2e:public-review-sandbox",
-    "Stream review feedback sandbox against the local mock API.",
-    ["tests/public-review/stream-review-feedback-sandbox.spec.ts"],
-    PUBLIC_REVIEW_SANDBOX_ENV,
     [DESKTOP, MOBILE]
   ),
   sandboxPack(

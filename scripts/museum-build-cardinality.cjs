@@ -4,89 +4,12 @@ const fs = require("node:fs");
 const path = require("node:path");
 const ts = require("typescript");
 
-const CONTRACT = "museum-build-cardinality-v1";
-const PUBLIC_REVIEW_ID = "6529-stream";
-const PUBLIC_REVIEW_ROOT = path.join("public", "review-data", PUBLIC_REVIEW_ID);
-const BASELINE_BUILD_ROUTES = 31_716;
-const BASELINE_GENERATED_PARAMS = 31_437;
-// The September snapshot adds 7,063 versioned params and 776 active params
-// relative to the recorded August baseline. These are source estimates;
-// the emitted-build budget below remains independent of snapshot growth.
-const SNAPSHOT_GENERATED_PARAMS_ADDED = 7_839;
-const REVIEWED_REDUCTION = 35_054;
-const STATIC_ROUTE_OVERHEAD = BASELINE_BUILD_ROUTES - BASELINE_GENERATED_PARAMS;
-const EXPECTED_REMAINING_GENERATED_PARAMS =
-  BASELINE_GENERATED_PARAMS +
-  SNAPSHOT_GENERATED_PARAMS_ADDED -
-  REVIEWED_REDUCTION;
-const EXPECTED_BUILD_ROUTES_AFTER_REVIEWED_REDUCTION =
-  BASELINE_BUILD_ROUTES + SNAPSHOT_GENERATED_PARAMS_ADDED - REVIEWED_REDUCTION;
+const CONTRACT = "museum-build-cardinality-v2";
 const MAX_PRERENDERED_ROUTES = 500;
-const EXPECTED_DYNAMIC_DECLARATION_ROUTES = Object.freeze([
-  "/reviews/[review]/reference/definitions/[definitionKey]/functions/[declarationKey]",
-  "/reviews/[review]/reference/definitions/[definitionKey]/events/[declarationKey]",
-  "/reviews/[review]/reference/definitions/[definitionKey]/errors/[declarationKey]",
-  "/reviews/[review]/versions/[version]/reference/definitions/[definitionKey]/functions/[declarationKey]",
-  "/reviews/[review]/versions/[version]/reference/definitions/[definitionKey]/events/[declarationKey]",
-  "/reviews/[review]/versions/[version]/reference/definitions/[definitionKey]/errors/[declarationKey]",
-]);
-
-const REVIEWED_HIGH_CARDINALITY_EXPORTS = Object.freeze([
-  {
-    path: "app/reviews/[review]/reference/definitions/[definitionKey]/functions/[declarationKey]/page.tsx",
-    kind: "functions",
-    mode: "active",
-  },
-  {
-    path: "app/reviews/[review]/reference/definitions/[definitionKey]/events/[declarationKey]/page.tsx",
-    kind: "events",
-    mode: "active",
-  },
-  {
-    path: "app/reviews/[review]/reference/definitions/[definitionKey]/errors/[declarationKey]/page.tsx",
-    kind: "errors",
-    mode: "active",
-  },
-  {
-    path: "app/reviews/[review]/versions/[version]/reference/definitions/[definitionKey]/functions/[declarationKey]/page.tsx",
-    kind: "functions",
-    mode: "versioned",
-  },
-  {
-    path: "app/reviews/[review]/versions/[version]/reference/definitions/[definitionKey]/events/[declarationKey]/page.tsx",
-    kind: "events",
-    mode: "versioned",
-  },
-  {
-    path: "app/reviews/[review]/versions/[version]/reference/definitions/[definitionKey]/errors/[declarationKey]/page.tsx",
-    kind: "errors",
-    mode: "versioned",
-  },
-]);
-
+// Pages that may export generateStaticParams. A new contributor must be
+// added here with an estimator in getRouteEstimates.
 const EXPECTED_REMAINING_EXPORTS = Object.freeze([
   "app/about/tech/[reportSlug]/page.tsx",
-  "app/reviews/[review]/[page]/page.tsx",
-  "app/reviews/[review]/feedback/page.tsx",
-  "app/reviews/[review]/page.tsx",
-  "app/reviews/[review]/reference/declarations/[declarationKey]/page.tsx",
-  "app/reviews/[review]/reference/definitions/[definitionKey]/page.tsx",
-  "app/reviews/[review]/reference/interfaces/[definitionKey]/page.tsx",
-  "app/reviews/[review]/reference/page.tsx",
-  "app/reviews/[review]/reference/sources/[...source]/page.tsx",
-  "app/reviews/[review]/versions/[version]/[page]/page.tsx",
-  "app/reviews/[review]/versions/[version]/feedback/page.tsx",
-  "app/reviews/[review]/versions/[version]/page.tsx",
-  "app/reviews/[review]/versions/[version]/reference/declarations/[declarationKey]/page.tsx",
-  "app/reviews/[review]/versions/[version]/reference/definitions/[definitionKey]/page.tsx",
-  "app/reviews/[review]/versions/[version]/reference/interfaces/[definitionKey]/page.tsx",
-  "app/reviews/[review]/versions/[version]/reference/page.tsx",
-  "app/reviews/[review]/versions/[version]/reference/sources/[...source]/page.tsx",
-]);
-
-const PUBLIC_REVIEW_LIFECYCLE_STATES = new Set([
-  "PUBLIC_REVIEW",
-  "REVIEW_CLOSED",
 ]);
 
 function normalizeRepoPath(value) {
@@ -267,7 +190,7 @@ function findVariableArrayCount(sourceFile, variableName, relativePath) {
   return result;
 }
 
-function getReviewSourceContracts(root) {
+function getTechReportContract(root) {
   const reportsPath = "components/about/tech/reports.ts";
   const reportsFile = createSourceFile(
     reportsPath,
@@ -279,323 +202,22 @@ function getReviewSourceContracts(root) {
       "TECH_PR_REPORTS",
       reportsPath
     ),
-    sourceContracts: [
-      `${reportsPath}:TECH_PR_REPORTS`,
-      "content/public-reviews/6529-stream/versions/*/editorial/manifest.json:pages",
-    ],
+    sourceContract: `${reportsPath}:TECH_PR_REPORTS`,
   };
-}
-
-function getPublicReviewFixtures(root) {
-  const publicationPath = "config/public-reviews/6529-stream.publication.json";
-  const publication = readJson(root, publicationPath);
-  if (
-    publication.reviewId !== PUBLIC_REVIEW_ID ||
-    !Array.isArray(publication.versions)
-  ) {
-    throw new Error(
-      "Museum build cardinality publication contract is invalid."
-    );
-  }
-  const publicVersions = publication.versions.filter((version) =>
-    PUBLIC_REVIEW_LIFECYCLE_STATES.has(version.lifecycleState)
-  );
-  if (publicVersions.length === 0) {
-    throw new Error("Museum build cardinality has no public review versions.");
-  }
-  const activeVersions = publication.versions.filter(
-    (version) => version.lifecycleState === "PUBLIC_REVIEW"
-  );
-  if (activeVersions.length !== 1) {
-    throw new Error(
-      `Museum build cardinality requires exactly one active public review version; found ${activeVersions.length}.`
-    );
-  }
-  const [activeVersion] = activeVersions;
-
-  const manifests = new Map();
-  for (const version of publicVersions) {
-    const relativePath = path.join(
-      PUBLIC_REVIEW_ROOT,
-      "versions",
-      version.version,
-      "reference-manifest.json"
-    );
-    const manifest = readJson(root, relativePath);
-    const editorialPath = path.join(
-      "content",
-      "public-reviews",
-      PUBLIC_REVIEW_ID,
-      "versions",
-      version.version,
-      "editorial",
-      "manifest.json"
-    );
-    const editorialManifest = readJson(root, editorialPath);
-    if (
-      !Array.isArray(manifest.declarationIndex) ||
-      !Array.isArray(manifest.definitionIndex) ||
-      !Array.isArray(manifest.files) ||
-      editorialManifest.review_id !== PUBLIC_REVIEW_ID ||
-      editorialManifest.review_version !== version.version ||
-      !Array.isArray(editorialManifest.pages)
-    ) {
-      throw new Error(
-        `Museum build cardinality manifest is invalid: ${relativePath} or ${editorialPath}`
-      );
-    }
-    const communityReviewPages = editorialManifest.pages.filter(
-      (page) => page.id === "community-review"
-    );
-    if (communityReviewPages.length !== 1) {
-      throw new Error(
-        `Museum build cardinality editorial manifest must contain exactly one community-review page: ${editorialPath}`
-      );
-    }
-    manifests.set(version.version, {
-      version: version.version,
-      routeCounts: {
-        narrativePages: editorialManifest.pages.length - 1,
-        definitions: manifest.definitionIndex.length,
-        interfaces: manifest.definitionIndex.filter(
-          (entry) => entry.interface?.published === true
-        ).length,
-        sources: manifest.files.length,
-        topLevelDeclarations: manifest.declarationIndex.filter(
-          (entry) => entry.topLevel === true
-        ).length,
-        functions: manifest.declarationIndex.filter(
-          (entry) =>
-            entry.kind === "function" &&
-            entry.topLevel !== true &&
-            Boolean(entry.definitionKey)
-        ).length,
-        events: manifest.declarationIndex.filter(
-          (entry) =>
-            entry.kind === "event" &&
-            entry.topLevel !== true &&
-            Boolean(entry.definitionKey)
-        ).length,
-        errors: manifest.declarationIndex.filter(
-          (entry) =>
-            entry.kind === "error" &&
-            entry.topLevel !== true &&
-            Boolean(entry.definitionKey)
-        ).length,
-      },
-    });
-  }
-
-  return {
-    activeVersion: activeVersion.version,
-    activeIsPublic: true,
-    publicVersions: publicVersions.map(({ version }) => version),
-    manifests,
-  };
-}
-
-function sumVersioned(manifests, selector) {
-  let total = 0;
-  for (const manifest of manifests.values()) {
-    total += selector(manifest.routeCounts);
-  }
-  return total;
 }
 
 function getRouteEstimates(root) {
-  const reviewSource = getReviewSourceContracts(root);
-  const reviewFixtures = getPublicReviewFixtures(root);
-  const activeManifest = reviewFixtures.manifests.get(
-    reviewFixtures.activeVersion
-  );
-  if (!activeManifest) {
-    throw new Error("Museum build cardinality active manifest is missing.");
-  }
-  const active = activeManifest.routeCounts;
-  const versioned = (key) =>
-    sumVersioned(reviewFixtures.manifests, (counts) => counts[key]);
-  const routes = new Map([
+  const techReports = getTechReportContract(root);
+  return new Map([
     [
       "app/about/tech/[reportSlug]/page.tsx",
       {
         id: "about.tech.report",
-        estimate: reviewSource.techReportCount,
-        source: reviewSource.sourceContracts[0],
-      },
-    ],
-    [
-      "app/reviews/[review]/[page]/page.tsx",
-      {
-        id: "public-review.active-page",
-        estimate: active.narrativePages,
-        source: reviewSource.sourceContracts[1],
-      },
-    ],
-    [
-      "app/reviews/[review]/feedback/page.tsx",
-      {
-        id: "public-review.active-feedback",
-        estimate: reviewFixtures.activeIsPublic ? 1 : 0,
-        source:
-          "config/public-reviews/6529-stream.publication.json:active lifecycle",
-      },
-    ],
-    [
-      "app/reviews/[review]/page.tsx",
-      {
-        id: "public-review.active-root",
-        estimate: reviewFixtures.activeIsPublic ? 1 : 0,
-        source:
-          "config/public-reviews/6529-stream.publication.json:active lifecycle",
-      },
-    ],
-    [
-      "app/reviews/[review]/reference/declarations/[declarationKey]/page.tsx",
-      {
-        id: "public-review.active-top-level-declaration",
-        estimate: active.topLevelDeclarations,
-        source:
-          "public/review-data/6529-stream/versions/*/reference-manifest.json:declarationIndex.topLevel",
-      },
-    ],
-    [
-      "app/reviews/[review]/reference/definitions/[definitionKey]/page.tsx",
-      {
-        id: "public-review.active-definition",
-        estimate: active.definitions,
-        source:
-          "public/review-data/6529-stream/versions/*/reference-manifest.json:definitionIndex",
-      },
-    ],
-    [
-      "app/reviews/[review]/reference/interfaces/[definitionKey]/page.tsx",
-      {
-        id: "public-review.active-interface",
-        estimate: active.interfaces,
-        source:
-          "public/review-data/6529-stream/versions/*/reference-manifest.json:definitionIndex.interface.published",
-      },
-    ],
-    [
-      "app/reviews/[review]/reference/page.tsx",
-      {
-        id: "public-review.active-reference-root",
-        estimate: reviewFixtures.activeIsPublic ? 1 : 0,
-        source:
-          "config/public-reviews/6529-stream.publication.json:active lifecycle",
-      },
-    ],
-    [
-      "app/reviews/[review]/reference/sources/[...source]/page.tsx",
-      {
-        id: "public-review.active-source",
-        estimate: active.sources,
-        source:
-          "public/review-data/6529-stream/versions/*/reference-manifest.json:files",
-      },
-    ],
-    [
-      "app/reviews/[review]/versions/[version]/[page]/page.tsx",
-      {
-        id: "public-review.versioned-page",
-        estimate: versioned("narrativePages"),
-        source: reviewSource.sourceContracts[1],
-      },
-    ],
-    [
-      "app/reviews/[review]/versions/[version]/feedback/page.tsx",
-      {
-        id: "public-review.versioned-feedback",
-        estimate: reviewFixtures.publicVersions.length,
-        source:
-          "config/public-reviews/6529-stream.publication.json:public lifecycle versions",
-      },
-    ],
-    [
-      "app/reviews/[review]/versions/[version]/page.tsx",
-      {
-        id: "public-review.versioned-root",
-        estimate: reviewFixtures.publicVersions.length,
-        source:
-          "config/public-reviews/6529-stream.publication.json:public lifecycle versions",
-      },
-    ],
-    [
-      "app/reviews/[review]/versions/[version]/reference/declarations/[declarationKey]/page.tsx",
-      {
-        id: "public-review.versioned-top-level-declaration",
-        estimate: versioned("topLevelDeclarations"),
-        source:
-          "public/review-data/6529-stream/versions/*/reference-manifest.json:declarationIndex.topLevel",
-      },
-    ],
-    [
-      "app/reviews/[review]/versions/[version]/reference/definitions/[definitionKey]/page.tsx",
-      {
-        id: "public-review.versioned-definition",
-        estimate: versioned("definitions"),
-        source:
-          "public/review-data/6529-stream/versions/*/reference-manifest.json:definitionIndex",
-      },
-    ],
-    [
-      "app/reviews/[review]/versions/[version]/reference/interfaces/[definitionKey]/page.tsx",
-      {
-        id: "public-review.versioned-interface",
-        estimate: versioned("interfaces"),
-        source:
-          "public/review-data/6529-stream/versions/*/reference-manifest.json:definitionIndex.interface.published",
-      },
-    ],
-    [
-      "app/reviews/[review]/versions/[version]/reference/page.tsx",
-      {
-        id: "public-review.versioned-reference-root",
-        estimate: reviewFixtures.publicVersions.length,
-        source:
-          "config/public-reviews/6529-stream.publication.json:public lifecycle versions",
-      },
-    ],
-    [
-      "app/reviews/[review]/versions/[version]/reference/sources/[...source]/page.tsx",
-      {
-        id: "public-review.versioned-source",
-        estimate: versioned("sources"),
-        source:
-          "public/review-data/6529-stream/versions/*/reference-manifest.json:files",
+        estimate: techReports.techReportCount,
+        source: techReports.sourceContract,
       },
     ],
   ]);
-  return { routes, reviewFixtures, reviewSource };
-}
-
-function getReviewedHighCardinalityEstimates(reviewFixtures) {
-  const active = reviewFixtures.manifests.get(reviewFixtures.activeVersion);
-  if (!active) {
-    throw new Error("Museum build cardinality active manifest is missing.");
-  }
-  return REVIEWED_HIGH_CARDINALITY_EXPORTS.map((entry) => ({
-    ...entry,
-    estimatedParams:
-      entry.mode === "active"
-        ? active.routeCounts[entry.kind]
-        : sumVersioned(
-            reviewFixtures.manifests,
-            (counts) => counts[entry.kind]
-          ),
-  }));
-}
-
-function assertReviewedExportsAbsent(discoveredPaths) {
-  const discovered = new Set(discoveredPaths);
-  const present = REVIEWED_HIGH_CARDINALITY_EXPORTS.filter((entry) =>
-    discovered.has(entry.path)
-  ).map((entry) => entry.path);
-  if (present.length > 0) {
-    throw new Error(
-      `Museum build cardinality reviewed high-cardinality exports still enumerate params: ${present.join(", ")}`
-    );
-  }
 }
 
 function assertExpectedContributorSet(discoveredPaths) {
@@ -610,28 +232,6 @@ function assertExpectedContributorSet(discoveredPaths) {
   if (missing.length > 0 || unknown.length > 0) {
     throw new Error(
       `Museum build cardinality contributor inventory drifted: missing=${missing.join(",") || "none"}; unknown=${unknown.join(",") || "none"}`
-    );
-  }
-}
-
-function assertCardinalityBaseline({
-  observedGeneratedParams,
-  observedReviewedReduction,
-}) {
-  const drift = [];
-  if (observedReviewedReduction !== REVIEWED_REDUCTION) {
-    drift.push(
-      `reviewed reduction expected ${REVIEWED_REDUCTION}, observed ${observedReviewedReduction}`
-    );
-  }
-  if (observedGeneratedParams !== EXPECTED_REMAINING_GENERATED_PARAMS) {
-    drift.push(
-      `remaining generateStaticParams expected ${EXPECTED_REMAINING_GENERATED_PARAMS}, observed ${observedGeneratedParams}`
-    );
-  }
-  if (drift.length > 0) {
-    throw new Error(
-      `Museum build cardinality source estimates drifted: ${drift.join("; ")}`
     );
   }
 }
@@ -673,41 +273,21 @@ function readBuildEvidence({
       `Museum build cardinality budget exceeded: ${prerenderedRoutes} prerendered routes > ${maxPrerenderedRoutes}`
     );
   }
-  const missingApplicationRoutes = EXPECTED_DYNAMIC_DECLARATION_ROUTES.filter(
-    (route) => !applicationRoutePaths.includes(`${route}/page`)
-  );
-  const unexpectedlyPrerenderedRoutes =
-    EXPECTED_DYNAMIC_DECLARATION_ROUTES.filter(
-      (route) =>
-        prerenderedRoutePaths.includes(route) ||
-        dynamicPrerenderRoutePaths.includes(route)
-    );
-  if (
-    missingApplicationRoutes.length > 0 ||
-    unexpectedlyPrerenderedRoutes.length > 0
-  ) {
-    throw new Error(
-      `Museum build cardinality declaration routes are not request-time dynamic: missing=${missingApplicationRoutes.join(", ") || "none"}; prerendered=${unexpectedlyPrerenderedRoutes.join(", ") || "none"}`
-    );
-  }
   return {
     evidencePaths: [prerenderManifestPath, appPathsManifestPath],
     prerenderedRoutes,
     applicationRouteEntries: applicationRoutePaths.length,
     dynamicPrerenderRouteEntries: dynamicPrerenderRoutePaths.length,
     maxPrerenderedRoutes,
-    requiredDynamicDeclarationRoutes: [...EXPECTED_DYNAMIC_DECLARATION_ROUTES],
   };
 }
 
 function analyze({ root = process.cwd(), includeBuildEvidence = true } = {}) {
   const discovered = discoverGenerateStaticParamsFiles(root);
-  const discoveredPaths = discovered.map(
-    ({ path: relativePath }) => relativePath
+  assertExpectedContributorSet(
+    discovered.map(({ path: relativePath }) => relativePath)
   );
-  assertReviewedExportsAbsent(discoveredPaths);
-  assertExpectedContributorSet(discoveredPaths);
-  const { routes, reviewFixtures, reviewSource } = getRouteEstimates(root);
+  const routes = getRouteEstimates(root);
   const contributors = discovered.map(({ path: relativePath, route }) => {
     const contract = routes.get(relativePath);
     if (!contract) {
@@ -723,42 +303,17 @@ function analyze({ root = process.cwd(), includeBuildEvidence = true } = {}) {
       source: contract.source,
     };
   });
-  const observedGeneratedParams = contributors.reduce(
-    (total, contributor) => total + contributor.estimatedParams,
-    0
-  );
-  const reviewed = getReviewedHighCardinalityEstimates(reviewFixtures);
-  const observedReviewedReduction = reviewed.reduce(
-    (total, entry) => total + entry.estimatedParams,
-    0
-  );
-  assertCardinalityBaseline({
-    observedGeneratedParams,
-    observedReviewedReduction,
-  });
   const result = {
     contract: CONTRACT,
     sourceInventory: {
-      baselineContributorCount:
-        discovered.length + REVIEWED_HIGH_CARDINALITY_EXPORTS.length,
       discoveredContributorCount: discovered.length,
-      reviewedRemovedContributorCount: REVIEWED_HIGH_CARDINALITY_EXPORTS.length,
-      reviewedRemovedExports: reviewed,
-      sourceContracts: reviewSource.sourceContracts,
     },
     cardinality: {
-      baselineBuildRoutes: BASELINE_BUILD_ROUTES,
-      baselineGenerateStaticParams: BASELINE_GENERATED_PARAMS,
-      snapshotGenerateStaticParamsAdded: SNAPSHOT_GENERATED_PARAMS_ADDED,
-      staticRouteOverhead: STATIC_ROUTE_OVERHEAD,
-      reviewedReduction: REVIEWED_REDUCTION,
-      observedReviewedReduction,
-      expectedRemainingGenerateStaticParams:
-        EXPECTED_REMAINING_GENERATED_PARAMS,
-      expectedBuildRoutesAfterReviewedReduction:
-        EXPECTED_BUILD_ROUTES_AFTER_REVIEWED_REDUCTION,
-      observedRemainingGenerateStaticParams: observedGeneratedParams,
-      museumRoutesWereNotTheBottleneck: true,
+      observedGenerateStaticParams: contributors.reduce(
+        (total, contributor) => total + contributor.estimatedParams,
+        0
+      ),
+      maxPrerenderedRoutes: MAX_PRERENDERED_ROUTES,
     },
     contributors,
   };
@@ -797,20 +352,11 @@ if (require.main === module) {
 }
 
 module.exports = {
-  BASELINE_BUILD_ROUTES,
-  BASELINE_GENERATED_PARAMS,
   CONTRACT,
-  EXPECTED_BUILD_ROUTES_AFTER_REVIEWED_REDUCTION,
-  EXPECTED_DYNAMIC_DECLARATION_ROUTES,
-  EXPECTED_REMAINING_GENERATED_PARAMS,
   EXPECTED_REMAINING_EXPORTS,
   MAX_PRERENDERED_ROUTES,
-  REVIEWED_HIGH_CARDINALITY_EXPORTS,
-  REVIEWED_REDUCTION,
   analyze,
-  assertCardinalityBaseline,
   assertExpectedContributorSet,
-  assertReviewedExportsAbsent,
   discoverGenerateStaticParamsFiles,
   readBuildEvidence,
 };

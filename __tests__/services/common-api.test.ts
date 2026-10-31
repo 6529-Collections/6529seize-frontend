@@ -99,14 +99,14 @@ describe("commonApiFetch", () => {
     });
 
     await commonApiFetch({
-      endpoint: "public-reviews/6529-stream/declarations",
+      endpoint: "example/route",
       includeWalletAuth: false,
       params: { version: "2026-07-26.1" },
       requestOrigin: "app",
     });
 
     expect(fetchMock).toHaveBeenCalledWith(
-      `${publicEnv.BASE_ENDPOINT}/api/public-reviews/6529-stream/declarations?version=2026-07-26.1`,
+      `${publicEnv.BASE_ENDPOINT}/api/example/route?version=2026-07-26.1`,
       expect.objectContaining({
         headers: { "x-6529-auth": "s" },
       })

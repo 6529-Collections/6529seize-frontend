@@ -22,10 +22,6 @@ const HTML_LIMITED_METADATA_BOTS = new RegExp(
   HTML_LIMITED_BOT_UA_RE.source + "|TelegramBot|Pinterestbot|opentweet",
   "i"
 );
-const PUBLIC_REVIEW_TRACE_EXCLUDES = [
-  "content/public-reviews/**/*",
-  "public/review-data/**/*",
-];
 const OG_IMAGE_SHARP_TRACE_INCLUDES = [
   "node_modules/@img/sharp-libvips-*/**/*",
   "node_modules/.pnpm/@img+sharp-libvips-*/node_modules/@img/sharp-libvips-*/**/*",
@@ -157,13 +153,17 @@ export function sharedConfig(
           destination: "/safe-collecting",
           permanent: true,
         },
+        // The 6529 Stream public contract review was removed; its section is
+        // being rebuilt at /stream.
+        {
+          source: "/reviews/6529-stream/:path*",
+          destination: "/stream",
+          permanent: true,
+        },
       ]);
     },
     logging: {
       incomingRequests: false,
-    },
-    outputFileTracingExcludes: {
-      "/*": PUBLIC_REVIEW_TRACE_EXCLUDES,
     },
     outputFileTracingIncludes: {
       "/*": MUSEUM_PUBLICATION_TRACE_INCLUDES,

@@ -82,4 +82,3 @@ a Museum holding.
 
 - [Network Museum](README.md)
 - [Institutional practice](feature-institutional-practice.md)
-- [Public Contract Reviews](../public-reviews/README.md)
