@@ -3,7 +3,7 @@ import { REGISTRY_V14 } from "@/components/explained/engine/tdh";
 import bundledManifest from "@/lib/tdh/formal/bundledManifest.json";
 import reference from "@/lib/explained/data/reference.json";
 import { createFactBook, fmt, type FactId } from "@/lib/explained/facts";
-import { RECORD, type FactInputs } from "@/lib/explained/factInputs";
+import type { FactInputs } from "@/lib/explained/factInputs";
 import { fixtureFactInputs } from "@/lib/explained/fixtureInputs";
 import type { ManifestSectionEntries } from "@/lib/explained/registry/formalFacts";
 import type {
@@ -16,8 +16,8 @@ import { parseFormalManifest } from "@/lib/tdh/formal/manifest";
 
 /**
  * The facts of the TDH reference pages (How sure and the shelf) on the
- * fixture feed of 2026-10-18 09:40 UTC: the manifest's counts by kind, the
- * record's Lean counts, the history the pages restate (each checked against
+ * fixture feed of 2026-10-18 09:40 UTC: the manifest's counts by kind and
+ * its theorems in Lean, the history the pages restate (each checked against
  * the source that ships with the site), and the values computed from the
  * registry and the editions.
  */
@@ -26,16 +26,16 @@ const book = createFactBook(inputs);
 const show = (id: FactId, style: "short" | "long" = "short") =>
   fmt(book.get(id), "en-US", style);
 
-/** The bundled manifest with its specification commit moved past the rename. */
-function v14Inputs(): FactInputs {
+/** The bundled manifest as if built from P26 before the rename (D136, D137). */
+function v10Inputs(): FactInputs {
   const manifest = parseFormalManifest({
     ...bundledManifest,
     documents: {
       ...bundledManifest.documents,
       specification: {
         ...bundledManifest.documents.specification,
-        lastChange: RECORD.p26.commit,
-        lastChangeDate: RECORD.p26.date,
+        lastChange: reference.names.v10.commit.padEnd(40, "0"),
+        lastChangeDate: "2026-10-16T00:00:00Z",
       },
     },
   });
@@ -49,12 +49,12 @@ function v14Inputs(): FactInputs {
 
 describe("How sure's facts, from the manifest", () => {
   it("names the rules a manifest is about by its specification commit", () => {
-    // The bundled manifest of Oct 16 follows P26 before D136 and D137.
-    expect(show("manifest.ruleVersion")).toBe("tdh-v1.0");
-    expect(show("manifest.specCommit")).toBe("f840096");
+    // The bundled manifest (e252d5f) follows P26 as round 7 left it.
+    expect(show("manifest.ruleVersion")).toBe("tdh-v1.4");
+    expect(show("manifest.specCommit")).toBe("a731bca");
     expect(
-      fmt(createFactBook(v14Inputs()).get("manifest.ruleVersion"), "en-US")
-    ).toBe("tdh-v1.4");
+      fmt(createFactBook(v10Inputs()).get("manifest.ruleVersion"), "en-US")
+    ).toBe("tdh-v1.0");
   });
 
   it("sorts the eleven counterexamples by kind, from the entries", () => {
@@ -75,7 +75,7 @@ describe("How sure's facts, from the manifest", () => {
 
   it("lists the sections in the manifest's order, each with its entries", () => {
     const ids = book.get<string[]>("manifest.sectionIds").value;
-    expect(ids).toEqual(["1", "2", "3", "4", "5a", "5b", "6", "stack"]);
+    expect(ids).toEqual(["1", "2", "3", "4", "5a", "5b", "6", "7", "stack"]);
     const entries = ids.flatMap(
       (id) =>
         book.get<ManifestSectionEntries>(`manifest.section.${id}`).value.entries
@@ -84,21 +84,70 @@ describe("How sure's facts, from the manifest", () => {
     const netting =
       book.get<ManifestSectionEntries>("manifest.section.1").value;
     expect(netting.title).toBe("Netting invariance");
-    // Only a named limit carries its words.
-    expect(
-      netting.entries.filter((entry) => entry.statement !== null)
-    ).toHaveLength(
-      netting.entries.filter((entry) => entry.status === "deferred").length
+    expect(netting.refs).toEqual(["P26 §7.1", "D131"]);
+    // Every entry carries the manifest's sentence for it.
+    expect(netting.entries.every((entry) => entry.statement !== null)).toBe(
+      true
     );
     expect(() => book.get("manifest.section.99")).toThrow(/no section 99/);
   });
 
-  it("reads the Lean model's own counts from the record, at its commit", () => {
+  it("prints each theorem in Lean at the manifest's commit, and only there", () => {
+    const entries = book
+      .get<string[]>("manifest.sectionIds")
+      .value.flatMap(
+        (id) =>
+          book.get<ManifestSectionEntries>(`manifest.section.${id}`).value
+            .entries
+      );
+    const withLean = entries.filter((entry) => entry.lean !== null);
+    // The proved theorems and the counterexamples proved in the kernel.
+    expect(withLean).toHaveLength(book.num("manifest.audited"));
+    expect(show("manifest.leanStatements")).toBe(show("manifest.audited"));
+    const headline = entries.find(
+      (entry) => entry.id === "1.replayHoldings_invariance"
+    );
+    expect(headline?.lean).toMatch(/^theorem replayHoldings_invariance /);
+    expect(headline?.lean).toContain("∀ k w, h₁.stack k w = h₂.stack k w");
+    // The proof is left out.
+    expect(headline?.lean).not.toContain(":= by");
+    // A manifest from another commit shows no Lean.
+    const other = v10Inputs();
+    if (!other.manifest) throw new Error("no manifest");
+    const moved = createFactBook({
+      ...other,
+      manifest: {
+        ...other.manifest,
+        manifest: {
+          ...other.manifest.manifest,
+          source: { ...other.manifest.manifest.source, commit: "0".repeat(40) },
+        },
+      },
+    });
+    expect(moved.maybe("manifest.leanStatements")).toBeNull();
+    expect(
+      moved
+        .get<ManifestSectionEntries>("manifest.section.1")
+        .value.entries.every((entry) => entry.lean === null)
+    ).toBe(true);
+  });
+
+  it("reads what one build checked, from the manifest's own record", () => {
+    expect(show("manifest.build.jobs")).toBe("71");
+    expect(show("manifest.audit.theorems")).toBe(show("manifest.audited"));
+    expect(book.get<string[]>("manifest.audit.axioms").value).toEqual([
+      "propext",
+      "Classical.choice",
+      "Quot.sound",
+    ]);
+    expect(show("manifest.facts.checks")).toBe("57");
+    expect(show("manifest.vectors.reasons.passed")).toBe("108");
+    expect(show("manifest.vectors.netting.total")).toBe("4");
+  });
+
+  it("reads the Lean model's commit and date from the record", () => {
     expect(show("rules.leanDate")).toBe("Oct 18");
-    expect(show("rules.lean.proved")).toBe("84");
-    expect(show("rules.lean.limits")).toBe("12");
-    expect(show("rules.lean.vectors.passed")).toBe("104");
-    expect(show("rules.lean.vectors.total")).toBe(show("rules.vectors"));
+    expect(show("rules.leanCommit")).toBe(show("manifest.commit"));
   });
 });
 
@@ -201,12 +250,13 @@ describe("values computed from the registry and the editions", () => {
 
   it("lists P26's deviations and issues by ID, one settled by D136", () => {
     const deviations = book.get<ItemRow[]>("spec.deviations").value;
-    expect(deviations).toHaveLength(19);
+    // P26 round 7 (a731bca) added DEV-20 to DEV-22 and BUG-16.
+    expect(deviations).toHaveLength(22);
     expect(deviations.filter((item) => item.settled)).toEqual([
       { id: "DEV-11", settled: true },
     ]);
-    expect(show("spec.deviations.inForce")).toBe("18");
-    expect(show("spec.issues")).toBe("15");
-    expect(book.get<string[]>("spec.issueIds").value[14]).toBe("BUG-15");
+    expect(show("spec.deviations.inForce")).toBe("21");
+    expect(show("spec.issues")).toBe("16");
+    expect(book.get<string[]>("spec.issueIds").value[15]).toBe("BUG-16");
   });
 });

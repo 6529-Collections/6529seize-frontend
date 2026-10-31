@@ -136,6 +136,24 @@ export const TERMS: readonly Term[] = [
     status: { mark: "tested" },
     values: (p) => ({ count: p.v("rules.vectors") }),
   },
+  {
+    id: "lean",
+    also: ["theorem"],
+    status: { mark: "proved" },
+    values: (p) => ({ count: p.v("manifest.proved") }),
+  },
+  { id: "axioms", also: ["kernel"], status: { mark: "assumed" } },
+  {
+    id: "counterexample",
+    also: ["shown-false"],
+    status: { mark: "shownFalse" },
+  },
+  { id: "limit", status: { mark: "notGuaranteed" } },
+  {
+    id: "zk",
+    also: ["proof-a", "proof-b"],
+    status: { mark: "decided", ref: "D119, D128" },
+  },
   { id: "root", status: { mark: "decided", ref: "D112" } },
   { id: "comparison", status: { mark: "tested" } },
   { id: "classes", status: LIVE },
@@ -164,5 +182,5 @@ export const TERMS: readonly Term[] = [
       bug: <CodeName>BUG-15</CodeName>,
     }),
   },
-  { id: "nic", status: LIVE },
+  { id: "nic", status: { mark: "decided", ref: "D142" } },
 ];

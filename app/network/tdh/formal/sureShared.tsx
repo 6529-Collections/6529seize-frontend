@@ -16,6 +16,8 @@ export type SureKey = Extract<MessageKey, `explained.tdh.sure.${string}`>;
 export interface SureSection {
   readonly id: string;
   readonly title: string | null;
+  /** The rules the section is about: "P26 §7.1", "D131". */
+  readonly refs: readonly string[];
   readonly counts: ManifestSection | null;
   readonly entries: ManifestSectionEntries["entries"];
   /** The fact the section's entries come from. */
@@ -35,6 +37,11 @@ export interface SureContext {
   readonly sections: readonly SureSection[];
   /** The manifest describes the rules under their old name (before D136, D137). */
   readonly olderRules: boolean;
+  /**
+   * The record has the Lean model at a newer commit than the manifest's: its
+   * counts here are the manifest's until the feed serves the new one.
+   */
+  readonly leanMoved: boolean;
 }
 
 function readSections(book: FactBook): SureSection[] {
@@ -49,6 +56,7 @@ function readSections(book: FactBook): SureSection[] {
       {
         id,
         title: fact.value.title,
+        refs: fact.value.refs,
         counts: counts?.find((section) => section.id === id) ?? null,
         entries: fact.value.entries,
         fact,
@@ -63,6 +71,8 @@ export function sureContext(
 ): SureContext {
   const manifestRules = book.maybe<string>("manifest.ruleVersion")?.value;
   const rules = book.maybe<string>("rules.version")?.value;
+  const manifestCommit = book.maybe<string>("manifest.commit")?.value;
+  const leanCommit = book.maybe<string>("rules.leanCommit")?.value;
   return {
     book,
     locale,
@@ -74,6 +84,11 @@ export function sureContext(
       manifestRules !== undefined &&
       rules !== undefined &&
       manifestRules !== rules,
+    leanMoved:
+      manifestCommit !== undefined &&
+      leanCommit !== undefined &&
+      !manifestCommit.startsWith(leanCommit.slice(0, 7)) &&
+      !leanCommit.startsWith(manifestCommit.slice(0, 7)),
   };
 }
 

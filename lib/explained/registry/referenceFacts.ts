@@ -20,9 +20,8 @@ import {
  * Facts of the TDH reference pages (How sure and the shelf: the
  * specification, implementations and vectors, versions and boosts, the
  * glossary). Four kinds:
- * - the record (6529chain, synced): the Lean model's own counts at its
- *   commit, P26's deviations and issues, the registry values the
- *   specification prints;
+ * - the record (6529chain, synced): the Lean model's commit, P26's
+ *   deviations and issues, the registry values the specification prints;
  * - history that does not change (`data/reference.json`): the rules' old
  *   name, the netting sentence's three commits, the counterexamples'
  *   numbers, earlier boost schedules, each with its source;
@@ -58,24 +57,6 @@ const namesRef = (data: Reference) => data.names.source;
 /** Minutes between two instants, rounded to the minute. */
 function minutesBetweenIso(from: string, to: string): number {
   return Math.round((Date.parse(to) - Date.parse(from)) / 60_000);
-}
-
-/** A record value of the Lean model's own proof manifest at its commit. */
-function leanCount(
-  pick: (manifest: FactInputs["record"]["lean"]["manifest"]) => number,
-  unit: "theorems" | "vectors"
-): FactDef<number> {
-  return defineFact<number>({
-    format: "count",
-    unit,
-    refresh: RECORD_REFRESH,
-    source: (inputs) =>
-      recordSource(
-        inputs,
-        `the Lean model's proof manifest at ${inputs.record.lean.commit.slice(0, 7)}`
-      ),
-    value: (inputs) => pick(inputs.record.lean.manifest),
-  });
 }
 
 type Registry = FactInputs["engine"]["registry"];
@@ -209,7 +190,7 @@ export interface ItemRow {
 }
 
 export const REFERENCE_FACTS = {
-  // The Lean model at the record's commit, before its manifest is published.
+  // The Lean model at the record's commit (its counts are the manifest's).
   "rules.leanDate": defineFact<string>({
     format: "day",
     refresh: RECORD_REFRESH,
@@ -217,16 +198,6 @@ export const REFERENCE_FACTS = {
       recordSource(inputs, "the Lean model (design/tdh-lean)"),
     value: (inputs) => inputs.record.lean.date.slice(0, 10),
   }),
-  "rules.lean.proved": leanCount((manifest) => manifest.proved, "theorems"),
-  "rules.lean.limits": leanCount((manifest) => manifest.limits, "theorems"),
-  "rules.lean.vectors.passed": leanCount(
-    (manifest) => manifest.vectorsPassed,
-    "vectors"
-  ),
-  "rules.lean.vectors.total": leanCount(
-    (manifest) => manifest.vectorsTotal,
-    "vectors"
-  ),
 
   // P26 §11 and §12, by ID.
   "spec.deviations": defineFact<ItemRow[]>({

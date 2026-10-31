@@ -328,19 +328,23 @@ export function Trap({
 
 /**
  * A block of the rule's own text: formulas and pseudocode quoted from the
- * specification, never translated. `#` comments are set quieter. Lines keep
- * their columns: where a line is wider than the screen, the block scrolls
- * sideways inside its frame (a focusable, named region), never the page.
+ * specification, never translated. Comments (`#`, or Lean's `--`) are set
+ * quieter. Lines keep their columns: where a line is wider than the screen,
+ * the block scrolls sideways inside its frame (a focusable, named region),
+ * never the page.
  */
 export function CodeBlock({
   code,
   label,
   className = "",
+  comment: marker = "#",
 }: {
   readonly code: string;
   /** What the block is, for screen readers. */
   readonly label: string;
   readonly className?: string;
+  /** Where a comment starts: `#` in the specification, `--` in Lean. */
+  readonly comment?: string;
 }) {
   const lines = code.split("\n");
   return (
@@ -356,7 +360,7 @@ export function CodeBlock({
       >
         <code className="tw-font-mono tw-text-iron-50">
           {lines.map((line, index) => {
-            const hash = line.indexOf("#");
+            const hash = line.indexOf(marker);
             const rule = hash >= 0 ? line.slice(0, hash) : line;
             const comment = hash >= 0 ? line.slice(hash) : "";
             return (

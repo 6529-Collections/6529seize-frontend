@@ -65,6 +65,7 @@ const theorem = z.object({
 const vectorRun = z
   .object({
     id: z.string().min(1).max(40),
+    description: nullish(z.string().max(400)),
     passed: count,
     total: count,
     failed: count,
@@ -72,10 +73,11 @@ const vectorRun = z
   })
   .refine((run) => run.passed <= run.total, "more passed than total");
 
-/** A PROOFS.md section as the manifest titles it; its prose is not read. */
+/** A PROOFS.md section as the manifest titles it, with the rules it is about; its prose is not read. */
 const manifestSection = z.object({
   id: z.string().min(1).max(20),
   title: z.string().min(1).max(200),
+  refs: nullish(z.array(z.string().min(1).max(40)).max(16)),
 });
 
 const documentChange = z.object({
@@ -107,6 +109,10 @@ export const formalManifestSchema = z
     }),
     build: z.object({
       ok: z.boolean().nullable(),
+      /** Lake's jobs for the whole model, its audit and its vector runner. */
+      jobs: nullish(count),
+      /** How the build checks each kind of entry, in the manifest's words. */
+      howChecked: nullish(z.array(z.string().min(1).max(1_000)).max(16)),
       audit: z.object({
         ok: z.boolean().nullable(),
         allowedAxioms: z.array(axiomName).max(16),

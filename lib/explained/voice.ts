@@ -61,9 +61,10 @@ export const VOICE_RULES: readonly VoiceRule[] = [
     instead: "Known cause",
   },
   {
-    id: "nic-expanded",
-    pattern: /\bNetwork Identity (Check|Credits?)\b/i,
-    instead: "NIC, until the owner names it",
+    // NIC is Network Identity Check (D142): a rating, never a credit.
+    id: "nic-credit",
+    pattern: /\bNetwork Identity Credits?\b/i,
+    instead: "Network Identity Check (D142)",
   },
   { id: "cco", pattern: /\bCCO\b/, instead: "CC0" },
   { id: "dao", pattern: /\bDAOs?\b/, instead: "the organization's name" },

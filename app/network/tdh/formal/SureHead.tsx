@@ -2,7 +2,7 @@ import Hash from "@/components/explained/marks/Hash";
 import DriftNote from "@/components/explained/marks/DriftNote";
 import { Scoreboard } from "@/components/explained/evidence/claims";
 import { EX_LINK } from "@/components/explained/tokens";
-import { CodeName, EyebrowNumber, PageHead } from "../_reference/parts";
+import { CodeName, EyebrowNumber, PageHead, Trap } from "../_reference/parts";
 import type { SureContext } from "./sureShared";
 
 /**
@@ -46,14 +46,18 @@ export default function SureHead({
             {m("explained.tdh.sure.drift", {
               oldName: <CodeName>{p.v("manifest.ruleVersion")}</CodeName>,
               written: p.v("manifest.writtenAt"),
-              leanDay: p.v("rules.leanDate"),
-              leanCommit: p.v("rules.leanCommit"),
-              leanProved: p.v("rules.lean.proved"),
-              leanPassed: p.v("rules.lean.vectors.passed"),
-              leanTotal: p.v("rules.lean.vectors.total"),
             })}
           </DriftNote>
         </div>
+      )}
+      {ctx.leanMoved && (
+        <Trap className="tw-mt-8" label={m("explained.tdh.sure.moved.label")}>
+          {m("explained.tdh.sure.moved.body", {
+            leanCommit: <CodeName>{p.v("rules.leanCommit")}</CodeName>,
+            leanDay: p.v("rules.leanDate"),
+            commit: <CodeName>{p.v("manifest.commit")}</CodeName>,
+          })}
+        </Trap>
       )}
       <div className="tw-mt-8">
         <Scoreboard
@@ -72,10 +76,17 @@ export default function SureHead({
             },
             {
               value: book.maybe("manifest.proved"),
-              caption: m("explained.tdh.sure.score.proved", {
-                distinct: p.v("manifest.distinct"),
-                examples: p.v("manifest.noAxioms"),
-              }),
+              // "each a distinct statement" once no theorem is listed twice.
+              caption:
+                book.maybe<number>("manifest.distinct")?.value ===
+                book.maybe<number>("manifest.proved")?.value
+                  ? m("explained.tdh.sure.score.provedAll", {
+                      examples: p.v("manifest.noAxioms"),
+                    })
+                  : m("explained.tdh.sure.score.proved", {
+                      distinct: p.v("manifest.distinct"),
+                      examples: p.v("manifest.noAxioms"),
+                    }),
             },
             {
               value: book.maybe("manifest.shownFalse"),

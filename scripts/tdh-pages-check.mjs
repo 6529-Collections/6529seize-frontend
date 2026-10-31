@@ -323,9 +323,12 @@ function inspectPage(limits) {
   };
 
   /** The part of a rect that its clipping ancestors leave visible. */
+  // A label cut with an ellipsis clips itself: it draws only inside its own
+  // box, however long its text runs.
   const clipRect = (el, rect) => {
     let { left, top, right, bottom } = rect;
-    for (let n = el.parentElement; n && n !== document.body; n = n.parentElement) {
+    const first = style(el).textOverflow === "ellipsis" ? el : el.parentElement;
+    for (let n = first; n && n !== document.body; n = n.parentElement) {
       const cs = style(n);
       const clipsX = cs.overflowX !== "visible";
       const clipsY = cs.overflowY !== "visible";

@@ -1,13 +1,16 @@
+import { kt } from "@/components/explained/i18n";
 import Mark, { type MarkKind } from "@/components/explained/marks/Mark";
 import { EX_FOCUS } from "@/components/explained/tokens";
 import type { StatementRow } from "@/lib/explained/registry/formalFacts";
-import { CodeName, EdSection, Prose, StackTable } from "../_reference/parts";
+import { CodeBlock, CodeName, EdSection, Prose } from "../_reference/parts";
 import type { SureContext, SureSection } from "./sureShared";
 
 /**
- * §05 Every statement (TDH-DESIGN.md §4.6): every manifest entry, in eight
- * or nine closed groups (one per section), each row with its Lean name, its
- * result, what checked it and where it is. Generated from the manifest.
+ * §08 Every statement (TDH-DESIGN.md §4.6): every manifest entry, in closed
+ * groups (one per section), each with its result, its Lean name, where it
+ * is and what checked it, the manifest's sentence for it in plain words,
+ * and, for a theorem, its statement in Lean behind one more disclosure.
+ * Generated from the manifest.
  */
 const RESULT: Record<string, MarkKind> = {
   proved: "proved",
@@ -36,6 +39,103 @@ function checkedBy(ctx: SureContext, entry: StatementRow): string {
   return ctx.s("explained.tdh.sure.check.limit");
 }
 
+/** One entry: its result, its name, where it is, its words, and its Lean. */
+function Entry({
+  ctx,
+  entry,
+  factId,
+}: {
+  readonly ctx: SureContext;
+  readonly entry: StatementRow;
+  readonly factId: string;
+}) {
+  const { s, locale } = ctx;
+  const where = entry.file
+    ? `${entry.file.split("/").pop() ?? entry.file}:${entry.line ?? ""}`
+    : "–";
+  return (
+    <li
+      className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-py-3.5 first:tw-border-t-0"
+      data-entry={entry.id}
+    >
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1.5">
+        <Mark
+          kind={RESULT[entry.status] ?? "notGuaranteed"}
+          locale={locale}
+          size="sm"
+          {...(entry.status === "deferred"
+            ? { label: s("explained.tdh.sure.check.notCovered") }
+            : {})}
+        />
+        <CodeName wrap>{shortName(entry)}</CodeName>
+      </div>
+      {/* Where it is, then what checked it: one line from sm, two below. */}
+      <span
+        className="tw-mt-1 tw-block tw-text-sm tw-leading-5 tw-text-iron-400"
+        data-fact={factId}
+      >
+        <span className="tw-block sm:tw-inline">{where}</span>
+        <span className="tw-hidden sm:tw-inline" aria-hidden="true">
+          {" · "}
+        </span>
+        <span className="tw-block sm:tw-inline">{checkedBy(ctx, entry)}</span>
+      </span>
+      {entry.statement && (
+        <p
+          className="tw-m-0 tw-mt-2 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-300 [overflow-wrap:anywhere]"
+          data-fact={factId}
+        >
+          {entry.statement}
+        </p>
+      )}
+      {entry.lean && (
+        <details className="tw-group/lean tw-mt-2">
+          <summary
+            className={`tw-inline-flex tw-min-h-8 tw-cursor-pointer tw-list-none tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-text-primary-300 marker:tw-hidden [&::-webkit-details-marker]:tw-hidden ${EX_FOCUS}`}
+          >
+            <span aria-hidden="true" className="group-open/lean:tw-hidden">
+              +
+            </span>
+            <span
+              aria-hidden="true"
+              className="tw-hidden group-open/lean:tw-inline"
+            >
+              –
+            </span>
+            {s("explained.tdh.sure.check.inLean")}
+          </summary>
+          <CodeBlock
+            className="tw-mt-2"
+            code={entry.lean}
+            comment="--"
+            label={s("explained.tdh.sure.theorems.codeLabel", {
+              name: entry.name ?? entry.id,
+            })}
+          />
+        </details>
+      )}
+    </li>
+  );
+}
+
+/** "16 proved · 7 shown false · 2 limits", with a count of none left out. */
+function counts(ctx: SureContext, count: (status: string) => number): string {
+  const parts: string[] = [];
+  const add = (n: number, key: Parameters<typeof kt>[1]) => {
+    if (n > 0) parts.push(kt(ctx.locale, key, { count: String(n) }));
+  };
+  add(count("proved"), "explained.kit.claimTable.proved");
+  add(count("counterexample"), "explained.kit.claimTable.shownFalse");
+  const limits = count("deferred");
+  add(
+    limits,
+    limits === 1
+      ? "explained.kit.claimTable.oneLimit"
+      : "explained.kit.claimTable.limits"
+  );
+  return parts.join(" · ");
+}
+
 function Group({
   ctx,
   section,
@@ -43,7 +143,7 @@ function Group({
   readonly ctx: SureContext;
   readonly section: SureSection;
 }) {
-  const { m, s, locale } = ctx;
+  const { s } = ctx;
   const title =
     section.title ?? s("explained.tdh.sure.check.untitled", { id: section.id });
   const count = (status: string) =>
@@ -58,13 +158,7 @@ function Group({
       >
         <span>{title}</span>
         <span className="tw-ml-auto tw-flex tw-items-center tw-gap-4 tw-text-sm tw-font-medium tw-text-iron-400">
-          <span>
-            {m("explained.tdh.sure.check.counts", {
-              proved: count("proved"),
-              false: count("counterexample"),
-              limits: count("deferred"),
-            })}
-          </span>
+          <span>{counts(ctx, count)}</span>
           <span
             aria-hidden="true"
             className="tw-w-3 tw-text-center tw-text-iron-400 group-open:tw-hidden"
@@ -80,47 +174,19 @@ function Group({
         </span>
       </summary>
       {/* Closed, the entries take no space: nothing to read or to measure. */}
-      <div className="tw-hidden tw-pb-4 group-open:tw-block">
-        <StackTable
-          size="small"
-          from="lg"
-          caption={s("explained.tdh.sure.check.caption", { title })}
-          columns={[
-            { key: "name", label: s("explained.tdh.sure.check.col.name") },
-            { key: "result", label: s("explained.tdh.sure.check.col.result") },
-            { key: "by", label: s("explained.tdh.sure.check.col.by") },
-            { key: "where", label: s("explained.tdh.sure.check.col.where") },
-          ]}
-          rows={section.entries.map((entry) => ({
-            key: entry.id,
-            cells: {
-              name: <CodeName wrap>{shortName(entry)}</CodeName>,
-              result: (
-                <Mark
-                  kind={RESULT[entry.status] ?? "notGuaranteed"}
-                  locale={locale}
-                  size="sm"
-                  {...(entry.status === "deferred"
-                    ? { label: s("explained.tdh.sure.check.notCovered") }
-                    : {})}
-                />
-              ),
-              by: (
-                <span className="tw-text-iron-400">
-                  {checkedBy(ctx, entry)}
-                </span>
-              ),
-              where: (
-                <span className="tw-text-iron-400">
-                  {entry.file
-                    ? `${entry.file.split("/").pop() ?? entry.file}:${entry.line ?? ""}`
-                    : "–"}
-                </span>
-              ),
-            },
-          }))}
-        />
-      </div>
+      <ol
+        className="tw-m-0 tw-hidden tw-list-none tw-p-0 tw-pb-4 group-open:tw-block"
+        aria-label={s("explained.tdh.sure.check.caption", { title })}
+      >
+        {section.entries.map((entry) => (
+          <Entry
+            key={entry.id}
+            ctx={ctx}
+            entry={entry}
+            factId={section.fact.id}
+          />
+        ))}
+      </ol>
     </details>
   );
 }
@@ -131,7 +197,7 @@ export default function EveryStatement({ ctx }: { readonly ctx: SureContext }) {
     <EdSection
       id="check"
       tight={false}
-      no="05"
+      no="08"
       label={m("explained.tdh.sure.check.label")}
       title={m("explained.tdh.sure.check.title", {
         count: p.v("manifest.entries"),

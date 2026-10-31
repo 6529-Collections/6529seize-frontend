@@ -1,7 +1,8 @@
 import type { FormalManifest } from "@/lib/tdh/formal/manifest";
+import lean from "../data/lean.json";
 import reference from "../data/reference.json";
 import type { FactInputs } from "../factInputs";
-import { MANIFEST_REFRESH, manifestSource } from "./helpers";
+import { MANIFEST_REFRESH, manifestSource, source } from "./helpers";
 import { defineFact, type FactDef, type FactFamily } from "./types";
 
 /**
@@ -71,14 +72,58 @@ export interface StatementRow {
   readonly axioms: string | null;
   readonly file: string | null;
   readonly line: number | null;
+  /** The manifest's sentence for the entry, in plain words. */
   readonly statement: string | null;
+  /**
+   * The theorem as the model states it in Lean, at the manifest's commit
+   * (`data/lean.json`); null for a limit, a #guard case, or while the copy
+   * is from another commit than the manifest's.
+   */
+  readonly lean: string | null;
   readonly [key: string]: string | number | null;
 }
 
 export interface ManifestSectionEntries {
   readonly title: string | null;
+  /** The rules the section is about: "P26 §7.1", "D131". */
+  readonly refs: readonly string[];
   readonly entries: readonly StatementRow[];
-  readonly [key: string]: string | null | readonly StatementRow[];
+  readonly [key: string]: string | null | readonly string[] | readonly StatementRow[];
+}
+
+/**
+ * The Lean statements copied at the manifest's commit, or none when the copy
+ * is from another commit: a statement is printed only beside the manifest
+ * that names its line.
+ */
+function leanStatements(
+  inputs: FactInputs
+): Readonly<Record<string, string>> | undefined {
+  if (inputs.manifest?.manifest.source.commit !== lean.commit) {
+    return undefined;
+  }
+  return lean.statements as Readonly<Record<string, string>>;
+}
+
+type VectorRun = FormalManifest["vectors"][number];
+
+function vectorRunCount(
+  id: string,
+  pick: (run: VectorRun) => number,
+  unit: "vectors" | "checks"
+): FactDef<number> {
+  return defineFact<number>({
+    format: "count",
+    unit,
+    refresh: MANIFEST_REFRESH,
+    source: manifestSource,
+    value: (inputs) => {
+      const run = inputs.manifest?.manifest.vectors.find(
+        (item) => item.id === id
+      );
+      return run ? pick(run) : undefined;
+    },
+  });
 }
 
 export const FORMAL_FACTS = {
@@ -117,6 +162,86 @@ export const FORMAL_FACTS = {
   "manifest.shownFalse.p53": countWhere(
     (entry) => shownFalse(entry) && entry.library === "p53"
   ),
+  "manifest.facts.checks": defineFact<number>({
+    format: "count",
+    unit: "checks",
+    refresh: MANIFEST_REFRESH,
+    source: manifestSource,
+    value: (inputs) => inputs.manifest?.manifest.facts.checks,
+  }),
+  "manifest.build.jobs": defineFact<number>({
+    format: "count",
+    refresh: MANIFEST_REFRESH,
+    source: manifestSource,
+    value: (inputs) => inputs.manifest?.manifest.build.jobs ?? undefined,
+  }),
+  "manifest.audit.axioms": defineFact<string[]>({
+    format: "list",
+    refresh: MANIFEST_REFRESH,
+    source: manifestSource,
+    value: (inputs) =>
+      inputs.manifest
+        ? [...inputs.manifest.manifest.build.audit.allowedAxioms]
+        : undefined,
+  }),
+  "manifest.audit.theorems": defineFact<number>({
+    format: "count",
+    unit: "theorems",
+    refresh: MANIFEST_REFRESH,
+    source: manifestSource,
+    value: (inputs) => inputs.manifest?.manifest.build.audit.theorems,
+  }),
+  "manifest.vectors.reasons.passed": vectorRunCount(
+    "p26-reasons",
+    (run) => run.passed,
+    "vectors"
+  ),
+  "manifest.vectors.reasons.total": vectorRunCount(
+    "p26-reasons",
+    (run) => run.total,
+    "vectors"
+  ),
+  "manifest.vectors.reasons.checks": vectorRunCount(
+    "p26-reasons",
+    (run) => run.checks,
+    "checks"
+  ),
+  "manifest.vectors.netting.passed": vectorRunCount(
+    "netting",
+    (run) => run.passed,
+    "vectors"
+  ),
+  "manifest.vectors.netting.total": vectorRunCount(
+    "netting",
+    (run) => run.total,
+    "vectors"
+  ),
+  "manifest.vectors.netting.checks": vectorRunCount(
+    "netting",
+    (run) => run.checks,
+    "checks"
+  ),
+  /** Where the page read the manifest, for the browser to fetch it again. */
+  "manifest.url": defineFact<string>({
+    format: "text",
+    refresh: MANIFEST_REFRESH,
+    source: manifestSource,
+    value: (inputs) => inputs.manifest?.url ?? undefined,
+  }),
+  "manifest.leanStatements": defineFact<number>({
+    format: "count",
+    unit: "theorems",
+    refresh: MANIFEST_REFRESH,
+    source: () =>
+      source(
+        "manifest",
+        `the Lean model at 6529's design record ${lean.commit.slice(0, 7)} (design/tdh-lean), each theorem read at the manifest's line`
+      ),
+    value: (inputs) => {
+      const statements = leanStatements(inputs);
+      return statements ? Object.keys(statements).length : undefined;
+    },
+  }),
   "manifest.sectionIds": defineFact<string[]>({
     format: "list",
     refresh: MANIFEST_REFRESH,
@@ -141,6 +266,7 @@ export const MANIFEST_SECTION_FAMILY: FactFamily = {
         const entries = manifest.theorems.filter(
           (entry) => entry.section === id
         );
+        const statements = leanStatements(inputs);
         const titled = (manifest.sections ?? []).some(
           (section) => section.id === id
         );
@@ -149,10 +275,12 @@ export const MANIFEST_SECTION_FAMILY: FactFamily = {
             `Unknown fact "manifest.section.${id}": the manifest has no section ${id}.`
           );
         }
+        const section = (manifest.sections ?? []).find(
+          (item) => item.id === id
+        );
         return {
-          title:
-            (manifest.sections ?? []).find((section) => section.id === id)
-              ?.title ?? null,
+          title: section?.title ?? null,
+          refs: section?.refs ?? [],
           entries: entries.map((entry) => ({
             id: entry.id,
             name: entry.leanName,
@@ -161,8 +289,8 @@ export const MANIFEST_SECTION_FAMILY: FactFamily = {
             axioms: entry.axioms === null ? null : entry.axioms.join(", "),
             file: entry.file,
             line: entry.line,
-            // Only a named limit carries its words: the page lists the limits.
-            statement: entry.status === "deferred" ? entry.statement : null,
+            statement: entry.statement,
+            lean: statements?.[entry.id] ?? null,
           })),
         };
       },

@@ -107,7 +107,8 @@ describe("the voice lint", () => {
       "explained-verdict",
     ]);
     expect(hit("6529 Explained")).toEqual([]);
-    expect(hit("Network Identity Check")).toEqual(["nic-expanded"]);
+    expect(hit("Network Identity Credit")).toEqual(["nic-credit"]);
+    expect(hit("NIC is Network Identity Check (D142)")).toEqual([]);
     expect(hit("CCO art")).toEqual(["cco"]);
     expect(hit("CC0 art")).toEqual([]);
     expect(hit("a DAO")).toEqual(["dao"]);

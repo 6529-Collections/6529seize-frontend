@@ -168,14 +168,30 @@
       "lane": "P4",
       "sources": ["app/network/tdh/formal/**", "app/network/tdh/_reference/**"],
       "dependsOn": ["D96", "D112", "D128", "D131", "D136", "D137"],
-      "checkedThrough": "D142",
+      "checkedThrough": "D145",
       "budget": {
         "words": 2100,
         "firstScreenMin": 150,
         "firstScreen": 285,
         "wordsPerScreen": 300
       },
-      "states": []
+      "states": [
+        {
+          "name": "theorem-groups",
+          "clicks": ["[data-claim=\"7\"]"],
+          "el": "[data-theorems]"
+        },
+        {
+          "name": "theorem-cap",
+          "clicks": ["[data-claim=\"5a\"]"],
+          "el": "[data-theorems]"
+        },
+        {
+          "name": "group-open",
+          "clicks": ["#contains details > summary"],
+          "el": "#contains"
+        }
+      ]
     },
     {
       "id": "tdh-specification",
@@ -189,7 +205,7 @@
         "app/network/tdh/_reference/**"
       ],
       "dependsOn": ["D30", "D89", "D116", "D121", "D131", "D136", "D137"],
-      "checkedThrough": "D142",
+      "checkedThrough": "D145",
       "states": []
     },
     {
@@ -204,7 +220,7 @@
         "app/network/tdh/_reference/**"
       ],
       "dependsOn": ["D116", "D119", "D125", "D132"],
-      "checkedThrough": "D142",
+      "checkedThrough": "D145",
       "states": []
     },
     {
@@ -231,7 +247,7 @@
         "app/network/tdh/_reference/**"
       ],
       "dependsOn": ["D136", "D137"],
-      "checkedThrough": "D142",
+      "checkedThrough": "D145",
       "states": []
     },
     {
@@ -258,7 +274,7 @@
         "D136",
         "D137"
       ],
-      "checkedThrough": "D142",
+      "checkedThrough": "D145",
       "states": []
     },
     {

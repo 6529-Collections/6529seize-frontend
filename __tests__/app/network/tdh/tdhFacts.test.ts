@@ -133,15 +133,15 @@ describe("TDH page facts", () => {
   it("takes the formal model's vector counts from its proof manifest", () => {
     const manifest = formalManifestSchema.parse(BUNDLED_FORMAL_MANIFEST);
     const p26 = manifest.vectors.find((run) => run.id === "p26");
-    // The bundled copy is the feed's manifest of the model's round 5.
-    expect(manifest.source.commit.startsWith("6b32f3f")).toBe(true);
-    expect(p26).toMatchObject({ passed: 89, total: 89, checks: 1_253 });
-    expect(manifest.facts.checks).toBe(46);
+    // The bundled copy is the feed's manifest of the TDH v1.4 model, round 7.
+    expect(manifest.source.commit.startsWith("e252d5f")).toBe(true);
+    expect(p26).toMatchObject({ passed: 108, total: 108, checks: 1_336 });
+    expect(manifest.facts.checks).toBe(57);
     expect(manifest.summary).toMatchObject({
-      proved: 78,
+      proved: 84,
       counterexample: 11,
-      deferred: 9,
-      audited: 85,
+      deferred: 12,
+      audited: 91,
     });
   });
 

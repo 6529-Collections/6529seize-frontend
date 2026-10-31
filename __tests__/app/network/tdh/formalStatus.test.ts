@@ -34,6 +34,7 @@ describe("How sure's reading of the manifest", () => {
       "5a",
       "5b",
       "6",
+      "7",
       "stack",
     ]);
     const netting = ctx.sections[0];
@@ -45,8 +46,10 @@ describe("How sure's reading of the manifest", () => {
     });
     expect(
       ctx.sections.reduce((sum, section) => sum + section.entries.length, 0)
-    ).toBe(98);
-    expect(ctx.olderRules).toBe(true);
+    ).toBe(107);
+    // The bundled manifest is about TDH v1.4, built from the record's model.
+    expect(ctx.olderRules).toBe(false);
+    expect(ctx.leanMoved).toBe(false);
   });
 
   it("reads an older manifest the same way", () => {

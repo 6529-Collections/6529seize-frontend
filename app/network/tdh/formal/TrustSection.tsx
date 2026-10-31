@@ -4,7 +4,7 @@ import {
   type LedgerRow,
 } from "@/components/explained/evidence/claims";
 import { EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
-import { Caption, CodeName, EdSection } from "../_reference/parts";
+import { CodeName, EdSection } from "../_reference/parts";
 import { isMessageKey } from "../_reference/rich";
 import { caseLetter, type SureContext, type SureKey } from "./sureShared";
 
@@ -79,7 +79,7 @@ export default function TrustSection({ ctx }: { readonly ctx: SureContext }) {
     <EdSection
       id="not"
       tight={false}
-      no="04"
+      no="06"
       label={m("explained.tdh.sure.not.label")}
       title={m("explained.tdh.sure.not.title")}
       full={
@@ -111,14 +111,6 @@ export default function TrustSection({ ctx }: { readonly ctx: SureContext }) {
                 </li>
               ))}
             </ol>
-            {ctx.olderRules && (
-              <Caption className="tw-mt-3">
-                {m("explained.tdh.sure.limits.newer", {
-                  day: p.v("rules.leanDate"),
-                  count: p.v("rules.lean.limits"),
-                })}
-              </Caption>
-            )}
           </div>
         </div>
       }

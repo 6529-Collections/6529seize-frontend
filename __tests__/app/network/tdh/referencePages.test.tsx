@@ -34,16 +34,16 @@ jest.mock("@/lib/explained/feed.server", () => ({
   loadFactBook: jest.fn(async () => createFactBook(inputs)),
 }));
 
-/** The bundled manifest, as if rebuilt from P26 after the rename. */
-function withV14Manifest(base: FactInputs): FactInputs {
+/** The bundled manifest, as if built from P26 before the rename (D136, D137). */
+function withV10Manifest(base: FactInputs): FactInputs {
   const parsed = parseFormalManifest({
     ...bundledManifest,
     documents: {
       ...bundledManifest.documents,
       specification: {
         ...bundledManifest.documents.specification,
-        lastChange: RECORD.p26.commit,
-        lastChangeDate: RECORD.p26.date,
+        lastChange: "f8400962310de6636b256c3b53bbfddbdec8f329",
+        lastChangeDate: "2026-10-16T00:00:00Z",
       },
     },
   });
@@ -106,7 +106,7 @@ describe("How sure", () => {
     inputs = fixtureFactInputs();
   });
 
-  it("says the served manifest is about the rules before D136 and D137, and reads every count from it", async () => {
+  it("reads every count from the manifest, and tells each claim to its limit", async () => {
     const { container } = await renderPage(FormalPage);
     expectPageBasics(container);
     expect(
@@ -115,48 +115,75 @@ describe("How sure", () => {
         name: "What is proved, what is tested, and what is not.",
       })
     ).toBeInTheDocument();
-    const drift = container.querySelector('[data-drift-by="D136 D137"]');
-    expect(drift?.textContent).toMatch(/under its old name tdh-v1\.0/);
-    expect(drift?.textContent).toMatch(
-      /84 theorems proved, 104 of 104 vectors/
-    );
+    // The bundled manifest is about TDH v1.4, at the record's Lean commit.
+    expect(container.querySelector("[data-drift-by]")).toBeNull();
+    expect(container.textContent).not.toMatch(/A newer model/);
     const board = container.querySelector("[data-scoreboard]");
     expect(
       [...(board?.querySelectorAll("dd > [data-fact]:first-child") ?? [])].map(
         (cell) => cell.textContent
       )
-    ).toEqual(["8", "78", "11", "9"]);
+    ).toEqual(["9", "84", "11", "12"]);
+    expect(board?.textContent).toMatch(/65 distinct statements/);
     for (const id of [
       "why",
       "layers",
       "featured",
       "claims",
       "statements",
+      "theorems",
+      "how",
       "not",
       "limits",
+      "yourself",
       "check",
       "contains",
     ]) {
       expect(container.querySelector(`[id="${id}"]`)).not.toBeNull();
     }
-    // Eight claims, one per section, each with its limit beside it.
-    expect(container.querySelectorAll("[data-claims] > li").length).toBe(8);
+    // Nine claims, one per section, each with its limit beside it.
+    expect(container.querySelectorAll("[data-claims] > li").length).toBe(9);
     expect(container.textContent).toMatch(
       /The 11 statements shown false, by kind: 5 against the first netting rule/
     );
     expect(container.textContent).toMatch(/\(H and I\)/);
     expect(container.textContent).toMatch(/Cases F, G, H, and I are checked/);
-    // Nine limits, each in a sentence of the page's own.
+    // Twelve limits, each in a sentence of the page's own.
     const limits = within(
       screen.getByRole("list", { name: "The limits the manifest names" })
     ).getAllByRole("listitem");
-    expect(limits).toHaveLength(9);
-    expect(container.textContent).toMatch(
-      /The model updated on Oct 18 names 12 limits/
+    expect(limits).toHaveLength(12);
+    // Each claim's main theorem, in words and in Lean, one shown at a time.
+    const picker = container.querySelector("[data-theorems]");
+    expect(picker?.querySelectorAll("[data-theorem]")).toHaveLength(9);
+    const shown = picker?.querySelector("[data-theorem]:not([hidden])");
+    expect(shown?.getAttribute("data-theorem")).toBe("1");
+    expect(shown?.textContent).toMatch(/theorem replayHoldings_invariance/);
+    expect(shown?.textContent).toMatch(/every wallet ends with the same stack/);
+    expect(shown?.textContent).toMatch(/NetInvariance\.lean:579, at e252d5f/);
+    // The proof is left out.
+    expect(shown?.textContent).not.toMatch(/:= by/);
+    // How Lean checks it, from the manifest's record of its build.
+    const how = container.querySelector("#how");
+    expect(how?.textContent).toMatch(/in 71 jobs/);
+    expect(how?.textContent).toMatch(
+      /each of the 91 named theorems rests on propext, Classical\.choice, and Quot\.sound/
     );
-    // Every manifest entry, in its section's group.
-    expect(container.querySelectorAll("#contains details")).toHaveLength(8);
-    expect(container.querySelectorAll("#contains tbody tr").length).toBe(98);
+    expect(how?.textContent).toMatch(/108 of 108 pass \(1,336 checks\)/);
+    // What a reader can repeat: the bundled copy has no URL to fetch, so the
+    // steps start at reading a theorem, and rerunning waits.
+    const yourself = container.querySelector("#yourself");
+    expect(yourself?.textContent).toMatch(/Read a theorem/);
+    expect(yourself?.textContent).toMatch(/Rerun the proofs/);
+    expect(yourself?.textContent).toMatch(/Not yet/);
+    // Every manifest entry, in its section's group, with its words.
+    expect(container.querySelectorAll("#contains > details")).toHaveLength(9);
+    expect(container.querySelectorAll("#contains [data-entry]").length).toBe(
+      107
+    );
+    expect(
+      container.querySelectorAll("#contains [data-entry] details").length
+    ).toBe(91);
     // The netting sentence told to the end, with its commits and times.
     const parts = container.querySelector("[data-claim-parts]");
     expect(parts?.textContent).toMatch(/11:32 UTC · as first written/);
@@ -166,13 +193,17 @@ describe("How sure", () => {
     );
     expect(parts?.textContent).toMatch(/4 h 3 min/);
     expect(parts?.textContent).toMatch(/2 h 43 min/);
+    // The proofs page, linked from the zero-knowledge rung.
+    expect(
+      container.querySelector('#layers a[href="/network/tdh/proofs"]')
+    ).not.toBeNull();
   });
 
-  it("drops the drift note once the manifest is about TDH v1.4", async () => {
-    inputs = withV14Manifest(fixtureFactInputs());
+  it("says when a manifest is about the rules before D136 and D137", async () => {
+    inputs = withV10Manifest(fixtureFactInputs());
     const { container } = await renderPage(FormalPage);
-    expect(container.querySelector("[data-drift-by]")).toBeNull();
-    expect(container.textContent).not.toMatch(/names 12 limits/);
+    const drift = container.querySelector('[data-drift-by="D136 D137"]');
+    expect(drift?.textContent).toMatch(/under their old name, tdh-v1\.0/);
   });
 
   it("names the page for search and sharing", () => {
@@ -190,7 +221,7 @@ describe("the specification", () => {
     expectPageBasics(container);
     const version = screen.getByRole("complementary", { name: "This version" });
     expect(version.textContent).toMatch(/tdh-v1\.4/);
-    expect(version.textContent).toMatch(/104/);
+    expect(version.textContent).toMatch(/108/);
     expect(within(version).getByText("Proposed")).toBeInTheDocument();
     const drift = container.querySelector('[data-drift-by="D136 D137"]');
     // The fixture's files still report the old name.
@@ -198,17 +229,17 @@ describe("the specification", () => {
     for (let n = 1; n <= 13; n += 1) {
       expect(container.querySelector(`#s${n}`)).not.toBeNull();
     }
-    for (let n = 1; n <= 19; n += 1) {
+    for (let n = 1; n <= 22; n += 1) {
       expect(container.querySelector(`#dev-${n}`)).not.toBeNull();
     }
-    for (let n = 1; n <= 15; n += 1) {
+    for (let n = 1; n <= 16; n += 1) {
       expect(container.querySelector(`#bug-${n}`)).not.toBeNull();
     }
     expect(container.querySelector("#dev-11")?.textContent).toMatch(
       /Settled by D136/
     );
     expect(container.textContent).toMatch(
-      /18 deviations from 6529\.io's old code/
+      /21 deviations from 6529\.io's old code/
     );
     expect(container.textContent).toMatch(/adj\[i\] {5}= -2,588 if i = 8/);
     expect(container.textContent).toMatch(/consolidation_max_wallets \(4\)/);
@@ -315,7 +346,7 @@ describe("implementations and vectors", () => {
       screen.getByRole("table", { name: "The programs that compute TDH" })
     ).toBeInTheDocument();
     expect(container.textContent).toMatch(
-      /P26 has 104 conformance vectors since Oct 18\. The Lean manifest served today checks 89, as P26 stood at f840096\./
+      /P26 has 108 conformance vectors since Oct 18\. The Lean manifest served today checks every one\./
     );
     const publicList = container.querySelector(
       'dl[aria-label="The public vectors"]'
@@ -418,9 +449,18 @@ describe("the glossary", () => {
       name: "TDH terms, their meanings, status and sources",
     });
     expect(within(table).getAllByRole("row").length).toBeGreaterThan(30);
-    expect(container.querySelector("#nic")?.textContent).not.toMatch(
-      /Network Identity/
+    // NIC is Network Identity Check (D142): a rating, never a credit.
+    expect(container.querySelector("#nic")?.textContent).toMatch(
+      /Network Identity Check: a rating/
     );
+    expect(container.querySelector("#nic")?.textContent).toMatch(/D142/);
+    // The words How sure uses are defined here too.
+    expect(container.querySelector("#lean")?.textContent).toMatch(
+      /the model has 84/
+    );
+    for (const id of ["axioms", "counterexample", "limit", "zk"]) {
+      expect(container.querySelector(`[id="${id}"]`)).not.toBeNull();
+    }
     expect(container.querySelector("#rate")?.textContent).toMatch(
       /3,941 divided by a card's effective edition, in cents: 12\.71 for 310 copies/
     );

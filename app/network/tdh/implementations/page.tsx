@@ -208,9 +208,7 @@ export default async function ImplementationsPage() {
                       "explained.tdh.impl.a.sub"
                     ),
                     written: m("explained.tdh.impl.a.written"),
-                    runs: m("explained.tdh.impl.a.runs", {
-                      cutover: p.v("tdh.cutover.about"),
-                    }),
+                    runs: m("explained.tdh.impl.a.runs"),
                     proved: (
                       <Mark
                         kind={programsFact ? "proved" : "notYet"}

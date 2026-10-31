@@ -2508,7 +2508,9 @@
         "how sure",
         "is tdh proved",
         "what is proved about tdh",
-        "tdh counterexamples"
+        "tdh counterexamples",
+        "tdh theorems in lean",
+        "lean kernel axioms tdh"
       ],
       "keywords": [
         "tdh",
@@ -2523,7 +2525,9 @@
       ],
       "facts": [
         "How sure, at /network/tdh/formal, is page 4 of the TDH chapter of 6529 Explained: what is proved about the TDH rules, what is tested every day, and what is not. Every count on it is read from the Lean proof manifest that 6529's public TDH feed serves (formal/manifest.json).",
-        "While the served manifest is about the rules before D136 (four wallets) and D137 (the name TDH v1.4), a note under the title says so and gives the updated model's own counts; when the feed serves the manifest built for TDH v1.4, the note goes away.",
+        "The feed serves the manifest built for TDH v1.4. A note under the title appears only if a served manifest is about the rules before D136 (four wallets) and D137 (the name TDH v1.4), or is older than the model 6529's design record names.",
+        "In words and in Lean: pick a claim to read its main theorem in plain words beside the statement Lean's kernel checked, copied from the model at the manifest's commit with the proof left out, with its file and line, its axioms and what it does not cover.",
+        "How Lean checks it: every proof is checked again by Lean's kernel at every build; an audit allows only Lean's three standard axioms; some counterexamples are kernel theorems and the rest run the model by evaluation, which trusts Lean's compiler; the model runs P26's vectors. Check it yourself: commands that print the manifest's counts and hash; rerunning the proofs waits for the model's source.",
         "Its sections: two questions (is the rule what it claims; did the day follow it), each a ladder with the line where today's evidence stops; one claim to the end (P26's netting sentence, refuted twice on October 15, 2026, then narrowed to what is proved); each claim with its limit beside it; what you still have to trust (the assumption ledger and every limit the manifest names); and every manifest entry with its Lean name, result, checker and file.",
         "A proof moves trust; it does not remove it: Lean's kernel and compiler are assumed, the model is tested against P26's vectors, and no proof yet links the programs' code to the model."
       ],

@@ -149,30 +149,30 @@ describe("the facts layer", () => {
     expect(book.get("rules.version").maturity).toBe("live");
   });
 
-  it("counts the manifest as the mockups did", () => {
-    expect(show("manifest.proved")).toBe("78");
-    expect(show("manifest.distinct")).toBe("59");
+  it("counts the manifest bundled with the site (e252d5f, TDH v1.4)", () => {
+    expect(show("manifest.proved")).toBe("84");
+    expect(show("manifest.distinct")).toBe("65");
     expect(show("manifest.noAxioms")).toBe("4");
     expect(show("manifest.shownFalse")).toBe("11");
     expect(show("manifest.shownFalse.kernel")).toBe("7");
     expect(show("manifest.shownFalse.evaluation")).toBe("4");
-    expect(show("manifest.limits")).toBe("9");
-    expect(show("manifest.entries")).toBe("98");
-    expect(show("manifest.audited")).toBe("85");
-    expect(show("manifest.audited.tdh")).toBe("55");
+    expect(show("manifest.limits")).toBe("12");
+    expect(show("manifest.entries")).toBe("107");
+    expect(show("manifest.audited")).toBe("91");
+    expect(show("manifest.audited.tdh")).toBe("61");
     expect(show("manifest.audited.p53")).toBe("30");
-    expect(show("manifest.vectors.passed")).toBe("89");
-    expect(show("manifest.vectors.total")).toBe("89");
-    expect(show("manifest.vectors.checks")).toBe("1,253");
+    expect(show("manifest.vectors.passed")).toBe("108");
+    expect(show("manifest.vectors.total")).toBe(show("rules.vectors"));
+    expect(show("manifest.vectors.checks")).toBe("1,336");
     expect(show("manifest.lean")).toBe("4.35.0");
-    expect(show("manifest.commit")).toBe("6b32f3f");
-    expect(show("manifest.writtenAt")).toBe("Oct 16, 01:27 UTC");
+    expect(show("manifest.commit")).toBe("e252d5f");
+    expect(show("manifest.writtenAt")).toBe("Oct 18, 15:05 UTC");
     expect(show("manifest.headline.name")).toBe(
       "Tdh.Proofs.replayHoldings_invariance"
     );
     expect(show("manifest.headline.file")).toBe("NetInvariance.lean");
     expect(show("manifest.headline.line")).toBe("579");
-    expect(show("manifest.sections.count")).toBe("8");
+    expect(show("manifest.sections.count")).toBe("9");
     // the bundled copy states no SHA-256 of the file as served
     expect(book.maybe("manifest.sha256")).toBeNull();
   });

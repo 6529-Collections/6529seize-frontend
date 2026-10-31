@@ -9,20 +9,25 @@ import { loadFactBook } from "@/lib/explained/feed.server";
 import { PlaceLinks, pagePlace } from "../_reference/frame";
 import LegacyAnchors from "../_reference/LegacyAnchors";
 import { FactText } from "../_reference/rich";
+import BuildSection from "./BuildSection";
 import ClaimsSection from "./ClaimsSection";
 import EveryStatement from "./EveryStatement";
 import OneClaim from "./OneClaim";
 import SureHead from "./SureHead";
 import { sureContext } from "./sureShared";
+import TheoremsSection from "./TheoremsSection";
 import TrustSection from "./TrustSection";
 import TwoQuestions from "./TwoQuestions";
+import YourselfSection from "./YourselfSection";
 
 /**
- * 4 How sure (TDH-DESIGN.md §4.6): what is proved about the TDH rules, what
- * is tested every day and what is not, driven by the Lean manifest the feed
- * serves. While that manifest is about the rules before D136 and D137, the
- * page says so in a drift note; the manifest for TDH v1.4 replaces it by
- * itself.
+ * 4 How sure (TDH-DESIGN.md §4.6): what is proved about the TDH rules, how
+ * Lean checks it, what is tested every day and what is not, driven by the
+ * Lean manifest the feed serves: the scoreboard, two questions, one claim
+ * told to the end, the claims with their limits, each claim's main theorem
+ * in words and in Lean, the build, what is still trusted, what a reader can
+ * check today, and every statement. A manifest about older rules, or older
+ * than the model the record names, is said to be so on the page.
  */
 export const revalidate = 600;
 
@@ -83,7 +88,10 @@ export default async function HowSurePage() {
         <TwoQuestions ctx={ctx} />
         <OneClaim ctx={ctx} />
         <ClaimsSection ctx={ctx} />
+        <TheoremsSection ctx={ctx} />
+        <BuildSection ctx={ctx} />
         <TrustSection ctx={ctx} />
+        <YourselfSection ctx={ctx} />
         <EveryStatement ctx={ctx} />
         <PlaceLinks place={place} locale={locale} />
         <HowWeKnow

@@ -1,9 +1,12 @@
 import AssuranceLadder, {
   type Rung,
 } from "@/components/explained/evidence/AssuranceLadder";
-import { EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
+import { EX_LAYOUT, EX_LINK, EX_TEXT } from "@/components/explained/tokens";
 import { FactScope } from "../_reference/rich";
 import type { SureContext } from "./sureShared";
+
+/** Proven on Ethereum: the chapter's page on the zero-knowledge proofs. */
+const PROOFS_HREF = "/network/tdh/proofs";
 
 /**
  * §01 Two questions (TDH-DESIGN.md §4.6): is the rule what it claims, and
@@ -90,6 +93,11 @@ export default function TwoQuestions({ ctx }: { readonly ctx: SureContext }) {
       detail: m("explained.tdh.sure.day.zkDetail", {
         cycle: p.v("site.proofA.cycle"),
         total: p.v("site.proofA.totalWithoutBurn"),
+        link: (
+          <a className={EX_LINK} href={PROOFS_HREF}>
+            {s("explained.tdh.sure.day.zkLink")}
+          </a>
+        ),
       }),
       // Proof B has no recorded day: the pair is half done.
       marks: [{ halfPair: { a: proofA, b: false } }],
