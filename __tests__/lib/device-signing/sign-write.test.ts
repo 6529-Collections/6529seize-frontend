@@ -387,6 +387,29 @@ describe("device-signed drop writes", () => {
     expect(mockRecords.get(ADDRESS)?.grant).toBeNull();
   });
 
+  it("resends unsigned and keeps the grant when the server does not accept device signatures", async () => {
+    await setUpGrant();
+    const unsupported = Object.assign(
+      new Error('"device_signature" is not allowed'),
+      { status: 400 }
+    );
+    postMock
+      .mockRejectedValueOnce(unsupported)
+      .mockResolvedValueOnce({ id: "drop" });
+    deleteMock
+      .mockRejectedValueOnce('"device_signature" is not allowed')
+      .mockResolvedValueOnce(undefined);
+
+    await expect(postDrop(createBody())).resolves.toEqual({ id: "drop" });
+    expect(sentSignature(postMock, 0)).toBeDefined();
+    expect(sentSignature(postMock, 1)).toBeUndefined();
+    await deleteDrop({ dropId: DROP_ID, waveId: WAVE_ID });
+    expect(deleteMock.mock.calls[1]![0]).toEqual({
+      endpoint: `drops/${DROP_ID}`,
+    });
+    expect(mockRecords.get(ADDRESS)?.grant).not.toBeNull();
+  });
+
   it("keeps the grant and surfaces any other failure without resending", async () => {
     await setUpGrant();
     const error = Object.assign(new Error("Drop too long"), { status: 400 });

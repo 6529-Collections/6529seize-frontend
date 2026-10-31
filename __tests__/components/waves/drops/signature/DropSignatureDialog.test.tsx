@@ -3,7 +3,7 @@ import DropSignatureMenuItem from "@/components/waves/drops/signature/DropSignat
 import type { DropSignatureVerdict } from "@/lib/device-signing/verify-signed-events";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import type { ReactElement } from "react";
+import type { ComponentProps, ReactElement } from "react";
 
 let mockEnabled = true;
 jest.mock("@/lib/device-signing/feature", () => ({
@@ -11,8 +11,10 @@ jest.mock("@/lib/device-signing/feature", () => ({
 }));
 
 const mockFetchSignedEvents = jest.fn();
+const mockFetchAuthorWallets = jest.fn();
 jest.mock("@/services/api/device-grants-api", () => ({
   fetchDropSignedEvents: (...args: unknown[]) => mockFetchSignedEvents(...args),
+  fetchAuthorWallets: (...args: unknown[]) => mockFetchAuthorWallets(...args),
 }));
 
 jest.mock("wagmi", () => ({
@@ -22,6 +24,7 @@ jest.mock("wagmi", () => ({
 const mockVerify = jest.fn();
 jest.mock("@/lib/device-signing/verify-signed-events", () => ({
   verifyDropSignedEvents: (...args: unknown[]) => mockVerify(...args),
+  toDisplayedDropContent: () => ({ title: null, parts: [] }),
 }));
 
 const DROP_ID = "drop-1";
@@ -30,6 +33,18 @@ const signedEvents = {
   current_event_id: null,
   events: [],
   grants: [],
+};
+
+const AUTHOR_ADDRESS = "0x1111111111111111111111111111111111111111";
+const shownDrop = {
+  title: null,
+  parts: [],
+  wave: { id: "wave-1" },
+  author: { primary_address: AUTHOR_ADDRESS },
+} as unknown as ComponentProps<typeof DropSignatureDialog>["drop"];
+const signedEventsWithAPost = {
+  ...signedEvents,
+  events: [{ id: `0x${"1".repeat(64)}`, kind: 1 }],
 };
 
 const renderWithQueryClient = (ui: ReactElement) =>
@@ -63,6 +78,7 @@ describe("drop signature details", () => {
   beforeEach(() => {
     mockEnabled = true;
     mockFetchSignedEvents.mockReset().mockResolvedValue(signedEvents);
+    mockFetchAuthorWallets.mockReset();
     mockVerify.mockReset();
   });
 
@@ -111,6 +127,17 @@ describe("drop signature details", () => {
     expect(
       await screen.findByText("Contract wallet: verified by 6529.io at sign-in")
     ).toBeVisible();
+    // The browser did not check this wallet signature, so it must not claim to.
+    expect(
+      screen.getByText(
+        "Your browser checked the device signature itself. This contract wallet's sign-in signature was checked by 6529.io at sign-in, not by your browser."
+      )
+    ).toBeVisible();
+    expect(
+      screen.queryByText(
+        "Your browser checked this signature itself, without relying on 6529.io."
+      )
+    ).toBeNull();
     expect(screen.getByText("Changed without a signature")).toBeVisible();
   });
 
@@ -138,12 +165,97 @@ describe("drop signature details", () => {
 
     expect(
       await screen.findByRole("alert", {}, { timeout: 5000 })
-    ).toHaveTextContent("Couldn't load the signature details.");
+    ).toHaveTextContent("Couldn't check the signature right now.");
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(await screen.findByText("Not signed by its author")).toBeVisible();
 
     fireEvent.click(screen.getByRole("button", { name: "Close" }));
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it("checks signed events against the author's wallets", async () => {
+    mockFetchSignedEvents.mockResolvedValue(signedEventsWithAPost);
+    mockFetchAuthorWallets.mockResolvedValue([AUTHOR_ADDRESS, "0xabc"]);
+    mockVerify.mockResolvedValue(signedVerdict());
+    renderWithQueryClient(
+      <DropSignatureDialog
+        dropId={DROP_ID}
+        drop={shownDrop}
+        isOpen
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(await screen.findByText("Signed by its author")).toBeVisible();
+    expect(
+      screen.getByText(
+        "Your browser checked this signature itself, without relying on 6529.io."
+      )
+    ).toBeVisible();
+    expect(mockFetchAuthorWallets).toHaveBeenCalledWith(
+      AUTHOR_ADDRESS,
+      expect.any(AbortSignal)
+    );
+    expect(mockVerify).toHaveBeenCalledWith(
+      signedEventsWithAPost,
+      expect.objectContaining({
+        expected: {
+          dropId: DROP_ID,
+          waveId: "wave-1",
+          authorWallets: [AUTHOR_ADDRESS, "0xabc"],
+        },
+      })
+    );
+  });
+
+  it("needs no identity lookup for a drop without signed events", async () => {
+    mockVerify.mockResolvedValue({ status: "unsigned" });
+    renderWithQueryClient(
+      <DropSignatureDialog
+        dropId={DROP_ID}
+        drop={shownDrop}
+        isOpen
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(await screen.findByText("Not signed by its author")).toBeVisible();
+    expect(mockFetchAuthorWallets).not.toHaveBeenCalled();
+    expect(mockVerify).toHaveBeenCalledWith(
+      signedEvents,
+      expect.objectContaining({
+        expected: { dropId: DROP_ID, waveId: "wave-1", authorWallets: [] },
+      })
+    );
+  });
+
+  it("offers Try again, never a verdict, when the author's wallets cannot be loaded", async () => {
+    mockFetchSignedEvents.mockResolvedValue(signedEventsWithAPost);
+    // The query retries once before showing the error.
+    mockFetchAuthorWallets
+      .mockRejectedValueOnce(new Error("503"))
+      .mockRejectedValueOnce(new Error("503"))
+      .mockResolvedValue([AUTHOR_ADDRESS]);
+    mockVerify.mockResolvedValue(signedVerdict());
+    renderWithQueryClient(
+      <DropSignatureDialog
+        dropId={DROP_ID}
+        drop={shownDrop}
+        isOpen
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(
+      await screen.findByRole("alert", {}, { timeout: 5000 })
+    ).toHaveTextContent("Couldn't check the signature right now.");
+    expect(mockVerify).not.toHaveBeenCalled();
+    expect(
+      screen.queryByText("The signature could not be verified")
+    ).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(await screen.findByText("Signed by its author")).toBeVisible();
   });
 
   it("does nothing while the flag is off or the dialog is closed", () => {

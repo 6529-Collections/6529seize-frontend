@@ -175,13 +175,19 @@ const WaveDropInner = ({
     shouldGroupWithPreviousDrop,
     isProfileView,
   });
-  const showGroupedTimestamp = shouldShowGroupedDropTimestamp({
-    shouldGroupWithPreviousDrop,
-    showAuthorInfo,
-    identityMode,
-    isProfileView,
-    location,
-  });
+  // Boolean() hands React Compiler a primitive. A plain helper result may
+  // alias showAuthorInfo, which later helpers receive, and the touch/pointer
+  // callbacks below depend on this value, so the compiler would otherwise
+  // skip memoizing this whole component.
+  const showGroupedTimestamp = Boolean(
+    shouldShowGroupedDropTimestamp({
+      shouldGroupWithPreviousDrop,
+      showAuthorInfo,
+      identityMode,
+      isProfileView,
+      location,
+    })
+  );
   const {
     canUseMobileActionsSheet,
     showActionsButton,

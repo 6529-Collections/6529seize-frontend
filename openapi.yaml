@@ -8983,7 +8983,10 @@ paths:
         reference, so anyone can verify them without trusting 6529.io.
         current_event_id is the event whose body is the drop's current content,
         or null when the current content is not author signed. Returns 404 when
-        the caller cannot read the drop.
+        the caller cannot read the drop. When moderation hides the drop's
+        content from the caller or its author is anonymous to the caller, returns
+        the empty result of an unsigned drop (no events, no grants,
+        current_event_id null).
       operationId: getDropSignedEvents
       security:
         - bearerAuth: []
@@ -27041,6 +27044,13 @@ components:
         credit_spent:
           type: integer
           format: int64
+        voter:
+          description: >-
+            Public profile summary of the voter, resolved for the whole page in
+            one batched lookup. Omitted when the profile cannot be resolved;
+            clients can then look up the identity by profile_id.
+          allOf:
+            - $ref: "#/components/schemas/ApiProfileMin"
     ApiCompetitionVoterPage:
       type: object
       additionalProperties: false

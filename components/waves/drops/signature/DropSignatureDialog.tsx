@@ -131,6 +131,14 @@ function VerdictView({
 }) {
   const { Icon, iconClassName, titleKey, descriptionKey } =
     VERDICT_PRESENTATION[verdict.status];
+  // A contract wallet's sign-in signature that the browser could not check
+  // rests on 6529.io's check at sign-in, so the browser-only claim would
+  // overstate it.
+  const shownDescriptionKey =
+    verdict.status === "signed" &&
+    verdict.signature.walletSignature === "contract-wallet"
+      ? "signedMessages.signature.contractWalletDescription"
+      : descriptionKey;
   return (
     <div>
       <p className="tw-m-0 tw-flex tw-items-center tw-gap-2 tw-text-base tw-font-semibold tw-text-iron-50">
@@ -141,7 +149,7 @@ function VerdictView({
         <span>{t(locale, titleKey)}</span>
       </p>
       <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
-        {t(locale, descriptionKey)}
+        {t(locale, shownDescriptionKey)}
       </p>
       {verdict.status === "signed" && (
         <SignedDetails locale={locale} verdict={verdict} />
@@ -177,19 +185,21 @@ function DropSignatureDialogContent({
   const query = useQuery({
     queryKey: [QueryKey.DROP_SIGNED_EVENTS, dropId, content ?? null],
     queryFn: async ({ signal }) => {
-      const [signedEvents, authorWallets] = await Promise.all([
-        fetchDropSignedEvents(dropId, signal),
-        drop
-          ? fetchAuthorWallets(drop.author.primary_address, signal)
-          : Promise.resolve(undefined),
-      ]);
+      const signedEvents = await fetchDropSignedEvents(dropId, signal);
+      // Only events are checked against the author's wallets, so an unsigned
+      // drop (or one whose author is hidden) needs no identity lookup. A
+      // failed lookup fails the query, which offers Try again.
+      const authorAddress = drop?.author.primary_address;
+      const authorWallets =
+        drop && authorAddress && signedEvents.events.length > 0
+          ? await fetchAuthorWallets(authorAddress, signal)
+          : [];
       return await verifyDropSignedEvents(signedEvents, {
         verifyContractSignature,
         displayed: content,
-        expected:
-          drop && authorWallets
-            ? { dropId, waveId: drop.wave.id, authorWallets }
-            : undefined,
+        expected: drop
+          ? { dropId, waveId: drop.wave.id, authorWallets }
+          : undefined,
       });
     },
     enabled: isOpen,

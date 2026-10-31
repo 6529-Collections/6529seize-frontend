@@ -2,6 +2,7 @@ import { SparklesIcon } from "@heroicons/react/24/outline";
 
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 
 export function StreamReviewBotAuthorshipNote() {
   const label = t(DEFAULT_LOCALE, "publicReview.authorship.label");

@@ -1,9 +1,6 @@
 "use client";
 
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { ApiDropId } from "@/generated/models/ApiDropId";
-import type { Drop } from "@/helpers/waves/drop.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDmWavesList from "@/hooks/useDmWavesList";
 import { useWaveById } from "@/hooks/useWaveById";
@@ -19,6 +16,7 @@ import React, {
   useContext,
   useEffect,
   useEffectEvent,
+  useInsertionEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -26,122 +24,23 @@ import React, {
   useSyncExternalStore,
 } from "react";
 import type { WaveMessages } from "./hooks/types";
-import type { ServerWaveFeedSeedResult } from "./server-wave-feed-seed";
 import { useActiveWaveManager } from "./hooks/useActiveWaveManager";
-import type { MinimalWave } from "./hooks/useEnhancedWavesListCore";
 import useEnhancedWavesListCore from "./hooks/useEnhancedWavesListCore";
 import { useRecentDirectMessagePrefetch } from "./hooks/useRecentDirectMessagePrefetch";
 import { useWaveDataManager } from "./hooks/useWaveDataManager";
 import type { Listener as WaveMessagesListener } from "./hooks/useWaveMessagesStore";
 import useWaveMessagesStore from "./hooks/useWaveMessagesStore";
-import type { NextPageProps } from "./hooks/useWavePagination";
-import type { ProcessIncomingDropType } from "./hooks/useWaveRealtimeUpdater";
 import { useWaveRealtimeUpdater } from "./hooks/useWaveRealtimeUpdater";
 import { useDmUnreadConversations } from "@/services/dm-unread/DmUnreadStateProvider";
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
 
-// Define nested structures for context data
-interface WavesContextData {
-  readonly recommendationsStatus?: "pending" | "error" | "success";
-  readonly retryRecommendations?: (() => void) | undefined;
-  readonly isAnnouncementsLoading?: boolean;
-  readonly hasLoadingError?: boolean | undefined;
-  readonly retryLoading?: (() => void) | undefined;
-  readonly isPinnedWavesLoading?: boolean;
-  readonly list: MinimalWave[];
-  readonly isFetching: boolean;
-  readonly isFetchingNextPage: boolean;
-  readonly hasNextPage: boolean;
-  readonly fetchNextPage: () => void;
-  readonly addPinnedWave: (id: string) => void;
-  readonly removePinnedWave: (id: string) => void;
-  readonly loadSubwavesForParent: (parentWaveId: string) => void;
-  readonly prefetchSubwavesForParent: (parentWaveId: string) => void;
-  readonly loadingSubwaveParentIds: readonly string[];
-  readonly markWaveRead: (waveId: string, readThroughSerialNo?: number) => void;
-  readonly restoreWaveUnreadCount: (waveId: string, count?: number) => void;
-}
-
-interface ActiveWaveSetOptions {
-  readonly isDirectMessage?: boolean | undefined;
-  readonly replace?: boolean | undefined;
-  readonly serialNo?: number | string | null | undefined;
-  readonly divider?: number | null | undefined;
-}
-
-interface ActiveWaveContextData {
-  readonly id: string | null;
-  readonly parentWaveId: string | null;
-  readonly set: (waveId: string | null, options?: ActiveWaveSetOptions) => void;
-}
-
-// Define the interface for the wave messages store functions
-interface WaveMessagesStoreData {
-  readonly getData: (key: string) => WaveMessages | undefined;
-  readonly subscribe: (key: string, listener: WaveMessagesListener) => void;
-  readonly unsubscribe: (key: string, listener: WaveMessagesListener) => void;
-}
-
-// Define the type for our context using nested structures
-interface MyStreamContextType {
-  readonly waves: WavesContextData;
-  readonly directMessages: WavesContextData;
-  readonly activeWave: ActiveWaveContextData;
-  readonly waveMessagesStore: WaveMessagesStoreData;
-  readonly requestMainWavesList: () => () => void;
-  readonly requestDirectMessagesList: () => () => void;
-  readonly registerWave: (waveId: string, syncNewest?: boolean) => void;
-  readonly serverFeedSeed: {
-    readonly registerPending: (
-      waveId: string,
-      promise: Promise<ServerWaveFeedSeedResult>
-    ) => void;
-    readonly clearPending: (
-      waveId: string,
-      promise: Promise<ServerWaveFeedSeedResult>
-    ) => void;
-    readonly replacePending: (
-      waveId: string,
-      expectedPromise: Promise<ServerWaveFeedSeedResult>,
-      promise: Promise<ServerWaveFeedSeedResult>
-    ) => boolean;
-    readonly expire: (
-      waveId: string,
-      expectedPromise: Promise<ServerWaveFeedSeedResult>
-    ) => void;
-    readonly apply: (params: {
-      readonly drops: ApiDrop[];
-      readonly hasNextPage: boolean;
-      readonly onReady: () => void;
-      readonly promise: Promise<ServerWaveFeedSeedResult>;
-      readonly waveId: string;
-    }) => boolean;
-    readonly completeInitialRegistration: (waveId: string) => void;
-  };
-  readonly fetchNextPageForWave: (
-    props: NextPageProps
-  ) => Promise<(ApiDrop | ApiDropId)[] | null>;
-  readonly fetchAroundSerialNo: (waveId: string, serialNo: number) => void;
-  readonly processIncomingDrop: (
-    drop: ApiDrop,
-    type: ProcessIncomingDropType
-  ) => Promise<void>;
-  readonly processDropRemoved: (waveId: string, dropId: string) => void;
-  readonly processDropsRemoved: (
-    waveId: string,
-    dropIds: readonly string[]
-  ) => void;
-  readonly refreshWaveMessages: (waveId: string) => void;
-  readonly applyOptimisticDropUpdate: ({
-    waveId,
-    dropId,
-    update,
-  }: {
-    waveId: string;
-    dropId: string;
-    update: (draft: Drop) => Drop | void;
-  }) => { rollback: () => void } | null;
-}
+import type {
+  ActiveWaveContextData,
+  ActiveWaveSetOptions,
+  MyStreamActionsContextType,
+  MyStreamContextType,
+  WavesContextData,
+} from "./MyStreamContext.types";
 
 interface MyStreamProviderProps {
   readonly children: ReactNode;
@@ -197,8 +96,11 @@ const scheduleAfterRouteIdle = (runTask: () => void): (() => void) => {
   };
 };
 
-// Create the context
+// Create the contexts
 const MyStreamContext = createContext<MyStreamContextType | null>(null);
+const MyStreamActionsContext = createContext<MyStreamActionsContextType | null>(
+  null
+);
 
 // Create a provider component
 export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
@@ -404,6 +306,17 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     isWaveMuted,
   });
 
+  // processIncomingDrop is rebuilt when the active wave, its mute state or
+  // wave eligibility changes. Expose a stable wrapper that always calls the
+  // latest implementation, so callers holding it never use a stale closure.
+  const processIncomingDropRef = useRef(processIncomingDrop);
+  useInsertionEffect(() => {
+    processIncomingDropRef.current = processIncomingDrop;
+  }, [processIncomingDrop]);
+  const stableProcessIncomingDrop = useCallback<
+    MyStreamActionsContextType["processIncomingDrop"]
+  >((drop, type) => processIncomingDropRef.current(drop, type), []);
+
   const setActiveWaveAndRegister = useCallback<ActiveWaveContextData["set"]>(
     (waveId, options) => {
       if (waveId) {
@@ -576,6 +489,61 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     };
   }, [isCapacitor]);
 
+  // Actions depend only on stable store and data-manager callbacks, so this
+  // value keeps its identity when drops arrive or wave lists change. The
+  // destructive store callbacks still rebind on a profile switch, so a caller
+  // holding an old one cannot change the new profile's cache.
+  const actionsValue = useMemo<MyStreamActionsContextType>(
+    () => ({
+      // Prepare the store data for the context (only read/subscribe parts)
+      waveMessagesStore: {
+        getData: waveMessagesStore.getData,
+        subscribe: waveMessagesStore.subscribe,
+        unsubscribe: waveMessagesStore.unsubscribe,
+      },
+      requestMainWavesList,
+      requestDirectMessagesList,
+      registerWave,
+      serverFeedSeed: {
+        registerPending: waveMessagesStore.registerPendingServerFeedSeed,
+        clearPending: waveMessagesStore.clearPendingServerFeedSeed,
+        replacePending: waveMessagesStore.replacePendingServerFeedSeed,
+        expire: waveMessagesStore.expireServerFeedSeed,
+        apply: waveMessagesStore.applyServerFeedSeed,
+        completeInitialRegistration:
+          waveMessagesStore.completeInitialServerFeedRegistration,
+      },
+      fetchNextPageForWave: fetchNextPage,
+      fetchAroundSerialNo,
+      processIncomingDrop: stableProcessIncomingDrop,
+      processDropRemoved,
+      processDropsRemoved: waveMessagesStore.removeDrops,
+      refreshWaveMessages,
+      applyOptimisticDropUpdate: waveMessagesStore.optimisticUpdateDrop,
+    }),
+    [
+      waveMessagesStore.getData,
+      waveMessagesStore.subscribe,
+      waveMessagesStore.unsubscribe,
+      requestMainWavesList,
+      requestDirectMessagesList,
+      registerWave,
+      waveMessagesStore.registerPendingServerFeedSeed,
+      waveMessagesStore.clearPendingServerFeedSeed,
+      waveMessagesStore.replacePendingServerFeedSeed,
+      waveMessagesStore.expireServerFeedSeed,
+      waveMessagesStore.applyServerFeedSeed,
+      waveMessagesStore.completeInitialServerFeedRegistration,
+      fetchNextPage,
+      fetchAroundSerialNo,
+      stableProcessIncomingDrop,
+      processDropRemoved,
+      waveMessagesStore.removeDrops,
+      refreshWaveMessages,
+      waveMessagesStore.optimisticUpdateDrop,
+    ]
+  );
+
   // Create the context value using the nested structure
   const contextValue = useMemo<MyStreamContextType>(() => {
     const activeWaveParentId =
@@ -627,39 +595,14 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       set: setActiveWaveAndRegister,
     };
 
-    // Prepare the store data for the context (only read/subscribe parts)
-    const waveMessagesStoreData: WaveMessagesStoreData = {
-      getData: waveMessagesStore.getData,
-      subscribe: waveMessagesStore.subscribe,
-      unsubscribe: waveMessagesStore.unsubscribe,
-    };
-
     return {
+      ...actionsValue,
       waves,
       directMessages,
       activeWave,
-      waveMessagesStore: waveMessagesStoreData,
-      requestMainWavesList,
-      requestDirectMessagesList,
-      registerWave,
-      serverFeedSeed: {
-        registerPending: waveMessagesStore.registerPendingServerFeedSeed,
-        clearPending: waveMessagesStore.clearPendingServerFeedSeed,
-        replacePending: waveMessagesStore.replacePendingServerFeedSeed,
-        expire: waveMessagesStore.expireServerFeedSeed,
-        apply: waveMessagesStore.applyServerFeedSeed,
-        completeInitialRegistration:
-          waveMessagesStore.completeInitialServerFeedRegistration,
-      },
-      fetchNextPageForWave: fetchNextPage,
-      fetchAroundSerialNo,
-      processIncomingDrop,
-      processDropRemoved,
-      processDropsRemoved: waveMessagesStore.removeDrops,
-      refreshWaveMessages,
-      applyOptimisticDropUpdate: waveMessagesStore.optimisticUpdateDrop,
     };
   }, [
+    actionsValue,
     wavesHookData.waves,
     mainWavesData.isPinnedWavesLoading,
     mainWavesData.recommendationsStatus,
@@ -694,31 +637,14 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     activeWaveId,
     resolvedActiveWaveData,
     setActiveWaveAndRegister,
-    requestMainWavesList,
-    requestDirectMessagesList,
-    waveMessagesStore.getData,
-    waveMessagesStore.subscribe,
-    waveMessagesStore.unsubscribe,
-    registerWave,
-    waveMessagesStore.registerPendingServerFeedSeed,
-    waveMessagesStore.clearPendingServerFeedSeed,
-    waveMessagesStore.replacePendingServerFeedSeed,
-    waveMessagesStore.expireServerFeedSeed,
-    waveMessagesStore.applyServerFeedSeed,
-    waveMessagesStore.completeInitialServerFeedRegistration,
-    fetchNextPage,
-    fetchAroundSerialNo,
-    processIncomingDrop,
-    processDropRemoved,
-    waveMessagesStore.removeDrops,
-    refreshWaveMessages,
-    waveMessagesStore.optimisticUpdateDrop,
   ]);
 
   return (
-    <MyStreamContext.Provider value={contextValue}>
-      {children}
-    </MyStreamContext.Provider>
+    <MyStreamActionsContext.Provider value={actionsValue}>
+      <MyStreamContext.Provider value={contextValue}>
+        {children}
+      </MyStreamContext.Provider>
+    </MyStreamActionsContext.Provider>
   );
 };
 
@@ -735,11 +661,29 @@ export const useMyStreamOptional = (): MyStreamContextType | null => {
   return useContext(MyStreamContext);
 };
 
+// Prefer these over useMyStream when a component only calls stream actions:
+// the actions value does not change when drops arrive, so callers skip the
+// re-render that every stream data change causes for useMyStream consumers.
+export const useMyStreamActions = (): MyStreamActionsContextType => {
+  const context = useContext(MyStreamActionsContext);
+  if (!context) {
+    throw new Error(
+      "useMyStreamActions must be used within a MyStreamProvider"
+    );
+  }
+  return context;
+};
+
+export const useMyStreamActionsOptional =
+  (): MyStreamActionsContextType | null => {
+    return useContext(MyStreamActionsContext);
+  };
+
 // Create the selector hook for wave messages
 export function useMyStreamWaveMessages(
   waveId: string | null | undefined
 ): WaveMessages | undefined {
-  const { waveMessagesStore } = useMyStream();
+  const { waveMessagesStore } = useMyStreamActions();
   const { getData, subscribe, unsubscribe } = waveMessagesStore;
 
   const getSnapshot = useCallback(

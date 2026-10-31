@@ -64,13 +64,15 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.signature.title": "Signature",
   "signedMessages.signature.close": "Close",
   "signedMessages.signature.loading": "Checking the signature…",
-  "signedMessages.signature.error": "Couldn't load the signature details.",
+  "signedMessages.signature.error": "Couldn't check the signature right now.",
   "signedMessages.signature.retry": "Try again",
   "signedMessages.signature.signed": "Signed by its author",
   "signedMessages.signature.unsigned": "Not signed by its author",
   "signedMessages.signature.invalid": "The signature could not be verified",
   "signedMessages.signature.signedDescription":
     "Your browser checked this signature itself, without relying on 6529.io.",
+  "signedMessages.signature.contractWalletDescription":
+    "Your browser checked the device signature itself. This contract wallet's sign-in signature was checked by 6529.io at sign-in, not by your browser.",
   "signedMessages.signature.unsignedDescription":
     "This post was sent without a device signature.",
   "signedMessages.signature.invalidDescription":
