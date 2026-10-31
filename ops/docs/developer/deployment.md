@@ -105,6 +105,14 @@ an installed nginx proxy does not protect connections that bypass it.
 
 See [AWS connection-timeout guidance](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-load-balancer-attributes.html#connection-idle-timeout).
 
+## Staging crawler cards
+
+Open Graph and crawler cards on staging intentionally require the visitor's
+staging access cookie, so they do not render without it. The deploy does not
+give the staging server its own access key: `/api` routes bypass the staging
+access gate, so a server-held key would let anyone without staging access render
+pre-release data through `/api/og-metadata/*`.
+
 ## Order and completion
 
 - Fetch shared refs before merging; preserve other developers' staging changes
