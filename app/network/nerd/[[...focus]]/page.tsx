@@ -1,4 +1,6 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { LeaderboardFocus } from "@/types/enums";
 import type { Metadata } from "next";
 import { Suspense } from "react";
@@ -21,7 +23,7 @@ export async function generateMetadata({
 
   return getAppMetadata({
     title: `Network Nerd - ${focusParam}`,
-    description: "Network",
+    description: t(DEFAULT_LOCALE, "pageMetadata.networkNerd.description"),
   });
 }
 

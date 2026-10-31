@@ -5,7 +5,7 @@ import UserPageClientHydrator from "@/components/user/layout/UserPageClientHydra
 import { TitleProvider } from "@/contexts/TitleContext";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import {
   useParams,
   usePathname,
@@ -24,22 +24,25 @@ jest.mock("@/contexts/TitleContext", () => ({
   ...jest.requireActual("@/contexts/TitleContext"),
   useSetTitle: (title: string) => mockUseSetTitle(title),
 }));
-jest.mock(
-  "@/components/user/user-page-header/UserPageHeader",
-  () =>
-    function MockHeader({
-      fallbackMainAddress,
-    }: {
-      readonly fallbackMainAddress: string;
-    }) {
-      return (
-        <div
-          data-testid="user-page-header"
-          data-fallback-main-address={fallbackMainAddress}
-        />
-      );
+let mockPendingHeader: Promise<void> | null = null;
+jest.mock("@/components/user/user-page-header/UserPageHeader", () => {
+  const { use } = jest.requireActual("react");
+  return function MockHeader({
+    fallbackMainAddress,
+  }: {
+    readonly fallbackMainAddress: string;
+  }) {
+    if (mockPendingHeader) {
+      use(mockPendingHeader);
     }
-);
+    return (
+      <div
+        data-testid="user-page-header"
+        data-fallback-main-address={fallbackMainAddress}
+      />
+    );
+  };
+});
 jest.mock(
   "@/components/user/layout/UserPageTabs",
   () =>
@@ -61,6 +64,7 @@ const mockUseSearchParams = useSearchParams as jest.Mock;
 
 describe("UserPageLayout", () => {
   beforeEach(() => {
+    mockPendingHeader = null;
     mockUseSetTitle.mockClear();
     mockReactQueryContext.setProfile.mockClear();
     mockUseParams.mockReturnValue({ user: "testuser" });
@@ -98,6 +102,35 @@ describe("UserPageLayout", () => {
     expect(screen.getByTestId("user-page-tabs")).toBeInTheDocument();
     expect(screen.getByText("Content")).toBeInTheDocument();
     expect(mockReactQueryContext.setProfile).not.toHaveBeenCalled();
+  });
+
+  it("keeps the page usable while the streamed header is still loading", async () => {
+    let resolveHeader: () => void = () => undefined;
+    mockPendingHeader = new Promise<void>((resolve) => {
+      resolveHeader = resolve;
+    });
+
+    let container: HTMLElement = document.body;
+    await act(async () => {
+      container = renderComponent().container;
+    });
+
+    expect(screen.queryByTestId("user-page-header")).not.toBeInTheDocument();
+    expect(
+      container.querySelector('[aria-hidden="true"].tailwind-scope')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("user-page-tabs")).toBeInTheDocument();
+    expect(screen.getByText("Content")).toBeInTheDocument();
+
+    mockPendingHeader = null;
+    await act(async () => {
+      resolveHeader();
+    });
+
+    expect(screen.getByTestId("user-page-header")).toBeInTheDocument();
+    expect(
+      container.querySelector('[aria-hidden="true"].tailwind-scope')
+    ).not.toBeInTheDocument();
   });
 
   it("uses the complete server title unchanged during hydration", () => {

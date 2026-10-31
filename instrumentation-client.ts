@@ -12,6 +12,7 @@ import {
   isIndexedDBError,
 } from "@/utils/error-sanitizer";
 import { startMobileLaunchTiming } from "@/utils/monitoring/mobileLaunchTiming";
+import { sanitizeSentryLog } from "@/utils/monitoring/sentryLogSanitizer";
 import {
   enrichCyclicJsonTimerEvent,
   installCyclicJsonTimerDiagnostics,
@@ -564,6 +565,11 @@ Sentry.init({
 
   beforeBreadcrumb(breadcrumb) {
     return sanitizeSentryBreadcrumb(breadcrumb);
+  },
+
+  // Structured logs skip beforeSend, so they are sanitized here as well.
+  beforeSendLog(log) {
+    return sanitizeSentryLog(log);
   },
 
   beforeSendSpan(span) {

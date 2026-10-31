@@ -105,6 +105,7 @@ let finePointerObserved = false;
 let pointerSentinelInstalled = false;
 let trustedMouseEvidenceCount = 0;
 let lastTrustedTouchAt = Number.NEGATIVE_INFINITY;
+let detachSharedMediaQueryListeners: (() => void) | undefined;
 
 const notifyCapabilityChange = () => {
   for (const listener of capabilityChangeListeners) {
@@ -306,16 +307,11 @@ export const isTouchFirstEnvironment = (options?: {
 };
 
 /**
- * Re-runs `onChange` whenever a capability media query flips (mouse plugged
- * in/out, convertible posture change) or behavioral fine-pointer evidence
- * arrives. Returns an unsubscribe function.
+ * Attaches ONE `change` listener per capability media query for the whole app.
+ * Subscribers are fanned out from `notifyCapabilityChange`, so any number of
+ * mounted rows still costs a single set of media query listeners.
  */
-export const subscribeToTouchFirstChanges = (
-  onChange: () => void
-): (() => void) => {
-  installPointerSentinel();
-  capabilityChangeListeners.add(onChange);
-
+const attachSharedMediaQueryListeners = (): (() => void) => {
   const unsubscribers: Array<() => void> = [];
 
   for (const query of TOUCH_FIRST_MEDIA_QUERIES) {
@@ -327,21 +323,47 @@ export const subscribeToTouchFirstChanges = (
       continue;
     }
 
-    mediaQueryList.addEventListener("change", onChange);
+    mediaQueryList.addEventListener("change", notifyCapabilityChange);
     unsubscribers.push(() =>
-      mediaQueryList.removeEventListener("change", onChange)
+      mediaQueryList.removeEventListener("change", notifyCapabilityChange)
     );
   }
 
   return () => {
-    capabilityChangeListeners.delete(onChange);
-    if (capabilityChangeListeners.size === 0) {
-      // No subscribers left — drop the global capture listener so genuine
-      // touch devices don't pay a page-lifetime hot-path cost.
-      uninstallPointerSentinel();
-    }
     for (const unsubscribe of unsubscribers) {
       unsubscribe();
+    }
+  };
+};
+
+/**
+ * Re-runs `onChange` whenever a capability media query flips (mouse plugged
+ * in/out, convertible posture change) or behavioral fine-pointer evidence
+ * arrives. Returns an unsubscribe function.
+ *
+ * The media query listeners and the pointer sentinel are shared: the first
+ * subscriber creates them and the last one to leave removes them, however many
+ * hooks subscribe in between.
+ */
+export const subscribeToTouchFirstChanges = (
+  onChange: () => void
+): (() => void) => {
+  installPointerSentinel();
+  // A wrapper per subscription keeps repeated subscriptions of the same
+  // callback independent instead of collapsing into one Set entry.
+  const subscription = () => onChange();
+  capabilityChangeListeners.add(subscription);
+  detachSharedMediaQueryListeners ??= attachSharedMediaQueryListeners();
+
+  return () => {
+    capabilityChangeListeners.delete(subscription);
+    if (capabilityChangeListeners.size === 0) {
+      // No subscribers left — drop the global capture listener so genuine
+      // touch devices don't pay a page-lifetime hot-path cost, and release
+      // the shared media query listeners.
+      uninstallPointerSentinel();
+      detachSharedMediaQueryListeners?.();
+      detachSharedMediaQueryListeners = undefined;
     }
   };
 };

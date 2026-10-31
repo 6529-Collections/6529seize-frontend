@@ -43,6 +43,13 @@ specific translation feature is added.
 - Avoid text embedded in images unless the image is content and an accessible
   text alternative is supplied.
 - Keep untranslated locales functional through documented fallback to `en-US`.
+- Keep language declarations truthful (WCAG 3.1.1, 3.1.2). The root layout
+  declares `en-US`, the locale the server renders, on `<html lang>`;
+  `DocumentLanguage` in `Providers` moves it to the browser locale after
+  hydration, in step with `useBrowserLocale`. A page that renders content in
+  another locale, such as a route opened with `?locale=`, sets `lang` on that
+  content instead of changing the document language. Do not set
+  `document.documentElement.lang` elsewhere.
 
 ## Progressive Routing Policy
 
@@ -56,6 +63,17 @@ locales.
 ## Message And Fallback Policy
 
 - `en-US` is the complete source dictionary.
+- Large copy used by a single route family can be a route namespace: part of
+  the `en-US` source and of `MessageKey`, but shipped only with that route.
+  `publicReview.*` is one. Its copy lives in `i18n/messages/public-review*.ts`
+  and `i18n/namespaces/public-review.ts` registers it. Every review module that
+  calls `t()` or `tRich()` imports that module, so the copy is registered
+  before the module runs. The `/reviews` layout and `PublicReviewMessages`
+  import it too, as a backstop for the whole route. Shared code must not
+  import it. Modules the sidebar loads may hold review keys as data but must
+  not look them up. Use its keys only under `components/public-review` and
+  `lib/public-review`. Add new review copy to the namespace files, not to
+  `en-US.ts`. `__tests__/i18n/routeNamespaces.test.ts` checks these rules.
 - Other locale dictionaries may be partial during migration.
 - Missing keys fall back to `en-US`.
 - Missing fallback keys should fail loudly in development or tests when the

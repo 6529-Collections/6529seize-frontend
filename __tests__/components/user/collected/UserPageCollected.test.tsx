@@ -404,6 +404,25 @@ describe("UserPageCollected", () => {
     Element.prototype.scrollIntoView = originalScroll;
   });
 
+  it.each([
+    ["fr-FR", "fr-FR"],
+    [null, "en-US"],
+    ["unsupported-LC", "en-US"],
+  ])(
+    "declares the route locale %s as the language of the collected content",
+    (routeLocale, lang) => {
+      mockSearchParams.get.mockImplementation((key: string) =>
+        key === "locale" ? routeLocale : null
+      );
+
+      renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+
+      expect(
+        screen.getByTestId("stats-collection-shortcut").closest("[lang]")
+      ).toHaveAttribute("lang", lang);
+    }
+  );
+
   it("shows loading state initially", () => {
     useQueryMock.mockReturnValue({
       isFetching: false,
