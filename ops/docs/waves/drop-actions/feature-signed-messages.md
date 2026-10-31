@@ -147,6 +147,44 @@ signature itself; the seal only reflects what 6529.io reports.
 - Grants are per wallet and per browser; each wallet signed in on a browser
   has its own key.
 
+## Turning On When the Wallet Is Not Ready
+
+**Turn on**, **Renew** and **Turn on signed messages in this browser** run the
+same steps from one click and show a status line under the button.
+
+- **No live wallet connection.** A locked browser wallet, an expired
+  WalletConnect session or a wallet that did not reconnect after a reload
+  leaves the profile signed in without a wallet that can sign. The click opens
+  the wallet connection ("Connect your wallet to continue. If it's locked,
+  unlock it first."); once the same wallet connects, the signature request
+  follows without another click. Closing the connection without connecting
+  shows "Your wallet didn't connect. Unlock it and try again." While the wallet
+  is still reconnecting after a page load, "Reconnecting your wallet…" shows
+  for up to 8 seconds first.
+- **Another account.** If the wallet is connected to a different signed-in
+  account, the status names the account to switch to (for example "Switch it
+  to 0x1234…abcd to continue.") and offers **Reconnect wallet**. Switching the
+  account in the wallet within 2 minutes continues by itself.
+- **Unsupported network.** The wallet is asked to switch to the first
+  supported network (Ethereum). If the switch is declined or fails, the status
+  names the network to switch to.
+- **Waiting for the signature.** "Check your wallet to sign", then after 8
+  seconds "Open your wallet to finish signing. It may be locked."
+- **WalletConnect (a wallet app on a phone).** "Open your wallet app on your
+  phone and approve the signature", after 8 seconds "Don't see it? Open the
+  wallet app on your phone. If nothing is waiting there, reconnect your
+  wallet.", and after 20 seconds **Reconnect wallet**. Reconnecting pairs the
+  wallet again (QR code or deep link) and asks for the signature again once it
+  is connected. A WalletConnect session or relay error, or a phone wallet that
+  returns no signature, also offers **Reconnect wallet**.
+- **Results.** A declined signature shows a calm note and changes nothing.
+  Other failures name the cause: the sign-in challenge could not be fetched,
+  this browser could not prepare its key, the wallet could not sign, or the
+  sign-in did not finish after the wallet signed.
+- Progress lines use a polite live region; failures are alerts. Each step and
+  failure is recorded for monitoring with a reason code only, never an address
+  or key.
+
 ## Limitations / Notes
 
 - Votes and ratings are not signed in this step.

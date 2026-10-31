@@ -4,6 +4,47 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "preferences.tabs.devices": "Devices",
   "signedMessages.enable.unavailable":
     "Couldn't turn on signed messages. Please try again.",
+  "signedMessages.enable.reconnectWallet":
+    "Reconnect the wallet for this profile and try again.",
+  "signedMessages.enable.reconnect": "Reconnect wallet",
+  "signedMessages.enable.status.reconnecting": "Reconnecting your wallet…",
+  "signedMessages.enable.status.connecting":
+    "Connect your wallet to continue. If it's locked, unlock it first.",
+  "signedMessages.enable.status.switchingNetwork":
+    "Approve the switch to {network} in your wallet.",
+  "signedMessages.enable.status.waiting": "Check your wallet to sign",
+  "signedMessages.enable.status.slow":
+    "Open your wallet to finish signing. It may be locked.",
+  "signedMessages.enable.status.waitingRemote":
+    "Open your wallet app on your phone and approve the signature",
+  "signedMessages.enable.status.slowRemote":
+    "Don't see it? Open the wallet app on your phone. If nothing is waiting there, reconnect your wallet.",
+  "signedMessages.enable.status.stalled":
+    "Still nothing on your phone? Reconnect your wallet to pair it again. You'll be asked to sign again once it reconnects.",
+  "signedMessages.enable.status.rejected":
+    "Signature canceled. Nothing changed, and you can try again any time.",
+  "signedMessages.enable.status.notConnected":
+    "Your wallet didn't connect. Unlock it and try again.",
+  "signedMessages.enable.status.networkSwitchCanceled":
+    "Network switch canceled. Switch your wallet to {network} to continue.",
+  "signedMessages.enable.error.wrongAccount":
+    "Your wallet is on a different account. Switch it to {address} to continue.",
+  "signedMessages.enable.error.wrongNetwork":
+    "Switch your wallet to {network}, then try again.",
+  "signedMessages.enable.error.connectFailed":
+    "Couldn't open your wallet. Please try again.",
+  "signedMessages.enable.error.deviceKey":
+    "This browser couldn't prepare its signing key. Please try again.",
+  "signedMessages.enable.error.challengeFailed":
+    "Couldn't reach 6529.io to start signing. Check your connection and try again.",
+  "signedMessages.enable.error.signatureFailed":
+    "Your wallet couldn't sign. Unlock it and try again.",
+  "signedMessages.enable.error.walletConnectSession":
+    "Couldn't reach the wallet app on your phone. Reconnect your wallet to pair it again, then approve the signature.",
+  "signedMessages.enable.error.signInFailed":
+    "Your wallet signed, but signed messages didn't turn on. Please try again.",
+  "signedMessages.enable.error.contextChanged":
+    "Your wallet or network changed while signing. Please try again.",
   "signedMessages.notice.ariaLabel": "Signed messages",
   "signedMessages.notice.dismiss": "Dismiss",
   "signedMessages.notice.enable.title":
