@@ -1,5 +1,8 @@
 import E2eeReportsPanel from "@/app/content-moderation/E2eeReportsPanel";
-import { readE2eeReportEvidence } from "@/app/content-moderation/E2eeReportDetail";
+import {
+  MAX_EVIDENCE_BASE64_LENGTH,
+  readE2eeReportEvidence,
+} from "@/app/content-moderation/E2eeReportDetail";
 import type { ApiE2eeTrustAndSafetyReport } from "@/generated/models/ApiE2eeTrustAndSafetyReport";
 import {
   fetchE2eeReport,
@@ -214,8 +217,10 @@ describe("E2eeReportsPanel", () => {
     await userEvent.click(
       screen.getByRole("button", { name: "Place on hold" })
     );
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Couldn’t change the hold. Please try again."
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Couldn’t change the hold. Please try again."
+      )
     );
   });
 
@@ -230,9 +235,93 @@ describe("E2eeReportsPanel", () => {
     await userEvent.click(await screen.findByRole("button", { name: "Retry" }));
     expect(await screen.findByText("No encrypted reports.")).toBeVisible();
   });
+
+  it("keeps one polite status region mounted before, during and after loading", async () => {
+    let resolveList: (
+      page: Awaited<ReturnType<typeof fetchE2eeReports>>
+    ) => void = () => undefined;
+    mockFetchReports.mockReturnValue(
+      new Promise((resolve) => {
+        resolveList = resolve;
+      })
+    );
+    renderPanel();
+    const status = screen.getByRole("status");
+    expect(status).toHaveAttribute("aria-live", "polite");
+    expect(status).toHaveTextContent("Loading encrypted reports…");
+
+    resolveList({
+      items: [aReport()],
+      next_before: null,
+      next_before_id: null,
+    });
+    await screen.findByRole("button", { name: /^Review evidence: / });
+    // The same node, now idle and empty: its text changes, it never remounts.
+    expect(screen.getByRole("status")).toBe(status);
+    expect(status).toHaveTextContent("");
+
+    // The detail announces through the region that existed before it loaded.
+    let resolveReport: (report: ApiE2eeTrustAndSafetyReport) => void = () =>
+      undefined;
+    mockFetchReport.mockReturnValue(
+      new Promise((resolve) => {
+        resolveReport = resolve;
+      })
+    );
+    mockSetHold.mockResolvedValue({
+      ...aReport(),
+      on_hold: true,
+      expires_at: null,
+    });
+    await userEvent.click(
+      screen.getByRole("button", { name: /^Review evidence: / })
+    );
+    expect(screen.getByRole("status")).toBe(status);
+    await waitFor(() => expect(status).toHaveTextContent("Loading evidence…"));
+    resolveReport(aReport());
+    await screen.findByText("I know where you live");
+    await waitFor(() => expect(status).toHaveTextContent(""));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Place on hold" })
+    );
+    await waitFor(() =>
+      expect(status).toHaveTextContent("Report placed on hold.")
+    );
+    expect(screen.getByRole("status")).toBe(status);
+  });
+
+  it("announces a repeated load failure again after each retry", async () => {
+    let rejectRetry: (error: Error) => void = () => undefined;
+    mockFetchReports
+      .mockRejectedValueOnce(new Error("down"))
+      .mockReturnValueOnce(
+        new Promise((_resolve, reject) => {
+          rejectRetry = reject;
+        })
+      );
+    renderPanel();
+    const alert = screen.getByRole("alert");
+    await waitFor(() =>
+      expect(alert).toHaveTextContent("Couldn't load WatchTower.")
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Retry" }));
+    // Cleared while the retry runs, so the same message is announced again.
+    await waitFor(() => expect(alert).toHaveTextContent(""));
+    rejectRetry(new Error("still down"));
+    await waitFor(() =>
+      expect(alert).toHaveTextContent("Couldn't load WatchTower.")
+    );
+    expect(screen.getByRole("alert")).toBe(alert);
+  });
 });
 
 describe("readE2eeReportEvidence", () => {
+  it("refuses a body larger than the server's report cap before decoding", () => {
+    expect(
+      readE2eeReportEvidence("A".repeat(MAX_EVIDENCE_BASE64_LENGTH + 4))
+    ).toEqual({ readable: false, text: "", attachments: [] });
+  });
+
   it("reads a message payload's text and attachment names, not its keys", () => {
     const body = b64(
       JSON.stringify({

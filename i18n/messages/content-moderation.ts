@@ -220,6 +220,10 @@ export const CONTENT_MODERATION_MESSAGES = {
     "A report on hold is kept past its 180-day retention until you release it.",
   "contentModeration.moderator.encryptedReports.holdFailed":
     "Couldn’t change the hold. Please try again.",
+  "contentModeration.moderator.encryptedReports.heldStatus":
+    "Report placed on hold.",
+  "contentModeration.moderator.encryptedReports.releasedStatus":
+    "Hold released.",
   "contentModeration.moderator.blockActivity.blocked": "Blocked",
   "contentModeration.moderator.blockActivity.unblocked": "Unblocked",
   "contentModeration.moderator.accessRequirement":

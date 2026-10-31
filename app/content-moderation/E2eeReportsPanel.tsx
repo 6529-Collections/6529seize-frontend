@@ -9,9 +9,14 @@ import {
 } from "@/services/api/e2ee-reports-api";
 import { ENCRYPTED_REPORTS_QUERY_KEY } from "@/services/content-moderation/content-moderation-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { formatTimestamp } from "./content-moderation-page.helpers";
-import E2eeReportDetail, { e2eeReportCategoryLabel } from "./E2eeReportDetail";
+import E2eeReportDetail, {
+  e2eeReportCategoryLabel,
+  type E2eeReportAnnouncement,
+} from "./E2eeReportDetail";
+
+const NO_ANNOUNCEMENT: E2eeReportAnnouncement = { status: "", alert: "" };
 
 const E2EE_REPORTS_PAGE_SIZE = 50;
 
@@ -109,7 +114,10 @@ export default function E2eeReportsPanel({
   const locale = useBrowserLocale();
   const [selected, setSelected] = useState<string | null>(null);
   const [returnFocusTo, setReturnFocusTo] = useState<string | null>(null);
+  const [detailAnnouncement, setDetailAnnouncement] =
+    useState<E2eeReportAnnouncement>(NO_ANNOUNCEMENT);
   const reviewButtons = useRef(new Map<string, HTMLButtonElement>());
+  const introRef = useRef<HTMLParagraphElement>(null);
   const query = useInfiniteQuery({
     queryKey: [...ENCRYPTED_REPORTS_QUERY_KEY, "list", profileId],
     queryFn: ({ pageParam, signal }) =>
@@ -135,56 +143,95 @@ export default function E2eeReportsPanel({
 
   useEffect(() => {
     if (selected === null && returnFocusTo !== null) {
-      reviewButtons.current.get(returnFocusTo)?.focus();
+      // If the opened report left the list, keep keyboard users oriented at
+      // the top of the tab instead of dropping focus.
+      (reviewButtons.current.get(returnFocusTo) ?? introRef.current)?.focus();
       setReturnFocusTo(null);
     }
   }, [selected, returnFocusTo]);
 
-  if (selected !== null) {
-    return (
-      <E2eeReportDetail
-        key={selected}
-        profileId={profileId}
-        reportId={selected}
-        onBack={() => {
-          setReturnFocusTo(selected);
-          setSelected(null);
-        }}
-      />
+  const announceDetail = useCallback(
+    (announcement: E2eeReportAnnouncement) =>
+      setDetailAnnouncement(announcement),
+    []
+  );
+
+  const listMode = selected === null;
+  // A failure shows only once a retry settles, so a repeat is announced.
+  const failed = query.isError && !query.isFetching;
+  let listStatus = "";
+  if (query.isLoading) {
+    listStatus = t(
+      locale,
+      "contentModeration.moderator.encryptedReports.loading"
+    );
+  } else if (query.isSuccess && reports.length === 0) {
+    listStatus = t(
+      locale,
+      "contentModeration.moderator.encryptedReports.empty"
     );
   }
+  const listAlert = failed
+    ? t(locale, "contentModeration.moderator.loadError")
+    : "";
+  const status = listMode ? listStatus : detailAnnouncement.status;
+  const alert = listMode ? listAlert : detailAnnouncement.alert;
 
   return (
     <div className="tw-mt-6">
-      <p className="tw-m-0 tw-max-w-2xl tw-text-sm tw-leading-6 tw-text-iron-400">
-        {t(locale, "contentModeration.moderator.encryptedReports.intro")}
-      </p>
-      {query.isLoading && (
-        <output className="tw-mb-0 tw-mt-6 tw-block tw-text-sm tw-text-iron-400">
-          {t(locale, "contentModeration.moderator.encryptedReports.loading")}
-        </output>
-      )}
-      {query.isError && (
-        <div role="alert" className="tw-mb-0 tw-mt-6 tw-text-sm tw-text-red">
-          <p className="tw-mt-0">
-            {t(locale, "contentModeration.moderator.loadError")}
-          </p>
-          <button
-            type="button"
-            className="tw-min-h-11 tw-rounded-lg tw-bg-iron-900 tw-px-4 tw-text-iron-100 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-            disabled={query.isFetching}
-            onClick={() => void query.refetch()}
-          >
-            {t(locale, "checks.retry")}
-          </button>
-        </div>
-      )}
-      {query.isSuccess && reports.length === 0 && (
-        <p className="tw-mb-0 tw-mt-6 tw-text-sm tw-text-iron-400">
-          {t(locale, "contentModeration.moderator.encryptedReports.empty")}
+      {listMode ? (
+        <p
+          ref={introRef}
+          tabIndex={-1}
+          className="tw-m-0 tw-max-w-2xl tw-text-sm tw-leading-6 tw-text-iron-400 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+        >
+          {t(locale, "contentModeration.moderator.encryptedReports.intro")}
         </p>
+      ) : (
+        <E2eeReportDetail
+          key={selected}
+          profileId={profileId}
+          reportId={selected}
+          onAnnounce={announceDetail}
+          onBack={() => {
+            setDetailAnnouncement(NO_ANNOUNCEMENT);
+            setReturnFocusTo(selected);
+            setSelected(null);
+          }}
+        />
       )}
-      {reports.length > 0 && (
+      {/* Always mounted (empty when idle) in both views, so screen readers
+          announce each change of text, including a repeated failure. */}
+      <p
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        data-testid="e2ee-reports-status"
+        className={
+          status ? "tw-mb-0 tw-mt-6 tw-text-sm tw-text-iron-400" : "tw-m-0"
+        }
+      >
+        {status}
+      </p>
+      <p
+        role="alert"
+        aria-atomic="true"
+        data-testid="e2ee-reports-alert"
+        className={alert ? "tw-mb-0 tw-mt-6 tw-text-sm tw-text-red" : "tw-m-0"}
+      >
+        {alert}
+      </p>
+      {listMode && query.isError && (
+        <button
+          type="button"
+          className="tw-mt-3 tw-min-h-11 tw-rounded-lg tw-bg-iron-900 tw-px-4 tw-text-iron-100 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          disabled={query.isFetching}
+          onClick={() => void query.refetch()}
+        >
+          {t(locale, "checks.retry")}
+        </button>
+      )}
+      {listMode && reports.length > 0 && (
         <ul className="tw-m-0 tw-mt-6 tw-list-none tw-space-y-4 tw-p-0">
           {reports.map((report) => (
             <ReportRow
@@ -202,7 +249,7 @@ export default function E2eeReportsPanel({
           ))}
         </ul>
       )}
-      {query.hasNextPage && (
+      {listMode && query.hasNextPage && (
         <div className="tw-flex tw-justify-center tw-pt-4">
           <button
             type="button"

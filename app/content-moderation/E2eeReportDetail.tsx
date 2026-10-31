@@ -43,6 +43,15 @@ export function e2eeReportCategoryLabel(
   return key ? t(locale, key) : category;
 }
 
+/** About 96 KiB of base64: above the server's 64 KiB report body cap. */
+export const MAX_EVIDENCE_BASE64_LENGTH = 96 * 1024;
+
+/** Messages for the panel's always-mounted live regions. */
+export interface E2eeReportAnnouncement {
+  readonly status: string;
+  readonly alert: string;
+}
+
 interface Evidence {
   readonly readable: boolean;
   readonly text: string;
@@ -55,9 +64,14 @@ interface Evidence {
  * keys in the payload are not displayed.
  */
 export function readE2eeReportEvidence(body: string): Evidence {
+  // The server caps a report body at 64 KiB; refuse anything larger before
+  // decoding reporter-controlled bytes (defense in depth).
+  if (body.length > MAX_EVIDENCE_BASE64_LENGTH) {
+    return { readable: false, text: "", attachments: [] };
+  }
   let bytes: Uint8Array;
   try {
-    bytes = Uint8Array.from(atob(body), (char) => char.charCodeAt(0));
+    bytes = Uint8Array.from(atob(body), (char) => char.codePointAt(0) ?? 0);
   } catch {
     return { readable: false, text: "", attachments: [] };
   }
@@ -138,10 +152,12 @@ export default function E2eeReportDetail({
   profileId,
   reportId,
   onBack,
+  onAnnounce,
 }: {
   readonly profileId: string;
   readonly reportId: string;
   readonly onBack: () => void;
+  readonly onAnnounce: (announcement: E2eeReportAnnouncement) => void;
 }) {
   const locale = useBrowserLocale();
   const queryClient = useQueryClient();
@@ -177,6 +193,39 @@ export default function E2eeReportDetail({
     headingRef.current?.focus();
   }, []);
 
+  // Loading, results and errors are shown in the panel's always-mounted live
+  // regions. An error is set again only after a retry settles, so a repeated
+  // failure is announced.
+  let status = "";
+  if (query.isLoading) {
+    status = t(
+      locale,
+      "contentModeration.moderator.encryptedReports.detailLoading"
+    );
+  } else if (hold.isSuccess && query.data) {
+    status = t(
+      locale,
+      query.data.on_hold
+        ? "contentModeration.moderator.encryptedReports.heldStatus"
+        : "contentModeration.moderator.encryptedReports.releasedStatus"
+    );
+  }
+  let alert = "";
+  if (query.isError && !query.isFetching) {
+    alert = t(
+      locale,
+      "contentModeration.moderator.encryptedReports.detailError"
+    );
+  } else if (hold.isError && !hold.isPending) {
+    alert = t(
+      locale,
+      "contentModeration.moderator.encryptedReports.holdFailed"
+    );
+  }
+  useEffect(() => {
+    onAnnounce({ status, alert });
+  }, [onAnnounce, status, alert]);
+
   const report = query.data;
   const evidence = report ? readE2eeReportEvidence(report.body) : null;
   const category = report
@@ -205,22 +254,6 @@ export default function E2eeReportDetail({
           ? category
           : t(locale, "contentModeration.moderator.encryptedReports.review")}
       </h2>
-      {query.isLoading && (
-        <output className="tw-block tw-text-sm tw-text-iron-400">
-          {t(
-            locale,
-            "contentModeration.moderator.encryptedReports.detailLoading"
-          )}
-        </output>
-      )}
-      {query.isError && (
-        <p role="alert" className="tw-m-0 tw-text-sm tw-text-red">
-          {t(
-            locale,
-            "contentModeration.moderator.encryptedReports.detailError"
-          )}
-        </p>
-      )}
       {report && evidence && (
         <>
           <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4">
@@ -393,14 +426,6 @@ export default function E2eeReportDetail({
                 "contentModeration.moderator.encryptedReports.holdHelp"
               )}
             </p>
-            {hold.isError && (
-              <p role="alert" className="tw-m-0 tw-text-sm tw-text-red">
-                {t(
-                  locale,
-                  "contentModeration.moderator.encryptedReports.holdFailed"
-                )}
-              </p>
-            )}
           </div>
         </>
       )}
