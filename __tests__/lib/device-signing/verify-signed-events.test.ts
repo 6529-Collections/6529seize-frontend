@@ -23,8 +23,14 @@ const otherWallet = privateKeyToAccount(`0x${"43".repeat(32)}`);
 const DROP_ID = "b0c5d6e7-1111-4222-8333-944455556666";
 const WAVE_ID = VECTORS.body.wave_id;
 
-async function createGrant(signer = wallet): Promise<ApiDeviceGrantProof> {
-  const message = buildVectorGrantMessage({ address: wallet.address });
+async function createGrant(
+  signer = wallet,
+  statement: string = VECTORS.grantStatement
+): Promise<ApiDeviceGrantProof> {
+  const message = buildVectorGrantMessage({
+    address: wallet.address,
+    statement,
+  });
   return {
     id: hashMessage(message),
     wallet: wallet.address.toLowerCase(),
@@ -129,6 +135,42 @@ describe("drop signature verification in the browser", () => {
       },
     });
   });
+
+  it("still verifies grants signed over the legacy statement", async () => {
+    const grant = await createGrant(wallet, VECTORS.legacyGrantStatement);
+    const post = await createEvent(grant, {
+      kind: 1,
+      seq: 1_760_000_000_000,
+      body: { wave_id: WAVE_ID, parts: [{ content: "gm" }] },
+    });
+
+    await expect(
+      verifyDropSignedEvents(signedEvents([post], [grant], post.id))
+    ).resolves.toMatchObject({
+      status: "signed",
+      currentContentSigned: true,
+      signature: { walletSignature: "verified" },
+    });
+  });
+
+  it.each([
+    ["current", VECTORS.grantStatement, "posts, edits", "posts"],
+    ["legacy", VECTORS.legacyGrantStatement, "post, edit", "post"],
+  ])(
+    "rejects a %s grant whose statement does not match its terms",
+    async (_name, statement, from, to) => {
+      const grant = await createGrant(wallet, statement.replace(from, to));
+      const post = await createEvent(grant, {
+        kind: 1,
+        seq: 1_760_000_000_000,
+        body: { parts: [{ content: "gm" }] },
+      });
+
+      await expect(
+        verifyDropSignedEvents(signedEvents([post], [grant], post.id))
+      ).resolves.toEqual({ status: "invalid" });
+    }
+  );
 
   it("reports content changed after signing and ignores other people's reactions", async () => {
     const grant = await createGrant();
