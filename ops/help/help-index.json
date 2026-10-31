@@ -1043,8 +1043,29 @@
       ]
     },
     {
+      "id": "stream.rebuild-notice",
+      "kind": "route",
+      "title": "6529 Stream",
+      "aliases": [
+        "6529 stream",
+        "stream",
+        "stream contracts",
+        "6529-works",
+        "6529 works"
+      ],
+      "keywords": ["stream", "contracts", "rebuilt", "works", "github"],
+      "facts": [
+        "/stream shows a short notice that 6529 Stream is being rebuilt. NFTs > 6529 Stream in the sidebar opens it.",
+        "The work on 6529 Stream is public in the 6529-works repository on GitHub, linked from /stream.",
+        "The earlier 6529 Stream public contract review is no longer published on 6529.io."
+      ],
+      "canonical_path": "/stream",
+      "tags": ["stream", "nfts"],
+      "source_refs": ["app/stream/page.tsx"]
+    },
+    {
       "id": "public-reviews.stream",
-      "environments": ["local", "staging", "production"],
+      "environments": ["local", "staging"],
       "public_review_id": "6529-stream",
       "kind": "route",
       "title": "6529 Stream contract review",
@@ -1070,7 +1091,7 @@
         "development status"
       ],
       "facts": [
-        "The 6529 Stream public review is published at /reviews/6529-stream in local development, shared staging, and production while its lifecycle permits public routes.",
+        "The 6529 Stream public review is published at /reviews/6529-stream in local development and shared staging while its lifecycle permits public routes. It is switched off in production.",
         "Start here, For artists, For collectors, and Review the code are the four current entry guides. Community Review explains how to give feedback. All topics expands the detailed chapters; current pages offer relevant Explore next links instead of a fourteen-page sequence.",
         "The active review is 2026-09-09.1, pinned to Stream source 92ea123380917032f01aae09691141a2a72df935 and checked September 9, 2026. Earlier snapshots keep their source and editorial content with feedback closed.",
         "The overview explains 1/1, 1/1/x, and editions outside The Memes. These are contract capabilities; launch formats and publishing tools still need confirmation.",
@@ -1135,7 +1156,7 @@
     },
     {
       "id": "public-reviews.stream.feedback-status",
-      "environments": ["local", "staging", "production"],
+      "environments": ["local", "staging"],
       "public_review_id": "6529-stream",
       "kind": "ui_affordance",
       "title": "Stream review feedback and public ledger",

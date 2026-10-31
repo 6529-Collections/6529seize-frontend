@@ -70,12 +70,13 @@ describe("sync-help-index publication policy", () => {
     }
   });
 
-  it("generates the production help corpus with the published Stream summaries", () => {
+  it("keeps the Stream review summaries out of the production help corpus", () => {
     const publishedRecordIds = getPublishedRecordIds("https://6529.io");
 
     for (const recordId of STREAM_SUMMARY_RECORD_IDS) {
-      expect(publishedRecordIds.has(recordId)).toBe(true);
+      expect(publishedRecordIds.has(recordId)).toBe(false);
     }
+    expect(publishedRecordIds.has("stream.rebuild-notice")).toBe(true);
   });
 });
 

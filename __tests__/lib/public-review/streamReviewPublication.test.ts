@@ -9,8 +9,8 @@ import {
 const SOURCE_COMMIT = "513bd7e079eafe109df6ae1ae21bfbca6fec6786";
 
 describe("Stream public-review version identities", () => {
-  it("publishes the review on the production host", () => {
-    expect(STREAM_REVIEW_PRODUCTION_ENABLED).toBe(true);
+  it("keeps the review off the production host", () => {
+    expect(STREAM_REVIEW_PRODUCTION_ENABLED).toBe(false);
   });
 
   it("pins every retained public and draft version to an explicit source commit", () => {

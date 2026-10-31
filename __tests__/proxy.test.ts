@@ -173,10 +173,6 @@ describe("proxy", () => {
     "/api/version",
     "/_next/data/build/page.json",
     "/error",
-    "/review-data/6529-stream/index.json",
-    "/review-data/6529-stream/versions/2026-07-27.1/reference-manifest.json",
-    "/review-data/6529-stream/versions/2026-07-27.1/definitions/record-shard.json",
-    "/review-data/6529-stream/versions/2026-07-27.1/sources/smart-contracts/StreamCore.sol",
   ])("serves %s without staging access-control fetches", async (path) => {
     const fetchMock = jest
       .spyOn(globalThis, "fetch")
@@ -191,12 +187,6 @@ describe("proxy", () => {
   });
 
   it.each([
-    "/review-data/6529-stream",
-    "/review-data/6529-stream-evil/index.json",
-    "/review-data/6529-streaming/index.json",
-    "/review-data/other-review/index.json",
-    "/review-data//6529-stream/index.json",
-    "/review-data/6529-stream%2Fversions/index.json",
     "/reviews/6529-stream",
     "/reviews/6529-stream/reference",
     // Static-looking suffixes outside real public files stay gated.
@@ -222,21 +212,6 @@ describe("proxy", () => {
     expect(mockRedirect).not.toHaveBeenCalled();
   });
 
-  it("keeps an encoded-slash request gated if Next exposes a decoded pathname", async () => {
-    const fetchMock = mockFetchStatus(200);
-
-    const response = await proxy(
-      createRequest("/review-data/6529-stream%2Fversions/index.json", {
-        nextUrlPathname: "/review-data/6529-stream/versions/index.json",
-      })
-    );
-
-    expect(response).toEqual({ kind: "next" });
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(mockNext).toHaveBeenCalledTimes(1);
-    expect(mockRedirect).not.toHaveBeenCalled();
-  });
-
   it.each([
     "/.git/HEAD",
     "/.git/config",
@@ -249,6 +224,19 @@ describe("proxy", () => {
     "/%2Egit/HEAD",
     "/punk6529/.hidden",
     "/api/.env",
+    "/review-data",
+    "/review-data/6529-stream",
+    "/review-data/6529-stream/index.json",
+    "/review-data/6529-stream/versions/2026-07-27.1/reference-manifest.json",
+    "/review-data/6529-stream/versions/2026-07-27.1/definitions/record-shard.json",
+    "/review-data/6529-stream/versions/2026-09-09.1/sources/smart-contracts/core/StreamCore.sol",
+    "/review-data/6529-stream/versions/2026-09-09.1/knowledge/manifest.json",
+    "/review-data/other-review/index.json",
+    "/review-data//6529-stream/index.json",
+    "/review-data/6529-stream%2Fversions/index.json",
+    "/Review-Data/6529-stream/index.json",
+    "/%72eview-data/6529-stream/index.json",
+    "//review-data/6529-stream/index.json",
   ])("answers %s with a plain 404 before any other work", async (path) => {
     const fetchMock = jest
       .spyOn(globalThis, "fetch")
@@ -596,5 +584,22 @@ describe("proxy", () => {
 
       expect(response.status).toBe(404);
     });
+
+    it.each([PRODUCTION_BASE_ENDPOINT, LOCAL_BASE_ENDPOINT])(
+      "answers retired review data with a plain 404 on %s",
+      async (baseEndpoint) => {
+        proxy = loadProxy(baseEndpoint);
+
+        const response = (await proxy(
+          createRequest(
+            "/review-data/6529-stream/versions/2026-09-09.1/sources/smart-contracts/core/StreamCore.sol",
+            { origin: baseEndpoint }
+          )
+        )) as Response;
+
+        expect(response.status).toBe(404);
+        expect(mockNext).not.toHaveBeenCalled();
+      }
+    );
   });
 });

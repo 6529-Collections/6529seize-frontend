@@ -2,7 +2,7 @@
   "schemaVersion": "public-review.publication.v3",
   "reviewId": "6529-stream",
   "lifecycleState": "PUBLIC_REVIEW",
-  "productionEnabled": true,
+  "productionEnabled": false,
   "versions": [
     {
       "version": "2026-07-26.1",

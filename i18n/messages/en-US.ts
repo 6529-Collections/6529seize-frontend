@@ -4625,7 +4625,13 @@ export const EN_US_MESSAGES = {
   "navigation.nfts.nextGen": "NextGen",
   "navigation.nfts.memeLab": "Meme Lab",
   "navigation.nfts.rememes": "ReMemes",
-  "navigation.nfts.streamReview": "6529 Stream — Review",
+  "navigation.nfts.stream": "6529 Stream",
+  "stream.placeholder.title": "6529 Stream",
+  "stream.placeholder.body":
+    "6529 Stream is being rebuilt. You can follow the work in the 6529-works repository on GitHub.",
+  "stream.placeholder.repositoryLink": "6529-works on GitHub",
+  "stream.placeholder.metadataDescription":
+    "6529 Stream is being rebuilt. Follow the work in the 6529-works repository on GitHub.",
   "navigation.nfts.activity": "NFT Activity",
   "navigation.nfts.memesCalendar": "Memes Calendar",
   ...EULA_MESSAGES,
