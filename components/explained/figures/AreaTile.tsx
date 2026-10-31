@@ -17,6 +17,8 @@ const AREA_DAY_AXES = [200, 400, 800, 1600] as const;
 const MAX_RATE = 14;
 const HEIGHT = 124;
 const PAD = { left: 2, right: 2, top: 10, bottom: 26 } as const;
+/** Narrower than this, the reference's label cannot be read whole, so it is not drawn. */
+const REFERENCE_MIN_WIDTH = 280;
 
 export function dayAxisFor(days: number): number {
   return AREA_DAY_AXES.find((axis) => axis >= days * 1.15) ?? 1600;
@@ -59,7 +61,8 @@ export default function AreaTile({
     fraction,
     value: axis * fraction,
   }));
-  const showReference = reference !== undefined && rate < 10;
+  const showReference =
+    reference !== undefined && rate < 10 && width >= REFERENCE_MIN_WIDTH;
   const referenceY = reference
     ? baseY - (reference.rateCents / 100 / MAX_RATE) * innerH
     : 0;

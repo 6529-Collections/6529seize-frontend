@@ -75,9 +75,9 @@ export default function LivePill({
       }
     >
       <Pulse live={!late} />
-      <span className="tw-hidden md:tw-inline">{lead}</span>
+      <span className="tw-hidden lg:tw-inline">{lead}</span>
       <b className="tw-font-semibold tw-text-iron-300">{clockText}</b>
-      <span>{`· ${late ? kt(locale, "explained.kit.live.late") : tail}`}</span>
+      <span className="max-[359px]:tw-hidden">{`· ${late ? kt(locale, "explained.kit.live.late") : tail}`}</span>
     </span>
   );
 }
