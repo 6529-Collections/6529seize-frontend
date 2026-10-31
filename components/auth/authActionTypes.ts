@@ -1,5 +1,6 @@
 import type { AppToastInput } from "@/components/utils/toast/AppToast";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { RequestSignedMessagesGrant } from "./authSignedMessagesGrant";
 import type {
   AuthLoadingState,
   AuthRolloutSettings,
@@ -54,5 +55,5 @@ export interface AuthRequestActions {
     options?: RequestAuthOptions
   ) => Promise<{ success: boolean }>;
   readonly requestSessionUpgrade: () => Promise<{ success: boolean }>;
-  readonly requestSignedMessagesGrant: () => Promise<{ success: boolean }>;
+  readonly requestSignedMessagesGrant: RequestSignedMessagesGrant;
 }

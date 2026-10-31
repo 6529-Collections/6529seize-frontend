@@ -85,7 +85,8 @@ export function useSignedMessagesNotice({
   const { dismissedUntil, seenGrantIds } =
     useSignedMessagesNoticeState(address);
   const { revoke: revokeGrant, isRevoking } = useRevokeDeviceGrant();
-  const { canEnable, enable, isEnabling } = useEnableSignedMessages();
+  const { canEnable, enable, isEnabling, reconnect, status } =
+    useEnableSignedMessages();
   const hasSeenBaseline = seenGrantIds !== undefined;
 
   // The first list this browser sees for a wallet is its baseline, so only
@@ -151,6 +152,8 @@ export function useSignedMessagesNotice({
     model,
     canEnable,
     enable,
+    enableStatus: status,
+    reconnect,
     isEnabling,
     dismiss,
     revoke,

@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import SignedMessagesEnableStatus from "@/components/device-signing/SignedMessagesEnableStatus";
 import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
 import Button from "@/components/utils/button/Button";
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
@@ -160,21 +161,28 @@ function EnableSignedMessagesButton({
 }) {
   const locale = useBrowserLocale();
   const account = useSignedMessagesAccount();
-  const { canEnable, enable, isEnabling } = useEnableSignedMessages();
+  const { canEnable, enable, isEnabling, reconnect, status } =
+    useEnableSignedMessages();
 
   if (!canEnable || !account || account !== address || hasActiveLocalGrant) {
     return null;
   }
   return (
-    <Button
-      size="sm"
-      variant="secondary"
-      loading={isEnabling}
-      onClick={() => void enable()}
-      className="tw-mt-4"
-    >
-      {t(locale, "signedMessages.devices.enable")}
-    </Button>
+    <div className="tw-mt-4">
+      <Button
+        size="sm"
+        variant="secondary"
+        loading={isEnabling}
+        onClick={() => enable("devices")}
+      >
+        {t(locale, "signedMessages.devices.enable")}
+      </Button>
+      <SignedMessagesEnableStatus
+        status={status}
+        onReconnect={reconnect}
+        className="tw-mt-2"
+      />
+    </div>
   );
 }
 
