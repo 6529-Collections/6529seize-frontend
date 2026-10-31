@@ -144,10 +144,27 @@ describe("E2EE device trust (trust on first use)", () => {
     expect(isIgnoredDevice(ctx, key(6))).toBe(true);
     const stored = await storage.getDevice(OWN);
     expect(stored?.trust).toEqual({
-      wallets: { bob: [WALLET_A, WALLET_B].sort() },
+      wallets: { bob: [WALLET_A, WALLET_B] },
       approved: [key(5)],
       ignored: [key(6)],
     });
+  });
+
+  it("keeps at most 16 pinned wallets per person, dropping the oldest", async () => {
+    const { ctx } = fakeCtx(new Map());
+    const wallet = (n: number) => `0x${n.toString(16).padStart(40, "0")}`;
+    await pinFirstSighting(ctx, [{ profileId: "bob", wallet: wallet(0) }]);
+    for (let n = 1; n <= 16; n += 1) {
+      await approveDevice(ctx, {
+        profileId: "bob",
+        deviceKey: key(100 + n),
+        wallet: wallet(n),
+      });
+    }
+    expect(isPinnedWallet(ctx, "bob", wallet(0))).toBe(false);
+    expect(isPinnedWallet(ctx, "bob", wallet(1))).toBe(true);
+    expect(isPinnedWallet(ctx, "bob", wallet(16))).toBe(true);
+    expect(ctx.device?.trust?.wallets["bob"]).toHaveLength(16);
   });
 
   it("always counts this device's own wallet for its own profile", async () => {

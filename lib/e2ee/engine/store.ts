@@ -172,18 +172,26 @@ export class EngineStore {
     });
   }
 
-  /** Replaces the untrusted devices found for `profileId`. */
+  /**
+   * Replaces the untrusted devices found for `profileId`. Entries are kept
+   * per person, so every chat with that person shows the same list.
+   */
   setUntrusted(profileId: string, devices: E2eeUntrustedDevice[]): void {
+    const normalized = devices.map((item) => ({
+      ...item,
+      deviceKey: item.deviceKey.toLowerCase(),
+      wallet: item.wallet.toLowerCase(),
+    }));
     const signature = (list: readonly E2eeUntrustedDevice[]) =>
       list.map((item) => `${item.deviceKey}:${item.reason}`).join(",");
     const previous = this.untrusted.get(profileId) ?? [];
-    if (signature(previous) === signature(devices)) {
+    if (signature(previous) === signature(normalized)) {
       return;
     }
-    if (devices.length === 0) {
+    if (normalized.length === 0) {
       this.untrusted.delete(profileId);
     } else {
-      this.untrusted.set(profileId, devices);
+      this.untrusted.set(profileId, normalized);
     }
     this.touch();
   }
@@ -199,17 +207,17 @@ export class EngineStore {
     return null;
   }
 
+  /** Clears the device from every person's list, hence from every chat. */
   dropUntrusted(deviceKey: string): void {
-    const found = this.findUntrusted(deviceKey);
-    if (!found) {
-      return;
+    const key = deviceKey.toLowerCase();
+    for (const [profileId, list] of [...this.untrusted]) {
+      if (list.some((item) => item.deviceKey === key)) {
+        this.setUntrusted(
+          profileId,
+          list.filter((item) => item.deviceKey !== key)
+        );
+      }
     }
-    this.setUntrusted(
-      found.profileId,
-      (this.untrusted.get(found.profileId) ?? []).filter(
-        (item) => item.deviceKey !== found.deviceKey
-      )
-    );
   }
 
   private untrustedFor(record: StoredGroup): E2eeUntrustedDevice[] {

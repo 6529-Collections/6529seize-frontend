@@ -13,6 +13,7 @@ import {
 import { type FormEvent, useId, useState } from "react";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import type {
   E2eeConversation,
@@ -33,6 +34,24 @@ import { E2eeDialog } from "../ui/E2eeDialog";
 import { E2eeAddMembers } from "./E2eeAddMembers";
 
 const GROUP_NAME_MAX = 100;
+
+/** One translatable line per device: label, check status and wallet. */
+function deviceLine(
+  locale: SupportedLocale,
+  device: E2eeMember["devices"][number]
+): string {
+  const params = {
+    device: device.label,
+    status: t(
+      locale,
+      device.verified ? "e2ee.devices.verified" : "e2ee.devices.unverified"
+    ),
+  };
+  const wallet = formatE2eeWallet(device.wallet);
+  return wallet
+    ? t(locale, "e2ee.info.deviceLine", { ...params, wallet })
+    : t(locale, "e2ee.info.deviceLineNoWallet", params);
+}
 
 const SECTION_HEADING =
   "tw-m-0 tw-mb-2 tw-text-sm tw-font-semibold tw-text-iron-200";
@@ -264,7 +283,7 @@ function MemberRow({
           {member.devices.map((device) => (
             <li
               key={device.deviceKey}
-              className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-0.5"
+              className="tw-flex tw-items-start tw-gap-1.5"
             >
               {device.verified ? (
                 <CheckBadgeIcon
@@ -277,22 +296,12 @@ function MemberRow({
                   className="tw-size-4 tw-text-amber-200"
                 />
               )}
-              <span className="tw-text-iron-300">{device.label}</span>
-              <span>
-                {t(
-                  locale,
-                  device.verified
-                    ? "e2ee.devices.verified"
-                    : "e2ee.devices.unverified"
-                )}
+              <span
+                className="tw-text-iron-300"
+                title={device.wallet ?? undefined}
+              >
+                {deviceLine(locale, device)}
               </span>
-              {formatE2eeWallet(device.wallet) ? (
-                <span title={device.wallet ?? undefined}>
-                  {t(locale, "e2ee.info.deviceWallet", {
-                    wallet: formatE2eeWallet(device.wallet),
-                  })}
-                </span>
-              ) : null}
             </li>
           ))}
         </ul>

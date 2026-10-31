@@ -47,10 +47,14 @@ function formatNoticeWallets(
   locale: SupportedLocale,
   detail: string | undefined
 ): string {
-  const wallets = (detail ?? "")
-    .split(",")
-    .map((wallet) => formatE2eeWallet(wallet.trim()))
-    .filter((wallet) => wallet.length > 0);
+  const wallets = [
+    ...new Set(
+      (detail ?? "")
+        .split(",")
+        .map((wallet) => formatE2eeWallet(wallet.trim()))
+        .filter((wallet) => wallet.length > 0)
+    ),
+  ];
   return wallets.length > 0 ? formatList(locale, wallets) : "";
 }
 

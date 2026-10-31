@@ -760,29 +760,35 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   // -- devices ----------------------------------------------------------------
 
-  /** "Add device": trusts the wallet for its owner, then adds the device. */
+  /**
+   * "Add device": trusts the wallet for its owner and approves the device,
+   * clears its notice from every chat, then adds it to each active chat the
+   * owner is in (the only chats that listed it).
+   */
   async trustDevice(deviceKey: string): Promise<void> {
     this.requireReady();
-    const target = this.ctx.store.findUntrusted(deviceKey);
+    const target = this.ctx.store.findUntrusted(deviceKey.toLowerCase());
     if (!target) {
       return;
     }
     await this.ctx.queue.run(() => approveDevice(this.ctx, target));
     this.ctx.store.dropUntrusted(target.deviceKey);
-    for (const [g, runtime] of this.ctx.store.groups) {
-      const member = runtime.record.members.some(
-        (leaf) => leaf.profileId === target.profileId
-      );
-      if (member && runtime.record.status === "active") {
-        await this.controller.addOtherDevices(g);
-      }
+    const chats = [...this.ctx.store.groups].filter(
+      ([, runtime]) =>
+        runtime.record.status === "active" &&
+        runtime.record.members.some(
+          (leaf) => leaf.profileId === target.profileId
+        )
+    );
+    for (const [g] of chats) {
+      await this.controller.addOtherDevices(g);
     }
   }
 
   /** "Ignore": the device stays out and its notice goes away. */
   async ignoreDevice(deviceKey: string): Promise<void> {
     this.requireReady();
-    const target = this.ctx.store.findUntrusted(deviceKey);
+    const target = this.ctx.store.findUntrusted(deviceKey.toLowerCase());
     if (!target) {
       return;
     }

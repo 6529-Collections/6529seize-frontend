@@ -74,7 +74,12 @@ const DEV_GRANT_HOSTNAMES: ReadonlySet<string> = new Set([
 ]);
 
 const isDevGrantHost = (host: string): boolean => {
-  const hostname = new URL(`https://${host}`).hostname;
+  let hostname: string;
+  try {
+    hostname = new URL(`https://${host}`).hostname;
+  } catch {
+    return false;
+  }
   return (
     DEV_GRANT_HOSTNAMES.has(hostname) ||
     hostname.endsWith(".localhost") ||

@@ -8,7 +8,8 @@ device and decrypted on each member's device. 6529.io delivers the encrypted
 data and orders group changes, but it cannot read messages, group names or the
 member list inside a chat. It does say which profile a device belongs to, so
 members' devices add a person's new device on their own only when a wallet
-already trusted for that person signed it (see [Device trust](#device-trust)).
+already trusted for that person signed it and the signature checks out on
+their device (see [Device trust](#device-trust)).
 
 Chats use the MLS protocol (RFC 9420) through a WebAssembly build of OpenMLS
 that runs in the browser or app. Keys are agreed with a hybrid post-quantum

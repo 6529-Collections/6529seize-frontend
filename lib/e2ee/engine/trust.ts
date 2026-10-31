@@ -19,6 +19,8 @@ type DeviceTrust = "trusted" | E2eeUntrustedDevice["reason"];
 
 /** Bounds the explicit approve/ignore lists kept per profile. */
 const MAX_DEVICE_DECISIONS = 500;
+/** Bounds the wallets pinned per person (oldest dropped first). */
+const MAX_PINNED_WALLETS = 16;
 
 const emptyTrust = (): StoredTrust => ({
   wallets: {},
@@ -96,6 +98,13 @@ async function saveTrust(ctx: EngineContext, next: StoredTrust): Promise<void> {
   ctx.directory.resetRevocations();
 }
 
+/** Adds `key` as the newest entry (moving it if present), keeping `max`. */
+const remember = (
+  list: readonly string[],
+  key: string,
+  max: number = MAX_DEVICE_DECISIONS
+): string[] => [...list.filter((item) => item !== key), key].slice(-max);
+
 /**
  * First sighting: a person with no pinned wallet yet gets the wallets of the
  * given verified devices pinned. People already pinned are left unchanged.
@@ -119,13 +128,11 @@ export async function pinFirstSighting(
   const trust = trustOf(ctx);
   const wallets = { ...trust.wallets };
   for (const [profileId, set] of fresh) {
-    wallets[profileId] = [...set].sort();
+    // Insertion order, newest last, so the cap drops the oldest pins.
+    wallets[profileId] = [...set].slice(-MAX_PINNED_WALLETS);
   }
   await saveTrust(ctx, { ...trust, wallets });
 }
-
-const remember = (list: readonly string[], key: string): string[] =>
-  [...list.filter((item) => item !== key), key].slice(-MAX_DEVICE_DECISIONS);
 
 /** "Add device": pins the device's wallet for its owner and approves it. */
 export async function approveDevice(
@@ -139,9 +146,7 @@ export async function approveDevice(
   await saveTrust(ctx, {
     wallets: {
       ...trust.wallets,
-      [device.profileId]: pins.includes(wallet)
-        ? pins
-        : [...pins, wallet].sort(),
+      [device.profileId]: remember(pins, wallet, MAX_PINNED_WALLETS),
     },
     approved: remember(trust.approved, key),
     ignored: trust.ignored.filter((item) => item !== key),
