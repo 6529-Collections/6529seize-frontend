@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import NextGenMint, {
   Spinner,
 } from "@/components/nextGen/collections/collectionParts/mint/NextGenMint";
@@ -75,7 +76,7 @@ describe("NextGenMint", () => {
             merkle_root: "",
           } as any
         }
-        mint_price={1}
+        mint_price={BigInt(1)}
         burn_amount={1}
       />
     );
@@ -106,7 +107,7 @@ describe("NextGenMint additional", () => {
             merkle_root: "",
           } as any
         }
-        mint_price={1}
+        mint_price={BigInt(1)}
         burn_amount={1}
       />
     );
@@ -132,10 +133,106 @@ describe("NextGenMint additional", () => {
             merkle_root: "root",
           } as any
         }
-        mint_price={1}
+        mint_price={BigInt(1)}
         burn_amount={1}
       />
     );
     expect(await screen.findByTestId("burn-widget")).toBeInTheDocument();
+  });
+});
+
+describe("NextGenMint allowlist loading", () => {
+  const collection = {
+    id: 1,
+    name: "C",
+    artist: "A",
+    artist_address: "0x",
+    image: "img.png",
+    public_start: "",
+    public_end: "",
+    merkle_root: "root",
+  } as any;
+
+  beforeEach(() => {
+    const helpers = require("@/components/nextGen/nextgen_helpers");
+    helpers.getStatusFromDates = jest.fn(() => "PAUSED");
+    (require("@/services/6529api").fetchUrl as jest.Mock).mockReset();
+  });
+
+  it("shows an accessible error instead of an endless loader when mint options fail", async () => {
+    const api = require("@/services/6529api");
+    (api.fetchUrl as jest.Mock).mockRejectedValue(
+      new Error("HTTP error! status: 500")
+    );
+    render(
+      <NextGenMint
+        collection={collection}
+        mint_price={BigInt(1)}
+        burn_amount={1}
+      />
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Mint options could not be loaded."
+    );
+    expect(screen.queryByLabelText("Loading mint options")).toBeNull();
+  });
+
+  it("retries loading mint options", async () => {
+    const api = require("@/services/6529api");
+    (api.fetchUrl as jest.Mock)
+      .mockRejectedValueOnce(new Error("HTTP error! status: 500"))
+      .mockResolvedValueOnce({ al_type: "external_burn" });
+    render(
+      <NextGenMint
+        collection={collection}
+        mint_price={BigInt(1)}
+        burn_amount={1}
+      />
+    );
+
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Try again" })
+    );
+
+    expect(await screen.findByTestId("burn-widget")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("aborts the allowlist request on unmount", () => {
+    const api = require("@/services/6529api");
+    (api.fetchUrl as jest.Mock).mockReturnValue(new Promise(() => {}));
+    const { unmount } = render(
+      <NextGenMint
+        collection={collection}
+        mint_price={BigInt(1)}
+        burn_amount={1}
+      />
+    );
+    const [, init] = (api.fetchUrl as jest.Mock).mock.calls[0];
+
+    expect(init.signal.aborted).toBe(false);
+    unmount();
+    expect(init.signal.aborted).toBe(true);
+  });
+
+  it.each([
+    [BigInt("12345678901234567891"), "12.345678901234567891 ETH"],
+    [BigInt("10000000000000001"), "0.010000000000000001 ETH"],
+    [BigInt(0), "Free"],
+  ])("shows the exact mint cost for %s wei", (price, label) => {
+    const api = require("@/services/6529api");
+    (api.fetchUrl as jest.Mock).mockReturnValue(new Promise(() => {}));
+    render(
+      <NextGenMint
+        collection={collection}
+        mint_price={price}
+        burn_amount={1}
+      />
+    );
+
+    expect(screen.getByText("Mint Cost").nextElementSibling).toHaveTextContent(
+      label
+    );
   });
 });

@@ -1,10 +1,11 @@
 import {
   QueryClient,
   QueryClientProvider,
+  useInfiniteQuery,
   useQuery,
 } from "@tanstack/react-query";
 import { act, render, screen } from "@testing-library/react";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { WsMessageType } from "@/helpers/Types";
 import {
@@ -13,6 +14,7 @@ import {
 } from "@/services/notifications/notification-realtime-state";
 import { NotificationWebSocketSync } from "@/services/websocket/NotificationWebSocketSync";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
+import type { TypedNotificationsResponse } from "@/types/feed.types";
 import { mockRandomUnit } from "../helpers/mockRandomUnit";
 
 const invalidateQueriesMock = jest.fn().mockResolvedValue(undefined);
@@ -124,6 +126,7 @@ describe("NotificationWebSocketSync", () => {
     randomUnitSpy = mockRandomUnit(0.5);
     mockUseQueryClient.mockReturnValue({
       invalidateQueries: invalidateQueriesMock,
+      getQueryCache: () => ({ findAll: () => [] }),
     });
     messageCallbacks.clear();
     webSocketStatus = WebSocketStatus.CONNECTED;
@@ -384,6 +387,7 @@ describe("NotificationWebSocketSync", () => {
     expect(invalidateQueriesMock).toHaveBeenCalledWith(
       {
         queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
+        predicate: expect.any(Function),
       },
       {
         cancelRefetch: false,
@@ -428,6 +432,7 @@ describe("NotificationWebSocketSync", () => {
     expect(invalidateQueriesMock).toHaveBeenCalledWith(
       {
         queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
+        predicate: expect.any(Function),
       },
       {
         cancelRefetch: false,
@@ -507,5 +512,187 @@ describe("NotificationWebSocketSync", () => {
 
     unmount();
     queryClient.clear();
+  });
+
+describe("mounted notification lists", () => {
+    const PAGE_SIZE = 3;
+    let serverIds: number[];
+    let listQueryFn: jest.Mock<
+      Promise<TypedNotificationsResponse>,
+      [{ readonly pageParam: number | null }]
+    >;
+    let counterQueryFn: jest.Mock<Promise<{ readonly unread_count: number }>, []>;
+    let fetchNextPage: () => Promise<unknown>;
+    let queryClient: QueryClient;
+
+    const readServerPage = (cursor: number | null): TypedNotificationsResponse => {
+      const start = cursor === null ? 0 : serverIds.indexOf(cursor) + 1;
+      const ids = serverIds.slice(start, start + PAGE_SIZE);
+      const hasMore = start + PAGE_SIZE < serverIds.length;
+      return {
+        unread_count: 0,
+        notifications: ids.map((id) => ({ id })),
+        nextPageParam: hasMore ? (ids.at(-1) ?? null) : null,
+      } as unknown as TypedNotificationsResponse;
+    };
+
+    function NotificationsList() {
+      const query = useInfiniteQuery({
+        queryKey: [QueryKey.IDENTITY_NOTIFICATIONS, "list"],
+        queryFn: listQueryFn,
+        initialPageParam: null as number | null,
+        getNextPageParam: (lastPage: TypedNotificationsResponse) =>
+          lastPage.nextPageParam,
+        staleTime: 60_000,
+      });
+      const { fetchNextPage: loadMore } = query;
+      useEffect(() => {
+        fetchNextPage = loadMore;
+      }, [loadMore]);
+      return null;
+    }
+
+    function UnreadCounter() {
+      useQuery({
+        queryKey: [QueryKey.IDENTITY_NOTIFICATIONS, "unread"],
+        queryFn: counterQueryFn,
+        staleTime: 60_000,
+      });
+      return null;
+    }
+
+    const cachedIds = () =>
+      queryClient
+        .getQueryData<{ readonly pages: TypedNotificationsResponse[] }>([
+          QueryKey.IDENTITY_NOTIFICATIONS,
+          "list",
+        ])
+        ?.pages.map((page) => page.notifications.map(({ id }) => id));
+
+    const renderLoadedLists = async () => {
+      mockUseQueryClient.mockReturnValue(queryClient);
+      const view = render(
+        createQueryClientWrapper(
+          queryClient,
+          <>
+            <NotificationWebSocketSync />
+            <NotificationsList />
+            <UnreadCounter />
+          </>
+        )
+      );
+      await flushQueryWork();
+      await act(async () => {
+        await fetchNextPage();
+      });
+      await flushQueryWork();
+      expect(cachedIds()).toEqual([
+        [10, 9, 8],
+        [7, 6, 5],
+      ]);
+      listQueryFn.mockClear();
+      counterQueryFn.mockClear();
+      return view;
+    };
+
+    const emitNotificationsChanged = async () => {
+      act(() => {
+        messageCallbacks.get(WsMessageType.IDENTITY_NOTIFICATIONS_CHANGED)?.({
+          profile_id: "profile-1",
+        });
+        jest.advanceTimersByTime(150);
+      });
+      await flushQueryWork();
+    };
+
+    beforeEach(() => {
+      serverIds = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+      listQueryFn = jest.fn(
+        async ({ pageParam }: { readonly pageParam: number | null }) =>
+          readServerPage(pageParam)
+      );
+      counterQueryFn = jest.fn(async () => ({ unread_count: 1 }));
+      queryClient = new QueryClient({
+        defaultOptions: {
+          queries: { gcTime: Number.POSITIVE_INFINITY, retry: false },
+        },
+      });
+    });
+
+    afterEach(() => {
+      queryClient.clear();
+    });
+
+    it("reloads only the first page of a mounted list and keeps the older pages", async () => {
+      const { unmount } = await renderLoadedLists();
+      serverIds = [12, 11, ...serverIds];
+
+      await emitNotificationsChanged();
+
+      expect(listQueryFn).toHaveBeenCalledTimes(1);
+      expect(listQueryFn).toHaveBeenCalledWith(
+        expect.objectContaining({ pageParam: null })
+      );
+      expect(cachedIds()).toEqual([
+        [12, 11, 10],
+        [9, 8, 7, 6, 5],
+      ]);
+
+      await act(async () => {
+        await fetchNextPage();
+      });
+      await flushQueryWork();
+      expect(listQueryFn).toHaveBeenLastCalledWith(
+        expect.objectContaining({ pageParam: 5 })
+      );
+      expect(cachedIds()).toEqual([
+        [12, 11, 10],
+        [9, 8, 7, 6, 5],
+        [4, 3, 2],
+      ]);
+      unmount();
+    });
+
+    it("still invalidates the other queries under the notifications key", async () => {
+      const { unmount } = await renderLoadedLists();
+      serverIds = [11, ...serverIds];
+
+      await emitNotificationsChanged();
+
+      expect(counterQueryFn).toHaveBeenCalledTimes(1);
+      expect(listQueryFn).toHaveBeenCalledTimes(1);
+      unmount();
+    });
+
+    it("refetches every loaded page when the first page cannot connect to the cache", async () => {
+      const { unmount } = await renderLoadedLists();
+      serverIds = [16, 15, 14, 13, 12, 11, ...serverIds];
+
+      await emitNotificationsChanged();
+
+      // One first-page attempt, then the two loaded pages.
+      expect(listQueryFn).toHaveBeenCalledTimes(3);
+      expect(cachedIds()).toEqual([
+        [16, 15, 14],
+        [13, 12, 11],
+      ]);
+      unmount();
+    });
+
+    it("keeps the cached list when the first page request fails with a client error", async () => {
+      const { unmount } = await renderLoadedLists();
+      listQueryFn.mockRejectedValueOnce(
+        Object.assign(new Error("Too many requests"), { status: 429 })
+      );
+
+      await emitNotificationsChanged();
+
+      expect(listQueryFn).toHaveBeenCalledTimes(1);
+      expect(cachedIds()).toEqual([
+        [10, 9, 8],
+        [7, 6, 5],
+      ]);
+      unmount();
+    });
   });
 });

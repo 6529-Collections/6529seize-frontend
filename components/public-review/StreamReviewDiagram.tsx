@@ -1,5 +1,6 @@
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import "@/i18n/namespaces/public-review";
 import { PublicReviewMarkdown } from "./PublicReviewMarkdown";
 
 export type StreamReviewDiagramKind =
