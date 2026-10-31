@@ -9,24 +9,24 @@ import { parseWorkKey } from "@/lib/stream/workKey";
 
 type Params = { readonly params: Promise<{ id: string }> };
 
-/** A master's token ID (6529 Stream Editions) or a federated `<contract>-<id>`. */
+/**
+ * A master's token ID (6529 Stream Editions) or a federated `<contract>-<id>`.
+ * Next passes the segment already decoded; decoding it again would throw on `%`.
+ */
 export default async function Page({ params }: Params) {
   assertStreamProduct();
   const { id } = await params;
-  const key = decodeURIComponent(id);
-  if (parseWorkKey(key) === null) {
+  if (parseWorkKey(id) === null) {
     notFound();
   }
-  return <EditionPage param={key} />;
+  return <EditionPage param={id} />;
 }
 
 export async function generateMetadata({ params }: Params) {
   const { id } = await params;
   return streamPageMetadata(
     "stream.edition.metadataTitle",
-    `/stream/editions/${id}`,
-    {
-      id: decodeURIComponent(id),
-    }
+    `/stream/editions/${encodeURIComponent(id)}`,
+    { id }
   );
 }

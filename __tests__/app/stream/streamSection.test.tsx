@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import { isValidElement, type ReactElement } from "react";
 
 const mockNotFound = jest.fn(() => {
@@ -19,6 +21,34 @@ import EditionsPage from "@/app/stream/editions/page";
 import WorkRoute from "@/app/stream/works/[id]/page";
 import AboutRoute from "@/app/stream/about/[page]/page";
 import StreamShell from "@/components/stream/layout/StreamShell";
+
+type RoutePage = (props: {
+  readonly params: Promise<Record<string, string>>;
+}) => unknown;
+
+/** Every page file under app/stream except the root, from the repo root. */
+function subPageFiles(dir = "app/stream"): string[] {
+  return fs
+    .readdirSync(path.join(process.cwd(), dir), { withFileTypes: true })
+    .flatMap((entry) => {
+      const file = `${dir}/${entry.name}`;
+      if (entry.isDirectory()) {
+        return subPageFiles(file);
+      }
+      return entry.name === "page.tsx" && dir !== "app/stream" ? [file] : [];
+    });
+}
+
+/** Params each dynamic route accepts, so only the flag can 404 it. */
+function validParams(file: string) {
+  return {
+    params: Promise.resolve({
+      id: file.startsWith("app/stream/artists/") ? "0x1" : "12",
+      page: "how-it-works",
+      contract: `0x${"a".repeat(40)}`,
+    }),
+  };
+}
 
 describe("the /stream section behind its flag", () => {
   beforeEach(() => {
@@ -46,6 +76,22 @@ describe("the /stream section behind its flag", () => {
       isValidElement(await WorkRoute({ params: Promise.resolve({ id: "12" }) }))
     ).toBe(true);
     expect(mockNotFound).not.toHaveBeenCalled();
+  });
+
+  it("gates every sub-page on the flag, including pages added later", async () => {
+    const files = subPageFiles();
+    expect(files.length).toBeGreaterThanOrEqual(13);
+    for (const file of files) {
+      const { default: Page } = (await import(
+        path.join(process.cwd(), file)
+      )) as { default: RoutePage };
+      env.BASE_ENDPOINT = "https://6529.io";
+      await expect(
+        Promise.resolve().then(() => Page(validParams(file)))
+      ).rejects.toThrow("NEXT_NOT_FOUND");
+      env.BASE_ENDPOINT = "https://staging.6529.io";
+      expect(isValidElement(await Page(validParams(file)))).toBe(true);
+    }
   });
 
   it("404s malformed work keys and unknown explainers", async () => {

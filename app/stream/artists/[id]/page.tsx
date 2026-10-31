@@ -14,7 +14,8 @@ const ARTIST_ID = /^0x[0-9a-f]{1,64}$/;
 export default async function Page({ params }: Params) {
   assertStreamProduct();
   const { id } = await params;
-  const artistId = decodeURIComponent(id).toLowerCase();
+  // Next passes the segment already decoded.
+  const artistId = id.toLowerCase();
   if (!ARTIST_ID.test(artistId)) {
     notFound();
   }
@@ -25,6 +26,6 @@ export async function generateMetadata({ params }: Params) {
   const { id } = await params;
   return streamPageMetadata(
     "stream.artist.metadataTitle",
-    `/stream/artists/${id}`
+    `/stream/artists/${encodeURIComponent(id)}`
   );
 }

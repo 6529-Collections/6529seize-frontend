@@ -24,6 +24,6 @@ export async function generateMetadata({ params }: Params) {
   const { contract } = await params;
   return streamPageMetadata(
     "stream.federated.metadataTitle",
-    `/stream/federated/${contract.toLowerCase()}`
+    `/stream/federated/${encodeURIComponent(contract.toLowerCase())}`
   );
 }
