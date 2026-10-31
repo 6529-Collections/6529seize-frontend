@@ -13,6 +13,7 @@ import { getDeviceKeyFingerprint } from "@/lib/device-signing/grant-message";
 import {
   verifyDropSignedEvents,
   type DropSignatureVerdict,
+  type WalletSignatureCheck,
   toDisplayedDropContent,
 } from "@/lib/device-signing/verify-signed-events";
 import {
@@ -47,6 +48,12 @@ interface DropSignatureDialogProps {
   readonly onClose: () => void;
 }
 
+/** How the wallet's sign-in signature was verified, one label per check. */
+const WALLET_SIGNATURE_KEYS = {
+  verified: "signedMessages.signature.walletVerified",
+  "contract-verified": "signedMessages.signature.contractWalletVerified",
+} as const satisfies Record<WalletSignatureCheck, string>;
+
 function SignedDetails({
   locale,
   verdict,
@@ -70,12 +77,7 @@ function SignedDetails({
     ],
     [
       t(locale, "signedMessages.signature.walletSignature"),
-      t(
-        locale,
-        signature.walletSignature === "verified"
-          ? "signedMessages.signature.walletVerified"
-          : "signedMessages.signature.contractWalletVerified"
-      ),
+      t(locale, WALLET_SIGNATURE_KEYS[signature.walletSignature]),
     ],
     [
       t(locale, "signedMessages.signature.currentContent"),

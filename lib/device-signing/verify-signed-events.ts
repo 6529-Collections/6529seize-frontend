@@ -23,7 +23,7 @@ import {
  * "contract-verified": the wallet has contract code on Ethereum and its
  * EIP-1271 check returned the magic value for this signature.
  */
-type WalletSignatureCheck = "verified" | "contract-verified";
+export type WalletSignatureCheck = "verified" | "contract-verified";
 
 /**
  * A grant's wallet signature: verified, "unverifiable" when only a contract

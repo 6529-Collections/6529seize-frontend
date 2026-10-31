@@ -120,7 +120,7 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.signature.invalidDescription":
     "The stored signature does not match this post. Treat its authorship with caution.",
   "signedMessages.signature.unverifiableDescription":
-    "Checking this wallet's sign-in signature needs a contract-wallet check on Ethereum that your browser couldn't complete, so this post is not shown as signed. Try again later.",
+    "This signature couldn't be checked right now, so this post isn't shown as signed. Try again later.",
   "signedMessages.signature.wallet": "Wallet",
   "signedMessages.signature.deviceKey": "Device key",
   "signedMessages.signature.grantExpires": "Grant expires",
