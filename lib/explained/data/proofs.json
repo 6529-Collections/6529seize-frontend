@@ -1,0 +1,207 @@
+{
+  "note": "The zero-knowledge proofs of a TDH day (6529chain P52, P53 section 4.6, D119, D128) as the validator's own records state them, at the commits named in sources. Refresh at ship time with the fact gate. No person, account, host or address is named; program identities are hashes of public code.",
+  "sources": {
+    "contracts": {
+      "ref": "the validator's contracts record (contracts/README.md), commit a92983d",
+      "writtenAt": "2026-10-18T17:33:40Z"
+    },
+    "programA": {
+      "ref": "the validator's program A record (zk/program-a/README.md), commit 1a89f27",
+      "writtenAt": "2026-10-16T04:01:24Z"
+    },
+    "programB": {
+      "ref": "the validator's program B record (zk/program-b/README.md), commit 0015ad3",
+      "writtenAt": "2026-10-16T05:36:24Z"
+    },
+    "runbook": {
+      "ref": "the proving runbook, sections 7 and 10, round 6 of 2026-10-16"
+    },
+    "p53": {
+      "ref": "P53 section 4.6, the T proof's statement, 6529chain 9b1ec14",
+      "writtenAt": "2026-10-31T10:00:36Z"
+    },
+    "p52": {
+      "ref": "P52 section 3, the T proof, 6529chain 32b6471",
+      "writtenAt": "2026-10-30T23:34:08Z"
+    },
+    "runLog": {
+      "ref": "6529's design record, run log of 2026-10-15"
+    }
+  },
+  "statement": {
+    "words": 25,
+    "bytes": 800,
+    "wordBytes": 32
+  },
+  "day": {
+    "date": "2026-10-11",
+    "ruleVersion": "tdh-v1.0",
+    "wordsA": [
+      "9a1f1eb01d9e60d7da5cab32650af0204525f51d30e121a58a30fb52395a6529",
+      "305a60a8768fcb3908a775373e58a0f8c60642dba778d8158c8cbd75284cd102",
+      "0000000000000000000000000000000000000000000000000000000000005101",
+      "63e242fac535c4db348f95768624c657571db32facfca4fb8a9ea780163bcf22",
+      "00000000000000000000000000000000000000000000000000000000018f24dc",
+      "df6b110e43acb4386323bf667c53dc86e3c74f048d30a6489c86d3456e603aab",
+      "00000000000000000000000000000000000000000000000000000000018f40e9",
+      "9d8779ccd70cb8d384d4641c44da5c8a10a53bba62b87d2d4409ef2e4d898873",
+      "000000000000000000000000000000000000000000000000000000006acad17f",
+      "40cea7e82177c3136767fda974126d13bbc4481cd771fa064134997d7fa1b131",
+      "00000000000000000000000000000000000000000000000000000000018f410a",
+      "8d36dafc86d1a32be3e9e6759b37bfaf95c4f35eb43bdafbe36fcca847740a1e",
+      "d743946651ae897162a2601482a93f095401ffd4962cd81209fb82a8abca42e0",
+      "00000000000000000000000000000000000000000000000000000000000650ef",
+      "fba71d9ca5102b91425d13542bd9e779656c7da38b349fbe39837b4950a26c3f",
+      "0000000000000000000000000000000000000000000000000000000000065137",
+      "17e174f22325748b5bd522cb8c317fb9c3c71d35e1da17fabad4dc3532728e9c",
+      "b67c44efd73692f44867f51fd9cafadac72fd9dec59069d9429f930482627061",
+      "0000000000000000000000000000000000000000000000000000000000002b78",
+      "0000000000000000000000000000000000000000000000000000000000002826",
+      "000000000000000000000000000000000000000000000000000000007ad55b2f",
+      "d3f3bd0fae6f2f5dd2340a98e77709e3faf471cb41cc0bda50ef48960a87af95",
+      "000000000000000000000000000000000000000000000000000000000001f6ea",
+      "10e2a7a05fa677b80a33b826fc897f2cbb80b29da99d93bffb48ed9fde7a9c45",
+      "c4fdd50200416da9f35dc16ce119152dba9ec0e922a747fae41e7396e8ec05db"
+    ],
+    "wordsB": [
+      "9a1f1eb01d9e60d7da5cab32650af0204525f51d30e121a58a30fb52395a6529",
+      "305a60a8768fcb3908a775373e58a0f8c60642dba778d8158c8cbd75284cd102",
+      "0000000000000000000000000000000000000000000000000000000000005101",
+      "63e242fac535c4db348f95768624c657571db32facfca4fb8a9ea780163bcf22",
+      "00000000000000000000000000000000000000000000000000000000018f24dc",
+      "df6b110e43acb4386323bf667c53dc86e3c74f048d30a6489c86d3456e603aab",
+      "00000000000000000000000000000000000000000000000000000000018f40e9",
+      "9d8779ccd70cb8d384d4641c44da5c8a10a53bba62b87d2d4409ef2e4d898873",
+      "000000000000000000000000000000000000000000000000000000006acad17f",
+      "40cea7e82177c3136767fda974126d13bbc4481cd771fa064134997d7fa1b131",
+      "00000000000000000000000000000000000000000000000000000000018fbf8e",
+      "e60f5bef7c7ab852d76624e8bc42a2fe85ab10db00eefe27ca982db572192af1",
+      "d743946651ae897162a2601482a93f095401ffd4962cd81209fb82a8abca42e0",
+      "00000000000000000000000000000000000000000000000000000000000650ef",
+      "fba71d9ca5102b91425d13542bd9e779656c7da38b349fbe39837b4950a26c3f",
+      "0000000000000000000000000000000000000000000000000000000000065137",
+      "17e174f22325748b5bd522cb8c317fb9c3c71d35e1da17fabad4dc3532728e9c",
+      "b67c44efd73692f44867f51fd9cafadac72fd9dec59069d9429f930482627061",
+      "0000000000000000000000000000000000000000000000000000000000002b78",
+      "0000000000000000000000000000000000000000000000000000000000002826",
+      "000000000000000000000000000000000000000000000000000000007ad55b2f",
+      "d3f3bd0fae6f2f5dd2340a98e77709e3faf471cb41cc0bda50ef48960a87af95",
+      "000000000000000000000000000000000000000000000000000000000001f6ea",
+      "10e2a7a05fa677b80a33b826fc897f2cbb80b29da99d93bffb48ed9fde7a9c45",
+      "c4fdd50200416da9f35dc16ce119152dba9ec0e922a747fae41e7396e8ec05db"
+    ],
+    "steps": 73453088911,
+    "nativeSeconds": 18,
+    "inputBytes": 1701311249,
+    "blocks": 7181,
+    "bloomBlocks": 1342,
+    "receiptBlocks": 5839,
+    "txBlocks": 33,
+    "dayLogs": 72,
+    "receiptBytes": 1567455532,
+    "historyLogs": 413935,
+    "gpu": "NVIDIA L4",
+    "hostMemoryGb": 128,
+    "costUsd": 27,
+    "provedOn": "2026-10-16",
+    "nativeTotal": 2060802863
+  },
+  "dayB": {
+    "userCycles": 137473152108,
+    "paddedCycles": 178829918208,
+    "segments": 170546,
+    "gpuHours": 95,
+    "costUsd": 290,
+    "total": 2060802863
+  },
+  "phases": {
+    "build": "54b57cf",
+    "total": 72052372452,
+    "parts": [
+      {
+        "id": "receipts",
+        "steps": 35484626999
+      },
+      {
+        "id": "tdh",
+        "steps": 14069058202
+      },
+      {
+        "id": "accounting",
+        "steps": 10835715931
+      },
+      {
+        "id": "history",
+        "steps": 6411485838
+      },
+      {
+        "id": "export",
+        "steps": 2499710842
+      },
+      {
+        "id": "decode",
+        "steps": 1588109783
+      },
+      {
+        "id": "rest",
+        "steps": 1163664857
+      }
+    ]
+  },
+  "pair": {
+    "cycle": 20741,
+    "date": "2026-10-15",
+    "provedOn": "2026-10-16",
+    "stepsA": 18961118,
+    "stepsB": 4504532,
+    "proofBytesA": 356,
+    "sealBytesB": 260,
+    "submitGas": 689735,
+    "transactionGas": 736300,
+    "calldataBytes": 2532,
+    "forkBlock": 26203200
+  },
+  "gas": {
+    "verifyA": 229812,
+    "verifyB": 238663,
+    "p52Estimate": 730000
+  },
+  "programs": {
+    "a": {
+      "zkvm": "SP1 6.9.0",
+      "wrapper": "Groth16 on BN254",
+      "vkey": "0x00d666ad2a6f6087e0f747a27890fc23573d53f71b6b7ed5ee32d9a683ec1595",
+      "elfSha256": "1c2770667d14d6d6efb013b7ca729b2b4795ab61aa62031f925a0d980af676e6"
+    },
+    "b": {
+      "zkvm": "RISC Zero 3.0.6",
+      "wrapper": "Groth16 on BN254",
+      "imageId": "0xae9b6294b15c5fb95827c6ed5c8c9ca4c1a89b5951c2417854396df6c6862d3d"
+    }
+  },
+  "contract": {
+    "checks": 8,
+    "unitTests": 103,
+    "forkTests": 38,
+    "testedOn": "2026-10-18",
+    "horizon": "2026-12-01T00:00:00Z",
+    "retiredRuleId": "0x63e242fac535c4db348f95768624c657571db32facfca4fb8a9ea780163bcf22"
+  },
+  "sp1Advisory": {
+    "id": "CVE-2026-40323",
+    "published": "2026-04-11",
+    "fixed": "6.1.0"
+  },
+  "catchup": {
+    "chainStart": 13360862,
+    "millionBlocks": 13
+  },
+  "milestones": {
+    "firstProofs": "2026-10-15",
+    "tdhV14": "2026-10-18"
+  },
+  "vectorFinding": {
+    "vectors": 5,
+    "date": "2026-10-15"
+  }
+}

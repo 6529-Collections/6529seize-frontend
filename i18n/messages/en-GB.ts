@@ -13,6 +13,7 @@ import explainedTdhDayMessages from "@/i18n/messages/explainedTdhDay.en-GB.json"
 import explainedTdhHowMessages from "@/i18n/messages/explainedTdhHow.en-GB.json";
 import explainedTdhWalletsMessages from "@/i18n/messages/explainedTdhWallets.en-GB.json";
 import explainedTdhDesignMessages from "@/i18n/messages/explainedTdhDesign.en-GB.json";
+import explainedTdhProofsMessages from "@/i18n/messages/explainedTdhProofs.en-GB.json";
 import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.en-GB.json";
 import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.en-GB.json";
 import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.en-GB.json";
@@ -65,6 +66,7 @@ export const EN_GB_MESSAGES = {
   ...explainedTdhHowMessages,
   ...explainedTdhWalletsMessages,
   ...explainedTdhDesignMessages,
+  ...explainedTdhProofsMessages,
   ...profileCmsStudioMessages,
   ...profileCmsAgentMessages,
   ...studioTemplateDescriptions,

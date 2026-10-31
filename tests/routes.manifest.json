@@ -1866,6 +1866,10 @@
       "classification": "crawlable",
       "family": "network"
     },
+    "/network/tdh/proofs": {
+      "classification": "crawlable",
+      "family": "network"
+    },
     "/network/tdh/specification": {
       "classification": "crawlable",
       "family": "network"

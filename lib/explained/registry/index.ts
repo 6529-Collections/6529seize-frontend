@@ -3,6 +3,7 @@ import { EDITION_FACTS, MEME_FAMILY } from "./editionFacts";
 import { FEED_FACTS } from "./feedFacts";
 import { FORMAL_FACTS, MANIFEST_SECTION_FAMILY } from "./formalFacts";
 import { MANIFEST_FACTS } from "./manifestFacts";
+import { PROOF_FACTS } from "./proofFacts";
 import { DECISION_FAMILY, RECORD_FACTS } from "./recordFacts";
 import { REFERENCE_FACTS } from "./referenceFacts";
 import { SITE_FACTS } from "./siteFacts";
@@ -21,6 +22,7 @@ export const FACT_REGISTRY = {
   ...EDITION_FACTS,
   ...FORMAL_FACTS,
   ...REFERENCE_FACTS,
+  ...PROOF_FACTS,
 } as const;
 
 export type StaticFactId = keyof typeof FACT_REGISTRY;

@@ -105,6 +105,7 @@ describe("the chapter shell", () => {
       "/network/tdh/consolidation",
       "/network/tdh/verification",
       "/network/tdh/formal",
+      "/network/tdh/proofs",
       "/network/tdh/specification",
       "/network/tdh/implementations",
       "/network/tdh/consolidation/design",

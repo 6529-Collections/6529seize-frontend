@@ -61,6 +61,7 @@ import explainedTdhGlossaryMessages from "@/i18n/messages/explainedTdhGlossary.e
 import explainedTdhHowMessages from "@/i18n/messages/explainedTdhHow.en-US.json";
 import explainedTdhWalletsMessages from "@/i18n/messages/explainedTdhWallets.en-US.json";
 import explainedTdhDesignMessages from "@/i18n/messages/explainedTdhDesign.en-US.json";
+import explainedTdhProofsMessages from "@/i18n/messages/explainedTdhProofs.en-US.json";
 import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US.json";
 import pageMetadataMessages from "@/i18n/messages/pageMetadata.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
@@ -4628,6 +4629,7 @@ export const EN_US_MESSAGES = {
   ...explainedTdhHowMessages,
   ...explainedTdhWalletsMessages,
   ...explainedTdhDesignMessages,
+  ...explainedTdhProofsMessages,
   ...delegationTapGuideMessages,
   ...pageMetadataMessages,
   ...toolsMessages,
