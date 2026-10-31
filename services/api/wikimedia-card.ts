@@ -134,6 +134,17 @@ export const fetchWikimediaCard = async (
       }
       return response.json() as Promise<WikimediaCardResponse>;
     })
+    .then((card) => {
+      // An unavailable card may be a transient upstream failure. The route
+      // does not cache it, so the next preview of this URL should retry too.
+      if (
+        card.kind === "unavailable" &&
+        wikimediaCache.get(normalizedUrl) === requestPromise
+      ) {
+        wikimediaCache.delete(normalizedUrl);
+      }
+      return card;
+    })
     .catch((error) => {
       wikimediaCache.delete(normalizedUrl);
       throw error;
