@@ -1,7 +1,5 @@
 "use client";
 
-import { useId } from "react";
-
 import {
   useStream,
   useStreamNow,
@@ -38,7 +36,6 @@ export default function StreamDevPanel({
 }) {
   const { client, account, setAccount } = useStream();
   const now = useStreamNow();
-  const selectId = useId();
   const dev = client?.dev ?? null;
   const { data: accounts = [] } = useStreamQuery("dev-accounts", [], () =>
     Promise.resolve(dev === null ? [] : dev.accounts())
@@ -115,33 +112,29 @@ export default function StreamDevPanel({
           </button>
         </div>
         <div>
-          <label
-            htmlFor={selectId}
-            className="tw-block tw-text-xs tw-text-iron-400"
-          >
+          <label className="tw-block tw-text-xs tw-text-iron-400">
             {t(locale, "stream.dev.account")}
-          </label>
-          <select
-            id={selectId}
-            value={account ?? NOT_CONNECTED}
-            onChange={(event) =>
-              setAccount(
-                event.target.value === NOT_CONNECTED
-                  ? null
-                  : (event.target.value as Address)
-              )
-            }
-            className="tw-mt-1 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-2 tw-py-1.5 tw-text-sm tw-text-iron-100"
-          >
-            <option value={NOT_CONNECTED}>
-              {t(locale, "stream.dev.notConnected")}
-            </option>
-            {accounts.map((entry) => (
-              <option key={entry.address} value={entry.address}>
-                {entry.label}
+            <select
+              value={account ?? NOT_CONNECTED}
+              onChange={(event) =>
+                setAccount(
+                  event.target.value === NOT_CONNECTED
+                    ? null
+                    : (event.target.value as Address)
+                )
+              }
+              className="tw-mt-1 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-2 tw-py-1.5 tw-text-sm tw-text-iron-100"
+            >
+              <option value={NOT_CONNECTED}>
+                {t(locale, "stream.dev.notConnected")}
               </option>
-            ))}
-          </select>
+              {accounts.map((entry) => (
+                <option key={entry.address} value={entry.address}>
+                  {entry.label}
+                </option>
+              ))}
+            </select>
+          </label>
           {current === undefined ? null : (
             <p className="tw-m-0 tw-mt-1 tw-text-xs tw-text-iron-400">
               {t(locale, "stream.dev.balance", {

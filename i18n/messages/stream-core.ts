@@ -88,8 +88,7 @@ export const STREAM_CORE_MESSAGES = {
 
   "stream.gas.about": "About {amount} gas · {source}",
   "stream.gas.range": "{low}–{high}",
-  "stream.gas.source.sepoliaR2":
-    "Sepolia r2, Glamsterdam, measured 11 Oct 2026",
+  "stream.gas.source.sepoliaR2": "Sepolia r2, Glamsterdam, measured {date}",
   "stream.gas.source.d138Estimate": "estimate, Glamsterdam",
   "stream.gas.source.adrFederated": "design estimate, per contract",
   "stream.gas.source.node": "node estimate",

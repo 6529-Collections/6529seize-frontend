@@ -189,7 +189,13 @@ function settleUnbid(engine: MockStreamEngine, auction: MockEnglishAuction) {
     return { outcome: "museum" as const, to: museum };
   }
   const artist = engine.state.artists.get(token.artistId);
-  if (artist?.restrainedUntil !== null) {
+  // While a recovery override is pending nobody may act as the artist, and
+  // settlement waits for its outcome (IDENTITY-1).
+  const restrained =
+    artist?.restrainedUntil !== undefined &&
+    artist.restrainedUntil !== null &&
+    engine.now() < artist.restrainedUntil;
+  if (artist === undefined || restrained) {
     revert("ArtistRestrained", { artistId: token.artistId });
   }
   token.owner = artist.authority;

@@ -17,9 +17,7 @@ import StreamLayout from "@/app/stream/layout";
 import MePage from "@/app/stream/me/page";
 import EditionsPage from "@/app/stream/editions/page";
 import WorkRoute from "@/app/stream/works/[id]/page";
-import AboutRoute, {
-  generateStaticParams,
-} from "@/app/stream/about/[page]/page";
+import AboutRoute from "@/app/stream/about/[page]/page";
 import StreamShell from "@/components/stream/layout/StreamShell";
 
 describe("the /stream section behind its flag", () => {
@@ -58,14 +56,13 @@ describe("the /stream section behind its flag", () => {
     await expect(
       AboutRoute({ params: Promise.resolve({ page: "overview" }) })
     ).rejects.toThrow("NEXT_NOT_FOUND");
-    expect(generateStaticParams().map((entry) => entry.page)).toEqual([
-      "artists",
-      "collectors",
-      "editions",
-      "curation",
-      "federated",
-      "how-it-works",
-      "developers",
-    ]);
+    await expect(
+      AboutRoute({ params: Promise.resolve({ page: "unknown" }) })
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+    expect(
+      isValidElement(
+        await AboutRoute({ params: Promise.resolve({ page: "how-it-works" }) })
+      )
+    ).toBe(true);
   });
 });

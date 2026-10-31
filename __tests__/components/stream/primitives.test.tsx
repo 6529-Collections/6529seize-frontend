@@ -58,6 +58,15 @@ describe("6529 Stream primitives", () => {
       />
     );
     expect(screen.getByRole("timer")).toHaveTextContent("Ended");
+    rerender(
+      <Countdown
+        endTime={10_000}
+        now={10_000 - 125}
+        locale="de-DE"
+        closeWindow={900}
+      />
+    );
+    expect(screen.getByRole("timer")).toHaveTextContent("Ends in 2m 05s");
   });
 
   it("draws an order book with a price line under the clearing price", () => {
@@ -132,7 +141,13 @@ describe("6529 Stream primitives", () => {
     );
     expect(
       screen.getByText(
-        "About 169K gas · Sepolia r2, Glamsterdam, measured 11 Oct 2026"
+        "About 169K gas · Sepolia r2, Glamsterdam, measured Oct 11, 2026"
+      )
+    ).toBeInTheDocument();
+    rerender(<GasNote estimate={GAS_ESTIMATES.auctionBid} locale="de-DE" />);
+    expect(
+      screen.getByText(
+        "About 169.000 gas · Sepolia r2, Glamsterdam, measured 11.10.2026"
       )
     ).toBeInTheDocument();
     rerender(

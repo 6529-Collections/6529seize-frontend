@@ -32,6 +32,8 @@ interface StreamClient {
   readonly dev: StreamDevControls | null;
 }
 
+// One mock world per tab. The chain source must not reuse a client across
+// accounts: account state lives in `useStream().account`, never in the client.
 let browserStream: StreamClient | null = null;
 
 /** One world per browser tab, kept across client-side navigation. */
@@ -106,28 +108,46 @@ function useRevision(dataSource: StreamDataSource | null): string {
   return `${version}:${now}`;
 }
 
+/**
+ * The clock the section renders against. `now()` is sampled once per real
+ * second and on every data change, and cached in between, so React's snapshot
+ * reads stay stable even when the mock clock runs at 3,600×.
+ */
 const tickListeners = new Set<() => void>();
 let tickTimer: ReturnType<typeof setInterval> | null = null;
+let stopDataTicks: (() => void) | null = null;
+let cachedNow = 0;
+
+function sampleNow(): void {
+  cachedNow = browserStream?.dataSource.now() ?? 0;
+  tickListeners.forEach((notify) => notify());
+}
 
 function subscribeTick(listener: () => void): () => void {
   tickListeners.add(listener);
-  tickTimer ??= setInterval(() => {
-    tickListeners.forEach((notify) => notify());
-  }, 1_000);
+  if (tickTimer === null) {
+    cachedNow = browserStream?.dataSource.now() ?? 0;
+    tickTimer = setInterval(sampleNow, 1_000);
+    stopDataTicks = browserStream?.dataSource.subscribe(sampleNow) ?? null;
+  }
   return () => {
     tickListeners.delete(listener);
     if (tickListeners.size === 0 && tickTimer !== null) {
       clearInterval(tickTimer);
       tickTimer = null;
+      stopDataTicks?.();
+      stopDataTicks = null;
     }
   };
 }
 
+const getCachedNow = () => cachedNow;
+
 /** The data's "now" in Unix seconds (simulated in the mock), ticking each second; 0 before hydration. */
 export function useStreamNow(): number {
   const { client } = useStream();
-  const getNow = useCallback(() => client?.dataSource.now() ?? 0, [client]);
-  return useSyncExternalStore(subscribeTick, getNow, zero);
+  const now = useSyncExternalStore(subscribeTick, getCachedNow, zero);
+  return client === null ? 0 : now;
 }
 
 /**

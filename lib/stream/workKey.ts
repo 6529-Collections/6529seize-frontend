@@ -20,12 +20,17 @@ type ParsedWorkKey =
 export function parseWorkKey(key: string): ParsedWorkKey | null {
   const trimmed = key.trim();
   if (DIGITS.test(trimmed)) {
-    return { kind: "stream", tokenId: Number(trimmed) };
+    const tokenId = Number(trimmed);
+    return Number.isSafeInteger(tokenId) ? { kind: "stream", tokenId } : null;
   }
   const match = CONTRACT_KEY.exec(trimmed);
   const contract = match?.[1];
   const tokenId = match?.[2];
-  if (contract === undefined || tokenId === undefined) {
+  if (
+    contract === undefined ||
+    tokenId === undefined ||
+    !Number.isSafeInteger(Number(tokenId))
+  ) {
     return null;
   }
   return {

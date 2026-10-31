@@ -1,9 +1,9 @@
-import { formatNumber } from "@/i18n/format";
+import { formatDate, formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { type MessageKey, t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream";
 import type { TxError } from "@/lib/stream/dataSource";
-import type { GasEstimate } from "@/lib/stream/gas";
+import { type GasEstimate, SEPOLIA_R2_MEASURED_ON } from "@/lib/stream/gas";
 
 function compactGas(locale: SupportedLocale, gas: number): string {
   return formatNumber(locale, gas, {
@@ -18,7 +18,9 @@ function formatGas(locale: SupportedLocale, estimate: GasEstimate): string {
   const high = compactGas(locale, estimate.high);
   return t(locale, "stream.gas.about", {
     amount: low === high ? low : t(locale, "stream.gas.range", { low, high }),
-    source: t(locale, `stream.gas.source.${estimate.source}`),
+    source: t(locale, `stream.gas.source.${estimate.source}`, {
+      date: formatDate(locale, SEPOLIA_R2_MEASURED_ON, { dateStyle: "medium" }),
+    }),
   });
 }
 

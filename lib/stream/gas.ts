@@ -17,6 +17,9 @@ export type GasSource =
   /** Estimated by the node for this transaction. */
   | "node";
 
+/** When the Sepolia r2 figures were measured (a calendar date). */
+export const SEPOLIA_R2_MEASURED_ON = "2026-10-11";
+
 export type GasOperation =
   | "auctionStart"
   | "auctionBid"

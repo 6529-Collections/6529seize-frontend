@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useId, useState } from "react";
+import { useState } from "react";
 
 import { useStreamQuery } from "@/components/stream/data/StreamProvider";
 import SplitBar from "@/components/stream/diagrams/SplitBar";
@@ -71,7 +71,6 @@ function ContractRow({
 /** /stream/federated: the registry directory. Artist-owned, not curated. */
 export function FederatedDirectoryPage() {
   const locale = useBrowserLocale();
-  const toggleId = useId();
   const [includeDelisted, setIncludeDelisted] = useState(false);
   const { data: contracts } = useStreamQuery(
     "federated",
@@ -89,18 +88,15 @@ export function FederatedDirectoryPage() {
         </p>
         <PlaceholderNote locale={locale} />
       </PageHeader>
-      <div className="tw-mb-4 tw-flex tw-items-center tw-gap-2">
+      <label className="tw-mb-4 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-text-iron-300">
         <input
-          id={toggleId}
           type="checkbox"
           checked={includeDelisted}
           onChange={(event) => setIncludeDelisted(event.target.checked)}
           className="tw-size-4 tw-accent-primary-500"
         />
-        <label htmlFor={toggleId} className="tw-text-sm tw-text-iron-300">
-          {t(locale, "stream.federated.showDelisted")}
-        </label>
-      </div>
+        {t(locale, "stream.federated.showDelisted")}
+      </label>
       {contracts === undefined ? <Loading /> : null}
       {contracts?.length === 0 ? (
         <Empty text={t(locale, "stream.federated.empty")} />

@@ -189,6 +189,13 @@ describe("work keys", () => {
       tokenId: 3,
     });
     expect(parseWorkKey("0")).toBeNull();
+    // IDs past Number.MAX_SAFE_INTEGER would round to another token.
+    expect(parseWorkKey("9007199254740993")).toBeNull();
+    expect(
+      parseWorkKey(
+        "0x00000000000000000000000000000000000000ab-9007199254740993"
+      )
+    ).toBeNull();
     expect(parseWorkKey("../etc")).toBeNull();
   });
 });

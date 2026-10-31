@@ -21,14 +21,6 @@ function explainer(page: string): Exclude<AboutPage, "overview"> | null {
   return match === undefined || match === "overview" ? null : match;
 }
 
-export function generateStaticParams() {
-  return STREAM_ABOUT_PAGES.filter((page) => page !== "overview").map(
-    (page) => ({ page })
-  );
-}
-
-export const dynamicParams = false;
-
 export default async function Page({ params }: Params) {
   assertStreamProduct();
   const page = explainer((await params).page);

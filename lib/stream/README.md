@@ -135,6 +135,12 @@ Seeded scenarios (fictional artists, generated art):
 | Halden Studio, Reik Multiples, Ohm Rooms | Federated 721, 1155 and linked pair, with different licenses                            |
 | Mara Vell Official                       | A delisted federated contract (impersonation)                                           |
 
+## Localization
+
+Copy is the `stream.*` route namespace (`i18n/messages/stream-*.ts`), en-US
+only for now: other locales fall back to en-US until the owner approves the copy
+and translations follow. Numbers, dates and ETH amounts use `@/i18n/format`.
+
 ## Tests
 
 `__tests__/lib/stream/`: clearing and FIFO parity with the D138 reference model
