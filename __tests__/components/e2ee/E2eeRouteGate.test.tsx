@@ -93,11 +93,12 @@ describe("E2eeRouteGate", () => {
         name: "Turn on encrypted messages (one signature)",
       })
     );
-    expect(
-      await screen.findByText(
-        "You cancelled the signature. Nothing was turned on."
-      )
-    ).toBeInTheDocument();
+    const declined = await screen.findByText(
+      "You cancelled the signature. Nothing was turned on."
+    );
+    // Declining is a choice: announced politely, never as an alert.
+    expect(declined.tagName).toBe("OUTPUT");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("lists devices with revoke buttons at the device limit", async () => {

@@ -70,6 +70,15 @@ export function E2eeEnrollmentCard({
       ? "e2ee.enroll.rejected"
       : null);
 
+  const declined = visibleErrorKey === "e2ee.enroll.rejected";
+  const failureKey = declined ? null : visibleErrorKey;
+  let statusKey: MessageKey | null = null;
+  if (waiting) {
+    statusKey = "e2ee.enroll.waiting";
+  } else if (declined) {
+    statusKey = "e2ee.enroll.rejected";
+  }
+
   const enroll = async () => {
     if (!engine || waiting) {
       return;
@@ -130,24 +139,20 @@ export function E2eeEnrollmentCard({
           >
             {t(locale, "e2ee.enroll.button")}
           </Button>
-          <p
-            role="status"
-            className={`tw-m-0 tw-text-center tw-text-sm tw-text-iron-400 ${
-              waiting ? "" : "tw-sr-only"
+          {/* One polite region for waiting and for declining (a choice). */}
+          <output
+            className={`tw-block tw-text-center tw-text-sm tw-text-iron-300 ${
+              statusKey ? "" : "tw-sr-only"
             }`}
           >
-            {waiting ? t(locale, "e2ee.enroll.waiting") : null}
-          </p>
-          {visibleErrorKey ? (
+            {statusKey ? t(locale, statusKey) : null}
+          </output>
+          {failureKey ? (
             <p
               role="alert"
-              className={`tw-m-0 tw-text-center tw-text-sm ${
-                visibleErrorKey === "e2ee.enroll.rejected"
-                  ? "tw-text-iron-300"
-                  : "tw-text-rose-300"
-              }`}
+              className="tw-m-0 tw-text-center tw-text-sm tw-text-rose-300"
             >
-              {t(locale, visibleErrorKey)}
+              {t(locale, failureKey)}
             </p>
           ) : null}
         </div>

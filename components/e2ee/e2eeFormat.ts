@@ -52,7 +52,11 @@ export function formatE2eeTimestamp(
   return formatDate(locale, ms);
 }
 
-/** Local calendar day of `ms`, for grouping a timeline by day. */
+/**
+ * Local calendar day of `ms`, for grouping a timeline by day. Day helpers use
+ * the viewer's time zone, so they run only in the client timeline, which
+ * renders after the engine starts in the browser (never during SSR).
+ */
 export function getE2eeDayKey(ms: number): string {
   const date = new Date(ms);
   return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
@@ -85,14 +89,7 @@ export function getE2eeDayLabel(
   if (days > 1 && days < 7) {
     return formatDate(locale, ms, { weekday: "long" });
   }
-  if (new Date(ms).getFullYear() === new Date(now).getFullYear()) {
-    return formatDate(locale, ms, {
-      weekday: "short",
-      day: "numeric",
-      month: "long",
-    });
-  }
-  return formatDate(locale, ms, { dateStyle: "long" });
+  return formatDate(locale, ms, { dateStyle: "medium" });
 }
 
 export function formatE2eeDateTime(

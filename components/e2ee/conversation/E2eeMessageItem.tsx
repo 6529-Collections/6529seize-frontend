@@ -376,7 +376,7 @@ function MessageActionsMenu({
     <Menu>
       <MenuButton
         aria-label={t(locale, "e2ee.message.actions")}
-        className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-300 tw-opacity-100 tw-transition-opacity data-[open]:tw-opacity-100 hover:tw-text-iron-50 focus-visible:tw-opacity-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:tw-opacity-0 desktop-hover:group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100 touch-only:tw-pointer-events-none touch-only:tw-opacity-0 touch-only:group-focus-within:tw-pointer-events-auto touch-only:group-focus-within:tw-opacity-100 touch-only:data-[open]:tw-opacity-100"
+        className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-300 tw-opacity-100 tw-transition-opacity data-[open]:tw-opacity-100 hover:tw-text-iron-50 focus-visible:tw-opacity-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:tw-opacity-0 desktop-hover:group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100 touch-only:tw-size-7 touch-only:tw-bg-transparent touch-only:tw-text-iron-500 touch-only:tw-opacity-100"
       >
         <EllipsisHorizontalIcon aria-hidden="true" className="tw-size-5" />
       </MenuButton>
@@ -472,18 +472,24 @@ function NoticeItem({
 /** After this long unsequenced, "Sending…" says the engine is still retrying. */
 const SLOW_SEND_MS = 10_000;
 
-/** True once a pending message has waited longer than SLOW_SEND_MS. */
+/**
+ * True once a pending message has waited longer than SLOW_SEND_MS. `ts` is
+ * the sender's own clock at send time (the local echo), so no server skew
+ * applies. The latch is keyed by id and send time: a new send, or the
+ * message leaving the outbox, resets it.
+ */
 function useSlowPending(message: E2eeMessage): boolean {
-  const [slowId, setSlowId] = useState<string | null>(null);
+  const sendKey = `${message.id}:${message.ts}`;
+  const [slowKey, setSlowKey] = useState<string | null>(null);
   useEffect(() => {
     if (!message.pending) {
       return;
     }
     const wait = Math.max(0, SLOW_SEND_MS - (Date.now() - message.ts));
-    const timer = globalThis.setTimeout(() => setSlowId(message.id), wait);
+    const timer = globalThis.setTimeout(() => setSlowKey(sendKey), wait);
     return () => globalThis.clearTimeout(timer);
-  }, [message.id, message.pending, message.ts]);
-  return message.pending && slowId === message.id;
+  }, [message.pending, message.ts, sendKey]);
+  return message.pending && slowKey === sendKey;
 }
 
 function MessageMarkers({ message }: { readonly message: E2eeMessage }) {
@@ -610,7 +616,9 @@ function E2eeMessageItemComponent({
           <E2eeAvatar pfp={sender?.pfp ?? null} name={shownName} size="sm" />
         )}
       </div>
-      <div className="tw-min-w-0 tw-flex-1">
+      <div
+        className={`tw-min-w-0 tw-flex-1 ${showActions ? "touch-only:tw-pr-7" : ""}`}
+      >
         <MessageMeta message={message} name={shownName} compact={compact} />
         {message.reply ? (
           <ReplyPreview

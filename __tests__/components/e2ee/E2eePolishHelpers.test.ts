@@ -67,7 +67,7 @@ describe("day separators", () => {
     ).toBe("Tuesday");
     expect(
       getE2eeDayLabel("en-US", new Date(2025, 0, 2, 9).getTime(), now)
-    ).toBe("January 2, 2025");
+    ).toBe("Jan 2, 2025");
   });
 
   it("groups by local calendar day", () => {
@@ -78,6 +78,8 @@ describe("day separators", () => {
 });
 
 describe("useE2eeDroppedMessage", () => {
+  // The engine keeps a message id from local echo through sequencing
+  // (lib/e2ee/engine/send.ts markSent), so only a refused send disappears.
   it("reports a pending message that disappears without being sequenced", () => {
     const { result, rerender } = renderHook(
       ({ messages }) => useE2eeDroppedMessage(messages, "me"),

@@ -147,10 +147,7 @@ function UploadingFiles({
 }) {
   return (
     <div className="tw-px-3 tw-pt-2">
-      <p
-        role="status"
-        className="tw-m-0 tw-mb-1.5 tw-flex tw-items-center tw-gap-2 tw-text-xs tw-text-iron-300"
-      >
+      <output className="tw-mb-1.5 tw-flex tw-items-center tw-gap-2 tw-text-xs tw-text-iron-300">
         <CircleLoader />
         {tCount(
           locale,
@@ -160,7 +157,7 @@ function UploadingFiles({
           },
           files.length
         )}
-      </p>
+      </output>
       <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-2 tw-p-0">
         {files.map((file) => (
           <FilePreview
@@ -367,6 +364,34 @@ interface E2eeComposerProps {
 }
 
 /**
+ * Loads text into the box once per source: the message being edited (which
+ * also clears picked files) or a refused message coming back to resend.
+ */
+function useLoadedComposerText(
+  editing: E2eeMessage | null,
+  restoredDraft: { readonly id: string; readonly text: string } | null,
+  setText: (text: string) => void,
+  clearFiles: () => void
+): { readonly editId: string | null; readonly draftId: string | null } {
+  const [loadedEditId, setLoadedEditId] = useState<string | null>(null);
+  const [loadedDraftId, setLoadedDraftId] = useState<string | null>(null);
+  const editId = editing?.id ?? null;
+  if (editId !== loadedEditId) {
+    setLoadedEditId(editId);
+    setText(editing ? editing.text : "");
+    clearFiles();
+  }
+  const draftId = restoredDraft?.id ?? null;
+  if (draftId !== loadedDraftId) {
+    setLoadedDraftId(draftId);
+    if (restoredDraft) {
+      setText(restoredDraft.text);
+    }
+  }
+  return { editId, draftId };
+}
+
+/**
  * Encrypted composer: text with @mentions, reply and edit modes, image
  * previews for attachments, Enter to send. Sends optimistically: the engine
  * shows the message as pending until it is sequenced.
@@ -391,10 +416,8 @@ export function E2eeComposer({
   const [text, setText] = useState("");
   const [files, setFiles] = useState<readonly File[]>([]);
   const [error, setError] = useState<ComposerError | null>(null);
-  const [loadedEditId, setLoadedEditId] = useState<string | null>(null);
   // Files of the message being encrypted and uploaded right now.
   const [uploading, setUploading] = useState<readonly File[]>([]);
-  const [loadedDraftId, setLoadedDraftId] = useState<string | null>(null);
   const mentions = useMentionPicker(conversation.members, selfProfileId);
 
   // Attachments switched off server-side drop anything already picked.
@@ -402,22 +425,12 @@ export function E2eeComposer({
     setFiles([]);
   }
 
-  // Entering edit mode loads the message text once per edited message.
-  const editId = editing?.id ?? null;
-  if (editId !== loadedEditId) {
-    setLoadedEditId(editId);
-    setText(editing ? editing.text : "");
-    setFiles([]);
-  }
-
-  // A refused message comes back into the box once, ready to resend.
-  const draftId = restoredDraft?.id ?? null;
-  if (draftId !== loadedDraftId) {
-    setLoadedDraftId(draftId);
-    if (restoredDraft) {
-      setText(restoredDraft.text);
-    }
-  }
+  const { editId, draftId } = useLoadedComposerText(
+    editing,
+    restoredDraft,
+    setText,
+    () => setFiles([])
+  );
 
   // Reply, edit and a restored draft move focus to the composer.
   const focusKey = editId ?? replyTo?.id ?? draftId ?? null;
