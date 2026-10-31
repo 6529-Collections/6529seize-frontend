@@ -171,7 +171,7 @@ export async function startDevice(
     storage,
     loadWasm: async () => world.wasm,
     polling: false,
-    isBlocked: (other) => world.ds.state.blocks.has(`${profileId}>${other}`),
+    isBlocked: (other) => world.ds.state["blocks"].has(`${profileId}>${other}`),
     ...options.extra,
   };
   if (options.noWake === true) {

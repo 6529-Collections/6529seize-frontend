@@ -26,10 +26,10 @@ import type { E2eeEngineExt, E2eeMessage } from "@/lib/e2ee/types";
 
 import { loadTestWasm } from "./support/harness";
 
-const API = process.env.E2EE_REAL_STACK_API ?? "";
-const SECRET = process.env.E2EE_REAL_STACK_JWT_SECRET ?? "";
-const USERS_JSON = process.env.E2EE_REAL_STACK_USERS ?? "";
-const WS = process.env.E2EE_REAL_STACK_WS ?? "";
+const API = process.env["E2EE_REAL_STACK_API"] ?? "";
+const SECRET = process.env["E2EE_REAL_STACK_JWT_SECRET"] ?? "";
+const USERS_JSON = process.env["E2EE_REAL_STACK_USERS"] ?? "";
+const WS = process.env["E2EE_REAL_STACK_WS"] ?? "";
 const enabled = API !== "" && SECRET !== "" && USERS_JSON !== "";
 const describeStack = enabled ? describe : describe.skip;
 
@@ -157,6 +157,20 @@ const users: StackUser[] = enabled
     })
   : [];
 
+/** The first `count` stack users; fails the test when fewer are configured. */
+function takeUsers(count: number): StackUser[] {
+  expect(users.length).toBeGreaterThanOrEqual(count);
+  return users.slice(0, count);
+}
+
+function at<T>(items: readonly T[], index: number): T {
+  const item = items[index];
+  if (item === undefined) {
+    throw new Error(`missing item ${index}`);
+  }
+  return item;
+}
+
 const devices: StackDevice[] = [];
 const sockets: WebSocket[] = [];
 
@@ -191,7 +205,7 @@ function wsWake(
         authenticatedSockets.add(socket);
       }
       if (typeof message.type === "string") {
-        if (process.env.E2EE_REAL_STACK_DEBUG === "1") {
+        if (process.env["E2EE_REAL_STACK_DEBUG"] === "1") {
           process.stderr.write(`[ws ${token.slice(-6)}] ${message.type}
 `);
         }
@@ -285,8 +299,12 @@ describeStack("E2EE engine against a real backend", () => {
   });
 
   it("enrolls, runs a DM and a group, and keeps removed and new members out", async () => {
-    expect(users.length).toBeGreaterThanOrEqual(4);
-    const [alice, bob, carol, dave] = users;
+    const [alice, bob, carol, dave] = takeUsers(4) as [
+      StackUser,
+      StackUser,
+      StackUser,
+      StackUser,
+    ];
     const a = await startDevice(alice);
     const b = await startDevice(bob);
     const c = await startDevice(carol);
@@ -384,7 +402,8 @@ describeStack("E2EE engine against a real backend", () => {
   });
 
   it("adds a second device automatically and revokes it from the first", async () => {
-    const [alice, bob] = users;
+    const alice = at(takeUsers(2), 0);
+    const bob = at(users, 1);
     const a = devices.find((d) => d.user === alice)!;
     const b1 = devices.find((d) => d.user === bob)!;
     const dm = a.engine.findDm(bob.profileId)!;
@@ -416,12 +435,13 @@ describeStack("E2EE engine against a real backend", () => {
   });
 
   it("respects the recipient's DM policy", async () => {
-    const [alice, , carol] = users;
+    const alice = at(takeUsers(3), 0);
+    const carol = at(users, 2);
     const a = devices.find((d) => d.user === alice)!;
     await setDmPolicy(carol, "NOBODY");
     try {
-      const [result] = await a.engine.checkEligibility([carol.profileId]);
-      expect(result.status).toBe("POLICY");
+      const results = await a.engine.checkEligibility([carol.profileId]);
+      expect(at(results, 0).status).toBe("POLICY");
       await expect(
         a.engine.createConversation({
           profileIds: [carol.profileId],
@@ -434,12 +454,12 @@ describeStack("E2EE engine against a real backend", () => {
   });
 
   const itLarge =
-    process.env.E2EE_REAL_STACK_LARGE === "1" && users.length >= 90
+    process.env["E2EE_REAL_STACK_LARGE"] === "1" && users.length >= 90
       ? it
       : it.skip;
 
   itLarge("runs 15- and 87-person groups", async () => {
-    const alice = users[0];
+    const alice = at(users, 0);
     const a = devices.find((d) => d.user === alice)!;
     const members: StackDevice[] = [];
     for (const user of users.slice(4, 90)) {
@@ -460,13 +480,13 @@ describeStack("E2EE engine against a real backend", () => {
         expect(texts(device.engine.getMessages(g))).toContain(`hello ${size}`);
       }
       // One member leaves, the creator removes another; the rest still talk.
-      await others[0].engine.leave(g);
-      await a.engine.removeMember(g, others[1].user.profileId);
+      await at(others, 0).engine.leave(g);
+      await a.engine.removeMember(g, at(others, 1).user.profileId);
       await settle(3);
-      await others[2].engine.send(g, { text: `after changes ${size}` });
+      await at(others, 2).engine.send(g, { text: `after changes ${size}` });
       await settle(3);
       expect(texts(a.engine.getMessages(g))).toContain(`after changes ${size}`);
-      expect(texts(others[1].engine.getMessages(g))).not.toContain(
+      expect(texts(at(others, 1).engine.getMessages(g))).not.toContain(
         `after changes ${size}`
       );
       expect(a.engine.getConversation(g)?.safetyCode).toBe(
