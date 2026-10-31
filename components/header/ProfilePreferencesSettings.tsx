@@ -133,11 +133,14 @@ const UPDATE_DM_POLICY: Record<DirectMessagePolicy, UpdateDirectMessagePolicy> =
   };
 
 /**
- * Group-policy fields for the save request. The group id is sent only when it
- * changed: the API keeps the saved group, and resending it could reject an
- * unrelated save after that group was hidden. The follow switch is sent with
- * the group policy or when it changed, so saving the existing policies sends
- * the same request shape as before.
+ * Group-policy fields for the save request. Under the group policy the
+ * selected group is always sent, so a form that loaded before another session
+ * changed the group saves what this form shows. The one exception: the policy
+ * was already the group policy, the user did not touch the group, and the API
+ * reports that saved group as unavailable; resending it would only reject an
+ * unrelated save, and the API keeps it. The follow switch is sent with the
+ * group policy or when it changed, so saving the existing policies sends the
+ * same request shape as before.
  */
 function getDirectMessageGroupUpdate(
   original: ApiProfilePreferences,
@@ -153,8 +156,13 @@ function getDirectMessageGroupUpdate(
   const allowChanged =
     current.direct_message_allow_people_i_follow !==
     original.direct_message_allow_people_i_follow;
+  const keepsUnavailableSavedGroup =
+    original.direct_message_policy === DirectMessagePolicy.GroupMembers &&
+    !groupChanged &&
+    original.direct_message_group_unavailable;
   return {
-    ...(groupChanged && current.direct_message_group_id
+    ...(current.direct_message_group_id &&
+    (groupChanged || (isGroupPolicy && !keepsUnavailableSavedGroup))
       ? { direct_message_group_id: current.direct_message_group_id }
       : {}),
     ...(isGroupPolicy || allowChanged

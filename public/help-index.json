@@ -6002,7 +6002,7 @@
         "With Members of a group I choose, People I follow can always message me is on by default and also admits followed profiles outside the group. Membership is checked when a conversation starts, so daily TDH and REP changes apply.",
         "If the chosen group is deleted or hidden, Preferences warns about it and new conversations fall back to People I follow until another group is chosen.",
         "Profiles you block can never start a new direct message with you under any setting, including people you follow. The refused profile sees the generic doesn't-accept-new-direct-messages notice, never a block disclosure.",
-        "When a new conversation is refused, the creator sees a notice naming the recipient's rule, such as only accepting messages from people they follow or from members of a group they chose. The group is named only when it is public.",
+        "When the recipient's direct-message setting refuses a new conversation, the creator sees a notice naming that rule, such as only accepting messages from people they follow or from members of a group they chose; the group is named only when it is public. A refusal caused by the recipient blocking the creator never names a rule or group and shows only the generic doesn't-accept-new-direct-messages notice.",
         "An authenticated wallet without a profile is directed to Create profile from /preferences; profile-scoped controls become available after setup.",
         "Direct-message admission preferences apply only to new exact participant sets; existing one-to-one and group conversations remain available.",
         "Every recipient must allow the creator before a new group direct message can be created.",

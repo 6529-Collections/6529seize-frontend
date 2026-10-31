@@ -333,7 +333,9 @@ describe("ProfilePreferencesSettings", () => {
     expect(body).not.toHaveProperty("direct_message_group_id");
   });
 
-  it("does not resend an unchanged saved group when only the follow switch changes", async () => {
+  it("saves the group this form shows, even if another session changed it", async () => {
+    // The form loaded group-1; another session may since have saved another
+    // group. Saving any change keeps what this form shows.
     mockFetch({
       ...preferences,
       direct_message_policy: DirectMessagePolicy.GroupMembers,
@@ -342,6 +344,59 @@ describe("ProfilePreferencesSettings", () => {
     const user = userEvent.setup();
     render(<ProfilePreferencesSettings />);
     await screen.findByRole("link", { name: "View members of Level 20+" });
+
+    await user.click(
+      screen.getByRole("checkbox", {
+        name: /People I follow can always message me/i,
+      })
+    );
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() =>
+      expect(commonApiPut).toHaveBeenCalledWith({
+        endpoint: "profile-preferences",
+        body: expect.objectContaining({
+          direct_message_policy: DirectMessagePolicy.GroupMembers,
+          direct_message_group_id: "group-1",
+          direct_message_allow_people_i_follow: false,
+        }),
+      })
+    );
+  });
+
+  it("sends the saved group when the save turns the group policy on", async () => {
+    mockFetch({ ...preferences, direct_message_group_id: "group-1" });
+    const user = userEvent.setup();
+    render(<ProfilePreferencesSettings />);
+    await screen.findByText("Subscription coverage");
+
+    await user.click(
+      screen.getByRole("radio", { name: "Members of a group I choose" })
+    );
+    await screen.findByRole("link", { name: "View members of Level 20+" });
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+
+    await waitFor(() =>
+      expect(commonApiPut).toHaveBeenCalledWith({
+        endpoint: "profile-preferences",
+        body: expect.objectContaining({
+          direct_message_policy: DirectMessagePolicy.GroupMembers,
+          direct_message_group_id: "group-1",
+        }),
+      })
+    );
+  });
+
+  it("does not resend an untouched saved group the API reports as unavailable", async () => {
+    mockFetch({
+      ...preferences,
+      direct_message_policy: DirectMessagePolicy.GroupMembers,
+      direct_message_group_id: "deleted-group",
+      direct_message_group_unavailable: true,
+    });
+    const user = userEvent.setup();
+    render(<ProfilePreferencesSettings />);
+    await screen.findByRole("alert");
 
     await user.click(
       screen.getByRole("checkbox", {
