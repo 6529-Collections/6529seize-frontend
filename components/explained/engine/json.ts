@@ -3,6 +3,11 @@
  * vector format's "Types"): every integer in full, a `bigint` from 2^53 on;
  * `-0`, fractions and exponents kept apart from integers, so they fail any
  * integer type; a member named twice refused, so the file is no vector.
+ *
+ * The text is I-JSON's (P26 §3.2, E14; RFC 7493 §2.1): UTF-8 without a byte
+ * order mark, and every string, member names included, a sequence of Unicode
+ * scalar values. A lone or reversed surrogate escape makes the file no
+ * vector; a pair escape names one character and stays.
  */
 
 /**
@@ -28,6 +33,56 @@ export type JsonValue =
 /** Not a vector at all: not JSON, a member twice, or a broken shape. */
 export class VectorFormatError extends Error {
   override readonly name = "VectorFormatError";
+}
+
+const BYTE_ORDER_MARK = "﻿";
+
+/**
+ * A vector file's text from its bytes (P26 §3.2, E14): UTF-8 without a byte
+ * order mark, or no vector. Bytes that are not UTF-8, such as `FF` or a
+ * surrogate in UTF-8's form (`ED A0 80`), are refused rather than replaced
+ * with U+FFFD.
+ */
+export function decodeVectorText(bytes: Uint8Array): string {
+  if (bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) {
+    throw new VectorFormatError(
+      "the file starts with a byte order mark (P26 §3.2, E14)"
+    );
+  }
+  try {
+    return new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(
+      bytes
+    );
+  } catch {
+    throw new VectorFormatError("the file is not UTF-8 (P26 §3.2, E14)");
+  }
+}
+
+function isHighSurrogate(code: number): boolean {
+  return code >= 0xd800 && code <= 0xdbff;
+}
+
+function isLowSurrogate(code: number): boolean {
+  return code >= 0xdc00 && code <= 0xdfff;
+}
+
+/**
+ * The first lone surrogate in `s` (a high one not followed by a low one, or a
+ * low one not after a high one), or -1 when `s` holds scalar values only.
+ */
+function loneSurrogate(s: string): number {
+  let at = 0;
+  while (at < s.length) {
+    const code = s.charCodeAt(at);
+    if (isHighSurrogate(code) && isLowSurrogate(s.charCodeAt(at + 1))) {
+      at += 2;
+    } else if (isHighSurrogate(code) || isLowSurrogate(code)) {
+      return code;
+    } else {
+      at += 1;
+    }
+  }
+  return -1;
 }
 
 const LITERALS: readonly (readonly [string, JsonValue])[] = [
@@ -124,11 +179,20 @@ class ExactParser {
       this.fail("an unterminated string");
     }
     this.at++;
+    let value: string;
     try {
-      return JSON.parse(this.text.slice(start, this.at)) as string;
+      value = JSON.parse(this.text.slice(start, this.at)) as string;
     } catch {
       return this.fail("an invalid string");
     }
+    const lone = loneSurrogate(value);
+    if (lone >= 0) {
+      this.at = start;
+      this.fail(
+        `a string holds the lone surrogate U+${lone.toString(16).toUpperCase()} (P26 §3.2, E14)`
+      );
+    }
+    return value;
   }
 
   private number(): JsonValue {
@@ -212,8 +276,16 @@ class ExactParser {
   }
 }
 
-/** Parses JSON (RFC 8259) without losing any integer. */
+/**
+ * Parses JSON (RFC 8259) without losing any integer, as I-JSON (RFC 7493
+ * §2.1): a leading byte order mark or a lone surrogate makes it no vector.
+ */
 export function parseJsonExact(text: string): JsonValue {
+  if (text.startsWith(BYTE_ORDER_MARK)) {
+    throw new VectorFormatError(
+      "the text starts with a byte order mark (P26 §3.2, E14)"
+    );
+  }
   const parser = new ExactParser(text);
   const result = parser.value();
   parser.space();

@@ -1,13 +1,15 @@
 /**
  * The TDH v1.4 engine of 6529 Explained: a typed, registry-driven port of
- * P26 (6529chain at 3bfa7b0, D136's four-wallet consolidation and D137's
- * names included), and the one computation every model on the TDH pages
- * reads. It replaces `lib/tdh/tdhV1Arithmetic.ts`.
+ * P26 (6529chain at a731bca: D136's four-wallet consolidation, D137's names,
+ * and round 7's untimed re-registration, E13 and E14), and the one
+ * computation every model on the TDH pages reads. It replaces
+ * `lib/tdh/tdhV1Arithmetic.ts`.
  *
- * Scope: one cycle from decoded inputs (P26 §3 to §9), the registry and its
- * hash (§10, `registryHash.ts`), cycle dates and the cutoff (§4). Ethereum
- * log decoding (§3.1 log selection, §3.2 and §6.1 ABI decoding) is the
- * validators' readers' work, not the explorables'.
+ * Scope: all of P26's computation. One cycle from decoded inputs, raw
+ * `eth_getLogs` entries or both (§3 to §9; `logs.ts` selects and decodes raw
+ * logs), the registry and its hash (§10, `registryHash.ts`), cycle dates and
+ * the cutoff (§4). Reading Ethereum itself, the RPC calls, is the
+ * validators' work: the engine takes what they read.
  *
  * Every function is pure. Every rule value comes from the `Registry` passed
  * in. CI checks the engine against P26's conformance vectors and the D136
@@ -24,7 +26,6 @@ import {
 } from "./arithmetic";
 import {
   clustersWithKept,
-  comparePositions,
   readDelegationEvent,
   type CheckedEvent,
   type ClusterResult,
@@ -38,6 +39,14 @@ import {
   type Stacks,
   type Transfer,
 } from "./holdings";
+import {
+  NO_LOGS,
+  checkLogOrder,
+  decodeLogs,
+  type DecodedLogs,
+  type LogPosition,
+  type RawLogsInput,
+} from "./logs";
 import {
   ZERO,
   invalid,
@@ -94,6 +103,7 @@ export {
   type PairState,
 } from "./consolidation";
 export { netMovements, type Transfer } from "./holdings";
+export { LOG_FIELDS, type RawLog, type RawLogsInput } from "./logs";
 export {
   cycleBoundary,
   cycleDayOfDate,
@@ -111,6 +121,12 @@ export interface CycleInput {
   readonly timestamp: Uint;
   readonly transfers?: readonly Transfer[];
   readonly delegationEvents?: readonly DelegationEvent[];
+  /**
+   * Raw `eth_getLogs` entries and their blocks' header timestamps, beside or
+   * instead of decoded transfers and events (P26 §3.1). A log is given raw
+   * or decoded, never both.
+   */
+  readonly logs?: RawLogsInput;
   /**
    * Manifold's `totalMax` at `B` by Meme id (decimal key, a `uint32` value);
    * an absent id has no claim (P26 §5.2).
@@ -209,24 +225,35 @@ function editionFloors(
   return floors;
 }
 
+interface SeenLog extends LogPosition {
+  /** `contract|from|to` for a transfer's log; null for any other log. */
+  readonly log: string | null;
+}
+
 /**
- * P26 §3.1 on decoded inputs in blocks `<= B`: the transfers of one log share
- * its txIndex, contract, from and to (vectors 85-87); no other transfer or
- * delegation event has its `(block, logIndex)`; and within a block a larger
- * logIndex never has a smaller txIndex (vector 53).
+ * P26 §3.1 on the inputs in blocks `<= B`, raw and decoded: the transfers of
+ * one log share its txIndex, contract, from and to (vectors 85-87); no other
+ * transfer or delegation event has its `(block, logIndex)`, nor has a
+ * selected raw log that gives neither (`ignored`, vector 63); and within a
+ * block a larger logIndex never has a smaller txIndex (vectors 53, 64).
  */
 function checkPositions(
   transfers: readonly CanonicalTransfer[],
   events: readonly CheckedEvent[],
-  B: bigint
+  B: bigint,
+  ignored: readonly LogPosition[]
 ): void {
-  const seen = new Map<string, { txIndex: bigint; log: string | null }>();
+  const seen = new Map<string, SeenLog>();
+  for (const p of ignored) {
+    seen.set(`${p.block}:${p.logIndex}`, { ...p, log: null });
+  }
   for (const t of transfers) {
     const key = `${t.block}:${t.logIndex}`;
     const log = `${t.contract}|${t.from}|${t.to}`;
     const prior = seen.get(key);
     if (prior === undefined) {
-      seen.set(key, { txIndex: t.txIndex, log });
+      const { block, txIndex, logIndex } = t;
+      seen.set(key, { block, txIndex, logIndex, log });
     } else if (prior.txIndex !== t.txIndex || prior.log !== log) {
       throw invalid(
         `transfers at block ${t.block}, logIndex ${t.logIndex} are no one log's (P26 §3.1)`
@@ -244,22 +271,40 @@ function checkPositions(
         `a delegation event shares block ${block}, logIndex ${logIndex} with another log (P26 §3.1)`
       );
     }
-    seen.set(key, { txIndex, log: null });
+    seen.set(key, { block, txIndex, logIndex, log: null });
   }
-  const order = [...seen.entries()]
-    .map(([key, v]) => {
-      const [block, logIndex] = key.split(":").map(BigInt) as [bigint, bigint];
-      return [block, v.txIndex, logIndex] as const;
-    })
-    .sort((a, b) => comparePositions([a[0], a[2], 0n], [b[0], b[2], 0n]));
-  order.forEach((p, i) => {
-    const previous = order[i - 1];
-    if (previous?.[0] === p[0] && p[1] < previous[1]) {
+  checkLogOrder(seen.values());
+}
+
+/**
+ * P26 §3.1: a log is given raw or decoded, never both. A decoded transfer or
+ * delegation event in a block `<= B` at the `(block, logIndex)` of a selected
+ * raw log makes the input invalid, whatever that log gives: nothing (vector
+ * 63), an event, or transfers, even as one more element of its batch
+ * (vector 72).
+ */
+function checkRawOrDecoded(
+  raw: DecodedLogs,
+  transfers: readonly CanonicalTransfer[],
+  events: readonly CheckedEvent[],
+  B: bigint
+): void {
+  const given = new Set<string>([
+    ...raw.transfers.map((t) => `${t.block}:${t.logIndex}`),
+    ...raw.events.map((e) => `${e.position[0]}:${e.position[2]}`),
+    ...raw.ignored.map((p) => `${p.block}:${p.logIndex}`),
+  ]);
+  const decoded = [
+    ...transfers.map((t) => [t.block, t.logIndex] as const),
+    ...events.map((e) => [e.position[0], e.position[2]] as const),
+  ];
+  for (const [block, logIndex] of decoded) {
+    if (block <= B && given.has(`${block}:${logIndex}`)) {
       throw invalid(
-        `block ${p[0]}: a larger logIndex has a smaller txIndex (P26 §3.1, vector 53)`
+        `a decoded input at block ${block}, logIndex ${logIndex}, a raw log's position: a log is given raw or decoded, never both (P26 §3.1)`
       );
     }
-  });
+  }
 }
 
 interface Eligibility {
@@ -618,25 +663,33 @@ function publicRecord(rec: ExactRecord, what: string): CycleRecord {
 }
 
 /**
- * One cycle of TDH v1.4 from decoded inputs (P26 §3 to §9): every input read
- * at its type and checked, eligibility and rates from the transfers before
- * netting, the cluster map at `B` applied to all history, the netted replay,
- * then wallet and identity records with their boosts and finals, and the
- * totals. Throws `TdhInputInvalid` when the input has no result, and
- * `TdhOutsideEngineRange` for a valid result with a value of 2^53 or more.
+ * One cycle of TDH v1.4 (P26 §3 to §9) from decoded inputs, raw logs or
+ * both: every input read at its type and checked, eligibility and rates from
+ * the transfers before netting, the cluster map at `B` applied to all
+ * history, the netted replay, then wallet and identity records with their
+ * boosts and finals, and the totals. Throws `TdhInputInvalid` when the input
+ * has no result, and `TdhOutsideEngineRange` for a valid result with a value
+ * of 2^53 or more.
  */
 export function computeCycle(input: CycleInput, r: Registry): CycleResult {
   const rules = rulesOf(r);
   const B = readUint(input.block, 64, "the cutoff block B");
   const T = readUint(input.timestamp, 64, "the cutoff timestamp T");
-  const all = (input.transfers ?? []).map((t) => readTransfer(t, rules));
-  const events = (input.delegationEvents ?? []).map((e) =>
+  const fromLogs = input.logs
+    ? decodeLogs(input.logs, B, T, rules)
+    : NO_LOGS;
+  const decoded = (input.transfers ?? []).map((t) => readTransfer(t, rules));
+  const decodedEvents = (input.delegationEvents ?? []).map((e) =>
     readDelegationEvent(e, rules)
   );
+  checkRawOrDecoded(fromLogs, decoded, decodedEvents, B);
+  const events = [...decodedEvents, ...fromLogs.events];
   const floors = editionFloors(input.claimMax ?? {}, rules);
   // Transfers after B are not inputs (P26 §3.1), beyond their types.
-  const transfers = canonicalOrder(all.filter((t) => t.block <= B));
-  checkPositions(transfers, events, B);
+  const transfers = canonicalOrder(
+    [...decoded, ...fromLogs.transfers].filter((t) => t.block <= B)
+  );
+  checkPositions(transfers, events, B, fromLogs.ignored);
   if (transfers.some((t) => t.timestamp > T)) {
     throw invalid(
       "a transfer in a block <= B is stamped after T (P26 §4.2, vector 54)"

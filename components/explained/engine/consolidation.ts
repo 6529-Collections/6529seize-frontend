@@ -34,10 +34,11 @@ export interface DelegationEvent {
   /** The event's `useCase`; absent means the registry's consolidation use case. */
   readonly useCase?: Uint;
   /**
-   * The header timestamp of the event's block (P26 §6.2). Absent or null: no
-   * time, which counts as before activation (vector 99).
+   * The header timestamp of the event's block (P26 §6.2), a `uint64`.
+   * Absent: no time, which counts as before activation (vector 99). Any
+   * other value, `null` included, is outside its type.
    */
-  readonly timestamp?: Uint | null;
+  readonly timestamp?: Uint;
 }
 
 /** `(block, txIndex, logIndex)`, compared in that order. */
@@ -63,9 +64,15 @@ export interface PairRow {
   /** The position of the event that last set the row. */
   readonly position: Position;
   readonly confirmed: boolean;
-  /** The time of `w1`'s latest registration, or null for none. */
+  /**
+   * The time of `w1`'s latest registration, or null for none. A
+   * re-registration without a time keeps the time it had (vector 104).
+   */
   readonly t1: bigint | null;
-  /** The time of `w2`'s latest registration; null while not confirmed. */
+  /**
+   * The time of `w2`'s latest registration; null while not confirmed, or
+   * when that registration had no time.
+   */
   readonly t2: bigint | null;
 }
 
@@ -98,7 +105,7 @@ function readPosition(e: DelegationEvent): Position {
 }
 
 function readTime(e: DelegationEvent): bigint | null {
-  return e.timestamp === undefined || e.timestamp === null
+  return e.timestamp === undefined
     ? null
     : readUint(e.timestamp, 64, "a delegation event's timestamp");
 }
@@ -154,10 +161,13 @@ function applyEvent(rows: Map<string, PairRow>, e: ReadEvent): void {
         t2: null,
       });
     } else if (row.w1 === a) {
-      // a registers its direction again: only its time moves (vector 92)
-      rows.set(key, { ...row, t1: e.time });
+      // a registers its direction again: only its time moves (vector 92),
+      // and an event without a time changes nothing, as 6529.io's
+      // planRegistration leaves the row unsaved (P26 §6.2, vector 104)
+      rows.set(key, { ...row, t1: e.time ?? row.t1 });
     } else {
-      // a confirms the pair, or registers again as its second registrant
+      // a confirms the pair, or registers again as its second registrant:
+      // the row moves, and an event without a time leaves w2 without one
       rows.set(key, {
         w1: b,
         w2: a,
@@ -394,11 +404,24 @@ export function readDelegationEvent(
 }
 
 /**
+ * P26 §6.1: an event is kept when its use case is `consolidation_use_case`,
+ * its collection is in `consolidation_collections`, and its two wallets
+ * differ and are not sinks.
+ */
+export function isKept(e: CheckedEvent, rules: Rules): boolean {
+  return (
+    e.useCase === rules.useCase &&
+    rules.collections.has(e.collection) &&
+    e.from !== e.to &&
+    !rules.sinks.has(e.from) &&
+    !rules.sinks.has(e.to)
+  );
+}
+
+/**
  * P26 §6.1: the kept events in blocks `<= B`, in position order. Two events
  * at one position, kept or not, make the input invalid (vector 51), and so
- * does one stamped after `T` (vector 100). An event is kept when its use
- * case is `consolidation_use_case`, its collection is in
- * `consolidation_collections`, and its two wallets differ and are not sinks.
+ * does one stamped after `T` (vector 100).
  */
 function keptEvents(
   events: readonly CheckedEvent[],
@@ -422,14 +445,7 @@ function keptEvents(
       );
     }
   });
-  return inputs.filter(
-    (e) =>
-      e.useCase === rules.useCase &&
-      rules.collections.has(e.collection) &&
-      e.from !== e.to &&
-      !rules.sinks.has(e.from) &&
-      !rules.sinks.has(e.to)
-  );
+  return inputs.filter((e) => isKept(e, rules));
 }
 
 function toEvent(e: CheckedEvent): DelegationEvent {
@@ -441,7 +457,7 @@ function toEvent(e: CheckedEvent): DelegationEvent {
     from: e.from,
     to: e.to,
     collection: e.collection,
-    timestamp: e.time,
+    ...(e.time === null ? {} : { timestamp: e.time }),
   };
 }
 
