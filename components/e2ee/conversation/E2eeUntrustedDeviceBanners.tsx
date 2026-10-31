@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
@@ -41,7 +41,13 @@ export function E2eeUntrustedDeviceBanners({
   selfProfileId,
 }: E2eeUntrustedDeviceBannersProps) {
   const locale = useBrowserLocale();
-  const [busyKey, setBusyKey] = useState<string | null>(null);
+  // One decision at a time across all banners; the ref also blocks a second
+  // click that lands before React re-renders the disabled buttons.
+  const inFlight = useRef(false);
+  const [pending, setPending] = useState<{
+    deviceKey: string;
+    add: boolean;
+  } | null>(null);
   const [failedKey, setFailedKey] = useState<string | null>(null);
 
   if (conversation.untrustedDevices.length === 0) {
@@ -49,7 +55,11 @@ export function E2eeUntrustedDeviceBanners({
   }
 
   const decide = async (device: E2eeUntrustedDevice, add: boolean) => {
-    setBusyKey(device.deviceKey);
+    if (inFlight.current) {
+      return;
+    }
+    inFlight.current = true;
+    setPending({ deviceKey: device.deviceKey, add });
     setFailedKey(null);
     try {
       await (add
@@ -58,7 +68,8 @@ export function E2eeUntrustedDeviceBanners({
     } catch {
       setFailedKey(device.deviceKey);
     } finally {
-      setBusyKey(null);
+      inFlight.current = false;
+      setPending(null);
     }
   };
 
@@ -73,7 +84,9 @@ export function E2eeUntrustedDeviceBanners({
           device.profileId,
           selfProfileId
         );
-        const busy = busyKey === device.deviceKey;
+        const busy = pending?.deviceKey === device.deviceKey;
+        const adding = busy && pending?.add === true;
+        const ignoring = busy && pending?.add === false;
         return (
           <E2eeBanner
             key={device.deviceKey}
@@ -83,8 +96,8 @@ export function E2eeUntrustedDeviceBanners({
                 <Button
                   variant="secondary"
                   size="xs"
-                  loading={busy}
-                  disabled={busyKey !== null && !busy}
+                  loading={adding}
+                  disabled={pending !== null}
                   onClick={() => void decide(device, true)}
                   aria-label={t(locale, "e2ee.banner.addDeviceAria", {
                     wallet,
@@ -95,7 +108,8 @@ export function E2eeUntrustedDeviceBanners({
                 <Button
                   variant="secondary"
                   size="xs"
-                  disabled={busyKey !== null}
+                  loading={ignoring}
+                  disabled={pending !== null}
                   onClick={() => void decide(device, false)}
                   aria-label={t(locale, "e2ee.banner.ignoreDeviceAria", {
                     wallet,
