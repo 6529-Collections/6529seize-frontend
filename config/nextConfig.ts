@@ -159,6 +159,12 @@ export function sharedConfig(
         },
         meebits445Headers,
         versionReloadImageHeaders,
+        {
+          // Connection links carry one-time credentials in the query string.
+          // Later entries override the site-wide same-origin policy above.
+          source: "/accept-connection-sharing",
+          headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
+        },
       ];
     },
     turbopack: {

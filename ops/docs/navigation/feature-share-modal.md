@@ -149,6 +149,12 @@ No copy-page, social, or current-page Share actions appear in this dialog.
   hidden in Capacitor/native and mobile-device web contexts; supported mobile
   contexts share directly from the header instead.
 - Desktop is hidden as a connection target when already running in Electron.
+- Connection links open `Accept Connection Sharing`. Mobile connection links
+  are accepted only in 6529 Mobile, and Desktop connection links only in 6529
+  Desktop. Opened anywhere else, the page shows a message and a home link
+  instead of `Accept connection`. The page removes the link's one-time
+  credential from the address bar as soon as it loads, so reloading it does not
+  reopen the connection; open the original link or QR code again instead.
 - Connection preparation can show sign-in, authentication-upgrade, loading,
   or unavailable states without revealing page-sharing controls. These notice
   states retain the final connection area's footprint. The unframed loading
