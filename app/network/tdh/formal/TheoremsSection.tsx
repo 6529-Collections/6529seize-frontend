@@ -3,7 +3,12 @@ import Mark from "@/components/explained/marks/Mark";
 import { EX_TEXT } from "@/components/explained/tokens";
 import { formatList } from "@/i18n/format";
 import type { StatementRow } from "@/lib/explained/registry/formalFacts";
-import { CodeBlock, CodeName, EdSection, Prose } from "@/components/explained/reference/parts";
+import {
+  CodeBlock,
+  CodeName,
+  EdSection,
+  Prose,
+} from "@/components/explained/reference/parts";
 import { FactScope } from "@/components/explained/facts/FactText";
 import { isMessageKey } from "@/components/explained/rich";
 import TheoremPicker, { type TheoremPanel } from "./TheoremPicker";

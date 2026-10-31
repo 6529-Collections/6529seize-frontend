@@ -1,7 +1,12 @@
 import type { ReactNode } from "react";
 import Mark from "@/components/explained/marks/Mark";
 import { EX_LINK } from "@/components/explained/tokens";
-import { CodeBlock, CodeName, EdSection, Prose } from "@/components/explained/reference/parts";
+import {
+  CodeBlock,
+  CodeName,
+  EdSection,
+  Prose,
+} from "@/components/explained/reference/parts";
 import type { SureContext } from "./sureShared";
 
 /**

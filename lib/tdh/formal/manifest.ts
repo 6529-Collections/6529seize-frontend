@@ -17,11 +17,7 @@ import { z } from "zod";
  */
 
 const FORMAL_MANIFEST_FORMAT = "6529chain.tdh-lean-manifest.v1";
-const FORMAL_STATUSES = [
-  "proved",
-  "counterexample",
-  "deferred",
-] as const;
+const FORMAL_STATUSES = ["proved", "counterexample", "deferred"] as const;
 
 /** Lean's three standard axioms, the only ones the audit allows. */
 const STANDARD_AXIOMS = ["propext", "Classical.choice", "Quot.sound"] as const;
@@ -174,10 +170,7 @@ export function parseFormalManifest(value: unknown) {
  * Lean name.
  */
 /** Whether a manifest entry is the one a name gives: its id, or its Lean name in full or short. */
-function formalEntryMatches(
-  entry: FormalTheorem,
-  name: string
-): boolean {
+function formalEntryMatches(entry: FormalTheorem, name: string): boolean {
   return (
     entry.id === name ||
     entry.leanName === name ||

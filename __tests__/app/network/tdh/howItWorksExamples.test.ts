@@ -326,7 +326,12 @@ describe("Sales and moves", () => {
   });
 
   it("sells the copy received last", () => {
-    expect(stackValues("sell")).toEqual({ a: [], b: [300], sold: 10, raw: 300 });
+    expect(stackValues("sell")).toEqual({
+      a: [],
+      b: [300],
+      sold: 10,
+      raw: 300,
+    });
   });
 
   it("keeps a copy's age on a move inside the identity", () => {

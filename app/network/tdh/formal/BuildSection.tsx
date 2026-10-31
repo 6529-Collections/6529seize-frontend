@@ -1,7 +1,11 @@
 import type { ReactNode } from "react";
 import Mark, { type MarkKind } from "@/components/explained/marks/Mark";
 import { formatList } from "@/i18n/format";
-import { CodeName, EdSection, Prose } from "@/components/explained/reference/parts";
+import {
+  CodeName,
+  EdSection,
+  Prose,
+} from "@/components/explained/reference/parts";
 import { FactScope } from "@/components/explained/facts/FactText";
 import type { SureContext } from "./sureShared";
 

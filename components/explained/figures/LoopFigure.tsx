@@ -56,7 +56,7 @@ function LoopList({ stations, focus, verify, locale }: LoopProps) {
           return (
             <li
               key={station.key}
-              className={`tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-gap-x-3 max-[359px]:tw-grid-cols-1 tw-gap-y-0.5 tw-rounded-[10px] tw-border tw-border-solid tw-px-3.5 tw-py-3 ${on ? "tw-border-primary-400 tw-bg-primary-400/10" : "tw-border-iron-800 tw-bg-iron-950"}`}
+              className={`tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-gap-x-3 tw-gap-y-0.5 tw-rounded-[10px] tw-border tw-border-solid tw-px-3.5 tw-py-3 max-[359px]:tw-grid-cols-1 ${on ? "tw-border-primary-400 tw-bg-primary-400/10" : "tw-border-iron-800 tw-bg-iron-950"}`}
               data-station={station.key}
               {...(on ? { "aria-current": "step" as const } : {})}
             >

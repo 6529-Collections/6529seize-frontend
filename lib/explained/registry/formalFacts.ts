@@ -88,7 +88,11 @@ export interface ManifestSectionEntries {
   /** The rules the section is about: "P26 §7.1", "D131". */
   readonly refs: readonly string[];
   readonly entries: readonly StatementRow[];
-  readonly [key: string]: string | null | readonly string[] | readonly StatementRow[];
+  readonly [key: string]:
+    | string
+    | null
+    | readonly string[]
+    | readonly StatementRow[];
 }
 
 /**

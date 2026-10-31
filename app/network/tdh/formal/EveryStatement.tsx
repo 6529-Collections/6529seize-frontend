@@ -2,7 +2,12 @@ import { kt } from "@/components/explained/i18n";
 import Mark, { type MarkKind } from "@/components/explained/marks/Mark";
 import { EX_FOCUS } from "@/components/explained/tokens";
 import type { StatementRow } from "@/lib/explained/registry/formalFacts";
-import { CodeBlock, CodeName, EdSection, Prose } from "@/components/explained/reference/parts";
+import {
+  CodeBlock,
+  CodeName,
+  EdSection,
+  Prose,
+} from "@/components/explained/reference/parts";
 import type { SureContext, SureSection } from "./sureShared";
 
 /**

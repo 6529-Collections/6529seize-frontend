@@ -19,7 +19,11 @@ export function HubOpener({ locale }: { readonly locale: SupportedLocale }) {
       <span className={`${EX_TEXT.label} tw-mb-4 tw-block`}>
         {ht(locale, "eyebrow")}
       </span>
-      <h1 className={`${EX_TEXT.displayHub} max-[359px]:tw-text-[30px] max-[359px]:tw-leading-[34px]`}>{ht(locale, "title")}</h1>
+      <h1
+        className={`${EX_TEXT.displayHub} max-[359px]:tw-text-[30px] max-[359px]:tw-leading-[34px]`}
+      >
+        {ht(locale, "title")}
+      </h1>
       <p className={HUB_LEDE} data-ex-lede="" data-ex-mission="">
         {ht(locale, "mission")}
       </p>

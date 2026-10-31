@@ -107,10 +107,12 @@ const NOT_FOUND_ROUTES = [
 ];
 
 const DEFAULT_ROUTES = [
+  "/explained",
   "/network/tdh",
   "/network/tdh/how-it-works",
   "/network/tdh/specification",
   "/network/tdh/formal",
+  "/network/tdh/proofs",
   "/network/tdh/implementations",
   "/network/tdh/verification",
   "/network/tdh/verification/{latestDay}",
@@ -406,8 +408,7 @@ function inspectPage(limits) {
       const cs = style(n);
       if (cs.display === "inline" || cs.display === "contents") continue;
       const bg = cs.backgroundColor;
-      const hasBg =
-        bg && bg !== "transparent" && !/rgba\(.*,\s*0\)$/.test(bg);
+      const hasBg = bg && bg !== "transparent" && !/rgba\(.*,\s*0\)$/.test(bg);
       const hasBorder =
         ["Left", "Right"].every(
           (side) => Number.parseFloat(cs[`border${side}Width`]) > 0
@@ -632,7 +633,12 @@ function inspectPage(limits) {
   for (const el of root.querySelectorAll("*")) {
     if (el.closest("svg")) continue;
     const cs = style(el);
-    if (cs.display === "inline" || cs.display === "contents" || cs.display === "none") continue;
+    if (
+      cs.display === "inline" ||
+      cs.display === "contents" ||
+      cs.display === "none"
+    )
+      continue;
     if (cs.whiteSpace.startsWith("pre")) continue;
     const nodes = inlineTextNodes(el, []);
     if (nodes.length === 0) continue;
@@ -684,7 +690,9 @@ function inspectPage(limits) {
           c.getBoundingClientRect().width > 0
       );
       if (cells.length === 0) continue;
-      const left = Math.min(...cells.map((c) => c.getBoundingClientRect().left));
+      const left = Math.min(
+        ...cells.map((c) => c.getBoundingClientRect().left)
+      );
       const right = Math.max(
         ...cells.map((c) => c.getBoundingClientRect().right)
       );
@@ -700,7 +708,8 @@ function inspectPage(limits) {
   }
 
   // 5. Controls too small to hit (WCAG 2.5.8), and short text fields.
-  const FIELD = 'input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea';
+  const FIELD =
+    'input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea';
   const TARGET = `button, [role="button"], [role="switch"], summary, ${FIELD}`;
   for (const el of root.querySelectorAll(TARGET)) {
     if (!isShown(el)) continue;
@@ -737,7 +746,10 @@ function inspectPage(limits) {
     if (!value || value === "none") return null;
     const m = /rgba?\(([^)]+)\)/.exec(value);
     if (!m) return 1;
-    const parts = m[1].split(/[\s,/]+/).filter(Boolean).map(Number);
+    const parts = m[1]
+      .split(/[\s,/]+/)
+      .filter(Boolean)
+      .map(Number);
     return parts.length > 3 ? parts[3] : 1;
   };
   const strokeOf = (el) => {
@@ -784,7 +796,10 @@ function inspectPage(limits) {
       covers.some((cover) => {
         if (
           cover === line ||
-          !(line.compareDocumentPosition(cover) & Node.DOCUMENT_POSITION_FOLLOWING)
+          !(
+            line.compareDocumentPosition(cover) &
+            Node.DOCUMENT_POSITION_FOLLOWING
+          )
         ) {
           return false;
         }
@@ -832,7 +847,11 @@ function inspectPage(limits) {
           const value = style(el)[key];
           return value && value !== "none";
         });
-        if (!hit && markers.length > 0 && typeof el.getTotalLength === "function") {
+        if (
+          !hit &&
+          markers.length > 0 &&
+          typeof el.getTotalLength === "function"
+        ) {
           const length = el.getTotalLength();
           for (const key of markers) {
             const local = el.getPointAtLength(key === "markerEnd" ? length : 0);
@@ -883,7 +902,11 @@ function inspectPage(limits) {
       continue;
     }
     // Only sentences: a hash or a signature with no space may break anywhere.
-    if (cs.wordBreak === "break-all" && /\s/.test(node.data.trim()) && isShown(parent)) {
+    if (
+      cs.wordBreak === "break-all" &&
+      /\s/.test(node.data.trim()) &&
+      isShown(parent)
+    ) {
       for (const word of node.data.matchAll(/[A-Za-z’']{2,24}/g)) {
         range.setStart(node, word.index);
         range.setEnd(node, word.index + word[0].length);
@@ -909,7 +932,10 @@ function inspectPage(limits) {
   const parseColor = (value) => {
     const m = /rgba?\(([^)]+)\)/.exec(value ?? "");
     if (!m) return null;
-    const parts = m[1].split(/[\s,/]+/).filter(Boolean).map(Number);
+    const parts = m[1]
+      .split(/[\s,/]+/)
+      .filter(Boolean)
+      .map(Number);
     return {
       r: parts[0],
       g: parts[1],
@@ -942,13 +968,12 @@ function inspectPage(limits) {
     }
     return o;
   };
-  const pageBg =
-    parseColor(style(document.body).backgroundColor) ?? {
-      r: 0,
-      g: 0,
-      b: 0,
-      a: 1,
-    };
+  const pageBg = parseColor(style(document.body).backgroundColor) ?? {
+    r: 0,
+    g: 0,
+    b: 0,
+    a: 1,
+  };
   for (const text of root.querySelectorAll("svg text")) {
     if (!isShown(text) || !text.textContent.trim()) continue;
     if (ignored(text, "svg-contrast")) continue;
@@ -969,9 +994,14 @@ function inspectPage(limits) {
       if (under instanceof SVGElement && under.tagName !== "svg") {
         // Shapes paint their fill; groups, text and the rest paint nothing
         // under this point.
-        if (["rect", "circle", "ellipse", "path", "polygon"].includes(under.tagName)) {
+        if (
+          ["rect", "circle", "ellipse", "path", "polygon"].includes(
+            under.tagName
+          )
+        ) {
           color = parseColor(us.fill);
-          if (color) color.a *= Number.parseFloat(us.fillOpacity) * opacityOf(under);
+          if (color)
+            color.a *= Number.parseFloat(us.fillOpacity) * opacityOf(under);
         }
       } else {
         color = parseColor(us.backgroundColor);
@@ -1014,7 +1044,11 @@ function inspectPage(limits) {
     if (
       [...el.children].some((child) => {
         const display = style(child).display;
-        return !display.startsWith("inline") && display !== "contents" && display !== "none";
+        return (
+          !display.startsWith("inline") &&
+          display !== "contents" &&
+          display !== "none"
+        );
       })
     ) {
       continue;
@@ -1039,7 +1073,11 @@ function inspectPage(limits) {
       Number.parseFloat(cs.paddingRight);
     const chars = width / averageCharWidth(cs, text);
     if (chars > 80.5) {
-      add("prose-measure", el, `${Math.round(chars)} characters a line at ${cs.fontSize}`);
+      add(
+        "prose-measure",
+        el,
+        `${Math.round(chars)} characters a line at ${cs.fontSize}`
+      );
     }
   }
 
@@ -1110,7 +1148,9 @@ function inspectPage(limits) {
     let found = null;
     for (const heading of headings) {
       // The last heading before the element, in document order.
-      if (heading.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING) {
+      if (
+        heading.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING
+      ) {
         found = heading;
       } else {
         break;
@@ -1125,11 +1165,21 @@ function inspectPage(limits) {
       Number.parseFloat(style(text).fontSize) *
       Math.abs(text.getScreenCTM()?.a ?? 1);
     const heading = sectionHeading(text);
-    const headingPx = heading ? Number.parseFloat(style(heading).fontSize) : Infinity;
+    const headingPx = heading
+      ? Number.parseFloat(style(heading).fontSize)
+      : Infinity;
     if (px > MAX_LABEL_PX + 0.05) {
-      add("svg-label-size", text, `${px.toFixed(1)}px, above ${MAX_LABEL_PX}px`);
+      add(
+        "svg-label-size",
+        text,
+        `${px.toFixed(1)}px, above ${MAX_LABEL_PX}px`
+      );
     } else if (px > headingPx - 0.5) {
-      add("svg-label-size", text, `${px.toFixed(1)}px against a ${headingPx}px heading`);
+      add(
+        "svg-label-size",
+        text,
+        `${px.toFixed(1)}px against a ${headingPx}px heading`
+      );
     }
   }
 
@@ -1163,12 +1213,15 @@ function inspectPage(limits) {
         if (el.children.length > 0 || (el.textContent ?? "").trim()) continue;
         if (parseColor(cs.backgroundColor)?.a > 0.05) {
           const rect = el.getBoundingClientRect();
-          if (rect.width > 0 && rect.height > 0) right = Math.max(right, rect.right);
+          if (rect.width > 0 && rect.height > 0)
+            right = Math.max(right, rect.right);
         }
       }
       return right;
     };
-    for (const card of root.querySelectorAll("div, section, article, aside, figure, li, a, details, ul, ol, dl, p")) {
+    for (const card of root.querySelectorAll(
+      "div, section, article, aside, figure, li, a, details, ul, ol, dl, p"
+    )) {
       if (!isShown(card) || card.closest("table, svg, pre")) continue;
       const cs = style(card);
       const bordered =
@@ -1193,7 +1246,11 @@ function inspectPage(limits) {
         Number.parseFloat(cs.borderRightWidth);
       const empty = innerRight - right;
       if (empty > Math.max(220, inner * 0.3)) {
-        add("empty-card", card, `${Math.round(empty)}px of ${Math.round(inner)}px empty at the right`);
+        add(
+          "empty-card",
+          card,
+          `${Math.round(empty)}px of ${Math.round(inner)}px empty at the right`
+        );
       }
     }
   }
@@ -1203,7 +1260,9 @@ function inspectPage(limits) {
   // and calendar cells are smaller than a card and are not counted.
   {
     const cards = [];
-    for (const el of root.querySelectorAll("div, section, article, aside, figure, li, a, details, ul, ol, dl")) {
+    for (const el of root.querySelectorAll(
+      "div, section, article, aside, figure, li, a, details, ul, ol, dl"
+    )) {
       if (!isShown(el) || el.closest("table, svg, pre")) continue;
       // A card that opts out (an open menu floating over the page) is not
       // measured against the cards around it, whichever comes first.
@@ -1226,8 +1285,10 @@ function inspectPage(limits) {
         const a = cards[i];
         const b = cards[j];
         if (a.el.contains(b.el) || b.el.contains(a.el)) continue;
-        const overlapX = Math.min(a.r.right, b.r.right) - Math.max(a.r.left, b.r.left);
-        const overlapY = Math.min(a.r.bottom, b.r.bottom) - Math.max(a.r.top, b.r.top);
+        const overlapX =
+          Math.min(a.r.right, b.r.right) - Math.max(a.r.left, b.r.left);
+        const overlapY =
+          Math.min(a.r.bottom, b.r.bottom) - Math.max(a.r.top, b.r.top);
         let gap = null;
         if (overlapX > 1 && overlapY <= 1) {
           gap = Math.max(a.r.top, b.r.top) - Math.min(a.r.bottom, b.r.bottom);
@@ -1373,7 +1434,9 @@ async function checkView(browser, args, route, widthKey) {
       result.error = `HTTP ${status}`;
       return result;
     }
-    await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => {});
+    await page
+      .waitForLoadState("networkidle", { timeout: 20_000 })
+      .catch(() => {});
     // First as the page loads, every <details> closed; then all open.
     await guard(settle(page, false));
     const limits = {
@@ -1399,7 +1462,10 @@ async function checkView(browser, args, route, widthKey) {
     }
     const notFound = NOT_FOUND_ROUTES.includes(route);
     for (const text of new Set(consoleErrors)) {
-      if (notFound && ALLOWED_NOT_FOUND_CONSOLE.some((allowed) => allowed.test(text))) {
+      if (
+        notFound &&
+        ALLOWED_NOT_FOUND_CONSOLE.some((allowed) => allowed.test(text))
+      ) {
         continue;
       }
       result.violations.push({
@@ -1420,18 +1486,25 @@ async function checkView(browser, args, route, widthKey) {
             check: `axe:${violation.id}`,
             where: node.target.join(" "),
             text: node.html.slice(0, 120),
-            detail: node.failureSummary?.split("\n").slice(1).join(" ").slice(0, 200) ?? "",
+            detail:
+              node.failureSummary
+                ?.split("\n")
+                .slice(1)
+                .join(" ")
+                .slice(0, 200) ?? "",
           });
         }
       }
     }
     if (result.violations.length > 0) {
       const file = `${route.replaceAll("/", "_").replace(/^_/, "") || "root"}--${view.label}.png`;
-      await page.screenshot({
-        path: path.join(args.out, file),
-        fullPage: true,
-        timeout: 60_000,
-      }).catch(() => {});
+      await page
+        .screenshot({
+          path: path.join(args.out, file),
+          fullPage: true,
+          timeout: 60_000,
+        })
+        .catch(() => {});
       result.screenshot = file;
     }
   } catch (error) {
@@ -1511,10 +1584,14 @@ async function main() {
           `${route} @ ${result.width}: ${status} (${((Date.now() - started) / 1000).toFixed(1)} s)`
         );
         for (const v of result.violations.slice(0, 40)) {
-          console.log(`  - ${v.check}: ${v.detail} | ${v.where} | ${v.text.slice(0, 70)}`);
+          console.log(
+            `  - ${v.check}: ${v.detail} | ${v.where} | ${v.text.slice(0, 70)}`
+          );
         }
         if (result.violations.length > 40) {
-          console.log(`  ... ${result.violations.length - 40} more in report.json`);
+          console.log(
+            `  ... ${result.violations.length - 40} more in report.json`
+          );
         }
       }
     }

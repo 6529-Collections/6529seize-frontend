@@ -203,7 +203,9 @@ describe("the vector reader", () => {
 
   it("keeps a surrogate pair escape, U+FFFD and noncharacters: they are scalar values", () => {
     expect(
-      parseJsonExact('["\\ud83d\\ude00", "\\uDBFF\\uDFFF", "\\ufffd", "\\uffff"]')
+      parseJsonExact(
+        '["\\ud83d\\ude00", "\\uDBFF\\uDFFF", "\\ufffd", "\\uffff"]'
+      )
     ).toEqual(["\u{1F600}", "\u{10FFFF}", "�", "￿"]);
   });
 
@@ -391,9 +393,9 @@ describe("the vector runner", () => {
         timestamps: { "500": 1_791_417_599 },
         expected: { wallets: { [mint.to]: { balance: 2 } } },
       });
-    expect(rawCycle([{ ...single, blockHash: `0x${word("2")}` }])).toMatchObject(
-      { status: "pass", scope: "raw-logs" }
-    );
+    expect(
+      rawCycle([{ ...single, blockHash: `0x${word("2")}` }])
+    ).toMatchObject({ status: "pass", scope: "raw-logs" });
     const { transactionHash: _hash, ...noHash } = single;
     expect(rawCycle([noHash]).noVector).toMatch(
       /raw_logs has no transactionHash/

@@ -33,7 +33,9 @@ const OTHER = "0x00000000000000000000000000000000000000ff";
 const topic = (signature: string): string =>
   keccak256(stringToBytes(signature));
 const SINGLE = topic("TransferSingle(address,address,address,uint256,uint256)");
-const BATCH = topic("TransferBatch(address,address,address,uint256[],uint256[])");
+const BATCH = topic(
+  "TransferBatch(address,address,address,uint256[],uint256[])"
+);
 const ERC721 = topic("Transfer(address,address,uint256)");
 const REGISTER = topic(
   "RegisterDelegation(address,address,address,uint256,bool,uint256)"
@@ -78,7 +80,12 @@ function log(
   };
 }
 const single = (from: string, to: string, id: number, n: number, at: At) =>
-  log(R.memes, [SINGLE, asTopic(OPERATOR), asTopic(from), asTopic(to)], data(id, n), at);
+  log(
+    R.memes,
+    [SINGLE, asTopic(OPERATOR), asTopic(from), asTopic(to)],
+    data(id, n),
+    at
+  );
 const batch = (
   from: string,
   to: string,
@@ -148,7 +155,11 @@ describe("raw logs give the same cycle as decoded inputs (P26 §3.1)", () => {
   // A and D linked both ways.
   const logs = [
     single(ZERO, A, 1, 3, { block: 1001 }),
-    batch(ZERO, C, [2, 2, 1], [1, 2, 1], { block: 1002, txIndex: 1, logIndex: 4 }),
+    batch(ZERO, C, [2, 2, 1], [1, 2, 1], {
+      block: 1002,
+      txIndex: 1,
+      logIndex: 4,
+    }),
     erc721(ZERO, A, 7, { block: 1003 }),
     single(A, C, 1, 1, { block: 1004, txIndex: 2, logIndex: 1 }),
     register(A, D, { block: 1005 }),
@@ -224,7 +235,10 @@ describe("raw logs give the same cycle as decoded inputs (P26 §3.1)", () => {
     });
     refused(logs, /raw or decoded, never both/, {
       delegationEvents: [
-        { ...((decoded.delegationEvents ?? [])[0] as DelegationEvent), block: 1001 },
+        {
+          ...((decoded.delegationEvents ?? [])[0] as DelegationEvent),
+          block: 1001,
+        },
       ],
     });
   });
@@ -244,9 +258,18 @@ describe("which logs are inputs (P26 §3.1)", () => {
   });
 
   it("reads every log's types, selected or not (vector 69)", () => {
-    refused([mint, { ...mint, removed: "false" as unknown as boolean }], /removed is not a boolean/);
     refused(
-      [mint, { ...single(ZERO, A, 1, 1, { block: B + 1 }), logIndex: `0x1${"0".repeat(16)}` }],
+      [mint, { ...mint, removed: "false" as unknown as boolean }],
+      /removed is not a boolean/
+    );
+    refused(
+      [
+        mint,
+        {
+          ...single(ZERO, A, 1, 1, { block: B + 1 }),
+          logIndex: `0x1${"0".repeat(16)}`,
+        },
+      ],
       /uint64/
     );
     refused([{ ...mint, topics: [SINGLE, "0x01"] }], /32 bytes of hex/);
@@ -260,12 +283,20 @@ describe("which logs are inputs (P26 §3.1)", () => {
   });
 
   it("refuses a larger logIndex with a smaller txIndex, an ignored log included (vector 64)", () => {
-    const approval = log(R.memes, [topic("ApprovalForAll(address,address,bool)"), asTopic(A), asTopic(C)], data(1), {
-      block: 1001,
-      txIndex: 0,
-      logIndex: 5,
-    });
-    refused([{ ...mint, transactionIndex: "0x1" }, approval], /smaller txIndex/);
+    const approval = log(
+      R.memes,
+      [topic("ApprovalForAll(address,address,bool)"), asTopic(A), asTopic(C)],
+      data(1),
+      {
+        block: 1001,
+        txIndex: 0,
+        logIndex: 5,
+      }
+    );
+    refused(
+      [{ ...mint, transactionIndex: "0x1" }, approval],
+      /smaller txIndex/
+    );
     // An ignored log is an input: nothing decoded may take its position (vector 63).
     refused([approval], /raw or decoded, never both/, {
       transfers: [
@@ -292,7 +323,10 @@ describe("which logs are inputs (P26 §3.1)", () => {
     refused([single(ZERO, A, 1, 1, { block: B })], /not T/, {}, { [B]: T - 1 });
     refused([mint], /canonical decimal/, {}, { "01001": stampOf(1001) });
     const atB = fromLogs(
-      [single(ZERO, A, 1, 2, { block: 1001 }), single(A, C, 1, 1, { block: B })],
+      [
+        single(ZERO, A, 1, 2, { block: 1001 }),
+        single(A, C, 1, 1, { block: B }),
+      ],
       {},
       { "1001": stampOf(1001), [B]: T }
     );
@@ -305,34 +339,94 @@ describe("the ABI decoding of transfer logs (P26 §3.2)", () => {
 
   it("refuses an address word with high bytes, the operator's included", () => {
     const bad = single(ZERO, A, 1, 1, at);
-    refused([{ ...bad, topics: [SINGLE, asTopic(OPERATOR), asTopic(`0x01${word(A).slice(2)}`), asTopic(A)] }], /non-zero high bytes/);
-    refused([{ ...bad, topics: [SINGLE, asTopic(`0x01${word(A).slice(2)}`), asTopic(ZERO), asTopic(A)] }], /non-zero high bytes/);
+    refused(
+      [
+        {
+          ...bad,
+          topics: [
+            SINGLE,
+            asTopic(OPERATOR),
+            asTopic(`0x01${word(A).slice(2)}`),
+            asTopic(A),
+          ],
+        },
+      ],
+      /non-zero high bytes/
+    );
+    refused(
+      [
+        {
+          ...bad,
+          topics: [
+            SINGLE,
+            asTopic(`0x01${word(A).slice(2)}`),
+            asTopic(ZERO),
+            asTopic(A),
+          ],
+        },
+      ],
+      /non-zero high bytes/
+    );
   });
 
   it("refuses data that is not the canonical encoding", () => {
-    refused([{ ...single(ZERO, A, 1, 1, at), data: data(1, 1, 0) }], /not id \|\| value/);
-    refused([{ ...single(ZERO, A, 1, 1, at), data: `${data(1, 1)}00` }], /whole number of words/);
+    refused(
+      [{ ...single(ZERO, A, 1, 1, at), data: data(1, 1, 0) }],
+      /not id \|\| value/
+    );
+    refused(
+      [{ ...single(ZERO, A, 1, 1, at), data: `${data(1, 1)}00` }],
+      /whole number of words/
+    );
     const twoArrays = batch(ZERO, A, [1, 2], [1, 1], at);
-    refused([{ ...twoArrays, data: data(0x40, 0xa0, 2, 1, 2, 1, 1) }], /canonical encoding/);
-    refused([{ ...twoArrays, data: data(0x40, 0xa0, 2, 1, 2, 3, 1, 1) }], /canonical encoding/);
-    refused([{ ...twoArrays, data: data(0x40, 0xc0, 2, 1, 2, 2, 1, 1) }], /canonical encoding/);
-    refused([{ ...erc721(ZERO, A, 7, at), data: data(0) }], /ERC-721 Transfer with data/);
+    refused(
+      [{ ...twoArrays, data: data(0x40, 0xa0, 2, 1, 2, 1, 1) }],
+      /canonical encoding/
+    );
+    refused(
+      [{ ...twoArrays, data: data(0x40, 0xa0, 2, 1, 2, 3, 1, 1) }],
+      /canonical encoding/
+    );
+    refused(
+      [{ ...twoArrays, data: data(0x40, 0xc0, 2, 1, 2, 2, 1, 1) }],
+      /canonical encoding/
+    );
+    refused(
+      [{ ...erc721(ZERO, A, 7, at), data: data(0) }],
+      /ERC-721 Transfer with data/
+    );
   });
 
   it("refuses an amount of 2^64 or more, and reads a token id of any uint256", () => {
-    refused([{ ...single(ZERO, A, 1, 0, at), data: data(1, 2n ** 64n) }], /2\^64 or more/);
+    refused(
+      [{ ...single(ZERO, A, 1, 0, at), data: data(1, 2n ** 64n) }],
+      /2\^64 or more/
+    );
     const big = 2n ** 255n;
     const res = fromLogs([
-      log(R.nextgen, [ERC721, asTopic(ZERO), asTopic(A), asTopic(big)], "0x", at),
+      log(
+        R.nextgen,
+        [ERC721, asTopic(ZERO), asTopic(A), asTopic(big)],
+        "0x",
+        at
+      ),
     ]);
-    expect(Object.keys(res.wallets[A]?.nextgen ?? {})).toEqual([big.toString()]);
+    expect(Object.keys(res.wallets[A]?.nextgen ?? {})).toEqual([
+      big.toString(),
+    ]);
   });
 
   it("ignores another event or topic count of a collection, as a log that gives nothing", () => {
     const res = fromLogs([
       single(ZERO, A, 1, 1, at),
-      { ...single(ZERO, A, 1, 5, { block: 1002 }), topics: [SINGLE, asTopic(OPERATOR), asTopic(ZERO)] },
-      { ...erc721(ZERO, A, 7, { block: 1003 }), topics: [SINGLE, asTopic(ZERO), asTopic(A), asTopic(7)] },
+      {
+        ...single(ZERO, A, 1, 5, { block: 1002 }),
+        topics: [SINGLE, asTopic(OPERATOR), asTopic(ZERO)],
+      },
+      {
+        ...erc721(ZERO, A, 7, { block: 1003 }),
+        topics: [SINGLE, asTopic(ZERO), asTopic(A), asTopic(7)],
+      },
     ]);
     expect(res.wallets[A]?.balance).toBe(1);
   });
@@ -352,19 +446,33 @@ describe("the delegation events (P26 §6.1, §6.2)", () => {
     const revoked = fromLogs([
       viaSub(A, C, 1001),
       viaSub(C, A, 1002),
-      log(R.delegation, [REVOKE, asTopic(A), asTopic(R.memes), asTopic(C)], data(999), { block: 1003 }),
+      log(
+        R.delegation,
+        [REVOKE, asTopic(A), asTopic(R.memes), asTopic(C)],
+        data(999),
+        { block: 1003 }
+      ),
     ]);
     expect(revoked.clusters.clusters).toEqual([]);
   });
 
   it("keeps only consolidations: another use case or collection is no link", () => {
-    const res = fromLogs([register(A, C, { block: 1001 }), register(C, A, { block: 1002 }, 1)]);
+    const res = fromLogs([
+      register(A, C, { block: 1001 }),
+      register(C, A, { block: 1002 }, 1),
+    ]);
     expect(res.clusters.clusters).toEqual([]);
   });
 
   it("refuses a malformed delegation event", () => {
-    refused([{ ...register(A, C, { block: 1001 }), data: data(999, 2, 0) }], /allTokens is not a bool/);
-    refused([{ ...register(A, C, { block: 1001 }), data: data(999, 1) }], /2 data words/);
+    refused(
+      [{ ...register(A, C, { block: 1001 }), data: data(999, 2, 0) }],
+      /allTokens is not a bool/
+    );
+    refused(
+      [{ ...register(A, C, { block: 1001 }), data: data(999, 1) }],
+      /2 data words/
+    );
     refused(
       [
         log(

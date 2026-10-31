@@ -32,10 +32,7 @@ const ROOT = path.resolve(
   "../.."
 );
 const OUT = path.join(ROOT, "lib/explained/data/lean.json");
-const DEFAULT_MANIFEST = path.join(
-  ROOT,
-  "lib/tdh/formal/bundledManifest.json"
-);
+const DEFAULT_MANIFEST = path.join(ROOT, "lib/tdh/formal/bundledManifest.json");
 /** Where the model lives in 6529chain. */
 const MODEL_DIR = "design/tdh-lean";
 /** No statement in the model runs longer; a longer one means a bad line. */
@@ -149,7 +146,10 @@ async function main() {
   const files = new Map();
   const readFile = (file) => {
     if (!files.has(file)) {
-      files.set(file, git(opts.chain, ["show", `${commit}:${MODEL_DIR}/${file}`]));
+      files.set(
+        file,
+        git(opts.chain, ["show", `${commit}:${MODEL_DIR}/${file}`])
+      );
     }
     return files.get(file);
   };
