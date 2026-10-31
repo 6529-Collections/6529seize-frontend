@@ -120,6 +120,7 @@ export const publicEnvSchema = z.object({
     .transform((value) => value === "true" || value === true)
     .optional(),
   FEATURE_AB_CARD: z.string().optional(),
+  NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: z.string().optional(),
   NEXT_PUBLIC_PROFILE_CMS_BUILDER_API_ENABLED: z.string().optional(),
   NEXT_PUBLIC_PROFILE_CMS_BUILDER_ENABLED: z.string().optional(),
   NEXT_PUBLIC_CLOUDFRONT_DOMAIN: z.string().optional(),
