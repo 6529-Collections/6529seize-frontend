@@ -1,6 +1,6 @@
 "use client";
 
-import { type CSSProperties } from "react";
+import type { CSSProperties } from "react";
 import { DropAuthorSignedIndicator } from "./signature/DropAuthorSignedMarker";
 import WaveDropTime from "./time/WaveDropTime";
 import { GROUPED_TIMESTAMP_SWIPE_MAX_OFFSET_PX } from "./WaveDrop.helpers";
