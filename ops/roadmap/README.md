@@ -199,18 +199,6 @@ Remediation:
 - Add regression tests covering unsafe schemes, disallowed hosts, and sandbox
   attributes.
 
-### P3: Remove Or Gate The Public Sentry Example Route
-
-`app/api/sentry-example-api/route.ts` remains public and intentionally throws on
-every GET request, with a public example page that triggers it.
-
-Remediation:
-
-- Remove the example route/page from production builds, or gate them behind a
-  local/dev-only flag or admin-only check.
-- Add a test or route inventory assertion so intentional error fixtures do not
-  ship publicly by accident.
-
 ### P3: Sanitize Or Render NextGen Artist Signatures As Text
 
 `NextGenCollectionDetails` still renders `collection.artist_signature` via
