@@ -545,31 +545,72 @@ describe("device-signed drop writes", () => {
     expect(sentSignature(postMock, 1)).toBeUndefined();
   });
 
-  it("resends unsigned without asking and keeps the grant when the server does not accept device signatures", async () => {
-    await setUpGrant();
-    const unsupported = Object.assign(
-      new Error('"device_signature" is not allowed'),
-      { status: 400 }
-    );
-    postMock
-      .mockRejectedValueOnce(unsupported)
-      .mockResolvedValueOnce({ id: "drop" });
-    deleteMock
-      .mockRejectedValueOnce('"device_signature" is not allowed')
-      .mockResolvedValueOnce(undefined);
+  describe("when the server does not accept device signatures", () => {
+    const unsupported = () =>
+      Object.assign(new Error('"device_signature" is not allowed'), {
+        status: 400,
+      });
 
-    await expect(postDrop(createBody())).resolves.toEqual({ id: "drop" });
-    expect(sentSignature(postMock, 0)).toBeDefined();
-    expect(sentSignature(postMock, 1)).toBeUndefined();
-    await deleteDrop({ dropId: DROP_ID, waveId: WAVE_ID });
-    expect(deleteMock.mock.calls[1]![0]).toEqual({
-      endpoint: `drops/${DROP_ID}`,
+    it("never resends unsigned by itself while the user has not chosen", async () => {
+      await setUpGrant();
+      postMock.mockRejectedValueOnce(unsupported());
+
+      const pending = postDrop(createBody());
+      await waitUntil(() => prompts.length === 1);
+
+      expect(prompts).toEqual([
+        expect.objectContaining({ action: "post", reason: "unsupported" }),
+      ]);
+      expect(postMock).toHaveBeenCalledTimes(1);
+      expect(sentSignature(postMock, 0)).toBeDefined();
+      resolveSigningDecision(prompts[0]!.id, "cancel");
+      await expect(pending).rejects.toMatchObject({ name: "AbortError" });
+      expect(postMock).toHaveBeenCalledTimes(1);
+      expect(mockReportFallback).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: "post",
+          reason: "unsupported",
+          phase: "send",
+        })
+      );
     });
-    expect(prompts).toEqual([]);
-    expect(mockRecords.get(ADDRESS)?.grant).not.toBeNull();
-    expect(mockReportFallback).toHaveBeenCalledWith(
-      expect.objectContaining({ reason: "unsupported" })
-    );
+
+    it("sends unsigned only on Send unsigned and keeps the grant", async () => {
+      await setUpGrant();
+      answers = ["unsigned", "unsigned"];
+      postMock
+        .mockRejectedValueOnce(unsupported())
+        .mockResolvedValueOnce({ id: "drop" });
+      deleteMock
+        .mockRejectedValueOnce('"device_signature" is not allowed')
+        .mockResolvedValueOnce(undefined);
+
+      await expect(postDrop(createBody())).resolves.toEqual({ id: "drop" });
+      expect(sentSignature(postMock, 0)).toBeDefined();
+      expect(sentSignature(postMock, 1)).toBeUndefined();
+      await deleteDrop({ dropId: DROP_ID, waveId: WAVE_ID });
+      expect(deleteMock.mock.calls[1]![0]).toEqual({
+        endpoint: `drops/${DROP_ID}`,
+      });
+      expect(prompts).toEqual([
+        expect.objectContaining({ action: "post", reason: "unsupported" }),
+        expect.objectContaining({ action: "delete", reason: "unsupported" }),
+      ]);
+      expect(mockRecords.get(ADDRESS)?.grant).not.toBeNull();
+    });
+
+    it("signs again with a fresh sequence on Try again", async () => {
+      await setUpGrant();
+      answers = ["retry"];
+      postMock
+        .mockRejectedValueOnce(unsupported())
+        .mockResolvedValueOnce({ id: "drop" });
+
+      await expect(postDrop(createBody())).resolves.toEqual({ id: "drop" });
+      const first = sentSignature(postMock, 0)!;
+      const retried = sentSignature(postMock, 1)!;
+      expect(retried.seq).toBeGreaterThan(first.seq);
+    });
   });
 
   describe("with a grant, a write that cannot be signed in time", () => {

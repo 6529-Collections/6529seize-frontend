@@ -3,7 +3,7 @@ import * as Sentry from "@sentry/nextjs";
 /**
  * Why a device-signed write was not signed on its first attempt. "unsupported"
  * is the backend-rollback case (the server does not know the field at all),
- * where the write is resent unsigned automatically.
+ * where the user is asked, as for any other rejection.
  */
 export type SignedWriteFallbackReason =
   | "timeout"
