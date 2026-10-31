@@ -18,7 +18,9 @@ import {
   type FactId,
 } from "@/lib/explained/facts";
 import { formatCount, formatUtcClock } from "@/lib/explained/format";
-import { FactText, pt, rich } from "../components/copy";
+import { pt } from "../components/copy";
+import { FactText } from "@/components/explained/facts/FactText";
+import { rich } from "@/components/explained/rich";
 import {
   checkState,
   snapshotInstant,

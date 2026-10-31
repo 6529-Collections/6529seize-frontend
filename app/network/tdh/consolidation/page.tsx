@@ -15,6 +15,10 @@ import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { loadFactBook } from "@/lib/explained/feed.server";
 import type { FactBook } from "@/lib/explained/facts";
 import { formatCount } from "@/lib/explained/format";
+import {
+  resolveExplainedLocale,
+  type ExplainedParams,
+} from "@/lib/explained/locale.server";
 import FactDerived, { RecordValue } from "../how-it-works/_kit/FactDerived";
 import {
   EdRow,
@@ -27,11 +31,7 @@ import {
   StatementLabel,
   You,
 } from "../how-it-works/_kit/layout";
-import {
-  pageLocale,
-  type LocaleSearchParams,
-} from "../how-it-works/_kit/pageLocale";
-import { rich } from "../how-it-works/_kit/rich";
+import { rich } from "@/components/explained/rich";
 import { wt, type WalletsKey } from "./copy";
 import PairPicture from "./PairPicture";
 import SignOrder from "./SignOrder";
@@ -58,9 +58,9 @@ const DESIGN_HREF = "/network/tdh/consolidation/design";
 export default async function TdhYourWalletsPage({
   searchParams,
 }: {
-  readonly searchParams: LocaleSearchParams;
+  readonly searchParams: Promise<ExplainedParams>;
 }) {
-  const locale = await pageLocale(searchParams);
+  const locale = await resolveExplainedLocale(await searchParams);
   const book = await loadFactBook();
   const gate = book.get<string>("rules.gateActivation");
   const when = gateText(gate, locale);

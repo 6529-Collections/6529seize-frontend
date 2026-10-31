@@ -1,6 +1,7 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { Glyph, type GlyphKind } from "@/components/explained/marks/glyphs";
-import { EX_TEXT } from "@/components/explained/tokens";
+import { EX_LINK, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import type { FactBook } from "@/lib/explained/facts";
 import { Fact } from "../_lib/facts";
@@ -10,9 +11,9 @@ import { hrich, ht } from "./copy";
  * Three things you can check today (MAP.md §3): every identity equal in
  * today's comparison, the Lean theorems with the claims they showed false,
  * and the one day proved in zero knowledge with its second proof not done;
- * then who runs the checks.
+ * then who runs the checks. Each head links to the page that shows it.
  */
-const BOLD = "tw-font-semibold tw-text-iron-50";
+const HEAD_LINK = `${EX_LINK} tw-font-semibold`;
 
 function Item({
   glyph,
@@ -56,12 +57,12 @@ export default function CheckableToday({
       <span className={EX_TEXT.label}>{ht(locale, "check.label")}</span>
       <ul className="tw-m-0 tw-list-none tw-p-0">
         <Item glyph="tested">
-          <b className={BOLD}>
+          <Link className={HEAD_LINK} href="/network/tdh/verification">
             {hrich(locale, "check.identities", {
               equal: fact("tdh.latest.agree.live.identities.equal"),
               total: fact("tdh.latest.agree.live.identities.total"),
             })}
-          </b>{" "}
+          </Link>{" "}
           {everyDayEqual(book)
             ? hrich(locale, "check.identitiesBody", { days, first })
             : hrich(locale, "check.identitiesSome", {
@@ -71,17 +72,19 @@ export default function CheckableToday({
               })}
         </Item>
         <Item glyph="proved">
-          <b className={BOLD}>
+          <Link className={HEAD_LINK} href="/network/tdh/formal">
             {hrich(locale, "check.theorems", {
               proved: fact("manifest.proved"),
             })}
-          </b>{" "}
+          </Link>{" "}
           {hrich(locale, "check.theoremsBody", {
             shownFalse: fact("manifest.shownFalse"),
           })}
         </Item>
         <Item glyph="tested">
-          <b className={BOLD}>{ht(locale, "check.proof")}</b>{" "}
+          <Link className={HEAD_LINK} href="/network/tdh/proofs">
+            {ht(locale, "check.proof")}
+          </Link>{" "}
           {ht(locale, "check.proofBody")}
         </Item>
       </ul>

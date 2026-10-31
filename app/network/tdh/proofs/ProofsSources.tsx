@@ -4,7 +4,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import proofs from "@/lib/explained/data/proofs.json";
 import { k, PROOFS_ROUTE } from "./_lib/copy";
 import type { PageFacts } from "./_lib/facts";
-import { rich } from "./_lib/rich";
+import { rich } from "@/components/explained/rich";
 
 /**
  * How we know (EXPLAINED.md §6.2): the records this page restates, each

@@ -9,7 +9,6 @@ import { chapterById } from "@/components/explained/shell/chapters";
 import { EX_BUTTON } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { fmt, type FactBook, type FactId } from "@/lib/explained/facts";
-import { WRAP_WHEN_NARROW } from "../_lib/buttons";
 import CheckableToday from "./CheckableToday";
 import { ht } from "./copy";
 
@@ -118,10 +117,7 @@ export default function HubLoop({
           fact: "tdh.latest.agree.live.identities.equal",
         }}
         action={
-          <Link
-            className={`${EX_BUTTON.cta} ${WRAP_WHEN_NARROW}`}
-            href={tdh.href ?? "/network/tdh"}
-          >
+          <Link className={EX_BUTTON.cta} href={tdh.href ?? "/network/tdh"}>
             {ht(locale, "chapterCta", {
               number: tdh.number ?? "",
               title: kt(locale, tdh.title),

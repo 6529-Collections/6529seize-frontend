@@ -4,7 +4,8 @@ import type { MessageKey } from "@/i18n/messages";
 import type { Fact, FactBook } from "@/lib/explained/facts";
 import type { ManifestSection } from "@/lib/explained/registry/manifestFacts";
 import type { ManifestSectionEntries } from "@/lib/explained/registry/formalFacts";
-import { plain, printers, rich, type RichValues } from "../_reference/rich";
+import { plain, rich, type RichValues } from "@/components/explained/rich";
+import { printers } from "@/components/explained/facts/printers";
 
 /**
  * What every part of How sure shares: its copy (explained.tdh.sure.*), the

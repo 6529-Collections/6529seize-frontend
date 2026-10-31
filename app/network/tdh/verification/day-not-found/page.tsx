@@ -21,8 +21,9 @@ import {
   minutesBetween,
 } from "@/lib/explained/format";
 import { cycleOf, dateOfCycle } from "@/lib/explained/registry/helpers";
-import { BUTTON_WRAP } from "../components/buttons";
-import { FactText, pt, rich } from "../components/copy";
+import { pt } from "../components/copy";
+import { FactText } from "@/components/explained/facts/FactText";
+import { rich } from "@/components/explained/rich";
 
 /**
  * The receipt pages' not-found view. The proxy rewrites a day permalink
@@ -206,7 +207,7 @@ export default async function TdhVerificationDayNotFound({
         <div className="tw-mt-8 tw-flex tw-flex-wrap tw-gap-2.5">
           {latest !== null && latestDate !== null && (
             <Link
-              className={`${EX_BUTTON.cta} ${BUTTON_WRAP}`}
+              className={EX_BUTTON.cta}
               href={`${CHECK_ROUTE}/${latest.value}`}
             >
               <span>
@@ -221,10 +222,7 @@ export default async function TdhVerificationDayNotFound({
               <Icon kind="arrow" />
             </Link>
           )}
-          <Link
-            className={`${EX_BUTTON.secondary} ${BUTTON_WRAP}`}
-            href={CHECK_ROUTE}
-          >
+          <Link className={EX_BUTTON.secondary} href={CHECK_ROUTE}>
             {pt(locale, "explained.tdh.day.notFound.check")}
           </Link>
         </div>

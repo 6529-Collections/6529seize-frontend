@@ -11,7 +11,7 @@ import { EX_TEXT } from "@/components/explained/tokens";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { loadFactBook } from "@/lib/explained/feed.server";
-import { PlaceLinks, pagePlace } from "../_reference/frame";
+import { PlaceLinks, pagePlace } from "@/components/explained/shell/place";
 import {
   Caption,
   CodeName,
@@ -57,7 +57,7 @@ export default async function SpecificationPage() {
   const locale = DEFAULT_LOCALE;
   const book = await loadFactBook();
   const ctx = specContext(book, locale);
-  const place = pagePlace("spec", locale);
+  const place = pagePlace("tdh", "spec", locale);
   const { m, s, p } = ctx;
   const reported = p.text("tdh.latest.ruleVersion");
   const current = p.text("rules.version");

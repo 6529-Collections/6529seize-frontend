@@ -4,7 +4,7 @@ import { EX_LINK, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { formatCount } from "@/lib/explained/format";
 import { Para, Section, Statement, StatementLabel } from "./_kit/layout";
-import { rich } from "./_kit/rich";
+import { rich } from "@/components/explained/rich";
 import { ht, type HowKey } from "./copy";
 
 /**

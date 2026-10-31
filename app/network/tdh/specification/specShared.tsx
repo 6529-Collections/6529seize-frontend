@@ -7,7 +7,8 @@ import type {
   RegistryRecord,
 } from "@/lib/explained/registry/referenceFacts";
 import { CodeName } from "../_reference/parts";
-import { plain, printers, rich, type RichValues } from "../_reference/rich";
+import { plain, rich, type RichValues } from "@/components/explained/rich";
+import { printers } from "@/components/explained/facts/printers";
 import { registryValues } from "./specCode";
 
 /**

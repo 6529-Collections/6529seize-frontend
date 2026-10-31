@@ -28,8 +28,9 @@ import CheckRibbon, {
   ribbonResults,
   type RibbonInput,
 } from "./CheckRibbon";
-import { BUTTON_WRAP } from "./buttons";
-import { FactText, pt, rich } from "./copy";
+import { pt } from "./copy";
+import { FactText } from "@/components/explained/facts/FactText";
+import { rich } from "@/components/explained/rich";
 import {
   VERDICT_FRAME,
   checkState,
@@ -473,16 +474,13 @@ export default function CheckTop({
     <>
       {cycle !== null && (
         <Link
-          className={`${EX_BUTTON.cta} ${BUTTON_WRAP}`}
+          className={EX_BUTTON.cta}
           href={`/network/tdh/verification/${cycle}`}
         >
           {pt(locale, "explained.tdh.check.act.receipt")}
         </Link>
       )}
-      <Link
-        className={`${EX_BUTTON.secondary} ${BUTTON_WRAP}`}
-        href="/network/tdh#explain"
-      >
+      <Link className={EX_BUTTON.secondary} href="/network/tdh#explain">
         {pt(locale, "explained.tdh.check.act.record")}
       </Link>
       {simulated !== null && (

@@ -14,7 +14,9 @@ import type { SupportedLocale } from "@/i18n/locales";
 import type { Fact } from "@/lib/explained/facts";
 import { formatCount, formatUtcDay } from "@/lib/explained/format";
 import { dateOfCycle } from "@/lib/explained/registry/helpers";
-import { FactText, pt, rich } from "./copy";
+import { pt } from "./copy";
+import { FactText } from "@/components/explained/facts/FactText";
+import { rich } from "@/components/explained/rich";
 import { DAY_TILE, checkStateOf, type CheckState } from "./dayModel";
 
 /**

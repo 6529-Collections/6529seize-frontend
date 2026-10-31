@@ -16,7 +16,10 @@ import { EX_LAYOUT, EX_LINK, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import type { Fact, FactBook } from "@/lib/explained/facts";
 import { formatCount, formatUtcClock } from "@/lib/explained/format";
-import { FactText, pt, rich, type CheckKey } from "./copy";
+import ProofsDoor from "../../proofs/ProofsDoor";
+import { pt, type CheckKey } from "./copy";
+import { FactText } from "@/components/explained/facts/FactText";
+import { rich } from "@/components/explained/rich";
 import {
   checkState,
   checkStateOf,
@@ -519,6 +522,10 @@ export function CheckItYourself({
             })}
           </p>
         </div>
+      </div>
+      {/* A green day is a check; a proof of a day goes further. */}
+      <div className="tw-mt-12">
+        <ProofsDoor from="check" locale={locale} />
       </div>
     </section>
   );

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Icon } from "@/components/explained/marks/glyphs";
 import { EX_BUTTON } from "@/components/explained/tokens";
-import { BUTTON_WRAP } from "../components/buttons";
 
 /**
  * "Copy the receipt as text" (TDH-DESIGN.md §4.5): every row of the
@@ -32,7 +31,7 @@ export default function CopyReceipt({
   return (
     <button
       type="button"
-      className={`${EX_BUTTON.secondary} ${BUTTON_WRAP} tw-cursor-pointer`}
+      className={`${EX_BUTTON.secondary} tw-cursor-pointer`}
       onClick={() => void copy()}
       aria-live="polite"
     >

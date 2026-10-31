@@ -14,7 +14,7 @@ import {
   Statement,
   StatementLabel,
 } from "./_kit/layout";
-import { rich } from "./_kit/rich";
+import { rich } from "@/components/explained/rich";
 import { ht } from "./copy";
 import TotalsLens from "./TotalsLens";
 

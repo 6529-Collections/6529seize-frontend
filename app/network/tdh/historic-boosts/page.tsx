@@ -11,7 +11,7 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { loadFactBook } from "@/lib/explained/feed.server";
 import type { VersionRow } from "@/lib/explained/registry/referenceFacts";
-import { PlaceLinks, pagePlace } from "../_reference/frame";
+import { PlaceLinks, pagePlace } from "@/components/explained/shell/place";
 import LegacyAnchors from "../_reference/LegacyAnchors";
 import {
   Caption,
@@ -21,14 +21,9 @@ import {
   Prose,
   StackTable,
 } from "../_reference/parts";
-import {
-  FactScope,
-  FactText,
-  plain,
-  printers,
-  rich,
-  type RichValues,
-} from "../_reference/rich";
+import { FactScope, FactText } from "@/components/explained/facts/FactText";
+import { plain, rich, type RichValues } from "@/components/explained/rich";
+import { printers } from "@/components/explained/facts/printers";
 
 /**
  * Shelf S4, Versions and boosts (TDH-DESIGN.md §4.7), at the Historic
@@ -52,7 +47,7 @@ const MOVED: Readonly<Record<string, string>> = {
 export default async function VersionsPage() {
   const locale = DEFAULT_LOCALE;
   const book = await loadFactBook();
-  const place = pagePlace("versions", locale);
+  const place = pagePlace("tdh", "versions", locale);
   const p = printers(book, locale);
   const m = (key: VersionsKey, values?: RichValues) =>
     rich(locale, key, values);

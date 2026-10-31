@@ -54,6 +54,14 @@ const ORDER = [
   "file",
 ];
 
+// The pages read the reader's language from Accept-Language (the kit's
+// resolveExplainedLocale); these tests read as an English browser.
+jest.mock("next/headers", () => ({
+  headers: async () => ({
+    get: (name: string) => (name === "accept-language" ? "en-US" : null),
+  }),
+}));
+
 describe("a day's receipt (TDH-DESIGN.md §4.5)", () => {
   beforeEach(() => {
     serveFixtureFeed();

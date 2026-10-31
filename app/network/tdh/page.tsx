@@ -15,7 +15,7 @@ import {
   firstParam,
   resolveExplainedLocale,
   type ExplainedParams,
-} from "@/app/explained/_lib/locale.server";
+} from "@/lib/explained/locale.server";
 import { ot } from "./overview/copy";
 import ExplainedOverview from "./overview/ExplainedOverview";
 import { showNetworkDistribution } from "./overview/flags";

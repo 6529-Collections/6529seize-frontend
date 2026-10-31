@@ -3,7 +3,7 @@ import { fill } from "@/components/explained/i18n";
 import type { SupportedLocale } from "@/i18n/locales";
 import { k } from "./_lib/copy";
 import type { PageFacts } from "./_lib/facts";
-import { rich } from "./_lib/rich";
+import { rich } from "@/components/explained/rich";
 import Section from "./Section";
 
 /**

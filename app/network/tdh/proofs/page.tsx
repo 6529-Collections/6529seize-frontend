@@ -6,10 +6,13 @@ import { fill, kt } from "@/components/explained/i18n";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { loadFactBook } from "@/lib/explained/feed.server";
+import {
+  resolveExplainedLocale,
+  type ExplainedParams,
+} from "@/lib/explained/locale.server";
 import { k, PROOFS_PAGE_ID, PROOFS_ROUTE } from "./_lib/copy";
 import { pageFacts } from "./_lib/facts";
-import { resolveLocale, type SearchParams } from "./_lib/locale.server";
-import { rich } from "./_lib/rich";
+import { rich } from "@/components/explained/rich";
 import ContractSection from "./ContractSection";
 import Guarantees from "./Guarantees";
 import HowMade from "./HowMade";
@@ -33,9 +36,9 @@ import WhereItStands from "./WhereItStands";
 export default async function ProofsPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<SearchParams>;
+  readonly searchParams: Promise<ExplainedParams>;
 }) {
-  const locale = await resolveLocale(await searchParams);
+  const locale = await resolveExplainedLocale(await searchParams);
   const book = await loadFactBook();
   const snapshot = book.snapshot();
   const facts = pageFacts(snapshot, locale);

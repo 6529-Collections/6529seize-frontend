@@ -11,7 +11,7 @@ import {
   firstParam,
   resolveExplainedLocale,
   type ExplainedParams,
-} from "./_lib/locale.server";
+} from "@/lib/explained/locale.server";
 import Cc0Answer from "./hub/Cc0Answer";
 import { ht } from "./hub/copy";
 import HubChapters from "./hub/HubChapters";

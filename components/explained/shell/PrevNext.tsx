@@ -3,7 +3,13 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { kt } from "../i18n";
 import { EX_FOCUS } from "../tokens";
 
-/** The page before and after, in reading order (EXPLAINED.md §6.2). */
+/**
+ * The page before and after, in reading order (EXPLAINED.md §6.2). The
+ * kickers name places in the chapter ("Back · 2", "Next · S1"), ordinals
+ * rather than quantities, and the cards are half-width with a short title
+ * by design, so the number lint and the TDH gate's empty-card rule do not
+ * apply to them.
+ */
 export interface PrevNextLink {
   readonly href: string;
   readonly title: string;
@@ -29,6 +35,8 @@ export default function PrevNext({
     <nav
       aria-label={kt(locale, "explained.kit.pn.label")}
       className="tw-mt-24 tw-flex tw-flex-col tw-gap-4 md:tw-flex-row md:tw-justify-between"
+      data-ex-allow-number=""
+      data-tdh-check-ignore="empty-card"
     >
       {prev && (
         <Link className={CARD} href={prev.href} rel="prev">

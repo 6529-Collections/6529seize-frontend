@@ -4,7 +4,8 @@ import { EX_LINK } from "@/components/explained/tokens";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { CodeName } from "../_reference/parts";
-import type { printers, RichValues } from "../_reference/rich";
+import type { printers } from "@/components/explained/facts/printers";
+import type { RichValues } from "@/components/explained/rich";
 
 /**
  * The glossary's terms (TDH-DESIGN.md §4.7, S5): each with its id (the

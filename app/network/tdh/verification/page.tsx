@@ -10,20 +10,19 @@ import { chapterById } from "@/components/explained/shell/chapters";
 import FactValue from "@/components/explained/facts/FactValue";
 import { EX_LINK, EX_TEXT } from "@/components/explained/tokens";
 import { formatUtcDate } from "@/i18n/format";
-import {
-  DEFAULT_LOCALE,
-  normalizeLocale,
-  type SupportedLocale,
-} from "@/i18n/locales";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import type { FactBook } from "@/lib/explained/facts";
 import { formatUtcClock, formatUtcDay } from "@/lib/explained/format";
+import { resolveExplainedLocale } from "@/lib/explained/locale.server";
 import {
   CheckItYourself,
   HowTheCheckRuns,
   ReadItRight,
 } from "./components/CheckSections";
 import CheckTop from "./components/CheckTop";
-import { FactText, pt, rich } from "./components/copy";
+import { pt } from "./components/copy";
+import { FactText } from "@/components/explained/facts/FactText";
+import { rich } from "@/components/explained/rich";
 import { dayView, type DayView } from "./components/dayModel";
 import { loadCheckBook, type PageBook } from "./components/loadBook.server";
 import { simulateFailingDay } from "./components/simulatedDay";
@@ -39,10 +38,6 @@ export const dynamic = "force-dynamic";
 type SearchParams = Promise<{ locale?: string | string[] }>;
 
 const ROUTE = "/network/tdh/verification";
-
-function firstValue(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
-}
 
 function Header({
   book,
@@ -244,7 +239,7 @@ export default async function TdhDailyCheckPage({
   readonly searchParams: SearchParams;
 }) {
   const params = await searchParams;
-  const locale = normalizeLocale(firstValue(params.locale));
+  const locale = await resolveExplainedLocale(params);
   const loaded = await loadCheckBook();
   const { book, files } = loaded;
   const day = dayView(book, "latest");
@@ -301,16 +296,11 @@ export default async function TdhDailyCheckPage({
         <HowTheCheckRuns book={book} day={day} locale={locale} />
         <ReadItRight book={book} locale={locale} />
         <CheckItYourself day={day} locale={locale} />
-        {/* The kit's half-width back and next cards with a short title, as
-            the mockup draws them: the TDH gate's empty-card rule does not
-            apply. Their kickers ("Back · 2") are places, not quantities. */}
-        <div data-ex-allow-number="" data-tdh-check-ignore="empty-card">
-          <PrevNext
-            locale={locale}
-            prev={pageLink("wallets")}
-            next={pageLink("sure")}
-          />
-        </div>
+        <PrevNext
+          locale={locale}
+          prev={pageLink("wallets")}
+          next={pageLink("sure")}
+        />
         <HowWeKnowRows loaded={loaded} day={day} locale={locale} />
       </article>
     </ExplainedShell>

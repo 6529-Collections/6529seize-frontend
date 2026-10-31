@@ -6,7 +6,7 @@ import {
 } from "@/components/explained/evidence/claims";
 import { EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
 import { CodeName } from "../_reference/parts";
-import { FactScope } from "../_reference/rich";
+import { FactScope } from "@/components/explained/facts/FactText";
 import type { SureContext } from "./sureShared";
 
 /**

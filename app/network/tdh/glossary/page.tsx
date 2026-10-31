@@ -10,11 +10,12 @@ import { EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { loadFactBook } from "@/lib/explained/feed.server";
-import { PlaceLinks, pagePlace } from "../_reference/frame";
+import { PlaceLinks, pagePlace } from "@/components/explained/shell/place";
 import GlossaryAnchors from "./GlossaryAnchors";
 import { TERMS, type GlossaryKey, type Status } from "./terms";
 import { PageHead, StackTable } from "../_reference/parts";
-import { plain, printers, rich, type RichValues } from "../_reference/rich";
+import { plain, rich, type RichValues } from "@/components/explained/rich";
+import { printers } from "@/components/explained/facts/printers";
 
 /**
  * Shelf S5, the Glossary (TDH-DESIGN.md §4.7): every term the TDH chapter
@@ -73,7 +74,7 @@ function StatusCell({
 export default async function GlossaryPage() {
   const locale = DEFAULT_LOCALE;
   const book = await loadFactBook();
-  const place = pagePlace("glossary", locale);
+  const place = pagePlace("tdh", "glossary", locale);
   const p = printers(book, locale);
   const m = (k: GlossaryKey, values?: RichValues) => rich(locale, k, values);
   const s = (k: GlossaryKey) => plain(locale, k);

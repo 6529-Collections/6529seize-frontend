@@ -5,7 +5,7 @@ import { EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { k } from "./_lib/copy";
 import type { PageFacts } from "./_lib/facts";
-import { rich } from "./_lib/rich";
+import { rich } from "@/components/explained/rich";
 
 /**
  * The record so far: each step of the proofs as a tile on one line, in the

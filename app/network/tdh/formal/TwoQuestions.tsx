@@ -2,7 +2,7 @@ import AssuranceLadder, {
   type Rung,
 } from "@/components/explained/evidence/AssuranceLadder";
 import { EX_LAYOUT, EX_LINK, EX_TEXT } from "@/components/explained/tokens";
-import { FactScope } from "../_reference/rich";
+import { FactScope } from "@/components/explained/facts/FactText";
 import type { SureContext } from "./sureShared";
 
 /** Proven on Ethereum: the chapter's page on the zero-knowledge proofs. */

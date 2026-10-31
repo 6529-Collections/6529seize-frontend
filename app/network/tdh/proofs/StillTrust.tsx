@@ -6,7 +6,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { fmt, isFact, type FactId } from "@/lib/explained/facts";
 import { k } from "./_lib/copy";
 import type { PageFacts } from "./_lib/facts";
-import { rich } from "./_lib/rich";
+import { rich } from "@/components/explained/rich";
 import Section from "./Section";
 
 /**

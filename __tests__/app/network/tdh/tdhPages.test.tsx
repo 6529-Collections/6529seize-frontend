@@ -71,6 +71,14 @@ function renderPage(element: ReactElement) {
   return render(element);
 }
 
+// The pages read the reader's language from Accept-Language (the kit's
+// resolveExplainedLocale); these tests read as an English browser.
+jest.mock("next/headers", () => ({
+  headers: async () => ({
+    get: (name: string) => (name === "accept-language" ? "en-US" : null),
+  }),
+}));
+
 describe("TDH sub-pages", () => {
   const realFetch = globalThis.fetch;
   beforeEach(() => {

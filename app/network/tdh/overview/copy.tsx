@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { fill } from "@/components/explained/i18n";
 import type { SupportedLocale } from "@/i18n/locales";
 import type { MessageKey } from "@/i18n/messages";
-import { rich, type RichParams } from "@/app/explained/_lib/rich";
+import { rich, type RichValues } from "@/components/explained/rich";
 
 /**
  * The overview's copy: every string is a key under explained.tdh.overview
@@ -33,7 +33,7 @@ export function ot(
 export function orich(
   locale: SupportedLocale,
   key: OverviewKey,
-  params: RichParams
+  params: RichValues
 ): ReactNode {
   return rich(locale, overviewKey(key), params);
 }

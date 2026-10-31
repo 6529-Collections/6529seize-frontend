@@ -11,18 +11,16 @@ import HowWeKnow from "@/components/explained/shell/HowWeKnow";
 import { chapterById } from "@/components/explained/shell/chapters";
 import { EX_BUTTON, EX_FOCUS, EX_TEXT } from "@/components/explained/tokens";
 import { formatInteger } from "@/i18n/format";
-import {
-  DEFAULT_LOCALE,
-  normalizeLocale,
-  type SupportedLocale,
-} from "@/i18n/locales";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import type { FactBook } from "@/lib/explained/facts";
 import { formatUtcDay, formatUtcLongDay } from "@/lib/explained/format";
+import { resolveExplainedLocale } from "@/lib/explained/locale.server";
 import { dayFactIds } from "@/lib/explained/registry/dayFacts";
 import { dateOfCycle } from "@/lib/explained/registry/helpers";
 import { loadVerificationIndex } from "@/lib/tdh/verification/loadVerification.server";
-import { BUTTON_WRAP } from "../components/buttons";
-import { FactText, pt, rich } from "../components/copy";
+import { pt } from "../components/copy";
+import { FactText } from "@/components/explained/facts/FactText";
+import { rich } from "@/components/explained/rich";
 import { dayView, type DayView } from "../components/dayModel";
 import { loadDayBook } from "../components/loadBook.server";
 import CopyReceipt from "./CopyReceipt";
@@ -54,10 +52,6 @@ const ARCHIVED_CADENCE_MINUTES = Number.MAX_SAFE_INTEGER;
 
 function parseCycleDay(value: string): number | null {
   return /^[1-9]\d{0,6}$/.test(value) ? Number(value) : null;
-}
-
-function firstValue(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
 }
 
 const NAV_BUTTON = `tw-inline-flex tw-h-10 tw-items-center tw-gap-2 tw-whitespace-nowrap tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-white/[0.06] tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-50 tw-no-underline hover:tw-border-iron-600 ${EX_FOCUS}`;
@@ -269,7 +263,7 @@ export default async function TdhDayReceiptPage({
   if (cycle === null) {
     notFound();
   }
-  const locale = normalizeLocale(firstValue((await searchParams).locale));
+  const locale = await resolveExplainedLocale(await searchParams);
   const { book, files, cycles } = await loadDayBook(cycle);
   // A day the index does not list is not found; the proxy has already
   // answered it with a 404 whenever it could read the index.
@@ -345,10 +339,7 @@ export default async function TdhDayReceiptPage({
                   done={pt(locale, "explained.tdh.day.act.copied")}
                 />
                 {fileUrl !== null && (
-                  <a
-                    className={`${EX_BUTTON.secondary} ${BUTTON_WRAP}`}
-                    href={fileUrl}
-                  >
+                  <a className={EX_BUTTON.secondary} href={fileUrl}>
                     <Icon kind="down" />
                     {pt(locale, "explained.tdh.day.act.json")}
                   </a>

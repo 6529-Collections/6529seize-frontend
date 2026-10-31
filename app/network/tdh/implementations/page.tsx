@@ -12,7 +12,7 @@ import { loadFactBook } from "@/lib/explained/feed.server";
 import { factText, type FactBook } from "@/lib/explained/facts";
 import CopyButton from "../_reference/CopyButton";
 import ImplAnchors from "./ImplAnchors";
-import { PlaceLinks, pagePlace } from "../_reference/frame";
+import { PlaceLinks, pagePlace } from "@/components/explained/shell/place";
 import {
   Caption,
   CodeBlock,
@@ -24,15 +24,14 @@ import {
   StackTable,
   Trap,
 } from "../_reference/parts";
+import { FactScope, FactText } from "@/components/explained/facts/FactText";
 import {
-  FactScope,
-  FactText,
   isMessageKey,
   plain,
-  printers,
   rich,
   type RichValues,
-} from "../_reference/rich";
+} from "@/components/explained/rich";
+import { printers } from "@/components/explained/facts/printers";
 
 /**
  * Shelf S2, Implementations and vectors (TDH-DESIGN.md §4.7): the six
@@ -79,7 +78,7 @@ function pinBlock(book: FactBook, comment: string, retired: string | null) {
 export default async function ImplementationsPage() {
   const locale = DEFAULT_LOCALE;
   const book = await loadFactBook();
-  const place = pagePlace("impl", locale);
+  const place = pagePlace("tdh", "impl", locale);
   const p = printers(book, locale);
   const m = (key: ImplKey, values?: RichValues) => rich(locale, key, values);
   const s = (

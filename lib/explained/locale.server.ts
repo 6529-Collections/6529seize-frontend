@@ -7,9 +7,10 @@ import {
 } from "@/i18n/locales";
 
 /**
- * The language a 6529 Explained page is rendered in. `?locale=` wins (the
- * gates render every page in de-DE with it); otherwise the reader's
- * browser language from Accept-Language, as 6529.io's client pages read
+ * The language a 6529 Explained page is rendered in, the same on every
+ * translated page of every chapter. `?locale=` wins (the gates render
+ * every page in de-DE with it); otherwise the reader's browser language
+ * from Accept-Language, as 6529.io's client pages read
  * `navigator.language`, matched exactly or by language ("de" reads de-DE);
  * otherwise en-US.
  */

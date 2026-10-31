@@ -5,12 +5,17 @@ import { kt } from "@/components/explained/i18n";
 import { chapterById, HUB_HREF } from "@/components/explained/shell/chapters";
 import ExplainedShell from "@/components/explained/shell/ExplainedShell";
 import HowWeKnow from "@/components/explained/shell/HowWeKnow";
+import { PlaceLinks, pagePlace } from "@/components/explained/shell/place";
 import { EX_TEXT } from "@/components/explained/tokens";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { loadFactBook } from "@/lib/explained/feed.server";
 import type { FactBook } from "@/lib/explained/facts";
 import { formatCount } from "@/lib/explained/format";
+import {
+  resolveExplainedLocale,
+  type ExplainedParams,
+} from "@/lib/explained/locale.server";
 import FactDerived, { RecordValue } from "../../how-it-works/_kit/FactDerived";
 import {
   EdRow,
@@ -19,11 +24,7 @@ import {
   Section,
   You,
 } from "../../how-it-works/_kit/layout";
-import {
-  pageLocale,
-  type LocaleSearchParams,
-} from "../../how-it-works/_kit/pageLocale";
-import { rich } from "../../how-it-works/_kit/rich";
+import { rich } from "@/components/explained/rich";
 import { wt } from "../copy";
 import WalletsLens from "../WalletsLens";
 import { RANDOM_LINK_GRAPHS, gateText } from "../walletFacts";
@@ -46,9 +47,9 @@ function registrations(wallets: number): number {
 export default async function TdhConsolidationDesignPage({
   searchParams,
 }: {
-  readonly searchParams: LocaleSearchParams;
+  readonly searchParams: Promise<ExplainedParams>;
 }) {
-  const locale = await pageLocale(searchParams);
+  const locale = await resolveExplainedLocale(await searchParams);
   const book = await loadFactBook();
   const gate = book.get<string>("rules.gateActivation");
   const max = book.get<number>("rules.maxWallets");
@@ -248,6 +249,10 @@ export default async function TdhConsolidationDesignPage({
             </Para>
           </EdRow>
         </Section>
+        <PlaceLinks
+          place={pagePlace("tdh", "design", locale)}
+          locale={locale}
+        />
       </article>
       <HowWeKnow
         locale={locale}

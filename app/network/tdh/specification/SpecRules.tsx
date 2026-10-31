@@ -10,7 +10,7 @@ import {
   StackTable,
   Trap,
 } from "../_reference/parts";
-import { FactText } from "../_reference/rich";
+import { FactText } from "@/components/explained/facts/FactText";
 import type { HalfCent } from "@/lib/explained/registry/referenceFacts";
 import {
   ARITHMETIC,

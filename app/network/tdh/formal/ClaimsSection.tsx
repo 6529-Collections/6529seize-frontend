@@ -6,7 +6,8 @@ import {
 } from "@/components/explained/evidence/claims";
 import type { FactEntry } from "@/lib/explained/facts";
 import { Caption, EdSection } from "../_reference/parts";
-import { FactScope, isMessageKey } from "../_reference/rich";
+import { FactScope } from "@/components/explained/facts/FactText";
+import { isMessageKey } from "@/components/explained/rich";
 import {
   caseLetter,
   countOf,

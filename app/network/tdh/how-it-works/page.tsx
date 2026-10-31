@@ -12,6 +12,10 @@ import { loadFactBook } from "@/lib/explained/feed.server";
 import type { FactBook, FactEntry } from "@/lib/explained/facts";
 import { ENGINE } from "@/lib/explained/engine";
 import { formatCents, formatCount, formatUtcDay } from "@/lib/explained/format";
+import {
+  resolveExplainedLocale,
+  type ExplainedParams,
+} from "@/lib/explained/locale.server";
 import BoostLens from "./BoostLens";
 import { ht } from "./copy";
 import EligibilityLens from "./EligibilityLens";
@@ -36,8 +40,7 @@ import {
   StatementLabel,
   You,
 } from "./_kit/layout";
-import { pageLocale, type LocaleSearchParams } from "./_kit/pageLocale";
-import { rich } from "./_kit/rich";
+import { rich } from "@/components/explained/rich";
 import { formatDecimal } from "./_kit/numbers";
 import { utcClock } from "./_kit/time";
 
@@ -56,9 +59,9 @@ const RECENT_CARDS = 3;
 export default async function TdhHowItWorksPage({
   searchParams,
 }: {
-  readonly searchParams: LocaleSearchParams;
+  readonly searchParams: Promise<ExplainedParams>;
 }) {
-  const locale = await pageLocale(searchParams);
+  const locale = await resolveExplainedLocale(await searchParams);
   const book = await loadFactBook();
   const editions = book.maybe<number[][]>("memes.editions");
   const ids = editions ? editions.value.map((row) => row[0] ?? 0) : [];

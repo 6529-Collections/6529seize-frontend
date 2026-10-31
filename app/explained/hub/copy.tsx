@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { fill } from "@/components/explained/i18n";
 import type { SupportedLocale } from "@/i18n/locales";
 import type { MessageKey } from "@/i18n/messages";
-import { rich, type RichParams } from "../_lib/rich";
+import { rich, type RichValues } from "@/components/explained/rich";
 
 /**
  * The hub's copy: every string is a key under explained.hub
@@ -30,7 +30,7 @@ export function ht(
 export function hrich(
   locale: SupportedLocale,
   key: HubKey,
-  params: RichParams
+  params: RichValues
 ): ReactNode {
   return rich(locale, hubKey(key), params);
 }

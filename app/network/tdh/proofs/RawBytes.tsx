@@ -7,7 +7,7 @@ import { EX_FOCUS } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { k } from "./_lib/copy";
 import { pageFacts } from "./_lib/facts";
-import { rich } from "./_lib/rich";
+import { rich } from "@/components/explained/rich";
 
 /**
  * Proof A's public values for 2026-10-11 as the verifier reads them: one

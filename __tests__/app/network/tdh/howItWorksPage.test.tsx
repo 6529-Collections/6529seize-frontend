@@ -37,6 +37,14 @@ function breakIt(id: string): HTMLElement {
   return found;
 }
 
+// The pages read the reader's language from Accept-Language (the kit's
+// resolveExplainedLocale); these tests read as an English browser.
+jest.mock("next/headers", () => ({
+  headers: async () => ({
+    get: (name: string) => (name === "accept-language" ? "en-US" : null),
+  }),
+}));
+
 describe("How TDH is calculated", () => {
   it("keeps every anchor of the fourteen steps inside its part", async () => {
     await renderPage();

@@ -4,7 +4,8 @@ import { EX_TEXT } from "@/components/explained/tokens";
 import { formatList } from "@/i18n/format";
 import type { StatementRow } from "@/lib/explained/registry/formalFacts";
 import { CodeBlock, CodeName, EdSection, Prose } from "../_reference/parts";
-import { FactScope, isMessageKey } from "../_reference/rich";
+import { FactScope } from "@/components/explained/facts/FactText";
+import { isMessageKey } from "@/components/explained/rich";
 import TheoremPicker, { type TheoremPanel } from "./TheoremPicker";
 import type { SureContext, SureKey, SureSection } from "./sureShared";
 

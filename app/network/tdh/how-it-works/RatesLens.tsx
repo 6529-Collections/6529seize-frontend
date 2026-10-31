@@ -17,7 +17,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { ENGINE } from "@/lib/explained/engine";
 import { factFromSnapshot, type FactId } from "@/lib/explained/facts";
 import { formatCents, formatCount } from "@/lib/explained/format";
-import { rich } from "./_kit/rich";
+import { rich } from "@/components/explained/rich";
 import { ht } from "./copy";
 import { EXAMPLE_CARD, FIRST_GM } from "./models/rates";
 

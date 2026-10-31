@@ -5,7 +5,6 @@ import ArtCard from "@/components/explained/things/ArtCard";
 import { EX_BUTTON, EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { MEME_ART } from "@/app/network/tdh/overview/art";
-import { WRAP_WHEN_NARROW } from "../_lib/buttons";
 import { ht } from "./copy";
 
 /**
@@ -45,10 +44,7 @@ export default function Cc0Answer({
           aria-label={ht(locale, "cc0.fanLabel")}
         >
           {FAN.map(({ art, place }) => (
-            <div
-              key={art.id}
-              className={`tw-absolute tw-w-[40%] ${place}`}
-            >
+            <div key={art.id} className={`tw-absolute tw-w-[40%] ${place}`}>
               <ArtCard
                 src={art.src}
                 alt={ht(locale, "cc0.alt", { id: art.id, title: art.title })}
@@ -73,7 +69,7 @@ export default function Cc0Answer({
           </div>
           <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-3 md:tw-mt-[30px]">
             <a
-              className={`${EX_BUTTON.secondary} ${WRAP_WHEN_NARROW}`}
+              className={EX_BUTTON.secondary}
               href={DOWNLOAD.original}
               download
               target="_blank"

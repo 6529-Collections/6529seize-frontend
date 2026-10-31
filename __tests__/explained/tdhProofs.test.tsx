@@ -10,7 +10,7 @@ import proofs from "@/lib/explained/data/proofs.json";
 import type { ProofPhase } from "@/lib/explained/registry/proofFacts";
 import { CONTRACT_CHECKS } from "@/app/network/tdh/proofs/_lib/checks";
 import { pageFacts } from "@/app/network/tdh/proofs/_lib/facts";
-import { resolveLocale } from "@/app/network/tdh/proofs/_lib/locale.server";
+import { resolveExplainedLocale as resolveLocale } from "@/lib/explained/locale.server";
 import {
   LAYERS,
   SCENARIOS,

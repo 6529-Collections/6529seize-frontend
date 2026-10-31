@@ -14,7 +14,7 @@ import { fmt, isFact } from "@/lib/explained/facts";
 import { formatCount, formatUtcInstant } from "@/lib/explained/format";
 import { k } from "./_lib/copy";
 import { pageFacts } from "./_lib/facts";
-import { rich } from "./_lib/rich";
+import { rich } from "@/components/explained/rich";
 import {
   ANCHOR_WORDS,
   STATEMENT_WORDS,

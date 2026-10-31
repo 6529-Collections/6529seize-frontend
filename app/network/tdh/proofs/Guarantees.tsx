@@ -15,7 +15,7 @@ import { fmt, isFact, type FactId } from "@/lib/explained/facts";
 import { CONTRACT_CHECKS, PROGRAM_RULE } from "./_lib/checks";
 import { k } from "./_lib/copy";
 import { pageFacts } from "./_lib/facts";
-import { rich } from "./_lib/rich";
+import { rich } from "@/components/explained/rich";
 import {
   LAYERS,
   SCENARIOS,

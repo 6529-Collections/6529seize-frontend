@@ -8,7 +8,9 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { factText, type Fact, type FactBook } from "@/lib/explained/facts";
 import { formatUtcDay } from "@/lib/explained/format";
 import { dateOfCycle } from "@/lib/explained/registry/helpers";
-import { FactText, pt, rich, type DayKey } from "../components/copy";
+import { pt, type DayKey } from "../components/copy";
+import { FactText } from "@/components/explained/facts/FactText";
+import { rich } from "@/components/explained/rich";
 import type { DayView } from "../components/dayModel";
 
 /**

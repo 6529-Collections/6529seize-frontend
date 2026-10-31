@@ -187,9 +187,17 @@ export const EX_FOCUS =
   "focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 
 /** Buttons: one main action per screen (cta), the rest secondary. */
+/**
+ * A button keeps to one line, except at 400% zoom (a 320 px window beside
+ * the site's rail): below 360 px a long label wraps inside it and the
+ * button grows to fit, instead of running past the page.
+ */
+const WRAP_WHEN_NARROW =
+  "max-[359px]:tw-h-auto max-[359px]:tw-min-h-[46px] max-[359px]:tw-whitespace-normal max-[359px]:tw-py-2.5";
+
 export const EX_BUTTON = {
-  cta: `tw-inline-flex tw-h-[46px] tw-items-center tw-gap-2 tw-whitespace-nowrap tw-rounded-full tw-border-0 tw-bg-iron-200 tw-px-[22px] tw-text-[15px] tw-font-semibold tw-text-iron-950 tw-no-underline hover:tw-bg-iron-50 md:tw-text-base ${EX_FOCUS}`,
-  secondary: `tw-inline-flex tw-h-[46px] tw-items-center tw-gap-2 tw-whitespace-nowrap tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-white/[0.06] tw-px-5 tw-text-[15px] tw-font-semibold tw-text-iron-50 tw-no-underline hover:tw-border-iron-600 md:tw-text-base ${EX_FOCUS}`,
+  cta: `tw-inline-flex tw-h-[46px] tw-items-center tw-gap-2 tw-whitespace-nowrap tw-rounded-full tw-border-0 tw-bg-iron-200 tw-px-[22px] tw-text-[15px] tw-font-semibold tw-text-iron-950 tw-no-underline hover:tw-bg-iron-50 md:tw-text-base ${WRAP_WHEN_NARROW} ${EX_FOCUS}`,
+  secondary: `tw-inline-flex tw-h-[46px] tw-items-center tw-gap-2 tw-whitespace-nowrap tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-white/[0.06] tw-px-5 tw-text-[15px] tw-font-semibold tw-text-iron-50 tw-no-underline hover:tw-border-iron-600 md:tw-text-base ${WRAP_WHEN_NARROW} ${EX_FOCUS}`,
   link: `tw-inline-flex tw-items-center tw-gap-1.5 tw-text-base tw-font-semibold tw-text-primary-300 tw-no-underline hover:tw-underline hover:tw-underline-offset-[3px] ${EX_FOCUS}`,
 } as const;
 

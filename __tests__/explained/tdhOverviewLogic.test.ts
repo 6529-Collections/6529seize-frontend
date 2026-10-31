@@ -15,7 +15,7 @@ import {
   rankGroups,
 } from "@/app/network/tdh/overview/networkDistribution.server";
 import type { TdhProfile } from "@/app/network/tdh/tdh-profile.helpers";
-import { localeFromAcceptLanguage } from "@/app/explained/_lib/locale.server";
+import { localeFromAcceptLanguage } from "@/lib/explained/locale.server";
 
 jest.mock("next/headers", () => ({ headers: jest.fn() }));
 
