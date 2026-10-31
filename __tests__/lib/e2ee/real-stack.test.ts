@@ -468,7 +468,12 @@ describeStack("E2EE engine against a real backend", () => {
     ]);
     const blobId = at(message!.attachments, 0).blob;
     const received = await b.engine.getAttachment(dm, message!.id, blobId);
-    expect(new Uint8Array(await received.arrayBuffer())).toEqual(bytes);
+    // Byte-exact, compared with memcmp: a deep toEqual over 1.5 M elements
+    // takes seconds, long enough for the local server to drop the idle
+    // keep-alive socket the next request reuses (ECONNRESET).
+    const receivedBytes = Buffer.from(await received.arrayBuffer());
+    expect(receivedBytes.length).toBe(bytes.length);
+    expect(receivedBytes.equals(Buffer.from(bytes))).toBe(true);
 
     // The API holds ciphertext only.
     const chunk = await httpClient(bob.token).getBlobChunk(

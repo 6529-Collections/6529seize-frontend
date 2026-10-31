@@ -3662,7 +3662,8 @@
         "Encrypted chats are rolling out. Where they are available they appear under Messages as an Encrypted section at /messages/encrypted, with new chats at /messages/encrypted/new and this browser's devices at /messages/encrypted/devices.",
         "Messages are end-to-end encrypted on your devices; 6529 delivers them but cannot read them. Each browser or app signs once with your wallet to become a device; there is no prompt per message.",
         "There is no history backup yet: if you lose all your devices or clear this browser's data, that chat history is gone. A new device sees messages from when it joined.",
-        "At launch encrypted chats are text only; attaching files is not offered.",
+        "You can attach up to 10 files of up to 25 MB each; they are encrypted on your device like messages. If attachments are switched off, the attach control is hidden.",
+        "Keys are agreed with a hybrid post-quantum method (MLS ciphersuite 0x004F, X-Wing: ML-KEM-768 combined with X25519), so messages stay confidential even if one of the two is broken, for example by a future quantum computer.",
         "Open a message's menu to mute the chat on this device, block its sender (they cannot start new chats with you or add you to encrypted chats), or choose who can message you in Preferences.",
         "Reporting is for illegal or severe harm only: child sexual abuse material, a credible threat of violence, intimate images shared without consent, or doxxing. Only the selected message is shared, with proof its sender sent it, and it goes to 6529's trust and safety team, not to wave moderators. Nothing else in the conversation is revealed."
       ],

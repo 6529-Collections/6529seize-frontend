@@ -26,7 +26,7 @@ export class ApiE2eeDeviceGrant {
     */
     'device_key': string;
     /**
-    * 1 (MLS_128_DHKEMX25519_AES128GCM_SHA256_Ed25519)
+    * 79 (0x004F, MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519, a draft code point)
     */
     'ciphersuite': number;
     /**
