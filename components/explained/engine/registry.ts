@@ -117,8 +117,8 @@ export const REGISTRY_FIELDS: readonly (readonly [RegistryField, FieldType])[] =
   ];
 
 /**
- * TDH v1.4 (D137): P26 §10's values at 6529chain 3bfa7b0, D136's four-wallet
- * consolidation included. Its registry hash is
+ * TDH v1.4 (D137): P26 §10's values at 6529chain a731bca (unchanged since
+ * 3bfa7b0), D136's four-wallet consolidation included. Its registry hash is
  * 0x3cfa0e6eae7b8769516597e117ecd55580ecb6b75194139f053d3e0ec09d9f36
  * (vector 28; `registryHash` computes it).
  */
@@ -383,6 +383,8 @@ export interface Rules {
   readonly floorCap: bigint;
   readonly floorThreshold: bigint;
   readonly gradientMinimum: number;
+  /** The delegation contract, whose logs give consolidation events (§6.1). */
+  readonly delegation: string;
   readonly useCase: bigint;
   readonly collections: ReadonlySet<string>;
   readonly maxWallets: number;
@@ -493,6 +495,7 @@ export function rulesOf(r: Registry): Rules {
     floorCap: big("edition_floor_cap"),
     floorThreshold: big("edition_floor_threshold"),
     gradientMinimum: small("gradient_rate_minimum"),
+    delegation: text("delegation"),
     useCase: big("consolidation_use_case"),
     collections: new Set(texts("consolidation_collections")),
     maxWallets: small("consolidation_max_wallets"),

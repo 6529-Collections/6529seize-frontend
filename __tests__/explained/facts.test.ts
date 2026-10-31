@@ -119,13 +119,13 @@ describe("the facts layer", () => {
     }
   });
 
-  it("reads the rules from P26 at 3bfa7b0 and the record's head", () => {
+  it("reads the rules from P26 at a731bca and the record's head", () => {
     expect(show("rules.version")).toBe("tdh-v1.4");
     expect(show("rules.registry")).toBe("0x3cfa0e6e…c09d9f36");
     expect(show("rules.ruleId")).toBe("0x772d61ed…7418ab3f");
-    expect(show("rules.vectors")).toBe("104");
-    expect(show("rules.p26Commit")).toBe("3bfa7b0");
-    expect(show("rules.leanCommit")).toBe("2694e72");
+    expect(show("rules.vectors")).toBe("108");
+    expect(show("rules.p26Commit")).toBe("a731bca");
+    expect(show("rules.leanCommit")).toBe("e252d5f");
     // The head moves with every decision: read it from the synced snapshot.
     expect(show("rules.chainHead")).toBe(RECORD.head.commit.slice(0, 7));
     expect(show("rules.newestDecision")).toBe(RECORD.head.newestDecision);

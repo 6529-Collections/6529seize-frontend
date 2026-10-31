@@ -1,31 +1,36 @@
 {
-  "format": "6529.explained.tdh-engine-conformance.v1",
+  "format": "6529.explained.tdh-engine-conformance.v2",
   "specification": {
     "repository": "6529chain",
-    "commit": "3bfa7b052202e40b0f178ee6de7f75f86ba5261c",
-    "path": "design/tdh-reference/vectors"
+    "commit": "a731bca37981708d2160dbaf4aca7e7acb1c4b6a",
+    "path": "design/tdh-reference/vectors",
+    "noVectorPath": "design/tdh-reference/no-vector"
   },
   "engine": {
-    "sha256": "b140ece6a1f6e34ce5fcf08edf766ae4ac94f4a2ee254b2699b46f38fcbd4719",
+    "sha256": "1da37032cffb182d3c84ae0382b5eef37a048a92c3fcca2af65e1bdbfe586131",
     "files": [
       "components/explained/engine/arithmetic.ts",
       "components/explained/engine/consolidation.ts",
       "components/explained/engine/holdings.ts",
       "components/explained/engine/json.ts",
+      "components/explained/engine/logs.ts",
       "components/explained/engine/registry.ts",
       "components/explained/engine/registryHash.ts",
       "components/explained/engine/tdh.ts",
       "components/explained/engine/time.ts",
+      "components/explained/engine/vectorFormat.ts",
       "components/explained/engine/vectors.ts"
     ]
   },
   "summary": {
-    "vectors": 104,
-    "inScope": 89,
-    "pass": 89,
+    "vectors": 108,
+    "inScope": 108,
+    "pass": 108,
     "fail": 0,
-    "outOfScope": 15,
-    "checks": 1128
+    "outOfScope": 0,
+    "checks": 1267,
+    "noVectors": 17,
+    "noVectorsRefused": 17
   },
   "vectors": [
     {
@@ -127,6 +132,34 @@
       "checks": 1
     },
     {
+      "id": "104-reregistration-without-time",
+      "digest": "41347a2ad23b0c1a7af68a5f18c36cd6e1513678c7a3029944bf6be3463ef2ad",
+      "scope": "clusters",
+      "status": "pass",
+      "checks": 1
+    },
+    {
+      "id": "105-raw-log-clusters",
+      "digest": "d57d695d41116e8de4bcbb376bfc1d99891b89db0e4936df7bd4a5edd0983f80",
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 5
+    },
+    {
+      "id": "106-format-members",
+      "digest": "467ac524526b6d5d0fa094317cfe2c5371b235bacf0ff981f5f7d9fab81e3aa8",
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 14
+    },
+    {
+      "id": "107-unicode-strings",
+      "digest": "89b9f58d874347da489d12f73907ee38afa024f05c0edf2ce196c18d99dd6c8c",
+      "scope": "cycle",
+      "status": "pass",
+      "checks": 9
+    },
+    {
       "id": "11-edition-floors",
       "digest": "da66f3059f44bc9639d3d70da5638ba021e3e6256239be3c882f7b7ecd7979b9",
       "scope": "cycle",
@@ -151,9 +184,8 @@
       "id": "13-log-decoding",
       "digest": "c94515970e60ff6579231ac42c11123a10e70241544c6d595cfaaafcd41a4417",
       "scope": "decoding",
-      "status": "out-of-scope",
-      "checks": 0,
-      "note": "Ethereum log decoding (P26 §3.1, §3.2, §6.1): the validators' readers"
+      "status": "pass",
+      "checks": 2
     },
     {
       "id": "14-consolidation-clusters",
@@ -235,26 +267,23 @@
     {
       "id": "25-raw-log-cycle",
       "digest": "6e042512e07b6e0144d65c05016a9f74daa808b2463c3ea26a0ae1fd36cb7b1e",
-      "scope": "decoding",
-      "status": "out-of-scope",
-      "checks": 0,
-      "note": "Ethereum log decoding (P26 §3.1, §3.2, §6.1): the validators' readers"
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 34
     },
     {
       "id": "26-delegation-decoding",
       "digest": "d83166c94c85906346d0c76b092170134c8a65c05bb35d6aa81896f45f3d7eaa",
       "scope": "decoding",
-      "status": "out-of-scope",
-      "checks": 0,
-      "note": "Ethereum log decoding (P26 §3.1, §3.2, §6.1): the validators' readers"
+      "status": "pass",
+      "checks": 8
     },
     {
       "id": "27-malformed-transfer-logs",
       "digest": "a73d61054e863ca244d94c53d2b38e949c9e15e5061c00cc8b227fefbe1c87a8",
       "scope": "decoding",
-      "status": "out-of-scope",
-      "checks": 0,
-      "note": "Ethereum log decoding (P26 §3.1, §3.2, §6.1): the validators' readers"
+      "status": "pass",
+      "checks": 12
     },
     {
       "id": "28-registry-hash",
@@ -357,10 +386,9 @@
     {
       "id": "42-batch-repeated-id",
       "digest": "725786976fe6141e36ca5866927333fdf246bdac84ca3f3c89475dd9d66aadb3",
-      "scope": "decoding",
-      "status": "out-of-scope",
-      "checks": 0,
-      "note": "Ethereum log decoding (P26 §3.1, §3.2, §6.1): the validators' readers"
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 28
     },
     {
       "id": "43-different-transactions",
@@ -428,10 +456,9 @@
     {
       "id": "52-invalid-duplicate-ignored-log",
       "digest": "662e4ce35e3f76ae85a1f984dfd49aca8a58e69f9c69ee217ca5a988f04bf6ef",
-      "scope": "decoding",
-      "status": "out-of-scope",
-      "checks": 0,
-      "note": "Ethereum log decoding (P26 §3.1, §3.2, §6.1): the validators' readers"
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 1
     },
     {
       "id": "53-invalid-log-order",
@@ -492,34 +519,30 @@
     {
       "id": "61-invalid-log-stamped-at-cutoff",
       "digest": "63847db0a60ad23252d5a9820ca458942f64c990efd158d09867c7469fc23738",
-      "scope": "decoding",
-      "status": "out-of-scope",
-      "checks": 0,
-      "note": "Ethereum log decoding (P26 §3.1, §3.2, §6.1): the validators' readers"
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 1
     },
     {
       "id": "62-invalid-cutoff-block-timestamp",
       "digest": "ab114d9b767c790ae46848cee317627e3e92c369a5a6b96d4b95c3f8be2accc7",
-      "scope": "decoding",
-      "status": "out-of-scope",
-      "checks": 0,
-      "note": "Ethereum log decoding (P26 §3.1, §3.2, §6.1): the validators' readers"
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 1
     },
     {
       "id": "63-invalid-transfer-at-ignored-log",
       "digest": "e531747088ef74a506838fd5f08f90b4fbfbd8e60caa9966c9771c3c7d4bbfe1",
-      "scope": "decoding",
-      "status": "out-of-scope",
-      "checks": 0,
-      "note": "Ethereum log decoding (P26 §3.1, §3.2, §6.1): the validators' readers"
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 1
     },
     {
       "id": "64-invalid-ignored-log-order",
       "digest": "721bc98e7d0a577ee8f8ca51e3504f9783cebcc5999294ceafc5241530fbc8fb",
-      "scope": "decoding",
-      "status": "out-of-scope",
-      "checks": 0,
-      "note": "Ethereum log decoding (P26 §3.1, §3.2, §6.1): the validators' readers"
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 1
     },
     {
       "id": "65-registry-lists",
@@ -538,10 +561,9 @@
     {
       "id": "67-removed-logs",
       "digest": "ecacd569b6500d6a6f4e00ebb95ddac4a6ee34324f5d1b01d88d702c4f7729c4",
-      "scope": "decoding",
-      "status": "out-of-scope",
-      "checks": 0,
-      "note": "Ethereum log decoding (P26 §3.1, §3.2, §6.1): the validators' readers"
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 11
     },
     {
       "id": "68-invalid-registry-out-of-type",
@@ -553,10 +575,9 @@
     {
       "id": "69-invalid-removed-not-boolean",
       "digest": "2a456efd2e24d37a8a3e13c5d240b52df8212fec374c61846e21050df7f1367c",
-      "scope": "decoding",
-      "status": "out-of-scope",
-      "checks": 0,
-      "note": "Ethereum log decoding (P26 §3.1, §3.2, §6.1): the validators' readers"
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 1
     },
     {
       "id": "70-invalid-day-s-out-of-type",
@@ -575,10 +596,9 @@
     {
       "id": "72-invalid-transfer-at-raw-transfer-log",
       "digest": "40f8dcd77b5c0bb6b311d10b6c114d62510f7c0bef192ce0daab636341ac1024",
-      "scope": "decoding",
-      "status": "out-of-scope",
-      "checks": 0,
-      "note": "Ethereum log decoding (P26 §3.1, §3.2, §6.1): the validators' readers"
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 1
     },
     {
       "id": "73-registry-uint256",
@@ -646,10 +666,9 @@
     {
       "id": "82-invalid-timestamps-key-leading-zero",
       "digest": "d18d3a36d53677d44330cb0e02878d54522498e8c94973816afdaef078742b4e",
-      "scope": "decoding",
-      "status": "out-of-scope",
-      "checks": 0,
-      "note": "Ethereum log decoding (P26 §3.1, §3.2, §6.1): the validators' readers"
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 1
     },
     {
       "id": "83-invalid-claim-max-out-of-type",
@@ -759,10 +778,9 @@
     {
       "id": "98-raw-log-four-wallet",
       "digest": "774ebac48c699c170bf8cc51c6cf560b5262efe067dc28527f9fb03432797706",
-      "scope": "decoding",
-      "status": "out-of-scope",
-      "checks": 0,
-      "note": "Ethereum log decoding (P26 §3.1, §3.2, §6.1): the validators' readers"
+      "scope": "raw-logs",
+      "status": "pass",
+      "checks": 7
     },
     {
       "id": "99-event-without-timestamp",
@@ -770,6 +788,110 @@
       "scope": "clusters",
       "status": "pass",
       "checks": 1
+    }
+  ],
+  "noVectors": [
+    {
+      "id": "nv01-duplicate-member",
+      "sha256": "b9a99af741611071095a615f336511a0e7fd876f39a8e0838503773376f155bb",
+      "refused": true,
+      "reason": "the member \"amount\" named twice at offset 578"
+    },
+    {
+      "id": "nv02-missing-field",
+      "sha256": "c737fbfa5c2acfb44d41b0d4d770a5452237e689204a9d03f3e18e24d901490e",
+      "refused": true,
+      "reason": "an entry of consolidation_events has no collection"
+    },
+    {
+      "id": "nv03-container-of-the-wrong-kind",
+      "sha256": "0c455edf64fb6c0030d2a9cd49f4d5c600a0c5ea40d5ff459c9b36dcec82d8a4",
+      "refused": true,
+      "reason": "claim_max is not a JSON object"
+    },
+    {
+      "id": "nv04-unknown-top-level-key",
+      "sha256": "894af1566d1982dd9d482c0c218c4037fd918fcd4bd4e3bc2ae10c1ee0273364",
+      "refused": true,
+      "reason": "unknown vector key transfer"
+    },
+    {
+      "id": "nv05-nan",
+      "sha256": "1e3f928fbd986a6a58abde96ce26f36123f35af00fd19cd78ecd9d1a5dedef10",
+      "refused": true,
+      "reason": "not JSON at offset 1200"
+    },
+    {
+      "id": "nv06-no-cycle",
+      "sha256": "4d1626ba8c600f5a83a74c2c78d960e80344c15637a57932fbd1e4b74e13ef22",
+      "refused": true,
+      "reason": "a vector with cycle inputs or expected values needs cycle"
+    },
+    {
+      "id": "nv07-member-of-a-transfer",
+      "sha256": "ef8d02a1c4425fa154c7b29487556c21d9cf8eff546461ac926f35768cb5803c",
+      "refused": true,
+      "reason": "an entry of transfers has the member removed, which the format does not name (E13)"
+    },
+    {
+      "id": "nv08-member-of-a-consolidation-event",
+      "sha256": "2c57cecaeea109c2b735b982808fb356b2dd2328020a3c725ca3ae69cf2c3dc7",
+      "refused": true,
+      "reason": "an entry of consolidation_events has the member expiry, which the format does not name (E13)"
+    },
+    {
+      "id": "nv09-member-of-the-cycle",
+      "sha256": "ae081a3ed1977a57512c9d2827ee7728f95f4994450b6c2dbf5e9ee9013a5bd2",
+      "refused": true,
+      "reason": "cycle has the member hash, which the format does not name (E13)"
+    },
+    {
+      "id": "nv10-lone-high-surrogate",
+      "sha256": "35b1788afab1626692b7a7508bfc7e2a95cec0be95026c25c56fee4c7ba63e86",
+      "refused": true,
+      "reason": "a string holds the lone surrogate U+D800 (P26 §3.2, E14) at offset 18"
+    },
+    {
+      "id": "nv11-lone-low-surrogate",
+      "sha256": "e0fd1aa77126dd46c4d757578f129716a9559809d6872da661136fe14a1c0808",
+      "refused": true,
+      "reason": "a string holds the lone surrogate U+DC00 (P26 §3.2, E14) at offset 18"
+    },
+    {
+      "id": "nv12-reversed-surrogate-pair",
+      "sha256": "c873d2c4013c181d1953293d1446bc078d1402c87750b0962d217723d2c9a5f4",
+      "refused": true,
+      "reason": "a string holds the lone surrogate U+DC00 (P26 §3.2, E14) at offset 18"
+    },
+    {
+      "id": "nv13-high-surrogate-before-another-escape",
+      "sha256": "f269123da799877ee9935a73a0a9a8c927cf42adab8d4322861dbfec321429a9",
+      "refused": true,
+      "reason": "a string holds the lone surrogate U+D800 (P26 §3.2, E14) at offset 18"
+    },
+    {
+      "id": "nv14-lone-surrogates-as-member-names",
+      "sha256": "a6962fd5c3f7f004e5c49f447181d10953ddbe4a84e3bd8907d1e0221ee54997",
+      "refused": true,
+      "reason": "a string holds the lone surrogate U+D800 (P26 §3.2, E14) at offset 1302"
+    },
+    {
+      "id": "nv15-not-utf-8",
+      "sha256": "bd5668c1b0d0f13ec58827af2ef94272a057f5b2daf71a6ad6c0a952bd1d6aa1",
+      "refused": true,
+      "reason": "the file is not UTF-8 (P26 §3.2, E14)"
+    },
+    {
+      "id": "nv16-utf-8-encoded-surrogate",
+      "sha256": "1da71d5392933e3ebb5262f79fdf3a6696b2ab58c65a8738d12765804952fc8b",
+      "refused": true,
+      "reason": "the file is not UTF-8 (P26 §3.2, E14)"
+    },
+    {
+      "id": "nv17-byte-order-mark",
+      "sha256": "94e47c0018fa56c63cdd520d6699990329853603bc362e9fdbe1b906a7f9d1de",
+      "refused": true,
+      "reason": "the file starts with a byte order mark (P26 §3.2, E14)"
     }
   ]
 }

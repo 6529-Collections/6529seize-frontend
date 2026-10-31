@@ -3,11 +3,14 @@
  * format in that folder's README) against the engine: the CI proof that the
  * pages compute TDH v1.4, and the reader a "run this vector" lens can use.
  *
- * The reader keeps every integer in full (a `bigint` from 2^53 on), keeps
- * `-0` and non-integers apart from integers so they fail their types, and
- * refuses a member named twice. A vector's scope is derived from its content:
- * every vector is run except those that need Ethereum log decoding (`logs`,
- * or non-empty `raw_logs`), which the validators' readers do.
+ * The reader takes the file's bytes as UTF-8 without a byte order mark, keeps
+ * every integer in full (a `bigint` from 2^53 on), keeps `-0` and
+ * non-integers apart from integers so they fail their types, and refuses a
+ * member named twice and a lone surrogate (E14). The format check refuses a
+ * member the format does not name in the cycle, a transfer or a consolidation
+ * event (E13). A file refused so is no vector: it fails whatever it expects,
+ * as `noVector` says. Every vector is in scope: arithmetic, registry hashes,
+ * cutoffs, log decoding, and cycles from decoded inputs, raw logs or both.
  */
 
 import {
@@ -18,214 +21,44 @@ import {
 } from "./arithmetic";
 import {
   ALL_COLLECTIONS,
-  REGISTRY_FIELDS,
   REGISTRY_V14,
   TdhInputInvalid,
   TdhOutsideEngineRange,
   fork,
+  rulesOf,
   type Registry,
   type Uint,
 } from "./registry";
+import {
+  comparePositions,
+  isKept,
+  type CheckedEvent,
+} from "./consolidation";
 import { registryHash } from "./registryHash";
+import { decodeDelegationLog, decodeTransferLog, readLog } from "./logs";
 import {
   computeCycle,
   type CycleRecord,
   type CycleResult,
   type TokenRecord,
 } from "./tdh";
+import { canonicalOrder } from "./holdings";
 import { headerTimestamps, selectCutoff, wholeDays } from "./time";
 import {
   VectorFormatError,
   canonicalJson,
+  decodeVectorText,
   isObject,
   parseJsonExact,
   type JsonObject,
   type JsonValue,
 } from "./json";
-
-const VECTOR_KEYS = new Set([
-  "description",
-  "derivation",
-  "params",
-  "cycle",
-  "transfers",
-  "consolidation_events",
-  "raw_logs",
-  "timestamps",
-  "claim_max",
-  "expected",
-  "expected_invalid",
-  "logs",
-  "expected_transfers",
-  "expected_events",
-  "malformed_logs",
-  "arithmetic",
-  "cutoff",
-  "cutoff_invalid",
-  "days",
-  "registry_hashes",
-  "legacy_expected",
-  "effective_time_variant",
-]);
-const OBJECTS = ["params", "cycle", "timestamps", "claim_max", "cutoff"];
-const ARRAYS = [
-  "transfers",
-  "consolidation_events",
-  "raw_logs",
-  "cutoff_invalid",
-];
-const ENTRY_FIELDS: Readonly<Record<string, readonly string[]>> = {
-  transfers: [
-    "block",
-    "tx_index",
-    "log_index",
-    "batch_pos",
-    "timestamp",
-    "tx",
-    "contract",
-    "token",
-    "from",
-    "to",
-    "amount",
-  ],
-  consolidation_events: [
-    "block",
-    "tx_index",
-    "log_index",
-    "kind",
-    "from",
-    "to",
-    "collection",
-  ],
-  cutoff_invalid: ["date", "headers", "finalized"],
-};
-const CYCLE_KEYS = [
-  "transfers",
-  "consolidation_events",
-  "raw_logs",
-  "claim_max",
-  "expected",
-  "expected_invalid",
-];
-const REGISTRY_NAMES = new Set(REGISTRY_FIELDS.map(([name]) => name as string));
-
-function list(v: JsonObject, key: string): readonly JsonValue[] {
-  const x = v[key];
-  return Array.isArray(x) ? x : [];
-}
-
-/** Only the format's keys, and each object or array member of its type. */
-function checkTopLevel(v: JsonObject): void {
-  for (const key of Object.keys(v)) {
-    if (!VECTOR_KEYS.has(key)) {
-      throw new VectorFormatError(`unknown vector key ${key}`);
-    }
-  }
-  for (const key of OBJECTS) {
-    if (key in v && !isObject(v[key])) {
-      throw new VectorFormatError(`${key} is not a JSON object`);
-    }
-  }
-  for (const key of ARRAYS) {
-    if (key in v && !Array.isArray(v[key])) {
-      throw new VectorFormatError(`${key} is not a JSON array`);
-    }
-  }
-}
-
-function checkEntry(
-  key: string,
-  entry: JsonValue,
-  fields: readonly string[]
-): void {
-  if (!isObject(entry)) {
-    throw new VectorFormatError(`an entry of ${key} is not a JSON object`);
-  }
-  const missing = fields.find((f) => !(f in entry));
-  if (missing !== undefined) {
-    throw new VectorFormatError(`an entry of ${key} has no ${missing}`);
-  }
-  if (key === "cutoff_invalid" && !isObject(entry["headers"])) {
-    throw new VectorFormatError("a cutoff's headers is not a JSON object");
-  }
-}
-
-/** Every list entry has the fields the format names; returns the entries. */
-function checkEntries(v: JsonObject): Record<string, readonly JsonValue[]> {
-  const entries: Record<string, readonly JsonValue[]> = {
-    transfers: list(v, "transfers"),
-    consolidation_events: list(v, "consolidation_events"),
-    cutoff_invalid: [
-      ...list(v, "cutoff_invalid"),
-      ...("cutoff" in v ? [v["cutoff"]] : []),
-    ],
-  };
-  for (const [key, fields] of Object.entries(ENTRY_FIELDS)) {
-    for (const entry of entries[key] ?? []) {
-      checkEntry(key, entry, fields);
-    }
-  }
-  return entries;
-}
-
-/** Event kinds and transfer contracts are names the format knows. */
-function checkNames(entries: Record<string, readonly JsonValue[]>): void {
-  for (const e of entries["consolidation_events"] ?? []) {
-    const kind = (e as JsonObject)["kind"];
-    if (kind !== "REGISTER" && kind !== "REVOKE") {
-      throw new VectorFormatError(
-        `unknown consolidation event kind ${show(kind)}`
-      );
-    }
-  }
-  for (const t of entries["transfers"] ?? []) {
-    const contract = (t as JsonObject)["contract"];
-    if (
-      contract !== "memes" &&
-      contract !== "gradients" &&
-      contract !== "nextgen"
-    ) {
-      throw new VectorFormatError(
-        `a transfer's contract ${show(contract)} is not memes, gradients or nextgen`
-      );
-    }
-  }
-}
-
-/** Cycle inputs need a cycle, raw logs their timestamps, params known names. */
-function checkCycleShape(v: JsonObject): void {
-  if (!("cycle" in v) && CYCLE_KEYS.some((k) => k in v)) {
-    throw new VectorFormatError(
-      "a vector with cycle inputs or expected values needs cycle"
-    );
-  }
-  const cycle = v["cycle"];
-  if (isObject(cycle) && !("block" in cycle && "timestamp" in cycle)) {
-    throw new VectorFormatError("cycle needs block and timestamp");
-  }
-  if (list(v, "raw_logs").length > 0 && !("timestamps" in v)) {
-    throw new VectorFormatError("raw_logs without timestamps");
-  }
-  for (const name of Object.keys(isObject(v["params"]) ? v["params"] : {})) {
-    if (!REGISTRY_NAMES.has(name)) {
-      throw new VectorFormatError(`unknown registry parameter ${name}`);
-    }
-  }
-}
-
-/** The vector format's shape, checked before any value is read as input. */
-function checkFormat(v: JsonValue): asserts v is JsonObject {
-  if (!isObject(v)) {
-    throw new VectorFormatError("a vector is a JSON object");
-  }
-  checkTopLevel(v);
-  checkNames(checkEntries(v));
-  checkCycleShape(v);
-}
+import { checkFormat, list, show } from "./vectorFormat";
 
 export type VectorScope =
   | "cycle"
   | "clusters"
+  | "raw-logs"
   | "arithmetic"
   | "registry"
   | "cutoff"
@@ -240,6 +73,12 @@ export interface VectorRun {
   readonly failures: readonly string[];
   /** Why out of scope, or the rule that refused an input with no result. */
   readonly note?: string;
+  /**
+   * Why the file is no vector (P26 §3.2, §13): refused while it was read or
+   * its format checked, before any value was read as an input. Such a file
+   * fails, whatever it expects; one made to be no vector passes only so.
+   */
+  readonly noVector?: string;
 }
 
 class Checker {
@@ -257,11 +96,6 @@ class Checker {
     this.checks++;
     this.failures.push(what);
   }
-}
-
-/** A reader value as text: a string as itself, anything else as JSON. */
-function show(x: JsonValue | undefined): string {
-  return typeof x === "string" ? x : canonicalJson(x ?? null);
 }
 
 function valueText(x: unknown): string {
@@ -309,9 +143,18 @@ function cycleInput(
     // Header timestamps have their types wherever they are (vectors 78, 79).
     headerTimestamps(v["timestamps"]);
   }
+  const rawLogs = list(v, "raw_logs");
   return {
     block: raw(cycle["block"]),
     timestamp: raw(cycle["timestamp"]),
+    ...(rawLogs.length > 0
+      ? {
+          logs: {
+            entries: rawLogs,
+            headerTimestamps: v["timestamps"] as JsonObject,
+          },
+        }
+      : {}),
     transfers: list(v, "transfers").map((x) => {
       const t = x as JsonObject;
       return {
@@ -602,12 +445,106 @@ function checkCutoff(chk: Checker, v: JsonObject, r: Registry): void {
   });
 }
 
+/** A decoded transfer as the vector format lists one, field by field. */
+function transferRow(t: ReturnType<typeof decodeTransferLog>[number]): string {
+  return canonicalJson([
+    t.block,
+    t.txIndex,
+    t.logIndex,
+    t.batchPos,
+    t.timestamp,
+    t.tx,
+    t.contract,
+    t.token,
+    t.from,
+    t.to,
+    t.amount,
+  ]);
+}
+
+/** A list of the vector's own rows, read the same way. */
+function rowsText(rows: readonly JsonValue[]): string {
+  const lower = (x: JsonValue): JsonValue =>
+    typeof x === "string" ? x.toLowerCase() : x;
+  return `[${rows
+    .map((row) => canonicalJson(Array.isArray(row) ? row.map(lower) : row))
+    .join(",")}]`;
+}
+
+function blockOf(log: JsonValue | undefined): bigint {
+  return readLog(log).position.block;
+}
+
+/**
+ * Log decoding (P26 §3.2, §6.1): each log's transfers, in canonical order,
+ * and its kept consolidation events equal the expected ones; each malformed
+ * log makes its input invalid.
+ */
+function checkDecoding(chk: Checker, v: JsonObject, r: Registry): void {
+  const stamps = headerTimestamps(
+    isObject(v["timestamps"]) ? v["timestamps"] : {}
+  );
+  const stampOf = (log: JsonValue | undefined): bigint => {
+    const stamp = stamps.get(blockOf(log));
+    if (stamp === undefined) {
+      throw new TypeError("a log's block has no header timestamp");
+    }
+    return stamp;
+  };
+  const rules = rulesOf(r);
+  const transfers = list(v, "logs").flatMap((log) =>
+    decodeTransferLog(readLog(log), stampOf(log), rules)
+  );
+  chk.eq(
+    "decoded transfers",
+    `[${canonicalOrder(transfers).map(transferRow).join(",")}]`,
+    rowsText(list(v, "expected_transfers"))
+  );
+  const events = list(v, "logs")
+    .map((log) => decodeDelegationLog(readLog(log), null, rules))
+    .filter((e): e is CheckedEvent => e !== null && isKept(e, rules))
+    .sort((a, b) => comparePositions(a.position, b.position))
+    .map((e) => [...e.position, e.kind, e.from, e.to]);
+  const expectedEvents = list(v, "expected_events").map((x) => {
+    const e = x as JsonObject;
+    return [
+      e["block"] ?? null,
+      e["tx_index"] ?? null,
+      e["log_index"] ?? null,
+      e["kind"] ?? null,
+      e["from"] ?? null,
+      e["to"] ?? null,
+    ];
+  });
+  chk.eq(
+    "decoded delegation events",
+    `[${events.map((e) => canonicalJson(e)).join(",")}]`,
+    rowsText(expectedEvents)
+  );
+  list(v, "malformed_logs").forEach((log, i) => {
+    try {
+      const typed = readLog(log);
+      decodeTransferLog(typed, stampOf(log), rules);
+      decodeDelegationLog(typed, null, rules);
+      chk.fail(`malformed log ${i} was decoded`);
+    } catch (error) {
+      if (!(error instanceof TdhInputInvalid)) {
+        throw error;
+      }
+      chk.checks++;
+    }
+  });
+}
+
 function scopeOf(v: JsonObject): VectorScope {
   if ("arithmetic" in v) {
     return "arithmetic";
   }
-  if ("logs" in v || list(v, "raw_logs").length > 0) {
+  if ("logs" in v) {
     return "decoding";
+  }
+  if (list(v, "raw_logs").length > 0) {
+    return "raw-logs";
   }
   if ("cutoff" in v) {
     return "cutoff";
@@ -649,6 +586,8 @@ function runChecks(
 ): string | undefined {
   if (scope === "arithmetic") {
     checkArithmetic(chk, v, r);
+  } else if (scope === "decoding") {
+    checkDecoding(chk, v, r);
   } else if (scope === "registry") {
     checkRegistryHashes(chk, v);
   } else if (scope === "cutoff") {
@@ -672,30 +611,50 @@ function failureKind(error: unknown): string {
   return error instanceof TdhInputInvalid ? "no result" : "error";
 }
 
-/** Runs one vector, given its file name without `.json` and its text. */
-export function runVector(id: string, text: string): VectorRun {
+/**
+ * A vector file read and its format checked (P26 §3.2): its bytes as UTF-8,
+ * or a text already decoded. Throws `VectorFormatError` for a file that is
+ * no vector, before any value is read as an input.
+ */
+export function readVector(file: string | Uint8Array): JsonObject {
+  const v = parseJsonExact(
+    typeof file === "string" ? file : decodeVectorText(file)
+  );
+  checkFormat(v);
+  return v;
+}
+
+function messageOf(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+/**
+ * Runs one vector, given its file name without `.json` and its bytes (or its
+ * text). A file that is no vector fails, with `noVector` saying why.
+ */
+export function runVector(id: string, file: string | Uint8Array): VectorRun {
+  let v: JsonObject;
+  try {
+    v = readVector(file);
+  } catch (error) {
+    // Any other error (nesting too deep to read, say) fails this file too.
+    const format = error instanceof VectorFormatError;
+    return {
+      id,
+      scope: "cycle",
+      status: "fail",
+      checks: 1,
+      failures: [`${format ? "not a vector" : "error"}: ${messageOf(error)}`],
+      ...(format ? { noVector: messageOf(error) } : {}),
+    };
+  }
   const chk = new Checker();
-  let scope: VectorScope = "cycle";
+  const scope = scopeOf(v);
   let note: string | undefined;
   try {
-    const v = parseJsonExact(text);
-    checkFormat(v);
-    scope = scopeOf(v);
-    if (scope === "decoding") {
-      return {
-        id,
-        scope,
-        status: "out-of-scope",
-        checks: 0,
-        failures: [],
-        note: "Ethereum log decoding (P26 §3.1, §3.2, §6.1): the validators' readers",
-      };
-    }
     note = runChecks(chk, v, scope, registryOf(v["params"]));
   } catch (error) {
-    chk.fail(
-      `${failureKind(error)}: ${error instanceof Error ? error.message : String(error)}`
-    );
+    chk.fail(`${failureKind(error)}: ${messageOf(error)}`);
   }
   return {
     id,

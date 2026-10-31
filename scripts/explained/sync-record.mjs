@@ -16,9 +16,8 @@
  *   the registry values the kit's facts print (§10), and the IDs of its
  *   deviations (§11, each marked when a decision settled it) and legacy
  *   issues (§12);
- * - the Lean model's commit, and the counts of its committed proof manifest
- *   (`design/tdh-lean/proof-manifest.json`): what the model proves at that
- *   commit, before the public feed republishes its manifest.
+ * - the Lean model's commit (its counts are read from the manifest the
+ *   public feed serves, which names the commit it was built from).
  *
  * `--ref` reads a reviewed commit instead of `origin/main`, so the snapshot
  * can be regenerated where the pages were checked without moving to a newer
@@ -203,29 +202,6 @@ export function parseItems(spec) {
   return { deviations, issues };
 }
 
-/**
- * The counts of the Lean model's committed proof manifest at its commit:
- * proved, shown false, named limits, entries, and P26's vectors it runs.
- */
-export function leanManifestCounts(text) {
-  const manifest = JSON.parse(text);
-  const p26 = (manifest.vectors ?? []).find((run) => run.id === "p26");
-  const { summary } = manifest;
-  if (!summary || !p26) {
-    throw new Error(
-      "the Lean model's proof manifest has no summary or no P26 run"
-    );
-  }
-  return {
-    proved: summary.proved,
-    shownFalse: summary.counterexample,
-    limits: summary.deferred,
-    entries: summary.entries,
-    vectorsPassed: p26.passed,
-    vectorsTotal: p26.total,
-  };
-}
-
 async function main() {
   const opts = args();
   if (opts.fetch) git(opts.chain, ["fetch", "--quiet", "origin"]);
@@ -304,16 +280,7 @@ async function main() {
       registry: parseRegistry(spec),
       ...parseItems(spec),
     },
-    lean: {
-      commit: lean[0],
-      date: lean[1],
-      manifest: leanManifestCounts(
-        git(opts.chain, [
-          "show",
-          `${lean[0]}:design/tdh-lean/proof-manifest.json`,
-        ])
-      ),
-    },
+    lean: { commit: lean[0], date: lean[1] },
     decisions: decisions.map((d) => ({
       id: d.id,
       refs: d.refs,
