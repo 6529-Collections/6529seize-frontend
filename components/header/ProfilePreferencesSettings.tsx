@@ -133,9 +133,11 @@ const UPDATE_DM_POLICY: Record<DirectMessagePolicy, UpdateDirectMessagePolicy> =
   };
 
 /**
- * Group-policy fields for the save request. They are sent only when the group
- * policy is selected or the values changed, so saving the existing policies
- * sends the same request shape as before.
+ * Group-policy fields for the save request. The group id is sent only when it
+ * changed: the API keeps the saved group, and resending it could reject an
+ * unrelated save after that group was hidden. The follow switch is sent with
+ * the group policy or when it changed, so saving the existing policies sends
+ * the same request shape as before.
  */
 function getDirectMessageGroupUpdate(
   original: ApiProfilePreferences,
@@ -152,7 +154,7 @@ function getDirectMessageGroupUpdate(
     current.direct_message_allow_people_i_follow !==
     original.direct_message_allow_people_i_follow;
   return {
-    ...((isGroupPolicy || groupChanged) && current.direct_message_group_id
+    ...(groupChanged && current.direct_message_group_id
       ? { direct_message_group_id: current.direct_message_group_id }
       : {}),
     ...(isGroupPolicy || allowChanged

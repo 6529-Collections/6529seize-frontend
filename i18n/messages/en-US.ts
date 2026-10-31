@@ -3304,6 +3304,8 @@ export const EN_US_MESSAGES = {
   "profilePreferences.dm.group.none": "No group chosen",
   "profilePreferences.dm.group.loading": "Loading group…",
   "profilePreferences.dm.group.unavailableName": "Group no longer available",
+  "profilePreferences.dm.group.loadError": "Couldn’t load the group details.",
+  "profilePreferences.dm.group.retry": "Try again",
   "profilePreferences.dm.group.viewMembers": "View members of {groupName}",
   "profilePreferences.dm.group.choose": "Choose group",
   "profilePreferences.dm.group.change": "Change group",
