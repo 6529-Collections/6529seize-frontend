@@ -40,6 +40,8 @@ export function Seg<V extends string>({
       role="group"
       aria-label={label}
     >
+      {/* Options keep their whole label on one line and move to the next
+          row first; one wider than the whole control wraps inside it. */}
       {options.map((option) => {
         const on = option.value === value;
         return (
@@ -50,7 +52,7 @@ export function Seg<V extends string>({
             onClick={() => onChange(option.value)}
             {...(option.name ? { "aria-label": option.name } : {})}
             {...(attr ? { [`data-${attr}`]: option.value } : {})}
-            className={`tw-min-h-10 tw-flex-auto tw-cursor-pointer tw-whitespace-nowrap tw-rounded-full tw-border-0 tw-px-3 tw-text-[13px] tw-font-semibold md:tw-min-h-9 md:tw-flex-none md:tw-px-3.5 md:tw-text-sm ${on ? "tw-bg-iron-50 tw-text-iron-950" : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-50"} ${EX_FOCUS}`}
+            className={`tw-min-h-10 tw-max-w-full tw-shrink-0 tw-grow tw-basis-auto tw-cursor-pointer tw-rounded-full tw-border-0 tw-px-3 tw-py-1 tw-text-[13px] tw-font-semibold tw-leading-4 md:tw-min-h-9 md:tw-grow-0 md:tw-px-3.5 md:tw-text-sm ${on ? "tw-bg-iron-50 tw-text-iron-950" : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-50"} ${EX_FOCUS}`}
           >
             {option.label}
           </button>
