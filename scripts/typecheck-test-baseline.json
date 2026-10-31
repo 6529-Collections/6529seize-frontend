@@ -25,7 +25,6 @@
     "__tests__/app/messagesPage.test.tsx": 1,
     "__tests__/app/messageWavePage.test.tsx": 1,
     "__tests__/app/nextgen/page.test.tsx": 1,
-    "__tests__/app/nextgen/token/page-utils.test.tsx": 1,
     "__tests__/app/nextgenMetadataPages.test.tsx": 4,
     "__tests__/app/omPages.test.tsx": 1,
     "__tests__/app/rememes/contract-id.test.tsx": 1,
