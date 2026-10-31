@@ -71,7 +71,7 @@ describe("signed messages notice storage", () => {
         STORAGE_KEY,
         JSON.stringify({ [ADDRESS]: { seenGrantIds: ["grant-4"] } })
       );
-      globalThis.dispatchEvent(new StorageEvent("storage"));
+      globalThis.dispatchEvent(new Event("storage"));
     });
     expect(result.current).toEqual({ seenGrantIds: ["grant-4"] });
   });
