@@ -15,6 +15,7 @@ import Link from "next/link";
 import React, { useMemo } from "react";
 import DropNotFound from "./DropNotFound";
 import WaveDropTime from "./time/WaveDropTime";
+import { WithDropAuthorSignedMarker } from "./signature/DropAuthorSignedMarker";
 import {
   useWaveDropQuoteDisplay,
   WaveDropQuoteDisplayProvider,
@@ -194,7 +195,9 @@ function WaveDropQuoteBody({
             {!!drop && (
               <div className="tw-flex tw-items-center tw-gap-x-2">
                 <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></div>
-                <WaveDropTime timestamp={drop.created_at} />
+                <WithDropAuthorSignedMarker drop={drop}>
+                  <WaveDropTime timestamp={drop.created_at} />
+                </WithDropAuthorSignedMarker>
               </div>
             )}
           </div>
