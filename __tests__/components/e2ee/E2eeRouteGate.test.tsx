@@ -101,25 +101,34 @@ describe("E2eeRouteGate", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
-  it("lists devices with revoke buttons at the device limit", async () => {
+  it("lists the profile's devices at the device limit, revoked from an active device", () => {
     const engine = createFakeE2eeEngine({
       status: "device-limit",
       devices: [
-        device({ deviceKey: "0x1", label: "Old laptop" }),
-        device({ deviceKey: "0x2", label: "Work phone", platform: "phone" }),
+        device({ deviceKey: "0x1", label: "Chrome on Windows" }),
+        device({
+          deviceKey: "0x2",
+          label: "6529 app on iPhone",
+          platform: "phone",
+        }),
       ],
     });
     renderGate(contextFor(engine));
     expect(
       screen.getByRole("heading", { name: "Too many devices" })
     ).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Revoke Old laptop" }));
-    fireEvent.click(
-      await screen.findByRole("button", { name: "Revoke device" })
-    );
-    await waitFor(() =>
-      expect(engine.revokeDevice).toHaveBeenCalledWith("0x1")
-    );
+    expect(
+      screen.getByRole("heading", { name: "Devices on your profile" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Chrome on Windows")).toBeInTheDocument();
+    expect(screen.getByText("6529 app on iPhone")).toBeInTheDocument();
+    // A revocation is signed by an active device; this one is not registered.
+    expect(
+      screen.queryByRole("button", { name: /^Revoke / })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/On a device you already use, open Devices/u)
+    ).toBeInTheDocument();
   });
 
   it("renders children when ready", () => {
