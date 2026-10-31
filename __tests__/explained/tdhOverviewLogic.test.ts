@@ -7,6 +7,8 @@ import {
 } from "@/app/network/tdh/overview/explain";
 import { showNetworkDistribution } from "@/app/network/tdh/overview/flags";
 import { missingResultDays } from "@/app/network/tdh/overview/HowWeKnowLadder";
+import { machineCards } from "@/app/network/tdh/overview/machineCards";
+import type { FactBook } from "@/lib/explained/facts";
 import { movedAnchor } from "@/app/network/tdh/overview/LegacyAnchors";
 import {
   loadNetworkDistribution,
@@ -130,6 +132,48 @@ describe("Explain my TDH: the arithmetic", () => {
     expect(shareOfWindow("2026-10-17T00:00:00Z", "2026-10-16", 4)).toBe(0.25);
     expect(shareOfWindow("2026-10-30T00:00:00Z", "2026-10-16", 4)).toBe(1);
     expect(shareOfWindow("2026-10-01T00:00:00Z", "2026-10-16", 4)).toBe(0);
+  });
+});
+
+describe("the machine's fourth card", () => {
+  // memes.editions rows: [id, season, minted, effective edition].
+  function book(rows: number[][]): FactBook {
+    const facts: Record<string, unknown> = {
+      "memes.editions": rows,
+      "rules.editionThreshold": 300,
+    };
+    return {
+      maybe: (id: string) =>
+        id in facts ? ({ value: facts[id] } as never) : null,
+    } as unknown as FactBook;
+  }
+
+  it("is the newest card while it mints below the threshold, counted at its claim floor", () => {
+    const cards = machineCards(
+      book([
+        [561, 17, 310, 310],
+        [562, 17, 152, 310],
+      ])
+    );
+    expect(cards.map((card) => card.id)).toEqual([2, 4, 3, 562]);
+    expect(cards[3]).toEqual({ id: 562, title: null, art: null });
+  });
+
+  it("falls back to #562, with its art, when the facts layer cannot say what the newest card counts as", () => {
+    // #568 minted 157 with no recorded claim limit: its edition is not known.
+    const cards = machineCards(
+      book([
+        [562, 17, 310, 310],
+        [568, 17, 157, 157],
+      ])
+    );
+    expect(cards[3]).toMatchObject({ id: 562, title: "Play the Long Game" });
+    expect(cards[3]?.art).toContain("/562.WEBP");
+  });
+
+  it("falls back to #562 once the newest card has finished minting", () => {
+    const cards = machineCards(book([[567, 17, 310, 310]]));
+    expect(cards[3]).toMatchObject({ id: 562, title: "Play the Long Game" });
   });
 });
 

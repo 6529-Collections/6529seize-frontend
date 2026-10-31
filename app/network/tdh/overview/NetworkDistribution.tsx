@@ -51,8 +51,17 @@ const TONES: Record<RankGroup["key"], Tone> = {
   },
 };
 
-/** A share below this is too narrow to carry its label inside the bar. */
+/**
+ * A share below this is too narrow to carry its label inside the bar: on a
+ * phone the bar is about 350 px wide, from a tablet up twice that.
+ */
 const LABEL_MIN_SHARE = 0.08;
+const LABEL_MIN_SHARE_PHONE = 0.15;
+
+function labelClass(share: number): string | null {
+  if (share < LABEL_MIN_SHARE) return null;
+  return share < LABEL_MIN_SHARE_PHONE ? "tw-hidden md:tw-inline" : "";
+}
 const BAND_HEIGHT = 48;
 
 function percent(locale: SupportedLocale, share: number): string {
@@ -107,7 +116,11 @@ function Bar({
             className={`tw-grid tw-min-w-0 tw-place-items-center tw-border-0 tw-border-r-2 tw-border-solid tw-border-[#0D0D0F] tw-text-[13px] tw-font-semibold last:tw-border-r-0 ${tone.ink}`}
             style={{ width: `${value * 100}%`, background: tone.fill }}
           >
-            {value >= LABEL_MIN_SHARE ? percent(locale, value) : ""}
+            {labelClass(value) === null ? null : (
+              <span className={labelClass(value) ?? ""}>
+                {percent(locale, value)}
+              </span>
+            )}
           </span>
         );
       })}
@@ -208,9 +221,9 @@ export default function NetworkDistribution({
             {ot(locale, "network.peopleRow")}
           </span>
         </div>
-        <table className="tw-w-full tw-max-w-[560px] tw-border-collapse tw-text-[15px] tw-leading-[23px] tw-text-iron-300">
+        <table className="tw-w-full tw-max-w-[560px] tw-border-collapse tw-text-sm tw-leading-[23px] tw-text-iron-300 sm:tw-text-[15px]">
           <thead>
-            <tr className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-400">
+            <tr className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-normal tw-text-iron-400 sm:tw-tracking-[0.12em]">
               <th scope="col" className="tw-pb-2 tw-text-left tw-font-semibold">
                 <span className="tw-sr-only">
                   {ot(locale, "network.colGroup")}
@@ -235,7 +248,7 @@ export default function NetworkDistribution({
               <tr key={share.group.key}>
                 <th
                   scope="row"
-                  className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-py-1.5 tw-text-left tw-font-semibold tw-text-iron-50"
+                  className="tw-whitespace-nowrap tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-py-1.5 tw-pr-3 tw-text-left tw-font-semibold tw-text-iron-50"
                 >
                   <span
                     className="tw-mr-2.5 tw-inline-block tw-size-3 tw-rounded-sm tw-align-[-1px]"

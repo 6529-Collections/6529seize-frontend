@@ -41,8 +41,9 @@ the 6529 Explained facts layer: the daily comparison feed, the Lean manifest,
    the published results), `Explain my TDH` and `How it is calculated`, and
    `Today on the network`: the latest total TDH, the identities, `Rust core =
 Python reference = 6529.io`, and the last five results with today open.
-2. Use the machine beside it: pick a card (Meme #2, #4, #3, or the newest card,
-   counted at its claim limit while it is still minting), move the whole days
+2. Use the machine beside it: pick a card (Meme #2, #4, #3, and the newest card
+   while it is still minting, counted at its claim floor; Meme #562 when the
+   newest card has finished minting or its floor is not on record), move the whole days
    held, and choose no boost, one Gradient or a full set. The rows show the
    rate (3,941 ÷ the edition) and the boost, the copy's TDH, and its area
    (width days, height rate, the boost a hatched band); `Tomorrow's result

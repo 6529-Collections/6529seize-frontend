@@ -16,11 +16,11 @@ import {
   resolveExplainedLocale,
   type ExplainedParams,
 } from "@/app/explained/_lib/locale.server";
-import { MEME_ART } from "./overview/art";
 import { ot } from "./overview/copy";
 import ExplainedOverview from "./overview/ExplainedOverview";
 import { showNetworkDistribution } from "./overview/flags";
 import type { MachineCard } from "./overview/Machine";
+import { machineCards } from "./overview/machineCards";
 
 /**
  * 01 TDH, the overview (TDH-DESIGN.md §4.1), on the 6529 Explained kit.
@@ -30,21 +30,6 @@ import type { MachineCard } from "./overview/Machine";
  * final mockups (2026-10-18 09:40 UTC) to compare the two number for number.
  */
 const CHAPTER = chapterById("tdh");
-
-/** The machine's cards: three with art, and the newest card, still minting. */
-function machineCards(book: FactBook): MachineCard[] {
-  const list = book.maybe<number[][]>("memes.editions")?.value ?? [];
-  const newest = Math.max(0, ...list.map((row) => row[0] ?? 0));
-  const art = [MEME_ART[2], MEME_ART[4], MEME_ART[3]];
-  const cards: MachineCard[] = art.map((entry) => ({
-    id: entry.id,
-    title: entry.title,
-    art: entry.src,
-  }));
-  return newest > 0
-    ? [...cards, { id: newest, title: null, art: null }]
-    : cards;
-}
 
 /** Facts the page's client models read: resolved before the snapshot. */
 function clientFacts(cards: readonly MachineCard[]): FactId[] {

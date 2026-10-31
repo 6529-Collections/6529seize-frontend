@@ -29,4 +29,5 @@ export const MEME_ART = {
   2: art(2, "SeizeJPGs", "JPEG"),
   3: art(3, "UncleSeize", "JPEG"),
   4: art(4, "NakamotoFreedom", "JPEG"),
+  562: art(562, "Play the Long Game", "JPG"),
 } as const satisfies Readonly<Record<number, MemeArt>>;
