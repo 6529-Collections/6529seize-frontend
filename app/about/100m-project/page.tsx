@@ -4,6 +4,8 @@ import MigratedWordPressStaticPage from "@/components/migrated-wordpress/Migrate
 import { getMigratedWordPressPageMetadata } from "@/components/migrated-wordpress/metadata";
 import { about100mProjectMigratedWordPressPage as content } from "./content";
 
+export const dynamic = "force-static";
+
 export default function About100mProjectPage() {
   return <MigratedWordPressStaticPage content={content} />;
 }
