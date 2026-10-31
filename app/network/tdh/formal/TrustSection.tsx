@@ -4,7 +4,7 @@ import {
   type LedgerRow,
 } from "@/components/explained/evidence/claims";
 import { EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
-import { CodeName, EdSection } from "../_reference/parts";
+import { CodeName, EdSection } from "@/components/explained/reference/parts";
 import { isMessageKey } from "@/components/explained/rich";
 import { caseLetter, type SureContext, type SureKey } from "./sureShared";
 

@@ -7,7 +7,7 @@ import {
   EdSection,
   Prose,
   StackTable,
-} from "../_reference/parts";
+} from "@/components/explained/reference/parts";
 import { FactScope } from "@/components/explained/facts/FactText";
 import { isMessageKey } from "@/components/explained/rich";
 import type { SpecContext, SpecKey } from "./specShared";

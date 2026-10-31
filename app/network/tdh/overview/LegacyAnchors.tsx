@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useLegacyAnchors } from "@/components/explained/shell/LegacyAnchors";
 
 /**
  * Old links still land (MAP.md §2): anchors of sections that moved to other
@@ -28,17 +28,11 @@ export function movedAnchor(hash: string): string | null {
   return term === undefined ? null : `/network/tdh/glossary#${term}`;
 }
 
+function overviewAnchorTarget(hash: string): string | undefined {
+  return movedAnchor(hash) ?? undefined;
+}
+
 export default function LegacyAnchors() {
-  useEffect(() => {
-    const follow = () => {
-      const target = movedAnchor(globalThis.location.hash);
-      if (target !== null) {
-        globalThis.location.replace(target);
-      }
-    };
-    follow();
-    globalThis.addEventListener("hashchange", follow);
-    return () => globalThis.removeEventListener("hashchange", follow);
-  }, []);
+  useLegacyAnchors(overviewAnchorTarget);
   return null;
 }

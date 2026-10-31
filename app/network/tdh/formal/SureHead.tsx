@@ -2,7 +2,7 @@ import Hash from "@/components/explained/marks/Hash";
 import DriftNote from "@/components/explained/marks/DriftNote";
 import { Scoreboard } from "@/components/explained/evidence/claims";
 import { EX_LINK } from "@/components/explained/tokens";
-import { CodeName, EyebrowNumber, PageHead, Trap } from "../_reference/parts";
+import { CodeName, EyebrowNumber, PageHead, Trap } from "@/components/explained/reference/parts";
 import type { SureContext } from "./sureShared";
 
 /**

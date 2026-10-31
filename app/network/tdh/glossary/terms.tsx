@@ -3,7 +3,7 @@ import type { MarkKind } from "@/components/explained/marks/Mark";
 import { EX_LINK } from "@/components/explained/tokens";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
-import { CodeName } from "../_reference/parts";
+import { CodeName } from "@/components/explained/reference/parts";
 import type { printers } from "@/components/explained/facts/printers";
 import type { RichValues } from "@/components/explained/rich";
 

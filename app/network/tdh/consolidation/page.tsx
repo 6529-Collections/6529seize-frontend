@@ -19,7 +19,8 @@ import {
   resolveExplainedLocale,
   type ExplainedParams,
 } from "@/lib/explained/locale.server";
-import FactDerived, { RecordValue } from "../how-it-works/_kit/FactDerived";
+import { RecordValue } from "../how-it-works/_kit/RecordValue";
+import { FactText } from "@/components/explained/facts/FactText";
 import {
   EdRow,
   GoLink,
@@ -68,9 +69,9 @@ export default async function TdhYourWalletsPage({
   const n = (id: string) =>
     [...chapter.read, ...chapter.check].find((entry) => entry.id === id)?.n;
   const day = (text: string) => (
-    <FactDerived fact={gate} locale={locale}>
+    <FactText fact={gate} locale={locale}>
       {text}
-    </FactDerived>
+    </FactText>
   );
   const B = "tw-font-semibold tw-text-iron-50";
 
@@ -126,7 +127,7 @@ export default async function TdhYourWalletsPage({
         >
           <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-center tw-gap-x-[18px] tw-gap-y-1.5">
             <Mark kind="decided" refText="D136" locale={locale} />
-            <FactDerived fact={gate} locale={locale}>
+            <FactText fact={gate} locale={locale}>
               <Track
                 maturity="live"
                 label={wt(locale, "explained.tdh.wallets.liveOn")}
@@ -135,7 +136,7 @@ export default async function TdhYourWalletsPage({
                 })}
                 locale={locale}
               />
-            </FactDerived>
+            </FactText>
           </div>
           <div className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-2.5 md:tw-mt-[30px]">
             <Link className={EX_BUTTON.cta} href={GUIDED_SETUP_HREF}>

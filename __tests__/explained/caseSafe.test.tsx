@@ -1,5 +1,5 @@
 import { render } from "@testing-library/react";
-import CaseSafe from "@/app/network/tdh/shared/CaseSafe";
+import CaseSafe from "@/components/explained/marks/CaseSafe";
 
 describe("CaseSafe", () => {
   it("keeps commits, domains and rule names in their own case inside capitals", () => {

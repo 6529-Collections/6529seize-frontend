@@ -1,6 +1,6 @@
 "use client";
 
-import { useLegacyAnchors } from "../_reference/LegacyAnchors";
+import { useLegacyAnchors } from "@/components/explained/shell/LegacyAnchors";
 
 /** Anchors of the implementations page before this one, and where they land. */
 const MOVED: Readonly<Record<string, string>> = {

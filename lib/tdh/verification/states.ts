@@ -125,7 +125,7 @@ export function reportsAreLate(now: Date): boolean {
 }
 
 /** How the page shows a day's verdict. */
-export const VERDICT_STATES = [
+const VERDICT_STATES = [
   "equal",
   "explained",
   "investigating",
@@ -135,7 +135,7 @@ export const VERDICT_STATES = [
   "unknown",
 ] as const;
 
-export type VerdictState = (typeof VERDICT_STATES)[number];
+type VerdictState = (typeof VERDICT_STATES)[number];
 
 /**
  * The daily job's verdict as a page state. `OK` is "equal" when no record
@@ -168,7 +168,7 @@ export function verdictState(
 }
 
 /** Whether an index entry has any identity that differs from 6529.io. */
-export function indexDayHasDifferences(day: VerificationIndexDay): boolean {
+function indexDayHasDifferences(day: VerificationIndexDay): boolean {
   return (
     day.identitiesEqual !== null &&
     day.identitiesTotal !== null &&
@@ -276,8 +276,6 @@ export function dayHasDifferences(day: VerificationDay): boolean {
 export function dayVerdict(day: VerificationDay): VerdictState {
   return verdictState(day.verdict, dayHasDifferences(day));
 }
-
-export type PillTone = "success" | "primary" | "warning" | "error" | "neutral";
 
 /**
  * The cutover as the pages show it. D132 plans it for about a date, never on

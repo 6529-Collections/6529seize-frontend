@@ -4,7 +4,6 @@
   "pageMetadata.networkDefinitions.description": "Definitions of the collection, activity and TDH metrics used across the 6529 network.",
   "pageMetadata.networkTdhStats.description": "Charts of total network TDH and its daily creation and destruction, with boosted, unboosted and unweighted views.",
   "pageMetadata.networkNerd.description": "Ranked leaderboard of 6529 network members by cards collected or interactions, with boosted and unboosted TDH views.",
-  "pageMetadata.networkTdhHistoricBoosts.description": "Archive of previous TDH versions with their effective periods, booster categories and rule details.",
   "pageMetadata.consolidationMappingTool.description": "Upload a CSV of wallet addresses and token balances and download it with balances combined under each consolidation's primary address.",
   "pageMetadata.memeGas.description": "Gas costs in ETH for each card in The Memes and Meme Lab, filterable by artist and period.",
   "pageMetadata.memeAccounting.description": "Volume, proceeds, royalties and artist splits for each card in The Memes and Meme Lab, filterable by artist and period.",

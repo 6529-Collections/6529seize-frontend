@@ -5,8 +5,9 @@ import { useCallback, useEffect } from "react";
 /**
  * Old links still land (MAP.md §2): an anchor a page no longer has is moved
  * to where its content went, on load and on every hash change. Each page
- * gives its own resolver, from the old anchor to the new one; a target that
- * starts with "/" is another page.
+ * gives its own resolver, from the old anchor (without its "#") to the new
+ * one; a target that starts with "/" is another page. An anchor the page
+ * still has is left alone.
  */
 export function useLegacyAnchors(
   resolve: (hash: string) => string | undefined

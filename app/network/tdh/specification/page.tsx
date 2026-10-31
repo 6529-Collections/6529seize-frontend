@@ -18,7 +18,7 @@ import {
   Contents,
   FactsList,
   PageHead,
-} from "../_reference/parts";
+} from "@/components/explained/reference/parts";
 import SpecificationAnchors from "./SpecificationAnchors";
 import SpecReference from "./SpecReference";
 import SpecRules from "./SpecRules";

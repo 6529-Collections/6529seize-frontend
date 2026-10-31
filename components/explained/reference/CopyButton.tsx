@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { EX_BUTTON } from "@/components/explained/tokens";
+import { EX_BUTTON } from "../tokens";
 
 /**
  * Copies a block of text (the pin block, a rule) whole. The label says

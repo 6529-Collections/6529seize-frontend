@@ -7,7 +7,7 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { loadFactBook } from "@/lib/explained/feed.server";
 import { PlaceLinks, pagePlace } from "@/components/explained/shell/place";
-import LegacyAnchors from "../_reference/LegacyAnchors";
+import LegacyAnchors from "@/components/explained/shell/LegacyAnchors";
 import { FactText } from "@/components/explained/facts/FactText";
 import BuildSection from "./BuildSection";
 import ClaimsSection from "./ClaimsSection";

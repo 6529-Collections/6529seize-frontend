@@ -6,7 +6,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import type { FactBook } from "@/lib/explained/facts";
 import { formatCount, formatUtcDay } from "@/lib/explained/format";
 import type { DaySummary } from "@/lib/explained/registry/feedFacts";
-import FactDerived from "./_kit/FactDerived";
+import { FactText } from "@/components/explained/facts/FactText";
 import {
   GoLink,
   Para,
@@ -52,9 +52,9 @@ export default function NetworkSection({
     cycle && days ? days.value.find((d) => d.cycle === cycle.value - 1) : null;
   const deltaPlain =
     delta === null ? null : (
-      <FactDerived fact={delta} locale={locale}>
+      <FactText fact={delta} locale={locale}>
         {formatCount(locale, Math.abs(delta.value))}
-      </FactDerived>
+      </FactText>
     );
   let bodyKey:
     | "explained.tdh.how.n.bodyMore"
@@ -145,9 +145,9 @@ export default function NetworkSection({
                 <span className={`tw-mt-1 tw-block ${EX_TEXT.cap}`}>
                   {rich(locale, "explained.tdh.how.n.statDelta", {
                     date: (
-                      <FactDerived fact={days} locale={locale}>
+                      <FactText fact={days} locale={locale}>
                         {formatUtcDay(locale, previous.date)}
-                      </FactDerived>
+                      </FactText>
                     ),
                   })}
                 </span>
@@ -165,20 +165,20 @@ export default function NetworkSection({
               {fileName !== null && fileUrl !== null && (
                 <>
                   {", "}
-                  <FactDerived fact={fileUrl} locale={locale}>
+                  <FactText fact={fileUrl} locale={locale}>
                     {fileName}
-                  </FactDerived>
+                  </FactText>
                 </>
               )}
             </span>
             {written !== null && (
-              <FactDerived
+              <FactText
                 fact={written}
                 locale={locale}
                 className="before:tw-mr-3.5 before:tw-content-['·']"
               >
                 <AsOf fact={written} locale={locale} />
-              </FactDerived>
+              </FactText>
             )}
             {cycle !== null && (
               <Link

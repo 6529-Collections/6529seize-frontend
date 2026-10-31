@@ -9,7 +9,7 @@ import {
   Prose,
   StackTable,
   Trap,
-} from "../_reference/parts";
+} from "@/components/explained/reference/parts";
 import { FactText } from "@/components/explained/facts/FactText";
 import type { HalfCent } from "@/lib/explained/registry/referenceFacts";
 import {

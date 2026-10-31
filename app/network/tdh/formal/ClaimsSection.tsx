@@ -5,7 +5,7 @@ import {
   type ClaimRow,
 } from "@/components/explained/evidence/claims";
 import type { FactEntry } from "@/lib/explained/facts";
-import { Caption, EdSection } from "../_reference/parts";
+import { Caption, EdSection } from "@/components/explained/reference/parts";
 import { FactScope } from "@/components/explained/facts/FactText";
 import { isMessageKey } from "@/components/explained/rich";
 import {

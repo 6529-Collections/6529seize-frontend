@@ -10,7 +10,7 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { loadFactBook } from "@/lib/explained/feed.server";
 import { factText, type FactBook } from "@/lib/explained/facts";
-import CopyButton from "../_reference/CopyButton";
+import CopyButton from "@/components/explained/reference/CopyButton";
 import ImplAnchors from "./ImplAnchors";
 import { PlaceLinks, pagePlace } from "@/components/explained/shell/place";
 import {
@@ -23,7 +23,7 @@ import {
   Prose,
   StackTable,
   Trap,
-} from "../_reference/parts";
+} from "@/components/explained/reference/parts";
 import { FactScope, FactText } from "@/components/explained/facts/FactText";
 import {
   isMessageKey,

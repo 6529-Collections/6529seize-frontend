@@ -2,54 +2,12 @@
 
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useEffect } from "react";
 import { TDH_CARD_GRID, TDH_FOCUS, TDH_PANEL } from "./TDHSection";
 
 interface TDHRelatedLink {
   readonly href: string;
   readonly title: string;
   readonly description: string;
-}
-
-const EMPTY_MOVED: Readonly<Record<string, string>> = {};
-
-/**
- * Scrolls to and focuses the section heading named in the URL hash, on load
- * and whenever the hash changes. A hash in `moved` names a section that now
- * lives elsewhere: the page replaces the address with its new place, so old
- * links keep working.
- */
-export function useTDHSectionHashFocus(
-  sectionIds: readonly string[],
-  moved: Readonly<Record<string, string>> = EMPTY_MOVED
-) {
-  useEffect(() => {
-    const focusAnchor = () => {
-      const id = globalThis.location.hash.slice(1);
-      const target = moved[id];
-      if (target !== undefined) {
-        if (target.startsWith("#")) {
-          globalThis.history.replaceState(null, "", target);
-          globalThis.dispatchEvent(new HashChangeEvent("hashchange"));
-        } else {
-          globalThis.location.replace(target);
-        }
-        return;
-      }
-      if (!sectionIds.includes(id)) return;
-      globalThis.requestAnimationFrame(() => {
-        globalThis.document
-          .getElementById(id)
-          ?.scrollIntoView({ block: "start" });
-        globalThis.document
-          .getElementById(`${id}-heading`)
-          ?.focus({ preventScroll: true });
-      });
-    };
-    focusAnchor();
-    globalThis.addEventListener("hashchange", focusAnchor);
-    return () => globalThis.removeEventListener("hashchange", focusAnchor);
-  }, [sectionIds, moved]);
 }
 
 export function TDHRelatedLinks({

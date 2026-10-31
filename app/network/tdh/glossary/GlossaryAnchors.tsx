@@ -1,6 +1,6 @@
 "use client";
 
-import { useLegacyAnchors } from "../_reference/LegacyAnchors";
+import { useLegacyAnchors } from "@/components/explained/shell/LegacyAnchors";
 
 const PREFIX = "glossary-";
 

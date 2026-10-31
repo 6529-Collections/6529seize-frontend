@@ -6,7 +6,7 @@ import type {
   ItemRow,
   RegistryRecord,
 } from "@/lib/explained/registry/referenceFacts";
-import { CodeName } from "../_reference/parts";
+import { CodeName } from "@/components/explained/reference/parts";
 import { plain, rich, type RichValues } from "@/components/explained/rich";
 import { printers } from "@/components/explained/facts/printers";
 import { registryValues } from "./specCode";

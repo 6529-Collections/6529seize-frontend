@@ -12,7 +12,7 @@ import { t, type MessageKey } from "@/i18n/messages";
 import { loadFactBook } from "@/lib/explained/feed.server";
 import type { VersionRow } from "@/lib/explained/registry/referenceFacts";
 import { PlaceLinks, pagePlace } from "@/components/explained/shell/place";
-import LegacyAnchors from "../_reference/LegacyAnchors";
+import LegacyAnchors from "@/components/explained/shell/LegacyAnchors";
 import {
   Caption,
   CodeName,
@@ -20,7 +20,7 @@ import {
   PageHead,
   Prose,
   StackTable,
-} from "../_reference/parts";
+} from "@/components/explained/reference/parts";
 import { FactScope, FactText } from "@/components/explained/facts/FactText";
 import { plain, rich, type RichValues } from "@/components/explained/rich";
 import { printers } from "@/components/explained/facts/printers";

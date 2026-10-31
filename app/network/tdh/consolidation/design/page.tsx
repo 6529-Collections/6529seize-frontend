@@ -16,7 +16,8 @@ import {
   resolveExplainedLocale,
   type ExplainedParams,
 } from "@/lib/explained/locale.server";
-import FactDerived, { RecordValue } from "../../how-it-works/_kit/FactDerived";
+import { RecordValue } from "../../how-it-works/_kit/RecordValue";
+import { FactText } from "@/components/explained/facts/FactText";
 import {
   EdRow,
   PageHead,
@@ -57,9 +58,9 @@ export default async function TdhConsolidationDesignPage({
   const chapter = chapterById("tdh");
   const shelfNo = chapter.shelf.findIndex((entry) => entry.id === "design") + 1;
   const count = (wallets: number) => (
-    <FactDerived fact={max} locale={locale}>
+    <FactText fact={max} locale={locale}>
       {formatCount(locale, registrations(wallets))}
-    </FactDerived>
+    </FactText>
   );
   const sizes = Array.from({ length: max.value - 1 }, (_, index) => index + 2);
   const statKeys = [
@@ -143,9 +144,9 @@ export default async function TdhConsolidationDesignPage({
                     <span className={`tw-mt-1 tw-block ${EX_TEXT.cap}`}>
                       {rich(locale, key, {
                         date: (
-                          <FactDerived fact={gate} locale={locale}>
+                          <FactText fact={gate} locale={locale}>
                             {when.day}
-                          </FactDerived>
+                          </FactText>
                         ),
                       })}
                     </span>
@@ -219,9 +220,9 @@ export default async function TdhConsolidationDesignPage({
                   dt(locale, "explained.tdh.design.protects.outside"),
                   rich(locale, "explained.tdh.design.protects.old", {
                     date: (
-                      <FactDerived fact={gate} locale={locale}>
+                      <FactText fact={gate} locale={locale}>
                         {when.dayYear}
-                      </FactDerived>
+                      </FactText>
                     ),
                   }),
                 ],

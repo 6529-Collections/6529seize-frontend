@@ -36,7 +36,8 @@
  *   runs through the text's box, or an arrowhead (marker) drawn inside it;
  * - case-significant text set in capitals by `text-transform`: a commit or
  *   hash, a 0x value, a domain such as 6529.io, or TDH-v1 and tdh-v1.0
- *   (wrap it in the CaseSafe component, which keeps its case);
+ *   (wrap it in the kit's CaseSafe, components/explained/marks/CaseSafe.tsx,
+ *   which keeps its case);
  * - a word split across two lines by `word-break: break-all` (apply it to
  *   the hash alone, never to the sentence around it);
  * - prose set wider than 80 characters a line: a paragraph or list item of

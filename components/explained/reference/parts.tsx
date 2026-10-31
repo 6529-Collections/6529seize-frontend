@@ -1,13 +1,12 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { EX_FOCUS, EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
+import { EX_FOCUS, EX_LAYOUT, EX_TEXT } from "../tokens";
 
 /**
- * The reference pages' layout parts (How sure and the shelf), built from the
- * kit's tokens: the page head, an editorial section, prose, a table that
- * stacks on a phone, a definition list, a code block, a note with a blue
- * edge, contents. Page-local until a second chapter needs them; each is a
- * candidate for the kit (listed in the lane's report).
+ * The reference genre's layout parts (SCORECARD.md §2, genre R: How sure
+ * and every chapter's shelf), built from the kit's tokens: the page head,
+ * an editorial section, prose, a table that stacks on a phone, a
+ * definition list, a code block, a note with a blue edge, contents.
  */
 
 /** The eyebrow, H1 and one-sentence lede of an evidence or reference page. */

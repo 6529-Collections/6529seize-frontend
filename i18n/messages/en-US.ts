@@ -38,16 +38,10 @@ import homeNewcomerMessages from "@/i18n/messages/homeNewcomer.en-US.json";
 import join6529Messages from "@/i18n/messages/join6529.en-US.json";
 import museumMessages from "@/i18n/messages/museum.en-US.json";
 import networkMetricsMessages from "@/i18n/messages/networkMetrics.en-US.json";
-import networkTdhMessages from "@/i18n/messages/networkTdh.en-US.json";
-import networkTdhExplainerMessages from "@/i18n/messages/networkTdhExplainer.en-US.json";
 import networkTdhConsolidationMessages from "@/i18n/messages/networkTdhConsolidation.en-US.json";
 import safeCollectingMessages from "@/i18n/messages/safeCollecting.en-US.json";
-import networkTdhProfileMessages from "@/i18n/messages/networkTdhProfile.en-US.json";
-import networkTdhRulesMessages from "@/i18n/messages/networkTdhRules.en-US.json";
 import networkTdhSharedMessages from "@/i18n/messages/networkTdhShared.en-US.json";
 import networkTdhVerifyMessages from "@/i18n/messages/networkTdhVerify.en-US.json";
-import networkTdhHowMessages from "@/i18n/messages/networkTdhHow.en-US.json";
-import networkTdhImplMessages from "@/i18n/messages/networkTdhImpl.en-US.json";
 import explainedKitMessages from "@/i18n/messages/explainedKit.en-US.json";
 import explainedHubMessages from "@/i18n/messages/explainedHub.en-US.json";
 import explainedTdhOverviewMessages from "@/i18n/messages/explainedTdhOverview.en-US.json";
@@ -4606,16 +4600,10 @@ export const EN_US_MESSAGES = {
   ...emmaMessages,
   ...museumMessages,
   ...networkMetricsMessages,
-  ...networkTdhMessages,
-  ...networkTdhExplainerMessages,
   ...networkTdhConsolidationMessages,
   ...safeCollectingMessages,
-  ...networkTdhProfileMessages,
-  ...networkTdhRulesMessages,
   ...networkTdhSharedMessages,
   ...networkTdhVerifyMessages,
-  ...networkTdhHowMessages,
-  ...networkTdhImplMessages,
   ...explainedKitMessages,
   ...explainedHubMessages,
   ...explainedTdhOverviewMessages,

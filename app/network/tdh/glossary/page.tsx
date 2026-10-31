@@ -13,7 +13,7 @@ import { loadFactBook } from "@/lib/explained/feed.server";
 import { PlaceLinks, pagePlace } from "@/components/explained/shell/place";
 import GlossaryAnchors from "./GlossaryAnchors";
 import { TERMS, type GlossaryKey, type Status } from "./terms";
-import { PageHead, StackTable } from "../_reference/parts";
+import { PageHead, StackTable } from "@/components/explained/reference/parts";
 import { plain, rich, type RichValues } from "@/components/explained/rich";
 import { printers } from "@/components/explained/facts/printers";
 

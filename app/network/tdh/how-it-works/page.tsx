@@ -28,7 +28,8 @@ import { EXAMPLE_CARD, FIRST_GM } from "./models/rates";
 import RatesLens from "./RatesLens";
 import StacksLens from "./StacksLens";
 import StepsInOrder from "./StepsInOrder";
-import FactDerived, { RecordValue } from "./_kit/FactDerived";
+import { RecordValue } from "./_kit/RecordValue";
+import { FactText } from "@/components/explained/facts/FactText";
 import {
   EdRow,
   GoLink,
@@ -250,14 +251,14 @@ function PartA({
             ? null
             : rich(locale, "explained.tdh.how.a.body", {
                 midnight: (
-                  <FactDerived fact={day} locale={locale}>
+                  <FactText fact={day} locale={locale}>
                     {`${utcClock(locale, 0)} UTC`}
-                  </FactDerived>
+                  </FactText>
                 ),
                 hours: (
-                  <FactDerived fact={day} locale={locale}>
+                  <FactText fact={day} locale={locale}>
                     {formatCount(locale, day.value / 3_600)}
-                  </FactDerived>
+                  </FactText>
                 ),
               })}
         </Para>
@@ -343,19 +344,19 @@ function PartB({
                   </span>
                 ),
                 sum: (
-                  <FactDerived
+                  <FactText
                     fact={rate}
                     locale={locale}
                     how={ht(locale, "explained.tdh.how.firstday.tag")}
                     className="tw-whitespace-nowrap"
                   >
                     {`${formatCount(locale, copies)} × ${formatCount(locale, days)} × ${formatCents(locale, cents / 100)} = ${formatDecimal(locale, (copies * days * cents) / 100, 1)}`}
-                  </FactDerived>
+                  </FactText>
                 ),
                 rounded: (
-                  <FactDerived fact={rate} locale={locale}>
+                  <FactText fact={rate} locale={locale}>
                     {formatCount(locale, ENGINE.baseTdh(cents, copies * days))}
-                  </FactDerived>
+                  </FactText>
                 ),
               })
             : null}
@@ -420,9 +421,9 @@ function howWeKnow(book: FactBook, locale: SupportedLocale) {
           readAt === null ? (
             v("memes.readAt")
           ) : (
-            <FactDerived fact={readAt} locale={locale}>
+            <FactText fact={readAt} locale={locale}>
               {formatUtcDay(locale, readAt.value)}
-            </FactDerived>
+            </FactText>
           ),
       }),
     },

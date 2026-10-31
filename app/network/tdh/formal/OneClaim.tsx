@@ -5,7 +5,7 @@ import {
   type ClaimSpan,
 } from "@/components/explained/evidence/claims";
 import { EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
-import { CodeName } from "../_reference/parts";
+import { CodeName } from "@/components/explained/reference/parts";
 import { FactScope } from "@/components/explained/facts/FactText";
 import type { SureContext } from "./sureShared";
 
