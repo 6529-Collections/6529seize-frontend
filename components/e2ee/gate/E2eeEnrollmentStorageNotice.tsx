@@ -13,7 +13,13 @@ const STEP_KEYS: readonly MessageKey[] = [
 
 const FALLBACK_SITE = "6529.io";
 const subscribeNever = () => () => undefined;
-const getSite = (): string => globalThis.location?.hostname || FALLBACK_SITE;
+const getSite = (): string => {
+  try {
+    return globalThis.location.hostname || FALLBACK_SITE;
+  } catch {
+    return FALLBACK_SITE;
+  }
+};
 const getServerSite = (): string => FALLBACK_SITE;
 
 interface E2eeEnrollmentStorageNoticeProps {
