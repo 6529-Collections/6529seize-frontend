@@ -3,35 +3,53 @@ import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream";
 
 /**
- * The three tiers of network art (6529chain D79): The Memes; 6529 Stream with
- * 6529 Stream Editions; Federated. A real table, so it reads row by row.
+ * The three tiers of network art on 6529.io: 6529 Stream (curated 1/1s),
+ * 6529 Stream Editions (editions linked to a Stream 1/1) and Federated
+ * (artist-owned contracts). A real table, so it reads row by row. The
+ * federated pages and the explainers share it; pass `rows` for a shorter cut.
  */
 
-type Tier = "memes" | "stream" | "federated";
+type Tier = "stream" | "editions" | "federated";
 
-const TIERS: readonly Tier[] = ["memes", "stream", "federated"];
+const TIERS: readonly Tier[] = ["stream", "editions", "federated"];
 
-const ROWS = [
+type TierRow =
+  | "what"
+  | "admission"
+  | "contract"
+  | "sale"
+  | "split"
+  | "unbid"
+  | "license"
+  | "status";
+
+const TIER_ROWS: readonly TierRow[] = [
+  "what",
+  "admission",
   "contract",
+  "sale",
   "split",
-  "curation",
-  "tdh",
-  "discovery",
+  "unbid",
   "license",
   "status",
-] as const;
+];
+
+const CELL = "tw-py-2 tw-pr-3 tw-align-top last:tw-pr-0";
 
 export default function TierComparison({
   locale,
   highlight,
+  rows = TIER_ROWS,
 }: {
   readonly locale: SupportedLocale;
   /** A column to emphasize, for example "federated" on the federated pages. */
   readonly highlight?: Tier;
+  /** Which rows to show, in order. Defaults to every row. */
+  readonly rows?: readonly TierRow[];
 }) {
   return (
     <div className="tw-overflow-x-auto">
-      <table className="tw-w-full tw-min-w-[36rem] tw-border-collapse tw-text-left tw-text-sm">
+      <table className="tw-w-full tw-min-w-[34rem] tw-border-collapse tw-text-left tw-text-sm">
         <caption className="tw-sr-only">
           {t(locale, "stream.tiers.caption")}
         </caption>
@@ -39,7 +57,7 @@ export default function TierComparison({
           <tr>
             <th
               scope="col"
-              className="tw-w-32 tw-py-2 tw-pr-3 tw-text-xs tw-font-medium tw-text-iron-400"
+              className={`${CELL} tw-w-28 tw-text-xs tw-font-medium tw-text-iron-400`}
             >
               <span className="tw-sr-only">
                 {t(locale, "stream.tiers.aspect")}
@@ -49,7 +67,7 @@ export default function TierComparison({
               <th
                 key={tier}
                 scope="col"
-                className={`tw-py-2 tw-pr-3 tw-text-sm tw-font-semibold ${highlight === tier ? "tw-text-primary-300" : "tw-text-iron-100"}`}
+                className={`${CELL} tw-font-semibold ${highlight === tier ? "tw-text-primary-300" : "tw-text-iron-100"}`}
               >
                 {t(locale, `stream.tiers.${tier}.name`)}
               </th>
@@ -57,21 +75,21 @@ export default function TierComparison({
           </tr>
         </thead>
         <tbody>
-          {ROWS.map((row) => (
+          {rows.map((row) => (
             <tr
               key={row}
               className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-800"
             >
               <th
                 scope="row"
-                className="tw-py-2 tw-pr-3 tw-align-top tw-text-xs tw-font-medium tw-text-iron-400"
+                className={`${CELL} tw-text-xs tw-font-medium tw-text-iron-400`}
               >
                 {t(locale, `stream.tiers.row.${row}`)}
               </th>
               {TIERS.map((tier) => (
                 <td
                   key={tier}
-                  className="tw-py-2 tw-pr-3 tw-align-top tw-text-iron-200"
+                  className={`${CELL} ${highlight === tier ? "tw-text-iron-50" : "tw-text-iron-300"}`}
                 >
                   {t(locale, `stream.tiers.${tier}.${row}`)}
                 </td>

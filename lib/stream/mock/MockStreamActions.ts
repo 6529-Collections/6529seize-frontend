@@ -26,7 +26,20 @@ import {
   resolveEnglishDispute,
 } from "@/lib/stream/mock/sales/englishAuction";
 import { MOCK_SALE_ADAPTERS } from "@/lib/stream/mock/sales/registry";
-import type { Address, KnownSaleKind, WorkKey } from "@/lib/stream/types";
+import type { GasOperation } from "@/lib/stream/gas";
+import type {
+  Address,
+  FederatedForm,
+  KnownSaleKind,
+  WorkKey,
+} from "@/lib/stream/types";
+
+/** Each federated form's deploy carries its own labelled gas estimate. */
+const DEPLOY_OPERATION: Readonly<Record<FederatedForm, GasOperation>> = {
+  ERC721: "federatedDeploy721",
+  ERC1155: "federatedDeploy1155",
+  PAIR: "federatedDeployPair",
+};
 
 /** The mock's writes: each runs atomically through `engine.tx`. */
 export class MockStreamActions implements StreamActions {
@@ -72,11 +85,8 @@ export class MockStreamActions implements StreamActions {
     request: Parameters<StreamActions["deployFederated"]>[1]
   ) {
     return later(() => {
-      return this.engine.tx(
-        request.form === "PAIR"
-          ? "federatedDeployPair"
-          : "federatedDeploySingle",
-        () => deployFederated(this.engine, from, request)
+      return this.engine.tx(DEPLOY_OPERATION[request.form], () =>
+        deployFederated(this.engine, from, request)
       );
     });
   }

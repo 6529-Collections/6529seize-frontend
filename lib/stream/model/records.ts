@@ -343,12 +343,20 @@ export interface FederatedContract {
   readonly symbol: string;
   readonly deployedAt: UnixSeconds;
   readonly deployTx: Hex32;
+  /** The factory that deployed and registered it (the `Registered` event's sender). */
+  readonly factory: Address;
+  /** The template's `owner()`: the artist identity's authority controls it. */
+  readonly owner: Address;
   readonly defaultLicense: string;
+  /** ERC-2981 rate for new works, out of 100,000; the artist sets it. */
+  readonly royaltyRate: number;
   readonly works: readonly WorkKey[];
+  /** Primary sales settled through the network's adapters (indexed `SaleSettled` / `AuctionSettled`). */
+  readonly volume: Wei;
   /**
    * Sale methods whose adapters may mint into this contract. Every contract
-   * starts with the two auctions; which further methods federated contracts get
-   * is an open owner question.
+   * starts with the two auctions (owner decision 14); governance admits a new
+   * adapter without redeploying the contract, and it joins this list.
    */
   readonly saleKinds: readonly SaleKindId[];
   readonly delisting: FederatedDelisting | null;
@@ -359,8 +367,36 @@ export interface FederatedDirectoryQuery {
   readonly form?: FederatedForm;
   readonly artistId?: string;
   readonly search?: string;
+  /**
+   * Only contracts with this status. A contract whose artist identity is
+   * delisted counts as delisted. Overrides `includeDelisted`.
+   */
+  readonly status?: FederatedStatus;
   /** Delisted contracts are hidden from 6529.io by default. */
   readonly includeDelisted?: boolean;
+}
+
+/** A template the federation factory deploys (v1.1 design; ADR 0001 section 16). */
+export interface FederatedTemplate {
+  readonly standard: TokenStandard;
+  readonly version: number;
+  readonly codeHash: Hex32;
+  /** Runtime code size (`extcodesize` of the template): the deploy pays for every byte. */
+  readonly codeBytes: number;
+  /** New storage slots one deployment writes: the template's state, the registry entry and the artist listing. */
+  readonly newSlots: number;
+}
+
+/** The federation factory: where it is, and what a deployment gets today. */
+export interface FederationFactoryInfo {
+  readonly factory: Address;
+  readonly registry: Address;
+  /** The current template for each standard. */
+  readonly templates: readonly FederatedTemplate[];
+  /** `PRODUCT_FEDERATED` network share, out of 100,000. */
+  readonly feeShare: number;
+  /** The default royalty rate for new works, out of 100,000. */
+  readonly royaltyRate: number;
 }
 
 /** The launch wizard's input to the federation factory. */

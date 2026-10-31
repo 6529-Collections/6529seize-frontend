@@ -13,6 +13,7 @@ import type {
   FederatedContract,
   FederatedDeployRequest,
   FederatedDirectoryQuery,
+  FederationFactoryInfo,
   Hex32,
   KnownSaleKind,
   MuseumHolding,
@@ -106,6 +107,8 @@ export interface StreamDataSource {
     query?: FederatedDirectoryQuery
   ): Promise<readonly FederatedContract[]>;
   getFederatedContract(address: Address): Promise<FederatedContract | null>;
+  /** The factory, its registry and the templates a new deployment gets. */
+  federationFactory(): Promise<FederationFactoryInfo>;
 }
 
 // ---------------------------------------------------------------------------

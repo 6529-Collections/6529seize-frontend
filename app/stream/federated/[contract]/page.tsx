@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { FederatedContractPage } from "@/components/stream/pages/FederatedPages";
+import { FederatedContractPage } from "@/components/stream/federated/FederatedContractPage";
 import {
   assertStreamProduct,
   streamPageMetadata,

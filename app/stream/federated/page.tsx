@@ -1,4 +1,4 @@
-import { FederatedDirectoryPage } from "@/components/stream/pages/FederatedPages";
+import { FederatedDirectoryPage } from "@/components/stream/federated/FederatedDirectoryPage";
 import {
   assertStreamProduct,
   streamPageMetadata,
