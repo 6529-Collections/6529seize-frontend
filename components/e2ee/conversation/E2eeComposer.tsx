@@ -11,7 +11,6 @@ import {
   useEffect,
   useId,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -44,6 +43,30 @@ const TEXTAREA_MAX_HEIGHT_PX = 200;
 const ICON_BUTTON =
   "tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
 
+/** Thumbnails are drawn at twice their 48 px box for sharp displays. */
+const THUMBNAIL_PX = 96;
+
+/** Draws `image` centered and cropped to fill the canvas (object-fit: cover). */
+function drawCover(canvas: HTMLCanvasElement, image: ImageBitmap): void {
+  const context = canvas.getContext("2d");
+  if (!context) {
+    return;
+  }
+  const scale = Math.max(
+    canvas.width / image.width,
+    canvas.height / image.height
+  );
+  const width = image.width * scale;
+  const height = image.height * scale;
+  context.drawImage(
+    image,
+    (canvas.width - width) / 2,
+    (canvas.height - height) / 2,
+    width,
+    height
+  );
+}
+
 function FilePreview({
   file,
   onRemove,
@@ -52,29 +75,41 @@ function FilePreview({
   readonly onRemove: () => void;
 }) {
   const locale = useBrowserLocale();
-  // Raster images only, the same rule as received attachments.
+  // Raster images only, the same rule as received attachments. The preview
+  // is decoded and painted on a canvas, so the picked file never becomes a
+  // URL in the DOM.
   const isImage = isSafeInlineImageMime(file.type);
-  const url = useMemo(
-    () => (isImage ? URL.createObjectURL(file) : null),
-    [file, isImage]
-  );
-  useEffect(
-    () => () => {
-      if (url) {
-        URL.revokeObjectURL(url);
-      }
-    },
-    [url]
-  );
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!isImage || !canvas || typeof createImageBitmap !== "function") {
+      return;
+    }
+    let cancelled = false;
+    createImageBitmap(file)
+      .then((decoded) => {
+        if (!cancelled) {
+          drawCover(canvas, decoded);
+        }
+        decoded.close();
+      })
+      .catch(() => {
+        // An undecodable image keeps an empty thumbnail box.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [file, isImage]);
 
   return (
     <li className="tw-relative tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-1.5 tw-pr-9">
-      {url ? (
-        // eslint-disable-next-line @next/next/no-img-element -- local blob: preview of a file that has not been uploaded; next/image cannot optimize it.
-        <img
-          src={url}
-          alt=""
-          className="tw-size-12 tw-flex-shrink-0 tw-rounded-md tw-object-cover"
+      {isImage ? (
+        <canvas
+          ref={canvasRef}
+          width={THUMBNAIL_PX}
+          height={THUMBNAIL_PX}
+          aria-hidden="true"
+          className="tw-size-12 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800"
         />
       ) : null}
       <span className="tw-max-w-[10rem] tw-truncate tw-text-xs tw-text-iron-200">

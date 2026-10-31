@@ -158,6 +158,40 @@ describe("E2eeConversationView", () => {
     expect(engine.send).not.toHaveBeenCalled();
   });
 
+  it("previews a picked image on a canvas, never as a URL in the DOM", async () => {
+    const bitmap = { width: 200, height: 100, close: jest.fn() };
+    const createImageBitmapMock = jest.fn().mockResolvedValue(bitmap);
+    const drawImage = jest.fn();
+    Object.defineProperty(globalThis, "createImageBitmap", {
+      configurable: true,
+      value: createImageBitmapMock,
+    });
+    const getContext = jest
+      .spyOn(HTMLCanvasElement.prototype, "getContext")
+      .mockReturnValue({ drawImage } as unknown as CanvasRenderingContext2D);
+    try {
+      renderView();
+      const file = new File(["png"], "cat.png", { type: "image/png" });
+      const fileInput =
+        document.querySelector<HTMLInputElement>('input[type="file"]');
+      fireEvent.change(fileInput!, { target: { files: [file] } });
+      const attachments = screen.getByRole("list", { name: "Attachments" });
+      expect(within(attachments).getByText("cat.png")).toBeInTheDocument();
+      expect(attachments.querySelector("img")).toBeNull();
+      expect(attachments.querySelector("canvas")).toHaveAttribute(
+        "aria-hidden",
+        "true"
+      );
+      await waitFor(() => expect(bitmap.close).toHaveBeenCalled());
+      expect(createImageBitmapMock).toHaveBeenCalledWith(file);
+      // A 2:1 image covers the 96 px square: scaled to 192x96, centered.
+      expect(drawImage).toHaveBeenCalledWith(bitmap, -48, 0, 192, 96);
+    } finally {
+      getContext.mockRestore();
+      Reflect.deleteProperty(globalThis, "createImageBitmap");
+    }
+  });
+
   it("offers member suggestions for @ mentions", () => {
     renderView();
     const input = screen.getByLabelText(
