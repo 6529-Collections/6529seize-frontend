@@ -5,6 +5,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMutation } from "@tanstack/react-query";
 import { deleteDrop } from "@/services/api/signed-drop-writes";
+import { isSignedWriteCancelled } from "@/lib/device-signing/signing-decision";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "@/components/auth/Auth";
 import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
@@ -38,6 +39,10 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
       onDropDeleted();
     },
     onError: (error) => {
+      // Cancelled at the signing prompt: nothing was sent.
+      if (isSignedWriteCancelled(error)) {
+        return;
+      }
       setToast({
         type: "error",
         title: "Couldn't delete this drop.",

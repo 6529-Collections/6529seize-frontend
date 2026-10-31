@@ -63,8 +63,15 @@ describe("the stream.* message namespace", () => {
       const { EN_US_MESSAGES } = jest.requireActual<EnUsModule>(
         "@/i18n/messages/en-US"
       );
+      // The production /stream placeholder (flag off) is shared copy.
       expect(
-        Object.keys(EN_US_MESSAGES).filter((key) => key.startsWith("stream."))
+        Object.keys(EN_US_MESSAGES).filter(
+          (key) =>
+            key.startsWith("stream.") && !key.startsWith("stream.placeholder.")
+        )
+      ).toEqual([]);
+      expect(
+        Object.keys(STREAM_MESSAGES).filter((key) => key in EN_US_MESSAGES)
       ).toEqual([]);
     });
   });
