@@ -100,6 +100,9 @@ function E2eeGateState({ e2ee }: { readonly e2ee: UseE2eeResult }) {
           enrolling={e2ee.status === "enrolling"}
           engineError={e2ee.error}
           details={<E2eeEnrollmentIdentity />}
+          clearOnExitProfileId={
+            e2ee.thisDevice === null ? e2ee.profileId : null
+          }
         />
       );
     case "device-limit":

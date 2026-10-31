@@ -82,7 +82,8 @@ async function activeDevices(
   for (const profileId of principals) {
     const keys: string[] = [];
     for (const device of await ctx.directory.getProfileDevices(profileId)) {
-      if (await isUsableDevice(ctx, device)) {
+      // Inactive devices are not claimable; they are added once used again.
+      if (device.inactive !== true && (await isUsableDevice(ctx, device))) {
         keys.push(device.device_key.toLowerCase());
       }
     }

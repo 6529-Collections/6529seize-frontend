@@ -7,6 +7,13 @@ import {
   E2eeTestProvider,
 } from "./fakeE2eeEngine";
 
+// The enrollment card reads the profile's devices before enrolling.
+jest.mock("@/lib/e2ee/api", () => ({
+  createE2eeApiClient: () => ({
+    getMe: jest.fn(async () => ({ devices: [] })),
+  }),
+}));
+
 const renderGate = (value: ReturnType<typeof contextFor>) =>
   render(
     <E2eeTestProvider value={value}>

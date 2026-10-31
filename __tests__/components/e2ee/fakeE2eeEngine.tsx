@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { type ReactNode, useState } from "react";
 import {
   E2eeContext,
   type E2eeAvailability,
@@ -215,5 +216,13 @@ export function E2eeTestProvider({
   readonly value: E2eeContextValue;
   readonly children: ReactNode;
 }) {
-  return <E2eeContext.Provider value={value}>{children}</E2eeContext.Provider>;
+  // The enrollment card reads the profile's devices through React Query.
+  const [queryClient] = useState(
+    () => new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  );
+  return (
+    <QueryClientProvider client={queryClient}>
+      <E2eeContext.Provider value={value}>{children}</E2eeContext.Provider>
+    </QueryClientProvider>
+  );
 }

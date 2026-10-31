@@ -17,6 +17,9 @@ import { HttpFile } from '../http/http';
 export class ApiE2eeEligibility {
     'profile_id': string;
     'status': ApiE2eeEligibilityStatus;
+    /**
+    * Active devices that are not inactive (claimable devices)
+    */
     'active_devices': number;
 
     static readonly discriminator: string | undefined = undefined;

@@ -16,7 +16,7 @@ import { HttpFile } from '../http/http';
 export class ApiE2eeClaimTarget {
     'profile_id': string;
     /**
-    * Only these devices; default all active devices of the profile
+    * Only these devices; default all active devices of the profile. Inactive devices are never claimed
     */
     'device_keys'?: Array<string>;
 

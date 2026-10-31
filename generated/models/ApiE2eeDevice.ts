@@ -43,6 +43,10 @@ export class ApiE2eeDevice {
     */
     'last_seen_at': number | null;
     /**
+    * True when the device is active (not revoked, not expired) but has not been used for E2EE_DEVICE_INACTIVE_DAYS (30 by default). An inactive device does not count toward max_devices and its KeyPackages are not claimable, so new groups and adds skip it; it becomes active again when it is next used. Absent from responses that do not judge activity (treat as false)
+    */
+    'inactive'?: boolean;
+    /**
     * Unix milliseconds
     */
     'revoked_at': number | null;
@@ -112,6 +116,12 @@ export class ApiE2eeDevice {
             "baseName": "last_seen_at",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "inactive",
+            "baseName": "inactive",
+            "type": "boolean",
+            "format": ""
         },
         {
             "name": "revoked_at",

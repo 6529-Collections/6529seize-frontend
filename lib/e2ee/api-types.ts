@@ -32,6 +32,12 @@ export interface ApiE2eeDevice {
   platform: string;
   created_at: number;
   last_seen_at: number | null;
+  /**
+   * Active but unused for E2EE_DEVICE_INACTIVE_DAYS (30 by default): it does
+   * not count toward the device limit and is not claimable. Absent from
+   * older servers and from responses that do not judge activity.
+   */
+  inactive?: boolean;
   revoked_at: number | null;
   revocation: ApiE2eeDeviceRevocation | null;
 }

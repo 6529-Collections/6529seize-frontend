@@ -123,6 +123,11 @@ function E2eeDeviceRow({ device, onRevoke }: E2eeDeviceRowProps) {
             </span>
           ) : null}
           <VerifiedIndicator verified={device.verified} />
+          {isActive && device.inactive === true ? (
+            <span className="tw-rounded-full tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-text-iron-300">
+              {t(locale, "e2ee.devices.inactive")}
+            </span>
+          ) : null}
         </div>
         <DeviceDates device={device} />
       </div>
