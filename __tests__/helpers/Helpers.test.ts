@@ -10,6 +10,7 @@ import {
   getRandomColorWithSeed,
   numberWithCommas,
   numberWithCommasFromString,
+  parseEmojis,
   parseIpfsUrl,
   parseIpfsUrlToGateway,
   parseNftDescriptionToHtml,
@@ -320,5 +321,25 @@ describe("more helper utilities", () => {
 
     const { removeBaseEndpoint } = require("@/helpers/Helpers");
     expect(removeBaseEndpoint("https://api.example.com/path")).toBe("/path");
+  });
+});
+
+describe("parseEmojis", () => {
+  test("replaces U+ code point tokens with the emoji character", () => {
+    expect(parseEmojis("Cat U+1F431")).toBe("Cat \u{1F431}");
+  });
+
+  test("leaves code points that are not Unicode scalar values as written", () => {
+    expect(parseEmojis("U+110000")).toBe("U+110000");
+    expect(parseEmojis("U+D800")).toBe("U+D800");
+    // Over-long tokens stay whole, not a converted prefix plus leftover digits.
+    expect(parseEmojis("U+1000000")).toBe("U+1000000");
+    expect(parseEmojis("U+0001F431")).toBe("U+0001F431");
+  });
+
+  test("returns markup-like input as plain text", () => {
+    expect(parseEmojis('<img src=x onerror="alert(1)"> U+1F431')).toBe(
+      '<img src=x onerror="alert(1)"> \u{1F431}'
+    );
   });
 });
