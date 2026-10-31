@@ -105,6 +105,29 @@ describe("DropsListItemDeleteDropModal", () => {
     expect(rq.invalidateDrops).toHaveBeenCalled();
   });
 
+  it("shows no error when the delete was cancelled at the signing prompt", async () => {
+    const { SignedWriteCancelledError } = jest.requireActual(
+      "@/lib/device-signing/signing-decision"
+    );
+    const cancelled = new SignedWriteCancelledError();
+    useMutationMock.mockImplementationOnce((opts) => ({
+      mutateAsync: async () => {
+        opts.onError?.(cancelled);
+        opts.onSettled?.();
+        throw cancelled;
+      },
+    }));
+    const user = userEvent.setup();
+    renderModal();
+
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Delete" })).toBeEnabled()
+    );
+    expect(auth.setToast).not.toHaveBeenCalled();
+  });
+
   it("shows a recoverable error when deletion fails", async () => {
     const error = new Error("Delete failed");
     useMutationMock.mockImplementationOnce((opts) => ({

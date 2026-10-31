@@ -9,10 +9,10 @@ import {
   toBytes,
 } from "viem";
 import {
+  isAllowedGrantDomain,
   parseDeviceGrantMessage,
   parseSiweIssuedAtSeconds,
 } from "@/lib/device-signing/grant-message";
-import { isAllowedGrantDomain } from "@/lib/device-signing/verify-signed-events";
 import type { ApiE2eeDevice, ApiE2eeDeviceGrant } from "./api-types";
 import { isHex } from "./bytes";
 
@@ -29,6 +29,7 @@ export const E2EE_SALT = keccak256(
  * under the old value re-enroll (engine/enroll.ts).
  */
 export const E2EE_CIPHERSUITE = 0x004f;
+const ETHEREUM_MAINNET_CHAIN_ID = 1;
 const GRANT_LIFETIME_SECONDS = 15_552_000; // 180 days
 const GRANT_MAX_LIFETIME_SECONDS = 181 * 86_400;
 const CREDENTIAL_PREFIX = "6529-e2ee-v1";
@@ -157,6 +158,15 @@ export function parseCredentialIdentity(
   return { wallet, grantId };
 }
 
+/**
+ * How a grant was accepted, in the terms signed drops use (#4520):
+ * "eoa": the signature recovers to the wallet (verified);
+ * "eip1271": this client's EIP-1271 check on Ethereum mainnet returned the
+ * magic value (contract-verified);
+ * "server": a contract-wallet grant this client could not check
+ * (unverifiable), accepted only on the server's `verified_via` word as the
+ * documented D109 2.2 residual and never reported as verified.
+ */
 export type GrantVerifiedVia = "eoa" | "eip1271" | "server";
 
 export interface GrantVerification {
@@ -312,8 +322,19 @@ async function verifyLoginGrant(
   if (signer === wallet) {
     return { ok: true, verified: true, via: "eoa", reason: null };
   }
+  // As for signed drops, contract code is only read on Ethereum mainnet; a
+  // sign-in on another chain cannot be contract-verified (unverifiable).
+  if (parseDeviceGrantMessage(message)?.chainId !== ETHEREUM_MAINNET_CHAIN_ID) {
+    return unverifiable(device);
+  }
   return await verifyContractOrServer(device, options, wallet, grantId);
 }
+
+/** A contract-wallet grant this client cannot check: never verified. */
+const unverifiable = (device: ApiE2eeDevice): GrantVerification =>
+  device.verified_via === "eip1271"
+    ? { ok: true, verified: false, via: "server", reason: null }
+    : failed("bad-signature");
 
 async function verifyContractOrServer(
   device: ApiE2eeDevice,
@@ -330,10 +351,10 @@ async function verifyContractOrServer(
   if (contractResult === true) {
     return { ok: true, verified: true, via: "eip1271", reason: null };
   }
-  if (contractResult === null && device.verified_via === "eip1271") {
-    return { ok: true, verified: false, via: "server", reason: null };
-  }
-  return failed("bad-signature");
+  // null: no RPC, or the check threw. Unverifiable, never verified.
+  return contractResult === null
+    ? unverifiable(device)
+    : failed("bad-signature");
 }
 
 /**

@@ -6,6 +6,7 @@ import UserCICAndLevel, {
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { getTimeAgoShort } from "@/helpers/Helpers";
+import { WithDropAuthorSignedMarker } from "@/components/waves/drops/signature/DropAuthorSignedMarker";
 import type { ImageScale } from "@/helpers/image.helpers";
 import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
@@ -231,13 +232,17 @@ function EndedParticipationDropInner({
 
             {!isStackedTimestamp && (
               <p className="tw-m-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
-                {getTimeAgoShort(drop.created_at)}
+                <WithDropAuthorSignedMarker drop={drop}>
+                  {getTimeAgoShort(drop.created_at)}
+                </WithDropAuthorSignedMarker>
               </p>
             )}
           </div>
           {isStackedTimestamp && (
             <p className="tw-m-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
-              {getTimeAgoShort(drop.created_at)}
+              <WithDropAuthorSignedMarker drop={drop}>
+                {getTimeAgoShort(drop.created_at)}
+              </WithDropAuthorSignedMarker>
             </p>
           )}
         </div>

@@ -2,6 +2,7 @@
 
 import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
+import { WithDropAuthorSignedMarker } from "@/components/waves/drops/signature/DropAuthorSignedMarker";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 interface MemesQuickVoteDropHeaderProps {
@@ -23,7 +24,9 @@ export default function MemesQuickVoteDropHeader({
           </span>
           <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-iron-500 [&_p]:tw-mb-0">
             <span className="tw-text-xs tw-font-medium tw-leading-none">•</span>
-            <WaveDropTime timestamp={drop.created_at} />
+            <WithDropAuthorSignedMarker drop={drop}>
+              <WaveDropTime timestamp={drop.created_at} />
+            </WithDropAuthorSignedMarker>
           </span>
         </div>
         <p className="tw-mb-0 tw-truncate tw-text-[9px] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-widest tw-text-iron-500">

@@ -1,3 +1,4 @@
+import type { AppToastInput } from "@/components/utils/toast/AppToast";
 import { isDevAuthEnabled } from "@/config/devAuth";
 import {
   InvalidRoleStateError,
@@ -81,14 +82,19 @@ export function createAuthRequestActions({
   signMessage,
   signModalReason,
 }: CreateAuthRequestActionsParams): AuthRequestActions {
-  const getSignature = async ({
-    message,
-  }: {
-    message: string;
-  }): Promise<{
+  const signWithWallet = async (
+    {
+      message,
+    }: {
+      message: string;
+    },
+    showToast: (toast: AppToastInput) => void
+  ): Promise<{
     signature: string | null;
     userRejected: boolean;
     failureToastShown: boolean;
+    /** The wallet's error, for callers that classify failures. */
+    error?: unknown;
   }> => {
     if (!isActiveChainSupported()) {
       // AppKit already explains the unsupported-network state. Suppress the
@@ -106,21 +112,21 @@ export function createAuthRequestActions({
 
       if (result.error) {
         if (result.error instanceof ConnectionMismatchError) {
-          setToast({
+          showToast({
             message:
               "Wallet address mismatch. Disconnect and reconnect the correct wallet.",
             type: "error",
           });
           failureToastShown = true;
         } else if (result.error instanceof SigningProviderError) {
-          setToast({
+          showToast({
             message:
               "Wallet provider error. Reconnect your wallet and try again.",
             type: "error",
           });
           failureToastShown = true;
         } else if (result.error instanceof MobileSigningError) {
-          setToast({
+          showToast({
             type: "error",
             title: "Couldn't sign in with this wallet.",
             description: "Check your wallet and try again.",
@@ -134,10 +140,11 @@ export function createAuthRequestActions({
         signature: result.signature,
         userRejected: result.userRejected,
         failureToastShown,
+        error: result.error,
       };
     } catch (error) {
       logErrorSecurely("getSignature", error);
-      setToast({
+      showToast({
         type: "error",
         title: "Couldn't sign in with this wallet.",
         description: "Check your wallet and try again.",
@@ -147,9 +154,18 @@ export function createAuthRequestActions({
         signature: null,
         userRejected: false,
         failureToastShown: true,
+        error,
       };
     }
   };
+
+  // The signed-messages grant reports its own failures, so it can pass a
+  // different toast function.
+  const createGetSignature =
+    (showToast: (toast: AppToastInput) => void) =>
+    (params: { message: string }) =>
+      signWithWallet(params, showToast);
+  const getSignature = createGetSignature(setToast);
 
   const requestSignIn = createAuthRequestSignIn({
     getNonce: getAuthNonce,
@@ -628,14 +644,13 @@ export function createAuthRequestActions({
   const requestSignedMessagesGrant = createSignedMessagesGrantRequest({
     address,
     canAuthenticate:
-      !activeProfileProxy &&
-      enableWalletAuthentication &&
-      !isDevAuthEnabled(),
+      !activeProfileProxy && enableWalletAuthentication && !isDevAuthEnabled(),
     canSignActiveWallet,
+    createGetSignature,
     createSigningAuthRequestGuard: () =>
       createSigningAuthRequestGuard(createAuthRequestGuard({})),
+    getNonce: getAuthNonce,
     isActiveChainSupported,
-    requestSignIn,
     setAuthLoadingState,
     setToast,
   });
