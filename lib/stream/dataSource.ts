@@ -185,7 +185,7 @@ export interface EditionAuctionActions {
 /** Writes per sale kind; a new adapter adds one entry. */
 export interface SaleActionsByKind {
   readonly ENGLISH_AUCTION: EnglishAuctionActions;
-  readonly UNIFORM_EDITION_AUCTION: EditionAuctionActions;
+  readonly UNIFORM_AUCTION: EditionAuctionActions;
 }
 
 export interface FederatedDeployResult {

@@ -42,7 +42,7 @@ const SALE_KINDS_BY_STANDARD: Readonly<
   Record<TokenStandard, readonly KnownSaleKind[]>
 > = {
   ERC721: ["ENGLISH_AUCTION"],
-  ERC1155: ["UNIFORM_EDITION_AUCTION"],
+  ERC1155: ["UNIFORM_AUCTION"],
 };
 
 const STYLES: readonly ArtStyle[] = [

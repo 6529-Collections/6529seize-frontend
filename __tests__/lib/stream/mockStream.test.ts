@@ -260,7 +260,7 @@ describe("disputes", () => {
     expectOk(await english.withdrawBid(B, auction.saleId));
 
     const edition = work.linked.edition ?? "";
-    const editions = stream.actions.sale("UNIFORM_EDITION_AUCTION");
+    const editions = stream.actions.sale("UNIFORM_AUCTION");
     const disputed = await stream.dataSource.getEditionAuction(edition);
     expect([
       disputed?.phase,
@@ -294,6 +294,18 @@ describe("disputes", () => {
       86_400
     );
   });
+
+  it("stays paused through its seventh day, then resumes by itself", async () => {
+    const stream = world();
+    const work = await workTitled(stream, "Glass Orchard");
+    const expiresAt = (await auctionOf(stream, work.key)).pause.expiresAt ?? 0;
+    stream.dev.advance(expiresAt - stream.dataSource.now());
+    expect((await auctionOf(stream, work.key)).state).toBe("PAUSED");
+    stream.dev.advance(1);
+    const resumed = await auctionOf(stream, work.key);
+    expect(resumed.state).toBe("ACTIVE");
+    expect(resumed.endTime).toBeGreaterThanOrEqual(expiresAt + 86_400);
+  });
 });
 
 describe("the uniform-price edition auction", () => {
@@ -308,7 +320,7 @@ describe("the uniform-price edition auction", () => {
     expect(auction?.clearing.price).toBe(eth("0.0511"));
     expect(auction?.clearing.revenue).toBe(eth("4.088"));
     expect(auction?.clearing.networkShare).toBe(eth("1.022"));
-    const editions = stream.actions.sale("UNIFORM_EDITION_AUCTION");
+    const editions = stream.actions.sale("UNIFORM_AUCTION");
     expectOk(await editions.settle(A, edition));
     const bids = await stream.dataSource.editionBids(edition);
     let minted = 0;
@@ -387,9 +399,7 @@ describe("the uniform-price edition auction", () => {
       (auction?.times.editionEnd ?? 0) - stream.dataSource.now() - 60
     );
     expectOk(
-      await stream.actions
-        .sale("UNIFORM_EDITION_AUCTION")
-        .bid(A, edition, 90, 1)
+      await stream.actions.sale("UNIFORM_AUCTION").bid(A, edition, 90, 1)
     );
     auction = await stream.dataSource.getEditionAuction(edition);
     expect(auction?.times.editionEnd).toBe(stream.dataSource.now() + 5 * 60);
@@ -403,7 +413,7 @@ describe("the uniform-price edition auction", () => {
     const stream = world();
     const work = await workTitled(stream, "Copper Rain");
     const edition = work.linked.edition ?? "";
-    const editions = stream.actions.sale("UNIFORM_EDITION_AUCTION");
+    const editions = stream.actions.sale("UNIFORM_AUCTION");
     expect((await stream.dataSource.getEditionAuction(edition))?.phase).toBe(
       "opening"
     );
@@ -454,7 +464,7 @@ describe("the uniform-price edition auction", () => {
     const [mine] = await stream.dataSource.editionBids(edition, A);
     expectRevert(
       await stream.actions
-        .sale("UNIFORM_EDITION_AUCTION")
+        .sale("UNIFORM_AUCTION")
         .withdraw(A, edition, mine?.bidId ?? 0),
       "WithdrawalsClosed"
     );

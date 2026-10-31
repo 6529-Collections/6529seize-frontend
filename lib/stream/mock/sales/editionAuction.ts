@@ -125,7 +125,7 @@ export function prepareEditionAuction(
   };
   engine.state.editionAuctions.set(edition, auction);
   token.sale = {
-    kind: "UNIFORM_EDITION_AUCTION",
+    kind: "UNIFORM_AUCTION",
     adapter: engine.contracts.editionAuction,
     saleId: auction.saleId,
   };

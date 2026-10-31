@@ -46,8 +46,10 @@ describe("1/1 English auction rules (IEnglishAuction)", () => {
     const end = 100_000;
     expect(endAfterBid(end, end - 16 * 60)).toBe(end);
     expect(endAfterBid(end, end - 10 * 60)).toBe(end + 5 * 60);
-    expect(isInAntiSnipeWindow(end, end - 15 * 60)).toBe(true);
-    expect(isInAntiSnipeWindow(end, end - 15 * 60 - 1)).toBe(false);
+    // As the contract: `end - now < window`, so exactly 15 minutes out does not extend.
+    expect(endAfterBid(end, end - 15 * 60)).toBe(end);
+    expect(isInAntiSnipeWindow(end, end - 15 * 60 + 1)).toBe(true);
+    expect(isInAntiSnipeWindow(end, end - 15 * 60)).toBe(false);
   });
 
   it("resumes a paused auction for the longest of remaining time, 24 hours and the window", () => {

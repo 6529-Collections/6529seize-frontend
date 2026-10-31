@@ -76,13 +76,16 @@ export function endAfterBid(
   return extended > endTime ? extended : endTime;
 }
 
-/** Whether a bid at `now` lands in the anti-snipe window. */
+/**
+ * Whether a bid at `now` moves the end: the contract extends when
+ * `endTime - now < extensionWindow`, so a bid exactly 15 minutes out does not.
+ */
 export function isInAntiSnipeWindow(
   endTime: UnixSeconds,
   now: UnixSeconds,
   rules: EnglishAuctionRules = LAUNCH_RULES
 ): boolean {
-  return now < endTime && endTime - now <= rules.extensionWindow;
+  return now < endTime && endTime - now < rules.extensionWindow;
 }
 
 /**

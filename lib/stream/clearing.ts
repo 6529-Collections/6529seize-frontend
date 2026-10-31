@@ -1,10 +1,11 @@
 import type { Wei } from "@/lib/stream/types";
 
 /**
- * Uniform-price clearing (D138), ported exactly from the D138 reference model
- * (`model/ref.py`). The contract (`UniformClearing`), its views and this port
- * must agree on every book; `__tests__/lib/stream/clearing.test.ts` checks the
- * port against the model's vectors and against `bruteClear`.
+ * Uniform-price clearing (D138), ported exactly from the D138 reference model,
+ * now `tools/edition_auction_ref.py` in 6529-works with its golden vectors in
+ * `test/fixtures/edition-auction/`. The contract, its views and this port must
+ * agree on every book; `__tests__/lib/stream/clearing.test.ts` checks the port
+ * against the model's vectors and against `bruteClear`.
  *
  * Definition, per unit: a bid of q units is q unit bids. P(k) is the k-th
  * highest unit price, revenue(k) = k·P(k) for k up to the cap, R* the best

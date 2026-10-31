@@ -106,7 +106,7 @@ function EditionAuctionSummary({
   sale,
   locale,
   now,
-}: SalePanelProps<"UNIFORM_EDITION_AUCTION">) {
+}: SalePanelProps<"UNIFORM_AUCTION">) {
   const auction: EditionAuction = sale;
   const { clearing } = auction;
   return (
@@ -160,7 +160,7 @@ const SALE_PANELS: {
   readonly [K in KnownSaleKind]: ComponentType<SalePanelProps<K>>;
 } = {
   ENGLISH_AUCTION: EnglishAuctionSummary,
-  UNIFORM_EDITION_AUCTION: EditionAuctionSummary,
+  UNIFORM_AUCTION: EditionAuctionSummary,
 };
 
 /** Reads a sale of any kind and renders its registered panel. */
@@ -191,9 +191,9 @@ export function SalePanel({
           now={now}
         />
       );
-    case "UNIFORM_EDITION_AUCTION":
+    case "UNIFORM_AUCTION":
       return (
-        <SALE_PANELS.UNIFORM_EDITION_AUCTION
+        <SALE_PANELS.UNIFORM_AUCTION
           sale={data.sale}
           locale={locale}
           now={now}

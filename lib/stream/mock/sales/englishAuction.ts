@@ -36,7 +36,10 @@ export function findEnglishAuction(
   return auction;
 }
 
-/** A pause ends by itself after 7 days; the auction resumes to its resumed end. */
+/**
+ * A pause ends by itself after 7 days; the auction resumes to its resumed end.
+ * As the contract, it is still PAUSED through `pausedAt + MAX_PAUSE` inclusive.
+ */
 export function syncPauseExpiry(
   engine: MockStreamEngine,
   auction: MockEnglishAuction
@@ -45,7 +48,7 @@ export function syncPauseExpiry(
     return;
   }
   const expiry = pauseExpiry(auction.pausedAt);
-  if (engine.now() < expiry) {
+  if (engine.now() <= expiry) {
     return;
   }
   auction.endTime = resumedEnd(auction, expiry);
@@ -190,13 +193,14 @@ function settleUnbid(engine: MockStreamEngine, auction: MockEnglishAuction) {
   }
   const artist = engine.state.artists.get(token.artistId);
   // While a recovery override is pending nobody may act as the artist, and
-  // settlement waits for its outcome (IDENTITY-1).
+  // settlement waits for its outcome (IDENTITY-1). The contract then reverts
+  // with `InvalidRecipient(address(0))`: the token reports no creator.
   const restrained =
     artist?.restrainedUntil !== undefined &&
     artist.restrainedUntil !== null &&
     engine.now() < artist.restrainedUntil;
   if (artist === undefined || restrained) {
-    revert("ArtistRestrained", { artistId: token.artistId });
+    revert("InvalidRecipient", { recipient: ZERO_ADDRESS });
   }
   token.owner = artist.authority;
   engine.record(auction.work, {

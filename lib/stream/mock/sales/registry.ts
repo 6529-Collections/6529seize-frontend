@@ -39,8 +39,8 @@ const englishAuctionAdapter: MockSaleAdapter<"ENGLISH_AUCTION"> = {
   actions: createEnglishActions,
 };
 
-const editionAuctionAdapter: MockSaleAdapter<"UNIFORM_EDITION_AUCTION"> = {
-  kind: "UNIFORM_EDITION_AUCTION",
+const editionAuctionAdapter: MockSaleAdapter<"UNIFORM_AUCTION"> = {
+  kind: "UNIFORM_AUCTION",
   read(engine, saleId) {
     for (const auction of engine.state.editionAuctions.values()) {
       if (auction.saleId === saleId) {
@@ -56,7 +56,7 @@ export const MOCK_SALE_ADAPTERS: {
   readonly [K in KnownSaleKind]: MockSaleAdapter<K>;
 } = {
   ENGLISH_AUCTION: englishAuctionAdapter,
-  UNIFORM_EDITION_AUCTION: editionAuctionAdapter,
+  UNIFORM_AUCTION: editionAuctionAdapter,
 };
 
 function isKnownSaleKind(kind: string): kind is KnownSaleKind {
@@ -73,11 +73,8 @@ function readKnown(
       const sale = MOCK_SALE_ADAPTERS.ENGLISH_AUCTION.read(engine, ref.saleId);
       return sale === null ? null : { kind, ref, sale };
     }
-    case "UNIFORM_EDITION_AUCTION": {
-      const sale = MOCK_SALE_ADAPTERS.UNIFORM_EDITION_AUCTION.read(
-        engine,
-        ref.saleId
-      );
+    case "UNIFORM_AUCTION": {
+      const sale = MOCK_SALE_ADAPTERS.UNIFORM_AUCTION.read(engine, ref.saleId);
       return sale === null ? null : { kind, ref, sale };
     }
   }

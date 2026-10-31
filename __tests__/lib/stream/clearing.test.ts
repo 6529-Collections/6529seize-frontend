@@ -29,7 +29,8 @@ import {
 } from "@/lib/stream/ladder";
 
 /**
- * Parity with the D138 reference model (`model/ref.py`). The fixture holds the
+ * Parity with the D138 reference model (now 6529-works
+ * `tools/edition_auction_ref.py`). The fixture holds the
  * model's own outputs: its E192 table, the 336-step ladder, 400 random books
  * cleared by the model (checked there against brute force), and 160 FIFO books
  * replayed from bids and raises.

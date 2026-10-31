@@ -35,8 +35,7 @@ export class MockStreamActions implements StreamActions {
   constructor(private readonly engine: MockStreamEngine) {
     this.saleActions = {
       ENGLISH_AUCTION: MOCK_SALE_ADAPTERS.ENGLISH_AUCTION.actions(engine),
-      UNIFORM_EDITION_AUCTION:
-        MOCK_SALE_ADAPTERS.UNIFORM_EDITION_AUCTION.actions(engine),
+      UNIFORM_AUCTION: MOCK_SALE_ADAPTERS.UNIFORM_AUCTION.actions(engine),
     };
   }
 

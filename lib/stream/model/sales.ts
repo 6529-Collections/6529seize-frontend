@@ -15,8 +15,10 @@ import type {
 
 /**
  * Sale methods the UI knows, by the adapter's `saleKind()` label (on-chain the
- * value is keccak256 of the label, as in `SaleTypes.SaleKind`). Every contract
- * starts with the two auctions; governance can admit another adapter later.
+ * value is keccak256 of the label, as in `SaleTypes.SaleKind`: `ENGLISH_AUCTION`
+ * and `UNIFORM_AUCTION`, so a label must match the library's exactly). Every
+ * contract starts with the two auctions; governance can admit another adapter
+ * later.
  *
  * Adding a method (for example a fixed-price sale):
  * 1. add its label here and its view to `SaleViewByKind`;
@@ -24,7 +26,7 @@ import type {
  * 3. add one mock adapter under `lib/stream/mock/sales/` and register it;
  * 4. add one panel to `components/stream/sales/salePanels.tsx`.
  */
-export type KnownSaleKind = "ENGLISH_AUCTION" | "UNIFORM_EDITION_AUCTION";
+export type KnownSaleKind = "ENGLISH_AUCTION" | "UNIFORM_AUCTION";
 
 /** A sale kind as read from a contract: known, or one this UI version does not render. */
 export type SaleKindId = KnownSaleKind | (string & Record<never, never>);
@@ -39,7 +41,7 @@ export interface SaleRef {
 /** The read model per sale kind. */
 export interface SaleViewByKind {
   readonly ENGLISH_AUCTION: OneOfOneAuction;
-  readonly UNIFORM_EDITION_AUCTION: EditionAuction;
+  readonly UNIFORM_AUCTION: EditionAuction;
 }
 
 /** A sale of any kind, or one this UI version cannot render. */
