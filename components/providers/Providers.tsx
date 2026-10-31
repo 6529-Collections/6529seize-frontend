@@ -11,9 +11,9 @@ import Auth from "@/components/auth/Auth";
 import AuthLaunchTimingReporter from "@/components/auth/AuthLaunchTimingReporter";
 import MarketActivityTracker from "@/components/collect/MarketActivityTracker";
 import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
+import { NftPurchasingServerRenderProvider } from "@/components/common/NftPurchasingServerRender";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
 import E2eeProvider from "@/components/e2ee/E2eeProvider";
-import { EULAConsentProvider } from "@/components/eula/EULAConsentContext";
 import { IpfsProvider } from "@/components/ipfs/IPFSContext";
 import QuickDirectMessagesGate from "@/components/messages/quick-dms/QuickDirectMessagesGate";
 import { NotificationsProvider } from "@/components/notifications/NotificationsContext";
@@ -35,6 +35,7 @@ import { SeizeSettingsMode } from "@/types/enums";
 import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import { ViewProvider } from "../navigation/ViewContext";
 import CapacitorSetup from "./CapacitorSetup";
+import EULAConsentStartup from "./EULAConsentStartup";
 import IpfsImageSetup from "./IpfsImageSetup";
 import LocaleMessagesGate from "./LocaleMessagesGate";
 import MixpanelSetup from "./MixpanelSetup";
@@ -51,6 +52,7 @@ export default function Providers({
   settingsMode = SeizeSettingsMode.REMOTE,
   initialIsIos = false,
   initialEulaConsentVersion,
+  canServerRenderNftPurchasing = false,
 }: {
   readonly children: React.ReactNode;
   readonly enableVersionCheck?: boolean;
@@ -60,6 +62,7 @@ export default function Providers({
   readonly settingsMode?: SeizeSettingsMode;
   readonly initialIsIos?: boolean;
   readonly initialEulaConsentVersion?: string | undefined;
+  readonly canServerRenderNftPurchasing?: boolean;
 }) {
   const sharedProviders = (
     <TitleProvider>
@@ -144,14 +147,20 @@ export default function Providers({
     <>
       <DocumentLanguage />
       <CapacitorSetup />
-      <EULAConsentProvider
+      <EULAConsentStartup
         initialIsIos={initialIsIos}
         initialConsentVersion={initialEulaConsentVersion}
       >
         <EditingDropProvider>
-          <ActiveGroupProvider>{appProviders}</ActiveGroupProvider>
+          <ActiveGroupProvider>
+            <NftPurchasingServerRenderProvider
+              enabled={canServerRenderNftPurchasing}
+            >
+              {appProviders}
+            </NftPurchasingServerRenderProvider>
+          </ActiveGroupProvider>
         </EditingDropProvider>
-      </EULAConsentProvider>
+      </EULAConsentStartup>
     </>
   );
 }
