@@ -28,7 +28,6 @@ import WaveDropReactions from "./WaveDropReactions";
 import {
   GROUPED_TIMESTAMP_SWIPE_ACTIVATION_PX,
   GROUPED_TIMESTAMP_SWIPE_AXIS_RATIO,
-  GroupedDropTimestamp,
   type TimestampSwipeStart,
   clampGroupedTimestampSwipeOffset,
   clearLongPressTimeout,
@@ -60,6 +59,7 @@ import type { WaveDropProps } from "./WaveDrop.types";
 import { ModerationRejectedDeliveryStatus } from "./ModerationRejectedDeliveryStatus";
 import { useWaveDropModerationPresentation } from "./useWaveDropModerationPresentation";
 import { isDropAuthorSigned } from "./signature/DropAuthorSignedMarker";
+import GroupedDropTimestamp from "./GroupedDropTimestamp";
 
 const WaveDropInner = ({
   drop,

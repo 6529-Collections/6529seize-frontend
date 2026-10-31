@@ -40,7 +40,7 @@ function DropAuthorSignedMarkerButton({ drop }: { readonly drop: MarkedDrop }) {
         type="button"
         aria-label={label}
         aria-haspopup="dialog"
-        data-tooltip-id={showTooltip ? tooltipId : undefined}
+        {...(showTooltip && { "data-tooltip-id": tooltipId })}
         onClick={(event) => {
           event.preventDefault();
           event.stopPropagation();
