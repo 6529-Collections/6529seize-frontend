@@ -476,13 +476,9 @@ export default function MyStreamWaveTabsHeader({
             waveScoreLearnMoreHref={waveScoreLearnMoreHref}
             isDirectMessage={isDirectMessage}
           />
-          {/* Plaintext DMs (D109): quiet label + start an encrypted chat. */}
-          {isDirectMessage ? (
-            <PlaintextDmEncryptionNotice
-              wave={wave}
-              variant={isCompact ? "icon" : "inline"}
-            />
-          ) : null}
+          {/* Plaintext DMs (D109): quiet label + start an encrypted chat.
+              Renders nothing for other waves or with the flag off. */}
+          <PlaintextDmEncryptionNotice wave={wave} compact={isCompact} />
         </div>
         <div className={actionsClassName}>
           <WaveJoinCta wave={wave} tooltipId={headerActionsTooltipId} />

@@ -143,4 +143,20 @@ describe("PlaintextDmEncryptionNotice", () => {
       })
     ).toBeInTheDocument();
   });
+
+  it("uses the icon in compact headers and nothing for other waves", () => {
+    const { container, rerender } = render(
+      <PlaintextDmEncryptionNotice wave={publicWave} compact />
+    );
+    expect(container).toBeEmptyDOMElement();
+    rerender(<PlaintextDmEncryptionNotice wave={dmWave} compact />);
+    expect(
+      screen.getByRole("button", {
+        name: "Not end-to-end encrypted. Start an encrypted chat with the same people",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Start encrypted chat" })
+    ).not.toBeInTheDocument();
+  });
 });
