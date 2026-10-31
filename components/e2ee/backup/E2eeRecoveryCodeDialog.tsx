@@ -66,6 +66,8 @@ export function E2eeRecoveryCodeDialog({
   };
 
   const copy = async () => {
+    // Clear first so a repeated identical status is announced again.
+    setCopyKey(null);
     try {
       await navigator.clipboard.writeText(prepared.code);
       setCopyKey("e2ee.backup.code.copied");

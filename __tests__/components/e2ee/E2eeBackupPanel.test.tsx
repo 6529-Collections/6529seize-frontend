@@ -172,4 +172,19 @@ describe("E2eeBackupPanel", () => {
     await waitFor(() => expect(manager.turnOff).toHaveBeenCalledTimes(1));
     expect(await screen.findByText(/Backup is off/)).toBeInTheDocument();
   });
+  it.each([
+    ["E2EE_BACKUP_QUOTA", "Your backup storage is full."],
+    ["E2EE_RATE_LIMITED", "Too many backup requests. Try again later."],
+  ] as const)(
+    "explains a background %s failure with its specific copy",
+    (lastError, copy) => {
+      renderPanel(
+        fakeManager(snapshot({ phase: "on", lastBackupAt: 2000, lastError }))
+      );
+      expect(screen.getByRole("alert")).toHaveTextContent(copy);
+      expect(screen.getByRole("alert")).not.toHaveTextContent(
+        "Something went wrong"
+      );
+    }
+  );
 });

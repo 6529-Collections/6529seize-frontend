@@ -11,7 +11,12 @@ import {
   sealChunk,
   sealEnvelope,
 } from "./crypto";
-import { BackupError, backupErrorCode } from "./errors";
+import {
+  BackupError,
+  type BackupFailureCode,
+  backupErrorCode,
+  toBackupError,
+} from "./errors";
 import {
   type BackupHistory,
   type BackupSegment,
@@ -74,7 +79,7 @@ export interface E2eeBackupSnapshot {
   /** The first full upload (or a replacement) has not finished yet. */
   readonly uploading: boolean;
   /** Last failure code of a background run (UI maps it to copy). */
-  readonly lastError: string | null;
+  readonly lastError: BackupFailureCode | null;
 }
 
 export interface PreparedBackup {
@@ -231,7 +236,7 @@ export class E2eeBackupManager {
       } catch (error) {
         this.update({
           phase: "error",
-          lastError: backupErrorCode(error) ?? "E2EE_BACKUP_FAILED",
+          lastError: backupErrorCode(error),
         });
       }
     });
@@ -328,12 +333,12 @@ export class E2eeBackupManager {
       try {
         await this.runIncremental();
       } catch (error) {
-        const code = backupErrorCode(error) ?? "E2EE_BACKUP_FAILED";
-        this.update({ lastError: code });
-        if (code !== "E2EE_BACKUP_REPLACED") {
+        const failure = toBackupError(error);
+        this.update({ lastError: failure.code });
+        if (failure.code !== "E2EE_BACKUP_REPLACED") {
           this.schedule(RETRY_MS);
         }
-        throw error;
+        throw failure;
       }
     });
   }
@@ -404,7 +409,8 @@ export class E2eeBackupManager {
         this.schedule(0);
       }
       const status = await this.deps.api.getStatus();
-      if (status.backup?.backup_id !== local.backupId) {
+      const active = status.backup;
+      if (active?.backup_id !== local.backupId) {
         // Our generation is gone: turned off or replaced on another device.
         await this.deps.state.delete(this.deps.profileId);
         this.local = null;
@@ -418,8 +424,8 @@ export class E2eeBackupManager {
         lastError: null,
         usedBytes: status.used_bytes,
         quotaBytes: status.quota_bytes,
-        backupCreatedAt: status.backup.created_at,
-        backupUpdatedAt: status.backup.updated_at,
+        backupCreatedAt: active.created_at,
+        backupUpdatedAt: active.updated_at,
       });
     } finally {
       this.update({ busy: false });
@@ -551,7 +557,10 @@ export class E2eeBackupManager {
   }
 }
 
-function phaseOf(connected: boolean, serverHasBackup: boolean): E2eeBackupPhase {
+function phaseOf(
+  connected: boolean,
+  serverHasBackup: boolean
+): E2eeBackupPhase {
   if (connected) {
     return "on";
   }
