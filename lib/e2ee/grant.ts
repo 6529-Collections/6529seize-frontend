@@ -10,7 +10,6 @@ import {
 } from "viem";
 import { getNodeEnv } from "@/config/env";
 import {
-  isAllowedGrantDomain,
   parseDeviceGrantMessage,
   parseSiweIssuedAtSeconds,
 } from "@/lib/device-signing/grant-message";
