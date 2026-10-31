@@ -633,6 +633,9 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
   test("keeps Native Collected page counts and pagination readable", async ({
     page,
   }) => {
+    // The initial load and both page changes each get the full data budget
+    // (RESPONSE_TIMEOUT_MS), which together can exceed the default test timeout.
+    test.setTimeout(120000);
     await page.setViewportSize({ width: 390, height: 844 });
     await gotoReady(
       page,
