@@ -11,6 +11,7 @@ import type { ReactNode } from "react";
 import type { DropTimestampLayout } from "../drop.types";
 import { DropAuthorBadges } from "../DropAuthorBadges";
 import WaveDropTime from "../time/WaveDropTime";
+import { WithDropAuthorSignedMarker } from "../signature/DropAuthorSignedMarker";
 import WinnerDropBadge from "../winner/WinnerDropBadge";
 import { AnonymousAuthorName } from "../AnonymousDropAuthor";
 
@@ -90,9 +91,17 @@ export default function ParticipationDropHeader({
           {!isStackedTimestamp && (
             <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></div>
           )}
-          {!isStackedTimestamp && <WaveDropTime timestamp={drop.created_at} />}
+          {!isStackedTimestamp && (
+            <WithDropAuthorSignedMarker drop={drop}>
+              <WaveDropTime timestamp={drop.created_at} />
+            </WithDropAuthorSignedMarker>
+          )}
         </div>
-        {isStackedTimestamp && <WaveDropTime timestamp={drop.created_at} />}
+        {isStackedTimestamp && (
+          <WithDropAuthorSignedMarker drop={drop}>
+            <WaveDropTime timestamp={drop.created_at} />
+          </WithDropAuthorSignedMarker>
+        )}
       </div>
       {drop.competition_id && drop.competition_title && (
         <Link
