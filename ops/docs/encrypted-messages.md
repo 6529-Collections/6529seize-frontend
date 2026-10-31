@@ -149,8 +149,11 @@ hybrid post-quantum key exchange) and has **Mute on this device**.
 your encrypted messages, marks **This device**, and shows each device's
 platform, when it was added, last seen and when it expires, and whether its
 wallet signature was verified on this device. You can rename this device and
-revoke any device, including this one. A profile can have up to 10 active
-devices; at the limit, revoke one before turning on a new device.
+revoke any device, including this one. A new device is named after its
+browser or app and OS family (for example "Chrome on Windows" or "6529 app on
+iPhone"); devices added earlier keep their name. A profile can have up to 10
+active devices; at the limit, the new device lists the profile's devices and
+asks you to revoke one from a device you already use, then turn it on.
 
 When another device of yours is turned on, your other devices show which
 device was added and when, that it can read your encrypted messages, and
