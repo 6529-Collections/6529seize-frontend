@@ -295,7 +295,7 @@ describe("the overview", () => {
     const index = screen.getByRole("list", {
       name: "The pages of this chapter",
     });
-    expect(within(index).getAllByRole("link")).toHaveLength(9);
+    expect(within(index).getAllByRole("link")).toHaveLength(10);
   });
 
   it("shows the network's distribution when the owner's flag is on", () => {
@@ -403,6 +403,7 @@ describe("how we know, on the overview", () => {
       "/network/tdh/consolidation",
       "/network/tdh/verification",
       "/network/tdh/formal",
+      "/network/tdh/proofs",
       "/network/tdh/specification",
       "/network/tdh/implementations",
       "/network/tdh/consolidation/design",

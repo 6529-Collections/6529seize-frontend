@@ -63,8 +63,9 @@ describe("the hub, first version", () => {
     expect(panel).toHaveTextContent(
       "10,273 of 10,273 identities: 6529.io's TDH equals two separately written recomputations, in each of the 5 results since Oct 14."
     );
+    // The theorem counts are the bundled manifest's, read through the facts.
     expect(panel).toHaveTextContent(
-      "78 Lean theorems about the rules, with 11 earlier claims shown false and kept on record."
+      `${book.num("manifest.proved").toLocaleString("en-US")} Lean theorems about the rules, with ${book.num("manifest.shownFalse")} earlier claims shown false and kept on record.`
     );
     expect(panel).toHaveTextContent(
       "program A ran inside SP1, and mainnet's SP1 verifier accepts its proof in a read-only call. Proof B is not done."
@@ -140,7 +141,7 @@ describe("the hub, first version", () => {
       "None yet."
     );
     expect(container.querySelector("[data-ex-hwk]")).toHaveTextContent(
-      "through D142"
+      `through ${book.text("rules.newestDecision")}`
     );
   });
 });
