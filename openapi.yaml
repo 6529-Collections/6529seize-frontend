@@ -29526,9 +29526,9 @@ components:
           description: >-
             True when the drop's current content is the body of an author's
             device signed create or edit event, the same state as a non-null
-            current_event_id from GET /drops/{dropId}/signed-events. Absent or
-            false otherwise, and always false or absent when the viewer cannot
-            see the drop's content or author.
+            current_event_id from GET /drops/{dropId}/signed-events. False
+            otherwise, including when the viewer cannot see the drop's content
+            or its author is anonymous. Treat a missing value as false.
         reactions:
           type: array
           items:
@@ -30265,9 +30265,9 @@ components:
           description: >-
             True when the drop's current content is the body of an author's
             device signed create or edit event, the same state as a non-null
-            current_event_id from GET /drops/{dropId}/signed-events. Absent or
-            false otherwise, and always false or absent when the viewer cannot
-            see the drop's content or author.
+            current_event_id from GET /drops/{dropId}/signed-events. False
+            otherwise, including when the viewer cannot see the drop's content
+            or its author is anonymous. Treat a missing value as false.
         hide_link_preview:
           type: boolean
         title:
@@ -30660,9 +30660,9 @@ components:
           description: >-
             True when the drop's current content is the body of an author's
             device signed create or edit event, the same state as a non-null
-            current_event_id from GET /drops/{dropId}/signed-events. Absent or
-            false otherwise, and always false or absent when the viewer cannot
-            see the drop's content or author.
+            current_event_id from GET /drops/{dropId}/signed-events. False
+            otherwise, including when the viewer cannot see the drop's content
+            or its author is anonymous. Treat a missing value as false.
         reactions:
           type: array
           items:
