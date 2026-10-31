@@ -4,7 +4,6 @@ import { useAuth } from "@/components/auth/Auth";
 import type { useEmoji } from "@/contexts/EmojiContext";
 import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
-import type { ApiAddReactionToDropRequest } from "@/generated/models/ApiAddReactionToDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import { ChatRestriction } from "@/hooks/useDropPriviledges";
@@ -25,7 +24,7 @@ import {
 } from "@/hooks/drops/useDropReactionAuthRecovery";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
-import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
+import { sendDropReaction } from "@/services/api/signed-drop-writes";
 import { useDropReactionRecovery } from "@/hooks/drops/useDropReactionRecovery";
 import { t } from "@/i18n/messages";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
@@ -647,30 +646,11 @@ function WaveDropReaction({
     try {
       await enqueueDropReactionRequest(drop.id, async (signal) => {
         if (!owner.isCurrent()) return;
-        const body = { reaction: reaction.reaction };
-        if (selected) {
-          recordReactionRequestSent(mutation, {
-            endpoint,
-            method: "DELETE",
-          });
-          await commonApiDelete({
-            endpoint,
-            errorMode: "structured",
-            signal,
-          });
-          return;
-        }
-
-        recordReactionRequestSent(mutation, {
-          endpoint,
-          method: "POST",
-        });
-        await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
-          endpoint,
-          body,
-          errorMode: "structured",
-          signal,
-        });
+        recordReactionRequestSent(mutation, { endpoint, method });
+        await sendDropReaction(
+          { dropId: drop.id, waveId, reaction: intendedReaction },
+          { errorMode: "structured", signal }
+        );
       });
       const result = recordReactionRequestSucceeded(mutation);
       if (result.isLatestMutation && isCurrent()) {

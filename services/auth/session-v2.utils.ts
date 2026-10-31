@@ -39,34 +39,13 @@ import {
   type AuthSessionClientType,
   type SessionRefreshEntry,
 } from "./session-refresh-coordination.utils";
-
-type RefreshTokenSessionClientType = Exclude<AuthSessionClientType, "web">;
-
-interface SessionLoginRequest {
-  readonly client_type: AuthSessionClientType;
-  readonly server_signature: string;
-  readonly client_signature: string;
-  readonly client_address: string;
-  readonly role?: string | null;
-}
-
-interface SessionWebResponse {
-  readonly address: string;
-  readonly role: string | null;
-  readonly access_token: string;
-  readonly access_token_expires_at: string;
-  readonly client_type: "web";
-}
-
-interface SessionNativeResponse {
-  readonly address: string;
-  readonly role: string | null;
-  readonly access_token: string;
-  readonly access_token_expires_at: string;
-  readonly client_type: RefreshTokenSessionClientType;
-  readonly native_refresh_token: string;
-  readonly refresh_token_expires_at: string;
-}
+import type {
+  RefreshTokenSessionClientType,
+  SessionLoginRequest,
+  SessionNativeResponse,
+  SessionNonceDeviceGrantParams,
+  SessionWebResponse,
+} from "./session-v2.types";
 
 type SessionLoginResponse = SessionWebResponse | SessionNativeResponse;
 type SessionRefreshResponse = SessionWebResponse | SessionNativeResponse;
@@ -258,22 +237,29 @@ async function rollbackUnpersistedSession(
 
 export async function getSessionNonce({
   signerAddress,
+  deviceGrant,
 }: {
   readonly signerAddress: string;
+  readonly deviceGrant?: SessionNonceDeviceGrantParams | undefined;
 }): Promise<ApiSessionNonceResponse> {
+  const clientType = getSessionClientType();
+  // Only web (SIWE) challenges can carry a device grant.
+  const deviceGrantParams =
+    deviceGrant && clientType === "web" ? deviceGrant : {};
   return await commonApiFetch<
     ApiSessionNonceResponse,
     {
       readonly signer_address: string;
       readonly client_type: AuthSessionClientType;
       readonly chain_id: string;
-    }
+    } & Partial<SessionNonceDeviceGrantParams>
   >({
     endpoint: "auth/session-nonce",
     params: {
       signer_address: signerAddress,
-      client_type: getSessionClientType(),
+      client_type: clientType,
       chain_id: "1",
+      ...deviceGrantParams,
     },
   });
 }
@@ -283,13 +269,16 @@ export async function loginWithSessionV2({
   clientSignature,
   signerAddress,
   role,
+  deviceLabel,
 }: {
   readonly serverSignature: string;
   readonly clientSignature: string;
   readonly signerAddress: string;
   readonly role: string | null;
+  readonly deviceLabel?: string | undefined;
 }): Promise<SessionLoginResponse> {
   const roleBody = role === null ? {} : { role };
+  const deviceLabelBody = deviceLabel ? { device_label: deviceLabel } : {};
   const response = await commonApiPost<
     SessionLoginRequest,
     SessionLoginResponse
@@ -301,6 +290,7 @@ export async function loginWithSessionV2({
       client_signature: clientSignature,
       client_address: signerAddress,
       ...roleBody,
+      ...deviceLabelBody,
     },
     credentials: getSessionCredentialsMode(),
   });
