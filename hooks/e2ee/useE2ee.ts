@@ -17,6 +17,7 @@ import type {
   E2eeEngineStatus,
   E2eeMessage,
 } from "@/lib/e2ee/types";
+import { useMutedE2eeChats } from "@/components/e2ee/e2eeMutedChats";
 
 /**
  * UI status: provider availability first, then engine status.
@@ -44,6 +45,8 @@ export interface UseE2eeResult {
   readonly thisDevice: E2eeDeviceInfo | null;
   readonly devices: readonly E2eeDeviceInfo[];
   readonly conversations: readonly E2eeConversation[];
+  /** Server switch; attaching is hidden while false (and until it is known). */
+  readonly attachmentsEnabled: boolean;
   readonly restart: () => void;
 }
 
@@ -97,6 +100,7 @@ export function useE2ee(): UseE2eeResult {
       thisDevice: snapshot?.thisDevice ?? null,
       devices: snapshot?.devices ?? EMPTY_DEVICES,
       conversations: snapshot?.conversations ?? EMPTY_CONVERSATIONS,
+      attachmentsEnabled: snapshot?.attachmentsEnabled ?? false,
       restart: context.restart,
     }),
     [context, snapshot]
@@ -137,16 +141,18 @@ interface E2eeUnreadSummary {
 
 /** Unread and mention totals across active encrypted chats. */
 export function useE2eeUnreadSummary(): E2eeUnreadSummary {
-  const { conversations } = useE2ee();
+  const { conversations, profileId } = useE2ee();
+  const muted = useMutedE2eeChats(profileId);
   return useMemo(() => {
     let unread = 0;
     let mentions = 0;
     for (const conversation of conversations) {
-      if (conversation.status === "active") {
+      // Chats muted on this device do not count toward the Messages badge.
+      if (conversation.status === "active" && !muted.has(conversation.g)) {
         unread += conversation.unread;
         mentions += conversation.mentions;
       }
     }
     return { unread, mentions, hasUnread: unread > 0 || mentions > 0 };
-  }, [conversations]);
+  }, [conversations, muted]);
 }

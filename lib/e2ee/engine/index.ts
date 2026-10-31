@@ -19,6 +19,7 @@ import {
   enrollDevice,
   ensureWasm,
   grantExpired,
+  loadCurrentSuiteDevice,
   refreshMe,
   renewalDue,
   renewGrant,
@@ -174,7 +175,7 @@ async function resolveProfiles(
 
 /** Loads an enrolled device from storage; false when enrollment is needed. */
 async function restore(ctx: EngineContext): Promise<boolean> {
-  const device = await ctx.storage.getDevice(ctx.profileId);
+  const device = await loadCurrentSuiteDevice(ctx);
   if (!device?.registered || !device.provisioned) {
     return false;
   }
@@ -307,6 +308,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
   getStatus = () => this.ctx.store.status;
   getError = () => this.ctx.store.error;
   getThisDevice = () => this.ctx.store.thisDevice;
+  getAttachmentsEnabled = () => this.ctx.store.attachmentsEnabled;
   getDevices = () => this.ctx.store.devices;
   getConversations = () => this.ctx.store.getConversations();
   getConversation = (g: string) =>
@@ -447,6 +449,9 @@ class E2eeEngineImpl implements E2eeEngineExt {
     }
   ): Promise<void> {
     this.requireReady();
+    if ((input.files?.length ?? 0) > 0 && !this.ctx.store.attachmentsEnabled) {
+      throw new E2eeError("E2EE_ATTACHMENTS_DISABLED");
+    }
     await queueMessage(this.ctx, g.toLowerCase(), input);
     await this.controller.flush(g.toLowerCase());
   }

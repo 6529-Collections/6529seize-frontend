@@ -57,6 +57,7 @@ export interface FakeDeliveryService {
     profileId: string,
     value: "EVERYONE" | "PEOPLE_I_FOLLOW" | "NOBODY"
   ): void;
+  setAttachmentsEnabled(enabled: boolean): void;
   follow(subscriber: string, target: string): void;
   block(blocker: string, blocked: string): void;
   unblock(blocker: string, blocked: string): void;

@@ -20,6 +20,10 @@ export class ApiE2eeMe {
     'devices': Array<ApiE2eeDevice>;
     'key_packages': Array<ApiE2eeKeyPackageStatus>;
     'max_devices': number;
+    /**
+    * Whether this server accepts encrypted attachments (E2EE_ATTACHMENTS_ENABLED); clients hide attaching while false
+    */
+    'attachments_enabled': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -48,6 +52,12 @@ export class ApiE2eeMe {
             "name": "max_devices",
             "baseName": "max_devices",
             "type": "number",
+            "format": ""
+        },
+        {
+            "name": "attachments_enabled",
+            "baseName": "attachments_enabled",
+            "type": "boolean",
             "format": ""
         }    ];
 

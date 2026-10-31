@@ -1,5 +1,6 @@
 "use client";
 
+import { BellSlashIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { getEncryptedConversationRoute } from "@/helpers/navigation.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -11,10 +12,12 @@ import {
   formatE2eeTimestamp,
   getConversationTitle,
   getDmPeer,
+  getMemberName,
   getMessagePreview,
   tCount,
 } from "../e2eeFormat";
-import { E2eeAvatar, E2eeAvatarStack } from "../ui/E2eeAvatar";
+import { useMutedE2eeChats } from "../e2eeMutedChats";
+import { E2eeAvatar } from "../ui/E2eeAvatar";
 
 const STATUS_KEYS: Partial<Record<E2eeConversation["status"], MessageKey>> = {
   invalid: "e2ee.list.status.invalid",
@@ -48,7 +51,62 @@ function ConversationAvatar({
       pfp: member.pfp,
       name: member.handle ?? title,
     }));
-  return <E2eeAvatarStack people={people} max={2} size="sm" />;
+  // Two overlapping faces in the same 40 px slot as a DM avatar, so titles align.
+  const [first, second] = people;
+  return (
+    <span
+      aria-hidden="true"
+      className="tw-relative tw-inline-flex tw-size-10 tw-flex-shrink-0"
+    >
+      {first ? (
+        <span className="tw-absolute tw-left-0 tw-top-0 tw-flex">
+          <E2eeAvatar pfp={first.pfp} name={first.name} size="duo" />
+        </span>
+      ) : null}
+      {second ? (
+        <span className="tw-absolute tw-bottom-0 tw-right-0 tw-flex">
+          <E2eeAvatar
+            pfp={second.pfp}
+            name={second.name}
+            size="duo"
+            className="tw-ring-2 tw-ring-black"
+          />
+        </span>
+      ) : null}
+    </span>
+  );
+}
+
+/** Groups and your own last message say who wrote it, like "carol: …". */
+function getRowPreview(
+  locale: SupportedLocale,
+  conversation: E2eeConversation,
+  selfProfileId: string | null
+): string {
+  const message = conversation.lastMessage;
+  const preview = getMessagePreview(
+    locale,
+    message,
+    conversation.members,
+    selfProfileId
+  );
+  if (
+    message?.kind !== "message" ||
+    message.deleted ||
+    message.undecryptable ||
+    (conversation.kind !== "group" && message.senderProfileId !== selfProfileId)
+  ) {
+    return preview;
+  }
+  return t(locale, "e2ee.list.preview.from", {
+    name: getMemberName(
+      locale,
+      conversation.members,
+      message.senderProfileId,
+      selfProfileId
+    ),
+    text: preview,
+  });
 }
 
 function UnreadBadges({
@@ -101,6 +159,17 @@ interface E2eeConversationRowProps {
   readonly selfProfileId: string | null;
   readonly active: boolean;
   readonly collapsed: boolean;
+  /** Muted on this device: a muted mark instead of unread badges. */
+  readonly muted: boolean;
+}
+
+function MutedMark({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <span className="tw-flex tw-flex-shrink-0 tw-items-center tw-text-iron-500">
+      <BellSlashIcon aria-hidden="true" className="tw-size-4" />
+      <span className="tw-sr-only">{t(locale, "e2ee.list.muted")}</span>
+    </span>
+  );
 }
 
 function E2eeConversationRow({
@@ -108,11 +177,14 @@ function E2eeConversationRow({
   selfProfileId,
   active,
   collapsed,
+  muted,
 }: E2eeConversationRowProps) {
   const locale = useBrowserLocale();
   const title = getConversationTitle(locale, conversation, selfProfileId);
   const statusKey = STATUS_KEYS[conversation.status];
   const href = getEncryptedConversationRoute(conversation.g);
+  const hasUnread =
+    !muted && (conversation.unread > 0 || conversation.mentions > 0);
   const rowClass = active
     ? "tw-bg-iron-900 tw-text-iron-50"
     : "tw-text-iron-200 desktop-hover:hover:tw-bg-iron-900/60";
@@ -132,7 +204,7 @@ function E2eeConversationRow({
             selfProfileId={selfProfileId}
             title={title}
           />
-          {conversation.unread > 0 || conversation.mentions > 0 ? (
+          {!muted && (conversation.unread > 0 || conversation.mentions > 0) ? (
             <span
               aria-hidden="true"
               className="tw-absolute tw-right-1.5 tw-top-1.5 tw-size-2.5 tw-rounded-full tw-bg-primary-400"
@@ -157,28 +229,41 @@ function E2eeConversationRow({
         />
         <span className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
           <span className="tw-flex tw-min-w-0 tw-items-baseline tw-gap-2">
-            <span className="tw-min-w-0 tw-flex-1 tw-truncate tw-text-sm tw-font-semibold">
+            <span
+              className={`tw-min-w-0 tw-flex-1 tw-truncate tw-text-sm ${
+                hasUnread ? "tw-font-bold tw-text-iron-50" : "tw-font-semibold"
+              }`}
+            >
               {title}
             </span>
-            <span className="tw-flex-shrink-0 tw-text-xs tw-text-iron-500">
+            <span
+              className={`tw-flex-shrink-0 tw-text-xs ${
+                hasUnread
+                  ? "tw-font-medium tw-text-primary-300"
+                  : "tw-text-iron-500"
+              }`}
+            >
               {formatE2eeTimestamp(locale, conversation.updatedAt)}
             </span>
           </span>
           <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
-            <span className="tw-min-w-0 tw-flex-1 tw-truncate tw-text-xs tw-text-iron-400">
-              {getMessagePreview(
-                locale,
-                conversation.lastMessage,
-                conversation.members,
-                selfProfileId
-              )}
+            <span
+              className={`tw-min-w-0 tw-flex-1 tw-truncate tw-text-xs ${
+                hasUnread ? "tw-text-iron-200" : "tw-text-iron-400"
+              }`}
+            >
+              {getRowPreview(locale, conversation, selfProfileId)}
             </span>
             {statusKey ? (
               <span className="tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-[11px] tw-text-iron-300">
                 {t(locale, statusKey)}
               </span>
             ) : null}
-            <UnreadBadges locale={locale} conversation={conversation} />
+            {muted ? (
+              <MutedMark locale={locale} />
+            ) : (
+              <UnreadBadges locale={locale} conversation={conversation} />
+            )}
           </span>
         </span>
       </Link>
@@ -203,6 +288,7 @@ export function E2eeConversationList({
   limit,
   label,
 }: E2eeConversationListProps) {
+  const muted = useMutedE2eeChats(selfProfileId);
   const visible =
     limit === undefined ? conversations : conversations.slice(0, limit);
   return (
@@ -217,6 +303,7 @@ export function E2eeConversationList({
           selfProfileId={selfProfileId}
           active={conversation.g === activeGroup}
           collapsed={collapsed}
+          muted={muted.has(conversation.g)}
         />
       ))}
     </ul>

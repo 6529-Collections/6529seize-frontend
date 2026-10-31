@@ -11539,9 +11539,11 @@ paths:
         - Encrypted Messages
       summary: Report a decrypted encrypted message
       description: >-
-        The reporter discloses the message body and the sender's inner
-        signature, which the server verifies. Reports are stored for human
-        review only and are never sent to an AI provider. Requires a profile;
+        For severe or illegal harm only. The reporter discloses one message
+        body and the sender's inner signature, which the server verifies.
+        Reports are readable only by the configured trust and safety group,
+        are never sent to an AI provider or to wave moderators, and are
+        deleted after 180 days unless placed on hold. Requires a profile;
         proxies are rejected; 404 E2EE_DISABLED while the feature flag is off.
       operationId: e2eeReportMessage
       security:
@@ -11589,6 +11591,151 @@ paths:
           description: Payload too large (E2EE_TOO_LARGE)
         "429":
           description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/trust-and-safety/reports:
+    get:
+      tags:
+        - Encrypted Messages
+      summary: List reported encrypted messages (trust and safety)
+      description: >-
+        Newest first. Only members of the group named by
+        E2EE_TRUST_AND_SAFETY_GROUP_ID may call this; every call is recorded in
+        an access log. Works whether or not the encrypted messaging flag is on.
+        Proxies are rejected.
+      operationId: e2eeListTrustAndSafetyReports
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee-trust-and-safety.handlers"
+          name: handleE2eeListTrustAndSafetyReports
+      parameters:
+        - name: before
+          in: query
+          required: false
+          description: Return reports created before this time (ms)
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeTrustAndSafetyReportPage"
+        "400":
+          description: Invalid request (E2EE_BAD_REQUEST)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Not a member of the trust and safety group, or the group is not
+            configured (E2EE_FORBIDDEN)
+  /e2ee/trust-and-safety/reports/{report_id}:
+    get:
+      tags:
+        - Encrypted Messages
+      summary: Read one reported encrypted message (trust and safety)
+      description: >-
+        Only members of the group named by E2EE_TRUST_AND_SAFETY_GROUP_ID may
+        call this; every read is recorded in an access log. Proxies are
+        rejected.
+      operationId: e2eeGetTrustAndSafetyReport
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee-trust-and-safety.handlers"
+          name: handleE2eeGetTrustAndSafetyReport
+      parameters:
+        - name: report_id
+          in: path
+          required: true
+          description: Report id (0x + 32 lowercase hex)
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{32}$
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeTrustAndSafetyReport"
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Not a member of the trust and safety group, or the group is not
+            configured (E2EE_FORBIDDEN)
+        "404":
+          description: Not found (E2EE_NOT_FOUND)
+  /e2ee/trust-and-safety/reports/{report_id}/hold:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Place a reported encrypted message on hold or release it
+      description: >-
+        A report on hold is kept past the 180-day retention until released.
+        Only members of the group named by E2EE_TRUST_AND_SAFETY_GROUP_ID may
+        call this; every change is recorded in an access log. Proxies are
+        rejected.
+      operationId: e2eeSetTrustAndSafetyReportHold
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee-trust-and-safety.handlers"
+          name: handleE2eeSetTrustAndSafetyReportHold
+      parameters:
+        - name: report_id
+          in: path
+          required: true
+          description: Report id (0x + 32 lowercase hex)
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{32}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeReportHoldRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeTrustAndSafetyReport"
+        "400":
+          description: Invalid request (E2EE_BAD_REQUEST)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Not a member of the trust and safety group, or the group is not
+            configured (E2EE_FORBIDDEN)
+        "404":
+          description: Not found (E2EE_NOT_FOUND)
   /feed:
     get:
       tags:
@@ -32304,7 +32451,7 @@ components:
           description: 0x + 64 hex
         ciphersuite:
           type: integer
-          description: 1 (MLS_128_DHKEMX25519_AES128GCM_SHA256_Ed25519)
+          description: 79 (0x004F, MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519, a draft code point)
         issued_at:
           type: integer
           format: int64
@@ -32582,6 +32729,7 @@ components:
         - devices
         - key_packages
         - max_devices
+        - attachments_enabled
       properties:
         profile_id:
           type: string
@@ -32595,6 +32743,11 @@ components:
             $ref: "#/components/schemas/ApiE2eeKeyPackageStatus"
         max_devices:
           type: integer
+        attachments_enabled:
+          type: boolean
+          description: >-
+            Whether this server accepts encrypted attachments
+            (E2EE_ATTACHMENTS_ENABLED); clients hide attaching while false
     ApiE2eeNotifyHint:
       type: object
       required:
@@ -32672,10 +32825,106 @@ components:
         reporter_device_key:
           type: string
         reason:
-          $ref: "#/components/schemas/ApiContentModerationReportReason"
+          $ref: "#/components/schemas/ApiE2eeReportCategory"
         notes:
           type: string
           maxLength: 1000
+    ApiE2eeReportCategory:
+      type: string
+      description: >-
+        Severe or illegal harm only: child sexual abuse material, a credible
+        threat of violence, non-consensual intimate imagery, or doxxing
+        (exposed personal data)
+      enum:
+        - CHILD_SEXUAL_ABUSE_MATERIAL
+        - CREDIBLE_THREAT_OF_VIOLENCE
+        - NON_CONSENSUAL_INTIMATE_IMAGERY
+        - DOXXING
+    ApiE2eeReportHoldRequest:
+      type: object
+      required:
+        - on_hold
+      properties:
+        on_hold:
+          type: boolean
+    ApiE2eeTrustAndSafetyReport:
+      type: object
+      required:
+        - id
+        - group
+        - epoch
+        - category
+        - body
+        - signature
+        - sender_device_key
+        - sender_profile_id
+        - reporter_device_key
+        - reporter_profile_id
+        - notes
+        - verified
+        - on_hold
+        - created_at
+        - expires_at
+      properties:
+        id:
+          type: string
+        group:
+          type: string
+        epoch:
+          type: integer
+          format: int64
+        category:
+          type: string
+          description: >-
+            An ApiE2eeReportCategory value (reports filed before categories
+            were restricted may hold an older reason)
+        body:
+          type: string
+          description: Standard base64 of the reported message body (UTF-8 JSON)
+        signature:
+          type: string
+        sender_device_key:
+          type: string
+        sender_profile_id:
+          type: string
+          nullable: true
+        reporter_device_key:
+          type: string
+        reporter_profile_id:
+          type: string
+        notes:
+          type: string
+          nullable: true
+        verified:
+          type: boolean
+          description: >-
+            The sender's device signature verified and the sender was in the
+            group
+        on_hold:
+          type: boolean
+        created_at:
+          type: integer
+          format: int64
+        expires_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: When retention deletes the report (ms); null while on hold
+    ApiE2eeTrustAndSafetyReportPage:
+      type: object
+      required:
+        - items
+        - next_before
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiE2eeTrustAndSafetyReport"
+        next_before:
+          type: integer
+          format: int64
+          nullable: true
+          description: Pass as `before` for the next page; null on the last page
     ApiE2eeRevokeDeviceRequest:
       type: object
       required:

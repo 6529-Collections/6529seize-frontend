@@ -113,6 +113,8 @@ export class EngineStore {
   error: string | null = null;
   thisDevice: E2eeDeviceInfo | null = null;
   devices: E2eeDeviceInfo[] = [];
+  /** Server switch (GET /e2ee/me); false until the server has answered. */
+  attachmentsEnabled = false;
   readonly groups = new Map<string, GroupRuntime>();
   readonly profiles = new Map<string, ProfileInfo>();
   private readonly listeners = new Set<() => void>();

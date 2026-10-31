@@ -9,7 +9,15 @@ data and orders group changes, but it cannot read messages, group names or the
 member list inside a chat, and it cannot add a device to a chat.
 
 Chats use the MLS protocol (RFC 9420) through a WebAssembly build of OpenMLS
-that runs in the browser or app.
+that runs in the browser or app. Keys are agreed with a hybrid post-quantum
+method: the MLS ciphersuite is 0x004F (X-Wing, which combines ML-KEM-768 with
+X25519). Recorded messages stay confidential as long as either part holds,
+so a future quantum computer that breaks X25519 alone cannot read them.
+Messages use AES-128-GCM. Device signatures use Ed25519, which is not
+post-quantum; they protect who sent a message, not its secrecy. 0x004F is a
+draft code point; if it changes before it is final, each device sets up
+encrypted messages again (one more wallet signature) and chats are started
+again.
 
 Existing direct messages are not changed. They stay where they are, are not
 moved into encrypted chats, and their header now says **Not end-to-end
@@ -85,10 +93,17 @@ the same people already chosen. Earlier messages are not copied.
 
 - Write in the composer and press Enter to send; Shift+Enter starts a new line.
 - Type `@` to mention a member.
-- Attach up to 10 files of up to 25 MB each. Images show inline; other files
-  are downloads.
-- Open a message's menu to react, reply, edit or delete your own messages, or
-  report someone else's message.
+- Attach up to 10 files of up to 25 MB each; they are encrypted on your
+  device like messages. Images show inline and other files are downloads.
+  The server can switch attachments off as a kill switch; while it is off
+  there is no attach control and chats are text only.
+- Open a message's menu to react, reply, or edit or delete your own messages.
+  On someone else's message the menu also offers **Mute this chat** (on this
+  device: the chat stops counting toward the Messages badge and shows a muted
+  mark), **Block** the sender (they can't start new chats with you or add you
+  to encrypted chats; chats you already share stay until you leave them),
+  **Choose who can message you** (Preferences) and, last, **Report illegal or
+  severe harm**.
 - Search in the header looks only through messages on this device.
 - **Chat info** lists members (with admin badges and their devices), the
   safety code, report help and **Leave chat**. In groups, admins can add and
@@ -99,26 +114,33 @@ the same people already chosen. Earlier messages are not copied.
 ### Safety code
 
 The safety code in **Chat info** is the same for everyone who sees the same
-chat. Compare it with the others in the chat; if it matches, nobody is
-intercepting.
+chat. Compare it with the other members in person or in another app you
+trust. If everyone sees the same code, no one has been added to the chat
+without your knowledge. **Chat info** also explains the encryption (MLS with
+hybrid post-quantum key exchange) and has **Mute on this device**.
 
 ### Banners
 
 - **Group changes are delayed. Messages will send once the change goes
   through.** A required change (for example removing a revoked device) has not
   been accepted yet. Sending resumes on its own.
-- **Possible split view detected: compare safety codes.** Members may be seeing
-  different versions of the chat. Compare safety codes.
+- **Security check needed: this device may not see the same chat as everyone
+  else.** Members may be seeing different versions of the chat. Compare
+  safety codes before sharing anything sensitive.
 - **This chat is paused because of an invalid change.** A change failed
   validation, so the chat stops. Select **Start a new encrypted chat with the
   same people** to continue in a fresh chat.
 
 ### Message states
 
-- **Sending…**: not yet delivered.
+- **Sending…**: not yet delivered. After about 10 seconds without a
+  connection it reads **Waiting for connection. Will keep trying.**
+- **This message couldn’t be sent.**: the delivery service refused it. A
+  banner above the composer offers **Edit and resend**.
 - **(edited)**: changed by its sender.
 - **Message deleted**: removed by its sender.
-- **Couldn’t decrypt this message**: this device could not read it.
+- **Couldn’t decrypt this message**: this device could not read it; ask the
+  sender to send it again.
 - **Signature not verified**: the sender's signature did not check out.
 
 ## Devices
@@ -130,8 +152,10 @@ wallet signature was verified on this device. You can rename this device and
 revoke any device, including this one. A profile can have up to 10 active
 devices; at the limit, revoke one before turning on a new device.
 
-When another device of yours is turned on, your other devices show
-"{device} can now read your encrypted messages. Not you? Revoke."
+When another device of yours is turned on, your other devices show which
+device was added and when, that it can read your encrypted messages, and
+**Revoke** or **This was me**. Your own device changes are not repeated in
+each chat's timeline.
 
 ## Notifications
 
@@ -142,6 +166,22 @@ When another device of yours is turned on, your other devices show
   `/messages/encrypted`.
 - The desktop app does not show a local notification for encrypted messages
   yet.
+
+## Reporting
+
+Reporting is for illegal or severe harm only: child sexual abuse material, a
+credible threat of violence, intimate images shared without consent, or
+doxxing (exposed personal data). The dialog requires one of these and explains
+what is shared:
+
+- Only the selected message is shared, with proof that its sender's device sent
+  it.
+- It goes to 6529's trust and safety team, not to wave moderators or the
+  moderation queue, and never to an AI service.
+- Nothing else in the conversation is revealed.
+
+Everything else is handled with blocking, muting and the "who can message you"
+setting. Reports are kept for 180 days unless trust and safety holds them.
 
 ## Limitations
 

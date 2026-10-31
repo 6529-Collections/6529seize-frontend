@@ -14,6 +14,7 @@ export interface E2eeEngineSnapshot {
   readonly thisDevice: E2eeDeviceInfo | null;
   readonly devices: readonly E2eeDeviceInfo[];
   readonly conversations: readonly E2eeConversation[];
+  readonly attachmentsEnabled: boolean;
 }
 
 export interface E2eeConversationSnapshot {
@@ -45,6 +46,7 @@ const readSnapshot = (
   thisDevice: engine.getThisDevice(),
   devices: engine.getDevices(),
   conversations: engine.getConversations(),
+  attachmentsEnabled: engine.getAttachmentsEnabled(),
 });
 
 export function createE2eeEngineStore(

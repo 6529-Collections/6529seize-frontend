@@ -1,6 +1,8 @@
 import { render, screen, within } from "@testing-library/react";
 import { E2eeConversationListPage } from "@/components/e2ee/list/E2eeConversationListPage";
 import { E2eeMessagesSection } from "@/components/e2ee/sidebar/E2eeMessagesSection";
+import { setE2eeChatMuted } from "@/components/e2ee/e2eeMutedChats";
+import { useE2eeUnreadSummary } from "@/hooks/e2ee/useE2ee";
 import {
   ALICE_ID,
   contextFor,
@@ -69,6 +71,28 @@ describe("encrypted conversation list", () => {
       screen.getByRole("heading", { name: "Encrypted messages" })
     ).toBeInTheDocument();
     expect(screen.getByText("End-to-end encrypted")).toBeInTheDocument();
+  });
+
+  it("marks a chat muted on this device and leaves it out of the badge", () => {
+    setE2eeChatMuted(SELF_ID, GROUP_G, true);
+    const engine = createFakeE2eeEngine({ conversations });
+    const summaries: { unread: number; hasUnread: boolean }[] = [];
+    function Summary() {
+      summaries.push(useE2eeUnreadSummary());
+      return null;
+    }
+    render(
+      <E2eeTestProvider value={contextFor(engine)}>
+        <E2eeConversationListPage />
+        <Summary />
+      </E2eeTestProvider>
+    );
+    const list = screen.getByRole("list", { name: "Encrypted chats" });
+    const [mutedRow] = within(list).getAllByRole("link");
+    expect(mutedRow).toHaveTextContent("Muted");
+    expect(mutedRow).not.toHaveTextContent("3 unread messages");
+    // The only other chat is paused, so nothing counts.
+    expect(summaries.at(-1)).toMatchObject({ unread: 0, hasUnread: false });
   });
 
   it("shows an empty state with a way to start a chat", () => {

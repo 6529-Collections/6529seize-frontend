@@ -459,6 +459,8 @@ export * from '../models/ApiE2eeMe';
 export * from '../models/ApiE2eeNotifyHint';
 export * from '../models/ApiE2eeRegisterDeviceRequest';
 export * from '../models/ApiE2eeReport';
+export * from '../models/ApiE2eeReportCategory';
+export * from '../models/ApiE2eeReportHoldRequest';
 export * from '../models/ApiE2eeReportRequest';
 export * from '../models/ApiE2eeRevokeDeviceRequest';
 export * from '../models/ApiE2eeRosterDevice';
@@ -466,6 +468,8 @@ export * from '../models/ApiE2eeRosterRepairRequest';
 export * from '../models/ApiE2eeSendMessageRequest';
 export * from '../models/ApiE2eeSendMessageResponse';
 export * from '../models/ApiE2eeSubmitEntryRequest';
+export * from '../models/ApiE2eeTrustAndSafetyReport';
+export * from '../models/ApiE2eeTrustAndSafetyReportPage';
 export * from '../models/ApiE2eeUploadKeyPackagesRequest';
 export * from '../models/ApiE2eeWelcome';
 export * from '../models/ApiE2eeWelcomeUpload';
@@ -1421,6 +1425,8 @@ import { ApiE2eeMe } from '../models/ApiE2eeMe';
 import { ApiE2eeNotifyHint , ApiE2eeNotifyHintKindEnum   } from '../models/ApiE2eeNotifyHint';
 import { ApiE2eeRegisterDeviceRequest     } from '../models/ApiE2eeRegisterDeviceRequest';
 import { ApiE2eeReport } from '../models/ApiE2eeReport';
+import { ApiE2eeReportCategory } from '../models/ApiE2eeReportCategory';
+import { ApiE2eeReportHoldRequest } from '../models/ApiE2eeReportHoldRequest';
 import { ApiE2eeReportRequest         } from '../models/ApiE2eeReportRequest';
 import { ApiE2eeRevokeDeviceRequest } from '../models/ApiE2eeRevokeDeviceRequest';
 import { ApiE2eeRosterDevice } from '../models/ApiE2eeRosterDevice';
@@ -1428,6 +1434,8 @@ import { ApiE2eeRosterRepairRequest } from '../models/ApiE2eeRosterRepairRequest
 import { ApiE2eeSendMessageRequest } from '../models/ApiE2eeSendMessageRequest';
 import { ApiE2eeSendMessageResponse } from '../models/ApiE2eeSendMessageResponse';
 import { ApiE2eeSubmitEntryRequest, ApiE2eeSubmitEntryRequestKindEnum             } from '../models/ApiE2eeSubmitEntryRequest';
+import { ApiE2eeTrustAndSafetyReport } from '../models/ApiE2eeTrustAndSafetyReport';
+import { ApiE2eeTrustAndSafetyReportPage } from '../models/ApiE2eeTrustAndSafetyReportPage';
 import { ApiE2eeUploadKeyPackagesRequest } from '../models/ApiE2eeUploadKeyPackagesRequest';
 import { ApiE2eeWelcome } from '../models/ApiE2eeWelcome';
 import { ApiE2eeWelcomeUpload } from '../models/ApiE2eeWelcomeUpload';
@@ -2057,6 +2065,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiE2eeLogItemTypeEnum",
     "ApiE2eeLogItemKindEnum",
     "ApiE2eeNotifyHintKindEnum",
+    "ApiE2eeReportCategory",
     "ApiE2eeSubmitEntryRequestKindEnum",
     "ApiEulaVersion",
     "ApiFeedItemType",
@@ -2649,6 +2658,7 @@ let typeMap: {[index: string]: any} = {
     "ApiE2eeNotifyHint": ApiE2eeNotifyHint,
     "ApiE2eeRegisterDeviceRequest": ApiE2eeRegisterDeviceRequest,
     "ApiE2eeReport": ApiE2eeReport,
+    "ApiE2eeReportHoldRequest": ApiE2eeReportHoldRequest,
     "ApiE2eeReportRequest": ApiE2eeReportRequest,
     "ApiE2eeRevokeDeviceRequest": ApiE2eeRevokeDeviceRequest,
     "ApiE2eeRosterDevice": ApiE2eeRosterDevice,
@@ -2656,6 +2666,8 @@ let typeMap: {[index: string]: any} = {
     "ApiE2eeSendMessageRequest": ApiE2eeSendMessageRequest,
     "ApiE2eeSendMessageResponse": ApiE2eeSendMessageResponse,
     "ApiE2eeSubmitEntryRequest": ApiE2eeSubmitEntryRequest,
+    "ApiE2eeTrustAndSafetyReport": ApiE2eeTrustAndSafetyReport,
+    "ApiE2eeTrustAndSafetyReportPage": ApiE2eeTrustAndSafetyReportPage,
     "ApiE2eeUploadKeyPackagesRequest": ApiE2eeUploadKeyPackagesRequest,
     "ApiE2eeWelcome": ApiE2eeWelcome,
     "ApiE2eeWelcomeUpload": ApiE2eeWelcomeUpload,

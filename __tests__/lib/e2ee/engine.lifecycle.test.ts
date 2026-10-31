@@ -67,6 +67,42 @@ describe("E2EE engine: lifecycle", () => {
     expect(eleventh.signCalls).toBe(1);
   });
 
+  it("drops a device stored under another ciphersuite and enrolls again", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    await addUser(world, "bob");
+    await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "dm",
+    });
+    await settle(world);
+    const { storage } = alice.primary;
+    const stored = (await storage.getDevice("alice"))!;
+    expect(await storage.listGroups("alice")).toHaveLength(1);
+    alice.primary.engine.dispose();
+    // As left behind by the classical 0x0001 build.
+    await storage.writeBatch("alice", {
+      device: { ...stored, grant: { ...stored.grant, ciphersuite: 1 } },
+    });
+
+    const restarted = await startDevice(world, "alice", alice.account, {
+      storage,
+      enroll: false,
+    });
+    expect(restarted.engine.getStatus()).toBe("needs-enrollment");
+    expect(await storage.getDevice("alice")).toBeNull();
+    expect(await storage.listGroups("alice")).toEqual([]);
+    expect(await storage.getWasmState("alice")).toBeNull();
+
+    await restarted.engine.enroll();
+    expect(restarted.engine.getStatus()).toBe("ready");
+    expect(restarted.signCalls).toBe(1);
+    const fresh = (await storage.getDevice("alice"))!;
+    expect(fresh.grant.ciphersuite).toBe(0x004f);
+    expect(fresh.deviceKey).not.toBe(stored.deviceKey);
+    restarted.engine.dispose();
+  });
+
   it("renews grants in their last 14 days and keeps every group working", async () => {
     const world = await createWorld();
     const alice = await addUser(world, "alice");

@@ -9,6 +9,7 @@ import {
   buildGrantTypedData,
   computeGrantId,
   credentialIdentity,
+  E2EE_CIPHERSUITE,
   E2EE_SALT,
   grantExpiresAt,
   parseCredentialIdentity,
@@ -25,7 +26,7 @@ const VECTOR = {
     wallet: "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
     device_key:
       "0xd75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
-    ciphersuite: 1,
+    ciphersuite: 79,
     issued_at: 1760270400,
     expires_at: 1775822400,
     origin: "staging.6529.io",
@@ -34,9 +35,9 @@ const VECTOR = {
     "Let this device send and read end-to-end encrypted messages as you until 2026-04-10 12:00 UTC (device key d75a9801...f707511a). 6529 cannot read these messages. This signature cannot move funds, change your handle or act as an admin, and it does not create a blockchain transaction or cost gas.",
   checksummed_wallet: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
   grant_id:
-    "0x071474c69e205b3bb03834c8d99c99b2b826caad6eec914c233e67eaca3b2200",
+    "0xa0d5e242c157cdf18a9bec3c34decb63815d19d048621a3aee19a5fdb18243c0",
   signature:
-    "0xa280cc8335dfaf00e13a7b6b83a2c7f217398dde4d0649b560b3cb3c5e6a9a665bf3d84f35540243c0f462cedbe96153e00db006627f0a3fe75257c219c495f31b",
+    "0xfda409a1ca8e0464eeda29d07ffa05abd066f75999672156ed7f03d1e790bce9540fa06de1640e708841c8a635e66da45ef270e39a615f79599afc26c1f039091b",
   verify_at_seconds: 1760274000,
 } as const;
 
@@ -63,6 +64,11 @@ const atMs = VECTOR.verify_at_seconds * 1000;
 describe("grant (contract 2.1)", () => {
   it("uses the DN1 salt", () => {
     expect(E2EE_SALT).toBe(VECTOR.salt);
+  });
+
+  it("pins the X-Wing ciphersuite 0x004F", () => {
+    expect(E2EE_CIPHERSUITE).toBe(0x004f);
+    expect(VECTOR.grant.ciphersuite).toBe(E2EE_CIPHERSUITE);
   });
 
   it("computes the 180-day minute-aligned expiry", () => {
@@ -99,7 +105,7 @@ describe("grant (contract 2.1)", () => {
       statement: VECTOR.statement,
       wallet: VECTOR.checksummed_wallet,
       deviceKey: VECTOR.grant.device_key,
-      ciphersuite: 1,
+      ciphersuite: 79,
       issuedAt: BigInt(VECTOR.grant.issued_at),
       expiresAt: BigInt(VECTOR.grant.expires_at),
       origin: VECTOR.grant.origin,
@@ -173,6 +179,16 @@ describe("verifyGrant (contract 2.2)", () => {
     await expect(verifyGrant(unaligned, { atMs })).resolves.toMatchObject({
       ok: false,
       reason: "not-minute-aligned",
+    });
+  });
+
+  it("rejects a grant for the classical 0x0001 suite", async () => {
+    const classical = deviceRecord({
+      grant: { ...VECTOR.grant, ciphersuite: 1 },
+    });
+    await expect(verifyGrant(classical, { atMs })).resolves.toMatchObject({
+      ok: false,
+      reason: "ciphersuite",
     });
   });
 

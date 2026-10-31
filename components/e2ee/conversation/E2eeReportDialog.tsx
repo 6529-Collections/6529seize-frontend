@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 import Button from "@/components/utils/button/Button";
-import { ApiContentModerationReportReason } from "@/generated/models/ApiContentModerationReportReason";
+import { ApiE2eeReportCategory } from "@/generated/models/ApiE2eeReportCategory";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
 import type { E2eeEngine, E2eeMessage } from "@/lib/e2ee/types";
@@ -11,38 +11,29 @@ import { E2eeDialog } from "../ui/E2eeDialog";
 
 const NOTES_MAX = 1000;
 
-/** Same reasons as drop reports (contract 4.1 ApiE2eeReportRequest.reason). */
-const REASONS: readonly {
-  readonly value: ApiContentModerationReportReason;
+/**
+ * Severe or illegal harm only (owner decision; NC15). Everything else is
+ * handled by blocking, muting and the "who can message you" setting.
+ */
+const CATEGORIES: readonly {
+  readonly value: ApiE2eeReportCategory;
   readonly label: MessageKey;
 }[] = [
   {
-    value: ApiContentModerationReportReason.ScamOrPhishing,
-    label: "contentModeration.report.reason.scam",
+    value: ApiE2eeReportCategory.ChildSexualAbuseMaterial,
+    label: "e2ee.report.category.CHILD_SEXUAL_ABUSE_MATERIAL",
   },
   {
-    value: ApiContentModerationReportReason.PrivateInformationOrDoxxing,
-    label: "contentModeration.report.reason.privateInformation",
+    value: ApiE2eeReportCategory.CredibleThreatOfViolence,
+    label: "e2ee.report.category.CREDIBLE_THREAT_OF_VIOLENCE",
   },
   {
-    value: ApiContentModerationReportReason.ThreatsOrTargetedHarassment,
-    label: "contentModeration.report.reason.threats",
+    value: ApiE2eeReportCategory.NonConsensualIntimateImagery,
+    label: "e2ee.report.category.NON_CONSENSUAL_INTIMATE_IMAGERY",
   },
   {
-    value: ApiContentModerationReportReason.HateOrDiscrimination,
-    label: "contentModeration.report.reason.hate",
-  },
-  {
-    value: ApiContentModerationReportReason.SexualExploitationOrIllegalContent,
-    label: "contentModeration.report.reason.illegal",
-  },
-  {
-    value: ApiContentModerationReportReason.Spam,
-    label: "contentModeration.report.reason.spam",
-  },
-  {
-    value: ApiContentModerationReportReason.Other,
-    label: "contentModeration.report.reason.other",
+    value: ApiE2eeReportCategory.Doxxing,
+    label: "e2ee.report.category.DOXXING",
   },
 ];
 
@@ -55,8 +46,9 @@ interface E2eeReportDialogProps {
 }
 
 /**
- * Reports one message. The engine sends that message's exact body and inner
- * signature so moderators can verify the sender; nothing else is shared.
+ * Reports one message to 6529's trust and safety team. The engine sends that
+ * message's exact body and inner signature so the sender can be verified;
+ * nothing else from the conversation is shared.
  */
 export function E2eeReportDialog({
   engine,
@@ -66,11 +58,9 @@ export function E2eeReportDialog({
   onReported,
 }: E2eeReportDialogProps) {
   const locale = useBrowserLocale();
-  const reasonId = useId();
+  const legendId = useId();
   const notesId = useId();
-  const [reason, setReason] = useState<ApiContentModerationReportReason>(
-    ApiContentModerationReportReason.ScamOrPhishing
-  );
+  const [category, setCategory] = useState<ApiE2eeReportCategory | null>(null);
   const [notes, setNotes] = useState("");
   const [pending, setPending] = useState(false);
   const [errorKey, setErrorKey] = useState<MessageKey | null>(null);
@@ -79,7 +69,7 @@ export function E2eeReportDialog({
     if (pending) {
       return;
     }
-    setReason(ApiContentModerationReportReason.ScamOrPhishing);
+    setCategory(null);
     setNotes("");
     setErrorKey(null);
     onClose();
@@ -89,12 +79,17 @@ export function E2eeReportDialog({
     if (!message) {
       return;
     }
+    if (category === null) {
+      setErrorKey("e2ee.report.chooseCategory");
+      return;
+    }
     setPending(true);
     setErrorKey(null);
     try {
       const trimmed = notes.trim();
-      await engine.report(g, message.id, reason, trimmed || undefined);
+      await engine.report(g, message.id, category, trimmed || undefined);
       setPending(false);
+      setCategory(null);
       setNotes("");
       onReported();
       onClose();
@@ -133,28 +128,41 @@ export function E2eeReportDialog({
       }
     >
       <div className="tw-flex tw-flex-col tw-gap-4">
-        <div>
-          <label
-            htmlFor={reasonId}
-            className="tw-block tw-text-sm tw-font-semibold tw-text-iron-200"
+        <fieldset
+          aria-labelledby={legendId}
+          className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0"
+        >
+          <legend
+            id={legendId}
+            className="tw-mb-2 tw-p-0 tw-text-sm tw-font-semibold tw-text-iron-200"
           >
-            {t(locale, "contentModeration.report.reasonLabel")}
-          </label>
-          <select
-            id={reasonId}
-            value={reason}
-            onChange={(event) =>
-              setReason(event.target.value as ApiContentModerationReportReason)
-            }
-            className="tw-mt-2 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-          >
-            {REASONS.map((item) => (
-              <option key={item.value} value={item.value}>
-                {t(locale, item.label)}
-              </option>
+            {t(locale, "e2ee.report.categoryLegend")}
+          </legend>
+          <div className="tw-flex tw-flex-col tw-gap-1.5">
+            {CATEGORIES.map((item) => (
+              <label
+                key={item.value}
+                className="tw-flex tw-cursor-pointer tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 has-[:checked]:tw-border-primary-400 has-[:focus-visible]:tw-ring-2 has-[:focus-visible]:tw-ring-primary-400"
+              >
+                <input
+                  type="radio"
+                  name={legendId}
+                  value={item.value}
+                  checked={category === item.value}
+                  onChange={() => {
+                    setCategory(item.value);
+                    setErrorKey(null);
+                  }}
+                  className="tw-size-4 tw-flex-shrink-0 tw-accent-primary-400"
+                />
+                <span>{t(locale, item.label)}</span>
+              </label>
             ))}
-          </select>
-        </div>
+          </div>
+        </fieldset>
+        <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+          {t(locale, "e2ee.report.otherTools")}
+        </p>
         <div>
           <label
             htmlFor={notesId}

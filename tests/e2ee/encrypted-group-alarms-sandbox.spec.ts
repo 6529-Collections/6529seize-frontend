@@ -24,7 +24,8 @@ import { isMobileWebProject } from "../support/surfaceSimulation";
 
 const DELAYED_BANNER =
   "Group changes are delayed. Messages will send once the change goes through.";
-const SPLIT_VIEW_BANNER = "Possible split view detected: compare safety codes.";
+const SPLIT_VIEW_BANNER =
+  "Security check needed: this device may not see the same chat as everyone else. Compare safety codes before sharing anything sensitive.";
 /** Contract 8.3: the composer blocks after 20 s of failed commits. */
 const STALL_RULE_MS = 20_000;
 

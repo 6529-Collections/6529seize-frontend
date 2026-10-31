@@ -64,8 +64,9 @@ const ACTION_ERROR_KEYS: Readonly<Record<string, MessageKey>> = {
   E2EE_POLICY: "e2ee.new.eligibility.POLICY",
   E2EE_BLOCKED: "e2ee.new.eligibility.BLOCKED",
   E2EE_NO_DEVICES: "e2ee.new.eligibility.NO_DEVICES",
-  E2EE_DEVICE_LIMIT: "e2ee.deviceLimit.body",
+  E2EE_DEVICE_LIMIT: "e2ee.deviceLimit.title",
   E2EE_CONVERSATION_INACTIVE: "e2ee.composer.unavailable",
+  E2EE_ATTACHMENTS_DISABLED: "e2ee.composer.attachmentsUnavailable",
 };
 
 /** Copy for an action failure; falls back to the given generic key. */

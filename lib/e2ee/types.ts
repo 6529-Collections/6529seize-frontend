@@ -105,6 +105,8 @@ export interface E2eeEngine {
   getError(): string | null;
   getThisDevice(): E2eeDeviceInfo | null;
   getDevices(): E2eeDeviceInfo[];
+  /** Whether the server accepts encrypted attachments (false until known). */
+  getAttachmentsEnabled(): boolean;
   getConversations(): E2eeConversation[]; // sorted by updatedAt desc
   getConversation(g: string): E2eeConversation | null;
   getMessages(g: string): E2eeMessage[]; // ascending seq, notices interleaved
