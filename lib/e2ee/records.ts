@@ -3,6 +3,7 @@ import type {
   ApiE2eeNotifyHint,
   ApiE2eePlatform,
 } from "./api-types";
+import type { ImportedPayload } from "./imported-payload";
 import type { Payload, PayloadAttachment } from "./payload";
 import type { E2eeNoticeType } from "./notice-types";
 import type { GroupMetadata, WasmLeaf } from "./wasm-types";
@@ -130,6 +131,8 @@ export interface StoredMessage {
   epoch: number | null;
   body: string | null;
   sig: string | null;
+  /** Set when the message was moved from an unencrypted DM (D146). */
+  imported?: ImportedPayload;
 }
 
 export interface SealedOutboxMessage {

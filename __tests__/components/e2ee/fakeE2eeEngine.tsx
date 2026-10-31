@@ -169,6 +169,7 @@ export function createFakeE2eeEngine(
     createConversation: jest.fn(async () => GROUP_G),
     findDm: jest.fn(() => null),
     send: jest.fn(async () => undefined),
+    sendImported: jest.fn(async () => undefined),
     edit: jest.fn(async () => undefined),
     remove: jest.fn(async () => undefined),
     react: jest.fn(async () => undefined),

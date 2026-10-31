@@ -3697,6 +3697,51 @@
       ]
     },
     {
+      "id": "messages.unencrypted-dm-deletion",
+      "kind": "workflow",
+      "title": "Unencrypted direct messages: export, move and the 1 December 2026 deletion",
+      "aliases": [
+        "old dms",
+        "unencrypted dm",
+        "dm history",
+        "export dms",
+        "move dm history",
+        "dm deletion"
+      ],
+      "keywords": [
+        "unencrypted",
+        "export",
+        "move history",
+        "import",
+        "deletion",
+        "december",
+        "dm"
+      ],
+      "facts": [
+        "Direct messages started before encrypted chats are not end-to-end encrypted. 6529 deletes their content from its servers, backups included, on 1 December 2026, except anything 6529 is legally required to keep; from then they are closed and no new unencrypted DM can be started.",
+        "When you start a new direct message on a build with encrypted chats, Start encrypted chat is the main action; Send unencrypted instead is a second choice, under a warning, until 1 December 2026.",
+        "Each unencrypted conversation shows a notice with Export history, which downloads the messages you can see as a readable HTML page or as JSON data. The file is made in your browser; images and files are listed as links that stop working on the deletion date.",
+        "Once an encrypted chat with exactly the same people exists on your device, the old conversation becomes read-only and offers Move history, which copies the messages you can see into the encrypted chat, oldest first, with their images and files where possible.",
+        "Moved messages show the original author and time labelled Imported, not verified, because 6529 held them unencrypted. Only the people and devices in the encrypted chat at that time see them, and nobody is notified.",
+        "Moving can be stopped and continued later without duplicates, even if another member moves the same history. A long history with many images may pause at the daily encrypted upload limit; continue the next day.",
+        "6529 cannot recall copies outside its servers: your own exports, push notification previews already delivered to phones, and attachments already published to public IPFS."
+      ],
+      "canonical_path": "/messages",
+      "related_paths": [
+        "/messages/encrypted",
+        "/messages/encrypted/new"
+      ],
+      "tags": [
+        "messages",
+        "encryption",
+        "privacy"
+      ],
+      "source_refs": [
+        "ops/docs/encrypted-messages.md",
+        "components/e2ee/legacy/LegacyDmBanner.tsx"
+      ]
+    },
+    {
       "id": "waves.composer",
       "kind": "ui_affordance",
       "title": "Wave composer",

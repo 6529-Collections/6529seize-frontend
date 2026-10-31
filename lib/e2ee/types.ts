@@ -75,6 +75,28 @@ export interface E2eeMessage {
     targetProfileIds: string[];
     detail?: string;
   };
+  /** Moved from an unencrypted 6529.io DM: not verified (D146). */
+  imported?: E2eeImported;
+}
+
+/**
+ * Where an imported message came from. Its author and times are what
+ * 6529's server copy said; the importer's device signed the message, so
+ * nothing proves the original author wrote it.
+ */
+export interface E2eeImported {
+  waveId: string;
+  dropId: string;
+  part: number;
+  serialNo: number;
+  authorProfileId: string;
+  authorHandle: string | null;
+  createdAt: number; // ms, original server time
+  editedAt: number | null;
+  replyToDropId: string | null;
+  /** Images and files of the original that were not carried over. */
+  mediaNotImported: number;
+  reactions: [string, number][];
 }
 
 export interface E2eeConversation {
@@ -141,6 +163,19 @@ export interface E2eeEngine {
     input: {
       text: string;
       mentions?: string[];
+      reply?: string | null;
+      files?: File[];
+    }
+  ): Promise<void>;
+  /**
+   * Sends one message moved from an unencrypted DM, labelled imported, with
+   * no push notification. A copy already in the chat is skipped (resolves).
+   */
+  sendImported(
+    g: string,
+    input: {
+      text: string;
+      imported: E2eeImported;
       reply?: string | null;
       files?: File[];
     }

@@ -10,6 +10,7 @@ import {
   type PayloadAttachment,
 } from "../payload";
 import type { StoredMessage, StoredOutboxItem } from "../records";
+import type { E2eeImported } from "../types";
 import {
   checkpoint,
   isActive,
@@ -19,6 +20,12 @@ import {
   type EngineContext,
 } from "./context";
 import { E2eeError, RetryableError } from "./errors";
+import {
+  importedText,
+  isDuplicateImport,
+  isValidImported,
+  toImportedPayload,
+} from "./imported";
 import { applyPayload } from "./messages";
 import type { GroupRuntime } from "./store";
 import { catchUpGroup } from "./sync";
@@ -55,7 +62,8 @@ function computeNotify(
   runtime: GroupRuntime,
   payload: Payload
 ): ApiE2eeNotifyHint[] {
-  if (payload.t !== "msg") {
+  // Imported history is old news: it never wakes anyone.
+  if (payload.t !== "msg" || payload.imp) {
     return [];
   }
   const recipients = new Set<string>();
@@ -114,6 +122,7 @@ function localEcho(
     epoch: null,
     body: null,
     sig: null,
+    ...(payload.imp ? { imported: payload.imp } : {}),
   };
 }
 
@@ -199,6 +208,60 @@ export async function queueMessage(
   await enqueue(ctx, runtime, payload);
 }
 
+/**
+ * Queues one message moved from an unencrypted DM (D146). Returns false,
+ * sending nothing, when the chat already holds a copy of that original.
+ */
+export async function queueImported(
+  ctx: EngineContext,
+  g: string,
+  input: {
+    text: string;
+    imported: E2eeImported;
+    reply?: string | null;
+    files?: File[];
+  }
+): Promise<boolean> {
+  const runtime = requireActiveGroup(ctx, g);
+  const { text, headerLength } = importedText(input.imported, input.text);
+  const imp = toImportedPayload(input.imported, headerLength);
+  if (!isValidImported(imp, text)) {
+    throw new E2eeError("E2EE_INVALID_INPUT", "E2EE_IMPORT_INVALID");
+  }
+  const id = newMessageId();
+  if (isDuplicateImport(runtime, id, imp)) {
+    return false;
+  }
+  const attachments: PayloadAttachment[] = [];
+  for (const file of input.files ?? []) {
+    attachments.push(
+      await uploadMedia({
+        api: ctx.api,
+        g: runtime.record.g,
+        deviceKey: ownDeviceKey(ctx),
+        media: await mediaFromFile(file),
+      })
+    );
+  }
+  const payload: MsgPayload = {
+    v: 1,
+    t: "msg",
+    id,
+    ts: ctx.now(),
+    text,
+    mentions: [],
+    imp,
+  };
+  if (input.reply) {
+    payload.reply = input.reply;
+  }
+  if (attachments.length > 0) {
+    payload.att = attachments;
+  }
+  await enqueue(ctx, runtime, payload);
+  return true;
+}
+
 export async function queueTargeted(
   ctx: EngineContext,
   g: string,
@@ -212,13 +275,7 @@ export async function queueTargeted(
   );
 }
 
-type SendStep =
-  | "sent"
-  | "empty"
-  | "stale"
-  | "failed"
-  | "dropped"
-  | "inactive";
+type SendStep = "sent" | "empty" | "stale" | "failed" | "dropped" | "inactive";
 
 const oldestOutbox = (runtime: GroupRuntime): StoredOutboxItem | null =>
   [...runtime.outbox.values()].sort((a, b) => a.createdAt - b.createdAt)[0] ??
