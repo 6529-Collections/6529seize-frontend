@@ -5,7 +5,7 @@ import { EX_LAYOUT, EX_LINK, EX_TEXT } from "@/components/explained/tokens";
 import { FactScope } from "@/components/explained/facts/FactText";
 import type { SureContext } from "./sureShared";
 
-/** Proven on Ethereum: the chapter's page on the zero-knowledge proofs. */
+/** Zero-knowledge proofs: the chapter's page on the zero-knowledge proofs. */
 const PROOFS_HREF = "/network/tdh/proofs";
 
 /**

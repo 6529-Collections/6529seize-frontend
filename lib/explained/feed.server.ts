@@ -19,6 +19,7 @@ import {
   type FeedInput,
   type ManifestInput,
 } from "./factInputs";
+import editionsSnapshot from "./data/editionsSnapshot.json";
 import { createFactBook, type FactBook } from "./facts";
 
 /**
@@ -26,7 +27,11 @@ import { createFactBook, type FactBook } from "./facts";
  * keep today's cache times: the feed's index and latest day 10 minutes, an
  * older day and the manifest an hour, the editions an hour. A source that
  * cannot be read leaves its facts unavailable; nothing falls back to a
- * number typed by hand.
+ * number typed by hand. The one exception is the editions, which every
+ * model and formula reads: when 6529.io's API cannot be read, the facts use
+ * this server's last good read, or else the snapshot the API gave at ship
+ * time (`data/editionsSnapshot.json`), each with its own read time, which
+ * the pages print wherever they name the editions' source.
  */
 
 const EDITIONS_REVALIDATE_SECONDS = 3_600;
@@ -97,22 +102,16 @@ async function loadManifest(now: string): Promise<ManifestInput | null> {
   };
 }
 
-interface EditionsPage {
-  readonly next?: string | null;
-  readonly data?: readonly {
-    readonly id?: unknown;
-    readonly season?: unknown;
-    readonly edition_size?: unknown;
-    readonly edition_size_floor?: unknown;
-  }[];
+interface EditionsRow {
+  readonly id?: unknown;
+  readonly season?: unknown;
+  readonly edition_size?: unknown;
+  readonly edition_size_floor?: unknown;
 }
 
-interface NftsPage {
-  readonly next?: string | null;
-  readonly data?: readonly {
-    readonly id?: unknown;
-    readonly mint_date?: unknown;
-  }[];
+interface NftsRow {
+  readonly id?: unknown;
+  readonly mint_date?: unknown;
 }
 
 /** "2026-10-16T09:06:23Z": an instant as the facts layer writes it. */
@@ -124,37 +123,69 @@ function isoSeconds(value: string): string | null {
 }
 
 /**
- * Each Meme's first mint (`meme.N.firstMint`), from 6529.io's `nfts` for
- * The Memes' contract. A page that cannot be read leaves the rest unknown:
- * those cards' first mints are unavailable, never guessed.
+ * Every page of one of 6529.io's paged lists: the first page, then the rest
+ * at once (its `count` says how many), so a slow API costs two round trips,
+ * not one per page. Null when any page cannot be read.
  */
-export async function loadFirstMints(): Promise<ReadonlyMap<number, string>> {
-  const mints = new Map<number, string>();
-  try {
-    for (let page = 1; page <= EDITIONS_MAX_PAGES; page += 1) {
-      const url = `${publicEnv.API_ENDPOINT}/api/nfts?contract=${REGISTRY_V14.memes}&page_size=${EDITIONS_PAGE_SIZE}&page=${page}`;
-      const response = await fetch(url, {
+async function readAllPages<Row>(base: string): Promise<Row[] | null> {
+  const read = async (page: number) => {
+    const response = await fetch(
+      `${base}page_size=${EDITIONS_PAGE_SIZE}&page=${page}`,
+      {
         headers: { accept: "application/json" },
         signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
         next: { revalidate: EDITIONS_REVALIDATE_SECONDS },
-      } as RequestInit);
-      if (!response.ok) {
-        break;
-      }
-      const body = (await response.json()) as NftsPage;
-      for (const row of body.data ?? []) {
-        const at =
-          typeof row.mint_date === "string" ? isoSeconds(row.mint_date) : null;
-        if (typeof row.id === "number" && at !== null) {
-          mints.set(row.id, at);
-        }
-      }
-      if (!body.next) {
-        break;
-      }
+      } as RequestInit
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
     }
+    return (await response.json()) as {
+      readonly count?: number;
+      readonly next?: string | null;
+      readonly data?: readonly Row[];
+    };
+  };
+  try {
+    const first = await read(1);
+    const rows = [...(first.data ?? [])];
+    if (!first.next) {
+      return rows;
+    }
+    const total =
+      typeof first.count === "number" ? first.count : EDITIONS_PAGE_SIZE * 2;
+    const pageCount = Math.min(
+      EDITIONS_MAX_PAGES,
+      Math.max(2, Math.ceil(total / Math.max(1, rows.length)))
+    );
+    const rest = await Promise.all(
+      Array.from({ length: pageCount - 1 }, (_, index) => read(index + 2))
+    );
+    for (const page of rest) {
+      rows.push(...(page.data ?? []));
+    }
+    return rows;
   } catch {
-    // Whatever was read stands; the rest stays unknown.
+    return null;
+  }
+}
+
+/**
+ * Each Meme's first mint (`meme.N.firstMint`), from 6529.io's `nfts` for
+ * The Memes' contract. When it cannot be read, those cards' first mints are
+ * unavailable, never guessed.
+ */
+export async function loadFirstMints(): Promise<ReadonlyMap<number, string>> {
+  const mints = new Map<number, string>();
+  const rows = await readAllPages<NftsRow>(
+    `${publicEnv.API_ENDPOINT}/api/nfts?contract=${REGISTRY_V14.memes}&`
+  );
+  for (const row of rows ?? []) {
+    const at =
+      typeof row.mint_date === "string" ? isoSeconds(row.mint_date) : null;
+    if (typeof row.id === "number" && at !== null) {
+      mints.set(row.id, at);
+    }
   }
   return mints;
 }
@@ -182,57 +213,87 @@ function editionCard(
   return { id, season, minted, firstMint: null, edition: floor };
 }
 
+/** This server's last good read of the editions, for a read that fails. */
+let lastEditions: EditionsInput | null = null;
+
+/** The editions as the API gave them at ship time (`data/editionsSnapshot.json`). */
+function snapshotEditions(): EditionsInput {
+  const cards = editionsSnapshot.cards.map((row) => {
+    const [id, season, size, floor, firstMint] = row as [
+      number,
+      number,
+      number,
+      number | null,
+      string | null,
+    ];
+    return {
+      ...editionCard(id, season, size, floor),
+      firstMint: firstMint ?? null,
+    };
+  });
+  return {
+    cards,
+    readAt: editionsSnapshot.readAt,
+    source: `${editionsSnapshot.source}, as read at ship time`,
+    claimLimits: SITE.claimLimits.values,
+  };
+}
+
 /** 6529.io's `memes_extended_data`, every page: each card's id, season and edition. */
 async function loadEditions(now: string): Promise<EditionsInput | null> {
-  const cards: EditionCard[] = [];
   const firstMints = loadFirstMints();
-  try {
-    for (let page = 1; page <= EDITIONS_MAX_PAGES; page += 1) {
-      const url = `${publicEnv.API_ENDPOINT}/api/memes_extended_data?page_size=${EDITIONS_PAGE_SIZE}&page=${page}`;
-      const response = await fetch(url, {
-        headers: { accept: "application/json" },
-        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-        next: { revalidate: EDITIONS_REVALIDATE_SECONDS },
-      } as RequestInit);
-      if (!response.ok) {
-        return null;
-      }
-      const body = (await response.json()) as EditionsPage;
-      for (const row of body.data ?? []) {
-        if (
-          typeof row.id === "number" &&
-          typeof row.season === "number" &&
-          typeof row.edition_size === "number"
-        ) {
-          cards.push(
-            editionCard(
-              row.id,
-              row.season,
-              row.edition_size,
-              row.edition_size_floor
-            )
-          );
-        }
-      }
-      if (!body.next) {
-        break;
-      }
+  const rows = await readAllPages<EditionsRow>(
+    `${publicEnv.API_ENDPOINT}/api/memes_extended_data?`
+  );
+  const byId = new Map<number, EditionCard>();
+  for (const row of rows ?? []) {
+    if (
+      typeof row.id === "number" &&
+      typeof row.season === "number" &&
+      typeof row.edition_size === "number"
+    ) {
+      byId.set(
+        row.id,
+        editionCard(
+          row.id,
+          row.season,
+          row.edition_size,
+          row.edition_size_floor
+        )
+      );
     }
-  } catch {
-    return null;
   }
-  if (cards.length === 0) {
-    return null;
+  if (rows === null || byId.size === 0) {
+    return lastEditions ?? snapshotEditions();
   }
   const mints = await firstMints;
-  return {
-    cards: cards
+  const read: EditionsInput = {
+    cards: [...byId.values()]
       .map((card) => ({ ...card, firstMint: mints.get(card.id) ?? null }))
       .sort((a, b) => a.id - b.id),
     readAt: now,
     source: "6529.io API memes_extended_data",
     claimLimits: SITE.claimLimits.values,
   };
+  // A first mint never changes, so a read whose first mints failed takes
+  // them from the last good read, or else from the snapshot.
+  if (mints.size === 0) {
+    const known = new Map(
+      (lastEditions ?? snapshotEditions()).cards.map((card) => [
+        card.id,
+        card.firstMint,
+      ])
+    );
+    return {
+      ...read,
+      cards: read.cards.map((card) => ({
+        ...card,
+        firstMint: known.get(card.id) ?? null,
+      })),
+    };
+  }
+  lastEditions = read;
+  return read;
 }
 
 /** Every source a page's facts read, now. */

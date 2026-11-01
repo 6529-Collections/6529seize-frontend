@@ -59,10 +59,12 @@ export default function RecordStrip({
     },
     {
       id: "v14",
-      when: facts.print("proofs.milestones.tdhV14"),
-      mark: <Mark kind="drift" locale={locale} size="sm" refText="D137" />,
+      when: facts.print("proofs.milestones.pairV14"),
+      mark: <HalfPair a b locale={locale} />,
       title: rich(locale, k("record.v14.title")),
-      body: rich(locale, k("record.v14.body")),
+      body: rich(locale, k("record.v14.body"), {
+        cycle: facts.print("proofs.pairV14.cycle"),
+      }),
     },
     {
       id: "next",

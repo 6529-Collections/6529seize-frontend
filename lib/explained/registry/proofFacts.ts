@@ -5,9 +5,10 @@ import { defineFact, type FactDef, type FactFormat } from "./types";
 /**
  * The zero-knowledge proofs of a TDH day (6529chain P52, P53 §4.6, D119,
  * D128), as the validator's own records state them: the statement both
- * programs prove, program A's proof of the 2026-10-11 day, the pair both
- * programs proved of one common test cycle, the D128 contract's tests and
- * gas, and what has not happened yet. Each fact names the record and commit
+ * programs prove, program A's proof of the 2026-10-11 day (under the retired
+ * tdh-v1.0), the two pairs both programs proved of a common test cycle (the
+ * first under tdh-v1.0, the second under tdh-v1.4), the D128 contract's
+ * tests and gas, and what has not happened yet. Each fact names the record and commit
  * it was read from (`lib/explained/data/proofs.json`); they are refreshed at
  * the fact gate, like the decision record.
  */
@@ -17,7 +18,9 @@ type SourceKey = keyof typeof proofs.sources;
 const KIND: Record<SourceKey, "site" | "spec" | "decision"> = {
   contracts: "site",
   programA: "site",
+  programAV14: "site",
   programB: "site",
+  programBV14: "site",
   runbook: "site",
   p53: "spec",
   p52: "spec",
@@ -105,11 +108,12 @@ export const PROOF_FACTS = {
     unit: "TDH",
     evidence: "tested",
   }),
-  "proofs.dayB.userCycles": count("programB", proofs.dayB.userCycles),
-  "proofs.dayB.paddedCycles": count("programB", proofs.dayB.paddedCycles),
-  "proofs.dayB.segments": count("contracts", proofs.dayB.segments),
-  "proofs.dayB.gpuHours": count("contracts", proofs.dayB.gpuHours),
-  "proofs.dayB.costUsd": count("runbook", proofs.dayB.costUsd),
+  "proofs.dayB.userCycles": count("programBV14", proofs.dayB.userCycles),
+  "proofs.dayB.totalCycles": count("programBV14", proofs.dayB.totalCycles),
+  "proofs.dayB.segments": count("programBV14", proofs.dayB.segments),
+  "proofs.dayB.gpuHoursLow": count("programBV14", proofs.dayB.gpuHoursLow),
+  "proofs.dayB.gpuHoursHigh": count("programBV14", proofs.dayB.gpuHoursHigh),
+  "proofs.dayB.costUsd": count("programBV14", proofs.dayB.costUsd),
 
   "proofs.phases.build": fact("programA", "commit", proofs.phases.build),
   "proofs.phases.total": count("programA", proofs.phases.total),
@@ -148,6 +152,21 @@ export const PROOF_FACTS = {
   ),
   "proofs.pair.forkBlock": count("contracts", proofs.pair.forkBlock),
 
+  "proofs.pairV14.cycle": count("contracts", proofs.pairV14.cycle),
+  "proofs.pairV14.provedOn": fact("contracts", "day", proofs.pairV14.provedOn),
+  "proofs.pairV14.stepsA": count("contracts", proofs.pairV14.stepsA),
+  "proofs.pairV14.stepsB": count("contracts", proofs.pairV14.stepsB),
+  "proofs.pairV14.submitGas": fact(
+    "contracts",
+    "count",
+    proofs.pairV14.submitGas,
+    { evidence: "tested" }
+  ),
+  "proofs.pairV14.ethCallBlock": count(
+    "contracts",
+    proofs.pairV14.ethCallBlock
+  ),
+
   "proofs.gas.verifyA": count("contracts", proofs.gas.verifyA),
   "proofs.gas.verifyB": count("contracts", proofs.gas.verifyB),
   "proofs.gas.p52Estimate": count("p52", proofs.gas.p52Estimate),
@@ -155,7 +174,11 @@ export const PROOF_FACTS = {
   "proofs.a.zkvm": fact("contracts", "text", proofs.programs.a.zkvm),
   "proofs.a.wrapper": fact("contracts", "text", proofs.programs.a.wrapper),
   "proofs.a.vkey": fact("contracts", "hash", proofs.programs.a.vkey),
-  "proofs.a.elfSha256": fact("programA", "hash", proofs.programs.a.elfSha256),
+  "proofs.a.elfSha256": fact(
+    "programAV14",
+    "hash",
+    proofs.programs.a.elfSha256
+  ),
   "proofs.b.zkvm": fact("contracts", "text", proofs.programs.b.zkvm),
   "proofs.b.wrapper": fact("contracts", "text", proofs.programs.b.wrapper),
   "proofs.b.imageId": fact("contracts", "hash", proofs.programs.b.imageId),
@@ -212,6 +235,11 @@ export const PROOF_FACTS = {
     "contracts",
     "day",
     proofs.milestones.tdhV14
+  ),
+  "proofs.milestones.pairV14": fact(
+    "contracts",
+    "day",
+    proofs.milestones.pairV14
   ),
 
   "proofs.vectorFinding.vectors": count("runLog", proofs.vectorFinding.vectors),

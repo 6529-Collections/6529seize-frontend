@@ -86,7 +86,14 @@ describe("the voice lint", () => {
     expect(hit("Recomputed independently every day")).toEqual(["independent"]);
     expect(hit("Proof A is proved to Ethereum")).toEqual([
       "proved-to-ethereum",
+      "proven-on-ethereum",
     ]);
+    expect(hit("Proven on Ethereum")).toEqual(["proven-on-ethereum"]);
+    expect(hit("Proofs of a day, checked on Ethereum.")).toEqual([
+      "proven-on-ethereum",
+    ]);
+    expect(hit("Auf Ethereum bewiesen")).toEqual(["proven-on-ethereum"]);
+    expect(hit("Not recorded on Ethereum yet.")).toEqual([]);
     expect(hit("Proof A lives on Ethereum now")).toEqual([
       "proof-a-on-ethereum",
     ]);

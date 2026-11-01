@@ -28,12 +28,6 @@ export default function SureHead({
 }) {
   const { m, p, book, locale } = ctx;
   const sha = book.maybe<string>("manifest.sha256");
-  const sep = (
-    <span
-      aria-hidden="true"
-      className="tw-inline-block tw-size-[3px] tw-rounded-full tw-bg-iron-600"
-    />
-  );
   return (
     <>
       <PageHead
@@ -114,7 +108,7 @@ export default function SureHead({
         />
       </div>
       <ul
-        className="tw-m-0 tw-mt-3.5 tw-flex tw-list-none tw-flex-wrap tw-items-center tw-gap-x-3.5 tw-gap-y-1 tw-p-0 tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-400"
+        className="tw-m-0 tw-mt-3.5 tw-flex tw-list-none tw-flex-wrap tw-items-center tw-gap-x-6 tw-gap-y-1 tw-p-0 tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-400"
         aria-label={ctx.s("explained.tdh.sure.src.label")}
       >
         <li>
@@ -122,7 +116,6 @@ export default function SureHead({
             version: p.v("manifest.lean"),
           })}
         </li>
-        <li aria-hidden="true">{sep}</li>
         <li className="tw-inline-flex tw-flex-wrap tw-items-center tw-gap-1">
           {sha
             ? m("explained.tdh.sure.src.file", {
@@ -134,7 +127,6 @@ export default function SureHead({
               })
             : m("explained.tdh.sure.src.bundled")}
         </li>
-        <li aria-hidden="true">{sep}</li>
         <li>
           {m("explained.tdh.sure.src.audited", {
             audited: p.v("manifest.audited"),
@@ -144,7 +136,6 @@ export default function SureHead({
             p53: p.v("manifest.audited.p53"),
           })}
         </li>
-        <li aria-hidden="true">{sep}</li>
         <li>
           {m("explained.tdh.sure.src.vectors", {
             passed: p.v("manifest.vectors.passed"),

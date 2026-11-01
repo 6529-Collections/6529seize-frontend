@@ -101,12 +101,12 @@ export default function StillTrust({
                 {
                   title: fill(locale, k("trail.files")),
                   sub: fill(locale, k("trail.filesSub")),
-                  who: "source",
+                  who: "sixFive",
                 },
                 {
                   title: fill(locale, k("trail.verifier")),
                   sub: fill(locale, k("trail.verifierSub")),
-                  who: "source",
+                  who: "files",
                 },
                 {
                   title: fill(locale, k("trail.words")),

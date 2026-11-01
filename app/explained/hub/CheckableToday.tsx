@@ -78,6 +78,8 @@ export default function CheckableToday({
             })}
           </Link>{" "}
           {hrich(locale, "check.theoremsBody", {
+            tdh: fact("manifest.proved.tdh"),
+            p53: fact("manifest.proved.p53"),
             shownFalse: fact("manifest.shownFalse"),
           })}
         </Item>

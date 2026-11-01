@@ -47,6 +47,7 @@ export default function ProofsSources({
             title: fill(locale, k("hwk.programA.title")),
             body: rich(locale, k("hwk.programA.body"), {
               commit: code(commitOf(proofs.sources.programA.ref)),
+              commitV14: code(commitOf(proofs.sources.programAV14.ref)),
               date: facts.print("proofs.day.date"),
             }),
           },
@@ -54,6 +55,7 @@ export default function ProofsSources({
             title: fill(locale, k("hwk.programB.title")),
             body: rich(locale, k("hwk.programB.body"), {
               commit: code(commitOf(proofs.sources.programB.ref)),
+              commitV14: code(commitOf(proofs.sources.programBV14.ref)),
             }),
           },
           {

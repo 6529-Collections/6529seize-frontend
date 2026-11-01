@@ -185,7 +185,10 @@ export function walletCase(preset: WalletPreset): WalletCase {
 export function walletPositions(
   found: WalletCase
 ): Record<string, { readonly x: number; readonly y: number }> {
-  if (found.wallets.length < 5) {
+  // The hull is a rounded box around its group, so a wallet left alone must
+  // sit outside every group's box: with one alone, the groups take the right
+  // and the lone wallets the left, as with five.
+  if (found.wallets.length < 5 && found.alone.length === 0) {
     const corners: Record<string, { x: number; y: number }> = {
       A: { x: 0.22, y: 0.24 },
       B: { x: 0.78, y: 0.24 },

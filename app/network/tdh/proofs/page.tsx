@@ -26,7 +26,7 @@ import TwoPrograms from "./TwoPrograms";
 import WhereItStands from "./WhereItStands";
 
 /**
- * 5 Proven on Ethereum (`/network/tdh/proofs`): the zero-knowledge proofs
+ * 5 Zero-knowledge proofs (`/network/tdh/proofs`): the zero-knowledge proofs
  * of a TDH day. What a T proof is and the words it binds; how one is made;
  * why two programs in two proof systems; the D128 contract that needs both;
  * what a proof guarantees and what it does not; where it stands; and what

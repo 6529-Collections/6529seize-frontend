@@ -91,15 +91,17 @@ function rungs(book: FactBook, locale: SupportedLocale): Rung[] {
     },
     {
       what: ot(locale, "rung.proved"),
-      detail: ot(locale, "rung.provedBody"),
+      detail: ot(locale, "rung.provedBody", {
+        p53: f("manifest.proved.p53"),
+      }),
       marks: [
         {
           kind: "proved",
           label: ot(locale, "rung.provedMark", {
-            proved: f("manifest.proved"),
+            proved: f("manifest.proved.tdh"),
           }),
           refText: ot(locale, "rung.provedRef", {
-            shownFalse: f("manifest.shownFalse"),
+            shownFalse: f("manifest.shownFalse.tdh"),
           }),
         },
       ],

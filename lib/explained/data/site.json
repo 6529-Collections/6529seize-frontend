@@ -22,7 +22,10 @@
   },
   "cutover": {
     "about": "2026-10-23",
-    "source": "decision D132: the website cuts over to the Rust result about one week after 2026-10-16"
+    "source": "decision D132: the website cuts over to the Rust result about one week after 2026-10-16",
+    "made": false,
+    "checkedAt": "2026-11-01",
+    "statusSource": "6529.io's TDH backend as of 2026-11-01: still its own computation; the cutover has not been made"
   },
   "proofA": {
     "cycle": 20737,
@@ -31,7 +34,7 @@
     "totalWithoutBurn": 2060802863,
     "totalWithBurn": 2061888816,
     "ethCallBlock": 26206630,
-    "source": "the validator's contracts record at cabb3e8: cycle 20,737 proved, accepted by mainnet's SP1 gateway in an eth_call"
+    "source": "the validator's contracts record at d49ffc7: cycle 20,737 proved under tdh-v1.0, accepted by mainnet's SP1 gateway in an eth_call"
   },
   "validator": {
     "version": "0.1.0",

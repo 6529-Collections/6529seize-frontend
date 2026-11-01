@@ -37,7 +37,7 @@ export default function BuildSection({ ctx }: { readonly ctx: SureContext }) {
         version: p.v("manifest.lean"),
         jobs: p.v("manifest.build.jobs"),
       }),
-      mark: "proved",
+      mark: "tested",
       refText: s("explained.tdh.sure.build.kernelRef"),
     },
     {
@@ -53,7 +53,7 @@ export default function BuildSection({ ctx }: { readonly ctx: SureContext }) {
         sorry: code("sorry"),
         native: code("native_decide"),
       }),
-      mark: "proved",
+      mark: "tested",
       refText: s("explained.tdh.sure.build.auditRef"),
     },
     {

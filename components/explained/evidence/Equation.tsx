@@ -57,7 +57,7 @@ export default function Equation({
             >
               <div className="tw-text-[15px] tw-font-semibold tw-text-iron-50">
                 {row.who}
-                <span className="tw-block tw-text-[13px] tw-font-medium tw-text-iron-400">
+                <span className="tw-block tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-400">
                   {row.sub}
                 </span>
               </div>

@@ -233,7 +233,7 @@
     {
       "id": "tdh-proofs",
       "route": "/network/tdh/proofs",
-      "title": "Proven on Ethereum",
+      "title": "Zero-knowledge proofs",
       "genre": "V",
       "mockup": null,
       "lane": "P5",

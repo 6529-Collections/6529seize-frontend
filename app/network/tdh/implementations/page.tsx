@@ -207,7 +207,9 @@ export default async function ImplementationsPage() {
                       "explained.tdh.impl.a.sub"
                     ),
                     written: m("explained.tdh.impl.a.written"),
-                    runs: m("explained.tdh.impl.a.runs"),
+                    runs: m("explained.tdh.impl.a.runs", {
+                      checked: p.v("tdh.cutover.checkedAt"),
+                    }),
                     proved: (
                       <Mark
                         kind={programsFact ? "proved" : "notYet"}
@@ -440,6 +442,7 @@ export default async function ImplementationsPage() {
               from: p.v("difftest.from"),
               to: p.v("difftest.to"),
               rounds: p.v("difftest.rounds"),
+              open: p.v("difftest.open"),
               random: p.v("programs.randomPerChange"),
             })}
           </Prose>

@@ -11,22 +11,30 @@ import { hrich, ht } from "./copy";
  * replaces the descriptive line by changing `explained.hub.mission`.
  */
 const HUB_LEDE =
-  "tw-m-0 tw-mt-4 tw-max-w-[1080px] tw-text-[18px] tw-font-normal tw-leading-[28px] tw-text-iron-300 md:tw-mt-[22px] md:tw-text-[22px] md:tw-leading-[34px]";
+  "tw-m-0 tw-mt-4 tw-max-w-[660px] tw-text-[18px] tw-font-normal tw-leading-[28px] tw-text-iron-300 md:tw-mt-[22px] md:tw-text-[22px] md:tw-leading-[34px] lg:tw-mt-0 lg:tw-pb-1.5 lg:tw-text-[20px] lg:tw-leading-[31px]";
 
+/**
+ * On a wide screen the title and the descriptive line sit side by side, so
+ * the loop below starts high enough for all six stations and Ethereum to
+ * show on the first screen at 1440 × 900 (MAP.md §3), and the line keeps a
+ * reading measure.
+ */
 export function HubOpener({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <header className="tw-pt-[30px] md:tw-pt-[52px]">
       <span className={`${EX_TEXT.label} tw-mb-4 tw-block`}>
         {ht(locale, "eyebrow")}
       </span>
-      <h1
-        className={`${EX_TEXT.displayHub} max-[359px]:tw-text-[30px] max-[359px]:tw-leading-[34px]`}
-      >
-        {ht(locale, "title")}
-      </h1>
-      <p className={HUB_LEDE} data-ex-lede="" data-ex-mission="">
-        {ht(locale, "mission")}
-      </p>
+      <div className="lg:tw-grid lg:tw-grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:tw-items-end lg:tw-gap-14">
+        <h1
+          className={`${EX_TEXT.displayHub} tw-text-balance max-[359px]:tw-text-[30px] max-[359px]:tw-leading-[34px] lg:tw-text-[72px] lg:tw-leading-[76px]`}
+        >
+          {ht(locale, "title")}
+        </h1>
+        <p className={HUB_LEDE} data-ex-lede="" data-ex-mission="">
+          {ht(locale, "mission")}
+        </p>
+      </div>
     </header>
   );
 }

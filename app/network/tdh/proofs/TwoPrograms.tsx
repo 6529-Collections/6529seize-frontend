@@ -98,6 +98,7 @@ function ProgramsTable({
       id: "day",
       label: rich(locale, k("table.day"), {
         date: facts.print("proofs.day.date"),
+        rule: facts.print("proofs.day.ruleVersion"),
       }),
       a: (
         <>
@@ -112,7 +113,8 @@ function ProgramsTable({
         <>
           <Mark kind="notYet" locale={locale} size="sm" />{" "}
           {rich(locale, k("table.dayB"), {
-            gpuHours: facts.print("proofs.dayB.gpuHours"),
+            low: facts.print("proofs.dayB.gpuHoursLow"),
+            high: facts.print("proofs.dayB.gpuHoursHigh"),
           })}
         </>
       ),
@@ -120,13 +122,13 @@ function ProgramsTable({
     {
       id: "pair",
       label: rich(locale, k("table.pair"), {
-        cycle: facts.print("proofs.pair.cycle"),
+        cycle: facts.print("proofs.pairV14.cycle"),
       }),
       a: (
         <>
           <Mark kind="proved" locale={locale} size="sm" />{" "}
           {rich(locale, k("table.pairA"), {
-            steps: facts.print("proofs.pair.stepsA"),
+            steps: facts.print("proofs.pairV14.stepsA"),
           })}
         </>
       ),
@@ -134,7 +136,7 @@ function ProgramsTable({
         <>
           <Mark kind="proved" locale={locale} size="sm" />{" "}
           {rich(locale, k("table.pairB"), {
-            steps: facts.print("proofs.pair.stepsB"),
+            steps: facts.print("proofs.pairV14.stepsB"),
             words: facts.print("proofs.statement.words"),
           })}
         </>

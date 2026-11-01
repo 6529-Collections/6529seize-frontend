@@ -57,7 +57,7 @@ describe("the hub, first version", () => {
     ).toHaveTextContent("562 cards");
   });
 
-  it("lists three things anyone can check, with who runs the checks", () => {
+  it("lists three things checked today, with who can repeat each", () => {
     const { container } = render(<CheckableToday book={book} locale="en-US" />);
     const panel = container.querySelector("[data-ex-checkable]");
     expect(panel).toHaveTextContent(
@@ -65,13 +65,13 @@ describe("the hub, first version", () => {
     );
     // The theorem counts are the bundled manifest's, read through the facts.
     expect(panel).toHaveTextContent(
-      `${book.num("manifest.proved").toLocaleString("en-US")} Lean theorems about the rules, with ${book.num("manifest.shownFalse")} earlier claims shown false and kept on record.`
+      `${book.num("manifest.proved").toLocaleString("en-US")} Lean theorems ${book.num("manifest.proved.tdh")} about TDH's rules and ${book.num("manifest.proved.p53")} about the validators', with ${book.num("manifest.shownFalse")} earlier statements shown false and kept on record.`
     );
     expect(panel).toHaveTextContent(
-      "program A ran inside SP1, and mainnet's SP1 verifier accepts its proof in a read-only call. Proof B is not done."
+      "program A ran inside SP1, a zero-knowledge prover, and mainnet's SP1 verifier contract accepts the proof without a transaction. Proof B of that day is not done."
     );
     expect(panel).toHaveTextContent(
-      "For now the checks are run by 6529 and read by everyone."
+      "Anyone can repeat the daily comparison from its published files. The Lean source and the proof files are private for now, so those two are run by 6529 and read by everyone."
     );
   });
 

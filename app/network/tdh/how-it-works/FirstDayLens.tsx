@@ -177,6 +177,7 @@ export default function FirstDayLens({
               day: dayText,
             }),
           },
+          { text: ht(locale, "explained.tdh.how.firstday.ruleDrawn") },
           { text: ht(locale, "explained.tdh.how.firstday.ruleA") },
           {
             text: (

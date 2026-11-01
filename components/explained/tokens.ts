@@ -96,12 +96,12 @@ export const EX_TEXT = {
   opener:
     "tw-m-0 tw-text-[40px] tw-font-semibold tw-leading-[44px] tw-tracking-[-0.03em] tw-text-iron-50 md:tw-text-[72px] md:tw-leading-[76px]",
   /** explainers and guides: 64/68, phone 38/43 */
-  h1: "tw-m-0 tw-text-[38px] tw-font-semibold tw-leading-[43px] tw-tracking-[-0.032em] tw-text-iron-50 md:tw-text-[64px] md:tw-leading-[68px]",
+  h1: "tw-m-0 tw-text-balance tw-text-[38px] tw-font-semibold tw-leading-[43px] tw-tracking-[-0.032em] tw-text-iron-50 md:tw-text-[64px] md:tw-leading-[68px]",
   /** evidence and reference: 46/52, phone 32/38 */
-  h1r: "tw-m-0 tw-text-[32px] tw-font-semibold tw-leading-[38px] tw-tracking-[-0.026em] tw-text-iron-50 md:tw-text-[46px] md:tw-leading-[52px]",
+  h1r: "tw-m-0 tw-text-balance tw-text-[32px] tw-font-semibold tw-leading-[38px] tw-tracking-[-0.026em] tw-text-iron-50 md:tw-text-[46px] md:tw-leading-[52px]",
   /** statement heading: 44/50, phone 29/35 */
-  stmt: "tw-m-0 tw-text-[29px] tw-font-semibold tw-leading-[35px] tw-tracking-[-0.026em] tw-text-iron-50 md:tw-text-[44px] md:tw-leading-[50px]",
-  h2: "tw-m-0 tw-text-[25px] tw-font-semibold tw-leading-[32px] tw-tracking-[-0.02em] tw-text-iron-50 md:tw-text-[32px] md:tw-leading-[40px]",
+  stmt: "tw-m-0 tw-text-balance tw-text-[29px] tw-font-semibold tw-leading-[35px] tw-tracking-[-0.026em] tw-text-iron-50 md:tw-text-[44px] md:tw-leading-[50px]",
+  h2: "tw-m-0 tw-text-balance tw-text-[25px] tw-font-semibold tw-leading-[32px] tw-tracking-[-0.02em] tw-text-iron-50 md:tw-text-[32px] md:tw-leading-[40px]",
   h3: "tw-m-0 tw-text-[21px] tw-font-semibold tw-leading-[28px] tw-tracking-[-0.01em] tw-text-iron-50",
   h4: "tw-m-0 tw-text-[17px] tw-font-semibold tw-leading-6 tw-text-iron-50",
   /** a model's question: 24/32, phone 20/27 */

@@ -292,6 +292,7 @@ export default function NetworkDistribution({
         {ot(locale, "network.caption", {
           count: formatCount(locale, top100.count),
           share: percent(locale, top100.tdh / data.total),
+          ranked: formatCount(locale, data.identities),
           read: readTime(locale, data.readAt),
         })}
       </figcaption>

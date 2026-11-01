@@ -620,4 +620,10 @@ export const REFERENCE_FACTS = {
     (d) => d.difftest.source,
     (d) => d.difftest.to
   ),
+  "difftest.open": fromReference<string>(
+    "text",
+    "decision",
+    (d) => d.difftest.source,
+    (d) => d.difftest.open
+  ),
 } as const;

@@ -68,6 +68,7 @@ function stations(book: FactBook, locale: SupportedLocale): AtlasStation[] {
       sub: ht(locale, "station.decideSub"),
       num: ht(locale, "station.decideNum", {
         count: f("site.mainStage.decisions"),
+        through: f("site.mainStage.through"),
       }),
       fact: "site.mainStage.decisions",
       say: ht(locale, "station.decideSay"),

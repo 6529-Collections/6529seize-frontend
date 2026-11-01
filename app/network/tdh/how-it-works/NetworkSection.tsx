@@ -44,6 +44,7 @@ export default function NetworkSection({
   const written = book.maybe<string>("feed.writtenAt");
   const fileUrl = book.maybe<string>("tdh.latest.file.url");
   const cutover = book.maybe<string>("tdh.cutover.about");
+  const cutoverChecked = book.maybe<string>("tdh.cutover.checkedAt");
   const v = (fact: Parameters<typeof FactValue>[0]["fact"]) => (
     <FactValue fact={fact} locale={locale} />
   );
@@ -98,7 +99,7 @@ export default function NetworkSection({
                 cutoverPast
                   ? "explained.tdh.how.n.cutoverPast"
                   : "explained.tdh.how.n.cutover",
-                { date: v(cutover) }
+                { date: v(cutover), checked: v(cutoverChecked) }
               )}
           </Para>
         )}

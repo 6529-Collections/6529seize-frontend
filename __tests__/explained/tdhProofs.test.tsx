@@ -53,7 +53,7 @@ jest.mock("next/navigation", () => ({
 }));
 
 /**
- * Proven on Ethereum (`/network/tdh/proofs`): the facts it prints agree
+ * Zero-knowledge proofs (`/network/tdh/proofs`): the facts it prints agree
  * with the records they restate, the models compute what the contract's
  * record says, and every section renders on the facts layer alone.
  */
@@ -309,7 +309,7 @@ describe("the page's sections", () => {
         facts={facts}
         chapterNumber={chapter.number ?? ""}
         pageNumber={page?.n ?? ""}
-        pageTitle="Proven on Ethereum"
+        pageTitle="Zero-knowledge proofs"
       />
     );
     expect(
@@ -374,7 +374,8 @@ describe("the page's sections", () => {
     expect(container.querySelectorAll("[data-row]")).toHaveLength(6);
     expect(screen.getByText("Not deployed.")).toBeInTheDocument();
     expect(
-      container.querySelectorAll('[data-fact="proofs.dayB.gpuHours"]').length
+      container.querySelectorAll('[data-fact="proofs.dayB.gpuHoursHigh"]')
+        .length
     ).toBeGreaterThan(0);
     for (const id of ["made", "two", "contract", "status", "trust"]) {
       expect(container.querySelector(`#${id}`)).not.toBeNull();
@@ -383,11 +384,21 @@ describe("the page's sections", () => {
 
   it("names its records by commit in How we know, never linking them", () => {
     const { container } = withFacts(
-      <ProofsSources locale="en-US" facts={facts} title="Proven on Ethereum" />
+      <ProofsSources
+        locale="en-US"
+        facts={facts}
+        title="Zero-knowledge proofs"
+      />
     );
     const footer = container.querySelector("[data-ex-hwk]") as HTMLElement;
     expect(footer).not.toBeNull();
-    for (const commit of ["a92983d", "1a89f27", "0015ad3"]) {
+    for (const commit of [
+      "d49ffc7",
+      "1a89f27",
+      "af2a81f",
+      "0015ad3",
+      "1aedfa3",
+    ]) {
       expect(footer.textContent).toContain(commit);
     }
     expect(within(footer).getByText("Private records")).toBeInTheDocument();
@@ -402,7 +413,7 @@ describe("the page's sections", () => {
     render(<ProofsDoor from="sure" locale="de-DE" />);
     const door = screen.getByRole("link");
     expect(door).toHaveAttribute("href", "/network/tdh/proofs");
-    expect(door).toHaveTextContent("Auf Ethereum bewiesen");
+    expect(door).toHaveTextContent("Zero-Knowledge-Beweise");
   });
 });
 

@@ -140,6 +140,7 @@
     "explained:sync-record": "node scripts/require-6529-command.cjs && node scripts/explained/sync-record.mjs",
     "explained:sync-lean": "node scripts/require-6529-command.cjs && node scripts/explained/sync-lean.mjs",
     "explained:fixtures": "node scripts/require-6529-command.cjs && node scripts/explained/make-fixtures.mjs",
+    "explained:snapshot-editions": "node scripts/require-6529-command.cjs && node scripts/explained/snapshot-editions.mjs",
     "lint": "node scripts/require-6529-command.cjs && eslint .",
     "typecheck": "node scripts/require-6529-command.cjs && pnpm run format:uncommitted && tsc --noEmit -p tsconfig.typecheck.json",
     "typecheck:ci": "node scripts/require-6529-command.cjs && tsc --noEmit -p tsconfig.typecheck.json",

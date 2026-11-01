@@ -43,10 +43,11 @@ export default function WhereItStands({
             {
               mark: "proved",
               text: rich(locale, k("is.pair"), {
-                cycle: facts.print("proofs.pair.cycle"),
+                cycle: facts.print("proofs.pairV14.cycle"),
                 words: facts.print("proofs.statement.words"),
-                gas: facts.print("proofs.pair.submitGas"),
-                txGas: facts.print("proofs.pair.transactionGas"),
+                date: facts.print("proofs.pairV14.provedOn"),
+                block: facts.print("proofs.pairV14.ethCallBlock"),
+                gas: facts.print("proofs.pairV14.submitGas"),
               }),
             },
             {
@@ -72,7 +73,9 @@ export default function WhereItStands({
             {
               mark: "notYet",
               text: rich(locale, k("isNot.b"), {
-                gpuHours: facts.print("proofs.dayB.gpuHours"),
+                date: facts.print("proofs.day.date"),
+                low: facts.print("proofs.dayB.gpuHoursLow"),
+                high: facts.print("proofs.dayB.gpuHoursHigh"),
                 cost: facts.print("proofs.dayB.costUsd"),
                 hours: facts.print("site.proofA.provedHours"),
                 minutes: facts.print("site.proofA.provedMinutes"),
@@ -87,7 +90,9 @@ export default function WhereItStands({
             },
             {
               mark: "notYet",
-              text: rich(locale, k("isNot.v14")),
+              text: rich(locale, k("isNot.v14"), {
+                date: facts.print("proofs.day.date"),
+              }),
             },
             {
               mark: "notYet",

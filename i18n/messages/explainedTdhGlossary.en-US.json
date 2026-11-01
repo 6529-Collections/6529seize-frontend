@@ -129,7 +129,7 @@
   "explained.tdh.glossary.knowncause.def": "A day's verdict when records differ and each difference has a known cause, class A or B. Formerly “Explained”.",
   "explained.tdh.glossary.knowncause.src": "this chapter",
   "explained.tdh.glossary.cutover.term": "Cutover",
-  "explained.tdh.glossary.cutover.def": "The day 6529.io switches from its current backend to the Rust core's result, about {about}.",
+  "explained.tdh.glossary.cutover.def": "The day 6529.io switches from its current backend to the Rust core's result. Planned for about {about}; as of {checked}, not made.",
   "explained.tdh.glossary.cutover.src": "D132",
   "explained.tdh.glossary.programs.term": "Programs A and B",
   "explained.tdh.glossary.programs.def": "Two separately written TDH programs; A is the Rust core. Proof A and proof B are each program run inside a zero-knowledge prover. The Python and Rust references were written from P26 as well.",

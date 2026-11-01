@@ -328,9 +328,10 @@ export function Trap({
 /**
  * A block of the rule's own text: formulas and pseudocode quoted from the
  * specification, never translated. Comments (`#`, or Lean's `--`) are set
- * quieter. Lines keep their columns: where a line is wider than the screen,
- * the block scrolls sideways inside its frame (a focusable, named region),
- * never the page.
+ * quieter. From a tablet up, lines keep their columns, and where a line is
+ * wider than the frame the block scrolls sideways inside it (a focusable,
+ * named region), never the page. On a phone a long line wraps with a
+ * hanging indent instead, so no rule is cut mid-token out of sight.
  */
 export function CodeBlock({
   code,
@@ -351,7 +352,7 @@ export function CodeBlock({
       className={`tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-[#0a0a0c] ${className}`.trim()}
     >
       <pre
-        className={`tw-m-0 tw-overflow-x-auto tw-whitespace-pre tw-bg-transparent tw-px-4 tw-py-4 tw-font-mono tw-text-[13px] tw-leading-[21px] tw-text-iron-50 md:tw-px-[18px] md:tw-text-sm md:tw-leading-[22px] ${EX_FOCUS}`}
+        className={`tw-m-0 tw-overflow-x-auto tw-whitespace-pre-wrap tw-bg-transparent tw-px-4 tw-py-4 tw-font-mono tw-text-[13px] tw-leading-[21px] tw-text-iron-50 [overflow-wrap:anywhere] md:tw-whitespace-pre md:tw-px-[18px] md:tw-text-sm md:tw-leading-[22px] md:[overflow-wrap:normal] ${EX_FOCUS}`}
         aria-label={label}
         data-tdh-scroll=""
         role="region"
@@ -364,7 +365,10 @@ export function CodeBlock({
             const comment = hash >= 0 ? line.slice(hash) : "";
             return (
               // A quoted block's lines are fixed in order.
-              <span key={index} className="tw-block">
+              <span
+                key={index}
+                className="tw-block tw-pl-[2ch] -tw-indent-[2ch] md:tw-pl-0 md:tw-indent-0"
+              >
                 {rule}
                 {comment && <span className="tw-text-iron-400">{comment}</span>}
                 {line === "" ? " " : null}

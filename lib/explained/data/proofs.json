@@ -1,17 +1,25 @@
 {
-  "note": "The zero-knowledge proofs of a TDH day (6529chain P52, P53 section 4.6, D119, D128) as the validator's own records state them, at the commits named in sources. Refresh at ship time with the fact gate. No person, account, host or address is named; program identities are hashes of public code.",
+  "note": "The zero-knowledge proofs of a TDH day (6529chain P52, P53 section 4.6, D119, D128) as the validator's own records state them, at the commits named in sources. Program A's proof of 2026-10-11 and the first pair are under the retired tdh-v1.0; the pair of 2026-10-31 is under tdh-v1.4. Refresh at ship time with the fact gate. No person, account, host or address is named; program identities are hashes of public code.",
   "sources": {
     "contracts": {
-      "ref": "the validator's contracts record (contracts/README.md), commit a92983d",
-      "writtenAt": "2026-10-18T17:33:40Z"
+      "ref": "the validator's contracts record (contracts/README.md), commit d49ffc7",
+      "writtenAt": "2026-10-31T17:35:08Z"
     },
     "programA": {
       "ref": "the validator's program A record (zk/program-a/README.md), commit 1a89f27",
       "writtenAt": "2026-10-16T04:01:24Z"
     },
+    "programAV14": {
+      "ref": "the validator's program A record (zk/program-a/README.md), commit af2a81f",
+      "writtenAt": "2026-10-31T13:03:31Z"
+    },
     "programB": {
       "ref": "the validator's program B record (zk/program-b/README.md), commit 0015ad3",
       "writtenAt": "2026-10-16T05:36:24Z"
+    },
+    "programBV14": {
+      "ref": "the validator's program B record (zk/program-b/README.md), commit 1aedfa3",
+      "writtenAt": "2026-10-31T17:08:33Z"
     },
     "runbook": {
       "ref": "the proving runbook, sections 7 and 10, round 6 of 2026-10-16"
@@ -107,11 +115,12 @@
     "nativeTotal": 2060802863
   },
   "dayB": {
-    "userCycles": 137473152108,
-    "paddedCycles": 178829918208,
-    "segments": 170546,
-    "gpuHours": 95,
-    "costUsd": 290,
+    "userCycles": 81731057930,
+    "totalCycles": 96753680384,
+    "segments": 92272,
+    "gpuHoursLow": 62,
+    "gpuHoursHigh": 79,
+    "costUsd": 150,
     "total": 2060802863
   },
   "phases": {
@@ -161,6 +170,16 @@
     "calldataBytes": 2532,
     "forkBlock": 26203200
   },
+  "pairV14": {
+    "cycle": 20744,
+    "provedOn": "2026-10-31",
+    "stepsA": 19969211,
+    "stepsB": 5566088,
+    "proofBytesA": 356,
+    "sealBytesB": 260,
+    "submitGas": 689735,
+    "ethCallBlock": 26314165
+  },
   "gas": {
     "verifyA": 229812,
     "verifyB": 238663,
@@ -170,20 +189,20 @@
     "a": {
       "zkvm": "SP1 6.9.0",
       "wrapper": "Groth16 on BN254",
-      "vkey": "0x00d666ad2a6f6087e0f747a27890fc23573d53f71b6b7ed5ee32d9a683ec1595",
-      "elfSha256": "1c2770667d14d6d6efb013b7ca729b2b4795ab61aa62031f925a0d980af676e6"
+      "vkey": "0x00d343e8c66fef85134fe2005fa49c4259ddf9a7d6cd841f2fee6189ce6709f9",
+      "elfSha256": "0ffde4df98b9774fc0c13b7a6892512a3400d7642767b8c7efcf0e7ec78a6a66"
     },
     "b": {
       "zkvm": "RISC Zero 3.0.6",
       "wrapper": "Groth16 on BN254",
-      "imageId": "0xae9b6294b15c5fb95827c6ed5c8c9ca4c1a89b5951c2417854396df6c6862d3d"
+      "imageId": "0x1dca211533ac7761e32d0ad76eef3fd72616bd1070328e4612e09e5d9c763a0d"
     }
   },
   "contract": {
     "checks": 8,
-    "unitTests": 103,
-    "forkTests": 38,
-    "testedOn": "2026-10-18",
+    "unitTests": 109,
+    "forkTests": 42,
+    "testedOn": "2026-10-31",
     "horizon": "2026-12-01T00:00:00Z",
     "retiredRuleId": "0x63e242fac535c4db348f95768624c657571db32facfca4fb8a9ea780163bcf22"
   },
@@ -198,7 +217,8 @@
   },
   "milestones": {
     "firstProofs": "2026-10-15",
-    "tdhV14": "2026-10-18"
+    "tdhV14": "2026-10-18",
+    "pairV14": "2026-10-31"
   },
   "vectorFinding": {
     "vectors": 5,

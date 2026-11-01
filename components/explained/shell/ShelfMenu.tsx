@@ -63,12 +63,25 @@ export default function ShelfMenu({
       <summary
         className={`tw-relative tw-flex tw-h-14 tw-cursor-pointer tw-list-none tw-items-center tw-gap-[7px] tw-whitespace-nowrap tw-px-[11px] tw-text-[15px] [&::-webkit-details-marker]:tw-hidden ${on ? "tw-font-semibold tw-text-iron-50" : "tw-font-medium tw-text-iron-400 hover:tw-text-iron-50"} ${EX_FOCUS}`}
       >
+        {/* On a shelf page the whole name shows only on a wide screen; below
+            it the bar keeps every spine page whole and the shelf says "Shelf",
+            underlined, since the breadcrumb and the H1 name the page. */}
         {on ? (
-          <span>
-            {kt(locale, "explained.kit.shell.shelfOn", {
-              page: kt(locale, on.title),
-            })}
-          </span>
+          <>
+            <span className="tw-hidden 2xl:tw-inline">
+              {kt(locale, "explained.kit.shell.shelfOn", {
+                page: kt(locale, on.title),
+              })}
+            </span>
+            <span
+              className="2xl:tw-hidden"
+              title={kt(locale, "explained.kit.shell.shelfOn", {
+                page: kt(locale, on.title),
+              })}
+            >
+              {kt(locale, "explained.kit.shell.shelf")}
+            </span>
+          </>
         ) : (
           kt(locale, "explained.kit.shell.shelf")
         )}

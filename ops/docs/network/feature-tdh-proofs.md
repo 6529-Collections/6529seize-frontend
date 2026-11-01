@@ -1,4 +1,4 @@
-# TDH Proven on Ethereum
+# TDH Zero-Knowledge Proofs
 
 Parent: [Network Index](README.md)
 
@@ -12,18 +12,19 @@ contract checks before it records a day, and where the work stands.
 ## Location in the Site
 
 - Route: `/network/tdh/proofs`
-- Page heading: `Proven on Ethereum`
-- Browser title: `Proven on Ethereum: TDH's zero-knowledge proofs`
-- Chapter bar: the Check group, `5 Proven on Ethereum`
+- Page name: `Zero-knowledge proofs`
+- Browser title: `Zero-knowledge proofs of a TDH day: what is proved so far`
+- Chapter bar: the Check group, `5 Zero-knowledge proofs`
 - Links in: the hub's "Three things you can check today", the overview's
   How we know, the daily check's closing door, and How sure's
   zero-knowledge rung.
 
 ## Content
 
-- The hero: program A's proof of one real day, accepted by mainnet's SP1
-  verifier in a read-only call, shown as half a pair; the three totals that
-  agree; the limit in the same block (not recorded: the contract needs both
+- The hero: program A's proof of one real day (under the retired
+  tdh-v1.0), accepted by mainnet's SP1 verifier in a read-only call, shown
+  as half a pair; the pair both programs proved of a test cycle under TDH
+  v1.4; the three totals that agree; the limit in the same block (not recorded: the contract needs both
   proofs and is not deployed, D128); and "Show a pair that fails", marked
   Simulated, where the contract stops at its second check.
 - 01 What a proof is: the proof's public values decoded word by word, with

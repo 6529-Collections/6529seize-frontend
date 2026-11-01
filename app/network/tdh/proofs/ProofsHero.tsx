@@ -37,6 +37,18 @@ import RecordStrip from "./RecordStrip";
 const TOTAL_WORD = STATEMENT_WORDS.findIndex(
   (word) => word.name === "totalTDH"
 );
+const ANCHOR_WORD = STATEMENT_WORDS.findIndex(
+  (word) => word.name === "anchorNumber"
+);
+
+/** Proof A's anchor block, decoded from its own public values. */
+function anchorBlock(facts: PageFacts, locale: SupportedLocale): string | null {
+  const words = facts.strings("proofs.day.wordsA");
+  const value = words ? decodeStatement(words)[ANCHOR_WORD]?.value : null;
+  return value === null || value === undefined
+    ? null
+    : formatCount(locale, Number(value));
+}
 
 /**
  * The failing pair: program B's output is proof A's with the total one
@@ -236,9 +248,15 @@ function RealVerdict({
           hours: facts.print("site.proofA.provedHours"),
           minutes: facts.print("site.proofA.provedMinutes"),
           seconds: facts.print("proofs.day.nativeSeconds"),
+          anchor: anchorBlock(facts, locale) ?? "",
         })
       )}
       {p(rich(locale, k("verdict.bodyB")))}
+      {p(
+        rich(locale, k("verdict.pairV14"), {
+          date: facts.print("proofs.pairV14.provedOn"),
+        })
+      )}
       <div>
         <LimitNote title={rich(locale, k("verdict.limitTitle"))}>
           {rich(locale, k("verdict.limitBody"), { decision: "D128" })}
@@ -389,6 +407,7 @@ export default function ProofsHero({
       <div className="tw-mt-6">
         <DriftNote by={["D136", "D137"]} locale={locale}>
           {rich(locale, k("drift"), {
+            date: facts.print("proofs.day.date"),
             old: (
               <code className="tw-font-mono tw-text-[14px] tw-text-iron-50">
                 {facts.print("proofs.day.ruleVersion")}

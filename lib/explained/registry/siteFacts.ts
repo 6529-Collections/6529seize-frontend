@@ -38,8 +38,23 @@ const mainStageSource = (inputs: FactInputs) =>
 const proofSource = (inputs: FactInputs) =>
   source("site", inputs.site.proofA.source);
 
-/** The first-card example: a copy of the newest card arrives Oct 17 at 19:05 UTC. */
-const FIRST_CARD_ARRIVAL = "2026-10-17T19:05:00Z";
+/**
+ * The first-card example: a copy arrives at 19:05 UTC on the evening before
+ * the latest result, so that result finds less than a whole day and the next
+ * one counts it. It moves with the feed, so "just bought" stays true; with no
+ * feed it is the evening before today. With the fixture feed (latest result
+ * Oct 18) it is Oct 17, 19:05, the design's example.
+ */
+const DAY_SECONDS = 86_400;
+const ARRIVAL_SECONDS_INTO_DAY = 19 * 3_600 + 5 * 60;
+
+function firstCardArrival(inputs: FactInputs): string {
+  const latest =
+    inputs.feed?.latest.day.cycleDay ??
+    Math.floor(Date.parse(inputs.now) / 1_000 / DAY_SECONDS);
+  const seconds = (latest - 1) * DAY_SECONDS + ARRIVAL_SECONDS_INTO_DAY;
+  return new Date(seconds * 1_000).toISOString().replace(/\.\d{3}Z$/, "Z");
+}
 
 export const SITE_FACTS = {
   "site.mainStage.decisions": defineFact<number>({
@@ -127,6 +142,13 @@ export const SITE_FACTS = {
     source: proofSource,
     value: (inputs) => inputs.site.proofA.ethCallBlock,
   }),
+  "tdh.cutover.checkedAt": defineFact<string>({
+    format: "day",
+    refresh: RECORD_REFRESH,
+    source: (inputs) => source("site", inputs.site.cutover.statusSource),
+    value: (inputs) =>
+      inputs.site.cutover.made ? undefined : inputs.site.cutover.checkedAt,
+  }),
   "site.validator.version": defineFact<string>({
     format: "text",
     refresh: RECORD_REFRESH,
@@ -140,7 +162,10 @@ export const SITE_FACTS = {
     unit: "UTC",
     refresh: RECORD_REFRESH,
     source: () =>
-      source("example", "a constructed example: a first card bought on Oct 17"),
-    value: () => FIRST_CARD_ARRIVAL,
+      source(
+        "example",
+        "a constructed example: a card bought at 19:05 UTC the evening before the latest result"
+      ),
+    value: firstCardArrival,
   }),
 } as const;

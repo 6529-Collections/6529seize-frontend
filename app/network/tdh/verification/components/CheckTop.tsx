@@ -56,11 +56,6 @@ const UTC_TIME: Intl.DateTimeFormatOptions = {
   hourCycle: "h23",
   timeZone: "UTC",
 };
-const DOT = (
-  <span className="tw-text-iron-600" aria-hidden="true">
-    ·
-  </span>
-);
 
 /** "days/20744.json": the file's path in the feed, from its URL. */
 function fileName(url: string | null): string | null {
@@ -93,24 +88,23 @@ function FileLine({
       );
   }
   return (
-    <p className="tw-m-0 tw-mt-3.5 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-text-[13px] tw-leading-5 tw-text-iron-400">
+    <p className="tw-m-0 tw-mt-3.5 tw-flex tw-flex-wrap tw-items-center tw-gap-x-5 tw-gap-y-1 tw-text-[13px] tw-leading-5 tw-text-iron-400">
       {name !== null && (
         <FactText fact={day.fact("file.url")} locale={locale}>
           {name}
         </FactText>
       )}
-      {DOT}
-      <span>{pt(locale, "explained.tdh.check.file.sha")}</span>
-      {stated === null ? (
-        <FactValue fact={null} locale={locale} />
-      ) : (
-        <Hash value={stated} locale={locale} stripes />
-      )}
-      {DOT}
-      {status}
+      <span className="tw-inline-flex tw-flex-wrap tw-items-center tw-gap-x-1.5">
+        <span>{pt(locale, "explained.tdh.check.file.sha")}</span>
+        {stated === null ? (
+          <FactValue fact={null} locale={locale} />
+        ) : (
+          <Hash value={stated} locale={locale} stripes />
+        )}
+        {status}
+      </span>
       {url !== null && name !== null && (
         <>
-          {DOT}
           <a
             className={`${EX_LINK} tw-font-semibold`}
             href={url}

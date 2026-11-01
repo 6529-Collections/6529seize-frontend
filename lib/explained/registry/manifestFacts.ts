@@ -101,6 +101,24 @@ export const MANIFEST_FACTS = {
     ...count((manifest) => manifest.summary.proved),
     evidence: "proved",
   }),
+  "manifest.proved.tdh": count(
+    (manifest) =>
+      manifest.theorems.filter(
+        (entry) => entry.status === "proved" && entry.library === "tdh"
+      ).length
+  ),
+  "manifest.proved.p53": count(
+    (manifest) =>
+      manifest.theorems.filter(
+        (entry) => entry.status === "proved" && entry.library === "p53"
+      ).length
+  ),
+  "manifest.shownFalse.tdh": count(
+    (manifest) =>
+      manifest.theorems.filter(
+        (entry) => entry.status === "counterexample" && entry.library === "tdh"
+      ).length
+  ),
   "manifest.distinct": count(
     (manifest) =>
       new Set(

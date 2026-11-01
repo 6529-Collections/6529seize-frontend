@@ -45,7 +45,7 @@ reference routes.
 - [How TDH Is Calculated](feature-tdh-how-it-works.md)
 - [TDH v1.4 Specification](feature-tdh-specification.md)
 - [TDH How Sure (Formal Model)](feature-tdh-formal-model.md)
-- [TDH Proven on Ethereum (Zero-Knowledge Proofs)](feature-tdh-proofs.md)
+- [TDH Zero-Knowledge Proofs](feature-tdh-proofs.md)
 - [TDH Implementations and Vectors](feature-tdh-implementations.md)
 - [TDH Verification Dashboard](feature-tdh-verification.md)
 - [TDH Versions and Boosts](feature-tdh-historic-boosts.md)

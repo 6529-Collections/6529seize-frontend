@@ -4,8 +4,9 @@ import { kt, type KitKey } from "../i18n";
 
 /**
  * Data provenance on figures (EXPLAINED.md §3): Real, with its source;
- * Example, a dotted tag; What if, a forked rule; Simulated, rose, only on a
- * failing day or state.
+ * Example, dotted; What if, dashed; Simulated, rose, only on a failing day
+ * or state. The tag is a small-caps word with its line under it, never a
+ * bordered pill (SCORECARD §4).
  */
 export type TagKind = "real" | "example" | "whatIf" | "simulated";
 
@@ -35,7 +36,7 @@ export default function Tag({
 }) {
   return (
     <span
-      className={`tw-inline-flex tw-min-h-6 tw-items-center tw-rounded tw-border tw-px-[9px] tw-py-0.5 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.1em] max-md:tw-whitespace-normal md:tw-whitespace-nowrap ${TONE[kind]}`}
+      className={`tw-inline-flex tw-items-center tw-border-0 tw-border-b tw-pb-px tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.1em] max-md:tw-whitespace-normal md:tw-whitespace-nowrap ${TONE[kind]}`}
       data-tag={kind}
     >
       {children ?? kt(locale, WORD[kind])}

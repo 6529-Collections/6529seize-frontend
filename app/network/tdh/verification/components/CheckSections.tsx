@@ -86,8 +86,12 @@ function liveLaneTitle(day: DayView, locale: SupportedLocale): string {
   if (state === "notCompared") {
     return pt(locale, "explained.tdh.check.lanes.liveNotCompared");
   }
-  const equal = day.num("agree.live.identities.equal") ?? 0;
-  const total = day.num("agree.live.identities.total") ?? 0;
+  const equal = day.num("agree.live.identities.equal");
+  const total = day.num("agree.live.identities.total");
+  if (equal === null || total === null) {
+    // The day file was not read: say so, never "equal" from two unknowns.
+    return pt(locale, "explained.tdh.check.lanes.notRead");
+  }
   return equal === total
     ? pt(locale, "explained.tdh.check.lanes.liveEqual")
     : pt(locale, "explained.tdh.check.lanes.liveDiffers", {
@@ -102,9 +106,9 @@ function lanes(day: DayView, locale: SupportedLocale): Lane[] {
     });
   const records = day.text("recordsSha");
   const same = records !== null && records === day.text("recordsSha.python");
-  const equal =
-    day.num("agree.live.identities.equal") ===
-    day.num("agree.live.identities.total");
+  let recordsTitle: CheckKey = "explained.tdh.check.lanes.recordsDiffer";
+  if (records === null) recordsTitle = "explained.tdh.check.lanes.notRead";
+  else if (same) recordsTitle = "explained.tdh.check.lanes.recordsSame";
   return [
     {
       kicker: pt(locale, "explained.tdh.check.lanes.eth"),
@@ -153,12 +157,7 @@ function lanes(day: DayView, locale: SupportedLocale): Lane[] {
     },
     {
       kicker: pt(locale, "explained.tdh.check.lanes.records"),
-      title: pt(
-        locale,
-        same
-          ? "explained.tdh.check.lanes.recordsSame"
-          : "explained.tdh.check.lanes.recordsDiffer"
-      ),
+      title: pt(locale, recordsTitle),
       cap:
         records === null ? (
           hashValue(null, locale)
@@ -178,7 +177,11 @@ function lanes(day: DayView, locale: SupportedLocale): Lane[] {
       cap: rich(locale, "explained.tdh.check.lanes.liveCap", {
         hash: hashValue(day.fact("liveSha"), locale),
       }),
-      ok: equal && checkState(day) !== "notCompared",
+      ok:
+        records !== null &&
+        day.num("agree.live.identities.equal") ===
+          day.num("agree.live.identities.total") &&
+        checkState(day) !== "notCompared",
     },
   ];
 }
@@ -291,12 +294,17 @@ export function HowTheCheckRuns({
       <div className="tw-mt-12">
         <AgreementBars pairs={agreementPairs(day, locale)} locale={locale} />
         <p className={`${CAPTION} tw-mt-3`}>
-          {pt(locale, "explained.tdh.check.agree.caption")}{" "}
-          {pt(
-            locale,
-            same
-              ? "explained.tdh.check.agree.rootsSame"
-              : "explained.tdh.check.agree.rootsDiffer"
+          {pt(locale, "explained.tdh.check.agree.caption")}
+          {records !== null && (
+            <>
+              {" "}
+              {pt(
+                locale,
+                same
+                  ? "explained.tdh.check.agree.rootsSame"
+                  : "explained.tdh.check.agree.rootsDiffer"
+              )}
+            </>
           )}
         </p>
       </div>
@@ -349,6 +357,12 @@ export function ReadItRight({
         {rich(locale, "explained.tdh.check.read.not4", {
           cutover: (
             <FactValue fact={book.maybe("tdh.cutover.about")} locale={locale} />
+          ),
+          checked: (
+            <FactValue
+              fact={book.maybe("tdh.cutover.checkedAt")}
+              locale={locale}
+            />
           ),
         })}
       </>

@@ -74,10 +74,13 @@ function glyphFor(kind: DayKind) {
 function accessibleName(props: DayTileProps, day: string): string {
   const { kind, locale, cycle, open } = props;
   if (kind === "open") {
-    return kt(locale, "explained.kit.day.openName", {
-      date: day,
-      time: ageText(locale, open?.minutesLeft ?? 0),
-    });
+    const left = open?.minutesLeft ?? 0;
+    return left <= 0
+      ? kt(locale, "explained.kit.day.dueName", { date: day })
+      : kt(locale, "explained.kit.day.openName", {
+          date: day,
+          time: ageText(locale, left),
+        });
   }
   if (kind === "future")
     return kt(locale, "explained.kit.day.futureName", { date: day });
@@ -133,9 +136,12 @@ function secondaryText(props: DayTileProps): string | null {
     });
   }
   if (open) {
-    return kt(locale, "explained.kit.day.openIn", {
-      time: ageText(locale, open.minutesLeft),
-    });
+    // Past the expected time the result is due, not "in 0 min".
+    return open.minutesLeft <= 0
+      ? kt(locale, "explained.kit.day.due")
+      : kt(locale, "explained.kit.day.openIn", {
+          time: ageText(locale, open.minutesLeft),
+        });
   }
   if (!written) {
     return null;

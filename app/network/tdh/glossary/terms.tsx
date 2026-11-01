@@ -162,7 +162,10 @@ export const TERMS: readonly Term[] = [
   {
     id: "cutover",
     status: { mark: "decided", ref: "D132" },
-    values: (p) => ({ about: p.v("tdh.cutover.about", "long") }),
+    values: (p) => ({
+      about: p.v("tdh.cutover.about", "long"),
+      checked: p.v("tdh.cutover.checkedAt", "long"),
+    }),
   },
   {
     id: "programs",

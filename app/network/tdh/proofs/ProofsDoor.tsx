@@ -6,7 +6,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { k, PROOFS_ROUTE } from "./_lib/copy";
 
 /**
- * The door to "Proven on Ethereum" from the pages that link it (How sure,
+ * The door to "Zero-knowledge proofs" from the pages that link it (How sure,
  * the overview's How we know, the daily check): one card with the half
  * pair and a sentence written for the page it sits on. Its copy is this
  * page's (`explained.tdh.proofs.door.*`), so the pages that place it add

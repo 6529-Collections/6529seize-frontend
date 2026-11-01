@@ -3,14 +3,17 @@ import { kt, type KitKey } from "../i18n";
 
 /**
  * Who can repeat each step (EXPLAINED.md §6.4): the steps from Ethereum to
- * the page, each tagged with who can repeat it today. "Anyone" is green;
- * the rest say what they need.
+ * the page, each tagged with who can repeat it today. The tag is a dot and a
+ * word in ink tones, never a bordered pill (EXPLAINED.md §3 rule 1): a filled
+ * dot when anyone can repeat the step, a hollow one when it needs something
+ * the reader does not have yet, named in the word.
  */
 export type TrailWho =
   | "anyone"
   | "node"
   | "spec"
   | "source"
+  | "files"
   | "record"
   | "sixFive";
 
@@ -19,6 +22,7 @@ const WHO: Record<TrailWho, KitKey> = {
   node: "explained.kit.trail.node",
   spec: "explained.kit.trail.spec",
   source: "explained.kit.trail.source",
+  files: "explained.kit.trail.files",
   record: "explained.kit.trail.record",
   sixFive: "explained.kit.trail.sixFive",
 };
@@ -70,8 +74,12 @@ export default function ProvenanceTrail({
               {step.sub}
             </p>
             <span
-              className={`tw-mt-2.5 tw-inline-flex tw-rounded tw-border tw-border-solid tw-px-2 tw-py-0.5 tw-text-[13px] tw-font-semibold tw-leading-[18px] ${open ? "tw-border-green/45 tw-text-green" : "tw-border-iron-700 tw-text-iron-300"}`}
+              className={`tw-mt-2.5 tw-flex tw-items-center tw-gap-2 tw-text-[13px] tw-font-semibold tw-leading-[18px] ${open ? "tw-text-iron-100" : "tw-text-iron-400"}`}
             >
+              <span
+                className={`tw-inline-block tw-size-2 tw-shrink-0 tw-rounded-full ${open ? "tw-bg-iron-100" : "tw-border tw-border-solid tw-border-iron-400"}`}
+                aria-hidden="true"
+              />
               {kt(locale, WHO[step.who])}
             </span>
           </li>

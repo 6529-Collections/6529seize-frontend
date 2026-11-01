@@ -395,7 +395,7 @@ function howWeKnow(book: FactBook, locale: SupportedLocale) {
     {
       title: ht(locale, "explained.tdh.how.hwk.rules"),
       body: rich(locale, "explained.tdh.how.hwk.rulesBody", {
-        head: <>6529chain {v("rules.chainHead")}</>,
+        head: <>6529chain {v("rules.p26Commit")}</>,
       }),
     },
     {

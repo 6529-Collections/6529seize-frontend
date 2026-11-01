@@ -3,6 +3,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { kt } from "../i18n";
 import { EX_FOCUS } from "../tokens";
 import type { ChapterDef, PageLink } from "./chapters";
+import ScrollActive from "./ScrollActive";
 import ShelfMenu from "./ShelfMenu";
 
 /**
@@ -134,6 +135,7 @@ export default function ChapterBar({
           />
         ))}
       </div>
+      <ScrollActive />
       {chapter.shelf.length > 0 && (
         <div className="tw-ml-3 tw-hidden md:tw-block">
           <ShelfMenu

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { LimitNote } from "@/components/explained/evidence/notes";
 import { Icon } from "@/components/explained/marks/glyphs";
 import Mark from "@/components/explained/marks/Mark";
@@ -9,8 +10,9 @@ import { ht } from "./copy";
 
 /**
  * CC0, in one minute (MAP.md §3; TDH-DESIGN.md §7): three real CC0 cards,
- * "The art is free. Holding is what counts.", where CC0 stops (Card #1's
- * Punk; the Gradients), a download, and the absolute behind it (D89). It
+ * "The art is free. Holding is what counts.", what an artist gives and
+ * keeps, where CC0 stops (Card #1's Punk; the Gradients), a download, the
+ * License page and the CC0 deed, and the absolute behind it (D89). It
  * lives on the hub until The Memes and CC0 ships, then moves there with a
  * redirect of #cc0.
  */
@@ -27,6 +29,9 @@ const FAN = [
 ] as const;
 
 const DOWNLOAD = MEME_ART[2];
+
+/** Creative Commons' deed for CC0 1.0: the dedication in plain words, and its notice on endorsement. */
+const CC0_DEED = "https://creativecommons.org/publicdomain/zero/1.0/";
 
 export default function Cc0Answer({
   locale,
@@ -62,6 +67,9 @@ export default function Cc0Answer({
           <p className={`${EX_TEXT.body} tw-m-0 tw-mt-4`}>
             {ht(locale, "cc0.body")}
           </p>
+          <p className={`${EX_TEXT.body} tw-m-0 tw-mt-4`} data-cc0="keep">
+            {ht(locale, "cc0.keep")}
+          </p>
           <div className="tw-mt-4">
             <LimitNote title={ht(locale, "cc0.limitTitle")}>
               {ht(locale, "cc0.limit")}
@@ -78,8 +86,17 @@ export default function Cc0Answer({
               <Icon kind="down" className="tw-size-4" />
               {ht(locale, "cc0.download", { id: DOWNLOAD.id })}
             </a>
-            <a className={EX_BUTTON.link} href="#chapters">
+            <Link className={EX_BUTTON.link} href="/about/license">
               {ht(locale, "cc0.chapter")}
+              <Icon kind="arrow" className="tw-size-4" />
+            </Link>
+            <a
+              className={EX_BUTTON.link}
+              href={CC0_DEED}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {ht(locale, "cc0.deed")}
               <Icon kind="arrow" className="tw-size-4" />
             </a>
           </div>

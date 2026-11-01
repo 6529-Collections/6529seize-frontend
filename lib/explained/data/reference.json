@@ -119,9 +119,10 @@
     ]
   },
   "difftest": {
-    "source": "the differential test rounds of 2026-10-15 and 2026-10-16, in 6529's design record",
-    "rounds": 5,
+    "source": "the validator's differential test record (tools/difftest/README.md): seven rounds from 2026-10-15 to 2026-10-18, the seventh at 6529chain e252d5f, with one finding (E15, how deep a file may nest) still open",
+    "rounds": 7,
     "from": "2026-10-15",
-    "to": "2026-10-16"
+    "to": "2026-10-18",
+    "open": "E15"
   }
 }

@@ -140,10 +140,10 @@ describe("Explain my TDH", () => {
     );
   });
 
-  it("shows when a card bought this week first counts, and a name not found", async () => {
+  it("shows when a card just bought first counts, and a name not found", async () => {
     const user = userEvent.setup();
     withFacts(<ExplainMyTdh locale="en-US" />);
-    await user.click(screen.getByRole("button", { name: "Bought this week" }));
+    await user.click(screen.getByRole("button", { name: "Just bought" }));
     expect(
       screen.getByText("Your card counts from Mon, Oct 19.")
     ).toBeInTheDocument();
@@ -321,7 +321,9 @@ describe("the overview", () => {
     expect(screen.getByText("the other 100")).toBeInTheDocument();
     expect(
       screen.getByText(/The top 100 identities hold 70\.0% of today's TDH/)
-    ).toHaveTextContent("6529.io's API, read Oct 31, 09:12 UTC.");
+    ).toHaveTextContent(
+      "The groups count the 1,100 identities 6529.io's API ranks with TDH above zero, so they add up to fewer than the identities the daily check compares. Read Oct 31, 09:12 UTC."
+    );
     const table = screen.getByRole("table");
     expect(within(table).getAllByRole("row")).toHaveLength(5);
     expect(
@@ -348,7 +350,7 @@ describe("how we know, on the overview", () => {
       "Program A, the Rust core, in SP1: proved the day of Oct 11; mainnet's SP1 verifier accepts it in a read-only call."
     );
     expect(zk).toHaveTextContent(
-      "Program B, written separately, in RISC Zero: no day proved yet."
+      "Program B, written separately, in RISC Zero: proved a test cycle with program A under TDH v1.4; no mainnet day yet."
     );
     expect(zk?.querySelector('[data-proof="A"]')).toHaveAttribute(
       "data-proved",

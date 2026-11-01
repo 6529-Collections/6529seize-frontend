@@ -24,6 +24,17 @@ export const VOICE_RULES: readonly VoiceRule[] = [
     instead: "mainnet's SP1 verifier accepts it in a read-only call",
   },
   {
+    // Any "proven on/to Ethereum" or "checked on Ethereum" said of a day or
+    // a proof, in every locale, titles and nav labels included: nothing is
+    // recorded on Ethereum until the contract is deployed. A sentence that
+    // says so ("not ... yet") may name it.
+    id: "proven-on-ethereum",
+    pattern:
+      /\b(prove[nd]?|checked)\b[^.]{0,20}\b(on|to) Ethereum\b(?![^.]*\b(not|yet)\b)|auf Ethereum (bewiesen|geprüft)|(prouvée?s?|vérifiée?s?) sur Ethereum|(probad[oa]s?|comprobad[oa]s?) en Ethereum/i,
+    instead:
+      "zero-knowledge proofs; mainnet's verifier accepts it in a read-only call",
+  },
+  {
     id: "proof-a-on-ethereum",
     pattern: /\bproof A\b[^.]*\bon Ethereum\b/i,
     instead: "mainnet's SP1 verifier accepts it in a read-only call",
