@@ -30,7 +30,10 @@ export interface LoginDeviceGrant {
 }
 
 const PREPARE_BUDGET_MS = 1500;
-const DEVICE_GRANT_URN_MARKER = "urn:6529:device-grant:";
+const GRANT_URN_MARKERS = [
+  "urn:6529:device-grant:",
+  "urn:6529:mls-device-grant:",
+] as const;
 
 /**
  * 6529 Desktop runs the site in Electron, which the session client type
@@ -122,14 +125,22 @@ export const toDeviceGrantNonceParams = (
   device_scopes: grant.scopes.join(","),
 });
 
-/** Whether a sign-in challenge carries any device grant at all. */
+/** Whether a sign-in challenge carries any device or MLS device grant. */
 export const carriesDeviceGrant = (message: string): boolean =>
-  message.includes(DEVICE_GRANT_URN_MARKER);
+  GRANT_URN_MARKERS.some((marker) => message.includes(marker));
 
-/** The wallet is asked to sign only a challenge that grants exactly this key. */
+/**
+ * The wallet is asked to sign only a challenge that grants exactly this key,
+ * plus exactly this MLS key when `mls` is given (a combined grant) and no MLS
+ * key otherwise.
+ */
 export const isDeviceGrantChallenge = (
   message: string,
-  grant: LoginDeviceGrant
+  grant: LoginDeviceGrant,
+  mls: {
+    readonly deviceKeyHex: string;
+    readonly ciphersuite: number;
+  } | null = null
 ): boolean =>
   isExpectedDeviceGrantMessage({
     message,
@@ -137,6 +148,7 @@ export const isDeviceGrantChallenge = (
     deviceKeyHex: grant.deviceKeyHex,
     scopes: grant.scopes,
     nowMs: Date.now(),
+    mls,
   });
 
 /** Stores the grant returned by session-login. Never throws. */

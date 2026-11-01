@@ -46,6 +46,18 @@ unchanged.
   date; the exact expiry time is only in the device-grant resource line. If
   the wallet declines or cannot sign that message, or the sign-in fails, the
   next sign-in on the same page uses the ordinary message without a grant.
+- **Sign in with encrypted messages (staging).** Where encrypted messages are
+  on, the same signature can also turn them on for this browser: the
+  message then grants a second key (the browser's encrypted-messages key)
+  with the same expiry, adds "It will also encrypt (send) and decrypt (read)
+  your end-to-end encrypted messages, which 6529.io cannot read." after the
+  sentence about signing, and ends "(Device key ..., encrypted messages key
+  ...)". The browser checks that the
+  message grants exactly its two keys before the wallet is asked. If the
+  server does not offer the combined message, or the browser cannot prepare
+  the second key within two seconds, the sign-in grants signed messages only
+  and encrypted messages keep their own one-signature prompt. Revoking the
+  device here also turns off encrypted messages for it.
 - **Turn on signed messages (one signature).** A logged-in user without a
   grant in this browser sees this notice above the composer while the
   composer is empty. **Turn on** asks for one wallet signature. The notice

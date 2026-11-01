@@ -44,6 +44,7 @@ jobs:
       ALLOWLIST_API_ENDPOINT: ${{ vars.STAGING_ALLOWLIST_API_ENDPOINT || 'https://allowlist-api.staging.6529.io' }}
       BASE_ENDPOINT: https://staging.6529.io
       NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: "true"
+      NEXT_PUBLIC_E2EE_DM_ENABLED: "true"
       NEXTGEN_CHAIN_ID: ${{ vars.STAGING_NEXTGEN_CHAIN_ID || '1' }}
       ASSETS_FROM_S3: "false"
 
@@ -137,7 +138,7 @@ jobs:
               cp ".next/$file" ".staging-bundle/.next/$file"
             fi
           done
-          node scripts/package-public-review-artifacts.cjs prepare \
+          node scripts/package-web-artifact.cjs prepare \
             --profile staging \
             --bundle-root .staging-bundle
           (cd .staging-bundle && zip -qry ../staging-artifact/package.zip .)
@@ -146,12 +147,12 @@ jobs:
           zip_extract="$(mktemp -d)"
           trap 'rm -f "$zip_listing"; rm -rf "$zip_extract"' EXIT
           unzip -Z1 staging-artifact/package.zip > "$zip_listing"
-          node scripts/package-public-review-artifacts.cjs assert-listing \
+          node scripts/package-web-artifact.cjs assert-listing \
             --profile staging \
             --bundle-root .staging-bundle \
             --listing-file "$zip_listing"
           unzip -q staging-artifact/package.zip -d "$zip_extract"
-          node scripts/package-public-review-artifacts.cjs assert-zip \
+          node scripts/package-web-artifact.cjs assert-zip \
             --profile staging \
             --bundle-root .staging-bundle \
             --listing-file "$zip_listing" \
@@ -170,14 +171,13 @@ jobs:
             --runtime-config "$zip_extract/.next/PUBLIC_RUNTIME.json" \
             --assets-flag "$zip_extract/.next/ASSETS_FROM_S3" \
             --source-root . \
-            --content-roots "public,content/public-reviews,config/public-reviews,public/review-data" \
+            --content-roots "public" \
             --environment staging \
             --node-version "$(node --version)" \
             --pnpm-version "$(pnpm --version)" \
             --output staging-artifact/artifact-portability.json
           (cd staging-artifact && sha256sum manifest.json artifact-portability.json package.zip > SHA256SUMS)
           printf '%s\n' "$help_artifact_checksums" | sha256sum -c -
-          test -z "$(git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews)"
 
       - name: Save Next.js build cache
         if: steps.nextjs-build-cache.outputs.cache-hit != 'true'
@@ -377,7 +377,6 @@ jobs:
           EXPECTED_DIGEST: ${{ steps.staging-artifact.outputs.package-digest }}
           EXPECTED_SHA: ${{ steps.expected-commit.outputs.sha }}
           INSTANCE_ID: ${{ secrets.STAGING_INSTANCE_ID }}
-          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: ${{ secrets.PUBLIC_REVIEW_DISCUSSION_DESTINATIONS }}
           REPO_DIR: ${{ env.STAGING_REPO_DIR }}
           RUN_AS: ${{ env.STAGING_RUN_AS }}
           STAGING_SSR_CLIENT_ID: ${{ secrets.STAGING_SSR_CLIENT_ID }}
@@ -393,24 +392,12 @@ jobs:
           test -n "$STAGING_ETHEREUM_RPC_URL"
           test -n "$STAGING_ALCHEMY_API_KEY"
 
-          jq -e '
-            type == "object" and
-            has("staging") and
-            (.staging | type == "object") and
-            (.staging["stream-review"] | type == "string" and test("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")) and
-            (has("production") | not)
-          ' <<<"$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" >/dev/null
-
           repo_dir_q="$(printf '%q' "$REPO_DIR")"
           run_as_q="$(printf '%q' "$RUN_AS")"
           branch_q="$(printf '%q' "$BRANCH")"
           artifact_url_q="$(printf '%q' "$ARTIFACT_URL")"
           expected_digest_q="$(printf '%q' "$EXPECTED_DIGEST")"
           expected_sha_q="$(printf '%q' "$EXPECTED_SHA")"
-          public_review_destinations_b64_q="$(
-            printf '%q' \
-              "$(printf '%s' "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS" | base64 -w0)"
-          )"
           ssr_client_id_b64_q="$(
             printf '%q' "$(printf '%s' "$STAGING_SSR_CLIENT_ID" | base64 -w0)"
           )"
@@ -433,7 +420,6 @@ jobs:
           ARTIFACT_URL=$artifact_url_q
           EXPECTED_DIGEST=$expected_digest_q
           EXPECTED_SHA=$expected_sha_q
-          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64=$public_review_destinations_b64_q
           SSR_CLIENT_ID_B64=$ssr_client_id_b64_q
           SSR_CLIENT_SECRET_B64=$ssr_client_secret_b64_q
           ETHEREUM_RPC_URL_B64=$ethereum_rpc_url_b64_q
@@ -503,7 +489,6 @@ jobs:
           ARTIFACT_URL="$ARTIFACT_URL" \
           EXPECTED_DIGEST="$EXPECTED_DIGEST" \
           EXPECTED_SHA="$EXPECTED_SHA" \
-          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64="$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64" \
           REPO_DIR="$REPO_DIR" \
           SOURCE_DIR="$source_dir" \
           RUN_AS="$RUN_AS" \

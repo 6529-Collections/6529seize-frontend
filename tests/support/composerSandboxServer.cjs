@@ -73,18 +73,6 @@ const SANDBOX_SIGNATURE_WAVE_DESCRIPTION =
   "Local-only signed drop sandbox wave for Playwright.";
 const SANDBOX_SIGNATURE_TERMS =
   "Local-only signature sandbox terms. Unsigned drops must not be submitted.";
-const PUBLIC_REVIEW_COMMENT =
-  "The recovery trigger needs clearer reviewer guidance.";
-const PUBLIC_REVIEW_WHY_IT_MATTERS = "Readers need to understand who can act.";
-const PUBLIC_REVIEW_SUGGESTED_CHANGE = "Clarify the trigger and eligible role.";
-const PUBLIC_REVIEW_METADATA_KEYS = [
-  "review_schema",
-  "type",
-  "severity",
-  "context",
-];
-const PUBLIC_REVIEW_CONTEXT_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const CREATED_AT = 1713744000000;
 const PREVIEW_URL = "https://example.com/6529-composer-preview";
 const publicScope = { group: null };
@@ -99,6 +87,11 @@ let sandboxRuleGroupSequence = 0;
 const sandboxRuleGroups = new Map();
 const sandboxRuleGroupWallets = new Map();
 const MAX_REQUEST_BODY_BYTES = 16 * 1024;
+// Multi-user end-to-end encrypted messages (D109) for the E2EE pack only.
+const isE2eeSandbox = process.env.PLAYWRIGHT_E2EE_SANDBOX === "1";
+const e2eeSandboxApi = isE2eeSandbox
+  ? require("./e2ee/e2eeSandboxApi.cjs").createE2eeSandboxApi({ corsHeaders })
+  : null;
 
 function encodeJwtPart(value) {
   return Buffer.from(JSON.stringify(value)).toString("base64url");
@@ -1182,123 +1175,6 @@ function isExpectedChatDropBody(body) {
   );
 }
 
-function getMetadataValue(metadata, key) {
-  if (!Array.isArray(metadata)) {
-    return undefined;
-  }
-  const item = metadata.find(
-    (candidate) => isPlainObject(candidate) && candidate.data_key === key
-  );
-  return isPlainObject(item) ? item.data_value : undefined;
-}
-
-function parsePublicReviewContext(metadata) {
-  const contextJson = getMetadataValue(metadata, "context");
-  if (typeof contextJson !== "string") {
-    return null;
-  }
-
-  try {
-    const context = JSON.parse(contextJson);
-    return isPlainObject(context) ? context : null;
-  } catch {
-    return null;
-  }
-}
-
-function isExpectedPublicReviewMetadata(metadata) {
-  if (
-    !Array.isArray(metadata) ||
-    metadata.length !== PUBLIC_REVIEW_METADATA_KEYS.length ||
-    !metadata.every(
-      (item, index) =>
-        isPlainObject(item) &&
-        hasOnlyKeys(item, ["data_key", "data_value"]) &&
-        item.data_key === PUBLIC_REVIEW_METADATA_KEYS[index] &&
-        typeof item.data_value === "string"
-    )
-  ) {
-    return false;
-  }
-
-  const context = parsePublicReviewContext(metadata);
-  return (
-    getMetadataValue(metadata, "review_schema") === "1" &&
-    getMetadataValue(metadata, "type") === "product-or-ux" &&
-    getMetadataValue(metadata, "severity") === "medium" &&
-    context !== null &&
-    hasOnlyKeys(context, [
-      "submissionId",
-      "reviewId",
-      "reviewVersion",
-      "pageId",
-      "sectionId",
-    ]) &&
-    typeof context.submissionId === "string" &&
-    PUBLIC_REVIEW_CONTEXT_PATTERN.test(context.submissionId) &&
-    context.reviewId === "6529-stream" &&
-    context.reviewVersion === "2026-08-01.1" &&
-    context.pageId === "overview" &&
-    context.sectionId === "what-stream-is-designed-to-hold-together"
-  );
-}
-
-function isExpectedPublicReviewDropBody(body) {
-  if (
-    process.env.PLAYWRIGHT_PUBLIC_REVIEW_SANDBOX !== "1" ||
-    !hasOnlyKeys(body, [
-      "drop_type",
-      "hide_link_preview",
-      "is_safe_signature",
-      "mentioned_groups",
-      "mentioned_users",
-      "mentioned_waves",
-      "metadata",
-      "parts",
-      "referenced_nfts",
-      "signature",
-      "signer_address",
-      "title",
-      "wave_id",
-    ])
-  ) {
-    return false;
-  }
-
-  const expectedContent = [
-    "## Product or UX",
-    PUBLIC_REVIEW_COMMENT,
-    "**Review:** 6529 Stream Contract Review (2026-08-01.1)",
-    `**Page:** [Overview](${frontendBaseUrl}/reviews/6529-stream/versions/2026-08-01.1)`,
-    "**Suspected severity:** Medium",
-    "**Section:** What Stream is designed to hold together",
-    `### Why this matters\n\n${PUBLIC_REVIEW_WHY_IT_MATTERS}`,
-    `### Suggested change\n\n${PUBLIC_REVIEW_SUGGESTED_CHANGE}`,
-  ].join("\n\n");
-
-  return (
-    body.wave_id === SANDBOX_WAVE_ID &&
-    body.drop_type === "CHAT" &&
-    body.title === null &&
-    body.signature === null &&
-    body.is_safe_signature === false &&
-    isSameAddress(body.signer_address, SANDBOX_WALLET) &&
-    body.hide_link_preview === false &&
-    Array.isArray(body.parts) &&
-    body.parts.length === 1 &&
-    isExpectedChatDropPart(body.parts[0], expectedContent) &&
-    Array.isArray(body.referenced_nfts) &&
-    body.referenced_nfts.length === 0 &&
-    Array.isArray(body.mentioned_users) &&
-    body.mentioned_users.length === 0 &&
-    Array.isArray(body.mentioned_groups) &&
-    body.mentioned_groups.length === 0 &&
-    Array.isArray(body.mentioned_waves) &&
-    body.mentioned_waves.length === 0 &&
-    isExpectedPublicReviewMetadata(body.metadata)
-  );
-}
-
 function hasAcceptedDropSubmit() {
   // Every sandbox reset grants one shared /api/drops mutation budget, regardless
   // of which exact allowlisted drop shape consumes it.
@@ -2238,7 +2114,7 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
   if (pathname === "/api/drops") {
     // The diagnostics reset bounds this synthetic chat submit to one accepted request.
     return (
-      (isExpectedChatDropBody(body) || isExpectedPublicReviewDropBody(body)) &&
+      isExpectedChatDropBody(body) &&
       !hasAcceptedDropSubmit()
     );
   }
@@ -2399,7 +2275,6 @@ function loggedRequestBody(pathname, body) {
 
   if (pathname === "/api/drops") {
     const firstPart = Array.isArray(body.parts) ? body.parts[0] : null;
-    const reviewContext = parsePublicReviewContext(body.metadata);
     return {
       wave_id: typeof body.wave_id === "string" ? body.wave_id : null,
       drop_type: typeof body.drop_type === "string" ? body.drop_type : null,
@@ -2439,9 +2314,6 @@ function loggedRequestBody(pathname, body) {
             isPlainObject(item) ? item.data_key : null
           )
         : [],
-      review_type: getMetadataValue(body.metadata, "type") ?? null,
-      review_severity: getMetadataValue(body.metadata, "severity") ?? null,
-      review_context: reviewContext,
       signature: body.signature,
       is_safe_signature: body.is_safe_signature,
       signer_address: body.signer_address,
@@ -2593,7 +2465,10 @@ const mockApiExactReadRoutes = new Map([
           ]
         : [],
   ],
-  [`/api/waves/${SANDBOX_DM_WAVE_ID}`, () => dmWave],
+  [
+    `/api/waves/${SANDBOX_DM_WAVE_ID}`,
+    () => e2eeSandboxApi?.decorateDirectMessageWave(dmWave) ?? dmWave,
+  ],
   [
     `/api/v2/waves/${SANDBOX_DM_WAVE_ID}/drops`,
     () => ({ wave: dmWaveOverview, drops: [currentDirectMessageDrop()] }),
@@ -3077,6 +2952,11 @@ async function handleRequest(req, res) {
     return;
   }
 
+  // E2EE bodies exceed the composer body cap, so this layer reads its own.
+  if (await e2eeSandboxApi?.handle(req, res, { method, url, pathname })) {
+    return;
+  }
+
   if (handleDiagnostics(method, pathname, res)) {
     return;
   }
@@ -3126,6 +3006,7 @@ function buildPublicRuntime() {
       process.env.IPFS_GATEWAY_ENDPOINT || "https://ipfs.6529.io/ipfs/",
     MEDIA_RESOLVER_ENDPOINT:
       process.env.MEDIA_RESOLVER_ENDPOINT || "https://media.6529.io",
+    ...(isE2eeSandbox ? { NEXT_PUBLIC_E2EE_DM_ENABLED: "true" } : {}),
     NODE_ENV: "development",
     PORT: String(frontendPort),
     WS_ENDPOINT: mockWsOrigin,
@@ -3175,9 +3056,6 @@ function startNextDev() {
     ...process.env,
     ...publicRuntime,
     __NEXT_EXPERIMENTAL_MCP_SERVER: "true",
-    PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: JSON.stringify({
-      local: { "stream-review": SANDBOX_WAVE_ID },
-    }),
     PUBLIC_RUNTIME: JSON.stringify(publicRuntime),
     SEIZE_6529_COMMAND: "1",
     PORT: String(frontendPort),

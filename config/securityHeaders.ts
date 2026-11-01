@@ -107,6 +107,12 @@ function cspDirective(
 interface SecurityHeaderOptions {
   readonly allowInsecureLocalhostConnectSrc?: boolean | undefined;
   readonly allowUnsafeEval?: boolean | undefined;
+  /**
+   * Allow WebAssembly compilation (`'wasm-unsafe-eval'`) without allowing
+   * JavaScript eval. Only the end-to-end encrypted messages build (D109)
+   * needs it, for the MLS WebAssembly module.
+   */
+  readonly allowWasmUnsafeEval?: boolean | undefined;
   readonly webSocketEndpoint?: string | undefined;
   readonly sentryDsn?: string | undefined;
 }
@@ -224,6 +230,9 @@ export function createSecurityHeaders(
       // Keep eval available for local/dev tooling only; production dependencies
       // in this app do not require eval-like script execution.
       options.allowUnsafeEval && "'unsafe-eval'",
+      // Encrypted messages compile an MLS WebAssembly module; this keyword
+      // permits WebAssembly compilation only, not JavaScript eval.
+      options.allowWasmUnsafeEval && "'wasm-unsafe-eval'",
     ]),
     cspDirective("connect-src", connectSrc),
     cspDirective("font-src", [

@@ -37,4 +37,31 @@ describe("parseDevicePushData", () => {
       target_profile_handle: "sesamenoodles",
     });
   });
+
+  it("accepts the content-free encrypted chat wake", () => {
+    expect(
+      parseDevicePushData({
+        notification_id: "e2ee",
+        redirect: "e2ee",
+        target_profile_id: "profile-1",
+        target_profile_handle: "sesamenoodles",
+      })
+    ).toEqual({
+      notification_id: "e2ee",
+      redirect: "e2ee",
+      target_profile_id: "profile-1",
+      target_profile_handle: "sesamenoodles",
+    });
+  });
+
+  it("still rejects unknown redirects", () => {
+    expect(
+      parseDevicePushData({
+        notification_id: "x",
+        redirect: "e2ee-group",
+        target_profile_id: "profile-1",
+        target_profile_handle: "sesamenoodles",
+      })
+    ).toBeNull();
+  });
 });

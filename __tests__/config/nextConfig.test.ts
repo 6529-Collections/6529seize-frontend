@@ -34,10 +34,18 @@ describe("shared Next config", () => {
     ).toBeUndefined();
   });
 
-  it("excludes public-review inputs from production traces", () => {
-    expect(sharedConfig(publicEnv, "").outputFileTracingExcludes).toEqual({
-      "/*": ["content/public-reviews/**/*", "public/review-data/**/*"],
+  it("sends every former Stream review link to /stream", async () => {
+    expect(await sharedConfig(publicEnv, "").redirects?.()).toContainEqual({
+      source: "/reviews/6529-stream/:path*",
+      destination: "/stream",
+      permanent: true,
     });
+  });
+
+  it("sets no trace exclusions", () => {
+    expect(
+      sharedConfig(publicEnv, "").outputFileTracingExcludes
+    ).toBeUndefined();
   });
 
   it("includes Sharp libvips assets in the OG image route trace", () => {
@@ -50,15 +58,27 @@ describe("shared Next config", () => {
     });
   });
 
-  it("lets staging packaging inject canonical public-review inputs", () => {
-    const stagingEnv = {
-      ...publicEnv,
-      BASE_ENDPOINT: "https://staging.6529.io",
+  it("allows WebAssembly compilation only in encrypted-messages builds", async () => {
+    const scriptSrcFor = async (env: PublicEnv): Promise<string> => {
+      const headers = await sharedConfig(env, "").headers?.();
+      const csp = headers
+        ?.flatMap((entry) => entry.headers)
+        .find((header) => header.key === "Content-Security-Policy")?.value;
+      return (
+        csp
+          ?.split(";")
+          .map((directive) => directive.trim())
+          .find((directive) => directive.startsWith("script-src ")) ?? ""
+      );
     };
 
-    expect(sharedConfig(stagingEnv, "").outputFileTracingExcludes).toEqual({
-      "/*": ["content/public-reviews/**/*", "public/review-data/**/*"],
-    });
+    expect(await scriptSrcFor(publicEnv)).not.toContain("'wasm-unsafe-eval'");
+    expect(
+      await scriptSrcFor({ ...publicEnv, NEXT_PUBLIC_E2EE_DM_ENABLED: "false" })
+    ).not.toContain("'wasm-unsafe-eval'");
+    expect(
+      await scriptSrcFor({ ...publicEnv, NEXT_PUBLIC_E2EE_DM_ENABLED: "true" })
+    ).toContain("'wasm-unsafe-eval'");
   });
 
   describe("security headers", () => {

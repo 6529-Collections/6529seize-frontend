@@ -7,6 +7,7 @@ let mockWaveId: string | null = null;
 let mockIsRightSidebarOpen = false;
 let mockEffectiveDropId: string | undefined;
 let mockSearchParams = new URLSearchParams();
+let mockIsEncryptedRoute = false;
 
 const mockChildMounted = jest.fn();
 const mockCloseRightSidebar = jest.fn();
@@ -55,6 +56,7 @@ jest.mock("next/navigation", () => ({
 
 jest.mock("@/helpers/navigation.helpers", () => ({
   getActiveWaveIdFromUrl: () => mockWaveId,
+  isEncryptedMessagesPathname: () => mockIsEncryptedRoute,
 }));
 
 jest.mock("@tanstack/react-query", () => ({
@@ -174,6 +176,7 @@ describe("WavesMessagesWrapper", () => {
     mockIsRightSidebarOpen = false;
     mockEffectiveDropId = undefined;
     mockSearchParams = new URLSearchParams();
+    mockIsEncryptedRoute = false;
     jest.clearAllMocks();
     mockUseQuery.mockReturnValue({ data: undefined, error: null });
   });
@@ -200,6 +203,18 @@ describe("WavesMessagesWrapper", () => {
       "true"
     );
     expect(mockChildMounted).not.toHaveBeenCalled();
+  });
+
+  it("mounts encrypted chat routes as main content on small screens", () => {
+    mockBreakpoint = "S";
+    mockWaveId = null;
+    mockIsEncryptedRoute = true;
+
+    renderWrapper({ defaultPath: "/messages" });
+
+    expect(screen.getByTestId("main-content")).toBeInTheDocument();
+    expect(screen.queryByTestId("left-sidebar")).not.toBeInTheDocument();
+    expect(mockChildMounted).toHaveBeenCalledTimes(1);
   });
 
   it("renders the direct profile feed query on small screens", () => {

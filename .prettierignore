@@ -10,6 +10,7 @@ build
 # Generated files
 generated
 *.generated.*
+native/mls-wasm/target
 lib/museum/generative-studies/minted-indexes/*.json
 # byte-exact copies of published files, checked by SHA-256
 lib/explained/fixtures
@@ -17,7 +18,6 @@ coverage
 content/delegation
 public/delegation-content
 public/glossary.json
-ops/public-review-knowledge/*/versions/*/knowledge
 
 # Package manager
 pnpm-lock.yaml
