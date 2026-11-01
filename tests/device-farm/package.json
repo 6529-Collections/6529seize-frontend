@@ -6,7 +6,8 @@
   "scripts": {
     "test": "npm run test:web",
     "test:web": "mocha specs/web.smoke.spec.cjs --timeout 900000 --retries 1 --reporter spec",
-    "test:native": "mocha specs/native-android.smoke.spec.cjs --timeout 900000 --retries 1 --reporter spec"
+    "test:native": "mocha specs/native-android.smoke.spec.cjs --timeout 900000 --retries 1 --reporter spec",
+    "test:legacy-notice-probe": "mocha specs/legacy-browser-notice.probe.spec.cjs --timeout 900000 --reporter spec"
   },
   "dependencies": {
     "mocha": "^11.1.0",
