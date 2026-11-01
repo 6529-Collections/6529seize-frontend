@@ -99,30 +99,33 @@ function requestLock(
   options: LockOptions,
   onStolen: () => void
 ): Promise<HeldLock | null> {
+  let releaseHold: () => void = () => undefined;
+  const hold = new Promise<void>((resolve) => {
+    releaseHold = resolve;
+  });
   return new Promise<HeldLock | null>((resolve, reject) => {
     let granted = false;
-    let releaseHold: () => void = () => undefined;
-    const hold = new Promise<void>((done) => {
-      releaseHold = done;
-    });
-    locks
-      .request(name, options, (lock) => {
-        if (!lock) {
-          resolve(null);
-          return undefined;
-        }
-        granted = true;
-        resolve({ release: releaseHold });
-        return hold;
-      })
-      .catch((error: unknown) => {
+    const request = async () => {
+      try {
+        await locks.request(name, options, (lock) => {
+          if (!lock) {
+            resolve(null);
+            return undefined;
+          }
+          granted = true;
+          resolve({ release: releaseHold });
+          return hold;
+        });
+      } catch (error) {
         if (granted) {
           // A steal rejects the holder's request with AbortError.
           onStolen();
           return;
         }
         reject(error as Error);
-      });
+      }
+    };
+    void request();
   });
 }
 
@@ -138,7 +141,7 @@ function waitForRelease(
       channel?.removeEventListener("message", onMessage);
       signal.removeEventListener("abort", onAbort);
     };
-    const onMessage = (event: MessageEvent<ChannelMessage>) => {
+    const onMessage = (event: MessageEvent<ChannelMessage | null>) => {
       if (event.data?.type === "released") {
         finish();
         resolve();
@@ -196,6 +199,9 @@ async function takeLock(
   return waited;
 }
 
+/** Read through a call: an abort can land while a lock request is awaited. */
+const isAborted = (signal: AbortSignal): boolean => signal.aborted;
+
 /**
  * Takes the engine lock for a profile. Resolves once this tab may run the
  * engine; rejects with AbortError when `signal` aborts first. Without Web
@@ -233,7 +239,7 @@ export async function acquireE2eeEngineLock(
     return unguardedLease();
   }
 
-  const onMessage = (event: MessageEvent<ChannelMessage>) => {
+  const onMessage = (event: MessageEvent<ChannelMessage | null>) => {
     if (event.data?.type === "release-request") {
       loseOnce();
     }
@@ -254,7 +260,8 @@ export async function acquireE2eeEngineLock(
     }
   };
 
-  if (input.signal.aborted) {
+  // The signal can abort while the lock is awaited above.
+  if (isAborted(input.signal)) {
     release();
     throw abortError();
   }

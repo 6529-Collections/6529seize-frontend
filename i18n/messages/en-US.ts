@@ -61,7 +61,6 @@ import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-c
 import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
 import { THE_MEMES_MINT_PROGRESS_MESSAGES } from "@/i18n/messages/the-memes-mint-progress";
-import type { PUBLIC_REVIEW_MESSAGES } from "@/i18n/messages/public-review";
 import { EN_US_RECEIPT_MESSAGES } from "@/i18n/messages/collect-receipts";
 import { CONTENT_MODERATION_MESSAGES } from "@/i18n/messages/content-moderation";
 import { SIGNED_MESSAGES_MESSAGES } from "@/i18n/messages/signed-messages";
@@ -3296,6 +3295,44 @@ export const EN_US_MESSAGES = {
   "profilePreferences.dm.NOBODY.label": "Nobody",
   "profilePreferences.dm.NOBODY.description":
     "No one can start a new conversation with you.",
+  "profilePreferences.dm.GROUP_MEMBERS.label": "Members of a group I choose",
+  "profilePreferences.dm.GROUP_MEMBERS.description":
+    "Only members of a group you pick, for example by level, TDH, REP or NIC, can start a new conversation with you.",
+  "profilePreferences.dm.blockNote":
+    "Profiles you block can never start a new conversation with you, whichever option you choose.",
+  "profilePreferences.dm.group.label": "Group",
+  "profilePreferences.dm.group.none": "No group chosen",
+  "profilePreferences.dm.group.loading": "Loading group…",
+  "profilePreferences.dm.group.unavailableName": "Group no longer available",
+  "profilePreferences.dm.group.loadError": "Couldn’t load the group details.",
+  "profilePreferences.dm.group.retry": "Try again",
+  "profilePreferences.dm.group.viewMembers": "View members of {groupName}",
+  "profilePreferences.dm.group.choose": "Choose group",
+  "profilePreferences.dm.group.change": "Change group",
+  "profilePreferences.dm.group.required": "Choose a group to save this option.",
+  "profilePreferences.dm.group.unavailable":
+    "The group you chose was deleted or hidden. Until you choose another group, only people you follow can start a new conversation with you.",
+  "profilePreferences.dm.group.allowFollowed":
+    "People I follow can always message me",
+  "profilePreferences.dm.group.allowFollowedDescription":
+    "Profiles you follow can start a conversation even if they aren’t in the group.",
+  "profilePreferences.dm.group.dialogTitle": "Who can message you",
+  "profilePreferences.dm.group.dialogDescription":
+    "Use an existing group or build one from level, TDH, REP, NIC, NFTs and specific profiles.",
+  "profilePreferences.dm.group.suggestedName": "Can message me",
+  "profilePreferences.dm.group.membersRoleLabel": "Can message me",
+  "profilePreferences.dm.group.createErrorTitle": "Couldn’t create this group.",
+  "profilePreferences.dm.group.createError": PLEASE_TRY_AGAIN,
+  "directMessageAdmission.notAccepting":
+    "@{handle} doesn’t accept new direct messages.",
+  "directMessageAdmission.peopleIFollowOnly":
+    "@{handle} only accepts new direct messages from people they follow.",
+  "directMessageAdmission.groupMembersOnly":
+    "@{handle} only accepts new direct messages from members of a group they chose.",
+  "directMessageAdmission.groupMembersOnlyWithGroup":
+    "@{handle} only accepts new direct messages from members of the group “{groupName}”.",
+  "directMessageAdmission.senderBlockedRecipient":
+    "You blocked @{handle}. Unblock them to start a new direct message.",
   "profilePreferences.dm.createRetry": PLEASE_TRY_AGAIN,
   "profilePreferences.notifications.heading": "Notifications",
   "profilePreferences.notifications.description":
@@ -4627,7 +4664,13 @@ export const EN_US_MESSAGES = {
   "navigation.nfts.nextGen": "NextGen",
   "navigation.nfts.memeLab": "Meme Lab",
   "navigation.nfts.rememes": "ReMemes",
-  "navigation.nfts.streamReview": "6529 Stream — Review",
+  "navigation.nfts.stream": "6529 Stream",
+  "stream.placeholder.title": "6529 Stream",
+  "stream.placeholder.body":
+    "6529 Stream is being rebuilt. You can follow the work in the 6529-works repository on GitHub.",
+  "stream.placeholder.repositoryLink": "6529-works on GitHub",
+  "stream.placeholder.metadataDescription":
+    "6529 Stream is being rebuilt. Follow the work in the 6529-works repository on GitHub.",
   "navigation.nfts.activity": "NFT Activity",
   "navigation.nfts.memesCalendar": "Memes Calendar",
   ...EULA_MESSAGES,
@@ -4761,9 +4804,4 @@ export const EN_US_MESSAGES = {
   "waves.sidebar.byCreator": "by {creator}",
 } as const;
 
-// Route namespaces are en-US source copy that ships only with its route. Each
-// module that reads one imports `@/i18n/namespaces/<name>`, which registers
-// the copy. The keys stay valid message keys everywhere.
-export type MessageKey =
-  | keyof typeof EN_US_MESSAGES
-  | keyof typeof PUBLIC_REVIEW_MESSAGES;
+export type MessageKey = keyof typeof EN_US_MESSAGES;

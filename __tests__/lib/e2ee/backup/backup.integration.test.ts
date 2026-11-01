@@ -138,7 +138,9 @@ describe("E2EE encrypted history backup", () => {
           base64ToBytes(data).length
         );
         expect(
-          Buffer.from(base64ToBytes(data)).includes(utf8Encode("secret"))
+          Buffer.from(base64ToBytes(data)).includes(
+            Buffer.from(utf8Encode("secret"))
+          )
         ).toBe(false);
       }
     }

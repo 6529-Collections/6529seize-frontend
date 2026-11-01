@@ -408,9 +408,11 @@ export class EngineController {
     this.armPoll();
   }
 
+  /** Stops wake events and polling; startBackground() resumes both. */
   stopBackground(): void {
     this.unsubscribeWake?.();
     this.unsubscribeWake = null;
+    this.ctx.timers.cancel("poll");
   }
 
   /**
@@ -425,7 +427,8 @@ export class EngineController {
   }
 
   private armPoll(): void {
-    if (this.ctx.options.polling === false || this.ctx.disposed) {
+    // Not ready (wiped, expired, disposed): a poll in flight does not re-arm.
+    if (this.ctx.options.polling === false || !this.isReady()) {
       return;
     }
     const wsQuiet = this.ctx.now() - this.ctx.lastWakeAt > WS_QUIET_MS;

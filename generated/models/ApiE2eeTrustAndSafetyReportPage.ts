@@ -20,6 +20,10 @@ export class ApiE2eeTrustAndSafetyReportPage {
     * Pass as `before` for the next page; null on the last page
     */
     'next_before': number | null;
+    /**
+    * Pass as `before_id` with `before` for the next page, so reports sharing a timestamp are neither skipped nor repeated; null on the last page
+    */
+    'next_before_id': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -37,6 +41,12 @@ export class ApiE2eeTrustAndSafetyReportPage {
             "baseName": "next_before",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "next_before_id",
+            "baseName": "next_before_id",
+            "type": "string",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {

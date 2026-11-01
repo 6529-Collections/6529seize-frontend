@@ -40,7 +40,12 @@ identities.
 - If profile context is missing, create controls are hidden and create content
   does not render.
 - Recipient profile preferences can allow new conversations from everyone,
-  only people the recipient follows, or nobody.
+  only people the recipient follows, members of a group the recipient chose,
+  or nobody. With the group option, people the recipient follows are also
+  admitted unless the recipient turned that off.
+- A profile the recipient has blocked can never start a new conversation with
+  them. A profile you have blocked cannot be added to a new conversation until
+  you unblock it.
 - A new group direct message must be allowed by every recipient.
 - Existing direct-message conversations are unaffected by later preference
   changes, including existing groups whose participants would not pass the
@@ -105,8 +110,11 @@ identities.
 - If search fails, use `Retry search`. Selected recipients stay in place.
 - Creation failures also keep the selection so it can be adjusted or retried.
 - If a recipient does not accept a new direct message from the creator, the UI
-  explains that recipient's policy. Change the participant set or use an
-  existing conversation.
+  explains that recipient's policy, for example "@alice only accepts new direct
+  messages from members of a group they chose". The group is named only when
+  the recipient made it public. A recipient's block shows the same "doesn't
+  accept new direct messages" notice as the Nobody setting and is never
+  disclosed. Change the participant set or use an existing conversation.
 - For other creation failures, the UI shows the server error when available;
   retry from the same flow.
 - If stale `create=dm` opens unexpectedly, close the flow to clear `create`

@@ -218,7 +218,9 @@ time your device sees someone. Compare safety codes and check the wallets in
 your encrypted messages, marks **This device**, and shows each device's
 platform, when it was added, last seen and when it expires, and whether its
 wallet signature was verified on this device. You can rename this device and
-revoke any device, including this one. A new device is named after its
+revoke any device, including this one. Revoking this device removes its
+encrypted messages and keys from this browser right away and shows the card
+to turn encrypted messages on again. A new device is named after its
 browser or app and OS family (for example "Chrome on Windows" or "6529 app on
 iPhone"); devices added earlier keep their name. A profile can have up to 10
 active devices; at the limit, the new device lists the profile's devices and
@@ -302,12 +304,14 @@ what is shared:
   original goes along only if you tick **Also send the original message**.
   An edit changes only the text, so attachments belong to the original and
   are shared only with it.
-- It goes to 6529's trust and safety team, not to wave moderators or the
-  moderation queue, and never to an AI service.
+- It goes to 6529's moderators, who review it in the **Encrypted reports** tab
+  of WatchTower (`/content-moderation/encrypted-reports`). It never goes to
+  wave moderators or to an AI service.
 - Nothing else in the conversation is revealed.
 
 Everything else is handled with blocking, muting and the "who can message you"
-setting. Reports are kept for 180 days unless trust and safety holds them.
+setting. Reports are kept for 180 days unless a moderator places them on
+hold.
 
 ## Unencrypted direct messages
 

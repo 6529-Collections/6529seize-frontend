@@ -129,12 +129,17 @@ export class TimerSet {
     }
   }
 
-  dispose(): void {
-    this.disposed = true;
+  /** Cancels every armed timer; unlike dispose(), later arms still run. */
+  cancelAll(): void {
     for (const handle of this.timers.values()) {
       this.scheduler.clearTimeout(handle);
     }
     this.timers.clear();
+  }
+
+  dispose(): void {
+    this.disposed = true;
+    this.cancelAll();
   }
 }
 

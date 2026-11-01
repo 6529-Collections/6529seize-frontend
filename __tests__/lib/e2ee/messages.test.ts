@@ -42,7 +42,7 @@ describe("message rules (contract 6)", () => {
         ts: n,
         target: ID,
         text,
-        mentions: [],
+        mentions: [] as string[],
       }) as const;
     applyPayload(rt, edit(2, "first edit"), {
       ...meta("alice", 2),

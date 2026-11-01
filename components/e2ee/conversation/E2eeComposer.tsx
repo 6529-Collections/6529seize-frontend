@@ -439,6 +439,7 @@ export function E2eeComposer({
   // Reply, edit and a restored draft move focus to the composer.
   const focusKey = editId ?? replyTo?.id ?? draftId ?? null;
   useEffect(() => {
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- The reply or edit is chosen in the message list; focus moves here once the composer has rendered it.
     if (focusKey !== null) {
       textareaRef.current?.focus();
     }

@@ -12028,8 +12028,9 @@ paths:
       description: >-
         For severe or illegal harm only. The reporter discloses one message
         body and the sender's inner signature, which the server verifies.
-        Reports are readable only by the configured trust and safety group,
-        are never sent to an AI provider or to wave moderators, and are
+        Reports are readable only by content moderators (and the optional
+        E2EE_TRUST_AND_SAFETY_GROUP_ID group), are never sent to an AI
+        provider or to wave moderators, and are
         deleted after 180 days unless placed on hold. Requires a profile;
         proxies are rejected; 404 E2EE_DISABLED while the feature flag is off.
       operationId: e2eeReportMessage
@@ -12084,7 +12085,8 @@ paths:
         - Encrypted Messages
       summary: List reported encrypted messages (trust and safety)
       description: >-
-        Newest first. Only members of the group named by
+        Newest first. Only content moderators (the content-moderation queue's
+        moderator check) and, when it is set, members of the group named by
         E2EE_TRUST_AND_SAFETY_GROUP_ID may call this; every call is recorded in
         an access log. Works whether or not the encrypted messaging flag is on.
         Proxies are rejected.
@@ -12102,11 +12104,22 @@ paths:
         - name: before
           in: query
           required: false
-          description: Return reports created before this time (ms)
+          description: >-
+            Return reports created before this time (ms). With `before_id`,
+            also reports created at exactly this time whose id sorts before
+            `before_id`.
           schema:
             type: integer
             format: int64
             minimum: 0
+        - name: before_id
+          in: query
+          required: false
+          description: >-
+            The `next_before_id` of the previous page; only together with
+            `before`
+          schema:
+            type: string
         - name: limit
           in: query
           required: false
@@ -12128,17 +12141,17 @@ paths:
           description: Unauthorized
         "403":
           description: >-
-            Not a member of the trust and safety group, or the group is not
-            configured (E2EE_FORBIDDEN)
+            Not a content moderator or a member of the optional review group
+            (E2EE_FORBIDDEN)
   /e2ee/trust-and-safety/reports/{report_id}:
     get:
       tags:
         - Encrypted Messages
       summary: Read one reported encrypted message (trust and safety)
       description: >-
-        Only members of the group named by E2EE_TRUST_AND_SAFETY_GROUP_ID may
-        call this; every read is recorded in an access log. Proxies are
-        rejected.
+        Only content moderators and, when it is set, members of the group
+        named by E2EE_TRUST_AND_SAFETY_GROUP_ID may call this; every read is
+        recorded in an access log. Proxies are rejected.
       operationId: e2eeGetTrustAndSafetyReport
       security:
         - bearerAuth: []
@@ -12168,8 +12181,8 @@ paths:
           description: Unauthorized
         "403":
           description: >-
-            Not a member of the trust and safety group, or the group is not
-            configured (E2EE_FORBIDDEN)
+            Not a content moderator or a member of the optional review group
+            (E2EE_FORBIDDEN)
         "404":
           description: Not found (E2EE_NOT_FOUND)
   /e2ee/trust-and-safety/reports/{report_id}/hold:
@@ -12179,9 +12192,9 @@ paths:
       summary: Place a reported encrypted message on hold or release it
       description: >-
         A report on hold is kept past the 180-day retention until released.
-        Only members of the group named by E2EE_TRUST_AND_SAFETY_GROUP_ID may
-        call this; every change is recorded in an access log. Proxies are
-        rejected.
+        Only content moderators and, when it is set, members of the group
+        named by E2EE_TRUST_AND_SAFETY_GROUP_ID may call this; every change is
+        recorded in an access log. Proxies are rejected.
       operationId: e2eeSetTrustAndSafetyReportHold
       security:
         - bearerAuth: []
@@ -12219,8 +12232,8 @@ paths:
           description: Unauthorized
         "403":
           description: >-
-            Not a member of the trust and safety group, or the group is not
-            configured (E2EE_FORBIDDEN)
+            Not a content moderator or a member of the optional review group
+            (E2EE_FORBIDDEN)
         "404":
           description: Not found (E2EE_NOT_FOUND)
   /feed:
@@ -19562,6 +19575,17 @@ paths:
                 $ref: "#/components/schemas/ApiWave"
         "400":
           description: Invalid request
+        "403":
+          description: |
+            A recipient does not admit new direct messages from the caller.
+            Existing conversations with the same members are returned without
+            this check. The body is `{ error, code, handle }` (handle may be
+            null when the recipient has none) where code is
+            DM_RECIPIENT_NOT_ACCEPTING, DM_RECIPIENT_PEOPLE_I_FOLLOW_ONLY,
+            DM_RECIPIENT_GROUP_MEMBERS_ONLY (plus group_id and group_name only
+            when the recipient's group is public) or
+            DM_SENDER_BLOCKED_RECIPIENT. A recipient's block is reported as
+            DM_RECIPIENT_NOT_ACCEPTING and never disclosed.
   /waves/{id}:
     get:
       tags:
@@ -33622,6 +33646,7 @@ components:
       required:
         - items
         - next_before
+        - next_before_id
       properties:
         items:
           type: array
@@ -33632,6 +33657,13 @@ components:
           format: int64
           nullable: true
           description: Pass as `before` for the next page; null on the last page
+        next_before_id:
+          type: string
+          nullable: true
+          description: >-
+            Pass as `before_id` with `before` for the next page, so reports
+            sharing a timestamp are neither skipped nor repeated; null on the
+            last page
     ApiE2eeRevokeDeviceRequest:
       type: object
       required:
@@ -39913,15 +39945,41 @@ components:
       type: object
       required:
         - direct_message_policy
+        - direct_message_group_id
+        - direct_message_allow_people_i_follow
+        - direct_message_group_unavailable
         - notification_level
         - notifications
       properties:
         direct_message_policy:
           type: string
+          description: |
+            Who may start a new direct message with this profile. Blocked
+            profiles can never start one. GROUP_MEMBERS admits members of
+            direct_message_group_id.
           enum:
             - EVERYONE
             - PEOPLE_I_FOLLOW
             - NOBODY
+            - GROUP_MEMBERS
+        direct_message_group_id:
+          type: string
+          nullable: true
+          description: |
+            Group whose members may start a new direct message when
+            direct_message_policy is GROUP_MEMBERS. Kept when another policy
+            is selected so the choice can be restored.
+        direct_message_allow_people_i_follow:
+          type: boolean
+          description: |
+            When direct_message_policy is GROUP_MEMBERS, people this profile
+            follows may always start a new direct message. Defaults to true.
+        direct_message_group_unavailable:
+          type: boolean
+          description: |
+            True when direct_message_policy is GROUP_MEMBERS but the chosen
+            group is missing or hidden. Admission then falls back to people
+            this profile follows until another group is chosen.
         notification_level:
           type: string
           enum:
@@ -42044,10 +42102,23 @@ components:
       properties:
         direct_message_policy:
           type: string
+          description: |
+            GROUP_MEMBERS requires direct_message_group_id in the same request
+            or an already saved group.
           enum:
             - EVERYONE
             - PEOPLE_I_FOLLOW
             - NOBODY
+            - GROUP_MEMBERS
+        direct_message_group_id:
+          type: string
+          nullable: true
+          description: |
+            A visible, non-direct-message group the profile can see. Null
+            clears the saved group and is rejected while the policy is
+            GROUP_MEMBERS.
+        direct_message_allow_people_i_follow:
+          type: boolean
         notification_level:
           type: string
           enum:

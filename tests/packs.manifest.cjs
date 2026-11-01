@@ -59,11 +59,6 @@ const AUTH_SANDBOX_ENV = {
   ...COMPOSER_SANDBOX_ENV,
 };
 
-const PUBLIC_REVIEW_SANDBOX_ENV = {
-  PLAYWRIGHT_PUBLIC_REVIEW_SANDBOX: "1",
-  ...COMPOSER_SANDBOX_ENV,
-};
-
 // End-to-end encrypted DMs and groups (D109): several local browsers, each
 // a different dev-auth user, against the fake E2EE delivery service mounted
 // in the composer sandbox mock API.
@@ -455,13 +450,6 @@ const PACKS = [
     "Waves composer sandbox against the local mock API.",
     ["tests/social/waves-composer-sandbox.spec.ts"],
     COMPOSER_SANDBOX_ENV,
-    [DESKTOP, MOBILE]
-  ),
-  sandboxPack(
-    "test:e2e:public-review-sandbox",
-    "Stream review feedback sandbox against the local mock API.",
-    ["tests/public-review/stream-review-feedback-sandbox.spec.ts"],
-    PUBLIC_REVIEW_SANDBOX_ENV,
     [DESKTOP, MOBILE]
   ),
   sandboxPack(

@@ -1,6 +1,4 @@
 import { downloadMedia, localBlobType } from "../media";
-import { MlsClient } from "../mls-adapter";
-import { getDefaultE2eeStorage, isIndexedDbAvailable } from "../storage";
 import { getDefaultBackupStateStore } from "../backup/state";
 import type { BackupHistory } from "../backup/format";
 import type {
@@ -19,13 +17,10 @@ import {
   type EngineContext,
 } from "./context";
 import { EngineController } from "./controller";
-import { DeviceDirectory } from "./directory";
 import {
   enrollDevice,
   hasLoginGrant,
-  ensureWasm,
   grantExpired,
-  loadCurrentSuiteDevice,
   refreshMe,
   renewalDue,
   renewGrant,
@@ -33,7 +28,6 @@ import {
 } from "./enroll";
 import { backupHistory, importBackupHistory } from "./backup";
 import { E2eeError, errorMessage } from "./errors";
-import { newRuntime } from "./groups";
 import {
   addMembers,
   checkEligibility,
@@ -46,184 +40,24 @@ import {
   setAdmin,
 } from "./membership";
 import { searchMessages } from "./messages";
-import {
-  createDefaultScheduler,
-  SerialQueue,
-  TaskTracker,
-  TimerSet,
-} from "./runtime";
 import { previewReport, sendReport } from "./report";
 import { queueImported, queueMessage, queueTargeted } from "./send";
-import { EngineStore, toE2eeMessage } from "./store";
 import {
-  approveDevice,
-  hasPinnedWallets,
-  ignoreUntrustedDevice,
-  isPinnedWallet,
-} from "./trust";
+  createContext,
+  loadGroups,
+  memberProfileIds,
+  resolveProfiles,
+  restore,
+  setStatus,
+  supported,
+} from "./setup";
+import { toE2eeMessage } from "./store";
+import { approveDevice, ignoreUntrustedDevice } from "./trust";
 
 /** Contract section 12 engine: framework-agnostic, one instance per profile. */
 
 const OPEN_CONVERSATION_MS = 60_000;
 const NEEDS_ENROLLMENT = "needs-enrollment" satisfies E2eeEngineStatus;
-
-function supported(options: E2eeEngineOptions): boolean {
-  const hasWasm =
-    typeof WebAssembly === "object" || options.loadWasm !== undefined;
-  const hasCrypto =
-    typeof globalThis.crypto === "object" && "subtle" in globalThis.crypto;
-  return (
-    hasWasm &&
-    hasCrypto &&
-    (options.storage !== undefined || isIndexedDbAvailable())
-  );
-}
-
-function createContext(options: E2eeEngineOptions): EngineContext {
-  const now = options.now ?? (() => Date.now());
-  const scheduler = options.scheduler ?? createDefaultScheduler();
-  const holder: { ctx: EngineContext | null } = { ctx: null };
-  const directory = new DeviceDirectory({
-    api: options.api,
-    now,
-    verifyContractSignature: options.verifyContractSignature,
-    verifyEd25519: (pub, digest, sig) =>
-      holder.ctx?.mls?.verifyEd25519(pub, digest, sig) ?? false,
-    pinnedWallet: (profileId, wallet) => {
-      const current = holder.ctx;
-      if (!current) {
-        return null;
-      }
-      if (isPinnedWallet(current, profileId, wallet)) {
-        return true;
-      }
-      return hasPinnedWallets(current, profileId) ? false : null;
-    },
-  });
-  const ctx: EngineContext = {
-    options,
-    api: options.api,
-    storage: options.storage ?? getDefaultE2eeStorage(),
-    profileId: options.profileId,
-    now,
-    random: options.random ?? Math.random,
-    scheduler,
-    queue: new SerialQueue(),
-    tasks: new TaskTracker(),
-    timers: new TimerSet(scheduler),
-    store: new EngineStore(options.profileId, directory),
-    directory,
-    wasm: null,
-    mls: null,
-    device: null,
-    lastState: null,
-    stateVersion: 0,
-    persistChain: Promise.resolve(),
-    disposed: false,
-    lastMeAt: 0,
-    lastWakeAt: 0,
-    openConversation: null,
-    openUntil: 0,
-  };
-  holder.ctx = ctx;
-  return ctx;
-}
-
-function setStatus(
-  ctx: EngineContext,
-  status: E2eeEngineStatus,
-  error: string | null = null
-): void {
-  ctx.store.status = status;
-  ctx.store.error = error;
-  ctx.store.touch();
-}
-
-async function loadGroups(ctx: EngineContext): Promise<void> {
-  const groups = await ctx.storage.listGroups(ctx.profileId);
-  const outbox = await ctx.storage.listOutbox(ctx.profileId);
-  for (const record of groups) {
-    const runtime = newRuntime(record);
-    for (const message of await ctx.storage.listMessages(
-      ctx.profileId,
-      record.g
-    )) {
-      runtime.messages.set(message.id, message);
-    }
-    for (const item of outbox.filter((entry) => entry.g === record.g)) {
-      runtime.outbox.set(item.id, item);
-    }
-    ctx.store.groups.set(record.g, runtime);
-  }
-  const names = new Set(
-    groups.flatMap((record) => record.members.map((m) => m.profileId))
-  );
-  await resolveProfiles(
-    ctx,
-    [...names].filter((id): id is string => id !== null)
-  );
-}
-
-function memberProfileIds(ctx: EngineContext): string[] {
-  const ids = new Set<string>();
-  for (const runtime of ctx.store.groups.values()) {
-    for (const member of runtime.record.members) {
-      if (member.profileId !== null) {
-        ids.add(member.profileId);
-      }
-    }
-  }
-  return [...ids];
-}
-
-async function resolveProfiles(
-  ctx: EngineContext,
-  profileIds: string[]
-): Promise<void> {
-  const missing = profileIds.filter((id) => !ctx.store.profiles.has(id));
-  if (missing.length === 0) {
-    return;
-  }
-  try {
-    const resolved = await ctx.options.resolveProfiles(missing);
-    for (const [id, info] of Object.entries(resolved)) {
-      ctx.store.profiles.set(id, {
-        handle: info.handle,
-        pfp: info.pfp,
-        wallets: [...info.wallets],
-      });
-    }
-    ctx.store.touch();
-  } catch {
-    // Profiles are cosmetic; retried on the next change.
-  }
-}
-
-/** Loads an enrolled device from storage; false when enrollment is needed. */
-async function restore(ctx: EngineContext): Promise<boolean> {
-  const device = await loadCurrentSuiteDevice(ctx);
-  if (!device?.registered || !device.provisioned) {
-    return false;
-  }
-  const state = await ctx.storage.getWasmState(ctx.profileId);
-  if (!state) {
-    return false;
-  }
-  await ensureWasm(ctx);
-  if (!ctx.wasm) {
-    return false;
-  }
-  const mls = MlsClient.load(ctx.wasm, state);
-  if (mls.deviceKey() !== device.deviceKey) {
-    mls.dispose();
-    throw new E2eeError("E2EE_DEVICE_MISMATCH");
-  }
-  ctx.mls = mls;
-  ctx.lastState = state;
-  ctx.device = device;
-  await loadGroups(ctx);
-  return true;
-}
 
 class E2eeEngineImpl implements E2eeEngineExt {
   private readonly ctx: EngineContext;
@@ -349,11 +183,13 @@ class E2eeEngineImpl implements E2eeEngineExt {
   /**
    * This device was revoked: local state is useless; back to enrollment. The
    * encrypted-backup state for the profile goes too (its chunk key belongs
-   * to this device).
+   * to this device). The background work stops but stays restartable: the
+   * gate keeps this engine, and enroll() starts it again for a new device.
    */
   private async wipe(): Promise<void> {
+    this.controller.stopBackground();
     await this.ctx.queue.run(async () => {
-      this.ctx.timers.dispose();
+      this.ctx.timers.cancelAll();
       this.ctx.mls?.dispose();
       this.ctx.mls = null;
       this.ctx.device = null;
@@ -815,8 +651,12 @@ class E2eeEngineImpl implements E2eeEngineExt {
   async revokeDevice(deviceKey: string): Promise<void> {
     this.requireReady();
     const target = deviceKey.toLowerCase();
+    // Decided before the request: this device's own E2EE_DEVICE_REVOKED hint
+    // can arrive first and start a wipe that clears ctx.device.
+    const isThisDevice = target === this.ctx.device?.deviceKey;
     await submitRevocation(this.ctx, target);
-    if (target === this.ctx.device?.deviceKey) {
+    if (isThisDevice) {
+      // Queued behind a wipe the hint started, so this resolves wiped.
       await this.wipe();
       return;
     }

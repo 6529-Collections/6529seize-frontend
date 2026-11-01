@@ -8,6 +8,10 @@ import {
   sanitizeRouteFamily,
 } from "./monitoring/mobileLaunchTimingSanitizers";
 import {
+  currentPathname,
+  isEncryptedChatUiBreadcrumb,
+} from "./monitoring/sentryEncryptedChatBreadcrumbs";
+import {
   sanitizeSentryExceptionValue,
   sanitizeSentryText as sanitizeString,
 } from "./monitoring/sentryTextSanitizer";
@@ -576,33 +580,6 @@ function sanitizeBreadcrumbData(
     sanitizedData["url"] = sanitizedTopLevelUrl;
   }
   return sanitizedData;
-}
-
-/** Encrypted chats and their devices and new-chat pages. */
-const ENCRYPTED_MESSAGES_PATH_PATTERN = /^\/messages\/encrypted(?:\/|$)/;
-
-const currentPathname = (): string | null => {
-  try {
-    return globalThis.location?.pathname ?? null;
-  } catch {
-    return null;
-  }
-};
-
-/**
- * Click and input breadcrumbs describe the element by its aria-label, title
- * or alt text. On encrypted-chat pages those carry decrypted metadata, such
- * as attachment file names and chat names, so they are not recorded there.
- */
-function isEncryptedChatUiBreadcrumb(
-  breadcrumb: Breadcrumb,
-  pathname: string | null
-): boolean {
-  return (
-    breadcrumb.category?.startsWith("ui.") === true &&
-    pathname !== null &&
-    ENCRYPTED_MESSAGES_PATH_PATTERN.test(pathname)
-  );
 }
 
 export function sanitizeSentryBreadcrumb(

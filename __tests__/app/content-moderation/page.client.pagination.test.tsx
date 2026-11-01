@@ -30,6 +30,7 @@ import {
   fetchSuspendedModerationProfiles,
 } from "@/services/api/content-moderation-api";
 import { BLOCK_ACTIVITY_QUERY_KEY } from "@/services/content-moderation/content-moderation-query";
+import { fetchE2eeReports } from "@/services/api/e2ee-reports-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   act,
@@ -145,6 +146,16 @@ jest.mock("@/services/api/content-moderation-api", () => ({
   fetchContentModerationQueue: jest.fn(),
   fetchSuspendedModerationProfiles: jest.fn(),
   setModeratedProfileStatus: jest.fn(),
+}));
+
+jest.mock("@/services/api/e2ee-reports-api", () => ({
+  fetchE2eeReports: jest.fn(async () => ({
+    items: [],
+    next_before: null,
+    next_before_id: null,
+  })),
+  fetchE2eeReport: jest.fn(),
+  setE2eeReportHold: jest.fn(),
 }));
 
 jest.mock("@/services/api/moderation-checks-api", () => ({
@@ -1112,6 +1123,30 @@ describe("ContentModerationPageClient pagination", () => {
     expect(
       screen.queryByText("Choose a content decision")
     ).not.toBeInTheDocument();
+  });
+
+  it("opens encrypted reports from their own tab for moderators", async () => {
+    mockFetchContentModerationQueue.mockResolvedValue([]);
+    render(
+      <QueryClientProvider
+        client={
+          new QueryClient({ defaultOptions: { queries: { retry: false } } })
+        }
+      >
+        <ContentModerationPageClient />
+      </QueryClientProvider>
+    );
+    await userEvent.click(
+      screen.getByRole("tab", { name: "Encrypted reports" })
+    );
+    expect(globalThis.location.pathname).toBe(
+      "/content-moderation/encrypted-reports"
+    );
+    expect(
+      screen.getByRole("tab", { name: "Encrypted reports", selected: true })
+    ).toBeVisible();
+    expect(await screen.findByText("No encrypted reports.")).toBeVisible();
+    expect(fetchE2eeReports).toHaveBeenCalledTimes(1);
   });
 
   it("lazy-loads the newest-first block activity trail", async () => {

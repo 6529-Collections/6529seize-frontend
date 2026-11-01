@@ -158,7 +158,9 @@ function persist(
   ctx: EngineContext,
   write: (expectedVersion: number) => Promise<void>
 ): Promise<void> {
-  const run = ctx.persistChain.then(async () => {
+  const previous = ctx.persistChain;
+  const run = (async () => {
+    await previous;
     try {
       await write(ctx.stateVersion);
     } catch (error) {
@@ -169,7 +171,7 @@ function persist(
       throw error;
     }
     ctx.stateVersion += 1;
-  });
+  })();
   ctx.persistChain = run.catch(() => undefined);
   return run;
 }
