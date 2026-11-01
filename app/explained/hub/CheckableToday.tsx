@@ -35,9 +35,9 @@ function Item({
           {when}
         </span>
       </div>
-      <p className="tw-m-0 tw-mt-1.5 tw-text-[15px] tw-leading-[23px] tw-text-iron-300">
+      <span className="tw-mt-1.5 tw-block tw-text-[15px] tw-leading-[23px] tw-text-iron-300">
         {children}
-      </p>
+      </span>
     </li>
   );
 }
@@ -130,7 +130,7 @@ export default function CheckableToday({
         </Item>
       </ul>
       <p
-        className={`${EX_TEXT.cap} tw-m-0 tw-mt-4 tw-max-w-[860px] lg:tw-mt-6`}
+        className={`${EX_TEXT.cap} tw-m-0 tw-mt-4 tw-max-w-[560px] lg:tw-mt-6`}
       >
         {ht(locale, "check.candour")}
       </p>

@@ -29,7 +29,7 @@ const SKETCH: readonly { readonly name: string; readonly key: SureKey }[] = [
 
 function ProofSketch({ m }: { readonly m: SureContext["m"] }) {
   return (
-    <details className="tw-group tw-mt-8 tw-max-w-[860px] tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-5 tw-py-4 md:tw-px-6">
+    <details className="tw-group tw-mt-8 tw-w-fit tw-max-w-[860px] tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-5 tw-py-4 open:tw-w-auto md:tw-px-6">
       <summary
         className={`tw-cursor-pointer tw-list-none tw-text-[17px] tw-font-semibold tw-leading-6 tw-text-iron-50 marker:tw-hidden [&::-webkit-details-marker]:tw-hidden ${EX_FOCUS}`}
       >
@@ -54,7 +54,7 @@ function ProofSketch({ m }: { readonly m: SureContext["m"] }) {
               {index + 1}
             </span>
             <span className="tw-text-[15px] tw-leading-6 tw-text-iron-300">
-              <code className="tw-font-mono tw-text-[13.5px] tw-text-iron-50">
+              <code className="tw-font-mono tw-text-[13.5px] tw-text-iron-50 [overflow-wrap:anywhere]">
                 {step.name}
               </code>
               {": "}

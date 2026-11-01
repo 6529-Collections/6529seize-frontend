@@ -71,6 +71,7 @@ export function Seg<V extends string>({
       role="group"
       aria-label={label}
       data-seg-layout={layout}
+      {...(layout === "row" ? { "data-tdh-scroll": "" } : {})}
     >
       {/* Options keep their whole label on one line and move to the next
           row first; one wider than the whole control wraps inside it. */}

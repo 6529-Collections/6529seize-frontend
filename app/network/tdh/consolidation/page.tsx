@@ -234,7 +234,7 @@ export default async function TdhYourWalletsPage({
           </div>
         </PageHead>
 
-        <Section id="why" tight>
+        <Section id="why">
           <span id="consolidation-change" />
           <span id="consolidation-wallets" />
           <EdRow
@@ -503,7 +503,7 @@ export default async function TdhYourWalletsPage({
                     –
                   </span>
                 </summary>
-                <p className="tw-m-0 tw-hidden tw-max-w-[660px] tw-pb-4 tw-text-[15px] tw-leading-6 tw-text-iron-300 group-open:tw-block">
+                <p className="tw-m-0 tw-hidden tw-max-w-[560px] tw-pb-4 tw-text-[15px] tw-leading-6 tw-text-iron-300 group-open:tw-block">
                   {wt(locale, answerKey)}
                 </p>
               </details>

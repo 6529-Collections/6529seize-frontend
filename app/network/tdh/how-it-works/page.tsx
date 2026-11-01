@@ -371,7 +371,7 @@ function PartB({
             : null}
         </Para>
         {rate !== null && cents !== null && (
-          <p className="tw-m-0 tw-mt-4">
+          <figure className="tw-m-0 tw-mt-4" data-fig="base">
             <code
               className="tw-inline-block tw-max-w-full tw-whitespace-pre-wrap tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-black/20 tw-px-3 tw-py-2 tw-font-mono tw-text-[13.5px] tw-leading-[21px] tw-text-iron-300"
               data-fact={rate.id}
@@ -383,7 +383,7 @@ function PartB({
             <span className="tw-mt-2 tw-block tw-text-[13px] tw-leading-5 tw-text-iron-400">
               {ht(locale, "explained.tdh.how.base.ruleSource")}
             </span>
-          </p>
+          </figure>
         )}
       </EdRow>
     </Section>

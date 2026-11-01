@@ -68,7 +68,7 @@ export default function LoopAtlas({
             <Seg
               label={kt(locale, "explained.kit.loop.follow")}
               attr="step"
-              phone="row"
+              phone="wrap"
               value={String(step)}
               onChange={(value) => setStep(Number(value))}
               options={steps.map((entry, index) => ({

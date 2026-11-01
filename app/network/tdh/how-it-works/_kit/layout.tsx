@@ -64,7 +64,7 @@ export function PageHead({
     return <header className="tw-pt-[30px] md:tw-pt-[52px]">{head}</header>;
   }
   return (
-    <header className="tw-grid tw-grid-cols-1 tw-items-end tw-gap-8 tw-pt-[30px] md:tw-pt-[52px] lg:tw-grid-cols-[minmax(0,1fr)_360px] lg:tw-gap-12">
+    <header className="tw-grid tw-grid-cols-1 tw-items-end tw-gap-8 tw-pt-[30px] md:tw-pt-[52px] lg:tw-grid-cols-[minmax(0,1fr)_360px] lg:tw-gap-12 lg:tw-pb-10">
       <div className="tw-min-w-0">{head}</div>
       <div className="tw-hidden tw-min-w-0 lg:tw-block">{aside}</div>
     </header>

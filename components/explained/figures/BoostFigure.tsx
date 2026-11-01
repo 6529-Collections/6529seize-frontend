@@ -152,11 +152,20 @@ export default function BoostFigure({
             </g>
           ) : null
         )}
-        {/* The origin, always: above the track's start, clear of the
-            value under it and of the markers' labels at the right. */}
-        <Label x={xAt(1)} y={18} tone="ink3">
-          {formatCents(locale, 1)}
-        </Label>
+        {/* The origin: above the track's start when today's label leaves
+            room for it, else under the track where the value leaves room. */}
+        {xAt(todayMaxCents / 100) - 4 - (markers[0]?.text.length ?? 0) * 7.6 >
+        xAt(1) + 40 ? (
+          <Label x={xAt(1)} y={18} tone="ink3">
+            {formatCents(locale, 1)}
+          </Label>
+        ) : (
+          valueX - xAt(1) > 48 && (
+            <Label x={xAt(1)} y={86}>
+              {formatCents(locale, 1)}
+            </Label>
+          )
+        )}
         <line
           x1={valueX}
           y1={64}

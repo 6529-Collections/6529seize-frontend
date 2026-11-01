@@ -109,24 +109,22 @@ export default function BoostHistory({
           // A short step's label sits at its start; the current one ends at
           // the right edge, so its label is anchored there.
           const anchor = step.current ? "end" : "start";
-          const lx = step.current ? x1 : x0 + 2;
+          const lx = step.current ? x1 : x0 + 4;
           // A step too narrow for its label sets it under its line, where
           // the next step's riser cannot cross it.
           const fits = step.current || x1 - x0 >= tag.length * 7.4 + 8;
           const ly = fits ? yy - 8 : yy + 18;
           return (
             <g key={step.version} data-boost-step={step.version}>
-              <rect
-                x={x0}
-                y={yy}
-                width={Math.max(0, x1 - x0)}
-                height={Math.max(0, y(low) - yy)}
-                fill={
-                  step.current
-                    ? "rgba(82,139,255,0.16)"
-                    : "rgba(206,207,212,0.07)"
-                }
-              />
+              {step.current && (
+                <rect
+                  x={x0}
+                  y={yy}
+                  width={Math.max(0, x1 - x0)}
+                  height={Math.max(0, y(low) - yy)}
+                  fill="rgba(82,139,255,0.16)"
+                />
+              )}
               <line
                 x1={x0}
                 y1={yy}

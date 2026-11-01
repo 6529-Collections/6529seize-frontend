@@ -1,5 +1,5 @@
 {
-  "note": "The 6529 Explained pages of release 1 and what the gates check on each (SCORECARD.md). Each page lane owns its row: its sources, the decisions it relies on (dependsOn) and the record head it was checked through. The drift check fails when a newer decision touches a dependsOn decision and the page's sources do not name it in a DriftNote. States are the Break-it and interaction captures (renders/states); their selectors are the kit's: Lens renders data-lens, BreakIt data-break.",
+  "note": "The 6529 Explained pages of release 1 and what the gates check on each (SCORECARD.md). Each page lane owns its row: its sources, the decisions it relies on (dependsOn) and the record head it was checked through. The drift check fails when a newer decision touches a dependsOn decision and the page's sources do not name it in a DriftNote. States are the Break-it and interaction captures (renders/states); their selectors are the kit's: Lens renders data-lens, BreakIt data-break. Round 2 (2026-11-01): the word budgets of the overview, How it works, a day's receipt, How sure and Zero-knowledge proofs are raised (to 1,050, 2,050, 500, 2,500 and 2,800 words; How it works to 180 words a screen) for the depth the owner asked of the chapter on 2026-10-31: the full calculation with a worked trace, how the Lean proof goes, and what the proofs still trust.",
   "pages": [
     {
       "id": "hub",
@@ -33,7 +33,11 @@
       "sources": ["app/network/tdh/*", "app/network/tdh/overview/**"],
       "dependsOn": ["D112", "D119", "D125", "D128", "D136", "D137", "D142"],
       "checkedThrough": "D152",
-      "budget": { "words": 900, "firstScreen": 120, "figuresPer1000": 6 },
+      "budget": {
+        "words": 1050,
+        "firstScreen": 120,
+        "figuresPer1000": 6
+      },
       "states": [
         {
           "name": "machine-card4-gradient",
@@ -65,7 +69,12 @@
       "sources": ["app/network/tdh/how-it-works/**"],
       "dependsOn": ["D89", "D131", "D132", "D136"],
       "checkedThrough": "D152",
-      "budget": { "words": 1800, "firstScreen": 120, "figuresPer1000": 6 },
+      "budget": {
+        "words": 2050,
+        "firstScreen": 120,
+        "figuresPer1000": 6,
+        "wordsPerScreen": 180
+      },
       "states": [
         {
           "name": "firstday-2359",
@@ -129,7 +138,11 @@
       "sources": ["app/network/tdh/consolidation/*"],
       "dependsOn": ["D136"],
       "checkedThrough": "D152",
-      "budget": { "words": 900, "firstScreen": 130, "figuresPer1000": 3 },
+      "budget": {
+        "words": 900,
+        "firstScreen": 130,
+        "figuresPer1000": 3
+      },
       "states": [
         {
           "name": "why-moved",
@@ -166,7 +179,11 @@
       ],
       "dependsOn": ["D116", "D121", "D131", "D132"],
       "checkedThrough": "D152",
-      "budget": { "words": 1000, "firstScreenMin": 150, "firstScreen": 285 },
+      "budget": {
+        "words": 1000,
+        "firstScreenMin": 150,
+        "firstScreen": 285
+      },
       "states": [
         {
           "name": "break-fail",
@@ -193,7 +210,11 @@
       ],
       "dependsOn": ["D116", "D136", "D137", "D144"],
       "checkedThrough": "D152",
-      "budget": { "words": 450, "firstScreenMin": 150, "firstScreen": 285 },
+      "budget": {
+        "words": 500,
+        "firstScreenMin": 150,
+        "firstScreen": 285
+      },
       "states": []
     },
     {
@@ -207,7 +228,7 @@
       "dependsOn": ["D96", "D112", "D128", "D131", "D136", "D137", "D148"],
       "checkedThrough": "D152",
       "budget": {
-        "words": 2100,
+        "words": 2500,
         "firstScreenMin": 150,
         "firstScreen": 285,
         "wordsPerScreen": 300
@@ -241,7 +262,7 @@
       "dependsOn": ["D119", "D123", "D128", "D136", "D137"],
       "checkedThrough": "D152",
       "budget": {
-        "words": 2400,
+        "words": 2800,
         "firstScreenMin": 150,
         "firstScreen": 285,
         "wordsPerScreen": 300
@@ -419,7 +440,10 @@
       "task": "TDH and why it matters",
       "budget": "60 s, first screen",
       "start": "/network/tdh",
-      "target": { "route": "/network/tdh", "selector": "#tdh-minute" },
+      "target": {
+        "route": "/network/tdh",
+        "selector": "#tdh-minute"
+      },
       "firstScreen": true
     },
     {
@@ -427,7 +451,10 @@
       "task": "What CC0 means for my card",
       "budget": "2 clicks",
       "start": "/network/tdh",
-      "target": { "route": "/explained", "anchor": "cc0" },
+      "target": {
+        "route": "/explained",
+        "anchor": "cc0"
+      },
       "clicks": 2
     },
     {
@@ -435,7 +462,10 @@
       "task": "Do I trust my number?",
       "budget": "2 min",
       "start": "/network/tdh",
-      "target": { "route": "/network/tdh", "anchor": "explain" },
+      "target": {
+        "route": "/network/tdh",
+        "anchor": "explain"
+      },
       "clicks": 1
     },
     {
@@ -443,7 +473,10 @@
       "task": "Why my TDH changed after a move",
       "budget": "1 click from the overview, first section",
       "start": "/network/tdh",
-      "target": { "route": "/network/tdh/consolidation", "anchor": "why" },
+      "target": {
+        "route": "/network/tdh/consolidation",
+        "anchor": "why"
+      },
       "clicks": 1
     },
     {
@@ -451,7 +484,9 @@
       "task": "Add a fourth wallet, safely",
       "budget": "3 min",
       "start": "/network/tdh",
-      "target": { "route": "/network/tdh/consolidation" },
+      "target": {
+        "route": "/network/tdh/consolidation"
+      },
       "clicks": 1
     },
     {
@@ -459,7 +494,10 @@
       "task": "Today's check",
       "budget": "first screen, phone included",
       "start": "/network/tdh/verification",
-      "target": { "route": "/network/tdh/verification", "selector": "#side" },
+      "target": {
+        "route": "/network/tdh/verification",
+        "selector": "#side"
+      },
       "firstScreen": true
     },
     {
@@ -467,7 +505,10 @@
       "task": "Rate formula and floor, exact",
       "budget": "1 screen",
       "start": "/network/tdh",
-      "target": { "route": "/network/tdh/how-it-works", "anchor": "part-b" },
+      "target": {
+        "route": "/network/tdh/how-it-works",
+        "anchor": "part-b"
+      },
       "clicks": 2
     },
     {
@@ -475,7 +516,9 @@
       "task": "Vectors and how to run them",
       "budget": "2 clicks",
       "start": "/network/tdh",
-      "target": { "route": "/network/tdh/implementations" },
+      "target": {
+        "route": "/network/tdh/implementations"
+      },
       "clicks": 2
     },
     {
@@ -483,7 +526,9 @@
       "task": "Reproduce a day",
       "budget": "the receipt and the pin block",
       "start": "/network/tdh/verification",
-      "target": { "route": "/network/tdh/verification/{latestDay}" },
+      "target": {
+        "route": "/network/tdh/verification/{latestDay}"
+      },
       "clicks": 1
     },
     {
@@ -491,7 +536,9 @@
       "task": "What is proved, where, what not",
       "budget": "one page",
       "start": "/network/tdh",
-      "target": { "route": "/network/tdh/formal" },
+      "target": {
+        "route": "/network/tdh/formal"
+      },
       "clicks": 1
     },
     {
@@ -499,7 +546,10 @@
       "task": "A counterexample told honestly",
       "budget": "one section",
       "start": "/network/tdh/formal",
-      "target": { "route": "/network/tdh/formal", "anchor": "featured" },
+      "target": {
+        "route": "/network/tdh/formal",
+        "anchor": "featured"
+      },
       "clicks": 1
     },
     {
@@ -507,7 +557,10 @@
       "task": "What a validator computes, why two",
       "budget": "1 page",
       "start": "/network/tdh",
-      "target": { "route": "/network/tdh/verification", "anchor": "classes" },
+      "target": {
+        "route": "/network/tdh/verification",
+        "anchor": "classes"
+      },
       "clicks": 2
     },
     {
@@ -515,7 +568,10 @@
       "task": "What the check shows and not",
       "budget": "1 section",
       "start": "/network/tdh/verification",
-      "target": { "route": "/network/tdh/verification", "anchor": "diff" },
+      "target": {
+        "route": "/network/tdh/verification",
+        "anchor": "diff"
+      },
       "clicks": 1
     },
     {
@@ -523,7 +579,10 @@
       "task": "6529 in two sentences",
       "budget": "the hub's first screen",
       "start": "/explained",
-      "target": { "route": "/explained", "selector": "[data-ex-lede]" },
+      "target": {
+        "route": "/explained",
+        "selector": "[data-ex-lede]"
+      },
       "firstScreen": true
     },
     {
@@ -531,7 +590,10 @@
       "task": "The most impressive thing",
       "budget": "the hub",
       "start": "/explained",
-      "target": { "route": "/explained", "selector": "[data-ex-checkable]" },
+      "target": {
+        "route": "/explained",
+        "selector": "[data-ex-checkable]"
+      },
       "clicks": 0
     },
     {
@@ -539,7 +601,10 @@
       "task": "CC0, what I give and keep",
       "budget": "2 clicks",
       "start": "/explained",
-      "target": { "route": "/explained", "anchor": "cc0" },
+      "target": {
+        "route": "/explained",
+        "anchor": "cc0"
+      },
       "clicks": 1
     }
   ]

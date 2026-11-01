@@ -117,7 +117,7 @@
   "explained.tdh.spec.s9.title": "Cycle output and roots",
   "explained.tdh.spec.s9.label": "Output and roots",
   "explained.tdh.spec.s9.heading": "What a day's result is",
-  "explained.tdh.spec.s9.body": "A cycle result is its header, (N, B, hash(B), T, rule version, registry hash), and each identity's key, wallets, boost and final TDH. Each token carries its balance, raw, base and final. Validators commit to it with a cycle root and a wallet root, but how a result is serialized and hashed into them belongs to other specifications (P28, P11), which are not public yet. A separately written implementation can match every final TDH and the totals today, not the roots.",
+  "explained.tdh.spec.s9.body": "A cycle result is its header, (N, B, hash(B), T, rule version, registry hash), and each identity's key, wallets, boost and final TDH. Each token carries its balance, raw, base and final. Validators commit to it with a cycle root and a wallet root. How a result is serialized and hashed into them belongs to P28 and P11, which are not public yet. A separate implementation can match every final TDH and the totals today, not the roots.",
   "explained.tdh.spec.s9.receipt": "The day's receipt prints both roots for every published day: {link}.",
   "explained.tdh.spec.s9.receiptLink": "the result dated {date}",
   "explained.tdh.spec.s10.title": "The parameter registry",

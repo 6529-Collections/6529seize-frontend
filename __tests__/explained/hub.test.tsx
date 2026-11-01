@@ -74,11 +74,11 @@ describe("the hub, first version", () => {
     );
     // The proved day carries its retired rule in the same sentence.
     expect(panel).toHaveTextContent(
-      "under the retired tdh-v1.0 rules. Program A ran inside SP1, a zero-knowledge prover, and mainnet's SP1 verifier contract accepts the proof without a transaction. Proof B of that day is not done, and under TDH v1.4 only a synthetic test cycle is proved by both."
+      "under the retired tdh-v1.0 rules. Mainnet's SP1 verifier accepts proof A without a transaction; proof B is not done, and under TDH v1.4 only a synthetic test cycle is proved by both."
     );
     // What anyone can repeat today, and what needs private code.
     expect(panel).toHaveTextContent(
-      "Anyone can check each day's file against the index and add up 6529.io's signed Arweave upload. Recomputing a day needs the validator code, private for now (D116)"
+      "Anyone can check each day's file against the index and add up 6529.io's signed upload. Recomputing a day needs the validator code, private for now (D116)"
     );
     expect(panel).not.toHaveTextContent("repeat the daily comparison");
   });
@@ -119,7 +119,7 @@ describe("the hub, first version", () => {
       })
     ).toBeInTheDocument();
     expect(container.querySelector('[data-limit="limit"]')).toHaveTextContent(
-      "Meme Card #1 shows a CryptoPunk, whose copyright was never the artist's to give, so CC0 does not cover it"
+      "Meme Card #1 shows a CryptoPunk, whose copyright was never the artist's to give, so CC0 does not cover it. 6529 Gradients are not CC0."
     );
     expect(
       screen.getByRole("link", { name: "Download Meme #2" })
