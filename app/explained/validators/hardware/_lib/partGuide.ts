@@ -86,7 +86,7 @@ export const PARTS: readonly PartDef[] = [
         "card"
       ),
       great: s(
-        "8 cores give the Ethereum node room to grow. EIP-7870’s minimum is 4 cores and 8 threads.",
+        "8 cores give the Ethereum node room to grow. EIP-7870 recommends 4 cores and 8 threads.",
         "eip7870"
       ),
       rack: s(

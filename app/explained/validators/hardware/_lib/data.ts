@@ -156,7 +156,7 @@ export const SPEC_ROWS: readonly SpecRow[] = [
       "4 cores (2 will do). Any 64-bit x86 or Arm processor, old ones included.",
     good: "4–8 cores: an Intel N150 or a small Ryzen",
     great:
-      "8 cores, which give the Ethereum node room to grow. EIP-7870’s minimum is 4 cores and 8 threads.",
+      "8 cores, which give the Ethereum node room to grow. EIP-7870 recommends 4 cores and 8 threads.",
   },
   {
     id: "memory",
