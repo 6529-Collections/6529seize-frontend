@@ -206,7 +206,7 @@ export function EditionsIndexPage() {
   groups.closed.sort((a, b) => b.times.editionEnd - a.times.editionEnd);
   groups.done.sort((a, b) => b.times.editionEnd - a.times.editionEnd);
   return (
-    <div className="tailwind-scope">
+    <div>
       <PageHeader
         title={t(locale, "stream.editions.title")}
         intro={t(locale, "stream.editionPages.list.intro")}
@@ -607,7 +607,7 @@ function EditionPageBody({ editionKey }: { readonly editionKey: WorkKey }) {
     return <NotFoundNote locale={locale} />;
   }
   return (
-    <div className="tailwind-scope">
+    <div>
       <EditionHeader
         auction={auction}
         work={work}

@@ -4,7 +4,7 @@ import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream";
 
 /** "2d 4h", "3h 12m" or "4m 05s" for a span of seconds. */
-function formatDuration(
+export function formatDuration(
   locale: SupportedLocale,
   seconds: number
 ): string {

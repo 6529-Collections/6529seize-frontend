@@ -201,6 +201,12 @@ export class MockStreamDataSource implements StreamDataSource {
     });
   }
 
+  claimableCredits(account: Address) {
+    return later(() => {
+      return this.engine.state.credits.get(account) ?? 0n;
+    });
+  }
+
   listEditionAuctions() {
     return later(() => {
       return [...this.engine.state.editionAuctions.values()]

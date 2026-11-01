@@ -131,7 +131,7 @@ export default function EditionAuctionPanel({
     "tw-contents @4xl:tw-flex @4xl:tw-min-w-0 @4xl:tw-flex-col @4xl:tw-gap-4";
 
   return (
-    <div className="tailwind-scope tw-@container">
+    <div className="tw-@container">
       <StatusBanner
         auction={auction}
         oneOfOne={oneOfOne}

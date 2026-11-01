@@ -70,6 +70,8 @@ export interface StreamDataSource {
   // The 1/1 English auction
   getOneOfOneAuction(saleId: string): Promise<OneOfOneAuction | null>;
   auctionForWork(key: WorkKey): Promise<OneOfOneAuction | null>;
+  /** `claimable(account, ETH)`: outbid and refunded 1/1 bids, waiting to be claimed. */
+  claimableCredits(account: Address): Promise<Wei>;
 
   // The uniform-price edition auction
   listEditionAuctions(): Promise<readonly EditionAuction[]>;
