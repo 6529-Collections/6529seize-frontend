@@ -183,8 +183,19 @@ const PUBLIC_IMAGE_EXTENSIONS = [
   ".webp",
 ] as const;
 
-/** Route families that bypass the staging gate as a whole segment. */
-const STATIC_SEGMENT_PREFIXES = ["/api", "/_next", "/pdfjs", "/error"] as const;
+/**
+ * Route families that bypass the staging gate as a whole segment. `/e2ee`
+ * holds the content-hashed OpenMLS WebAssembly module of encrypted chats
+ * (built by `6529 run build:mls-wasm`); it is public code the loader checks
+ * against a bundled SHA-256 before use.
+ */
+const STATIC_SEGMENT_PREFIXES = [
+  "/api",
+  "/_next",
+  "/pdfjs",
+  "/e2ee",
+  "/error",
+] as const;
 
 /** `next-sitemap` writes `/sitemap.xml` and `/sitemap-<n>.xml` after builds. */
 function isGeneratedSitemapPath(pathname: string): boolean {
@@ -249,10 +260,9 @@ function decodePathname(pathname: string): string {
 }
 
 /**
- * True for the retired public contract review's data under
- * `public/review-data`, which no host serves any more. The path is decoded,
- * lower-cased and stripped of repeated slashes first, so an encoded or
- * oddly spelled request cannot reach the files.
+ * True for `/review-data`, the namespace of the removed public contract
+ * review's generated files. The path is decoded, lower-cased and stripped of
+ * repeated slashes first, so every spelling of an old link gets the same 404.
  */
 export function isRetiredReviewDataPath(pathname: string): boolean {
   const normalized = decodePathname(pathname)

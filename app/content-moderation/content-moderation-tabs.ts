@@ -2,6 +2,7 @@ export const MODERATION_TAB_SLUGS = {
   REVIEW: "needs-review",
   CHECKS: "checks",
   RESOLVED: "resolved-reports",
+  ENCRYPTED_REPORTS: "encrypted-reports",
   SUSPENDED: "suspended-profiles",
   BLOCK_ACTIVITY: "block-activity",
 } as const;

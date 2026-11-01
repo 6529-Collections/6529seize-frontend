@@ -163,9 +163,12 @@ describe("hasMalformedWaveId", () => {
 // lib/proxy/waveRoutes.ts is updated to match.
 describe("wave route tree", () => {
   it("has `create` as the only static sibling of [wave]", () => {
-    for (const family of ["waves", "messages"]) {
-      expect(childDirectories(family)).toEqual(["[wave]", "create"]);
-    }
+    expect(childDirectories("waves")).toEqual(["[wave]", "create"]);
+    expect(childDirectories("messages")).toEqual([
+      "[wave]",
+      "create",
+      "encrypted",
+    ]);
   });
 
   it("has only the routes the wave-id policy knows below [wave]", () => {

@@ -31,6 +31,9 @@ export interface SessionNonceDeviceGrantParams {
   readonly device_key: string;
   readonly device_key_type: "ed25519";
   readonly device_scopes: string;
+  /** Combined grant (NC8): also grant this MLS device key. */
+  readonly mls_device_key?: string;
+  readonly mls_ciphersuite?: string;
 }
 
 export interface SessionNativeResponse {

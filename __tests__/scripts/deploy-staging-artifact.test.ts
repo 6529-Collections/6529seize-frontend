@@ -175,7 +175,6 @@ function runHostPreflight(
         ARTIFACT_URL: "https://example.invalid/artifact.zip",
         EXPECTED_SHA: expectedSha,
         EXPECTED_DIGEST: expectedDigest,
-        PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64: "e30=",
         SSR_CLIENT_ID_B64: "Y2xpZW50",
         SSR_CLIENT_SECRET_B64: "c2VjcmV0",
         ETHEREUM_RPC_URL_B64: Buffer.from(ethereumRpcUrl).toString("base64"),
@@ -584,7 +583,6 @@ bash() {
           EXPECTED_SHA: candidateSha,
           EXPECTED_DIGEST: expectedDigest,
           ARTIFACT_URL: "https://example.invalid/artifact.zip",
-          PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64: "e30=",
           SSR_CLIENT_ID_B64: "Y2xpZW50",
           SSR_CLIENT_SECRET_B64: "c2VjcmV0",
           TEST_COMMAND_LOG: commandLog,
@@ -853,7 +851,7 @@ describe("staging immutable artifact deployment", () => {
     );
     const build = buildCommands.indexOf("./bin/6529 run base-build");
     const packageValidation = buildCommands.indexOf(
-      "node scripts/package-public-review-artifacts.cjs assert-zip"
+      "node scripts/package-web-artifact.cjs assert-zip"
     );
     const unchangedCheck = buildCommands.indexOf(
       `printf '%s\\n' "$help_artifact_checksums" | sha256sum -c -`
@@ -894,18 +892,7 @@ describe("staging immutable artifact deployment", () => {
     );
     expect(script).toContain("--connect-timeout 30");
     expect(script).toContain("--max-time 900");
-    expect(script).toContain(
-      'install -m 600 -o "$RUN_AS" -g "$RUN_AS" /dev/null "$destinations_file"'
-    );
-    expect(script).toContain(
-      "unset review_destinations PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64"
-    );
-    expect(script).toContain(
-      '[[ "$retain_destinations_file" != true && -n "$destinations_file" ]]'
-    );
-    expect(script.indexOf("retain_destinations_file=true")).toBeGreaterThan(
-      script.indexOf('chown "$RUN_AS:$RUN_AS" "$destinations_file"')
-    );
+    expect(script).not.toMatch(/PUBLIC_REVIEW|destinations/u);
     expect(script).toContain('wait_for_local_version "$EXPECTED_SHA"');
     expect(script.match(/if ! rollback_process; then/g)).toHaveLength(3);
     expect(script).toContain("legacy) restore_legacy_process");
@@ -1012,6 +999,8 @@ describe("staging immutable artifact deployment", () => {
     expect(build.env.NEXTGEN_CHAIN_ID).toBe(
       "${{ vars.STAGING_NEXTGEN_CHAIN_ID || '1' }}"
     );
+    // Encrypted DMs (D109) are a staging-only build flag.
+    expect(build.env.NEXT_PUBLIC_E2EE_DM_ENABLED).toBe("true");
     expect(buildSource).not.toContain("secrets.");
     expect(buildSource).not.toContain("11155111");
     expect(buildStep.run).toContain("./bin/6529 run base-build");

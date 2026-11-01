@@ -33,8 +33,14 @@ const COMPETITION_ROUTE_PATTERNS: readonly RegExp[] = [
   /^\/waves\/([^/]+)\/competitions\/[^/]+$/,
 ];
 
-/** Static sibling of `[wave]` (`app/{waves,messages}/create`). */
-const CREATE_SEGMENT = "create";
+/**
+ * Static siblings of `[wave]`: `app/{waves,messages}/create`, and
+ * `app/messages/encrypted` from the encrypted-messages work.
+ */
+const STATIC_THREAD_SEGMENTS: ReadonlySet<string> = new Set([
+  "create",
+  "encrypted",
+]);
 
 /**
  * Index routes whose page turns the legacy `?wave=<id>` link into the thread
@@ -58,7 +64,7 @@ function isWaveId(segment: string): boolean {
 function waveSegmentOf(pathname: string): string | undefined {
   const thread = THREAD_ROUTE_PATTERN.exec(pathname)?.[1];
   if (thread !== undefined) {
-    return thread === CREATE_SEGMENT ? undefined : thread;
+    return STATIC_THREAD_SEGMENTS.has(thread) ? undefined : thread;
   }
   for (const pattern of COMPETITION_ROUTE_PATTERNS) {
     const segment = pattern.exec(pathname)?.[1];

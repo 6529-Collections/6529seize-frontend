@@ -8,6 +8,10 @@ import {
   sanitizeRouteFamily,
 } from "./monitoring/mobileLaunchTimingSanitizers";
 import {
+  currentPathname,
+  isEncryptedChatUiBreadcrumb,
+} from "./monitoring/sentryEncryptedChatBreadcrumbs";
+import {
   sanitizeSentryExceptionValue,
   sanitizeSentryText as sanitizeString,
 } from "./monitoring/sentryTextSanitizer";
@@ -579,9 +583,11 @@ function sanitizeBreadcrumbData(
 }
 
 export function sanitizeSentryBreadcrumb(
-  breadcrumb: Breadcrumb | undefined | null
+  breadcrumb: Breadcrumb | undefined | null,
+  pathname: string | null = currentPathname()
 ): Breadcrumb | null {
   if (!breadcrumb) return null;
+  if (isEncryptedChatUiBreadcrumb(breadcrumb, pathname)) return null;
 
   const crumb = { ...breadcrumb };
   sanitizeBreadcrumbTextFields(crumb);

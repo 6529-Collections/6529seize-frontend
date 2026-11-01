@@ -59,9 +59,16 @@ const AUTH_SANDBOX_ENV = {
   ...COMPOSER_SANDBOX_ENV,
 };
 
-const PUBLIC_REVIEW_SANDBOX_ENV = {
-  PLAYWRIGHT_PUBLIC_REVIEW_SANDBOX: "1",
+// End-to-end encrypted DMs and groups (D109): several local browsers, each
+// a different dev-auth user, against the fake E2EE delivery service mounted
+// in the composer sandbox mock API.
+const E2EE_SANDBOX_ENV = {
   ...COMPOSER_SANDBOX_ENV,
+  PLAYWRIGHT_E2EE_SANDBOX: "1",
+  PLAYWRIGHT_BASE_URL: "http://localhost:3299",
+  PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3299",
+  PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4299",
+  NEXT_DEV_DIST_DIR: ".next-playwright-e2ee",
 };
 
 const READONLY_SPECS = {
@@ -446,13 +453,6 @@ const PACKS = [
     [DESKTOP, MOBILE]
   ),
   sandboxPack(
-    "test:e2e:public-review-sandbox",
-    "Stream review feedback sandbox against the local mock API.",
-    ["tests/public-review/stream-review-feedback-sandbox.spec.ts"],
-    PUBLIC_REVIEW_SANDBOX_ENV,
-    [DESKTOP, MOBILE]
-  ),
-  sandboxPack(
     "test:e2e:reaction-sandbox",
     "Drop reaction sandbox against the local mock API.",
     ["tests/social/wave-reaction-sandbox.spec.ts"],
@@ -581,6 +581,16 @@ const PACKS = [
       [DESKTOP, MOBILE]
     ),
     triggers: ["pr-ci", "manual"],
+  },
+  {
+    ...sandboxPack(
+      "test:e2e:e2ee-sandbox",
+      "Encrypted DMs and groups across several local browsers against the fake delivery service.",
+      ["tests/e2ee"],
+      E2EE_SANDBOX_ENV,
+      [DESKTOP, MOBILE]
+    ),
+    timeoutMinutes: 30,
   },
 
   localPack(
