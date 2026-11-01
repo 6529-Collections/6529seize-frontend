@@ -5,6 +5,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import {
+  isRetiredReviewDataPath,
   isStaticAssetPath,
   isUnservableDotPath,
   PUBLIC_IMAGE_DIRECTORIES,
@@ -17,8 +18,6 @@ const APP_DIR = path.join(process.cwd(), "app");
 // Generated before dev/build (pdfjs) or by build:mls-wasm (e2ee), and handled
 // by their own segment prefixes.
 const GENERATED_PUBLIC_DIRECTORIES = new Set(["pdfjs", "e2ee"]);
-// Gated by proxy's exact `/review-data/6529-stream/` rule instead.
-const SPECIAL_PUBLIC_DIRECTORIES = new Set(["review-data"]);
 const IMAGE_FILE_PATTERN = /\.(?:jpe?g|png|gif|svg|webp)$/i;
 
 function listFiles(directory: string): string[] {
@@ -67,8 +66,7 @@ describe("public path contract", () => {
     const unclassified = rootDirectories.filter(
       (directory) =>
         !PUBLIC_IMAGE_DIRECTORIES.has(directory) &&
-        !GENERATED_PUBLIC_DIRECTORIES.has(directory) &&
-        !SPECIAL_PUBLIC_DIRECTORIES.has(directory)
+        !GENERATED_PUBLIC_DIRECTORIES.has(directory)
     );
     expect(unclassified).toEqual([]);
   });
@@ -163,5 +161,32 @@ describe("isUnservableDotPath", () => {
     "/.well-known/apple-app-site-association",
   ])("leaves %s to normal routing", (pathname) => {
     expect(isUnservableDotPath(pathname)).toBe(false);
+  });
+});
+
+describe("isRetiredReviewDataPath", () => {
+  it.each([
+    "/review-data",
+    "/review-data/",
+    "/review-data/6529-stream/index.json",
+    "/review-data/6529-stream/versions/2026-09-09.1/sources/smart-contracts/core/StreamCore.sol",
+    "/review-data/other-review/index.json",
+    "/Review-Data/6529-stream/index.json",
+    "/%72eview-data/6529-stream/index.json",
+    "/review-data%2F6529-stream/index.json",
+    "//review-data/6529-stream/index.json",
+  ])("retires %s", (pathname) => {
+    expect(isRetiredReviewDataPath(pathname)).toBe(true);
+  });
+
+  it.each([
+    "/",
+    "/review-database",
+    "/reviews/6529-stream",
+    "/stream",
+    "/api/review-data",
+    "/%E0%A4%A",
+  ])("leaves %s to normal routing", (pathname) => {
+    expect(isRetiredReviewDataPath(pathname)).toBe(false);
   });
 });

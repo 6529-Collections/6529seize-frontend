@@ -37,9 +37,9 @@ authentication requirement.
 Optional `family` and `projects` fields group intended sampling decisions;
 they do not schedule tests. Omitted projects impose no project restriction.
 The initial fixtures reuse existing browser examples, checked-in report slugs,
-Museum route contracts, and the September Stream publication. Some dynamic
-catalog/legacy-alias and reference-declaration routes still need qualified
-fixtures; their per-environment omissions make this remaining work explicit.
+and Museum route contracts. Some dynamic catalog and legacy-alias routes still
+need qualified fixtures; their per-environment omissions make this remaining
+work explicit.
 Recheck fixture availability when a browser consumer is introduced or changed.
 
 The scanner covers `page.ts`, `page.tsx`, `page.js`, and `page.jsx` under `app/`,
@@ -137,7 +137,6 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:artwork-documentation-sandbox`            | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Artwork documentation saving and upload recovery through the real editor with isolated HTTP fixtures. |
 | `test:e2e:pdf-attachments-sandbox`                  | —                             | sandbox  | local       | pr-ci, manual             | 15m     | PDF attachment scrolling, recovery and touch layout in WebKit.                                        |
 | `test:e2e:composer-sandbox`                         | —                             | sandbox  | local       | manual                    | 15m     | Waves composer sandbox against the local mock API.                                                    |
-| `test:e2e:public-review-sandbox`                    | —                             | sandbox  | local       | manual                    | 15m     | Stream review feedback sandbox against the local mock API.                                            |
 | `test:e2e:reaction-sandbox`                         | —                             | sandbox  | local       | manual                    | 15m     | Drop reaction sandbox against the local mock API.                                                     |
 | `test:e2e:edit-drop-sandbox`                        | —                             | sandbox  | local       | manual                    | 15m     | Drop edit sandbox against the local mock API.                                                         |
 | `test:e2e:native-competition-sandbox`               | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Native competition context, parallel budgets and navigation against the local mock API.               |
@@ -421,13 +420,6 @@ Surface matrix:
   form; upload and attachment endpoints still fail closed. It must run against a
   loopback base URL, but it is not a full network-isolation harness and is not a
   staging or production smoke pack.
-- `test:e2e:public-review-sandbox` runs the authenticated Stream review
-  feedback flow on both baseline web projects. It verifies the responsive
-  Show/Hide feedback control, the primary comment input, optional section,
-  category, severity and technical-detail controls, the Wave preview, and the
-  exact four-field review metadata submitted to the local mock API. The mock
-  permits one canonical review drop per test and rejects every other drop
-  mutation. It never writes to staging or production.
 - `test:e2e:reaction-sandbox` runs a local-only authenticated Waves reaction
   sandbox on desktop Chromium. It adds and removes the deterministic quick
   reaction on the synthetic sandbox drop, then verifies that only the exact
