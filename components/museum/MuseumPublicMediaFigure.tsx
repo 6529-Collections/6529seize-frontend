@@ -3,6 +3,16 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { MuseumManagedImage } from "./MuseumManagedImage";
 
+const TITLE_LINK_CLASS =
+  "hover:tw-text-primary-200 tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
+
+// Top-aligned titles keep their 44px target in a pseudo-element, so one- and
+// two-line titles in a row start at the same height.
+const TITLE_LINK_LAYOUT_CLASS = {
+  centered: "tw-inline-flex tw-min-h-11 tw-items-center",
+  top: "tw-relative tw-block tw-leading-6 after:tw-absolute after:tw-inset-x-0 after:tw-top-1/2 after:tw-h-11 after:-tw-translate-y-1/2 after:tw-content-['']",
+} as const;
+
 export function MuseumPublicMediaFigure({
   src,
   width,
@@ -19,6 +29,7 @@ export function MuseumPublicMediaFigure({
   sizes = "(min-width: 1280px) 30vw, (min-width: 640px) 50vw, 100vw",
   srcSet,
   aspectRatio,
+  alignTitleToTop = false,
 }: {
   readonly src: string;
   readonly width: number | null;
@@ -35,6 +46,7 @@ export function MuseumPublicMediaFigure({
   readonly sizes?: string;
   readonly srcSet?: string;
   readonly aspectRatio?: number;
+  readonly alignTitleToTop?: boolean;
 }) {
   const mediaFrameStyle =
     aspectRatio === undefined ? undefined : { aspectRatio };
@@ -69,7 +81,7 @@ export function MuseumPublicMediaFigure({
         {href ? (
           <Link
             href={href}
-            className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            className={`${TITLE_LINK_LAYOUT_CLASS[alignTitleToTop ? "top" : "centered"]} ${TITLE_LINK_CLASS}`}
           >
             {title}
           </Link>

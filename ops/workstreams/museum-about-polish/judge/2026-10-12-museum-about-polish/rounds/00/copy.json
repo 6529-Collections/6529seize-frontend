@@ -1,0 +1,148 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "0fd7ba1d15bf4e38bcbfd825574e2289c40277b4",
+  "coverage": [
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/about-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/about-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/about-390x844-full.png"
+    }
+  ],
+  "dimensions": {
+    "J07": {
+      "score": 7.0,
+      "evidence": [
+        "evidence/about-1440x1000-01.png",
+        "evidence/about-1440x1000-02.png",
+        "evidence/about-1440x1000-03.png",
+        "evidence/about-1440x1000-04.png",
+        "evidence/about-820x1000-05.png",
+        "evidence/about-390x844-04.png",
+        "evidence/about-390x844-06.png",
+        "evidence/about-390x844-08.png"
+      ],
+      "findings": ["E-001", "E-002", "E-003", "E-004"],
+      "note": "The copy is plain, well sectioned, and careful with tense and hedging, and the Collection link labels now match. But the page's account of what the Museum holds is out of date (Vera Molnár's accessioned gift is missing, and the intro limits the scope to internet-native culture above a 1952 photograph), the public repository goes by four names, the governance and record cards use insider terms, and the on-chain transition and Collection care sections are abstract and give no status."
+    }
+  },
+  "checks": {
+    "I1": "pass",
+    "I2": "pass",
+    "I3": "pass"
+  },
+  "findings": [
+    {
+      "id": "E-001",
+      "targets": ["J07"],
+      "severity": "P1",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/about-1440x1000-02.png",
+      "observation": "Under 'Collection and acquisition' the page says: 'Casey Reas and Magnum Photos are represented by completed gifts.' The same build's Collection route lists 13 accessioned works from three completed gifts: Casey Reas, five Magnum photographers, and Vera Molnár in collaboration with Martin Grasser. The Acquisition programs route also lists three completed gifts. So the About page leaves out Vera Molnár's gift, and 'Magnum Photos are represented' names the agency rather than the five photographers. The intro (evidence/about-1440x1000-01.png) says the Museum shares 'art from the history of internet-native culture', yet one of the three works directly below it is David Seymour's 1952 Negev photograph, and the Collection holds documentary photographs from 1952 to 2016. The Museum home describes the Collection as 'digital art and photography held by the Network on Ethereum'.",
+      "consequence": "The route's primary task is understanding what the Museum holds. A visitor leaves with an account that is incomplete and drawn too narrowly, and it contradicts the Collection page and the Museum home one click away. That undermines trust in the institution's record.",
+      "change": "Rewrite museum.network.proposition.collection.body. Either derive the artist list from the publication data, as the Collection route's lead does, or use this draft: 'The permanent Collection contains works formally accessioned by the Museum. It holds three completed gifts: seven works by Casey Reas, five photographs by Magnum photographers, and Themes and Variations #210 by Vera Molnár in collaboration with Martin Grasser.' In museum.network.proposition.intro, replace 'art from the history of internet-native culture' with a scope that matches the Museum home. For example: 'The 6529 Network Museum is a permanent collection of digital art and photography held for the benefit of the 6529 Network and the public. It collects, preserves, studies, and shares works held by the Network on Ethereum.' Update museum.network.proposition.metadata to match.",
+      "acceptance_check": "At 1440, 820, and 390, 'Collection and acquisition' names every completed gift shown on /museum/network/collection (currently Casey Reas, the Magnum photographers, and Vera Molnár with Martin Grasser). The intro and meta description describe the Collection the same way the Museum home does and no longer limit it to internet-native culture.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-002",
+      "targets": ["J07"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/about-1440x1000-04.png",
+      "observation": "The page refers to one GitHub repository as 'the public record', 'the institutional record' (twice in The next stage), 'the repository', and 'the Museum's current canonical institutional record'. Two links to that same URL read 'View the Museum repository' (evidence/about-1440x1000-03.png) and 'View the public record'. At the foot of the page, the Institutional sources list and the Related works and context disclosure link the same documents under different names: 'Founding record' and 'Founding principles' for the same file, and 'On-chain transition' in both. 'Open Museum statement' and 'Read the source' open the same file. 'Open Museum statement' also reads as a command to open something rather than the name of a document. 'Museum Safe' leads to Etherscan without saying so. The word 'record' appears 17 times in the body copy.",
+      "consequence": "Readers cannot tell whether 'the public record', 'the institutional record', and 'the repository' are one source or three. The sources at the end look longer and more varied than they are, because ten links lead to five destinations. This is the same mixed-label defect the release intent fixed for the Collection links.",
+      "change": "Name the repository once: 'the Museum's public record, kept in a public GitHub repository'. Then use 'the public record' everywhere, including The next stage and The public record card, in place of 'institutional record' and 'canonical institutional record'. Give each destination one label. Both repository links: 'View the public record on GitHub'. The founding document: 'Founding principles', matching the disclosure. 'Open Museum statement': 'The Open Museum statement'. 'Museum Safe': 'Museum Safe on Etherscan'. Do not list a document in Institutional sources under a different name from the one the disclosure uses for it.",
+      "acceptance_check": "In the page body and the Institutional sources list, each destination URL has a single visible label, and that label matches the one the Related works and context disclosure uses for the same document. The body copy calls the GitHub repository by one name throughout. The labels say when a link leads to GitHub or Etherscan. No source label reads as an imperative.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-003",
+      "targets": ["J07"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/about-390x844-06.png",
+      "observation": "The page's stated audience is visitors learning what the Museum is, but its key mechanisms are written in insider vocabulary. 'The Network uses TDH-weighted voting…': TDH is never explained. 'Adopted effects and proposals awaiting adoption remain separate in the public record': 'adopted effects' is decision-register jargon, and the decisions page labels non-adopted proposals 'No adopted effect recorded', not 'awaiting adoption'. 'canonical institutional record' and 'version-controlled' are software terms. 'Copyright, public-domain, artist, and collector guidance accompanies the object-level rights record' is a string of nouns. The card is titled 'Rights education' and its link says 'rights handbook', but the destination page is titled 'Rights in digital art'. In 'Collection and acquisition' (evidence/about-390x844-04.png), 'Meme Card-funded' is unexplained, and 'current acquisition work … while acquisition and accession proceed' uses 'acquisition' three times in two sentences without saying the works are unminted. The heading 'The governance' carries a stray article.",
+      "consequence": "The one passage that answers who decides, and how a visitor can check, is unreadable to a newcomer. Card titles and links that name three different things make it unclear where a link will lead.",
+      "change": "Governance card: retitle it 'Governance'. Draft body: 'Major collecting and policy decisions are put to a Network vote weighted by TDH (Total Days Held), a measure of how long members have held 6529 NFTs. The decisions page lists adopted decisions separately from proposals with no adopted outcome.' Public record card: 'The Museum's rules, records, and their full revision history are kept in a public GitHub repository. Anyone can read every change, copy the record, or propose a correction.' Rights card: title 'Rights in digital art', body 'A guide to copyright, the public domain, licenses, collecting, and long-term care for digital art.', link 'Read the rights guide'. Keys and Gates: 'Keys and Gates is the first acquisition program funded by a Meme Card from The Memes by 6529. Its selected photographs are not yet minted or accessioned, so they are not part of the permanent Collection.'",
+      "acceptance_check": "TDH and Meme Card are explained in plain words at first use. The phrases 'adopted effects', 'canonical', 'version-controlled', 'object-level', and 'current acquisition work' no longer appear on the page. The governance sentence describes non-adopted proposals the way the decisions page labels them. The rights card's title and link name the destination page.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-004",
+      "targets": ["J07"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/about-1440x1000-04.png",
+      "observation": "The next stage is abstract and gives no status. The intro reads 'will connect Network governance, the institutional record, and Ethereum execution through three linked parts'. The parts read 'Decision-constrained custody … will follow valid Network decisions through technical custody controls' and 'Valid decisions will have a reliable path to an authorized Ethereum action'. The linked Open Museum statement says contract design is in progress and deployment and activation are pending, with a stated Fall 2026 goal, but the page states no status at all. 'Museum Safe' first appears here and is never explained. The page never says who controls the works today; the Founding principles describe a multisignature Safe (networkmuseum.6529.eth) with five named signers and a 3-of-5 quorum. Collection care, which follows, then refers to 'signers' and is in the present tense: 'The Museum is built to survive changes in websites, software, operators, signers, and service providers' and 'Long-term care joins Ethereum state to content-addressed records, preserved media and software, rights and provenance evidence, and migration paths'. These sentences list nouns without naming a mechanism a reader can check.",
+      "consequence": "A visitor cannot tell what protects the Collection today and what is still planned, or who can move the works now. Lofty abstractions next to unexplained custody make the on-chain story read as aspiration rather than as an institution's working arrangements.",
+      "change": "Introduce current custody at first mention. Draft: 'Today the accessioned works are held in the Museum Safe (networkmuseum.6529.eth), a multisignature wallet that needs 3 of its 5 signers to approve a transaction.' Check the current signing policy against the Safe before publishing. Give The next stage a status line consistent with the Open Museum statement, e.g. 'Planned. Contract design is in progress; nothing has been deployed yet.', and link the On-chain transition document there. Rewrite each part around its mechanism, e.g. 'A Museum contract on Ethereum will record each approved decision with its author, effective date, and evidence.' Rewrite Collection care around what exists now, e.g. 'Each published edition of the public record is fixed with cryptographic hashes, and anyone can copy it.' Keep planned items in the future tense.",
+      "acceptance_check": "The next stage states its current status in words consistent with the linked Open Museum statement. The Museum Safe is explained at first mention, including who can currently approve its transactions. Each of the three parts and each Collection care sentence names a concrete mechanism a reader can check through a linked source. Nothing planned appears in the present tense.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-005",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000 · en-US",
+      "evidence": "evidence/about-1440x1000-03.png",
+      "observation": "'A museum open to the public' ends with 'Museum governance, rights, provenance, and preservation records explain how that responsibility is carried out.' The next section's intro then restates the idea: 'The Museum records its decisions, custody, rights, and collecting work in public. These records support the art and the people who study it.' The final sentence could sit on any archive's website.",
+      "consequence": "The same point is made twice in a row, and a filler sentence slows the reader.",
+      "change": "Cut 'These records support the art and the people who study it.' and remove one of the two 'records explain/record in public' sentences.",
+      "acceptance_check": "The 'records kept in public' point is made once between the two sections.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-006",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · all viewports · en-US",
+      "evidence": "evidence/about-1440x1000-01.png",
+      "observation": "The document title is 'The 6529 Network Museum', almost the same as the Museum home's '6529 Network Museum'. An unused message, museum.network.about.title, already reads 'About the 6529 Network Museum'.",
+      "consequence": "Browser tabs, history, bookmarks, and search results do not tell the About page apart from the Museum home.",
+      "change": "Use museum.network.about.title ('About the 6529 Network Museum') for the route metadata title, and keep the visible H1.",
+      "acceptance_check": "The About page's document title differs from the Museum home's and includes 'About'.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "One label, 'Explore the Collection', on both Collection links (release intent achieved)",
+    "The hedged permanence sentence: 'Accessioned works are intended to remain in the Collection.'",
+    "Keys and Gates presented as separate from the permanent Collection until accession",
+    "The next stage written in the future tense; do not convert planned on-chain parts into present-tense claims",
+    "The governance card's inspectable mechanism: a stated vote, the public record, and the 'View Museum decisions' link",
+    "Link labels that name the object and the action: 'See acquisition programs', 'Read Museum research', 'View Museum decisions'",
+    "Plain, noun-led section headings ('Collection and acquisition', 'Scholarship and interpretation', 'Collection care')",
+    "No machine identifiers (6529NM IDs, hashes, file paths) in visible headings or captions"
+  ]
+}

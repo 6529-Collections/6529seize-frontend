@@ -1,0 +1,178 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "20d79da68d8526e6b64404655725fa2d0a70445a",
+  "coverage": [
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/about-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/about-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/about-390x844-full.png"
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 8.0,
+      "evidence": [
+        "evidence/about-1440x1000-01.png",
+        "evidence/about-1440x1000-02.png",
+        "evidence/about-1440x1000-03.png",
+        "evidence/about-1440x1000-04.png",
+        "evidence/about-820x1000-02.png",
+        "evidence/about-390x844-04.png"
+      ],
+      "findings": ["C-005"],
+      "note": "The page now answers all three parts of the task. It names all three accessioned gifts, shows one work from each, explains governance, custody, the public record and the planned stage, and links to a destination for each. It is held at 8 by one wrong status figure: it says Keys and Gates has twenty-three selected photographs, but the program record lists sixteen."
+    },
+    "J14": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/about-1440x1000-01.png",
+        "evidence/about-1440x1000-02.png",
+        "evidence/about-820x1000-01.png",
+        "evidence/about-820x1000-02.png",
+        "evidence/about-390x844-02.png",
+        "evidence/about-390x844-03.png",
+        "evidence/contact-sheet-1440x1000.png"
+      ],
+      "findings": ["C-005"],
+      "note": "This now reads as a credible museum publication. Its art section shows one principal work from each gift in accession order, each with the record credit line and licence or copyright, and the planned stage is labelled 'Status: planned'. Credibility is held below 9 by the misstated Keys and Gates count. The Molnár byline drops the collaborator, and the generative stills are not labelled as documentation; both are optional fixes."
+    }
+  },
+  "checks": {
+    "M1": "pass",
+    "M2": "pass",
+    "M3": "fail",
+    "M4": "pass"
+  },
+  "findings": [
+    {
+      "id": "C-001",
+      "targets": ["M3", "J01"],
+      "severity": "P1",
+      "status": "resolved",
+      "where": "/museum/network/about · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/about-1440x1000-02.png",
+      "observation": "Under 'Collection and acquisition' the page reads: 'The permanent Collection contains works that have been formally accessioned by the Museum. Casey Reas and Magnum Photos are represented by completed gifts.' (The same text appears in evidence/about-820x1000-02.png and evidence/about-390x844-04.png.) The same production build's /museum/network/collection, /museum/network/acquisitions and /museum/network/acquisition-programs record 13 works from three accessioned gifts: The System in Seven States (Casey Reas, 7 works), Conflict at Its Edges (five Magnum photographers, 5 works) and A Gift of Themes and Variations #210 (Vera Molnár, in collaboration with Martin Grasser). The About page leaves out the Molnár gift. It also names the agency (Magnum Photos) where the record names the photographers.",
+      "consequence": "On the page meant to explain what the Museum holds, a visitor is told the Collection comes from two sources when the record lists three accessioned gifts. The page also contradicts the Collection route, which is one click away.",
+      "change": "Rewrite museum.network.proposition.collection.body so it matches the record, for example: 'The permanent Collection contains works formally accessioned by the Museum. Gifts of work by Casey Reas, five Magnum photographers, and Vera Molnár, in collaboration with Martin Grasser, are in the permanent Collection.' This reuses the existing sibling phrasing in museum.network.acquisitions.description. If the copy states a work count, derive it from the publication, as the Collection route does, rather than hard-coding it.",
+      "acceptance_check": "At 1440, 820 and 390 px, 'Collection and acquisition' names every accessioned gift that /museum/network/collection lists (Casey Reas; five Magnum photographers; Vera Molnár, in collaboration with Martin Grasser). Any count it states equals the Collection route's 'In the Collection' count.",
+      "verification": "Passes. At all three viewports (evidence/about-1440x1000-02.png, evidence/about-820x1000-02.png, evidence/about-390x844-04.png) the section reads 'The permanent Collection contains works formally accessioned by the Museum: gifts of work by Casey Reas, five Magnum photographers, and Vera Molnár, in collaboration with Martin Grasser.' This uses the Collection route's wording for the same three gifts, and the section states no work count.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-002",
+      "targets": ["M2", "J14"],
+      "severity": "P1",
+      "status": "resolved",
+      "where": "/museum/network/about · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/about-1440x1000-02.png",
+      "observation": "Each figure under 'Works held and studied' shows only a title and the artist's name, e.g. 'Patrolling the border between the Negev Desert and Jordan / David Seymour' and 'CENTURY #31 / Casey Reas' (also evidence/about-820x1000-02.png, evidence/about-390x844-02.png, evidence/about-390x844-03.png). The /museum/network/collection route of the same build prints each record's credit line under these same works: 'David Seymour, Negev, 1952. © David Seymour/Magnum Photos 2022.' and 'Gift of punk6529; Casey REAS; CENTURY #31; 6529 Network Museum, 6529NM.2026.001.01. Licensed CC BY-NC 4.0.' The Seymour photograph is All Rights Reserved. Its work record says the Museum's public presentation 'is limited to the credited accession context'. The Museum's rights note covers only 'credited institutional display'.",
+      "consequence": "The About page reproduces an All Rights Reserved photograph with no copyright credit, which goes against the Museum's own recorded rights position. None of the featured works shows a date, gift or licence, so their captions fall below those on the Collection route next door.",
+      "change": "Render each featured work's record credit line beneath the byline, as the Collection route does, using media.credit.creditLine for retained media or presentationMedia.credit.creditLine for presentation media. MuseumPublicMediaFigure already has a status/qualifier caption slot that can carry it.",
+      "acceptance_check": "At all three viewports, each About figure shows the same credit line that /museum/network/collection shows for that work. The Seymour figure shows '© David Seymour/Magnum Photos 2022' in its caption next to the image.",
+      "verification": "Passes. In the running build, the About page's three figure captions match the Collection route's credit lines exactly: 'Gift of punk6529; Casey REAS; CENTURY #31; 6529 Network Museum, 6529NM.2026.001.01. Licensed CC BY-NC 4.0.', 'David Seymour, Negev, 1952. © David Seymour/Magnum Photos 2022.' and 'Vera Molnár, in collaboration with Martin Grasser, Themes and Variations #210, 2023. Licensed under CC BY-NC 4.0.' They are visible directly under each image at 1440 (evidence/about-1440x1000-02.png), 820 (evidence/about-820x1000-02.png) and 390 (evidence/about-390x844-02.png, -03.png, -04.png).",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-003",
+      "targets": ["J14"],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "/museum/network/about · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/contact-sheet-1440x1000.png",
+      "observation": "'Works held and studied' is the page's only art. It shows CENTURY #31, the Seymour photograph and CENTURY #724, so two of its three slots hold circular compositions from the same Casey Reas series (evidence/about-1440x1000-01.png, evidence/about-820x1000-02.png, evidence/about-390x844-02.png, evidence/about-390x844-03.png). The accessioned Vera Molnár gift, Themes and Variations #210, does not appear. The selection takes one Reas work, then one Magnum work, then fills the last slot with the next Collection work, which is another CENTURY.",
+      "consequence": "The art section understates the range of the holdings: across the three viewports it reads as one series plus one photograph rather than three gifts. This works against the page's job of showing what the Museum holds.",
+      "change": "Choose one principal work from each accessioned gift (Reas, Magnum, Molnár), e.g. CENTURY #31, Patrolling the border between the Negev Desert and Jordan, and Themes and Variations #210. Order them by accession, and caption each per C-002.",
+      "acceptance_check": "At 1440, 820 and 390 px the art section shows three works from three different accessioned gifts, no two from the same series, and each linked to its object record.",
+      "verification": "Passes. The section shows CENTURY #31 (6529NM.2026.001), Patrolling the border between the Negev Desert and Jordan (6529NM.2026.002) and Themes and Variations #210 (6529NM.2026.003), in accession order. Each comes from a different gift and series, and each links to its object record (/museum/network/works/6529NM-W-0001, -0024, -0029). This holds at 1440 (evidence/about-1440x1000-01.png), 820 (evidence/about-820x1000-01.png) and 390 (evidence/about-390x844-02.png, -03.png). The contact sheets show three distinct images.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-004",
+      "targets": ["M3"],
+      "severity": "P3",
+      "status": "resolved",
+      "where": "/museum/network/about · default · 1440x1000 · en-US",
+      "evidence": "evidence/about-1440x1000-02.png",
+      "observation": "The page says: 'Keys and Gates is the first Meme Card-funded acquisition program. Its selected photographs are current acquisition work and remain separate from the permanent Collection while acquisition and accession proceed.' This is accurate but less specific than the record. The Collection and Acquisitions routes state that the twenty-three selected photographs are unminted, and that minting, acquisition, custody and accession remain in progress.",
+      "consequence": "Optional: a visitor cannot tell from the About page that these works do not exist on-chain yet.",
+      "change": "Optionally name the stage: 'Keys and Gates is the first Meme Card-funded acquisition program. Its twenty-three selected photographs are not yet minted; they remain outside the permanent Collection while minting, acquisition, and accession proceed.'",
+      "acceptance_check": "The Keys and Gates sentence states the unminted status that the Collection route shows.",
+      "verification": "Passes for the unminted status: the sentence now reads '…have not yet been minted or accessioned, so they are not part of the permanent Collection' at all three viewports. Grading correction: the round-00 observation and draft copy for this finding gave the count as 'twenty-three'. That figure was wrong. The program record and the Collection route list sixteen selected photographs. The candidate copied the error, and C-005 now tracks it.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-005",
+      "targets": ["M3", "J01", "J14"],
+      "severity": "P1",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/about-1440x1000-02.png",
+      "observation": "Under 'Collection and acquisition' the page now reads: 'Its twenty-three selected photographs have not yet been minted or accessioned, so they are not part of the permanent Collection.' The same text appears in evidence/about-820x1000-02.png and evidence/about-390x844-04.png. The program record in the same build says sixteen. /museum/network/acquisitions/keys-and-gates shows '16 works' and states 'The Museum records sixteen outcomes as selected_unminted'. It also says the program Wave 'returned sixteen submissions as WINNER, with selection places 1 through 16'. /museum/network/collection lists 16 Keys and Gates works under 'Acquisitions in progress', and the Museum home message (museum.network.home.acquisitionStoriesDescription) says 'its sixteen selected photographs await minting and accession'. The wrong figure entered through the round-00 curatorial draft copy in C-004, which was a grading error. The candidate's earlier sentence stated no count. Note for the coordinator: the same 'twenty-three' appears in museum.network.acquisitions.description on /museum/network/acquisitions, which is outside this run's route scope.",
+      "consequence": "The page meant to explain what the Museum holds overstates its only acquisition program by seven works. It contradicts the program record, the Collection route and the Museum home, so a visitor who checks finds an institution misreporting its own holdings in progress.",
+      "change": "In museum.network.proposition.collection.acquisitions, replace 'twenty-three' with 'sixteen': '…Its sixteen selected photographs have not yet been minted or accessioned, so they are not part of the permanent Collection.' Preferably, derive the count from the publication (the Keys and Gates acquisition's selected works, as the Collection and acquisition routes do), so it cannot drift as the program changes. Alternatively, drop the number ('Its selected photographs have not yet been minted or accessioned…').",
+      "acceptance_check": "At 1440, 820 and 390 px, the Keys and Gates sentence either states no count or states a selected-photograph count equal to the number of works /museum/network/acquisitions/keys-and-gates lists (currently 16).",
+      "admission": "regression",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-006",
+      "targets": ["J14"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/about-1440x1000-02.png",
+      "observation": "The newly added Themes and Variations #210 figure has the byline 'Vera Molnár'. The Collection route and the object record (/museum/network/works/6529NM-W-0029) attribute the work to 'Vera Molnár, in collaboration with Martin Grasser'. The full attribution appears in the credit line directly beneath the byline (evidence/about-820x1000-02.png, evidence/about-390x844-03.png), so the caption is not wrong.",
+      "consequence": "Optional: the byline credits one artist for a collaborative work, while the Collection route's byline names both.",
+      "change": "Use the record's attribution for the byline, 'Vera Molnár, in collaboration with Martin Grasser', as the Collection route does.",
+      "acceptance_check": "The Themes and Variations #210 byline on the About page matches the byline the Collection route shows for that work.",
+      "admission": "regression",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-007",
+      "targets": ["J14"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/about-1440x1000-01.png",
+      "observation": "The new Themes and Variations #210 figure shows the official 2400x2400 PNG with no medium or surrogate label. The work's record display note says 'Use the live generator as the primary manifestation and label the PNG as a documentation surrogate.' Its object page says 'The image above is a 2400 × 2400 documentation still.' CENTURY #31 follows the same pattern: its object page carries the same sentence, and its rights review asks that surrogates carry a documentation statement. The Collection and Acquisitions routes show these stills unlabelled too, so this is a section-wide convention rather than an About-page defect.",
+      "consequence": "Optional: a visitor sees a still image as the work and is not told that the work is a live generative program. That matters most for the Molnár record, which asks for the label explicitly.",
+      "change": "Optionally add a short qualifier for generative works in the caption, for example 'Documentation still of a live generative work', or handle it in a section-wide caption change.",
+      "acceptance_check": "Each About figure whose record identifies its image as a documentation still says so in its caption.",
+      "admission": "regression",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "One principal work from each accessioned gift, in accession order: CENTURY #31, Patrolling the border between the Negev Desert and Jordan, and Themes and Variations #210. Each is shown whole with object-contain at its native ratio (2400x2400 squares, 1280x1927 portrait), with no obstruction or fallback panel at any viewport, and each links to its object record.",
+    "Captions carry title, artist, and the record credit line exactly as the Collection route prints it, including '© David Seymour/Magnum Photos 2022' beside the All Rights Reserved photograph and the CC BY-NC 4.0 licences for the generative works.",
+    "'Collection and acquisition' names all three completed gifts in the Collection route's own words and states no hard-coded work count.",
+    "Keys and Gates is kept outside the permanent Collection, with its not-yet-minted, not-yet-accessioned status stated plainly.",
+    "The Custody card names the Museum Safe and links to it on Etherscan. Its account matches the work records, which show transfers to networkmuseum.6529.eth.",
+    "'The next stage' carries an explicit 'Status: planned' line and stays in the future tense, separate from the mechanisms that operate today.",
+    "'Institutional sources' links the founding principles, the Open Museum statement and the on-chain transition document, pinned to a commit."
+  ]
+}

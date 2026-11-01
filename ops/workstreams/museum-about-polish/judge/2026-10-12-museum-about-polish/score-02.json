@@ -1,0 +1,32 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "run_id": "2026-10-12-museum-about-polish",
+  "calibration": "uncalibrated",
+  "decision": "accepted",
+  "label": "judge-accepted (uncalibrated)",
+  "round": 2,
+  "file": "02",
+  "candidate": "a517ac2016f134bf21be086c77df1e8e7bd30e8b",
+  "total": 8.903,
+  "applicable_weight": 72,
+  "failed_floors": [],
+  "failed_checks": [],
+  "open_required": [],
+  "unverified": {
+    "coverage": [],
+    "dimensions": [],
+    "checks": []
+  },
+  "errors": [],
+  "budget": {
+    "repair_batches": 6,
+    "used": 2,
+    "remaining": 4,
+    "no_progress_streak": 0,
+    "recovery_batch": false
+  },
+  "best": {
+    "round": 2,
+    "candidate": "a517ac2016f134bf21be086c77df1e8e7bd30e8b"
+  }
+}
