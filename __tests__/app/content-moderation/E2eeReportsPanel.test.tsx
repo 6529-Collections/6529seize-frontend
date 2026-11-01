@@ -1,8 +1,5 @@
 import E2eeReportsPanel from "@/app/content-moderation/E2eeReportsPanel";
-import {
-  MAX_EVIDENCE_BASE64_LENGTH,
-  readE2eeReportEvidence,
-} from "@/app/content-moderation/E2eeReportDetail";
+import { readE2eeReportEvidence } from "@/app/content-moderation/e2eeReportEvidence";
 import type { ApiE2eeTrustAndSafetyReport } from "@/generated/models/ApiE2eeTrustAndSafetyReport";
 import {
   fetchE2eeReport,
@@ -70,6 +67,9 @@ function renderPanel() {
     </QueryClientProvider>
   );
 }
+
+// The evidence cap in e2eeReportEvidence.ts: about 96 KiB of base64.
+const EVIDENCE_CAP = 96 * 1024;
 
 describe("E2eeReportsPanel", () => {
   beforeEach(() => {
@@ -318,7 +318,7 @@ describe("E2eeReportsPanel", () => {
 describe("readE2eeReportEvidence", () => {
   it("refuses a body larger than the server's report cap before decoding", () => {
     expect(
-      readE2eeReportEvidence("A".repeat(MAX_EVIDENCE_BASE64_LENGTH + 4))
+      readE2eeReportEvidence("A".repeat(EVIDENCE_CAP + 4))
     ).toEqual({ readable: false, text: "", attachments: [] });
   });
 
