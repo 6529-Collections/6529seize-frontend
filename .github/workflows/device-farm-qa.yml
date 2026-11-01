@@ -218,7 +218,7 @@ jobs:
             > "tests/device-farm/dist/${TESTSPEC}"
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           aws-access-key-id: ${{ secrets.DEVICEFARM_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.DEVICEFARM_AWS_SECRET_ACCESS_KEY }}
@@ -226,7 +226,7 @@ jobs:
 
       - name: Run mobile web smoke on Device Farm
         id: devicefarm
-        uses: aws-actions/aws-devicefarm-mobile-device-testing@5a6c9fbb66ca99cb92ce07381c8be038f654eff6 # v3.0
+        uses: aws-actions/aws-devicefarm-mobile-device-testing@bb964f15f6f623d527a964c1c0bffc36437b8f7a # v3.2
         with:
           run-settings-json: |
             {
@@ -359,7 +359,7 @@ jobs:
 
       - name: Configure AWS Credentials
         id: aws-credentials
-        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           aws-access-key-id: ${{ secrets.DEVICEFARM_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.DEVICEFARM_AWS_SECRET_ACCESS_KEY }}
@@ -367,7 +367,7 @@ jobs:
 
       - name: Run native Appium smoke on Device Farm
         id: devicefarm-smoke
-        uses: aws-actions/aws-devicefarm-mobile-device-testing@5a6c9fbb66ca99cb92ce07381c8be038f654eff6 # v3.0
+        uses: aws-actions/aws-devicefarm-mobile-device-testing@bb964f15f6f623d527a964c1c0bffc36437b8f7a # v3.2
         with:
           run-settings-json: |
             {
@@ -391,7 +391,7 @@ jobs:
       - name: Run built-in fuzz on Device Farm
         id: devicefarm-fuzz
         if: always() && steps.build-apk.outcome == 'success' && steps.aws-credentials.outcome == 'success'
-        uses: aws-actions/aws-devicefarm-mobile-device-testing@5a6c9fbb66ca99cb92ce07381c8be038f654eff6 # v3.0
+        uses: aws-actions/aws-devicefarm-mobile-device-testing@bb964f15f6f623d527a964c1c0bffc36437b8f7a # v3.2
         with:
           run-settings-json: |
             {
