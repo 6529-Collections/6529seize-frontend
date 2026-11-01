@@ -18,9 +18,9 @@ import {
 } from "./context";
 import { EngineController } from "./controller";
 import {
+  confirmOwnRejection,
   enrollDevice,
   hasLoginGrant,
-  grantExpired,
   needsNewDevice,
   refreshMe,
   renewalDue,
@@ -197,28 +197,42 @@ class E2eeEngineImpl implements E2eeEngineExt {
     }
   }
 
+  /** Read fresh after an await (dispose can land meanwhile). */
+  private isDisposed(): boolean {
+    return this.ctx.disposed;
+  }
+
   private async refreshMe(): Promise<void> {
     if (!this.ctx.device?.registered || this.ctx.disposed) {
       return;
     }
     const result = await refreshMe(this.ctx);
-    if (result.ownRevoked) {
+    if (result.ownRevoked && !this.isDisposed()) {
       await this.wipe();
     }
   }
 
   /**
-   * The server no longer accepts this device. An expired grant keeps the
-   * state for a renewal through enroll(); a revocation wipes it.
+   * The server refused this device (E2EE_NOT_YOUR_DEVICE, or a revocation
+   * hint). Only a revocation that /e2ee/me confirms for this profile wipes
+   * the state; an expired or unlisted device keeps it (enroll() renews or
+   * resumes it), and an unconfirmed refusal changes nothing. A disposed
+   * engine never acts: its account may already have changed.
    */
   private async onOwnRejected(): Promise<void> {
-    const device = this.ctx.device;
-    if (device && grantExpired(this.ctx, device)) {
-      this.controller.stopBackground();
-      setStatus(this.ctx, NEEDS_ENROLLMENT);
+    if (this.isDisposed()) {
       return;
     }
-    await this.wipe();
+    const verdict = await confirmOwnRejection(this.ctx);
+    if (this.isDisposed() || verdict === "unconfirmed") {
+      return;
+    }
+    if (verdict === "revoked") {
+      await this.wipe();
+      return;
+    }
+    this.controller.stopBackground();
+    setStatus(this.ctx, NEEDS_ENROLLMENT);
   }
 
   /**

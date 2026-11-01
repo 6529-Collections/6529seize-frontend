@@ -38,7 +38,7 @@ const codeOf = async (promise: Promise<unknown>) => {
 
 describe("startE2eeBackup", () => {
   it("does nothing for an engine without backup support", () => {
-    expect(startE2eeBackup({}, "profile-1")).toBeNull();
+    expect(startE2eeBackup({}, { profileId: "profile-1", wallet: "0x1" })).toBeNull();
   });
 });
 
