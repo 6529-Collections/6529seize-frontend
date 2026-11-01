@@ -302,7 +302,10 @@ encrypted copy of your message history so you can restore it on a new device.
   Messages badge.
 - Phone push notifications say only "New encrypted message" (or that you were
   added to an encrypted chat). They carry no sender, chat or text, and open
-  `/messages/encrypted`.
+  `/messages/encrypted`. Once the phone has fetched the new messages, it opens
+  the chat if exactly one unmuted chat has unread messages; otherwise the
+  list stays open and shows which chats changed. The phone decides this
+  itself.
 - 6529 Desktop shows a local notification, "New encrypted message", when a
   chat gets a message from someone else, unless the chat is muted or open in
   the focused window. Like phone push it names no sender, chat or text.
