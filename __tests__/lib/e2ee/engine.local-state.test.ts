@@ -3,13 +3,20 @@
  *
  * Integration: real OpenMLS WASM + fake delivery service. Local state safety:
  * a second engine on the same browser storage never overwrites newer state,
- * and a wipe also drops the encrypted-backup state.
+ * a wipe also drops the encrypted-backup state, and a device that revokes
+ * itself is wiped the same way as one revoked from another device.
  */
 import {
   type BackupLocalState,
   createMemoryBackupStateStore,
 } from "@/lib/e2ee/backup/state";
-import { addUser, createWorld, settle, startDevice } from "./support/harness";
+import {
+  addUser,
+  createWorld,
+  realSleep,
+  settle,
+  startDevice,
+} from "./support/harness";
 
 jest.setTimeout(180_000);
 
@@ -71,5 +78,92 @@ describe("E2EE engine: local state", () => {
     expect(await backupState.get("alice")).toBeNull();
     expect(await laptop.storage.getWasmState("alice")).toBeNull();
     expect(await laptop.storage.getDevice("alice")).toBeNull();
+  });
+
+  it.each([
+    ["with its own WS hint", false],
+    ["without WS hints", true],
+  ])(
+    "revoking this device from itself wipes it at once (%s)",
+    async (_label, noWake) => {
+      const world = await createWorld();
+      const alice = await addUser(world, "alice");
+      await addUser(world, "bob");
+      const backupState = createMemoryBackupStateStore();
+      const laptop = await startDevice(world, "alice", alice.account, {
+        noWake,
+        extra: { backupState },
+      });
+      alice.devices.push(laptop);
+      await settle(world);
+      const g = await alice.primary.engine.createConversation({
+        profileIds: ["bob"],
+        kind: "dm",
+      });
+      await settle(world);
+      const laptopKey = laptop.engine.getThisDevice()?.deviceKey ?? "";
+      expect(laptop.engine.getConversation(g)).not.toBeNull();
+      expect(await laptop.storage.listGroups("alice")).toHaveLength(1);
+      await backupState.put({
+        profileId: "alice",
+        deviceKey: laptopKey,
+        backupId: "backup-1",
+      } as BackupLocalState);
+
+      // The Devices page on the laptop revokes the laptop itself. With WS
+      // hints, its own E2EE_DEVICE_REVOKED arrives while the request is open.
+      await laptop.engine.revokeDevice(laptopKey);
+
+      expect(laptop.engine.getStatus()).toBe("needs-enrollment");
+      expect(laptop.engine.getThisDevice()).toBeNull();
+      expect(laptop.engine.getConversations()).toEqual([]);
+      expect(await laptop.storage.getDevice("alice")).toBeNull();
+      expect(await laptop.storage.getWasmState("alice")).toBeNull();
+      expect(await laptop.storage.listGroups("alice")).toEqual([]);
+      expect(await backupState.get("alice")).toBeNull();
+
+      // Stopped: later passes leave it wiped, and the others drop the device.
+      await settle(world);
+      expect(laptop.engine.getStatus()).toBe("needs-enrollment");
+      expect(await laptop.storage.getDevice("alice")).toBeNull();
+      const leaves = (alice.primary.engine.getConversation(g)?.members ?? [])
+        .flatMap((member) => member.devices)
+        .map((device) => device.deviceKey);
+      expect(leaves).not.toContain(laptopKey);
+    }
+  );
+
+  it("a device turned on again after revoking itself runs its background work", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    await addUser(world, "bob");
+    const laptop = await startDevice(world, "alice", alice.account);
+    alice.devices.push(laptop);
+    await settle(world);
+    await laptop.engine.revokeDevice(
+      laptop.engine.getThisDevice()?.deviceKey ?? ""
+    );
+    await laptop.engine.idle();
+    expect(laptop.engine.getStatus()).toBe("needs-enrollment");
+
+    await laptop.engine.enroll();
+    expect(laptop.engine.getStatus()).toBe("ready");
+    await settle(world);
+
+    // Only the WS hint, debounced on a timer, tells the laptop about the new
+    // chat: nothing calls its sync() here.
+    const g = await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "dm",
+    });
+    for (
+      let round = 0;
+      round < 200 && laptop.engine.getConversation(g) === null;
+      round += 1
+    ) {
+      await realSleep(5);
+      await laptop.engine.idle();
+    }
+    expect(laptop.engine.getConversation(g)).not.toBeNull();
   });
 });
