@@ -66,6 +66,7 @@ import { EN_US_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-c
 import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
 import { THE_MEMES_MINT_PROGRESS_MESSAGES } from "@/i18n/messages/the-memes-mint-progress";
+import type { STREAM_MESSAGES } from "@/i18n/messages/stream";
 import { EN_US_RECEIPT_MESSAGES } from "@/i18n/messages/collect-receipts";
 import { CONTENT_MODERATION_MESSAGES } from "@/i18n/messages/content-moderation";
 import { SIGNED_MESSAGES_MESSAGES } from "@/i18n/messages/signed-messages";
@@ -4816,4 +4817,9 @@ export const EN_US_MESSAGES = {
   "waves.sidebar.byCreator": "by {creator}",
 } as const;
 
-export type MessageKey = keyof typeof EN_US_MESSAGES;
+// Route namespaces are en-US source copy that ships only with its route. Each
+// module that reads one imports `@/i18n/namespaces/<name>`, which registers
+// the copy. The keys stay valid message keys everywhere.
+export type MessageKey =
+  | keyof typeof EN_US_MESSAGES
+  | keyof typeof STREAM_MESSAGES;
