@@ -326,7 +326,7 @@ jobs:
 
       - name: Upload CI plan artifacts
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: app-pr-ci-plan-${{ github.event.pull_request.number || github.run_id }}
           path: |
@@ -550,7 +550,7 @@ jobs:
 
       - name: Upload app check artifacts
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: app-pr-ci-results-${{ matrix.lane }}${{ matrix.shard && format('-{0}', matrix.shard) || '' }}-${{ github.event.pull_request.number || github.run_id }}
           path: |
@@ -1167,7 +1167,7 @@ jobs:
 
       - name: Upload exact PR merge-tree CI evidence
         if: matrix.lane == 'quality'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: exact-pr-ci-${{ github.sha }}
           path: exact-pr-ci-evidence
@@ -1715,7 +1715,7 @@ jobs:
 
       - name: Upload app check artifacts
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: app-pr-ci-results-${{ matrix.lane }}-${{ github.event.pull_request.number || github.run_id }}
           path: |
