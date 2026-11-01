@@ -218,7 +218,9 @@ time your device sees someone. Compare safety codes and check the wallets in
 your encrypted messages, marks **This device**, and shows each device's
 platform, when it was added, last seen and when it expires, and whether its
 wallet signature was verified on this device. You can rename this device and
-revoke any device, including this one. A new device is named after its
+revoke any device, including this one. Revoking this device removes its
+encrypted messages and keys from this browser right away and shows the card
+to turn encrypted messages on again. A new device is named after its
 browser or app and OS family (for example "Chrome on Windows" or "6529 app on
 iPhone"); devices added earlier keep their name. A profile can have up to 10
 active devices; at the limit, the new device lists the profile's devices and
