@@ -2,9 +2,9 @@ import { getReleaseFeedSnapshot, type ValidatorRelease } from "./releaseFeed";
 import { getReleaseObjectKey, presignReleaseObject } from "./releasesBucket";
 
 /** A presigned URL works this long after the redirect. */
-export const DOWNLOAD_URL_TTL_SECONDS = 300;
+const DOWNLOAD_URL_TTL_SECONDS = 300;
 
-export type ReleaseDownloadResult =
+type ReleaseDownloadResult =
   | { readonly state: "found"; readonly url: string }
   | { readonly state: "not-found" }
   | { readonly state: "unavailable" };

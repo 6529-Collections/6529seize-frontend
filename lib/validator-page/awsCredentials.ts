@@ -116,9 +116,3 @@ export async function getAwsCredentials(): Promise<AwsCredentials> {
   }
   return cached.credentials;
 }
-
-/** Test hook: forget cached instance-role credentials. */
-export function resetAwsCredentialsCacheForTests(): void {
-  cached = null;
-  inFlight = null;
-}

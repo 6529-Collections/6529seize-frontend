@@ -4,7 +4,7 @@ import { readReleaseObject } from "./releasesBucket";
  * The addresses of 6529's two sentries live in the private bucket, not in
  * this public repository: testers see them only behind the password.
  */
-export const BOOTSTRAP_PEERS_OBJECT_KEY = "content/bootstrap-peers.json";
+const BOOTSTRAP_PEERS_OBJECT_KEY = "content/bootstrap-peers.json";
 
 const ADDRESS_KINDS = ["peer_id", "tcp", "quic", "onion"] as const;
 type AddressKind = (typeof ADDRESS_KINDS)[number];
@@ -80,7 +80,9 @@ export async function fillBootstrapPeers(
         return value;
       }
       complete = false;
-      return `<sentry-${index} ${kind === "PEER_ID" ? "peer ID" : `${kind.toLowerCase()} address`}>`;
+      const addressLabel = `${kind.toLowerCase()} address`;
+      const what = kind === "PEER_ID" ? "peer ID" : addressLabel;
+      return `<sentry-${index} ${what}>`;
     }
   );
   return { markdown: filled, complete };

@@ -17,13 +17,13 @@ export type ValidatorInstaller = {
   readonly file: ValidatorReleaseFile;
 };
 
-export type ValidatorArchive = {
+type ValidatorArchive = {
   readonly title: string;
   readonly signing: string | null;
   readonly file: ValidatorReleaseFile;
 };
 
-export type ValidatorReleaseDownloads = {
+type ValidatorReleaseDownloads = {
   readonly installers: readonly ValidatorInstaller[];
   readonly archives: readonly ValidatorArchive[];
   readonly checksums: ValidatorReleaseFile | null;
