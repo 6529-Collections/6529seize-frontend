@@ -2071,6 +2071,58 @@
       "classification": "crawlable",
       "family": "public-content"
     },
+    "/stream/about": {
+      "classification": "exempt",
+      "exemptReason": "6529 Stream product section behind its host flag: production 404s until the r4 launch; staging and local serve mock data."
+    },
+    "/stream/about/[page]": {
+      "classification": "exempt",
+      "exemptReason": "6529 Stream product section behind its host flag: production 404s until the r4 launch; staging and local serve mock data."
+    },
+    "/stream/artists": {
+      "classification": "exempt",
+      "exemptReason": "6529 Stream product section behind its host flag: production 404s until the r4 launch; staging and local serve mock data."
+    },
+    "/stream/artists/[id]": {
+      "classification": "exempt",
+      "exemptReason": "6529 Stream product section behind its host flag: production 404s until the r4 launch; staging and local serve mock data."
+    },
+    "/stream/curation": {
+      "classification": "exempt",
+      "exemptReason": "6529 Stream product section behind its host flag: production 404s until the r4 launch; staging and local serve mock data."
+    },
+    "/stream/editions": {
+      "classification": "exempt",
+      "exemptReason": "6529 Stream product section behind its host flag: production 404s until the r4 launch; staging and local serve mock data."
+    },
+    "/stream/editions/[id]": {
+      "classification": "exempt",
+      "exemptReason": "6529 Stream product section behind its host flag: production 404s until the r4 launch; staging and local serve mock data."
+    },
+    "/stream/federated": {
+      "classification": "exempt",
+      "exemptReason": "6529 Stream product section behind its host flag: production 404s until the r4 launch; staging and local serve mock data."
+    },
+    "/stream/federated/[contract]": {
+      "classification": "exempt",
+      "exemptReason": "6529 Stream product section behind its host flag: production 404s until the r4 launch; staging and local serve mock data."
+    },
+    "/stream/launch": {
+      "classification": "exempt",
+      "exemptReason": "6529 Stream product section behind its host flag: production 404s until the r4 launch; staging and local serve mock data."
+    },
+    "/stream/me": {
+      "classification": "exempt",
+      "exemptReason": "6529 Stream product section behind its host flag: production 404s until the r4 launch; staging and local serve mock data."
+    },
+    "/stream/museum": {
+      "classification": "exempt",
+      "exemptReason": "6529 Stream product section behind its host flag: production 404s until the r4 launch; staging and local serve mock data."
+    },
+    "/stream/works/[id]": {
+      "classification": "exempt",
+      "exemptReason": "6529 Stream product section behind its host flag: production 404s until the r4 launch; staging and local serve mock data."
+    },
     "/the-memes": {
       "classification": "crawlable",
       "family": "collections"

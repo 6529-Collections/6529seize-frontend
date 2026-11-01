@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 
 import { getAppMetadata } from "@/components/providers/metadata";
+import StreamHomePage from "@/components/stream/pages/StreamHomePage";
+import { isStreamProductEnabled } from "@/config/streamProduct";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { streamPageMetadata } from "@/lib/stream/route.server";
 
 const STREAM_WORKS_REPOSITORY_URL =
   "https://github.com/6529-Collections/6529-works";
@@ -11,6 +14,11 @@ const STREAM_LINK_CLASS =
   "tw-font-medium tw-text-primary-300 tw-underline tw-decoration-primary-400/50 tw-underline-offset-4 tw-transition-colors hover:tw-text-primary-400 hover:tw-decoration-primary-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-[#0D0D0F] motion-reduce:tw-transition-none";
 
 export default function StreamPage() {
+  // Where its flag is on (local, staging), the 6529 Stream section owns /stream.
+  if (isStreamProductEnabled()) {
+    return <StreamHomePage />;
+  }
+
   return (
     <main className="tailwind-scope tw-min-h-screen tw-bg-[#0D0D0F] tw-px-4 tw-pb-12 tw-pt-10 tw-text-iron-100 sm:tw-px-6 sm:tw-pt-12 lg:tw-px-8">
       <div className="tw-mx-auto tw-max-w-3xl">
@@ -31,6 +39,9 @@ export default function StreamPage() {
 }
 
 export function generateMetadata(): Metadata {
+  if (isStreamProductEnabled()) {
+    return streamPageMetadata("stream.home.title", "/stream");
+  }
   return getAppMetadata(
     {
       title: t(DEFAULT_LOCALE, "stream.placeholder.title"),

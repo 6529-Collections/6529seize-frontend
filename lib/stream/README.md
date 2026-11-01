@@ -1,0 +1,190 @@
+# 6529 Stream data layer
+
+The `/stream` section reads through `StreamDataSource` and writes through
+`StreamActions` (`dataSource.ts`). Today both are the in-memory mock under
+`mock/`. When the rc.2 contracts are on Sepolia (r4), a chain implementation
+replaces the mock in one place, `createBrowserStream` in
+`components/stream/data/StreamProvider.tsx`, and no page changes.
+
+The section is behind a host flag (`config/streamProduct.ts`): on for local
+development and `staging.6529.io`, off in production.
+
+## Layout
+
+| Path                                         | What it holds                                                                          |
+| -------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `types.ts`                                   | Read models, each named after the contract view, struct or event that backs it         |
+| `dataSource.ts`                              | `StreamDataSource`, `StreamActions`, `TxResult`, and the mock-only `StreamDevControls` |
+| `constants.ts`                               | Launch values: splits, royalty, auction config, edition-auction terms                  |
+| `ladder.ts`                                  | The E192 price ladder (D138): `stepPrice`, `ladderPrices`, `nearestStep`               |
+| `clearing.ts`                                | Uniform-price clearing, the brute-force definition, the FIFO cut-step sweep            |
+| `editionBook.ts`                             | The bid book (live units, queue positions, departures) and what-if reads               |
+| `editionViews.ts`                            | Order-book rows and the "why this many" candidates, shared by mock and chain           |
+| `editionTiming.ts`                           | Edition close, soft close and backstop, and the UX phase                               |
+| `englishAuction.ts`                          | 1/1 rules: minimum bid, anti-snipe, resume, splits, royalty                            |
+| `eth.ts`, `media.ts`, `gas.ts`, `workKey.ts` | Wei text, media kinds and locators, labelled gas figures, work keys and routes         |
+| `route.server.ts`                            | The flag guard and `noindex` metadata for section pages                                |
+| `mock/`                                      | The simulation: engine, sale adapters, federated factory, scenarios, art               |
+
+Work keys: a 6529 Stream token is its bare ID (`"12"`); any other token is
+`<contract>-<tokenId>`. `/stream/editions/12` is the 6529 Stream Editions
+edition of master 12.
+
+## Swapping the mock for the chain
+
+Implement `StreamDataSource` and `StreamActions` with viem reads and wagmi
+writes. `now()` is the latest block's timestamp; `subscribe` fires on new
+blocks and on the events below; `version()` increments with them. Set `dev` to
+`null`: the dev panel then hides itself. Contract names follow `6529-works`
+`src/interfaces/`.
+
+### Reads
+
+| Method                                       | Contract view or event                                                                                                                                                                                                                                                                                                                                              |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `source`                                     | The deployment record `deployments/11155111/<instance>.json`                                                                                                                                                                                                                                                                                                        |
+| `homeFeed`                                   | `SaleStarted`, `BidPlaced`, `SaleSettled` (indexed), `IEnglishAuction.auction`; startable items from `curationQueue`                                                                                                                                                                                                                                                |
+| `listWorks`, `getWork`                       | `IStream.work`, `coreOf`, `tokenURI` (decoded per docs/integrators/reading-a-work.md), `primarySaleSettled`, `primarySale` (owner decision 17), `editionOf`, `ownerOf`; `IWorkRecords.isOpen`, `record`, `mediaOf`, `locators`, `preferredLocator`, `licenseOf`, `seedOf`; `IEditions.edition`, `masterOf`, `uri`; `IFederationRegistry.entry` for federated tokens |
+| `provenance`                                 | `WorkMinted`, `SaleStarted`, `BidPlaced`, `SaleSettled`, `Transfer`, `RecordOpened`, `WorkFinalized`, `WorkOnChainComplete`, `LocatorAdded`, `EditionCreated`, `AuctionPaused`, `AuctionResumed`, `AuctionCancelled`, `BidWithdrawn`, `DeliveryPending`, `DeliveryClaimed`, `StatementAppended`                                                                     |
+| `listArtists`, `getArtist`, `artistOf`       | `IArtistRegistry.artist`, `activeAuthorityOf`, `pendingChange`, `standingOf`, `artistIdOf`; `ArtistRegistered`, `ChangeStaged`, `ChangeExecuted`, `FederatedContractListed`                                                                                                                                                                                         |
+| `getSale`                                    | Dispatches on the adapter's `saleKind()` (see "Sale methods")                                                                                                                                                                                                                                                                                                       |
+| `getOneOfOneAuction`, `auctionForWork`       | `IEnglishAuction.auction`, `minimumBid`, `lockedTerms`, `pendingDelivery`, `config`; `saleIdOf(token, tokenId)`; bid history from `BidPlaced`                                                                                                                                                                                                                       |
+| `claimableCredits`                           | `ISaleAdapter.claimable(account, ETH)` on the English auction: outbid and refunded bids                                                                                                                                                                                                                                                                             |
+| `listEditionAuctions`, `getEditionAuction`   | `IUniformEditionAuction.auction`, `endTimes` (with `biddingOpen`, `withdrawalsOpen`), `clearing`, `settlement`; `AuctionOpened`, `AuctionCleared`, `AuctionSettled`, `AuctionVoided`                                                                                                                                                                                |
+| `stepTotals`, `candidates`                   | `stepTotals(saleId)` (low step and units) and `ladder`; rows built with `editionViews.ts` from those totals and `clear`                                                                                                                                                                                                                                             |
+| `editionBids`                                | `BidPlaced`, `BidRaised`, `BidWithdrawn`, `BidClaimed` per bidder, then `bidOf` and `bidOutcome(saleId, bidId)` (units won, refund, units ahead)                                                                                                                                                                                                                    |
+| `quoteEditionBid`, `lowestWinningStep`       | `quote(saleId, step, quantity)` (won, pushed out, pulled in), `lowestWinningStep(saleId, quantity)` (at least one copy)                                                                                                                                                                                                                                             |
+| `lowestStepFullyIn`                          | Client-side: `editionBook.ts` on the step totals and `departures`, checked against the golden vectors                                                                                                                                                                                                                                                               |
+| `quoteEditionRaise`                          | Client-side, like `lowestStepFullyIn`: the bid moved to the back of the new step, its old position left as a departure                                                                                                                                                                                                                                              |
+| `editionActivity`                            | `AuctionOpened`, `BidPlaced`, `BidRaised` (their `endTime` marks a moved close), `BidWithdrawn`, `SettlementScanned`, `AuctionCleared`, `DeparturesSwept`, `AuctionSettled`, `AuctionVoided`, `BidClaimed` for the sale                                                                                                                                             |
+| `editionHolders`                             | ERC-1155 `TransferSingle` / `TransferBatch` on the edition, summed per account                                                                                                                                                                                                                                                                                      |
+| `sweepOf`, `settlementOrderFor`              | The lens's `sweepOf(saleId, settler)` and `settlementOrderFor(saleId, settler)`: each settler's own departure sweep and the rest of its order                                                                                                                                                                                                                       |
+| `ladder`                                     | `ladder(saleId)` / `stepPrice(saleId, step)` over the auction's locked terms                                                                                                                                                                                                                                                                                        |
+| `editionBalances`                            | ERC-1155 `balanceOf` / `TransferSingle` on 6529 Stream Editions and federated 1155s                                                                                                                                                                                                                                                                                 |
+| `splitWallet`                                | `ISplitWallet.payees`, `observed(ETH)`, `released`, `releasable`                                                                                                                                                                                                                                                                                                    |
+| `accountOverview`                            | The reads above for one account, plus `IEnglishAuction.claimable(account, ETH)`                                                                                                                                                                                                                                                                                     |
+| `museumHoldings`                             | `EconomicsResolver.museum()` and `Transfer` events to it                                                                                                                                                                                                                                                                                                            |
+| `curationQueue`                              | `PackageRegistered`, `PackageRevoked`, `PackageAccepted`, `ItemConsumed`; `packageOf`, `acceptedAs`; item details from the published package files                                                                                                                                                                                                                  |
+| `disputes`                                   | `AuctionPaused`, `AuctionResumed`, `AuctionCancelled`; `StatementLog.latestDisputeOutcome`, `StatementAppended`                                                                                                                                                                                                                                                     |
+| `federatedDirectory`, `getFederatedContract` | `IFederationRegistry.Registered`, `StatusSet`, `ArtistDelistingSet`, `entry`, `isActive`; the template's `owner()` and ERC-2981 default; volume from indexed settlements; sale methods from the admitted adapters (v1.1: no contracts yet)                                                                                                                          |
+| `federationFactory`                          | The v1.1 factory: its registry, each template's version, code hash and `extcodesize`, the `PRODUCT_FEDERATED` terms (no contracts yet)                                                                                                                                                                                                                              |
+
+### Writes
+
+| Action                                                                             | Contract call                                                                                                                                                                                                                                                                                                                                                              |
+| ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sale("ENGLISH_AUCTION").bid`                                                      | `IEnglishAuction.bid(saleId, recipient, payment)`                                                                                                                                                                                                                                                                                                                          |
+| `.settle`, `.claimDelivery`, `.withdrawBid`                                        | `settle(saleId)`, `claimDelivery(saleId, to)`, `withdrawBid(saleId)`                                                                                                                                                                                                                                                                                                       |
+| `.claimCredits`                                                                    | `ISaleAdapter.claim(ETH, to)`                                                                                                                                                                                                                                                                                                                                              |
+| `sale("UNIFORM_AUCTION").open` / `bid` / `raise` / `withdraw` / `settle` / `claim` | `IUniformEditionAuction.open(token, id, data)`, `bid(saleId, step, quantity)`, `raise(saleId, bidId, newStep)`, `withdrawBid(saleId, bidId, to)`, `settle(saleId, order)` with the caller's `settlementOrderFor(saleId, caller)`, one call per action (it returns false while SETTLING, and true on a SETTLED sale; the UI offers Continue), `claimBid(saleId, bidId, to)` |
+| `startAuction`                                                                     | `IEnglishAuction.start(stream, abi.encode(StreamMintRequest))`                                                                                                                                                                                                                                                                                                             |
+| `createEdition`                                                                    | `IEditions.createEdition`                                                                                                                                                                                                                                                                                                                                                  |
+| `releaseSplit`                                                                     | `ISplitWallet.release(ETH, index)`                                                                                                                                                                                                                                                                                                                                         |
+| `deployFederated`, `mintViaAuction`, `openFederatedEditionAuction`                 | The v1.1 federation factory and the shared adapters (no contracts yet)                                                                                                                                                                                                                                                                                                     |
+
+The read models use the contracts' field names (6529-works main:
+`IUniformEditionAuction`, its lens, `IEnglishAuction`, `IEnglishAuctionClock`,
+`IEditions`, `IStream`): for example `terms.basePrice`, `stepsPerDecade`,
+`stepCount`, `closeOffset`, `maxCount`; `times.oneOfOneEnd`, `closeAt`,
+`endTime`; `clearing.networkFee`, `cutUnits`; a bid's `quantity`, `position`,
+`unitsWon`; a quote's `escrow`, `result`, `unitsPushedOut`, `unitsPulledIn`;
+the 1/1's `bid`, `bidder`, `minimumBid`. Fields with no contract counterpart
+(`phase`, `sellerShare`, `threshold`, the order-book rows) are derived and say
+so.
+
+Token IDs and other unbounded uint256 values are `bigint`, and decimal strings
+in work keys, sale IDs and URLs: federated token IDs can exceed 2^53 (the seed's
+Halden Studio starts at 2^53 + 1). Steps, counts and quantities, which the
+contract stores in 16 or 32 bits, are numbers.
+
+The edition-auction shapes follow the frozen `IUniformEditionAuction` (ADR
+0005, lane L0): statuses `NONE`, `OPEN`, `CLOSED` (derived), `SETTLING`,
+`SETTLED`, `VOID`; the margin as `marginShare` out of 100,000; and the
+contract's custom errors (`BiddingClosed`, `WithdrawalsClosed`,
+`SettlementNotReady`, `InvalidSettlementOrder`, `UnknownBid`, ...). The chain
+source maps a work key to `saleIdOf(token, id)`.
+
+Settlement sweeps per settler: each caller passes its own remaining slice
+(`settlementOrderFor(saleId, caller)`); the first to sweep every departure
+fixes the cutoff and settles the sale, and `settlement(saleId).departuresSwept`
+stays zero until then. While the 1/1 is paused, `endTimes` reports its stored
+end (the close moves when it resumes); the UI shows that end with a "paused"
+note.
+
+A 1/1's primary sale is recorded on the token (owner decision 17, 6529-works
+#82): `IStream.primarySale(id)` returns SOLD (with currency and price), UNBID,
+FROZEN_OUT or NONE, and 6529 Stream itself moves an unsold canonical work to
+the 6529 Network Museum at settlement. Governed sale methods (decision 15) and
+replaceable dependencies (decision 16) need nothing beyond the sale-method list
+the pages read from the admitted adapters.
+
+Every write returns `TxResult`: the hash and a labelled gas figure, or the
+contract's custom error (`BidTooLow`, `InvalidAuctionState`, ...).
+`components/stream/ui/GasNote.tsx` turns errors into words.
+
+## Sale methods
+
+Every contract starts with the two auctions; governance can admit another
+adapter later. To add one (for example fixed price):
+
+1. add its label to `KnownSaleKind` and its view to `SaleViewByKind` (`types.ts`);
+2. add its writes to `SaleActionsByKind` (`dataSource.ts`);
+3. add one mock adapter under `mock/sales/` and register it in `mock/sales/registry.ts`;
+4. add one panel to `components/stream/sales/salePanels.tsx`.
+
+An unknown kind read from a contract renders as "unsupported", not as an error.
+
+## The mock
+
+`createMockStream()` builds an independent world on a simulated clock that
+starts four days before `MOCK_EPOCH` and replays the seed in time order through
+the same functions the actions use. Writes are atomic: a revert restores the
+state. The dev panel speeds up, pauses or jumps the clock, switches accounts and
+resets the world.
+
+Rules it enforces: the 24-hour English auction from zero, 5% or 0.001 ETH
+increments, the 15-minute anti-snipe, pull credits, pending delivery, the
+75/25 and 90/10 splits, the 6.529% royalty, CC0 by default; the edition auction
+on the 336-step ladder with the 10% breadth rule, settlement in calls of bounded gas (24 book words per call, then the departure sweep), the optional cap with FIFO and
+the departure sweep, firm bids, the 5-minute soft close with the 24-hour
+backstop, the close 15 minutes after the 1/1, no editions without bids; an
+unbid canonical 1/1 to the museum, an unbid federated 1/1 to its artist; the
+dispute pause, withdrawal, upheld cancel (burn and void) and rejected resume;
+federated deploy, delisting (MARKET-5 on settle) and the directory. A
+standalone federated 1155 edition auction closes a fixed 24 hours after it
+opens, then the 5-minute soft close: this is PROVISIONAL, because the
+contracts don't define that close yet. Federated deploy gas is computed from
+Sepolia's Glamsterdam prices (`gas.ts`, `deployGas`) and labelled "Sepolia,
+estimated".
+
+Seeded scenarios (fictional artists, generated art):
+
+| Work                                     | State                                                                                   |
+| ---------------------------------------- | --------------------------------------------------------------------------------------- |
+| Salt Meridian                            | Sold; finalized and fully on-chain; a statement-only dispute outcome; a resale royalty  |
+| Lantern Field                            | No bids: in the museum                                                                  |
+| Ember Index                              | Sold; delivery pending (the winner's wallet refuses); editions settled with claims open |
+| Withdrawn Light                          | Dispute upheld: burned; its edition auction void with refunds                           |
+| Glass Orchard                            | Paused for a dispute: withdrawals open on both auctions                                 |
+| Open Ledger                              | The owner's example: editions closed at 80 for 0.0511 ETH, waiting to settle            |
+| Night Tide                               | Ended with no bids: settling sends it to the museum                                     |
+| Fold Study 7                             | Ending in minutes after an anti-snipe extension; capped editions with a raise hole      |
+| Tide Table                               | 1/1 unbid (museum); editions sold anyway, a wide book SETTLING with 2 words left        |
+| Quiet Engine                             | Live, partly on-chain, with an open edition auction                                     |
+| Copper Rain                              | Live HTML work on Arweave and IPFS; edition auction not yet opened                      |
+| Low Water, Salt Lines, Quarry Song       | Curation: ready to start, waiting for the move, waiting for signatures                  |
+| Halden Studio, Reik Multiples, Ohm Rooms | Federated 721, 1155 and linked pair, with different licenses                            |
+| Mara Vell Official                       | A delisted federated contract (impersonation)                                           |
+
+## Localization
+
+Copy is the `stream.*` route namespace (`i18n/messages/stream-*.ts`), en-US
+only for now: other locales fall back to en-US until the owner approves the copy
+and translations follow. Numbers, dates and ETH amounts use `@/i18n/format`.
+
+## Tests
+
+`__tests__/lib/stream/`: clearing and FIFO parity with the D138 reference model
+(`fixtures/d138-reference-vectors.json`, generated by the model that is now
+6529-works `tools/edition_auction_ref.py`), the auction rules and clocks, and
+the seeded engine end to end.
