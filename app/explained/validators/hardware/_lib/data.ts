@@ -37,6 +37,9 @@ export const FACTS = {
   ),
   "dc.cloud.month": f("$10–80", "cloudAll"),
   "dc.cloud.bigThree": f("$61–63", "cloudAll"),
+  // Four years (48 months) of the big three's $61–63, and of Good's $10–13.
+  "dc.cloud.bigThreeFourYears": f("$2,900–3,000", "cloudAll"),
+  "tier.good.fourYears": f("$500–600", "homePrices"),
   "dc.cloud.ovh": f("$10", "ovh"),
   "dc.cloud.egress": f("50 GB", "cloudAll"),
   "dc.colo.month": f("$100–300", "colo"),
@@ -44,23 +47,30 @@ export const FACTS = {
 
   // The tiers' own numbers, as the card gives them.
   "spec.bits": f("64-bit", "code"),
+  "spec.x64": f("x64", "docs"),
   "spec.acceptable.cores": f("4 cores", "card"),
   "spec.acceptable.ram": f("8 GB", "card"),
+  "spec.pi.min": f("4 GB", "bench"),
   "spec.good.watts": f("12 W", "p53"),
   "spec.great.ram": f("32 GB", "card"),
   "spec.great.disk": f("4 TB", "card"),
   "spec.good.driveMin": f("500 GB", "homePrices"),
+  "spec.good.drive": f("1–2 TB", "card"),
   "spec.cloud.vcpu": f("2–4 vCPUs", "card"),
   "spec.cloud.ram": f("8–16 GB", "card"),
   "spec.cloud.ram8": f("8 GB", "card"),
   "power.good.month": f("$1.60", "eia"),
   "power.kwh": f("18.16 cents", "eia"),
+  "power.month": f("August 2026", "eia"),
+  // Memory and flash prices rose this year (Raspberry Pi's three rises).
+  "price.riseYear": f("2026", "homePrices"),
 
   // What one validator uses, and its day.
   "use.wire": f("15–20 GB", "measured"),
   "use.upload": f("under 1 GB", "benchEstimate"),
   "use.windowOpen": f("00:15 UTC", "p53"),
   "use.windowClose": f("19:00 UTC", "p53"),
+  "use.hours": f("About three hours a day", "p53"),
 
   // Large holders.
   "holders.keys": f("16", "p53"),
@@ -77,7 +87,7 @@ export const FACTS = {
   "node.upload": f("1.6–2.5 TB", "ownNode"),
   "node.consensus": f("15–90 GiB", "ethdocker"),
   "node.growthYear": f("2024", "paradigm"),
-  "node.rented": f("$95–320", "rented"),
+  "node.rented": f("$95–289", "rented"),
   "node.rentedFrom": f("$95", "ovhDedicated"),
   "node.cloud": f("$805–920", "awsNode"),
 
@@ -94,7 +104,10 @@ export const FACTS = {
     "docs"
   ),
   "os.mac": f("macOS 11 or newer, Apple silicon or Intel", "docs"),
-  "os.windows": f("Windows 10 (version 1809 or newer) or Windows 11", "docs"),
+  "os.windows": f(
+    "Windows 10 (version 1809 or newer) or Windows 11, on x64",
+    "docs"
+  ),
 
   // Oracle's free tier.
   "oracle.free": f("2 Arm cores, 12 GB of memory and 200 GB of disk", "oracle"),
@@ -133,20 +146,22 @@ interface SpecRow {
  * each validator on the network (its votes and reports, kept six years).
  */
 const VALIDATOR_DISK =
-  "About 0.5 GB in the first year and about 2 GB after six years, plus about 4 MB a year for each validator on the network";
+  "About 0.5 GB in the first year and about 2 GB after six years, plus about 4 MB a year for each validator on the network.";
 
 export const SPEC_ROWS: readonly SpecRow[] = [
   {
     id: "cpu",
     source: "card",
-    acceptable: "4 cores (2 will do). Any 64-bit processor, old ones included",
+    acceptable:
+      "4 cores (2 will do). Any 64-bit x86 or Arm processor, old ones included.",
     good: "4–8 cores: an Intel N150 or a small Ryzen",
-    great: "8 cores, for the Ethereum node",
+    great:
+      "8 cores, which give the Ethereum node room to grow. EIP-7870’s minimum is 4 cores and 8 threads.",
   },
   {
     id: "memory",
     source: "card",
-    acceptable: "8 GB. The validator peaks at about 2 GB, once a day",
+    acceptable: "8 GB. The validator peaks at about 2 GB, once a day.",
     good: "16 GB",
     great: "32 GB, most of it for the Ethereum node",
   },
@@ -154,9 +169,9 @@ export const SPEC_ROWS: readonly SpecRow[] = [
     id: "storage",
     source: "card",
     acceptable: "256–512 GB SSD",
-    good: "1–2 TB NVMe. The drive a mini PC comes with, 500 GB or more, is enough for the validator; a node needs a 4 TB drive of its own",
+    good: "1–2 TB NVMe, which leaves room for other uses. The drive a mini PC comes with, 500 GB or more, is enough for the validator. A node needs a 4 TB drive of its own.",
     great:
-      "4 TB NVMe, TLC with DRAM. ethereum.org expects 2 TB to be too small by 2027",
+      "4 TB NVMe, TLC with DRAM. ethereum.org expects 2 TB to be too small by 2027.",
   },
   {
     id: "disk",
@@ -164,15 +179,15 @@ export const SPEC_ROWS: readonly SpecRow[] = [
     acceptable: VALIDATOR_DISK,
     good: VALIDATOR_DISK,
     great:
-      "For the validator, about 0.5 GB in the first year and about 2 GB after six years, plus about 4 MB a year for each validator on the network. The node’s database was 1.5–2 TiB in September 2026 and keeps growing",
+      "Same as Acceptable, plus the node’s database: 1.5–2 TiB in September 2026, and growing.",
   },
   {
     id: "internet",
     source: "measured",
-    acceptable: "About 0.5 GB a day, 15–20 GB a month",
-    good: "About 0.5 GB a day, 15–20 GB a month",
+    acceptable: "About 0.5 GB a day, 15–20 GB a month, from public servers",
+    good: "About 0.5 GB a day, 15–20 GB a month, from public servers",
     great:
-      "For the validator, about 0.5 GB a day, 15–20 GB a month. The node wants 50 Mbps down and 15 Mbps up; 6529’s node sent its peers 1.6–2.5 TB a month while syncing",
+      "Little for the validator, which reads from your node. The node wants 50 Mbps down and 15 Mbps up; 6529’s node sent its peers 1.6–2.5 TB a month while syncing.",
   },
   {
     id: "power",
@@ -186,19 +201,19 @@ export const SPEC_ROWS: readonly SpecRow[] = [
     id: "systems",
     source: "docs",
     acceptable:
-      "Linux, macOS or Windows. A Raspberry Pi needs the 64-bit Raspberry Pi OS (Trixie or Bookworm)",
-    good: "Linux, macOS or Windows",
+      "Linux, macOS or Windows (x64 only). A Raspberry Pi needs the 64-bit Raspberry Pi OS (Trixie or Bookworm).",
+    good: "Linux, macOS or Windows (x64 only)",
     great:
-      "Linux, macOS or Windows, beside an execution and a consensus client",
+      "Linux, macOS or Windows (x64 only), beside an execution and a consensus client",
   },
   {
     id: "connections",
     source: "modes",
     acceptable:
-      "Outbound only, no port to open. Tor is built in and on, Ethereum calls included",
-    good: "Outbound only, no port to open, on wired Ethernet. Tor is built in and on",
+      "Outbound only, no port to open. Tor is built in and on, Ethereum calls included.",
+    good: "Outbound only, no port to open, on wired Ethernet. Tor is built in and on.",
     great:
-      "Outbound only for the validator, through Tor. The node keeps its own peer connections",
+      "Outbound only for the validator, through Tor. The node keeps its own peer connections.",
   },
   {
     id: "uptime",
@@ -207,7 +222,7 @@ export const SPEC_ROWS: readonly SpecRow[] = [
       "About three hours a day inside the signing window, 00:15 to 19:00 UTC, with sleep turned off",
     good: "Always on, with a small UPS for short power cuts",
     great:
-      "Always on, with a UPS, so a short power cut doesn't stop the node mid-write",
+      "Always on, with a UPS, so a short power cut doesn’t stop the node mid-write",
   },
   {
     id: "cost",
@@ -323,8 +338,8 @@ interface ModeRow {
 export const MODE_ROWS: readonly ModeRow[] = [
   {
     id: "listen",
-    home: "Outbound only. No port to open, nothing to forward on your router",
-    rack: "Listens in public: open the TCP port you set in [p2p] listen, and the same UDP port if you list a QUIC address",
+    home: "Outbound only. No port to open, nothing to forward on your router.",
+    rack: "Listens in public. Open the TCP port you set in `[p2p] listen`, and the same UDP port if you list a QUIC address.",
   },
   {
     id: "tor",
@@ -370,42 +385,42 @@ export const USE_ROWS: readonly UseRow[] = [
   {
     id: "read",
     value:
-      "It reads each Ethereum block as it finalizes, through the day, and checks every answer against Ethereum’s block headers",
+      "It reads each Ethereum block as it finalizes, through the day, and checks every answer against Ethereum’s block headers.",
     source: "docs",
   },
   {
     id: "sign",
     value:
-      "From about 00:15 UTC, once Ethereum has finalized the day’s last block, it computes TDH with both programs and signs, within minutes. A vote counts until 19:00 UTC",
+      "From about 00:15 UTC, once Ethereum has finalized the day’s last block, it computes TDH with both programs and signs, within minutes. A vote counts until 19:00 UTC.",
     source: "docs",
   },
   {
     id: "publish",
     value:
-      "At home, after a random wait of up to two hours, never later than 18:00 UTC, so the time it sends doesn’t point to where it is. In a datacenter, at once",
+      "At home, after a random wait of up to two hours, never later than 18:00 UTC, so the time it sends doesn’t point to where it is. In a datacenter, at once.",
     source: "modes",
   },
   {
     id: "catchup",
     value:
-      "After a sleep or a day off, it first reads the blocks it missed: about 10 minutes for each day, from public servers",
+      "After a sleep or a day off, it first reads the blocks it missed: about 10 minutes for each day, from public servers.",
     source: "docs",
   },
   {
     id: "offline",
     value:
-      "Seven days without a signature before the account leaves the roster. Its next vote brings it back, with no penalty",
+      "Seven days without a signature before the account leaves the roster. Its next vote brings it back, with no penalty.",
     source: "p53",
   },
   {
     id: "start",
-    value: "Up to a minute or two the first time, while Tor connects",
+    value: "Up to a minute or two the first time, while Tor connects.",
     source: "docs",
   },
   {
     id: "full",
     value:
-      "Optional. With your own node: 5 h 05 min on a 48-thread machine. Through a remote server: 1.6–3 TB of receipts, once",
+      "Optional. With your own node: 5 h 05 min on a 48-thread machine. Through a remote server: 1.6–3 TB of receipts, once.",
     source: "remoteCheck",
   },
 ];
@@ -420,7 +435,7 @@ interface CostBar {
 
 export const NODE_COST_BARS: readonly CostBar[] = [
   { id: "home", fact: "tier.great.month", low: 44, high: 50 },
-  { id: "rented", fact: "node.rented", low: 95, high: 320 },
+  { id: "rented", fact: "node.rented", low: 95, high: 289 },
   { id: "cloud", fact: "node.cloud", low: 805, high: 920 },
 ];
 

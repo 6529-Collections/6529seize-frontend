@@ -56,8 +56,11 @@ const s = (text: string, source: SourceId): Said => ({ text, source });
 export const PARTS: readonly PartDef[] = [
   {
     id: "cpu",
-    answer: s("Any 64-bit processor, old ones included.", "code"),
-    why: s("The day’s TDH takes seconds, on two cores.", "bench"),
+    answer: s("Any 64-bit x86 or Arm processor.", "code"),
+    why: s(
+      "Old ones work: the day’s TDH takes seconds, on two cores.",
+      "bench"
+    ),
     uses: [
       s(
         "Each day the two TDH programs run side by side, one thread each, for about 2–8 seconds on a 48-thread server. Between days the validator uses about 1% of one core.",
@@ -83,7 +86,7 @@ export const PARTS: readonly PartDef[] = [
         "card"
       ),
       great: s(
-        "8 cores, for the Ethereum node. EIP-7870 asks for at least 4 cores and 8 threads.",
+        "8 cores give the Ethereum node room to grow. EIP-7870’s minimum is 4 cores and 8 threads.",
         "eip7870"
       ),
       rack: s(
@@ -185,7 +188,7 @@ export const PARTS: readonly PartDef[] = [
         "card"
       ),
       good: s(
-        "1–2 TB NVMe. The drive a mini PC comes with, 500 GB or more, is enough for the validator; an Ethereum node needs a 4 TB drive of its own.",
+        "1–2 TB NVMe, which leaves room for other uses. The drive a mini PC comes with, 500 GB or more, is enough for the validator. An Ethereum node needs a 4 TB drive of its own.",
         "card"
       ),
       great: s(
@@ -209,12 +212,16 @@ export const PARTS: readonly PartDef[] = [
     ),
     uses: [
       s(
-        "About 0.5 GB a day, 15–20 GB a month, from the first default Ethereum servers, PublicNode and dRPC, which compress.",
+        "About 0.5 GB a day, 15–20 GB a month, from the first default Ethereum servers, PublicNode and dRPC, which compress. With your own node, the validator reads from it instead.",
         "measured"
       ),
       s(
-        "The 50 GB a month above is the receipts’ size in Ethereum’s own encoding (47–56 GB). Servers send them as JSON, about 175 GB a month; PublicNode and dRPC compress that about 11 times.",
+        "The card’s 50 GB a month is the receipts’ size in Ethereum’s own encoding (47–56 GB). Servers send them as JSON, about 175 GB a month; PublicNode and dRPC compress that about 11 times.",
         "measured"
+      ),
+      s(
+        "Some servers refuse Tor, and the validator then reads from the next one on its list. A server that doesn’t compress sends up to about 175 GB a month.",
+        "docs"
       ),
       s(
         "Its own upload is under 1 GB a month: requests, and a vote of about 200 bytes a day. An estimate, not yet measured.",
@@ -227,6 +234,10 @@ export const PARTS: readonly PartDef[] = [
       s(
         "Wi-Fi works. The vote can go out any time in a window of about 19 hours, so a short drop costs nothing.",
         "p53"
+      ),
+      s(
+        "On a metered, mobile or satellite plan, check that 15–20 GB a month fits.",
+        "measured"
       ),
     ],
     tiers: {
@@ -243,7 +254,7 @@ export const PARTS: readonly PartDef[] = [
       cloud: s("Any. Data coming in is free at every provider.", "cloudAll"),
     },
     avoid: s(
-      "A faster plan for the validator. On a metered, mobile or satellite plan, check that 15–20 GB a month fits.",
+      "A faster plan for the validator. It reads about 0.5 GB a day.",
       "measured"
     ),
   },
@@ -414,12 +425,22 @@ export const IDLE: readonly IdleRow[] = [
 /**
  * Turning off sleep, for a laptop or desktop that runs the validator: the
  * commands, and for Windows the lid setting, so a closed laptop keeps
- * signing while it is plugged in.
+ * signing while it is plugged in. The setting moved in Windows 11 24H2, so
+ * it has a path for each.
  */
+export interface MenuPath {
+  /** Which Windows: "Windows 11, version 24H2 or newer". */
+  readonly where: string;
+  /** The names to click, in order. */
+  readonly path: readonly string[];
+}
+
 export const SLEEP: readonly {
   readonly os: string;
   readonly cmds: readonly string[];
+  /** A setting's names between double asterisks print in bold. */
   readonly note?: string;
+  readonly paths?: readonly MenuPath[];
 }[] = [
   { os: "macOS", cmds: ["sudo pmset -c sleep 0"] },
   {
@@ -428,7 +449,26 @@ export const SLEEP: readonly {
       "powercfg /change standby-timeout-ac 0",
       "powercfg /change hibernate-timeout-ac 0",
     ],
-    note: "For a laptop with its lid closed: Settings, System, Power & battery, Lid & power button controls, and set Plugged in to Do nothing.",
+    note: "For a laptop with its lid closed, set **Plugged in** to **Do nothing**:",
+    paths: [
+      {
+        where: "Windows 11, version 24H2 or newer",
+        path: [
+          "Settings",
+          "System",
+          "Power & battery",
+          "Lid & power button controls",
+        ],
+      },
+      {
+        where: "Windows 10, or an older Windows 11",
+        path: [
+          "Control Panel",
+          "Power Options",
+          "Choose what closing the lid does",
+        ],
+      },
+    ],
   },
   {
     os: "Linux",

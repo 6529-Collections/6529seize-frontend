@@ -76,7 +76,7 @@ export const CLOUD: readonly CloudProvider[] = [
     typeIsId: true,
     notes: [
       "Totals add 100 GB of gp3 disk ($8.00) and a public IPv4 address ($3.65). The first 100 GB out each month are free.",
-      "If a t-type's 24-hour average ever passes its baseline, AWS bills the extra at $0.04 (t4g) or $0.05 (t3a) per vCPU-hour.",
+      "If a t-type’s 24-hour average ever passes its baseline, AWS bills the extra at $0.04 (t4g) or $0.05 (t3a) per vCPU-hour.",
     ],
     rows: [
       {
@@ -234,7 +234,7 @@ export const CLOUD: readonly CloudProvider[] = [
         arch: "arm",
         size: V2_8GIB,
         disk: AZURE_EXTRAS,
-        burst: "Yes, 40% base",
+        burst: "Yes, 40% baseline",
         machine: "$49.06",
         total: "$62.31",
         totalUsd: 62.31,
@@ -260,7 +260,7 @@ export const CLOUD: readonly CloudProvider[] = [
         arch: "x86",
         size: V2_8GIB,
         disk: AZURE_EXTRAS,
-        burst: "Yes, 40% base",
+        burst: "Yes, 40% baseline",
         machine: "$54.90",
         total: "$68.15",
         totalUsd: 68.15,
@@ -289,7 +289,8 @@ export const CLOUD: readonly CloudProvider[] = [
     typeIsId: false,
     notes: [
       "Prices include the disk, a public IPv4 address and 20 TB of traffic in the EU (1–3 TB in the US). Converted at 1 EUR = 1.1172 USD.",
-      "Hetzner raised cloud prices on June 15, 2026. CX and CAX plans showed as unavailable on October 31, 2026.",
+      "Hetzner raised cloud prices in 2026, most sharply on June 15. Its own pages showed CX and CAX as not available on October 31, 2026.",
+      "That CPX and CCX could be ordered rests on third-party checks of October 13 and 20, 2026. Check in Hetzner’s console before you plan on one.",
     ],
     rows: [
       {
@@ -512,14 +513,15 @@ export const CLOUD: readonly CloudProvider[] = [
     notes: [
       "IPv4 is included. VPS traffic is unlimited, except in Mumbai, Singapore and Sydney. No Arm.",
       "Paid 12 months ahead, VPS-2 costs $8.50 a month and VPS-3 $12.32.",
+      "VPS-2 and VPS-3 are OVHcloud’s current VPS range, which its catalog calls the 2027 range. OVHcloud calls their cores vCores.",
     ],
     rows: [
       {
         id: "vps-2",
-        type: "VPS-2 (2027 range)",
+        type: "VPS-2",
         cpu: "Shared",
         arch: "x86",
-        size: "4 vCores, 8 GB",
+        size: "4 vCPU, 8 GB",
         disk: "75 GB NVMe, unlimited traffic",
         burst: SHARED,
         machine: "$10.00",
@@ -529,10 +531,10 @@ export const CLOUD: readonly CloudProvider[] = [
       },
       {
         id: "vps-3",
-        type: "VPS-3 (2027 range)",
+        type: "VPS-3",
         cpu: "Shared",
         arch: "x86",
-        size: "6 vCores, 12 GB",
+        size: "6 vCPU, 12 GB",
         disk: "100 GB NVMe, unlimited traffic",
         burst: SHARED,
         machine: "$14.50",
@@ -681,16 +683,6 @@ export const NODE_ROWS: readonly NodeRow[] = [
     source: "hetznerDedicated",
   },
   {
-    id: "advance-1",
-    option: "OVHcloud ADVANCE-1 (US), NVMe added",
-    spec: "EPYC 4244P, 6 cores, 32 GB, two 960 GB and two 1.92 TB NVMe",
-    machine: "$317",
-    upload: "3 Gbps included",
-    total: "$317",
-    kind: "rented",
-    source: "ovhDedicated",
-  },
-  {
     id: "i3en-2xl",
     option: "AWS i3en.2xlarge",
     spec: "8 vCPU Intel, 64 GiB, two 2.5 TB local NVMe",
@@ -740,7 +732,7 @@ export const NODE_NOTES: readonly {
     source: "awsNode",
   },
   {
-    text: "The OVHcloud KS-5-A, RISE-1 and ADVANCE-1 have 4–6 cores: enough for a node, which needs 4 cores and 8 threads, but fewer than the Rack tier’s 8–16.",
+    text: "The OVHcloud KS-5-A and RISE-1 have 4 and 6 cores: enough for a node, which needs 4 cores and 8 threads, but fewer than the Rack tier’s 8–16.",
     source: "ovhDedicated",
   },
   {

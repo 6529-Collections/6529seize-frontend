@@ -21,7 +21,7 @@ import {
   SPEND,
   type Said,
 } from "./partGuide";
-import { nb } from "./nb";
+import { nb, nbCode } from "./nb";
 import { SOURCES, type HwSource, type SourceId } from "./sources";
 
 /**
@@ -53,7 +53,7 @@ export function sourceTitle(id: SourceId, locale: SupportedLocale): string {
   });
 }
 
-export { nb };
+export { nb, nbCode };
 
 /** One number of the page, printed with its source. */
 export function Hw({
@@ -264,7 +264,13 @@ export function partFacts(): [string, Said][] {
     "part.power.sleep",
     {
       text: SLEEP.map((row) =>
-        [`${row.os}: ${row.cmds.join(", then ")}`, row.note]
+        [
+          `${row.os}: ${row.cmds.join(", then ")}`,
+          row.note?.replaceAll("**", ""),
+          ...(row.paths ?? []).map(
+            (entry) => `${entry.where}: ${entry.path.join(" > ")}`
+          ),
+        ]
           .filter(Boolean)
           .join(". ")
       ).join("; "),

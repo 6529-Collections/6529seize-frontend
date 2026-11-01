@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { EX_FOCUS, EX_LAYOUT } from "@/components/explained/tokens";
+import { EX_FOCUS, EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { CARD, type DcId, type TierId } from "./_lib/card";
 import { hw, hwRich, type HwSuffix } from "./_lib/copy";
@@ -115,7 +115,7 @@ function TierCost({
           locale={locale}
           className="tw-text-[26px] tw-font-semibold tw-leading-8 tw-tracking-[-0.02em] tw-text-iron-50"
         />
-        <span className="tw-text-[15px] tw-text-iron-400">
+        <span className="tw-text-[15px] tw-text-iron-400 md:tw-text-sm">
           {hw(locale, "tier.buy")}
         </span>
       </p>
@@ -143,7 +143,7 @@ function DcCost({
           locale={locale}
           className="tw-text-[26px] tw-font-semibold tw-leading-8 tw-tracking-[-0.02em] tw-text-iron-50"
         />
-        <span className="tw-text-[15px] tw-text-iron-400">
+        <span className="tw-text-[15px] tw-text-iron-400 md:tw-text-sm">
           {hw(locale, "tier.perMonth")}
         </span>
       </p>
@@ -187,14 +187,16 @@ function WhyHome({ locale }: { readonly locale: SupportedLocale }) {
         good: <Hw id="tier.good.month" locale={locale} />,
       }),
       body: hwRich(locale, "home.cost", {
-        ovh: <Hw id="dc.cloud.ovh" locale={locale} />,
+        fourYears: <Hw id="tier.good.fourYears" locale={locale} />,
         cloud: <Hw id="dc.cloud.bigThree" locale={locale} />,
+        cloudFourYears: <Hw id="dc.cloud.bigThreeFourYears" locale={locale} />,
+        ovh: <Hw id="dc.cloud.ovh" locale={locale} />,
       }),
     },
   ];
   return (
     <div className="tw-mb-6 md:tw-mb-8" id="why-home">
-      <h3 className="tw-m-0 tw-text-[17px] tw-font-semibold tw-leading-6 tw-text-iron-50">
+      <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-50">
         {hw(locale, "home.why")}
       </h3>
       <ul className="tw-m-0 tw-mt-3 tw-grid tw-list-none tw-grid-cols-1 tw-items-start tw-gap-x-8 tw-gap-y-2 tw-p-0 md:tw-mt-4 md:tw-grid-cols-3">
@@ -291,6 +293,7 @@ export function HomeOffice({ locale }: { readonly locale: SupportedLocale }) {
                 ? {
                     tip: hwRich(locale, "tier.goodDrive", {
                       min: <Hw id="spec.good.driveMin" locale={locale} />,
+                      range: <Hw id="spec.good.drive" locale={locale} />,
                       node: <Hw id="spec.great.disk" locale={locale} />,
                     }),
                   }
@@ -309,8 +312,12 @@ export function HomeOffice({ locale }: { readonly locale: SupportedLocale }) {
         </CardText>{" "}
         {hwRich(locale, "tier.basis", {
           date: <Hw id="read.day" locale={locale} />,
+          year: <Hw id="price.riseYear" locale={locale} />,
           kwh: <Hw id="power.kwh" locale={locale} />,
-        })}{" "}
+          month: <Hw id="power.month" locale={locale} />,
+        })}
+      </p>
+      <p className={`tw-m-0 tw-mt-1 ${READ}`}>
         <a href="#spec" className={`${TAP_LINK} tw-font-semibold`}>
           {hw(locale, "tier.full")}
         </a>
@@ -387,7 +394,7 @@ export function LargeHolders({ locale }: { readonly locale: SupportedLocale }) {
                 {index + 1}
               </span>
               <div className="tw-min-w-0">
-                <h3 className="tw-m-0 tw-pt-1 tw-text-[17px] tw-font-semibold tw-leading-6 tw-tracking-[-0.01em] tw-text-iron-50 sm:tw-mt-3 sm:tw-pt-0 sm:tw-text-lg">
+                <h3 className="tw-m-0 tw-pt-1 tw-text-lg tw-font-semibold tw-leading-6 tw-tracking-[-0.01em] tw-text-iron-50 sm:tw-mt-3 sm:tw-pt-0">
                   {item.title}
                 </h3>
                 <CardText
@@ -423,10 +430,7 @@ export function EveryValidator({
       id="every-validator"
     >
       <div className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pt-8">
-        <h2
-          id="every-title"
-          className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.14em] tw-text-primary-300"
-        >
+        <h2 id="every-title" className={EX_TEXT.h2}>
           {CARD.every.label}
         </h2>
         <ul className="tw-m-0 tw-mt-5 tw-grid tw-list-none tw-grid-cols-1 tw-gap-x-8 tw-gap-y-4 tw-p-0 sm:tw-grid-cols-2 lg:tw-grid-cols-4">
@@ -460,9 +464,9 @@ export function EveryValidator({
 }
 
 /**
- * Under the header: where things are, one tap away. The page is long on a
- * phone, so the card's sections and the tables people come back for are
- * named here.
+ * At the foot of the header: where things are, one tap away. The page is
+ * long on a phone, so the card's sections and the tables people come back
+ * for are named here.
  */
 const JUMPS: readonly { readonly href: string; readonly label: HwSuffix }[] = [
   { href: "#home", label: "jump.home" },
@@ -477,7 +481,7 @@ export function JumpRow({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <nav
       aria-label={hw(locale, "jump.label")}
-      className="tw-mt-8 tw-scroll-mt-24 tw-border-0 tw-border-y tw-border-solid tw-border-iron-900 tw-py-3 md:tw-mt-10"
+      className="tw-scroll-mt-24 tw-border-0 tw-border-y tw-border-solid tw-border-iron-900 tw-py-3"
       data-jumps=""
       id="jumps"
     >

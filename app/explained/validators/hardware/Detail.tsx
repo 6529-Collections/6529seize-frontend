@@ -15,7 +15,7 @@ import {
   NODE_COST_BARS,
   USE_ROWS,
 } from "./_lib/data";
-import { Hw, nb, Sourced, sourceText, sourceTitle } from "./_lib/facts";
+import { Hw, nb, nbCode, Sourced, sourceText, sourceTitle } from "./_lib/facts";
 import { SOURCES, type SourceId } from "./_lib/sources";
 import CloudTable, { type ProviderMeta } from "./CloudTable";
 import { Disclosure, FactTable, OpenMark, READ } from "./parts";
@@ -127,9 +127,14 @@ function Modes({ locale }: { readonly locale: SupportedLocale }) {
             {
               key: "home",
               label: hw(locale, "modes.col.home"),
+              short: hw(locale, "modes.short.home"),
               width: "tw-w-[41%]",
             },
-            { key: "rack", label: hw(locale, "modes.col.rack") },
+            {
+              key: "rack",
+              label: hw(locale, "modes.col.rack"),
+              short: hw(locale, "modes.short.rack"),
+            },
           ]}
           rows={MODE_ROWS.map((row) => ({
             key: row.id,
@@ -137,8 +142,8 @@ function Modes({ locale }: { readonly locale: SupportedLocale }) {
             source: "modes",
             cells: {
               what: hw(locale, `modes.row.${row.id}`),
-              home: <span className="tw-text-iron-50">{row.home}</span>,
-              rack: row.rack,
+              home: <span className="tw-text-iron-50">{nbCode(row.home)}</span>,
+              rack: nbCode(row.rack),
             },
           }))}
         />
@@ -204,7 +209,7 @@ function Cloud({ locale }: { readonly locale: SupportedLocale }) {
             <h3 className={`${EX_TEXT.label} tw-m-0`}>
               {hw(locale, "cloud.tips")}
             </h3>
-            <ul className="tw-m-0 tw-mt-3 tw-grid tw-list-none tw-grid-cols-1 tw-gap-x-8 tw-gap-y-3 tw-p-0 md:tw-grid-cols-3">
+            <ul className="tw-m-0 tw-mt-3 tw-grid tw-list-none tw-grid-cols-1 tw-items-start tw-gap-x-8 tw-gap-y-3 tw-p-0 md:tw-grid-cols-3">
               {tips.map((tip) => (
                 <li
                   key={tip}
@@ -240,7 +245,7 @@ function NodeCosts({ locale }: { readonly locale: SupportedLocale }) {
       data-fig="node-costs"
       aria-label={hw(locale, "node.figure")}
     >
-      <figcaption className="tw-m-0 tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-50">
+      <figcaption className="tw-m-0 tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-50 md:tw-text-base">
         {hw(locale, "node.figure")}
       </figcaption>
       <ul className="tw-m-0 tw-mt-5 tw-flex tw-list-none tw-flex-col tw-gap-5 tw-p-0">
@@ -250,7 +255,7 @@ function NodeCosts({ locale }: { readonly locale: SupportedLocale }) {
             className="tw-grid tw-grid-cols-1 tw-gap-2 md:tw-grid-cols-[220px_minmax(0,1fr)] md:tw-items-center md:tw-gap-6"
           >
             <span>
-              <span className="tw-block tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-50">
+              <span className="tw-block tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-50 md:tw-text-base">
                 {hw(locale, `node.bar.${bar.id}`)}
               </span>
               <span className="tw-block tw-text-[13px] tw-leading-5 tw-text-iron-400">
@@ -271,7 +276,7 @@ function NodeCosts({ locale }: { readonly locale: SupportedLocale }) {
                 aria-hidden="true"
               />
               <span
-                className="tw-absolute tw-top-1/2 tw--translate-y-1/2 tw-whitespace-nowrap tw-pl-3 tw-text-[15px] tw-font-semibold tw-text-iron-50"
+                className="tw-absolute tw-top-1/2 tw--translate-y-1/2 tw-whitespace-nowrap tw-pl-3 tw-text-[15px] tw-font-semibold tw-text-iron-50 md:tw-text-base"
                 style={
                   bar.high / NODE_COST_AXIS.max > 0.7
                     ? {
@@ -290,15 +295,25 @@ function NodeCosts({ locale }: { readonly locale: SupportedLocale }) {
       <div className="tw-mt-3 tw-hidden md:tw-grid md:tw-grid-cols-[220px_minmax(0,1fr)] md:tw-gap-6">
         <span aria-hidden="true" />
         <span className="tw-relative tw-block tw-h-5" aria-hidden="true">
-          {NODE_COST_AXIS.ticks.map((tick) => (
-            <span
-              key={tick}
-              className="tw-absolute tw-top-0 tw--translate-x-1/2 tw-text-xs tw-leading-5 tw-text-iron-400"
-              style={{ left: pct(tick) }}
-            >
-              {dollars.format(tick)}
-            </span>
-          ))}
+          {NODE_COST_AXIS.ticks.map((tick, index, all) => {
+            // The first label starts at the axis's left end and the last
+            // ends at its right end; the rest are centred on their tick.
+            const edge =
+              index === 0
+                ? ""
+                : index === all.length - 1
+                  ? "tw--translate-x-full"
+                  : "tw--translate-x-1/2";
+            return (
+              <span
+                key={tick}
+                className={`tw-absolute tw-top-0 tw-text-xs tw-leading-5 tw-text-iron-400 ${edge}`}
+                style={{ left: pct(tick) }}
+              >
+                {dollars.format(tick)}
+              </span>
+            );
+          })}
         </span>
       </div>
     </figure>
@@ -394,7 +409,7 @@ function OwnNode({ locale }: { readonly locale: SupportedLocale }) {
     >
       <Para>{hw(locale, "node.p1")}</Para>
       <Para>{hw(locale, "node.p2")}</Para>
-      <div className="tw-mt-6">
+      <div className="tw-mt-6 md:[&_dl]:tw-text-base md:[&_dl]:tw-leading-[26px]">
         <FactsList
           label={hw(locale, "node.needs")}
           rows={[
@@ -452,7 +467,7 @@ function SeveralMachines({ locale }: { readonly locale: SupportedLocale }) {
       body: hwRich(locale, "holders.grant", {
         keys: <Hw id="holders.keys" locale={locale} />,
         syntax: (
-          <code className="tw-whitespace-nowrap tw-rounded-md tw-bg-iron-900 tw-px-1.5 tw-py-0.5 tw-font-mono tw-text-[0.9em] tw-text-iron-50">
+          <code className="tw-whitespace-nowrap tw-rounded-md tw-bg-iron-900 tw-px-1.5 tw-py-0.5 tw-font-mono tw-text-[0.875em] tw-text-iron-50">
             --key KEY_ID:3
           </code>
         ),
@@ -501,7 +516,15 @@ function Uses({ locale }: { readonly locale: SupportedLocale }) {
         />
       }
     >
-      <Para>{hw(locale, "use.intro")}</Para>
+      <Para>
+        {hwRich(locale, "use.intro", {
+          link: (
+            <a href="#parts" className={EX_LINK}>
+              {hw(locale, "parts.kicker")}
+            </a>
+          ),
+        })}
+      </Para>
     </Section>
   );
 }
@@ -532,6 +555,7 @@ function Questions({ locale }: { readonly locale: SupportedLocale }) {
       q: "faq.pi.q",
       a: hwRich(locale, "faq.pi.a", {
         ram: f("spec.acceptable.ram"),
+        min: f("spec.pi.min"),
         os: f("os.pi"),
       }),
     },
@@ -555,7 +579,7 @@ function Questions({ locale }: { readonly locale: SupportedLocale }) {
       a: hwRich(locale, "faq.cloud.a", {
         link: (
           <a href="#cloud-tips" className={EX_LINK}>
-            {hw(locale, "cloud.tips")}
+            {hw(locale, "faq.cloud.link")}
           </a>
         ),
       }),
@@ -592,9 +616,7 @@ function Questions({ locale }: { readonly locale: SupportedLocale }) {
               <span>{hw(locale, faq.q)}</span>
               <OpenMark />
             </summary>
-            <p
-              className={`tw-m-0 tw-hidden tw-max-w-[660px] tw-pb-4 tw-text-iron-300 group-open:tw-block ${READ}`}
-            >
+            <p className="tw-m-0 tw-hidden tw-max-w-[660px] tw-pb-4 tw-text-[15px] tw-leading-6 tw-text-iron-300 group-open:tw-block md:tw-text-lg md:tw-leading-[29px]">
               {faq.a}
             </p>
           </details>

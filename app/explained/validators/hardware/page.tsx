@@ -68,8 +68,11 @@ export default async function ValidatorHardwarePage({
       locale={locale}
     >
       <article data-ex-article="" lang={locale}>
-        <Hero locale={locale} version={book.maybe("site.validator.version")} />
-        <JumpRow locale={locale} />
+        <Hero
+          locale={locale}
+          version={book.maybe("site.validator.version")}
+          jumps={<JumpRow locale={locale} />}
+        />
         <OpenOnHash />
         <HomeOffice locale={locale} />
         <Datacenter locale={locale} />
@@ -87,11 +90,11 @@ export default async function ValidatorHardwarePage({
               <span className={`${EX_TEXT.label} tw-mb-3.5 tw-block`}>
                 {hw(locale, "detail.label")}
               </span>
-              <h2 id="detail-title" className={EX_TEXT.stmt}>
+              <h2 id="detail-title" className={EX_TEXT.h2}>
                 {hw(locale, "detail.title")}
               </h2>
             </div>
-            <div className="lg:tw-pt-[30px]">
+            <div className="lg:tw-pt-[22px]">
               <Contents
                 label={hw(locale, "detail.contents")}
                 items={DETAIL_SECTIONS.map((section, index) => ({

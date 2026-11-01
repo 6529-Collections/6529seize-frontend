@@ -14,6 +14,27 @@ import type { ReactNode } from "react";
 const TOKEN =
   /\b(?:Raspberry )?Pi \d\b|\bEIP-\d+|(?:[$€]?\d[\d,.]*\d|[$€]?\d)(?:–(?:[$€]?\d[\d,.]*\d|[$€]?\d))?(?:[  ](?:W|GB|MB|TB|TiB|GiB|Mbps|Gbps|cores?|threads|vCPUs?|vCPU|vCores|minutes|seconds|hours|days|months|years|times|cents|kWh|bytes|UTC|h|min)\b)?/g;
 
+/**
+ * `nb`, with a config key or command between backticks set in the code
+ * face: "open the port you set in `[p2p] listen`". The backticks are not
+ * printed.
+ */
+export function nbCode(text: string): ReactNode {
+  if (!text.includes("`")) return nb(text);
+  return text.split("`").map((piece, index) =>
+    index % 2 === 1 ? (
+      <code
+        key={index}
+        className="tw-whitespace-nowrap tw-rounded-md tw-bg-iron-900 tw-px-1.5 tw-py-0.5 tw-font-mono tw-text-[0.875em] tw-text-iron-50"
+      >
+        {piece}
+      </code>
+    ) : (
+      <span key={index}>{nb(piece)}</span>
+    )
+  );
+}
+
 export function nb(text: string): ReactNode {
   const parts: ReactNode[] = [];
   let last = 0;

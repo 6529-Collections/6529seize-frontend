@@ -10,7 +10,7 @@ import { Disclosure, FactTable, READ } from "./parts";
  * marked as the card marks it, and a Good cell that repeats Acceptable's
  * says so; on a phone one block per tier, Good open, every cell in full.
  * Then the systems every tier runs, and the machines that fit with their
- * store prices behind a disclosure.
+ * store prices behind a disclosure, grouped by tier.
  */
 const TIERS: readonly TierId[] = ["acceptable", "good", "great"];
 
@@ -149,22 +149,18 @@ function Machines({ locale }: { readonly locale: SupportedLocale }) {
       <FactTable
         locale={locale}
         caption={hw(locale, "machines.caption")}
+        plainHead
         columns={[
           {
             key: "machine",
             label: hw(locale, "machines.col.machine"),
-            width: "tw-w-[46%]",
-          },
-          {
-            key: "tier",
-            label: hw(locale, "machines.col.tier"),
-            width: "tw-w-[12%]",
+            width: "tw-w-[52%]",
           },
           {
             key: "price",
             label: hw(locale, "machines.col.price"),
             numeric: true,
-            width: "tw-w-[14%]",
+            width: "tw-w-[16%]",
           },
           { key: "where", label: hw(locale, "machines.col.where") },
         ]}
@@ -172,9 +168,9 @@ function Machines({ locale }: { readonly locale: SupportedLocale }) {
           key: row.id,
           fact: `machine.${row.id}`,
           source: row.source,
+          group: tierName(row.tier),
           cells: {
             machine: nb(row.machine),
-            tier: tierName(row.tier),
             price: (
               <span className="tw-font-semibold tw-text-iron-50">
                 {nb(row.price)}

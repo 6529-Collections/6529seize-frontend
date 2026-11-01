@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { EX_FOCUS, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { nb, sourceTitle } from "./_lib/facts";
@@ -147,6 +147,23 @@ interface FactRow {
   readonly cells: Readonly<Record<string, ReactNode>>;
   /** Shown quieter: a type that cannot be ordered. */
   readonly muted?: boolean;
+  /**
+   * The group the row belongs to ("Good"). A table whose rows carry groups
+   * prints a header row where each group starts, instead of a column that
+   * repeats it.
+   */
+  readonly group?: string;
+}
+
+/** Where a row starts a new group, its header; otherwise nothing. */
+function groupStart(
+  rows: readonly FactRow[],
+  index: number
+): string | undefined {
+  const group = rows[index]?.group;
+  return group !== undefined && group !== rows[index - 1]?.group
+    ? group
+    : undefined;
 }
 
 const TH =
@@ -165,6 +182,7 @@ export function FactTable({
   caption,
   locale,
   stack = true,
+  plainHead = false,
 }: {
   readonly columns: readonly FactColumn[];
   readonly rows: readonly FactRow[];
@@ -172,6 +190,11 @@ export function FactTable({
   readonly caption: string;
   readonly locale: SupportedLocale;
   readonly stack?: boolean;
+  /**
+   * The first cell at reading weight, so another column (a price) carries
+   * the emphasis.
+   */
+  readonly plainHead?: boolean;
 }) {
   if (!stack) {
     return (
@@ -202,43 +225,58 @@ export function FactTable({
         </tr>
       </thead>
       <tbody className="tw-block lg:tw-table-row-group">
-        {rows.map((row) => (
-          <tr
-            key={row.key}
-            data-fact={`hw.${row.fact}`}
-            title={sourceTitle(row.source, locale)}
-            className={`tw-block tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 lg:tw-table-row lg:tw-py-0 ${row.muted ? "tw-opacity-60" : ""}`}
-          >
-            {columns.map((column, index) => {
-              const label =
-                column.short === undefined ? (
-                  <span className="tw-block tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.1em] tw-text-iron-400 lg:tw-hidden">
-                    {column.label}
-                  </span>
-                ) : (
-                  <span className="tw-font-semibold tw-text-iron-400 lg:tw-hidden">
-                    {column.short}:{" "}
-                  </span>
-                );
-              const cell = row.cells[column.key] ?? "–";
-              const base = `tw-block tw-border-0 tw-py-1 tw-align-top lg:tw-table-cell lg:tw-border-b lg:tw-border-solid lg:tw-border-iron-900 lg:tw-py-3.5 lg:tw-pr-4 lg:last:tw-pr-0 ${column.numeric ? "lg:tw-text-right" : ""}`;
-              return index === 0 ? (
-                <th
-                  key={column.key}
-                  scope="row"
-                  className={`${base} tw-text-left tw-font-semibold tw-text-iron-50`}
-                >
-                  {cell}
-                </th>
-              ) : (
-                <td key={column.key} className={`${base} tw-text-iron-300`}>
-                  {label}
-                  {cell}
-                </td>
-              );
-            })}
-          </tr>
-        ))}
+        {rows.map((row, rowIndex) => {
+          const group = groupStart(rows, rowIndex);
+          return (
+            <Fragment key={row.key}>
+              {group !== undefined && (
+                <tr className="tw-block lg:tw-table-row" data-group={group}>
+                  <th
+                    colSpan={columns.length}
+                    scope="colgroup"
+                    className={`tw-block tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-2 tw-text-left tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-primary-300 lg:tw-table-cell ${rowIndex === 0 ? "tw-pt-1 lg:tw-pt-3" : "tw-pt-6 lg:tw-pt-7"}`}
+                  >
+                    {group}
+                  </th>
+                </tr>
+              )}
+              <tr
+                data-fact={`hw.${row.fact}`}
+                title={sourceTitle(row.source, locale)}
+                className={`tw-block tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 lg:tw-table-row lg:tw-py-0 ${row.muted ? "tw-opacity-60" : ""}`}
+              >
+                {columns.map((column, index) => {
+                  const label =
+                    column.short === undefined ? (
+                      <span className="tw-block tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.1em] tw-text-iron-400 lg:tw-hidden">
+                        {column.label}
+                      </span>
+                    ) : (
+                      <span className="tw-font-semibold tw-text-iron-400 lg:tw-hidden">
+                        {column.short}:{" "}
+                      </span>
+                    );
+                  const cell = row.cells[column.key] ?? "–";
+                  const base = `tw-block tw-border-0 tw-py-1 tw-align-top lg:tw-table-cell lg:tw-border-b lg:tw-border-solid lg:tw-border-iron-900 lg:tw-py-3.5 lg:tw-pr-4 lg:last:tw-pr-0 ${column.numeric ? "lg:tw-text-right" : ""}`;
+                  return index === 0 ? (
+                    <th
+                      key={column.key}
+                      scope="row"
+                      className={`${base} tw-text-left ${plainHead ? "tw-font-normal tw-text-iron-50" : "tw-font-semibold tw-text-iron-50"}`}
+                    >
+                      {cell}
+                    </th>
+                  ) : (
+                    <td key={column.key} className={`${base} tw-text-iron-300`}>
+                      {label}
+                      {cell}
+                    </td>
+                  );
+                })}
+              </tr>
+            </Fragment>
+          );
+        })}
       </tbody>
     </table>
   );

@@ -178,7 +178,7 @@ function Total({
 }) {
   return (
     <>
-      <span className="tw-block tw-whitespace-nowrap tw-text-[17px] tw-font-semibold tw-leading-6 tw-text-iron-50">
+      <span className="tw-block tw-whitespace-nowrap tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50">
         {row.total}
       </span>
       <TotalNotes row={row} copy={copy} showMachine={showMachine} />
@@ -289,7 +289,7 @@ export default function CloudTable({
 
       <div aria-live="polite">
         <table
-          className="tw-hidden tw-w-full tw-border-collapse tw-text-[15px] tw-leading-6 before:tw-content-none after:tw-content-none lg:tw-table [&_:is(thead,tbody,tr)]:before:tw-content-none [&_:is(thead,tbody,tr)]:after:tw-content-none"
+          className="tw-hidden tw-w-full tw-border-collapse tw-text-sm tw-leading-[22px] before:tw-content-none after:tw-content-none lg:tw-table [&_:is(thead,tbody,tr)]:before:tw-content-none [&_:is(thead,tbody,tr)]:after:tw-content-none"
           aria-label={copy.caption}
         >
           <thead>

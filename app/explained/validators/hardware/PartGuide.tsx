@@ -1,4 +1,4 @@
-import { EX_FOCUS, EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
+import { EX_FOCUS, EX_LAYOUT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { CARD } from "./_lib/card";
 import { hw, hwRich } from "./_lib/copy";
@@ -208,6 +208,7 @@ function Idle({ locale }: { readonly locale: SupportedLocale }) {
           <p className="tw-m-0 tw-mt-2.5 tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-400">
             {hwRich(locale, "parts.idle.basis", {
               kwh: <Hw id="power.kwh" locale={locale} />,
+              month: <Hw id="power.month" locale={locale} />,
             })}
           </p>
         </div>
@@ -238,9 +239,43 @@ function Idle({ locale }: { readonly locale: SupportedLocale }) {
                 />
               ))}
               {row.note !== undefined && (
-                <span className="tw-mt-1.5 tw-block tw-text-iron-400">
-                  {row.note}
+                <span className="tw-mt-1.5 tw-block tw-text-iron-300">
+                  {row.note.split("**").map((piece, index) =>
+                    index % 2 === 1 ? (
+                      <b
+                        key={piece}
+                        className="tw-font-semibold tw-text-iron-50"
+                      >
+                        {piece}
+                      </b>
+                    ) : (
+                      piece
+                    )
+                  )}
                 </span>
+              )}
+              {row.paths !== undefined && (
+                <ul className="tw-m-0 tw-mt-1.5 tw-flex tw-list-none tw-flex-col tw-gap-1.5 tw-p-0">
+                  {row.paths.map((entry) => (
+                    <li key={entry.where} className="tw-text-iron-400">
+                      {entry.where}:{" "}
+                      {entry.path.map((name, index) => (
+                        <span key={name}>
+                          {index > 0 && (
+                            <>
+                              {" "}
+                              <span aria-hidden="true">›</span>
+                              <span className="tw-sr-only">,</span>{" "}
+                            </>
+                          )}
+                          <b className="tw-whitespace-nowrap tw-font-semibold tw-text-iron-50">
+                            {name}
+                          </b>
+                        </span>
+                      ))}
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
           ))}
@@ -267,7 +302,7 @@ function PartRow({
       <summary
         className={`tw-grid tw-cursor-pointer tw-list-none tw-grid-cols-[minmax(0,1fr)_28px] tw-gap-x-4 tw-gap-y-1.5 tw-px-5 tw-py-4 md:tw-px-6 lg:tw-grid-cols-[208px_minmax(0,1fr)_28px] lg:tw-gap-x-8 lg:tw-py-5 [&::-webkit-details-marker]:tw-hidden ${EX_FOCUS}`}
       >
-        <span className="tw-col-start-1 tw-row-start-1 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.12em] tw-text-iron-400 lg:tw-pt-0.5 lg:tw-text-[15px] lg:tw-normal-case lg:tw-leading-6 lg:tw-tracking-normal lg:tw-text-iron-300">
+        <span className="tw-col-start-1 tw-row-start-1 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.12em] tw-text-iron-400 lg:tw-pt-0.5 lg:tw-text-base lg:tw-normal-case lg:tw-leading-6 lg:tw-tracking-normal lg:tw-text-iron-300">
           {hw(locale, `parts.name.${part.id}`)}
         </span>
         <span className="tw-col-start-1 tw-row-start-2 lg:tw-col-start-2 lg:tw-row-start-1">
@@ -275,7 +310,7 @@ function PartRow({
             id={`${base}.answer`}
             said={part.answer}
             locale={locale}
-            className="tw-block tw-text-[17px] tw-font-semibold tw-leading-6 tw-tracking-[-0.01em] tw-text-iron-50 md:tw-text-lg md:tw-leading-7"
+            className="tw-block tw-text-lg tw-font-semibold tw-leading-6 tw-tracking-[-0.01em] tw-text-iron-50 md:tw-leading-7"
           />
           <Line
             id={`${base}.why`}
@@ -334,7 +369,7 @@ function PartRow({
 function Spend({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <div className="tw-mt-6 tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5 md:tw-p-6">
-      <h3 className={`${EX_TEXT.h4} tw-m-0`}>
+      <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-50">
         {hw(locale, "parts.spend.title")}
       </h3>
       <ol className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-grid-cols-1 tw-gap-3 tw-p-0 sm:tw-grid-cols-2 lg:tw-grid-cols-5 lg:tw-gap-4">

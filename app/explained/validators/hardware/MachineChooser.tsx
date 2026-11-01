@@ -40,6 +40,8 @@ interface ChooserCopy {
   /** Above the questions once the reader has changed one. */
   readonly yours: string;
   readonly where: string;
+  /** How much "a few hours" is, with its facts. */
+  readonly whereHint: ReactNode;
   readonly node: string;
   readonly nodeHint: string;
   readonly spare: string;
@@ -59,7 +61,7 @@ function Question({
 }: {
   readonly id: keyof Answers;
   readonly text: string;
-  readonly hint?: string;
+  readonly hint?: ReactNode;
   readonly value: Answer;
   readonly onChange: (value: Answer) => void;
   readonly copy: ChooserCopy;
@@ -70,7 +72,7 @@ function Question({
       data-q={id}
     >
       <div className="tw-min-w-0">
-        <p className="tw-m-0 tw-text-[15px] tw-font-semibold tw-leading-[22px] tw-text-iron-50">
+        <p className="tw-m-0 tw-text-[15px] tw-font-semibold tw-leading-[22px] tw-text-iron-50 md:tw-text-base md:tw-leading-6">
           {text}
         </p>
         {hint !== undefined && (
@@ -119,7 +121,7 @@ export default function MachineChooser({
     >
       <h2
         id="chooser-title"
-        className="tw-m-0 tw-text-[21px] tw-font-semibold tw-leading-7 tw-tracking-[-0.012em] tw-text-iron-50 md:tw-text-[23px] md:tw-leading-[30px]"
+        className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-[30px] tw-tracking-[-0.012em] tw-text-iron-50"
       >
         {copy.title}
       </h2>
@@ -136,6 +138,7 @@ export default function MachineChooser({
         <Question
           id="where"
           text={copy.where}
+          hint={copy.whereHint}
           value={answers.where}
           onChange={set("where")}
           copy={copy}
@@ -178,14 +181,14 @@ export default function MachineChooser({
                   </span>
                 )}
               </p>
-              <p className="tw-m-0 tw-mt-2.5 tw-text-lg tw-font-semibold tw-leading-6 tw-tracking-[-0.01em] tw-text-iron-50 md:tw-text-xl md:tw-leading-7">
+              <p className="tw-m-0 tw-mt-2.5 tw-text-lg tw-font-semibold tw-leading-6 tw-tracking-[-0.01em] tw-text-iron-50">
                 {result.title}
               </p>
               <p className="tw-m-0 tw-mt-1.5 tw-text-[15px] tw-leading-6 tw-text-iron-300 md:tw-text-base md:tw-leading-[26px]">
                 {result.body}
               </p>
               <div className="tw-mt-3.5 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2">
-                <span className="tw-text-[15px] tw-leading-6 tw-text-iron-300">
+                <span className="tw-text-[15px] tw-leading-6 tw-text-iron-300 md:tw-text-base">
                   {result.cost}
                 </span>
                 <a href={SUGGESTION_ANCHOR[key]} className={EX_BUTTON.link}>

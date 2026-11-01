@@ -18,6 +18,8 @@ import {
 import {
   FACTS,
   MACHINES,
+  MODE_ROWS,
+  NODE_COST_BARS,
   SPEC_ROWS,
   USE_ROWS,
 } from "@/app/explained/validators/hardware/_lib/data";
@@ -553,9 +555,7 @@ describe("round 2: numbers that agree with each other", () => {
     expect(disk?.acceptable).toMatch(
       /about 2 GB after six years, plus about 4 MB a year for each validator/
     );
-    expect(disk?.great).toMatch(
-      /about 2 GB after six years, plus about 4 MB a year for each validator/
-    );
+    expect(disk?.great).toMatch(/^Same as Acceptable, plus the node’s/);
   });
 
   it("prints each chooser price once, in the suggestion's footer", () => {
@@ -576,5 +576,104 @@ describe("round 2: numbers that agree with each other", () => {
     expect(Object.keys(messages).join(" ")).not.toMatch(/faq\.shared/);
     expect(JSON.stringify(DRIVES)).not.toMatch(/in order/);
     expect(JSON.stringify(messages)).not.toMatch(/Reth documentation/);
+  });
+});
+
+describe("round 3: what each reader is told", () => {
+  it("prices only rented servers that hold a node, and the range says so", () => {
+    const rented = NODE_ROWS.filter((row) => row.kind === "rented");
+    // The ADVANCE-1 as configured mirrors to 1.92 TB for the node.
+    expect(rented.map((row) => row.id)).not.toContain("advance-1");
+    const tops = rented.map((row) =>
+      dollars(row.total.split(/[–\s]/)[0] ?? "")
+    );
+    expect(Math.max(...tops)).toBe(289);
+    expect(FACTS["node.rented"].text).toBe("$95–289");
+    const bar = NODE_COST_BARS.find((entry) => entry.id === "rented");
+    expect([bar?.low, bar?.high]).toEqual([95, 289]);
+    expect(JSON.stringify(NODE_NOTES)).not.toMatch(/ADVANCE/);
+  });
+
+  it("names the systems wherever it says any 64-bit computer works", () => {
+    const body =
+      messages["explained.validators.hardware.chooser.acceptable.body"] ?? "";
+    expect(body).toMatch(/Linux, macOS or Windows \(\{x64\} only\)/);
+    expect(messages["explained.validators.hardware.faq.os.a"]).toMatch(
+      /Windows on Arm is not supported/
+    );
+    expect(FACTS["os.windows"].text).toMatch(/on x64$/);
+    const cpu = PARTS.find((part) => part.id === "cpu");
+    expect(cpu?.answer.text).toBe("Any 64-bit x86 or Arm processor.");
+  });
+
+  it("asks for a few hours a day, not a machine that never sleeps", () => {
+    expect(messages["explained.validators.hardware.chooser.where"]).toMatch(
+      /a few hours a day/
+    );
+    expect(messages["explained.validators.hardware.chooser.whereHint"]).toBe(
+      "{hours}, between {open} and {close}, is enough."
+    );
+  });
+
+  it("never bills a Great validator for the public servers' data", () => {
+    const internet = SPEC_ROWS.find((row) => row.id === "internet");
+    expect(internet?.great).toMatch(/^Little for the validator/);
+    expect(internet?.great).not.toMatch(/15–20 GB/);
+    expect(messages["explained.validators.hardware.every.wire"]).toMatch(
+      /^When it reads from public servers/
+    );
+  });
+
+  it("ends every table cell that holds a sentence with a period", () => {
+    const cells = [
+      ...SPEC_ROWS.flatMap((row) => [row.acceptable, row.good, row.great]),
+      ...USE_ROWS.map((row) => row.value),
+      ...MODE_ROWS.flatMap((row) => [row.home, row.rack]),
+    ];
+    for (const cell of cells) {
+      // Two sentences or more: the last one ends with a period too.
+      if (/\. [A-Z]/.test(cell)) {
+        expect([cell, cell.endsWith(".")]).toEqual([cell, true]);
+      }
+    }
+  });
+
+  it("uses one word for each thing in the cloud tables", () => {
+    for (const provider of CLOUD) {
+      for (const row of provider.rows) {
+        expect([row.id, /\bbase$/.test(row.burst)]).toEqual([row.id, false]);
+        expect([row.id, /vCores/.test(row.size)]).toEqual([row.id, false]);
+        expect([row.id, /\(2027 range\)/.test(row.type)]).toEqual([
+          row.id,
+          false,
+        ]);
+      }
+    }
+  });
+
+  it("sets every apostrophe of the page’s copy as ’", () => {
+    const copy = JSON.stringify([
+      messages,
+      SOURCES,
+      FACTS,
+      CLOUD,
+      NODE_ROWS,
+      NODE_NOTES,
+      PARTS,
+      SPEC_ROWS,
+      USE_ROWS,
+      MODE_ROWS,
+      MACHINES,
+    ]);
+    expect(copy.match(/[A-Za-z]'[A-Za-z]/g) ?? []).toEqual([]);
+  });
+
+  it("dates the power price with its year", () => {
+    expect(FACTS["power.month"].text).toBe("August 2026");
+    for (const key of ["tier.basis", "parts.idle.basis"]) {
+      expect(messages[`explained.validators.hardware.${key}`]).toMatch(
+        /the US average for \{month\}\.$/
+      );
+    }
   });
 });
