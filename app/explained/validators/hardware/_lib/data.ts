@@ -54,10 +54,10 @@ export const FACTS = {
   "use.runStart": f("00:30 UTC", "docs"),
   "use.runLate": f("20 minutes", "docs"),
   "use.tdh": f("1.7–5.7 seconds", "docs"),
-  "use.memory": f("560 MB", "docs"),
+  "use.memory": f("1.5–2 GB", "bench"),
   "use.store": f("129 MB", "measured"),
   "use.storeSince": f("October 2021", "p53"),
-  "use.growth": f("2 MB", "measured"),
+  "use.growth": f("1–3 MB", "benchEstimate"),
   "use.windowOpen": f("00:15 UTC", "p53"),
   "use.windowClose": f("19:00 UTC", "p53"),
   "use.fullCheck": f("5 h 05 min", "measured"),
@@ -88,9 +88,9 @@ export const FACTS = {
   "home.months": f("48 months", "homePrices"),
 
   // Systems the validator is built for.
-  "os.pi": f("64-bit Raspberry Pi OS (Bookworm)", "docs"),
+  "os.pi": f("64-bit Raspberry Pi OS (Trixie or Bookworm)", "rpiOs"),
   "os.linux": f(
-    "64-bit Linux with glibc 2.35 or newer: Ubuntu 22.04, Debian 12, Raspberry Pi OS Bookworm (64-bit) or Fedora 36",
+    "64-bit Linux on x86 or Arm with glibc 2.35 or newer: Ubuntu 22.04, Debian 12, Fedora 36 or 64-bit Raspberry Pi OS (Trixie or Bookworm)",
     "docs"
   ),
   "os.mac": f("macOS 11 or newer, Apple silicon or Intel", "docs"),
@@ -122,18 +122,21 @@ interface SpecRow {
   readonly great: string;
 }
 
+const VALIDATOR_DISK =
+  "Under 1 GB in the first year and about 2 GB after six years: Ethereum history, the day's TDH weights and the network's votes";
+
 export const SPEC_ROWS: readonly SpecRow[] = [
   {
     id: "cpu",
     source: "card",
-    acceptable: "4 cores",
+    acceptable: "4 cores; 2 work. Any 64-bit processor, old ones included",
     good: "4–8 cores: an Intel N150 or a small Ryzen",
     great: "8 cores",
   },
   {
     id: "memory",
     source: "card",
-    acceptable: "8 GB. The validator uses at most 560 MB for a day's work",
+    acceptable: "8 GB. The validator peaks at about 2 GB, once a day",
     good: "16 GB",
     great: "32 GB, most of it for the Ethereum node",
   },
@@ -147,12 +150,11 @@ export const SPEC_ROWS: readonly SpecRow[] = [
   },
   {
     id: "disk",
-    source: "measured",
-    acceptable:
-      "129 MB of history since October 2021, growing about 2 MB a month",
-    good: "129 MB of history since October 2021, growing about 2 MB a month",
+    source: "benchEstimate",
+    acceptable: VALIDATOR_DISK,
+    good: VALIDATOR_DISK,
     great:
-      "The validator's 129 MB, plus the node: 1.6–1.7 TiB for a full node in September 2026, and growing",
+      "The validator's under 1 GB a year, plus the node: 1.6–1.7 TiB for a full node in September 2026, and growing",
   },
   {
     id: "internet",
@@ -173,7 +175,7 @@ export const SPEC_ROWS: readonly SpecRow[] = [
     id: "systems",
     source: "docs",
     acceptable:
-      "Linux, macOS or Windows. A Raspberry Pi needs the 64-bit Raspberry Pi OS (Bookworm)",
+      "Linux, macOS or Windows. A Raspberry Pi needs the 64-bit Raspberry Pi OS (Trixie or Bookworm)",
     good: "Linux, macOS or Windows",
     great:
       "Linux, macOS or Windows, beside an execution and a consensus client",
@@ -394,14 +396,15 @@ export const USE_ROWS: readonly UseRow[] = [
   },
   {
     id: "memory",
-    value: "At most 560 MB for a day's computation; Tor and peers add to it",
-    source: "docs",
+    value:
+      "About 47 MB at rest with Tor connected; 1.5–2 GB at the daily peak, while both TDH programs run",
+    source: "bench",
   },
   {
     id: "store",
     value:
-      "129 MB for all 417,060 counted logs since October 2021, growing about 2 MB a month",
-    source: "measured",
+      "About 0.5 GB after a year: 129 MB for all 417,060 counted logs since October 2021, growing 1–3 MB a month, plus the day's TDH weights. About 2 GB after six years, plus a few MB a year for each validator on the network",
+    source: "benchEstimate",
   },
   {
     id: "start",

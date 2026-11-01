@@ -27,17 +27,20 @@ import {
 } from "./CardSections";
 import Detail, { DETAIL_SECTIONS } from "./Detail";
 import Hero from "./Hero";
+import PartGuide from "./PartGuide";
 import Sources from "./Sources";
 
 /**
  * Validators · Hardware (`/explained/validators/hardware`): the first live
  * page of the Validators chapter, which is itself still coming. First the
  * owner's approved card, in its order and its words, with a chooser that
- * points each reader to one machine; home and office come first. Then the
- * numbers behind it: each tier in full, how each mode connects, instance
- * types and prices at nine cloud providers, your own Ethereum node, several
- * machines under one account, what one validator uses, and questions. Every
- * number prints with its source and the day it was read.
+ * points each reader to one machine; home and office come first. Then each
+ * part of the machine, from CPU and GPU to power, with what the validator
+ * uses and what to get at each tier. Then the numbers behind it: each tier
+ * in full, how each mode connects, instance types and prices at nine cloud
+ * providers, your own Ethereum node, several machines under one account,
+ * what one validator uses, and questions. Every number prints with its
+ * source and the day it was read.
  */
 export default async function ValidatorHardwarePage({
   searchParams,
@@ -67,6 +70,7 @@ export default async function ValidatorHardwarePage({
         <Datacenter locale={locale} />
         <LargeHolders locale={locale} />
         <EveryValidator locale={locale} />
+        <PartGuide locale={locale} />
 
         <section
           aria-labelledby="detail-title"

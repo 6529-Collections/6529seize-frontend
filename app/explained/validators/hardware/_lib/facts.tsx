@@ -12,6 +12,15 @@ import { CARD } from "./card";
 import { hw } from "./copy";
 import { CLOUD, NODE_ROWS } from "./cloud";
 import { FACTS, MACHINES, type HwFactId } from "./data";
+import {
+  DRIVES,
+  IDLE,
+  PART_TIERS,
+  PARTS,
+  SLEEP,
+  SPEND,
+  type Said,
+} from "./partGuide";
 import { SOURCES, type HwSource, type SourceId } from "./sources";
 
 /**
@@ -77,7 +86,7 @@ export function Hw({
  * Anything quoted from one source, numbers included: a row of a price
  * table, a sentence of the owner's card. The element carries the source.
  */
-function Sourced({
+export function Sourced({
   id,
   source,
   locale,
@@ -208,5 +217,61 @@ export function withPageFacts(
       locale
     );
   }
+  for (const [id, said] of partFacts()) {
+    facts[`${PREFIX}${id}`] = asKitFact(id, said.text, said.source, locale);
+  }
+  for (const row of DRIVES) {
+    const id = `drive.${row.id}`;
+    facts[`${PREFIX}${id}`] = asKitFact(
+      id,
+      { drive: row.drive, alone: row.alone, node: row.node },
+      row.source,
+      locale
+    );
+  }
+  for (const row of IDLE) {
+    const id = `idle.${row.id}`;
+    facts[`${PREFIX}${id}`] = asKitFact(
+      id,
+      { machine: row.machine, watts: row.watts, year: row.year },
+      "power",
+      locale
+    );
+  }
   return { asOf: snapshot.asOf, facts: { ...snapshot.facts, ...facts } };
+}
+
+/**
+ * Every line of the part-by-part guide with the id it prints under:
+ * "part.gpu.answer", "part.memory.tier.good", "part.cpu.uses.2", "spend.1".
+ * The drive and idle-power tables join under "drive.*" and "idle.*".
+ */
+export function partFacts(): [string, Said][] {
+  const out: [string, Said][] = [];
+  for (const part of PARTS) {
+    const base = `part.${part.id}`;
+    out.push([`${base}.answer`, part.answer], [`${base}.why`, part.why]);
+    part.uses.forEach((said, index) => {
+      out.push([`${base}.uses.${index + 1}`, said]);
+    });
+    if ("text" in part.tiers) {
+      out.push([`${base}.tier.all`, part.tiers]);
+    } else {
+      for (const tier of PART_TIERS) {
+        out.push([`${base}.tier.${tier}`, part.tiers[tier]]);
+      }
+    }
+    out.push([`${base}.avoid`, part.avoid]);
+  }
+  out.push([
+    "part.power.sleep",
+    {
+      text: SLEEP.map((row) => `${row.os}: ${row.cmd}`).join("; "),
+      source: "sleep",
+    },
+  ]);
+  SPEND.forEach((said, index) => {
+    out.push([`spend.${index + 1}`, said]);
+  });
+  return out;
 }

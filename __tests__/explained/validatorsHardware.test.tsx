@@ -17,9 +17,20 @@ import {
 import {
   FACTS,
   MACHINES,
+  SPEC_ROWS,
   USE_ROWS,
 } from "@/app/explained/validators/hardware/_lib/data";
-import { withPageFacts } from "@/app/explained/validators/hardware/_lib/facts";
+import {
+  partFacts,
+  withPageFacts,
+} from "@/app/explained/validators/hardware/_lib/facts";
+import {
+  DRIVES,
+  IDLE,
+  PARTS,
+  type PartId,
+  type PartTier,
+} from "@/app/explained/validators/hardware/_lib/partGuide";
 import { SOURCES } from "@/app/explained/validators/hardware/_lib/sources";
 import {
   Datacenter,
@@ -30,6 +41,7 @@ import {
 import { shownRows } from "@/app/explained/validators/hardware/CloudTable";
 import Detail from "@/app/explained/validators/hardware/Detail";
 import Hero from "@/app/explained/validators/hardware/Hero";
+import PartGuide from "@/app/explained/validators/hardware/PartGuide";
 
 /**
  * Validators · Hardware (`/explained/validators/hardware`): the owner's card
@@ -167,8 +179,11 @@ describe("sources", () => {
     for (const fact of Object.values(FACTS)) {
       expect(known.has(fact.source)).toBe(true);
     }
-    for (const row of [...MACHINES, ...NODE_ROWS, ...USE_ROWS]) {
+    for (const row of [...MACHINES, ...NODE_ROWS, ...USE_ROWS, ...DRIVES]) {
       expect(known.has(row.source)).toBe(true);
+    }
+    for (const [id, said] of partFacts()) {
+      expect([id, known.has(said.source)]).toEqual([id, true]);
     }
   });
 
@@ -184,6 +199,12 @@ describe("sources", () => {
         "hw.cloud.aws.t4g.large",
         "hw.machine.pi5",
         "hw.node.ax102",
+        "hw.part.gpu.answer",
+        "hw.part.memory.tier.good",
+        "hw.part.power.sleep",
+        "hw.drive.hdd",
+        "hw.idle.pi5",
+        "hw.spend.1",
       ])
     );
   });
@@ -265,11 +286,12 @@ describe("the page", () => {
       <>
         <HomeOffice locale="en-US" />
         <Datacenter locale="en-US" />
+        <PartGuide locale="en-US" />
         <Detail locale="en-US" />
       </>
     );
     const facts = [...container.querySelectorAll("[data-fact]")];
-    expect(facts.length).toBeGreaterThan(80);
+    expect(facts.length).toBeGreaterThan(150);
     for (const el of facts) {
       expect([el.getAttribute("data-fact"), el.getAttribute("title")]).toEqual([
         el.getAttribute("data-fact"),
@@ -278,18 +300,142 @@ describe("the page", () => {
     }
   });
 
-  it("shows the cloud table after the home tiers, never first", () => {
+  it("shows the parts after the card's tiers, and the cloud table after both", () => {
     const { container } = render(
       <>
         <Hero locale="en-US" version={null} />
         <HomeOffice locale="en-US" />
         <Datacenter locale="en-US" />
+        <EveryValidator locale="en-US" />
+        <PartGuide locale="en-US" />
         <Detail locale="en-US" />
       </>
     );
     const order = [
-      ...container.querySelectorAll("#home, #datacenter, [data-lens='cloud']"),
+      ...container.querySelectorAll(
+        "#home, #datacenter, #parts, [data-lens='cloud']"
+      ),
     ].map((el) => el.id || el.getAttribute("data-lens"));
-    expect(order).toEqual(["home", "datacenter", "cloud"]);
+    expect(order).toEqual(["home", "datacenter", "parts", "cloud"]);
+  });
+});
+
+describe("part by part", () => {
+  const partOf = (id: PartId) => {
+    const part = PARTS.find((entry) => entry.id === id);
+    if (!part) throw new Error(id);
+    return part;
+  };
+  const tierText = (id: PartId, tier: PartTier) => {
+    const tiers = partOf(id).tiers;
+    return "text" in tiers ? tiers.text : tiers[tier].text;
+  };
+  const usesOf = (id: PartId) =>
+    partOf(id)
+      .uses.map((said) => said.text)
+      .join(" ");
+
+  it("covers each part, the answer first and short", () => {
+    expect(PARTS.map((part) => part.id)).toEqual([
+      "cpu",
+      "gpu",
+      "memory",
+      "storage",
+      "network",
+      "power",
+      "system",
+    ]);
+    for (const part of PARTS) {
+      const words = part.answer.text.split(/\s+/).length;
+      expect([part.id, words <= 8]).toEqual([part.id, true]);
+      expect([part.id, part.uses.length > 0]).toEqual([part.id, true]);
+      expect([part.id, part.avoid.text.length > 0]).toEqual([part.id, true]);
+    }
+  });
+
+  it("says a GPU is not needed, and where 6529 uses GPUs", () => {
+    expect(partOf("gpu").answer.text).toBe("Not needed.");
+    expect(usesOf("gpu")).toMatch(
+      /zero-knowledge proofs[^.]*\(D119\)[^.]*\. Making proofs is not a validator’s job\./
+    );
+  });
+
+  it("agrees with the card's chips at every tier", () => {
+    const chipPart = (chip: string): [PartId, string] => {
+      if (/cores|vCPU/.test(chip)) return ["cpu", chip];
+      if (/ RAM$/.test(chip)) return ["memory", chip.replace(/ RAM$/, "")];
+      if (/ W$/.test(chip) || chip === "UPS") return ["power", chip];
+      return ["storage", chip.replace(/ with its own Ethereum node$/, "")];
+    };
+    const cards: [PartTier, readonly string[]][] = [
+      ["acceptable", CARD.tiers.acceptable.chips],
+      ["good", CARD.tiers.good.chips],
+      ["great", CARD.tiers.great.chips],
+      ["rack", CARD.dc.rack.chips],
+      ["cloud", CARD.dc.cloud.chips],
+    ];
+    for (const [tier, chips] of cards) {
+      for (const chip of chips) {
+        const [part, value] = chipPart(chip);
+        expect([tier, chip, tierText(part, tier).includes(value)]).toEqual([
+          tier,
+          chip,
+          true,
+        ]);
+      }
+    }
+  });
+
+  it("prints the fixed build's figures, never the old ones", () => {
+    const all = JSON.stringify([PARTS, FACTS, SPEC_ROWS, USE_ROWS]);
+    expect(all).not.toMatch(/560 MB|2\.6 GB|ADX|BMI2|OS \(Bookworm\)/);
+    expect(usesOf("memory")).toMatch(
+      /About 47 MB at rest[^]*1\.5–2 GB at the daily peak/
+    );
+    expect(usesOf("cpu")).toMatch(
+      /any 64-bit x86 processor, old ones included, and on 64-bit Arm/
+    );
+    expect(usesOf("system")).toMatch(
+      /Not supported: 32-bit systems, and Windows on Arm\./
+    );
+  });
+
+  it("writes its lines plainly", () => {
+    const lines: Record<string, string> = Object.fromEntries([
+      ...partFacts().map(([id, said]) => [id, said.text]),
+      ...DRIVES.map((row) => [row.id, `${row.alone} ${row.node}`]),
+      ...IDLE.map((row) => [row.id, row.machine]),
+    ]);
+    expect(lintVoice(lines)).toEqual([]);
+    const banned =
+      /\b(seamless|robust|leverage|unlock|empower|elevate|delve|cutting-edge|game-changer|effortless|journey|simply|blazing|rock-solid)\b/i;
+    for (const [id, text] of Object.entries(lines)) {
+      expect([
+        id,
+        banned.test(text),
+        text.includes("!"),
+        text.includes("—"),
+      ]).toEqual([id, false, false, false]);
+    }
+  });
+
+  it("shows each part's answer, and opens to the tiers with Good recommended", () => {
+    const { container } = render(<PartGuide locale="en-US" />);
+    const rows = [...container.querySelectorAll("[data-part]")];
+    expect(rows.map((row) => row.getAttribute("data-part"))).toEqual(
+      PARTS.map((part) => part.id)
+    );
+    const gpu = container.querySelector('[data-part="gpu"]') as HTMLElement;
+    expect(gpu.querySelector("summary")).toHaveTextContent(
+      "Graphics card (GPU)Not needed.Nothing in the validator uses a GPU."
+    );
+    const memory = container.querySelector(
+      '[data-part="memory"]'
+    ) as HTMLElement;
+    expect(memory.hasAttribute("open")).toBe(false);
+    expect(within(memory).getByText("Recommended")).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-fact="hw.part.memory.tier.good"]')
+    ).toHaveTextContent(/^16\sGB: room/);
   });
 });

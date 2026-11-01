@@ -204,6 +204,52 @@ export const SOURCES = {
     read,
     thirdParty: true,
   },
+
+  // The part-by-part guide.
+  bench: {
+    name: "measured on the validator 0.1.0: a test network of four validators replaying ten real days on one 48-thread server, and a home-mode validator with Tor",
+    read,
+  },
+  benchEstimate: {
+    name: "worked out from the validator 0.1.0's measured use and its code",
+    read,
+    estimate: true,
+  },
+  code: {
+    name: "the validator's code and release builds, 0.1.0: its package list, its build targets, and the release check on an emulated 2010 Intel processor",
+    read: "2026-11-01",
+  },
+  proofs: {
+    name: "6529chain decision D119, P53 section 8.6 and design/ethereum-input-pipeline.md",
+    read: "2026-11-01",
+  },
+  power: {
+    name: "published power measurements: Jeff Geerling (Raspberry Pi 5), ServeTheHome and number13.de (Intel N150 mini PCs), Apple (Mac mini M4), and older reviews of desktops and business mini PCs; priced at the EIA's US average",
+    url: "https://support.apple.com/en-us/103253",
+    read,
+    thirdParty: true,
+  },
+  sleep: {
+    name: "the validator's macOS guide, Microsoft's powercfg documentation and systemd's sleep targets",
+    url: "https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/powercfg-command-line-options",
+    read,
+  },
+  rpiOs: {
+    name: "Raspberry Pi's operating system page (Raspberry Pi OS of Oct 6, 2026, on Debian Trixie)",
+    url: "https://www.raspberrypi.com/software/operating-systems/",
+    read,
+  },
+  geth: {
+    name: "Geth's database documentation (edited Jan 12, 2024) and the validator's own crash-safe stores",
+    url: "https://geth.ethereum.org/docs/fundamentals/databases",
+    read,
+  },
+  ethdockerHw: {
+    name: "eth-docker's hardware page (2026)",
+    url: "https://ethdocker.com/Usage/Hardware",
+    read,
+    thirdParty: true,
+  },
 } as const satisfies Readonly<Record<string, HwSource>>;
 
 export type SourceId = keyof typeof SOURCES;

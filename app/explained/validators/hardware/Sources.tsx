@@ -32,6 +32,10 @@ export default function Sources({
           body: hw(locale, "hwk.holders.body"),
         },
         {
+          title: hw(locale, "hwk.parts.title"),
+          body: hwRich(locale, "hwk.parts.body", { date: day }),
+        },
+        {
           title: hw(locale, "hwk.use.title"),
           body: hwRich(locale, "hwk.use.body", {
             date: day,

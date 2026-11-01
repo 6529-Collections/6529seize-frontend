@@ -382,6 +382,16 @@
           "name": "cloud-arm",
           "clicks": ["[data-lens=\"cloud\"] [data-arch=\"arm\"]"],
           "el": "[data-lens=\"cloud\"]"
+        },
+        {
+          "name": "part-storage",
+          "clicks": ["[data-part=\"storage\"] summary"],
+          "el": "[data-part=\"storage\"]"
+        },
+        {
+          "name": "part-power",
+          "clicks": ["[data-part=\"power\"] summary"],
+          "el": "[data-part=\"power\"]"
         }
       ]
     },
