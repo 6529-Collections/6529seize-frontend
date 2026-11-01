@@ -25,7 +25,7 @@ const KNOW: readonly { kind: MarkKind; note?: HubKey }[] = [
   { kind: "tested", note: "guide.tested" },
   { kind: "shownFalse" },
   { kind: "notGuaranteed", note: "guide.notGuaranteed" },
-  { kind: "assumed", note: "guide.assumed" },
+  { kind: "assumed" },
   { kind: "notYet" },
 ];
 
