@@ -4,7 +4,7 @@
   "explained.tdh.sure.crumb": "How sure",
   "explained.tdh.sure.eyebrow": "Chapter {chapter} · {n} How sure",
   "explained.tdh.sure.title": "What is proved, what is tested, and what is not.",
-  "explained.tdh.sure.lede": "Lean, a proof assistant, checks every step of a proof. The proofs show that a Lean model of the rules, P26 rewritten as Lean definitions, has the properties it states; the vectors test that the model matches P26. The daily check tests, each day, that 6529.io equals two programs written from the rules; it proves nothing.",
+  "explained.tdh.sure.lede": "Lean, a proof assistant, checks every step: the proofs show that a Lean model of P26's rules has the properties it states, while the daily check tests each day and proves nothing.",
   "explained.tdh.sure.drift": "These proofs are about the rules under their old name, {oldName}, as the manifest written {written} records. D136 (four wallets) and D137 (the name TDH v1.4) came after it; the counts below are that manifest's.",
   "explained.tdh.sure.moved.label": "A newer model",
   "explained.tdh.sure.moved.body": "6529's design record has the Lean model at {leanCommit} ({leanDay}); this manifest was built from {commit}. The counts and statements here are the manifest's until the feed serves the new one.",

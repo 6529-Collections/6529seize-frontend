@@ -1,7 +1,7 @@
 import HowWeKnow from "@/components/explained/shell/HowWeKnow";
 import { EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
-import { fmt, type FactBook } from "@/lib/explained/facts";
+import type { FactBook } from "@/lib/explained/facts";
 import { mainStageDays } from "./schedule";
 import { Fact } from "../_lib/facts";
 import { hrich, ht } from "./copy";
@@ -27,7 +27,6 @@ export function HubOpener({
   readonly book: FactBook;
   readonly locale: SupportedLocale;
 }) {
-  const perWeek = book.maybe("site.mainStage.perWeek");
   return (
     <header className="tw-pt-[30px] md:tw-pt-[52px]">
       <span className={`${EX_TEXT.label} tw-mb-4 tw-block`}>
@@ -40,8 +39,10 @@ export function HubOpener({
           {ht(locale, "title")}
         </h1>
         <p className={HUB_LEDE} data-ex-lede="" data-ex-mission="">
-          {ht(locale, "mission", {
-            perWeek: perWeek === null ? "" : fmt(perWeek, locale),
+          {hrich(locale, "mission", {
+            perWeek: (
+              <Fact book={book} id="site.mainStage.perWeek" locale={locale} />
+            ),
           })}
         </p>
       </div>

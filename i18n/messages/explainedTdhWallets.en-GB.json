@@ -3,7 +3,7 @@
   "explained.tdh.wallets.meta.description": "Why your TDH changed, and how up to four wallets count as one collector.",
   "explained.tdh.wallets.eyebrow.chapter": "Chapter",
   "explained.tdh.wallets.title": "Up to four wallets count as one collector.",
-  "explained.tdh.wallets.lede": "Link your wallets both ways, and their copies, days and one boost count together. A fourth needs fresh links, made on or after {date}.",
+  "explained.tdh.wallets.lede": "Link your wallets both ways, and their copies, days and one boost count together; a fourth needs fresh links, made on or after {date}.",
   "explained.tdh.wallets.liveOn": "Live on 6529.io",
   "explained.tdh.wallets.since": "since {date}",
   "explained.tdh.wallets.setup": "Start guided setup",

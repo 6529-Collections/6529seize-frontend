@@ -41,7 +41,7 @@ describe("Your wallets", () => {
       })
     ).toBeInTheDocument();
     expect(document.querySelector("[data-ex-lede]")).toHaveTextContent(
-      "A fourth needs fresh links, made on or after October 15, 2026."
+      "a fourth needs fresh links, made on or after October 15, 2026."
     );
     // In the hero, and again where the page says how to add a wallet.
     const setups = screen.getAllByRole("link", { name: "Start guided setup" });

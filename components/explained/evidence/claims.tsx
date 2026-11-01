@@ -231,8 +231,10 @@ function scoreBorders(index: number, count: number): string {
   if (count % 2 !== 0) {
     return index > 0 ? `tw-border-t ${wide}` : "";
   }
-  const left = index % 2 === 1 ? "tw-border-l" : "";
-  const top = index >= 2 ? "tw-border-t" : "";
+  // Under 360 px the cells stack in one column, a rule above each.
+  const left = index % 2 === 1 ? "min-[360px]:tw-border-l" : "";
+  const top =
+    index >= 2 ? "tw-border-t" : index === 1 ? "max-[359px]:tw-border-t" : "";
   return `${left} ${top} ${wide}`.trim();
 }
 
@@ -247,7 +249,7 @@ export function Scoreboard({
 }) {
   return (
     <dl
-      className={`tw-m-0 tw-grid ${cells.length % 2 === 0 ? "tw-grid-cols-2" : "tw-grid-cols-1"} tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 lg:[grid-template-columns:repeat(var(--ex-score),minmax(0,1fr))]`}
+      className={`tw-m-0 tw-grid tw-grid-cols-1 ${cells.length % 2 === 0 ? "min-[360px]:tw-grid-cols-2" : ""} tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 lg:[grid-template-columns:repeat(var(--ex-score),minmax(0,1fr))]`}
       style={{ ["--ex-score" as string]: String(cells.length) }}
       aria-label={label}
       data-scoreboard=""

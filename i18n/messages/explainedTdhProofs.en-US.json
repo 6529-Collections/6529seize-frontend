@@ -3,7 +3,7 @@
   "explained.tdh.proofs.meta.description": "What a zero-knowledge proof of a TDH day shows, why two programs must prove it, what has been proved so far, and what has not.",
   "explained.tdh.proofs.eyebrow": "Chapter {chapter} · {n} {page}",
   "explained.tdh.proofs.h1": "What a proof of a day shows, what is proved so far, and what is not.",
-  "explained.tdh.proofs.lede": "Once both programs prove a day and a contract checks both proofs, anyone could confirm that the programs' TDH for that day follows from Ethereum's own blocks, without rerunning them. The proof files are not public yet.",
+  "explained.tdh.proofs.lede": "Once both programs prove a day and a contract checks both proofs, anyone could confirm that the programs' TDH for that day follows from Ethereum's own blocks; the proof files are not public yet.",
   "explained.tdh.proofs.verdict.headline": "Program A's run of {date}, under the retired {version} rules, is proved, and mainnet's SP1 verifier accepts the proof in a read-only call.",
   "explained.tdh.proofs.verdict.retired": "rules {version}, retired",
   "explained.tdh.proofs.verdict.body": "Program A is the validator's own code, with the Rust core of the daily check inside it, run in SP1, a zero-knowledge virtual machine. Its proof says its {words} words, values of {wordBytes} bytes each, follow from blocks that hash forward to anchor block {anchor}, and from the history before them. The cycle dated {date} covers the day that ended at its midnight. Checking the anchor against Ethereum is the contract's step, and the contract is not deployed. One GPU worked {hours} h {minutes} min to prove what the same code computes in {seconds} s without a proof.",

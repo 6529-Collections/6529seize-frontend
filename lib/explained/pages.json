@@ -1,5 +1,5 @@
 {
-  "note": "The 6529 Explained pages of release 1 and what the gates check on each (SCORECARD.md). Each page lane owns its row: its sources, the decisions it relies on (dependsOn) and the record head it was checked through. The drift check fails when a newer decision touches a dependsOn decision and the page's sources do not name it in a DriftNote. States are the Break-it and interaction captures (renders/states); their selectors are the kit's: Lens renders data-lens, BreakIt data-break. Round 2 (2026-11-01): the word budgets of the overview, How it works, a day's receipt, How sure and Zero-knowledge proofs are raised (to 1,050, 2,050, 500, 2,500 and 2,800 words; How it works to 180 words a screen) for the depth the owner asked of the chapter on 2026-10-31: the full calculation with a worked trace, how the Lean proof goes, and what the proofs still trust.",
+  "note": "The 6529 Explained pages of release 1 and what the gates check on each (SCORECARD.md). Each page lane owns its row: its sources, the decisions it relies on (dependsOn) and the record head it was checked through. The drift check fails when a newer decision touches a dependsOn decision and the page's sources do not name it in a DriftNote. States are the Break-it and interaction captures (renders/states); their selectors are the kit's: Lens renders data-lens, BreakIt data-break. Round 2 (2026-11-01): the word budgets of the overview, How it works, a day's receipt, How sure and Zero-knowledge proofs are raised (to 1,050, 2,050, 500, 2,500 and 2,800 words; How it works to 180 words a screen) for the depth the owner asked of the chapter on 2026-10-31: the full calculation with a worked trace, how the Lean proof goes, and what the proofs still trust. Round 3 (2026-11-01): the overview, How sure and Zero-knowledge proofs to 1,150, 2,750 and 3,100 words, for the corrections the fact-check and the judges asked for (xTDH defined, the model named as a model, the contract's immutability and verifier routes, the two random-input runs).",
   "pages": [
     {
       "id": "hub",
@@ -34,7 +34,7 @@
       "dependsOn": ["D112", "D119", "D125", "D128", "D136", "D137", "D142"],
       "checkedThrough": "D152",
       "budget": {
-        "words": 1050,
+        "words": 1150,
         "firstScreen": 120,
         "figuresPer1000": 6
       },
@@ -228,7 +228,7 @@
       "dependsOn": ["D96", "D112", "D128", "D131", "D136", "D137", "D148"],
       "checkedThrough": "D152",
       "budget": {
-        "words": 2500,
+        "words": 2750,
         "firstScreenMin": 150,
         "firstScreen": 285,
         "wordsPerScreen": 300
@@ -262,7 +262,7 @@
       "dependsOn": ["D119", "D123", "D128", "D136", "D137"],
       "checkedThrough": "D152",
       "budget": {
-        "words": 2800,
+        "words": 3100,
         "firstScreenMin": 150,
         "firstScreen": 285,
         "wordsPerScreen": 300

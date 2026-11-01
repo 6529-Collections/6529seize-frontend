@@ -59,7 +59,7 @@ function ProofSketch({ m }: { readonly m: SureContext["m"] }) {
         <h3 className="tw-m-0 tw-text-[19px] tw-font-semibold tw-leading-7 tw-text-iron-50">
           {m("explained.tdh.sure.sketch.summary")}
         </h3>
-        <p className="tw-m-0 tw-mt-2 tw-max-w-[600px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
+        <p className="tw-m-0 tw-mt-2 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
           {m("explained.tdh.sure.sketch.intro")}
         </p>
       </figcaption>
@@ -97,7 +97,7 @@ function ProofSketch({ m }: { readonly m: SureContext["m"] }) {
           </li>
         ))}
       </ol>
-      <p className="tw-m-0 tw-mt-4 tw-max-w-[600px] tw-text-[15px] tw-leading-6 tw-text-iron-400">
+      <p className="tw-m-0 tw-mt-4 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-400">
         {m("explained.tdh.sure.sketch.close")}
       </p>
     </figure>

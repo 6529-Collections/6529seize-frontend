@@ -182,9 +182,9 @@ export default function AreaTile({
               strokeDasharray="5 4"
             />
             <Label
-              x={PAD.left + Math.min(lostW, innerW) / 2}
+              x={PAD.left + 4}
               y={Math.max(18, baseY - tileH - bandH - 8)}
-              anchor="middle"
+              anchor="start"
               size={13}
               weight={600}
               tone="fails"

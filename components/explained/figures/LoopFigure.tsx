@@ -47,8 +47,8 @@ interface LoopProps {
  * the rest.
  */
 function MiniRing({ stations, focus }: Pick<LoopProps, "stations" | "focus">) {
-  // Wide enough for each station's name outside its circle, at 14 px, which
-  // stays at 12 px or more when a 320 px window scales the ring down.
+  // Wide enough for each station's name outside its circle, at 15 px, which
+  // stays legible (12 px on a phone, 9 at 400% zoom) when the ring scales.
   const size = 320;
   const c = size / 2;
   const r = 78;
@@ -155,7 +155,7 @@ function MiniLabel({
       x={x}
       y={y + dy}
       textAnchor={anchor}
-      fontSize={14}
+      fontSize={15}
       fontWeight={600}
       fill={on ? EX_HEX.youInk : EX_HEX.ink2}
     >

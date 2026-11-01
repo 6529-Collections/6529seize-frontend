@@ -138,7 +138,13 @@ export function renderChecks(vw) {
   }
   // Text that escapes its frame: the nearest box with a border or a
   // background around it (the TDH gate's check). A frame may opt out with
-  // data-ex-frame-ignore (a rule line whose label sits on it).
+  // data-ex-frame-ignore (a rule line whose label sits on it). A frame that
+  // itself scrolls sideways (a row of chips on a phone) holds text past its
+  // edge by design, as a scroller inside a frame does.
+  const scrolls = (el) => {
+    const o = getComputedStyle(el).overflowX;
+    return o === "auto" || o === "scroll";
+  };
   const escapes = [];
   const framed = (el) => {
     const cs = getComputedStyle(el);
@@ -158,6 +164,7 @@ export function renderChecks(vw) {
       !vis(frame) ||
       frame.closest("svg, [data-ex-frame-ignore]") ||
       inScroller(frame) ||
+      scrolls(frame) ||
       !framed(frame)
     )
       continue;

@@ -143,9 +143,11 @@ function Term({
       className={`tw-inline tw-rounded tw-bg-iron-900 tw-px-1.5 tw-text-iron-50 tw-no-underline [box-decoration-break:clone] hover:tw-bg-iron-800 md:tw-whitespace-nowrap ${EX_FOCUS}`}
     >
       {children}
-      <sup className="tw-ml-0.5 tw-text-xs tw-font-bold tw-not-italic tw-text-primary-300">
+      {/* The part's letter, on the line rather than raised, so it stays
+          inside the term's box. */}
+      <span className="tw-ml-1 tw-align-baseline tw-text-xs tw-font-bold tw-text-primary-300">
         {letter}
-      </sup>
+      </span>
     </a>
   );
 }
@@ -158,36 +160,41 @@ function Term({
  */
 export function HowFormula({ locale }: { readonly locale: SupportedLocale }) {
   return (
-    <p
-      className="tw-m-0 tw-mt-8 tw-text-[17px] tw-leading-[32px] tw-text-iron-300 md:tw-text-lg md:tw-leading-[34px]"
-      data-formula=""
+    <figure
+      className="tw-m-0 tw-mt-8 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-[18px] tw-py-4 md:tw-px-6 md:tw-py-5"
+      data-fig="formula"
     >
-      <span className="tw-mb-1 tw-block tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-400">
+      <figcaption className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-400">
         {ht(locale, "explained.tdh.how.formula.lead")}
-      </span>
-      <b className="tw-font-semibold tw-text-iron-50">TDH = Σ</b>{" "}
-      <span className="tw-text-iron-400">
-        {ht(locale, "explained.tdh.how.formula.over")}
-      </span>{" "}
-      <Term href="#part-d" letter="D">
-        {ht(locale, "explained.tdh.how.formula.cards")}
-      </Term>
-      {" : "}
-      <Term href="#part-a" letter="A">
-        {ht(locale, "explained.tdh.how.formula.days")}
-      </Term>
-      {" × "}
-      <Term href="#part-b" letter="B">
-        {ht(locale, "explained.tdh.how.formula.rate")}
-      </Term>
-      {" × "}
-      <Term href="#part-c" letter="C">
-        {ht(locale, "explained.tdh.how.formula.boost")}
-      </Term>
-      {", "}
-      <span className="tw-text-iron-400">
-        {ht(locale, "explained.tdh.how.formula.round")}
-      </span>
-    </p>
+      </figcaption>
+      <p
+        className="tw-m-0 tw-text-[17px] tw-leading-[32px] tw-text-iron-300 md:tw-text-lg md:tw-leading-[34px]"
+        data-formula=""
+      >
+        <b className="tw-font-semibold tw-text-iron-50">TDH = Σ</b>{" "}
+        <span className="tw-text-iron-400">
+          {ht(locale, "explained.tdh.how.formula.over")}
+        </span>{" "}
+        <Term href="#part-d" letter="D">
+          {ht(locale, "explained.tdh.how.formula.cards")}
+        </Term>
+        {" : "}
+        <Term href="#part-a" letter="A">
+          {ht(locale, "explained.tdh.how.formula.days")}
+        </Term>
+        {" × "}
+        <Term href="#part-b" letter="B">
+          {ht(locale, "explained.tdh.how.formula.rate")}
+        </Term>
+        {" × "}
+        <Term href="#part-c" letter="C">
+          {ht(locale, "explained.tdh.how.formula.boost")}
+        </Term>
+        {", "}
+        <span className="tw-text-iron-400">
+          {ht(locale, "explained.tdh.how.formula.round")}
+        </span>
+      </p>
+    </figure>
   );
 }
