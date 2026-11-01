@@ -30,14 +30,16 @@ can export them or move them into an encrypted chat.
 
 ## Availability
 
-- Staging only. The feature is behind the `NEXT_PUBLIC_E2EE_DM_ENABLED` build
-  flag, which the staging build turns on. Production builds leave it off: the
-  encrypted routes return 404 and none of the controls below appear.
+- On in production and staging, behind the `NEXT_PUBLIC_E2EE_DM_ENABLED`
+  build flag. A build with the flag off returns 404 on the encrypted routes
+  and shows none of the controls below.
 - A signed-in profile with a connected wallet is required.
 - Not available while acting as a proxy. Encrypted chats belong to your own
   profile; the pages explain this and show nothing else.
 - The browser needs WebAssembly, IndexedDB and Web Crypto. Browsers without
   them see "This browser can’t use encrypted messages".
+- 6529 Mobile and 6529 Desktop: see
+  [In 6529 Mobile and 6529 Desktop](#in-6529-mobile-and-6529-desktop).
 - Encrypted messages run in one tab at a time per profile. Other tabs show
   "Encrypted messages are open in another tab." with **Use here**, which moves
   them to that tab and pauses the first one. Closing the tab that has them
@@ -298,8 +300,35 @@ encrypted copy of your message history so you can restore it on a new device.
 - Phone push notifications say only "New encrypted message" (or that you were
   added to an encrypted chat). They carry no sender, chat or text, and open
   `/messages/encrypted`.
-- The desktop app does not show a local notification for encrypted messages
-  yet.
+- 6529 Desktop shows a local notification, "New encrypted message", when a
+  chat gets a message from someone else, unless the chat is muted or open in
+  the focused window. Like phone push it names no sender, chat or text.
+  Selecting it opens that chat. It is raised on the computer from the chats
+  the app already decrypted, so nothing about the chat leaves the device.
+  Chats that already had unread messages when the app started do not
+  notify.
+
+## In 6529 Mobile and 6529 Desktop
+
+- **Turning it on.** The apps sign in with their own session message, so the
+  website's combined sign-in grant does not apply. Where signed messages are
+  available in the app, **Turn on signed messages** asks for one app grant
+  signature that turns on both signed messages and encrypted messages (see
+  [Signed messages](waves/drop-actions/feature-signed-messages.md#in-6529-mobile-and-6529-desktop));
+  this device then finishes setting up encrypted messages in the background.
+  Otherwise the encrypted-messages card asks for its own signature as on the
+  website. The grant's origin is "6529 Desktop" in the desktop app and the
+  site host in the phone app.
+- **Phones.** 6529 Mobile needs iOS 16.4 or later (earlier iOS versions cannot
+  run the current site at all) or a current Android System WebView. Signed
+  messages additionally need iOS 17 or later. Keys and history live in the
+  app's own storage, which iOS and Android keep until the app is deleted;
+  unlike Safari, the app is not subject to the 7-day storage limit.
+- **Desktop.** 6529 Desktop keeps keys and history in the app's storage for
+  its local address; it reuses the same local port on every start, so the
+  device survives restarts.
+- **Wallets.** App wallets sign inside the app. WalletConnect wallets get a
+  typed-data (`eth_signTypedData_v4`) request in the wallet app.
 
 ## Reporting
 

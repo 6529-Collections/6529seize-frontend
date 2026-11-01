@@ -3522,7 +3522,9 @@
         "report encrypted message",
         "encrypted backup",
         "recovery code",
-        "restore encrypted messages"
+        "restore encrypted messages",
+        "encrypted messages in the app",
+        "desktop encrypted message notification"
       ],
       "keywords": [
         "encrypted",
@@ -3550,7 +3552,8 @@
         "Open a message's menu to mute the chat on this device, block its sender (they cannot start new chats with you or add you to encrypted chats), or choose who can message you in Preferences.",
         "Reporting is for illegal or severe harm only: child sexual abuse material, a credible threat of violence, intimate images shared without consent, or doxxing. Only the selected message is shared, with proof its sender sent it, and it goes to 6529's moderators, who review it in WatchTower's Encrypted reports tab, not to wave moderators. The dialog shows the text and attachment names that will be sent. An edited message is reported as the edited version you see; the original is sent too only if you tick Also send the original message. Nothing else in the conversation is revealed.",
         "Encrypted messages run in one browser tab at a time per profile. Other tabs show Encrypted messages are open in another tab. with Use here, which moves them to that tab and pauses the first one.",
-        "When this browser holds encrypted messages, Sign out and Sign Out All Profiles offer Remove encrypted messages from this browser (on by default for Sign Out All Profiles). It deletes the chats, attachment keys, unsent messages and encryption keys saved in this browser; without encrypted backup that history cannot be recovered."
+        "When this browser holds encrypted messages, Sign out and Sign Out All Profiles offer Remove encrypted messages from this browser (on by default for Sign Out All Profiles). It deletes the chats, attachment keys, unsent messages and encryption keys saved in this browser; without encrypted backup that history cannot be recovered.",
+        "In 6529 Mobile and 6529 Desktop, one app grant signature from Turn on signed messages can turn on signed and encrypted messages together; otherwise the encrypted-messages card asks for its own signature. 6529 Mobile needs iOS 16.4 or later for encrypted messages. 6529 Desktop shows a local New encrypted message notification with no sender, chat or text, unless the chat is muted or open in the focused window, and selecting it opens that chat. Phone push says only New encrypted message and opens /messages/encrypted."
       ],
       "canonical_path": "/messages/encrypted",
       "related_paths": [
@@ -11000,7 +11003,9 @@
         "couldn't sign this post",
         "send unsigned",
         "posts signed by their author",
-        "signatures in this group"
+        "signatures in this group",
+        "signed messages in the app",
+        "app device grant"
       ],
       "keywords": [
         "waves",
@@ -11013,15 +11018,15 @@
         "preferences"
       ],
       "facts": [
-        "Signed messages are on for the 6529.io website. A web browser holds a non-extractable Ed25519 key per wallet; one wallet signature grants it the right to sign your posts, edits, deletes and reactions for 180 days. There is no wallet prompt per message and chat behaves as before.",
+        "Signed messages are on for the 6529.io website (and, in staging, for 6529 Mobile and 6529 Desktop). A web browser holds a non-extractable Ed25519 key per wallet; one wallet signature grants it the right to sign your posts, edits, deletes and reactions for 180 days. There is no wallet prompt per message and chat behaves as before.",
         "The grant rides on the ordinary web sign-in; if the wallet declines or cannot sign that message, the next sign-in on the page uses the ordinary message. A logged-in user without a grant in this browser sees Turn on signed messages (one signature) above the empty wave composer; Turn on asks for one signature and the notice can be dismissed for 30 days. In a grant's last 14 days the notice offers Renew; after expiry writes go unsigned until renewed.",
         "With a grant in this browser, a write is never sent unsigned without your choice. The key is loaded ahead of time so signing is normally instant; a write waits up to 10 seconds while its pending drop stays visible. If signing fails or times out, or 6529.io rejects the signature, the write stays pending and Couldn't sign this post (or edit, reaction, deletion) offers Try again or Send unsigned (Save unsigned for edits, Do it unsigned plus Cancel for reactions and deletes). If the grant was revoked or expired, the prompt offers Turn on signed messages (one signature) or Send unsigned. A backend that does not accept device signatures gets the same prompt, never an automatic unsigned resend. Without a grant, writes are sent unsigned as before.",
         "Preferences > Devices at /preferences?tab=devices lists the browsers that can post as you, newest first (at most the 100 newest grants, including expired and revoked ones), each with its label, This device marker, scopes, wallet, added, expiry and last-used dates and status (Active, Expired, Revoked). Revoke asks for confirmation; earlier signatures stay verifiable. Proxies cannot manage devices.",
         "When a new browser gains a grant for your profile, other browsers show {label} can now post as you. Not you? with Revoke above the composer. The check runs when a wave opens and at most every 10 minutes while the tab is visible. The first grant list a browser loads is its baseline, so a grant that already exists then raises no alert; check Preferences > Devices for existing grants.",
-        "The Signature item in a drop's More menu (or touch menu) verifies the drop in your browser and reports Signed by its author, Not signed by its author, or The signature could not be verified, with wallet, device key fingerprint, grant expiry and whether the current content is the signed version. A contract wallet counts only when it has contract code on Ethereum and its EIP-1271 check accepts the sign-in signature (Contract wallet: verified on Ethereum in your browser); when that Ethereum check cannot run it shows Couldn't verify this signature right now, never signed. Grants signed anywhere but 6529.io or staging.6529.io read The signature could not be verified. If the signed events cannot be loaded right now it shows Couldn't check the signature right now. with Try again, never an invalid verdict. Drops hidden by moderation and anonymous competition entries read Not signed by its author.",
+        "The Signature item in a drop's More menu (or touch menu) verifies the drop in your browser and reports Signed by its author, Not signed by its author, or The signature could not be verified, with wallet, device key fingerprint, grant expiry and whether the current content is the signed version. A contract wallet counts only when it has contract code on Ethereum and its EIP-1271 check accepts the sign-in signature (Contract wallet: verified on Ethereum in your browser); when that Ethereum check cannot run it shows Couldn't verify this signature right now, never signed. Sign-in grants signed anywhere but 6529.io or staging.6529.io read The signature could not be verified; app grants from 6529 Mobile and 6529 Desktop are verified from their typed-data signature. If the signed events cannot be loaded right now it shows Couldn't check the signature right now. with Try again, never an invalid verdict. Drops hidden by moderation and anonymous competition entries read Not signed by its author.",
         "A drop whose current content is the version its author signed shows a small shield-check seal named Signed by its author right after its timestamp, in chat rows, feed cards, participation drops, the single-drop view, link previews of 6529 drop links, quoted drops, and leaderboard, winner, Memes and quick-vote cards. Clicking it or pressing Enter opens the same Signature dialog without opening the linked drop. Search results and competition entry cards show a static seal. Unsigned drops show nothing, so posts from the apps, older posts and drops edited without a signature look as before. An unsigned edit or a delete removes the seal, and it is hidden for moderated content and anonymous authors.",
         "When consecutive chat posts by the same author share one header, its seal covers the group: a full seal named for example All 3 posts signed by their author, an outlined seal for 2 of 3 posts signed by their author, and none when no post is signed. It opens Signatures in this group, which lists each post's time, first line and status and checks a post's signature when its row is opened. Each grouped row keeps a static seal beside its hover or swipe timestamp, and the count updates when posts join or are edited.",
-        "Signed messages are web only: the mobile and desktop apps, proxy sessions and browsers without Ed25519 support sign in and post exactly as before. Votes and ratings are not signed yet."
+        "In 6529 Mobile and 6529 Desktop, signing in does not turn signed messages on. Turn on signed messages (the composer notice, Renew, Preferences > Devices or the Couldn't sign prompt) asks the wallet for one app grant, an EIP-712 typed-data signature whose statement starts Turn on signed messages on this device until; for a wallet with a profile the same signature also turns on encrypted messages. App wallets sign in the app; WalletConnect wallets get an eth_signTypedData_v4 request. App grants are on in staging while their wording awaits approval. Proxy sessions and browsers without Ed25519 support (including 6529 Mobile on iOS before 17) post exactly as before. Votes and ratings are not signed yet."
       ],
       "canonical_path": "/preferences?tab=devices",
       "link_label": "Devices",

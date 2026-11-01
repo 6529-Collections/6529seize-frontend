@@ -15,7 +15,7 @@ interface DesktopNotificationTarget {
 }
 
 /** The native notification bridge 6529 Desktop's preload exposes. */
-export interface DesktopNotificationsBridge {
+interface DesktopNotificationsBridge {
   showNotification(
     id: number,
     pfp: string,
@@ -46,7 +46,7 @@ export function getDesktopNotificationsBridge(): DesktopNotificationsBridge | nu
 /** The newest countable message per chat that was already notified or seen. */
 export type E2eeNoticeMarks = ReadonlyMap<string, number>;
 
-export interface E2eeDesktopNotice {
+interface E2eeDesktopNotice {
   readonly g: string;
   readonly seq: number;
 }
@@ -103,5 +103,5 @@ export function e2eeNoticeId(notice: E2eeDesktopNotice): number {
     hash ^= char.codePointAt(0) ?? 0;
     hash = Math.imul(hash, 0x01000193);
   }
-  return (hash >>> 1) || 1;
+  return hash >>> 1 || 1;
 }

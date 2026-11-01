@@ -23,7 +23,11 @@ const GRANT = {
 };
 let mockPreparedGrant: typeof GRANT | null = GRANT;
 let mockIsGrantChallenge = true;
+let mockIsAppPlatform = false;
+let mockAppGrantPossible = true;
 jest.mock("@/lib/device-signing/login-grant", () => ({
+  isAppGrantPlatform: () => mockIsAppPlatform,
+  isAppDeviceGrantPossible: () => mockAppGrantPossible,
   carriesDeviceGrant: () => false,
   isDeviceGrantChallenge: () => mockIsGrantChallenge,
   isDeviceGrantPossible: () => true,
@@ -47,6 +51,11 @@ jest.mock("@/lib/device-signing/login-e2ee", () => ({
 const mockAdopt = jest.fn(async (_params: unknown) => true);
 jest.mock("@/components/auth/authLoginE2eeDevice", () => ({
   adoptLoginE2eeDevice: (params: unknown) => mockAdopt(params),
+}));
+const mockRequestAppGrant = jest.fn();
+jest.mock("@/components/auth/authAppSignedMessagesGrant", () => ({
+  requestAppSignedMessagesGrant: (...args: unknown[]) =>
+    mockRequestAppGrant(...args),
 }));
 
 const nonce = (): ApiSessionNonceResponse =>
@@ -85,6 +94,8 @@ const createSubject = ({
   );
   const deps = {
     address: ADDRESS,
+    ownProfileId: "profile-1",
+    signAppGrant: jest.fn(),
     canAuthenticate: true,
     canSignActiveWallet: true,
     createSigningAuthRequestGuard: jest.fn(() => guard),
@@ -109,6 +120,9 @@ describe("turn on signed messages", () => {
   beforeEach(() => {
     mockPreparedGrant = GRANT;
     mockIsGrantChallenge = true;
+    mockIsAppPlatform = false;
+    mockAppGrantPossible = true;
+    mockRequestAppGrant.mockReset();
     mockLoginWithSessionV2.mockReset().mockResolvedValue({
       client_type: "web",
       role: null,
@@ -376,6 +390,59 @@ describe("turn on signed messages", () => {
       await expect(request({ silent: true })).resolves.toEqual({
         success: true,
       });
+
+  describe("in 6529 Mobile and Desktop", () => {
+    beforeEach(() => {
+      mockIsAppPlatform = true;
+    });
+
+    it("asks for one app grant signature instead of a web sign-in", async () => {
+      mockRequestAppGrant.mockResolvedValue({ success: true });
+      const onSignatureRequested = jest.fn();
+      const { deps, getSignature, request } = createSubject();
+
+      await expect(request({ onSignatureRequested })).resolves.toEqual({
+        success: true,
+      });
+      expect(mockRequestAppGrant).toHaveBeenCalledWith({
+        address: ADDRESS,
+        ownProfileId: "profile-1",
+        signAppGrant: deps.signAppGrant,
+        onSignatureRequested,
+      });
+      expect(deps.getNonce).not.toHaveBeenCalled();
+      expect(getSignature).not.toHaveBeenCalled();
+      expect(deps.setAuthLoadingState).toHaveBeenLastCalledWith("idle");
+    });
+
+    it("is unavailable while app grants are off", async () => {
+      mockAppGrantPossible = false;
+      const { request } = createSubject();
+      await expect(request({ silent: true })).resolves.toEqual({
+        success: false,
+        reason: "unavailable",
+      });
+      expect(mockRequestAppGrant).not.toHaveBeenCalled();
+    });
+
+    it("explains a failure unless the user declined or the caller reports it", async () => {
+      mockRequestAppGrant.mockResolvedValue({
+        success: false,
+        reason: "sign-in-failed",
+      });
+      const loud = createSubject();
+      await loud.request();
+      expect(loud.deps.setToast).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "error" })
+      );
+
+      mockRequestAppGrant.mockResolvedValue({
+        success: false,
+        reason: "rejected",
+      });
+      const declined = createSubject();
+      await declined.request();
+      expect(declined.deps.setToast).not.toHaveBeenCalled();
     });
   });
 });

@@ -2,9 +2,7 @@ import {
   getAddress,
   hashTypedData,
   isAddress,
-  keccak256,
   recoverTypedDataAddress,
-  toBytes,
   zeroHash,
   type Hex,
 } from "viem";
@@ -28,12 +26,13 @@ import {
 export const APP_GRANT_DOMAIN = {
   name: "6529 Device Grant",
   version: "1",
-  salt: keccak256(toBytes("6529 Network pre-genesis interim 1")),
+  /** keccak256("6529 Network pre-genesis interim 1"), shared with E2EE grants. */
+  salt: "0x4887f15a22b96f574a9f835b87e01e293dc7587acbfc13b5f224b89cd2d8c8aa",
 } as const;
 
-export const APP_GRANT_PRIMARY_TYPE = "DeviceGrant";
+const APP_GRANT_PRIMARY_TYPE = "DeviceGrant";
 
-export const APP_GRANT_TYPES = {
+const APP_GRANT_TYPES = {
   DeviceGrant: [
     { name: "statement", type: "string" },
     { name: "wallet", type: "address" },
@@ -73,7 +72,7 @@ export interface AppGrantFields {
   readonly origin: string;
 }
 
-export interface AppGrantTypedMessage {
+interface AppGrantTypedMessage {
   readonly statement: string;
   readonly wallet: Hex;
   readonly deviceKey: Hex;
@@ -123,7 +122,7 @@ const APP_GRANT_STATEMENTS: readonly StatementRenderer[] = [
   renderAppGrantStatementDraft1,
 ];
 
-export const renderAppGrantStatement = (fields: AppGrantFields): string =>
+const renderAppGrantStatement = (fields: AppGrantFields): string =>
   renderAppGrantStatementDraft1(fields);
 
 /** Unix seconds, and the minute-aligned expiry 180 days later. */
@@ -158,7 +157,7 @@ const toTypedMessage = (
 export const buildAppGrantTypedData = (fields: AppGrantFields) => ({
   domain: APP_GRANT_DOMAIN,
   types: APP_GRANT_TYPES,
-  primaryType: APP_GRANT_PRIMARY_TYPE,
+  primaryType: APP_GRANT_PRIMARY_TYPE as typeof APP_GRANT_PRIMARY_TYPE,
   message: toTypedMessage(fields, renderAppGrantStatement(fields)),
 });
 

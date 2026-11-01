@@ -35,7 +35,7 @@ export type AppGrantFailure =
   /** The wallet signed but the server did not store the grant. */
   | "register-failed";
 
-export type AppGrantResult =
+type AppGrantResult =
   | {
       readonly success: true;
       readonly grant: ApiDeviceGrant;

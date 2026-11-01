@@ -1,4 +1,7 @@
-import { detectE2eePlatform, getE2eeGrantOrigin } from "@/components/e2ee/e2eePlatform";
+import {
+  detectE2eePlatform,
+  getE2eeGrantOrigin,
+} from "@/components/e2ee/e2eePlatform";
 import { getE2eeDeviceLabel } from "@/components/e2ee/e2eeDeviceLabel";
 import { setE2eeEnrollmentMarker } from "@/components/e2ee/e2eeLocalState";
 import { isWalletConnectSessionError } from "@/helpers/wallet-error.helpers";
