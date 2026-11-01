@@ -8,7 +8,11 @@ import {
   splitWalletView,
 } from "@/lib/stream/mock/accounts";
 import { later, type MockStreamEngine } from "@/lib/stream/mock/engine";
-import { federatedDirectory, federatedView } from "@/lib/stream/mock/federated";
+import {
+  federatedDirectory,
+  federatedView,
+  federationFactoryInfo,
+} from "@/lib/stream/mock/federated";
 import {
   auctionPhase,
   auctionPrices,
@@ -16,6 +20,7 @@ import {
   candidatesView,
   editionAuctionView,
   quoteBid,
+  quoteRaise,
   stepTotalsView,
 } from "@/lib/stream/mock/sales/editionAuction";
 import { acceptsBids } from "@/lib/stream/editionTiming";
@@ -23,6 +28,10 @@ import {
   englishState,
   englishView,
 } from "@/lib/stream/mock/sales/englishAuction";
+import {
+  settlementOrderFor,
+  sweepOf,
+} from "@/lib/stream/mock/sales/editionSettlement";
 import { readSale } from "@/lib/stream/mock/sales/registry";
 import { summaryOf, workView } from "@/lib/stream/mock/works";
 import type {
@@ -200,6 +209,12 @@ export class MockStreamDataSource implements StreamDataSource {
     });
   }
 
+  claimableCredits(account: Address) {
+    return later(() => {
+      return this.engine.state.credits.get(account) ?? 0n;
+    });
+  }
+
   listEditionAuctions() {
     return later(() => {
       return [...this.engine.state.editionAuctions.values()]
@@ -248,7 +263,7 @@ export class MockStreamDataSource implements StreamDataSource {
       const auction = this.engine.state.editionAuctions.get(edition);
       const valid =
         Number.isInteger(step) && step >= 0 && Number.isInteger(qty) && qty > 0;
-      return auction && valid && step < auction.terms.steps
+      return auction && valid && step < auction.terms.stepCount
         ? quoteBid(auction, step, qty)
         : null;
     });
@@ -284,10 +299,57 @@ export class MockStreamDataSource implements StreamDataSource {
     });
   }
 
+  quoteEditionRaise(edition: WorkKey, bidId: number, newStep: number) {
+    return later(() => {
+      const auction = this.engine.state.editionAuctions.get(edition);
+      return auction ? quoteRaise(auction, bidId, newStep) : null;
+    });
+  }
+
+  editionActivity(edition: WorkKey) {
+    return later(() => {
+      const auction = this.engine.state.editionAuctions.get(edition);
+      return auction ? [...auction.events] : [];
+    });
+  }
+
+  editionHolders(edition: WorkKey) {
+    return later(() => {
+      const prefix = `${edition}|`;
+      return [...this.engine.state.editionBalances]
+        .filter(([key, balance]) => key.startsWith(prefix) && balance > 0)
+        .map(([key, balance]) => ({
+          account: key.slice(prefix.length) as Address,
+          balance,
+        }))
+        .sort(
+          (left, right) =>
+            right.balance - left.balance ||
+            left.account.localeCompare(right.account)
+        );
+    });
+  }
+
   ladder(edition: WorkKey) {
     return later(() => {
       const auction = this.engine.state.editionAuctions.get(edition);
       return auction ? auctionPrices(auction) : [];
+    });
+  }
+
+  sweepOf(edition: WorkKey, settler: Address) {
+    return later(() => {
+      const auction = this.engine.state.editionAuctions.get(edition);
+      return auction === undefined
+        ? { swept: 0, nextPosition: 0, cutoff: 0 }
+        : sweepOf(auction, settler);
+    });
+  }
+
+  settlementOrderFor(edition: WorkKey, settler: Address) {
+    return later(() => {
+      const auction = this.engine.state.editionAuctions.get(edition);
+      return auction === undefined ? [] : settlementOrderFor(auction, settler);
     });
   }
 
@@ -368,6 +430,10 @@ export class MockStreamDataSource implements StreamDataSource {
       }
       return null;
     });
+  }
+
+  federationFactory() {
+    return later(() => federationFactoryInfo(this.engine));
   }
 }
 

@@ -37,7 +37,7 @@ export interface ClearOutcome {
   /** The cap binds inside the cut step, so it is filled in queue order. */
   readonly rationed: boolean;
   /** A: units the cut step wins (k − units above it). */
-  readonly cutStepUnits: number;
+  readonly cutUnits: number;
   /** R*: the best candidate revenue. */
   readonly bestRevenue: Wei;
   /** Every candidate, highest step first; the clearing scan stops at the cap. */
@@ -52,7 +52,7 @@ const EMPTY: ClearOutcome = {
   count: 0,
   step: null,
   rationed: false,
-  cutStepUnits: 0,
+  cutUnits: 0,
   bestRevenue: 0n,
   candidates: [],
   chosen: -1,
@@ -135,7 +135,7 @@ export function clear(
     count: pick.count,
     step: pick.step,
     rationed: pick.count < pick.above + pick.units,
-    cutStepUnits: pick.count - pick.above,
+    cutUnits: pick.count - pick.above,
     bestRevenue: best,
     candidates,
     chosen,
@@ -183,8 +183,8 @@ export function bruteClear(
 
 /** A hole in a capped step's queue: a raise out of it, or a dispute withdrawal. */
 export interface QueueDeparture {
-  readonly pos: number;
-  readonly qty: number;
+  readonly position: number;
+  readonly quantity: number;
 }
 
 /**
@@ -196,23 +196,29 @@ export function sweepCutoff(
   cutStepUnits: number,
   departures: readonly QueueDeparture[]
 ): number {
-  const ordered = [...departures].sort((left, right) => left.pos - right.pos);
+  const ordered = [...departures].sort(
+    (left, right) => left.position - right.position
+  );
   let cutoff = cutStepUnits;
   for (const departure of ordered) {
-    if (departure.pos >= cutoff) {
+    if (departure.position >= cutoff) {
       break;
     }
-    cutoff += departure.qty;
+    cutoff += departure.quantity;
   }
   return cutoff;
 }
 
 /**
  * Units a bid wins: everything above the cut step, nothing below it, and at a
- * rationed cut step `clamp(X − pos, 0, qty)` in queue order.
+ * rationed cut step `clamp(X − position, 0, quantity)` in queue order.
  */
 export function unitsWon(
-  bid: { readonly step: number; readonly qty: number; readonly pos: number },
+  bid: {
+    readonly step: number;
+    readonly quantity: number;
+    readonly position: number;
+  },
   outcome: Pick<ClearOutcome, "step" | "rationed">,
   cutoff: number
 ): number {
@@ -220,7 +226,7 @@ export function unitsWon(
     return 0;
   }
   if (bid.step > outcome.step || !outcome.rationed) {
-    return bid.qty;
+    return bid.quantity;
   }
-  return Math.max(0, Math.min(cutoff - bid.pos, bid.qty));
+  return Math.max(0, Math.min(cutoff - bid.position, bid.quantity));
 }

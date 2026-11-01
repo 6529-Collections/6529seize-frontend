@@ -157,8 +157,8 @@ describe("the 1/1 English auction", () => {
     };
     const creditBefore = await creditOf(A);
     let auction = await auctionOf(stream, work.key);
-    expect(auction.highBid).toBe(eth("0.2"));
-    expect(auction.minimumNextBid).toBe(eth("0.21"));
+    expect(auction.bid).toBe(eth("0.2"));
+    expect(auction.minimumBid).toBe(eth("0.21"));
     const english = stream.actions.sale("ENGLISH_AUCTION");
     expectRevert(
       await english.bid(B, auction.saleId, eth("0.209")),
@@ -178,11 +178,11 @@ describe("the 1/1 English auction", () => {
     const stream = world();
     const work = await workTitled(stream, "Copper Rain");
     const auction = await auctionOf(stream, work.key);
-    expect(auction.highBid).toBe(eth("0.1"));
-    expect(auction.minimumNextBid).toBe(eth("0.105"));
+    expect(auction.bid).toBe(eth("0.1"));
+    expect(auction.minimumBid).toBe(eth("0.105"));
     const stream2 = world();
     const unbid = await workTitled(stream2, "Night Tide");
-    expect((await auctionOf(stream2, unbid.key)).minimumNextBid).toBe(1n);
+    expect((await auctionOf(stream2, unbid.key)).minimumBid).toBe(1n);
   });
 
   it("sends an unbid canonical work to the 6529 Network Museum", async () => {
@@ -190,7 +190,7 @@ describe("the 1/1 English auction", () => {
     const work = await workTitled(stream, "Night Tide");
     const auction = await auctionOf(stream, work.key);
     expect(auction.state).toBe("ENDED");
-    expect(auction.highBidder).toBeNull();
+    expect(auction.bidder).toBeNull();
     expectOk(
       await stream.actions.sale("ENGLISH_AUCTION").settle(A, auction.saleId)
     );
@@ -278,7 +278,13 @@ describe("disputes", () => {
     expect((await stream.dataSource.getEditionAuction(edition))?.phase).toBe(
       "void"
     );
-    expectOk(await editions.settle(A, edition));
+    expectOk(
+      await editions.settle(
+        A,
+        edition,
+        await stream.dataSource.settlementOrderFor(edition, A)
+      )
+    );
     const claim = (await stream.dataSource.editionBids(edition, A))[0];
     expect(claim?.refund).toBe(claim?.escrow);
   });
@@ -319,9 +325,15 @@ describe("the uniform-price edition auction", () => {
     expect(auction?.clearing.count).toBe(80);
     expect(auction?.clearing.price).toBe(eth("0.0511"));
     expect(auction?.clearing.revenue).toBe(eth("4.088"));
-    expect(auction?.clearing.networkShare).toBe(eth("1.022"));
+    expect(auction?.clearing.networkFee).toBe(eth("1.022"));
     const editions = stream.actions.sale("UNIFORM_AUCTION");
-    expectOk(await editions.settle(A, edition));
+    expectOk(
+      await editions.settle(
+        A,
+        edition,
+        await stream.dataSource.settlementOrderFor(edition, A)
+      )
+    );
     const bids = await stream.dataSource.editionBids(edition);
     let minted = 0;
     for (const bid of bids) {
@@ -334,7 +346,7 @@ describe("the uniform-price edition auction", () => {
       );
     }
     expect(minted).toBe(80);
-    expect((await stream.dataSource.getWork(edition))?.editionSupply).toBe(80);
+    expect((await stream.dataSource.getWork(edition))?.minted).toBe(80);
     const seller = await stream.dataSource.splitWallet(work.economics.seller);
     expect(seller?.received).toBeGreaterThanOrEqual(eth("3.066"));
   });
@@ -344,14 +356,14 @@ describe("the uniform-price edition auction", () => {
     const work = await workTitled(stream, "Fold Study 7");
     const edition = work.linked.edition ?? "";
     const auction = await stream.dataSource.getEditionAuction(edition);
-    expect(auction?.terms.cap).toBe(25);
+    expect(auction?.terms.maxCount).toBe(25);
     expect([
       auction?.clearing.count,
       auction?.clearing.step,
       auction?.clearing.rationed,
     ]).toEqual([25, 130, true]);
     const statuses = (await stream.dataSource.editionBids(edition)).map(
-      (bid) => [bid.qty, bid.status, bid.won]
+      (bid) => [bid.quantity, bid.status, bid.unitsWon]
     );
     expect(statuses).toEqual([
       [12, "in", 12],
@@ -394,18 +406,18 @@ describe("the uniform-price edition auction", () => {
     const edition = work.linked.edition ?? "";
     const oneOfOne = await auctionOf(stream, work.key);
     let auction = await stream.dataSource.getEditionAuction(edition);
-    expect(auction?.times.editionEnd).toBe(oneOfOne.endTime + 15 * 60);
+    expect(auction?.times.endTime).toBe(oneOfOne.endTime + 15 * 60);
     stream.dev.advance(
-      (auction?.times.editionEnd ?? 0) - stream.dataSource.now() - 60
+      (auction?.times.endTime ?? 0) - stream.dataSource.now() - 60
     );
     expectOk(
       await stream.actions.sale("UNIFORM_AUCTION").bid(A, edition, 90, 1)
     );
     auction = await stream.dataSource.getEditionAuction(edition);
-    expect(auction?.times.editionEnd).toBe(stream.dataSource.now() + 5 * 60);
+    expect(auction?.times.endTime).toBe(stream.dataSource.now() + 5 * 60);
     expect(auction?.phase).toBe("extended");
     expect(auction?.times.backstop).toBe(
-      (auction?.times.baseEnd ?? 0) + 86_400
+      (auction?.times.closeAt ?? 0) + 86_400
     );
   });
 
@@ -427,11 +439,17 @@ describe("the uniform-price edition auction", () => {
     expect((await stream.dataSource.getEditionAuction(edition))?.phase).toBe(
       "noBids"
     );
-    expectRevert(await editions.settle(A, edition), "SettlementNotReady");
+    expectRevert(await editions.settle(A, edition, []), "SettlementNotReady");
     expectOk(
       await stream.actions.sale("ENGLISH_AUCTION").settle(A, oneOfOne.saleId)
     );
-    expectOk(await editions.settle(A, edition));
+    expectOk(
+      await editions.settle(
+        A,
+        edition,
+        await stream.dataSource.settlementOrderFor(edition, A)
+      )
+    );
     expect(
       (await stream.dataSource.getEditionAuction(edition))?.clearing.count
     ).toBe(0);
@@ -448,13 +466,13 @@ describe("the uniform-price edition auction", () => {
       lowest ?? 0,
       1
     );
-    expect(quote?.won).toBe(1);
+    expect(quote?.unitsWon).toBe(1);
     const below = await stream.dataSource.quoteEditionBid(
       edition,
       (lowest ?? 1) - 1,
       1
     );
-    expect(below?.won).toBe(0);
+    expect(below?.unitsWon).toBe(0);
   });
 
   it("refuses withdrawals unless the 1/1 is paused for a dispute", async () => {
@@ -545,6 +563,59 @@ describe("6529 Stream Federated (v1.1 design)", () => {
       await stream.actions.sale("ENGLISH_AUCTION").settle(A, auction.saleId)
     );
     expect((await auctionOf(stream, work)).settlement?.outcome).toBe("artist");
+    // Owner decision 17: a delisting ends the sale FROZEN_OUT, with no price.
+    expect((await stream.dataSource.getWork(work))?.primarySale).toEqual({
+      outcome: "FROZEN_OUT",
+      currency: "0x0000000000000000000000000000000000000000",
+      price: 0n,
+    });
+  });
+
+  it("keeps federated token IDs past 2^53 exact, as bigint and in the work key", async () => {
+    const stream = world();
+    const ferry = await workTitled(stream, "Ferry Light");
+    expect(ferry.tokenId).toBe(2n ** 53n + 1n);
+    expect(ferry.key.endsWith("-9007199254740993")).toBe(true);
+    expect((await stream.dataSource.getWork(ferry.key))?.title).toBe(
+      "Ferry Light"
+    );
+    expect((await auctionOf(stream, ferry.key)).tokenId).toBe(ferry.tokenId);
+  });
+
+  it("records each 1/1's primary-sale outcome, and Stream moves an unbid work to the museum (decision 17)", async () => {
+    const stream = world();
+    const zero = "0x0000000000000000000000000000000000000000";
+    const sold = await workTitled(stream, "Salt Meridian");
+    const soldAuction = await auctionOf(stream, sold.key);
+    expect(sold.primarySale).toEqual({
+      outcome: "SOLD",
+      currency: zero,
+      price: soldAuction.settlement?.price,
+    });
+    expect(sold.primarySale.price).toBeGreaterThan(0n);
+
+    const night = await workTitled(stream, "Night Tide");
+    expect(night.primarySale.outcome).toBe("NONE");
+    expect(night.primarySaleSettled).toBe(false);
+    const auction = await auctionOf(stream, night.key);
+    expectOk(
+      await stream.actions.sale("ENGLISH_AUCTION").settle(A, auction.saleId)
+    );
+    const after = await stream.dataSource.getWork(night.key);
+    expect(after?.primarySale).toEqual({
+      outcome: "UNBID",
+      currency: zero,
+      price: 0n,
+    });
+    expect(after?.owner).toBe(stream.dataSource.source().contracts.museum);
+    expect((await auctionOf(stream, night.key)).pendingDelivery).toBeNull();
+    const moved = (await stream.dataSource.provenance(night.key)).find(
+      (event) => event.kind === "to-museum"
+    );
+    expect([moved?.kind, moved?.actor]).toEqual([
+      "to-museum",
+      stream.dataSource.source().contracts.stream,
+    ]);
   });
 
   it("deploys a linked pair through the factory and sells a master with its edition auction", async () => {

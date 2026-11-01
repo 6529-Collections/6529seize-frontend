@@ -4,15 +4,19 @@ import type {
   Address,
   CurationPackage,
   DisputeView,
+  EditionActivity,
   EditionAuction,
   EditionBalance,
   EditionBidView,
   EditionCandidate,
+  EditionHolder,
   EditionQuote,
   EditionStepTotal,
+  EditionSweep,
   FederatedContract,
   FederatedDeployRequest,
   FederatedDirectoryQuery,
+  FederationFactoryInfo,
   Hex32,
   KnownSaleKind,
   MuseumHolding,
@@ -68,6 +72,8 @@ export interface StreamDataSource {
   // The 1/1 English auction
   getOneOfOneAuction(saleId: string): Promise<OneOfOneAuction | null>;
   auctionForWork(key: WorkKey): Promise<OneOfOneAuction | null>;
+  /** `claimable(account, ETH)`: outbid and refunded 1/1 bids, waiting to be claimed. */
+  claimableCredits(account: Address): Promise<Wei>;
 
   // The uniform-price edition auction
   listEditionAuctions(): Promise<readonly EditionAuction[]>;
@@ -82,14 +88,39 @@ export interface StreamDataSource {
   quoteEditionBid(
     edition: WorkKey,
     step: number,
-    qty: number
+    quantity: number
   ): Promise<EditionQuote | null>;
-  /** `lowestWinningStep(qty)`: the lowest step where a new bid wins at least one copy. */
-  lowestWinningStep(edition: WorkKey, qty: number): Promise<number | null>;
-  /** The lowest step where a new bid of `qty` gets every unit in (client-side search). */
-  lowestStepFullyIn(edition: WorkKey, qty: number): Promise<number | null>;
+  /** `lowestWinningStep(quantity)`: the lowest step where a new bid wins at least one copy. */
+  lowestWinningStep(edition: WorkKey, quantity: number): Promise<number | null>;
+  /** The lowest step where a new bid of `quantity` gets every unit in (client-side search). */
+  lowestStepFullyIn(edition: WorkKey, quantity: number): Promise<number | null>;
+  /**
+   * What raising bid `bidId` to `newStep` would do (client-side, like
+   * `lowestStepFullyIn`): it rejoins the back of `newStep`, leaving a hole.
+   */
+  quoteEditionRaise(
+    edition: WorkKey,
+    bidId: number,
+    newStep: number
+  ): Promise<EditionQuote | null>;
+  /** The sale's history from its events, oldest first. */
+  editionActivity(edition: WorkKey): Promise<readonly EditionActivity[]>;
+  /** The edition's holders, largest first. */
+  editionHolders(edition: WorkKey): Promise<readonly EditionHolder[]>;
   /** Every step's price for an auction's locked ladder. */
   ladder(edition: WorkKey): Promise<readonly Wei[]>;
+  /** `sweepOf(saleId, settler)`: the settler's own departure sweep in progress. */
+  sweepOf(edition: WorkKey, settler: Address): Promise<EditionSweep>;
+  /**
+   * `settlementOrderFor(saleId, settler)`: what the settler passes to its
+   * next `settle` call, the rest of the departure order after its own
+   * progress (`settlementOrder` for a settler with none). Empty unless the
+   * result is rationed.
+   */
+  settlementOrderFor(
+    edition: WorkKey,
+    settler: Address
+  ): Promise<readonly number[]>;
 
   // Editions, payouts, claims
   editionBalances(account: Address): Promise<readonly EditionBalance[]>;
@@ -106,6 +137,8 @@ export interface StreamDataSource {
     query?: FederatedDirectoryQuery
   ): Promise<readonly FederatedContract[]>;
   getFederatedContract(address: Address): Promise<FederatedContract | null>;
+  /** The factory, its registry and the templates a new deployment gets. */
+  federationFactory(): Promise<FederationFactoryInfo>;
 }
 
 // ---------------------------------------------------------------------------
@@ -150,8 +183,9 @@ export interface EnglishAuctionActions {
 
 /**
  * `IUniformEditionAuction` writes (6529-works ADR 0005). The chain source maps
- * the edition key to `saleIdOf(token, id)`; `settle` supplies the departure
- * order from `settlementOrder(saleId)` and repeats until it returns true.
+ * the edition key to `saleIdOf(token, id)`; `settle` sends one call with the
+ * remaining departure order from `settlementOrder(saleId)`, and the UI offers
+ * the next call while it returns false.
  */
 export interface EditionAuctionActions {
   /** Permissionless from the 1/1's start; the keeper batches it with `start`. */
@@ -160,7 +194,7 @@ export interface EditionAuctionActions {
     from: Address,
     edition: WorkKey,
     step: number,
-    qty: number
+    quantity: number
   ): Promise<TxResult<{ readonly bidId: number }>>;
   /** Moves the whole bid up and pays exactly the difference. */
   raise(
@@ -171,8 +205,19 @@ export interface EditionAuctionActions {
   ): Promise<TxResult>;
   /** `withdrawBid(saleId, bidId, to)`: only while the coupled 1/1 is paused for a dispute. */
   withdraw(from: Address, edition: WorkKey, bidId: number): Promise<TxResult>;
-  /** Permissionless after the edition end once the 1/1 is settled or cancelled. */
-  settle(from: Address, edition: WorkKey): Promise<TxResult>;
+  /**
+   * `settle(saleId, order)`: one permissionless settle call, after the
+   * edition end once the 1/1 is settled or cancelled. Settlement runs in calls
+   * of bounded gas: `settled` is false while more calls are needed (the sale
+   * stays SETTLING). `order` is the caller's remaining slice of the departure
+   * sweep, from `settlementOrderFor(edition, from)`. A call on a SETTLED sale
+   * returns `settled: true` and changes nothing.
+   */
+  settle(
+    from: Address,
+    edition: WorkKey,
+    order: readonly number[]
+  ): Promise<TxResult<{ readonly settled: boolean }>>;
   /** `claimBid(saleId, bidId, to)`: mints the editions won and sends the refund. */
   claim(
     from: Address,
@@ -223,7 +268,7 @@ export interface StreamActions {
     from: Address,
     contract: Address,
     title: string,
-    cap: number
+    maxCount: number
   ): Promise<TxResult<WorkKey>>;
 }
 
@@ -263,6 +308,8 @@ export interface StreamDevControls {
   pauseForDispute(work: WorkKey): TxResult;
   /** The TDH vote outcome: upheld cancels and burns; rejected resumes. */
   resolveDispute(work: WorkKey, upheld: boolean): TxResult;
+  /** Other bidders bid near the current price, `count` times (edition auctions). */
+  simulateEditionBids(edition: WorkKey, count: number): TxResult;
   /** A TDH vote delists or relists a federated contract. */
   setFederatedStatus(contract: Address, delisted: boolean): TxResult;
   reset(): void;

@@ -88,11 +88,11 @@ describe("1/1 English auction rules (IEnglishAuction)", () => {
 });
 
 describe("edition auction clocks (D140, D141)", () => {
-  const terms = { offset: 900, softWindow: 300, maxExtension: 86_400 };
+  const terms = { closeOffset: 900, softWindow: 300, maxExtension: 86_400 };
 
   it("closes 15 minutes after the 1/1's final end", () => {
     const times = editionTimes(0, 10_000, null, terms);
-    expect(times.editionEnd).toBe(10_900);
+    expect(times.endTime).toBe(10_900);
     expect(times.backstop).toBe(10_900 + 86_400);
   });
 
@@ -127,7 +127,7 @@ describe("edition auction clocks (D140, D141)", () => {
     expect(
       editionPhase({
         ...base,
-        totalUnits: 0,
+        liveUnits: 0,
         oneOfOneState: "SETTLED",
         now: 11_000,
       })
@@ -178,26 +178,46 @@ describe("ETH text", () => {
 describe("work keys", () => {
   const stream = "0x00000000000000000000000000000000000000f1";
   it("uses bare token IDs for 6529 Stream and contract keys otherwise", () => {
-    expect(workKeyFor(stream, 12, stream)).toBe("12");
+    expect(workKeyFor(stream, 12n, stream)).toBe("12");
     expect(
-      workKeyFor("0x00000000000000000000000000000000000000AB", 3, stream)
+      workKeyFor("0x00000000000000000000000000000000000000AB", 3n, stream)
     ).toBe("0x00000000000000000000000000000000000000ab-3");
-    expect(parseWorkKey("12")).toEqual({ kind: "stream", tokenId: 12 });
+    expect(parseWorkKey("12")).toEqual({ kind: "stream", tokenId: 12n });
     expect(
       parseWorkKey("0x00000000000000000000000000000000000000ab-3")
     ).toEqual({
       kind: "contract",
       contract: "0x00000000000000000000000000000000000000ab",
-      tokenId: 3,
+      tokenId: 3n,
     });
     expect(parseWorkKey("0")).toBeNull();
-    // IDs past Number.MAX_SAFE_INTEGER would round to another token.
-    expect(parseWorkKey("9007199254740993")).toBeNull();
+    // Token IDs are uint256: past 2^53 they stay exact (federated IDs).
+    expect(parseWorkKey("9007199254740993")).toEqual({
+      kind: "stream",
+      tokenId: 9_007_199_254_740_993n,
+    });
+    const big = 2n ** 200n + 7n;
+    const key = workKeyFor(
+      "0x00000000000000000000000000000000000000AB",
+      big,
+      stream
+    );
+    expect(key).toBe(`0x00000000000000000000000000000000000000ab-${big}`);
+    expect(parseWorkKey(key)).toEqual({
+      kind: "contract",
+      contract: "0x00000000000000000000000000000000000000ab",
+      tokenId: big,
+    });
+    // A federated token ID may be 0; past uint256 or with a leading zero, no key.
     expect(
-      parseWorkKey(
-        "0x00000000000000000000000000000000000000ab-9007199254740993"
-      )
-    ).toBeNull();
+      parseWorkKey("0x00000000000000000000000000000000000000ab-0")
+    ).toEqual({
+      kind: "contract",
+      contract: "0x00000000000000000000000000000000000000ab",
+      tokenId: 0n,
+    });
+    expect(parseWorkKey((2n ** 256n).toString())).toBeNull();
+    expect(parseWorkKey("012")).toBeNull();
     expect(parseWorkKey("../etc")).toBeNull();
   });
 });

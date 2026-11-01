@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import WorkPage from "@/components/stream/pages/WorkPage";
+import WorkPage from "@/components/stream/work/WorkPage";
 import {
   assertStreamProduct,
   streamPageMetadata,

@@ -18,7 +18,11 @@ import {
   openFederatedEdition,
   setFederatedStatus,
 } from "@/lib/stream/mock/federated";
-import { auctionTimes } from "@/lib/stream/mock/sales/editionAuction";
+import {
+  auctionTimes,
+  findEditionAuction,
+  simulateEditionBids,
+} from "@/lib/stream/mock/sales/editionAuction";
 import {
   englishState,
   findEnglishAuction,
@@ -26,7 +30,21 @@ import {
   resolveEnglishDispute,
 } from "@/lib/stream/mock/sales/englishAuction";
 import { MOCK_SALE_ADAPTERS } from "@/lib/stream/mock/sales/registry";
-import type { Address, KnownSaleKind, WorkKey } from "@/lib/stream/types";
+import { OTHER_BIDDERS } from "@/lib/stream/mock/scenarioKit";
+import type { GasOperation } from "@/lib/stream/gas";
+import type {
+  Address,
+  FederatedForm,
+  KnownSaleKind,
+  WorkKey,
+} from "@/lib/stream/types";
+
+/** Each federated form's deploy carries its own labelled gas estimate. */
+const DEPLOY_OPERATION: Readonly<Record<FederatedForm, GasOperation>> = {
+  ERC721: "federatedDeploy721",
+  ERC1155: "federatedDeploy1155",
+  PAIR: "federatedDeployPair",
+};
 
 /** The mock's writes: each runs atomically through `engine.tx`. */
 export class MockStreamActions implements StreamActions {
@@ -72,11 +90,8 @@ export class MockStreamActions implements StreamActions {
     request: Parameters<StreamActions["deployFederated"]>[1]
   ) {
     return later(() => {
-      return this.engine.tx(
-        request.form === "PAIR"
-          ? "federatedDeployPair"
-          : "federatedDeploySingle",
-        () => deployFederated(this.engine, from, request)
+      return this.engine.tx(DEPLOY_OPERATION[request.form], () =>
+        deployFederated(this.engine, from, request)
       );
     });
   }
@@ -156,7 +171,7 @@ export class MockDevControls implements StreamDevControls {
     }
     for (const auction of engine.state.editionAuctions.values()) {
       if (auction.status === "OPEN") {
-        ends.push(auctionTimes(engine, auction).editionEnd);
+        ends.push(auctionTimes(engine, auction).endTime);
       }
     }
     const next = ends.filter((end) => end > now).sort((a, b) => a - b)[0];
@@ -189,12 +204,23 @@ export class MockDevControls implements StreamDevControls {
     });
   }
 
+  simulateEditionBids(edition: WorkKey, count: number): TxResult {
+    return this.engine.tx(null, () => {
+      simulateEditionBids(
+        this.engine,
+        findEditionAuction(this.engine, edition),
+        count,
+        OTHER_BIDDERS
+      );
+    });
+  }
+
   setFederatedStatus(contract: Address, delisted: boolean): TxResult {
     return this.engine.tx(null, () => {
       const statement = appendStatement(this.engine, {
         role: "CURATOR",
         kind: delisted ? "DELISTING" : "RELISTING",
-        subject: { token: contract, id: 0 },
+        subject: { token: contract, id: 0n },
         summary: delisted
           ? "TDH vote: delisted (simulated)."
           : "TDH vote: relisted (simulated).",

@@ -10,6 +10,7 @@ import type { MockStreamEngine } from "@/lib/stream/mock/engine";
 import { mockHash } from "@/lib/stream/mock/ids";
 import { englishState } from "@/lib/stream/mock/sales/englishAuction";
 import type { MockToken } from "@/lib/stream/mock/state";
+import { NO_PRIMARY_SALE } from "@/lib/stream/mock/tokens";
 import type {
   Hex32,
   MediaFileView,
@@ -216,7 +217,7 @@ function rendererTraits(
     traits.push({ trait_type: "Serial", value: source.collection.serial });
   }
   if (isLinkedEdition(entry, source)) {
-    traits.push({ trait_type: "Edition of", value: source.tokenId });
+    traits.push({ trait_type: "Edition of", value: source.tokenId.toString() });
   }
   const outcome = disputeStateOf(engine, source).latestOutcome;
   if (outcome !== null) {
@@ -237,7 +238,10 @@ function coreOnlyMetadata(entry: MockToken, source: MockToken): TokenUriJson {
     attributes.push({ trait_type: "Serial", value: source.collection.serial });
   }
   if (isLinkedEdition(entry, source)) {
-    attributes.push({ trait_type: "Edition of", value: source.tokenId });
+    attributes.push({
+      trait_type: "Edition of",
+      value: source.tokenId.toString(),
+    });
   }
   return {
     name: source.collection
@@ -250,10 +254,7 @@ function coreOnlyMetadata(entry: MockToken, source: MockToken): TokenUriJson {
 }
 
 /** `tokenURI` / `uri`, decoded, as the renderer would build it. */
-function metadataOf(
-  engine: MockStreamEngine,
-  token: MockToken
-): TokenUriJson {
+function metadataOf(engine: MockStreamEngine, token: MockToken): TokenUriJson {
   const source = recordSource(engine, token);
   if (!source.storage.recordOpen) {
     return coreOnlyMetadata(token, source);
@@ -321,10 +322,11 @@ export function workView(
     economics: token.economics,
     linked: { ...token.linked },
     owner: token.standard === "ERC721" && !token.burned ? token.owner : null,
-    editionSupply:
-      token.standard === "ERC1155" && token.created ? token.supply : null,
+    minted: token.standard === "ERC1155" && token.created ? token.supply : null,
     sale: token.sale,
     primarySaleSettled: token.primarySaleSettled,
+    // A burned ID answers NONE.
+    primarySale: token.burned ? NO_PRIMARY_SALE : token.primarySale,
     dispute: disputeStateOf(engine, source),
     federated:
       federated === undefined || federated === null

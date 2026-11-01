@@ -27,6 +27,7 @@ import {
   STREAM_LABEL,
   STREAM_TEXT,
 } from "@/components/stream/ui/styles";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -79,25 +80,21 @@ export function Section({
   );
 }
 
-/** Marks a page whose full version a later change builds on this foundation. */
-export function PlaceholderNote({
-  locale,
+/** A loading placeholder that screen readers announce as "Loading". */
+export function Loading({
+  className = "tw-h-32",
 }: {
-  readonly locale: SupportedLocale;
+  readonly className?: string;
 }) {
-  return (
-    <p className={`${STREAM_HELP} tw-mt-2`}>
-      {t(locale, "stream.placeholder.note")}
-    </p>
-  );
-}
-
-export function Loading() {
+  const locale = useBrowserLocale();
   return (
     <div
-      className={`${STREAM_CARD} tw-h-32 tw-animate-pulse`}
+      role="status"
       aria-busy="true"
-    />
+      className={`${STREAM_CARD} ${className} tw-animate-pulse`}
+    >
+      <span className="tw-sr-only">{t(locale, "stream.common.loading")}</span>
+    </div>
   );
 }
 
@@ -215,7 +212,7 @@ function SaleLine({
             {t(locale, `stream.card.outcome.${auction.settlement.outcome}`)}
           </span>
         ) : (
-          <EthAmount wei={auction.highBid} locale={locale} />
+          <EthAmount wei={auction.bid} locale={locale} />
         )}
         {auction.state === "ACTIVE" ? (
           <Countdown

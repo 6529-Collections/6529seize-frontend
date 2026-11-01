@@ -3,6 +3,7 @@ import {
   CC0_SPDX_ID,
   DEFAULT_ROYALTY_RATE,
   SPLITS_DENOMINATOR,
+  ZERO_ADDRESS,
 } from "@/lib/stream/constants";
 import type { MockStreamEngine } from "@/lib/stream/mock/engine";
 import { revert } from "@/lib/stream/mock/engine";
@@ -16,12 +17,20 @@ import type {
 } from "@/lib/stream/mock/state";
 import type {
   Address,
+  PrimarySale,
   WorkEconomics,
   WorkKey,
   WorkParty,
   WorkVariant,
 } from "@/lib/stream/types";
 import { workKeyFor } from "@/lib/stream/workKey";
+
+/** `IStream.primarySale` before settlement: NONE, with zero currency and price. */
+export const NO_PRIMARY_SALE: PrimarySale = {
+  outcome: "NONE",
+  currency: ZERO_ADDRESS,
+  price: 0n,
+};
 
 /** Factories the scenarios and the federated factory share. */
 
@@ -169,7 +178,7 @@ function nextSerial(engine: MockStreamEngine, collectionId: number): number {
 
 interface TokenPlacement {
   readonly token: Address;
-  readonly tokenId: number;
+  readonly tokenId: bigint;
   readonly variant: WorkVariant;
   readonly feeShare: number;
   readonly federatedContract: Address | null;
@@ -219,10 +228,13 @@ export function addOneOfOne(
     created: true,
     sale: null,
     primarySaleSettled: false,
+    primarySale: NO_PRIMARY_SALE,
     burned: false,
     mintedAt: placement.mintedAt,
-    packageRoot: mockHash(`package:${spec.artistId}:${spec.title}`),
-    itemHash: mockHash(`item:${spec.title}`),
+    packageRoot:
+      spec.item?.packageRoot ??
+      mockHash(`package:${spec.artistId}:${spec.title}`),
+    itemHash: spec.item?.itemHash ?? mockHash(`item:${spec.title}`),
     federatedContract: placement.federatedContract,
   };
   engine.state.tokens.set(key, token);
@@ -243,7 +255,7 @@ export function addStreamWork(
   mintedAt: number
 ): MockToken {
   const tokenId = engine.state.nextStreamTokenId;
-  engine.state.nextStreamTokenId += 1;
+  engine.state.nextStreamTokenId += 1n;
   const artist = artistOrThrow(engine, spec.artistId);
   if (!artist.programs.includes("canonical")) {
     artist.programs.push("canonical");
@@ -290,6 +302,7 @@ export function addLinkedEdition(
     created: options.created,
     sale: null,
     primarySaleSettled: false,
+    primarySale: NO_PRIMARY_SALE,
     mintedAt: null,
   };
   master.linked.edition = key;

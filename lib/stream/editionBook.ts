@@ -19,18 +19,18 @@ export interface BookBid {
   readonly id: number;
   readonly bidder: Address;
   step: number;
-  readonly qty: number;
+  readonly quantity: number;
   /** Position in entered units at its step (capped auctions; 0 otherwise). */
-  pos: number;
+  position: number;
   readonly placedAt: number;
   withdrawn: boolean;
   claimed: boolean;
 }
 
 export interface EditionBook {
-  readonly steps: number;
+  readonly stepCount: number;
   /** The creator cap; 0 means no cap. */
-  readonly cap: number;
+  readonly maxCount: number;
   readonly live: number[];
   readonly entered: number[];
   readonly departures: Map<number, QueueDeparture[]>;
@@ -39,8 +39,8 @@ export interface EditionBook {
 
 export function createBook(steps: number, cap: number): EditionBook {
   return {
-    steps,
-    cap,
+    stepCount: steps,
+    maxCount: cap,
     live: new Array<number>(steps).fill(0),
     entered: new Array<number>(steps).fill(0),
     departures: new Map(),
@@ -51,8 +51,8 @@ export function createBook(steps: number, cap: number): EditionBook {
 /** A deep copy, for what-if questions. */
 export function cloneBook(book: EditionBook): EditionBook {
   return {
-    steps: book.steps,
-    cap: book.cap,
+    stepCount: book.stepCount,
+    maxCount: book.maxCount,
     live: [...book.live],
     entered: [...book.entered],
     departures: new Map(
@@ -64,7 +64,7 @@ export function cloneBook(book: EditionBook): EditionBook {
 
 function enqueue(book: EditionBook, step: number, qty: number): number {
   book.live[step] = (book.live[step] ?? 0) + qty;
-  if (book.cap === 0) {
+  if (book.maxCount === 0) {
     return 0;
   }
   const pos = book.entered[step] ?? 0;
@@ -73,10 +73,10 @@ function enqueue(book: EditionBook, step: number, qty: number): number {
 }
 
 function leave(book: EditionBook, bid: BookBid): void {
-  book.live[bid.step] = (book.live[bid.step] ?? 0) - bid.qty;
-  if (book.cap > 0) {
+  book.live[bid.step] = (book.live[bid.step] ?? 0) - bid.quantity;
+  if (book.maxCount > 0) {
     const list = book.departures.get(bid.step) ?? [];
-    list.push({ pos: bid.pos, qty: bid.qty });
+    list.push({ position: bid.position, quantity: bid.quantity });
     book.departures.set(bid.step, list);
   }
 }
@@ -96,8 +96,8 @@ export function addBid(
     id: book.bids.length + 1,
     bidder: bid.bidder,
     step: bid.step,
-    qty: bid.qty,
-    pos,
+    quantity: bid.qty,
+    position: pos,
     placedAt: bid.at,
     withdrawn: false,
     claimed: false,
@@ -113,7 +113,7 @@ export function moveBid(
   newStep: number
 ): void {
   leave(book, bid);
-  bid.pos = enqueue(book, newStep, bid.qty);
+  bid.position = enqueue(book, newStep, bid.quantity);
   bid.step = newStep;
 }
 
@@ -137,14 +137,14 @@ export function clearBook(
   prices: readonly Wei[],
   marginShare: number
 ): BookResult {
-  const outcome = clear(book.live, prices, book.cap, marginShare);
+  const outcome = clear(book.live, prices, book.maxCount, marginShare);
   if (outcome.step === null || !outcome.rationed) {
-    return { ...outcome, cutoff: outcome.cutStepUnits };
+    return { ...outcome, cutoff: outcome.cutUnits };
   }
   const departures = book.departures.get(outcome.step) ?? [];
   return {
     ...outcome,
-    cutoff: sweepCutoff(outcome.cutStepUnits, departures),
+    cutoff: sweepCutoff(outcome.cutUnits, departures),
   };
 }
 
@@ -154,15 +154,17 @@ export function wonBy(bid: BookBid, result: BookResult): number {
 
 /** Live units queued ahead of a bid at its step (capped auctions). */
 export function unitsAhead(book: EditionBook, bid: BookBid): number {
-  if (book.cap === 0) {
+  if (book.maxCount === 0) {
     return 0;
   }
   return book.bids
     .filter(
       (other) =>
-        !other.withdrawn && other.step === bid.step && other.pos < bid.pos
+        !other.withdrawn &&
+        other.step === bid.step &&
+        other.position < bid.position
     )
-    .reduce((sum, other) => sum + other.qty, 0);
+    .reduce((sum, other) => sum + other.quantity, 0);
 }
 
 /** Units each live bid wins, by bid ID. */
@@ -207,22 +209,22 @@ export function raiseToGetIn(
   prices: readonly Wei[],
   marginShare: number
 ): number | null {
-  return lowestStepWhere(bid.step + 1, book.steps, (step) => {
+  return lowestStepWhere(bid.step + 1, book.stepCount, (step) => {
     const copy = cloneBook(book);
     const moved = findBid(copy, bid.id);
     if (moved === undefined) {
       return false;
     }
     moveBid(copy, moved, step);
-    return wonBy(moved, clearBook(copy, prices, marginShare)) >= moved.qty;
+    return wonBy(moved, clearBook(copy, prices, marginShare)) >= moved.quantity;
   });
 }
 
 interface WhatIf {
   readonly result: BookResult;
-  readonly won: number;
-  readonly pushedOut: number;
-  readonly pulledIn: number;
+  readonly unitsWon: number;
+  readonly unitsPushedOut: number;
+  readonly unitsPulledIn: number;
 }
 
 /** `quote(step, qty)`: what a new bid would do to the book. */
@@ -251,7 +253,48 @@ export function whatIfBid(
       pulledIn += Math.max(0, change);
     }
   }
-  return { result, won: wonBy(added, result), pushedOut, pulledIn };
+  return {
+    result,
+    unitsWon: wonBy(added, result),
+    unitsPushedOut: pushedOut,
+    unitsPulledIn: pulledIn,
+  };
+}
+
+/**
+ * What raising `bid` to `newStep` would do (client-side; the contract has no
+ * raise quote): it rejoins the back of `newStep` and leaves a hole behind.
+ */
+export function whatIfRaise(
+  book: EditionBook,
+  bid: BookBid,
+  newStep: number,
+  prices: readonly Wei[],
+  marginShare: number
+): WhatIf {
+  const before = allocation(book, clearBook(book, prices, marginShare));
+  const copy = cloneBook(book);
+  const moved = findBid(copy, bid.id);
+  if (moved === undefined) {
+    throw new RangeError(`no bid ${bid.id}`);
+  }
+  moveBid(copy, moved, newStep);
+  const result = clearBook(copy, prices, marginShare);
+  let pushedOut = 0;
+  let pulledIn = 0;
+  for (const other of copy.bids) {
+    if (other.id !== moved.id) {
+      const change = wonBy(other, result) - (before.get(other.id) ?? 0);
+      pushedOut += Math.max(0, -change);
+      pulledIn += Math.max(0, change);
+    }
+  }
+  return {
+    result,
+    unitsWon: wonBy(moved, result),
+    unitsPushedOut: pushedOut,
+    unitsPulledIn: pulledIn,
+  };
 }
 
 /**
@@ -266,8 +309,8 @@ export function lowestWinningStep(
 ): number | null {
   return lowestStepWhere(
     0,
-    book.steps,
-    (step) => whatIfBid(book, step, qty, prices, marginShare).won > 0
+    book.stepCount,
+    (step) => whatIfBid(book, step, qty, prices, marginShare).unitsWon > 0
   );
 }
 
@@ -284,7 +327,7 @@ export function lowestStepFullyIn(
 ): number | null {
   return lowestStepWhere(
     0,
-    book.steps,
-    (step) => whatIfBid(book, step, qty, prices, marginShare).won >= qty
+    book.stepCount,
+    (step) => whatIfBid(book, step, qty, prices, marginShare).unitsWon >= qty
   );
 }

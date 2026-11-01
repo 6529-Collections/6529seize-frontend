@@ -41,7 +41,9 @@ const AXIS_Y = 40;
 /**
  * A horizontal timeline drawn in inline SVG (`<title>` and `<desc>` name it),
  * with the marks and spans repeated as an HTML list underneath: the list is
- * what screen readers and narrow screens use.
+ * what screen readers and narrow screens use. The SVG stretches to the width
+ * (`preserveAspectRatio="none"`), so its strokes don't scale and the mark
+ * dots are HTML, which keeps them round at any width.
  */
 export default function Timeline({
   start,
@@ -68,49 +70,64 @@ export default function Timeline({
   const titleId = useId();
   return (
     <div>
-      <svg
-        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-        role="img"
-        aria-labelledby={`${titleId}-title ${titleId}-desc`}
-        className="tw-block tw-h-16 tw-w-full"
-        preserveAspectRatio="none"
-      >
-        <title id={`${titleId}-title`}>{title}</title>
-        <desc id={`${titleId}-desc`}>{description}</desc>
-        {spans.map((span) => (
-          <rect
-            key={span.label}
-            x={x(span.from)}
-            y={AXIS_Y - 14}
-            width={Math.max(2, x(span.to) - x(span.from))}
-            height={28}
-            rx={4}
-            className={`${SPAN[span.tone ?? "accent"]} tw-stroke-[1.5]`}
+      <div className="tw-relative">
+        <svg
+          viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+          role="img"
+          aria-labelledby={`${titleId}-title ${titleId}-desc`}
+          className="tw-block tw-h-16 tw-w-full"
+          preserveAspectRatio="none"
+        >
+          <title id={`${titleId}-title`}>{title}</title>
+          <desc id={`${titleId}-desc`}>{description}</desc>
+          {spans.map((span) => (
+            <rect
+              key={span.label}
+              x={x(span.from)}
+              y={AXIS_Y - 14}
+              width={Math.max(2, x(span.to) - x(span.from))}
+              height={28}
+              rx={4}
+              vectorEffect="non-scaling-stroke"
+              className={`${SPAN[span.tone ?? "accent"]} tw-stroke-[1.5]`}
+            />
+          ))}
+          <line
+            x1={0}
+            x2={WIDTH}
+            y1={AXIS_Y}
+            y2={AXIS_Y}
+            vectorEffect="non-scaling-stroke"
+            className="tw-stroke-iron-600 tw-stroke-2"
+          />
+          {marks.map((mark) => (
+            <g
+              key={`${mark.at}-${mark.label}`}
+              className={MARK[mark.tone ?? "neutral"]}
+            >
+              <line
+                x1={x(mark.at)}
+                x2={x(mark.at)}
+                y1={AXIS_Y - 18}
+                y2={AXIS_Y + 18}
+                vectorEffect="non-scaling-stroke"
+                className="tw-stroke-2"
+              />
+            </g>
+          ))}
+        </svg>
+        {marks.map((mark) => (
+          <span
+            key={`${mark.at}-${mark.label}`}
+            aria-hidden="true"
+            className={`tw-absolute tw-size-3 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full ${DOT[mark.tone ?? "neutral"]}`}
+            style={{
+              left: `${(x(mark.at) / WIDTH) * 100}%`,
+              top: `${(AXIS_Y / HEIGHT) * 100}%`,
+            }}
           />
         ))}
-        <line
-          x1={0}
-          x2={WIDTH}
-          y1={AXIS_Y}
-          y2={AXIS_Y}
-          className="tw-stroke-iron-600 tw-stroke-2"
-        />
-        {marks.map((mark) => (
-          <g
-            key={`${mark.at}-${mark.label}`}
-            className={MARK[mark.tone ?? "neutral"]}
-          >
-            <line
-              x1={x(mark.at)}
-              x2={x(mark.at)}
-              y1={AXIS_Y - 18}
-              y2={AXIS_Y + 18}
-              className="tw-stroke-2"
-            />
-            <circle cx={x(mark.at)} cy={AXIS_Y} r={6} />
-          </g>
-        ))}
-      </svg>
+      </div>
       <div
         className="tw-mt-1 tw-flex tw-justify-between tw-text-[11px] tw-text-iron-500"
         aria-hidden="true"

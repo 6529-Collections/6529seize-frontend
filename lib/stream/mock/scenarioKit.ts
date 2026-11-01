@@ -32,6 +32,9 @@ export const MOCK_ACCOUNTS = {
   guardian: mockAddress("account:guardian"),
 } as const;
 
+/** The seed's keeper: settles edition auctions on the timeline. */
+export const SEED_KEEPER: Address = mockAddress("account:keeper");
+
 export const OTHER_BIDDERS: readonly Address[] = Array.from(
   { length: 8 },
   (_, index) => mockAddress(`account:bidder-${index + 1}`)

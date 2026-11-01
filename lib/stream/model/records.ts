@@ -134,6 +134,7 @@ export interface ProvenanceEvent {
     | "minted"
     | "auction-started"
     | "bid"
+    | "bid-withdrawn"
     | "settled"
     | "to-museum"
     | "to-artist"
@@ -159,6 +160,28 @@ export interface ProvenanceEvent {
   readonly source: string;
 }
 
+/**
+ * `SaleTypes.PrimaryOutcome` (owner decision 17): how a 1/1's primary sale
+ * ended, as the adapter that minted it reported it to the token. NONE before
+ * settlement, and for burned or unminted IDs.
+ */
+export type PrimaryOutcome = "NONE" | "SOLD" | "UNBID" | "FROZEN_OUT";
+
+/**
+ * `IStream.primarySale(tokenId)`: the recorded outcome, and the currency and
+ * price when SOLD (zero otherwise). UNBID: the sale ended with no bid.
+ * FROZEN_OUT: it ended unsold because its currency stayed frozen or its
+ * federated contract was delisted. 6529 Stream itself moves an UNBID or
+ * FROZEN_OUT canonical work to the 6529 Network Museum at settlement.
+ */
+export interface PrimarySale {
+  readonly outcome: PrimaryOutcome;
+  /** `CURRENCY_ETH` (zero) or an ERC-20; zero unless SOLD. */
+  readonly currency: Address;
+  /** The price paid, exact (from `PrimarySaleSettled`); zero unless SOLD. */
+  readonly price: Wei;
+}
+
 /** A work, in every variant. */
 export interface StreamWork {
   readonly key: WorkKey;
@@ -166,8 +189,8 @@ export interface StreamWork {
   readonly program: StreamProgram;
   readonly standard: TokenStandard;
   readonly token: Address;
-  /** uint256 on-chain; sequential from 1, so it fits a JS number. */
-  readonly tokenId: number;
+  /** uint256: 6529 Stream IDs run from 1; federated IDs can exceed 2^53. */
+  readonly tokenId: bigint;
   readonly kind: ItemKind;
   readonly title: string;
   readonly artistId: string;
@@ -193,10 +216,15 @@ export interface StreamWork {
   /** ERC-721 owner (`ownerOf`), or null for an edition or a burned token. */
   readonly owner: Address | null;
   /** ERC-1155 supply minted so far (`IEditions.edition(id).minted`). */
-  readonly editionSupply: number | null;
+  readonly minted: number | null;
   /** The sale that mints this token, if any. Its kind is extensible (`SaleKindId`). */
   readonly sale: SaleRef | null;
   readonly primarySaleSettled: boolean;
+  /**
+   * `IStream.primarySale(id)` for a 1/1 (federated templates record the same
+   * report, v1.1 design); NONE for an edition.
+   */
+  readonly primarySale: PrimarySale;
   /** The latest dispute outcome (`StatementLog.latestDisputeOutcome`), and the pause state. */
   readonly dispute: WorkDisputeState;
   /** For federated tokens: the contract and its registry status. */
@@ -271,7 +299,7 @@ export interface StatementView {
   readonly role: StatementRole;
   /** The kind's label, for example "DISPUTE_OUTCOME" (on-chain: its keccak256). */
   readonly kind: string;
-  readonly subject: { readonly token: Address; readonly id: number };
+  readonly subject: { readonly token: Address; readonly id: bigint };
   readonly contentHash: Hex32;
   readonly uri: string | null;
   readonly summary: string;
@@ -343,12 +371,20 @@ export interface FederatedContract {
   readonly symbol: string;
   readonly deployedAt: UnixSeconds;
   readonly deployTx: Hex32;
+  /** The factory that deployed and registered it (the `Registered` event's sender). */
+  readonly factory: Address;
+  /** The template's `owner()`: the artist identity's authority controls it. */
+  readonly owner: Address;
   readonly defaultLicense: string;
+  /** ERC-2981 rate for new works, out of 100,000; the artist sets it. */
+  readonly royaltyRate: number;
   readonly works: readonly WorkKey[];
+  /** Primary sales settled through the network's adapters (indexed `SaleSettled` / `AuctionSettled`). */
+  readonly volume: Wei;
   /**
    * Sale methods whose adapters may mint into this contract. Every contract
-   * starts with the two auctions; which further methods federated contracts get
-   * is an open owner question.
+   * starts with the two auctions (owner decision 14); governance admits a new
+   * adapter without redeploying the contract, and it joins this list.
    */
   readonly saleKinds: readonly SaleKindId[];
   readonly delisting: FederatedDelisting | null;
@@ -359,8 +395,36 @@ export interface FederatedDirectoryQuery {
   readonly form?: FederatedForm;
   readonly artistId?: string;
   readonly search?: string;
+  /**
+   * Only contracts with this status. A contract whose artist identity is
+   * delisted counts as delisted. Overrides `includeDelisted`.
+   */
+  readonly status?: FederatedStatus;
   /** Delisted contracts are hidden from 6529.io by default. */
   readonly includeDelisted?: boolean;
+}
+
+/** A template the federation factory deploys (v1.1 design; ADR 0001 section 16). */
+export interface FederatedTemplate {
+  readonly standard: TokenStandard;
+  readonly version: number;
+  readonly codeHash: Hex32;
+  /** Runtime code size (`extcodesize` of the template): the deploy pays for every byte. */
+  readonly codeBytes: number;
+  /** New storage slots one deployment writes: the template's state, the registry entry and the artist listing. */
+  readonly newSlots: number;
+}
+
+/** The federation factory: where it is, and what a deployment gets today. */
+export interface FederationFactoryInfo {
+  readonly factory: Address;
+  readonly registry: Address;
+  /** The current template for each standard. */
+  readonly templates: readonly FederatedTemplate[];
+  /** `PRODUCT_FEDERATED` network share, out of 100,000. */
+  readonly feeShare: number;
+  /** The default royalty rate for new works, out of 100,000. */
+  readonly royaltyRate: number;
 }
 
 /** The launch wizard's input to the federation factory. */

@@ -30,15 +30,15 @@ export const E192_MANTISSAS: readonly number[] = [
 const LADDER_DENSITIES = [24, 48, 96, 192] as const;
 
 interface LadderParams {
-  readonly base: Wei;
-  readonly perDecade: number;
-  readonly steps: number;
+  readonly basePrice: Wei;
+  readonly stepsPerDecade: number;
+  readonly stepCount: number;
 }
 
 const DEFAULT_LADDER: LadderParams = {
-  base: EDITION_AUCTION_CONFIG.base,
-  perDecade: EDITION_AUCTION_CONFIG.perDecade,
-  steps: EDITION_AUCTION_CONFIG.steps,
+  basePrice: EDITION_AUCTION_CONFIG.basePrice,
+  stepsPerDecade: EDITION_AUCTION_CONFIG.stepsPerDecade,
+  stepCount: EDITION_AUCTION_CONFIG.stepCount,
 };
 
 function assertDensity(perDecade: number): void {
@@ -50,24 +50,24 @@ function assertDensity(perDecade: number): void {
 /** The price of step `step`, in wei. Exact integer math, as on-chain. */
 export function stepPrice(
   step: number,
-  ladder: Pick<LadderParams, "base" | "perDecade"> = DEFAULT_LADDER
+  ladder: Pick<LadderParams, "basePrice" | "stepsPerDecade"> = DEFAULT_LADDER
 ): Wei {
-  assertDensity(ladder.perDecade);
+  assertDensity(ladder.stepsPerDecade);
   if (!Number.isInteger(step) || step < 0) {
     throw new RangeError(`invalid step: ${step}`);
   }
-  const stride = 192 / ladder.perDecade;
-  const mantissa = E192_MANTISSAS[(step % ladder.perDecade) * stride];
+  const stride = 192 / ladder.stepsPerDecade;
+  const mantissa = E192_MANTISSAS[(step % ladder.stepsPerDecade) * stride];
   if (mantissa === undefined) {
     throw new RangeError(`invalid step: ${step}`);
   }
-  const decade = BigInt(Math.floor(step / ladder.perDecade));
-  return (ladder.base * BigInt(mantissa) * 10n ** decade) / 100n;
+  const decade = BigInt(Math.floor(step / ladder.stepsPerDecade));
+  return (ladder.basePrice * BigInt(mantissa) * 10n ** decade) / 100n;
 }
 
 /** Every step's price, ascending. */
 export function ladderPrices(ladder: LadderParams = DEFAULT_LADDER): Wei[] {
-  return Array.from({ length: ladder.steps }, (_, step) =>
+  return Array.from({ length: ladder.stepCount }, (_, step) =>
     stepPrice(step, ladder)
   );
 }
@@ -81,7 +81,7 @@ export function nearestStep(
   ladder: LadderParams = DEFAULT_LADDER
 ): number {
   let low = 0;
-  let high = ladder.steps - 1;
+  let high = ladder.stepCount - 1;
   while (low < high) {
     const middle = Math.floor((low + high) / 2);
     if (stepPrice(middle, ladder) < amount) {

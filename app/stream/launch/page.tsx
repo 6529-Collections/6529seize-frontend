@@ -1,4 +1,4 @@
-import { LaunchPage } from "@/components/stream/pages/FederatedPages";
+import { LaunchWizard } from "@/components/stream/federated/LaunchWizard";
 import {
   assertStreamProduct,
   streamPageMetadata,
@@ -6,7 +6,7 @@ import {
 
 export default function Page() {
   assertStreamProduct();
-  return <LaunchPage />;
+  return <LaunchWizard />;
 }
 
 export const generateMetadata = () =>

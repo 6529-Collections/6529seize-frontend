@@ -185,7 +185,7 @@ function claimables(
         kind: "edition-bid",
         edition: bid.edition,
         bidId: bid.bidId,
-        editions: bid.won,
+        editions: bid.unitsWon,
         refund: bid.refund,
       });
     }

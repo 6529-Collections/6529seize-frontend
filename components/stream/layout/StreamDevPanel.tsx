@@ -11,6 +11,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream";
 import { STREAM_BUTTON_SMALL } from "@/components/stream/ui/styles";
+import DevWorkControls from "@/components/stream/work/DevWorkControls";
 import type { Address } from "@/lib/stream/types";
 
 const SPEEDS = [1, 60, 600, 3_600] as const;
@@ -26,8 +27,8 @@ const NOT_CONNECTED = "none";
 
 /**
  * Mock-only controls: the simulated clock (speed, pause, jumps), the dev
- * account switcher and a scenario reset. Hidden when the data source has no
- * dev controls (the chain).
+ * account switcher, the page's dispute and delisting actors, and a scenario
+ * reset. Hidden when the data source has no dev controls (the chain).
  */
 export default function StreamDevPanel({
   locale,
@@ -47,7 +48,7 @@ export default function StreamDevPanel({
   const paused = dev.isClockPaused();
   const current = accounts.find((entry) => entry.address === account);
   return (
-    <details className="tw-fixed tw-bottom-3 tw-right-3 tw-z-50 tw-max-w-[calc(100vw-1.5rem)] tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-text-iron-200 tw-shadow-2xl sm:tw-w-80">
+    <details className="tailwind-scope tw-fixed tw-bottom-3 tw-right-3 tw-z-50 tw-max-w-[calc(100vw-1.5rem)] tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-text-iron-200 tw-shadow-2xl sm:tw-w-80">
       <summary className="tw-cursor-pointer tw-list-none tw-rounded-xl tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-amber-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
         {t(locale, "stream.dev.title")}
       </summary>
@@ -143,6 +144,7 @@ export default function StreamDevPanel({
             </p>
           )}
         </div>
+        <DevWorkControls dev={dev} locale={locale} />
         <button type="button" className={BUTTON} onClick={() => dev.reset()}>
           {t(locale, "stream.dev.reset")}
         </button>

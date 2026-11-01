@@ -126,7 +126,7 @@ describe("6529 Stream primitives", () => {
       screen.getByRole("columnheader", { name: "Federated" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("row", { name: /Split 50\/50 75\/25 90\/10/ })
+      screen.getByRole("row", { name: /Split 75\/25 75\/25 90\/10/ })
     ).toBeInTheDocument();
   });
 
@@ -151,10 +151,10 @@ describe("6529 Stream primitives", () => {
       )
     ).toBeInTheDocument();
     rerender(
-      <GasNote estimate={GAS_ESTIMATES.federatedDeploySingle} locale="en-US" />
+      <GasNote estimate={GAS_ESTIMATES.federatedDeploy721} locale="en-US" />
     );
     expect(
-      screen.getByText("About 4M–5M gas · design estimate, per contract")
+      screen.getByText("About 33.6M gas · Sepolia, estimated")
     ).toBeInTheDocument();
   });
 

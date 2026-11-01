@@ -21,7 +21,7 @@ export function appendStatement(
   statement: {
     readonly role: StatementRole;
     readonly kind: string;
-    readonly subject: { readonly token: Address; readonly id: number };
+    readonly subject: { readonly token: Address; readonly id: bigint };
     readonly summary: string;
     readonly supersedes?: Hex32 | null;
   }
@@ -84,7 +84,18 @@ export function startFromItem(
   if (!pending) {
     revert("UnknownItem", { itemHash });
   }
-  const work = addStreamWork(engine, pending.spec, at);
+  const entry = engine.state.packages[packageIndex];
+  // The minted work records the package item it consumed.
+  const work = addStreamWork(
+    engine,
+    entry
+      ? {
+          ...pending.spec,
+          item: { packageRoot: entry.packageRoot, itemHash },
+        }
+      : pending.spec,
+    at
+  );
   startEnglishAuction(engine, work.key, at);
   if (work.kind === "EDITION_MASTER") {
     const edition = addLinkedEdition(engine, work, {
@@ -98,7 +109,6 @@ export function startFromItem(
     });
     openPreparedAuction(engine, auction, at);
   }
-  const entry = engine.state.packages[packageIndex];
   if (entry) {
     engine.state.packages[packageIndex] = {
       ...entry,
@@ -119,14 +129,14 @@ export function createEditionFor(
 ): WorkKey {
   const token = engine.token(master);
   if (token.kind !== "EDITION_MASTER" || token.linked.edition === null) {
-    revert("NotEditionMaster", { workId: token.tokenId });
+    revert("NotEditionMaster", { workId: token.tokenId.toString() });
   }
   if (!token.primarySaleSettled) {
-    revert("EditionUnavailable", { editionId: token.tokenId });
+    revert("EditionUnavailable", { editionId: token.tokenId.toString() });
   }
   const edition = engine.token(token.linked.edition);
   if (edition.created) {
-    revert("EditionExists", { editionId: token.tokenId });
+    revert("EditionExists", { editionId: token.tokenId.toString() });
   }
   edition.created = true;
   engine.record(edition.key, {

@@ -4,6 +4,7 @@ import type { ArtStyle } from "@/lib/stream/mock/art";
 import type {
   Address,
   CurationPackage,
+  EditionActivity,
   EditionAuctionStatus,
   EditionAuctionTerms,
   EnglishBid,
@@ -14,17 +15,18 @@ import type {
   LocatorKind,
   MuseumHolding,
   OneOfOneOutcome,
+  PrimarySale,
   ProvenanceEvent,
   SaleRef,
   SeedPolicy,
   StatementView,
   StreamProgram,
   TokenStandard,
+  Wei,
   WorkEconomics,
   WorkKey,
   WorkParty,
   WorkVariant,
-  Wei,
 } from "@/lib/stream/types";
 
 /** The mock's in-memory "chain". Views are built from this on every read. */
@@ -59,7 +61,7 @@ export interface MockToken {
   readonly program: StreamProgram;
   readonly standard: TokenStandard;
   readonly token: Address;
-  readonly tokenId: number;
+  readonly tokenId: bigint;
   readonly kind: ItemKind;
   readonly title: string;
   readonly description: string;
@@ -84,6 +86,8 @@ export interface MockToken {
   created: boolean;
   sale: SaleRef | null;
   primarySaleSettled: boolean;
+  /** `IStream.primarySale` (owner decision 17), set by `settlePrimary`. */
+  primarySale: PrimarySale;
   burned: boolean;
   readonly mintedAt: number | null;
   readonly packageRoot: Hex32;
@@ -132,6 +136,38 @@ export interface MockEditionAuction {
   readonly oneOfOneSaleId: string | null;
   readonly book: EditionBook;
   result: BookResult | null;
+  /** The lowest and highest steps any bid has used (`Auction.lowStep`, `highStep`). */
+  lowStep: number | null;
+  highStep: number | null;
+  /** A settlement in progress or done (rc.2 chunked settle); null before the first call. */
+  settling: MockSettling | null;
+  /** The sale's events, oldest first. */
+  readonly events: EditionActivity[];
+}
+
+/** Where a chunked settlement stands (`ScanWord` and the result's sweep counters). */
+export interface MockSettling {
+  /** One past the next book word to scan (words are eight steps). */
+  cursor: number;
+  /** The lowest word: where the scan ends. */
+  readonly low: number;
+  cleared: boolean;
+  /** The clearing step's winning units, once cleared. */
+  cutUnits: number;
+  /** `cutUnits` until a settler's sweep completes, then the final cutoff. */
+  cutoff: number;
+  /** Zero until a settler's sweep completes, then `departures`. */
+  departuresSwept: number;
+  departures: number;
+  /** Each settler's own sweep in progress (`Space.SWEEP`), by lowercase address. */
+  readonly sweeps: Map<string, MockSweep>;
+}
+
+/** One settler's sweep: `swept | nextPosition << 32 | cutoff << 64` on-chain. */
+export interface MockSweep {
+  readonly swept: number;
+  readonly nextPosition: number;
+  readonly cutoff: number;
 }
 
 export interface MockSplitWallet {
@@ -149,11 +185,17 @@ export interface MockSplitWallet {
 
 export interface MockFederatedState extends Omit<
   FederatedContract,
-  "works" | "status" | "delisting"
+  | "works"
+  | "status"
+  | "delisting"
+  | "saleKinds"
+  | "factory"
+  | "owner"
+  | "volume"
 > {
   status: FederatedContract["status"];
   delisting: FederatedDelisting | null;
-  nextTokenId: number;
+  nextTokenId: bigint;
 }
 
 export interface PayeeSpec {
@@ -177,6 +219,8 @@ export interface WorkSpec {
   readonly seedPolicy?: SeedPolicy;
   readonly collection?: { readonly id: number; readonly name: string };
   readonly storage?: Partial<MockStorage>;
+  /** The approved package item this work mints from (`IStream.work(id)`), when it has one. */
+  readonly item?: { readonly packageRoot: Hex32; readonly itemHash: Hex32 };
 }
 
 /** An approved item waiting in curation, with what `start` will mint. */
@@ -206,6 +250,6 @@ export interface MockState {
   readonly museum: MuseumHolding[];
   readonly provenance: Map<WorkKey, ProvenanceEvent[]>;
   networkFees: Wei;
-  nextStreamTokenId: number;
+  nextStreamTokenId: bigint;
   federatedDeployNonce: number;
 }

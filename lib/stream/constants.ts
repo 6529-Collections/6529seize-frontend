@@ -58,13 +58,13 @@ export const EDITION_AUCTION_CONFIG = {
   /** Breadth margin (D138): 10%, out of 100,000 (`marginShare`). */
   marginShare: 10_000,
   /** Steps per decade: 48 (about 4.9% apart). */
-  perDecade: 48,
+  stepsPerDecade: 48,
   /** Base price: 0.0001 ETH. */
-  base: 10n ** 14n,
+  basePrice: 10n ** 14n,
   /** Number of steps: 336, reaching 953 ETH. */
-  steps: 336,
+  stepCount: 336,
   /** The edition close follows the 1/1's final end by 15 minutes (D140). */
-  offset: 15 * SECONDS_PER_MINUTE,
+  closeOffset: 15 * SECONDS_PER_MINUTE,
   /** Soft close (D141): a bid in the last 5 minutes extends to 5 minutes after it. */
   softWindow: 5 * SECONDS_PER_MINUTE,
   /** Total soft-close extension is capped at 24 hours (owner decision 5). */
@@ -72,9 +72,11 @@ export const EDITION_AUCTION_CONFIG = {
 } as const;
 
 /**
- * A standalone federated ERC-1155 has no 1/1 to follow. The mock anchors its
- * edition auction to a fixed 24-hour window (PLAN section 1.12, "a fixed-duration
- * anchor"); which sale methods federated contracts get is an open owner question.
+ * PROVISIONAL. A standalone federated ERC-1155 edition auction has no 1/1 to
+ * follow, and the contracts don't define its close yet. The mock closes it a
+ * fixed 24 hours after opening (PLAN section 1.12, "a fixed-duration anchor"),
+ * with no 15-minute offset, then the usual 5-minute soft close and its 24-hour
+ * backstop. Federated contracts start with the two auctions (owner decision 14).
  */
 export const STANDALONE_EDITION_DURATION = 24 * SECONDS_PER_HOUR;
 

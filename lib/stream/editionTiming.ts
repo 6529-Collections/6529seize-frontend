@@ -16,7 +16,7 @@ import type {
 
 type Timing = Pick<
   EditionAuctionTerms,
-  "offset" | "softWindow" | "maxExtension"
+  "closeOffset" | "softWindow" | "maxExtension"
 >;
 
 export function editionTimes(
@@ -25,12 +25,12 @@ export function editionTimes(
   softEnd: UnixSeconds | null,
   terms: Timing
 ): EditionAuctionTimes {
-  const base = anchorEnd + terms.offset;
+  const base = anchorEnd + terms.closeOffset;
   return {
     openedAt,
-    anchorEnd,
-    baseEnd: base,
-    editionEnd: Math.max(base, softEnd ?? 0),
+    oneOfOneEnd: anchorEnd,
+    closeAt: base,
+    endTime: Math.max(base, softEnd ?? 0),
     softEnd,
     backstop: base + terms.maxExtension,
   };
@@ -42,7 +42,7 @@ export function softEndAfterBid(
   now: UnixSeconds,
   terms: Timing
 ): UnixSeconds | null {
-  if (now < times.editionEnd - terms.softWindow) {
+  if (now < times.endTime - terms.softWindow) {
     return times.softEnd;
   }
   const next = Math.min(now + terms.softWindow, times.backstop);
@@ -52,7 +52,7 @@ export function softEndAfterBid(
 interface PhaseInput {
   readonly status: EditionAuctionStatus;
   readonly times: EditionAuctionTimes;
-  readonly totalUnits: number;
+  readonly liveUnits: number;
   readonly settledCount: number | null;
   readonly oneOfOneState: EnglishAuctionState | null;
   readonly now: UnixSeconds;
@@ -70,13 +70,13 @@ function openPhase(input: PhaseInput): EditionAuctionPhase {
   if (oneOfOneState === "PAUSED") {
     return "disputed";
   }
-  if (now >= times.editionEnd) {
-    return input.totalUnits === 0 ? "noBids" : "closed";
+  if (now >= times.endTime) {
+    return input.liveUnits === 0 ? "noBids" : "closed";
   }
-  if (times.softEnd !== null && times.softEnd > times.baseEnd) {
+  if (times.softEnd !== null && times.softEnd > times.closeAt) {
     return "extended";
   }
-  return now >= times.anchorEnd ? "oneOfOneEnded" : "open";
+  return now >= times.oneOfOneEnd ? "oneOfOneEnded" : "open";
 }
 
 /** The UX state (PLAN section 6 "States"). */
@@ -88,9 +88,10 @@ export function editionPhase(input: PhaseInput): EditionAuctionPhase {
       return "void";
     case "SETTLED":
       return settledPhase(input.settledCount);
+    case "SETTLING":
+      return "settling";
     case "OPEN":
     case "CLOSED":
-    case "SETTLING":
       return openPhase(input);
   }
 }

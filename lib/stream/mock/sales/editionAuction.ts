@@ -3,7 +3,6 @@ import {
   MAX_EDITION_BID_QTY,
 } from "@/lib/stream/constants";
 import { revenueThreshold } from "@/lib/stream/clearing";
-import type { EditionAuctionActions } from "@/lib/stream/dataSource";
 import {
   addBid,
   type BookBid,
@@ -13,9 +12,9 @@ import {
   findBid,
   moveBid,
   raiseToGetIn,
-  removeBid,
   unitsAhead,
   whatIfBid,
+  whatIfRaise,
   wonBy,
 } from "@/lib/stream/editionBook";
 import {
@@ -25,9 +24,8 @@ import {
   softEndAfterBid,
 } from "@/lib/stream/editionTiming";
 import { candidateRows, stepTotalRows } from "@/lib/stream/editionViews";
-import { resumedEnd } from "@/lib/stream/englishAuction";
-import { ladderPrices } from "@/lib/stream/ladder";
-import { later, type MockStreamEngine, revert } from "@/lib/stream/mock/engine";
+import { ladderPrices, nearestStep } from "@/lib/stream/ladder";
+import { type MockStreamEngine, revert } from "@/lib/stream/mock/engine";
 import { mockHash } from "@/lib/stream/mock/ids";
 import {
   assertListed,
@@ -36,6 +34,7 @@ import {
 import type { MockEditionAuction } from "@/lib/stream/mock/state";
 import type {
   Address,
+  EditionActivity,
   EditionAuction,
   EditionAuctionPhase,
   EditionAuctionStatus,
@@ -44,6 +43,7 @@ import type {
   EditionCandidate,
   EditionClearing,
   EditionQuote,
+  EditionSettlement,
   EditionStepTotal,
   EnglishAuctionState,
   Wei,
@@ -58,11 +58,19 @@ const priceCache = new Map<string, Wei[]>();
 
 /** Every step's price for an auction's locked ladder (cached per ladder). */
 export function auctionPrices(auction: MockEditionAuction): Wei[] {
-  const { base, perDecade, steps } = auction.terms;
+  const {
+    basePrice: base,
+    stepsPerDecade: perDecade,
+    stepCount: steps,
+  } = auction.terms;
   const key = `${base}:${perDecade}:${steps}`;
   let prices = priceCache.get(key);
   if (!prices) {
-    prices = ladderPrices({ base, perDecade, steps });
+    prices = ladderPrices({
+      basePrice: base,
+      stepsPerDecade: perDecade,
+      stepCount: steps,
+    });
     priceCache.set(key, prices);
   }
   return prices;
@@ -104,14 +112,14 @@ export function prepareEditionAuction(
     program: token.program,
     status: "NONE",
     terms: {
-      base: EDITION_AUCTION_CONFIG.base,
-      perDecade: EDITION_AUCTION_CONFIG.perDecade,
-      steps: EDITION_AUCTION_CONFIG.steps,
+      basePrice: EDITION_AUCTION_CONFIG.basePrice,
+      stepsPerDecade: EDITION_AUCTION_CONFIG.stepsPerDecade,
+      stepCount: EDITION_AUCTION_CONFIG.stepCount,
       marginShare: EDITION_AUCTION_CONFIG.marginShare,
-      offset: EDITION_AUCTION_CONFIG.offset,
+      closeOffset: EDITION_AUCTION_CONFIG.closeOffset,
       softWindow: EDITION_AUCTION_CONFIG.softWindow,
       maxExtension: EDITION_AUCTION_CONFIG.maxExtension,
-      cap: options.cap,
+      maxCount: options.cap,
       feeShare: token.economics.feeShare,
       seller: token.economics.seller,
       feeRecipient: token.economics.feeRecipient,
@@ -120,8 +128,12 @@ export function prepareEditionAuction(
     softEnd: null,
     fixedAnchorEnd: options.fixedAnchorEnd ?? null,
     oneOfOneSaleId,
-    book: createBook(EDITION_AUCTION_CONFIG.steps, options.cap),
+    book: createBook(EDITION_AUCTION_CONFIG.stepCount, options.cap),
     result: null,
+    lowStep: null,
+    highStep: null,
+    settling: null,
+    events: [],
   };
   engine.state.editionAuctions.set(edition, auction);
   token.sale = {
@@ -148,9 +160,32 @@ export function openPreparedAuction(
   }
   auction.status = "OPEN";
   auction.openedAt = at;
+  logEvent(engine, auction, { kind: "opened", source: "AuctionOpened" }, at);
 }
 
-function oneOfOneState(
+type WithoutStamp<E> = E extends unknown ? Omit<E, "at" | "txHash"> : never;
+
+/** Records one of the sale's events, as the chain source reads them from logs. */
+export function logEvent(
+  engine: MockStreamEngine,
+  auction: MockEditionAuction,
+  event: WithoutStamp<EditionActivity>,
+  at: number = engine.now()
+): void {
+  auction.events.push({
+    ...event,
+    at,
+    txHash: engine.pendingTxHash(),
+  } as EditionActivity);
+}
+
+/** `Auction.lowStep` and `highStep`: every step any bid has used. */
+function trackStep(auction: MockEditionAuction, step: number): void {
+  auction.lowStep = Math.min(auction.lowStep ?? step, step);
+  auction.highStep = Math.max(auction.highStep ?? step, step);
+}
+
+export function oneOfOneState(
   engine: MockStreamEngine,
   auction: MockEditionAuction
 ): EnglishAuctionState | null {
@@ -172,10 +207,11 @@ function anchorEnd(engine: MockStreamEngine, auction: MockEditionAuction) {
   if (!oneOfOne) {
     return auction.openedAt;
   }
-  // While the 1/1 is paused, the edition end follows the end it resumes to.
-  return oneOfOne.stored === "PAUSED"
-    ? resumedEnd(oneOfOne, engine.now())
-    : oneOfOne.endTime;
+  // `endTimes` reads the 1/1's end as `IEnglishAuction.auction` reports it:
+  // while it is paused, the stored end, not the end it will resume to. Bidding
+  // stays open while paused (`withdrawalsOpen`), and the close moves when the
+  // 1/1 resumes.
+  return oneOfOne.endTime;
 }
 
 export function auctionTimes(
@@ -197,7 +233,7 @@ export function auctionPhase(
   return editionPhase({
     status: auction.status,
     times: auctionTimes(engine, auction),
-    totalUnits: totalUnits(auction),
+    liveUnits: totalUnits(auction),
     settledCount: auction.result?.count ?? null,
     oneOfOneState: oneOfOneState(engine, auction),
     now: engine.now(),
@@ -216,7 +252,7 @@ function currentResult(auction: MockEditionAuction): BookResult {
   );
 }
 
-function clearingView(
+export function clearingView(
   auction: MockEditionAuction,
   result: BookResult
 ): EditionClearing {
@@ -229,10 +265,10 @@ function clearingView(
     step: result.step,
     price,
     revenue,
-    networkShare,
+    networkFee: networkShare,
     sellerShare: revenue - networkShare,
     rationed: result.rationed,
-    cutStepUnits: result.cutStepUnits,
+    cutUnits: result.cutUnits,
     cutoff: result.cutoff,
     bestRevenue: result.bestRevenue,
     threshold: revenueThreshold(result.bestRevenue, auction.terms.marginShare),
@@ -266,10 +302,10 @@ export function editionAuctionView(
     phase,
     terms: auction.terms,
     times: auctionTimes(engine, auction),
-    totalUnits: totalUnits(auction),
+    liveUnits: totalUnits(auction),
     bidCount: auction.book.bids.length,
-    lo: used[0] ?? null,
-    hi: used.at(-1) ?? null,
+    lowStep: used[0] ?? null,
+    highStep: used.at(-1) ?? null,
     clearing:
       auction.status === "VOID"
         ? clearingView(auction, {
@@ -286,6 +322,22 @@ export function editionAuctionView(
     biddingOpen: acceptsBids(phase),
     withdrawalsOpen: phase === "disputed",
     editionCreated: token.created,
+    settlement: settlementView(auction),
+  };
+}
+
+function settlementView(auction: MockEditionAuction): EditionSettlement | null {
+  const settling = auction.settling;
+  if (settling === null || auction.status === "VOID") {
+    return null;
+  }
+  return {
+    cleared: settling.cleared,
+    wordsLeft: settling.cleared ? 0 : settling.cursor - settling.low,
+    cutUnits: settling.cutUnits,
+    cutoff: settling.cutoff,
+    departuresSwept: settling.departuresSwept,
+    departures: settling.departures,
   };
 }
 
@@ -309,7 +361,7 @@ export function stepTotalsView(
   return stepTotalRows(
     auction.book.live,
     auctionPrices(auction),
-    auction.terms.cap,
+    auction.terms.maxCount,
     result
   );
 }
@@ -338,12 +390,12 @@ export function bidView(
 ): EditionBidView {
   const prices = auctionPrices(auction);
   const price = prices[bid.step] ?? 0n;
-  const escrow = BigInt(bid.qty) * price;
+  const escrow = BigInt(bid.quantity) * price;
   const isVoid = auction.status === "VOID";
   const result = currentResult(auction);
   const won = isVoid ? 0 : wonBy(bid, result);
   const clearingPrice = result.step === null ? 0n : (prices[result.step] ?? 0n);
-  const status = bidStatus(won, bid.qty);
+  const status = bidStatus(won, bid.quantity);
   const canRaise =
     status !== "in" &&
     !bid.withdrawn &&
@@ -353,12 +405,12 @@ export function bidView(
     bidder: bid.bidder,
     step: bid.step,
     price,
-    qty: bid.qty,
-    pos: bid.pos,
+    quantity: bid.quantity,
+    position: bid.position,
     escrow,
     placedAt: bid.placedAt,
     status,
-    won,
+    unitsWon: won,
     refund: bid.withdrawn ? 0n : escrow - BigInt(won) * clearingPrice,
     unitsAhead: unitsAhead(auction.book, bid),
     raiseToGetIn: canRaise
@@ -384,12 +436,50 @@ export function quoteBid(
   );
   return {
     step,
-    qty,
-    cost: BigInt(qty) * (prices[step] ?? 0n),
-    after: clearingView(auction, whatIf.result),
-    won: whatIf.won,
-    pushedOut: whatIf.pushedOut,
-    pulledIn: whatIf.pulledIn,
+    quantity: qty,
+    escrow: BigInt(qty) * (prices[step] ?? 0n),
+    result: clearingView(auction, whatIf.result),
+    unitsWon: whatIf.unitsWon,
+    unitsPushedOut: whatIf.unitsPushedOut,
+    unitsPulledIn: whatIf.unitsPulledIn,
+  };
+}
+
+/** What raising `bidId` to `newStep` would do, or null if that raise is not allowed. */
+export function quoteRaise(
+  auction: MockEditionAuction,
+  bidId: number,
+  newStep: number
+): EditionQuote | null {
+  const bid = findBid(auction.book, bidId);
+  if (
+    bid === undefined ||
+    bid.withdrawn ||
+    bid.claimed ||
+    !Number.isInteger(newStep) ||
+    newStep <= bid.step ||
+    newStep >= auction.terms.stepCount
+  ) {
+    return null;
+  }
+  const prices = auctionPrices(auction);
+  const whatIf = whatIfRaise(
+    auction.book,
+    bid,
+    newStep,
+    prices,
+    auction.terms.marginShare
+  );
+  return {
+    step: newStep,
+    quantity: bid.quantity,
+    escrow:
+      BigInt(bid.quantity) *
+      ((prices[newStep] ?? 0n) - (prices[bid.step] ?? 0n)),
+    result: clearingView(auction, whatIf.result),
+    unitsWon: whatIf.unitsWon,
+    unitsPushedOut: whatIf.unitsPushedOut,
+    unitsPulledIn: whatIf.unitsPulledIn,
   };
 }
 
@@ -398,14 +488,14 @@ function assertBidding(engine: MockStreamEngine, auction: MockEditionAuction) {
   if (!acceptsBids(phase)) {
     revert("BiddingClosed", {
       saleId: auction.saleId,
-      endTime: auctionTimes(engine, auction).editionEnd,
+      endTime: auctionTimes(engine, auction).endTime,
     });
   }
   assertListed(engine, auction.edition);
 }
 
 function assertStep(auction: MockEditionAuction, step: number) {
-  if (!Number.isInteger(step) || step < 0 || step >= auction.terms.steps) {
+  if (!Number.isInteger(step) || step < 0 || step >= auction.terms.stepCount) {
     revert("InvalidStep", { step });
   }
 }
@@ -418,7 +508,11 @@ function applySoftClose(engine: MockStreamEngine, auction: MockEditionAuction) {
   );
 }
 
-function ownBid(auction: MockEditionAuction, from: Address, bidId: number) {
+export function ownBid(
+  auction: MockEditionAuction,
+  from: Address,
+  bidId: number
+) {
   const bid = findBid(auction.book, bidId);
   if (!bid) {
     revert("UnknownBid", { saleId: auction.saleId, bidId });
@@ -442,9 +536,28 @@ export function placeEditionBid(
     revert("InvalidQuantity", { quantity: qty });
   }
   const price = auctionPrices(auction)[step] ?? 0n;
+  const endBefore = auctionTimes(engine, auction).endTime;
   engine.debit(from, BigInt(qty) * price);
   applySoftClose(engine, auction);
-  return addBid(auction.book, { bidder: from, step, qty, at: engine.now() });
+  const bid = addBid(auction.book, {
+    bidder: from,
+    step,
+    qty,
+    at: engine.now(),
+  });
+  trackStep(auction, step);
+  const endTime = auctionTimes(engine, auction).endTime;
+  logEvent(engine, auction, {
+    kind: "bid",
+    bidder: from,
+    bidId: bid.id,
+    step,
+    quantity: qty,
+    endTime,
+    extended: endTime > endBefore,
+    source: "BidPlaced",
+  });
+  return bid;
 }
 
 export function raiseEditionBid(
@@ -462,49 +575,26 @@ export function raiseEditionBid(
   }
   const prices = auctionPrices(auction);
   const difference =
-    BigInt(bid.qty) * ((prices[newStep] ?? 0n) - (prices[bid.step] ?? 0n));
+    BigInt(bid.quantity) * ((prices[newStep] ?? 0n) - (prices[bid.step] ?? 0n));
+  const endBefore = auctionTimes(engine, auction).endTime;
+  const fromStep = bid.step;
   engine.debit(from, difference);
   applySoftClose(engine, auction);
   moveBid(auction.book, bid, newStep);
-}
-
-export function settleEditionAuction(
-  engine: MockStreamEngine,
-  auction: MockEditionAuction
-): void {
-  const times = auctionTimes(engine, auction);
-  const state = oneOfOneState(engine, auction);
-  if (auction.status !== "OPEN") {
-    revert("InvalidAuctionState", { status: auction.status });
-  }
-  if (state === "CANCELLED") {
-    auction.status = "VOID";
-    return;
-  }
-  if (
-    engine.now() < times.editionEnd ||
-    (state !== null && state !== "SETTLED")
-  ) {
-    revert("SettlementNotReady", { saleId: auction.saleId });
-  }
-  const result = clearBook(
-    auction.book,
-    auctionPrices(auction),
-    auction.terms.marginShare
-  );
-  if (result.count > 0) {
-    if (!engine.token(auction.edition).created) {
-      revert("EditionNotCreated", { edition: auction.edition });
-    }
-    const clearing = clearingView(auction, result);
-    engine.payPrimary(
-      auction.terms.seller,
-      auction.terms.feeShare,
-      clearing.revenue
-    );
-  }
-  auction.result = result;
-  auction.status = "SETTLED";
+  trackStep(auction, newStep);
+  const endTime = auctionTimes(engine, auction).endTime;
+  logEvent(engine, auction, {
+    kind: "raised",
+    bidder: from,
+    bidId: bid.id,
+    fromStep,
+    step: newStep,
+    quantity: bid.quantity,
+    paid: difference,
+    endTime,
+    extended: endTime > endBefore,
+    source: "BidRaised",
+  });
 }
 
 export function claimEditionBid(
@@ -524,9 +614,18 @@ export function claimEditionBid(
   }
   const view = bidView(engine, auction, bid);
   bid.claimed = true;
-  engine.mintEditions(auction.edition, to, view.won);
+  engine.mintEditions(auction.edition, to, view.unitsWon);
   engine.creditBalance(to, view.refund);
-  if (view.won > 0) {
+  logEvent(engine, auction, {
+    kind: "claimed",
+    bidder: from,
+    bidId,
+    to,
+    unitsWon: view.unitsWon,
+    refund: view.refund,
+    source: "BidClaimed",
+  });
+  if (view.unitsWon > 0) {
     engine.record(auction.edition, {
       kind: "editions-minted",
       actor: to,
@@ -534,76 +633,58 @@ export function claimEditionBid(
       source: "ERC1155.TransferSingle (claim)",
     });
   }
-  return { editions: view.won, refund: view.refund };
+  return { editions: view.unitsWon, refund: view.refund };
 }
 
-export function createEditionActions(
-  engine: MockStreamEngine
-): EditionAuctionActions {
-  return {
-    open: (_from, edition) =>
-      later(() =>
-        engine.tx("editionOpen", () => {
-          openPreparedAuction(engine, findEditionAuction(engine, edition));
-        })
-      ),
-    bid: (from, edition, step, qty) =>
-      later(() =>
-        engine.tx("editionBid", () => ({
-          bidId: placeEditionBid(
-            engine,
-            findEditionAuction(engine, edition),
-            from,
-            step,
-            qty
-          ).id,
-        }))
-      ),
-    raise: (from, edition, bidId, newStep) =>
-      later(() =>
-        engine.tx("editionRaise", () => {
-          raiseEditionBid(
-            engine,
-            findEditionAuction(engine, edition),
-            from,
-            bidId,
-            newStep
-          );
-        })
-      ),
-    withdraw: (from, edition, bidId) =>
-      later(() =>
-        engine.tx(null, () => {
-          const auction = findEditionAuction(engine, edition);
-          if (oneOfOneState(engine, auction) !== "PAUSED") {
-            revert("WithdrawalsClosed", { saleId: auction.saleId });
-          }
-          const bid = ownBid(auction, from, bidId);
-          if (bid.withdrawn) {
-            revert("UnknownBid", { saleId: auction.saleId, bidId });
-          }
-          const escrow = bidView(engine, auction, bid).escrow;
-          removeBid(auction.book, bid);
-          engine.creditBalance(from, escrow);
-        })
-      ),
-    settle: (_from, edition) =>
-      later(() =>
-        engine.tx("editionSettle", () => {
-          settleEditionAuction(engine, findEditionAuction(engine, edition));
-        })
-      ),
-    claim: (from, edition, bidId, to) =>
-      later(() =>
-        engine.tx("editionClaimWin", () =>
-          claimEditionBid(
-            engine,
-            findEditionAuction(engine, edition),
-            from,
-            bidId,
-            to
-          )
-        )
-      ),
+/** A small deterministic generator, so a simulated crowd replays the same way. */
+function generator(seed: number): () => number {
+  let state = seed % 2_147_483_647;
+  if (state <= 0) {
+    state += 2_147_483_646;
+  }
+  return () => {
+    state = (state * 16_807) % 2_147_483_647;
+    return (state - 1) / 2_147_483_646;
   };
+}
+
+/** Quantities like a real crowd: mostly one or two, sometimes a handful. */
+function crowdQuantity(random: () => number): number {
+  const roll = random();
+  if (roll < 0.5) {
+    return 1;
+  }
+  return roll < 0.8
+    ? 2 + Math.floor(random() * 2)
+    : 4 + Math.floor(random() * 7);
+}
+
+/** Mock only: other bidders bid around the current price (the dev controls' "+1 bidder"). */
+export function simulateEditionBids(
+  engine: MockStreamEngine,
+  auction: MockEditionAuction,
+  count: number,
+  bidders: readonly Address[]
+): void {
+  const prices = auctionPrices(auction);
+  const random = generator(
+    engine.state.txSequence * 7_919 + auction.book.bids.length * 31 + 17
+  );
+  for (let index = 0; index < count; index += 1) {
+    const center =
+      clearBook(auction.book, prices, auction.terms.marginShare).step ??
+      nearestStep(10n ** 16n, auction.terms);
+    // Roughly normal, about 6 steps (a third of a price doubling) either side.
+    const spread = (random() + random() + random() - 1.5) * 2 * 6;
+    const step = Math.max(
+      0,
+      Math.min(auction.terms.stepCount - 1, Math.round(center + spread))
+    );
+    const qty = crowdQuantity(random);
+    const bidder = bidders[(auction.book.bids.length + index) % bidders.length];
+    const cost = BigInt(qty) * (prices[step] ?? 0n);
+    if (bidder !== undefined && engine.balanceOf(bidder) >= cost) {
+      placeEditionBid(engine, auction, bidder, step, qty);
+    }
+  }
 }
