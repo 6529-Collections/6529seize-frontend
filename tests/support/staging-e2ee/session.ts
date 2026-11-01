@@ -330,11 +330,13 @@ export async function signInThroughWalletModal(session: StagingE2eeSession) {
   // Awaited below; keep an earlier failure from leaving it unhandled.
   login.catch(() => undefined);
   let lastChallenge: string | null = null;
+  // The challenge is parsed off the response event; awaited before use.
+  let nonceParsed: Promise<void> = Promise.resolve();
   const onNonce = (response: Response) => {
     if (new URL(response.url()).pathname !== "/api/auth/session-nonce") {
       return;
     }
-    response
+    nonceParsed = response
       .json()
       .then((body: { signable_message?: unknown }) => {
         if (typeof body.signable_message === "string") {
@@ -394,6 +396,7 @@ export async function signInThroughWalletModal(session: StagingE2eeSession) {
 
   const loginResponse = await login;
   page.off("response", onNonce);
+  await nonceParsed;
   session.signInMessage = lastChallenge;
   expect(
     loginResponse.ok(),
@@ -729,6 +732,12 @@ export async function prepareEnrolledSession(
     if (!user.profileId) {
       await createThrowawayProfile(session);
       if (options.signInAgainWithProfile) {
+        // The first device is closed here, so its guard evidence is checked
+        // now; the run's hygiene checks see only the second device.
+        expect(
+          session.productionWrites,
+          `${label}: writes aimed at production hosts before the second sign-in`
+        ).toEqual([]);
         await session.close();
         session = await openStagingSession(browser, testInfo, user, label);
         await signInThroughWalletModal(session);
