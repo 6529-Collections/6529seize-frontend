@@ -574,6 +574,7 @@ export default function Auth({
     showSessionUpgradePrompt,
     signMessage,
     signModalReason,
+    ownProfileId: connectedProfile?.id ?? null,
   });
 
   const navigateAfterProfileSwitchForRoute = useCallback(() => {

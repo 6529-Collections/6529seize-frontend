@@ -15,10 +15,13 @@ import { HttpFile } from '../http/http';
 
 export class ApiDeviceGrantProof {
     /**
-    * Exact SIWE message signed by the wallet.
+    * Exact SIWE message signed by the wallet, or for an app device grant the signed EIP-712 DeviceGrant message as JSON (it starts with \"{\"; its EIP-712 digest is the grant id).
     */
     'message': string;
     'wallet_signature': string;
+    /**
+    * SIWE Chain ID; 1 for app device grants, whose EIP-1271 contract wallet signatures are checked on Ethereum mainnet.
+    */
     'chain_id': number;
     'id': string;
     /**
@@ -33,11 +36,11 @@ export class ApiDeviceGrantProof {
     'scopes': Array<string>;
     'device_label': string;
     /**
-    * SIWE domain the grant was signed for, e.g. 6529.io.
+    * SIWE domain the grant was signed for, e.g. 6529.io, or the origin of an app device grant (e.g. 6529.io or \"6529 Desktop\").
     */
     'domain': string;
     /**
-    * SIWE Issued At, epoch milliseconds.
+    * SIWE Issued At (or app grant issuedAt), epoch milliseconds.
     */
     'issued_at': number;
     /**

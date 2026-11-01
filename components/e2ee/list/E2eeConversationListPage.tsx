@@ -20,6 +20,7 @@ import { E2eeRouteGate } from "../gate/E2eeRouteGate";
 import { E2eeBadge } from "../ui/E2eeBadge";
 import { E2eeCenteredMessage, E2eePageShell } from "../ui/E2eePageShell";
 import { E2eeConversationList } from "./E2eeConversationList";
+import { useOpenWakeChat } from "./useOpenWakeChat";
 
 const ACTION_LINK_CLASS =
   "tw-inline-flex tw-h-9 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-text-xs tw-font-semibold tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
@@ -72,6 +73,7 @@ function DevicesLink() {
 /** `/messages/encrypted`: the encrypted chats on this device. */
 export function E2eeConversationListPage() {
   const locale = useBrowserLocale();
+  useOpenWakeChat();
   // Devices and new chats only make sense once this device is turned on.
   const ready = useE2ee().status === "ready";
   return (

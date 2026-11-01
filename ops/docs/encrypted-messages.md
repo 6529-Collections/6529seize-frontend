@@ -30,14 +30,16 @@ can export them or move them into an encrypted chat.
 
 ## Availability
 
-- Staging only. The feature is behind the `NEXT_PUBLIC_E2EE_DM_ENABLED` build
-  flag, which the staging build turns on. Production builds leave it off: the
-  encrypted routes return 404 and none of the controls below appear.
+- On in production and staging, behind the `NEXT_PUBLIC_E2EE_DM_ENABLED`
+  build flag. A build with the flag off returns 404 on the encrypted routes
+  and shows none of the controls below.
 - A signed-in profile with a connected wallet is required.
 - Not available while acting as a proxy. Encrypted chats belong to your own
   profile; the pages explain this and show nothing else.
 - The browser needs WebAssembly, IndexedDB and Web Crypto. Browsers without
   them see "This browser can’t use encrypted messages".
+- 6529 Mobile and 6529 Desktop: see
+  [In 6529 Mobile and 6529 Desktop](#in-6529-mobile-and-6529-desktop).
 - Encrypted messages run in one tab at a time per profile. Other tabs show
   "Encrypted messages are open in another tab." with **Use here**, which moves
   them to that tab and pauses the first one. Closing the tab that has them
@@ -93,10 +95,13 @@ combined sign-in message. This happens, for example, when you signed in before
 your profile existed or before encrypted messages launched. The one signature
 covers signed messages and encrypted messages in this browser, with one
 180-day expiry. The browser's earlier signed-messages grant is revoked, so
-**Devices that can post as you** lists one entry for this browser. The 6529
-apps, and any case where the combined message cannot be used, ask for the
-separate encrypted-messages signature instead. For example, the wallet cannot
-sign it, or the browser cannot load encrypted messages in time.
+**Devices that can post as you** lists one entry for this browser. In 6529
+Mobile and 6529 Desktop the button asks for one app grant signature instead,
+with the same result (see
+[In 6529 Mobile and 6529 Desktop](#in-6529-mobile-and-6529-desktop)). Any case
+where neither can be used asks for the separate encrypted-messages signature
+instead. For example, the wallet cannot sign it, the browser cannot load
+encrypted messages in time, or the app cannot hold a signing key.
 
 If 6529 cannot use a sign-in grant (for example it was revoked), the card asks
 for the separate signature as usual. Revoking the device under **Devices that
@@ -297,9 +302,42 @@ encrypted copy of your message history so you can restore it on a new device.
   Messages badge.
 - Phone push notifications say only "New encrypted message" (or that you were
   added to an encrypted chat). They carry no sender, chat or text, and open
-  `/messages/encrypted`.
-- The desktop app does not show a local notification for encrypted messages
-  yet.
+  `/messages/encrypted`. Once the phone has fetched the new messages, it opens
+  the chat if exactly one unmuted chat has unread messages; otherwise the
+  list stays open and shows which chats changed. The phone decides this
+  itself.
+- 6529 Desktop shows a local notification, "New encrypted message", when a
+  chat gets a message from someone else, unless the chat is muted or open in
+  the focused window. Like phone push it names no sender, chat or text.
+  Selecting it opens that chat. It is raised on the computer from the chats
+  the app already decrypted, so nothing about the chat leaves the device.
+  Chats that already had unread messages when the app started do not
+  notify.
+
+## In 6529 Mobile and 6529 Desktop
+
+- **Turning it on.** The apps sign in with their own session message, so the
+  website's combined sign-in grant does not apply. Where app grants are on,
+  **Turn on encrypted messages (one signature)** and **Turn on signed
+  messages** both ask for one app grant signature (EIP-712 typed data) that
+  turns on signed messages and encrypted messages together (see
+  [Signed messages](waves/drop-actions/feature-signed-messages.md#in-6529-mobile-and-6529-desktop));
+  the device then registers without another prompt, and an earlier
+  signing-only grant of the app is revoked, as on the website. Where they are
+  off (production until the grant wording is approved), or the app cannot
+  hold a signing key (iOS before 17), the card asks for the separate
+  encrypted-messages signature. The grant's origin is "6529 Desktop" in the
+  desktop app and the site host in the phone app.
+- **Phones.** 6529 Mobile needs iOS 16.4 or later (earlier iOS versions cannot
+  run the current site at all) or a current Android System WebView. Signed
+  messages additionally need iOS 17 or later. Keys and history live in the
+  app's own storage, which iOS and Android keep until the app is deleted;
+  unlike Safari, the app is not subject to the 7-day storage limit.
+- **Desktop.** 6529 Desktop keeps keys and history in the app's storage for
+  its local address; it reuses the same local port on every start, so the
+  device survives restarts.
+- **Wallets.** App wallets sign inside the app. WalletConnect wallets get a
+  typed-data (`eth_signTypedData_v4`) request in the wallet app.
 
 ## Reporting
 

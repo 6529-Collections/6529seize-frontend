@@ -1,6 +1,6 @@
 import { isE2eeEnabled } from "@/config/e2eeEnv";
 import type { PreparedLoginE2eeDevice } from "@/lib/e2ee/login-device";
-import { isDeviceGrantPossible } from "./login-grant";
+import { isAnyDeviceGrantPossible } from "./login-grant";
 import { withinTimeBudget } from "./time-budget";
 
 /**
@@ -33,12 +33,13 @@ let prefetching: Promise<void> | null = null;
 
 /**
  * Starts loading the MLS module and the code that creates the key before a
- * sign-in needs them, so the budget is rarely reached. Only website sessions
- * ask for a combined grant, so the apps never download it here. Never throws;
- * a failed download is retried on the next call.
+ * sign-in needs them, so the budget is rarely reached. Only sessions that can
+ * ask for a combined grant (a website sign-in or an app grant in 6529 Mobile
+ * and Desktop) download it here. Never throws; a failed download is retried
+ * on the next call.
  */
 export function prefetchLoginE2eeDevice(): void {
-  if (prefetching || !canHoldE2eeDevice() || !isDeviceGrantPossible(null)) {
+  if (prefetching || !canHoldE2eeDevice() || !isAnyDeviceGrantPossible(null)) {
     return;
   }
   prefetching = import("@/lib/e2ee/login-device")

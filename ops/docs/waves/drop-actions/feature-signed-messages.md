@@ -16,7 +16,10 @@ instead of going out unsigned (see
 Signed messages are on for the website in production and staging. They
 are controlled by the `NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES` build flag; a
 build with the flag off shows none of the controls below and leaves writes
-unchanged.
+unchanged. In 6529 Mobile and 6529 Desktop they also need the
+`NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS` build flag, which is on in staging
+only until the app grant wording is approved (see
+[In 6529 Mobile and 6529 Desktop](#in-6529-mobile-and-6529-desktop)).
 
 ## Location in the Site
 
@@ -85,8 +88,8 @@ unchanged.
 
 ## When a Write Cannot Be Signed
 
-This applies only when this browser holds an active grant for the signed-in
-wallet. Without a grant, and in the apps, proxy sessions and browsers without
+This applies only when this browser (or app) holds an active grant for the
+signed-in wallet. Without a grant, and in proxy sessions and browsers without
 Ed25519, writes are sent unsigned exactly as before.
 
 - A write waits up to 10 seconds for its signature. The pending drop stays
@@ -238,9 +241,51 @@ chat's usual grouping), the header's seal stands for the whole group:
   unsigned edit updates it.
 - A header with no grouped posts behaves like any single drop.
 
+## In 6529 Mobile and 6529 Desktop
+
+The apps sign in with their own session message, not the website's
+Sign-In with Ethereum message, so signing in never turns signed messages on
+there. **Turn on signed messages** (the composer notice, **Renew**, the
+Devices tab and the **Couldn't sign** prompt) asks the wallet for one app
+grant instead: an EIP-712 typed-data signature (domain "6529 Device Grant")
+that the wallet shows as structured fields with this statement:
+
+- "Turn on signed messages on this device until 29 Apr 2027. This device will
+  sign your posts, edits, deletes and reactions so anyone can verify they
+  came from your wallet. It can't move funds, change your handle, add devices
+  or act as an admin. No transaction, no gas, no token approvals. (Device key
+  65942d9f...d8128d49)"
+- When encrypted messages are on and the wallet has a profile, the same
+  signature also turns them on for the app: the statement adds "It will also
+  encrypt (send) and decrypt (read) your end-to-end encrypted messages, which
+  6529.io cannot read." and ends "(Device key ..., encrypted messages key
+  ...)". The encrypted-messages key then registers in the background without
+  another prompt.
+
+This wording is a draft awaiting owner approval. The grant's origin is
+"6529 Desktop" in the desktop app and the site host (6529.io) in the phone
+app. App grants last 180 days, appear under **Devices that can post as you**
+like any other grant (labelled, for example, "6529 app on iPhone"), sign
+writes exactly as above, and anyone can verify them: the drop's
+**Signature** dialog checks the wallet's typed-data signature, or a contract
+wallet's EIP-1271 check on Ethereum. Revoking an app grant also turns off
+encrypted messages for that app, and the other way round.
+
+App wallets sign the grant inside the app. WalletConnect wallets receive an
+`eth_signTypedData_v4` request, so the wallet app must support typed-data
+signing (most do).
+
+Signed messages need WebCrypto Ed25519 keys: iOS 17 or later in 6529 Mobile
+(earlier iOS versions send writes unsigned exactly as before), and every
+current Android and desktop app. Encrypted messages in 6529 Mobile need iOS
+16.4 or later.
+
 ## Availability and Edge Cases
 
-- Web only. 6529 Mobile and 6529 Desktop sign in exactly as before.
+- On the website, signing in turns signed messages on (see
+  [Entry Points](#entry-points)); in the apps, **Turn on signed messages**
+  asks for an app grant (see
+  [In 6529 Mobile and 6529 Desktop](#in-6529-mobile-and-6529-desktop)).
 - Turning signed messages on never blocks sign-in: a wallet that declines or
   cannot sign the grant message can sign in again with the ordinary message.
 - Proxy sessions never sign and never request a grant.
@@ -296,14 +341,14 @@ same steps from one click and show a status line under the button.
 
 ### Wallet-signed grant statement
 
-| Field                     | Current exception                                                                                                                                                                     |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Route or component        | Sign-in challenge built by the backend and checked in `lib/device-signing/grant-message.ts` (`renderDeviceGrantStatement`, `renderLegacyDeviceGrantStatement`, `buildDeviceGrantUrn`) |
-| Untranslated surface      | The statement the wallet shows ("Sign in to 6529 and turn on signed messages on this device until ...", or the earlier "let this device post as you" wording) and the resource line   |
-| Current fallback behavior | Always English, with a fixed UTC date in the form `29 Apr 2027` (earlier wording: `2027-04-29 00:30 UTC`), in every locale                                                            |
-| User impact               | Wallet users in other locales read the grant statement in English                                                                                                                     |
-| Owner or follow-up        | Frontend and backend maintainers jointly; the text is a signed commitment that both sides render and compare byte for byte, so it is not translatable through the message system      |
-| Expected remediation      | If localized statements are wanted, add them as new versioned statement templates on both sides (with vectors), never by interpolating translated copy into the current one           |
+| Field                     | Current exception                                                                                                                                                                                                                                   |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Route or component        | Sign-in challenge built by the backend and checked in `lib/device-signing/grant-message.ts` (`renderDeviceGrantStatement`, `renderLegacyDeviceGrantStatement`, `buildDeviceGrantUrn`); the app grant statement in `lib/device-signing/app-grant.ts` |
+| Untranslated surface      | The statement the wallet shows ("Sign in to 6529 and turn on signed messages on this device until ...", or the earlier "let this device post as you" wording) and the resource line                                                                 |
+| Current fallback behavior | Always English, with a fixed UTC date in the form `29 Apr 2027` (earlier wording: `2027-04-29 00:30 UTC`), in every locale                                                                                                                          |
+| User impact               | Wallet users in other locales read the grant statement in English                                                                                                                                                                                   |
+| Owner or follow-up        | Frontend and backend maintainers jointly; the text is a signed commitment that both sides render and compare byte for byte, so it is not translatable through the message system                                                                    |
+| Expected remediation      | If localized statements are wanted, add them as new versioned statement templates on both sides (with vectors), never by interpolating translated copy into the current one                                                                         |
 
 ### Signed messages UI
 

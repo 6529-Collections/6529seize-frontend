@@ -256,4 +256,66 @@ describe("mobile app links", () => {
       ).toBe(true);
     });
   });
+
+  describe("on Android WebViews before Chromium 130", () => {
+    // Those parse custom-scheme URLs with an empty host and keep the host in
+    // the path, e.g. mobile6529://navigate/x -> host "", path "//navigate/x".
+    const RealURL = globalThis.URL;
+    class LegacyCustomSchemeURL extends RealURL {
+      constructor(value: string | URL, base?: string | URL) {
+        super(value, base);
+        const text = String(value);
+        if (!text.startsWith("mobile6529://")) {
+          return;
+        }
+        const legacy = new RealURL(
+          `${text.replace("mobile6529://", "https://legacy.invalid//")}`
+        );
+        Object.defineProperty(this, "hostname", { value: "" });
+        Object.defineProperty(this, "pathname", { value: legacy.pathname });
+      }
+    }
+
+    beforeEach(() => {
+      globalThis.URL = LegacyCustomSchemeURL as typeof URL;
+    });
+
+    afterEach(() => {
+      globalThis.URL = RealURL;
+    });
+
+    it("still opens the linked page", () => {
+      const result = new RealURL(
+        getNativeLinkDestination(
+          "mobile6529://navigate/messages/encrypted?x=1#m",
+          "mobile6529",
+          origin,
+          123
+        )!,
+        origin
+      );
+      expect(result.pathname).toBe("/messages/encrypted");
+      expect(result.searchParams.get("x")).toBe("1");
+      expect(result.hash).toBe("#m");
+    });
+
+    it("still opens connection sharing and nothing else", () => {
+      expect(
+        getNativeLinkDestination(
+          "mobile6529://share-connection?code=1",
+          "mobile6529",
+          origin,
+          123
+        )
+      ).toMatch(/^\/accept-connection-sharing\?/);
+      expect(
+        getNativeLinkDestination(
+          "mobile6529://evil/messages",
+          "mobile6529",
+          origin,
+          123
+        )
+      ).toBeNull();
+    });
+  });
 });

@@ -31,6 +31,7 @@ import {
   hasE2eeEnrollmentMarker,
   setE2eeEnrollmentMarker,
 } from "./e2eeLocalState";
+import E2eeDesktopNotices from "./E2eeDesktopNotices";
 import { E2eeSignOutPromptHost } from "./signout/E2eeSignOutPromptHost";
 import { useE2eeEngineDeps } from "./useE2eeEngineDeps";
 import { useLoginE2eePrefetch } from "./useLoginE2eePrefetch";
@@ -284,6 +285,12 @@ function E2eeProviderEnabled({
       <E2eeSignOutPromptHost
         profileId={isProxy ? null : profileId}
         releaseEngines={releaseEngines}
+      />
+      <E2eeDesktopNotices
+        engine={value.engine}
+        profileId={value.profileId}
+        wallet={wallet}
+        handle={connectedProfile?.handle ?? null}
       />
     </E2eeContext.Provider>
   );

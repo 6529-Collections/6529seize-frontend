@@ -7,7 +7,7 @@ import type { E2eeEngine, E2eeEngineStatus } from "@/lib/e2ee/types";
 
 let mockGrantPossible = true;
 jest.mock("@/lib/device-signing/login-grant", () => ({
-  isDeviceGrantPossible: (role: string | null) =>
+  isAnyDeviceGrantPossible: (role: string | null) =>
     role === null && mockGrantPossible,
 }));
 
@@ -182,7 +182,7 @@ describe("turn on encrypted messages with one combined sign-in (NC8)", () => {
     await expect(run(asEngine, async () => combined())).resolves.toBe("done");
   });
 
-  it("keeps the grant prompt in the apps and other sessions without a web grant", async () => {
+  it("keeps the grant prompt where no combined grant is possible (proxies, apps with app grants off)", async () => {
     mockGrantPossible = false;
     const { asEngine } = createEngine();
     const requestGrant = jest.fn(async () => combined());
