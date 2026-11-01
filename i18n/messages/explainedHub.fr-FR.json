@@ -125,7 +125,7 @@
   "explained.hub.hwk.site": "6529.io",
   "explained.hub.hwk.siteBody": "{cards} cartes Meme (lues à {editionsRead}) ; le calendrier de Main Stage, chaque {days} à {time} UTC ; wallets et identités issus de la comparaison.",
   "explained.hub.hwk.record": "Le registre des décisions",
-  "explained.hub.hwk.recordBody": "Le registre de conception de 6529, jusqu'à {newest} ({date}). Privé jusqu'à publication ; chaque décision citée est reprise là où elle sert.",
+  "explained.hub.hwk.recordBody": "Le registre de conception de 6529, jusqu'à {newest} ({date}) ; privé, chaque décision reprise là où elle est citée.",
   "explained.hub.hwk.manifest": "Le manifeste Lean",
   "explained.hub.hwk.manifestBody": "formal/manifest.json, écrit le {written}."
 }
