@@ -23,7 +23,6 @@ import {
   hasStagingAccessCode,
   prepareEnrolledSession,
   probeEncryptedRoute,
-  enrolledByCombinedSignIn,
   stagingE2eeOptInProblem,
   type StagingE2eeSession,
   type StagingE2eeUser,
@@ -50,8 +49,9 @@ import {
  * Every user is a throwaway wallet generated for this run. It signs in
  * through the real wallet modal (a scripted EIP-1193 wallet answers in the
  * test process), gets a test-only `e2eeqa_*` profile and turns on encrypted
- * messages with its own EIP-712 device grant. Each browser context is a
- * separate device. The run writes throwaway data to staging, so it is an
+ * messages with its own combined sign-in grant (NC8: one grant per browser
+ * for signed and encrypted messages). Each browser context is a separate
+ * device. The run writes throwaway data to staging, so it is an
  * opt-in pack (`e2ee-staging`) and never part of PR or post-deploy lanes.
  *
  * Engine rules are covered in Jest and the local sandbox packs; this proves
@@ -197,7 +197,9 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     const runId = newRunId();
     // A signs in again once the profile exists, as returning users do, and
     // enrolls with that one sign-in signature. B signs in before having a
-    // profile and enrolls through the separate grant prompt.
+    // profile (a signing-only grant), then turns encrypted messages on from
+    // the enrollment button: one more combined sign-in signature, which
+    // replaces and revokes that grant.
     const a = await prepareEnrolledSession(
       browser,
       testInfo,
@@ -236,12 +238,14 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
   test("each device signs one grant and loads OpenMLS WebAssembly under the staging CSP", () => {
     const { a, b } = requireWorld();
     for (const session of [a, b]) {
-      // NC8: a combined sign-in grant is the device's one grant signature
-      // (A); otherwise the device signs one EIP-712 MlsDeviceGrant (B).
+      // NC8 on the website: the device's one grant is a combined sign-in
+      // grant, from A's sign-in or from B's enrollment button (one more
+      // sign-in signature, checked at enrollment). No device signs an
+      // EIP-712 MlsDeviceGrant.
       expect(
         session.wallet.typedDataSignatures("MlsDeviceGrant"),
         `${session.label}: device grant signatures`
-      ).toHaveLength(enrolledByCombinedSignIn(session) ? 0 : 1);
+      ).toHaveLength(0);
       expect(
         session.evidence.wasmResponses.length,
         `${session.label} never fetched the MLS WebAssembly module`

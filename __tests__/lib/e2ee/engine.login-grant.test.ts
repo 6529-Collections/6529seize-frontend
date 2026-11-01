@@ -15,7 +15,7 @@ import {
 } from "@/lib/device-signing/grant-message";
 import { E2EE_CIPHERSUITE, grantExpiresAt } from "@/lib/e2ee/grant";
 import { createLoginE2eeDevice } from "@/lib/e2ee/login-device";
-import { createMemoryE2eeStorage } from "@/lib/e2ee/storage";
+import { createMemoryE2eeStorage, type E2eeStorage } from "@/lib/e2ee/storage";
 import {
   addUser,
   createWorld,
@@ -88,9 +88,9 @@ async function signCombinedSignIn(
 async function combinedSignIn(
   world: World,
   profileId: string,
-  account: PrivateKeyAccount
+  account: PrivateKeyAccount,
+  storage: E2eeStorage = createMemoryE2eeStorage()
 ) {
-  const storage = createMemoryE2eeStorage();
   const prepared = await createLoginE2eeDevice({
     loadWasm: async () => world.wasm,
     storage,
@@ -214,5 +214,75 @@ describe("E2EE engine: combined sign-in grant (NC8)", () => {
     expect((await alice.primary.storage.getDevice("alice"))?.deviceKey).toBe(
       enrolledKey
     );
+    // Turning on again would only resume this device: no new grant needed.
+    expect(await alice.primary.engine.needsNewDevice()).toBe(false);
+  });
+
+  it("enrolls a running engine from a combined sign-in made while it waited", async () => {
+    const world = await createWorld();
+    const account = privateKeyToAccount(generatePrivateKey());
+    world.ds.setWallets("alice", [account.address]);
+    const storage = createMemoryE2eeStorage();
+    const onStateConflict = jest.fn();
+    const alice = await startDevice(world, "alice", account, {
+      storage,
+      enroll: false,
+      extra: {
+        origin: ORIGIN,
+        deviceLabel: "Chrome on Windows",
+        onStateConflict,
+      },
+    });
+    expect(alice.engine.getStatus()).toBe("needs-enrollment");
+    expect(await alice.engine.needsNewDevice()).toBe(true);
+    // Nothing to register yet: no prompt and no change.
+    await expect(alice.engine.enrollWithLoginGrant()).resolves.toBe(
+      "needs-enrollment"
+    );
+
+    // The gate's sign-in stores the key while this engine holds the lock.
+    const signIn = await combinedSignIn(world, "alice", account, storage);
+    expect(signIn.adopted).toBe(true);
+    expect(await alice.engine.needsNewDevice()).toBe(false);
+
+    await expect(alice.engine.enrollWithLoginGrant()).resolves.toBe("ready");
+    expect(alice.signCalls).toBe(0);
+    expect(onStateConflict).not.toHaveBeenCalled();
+    const [record] = world.ds.devicesOf("alice");
+    expect(record).toMatchObject({
+      device_key: signIn.deviceKey,
+      grant_id: signIn.grantId,
+      label: "Chrome on Windows",
+    });
+    expect((await storage.getDevice("alice"))?.registered).toBe(true);
+    // Already enrolled: a repeat call changes nothing.
+    await expect(alice.engine.enrollWithLoginGrant()).resolves.toBe("ready");
+    expect(world.ds.devicesOf("alice")).toHaveLength(1);
+  });
+
+  it("leaves a running engine waiting for the grant prompt when the sign-in grant is refused", async () => {
+    const world = await createWorld();
+    const account = privateKeyToAccount(generatePrivateKey());
+    world.ds.setWallets("alice", [account.address]);
+    const storage = createMemoryE2eeStorage();
+    const alice = await startDevice(world, "alice", account, {
+      storage,
+      enroll: false,
+      extra: { origin: ORIGIN },
+    });
+    const signIn = await combinedSignIn(world, "alice", account, storage);
+    world.ds.revokeLoginGrant(signIn.grantId);
+
+    await expect(alice.engine.enrollWithLoginGrant()).resolves.toBe(
+      "needs-enrollment"
+    );
+    expect(alice.engine.getError()).toBe("E2EE_LOGIN_GRANT_REJECTED");
+    expect(alice.signCalls).toBe(0);
+    expect(await storage.getDevice("alice")).toBeNull();
+    expect(await alice.engine.needsNewDevice()).toBe(true);
+
+    await alice.engine.enroll();
+    expect(alice.engine.getStatus()).toBe("ready");
+    expect(alice.signCalls).toBe(1);
   });
 });

@@ -3,7 +3,10 @@ import { isWalletConnectSessionError } from "@/helpers/wallet-error.helpers";
 import { t } from "@/i18n/messages";
 import type { AuthLoadingState } from "./authTypes";
 import type { AuthRequestGuard } from "./authRequestGuard";
-import { createAuthRequestSignIn } from "./authRequestSignIn";
+import {
+  createAuthRequestSignIn,
+  type LoginE2eeGrantResult,
+} from "./authRequestSignIn";
 import { AUTH_MODAL_LOCALE } from "./authSessionUpgrade";
 
 type SignInDependencies = Parameters<typeof createAuthRequestSignIn>[0];
@@ -42,7 +45,11 @@ export type SignedMessagesGrantFailure =
   | "context-changed";
 
 export type SignedMessagesGrantResult =
-  | { readonly success: true }
+  | {
+      readonly success: true;
+      /** Set when `encryptedMessages` was asked for. */
+      readonly e2ee?: LoginE2eeGrantResult | undefined;
+    }
   | { readonly success: false; readonly reason: SignedMessagesGrantFailure };
 
 export interface SignedMessagesGrantOptions {
@@ -50,6 +57,12 @@ export interface SignedMessagesGrantOptions {
   readonly onSignatureRequested?: (() => void) | undefined;
   /** The caller reports failures itself, so nothing is shown as a toast. */
   readonly silent?: boolean | undefined;
+  /**
+   * "Turn on encrypted messages" (NC8): the one signature must also grant
+   * this browser's encrypted-messages key. Without a challenge that does,
+   * nothing is signed and the result is a failure.
+   */
+  readonly encryptedMessages?: boolean | undefined;
 }
 
 export type RequestSignedMessagesGrant = (
@@ -171,7 +184,11 @@ export const createSignedMessagesGrantRequest =
     setAuthLoadingState,
     setToast,
   }: SignedMessagesGrantRequestParams): RequestSignedMessagesGrant =>
-  async ({ onSignatureRequested, silent = false } = {}) => {
+  async ({
+    onSignatureRequested,
+    silent = false,
+    encryptedMessages = false,
+  } = {}) => {
     const showToast = silent ? ignoreToast : setToast;
     if (!address || !canAuthenticate) {
       return failed("unavailable");
@@ -202,15 +219,17 @@ export const createSignedMessagesGrantRequest =
     });
     setAuthLoadingState("signing");
     try {
-      const { success } = await requestSignIn({
+      const { success, e2ee } = await requestSignIn({
         signerAddress: address,
         role: null,
         authRequestGuard,
         deviceGrantMode: "required",
+        requireE2eeDevice: encryptedMessages,
       });
-      return success
-        ? { success: true }
-        : failed(progress.getFailure(authRequestGuard.isCurrent()));
+      if (!success) {
+        return failed(progress.getFailure(authRequestGuard.isCurrent()));
+      }
+      return e2ee ? { success: true, e2ee } : { success: true };
     } finally {
       setAuthLoadingState("idle");
     }

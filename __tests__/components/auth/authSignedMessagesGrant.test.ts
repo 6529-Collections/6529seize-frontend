@@ -29,8 +29,24 @@ jest.mock("@/lib/device-signing/login-grant", () => ({
   isDeviceGrantPossible: () => true,
   prepareLoginDeviceGrant: async () => mockPreparedGrant,
   skipAutoDeviceGrant: jest.fn(),
-  storeLoginDeviceGrant: jest.fn(async () => undefined),
+  storeLoginDeviceGrant: jest.fn(async () => true),
   toDeviceGrantNonceParams: () => ({}),
+}));
+
+const E2EE_DEVICE = {
+  deviceKeyHex: `0x${"3d".repeat(32)}`,
+  ciphersuite: 1,
+  adopt: jest.fn(async () => true),
+  dispose: jest.fn(),
+};
+let mockPreparedE2ee: typeof E2EE_DEVICE | null = null;
+jest.mock("@/lib/device-signing/login-e2ee", () => ({
+  prepareLoginE2eeDevice: async () => mockPreparedE2ee,
+  toE2eeNonceParams: () => ({ mls_device_key: "0x3d", mls_ciphersuite: "1" }),
+}));
+const mockAdopt = jest.fn(async (_params: unknown) => true);
+jest.mock("@/components/auth/authLoginE2eeDevice", () => ({
+  adoptLoginE2eeDevice: (params: unknown) => mockAdopt(params),
 }));
 
 const nonce = (): ApiSessionNonceResponse =>
@@ -309,5 +325,57 @@ describe("turn on signed messages", () => {
       reason: "signature-failed",
     });
     expect(subject.deps.setAuthLoadingState).toHaveBeenLastCalledWith("idle");
+  });
+
+  describe("with the encrypted-messages key (NC8 turn-on)", () => {
+    const GRANT_ID = `0x${"7".repeat(64)}`;
+
+    beforeEach(() => {
+      mockPreparedE2ee = null;
+      mockAdopt.mockClear();
+      mockLoginWithSessionV2.mockResolvedValue({
+        client_type: "web",
+        role: "profile-1",
+        device_grant: { id: GRANT_ID },
+      });
+    });
+
+    it("grants both keys with one signature and reports the handover", async () => {
+      mockPreparedE2ee = E2EE_DEVICE;
+      const { getSignature, request } = createSubject();
+
+      await expect(
+        request({ silent: true, encryptedMessages: true })
+      ).resolves.toEqual({
+        success: true,
+        e2ee: { grantId: GRANT_ID, grantSaved: true, adopted: true },
+      });
+      expect(getSignature).toHaveBeenCalledTimes(1);
+      expect(mockAdopt).toHaveBeenCalledWith(
+        expect.objectContaining({
+          storedGrantId: GRANT_ID,
+          ownProfileId: "profile-1",
+        })
+      );
+    });
+
+    it("signs nothing without an encrypted-messages key", async () => {
+      const { deps, getSignature, request } = createSubject();
+
+      await expect(
+        request({ silent: true, encryptedMessages: true })
+      ).resolves.toEqual({ success: false, reason: "device-key" });
+      expect(deps.getNonce).not.toHaveBeenCalled();
+      expect(getSignature).not.toHaveBeenCalled();
+    });
+
+    it("keeps Turn on signed messages free of the handover report", async () => {
+      mockPreparedE2ee = E2EE_DEVICE;
+      const { request } = createSubject();
+
+      await expect(request({ silent: true })).resolves.toEqual({
+        success: true,
+      });
+    });
   });
 });

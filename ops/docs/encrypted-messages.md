@@ -86,10 +86,21 @@ If you signed in on this browser with the combined sign-in message (it
 mentions end-to-end encrypted messages and an encrypted messages key; see
 [Signed messages](waves/drop-actions/feature-signed-messages.md)), that one
 sign-in signature already turned encrypted messages on: this device finishes
-setting up in the background and the card does not ask again. If 6529 cannot
-use that sign-in grant (for example it was revoked), the card asks for the
-separate signature as usual. Revoking the device under **Devices that can
-post as you** also revokes it for encrypted messages, and revoking it here
+setting up in the background and the card does not ask again.
+
+Otherwise, on the website, the button asks your wallet to sign that same
+combined sign-in message. This happens, for example, when you signed in before
+your profile existed or before encrypted messages launched. The one signature
+covers signed messages and encrypted messages in this browser, with one
+180-day expiry. The browser's earlier signed-messages grant is revoked, so
+**Devices that can post as you** lists one entry for this browser. The 6529
+apps, and any case where the combined message cannot be used, ask for the
+separate encrypted-messages signature instead. For example, the wallet cannot
+sign it, or the browser cannot load encrypted messages in time.
+
+If 6529 cannot use a sign-in grant (for example it was revoked), the card asks
+for the separate signature as usual. Revoking the device under **Devices that
+can post as you** also revokes it for encrypted messages, and revoking it here
 also stops its signed messages.
 
 On Safari, the site's data can be deleted if you do not open 6529 for 7 days;

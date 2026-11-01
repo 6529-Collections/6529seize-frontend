@@ -100,6 +100,27 @@ async function signGrant(
   }
 }
 
+/**
+ * Whether enrolling needs a brand-new device key that a combined sign-in can
+ * grant instead of the prompt: no stored device, or an unregistered one that
+ * enrollDevice() would not reuse. A registered device keeps enrollDevice(),
+ * which resumes or renews it (or resets it after a suite change), since a
+ * sign-in key is never adopted over a registered device.
+ */
+export async function needsNewDevice(ctx: EngineContext): Promise<boolean> {
+  const stored = await ctx.storage.getDevice(ctx.profileId);
+  if (stored === null) {
+    return true;
+  }
+  if (stored.registered) {
+    return false;
+  }
+  return (
+    stored.grant.ciphersuite !== E2EE_CIPHERSUITE ||
+    !reusablePending(ctx, stored)
+  );
+}
+
 const DEFAULT_DEVICE_LABEL = "Device";
 
 /** The caller's coarse name for a new device ("Chrome on Windows"). */

@@ -254,7 +254,11 @@ Opt-in stateful staging packs:
   the test process, so the private keys never enter the page, logs or
   artifacts. Each user signs in through the real wallet modal, gets a
   test-only `e2eeqa_*` profile and turns on encrypted messages with one
-  `MlsDeviceGrant` signature. The spec covers a DM in both directions, an image
+  combined sign-in grant (NC8): a returning user's sign-in grants it, and a
+  new user (who signs in before the profile exists) gets it from the
+  enrollment button with one more sign-in signature, which also revokes the
+  earlier signing-only grant. No device signs an EIP-712 `MlsDeviceGrant` on
+  the website. The spec covers a DM in both directions, an image
   attachment through the blob store, a group with a third user and a revoked
   second device that can no longer read new messages. It also asserts that no
   request URL, body or sent WebSocket frame contains any plaintext (raw, hex
