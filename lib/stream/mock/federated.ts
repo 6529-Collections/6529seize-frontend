@@ -1,13 +1,16 @@
 import {
+  DEFAULT_ROYALTY_RATE,
   FEDERATED_FEE_SHARE,
   SPLITS_DENOMINATOR,
   STANDALONE_EDITION_DURATION,
 } from "@/lib/stream/constants";
+import { FEDERATED_TEMPLATE_SIZES } from "@/lib/stream/gas";
 import type { FederatedDeployResult } from "@/lib/stream/dataSource";
 import type { ArtStyle } from "@/lib/stream/mock/art";
 import { type MockStreamEngine, revert } from "@/lib/stream/mock/engine";
 import { artistIdOf, mockAddress, mockHash } from "@/lib/stream/mock/ids";
 import {
+  auctionPrices,
   openPreparedAuction,
   prepareEditionAuction,
 } from "@/lib/stream/mock/sales/editionAuction";
@@ -24,9 +27,12 @@ import type {
   FederatedContract,
   FederatedDeployRequest,
   FederatedDirectoryQuery,
-  KnownSaleKind,
+  FederatedStatus,
+  FederationFactoryInfo,
+  SaleKindId,
   StatementView,
   TokenStandard,
+  Wei,
   WorkKey,
 } from "@/lib/stream/types";
 
@@ -38,12 +44,37 @@ import type {
 
 const FEDERATED_TEMPLATE_VERSION = 1;
 
-const SALE_KINDS_BY_STANDARD: Readonly<
-  Record<TokenStandard, readonly KnownSaleKind[]>
+const TEMPLATE_STANDARDS: readonly TokenStandard[] = ["ERC721", "ERC1155"];
+
+/**
+ * The adapters governance has admitted for federated templates, per standard
+ * (owner decision 14): the 1/1 English auction and the uniform-price edition
+ * auction. Admitting another adapter (a fixed-price sale, say) adds its kind
+ * here; every contract, old or new, lists it with no redeploy, because a
+ * contract's methods are read from this set, not stored at deployment.
+ */
+const ADMITTED_SALE_KINDS: Readonly<
+  Record<TokenStandard, readonly SaleKindId[]>
 > = {
   ERC721: ["ENGLISH_AUCTION"],
   ERC1155: ["UNIFORM_AUCTION"],
 };
+
+/** The mock always deploys the v1.1 factory and registry (on chain they are null until then). */
+function federationContracts(engine: MockStreamEngine): {
+  readonly factory: Address;
+  readonly registry: Address;
+} {
+  const { federationFactory, federationRegistry } = engine.contracts;
+  if (federationFactory === null || federationRegistry === null) {
+    throw new Error("the mock has no federation factory or registry");
+  }
+  return { factory: federationFactory, registry: federationRegistry };
+}
+
+function templateCodeHash(standard: TokenStandard) {
+  return mockHash(`template:v${FEDERATED_TEMPLATE_VERSION}:${standard}`);
+}
 
 const STYLES: readonly ArtStyle[] = [
   "orbits",
@@ -78,12 +109,16 @@ function ensureArtist(engine: MockStreamEngine, from: Address): string {
 
 function registerContract(
   engine: MockStreamEngine,
-  entry: Omit<MockFederatedState, "nextTokenId" | "delisting" | "status">
+  entry: Omit<
+    MockFederatedState,
+    "nextTokenId" | "delisting" | "status" | "royaltyRate"
+  >
 ): MockFederatedState {
   const state: MockFederatedState = {
     ...entry,
     status: "ACTIVE",
     delisting: null,
+    royaltyRate: DEFAULT_ROYALTY_RATE,
     nextTokenId: 1,
   };
   engine.state.federated.set(entry.address, state);
@@ -134,7 +169,7 @@ export function deployFederated(
       partner: request.form === "PAIR" ? (addresses[1 - index] ?? null) : null,
       artistId,
       templateVersion: FEDERATED_TEMPLATE_VERSION,
-      codeHash: mockHash(`template:v${FEDERATED_TEMPLATE_VERSION}:${standard}`),
+      codeHash: templateCodeHash(standard),
       feeShare: FEDERATED_FEE_SHARE,
       artistDelisted: false,
       name: isEdition ? (request.editionName ?? request.name) : request.name,
@@ -144,7 +179,6 @@ export function deployFederated(
       deployedAt: at,
       deployTx,
       defaultLicense: request.defaultLicense,
-      saleKinds: SALE_KINDS_BY_STANDARD[standard],
     });
   });
   return { contracts: addresses, artistId };
@@ -247,7 +281,11 @@ export function mintViaAuction(
   return master.key;
 }
 
-/** A standalone federated ERC-1155 edition with its own fixed 24-hour anchor. */
+/**
+ * A standalone federated ERC-1155 edition auction. PROVISIONAL: the contracts
+ * don't define its close yet; the mock uses a fixed 24 hours from opening plus
+ * the 5-minute soft close (`STANDALONE_EDITION_DURATION`).
+ */
 export function openFederatedEdition(
   engine: MockStreamEngine,
   from: Address,
@@ -274,11 +312,15 @@ export function openFederatedEdition(
     supply: 0,
   };
   engine.state.tokens.set(edition.key, edition);
-  const auction = prepareEditionAuction(engine, edition.key, {
+  const prepared = prepareEditionAuction(engine, edition.key, {
     master: null,
     cap,
     fixedAnchorEnd: at + STANDALONE_EDITION_DURATION,
   });
+  // PROVISIONAL: with no 1/1 to follow there is no 15-minute offset, so the
+  // close is the fixed 24 hours, then the 5-minute soft close.
+  const auction = { ...prepared, terms: { ...prepared.terms, offset: 0 } };
+  engine.state.editionAuctions.set(edition.key, auction);
   openPreparedAuction(engine, auction, at);
   return edition.key;
 }
@@ -308,6 +350,38 @@ export function setFederatedStatus(
   }
 }
 
+/** Primary revenue settled through the shared adapters for one contract's tokens. */
+function primaryVolume(
+  engine: MockStreamEngine,
+  works: readonly WorkKey[]
+): Wei {
+  const keys = new Set(works);
+  let volume = 0n;
+  for (const auction of engine.state.englishAuctions.values()) {
+    if (keys.has(auction.work) && auction.settlement?.outcome === "collector") {
+      volume += auction.settlement.price;
+    }
+  }
+  for (const auction of engine.state.editionAuctions.values()) {
+    const step = auction.result?.step ?? null;
+    if (
+      keys.has(auction.edition) &&
+      auction.status === "SETTLED" &&
+      auction.result !== null &&
+      step !== null
+    ) {
+      volume +=
+        BigInt(auction.result.count) * (auctionPrices(auction)[step] ?? 0n);
+    }
+  }
+  return volume;
+}
+
+/** A contract delisted by itself or through its artist identity. */
+function effectiveStatus(entry: MockFederatedState): FederatedStatus {
+  return entry.artistDelisted ? "DELISTED" : entry.status;
+}
+
 export function federatedView(
   engine: MockStreamEngine,
   entry: MockFederatedState
@@ -315,6 +389,7 @@ export function federatedView(
   const works = [...engine.state.tokens.values()]
     .filter((token) => token.federatedContract === entry.address)
     .map((token) => token.key);
+  const artist = engine.state.artists.get(entry.artistId);
   return {
     address: entry.address,
     form: entry.form,
@@ -330,10 +405,32 @@ export function federatedView(
     symbol: entry.symbol,
     deployedAt: entry.deployedAt,
     deployTx: entry.deployTx,
+    factory: federationContracts(engine).factory,
+    owner: artist?.authority ?? entry.address,
     defaultLicense: entry.defaultLicense,
+    royaltyRate: entry.royaltyRate,
     works,
-    saleKinds: [...entry.saleKinds],
+    volume: primaryVolume(engine, works),
+    saleKinds: [...ADMITTED_SALE_KINDS[entry.standard]],
     delisting: entry.delisting,
+  };
+}
+
+/** The factory, its registry and the current template for each standard. */
+export function federationFactoryInfo(
+  engine: MockStreamEngine
+): FederationFactoryInfo {
+  return {
+    ...federationContracts(engine),
+    templates: TEMPLATE_STANDARDS.map((standard) => ({
+      standard,
+      version: FEDERATED_TEMPLATE_VERSION,
+      codeHash: templateCodeHash(standard),
+      codeBytes: FEDERATED_TEMPLATE_SIZES[standard].codeBytes,
+      newSlots: FEDERATED_TEMPLATE_SIZES[standard].newSlots,
+    })),
+    feeShare: FEDERATED_FEE_SHARE,
+    royaltyRate: DEFAULT_ROYALTY_RATE,
   };
 }
 
@@ -343,8 +440,10 @@ export function federatedDirectory(
 ): FederatedContract[] {
   const search = query.search?.trim().toLowerCase() ?? "";
   return [...engine.state.federated.values()]
-    .filter(
-      (entry) => query.includeDelisted === true || entry.status === "ACTIVE"
+    .filter((entry) =>
+      query.status === undefined
+        ? query.includeDelisted === true || effectiveStatus(entry) === "ACTIVE"
+        : effectiveStatus(entry) === query.status
     )
     .filter((entry) => query.form === undefined || entry.form === query.form)
     .filter(

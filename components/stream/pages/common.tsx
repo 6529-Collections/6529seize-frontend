@@ -79,19 +79,6 @@ export function Section({
   );
 }
 
-/** Marks a page whose full version a later change builds on this foundation. */
-export function PlaceholderNote({
-  locale,
-}: {
-  readonly locale: SupportedLocale;
-}) {
-  return (
-    <p className={`${STREAM_HELP} tw-mt-2`}>
-      {t(locale, "stream.placeholder.note")}
-    </p>
-  );
-}
-
 export function Loading() {
   return (
     <div

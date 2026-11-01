@@ -8,7 +8,11 @@ import {
   splitWalletView,
 } from "@/lib/stream/mock/accounts";
 import { later, type MockStreamEngine } from "@/lib/stream/mock/engine";
-import { federatedDirectory, federatedView } from "@/lib/stream/mock/federated";
+import {
+  federatedDirectory,
+  federatedView,
+  federationFactoryInfo,
+} from "@/lib/stream/mock/federated";
 import {
   auctionPhase,
   auctionPrices,
@@ -406,6 +410,10 @@ export class MockStreamDataSource implements StreamDataSource {
       }
       return null;
     });
+  }
+
+  federationFactory() {
+    return later(() => federationFactoryInfo(this.engine));
   }
 }
 

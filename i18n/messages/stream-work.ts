@@ -18,6 +18,8 @@ export const STREAM_WORK_MESSAGES = {
     "Federated · artist-owned · not curated by the network",
   "stream.workPage.burned":
     "Burned after an upheld dispute. Every bid was refunded.",
+  "stream.workPage.delisted":
+    "Delisted by TDH vote. It can't sell through the network. Its tokens are untouched.",
 
   "stream.workFacts.title": "About this token",
   "stream.workFacts.token": "Token",

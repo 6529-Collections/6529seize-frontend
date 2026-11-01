@@ -65,7 +65,8 @@ blocks and on the events below; `version()` increments with them. Set `dev` to
 | `museumHoldings`                             | `EconomicsResolver.museum()` and `Transfer` events to it                                                                                                                                                                                                                                                                         |
 | `curationQueue`                              | `PackageRegistered`, `PackageRevoked`, `PackageAccepted`, `ItemConsumed`; `packageOf`, `acceptedAs`; item details from the published package files                                                                                                                                                                               |
 | `disputes`                                   | `AuctionPaused`, `AuctionResumed`, `AuctionCancelled`; `StatementLog.latestDisputeOutcome`, `StatementAppended`                                                                                                                                                                                                                  |
-| `federatedDirectory`, `getFederatedContract` | `IFederationRegistry.Registered`, `StatusSet`, `ArtistDelistingSet`, `entry`, `isActive` (v1.1: no contracts yet)                                                                                                                                                                                                                |
+| `federatedDirectory`, `getFederatedContract` | `IFederationRegistry.Registered`, `StatusSet`, `ArtistDelistingSet`, `entry`, `isActive`; the template's `owner()` and ERC-2981 default; volume from indexed settlements; sale methods from the admitted adapters (v1.1: no contracts yet)                                                                                       |
+| `federationFactory`                          | The v1.1 factory: its registry, each template's version, code hash and `extcodesize`, the `PRODUCT_FEDERATED` terms (no contracts yet)                                                                                                                                                                                           |
 
 ### Writes
 
@@ -119,7 +120,12 @@ the departure sweep, firm bids, the 5-minute soft close with the 24-hour
 backstop, the close 15 minutes after the 1/1, no editions without bids; an
 unbid canonical 1/1 to the museum, an unbid federated 1/1 to its artist; the
 dispute pause, withdrawal, upheld cancel (burn and void) and rejected resume;
-federated deploy, delisting (MARKET-5 on settle) and the directory.
+federated deploy, delisting (MARKET-5 on settle) and the directory. A
+standalone federated 1155 edition auction closes a fixed 24 hours after it
+opens, then the 5-minute soft close: this is PROVISIONAL, because the
+contracts don't define that close yet. Federated deploy gas is computed from
+Sepolia's Glamsterdam prices (`gas.ts`, `deployGas`) and labelled "Sepolia,
+estimated".
 
 Seeded scenarios (fictional artists, generated art):
 

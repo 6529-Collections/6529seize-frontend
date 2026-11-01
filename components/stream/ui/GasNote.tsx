@@ -67,6 +67,10 @@ const TX_ERRORS: Readonly<Record<string, MessageKey>> = {
   MoveNotSigned: "stream.tx.error.moveNotSigned",
   PartiesNotAccepted: "stream.tx.error.partiesNotAccepted",
   NothingToRelease: "stream.tx.error.nothingToRelease",
+  InvalidName: "stream.tx.error.invalidName",
+  InvalidLicense: "stream.tx.error.invalidLicense",
+  UnknownContract: "stream.tx.error.unknownContract",
+  WrongForm: "stream.tx.error.wrongForm",
 };
 
 /** A reverted transaction in words; unknown errors show their contract name. */

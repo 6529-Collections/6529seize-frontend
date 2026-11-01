@@ -61,7 +61,7 @@ export default function WorkHeader({
         <Alert text={t(locale, "stream.workPage.burned")} />
       ) : null}
       {work.federated?.status === "DELISTED" ? (
-        <Alert text={t(locale, "stream.federated.delisted")} />
+        <Alert text={t(locale, "stream.workPage.delisted")} />
       ) : null}
     </header>
   );

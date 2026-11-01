@@ -72,9 +72,11 @@ export const EDITION_AUCTION_CONFIG = {
 } as const;
 
 /**
- * A standalone federated ERC-1155 has no 1/1 to follow. The mock anchors its
- * edition auction to a fixed 24-hour window (PLAN section 1.12, "a fixed-duration
- * anchor"); which sale methods federated contracts get is an open owner question.
+ * PROVISIONAL. A standalone federated ERC-1155 edition auction has no 1/1 to
+ * follow, and the contracts don't define its close yet. The mock closes it a
+ * fixed 24 hours after opening (PLAN section 1.12, "a fixed-duration anchor"),
+ * with no 15-minute offset, then the usual 5-minute soft close and its 24-hour
+ * backstop. Federated contracts start with the two auctions (owner decision 14).
  */
 export const STANDALONE_EDITION_DURATION = 24 * SECONDS_PER_HOUR;
 

@@ -168,7 +168,13 @@ export interface MockSplitWallet {
 
 export interface MockFederatedState extends Omit<
   FederatedContract,
-  "works" | "status" | "delisting"
+  | "works"
+  | "status"
+  | "delisting"
+  | "saleKinds"
+  | "factory"
+  | "owner"
+  | "volume"
 > {
   status: FederatedContract["status"];
   delisting: FederatedDelisting | null;
