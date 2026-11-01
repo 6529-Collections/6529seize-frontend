@@ -19,6 +19,10 @@ specs/web.smoke.spec.cjs       mobile web smoke (Android Chrome / iOS Safari)
 specs/native-android.smoke.spec.cjs
                                native shell smoke (launch, WebView boot,
                                mobile6529:// deep link)
+specs/legacy-browser-notice.probe.spec.cjs
+                               one-off data probe (not in the workflow): the
+                               iOS < 16.4 "update iOS" notice gate, using
+                               fixtures/legacy-browser-gate.json
 testspecs/*.yml                Device Farm test spec files (run on the Device
                                Farm test host, not in GitHub Actions)
 ```

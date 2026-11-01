@@ -13,6 +13,13 @@ import "@/styles/wave-navigation-transition.css";
 import "@/styles/animations.css";
 import "@/styles/globals.css";
 
+import LegacyBrowserNotice from "@/components/legacy-browser/LegacyBrowserNotice";
+import {
+  LEGACY_BROWSER_FLAG_SCRIPT,
+  LEGACY_BROWSER_NOTICE_SCRIPT,
+  LEGACY_BROWSER_STYLES,
+  LEGACY_BROWSER_SYNTAX_SCRIPT,
+} from "@/components/legacy-browser/legacyBrowserGate";
 import VersionReloadScreen, {
   VERSION_RELOAD_STYLES,
 } from "@/components/version-update/VersionReloadScreen";
@@ -90,6 +97,18 @@ export default async function RootLayout({
     // keyboard input arrives during startup. Keep that root-only mutation.
     <html lang="en-US" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
+        {/* First, before any bundle: browsers that cannot run the site (iOS
+            before 16.4) get a notice instead of a dead page. */}
+        <style dangerouslySetInnerHTML={{ __html: LEGACY_BROWSER_STYLES }} />
+        <script
+          dangerouslySetInnerHTML={{ __html: LEGACY_BROWSER_FLAG_SCRIPT }}
+        />
+        <script
+          dangerouslySetInnerHTML={{ __html: LEGACY_BROWSER_SYNTAX_SCRIPT }}
+        />
+        <script
+          dangerouslySetInnerHTML={{ __html: LEGACY_BROWSER_NOTICE_SCRIPT }}
+        />
         <style dangerouslySetInnerHTML={{ __html: NATIVE_STARTUP_STYLES }} />
         {/* Synchronous detection prevents a desktop paint before Next loads. */}
         <script
@@ -142,6 +161,7 @@ export default async function RootLayout({
       </head>
       {/* The touch-first helper may restore data-fine-pointer before hydration. */}
       <body suppressHydrationWarning>
+        <LegacyBrowserNotice />
         <VersionReloadScreen />
         <RuntimeFavicon />
         <MobileLaunchTimingReporter />
