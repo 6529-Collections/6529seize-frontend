@@ -139,13 +139,13 @@ function ResultLines({
         {t(locale, "stream.editionAuction.result.raised", {
           revenue: ethText(locale, clearing.revenue),
           artist: ethText(locale, clearing.sellerShare),
-          network: ethText(locale, clearing.networkShare),
+          network: ethText(locale, clearing.networkFee),
         })}
       </p>
-      {auction.terms.cap === 0 ? null : (
+      {auction.terms.maxCount === 0 ? null : (
         <p className={`${PANEL_NOTE} tw-mt-1`}>
           {t(locale, "stream.editionAuction.result.cap", {
-            cap: editionsText(locale, auction.terms.cap),
+            cap: editionsText(locale, auction.terms.maxCount),
           })}
         </p>
       )}
@@ -162,14 +162,14 @@ function closeRule(
   if (auction.phase === "disputed") {
     return t(locale, "stream.editionAuction.close.disputed");
   }
-  if (times.editionEnd > times.baseEnd) {
+  if (times.endTime > times.closeAt) {
     return t(locale, "stream.editionAuction.close.moved", {
-      base: clockText(locale, times.baseEnd, now),
+      base: clockText(locale, times.closeAt, now),
       latest: clockText(locale, times.backstop, now),
     });
   }
   return t(locale, "stream.editionAuction.close.rule", {
-    offset: formatInteger(locale, Math.round(terms.offset / 60)),
+    offset: formatInteger(locale, Math.round(terms.closeOffset / 60)),
     window: formatInteger(locale, Math.round(terms.softWindow / 60)),
     latest: clockText(locale, times.backstop, now),
   });
@@ -198,12 +198,12 @@ function CloseBox({
       </p>
       <p className="tw-m-0 tw-text-lg tw-font-semibold tw-tabular-nums tw-text-iron-50">
         {t(locale, "stream.editionAuction.close.at", {
-          time: clockText(locale, times.editionEnd, now),
+          time: clockText(locale, times.endTime, now),
         })}
       </p>
       {open && auction.phase !== "disputed" ? (
         <Countdown
-          endTime={times.editionEnd}
+          endTime={times.endTime}
           now={now}
           locale={locale}
           closeWindow={auction.terms.softWindow}

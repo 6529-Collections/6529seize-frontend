@@ -13,7 +13,7 @@ import {
   prepareEditionAuction,
   raiseEditionBid,
 } from "@/lib/stream/mock/sales/editionAuction";
-import { settleEditionAuction } from "@/lib/stream/mock/sales/editionSettlement";
+import { keeperSettle } from "@/lib/stream/mock/sales/editionSettlement";
 import {
   pauseEnglishAuction,
   resolveEnglishDispute,
@@ -35,6 +35,7 @@ import {
   OTHER_BIDDERS,
   saleOf,
   type SeedContext,
+  SEED_KEEPER,
   SEED_START,
   spec,
   type Step,
@@ -103,10 +104,14 @@ function earlySteps(): Step[] {
           symbol: "HALDEN",
           defaultLicense: "LicenseRef-All-Rights-Reserved",
         });
-        c.federated.set(
-          "halden",
-          result.contracts[0] ?? MOCK_ACCOUNTS.guardian
-        );
+        const halden = result.contracts[0] ?? MOCK_ACCOUNTS.guardian;
+        c.federated.set("halden", halden);
+        // Federated token IDs are uint256 (v1.1 design): this contract's start
+        // past 2^53, so the section shows they stay exact end to end.
+        const entry = c.engine.state.federated.get(halden);
+        if (entry !== undefined) {
+          entry.nextTokenId = 2n ** 53n + 1n;
+        }
       },
     },
     {
@@ -286,7 +291,7 @@ function dayOneSteps(): Step[] {
         const statement = appendStatement(c.engine, {
           role: "CURATOR",
           kind: "DELISTING",
-          subject: { token: federatedAddress(c, "counterfeit"), id: 0 },
+          subject: { token: federatedAddress(c, "counterfeit"), id: 0n },
           summary: "TDH vote: delisted for impersonating another artist.",
         });
         setFederatedStatus(
@@ -373,7 +378,7 @@ function dayTwoSteps(): Step[] {
       at: S + 2 * H,
       run: (c) => {
         createEditionFor(c.engine, work(c, "emberIndex").key);
-        settleEditionAuction(c.engine, editionOf(c, "emberIndex"));
+        keeperSettle(c.engine, editionOf(c, "emberIndex"), SEED_KEEPER);
         claimEditionBid(
           c.engine,
           editionOf(c, "emberIndex"),
@@ -520,7 +525,7 @@ function dayThreeMorningSteps(): Step[] {
     {
       at: S + 4 * H,
       run: (c) => {
-        settleEditionAuction(c.engine, editionOf(c, "twoRooms"));
+        keeperSettle(c.engine, editionOf(c, "twoRooms"), SEED_KEEPER);
         bid(c, "foldStudy", MOCK_ACCOUNTS.collectorB, "0.5");
       },
     },
@@ -572,7 +577,7 @@ function dayThreeMorningSteps(): Step[] {
     {
       at: S + 11 * H + 5 * M,
       run: (c) =>
-        settleEditionAuction(c.engine, editionOf(c, "withdrawnLight")),
+        keeperSettle(c.engine, editionOf(c, "withdrawnLight"), SEED_KEEPER),
     },
   ];
 }
@@ -739,7 +744,8 @@ function tideTableSteps(): Step[] {
     },
     {
       at: S + D + 17 * M,
-      run: (c) => settleEditionAuction(c.engine, editionOf(c, "tideTable")),
+      run: (c) =>
+        keeperSettle(c.engine, editionOf(c, "tideTable"), SEED_KEEPER),
     },
   ];
 }

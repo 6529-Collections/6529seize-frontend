@@ -24,7 +24,7 @@ import type { StatementView, StreamArtist } from "@/lib/stream/model/records";
 export interface EditionBalance {
   readonly edition: WorkKey;
   readonly token: Address;
-  readonly id: number;
+  readonly id: bigint;
   readonly balance: number;
 }
 

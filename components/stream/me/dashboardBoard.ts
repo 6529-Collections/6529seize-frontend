@@ -32,6 +32,8 @@ export type DashboardBid =
       readonly work: StreamWork;
       /** The price at `bid.raiseToGetIn`, the lowest step that gets every unit in. */
       readonly raisePrice: Wei | null;
+      /** `settlementOrderFor(edition, account)`: this account's next settle order. */
+      readonly settleOrder: readonly number[];
     };
 
 /** Everything to claim except split payouts, which the wallets table releases. */
@@ -127,7 +129,11 @@ async function readBids(
           bid.raiseToGetIn === null
             ? null
             : ((await source.ladder(bid.edition))[bid.raiseToGetIn] ?? null);
-        return { kind: "edition", bid, auction, work, raisePrice };
+        const settleOrder = await source.settlementOrderFor(
+          bid.edition,
+          overview.account
+        );
+        return { kind: "edition", bid, auction, work, raisePrice, settleOrder };
       })
   );
   return [...oneOfOne, ...editions].filter(

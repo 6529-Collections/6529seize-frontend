@@ -61,7 +61,7 @@ function voteRecord(
     entryHash: mockHash(`vote-record:${packageRoot}`),
     role: "CURATOR",
     kind: "CURATION_EVIDENCE",
-    subject: { token: ZERO_ADDRESS, id: 0 },
+    subject: { token: ZERO_ADDRESS, id: 0n },
     contentHash: mockHash(`vote-record-content:${packageRoot}`),
     uri: `ar://${mockHash("vote-record-uri:" + packageRoot).slice(2, 45)}`,
     summary,

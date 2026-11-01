@@ -119,7 +119,7 @@ function registerContract(
     status: "ACTIVE",
     delisting: null,
     royaltyRate: DEFAULT_ROYALTY_RATE,
-    nextTokenId: 1,
+    nextTokenId: 1n,
   };
   engine.state.federated.set(entry.address, state);
   const artist = artistOrThrow(engine, entry.artistId);
@@ -213,7 +213,7 @@ function newFederatedToken(
   at: number
 ): MockToken {
   const tokenId = entry.nextTokenId;
-  entry.nextTokenId += 1;
+  entry.nextTokenId += 1n;
   const seed = Number.parseInt(
     mockHash(`${entry.address}:${tokenId}`).slice(2, 10),
     16
@@ -319,7 +319,7 @@ export function openFederatedEdition(
   });
   // PROVISIONAL: with no 1/1 to follow there is no 15-minute offset, so the
   // close is the fixed 24 hours, then the 5-minute soft close.
-  const auction = { ...prepared, terms: { ...prepared.terms, offset: 0 } };
+  const auction = { ...prepared, terms: { ...prepared.terms, closeOffset: 0 } };
   engine.state.editionAuctions.set(edition.key, auction);
   openPreparedAuction(engine, auction, at);
   return edition.key;

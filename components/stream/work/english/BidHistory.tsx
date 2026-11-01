@@ -18,7 +18,7 @@ function bidStatus(context: EnglishPanelContext, isLast: boolean): MessageKey {
   if (!isLast) {
     return "stream.english.history.outbid";
   }
-  if (auction.highBidder === null || auction.state === "CANCELLED") {
+  if (auction.bidder === null || auction.state === "CANCELLED") {
     return "stream.english.history.refunded";
   }
   return auction.settlement?.outcome === "collector"

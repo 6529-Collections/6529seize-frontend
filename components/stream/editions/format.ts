@@ -129,8 +129,8 @@ export function bidTotals(
   let held = 0n;
   let back = 0n;
   for (const bid of bids) {
-    wanted += bid.qty;
-    won += bid.won;
+    wanted += bid.quantity;
+    won += bid.unitsWon;
     held += bid.escrow;
     back += bid.refund;
   }

@@ -41,7 +41,7 @@ export const STREAM_EDITION_MESSAGES = {
   "stream.editionAuction.close.moved":
     "Moved from {base} by late bids. It can move until {latest} UTC at the latest.",
   "stream.editionAuction.close.disputed":
-    "The 1/1 is paused for a dispute. The close follows it when it resumes.",
+    "Paused: the 1/1 is on hold for a dispute. The close moves when it resumes.",
 
   "stream.editionAuction.book.title": "Bids",
   "stream.editionAuction.book.aside": "{bids} bids · {wanted} wanted",

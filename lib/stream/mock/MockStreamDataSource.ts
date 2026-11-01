@@ -28,6 +28,10 @@ import {
   englishState,
   englishView,
 } from "@/lib/stream/mock/sales/englishAuction";
+import {
+  settlementOrderFor,
+  sweepOf,
+} from "@/lib/stream/mock/sales/editionSettlement";
 import { readSale } from "@/lib/stream/mock/sales/registry";
 import { summaryOf, workView } from "@/lib/stream/mock/works";
 import type {
@@ -259,7 +263,7 @@ export class MockStreamDataSource implements StreamDataSource {
       const auction = this.engine.state.editionAuctions.get(edition);
       const valid =
         Number.isInteger(step) && step >= 0 && Number.isInteger(qty) && qty > 0;
-      return auction && valid && step < auction.terms.steps
+      return auction && valid && step < auction.terms.stepCount
         ? quoteBid(auction, step, qty)
         : null;
     });
@@ -330,6 +334,22 @@ export class MockStreamDataSource implements StreamDataSource {
     return later(() => {
       const auction = this.engine.state.editionAuctions.get(edition);
       return auction ? auctionPrices(auction) : [];
+    });
+  }
+
+  sweepOf(edition: WorkKey, settler: Address) {
+    return later(() => {
+      const auction = this.engine.state.editionAuctions.get(edition);
+      return auction === undefined
+        ? { swept: 0, nextPosition: 0, cutoff: 0 }
+        : sweepOf(auction, settler);
+    });
+  }
+
+  settlementOrderFor(edition: WorkKey, settler: Address) {
+    return later(() => {
+      const auction = this.engine.state.editionAuctions.get(edition);
+      return auction === undefined ? [] : settlementOrderFor(auction, settler);
     });
   }
 

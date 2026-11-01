@@ -20,7 +20,7 @@ import type {
 } from "@/lib/stream/types";
 
 /** `saleIdOf(token, tokenId)`: on-chain keccak256(abi.encode(token, tokenId)). */
-function englishSaleId(token: Address, tokenId: number): string {
+function englishSaleId(token: Address, tokenId: bigint): string {
   return mockHash(`sale:english:${token.toLowerCase()}:${tokenId}`);
 }
 
@@ -172,7 +172,17 @@ export function placeEnglishBid(
   });
 }
 
-function settleUnbid(engine: MockStreamEngine, auction: MockEnglishAuction) {
+/**
+ * An unsold 1/1 (owner decision 17). 6529 Stream records the outcome and
+ * moves a canonical work from the auction's custody to the museum itself
+ * (`settlePrimary` returns the museum as `holder`; nothing is pending). Any
+ * other token's work goes to its artist, delivered by the auction.
+ */
+function settleUnbid(
+  engine: MockStreamEngine,
+  auction: MockEnglishAuction,
+  outcome: "UNBID" | "FROZEN_OUT"
+) {
   const token = engine.token(auction.work);
   const now = engine.now();
   if (auction.program === "canonical") {
@@ -181,13 +191,13 @@ function settleUnbid(engine: MockStreamEngine, auction: MockEnglishAuction) {
     engine.state.museum.push({
       work: auction.work,
       arrivedAt: now,
-      reason: "no-bids",
+      reason: outcome === "UNBID" ? "no-bids" : "freeze-exit",
       txHash: engine.pendingTxHash(),
     });
     engine.record(auction.work, {
       kind: "to-museum",
-      actor: null,
-      source: "ISaleAdapter.SaleSettled + ERC721.Transfer(→ museum)",
+      actor: engine.contracts.stream,
+      source: `IStream.PrimarySaleSettled(${outcome}) + ERC721.Transfer(→ museum), by 6529 Stream`,
     });
     return { outcome: "museum" as const, to: museum };
   }
@@ -221,14 +231,29 @@ export function settleEnglishAuction(
   }
   const token = engine.token(auction.work);
   const now = engine.now();
-  if (auction.bidder !== null && isDelisted(engine, auction.work)) {
-    // MARKET-5: a delisted federated contract's sale ends unsold; the bid is credited back.
+  // MARKET-5: a delisted federated contract's sale ends unsold (FROZEN_OUT);
+  // any standing bid is credited back.
+  const frozenOut = isDelisted(engine, auction.work);
+  if (auction.bidder !== null && frozenOut) {
     engine.addCredit(auction.bidder, auction.bid);
     auction.bidder = null;
     auction.recipient = null;
   }
+  // `IMintTarget.settlePrimary`: the token records the outcome first.
+  token.primarySale =
+    auction.bidder === null
+      ? {
+          outcome: frozenOut ? "FROZEN_OUT" : "UNBID",
+          currency: ZERO_ADDRESS,
+          price: 0n,
+        }
+      : { outcome: "SOLD", currency: ZERO_ADDRESS, price: auction.bid };
   if (auction.bidder === null) {
-    const unbid = settleUnbid(engine, auction);
+    const unbid = settleUnbid(
+      engine,
+      auction,
+      frozenOut ? "FROZEN_OUT" : "UNBID"
+    );
     auction.settlement = {
       ...unbid,
       price: 0n,
@@ -365,10 +390,10 @@ export function englishView(
       incrementShare: LAUNCH_RULES.incrementShare,
       incrementFloor: LAUNCH_RULES.incrementFloor,
     },
-    highBidder: auction.bidder,
+    bidder: auction.bidder,
     recipient: auction.recipient,
-    highBid: auction.bid,
-    minimumNextBid: minimumBid(auction),
+    bid: auction.bid,
+    minimumBid: minimumBid(auction),
     bids: [...auction.bids],
     pause: {
       pausedAt: auction.pausedAt,

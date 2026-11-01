@@ -64,6 +64,18 @@ export const STREAM_WORK_MESSAGES = {
   "stream.workFacts.supply.sold": "{count} sold · {minted} claimed",
   "stream.workFacts.supply.notYet": "None yet: editions mint after the close",
   "stream.workFacts.cap": "Cap",
+  "stream.workFacts.primaryLabel": "Sale result",
+  "stream.workFacts.primary.none": "Not settled yet",
+  "stream.workFacts.primary.sold": "Sold for {price}",
+  "stream.workFacts.primary.soldToken": "Sold for {price} of token {currency}",
+  "stream.workFacts.primary.unbidMuseum":
+    "No bids. 6529 Stream moved it to the 6529 Network Museum.",
+  "stream.workFacts.primary.unbidArtist":
+    "No bids. It went back to the artist.",
+  "stream.workFacts.primary.frozenMuseum":
+    "Unsold: its currency froze. 6529 Stream moved it to the 6529 Network Museum.",
+  "stream.workFacts.primary.frozenArtist":
+    "Unsold: the contract was delisted. It went back to the artist.",
   "stream.workFacts.saleLabel": "Sale",
   "stream.workFacts.sale.unknown": "{kind} (not shown in this version)",
   "stream.workFacts.sale.id": "Sale {id}",
@@ -121,7 +133,7 @@ export const STREAM_WORK_MESSAGES = {
   "stream.english.nextBid": "Next bid from",
   "stream.english.ends": "Ends",
   "stream.english.endedAt": "Ended",
-  "stream.english.end.paused": "On hold",
+  "stream.english.end.paused": "Paused: the end moves when it resumes",
   "stream.english.end.cancelled": "Cancelled",
   "stream.english.notStarted": "Not started.",
   "stream.english.rule.increment":
@@ -201,14 +213,14 @@ export const STREAM_WORK_MESSAGES = {
   "stream.english.times.start": "Started",
   "stream.english.times.scheduled": "Scheduled end",
   "stream.english.times.end": "End",
-  "stream.english.times.endPaused": "Set when the auction resumes",
+  "stream.english.times.endPaused": "Paused: the end moves when it resumes",
   "stream.english.times.moved": "Moved by late bids",
   "stream.english.times.movedByResume": "Set when the auction resumed",
   "stream.english.times.editions": "Editions close",
   "stream.english.times.editionsAfter":
     "{minutes} min after the 1/1's final end",
   "stream.english.times.editionsAfterResume":
-    "{minutes} min after the 1/1's end, once it resumes",
+    "{minutes} min after the 1/1's end · paused: it moves when the 1/1 resumes",
   "stream.english.times.editionsAfterSoft":
     "{minutes} min after the 1/1's final end, extended by late edition bids",
   "stream.english.times.editionsVoid": "Void: refunded in full.",

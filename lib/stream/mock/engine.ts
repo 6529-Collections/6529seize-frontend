@@ -81,7 +81,7 @@ function emptyState(): MockState {
     museum: [],
     provenance: new Map(),
     networkFees: 0n,
-    nextStreamTokenId: 1,
+    nextStreamTokenId: 1n,
     federatedDeployNonce: 0,
   };
 }

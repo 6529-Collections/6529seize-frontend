@@ -96,7 +96,7 @@ export interface OneOfOneAuction {
   readonly saleId: string;
   readonly work: WorkKey;
   readonly token: Address;
-  readonly tokenId: number;
+  readonly tokenId: bigint;
   readonly program: StreamProgram;
   /** ETH is the zero address. */
   readonly currency: Address;
@@ -112,11 +112,11 @@ export interface OneOfOneAuction {
     readonly incrementShare: number;
     readonly incrementFloor: Wei;
   };
-  readonly highBidder: Address | null;
+  readonly bidder: Address | null;
   readonly recipient: Address | null;
   /** The high bid; with no bidder, a withdrawn bid's reserve or zero. */
-  readonly highBid: Wei;
-  readonly minimumNextBid: Wei;
+  readonly bid: Wei;
+  readonly minimumBid: Wei;
   readonly bids: readonly EnglishBid[];
   readonly pause: {
     readonly pausedAt: UnixSeconds | null;
@@ -174,16 +174,16 @@ export type EditionAuctionPhase =
 
 /** Terms locked when the auction opens (interned terms word, PLAN Appendix A). */
 export interface EditionAuctionTerms {
-  readonly base: Wei;
-  readonly perDecade: number;
-  readonly steps: number;
+  readonly basePrice: Wei;
+  readonly stepsPerDecade: number;
+  readonly stepCount: number;
   /** The breadth margin, out of 100,000. */
   readonly marginShare: number;
-  readonly offset: number;
+  readonly closeOffset: number;
   readonly softWindow: number;
   readonly maxExtension: number;
   /** The creator cap; 0 means no cap. */
-  readonly cap: number;
+  readonly maxCount: number;
   readonly feeShare: number;
   readonly seller: Address;
   readonly feeRecipient: Address;
@@ -193,11 +193,11 @@ export interface EditionAuctionTerms {
 export interface EditionAuctionTimes {
   readonly openedAt: UnixSeconds;
   /** The coupled 1/1's end, or the fixed anchor for a standalone federated 1155. */
-  readonly anchorEnd: UnixSeconds;
+  readonly oneOfOneEnd: UnixSeconds;
   /** `anchorEnd + offset`: the close before any soft-close extension. */
-  readonly baseEnd: UnixSeconds;
+  readonly closeAt: UnixSeconds;
   /** `max(baseEnd, softEnd)`. */
-  readonly editionEnd: UnixSeconds;
+  readonly endTime: UnixSeconds;
   readonly softEnd: UnixSeconds | null;
   /** The latest the soft close may extend to: `anchorEnd + offset + maxExtension`. */
   readonly backstop: UnixSeconds;
@@ -213,13 +213,13 @@ export interface EditionClearing {
   readonly price: Wei;
   readonly revenue: Wei;
   /** The network's part (25% canonical, 10% federated). */
-  readonly networkShare: Wei;
+  readonly networkFee: Wei;
   /** The artist side: the seller split wallet's part. */
   readonly sellerShare: Wei;
   /** A cap binds inside the cut step, so the marginal bid is partly filled (FIFO). */
   readonly rationed: boolean;
   /** A: units the cut step wins. */
-  readonly cutStepUnits: number;
+  readonly cutUnits: number;
   /** X: the swept cutoff at the cut step (PLAN section 1.6). */
   readonly cutoff: number;
   /** The best revenue R* and the 90% threshold the result clears. */
@@ -267,14 +267,14 @@ export interface EditionBidView {
   readonly bidder: Address;
   readonly step: number;
   readonly price: Wei;
-  readonly qty: number;
+  readonly quantity: number;
   /** Queue position in entered units (capped auctions). */
-  readonly pos: number;
+  readonly position: number;
   readonly escrow: Wei;
   readonly placedAt: UnixSeconds;
   /** in: all units win; partly: the marginal bid under a cap; out: none. */
   readonly status: "in" | "partly" | "out";
-  readonly won: number;
+  readonly unitsWon: number;
   /** escrow − won × clearing price. */
   readonly refund: Wei;
   /** Units ahead of this bid in its step's queue, under a cap. */
@@ -291,14 +291,14 @@ export interface EditionBidView {
 /** `quote(step, qty)`: a what-if for a new bid. */
 export interface EditionQuote {
   readonly step: number;
-  readonly qty: number;
-  readonly cost: Wei;
-  readonly after: EditionClearing;
-  readonly won: number;
+  readonly quantity: number;
+  readonly escrow: Wei;
+  readonly result: EditionClearing;
+  readonly unitsWon: number;
   /** Net existing winning units it would push out. */
-  readonly pushedOut: number;
+  readonly unitsPushedOut: number;
   /** Net existing units it would pull in (the breadth rule). */
-  readonly pulledIn: number;
+  readonly unitsPulledIn: number;
 }
 
 /**
@@ -307,17 +307,36 @@ export interface EditionQuote {
  * call checks the close and starts scanning the book, each call scans up to 24
  * of its words (eight steps each), the call that finishes the scan clears and
  * pays (`AuctionCleared`), and later calls sweep the clearing step's
- * departures (`DeparturesSwept`). Typical sales settle in one call.
+ * departures (`DeparturesSwept`). Each settler sweeps on its own
+ * (`EditionSweep`); the first to sweep every departure settles the sale.
+ * Typical sales settle in one call.
  */
 export interface EditionSettlement {
   /** The scan finished: the result is stored and paid. */
   readonly cleared: boolean;
   /** `SettlementScanned.wordsLeft`: book words still to scan; 0 once cleared. */
   readonly wordsLeft: number;
-  /** Departures at the clearing step swept so far (rationed sales). */
+  /** `cutUnits`: the clearing step's winning units. */
+  readonly cutUnits: number;
+  /** `cutUnits` until a settler's sweep completes, then the final cutoff. */
+  readonly cutoff: number;
+  /** Zero until a settler's sweep completes, then `departures`. */
   readonly departuresSwept: number;
   /** Departures logged at the clearing step (zero unless rationed). */
   readonly departures: number;
+}
+
+/**
+ * `IUniformEditionAuctionLens.sweepOf(saleId, settler)`: one settler's own
+ * departure sweep in progress. All zero when it has none (it never swept, or
+ * it finished).
+ */
+export interface EditionSweep {
+  readonly swept: number;
+  /** The least position its next departure may have. */
+  readonly nextPosition: number;
+  /** Its cutoff so far. */
+  readonly cutoff: number;
 }
 
 /** The edition auction of one master (or one standalone federated 1155 edition). */
@@ -332,10 +351,10 @@ export interface EditionAuction {
   readonly phase: EditionAuctionPhase;
   readonly terms: EditionAuctionTerms;
   readonly times: EditionAuctionTimes;
-  readonly totalUnits: number;
+  readonly liveUnits: number;
   readonly bidCount: number;
-  readonly lo: number | null;
-  readonly hi: number | null;
+  readonly lowStep: number | null;
+  readonly highStep: number | null;
   readonly clearing: EditionClearing;
   /** The 1/1 the auction follows (state drives disputed/void). */
   readonly oneOfOne: {

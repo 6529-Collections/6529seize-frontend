@@ -12,6 +12,7 @@ import type {
   EditionHolder,
   EditionQuote,
   EditionStepTotal,
+  EditionSweep,
   FederatedContract,
   FederatedDeployRequest,
   FederatedDirectoryQuery,
@@ -87,12 +88,12 @@ export interface StreamDataSource {
   quoteEditionBid(
     edition: WorkKey,
     step: number,
-    qty: number
+    quantity: number
   ): Promise<EditionQuote | null>;
-  /** `lowestWinningStep(qty)`: the lowest step where a new bid wins at least one copy. */
-  lowestWinningStep(edition: WorkKey, qty: number): Promise<number | null>;
-  /** The lowest step where a new bid of `qty` gets every unit in (client-side search). */
-  lowestStepFullyIn(edition: WorkKey, qty: number): Promise<number | null>;
+  /** `lowestWinningStep(quantity)`: the lowest step where a new bid wins at least one copy. */
+  lowestWinningStep(edition: WorkKey, quantity: number): Promise<number | null>;
+  /** The lowest step where a new bid of `quantity` gets every unit in (client-side search). */
+  lowestStepFullyIn(edition: WorkKey, quantity: number): Promise<number | null>;
   /**
    * What raising bid `bidId` to `newStep` would do (client-side, like
    * `lowestStepFullyIn`): it rejoins the back of `newStep`, leaving a hole.
@@ -108,6 +109,18 @@ export interface StreamDataSource {
   editionHolders(edition: WorkKey): Promise<readonly EditionHolder[]>;
   /** Every step's price for an auction's locked ladder. */
   ladder(edition: WorkKey): Promise<readonly Wei[]>;
+  /** `sweepOf(saleId, settler)`: the settler's own departure sweep in progress. */
+  sweepOf(edition: WorkKey, settler: Address): Promise<EditionSweep>;
+  /**
+   * `settlementOrderFor(saleId, settler)`: what the settler passes to its
+   * next `settle` call, the rest of the departure order after its own
+   * progress (`settlementOrder` for a settler with none). Empty unless the
+   * result is rationed.
+   */
+  settlementOrderFor(
+    edition: WorkKey,
+    settler: Address
+  ): Promise<readonly number[]>;
 
   // Editions, payouts, claims
   editionBalances(account: Address): Promise<readonly EditionBalance[]>;
@@ -181,7 +194,7 @@ export interface EditionAuctionActions {
     from: Address,
     edition: WorkKey,
     step: number,
-    qty: number
+    quantity: number
   ): Promise<TxResult<{ readonly bidId: number }>>;
   /** Moves the whole bid up and pays exactly the difference. */
   raise(
@@ -193,13 +206,17 @@ export interface EditionAuctionActions {
   /** `withdrawBid(saleId, bidId, to)`: only while the coupled 1/1 is paused for a dispute. */
   withdraw(from: Address, edition: WorkKey, bidId: number): Promise<TxResult>;
   /**
-   * One permissionless settle call, after the edition end once the 1/1 is
-   * settled or cancelled. Settlement runs in calls of bounded gas: `settled`
-   * is false while more calls are needed (the sale stays SETTLING).
+   * `settle(saleId, order)`: one permissionless settle call, after the
+   * edition end once the 1/1 is settled or cancelled. Settlement runs in calls
+   * of bounded gas: `settled` is false while more calls are needed (the sale
+   * stays SETTLING). `order` is the caller's remaining slice of the departure
+   * sweep, from `settlementOrderFor(edition, from)`. A call on a SETTLED sale
+   * returns `settled: true` and changes nothing.
    */
   settle(
     from: Address,
-    edition: WorkKey
+    edition: WorkKey,
+    order: readonly number[]
   ): Promise<TxResult<{ readonly settled: boolean }>>;
   /** `claimBid(saleId, bidId, to)`: mints the editions won and sends the refund. */
   claim(
@@ -251,7 +268,7 @@ export interface StreamActions {
     from: Address,
     contract: Address,
     title: string,
-    cap: number
+    maxCount: number
   ): Promise<TxResult<WorkKey>>;
 }
 

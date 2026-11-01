@@ -82,10 +82,10 @@ function MasterRelation({
         <SpecBadge spec={auctionStateBadge(auction.state)} locale={locale} />
       </div>
       <p className={`${STREAM_TEXT} tw-mt-2 tw-flex tw-flex-wrap tw-gap-x-3`}>
-        {auction.highBidder === null ? (
+        {auction.bidder === null ? (
           t(locale, "stream.english.noBid")
         ) : (
-          <EthAmount wei={auction.highBid} locale={locale} />
+          <EthAmount wei={auction.bid} locale={locale} />
         )}
         {auction.state === "ACTIVE" ? (
           <Countdown
@@ -102,9 +102,9 @@ function MasterRelation({
           {t(locale, "stream.workSales.masterRule", {
             minutes: formatInteger(
               locale,
-              Math.round(editions.terms.offset / 60)
+              Math.round(editions.terms.closeOffset / 60)
             ),
-            time: formatStreamTime(locale, editions.times.editionEnd),
+            time: formatStreamTime(locale, editions.times.endTime),
           })}
         </p>
       ) : null}

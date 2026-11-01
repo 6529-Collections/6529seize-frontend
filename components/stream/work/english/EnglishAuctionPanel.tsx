@@ -71,7 +71,15 @@ function EndFact({ context }: { readonly context: EnglishPanelContext }) {
         />
       );
     case "PAUSED":
-      return <>{t(locale, "stream.english.end.paused")}</>;
+      // The stored end, as `auction(saleId).endTime` reports it while paused.
+      return (
+        <>
+          <StreamTime seconds={auction.endTime} locale={locale} />
+          <span className="tw-block tw-text-xs tw-font-normal tw-text-amber-300">
+            {t(locale, "stream.english.end.paused")}
+          </span>
+        </>
+      );
     case "CANCELLED":
       return <>{t(locale, "stream.english.end.cancelled")}</>;
     case "NONE":
@@ -97,7 +105,7 @@ function KeyFacts({ context }: { readonly context: EnglishPanelContext }) {
   const { auction, locale, label } = context;
   const finished = auction.state === "SETTLED" || auction.state === "CANCELLED";
   const won = auction.settlement?.outcome === "collector";
-  const leader = auction.highBidder;
+  const leader = auction.bidder;
   return (
     <dl className="tw-m-0 tw-mt-4 tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-3">
       <Fact
@@ -110,7 +118,7 @@ function KeyFacts({ context }: { readonly context: EnglishPanelContext }) {
           t(locale, noBidKey(auction))
         ) : (
           <EthAmount
-            wei={auction.highBid}
+            wei={auction.bid}
             locale={locale}
             className="tw-text-lg tw-font-semibold"
           />
@@ -130,7 +138,7 @@ function KeyFacts({ context }: { readonly context: EnglishPanelContext }) {
       </Fact>
       {auction.state === "ACTIVE" ? (
         <Fact label={t(locale, "stream.english.nextBid")}>
-          <EthAmount wei={auction.minimumNextBid} locale={locale} />
+          <EthAmount wei={auction.minimumBid} locale={locale} />
         </Fact>
       ) : null}
       <Fact
@@ -182,7 +190,10 @@ function EditionsClose({ context }: { readonly context: EnglishPanelContext }) {
   if (editions === null) {
     return null;
   }
-  const minutes = formatInteger(locale, Math.round(editions.terms.offset / 60));
+  const minutes = formatInteger(
+    locale,
+    Math.round(editions.terms.closeOffset / 60)
+  );
   const link = (
     <Link
       href={STREAM_ROUTES.edition(editions.edition)}
@@ -200,7 +211,7 @@ function EditionsClose({ context }: { readonly context: EnglishPanelContext }) {
   }
   const extended =
     editions.times.softEnd !== null &&
-    editions.times.softEnd > editions.times.baseEnd;
+    editions.times.softEnd > editions.times.closeAt;
   let rule: MessageKey = "stream.english.times.editionsAfter";
   if (context.auction.state === "PAUSED") {
     rule = "stream.english.times.editionsAfterResume";
@@ -209,7 +220,7 @@ function EditionsClose({ context }: { readonly context: EnglishPanelContext }) {
   }
   return (
     <>
-      <StreamTime seconds={editions.times.editionEnd} locale={locale} />
+      <StreamTime seconds={editions.times.endTime} locale={locale} />
       <span className="tw-block tw-text-xs tw-text-iron-400">
         {t(locale, rule, { minutes })}
       </span>
@@ -247,7 +258,12 @@ function TimesTable({ context }: { readonly context: EnglishPanelContext }) {
       label: t(locale, "stream.english.times.end"),
       value:
         auction.state === "PAUSED" ? (
-          t(locale, "stream.english.times.endPaused")
+          <>
+            <StreamTime seconds={auction.endTime} locale={locale} />
+            <span className="tw-block tw-text-xs tw-text-amber-300">
+              {t(locale, "stream.english.times.endPaused")}
+            </span>
+          </>
         ) : (
           <>
             <StreamTime seconds={auction.endTime} locale={locale} />

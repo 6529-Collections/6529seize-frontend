@@ -1,5 +1,8 @@
 import type { ReactNode } from "react";
 
+import StatusBadge, {
+  type BadgeTone,
+} from "@/components/stream/ui/StatusBadge";
 import {
   STREAM_CARD,
   STREAM_FOCUS,
@@ -53,13 +56,13 @@ export function standingOf(won: number, qty: number): Standing {
   return won > 0 ? "partly" : "out";
 }
 
-const STANDING_CLASS: Readonly<Record<Standing, string>> = {
-  in: "tw-bg-success/15 tw-text-success",
-  partly: "tw-bg-amber-400/10 tw-text-amber-300",
-  out: "tw-bg-white/[0.06] tw-text-iron-400",
+const STANDING_TONE: Readonly<Record<Standing, BadgeTone>> = {
+  in: "live",
+  partly: "warning",
+  out: "muted",
 };
 
-/** In / 3 of 5 in / Out: a small square-cornered tag, not a pill. */
+/** In / 3 of 5 in / Out: the section's plain status (text and a dot). */
 export function StandingTag({
   won,
   qty,
@@ -71,16 +74,18 @@ export function StandingTag({
 }) {
   const standing = standingOf(won, qty);
   return (
-    <span
-      className={`tw-inline-flex tw-h-5 tw-flex-none tw-items-center tw-whitespace-nowrap tw-rounded tw-px-1.5 tw-text-xs tw-font-semibold tw-tabular-nums ${STANDING_CLASS[standing]}`}
-    >
-      {standing === "partly"
-        ? t(locale, "stream.editionAuction.tag.partly", {
-            won: formatInteger(locale, won),
-            qty: formatInteger(locale, qty),
-          })
-        : t(locale, `stream.editionAuction.tag.${standing}`)}
-    </span>
+    <StatusBadge
+      tone={STANDING_TONE[standing]}
+      className="tw-flex-none"
+      label={
+        standing === "partly"
+          ? t(locale, "stream.editionAuction.tag.partly", {
+              won: formatInteger(locale, won),
+              qty: formatInteger(locale, qty),
+            })
+          : t(locale, `stream.editionAuction.tag.${standing}`)
+      }
+    />
   );
 }
 

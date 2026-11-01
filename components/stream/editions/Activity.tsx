@@ -207,12 +207,12 @@ export default function Activity({
     !auction.biddingOpen &&
     auction.phase !== "void" &&
     auction.phase !== "disputed" &&
-    now >= auction.times.editionEnd;
+    now >= auction.times.endTime;
   if (closed) {
     const { count, price } = auction.clearing;
     lines.push({
       key: "closed",
-      at: auction.times.editionEnd,
+      at: auction.times.endTime,
       // Before the settlement events at the same second.
       order: -1,
       system: true,

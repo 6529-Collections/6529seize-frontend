@@ -143,8 +143,8 @@ function BidStatus({
         <StatusBadge
           tone="warning"
           label={t(locale, "stream.me.status.partly", {
-            won: formatInteger(locale, row.bid.won),
-            qty: formatInteger(locale, row.bid.qty),
+            won: formatInteger(locale, row.bid.unitsWon),
+            qty: formatInteger(locale, row.bid.quantity),
           })}
         />
       );
@@ -242,7 +242,9 @@ function editionSettleAction(
       subject={row.work.title}
       label={t(locale, "stream.me.action.settle")}
       send={(actions, from) =>
-        actions.sale("UNIFORM_AUCTION").settle(from, auction.edition)
+        actions
+          .sale("UNIFORM_AUCTION")
+          .settle(from, auction.edition, row.settleOrder)
       }
       run={run}
       pending={pending}
@@ -293,7 +295,7 @@ function editionAction(
       />
     );
   }
-  return auction.phase === "closed"
+  return auction.phase === "closed" || auction.phase === "settling"
     ? editionSettleAction(row, locale, run, pending)
     : null;
 }
@@ -325,9 +327,9 @@ function bidCells(
       work,
       formatEth(locale, row.bid.amount),
       status,
-      row.auction.highBidder === null
+      row.auction.bidder === null
         ? t(locale, "stream.browse.noBidsYet")
-        : formatEth(locale, row.auction.highBid),
+        : formatEth(locale, row.auction.bid),
       <OneOfOneClose
         key="close"
         auction={row.auction}
@@ -341,7 +343,7 @@ function bidCells(
     work,
     <span key="bid" className="tw-whitespace-nowrap">
       {t(locale, "stream.browse.kAtP", {
-        count: formatInteger(locale, row.bid.qty),
+        count: formatInteger(locale, row.bid.quantity),
         price: formatEth(locale, row.bid.price),
       })}
     </span>,

@@ -9,7 +9,7 @@ import type {
   WorkVariant,
 } from "@/lib/stream/types";
 
-type BadgeTone =
+export type BadgeTone =
   | "live"
   | "warning"
   | "neutral"
@@ -18,17 +18,22 @@ type BadgeTone =
   | "info"
   | "muted";
 
-const TONE_CLASSES: Readonly<Record<BadgeTone, string>> = {
-  live: "tw-bg-success/10 tw-text-success tw-ring-success/30",
-  warning: "tw-bg-amber-400/10 tw-text-amber-300 tw-ring-amber-400/30",
-  neutral: "tw-bg-iron-800 tw-text-iron-200 tw-ring-white/10",
-  success: "tw-bg-primary-500/10 tw-text-primary-300 tw-ring-primary-400/30",
-  danger: "tw-bg-error/10 tw-text-error tw-ring-error/30",
-  info: "tw-bg-iron-900 tw-text-iron-300 tw-ring-iron-600",
-  muted: "tw-bg-transparent tw-text-iron-400 tw-ring-iron-700",
+/** The dot's color per tone; the text stays plain. */
+const DOT_CLASSES: Readonly<Record<BadgeTone, string>> = {
+  live: "tw-bg-success",
+  warning: "tw-bg-amber-400",
+  neutral: "tw-bg-iron-400",
+  success: "tw-bg-primary-400",
+  danger: "tw-bg-error",
+  info: "tw-bg-iron-300",
+  muted: "tw-bg-iron-600",
 };
 
-/** A compact, rectangular status tag (4px radius, not a pill). Pass the label translated. */
+/**
+ * A status in plain text with a small colored dot: no background, border or
+ * pill shape (owner direction). The text carries the meaning; the dot is
+ * decorative. Pass the label translated.
+ */
 export default function StatusBadge({
   tone,
   label,
@@ -40,8 +45,12 @@ export default function StatusBadge({
 }) {
   return (
     <span
-      className={`tw-inline-flex tw-items-center tw-whitespace-nowrap tw-rounded tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset ${TONE_CLASSES[tone]} ${className}`}
+      className={`tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-xs tw-font-medium tw-tabular-nums tw-text-iron-200 ${className}`}
     >
+      <span
+        aria-hidden="true"
+        className={`tw-size-1.5 tw-flex-none tw-rounded-full ${DOT_CLASSES[tone]}`}
+      />
       {label}
     </span>
   );

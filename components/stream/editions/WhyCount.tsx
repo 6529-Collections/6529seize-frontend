@@ -93,8 +93,8 @@ function Verdict({
   if (chosen === undefined || best === undefined) {
     return null;
   }
-  const { cap } = auction.terms;
-  const capBinds = cap > 0 && chosen.count === cap && auction.totalUnits > cap;
+  const { maxCount: cap } = auction.terms;
+  const capBinds = cap > 0 && chosen.count === cap && auction.liveUnits > cap;
   return (
     <>
       <p className="tw-m-0 tw-mt-3.5 tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-50">

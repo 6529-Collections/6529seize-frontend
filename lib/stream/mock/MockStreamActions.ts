@@ -171,7 +171,7 @@ export class MockDevControls implements StreamDevControls {
     }
     for (const auction of engine.state.editionAuctions.values()) {
       if (auction.status === "OPEN") {
-        ends.push(auctionTimes(engine, auction).editionEnd);
+        ends.push(auctionTimes(engine, auction).endTime);
       }
     }
     const next = ends.filter((end) => end > now).sort((a, b) => a - b)[0];
@@ -220,7 +220,7 @@ export class MockDevControls implements StreamDevControls {
       const statement = appendStatement(this.engine, {
         role: "CURATOR",
         kind: delisted ? "DELISTING" : "RELISTING",
-        subject: { token: contract, id: 0 },
+        subject: { token: contract, id: 0n },
         summary: delisted
           ? "TDH vote: delisted (simulated)."
           : "TDH vote: relisted (simulated).",

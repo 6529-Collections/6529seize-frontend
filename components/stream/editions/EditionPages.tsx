@@ -176,7 +176,7 @@ function EditionRow({
         <SpecBadge spec={editionPhaseBadge(auction.phase)} locale={locale} />
         {open && auction.status !== "NONE" && auction.phase !== "disputed" ? (
           <Countdown
-            endTime={auction.times.editionEnd}
+            endTime={auction.times.endTime}
             now={now}
             locale={locale}
             className="tw-text-xs tw-text-iron-400"
@@ -202,9 +202,9 @@ export function EditionsIndexPage() {
   for (const auction of auctions ?? []) {
     groups[groupOf(auction)].push(auction);
   }
-  groups.live.sort((a, b) => a.times.editionEnd - b.times.editionEnd);
-  groups.closed.sort((a, b) => b.times.editionEnd - a.times.editionEnd);
-  groups.done.sort((a, b) => b.times.editionEnd - a.times.editionEnd);
+  groups.live.sort((a, b) => a.times.endTime - b.times.endTime);
+  groups.closed.sort((a, b) => b.times.endTime - a.times.endTime);
+  groups.done.sort((a, b) => b.times.endTime - a.times.endTime);
   return (
     <div>
       <PageHeader
@@ -249,7 +249,7 @@ function oneOfOneText(
       return auction.bids.length === 0
         ? t(locale, "stream.editionPages.one.noBidsYet")
         : t(locale, "stream.editionPages.one.top", {
-            amount: ethText(locale, auction.highBid),
+            amount: ethText(locale, auction.bid),
             bids: formatInteger(locale, auction.bids.length),
           });
     case "PAUSED":
@@ -266,7 +266,7 @@ function oneOfOneText(
         return t(locale, "stream.editionPages.one.artist");
       }
       return t(locale, "stream.editionPages.one.sold", {
-        amount: ethText(locale, settlement?.price ?? auction.highBid),
+        amount: ethText(locale, settlement?.price ?? auction.bid),
       });
     case "NONE":
       return t(locale, "stream.editionPages.one.none");
@@ -381,14 +381,14 @@ function EditionFacts({
     },
     {
       label: t(locale, "stream.editionPages.facts.minted"),
-      value: formatInteger(locale, work?.editionSupply ?? 0),
+      value: formatInteger(locale, work?.minted ?? 0),
     },
     {
       label: t(locale, "stream.editionPages.facts.cap"),
       value:
-        auction.terms.cap === 0
+        auction.terms.maxCount === 0
           ? t(locale, "stream.editionPages.facts.noCap")
-          : formatInteger(locale, auction.terms.cap),
+          : formatInteger(locale, auction.terms.maxCount),
     },
     {
       label: t(locale, "stream.editionPages.facts.license"),

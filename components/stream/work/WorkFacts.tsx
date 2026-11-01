@@ -8,6 +8,7 @@ import {
   useStreamQuery,
 } from "@/components/stream/data/StreamProvider";
 import { AddressChip, ArtistChip } from "@/components/stream/ui/AddressChip";
+import { formatEth } from "@/components/stream/ui/EthAmount";
 import {
   SpecBadge,
   storageBadge,
@@ -26,7 +27,7 @@ import { formatInteger, formatPercent } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { type MessageKey, t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream";
-import { SPLITS_DENOMINATOR } from "@/lib/stream/constants";
+import { SPLITS_DENOMINATOR, ZERO_ADDRESS } from "@/lib/stream/constants";
 import { locatorDisplayUrl } from "@/lib/stream/media";
 import type {
   EditionAuction,
@@ -151,7 +152,7 @@ function linkedValue(context: FactsContext): ReactNode {
       ? key
       : t(locale, "stream.workFacts.linked.token", {
           name: t(locale, variantBadge(linked.variant).label),
-          id: formatInteger(locale, linked.tokenId),
+          id: linked.tokenId.toString(),
         });
   return (
     <>
@@ -212,7 +213,7 @@ function supplyValue(context: FactsContext): string {
   const { work, editionAuction, locale } = context;
   return t(locale, supplyKey(context), {
     count: formatInteger(locale, editionAuction?.clearing.count ?? 0),
-    minted: formatInteger(locale, work.editionSupply ?? 0),
+    minted: formatInteger(locale, work.minted ?? 0),
   });
 }
 
@@ -221,9 +222,9 @@ function capValue(context: FactsContext): string {
   if (editionAuction === null) {
     return t(locale, NONE);
   }
-  return editionAuction.terms.cap === 0
+  return editionAuction.terms.maxCount === 0
     ? t(locale, "stream.sale.edition.noCap")
-    : formatInteger(locale, editionAuction.terms.cap);
+    : formatInteger(locale, editionAuction.terms.maxCount);
 }
 
 function saleKindLabel(locale: SupportedLocale, sale: SaleRef): string {
@@ -253,6 +254,44 @@ function saleValue(context: FactsContext): ReactNode {
   );
 }
 
+/**
+ * `IStream.primarySale(id)` (owner decision 17): the outcome the minting
+ * adapter reported, and the price when sold. An unsold canonical work is moved
+ * to the museum by 6529 Stream itself.
+ */
+function primarySaleValue(context: FactsContext): string {
+  const { work, locale } = context;
+  const { outcome, currency, price } = work.primarySale;
+  const canonical = work.program === "canonical";
+  switch (outcome) {
+    case "NONE":
+      return t(locale, "stream.workFacts.primary.none");
+    case "SOLD":
+      return currency === ZERO_ADDRESS
+        ? t(locale, "stream.workFacts.primary.sold", {
+            price: formatEth(locale, price),
+          })
+        : t(locale, "stream.workFacts.primary.soldToken", {
+            price: price.toString(),
+            currency: short(currency),
+          });
+    case "UNBID":
+      return t(
+        locale,
+        canonical
+          ? "stream.workFacts.primary.unbidMuseum"
+          : "stream.workFacts.primary.unbidArtist"
+      );
+    case "FROZEN_OUT":
+      return t(
+        locale,
+        canonical
+          ? "stream.workFacts.primary.frozenMuseum"
+          : "stream.workFacts.primary.frozenArtist"
+      );
+  }
+}
+
 function tokenRows(context: FactsContext): FactRow[] {
   const { work, locale } = context;
   const isEdition = work.standard === "ERC1155";
@@ -275,7 +314,7 @@ function tokenRows(context: FactsContext): FactRow[] {
           {contractName(context)}
           <Line>
             {t(locale, "stream.workFacts.tokenId", {
-              id: formatInteger(locale, work.tokenId),
+              id: work.tokenId.toString(),
             })}
           </Line>
           <AddressChip address={work.token} locale={locale} />
@@ -317,11 +356,18 @@ function tokenRows(context: FactsContext): FactRow[] {
       }
     );
   } else {
-    rows.push({
-      key: "owner",
-      label: t(locale, "stream.workFacts.ownerLabel"),
-      value: ownerValue(context),
-    });
+    rows.push(
+      {
+        key: "owner",
+        label: t(locale, "stream.workFacts.ownerLabel"),
+        value: ownerValue(context),
+      },
+      {
+        key: "primary",
+        label: t(locale, "stream.workFacts.primaryLabel"),
+        value: primarySaleValue(context),
+      }
+    );
   }
   rows.push(
     {

@@ -190,7 +190,7 @@ describe("a standalone federated edition auction (provisional close)", () => {
     );
     const auction = await stream.dataSource.getEditionAuction(edition);
     expect(auction?.master).toBeNull();
-    expect(auction?.times.baseEnd).toBe((auction?.times.openedAt ?? 0) + DAY);
+    expect(auction?.times.closeAt).toBe((auction?.times.openedAt ?? 0) + DAY);
     expect(auction?.terms.softWindow).toBe(5 * 60);
   });
 });

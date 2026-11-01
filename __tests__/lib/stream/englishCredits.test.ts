@@ -31,14 +31,14 @@ describe("1/1 auction credits and withdrawals", () => {
     const key = await keyTitled(stream, "Glass Orchard");
     const auction = await stream.dataSource.auctionForWork(key);
     expect(auction?.state).toBe("PAUSED");
-    expect(auction?.highBidder).toBe(B);
+    expect(auction?.bidder).toBe(B);
     const before = await stream.dataSource.claimableCredits(B);
     expectOk(
       await stream.actions
         .sale("ENGLISH_AUCTION")
         .withdrawBid(B, auction?.saleId ?? "")
     );
-    const withdrawn = auction?.highBid ?? 0n;
+    const withdrawn = auction?.bid ?? 0n;
     expect(withdrawn).toBe(parseEthToWei("0.3"));
     expect(await stream.dataSource.claimableCredits(B)).toBe(
       before + withdrawn

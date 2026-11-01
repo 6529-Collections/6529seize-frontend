@@ -2,7 +2,8 @@
 import type { TxResult } from "@/lib/stream/dataSource";
 import { parseEthToWei } from "@/lib/stream/eth";
 import { createMockStream, MOCK_ACCOUNTS } from "@/lib/stream/mock";
-import type { StreamWork } from "@/lib/stream/types";
+import { OTHER_BIDDERS } from "@/lib/stream/mock/scenarioKit";
+import type { Address, StreamWork } from "@/lib/stream/types";
 
 const eth = (text: string): bigint => parseEthToWei(text) ?? 0n;
 
@@ -59,6 +60,8 @@ describe("chunked edition settlement (rc.2)", () => {
     expect(settling?.settlement).toEqual({
       cleared: false,
       wordsLeft: 2,
+      cutUnits: 0,
+      cutoff: 0,
       departuresSwept: 0,
       departures: 0,
     });
@@ -86,7 +89,9 @@ describe("chunked edition settlement (rc.2)", () => {
     ]);
 
     // Anyone continues: here collector B, who has no bids to claim.
-    expect(expectOk(await editions.settle(B, edition))).toEqual({
+    const order = await stream.dataSource.settlementOrderFor(edition, B);
+    expect(order).toEqual([]);
+    expect(expectOk(await editions.settle(B, edition, order))).toEqual({
       settled: true,
     });
     const settled = await stream.dataSource.getEditionAuction(edition);
@@ -108,14 +113,17 @@ describe("chunked edition settlement (rc.2)", () => {
     ]);
     const holders = await stream.dataSource.editionHolders(edition);
     expect(holders).toEqual([{ account: A, balance: 4 }]);
-    expectRevert(await editions.settle(B, edition), "InvalidAuctionState");
+    // Settling a SETTLED sale changes nothing and reports it settled.
+    expect(expectOk(await editions.settle(B, edition, []))).toEqual({
+      settled: true,
+    });
   });
 
   it("settles a typical sale in one call: the owner's example", async () => {
     const stream = world();
     const { edition } = await masterTitled(stream, "Open Ledger");
     const result = expectOk(
-      await stream.actions.sale("UNIFORM_AUCTION").settle(B, edition)
+      await stream.actions.sale("UNIFORM_AUCTION").settle(B, edition, [])
     );
     expect(result).toEqual({ settled: true });
     const events = await stream.dataSource.editionActivity(edition);
@@ -138,11 +146,11 @@ describe("chunked edition settlement (rc.2)", () => {
     const auction = await stream.dataSource.getEditionAuction(edition);
     expect([
       auction?.clearing.rationed,
-      auction?.clearing.cutStepUnits,
+      auction?.clearing.cutUnits,
       auction?.clearing.cutoff,
     ]).toEqual([true, 14, 22]);
     stream.dev.advance(
-      (auction?.times.editionEnd ?? 0) - stream.dataSource.now() + 1
+      (auction?.times.endTime ?? 0) - stream.dataSource.now() + 1
     );
     expectOk(
       await stream.actions
@@ -150,18 +158,117 @@ describe("chunked edition settlement (rc.2)", () => {
         .settle(A, oneOfOne?.saleId ?? "")
     );
     expectOk(await stream.actions.createEdition(A, key));
+    const order = await stream.dataSource.settlementOrderFor(edition, A);
+    expect(order).toEqual([0]);
     expect(
       expectOk(
-        await stream.actions.sale("UNIFORM_AUCTION").settle(A, edition)
+        await stream.actions.sale("UNIFORM_AUCTION").settle(A, edition, order)
       )
     ).toEqual({ settled: true });
     const settled = await stream.dataSource.getEditionAuction(edition);
     expect(settled?.settlement).toEqual({
       cleared: true,
       wordsLeft: 0,
+      cutUnits: 14,
+      cutoff: 22,
       departuresSwept: 1,
       departures: 1,
     });
+  });
+
+  it("sweeps per settler: a partial slice keeps its own progress, another settler starts afresh", async () => {
+    const stream = world();
+    const editions = stream.actions.sale("UNIFORM_AUCTION");
+    // A standalone federated 1155 with a cap of 10: six bids of 2 at one step,
+    // then the first two raise a step, leaving two holes at the cut step.
+    const artist = "0x00000000000000000000000000000000000000f5" as Address;
+    const [contract] = expectOk(
+      await stream.actions.deployFederated(artist, {
+        form: "ERC1155",
+        name: "Sweep Study",
+        symbol: "SWEEP",
+        defaultLicense: "CC0-1.0",
+      })
+    ).contracts;
+    const edition = expectOk(
+      await stream.actions.openFederatedEditionAuction(
+        artist,
+        contract ?? A,
+        "Sweep Study",
+        10
+      )
+    );
+    // Six funded bidders (the seed funds OTHER_BIDDERS).
+    const bidders = OTHER_BIDDERS.slice(0, 6);
+    const bidIds: number[] = [];
+    for (const bidder of bidders) {
+      bidIds.push(expectOk(await editions.bid(bidder, edition, 100, 2)).bidId);
+    }
+    for (const index of [0, 1]) {
+      expectOk(
+        await editions.raise(
+          bidders[index] ?? A,
+          edition,
+          bidIds[index] ?? 0,
+          101
+        )
+      );
+    }
+    const live = await stream.dataSource.getEditionAuction(edition);
+    expect([
+      live?.clearing.count,
+      live?.clearing.step,
+      live?.clearing.rationed,
+      live?.clearing.cutUnits,
+    ]).toEqual([10, 100, true, 6]);
+    stream.dev.advance(
+      (live?.times.endTime ?? 0) - stream.dataSource.now() + 1
+    );
+
+    const full = await stream.dataSource.settlementOrderFor(edition, A);
+    expect(full).toEqual([0, 1]);
+    // An order out of position order cannot sweep.
+    expectRevert(
+      await editions.settle(A, edition, [1, 0]),
+      "InvalidSettlementOrder"
+    );
+    // A clears and sweeps only its first departure.
+    expect(expectOk(await editions.settle(A, edition, [0]))).toEqual({
+      settled: false,
+    });
+    expect(await stream.dataSource.sweepOf(edition, A)).toEqual({
+      swept: 1,
+      nextPosition: 1,
+      cutoff: 8,
+    });
+    expect(await stream.dataSource.settlementOrderFor(edition, A)).toEqual([1]);
+    const pending = await stream.dataSource.getEditionAuction(edition);
+    expect([pending?.status, pending?.settlement?.departuresSwept]).toEqual([
+      "SETTLING",
+      0,
+    ]);
+    // B has no progress: its order is the whole sweep, and it finishes first.
+    expect(await stream.dataSource.sweepOf(edition, B)).toEqual({
+      swept: 0,
+      nextPosition: 0,
+      cutoff: 0,
+    });
+    const orderB = await stream.dataSource.settlementOrderFor(edition, B);
+    expect(orderB).toEqual(full);
+    expect(expectOk(await editions.settle(B, edition, orderB))).toEqual({
+      settled: true,
+    });
+    const settled = await stream.dataSource.getEditionAuction(edition);
+    expect(settled?.status).toBe("SETTLED");
+    expect(settled?.settlement).toEqual(
+      expect.objectContaining({ cutUnits: 6, cutoff: 10, departuresSwept: 2 })
+    );
+    expect(settled?.settlement?.cutoff).toBe(live?.clearing.cutoff);
+    // A's rest is moot now: settling a SETTLED sale returns true.
+    expect(expectOk(await editions.settle(A, edition, [1]))).toEqual({
+      settled: true,
+    });
+    expect(await stream.dataSource.settlementOrderFor(edition, A)).toEqual([]);
   });
 });
 
@@ -173,7 +280,7 @@ describe("edition auction reads added for the bidding panel", () => {
     const editions = stream.actions.sale("UNIFORM_AUCTION");
     expectOk(await editions.bid(A, edition, 100, 1));
     stream.dev.advance(
-      (auction?.times.editionEnd ?? 0) - stream.dataSource.now() - 60
+      (auction?.times.endTime ?? 0) - stream.dataSource.now() - 60
     );
     expectOk(await editions.bid(B, edition, 100, 2));
     const bids = (await stream.dataSource.editionActivity(edition)).filter(
@@ -205,7 +312,7 @@ describe("edition auction reads added for the bidding panel", () => {
       out?.bidId ?? 0,
       target ?? 0
     );
-    expect(quote?.won).toBe(out?.qty);
+    expect(quote?.unitsWon).toBe(out?.quantity);
     expectOk(
       await stream.actions
         .sale("UNIFORM_AUCTION")
@@ -213,12 +320,12 @@ describe("edition auction reads added for the bidding panel", () => {
     );
     const after = await stream.dataSource.getEditionAuction(edition);
     expect([after?.clearing.count, after?.clearing.step]).toEqual([
-      quote?.after.count,
-      quote?.after.step,
+      quote?.result.count,
+      quote?.result.step,
     ]);
     const raised = (await stream.dataSource.editionActivity(edition)).at(-1);
     expect(raised).toEqual(
-      expect.objectContaining({ kind: "raised", paid: quote?.cost })
+      expect.objectContaining({ kind: "raised", paid: quote?.escrow })
     );
     expect(
       await stream.dataSource.quoteEditionRaise(edition, out?.bidId ?? 0, 0)

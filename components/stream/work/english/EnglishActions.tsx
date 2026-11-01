@@ -32,11 +32,11 @@ function bidHelp(
   leading: boolean
 ): string {
   const { auction, locale } = context;
-  const minimum = formatEth(locale, auction.minimumNextBid);
+  const minimum = formatEth(locale, auction.minimumBid);
   if (wei === null) {
     return t(locale, "stream.english.bid.invalid");
   }
-  if (wei < auction.minimumNextBid) {
+  if (wei < auction.minimumBid) {
     return t(locale, "stream.english.bid.tooLow", { minimum });
   }
   return leading
@@ -54,9 +54,9 @@ export function BidForm({
   const inputId = useId();
   const helpId = useId();
   const [text, setText] = useState<string | null>(null);
-  const value = text ?? weiToEthString(auction.minimumNextBid);
+  const value = text ?? weiToEthString(auction.minimumBid);
   const wei = parseEthToWei(value);
-  const leading = sameAddress(auction.highBidder, action.account);
+  const leading = sameAddress(auction.bidder, action.account);
   if (isDelisted(context)) {
     return (
       <p className="tw-m-0 tw-text-sm tw-text-error">
@@ -75,7 +75,7 @@ export function BidForm({
       setText(null);
     }
   };
-  const invalid = wei === null || wei < auction.minimumNextBid;
+  const invalid = wei === null || wei < auction.minimumBid;
   return (
     <form
       className="tw-flex tw-flex-col tw-gap-2"
@@ -150,10 +150,10 @@ export function WithdrawButton({
   readonly context: EnglishPanelContext;
 }) {
   const { auction, locale, action } = context;
-  if (auction.highBidder === null) {
+  if (auction.bidder === null) {
     return null;
   }
-  if (!sameAddress(auction.highBidder, action.account)) {
+  if (!sameAddress(auction.bidder, action.account)) {
     return (
       <p className={STREAM_HELP}>
         {t(locale, "stream.english.withdraw.onlyLeader")}

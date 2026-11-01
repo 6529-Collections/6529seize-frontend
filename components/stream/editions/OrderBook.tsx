@@ -27,9 +27,11 @@ function PriceLine({
   readonly auction: EditionAuction;
   readonly locale: SupportedLocale;
 }) {
-  const { clearing, terms, totalUnits } = auction;
+  const { clearing, terms, liveUnits: totalUnits } = auction;
   const capped =
-    terms.cap > 0 && clearing.count === terms.cap && totalUnits > terms.cap;
+    terms.maxCount > 0 &&
+    clearing.count === terms.maxCount &&
+    totalUnits > terms.maxCount;
   return (
     <tr>
       <td colSpan={4} className="tw-p-0">
@@ -109,7 +111,7 @@ function Footer({
   readonly locale: SupportedLocale;
 }) {
   const { clearing } = auction;
-  const gap = clearing.rationed && clearing.cutoff > clearing.cutStepUnits;
+  const gap = clearing.rationed && clearing.cutoff > clearing.cutUnits;
   return (
     <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2">
       <div className="tw-min-w-0 tw-flex-1 tw-basis-64">
@@ -188,7 +190,7 @@ export default function OrderBook({
       ? undefined
       : t(locale, "stream.editionAuction.book.aside", {
           bids: formatInteger(locale, auction.bidCount),
-          wanted: editionsText(locale, auction.totalUnits),
+          wanted: editionsText(locale, auction.liveUnits),
         });
   // A cancelled 1/1 voids the sale: every bid is out and refunded in full.
   const isVoid = auction.phase === "void";

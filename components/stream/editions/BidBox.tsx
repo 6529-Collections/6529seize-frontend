@@ -72,9 +72,9 @@ function Preview({
   readonly onUse: (step: number) => void;
   readonly locale: SupportedLocale;
 }) {
-  const standing = standingOf(quote.won, qty);
+  const standing = standingOf(quote.unitsWon, qty);
   const now = auction.clearing;
-  const after = quote.after;
+  const after = quote.result;
   let headKey: MessageKey = "stream.editionAuction.box.wouldBeOut";
   if (standing === "in") {
     headKey = "stream.editionAuction.box.wouldBeIn";
@@ -106,19 +106,19 @@ function Preview({
   return (
     <>
       <p className="tw-m-0 tw-flex tw-items-center tw-gap-2 tw-font-semibold tw-text-iron-50">
-        <StandingTag won={quote.won} qty={qty} locale={locale} />
+        <StandingTag won={quote.unitsWon} qty={qty} locale={locale} />
         <span>
           {t(locale, headKey, {
-            won: formatInteger(locale, quote.won),
+            won: formatInteger(locale, quote.unitsWon),
             qty: formatInteger(locale, qty),
           })}
         </span>
       </p>
       <p className="tw-m-0 tw-tabular-nums">{effect}</p>
-      {quote.pushedOut > 0 ? (
+      {quote.unitsPushedOut > 0 ? (
         <p className="tw-m-0 tw-tabular-nums">
           {t(locale, "stream.editionAuction.box.pushesOut", {
-            editions: editionsText(locale, quote.pushedOut),
+            editions: editionsText(locale, quote.unitsPushedOut),
           })}
         </p>
       ) : null}
@@ -361,11 +361,7 @@ export default function BidBox({
   const fieldId = useId();
   const bidButton = useRef<HTMLButtonElement>(null);
   const { terms } = auction;
-  const ladder = {
-    base: terms.base,
-    perDecade: terms.perDecade,
-    steps: terms.steps,
-  };
+  const ladder = terms;
   const [chosen, setChosen] = useState<number | null>(null);
   const [typed, setTyped] = useState<string | null>(null);
   const quantity = useQuantity();
@@ -395,7 +391,7 @@ export default function BidBox({
   );
 
   const moveTo = (next: number) => {
-    setChosen(Math.max(0, Math.min(terms.steps - 1, next)));
+    setChosen(Math.max(0, Math.min(terms.stepCount - 1, next)));
     setTyped(null);
     setNotice(null);
   };
@@ -407,7 +403,7 @@ export default function BidBox({
     if (!ready || price === undefined) {
       return;
     }
-    const won = quote?.won ?? 0;
+    const won = quote?.unitsWon ?? 0;
     const result = await submit(step, qty);
     setNotice(
       noticeOf(locale, result, () => placedText(locale, qty, price, won))
@@ -452,7 +448,7 @@ export default function BidBox({
         }}
         higher={{
           label: t(locale, "stream.editionAuction.box.higher"),
-          disabled: !open || priceError || step >= terms.steps - 1,
+          disabled: !open || priceError || step >= terms.stepCount - 1,
           run: () => moveTo(step + 1),
         }}
         onText={(text) => {

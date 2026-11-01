@@ -100,7 +100,7 @@ export function liveCloses(sales: WorkSales): LiveClose[] {
     closes.push({
       sales,
       auction: "edition",
-      closesAt: sales.edition.times.editionEnd,
+      closesAt: sales.edition.times.endTime,
     });
   }
   return closes.sort((left, right) => left.closesAt - right.closesAt);
@@ -137,7 +137,7 @@ export function editionMoney(auction: EditionAuction | null): SaleMoney {
   return {
     raised: auction.clearing.revenue,
     artistSide: auction.clearing.sellerShare,
-    network: auction.clearing.networkShare,
+    network: auction.clearing.networkFee,
   };
 }
 

@@ -112,12 +112,12 @@ function PausedBlock({ context }: { readonly context: EnglishPanelContext }) {
   if (editions !== null) {
     lines.push(line("editions", t(locale, "stream.english.paused.editions")));
   }
-  if (auction.highBidder === null && auction.highBid > 0n) {
+  if (auction.bidder === null && auction.bid > 0n) {
     lines.push(
       line(
         "reserve",
         t(locale, "stream.english.paused.reserve", {
-          amount: formatEth(locale, auction.highBid),
+          amount: formatEth(locale, auction.bid),
         })
       )
     );
@@ -152,7 +152,7 @@ function PausedBlock({ context }: { readonly context: EnglishPanelContext }) {
 
 function endedPreviewKey(context: EnglishPanelContext): MessageKey {
   const { auction } = context;
-  if (auction.highBidder !== null) {
+  if (auction.bidder !== null) {
     return isDelisted(context)
       ? "stream.english.ended.delisted"
       : "stream.english.ended.sold";
@@ -164,7 +164,7 @@ function endedPreviewKey(context: EnglishPanelContext): MessageKey {
 
 function EndedBlock({ context }: { readonly context: EnglishPanelContext }) {
   const { auction, locale, label } = context;
-  const winner = auction.recipient ?? auction.highBidder;
+  const winner = auction.recipient ?? auction.bidder;
   return (
     <Notice
       tone="neutral"

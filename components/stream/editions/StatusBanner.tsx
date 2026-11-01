@@ -17,6 +17,7 @@ import "@/i18n/namespaces/stream";
 import type {
   EditionAuction,
   EditionBidView,
+  EditionSweep,
   OneOfOneAuction,
 } from "@/lib/stream/types";
 import { STREAM_ROUTES } from "@/lib/stream/workKey";
@@ -51,7 +52,7 @@ function claimWhat(
   let won = 0;
   let refund = 0n;
   for (const bid of bids) {
-    won += bid.won;
+    won += bid.unitsWon;
     refund += bid.refund;
   }
   if (won > 0 && refund > 0n) {
@@ -97,12 +98,15 @@ function ActionButton({
 function settlingBanner(
   locale: SupportedLocale,
   auction: EditionAuction,
+  sweep: EditionSweep | null,
   actions: BannerActions
 ): Banner {
   const progress = auction.settlement;
   const wordsLeft = progress?.wordsLeft ?? 0;
+  // Each settler sweeps on its own (`sweepOf`): the gaps left are this
+  // account's, and "Continue" sends its own rest of the order.
   const gapsLeft =
-    progress === null ? 0 : progress.departures - progress.departuresSwept;
+    progress === null ? 0 : progress.departures - (sweep?.swept ?? 0);
   return {
     tone: "plain",
     text: (
@@ -254,7 +258,7 @@ function liveBanner(
   now: number
 ): Banner | null {
   const { times, terms } = auction;
-  if (now >= times.editionEnd - terms.softWindow) {
+  if (now >= times.endTime - terms.softWindow) {
     return {
       tone: "warn",
       text: (
@@ -318,6 +322,7 @@ interface BannerInput {
   readonly auction: EditionAuction;
   readonly oneOfOne: OneOfOneAuction | null;
   readonly bids: readonly EditionBidView[];
+  readonly sweep: EditionSweep | null;
   readonly now: number;
   readonly actions: BannerActions;
 }
@@ -327,6 +332,7 @@ function bannerFor({
   auction,
   oneOfOne,
   bids,
+  sweep,
   now,
   actions,
 }: BannerInput): Banner | null {
@@ -347,7 +353,7 @@ function bannerFor({
     return finalBanner(locale, auction, bids, actions);
   }
   if (auction.status === "SETTLING") {
-    return settlingBanner(locale, auction, actions);
+    return settlingBanner(locale, auction, sweep, actions);
   }
   switch (auction.phase) {
     case "void":
@@ -401,6 +407,7 @@ export default function StatusBanner({
   auction,
   oneOfOne,
   bids,
+  sweep,
   now,
   actions,
   locale,
@@ -408,11 +415,21 @@ export default function StatusBanner({
   readonly auction: EditionAuction;
   readonly oneOfOne: OneOfOneAuction | null;
   readonly bids: readonly EditionBidView[];
+  /** This account's own departure sweep (`sweepOf`), or null. */
+  readonly sweep: EditionSweep | null;
   readonly now: number;
   readonly actions: BannerActions;
   readonly locale: SupportedLocale;
 }) {
-  const banner = bannerFor({ locale, auction, oneOfOne, bids, now, actions });
+  const banner = bannerFor({
+    locale,
+    auction,
+    oneOfOne,
+    bids,
+    sweep,
+    now,
+    actions,
+  });
   if (banner === null && actions.message === null) {
     return null;
   }

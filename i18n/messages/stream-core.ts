@@ -28,6 +28,7 @@ export const STREAM_CORE_MESSAGES = {
   "stream.common.yes": "Yes",
   "stream.common.no": "No",
   "stream.common.none": "None",
+  "stream.common.loading": "Loading",
 
   "stream.notFound.title": "Not found",
   "stream.notFound.body": "No work, edition or contract has this ID.",

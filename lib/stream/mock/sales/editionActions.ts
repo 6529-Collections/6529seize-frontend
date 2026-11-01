@@ -76,12 +76,14 @@ export function createEditionActions(
           });
         })
       ),
-    settle: (_from, edition) =>
+    settle: (from, edition, order) =>
       later(() =>
         engine.tx("editionSettle", () => ({
           settled: settleEditionAuction(
             engine,
-            findEditionAuction(engine, edition)
+            findEditionAuction(engine, edition),
+            from,
+            order
           ),
         }))
       ),

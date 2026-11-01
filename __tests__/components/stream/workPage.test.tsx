@@ -146,6 +146,8 @@ describe("the work page variants", () => {
       "75% artist side · 25% network"
     );
     expect(await fact("Royalty")).toHaveTextContent("6.529% of resales");
+    // `IStream.primarySale` (owner decision 17): SOLD, with the price.
+    expect(await fact("Sale result")).toHaveTextContent(/^Sold for .+ ETH$/);
     expect(await fact("Dispute statement")).not.toHaveTextContent("None");
     expect(await screen.findByText(/^Sold to/)).toBeInTheDocument();
     expect(screen.getByText("Delivered to the winner.")).toBeInTheDocument();
@@ -174,6 +176,9 @@ describe("the work page variants", () => {
     expect(await fact("Contract")).toHaveTextContent("Halden Studio (HALDEN)");
     expect(await fact("Primary sale")).toHaveTextContent(
       "90% artist side · 10% network"
+    );
+    expect(await fact("Sale result")).toHaveTextContent(
+      "No bids. It went back to the artist."
     );
     expect(
       await screen.findByText("The work went back to its artist.")
@@ -277,11 +282,16 @@ describe("the 1/1 English auction panel", () => {
         "No bids. Settling sends the work to the 6529 Network Museum."
       )
     ).toBeInTheDocument();
+    expect(await fact("Sale result")).toHaveTextContent("Not settled yet");
     fireEvent.click(screen.getByRole("button", { name: "Settle" }));
     expect(
       await screen.findByText("The work went to the 6529 Network Museum.")
     ).toBeInTheDocument();
     expect(await fact("Owner")).toHaveTextContent("6529 Network Museum");
+    // Owner decision 17: Stream records UNBID and moves the work itself.
+    expect(await fact("Sale result")).toHaveTextContent(
+      "No bids. 6529 Stream moved it to the 6529 Network Museum."
+    );
   });
 
   it("lets a winner whose wallet refused the token claim it", async () => {

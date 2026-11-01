@@ -26,7 +26,7 @@ export function stepTotalRows(
   live: readonly number[],
   prices: readonly Wei[],
   cap: number,
-  result: Pick<ClearOutcome, "step" | "rationed" | "cutStepUnits">
+  result: Pick<ClearOutcome, "step" | "rationed" | "cutUnits">
 ): EditionStepTotal[] {
   const rows: EditionStepTotal[] = [];
   let cumulative = 0;
@@ -41,7 +41,7 @@ export function stepTotalRows(
       if (status === "in") {
         won = units;
       } else if (status === "part") {
-        won = result.cutStepUnits;
+        won = result.cutUnits;
       }
       rows.push({
         step,

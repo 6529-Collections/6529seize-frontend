@@ -15,17 +15,18 @@ import type {
   LocatorKind,
   MuseumHolding,
   OneOfOneOutcome,
+  PrimarySale,
   ProvenanceEvent,
   SaleRef,
   SeedPolicy,
   StatementView,
   StreamProgram,
   TokenStandard,
+  Wei,
   WorkEconomics,
   WorkKey,
   WorkParty,
   WorkVariant,
-  Wei,
 } from "@/lib/stream/types";
 
 /** The mock's in-memory "chain". Views are built from this on every read. */
@@ -60,7 +61,7 @@ export interface MockToken {
   readonly program: StreamProgram;
   readonly standard: TokenStandard;
   readonly token: Address;
-  readonly tokenId: number;
+  readonly tokenId: bigint;
   readonly kind: ItemKind;
   readonly title: string;
   readonly description: string;
@@ -85,6 +86,8 @@ export interface MockToken {
   created: boolean;
   sale: SaleRef | null;
   primarySaleSettled: boolean;
+  /** `IStream.primarySale` (owner decision 17), set by `settlePrimary`. */
+  primarySale: PrimarySale;
   burned: boolean;
   readonly mintedAt: number | null;
   readonly packageRoot: Hex32;
@@ -149,8 +152,22 @@ export interface MockSettling {
   /** The lowest word: where the scan ends. */
   readonly low: number;
   cleared: boolean;
+  /** The clearing step's winning units, once cleared. */
+  cutUnits: number;
+  /** `cutUnits` until a settler's sweep completes, then the final cutoff. */
+  cutoff: number;
+  /** Zero until a settler's sweep completes, then `departures`. */
   departuresSwept: number;
   departures: number;
+  /** Each settler's own sweep in progress (`Space.SWEEP`), by lowercase address. */
+  readonly sweeps: Map<string, MockSweep>;
+}
+
+/** One settler's sweep: `swept | nextPosition << 32 | cutoff << 64` on-chain. */
+export interface MockSweep {
+  readonly swept: number;
+  readonly nextPosition: number;
+  readonly cutoff: number;
 }
 
 export interface MockSplitWallet {
@@ -178,7 +195,7 @@ export interface MockFederatedState extends Omit<
 > {
   status: FederatedContract["status"];
   delisting: FederatedDelisting | null;
-  nextTokenId: number;
+  nextTokenId: bigint;
 }
 
 export interface PayeeSpec {
@@ -233,6 +250,6 @@ export interface MockState {
   readonly museum: MuseumHolding[];
   readonly provenance: Map<WorkKey, ProvenanceEvent[]>;
   networkFees: Wei;
-  nextStreamTokenId: number;
+  nextStreamTokenId: bigint;
   federatedDeployNonce: number;
 }

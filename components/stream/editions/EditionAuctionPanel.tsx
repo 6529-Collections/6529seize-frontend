@@ -67,6 +67,23 @@ export default function EditionAuctionPanel({
         ? Promise.resolve([])
         : source.editionBids(edition, account)
   );
+  // Each settler sweeps on its own: "Continue" sends this account's rest.
+  const { data: settleOrder = [] } = useStreamQuery(
+    "edition-settle-order",
+    [edition, account],
+    (source) =>
+      account === null
+        ? Promise.resolve([])
+        : source.settlementOrderFor(edition, account)
+  );
+  const { data: sweep = null } = useStreamQuery(
+    "edition-sweep",
+    [edition, account],
+    (source) =>
+      account === null
+        ? Promise.resolve(null)
+        : source.sweepOf(edition, account)
+  );
   const oneOfOneSale = auction.oneOfOne?.saleId ?? null;
   const { data: oneOfOne = null } = useStreamQuery(
     "edition-one-of-one",
@@ -84,7 +101,7 @@ export default function EditionAuctionPanel({
   const mine = new Map<number, number>();
   for (const bid of bids) {
     if (isLive(bid)) {
-      mine.set(bid.step, (mine.get(bid.step) ?? 0) + bid.qty);
+      mine.set(bid.step, (mine.get(bid.step) ?? 0) + bid.quantity);
     }
   }
 
@@ -103,7 +120,7 @@ export default function EditionAuctionPanel({
           return stop;
         }
       }
-      return editionActions(actions).settle(from, edition);
+      return editionActions(actions).settle(from, edition, settleOrder);
     });
   const claim = (claimable: readonly EditionBidView[]) =>
     void bannerAction.run(async (actions, from) => {
@@ -136,6 +153,7 @@ export default function EditionAuctionPanel({
         auction={auction}
         oneOfOne={oneOfOne}
         bids={bids}
+        sweep={sweep}
         now={now}
         locale={locale}
         actions={{

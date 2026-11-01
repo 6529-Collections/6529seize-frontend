@@ -61,7 +61,12 @@ describe("price ladder", () => {
     (density, expected) => {
       const perDecade = Number(density);
       const sampled = expected.map((_, index) =>
-        String(stepPrice(index * 7, { base: 10n ** 14n, perDecade }))
+        String(
+          stepPrice(index * 7, {
+            basePrice: 10n ** 14n,
+            stepsPerDecade: perDecade,
+          })
+        )
       );
       expect(sampled).toEqual(expected);
     }
@@ -75,7 +80,9 @@ describe("price ladder", () => {
   });
 
   it("refuses densities governance cannot set", () => {
-    expect(() => stepPrice(1, { base: 1n, perDecade: 50 })).toThrow(RangeError);
+    expect(() => stepPrice(1, { basePrice: 1n, stepsPerDecade: 50 })).toThrow(
+      RangeError
+    );
   });
 });
 
@@ -84,7 +91,10 @@ describe("uniform-price clearing (D138)", () => {
     "matches the model on random book %i",
     (_, vector) => {
       const prices = vector.totals.map((__, step) =>
-        stepPrice(step, { base: 10n ** 14n, perDecade: vector.perDecade })
+        stepPrice(step, {
+          basePrice: 10n ** 14n,
+          stepsPerDecade: vector.perDecade,
+        })
       );
       const result = clear(
         vector.totals,
@@ -96,7 +106,7 @@ describe("uniform-price clearing (D138)", () => {
         k: result.count,
         step: result.step,
         rationed: result.rationed,
-        cutStepUnits: result.cutStepUnits,
+        cutStepUnits: result.cutUnits,
       }).toEqual({
         k: vector.k,
         step: vector.step,
@@ -119,7 +129,10 @@ describe("uniform-price clearing (D138)", () => {
   it("never splits a step without a cap", () => {
     for (const vector of vectors.clearing.filter((item) => item.cap === 0)) {
       const prices = vector.totals.map((_, step) =>
-        stepPrice(step, { base: 10n ** 14n, perDecade: vector.perDecade })
+        stepPrice(step, {
+          basePrice: 10n ** 14n,
+          stepsPerDecade: vector.perDecade,
+        })
       );
       expect(
         clear(vector.totals, prices, 0, vector.marginBps * 10).rationed
@@ -177,7 +190,7 @@ describe("the owner's worked example (PLAN Appendix C)", () => {
       });
     }
     expect(lowestWinningStep(book, 1, prices, 10_000)).toBe(128);
-    expect(whatIfBid(book, 127, 1, prices, 10_000).won).toBe(0);
+    expect(whatIfBid(book, 127, 1, prices, 10_000).unitsWon).toBe(0);
   });
 
   it("matches the model's unsnapped example at margins 0, 10% and 30%", () => {
@@ -191,21 +204,21 @@ describe("the owner's worked example (PLAN Appendix C)", () => {
         count: 80,
         step: 1,
         rationed: false,
-        cutStepUnits: 50,
+        cutUnits: 50,
         bestRevenue: 4_000n,
       },
       {
         count: 80,
         step: 1,
         rationed: false,
-        cutStepUnits: 50,
+        cutUnits: 50,
         bestRevenue: 4_000n,
       },
       {
         count: 280,
         step: 0,
         rationed: false,
-        cutStepUnits: 200,
+        cutUnits: 200,
         bestRevenue: 4_000n,
       },
     ]);
@@ -240,7 +253,7 @@ describe("the owner's worked example (PLAN Appendix C)", () => {
       130,
       true,
     ]);
-    expect(result.cutStepUnits).toBe(30);
+    expect(result.cutUnits).toBe(30);
     expect(result.cutoff).toBe(45);
     const won = allocation(book, result);
     expect([
@@ -252,7 +265,7 @@ describe("the owner's worked example (PLAN Appendix C)", () => {
     // B2 wins 15 at 0.0511 of its 1.5 ETH escrow: 0.7335 ETH comes back.
     expect(15n * stepPrice(144) - 15n * stepPrice(130)).toBe(eth("0.7335"));
     // Without the sweep, B3 would get nothing and 10 editions would be lost.
-    expect(unitsWon(b3, result, result.cutStepUnits)).toBe(0);
+    expect(unitsWon(b3, result, result.cutUnits)).toBe(0);
   });
 });
 
@@ -261,9 +274,9 @@ describe("FIFO at the cut step (owner decision 1)", () => {
     "replays model book %i: positions, sweep and units won",
     (_, vector) => {
       const prices = ladderPrices({
-        base: 10n ** 14n,
-        perDecade: 48,
-        steps: vector.steps,
+        basePrice: 10n ** 14n,
+        stepsPerDecade: 48,
+        stepCount: vector.steps,
       });
       const book = createBook(vector.steps, vector.cap);
       const bidder = "0x00000000000000000000000000000000000000aa" as const;
@@ -277,13 +290,13 @@ describe("FIFO at the cut step (owner decision 1)", () => {
           }
         }
       }
-      expect(book.bids.map((bid) => bid.pos)).toEqual(vector.positions);
+      expect(book.bids.map((bid) => bid.position)).toEqual(vector.positions);
       const result = clearBook(book, prices, 10_000);
       expect([
         result.count,
         result.step,
         result.rationed,
-        result.cutStepUnits,
+        result.cutUnits,
       ]).toEqual([vector.k, vector.step, vector.rationed, vector.cutStepUnits]);
       expect(result.cutoff).toBe(vector.cutoff);
       const won = allocation(book, result);
@@ -295,11 +308,11 @@ describe("FIFO at the cut step (owner decision 1)", () => {
   it("sweeps departures in position order, whatever order they were logged", () => {
     expect(
       sweepCutoff(30, [
-        { pos: 40, qty: 5 },
-        { pos: 20, qty: 15 },
+        { position: 40, quantity: 5 },
+        { position: 20, quantity: 15 },
       ])
     ).toBe(50);
-    expect(sweepCutoff(10, [{ pos: 12, qty: 5 }])).toBe(10);
+    expect(sweepCutoff(10, [{ position: 12, quantity: 5 }])).toBe(10);
   });
 });
 
@@ -320,7 +333,7 @@ describe("what-if reads", () => {
         moveBid(copy, moved, step);
         if (
           (allocation(copy, clearBook(copy, prices, 10_000)).get(low.id) ??
-            0) >= low.qty
+            0) >= low.quantity
         ) {
           linear = step;
         }
@@ -335,8 +348,8 @@ describe("what-if reads", () => {
     const bidder = "0x00000000000000000000000000000000000000cc" as const;
     addBid(book, { bidder, step: 100, qty: 5, at: 0 });
     const result = whatIfBid(book, 110, 3, prices, 10_000);
-    expect(result.won).toBe(3);
-    expect(result.pushedOut).toBe(3);
+    expect(result.unitsWon).toBe(3);
+    expect(result.unitsPushedOut).toBe(3);
   });
 });
 
@@ -353,7 +366,11 @@ describe("binary searches match a linear scan", () => {
   it("for the lowest step that gets a new bid fully in, with and without a cap", () => {
     const random = prng(7);
     const steps = 40;
-    const prices = ladderPrices({ base: 10n ** 14n, perDecade: 48, steps });
+    const prices = ladderPrices({
+      basePrice: 10n ** 14n,
+      stepsPerDecade: 48,
+      stepCount: steps,
+    });
     const bidder = "0x00000000000000000000000000000000000000dd" as const;
     for (let trial = 0; trial < 60; trial += 1) {
       const cap = trial % 2 === 0 ? 0 : 1 + Math.floor(random() * 30);
@@ -370,14 +387,14 @@ describe("binary searches match a linear scan", () => {
       const qty = 1 + Math.floor(random() * 5);
       let linear: number | null = null;
       for (let step = 0; step < steps && linear === null; step += 1) {
-        if (whatIfBid(book, step, qty, prices, 10_000).won >= qty) {
+        if (whatIfBid(book, step, qty, prices, 10_000).unitsWon >= qty) {
           linear = step;
         }
       }
       expect(lowestStepFullyIn(book, qty, prices, 10_000)).toBe(linear);
       let anyWin: number | null = null;
       for (let step = 0; step < steps && anyWin === null; step += 1) {
-        if (whatIfBid(book, step, qty, prices, 10_000).won > 0) {
+        if (whatIfBid(book, step, qty, prices, 10_000).unitsWon > 0) {
           anyWin = step;
         }
       }

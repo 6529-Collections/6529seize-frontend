@@ -130,9 +130,9 @@ export function oneOfOneValueText(
       ? formatEth(locale, settlement.price)
       : t(locale, "stream.browse.noSale");
   }
-  return auction.highBidder === null
+  return auction.bidder === null
     ? t(locale, "stream.browse.noBidsYet")
-    : formatEth(locale, auction.highBid);
+    : formatEth(locale, auction.bid);
 }
 
 /** The 1/1's state, or where a settled 1/1 went. */
@@ -220,7 +220,7 @@ export function EditionClose({
   }
   return (
     <Countdown
-      endTime={auction.times.editionEnd}
+      endTime={auction.times.endTime}
       now={now}
       locale={locale}
       closeWindow={auction.terms.softWindow}

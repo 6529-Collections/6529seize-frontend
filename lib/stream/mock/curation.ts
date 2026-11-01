@@ -21,7 +21,7 @@ export function appendStatement(
   statement: {
     readonly role: StatementRole;
     readonly kind: string;
-    readonly subject: { readonly token: Address; readonly id: number };
+    readonly subject: { readonly token: Address; readonly id: bigint };
     readonly summary: string;
     readonly supersedes?: Hex32 | null;
   }
@@ -129,14 +129,14 @@ export function createEditionFor(
 ): WorkKey {
   const token = engine.token(master);
   if (token.kind !== "EDITION_MASTER" || token.linked.edition === null) {
-    revert("NotEditionMaster", { workId: token.tokenId });
+    revert("NotEditionMaster", { workId: token.tokenId.toString() });
   }
   if (!token.primarySaleSettled) {
-    revert("EditionUnavailable", { editionId: token.tokenId });
+    revert("EditionUnavailable", { editionId: token.tokenId.toString() });
   }
   const edition = engine.token(token.linked.edition);
   if (edition.created) {
-    revert("EditionExists", { editionId: token.tokenId });
+    revert("EditionExists", { editionId: token.tokenId.toString() });
   }
   edition.created = true;
   engine.record(edition.key, {

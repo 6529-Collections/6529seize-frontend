@@ -36,7 +36,7 @@ async function readIncoming(
   const rows = await Promise.all(
     summaries.map(async (summary) => {
       const auction = await source.auctionForWork(summary.key);
-      if (auction?.state !== "ENDED" || auction.highBidder !== null) {
+      if (auction?.state !== "ENDED" || auction.bidder !== null) {
         return null;
       }
       const work = await source.getWork(summary.key);

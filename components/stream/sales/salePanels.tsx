@@ -7,6 +7,7 @@ import {
   useStreamQuery,
 } from "@/components/stream/data/StreamProvider";
 import EditionAuctionPanel from "@/components/stream/editions/EditionAuctionPanel";
+import { Loading } from "@/components/stream/pages/common";
 import EnglishAuctionPanel from "@/components/stream/work/english/EnglishAuctionPanel";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -54,9 +55,7 @@ export function SalePanel({
     (source) => source.getSale(saleRef)
   );
   if (data === undefined) {
-    return (
-      <div className={`${PANEL} tw-h-40 tw-animate-pulse`} aria-busy="true" />
-    );
+    return <Loading className="tw-h-40" />;
   }
   switch (data.kind) {
     case "ENGLISH_AUCTION":

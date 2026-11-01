@@ -104,7 +104,7 @@ function bidNote(
       amount: ethText(locale, bid.escrow),
     });
   }
-  const standing = standingOf(bid.won, bid.qty);
+  const standing = standingOf(bid.unitsWon, bid.quantity);
   if (standing === "in") {
     return bid.refund > 0n
       ? t(locale, "stream.editionAuction.yours.pays", {
@@ -115,8 +115,8 @@ function bidNote(
   }
   if (standing === "partly") {
     return t(locale, "stream.editionAuction.yours.partly", {
-      won: formatInteger(locale, bid.won),
-      qty: formatInteger(locale, bid.qty),
+      won: formatInteger(locale, bid.unitsWon),
+      qty: formatInteger(locale, bid.quantity),
     });
   }
   if (auction.biddingOpen && bid.step === auction.clearing.step) {
@@ -163,11 +163,11 @@ function RaiseButton({
   if (targetPrice === undefined) {
     return null;
   }
-  const cost = BigInt(bid.qty) * (targetPrice - bid.price);
+  const cost = BigInt(bid.quantity) * (targetPrice - bid.price);
   const moves =
     quote !== null &&
     quote !== undefined &&
-    quote.after.step !== auction.clearing.step;
+    quote.result.step !== auction.clearing.step;
   return (
     <div className="tw-grid tw-justify-items-start tw-gap-1">
       <button
@@ -184,8 +184,8 @@ function RaiseButton({
       {moves ? (
         <p className={`${PANEL_NOTE} tw-tabular-nums`}>
           {t(locale, "stream.editionAuction.yours.raiseMoves", {
-            price: priceText(locale, quote.after.price),
-            editions: editionsText(locale, quote.after.count),
+            price: priceText(locale, quote.result.price),
+            editions: editionsText(locale, quote.result.count),
           })}
         </p>
       ) : null}
@@ -208,16 +208,18 @@ function BidRow({
 }) {
   const live = isLive(bid);
   const canRaise =
-    live && auction.biddingOpen && standingOf(bid.won, bid.qty) !== "in";
+    live &&
+    auction.biddingOpen &&
+    standingOf(bid.unitsWon, bid.quantity) !== "in";
   return (
     <li className="tw-grid tw-gap-1.5 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-py-2.5">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
         {live && auction.phase !== "void" ? (
-          <StandingTag won={bid.won} qty={bid.qty} locale={locale} />
+          <StandingTag won={bid.unitsWon} qty={bid.quantity} locale={locale} />
         ) : null}
         <span className="tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-50">
           {t(locale, "stream.editionAuction.yours.bid", {
-            qty: formatInteger(locale, bid.qty),
+            qty: formatInteger(locale, bid.quantity),
             price: stepText(locale, prices, bid.step),
           })}
         </span>
