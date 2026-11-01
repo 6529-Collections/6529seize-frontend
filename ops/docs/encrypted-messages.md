@@ -95,10 +95,13 @@ combined sign-in message. This happens, for example, when you signed in before
 your profile existed or before encrypted messages launched. The one signature
 covers signed messages and encrypted messages in this browser, with one
 180-day expiry. The browser's earlier signed-messages grant is revoked, so
-**Devices that can post as you** lists one entry for this browser. The 6529
-apps, and any case where the combined message cannot be used, ask for the
-separate encrypted-messages signature instead. For example, the wallet cannot
-sign it, or the browser cannot load encrypted messages in time.
+**Devices that can post as you** lists one entry for this browser. In 6529
+Mobile and 6529 Desktop the button asks for one app grant signature instead,
+with the same result (see
+[In 6529 Mobile and 6529 Desktop](#in-6529-mobile-and-6529-desktop)). Any case
+where neither can be used asks for the separate encrypted-messages signature
+instead. For example, the wallet cannot sign it, the browser cannot load
+encrypted messages in time, or the app cannot hold a signing key.
 
 If 6529 cannot use a sign-in grant (for example it was revoked), the card asks
 for the separate signature as usual. Revoking the device under **Devices that
@@ -311,14 +314,17 @@ encrypted copy of your message history so you can restore it on a new device.
 ## In 6529 Mobile and 6529 Desktop
 
 - **Turning it on.** The apps sign in with their own session message, so the
-  website's combined sign-in grant does not apply. Where signed messages are
-  available in the app, **Turn on signed messages** asks for one app grant
-  signature that turns on both signed messages and encrypted messages (see
+  website's combined sign-in grant does not apply. Where app grants are on,
+  **Turn on encrypted messages (one signature)** and **Turn on signed
+  messages** both ask for one app grant signature (EIP-712 typed data) that
+  turns on signed messages and encrypted messages together (see
   [Signed messages](waves/drop-actions/feature-signed-messages.md#in-6529-mobile-and-6529-desktop));
-  this device then finishes setting up encrypted messages in the background.
-  Otherwise the encrypted-messages card asks for its own signature as on the
-  website. The grant's origin is "6529 Desktop" in the desktop app and the
-  site host in the phone app.
+  the device then registers without another prompt, and an earlier
+  signing-only grant of the app is revoked, as on the website. Where they are
+  off (production until the grant wording is approved), or the app cannot
+  hold a signing key (iOS before 17), the card asks for the separate
+  encrypted-messages signature. The grant's origin is "6529 Desktop" in the
+  desktop app and the site host in the phone app.
 - **Phones.** 6529 Mobile needs iOS 16.4 or later (earlier iOS versions cannot
   run the current site at all) or a current Android System WebView. Signed
   messages additionally need iOS 17 or later. Keys and history live in the

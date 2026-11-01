@@ -390,6 +390,8 @@ describe("turn on signed messages", () => {
       await expect(request({ silent: true })).resolves.toEqual({
         success: true,
       });
+    });
+  });
 
   describe("in 6529 Mobile and Desktop", () => {
     beforeEach(() => {
@@ -409,10 +411,28 @@ describe("turn on signed messages", () => {
         ownProfileId: "profile-1",
         signAppGrant: deps.signAppGrant,
         onSignatureRequested,
+        encryptedMessages: false,
       });
       expect(deps.getNonce).not.toHaveBeenCalled();
       expect(getSignature).not.toHaveBeenCalled();
       expect(deps.setAuthLoadingState).toHaveBeenLastCalledWith("idle");
+    });
+
+    it("passes on a turn-on that needs the encrypted-messages key", async () => {
+      const e2ee = {
+        grantId: `0x${"7".repeat(64)}`,
+        grantSaved: true,
+        adopted: true,
+      };
+      mockRequestAppGrant.mockResolvedValue({ success: true, e2ee });
+      const { request } = createSubject();
+
+      await expect(
+        request({ silent: true, encryptedMessages: true })
+      ).resolves.toEqual({ success: true, e2ee });
+      expect(mockRequestAppGrant).toHaveBeenCalledWith(
+        expect.objectContaining({ encryptedMessages: true })
+      );
     });
 
     it("is unavailable while app grants are off", async () => {

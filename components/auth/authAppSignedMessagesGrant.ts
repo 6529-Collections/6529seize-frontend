@@ -29,6 +29,11 @@ interface AppSignedMessagesGrantParams {
   readonly ownProfileId: string | null;
   readonly signAppGrant: SignAppGrant;
   readonly onSignatureRequested?: (() => void) | undefined;
+  /**
+   * "Turn on encrypted messages": the one signature must also grant the
+   * encrypted-messages key; without one nothing is signed.
+   */
+  readonly encryptedMessages?: boolean | undefined;
 }
 
 const toFailure = (
@@ -72,9 +77,17 @@ export async function requestAppSignedMessagesGrant({
   ownProfileId,
   signAppGrant,
   onSignatureRequested,
+  encryptedMessages = false,
 }: AppSignedMessagesGrantParams): Promise<SignedMessagesGrantResult> {
   const platform = detectE2eePlatform() === "desktop" ? "desktop" : "phone";
-  const e2eeDevice = ownProfileId ? await prepareLoginE2eeDevice() : null;
+  const e2eeDevice = ownProfileId
+    ? await prepareLoginE2eeDevice({ required: encryptedMessages })
+    : null;
+  if (encryptedMessages && !e2eeDevice) {
+    // A signing-only grant would not turn on encrypted messages; they keep
+    // their own grant prompt instead of a second signature.
+    return { success: false, reason: "unavailable" };
+  }
   let signatureError: unknown = null;
   const result = await requestAppDeviceGrant({
     address,
@@ -102,5 +115,14 @@ export async function requestAppSignedMessagesGrant({
   if (result.e2eeAdopted && ownProfileId) {
     announceEnrollmentMarker(ownProfileId);
   }
-  return { success: true };
+  return encryptedMessages
+    ? {
+        success: true,
+        e2ee: {
+          grantId: result.grant.id,
+          grantSaved: true,
+          adopted: result.e2eeAdopted,
+        },
+      }
+    : { success: true };
 }

@@ -244,6 +244,7 @@ export const createSignedMessagesGrantRequest =
           ownProfileId,
           signAppGrant,
           onSignatureRequested,
+          encryptedMessages,
         });
         const errorKey = result.success
           ? undefined

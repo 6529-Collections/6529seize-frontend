@@ -77,12 +77,13 @@ export const isAppDeviceGrantPossible = (role: string | null): boolean =>
   isAppDeviceGrantsEnabled() &&
   isAppGrantPlatform();
 
+/** A sign-in grant on the website, or an app grant in the apps. */
+export const isAnyDeviceGrantPossible = (role: string | null): boolean =>
+  isDeviceGrantPossible(role) || isAppDeviceGrantPossible(role);
+
 /** Whether this browser session can hold a device key at all. */
 export async function canUseDeviceSigning(): Promise<boolean> {
-  return (
-    (isDeviceGrantPossible(null) || isAppDeviceGrantPossible(null)) &&
-    (await isEd25519Supported())
-  );
+  return isAnyDeviceGrantPossible(null) && (await isEd25519Supported());
 }
 
 async function prepare(

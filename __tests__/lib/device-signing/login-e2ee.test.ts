@@ -15,7 +15,7 @@ jest.mock("@/config/e2eeEnv", () => ({
 
 let mockGrantPossible = true;
 jest.mock("@/lib/device-signing/login-grant", () => ({
-  isDeviceGrantPossible: (role: string | null) =>
+  isAnyDeviceGrantPossible: (role: string | null) =>
     role === null && mockGrantPossible,
 }));
 
@@ -91,7 +91,7 @@ describe("encrypted-messages key for the sign-in (NC8)", () => {
       expect(mockPreload).toHaveBeenCalledTimes(2);
     });
 
-    it("downloads nothing where sign-in grants no device (apps, signed messages off)", async () => {
+    it("downloads nothing where no grant can carry the key (apps with app grants off, signed messages off)", async () => {
       mockGrantPossible = false;
       const { prefetchLoginE2eeDevice } = await loadModule();
       prefetchLoginE2eeDevice();
