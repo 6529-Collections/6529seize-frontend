@@ -255,6 +255,37 @@ export function whatIfBid(
 }
 
 /**
+ * What raising `bid` to `newStep` would do (client-side; the contract has no
+ * raise quote): it rejoins the back of `newStep` and leaves a hole behind.
+ */
+export function whatIfRaise(
+  book: EditionBook,
+  bid: BookBid,
+  newStep: number,
+  prices: readonly Wei[],
+  marginShare: number
+): WhatIf {
+  const before = allocation(book, clearBook(book, prices, marginShare));
+  const copy = cloneBook(book);
+  const moved = findBid(copy, bid.id);
+  if (moved === undefined) {
+    throw new RangeError(`no bid ${bid.id}`);
+  }
+  moveBid(copy, moved, newStep);
+  const result = clearBook(copy, prices, marginShare);
+  let pushedOut = 0;
+  let pulledIn = 0;
+  for (const other of copy.bids) {
+    if (other.id !== moved.id) {
+      const change = wonBy(other, result) - (before.get(other.id) ?? 0);
+      pushedOut += Math.max(0, -change);
+      pulledIn += Math.max(0, change);
+    }
+  }
+  return { result, won: wonBy(moved, result), pushedOut, pulledIn };
+}
+
+/**
  * `lowestWinningStep(qty)`, as the contract defines it: the lowest step where
  * a new bid of `qty` wins at least one copy if the sale closed now.
  */

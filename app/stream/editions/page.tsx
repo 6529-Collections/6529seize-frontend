@@ -1,4 +1,4 @@
-import { EditionsIndexPage } from "@/components/stream/pages/EditionPages";
+import { EditionsIndexPage } from "@/components/stream/editions/EditionPages";
 import {
   assertStreamProduct,
   streamPageMetadata,

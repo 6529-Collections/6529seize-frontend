@@ -48,7 +48,7 @@ export default function StreamDevPanel({
   const paused = dev.isClockPaused();
   const current = accounts.find((entry) => entry.address === account);
   return (
-    <details className="tw-fixed tw-bottom-3 tw-right-3 tw-z-50 tw-max-w-[calc(100vw-1.5rem)] tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-text-iron-200 tw-shadow-2xl sm:tw-w-80">
+    <details className="tailwind-scope tw-fixed tw-bottom-3 tw-right-3 tw-z-50 tw-max-w-[calc(100vw-1.5rem)] tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-text-iron-200 tw-shadow-2xl sm:tw-w-80">
       <summary className="tw-cursor-pointer tw-list-none tw-rounded-xl tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-amber-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
         {t(locale, "stream.dev.title")}
       </summary>

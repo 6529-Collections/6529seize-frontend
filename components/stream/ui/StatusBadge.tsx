@@ -68,6 +68,7 @@ const EDITION_PHASE: Readonly<Record<EditionAuctionPhase, BadgeSpec>> = {
   extended: { tone: "warning", label: "stream.badge.edition.extended" },
   disputed: { tone: "warning", label: "stream.badge.edition.disputed" },
   closed: { tone: "neutral", label: "stream.badge.edition.closed" },
+  settling: { tone: "neutral", label: "stream.badge.edition.settling" },
   settled: { tone: "success", label: "stream.badge.edition.settled" },
   void: { tone: "danger", label: "stream.badge.edition.void" },
   noBids: { tone: "muted", label: "stream.badge.edition.noBids" },
