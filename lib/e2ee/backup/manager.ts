@@ -1,7 +1,7 @@
 import { asE2eeApiError } from "../api";
 import { base64ToBytes, bytesToBase64, randomHex } from "../bytes";
 import type { E2eeDeviceInfo, E2eeEngineStatus } from "../types";
-import type { E2eeBackupApi, ApiE2eeBackup } from "./api";
+import type { ApiE2eeBackup, ApiE2eeBackupChunk, E2eeBackupApi } from "./api";
 import {
   type BackupChainState,
   chainAt,
@@ -52,9 +52,12 @@ import type { BackupLocalState, BackupStateStore } from "./state";
  * - Chunks form a hash chain (chain.ts). Before appending, a device follows
  *   whatever the server has after its last seen chunk (its own appends whose
  *   response was lost, other devices' appends) so it continues the same
- *   chain. If two devices append at the same moment the chain forks; the
- *   device that notices starts a new chain with a full snapshot and compacts
- *   everything before it, exactly like a regular compaction.
+ *   chain. Every append names the seq it must get (expected_seq); when two
+ *   devices append at the same moment the server refuses the later one
+ *   (409), which follows the other chunk and appends after it. Only when
+ *   that keeps failing, or the server predates the precondition and the
+ *   chain forks, the device starts a new chain with a full snapshot and
+ *   compacts everything before it, exactly like a regular compaction.
  * - Restoring on another device unwraps K_b with the code, downloads and
  *   verifies the whole chain, merges the segments (later chunks win) and
  *   imports the result into local history. Any gap, reorder, replay or
@@ -136,6 +139,8 @@ const DEFAULT_DEBOUNCE_MS = 30_000;
 const RETRY_MS = 5 * 60_000;
 const DEFAULT_COMPACT_AT = 1000;
 const LIST_PAGE = 500;
+/** Appends retried after a 409 before falling back to the fork repair. */
+const APPEND_CONFLICT_RETRIES = 3;
 
 const defaultScheduler: BackupScheduler = {
   setTimeout: (callback, ms) => globalThis.setTimeout(callback, ms),
@@ -148,6 +153,17 @@ const isNotFound = (error: unknown): boolean => {
   const apiError = asE2eeApiError(error);
   return apiError?.status === 404 && apiError.code === "E2EE_NOT_FOUND";
 };
+
+/** Another device appended first: the expected_seq precondition failed. */
+const isSeqConflict = (error: unknown): boolean => {
+  const apiError = asE2eeApiError(error);
+  return (
+    apiError?.status === 409 && apiError.code === "E2EE_BACKUP_SEQ_CONFLICT"
+  );
+};
+
+/** How one append attempt ended. */
+type AppendOutcome = "appended" | "forked" | "conflict";
 
 export class E2eeBackupManager {
   private readonly deps: E2eeBackupManagerDeps;
@@ -381,8 +397,9 @@ export class E2eeBackupManager {
       const segments = await this.pendingSegments(local);
       for (const segment of segments) {
         if (await this.appendSegment(local, deviceKey, segment)) {
-          // Another device appended at the same moment: the next run starts
-          // a new chain with a full snapshot and compacts the fork away.
+          // The chain forked (a server without the append precondition) or
+          // other devices kept appending first: the next run starts a new
+          // chain with a full snapshot and compacts everything before it.
           this.schedule(0);
           return;
         }
@@ -518,12 +535,63 @@ export class E2eeBackupManager {
     return linkChunk(chunkKey, backupId, tip, decodeChunk(chunk.data), mode);
   }
 
-  /** Seals and uploads one segment; true when the chain forked at it. */
+  /**
+   * Seals and uploads one segment; true when the chain forked at it or the
+   * fork repair is needed (the next run starts a new chain).
+   *
+   * A 409 means another device appended first: this device follows those
+   * chunks and seals the segment again after them, up to
+   * APPEND_CONFLICT_RETRIES times. A server without the precondition
+   * assigns the next seq anyway; an unexpected seq is then a fork.
+   */
   private async appendSegment(
     local: BackupLocalState,
     deviceKey: string,
     segment: EncodedSegment
   ): Promise<boolean> {
+    for (let retries = 0; ; retries += 1) {
+      const outcome = await this.tryAppend(local, deviceKey, segment);
+      if (outcome !== "conflict") {
+        return outcome === "forked";
+      }
+      if (
+        retries >= APPEND_CONFLICT_RETRIES ||
+        !(await this.followAfterConflict(local))
+      ) {
+        startNewChain(local);
+        await this.deps.state.put(local);
+        return true;
+      }
+    }
+  }
+
+  /**
+   * After a 409: follows the chunks other devices appended. False when the
+   * append cannot simply be retried: those chunks do not continue this
+   * device's chain, or there was nothing new to follow (the seq is then
+   * resynced so the repair's new chain lands).
+   */
+  private async followAfterConflict(local: BackupLocalState): Promise<boolean> {
+    const seen = local.chain.seq;
+    if (await this.withBackup(() => this.catchUp(local))) {
+      return false;
+    }
+    if (local.chain.seq > seen) {
+      return true;
+    }
+    const backup = await this.withBackup(() =>
+      this.deps.api.getBackup(local.backupId)
+    );
+    local.chain = { ...local.chain, seq: backup.next_seq - 1 };
+    return false;
+  }
+
+  /** One sealed append at the seq after this device's last seen chunk. */
+  private async tryAppend(
+    local: BackupLocalState,
+    deviceKey: string,
+    segment: EncodedSegment
+  ): Promise<AppendOutcome> {
     const link = nextLink(local.chain);
     const data = await sealChunk(
       local.chunkKey,
@@ -532,12 +600,21 @@ export class E2eeBackupManager {
       segment.json
     );
     const expectedSeq = local.chain.seq + 1;
-    const appended = await this.withBackup(() =>
-      this.deps.api.appendChunk(local.backupId, {
-        device_key: deviceKey,
-        data: bytesToBase64(data),
-      })
-    );
+    let appended: ApiE2eeBackupChunk;
+    try {
+      appended = await this.withBackup(() =>
+        this.deps.api.appendChunk(local.backupId, {
+          device_key: deviceKey,
+          data: bytesToBase64(data),
+          expected_seq: expectedSeq,
+        })
+      );
+    } catch (error) {
+      if (isSeqConflict(error)) {
+        return "conflict";
+      }
+      throw error;
+    }
     const tip: ChainTip = {
       epoch: link.epoch,
       index: link.index,
@@ -562,11 +639,12 @@ export class E2eeBackupManager {
         );
       }
     } else if (appended.seq !== expectedSeq) {
+      // Only a server that ignores expected_seq assigns another seq.
       forked = true;
       startNewChain(local);
     }
     await this.deps.state.put(local);
-    return forked;
+    return forked ? "forked" : "appended";
   }
 
   /** A 404 on our generation means it was deleted or replaced elsewhere. */

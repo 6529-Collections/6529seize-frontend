@@ -34,6 +34,17 @@ export interface ApiE2eeBackupChunk {
   created_at: number;
 }
 
+export interface ApiE2eeBackupChunkUpload {
+  device_key: string;
+  data: string;
+  /**
+   * Append precondition: the seq this chunk must get. The server refuses
+   * any other next seq with 409 E2EE_BACKUP_SEQ_CONFLICT (another device
+   * appended first). Servers without it ignore the field.
+   */
+  expected_seq?: number;
+}
+
 export interface ApiE2eeBackupChunkPage {
   items: ApiE2eeBackupChunk[];
   next_after_seq: number | null;
@@ -56,7 +67,7 @@ export interface E2eeBackupApi {
   activate(backupId: string, deviceKey: string): Promise<ApiE2eeBackup>;
   appendChunk(
     backupId: string,
-    body: { device_key: string; data: string }
+    body: ApiE2eeBackupChunkUpload
   ): Promise<ApiE2eeBackupChunk>;
   listChunks(
     backupId: string,
