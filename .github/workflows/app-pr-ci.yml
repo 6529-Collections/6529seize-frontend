@@ -345,7 +345,7 @@ jobs:
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ${{ matrix.runner }}
     # The complete native pack needs room for its dev-server bootstrap and tests.
-    timeout-minutes: ${{ matrix.lane == 'playwright-native-competition' && 30 || 20 }}
+    timeout-minutes: ${{ (matrix.lane == 'playwright-native-competition' || matrix.lane == 'playwright-smoke') && 35 || 20 }}
     permissions:
       contents: read
       issues: read
@@ -438,20 +438,19 @@ jobs:
               setTimeout(wait, 3000);
             })();
           '
+          # Whole smoke pack per arm: the stall needs the pack's earlier tests.
           run_arm() {
-            PLAYWRIGHT_READONLY="$2" ./bin/6529 exec playwright test tests/pages/the-memes.spec.ts \
-              -g "sort options keep pills" --project=web-desktop-chromium \
-              --repeat-each="$3" --retries=0 --workers=1 --reporter=list > "ab-$1.log" 2>&1
-            line="AB $1 readonly=$2 runs=$3: volume-stalls=$(grep -c 'Expected pattern: /sort=volume_days_7/' "ab-$1.log") url-stalls=$(grep -c 'Expected pattern: /sort=' "ab-$1.log") other-errors=$(grep -c 'Error: ' "ab-$1.log") | $(grep -oE '[0-9]+ (failed|passed|flaky)' "ab-$1.log" | tr '\n' ' ')"
+            PLAYWRIGHT_READONLY="$2" ./bin/6529 exec playwright test tests/home/home.spec.ts \
+              tests/pages/about.spec.ts tests/pages/the-memes.spec.ts --grep @smoke \
+              --project=web-desktop-chromium --retries=0 --workers=1 --reporter=list > "ab-$1.log" 2>&1
+            line="AB $1 readonly=$2 full-pack: volume-stalls=$(grep -c 'Expected pattern: /sort=volume_days_7/' "ab-$1.log") url-stalls=$(grep -c 'Expected pattern: /' "ab-$1.log") | $(grep -oE '[0-9]+ (failed|passed|flaky|skipped|did not run)' "ab-$1.log" | tr '\n' ' ')"
             echo "$line"
             echo "$line" >> "$GITHUB_STEP_SUMMARY"
+            grep -E "✘" "ab-$1.log" | head -10
           }
-          run_arm warmup 0 1
-          run_arm on1 1 5
-          run_arm off1 0 5
-          run_arm on2 1 5
-          run_arm off2 0 5
-          grep -hE "✘|Expected pattern|Received string" ab-*.log | head -40
+          run_arm off 0
+          run_arm on 1
+          grep -hE "Expected pattern|Received string" ab-*.log | head -20
           echo "A/B complete; failing on purpose so the result is reported."
           exit 1
 
