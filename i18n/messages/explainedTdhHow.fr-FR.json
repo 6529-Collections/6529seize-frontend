@@ -230,7 +230,7 @@
   "explained.tdh.how.n.bodyLess": "Le TDH de chaque identité, additionné, est celui du réseau : {total} dans le résultat du {date}, {delta} de moins que la veille.",
   "explained.tdh.how.n.bodyTotal": "Le TDH de chaque identité, additionné, est celui du réseau : {total} dans le résultat du {date}.",
   "explained.tdh.how.n.cutover": "Vers le {date}, 6529.io passe au calcul du TDH par le cœur Rust, le programme auquel la vérification quotidienne le compare aujourd'hui.",
-  "explained.tdh.how.n.cutoverPast": "Le passage de 6529.io au calcul du TDH par le cœur Rust était prévu vers le {date} ; au {checked}, il n'a pas eu lieu. Le contrôle quotidien ne peut pas les distinguer : le cœur Rust et la référence Python écrivent les mêmes enregistrements, octet pour octet.",
+  "explained.tdh.how.n.cutoverPast": "Le passage de 6529.io au calcul du TDH par le cœur Rust était prévu vers le {date} ; au {checked}, il n'a pas eu lieu.",
   "explained.tdh.how.n.link": "La vérification quotidienne",
   "explained.tdh.how.n.statTotal": "TDH, cycle {cycle}",
   "explained.tdh.how.n.statIdentities": "identités",

@@ -178,7 +178,7 @@ function RealVerdict({
   readonly facts: PageFacts;
 }) {
   const p = (children: ReactNode) => (
-    <p className="tw-m-0 tw-mb-4 tw-text-base tw-leading-[25px] tw-text-iron-300">
+    <p className="tw-m-0 tw-mb-4 tw-max-w-[620px] tw-text-base tw-leading-[25px] tw-text-iron-300">
       {children}
     </p>
   );
