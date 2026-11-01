@@ -95,11 +95,24 @@ describe("encrypted-message desktop notices", () => {
     expect(result.marks.get("g2")).toBe(6);
   });
 
-  it("gives every message a stable positive id", () => {
+  it("gives every message a stable id that never equals a server notification id", () => {
     const id = e2eeNoticeId({ g: "g1", seq: 6 });
     expect(id).toBe(e2eeNoticeId({ g: "g1", seq: 6 }));
-    expect(id).not.toBe(e2eeNoticeId({ g: "g1", seq: 7 }));
-    expect(Number.isInteger(id) && id > 0 && id <= 0x7fffffff).toBe(true);
+    expect(Number.isSafeInteger(id) && id < 0).toBe(true);
+    const ids = new Set<number>();
+    for (let chatIndex = 0; chatIndex < 200; chatIndex += 1) {
+      for (let seq = 1; seq <= 50; seq += 1) {
+        ids.add(e2eeNoticeId({ g: `0x${chatIndex.toString(16)}`, seq }));
+      }
+    }
+    expect(ids.size).toBe(200 * 50);
+  });
+
+  it("forgets chats that are no longer listed", () => {
+    const baseline = collect(null, [chat("g1", 5), chat("g2", 5)]).marks;
+    expect([...collect(baseline, [chat("g1", 5)]).marks.keys()]).toEqual([
+      "g1",
+    ]);
   });
 
   describe("the desktop bridge", () => {

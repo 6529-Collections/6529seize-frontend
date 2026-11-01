@@ -71,7 +71,8 @@ export function collectE2eeDesktopNotices({
   readonly muted: ReadonlySet<string>;
   readonly focusedChat: string | null;
 }): { readonly notices: E2eeDesktopNotice[]; readonly marks: E2eeNoticeMarks } {
-  const next = new Map(marks ?? []);
+  // Only chats listed now are kept, so chats left or removed drop out.
+  const next = new Map<string, number>();
   const notices: E2eeDesktopNotice[] = [];
   for (const conversation of conversations) {
     const last = conversation.lastMessage;
@@ -96,12 +97,23 @@ export function collectE2eeDesktopNotices({
   return { notices, marks: next };
 }
 
-/** A stable positive 31-bit id per chat message, for the desktop's de-duplication. */
-export function e2eeNoticeId(notice: E2eeDesktopNotice): number {
-  let hash = 0x811c9dc5;
-  for (const char of `e2ee:${notice.g}:${notice.seq}`) {
+const fnv1a = (text: string, seed: number): number => {
+  let hash = seed;
+  for (const char of text) {
     hash ^= char.codePointAt(0) ?? 0;
     hash = Math.imul(hash, 0x01000193);
   }
-  return hash >>> 1 || 1;
+  return hash >>> 0;
+};
+
+/**
+ * A stable id per chat message for the desktop's de-duplication. Negative,
+ * so it never equals a notification id from the server (positive), and 52
+ * bits wide, so two messages practically never share one.
+ */
+export function e2eeNoticeId(notice: E2eeDesktopNotice): number {
+  const key = `e2ee:${notice.g}:${notice.seq}`;
+  const high = fnv1a(key, 0x811c9dc5) & 0xfffff;
+  const low = fnv1a(key, 0x050c5d1f);
+  return -(high * 0x1_0000_0000 + low + 1);
 }
