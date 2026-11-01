@@ -98,12 +98,14 @@ import { AxeBuilder } from "@axe-core/playwright";
 import { chromium } from "playwright";
 
 /**
- * Day permalinks that cannot name a published day: each must answer 404
- * with the TDH pages' own not-found view, inside the site.
+ * Day permalinks that cannot name a published day, and an address in the
+ * chapter that names no page: each must answer 404 with the TDH pages' own
+ * not-found view, inside the site.
  */
 const NOT_FOUND_ROUTES = [
   "/network/tdh/verification/20739",
   "/network/tdh/verification/abc",
+  "/network/tdh/no-such-page",
 ];
 
 const DEFAULT_ROUTES = [
