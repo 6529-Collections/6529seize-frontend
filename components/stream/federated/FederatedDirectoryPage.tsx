@@ -71,6 +71,10 @@ const CELL_BASE =
 
 const CELL = `${CELL_BASE} tw-text-left`;
 
+/** A cell whose text may wrap (the contract and status columns). */
+const CELL_WRAP =
+  "tw-min-w-[7rem] tw-px-3 tw-py-3 tw-text-left tw-align-top first:tw-pl-0 last:tw-pr-0";
+
 const NUMERIC = `${CELL_BASE} tw-text-right`;
 
 function statusLabel(locale: SupportedLocale, status: StatusFilter): string {
@@ -202,6 +206,56 @@ function StatusCell({
   );
 }
 
+/** Columns; `wide` ones hide below the `sm` breakpoint, where the contract cell summarizes them. */
+const COLUMNS = [
+  { key: "contract", numeric: false, wide: false },
+  { key: "form", numeric: false, wide: true },
+  { key: "artist", numeric: false, wide: true },
+  { key: "license", numeric: false, wide: true },
+  { key: "status", numeric: false, wide: false },
+  { key: "works", numeric: true, wide: true },
+  { key: "volume", numeric: true, wide: false },
+] as const;
+
+const WIDE = "tw-hidden sm:tw-table-cell";
+
+function ContractCell({
+  row,
+  artistName,
+  locale,
+}: {
+  readonly row: DirectoryRow;
+  readonly artistName: string;
+  readonly locale: SupportedLocale;
+}) {
+  const { entry, partner, works } = row;
+  return (
+    <th scope="row" className={`${CELL_WRAP} tw-font-medium`}>
+      <Link
+        href={STREAM_ROUTES.federatedContract(entry.address)}
+        className={`tw-text-iron-50 tw-no-underline hover:tw-underline ${STREAM_FOCUS}`}
+      >
+        {entry.name}
+      </Link>
+      <span className="tw-block tw-text-xs tw-font-normal tw-text-iron-400">
+        {partner === null
+          ? entry.symbol
+          : t(locale, "stream.federated.pairLabel", {
+              first: entry.symbol,
+              second: partner.symbol,
+            })}
+      </span>
+      <span className="tw-block tw-text-xs tw-font-normal tw-text-iron-400 sm:tw-hidden">
+        {t(locale, "stream.federated.rowSummary", {
+          form: t(locale, `stream.federated.form.${entry.form}`),
+          artist: artistName,
+          works: formatInteger(locale, works),
+        })}
+      </span>
+    </th>
+  );
+}
+
 function DirectoryTable({
   rows,
   artists,
@@ -223,69 +277,54 @@ function DirectoryTable({
         <caption className="tw-sr-only">{label}</caption>
         <thead>
           <tr>
-            {(["contract", "form", "artist", "license", "status"] as const).map(
-              (column) => (
-                <th
-                  key={column}
-                  scope="col"
-                  className={`${CELL} tw-font-medium tw-text-iron-400`}
-                >
-                  {t(locale, `stream.federated.col.${column}`)}
-                </th>
-              )
-            )}
-            {(["works", "volume"] as const).map((column) => (
+            {COLUMNS.map((column) => (
               <th
-                key={column}
+                key={column.key}
                 scope="col"
-                className={`${NUMERIC} tw-font-medium tw-text-iron-400`}
+                className={`${column.numeric ? NUMERIC : CELL} ${column.wide ? WIDE : ""} tw-font-medium tw-text-iron-400`}
               >
-                {t(locale, `stream.federated.col.${column}`)}
+                {t(locale, `stream.federated.col.${column.key}`)}
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {rows.map(({ entry, partner, works, volume }) => {
+          {rows.map((row) => {
+            const { entry, works, volume } = row;
             const artist = artists.get(entry.artistId);
+            const artistName = artist?.displayName ?? shortHex(entry.artistId);
             return (
               <tr
                 key={entry.address}
                 className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-text-iron-200"
               >
-                <th scope="row" className={`${CELL} tw-font-medium`}>
-                  <Link
-                    href={STREAM_ROUTES.federatedContract(entry.address)}
-                    className={`tw-text-iron-50 tw-no-underline hover:tw-underline ${STREAM_FOCUS}`}
-                  >
-                    {entry.name}
-                  </Link>
-                  <span className="tw-block tw-text-xs tw-font-normal tw-text-iron-400">
-                    {partner === null
-                      ? entry.symbol
-                      : `${entry.symbol} · ${partner.symbol}`}
-                  </span>
-                </th>
-                <td className={CELL}>
+                <ContractCell
+                  row={row}
+                  artistName={artistName}
+                  locale={locale}
+                />
+                <td className={`${CELL} ${WIDE}`}>
                   {t(locale, `stream.federated.form.${entry.form}`)}
                 </td>
-                <td className={CELL}>
+                <td className={`${CELL} ${WIDE}`}>
                   {artist === undefined ? (
-                    shortHex(entry.artistId)
+                    artistName
                   ) : (
                     <Link
                       href={STREAM_ROUTES.artist(entry.artistId)}
                       className={`tw-text-iron-200 tw-no-underline hover:tw-underline ${STREAM_FOCUS}`}
                     >
-                      {artist.displayName}
+                      {artistName}
                     </Link>
                   )}
                 </td>
-                <td className={CELL}>{entry.defaultLicense}</td>
-                <td className={CELL}>
+                <td className={`${CELL} ${WIDE}`}>{entry.defaultLicense}</td>
+                <td className={CELL_WRAP}>
                   <StatusCell entry={entry} locale={locale} />
                 </td>
-                <td className={NUMERIC}>{formatInteger(locale, works)}</td>
+                <td className={`${NUMERIC} ${WIDE}`}>
+                  {formatInteger(locale, works)}
+                </td>
                 <td className={NUMERIC}>
                   <EthAmount wei={volume} locale={locale} />
                 </td>
@@ -350,13 +389,15 @@ export function FederatedDirectoryPage() {
         onStatus={setStatus}
       />
       <p className={`${STREAM_HELP} tw-mb-2 tw-mt-4`} aria-live="polite">
-        {t(locale, "stream.federated.count", {
-          count: formatInteger(locale, rows.length),
-        })}
+        {contracts === undefined
+          ? ""
+          : t(locale, "stream.federated.count", {
+              count: formatInteger(locale, rows.length),
+            })}
       </p>
       {contracts === undefined ? <Loading /> : null}
       {contracts !== undefined && rows.length === 0 ? (
-        <p className="tw-m-0 tw-py-6 tw-text-sm tw-text-iron-400">
+        <p className="tw-m-0 tw-py-6 tw-text-sm tw-text-iron-400" role="status">
           {t(locale, "stream.federated.empty")}
         </p>
       ) : null}

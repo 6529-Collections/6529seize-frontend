@@ -1,4 +1,6 @@
-import type { MessageKey } from "@/i18n/messages";
+import type { SupportedLocale } from "@/i18n/locales";
+import { type MessageKey, t } from "@/i18n/messages";
+import "@/i18n/namespaces/stream";
 import type {
   FederatedDeployRequest,
   FederatedForm,
@@ -56,10 +58,17 @@ export function standardsOf(form: FederatedForm): readonly TokenStandard[] {
   return form === "PAIR" ? ["ERC721", "ERC1155"] : [form];
 }
 
-/** A pair's editions name when left empty: "<name> Editions". */
-export function editionNameOf(details: LaunchDetails): string {
+/** A pair's editions name when left empty: "<name> Editions", from the copy. */
+export function editionNameOf(
+  details: LaunchDetails,
+  locale: SupportedLocale
+): string {
   const typed = details.editionName.trim();
-  return typed === "" ? `${details.name.trim()} Editions` : typed;
+  return typed === ""
+    ? t(locale, "stream.launch.details.editionNameDefault", {
+        name: details.name.trim(),
+      })
+    : typed;
 }
 
 /** A pair's editions symbol when left empty: the 1/1 symbol plus "E". */
@@ -93,7 +102,8 @@ function symbolError(value: string): MessageKey | undefined {
 /** Inline errors for step 3; an empty object means the step is valid. */
 export function validateDetails(
   form: FederatedForm,
-  details: LaunchDetails
+  details: LaunchDetails,
+  locale: SupportedLocale
 ): LaunchErrors {
   const found: [LaunchField, MessageKey | undefined][] = [
     ["name", nameError(details.name)],
@@ -103,7 +113,7 @@ export function validateDetails(
     // The editions half's defaults derive from the 1/1 half, so they are only
     // checked once the 1/1 name and symbol are there.
     if (details.name.trim() !== "") {
-      found.push(["editionName", nameError(editionNameOf(details))]);
+      found.push(["editionName", nameError(editionNameOf(details, locale))]);
     }
     if (details.symbol.trim() !== "") {
       const editionSymbol = editionSymbolOf(details);
@@ -134,7 +144,8 @@ export function validateDetails(
 /** The factory call the review step sends. */
 export function toDeployRequest(
   form: FederatedForm,
-  details: LaunchDetails
+  details: LaunchDetails,
+  locale: SupportedLocale
 ): FederatedDeployRequest {
   const base = {
     form,
@@ -145,7 +156,7 @@ export function toDeployRequest(
   return form === "PAIR"
     ? {
         ...base,
-        editionName: editionNameOf(details),
+        editionName: editionNameOf(details, locale),
         editionSymbol: editionSymbolOf(details),
       }
     : base;

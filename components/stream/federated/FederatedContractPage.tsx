@@ -75,7 +75,8 @@ function codeHashLabel(
 ): string {
   return paired
     ? t(locale, "stream.federated.contract.codeHashOf", {
-        form: t(locale, `stream.federated.form.${half.standard}`),
+        // The token standard as written ("ERC-721"), since labels are uppercased.
+        form: half.standard === "ERC721" ? "ERC-721" : "ERC-1155",
       })
     : t(locale, "stream.federated.contract.codeHash");
 }
@@ -303,7 +304,15 @@ export function FederatedContractPage({
     return <NotFoundNote locale={locale} />;
   }
   const pair = partner ?? null;
-  const works = halvesOf(entry, pair).flatMap((half) => half.works);
+  const halves = halvesOf(entry, pair);
+  const works = halves.flatMap((half) => half.works);
+  const symbols =
+    halves.length === 2
+      ? t(locale, "stream.federated.pairLabel", {
+          first: halves[0]?.symbol ?? "",
+          second: halves[1]?.symbol ?? "",
+        })
+      : entry.symbol;
   const listed = entry.status === "ACTIVE" && !entry.artistDelisted;
   const isArtist =
     account !== null && account.toLowerCase() === entry.owner.toLowerCase();
@@ -316,12 +325,7 @@ export function FederatedContractPage({
             locale={locale}
           />
           <span className="tw-text-sm tw-text-iron-300">
-            {pair === null
-              ? entry.symbol
-              : `${halvesOf(entry, pair)
-                  .map((half) => half.symbol)
-                  .join(" · ")}`}{" "}
-            · {t(locale, `stream.federated.form.${entry.form}`)}
+            {symbols} · {t(locale, `stream.federated.form.${entry.form}`)}
           </span>
         </div>
         <p className={`${STREAM_HELP} tw-mt-2`}>

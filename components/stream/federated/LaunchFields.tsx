@@ -189,7 +189,7 @@ function EditionFields({
   readonly locale: SupportedLocale;
 }) {
   const namePlaceholder =
-    details.name.trim() === "" ? undefined : editionNameOf(details);
+    details.name.trim() === "" ? undefined : editionNameOf(details, locale);
   const symbolPlaceholder =
     details.symbol.trim() === "" ? undefined : editionSymbolOf(details);
   return (
@@ -269,7 +269,7 @@ export function DetailsFields({
           field="customLicense"
           label={t(locale, "stream.launch.details.licenseId")}
           value={details.customLicense}
-          placeholder="LicenseRef-My-Studio-1.0"
+          placeholder={t(locale, "stream.launch.details.licenseIdPlaceholder")}
           help={t(locale, "stream.launch.details.licenseIdHelp")}
           error={errors.customLicense}
           onChange={(customLicense) => onChange({ customLicense })}

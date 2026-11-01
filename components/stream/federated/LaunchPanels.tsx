@@ -128,7 +128,10 @@ export function ReviewPanel({
       ? [
           {
             label: t(locale, "stream.launch.details.editionName"),
-            value: `${editionNameOf(details)} · ${editionSymbolOf(details)}`,
+            value: t(locale, "stream.federated.pairLabel", {
+              first: editionNameOf(details, locale),
+              second: editionSymbolOf(details),
+            }),
           },
         ]
       : [];
@@ -151,7 +154,10 @@ export function ReviewPanel({
           },
           {
             label: t(locale, "stream.launch.details.name"),
-            value: `${details.name.trim()} · ${details.symbol.trim()}`,
+            value: t(locale, "stream.federated.pairLabel", {
+              first: details.name.trim(),
+              second: details.symbol.trim(),
+            }),
           },
           ...pairItems,
           {

@@ -116,11 +116,11 @@ export function SaleMethodList({
   const methods = saleMethodsOf(entry, partner);
   return (
     <div>
-      <ul className="tw-m-0 tw-list-none tw-divide-y tw-divide-solid tw-divide-iron-800 tw-border-0 tw-border-y tw-border-solid tw-border-iron-800 tw-p-0">
+      <ul className="tw-m-0 tw-list-none tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-p-0">
         {methods.map((method) => (
           <li
             key={`${method.contract.address}:${method.kind}`}
-            className="tw-flex tw-flex-col tw-gap-0.5 tw-py-3 sm:tw-flex-row sm:tw-items-baseline sm:tw-gap-4"
+            className="tw-flex tw-flex-col tw-gap-0.5 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-3 sm:tw-flex-row sm:tw-items-baseline sm:tw-gap-4"
           >
             <span className="tw-text-sm tw-font-semibold tw-text-iron-50 sm:tw-w-40 sm:tw-flex-none">
               {methodName(locale, method.kind)}
@@ -168,10 +168,7 @@ function StartedNote({
       ? STREAM_ROUTES.edition(started.key)
       : STREAM_ROUTES.work(started.key);
   return (
-    <div
-      className="tw-flex tw-flex-wrap tw-items-center tw-gap-3"
-      role="status"
-    >
+    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
       <p className="tw-m-0 tw-text-sm tw-text-success">
         {t(locale, "stream.federated.sell.started", { title: started.title })}
       </p>
@@ -303,7 +300,9 @@ function SellForm({
   const { run, pending } = useStreamAction(locale);
   const method = methods[Math.min(choice, methods.length - 1)];
   if (method === undefined) {
-    return null;
+    return (
+      <p className={STREAM_HELP}>{t(locale, "stream.federated.sell.none")}</p>
+    );
   }
   const isEdition = method.kind === "UNIFORM_EDITION_AUCTION";
   const titleError =
@@ -386,9 +385,11 @@ function SellForm({
           {error}
         </p>
       )}
-      {started === null ? null : (
-        <StartedNote started={started} locale={locale} />
-      )}
+      <div role="status">
+        {started === null ? null : (
+          <StartedNote started={started} locale={locale} />
+        )}
+      </div>
     </form>
   );
 }

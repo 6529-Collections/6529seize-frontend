@@ -18,7 +18,13 @@ import type {
 } from "@/lib/stream/types";
 
 const CELL =
-  "tw-whitespace-nowrap tw-px-3 tw-py-2 tw-text-right first:tw-pl-0 first:tw-text-left last:tw-pr-0";
+  "tw-whitespace-nowrap tw-px-3 tw-py-2 tw-text-right first:tw-whitespace-normal first:tw-pl-0 first:tw-text-left last:tw-pr-0";
+
+/** Column heads: the token standards as written, short enough for 375px. */
+const STANDARD_NAME: Readonly<Record<TokenStandard, string>> = {
+  ERC721: "ERC-721",
+  ERC1155: "ERC-1155",
+};
 
 function compact(locale: SupportedLocale, gas: number): string {
   return formatNumber(locale, gas, {
@@ -107,7 +113,7 @@ export default function DeployGasTable({
                   scope="col"
                   className={`${CELL} tw-font-medium tw-text-iron-400`}
                 >
-                  {t(locale, `stream.federated.form.${column.standard}`)}
+                  {STANDARD_NAME[column.standard]}
                 </th>
               ))}
             </tr>

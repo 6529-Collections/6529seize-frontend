@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 import { STREAM_HELP, STREAM_LABEL } from "@/components/stream/ui/styles";
 import { formatUtcDate } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -17,10 +19,16 @@ function NoticeList({
   readonly title: string;
   readonly items: readonly string[];
 }) {
+  const id = useId();
   return (
     <div className="tw-min-w-0">
-      <h3 className={STREAM_LABEL}>{title}</h3>
-      <ul className="tw-m-0 tw-mt-2 tw-list-disc tw-space-y-1 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-200">
+      <p id={id} className={STREAM_LABEL}>
+        {title}
+      </p>
+      <ul
+        aria-labelledby={id}
+        className="tw-m-0 tw-mt-2 tw-list-disc tw-space-y-1 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-200"
+      >
         {items.map((item) => (
           <li key={item}>{item}</li>
         ))}

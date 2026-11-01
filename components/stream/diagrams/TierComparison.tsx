@@ -49,7 +49,7 @@ export default function TierComparison({
 }) {
   return (
     <div className="tw-overflow-x-auto">
-      <table className="tw-w-full tw-min-w-[34rem] tw-border-collapse tw-text-left tw-text-sm">
+      <table className="tw-w-full tw-border-collapse tw-text-left tw-text-xs sm:tw-min-w-[34rem] sm:tw-text-sm">
         <caption className="tw-sr-only">
           {t(locale, "stream.tiers.caption")}
         </caption>
@@ -57,7 +57,7 @@ export default function TierComparison({
           <tr>
             <th
               scope="col"
-              className={`${CELL} tw-w-28 tw-text-xs tw-font-medium tw-text-iron-400`}
+              className={`${CELL} tw-w-20 tw-text-xs tw-font-medium tw-text-iron-400 sm:tw-w-28`}
             >
               <span className="tw-sr-only">
                 {t(locale, "stream.tiers.aspect")}

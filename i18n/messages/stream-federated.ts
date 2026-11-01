@@ -35,6 +35,8 @@ export const STREAM_FEDERATED_MESSAGES = {
   "stream.federated.col.works": "Works",
   "stream.federated.col.volume": "Volume",
   "stream.federated.delistedLine": "{date} · {reason}",
+  "stream.federated.pairLabel": "{first} · {second}",
+  "stream.federated.rowSummary": "{form} · {artist} · Works: {works}",
   "stream.federated.empty": "No contracts match these filters.",
   "stream.federated.tiers": "How Federated compares",
 
@@ -112,6 +114,8 @@ export const STREAM_FEDERATED_MESSAGES = {
     "Its edition auction opens alongside and closes 15 minutes after the 1/1.",
   "stream.federated.sell.standaloneNote":
     "Provisional: closes 24 hours after it opens; a bid in the last 5 minutes extends it.",
+  "stream.federated.sell.none":
+    "No sale method on this page fits this contract yet.",
   "stream.federated.sell.withMaster":
     "Opens with each 1/1 on the linked contract.",
   "stream.federated.sell.started": "Started: {title}.",
@@ -150,9 +154,11 @@ export const STREAM_FEDERATED_MESSAGES = {
   "stream.launch.details.symbol": "Symbol",
   "stream.launch.details.symbolHelp": "Up to 11 capital letters or digits.",
   "stream.launch.details.editionName": "Editions contract name",
+  "stream.launch.details.editionNameDefault": "{name} Editions",
   "stream.launch.details.editionSymbol": "Editions contract symbol",
   "stream.launch.details.license": "License",
   "stream.launch.details.licenseId": "License ID",
+  "stream.launch.details.licenseIdPlaceholder": "LicenseRef-My-Studio-1.0",
   "stream.launch.details.licenseIdHelp":
     "An SPDX ID, or LicenseRef- followed by your own name.",
   "stream.launch.license.CC0-1.0": "CC0: no rights reserved",

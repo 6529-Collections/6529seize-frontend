@@ -139,18 +139,20 @@ function StepFrame({
         {t(locale, `stream.launch.step.${id}.line`)}
       </p>
       <div className="tw-mt-5">{children}</div>
-      <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-        {action}
-        {onBack === undefined ? null : (
-          <button
-            type="button"
-            onClick={onBack}
-            className={STREAM_BUTTON_SECONDARY}
-          >
-            {t(locale, "stream.launch.back")}
-          </button>
-        )}
-      </div>
+      {action === null && onBack === undefined ? null : (
+        <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+          {action}
+          {onBack === undefined ? null : (
+            <button
+              type="button"
+              onClick={onBack}
+              className={STREAM_BUTTON_SECONDARY}
+            >
+              {t(locale, "stream.launch.back")}
+            </button>
+          )}
+        </div>
+      )}
     </section>
   );
 }
@@ -166,7 +168,8 @@ interface WizardState {
 function stepIsValid(
   step: StepId,
   state: WizardState,
-  hasAccount: boolean
+  hasAccount: boolean,
+  locale: SupportedLocale
 ): boolean {
   if (step === "form") {
     return state.form !== null;
@@ -177,7 +180,8 @@ function stepIsValid(
   if (step === "details") {
     return (
       state.form !== null &&
-      Object.keys(validateDetails(state.form, state.details)).length === 0
+      Object.keys(validateDetails(state.form, state.details, locale)).length ===
+        0
     );
   }
   return true;
@@ -216,7 +220,7 @@ function StepBody({
       <DetailsFields
         form={form}
         details={details}
-        errors={showErrors ? validateDetails(form, details) : {}}
+        errors={showErrors ? validateDetails(form, details, locale) : {}}
         onChange={onDetails}
         locale={locale}
       />
@@ -243,10 +247,6 @@ function StepAction({
   readonly pending: boolean;
   readonly locale: SupportedLocale;
 }) {
-  if (step === "sell") {
-    // The sale panel carries the step's one action.
-    return null;
-  }
   if (step === "deploy") {
     return (
       <button
@@ -296,13 +296,16 @@ export function LaunchWizard() {
     moved.current = true;
     setState((value) => ({ ...value, showErrors: false }));
     setDeployError(null);
-    setStep(target);
+    setStep(Math.min(Math.max(target, 0), STEPS.length - 1));
   }
 
   async function deploy(form: FederatedForm) {
     setDeployError(null);
     const result = await run((actions, from) =>
-      actions.deployFederated(from, toDeployRequest(form, state.details))
+      actions.deployFederated(
+        from,
+        toDeployRequest(form, state.details, locale)
+      )
     );
     if (result === null) {
       setDeployError(t(locale, "stream.launch.identity.noWallet"));
@@ -319,7 +322,7 @@ export function LaunchWizard() {
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!stepIsValid(current, state, account !== null)) {
+    if (!stepIsValid(current, state, account !== null, locale)) {
       setState((value) => ({ ...value, showErrors: true }));
       return;
     }
@@ -337,7 +340,11 @@ export function LaunchWizard() {
       locale={locale}
       headingRef={headingRef}
       onBack={canGoBack ? () => goTo(step - 1) : undefined}
-      action={<StepAction step={current} pending={pending} locale={locale} />}
+      action={
+        current === "sell" ? null : (
+          <StepAction step={current} pending={pending} locale={locale} />
+        )
+      }
     >
       <StepBody
         step={current}
@@ -373,7 +380,8 @@ export function LaunchWizard() {
       </PageHeader>
       <Progress current={step} locale={locale} />
       {current === "sell" ? (
-        // The sale panel is its own form; forms must not nest.
+        // The sale panel is its own form (and carries the step's one action);
+        // forms must not nest.
         frame
       ) : (
         <form noValidate onSubmit={submit}>
