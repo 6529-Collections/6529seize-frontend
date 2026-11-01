@@ -1,4 +1,6 @@
-export type PushRedirect = "profile" | "waves";
+// "e2ee" is the content-free wake for end-to-end encrypted chats (D109): it
+// carries no sender, group or text and opens the encrypted chats list.
+export type PushRedirect = "profile" | "waves" | "e2ee";
 
 export interface DevicePushData {
   notification_id: string;

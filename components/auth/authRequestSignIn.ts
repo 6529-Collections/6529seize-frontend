@@ -13,6 +13,12 @@ import {
   type DeviceGrantMode,
   type LoginDeviceGrant,
 } from "@/lib/device-signing/login-grant";
+import {
+  prepareLoginE2eeDevice,
+  toE2eeNonceParams,
+  type LoginE2eeDevice,
+} from "@/lib/device-signing/login-e2ee";
+import { adoptLoginE2eeDevice } from "./authLoginE2eeDevice";
 import { AUTH_SIGNATURE_FAILED_MESSAGE } from "@/services/auth/auth.messages";
 import { canStoreAnotherWalletAccount } from "@/services/auth/auth.utils";
 import {
@@ -61,7 +67,36 @@ interface SignInChallenge {
   readonly nonceResponse: ApiSessionNonceResponse;
   /** Set only when the challenge grants exactly this device's key. */
   readonly deviceGrant: LoginDeviceGrant | null;
+  /**
+   * Set only when the challenge is a combined grant (NC8) that also grants
+   * exactly this browser's MLS key for encrypted messages.
+   */
+  readonly e2eeDevice: LoginE2eeDevice | null;
 }
+
+type GetNonce = AuthRequestSignInDependencies["getNonce"];
+
+/** Classifies a grant challenge; null when it must not be signed. */
+const toGrantChallenge = (
+  nonceResponse: ApiSessionNonceResponse,
+  deviceGrant: LoginDeviceGrant,
+  e2eeDevice: LoginE2eeDevice | null
+): SignInChallenge | null => {
+  const message = nonceResponse.signable_message;
+  if (e2eeDevice && isDeviceGrantChallenge(message, deviceGrant, e2eeDevice)) {
+    return { nonceResponse, deviceGrant, e2eeDevice };
+  }
+  // A server with encrypted messages off (or on another ciphersuite) grants
+  // the signing key alone; encrypted messages then keep their own prompt.
+  if (isDeviceGrantChallenge(message, deviceGrant)) {
+    return { nonceResponse, deviceGrant, e2eeDevice: null };
+  }
+  // A challenge without any device grant is the ordinary one; never sign a
+  // grant for a key other than this device's.
+  return carriesDeviceGrant(message)
+    ? null
+    : { nonceResponse, deviceGrant: null, e2eeDevice: null };
+};
 
 const getGrantChallenge = async ({
   deviceGrant,
@@ -71,7 +106,7 @@ const getGrantChallenge = async ({
 }: {
   readonly deviceGrant: LoginDeviceGrant;
   readonly deviceGrantMode: DeviceGrantMode;
-  readonly getNonce: AuthRequestSignInDependencies["getNonce"];
+  readonly getNonce: GetNonce;
   readonly signerAddress: string;
 }): Promise<SignInChallenge | null> => {
   try {
@@ -79,21 +114,79 @@ const getGrantChallenge = async ({
       signerAddress,
       deviceGrant: toDeviceGrantNonceParams(deviceGrant),
     });
-    const message = nonceResponse.signable_message;
-    if (isDeviceGrantChallenge(message, deviceGrant)) {
-      return { nonceResponse, deviceGrant };
-    }
-    // A challenge without any device grant is the ordinary one; never sign a
-    // grant for a key other than this device's.
-    return carriesDeviceGrant(message)
-      ? null
-      : { nonceResponse, deviceGrant: null };
+    return toGrantChallenge(nonceResponse, deviceGrant, null);
   } catch (error) {
     if (deviceGrantMode === "required") {
       throw error;
     }
     return null;
   }
+};
+
+/**
+ * NC8: asks for a challenge that grants the signing key and the MLS key in
+ * one signature. Null whenever that cannot be had (a server without combined
+ * grants rejects the parameters, or answers with something unexpected), so
+ * the caller falls back to the signing-only grant challenge.
+ */
+const getCombinedGrantChallenge = async ({
+  deviceGrant,
+  e2eeDevice,
+  getNonce,
+  signerAddress,
+}: {
+  readonly deviceGrant: LoginDeviceGrant;
+  readonly e2eeDevice: LoginE2eeDevice;
+  readonly getNonce: GetNonce;
+  readonly signerAddress: string;
+}): Promise<SignInChallenge | null> => {
+  try {
+    const nonceResponse = await getNonce({
+      signerAddress,
+      deviceGrant: {
+        ...toDeviceGrantNonceParams(deviceGrant),
+        ...toE2eeNonceParams(e2eeDevice),
+      },
+    });
+    const challenge = toGrantChallenge(nonceResponse, deviceGrant, e2eeDevice);
+    return challenge?.deviceGrant ? challenge : null;
+  } catch {
+    return null;
+  }
+};
+
+const getDeviceGrantChallenge = async ({
+  deviceGrant,
+  deviceGrantMode,
+  getNonce,
+  signerAddress,
+}: {
+  readonly deviceGrant: LoginDeviceGrant;
+  readonly deviceGrantMode: DeviceGrantMode;
+  readonly getNonce: GetNonce;
+  readonly signerAddress: string;
+}): Promise<SignInChallenge | null> => {
+  const e2eeDevice = await prepareLoginE2eeDevice();
+  const combined = e2eeDevice
+    ? await getCombinedGrantChallenge({
+        deviceGrant,
+        e2eeDevice,
+        getNonce,
+        signerAddress,
+      })
+    : null;
+  if (e2eeDevice && !combined?.e2eeDevice) {
+    e2eeDevice.dispose();
+  }
+  return (
+    combined ??
+    (await getGrantChallenge({
+      deviceGrant,
+      deviceGrantMode,
+      getNonce,
+      signerAddress,
+    }))
+  );
 };
 
 /**
@@ -116,7 +209,7 @@ const getSignInChallenge = async ({
     ? await prepareLoginDeviceGrant({ signerAddress, mode: deviceGrantMode })
     : null;
   const grantChallenge = deviceGrant
-    ? await getGrantChallenge({
+    ? await getDeviceGrantChallenge({
         deviceGrant,
         deviceGrantMode,
         getNonce,
@@ -124,14 +217,30 @@ const getSignInChallenge = async ({
       })
     : null;
   if (deviceGrantMode === "required" && !grantChallenge?.deviceGrant) {
+    grantChallenge?.e2eeDevice?.dispose();
     throw new DeviceGrantUnavailableError();
   }
   return (
-    grantChallenge ?? {
-      nonceResponse: await getNonce({ signerAddress }),
-      deviceGrant: null,
-    }
+    grantChallenge ?? (await getOrdinaryChallenge(getNonce, signerAddress))
   );
+};
+
+/**
+ * The ordinary challenge must grant nothing: the wallet never signs a device
+ * or encrypted-messages grant that this browser did not ask for and check,
+ * so the server cannot have a key of its choosing granted.
+ */
+const getOrdinaryChallenge = async (
+  getNonce: GetNonce,
+  signerAddress: string
+): Promise<SignInChallenge> => {
+  const nonceResponse = await getNonce({ signerAddress });
+  if (carriesDeviceGrant(nonceResponse.signable_message)) {
+    throw new NonceResponseValidationError(
+      "Unrequested device grant in the sign-in challenge"
+    );
+  }
+  return { nonceResponse, deviceGrant: null, e2eeDevice: null };
 };
 
 const createSignInSession = async ({
@@ -144,12 +253,73 @@ const createSignInSession = async ({
   signerAddress,
 }: AuthRequestSignInDependencies &
   AuthRequestSignInParams): Promise<AuthSessionResponse | null> => {
-  const { nonceResponse, deviceGrant } = await getSignInChallenge({
+  const { nonceResponse, deviceGrant, e2eeDevice } = await getSignInChallenge({
     deviceGrantMode,
     getNonce,
     role,
     signerAddress,
   });
+  // The MLS key is used only by a combined sign-in that completes.
+  const handover = { adopted: false };
+  try {
+    return await signInWithChallenge({
+      authRequestGuard,
+      deviceGrant,
+      deviceGrantMode,
+      getSignature,
+      nonceResponse,
+      role,
+      setToast,
+      signerAddress,
+      onSignedIn: ({ storedGrantId, ownProfileId }, clientSignature) => {
+        if (e2eeDevice && storedGrantId) {
+          handover.adopted = true;
+          void adoptLoginE2eeDevice({
+            e2eeDevice,
+            message: nonceResponse.signable_message,
+            walletSignature: clientSignature,
+            storedGrantId,
+            ownProfileId,
+            signerAddress,
+          });
+        }
+      },
+    });
+  } finally {
+    if (!handover.adopted) {
+      e2eeDevice?.dispose();
+    }
+  }
+};
+
+const signInWithChallenge = async ({
+  authRequestGuard,
+  deviceGrant,
+  deviceGrantMode,
+  getSignature,
+  nonceResponse,
+  onSignedIn,
+  role,
+  setToast,
+  signerAddress,
+}: {
+  readonly authRequestGuard: AuthRequestGuard | undefined;
+  readonly deviceGrant: LoginDeviceGrant | null;
+  readonly deviceGrantMode: DeviceGrantMode;
+  readonly getSignature: AuthRequestSignInDependencies["getSignature"];
+  readonly nonceResponse: ApiSessionNonceResponse;
+  /** A web grant sign-in finished: the grant the server stored, if any. */
+  readonly onSignedIn: (
+    signedIn: {
+      readonly storedGrantId: string | null;
+      readonly ownProfileId: string | null;
+    },
+    clientSignature: string
+  ) => void;
+  readonly role: string | null;
+  readonly setToast: (toast: AppToastInput) => void;
+  readonly signerAddress: string;
+}): Promise<AuthSessionResponse | null> => {
   if (isAuthRequestStale(authRequestGuard)) {
     return null;
   }
@@ -206,6 +376,13 @@ const createSignInSession = async ({
       deviceGrant,
       sessionResponse.device_grant,
       sessionResponse.role ?? null
+    );
+    onSignedIn(
+      {
+        storedGrantId: sessionResponse.device_grant?.id ?? null,
+        ownProfileId: sessionResponse.role ?? null,
+      },
+      clientSignature.signature
     );
   }
   return isAuthRequestStale(authRequestGuard) ? null : sessionResponse;

@@ -999,6 +999,8 @@ describe("staging immutable artifact deployment", () => {
     expect(build.env.NEXTGEN_CHAIN_ID).toBe(
       "${{ vars.STAGING_NEXTGEN_CHAIN_ID || '1' }}"
     );
+    // Encrypted DMs (D109) are a staging-only build flag.
+    expect(build.env.NEXT_PUBLIC_E2EE_DM_ENABLED).toBe("true");
     expect(buildSource).not.toContain("secrets.");
     expect(buildSource).not.toContain("11155111");
     expect(buildStep.run).toContain("./bin/6529 run base-build");

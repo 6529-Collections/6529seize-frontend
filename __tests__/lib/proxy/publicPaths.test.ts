@@ -15,8 +15,9 @@ import {
 
 const PUBLIC_DIR = path.join(process.cwd(), "public");
 const APP_DIR = path.join(process.cwd(), "app");
-// Generated before dev/build and handled by its own segment prefix.
-const GENERATED_PUBLIC_DIRECTORIES = new Set(["pdfjs"]);
+// Generated before dev/build (pdfjs) or by build:mls-wasm (e2ee), and handled
+// by their own segment prefixes.
+const GENERATED_PUBLIC_DIRECTORIES = new Set(["pdfjs", "e2ee"]);
 const IMAGE_FILE_PATTERN = /\.(?:jpe?g|png|gif|svg|webp)$/i;
 
 function listFiles(directory: string): string[] {
@@ -68,6 +69,14 @@ describe("public path contract", () => {
         !GENERATED_PUBLIC_DIRECTORIES.has(directory)
     );
     expect(unclassified).toEqual([]);
+  });
+
+  it("lets the encrypted-chat WebAssembly module past the gate", () => {
+    const modules = listFiles(path.join(PUBLIC_DIR, "e2ee"))
+      .filter((file) => file.endsWith(".wasm"))
+      .map((file) => `/${file}`);
+    expect(modules.length).toBeGreaterThan(0);
+    expect(modules.filter((file) => !isStaticAssetPath(file))).toEqual([]);
   });
 
   it("lists only public image directories that exist", () => {

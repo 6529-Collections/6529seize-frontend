@@ -1,6 +1,11 @@
 import { getUserPageTabByRoute } from "@/components/user/layout/userTabs.config";
 import { getCompetitionRoute } from "@/helpers/competition.helpers";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { isE2eeEnabled } from "@/config/e2eeEnv";
+import {
+  getEncryptedMessagesRoute,
+  getMessagesBaseRoute,
+  getWaveRoute,
+} from "@/helpers/navigation.helpers";
 import type { DevicePushData } from "./device-push.types";
 
 const redirectConfig = {
@@ -38,6 +43,11 @@ const redirectConfig = {
       isApp: false,
     });
   },
+  // Content-free encrypted-chat wake: open the encrypted list; the engine
+  // syncs and shows which chat changed. Builds without encrypted chats fall
+  // back to the plaintext messages list.
+  e2ee: () =>
+    isE2eeEnabled() ? getEncryptedMessagesRoute() : getMessagesBaseRoute(true),
 };
 
 export const resolvePushRedirectUrl = (notificationData: DevicePushData) => {

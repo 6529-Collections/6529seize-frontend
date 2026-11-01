@@ -14,8 +14,13 @@ const CANONICAL_SCOPE_ORDER: readonly DeviceScope[] = [
 ];
 const SIWE_HEADER_SUFFIX = " wants you to sign in with your Ethereum account:";
 const RESOURCES_LINE = "Resources:";
+// Same expiry grammar as the backend parser (no leading zeros, at most 16
+// digits), so both sides accept exactly the same grant messages.
 const URN_PATTERN =
-  /^urn:6529:device-grant:v1:ed25519:([0-9a-f]{64}):([a-z.]+):(\d+)$/;
+  /^urn:6529:device-grant:v1:ed25519:([0-9a-f]{64}):([a-z.]+):([1-9]\d{0,15})$/;
+const MLS_URN_PATTERN =
+  /^urn:6529:mls-device-grant:v1:([1-9]\d{0,4}):([0-9a-f]{64}):([1-9]\d{0,15})$/;
+const MAX_MLS_CIPHERSUITE = 0xffff;
 /** The server grants 180 days; allow a day of clock skew. */
 const MAX_GRANT_TTL_MS = 181 * 24 * 60 * 60 * 1000;
 
@@ -26,15 +31,41 @@ interface DeviceGrantTerms {
   readonly expiresAtSeconds: number;
 }
 
+/**
+ * The second resource of a combined sign-in grant (NC8): this device's MLS
+ * signature key for end-to-end encrypted messages, with the same expiry.
+ */
+interface MlsDeviceGrantTerms {
+  /** 0x-prefixed lowercase hex of the raw MLS Ed25519 signature key. */
+  readonly deviceKeyHex: string;
+  /** The MLS ciphersuite (uint16) the key is granted for. */
+  readonly ciphersuite: number;
+  readonly expiresAtSeconds: number;
+}
+
 interface ParsedDeviceGrantMessage extends DeviceGrantTerms {
   readonly address: string;
   /** The SIWE domain (host) the wallet was shown. */
   readonly domain: string;
   /** The SIWE Chain ID line. */
   readonly chainId: number;
+  /** Present only for a combined grant that also grants an MLS device key. */
+  readonly mls?: MlsDeviceGrantTerms;
 }
 
 const CHAIN_ID_PREFIX = "Chain ID: ";
+const ISSUED_AT_PREFIX = "Issued At: ";
+
+/** The SIWE Issued At line in unix seconds, or null when absent or invalid. */
+export function parseSiweIssuedAtSeconds(message: string): number | null {
+  const line = message
+    .split("\n")
+    .find((candidate) => candidate.startsWith(ISSUED_AT_PREFIX));
+  const ms = line
+    ? Date.parse(line.slice(ISSUED_AT_PREFIX.length))
+    : Number.NaN;
+  return Number.isFinite(ms) ? Math.floor(ms / 1000) : null;
+}
 
 /**
  * The only hosts that serve the 6529 app. Other 6529.io subdomains, such as
@@ -164,6 +195,9 @@ const SCOPE_NOUNS: Readonly<Record<DeviceScope, string>> = {
 const toScopeNoun = (scope: string): string =>
   Object.hasOwn(SCOPE_NOUNS, scope) ? SCOPE_NOUNS[scope as DeviceScope] : scope;
 
+const describeScopes = (scopes: readonly string[]): string =>
+  formatEnglishList(scopes.map(toScopeNoun));
+
 /**
  * The wallet-signed grant statement the server renders into new challenges.
  * Intentionally not localized: the server renders the same bytes into the
@@ -181,13 +215,65 @@ export function renderDeviceGrantStatement({
   return (
     `Sign in to 6529 and turn on signed messages on this device until ` +
     `${formatGrantExpiryDate(expiresAtSeconds)}. ` +
-    `This device will sign your ${formatEnglishList(scopes.map(toScopeNoun))} ` +
+    `This device will sign your ${describeScopes(scopes)} ` +
     `so anyone can verify they came from your wallet. ` +
     `It can't move funds, change your handle, add devices or act as an admin. ` +
     `No transaction, no gas, no token approvals. ` +
     `(Device key ${getDeviceKeyFingerprint(deviceKeyHex)})`
   );
 }
+
+type CombinedStatementRenderer = (
+  signing: DeviceGrantTerms,
+  mls: MlsDeviceGrantTerms
+) => string;
+
+/**
+ * v1 combined wording (owner-approved 2026-10-31): the approved
+ * signed-messages statement plus one sentence for encrypted messages and the
+ * second key.
+ */
+const renderCombinedGrantStatementV1: CombinedStatementRenderer = (
+  signing,
+  mls
+) =>
+  `Sign in to 6529 and turn on signed messages on this device until ` +
+  `${formatGrantExpiryDate(signing.expiresAtSeconds)}. ` +
+  `This device will sign your ${describeScopes(signing.scopes)} ` +
+  `so anyone can verify they came from your wallet. ` +
+  `It will also encrypt (send) and decrypt (read) your end-to-end encrypted ` +
+  `messages, which 6529.io cannot read. ` +
+  `It can't move funds, change your handle, add devices or act as an admin. ` +
+  `No transaction, no gas, no token approvals. ` +
+  `(Device key ${getDeviceKeyFingerprint(signing.deviceKeyHex)}, ` +
+  `encrypted messages key ${getDeviceKeyFingerprint(mls.deviceKeyHex)})`;
+
+/**
+ * Combined (signing + encrypted messages) statements, newest first. The
+ * backend renders the first into new challenges; every entry keeps parsing,
+ * so grants signed under an earlier wording stay valid. Not localized, for
+ * the same reason as renderDeviceGrantStatement. To change the wording: add
+ * a renderer at the front here and in the backend's combined-device-grant.ts
+ * (same shared vector), and ship this frontend first.
+ */
+const COMBINED_GRANT_STATEMENTS: readonly CombinedStatementRenderer[] = [
+  renderCombinedGrantStatementV1,
+];
+
+/** The combined statement the backend renders into new combined challenges. */
+export const renderCombinedGrantStatement = (
+  signing: DeviceGrantTerms,
+  mls: MlsDeviceGrantTerms
+): string => renderCombinedGrantStatementV1(signing, mls);
+
+const isCombinedGrantStatement = (
+  statement: string,
+  signing: DeviceGrantTerms,
+  mls: MlsDeviceGrantTerms
+): boolean =>
+  COMBINED_GRANT_STATEMENTS.some(
+    (render) => render(signing, mls) === statement
+  );
 
 /**
  * The statement of grants issued before the current wording. Wallets signed
@@ -240,6 +326,44 @@ const areCanonicalScopes = (scopes: readonly string[]): boolean => {
   return scopes.includes("post");
 };
 
+export function buildMlsDeviceGrantUrn({
+  deviceKeyHex,
+  ciphersuite,
+  expiresAtSeconds,
+}: MlsDeviceGrantTerms): string {
+  return `urn:6529:mls-device-grant:v1:${ciphersuite}:${stripHexPrefix(
+    deviceKeyHex
+  )}:${expiresAtSeconds}`;
+}
+
+const parseMlsResource = (resource: string): MlsDeviceGrantTerms | null => {
+  const match = resource.startsWith("- ")
+    ? MLS_URN_PATTERN.exec(resource.slice(2))
+    : null;
+  if (!match) {
+    return null;
+  }
+  const [, ciphersuiteRaw = "", keyHex = "", expiresAt = ""] = match;
+  const ciphersuite = Number(ciphersuiteRaw);
+  const expiresAtSeconds = Number(expiresAt);
+  if (
+    ciphersuite > MAX_MLS_CIPHERSUITE ||
+    !Number.isSafeInteger(expiresAtSeconds) ||
+    expiresAtSeconds % 60 !== 0
+  ) {
+    return null;
+  }
+  return { deviceKeyHex: `0x${keyHex}`, ciphersuite, expiresAtSeconds };
+};
+
+/** One expiry and two different keys (revoking one never covers the other). */
+const isCombinedPair = (
+  signing: DeviceGrantTerms,
+  mls: MlsDeviceGrantTerms
+): boolean =>
+  mls.expiresAtSeconds === signing.expiresAtSeconds &&
+  mls.deviceKeyHex !== signing.deviceKeyHex;
+
 const getResourceLines = (lines: readonly string[]): string[] | null => {
   const resourcesIndex = lines.indexOf(RESOURCES_LINE);
   if (
@@ -256,10 +380,9 @@ const getResourceLines = (lines: readonly string[]): string[] | null => {
 };
 
 const parseGrantResource = (
-  resources: readonly string[]
+  resource: string | undefined
 ): DeviceGrantTerms | null => {
-  const [resource] = resources;
-  if (resources.length !== 1 || !resource?.startsWith("- ")) {
+  if (!resource?.startsWith("- ")) {
     return null;
   }
   const match = URN_PATTERN.exec(resource.slice(2));
@@ -278,10 +401,44 @@ const parseGrantResource = (
   };
 };
 
+type GrantResources =
+  | { readonly signing: DeviceGrantTerms; readonly mls: null }
+  | { readonly signing: DeviceGrantTerms; readonly mls: MlsDeviceGrantTerms };
+
+/**
+ * Exactly one device-grant resource, or that resource followed by exactly one
+ * MLS device-grant resource (a combined grant), and a statement rendered from
+ * them: the current or legacy signing statement, or a combined statement.
+ */
+const parseGrantResources = (
+  resources: readonly string[],
+  statement: string
+): GrantResources | null => {
+  if (resources.length < 1 || resources.length > 2) {
+    return null;
+  }
+  const signing = parseGrantResource(resources[0]);
+  if (!signing) {
+    return null;
+  }
+  if (resources.length === 1) {
+    return isDeviceGrantStatement(statement, signing)
+      ? { signing, mls: null }
+      : null;
+  }
+  const mls = parseMlsResource(resources[1] ?? "");
+  return mls &&
+    isCombinedPair(signing, mls) &&
+    isCombinedGrantStatement(statement, signing, mls)
+    ? { signing, mls }
+    : null;
+};
+
 /**
  * Parses an ERC-4361 message that carries exactly one device-grant resource
- * and whose statement is exactly the current or the legacy statement rendered
- * from that resource.
+ * whose statement is the current or legacy statement rendered from it, or a
+ * combined grant (that resource plus one MLS device-grant resource with the
+ * same expiry) whose statement is a combined statement rendered from both.
  */
 export function parseDeviceGrantMessage(
   message: string
@@ -299,23 +456,38 @@ export function parseDeviceGrantMessage(
   const domain = parseHeaderDomain(header.slice(0, -SIWE_HEADER_SUFFIX.length));
   const chainId = parseChainId(lines);
   const resources = getResourceLines(lines);
-  const terms = resources ? parseGrantResource(resources) : null;
-  if (
-    !terms ||
-    domain === null ||
-    chainId === null ||
-    statement === undefined ||
-    !isDeviceGrantStatement(statement, terms)
-  ) {
+  const grants =
+    resources && statement !== undefined
+      ? parseGrantResources(resources, statement)
+      : null;
+  if (!grants || domain === null || chainId === null) {
     return null;
   }
-  return { ...terms, address, domain, chainId };
+  return {
+    ...grants.signing,
+    address,
+    domain,
+    chainId,
+    ...(grants.mls ? { mls: grants.mls } : {}),
+  };
 }
+
+/** The MLS key a combined challenge must grant, and nothing else. */
+const isExpectedMls = (
+  parsed: MlsDeviceGrantTerms | undefined,
+  expected: Omit<MlsDeviceGrantTerms, "expiresAtSeconds"> | null
+): boolean =>
+  expected === null
+    ? parsed === undefined
+    : parsed?.deviceKeyHex === expected.deviceKeyHex.toLowerCase() &&
+      parsed.ciphersuite === expected.ciphersuite;
 
 /**
  * Checks the server's sign-in challenge before the wallet is asked to sign
  * it: a 6529 app domain, the right wallet, this device's key, the requested
- * scopes and a sane expiry.
+ * scopes and a sane expiry. With `mls`, the challenge must be a combined grant
+ * of exactly that MLS key; without it, it must grant no MLS key at all, so the
+ * wallet never grants a key this device does not hold.
  */
 export function isExpectedDeviceGrantMessage({
   message,
@@ -323,12 +495,14 @@ export function isExpectedDeviceGrantMessage({
   deviceKeyHex,
   scopes,
   nowMs,
+  mls = null,
 }: {
   readonly message: string;
   readonly signerAddress: string;
   readonly deviceKeyHex: string;
   readonly scopes: readonly string[];
   readonly nowMs: number;
+  readonly mls?: Omit<MlsDeviceGrantTerms, "expiresAtSeconds"> | null;
 }): boolean {
   const parsed = parseDeviceGrantMessage(message);
   if (!parsed) {
@@ -341,6 +515,7 @@ export function isExpectedDeviceGrantMessage({
     parsed.address.toLowerCase() === signerAddress.toLowerCase() &&
     parsed.deviceKeyHex === deviceKeyHex.toLowerCase() &&
     parsed.scopes.join(",") === scopes.join(",") &&
+    isExpectedMls(parsed.mls, mls) &&
     expiresAtMs > nowMs &&
     expiresAtMs <= nowMs + MAX_GRANT_TTL_MS
   );

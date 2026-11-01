@@ -53,6 +53,7 @@ import worldTimeZonesMessages from "@/i18n/messages/worldTimeZones.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
+import { E2EE_MESSAGES } from "@/i18n/messages/e2ee";
 import { EN_US_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import { EN_US_DATE_COUNTDOWN_MESSAGES } from "@/i18n/messages/date-countdown";
 import profileCmsArtDisplayMessages from "@/i18n/messages/profileCmsArtDisplay.en-US.json";
@@ -3294,6 +3295,44 @@ export const EN_US_MESSAGES = {
   "profilePreferences.dm.NOBODY.label": "Nobody",
   "profilePreferences.dm.NOBODY.description":
     "No one can start a new conversation with you.",
+  "profilePreferences.dm.GROUP_MEMBERS.label": "Members of a group I choose",
+  "profilePreferences.dm.GROUP_MEMBERS.description":
+    "Only members of a group you pick, for example by level, TDH, REP or NIC, can start a new conversation with you.",
+  "profilePreferences.dm.blockNote":
+    "Profiles you block can never start a new conversation with you, whichever option you choose.",
+  "profilePreferences.dm.group.label": "Group",
+  "profilePreferences.dm.group.none": "No group chosen",
+  "profilePreferences.dm.group.loading": "Loading group…",
+  "profilePreferences.dm.group.unavailableName": "Group no longer available",
+  "profilePreferences.dm.group.loadError": "Couldn’t load the group details.",
+  "profilePreferences.dm.group.retry": "Try again",
+  "profilePreferences.dm.group.viewMembers": "View members of {groupName}",
+  "profilePreferences.dm.group.choose": "Choose group",
+  "profilePreferences.dm.group.change": "Change group",
+  "profilePreferences.dm.group.required": "Choose a group to save this option.",
+  "profilePreferences.dm.group.unavailable":
+    "The group you chose was deleted or hidden. Until you choose another group, only people you follow can start a new conversation with you.",
+  "profilePreferences.dm.group.allowFollowed":
+    "People I follow can always message me",
+  "profilePreferences.dm.group.allowFollowedDescription":
+    "Profiles you follow can start a conversation even if they aren’t in the group.",
+  "profilePreferences.dm.group.dialogTitle": "Who can message you",
+  "profilePreferences.dm.group.dialogDescription":
+    "Use an existing group or build one from level, TDH, REP, NIC, NFTs and specific profiles.",
+  "profilePreferences.dm.group.suggestedName": "Can message me",
+  "profilePreferences.dm.group.membersRoleLabel": "Can message me",
+  "profilePreferences.dm.group.createErrorTitle": "Couldn’t create this group.",
+  "profilePreferences.dm.group.createError": PLEASE_TRY_AGAIN,
+  "directMessageAdmission.notAccepting":
+    "@{handle} doesn’t accept new direct messages.",
+  "directMessageAdmission.peopleIFollowOnly":
+    "@{handle} only accepts new direct messages from people they follow.",
+  "directMessageAdmission.groupMembersOnly":
+    "@{handle} only accepts new direct messages from members of a group they chose.",
+  "directMessageAdmission.groupMembersOnlyWithGroup":
+    "@{handle} only accepts new direct messages from members of the group “{groupName}”.",
+  "directMessageAdmission.senderBlockedRecipient":
+    "You blocked @{handle}. Unblock them to start a new direct message.",
   "profilePreferences.dm.createRetry": PLEASE_TRY_AGAIN,
   "profilePreferences.notifications.heading": "Notifications",
   "profilePreferences.notifications.description":
@@ -4513,6 +4552,7 @@ export const EN_US_MESSAGES = {
   "walletAddress.copy.copiedTooltip": "Copied",
   ...QR_SCANNER_MESSAGES,
   ...CAPACITOR_CONNECT_MESSAGES,
+  ...E2EE_MESSAGES,
   "drops.additionalActionBadge.label": "Additional Action",
   "drops.additionalActionBadge.tooltip":
     "The creator marked this submission as promising an extra action beyond the artwork, such as an event, donation, physical item, airdrop, or future deliverable.",

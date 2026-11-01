@@ -35,6 +35,14 @@ export class ApiSessionNonceQuery {
     * Optional comma separated list from post, edit, delete, react, vote. Defaults to post,edit,delete,react. Must include post.
     */
     'device_scopes'?: string;
+    /**
+    * Combined grant: the MLS device key to grant for encrypted messages.
+    */
+    'mls_device_key'?: string;
+    /**
+    * Required when mls_device_key is present.
+    */
+    'mls_ciphersuite'?: number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -75,6 +83,18 @@ export class ApiSessionNonceQuery {
             "name": "device_scopes",
             "baseName": "device_scopes",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "mls_device_key",
+            "baseName": "mls_device_key",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "mls_ciphersuite",
+            "baseName": "mls_ciphersuite",
+            "type": "number",
             "format": ""
         }    ];
 

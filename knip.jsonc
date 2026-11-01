@@ -6,7 +6,8 @@
       "**/*.{ts,tsx,js,jsx,cjs,mjs}",
       "!{node_modules,.next,coverage,public}/**",
       "!{tmp_gen_outp,tmp_gen_final}/**",
-      "!.generated-backup-*/**"
+      "!.generated-backup-*/**",
+      "!native/**"
     ],
 
     // 2) Optionally add entries Knip can't infer from scripts/configs
@@ -66,6 +67,8 @@
       "tests/**": ["files", "exports", "types"],
       ".deepsec/deepsec.config.ts": ["unlisted", "exports"],
       "generated/**": ["exports", "types", "enumMembers"], // ignore only these issue kinds
+      // wasm-bindgen glue of the MLS module (scripts/build-mls-wasm.cjs).
+      "lib/e2ee/wasm/generated/**": ["exports", "types"],
       // Backend operation-code catalog; several codes are intentionally
       // declared before the tool implements them (see inline comments).
       "components/allowlist-tool/allowlist-tool.types.ts": ["enumMembers"],

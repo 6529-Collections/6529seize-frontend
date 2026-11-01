@@ -10,6 +10,7 @@ build
 # Generated files
 generated
 *.generated.*
+native/mls-wasm/target
 lib/museum/generative-studies/minted-indexes/*.json
 coverage
 content/delegation

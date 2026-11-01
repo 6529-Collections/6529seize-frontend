@@ -183,8 +183,19 @@ const PUBLIC_IMAGE_EXTENSIONS = [
   ".webp",
 ] as const;
 
-/** Route families that bypass the staging gate as a whole segment. */
-const STATIC_SEGMENT_PREFIXES = ["/api", "/_next", "/pdfjs", "/error"] as const;
+/**
+ * Route families that bypass the staging gate as a whole segment. `/e2ee`
+ * holds the content-hashed OpenMLS WebAssembly module of encrypted chats
+ * (built by `6529 run build:mls-wasm`); it is public code the loader checks
+ * against a bundled SHA-256 before use.
+ */
+const STATIC_SEGMENT_PREFIXES = [
+  "/api",
+  "/_next",
+  "/pdfjs",
+  "/e2ee",
+  "/error",
+] as const;
 
 /** `next-sitemap` writes `/sitemap.xml` and `/sitemap-<n>.xml` after builds. */
 function isGeneratedSitemapPath(pathname: string): boolean {

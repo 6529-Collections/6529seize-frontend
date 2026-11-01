@@ -481,6 +481,18 @@
     "/messages/create": {
       "classification": "auth"
     },
+    "/messages/encrypted": {
+      "classification": "auth"
+    },
+    "/messages/encrypted/[group]": {
+      "classification": "auth"
+    },
+    "/messages/encrypted/devices": {
+      "classification": "auth"
+    },
+    "/messages/encrypted/new": {
+      "classification": "auth"
+    },
     "/museum": {
       "classification": "crawlable",
       "family": "content-archive",

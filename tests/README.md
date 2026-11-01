@@ -147,6 +147,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:notifications-inbox-sandbox`              | —                             | sandbox  | local       | manual                    | 15m     | Desktop notification preview, explicit read actions, and mobile navigation.                           |
 | `test:e2e:profile-following-sandbox`                | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Profile Following and REP editing dialogs, permissions and recovery.                                  |
 | `test:e2e:wave-creation-sandbox`                    | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Wave creation, permissions, and draft recovery on desktop and mobile.                                 |
+| `test:e2e:e2ee-sandbox`                             | —                             | sandbox  | local       | manual                    | 30m     | Encrypted DMs and groups across several local browsers against the fake delivery service.             |
 | `test:e2e:smoke:surface-matrix`                     | —                             | local    | local       | pr-ci, manual             | 15m     | @smoke subset on desktop and mobile web shells.                                                       |
 | `test:e2e:surface-matrix`                           | —                             | local    | local       | pr-ci, manual             | 15m     | Core surfaces on desktop and mobile web shells.                                                       |
 | `test:e2e:browser-diversity`                        | —                             | local    | local       | pr-ci, manual             | 15m     | Engine-diversity pass on Firefox and WebKit.                                                          |
@@ -449,6 +450,24 @@ Surface matrix:
   external browser writes are blocked by a browser route guard. Known wallet and
   analytics SDK background writes are still blocked in-browser, but they do not
   fail the test. This pack must never run against staging or production.
+- `test:e2e:e2ee-sandbox` runs end-to-end encrypted DMs and groups (D109)
+  in several browser contexts at once, each a different local user (alice,
+  bob, carol, dave) or another device of the same user, against one Next dev
+  server whose public runtime turns `NEXT_PUBLIC_E2EE_DM_ENABLED` on. The
+  composer sandbox mock API mounts the in-memory fake delivery service
+  (`tests/support/e2ee/fakeDeliveryService.cjs`) at `/api/e2ee/*`, acting as
+  the profile whose wallet is the synthetic dev JWT's `sub`, and exposes
+  loopback-only `/__e2ee-sandbox/*` controls for DM policy, blocks, faults,
+  epoch fingerprint tampering, state reads and a plaintext scan of everything
+  the service received. Each context sets its dev wallet and JWT through the
+  localhost-only dev-auth test override (`services/auth/devAuthTestOverride.ts`)
+  and answers the single enrollment signature with a throwaway viem key
+  through the test signer seam (`components/e2ee/e2eeTestSigner.ts`); both
+  are inert unless `USE_DEV_AUTH=true`, the build is development-like and the
+  page is on `localhost` or `127.0.0.1`. The sandbox has no WebSocket, so
+  engines poll (5 s with a chat open, 30 s otherwise) and specs use generous
+  `expect` timeouts. The DM spec also runs on mobile Chromium; the others are
+  desktop only. It must never run against staging or production.
 - `test:e2e:staging:smoke` runs the smoke surface matrix against staging.
 - `test:e2e:staging` runs the broader surface matrix against the same
   environment.
@@ -632,6 +651,10 @@ Large-pack ownership:
   coverage for drop reaction writes. The pack may use local synthetic auth and
   a mock API, but it must never allow broad `/api/drops/**` writes beyond the
   exact sandbox reaction endpoint and body.
+- `test:e2e:e2ee-sandbox` is owned by PR or train owners changing encrypted
+  messages (`lib/e2ee`, `components/e2ee`, `hooks/e2ee`,
+  `app/messages/encrypted`, the MLS WebAssembly module), the dev-auth test
+  override, the composer sandbox mock API or the fake delivery service.
 - `test:e2e:production:readonly` is owned by the release captain or validation
   agent after a production deploy. It is a production-safe aggregate of the
   individual public read-only packs on desktop Chromium. Do

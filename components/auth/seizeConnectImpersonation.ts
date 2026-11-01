@@ -1,6 +1,7 @@
 import { isDevLikeEnv } from "@/config/devAuth";
 import { publicEnv } from "@/config/env";
 import { getAgentLoginActiveAddress } from "@/services/auth/auth.utils";
+import { getDevAuthTestOverride } from "@/services/auth/devAuthTestOverride";
 import { getAddress, isAddress } from "viem";
 
 const isPrivateIpv4Host = (hostname: string): boolean => {
@@ -48,13 +49,17 @@ export const getSeizeConnectImpersonation = () => {
   const isLocalHost =
     globalThis.window !== undefined &&
     isLocalDevelopmentHost(globalThis.window.location.hostname);
+  // Local multi-user browser tests may give each browser its own dev wallet;
+  // the override is inert outside dev auth on localhost.
+  const devAuthWallet =
+    getDevAuthTestOverride()?.wallet ?? publicEnv.DEV_MODE_WALLET_ADDRESS;
   const devAuthImpersonatedAddress =
     devLikeEnv &&
     isLocalHost &&
     publicEnv.USE_DEV_AUTH === "true" &&
-    publicEnv.DEV_MODE_WALLET_ADDRESS &&
-    isAddress(publicEnv.DEV_MODE_WALLET_ADDRESS)
-      ? getAddress(publicEnv.DEV_MODE_WALLET_ADDRESS)
+    devAuthWallet &&
+    isAddress(devAuthWallet)
+      ? getAddress(devAuthWallet)
       : undefined;
   const canUseAgentLoginImpersonation =
     devLikeEnv && isLocalHost && publicEnv.USE_DEV_AUTH !== "true";

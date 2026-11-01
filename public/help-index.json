@@ -568,11 +568,11 @@
         "Notification, messaging, blocked-profile, and report-history settings are combined at /preferences. Blocked Profiles is available at /preferences?tab=blocked-profiles, Reports is available at /preferences?tab=reports, and the older content-preferences paths resolve to Blocked Profiles.",
         "The Reports tab lists reports submitted by the current profile, a snapshot of each reported post, its Wave name and picture, and its public review status. The Wave remains linked after removal; visible posts also link to their exact Wave or direct-message context, while media and files stay collapsed by default. Open reports can be withdrawn there; AI assessments, parent evidence, internal notes or reasons, moderator identity, and other reporters are not exposed.",
         "Preferences are profile-scoped. An authenticated wallet without a profile sees a Create profile action instead of a connection prompt, and the controls become available after profile creation.",
-        "A blocked profile's avatar and handle in Preferences link to its public profile. Its profile header shows a red-tinted Blocked status beside the handle, keeps Direct Message available, and puts a separate confirmation-backed Unblock action where Follow normally appears.",
+        "A blocked profile's avatar and handle in Preferences link to its public profile. Its profile header shows a red-tinted Blocked status beside the handle, keeps Direct Message available for an existing conversation, and puts a separate confirmation-backed Unblock action where Follow normally appears. Starting a new conversation with a profile you blocked asks you to unblock it first.",
         "Blocking hides the profile's content, treats its activity as muted, automatically unfollows it, and prevents following again until it is unblocked. It does not notify the blocked profile or remove that profile's subscription to the blocker.",
         "Unblocked profile headers place icon-labelled Mute notifications or Unmute notifications and Block profile in one responsive profile-actions menu instead of showing a standalone mute button. Desktop uses an overflow menu, while mobile browsers and the mobile app use a bottom sheet. Blocking still requires confirmation.",
         "Blocked public profiles remain reachable. Public profile and Brain summary metadata stays visible, while each Brain activity post keeps its normal height under a blur with visible Wave information. Reveal is temporary and changes to Hide again without resizing the card.",
-        "Blocking does not prevent one-to-one direct-message creation or delivery. The blocker's existing and future conversation is instead treated as muted and deprioritized, blocked-author messages stay hidden until individually revealed, and the other profile receives no block disclosure.",
+        "A blocked profile can never start a new direct message, one-to-one or group, with the blocker, whatever the blocker's direct-message setting and even if the blocker follows it. It sees the same doesn't-accept-new-direct-messages notice as the Nobody setting, so the block is never disclosed. Existing conversations stay available. For the blocker, an existing one-to-one conversation is muted and deprioritized; in any conversation, blocked-author messages stay hidden until individually revealed.",
         "Group direct messages and shared Waves remain usable and are not muted as a whole. Blocked-author posts stay hidden and do not create ordinary notifications, push notifications, or direct-message unread counts for the blocker; other members behave normally.",
         "Globally quarantined or moderator-removed posts cannot be revealed. Primary Wave chat keeps author, time, and Wave context while replacing only the body; compact secondary surfaces use a redacted tombstone.",
         "The author can still see their own globally moderated post and its moderation state; other viewers receive redacted content.",
@@ -580,7 +580,8 @@
         "WatchTower identifies author and reporter and defaults to Needs review, showing one row per subject-based case requiring manual attention, labeled User report, Automated check, or both. Reports and check revisions for the same post count once, including multiple reports. Standalone pending checks also create cases. Its badge, Items needing review summary and sidebar indicator use the same unique-case count. Review case opens the complete Needs review case list on the left, highlights the selected row with Selected, and shows its detail on the right. Switching left-hand rows opens another case without returning to the queue. User reports for this case and Checks for this case retain the selected case's reporter notes and individual pending revisions. A report-only case stays in the list after Mark reviewed until its report is resolved. On mobile, Back to list returns to the queue; desktop uses the visible left list and hides the redundant back button. Failed case loads show Retry while preserving loaded rows.",
         "Deleted reported posts show a red Deleted pill on the Needs review card, review workspace list row and detail panel. Resolve reports — post deleted requires a reason and confirmation and closes all open reports for that deleted post with the Post deleted outcome. The case list, count and navigation indicator refresh after saving. Saved evidence and audit history remain available under retention rules; the post is not restored. Mark reviewed records a check review and does not resolve the post's open reports.",
         "Live-post cards and published-post check details provide a dedicated Open original post link using the original post ID and saved Wave context, separate from links embedded in content. Deleted posts hide this action. Where evidence remains, they explain Original post deleted. Saved evidence retained. Expired or unavailable evidence is not described as retained. Missing or invalid live-post context shows a link-unavailable message. Short saved-text previews include retained titles and textual parts, including titleless posts, without exposing expired evidence.",
-        "WatchTower tabs have direct URLs: /content-moderation/needs-review, /content-moderation/checks, /content-moderation/resolved-reports, /content-moderation/suspended-profiles, and /content-moderation/block-activity. Switching tabs updates the URL without reloading the page. Direct links and refresh open the selected tab, browser Back and Forward restore tab selections, and /content-moderation defaults to Needs review; older /content-moderation/open-reports links open that same queue. Moderator authorization applies to every tab URL.",
+        "WatchTower tabs have direct URLs: /content-moderation/needs-review, /content-moderation/checks, /content-moderation/resolved-reports, /content-moderation/encrypted-reports, /content-moderation/suspended-profiles, and /content-moderation/block-activity. Switching tabs updates the URL without reloading the page. Direct links and refresh open the selected tab, browser Back and Forward restore tab selections, and /content-moderation defaults to Needs review; older /content-moderation/open-reports links open that same queue. Moderator authorization applies to every tab URL.",
+        "Encrypted reports lists severe-harm reports from end-to-end encrypted chats with category, report time, sender verification and hold or deletion date, but no message content. Review evidence opens the one message the reporter chose to share as plain text, states that it is not the chat, shows whether the sender's device signature was verified, and offers Place on hold or Release hold. Every list, opened report and hold change is recorded in a server access log.",
         "Block activity is a newest-first, continuously loaded moderator trail showing who blocked or unblocked whom in the same feed. Aligned rows link both available profiles without truncating handles and show the event date. Blocked uses red text and a closed lock; Unblocked uses green text and an open lock. Only actual relationship transitions are recorded; unblocking preserves the earlier block in history. The feed remains independent from reports, AI assessment, content decisions, and suspension.",
         "Allow keeps or restores a post to visible and closes its reports; Quarantine hides it globally while reports remain open; Remove hides it globally and closes its reports as removed.",
         "Profile suspension is separate from the post decision, prevents future creates and edits without changing existing posts, and can be reversed by opening Checks from the Suspended profiles view or a moderator-only profile action. A moderator's personal Blocked state remains independent.",
@@ -603,6 +604,7 @@
         "/content-moderation/open-reports",
         "/content-moderation/checks",
         "/content-moderation/resolved-reports",
+        "/content-moderation/encrypted-reports",
         "/content-moderation/suspended-profiles",
         "/content-moderation/block-activity",
         "/waves"
@@ -3509,6 +3511,100 @@
       ]
     },
     {
+      "id": "messages.encrypted-chats",
+      "kind": "workflow",
+      "title": "Encrypted chats, reporting and safety tools",
+      "aliases": [
+        "encrypted chat",
+        "end-to-end encrypted messages",
+        "e2ee",
+        "encrypted dm",
+        "report encrypted message",
+        "encrypted backup",
+        "recovery code",
+        "restore encrypted messages"
+      ],
+      "keywords": [
+        "encrypted",
+        "e2ee",
+        "end-to-end",
+        "report",
+        "block",
+        "mute",
+        "devices",
+        "trust and safety",
+        "backup",
+        "restore",
+        "recovery code"
+      ],
+      "facts": [
+        "Encrypted chats are rolling out. Where they are available they appear under Messages as an Encrypted section at /messages/encrypted, with new chats at /messages/encrypted/new and this browser's devices at /messages/encrypted/devices.",
+        "Messages are end-to-end encrypted on your devices; 6529 delivers them but cannot read them. Each browser or app signs once with your wallet to become a device; there is no prompt per message.",
+        "Where it is offered, the wallet sign-in on a web browser can turn on signed messages and encrypted messages with the same single signature; that browser then becomes an encrypted-messages device without a second prompt. Revoking that device, from Devices that can post as you or from encrypted devices, turns off both.",
+        "Encrypted backup is optional. In /messages/encrypted/devices select Turn on backup to get a recovery code (shown once; copy or download it). Your history is then backed up encrypted and incrementally; 6529 cannot read it or recover the code.",
+        "On a new device turn on encrypted messages, then in Devices select Restore messages and enter the recovery code. Restored chats show From backup and are read-only until someone in the chat adds the new device. Without backup, losing all devices or clearing browser data loses that history.",
+        "Create new recovery code replaces the backup and makes the old code stop working (do this after revoking a device that had backup on). Turn off backup deletes the encrypted backup from 6529.",
+        "You can attach up to 10 files of up to 25 MB each; they are encrypted on your device like messages. If attachments are switched off, the attach control is hidden.",
+        "Keys are agreed with a hybrid post-quantum method (MLS ciphersuite 0x004F, X-Wing: ML-KEM-768 combined with X25519), so messages stay confidential even if one of the two is broken, for example by a future quantum computer.",
+        "Encrypted messages trust each person's wallets the first time your device sees them (trust on first use). A member's later device is added automatically only when one of those wallets signed it. A device signed by a new wallet, or by a contract wallet whose signature could not be checked, is not added: the chat shows a notice naming the wallet with Add device and Ignore. Add it only if you know whose wallet it is. Chat info shows the wallet that signed each member's device.",
+        "Open a message's menu to mute the chat on this device, block its sender (they cannot start new chats with you or add you to encrypted chats), or choose who can message you in Preferences.",
+        "Reporting is for illegal or severe harm only: child sexual abuse material, a credible threat of violence, intimate images shared without consent, or doxxing. Only the selected message is shared, with proof its sender sent it, and it goes to 6529's moderators, who review it in WatchTower's Encrypted reports tab, not to wave moderators. The dialog shows the text and attachment names that will be sent. An edited message is reported as the edited version you see; the original is sent too only if you tick Also send the original message. Nothing else in the conversation is revealed.",
+        "Encrypted messages run in one browser tab at a time per profile. Other tabs show Encrypted messages are open in another tab. with Use here, which moves them to that tab and pauses the first one.",
+        "When this browser holds encrypted messages, Sign out and Sign Out All Profiles offer Remove encrypted messages from this browser (on by default for Sign Out All Profiles). It deletes the chats, attachment keys, unsent messages and encryption keys saved in this browser; without encrypted backup that history cannot be recovered."
+      ],
+      "canonical_path": "/messages/encrypted",
+      "related_paths": [
+        "/messages/encrypted/new",
+        "/messages/encrypted/devices",
+        "/preferences"
+      ],
+      "tags": ["messages", "encryption", "safety"],
+      "source_refs": [
+        "ops/docs/encrypted-messages.md",
+        "components/e2ee/conversation/E2eeReportDialog.tsx",
+        "components/e2ee/backup/E2eeBackupPanel.tsx",
+        "components/e2ee/conversation/E2eeUntrustedDeviceBanners.tsx"
+      ]
+    },
+    {
+      "id": "messages.unencrypted-dm-deletion",
+      "kind": "workflow",
+      "title": "Unencrypted direct messages: export, move and the 1 December 2026 deletion",
+      "aliases": [
+        "old dms",
+        "unencrypted dm",
+        "dm history",
+        "export dms",
+        "move dm history",
+        "dm deletion"
+      ],
+      "keywords": [
+        "unencrypted",
+        "export",
+        "move history",
+        "import",
+        "deletion",
+        "december",
+        "dm"
+      ],
+      "facts": [
+        "Direct messages started before encrypted chats are not end-to-end encrypted. 6529 deletes their content from its servers, backups included, on 1 December 2026, except anything 6529 is legally required to keep; from then they are closed and no new unencrypted DM can be started.",
+        "When you start a new direct message on a build with encrypted chats, Start encrypted chat is the main action; Send unencrypted instead is a second choice, under a warning, until 1 December 2026.",
+        "Each unencrypted conversation shows a notice with Export history, which downloads the messages you can see as a readable HTML page or as JSON data. The file is made in your browser; images and files are listed as links that stop working on the deletion date.",
+        "Once an encrypted chat with exactly the same people exists on your device, the old conversation becomes read-only and offers Move history, which copies the messages you can see into the encrypted chat, oldest first, with their images and files where possible.",
+        "Moved messages show the original author and time labelled Imported, not verified, and say who moved them, because 6529 held them unencrypted. An author who is not a member of the chat shows as Unknown. Only the people and devices in the encrypted chat at that time see them, and nobody is notified.",
+        "Moving can be stopped and continued later without duplicates, even if another member moves the same history. A long history with many images may pause at the daily encrypted upload limit; continue the next day.",
+        "6529 cannot recall copies outside its servers: your own exports, push notification previews already delivered to phones, and attachments already published to public IPFS."
+      ],
+      "canonical_path": "/messages",
+      "related_paths": ["/messages/encrypted", "/messages/encrypted/new"],
+      "tags": ["messages", "encryption", "privacy"],
+      "source_refs": [
+        "ops/docs/encrypted-messages.md",
+        "components/e2ee/legacy/LegacyDmBanner.tsx"
+      ]
+    },
+    {
       "id": "waves.composer",
       "kind": "ui_affordance",
       "title": "Wave composer",
@@ -5849,6 +5945,10 @@
         "profile preferences",
         "who can DM me",
         "people I follow can DM me",
+        "only let a group DM me",
+        "limit DMs by TDH or REP",
+        "block someone from messaging me",
+        "doesn't accept new direct messages",
         "disable notifications",
         "essential notifications",
         "subscription coverage notifications"
@@ -5864,7 +5964,12 @@
         "subscription coverage"
       ],
       "facts": [
-        "Profile Preferences lets an authenticated profile choose whether Everyone, People I follow, or Nobody can start a new direct-message conversation.",
+        "Profile Preferences lets an authenticated profile choose whether Everyone, People I follow, Members of a group I choose, or Nobody can start a new direct-message conversation.",
+        "Members of a group I choose reuses network groups, so new conversations can require a level, TDH, REP overall or in one category, NIC, NFTs, or specific included and excluded profiles. Choose group picks an existing group or builds one with the Wave access group builder; Save Changes stays disabled until a group is chosen.",
+        "With Members of a group I choose, People I follow can always message me is on by default and also admits followed profiles outside the group. Membership is checked when a conversation starts, so daily TDH and REP changes apply.",
+        "If the chosen group is deleted or hidden, Preferences warns about it and new conversations fall back to People I follow until another group is chosen.",
+        "Profiles you block can never start a new direct message with you under any setting, including people you follow. The refused profile sees the generic doesn't-accept-new-direct-messages notice, never a block disclosure.",
+        "When the recipient's direct-message setting refuses a new conversation, the creator sees a notice naming that rule, such as only accepting messages from people they follow or from members of a group they chose; the group is named only when it is public. A refusal caused by the recipient blocking the creator never names a rule or group and shows only the generic doesn't-accept-new-direct-messages notice.",
         "An authenticated wallet without a profile is directed to Create profile from /preferences; profile-scoped controls become available after setup.",
         "Direct-message admission preferences apply only to new exact participant sets; existing one-to-one and group conversations remain available.",
         "Every recipient must allow the creator before a new group direct message can be created.",
@@ -5874,12 +5979,14 @@
         "Profile Preferences is available from the app sidebar, the desktop profile menu, and the Preferences action in the authenticated user's own profile header.",
         "When Preferences is opened from the active profile, desktop users can select Back to profile and mobile-app users can use the standard app-header back arrow. Sidebar, desktop profile-menu, and direct entries omit that profile-return control."
       ],
-      "canonical_path": "/notifications",
+      "canonical_path": "/preferences",
       "related_paths": ["/messages", "/notifications"],
       "tags": ["profile", "privacy", "direct messages", "notifications"],
       "source_refs": [
         "components/header/AppHeader.tsx",
         "components/header/ProfilePreferencesSettings.tsx",
+        "components/header/ProfilePreferencesDirectMessageGroup.tsx",
+        "helpers/waves/direct-message-admission.helpers.ts",
         "components/user/user-page-header/UserPageHeaderClient.tsx",
         "ops/docs/notifications/feature-profile-preferences.md",
         "ops/docs/waves/create/feature-direct-message-creation.md"

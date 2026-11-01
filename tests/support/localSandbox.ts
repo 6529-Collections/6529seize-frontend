@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type BrowserContext, type Page } from "@playwright/test";
 
 export type SandboxRequest = {
   readonly method: string;
@@ -87,7 +87,7 @@ export function useLocalSandboxMutationGuard(
 }
 
 export async function installLocalSandboxBrowserMutationGuard(
-  page: Page,
+  page: Page | BrowserContext,
   baseURL: string | undefined
 ): Promise<LocalSandboxBrowserMutationGuard> {
   assertLocalSandboxBaseURL(baseURL);
@@ -179,9 +179,7 @@ export async function resetSandboxRequests(baseURL: string | undefined) {
   expect(response.ok).toBe(true);
 }
 
-export async function enableSandboxWaveGuidelines(
-  baseURL: string | undefined
-) {
+export async function enableSandboxWaveGuidelines(baseURL: string | undefined) {
   const response = await fetch(
     `${getSandboxApiOrigin(baseURL)}/__composer-sandbox/guidelines`,
     { method: "POST" }
@@ -244,6 +242,7 @@ function isAllowedBlockedExternalWrite(url: URL) {
       url.pathname === "/g/collect") ||
     (url.hostname === "www.google-analytics.com" &&
       url.pathname === "/g/collect") ||
-    (url.hostname === "www.google.com" && url.pathname === "/g/collect")
+    (url.hostname === "www.google.com" && url.pathname === "/g/collect") ||
+    (url.hostname === "www.googletagmanager.com" && url.pathname === "/td")
   );
 }

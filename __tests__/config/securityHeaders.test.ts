@@ -272,6 +272,28 @@ describe("createSecurityHeaders CSP", () => {
     ).toContain("'unsafe-eval'");
   });
 
+  it("adds wasm-unsafe-eval only when encrypted messages need WebAssembly", () => {
+    const defaultSources = getDirectiveSources(
+      getContentSecurityPolicy(),
+      "script-src"
+    );
+    expect(defaultSources).not.toContain("'wasm-unsafe-eval'");
+
+    const e2eeSources = getDirectiveSources(
+      getContentSecurityPolicy({ allowWasmUnsafeEval: true }),
+      "script-src"
+    );
+    expect(e2eeSources).toContain("'wasm-unsafe-eval'");
+    // WebAssembly compilation must not widen JavaScript eval.
+    expect(e2eeSources).not.toContain("'unsafe-eval'");
+    expect(
+      getDirectiveSources(
+        getContentSecurityPolicy({ allowWasmUnsafeEval: true }),
+        "connect-src"
+      )
+    ).not.toContain("'wasm-unsafe-eval'");
+  });
+
   it("keeps inline script and style exceptions explicit", () => {
     expect(
       getDirectiveSources(getContentSecurityPolicy(), "script-src")
