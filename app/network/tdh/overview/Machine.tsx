@@ -322,6 +322,9 @@ export default function Machine({
           locale={locale}
           reference={facts.reference}
           hatchId="ex-machine-band"
+          {...(model.broken && model.saved
+            ? { lostDays: model.saved.days }
+            : {})}
         />
       </div>
       <p

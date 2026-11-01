@@ -199,6 +199,7 @@
   "explained.kit.clock.later": "One day later",
   "explained.kit.area.aria": "This copy's TDH drawn as an area: {days} whole days wide, rate {rate} tall.",
   "explained.kit.area.none": "{days} days: no area",
+  "explained.kit.area.lost": "{days} days left with the copy",
   "explained.kit.area.days": "{days} days",
   "explained.kit.area.tdh": "{tdh} TDH",
   "explained.kit.area.reference": "a {copies}-copy card stands this tall: {rate}",

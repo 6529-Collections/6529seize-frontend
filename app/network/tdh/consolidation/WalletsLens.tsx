@@ -18,7 +18,7 @@ import {
   utcClock,
   utcDay,
   utcDayYear,
-} from "../how-it-works/_kit/time";
+} from "@/components/explained/layout/time";
 import { wt } from "./copy";
 import {
   walletCase,

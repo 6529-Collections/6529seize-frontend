@@ -1,9 +1,10 @@
 "use client";
 
 import type React from "react";
+import { useEffect, useRef, useState } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { kt } from "../i18n";
-import { EX_HEX, EX_MOTION } from "../tokens";
+import { EX_HEX } from "../tokens";
 import { Label, SvgFrame, px as round2 } from "./svg";
 import { useMeasuredWidth } from "./useMeasuredWidth";
 
@@ -46,13 +47,14 @@ interface LoopProps {
  * the rest.
  */
 function MiniRing({ stations, focus }: Pick<LoopProps, "stations" | "focus">) {
-  const size = 216;
+  // Wide enough for each station's name outside its circle, at 12 px.
+  const size = 300;
   const c = size / 2;
   const r = 78;
   return (
     <svg
       viewBox={`0 0 ${size} ${size}`}
-      className="tw-mx-auto tw-mb-4 tw-block tw-h-[216px] tw-w-[216px]"
+      className="tw-mx-auto tw-mb-4 tw-block tw-h-auto tw-w-full tw-max-w-[300px]"
       aria-hidden="true"
       data-loop-mini=""
     >
@@ -113,10 +115,133 @@ function MiniRing({ stations, focus }: Pick<LoopProps, "stations" | "focus">) {
                 on ? EX_HEX.youInk : station.chapter ? EX_HEX.ink1 : EX_HEX.ink3
               }
             />
+            <MiniLabel
+              name={station.name}
+              angle={angle}
+              x={round2(c + (r + 34) * Math.cos(angle))}
+              y={round2(c + (r + 34) * Math.sin(angle))}
+              on={on}
+            />
           </g>
         );
       })}
     </svg>
+  );
+}
+
+/** A station's name beside its circle on the phone ring, anchored away from the centre. */
+function MiniLabel({
+  name,
+  angle,
+  x,
+  y,
+  on,
+}: {
+  readonly name: string;
+  readonly angle: number;
+  readonly x: number;
+  readonly y: number;
+  readonly on: boolean;
+}) {
+  const cos = Math.cos(angle);
+  let anchor: "start" | "middle" | "end" = "middle";
+  if (cos > 0.3) anchor = "start";
+  else if (cos < -0.3) anchor = "end";
+  // Below the ring the name sits under the circle; above, over it.
+  const dy = Math.sin(angle) > 0.6 ? 10 : Math.sin(angle) < -0.6 ? -2 : 4;
+  return (
+    <text
+      x={x}
+      y={y + dy}
+      textAnchor={anchor}
+      fontSize={12}
+      fontWeight={600}
+      fill={on ? EX_HEX.youInk : EX_HEX.ink2}
+    >
+      {name}
+    </text>
+  );
+}
+
+/**
+ * The copy's angle on the ring, moved along the arc to the next station
+ * rather than across it (about half a second, eased); with reduced motion
+ * it jumps.
+ */
+function useArcAngle(target: number): number {
+  const [angle, setAngle] = useState(target);
+  const current = useRef(target);
+  useEffect(() => {
+    const reduce =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const start = current.current;
+    let delta = (((target - start) % 360) + 360) % 360;
+    if (delta > 180) delta -= 360;
+    if (reduce === true || Math.abs(delta) < 0.5) {
+      current.current = target;
+      setAngle(target);
+      return undefined;
+    }
+    const began = performance.now();
+    const duration = 520;
+    let frame = 0;
+    const step = (now: number) => {
+      const p = Math.min(1, (now - began) / duration);
+      const eased = p < 0.5 ? 2 * p * p : 1 - (-2 * p + 2) ** 2 / 2;
+      const next = start + delta * eased;
+      current.current = next;
+      setAngle(next);
+      if (p < 1) frame = requestAnimationFrame(step);
+    };
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }, [target]);
+  return angle;
+}
+
+/**
+ * "Follow one copy": the copy, drawn as a small card at the art's ratio
+ * (542:801) with a blue face, travelling the ring between stations.
+ */
+function CopyToken({
+  angle,
+  at,
+  radius,
+}: {
+  readonly angle: number;
+  readonly at: (degrees: number, r?: number) => [number, number];
+  readonly radius: number;
+}) {
+  const shown = useArcAngle(angle);
+  const [tx, ty] = at(shown, radius - 52);
+  return (
+    <g
+      aria-hidden="true"
+      data-copy-token=""
+      transform={`translate(${tx} ${ty})`}
+    >
+      <rect
+        x={-10}
+        y={-14}
+        width={20}
+        height={28}
+        rx={3}
+        fill={EX_HEX.panel}
+        stroke={EX_HEX.youInk}
+        strokeWidth={1.2}
+      />
+      <rect x={-7} y={-11} width={14} height={16} rx={1.5} fill={EX_HEX.you} />
+      <line
+        x1={-6}
+        y1={9}
+        x2={4}
+        y2={9}
+        stroke={EX_HEX.youInk}
+        strokeWidth={1.2}
+        strokeLinecap="round"
+      />
+    </g>
   );
 }
 
@@ -447,35 +572,19 @@ function LoopCircle({ stations, focus, verify, locale }: LoopProps) {
             </g>
           );
         })}
-        {(() => {
-          // "Follow one copy": the copy travels to the selected station.
-          const index = Math.max(
-            0,
-            stations.findIndex((station) => station.key === focus)
-          );
-          const [tx, ty] = at(ANGLES[index] ?? 0, radius - 52);
-          return (
-            <g
-              aria-hidden="true"
-              data-copy-token=""
-              style={{
-                transform: `translate(${tx}px, ${ty}px)`,
-                transition: `transform 450ms ${EX_MOTION.ease}`,
-              }}
-              className="motion-reduce:!tw-transition-none"
-            >
-              <rect
-                x={-6}
-                y={-8}
-                width={12}
-                height={16}
-                rx={2}
-                fill={EX_HEX.you}
-                stroke={EX_HEX.youInk}
-              />
-            </g>
-          );
-        })()}
+        {/* "Follow one copy": the copy travels the ring to the selected station. */}
+        <CopyToken
+          angle={
+            ANGLES[
+              Math.max(
+                0,
+                stations.findIndex((station) => station.key === focus)
+              )
+            ] ?? 0
+          }
+          at={at}
+          radius={radius}
+        />
         <path
           d={`M${artBottom[0] - 32} ${artBottom[1] + 4} C${artBottom[0] - 90} ${artBottom[1] + 10} ${artBottom[0] - 150} ${artBottom[1] - 6} ${artBottom[0] - 200} ${artBottom[1] - 30}`}
           fill="none"

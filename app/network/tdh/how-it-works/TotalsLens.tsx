@@ -8,7 +8,7 @@ import StampLine from "@/components/explained/marks/StampLine";
 import type { SupportedLocale } from "@/i18n/locales";
 import { ENGINE } from "@/lib/explained/engine";
 import { formatCents, formatCount } from "@/lib/explained/format";
-import ValueTable from "./_kit/ValueTable";
+import ValueTable from "@/components/explained/layout/ValueTable";
 import { ht } from "./copy";
 import { identityValues, rateFromEditions } from "./models/identity";
 

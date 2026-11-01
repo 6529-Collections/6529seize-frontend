@@ -28,7 +28,7 @@ import { EXAMPLE_CARD, FIRST_GM } from "./models/rates";
 import RatesLens from "./RatesLens";
 import StacksLens from "./StacksLens";
 import StepsInOrder, { traceOf } from "./StepsInOrder";
-import { RecordValue } from "./_kit/RecordValue";
+import { RecordValue } from "@/components/explained/layout/RecordValue";
 import { FactText } from "@/components/explained/facts/FactText";
 import {
   EdRow,
@@ -40,10 +40,10 @@ import {
   Statement,
   StatementLabel,
   You,
-} from "./_kit/layout";
+} from "@/components/explained/layout/rows";
 import { rich } from "@/components/explained/rich";
-import { formatDecimal } from "./_kit/numbers";
-import { utcClock } from "./_kit/time";
+import { formatDecimal } from "@/components/explained/layout/numbers";
+import { utcClock } from "@/components/explained/layout/time";
 
 const ROUTE = "/network/tdh/how-it-works";
 /** The base TDH example: two copies of a 310-copy card held thirty days. */

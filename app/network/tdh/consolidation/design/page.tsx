@@ -15,7 +15,7 @@ import {
   resolveExplainedLocale,
   type ExplainedParams,
 } from "@/lib/explained/locale.server";
-import { RecordValue } from "../../how-it-works/_kit/RecordValue";
+import { RecordValue } from "@/components/explained/layout/RecordValue";
 import { FactText } from "@/components/explained/facts/FactText";
 import {
   EdRow,
@@ -23,7 +23,7 @@ import {
   Para,
   Section,
   You,
-} from "../../how-it-works/_kit/layout";
+} from "@/components/explained/layout/rows";
 import { rich } from "@/components/explained/rich";
 import { wt } from "../copy";
 import WalletsLens from "../WalletsLens";

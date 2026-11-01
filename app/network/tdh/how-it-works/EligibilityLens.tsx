@@ -10,8 +10,13 @@ import StampLine from "@/components/explained/marks/StampLine";
 import type { SupportedLocale } from "@/i18n/locales";
 import { factFromSnapshot } from "@/lib/explained/facts";
 import { formatCount } from "@/lib/explained/format";
-import ValueTable from "./_kit/ValueTable";
-import { secondsOf, utcClock, utcDay, utcLongWeekday } from "./_kit/time";
+import ValueTable from "@/components/explained/layout/ValueTable";
+import {
+  secondsOf,
+  utcClock,
+  utcDay,
+  utcLongWeekday,
+} from "@/components/explained/layout/time";
 import { ht } from "./copy";
 import FirstDayTimeline from "./FirstDayTimeline";
 import { CASE_I, caseI, firstCountingResult } from "./models/eligibility";

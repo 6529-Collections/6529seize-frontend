@@ -13,7 +13,7 @@ import {
   Section,
   Statement,
   StatementLabel,
-} from "./_kit/layout";
+} from "@/components/explained/layout/rows";
 import { rich } from "@/components/explained/rich";
 import { ht } from "./copy";
 import TotalsLens from "./TotalsLens";

@@ -71,6 +71,8 @@ export default function BoostHistory({
     years.push(`${year}-01-01`);
   }
   const narrow = width < 520;
+  // Labels set so far, left to right: their side, level and right edge.
+  const placed: { above: boolean; y: number; right: number }[] = [];
   return (
     <div ref={ref} className="tw-w-full tw-min-w-0" data-fig="boost-history">
       <SvgFrame width={width} height={HEIGHT} label={label}>
@@ -107,6 +109,7 @@ export default function BoostHistory({
           </g>
         ))}
         {steps.map((step, index) => {
+          if (index === 0) placed.length = 0;
           const x0 = x(step.from);
           const x1 = x(step.to);
           const yy = y(step.fullSet);
@@ -121,8 +124,26 @@ export default function BoostHistory({
           // the next step's riser cannot cross it.
           const fits = step.current || x1 - x0 >= tag.length * 7.4 + 8;
           // The first step has no riser to its left, so its label may sit
-          // above the line even when it is wider than the step.
-          const ly = fits || index === 0 ? yy - 8 : yy + 18;
+          // above the line even when it is wider than the step. A label that
+          // would run into the one before it, on the same side and level,
+          // takes the other side.
+          let above = fits || index === 0;
+          const prev = placed[placed.length - 1];
+          if (
+            prev &&
+            !step.current &&
+            prev.above === above &&
+            Math.abs(prev.y - yy) < 18 &&
+            lx < prev.right + 8
+          ) {
+            above = !above;
+          }
+          const ly = above ? yy - 8 : yy + 18;
+          placed.push({
+            above,
+            y: yy,
+            right: step.current ? x1 : lx + tag.length * 7.4,
+          });
           return (
             <g key={step.version} data-boost-step={step.version}>
               {/* Each version's start, ticked on the axis. */}

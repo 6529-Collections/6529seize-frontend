@@ -100,7 +100,9 @@ describe("the machine", () => {
     expect(machine).toHaveAttribute("data-broken", "1");
     expect(breakIt).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByText("Sold.")).toBeInTheDocument();
-    expect(screen.getByText("0 days: no area")).toBeInTheDocument();
+    // The area the copy took with it, drawn where it was.
+    expect(screen.getByText("100 days left with the copy")).toBeInTheDocument();
+    expect(container.querySelector("[data-area-lost]")).not.toBeNull();
     await user.click(breakIt);
     expect(machine).toHaveAttribute("data-broken", "0");
     expect(screen.getByText("394")).toBeInTheDocument();

@@ -10,6 +10,8 @@ import { useCallback, useState } from "react";
 export interface Breakable<S> {
   readonly state: S;
   readonly broken: boolean;
+  /** While broken, the state the reader had, which Break it restores. */
+  readonly saved: S | null;
   /** Changes the state; leaves the broken state if it was on. */
   readonly set: (next: Partial<S>) => void;
   readonly toggleBreak: () => void;
@@ -36,5 +38,11 @@ export function useBreakable<S extends object>(
         : { state: current.saved, saved: null }
     );
   }, [broken]);
-  return { state: model.state, broken: model.saved !== null, set, toggleBreak };
+  return {
+    state: model.state,
+    broken: model.saved !== null,
+    saved: model.saved,
+    set,
+    toggleBreak,
+  };
 }

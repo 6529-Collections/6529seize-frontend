@@ -199,6 +199,7 @@
   "explained.kit.clock.later": "Un jour plus tard",
   "explained.kit.area.aria": "Le TDH de cette copie dessiné comme une surface : {days} jours entiers de large, taux de {rate} de haut.",
   "explained.kit.area.none": "{days} jours : aucune surface",
+  "explained.kit.area.lost": "{days} jours partis avec l'exemplaire",
   "explained.kit.area.days": "{days} jours",
   "explained.kit.area.tdh": "{tdh} TDH",
   "explained.kit.area.reference": "une carte de {copies} copies a cette hauteur : {rate}",

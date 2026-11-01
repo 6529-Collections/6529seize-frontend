@@ -8,10 +8,10 @@ import { EX_LAYOUT, EX_LINK, EX_TEXT } from "@/components/explained/tokens";
  * The editorial rows of the explainer and guide pages (EXPLAINED.md §5.3):
  * a page head, a statement row (the heading left, the prose right) and an
  * editorial row (a numbered label in the left column, the content across
- * the text and margin columns). The kit has their tokens (`EX_LAYOUT`)
- * but not these components; they are candidates for `components/explained/
- * shell/`. Each numeral sits in its own text node: a bare ordinal is a
- * position, not a quantity.
+ * the text and margin columns), on the kit's tokens (`EX_LAYOUT`). Every
+ * chapter composes its pages from these, not from another page's folder.
+ * Each numeral sits in its own text node: a bare ordinal is a position,
+ * not a quantity.
  */
 
 /** "Chapter 01 · 1 How it works": the label above a page's H1. */

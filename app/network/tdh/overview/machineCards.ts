@@ -1,5 +1,5 @@
 import type { FactBook } from "@/lib/explained/facts";
-import { MEME_ART, scaledArt } from "./art";
+import { MEME_ART } from "./art";
 import type { MachineCard } from "./Machine";
 
 /**
@@ -42,6 +42,8 @@ export function machineCards(book: FactBook): MachineCard[] {
           art: FLOOR_CARD.src,
           original: FLOOR_CARD.original,
         }
-      : { id: minting, title: null, art: scaledArt(minting) },
+      : // The newest card's scaled art is often not made yet, and a
+        // missing image is a console error, so it draws its frame.
+        { id: minting, title: null, art: null },
   ];
 }

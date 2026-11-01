@@ -74,9 +74,12 @@ const RULE_LINES: readonly {
 function WordValue({
   word,
   locale,
+  tone = "tw-text-iron-50",
 }: {
   readonly word: DecodedWord;
   readonly locale: SupportedLocale;
+  /** The value's colour: rose for a changed word. */
+  readonly tone?: string;
 }) {
   if (word.value === null) {
     return <Hash value={word.hex} locale={locale} short={[6, 4]} />;
@@ -84,7 +87,7 @@ function WordValue({
   const count = formatCount(locale, Number(word.value));
   if (word.word.kind === "time") {
     return (
-      <span className="tw-font-mono tw-text-[13px] tw-text-iron-50 md:tw-text-sm">
+      <span className={`tw-font-mono tw-text-[13px] md:tw-text-sm ${tone}`}>
         {count}
         <span className="tw-ml-2 tw-font-sans tw-text-iron-400">
           {formatUtcInstant(new Date(Number(word.value) * 1000).toISOString())}
@@ -93,7 +96,7 @@ function WordValue({
     );
   }
   return (
-    <span className="tw-font-mono tw-text-[13px] tw-text-iron-50 md:tw-text-sm">
+    <span className={`tw-font-mono tw-text-[13px] md:tw-text-sm ${tone}`}>
       {count}
     </span>
   );
@@ -282,11 +285,17 @@ export default function StatementWords({
                         )}
                         {flip && word.index === FLIPPED_WORD ? (
                           <span className="tw-inline-flex tw-flex-wrap tw-items-baseline tw-gap-x-2">
-                            <span className="tw-text-error">
-                              <WordValue word={flipped(word)} locale={locale} />
-                            </span>
-                            <s className="tw-text-[13px] tw-text-iron-400">
-                              <WordValue word={word} locale={locale} />
+                            <WordValue
+                              word={flipped(word)}
+                              locale={locale}
+                              tone="tw-text-error"
+                            />
+                            <s className="tw-text-iron-400">
+                              <WordValue
+                                word={word}
+                                locale={locale}
+                                tone="tw-text-iron-400"
+                              />
                             </s>
                           </span>
                         ) : (

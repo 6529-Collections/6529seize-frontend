@@ -80,7 +80,7 @@ export default function LoopAtlas({
         </div>
         {station && (
           <div
-            className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-p-6 lg:tw-sticky lg:tw-top-24"
+            className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-p-6 lg:tw-self-center"
             aria-live="polite"
             data-station-card={station.key}
           >

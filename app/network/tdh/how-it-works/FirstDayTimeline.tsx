@@ -3,7 +3,12 @@
 import { Fragment } from "react";
 import { useMeasuredWidth } from "@/components/explained/figures/useMeasuredWidth";
 import type { SupportedLocale } from "@/i18n/locales";
-import { utcClock, utcDate, utcDay, utcWeekday } from "./_kit/time";
+import {
+  utcClock,
+  utcDate,
+  utcDay,
+  utcWeekday,
+} from "@/components/explained/layout/time";
 import { ht } from "./copy";
 import type { FirstDayResult } from "./models/firstDay";
 

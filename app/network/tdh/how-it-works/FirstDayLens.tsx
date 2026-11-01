@@ -11,7 +11,12 @@ import { useBreakable } from "@/components/explained/lens/useBreakable";
 import StampLine from "@/components/explained/marks/StampLine";
 import type { SupportedLocale } from "@/i18n/locales";
 import { formatCount } from "@/lib/explained/format";
-import { secondsOf, utcClock, utcDay, utcLongWeekday } from "./_kit/time";
+import {
+  secondsOf,
+  utcClock,
+  utcDay,
+  utcLongWeekday,
+} from "@/components/explained/layout/time";
 import { ht } from "./copy";
 import FirstDayTimeline from "./FirstDayTimeline";
 import {

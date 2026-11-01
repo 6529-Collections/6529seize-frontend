@@ -7,7 +7,7 @@ import {
   utcClock,
   utcDay,
   utcDayYear,
-} from "../how-it-works/_kit/time";
+} from "@/components/explained/layout/time";
 
 /**
  * Values the Your wallets and Consolidation design pages print beyond the

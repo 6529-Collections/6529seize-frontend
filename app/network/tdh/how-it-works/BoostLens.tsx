@@ -12,8 +12,8 @@ import StampLine from "@/components/explained/marks/StampLine";
 import { EX_LINK } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { formatCents, formatCount } from "@/lib/explained/format";
-import { formatDecimal } from "./_kit/numbers";
-import Toggles from "./_kit/Toggles";
+import { formatDecimal } from "@/components/explained/layout/numbers";
+import Toggles from "@/components/explained/layout/Toggles";
 import { ht } from "./copy";
 import {
   BOOST_START,

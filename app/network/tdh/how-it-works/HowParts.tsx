@@ -140,7 +140,7 @@ function Term({
   return (
     <a
       href={href}
-      className={`tw-inline-flex tw-items-baseline tw-gap-1 tw-whitespace-nowrap tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-px-2 tw-py-0.5 tw-text-iron-50 tw-no-underline hover:tw-border-iron-500 ${EX_FOCUS}`}
+      className={`tw-inline-flex tw-items-baseline tw-gap-0.5 tw-whitespace-nowrap tw-rounded tw-bg-iron-900 tw-px-1.5 tw-text-iron-50 tw-no-underline hover:tw-bg-iron-800 ${EX_FOCUS}`}
     >
       {children}
       <sup className="tw-text-[11px] tw-font-bold tw-not-italic tw-text-primary-300">
@@ -159,10 +159,10 @@ function Term({
 export function HowFormula({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <p
-      className="tw-m-0 tw-mt-8 tw-max-w-[980px] tw-text-[17px] tw-leading-[34px] tw-text-iron-300 md:tw-text-lg md:tw-leading-9"
+      className="tw-m-0 tw-mt-8 tw-text-[17px] tw-leading-[32px] tw-text-iron-300 md:tw-text-lg md:tw-leading-[34px]"
       data-formula=""
     >
-      <span className="tw-mr-2 tw-text-iron-400">
+      <span className="tw-mb-1 tw-block tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-400">
         {ht(locale, "explained.tdh.how.formula.lead")}
       </span>
       <b className="tw-font-semibold tw-text-iron-50">TDH = Σ</b>{" "}
