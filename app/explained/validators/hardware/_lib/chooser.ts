@@ -6,21 +6,24 @@
 export type Answer = "yes" | "no";
 
 export interface Answers {
-  /** Can you keep a machine running at home or at your office? */
+  /** Can a computer stay plugged in and online at your home or office? */
   readonly where: Answer;
   /** Will you also run your own Ethereum node? */
   readonly node: Answer;
-  /** Do you have a computer you can leave on all day? */
+  /** Do you already have a computer you can use for this? */
   readonly spare: Answer;
 }
 
 export type Suggestion = "acceptable" | "good" | "great" | "rack" | "cloud";
 
-/** The page opens on the tier the card recommends. */
+/**
+ * The page opens on the computer you already have, the testing period's
+ * advice: no purchase is suggested until a reader says they have none.
+ */
 export const DEFAULT_ANSWERS: Answers = {
   where: "yes",
   node: "no",
-  spare: "no",
+  spare: "yes",
 };
 
 /** The spare-computer question matters only at home, without a node. */

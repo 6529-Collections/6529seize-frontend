@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
-import { EX_LAYOUT } from "@/components/explained/tokens";
+import { EX_FOCUS, EX_LAYOUT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { CARD, type DcId, type TierId } from "./_lib/card";
-import { hw, hwRich } from "./_lib/copy";
+import { hw, hwRich, type HwSuffix } from "./_lib/copy";
 import { CardText, Hw } from "./_lib/facts";
 import { CardHead, Chip } from "./parts";
 
@@ -14,6 +14,13 @@ import { CardHead, Chip } from "./parts";
  */
 const CARD_BOX =
   "tw-relative tw-flex tw-flex-col tw-rounded-2xl tw-border tw-border-solid tw-p-5 md:tw-p-6";
+
+/**
+ * The line under a card's price. Side by side, every card keeps room for
+ * two lines, so the price rows of a row of cards line up.
+ */
+const COST_LINE =
+  "tw-m-0 tw-mt-1 tw-text-[15px] tw-leading-6 tw-text-iron-300 md:tw-min-h-12";
 
 function OptionCard({
   id,
@@ -106,7 +113,7 @@ function TierCost({
           {hw(locale, "tier.buy")}
         </span>
       </p>
-      <p className="tw-m-0 tw-mt-1 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+      <p className={COST_LINE}>
         {tier === "acceptable"
           ? hwRich(locale, "tier.acceptableMonth", { month })
           : hwRich(locale, "tier.month", { month })}
@@ -134,8 +141,15 @@ function DcCost({
           {hw(locale, "tier.perMonth")}
         </span>
       </p>
-      <p className="tw-m-0 tw-mt-1 tw-text-[15px] tw-leading-6 tw-text-iron-300">
-        {hw(locale, id === "rack" ? "dc.rackCost" : "dc.cloudCost")}
+      <p className={COST_LINE}>
+        {id === "rack"
+          ? hwRich(locale, "dc.rackCost", {
+              colo: <Hw id="dc.colo.month" locale={locale} />,
+              server: <Hw id="dc.colo.server" locale={locale} />,
+            })
+          : hwRich(locale, "dc.cloudCost", {
+              ram: <Hw id="spec.cloud.ram8" locale={locale} />,
+            })}
       </p>
     </>
   );
@@ -288,13 +302,13 @@ export function LargeHolders({ locale }: { readonly locale: SupportedLocale }) {
         title={CARD.holders.title}
         note={CARD.holders.note}
       />
-      <ol className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-4 tw-p-0 sm:tw-grid-cols-2 lg:tw-grid-cols-4">
+      <ol className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-0 tw-p-0 sm:tw-grid-cols-2 sm:tw-gap-4 lg:tw-grid-cols-4">
         {CARD.holders.items.map((item, index) => {
           const warn = index === CARD.holders.items.length - 1;
           return (
             <li
               key={item.title}
-              className={`tw-rounded-2xl tw-border tw-border-solid tw-bg-iron-950 tw-p-5 ${warn ? "tw-border-error/40" : "tw-border-iron-800"}`}
+              className={`tw-grid tw-grid-cols-[32px_minmax(0,1fr)] tw-gap-x-3.5 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-4 first:tw-border-t-0 first:tw-pt-0 sm:tw-block sm:tw-rounded-2xl sm:tw-border sm:tw-bg-iron-950 sm:tw-p-5 sm:first:tw-border-t sm:first:tw-pt-5 ${warn ? "sm:tw-border-error/40" : ""}`}
             >
               <span
                 className={`tw-grid tw-size-8 tw-place-items-center tw-rounded-lg tw-border tw-border-solid tw-text-sm tw-font-bold ${warn ? "tw-border-error/40 tw-bg-error/[0.1] tw-text-error" : "tw-border-primary-300/30 tw-bg-primary-400/[0.12] tw-text-primary-300"}`}
@@ -303,16 +317,18 @@ export function LargeHolders({ locale }: { readonly locale: SupportedLocale }) {
               >
                 {index + 1}
               </span>
-              <h3 className="tw-m-0 tw-mt-3 tw-text-lg tw-font-semibold tw-leading-6 tw-tracking-[-0.01em] tw-text-iron-50">
-                {item.title}
-              </h3>
-              <CardText
-                id={`holders.${index + 1}`}
-                locale={locale}
-                className="tw-mt-2 tw-block tw-text-[15px] tw-leading-6 tw-text-iron-300"
-              >
-                {item.body}
-              </CardText>
+              <div className="tw-min-w-0">
+                <h3 className="tw-m-0 tw-pt-1 tw-text-[17px] tw-font-semibold tw-leading-6 tw-tracking-[-0.01em] tw-text-iron-50 sm:tw-mt-3 sm:tw-pt-0 sm:tw-text-lg">
+                  {item.title}
+                </h3>
+                <CardText
+                  id={`holders.${index + 1}`}
+                  locale={locale}
+                  className="tw-mt-1 tw-block tw-text-[15px] tw-leading-6 tw-text-iron-300 sm:tw-mt-2"
+                >
+                  {item.body}
+                </CardText>
+              </div>
             </li>
           );
         })}
@@ -364,15 +380,55 @@ export function EveryValidator({
             </li>
           ))}
         </ul>
-        <p className="tw-m-0 tw-mt-5 tw-text-[15px] tw-leading-6">
+        <p className="tw-m-0 tw-mt-5 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+          {hwRich(locale, "every.wire", {
+            wire: <Hw id="use.wire" locale={locale} />,
+          })}{" "}
           <a
-            href="#what-it-uses"
+            href="#part-network"
             className="tw-text-primary-300 tw-no-underline hover:tw-underline"
           >
-            {hw(locale, "use.title")}
+            {hw(locale, "every.more")}
           </a>
         </p>
       </div>
     </section>
+  );
+}
+
+/**
+ * Under the header: where things are, one tap away. The page is long on a
+ * phone, so the card's sections and the tables people come back for are
+ * named here.
+ */
+const JUMPS: readonly { readonly href: string; readonly label: HwSuffix }[] = [
+  { href: "#home", label: "jump.home" },
+  { href: "#datacenter", label: "jump.datacenter" },
+  { href: "#parts", label: "jump.parts" },
+  { href: "#instance-types", label: "jump.cloud" },
+  { href: "#own-node", label: "jump.node" },
+  { href: "#questions", label: "jump.questions" },
+];
+
+export function JumpRow({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <nav
+      aria-label={hw(locale, "jump.label")}
+      className="tw-mt-8 tw-border-0 tw-border-y tw-border-solid tw-border-iron-900 tw-py-3 md:tw-mt-10"
+      data-jumps=""
+    >
+      <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-x-1 tw-gap-y-1.5 tw-p-0">
+        {JUMPS.map((jump) => (
+          <li key={jump.href}>
+            <a
+              href={jump.href}
+              className={`tw-inline-flex tw-min-h-9 tw-items-center tw-rounded-full tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-300 tw-no-underline hover:tw-bg-iron-900 hover:tw-text-iron-50 ${EX_FOCUS}`}
+            >
+              {hw(locale, jump.label)}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
   );
 }

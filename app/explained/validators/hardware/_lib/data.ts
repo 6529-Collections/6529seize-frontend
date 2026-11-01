@@ -22,18 +22,22 @@ export const FACTS = {
   "read.day": f("Oct 31, 2026", "readDay"),
 
   // What each tier costs today: to buy, and a month over four years with power.
+  "tier.acceptable.own": f("$0", "homePrices"),
   "tier.acceptable.buy": f("$0–300", "homePrices"),
   "tier.acceptable.month": f("$7", "homePrices"),
   "tier.good.buy": f("$400–550", "homePrices"),
   "tier.good.month": f("$10–13", "homePrices"),
-  "tier.great.buy": f("$1,400–2,000", "homePrices"),
-  "tier.great.month": f("$31–46", "homePrices"),
+  "tier.great.buy": f("$2,000–2,200", "homePrices"),
+  "tier.great.month": f("$44–49", "homePrices"),
   "dc.rack.month": f("$95–320", "rented"),
   "dc.cloud.month": f("$10–80", "cloudAll"),
   "dc.cloud.bigThree": f("$61–63", "cloudAll"),
   "dc.cloud.egress": f("50 GB", "cloudAll"),
+  "dc.colo.month": f("$100–300", "colo"),
+  "dc.colo.server": f("$2,000–5,000", "colo"),
 
   // The tiers' own numbers, as the card gives them.
+  "spec.bits": f("64-bit", "code"),
   "spec.acceptable.cores": f("4 cores", "card"),
   "spec.acceptable.ram": f("8 GB", "card"),
   "spec.good.watts": f("12 W", "p53"),
@@ -41,34 +45,22 @@ export const FACTS = {
   "spec.great.disk": f("4 TB", "card"),
   "spec.cloud.vcpu": f("2–4 vCPUs", "card"),
   "spec.cloud.ram": f("8–16 GB", "card"),
+  "spec.cloud.ram8": f("8 GB", "card"),
   "power.good.month": f("$1.60", "eia"),
   "power.kwh": f("18.16 cents", "eia"),
 
-  // What one validator uses.
+  // What one validator uses, and its day.
   "use.wire": f("15–20 GB", "measured"),
-  "use.wireDay": f("0.5 GB", "measured"),
-  "use.ratio": f("11 times", "measured"),
-  "use.raw": f("47–56 GB", "p53"),
-  "use.json": f("175 GB", "measured"),
-  "use.run": f("8 minutes", "docs"),
-  "use.runStart": f("00:30 UTC", "docs"),
-  "use.runLate": f("20 minutes", "docs"),
-  "use.tdh": f("1.7–5.7 seconds", "docs"),
-  "use.memory": f("1.5–2 GB", "bench"),
-  "use.store": f("129 MB", "measured"),
-  "use.storeSince": f("October 2021", "p53"),
-  "use.growth": f("1–3 MB", "benchEstimate"),
+  "use.upload": f("under 1 GB", "benchEstimate"),
   "use.windowOpen": f("00:15 UTC", "p53"),
   "use.windowClose": f("19:00 UTC", "p53"),
-  "use.fullCheck": f("5 h 05 min", "measured"),
-  "use.remoteCheck": f("1.6–3 TB", "p53"),
 
   // Large holders.
   "holders.keys": f("16", "p53"),
 
   // Your own Ethereum node.
   "node.disk": f("4 TB", "ethOrg"),
-  "node.db": f("1.6–1.7 TiB", "ethdocker"),
+  "node.db": f("1.5–2 TiB", "ethdocker"),
   "node.tooSmall": f("2 TB", "ethOrg"),
   "node.tooSmallBy": f("2027", "ethOrg"),
   "node.ram": f("32 GB", "eip7870"),
@@ -99,6 +91,7 @@ export const FACTS = {
   // Oracle's free tier.
   "oracle.free": f("2 Arm cores, 12 GB of memory and 200 GB of disk", "oracle"),
   "oracle.halvedOn": f("June 15, 2026", "oracle"),
+  "oracle.paygFree": f("4 Arm cores and 24 GB of memory", "oracle"),
 } as const satisfies Readonly<Record<string, FactDef>>;
 
 export type HwFactId = keyof typeof FACTS;
@@ -129,9 +122,9 @@ export const SPEC_ROWS: readonly SpecRow[] = [
   {
     id: "cpu",
     source: "card",
-    acceptable: "4 cores; 2 work. Any 64-bit processor, old ones included",
+    acceptable: "4 cores (2 will do). Any 64-bit processor, old ones included",
     good: "4–8 cores: an Intel N150 or a small Ryzen",
-    great: "8 cores",
+    great: "8 cores, for the Ethereum node",
   },
   {
     id: "memory",
@@ -144,7 +137,7 @@ export const SPEC_ROWS: readonly SpecRow[] = [
     id: "storage",
     source: "card",
     acceptable: "256–512 GB SSD",
-    good: "1–2 TB NVMe. 512 GB is enough for the validator alone, and costs $100–300 less today",
+    good: "1–2 TB NVMe. 512 GB is enough for the validator alone; a node needs 4 TB",
     great:
       "4 TB NVMe, TLC with DRAM: ethereum.org expects 2 TB to be too small by 2027",
   },
@@ -154,7 +147,7 @@ export const SPEC_ROWS: readonly SpecRow[] = [
     acceptable: VALIDATOR_DISK,
     good: VALIDATOR_DISK,
     great:
-      "The validator's under 1 GB a year, plus the node: 1.6–1.7 TiB for a full node in September 2026, and growing",
+      "The validator stays under 1 GB a year. The node adds 1.5–2 TiB for a full node in September 2026, and grows",
   },
   {
     id: "internet",
@@ -166,8 +159,9 @@ export const SPEC_ROWS: readonly SpecRow[] = [
   },
   {
     id: "power",
-    source: "economics",
-    acceptable: "What your computer draws: 10–100 W for a PC you own",
+    source: "power",
+    acceptable:
+      "What your computer draws: about 3 W for a Pi 5, up to 75 W for an older desktop tower",
     good: "8–20 W: about $1.60 a month at 12 W",
     great: "15–30 W: about $2–4 a month",
   },
@@ -185,24 +179,26 @@ export const SPEC_ROWS: readonly SpecRow[] = [
     source: "modes",
     acceptable:
       "Outbound only, no port to open. Tor is built in and on, Ethereum calls included",
-    good: "The same, on wired Ethernet",
+    good: "Outbound only, no port to open, on wired Ethernet. Tor is built in and on",
     great:
-      "The same for the validator; the node keeps its own peer connections",
+      "Outbound only for the validator, through Tor. The node keeps its own peer connections",
   },
   {
     id: "uptime",
     source: "p53",
     acceptable:
-      "On every day inside the signing window, 00:15 to 19:00 UTC, with sleep turned off",
+      "About three hours a day inside the signing window, 00:15 to 19:00 UTC, with sleep turned off",
     good: "Always on, with a small UPS for short power cuts",
-    great: "Always on, with a UPS: a node that stops has to catch up",
+    great:
+      "Always on, with a UPS, so a short power cut doesn't stop the node mid-write",
   },
   {
     id: "cost",
     source: "homePrices",
     acceptable: "$0 if you own it; about $300 for a new Pi 5 with an SSD",
     good: "About $400–550 with a UPS; about $10–13 a month",
-    great: "About $1,400–2,000 with a UPS; about $31–46 a month",
+    great:
+      "About $2,000–2,200 with a UPS and a 4 TB TLC drive with DRAM; about $44–49 a month",
   },
 ];
 
@@ -283,17 +279,9 @@ export const MACHINES: readonly MachineRow[] = [
     source: "gmktec",
   },
   {
-    id: "nvme4",
-    tier: "great",
-    machine: "A 4 TB NVMe drive for the node, cheapest known brands",
-    price: "$563–705",
-    where: "datacenterdisk.com; check that it is TLC with DRAM",
-    source: "drives",
-  },
-  {
     id: "990pro",
     tier: "great",
-    machine: "Samsung 990 PRO 4 TB, TLC with DRAM",
+    machine: "Samsung 990 PRO 4 TB for the node, TLC with DRAM",
     price: "$1,099.99",
     where: "samsung.com, list price",
     source: "samsung",
@@ -319,7 +307,7 @@ export const MODE_ROWS: readonly ModeRow[] = [
   {
     id: "listen",
     home: "Outbound only. No port to open, nothing to forward on your router",
-    rack: "Listens in public: open the one TCP port you set in [p2p] listen",
+    rack: "Listens in public: open the TCP port you set in [p2p] listen, and the same UDP port if you list a QUIC address",
   },
   {
     id: "tor",
@@ -343,19 +331,19 @@ export const MODE_ROWS: readonly ModeRow[] = [
   },
 ];
 
-/** What one validator uses, measured or worked out, each with its basis. */
+/**
+ * A validator's day, from reading Ethereum to its vote, each with its
+ * basis. What it uses of each part (memory, disk, internet) is in the part
+ * guide (`partGuide.ts`), not repeated here.
+ */
 interface UseRow {
   readonly id:
-    | "wire"
-    | "raw"
-    | "json"
-    | "upload"
-    | "run"
-    | "tdh"
-    | "memory"
-    | "store"
+    | "read"
+    | "sign"
+    | "publish"
+    | "catchup"
+    | "offline"
     | "start"
-    | "window"
     | "full";
   readonly value: string;
   readonly source: SourceId;
@@ -363,48 +351,34 @@ interface UseRow {
 
 export const USE_ROWS: readonly UseRow[] = [
   {
-    id: "wire",
+    id: "read",
     value:
-      "About 0.5 GB a day, 15–20 GB a month. Worked out from 24 blocks; a week on a running validator will settle it",
-    source: "measured",
+      "It reads each Ethereum block as it finalizes, through the day, and checks every answer against Ethereum’s block headers",
+    source: "docs",
   },
   {
-    id: "raw",
-    value: "47–56 GB a month: the card's figure",
+    id: "sign",
+    value:
+      "From about 00:15 UTC, once Ethereum has finalized the day’s last block, it computes TDH with both programs and signs, within minutes. A vote counts until 19:00 UTC",
+    source: "docs",
+  },
+  {
+    id: "publish",
+    value:
+      "At home, after a random wait of up to two hours, never later than 18:00 UTC, so the time it sends doesn’t point to where it is. In a datacenter, at once",
+    source: "modes",
+  },
+  {
+    id: "catchup",
+    value:
+      "After a sleep or a day off, it first reads the blocks it missed: about 10 minutes for each day, from public servers",
+    source: "docs",
+  },
+  {
+    id: "offline",
+    value:
+      "Seven days without a signature before the account leaves the roster. Its next vote brings it back, with no penalty",
     source: "p53",
-  },
-  {
-    id: "json",
-    value: "About 175 GB a month",
-    source: "measured",
-  },
-  {
-    id: "upload",
-    value: "A few GB a month of requests and peer messages: an estimate",
-    source: "measured",
-  },
-  {
-    id: "run",
-    value:
-      "About 8 minutes, starting at 00:30 UTC; 11–20 minutes later in the day",
-    source: "docs",
-  },
-  {
-    id: "tdh",
-    value: "1.7–5.7 seconds for one day",
-    source: "docs",
-  },
-  {
-    id: "memory",
-    value:
-      "About 47 MB at rest with Tor connected; 1.5–2 GB at the daily peak, while both TDH programs run",
-    source: "bench",
-  },
-  {
-    id: "store",
-    value:
-      "About 0.5 GB after a year: 129 MB for all 417,060 counted logs since October 2021, growing 1–3 MB a month, plus the day's TDH weights. About 2 GB after six years, plus a few MB a year for each validator on the network",
-    source: "benchEstimate",
   },
   {
     id: "start",
@@ -412,16 +386,10 @@ export const USE_ROWS: readonly UseRow[] = [
     source: "docs",
   },
   {
-    id: "window",
-    value:
-      "Once a day, any time from about 00:15 to 19:00 UTC. Seven days without a signature before the account leaves the roster",
-    source: "p53",
-  },
-  {
     id: "full",
     value:
       "Optional. With your own node: 5 h 05 min on a 48-thread machine. Through a remote server: 1.6–3 TB of receipts, once",
-    source: "measured",
+    source: "remoteCheck",
   },
 ];
 
@@ -434,7 +402,7 @@ interface CostBar {
 }
 
 export const NODE_COST_BARS: readonly CostBar[] = [
-  { id: "home", fact: "tier.great.month", low: 31, high: 46 },
+  { id: "home", fact: "tier.great.month", low: 44, high: 49 },
   { id: "rented", fact: "node.rented", low: 95, high: 320 },
   { id: "cloud", fact: "node.cloud", low: 475, high: 645 },
 ];

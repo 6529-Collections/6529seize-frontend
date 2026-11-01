@@ -1,8 +1,9 @@
 import { FactText } from "@/components/explained/facts/FactText";
 import { kt } from "@/components/explained/i18n";
-import Mark from "@/components/explained/marks/Mark";
-import Track from "@/components/explained/marks/Track";
-import { EX_TEXT } from "@/components/explained/tokens";
+import Mark, { MARK_TEXT } from "@/components/explained/marks/Mark";
+import { TrackBar } from "@/components/explained/marks/Track";
+import { Icon } from "@/components/explained/marks/glyphs";
+import { EX_FOCUS, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { fmt, type Fact } from "@/lib/explained/facts";
 import { CARD, type TierId } from "./_lib/card";
@@ -72,10 +73,13 @@ function results(
       recommended: false,
       title: hw(locale, "chooser.acceptable.title"),
       body: hwRich(locale, "chooser.acceptable.body", {
+        bits: f("spec.bits"),
         cores: f("spec.acceptable.cores"),
         ram: f("spec.acceptable.ram"),
       }),
-      ...tierCost(locale, "acceptable"),
+      cost: hwRich(locale, "chooser.acceptable.cost", {
+        zero: strong("tier.acceptable.own"),
+      }),
       more: tierMore,
     },
     good: {
@@ -123,6 +127,7 @@ function results(
       body: hwRich(locale, "chooser.cloud.body", {
         vcpu: f("spec.cloud.vcpu"),
         ram: f("spec.cloud.ram"),
+        ram8: f("spec.cloud.ram8"),
         month: f("dc.cloud.month"),
       }),
       cost: (
@@ -157,21 +162,28 @@ export default function Hero({
             {CARD.lede}
           </CardText>
         </p>
+        <a
+          href="#chooser"
+          className={`tw-mt-4 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-full tw-bg-primary-500 tw-px-4 tw-text-[15px] tw-font-semibold tw-text-white tw-no-underline hover:tw-bg-primary-400 lg:tw-hidden ${EX_FOCUS}`}
+          data-jump="chooser"
+        >
+          {hw(locale, "jumpChooser")}
+          <Icon kind="arrow" className="tw-size-[15px] tw-rotate-90" />
+        </a>
         <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-center tw-gap-x-[18px] tw-gap-y-2">
-          <Mark
-            kind="decided"
-            label={hw(locale, "guidance")}
-            refText="D144 · D146"
-            locale={locale}
-          />
+          <Mark kind="decided" label={hw(locale, "guidance")} locale={locale} />
           <FactText fact={version} locale={locale}>
-            <Track
-              maturity="built"
-              label={hw(locale, "software", {
-                version: version ? fmt(version, locale) : "",
-              })}
-              locale={locale}
-            />
+            <span
+              className={`tw-inline-flex tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-whitespace-nowrap tw-font-semibold tw-text-iron-50 ${MARK_TEXT.md}`}
+              data-track="built"
+            >
+              <TrackBar maturity="built" />
+              <span>
+                {hw(locale, "software", {
+                  version: version ? fmt(version, locale) : "",
+                })}
+              </span>
+            </span>
           </FactText>
         </div>
         <TestingBanner locale={locale} />

@@ -31,6 +31,7 @@ import {
   type PartId,
   type PartTier,
 } from "@/app/explained/validators/hardware/_lib/partGuide";
+import { nb } from "@/app/explained/validators/hardware/_lib/nb";
 import { SOURCES } from "@/app/explained/validators/hardware/_lib/sources";
 import {
   Datacenter,
@@ -111,8 +112,18 @@ describe("the copy", () => {
 describe("the chooser", () => {
   const answers: Answer[] = ["yes", "no"];
 
-  it("opens on the recommended tier", () => {
-    expect(suggest(DEFAULT_ANSWERS)).toBe("good");
+  it("opens on the computer you have, and suggests no purchase", () => {
+    expect(suggest(DEFAULT_ANSWERS)).toBe("acceptable");
+    expect(suggest({ ...DEFAULT_ANSWERS, spare: "no" })).toBe("good");
+  });
+
+  it("asks where and what you own as two different questions", () => {
+    expect(messages["explained.validators.hardware.chooser.where"]).toMatch(
+      /home or office/
+    );
+    expect(messages["explained.validators.hardware.chooser.spare"]).toMatch(
+      /already have a computer/
+    );
   });
 
   it("sends only readers who can't run at home to a datacenter", () => {
@@ -146,6 +157,12 @@ describe("the chooser", () => {
       [...container.querySelectorAll("[data-suggestion]")].filter(
         (el) => !el.hasAttribute("hidden")
       );
+    expect(visible().map((el) => el.getAttribute("data-suggestion"))).toEqual([
+      "acceptable",
+    ]);
+    expect(visible()[0]).toHaveTextContent(/\$0 to buy, its power only/);
+    const spare = container.querySelector('[data-q="spare"]') as HTMLElement;
+    fireEvent.click(within(spare).getByRole("button", { name: "No" }));
     expect(visible().map((el) => el.getAttribute("data-suggestion"))).toEqual([
       "good",
     ]);
@@ -320,6 +337,32 @@ describe("the page", () => {
   });
 });
 
+describe("numbers on a line", () => {
+  it("keeps a range and its unit together", () => {
+    const { container } = render(
+      <p>{nb("About $10–13 a month, 1.5–2 GB at the peak, 12 W idle.")}</p>
+    );
+    const kept = [...container.querySelectorAll(".tw-whitespace-nowrap")].map(
+      (el) => el.textContent
+    );
+    expect(kept).toEqual(["$10–13", "1.5–2 GB", "12 W"]);
+    expect(container.textContent).toBe(
+      "About $10–13 a month, 1.5–2 GB at the peak, 12 W idle."
+    );
+  });
+
+  it("prints every cloud total with cents", () => {
+    for (const provider of CLOUD) {
+      for (const row of provider.rows) {
+        expect([row.id, /^\$\d[\d,]*\.\d{2}$/.test(row.total)]).toEqual([
+          row.id,
+          true,
+        ]);
+      }
+    }
+  });
+});
+
 describe("part by part", () => {
   const partOf = (id: PartId) => {
     const part = PARTS.find((entry) => entry.id === id);
@@ -349,14 +392,22 @@ describe("part by part", () => {
       const words = part.answer.text.split(/\s+/).length;
       expect([part.id, words <= 8]).toEqual([part.id, true]);
       expect([part.id, part.uses.length > 0]).toEqual([part.id, true]);
-      expect([part.id, part.avoid.text.length > 0]).toEqual([part.id, true]);
+      // Every part says what not to buy, except one that is not needed.
+      expect([part.id, (part.avoid?.text.length ?? 0) > 0]).toEqual([
+        part.id,
+        part.answer.text !== "Not needed.",
+      ]);
     }
   });
 
   it("says a GPU is not needed, and where 6529 uses GPUs", () => {
     expect(partOf("gpu").answer.text).toBe("Not needed.");
     expect(usesOf("gpu")).toMatch(
-      /zero-knowledge proofs[^.]*\(D119\)[^.]*\. Making proofs is not a validator’s job\./
+      /zero-knowledge proofs[^.]*\. Making proofs is not a validator’s job\./
+    );
+    // Said once, not three times.
+    expect(tierText("gpu", "good")).toBe(
+      "None. A machine without a graphics card draws less power."
     );
   });
 
@@ -387,10 +438,13 @@ describe("part by part", () => {
   });
 
   it("prints the fixed build's figures, never the old ones", () => {
-    const all = JSON.stringify([PARTS, FACTS, SPEC_ROWS, USE_ROWS]);
+    const all = JSON.stringify([PARTS, FACTS, SPEC_ROWS, USE_ROWS, MACHINES]);
     expect(all).not.toMatch(/560 MB|2\.6 GB|ADX|BMI2|OS \(Bookworm\)/);
+    // Round 1's corrections: no "at rest", no "at worst", no 00:30 run, no
+    // drive that a node must not use setting a price.
+    expect(all).not.toMatch(/at rest|at worst|00:30|NM790|1\.7–5\.7/);
     expect(usesOf("memory")).toMatch(
-      /About 47 MB at rest[^]*1\.5–2 GB at the daily peak/
+      /About 47 MB at start[^]*1\.5–2 GB at the daily peak/
     );
     expect(usesOf("cpu")).toMatch(
       /any 64-bit x86 processor, old ones included, and on 64-bit Arm/

@@ -21,6 +21,7 @@ import {
   SPEND,
   type Said,
 } from "./partGuide";
+import { nb } from "./nb";
 import { SOURCES, type HwSource, type SourceId } from "./sources";
 
 /**
@@ -52,13 +53,7 @@ export function sourceTitle(id: SourceId, locale: SupportedLocale): string {
   });
 }
 
-/** Keeps a number on the same line as its unit: "12 W", "8 GB". */
-export function nb(text: string): string {
-  return text.replace(
-    /(\d) (W|GB|MB|TB|TiB|GiB|Mbps|cores|vCPUs?|minutes|seconds|hours|months|times|cents)\b/g,
-    "$1\u00a0$2"
-  );
-}
+export { nb };
 
 /** One number of the page, printed with its source. */
 export function Hw({
@@ -261,7 +256,9 @@ export function partFacts(): [string, Said][] {
         out.push([`${base}.tier.${tier}`, part.tiers[tier]]);
       }
     }
-    out.push([`${base}.avoid`, part.avoid]);
+    if (part.avoid !== undefined) {
+      out.push([`${base}.avoid`, part.avoid]);
+    }
   }
   out.push([
     "part.power.sleep",

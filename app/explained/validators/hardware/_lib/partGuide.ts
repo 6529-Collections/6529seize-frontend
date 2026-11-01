@@ -47,7 +47,8 @@ interface PartDef {
   readonly uses: readonly Said[];
   /** What to get at each tier, or one line for all of them. */
   readonly tiers: Readonly<Record<PartTier, Said>> | Said;
-  readonly avoid: Said;
+  /** What not to buy; a part whose answer is "Not needed." has none. */
+  readonly avoid?: Said;
 }
 
 const s = (text: string, source: SourceId): Said => ({ text, source });
@@ -55,11 +56,11 @@ const s = (text: string, source: SourceId): Said => ({ text, source });
 export const PARTS: readonly PartDef[] = [
   {
     id: "cpu",
-    answer: s("Any 64-bit processor. Four cores are plenty.", "code"),
+    answer: s("Any 64-bit processor, old ones included.", "code"),
     why: s("The day’s TDH takes seconds, on two cores.", "bench"),
     uses: [
       s(
-        "Each day the two TDH programs run side by side, one thread each, for 1.7–5.7 seconds on a 48-thread server. Between days the validator uses about 1% of one core.",
+        "Each day the two TDH programs run side by side, one thread each, for about 2–8 seconds on a 48-thread server. Between days the validator uses about 1% of one core.",
         "bench"
       ),
       s(
@@ -67,7 +68,7 @@ export const PARTS: readonly PartDef[] = [
         "code"
       ),
       s(
-        "A Raspberry Pi 5 is several times slower per core, so expect tens of seconds. The vote can be signed any time from about 00:15 to 19:00 UTC.",
+        "A Raspberry Pi 5 is several times slower per core, so expect tens of seconds (an estimate: no Pi was measured). The vote can be signed any time from about 00:15 to 19:00 UTC.",
         "benchEstimate"
       ),
       s(
@@ -76,7 +77,7 @@ export const PARTS: readonly PartDef[] = [
       ),
     ],
     tiers: {
-      acceptable: s("4 cores, as the card says. 2 cores work too.", "card"),
+      acceptable: s("4 cores. 2 work too.", "card"),
       good: s(
         "4–8 cores: an Intel N150 or a small Ryzen. The spare cores serve Tor and the system.",
         "card"
@@ -105,11 +106,11 @@ export const PARTS: readonly PartDef[] = [
     why: s("Nothing in the validator uses a GPU.", "code"),
     uses: [
       s(
-        "None of the 823 packages the validator is built from is a GPU library, and none of its code calls one.",
+        "None of the 823 packages in the validator’s lock file is a GPU library, and none of its code calls one.",
         "code"
       ),
       s(
-        "GPUs appear in 6529 only for the zero-knowledge proofs of each day’s result (D119), which 6529 plans to make on GPUs it rents. Making proofs is not a validator’s job.",
+        "GPUs appear in 6529 only for the zero-knowledge proofs of each day’s result, which 6529 plans to make on GPUs it rents. Making proofs is not a validator’s job.",
         "proofs"
       ),
       s(
@@ -118,17 +119,16 @@ export const PARTS: readonly PartDef[] = [
       ),
     ],
     tiers: s(
-      "None, at every tier. A machine without a graphics card draws less power.",
+      "None. A machine without a graphics card draws less power.",
       "code"
     ),
-    avoid: s("A graphics card, at any tier.", "code"),
   },
   {
     id: "memory",
     answer: s("8 GB is plenty.", "card"),
     why: s("The validator peaks at about 2 GB, once a day.", "bench"),
     uses: [
-      s("About 47 MB at rest, with Tor connected.", "bench"),
+      s("About 47 MB at start, with Tor connected.", "bench"),
       s(
         "1.5–2 GB at the daily peak, while both TDH programs hold the day’s records: about 10,000 identities, 416,000 logs and 391,000 transfers.",
         "bench"
@@ -149,7 +149,7 @@ export const PARTS: readonly PartDef[] = [
       cloud: s("8–16 GB. 8 GB is enough.", "card"),
     },
     avoid: s(
-      "A board with 2 GB or less. ECC memory for a validator without a node: a memory error would at worst make the two programs disagree, and the validator then skips that day’s vote.",
+      "A board with 2 GB or less. ECC memory for a validator without a node: a memory error would most likely make its two programs disagree, and it would skip that day’s vote.",
       "p53"
     ),
   },
@@ -174,7 +174,7 @@ export const PARTS: readonly PartDef[] = [
         "benchEstimate"
       ),
       s(
-        "It writes one append-only file and a few small files a day. It keeps no copy of Ethereum’s blocks or receipts.",
+        "It keeps each vote, report and certificate it receives as a small file of its own, so the number of files grows with the number of validators. It keeps no copy of Ethereum’s blocks or receipts.",
         "code"
       ),
     ],
@@ -184,7 +184,7 @@ export const PARTS: readonly PartDef[] = [
         "card"
       ),
       good: s(
-        "1–2 TB NVMe, so an Ethereum node fits later. 512 GB is plenty for the validator alone.",
+        "1–2 TB NVMe. 512 GB is enough for the validator alone; an Ethereum node needs a 4 TB drive of its own.",
         "card"
       ),
       great: s(
@@ -208,12 +208,16 @@ export const PARTS: readonly PartDef[] = [
     ),
     uses: [
       s(
-        "About 0.5 GB a day, 15–20 GB a month, from the default Ethereum servers, which compress. A server that doesn’t compress sends up to about 175 GB a month.",
+        "About 0.5 GB a day, 15–20 GB a month, from the default Ethereum servers, which compress.",
         "measured"
       ),
       s(
-        "Its own upload is small: requests, and a vote of about 200 bytes a day.",
-        "p53"
+        "The 50 GB a month above is the receipts’ size in Ethereum’s own encoding (47–56 GB). Servers send them as JSON, about 175 GB a month; the default servers compress that about 11 times.",
+        "measured"
+      ),
+      s(
+        "Its own upload is under 1 GB a month: requests, and a vote of about 200 bytes a day. An estimate, not yet measured.",
+        "benchEstimate"
       ),
       s(
         "At home it only connects out, through its built-in Tor. No port forwarding, and it works behind a provider’s shared address (CGNAT).",
@@ -232,7 +236,7 @@ export const PARTS: readonly PartDef[] = [
         "eip7870"
       ),
       rack: s(
-        "A datacenter link, with the one TCP port you set open to other validators.",
+        "A datacenter link, with the TCP port you set open to other validators, and the same UDP port if you list a QUIC address.",
         "modes"
       ),
       cloud: s("Any. Data coming in is free at every provider.", "cloudAll"),
@@ -255,7 +259,7 @@ export const PARTS: readonly PartDef[] = [
         "benchEstimate"
       ),
       s(
-        "It signs once a day, any time from about 00:15 to 19:00 UTC. Offline is not a fault: you miss that day’s vote, and your account stays registered for seven days without one.",
+        "It needs about three hours on each day, inside 00:15 to 19:00 UTC: minutes to sign, then at home a random wait of up to two hours before its vote goes out. Offline is not a fault: you miss that day’s vote, and your account stays registered for seven days without one.",
         "p53"
       ),
       s(
@@ -265,12 +269,12 @@ export const PARTS: readonly PartDef[] = [
     ],
     tiers: {
       acceptable: s(
-        "What your machine draws: 3–5 W for a Raspberry Pi 5, up to 75 W for an older desktop tower. A UPS is optional.",
+        "What your machine draws: about 3 W for a Raspberry Pi 5, up to 75 W for an older desktop tower. A UPS is optional.",
         "power"
       ),
       good: s("8–20 W, with a small UPS that also powers the router.", "card"),
       great: s(
-        "15–30 W, with a UPS, so the Ethereum node never stops suddenly.",
+        "15–30 W, with a UPS, so a short power cut doesn’t stop the Ethereum node mid-write.",
         "card"
       ),
       rack: s("Redundant power, from the datacenter.", "card"),
@@ -407,9 +411,9 @@ export const SLEEP: readonly { readonly os: string; readonly cmd: string }[] = [
   { os: "macOS", cmd: "sudo pmset -c sleep 0" },
   { os: "Windows", cmd: "powercfg /change standby-timeout-ac 0" },
   {
-      os: "Linux",
-      cmd: "sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target",
-    },
+    os: "Linux",
+    cmd: "sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target",
+  },
 ];
 
 /** Where extra money helps, in order. */

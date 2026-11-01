@@ -18,7 +18,8 @@ import {
  * "Which machine should I use?" (the page's chooser): two or three yes-or-no
  * questions and one suggestion. Every suggestion is rendered on the server,
  * so the page copies and indexes whole; the browser only shows the one the
- * answers lead to. It opens on the card's recommended tier, Good.
+ * answers lead to. It opens on "Start with the computer you have", the
+ * testing period's advice; changing an answer shows another suggestion.
  */
 export interface ChooserResult {
   /** "Good", "Cloud VM": the tier or option's own name. */
@@ -73,7 +74,7 @@ function Question({
           </p>
         )}
       </div>
-      <div className="tw-flex-none">
+      <div className="tw-flex-none [&_button]:tw-min-h-11 [&_button]:tw-min-w-[64px]">
         <Seg<Answer>
           label={text}
           options={[

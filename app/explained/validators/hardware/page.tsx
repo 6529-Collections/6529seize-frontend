@@ -23,10 +23,12 @@ import {
   Datacenter,
   EveryValidator,
   HomeOffice,
+  JumpRow,
   LargeHolders,
 } from "./CardSections";
 import Detail, { DETAIL_SECTIONS } from "./Detail";
 import Hero from "./Hero";
+import OpenOnHash from "./OpenOnHash";
 import PartGuide from "./PartGuide";
 import Sources from "./Sources";
 
@@ -66,6 +68,8 @@ export default async function ValidatorHardwarePage({
     >
       <article data-ex-article="" lang={locale}>
         <Hero locale={locale} version={book.maybe("site.validator.version")} />
+        <JumpRow locale={locale} />
+        <OpenOnHash />
         <HomeOffice locale={locale} />
         <Datacenter locale={locale} />
         <LargeHolders locale={locale} />

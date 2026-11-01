@@ -154,6 +154,15 @@ export const SOURCES = {
     url: "https://www.hetzner.com/dedicated-rootserver/matrix-ax",
     read,
   },
+  colo: {
+    name: "6529chain P53 section 15.1, for colocation and the server's price",
+    read,
+    estimate: true,
+  },
+  remoteCheck: {
+    name: "measured against 6529's own node (5 h 05 min); for a remote server, 6529chain P53 section 11.4 (1.6-2.2 TB) and the validator's eth crate README (2-3 TB)",
+    read,
+  },
   readDay: {
     name: "the day every price and measurement on this page was read",
     read,
@@ -179,8 +188,8 @@ export const SOURCES = {
     read,
   },
   ethOrg: {
-    name: "ethereum.org, Run a node (updated Aug 17, 2026)",
-    url: "https://ethereum.org/en/run-a-node/",
+    name: "ethereum.org, Spin up your own Ethereum node (updated Aug 17, 2026)",
+    url: "https://ethereum.org/en/developers/docs/nodes-and-clients/run-a-node/",
     read,
   },
   eip7870: {

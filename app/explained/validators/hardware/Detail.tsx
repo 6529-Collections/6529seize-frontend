@@ -1,6 +1,11 @@
 import type { ReactNode } from "react";
 import { EdSection, FactsList } from "@/components/explained/reference/parts";
-import { EX_LAYOUT, EX_LINK, EX_TEXT } from "@/components/explained/tokens";
+import {
+  EX_FOCUS,
+  EX_LAYOUT,
+  EX_LINK,
+  EX_TEXT,
+} from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { hw, hwRich, hwTemplate, type HwSuffix } from "./_lib/copy";
 import { CLOUD, NODE_ROWS } from "./_lib/cloud";
@@ -10,10 +15,10 @@ import {
   NODE_COST_BARS,
   USE_ROWS,
 } from "./_lib/data";
-import { Hw, sourceText, sourceTitle } from "./_lib/facts";
+import { Hw, nb, sourceText, sourceTitle } from "./_lib/facts";
 import { SOURCES, type SourceId } from "./_lib/sources";
 import CloudTable, { type ProviderMeta } from "./CloudTable";
-import { Disclosure, FactTable } from "./parts";
+import { Disclosure, FactTable, OpenMark } from "./parts";
 import TierSpecs from "./TierSpecs";
 
 /**
@@ -191,6 +196,8 @@ function Cloud({ locale }: { readonly locale: SupportedLocale }) {
               region: hw(locale, "cloud.region"),
               source: hw(locale, "cloud.source"),
               allNote: hw(locale, "cloud.allNote"),
+              showAll: hw(locale, "cloud.showAll"),
+              showFewer: hw(locale, "cloud.showFewer"),
             }}
           />
           <div className="tw-mt-8 lg:tw-grid lg:tw-grid-cols-[192px_minmax(0,1fr)] lg:tw-gap-x-8">
@@ -345,13 +352,13 @@ function OwnNode({ locale }: { readonly locale: SupportedLocale }) {
                 fact: `node.${row.id}`,
                 source: row.source,
                 cells: {
-                  option: row.option,
-                  spec: row.spec,
-                  machine: row.machine,
-                  upload: row.upload,
+                  option: nb(row.option),
+                  spec: nb(row.spec),
+                  machine: nb(row.machine),
+                  upload: nb(row.upload),
                   total: (
                     <span className="tw-font-semibold tw-text-iron-50">
-                      {row.total}
+                      {nb(row.total)}
                     </span>
                   ),
                 },
@@ -424,16 +431,21 @@ function OwnNode({ locale }: { readonly locale: SupportedLocale }) {
 
 function SeveralMachines({ locale }: { readonly locale: SupportedLocale }) {
   const items: readonly { key: HwSuffix; body: ReactNode }[] = [
+    { key: "holders.plan", body: hw(locale, "holders.plan") },
     {
       key: "holders.grant",
       body: hwRich(locale, "holders.grant", {
         keys: <Hw id="holders.keys" locale={locale} />,
+        syntax: (
+          <code className="tw-whitespace-nowrap tw-rounded-md tw-bg-iron-900 tw-px-1.5 tw-py-0.5 tw-font-mono tw-text-[0.9em] tw-text-iron-50">
+            --key KEY_ID:3
+          </code>
+        ),
       }),
     },
     { key: "holders.down", body: hw(locale, "holders.down") },
     { key: "holders.backup", body: hw(locale, "holders.backup") },
     { key: "holders.wallet", body: hw(locale, "holders.wallet") },
-    { key: "holders.split", body: hw(locale, "holders.split") },
   ];
   return (
     <Section id="several-machines" locale={locale}>
@@ -457,28 +469,24 @@ function Uses({ locale }: { readonly locale: SupportedLocale }) {
             {
               key: "what",
               label: hw(locale, "use.col.what"),
-              width: "tw-w-[28%]",
+              width: "tw-w-[34%] lg:tw-w-[28%]",
             },
             { key: "value", label: hw(locale, "use.col.value") },
           ]}
+          stack={false}
           rows={USE_ROWS.map((row) => ({
             key: row.id,
             fact: `use.${row.id}`,
             source: row.source,
             cells: {
               what: hw(locale, `use.row.${row.id}`),
-              value: <span className="tw-text-iron-50">{row.value}</span>,
+              value: <span className="tw-text-iron-50">{nb(row.value)}</span>,
             },
           }))}
         />
       }
     >
-      <Para>
-        {hwRich(locale, "use.intro", {
-          ratio: <Hw id="use.ratio" locale={locale} />,
-          wire: <Hw id="use.wire" locale={locale} />,
-        })}
-      </Para>
+      <Para>{hw(locale, "use.intro")}</Para>
     </Section>
   );
 }
@@ -528,9 +536,14 @@ function Questions({ locale }: { readonly locale: SupportedLocale }) {
       a: hwRich(locale, "faq.oracle.a", {
         free: f("oracle.free"),
         halved: f("oracle.halvedOn"),
+        payg: f("oracle.paygFree"),
       }),
     },
-    { id: "bill", q: "faq.bill.q", a: hw(locale, "faq.bill.a") },
+    {
+      id: "bill",
+      q: "faq.bill.q",
+      a: hwRich(locale, "faq.bill.a", { upload: f("use.upload") }),
+    },
     { id: "shared", q: "faq.shared.q", a: hw(locale, "faq.shared.a") },
   ];
   return (
@@ -543,20 +556,11 @@ function Questions({ locale }: { readonly locale: SupportedLocale }) {
             data-faq={faq.id}
             className="tw-group tw-border-0 tw-border-t tw-border-solid tw-border-iron-900"
           >
-            <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-py-4 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 [&::-webkit-details-marker]:tw-hidden">
+            <summary
+              className={`tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-py-4 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 [&::-webkit-details-marker]:tw-hidden ${EX_FOCUS}`}
+            >
               <span>{hw(locale, faq.q)}</span>
-              <span
-                className="tw-flex-none tw-font-medium tw-text-iron-400 group-open:tw-hidden"
-                aria-hidden="true"
-              >
-                +
-              </span>
-              <span
-                className="tw-hidden tw-flex-none tw-font-medium tw-text-iron-400 group-open:tw-inline"
-                aria-hidden="true"
-              >
-                –
-              </span>
+              <OpenMark />
             </summary>
             <p className="tw-m-0 tw-hidden tw-max-w-[660px] tw-pb-4 tw-text-[15px] tw-leading-6 tw-text-iron-300 group-open:tw-block">
               {faq.a}

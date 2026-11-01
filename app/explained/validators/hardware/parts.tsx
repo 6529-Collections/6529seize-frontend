@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { EX_FOCUS, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
-import { sourceTitle } from "./_lib/facts";
+import { nb, sourceTitle } from "./_lib/facts";
 import type { SourceId } from "./_lib/sources";
 
 /**
@@ -41,11 +41,27 @@ export function CardHead({
 }
 
 /** A spec as the card shows it: "16 GB RAM". A soft tile, never a bordered pill. */
-export function Chip({ children }: { readonly children: ReactNode }) {
+export function Chip({ children }: { readonly children: string }) {
   return (
     <li className="tw-rounded-lg tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-text-sm tw-font-semibold tw-leading-6 tw-text-iron-50">
-      {children}
+      {nb(children)}
     </li>
+  );
+}
+
+/**
+ * The page's one disclosure mark: a circled plus that turns into a cross
+ * when its `<details>` (a `tw-group`) opens. Parts, tiers, machines and
+ * questions all use it.
+ */
+export function OpenMark({ className = "" }: { readonly className?: string }) {
+  return (
+    <span
+      className={`tw-flex tw-size-7 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-text-base tw-font-medium tw-leading-none tw-text-iron-300 group-open:tw-rotate-45 motion-safe:tw-transition-transform ${className}`}
+      aria-hidden="true"
+    >
+      +
+    </span>
   );
 }
 
@@ -83,12 +99,7 @@ export function Disclosure({
             </span>
           )}
         </span>
-        <span
-          className="tw-flex tw-size-7 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-text-base tw-font-medium tw-leading-none tw-text-iron-300 group-open:tw-rotate-45 motion-safe:tw-transition-transform"
-          aria-hidden="true"
-        >
-          +
-        </span>
+        <OpenMark />
       </summary>
       <div className="tw-hidden tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-5 tw-pb-5 tw-pt-4 group-open:tw-block md:tw-px-6 md:tw-pb-6">
         {children}
@@ -123,20 +134,33 @@ const TH =
  * A table of sourced rows: each row carries the fact it prints and the
  * source it was read from (a title on hover, `data-fact` for the gates).
  * Below `lg` each row becomes a block: the first cell its title, every other
- * cell its label above its value.
+ * cell its label above its value. A narrow table with short values
+ * (`stack={false}`) stays a table at every width.
  */
 export function FactTable({
   columns,
   rows,
   caption,
   locale,
+  stack = true,
 }: {
   readonly columns: readonly FactColumn[];
   readonly rows: readonly FactRow[];
   /** The table's name for screen readers. */
   readonly caption: string;
   readonly locale: SupportedLocale;
+  readonly stack?: boolean;
 }) {
+  if (!stack) {
+    return (
+      <PlainTable
+        columns={columns}
+        rows={rows}
+        caption={caption}
+        locale={locale}
+      />
+    );
+  }
   return (
     <table
       className="tw-w-full tw-border-collapse tw-text-[15px] tw-leading-6 before:tw-content-none after:tw-content-none [&_:is(thead,tbody,tr)]:before:tw-content-none [&_:is(thead,tbody,tr)]:after:tw-content-none"
@@ -182,6 +206,68 @@ export function FactTable({
               ) : (
                 <td key={column.key} className={`${base} tw-text-iron-300`}>
                   {label}
+                  {cell}
+                </td>
+              );
+            })}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+/** A sourced table that stays a table on a phone: two or three short columns. */
+function PlainTable({
+  columns,
+  rows,
+  caption,
+  locale,
+}: {
+  readonly columns: readonly FactColumn[];
+  readonly rows: readonly FactRow[];
+  readonly caption: string;
+  readonly locale: SupportedLocale;
+}) {
+  return (
+    <table
+      className="tw-w-full tw-border-collapse tw-text-[15px] tw-leading-6 before:tw-content-none after:tw-content-none [&_:is(thead,tbody,tr)]:before:tw-content-none [&_:is(thead,tbody,tr)]:after:tw-content-none"
+      aria-label={caption}
+    >
+      <thead>
+        <tr>
+          {columns.map((column) => (
+            <th
+              key={column.key}
+              scope="col"
+              className={`${TH} tw-pr-3 md:tw-pr-4 ${column.numeric ? "tw-text-right" : ""} ${column.width ?? ""}`}
+            >
+              {column.label}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row) => (
+          <tr
+            key={row.key}
+            data-fact={`hw.${row.fact}`}
+            title={sourceTitle(row.source, locale)}
+            className={row.muted ? "tw-opacity-60" : ""}
+          >
+            {columns.map((column, index) => {
+              const cell = row.cells[column.key] ?? "–";
+              const base = `tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3 tw-pr-3 tw-align-top last:tw-pr-0 md:tw-pr-4 ${column.numeric ? "tw-text-right" : ""}`;
+              return index === 0 ? (
+                <th
+                  key={column.key}
+                  scope="row"
+                  className={`${base} tw-text-left tw-font-semibold tw-text-iron-50`}
+                >
+                  {cell}
+                </th>
+              ) : (
+                <td key={column.key} className={`${base} tw-text-iron-300`}>
                   {cell}
                 </td>
               );

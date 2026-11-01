@@ -163,14 +163,14 @@ function Machines({ locale }: { readonly locale: SupportedLocale }) {
           fact: `machine.${row.id}`,
           source: row.source,
           cells: {
-            machine: row.machine,
+            machine: nb(row.machine),
             tier: tierName(row.tier),
             price: (
               <span className="tw-font-semibold tw-text-iron-50">
-                {row.price}
+                {nb(row.price)}
               </span>
             ),
-            where: row.where || "–",
+            where: row.where ? nb(row.where) : "–",
           },
         }))}
       />

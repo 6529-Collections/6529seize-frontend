@@ -9,6 +9,7 @@ import {
   type CloudProvider,
   type CloudRow,
 } from "./_lib/cloud";
+import { nb } from "./_lib/nb";
 
 /**
  * Instance types at nine providers: the cheapest type that fits at each
@@ -39,7 +40,13 @@ interface CloudCopy {
   readonly region: string;
   readonly source: string;
   readonly allNote: string;
+  /** On a phone the summary shows the cheapest few; this shows the rest. */
+  readonly showAll: string;
+  readonly showFewer: string;
 }
+
+/** How many providers a phone's summary shows before "Show every provider". */
+const PHONE_SUMMARY = 4;
 
 export interface ProviderMeta {
   /** "Source: …, read Oct 31, 2026", for the rows' titles. */
@@ -115,7 +122,7 @@ function TypeName({ row }: { readonly row: CloudRow }) {
   );
 }
 
-function Total({
+function TotalNotes({
   row,
   copy,
   showMachine,
@@ -126,12 +133,9 @@ function Total({
 }) {
   return (
     <>
-      <span className="tw-block tw-text-[17px] tw-font-semibold tw-leading-6 tw-text-iron-50">
-        {row.total}
-      </span>
       {row.totalNote !== undefined && (
         <span className="tw-block tw-text-[13px] tw-leading-5 tw-text-iron-400">
-          {row.totalNote}
+          {nb(row.totalNote)}
         </span>
       )}
       {showMachine && row.machine !== row.total && (
@@ -144,6 +148,25 @@ function Total({
           {copy.cantOrder}
         </span>
       )}
+    </>
+  );
+}
+
+function Total({
+  row,
+  copy,
+  showMachine,
+}: {
+  readonly row: CloudRow;
+  readonly copy: CloudCopy;
+  readonly showMachine: boolean;
+}) {
+  return (
+    <>
+      <span className="tw-block tw-whitespace-nowrap tw-text-[17px] tw-font-semibold tw-leading-6 tw-text-iron-50">
+        {row.total}
+      </span>
+      <TotalNotes row={row} copy={copy} showMachine={showMachine} />
     </>
   );
 }
@@ -162,6 +185,7 @@ export default function CloudTable({
 }) {
   const [tab, setTab] = useState("all");
   const [arch, setArch] = useState<ArchFilter>("any");
+  const [phoneAll, setPhoneAll] = useState(false);
   const selectId = useId();
   const rows = shownRows(providers, tab, arch);
   const summary = tab === "all";
@@ -331,7 +355,7 @@ export default function CloudTable({
                     {row.size}
                   </td>
                   <td className="tw-py-3.5 tw-pr-3 tw-text-iron-300">
-                    {row.disk}
+                    {nb(row.disk)}
                   </td>
                   <td className="tw-py-3.5 tw-pr-3 tw-text-iron-300">
                     {row.burst}
@@ -349,10 +373,12 @@ export default function CloudTable({
           className="tw-m-0 tw-list-none tw-p-0 lg:tw-hidden"
           aria-label={copy.caption}
         >
-          {rows.map(({ provider, row }) =>
-            row === null ? (
+          {rows.map(({ provider, row }, index) => {
+            const folded = summary && !phoneAll && index >= PHONE_SUMMARY;
+            return row === null ? (
               <li
                 key={`${provider.id}-none`}
+                hidden={folded}
                 className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-px-4 tw-py-3.5 tw-text-[15px] tw-text-iron-400 first:tw-border-t-0 md:tw-px-5"
               >
                 {noneText(provider)}
@@ -360,33 +386,50 @@ export default function CloudTable({
             ) : (
               <li
                 key={`${provider.id}-${row.id}`}
+                hidden={folded}
                 data-fact={factOf(provider, row)}
                 title={titleOf(provider)}
                 className={`tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-px-4 tw-py-4 first:tw-border-t-0 md:tw-px-5 ${row.orderable ? "" : "tw-opacity-60"}`}
               >
-                <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
-                  <div className="tw-min-w-0">
-                    {summary && (
-                      <span className="tw-block tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-50">
-                        {provider.name}
-                      </span>
-                    )}
+                <div className="tw-flex tw-items-baseline tw-justify-between tw-gap-3">
+                  <span className="tw-min-w-0 tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-50">
+                    {summary ? provider.name : <TypeName row={row} />}
+                  </span>
+                  <span className="tw-flex-none tw-whitespace-nowrap tw-text-[17px] tw-font-semibold tw-leading-6 tw-text-iron-50">
+                    {row.total}
+                  </span>
+                </div>
+                {summary && (
+                  <div className="tw-mt-0.5">
                     <TypeName row={row} />
                   </div>
-                  <div className="tw-flex-none tw-text-right">
-                    <Total row={row} copy={copy} showMachine={!summary} />
-                  </div>
+                )}
+                <div className="tw-mt-1">
+                  <TotalNotes row={row} copy={copy} showMachine={!summary} />
                 </div>
                 <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-[22px] tw-text-iron-300">
-                  <ArchTag arch={row.arch} /> {row.cpu} · {row.size}
+                  <ArchTag arch={row.arch} /> {row.cpu} · {nb(row.size)}
                 </p>
                 <p className="tw-m-0 tw-mt-0.5 tw-text-sm tw-leading-[22px] tw-text-iron-400">
-                  {row.disk} · {copy.cols.burst}: {row.burst}
+                  {nb(row.disk)} · {copy.cols.burst}: {nb(row.burst)}
                 </p>
               </li>
-            )
-          )}
+            );
+          })}
         </ul>
+        {summary && rows.length > PHONE_SUMMARY && (
+          <div className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-px-4 tw-py-3 md:tw-px-5 lg:tw-hidden">
+            <button
+              type="button"
+              aria-expanded={phoneAll}
+              data-cloud-more=""
+              onClick={() => setPhoneAll((open) => !open)}
+              className={`tw-min-h-11 tw-cursor-pointer tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-transparent tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-50 hover:tw-border-iron-500 ${EX_FOCUS}`}
+            >
+              {phoneAll ? copy.showFewer : copy.showAll}
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-4 tw-py-4 md:tw-px-5">
@@ -401,10 +444,10 @@ export default function CloudTable({
                 <b className="tw-font-semibold tw-text-iron-50">
                   {copy.region}:
                 </b>{" "}
-                {current.region}
+                {nb(current.region)}
               </li>
               {current.notes.map((note) => (
-                <li key={note}>{note}</li>
+                <li key={note}>{nb(note)}</li>
               ))}
             </ul>
           )

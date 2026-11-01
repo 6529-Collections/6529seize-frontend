@@ -13,7 +13,8 @@ import {
   type PartTier,
   type Said,
 } from "./_lib/partGuide";
-import { CardHead, FactTable } from "./parts";
+import CopyCommand from "./CopyCommand";
+import { CardHead, FactTable, OpenMark } from "./parts";
 
 /**
  * Part by part: one row per part of the machine, the answer first ("Graphics
@@ -141,7 +142,7 @@ function Drives({ locale }: { readonly locale: SupportedLocale }) {
             source: row.source,
             cells: {
               drive: row.drive,
-              alone: <span className="tw-text-iron-50">{row.alone}</span>,
+              alone: <span className="tw-text-iron-50">{nb(row.alone)}</span>,
               node: nb(row.node),
             },
           }))}
@@ -160,11 +161,12 @@ function Idle({ locale }: { readonly locale: SupportedLocale }) {
           <FactTable
             locale={locale}
             caption={hw(locale, "parts.idle.title")}
+            stack={false}
             columns={[
               {
                 key: "machine",
                 label: hw(locale, "parts.idle.col.machine"),
-                width: "tw-w-[48%]",
+                width: "tw-w-[46%]",
               },
               {
                 key: "watts",
@@ -194,6 +196,11 @@ function Idle({ locale }: { readonly locale: SupportedLocale }) {
               },
             }))}
           />
+          <p className="tw-m-0 tw-mt-2.5 tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-400">
+            {hwRich(locale, "parts.idle.basis", {
+              kwh: <Hw id="power.kwh" locale={locale} />,
+            })}
+          </p>
         </div>
       </div>
       <div className="tw-mt-6 lg:tw-mt-0">
@@ -202,21 +209,23 @@ function Idle({ locale }: { readonly locale: SupportedLocale }) {
           id="part.power.sleep"
           source="sleep"
           locale={locale}
-          as="p"
-          className="tw-m-0 tw-mt-3"
+          as="div"
+          className="tw-mt-3"
         >
           {SLEEP.map((row) => (
-            <span
+            <div
               key={row.os}
-              className="tw-mb-3 tw-block tw-text-[15px] tw-leading-6 tw-text-iron-300 last:tw-mb-0"
+              className="tw-mb-3 tw-text-[15px] tw-leading-6 tw-text-iron-300 last:tw-mb-0"
             >
               <span className="tw-block tw-font-semibold tw-text-iron-50">
                 {row.os}
               </span>
-              <code className="tw-mt-1 tw-inline-block tw-max-w-full tw-break-words tw-rounded-md tw-bg-iron-900 tw-px-2 tw-py-0.5 tw-font-mono tw-text-[13px] tw-leading-5 tw-text-iron-50">
-                {row.cmd}
-              </code>
-            </span>
+              <CopyCommand
+                cmd={row.cmd}
+                label={hw(locale, "parts.copy")}
+                copied={hw(locale, "parts.copied")}
+              />
+            </div>
           ))}
         </Sourced>
       </div>
@@ -258,12 +267,7 @@ function PartRow({
             className="tw-mt-0.5 tw-block tw-text-[15px] tw-leading-6 tw-text-iron-300"
           />
         </span>
-        <span
-          className="tw-col-start-2 tw-row-span-2 tw-row-start-1 tw-flex tw-size-7 tw-items-center tw-justify-center tw-self-start tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-text-base tw-font-medium tw-leading-none tw-text-iron-300 group-open:tw-rotate-45 motion-safe:tw-transition-transform lg:tw-col-start-3 lg:tw-row-span-1"
-          aria-hidden="true"
-        >
-          +
-        </span>
+        <OpenMark className="tw-col-start-2 tw-row-span-2 tw-row-start-1 tw-self-start lg:tw-col-start-3 lg:tw-row-span-1" />
       </summary>
       <div className="tw-hidden tw-px-5 tw-pb-6 group-open:tw-block md:tw-px-6 lg:tw-pl-[264px]">
         <div className="tw-grid tw-grid-cols-1 tw-gap-6 tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-pt-5 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:tw-gap-x-10">
@@ -281,20 +285,8 @@ function PartRow({
                 />
               ))}
             </ul>
-            <div className="tw-mt-5 tw-border-0 tw-border-l-2 tw-border-solid tw-border-error/50 tw-pl-4">
-              <p className={`${LABEL} tw-text-error`}>
-                {hw(locale, "parts.avoid")}
-              </p>
-              <Line
-                id={`${base}.avoid`}
-                said={part.avoid}
-                locale={locale}
-                as="p"
-                className="tw-m-0 tw-mt-1.5 tw-text-[15px] tw-leading-6 tw-text-iron-300"
-              />
-            </div>
           </div>
-          <div>
+          <div className="tw-order-first lg:tw-order-none">
             <p className={LABEL}>{hw(locale, "parts.tiers")}</p>
             <div className="tw-mt-1.5">
               <Tiers part={part} locale={locale} />
@@ -303,6 +295,20 @@ function PartRow({
         </div>
         {part.id === "storage" && <Drives locale={locale} />}
         {part.id === "power" && <Idle locale={locale} />}
+        {part.avoid !== undefined && (
+          <div className="tw-mt-6 tw-border-0 tw-border-l-2 tw-border-solid tw-border-error/50 tw-pl-4">
+            <p className={`${LABEL} tw-text-error`}>
+              {hw(locale, "parts.avoid")}
+            </p>
+            <Line
+              id={`${base}.avoid`}
+              said={part.avoid}
+              locale={locale}
+              as="p"
+              className="tw-m-0 tw-mt-1.5 tw-text-[15px] tw-leading-6 tw-text-iron-300"
+            />
+          </div>
+        )}
       </div>
     </details>
   );
