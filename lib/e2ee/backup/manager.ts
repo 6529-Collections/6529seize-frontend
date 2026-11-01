@@ -1,7 +1,6 @@
 import { asE2eeApiError } from "../api";
-import { base64ToBytes, bytesToBase64, randomHex } from "../bytes";
-import type { E2eeDeviceInfo, E2eeEngineStatus } from "../types";
-import type { ApiE2eeBackup, ApiE2eeBackupChunk, E2eeBackupApi } from "./api";
+import { bytesToBase64, randomHex } from "../bytes";
+import type { ApiE2eeBackup, ApiE2eeBackupChunk } from "./api";
 import {
   type BackupChainState,
   chainAt,
@@ -25,12 +24,10 @@ import {
 } from "./crypto";
 import {
   BackupError,
-  type BackupFailureCode,
   backupErrorCode,
   toBackupError,
 } from "./errors";
 import {
-  type BackupHistory,
   type BackupSegment,
   decodeSegment,
   type EncodedSegment,
@@ -40,7 +37,28 @@ import {
   packSegments,
 } from "./format";
 import { generateRecoveryCode, parseRecoveryCode } from "./recovery-code";
-import type { BackupLocalState, BackupStateStore } from "./state";
+import type { BackupLocalState } from "./state";
+import {
+  changedHistory,
+  decodeChunk,
+  followChunk,
+  startNewChain,
+} from "./local-chain";
+import type {
+  BackupScheduler,
+  E2eeBackupManagerDeps,
+  E2eeBackupPhase,
+  E2eeBackupSnapshot,
+  PreparedBackup,
+  RestoreResult,
+} from "./manager-types";
+
+export type {
+  BackupEngine,
+  E2eeBackupSnapshot,
+  PreparedBackup,
+  RestoreResult,
+} from "./manager-types";
 
 /**
  * Encrypted message-history backup (history backup v2, design P35 8).
@@ -68,72 +86,6 @@ import type { BackupLocalState, BackupStateStore } from "./state";
  *   the old one only once fully uploaded. Turning backup off deletes
  *   everything on the server.
  */
-
-/** The engine surface the backup module needs. */
-export interface BackupEngine {
-  getStatus(): E2eeEngineStatus;
-  getThisDevice(): E2eeDeviceInfo | null;
-  subscribe(listener: () => void): () => void;
-  backupHistory(): BackupHistory;
-  importBackupHistory(
-    history: BackupHistory
-  ): Promise<{ conversations: number; messages: number }>;
-}
-
-export type E2eeBackupPhase =
-  | "loading"
-  /** No backup on the server. */
-  | "off"
-  /** The server has a backup this device is not connected to. */
-  | "available"
-  /** This device backs up into the active (or pending) generation. */
-  | "on"
-  | "error";
-
-export interface E2eeBackupSnapshot {
-  readonly phase: E2eeBackupPhase;
-  /** The server's active generation. */
-  readonly backupCreatedAt: number | null;
-  readonly backupUpdatedAt: number | null;
-  readonly usedBytes: number;
-  readonly quotaBytes: number;
-  readonly lastBackupAt: number | null;
-  /** A backup or restore run is in progress. */
-  readonly busy: boolean;
-  /** The first full upload (or a replacement) has not finished yet. */
-  readonly uploading: boolean;
-  /** Last failure code of a background run (UI maps it to copy). */
-  readonly lastError: BackupFailureCode | null;
-}
-
-export interface PreparedBackup {
-  /** Display form; show once, never store. */
-  readonly code: string;
-  readonly secret: Uint8Array;
-}
-
-export interface RestoreResult {
-  readonly conversations: number;
-  readonly messages: number;
-}
-
-interface BackupScheduler {
-  setTimeout(callback: () => void, ms: number): unknown;
-  clearTimeout(handle: unknown): void;
-}
-
-interface E2eeBackupManagerDeps {
-  readonly profileId: string;
-  readonly engine: BackupEngine;
-  readonly api: E2eeBackupApi;
-  readonly state: BackupStateStore;
-  readonly now?: () => number;
-  readonly scheduler?: BackupScheduler;
-  /** Delay between a history change and the next incremental run. */
-  readonly debounceMs?: number;
-  /** Compact once a generation has this many chunks. */
-  readonly compactAtChunks?: number;
-}
 
 const DEFAULT_DEBOUNCE_MS = 30_000;
 const RETRY_MS = 5 * 60_000;
@@ -805,64 +757,4 @@ function phaseOf(
     return "on";
   }
   return serverHasBackup ? "available" : "off";
-}
-
-/** Chunk bytes from the API; malformed base64 never links. */
-function decodeChunk(data: string): Uint8Array {
-  try {
-    return base64ToBytes(data);
-  } catch {
-    return new Uint8Array(0);
-  }
-}
-
-/** Moves a writer's chain state past one chunk it found on the server. */
-function followChunk(
-  local: BackupLocalState,
-  seq: number,
-  linked: LinkedChunk | null
-): void {
-  if (!linked) {
-    // Does not continue this device's chain: remember it was seen.
-    local.chain = { ...local.chain, seq };
-    return;
-  }
-  const started =
-    local.chain.index >= 0 && linked.tip.epoch > local.chain.epoch;
-  if (started && local.chain.restart) {
-    // A newer chain already exists (another device's, or ours whose
-    // response was lost): follow it instead of starting another one. This
-    // run still uploads the full history into it, so the chunks before it
-    // can be compacted at the end of the run.
-    local.compactThroughSeq = Math.max(local.compactThroughSeq ?? 0, seq - 1);
-  }
-  local.chain = chainAt(linked.tip, seq, local.chain.restart && !started);
-}
-
-/**
- * The next chunk starts a new chain and the whole history is uploaded again
- * after it (compaction, or repairing a fork). The chunks before it are
- * compacted once that upload finishes.
- */
-function startNewChain(local: BackupLocalState): void {
-  local.chain = { ...local.chain, restart: true };
-  local.groupPrints = {};
-  local.messagePrints = {};
-}
-
-/** Records whose fingerprint differs from what this device uploaded. */
-function changedHistory(
-  history: BackupHistory,
-  local: BackupLocalState
-): BackupHistory {
-  return {
-    groups: history.groups.filter(
-      (group) => local.groupPrints[group.g] !== fingerprint(group)
-    ),
-    messages: history.messages.filter(
-      (message) =>
-        local.messagePrints[messageKey(message.g, message.id)] !==
-        fingerprint(message)
-    ),
-  };
 }

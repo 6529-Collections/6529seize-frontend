@@ -1,5 +1,9 @@
 import { asE2eeApiError } from "../api";
-import type { ApiE2eeDevice, ApiE2eeKeyPackageStatus } from "../api-types";
+import type {
+  ApiE2eeDevice,
+  ApiE2eeKeyPackageStatus,
+  ApiE2eeMe,
+} from "../api-types";
 import { digestBytes, revokeDigest } from "../digests";
 import {
   buildGrant,
@@ -38,7 +42,7 @@ const RENEWAL_WINDOW_MS = 14 * DAY_MS;
 export const renewalDue = (ctx: EngineContext, device: StoredDevice): boolean =>
   device.grant.expires_at * 1000 - ctx.now() <= RENEWAL_WINDOW_MS;
 
-export const grantExpired = (
+const grantExpired = (
   ctx: EngineContext,
   device: StoredDevice
 ): boolean => device.grant.expires_at * 1000 <= ctx.now();
@@ -431,11 +435,59 @@ function toDeviceInfo(
   };
 }
 
+/**
+ * GET /e2ee/me, refused when another profile's session answered: the
+ * browser's active account can change under a running engine, and that
+ * account's devices say nothing about this profile's.
+ */
+async function getOwnMe(ctx: EngineContext): Promise<ApiE2eeMe> {
+  const me = await ctx.api.getMe();
+  if (me.profile_id !== ctx.profileId) {
+    throw new E2eeError("E2EE_ACCOUNT_MISMATCH");
+  }
+  return me;
+}
+
+/** What /e2ee/me says about this device after the server refused it. */
+type OwnRejection = "revoked" | "inactive" | "unconfirmed";
+
+/**
+ * E2EE_NOT_YOUR_DEVICE also answers a request sent with another profile's
+ * credentials, so it alone never justifies a wipe. Asks /e2ee/me for this
+ * profile: "revoked" only when it lists this device revoked, "inactive"
+ * when it lists the device expired or not at all, otherwise "unconfirmed"
+ * (another profile answered, the device is still active, or no answer).
+ */
+export async function confirmOwnRejection(
+  ctx: EngineContext
+): Promise<OwnRejection> {
+  const device = ctx.device;
+  if (!device?.registered) {
+    return "unconfirmed";
+  }
+  let me: ApiE2eeMe;
+  try {
+    me = await getOwnMe(ctx);
+  } catch {
+    return "unconfirmed";
+  }
+  const own = me.devices.find(
+    (record) => record.device_key.toLowerCase() === device.deviceKey
+  );
+  if (own && own.revoked_at !== null) {
+    return "revoked";
+  }
+  if (!own || grantExpired(ctx, device)) {
+    return "inactive";
+  }
+  return "unconfirmed";
+}
+
 /** Refreshes the device list and KeyPackage pool from GET /e2ee/me. */
 export async function refreshMe(
   ctx: EngineContext
 ): Promise<{ ownRevoked: boolean }> {
-  const me = await ctx.api.getMe();
+  const me = await getOwnMe(ctx);
   ctx.lastMeAt = ctx.now();
   ctx.directory.seed(me.devices);
   const infos: E2eeDeviceInfo[] = [];
@@ -451,7 +503,13 @@ export async function refreshMe(
   );
   ctx.store.thisDevice = infos.find((info) => info.isThisDevice) ?? null;
   ctx.store.touch();
-  if (ctx.device?.registered === true && own?.revoked_at !== null) {
+  // Only a listed revocation counts: a device missing from the list is not
+  // proof (another session, or a listing that is not yet up to date).
+  if (
+    ctx.device?.registered === true &&
+    own !== undefined &&
+    own.revoked_at !== null
+  ) {
     return { ownRevoked: true };
   }
   if (ctx.device?.provisioned) {
