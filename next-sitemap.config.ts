@@ -124,6 +124,7 @@ const EXACT_EXCLUDED_PATHS = new Set([
   "/stream",
   "/tools/app-wallets",
   "/tools/app-wallets/import-wallet",
+  "/validator",
   "/waves/create",
 ]);
 
@@ -136,6 +137,7 @@ const PREFIX_EXCLUDED_PATHS = [
   "/setup/",
   "/builders/",
   "/managers/",
+  "/validator/",
 ] as const;
 const LEGACY_MUSEUM_PREFIXES = [
   "/museum/network/accessions",

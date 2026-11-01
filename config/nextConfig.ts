@@ -217,6 +217,12 @@ export function sharedConfig(
           source: "/accept-connection-sharing",
           headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
         },
+        {
+          // The validator download pages stay out of search engines, the
+          // public release feed included.
+          source: "/validator/:path*",
+          headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+        },
       ];
     },
     turbopack: {
