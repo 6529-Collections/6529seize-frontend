@@ -289,24 +289,41 @@ jobs:
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
           GITHUB_LINK_STATUS_PREVIEW_TOKEN: ${{ secrets.LINK_STATUS_PREVIEW_GITHUB_TOKEN }}
+          # The password of the /validator pages. Setting the variable to
+          # true, or deleting the secret, opens them to everyone on the next
+          # deploy. See ops/docs/validator-download-page.md.
+          VALIDATOR_PAGE_PASSWORD: ${{ secrets.VALIDATOR_PAGE_PASSWORD }}
+          VALIDATOR_PAGE_PUBLIC: ${{ vars.VALIDATOR_PAGE_PUBLIC }}
         run: |
           set -euo pipefail
           printf '%s' "$ETHEREUM_RPC_URL" |
             node ops/scripts/validate-ethereum-rpc-url.cjs
+          # Elastic Beanstalk keeps a property the deploy does not send, so a
+          # missing password is sent as "public", never as an empty value.
+          if [ -z "$VALIDATOR_PAGE_PASSWORD" ] || [ "$VALIDATOR_PAGE_PUBLIC" = true ]; then
+            VALIDATOR_PAGE_PUBLIC=true
+          else
+            VALIDATOR_PAGE_PUBLIC=false
+          fi
           option_settings="$(jq -cn \
             --arg ssr_client_id "$SSR_CLIENT_ID" \
             --arg ssr_client_secret "$SSR_CLIENT_SECRET" \
             --arg alchemy_api_key "$ALCHEMY_API_KEY" \
             --arg ethereum_rpc_url "$ETHEREUM_RPC_URL" \
-            --arg github_link_status_preview_token "$GITHUB_LINK_STATUS_PREVIEW_TOKEN" '
+            --arg github_link_status_preview_token "$GITHUB_LINK_STATUS_PREVIEW_TOKEN" \
+            --arg validator_page_password "$VALIDATOR_PAGE_PASSWORD" \
+            --arg validator_page_public "$VALIDATOR_PAGE_PUBLIC" '
               [
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"SSR_CLIENT_ID",Value:$ssr_client_id},
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"SSR_CLIENT_SECRET",Value:$ssr_client_secret},
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"ALCHEMY_API_KEY",Value:$alchemy_api_key},
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"ETHEREUM_RPC_URL",Value:$ethereum_rpc_url},
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"GITHUB_LINK_STATUS_PREVIEW_TOKEN",Value:$github_link_status_preview_token},
+                {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"VALIDATOR_PAGE_PUBLIC",Value:$validator_page_public},
                 {Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"SENTRY_SERVER_INSTRUMENTATION",Value:"true"}
-              ]')"
+              ] + (if $validator_page_password == "" then [] else
+                [{Namespace:"aws:elasticbeanstalk:application:environment",OptionName:"VALIDATOR_PAGE_PASSWORD",Value:$validator_page_password}]
+              end)')"
           aws elasticbeanstalk update-environment \
             --application-name "$BEANSTALK_APP_NAME" \
             --environment-name "$BEANSTALK_ENV_NAME" \

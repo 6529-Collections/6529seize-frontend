@@ -54,3 +54,57 @@ export const getStagingApiKey = (): string | undefined =>
 
 export const getFarcasterWarpcastApiKey = (): string | undefined =>
   getOptionalServerValue(process.env["FARCASTER_WARPCAST_API_KEY"]);
+
+/**
+ * Settings of the validator download page under `/validator`. The deploy
+ * workflow sets them from the production environment's GitHub secret and
+ * variable; see `ops/docs/validator-download-page.md`.
+ */
+type ValidatorPageServerEnv = {
+  /** The page password. Unset or empty leaves the page open to everyone. */
+  readonly password: string | undefined;
+  /** `true` opens the page to everyone even when a password is set. */
+  readonly isPublic: boolean;
+  /** Private bucket that holds the release feed and the release files. */
+  readonly releasesBucket: string | undefined;
+  readonly releasesRegion: string | undefined;
+};
+
+export const getValidatorPageServerEnv = (): ValidatorPageServerEnv => ({
+  password: getOptionalServerValue(process.env["VALIDATOR_PAGE_PASSWORD"]),
+  isPublic:
+    getOptionalServerValue(
+      process.env["VALIDATOR_PAGE_PUBLIC"]
+    )?.toLowerCase() === "true",
+  releasesBucket: getOptionalServerValue(
+    process.env["VALIDATOR_RELEASES_BUCKET"]
+  ),
+  releasesRegion: getOptionalServerValue(
+    process.env["VALIDATOR_RELEASES_REGION"]
+  ),
+});
+
+/**
+ * Static AWS credentials from the standard variables, for local development
+ * only. Deployed servers set none of them and use their instance role.
+ */
+export const getAwsEnvironmentCredentials = ():
+  | {
+      readonly accessKeyId: string;
+      readonly secretAccessKey: string;
+      readonly sessionToken: string | undefined;
+    }
+  | undefined => {
+  const accessKeyId = getOptionalServerValue(process.env["AWS_ACCESS_KEY_ID"]);
+  const secretAccessKey = getOptionalServerValue(
+    process.env["AWS_SECRET_ACCESS_KEY"]
+  );
+  if (!accessKeyId || !secretAccessKey) {
+    return undefined;
+  }
+  return {
+    accessKeyId,
+    secretAccessKey,
+    sessionToken: getOptionalServerValue(process.env["AWS_SESSION_TOKEN"]),
+  };
+};
