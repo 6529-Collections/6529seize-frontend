@@ -1,4 +1,5 @@
 import { createSecurityHeaders } from "./securityHeaders";
+import { e2eeAssetCacheHeaders } from "./e2eeAssetCacheHeaders";
 import { isE2eeFlagEnabled } from "./e2eeFlag";
 import { meebits445Headers } from "./meebits445Headers";
 import { staticAssetCacheHeaders } from "./staticAssetCacheHeaders";
@@ -222,6 +223,7 @@ export function sharedConfig(
         },
         meebits445Headers,
         versionReloadImageHeaders,
+        e2eeAssetCacheHeaders,
         {
           // Connection links carry one-time credentials in the query string.
           // Later entries override the site-wide same-origin policy above.

@@ -430,6 +430,13 @@ export * from '../models/ApiDropsLeaderboardPage';
 export * from '../models/ApiDropsLeaderboardPageV2';
 export * from '../models/ApiDropsPage';
 export * from '../models/ApiE2eeAck';
+export * from '../models/ApiE2eeBackup';
+export * from '../models/ApiE2eeBackupChunk';
+export * from '../models/ApiE2eeBackupChunkData';
+export * from '../models/ApiE2eeBackupChunkPage';
+export * from '../models/ApiE2eeBackupChunkUpload';
+export * from '../models/ApiE2eeBackupDeviceRequest';
+export * from '../models/ApiE2eeBackupStatus';
 export * from '../models/ApiE2eeBlob';
 export * from '../models/ApiE2eeBlobChunk';
 export * from '../models/ApiE2eeClaimKeyPackagesRequest';
@@ -437,6 +444,8 @@ export * from '../models/ApiE2eeClaimKeyPackagesResponse';
 export * from '../models/ApiE2eeClaimResult';
 export * from '../models/ApiE2eeClaimTarget';
 export * from '../models/ApiE2eeClaimedKeyPackage';
+export * from '../models/ApiE2eeCompactBackupRequest';
+export * from '../models/ApiE2eeCreateBackupRequest';
 export * from '../models/ApiE2eeCreateBlobRequest';
 export * from '../models/ApiE2eeCreateGroupRequest';
 export * from '../models/ApiE2eeDevice';
@@ -1397,6 +1406,13 @@ import { ApiDropsLeaderboardPage } from '../models/ApiDropsLeaderboardPage';
 import { ApiDropsLeaderboardPageV2 } from '../models/ApiDropsLeaderboardPageV2';
 import { ApiDropsPage } from '../models/ApiDropsPage';
 import { ApiE2eeAck } from '../models/ApiE2eeAck';
+import { ApiE2eeBackup } from '../models/ApiE2eeBackup';
+import { ApiE2eeBackupChunk } from '../models/ApiE2eeBackupChunk';
+import { ApiE2eeBackupChunkData } from '../models/ApiE2eeBackupChunkData';
+import { ApiE2eeBackupChunkPage } from '../models/ApiE2eeBackupChunkPage';
+import { ApiE2eeBackupChunkUpload } from '../models/ApiE2eeBackupChunkUpload';
+import { ApiE2eeBackupDeviceRequest } from '../models/ApiE2eeBackupDeviceRequest';
+import { ApiE2eeBackupStatus } from '../models/ApiE2eeBackupStatus';
 import { ApiE2eeBlob } from '../models/ApiE2eeBlob';
 import { ApiE2eeBlobChunk } from '../models/ApiE2eeBlobChunk';
 import { ApiE2eeClaimKeyPackagesRequest } from '../models/ApiE2eeClaimKeyPackagesRequest';
@@ -1404,6 +1420,8 @@ import { ApiE2eeClaimKeyPackagesResponse } from '../models/ApiE2eeClaimKeyPackag
 import { ApiE2eeClaimResult    } from '../models/ApiE2eeClaimResult';
 import { ApiE2eeClaimTarget } from '../models/ApiE2eeClaimTarget';
 import { ApiE2eeClaimedKeyPackage } from '../models/ApiE2eeClaimedKeyPackage';
+import { ApiE2eeCompactBackupRequest } from '../models/ApiE2eeCompactBackupRequest';
+import { ApiE2eeCreateBackupRequest } from '../models/ApiE2eeCreateBackupRequest';
 import { ApiE2eeCreateBlobRequest } from '../models/ApiE2eeCreateBlobRequest';
 import { ApiE2eeCreateGroupRequest } from '../models/ApiE2eeCreateGroupRequest';
 import { ApiE2eeDevice     , ApiE2eeDeviceVerifiedViaEnum          } from '../models/ApiE2eeDevice';
@@ -2634,6 +2652,13 @@ let typeMap: {[index: string]: any} = {
     "ApiDropsLeaderboardPageV2": ApiDropsLeaderboardPageV2,
     "ApiDropsPage": ApiDropsPage,
     "ApiE2eeAck": ApiE2eeAck,
+    "ApiE2eeBackup": ApiE2eeBackup,
+    "ApiE2eeBackupChunk": ApiE2eeBackupChunk,
+    "ApiE2eeBackupChunkData": ApiE2eeBackupChunkData,
+    "ApiE2eeBackupChunkPage": ApiE2eeBackupChunkPage,
+    "ApiE2eeBackupChunkUpload": ApiE2eeBackupChunkUpload,
+    "ApiE2eeBackupDeviceRequest": ApiE2eeBackupDeviceRequest,
+    "ApiE2eeBackupStatus": ApiE2eeBackupStatus,
     "ApiE2eeBlob": ApiE2eeBlob,
     "ApiE2eeBlobChunk": ApiE2eeBlobChunk,
     "ApiE2eeClaimKeyPackagesRequest": ApiE2eeClaimKeyPackagesRequest,
@@ -2641,6 +2666,8 @@ let typeMap: {[index: string]: any} = {
     "ApiE2eeClaimResult": ApiE2eeClaimResult,
     "ApiE2eeClaimTarget": ApiE2eeClaimTarget,
     "ApiE2eeClaimedKeyPackage": ApiE2eeClaimedKeyPackage,
+    "ApiE2eeCompactBackupRequest": ApiE2eeCompactBackupRequest,
+    "ApiE2eeCreateBackupRequest": ApiE2eeCreateBackupRequest,
     "ApiE2eeCreateBlobRequest": ApiE2eeCreateBlobRequest,
     "ApiE2eeCreateGroupRequest": ApiE2eeCreateGroupRequest,
     "ApiE2eeDevice": ApiE2eeDevice,

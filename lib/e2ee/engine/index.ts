@@ -21,6 +21,7 @@ import {
   enrollDevice,
   hasLoginGrant,
   grantExpired,
+  needsNewDevice,
   refreshMe,
   renewalDue,
   renewGrant,
@@ -103,13 +104,53 @@ class E2eeEngineImpl implements E2eeEngineExt {
    * separate grant prompt with a fresh key.
    */
   private async startEnrollmentFromLoginGrant(): Promise<void> {
-    const stored = await this.ctx.storage.getDevice(this.ctx.profileId);
-    if (!hasLoginGrant(stored) || stored.registered) {
+    if (!(await this.takeLoginGrantDevice())) {
       return;
     }
     // Runs in the background so engine start never waits on the network;
     // the status is "enrolling" from here until it settles.
     void this.ctx.tasks.track(this.enrollFromLoginGrant());
+  }
+
+  /**
+   * Whether storage holds an unregistered device a combined sign-in stored.
+   * Any key this engine still holds from an earlier attempt is released,
+   * so enrollment loads the stored device's own key state.
+   */
+  private takeLoginGrantDevice(): Promise<boolean> {
+    return this.ctx.queue.run(async () => {
+      const stored = await this.ctx.storage.getDevice(this.ctx.profileId);
+      if (!hasLoginGrant(stored) || stored.registered) {
+        return false;
+      }
+      if (this.ctx.device?.deviceKey !== stored.deviceKey) {
+        this.ctx.mls?.dispose();
+        this.ctx.mls = null;
+        this.ctx.device = null;
+        this.ctx.lastState = null;
+      }
+      return true;
+    });
+  }
+
+  /**
+   * NC8: the gate's combined sign-in stored this browser's key while this
+   * engine waited for enrollment (holding the engine lock). The sign-in
+   * writes without a state version and keeps it, so this engine's next
+   * write still passes its version check.
+   */
+  async enrollWithLoginGrant(): Promise<E2eeEngineStatus> {
+    if (
+      this.ctx.store.status === NEEDS_ENROLLMENT &&
+      (await this.takeLoginGrantDevice())
+    ) {
+      await this.enrollFromLoginGrant();
+    }
+    return this.ctx.store.status;
+  }
+
+  needsNewDevice(): Promise<boolean> {
+    return this.ctx.queue.run(() => needsNewDevice(this.ctx));
   }
 
   private async enrollFromLoginGrant(): Promise<void> {

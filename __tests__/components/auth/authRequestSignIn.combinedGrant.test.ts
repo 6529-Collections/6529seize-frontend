@@ -33,10 +33,14 @@ jest.mock("@/utils/error-sanitizer", () => ({
   logErrorSecurely: jest.fn(),
 }));
 
-const mockPrepareE2ee = jest.fn<Promise<LoginE2eeDevice | null>, []>();
+const mockPrepareE2ee = jest.fn<
+  Promise<LoginE2eeDevice | null>,
+  [options?: { readonly required?: boolean | undefined }]
+>();
 jest.mock("@/lib/device-signing/login-e2ee", () => ({
   ...jest.requireActual("@/lib/device-signing/login-e2ee"),
-  prepareLoginE2eeDevice: () => mockPrepareE2ee(),
+  prepareLoginE2eeDevice: (options?: { readonly required?: boolean }) =>
+    mockPrepareE2ee(options),
 }));
 
 const mockAdopt = jest.fn(async (_params: unknown) => true);
@@ -411,5 +415,96 @@ describe("sign-in with a combined signing + encrypted messages grant (NC8)", () 
 
     expect(getSignature).toHaveBeenCalledTimes(1);
     expect(mockAdopt).toHaveBeenCalledTimes(1);
+  });
+
+  describe("turning on encrypted messages (requireE2eeDevice)", () => {
+    const turnOn = (signIn: ReturnType<typeof createSubject>["signIn"]) =>
+      signIn({
+        signerAddress: SIGNER,
+        role: null,
+        deviceGrantMode: "required",
+        requireE2eeDevice: true,
+      });
+
+    it("signs one combined challenge and reports the stored grant and the key handover", async () => {
+      const e2ee = preparedE2eeDevice();
+      const { getNonce, getSignature, signIn } = createSubject();
+
+      await expect(turnOn(signIn)).resolves.toEqual({
+        success: true,
+        e2ee: {
+          grantId: `0x${"7".repeat(64)}`,
+          grantSaved: true,
+          adopted: true,
+        },
+      });
+
+      expect(mockPrepareE2ee).toHaveBeenCalledWith({ required: true });
+      expect(getNonce).toHaveBeenCalledTimes(1);
+      expect(getSignature).toHaveBeenCalledTimes(1);
+      expect(getSignature).toHaveBeenCalledWith({
+        message: combinedMessage(
+          mockRecords.get(SIGNER)!.publicKeyHex,
+          MLS_KEY
+        ),
+      });
+      // The local record now holds the new grant.
+      expect(mockRecords.get(SIGNER)?.grant?.id).toBe(`0x${"7".repeat(64)}`);
+      expect(e2ee.dispose).not.toHaveBeenCalled();
+    });
+
+    it("reports a key the encrypted-messages storage did not take", async () => {
+      preparedE2eeDevice();
+      mockAdopt.mockResolvedValueOnce(false);
+      const { signIn } = createSubject();
+
+      await expect(turnOn(signIn)).resolves.toEqual({
+        success: true,
+        e2ee: expect.objectContaining({ adopted: false, grantSaved: true }),
+      });
+    });
+
+    it("signs nothing when the server grants the signing key only", async () => {
+      const e2ee = preparedE2eeDevice();
+      const { getNonce, getSignature, signIn } = createSubject((params) =>
+        signingOnlyMessage(params.deviceGrant!.device_key)
+      );
+
+      await expect(turnOn(signIn)).resolves.toEqual({ success: false });
+
+      // No signing-only retry: encrypted messages keep their own prompt.
+      expect(getNonce).toHaveBeenCalledTimes(1);
+      expect(getSignature).not.toHaveBeenCalled();
+      expect(loginMock).not.toHaveBeenCalled();
+      expect(e2ee.dispose).toHaveBeenCalled();
+      expect(mockAdopt).not.toHaveBeenCalled();
+    });
+
+    it("signs nothing when the encrypted-messages key is not ready", async () => {
+      const { getNonce, getSignature, signIn } = createSubject();
+
+      await expect(turnOn(signIn)).resolves.toEqual({ success: false });
+
+      expect(getNonce).not.toHaveBeenCalled();
+      expect(getSignature).not.toHaveBeenCalled();
+      expect(loginMock).not.toHaveBeenCalled();
+    });
+
+    it("changes nothing when the wallet declines", async () => {
+      const e2ee = preparedE2eeDevice();
+      const { getSignature, signIn } = createSubject();
+      getSignature.mockResolvedValueOnce({
+        signature: null,
+        userRejected: true,
+        failureToastShown: false,
+      });
+
+      await expect(turnOn(signIn)).resolves.toEqual({ success: false });
+
+      expect(loginMock).not.toHaveBeenCalled();
+      expect(mockAdopt).not.toHaveBeenCalled();
+      expect(e2ee.dispose).toHaveBeenCalled();
+      expect(mockRecords.get(SIGNER)?.grant ?? null).toBeNull();
+    });
   });
 });

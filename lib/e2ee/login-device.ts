@@ -45,6 +45,15 @@ interface LoginE2eeDeviceDeps {
   readonly now?: (() => number) | undefined;
 }
 
+/**
+ * Loads (fetches, verifies and instantiates) the default MLS module ahead
+ * of a sign-in; the loader keeps it, so createLoginE2eeDevice and the
+ * engine then start without the download.
+ */
+export async function preloadLoginE2eeDevice(): Promise<void> {
+  await loadDefaultWasm();
+}
+
 export async function createLoginE2eeDevice(
   deps: LoginE2eeDeviceDeps = {}
 ): Promise<PreparedLoginE2eeDevice> {
