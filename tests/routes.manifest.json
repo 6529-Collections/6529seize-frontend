@@ -424,6 +424,10 @@
       "classification": "crawlable",
       "family": "info"
     },
+    "/explained/[...rest]": {
+      "classification": "exempt",
+      "exemptReason": "Any address under /explained that names no page: it calls notFound() and renders 6529 Explained's own not-found view with a 404; it is not a page to crawl."
+    },
     "/explained/kit": {
       "classification": "exempt",
       "exemptReason": "Development-only 6529 Explained kit gallery; production answers 404 and the explained gates render it."
@@ -1838,6 +1842,10 @@
       "classification": "crawlable",
       "family": "network"
     },
+    "/network/tdh/[...rest]": {
+      "classification": "exempt",
+      "exemptReason": "Any address under /network/tdh that names no page: it calls notFound() and renders the chapter's not-found view; the proxy answers such addresses with /network/tdh/not-found-view and a 404."
+    },
     "/network/tdh/consolidation": {
       "classification": "crawlable",
       "family": "network"
@@ -1865,6 +1873,10 @@
     "/network/tdh/implementations": {
       "classification": "crawlable",
       "family": "network"
+    },
+    "/network/tdh/not-found-view": {
+      "classification": "exempt",
+      "exemptReason": "The not-found view the proxy rewrites an unknown /network/tdh address to, with a 404 status and noindex; it is not a page to crawl."
     },
     "/network/tdh/proofs": {
       "classification": "crawlable",

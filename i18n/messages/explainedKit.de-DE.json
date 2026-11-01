@@ -49,6 +49,7 @@
   "explained.kit.notFound.chapterBody": "{chapter} hat hier keine Seite. Seine Seiten stehen unten, oder beginnen Sie wieder beim Überblick des Kapitels.",
   "explained.kit.notFound.hubBody": "6529 Explained hat hier keine Seite. Bisher ist ein Kapitel online; die Übersicht listet die übrigen, sobald sie kommen.",
   "explained.kit.notFound.toHub": "6529 Explained",
+  "explained.kit.notFound.metaTitle": "Keine Seite hier · 6529 Explained",
   "explained.kit.shell.coming": "Folgt",
   "explained.kit.shell.live": "Live",
   "explained.kit.live.feedWritten": "Feed geschrieben",

@@ -49,6 +49,7 @@
   "explained.kit.notFound.chapterBody": "{chapter} has no page here. Its pages are listed below, or start again from the chapter's overview.",
   "explained.kit.notFound.hubBody": "6529 Explained has no page here. One chapter is live so far; the hub lists the rest as they come.",
   "explained.kit.notFound.toHub": "6529 Explained",
+  "explained.kit.notFound.metaTitle": "No page here · 6529 Explained",
   "explained.kit.shell.coming": "Coming",
   "explained.kit.shell.live": "Live",
   "explained.kit.live.feedWritten": "Feed written",

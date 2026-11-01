@@ -3,7 +3,7 @@
  * streams under `app/network/loading.tsx`, so an address that names no page
  * can only render the chapter's not-found view (`app/network/tdh/not-found.tsx`)
  * with status 200. The proxy answers those addresses itself: a rewrite to
- * the chapter's catch-all, which calls notFound(), with a real 404 status.
+ * the chapter's not-found view, with a real 404 status.
  */
 const CHAPTER_PREFIX = "/network/tdh/";
 
@@ -20,6 +20,7 @@ const PAGES: ReadonlySet<string> = new Set([
   "implementations",
   "historic-boosts",
   "glossary",
+  "not-found-view",
   "public-vectors.json",
   "verification.rss",
 ]);
@@ -27,8 +28,11 @@ const PAGES: ReadonlySet<string> = new Set([
 /** A day's receipt: the proxy's day check answers for those. */
 const DAY_PAGE = /^verification\/[^/]+$/;
 
-/** Where an unknown address is rewritten: the chapter's catch-all. */
-export const TDH_UNKNOWN_PAGE_PATH = "/network/tdh/not-found";
+/**
+ * Where an unknown address is rewritten: the chapter's not-found view as a
+ * page, so the view is in the server's HTML, not only in the client payload.
+ */
+export const TDH_UNKNOWN_PAGE_PATH = "/network/tdh/not-found-view";
 
 /** True for an address under /network/tdh that names no page of the chapter. */
 export function isUnknownTdhChapterPath(pathname: string): boolean {
@@ -40,7 +44,7 @@ export function isUnknownTdhChapterPath(pathname: string): boolean {
 }
 
 /**
- * The rewrite target for an unknown address: the catch-all, whose view reads
+ * The rewrite target for an unknown address: the not-found view, which reads
  * nothing from the address. The query stays, so Next's `_rsc` check still
  * matches on a client navigation; the address bar keeps what was asked.
  */

@@ -49,6 +49,7 @@
   "explained.kit.notFound.chapterBody": "{chapter} n'a pas de page ici. Ses pages sont listées ci-dessous, ou repartez de la vue d'ensemble du chapitre.",
   "explained.kit.notFound.hubBody": "6529 Explained n'a pas de page ici. Un chapitre est en ligne pour l'instant ; l'accueil liste les autres à mesure qu'ils arrivent.",
   "explained.kit.notFound.toHub": "6529 Explained",
+  "explained.kit.notFound.metaTitle": "Aucune page ici · 6529 Explained",
   "explained.kit.shell.coming": "À venir",
   "explained.kit.shell.live": "En service",
   "explained.kit.live.feedWritten": "Flux écrit",
