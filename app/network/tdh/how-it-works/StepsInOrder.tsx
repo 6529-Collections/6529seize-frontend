@@ -228,7 +228,7 @@ export default function StepsInOrder({
               </code>
               {trace !== null && (
                 <span
-                  className="tw-col-start-2 tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-2.5 tw-text-[14px] tw-leading-[21px] tw-text-iron-300 md:tw-col-span-2 md:tw-col-start-3 md:tw-row-start-2 xl:tw-col-span-1 xl:tw-col-start-auto xl:tw-row-start-auto"
+                  className="tw-col-span-2 tw-col-start-1 tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-2.5 tw-text-[13px] tw-leading-[20px] tw-text-iron-300 md:tw-col-span-2 md:tw-col-start-3 md:tw-row-start-2 md:tw-text-[14px] md:tw-leading-[21px] xl:tw-col-span-1 xl:tw-col-start-auto xl:tw-row-start-auto"
                   data-trace={step.id}
                 >
                   {traceLine(step.id, trace, locale)}

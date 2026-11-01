@@ -134,7 +134,7 @@ export default function SureHead({
           })}
         </li>
       </ul>
-      <p className="tw-m-0 tw-mt-5 tw-max-w-[620px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
+      <p className="tw-m-0 tw-mt-5 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
         {m("explained.tdh.sure.score.terms")}
       </p>
       <SplitTable ctx={ctx} />

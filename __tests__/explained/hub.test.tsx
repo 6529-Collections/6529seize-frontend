@@ -77,7 +77,7 @@ describe("the hub, first version", () => {
     );
     // The proved day carries its retired rule in the same sentence.
     expect(panel).toHaveTextContent(
-      "One real day, half proved Proof A proved the day of Oct 11 (cycle 20,737) under the retired tdh-v1.0 rules, and mainnet's SP1 verifier accepts it in a read-only call that writes nothing. Proof B is not done. Under TDH v1.4 both proofs exist only for a synthetic test cycle."
+      "One real day, half proved Proof A proved the day of Oct 11 (cycle 20,737) under the retired tdh-v1.0 rules; mainnet's SP1 verifier accepts it in a read-only call. Proof B is not done; under TDH v1.4 both exist only for a synthetic test cycle."
     );
     // What anyone can repeat today, and what needs private code.
     expect(panel).toHaveTextContent(

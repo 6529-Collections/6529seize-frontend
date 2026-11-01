@@ -56,7 +56,9 @@ export default function LiveStrip({
       aria-hidden="true"
       className="tw-flex tw-w-full tw-flex-col tw-items-center"
     >
-      <span className="tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400">
+      {/* Under 360 px a tile is too narrow for its month: the legend and
+          the list's names still date it. */}
+      <span className="tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400 max-[359px]:tw-hidden">
         {month(date)}
       </span>
       <span className="tw-text-[15px] tw-leading-5">{dayNumber(date)}</span>
