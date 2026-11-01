@@ -74,7 +74,7 @@
   "explained.tdh.day.builds.live": "6529.io",
   "explained.tdh.day.builds.pythonSource": "das Design-Archiv von 6529",
   "explained.tdh.day.builds.liveCommit": "sein Produktions-Backend",
-  "explained.tdh.day.builds.liveUpload": "Arweave, signiert · {hash} · {link}",
+  "explained.tdh.day.builds.liveUpload": "Arweave, signiert · {hash}",
   "explained.tdh.day.builds.liveOpen": "öffnen",
   "explained.tdh.day.builds.none": "nicht veröffentlicht",
   "explained.tdh.day.builds.note": "Der Validator-Code mit dem Rust-Kern wird veröffentlicht, wenn der Eigentümer es entscheidet (D116); ein Datum steht nicht fest. Bis dahin nennen die Commits genau, was gelaufen ist.",

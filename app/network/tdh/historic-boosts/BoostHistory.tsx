@@ -150,7 +150,9 @@ export default function BoostHistory({
           // above the line even when it is wider than the step. A label that
           // would run into the one before it, on the same side and level,
           // takes the other side.
-          let above = fits || index === 0;
+          // A merged label wider than its run sits under the line, where the
+          // next step, higher, cannot cross it.
+          let above = fits || (index === 0 && run.length === 1);
           const prev = placed[placed.length - 1];
           if (
             prev &&
@@ -188,7 +190,9 @@ export default function BoostHistory({
                 stroke={tone}
                 strokeWidth={step.current ? 3 : 2}
               />
-              {next && (
+              {/* A riser only where the value changes: two steps at one
+                  level join without a zero-length line through a label. */}
+              {next && next.fullSet !== step.fullSet && (
                 <line
                   x1={x1}
                   y1={yy}

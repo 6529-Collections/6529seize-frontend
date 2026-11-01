@@ -283,16 +283,21 @@ function buildRows(day: DayView, locale: SupportedLocale): BuildRow[] {
       program: "explained.tdh.day.builds.live",
       commit: pt(locale, "explained.tdh.day.builds.liveCommit"),
       binaryLabel: "explained.tdh.day.builds.upload",
-      binary: rich(locale, "explained.tdh.day.builds.liveUpload", {
-        hash: hashCell(day.fact("liveSha"), locale),
-        link: (
-          <UploadLink
-            day={day}
-            field="liveUpload"
-            label={pt(locale, "explained.tdh.day.builds.liveOpen")}
-          />
-        ),
-      }),
+      binary: (
+        <>
+          {rich(locale, "explained.tdh.day.builds.liveUpload", {
+            hash: hashCell(day.fact("liveSha"), locale),
+          })}
+          {/* The link on a line of its own, so the cell keeps its words. */}
+          <span className="tw-block">
+            <UploadLink
+              day={day}
+              field="liveUpload"
+              label={pt(locale, "explained.tdh.day.builds.liveOpen")}
+            />
+          </span>
+        </>
+      ),
       run: none,
     },
   ];
