@@ -4,7 +4,7 @@ import { ABOUT_CARD_CLASS_NAME } from "@/components/about/AboutLayout";
 import { VALIDATOR_UNLOCK_PATH } from "@/lib/validator-page/accessGate";
 import ValidatorPageFrame, { ValidatorPageHeader } from "./ValidatorPageFrame";
 
-export type ValidatorGateNotice = "wrong" | "wait" | null;
+type ValidatorGateNotice = "wrong" | "wait" | null;
 
 const NOTICES: Record<Exclude<ValidatorGateNotice, null>, string> = {
   wrong: "That password is not right. Check it and try again.",

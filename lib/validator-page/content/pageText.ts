@@ -2,7 +2,7 @@
  * The 6529 app account testers send status files and logs to, by encrypted
  * DM. 6529 named it on 2026-11-01.
  */
-export const VALIDATOR_STATUS_DM_ACCOUNT = "6529validators";
+const VALIDATOR_STATUS_DM_ACCOUNT = "6529validators";
 
 export function describeStatusDmAccount(): string {
   return `6529's account, ${VALIDATOR_STATUS_DM_ACCOUNT}`;

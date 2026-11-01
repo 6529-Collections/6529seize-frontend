@@ -4,7 +4,7 @@ import { readReleaseObject } from "./releasesBucket";
  * The addresses of 6529's two sentries live in the private bucket, not in
  * this public repository: testers see them only behind the password.
  */
-export const BOOTSTRAP_PEERS_OBJECT_KEY = "content/bootstrap-peers.json";
+const BOOTSTRAP_PEERS_OBJECT_KEY = "content/bootstrap-peers.json";
 
 const ADDRESS_KINDS = ["peer_id", "tcp", "quic", "onion"] as const;
 type AddressKind = (typeof ADDRESS_KINDS)[number];

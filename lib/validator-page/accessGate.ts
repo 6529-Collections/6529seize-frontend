@@ -1,9 +1,4 @@
-import {
-  createHash,
-  createHmac,
-  scryptSync,
-  timingSafeEqual,
-} from "node:crypto";
+import { createHmac, scryptSync, timingSafeEqual } from "node:crypto";
 
 import { getValidatorPageServerEnv } from "@/config/serverEnv";
 
@@ -112,11 +107,30 @@ export function isAccessCookieValid(
   return expected.length === given.length && timingSafeEqual(expected, given);
 }
 
-/** Compares in constant time, so the answer's timing gives nothing away. */
+const MAX_PASSWORD_BYTES = 256;
+
+function padded(value: string): Buffer | null {
+  const bytes = Buffer.from(value, "utf8");
+  if (bytes.length > MAX_PASSWORD_BYTES) {
+    return null;
+  }
+  const buffer = Buffer.alloc(MAX_PASSWORD_BYTES + 1);
+  bytes.copy(buffer);
+  // The last byte holds the length, so "a" and "a\0" differ.
+  buffer.writeUInt8(bytes.length % 256, MAX_PASSWORD_BYTES);
+  return buffer;
+}
+
+/**
+ * Compares in constant time over a fixed-size buffer, so the answer's timing
+ * gives nothing away about how much of the password matched.
+ */
 export function isPasswordCorrect(input: string, password: string): boolean {
-  const digest = (value: string) =>
-    createHash("sha256").update(value, "utf8").digest();
-  return timingSafeEqual(digest(input), digest(password));
+  const given = padded(input);
+  const expected = padded(password);
+  return (
+    given !== null && expected !== null && timingSafeEqual(given, expected)
+  );
 }
 
 /** True when the page is open, or the cookie is a valid one. */

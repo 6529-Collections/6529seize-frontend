@@ -53,7 +53,7 @@ function formatDate(value: string): string {
   return value.slice(0, 10);
 }
 
-export function Checksum({ file }: { readonly file: ValidatorReleaseFile }) {
+function Checksum({ file }: { readonly file: ValidatorReleaseFile }) {
   return (
     <div className="tw-flex tw-items-start tw-gap-3">
       <div className="tw-min-w-0 tw-flex-1">

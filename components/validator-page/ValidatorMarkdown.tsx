@@ -17,7 +17,7 @@ function textOf(node: ReactNode): string {
 }
 
 /** "Add 6529's two sentries" becomes "add-6529s-two-sentries". */
-export function slugifyHeading(text: string): string {
+function slugifyHeading(text: string): string {
   return text
     .toLowerCase()
     .replaceAll(/['’]/g, "")

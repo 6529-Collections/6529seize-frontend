@@ -60,7 +60,7 @@ export const getFarcasterWarpcastApiKey = (): string | undefined =>
  * workflow sets them from the production environment's GitHub secret and
  * variable; see `ops/docs/validator-download-page.md`.
  */
-export type ValidatorPageServerEnv = {
+type ValidatorPageServerEnv = {
   /** The page password. Unset or empty leaves the page open to everyone. */
   readonly password: string | undefined;
   /** `true` opens the page to everyone even when a password is set. */
