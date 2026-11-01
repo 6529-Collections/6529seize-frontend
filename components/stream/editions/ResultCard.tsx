@@ -33,10 +33,13 @@ function asideKey(auction: EditionAuction): MessageKey {
 }
 
 /** The result in words, kept to compare against after a change. */
-function resultWords(locale: SupportedLocale, auction: EditionAuction): string {
+function resultWords(
+  locale: SupportedLocale,
+  auction: EditionAuction
+): string | null {
   const { clearing } = auction;
   return clearing.count === 0
-    ? t(locale, "stream.editionAuction.result.noneShort")
+    ? null
     : t(locale, "stream.editionAuction.result.short", {
         count: formatInteger(locale, clearing.count),
         price: priceText(locale, clearing.price),
@@ -57,7 +60,8 @@ function useLastChange(
   } | null>(null);
   if (seen !== words) {
     setSeen(words);
-    setChange({ was: seen, at: now });
+    // The first bid sets a price; there is nothing it was before.
+    setChange(seen === null ? null : { was: seen, at: now });
   }
   return auction.biddingOpen ? change : null;
 }
@@ -92,9 +96,11 @@ function Headline({
             : "stream.editionAuction.result.unitOther"
         )}
       </span>{" "}
-      {priceText(locale, clearing.price)}{" "}
-      <span className={unit}>
-        {t(locale, "stream.editionAuction.result.each")}
+      <span className="tw-whitespace-nowrap">
+        {priceText(locale, clearing.price)}{" "}
+        <span className={unit}>
+          {t(locale, "stream.editionAuction.result.each")}
+        </span>
       </span>
     </p>
   );

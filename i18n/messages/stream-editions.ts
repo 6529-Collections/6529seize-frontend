@@ -24,7 +24,6 @@ export const STREAM_EDITION_MESSAGES = {
   "stream.editionAuction.result.unitOther": "editions at",
   "stream.editionAuction.result.each": "ETH each",
   "stream.editionAuction.result.short": "{count} at {price}",
-  "stream.editionAuction.result.noneShort": "no editions",
   "stream.editionAuction.result.firstBid":
     "The first bid sets the price. If nobody bids, no editions are made.",
   "stream.editionAuction.result.nobody": "Nobody bid, so none were made.",
@@ -111,6 +110,8 @@ export const STREAM_EDITION_MESSAGES = {
   "stream.editionAuction.yours.partly":
     "{won} of {qty} get in. Earlier bids at this price come first.",
   "stream.editionAuction.yours.below": "Below the price line.",
+  "stream.editionAuction.yours.queued":
+    "At the price line, behind earlier bids.",
   "stream.editionAuction.yours.allBack": "All {amount} ETH comes back.",
   "stream.editionAuction.yours.voidBack": "Refunded in full: {amount} ETH.",
   "stream.editionAuction.yours.withdrawn": "Withdrawn. {amount} ETH returned.",

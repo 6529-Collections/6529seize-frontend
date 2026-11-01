@@ -47,7 +47,8 @@ function Summary({
     return null;
   }
   const totals = bidTotals(live, auction.clearing.price);
-  const final = auction.settled || auction.status === "VOID";
+  // Once bidding closes the book is frozen, so the result is final.
+  const final = !auction.biddingOpen;
   let key: MessageKey;
   if (auction.phase === "void") {
     key = "stream.editionAuction.yours.voidSummary";
@@ -117,6 +118,9 @@ function bidNote(
       won: formatInteger(locale, bid.won),
       qty: formatInteger(locale, bid.qty),
     });
+  }
+  if (auction.biddingOpen && bid.step === auction.clearing.step) {
+    return t(locale, "stream.editionAuction.yours.queued");
   }
   return auction.biddingOpen
     ? t(locale, "stream.editionAuction.yours.below")
@@ -279,9 +283,10 @@ export default function YourBids({
   if (account === null) {
     empty = "stream.editionAuction.yours.connect";
   } else if (bids.length === 0) {
-    empty = auction.biddingOpen
-      ? "stream.editionAuction.yours.noneYet"
-      : "stream.editionAuction.yours.noneHad";
+    empty =
+      auction.biddingOpen || auction.status === "NONE"
+        ? "stream.editionAuction.yours.noneYet"
+        : "stream.editionAuction.yours.noneHad";
   }
   return (
     <PanelCard

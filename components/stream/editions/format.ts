@@ -10,9 +10,25 @@ import "@/i18n/namespaces/stream";
 import { weiToEthDisplay, weiToEthString } from "@/lib/stream/eth";
 import type { EditionBidView, Wei } from "@/lib/stream/types";
 
-/** A ladder price, three significant figures, no unit: "0.0511", "1", "953". */
+const WEI_PER_ETH = 10n ** 18n;
+
+/**
+ * A ladder price, three significant figures, no unit: "0.0511", "0.01",
+ * "1.00", "21.5", "953". From 1 ETH up, trailing zeros stay, so "1 at 1.00"
+ * reads as a price.
+ */
 export function priceText(locale: SupportedLocale, wei: Wei): string {
-  return formatDecimalString(locale, weiToEthDisplay(wei, 3));
+  if (wei < WEI_PER_ETH) {
+    return formatDecimalString(locale, weiToEthDisplay(wei, 3));
+  }
+  const whole = (wei / WEI_PER_ETH).toString();
+  const decimals = Math.max(0, 3 - whole.length);
+  const text = weiToEthString(wei, decimals);
+  const [integer = text, fraction = ""] = text.split(".");
+  return formatDecimalString(
+    locale,
+    decimals === 0 ? integer : `${integer}.${fraction.padEnd(decimals, "0")}`
+  );
 }
 
 /** The price of `step` on a ladder, or a dash. */

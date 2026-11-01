@@ -637,18 +637,15 @@ function generator(seed: number): () => number {
   };
 }
 
-/** Quantities like a real crowd: mostly one or two, sometimes a handful, rarely dozens. */
+/** Quantities like a real crowd: mostly one or two, sometimes a handful. */
 function crowdQuantity(random: () => number): number {
   const roll = random();
   if (roll < 0.5) {
     return 1;
   }
-  if (roll < 0.78) {
-    return 2 + Math.floor(random() * 2);
-  }
-  return roll < 0.94
-    ? 4 + Math.floor(random() * 7)
-    : 15 + Math.floor(random() * 26);
+  return roll < 0.8
+    ? 2 + Math.floor(random() * 2)
+    : 4 + Math.floor(random() * 7);
 }
 
 /** Mock only: other bidders bid around the current price (the dev controls' "+1 bidder"). */
@@ -666,8 +663,8 @@ export function simulateEditionBids(
     const center =
       clearBook(auction.book, prices, auction.terms.marginShare).step ??
       nearestStep(10n ** 16n, auction.terms);
-    // Roughly normal, about 14 steps (a third of a decade) either side.
-    const spread = (random() + random() + random() - 1.5) * 2 * 14;
+    // Roughly normal, about 6 steps (a third of a price doubling) either side.
+    const spread = (random() + random() + random() - 1.5) * 2 * 6;
     const step = Math.max(
       0,
       Math.min(auction.terms.steps - 1, Math.round(center + spread))

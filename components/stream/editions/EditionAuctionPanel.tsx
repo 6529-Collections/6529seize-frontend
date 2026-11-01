@@ -16,6 +16,8 @@ import WhyCount from "@/components/stream/editions/WhyCount";
 import YourBids from "@/components/stream/editions/YourBids";
 import { useStreamAction } from "@/components/stream/pages/common";
 import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/stream";
 import type {
   EditionAuctionActions,
   StreamActions,
@@ -75,6 +77,10 @@ export default function EditionAuctionPanel({
         : source.getOneOfOneAuction(oneOfOneSale)
   );
 
+  // The cards show the new state; only a failure needs words.
+  const failureOnly = (message: string | null) =>
+    message === t(locale, "stream.tx.done") ? null : message;
+
   const mine = new Map<number, number>();
   for (const bid of bids) {
     if (isLive(bid)) {
@@ -125,7 +131,7 @@ export default function EditionAuctionPanel({
     "tw-contents @4xl:tw-flex @4xl:tw-min-w-0 @4xl:tw-flex-col @4xl:tw-gap-4";
 
   return (
-    <div className="tw-@container">
+    <div className="tailwind-scope tw-@container">
       <StatusBanner
         auction={auction}
         oneOfOne={oneOfOne}
@@ -134,7 +140,7 @@ export default function EditionAuctionPanel({
         locale={locale}
         actions={{
           pending: bannerAction.pending,
-          message: bannerAction.message,
+          message: failureOnly(bannerAction.message),
           open: () =>
             void bannerAction.run((actions, from) =>
               editionActions(actions).open(from, edition)
@@ -173,7 +179,7 @@ export default function EditionAuctionPanel({
             bids={bids}
             prices={prices}
             locale={locale}
-            message={bidsAction.message}
+            message={failureOnly(bidsAction.message)}
             actions={{
               pending: bidsAction.pending,
               raise: (bid, step) =>
