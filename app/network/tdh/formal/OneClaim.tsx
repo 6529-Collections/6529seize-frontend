@@ -29,43 +29,47 @@ const SKETCH: readonly { readonly name: string; readonly key: SureKey }[] = [
 
 function ProofSketch({ m }: { readonly m: SureContext["m"] }) {
   return (
-    <details className="tw-group tw-mt-8 tw-w-fit tw-max-w-[860px] tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-5 tw-py-4 open:tw-w-auto md:tw-px-6">
+    // An unboxed disclosure: the summary reads as a link to open, the
+    // steps as a list under it.
+    <details className="tw-group tw-mt-8 tw-max-w-[860px]">
       <summary
-        className={`tw-cursor-pointer tw-list-none tw-text-[17px] tw-font-semibold tw-leading-6 tw-text-iron-50 marker:tw-hidden [&::-webkit-details-marker]:tw-hidden ${EX_FOCUS}`}
+        className={`tw-inline-flex tw-cursor-pointer tw-list-none tw-items-center tw-rounded-md tw-text-[17px] tw-font-semibold tw-leading-6 tw-text-primary-300 marker:tw-hidden hover:tw-underline hover:tw-underline-offset-[3px] [&::-webkit-details-marker]:tw-hidden ${EX_FOCUS}`}
       >
         <span
           aria-hidden="true"
-          className="tw-mr-2 tw-inline-block tw-text-iron-400 group-open:tw-rotate-90"
+          className="tw-mr-2 tw-inline-block group-open:tw-rotate-90 motion-reduce:tw-transition-none"
         >
           ›
         </span>
         {m("explained.tdh.sure.sketch.summary")}
       </summary>
-      <p className="tw-m-0 tw-mt-3 tw-text-[15px] tw-leading-6 tw-text-iron-300">
-        {m("explained.tdh.sure.sketch.intro")}
-      </p>
-      <ol className="tw-m-0 tw-mt-3 tw-list-none tw-p-0">
-        {SKETCH.map((step, index) => (
-          <li
-            key={step.name}
-            className="tw-grid tw-grid-cols-[28px_minmax(0,1fr)] tw-gap-x-2 tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-py-3"
-          >
-            <span className="tw-text-sm tw-font-semibold tw-tabular-nums tw-text-primary-300">
-              {index + 1}
-            </span>
-            <span className="tw-text-[15px] tw-leading-6 tw-text-iron-300">
-              <code className="tw-font-mono tw-text-[13.5px] tw-text-iron-50 [overflow-wrap:anywhere]">
-                {step.name}
-              </code>
-              {": "}
-              {m(step.key)}
-            </span>
-          </li>
-        ))}
-      </ol>
-      <p className="tw-m-0 tw-mt-1 tw-text-[15px] tw-leading-6 tw-text-iron-400">
-        {m("explained.tdh.sure.sketch.close")}
-      </p>
+      <div className="tw-mt-3 md:tw-pl-6">
+        <p className="tw-m-0 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+          {m("explained.tdh.sure.sketch.intro")}
+        </p>
+        <ol className="tw-m-0 tw-mt-3 tw-list-none tw-p-0">
+          {SKETCH.map((step, index) => (
+            <li
+              key={step.name}
+              className="tw-grid tw-grid-cols-[28px_minmax(0,1fr)] tw-gap-x-2 tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-py-3"
+            >
+              <span className="tw-text-sm tw-font-semibold tw-tabular-nums tw-text-primary-300">
+                {index + 1}
+              </span>
+              <span className="tw-text-[15px] tw-leading-6 tw-text-iron-300">
+                <code className="tw-font-mono tw-text-[13.5px] tw-text-iron-50 [overflow-wrap:anywhere]">
+                  {step.name}
+                </code>
+                {": "}
+                {m(step.key)}
+              </span>
+            </li>
+          ))}
+        </ol>
+        <p className="tw-m-0 tw-mt-1 tw-text-[15px] tw-leading-6 tw-text-iron-400">
+          {m("explained.tdh.sure.sketch.close")}
+        </p>
+      </div>
     </details>
   );
 }
