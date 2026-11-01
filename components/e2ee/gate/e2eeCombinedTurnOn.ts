@@ -98,7 +98,7 @@ export async function turnOnWithCombinedSignIn({
     if (result.reason === "rejected") {
       return "declined";
     }
-    // Owner decision: any other failure (no MLS key in time, a signing-only
+    // Any other failure (no MLS key in time, a signing-only
     // or failed challenge, a wallet that could not sign the sign-in message,
     // a failed login) still turns encrypted messages on, through their own
     // EIP-712 prompt; its errors and a decline show on the card as before.
