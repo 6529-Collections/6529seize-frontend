@@ -1,7 +1,6 @@
 import { asE2eeApiError } from "../api";
-import { base64ToBytes, bytesToBase64, randomHex } from "../bytes";
-import type { E2eeDeviceInfo, E2eeEngineStatus } from "../types";
-import type { E2eeBackupApi, ApiE2eeBackup } from "./api";
+import { bytesToBase64, randomHex } from "../bytes";
+import type { ApiE2eeBackup, ApiE2eeBackupChunk } from "./api";
 import {
   type BackupChainState,
   chainAt,
@@ -25,12 +24,10 @@ import {
 } from "./crypto";
 import {
   BackupError,
-  type BackupFailureCode,
   backupErrorCode,
   toBackupError,
 } from "./errors";
 import {
-  type BackupHistory,
   type BackupSegment,
   decodeSegment,
   type EncodedSegment,
@@ -40,7 +37,28 @@ import {
   packSegments,
 } from "./format";
 import { generateRecoveryCode, parseRecoveryCode } from "./recovery-code";
-import type { BackupLocalState, BackupStateStore } from "./state";
+import type { BackupLocalState } from "./state";
+import {
+  changedHistory,
+  decodeChunk,
+  followChunk,
+  startNewChain,
+} from "./local-chain";
+import type {
+  BackupScheduler,
+  E2eeBackupManagerDeps,
+  E2eeBackupPhase,
+  E2eeBackupSnapshot,
+  PreparedBackup,
+  RestoreResult,
+} from "./manager-types";
+
+export type {
+  BackupEngine,
+  E2eeBackupSnapshot,
+  PreparedBackup,
+  RestoreResult,
+} from "./manager-types";
 
 /**
  * Encrypted message-history backup (history backup v2, design P35 8).
@@ -52,9 +70,12 @@ import type { BackupLocalState, BackupStateStore } from "./state";
  * - Chunks form a hash chain (chain.ts). Before appending, a device follows
  *   whatever the server has after its last seen chunk (its own appends whose
  *   response was lost, other devices' appends) so it continues the same
- *   chain. If two devices append at the same moment the chain forks; the
- *   device that notices starts a new chain with a full snapshot and compacts
- *   everything before it, exactly like a regular compaction.
+ *   chain. Every append names the seq it must get (expected_seq); when two
+ *   devices append at the same moment the server refuses the later one
+ *   (409), which follows the other chunk and appends after it. Only when
+ *   that keeps failing, or the server predates the precondition and the
+ *   chain forks, the device starts a new chain with a full snapshot and
+ *   compacts everything before it, exactly like a regular compaction.
  * - Restoring on another device unwraps K_b with the code, downloads and
  *   verifies the whole chain, merges the segments (later chunks win) and
  *   imports the result into local history. Any gap, reorder, replay or
@@ -66,76 +87,12 @@ import type { BackupLocalState, BackupStateStore } from "./state";
  *   everything on the server.
  */
 
-/** The engine surface the backup module needs. */
-export interface BackupEngine {
-  getStatus(): E2eeEngineStatus;
-  getThisDevice(): E2eeDeviceInfo | null;
-  subscribe(listener: () => void): () => void;
-  backupHistory(): BackupHistory;
-  importBackupHistory(
-    history: BackupHistory
-  ): Promise<{ conversations: number; messages: number }>;
-}
-
-export type E2eeBackupPhase =
-  | "loading"
-  /** No backup on the server. */
-  | "off"
-  /** The server has a backup this device is not connected to. */
-  | "available"
-  /** This device backs up into the active (or pending) generation. */
-  | "on"
-  | "error";
-
-export interface E2eeBackupSnapshot {
-  readonly phase: E2eeBackupPhase;
-  /** The server's active generation. */
-  readonly backupCreatedAt: number | null;
-  readonly backupUpdatedAt: number | null;
-  readonly usedBytes: number;
-  readonly quotaBytes: number;
-  readonly lastBackupAt: number | null;
-  /** A backup or restore run is in progress. */
-  readonly busy: boolean;
-  /** The first full upload (or a replacement) has not finished yet. */
-  readonly uploading: boolean;
-  /** Last failure code of a background run (UI maps it to copy). */
-  readonly lastError: BackupFailureCode | null;
-}
-
-export interface PreparedBackup {
-  /** Display form; show once, never store. */
-  readonly code: string;
-  readonly secret: Uint8Array;
-}
-
-export interface RestoreResult {
-  readonly conversations: number;
-  readonly messages: number;
-}
-
-interface BackupScheduler {
-  setTimeout(callback: () => void, ms: number): unknown;
-  clearTimeout(handle: unknown): void;
-}
-
-interface E2eeBackupManagerDeps {
-  readonly profileId: string;
-  readonly engine: BackupEngine;
-  readonly api: E2eeBackupApi;
-  readonly state: BackupStateStore;
-  readonly now?: () => number;
-  readonly scheduler?: BackupScheduler;
-  /** Delay between a history change and the next incremental run. */
-  readonly debounceMs?: number;
-  /** Compact once a generation has this many chunks. */
-  readonly compactAtChunks?: number;
-}
-
 const DEFAULT_DEBOUNCE_MS = 30_000;
 const RETRY_MS = 5 * 60_000;
 const DEFAULT_COMPACT_AT = 1000;
 const LIST_PAGE = 500;
+/** Appends retried after a 409 before falling back to the fork repair. */
+const APPEND_CONFLICT_RETRIES = 3;
 
 const defaultScheduler: BackupScheduler = {
   setTimeout: (callback, ms) => globalThis.setTimeout(callback, ms),
@@ -148,6 +105,17 @@ const isNotFound = (error: unknown): boolean => {
   const apiError = asE2eeApiError(error);
   return apiError?.status === 404 && apiError.code === "E2EE_NOT_FOUND";
 };
+
+/** Another device appended first: the expected_seq precondition failed. */
+const isSeqConflict = (error: unknown): boolean => {
+  const apiError = asE2eeApiError(error);
+  return (
+    apiError?.status === 409 && apiError.code === "E2EE_BACKUP_SEQ_CONFLICT"
+  );
+};
+
+/** How one append attempt ended. */
+type AppendOutcome = "appended" | "forked" | "conflict";
 
 export class E2eeBackupManager {
   private readonly deps: E2eeBackupManagerDeps;
@@ -381,8 +349,9 @@ export class E2eeBackupManager {
       const segments = await this.pendingSegments(local);
       for (const segment of segments) {
         if (await this.appendSegment(local, deviceKey, segment)) {
-          // Another device appended at the same moment: the next run starts
-          // a new chain with a full snapshot and compacts the fork away.
+          // The chain forked (a server without the append precondition) or
+          // other devices kept appending first: the next run starts a new
+          // chain with a full snapshot and compacts everything before it.
           this.schedule(0);
           return;
         }
@@ -518,12 +487,63 @@ export class E2eeBackupManager {
     return linkChunk(chunkKey, backupId, tip, decodeChunk(chunk.data), mode);
   }
 
-  /** Seals and uploads one segment; true when the chain forked at it. */
+  /**
+   * Seals and uploads one segment; true when the chain forked at it or the
+   * fork repair is needed (the next run starts a new chain).
+   *
+   * A 409 means another device appended first: this device follows those
+   * chunks and seals the segment again after them, up to
+   * APPEND_CONFLICT_RETRIES times. A server without the precondition
+   * assigns the next seq anyway; an unexpected seq is then a fork.
+   */
   private async appendSegment(
     local: BackupLocalState,
     deviceKey: string,
     segment: EncodedSegment
   ): Promise<boolean> {
+    for (let retries = 0; ; retries += 1) {
+      const outcome = await this.tryAppend(local, deviceKey, segment);
+      if (outcome !== "conflict") {
+        return outcome === "forked";
+      }
+      if (
+        retries >= APPEND_CONFLICT_RETRIES ||
+        !(await this.followAfterConflict(local))
+      ) {
+        startNewChain(local);
+        await this.deps.state.put(local);
+        return true;
+      }
+    }
+  }
+
+  /**
+   * After a 409: follows the chunks other devices appended. False when the
+   * append cannot simply be retried: those chunks do not continue this
+   * device's chain, or there was nothing new to follow (the seq is then
+   * resynced so the repair's new chain lands).
+   */
+  private async followAfterConflict(local: BackupLocalState): Promise<boolean> {
+    const seen = local.chain.seq;
+    if (await this.withBackup(() => this.catchUp(local))) {
+      return false;
+    }
+    if (local.chain.seq > seen) {
+      return true;
+    }
+    const backup = await this.withBackup(() =>
+      this.deps.api.getBackup(local.backupId)
+    );
+    local.chain = { ...local.chain, seq: backup.next_seq - 1 };
+    return false;
+  }
+
+  /** One sealed append at the seq after this device's last seen chunk. */
+  private async tryAppend(
+    local: BackupLocalState,
+    deviceKey: string,
+    segment: EncodedSegment
+  ): Promise<AppendOutcome> {
     const link = nextLink(local.chain);
     const data = await sealChunk(
       local.chunkKey,
@@ -532,12 +552,21 @@ export class E2eeBackupManager {
       segment.json
     );
     const expectedSeq = local.chain.seq + 1;
-    const appended = await this.withBackup(() =>
-      this.deps.api.appendChunk(local.backupId, {
-        device_key: deviceKey,
-        data: bytesToBase64(data),
-      })
-    );
+    let appended: ApiE2eeBackupChunk;
+    try {
+      appended = await this.withBackup(() =>
+        this.deps.api.appendChunk(local.backupId, {
+          device_key: deviceKey,
+          data: bytesToBase64(data),
+          expected_seq: expectedSeq,
+        })
+      );
+    } catch (error) {
+      if (isSeqConflict(error)) {
+        return "conflict";
+      }
+      throw error;
+    }
     const tip: ChainTip = {
       epoch: link.epoch,
       index: link.index,
@@ -562,11 +591,12 @@ export class E2eeBackupManager {
         );
       }
     } else if (appended.seq !== expectedSeq) {
+      // Only a server that ignores expected_seq assigns another seq.
       forked = true;
       startNewChain(local);
     }
     await this.deps.state.put(local);
-    return forked;
+    return forked ? "forked" : "appended";
   }
 
   /** A 404 on our generation means it was deleted or replaced elsewhere. */
@@ -727,64 +757,4 @@ function phaseOf(
     return "on";
   }
   return serverHasBackup ? "available" : "off";
-}
-
-/** Chunk bytes from the API; malformed base64 never links. */
-function decodeChunk(data: string): Uint8Array {
-  try {
-    return base64ToBytes(data);
-  } catch {
-    return new Uint8Array(0);
-  }
-}
-
-/** Moves a writer's chain state past one chunk it found on the server. */
-function followChunk(
-  local: BackupLocalState,
-  seq: number,
-  linked: LinkedChunk | null
-): void {
-  if (!linked) {
-    // Does not continue this device's chain: remember it was seen.
-    local.chain = { ...local.chain, seq };
-    return;
-  }
-  const started =
-    local.chain.index >= 0 && linked.tip.epoch > local.chain.epoch;
-  if (started && local.chain.restart) {
-    // A newer chain already exists (another device's, or ours whose
-    // response was lost): follow it instead of starting another one. This
-    // run still uploads the full history into it, so the chunks before it
-    // can be compacted at the end of the run.
-    local.compactThroughSeq = Math.max(local.compactThroughSeq ?? 0, seq - 1);
-  }
-  local.chain = chainAt(linked.tip, seq, local.chain.restart && !started);
-}
-
-/**
- * The next chunk starts a new chain and the whole history is uploaded again
- * after it (compaction, or repairing a fork). The chunks before it are
- * compacted once that upload finishes.
- */
-function startNewChain(local: BackupLocalState): void {
-  local.chain = { ...local.chain, restart: true };
-  local.groupPrints = {};
-  local.messagePrints = {};
-}
-
-/** Records whose fingerprint differs from what this device uploaded. */
-function changedHistory(
-  history: BackupHistory,
-  local: BackupLocalState
-): BackupHistory {
-  return {
-    groups: history.groups.filter(
-      (group) => local.groupPrints[group.g] !== fingerprint(group)
-    ),
-    messages: history.messages.filter(
-      (message) =>
-        local.messagePrints[messageKey(message.g, message.id)] !==
-        fingerprint(message)
-    ),
-  };
 }
