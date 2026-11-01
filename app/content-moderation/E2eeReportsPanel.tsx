@@ -113,7 +113,8 @@ export default function E2eeReportsPanel({
 }) {
   const locale = useBrowserLocale();
   const [selected, setSelected] = useState<string | null>(null);
-  const [returnFocusTo, setReturnFocusTo] = useState<string | null>(null);
+  // The report whose review button gets focus back when its detail closes.
+  const returnFocusTo = useRef<string | null>(null);
   const [detailAnnouncement, setDetailAnnouncement] =
     useState<E2eeReportAnnouncement>(NO_ANNOUNCEMENT);
   const reviewButtons = useRef(new Map<string, HTMLButtonElement>());
@@ -142,13 +143,15 @@ export default function E2eeReportsPanel({
   );
 
   useEffect(() => {
-    if (selected === null && returnFocusTo !== null) {
+    const reportId = returnFocusTo.current;
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- The review buttons mount again only after the detail closes, so focus can move back only here.
+    if (selected === null && reportId !== null) {
+      returnFocusTo.current = null;
       // If the opened report left the list, keep keyboard users oriented at
       // the top of the tab instead of dropping focus.
-      (reviewButtons.current.get(returnFocusTo) ?? introRef.current)?.focus();
-      setReturnFocusTo(null);
+      (reviewButtons.current.get(reportId) ?? introRef.current)?.focus();
     }
-  }, [selected, returnFocusTo]);
+  }, [selected]);
 
   const announceDetail = useCallback(
     (announcement: E2eeReportAnnouncement) =>
@@ -195,7 +198,7 @@ export default function E2eeReportsPanel({
           onAnnounce={announceDetail}
           onBack={() => {
             setDetailAnnouncement(NO_ANNOUNCEMENT);
-            setReturnFocusTo(selected);
+            returnFocusTo.current = selected;
             setSelected(null);
           }}
         />
