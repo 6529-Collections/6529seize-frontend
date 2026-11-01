@@ -418,12 +418,42 @@ jobs:
           SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 ci
 
+      # TEMP A/B for the Memes RSC stall under the readonly guard; revert before merge.
       - name: Run small Playwright smoke pack
         if: matrix.lane == 'playwright-smoke'
         env:
           NEXT_DEV_DIST_DIR: ".next-playwright-smoke"
-          PLAYWRIGHT_READONLY: "1"
-        run: ./bin/6529 run test:e2e:smoke
+          PLAYWRIGHT_SKIP_WEB_SERVER: "1"
+        run: |
+          set +e
+          ./bin/6529 run dev > dev-server.log 2>&1 &
+          node -e '
+            const deadline = Date.now() + 600000;
+            (async function wait() {
+              try {
+                const response = await fetch("http://localhost:3001/the-memes");
+                if (response.ok) return console.log("dev server warm", response.status);
+              } catch {}
+              if (Date.now() > deadline) process.exit(1);
+              setTimeout(wait, 3000);
+            })();
+          '
+          run_arm() {
+            PLAYWRIGHT_READONLY="$2" ./bin/6529 exec playwright test tests/pages/the-memes.spec.ts \
+              -g "sort options keep pills" --project=web-desktop-chromium \
+              --repeat-each="$3" --retries=0 --workers=1 --reporter=list > "ab-$1.log" 2>&1
+            line="AB $1 readonly=$2 runs=$3: volume-stalls=$(grep -c 'Expected pattern: /sort=volume_days_7/' "ab-$1.log") url-stalls=$(grep -c 'Expected pattern: /sort=' "ab-$1.log") other-errors=$(grep -c 'Error: ' "ab-$1.log") | $(grep -oE '[0-9]+ (failed|passed|flaky)' "ab-$1.log" | tr '\n' ' ')"
+            echo "$line"
+            echo "$line" >> "$GITHUB_STEP_SUMMARY"
+          }
+          run_arm warmup 0 1
+          run_arm on1 1 5
+          run_arm off1 0 5
+          run_arm on2 1 5
+          run_arm off2 0 5
+          grep -hE "✘|Expected pattern|Received string" ab-*.log | head -40
+          echo "A/B complete; failing on purpose so the result is reported."
+          exit 1
 
       - name: Run Collect public browser pack
         if: matrix.lane == 'playwright-smoke' && needs.plan.outputs.playwright_collect_required == 'true'
