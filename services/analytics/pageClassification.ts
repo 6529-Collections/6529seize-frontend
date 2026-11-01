@@ -62,6 +62,7 @@ const RESERVED_TOP_LEVEL_ROUTE_SEGMENTS = new Set([
   "slide-page",
   "the-memes",
   "tools",
+  "validator",
   "waves",
   "xtdh",
 ]);

@@ -2149,6 +2149,22 @@
       "classification": "crawlable",
       "family": "tools"
     },
+    "/validator": {
+      "classification": "auth"
+    },
+    "/validator/guide": {
+      "classification": "auth"
+    },
+    "/validator/known-issues": {
+      "classification": "auth"
+    },
+    "/validator/locked": {
+      "classification": "exempt",
+      "exemptReason": "The password form that the /validator gate shows in place of a locked page; reached by rewrite, not by link."
+    },
+    "/validator/releases": {
+      "classification": "auth"
+    },
     "/wave-not-found": {
       "classification": "exempt",
       "exemptReason": "Internal rewrite target for malformed wave ids; always answers 404."

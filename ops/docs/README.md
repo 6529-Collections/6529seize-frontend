@@ -79,6 +79,10 @@ March 19, 2026.
   `/messages/encrypted`, `/messages/encrypted/new`,
   `/messages/encrypted/devices`, `/messages/encrypted/{chat}`
 - [Realtime](realtime/README.md): `/nft-activity`
+- [Validator Download Page](validator-download-page.md): password-protected
+  `/validator`, `/validator/guide`, `/validator/known-issues`,
+  `/validator/releases`; public `/validator/releases.json` and
+  `/validator/releases.json.sig`
 - [Network](network/README.md): `/network/*`, `/network/xtdh`, `/xtdh`
 - [Safe Collecting](delegation/README.md): `/safe-collecting` and `/safe-collecting/{param+}`
 - [NextGen](nextgen/README.md): `/nextgen` and `/nextgen/{param*}`
