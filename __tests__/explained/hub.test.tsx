@@ -81,7 +81,7 @@ describe("the hub, first version", () => {
     );
     // What anyone can repeat today, and what needs private code.
     expect(panel).toHaveTextContent(
-      "Anyone can check each day's file against the index and add up 6529.io's signed upload. Recomputing a day takes your own program, written from the specification, and your own read of Ethereum; 6529's two programs are private for now (D116)."
+      "Anyone can check each day's file against the index and add up 6529.io's signed upload. Recomputing a day takes your own program and your own read of Ethereum; 6529's are private for now (D116)."
     );
     expect(panel).not.toHaveTextContent("repeat the daily comparison");
   });

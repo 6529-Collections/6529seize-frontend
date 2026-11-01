@@ -72,7 +72,7 @@ export default function YourselfSection({
       who: "notYet",
       title: s("explained.tdh.sure.yourself.rerun"),
       body: m("explained.tdh.sure.yourself.rerunBody", {
-        generator: <CodeName>{p.v("manifest.generator")}</CodeName>,
+        generator: <CodeName wrap>{p.v("manifest.generator")}</CodeName>,
         command: <CodeName>lake build</CodeName>,
         commit: <CodeName>{p.v("manifest.commit")}</CodeName>,
         version: p.v("manifest.lean"),

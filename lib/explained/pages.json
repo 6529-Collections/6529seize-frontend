@@ -1,5 +1,5 @@
 {
-  "note": "The 6529 Explained pages of release 1 and what the gates check on each (SCORECARD.md). Each page lane owns its row: its sources, the decisions it relies on (dependsOn) and the record head it was checked through. The drift check fails when a newer decision touches a dependsOn decision and the page's sources do not name it in a DriftNote. States are the Break-it and interaction captures (renders/states); their selectors are the kit's: Lens renders data-lens, BreakIt data-break. Round 2 (2026-11-01): the word budgets of the overview, How it works, a day's receipt, How sure and Zero-knowledge proofs are raised (to 1,050, 2,050, 500, 2,500 and 2,800 words; How it works to 180 words a screen) for the depth the owner asked of the chapter on 2026-10-31: the full calculation with a worked trace, how the Lean proof goes, and what the proofs still trust. Round 3 (2026-11-01): the overview, How sure and Zero-knowledge proofs to 1,150, 2,750 and 3,100 words, for the corrections the fact-check and the judges asked for (xTDH defined, the model named as a model, the contract's immutability and verifier routes, the two random-input runs), and the hub to 155 words a screen for TDH spelled out on first use, the CC0 tool named, the proved items' limits and the schedule from its fact.",
+  "note": "The 6529 Explained pages of release 1 and what the gates check on each (SCORECARD.md). Each page lane owns its row: its sources, the decisions it relies on (dependsOn) and the record head it was checked through. The drift check fails when a newer decision touches a dependsOn decision and the page's sources do not name it in a DriftNote. States are the Break-it and interaction captures (renders/states); their selectors are the kit's: Lens renders data-lens, BreakIt data-break. Round 2 (2026-11-01): the word budgets of the overview, How it works, a day's receipt, How sure and Zero-knowledge proofs are raised (to 1,050, 2,050, 500, 2,500 and 2,800 words; How it works to 180 words a screen) for the depth the owner asked of the chapter on 2026-10-31: the full calculation with a worked trace, how the Lean proof goes, and what the proofs still trust. Round 3 (2026-11-01): the overview, How sure and Zero-knowledge proofs to 1,150, 2,750 and 3,100 words, for the corrections the fact-check and the judges asked for (xTDH defined, the model named as a model, the contract's immutability and verifier routes, the two random-input runs), and the hub to 155 words a screen for TDH spelled out on first use, the CC0 tool named, the proved items' limits and the schedule from its fact. Round 4 (2026-11-01): the overview to 1,175 words for the ladder's limits named in place and a line under each shelf page; How it works to 2,150 words and 190 a screen for every collection's rate in the full calculation (Memes, Gradients, NextGen) and beta in cents; a day's receipt to 520 for 6529.io's two uploads linked for diffing; Zero-knowledge proofs to 3,200 for a plain definition of a zero-knowledge proof and glosses of its terms.",
   "pages": [
     {
       "id": "hub",
@@ -37,7 +37,7 @@
       "dependsOn": ["D112", "D119", "D125", "D128", "D136", "D137", "D142"],
       "checkedThrough": "D152",
       "budget": {
-        "words": 1150,
+        "words": 1175,
         "firstScreen": 120,
         "figuresPer1000": 6
       },
@@ -73,10 +73,10 @@
       "dependsOn": ["D89", "D131", "D132", "D136"],
       "checkedThrough": "D152",
       "budget": {
-        "words": 2050,
+        "words": 2150,
         "firstScreen": 120,
         "figuresPer1000": 6,
-        "wordsPerScreen": 180
+        "wordsPerScreen": 190
       },
       "states": [
         {
@@ -214,7 +214,7 @@
       "dependsOn": ["D116", "D136", "D137", "D144"],
       "checkedThrough": "D152",
       "budget": {
-        "words": 500,
+        "words": 520,
         "firstScreenMin": 150,
         "firstScreen": 285
       },
@@ -265,7 +265,7 @@
       "dependsOn": ["D119", "D123", "D128", "D136", "D137"],
       "checkedThrough": "D152",
       "budget": {
-        "words": 3100,
+        "words": 3200,
         "firstScreenMin": 150,
         "firstScreen": 285,
         "wordsPerScreen": 300

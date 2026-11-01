@@ -102,8 +102,8 @@ export default function RunVectors({
       aria-label={s("explained.tdh.impl.here.label")}
       data-ex-allow-number=""
     >
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-        <div className="tw-max-w-[560px]">
+      <div className="tw-grid tw-gap-3.5">
+        <div>
           <b className="tw-block tw-text-base tw-font-semibold tw-text-iron-50">
             {s("explained.tdh.impl.here.label")}
           </b>

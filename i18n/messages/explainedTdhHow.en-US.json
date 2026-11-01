@@ -143,7 +143,7 @@
   "explained.tdh.how.netting.ruleSource": "P26 §7.1, D131. Proved for canonical sequences, when both replays have a result: the steps inside a transaction change no stack. They can still change an edition.",
   "explained.tdh.how.b.title": "Rarer cards count more per copy, and every card adds about the same.",
   "explained.tdh.how.b.body": "A card's rate is {H} divided by its edition: {H} is FirstGM's edition, the largest, so FirstGM's rate is {rateFirstGM} and a {cap}-copy card's is {rate310}. A release that ends below {threshold} copies minted gets a final airdrop up to {cap}, so while fewer than {threshold} are minted a card counts as if it had its claim limit (the most copies its mint allows), at most {cap}. From {threshold} on there is no top-up, and the minted count is the edition. The Memes lock {threshold} as the smallest edition a release ends with (D89), but the formula does not assume it: a card with no claim gets no floor.",
-  "explained.tdh.how.b.others": "Two other collections count the same way. A 6529 Gradient's rate is {H} divided by the Gradients minted, and never less than one TDH a day, so each adds {rateGradient}; a NextGen token's is {H} divided by the tokens minted in its collection.",
+  "explained.tdh.how.b.others": "Gradients and NextGen count the same way: a 6529 Gradient's rate is {H} over the Gradients minted, at least one TDH a day, so each adds {rateGradient}; a NextGen token's is {H} over the tokens minted in its collection.",
   "explained.tdh.how.rates.label": "The rate and the edition floor",
   "explained.tdh.how.rates.question": "Why does a rare card earn more per copy, yet every card adds about the same?",
   "explained.tdh.how.rates.with": "A card with",

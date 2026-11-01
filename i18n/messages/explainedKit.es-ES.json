@@ -128,7 +128,7 @@
   "explained.kit.day.cutoverName": "hacia el {date}: el cambio",
   "explained.kit.day.simulated": "simulado",
   "explained.kit.liveStrip.today": "Hoy en la red",
-  "explained.kit.liveStrip.legend": "Una casilla por cada resultado diario, fechado por su instantánea de medianoche. La casilla discontinua es hoy, aún abierta.",
+  "explained.kit.liveStrip.legend": "Discontinua: hoy, aún abierta.",
   "explained.kit.contents.label": "En esta página",
   "explained.kit.receipt.label": "El recibo del ciclo {cycle}",
   "explained.kit.receipt.result": "Resultado",

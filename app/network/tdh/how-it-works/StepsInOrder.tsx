@@ -178,7 +178,8 @@ function traceLine(
     return `(${n(t.rateCents)} × ${n(t.days)} + 50) div 100 = ${n(t.base)}`;
   }
   if (id === "final") {
-    return `HALFUP(B64(${n(t.base)} × B64(${n(t.betaCents)} ÷ 100))) = ${n(t.final)}`;
+    // Zero-width spaces after each bracket let a narrow column break there.
+    return `HALFUP(\u200bB64(\u200b${n(t.base)} × B64(\u200b${n(t.betaCents)} ÷ 100))) = ${n(t.final)}`;
   }
   const params = values[id];
   return params === undefined ? null : ht(locale, key, params);

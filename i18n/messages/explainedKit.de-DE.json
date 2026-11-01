@@ -128,7 +128,7 @@
   "explained.kit.day.cutoverName": "etwa {date}: die Umstellung",
   "explained.kit.day.simulated": "simuliert",
   "explained.kit.liveStrip.today": "Heute im Netzwerk",
-  "explained.kit.liveStrip.legend": "Eine Kachel je Tagesergebnis, datiert nach seinem Mitternachts-Snapshot. Die gestrichelte Kachel ist heute, noch offen.",
+  "explained.kit.liveStrip.legend": "Gestrichelt: heute, noch offen.",
   "explained.kit.contents.label": "Auf dieser Seite",
   "explained.kit.receipt.label": "Der Beleg für Zyklus {cycle}",
   "explained.kit.receipt.result": "Ergebnis",

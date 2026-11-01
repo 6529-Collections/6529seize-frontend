@@ -143,7 +143,9 @@ export default function BoostHistory({
           const lx = step.current ? x1 : x0 + 4;
           // A step too narrow for its label sets it under its line, where
           // the next step's riser cannot cross it.
-          const fits = step.current || x1 - x0 >= tag.length * 7.4 + 8;
+          const runEnd = run.at(-1);
+          const runX1 = runEnd ? x(runEnd.to) : x1;
+          const fits = step.current || runX1 - x0 >= tag.length * 7.4 + 8;
           // The first step has no riser to its left, so its label may sit
           // above the line even when it is wider than the step. A label that
           // would run into the one before it, on the same side and level,
@@ -160,11 +162,13 @@ export default function BoostHistory({
             above = !above;
           }
           const ly = above ? yy - 8 : yy + 18;
-          placed.push({
-            above,
-            y: yy,
-            right: step.current ? x1 : lx + tag.length * 7.4,
-          });
+          if (!sameAsPrev) {
+            placed.push({
+              above,
+              y: yy,
+              right: step.current ? x1 : lx + tag.length * 7.4,
+            });
+          }
           return (
             <g key={step.version} data-boost-step={step.version}>
               {/* Each version's start, ticked on the axis. */}

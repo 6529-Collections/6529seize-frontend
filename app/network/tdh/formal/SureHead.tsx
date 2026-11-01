@@ -134,7 +134,7 @@ export default function SureHead({
           })}
         </li>
       </ul>
-      <p className="tw-m-0 tw-mt-5 tw-max-w-[720px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
+      <p className="tw-m-0 tw-mt-5 tw-max-w-[620px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
         {m("explained.tdh.sure.score.terms")}
       </p>
       <SplitTable ctx={ctx} />
@@ -177,11 +177,33 @@ function SplitTable({ ctx }: { readonly ctx: SureContext }) {
     },
   ];
   return (
-    <div className="tw-mt-5 tw-max-w-[720px] tw-overflow-x-auto">
-      <table className="tw-w-full tw-border-collapse" data-split="">
-        <caption className="tw-sr-only">
-          {m("explained.tdh.sure.split.caption")}
-        </caption>
+    <div className="tw-mt-5 tw-max-w-[720px]">
+      {/* Narrow screens: one line a row, no table to scroll. */}
+      <ul
+        className="tw-m-0 tw-list-none tw-p-0 md:tw-hidden"
+        aria-label={ctx.s("explained.tdh.sure.split.caption")}
+      >
+        {rows.map((row) => (
+          <li
+            key={row.id}
+            className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-2.5 tw-text-[15px] tw-leading-6 tw-text-iron-300"
+          >
+            <b className="tw-block tw-font-semibold tw-text-iron-50">
+              {row.name}
+            </b>
+            {m("explained.tdh.sure.split.line", {
+              proved: row.proved,
+              shownFalse: row.shownFalse,
+              audited: row.audited,
+            })}
+          </li>
+        ))}
+      </ul>
+      <table
+        className="tw-w-full tw-border-collapse max-md:tw-hidden"
+        data-split=""
+        aria-label={ctx.s("explained.tdh.sure.split.caption")}
+      >
         <thead>
           <tr>
             <th scope="col" className={head}>

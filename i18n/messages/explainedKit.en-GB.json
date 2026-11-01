@@ -128,7 +128,7 @@
   "explained.kit.day.cutoverName": "about {date}: the cutover",
   "explained.kit.day.simulated": "simulated",
   "explained.kit.liveStrip.today": "Today on the network",
-  "explained.kit.liveStrip.legend": "One tile per day's result, dated by its midnight snapshot. The dashed tile is today, still open.",
+  "explained.kit.liveStrip.legend": "Dashed: today, still open.",
   "explained.kit.contents.label": "On this page",
   "explained.kit.receipt.label": "The receipt for cycle {cycle}",
   "explained.kit.receipt.result": "Result",

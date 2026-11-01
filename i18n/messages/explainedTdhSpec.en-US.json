@@ -122,7 +122,7 @@
   "explained.tdh.spec.s8-3.checkpoints": "The extra-set bonus at three checkpoints",
   "explained.tdh.spec.s8-4.title": "Final and totals",
   "explained.tdh.spec.s8-4.body": "FINAL is computed per token, and a record's final is their sum. The total is the sum of identity finals, never of wallet finals; a second total leaves out the burn addresses, which never enter any consensus weight ({dev13}).",
-  "explained.tdh.spec.s8-4.trapLabel": "The {binary64} tie",
+  "explained.tdh.spec.s8-4.trapLabel": "The double-precision tie",
   "explained.tdh.spec.s8-4.trap": "FINAL rounds a {binary64} product, not a decimal one. In {call} the product is exactly a half in decimals, but the {binary64} value of the boost lies just below it, so FINAL gives {final}, not {decimal}. Ties like this occur on real days: a program that multiplies in exact decimals or integers is off by one there.",
   "explained.tdh.spec.s8-6.title": "Daily rate",
   "explained.tdh.spec.s8-6.body": "What a record adds for each further day it holds what it holds: its boost times its copies' token rates, counting only copies at least one whole day old. It is the number behind “tomorrow's result adds n”. It is derived data, not part of a day's output (§9), and was not replayed against 6529.io, whose uploads do not carry it.",

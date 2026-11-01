@@ -88,7 +88,9 @@ function BlocksFigure({
           <b className="tw-font-semibold tw-text-iron-50">
             {facts.print("proofs.day.txBlocks")}
           </b>
-          {fill(locale, k("blocks.held"))}
+          <span className="max-sm:tw-hidden">
+            {fill(locale, k("blocks.held"))}
+          </span>
         </span>
         <span className="tw-absolute -tw-bottom-0 tw-right-px tw-h-1.5 tw-w-px tw-bg-iron-50" />
       </div>

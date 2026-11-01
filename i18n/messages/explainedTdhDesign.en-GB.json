@@ -25,7 +25,7 @@
   "explained.tdh.design.protects.old": "Old registrations cannot fill the fourth slot: links from before {date} never form a group of four.",
   "explained.tdh.design.protects.keys": "Make any one wallet safer. Each linked wallet is a full key to your profile; four wallets are four keys.",
   "explained.tdh.design.protects.manager": "Protect against one delegation manager acting for all your wallets: its key alone can change your consolidation.",
-  "explained.tdh.design.protects.tested": "Each candidate rule was checked exhaustively for a group of up to four wallets: every set of registrations an attacker holding one to three of your wallets could sign, and every order in which a new wallet's transactions can land. The cheapest alternative saved two transactions, once. P26's rule was checked against 6529.io's own code on {graphs} random link graphs and the real rows. These are 6529's own tests, not an outside audit.",
+  "explained.tdh.design.protects.tested": "Each candidate rule was checked exhaustively for a group of up to four wallets. That covers every set of registrations an attacker holding one to three of your wallets could sign, and every order in which a new wallet's transactions can land. The cheapest alternative saved two transactions, once. P26's rule was checked against 6529.io's own code on {graphs} random link graphs and the real rows. These are 6529's own tests, not an outside audit.",
   "explained.tdh.design.hwk.rule": "The rule",
   "explained.tdh.design.hwk.ruleBody": "D136; P26 §6.2 and §6.3 (TDH v1.4) at {head}.",
   "explained.tdh.design.hwk.analysis": "The analysis",

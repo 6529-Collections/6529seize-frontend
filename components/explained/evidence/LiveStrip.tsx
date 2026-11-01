@@ -52,7 +52,10 @@ export default function LiveStrip({
       at(date)
     );
   const face = (date: string) => (
-    <span aria-hidden="true" className="tw-grid tw-justify-items-center">
+    <span
+      aria-hidden="true"
+      className="tw-flex tw-w-full tw-flex-col tw-items-center"
+    >
       <span className="tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400">
         {month(date)}
       </span>
