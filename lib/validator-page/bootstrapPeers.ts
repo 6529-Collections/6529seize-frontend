@@ -80,7 +80,9 @@ export async function fillBootstrapPeers(
         return value;
       }
       complete = false;
-      return `<sentry-${index} ${kind === "PEER_ID" ? "peer ID" : `${kind.toLowerCase()} address`}>`;
+      const addressLabel = `${kind.toLowerCase()} address`;
+      const what = kind === "PEER_ID" ? "peer ID" : addressLabel;
+      return `<sentry-${index} ${what}>`;
     }
   );
   return { markdown: filled, complete };
