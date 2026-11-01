@@ -31,7 +31,7 @@ export class ApiAppDeviceGrant {
     */
     'mls_device_key'?: string | null;
     /**
-    * The MLS ciphersuite of mls_device_key; null without one.
+    * The MLS ciphersuite of mls_device_key; null or absent without one (0 is rejected).
     */
     'ciphersuite'?: number | null;
     /**

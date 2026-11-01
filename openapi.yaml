@@ -30915,7 +30915,9 @@ components:
         ciphersuite:
           type: integer
           nullable: true
-          description: The MLS ciphersuite of mls_device_key; null without one.
+          description: >-
+            The MLS ciphersuite of mls_device_key; null or absent without one
+            (0 is rejected).
         issued_at:
           type: integer
           format: int64
