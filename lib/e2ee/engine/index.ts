@@ -349,11 +349,13 @@ class E2eeEngineImpl implements E2eeEngineExt {
   /**
    * This device was revoked: local state is useless; back to enrollment. The
    * encrypted-backup state for the profile goes too (its chunk key belongs
-   * to this device).
+   * to this device). The background work stops but stays restartable: the
+   * gate keeps this engine, and enroll() starts it again for a new device.
    */
   private async wipe(): Promise<void> {
+    this.controller.stopBackground();
     await this.ctx.queue.run(async () => {
-      this.ctx.timers.dispose();
+      this.ctx.timers.cancelAll();
       this.ctx.mls?.dispose();
       this.ctx.mls = null;
       this.ctx.device = null;
@@ -815,8 +817,12 @@ class E2eeEngineImpl implements E2eeEngineExt {
   async revokeDevice(deviceKey: string): Promise<void> {
     this.requireReady();
     const target = deviceKey.toLowerCase();
+    // Decided before the request: this device's own E2EE_DEVICE_REVOKED hint
+    // can arrive first and start a wipe that clears ctx.device.
+    const isThisDevice = target === this.ctx.device?.deviceKey;
     await submitRevocation(this.ctx, target);
-    if (target === this.ctx.device?.deviceKey) {
+    if (isThisDevice) {
+      // Queued behind a wipe the hint started, so this resolves wiped.
       await this.wipe();
       return;
     }
