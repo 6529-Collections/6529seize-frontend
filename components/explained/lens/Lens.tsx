@@ -45,6 +45,9 @@ export function RuleRail({
     <div
       className={`tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-bg-black/20 tw-p-4 md:tw-border-l md:tw-border-t-0 md:tw-px-[22px] md:tw-py-5 ${anyOn ? "" : closed}`}
       data-rule-rail=""
+      // The rule is code, not prose: in a narrow rail a formula wraps at its
+      // tokens, and a short line of tokens is not a word left alone.
+      data-tdh-check-ignore="one-word-lines"
     >
       <span className="tw-mb-2.5 tw-block tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-400">
         {kt(locale, "explained.kit.lens.rule")}

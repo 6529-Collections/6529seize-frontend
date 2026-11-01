@@ -448,7 +448,11 @@ export default async function TdhYourWalletsPage({
                   key={title}
                   className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-px-[22px] tw-py-5"
                 >
-                  <h3 className={EX_TEXT.h4}>{wt(locale, title)}</h3>
+                  <h3
+                    className={`${EX_TEXT.h4} md:tw-text-[20px] md:tw-leading-7`}
+                  >
+                    {wt(locale, title)}
+                  </h3>
                   <p className="tw-m-0 tw-mt-2 tw-text-base tw-leading-[26px] tw-text-iron-300 md:tw-text-[18px] md:tw-leading-[29px]">
                     {wt(locale, body)}
                   </p>

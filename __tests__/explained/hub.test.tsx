@@ -77,11 +77,11 @@ describe("the hub, first version", () => {
     );
     // The theorem counts are the bundled manifest's, read through the facts.
     expect(panel).toHaveTextContent(
-      `${book.num("manifest.proved").toLocaleString("en-US")} Lean theorems about a Lean model of the rules: ${book.num("manifest.proved.tdh")} on TDH's, ${book.num("manifest.proved.p53")} on the validators' (P53, a proposal). ${book.num("manifest.shownFalse")} earlier statements were shown false and stay on record. The model's source is private, so for now only 6529 can rerun the proofs`
+      `${book.num("manifest.proved").toLocaleString("en-US")} Lean theorems about a Lean model of the rules: ${book.num("manifest.proved.tdh")} on TDH's, ${book.num("manifest.proved.p53")} on the validators' (P53). ${book.num("manifest.shownFalse")} earlier statements were shown false and stay on record.`
     );
     // The proved day carries its retired rule in the same sentence.
     expect(panel).toHaveTextContent(
-      "under the retired tdh-v1.0 rules. Mainnet's SP1 verifier accepts proof A in a read-only call, with nothing written to Ethereum. Proof B of that day is not done; under TDH v1.4, both proofs exist only for a synthetic test cycle."
+      "under the retired tdh-v1.0 rules. Mainnet's SP1 verifier accepts proof A in a read-only call, writing nothing to Ethereum. Proof B is not done; under TDH v1.4 both exist only for a synthetic test cycle."
     );
     // What anyone can repeat today, and what needs private code.
     expect(panel).toHaveTextContent(
