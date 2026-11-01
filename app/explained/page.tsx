@@ -35,7 +35,8 @@ async function factBook(params: ExplainedParams): Promise<FactBook> {
   ) {
     return createFactBook(fixtureFactInputs());
   }
-  return loadFactBook();
+  // Every day file, so the results written late or re-run are counted.
+  return loadFactBook(true);
 }
 
 export default async function ExplainedHubPage({

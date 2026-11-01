@@ -161,7 +161,11 @@ function FoundExample({ locale }: { readonly locale: SupportedLocale }) {
     <div data-ans="found" data-ex-allow-number="">
       <RecordTable rows={summary.rows} locale={locale} />
       <TotalLine summary={summary} date={date} locale={locale} />
-      <Included cycle={num(snapshot, "tdh.latest.cycle")} locale={locale} />
+      {/* A constructed record was never compared: no verdict sits on it, only
+          what the line says for a real one. */}
+      <p className="tw-m-0 tw-mt-4 tw-text-[15px] tw-leading-6 tw-text-iron-400">
+        {ot(locale, "explain.includedExample")}
+      </p>
     </div>
   );
 }

@@ -151,12 +151,14 @@ export function KitShell({
             fact: "tdh.latest.identities",
           }}
           locale={locale}
-          action={
-            <Link className={EX_BUTTON.cta} href="/network/tdh">
-              Chapter 01: TDH
-              <Icon kind="arrow" className="tw-size-[15px]" />
-            </Link>
-          }
+          actions={{
+            time: (
+              <Link className={EX_BUTTON.cta} href="/network/tdh">
+                Chapter 01: TDH
+                <Icon kind="arrow" className="tw-size-[15px]" />
+              </Link>
+            ),
+          }}
         />
       </Specimen>
       <Specimen

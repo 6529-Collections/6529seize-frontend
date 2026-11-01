@@ -365,6 +365,23 @@ export const FEED_FACTS = {
     value: (inputs) =>
       inputs.feed?.index.days.filter((day) => day.verdict === "OK").length,
   }),
+  /**
+   * Results written late or re-run (↻): known only when every day file the
+   * index lists was read, since only a file says when it was written.
+   */
+  "tdh.days.late": defineFact<number>({
+    format: "count",
+    unit: "days",
+    refresh: FEED_REFRESH,
+    source: indexSource,
+    value: (inputs) => {
+      const days = daySummaries(inputs);
+      if (days === undefined || days.some((day) => day.writtenAt === null)) {
+        return undefined;
+      }
+      return days.filter((day) => day.rewritten).length;
+    },
+  }),
   "tdh.days.first": defineFact<string>({
     format: "day",
     refresh: FEED_REFRESH,

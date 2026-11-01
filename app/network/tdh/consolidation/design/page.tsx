@@ -266,10 +266,7 @@ function howWeKnow(book: FactBook, locale: SupportedLocale) {
       title: dt(locale, "explained.tdh.design.hwk.rule"),
       body: rich(locale, "explained.tdh.design.hwk.ruleBody", {
         head: (
-          <>
-            6529chain{" "}
-            <FactValue fact={book.maybe("rules.chainHead")} locale={locale} />
-          </>
+          <FactValue fact={book.maybe("rules.p26Commit")} locale={locale} />
         ),
       }),
     },

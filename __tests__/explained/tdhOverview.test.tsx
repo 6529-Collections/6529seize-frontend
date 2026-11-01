@@ -58,7 +58,7 @@ describe("the machine", () => {
     expect(screen.getByText("3,941 ÷ 1,000 copies")).toBeInTheDocument();
     expect(screen.getByText("394")).toBeInTheDocument();
     expect(screen.getByText(/Tomorrow's result adds/)).toHaveTextContent(
-      "Tomorrow's result adds 4."
+      "Tomorrow's result adds 4, rounded per card."
     );
   });
 
@@ -133,11 +133,11 @@ describe("Explain my TDH", () => {
       screen.getByRole("button", { name: "A record found" })
     ).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByText("6,399 TDH")).toBeInTheDocument();
-    expect(screen.getByText("This record was included.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "See that day" })).toHaveAttribute(
-      "href",
-      "/network/tdh/verification/20744"
-    );
+    // A constructed record was never compared: no verdict sits on it.
+    expect(screen.queryByText("This record was included.")).toBeNull();
+    expect(
+      screen.getByText(/For a real record, this line says whether/)
+    ).toBeInTheDocument();
   });
 
   it("shows when a card just bought first counts, and a name not found", async () => {
@@ -347,10 +347,10 @@ describe("how we know, on the overview", () => {
     );
     const zk = container.querySelector('[data-rung="5"]');
     expect(zk).toHaveTextContent(
-      "Program A, the Rust core, in SP1: proved the day of Oct 11; mainnet's SP1 verifier accepts it in a read-only call."
+      "Proof A, program A in SP1: proved the day of Oct 11 under tdh-v1.0, the rules' earlier version; mainnet's SP1 verifier accepts it in a read-only call."
     );
     expect(zk).toHaveTextContent(
-      "Program B, written separately, in RISC Zero: proved a test cycle with program A under TDH v1.4; no mainnet day yet."
+      "Proof B, program B in RISC Zero, written separately: proved a synthetic test cycle with program A under TDH v1.4; no mainnet day yet."
     );
     expect(zk?.querySelector('[data-proof="A"]')).toHaveAttribute(
       "data-proved",
@@ -361,7 +361,7 @@ describe("how we know, on the overview", () => {
       "0"
     );
     expect(container.querySelector('[data-rung="6"]')).toHaveTextContent(
-      "A contract records a day only with both proofs. Tested on a copy of mainnet; not deployed."
+      "A contract would record a day only with both proofs. Built, tested on a copy of mainnet, not deployed."
     );
     expect(container.querySelector('[data-rung="7"]')).toHaveTextContent(
       /Built\s*0\.1\.0, being tested/

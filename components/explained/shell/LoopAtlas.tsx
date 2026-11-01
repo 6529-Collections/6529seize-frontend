@@ -28,7 +28,7 @@ export default function LoopAtlas({
   steps,
   initialStep,
   verify,
-  action,
+  actions,
   aside,
   locale,
 }: {
@@ -38,47 +38,49 @@ export default function LoopAtlas({
   readonly steps: readonly AtlasStep[];
   readonly initialStep: number;
   readonly verify: { readonly identities: string; readonly fact?: string };
-  /** The station card's action: "Chapter 01: TDH". */
-  readonly action?: ReactNode;
-  /** More panels under the station card: "Three things you can check today". */
+  /**
+   * The station card's action, by station key: "Chapter 01: TDH" for a
+   * station with a live chapter, the coming chapter's name for the others.
+   */
+  readonly actions?: Readonly<Record<string, ReactNode>>;
+  /** A panel under the loop and its card, full width: "Three things checked". */
   readonly aside?: ReactNode;
   readonly locale: SupportedLocale;
 }) {
   const [step, setStep] = useState(initialStep);
   const focus = steps[step]?.station ?? stations[0]?.key ?? "";
   const station = stations.find((entry) => entry.key === focus);
+  const action = station ? actions?.[station.key] : undefined;
   return (
-    <section
-      className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-6 lg:tw-grid-cols-[minmax(0,1fr)_380px] lg:tw-gap-10"
-      data-lens={id}
-    >
-      <div className="tw-min-w-0">
-        <LoopFigure
-          stations={stations}
-          focus={focus}
-          verify={verify}
-          locale={locale}
-        />
-        <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2.5">
-          <span className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-400">
-            {kt(locale, "explained.kit.loop.follow")}
-          </span>
-          <Seg
-            label={kt(locale, "explained.kit.loop.follow")}
-            attr="step"
-            value={String(step)}
-            onChange={(value) => setStep(Number(value))}
-            options={steps.map((entry, index) => ({
-              value: String(index),
-              label: `${index + 1} ${entry.label}`,
-            }))}
+    <section data-lens={id}>
+      <div className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-6 lg:tw-grid-cols-[minmax(0,1fr)_380px] lg:tw-gap-10">
+        <div className="tw-min-w-0">
+          <LoopFigure
+            stations={stations}
+            focus={focus}
+            verify={verify}
+            locale={locale}
           />
+          <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2.5">
+            <span className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-400">
+              {kt(locale, "explained.kit.loop.follow")}
+            </span>
+            <Seg
+              label={kt(locale, "explained.kit.loop.follow")}
+              attr="step"
+              phone="row"
+              value={String(step)}
+              onChange={(value) => setStep(Number(value))}
+              options={steps.map((entry, index) => ({
+                value: String(index),
+                label: `${index + 1} ${entry.label}`,
+              }))}
+            />
+          </div>
         </div>
-      </div>
-      <aside className="tw-grid tw-gap-4">
         {station && (
           <div
-            className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-p-6"
+            className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-p-6 lg:tw-sticky lg:tw-top-24"
             aria-live="polite"
             data-station-card={station.key}
           >
@@ -99,8 +101,10 @@ export default function LoopAtlas({
             )}
           </div>
         )}
-        {aside}
-      </aside>
+      </div>
+      {aside !== undefined && aside !== null && (
+        <div className="tw-mt-8 lg:tw-mt-10">{aside}</div>
+      )}
     </section>
   );
 }

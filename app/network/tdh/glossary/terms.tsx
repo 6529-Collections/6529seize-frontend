@@ -43,6 +43,7 @@ export const TERMS: readonly Term[] = [
     status: { mark: "decided", ref: "D137" },
     values: (p) => ({
       since: p.v("versions.current.since", "long"),
+      renamed: p.v("names.renamedAt", "long"),
       version: <CodeName>{p.v("rules.version")}</CodeName>,
       versions: (
         <Link className={EX_LINK} href="/network/tdh/historic-boosts">
@@ -53,6 +54,7 @@ export const TERMS: readonly Term[] = [
   },
   { id: "p26", status: { mark: "proposed" } },
   { id: "memes", status: LIVE },
+  { id: "cc0", status: { mark: "absolute", ref: "D89" } },
   { id: "card", status: { word: "explained.tdh.glossary.convention" } },
   {
     id: "edition",
@@ -119,6 +121,7 @@ export const TERMS: readonly Term[] = [
     }),
   },
   { id: "consolidation", status: { mark: "decided", ref: "D136" } },
+  { id: "pairkey", status: { mark: "decided", ref: "D136" } },
   { id: "delegation", status: LIVE },
   {
     id: "xtdh",
@@ -161,7 +164,14 @@ export const TERMS: readonly Term[] = [
     status: { mark: "decided", ref: "D119, D128" },
   },
   { id: "zkvm", status: { mark: "decided", ref: "D119" } },
-  { id: "groth16", status: { mark: "decided", ref: "P52" } },
+  // Both wrappers on BN254 is what is built (contracts open issue 6), not a
+  // decision: P52, a proposal, recommends another one for program B.
+  { id: "groth16", status: { mark: "open", ref: "P52 §3.7" } },
+  {
+    id: "tproof",
+    status: { mark: "decided", ref: "D128" },
+    values: (p) => ({ words: p.v("proofs.statement.words") }),
+  },
   {
     id: "word",
     status: { mark: "decided", ref: "D128" },

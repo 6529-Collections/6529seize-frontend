@@ -19,7 +19,7 @@ function Row({ row }: { readonly row: PageIndexRow }) {
       className={`tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 ${row.shelf ? "lg:tw-col-start-2" : "lg:tw-col-start-1"}`}
     >
       <Link
-        href={row.href}
+        href={row.href ?? "/network/tdh"}
         className={`tw-grid tw-grid-cols-[40px_minmax(0,1fr)_24px] tw-items-baseline tw-gap-x-3 tw-gap-y-1 tw-py-4 tw-no-underline hover:tw-bg-white/[0.015] md:tw-grid-cols-[56px_minmax(0,1fr)_30px] md:tw-gap-x-5 ${EX_FOCUS}`}
       >
         <span

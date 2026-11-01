@@ -27,6 +27,10 @@ import {
   isUnknownTdhChapterPath,
   tdhUnknownTarget,
 } from "@/lib/proxy/tdhChapterPaths";
+import {
+  explainedUnknownTarget,
+  isUnknownExplainedPath,
+} from "@/lib/proxy/explainedPaths";
 import { getAppEnvironment } from "@/config/appEnvironment";
 import { resolveVerificationSource } from "@/lib/tdh/verification/feedSource";
 import {
@@ -422,6 +426,16 @@ export default async function proxy(req: NextRequest) {
       return (
         (await accessDenial(req, normalizedPathname)) ??
         NextResponse.rewrite(tdhUnknownTarget(req.nextUrl), { status: 404 })
+      );
+    }
+
+    // The same for 6529 Explained's own addresses under /explained.
+    if (isUnknownExplainedPath(normalizedPathname)) {
+      return (
+        (await accessDenial(req, normalizedPathname)) ??
+        NextResponse.rewrite(explainedUnknownTarget(req.nextUrl), {
+          status: 404,
+        })
       );
     }
 

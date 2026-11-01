@@ -8,17 +8,17 @@ import Lens, { Readout, RuleValue } from "@/components/explained/lens/Lens";
 import { useBreakable } from "@/components/explained/lens/useBreakable";
 import StampLine from "@/components/explained/marks/StampLine";
 import type { SupportedLocale } from "@/i18n/locales";
+import { ENGINE } from "@/lib/explained/engine";
 import { formatCents, formatCount } from "@/lib/explained/format";
 import { ht } from "./copy";
-import { identityValues } from "./models/identity";
+import { identityValues, rateFromEditions } from "./models/identity";
 
 const B = "tw-font-semibold tw-text-iron-50";
 
 /**
  * Model D: an identity (TDH-DESIGN.md §5.7). Linked or not: one boost band
- * across both wallets' cards, or none. The cards are drawn at a 310-copy
- * card's rate (the facts layer's); the boost and every total are the
- * engine's (P26 §7.3, §8.3, §8.4). The Break it links one way only: a pair
+ * across both wallets' cards, or none. Each card is at its own rate (the
+ * facts layer's editions); the boost and every total are the engine's (P26 §7.3, §8.3, §8.4). The Break it links one way only: a pair
  * groups only when both wallets register it (§6.2).
  */
 export default function IdentityModel({
@@ -26,15 +26,19 @@ export default function IdentityModel({
 }: {
   readonly locale: SupportedLocale;
 }) {
-  const rate = useFact<number>("engine.rate.310");
+  const editions = useFact<number[][]>("memes.editions");
+  const h = useFact<number>("engine.H");
   const count = useFact<number>("memes.count");
   const max = useFact<number>("rules.maxWallets");
   const model = useBreakable<{ linked: boolean }>({ linked: true }, () => ({
     linked: false,
   }));
   const values =
-    rate && count
-      ? identityValues(Math.round(rate.value * 100), count.value)
+    editions && h && count
+      ? identityValues(
+          rateFromEditions(editions.value, h.value, ENGINE.rateCents),
+          count.value
+        )
       : null;
   if (!values || !max) {
     return (
@@ -64,11 +68,31 @@ export default function IdentityModel({
       </>
     );
   } else if (linked) {
-    say = ht(locale, "explained.tdh.how.identity.sayLinked", {
-      count: n(values.cards),
-      season: n(values.season),
-      boost,
-    });
+    const others = values.cards - values.typical.cards;
+    say = (
+      <>
+        {ht(locale, "explained.tdh.how.identity.sayLinked", {
+          count: n(values.cards),
+          season: n(values.season),
+          boost,
+        })}{" "}
+        {ht(
+          locale,
+          others > 0
+            ? "explained.tdh.how.identity.sayPerCard"
+            : "explained.tdh.how.identity.sayPerCardAll",
+          {
+            typical: n(values.typical.cards),
+            rate: formatCents(locale, values.typical.rateCents / 100),
+            days: n(values.days),
+            base: n(values.typical.base),
+            boost,
+            final: n(values.typical.linkedFinal),
+            others: n(others),
+          }
+        )}
+      </>
+    );
   } else {
     say = ht(locale, "explained.tdh.how.identity.sayApart", {
       a: n(values.aTdh),

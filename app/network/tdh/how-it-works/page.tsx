@@ -27,7 +27,7 @@ import NetworkSection from "./NetworkSection";
 import { EXAMPLE_CARD, FIRST_GM } from "./models/rates";
 import RatesLens from "./RatesLens";
 import StacksLens from "./StacksLens";
-import StepsInOrder from "./StepsInOrder";
+import StepsInOrder, { traceOf } from "./StepsInOrder";
 import { RecordValue } from "./_kit/RecordValue";
 import { FactText } from "@/components/explained/facts/FactText";
 import {
@@ -88,6 +88,15 @@ export default async function TdhHowItWorksPage({
   const recentCards = recent.filter(
     (id) => book.maybe<string>(`meme.${id}.firstMint`) !== null
   );
+
+  // One copy through every step, on today's H (the steps table's trace).
+  const hFact = book.maybe<number>("engine.H");
+  const capFact = book.maybe<number>("rules.editionFloorCap");
+  const countFact = book.maybe<number>("memes.count");
+  const trace =
+    hFact && capFact && countFact
+      ? traceOf(hFact.value, capFact.value, countFact.value)
+      : null;
 
   const chapter = chapterById("tdh");
   const page = chapter.read.find((entry) => entry.id === "how");
@@ -199,7 +208,7 @@ export default async function TdhHowItWorksPage({
 
         <NetworkSection book={book} locale={locale} />
 
-        <StepsInOrder locale={locale} />
+        <StepsInOrder locale={locale} trace={trace} />
 
         <PrevNext
           locale={locale}
@@ -329,7 +338,7 @@ function PartB({
         {ready && <RatesLens locale={locale} floorCard={floorCard} />}
       </div>
       <EdRow
-        no="8"
+        no="B"
         label={ht(locale, "explained.tdh.how.base.label")}
         className="tw-mt-16"
       >

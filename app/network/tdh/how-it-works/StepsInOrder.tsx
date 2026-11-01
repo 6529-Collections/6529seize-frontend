@@ -2,7 +2,8 @@ import Link from "next/link";
 import { DAY, REGISTRY_V14 } from "@/components/explained/engine/tdh";
 import { EX_LINK, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
-import { formatCount } from "@/lib/explained/format";
+import { ENGINE } from "@/lib/explained/engine";
+import { formatCents, formatCount } from "@/lib/explained/format";
 import { Para, Section, Statement, StatementLabel } from "./_kit/layout";
 import { rich } from "@/components/explained/rich";
 import { ht, type HowKey } from "./copy";
@@ -86,7 +87,8 @@ const STEPS: readonly Step[] = [
     id: "boost",
     href: "#part-c",
     sections: "§8.3",
-    rule: () => "beta = HALFUP((10⁶ + meme_u + grad_u) ÷ 10⁴)",
+    rule: () =>
+      "beta = HALFUP((10⁶ + meme_u + grad_u) ÷ 10⁴)\nmeme_u: seasons and sets, grad_u: Gradients, in millionths",
   },
   {
     id: "final",
@@ -102,10 +104,81 @@ const STEPS: readonly Step[] = [
   },
 ];
 
+/**
+ * One copy through every step (the full calculation by hand): a 310-copy
+ * card held one whole hundred days, in a wallet of its own with one
+ * Gradient. Every number is the engine's, on today's H.
+ */
+export interface Trace {
+  readonly h: number;
+  readonly edition: number;
+  readonly days: number;
+  readonly rateCents: number;
+  readonly base: number;
+  readonly betaCents: number;
+  readonly final: number;
+}
+
+export function traceOf(h: number, edition: number, nMemes: number): Trace {
+  const days = 100;
+  const rateCents = ENGINE.rateCents(h, edition);
+  const base = ENGINE.baseTdh(rateCents, days);
+  const betaCents = ENGINE.boostCents({
+    fullSets: 0,
+    gradients: 1,
+    completeSeasons: [],
+    genesis: false,
+    nakamoto: false,
+    nMemes,
+  });
+  return {
+    h,
+    edition,
+    days,
+    rateCents,
+    base,
+    betaCents,
+    final: ENGINE.finalTdh(base, betaCents),
+  };
+}
+
+function traceLine(
+  id: string,
+  t: Trace,
+  locale: SupportedLocale
+): string | null {
+  const n = (value: number) => formatCount(locale, value);
+  const c = (cents: number) => formatCents(locale, cents / 100);
+  const key = `explained.tdh.how.trace.${id}` as HowKey;
+  const values: Record<string, Record<string, string>> = {
+    snapshot: {},
+    eligible: {},
+    editions: { E: n(t.edition), H: n(t.h) },
+    rates: { H: n(t.h), E: n(t.edition), cents: n(t.rateCents) },
+    seasons: {},
+    identities: {},
+    stacks: { days: n(t.days) },
+    records: { base: n(t.base) },
+    boost: { beta: c(t.betaCents) },
+    final: { base: n(t.base), beta: c(t.betaCents), final: n(t.final) },
+    totals: { final: n(t.final) },
+  };
+  // The base is P26's notation with the trace's numbers in it: code, not
+  // copy, as the rules beside it are.
+  if (id === "base") {
+    return `(${n(t.rateCents)} × ${n(t.days)} + 50) div 100 = ${n(t.base)}`;
+  }
+  const params = values[id];
+  return params === undefined ? null : ht(locale, key, params);
+}
+
 export default function StepsInOrder({
   locale,
+  trace,
 }: {
   readonly locale: SupportedLocale;
+  /** The worked example, or null when the editions could not be read. */
+  readonly trace: Trace | null;
 }) {
   const n = (value: number) => formatCount(locale, value);
   return (
@@ -125,7 +198,7 @@ export default function StepsInOrder({
           {STEPS.map((step, index) => (
             <li
               key={step.id}
-              className="tw-grid tw-grid-cols-[32px_minmax(0,1fr)] tw-gap-x-3 tw-gap-y-1.5 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 md:tw-grid-cols-[40px_minmax(0,230px)_minmax(0,1fr)_150px] md:tw-items-baseline md:tw-gap-x-5"
+              className="tw-grid tw-grid-cols-[32px_minmax(0,1fr)] tw-gap-x-3 tw-gap-y-1.5 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 md:tw-grid-cols-[40px_minmax(0,200px)_minmax(0,1fr)_120px] md:tw-items-baseline md:tw-gap-x-5 xl:tw-grid-cols-[40px_minmax(0,190px)_minmax(0,1fr)_minmax(0,300px)_110px]"
               data-step={step.id}
             >
               <span className="tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-400">
@@ -140,8 +213,16 @@ export default function StepsInOrder({
               <code className="tw-col-start-2 tw-whitespace-pre-wrap tw-break-words tw-font-mono tw-text-[13.5px] tw-leading-[21px] tw-text-iron-300 md:tw-col-start-auto">
                 {step.rule(n)}
               </code>
+              {trace !== null && (
+                <span
+                  className="tw-col-start-2 tw-text-[14px] tw-leading-[21px] tw-text-primary-300 md:tw-col-span-2 md:tw-col-start-3 md:tw-row-start-2 xl:tw-col-span-1 xl:tw-col-start-auto xl:tw-row-start-auto"
+                  data-trace={step.id}
+                >
+                  {traceLine(step.id, trace, locale)}
+                </span>
+              )}
               <span
-                className={`tw-col-start-2 md:tw-col-start-auto md:tw-text-right ${EX_TEXT.small}`}
+                className={`tw-col-start-2 md:tw-col-start-4 md:tw-row-start-1 md:tw-text-right xl:tw-col-start-auto xl:tw-row-start-auto ${EX_TEXT.small}`}
               >
                 {`P26 ${step.sections}`}
               </span>
@@ -154,6 +235,14 @@ export default function StepsInOrder({
             halfup: <code className={CODE}>HALFUP</code>,
             b64: <code className={CODE}>B64</code>,
           })}
+          {trace !== null && (
+            <>
+              {" "}
+              <span className="tw-text-primary-300">
+                {ht(locale, "explained.tdh.how.trace.caption")}
+              </span>
+            </>
+          )}
         </figcaption>
       </figure>
     </Section>

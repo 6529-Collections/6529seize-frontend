@@ -19,12 +19,25 @@ export interface SegOption<V extends string> {
   readonly name?: string;
 }
 
+/** Labels this long, together, wrap into ragged rows on a phone. */
+const PHONE_STACK_CHARS = 30;
+
+function labelLength(option: SegOption<string>): number {
+  return typeof option.label === "string" ? option.label.length : 0;
+}
+
+/**
+ * Segmented buttons. On a phone, a group whose labels would wrap into
+ * ragged rows stacks as a list, one option a row; `phone` forces a layout:
+ * "row" keeps one row that scrolls sideways, with a fade at its edge.
+ */
 export function Seg<V extends string>({
   label,
   options,
   value,
   onChange,
   attr,
+  phone = "auto",
 }: {
   /** The group's accessible name: "Boost". */
   readonly label: string;
@@ -33,12 +46,32 @@ export function Seg<V extends string>({
   readonly onChange: (value: V) => void;
   /** A data attribute carrying each option's value: "card" gives data-card="4". */
   readonly attr?: string;
+  readonly phone?: "auto" | "stack" | "row" | "wrap";
 }) {
+  const chars = options.reduce((sum, option) => sum + labelLength(option), 0);
+  let layout = phone;
+  if (layout === "auto") {
+    layout =
+      options.length > 2 && chars > PHONE_STACK_CHARS ? "stack" : "wrap";
+  }
+  const group = {
+    wrap: "tw-inline-flex tw-flex-wrap tw-rounded-2xl",
+    stack:
+      "max-md:tw-flex max-md:tw-w-full max-md:tw-flex-col max-md:tw-rounded-xl md:tw-inline-flex md:tw-flex-wrap",
+    row: "max-md:tw-flex max-md:tw-flex-nowrap max-md:tw-overflow-x-auto max-md:tw-rounded-full max-md:[mask-image:linear-gradient(90deg,#000_88%,transparent)] max-md:[scrollbar-width:none] md:tw-inline-flex md:tw-flex-wrap",
+  }[layout];
+  const button = {
+    wrap: "tw-grow tw-rounded-full",
+    stack:
+      "max-md:tw-w-full max-md:tw-rounded-lg max-md:tw-px-3.5 max-md:tw-text-left md:tw-rounded-full",
+    row: "tw-rounded-full max-md:tw-whitespace-nowrap",
+  }[layout];
   return (
     <div
-      className="tw-inline-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-gap-0.5 tw-rounded-2xl tw-border tw-border-solid tw-border-iron-700 tw-p-[3px] md:tw-rounded-full"
+      className={`${group} tw-min-w-0 tw-max-w-full tw-gap-0.5 tw-border tw-border-solid tw-border-iron-700 tw-p-[3px] md:tw-rounded-full`}
       role="group"
       aria-label={label}
+      data-seg-layout={layout}
     >
       {/* Options keep their whole label on one line and move to the next
           row first; one wider than the whole control wraps inside it. */}
@@ -52,7 +85,7 @@ export function Seg<V extends string>({
             onClick={() => onChange(option.value)}
             {...(option.name ? { "aria-label": option.name } : {})}
             {...(attr ? { [`data-${attr}`]: option.value } : {})}
-            className={`tw-min-h-10 tw-max-w-full tw-shrink-0 tw-grow tw-basis-auto tw-cursor-pointer tw-rounded-full tw-border-0 tw-px-3 tw-py-1 tw-text-[13px] tw-font-semibold tw-leading-4 md:tw-min-h-9 md:tw-grow-0 md:tw-px-3.5 md:tw-text-sm ${on ? "tw-bg-iron-50 tw-text-iron-950" : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-50"} ${EX_FOCUS}`}
+            className={`tw-min-h-10 tw-max-w-full tw-shrink-0 tw-basis-auto tw-cursor-pointer tw-border-0 tw-px-3 tw-py-1 tw-text-[13px] tw-font-semibold tw-leading-4 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none md:tw-min-h-9 md:tw-grow-0 md:tw-px-3.5 md:tw-text-sm ${button} ${on ? "tw-bg-iron-50 tw-text-iron-950" : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-50"} ${EX_FOCUS}`}
           >
             {option.label}
           </button>

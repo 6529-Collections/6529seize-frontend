@@ -134,6 +134,8 @@ export default function SureHead({
             kernel: p.v("manifest.shownFalse.kernel"),
             tdh: p.v("manifest.audited.tdh"),
             p53: p.v("manifest.audited.p53"),
+            provedTdh: p.v("manifest.proved.tdh"),
+            provedP53: p.v("manifest.proved.p53"),
           })}
         </li>
         <li>

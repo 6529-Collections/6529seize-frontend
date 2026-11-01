@@ -244,15 +244,25 @@ describe("the network's distribution", () => {
     });
   });
 
-  it("draws nothing when the API does not answer", async () => {
+  it("draws the shipped snapshot, with its read date, when the API does not answer", async () => {
     global.fetch = jest
       .fn()
       .mockResolvedValue({ ok: false }) as unknown as typeof fetch;
-    await expect(loadNetworkDistribution()).resolves.toBeNull();
+    const failed = await loadNetworkDistribution();
+    expect(failed).toMatchObject({ fromSnapshot: true });
+    expect(failed?.readAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    expect(failed?.groups.map((group) => group.key)).toEqual([
+      "top",
+      "next",
+      "next2",
+      "rest",
+    ]);
     global.fetch = jest
       .fn()
       .mockRejectedValue(new Error("down")) as unknown as typeof fetch;
-    await expect(loadNetworkDistribution()).resolves.toBeNull();
+    await expect(loadNetworkDistribution()).resolves.toMatchObject({
+      fromSnapshot: true,
+    });
   });
 
   it("says when 6529.io answered, from the API's own Date header", async () => {

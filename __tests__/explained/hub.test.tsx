@@ -48,10 +48,15 @@ describe("the hub, first version", () => {
     expect(
       within(card as HTMLElement).getByRole("link", { name: /Chapter 01: TDH/ })
     ).toHaveAttribute("href", "/network/tdh");
-    await user.click(screen.getByRole("button", { name: "5 Votes" }));
-    expect(container.querySelector("[data-station-card]")).toHaveTextContent(
-      "221 decisions"
+    await user.click(screen.getByRole("button", { name: "5 Decide" }));
+    const decide = container.querySelector("[data-station-card]");
+    expect(decide).toHaveAttribute("data-station-card", "decide");
+    // A station without a live chapter names the chapter that will explain
+    // it, and links nowhere.
+    expect(decide).toHaveTextContent(
+      "Explained in Waves and decisions, a chapter still coming."
     );
+    expect(within(decide as HTMLElement).queryByRole("link")).toBeNull();
     expect(
       container.querySelector('[data-station="art"] [data-fact="memes.count"]')
     ).toHaveTextContent("562 cards");
@@ -67,12 +72,15 @@ describe("the hub, first version", () => {
     expect(panel).toHaveTextContent(
       `${book.num("manifest.proved").toLocaleString("en-US")} Lean theorems (${book.num("manifest.proved.tdh")} about TDH's rules, ${book.num("manifest.proved.p53")} about the validators'), with ${book.num("manifest.shownFalse")} earlier statements shown false and kept on record.`
     );
+    // The proved day carries its retired rule in the same sentence.
     expect(panel).toHaveTextContent(
-      "program A ran inside SP1, a zero-knowledge prover, and mainnet's SP1 verifier contract accepts the proof without a transaction. Proof B of that day is not done."
+      "under the retired tdh-v1.0 rules. Program A ran inside SP1, a zero-knowledge prover, and mainnet's SP1 verifier contract accepts the proof without a transaction. Proof B of that day is not done, and under TDH v1.4 only a synthetic test cycle is proved by both."
     );
+    // What anyone can repeat today, and what needs private code.
     expect(panel).toHaveTextContent(
-      "Anyone can repeat the daily comparison from its published files. The Lean source and the proof files are private for now, so those two are run by 6529 and read by everyone."
+      "Anyone can check each day's file against the index and add up 6529.io's signed Arweave upload. Recomputing a day needs the validator code, private for now (D116)"
     );
+    expect(panel).not.toHaveTextContent("repeat the daily comparison");
   });
 
   it("lists TDH live, the rest coming in order, with no link until they ship", () => {
@@ -111,7 +119,7 @@ describe("the hub, first version", () => {
       })
     ).toBeInTheDocument();
     expect(container.querySelector('[data-limit="limit"]')).toHaveTextContent(
-      "Meme Card #1 shows a CryptoPunk, which is Yuga Labs' copyright. 6529 Gradients are not CC0."
+      "Meme Card #1 shows a CryptoPunk, whose copyright was never the artist's to give, so CC0 does not cover it"
     );
     expect(
       screen.getByRole("link", { name: "Download Meme #2" })

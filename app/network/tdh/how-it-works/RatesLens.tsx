@@ -16,6 +16,7 @@ import { EX_LINK } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { ENGINE } from "@/lib/explained/engine";
 import { factFromSnapshot, type FactId } from "@/lib/explained/facts";
+import type { HalfCent } from "@/lib/explained/registry/referenceFacts";
 import { formatCents, formatCount } from "@/lib/explained/format";
 import { rich } from "@/components/explained/rich";
 import { ht } from "./copy";
@@ -74,6 +75,8 @@ export default function RatesLens({
     ? ENGINE.effectiveEdition(threshold - 1, cap).edition
     : (real?.edition?.value ?? null);
   const editions = useFact<number[][]>("memes.editions");
+  const halfCentFact = useFact<HalfCent>("engine.halfCent");
+  const halfCent = halfCentFact?.value ?? null;
   const model = useBreakable<{ pick: Pick }>({ pick: "cap" }, (state) => ({
     ...state,
     pick: "newest",
@@ -259,6 +262,13 @@ export default function RatesLens({
             on: true,
           },
           {
+            text: ht(locale, "explained.tdh.how.rates.ruleAdj", {
+              adj: n(pick === "firstgm" ? burned : 0),
+              burned: n(-burned),
+            }),
+            on: pick === "firstgm",
+          },
+          {
             text: ht(locale, "explained.tdh.how.rates.ruleH", {
               H: n(h),
               gross: n(h - burned),
@@ -275,6 +285,19 @@ export default function RatesLens({
               cents: <RuleValue>{n(cents)}</RuleValue>,
             }),
           },
+          ...(halfCent === null
+            ? []
+            : [
+                {
+                  // P26 §8.1's half-cent trap, on today's H: where H ÷ E is
+                  // an exact half cent, the two roundings can round down.
+                  text: ht(locale, "explained.tdh.how.rates.ruleHalfCent", {
+                    E: n(halfCent.example),
+                    rate: n(halfCent.rate),
+                    halfUp: n(halfCent.halfUp),
+                  }),
+                },
+              ]),
         ],
         source: rich(locale, "explained.tdh.how.rates.ruleSource", {
           threshold: n(threshold),

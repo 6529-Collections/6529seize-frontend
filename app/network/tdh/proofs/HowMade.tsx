@@ -68,7 +68,9 @@ function BlocksFigure({
       label: fill(locale, k("blocks.held")),
       n: facts.print("proofs.day.txBlocks"),
       width: pct(held),
-      tone: "tw-bg-primary-400",
+      tone: "tw-bg-iron-50",
+      // A part of the blocks whose receipts were rebuilt, not a third kind.
+      within: true,
     },
   ];
   return (
@@ -92,7 +94,7 @@ function BlocksFigure({
           style={{ width: pct(receipts) }}
         >
           <span
-            className="tw-absolute tw-inset-y-0 tw-right-0 tw-min-w-[3px] tw-bg-primary-400"
+            className="tw-absolute tw-inset-y-0 tw-right-0 tw-min-w-[3px] tw-bg-iron-50"
             style={{ width: `${(held / Math.max(1, receipts)) * 100}%` }}
           />
         </span>
@@ -101,7 +103,7 @@ function BlocksFigure({
         {rows.map((row) => (
           <li
             key={row.id}
-            className="tw-grid tw-grid-cols-[12px_minmax(0,1fr)] tw-items-baseline tw-gap-2.5 tw-text-[15px] tw-leading-[22px] tw-text-iron-300"
+            className={`tw-grid tw-grid-cols-[12px_minmax(0,1fr)] tw-items-baseline tw-gap-2.5 tw-text-[15px] tw-leading-[22px] tw-text-iron-300 ${"within" in row ? "max-md:tw-pl-6" : ""}`}
           >
             <span
               className={`tw-inline-block tw-size-3 tw-rounded-sm ${row.tone}`}
@@ -172,7 +174,7 @@ function PhasesFigure({
                 aria-hidden="true"
               >
                 <span
-                  className={`tw-block tw-h-full ${index === 0 ? "tw-bg-primary-400" : "tw-bg-iron-400"}`}
+                  className={`tw-block tw-h-full ${index === 0 ? "tw-bg-iron-50" : "tw-bg-iron-400"}`}
                   style={{ width: `${(part.steps / top) * 100}%` }}
                 />
               </span>
@@ -186,7 +188,7 @@ function PhasesFigure({
       <p className={`${EX_TEXT.cap} tw-m-0 tw-mt-3 tw-max-w-[760px]`}>
         {rich(locale, k("phases.cap"), {
           build: (
-            <code className="tw-font-mono tw-text-[14px]">
+            <code className="tw-font-mono tw-text-[14px] tw-text-inherit">
               {facts.print("proofs.phases.build")}
             </code>
           ),

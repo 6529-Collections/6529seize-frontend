@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { getNodeEnv } from "@/config/env";
-import { EX_FILL, EX_HEX } from "../tokens";
+import { EX_FILL, EX_HEX, EX_MOTION } from "../tokens";
 import { stripeColor, stripeHues } from "../marks/HashStripes";
 
 /**
@@ -150,14 +150,16 @@ export function Tile({
         fill={you ? EX_FILL.youArea : EX_FILL.neutralArea}
         stroke={you ? EX_HEX.you : EX_HEX.ink3}
         strokeWidth={1.5}
+        className={EX_MOTION.model}
       />
-      {band && band.height > 0.5 && (
+      {band && (
         <rect
           x={x}
           y={y - band.height}
           width={Math.max(0, width)}
-          height={band.height}
+          height={band.height > 0.5 ? band.height : 0}
           fill={`url(#${band.hatch})`}
+          className={EX_MOTION.model}
         />
       )}
     </g>

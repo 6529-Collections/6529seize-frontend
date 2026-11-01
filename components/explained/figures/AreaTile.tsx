@@ -15,7 +15,7 @@ import { useMeasuredWidth } from "./useMeasuredWidth";
  */
 const AREA_DAY_AXES = [200, 400, 800, 1600] as const;
 const MAX_RATE = 14;
-const HEIGHT = 124;
+const HEIGHT = 164;
 const PAD = { left: 2, right: 2, top: 10, bottom: 26 } as const;
 /** Narrower than this, the reference's label cannot be read whole, so it is not drawn. */
 const REFERENCE_MIN_WIDTH = 280;
@@ -100,6 +100,22 @@ export default function AreaTile({
           y2={baseY}
           stroke={EX_HEX.line2}
         />
+        {/* The rate axis, 0 to 14: faint lines at its middle and its top, so
+            a short card reads as short against the scale. */}
+        {[MAX_RATE / 2, MAX_RATE].map((value) => {
+          const y = baseY - (value / MAX_RATE) * innerH;
+          return (
+            <g key={value} aria-hidden="true">
+              <line
+                x1={PAD.left}
+                y1={y}
+                x2={PAD.left + innerW}
+                y2={y}
+                stroke={EX_HEX.line}
+              />
+            </g>
+          );
+        })}
         {showReference && (
           <g>
             <line
@@ -157,7 +173,7 @@ export default function AreaTile({
             y={baseY - 10}
             size={13}
             weight={600}
-            tone="fails"
+            tone="ink2"
           >
             {kt(locale, "explained.kit.area.none", {
               days: formatCount(locale, 0),

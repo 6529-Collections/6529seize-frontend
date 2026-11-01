@@ -1,3 +1,4 @@
+import { CodeName } from "@/components/explained/reference/parts";
 import AssuranceLadder, {
   type Rung,
 } from "@/components/explained/evidence/AssuranceLadder";
@@ -93,6 +94,7 @@ export default function TwoQuestions({ ctx }: { readonly ctx: SureContext }) {
       detail: m("explained.tdh.sure.day.zkDetail", {
         cycle: p.v("site.proofA.cycle"),
         total: p.v("site.proofA.totalWithoutBurn"),
+        version: <CodeName>{p.v("proofs.day.ruleVersion")}</CodeName>,
         link: (
           <a className={EX_LINK} href={PROOFS_HREF}>
             {s("explained.tdh.sure.day.zkLink")}

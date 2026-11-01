@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { Icon } from "@/components/explained/marks/glyphs";
 import { kt } from "@/components/explained/i18n";
 import LoopAtlas, {
@@ -43,7 +44,6 @@ function stations(book: FactBook, locale: SupportedLocale): AtlasStation[] {
       sub: ht(locale, "station.holdSub"),
       num: ht(locale, "station.holdNum", { count: f("tdh.latest.wallets") }),
       fact: "tdh.latest.wallets",
-      chapter: tdh,
       say: ht(locale, "station.holdSay"),
     },
     {
@@ -67,10 +67,9 @@ function stations(book: FactBook, locale: SupportedLocale): AtlasStation[] {
       name: ht(locale, "station.decide"),
       sub: ht(locale, "station.decideSub"),
       num: ht(locale, "station.decideNum", {
-        count: f("site.mainStage.decisions"),
-        through: f("site.mainStage.through"),
+        next: f("site.mainStage.next"),
       }),
-      fact: "site.mainStage.decisions",
+      fact: "site.mainStage.next",
       say: ht(locale, "station.decideSay"),
     },
     {
@@ -83,15 +82,47 @@ function stations(book: FactBook, locale: SupportedLocale): AtlasStation[] {
   ];
 }
 
+/** "Follow one copy": the stations in the order a copy meets them. */
 function steps(locale: SupportedLocale): AtlasStep[] {
-  return [
-    { label: ht(locale, "step.minted"), station: "art" },
-    { label: ht(locale, "step.collected"), station: "hold" },
-    { label: ht(locale, "step.held"), station: "time" },
-    { label: ht(locale, "step.standing"), station: "standing" },
-    { label: ht(locale, "step.votes"), station: "decide" },
-    { label: ht(locale, "step.mints"), station: "execute" },
-  ];
+  return (["art", "hold", "time", "standing", "decide", "execute"] as const).map(
+    (station) => ({ label: ht(locale, `station.${station}`), station })
+  );
+}
+
+/** The chapter that explains each station (MAP.md §3). */
+const STATION_CHAPTER: Readonly<Record<string, string>> = {
+  art: "memes",
+  hold: "tdh",
+  time: "tdh",
+  standing: "standing",
+  decide: "waves",
+  execute: "network",
+};
+
+/**
+ * Each station card's action: a live chapter's link, or the name of the
+ * chapter that will explain it, marked coming.
+ */
+function stationActions(locale: SupportedLocale): Record<string, ReactNode> {
+  const actions: Record<string, ReactNode> = {};
+  for (const [station, id] of Object.entries(STATION_CHAPTER)) {
+    const chapter = chapterById(id);
+    actions[station] =
+      chapter.status === "live" && chapter.href ? (
+        <Link className={EX_BUTTON.cta} href={chapter.href}>
+          {ht(locale, "chapterCta", {
+            number: chapter.number ?? "",
+            title: kt(locale, chapter.title),
+          })}
+          <Icon kind="arrow" className="tw-size-4" />
+        </Link>
+      ) : (
+        <span className="tw-text-[15px] tw-leading-6 tw-text-iron-400">
+          {ht(locale, "chapterComing", { title: kt(locale, chapter.title) })}
+        </span>
+      );
+  }
+  return actions;
 }
 
 /** "Follow one copy" opens on the copy being held: the Time station. */
@@ -104,7 +135,6 @@ export default function HubLoop({
   readonly book: FactBook;
   readonly locale: SupportedLocale;
 }) {
-  const tdh = chapterById("tdh");
   const equal = book.maybe("tdh.latest.agree.live.identities.equal");
   return (
     <div className="tw-mt-8">
@@ -117,15 +147,7 @@ export default function HubLoop({
           identities: equal === null ? NOT_AVAILABLE : fmt(equal, locale),
           fact: "tdh.latest.agree.live.identities.equal",
         }}
-        action={
-          <Link className={EX_BUTTON.cta} href={tdh.href ?? "/network/tdh"}>
-            {ht(locale, "chapterCta", {
-              number: tdh.number ?? "",
-              title: kt(locale, tdh.title),
-            })}
-            <Icon kind="arrow" className="tw-size-4" />
-          </Link>
-        }
+        actions={stationActions(locale)}
         aside={<CheckableToday book={book} locale={locale} />}
       />
     </div>

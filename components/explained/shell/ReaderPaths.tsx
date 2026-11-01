@@ -27,7 +27,12 @@ export default function ReaderPaths({
   return (
     <ul
       aria-label={kt(locale, "explained.kit.paths.label")}
-      className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-3.5 tw-p-0 md:tw-grid-cols-2 xl:tw-grid-cols-4"
+      className={`tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-3.5 tw-p-0 md:tw-grid-cols-2 ${
+        paths.length === 7
+          ? // Seven paths: four, then three that fill the row, never an empty slot.
+            "xl:tw-grid-cols-12 xl:[&>li:nth-child(-n+4)]:tw-col-span-3 xl:[&>li:nth-child(n+5)]:tw-col-span-4"
+          : "xl:tw-grid-cols-4"
+      }`}
     >
       {paths.map((path) => (
         <li key={path.who}>

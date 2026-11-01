@@ -11,7 +11,7 @@
   "explained.tdh.versions.table": "Every TDH version 6529.io has run",
   "explained.tdh.versions.col.version": "Version",
   "explained.tdh.versions.col.when": "In effect",
-  "explained.tdh.versions.col.fullSet": "Full-set boost",
+  "explained.tdh.versions.col.fullSet": "Full-set boost, from seasons",
   "explained.tdh.versions.col.seasons": "Seasons that can pay",
   "explained.tdh.versions.name": "TDH v{version}",
   "explained.tdh.versions.live": "Live",
@@ -21,11 +21,14 @@
   "explained.tdh.versions.past.when": "{from} to {to}",
   "explained.tdh.versions.past.seasons": "Up to {last}",
   "explained.tdh.versions.note": "Under TDH v1.4 the highest boost today is about {max}, with full sets, extra sets and {gradients} Gradients, and the rule's ceiling about {ceiling} once season {last} is complete. Today's values are computed by the TDH v1.4 engine on the editions read {date}.",
+  "explained.tdh.versions.chart.label": "The full-set boost from seasons, version by version",
+  "explained.tdh.versions.chart.ceiling": "{ceiling} at most",
+  "explained.tdh.versions.chart.caption": "Each step is one version: the full-set boost from seasons while it was in effect. Today's version is blue; the dashed line is its ceiling, reached once every season it names pays.",
   "explained.tdh.versions.spec.label": "In the specification",
   "explained.tdh.versions.spec.title": "One set of rules, renamed once",
   "explained.tdh.versions.spec.body": "P26 names the rules by a rule version that every result carries, and a new TDH version on 6529.io is a new rule version (D137).",
   "explained.tdh.versions.spec.list": "The rule versions of the specification",
-  "explained.tdh.versions.v14.body": "From {date} (D137), with four-wallet consolidation (D136). Registry {registry}, rule ID {ruleId}. Frozen at launch; any later change is a new rule version.",
+  "explained.tdh.versions.v14.body": "The specification's name, from {date} (D137), for the rules 6529.io runs as TDH v1.4, with four-wallet consolidation (D136). Registry {registry}, rule ID {ruleId}. Frozen at launch; any later change is a new rule version.",
   "explained.tdh.versions.v14.mark": "D137",
   "explained.tdh.versions.v10.body": "P26's name for the same rules until {date}, with up to {wallets} wallets. Registry {registry}. Retired; the daily comparison's files report it until their builds move.",
   "explained.tdh.versions.v10.mark": "Retired",
@@ -35,5 +38,6 @@
   "explained.tdh.versions.hwk.namesBody": "D136, D137; P26 §10 at {commit}.",
   "explained.tdh.versions.hwk.today": "Today's values",
   "explained.tdh.versions.hwk.todayBody": "The TDH v1.4 engine on the real editions, read {time}.",
-  "explained.tdh.versions.v10.bodyMoved": "P26's name for the same rules until {date}, with up to {wallets} wallets. Registry {registry}. Retired; the daily comparison's files report {current} since its builds moved."
+  "explained.tdh.versions.v10.bodyMoved": "P26's name for the same rules until {date}, with up to {wallets} wallets. Registry {registry}. Retired: the daily comparison's newer files report {current}, and only its first files, written before its builds moved, still report this name.",
+  "explained.tdh.versions.v10.bodyUnread": "P26's name for the same rules until {date}, with up to {wallets} wallets. Registry {registry}. Retired."
 }

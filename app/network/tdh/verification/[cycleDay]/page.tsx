@@ -164,15 +164,29 @@ function Header({
   );
 }
 
-/** The day the index lists, whose file could not be read. */
-function MissingFile({ locale }: { readonly locale: SupportedLocale }) {
+/**
+ * The day's file could not be read: either the index lists the day and its
+ * file failed, or the feed's index itself could not be read just now.
+ */
+function MissingFile({
+  locale,
+  indexRead,
+}: {
+  readonly locale: SupportedLocale;
+  readonly indexRead: boolean;
+}) {
   return (
     <div className="tw-mt-10 md:tw-mt-12">
       <Verdict
         state="missing"
         date={null}
         cycle={null}
-        headline={pt(locale, "explained.tdh.day.missing.headline")}
+        headline={pt(
+          locale,
+          indexRead
+            ? "explained.tdh.day.missing.headline"
+            : "explained.tdh.day.missing.headlineFeed"
+        )}
         locale={locale}
       >
         <p className="tw-m-0 tw-text-[15px] tw-leading-6 tw-text-iron-300">
@@ -266,8 +280,11 @@ export default async function TdhDayReceiptPage({
   const locale = await resolveExplainedLocale(await searchParams);
   const { book, files, cycles } = await loadDayBook(cycle);
   // A day the index does not list is not found; the proxy has already
-  // answered it with a 404 whenever it could read the index.
-  if (!cycles.includes(cycle)) {
+  // answered it with a 404 whenever it could read the index. When the index
+  // itself could not be read just now, the day is not declared missing: the
+  // page says the feed could not be read, and to try again.
+  const indexRead = cycles.length > 0;
+  if (indexRead && !cycles.includes(cycle)) {
     notFound();
   }
   for (const id of dayFactIds(cycle)) {
@@ -323,7 +340,7 @@ export default async function TdhDayReceiptPage({
           locale={locale}
         />
         {file === null ? (
-          <MissingFile locale={locale} />
+          <MissingFile locale={locale} indexRead={indexRead} />
         ) : (
           <div className="tw-mt-10 tw-grid tw-grid-cols-1 tw-items-start tw-gap-7 md:tw-mt-12 lg:tw-grid-cols-[minmax(0,1fr)_360px] lg:tw-gap-10">
             <div className="tw-min-w-0">

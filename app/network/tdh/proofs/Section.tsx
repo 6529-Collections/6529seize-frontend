@@ -34,7 +34,13 @@ export default function Section({
       className={`${tight ? EX_LAYOUT.sectionTight : EX_LAYOUT.section} tw-scroll-mt-24`}
       aria-labelledby={`${id}-heading`}
     >
-      <div className={EX_LAYOUT.stmt}>
+      {/* A heading with no prose beside it takes the full measure, so the
+          right half is never an empty block. */}
+      <div
+        className={
+          children === undefined ? "tw-max-w-[940px]" : EX_LAYOUT.stmt
+        }
+      >
         <div>
           <span className={`${EX_TEXT.label} tw-mb-3.5 tw-block`}>
             <span className="tw-text-primary-300">{number}</span>
@@ -45,7 +51,7 @@ export default function Section({
           </h2>
         </div>
         {children !== undefined && (
-          <div className={`${EX_TEXT.body} lg:tw-pt-[30px]`}>{children}</div>
+          <div className={`${EX_TEXT.body} lg:tw-pt-1.5`}>{children}</div>
         )}
       </div>
       {figure !== undefined && (

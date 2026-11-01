@@ -6,10 +6,11 @@ import Lens, { Readout } from "@/components/explained/lens/Lens";
 import { useBreakable } from "@/components/explained/lens/useBreakable";
 import StampLine from "@/components/explained/marks/StampLine";
 import type { SupportedLocale } from "@/i18n/locales";
+import { ENGINE } from "@/lib/explained/engine";
 import { formatCents, formatCount } from "@/lib/explained/format";
 import ValueTable from "./_kit/ValueTable";
 import { ht } from "./copy";
-import { identityValues } from "./models/identity";
+import { identityValues, rateFromEditions } from "./models/identity";
 
 const B = "tw-font-semibold tw-text-iron-50";
 
@@ -25,14 +26,18 @@ export default function TotalsLens({
 }: {
   readonly locale: SupportedLocale;
 }) {
-  const rate = useFact<number>("engine.rate.310");
+  const editions = useFact<number[][]>("memes.editions");
+  const h = useFact<number>("engine.H");
   const count = useFact<number>("memes.count");
   const model = useBreakable<{ wallets: boolean }>({ wallets: false }, () => ({
     wallets: true,
   }));
   const values =
-    rate && count
-      ? identityValues(Math.round(rate.value * 100), count.value)
+    editions && h && count
+      ? identityValues(
+          rateFromEditions(editions.value, h.value, ENGINE.rateCents),
+          count.value
+        )
       : null;
   if (!values) {
     return (

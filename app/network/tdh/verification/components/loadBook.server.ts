@@ -12,11 +12,11 @@ import type { VerificationDay } from "@/lib/tdh/verification/schema";
 /**
  * The facts of the daily check and of a day's receipt, read once per
  * server render: every source the facts layer reads, plus the day files
- * the page shows. The daily check reads the newest days its ribbon can
- * show; a receipt reads its day and the day before it, so its change since
- * then is a fact too. No page reads every day file the feed has ever
- * published (the kit's `loadFactBook(true)` does, and grows by a file a
- * day).
+ * the page shows. The daily check reads every day file, since only a file
+ * says when it was written, and a result written late or re-run is marked
+ * (↻) wherever the page lists it; an older file is cached an hour. A
+ * receipt reads its day and the day before it, so its change since then is
+ * a fact too.
  */
 interface DayFile {
   readonly day: VerificationDay;
@@ -90,13 +90,9 @@ async function loadPageBook(
   };
 }
 
-/** The newest days a ribbon of ten tiles can hold, with the open day. */
-const CHECK_WINDOW_DAYS = 9;
-
-/** The daily check: the newest days of the ribbon. */
+/** The daily check: every published day. */
 export const loadCheckBook = cache(
-  (): Promise<PageBook> =>
-    loadPageBook((cycles) => cycles.slice(-CHECK_WINDOW_DAYS))
+  (): Promise<PageBook> => loadPageBook((cycles) => cycles)
 );
 
 /** A day's receipt: the day, and the day before it when the feed has it. */

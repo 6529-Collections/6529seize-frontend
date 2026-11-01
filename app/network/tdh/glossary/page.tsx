@@ -154,10 +154,15 @@ export default async function GlossaryPage() {
             from="lg"
             caption={s("explained.tdh.glossary.table")}
             columns={[
-              { key: "term", label: s("explained.tdh.glossary.col.term") },
+              {
+                key: "term",
+                label: s("explained.tdh.glossary.col.term"),
+                phoneLabel: false,
+              },
               {
                 key: "meaning",
                 label: s("explained.tdh.glossary.col.meaning"),
+                phoneLabel: false,
               },
               { key: "status", label: s("explained.tdh.glossary.col.status") },
               { key: "source", label: s("explained.tdh.glossary.col.source") },

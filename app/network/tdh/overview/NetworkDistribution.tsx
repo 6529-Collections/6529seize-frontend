@@ -31,22 +31,22 @@ interface Tone {
 const TONES: Record<RankGroup["key"], Tone> = {
   top: {
     fill: "rgba(206, 207, 212, 0.9)",
-    band: "rgba(206, 207, 212, 0.34)",
+    band: "rgba(206, 207, 212, 0.42)",
     ink: "tw-text-[#0D0D0F]",
   },
   next: {
     fill: "rgba(206, 207, 212, 0.62)",
-    band: "rgba(206, 207, 212, 0.24)",
+    band: "rgba(206, 207, 212, 0.28)",
     ink: "tw-text-[#0D0D0F]",
   },
   next2: {
     fill: "rgba(206, 207, 212, 0.36)",
-    band: "rgba(206, 207, 212, 0.15)",
+    band: "rgba(206, 207, 212, 0.17)",
     ink: "tw-text-iron-50",
   },
   rest: {
     fill: "repeating-linear-gradient(45deg, rgba(206, 207, 212, 0.3) 0 3px, rgba(206, 207, 212, 0.1) 3px 8px)",
-    band: "rgba(206, 207, 212, 0.07)",
+    band: "rgba(206, 207, 212, 0.09)",
     ink: "tw-text-iron-50",
   },
 };
@@ -62,7 +62,7 @@ function labelClass(share: number): string | null {
   if (share < LABEL_MIN_SHARE) return null;
   return share < LABEL_MIN_SHARE_PHONE ? "tw-hidden md:tw-inline" : "";
 }
-const BAND_HEIGHT = 48;
+const BAND_HEIGHT = 80;
 
 function percent(locale: SupportedLocale, share: number): string {
   return formatNumber(locale, share, {
@@ -158,19 +158,33 @@ function Bands({ items }: { readonly items: readonly Share[] }) {
     <svg
       viewBox={`0 0 1000 ${BAND_HEIGHT}`}
       preserveAspectRatio="none"
-      className="tw-block tw-h-12 tw-w-full"
+      className="tw-block tw-h-20 tw-w-full"
       aria-hidden="true"
     >
-      {bandShapes(items).map(({ key, top, bottom }) => (
-        <polygon
-          key={key}
-          points={`${top[0]},0 ${top[1]},0 ${bottom[1]},${BAND_HEIGHT} ${bottom[0]},${BAND_HEIGHT}`}
-          fill={TONES[key].band}
-          stroke="rgba(206, 207, 212, 0.45)"
-          strokeWidth={1}
-          vectorEffect="non-scaling-stroke"
-        />
-      ))}
+      {bandShapes(items).map(({ key, top, bottom }) => {
+        // Each group flows as a ribbon from its share of TDH (above) to
+        // its share of identities (below): curved sides, a filled body.
+        const mid = BAND_HEIGHT / 2;
+        const h = BAND_HEIGHT;
+        const d = [
+          `M${top[0]},0`,
+          `L${top[1]},0`,
+          `C${top[1]},${mid} ${bottom[1]},${mid} ${bottom[1]},${h}`,
+          `L${bottom[0]},${h}`,
+          `C${bottom[0]},${mid} ${top[0]},${mid} ${top[0]},0`,
+          "Z",
+        ].join(" ");
+        return (
+          <path
+            key={key}
+            d={d}
+            fill={TONES[key].band}
+            stroke="rgba(13, 13, 15, 0.9)"
+            strokeWidth={1.5}
+            vectorEffect="non-scaling-stroke"
+          />
+        );
+      })}
     </svg>
   );
 }

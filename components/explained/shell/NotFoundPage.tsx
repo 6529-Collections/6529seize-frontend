@@ -29,6 +29,12 @@ export default function NotFoundPage({
         title: kt(locale, def.title),
       })
     : null;
+  // "The TDH chapter", not "01 TDH": a chapter named in a sentence.
+  const chapterName = def
+    ? kt(locale, "explained.kit.notFound.chapterName", {
+        title: kt(locale, def.title),
+      })
+    : null;
   const rows: PageIndexRow[] = def
     ? [
         ...[...def.read, ...def.check].map((page) => ({
@@ -43,12 +49,20 @@ export default function NotFoundPage({
           shelf: true,
         })),
       ]
-    : CHAPTERS.filter((entry) => entry.status === "live" && entry.href).map(
-        (entry) => ({
-          no: entry.number ?? "",
-          title: kt(locale, entry.title),
-          href: entry.href ?? HUB_HREF,
-        })
+    : // Every chapter, the coming ones listed without a link, so a reader
+      // who typed /explained/validators learns it is coming, not missing.
+      CHAPTERS.map((entry) =>
+        entry.status === "live" && entry.href
+          ? {
+              no: entry.number ?? "",
+              title: kt(locale, entry.title),
+              href: entry.href,
+            }
+          : {
+              no: "",
+              title: kt(locale, entry.title),
+              desc: kt(locale, "explained.kit.chapters.coming"),
+            }
       );
   return (
     <ExplainedShell
@@ -72,9 +86,9 @@ export default function NotFoundPage({
             {kt(locale, "explained.kit.notFound.title")}
           </h1>
           <p className={`${EX_TEXT.lede} tw-mt-4 md:tw-mt-[22px]`}>
-            {def && chapterTitle
+            {def && chapterName
               ? kt(locale, "explained.kit.notFound.chapterBody", {
-                  chapter: chapterTitle,
+                  chapter: chapterName,
                 })
               : kt(locale, "explained.kit.notFound.hubBody")}
           </p>

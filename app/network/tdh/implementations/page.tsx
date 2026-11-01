@@ -219,7 +219,9 @@ export default async function ImplementationsPage() {
                         locale={locale}
                         size="sm"
                         label={s("explained.tdh.impl.a.proof")}
-                        refText={s("explained.tdh.impl.a.proofRef")}
+                        refText={s("explained.tdh.impl.a.proofRef", {
+                          version: p.f("proofs.day.ruleVersion"),
+                        })}
                       />
                     ),
                   },

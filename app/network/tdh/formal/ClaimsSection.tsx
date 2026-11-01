@@ -110,7 +110,7 @@ export default function ClaimsSection({ ctx }: { readonly ctx: SureContext }) {
           {/* D148 exempts the network-held accounts from the cap claim 5a
               states for every party; the Lean model predates it. */}
           <div className="tw-mt-6">
-            <DriftNote by={["D148"]} locale={locale}>
+            <DriftNote by={["D148", "D150"]} locale={locale}>
               {m("explained.tdh.sure.claims.capDrift", {
                 cap: p.v("validators.cap"),
               })}

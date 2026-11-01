@@ -264,6 +264,8 @@ export function Scoreboard({
 export interface LedgerRow {
   readonly assumption: string;
   readonly mark: "assumed" | "tested" | "notProved" | "notYet" | "proved";
+  /** A narrower word for the mark: "Tested, one machine". */
+  readonly markLabel?: string;
   readonly covers: ReactNode;
 }
 
@@ -307,7 +309,12 @@ export function AssumptionLedger({
               {row.assumption}
             </th>
             <td className={`${cell} md:tw-min-w-[136px]`}>
-              <Mark kind={row.mark} locale={locale} size="sm" />
+              <Mark
+                kind={row.mark}
+                locale={locale}
+                size="sm"
+                {...(row.markLabel === undefined ? {} : { label: row.markLabel })}
+              />
             </td>
             <td className={cell}>{row.covers}</td>
           </tr>

@@ -1,4 +1,5 @@
 import { publicEnv } from "@/config/env";
+import snapshot from "@/lib/explained/data/networkSnapshot.json";
 
 /**
  * Everyone's TDH, read from 6529.io's public API (`tdh/consolidated_metrics`,
@@ -23,6 +24,28 @@ export interface NetworkDistribution {
   readonly source: string;
   /** When 6529.io answered (its Date header, ISO 8601 UTC), if it said. */
   readonly readAt: string | null;
+  /** The figure is the snapshot kept with the page, not today's read. */
+  readonly fromSnapshot?: boolean;
+}
+
+/**
+ * The owner wants this figure on ("spread important"), so it does not
+ * vanish when the API is slow: the sums kept at ship time stand in, with
+ * the date they were read (`data/networkSnapshot.json`).
+ */
+function fromSnapshot(): NetworkDistribution {
+  return {
+    total: snapshot.total,
+    identities: snapshot.identities,
+    groups: snapshot.groups.map((group) => ({
+      key: group.key as RankGroup["key"],
+      count: group.count,
+      tdh: group.tdh,
+    })),
+    source: snapshot.source,
+    readAt: snapshot.readAt,
+    fromSnapshot: true,
+  };
 }
 
 const PAGE_SIZE = 1000;
@@ -119,7 +142,7 @@ export function rankGroups(sorted: readonly number[]): RankGroup[] {
 export async function loadNetworkDistribution(): Promise<NetworkDistribution | null> {
   const read = await readValues();
   if (read === null || read.values.length === 0) {
-    return null;
+    return fromSnapshot();
   }
   const { values, readAt } = read;
   return {

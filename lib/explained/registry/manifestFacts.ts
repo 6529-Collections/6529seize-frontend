@@ -119,12 +119,15 @@ export const MANIFEST_FACTS = {
         (entry) => entry.status === "counterexample" && entry.library === "tdh"
       ).length
   ),
+  // Distinct Lean statements: theorems are told apart by their Lean names.
+  // The manifest's English descriptions are not counted, since related
+  // theorems (a sum and its slice, the five permutation checks) share one.
   "manifest.distinct": count(
     (manifest) =>
       new Set(
         manifest.theorems
           .filter((entry) => entry.status === "proved")
-          .map((entry) => entry.statement ?? entry.id)
+          .map((entry) => entry.leanName ?? entry.id)
       ).size
   ),
   "manifest.noAxioms": count(

@@ -102,6 +102,7 @@ function rungs(book: FactBook, locale: SupportedLocale): Rung[] {
           }),
           refText: ot(locale, "rung.provedRef", {
             shownFalse: f("manifest.shownFalse.tdh"),
+            all: f("manifest.shownFalse"),
           }),
         },
       ],

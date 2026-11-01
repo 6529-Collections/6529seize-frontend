@@ -1,8 +1,9 @@
 "use client";
 
+import type React from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { kt } from "../i18n";
-import { EX_HEX } from "../tokens";
+import { EX_HEX, EX_MOTION } from "../tokens";
 import { Label, SvgFrame, px as round2 } from "./svg";
 import { useMeasuredWidth } from "./useMeasuredWidth";
 
@@ -39,7 +40,55 @@ interface LoopProps {
   readonly locale: SupportedLocale;
 }
 
-/** On a phone: the stations as a list, Verify last. */
+/**
+ * On a phone, the loop's picture in small: the six stations round Verify,
+ * each with its pictogram, the selected one blue. The list under it says
+ * the rest.
+ */
+function MiniRing({ stations, focus }: Pick<LoopProps, "stations" | "focus">) {
+  const size = 216;
+  const c = size / 2;
+  const r = 78;
+  return (
+    <svg
+      viewBox={`0 0 ${size} ${size}`}
+      className="tw-mx-auto tw-mb-4 tw-block tw-h-[216px] tw-w-[216px]"
+      aria-hidden="true"
+      data-loop-mini=""
+    >
+      <circle cx={c} cy={c} r={r} fill="none" stroke={EX_HEX.line} strokeWidth={1.5} />
+      <circle cx={c} cy={c} r={r + 24} fill="none" stroke={EX_HEX.line} strokeDasharray="3 6" />
+      <circle cx={c} cy={c} r={30} fill={EX_HEX.panel} stroke={EX_HEX.holds} strokeWidth={1.5} />
+      <path d={`M${c - 9} ${c}l6 6l12 -12`} fill="none" stroke={EX_HEX.holds} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+      {stations.map((station, index) => {
+        const angle = ((ANGLES[index] ?? 0) * Math.PI) / 180;
+        const x = round2(c + r * Math.cos(angle));
+        const y = round2(c + r * Math.sin(angle));
+        const on = station.key === focus;
+        return (
+          <g key={station.key}>
+            <circle
+              cx={x}
+              cy={y}
+              r={20}
+              fill={on ? "rgba(82,139,255,0.16)" : EX_HEX.panel}
+              stroke={on ? EX_HEX.you : station.chapter ? EX_HEX.ink2 : EX_HEX.line2}
+              strokeWidth={on ? 2.2 : 1.4}
+            />
+            <StationGlyph
+              kind={station.key}
+              x={x}
+              y={y}
+              tone={on ? EX_HEX.youInk : station.chapter ? EX_HEX.ink1 : EX_HEX.ink3}
+            />
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+/** On a phone: the loop's picture in small, then the stations as a list, Verify last. */
 function LoopList({ stations, focus, verify, locale }: LoopProps) {
   return (
     <div
@@ -47,6 +96,7 @@ function LoopList({ stations, focus, verify, locale }: LoopProps) {
       data-fig="loop"
       data-loop-layout="list"
     >
+      <MiniRing stations={stations} focus={focus} />
       <ol
         className="tw-m-0 tw-grid tw-list-none tw-gap-2 tw-p-0"
         aria-label={kt(locale, "explained.kit.loop.aria")}
@@ -103,6 +153,84 @@ function namePlace(
   if (cos < -0.2) return { x: x - 42, y: y - 6, anchor: "end" };
   const below = round2(Math.sin(radians)) > 0;
   return { x, y: below ? y + 48 : y - 54, anchor: "middle" };
+}
+
+/**
+ * A station's pictogram, drawn in its ring: a card, a wallet, a clock,
+ * rising bars, a ballot and a mint press. Strokes only, in the station's
+ * tone, so the ring reads as that station before its name does.
+ */
+function StationGlyph({
+  kind,
+  x,
+  y,
+  tone,
+}: {
+  readonly kind: string;
+  readonly x: number;
+  readonly y: number;
+  readonly tone: string;
+}) {
+  const stroke = {
+    fill: "none",
+    stroke: tone,
+    strokeWidth: 1.6,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+  };
+  let body: React.ReactNode;
+  switch (kind) {
+    case "art":
+      body = (
+        <>
+          <rect x={-6.5} y={-9} width={13} height={18} rx={2} {...stroke} />
+          <path d="M-4 4.5L-1 0.5L1.5 3L3 1.5L4.5 4.5" {...stroke} />
+          <circle cx={2} cy={-4} r={1.6} {...stroke} />
+        </>
+      );
+      break;
+    case "hold":
+      body = (
+        <>
+          <rect x={-9} y={-6.5} width={18} height={13} rx={2.5} {...stroke} />
+          <path d="M3 -1.5H9V2.5H3a2 2 0 0 1 0-4z" {...stroke} />
+        </>
+      );
+      break;
+    case "time":
+      body = (
+        <>
+          <circle cx={0} cy={0} r={8.5} {...stroke} />
+          <path d="M0 -5V0L3.5 2.5" {...stroke} />
+        </>
+      );
+      break;
+    case "standing":
+      body = (
+        <path d="M-7 7V2M-2.5 7V-1.5M2 7V-5M6.5 7V-8.5" {...stroke} strokeWidth={2.2} />
+      );
+      break;
+    case "decide":
+      body = (
+        <>
+          <rect x={-8} y={-8} width={16} height={16} rx={2.5} {...stroke} />
+          <path d="M-4 0.5L-1 3.5L4.5 -3" {...stroke} />
+        </>
+      );
+      break;
+    default:
+      body = (
+        <>
+          <path d="M0 -9V2M-4 -2L0 2L4 -2" {...stroke} />
+          <path d="M-8 6H8" {...stroke} />
+        </>
+      );
+  }
+  return (
+    <g transform={`translate(${x} ${y})`} aria-hidden="true">
+      {body}
+    </g>
+  );
 }
 
 function LoopCircle({ stations, focus, verify, locale }: LoopProps) {
@@ -241,24 +369,23 @@ function LoopCircle({ stations, focus, verify, locale }: LoopProps) {
                 stroke={ring}
                 strokeWidth={on ? 2.5 : 1.5}
               />
-              {ours ? (
+              <StationGlyph
+                kind={station.key}
+                x={px}
+                y={ours ? py - 6 : py}
+                tone={on ? EX_HEX.youInk : ours ? EX_HEX.ink1 : EX_HEX.ink3}
+              />
+              {ours && (
                 <Label
                   x={px}
-                  y={py + 5}
+                  y={py + 21}
                   anchor="middle"
-                  size={13}
+                  size={12}
                   weight={700}
                   tone="ink1"
                 >
                   {station.chapter}
                 </Label>
-              ) : (
-                <circle
-                  cx={px}
-                  cy={py}
-                  r={4}
-                  fill={on ? EX_HEX.youInk : EX_HEX.ink4}
-                />
               )}
               <Label
                 x={tx}
@@ -284,6 +411,35 @@ function LoopCircle({ stations, focus, verify, locale }: LoopProps) {
             </g>
           );
         })}
+        {(() => {
+          // "Follow one copy": the copy travels to the selected station.
+          const index = Math.max(
+            0,
+            stations.findIndex((station) => station.key === focus)
+          );
+          const [tx, ty] = at(ANGLES[index] ?? 0, radius - 52);
+          return (
+            <g
+              aria-hidden="true"
+              data-copy-token=""
+              style={{
+                transform: `translate(${tx}px, ${ty}px)`,
+                transition: `transform 450ms ${EX_MOTION.ease}`,
+              }}
+              className="motion-reduce:!tw-transition-none"
+            >
+              <rect
+                x={-6}
+                y={-8}
+                width={12}
+                height={16}
+                rx={2}
+                fill={EX_HEX.you}
+                stroke={EX_HEX.youInk}
+              />
+            </g>
+          );
+        })()}
         <path
           d={`M${artBottom[0] - 32} ${artBottom[1] + 4} C${artBottom[0] - 90} ${artBottom[1] + 10} ${artBottom[0] - 150} ${artBottom[1] - 6} ${artBottom[0] - 200} ${artBottom[1] - 30}`}
           fill="none"

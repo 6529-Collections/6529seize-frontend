@@ -106,7 +106,7 @@ export const EX_TEXT = {
   h4: "tw-m-0 tw-text-[17px] tw-font-semibold tw-leading-6 tw-text-iron-50",
   /** a model's question: 24/32, phone 20/27 */
   lensQ:
-    "tw-m-0 tw-max-w-[760px] tw-text-[20px] tw-font-semibold tw-leading-[27px] tw-tracking-[-0.012em] tw-text-iron-50 md:tw-text-[24px] md:tw-leading-8",
+    "tw-m-0 tw-max-w-[760px] tw-text-balance tw-text-[20px] tw-font-semibold tw-leading-[27px] tw-tracking-[-0.012em] tw-text-iron-50 md:tw-text-[24px] md:tw-leading-8",
   /** one sentence, at most 45 words: 22/34, phone 18/28 */
   lede: "tw-m-0 tw-max-w-[700px] tw-text-[18px] tw-font-normal tw-leading-[28px] tw-text-iron-300 md:tw-text-[22px] md:tw-leading-[34px]",
   /** body: 18/29, phone 16/26 */

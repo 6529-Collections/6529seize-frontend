@@ -156,6 +156,11 @@ interface StackColumn {
   readonly label: string;
   /** Right-aligned on a desktop: numbers. */
   readonly numeric?: boolean;
+  /**
+   * Whether the stacked row on a phone repeats this column's label above
+   * its value. A term and its meaning read without one.
+   */
+  readonly phoneLabel?: boolean;
 }
 
 interface StackRow {
@@ -241,7 +246,10 @@ export function StackTable({
         {rows.map((row) => (
           <tr key={row.key} id={row.id} className={at.row}>
             {columns.map((column, index) => {
-              const label = <span className={at.label}>{column.label}</span>;
+              const label =
+                column.phoneLabel === false ? null : (
+                  <span className={at.label}>{column.label}</span>
+                );
               const cell = row.cells[column.key] ?? "–";
               const align = column.numeric ? at.right : "";
               return index === 0 ? (
@@ -355,12 +363,14 @@ export function CodeBlock({
 }) {
   const lines = code.split("\n");
   const aligned = lines.some((line) => ALIGNED_COLUMNS.test(line));
+  // Wrapped at every width, so a long Lean or rule line is never cut at the
+  // frame's edge out of sight; a column-aligned block scrolls, with a fade.
   const wrap = aligned
     ? "tw-whitespace-pre"
-    : "tw-whitespace-pre-wrap [overflow-wrap:anywhere] md:tw-whitespace-pre md:[overflow-wrap:normal]";
+    : "tw-whitespace-pre-wrap [overflow-wrap:anywhere]";
   return (
     <div
-      className={`tw-relative tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-[#0a0a0c] ${className}`.trim()}
+      className={`tw-relative tw-min-w-0 tw-max-w-[924px] tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-[#0a0a0c] ${className}`.trim()}
       data-code-wrap={aligned ? "scroll" : "wrap"}
     >
       <pre
@@ -380,7 +390,7 @@ export function CodeBlock({
               // A quoted block's lines are fixed in order.
               <span
                 key={index}
-                className="tw-block md:!tw-pl-0 md:!tw-indent-0"
+                className="tw-block"
                 style={
                   aligned
                     ? undefined

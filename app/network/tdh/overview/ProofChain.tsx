@@ -51,7 +51,14 @@ export default function ProofChain({
       <span>{ot(locale, "zk.lead")}</span>
       <span className={line}>
         <Capsule letter="A" done={cycle !== null} />
-        <span>{ot(locale, "zk.lineA", { date })}</span>
+        <span>
+          {ot(locale, "zk.lineA", {
+            date,
+            version:
+              book.maybe<string>("proofs.day.ruleVersion")?.value ??
+              NOT_AVAILABLE,
+          })}
+        </span>
       </span>
       <span className={line}>
         <Capsule letter="B" done={false} />

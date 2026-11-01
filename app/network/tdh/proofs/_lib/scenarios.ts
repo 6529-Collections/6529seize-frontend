@@ -59,8 +59,11 @@ export const SCENARIOS: readonly Scenario[] = [
   { id: "total", stoppedBy: "proof", line: "proofs", evidence: "tested" },
   { id: "log", stoppedBy: "program", line: "program", evidence: "tested" },
   { id: "blocks", stoppedBy: "contract", line: "anchors", evidence: "tested" },
-  { id: "bugA", stoppedBy: "second", line: "outputs", evidence: "tested" },
-  { id: "flaw", stoppedBy: "second", line: "proofs", evidence: "decided" },
+  // Program B is the reason these two stop, but the contract is what
+  // refuses them: at its second check (outputs differ) and at its eighth
+  // (RISC Zero's verification of the same words).
+  { id: "bugA", stoppedBy: "contract", line: "outputs", evidence: "tested" },
+  { id: "flaw", stoppedBy: "contract", line: "proofs", evidence: "decided" },
   { id: "skip", stoppedBy: "contract", line: "chaining", evidence: "tested" },
   { id: "rule", stoppedBy: "contract", line: "network", evidence: "tested" },
 ];

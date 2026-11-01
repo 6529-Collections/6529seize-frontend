@@ -192,7 +192,11 @@ export default async function SpecificationPage() {
                 maturity="live"
                 locale={locale}
                 size="sm"
-                refText={s("explained.tdh.spec.version.live")}
+                refText={s("explained.tdh.spec.version.live", {
+                  equal: p.f("tdh.days.equal"),
+                  days: p.f("tdh.days.compared"),
+                  first: p.f("tdh.days.first"),
+                })}
               />
             </div>
             <Caption className="tw-mt-3">
@@ -204,9 +208,11 @@ export default async function SpecificationPage() {
         <div className="tw-mt-8">
           <DriftNote by={["D136", "D137"]} locale={locale}>
             {m(
-              reported !== null && current !== null && reported !== current
-                ? "explained.tdh.spec.transition"
-                : "explained.tdh.spec.transitionDone",
+              reported === null || current === null
+                ? "explained.tdh.spec.transitionUnread"
+                : reported !== current
+                  ? "explained.tdh.spec.transition"
+                  : "explained.tdh.spec.transitionDone",
               {
                 date: p.v("names.renamedAt", "long"),
                 old: <CodeName>{p.v("names.v10.name")}</CodeName>,

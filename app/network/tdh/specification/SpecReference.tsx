@@ -29,6 +29,11 @@ const DECISION: Readonly<Record<string, SpecKey>> = {
   "DEV-14": KEPT,
   "DEV-17": KEPT,
   "DEV-13": "explained.tdh.spec.s11.sinks",
+  // Found after D121 by program B's review (D136's paragraph of P26 §11):
+  // P26 recommends them, and no decision adopts them yet.
+  "DEV-20": "explained.tdh.spec.s11.proposedSpecWins",
+  "DEV-21": "explained.tdh.spec.s11.proposedAdopt",
+  "DEV-22": "explained.tdh.spec.s11.proposedAdopt",
 };
 
 function itemKey(

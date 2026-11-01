@@ -151,7 +151,9 @@ describe("the facts layer", () => {
 
   it("counts the manifest bundled with the site (e252d5f, TDH v1.4)", () => {
     expect(show("manifest.proved")).toBe("84");
-    expect(show("manifest.distinct")).toBe("65");
+    // Theorems are told apart by their Lean names, not by the manifest's
+    // English descriptions, which related theorems share.
+    expect(show("manifest.distinct")).toBe("84");
     expect(show("manifest.noAxioms")).toBe("4");
     expect(show("manifest.shownFalse")).toBe("11");
     expect(show("manifest.shownFalse.kernel")).toBe("7");

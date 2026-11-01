@@ -224,19 +224,13 @@ function historyRow(ctx: Ctx): Row {
     };
   }
   const notYet = pt(locale, "explained.tdh.day.row.historyNotYet");
-  const note = pt(locale, "explained.tdh.day.row.historyNote", {
-    mode: day.text("mode") ?? "",
-  });
+  const note = pt(locale, "explained.tdh.day.row.historyNote");
   return {
     id: "history",
     value: (
       <>
         <Mark kind="notYet" label={notYet} locale={locale} />
-        {quiet(
-          rich(locale, "explained.tdh.day.row.historyNote", {
-            mode: value(ctx, "mode"),
-          })
-        )}
+        {quiet(pt(locale, "explained.tdh.day.row.historyNote"))}
       </>
     ),
     text: `${notYet}: ${note}`,
@@ -355,13 +349,26 @@ function rootRow(
       ? {
           note: (
             <ReceiptNote>
-              {rich(locale, "explained.tdh.day.row.cycleRootNote", {
-                size: (
-                  <FactText fact={day.fact(field)} locale={locale}>
-                    {formatCount(locale, root.replace(/^0x/, "").length / 2)}
-                  </FactText>
-                ),
-              })}
+              {rich(
+                locale,
+                underCurrentRules(ctx)
+                  ? "explained.tdh.day.row.cycleRootNote"
+                  : "explained.tdh.day.row.cycleRootRetired",
+                {
+                  size: (
+                    <FactText fact={day.fact(field)} locale={locale}>
+                      {formatCount(locale, root.replace(/^0x/, "").length / 2)}
+                    </FactText>
+                  ),
+                  version: (
+                    <FactValue
+                      fact={day.fact("ruleVersion")}
+                      locale={locale}
+                      className={MONO}
+                    />
+                  ),
+                }
+              )}
             </ReceiptNote>
           ),
         }
@@ -424,7 +431,7 @@ function fileRow(ctx: Ctx, text: string | null): Row {
       ),
     note: (
       <ReceiptNote>
-        {rich(locale, "explained.tdh.day.row.fileNote", {
+        {rich(locale, writtenLate(day) ? "explained.tdh.day.row.fileNoteLate" : "explained.tdh.day.row.fileNote", {
           file: (
             <FactText fact={day.fact("file.url")} locale={locale}>
               {name}
@@ -443,6 +450,19 @@ function fileRow(ctx: Ctx, text: string | null): Row {
     ),
     text: `${name}: SHA-256 ${stated ?? plain(null, locale)}`,
   };
+}
+
+/**
+ * Written late or re-run: more than 2 h 40 min after its day began, as the
+ * daily check's ribbon marks it (↻).
+ */
+const LATE_AFTER_MS = (2 * 60 + 40) * 60_000;
+
+function writtenLate(day: DayView): boolean {
+  const written = day.text("writtenAt");
+  const date = day.text("date");
+  if (written === null || date === null) return false;
+  return Date.parse(written) - Date.parse(`${date}T00:00:00Z`) > LATE_AFTER_MS;
 }
 
 /** Every row of a day's receipt, in its fixed order. */

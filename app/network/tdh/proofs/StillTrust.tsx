@@ -51,6 +51,11 @@ export default function StillTrust({
                 }),
               },
               {
+                assumption: fill(locale, k("trust.setup")),
+                mark: "assumed",
+                covers: rich(locale, k("trust.setupCovers")),
+              },
+              {
                 assumption: fill(locale, k("trust.programs")),
                 mark: "notProved",
                 covers: rich(locale, k("trust.programsCovers")),
@@ -58,6 +63,7 @@ export default function StillTrust({
               {
                 assumption: fill(locale, k("trust.identity")),
                 mark: "tested",
+                markLabel: fill(locale, k("trust.identityMark")),
                 covers: rich(locale, k("trust.identityCovers")),
               },
               {
@@ -113,7 +119,7 @@ export default function StillTrust({
                   sub: fill(locale, k("trail.wordsSub"), {
                     words: text("proofs.statement.words"),
                   }),
-                  who: "anyone",
+                  who: "read",
                 },
               ]}
             />

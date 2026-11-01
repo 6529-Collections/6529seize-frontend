@@ -10,6 +10,7 @@ import { kt, type KitKey } from "../i18n";
  */
 export type TrailWho =
   | "anyone"
+  | "read"
   | "node"
   | "spec"
   | "source"
@@ -19,6 +20,7 @@ export type TrailWho =
 
 const WHO: Record<TrailWho, KitKey> = {
   anyone: "explained.kit.trail.anyone",
+  read: "explained.kit.trail.read",
   node: "explained.kit.trail.node",
   spec: "explained.kit.trail.spec",
   source: "explained.kit.trail.source",
@@ -50,7 +52,10 @@ export default function ProvenanceTrail({
       {steps.map((step, index) => {
         const last = index === steps.length - 1;
         const open =
-          step.who === "anyone" || step.who === "node" || step.who === "spec";
+          step.who === "anyone" ||
+          step.who === "read" ||
+          step.who === "node" ||
+          step.who === "spec";
         return (
           <li
             key={step.title}

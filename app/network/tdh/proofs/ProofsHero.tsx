@@ -196,11 +196,24 @@ function RealVerdict({
             {rich(locale, "explained.kit.verdict.cycle", {
               cycle: facts.print("site.proofA.cycle"),
             })}
+            {" · "}
+            {rich(locale, k("verdict.retired"), {
+              version: (
+                <span className="tw-font-mono">
+                  {facts.print("proofs.day.ruleVersion")}
+                </span>
+              ),
+            })}
           </span>
         </>
       }
       headline={rich(locale, k("verdict.headline"), {
         date: facts.print("proofs.day.date"),
+        version: (
+          <span className="tw-font-mono">
+            {facts.print("proofs.day.ruleVersion")}
+          </span>
+        ),
       })}
       aside={
         <>
@@ -244,7 +257,9 @@ function RealVerdict({
     >
       {p(
         rich(locale, k("verdict.body"), {
+          date: facts.print("proofs.day.date"),
           words: facts.print("proofs.statement.words"),
+          wordBytes: facts.print("proofs.statement.wordBytes"),
           hours: facts.print("site.proofA.provedHours"),
           minutes: facts.print("site.proofA.provedMinutes"),
           seconds: facts.print("proofs.day.nativeSeconds"),

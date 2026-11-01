@@ -41,8 +41,10 @@ export default function AgreementBars({
       {pairs.map((pair) => {
         const equal = numberOf(pair.equal);
         const total = numberOf(pair.total);
+        // An unread count is not a difference: it draws a dashed neutral
+        // track (EXPLAINED.md §3 rule 8), never a rose bar.
         const share =
-          equal !== null && total !== null && total > 0 ? equal / total : 0;
+          equal !== null && total !== null && total > 0 ? equal / total : null;
         // Each count is printed through its fact, so it carries its source.
         const count =
           pair.equal && isFact(pair.equal) && pair.total && isFact(pair.total)
@@ -58,7 +60,7 @@ export default function AgreementBars({
           <li
             key={`${pair.who}-${pair.sub}`}
             className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-3 tw-gap-y-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 tw-text-base max-[359px]:tw-grid-cols-1 lg:tw-grid-cols-[250px_minmax(0,1fr)_190px] lg:tw-gap-[18px]"
-            data-agree-share={share.toFixed(4)}
+            data-agree-share={share === null ? "unread" : share.toFixed(4)}
           >
             <span className="tw-font-semibold tw-text-iron-50">
               {pair.who}
@@ -67,15 +69,19 @@ export default function AgreementBars({
               </span>
             </span>
             <span
-              className="tw-col-span-2 tw-row-start-2 tw-flex tw-h-2.5 tw-overflow-hidden tw-rounded-[5px] tw-bg-iron-800 max-[359px]:tw-col-span-1 max-[359px]:tw-row-start-3 lg:tw-col-span-1 lg:tw-row-start-auto"
+              className={`tw-col-span-2 tw-row-start-2 tw-flex tw-h-2.5 tw-overflow-hidden tw-rounded-[5px] max-[359px]:tw-col-span-1 max-[359px]:tw-row-start-3 lg:tw-col-span-1 lg:tw-row-start-auto ${share === null ? "tw-border tw-border-dashed tw-border-iron-600 tw-bg-transparent" : "tw-bg-iron-800"}`}
               aria-hidden="true"
             >
-              <span
-                className="tw-h-full tw-bg-green"
-                style={{ width: `${share * 100}%` }}
-              />
-              {share < 1 && (
-                <span className="tw-h-full tw-flex-1 tw-bg-error" />
+              {share !== null && (
+                <>
+                  <span
+                    className="tw-h-full tw-bg-green tw-transition-[width] tw-duration-[400ms] tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none"
+                    style={{ width: `${share * 100}%` }}
+                  />
+                  {share < 1 && (
+                    <span className="tw-h-full tw-flex-1 tw-bg-error" />
+                  )}
+                </>
               )}
             </span>
             <span className="tw-text-right tw-font-semibold tw-text-iron-50 max-[359px]:tw-text-left lg:tw-col-start-3">

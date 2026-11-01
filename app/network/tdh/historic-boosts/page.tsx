@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import BoostHistory, { type BoostStep } from "./BoostHistory";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { kt } from "@/components/explained/i18n";
 import Mark from "@/components/explained/marks/Mark";
@@ -55,11 +56,37 @@ export default async function VersionsPage() {
     plain(locale, key, params);
   // Once the daily comparison's builds report the new name, the old one is
   // history only.
+  const reportedVersion = p.text("tdh.latest.ruleVersion");
   const buildsMoved =
-    p.text("tdh.latest.ruleVersion") === p.text(RULES_VERSION);
+    reportedVersion !== null && reportedVersion === p.text(RULES_VERSION);
   const pastFact = book.maybe<VersionRow[]>("versions.past");
   const past = pastFact?.value ?? [];
   const since = p.text("versions.current.since");
+  // The step line: every past schedule, oldest first, then today's.
+  const todayFullSet = p.num("engine.boost.fullSet");
+  const ceilingValue = p.num("rules.fullSetCeiling");
+  const readAt = p.text("page.readAt");
+  const historySteps: BoostStep[] = [
+    ...[...past]
+      .sort((a, b) => a.from.localeCompare(b.from))
+      .map((row) => ({
+        version: row.version,
+        from: row.from,
+        to: row.to,
+        fullSet: row.fullSet,
+      })),
+    ...(since !== null && todayFullSet !== null && readAt !== null
+      ? [
+          {
+            version: p.text("versions.current.number") ?? "",
+            from: since,
+            to: readAt.slice(0, 10),
+            fullSet: todayFullSet,
+            current: true,
+          },
+        ]
+      : []),
+  ];
   const firstYear = [...past.map((row) => row.from), since ?? ""]
     .filter(Boolean)
     .sort()[0]
@@ -194,6 +221,22 @@ export default async function VersionsPage() {
               rows={rows}
             />
           </div>
+          {historySteps.length > 1 && ceilingValue !== null && (
+            <figure className="tw-m-0 tw-mt-10" aria-label={s("explained.tdh.versions.chart.label")}>
+              <BoostHistory
+                steps={historySteps}
+                ceiling={ceilingValue}
+                label={s("explained.tdh.versions.chart.label")}
+                ceilingLabel={s("explained.tdh.versions.chart.ceiling", {
+                  ceiling: p.f("rules.fullSetCeiling"),
+                })}
+                locale={locale}
+              />
+              <figcaption className="tw-mt-2 tw-text-[15px] tw-leading-6 tw-text-iron-400">
+                {s("explained.tdh.versions.chart.caption")}
+              </figcaption>
+            </figure>
+          )}
           <Caption className="tw-mt-3 tw-scroll-mt-24" id="boost-figures">
             {m("explained.tdh.versions.note", {
               max: p.v("engine.boost.todayMax"),
@@ -248,9 +291,11 @@ export default async function VersionsPage() {
                   </span>
                   <p className="tw-m-0 tw-mt-1.5 tw-max-w-[660px] tw-text-iron-300">
                     {m(
-                      buildsMoved
-                        ? "explained.tdh.versions.v10.bodyMoved"
-                        : "explained.tdh.versions.v10.body",
+                      reportedVersion === null
+                        ? "explained.tdh.versions.v10.bodyUnread"
+                        : buildsMoved
+                          ? "explained.tdh.versions.v10.bodyMoved"
+                          : "explained.tdh.versions.v10.body",
                       {
                         date: p.v("names.renamedAt", "long"),
                         wallets: p.v("names.v10.maxWallets"),

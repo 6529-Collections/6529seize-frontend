@@ -100,10 +100,6 @@ function liveLaneTitle(day: DayView, locale: SupportedLocale): string {
 }
 
 function lanes(day: DayView, locale: SupportedLocale): Lane[] {
-  const program = (n: number) =>
-    pt(locale, "explained.tdh.check.lanes.program", {
-      number: formatCount(locale, n),
-    });
   const records = day.text("recordsSha");
   const same = records !== null && records === day.text("recordsSha.python");
   let recordsTitle: CheckKey = "explained.tdh.check.lanes.recordsDiffer";
@@ -128,7 +124,7 @@ function lanes(day: DayView, locale: SupportedLocale): Lane[] {
     {
       pair: [
         {
-          kicker: program(1),
+          kicker: pt(locale, "explained.tdh.check.lanes.rustKicker"),
           title: pt(locale, "explained.tdh.check.eq.rust"),
           cap: rich(locale, "explained.tdh.check.lanes.rustCap", {
             commit: hashValue(day.fact("builds.rust.commit"), locale),
@@ -141,7 +137,7 @@ function lanes(day: DayView, locale: SupportedLocale): Lane[] {
           }),
         },
         {
-          kicker: program(2),
+          kicker: pt(locale, "explained.tdh.check.lanes.pythonKicker"),
           title: pt(locale, "explained.tdh.check.eq.python"),
           cap: rich(locale, "explained.tdh.check.lanes.pythonCap", {
             commit: hashValue(day.fact("builds.python.commit"), locale),
