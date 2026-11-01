@@ -1,7 +1,8 @@
 # Signed and encrypted messages in the apps: release handoff
 
-Status on 2026-11-01: review-ready PRs; nothing merged to `main`, nothing in
-production. For prxt6529 to ship. Live GitHub state overrides this note.
+Status on 2026-11-01: review-ready PRs, deployed to staging; nothing merged to
+`main`, nothing in production. For prxt6529 to ship. Live GitHub state
+overrides this note.
 
 ## PRs and deploy order
 
@@ -102,28 +103,34 @@ Ship in this order. Backend before frontend before app builds.
 
 Not verified: a real wallet signing an app grant (phone or desktop), push
 wakes on a physical phone, a real WalletConnect wallet's typed-data prompt,
-and anything on staging (the backend and frontend are not deployed there:
-this agent session's permission settings blocked pushes to `1a-staging`).
-These need a person with a wallet; see "How to test".
+and the apps against staging. These need a person with a wallet and the
+staging access secret; see "How to test".
 
-## Staging candidates
+## Staging
 
-Prepared and typechecked, not pushed (fetch and redo the merge if
-`1a-staging` moved):
+On staging since 2026-11-01 18:19 UTC (owner-approved; pushed by the
+coordinator session):
 
-- Backend: merge `claude/app-device-grant` into `1a-staging`, then
-  `gh workflow run deploy.yml --ref 1a-staging -f environment=staging -f
-service=api`. Prepared as `7f67cc14e` on `f9b09962a`.
-- Frontend: merge `claude/app-signed-e2ee` into `1a-staging` (it already has
-  #4540); help files need no change in the production profile. Prepared as
-  `99ff0ee51d` on `27c33ba644` (before the later CI fix commits).
+- Backend `1a-staging` `0fde43531f`: the two signed #2287 commits replayed
+  onto staging; `api` deploy run 41335897736.
+- Frontend `1a-staging` `e5679b8322`: #4541 at `228f8fdd95` (with #4540);
+  Web Deploy - STAGING run 41335981782. App grants are on there
+  (`NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS`).
+
+Neither app could be pointed at staging from this machine: staging.6529.io
+sends every path to `/access`, and the desktop test build stops at the
+staging Team Login, without the staging access secret. Test the apps on
+staging by hand (below) with that secret.
 
 ## How to test (staging)
 
 Staging has app grants on. Use a throwaway wallet with a profile.
 
-1. Phone app pointed at staging, or the desktop app built against the test
-   backend. Sign in.
+1. Phone: a debug build of 6529 Mobile with `server.url` set to
+   `https://staging.6529.io` (the shell ships with 6529.io; the CI check in
+   6529-core-mobile#27 shows how to patch it for a test build), then pass
+   the staging access gate. Desktop: a 6529-core test build (`BACKEND_TARGET
+test`, needs `STAGING_API_KEY`), then the staging Team Login. Sign in.
 2. Open a wave and select **Turn on** in the signed-messages notice. The
    wallet shows one typed-data request ("6529 Device Grant") with the
    statement above. Approve.
