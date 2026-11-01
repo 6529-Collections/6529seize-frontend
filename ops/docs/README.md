@@ -35,8 +35,6 @@ March 19, 2026.
   [Media](media/README.md)
 - Prepare, read or review an artwork's record:
   [Artwork Documentation](artwork-documentation.md)
-- Review a proposed permanent contract before deployment:
-  [Public Contract Reviews](public-reviews/README.md)
 - Run Drop Forge craft and launch claim operations: [Drop Forge](drop-forge/README.md)
 - Check app notifications and push behavior:
   [Notifications](notifications/README.md)
@@ -72,10 +70,6 @@ March 19, 2026.
 - [Media](media/README.md): `/the-memes`, `/the-memes/{param*}`,
   `/6529-gradient`, `/6529-gradient/{param*}`, `/meme-lab`,
   `/meme-lab/{param*}`, `/rememes`, `/rememes/{param*}`, `/meme-calendar`
-- [Public Contract Reviews](public-reviews/README.md):
-  local/staging-only `/reviews/6529-stream`,
-  `/reviews/6529-stream/{page}`, and versioned review routes; `/stream` shows
-  a notice that 6529 Stream is being rebuilt
 - [Drop Forge](drop-forge/README.md): `/drop-forge`, `/drop-forge/craft`,
   `/drop-forge/craft/{id}`, `/drop-forge/launch`, `/drop-forge/launch/{id}`
 - [Notifications](notifications/README.md): `/notifications`
@@ -130,13 +124,10 @@ Route patterns use normalized placeholders: `{param}` for one segment,
   `/meme-lab`, `/meme-lab/collection/{collection}`, `/meme-lab/{id}`,
   `/meme-lab/{id}/distribution`, `/rememes`, `/rememes/add`,
   `/rememes/{contract}/{id}`, `/meme-calendar`
-- 6529 Stream rebuild notice: `/stream`
-- Public contract reviews, on local development and shared staging only:
-  `/reviews/6529-stream`, `/reviews/6529-stream/{page}`,
-  `/reviews/6529-stream/versions/{version}`,
-  `/reviews/6529-stream/versions/{version}/{page}`
-- Encrypted messages, on builds with the encrypted-messages flag (staging):
-  `/messages/encrypted`, `/messages/encrypted/new`,
+- 6529 Stream rebuild notice: `/stream`. Former `/reviews/6529-stream`
+  links redirect there.
+- Encrypted messages, on builds with the encrypted-messages flag (on in
+  staging and production): `/messages/encrypted`, `/messages/encrypted/new`,
   `/messages/encrypted/devices`, `/messages/encrypted/{chat}`
 - Drop Forge:
   `/drop-forge`, `/drop-forge/craft`, `/drop-forge/craft/{id}`,

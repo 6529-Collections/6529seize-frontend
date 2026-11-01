@@ -18,8 +18,6 @@ const APP_DIR = path.join(process.cwd(), "app");
 // Generated before dev/build (pdfjs) or by build:mls-wasm (e2ee), and handled
 // by their own segment prefixes.
 const GENERATED_PUBLIC_DIRECTORIES = new Set(["pdfjs", "e2ee"]);
-// Retired review data: proxy answers the whole segment with a plain 404.
-const SPECIAL_PUBLIC_DIRECTORIES = new Set(["review-data"]);
 const IMAGE_FILE_PATTERN = /\.(?:jpe?g|png|gif|svg|webp)$/i;
 
 function listFiles(directory: string): string[] {
@@ -68,8 +66,7 @@ describe("public path contract", () => {
     const unclassified = rootDirectories.filter(
       (directory) =>
         !PUBLIC_IMAGE_DIRECTORIES.has(directory) &&
-        !GENERATED_PUBLIC_DIRECTORIES.has(directory) &&
-        !SPECIAL_PUBLIC_DIRECTORIES.has(directory)
+        !GENERATED_PUBLIC_DIRECTORIES.has(directory)
     );
     expect(unclassified).toEqual([]);
   });

@@ -16,7 +16,6 @@ coverage
 content/delegation
 public/delegation-content
 public/glossary.json
-ops/public-review-knowledge/*/versions/*/knowledge
 
 # Package manager
 pnpm-lock.yaml

@@ -39,7 +39,6 @@ const ALLOWED_PUBLICATION_ENVIRONMENTS = new Set([
   "staging",
   "production",
 ]);
-const PUBLIC_REVIEW_ID_PATTERN = /^[a-z0-9][a-z0-9-]*$/;
 
 function fail(message) {
   console.error(message);
@@ -389,12 +388,6 @@ function validateRecord(record, ids, routePatterns) {
       }
     }
   }
-  if (record.public_review_id !== undefined) {
-    requireString(record.public_review_id, "public_review_id", record.id);
-    if (!PUBLIC_REVIEW_ID_PATTERN.test(record.public_review_id)) {
-      fail(`${record.id}: public_review_id is not a valid review id`);
-    }
-  }
   for (const relatedPath of record.related_paths || []) {
     validateInternalPath(
       relatedPath,
@@ -441,7 +434,6 @@ async function publishHelpIndex() {
     records: getPublishedHelpRecords({
       records: index.records,
       publicationEnvironment,
-      repoRoot,
     }),
   };
   const output = await prettier.format(JSON.stringify(publishedIndex), {

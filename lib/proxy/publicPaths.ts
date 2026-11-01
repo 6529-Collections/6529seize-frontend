@@ -260,10 +260,9 @@ function decodePathname(pathname: string): string {
 }
 
 /**
- * True for the retired public contract review's data under
- * `public/review-data`, which no host serves any more. The path is decoded,
- * lower-cased and stripped of repeated slashes first, so an encoded or
- * oddly spelled request cannot reach the files.
+ * True for `/review-data`, the namespace of the removed public contract
+ * review's generated files. The path is decoded, lower-cased and stripped of
+ * repeated slashes first, so every spelling of an old link gets the same 404.
  */
 export function isRetiredReviewDataPath(pathname: string): boolean {
   const normalized = decodePathname(pathname)

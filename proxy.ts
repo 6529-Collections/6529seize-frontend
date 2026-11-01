@@ -131,9 +131,8 @@ export const config = {
   matcher: ["/((?!_next/static|_next/image).*)"],
 };
 
-// The retired Stream review's files stay in `public/review-data` until the
-// review is removed, but no host serves them: proxy runs before Next serves
-// `public/`, so it answers them with a plain 404 on every deployment.
+// `/review-data` held the removed Stream review's generated files. Old links
+// get a plain 404 here instead of falling through to the profile catch-all.
 function isRetiredReviewDataRequest(req: NextRequest): boolean {
   return (
     isRetiredReviewDataPath(req.nextUrl.pathname) ||
