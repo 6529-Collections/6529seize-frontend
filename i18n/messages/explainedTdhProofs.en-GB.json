@@ -205,7 +205,7 @@
   "explained.tdh.proofs.layer.second": "Program B",
   "explained.tdh.proofs.layer.secondSub": "the same words, from code written apart",
   "explained.tdh.proofs.layer.contract": "The contract",
-  "explained.tdh.proofs.layer.contractSub": "rule, chain, time, cycle root, anchors",
+  "explained.tdh.proofs.layer.contractSub": "two equal outputs, rule, chain, time, cycle root, anchors",
   "explained.tdh.proofs.layer.recorded": "Recorded",
   "explained.tdh.proofs.layer.recordedSub": "a root anyone could read",
   "explained.tdh.proofs.state.passed": "passes",

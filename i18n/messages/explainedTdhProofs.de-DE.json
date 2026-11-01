@@ -205,7 +205,7 @@
   "explained.tdh.proofs.layer.second": "Programm B",
   "explained.tdh.proofs.layer.secondSub": "dieselben Wörter, aus getrennt geschriebenem Code",
   "explained.tdh.proofs.layer.contract": "Der Vertrag",
-  "explained.tdh.proofs.layer.contractSub": "Regel, Kette, Zeit, Zykluswurzel, Anker",
+  "explained.tdh.proofs.layer.contractSub": "zwei gleiche Ausgaben, Regel, Kette, Zeit, Zykluswurzel, Anker",
   "explained.tdh.proofs.layer.recorded": "Festgehalten",
   "explained.tdh.proofs.layer.recordedSub": "eine Wurzel, die jeder lesen könnte",
   "explained.tdh.proofs.state.passed": "lässt durch",

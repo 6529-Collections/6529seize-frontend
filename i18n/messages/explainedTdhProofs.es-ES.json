@@ -205,7 +205,7 @@
   "explained.tdh.proofs.layer.second": "Programa B",
   "explained.tdh.proofs.layer.secondSub": "las mismas palabras, con código escrito aparte",
   "explained.tdh.proofs.layer.contract": "El contrato",
-  "explained.tdh.proofs.layer.contractSub": "regla, cadena, tiempo, raíz del ciclo, anclas",
+  "explained.tdh.proofs.layer.contractSub": "dos salidas iguales, regla, cadena, tiempo, raíz del ciclo, anclas",
   "explained.tdh.proofs.layer.recorded": "Registrado",
   "explained.tdh.proofs.layer.recordedSub": "una raíz que cualquiera podría leer",
   "explained.tdh.proofs.state.passed": "pasa",

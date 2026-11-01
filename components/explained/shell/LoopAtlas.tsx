@@ -61,14 +61,17 @@ export default function LoopAtlas({
 }) {
   const [step, setStep] = useState(initialStep);
   const sectionRef = useRef<HTMLElement>(null);
+  const loopRef = useRef<HTMLDivElement>(null);
   const touched = useRef(false);
   // While the copy goes round by itself, the card does not announce each stop.
   const [playing, setPlaying] = useState(false);
   useEffect(() => {
     const section = sectionRef.current;
+    const loop = loopRef.current;
     if (
       !autoplay ||
       section === null ||
+      loop === null ||
       typeof IntersectionObserver === "undefined" ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
     ) {
@@ -98,9 +101,11 @@ export default function LoopAtlas({
           timer = window.setTimeout(next, AUTOPLAY_STEP_MS / 2);
         }
       },
-      { threshold: 0.6 }
+      { threshold: 0.5 }
     );
-    seen.observe(section);
+    // The loop itself, not the whole section: "Three things checked" under
+    // it makes the section taller than a screen.
+    seen.observe(loop);
     section.addEventListener("pointerdown", stop);
     section.addEventListener("keydown", stop);
     return () => {
@@ -115,7 +120,10 @@ export default function LoopAtlas({
   const action = station ? actions?.[station.key] : undefined;
   return (
     <section data-lens={id} ref={sectionRef}>
-      <div className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-6 lg:tw-grid-cols-[minmax(0,1fr)_380px] lg:tw-gap-10">
+      <div
+        ref={loopRef}
+        className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-6 lg:tw-grid-cols-[minmax(0,1fr)_380px] lg:tw-gap-10"
+      >
         <div className="tw-min-w-0">
           <LoopFigure
             stations={stations}
