@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { DAY, REGISTRY_V14 } from "@/components/explained/engine/tdh";
-import { EX_LINK, EX_TEXT } from "@/components/explained/tokens";
+import { EX_FOCUS, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { ENGINE } from "@/lib/explained/engine";
 import { formatCents, formatCount } from "@/lib/explained/format";
@@ -217,7 +217,7 @@ export default function StepsInOrder({
                 {String(index + 1).padStart(2, "0")}
               </span>
               <Link
-                className={`${EX_LINK} tw-text-base tw-font-semibold tw-leading-6`}
+                className={`tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 tw-no-underline hover:tw-underline ${EX_FOCUS}`}
                 href={step.href}
               >
                 {ht(locale, `explained.tdh.how.order.${step.id}` as HowKey)}
@@ -227,7 +227,7 @@ export default function StepsInOrder({
               </code>
               {trace !== null && (
                 <span
-                  className="tw-col-start-2 tw-text-[14px] tw-leading-[21px] tw-text-primary-300 md:tw-col-span-2 md:tw-col-start-3 md:tw-row-start-2 xl:tw-col-span-1 xl:tw-col-start-auto xl:tw-row-start-auto"
+                  className="tw-col-start-2 tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-2.5 tw-text-[14px] tw-leading-[21px] tw-text-iron-300 md:tw-col-span-2 md:tw-col-start-3 md:tw-row-start-2 xl:tw-col-span-1 xl:tw-col-start-auto xl:tw-row-start-auto"
                   data-trace={step.id}
                 >
                   {traceLine(step.id, trace, locale)}
@@ -250,7 +250,7 @@ export default function StepsInOrder({
           {trace !== null && (
             <>
               {" "}
-              <span className="tw-text-primary-300">
+              <span className="tw-text-iron-400">
                 {ht(locale, "explained.tdh.how.trace.caption")}
               </span>
             </>

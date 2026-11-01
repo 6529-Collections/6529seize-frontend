@@ -19,9 +19,19 @@ export type Lane =
   | (LaneStep & { readonly ok?: boolean; readonly pair?: undefined })
   | { readonly pair: readonly [LaneStep, LaneStep]; readonly ok?: boolean };
 
-function StepText({ step }: { readonly step: LaneStep }) {
+/**
+ * A step's words. A lane of one step fills its box, its caption (the hash
+ * or the count) at the box's foot, so every box in a row ends on content.
+ */
+function StepText({
+  step,
+  foot = false,
+}: {
+  readonly step: LaneStep;
+  readonly foot?: boolean;
+}) {
   return (
-    <div className="tw-flex tw-flex-col tw-gap-1">
+    <div className={`tw-flex tw-flex-col tw-gap-1 ${foot ? "tw-flex-1" : ""}`}>
       <span className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-400">
         {step.kicker}
       </span>
@@ -29,7 +39,9 @@ function StepText({ step }: { readonly step: LaneStep }) {
         {step.title}
       </b>
       {step.cap !== undefined && (
-        <span className="tw-block tw-text-[13px] tw-leading-[19px] tw-text-iron-400">
+        <span
+          className={`tw-block tw-text-[13px] tw-leading-[19px] tw-text-iron-400 ${foot ? "tw-mt-auto tw-pt-2" : ""}`}
+        >
           {step.cap}
         </span>
       )}
@@ -92,7 +104,7 @@ export default function Lanes({
                   </div>
                 </>
               ) : (
-                <StepText step={lane} />
+                <StepText step={lane} foot />
               )}
             </li>
           </Fragment>

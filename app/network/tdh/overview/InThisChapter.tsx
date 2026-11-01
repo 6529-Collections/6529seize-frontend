@@ -8,7 +8,7 @@ import { orich, ot, type OverviewKey } from "./copy";
 
 /**
  * §05 In this chapter (TDH-DESIGN.md §4.1): the spine 1 to 4 with a line
- * each, then the shelf S1 to S5, titles only; and where to start.
+ * each, then the shelf S1 to S5, each with a line too; and where to start.
  */
 const SPINE_DESC: Readonly<Record<string, OverviewKey>> = {
   how: "index.how",
@@ -16,6 +16,11 @@ const SPINE_DESC: Readonly<Record<string, OverviewKey>> = {
   check: "index.check",
   sure: "index.sure",
   proofs: "index.proofs",
+  spec: "index.spec",
+  impl: "index.impl",
+  design: "index.design",
+  versions: "index.versions",
+  glossary: "index.glossary",
 };
 
 export default function InThisChapter({
@@ -37,12 +42,16 @@ export default function InThisChapter({
         ...(desc === undefined ? {} : { desc: ot(locale, desc) }),
       };
     }),
-    ...tdh.shelf.map((page, index) => ({
-      no: `S${index + 1}`,
-      title: kt(locale, page.title),
-      href: page.href,
-      shelf: true,
-    })),
+    ...tdh.shelf.map((page, index) => {
+      const desc = SPINE_DESC[page.id];
+      return {
+        no: `S${index + 1}`,
+        title: kt(locale, page.title),
+        href: page.href,
+        shelf: true,
+        ...(desc === undefined ? {} : { desc: ot(locale, desc) }),
+      };
+    }),
   ];
   const n = (id: string) => spine.find((page) => page.id === id)?.n ?? "";
   return (

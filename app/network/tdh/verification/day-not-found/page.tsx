@@ -128,6 +128,19 @@ function Explanation({
             date: formatUtcLongDay(locale, dateOfCycle(cycle)),
           })}
         </p>
+        {/* The day proof A proved is before the first published day: say
+            so, and where its proof is, since readers type it from there. */}
+        {book.maybe<number>("proofs.day.cycle")?.value === cycle && (
+          <p className={`${EX_TEXT.body} tw-m-0 tw-mt-4 tw-max-w-[660px]`}>
+            {rich(locale, "explained.tdh.day.notFound.proved", {
+              link: (
+                <Link className={EX_LINK} href="/network/tdh/proofs">
+                  {pt(locale, "explained.tdh.day.notFound.provedLink")}
+                </Link>
+              ),
+            })}
+          </p>
+        )}
         <p className={`${EX_TEXT.body} tw-m-0 tw-mt-4 tw-max-w-[660px]`}>
           {rich(locale, "explained.tdh.day.notFound.uploads", {
             link: (

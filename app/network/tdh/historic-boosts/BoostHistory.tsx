@@ -118,7 +118,25 @@ export default function BoostHistory({
           const yy = y(step.fullSet);
           const next = steps[index + 1];
           const tone = step.current ? EX_HEX.you : EX_HEX.ink2;
-          const tag = `${stepName(step)} · ${formatCents(locale, step.fullSet)}`;
+          // Steps in a row at one value share one label, set on the first:
+          // "before TDH v1.1, v1.1 · 1.20", not two labels for one level.
+          const prevStep = index > 0 ? steps[index - 1] : undefined;
+          const sameAsPrev =
+            prevStep !== undefined &&
+            !step.current &&
+            prevStep.fullSet === step.fullSet;
+          const run = [step];
+          for (
+            let after = index + 1;
+            after < steps.length &&
+            !steps[after]?.current &&
+            steps[after]?.fullSet === step.fullSet;
+            after += 1
+          ) {
+            const member = steps[after];
+            if (member) run.push(member);
+          }
+          const tag = `${run.map(stepName).join(", ")} · ${formatCents(locale, step.fullSet)}`;
           // A short step's label sits at its start; the current one ends at
           // the right edge, so its label is anchored there.
           const anchor = step.current ? "end" : "start";
@@ -176,23 +194,31 @@ export default function BoostHistory({
                   strokeWidth={1.5}
                 />
               )}
-              {(!narrow || step.current || (index === 0 && fits)) && (
-                <Label
-                  x={lx}
-                  y={ly}
-                  anchor={anchor}
-                  size={13}
-                  weight={600}
-                  tone={step.current ? "you" : "ink2"}
-                >
-                  {tag}
-                </Label>
-              )}
+              {!sameAsPrev &&
+                (!narrow || step.current || (index === 0 && fits)) && (
+                  <Label
+                    x={lx}
+                    y={ly}
+                    anchor={anchor}
+                    size={13}
+                    weight={600}
+                    tone={step.current ? "you" : "ink2"}
+                  >
+                    {tag}
+                  </Label>
+                )}
             </g>
           );
         })}
       </SvgFrame>
-      <p className="tw-sr-only">
+      {/* On a phone most steps are too short to label: the list says them. */}
+      <p
+        className={
+          narrow
+            ? "tw-m-0 tw-mt-2 tw-text-[13px] tw-leading-5 tw-text-iron-400"
+            : "tw-sr-only"
+        }
+      >
         {steps
           .map(
             (step) =>

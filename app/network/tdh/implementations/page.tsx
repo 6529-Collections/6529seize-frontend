@@ -18,6 +18,7 @@ import { loadFactBook } from "@/lib/explained/feed.server";
 import { factText, type FactBook } from "@/lib/explained/facts";
 import CopyButton from "@/components/explained/reference/CopyButton";
 import ImplAnchors from "./ImplAnchors";
+import RunVectors from "./RunVectors";
 import { PlaceLinks, pagePlace } from "@/components/explained/shell/place";
 import {
   Caption,
@@ -410,6 +411,7 @@ export default async function ImplementationsPage({
                   }),
                   m("explained.tdh.impl.run.compare", {
                     expected: code("expected"),
+                    boost: code("boost_c"),
                     legacy: code("legacy_expected"),
                   }),
                   m("explained.tdh.impl.run.invalid", {
@@ -433,6 +435,7 @@ export default async function ImplementationsPage({
               </ol>
             </div>
           </div>
+          <RunVectors locale={locale} />
         </EdSection>
 
         <EdSection

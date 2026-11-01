@@ -63,7 +63,7 @@ export function ReceiptRow({
 }) {
   return (
     <div
-      className="tw-grid tw-grid-cols-1 tw-gap-0.5 tw-border-0 tw-border-b tw-border-dashed tw-border-iron-800 tw-py-[9px] tw-text-base tw-leading-6 last:tw-border-b-0 md:tw-grid-cols-[190px_minmax(0,1fr)] md:tw-gap-[18px]"
+      className="tw-grid tw-grid-cols-1 tw-gap-0.5 tw-border-0 tw-border-b tw-border-dashed tw-border-iron-800 tw-py-[9px] tw-text-[15px] tw-leading-6 last:tw-border-b-0 md:tw-grid-cols-[190px_minmax(0,1fr)] md:tw-gap-x-[18px]"
       data-receipt-row={row.id}
     >
       <span className="tw-text-iron-400">{kt(locale, LABEL[row.id])}</span>
@@ -71,16 +71,19 @@ export function ReceiptRow({
         {row.value}
       </span>
       {row.note !== undefined && (
-        <div className="tw-mt-1 md:tw-col-start-2">{row.note}</div>
+        <div className="md:tw-col-start-2">{row.note}</div>
       )}
     </div>
   );
 }
 
-/** A receipt row's note: a quiet left rule, never a status colour. */
+/**
+ * A receipt row's note: one quiet line under the value, in the row's own
+ * rhythm, never a box or a status colour.
+ */
 export function ReceiptNote({ children }: { readonly children: ReactNode }) {
   return (
-    <div className="tw-rounded-r-md tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-400 tw-bg-white/[0.025] tw-px-3 tw-py-2 tw-text-sm tw-leading-[21px] tw-text-iron-300">
+    <div className="tw-max-w-[560px] tw-text-sm tw-leading-[21px] tw-text-iron-400">
       {children}
     </div>
   );

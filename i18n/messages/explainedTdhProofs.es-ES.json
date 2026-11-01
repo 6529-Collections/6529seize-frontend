@@ -8,7 +8,6 @@
   "explained.tdh.proofs.verdict.retired": "reglas {version}, retiradas",
   "explained.tdh.proofs.verdict.body": "El programa A es el código propio del validador, con el núcleo Rust de la comprobación diaria dentro, ejecutado en SP1, una máquina virtual de conocimiento cero. Su prueba dice que sus {words} palabras, valores de {wordBytes} bytes cada uno, se derivan de bloques que se encadenan por hash hasta el bloque ancla {anchor}, y del historial anterior. El ciclo fechado el {date} cubre el día que terminó a su medianoche. Comprobar el ancla contra Ethereum es el paso del contrato, y el contrato no está desplegado. Una GPU trabajó {hours} h {minutes} min para probar lo que el mismo código calcula en {seconds} s sin prueba.",
   "explained.tdh.proofs.verdict.bodyB": "El programa B, escrito por separado, ejecutó el mismo día y obtuvo las mismas palabras, salvo el ancla. No las ha probado.",
-  "explained.tdh.proofs.verdict.pairV14": "Bajo TDH v1.4, ambos programas probaron un ciclo de prueba sintético el {date}, y los verificadores de mainnet aceptan las dos pruebas en una llamada de solo lectura. Ningún día de mainnet está probado aún por los dos.",
   "explained.tdh.proofs.verdict.limitTitle": "Aún no registrado en Ethereum.",
   "explained.tdh.proofs.verdict.limitBody": "El contrato registraría un día solo con las pruebas de ambos programas. Está construido y probado en una copia local de mainnet, y no está desplegado: desplegarlo es decisión del propietario ({decision}).",
   "explained.tdh.proofs.verdict.toWords": "Leer las {words} palabras",

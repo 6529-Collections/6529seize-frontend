@@ -260,7 +260,7 @@ export default function StatementWords({
                   return (
                     <tr
                       key={word.word.name}
-                      className={`tw-grid tw-grid-cols-[28px_minmax(0,1fr)] tw-gap-x-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-1.5 lg:tw-table-row lg:tw-py-0 ${on ? "tw-bg-primary-400/[0.08]" : "max-lg:tw-hidden"}`}
+                      className={`tw-grid tw-grid-cols-[28px_minmax(0,1fr)] tw-gap-x-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-1.5 lg:tw-table-row lg:tw-py-0 ${on ? "" : "max-lg:tw-hidden"}`}
                       data-word={word.index}
                       data-lit={on ? "1" : "0"}
                     >
@@ -369,7 +369,9 @@ export default function StatementWords({
             { kind: "proved", refText: fill(locale, k("words.colA")) },
             { kind: "tested", refText: fill(locale, k("words.colB")) },
           ]}
-          tag={{ kind: "real" }}
+          // The flipped bit is made up for the model: Simulated, as the
+          // failing pair above is; the real proof's words are Real.
+          tag={{ kind: flip ? "simulated" : "real" }}
         />
       }
     />

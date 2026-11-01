@@ -90,6 +90,8 @@
   "explained.tdh.day.notFound.body": "Der tägliche Vergleich veröffentlicht eine Datei je Zyklus, vom {first} (Zyklus {cycle}) bis zum letzten abgeschlossenen Zyklus. Diese Adresse nennt keinen Tag, den der Feed enthält.",
   "explained.tdh.day.notFound.future": "Zyklus {day} endet um {close} am {date}, daher gibt es noch kein Ergebnis. Jedes Ergebnis erscheint etwa {after} nach seinem Snapshot.",
   "explained.tdh.day.notFound.before": "Zyklus {day} ({date}) liegt vor dem ersten veröffentlichten Tag, dem {first} (Zyklus {cycle}).",
+  "explained.tdh.day.notFound.proved": "Das ist der Tag, den Programm A in Zero Knowledge bewiesen hat, unter den ausgemusterten Regeln; {link} zeigt seine Aussage und seinen Beweis.",
+  "explained.tdh.day.notFound.provedLink": "Die Seite zu den Zero-Knowledge-Beweisen",
   "explained.tdh.day.notFound.uploads": "Die eigenen Uploads von 6529.io für frühere Tage liegen auf Arweave, aufgelistet in {link}.",
   "explained.tdh.day.notFound.uploadsLink": "den konsolidierten Uploads von 6529.io",
   "explained.tdh.day.notFound.latest": "Das neueste Ergebnis: {date}",

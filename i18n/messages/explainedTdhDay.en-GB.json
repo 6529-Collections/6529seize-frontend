@@ -90,6 +90,8 @@
   "explained.tdh.day.notFound.body": "The daily comparison publishes one file per cycle, from {first} (cycle {cycle}) to the latest closed cycle. This address names no day the feed holds.",
   "explained.tdh.day.notFound.future": "Cycle {day} closes at {close} on {date}, so it has no result yet. Each result is published about {after} after its snapshot.",
   "explained.tdh.day.notFound.before": "Cycle {day} ({date}) is before the first published day, {first} (cycle {cycle}).",
+  "explained.tdh.day.notFound.proved": "This is the day program A proved in zero knowledge, under the retired rules; {link} shows its statement and its proof.",
+  "explained.tdh.day.notFound.provedLink": "The zero-knowledge proofs page",
   "explained.tdh.day.notFound.uploads": "6529.io's own uploads for earlier days are on Arweave, listed in {link}.",
   "explained.tdh.day.notFound.uploadsLink": "6529.io's consolidated uploads",
   "explained.tdh.day.notFound.latest": "The latest result: {date}",

@@ -133,11 +133,12 @@ function VerdictFrame({
           {headline}
         </h2>
         {children}
-        <div className="tw-mt-[22px] tw-flex tw-flex-wrap tw-gap-2.5">
-          {actions}
-        </div>
       </div>
       <div>{aside}</div>
+      {/* The actions span the frame, so the three sit on one row. */}
+      <div className="tw-flex tw-flex-wrap tw-gap-2.5 lg:tw-col-span-2 lg:-tw-mt-3">
+        {actions}
+      </div>
     </section>
   );
 }
@@ -267,11 +268,6 @@ function RealVerdict({
         })
       )}
       {p(rich(locale, k("verdict.bodyB")))}
-      {p(
-        rich(locale, k("verdict.pairV14"), {
-          date: facts.print("proofs.pairV14.provedOn"),
-        })
-      )}
       <div>
         <LimitNote title={rich(locale, k("verdict.limitTitle"))}>
           {rich(locale, k("verdict.limitBody"), { decision: "D128" })}

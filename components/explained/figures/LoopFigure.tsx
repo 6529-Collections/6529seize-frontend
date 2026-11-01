@@ -332,6 +332,8 @@ function LoopList({ stations, focus, verify, locale }: LoopProps) {
 
 /** The circle: its height is fixed, so the page does not move when it measures its width. */
 const CIRCLE_HEIGHT = 520;
+/** Narrower than this, the stations' names and numbers do not fit round the circle. */
+const MIN_CIRCLE_WIDTH = 560;
 
 /**
  * Where a station's name sits: beside the station on the circle's sides,
@@ -441,6 +443,20 @@ function LoopCircle({
 }: LoopProps) {
   const [ref, width] = useMeasuredWidth<HTMLDivElement>(600);
   const height = CIRCLE_HEIGHT;
+  // A wide screen with the site's sidebar open can leave the circle too
+  // little room for its labels: it is then the list, as on a phone.
+  if (width < MIN_CIRCLE_WIDTH) {
+    return (
+      <div ref={ref} className="tw-w-full tw-min-w-0">
+        <LoopList
+          stations={stations}
+          focus={focus}
+          verify={verify}
+          locale={locale}
+        />
+      </div>
+    );
+  }
   const cx = width / 2;
   // The ring sits a little above the middle, so Art's number keeps clear of
   // the Ethereum bar under it.

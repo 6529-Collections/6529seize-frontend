@@ -302,7 +302,7 @@
   "explained.tdh.how.trace.records": "la base de la identidad es la de la cartera: {base}",
   "explained.tdh.how.trace.boost": "un Gradient: beta = {cents} céntimos, un boost de {beta}",
   "explained.tdh.how.trace.totals": "suma {final} al total de la red",
-  "explained.tdh.how.trace.caption": "En azul, una copia calculada paso a paso: una carta minteada hasta el tope del suelo, así que no lo necesita, conservada cien días enteros por una cartera propia que también tiene un Gradient.",
+  "explained.tdh.how.trace.caption": "Junto a la línea azul, una copia calculada paso a paso: una carta minteada hasta el tope del suelo, así que no lo necesita, conservada cien días enteros por una cartera propia que también tiene un Gradient.",
   "explained.tdh.how.model.unavailable": "Este modelo necesita las ediciones de los Memes de 6529.io, que no se han podido leer ahora.",
   "explained.tdh.how.hwk.rules": "Las reglas",
   "explained.tdh.how.hwk.rulesBody": "P26, TDH v1.4, §4 a §8 ({head}); reproducidas en la página Especificación.",

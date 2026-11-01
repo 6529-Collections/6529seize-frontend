@@ -81,6 +81,17 @@ function BlocksFigure({
           date: facts.print("proofs.day.date"),
         })}
       </figcaption>
+      {/* The blocks that held a log are a sliver at the bar's end: a
+          callout above it names them, with a leader down to the sliver. */}
+      <div className="tw-relative tw-h-7" aria-hidden="true">
+        <span className="tw-absolute tw-bottom-1.5 tw-right-0 tw-flex tw-items-baseline tw-gap-1.5 tw-whitespace-nowrap tw-text-[13px] tw-leading-4 tw-text-iron-300">
+          <b className="tw-font-semibold tw-text-iron-50">
+            {facts.print("proofs.day.txBlocks")}
+          </b>
+          {fill(locale, k("blocks.held"))}
+        </span>
+        <span className="tw-absolute -tw-bottom-0 tw-right-px tw-h-1.5 tw-w-px tw-bg-iron-50" />
+      </div>
       <div
         className="tw-flex tw-h-7 tw-w-full tw-overflow-hidden tw-rounded-md"
         aria-hidden="true"

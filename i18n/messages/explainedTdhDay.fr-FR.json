@@ -90,6 +90,8 @@
   "explained.tdh.day.notFound.body": "La comparaison quotidienne publie un fichier par cycle, du {first} (cycle {cycle}) au dernier cycle clos. Cette adresse ne désigne aucun jour que contient le flux.",
   "explained.tdh.day.notFound.future": "Le cycle {day} se clôt à {close} le {date}, il n'a donc pas encore de résultat. Chaque résultat est publié environ {after} après son instantané.",
   "explained.tdh.day.notFound.before": "Le cycle {day} ({date}) précède le premier jour publié, le {first} (cycle {cycle}).",
+  "explained.tdh.day.notFound.proved": "C'est le jour que le programme A a prouvé à divulgation nulle, sous les règles retirées ; {link} montre son énoncé et sa preuve.",
+  "explained.tdh.day.notFound.provedLink": "La page des preuves à divulgation nulle",
   "explained.tdh.day.notFound.uploads": "Les dépôts de 6529.io pour les jours antérieurs sont sur Arweave, listés dans {link}.",
   "explained.tdh.day.notFound.uploadsLink": "les dépôts consolidés de 6529.io",
   "explained.tdh.day.notFound.latest": "Le dernier résultat : {date}",

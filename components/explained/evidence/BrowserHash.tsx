@@ -1,10 +1,15 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { formatCount, shortHash } from "@/lib/explained/format";
 import { kt } from "../i18n";
 import { Glyph } from "../marks/glyphs";
+import { EX_FOCUS } from "../tokens";
+
+/** After this long still computing, the row says so and offers to try again. */
+const SLOW_MS = 8000;
 
 /**
  * The receipt's last row (TDH-DESIGN.md §5.11): the browser fetches the day
@@ -70,6 +75,16 @@ export default function BrowserHash({
   });
   let state: HashState = hashed.data ?? { status: "computing" };
   if (hashed.isError) state = { status: "unavailable" };
+  const [slow, setSlow] = useState(false);
+  const computing = state.status === "computing";
+  useEffect(() => {
+    if (!computing) {
+      setSlow(false);
+      return undefined;
+    }
+    const timer = window.setTimeout(() => setSlow(true), SLOW_MS);
+    return () => window.clearTimeout(timer);
+  }, [computing]);
 
   let shown = kt(locale, "explained.kit.receipt.computing");
   let verdict: string | null = null;
@@ -98,6 +113,23 @@ export default function BrowserHash({
       >
         {shown}
       </span>
+      {computing && slow && (
+        <span className="tw-text-[15px] tw-font-normal tw-leading-[22px] tw-text-iron-400">
+          {kt(locale, "explained.kit.receipt.slow", {
+            hash: shortHash(expected),
+          })}{" "}
+          <button
+            type="button"
+            className={`hover:tw-text-primary-200 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-font-semibold tw-text-primary-300 ${EX_FOCUS}`}
+            onClick={() => {
+              setSlow(false);
+              void hashed.refetch();
+            }}
+          >
+            {kt(locale, "explained.kit.receipt.retry")}
+          </button>
+        </span>
+      )}
       {verdict !== null && (
         <span className="tw-grid tw-grid-cols-[14px_minmax(0,1fr)] tw-gap-2 tw-text-[15px] tw-font-normal tw-leading-[22px] tw-text-iron-300">
           <Glyph

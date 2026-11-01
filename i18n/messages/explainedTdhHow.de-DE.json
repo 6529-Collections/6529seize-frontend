@@ -302,7 +302,7 @@
   "explained.tdh.how.trace.records": "die Basis der Identität ist die des Wallets: {base}",
   "explained.tdh.how.trace.boost": "ein Gradient: beta = {cents} Cent, ein Boost von {beta}",
   "explained.tdh.how.trace.totals": "fügt der Summe des Netzwerks {final} hinzu",
-  "explained.tdh.how.trace.caption": "In Blau ein Exemplar durch jeden Schritt gerechnet: eine Karte, bis zur Obergrenze der Untergrenze gemintet und daher ohne Untergrenze, hundert ganze Tage gehalten von einem eigenen Wallet, das auch einen Gradient hält.",
+  "explained.tdh.how.trace.caption": "Neben der blauen Linie ein Exemplar durch jeden Schritt gerechnet: eine Karte, bis zur Obergrenze der Untergrenze gemintet und daher ohne Untergrenze, hundert ganze Tage gehalten von einem eigenen Wallet, das auch einen Gradient hält.",
   "explained.tdh.how.model.unavailable": "Dieses Modell braucht die Meme-Auflagen von 6529.io, die gerade nicht gelesen werden konnten.",
   "explained.tdh.how.hwk.rules": "Die Regeln",
   "explained.tdh.how.hwk.rulesBody": "P26, TDH v1.4, §4 bis §8 ({head}); wiedergegeben auf der Seite Spezifikation.",

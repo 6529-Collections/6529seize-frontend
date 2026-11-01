@@ -90,6 +90,8 @@
   "explained.tdh.day.notFound.body": "La comparación diaria publica un archivo por ciclo, desde el {first} (ciclo {cycle}) hasta el último ciclo cerrado. Esta dirección no indica ningún día que contenga el feed.",
   "explained.tdh.day.notFound.future": "El ciclo {day} se cierra a las {close} del {date}, así que aún no tiene resultado. Cada resultado se publica unos {after} después de su instantánea.",
   "explained.tdh.day.notFound.before": "El ciclo {day} ({date}) es anterior al primer día publicado, el {first} (ciclo {cycle}).",
+  "explained.tdh.day.notFound.proved": "Este es el día que el programa A probó en conocimiento cero, bajo las reglas retiradas; {link} muestra su enunciado y su prueba.",
+  "explained.tdh.day.notFound.provedLink": "La página de las pruebas de conocimiento cero",
   "explained.tdh.day.notFound.uploads": "Las subidas propias de 6529.io de días anteriores están en Arweave, listadas en {link}.",
   "explained.tdh.day.notFound.uploadsLink": "las subidas consolidadas de 6529.io",
   "explained.tdh.day.notFound.latest": "El resultado más reciente: {date}",

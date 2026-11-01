@@ -148,6 +148,8 @@
   "explained.kit.receipt.file": "This file",
   "explained.kit.receipt.asReported": "as this file reports it",
   "explained.kit.receipt.computing": "computing…",
+  "explained.kit.receipt.slow": "Still computing in this browser. The index states {hash}.",
+  "explained.kit.receipt.retry": "Try again",
   "explained.kit.receipt.hashEquals": "equals the index: your browser computed it from the {bytes} bytes of the file",
   "explained.kit.receipt.hashDiffers": "differs from the index",
   "explained.kit.receipt.hashUnavailable": "not computed in this browser",

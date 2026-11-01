@@ -47,8 +47,11 @@ function StatusCell({
   readonly comparisonRef?: string;
 }): ReactNode {
   if ("word" in status) {
+    // A status in words keeps the glyph column empty, so every status's
+    // word starts on one line down the table.
     return (
-      <span className="tw-text-[13px] tw-font-semibold tw-text-iron-50">
+      <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-[13px] tw-font-semibold tw-text-iron-50">
+        <span className="tw-inline-block tw-w-3" aria-hidden="true" />
         {t(locale, status.word)}
       </span>
     );
@@ -178,8 +181,18 @@ export default async function GlossaryPage({
                 label: s("explained.tdh.glossary.col.meaning"),
                 phoneLabel: false,
               },
-              { key: "status", label: s("explained.tdh.glossary.col.status") },
-              { key: "source", label: s("explained.tdh.glossary.col.source") },
+              // On a phone, the status and the source read as one line
+              // under the meaning, without their column names each time.
+              {
+                key: "status",
+                label: s("explained.tdh.glossary.col.status"),
+                phoneLabel: false,
+              },
+              {
+                key: "source",
+                label: s("explained.tdh.glossary.col.source"),
+                phoneLabel: false,
+              },
             ]}
             rows={rows}
           />

@@ -148,6 +148,8 @@
   "explained.kit.receipt.file": "Ce fichier",
   "explained.kit.receipt.asReported": "tel que ce fichier l'indique",
   "explained.kit.receipt.computing": "calcul en cours…",
+  "explained.kit.receipt.slow": "Toujours en calcul dans ce navigateur. L'index indique {hash}.",
+  "explained.kit.receipt.retry": "Réessayer",
   "explained.kit.receipt.hashEquals": "égal à l'index : votre navigateur l'a calculé à partir des {bytes} octets du fichier",
   "explained.kit.receipt.hashDiffers": "diffère de l'index",
   "explained.kit.receipt.hashUnavailable": "non calculé dans ce navigateur",

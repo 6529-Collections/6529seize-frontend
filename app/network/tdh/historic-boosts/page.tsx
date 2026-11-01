@@ -286,6 +286,9 @@ export default async function VersionsPage({
               ]}
               rows={rows}
             />
+            <Caption className="tw-mt-2">
+              {m("explained.tdh.versions.tableSource")}
+            </Caption>
           </div>
           {historySteps.length > 1 && ceilingValue !== null && (
             <figure

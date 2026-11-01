@@ -302,7 +302,7 @@
   "explained.tdh.how.trace.records": "the identity's base is the wallet's: {base}",
   "explained.tdh.how.trace.boost": "one Gradient: beta = {cents} cents, a boost of {beta}",
   "explained.tdh.how.trace.totals": "adds {final} to the network's total",
-  "explained.tdh.how.trace.caption": "In blue, one copy worked through every step: a card minted to the floor's cap, so it needs no floor, held a hundred whole days by a wallet of its own that also holds one Gradient.",
+  "explained.tdh.how.trace.caption": "Beside the blue rule, one copy worked through every step: a card minted to the floor's cap, so it needs no floor, held a hundred whole days by a wallet of its own that also holds one Gradient.",
   "explained.tdh.how.model.unavailable": "This model needs the Meme editions from 6529.io, which could not be read just now.",
   "explained.tdh.how.hwk.rules": "The rules",
   "explained.tdh.how.hwk.rulesBody": "P26, TDH v1.4, §4 to §8 ({head}); restated on the Specification page.",
