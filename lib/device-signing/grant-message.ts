@@ -1,3 +1,4 @@
+import { isDevLikeEnv } from "@/config/devAuth";
 import type { DeviceScope } from "./interim-event";
 
 export const DEFAULT_DEVICE_SCOPES: readonly DeviceScope[] = [
@@ -34,6 +35,59 @@ interface ParsedDeviceGrantMessage extends DeviceGrantTerms {
 }
 
 const CHAIN_ID_PREFIX = "Chain ID: ";
+
+/**
+ * The only hosts that serve the 6529 app. Other 6529.io subdomains, such as
+ * the IPFS and media gateways, serve user-published pages, so a grant signed
+ * there could have been phished and never counts.
+ */
+const APP_GRANT_DOMAINS: ReadonlySet<string> = new Set([
+  "6529.io",
+  "staging.6529.io",
+]);
+const LOCAL_GRANT_HOSTNAMES: ReadonlySet<string> = new Set([
+  "localhost",
+  "127.0.0.1",
+  "[::1]",
+]);
+
+/**
+ * The host a SIWE domain names, or null unless it is exactly one bare host
+ * (no scheme, path, query, fragment, user info, whitespace or empty label),
+ * so a value such as "evil.example/x.6529.io" can never pass for a 6529 host.
+ */
+function toExactHost(domain: string): URL | null {
+  const value = domain.toLowerCase();
+  if (value.split(".").includes("")) {
+    return null;
+  }
+  try {
+    const url = new URL(`https://${value}`);
+    return url.host === value ? url : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Whether a wallet signing a grant for this SIWE domain was on the 6529 app:
+ * exactly 6529.io or staging.6529.io, without a port. Development and test
+ * runtimes also accept local hosts (any port); a production build never does.
+ */
+export function isAllowedGrantDomain(domain: string): boolean {
+  const url = toExactHost(domain);
+  if (url === null) {
+    return false;
+  }
+  if (APP_GRANT_DOMAINS.has(url.host)) {
+    return true;
+  }
+  return (
+    isDevLikeEnv() &&
+    (LOCAL_GRANT_HOSTNAMES.has(url.hostname) ||
+      url.hostname.endsWith(".localhost"))
+  );
+}
 
 /** The host of a SIWE header origin such as "https://6529.io". */
 function parseHeaderDomain(origin: string): string | null {
@@ -260,8 +314,8 @@ export function parseDeviceGrantMessage(
 
 /**
  * Checks the server's sign-in challenge before the wallet is asked to sign
- * it: the right wallet, this device's key, the requested scopes and a sane
- * expiry.
+ * it: a 6529 app domain, the right wallet, this device's key, the requested
+ * scopes and a sane expiry.
  */
 export function isExpectedDeviceGrantMessage({
   message,
@@ -282,6 +336,8 @@ export function isExpectedDeviceGrantMessage({
   }
   const expiresAtMs = parsed.expiresAtSeconds * 1000;
   return (
+    // Never sign a grant that readers' browsers would reject.
+    isAllowedGrantDomain(parsed.domain) &&
     parsed.address.toLowerCase() === signerAddress.toLowerCase() &&
     parsed.deviceKeyHex === deviceKeyHex.toLowerCase() &&
     parsed.scopes.join(",") === scopes.join(",") &&

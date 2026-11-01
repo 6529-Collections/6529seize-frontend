@@ -57,6 +57,7 @@ import type { CreateDropProps } from "./create-drop-content/create-drop.types";
 import { reportDropSubmissionFailure } from "@/utils/monitoring/dropSubmissionMonitoring";
 import { removeTemporaryThreadReply } from "./drops/reply-threads/pending-replies";
 import { isWaveRepliesCollapsed } from "@/helpers/waves/collapsed-replies.helpers";
+import { useDeviceSigningPrewarm } from "@/hooks/device-signing/useDeviceSigningPrewarm";
 
 export default function CreateDrop({
   activeDrop,
@@ -86,6 +87,9 @@ export default function CreateDrop({
 }: CreateDropProps) {
   const locale = useBrowserLocale();
   const { setToast, connectedProfile } = useAuth();
+  // Every composer (chat, curation, quorum) warms the device key on mount so
+  // a signed post does not wait on IndexedDB or WebCrypto at send time.
+  useDeviceSigningPrewarm();
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
   const queryClient = useQueryClient();
   const unreadDividerContext = useUnreadDividerOptional();

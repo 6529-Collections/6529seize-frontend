@@ -238,6 +238,28 @@ export function isUnservableDotPath(pathname: string): boolean {
   );
 }
 
+const RETIRED_REVIEW_DATA_SEGMENT = "/review-data";
+
+function decodePathname(pathname: string): string {
+  try {
+    return decodeURIComponent(pathname);
+  } catch {
+    return pathname;
+  }
+}
+
+/**
+ * True for `/review-data`, the namespace of the removed public contract
+ * review's generated files. The path is decoded, lower-cased and stripped of
+ * repeated slashes first, so every spelling of an old link gets the same 404.
+ */
+export function isRetiredReviewDataPath(pathname: string): boolean {
+  const normalized = decodePathname(pathname)
+    .toLowerCase()
+    .replaceAll(/\/{2,}/g, "/");
+  return hasSegmentPrefix(normalized, RETIRED_REVIEW_DATA_SEGMENT);
+}
+
 /**
  * True for real static responses that skip the staging access gate. Matching
  * is anchored to known files, `public/` image directories and whole route

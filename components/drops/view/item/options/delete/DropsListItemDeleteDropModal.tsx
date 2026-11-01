@@ -8,6 +8,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { deleteDrop } from "@/services/api/signed-drop-writes";
+import { isSignedWriteCancelled } from "@/lib/device-signing/signing-decision";
 import {
   Description,
   Dialog,
@@ -57,6 +58,10 @@ export default function DropsListItemDeleteDropModal({
       }
     },
     onError: (error) => {
+      // Cancelled at the signing prompt: nothing was sent.
+      if (isSignedWriteCancelled(error)) {
+        return;
+      }
       setToast({
         type: "error",
         title: `Couldn't delete this ${contentType.toLowerCase()}.`,

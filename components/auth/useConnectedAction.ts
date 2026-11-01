@@ -5,7 +5,7 @@ export type RunConnectedAction = (action: () => void) => void;
 
 // AppKit can report its modal closed just before wagmi exposes the new signer.
 // Keep the pending action briefly so that transition can complete.
-const CONNECTED_ACTION_CLOSE_GRACE_MS = 1000;
+export const CONNECTED_ACTION_CLOSE_GRACE_MS = 1000;
 
 interface UseConnectedActionOptions {
   readonly contextFingerprint?: string | undefined;
