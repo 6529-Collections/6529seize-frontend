@@ -27,7 +27,7 @@ import { resetReleaseFeedCacheForTests } from "@/lib/validator-page/releaseFeed"
 const FEED_BYTES = new TextEncoder().encode(JSON.stringify(TEST_FEED));
 const SIG_BYTES = new Uint8Array([0x30, 0x45, 0x02, 0x21]);
 
-function found(body: Uint8Array, etag: string): BucketObject {
+function found(body: Uint8Array<ArrayBuffer>, etag: string): BucketObject {
   return {
     state: "found",
     body,
