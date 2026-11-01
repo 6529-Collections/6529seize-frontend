@@ -23,7 +23,7 @@ import {
   hasStagingAccessCode,
   prepareEnrolledSession,
   probeEncryptedRoute,
-  signedInWithCombinedGrant,
+  enrolledByCombinedSignIn,
   stagingE2eeOptInProblem,
   type StagingE2eeSession,
   type StagingE2eeUser,
@@ -195,11 +195,15 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     );
 
     const runId = newRunId();
+    // A signs in again once the profile exists, as returning users do, and
+    // enrolls with that one sign-in signature. B signs in before having a
+    // profile and enrolls through the separate grant prompt.
     const a = await prepareEnrolledSession(
       browser,
       testInfo,
       createThrowawayUser("A"),
-      "A"
+      "A",
+      { signInAgainWithProfile: true }
     );
     try {
       const b = await prepareEnrolledSession(
@@ -232,12 +236,12 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
   test("each device signs one grant and loads OpenMLS WebAssembly under the staging CSP", () => {
     const { a, b } = requireWorld();
     for (const session of [a, b]) {
-      // NC8: a combined sign-in grant is the device's one grant signature;
-      // otherwise the device signs one EIP-712 MlsDeviceGrant.
+      // NC8: a combined sign-in grant is the device's one grant signature
+      // (A); otherwise the device signs one EIP-712 MlsDeviceGrant (B).
       expect(
         session.wallet.typedDataSignatures("MlsDeviceGrant"),
         `${session.label}: device grant signatures`
-      ).toHaveLength(signedInWithCombinedGrant(session) ? 0 : 1);
+      ).toHaveLength(enrolledByCombinedSignIn(session) ? 0 : 1);
       expect(
         session.evidence.wasmResponses.length,
         `${session.label} never fetched the MLS WebAssembly module`
