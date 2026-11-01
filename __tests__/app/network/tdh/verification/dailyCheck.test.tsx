@@ -201,8 +201,9 @@ describe("the daily check (TDH-DESIGN.md §4.4)", () => {
       open: { date: "2026-10-18", minutesLeft: 600, progress: 60 },
       cutover: null,
     };
-    // Ten columns: the open day and three days to come leave room for six.
-    expect(ribbonResults(input)).toHaveLength(6);
+    // Ten columns: the open day leaves room for nine; no empty tiles for
+    // days to come take the room of days already compared.
+    expect(ribbonResults(input)).toHaveLength(9);
     const slots = resultSlots(days);
     expect(slots).toHaveLength(14);
     expect(slots[5]).toEqual({ kind: "gap", cycle: 20735, date: "2026-10-09" });

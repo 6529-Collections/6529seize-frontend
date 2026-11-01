@@ -64,12 +64,16 @@ export function resultSlots(days: readonly ResultDay[]): ResultSlot[] {
   return slots;
 }
 
-/** The tiles after the results: the open day, the days to come, the cutover. */
+/**
+ * The tile after the results: the open day. Empty tiles for days to come
+ * would take the room of days already compared, so none is drawn.
+ */
 function trailingTiles(input: RibbonInput): RibbonDay[] {
   return ribbonDays({
     days: [],
     ...(input.open ? { open: input.open } : {}),
     ...(input.cutover ? { cutover: input.cutover } : {}),
+    futureDays: 0,
   });
 }
 
@@ -318,9 +322,9 @@ export function AllResults({
       <div className="tw-mt-3">
         <RibbonGrid
           label={pt(locale, "explained.tdh.check.ribbon.allLabel")}
-          // When each file was written is known only for the files the page
-          // read (the ribbon's), so the full record leaves it to the receipts.
-          items={slots.map((slot) => slotTile(slot, locale, null, false))}
+          // The page reads every day file, so each tile says when its file
+          // was written, and a late or re-run result carries its mark.
+          items={slots.map((slot) => slotTile(slot, locale, null, true))}
         />
         {missing && (
           <p className="tw-m-0 tw-mt-3 tw-text-[15px] tw-leading-[23px] tw-text-iron-400">
