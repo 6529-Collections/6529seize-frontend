@@ -378,6 +378,10 @@ export function CodeBlock({
   // Lean on a phone, where wrapping would split its long identifiers; a
   // scrolling block fades at its right edge to say there is more.
   const lean = marker === "--";
+  // A block that scrolls sideways on a phone fades at its right edge, so the
+  // cut reads as more to scroll, not as the end of the line.
+  const scrollCue =
+    "max-md:[mask-image:linear-gradient(90deg,#000_calc(100%-28px),transparent)]";
   const wrap = aligned
     ? "tw-whitespace-pre"
     : lean
@@ -397,7 +401,7 @@ export function CodeBlock({
         </span>
       )}
       <pre
-        className={`tw-m-0 tw-overflow-x-auto tw-bg-transparent tw-px-4 tw-py-4 tw-font-mono tw-text-[13px] tw-leading-[21px] tw-text-iron-50 md:tw-px-[18px] md:tw-text-sm md:tw-leading-[22px] ${wrap} ${EX_FOCUS}`}
+        className={`tw-m-0 tw-overflow-x-auto tw-bg-transparent tw-px-4 tw-py-4 tw-font-mono tw-text-[13px] tw-leading-[21px] tw-text-iron-50 md:tw-px-[18px] md:tw-text-sm md:tw-leading-[22px] ${wrap} ${aligned || lean ? scrollCue : ""} ${EX_FOCUS}`}
         aria-label={label}
         data-tdh-scroll=""
         role="region"

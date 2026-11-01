@@ -23,6 +23,9 @@ import { mainStageDays } from "./schedule";
  */
 const NOT_AVAILABLE = "-";
 
+/** The card whose copy travels the loop: Meme #2, one of the CC0 cards below. */
+const HELD_CARD = 2;
+
 function stations(book: FactBook, locale: SupportedLocale): AtlasStation[] {
   const f = (id: FactId) => {
     const fact = book.maybe(id);
@@ -57,10 +60,15 @@ function stations(book: FactBook, locale: SupportedLocale): AtlasStation[] {
       num: ht(locale, "station.timeNum", { total: f("tdh.latest.total") }),
       fact: "tdh.latest.total",
       chapter: tdh,
+      head: ht(locale, "station.timeHead", {
+        copy: f("engine.machine.default"),
+      }),
       say: ht(locale, "station.timeSay", {
         total: f("tdh.latest.total"),
         date: f("tdh.latest.date"),
         copy: f("engine.machine.default"),
+        rate: f(`meme.${HELD_CARD}.rate`),
+        edition: f(`meme.${HELD_CARD}.edition`),
       }),
     },
     {
@@ -129,6 +137,16 @@ function stationActions(locale: SupportedLocale): Record<string, ReactNode> {
       ) : (
         <span className="tw-text-[15px] tw-leading-6 tw-text-iron-400">
           {ht(locale, "chapterComing", { title: kt(locale, chapter.title) })}
+          {/* The art's chapter is coming; its one-minute CC0 answer is on
+              this page already. */}
+          {station === "art" && (
+            <>
+              {" "}
+              <a className={EX_LINK} href="#cc0">
+                {ht(locale, "chapterCc0")}
+              </a>
+            </>
+          )}
         </span>
       );
   }
@@ -139,7 +157,7 @@ function stationActions(locale: SupportedLocale): Record<string, ReactNode> {
 const HELD_STEP = 2;
 
 /** The copy that travels the loop: Meme #2, one of the CC0 cards below. */
-const TOKEN_ART = MEME_ART[2].src;
+const TOKEN_ART = MEME_ART[HELD_CARD].src;
 
 /** Under the station card: what Verify at the centre shows, and what it does not. */
 function VerifyNote({ locale }: { readonly locale: SupportedLocale }) {

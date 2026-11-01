@@ -56,6 +56,7 @@
   "explained.tdh.check.ribbon.caption": "Chaque tuile est un résultat : le jour détenu, clos par l'instantané de {midnight} sur son bord droit. L'heure d'une tuile est celle où son fichier a été écrit.",
   "explained.tdh.check.ribbon.rewritten": "↻ marque un fichier réécrit après son exécution : {groups}.",
   "explained.tdh.check.ribbon.rewrittenGroup": "{dates} le {date} à {time}",
+  "explained.tdh.check.ribbon.rewrittenWhy": "Un fichier est réécrit quand sa journée est recalculée, comme après une exécution échouée ou quand les règles ont pris leur nouveau nom ; chaque fichier correspond toujours à son hachage dans l'index.",
   "explained.tdh.check.ribbon.window": "Les {shown} jours les plus récents sur {total} sont dessinés.",
   "explained.tdh.check.ribbon.all": "Les {count} jours, chacun avec son reçu",
   "explained.tdh.check.ribbon.allLabel": "Chaque jour depuis le premier résultat",

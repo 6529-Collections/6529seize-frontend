@@ -325,6 +325,10 @@ export default function RatesLens({
               cents: <RuleValue>{n(cents)}</RuleValue>,
             }),
           },
+          {
+            // The rule's three terms, glossed where they are first used.
+            text: ht(locale, "explained.tdh.how.rates.ruleGloss"),
+          },
           ...(halfCent === null
             ? []
             : [

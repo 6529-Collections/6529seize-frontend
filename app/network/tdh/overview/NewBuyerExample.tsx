@@ -1,5 +1,6 @@
 "use client";
 
+import Tag from "@/components/explained/marks/Tag";
 import { ageText } from "@/components/explained/age";
 import { useFactSnapshot } from "@/components/explained/facts/FactsProvider";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -58,7 +59,10 @@ export default function NewBuyerExample({
   const rateText = formatCents(locale, rate);
   return (
     <div data-ans="new" data-ex-allow-number="">
-      <p className="tw-m-0 tw-text-[21px] tw-font-semibold tw-leading-7 tw-text-iron-50">
+      {/* The result speaks to "you" with real dates, so it carries its own
+          Example tag: no one should read it as their own wallet. */}
+      <Tag kind="example" locale={locale} />
+      <p className="tw-m-0 tw-mt-2 tw-text-[21px] tw-font-semibold tw-leading-7 tw-text-iron-50">
         {ot(locale, "explain.newTitle", {
           date: formatUtcWeekday(locale, count.firstDate),
         })}

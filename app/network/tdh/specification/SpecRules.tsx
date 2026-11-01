@@ -497,7 +497,6 @@ function Section8({ ctx }: { readonly ctx: SpecContext }) {
       title={m("explained.tdh.spec.s8.title")}
     >
       <Sub id="s8-1" no="8.1" title={m("explained.tdh.spec.s8-1.title")}>
-        <span id="s8-2" className="tw-scroll-mt-24" />
         <CodeBlock
           code={ARITHMETIC}
           label={s("explained.tdh.spec.s8-1.code")}
@@ -534,6 +533,9 @@ function Section8({ ctx }: { readonly ctx: SpecContext }) {
           </Trap>
         )}
       </Sub>
+      <Sub id="s8-2" no="8.2" title={m("explained.tdh.spec.s8-2.title")}>
+        <Prose>{m("explained.tdh.spec.s8-2.body")}</Prose>
+      </Sub>
       <Sub id="s8-3" no="8.3" title={m("explained.tdh.spec.s8-3.title")}>
         <Prose>{m("explained.tdh.spec.s8-3.body")}</Prose>
         {registry && (
@@ -550,7 +552,6 @@ function Section8({ ctx }: { readonly ctx: SpecContext }) {
         />
       </Sub>
       <Sub id="s8-4" no="8.4" title={m("explained.tdh.spec.s8-4.title")}>
-        <span id="s8-5" className="tw-scroll-mt-24" />
         <Prose>{m("explained.tdh.spec.s8-4.body")}</Prose>
         <Trap
           className="tw-mt-5"
@@ -570,6 +571,9 @@ function Section8({ ctx }: { readonly ctx: SpecContext }) {
             ),
           })}
         </Trap>
+      </Sub>
+      <Sub id="s8-5" no="8.5" title={m("explained.tdh.spec.s8-5.title")}>
+        <Prose>{m("explained.tdh.spec.s8-5.body")}</Prose>
       </Sub>
       <Sub id="s8-6" no="8.6" title={m("explained.tdh.spec.s8-6.title")}>
         <Prose>{m("explained.tdh.spec.s8-6.body")}</Prose>

@@ -42,6 +42,10 @@
     "sp1Cve": {
       "ref": "GitHub's advisory database, GHSA-63x8-x938-vx33 (CVE-2026-40323): a soundness flaw in SP1 6's recursion circuit, fixed in 6.1.0",
       "url": "https://github.com/advisories/GHSA-63x8-x938-vx33"
+    },
+    "sp1Native": {
+      "ref": "SP1's security advisory GHSA-p7v2-jjv3-8p8f, published 2026-10-11 (high): mismatched tensor lengths in SP1 6's native Rust verifier, versions 6.0.0 to 6.8.0, fixed in 6.8.1; the on-chain Groth16 and PLONK verifiers were not affected",
+      "url": "https://github.com/succinctlabs/sp1/security/advisories/GHSA-p7v2-jjv3-8p8f"
     }
   },
   "statement": {
@@ -221,7 +225,10 @@
     "id": "CVE-2026-40323",
     "published": "2026-04-11",
     "fixed": "6.1.0",
-    "earlier": "2025-01-27"
+    "earlier": "2025-01-27",
+    "latestId": "GHSA-p7v2-jjv3-8p8f",
+    "latestPublished": "2026-10-11",
+    "latestFixed": "6.8.1"
   },
   "catchup": {
     "chainStart": 13360862,

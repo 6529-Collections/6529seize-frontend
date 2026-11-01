@@ -29,6 +29,8 @@ interface Step {
   readonly href: string;
   readonly sections: string;
   readonly rule: (n: (value: number) => string) => string;
+  /** A line that sums a longer rule up; the Specification states it exactly. */
+  readonly summary?: boolean;
 }
 
 const STEPS: readonly Step[] = [
@@ -72,13 +74,18 @@ const STEPS: readonly Step[] = [
     href: "#part-d",
     sections: "§6.2, §6.3",
     rule: (n) =>
-      `pairs registered both ways → groups of ≤ ${n(R.consolidation_max_wallets)}`,
+      [
+        `pairs registered both ways → groups of ≤ ${n(R.consolidation_max_wallets)}`,
+        `beyond ${n(R.consolidation_ungated_max_wallets)}: one member freshly linked to every other (D136)`,
+      ].join("\n"),
+    summary: true,
   },
   {
     id: "stacks",
     href: "#step-4",
     sections: "§7.1",
     rule: () => "net(w) per transaction; last in, first out",
+    summary: true,
   },
   {
     id: "base",
@@ -223,12 +230,14 @@ export default function StepsInOrder({
               >
                 {ht(locale, `explained.tdh.how.order.${step.id}` as HowKey)}
               </Link>
+              {/* An operator stays with what follows it, so a formula
+                  breaks between terms, never inside one. */}
               <code className="tw-col-start-2 tw-whitespace-pre-wrap tw-break-words tw-font-mono tw-text-[13.5px] tw-leading-[21px] tw-text-iron-300 md:tw-col-start-auto">
-                {step.rule(n)}
+                {step.rule(n).replace(/([≤−×÷=+→]) /g, "$1\u00a0")}
               </code>
               {trace !== null && (
                 <span
-                  className="tw-col-span-2 tw-col-start-1 tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-2.5 tw-text-[13px] tw-leading-[20px] tw-text-iron-300 md:tw-col-span-2 md:tw-col-start-3 md:tw-row-start-2 md:tw-text-[14px] md:tw-leading-[21px] xl:tw-col-span-1 xl:tw-col-start-auto xl:tw-row-start-auto"
+                  className="tw-col-start-2 tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-2.5 tw-text-[13px] tw-leading-[20px] tw-text-iron-300 md:tw-col-span-2 md:tw-col-start-3 md:tw-row-start-2 md:tw-text-[14px] md:tw-leading-[21px] xl:tw-col-span-1 xl:tw-col-start-auto xl:tw-row-start-auto"
                   data-trace={step.id}
                 >
                   {traceLine(step.id, trace, locale)}
@@ -238,6 +247,8 @@ export default function StepsInOrder({
                 className={`tw-col-start-2 md:tw-col-start-4 md:tw-row-start-1 md:tw-text-right xl:tw-col-start-auto xl:tw-row-start-auto ${EX_TEXT.small}`}
               >
                 {`P26 ${step.sections}`}
+                {step.summary === true &&
+                  ` · ${ht(locale, "explained.tdh.how.order.summary")}`}
               </span>
             </li>
           ))}

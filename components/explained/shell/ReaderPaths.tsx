@@ -38,7 +38,7 @@ export default function ReaderPaths({
         <li key={path.who}>
           <Link
             href={path.href}
-            className={`tw-block tw-h-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-5 tw-pb-[18px] tw-pt-5 tw-no-underline hover:tw-border-iron-700 ${EX_FOCUS}`}
+            className={`tw-flex tw-h-full tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-5 tw-pb-[18px] tw-pt-5 tw-no-underline hover:tw-border-iron-700 ${EX_FOCUS}`}
           >
             <span className="tw-block tw-text-lg tw-font-semibold tw-leading-[25px] tw-text-iron-50">
               {path.who}
@@ -46,7 +46,8 @@ export default function ReaderPaths({
             <span className="tw-mt-2 tw-block tw-text-[15px] tw-leading-[23px] tw-text-iron-400">
               {path.route}
             </span>
-            <span className="tw-mt-3 tw-block tw-text-[13px] tw-font-semibold tw-text-primary-300">
+            {/* The time sits on the card's foot, so a row of cards reads as a grid. */}
+            <span className="tw-mt-auto tw-block tw-pt-3 tw-text-[13px] tw-font-semibold tw-text-primary-300">
               {kt(locale, "explained.kit.paths.minutes", {
                 minutes: path.minutes,
               })}

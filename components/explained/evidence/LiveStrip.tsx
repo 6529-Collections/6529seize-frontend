@@ -113,8 +113,14 @@ export default function LiveStrip({
           </li>
         )}
       </ol>
+      {/* The dashed tile is dated by its snapshot, the midnight that ends
+          today, so the legend says which day it counts. */}
       <p className="tw-m-0 -tw-mt-1.5 tw-text-[13px] tw-leading-5 tw-text-iron-400">
-        {kt(locale, "explained.kit.liveStrip.legend")}
+        {openDate
+          ? kt(locale, "explained.kit.liveStrip.legendOpen", {
+              date: formatUtcDay(locale, openDate),
+            })
+          : kt(locale, "explained.kit.liveStrip.legend")}
       </p>
     </section>
   );

@@ -29,8 +29,14 @@ function stepName(step: BoostStep): string {
   return step.label ?? "v" + step.version;
 }
 
-const HEIGHT = 230;
-const PAD = { left: 8, right: 8, top: 28, bottom: 30 } as const;
+const HEIGHT = 260;
+// Room on the left for the value axis, and under the line for each
+// version's name at its start, then the years.
+const PAD = { left: 44, right: 8, top: 28, bottom: 52 } as const;
+/** The value axis's ticks: a boost of 1 (none), then each half. */
+const TICK_STEP = 0.5;
+/** Version names closer than this on the axis would overprint: the later one is left to the table. */
+const NAME_GAP = 52;
 
 export default function BoostHistory({
   steps,
@@ -73,9 +79,36 @@ export default function BoostHistory({
   const narrow = width < 520;
   // Labels set so far, left to right: their side, level and right edge.
   const placed: { above: boolean; y: number; right: number }[] = [];
+  const ticks: number[] = [];
+  for (let value = low; value <= high + 0.001; value += TICK_STEP) {
+    ticks.push(Math.round(value * 100) / 100);
+  }
+  // Each version's name under its start, the first of a crowded pair kept.
+  let lastName = -Infinity;
+  const names = steps.map((step, index) => {
+    const at = x(step.from);
+    const show = index > 0 && at - lastName >= NAME_GAP && !narrow;
+    if (show) lastName = at;
+    return show;
+  });
   return (
     <div ref={ref} className="tw-w-full tw-min-w-0" data-fig="boost-history">
       <SvgFrame width={width} height={HEIGHT} label={label}>
+        {ticks.map((value) => (
+          <g key={value} data-boost-tick={value}>
+            <line
+              x1={PAD.left}
+              y1={y(value)}
+              x2={PAD.left + innerW}
+              y2={y(value)}
+              stroke={EX_HEX.line2}
+              strokeOpacity={value === low ? 1 : 0.45}
+            />
+            <Label x={PAD.left - 8} y={y(value) + 4} anchor="end">
+              {formatCents(locale, value)}
+            </Label>
+          </g>
+        ))}
         <line
           x1={PAD.left}
           y1={y(ceiling)}
@@ -106,7 +139,7 @@ export default function BoostHistory({
                 y2={y(low) + 5}
                 stroke={EX_HEX.ink4}
               />
-              <Label x={x(year)} y={HEIGHT - 8} anchor="middle">
+              <Label x={x(year)} y={HEIGHT - 6} anchor="middle">
                 {year.slice(0, 4)}
               </Label>
             </g>
@@ -190,6 +223,32 @@ export default function BoostHistory({
                 stroke={tone}
                 strokeWidth={step.current ? 3 : 2}
               />
+              {/* Each version's own start on the line, so two versions at
+                  one level still read as two steps. */}
+              {index > 0 && (
+                <circle
+                  cx={x0}
+                  cy={yy}
+                  r={3}
+                  fill={EX_HEX.panel}
+                  stroke={tone}
+                  strokeWidth={1.5}
+                />
+              )}
+              {names[index] && (
+                <Label
+                  x={x0}
+                  y={y(low) + 22}
+                  anchor="middle"
+                  size={12}
+                  weight={600}
+                  tone={step.current ? "you" : "ink2"}
+                >
+                  {step.current
+                    ? `${stepName(step)} · ${formatUtcDate(locale, step.from, { month: "short", day: "numeric", year: "numeric" })}`
+                    : stepName(step)}
+                </Label>
+              )}
               {/* A riser only where the value changes: two steps at one
                   level join without a zero-length line through a label. */}
               {next && next.fullSet !== step.fullSet && (

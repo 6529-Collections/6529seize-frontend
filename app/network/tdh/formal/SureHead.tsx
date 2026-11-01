@@ -66,6 +66,8 @@ export default function SureHead({
             {
               value: book.maybe("manifest.sections.count"),
               caption: m("explained.tdh.sure.score.claims", {
+                tdh: p.v("manifest.sections.tdh"),
+                p53: p.v("manifest.sections.p53"),
                 link: (
                   <a className={EX_LINK} href="#claims">
                     {m("explained.tdh.sure.score.claimsLink")}
@@ -80,11 +82,13 @@ export default function SureHead({
                 book.maybe<number>("manifest.distinct")?.value ===
                 book.maybe<number>("manifest.proved")?.value
                   ? m("explained.tdh.sure.score.provedAll", {
-                      examples: p.v("manifest.noAxioms"),
+                      tdh: p.v("manifest.proved.tdh"),
+                      p53: p.v("manifest.proved.p53"),
                     })
                   : m("explained.tdh.sure.score.proved", {
                       distinct: p.v("manifest.distinct"),
-                      examples: p.v("manifest.noAxioms"),
+                      tdh: p.v("manifest.proved.tdh"),
+                      p53: p.v("manifest.proved.p53"),
                     }),
             },
             {
@@ -236,6 +240,9 @@ function SplitTable({ ctx }: { readonly ctx: SureContext }) {
           ))}
         </tbody>
       </table>
+      <p className="tw-m-0 tw-mt-3 tw-text-[13px] tw-leading-5 tw-text-iron-400">
+        {m("explained.tdh.sure.split.note")}
+      </p>
     </div>
   );
 }

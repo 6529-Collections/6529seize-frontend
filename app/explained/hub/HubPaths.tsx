@@ -92,14 +92,16 @@ export default function HubPaths({
   }));
   return (
     <section id="paths" className={EX_LAYOUT.section}>
-      <div className={EX_LAYOUT.stmt}>
+      {/* A short heading with its one line under it, not a statement row
+          with a near-empty right column. */}
+      <div className="tw-max-w-[940px]">
         <div>
           <span className={`${EX_TEXT.label} tw-mb-3.5 tw-block`}>
             {ht(locale, "paths.label")}
           </span>
           <h2 className={EX_TEXT.stmt}>{ht(locale, "paths.title")}</h2>
         </div>
-        <div className="lg:tw-pt-1.5">
+        <div className="tw-mt-3">
           <p className={`${EX_TEXT.body} tw-m-0`}>{ht(locale, "paths.body")}</p>
         </div>
       </div>

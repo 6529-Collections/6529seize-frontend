@@ -93,6 +93,8 @@ export const TERMS: readonly Term[] = [
       cap: p.v("rules.editionFloorCap"),
     }),
   },
+  { id: "cents", status: { word: "explained.tdh.glossary.convention" } },
+  { id: "arith", status: { mark: "proposed", ref: "P26 §8.1" } },
   { id: "raw", status: LIVE },
   { id: "base", status: LIVE },
   { id: "boost", status: LIVE },
@@ -230,6 +232,7 @@ export const TERMS: readonly Term[] = [
     id: "items",
     status: { word: "explained.tdh.glossary.convention" },
     values: () => ({
+      p: <CodeName>P26</CodeName>,
       d: <CodeName>D132</CodeName>,
       dev: <CodeName>DEV-2</CodeName>,
       bug: <CodeName>BUG-15</CodeName>,

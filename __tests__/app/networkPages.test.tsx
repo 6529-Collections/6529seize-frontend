@@ -120,7 +120,7 @@ describe("network pages render", () => {
     expect(
       screen.getByRole("heading", {
         level: 2,
-        name: "Checked every day, and published with the files to check its hashes.",
+        name: "Checked every day, with the files to check it.",
       })
     ).toBeInTheDocument();
     expect(

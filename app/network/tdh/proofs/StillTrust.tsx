@@ -41,6 +41,14 @@ export default function StillTrust({
                 mark: "assumed",
                 covers: rich(locale, k("trust.systemsCovers"), {
                   id: facts.print("proofs.sp1Advisory.id"),
+                  date: facts.print("proofs.sp1Advisory.published", "long"),
+                  latestId: facts.print("proofs.sp1Advisory.latestId"),
+                  latestDate: facts.print(
+                    "proofs.sp1Advisory.latestPublished",
+                    "long"
+                  ),
+                  latestFixed: facts.print("proofs.sp1Advisory.latestFixed"),
+                  zkvm: facts.print("proofs.a.zkvm"),
                 }),
               },
               {

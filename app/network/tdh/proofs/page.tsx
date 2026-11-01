@@ -1,3 +1,4 @@
+import { CONTRACT_CHECKS } from "./_lib/checks";
 import type { Metadata } from "next";
 import ExplainedShell from "@/components/explained/shell/ExplainedShell";
 import PageContents from "@/components/explained/shell/PageContents";
@@ -34,6 +35,11 @@ import WhereItStands from "./WhereItStands";
  * is still trusted. Genre V (evidence), built on the 6529 Explained kit;
  * every number is a fact (`lib/explained/registry/proofFacts.ts`).
  */
+/** A contract check's place in the order the contract runs them, from 1. */
+function checkNumber(id: string): number {
+  return CONTRACT_CHECKS.findIndex((check) => check.id === id) + 1;
+}
+
 export default async function ProofsPage({
   searchParams,
 }: {
@@ -137,7 +143,12 @@ export default async function ProofsPage({
           heading={rich(locale, k("s6.heading"))}
           figure={<Guarantees locale={locale} />}
         >
-          <Para>{rich(locale, k("s6.p1"))}</Para>
+          <Para>
+            {rich(locale, k("s6.p1"), {
+              outputs: String(checkNumber("outputs")),
+              proofs: String(checkNumber("proofs")),
+            })}
+          </Para>
         </Section>
         <WhereItStands locale={locale} facts={facts} />
         <StillTrust locale={locale} facts={facts} />

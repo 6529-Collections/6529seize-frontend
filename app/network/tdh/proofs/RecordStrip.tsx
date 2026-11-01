@@ -40,7 +40,7 @@ export default function RecordStrip({
     {
       id: "pair",
       when: facts.print("proofs.pair.provedOn"),
-      mark: <HalfPair a b locale={locale} />,
+      mark: <HalfPair a b test locale={locale} />,
       title: rich(locale, k("record.pair.title")),
       body: rich(locale, k("record.pair.body"), {
         gas: facts.print("proofs.pair.submitGas"),
@@ -60,7 +60,7 @@ export default function RecordStrip({
     {
       id: "v14",
       when: facts.print("proofs.milestones.pairV14"),
-      mark: <HalfPair a b locale={locale} />,
+      mark: <HalfPair a b test locale={locale} />,
       title: rich(locale, k("record.v14.title")),
       body: rich(locale, k("record.v14.body"), {
         cycle: facts.print("proofs.pairV14.cycle"),
@@ -82,7 +82,7 @@ export default function RecordStrip({
         {rich(locale, k("record.label"))}
       </h2>
       <ol
-        className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-grid-cols-1 tw-gap-2.5 tw-p-0 sm:tw-grid-cols-2 lg:tw-grid-cols-5"
+        className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-grid-cols-1 tw-items-start tw-gap-2.5 tw-p-0 sm:tw-grid-cols-2 lg:tw-grid-cols-5"
         data-fig="record"
       >
         {tiles.map((tile) => (

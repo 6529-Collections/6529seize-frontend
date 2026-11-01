@@ -385,7 +385,10 @@ function RewrittenLine({
   return (
     <>
       {" "}
-      {rich(locale, "explained.tdh.check.ribbon.rewritten", { groups: joined })}
+      {rich(locale, "explained.tdh.check.ribbon.rewritten", {
+        groups: joined,
+      })}{" "}
+      {pt(locale, "explained.tdh.check.ribbon.rewrittenWhy")}
     </>
   );
 }
@@ -442,7 +445,7 @@ function RibbonCaption({
 }
 
 /** The ribbon's input from the facts: the results, the open day, the cutover ahead. */
-function ribbonInput(book: FactBook): RibbonInput {
+export function ribbonInput(book: FactBook): RibbonInput {
   const days = book.maybe<ResultDay[]>("tdh.days")?.value ?? [];
   const openDate = book.maybe<string>("tdh.open.date")?.value ?? null;
   const minutesLeft = book.maybe<number>("tdh.open.minutesLeft")?.value;

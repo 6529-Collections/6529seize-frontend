@@ -410,8 +410,8 @@ export function KitEvidence({
               ),
               note: (
                 <ReceiptNote>
-                  The 32 bytes validators will sign for this day, once
-                  validators sign.
+                  The 32 bytes a validator signs for this day. No validator
+                  certificate is shown for this day.
                 </ReceiptNote>
               ),
             },

@@ -18,6 +18,12 @@ const AUTOPLAY_STEP_MS = 1100;
 export interface AtlasStation extends LoopStation {
   /** One sentence: what happens at this station. */
   readonly say: string;
+  /**
+   * The card's headline when it is not the station's number on the loop:
+   * the copy's own value, so the first screen does not print one number
+   * twice.
+   */
+  readonly head?: string;
 }
 
 export interface AtlasStep {
@@ -164,9 +170,11 @@ export default function LoopAtlas({
               </span>
               <span
                 className="tw-mt-2 tw-block tw-text-[26px] tw-font-semibold tw-leading-8 tw-tracking-[-0.02em] tw-text-primary-300 max-[359px]:tw-text-xl"
-                {...(station.fact ? { "data-fact": station.fact } : {})}
+                {...(station.fact && station.head === undefined
+                  ? { "data-fact": station.fact }
+                  : {})}
               >
-                {station.num}
+                {station.head ?? station.num}
               </span>
               <p className="tw-m-0 tw-mt-2 tw-text-[15px] tw-leading-6 tw-text-iron-300">
                 {station.say}

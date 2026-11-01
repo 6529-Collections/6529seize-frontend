@@ -12,7 +12,7 @@ import { fill, kt } from "@/components/explained/i18n";
 import DriftNote from "@/components/explained/marks/DriftNote";
 import { Glyph } from "@/components/explained/marks/glyphs";
 import Tag from "@/components/explained/marks/Tag";
-import { EX_BUTTON, EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
+import { EX_BUTTON, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { formatCount } from "@/lib/explained/format";
 import { CONTRACT_CHECKS } from "./_lib/checks";
@@ -24,7 +24,6 @@ import {
   compareOutputs,
   decodeStatement,
 } from "./_lib/statement";
-import RecordStrip from "./RecordStrip";
 
 /**
  * The first screen (TDH-DESIGN.md §4, genre V; evidence first): the title
@@ -37,18 +36,6 @@ import RecordStrip from "./RecordStrip";
 const TOTAL_WORD = STATEMENT_WORDS.findIndex(
   (word) => word.name === "totalTDH"
 );
-const ANCHOR_WORD = STATEMENT_WORDS.findIndex(
-  (word) => word.name === "anchorNumber"
-);
-
-/** Proof A's anchor block, decoded from its own public values. */
-function anchorBlock(facts: PageFacts, locale: SupportedLocale): string | null {
-  const words = facts.strings("proofs.day.wordsA");
-  const value = words ? decodeStatement(words)[ANCHOR_WORD]?.value : null;
-  return value === null || value === undefined
-    ? null
-    : formatCount(locale, Number(value));
-}
 
 /**
  * The failing pair: program B's output is proof A's with the total one
@@ -208,14 +195,7 @@ function RealVerdict({
           </span>
         </>
       }
-      headline={rich(locale, k("verdict.headline"), {
-        date: facts.print("proofs.day.date"),
-        version: (
-          <span className="tw-font-mono">
-            {facts.print("proofs.day.ruleVersion")}
-          </span>
-        ),
-      })}
+      headline={rich(locale, k("verdict.headline"))}
       aside={
         <>
           <Equation
@@ -259,12 +239,14 @@ function RealVerdict({
       {p(
         rich(locale, k("verdict.body"), {
           date: facts.print("proofs.day.date"),
-          words: facts.print("proofs.statement.words"),
-          wordBytes: facts.print("proofs.statement.wordBytes"),
+          version: (
+            <span className="tw-font-mono">
+              {facts.print("proofs.day.ruleVersion")}
+            </span>
+          ),
           hours: facts.print("site.proofA.provedHours"),
           minutes: facts.print("site.proofA.provedMinutes"),
           seconds: facts.print("proofs.day.nativeSeconds"),
-          anchor: anchorBlock(facts, locale) ?? "",
         })
       )}
       {p(rich(locale, k("verdict.bodyB")))}
@@ -427,9 +409,6 @@ export default function ProofsHero({
             ruleId: facts.print("rules.ruleId"),
           })}
         </DriftNote>
-      </div>
-      <div className={`${EX_LAYOUT.sectionTight}`} id="record">
-        <RecordStrip locale={locale} facts={facts} />
       </div>
     </>
   );

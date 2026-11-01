@@ -326,6 +326,11 @@ function PartB({
             rateFirstGM: v("engine.rate.firstGM"),
             cap: v("rules.editionFloorCap"),
             rate310: v("engine.rate.310"),
+          })}
+        </Para>
+        <Para>
+          {rich(locale, "explained.tdh.how.b.floor", {
+            cap: v("rules.editionFloorCap"),
             threshold: v("rules.editionThreshold"),
           })}
         </Para>

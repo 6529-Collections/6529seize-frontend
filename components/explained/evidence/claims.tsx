@@ -27,6 +27,8 @@ export interface ClaimPart {
     readonly file: FactEntry | null;
     readonly line: FactEntry | null;
     readonly axioms: FactEntry | null;
+    /** The commit the file and line are read at, when it is not the part's own. */
+    readonly at?: FactEntry | null;
   };
   /** What the proof does not cover. */
   readonly doesNotCover?: ReactNode;
@@ -57,7 +59,13 @@ function LeanBlock({
       className="tw-my-3 tw-whitespace-pre-wrap tw-rounded-md tw-bg-black/40 tw-p-3 tw-font-mono tw-text-[13px] tw-leading-[21px] tw-text-iron-50 [overflow-wrap:anywhere]"
       data-fact={lean.name?.id ?? ""}
     >
-      {`${text(lean.name)}\n${text(lean.file)}:${text(lean.line)}\n${axioms}`}
+      {`${text(lean.name)}\n${text(lean.file)}:${text(lean.line)}${
+        lean.at && isFact(lean.at)
+          ? ` ${kt(locale, "explained.kit.claim.at", {
+              commit: fmt(lean.at, locale),
+            })}`
+          : ""
+      }\n${axioms}`}
     </div>
   );
 }

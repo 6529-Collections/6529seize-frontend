@@ -35,22 +35,37 @@ export function HalfPair({
   a,
   b,
   locale,
+  test = false,
 }: {
   readonly a: boolean;
   readonly b: boolean;
   readonly locale: SupportedLocale;
+  /**
+   * Proofs of a synthetic test cycle, not of a real day: the capsules are
+   * outlined in green, not filled, and the word says so, so a skim never
+   * reads a test pair as a day fully proved.
+   */
+  readonly test?: boolean;
 }) {
   let word = kt(locale, "explained.kit.halfPair.none");
   if (a && b) word = kt(locale, "explained.kit.halfPair.both");
   else if (a || b) word = kt(locale, "explained.kit.halfPair.half");
+  if (test) word = kt(locale, "explained.kit.halfPair.test", { word });
   const capsule = (letter: "A" | "B", done: boolean) => {
     const proof = kt(
       locale,
       letter === "A" ? "explained.kit.halfPair.a" : "explained.kit.halfPair.b"
     );
+    let look =
+      "tw-border-[1.5px] tw-border-dashed tw-border-iron-400 tw-text-iron-400";
+    if (done) {
+      look = test
+        ? "tw-border-[1.5px] tw-border-solid tw-border-green tw-text-green"
+        : "tw-bg-green tw-text-[#0D0D0F]";
+    }
     return (
       <span
-        className={`tw-inline-grid tw-size-6 tw-place-items-center tw-rounded-full tw-text-xs tw-font-bold tw-leading-none ${done ? "tw-bg-green tw-text-[#0D0D0F]" : "tw-border-[1.5px] tw-border-dashed tw-border-iron-400 tw-text-iron-400"}`}
+        className={`tw-inline-grid tw-size-6 tw-place-items-center tw-rounded-full tw-text-xs tw-font-bold tw-leading-none ${look}`}
         role="img"
         aria-label={kt(
           locale,
@@ -70,6 +85,7 @@ export function HalfPair({
     <span
       className="tw-inline-flex tw-items-center tw-gap-1.5"
       data-halfpair={`${a ? 1 : 0}${b ? 1 : 0}`}
+      {...(test ? { "data-test-cycle": "" } : {})}
     >
       {capsule("A", a)}
       {capsule("B", b)}

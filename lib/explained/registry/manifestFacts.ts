@@ -186,6 +186,24 @@ export const MANIFEST_FACTS = {
   "manifest.sections.count": count(
     (manifest) => new Set(manifest.theorems.map((entry) => entry.section)).size
   ),
+  // The claims by whose rules they are about: TDH's (P26), or the proposed
+  // validator rules' (P53).
+  "manifest.sections.tdh": count(
+    (manifest) =>
+      new Set(
+        manifest.theorems
+          .filter((entry) => entry.library === "tdh")
+          .map((entry) => entry.section)
+      ).size
+  ),
+  "manifest.sections.p53": count(
+    (manifest) =>
+      new Set(
+        manifest.theorems
+          .filter((entry) => entry.library === "p53")
+          .map((entry) => entry.section)
+      ).size
+  ),
   "manifest.headline.name": defineFact<string>({
     format: "text",
     refresh: MANIFEST_REFRESH,

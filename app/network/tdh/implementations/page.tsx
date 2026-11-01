@@ -255,7 +255,9 @@ export default async function ImplementationsPage({
                       <span className="tw-inline-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
                         <HalfPair a b={false} locale={locale} />
                         <span className={EX_TEXT.cap}>
-                          {s("explained.tdh.impl.a.proofRef")}
+                          {m("explained.tdh.impl.a.proofRef", {
+                            day: p.v("proofs.day.date"),
+                          })}
                         </span>
                       </span>
                     ) : (
@@ -264,7 +266,7 @@ export default async function ImplementationsPage({
                         locale={locale}
                         size="sm"
                         label={s("explained.tdh.impl.a.proof")}
-                        refText={s("explained.tdh.impl.a.proofRef")}
+                        refText={s("explained.tdh.impl.a.proofRefNoDay")}
                       />
                     ),
                   },
@@ -315,7 +317,8 @@ export default async function ImplementationsPage({
                       random: p.v("programs.randomPerChange"),
                     }),
                     proved: m("explained.tdh.impl.lean.proved", {
-                      count: p.v("manifest.proved"),
+                      tdh: p.v("manifest.proved.tdh"),
+                      all: p.v("manifest.proved"),
                     }),
                   },
                 },

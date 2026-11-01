@@ -29,7 +29,9 @@ function Item({
 }) {
   return (
     <li className="tw-mt-4 tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-pt-4 first:tw-mt-3 first:tw-border-t-0 first:tw-pt-0 lg:tw-mt-3 lg:tw-border-l lg:tw-border-t-0 lg:tw-pl-6 lg:tw-pt-0 lg:first:tw-border-l-0 lg:first:tw-pl-0">
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+      {/* Two lines kept for the mark and its date from lg up, where the three
+          sit side by side, so their headlines share one baseline. */}
+      <div className="tw-flex tw-flex-wrap tw-content-start tw-items-center tw-gap-x-2 tw-gap-y-1 lg:tw-min-h-[48px]">
         {mark}
         <span className="tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-400">
           {when}
@@ -105,16 +107,18 @@ export default function CheckableToday({
         >
           <Link className={HEAD_LINK} href="/network/tdh/formal">
             {hrich(locale, "check.theorems", {
-              proved: fact("manifest.proved"),
+              proved: fact("manifest.proved.tdh"),
             })}
           </Link>{" "}
           {hrich(locale, "check.theoremsBody", {
-            shownFalse: fact("manifest.shownFalse"),
+            p53: fact("manifest.proved.p53"),
+            shownFalse: fact("manifest.shownFalse.tdh"),
           })}
         </Item>
         <Item
           mark={<HalfPair a b={false} locale={locale} />}
           when={hrich(locale, "check.proofWhen", {
+            day: fact("proofs.day.date"),
             date: fact("proofs.day.provedOn"),
           })}
         >

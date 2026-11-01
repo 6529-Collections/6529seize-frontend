@@ -3,11 +3,86 @@ import { fill } from "@/components/explained/i18n";
 import StampLine from "@/components/explained/marks/StampLine";
 import { EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
+import { formatCount } from "@/lib/explained/format";
 import { CONTRACT_CHECKS } from "./_lib/checks";
 import { k } from "./_lib/copy";
 import type { PageFacts } from "./_lib/facts";
 import { rich } from "@/components/explained/rich";
 import Section, { Para } from "./Section";
+
+/**
+ * One submission's gas, part by part: the two verifiers, the rest of the
+ * contract's own work (its execution less the two verifications), and the
+ * transaction's base cost with its calldata; then the whole.
+ */
+function GasTable({
+  locale,
+  facts,
+}: {
+  readonly locale: SupportedLocale;
+  readonly facts: PageFacts;
+}) {
+  const execution = facts.num("proofs.pair.executionGas");
+  const verifyA = facts.num("proofs.gas.verifyA");
+  const verifyB = facts.num("proofs.gas.verifyB");
+  const rest =
+    execution === null || verifyA === null || verifyB === null
+      ? null
+      : execution - verifyA - verifyB;
+  const rows = [
+    { id: "verifyA", value: facts.print("proofs.gas.verifyA") },
+    { id: "verifyB", value: facts.print("proofs.gas.verifyB") },
+    {
+      id: "rest",
+      value: rest === null ? "-" : formatCount(locale, rest),
+    },
+    {
+      id: "intrinsic",
+      value: facts.print("proofs.pair.intrinsicGas"),
+    },
+  ] as const;
+  return (
+    <table
+      className="tw-w-full tw-max-w-[620px] tw-border-collapse tw-text-[15px] tw-leading-6"
+      data-fig="gas"
+    >
+      <caption className={`${EX_TEXT.label} tw-pb-2 tw-text-left`}>
+        {fill(locale, k("gas.caption"))}
+      </caption>
+      <tbody>
+        {rows.map((row) => (
+          <tr
+            key={row.id}
+            className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800"
+          >
+            <th
+              scope="row"
+              className="tw-py-2 tw-pr-4 tw-text-left tw-font-normal tw-text-iron-300"
+            >
+              {rich(locale, k(`gas.${row.id}`), {
+                calldata: facts.print("proofs.pair.calldataBytes"),
+              })}
+            </th>
+            <td className="tw-whitespace-nowrap tw-py-2 tw-text-right tw-font-mono tw-text-[14px] tw-tabular-nums tw-text-iron-50">
+              {row.value}
+            </td>
+          </tr>
+        ))}
+        <tr>
+          <th
+            scope="row"
+            className="tw-py-2 tw-pr-4 tw-text-left tw-font-semibold tw-text-iron-50"
+          >
+            {fill(locale, k("gas.total"))}
+          </th>
+          <td className="tw-whitespace-nowrap tw-py-2 tw-text-right tw-font-mono tw-text-[14px] tw-font-semibold tw-tabular-nums tw-text-iron-50">
+            {facts.print("proofs.pair.transactionGas")}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  );
+}
 
 /**
  * 04 · The contract (D128): what a submission must satisfy, check by check
@@ -101,16 +176,11 @@ export default function ContractSection({
       <Para>{rich(locale, k("s4.p1"), { decision: "D128" })}</Para>
       <Para>
         {rich(locale, k("s4.p2"), {
-          gas: facts.print("proofs.pair.transactionGas"),
-          execution: facts.print("proofs.pair.executionGas"),
-          verifyA: facts.print("proofs.gas.verifyA"),
-          verifyB: facts.print("proofs.gas.verifyB"),
-          calldata: facts.print("proofs.pair.calldataBytes"),
-          intrinsic: facts.print("proofs.pair.intrinsicGas"),
           submit: facts.print("proofs.pair.submitGas"),
           cold: facts.print("proofs.pair.coldCallGas"),
         })}
       </Para>
+      <GasTable locale={locale} facts={facts} />
     </Section>
   );
 }

@@ -304,16 +304,18 @@ export function HowTheCheckRuns({
           )}
         </p>
       </div>
-      <ul className="tw-m-0 tw-mt-12 tw-grid tw-list-none tw-grid-cols-1 tw-gap-4 tw-p-0 sm:tw-grid-cols-2 lg:tw-grid-cols-4">
+      {/* Four classes, each a row sized to its sentence: a definition list,
+          not four cards half empty. */}
+      <ul className="tw-m-0 tw-mt-12 tw-grid tw-list-none tw-grid-cols-1 tw-gap-x-10 tw-p-0 lg:tw-grid-cols-2">
         {CLASSES.map(([name, key]) => (
           <li
             key={name}
-            className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-px-[22px] tw-py-5"
+            className="tw-grid tw-grid-cols-[88px_minmax(0,1fr)] tw-items-baseline tw-gap-x-4 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-3.5"
           >
             <span className={EX_TEXT.label}>
               {pt(locale, "explained.tdh.check.classes.name", { name })}
             </span>
-            <p className="tw-m-0 tw-mt-2 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+            <p className="tw-m-0 tw-text-[15px] tw-leading-6 tw-text-iron-300">
               {pt(locale, key)}
             </p>
           </li>

@@ -59,7 +59,9 @@ export default function NotFoundPage({
               href: entry.href,
             }
           : {
-              no: "",
+              // A coming chapter's place in the build order, as the hub
+              // lists it: Next, Then, Later.
+              no: entry.order ? kt(locale, entry.order) : "",
               title: kt(locale, entry.title),
               desc: kt(locale, "explained.kit.chapters.coming"),
             }

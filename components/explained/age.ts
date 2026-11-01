@@ -21,6 +21,19 @@ export function ageText(locale: SupportedLocale, minutes: number): string {
   });
 }
 
+/**
+ * The same, in whole hours for a phone's narrow tile: "in 3 h", not a line
+ * that wraps onto three.
+ */
+export function ageTextShort(locale: SupportedLocale, minutes: number): string {
+  if (minutes < 60) {
+    return kt(locale, "explained.kit.age.minutes", { minutes });
+  }
+  return kt(locale, "explained.kit.age.hoursShort", {
+    hours: Math.round(minutes / 60),
+  });
+}
+
 /** Two hours past its cadence, a live source is late. */
 const LATE_GRACE_MINUTES = 120;
 

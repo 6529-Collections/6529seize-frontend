@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { kt } from "../i18n";
 import { EX_FOCUS } from "../tokens";
@@ -31,9 +31,10 @@ function labelLength(option: SegOption<string>): number {
 
 /**
  * Segmented buttons. On a phone, a group whose labels would wrap into
- * ragged rows keeps one row of chips that scrolls sideways, with a fade at
- * its edge, and the chosen chip scrolled into view; `phone` forces a
- * layout ("stack" lists one option a row, "wrap" lets short labels wrap).
+ * ragged rows becomes separate chips, each with its own edge, that wrap
+ * onto as many rows as they need: every label is whole and every option is
+ * in view, with nothing scrolled off-screen. `phone` forces a layout
+ * ("stack" lists one option a row, "wrap" lets short labels wrap).
  */
 export function Seg<V extends string>({
   label,
@@ -58,39 +59,41 @@ export function Seg<V extends string>({
     layout = options.length > 2 && chars > PHONE_STACK_CHARS ? "row" : "wrap";
   }
   const groupRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const row = groupRef.current;
-    if (layout !== "row" || row === null || row.scrollWidth <= row.clientWidth)
-      return;
-    const chosen = row.querySelector<HTMLElement>('[aria-pressed="true"]');
-    if (chosen === null) return;
-    const left = chosen.offsetLeft - row.offsetLeft;
-    const right = left + chosen.offsetWidth;
-    if (left < row.scrollLeft || right > row.scrollLeft + row.clientWidth) {
-      row.scrollTo({ left: Math.max(0, left - 24) });
-    }
-  }, [layout, value]);
   const group = {
     wrap: "tw-inline-flex tw-flex-wrap tw-rounded-2xl",
     stack:
       "max-md:tw-flex max-md:tw-w-full max-md:tw-flex-col max-md:tw-rounded-xl md:tw-inline-flex md:tw-flex-wrap",
-    row: "max-md:tw-flex max-md:tw-flex-nowrap max-md:tw-overflow-x-auto max-md:tw-rounded-full max-md:[mask-image:linear-gradient(90deg,#000_calc(100%_-_32px),transparent)] max-md:[scrollbar-width:none] md:tw-inline-flex md:tw-flex-wrap",
+    row: "max-md:tw-flex max-md:tw-flex-wrap md:tw-inline-flex md:tw-flex-wrap",
   }[layout];
   const button = {
     wrap: "tw-grow tw-rounded-full",
     stack:
       "max-md:tw-w-full max-md:tw-rounded-lg max-md:tw-px-3.5 max-md:tw-text-left md:tw-rounded-full",
-    row: "tw-rounded-full max-md:tw-whitespace-nowrap",
+    row: "tw-rounded-full max-md:tw-text-left",
   }[layout];
-  // Seven options or more can take two rows on a wide screen: there they
-  // are a grid of chips, each with its own edge, not one pill that breaks.
+  // Seven options or more can take two rows on a wide screen, and a phone's
+  // long labels always can: there they are separate chips, each with its
+  // own edge, not one pill that breaks.
   const many = options.length >= MANY_OPTIONS;
-  const frame = many
-    ? "tw-gap-0.5 tw-border tw-border-solid tw-border-iron-700 tw-p-[3px] md:tw-gap-1.5 md:tw-border-0 md:tw-p-0"
-    : "tw-gap-0.5 tw-border tw-border-solid tw-border-iron-700 tw-p-[3px] md:tw-rounded-full";
-  const chip = many
-    ? "md:tw-border md:tw-border-solid md:tw-border-iron-700"
-    : "";
+  const phoneChips = layout === "row";
+  let frame =
+    "tw-gap-0.5 tw-border tw-border-solid tw-border-iron-700 tw-p-[3px] md:tw-rounded-full";
+  if (many) {
+    frame = phoneChips
+      ? "tw-gap-1.5"
+      : "tw-gap-0.5 tw-border tw-border-solid tw-border-iron-700 tw-p-[3px] md:tw-gap-1.5 md:tw-border-0 md:tw-p-0";
+  } else if (phoneChips) {
+    frame =
+      "max-md:tw-gap-1.5 md:tw-gap-0.5 md:tw-rounded-full md:tw-border md:tw-border-solid md:tw-border-iron-700 md:tw-p-[3px]";
+  }
+  let chip = "";
+  if (many) {
+    chip = phoneChips
+      ? "tw-border tw-border-solid tw-border-iron-700"
+      : "md:tw-border md:tw-border-solid md:tw-border-iron-700";
+  } else if (phoneChips) {
+    chip = "max-md:tw-border max-md:tw-border-solid max-md:tw-border-iron-700";
+  }
   return (
     <div
       ref={groupRef}
@@ -98,7 +101,6 @@ export function Seg<V extends string>({
       role="group"
       aria-label={label}
       data-seg-layout={layout}
-      {...(layout === "row" ? { "data-tdh-scroll": "" } : {})}
     >
       {/* Options keep their whole label on one line and move to the next
           row first; one wider than the whole control wraps inside it. */}

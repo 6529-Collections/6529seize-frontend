@@ -120,7 +120,8 @@ export function lintVoice(
  * Names that contain digits and are not quantities: 6529 and its domains,
  * CC0, SP1, Groth16 and BN254, SHA-256, token standards, card numbers
  * (#562), decision and proposal numbers (D136, P26), specification sections
- * (§5.2), the rules' name (TDH v1.4, D137) and placeholders ({count}).
+ * (§5.2), the rules' name (TDH v1.4, D137), P26's arithmetic (B64,
+ * binary64) and placeholders ({count}).
  */
 const NAME_TOKENS: readonly RegExp[] = [
   /\{\w+\}/g,
@@ -136,6 +137,9 @@ const NAME_TOKENS: readonly RegExp[] = [
   /§ ?[\d.]*\d/g,
   /\bTDH v\d+\.\d+\b/g,
   /\bEIP-\d+\b/g,
+  // The arithmetic's names, as P26 §8.1 writes them: a format, not a number.
+  /\bB64\b/g,
+  /\bbinary64\b/g,
 ];
 
 /** The numbers left in a string once names are taken out: each should be a fact. */

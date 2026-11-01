@@ -157,7 +157,7 @@ export function exampleCopy(book: FactBook, locale: SupportedLocale) {
       question: "Who checks the day, and what would it take to fool them?",
       maturity: "built",
       maturityLabel: `Built, ${f("site.validator.version")}`,
-      note: "“run one” waits on its release (D144)",
+      note: "“run one” waits on its release",
     },
     {
       id: "network",
@@ -241,7 +241,7 @@ export function exampleCopy(book: FactBook, locale: SupportedLocale) {
     },
     {
       what: "Signed by validators",
-      detail: `The validator software is at ${f("site.validator.version")}; so far only 6529's own validators sign, in testing.`,
+      detail: `The validator software is at ${f("site.validator.version")}, built and being tested.`,
       marks: [
         { kind: "decided", refText: "D112" },
         { maturity: "built", refText: f("site.validator.version") },

@@ -221,24 +221,34 @@ export default async function SpecificationPage({
                 size="sm"
                 refText={s("explained.tdh.spec.version.liveRule")}
               />
-              {/* How we know it runs as written: tested, a separate question. */}
-              <Mark
-                kind="tested"
-                locale={locale}
-                size="sm"
-                refText={s(
-                  p.num("tdh.days.equal") !== null &&
-                    p.num("tdh.days.equal") === p.num("tdh.days.compared")
-                    ? "explained.tdh.spec.version.live"
-                    : "explained.tdh.spec.version.liveSome"
-                )}
-              />
+              {/* How we know it runs as written: tested, a separate question;
+                  its counts and date are the daily comparison's facts. */}
+              <span data-fact="tdh.days.equal">
+                <Mark
+                  kind="tested"
+                  locale={locale}
+                  size="sm"
+                  refText={s(
+                    p.num("tdh.days.equal") !== null &&
+                      p.num("tdh.days.equal") === p.num("tdh.days.compared")
+                      ? "explained.tdh.spec.version.live"
+                      : "explained.tdh.spec.version.liveSome",
+                    {
+                      equal: p.f("tdh.days.equal"),
+                      compared: p.f("tdh.days.compared"),
+                      date: p.f("tdh.latest.date"),
+                    }
+                  )}
+                />
+              </span>
             </div>
-            <Caption className="tw-mt-3">
-              {m("explained.tdh.spec.version.private")}
-            </Caption>
           </aside>
         </div>
+        {/* Where P26 lives, under the panel and the contents, so the panel
+            keeps to its rows and marks and no column stands empty. */}
+        <Caption className="tw-mt-6 tw-max-w-[760px]">
+          {m("explained.tdh.spec.version.private")}
+        </Caption>
 
         <div className="tw-mt-8">
           <DriftNote by={["D136", "D137"]} locale={locale}>

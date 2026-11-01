@@ -40,6 +40,7 @@ export default function TrustSection({ ctx }: { readonly ctx: SureContext }) {
       mark: "assumed",
       covers: m("explained.tdh.sure.ledger.compilerCovers", {
         cases: formatList(locale, evaluated),
+        facts: p.v("manifest.facts.checks"),
       }),
     },
     {

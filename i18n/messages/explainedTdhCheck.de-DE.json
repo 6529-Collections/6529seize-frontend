@@ -56,6 +56,7 @@
   "explained.tdh.check.ribbon.caption": "Jede Kachel ist ein Ergebnis: der gehaltene Tag, abgeschlossen durch den Snapshot um {midnight} an ihrem rechten Rand. Die Uhrzeit auf einer Kachel ist die, zu der ihre Datei geschrieben wurde.",
   "explained.tdh.check.ribbon.rewritten": "↻ markiert eine Datei, die nach ihrem Lauf neu geschrieben wurde: {groups}.",
   "explained.tdh.check.ribbon.rewrittenGroup": "{dates} am {date} um {time}",
+  "explained.tdh.check.ribbon.rewrittenWhy": "Eine Datei wird neu geschrieben, wenn ihr Tag noch einmal berechnet wird, etwa nach einem fehlgeschlagenen Lauf oder als die Regeln ihren neuen Namen bekamen; jede Datei passt weiterhin zu ihrem Hash im Index.",
   "explained.tdh.check.ribbon.window": "Gezeigt sind die neuesten {shown} von {total} Tagen.",
   "explained.tdh.check.ribbon.all": "Alle {count} Tage, jeder mit seinem Beleg",
   "explained.tdh.check.ribbon.allLabel": "Jeder Tag seit dem ersten Ergebnis",

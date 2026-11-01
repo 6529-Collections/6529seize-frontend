@@ -68,6 +68,9 @@ const NAMES = [
   /§\s?\d+(?:\.\d+)*/g,
   /\bTDH v\d+\.\d+\b/g,
   /\bS\d\b/g,
+  /\bB64\b/g,
+  /\bbinary64\b/g,
+  /\bEIP-\d+\b/g,
 ];
 function numbersOutsideFacts(root: HTMLElement): string[] {
   const article = root.querySelector("[data-ex-article]") ?? root;
@@ -121,9 +124,10 @@ describe("How sure", () => {
     expect(container.querySelector('[data-drift-by="D136 D137"]')).toBeNull();
     expect(container.textContent).not.toMatch(/A newer model/);
     // D148 takes the network-held accounts out of the cap claim 5a states.
-    // D150 (two separate exempt parties) is named beside D148.
+    // D144 (the water-fill) and D150 (two separate exempt parties) are named
+    // beside it.
     expect(
-      container.querySelector('[data-drift-by="D148 D150"]')
+      container.querySelector('[data-drift-by="D144 D148 D150"]')
     ).toHaveTextContent(
       "D148 exempts the network’s two accounts from the 19.99% cap, and D150 makes them two separate parties"
     );
@@ -134,7 +138,7 @@ describe("How sure", () => {
       )
     ).toEqual(["9", "84", "11", "12"]);
     expect(board?.textContent).toMatch(
-      /84Lean theorems behind the claims below, lemmas on the way included/
+      /84Lean theorems behind the claims below, lemmas on the way included: 56 about TDH and 28 about the validator rules/
     );
     for (const id of [
       "why",
@@ -158,7 +162,9 @@ describe("How sure", () => {
       /The 11 statements shown false, by kind: 5 against the first netting rule/
     );
     expect(container.textContent).toMatch(/\(H and I\)/);
-    expect(container.textContent).toMatch(/Cases F, G, H, and I are checked/);
+    expect(container.textContent).toMatch(
+      /Cases F, G, H, and I, and the \d+ checks of P26's stated facts, are checked/
+    );
     // Twelve limits, each in a sentence of the page's own.
     const limits = within(
       screen.getByRole("list", { name: "The limits the manifest names" })
@@ -178,7 +184,7 @@ describe("How sure", () => {
     const how = container.querySelector("#how");
     expect(how?.textContent).toMatch(/in 71 jobs/);
     expect(how?.textContent).toMatch(
-      /each of the 91 named theorems rests on propext, Classical\.choice, and Quot\.sound/
+      /each of the 91 named theorems uses no axiom beyond propext, Classical\.choice, and Quot\.sound/
     );
     expect(how?.textContent).toMatch(/108 of 108 pass \(1,336 checks\)/);
     // What a reader can repeat: the bundled copy has no URL to fetch, so the

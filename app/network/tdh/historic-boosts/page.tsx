@@ -309,7 +309,7 @@ export default async function VersionsPage({
               </figcaption>
             </figure>
           )}
-          <Caption className="tw-mt-3 tw-scroll-mt-24" id="boost-figures">
+          <Caption className="tw-mt-8 tw-scroll-mt-24" id="boost-figures">
             {m("explained.tdh.versions.note", {
               max: p.v("engine.boost.todayMax"),
               gradients: p.v("rules.gradientMax"),

@@ -375,7 +375,7 @@ describe("how we know, on the overview", () => {
       "A contract would record a day only with both proofs. Built, tested on a copy of mainnet, not deployed."
     );
     expect(container.querySelector('[data-rung="7"]')).toHaveTextContent(
-      /Built\s*0\.1\.0, being tested/
+      /Built\s*0\.1\.0, built and being tested/
     );
     expect(
       screen.getByRole("link", { name: /What is proved, and what is not/ })

@@ -400,11 +400,22 @@ function recordsRow(ctx: Ctx): Row {
     : pt(locale, "explained.tdh.day.row.recordsDiffer", {
         hash: python ?? plain(null, locale),
       });
+  const wallets = day.text("walletsSha");
+  // Two files: every identity's record, then every wallet's, each by hash.
   return {
     id: "records",
     value: (
       <>
-        {hashOf(ctx, "recordsSha", { stripes: true })}
+        <span className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2">
+          {quiet(pt(locale, "explained.tdh.day.row.recordsIdentities"))}
+          {hashOf(ctx, "recordsSha", { stripes: true })}
+        </span>
+        {wallets !== null && (
+          <span className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2">
+            {quiet(pt(locale, "explained.tdh.day.row.recordsWallets"))}
+            {hashOf(ctx, "walletsSha", { stripes: true })}
+          </span>
+        )}
         {quiet(
           same
             ? note
@@ -414,7 +425,11 @@ function recordsRow(ctx: Ctx): Row {
         )}
       </>
     ),
-    text: `${rust ?? plain(null, locale)} (${note})`,
+    text: `${pt(locale, "explained.tdh.day.row.recordsIdentities")} ${rust ?? plain(null, locale)}${
+      wallets === null
+        ? ""
+        : `; ${pt(locale, "explained.tdh.day.row.recordsWallets")} ${wallets}`
+    } (${note})`,
   };
 }
 

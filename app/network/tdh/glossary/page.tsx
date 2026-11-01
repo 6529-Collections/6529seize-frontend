@@ -51,7 +51,10 @@ function StatusCell({
     // word starts on one line down the table.
     return (
       <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-[13px] tw-font-semibold tw-text-iron-50">
-        <span className="tw-inline-block tw-w-3" aria-hidden="true" />
+        <span
+          className="tw-inline-block tw-size-3 tw-rounded-full tw-border tw-border-dotted tw-border-iron-400"
+          aria-hidden="true"
+        />
         {t(locale, status.word)}
       </span>
     );

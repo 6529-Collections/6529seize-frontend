@@ -56,6 +56,7 @@
   "explained.tdh.check.ribbon.caption": "Cada casilla es un resultado: el día mantenido, cerrado por la instantánea de las {midnight} en su borde derecho. La hora de una casilla es cuando se escribió su archivo.",
   "explained.tdh.check.ribbon.rewritten": "↻ marca un archivo reescrito después de su ejecución: {groups}.",
   "explained.tdh.check.ribbon.rewrittenGroup": "{dates} el {date} a las {time}",
+  "explained.tdh.check.ribbon.rewrittenWhy": "Un archivo se reescribe cuando su día se calcula de nuevo, como tras una ejecución fallida o cuando las reglas tomaron su nuevo nombre; cada archivo sigue coincidiendo con su hash del índice.",
   "explained.tdh.check.ribbon.window": "Se muestran los {shown} días más recientes de {total}.",
   "explained.tdh.check.ribbon.all": "Los {count} días, cada uno con su recibo",
   "explained.tdh.check.ribbon.allLabel": "Cada día desde el primer resultado",

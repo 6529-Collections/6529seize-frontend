@@ -28,25 +28,28 @@ interface Tone {
   readonly ink: string;
 }
 
+// A stepped ramp, lightest at the top of the ranking: each group's bar and
+// ribbon are one step of it, so the four ribbons read apart. The rest keep
+// their hatch from bar to ribbon to bar.
 const TONES: Record<RankGroup["key"], Tone> = {
   top: {
-    fill: "rgba(206, 207, 212, 0.9)",
-    band: "rgba(206, 207, 212, 0.42)",
+    fill: "rgba(232, 233, 237, 0.96)",
+    band: "rgba(232, 233, 237, 0.55)",
     ink: "tw-text-[#0D0D0F]",
   },
   next: {
-    fill: "rgba(206, 207, 212, 0.62)",
-    band: "rgba(206, 207, 212, 0.28)",
+    fill: "rgba(206, 207, 212, 0.7)",
+    band: "rgba(206, 207, 212, 0.36)",
     ink: "tw-text-[#0D0D0F]",
   },
   next2: {
-    fill: "rgba(206, 207, 212, 0.36)",
-    band: "rgba(206, 207, 212, 0.17)",
+    fill: "rgba(170, 171, 178, 0.48)",
+    band: "rgba(170, 171, 178, 0.22)",
     ink: "tw-text-iron-50",
   },
   rest: {
     fill: "repeating-linear-gradient(45deg, rgba(206, 207, 212, 0.3) 0 3px, rgba(206, 207, 212, 0.1) 3px 8px)",
-    band: "rgba(206, 207, 212, 0.09)",
+    band: "url(#ex-network-hatch)",
     ink: "tw-text-iron-50",
   },
 };
@@ -161,6 +164,18 @@ function Bands({ items }: { readonly items: readonly Share[] }) {
       className="tw-block tw-h-20 tw-w-full"
       aria-hidden="true"
     >
+      <defs>
+        <pattern
+          id="ex-network-hatch"
+          width="8"
+          height="8"
+          patternUnits="userSpaceOnUse"
+          patternTransform="rotate(45)"
+        >
+          <rect width="8" height="8" fill="rgba(206, 207, 212, 0.06)" />
+          <rect width="3" height="8" fill="rgba(206, 207, 212, 0.2)" />
+        </pattern>
+      </defs>
       {bandShapes(items).map(({ key, top, bottom }) => {
         // Each group flows as a ribbon from its share of TDH (above) to
         // its share of identities (below): curved sides, a filled body.
@@ -186,6 +201,41 @@ function Bands({ items }: { readonly items: readonly Share[] }) {
         );
       })}
     </svg>
+  );
+}
+
+/**
+ * The groups too thin to carry their share inside the bar, named under it
+ * at the left edge where they sit, so no slice of the drawing is unlabelled.
+ */
+function Callouts({
+  items,
+  pick,
+  locale,
+}: {
+  readonly items: readonly Share[];
+  readonly pick: (share: Share) => number;
+  readonly locale: SupportedLocale;
+}) {
+  const thin = items.filter((share) => pick(share) < LABEL_MIN_SHARE);
+  if (thin.length === 0) return null;
+  return (
+    <span
+      className="tw-mt-1 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-text-[12px] tw-font-semibold tw-leading-4 tw-text-iron-300"
+      aria-hidden="true"
+      data-network-callouts=""
+    >
+      <span className="tw-text-iron-400">↑</span>
+      {thin.map((share) => (
+        <span key={share.group.key} className="tw-inline-flex tw-items-center">
+          <span
+            className="tw-mr-1.5 tw-inline-block tw-size-2.5 tw-rounded-sm"
+            style={{ background: TONES[share.group.key].fill }}
+          />
+          {`${groupName(locale, share.group)} ${percent(locale, pick(share))}`}
+        </span>
+      ))}
+    </span>
   );
 }
 
@@ -296,6 +346,11 @@ export default function NetworkDistribution({
           <Bar items={items} pick={(share) => share.tdh} locale={locale} />
           <Bands items={items} />
           <Bar items={items} pick={(share) => share.people} locale={locale} />
+          <Callouts
+            items={items}
+            pick={(share) => share.people}
+            locale={locale}
+          />
           <span className={`${rowLabel} tw-mb-0 tw-mt-1.5`} aria-hidden="true">
             {ot(locale, "network.peopleRow")}
           </span>

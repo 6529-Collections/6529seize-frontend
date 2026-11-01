@@ -337,7 +337,7 @@ describe("the page's sections", () => {
     expect(container.querySelector('[data-verdict="halfpair"]')).not.toBeNull();
     expect(container.querySelector('[data-halfpair="10"]')).not.toBeNull();
     expect(
-      screen.getByText("Not recorded on Ethereum yet.")
+      screen.getByText("You cannot repeat that call yet.")
     ).toBeInTheDocument();
     // three computations of the total agree
     expect(container.querySelectorAll('[data-relation="equal"]')).toHaveLength(
@@ -367,8 +367,6 @@ describe("the page's sections", () => {
       screen.getByRole("button", { name: "Back to the real proof" })
     );
     expect(container.querySelector('[data-verdict="halfpair"]')).not.toBeNull();
-    // the record so far: five steps, the last one not dated
-    expect(container.querySelectorAll("[data-record]")).toHaveLength(5);
   });
 
   it("renders every other section from the facts alone", () => {
@@ -387,7 +385,13 @@ describe("the page's sections", () => {
     );
     expect(container.querySelectorAll("[data-phase]")).toHaveLength(7);
     expect(container.querySelectorAll("[data-row]")).toHaveLength(6);
-    expect(screen.getByText("Not deployed.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Not deployed, and not audited.")
+    ).toBeInTheDocument();
+    // the record so far, under Where it stands: five steps, the last one not
+    // dated, and the two test pairs marked as test cycles
+    expect(container.querySelectorAll("[data-record]")).toHaveLength(5);
+    expect(container.querySelectorAll("[data-test-cycle]")).toHaveLength(2);
     expect(
       container.querySelectorAll('[data-fact="proofs.dayB.gpuHoursHigh"]')
         .length

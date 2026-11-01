@@ -1,7 +1,7 @@
 import type { SupportedLocale } from "@/i18n/locales";
 import { formatCount, formatUtcDay } from "@/lib/explained/format";
 import { kt } from "../i18n";
-import { ageText } from "../age";
+import { ageText, ageTextShort } from "../age";
 import { Glyph } from "../marks/glyphs";
 import Ribbon from "../figures/Ribbon";
 
@@ -191,12 +191,23 @@ export function DayTile(props: DayTileProps) {
       >
         {primary}
         {written?.rewritten && <span className="tw-ml-1 md:tw-hidden">↻</span>}
-        {secondary && (
-          <span
-            className={`tw-block tw-text-xs ${written && !open ? "max-md:tw-hidden" : ""}`}
-          >
-            {secondary}
+        {secondary && open && open.minutesLeft > 0 ? (
+          <span className="tw-block tw-text-xs">
+            <span className="md:tw-hidden">
+              {kt(locale, "explained.kit.day.openIn", {
+                time: ageTextShort(locale, open.minutesLeft),
+              })}
+            </span>
+            <span className="max-md:tw-hidden">{secondary}</span>
           </span>
+        ) : (
+          secondary && (
+            <span
+              className={`tw-block tw-text-xs ${written && !open ? "max-md:tw-hidden" : ""}`}
+            >
+              {secondary}
+            </span>
+          )
         )}
       </span>
       {open && (

@@ -86,7 +86,9 @@ export default function AreaTile({
   const lostOpacity = useTween(lostW > 0 ? 1 : 0, EX_MOTION.liveMs);
 
   let tdhLabel = null;
-  if (tileW > 0) {
+  // Once the copy is sold its area leaves and the lost area speaks; a total
+  // label riding the shrinking tile would print over it.
+  if (tileW > 0 && lostW === 0) {
     const right = PAD.left + tileW + 8 > width - 150;
     const x = right ? PAD.left + tileW - 8 : PAD.left + tileW + 8;
     const top = baseY - tileH - bandH;

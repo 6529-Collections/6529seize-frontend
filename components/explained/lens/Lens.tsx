@@ -197,7 +197,7 @@ export default function Lens({
   const [ruleOpen, setRuleOpen] = useState(false);
   return (
     <section
-      className={`tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-bg-iron-950 ${broken ? "tw-border-error/45" : "tw-border-iron-800"}`}
+      className={`tw-scroll-mt-24 tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-bg-iron-950 ${broken ? "tw-border-error/45" : "tw-border-iron-800"}`}
       data-lens={id}
       data-broken={broken ? "1" : "0"}
       aria-label={label}

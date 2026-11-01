@@ -56,6 +56,7 @@
   "explained.tdh.check.ribbon.caption": "Each tile is one result: the day held, closed by the {midnight} snapshot on its right edge. The time on a tile is when its file was written.",
   "explained.tdh.check.ribbon.rewritten": "↻ marks a file rewritten after its run: {groups}.",
   "explained.tdh.check.ribbon.rewrittenGroup": "{dates} on {date} at {time}",
+  "explained.tdh.check.ribbon.rewrittenWhy": "A file is rewritten when its day is computed again, as after a failed run or when the rules took their new name; every file still hashes to the index.",
   "explained.tdh.check.ribbon.window": "The newest {shown} of {total} days are drawn.",
   "explained.tdh.check.ribbon.all": "All {count} days, each with its receipt",
   "explained.tdh.check.ribbon.allLabel": "Every day since the first result",

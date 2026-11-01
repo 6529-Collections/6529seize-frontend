@@ -26,6 +26,8 @@ export interface ChapterDef {
   readonly status: "live" | "coming";
   /** Does the chapter's subject run today? (EXPLAINED.md §3) */
   readonly maturity: Maturity;
+  /** A coming chapter's place in the build order: "Next", "Then"… */
+  readonly order?: KitKey;
   readonly read: readonly PageLink[];
   readonly check: readonly PageLink[];
   readonly shelf: readonly PageLink[];
@@ -108,13 +110,19 @@ const TDH: ChapterDef = {
   ],
 };
 
-function coming(id: string, title: KitKey, maturity: Maturity): ChapterDef {
+function coming(
+  id: string,
+  title: KitKey,
+  maturity: Maturity,
+  order: KitKey
+): ChapterDef {
   return {
     id,
     title,
     href: null,
     status: "coming",
     maturity,
+    order,
     read: [],
     check: [],
     shelf: [],
@@ -124,13 +132,48 @@ function coming(id: string, title: KitKey, maturity: Maturity): ChapterDef {
 /** The chapters in build order (MAP.md §6). */
 export const CHAPTERS: readonly ChapterDef[] = [
   TDH,
-  coming("memes", "explained.kit.map.memes", "live"),
-  coming("waves", "explained.kit.map.waves", "live"),
-  coming("validators", "explained.kit.map.validators", "built"),
-  coming("nextgen", "explained.kit.map.nextgen", "live"),
-  coming("standing", "explained.kit.map.standing", "live"),
-  coming("works", "explained.kit.map.works", "built"),
-  coming("network", "explained.kit.map.network", "design"),
+  coming(
+    "memes",
+    "explained.kit.map.memes",
+    "live",
+    "explained.kit.order.next"
+  ),
+  coming(
+    "waves",
+    "explained.kit.map.waves",
+    "live",
+    "explained.kit.order.then"
+  ),
+  coming(
+    "validators",
+    "explained.kit.map.validators",
+    "built",
+    "explained.kit.order.then"
+  ),
+  coming(
+    "nextgen",
+    "explained.kit.map.nextgen",
+    "live",
+    "explained.kit.order.later"
+  ),
+  coming(
+    "standing",
+    "explained.kit.map.standing",
+    "live",
+    "explained.kit.order.later"
+  ),
+  coming(
+    "works",
+    "explained.kit.map.works",
+    "built",
+    "explained.kit.order.later"
+  ),
+  coming(
+    "network",
+    "explained.kit.map.network",
+    "design",
+    "explained.kit.order.last"
+  ),
 ];
 
 export function chapterById(id: string): ChapterDef {

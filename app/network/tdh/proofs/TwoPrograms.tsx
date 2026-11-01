@@ -241,7 +241,7 @@ export default function TwoPrograms({
           <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2">
             <Case title={rich(locale, k("case.flaw.title"))}>
               {rich(locale, k("case.flaw.body"), {
-                date: facts.print("proofs.sp1Advisory.published"),
+                date: facts.print("proofs.sp1Advisory.published", "long"),
                 id: facts.print("proofs.sp1Advisory.id"),
                 fixed: facts.print("proofs.sp1Advisory.fixed"),
                 earlier: facts.print("proofs.sp1Advisory.earlier", "long"),

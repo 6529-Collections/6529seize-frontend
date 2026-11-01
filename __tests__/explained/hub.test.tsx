@@ -47,7 +47,12 @@ describe("the hub, first version", () => {
     const { container } = withFacts(<HubLoop book={book} locale="en-US" />);
     const card = container.querySelector("[data-station-card]");
     expect(card).toHaveAttribute("data-station-card", "time");
-    expect(card).toHaveTextContent("2,082,190,981 TDH");
+    // The card follows the copy: its own TDH heads it, the network's total
+    // stays on the loop and in the sentence.
+    expect(card).toHaveTextContent("394 TDH");
+    expect(card).toHaveTextContent(
+      "Everyone's together, on Oct 18: 2,082,190,981."
+    );
     expect(
       within(card as HTMLElement).getByRole("link", { name: /Chapter 01: TDH/ })
     ).toHaveAttribute("href", "/network/tdh");
@@ -73,11 +78,11 @@ describe("the hub, first version", () => {
     );
     // The theorem counts are the bundled manifest's, read through the facts.
     expect(panel).toHaveTextContent(
-      `${book.num("manifest.proved").toLocaleString("en-US")} Lean theorems about a model of the rules, checked by machine. ${book.num("manifest.shownFalse")} earlier draft statements were shown false and stay on record.`
+      `${book.num("manifest.proved.tdh").toLocaleString("en-US")} Lean theorems about a model of TDH's rules, checked by machine, and ${book.num("manifest.proved.p53")} more about the proposed validator rules. ${book.num("manifest.shownFalse.tdh")} earlier drafts about TDH were shown false and stay on record.`
     );
     // The proved day carries its retired rule in the same sentence.
     expect(panel).toHaveTextContent(
-      "One real day, half proved Proof A proved the day of Oct 11 (cycle 20,737) under the retired tdh-v1.0 rules; mainnet's SP1 verifier accepts it in a read-only call. Proof B is not done; under TDH v1.4 both exist only for a synthetic test cycle."
+      "One real day, half proved A zero-knowledge proof lets a contract check a program's output without running it again. Proof A proved the day of Oct 11 (cycle 20,737) under the retired tdh-v1.0 rules; mainnet's SP1 verifier accepts it in a read-only call. Proof B is not done; under TDH v1.4 both exist only for a synthetic test cycle."
     );
     // What anyone can repeat today, and what needs private code.
     expect(panel).toHaveTextContent(
@@ -97,7 +102,7 @@ describe("the hub, first version", () => {
       "waits on: how cards were chosen before Main Stage"
     );
     expect(rows[3]).toHaveTextContent(
-      'software 0.1.0, built and being tested; "run one" waits on its release (D144)'
+      'software 0.1.0, built and being tested; "run one" waits on its release'
     );
     expect(rows[6]).toHaveTextContent("6529 Stream Editions");
     expect(list).not.toHaveTextContent("NIC's full name");

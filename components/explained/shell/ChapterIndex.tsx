@@ -60,6 +60,10 @@ export default function ChapterIndex({
               </span>
             </span>
             <span className="tw-col-start-2 tw-flex tw-flex-col tw-gap-1.5 tw-text-sm tw-leading-5 tw-text-iron-400 lg:tw-col-start-3">
+              {/* The status answers the legend's question, so it says which. */}
+              <span className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.1em] tw-text-iron-400">
+                {kt(locale, "explained.kit.chapters.runs")}
+              </span>
               <Track
                 maturity={row.maturity}
                 locale={locale}

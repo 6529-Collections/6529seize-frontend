@@ -3,6 +3,7 @@
 import { useState } from "react";
 import BreakIt, { breakItLabel } from "@/components/explained/lens/BreakIt";
 import { Glyph } from "@/components/explained/marks/glyphs";
+import Tag from "@/components/explained/marks/Tag";
 import { PUBLIC_VECTORS_JSON } from "@/components/explained/engine/publicVectors";
 import {
   canonicalJson,
@@ -174,8 +175,11 @@ export default function RunVectors({
         </ol>
       )}
       {broken && results !== null && (
-        <p className="tw-m-0 tw-mt-3 tw-text-[15px] tw-leading-6 tw-text-iron-300">
-          {s("explained.tdh.impl.here.broken")}
+        <p className="tw-m-0 tw-mt-3 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+          {/* A changed vector is constructed, as the other pages' failing
+              states are: it carries the same Simulated tag. */}
+          <Tag kind="simulated" locale={locale} />
+          <span>{s("explained.tdh.impl.here.broken")}</span>
         </p>
       )}
     </section>

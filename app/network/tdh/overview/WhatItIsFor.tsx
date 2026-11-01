@@ -68,7 +68,7 @@ export default function WhatItIsFor({
         className="tw-m-0 tw-mt-10 tw-grid tw-grid-cols-1 md:tw-mt-12 md:tw-grid-cols-[200px_minmax(0,1fr)]"
         aria-label={ot(locale, "uses.aria")}
       >
-        <div className="tw-flex tw-flex-col tw-justify-center tw-gap-1.5 tw-rounded-t-xl tw-border tw-border-solid tw-border-primary-400/50 tw-bg-primary-400/[0.12] tw-p-4 md:tw-rounded-l-xl md:tw-rounded-tr-none md:tw-p-6">
+        <div className="tw-flex tw-flex-col tw-justify-start tw-gap-1.5 tw-rounded-t-xl tw-border tw-border-solid tw-border-primary-400/50 tw-bg-primary-400/[0.12] tw-p-4 md:tw-rounded-l-xl md:tw-rounded-tr-none md:tw-p-6">
           <span className={EX_TEXT.label}>{ot(locale, "uses.src")}</span>
           <span className="tw-text-[26px] tw-font-semibold tw-leading-8 tw-tracking-[-0.02em] tw-text-primary-300">
             {ot(locale, "uses.srcNum")}

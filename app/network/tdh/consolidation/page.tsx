@@ -317,11 +317,11 @@ export default async function TdhYourWalletsPage({
                     {
                       value: "step1",
                       label: wt(locale, "explained.tdh.wallets.lens.step1", {
-                        step: formatCount(locale, 1),
+                        step: "D–A",
                       }),
                     },
-                    { value: "step2", label: formatCount(locale, 2) },
-                    { value: "step3", label: formatCount(locale, 3) },
+                    { value: "step2", label: "D–B" },
+                    { value: "step3", label: "D–C" },
                     {
                       value: "batch",
                       label: wt(locale, "explained.tdh.wallets.lens.batch"),
@@ -409,7 +409,13 @@ export default async function TdhYourWalletsPage({
                 {wt(locale, "explained.tdh.wallets.setup")}
               </Link>
               <span className="tw-text-[15px] tw-leading-6 tw-text-iron-400">
-                {wt(locale, "explained.tdh.wallets.add.setupNote")}
+                {rich(locale, "explained.tdh.wallets.add.setupNote", {
+                  before: (
+                    <a className={EX_LINK} href="#before">
+                      {wt(locale, "explained.tdh.wallets.before.label")}
+                    </a>
+                  ),
+                })}
               </span>
             </p>
           </EdRow>
@@ -564,7 +570,7 @@ function howWeKnow(book: FactBook, locale: SupportedLocale) {
         head: (
           <>
             6529chain{" "}
-            <FactValue fact={book.maybe("rules.chainHead")} locale={locale} />
+            <FactValue fact={book.maybe("rules.p26Commit")} locale={locale} />
           </>
         ),
         graphs: (

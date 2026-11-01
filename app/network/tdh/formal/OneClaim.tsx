@@ -176,6 +176,7 @@ export default function OneClaim({ ctx }: { readonly ctx: SureContext }) {
         file: book.maybe("manifest.headline.file"),
         line: book.maybe("manifest.headline.line"),
         axioms: book.maybe("manifest.headline.axioms"),
+        at: book.maybe("manifest.commit"),
       },
       body: null,
       doesNotCover: m("explained.tdh.sure.part.proved.notCovered"),

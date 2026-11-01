@@ -167,6 +167,20 @@ export default function StatementWords({
         ? ANCHOR_WORDS.includes(word.index)
         : word.word.group === group;
   const litCount = flip ? 1 : compare ? ANCHOR_WORDS.length : inGroup;
+  // The block numbers a reader can look up on any explorer today: the cut,
+  // the block after it and the anchor, whose hashes are words 7, 9 and 11.
+  const blockOf = (name: string): number | null => {
+    const value = decoded.a?.find((entry) => entry.word.name === name)?.value;
+    return value === null || value === undefined ? null : Number(value);
+  };
+  const printBlock = (block: number | null) =>
+    block === null ? "" : formatCount(locale, block);
+  const cutBlock = blockOf("cutNumber");
+  const lookUp = {
+    anchor: printBlock(blockOf("anchorNumber")),
+    cut: printBlock(cutBlock),
+    next: printBlock(cutBlock === null ? null : cutBlock + 1),
+  };
   const flippedName = STATEMENT_WORDS[FLIPPED_WORD]?.name ?? "";
 
   const readout = flip ? (
@@ -189,7 +203,7 @@ export default function StatementWords({
     <Readout
       big={formatCount(locale, inGroup)}
       unit={fill(locale, k("words.unit"), { words })}
-      say={fill(locale, k(`words.say.${group}`))}
+      say={fill(locale, k(`words.say.${group}`), lookUp)}
     />
   );
 

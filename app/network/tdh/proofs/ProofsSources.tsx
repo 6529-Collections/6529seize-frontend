@@ -1,3 +1,4 @@
+import proofsRecord from "@/lib/explained/data/proofs.json";
 import HowWeKnow from "@/components/explained/shell/HowWeKnow";
 import { EX_LINK } from "@/components/explained/tokens";
 import { fill } from "@/components/explained/i18n";
@@ -16,6 +17,9 @@ function commitOf(ref: string): string {
   return /commit ([0-9a-f]{7})/.exec(ref)?.[1] ?? "";
 }
 
+/** SP1's newest advisory's identifier, as the link's text. */
+const LATEST_ADVISORY = proofsRecord.sp1Advisory.latestId;
+
 export default function ProofsSources({
   locale,
   facts,
@@ -30,9 +34,13 @@ export default function ProofsSources({
       {value}
     </code>
   );
-  // SP1's advisories are public: each links to where it was published.
+  // SP1's advisories are public: each links to where it was published,
+  // under its own identifier.
   const advisory = (
-    id: "proofs.sp1Advisory.earlier" | "proofs.sp1Advisory.id",
+    id:
+      | "proofs.sp1Advisory.earlier"
+      | "proofs.sp1Advisory.id"
+      | "proofs.sp1Advisory.latestId",
     name: string
   ) => {
     const url = facts.entry(id)?.source.url;
@@ -98,6 +106,15 @@ export default function ProofsSources({
               ),
               id: facts.print("proofs.sp1Advisory.id"),
               idLink: advisory("proofs.sp1Advisory.id", "GHSA-63x8-x938-vx33"),
+              latestId: facts.print("proofs.sp1Advisory.latestId"),
+              latestDate: facts.print(
+                "proofs.sp1Advisory.latestPublished",
+                "long"
+              ),
+              latestLink: advisory(
+                "proofs.sp1Advisory.latestId",
+                LATEST_ADVISORY
+              ),
             }),
           },
           {

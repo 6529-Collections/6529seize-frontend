@@ -27,6 +27,7 @@ const KIND: Record<SourceKey, "site" | "spec" | "decision"> = {
   runLog: "decision",
   sp1Update: "site",
   sp1Cve: "site",
+  sp1Native: "site",
 };
 
 function proofSource(key: SourceKey) {
@@ -233,6 +234,23 @@ export const PROOF_FACTS = {
     "sp1Update",
     "day",
     proofs.sp1Advisory.earlier
+  ),
+  // SP1's newest advisory: its native verifier only, fixed before the SP1
+  // that program A uses.
+  "proofs.sp1Advisory.latestId": fact(
+    "sp1Native",
+    "text",
+    proofs.sp1Advisory.latestId
+  ),
+  "proofs.sp1Advisory.latestPublished": fact(
+    "sp1Native",
+    "day",
+    proofs.sp1Advisory.latestPublished
+  ),
+  "proofs.sp1Advisory.latestFixed": fact(
+    "sp1Native",
+    "text",
+    proofs.sp1Advisory.latestFixed
   ),
 
   "proofs.catchup.chainStart": count("p53", proofs.catchup.chainStart),

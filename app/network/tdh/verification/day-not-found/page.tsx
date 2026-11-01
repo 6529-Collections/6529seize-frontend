@@ -21,6 +21,8 @@ import {
   minutesBetween,
 } from "@/lib/explained/format";
 import { cycleOf, dateOfCycle } from "@/lib/explained/registry/helpers";
+import CheckRibbon from "../components/CheckRibbon";
+import { ribbonInput } from "../components/CheckTop";
 import { pt } from "../components/copy";
 import { FactText } from "@/components/explained/facts/FactText";
 import { rich } from "@/components/explained/rich";
@@ -239,6 +241,16 @@ export default async function TdhVerificationDayNotFound({
             {pt(locale, "explained.tdh.day.notFound.check")}
           </Link>
         </div>
+        {/* The newest published days, each a link to its receipt, so a
+            mistyped day ends on a real one. */}
+        <section className="tw-mt-12 md:tw-mt-16" aria-labelledby="pick-day">
+          <h2 id="pick-day" className={`${EX_TEXT.label} tw-m-0`}>
+            {pt(locale, "explained.tdh.day.notFound.pick")}
+          </h2>
+          <div className="tw-mt-4">
+            <CheckRibbon input={ribbonInput(book)} locale={locale} />
+          </div>
+        </section>
       </article>
     </ExplainedShell>
   );
