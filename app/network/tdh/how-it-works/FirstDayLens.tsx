@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useFact } from "@/components/explained/facts/FactsProvider";
 import { kt } from "@/components/explained/i18n";
 import BreakIt, { breakItLabel } from "@/components/explained/lens/BreakIt";
@@ -85,6 +85,9 @@ export default function FirstDayLens({
     { arrival: "example", sold: false },
     (state) => ({ ...state, sold: true })
   );
+  // Guess first: the answer stays hidden until the reader guesses or moves
+  // the model, and a guess moves the model to the case it asked about.
+  const [shown, setShown] = useState(false);
   if (!world) {
     return null;
   }
@@ -118,6 +121,10 @@ export default function FirstDayLens({
             label: utcDay(locale, T),
             right: T === guess.first,
           }))}
+          onAnswer={() => {
+            setShown(true);
+            model.set({ arrival: "beforeMidnight", sold: false });
+          }}
           answer={ht(locale, "explained.tdh.how.firstday.answer", {
             right: utcDay(locale, guess.first ?? 0),
             early: utcDay(locale, times[1] ?? 0),
@@ -139,7 +146,10 @@ export default function FirstDayLens({
               value={model.state.arrival}
               onChange={(key) => {
                 const picked = options.find((o) => o.key === key);
-                if (picked) model.set({ arrival: picked.key, sold: false });
+                if (picked) {
+                  setShown(true);
+                  model.set({ arrival: picked.key, sold: false });
+                }
               }}
               options={options.map(({ key, at }) => ({
                 value: key,
@@ -180,7 +190,7 @@ export default function FirstDayLens({
                 {ht(locale, "explained.tdh.how.firstday.ruleCounts", {
                   one: formatCount(locale, 1),
                 })}
-                {result.first !== null && (
+                {shown && result.first !== null && (
                   <>
                     {" · "}
                     <RuleValue>{utcDay(locale, result.first)}</RuleValue>
@@ -195,21 +205,27 @@ export default function FirstDayLens({
       readout={
         <Readout
           big={
-            result.first === null
-              ? ht(locale, "explained.tdh.how.firstday.none")
-              : utcDay(locale, result.first)
+            !shown
+              ? "?"
+              : result.first === null
+                ? ht(locale, "explained.tdh.how.firstday.none")
+                : utcDay(locale, result.first)
           }
           say={
-            <>
-              {said.lead && (
-                <>
-                  <b className="tw-font-semibold tw-text-iron-50">
-                    {said.lead}
-                  </b>{" "}
-                </>
-              )}
-              {said.rest}
-            </>
+            !shown ? (
+              ht(locale, "explained.tdh.how.firstday.hidden")
+            ) : (
+              <>
+                {said.lead && (
+                  <>
+                    <b className="tw-font-semibold tw-text-iron-50">
+                      {said.lead}
+                    </b>{" "}
+                  </>
+                )}
+                {said.rest}
+              </>
+            )
           }
         />
       }
@@ -217,7 +233,10 @@ export default function FirstDayLens({
         <BreakIt
           id="sellearly"
           pressed={model.broken}
-          onToggle={model.toggleBreak}
+          onToggle={() => {
+            setShown(true);
+            model.toggleBreak();
+          }}
           label={breakItLabel(
             locale,
             ht(locale, "explained.tdh.how.firstday.break")

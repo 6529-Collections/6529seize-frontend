@@ -1,5 +1,5 @@
 {
-  "explained.tdh.design.meta.title": "Conception de la consolidation",
+  "explained.tdh.design.meta.title": "Conception de la consolidation · 6529 Explained",
   "explained.tdh.design.meta.description": "Pourquoi chaque paire de wallets doit se lier dans les deux sens, ce que cela protège, et ce que cela ne protège pas.",
   "explained.tdh.design.eyebrow.shelf": "Rayon",
   "explained.tdh.design.eyebrow.kind": "Référence",
@@ -7,7 +7,7 @@
   "explained.tdh.design.lede": "Exiger que chaque paire soit liée dans les deux sens coûte quelques transactions, et parmi les règles testées, c'est la seule où aucun groupe plus petit de vos wallets ne peut ajouter un wallet extérieur.",
   "explained.tdh.design.rule.label": "La règle",
   "explained.tdh.design.rule.title": "Les enregistrements, paire par paire",
-  "explained.tdh.design.rule.body": "Chaque paire de wallets enregistre une consolidation, cas d'usage {useCase}, dans les deux sens, sur Any Collection ou The Memes. Deux wallets demandent {two} enregistrements, trois en demandent {three}, et quatre en demandent {four}. Les enregistrements n'expirent pas : un lien dure jusqu'à ce que l'un de ses wallets le révoque.",
+  "explained.tdh.design.rule.body": "Chaque paire de wallets enregistre une consolidation dans les deux sens dans le contrat de délégation de 6529, où la consolidation est le cas d'usage {useCase}, sur Any Collection ou The Memes. Deux wallets demandent {two} enregistrements, trois en demandent {three}, et quatre en demandent {four}. Les enregistrements n'expirent pas : un lien dure jusqu'à ce que l'un de ses wallets le révoque.",
   "explained.tdh.design.rule.statTwo": "enregistrements pour deux wallets",
   "explained.tdh.design.rule.statThree": "pour trois",
   "explained.tdh.design.rule.statFour": "pour quatre, ceux du quatrième à partir du {date}",
@@ -29,7 +29,7 @@
   "explained.tdh.design.hwk.rule": "La règle",
   "explained.tdh.design.hwk.ruleBody": "D136 ; P26 §6.2 et §6.3 (TDH v1.4) à {head}.",
   "explained.tdh.design.hwk.analysis": "L'analyse",
-  "explained.tdh.design.hwk.analysisBody": "Les textes de 6529.io sur la conception de la consolidation et leur analyse testée.",
+  "explained.tdh.design.hwk.analysisBody": "L'ancienne page Consolidation design des pages TDH ({frontend}), How it was tested : chaque règle candidate face à tout ensemble d'enregistrements qu'un attaquant détenant certains de vos wallets pourrait signer, et le code de regroupement qu'elle épingle ({backend}).",
   "explained.tdh.design.hwk.model": "Le modèle",
   "explained.tdh.design.hwk.modelBody": "Le regroupement du moteur de TDH v1.4, dans votre navigateur."
 }

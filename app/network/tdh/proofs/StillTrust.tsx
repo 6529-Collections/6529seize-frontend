@@ -63,7 +63,6 @@ export default function StillTrust({
               {
                 assumption: fill(locale, k("trust.identity")),
                 mark: "tested",
-                markLabel: fill(locale, k("trust.identityMark")),
                 covers: rich(locale, k("trust.identityCovers")),
               },
               {
@@ -77,6 +76,19 @@ export default function StillTrust({
                 assumption: fill(locale, k("trust.hashes")),
                 mark: "assumed",
                 covers: rich(locale, k("trust.hashesCovers")),
+              },
+              {
+                assumption: fill(locale, k("trust.routes")),
+                mark: "assumed",
+                covers: rich(locale, k("trust.routesCovers")),
+              },
+              {
+                assumption: fill(locale, k("trust.contract")),
+                mark: "tested",
+                covers: rich(locale, k("trust.contractCovers"), {
+                  unit: facts.print("proofs.contract.unitTests"),
+                  fork: facts.print("proofs.contract.forkTests"),
+                }),
               },
               {
                 assumption: fill(locale, k("trust.rerun")),

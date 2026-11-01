@@ -15,7 +15,9 @@ import Pulse from "../marks/Pulse";
 /**
  * The feed-time pill (EXPLAINED.md §6.2): when the page's live source was
  * written or read, and how long ago. Live, the pulse shows; older than its
- * cadence plus two hours, the pulse stops and the pill says "late".
+ * cadence plus two hours, the pulse stops and the pill says "late". A
+ * record (a specification, a manifest, a validator's record) is not a live
+ * feed: its pill names the record's date, with no pulse and no "late".
  */
 export default function LivePill({
   fact,
@@ -28,7 +30,7 @@ export default function LivePill({
   /** The time shown: when the feed or file was written, or when the page read it. */
   readonly fact: FactEntry | null;
   readonly locale: SupportedLocale;
-  readonly kind?: "feed" | "file" | "read";
+  readonly kind?: "feed" | "file" | "read" | "record";
   readonly cadenceMinutes?: number;
   /** The page's render time: the age shown before the browser's clock takes over. */
   readonly asOf: string;
@@ -51,14 +53,19 @@ export default function LivePill({
   }
   const at = factText(fact);
   const minutes = minutesBetween(at, now);
-  const late = kind !== "read" && isLate(minutes, cadenceMinutes);
+  const record = kind === "record";
+  const late = kind !== "read" && !record && isLate(minutes, cadenceMinutes);
   let lead = kt(locale, "explained.kit.live.read");
   if (kind === "feed") {
     lead = kt(locale, "explained.kit.live.feedWritten");
   } else if (kind === "file") {
     lead = kt(locale, "explained.kit.live.fileWritten");
+  } else if (record) {
+    lead = kt(locale, "explained.kit.live.recordWritten");
   }
-  const clockText = formatUtcClock(locale, at);
+  const clockText = record
+    ? formatUtcDay(locale, at)
+    : formatUtcClock(locale, at);
   const tail =
     kind === "read"
       ? formatUtcDay(locale, at)
@@ -66,18 +73,22 @@ export default function LivePill({
   return (
     <span
       className="tw-inline-flex tw-h-[30px] tw-items-center tw-gap-2 tw-whitespace-nowrap tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-400 md:tw-h-8 md:tw-gap-[9px] md:tw-px-[13px] md:tw-text-[13px]"
-      data-live={late ? "late" : "live"}
+      data-live={record ? "record" : late ? "late" : "live"}
       data-fact={fact.id}
       title={
-        late
-          ? kt(locale, "explained.kit.live.lateLabel", { time: clockText })
-          : kt(locale, "explained.kit.live.liveLabel", { time: clockText })
+        record
+          ? kt(locale, "explained.kit.live.recordLabel", { time: clockText })
+          : late
+            ? kt(locale, "explained.kit.live.lateLabel", { time: clockText })
+            : kt(locale, "explained.kit.live.liveLabel", { time: clockText })
       }
     >
-      <Pulse live={!late} />
-      <span className="tw-hidden lg:tw-inline">{lead}</span>
+      {!record && <Pulse live={!late} />}
+      <span className={record ? "" : "tw-hidden lg:tw-inline"}>{lead}</span>
       <b className="tw-font-semibold tw-text-iron-300">{clockText}</b>
-      <span className="max-[359px]:tw-hidden">{`· ${late ? kt(locale, "explained.kit.live.late") : tail}`}</span>
+      {!record && (
+        <span className="max-[359px]:tw-hidden">{`· ${late ? kt(locale, "explained.kit.live.late") : tail}`}</span>
+      )}
     </span>
   );
 }

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { publicEnv } from "@/config/env";
 import snapshot from "@/lib/explained/data/networkSnapshot.json";
 
@@ -139,7 +140,15 @@ export function rankGroups(sorted: readonly number[]): RankGroup[] {
     .filter((group) => group.count > 0);
 }
 
-export async function loadNetworkDistribution(): Promise<NetworkDistribution | null> {
+/**
+ * One read per request: the figure and How we know's source line both ask,
+ * and must describe the same numbers (the API's, or the snapshot's).
+ */
+export const loadNetworkDistribution = cache(
+  async (): Promise<NetworkDistribution | null> => readDistribution()
+);
+
+async function readDistribution(): Promise<NetworkDistribution | null> {
   const read = await readValues();
   if (read === null || read.values.length === 0) {
     return fromSnapshot();

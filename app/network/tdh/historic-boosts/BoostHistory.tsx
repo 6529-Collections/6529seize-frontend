@@ -20,6 +20,13 @@ export interface BoostStep {
   readonly to: string;
   readonly fullSet: number;
   readonly current?: boolean;
+  /** The step's name when it is not a version number: "before v1.1". */
+  readonly label?: string;
+}
+
+/** "v1.3", or the step's own name ("before TDH v1.1"). */
+function stepName(step: BoostStep): string {
+  return step.label ?? "v" + step.version;
 }
 
 const HEIGHT = 230;
@@ -105,7 +112,7 @@ export default function BoostHistory({
           const yy = y(step.fullSet);
           const next = steps[index + 1];
           const tone = step.current ? EX_HEX.you : EX_HEX.ink2;
-          const tag = `v${step.version} · ${formatCents(locale, step.fullSet)}`;
+          const tag = `${stepName(step)} · ${formatCents(locale, step.fullSet)}`;
           // A short step's label sits at its start; the current one ends at
           // the right edge, so its label is anchored there.
           const anchor = step.current ? "end" : "start";
@@ -113,18 +120,20 @@ export default function BoostHistory({
           // A step too narrow for its label sets it under its line, where
           // the next step's riser cannot cross it.
           const fits = step.current || x1 - x0 >= tag.length * 7.4 + 8;
-          const ly = fits ? yy - 8 : yy + 18;
+          // The first step has no riser to its left, so its label may sit
+          // above the line even when it is wider than the step.
+          const ly = fits || index === 0 ? yy - 8 : yy + 18;
           return (
             <g key={step.version} data-boost-step={step.version}>
-              {step.current && (
-                <rect
-                  x={x0}
-                  y={yy}
-                  width={Math.max(0, x1 - x0)}
-                  height={Math.max(0, y(low) - yy)}
-                  fill="rgba(82,139,255,0.16)"
-                />
-              )}
+              {/* Each version's start, ticked on the axis. */}
+              <line
+                x1={x0}
+                y1={y(low)}
+                x2={x0}
+                y2={y(low) + 8}
+                stroke={step.current ? EX_HEX.you : EX_HEX.ink3}
+                strokeWidth={1.5}
+              />
               <line
                 x1={x0}
                 y1={yy}
@@ -163,7 +172,7 @@ export default function BoostHistory({
         {steps
           .map(
             (step) =>
-              `v${step.version}: ${formatCents(locale, step.fullSet)}, ${formatUtcDate(locale, step.from, { month: "short", day: "numeric", year: "numeric" })}`
+              `${stepName(step)}: ${formatCents(locale, step.fullSet)}, ${formatUtcDate(locale, step.from, { month: "short", day: "numeric", year: "numeric" })}`
           )
           .join("; ")}
       </p>

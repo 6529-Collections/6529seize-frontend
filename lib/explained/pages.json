@@ -279,8 +279,13 @@
           "el": "[data-lens=\"words\"]"
         },
         {
-          "name": "words-break-anchors",
-          "clicks": ["[data-break=\"anchors\"]"],
+          "name": "words-program-b",
+          "clicks": ["[data-group=\"b\"]"],
+          "el": "[data-lens=\"words\"]"
+        },
+        {
+          "name": "words-break-flip",
+          "clicks": ["[data-break=\"flip\"]"],
           "el": "[data-lens=\"words\"]"
         },
         {

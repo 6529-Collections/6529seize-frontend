@@ -126,3 +126,68 @@ export default function HowParts({
     </figure>
   );
 }
+
+/** One term of the formula, with the letter of the part that explains it. */
+function Term({
+  href,
+  letter,
+  children,
+}: {
+  readonly href: string;
+  readonly letter: string;
+  readonly children: string;
+}) {
+  return (
+    <a
+      href={href}
+      className={`tw-inline-flex tw-items-baseline tw-gap-1 tw-whitespace-nowrap tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-px-2 tw-py-0.5 tw-text-iron-50 tw-no-underline hover:tw-border-iron-500 ${EX_FOCUS}`}
+    >
+      {children}
+      <sup className="tw-text-[11px] tw-font-bold tw-not-italic tw-text-primary-300">
+        {letter}
+      </sup>
+    </a>
+  );
+}
+
+/**
+ * The whole calculation on the first screen, in one line, each term
+ * lettered with the part below that explains it: TDH is the sum, over every
+ * card an identity holds (D), of whole days held (A) × rate (B) × boost (C),
+ * each card rounded on its own.
+ */
+export function HowFormula({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <p
+      className="tw-m-0 tw-mt-8 tw-max-w-[980px] tw-text-[17px] tw-leading-[34px] tw-text-iron-300 md:tw-text-lg md:tw-leading-9"
+      data-formula=""
+    >
+      <span className="tw-mr-2 tw-text-iron-400">
+        {ht(locale, "explained.tdh.how.formula.lead")}
+      </span>
+      <b className="tw-font-semibold tw-text-iron-50">TDH = Σ</b>{" "}
+      <span className="tw-text-iron-400">
+        {ht(locale, "explained.tdh.how.formula.over")}
+      </span>{" "}
+      <Term href="#part-d" letter="D">
+        {ht(locale, "explained.tdh.how.formula.cards")}
+      </Term>
+      {" : "}
+      <Term href="#part-a" letter="A">
+        {ht(locale, "explained.tdh.how.formula.days")}
+      </Term>
+      {" × "}
+      <Term href="#part-b" letter="B">
+        {ht(locale, "explained.tdh.how.formula.rate")}
+      </Term>
+      {" × "}
+      <Term href="#part-c" letter="C">
+        {ht(locale, "explained.tdh.how.formula.boost")}
+      </Term>
+      {", "}
+      <span className="tw-text-iron-400">
+        {ht(locale, "explained.tdh.how.formula.round")}
+      </span>
+    </p>
+  );
+}

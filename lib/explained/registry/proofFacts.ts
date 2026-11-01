@@ -25,6 +25,7 @@ const KIND: Record<SourceKey, "site" | "spec" | "decision"> = {
   p53: "spec",
   p52: "spec",
   runLog: "decision",
+  sp1Update: "site",
 };
 
 function proofSource(key: SourceKey) {
@@ -144,6 +145,9 @@ export const PROOF_FACTS = {
     evidence: "tested",
   }),
   "proofs.pair.transactionGas": count("contracts", proofs.pair.transactionGas),
+  "proofs.pair.executionGas": count("contracts", proofs.pair.executionGas),
+  "proofs.pair.intrinsicGas": count("contracts", proofs.pair.intrinsicGas),
+  "proofs.pair.coldCallGas": count("contracts", proofs.pair.coldCallGas),
   "proofs.pair.calldataBytes": fact(
     "contracts",
     "count",
@@ -218,6 +222,11 @@ export const PROOF_FACTS = {
     "contracts",
     "text",
     proofs.sp1Advisory.fixed
+  ),
+  "proofs.sp1Advisory.earlier": fact(
+    "sp1Update",
+    "day",
+    proofs.sp1Advisory.earlier
   ),
 
   "proofs.catchup.chainStart": count("p53", proofs.catchup.chainStart),

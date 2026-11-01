@@ -22,7 +22,7 @@ import { rich } from "@/components/explained/rich";
 import { ht } from "./copy";
 import { EXAMPLE_CARD, FIRST_GM } from "./models/rates";
 
-type Pick = "cap" | "card" | "firstgm" | "newest";
+type Pick = "cap" | "card" | "firstgm" | "newest" | "edge";
 
 /** P26 §8.1's rate, in the specification's own notation. */
 const RATE_RULE = "rate = HALFUP(B64(B64(H ÷ E) × 100))";
@@ -77,9 +77,12 @@ export default function RatesLens({
   const editions = useFact<number[][]>("memes.editions");
   const halfCentFact = useFact<HalfCent>("engine.halfCent");
   const halfCent = halfCentFact?.value ?? null;
+  // Break it: the copy that ends the floor. One copy below the threshold a
+  // card counts at its claim limit; at the threshold the floor falls away,
+  // the edition drops to the minted count and every copy's rate rises.
   const model = useBreakable<{ pick: Pick }>({ pick: "cap" }, (state) => ({
     ...state,
-    pick: "newest",
+    pick: "edge",
   }));
   if (
     h === null ||
@@ -106,13 +109,18 @@ export default function RatesLens({
     card: mintedCard,
     firstgm: mintedFirstGM - burned,
     newest: mintedNewest,
+    edge: threshold,
   };
   const pick = model.state.pick;
   const floorApplied = pick === "newest" && mintedNewest < threshold;
   let E = editionNewest;
   if (pick === "firstgm") E = mintedFirstGM;
+  else if (pick === "edge") E = ENGINE.effectiveEdition(threshold, cap).edition;
   else if (pick !== "newest")
     E = ENGINE.effectiveEdition(minted[pick], minted[pick]).edition;
+  // The edge's "before": one copy short of the threshold, at the floor.
+  const belowEdge = ENGINE.effectiveEdition(threshold - 1, cap).edition;
+  const belowRate = formatCents(locale, ENGINE.rateCents(h, belowEdge) / 100);
   const cents = ENGINE.rateCents(h, E);
   const rate = formatCents(locale, cents / 100);
   const area = n(Math.round((E * cents) / 100));
@@ -130,32 +138,52 @@ export default function RatesLens({
         : ht(locale, "explained.tdh.how.rates.nameNewest", {
             card: floorCard,
           }),
+    edge: ht(locale, "explained.tdh.how.rates.nameWhatIf", {
+      minted: n(threshold),
+    }),
   };
   const B = "tw-font-semibold tw-text-iron-50";
-  const say = floorApplied ? (
-    <>
-      <b className={B}>
-        {ht(locale, "explained.tdh.how.rates.sayFloorLead", {
-          minted: n(mintedNewest),
+  const say =
+    pick === "edge" ? (
+      <>
+        <b className={B}>
+          {ht(locale, "explained.tdh.how.rates.sayEdgeLead", {
+            threshold: n(threshold),
+          })}
+        </b>{" "}
+        {ht(locale, "explained.tdh.how.rates.sayEdge", {
+          below: n(threshold - 1),
+          cap: n(belowEdge),
+          threshold: n(threshold),
           E: n(E),
+          before: belowRate,
+          rate,
         })}
-      </b>{" "}
-      {ht(locale, "explained.tdh.how.rates.sayFloor", {
-        threshold: n(threshold),
-        cap: n(cap),
-        rate,
-        E: n(E),
-        area,
-      })}
-    </>
-  ) : (
-    <>
-      <b className={B}>
-        {ht(locale, "explained.tdh.how.rates.sayLead", { name: names[pick] })}
-      </b>{" "}
-      {ht(locale, "explained.tdh.how.rates.say", { rate, E: n(E), area })}
-    </>
-  );
+      </>
+    ) : floorApplied ? (
+      <>
+        <b className={B}>
+          {ht(locale, "explained.tdh.how.rates.sayFloorLead", {
+            minted: n(mintedNewest),
+            E: n(E),
+          })}
+        </b>{" "}
+        {ht(locale, "explained.tdh.how.rates.sayFloor", {
+          threshold: n(threshold),
+          cap: n(cap),
+          rate,
+          E: n(E),
+          area,
+        })}
+      </>
+    ) : (
+      <>
+        <b className={B}>
+          {ht(locale, "explained.tdh.how.rates.sayLead", { name: names[pick] })}
+        </b>{" "}
+        {ht(locale, "explained.tdh.how.rates.say", { rate, E: n(E), area })}
+      </>
+    );
   const firstGMCents = ENGINE.rateCents(h, h);
   const cardCents = ENGINE.rateCents(
     h,
@@ -178,7 +206,7 @@ export default function RatesLens({
             <Seg
               label={ht(locale, "explained.tdh.how.rates.group")}
               attr="ed"
-              value={pick === "newest" ? null : pick}
+              value={pick === "edge" ? null : pick}
               onChange={(value) => model.set({ pick: value })}
               options={[
                 {
@@ -199,6 +227,18 @@ export default function RatesLens({
                   label: ht(locale, "explained.tdh.how.rates.optionFirstGM", {
                     copies: n(mintedFirstGM),
                   }),
+                },
+                {
+                  value: "newest",
+                  label:
+                    floorCard === null
+                      ? ht(locale, "explained.tdh.how.rates.optionWhatIf", {
+                          minted: n(mintedNewest),
+                        })
+                      : ht(locale, "explained.tdh.how.rates.optionNewest", {
+                          minted: n(mintedNewest),
+                          card: floorCard,
+                        }),
                 },
               ]}
             />
@@ -323,7 +363,7 @@ export default function RatesLens({
           label={breakItLabel(
             locale,
             ht(locale, "explained.tdh.how.rates.break", {
-              minted: n(mintedNewest),
+              threshold: n(threshold),
             })
           )}
         />
@@ -338,7 +378,7 @@ export default function RatesLens({
             },
           ]}
           tag={
-            model.broken && whatIf
+            model.broken || (pick === "newest" && whatIf)
               ? {
                   kind: "whatIf",
                   text: ht(locale, "explained.tdh.how.rates.tagWhatIf"),

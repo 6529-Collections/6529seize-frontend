@@ -34,7 +34,8 @@
     "totalWithoutBurn": 2060802863,
     "totalWithBurn": 2061888816,
     "ethCallBlock": 26206630,
-    "source": "the validator's contracts record at d49ffc7: cycle 20,737 proved under tdh-v1.0, accepted by mainnet's SP1 gateway in an eth_call"
+    "source": "the validator's contracts record at d49ffc7: cycle 20,737 proved under tdh-v1.0, accepted by mainnet's SP1 gateway in an eth_call",
+    "totalsSource": "P26 section 13 (6529chain 25734b7), the conformance replay of 2026-10-11: the live total with the burn addresses, and the total without them, which proof A's statement (word 20) also holds"
   },
   "validator": {
     "version": "0.1.0",

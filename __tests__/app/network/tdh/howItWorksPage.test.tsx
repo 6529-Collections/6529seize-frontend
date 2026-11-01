@@ -76,12 +76,21 @@ describe("How TDH is calculated", () => {
     const user = userEvent.setup();
     await renderPage();
     const model = lens("firstday");
+    // Guess first: the answer waits for the guess.
     expect(model).toHaveTextContent(
-      "The result dated Monday, Oct 19 counts its first whole day (28 h 55 min held). The one before found 4 h 55 min: not a whole day."
+      "Make your guess above, or pick when the copy arrives, to see the answer."
     );
     await user.click(within(model).getByRole("button", { name: "Oct 19" }));
     expect(model).toHaveTextContent(
       "Right. Oct 19. The snapshot of Oct 18 finds one minute; the snapshot of Oct 19 finds 24 hours and one minute."
+    );
+    // The guess moves the model to the case it asked about.
+    expect(model).toHaveTextContent(
+      "The result dated Monday, Oct 19 counts its first whole day (24 h 1 min held)."
+    );
+    await user.click(model.querySelector<HTMLElement>('[data-at="example"]')!);
+    expect(model).toHaveTextContent(
+      "The result dated Monday, Oct 19 counts its first whole day (28 h 55 min held). The one before found 4 h 55 min: not a whole day."
     );
     await user.click(
       model.querySelector<HTMLElement>('[data-at="afterMidnight"]')!
@@ -106,7 +115,7 @@ describe("How TDH is calculated", () => {
     await user.click(breakIt("mintburn"));
     expect(model).toHaveTextContent("800 → 1,600");
     expect(model).toHaveTextContent(
-      "minted rises from 10 to 20, so H, the largest edition, goes from 10 to 20, and every rate rises with it: Meme #2's from 2.00 to 4.00, and B's TDH from 800 to 1,600"
+      "minted rises from 10 to 20, so H, the largest edition, goes from 10 to 20. Meme #1's own edition rose with it, so its rate stays; Meme #2's rate goes from 2.00 to 4.00, and B's TDH from 800 to 1,600"
     );
     expect(model).toHaveTextContent("Where the proof stops.");
   });
@@ -120,10 +129,19 @@ describe("How TDH is calculated", () => {
     );
     await user.click(within(model).getByRole("button", { name: "1,000 (#2)" }));
     expect(model).toHaveTextContent("3.94");
-    await user.click(breakIt("floor"));
+    await user.click(
+      within(model).getByRole("button", { name: "152 (#562, minting)" })
+    );
     expect(model).toHaveTextContent("152 minted, counted as 310.");
     expect(model).toHaveTextContent("min(claim limit, 310) = 310");
     expect(model).toHaveTextContent("H = 3,941 (FirstGM: 6,529 − 2,588)");
+    // Break it: the copy that ends the floor raises every copy's rate.
+    await user.click(breakIt("floor"));
+    expect(model).toHaveAttribute("data-broken", "1");
+    expect(model).toHaveTextContent("Copy number 300 lowers the edition.");
+    expect(model).toHaveTextContent(
+      "a card with 299 minted counts as 310 copies. Mint one more and the floor falls away: the edition is the minted count, 300, and every copy's rate rises from 12.71 to 13.14 a day."
+    );
   });
 
   it("The boost ladder: 1.02, a sixth Gradient adds nothing", async () => {

@@ -49,6 +49,33 @@ function sectionIds(inputs: FactInputs): string[] | undefined {
 }
 
 /**
+ * The whole-model audit's counts, as the manifest's build states them in
+ * words ("1,153 theorems and 1,584 definitions"): every theorem and
+ * definition of the model rests only on Lean's standard axioms. Undefined
+ * when the manifest does not say, so the page leaves the sentence out.
+ */
+const WHOLE_MODEL = /\(([\d,]+) theorems and ([\d,]+) definitions/;
+
+function wholeModelCount(kind: "theorems" | "definitions"): FactDef<number> {
+  return defineFact<number>({
+    format: "count",
+    ...(kind === "theorems" ? { unit: "theorems" as const } : {}),
+    refresh: MANIFEST_REFRESH,
+    source: manifestSource,
+    value: (inputs) => {
+      for (const line of inputs.manifest?.manifest.build.howChecked ?? []) {
+        const match = WHOLE_MODEL.exec(line);
+        const text = match?.[kind === "theorems" ? 1 : 2];
+        if (text !== undefined) {
+          return Number(text.replaceAll(",", ""));
+        }
+      }
+      return undefined;
+    },
+  });
+}
+
+/**
  * The rule version the manifest's model followed. P26 called its rules
  * `tdh-v1.0` until it took the name `tdh-v1.4` (D137); a manifest whose
  * specification commit predates that change is about the rules under their
@@ -188,6 +215,8 @@ export const FORMAL_FACTS = {
         ? [...inputs.manifest.manifest.build.audit.allowedAxioms]
         : undefined,
   }),
+  "manifest.audit.wholeTheorems": wholeModelCount("theorems"),
+  "manifest.audit.wholeDefinitions": wholeModelCount("definitions"),
   "manifest.audit.theorems": defineFact<number>({
     format: "count",
     unit: "theorems",

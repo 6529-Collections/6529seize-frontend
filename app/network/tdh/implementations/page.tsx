@@ -271,6 +271,7 @@ export default async function ImplementationsPage() {
                     runs: m("explained.tdh.impl.lean.runs", {
                       day: p.v("model.replayDay"),
                       random: p.v("programs.randomPerChange"),
+                      all: p.v("model.randomInputs"),
                     }),
                     proved: m("explained.tdh.impl.lean.proved", {
                       count: p.v("manifest.proved"),

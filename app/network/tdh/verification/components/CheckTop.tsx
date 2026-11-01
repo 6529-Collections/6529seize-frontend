@@ -326,7 +326,11 @@ function simulatedFace(
           forceDiffers={[2]}
           locale={locale}
         />
-        <FileLine day={day} locale={locale} />
+        {/* A constructed day has no file: the real file's hash would mix the
+            real with the example. */}
+        <p className="tw-m-0 tw-mt-3.5 tw-text-[13px] tw-leading-5 tw-text-iron-400">
+          {pt(locale, "explained.tdh.check.file.constructed")}
+        </p>
       </>
     ),
   };

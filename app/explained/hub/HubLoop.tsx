@@ -12,6 +12,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { fmt, type FactBook, type FactId } from "@/lib/explained/facts";
 import CheckableToday from "./CheckableToday";
 import { ht } from "./copy";
+import { mainStageDays } from "./schedule";
 
 /**
  * The loop, live (MAP.md §3): six stations around Verify, each with its
@@ -35,6 +36,7 @@ function stations(book: FactBook, locale: SupportedLocale): AtlasStation[] {
       num: ht(locale, "station.artNum", { count: f("memes.count") }),
       fact: "memes.count",
       say: ht(locale, "station.artSay", {
+        days: mainStageDays(book, locale) ?? NOT_AVAILABLE,
         copies: f("rules.editionFloorCap"),
       }),
     },
@@ -53,7 +55,10 @@ function stations(book: FactBook, locale: SupportedLocale): AtlasStation[] {
       num: ht(locale, "station.timeNum", { total: f("tdh.latest.total") }),
       fact: "tdh.latest.total",
       chapter: tdh,
-      say: ht(locale, "station.timeSay"),
+      say: ht(locale, "station.timeSay", {
+        total: f("tdh.latest.total"),
+        date: f("tdh.latest.date"),
+      }),
     },
     {
       key: "standing",
@@ -70,7 +75,9 @@ function stations(book: FactBook, locale: SupportedLocale): AtlasStation[] {
         next: f("site.mainStage.next"),
       }),
       fact: "site.mainStage.next",
-      say: ht(locale, "station.decideSay"),
+      say: ht(locale, "station.decideSay", {
+        perWeek: f("site.mainStage.perWeek"),
+      }),
     },
     {
       key: "execute",

@@ -104,13 +104,18 @@ describe("the lens and Break it", () => {
     expect(
       container.querySelectorAll('[aria-live="polite"]').length
     ).toBeGreaterThanOrEqual(2);
+    // Closed on a phone, the rail keeps the line in use and hides the rest.
     const rail = container.querySelector("[data-rule-rail]");
-    expect(rail).toHaveClass("max-md:tw-hidden");
+    expect(rail).not.toHaveClass("max-md:tw-hidden");
+    // The machine's rule is all in use, so only its source waits behind
+    // the button.
+    const off = rail?.lastElementChild ?? null;
+    expect(off).toHaveClass("max-md:tw-hidden");
     const toggle = screen.getByRole("button", { name: "The exact rule" });
     expect(toggle).toHaveAttribute("aria-expanded", "false");
     await user.click(toggle);
     expect(toggle).toHaveAttribute("aria-expanded", "true");
-    expect(rail).not.toHaveClass("max-md:tw-hidden");
+    expect(off).not.toHaveClass("max-md:tw-hidden");
     expect(container.querySelector('[data-rule-on="1"]')).toHaveTextContent(
       "days = (T − a) div 86,400"
     );

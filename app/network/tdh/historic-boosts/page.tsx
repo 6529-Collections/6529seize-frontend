@@ -11,7 +11,10 @@ import { formatInteger, formatUtcDate } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { loadFactBook } from "@/lib/explained/feed.server";
-import type { VersionRow } from "@/lib/explained/registry/referenceFacts";
+import type {
+  BeforeRow,
+  VersionRow,
+} from "@/lib/explained/registry/referenceFacts";
 import { PlaceLinks, pagePlace } from "@/components/explained/shell/place";
 import LegacyAnchors from "@/components/explained/shell/LegacyAnchors";
 import {
@@ -61,12 +64,26 @@ export default async function VersionsPage() {
     reportedVersion !== null && reportedVersion === p.text(RULES_VERSION);
   const pastFact = book.maybe<VersionRow[]>("versions.past");
   const past = pastFact?.value ?? [];
+  // The boost 6529.io's code applied before v1.1, from its first commit.
+  const beforeFact = book.maybe<BeforeRow>("versions.before");
+  const before = beforeFact?.value ?? null;
   const since = p.text("versions.current.since");
   // The step line: every past schedule, oldest first, then today's.
   const todayFullSet = p.num("engine.boost.fullSet");
   const ceilingValue = p.num("rules.fullSetCeiling");
   const readAt = p.text("page.readAt");
   const historySteps: BoostStep[] = [
+    ...(before
+      ? [
+          {
+            version: "0",
+            label: s("explained.tdh.versions.before.tag"),
+            from: before.from,
+            to: before.to,
+            fullSet: before.fullSet,
+          },
+        ]
+      : []),
     ...[...past]
       .sort((a, b) => a.from.localeCompare(b.from))
       .map((row) => ({
@@ -87,7 +104,11 @@ export default async function VersionsPage() {
         ]
       : []),
   ];
-  const firstYear = [...past.map((row) => row.from), since ?? ""]
+  const firstYear = [
+    ...(before ? [before.from] : []),
+    ...past.map((row) => row.from),
+    since ?? "",
+  ]
     .filter(Boolean)
     .sort()[0]
     ?.slice(0, 4);
@@ -100,6 +121,11 @@ export default async function VersionsPage() {
     });
   const pastText = (children: string) => (
     <FactText fact={pastFact} locale={locale}>
+      {children}
+    </FactText>
+  );
+  const beforeText = (children: string) => (
+    <FactText fact={beforeFact} locale={locale}>
       {children}
     </FactText>
   );
@@ -119,6 +145,7 @@ export default async function VersionsPage() {
           </span>
         ),
         when: m("explained.tdh.versions.current.when", {
+          fourWallets: p.v("versions.fourWallets"),
           from: (
             <FactText
               fact={book.maybe("versions.current.since")}
@@ -155,6 +182,29 @@ export default async function VersionsPage() {
         }),
       },
     })),
+    ...(before
+      ? [
+          {
+            key: before.id,
+            id: before.id,
+            cells: {
+              version: m("explained.tdh.versions.before.name"),
+              when: m("explained.tdh.versions.before.when", {
+                from: beforeText(day(before.from)),
+                to: beforeText(day(before.to)),
+              }),
+              fullSet: m("explained.tdh.versions.before.fullSet", {
+                full: beforeText(formatCents(locale, before.fullSet)),
+                max: beforeText(formatCents(locale, before.fullSetMax)),
+              }),
+              seasons: m("explained.tdh.versions.before.seasons", {
+                high: beforeText(formatCents(locale, before.partialHigh)),
+                low: beforeText(formatCents(locale, before.partialLow)),
+              }),
+            },
+          },
+        ]
+      : []),
   ];
   return (
     <ExplainedShell
@@ -192,7 +242,9 @@ export default async function VersionsPage() {
             site: <span className="tw-normal-case">6529.io</span>,
           })}
           title={m("explained.tdh.versions.site.title", {
-            count: pastText(formatInteger(locale, past.length + 1)),
+            count: pastText(
+              formatInteger(locale, past.length + 1 + (before ? 1 : 0))
+            ),
             year: pastText(firstYear ?? ""),
           })}
         >
@@ -336,6 +388,20 @@ export default async function VersionsPage() {
                 ),
               }),
             },
+            ...(beforeFact
+              ? [
+                  {
+                    title: s("explained.tdh.versions.hwk.before"),
+                    body: m("explained.tdh.versions.hwk.versionsBody", {
+                      source: (
+                        <FactText fact={beforeFact} locale={locale}>
+                          {beforeFact.source.ref}
+                        </FactText>
+                      ),
+                    }),
+                  },
+                ]
+              : []),
             {
               title: s("explained.tdh.versions.hwk.names"),
               body: m("explained.tdh.versions.hwk.namesBody", {

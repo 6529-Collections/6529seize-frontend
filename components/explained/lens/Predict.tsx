@@ -21,6 +21,7 @@ export default function Predict({
   options,
   answer,
   locale,
+  onAnswer,
 }: {
   /** `data-predict`, for the gates' states. */
   readonly id: string;
@@ -28,6 +29,8 @@ export default function Predict({
   readonly options: readonly PredictOption[];
   readonly answer: ReactNode;
   readonly locale: SupportedLocale;
+  /** Called with the reader's choice, so the model can show the case asked about. */
+  readonly onAnswer?: (index: number) => void;
 }) {
   const [picked, setPicked] = useState<number | null>(null);
   const right = picked !== null && options[picked]?.right === true;
@@ -58,7 +61,10 @@ export default function Predict({
               type="button"
               aria-pressed={on}
               data-right={option.right ? "1" : "0"}
-              onClick={() => setPicked(index)}
+              onClick={() => {
+                setPicked(index);
+                onAnswer?.(index);
+              }}
               className={`tw-min-h-10 tw-cursor-pointer tw-whitespace-nowrap tw-rounded-full tw-border-0 tw-px-3.5 tw-text-sm tw-font-semibold md:tw-min-h-9 ${tone} ${EX_FOCUS}`}
             >
               {option.label}

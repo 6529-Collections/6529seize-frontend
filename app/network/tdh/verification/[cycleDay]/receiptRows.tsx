@@ -372,7 +372,20 @@ function rootRow(
             </ReceiptNote>
           ),
         }
-      : {}),
+      : id !== "cycleRoot" && root !== null
+        ? {
+            note: (
+              <ReceiptNote>
+                {pt(
+                  locale,
+                  id === "walletRoot"
+                    ? "explained.tdh.day.row.walletRootNote"
+                    : "explained.tdh.day.row.historyRootNote"
+                )}
+              </ReceiptNote>
+            ),
+          }
+        : {}),
     text: root ?? plain(null, locale),
   };
 }

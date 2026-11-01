@@ -29,9 +29,28 @@ import {
  * Model · The words (TDH-DESIGN.md §5.12, the statement proof A binds): the
  * real public values of proof A for 2026-10-11, decoded word by word, with
  * the group the reader picks lit and what that group binds and who checks
- * it. Break it puts program B's own run of the same day beside them: every
- * word equal but the anchor's two, which each prover picks (P53 §4.6).
+ * it. "Beside program B" puts program B's own run of the same day beside
+ * them: every word equal but the anchor's two, which each prover picks (P53
+ * §4.6). Break it changes one bit of the total, and the verifier refuses the
+ * changed bytes, as the tests on the first real proofs showed for every word.
  */
+
+/** The word Break it changes: totalTDH, the number a reader cares about. */
+const FLIPPED_WORD = 20;
+
+/** One bit changed: the word's lowest bit. */
+function flipped(word: DecodedWord): DecodedWord {
+  const hex = word.hex.replace(/^0x/, "");
+  const last = Number.parseInt(hex.slice(-1), 16) ^ 1;
+  const next = `0x${hex.slice(0, -1)}${last.toString(16)}`;
+  return {
+    ...word,
+    hex: next,
+    value: word.value === null ? null : word.value ^ 1n,
+  };
+}
+
+type WordPick = WordGroup | "b";
 
 /** P53 §4.6's encoding, one line a group, as the exact rule beside the words. */
 const RULE_LINES: readonly {
@@ -115,8 +134,10 @@ export default function StatementWords({
 }) {
   const snapshot = useFactSnapshot();
   const facts = pageFacts(snapshot, locale);
-  const [group, setGroup] = useState<WordGroup>("result");
-  const [compare, setCompare] = useState(false);
+  const [pick, setPick] = useState<WordPick>("result");
+  const [flip, setFlip] = useState(false);
+  const compare = !flip && pick === "b";
+  const group: WordGroup = pick === "b" ? "anchor" : pick;
 
   const wordsA = facts.strings("proofs.day.wordsA");
   const wordsB = facts.strings("proofs.day.wordsB");
@@ -137,10 +158,25 @@ export default function StatementWords({
     decoded.a && decoded.b ? differingWords(decoded.a, decoded.b) : [];
   const equal = STATEMENT_WORDS.length - differs.length;
   const lit = (word: DecodedWord) =>
-    compare ? ANCHOR_WORDS.includes(word.index) : word.word.group === group;
-  const litCount = compare ? ANCHOR_WORDS.length : inGroup;
+    flip
+      ? word.index === FLIPPED_WORD
+      : compare
+        ? ANCHOR_WORDS.includes(word.index)
+        : word.word.group === group;
+  const litCount = flip ? 1 : compare ? ANCHOR_WORDS.length : inGroup;
+  const flippedName = STATEMENT_WORDS[FLIPPED_WORD]?.name ?? "";
 
-  const readout = compare ? (
+  const readout = flip ? (
+    <Readout
+      big={fill(locale, k("words.flipBig"))}
+      say={rich(locale, k("words.flipSay"), {
+        word: formatCount(locale, FLIPPED_WORD),
+        name: <code className="tw-font-mono">{flippedName}</code>,
+        bytes: facts.print("proofs.statement.bytes"),
+        words,
+      })}
+    />
+  ) : compare ? (
     <Readout
       big={`${formatCount(locale, equal)} / ${words}`}
       unit={fill(locale, k("words.equalUnit"))}
@@ -159,22 +195,25 @@ export default function StatementWords({
       id="words"
       label={fill(locale, k("words.label"), { words })}
       question={fill(locale, k("words.question"), { date: dateText })}
-      broken={compare}
+      broken={flip}
       locale={locale}
       stage={
         <div>
-          <Seg
+          <Seg<WordPick>
             label={fill(locale, k("words.groups"))}
             attr="group"
-            value={compare ? null : group}
+            value={flip ? null : pick}
             onChange={(next) => {
-              setCompare(false);
-              setGroup(next);
+              setFlip(false);
+              setPick(next);
             }}
-            options={WORD_GROUPS.map((value) => ({
-              value,
-              label: fill(locale, k(`words.group.${value}`)),
-            }))}
+            options={[
+              ...WORD_GROUPS.map((value) => ({
+                value,
+                label: fill(locale, k(`words.group.${value}`)),
+              })),
+              { value: "b" as const, label: fill(locale, k("words.group.b")) },
+            ]}
           />
           {decoded.a ? (
             <table
@@ -241,7 +280,18 @@ export default function StatementWords({
                             {fill(locale, k("words.colA"))}
                           </span>
                         )}
-                        <WordValue word={word} locale={locale} />
+                        {flip && word.index === FLIPPED_WORD ? (
+                          <span className="tw-inline-flex tw-flex-wrap tw-items-baseline tw-gap-x-2">
+                            <span className="tw-text-error">
+                              <WordValue word={flipped(word)} locale={locale} />
+                            </span>
+                            <s className="tw-text-[13px] tw-text-iron-400">
+                              <WordValue word={word} locale={locale} />
+                            </s>
+                          </span>
+                        ) : (
+                          <WordValue word={word} locale={locale} />
+                        )}
                       </td>
                       {compare && (
                         <td className="tw-col-start-2 tw-py-0 lg:tw-py-[5px]">
@@ -283,9 +333,11 @@ export default function StatementWords({
       rule={{
         lines: RULE_LINES.map((line) => ({
           text: line.text,
-          on: compare
-            ? line.group === "anchor"
-            : line.group !== null && line.group === group,
+          on: flip
+            ? line.text.includes("totalTDH")
+            : compare
+              ? line.group === "anchor"
+              : line.group !== null && line.group === group,
         })),
         source: rich(locale, k("words.ruleSource"), {
           wordBytes: facts.print("proofs.statement.wordBytes"),
@@ -295,9 +347,9 @@ export default function StatementWords({
       readout={readout}
       breakIt={
         <BreakIt
-          id="anchors"
-          pressed={compare}
-          onToggle={() => setCompare((value) => !value)}
+          id="flip"
+          pressed={flip}
+          onToggle={() => setFlip((value) => !value)}
           label={breakItLabel(locale, fill(locale, k("words.breakEdge")))}
         />
       }

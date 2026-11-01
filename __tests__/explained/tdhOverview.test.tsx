@@ -55,7 +55,9 @@ describe("the machine", () => {
     expect(machine).toHaveAttribute("data-broken", "0");
     expect(screen.getByText("Meme #2 · SeizeJPGs")).toBeInTheDocument();
     expect(screen.getByText("1,000 copies · CC0")).toBeInTheDocument();
-    expect(screen.getByText("3,941 ÷ 1,000 copies")).toBeInTheDocument();
+    expect(
+      screen.getByText("3,941, the largest edition, ÷ 1,000 copies")
+    ).toBeInTheDocument();
     expect(screen.getByText("394")).toBeInTheDocument();
     expect(screen.getByText(/Tomorrow's result adds/)).toHaveTextContent(
       "Tomorrow's result adds 4, rounded per card."
@@ -350,7 +352,7 @@ describe("how we know, on the overview", () => {
       "Proof A, program A in SP1: proved the day of Oct 11 under tdh-v1.0, the rules' earlier version; mainnet's SP1 verifier accepts it in a read-only call."
     );
     expect(zk).toHaveTextContent(
-      "Proof B, program B in RISC Zero, written separately: proved a synthetic test cycle with program A under TDH v1.4; no mainnet day yet."
+      "Proof B, program B in RISC Zero, written separately from A and from the Python reference: no mainnet day yet. Under TDH v1.4, programs A and B both proved one synthetic test cycle."
     );
     expect(zk?.querySelector('[data-proof="A"]')).toHaveAttribute(
       "data-proved",

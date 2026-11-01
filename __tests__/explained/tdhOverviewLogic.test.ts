@@ -156,7 +156,9 @@ describe("the machine's fourth card", () => {
       ])
     );
     expect(cards.map((card) => card.id)).toEqual([2, 4, 3, 562]);
-    expect(cards[3]).toEqual({ id: 562, title: null, art: null });
+    expect(cards[3]).toMatchObject({ id: 562, title: null });
+    // Its scaled art is tried; until 6529.io makes it, the card draws its frame.
+    expect(cards[3]?.art).toContain("/562.WEBP");
   });
 
   it("falls back to #562, with its art, when the facts layer cannot say what the newest card counts as", () => {

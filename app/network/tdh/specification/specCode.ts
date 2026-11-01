@@ -171,6 +171,52 @@ export const UNDERFLOW = [
   "count[to] += amount",
 ].join("\n");
 
+/** P26 §7.1, transaction netting: each transaction's net movements, paired in address order. */
+export const NETTING = [
+  "for each transaction (block, txIndex) and token (contract, tokenId):",
+  "    M = its transfers with amount > 0 and from != to",
+  "    net(w) = received(w) - sent(w), for every address w in M, a sink included",
+  "    sources      = [(w, -net(w)) for net(w) < 0], ascending address",
+  "    destinations = [(w,  net(w)) for net(w) > 0], ascending address",
+  "    while sources:",
+  "        k = min(amount(head(sources)), amount(head(destinations)))",
+  "        emit (head(sources) -> head(destinations), k)",
+  "        subtract k from both heads; drop a head that reaches 0",
+  "    M := the emitted pairs, in order, at the position of M's first transfer",
+  "    # each pair has M's block, timestamp and txHash",
+  "|net(w)| < 2^64 for every w, else the cycle is outside the range (§8.7)",
+].join("\n");
+
+/** P26 §3.1 and §3.2: every value read at its type; a document that breaks the format is no input. */
+export const VALUES = [
+  "amount          a transfer of 2^64 or more in a block <= B: input invalid",
+  "totalMax        uint32, the type of Manifold's Claim field; else no result",
+  "cycleDay        uint32",
+  "removed         a JSON boolean; true: no input, neither decoded nor checked",
+  "JSON integer    canonical: no fraction, no exponent, no -0, '-' only if signed",
+  "JSON string     never an integer, a decimal token id included",
+  "integer key     its canonical decimal: no sign, no leading zero",
+  "object          no member twice or missing, none the format does not name (E13)",
+  "text            UTF-8, no byte order mark, Unicode scalar values only (E14)",
+].join("\n");
+
+/** P26 §8.6, the daily rate: derived data, not part of a day's output. */
+export const DAILY_RATE = [
+  "rate_e4 = beta × Σ r over the record's copies with days(a) > 0",
+  "    # in units of 10^-4 TDH a day; r = the copy's token rate in cents",
+  "    # beta = the record's own boost; zero-day copies add nothing",
+].join("\n");
+
+/** P26 §8.7, the numeric range of a TDH v1.4 result. */
+export const RANGE = [
+  "H, G and every Nc                              < 2^53",
+  "base × beta, for every token of every record   < 2^53",
+  "total_final                                    < 2^53",
+  "|net(w)| in §7.1's netting                     < 2^64",
+  "every balance and raw, per token and in total  < 2^64",
+  "outside the range: no tdh-v1.4 result, and a node MUST NOT publish one",
+].join("\n");
+
 /** P26 §7.1, the replay of the netted transfers. */
 export const REPLAY = [
   "if from = to or amount = 0: skip",

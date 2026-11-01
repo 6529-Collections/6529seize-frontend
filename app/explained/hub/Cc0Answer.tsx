@@ -11,20 +11,21 @@ import { ht } from "./copy";
 /**
  * CC0, in one minute (MAP.md §3; TDH-DESIGN.md §7): three real CC0 cards,
  * "The art is free. Holding is what counts.", what an artist gives and
- * keeps, where CC0 stops (Card #1's Punk; the Gradients), a download, the
- * License page and the CC0 deed, and the absolute behind it (D89). It
+ * keeps, where CC0 stops (Card #1's Punk), the full image, the License
+ * page, the CC0 deed and how holding counts, and the absolute behind it
+ * (D89). It
  * lives on the hub until The Memes and CC0 ships, then moves there with a
  * redirect of #cc0.
  */
 const FAN = [
   {
     art: MEME_ART[3],
-    place: "tw-left-0 tw-top-6 tw-rotate-[-5deg] lg:tw-top-10",
+    place: "tw-left-0 tw-top-6 tw-rotate-[-5deg]",
   },
-  { art: MEME_ART[2], place: "tw-left-[28%] tw-top-0 tw-z-[2]" },
+  { art: MEME_ART[2], place: "tw-left-[30%] tw-top-0 tw-z-[2]" },
   {
     art: MEME_ART[4],
-    place: "tw-left-[56%] tw-top-6 tw-rotate-[5deg] lg:tw-top-10",
+    place: "tw-left-[60%] tw-top-6 tw-rotate-[5deg]",
   },
 ] as const;
 
@@ -40,18 +41,19 @@ export default function Cc0Answer({
 }) {
   return (
     <section id="cc0" className={EX_LAYOUT.section}>
-      <div className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-5 lg:tw-grid-cols-[540px_minmax(0,1fr)] lg:tw-gap-16">
+      <div className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-5 lg:tw-grid-cols-[500px_minmax(0,1fr)] lg:tw-gap-16">
         <div
-          className="tw-relative tw-aspect-[350/300] tw-w-full lg:tw-aspect-[540/430]"
+          className="tw-relative tw-aspect-[350/300] tw-w-full lg:tw-mt-2 lg:tw-aspect-[500/400]"
           // The three cards overlap as a fan by design.
           data-tdh-check-ignore="card-gap"
           role="group"
           aria-label={ht(locale, "cc0.fanLabel")}
         >
           {FAN.map(({ art, place }) => (
-            <div key={art.id} className={`tw-absolute tw-w-[40%] ${place}`}>
+            <div key={art.id} className={`tw-absolute tw-w-[38%] ${place}`}>
               <ArtCard
                 src={art.src}
+                fallbackSrc={art.original}
                 alt={ht(locale, "cc0.alt", { id: art.id, title: art.title })}
                 number={`#${art.id}`}
                 sizes="(max-width: 1024px) 40vw, 216px"
@@ -70,7 +72,7 @@ export default function Cc0Answer({
           <p className={`${EX_TEXT.body} tw-m-0`} data-cc0="keep">
             {ht(locale, "cc0.keep")}
           </p>
-          <div className="tw-mt-4">
+          <div className="tw-mt-8">
             <LimitNote title={ht(locale, "cc0.limitTitle")}>
               {ht(locale, "cc0.limit")}
             </LimitNote>
@@ -79,12 +81,11 @@ export default function Cc0Answer({
             <a
               className={EX_BUTTON.secondary}
               href={DOWNLOAD.original}
-              download
               target="_blank"
               rel="noreferrer"
             >
-              <Icon kind="down" className="tw-size-4" />
               {ht(locale, "cc0.download", { id: DOWNLOAD.id })}
+              <Icon kind="arrow" className="tw-size-4" />
             </a>
             <Link className={EX_BUTTON.link} href="/about/license">
               {ht(locale, "cc0.chapter")}
@@ -100,6 +101,12 @@ export default function Cc0Answer({
               <Icon kind="arrow" className="tw-size-4" />
             </a>
           </div>
+          <p className="tw-m-0 tw-mt-6">
+            <Link className={EX_BUTTON.cta} href="/network/tdh">
+              {ht(locale, "cc0.holding")}
+              <Icon kind="arrow" className="tw-size-4" />
+            </Link>
+          </p>
           <p className="tw-m-0 tw-mt-4">
             <Mark
               kind="absolute"

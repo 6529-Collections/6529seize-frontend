@@ -7,9 +7,9 @@ import { EX_ELEVATION } from "../tokens";
 /**
  * A card (EXPLAINED.md §4.2, §6.5): a portrait at the art's own ratio
  * (542:801) with the art inside, its alt text and a caption with its
- * number, name, season and licence. When there is no art, or it cannot
- * load, an empty dashed frame with its number. The art is the only colour
- * in the art.
+ * number, name, season and licence. When the scaled art cannot load, the
+ * original is tried; when neither can, an empty dashed frame with its
+ * number. The art is the only colour in the art.
  */
 const ART_RATIO = "542 / 801";
 
@@ -20,9 +20,12 @@ export default function ArtCard({
   caption,
   sizes = "(max-width: 768px) 96px, 150px",
   priority = false,
+  fallbackSrc = null,
 }: {
   /** The art; null draws the frame. */
   readonly src: string | null;
+  /** The original image, tried when the scaled one fails to load. */
+  readonly fallbackSrc?: string | null;
   readonly alt: string;
   /** "#562": shown in the frame when there is no art. */
   readonly number: string;
@@ -31,8 +34,10 @@ export default function ArtCard({
   readonly sizes?: string;
   readonly priority?: boolean;
 }) {
-  const [failed, setFailed] = useState(false);
-  const art = src && !failed ? src : null;
+  // 0: the scaled art; 1: its original; 2: neither loads, so the frame.
+  const [attempt, setAttempt] = useState(0);
+  const candidates = [src, fallbackSrc];
+  const art = attempt < 2 ? (candidates[attempt] ?? null) : null;
   return (
     <figure className="tw-m-0" data-artcard={art ? "art" : "frame"}>
       {art ? (
@@ -48,7 +53,9 @@ export default function ArtCard({
             className="tw-object-cover"
             priority={priority}
             unoptimized
-            onError={() => setFailed(true)}
+            onError={() =>
+              setAttempt((value) => (value === 0 && fallbackSrc ? 1 : 2))
+            }
           />
         </div>
       ) : (

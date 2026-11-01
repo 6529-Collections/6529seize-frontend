@@ -1,5 +1,5 @@
 {
-  "explained.tdh.impl.meta.title": "Implementations and vectors: TDH v1.4 | 6529 Explained",
+  "explained.tdh.impl.meta.title": "Implementations and vectors: TDH v1.4 · 6529 Explained",
   "explained.tdh.impl.meta.description": "The programs that compute TDH, which one runs when, and how to test your own implementation against the vectors and a real day.",
   "explained.tdh.impl.crumb": "Implementations",
   "explained.tdh.impl.eyebrow": "Shelf · {n} · Reference",
@@ -38,7 +38,7 @@
   "explained.tdh.impl.rustRef.runs": "Beside P26; program A's ancestor",
   "explained.tdh.impl.lean.name": "Lean model",
   "explained.tdh.impl.lean.written": "From P26",
-  "explained.tdh.impl.lean.runs": "CI on every change: the build and its axiom audit, P26's vectors, {random} seeded random inputs and further test files that are not conformance vectors. The day of {day} was replayed once, by hand.",
+  "explained.tdh.impl.lean.runs": "CI on every change: the build and its axiom audit, P26's vectors, {random} seeded random inputs and further test files that are not conformance vectors. {all} random inputs in all have run against the Python reference, the rest of them once. The day of {day} was replayed once, by hand.",
   "explained.tdh.impl.lean.proved": "{count} theorems",
   "explained.tdh.impl.live.name": "6529.io",
   "explained.tdh.impl.live.written": "The production backend",

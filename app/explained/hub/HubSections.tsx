@@ -1,7 +1,8 @@
 import HowWeKnow from "@/components/explained/shell/HowWeKnow";
 import { EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
-import type { FactBook } from "@/lib/explained/facts";
+import { fmt, type FactBook } from "@/lib/explained/facts";
+import { mainStageDays } from "./schedule";
 import { Fact } from "../_lib/facts";
 import { hrich, ht } from "./copy";
 
@@ -19,7 +20,14 @@ const HUB_LEDE =
  * show on the first screen at 1440 × 900 (MAP.md §3), and the line keeps a
  * reading measure.
  */
-export function HubOpener({ locale }: { readonly locale: SupportedLocale }) {
+export function HubOpener({
+  book,
+  locale,
+}: {
+  readonly book: FactBook;
+  readonly locale: SupportedLocale;
+}) {
+  const perWeek = book.maybe("site.mainStage.perWeek");
   return (
     <header className="tw-pt-[30px] md:tw-pt-[52px]">
       <span className={`${EX_TEXT.label} tw-mb-4 tw-block`}>
@@ -32,7 +40,9 @@ export function HubOpener({ locale }: { readonly locale: SupportedLocale }) {
           {ht(locale, "title")}
         </h1>
         <p className={HUB_LEDE} data-ex-lede="" data-ex-mission="">
-          {ht(locale, "mission")}
+          {ht(locale, "mission", {
+            perWeek: perWeek === null ? "" : fmt(perWeek, locale),
+          })}
         </p>
       </div>
     </header>
@@ -63,6 +73,12 @@ export function Corrections({ locale }: { readonly locale: SupportedLocale }) {
   );
 }
 
+/** Main Stage's hour as a clock, "16:00", from the schedule fact. */
+function mainStageTime(book: FactBook): string {
+  const hour = book.maybe<number>("site.mainStage.hourUtc")?.value;
+  return hour === undefined ? "–" : `${String(hour).padStart(2, "0")}:00`;
+}
+
 export function HubSources({
   book,
   locale,
@@ -91,7 +107,8 @@ export function HubSources({
           body: hrich(locale, "hwk.siteBody", {
             cards: fact("memes.count"),
             editionsRead: fact("memes.readAt"),
-            through: fact("site.mainStage.through"),
+            days: mainStageDays(book, locale) ?? "",
+            time: mainStageTime(book),
           }),
         },
         {

@@ -20,7 +20,7 @@ import BoostLens from "./BoostLens";
 import { ht } from "./copy";
 import EligibilityLens from "./EligibilityLens";
 import FirstDayLens from "./FirstDayLens";
-import HowParts from "./HowParts";
+import HowParts, { HowFormula } from "./HowParts";
 import IdentityModel from "./IdentityModel";
 import NettingLens from "./NettingLens";
 import NetworkSection from "./NetworkSection";
@@ -138,6 +138,7 @@ export default async function TdhHowItWorksPage({
             title={ht(locale, "explained.tdh.how.title")}
             lede={ht(locale, "explained.tdh.how.lede")}
           />
+          <HowFormula locale={locale} />
           <HowParts locale={locale} />
           <p className="tw-m-0 tw-mt-5">
             <GoLink href="#steps">
@@ -420,6 +421,8 @@ function howWeKnow(book: FactBook, locale: SupportedLocale) {
           </RecordValue>
         ),
         vectors: v("rules.vectors"),
+        commit: conformance.specification.commit.slice(0, 7),
+        public: v("vectors.public.count"),
       }),
     },
     {

@@ -243,6 +243,7 @@ export default function TwoPrograms({
                 date: facts.print("proofs.sp1Advisory.published"),
                 id: facts.print("proofs.sp1Advisory.id"),
                 fixed: facts.print("proofs.sp1Advisory.fixed"),
+                earlier: facts.print("proofs.sp1Advisory.earlier"),
               })}
             </Case>
             <Case title={rich(locale, k("case.review.title"))}>

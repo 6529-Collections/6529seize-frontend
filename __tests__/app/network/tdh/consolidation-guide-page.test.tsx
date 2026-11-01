@@ -41,11 +41,17 @@ describe("Your wallets", () => {
       })
     ).toBeInTheDocument();
     expect(document.querySelector("[data-ex-lede]")).toHaveTextContent(
-      "a fourth needs fresh links, made on or after October 15, 2026."
+      "A fourth needs fresh links, made on or after October 15, 2026."
     );
-    expect(
-      screen.getByRole("link", { name: "Start guided setup" })
-    ).toHaveAttribute("href", "/safe-collecting/build-consolidation");
+    // In the hero, and again where the page says how to add a wallet.
+    const setups = screen.getAllByRole("link", { name: "Start guided setup" });
+    expect(setups).toHaveLength(2);
+    for (const setup of setups) {
+      expect(setup).toHaveAttribute(
+        "href",
+        "/safe-collecting/build-consolidation"
+      );
+    }
     expect(
       screen.getAllByRole("link", { name: "Explain my TDH" })[0]
     ).toHaveAttribute("href", "/network/tdh#explain");

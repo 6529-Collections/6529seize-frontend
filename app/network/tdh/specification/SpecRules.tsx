@@ -14,12 +14,16 @@ import { FactText } from "@/components/explained/facts/FactText";
 import type { HalfCent } from "@/lib/explained/registry/referenceFacts";
 import {
   ARITHMETIC,
+  DAILY_RATE,
+  NETTING,
   ORDER,
   PAIR_STATE,
+  RANGE,
   REPLAY,
   TOKEN_VALUES,
   TOPICS,
   UNDERFLOW,
+  VALUES,
   boost,
   clusters,
   conventions,
@@ -247,6 +251,14 @@ function Section3({ ctx }: { readonly ctx: SpecContext }) {
           })}
         </Prose>
       </Sub>
+      <Sub id="s3-5" no="3.5" title={m("explained.tdh.spec.s3-5.title")}>
+        <Prose>{m("explained.tdh.spec.s3-5.body")}</Prose>
+        <CodeBlock
+          className="tw-mt-4"
+          code={VALUES}
+          label={s("explained.tdh.spec.s3-5.code")}
+        />
+      </Sub>
     </EdSection>
   );
 }
@@ -402,11 +414,19 @@ function Section7({ ctx }: { readonly ctx: SpecContext }) {
           className="tw-mt-4"
           code={UNDERFLOW}
           label={s("explained.tdh.spec.s7-1.underflow")}
+          showLabel
+        />
+        <CodeBlock
+          className="tw-mt-3"
+          code={NETTING}
+          label={s("explained.tdh.spec.s7-1.netting")}
+          showLabel
         />
         <CodeBlock
           className="tw-mt-3"
           code={REPLAY}
           label={s("explained.tdh.spec.s7-1.replay")}
+          showLabel
         />
         <Prose className="tw-mt-4">
           {m("explained.tdh.spec.s7-1.replayNote")}
@@ -493,9 +513,23 @@ function Section8({ ctx }: { readonly ctx: SpecContext }) {
       </Sub>
       <Sub id="s8-4" no="8.4" title={m("explained.tdh.spec.s8-4.title")}>
         <span id="s8-5" className="tw-scroll-mt-24" />
-        <span id="s8-6" className="tw-scroll-mt-24" />
-        <span id="s8-7" className="tw-scroll-mt-24" />
         <Prose>{m("explained.tdh.spec.s8-4.body")}</Prose>
+      </Sub>
+      <Sub id="s8-6" no="8.6" title={m("explained.tdh.spec.s8-6.title")}>
+        <Prose>{m("explained.tdh.spec.s8-6.body")}</Prose>
+        <CodeBlock
+          className="tw-mt-4"
+          code={DAILY_RATE}
+          label={s("explained.tdh.spec.s8-6.title")}
+        />
+      </Sub>
+      <Sub id="s8-7" no="8.7" title={m("explained.tdh.spec.s8-7.title")}>
+        <Prose>{m("explained.tdh.spec.s8-7.body")}</Prose>
+        <CodeBlock
+          className="tw-mt-4"
+          code={RANGE}
+          label={s("explained.tdh.spec.s8-7.title")}
+        />
       </Sub>
     </EdSection>
   );

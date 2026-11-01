@@ -34,6 +34,14 @@ export default function HowWeKnow({
   readonly correctionsHref?: string;
 }) {
   const heading = kt(locale, "explained.kit.hwk.title");
+  // Rows fill whole lines: four as two pairs (four across on a wide
+  // screen), two side by side, anything else in threes.
+  const columns =
+    rows.length % 4 === 0
+      ? "md:tw-grid-cols-2 xl:tw-grid-cols-4"
+      : rows.length === 2
+        ? "md:tw-grid-cols-2"
+        : "md:tw-grid-cols-3";
   return (
     <footer
       aria-label={heading}
@@ -44,7 +52,9 @@ export default function HowWeKnow({
         {heading}
       </h2>
       <div>
-        <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-5 md:tw-grid-cols-3 lg:tw-mt-0">
+        <div
+          className={`tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-5 lg:tw-mt-0 ${columns}`}
+        >
           {rows.map((row) => (
             <div
               key={row.title}

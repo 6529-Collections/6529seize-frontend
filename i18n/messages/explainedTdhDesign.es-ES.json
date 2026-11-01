@@ -1,5 +1,5 @@
 {
-  "explained.tdh.design.meta.title": "Diseño de la consolidación",
+  "explained.tdh.design.meta.title": "Diseño de la consolidación · 6529 Explained",
   "explained.tdh.design.meta.description": "Por qué cada par de wallets debe vincularse en ambos sentidos, qué protege eso y qué no.",
   "explained.tdh.design.eyebrow.shelf": "Estante",
   "explained.tdh.design.eyebrow.kind": "Referencia",
@@ -7,7 +7,7 @@
   "explained.tdh.design.lede": "Pedir que cada par se vincule en ambos sentidos cuesta unas pocas transacciones, y de las reglas probadas es la única en la que ningún grupo menor de tus wallets puede añadir una wallet ajena.",
   "explained.tdh.design.rule.label": "La regla",
   "explained.tdh.design.rule.title": "Registros, par por par",
-  "explained.tdh.design.rule.body": "Cada par de wallets registra una consolidación, caso de uso {useCase}, en ambos sentidos, en Any Collection o The Memes. Dos wallets necesitan {two} registros, tres necesitan {three} y cuatro necesitan {four}. Los registros no caducan: un vínculo dura hasta que una de sus wallets lo revoca.",
+  "explained.tdh.design.rule.body": "Cada par de wallets registra una consolidación en ambos sentidos en el contrato de delegación de 6529, donde la consolidación es el caso de uso {useCase}, en Any Collection o The Memes. Dos wallets necesitan {two} registros, tres necesitan {three} y cuatro necesitan {four}. Los registros no caducan: un vínculo dura hasta que una de sus wallets lo revoca.",
   "explained.tdh.design.rule.statTwo": "registros para dos wallets",
   "explained.tdh.design.rule.statThree": "para tres",
   "explained.tdh.design.rule.statFour": "para cuatro, los de la cuarta desde el {date}",
@@ -29,7 +29,7 @@
   "explained.tdh.design.hwk.rule": "La regla",
   "explained.tdh.design.hwk.ruleBody": "D136; P26 §6.2 y §6.3 (TDH v1.4) en {head}.",
   "explained.tdh.design.hwk.analysis": "El análisis",
-  "explained.tdh.design.hwk.analysisBody": "Los textos de 6529.io sobre el diseño de la consolidación y su análisis probado.",
+  "explained.tdh.design.hwk.analysisBody": "La anterior página Consolidation design de las páginas de TDH ({frontend}), How it was tested: cada regla candidata frente a todo conjunto de registros que pudiera firmar un atacante con algunas de tus wallets, y el código de agrupación que fija ({backend}).",
   "explained.tdh.design.hwk.model": "El modelo",
   "explained.tdh.design.hwk.modelBody": "La agrupación del motor de TDH v1.4, en tu navegador."
 }

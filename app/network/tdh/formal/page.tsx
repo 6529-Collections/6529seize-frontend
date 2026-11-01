@@ -76,7 +76,7 @@ export default async function HowSurePage() {
       ]}
       live={{
         fact: book.maybe("manifest.writtenAt"),
-        kind: "file",
+        kind: "record",
         cadenceMinutes: MANIFEST_CADENCE_MINUTES,
       }}
       facts={book.snapshot()}

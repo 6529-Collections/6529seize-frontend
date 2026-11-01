@@ -134,7 +134,7 @@ describe("How sure", () => {
       )
     ).toEqual(["9", "84", "11", "12"]);
     expect(board?.textContent).toMatch(
-      /84Lean theorems, each a distinct statement/
+      /84Lean theorems behind the claims below, lemmas on the way included/
     );
     for (const id of [
       "why",

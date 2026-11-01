@@ -9,8 +9,9 @@ import { EX_FOCUS } from "../tokens";
 /**
  * A lens (EXPLAINED.md §8.1): one model, always in this order. The label
  * and the question in the reader's words; an optional Guess first; the
- * stage with its controls; the exact rule beside it (a rail on a desktop,
- * one button on a phone); the readout, a big number with its unit and one
+ * stage with its controls; the exact rule beside it (a rail on a desktop;
+ * on a phone its lines in use, with one button for the rest); the readout,
+ * a big number with its unit and one
  * sentence of why, read aloud as it changes; the footer with Break it and
  * one stamp line. Broken, the lens is rose-edged.
  */
@@ -20,6 +21,9 @@ export interface RuleLine {
   /** The line in use, highlighted. */
   readonly on?: boolean;
 }
+
+const ON_LINE =
+  "-tw-ml-3 tw-rounded-sm tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400 tw-bg-primary-400/[0.12] tw-pl-2.5 tw-text-iron-50";
 
 export function RuleRail({
   lines,
@@ -33,25 +37,42 @@ export function RuleRail({
   /** Shown on a phone. */
   readonly open: boolean;
 }) {
+  // On a phone, closed, the rail still shows the lines in use, so the rule
+  // stays beside the model; the button opens the rest and the source.
+  const anyOn = lines.some((line) => line.on);
+  const closed = open ? "" : "max-md:tw-hidden";
   return (
     <div
-      className={`tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-bg-black/20 tw-p-4 md:tw-border-l md:tw-border-t-0 md:tw-px-[22px] md:tw-py-5 ${open ? "" : "max-md:tw-hidden"}`}
+      className={`tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-bg-black/20 tw-p-4 md:tw-border-l md:tw-border-t-0 md:tw-px-[22px] md:tw-py-5 ${anyOn ? "" : closed}`}
       data-rule-rail=""
     >
       <span className="tw-mb-2.5 tw-block tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-400">
         {kt(locale, "explained.kit.lens.rule")}
       </span>
-      {lines.map((line, index) => (
-        <div
-          // The rule's lines are a fixed sequence.
-          key={index}
-          className={`tw-whitespace-pre-wrap tw-py-0.5 tw-font-mono tw-text-[13px] tw-leading-[21px] md:tw-text-[13.5px] ${line.on ? "-tw-ml-3 tw-rounded-sm tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400 tw-bg-primary-400/[0.12] tw-pl-2.5 tw-text-iron-50" : "tw-text-iron-400"}`}
-          data-rule-on={line.on ? "1" : "0"}
-        >
-          {line.text}
-        </div>
-      ))}
-      <div className="tw-mt-3 tw-text-[13px] tw-leading-5 tw-text-iron-400">
+      {lines.map((line, index) => {
+        // A wrapped line hangs under its own first character, so a long
+        // formula reads as one expression.
+        const text = typeof line.text === "string" ? line.text : "";
+        const hang = `${text.length - text.trimStart().length + 2}ch`;
+        return (
+          <div
+            // The rule's lines are a fixed sequence.
+            key={index}
+            className={`tw-whitespace-pre-wrap tw-py-0.5 tw-font-mono tw-text-[13px] tw-leading-[21px] md:tw-text-[13.5px] ${line.on ? ON_LINE : "tw-text-iron-400 " + closed}`}
+            data-rule-on={line.on ? "1" : "0"}
+          >
+            <span
+              className="tw-block"
+              style={{ paddingLeft: hang, textIndent: `-${hang}` }}
+            >
+              {line.text}
+            </span>
+          </div>
+        );
+      })}
+      <div
+        className={`tw-mt-3 tw-text-[13px] tw-leading-5 tw-text-iron-400 ${closed}`}
+      >
         {source}
       </div>
     </div>
@@ -81,7 +102,11 @@ export function Readout({
         className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-1.5 tw-text-[30px] tw-font-semibold tw-leading-[34px] tw-tracking-[-0.02em] tw-text-iron-50 md:tw-text-4xl md:tw-leading-10"
         aria-live="polite"
       >
-        <span className="tw-whitespace-nowrap">{big}</span>
+        {/* A worded readout ("Recorded, and wrong") may wrap on a phone; a
+            number never splits, having no space to break at. */}
+        <span className="max-md:tw-whitespace-normal md:tw-whitespace-nowrap">
+          {big}
+        </span>
         {unit && (
           <small className="tw-text-[15px] tw-font-semibold tw-leading-6 tw-tracking-normal tw-text-iron-400">
             {unit}
@@ -89,7 +114,7 @@ export function Readout({
         )}
       </span>
       <p
-        className="tw-m-0 tw-max-w-[600px] tw-text-base tw-leading-[25px] tw-text-iron-300"
+        className="tw-m-0 tw-max-w-[760px] tw-text-base tw-leading-[25px] tw-text-iron-300"
         aria-live="polite"
       >
         {say}
@@ -178,7 +203,7 @@ export default function Lens({
         {predict}
       </LensHead>
       <div
-        className={`tw-mt-5 tw-grid tw-grid-cols-1 tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 ${rule ? "md:tw-grid-cols-[minmax(0,1fr)_340px]" : ""}`}
+        className={`tw-mt-5 tw-grid tw-grid-cols-1 tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 ${rule ? "md:tw-grid-cols-[minmax(0,1fr)_340px] xl:tw-grid-cols-[minmax(0,1fr)_396px]" : ""}`}
       >
         <Stage>{stage}</Stage>
         {rule && (

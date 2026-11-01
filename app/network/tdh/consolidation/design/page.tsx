@@ -272,7 +272,15 @@ function howWeKnow(book: FactBook, locale: SupportedLocale) {
     },
     {
       title: dt(locale, "explained.tdh.design.hwk.analysis"),
-      body: dt(locale, "explained.tdh.design.hwk.analysisBody"),
+      body: rich(locale, "explained.tdh.design.hwk.analysisBody", {
+        // Where the candidate rules were checked: the earlier TDH pages'
+        // Consolidation design, "How it was tested", and the grouping code
+        // it pins.
+        frontend: <code className="tw-font-mono">7f2f68700e</code>,
+        backend: (
+          <code className="tw-font-mono">6529seize-backend ee74952</code>
+        ),
+      }),
     },
     {
       title: dt(locale, "explained.tdh.design.hwk.model"),

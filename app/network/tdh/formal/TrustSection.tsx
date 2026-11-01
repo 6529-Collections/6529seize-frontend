@@ -48,6 +48,7 @@ export default function TrustSection({ ctx }: { readonly ctx: SureContext }) {
       covers: m("explained.tdh.sure.ledger.modelCovers", {
         day: p.v("model.replayDay"),
         random: p.v("model.randomInputs"),
+        perChange: p.v("programs.randomPerChange"),
       }),
     },
     {

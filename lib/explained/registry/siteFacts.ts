@@ -37,6 +37,9 @@ const mainStageSource = (inputs: FactInputs) =>
   });
 const proofSource = (inputs: FactInputs) =>
   source("site", inputs.site.proofA.source);
+/** The two totals of 2026-10-11: P26 §13's replay gives both; proof A holds only the second. */
+const totalsSource = (inputs: FactInputs) =>
+  source("spec", inputs.site.proofA.totalsSource);
 
 /**
  * The first-card example: a copy arrives at 19:05 UTC on the evening before
@@ -70,6 +73,33 @@ export const SITE_FACTS = {
     refresh: SITE_REFRESH,
     source: mainStageSource,
     value: (inputs) => mainStage(inputs).through,
+  }),
+  "site.mainStage.perWeek": defineFact<number>({
+    format: "count",
+    refresh: SITE_REFRESH,
+    source: (inputs) =>
+      source("site", mainStage(inputs).scheduleSource, {
+        readAt: mainStage(inputs).readAt,
+      }),
+    value: (inputs) => mainStage(inputs).weekdaysUtc.length,
+  }),
+  "site.mainStage.weekdays": defineFact<number[]>({
+    format: "list",
+    refresh: SITE_REFRESH,
+    source: (inputs) =>
+      source("site", mainStage(inputs).scheduleSource, {
+        readAt: mainStage(inputs).readAt,
+      }),
+    value: (inputs) => [...mainStage(inputs).weekdaysUtc],
+  }),
+  "site.mainStage.hourUtc": defineFact<number>({
+    format: "count",
+    refresh: SITE_REFRESH,
+    source: (inputs) =>
+      source("site", mainStage(inputs).scheduleSource, {
+        readAt: mainStage(inputs).readAt,
+      }),
+    value: (inputs) => mainStage(inputs).hourUtc,
   }),
   "site.mainStage.next": defineFact<string>({
     format: "instant",
@@ -126,14 +156,14 @@ export const SITE_FACTS = {
     format: "count",
     unit: "TDH",
     refresh: RECORD_REFRESH,
-    source: proofSource,
+    source: totalsSource,
     value: (inputs) => inputs.site.proofA.totalWithoutBurn,
   }),
   "site.proofA.totalWithBurn": defineFact<number>({
     format: "count",
     unit: "TDH",
     refresh: RECORD_REFRESH,
-    source: proofSource,
+    source: totalsSource,
     value: (inputs) => inputs.site.proofA.totalWithBurn,
   }),
   "site.proofA.ethCallBlock": defineFact<number>({

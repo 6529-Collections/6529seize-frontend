@@ -65,6 +65,7 @@ export default async function ProofsPage({
         },
         { label: title },
       ]}
+      live={{ fact: book.maybe("proofs.recordWrittenAt"), kind: "record" }}
       facts={snapshot}
       locale={locale}
     >

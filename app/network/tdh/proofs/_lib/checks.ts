@@ -64,7 +64,7 @@ export const CONTRACT_CHECKS: readonly ContractCheck[] = [
   {
     id: "proofs",
     refusals: ["ProofInvalid", "VerificationFailed"],
-    rule: "SP1.verifyProof(A) and RiscZero.verify(B)",
+    rule: "SP1.verifyProof(PROGRAM_A_VKEY, A, proofA); RiscZero.verify(sealB, PROGRAM_B_IMAGE_ID, sha256(B)); pinned selectors only",
   },
 ];
 

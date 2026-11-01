@@ -63,7 +63,7 @@ export const SCENARIOS: readonly Scenario[] = [
   // refuses them: at its second check (outputs differ) and at its eighth
   // (RISC Zero's verification of the same words).
   { id: "bugA", stoppedBy: "contract", line: "outputs", evidence: "tested" },
-  { id: "flaw", stoppedBy: "contract", line: "proofs", evidence: "decided" },
+  { id: "flaw", stoppedBy: "contract", line: "proofs", evidence: "tested" },
   { id: "skip", stoppedBy: "contract", line: "chaining", evidence: "tested" },
   { id: "rule", stoppedBy: "contract", line: "network", evidence: "tested" },
 ];

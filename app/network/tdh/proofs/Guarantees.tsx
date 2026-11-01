@@ -200,6 +200,7 @@ export default function Guarantees({
       bytes: facts.print("proofs.statement.bytes"),
       words: facts.print("proofs.statement.words"),
       id: facts.print("proofs.sp1Advisory.id"),
+      earlier: facts.print("proofs.sp1Advisory.earlier"),
     })
   );
 

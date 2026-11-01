@@ -183,6 +183,18 @@ export interface VersionRow {
   readonly [key: string]: string | number;
 }
 
+/** The boost 6529.io's code applied before TDH v1.1, which the Historic boosts page does not archive. */
+export interface BeforeRow {
+  readonly id: string;
+  readonly from: string;
+  readonly to: string;
+  readonly fullSet: number;
+  readonly fullSetMax: number;
+  readonly partialHigh: number;
+  readonly partialLow: number;
+  readonly [key: string]: string | number;
+}
+
 export interface ItemRow {
   readonly id: string;
   readonly settled: boolean;
@@ -395,6 +407,21 @@ export const REFERENCE_FACTS = {
     (data) => data.versions.source,
     (data) => data.versions.current.version
   ),
+  "versions.before": defineFact<BeforeRow>({
+    format: "text",
+    refresh: REFERENCE_REFRESH,
+    source: () => source("site", reference.versions.before.source),
+    value: () => {
+      const { source: _source, ...row } = reference.versions.before;
+      return row;
+    },
+  }),
+  "versions.fourWallets": defineFact<string>({
+    format: "day",
+    refresh: REFERENCE_REFRESH,
+    source: () => source("decision", reference.versions.inVersion.source),
+    value: () => reference.versions.inVersion.fourWallets,
+  }),
   "versions.past": defineFact<VersionRow[]>({
     format: "list",
     refresh: REFERENCE_REFRESH,
@@ -455,6 +482,18 @@ export const REFERENCE_FACTS = {
     "spec",
     nettingRef,
     (data) => data.netting.proved.commit
+  ),
+  "netting.exact.at": fromReference<string>(
+    "clock",
+    "spec",
+    nettingRef,
+    (data) => data.netting.exact.at
+  ),
+  "netting.exact.commit": fromReference<string>(
+    "commit",
+    "spec",
+    nettingRef,
+    (data) => data.netting.exact.commit
   ),
   "netting.first.minutes": fromReference<number>(
     "count",

@@ -37,22 +37,30 @@ export default function BuildSection({ ctx }: { readonly ctx: SureContext }) {
         version: p.v("manifest.lean"),
         jobs: p.v("manifest.build.jobs"),
       }),
-      mark: "tested",
+      mark: "proved",
       refText: s("explained.tdh.sure.build.kernelRef"),
     },
     {
       id: "audit",
       what: s("explained.tdh.sure.build.audit"),
-      body: m("explained.tdh.sure.build.auditBody", {
-        count: p.v("manifest.audit.theorems"),
-        axioms: (
-          <span data-fact="manifest.audit.axioms">
-            {formatList(locale, axioms)}
-          </span>
-        ),
-        sorry: code("sorry"),
-        native: code("native_decide"),
-      }),
+      body: m(
+        book.maybe("manifest.audit.wholeTheorems") &&
+          book.maybe("manifest.audit.wholeDefinitions")
+          ? "explained.tdh.sure.build.auditWholeBody"
+          : "explained.tdh.sure.build.auditBody",
+        {
+          theorems: p.v("manifest.audit.wholeTheorems"),
+          definitions: p.v("manifest.audit.wholeDefinitions"),
+          count: p.v("manifest.audit.theorems"),
+          axioms: (
+            <span data-fact="manifest.audit.axioms">
+              {formatList(locale, axioms)}
+            </span>
+          ),
+          sorry: code("sorry"),
+          native: code("native_decide"),
+        }
+      ),
       mark: "tested",
       refText: s("explained.tdh.sure.build.auditRef"),
     },
@@ -99,13 +107,19 @@ export default function BuildSection({ ctx }: { readonly ctx: SureContext }) {
       label={m("explained.tdh.sure.build.label")}
       title={m("explained.tdh.sure.build.title")}
     >
-      <Prose>{m("explained.tdh.sure.build.body")}</Prose>
+      <Prose>
+        {m("explained.tdh.sure.build.body", {
+          written: p.v("manifest.writtenAt"),
+        })}
+      </Prose>
       <FactScope
         className="tw-mt-6"
         ids={[
           "manifest.lean",
           "manifest.build.jobs",
           "manifest.audit.theorems",
+          "manifest.audit.wholeTheorems",
+          "manifest.audit.wholeDefinitions",
           "manifest.facts.checks",
         ]}
       >

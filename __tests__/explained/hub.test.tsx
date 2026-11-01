@@ -27,7 +27,7 @@ function withFacts(node: React.ReactNode) {
 
 describe("the hub, first version", () => {
   it("opens on the title and the mission line, one swappable key", () => {
-    const { container } = render(<HubOpener locale="en-US" />);
+    const { container } = render(<HubOpener book={book} locale="en-US" />);
     expect(
       screen.getByRole("heading", {
         level: 1,
@@ -36,7 +36,14 @@ describe("the hub, first version", () => {
     ).toBeInTheDocument();
     const lede = container.querySelector("[data-ex-lede]");
     expect(lede).toHaveAttribute("data-ex-mission");
-    expect(lede).toHaveTextContent(t("en-US", "explained.hub.mission"));
+    // The descriptive line, with its count filled from the schedule fact,
+    // and TDH spelled out on first use.
+    expect(lede).toHaveTextContent(
+      t("en-US", "explained.hub.mission", {
+        perWeek: String(book.num("site.mainStage.perWeek")),
+      })
+    );
+    expect(lede).toHaveTextContent("Total Days Held (TDH)");
   });
 
   it("draws the loop with live numbers and steps a copy round it", async () => {
@@ -70,11 +77,11 @@ describe("the hub, first version", () => {
     );
     // The theorem counts are the bundled manifest's, read through the facts.
     expect(panel).toHaveTextContent(
-      `${book.num("manifest.proved").toLocaleString("en-US")} Lean theorems (${book.num("manifest.proved.tdh")} about TDH's rules, ${book.num("manifest.proved.p53")} about the validators'), with ${book.num("manifest.shownFalse")} earlier statements shown false and kept on record.`
+      `${book.num("manifest.proved").toLocaleString("en-US")} Lean theorems about a Lean model of the rules: ${book.num("manifest.proved.tdh")} on TDH's, ${book.num("manifest.proved.p53")} on the validators' (P53, a proposal). ${book.num("manifest.shownFalse")} earlier statements were shown false and stay on record. The model's source is private, so for now only 6529 can rerun the proofs`
     );
     // The proved day carries its retired rule in the same sentence.
     expect(panel).toHaveTextContent(
-      "under the retired tdh-v1.0 rules. Mainnet's SP1 verifier accepts proof A without a transaction; proof B is not done, and under TDH v1.4 only a synthetic test cycle is proved by both."
+      "under the retired tdh-v1.0 rules. Mainnet's SP1 verifier accepts proof A in a read-only call, with nothing written to Ethereum. Proof B of that day is not done; under TDH v1.4, both proofs exist only for a synthetic test cycle."
     );
     // What anyone can repeat today, and what needs private code.
     expect(panel).toHaveTextContent(
@@ -119,10 +126,10 @@ describe("the hub, first version", () => {
       })
     ).toBeInTheDocument();
     expect(container.querySelector('[data-limit="limit"]')).toHaveTextContent(
-      "Meme Card #1 shows a CryptoPunk, whose copyright was never the artist's to give, so CC0 does not cover it. 6529 Gradients are not CC0."
+      "Meme Card #1 shows a CryptoPunk, whose copyright was never the artist's to give, so CC0 does not cover the Punk itself."
     );
     expect(
-      screen.getByRole("link", { name: "Download Meme #2" })
+      screen.getByRole("link", { name: "Open Meme #2, full size" })
     ).toHaveAttribute("href", expect.stringContaining("/original/"));
     expect(container.querySelector('[data-mark="absolute"]')).toHaveTextContent(
       "CC0 for The Memes, D89"

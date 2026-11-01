@@ -1,5 +1,5 @@
 {
-  "explained.tdh.design.meta.title": "Consolidation design",
+  "explained.tdh.design.meta.title": "Consolidation design · 6529 Explained",
   "explained.tdh.design.meta.description": "Why every pair of wallets must link both ways, what that protects, and what it does not.",
   "explained.tdh.design.eyebrow.shelf": "Shelf",
   "explained.tdh.design.eyebrow.kind": "Reference",
@@ -7,7 +7,7 @@
   "explained.tdh.design.lede": "Asking every pair to link both ways costs a few transactions, and of the rules tested, it is the only one where no smaller group of your wallets can add an outside wallet.",
   "explained.tdh.design.rule.label": "The rule",
   "explained.tdh.design.rule.title": "Registrations, pair by pair",
-  "explained.tdh.design.rule.body": "Each pair of wallets registers a consolidation, use case {useCase}, in both directions, on Any Collection or The Memes. Two wallets need {two} registrations, three need {three}, and four need {four}. Registrations do not expire: a link lasts until one of its wallets revokes it.",
+  "explained.tdh.design.rule.body": "Each pair of wallets registers a consolidation in both directions in 6529's delegation contract, where consolidation is use case {useCase}, on Any Collection or The Memes. Two wallets need {two} registrations, three need {three}, and four need {four}. Registrations do not expire: a link lasts until one of its wallets revokes it.",
   "explained.tdh.design.rule.statTwo": "registrations for two wallets",
   "explained.tdh.design.rule.statThree": "for three",
   "explained.tdh.design.rule.statFour": "for four, the fourth's from {date}",
@@ -29,7 +29,7 @@
   "explained.tdh.design.hwk.rule": "The rule",
   "explained.tdh.design.hwk.ruleBody": "D136; P26 §6.2 and §6.3 (TDH v1.4) at {head}.",
   "explained.tdh.design.hwk.analysis": "The analysis",
-  "explained.tdh.design.hwk.analysisBody": "6529.io's consolidation design copy and its tested analysis.",
+  "explained.tdh.design.hwk.analysisBody": "The earlier TDH pages' Consolidation design ({frontend}), How it was tested: each candidate rule against every set of registrations an attacker holding some of your wallets could sign, and the grouping code it pins ({backend}).",
   "explained.tdh.design.hwk.model": "The model",
   "explained.tdh.design.hwk.modelBody": "The TDH v1.4 engine's grouping, in your browser."
 }

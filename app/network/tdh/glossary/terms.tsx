@@ -80,6 +80,11 @@ export const TERMS: readonly Term[] = [
     values: (p) => ({ threshold: p.v("rules.editionThreshold") }),
   },
   {
+    id: "claimLimit",
+    status: LIVE,
+    values: (p) => ({ cap: p.v("rules.editionFloorCap") }),
+  },
+  {
     id: "rate",
     status: LIVE,
     values: (p) => ({
@@ -173,6 +178,10 @@ export const TERMS: readonly Term[] = [
     values: (p) => ({ words: p.v("proofs.statement.words") }),
   },
   {
+    id: "halfPair",
+    status: { word: "explained.tdh.glossary.convention" },
+  },
+  {
     id: "word",
     status: { mark: "decided", ref: "D128" },
     values: (p) => ({
@@ -192,6 +201,7 @@ export const TERMS: readonly Term[] = [
   { id: "comparison", status: { mark: "tested" } },
   { id: "classes", status: LIVE },
   { id: "knowncause", status: { word: "explained.tdh.glossary.renamed" } },
+  { id: "simulated", status: { word: "explained.tdh.glossary.convention" } },
   {
     id: "cutover",
     status: { mark: "decided", ref: "D132" },

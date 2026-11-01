@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { kt } from "../i18n";
 import { EX_FOCUS } from "../tokens";
@@ -28,8 +28,9 @@ function labelLength(option: SegOption<string>): number {
 
 /**
  * Segmented buttons. On a phone, a group whose labels would wrap into
- * ragged rows stacks as a list, one option a row; `phone` forces a layout:
- * "row" keeps one row that scrolls sideways, with a fade at its edge.
+ * ragged rows keeps one row of chips that scrolls sideways, with a fade at
+ * its edge, and the chosen chip scrolled into view; `phone` forces a
+ * layout ("stack" lists one option a row, "wrap" lets short labels wrap).
  */
 export function Seg<V extends string>({
   label,
@@ -51,13 +52,26 @@ export function Seg<V extends string>({
   const chars = options.reduce((sum, option) => sum + labelLength(option), 0);
   let layout = phone;
   if (layout === "auto") {
-    layout = options.length > 2 && chars > PHONE_STACK_CHARS ? "stack" : "wrap";
+    layout = options.length > 2 && chars > PHONE_STACK_CHARS ? "row" : "wrap";
   }
+  const groupRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const row = groupRef.current;
+    if (layout !== "row" || row === null || row.scrollWidth <= row.clientWidth)
+      return;
+    const chosen = row.querySelector<HTMLElement>('[aria-pressed="true"]');
+    if (chosen === null) return;
+    const left = chosen.offsetLeft - row.offsetLeft;
+    const right = left + chosen.offsetWidth;
+    if (left < row.scrollLeft || right > row.scrollLeft + row.clientWidth) {
+      row.scrollTo({ left: Math.max(0, left - 24) });
+    }
+  }, [layout, value]);
   const group = {
     wrap: "tw-inline-flex tw-flex-wrap tw-rounded-2xl",
     stack:
       "max-md:tw-flex max-md:tw-w-full max-md:tw-flex-col max-md:tw-rounded-xl md:tw-inline-flex md:tw-flex-wrap",
-    row: "max-md:tw-flex max-md:tw-flex-nowrap max-md:tw-overflow-x-auto max-md:tw-rounded-full max-md:[mask-image:linear-gradient(90deg,#000_88%,transparent)] max-md:[scrollbar-width:none] md:tw-inline-flex md:tw-flex-wrap",
+    row: "max-md:tw-flex max-md:tw-flex-nowrap max-md:tw-overflow-x-auto max-md:tw-rounded-full max-md:[mask-image:linear-gradient(90deg,#000_86%,transparent)] max-md:[scrollbar-width:none] md:tw-inline-flex md:tw-flex-wrap",
   }[layout];
   const button = {
     wrap: "tw-grow tw-rounded-full",
@@ -67,6 +81,7 @@ export function Seg<V extends string>({
   }[layout];
   return (
     <div
+      ref={groupRef}
       className={`${group} tw-min-w-0 tw-max-w-full tw-gap-0.5 tw-border tw-border-solid tw-border-iron-700 tw-p-[3px] md:tw-rounded-full`}
       role="group"
       aria-label={label}

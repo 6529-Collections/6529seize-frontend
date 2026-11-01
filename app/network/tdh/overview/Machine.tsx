@@ -33,6 +33,8 @@ export interface MachineCard {
   readonly title: string | null;
   /** The scaled art; null draws the card's frame with its number. */
   readonly art: string | null;
+  /** The original image, tried when the scaled one does not load. */
+  readonly original?: string;
 }
 
 const DEFAULT_DAYS = 100;
@@ -183,7 +185,9 @@ function MachineArt({
   return (
     <div className="max-[359px]:tw-w-24 md:tw-row-span-2">
       <ArtCard
+        key={card.id}
         src={card.art}
+        fallbackSrc={card.original ?? null}
         alt={alt}
         number={`#${card.id}`}
         sizes="(max-width: 768px) 96px, 150px"

@@ -1,5 +1,5 @@
 import type { FactBook } from "@/lib/explained/facts";
-import { MEME_ART } from "./art";
+import { MEME_ART, scaledArt } from "./art";
 import type { MachineCard } from "./Machine";
 
 /**
@@ -30,12 +30,18 @@ export function machineCards(book: FactBook): MachineCard[] {
     id: entry.id,
     title: entry.title,
     art: entry.src,
+    original: entry.original,
   }));
   const minting = newestStillMinting(book);
   return [
     ...cards,
     minting === null
-      ? { id: FLOOR_CARD.id, title: FLOOR_CARD.title, art: FLOOR_CARD.src }
-      : { id: minting, title: null, art: null },
+      ? {
+          id: FLOOR_CARD.id,
+          title: FLOOR_CARD.title,
+          art: FLOOR_CARD.src,
+          original: FLOOR_CARD.original,
+        }
+      : { id: minting, title: null, art: scaledArt(minting) },
   ];
 }

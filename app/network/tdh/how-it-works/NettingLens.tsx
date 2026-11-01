@@ -62,6 +62,7 @@ export default function NettingLens({
             mintedAfter: n(after.minted1),
             hBefore: n(before.H),
             hAfter: n(after.H),
+            m1: CASE_H.meme1,
             m2: CASE_H.meme2,
             rateBefore: formatCents(locale, before.rate2 / 100),
             rateAfter: formatCents(locale, after.rate2 / 100),

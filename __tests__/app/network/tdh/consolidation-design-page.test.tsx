@@ -39,7 +39,7 @@ describe("Consolidation design", () => {
     );
     const article = document.querySelector<HTMLElement>("[data-ex-article]")!;
     expect(article).toHaveTextContent(
-      "use case 999, in both directions, on Any Collection or The Memes. Two wallets need 2 registrations, three need 6, and four need 12."
+      "registers a consolidation in both directions in 6529's delegation contract, where consolidation is use case 999, on Any Collection or The Memes. Two wallets need 2 registrations, three need 6, and four need 12."
     );
     expect(article).toHaveTextContent("for four, the fourth's from Oct 15");
     expect(within(article).getByText("S3")).toBeInTheDocument();

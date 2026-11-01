@@ -98,10 +98,13 @@ export default function ContractSection({
       <Para>
         {rich(locale, k("s4.p2"), {
           gas: facts.print("proofs.pair.transactionGas"),
-          execution: facts.print("proofs.pair.submitGas"),
+          execution: facts.print("proofs.pair.executionGas"),
           verifyA: facts.print("proofs.gas.verifyA"),
           verifyB: facts.print("proofs.gas.verifyB"),
           calldata: facts.print("proofs.pair.calldataBytes"),
+          intrinsic: facts.print("proofs.pair.intrinsicGas"),
+          submit: facts.print("proofs.pair.submitGas"),
+          cold: facts.print("proofs.pair.coldCallGas"),
         })}
       </Para>
     </Section>

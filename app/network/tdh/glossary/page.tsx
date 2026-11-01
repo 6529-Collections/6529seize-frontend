@@ -134,7 +134,7 @@ export default async function GlossaryPage() {
       ]}
       live={{
         fact: book.maybe("rules.chainHeadDate"),
-        kind: "file",
+        kind: "record",
         cadenceMinutes: RECORD_CADENCE_MINUTES,
       }}
       facts={book.snapshot()}

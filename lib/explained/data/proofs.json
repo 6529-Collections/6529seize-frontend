@@ -34,6 +34,9 @@
     },
     "runLog": {
       "ref": "6529's design record, run log of 2026-10-15"
+    },
+    "sp1Update": {
+      "ref": "Succinct's SP1 security update of 2025-01-27 (advisory GHSA-c873-wfhp-wx5m): two soundness flaws disclosed, and the routers to the SP1 verifier contracts on mainnets frozen"
     }
   },
   "statement": {
@@ -166,6 +169,9 @@
     "proofBytesA": 356,
     "sealBytesB": 260,
     "submitGas": 689735,
+    "coldCallGas": 2600,
+    "executionGas": 687135,
+    "intrinsicGas": 49188,
     "transactionGas": 736300,
     "calldataBytes": 2532,
     "forkBlock": 26203200
@@ -209,7 +215,8 @@
   "sp1Advisory": {
     "id": "CVE-2026-40323",
     "published": "2026-04-11",
-    "fixed": "6.1.0"
+    "fixed": "6.1.0",
+    "earlier": "2025-01-27"
   },
   "catchup": {
     "chainStart": 13360862,

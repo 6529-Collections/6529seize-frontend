@@ -251,7 +251,7 @@ describe("what a proof guarantees", () => {
 });
 
 describe("the words model", () => {
-  it("lights a group, and Break it puts program B's words beside proof A's", async () => {
+  it("lights a group, puts program B's words beside proof A's, and Break it changes a bit", async () => {
     const user = userEvent.setup();
     const { container } = withFacts(<StatementWords locale="en-US" />);
     const lens = container.querySelector('[data-lens="words"]') as HTMLElement;
@@ -263,16 +263,25 @@ describe("the words model", () => {
     expect(lens.textContent).toContain("2,060,802,863");
     await user.click(within(lens).getByRole("button", { name: "Start" }));
     expect(lit()).toEqual([4, 5, 12, 13]);
+    // Program B beside proof A is a comparison, not a break.
     await user.click(
-      within(lens).getByRole("button", {
-        name: "Break it: program B's own words",
-      })
+      within(lens).getByRole("button", { name: "Beside program B" })
     );
-    expect(lens).toHaveAttribute("data-broken", "1");
+    expect(lens).toHaveAttribute("data-broken", "0");
     expect(lit()).toEqual([...ANCHOR_WORDS]);
     expect(within(lens).getAllByText("same")).toHaveLength(23);
     expect(within(lens).getAllByText("own anchor")).toHaveLength(2);
     expect(lens.textContent).toContain("26,197,902");
+    // Break it: one bit of the total changes, and the verifier refuses it.
+    await user.click(
+      within(lens).getByRole("button", {
+        name: "Break it: change one bit of the total",
+      })
+    );
+    expect(lens).toHaveAttribute("data-broken", "1");
+    expect(lit()).toEqual([20]);
+    expect(lens.textContent).toContain("Refused");
+    expect(lens.textContent).toContain("2,060,802,862");
   });
 
   it("shows the 800 bytes behind a disclosure, rendered once opened", () => {

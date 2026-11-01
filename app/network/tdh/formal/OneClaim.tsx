@@ -4,7 +4,7 @@ import {
   type ClaimPart,
   type ClaimSpan,
 } from "@/components/explained/evidence/claims";
-import { EX_FOCUS, EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
+import { EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
 import { CodeName } from "@/components/explained/reference/parts";
 import { FactScope } from "@/components/explained/facts/FactText";
 import type { SureContext, SureKey } from "./sureShared";
@@ -20,57 +20,84 @@ import type { SureContext, SureKey } from "./sureShared";
  * what not): the four theorems it rests on, in the manifest's own words,
  * read in order. A disclosure, so the page reads first as the story.
  */
-const SKETCH: readonly { readonly name: string; readonly key: SureKey }[] = [
-  { name: "netPairs_eq_of_net", key: "explained.tdh.sure.sketch.pairs" },
-  { name: "net_invariance", key: "explained.tdh.sure.sketch.one" },
-  { name: "replay_invariance", key: "explained.tdh.sure.sketch.all" },
-  { name: "replayHoldings_invariance", key: "explained.tdh.sure.sketch.cycle" },
+const SKETCH: readonly {
+  readonly name: string;
+  readonly key: SureKey;
+  readonly short: SureKey;
+}[] = [
+  {
+    name: "netPairs_eq_of_net",
+    key: "explained.tdh.sure.sketch.pairs",
+    short: "explained.tdh.sure.sketch.pairsShort",
+  },
+  {
+    name: "net_invariance",
+    key: "explained.tdh.sure.sketch.one",
+    short: "explained.tdh.sure.sketch.oneShort",
+  },
+  {
+    name: "replay_invariance",
+    key: "explained.tdh.sure.sketch.all",
+    short: "explained.tdh.sure.sketch.allShort",
+  },
+  {
+    name: "replayHoldings_invariance",
+    key: "explained.tdh.sure.sketch.cycle",
+    short: "explained.tdh.sure.sketch.cycleShort",
+  },
 ];
 
+/**
+ * The argument as a chain of four theorems, each the next one's step:
+ * pairs, one transaction, the replay, a cycle. Open on the page, since how
+ * the proof goes is what this section is for.
+ */
 function ProofSketch({ m }: { readonly m: SureContext["m"] }) {
   return (
-    // An unboxed disclosure: the summary reads as a link to open, the
-    // steps as a list under it.
-    <details className="tw-group tw-mt-8 tw-max-w-[860px]">
-      <summary
-        className={`tw-inline-flex tw-cursor-pointer tw-list-none tw-items-center tw-rounded-md tw-text-[17px] tw-font-semibold tw-leading-6 tw-text-primary-300 marker:tw-hidden hover:tw-underline hover:tw-underline-offset-[3px] [&::-webkit-details-marker]:tw-hidden ${EX_FOCUS}`}
-      >
-        <span
-          aria-hidden="true"
-          className="tw-mr-2 tw-inline-block group-open:tw-rotate-90 motion-reduce:tw-transition-none"
-        >
-          ›
-        </span>
-        {m("explained.tdh.sure.sketch.summary")}
-      </summary>
-      <div className="tw-mt-3 md:tw-pl-6">
-        <p className="tw-m-0 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+    <figure className="tw-m-0 tw-mt-10" data-fig="proof-chain">
+      <figcaption>
+        <h3 className="tw-m-0 tw-text-[19px] tw-font-semibold tw-leading-7 tw-text-iron-50">
+          {m("explained.tdh.sure.sketch.summary")}
+        </h3>
+        <p className="tw-m-0 tw-mt-2 tw-max-w-[760px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
           {m("explained.tdh.sure.sketch.intro")}
         </p>
-        <ol className="tw-m-0 tw-mt-3 tw-list-none tw-p-0">
-          {SKETCH.map((step, index) => (
-            <li
-              key={step.name}
-              className="tw-grid tw-grid-cols-[28px_minmax(0,1fr)] tw-gap-x-2 tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-py-3"
-            >
+      </figcaption>
+      <ol className="tw-m-0 tw-mt-5 tw-grid tw-list-none tw-grid-cols-1 tw-gap-3 tw-p-0 lg:tw-grid-cols-4 lg:tw-gap-0">
+        {SKETCH.map((step, index) => (
+          <li
+            key={step.name}
+            className="tw-relative tw-flex tw-min-w-0 tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-4 lg:tw-mr-7 lg:last:tw-mr-0"
+          >
+            <span className="tw-flex tw-items-baseline tw-gap-2">
               <span className="tw-text-sm tw-font-semibold tw-tabular-nums tw-text-primary-300">
                 {index + 1}
               </span>
-              <span className="tw-text-[15px] tw-leading-6 tw-text-iron-300">
-                <code className="tw-font-mono tw-text-[13.5px] tw-text-iron-50 [overflow-wrap:anywhere]">
-                  {step.name}
-                </code>
-                {": "}
-                {m(step.key)}
+              <b className="tw-text-[15px] tw-font-semibold tw-leading-5 tw-text-iron-50">
+                {m(step.short)}
+              </b>
+            </span>
+            <code className="tw-mt-2 tw-block tw-font-mono tw-text-[13px] tw-leading-[18px] tw-text-iron-300 [overflow-wrap:anywhere]">
+              {step.name}
+            </code>
+            <span className="tw-mt-2 tw-text-[14px] tw-leading-[21px] tw-text-iron-300">
+              {m(step.key)}
+            </span>
+            {index < SKETCH.length - 1 && (
+              <span
+                aria-hidden="true"
+                className="tw-absolute tw-hidden tw-text-lg tw-text-iron-400 lg:tw-right-[-22px] lg:tw-top-1/2 lg:tw-block lg:-tw-translate-y-1/2"
+              >
+                →
               </span>
-            </li>
-          ))}
-        </ol>
-        <p className="tw-m-0 tw-mt-1 tw-text-[15px] tw-leading-6 tw-text-iron-400">
-          {m("explained.tdh.sure.sketch.close")}
-        </p>
-      </div>
-    </details>
+            )}
+          </li>
+        ))}
+      </ol>
+      <p className="tw-m-0 tw-mt-4 tw-max-w-[760px] tw-text-[15px] tw-leading-6 tw-text-iron-400">
+        {m("explained.tdh.sure.sketch.close")}
+      </p>
+    </figure>
   );
 }
 
@@ -132,8 +159,9 @@ export default function OneClaim({ ctx }: { readonly ctx: SureContext }) {
       when: s("explained.tdh.sure.part.proved.when", {
         time: p.f("netting.proved.at"),
       }),
-      where: s("explained.tdh.sure.part.where", {
+      where: s("explained.tdh.sure.part.whereExact", {
         commit: p.f("netting.proved.commit"),
+        exact: p.f("netting.exact.commit"),
       }),
       quote: m("explained.tdh.sure.part.proved.quote"),
       mark: {
@@ -165,7 +193,9 @@ export default function OneClaim({ ctx }: { readonly ctx: SureContext }) {
       duration: s("explained.tdh.sure.span.since", {
         time: p.f("netting.proved.at"),
       }),
-      what: s("explained.tdh.sure.span.holds"),
+      what: s("explained.tdh.sure.span.holds", {
+        exact: p.f("netting.exact.at"),
+      }),
       outcome: "holds",
     },
   ];
@@ -198,6 +228,8 @@ export default function OneClaim({ ctx }: { readonly ctx: SureContext }) {
           "netting.narrowed.at",
           "netting.narrowed.commit",
           "netting.proved.at",
+          "netting.exact.at",
+          "netting.exact.commit",
           "netting.proved.commit",
           "netting.first.minutes",
           "netting.narrowed.minutes",

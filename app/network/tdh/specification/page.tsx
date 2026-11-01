@@ -94,7 +94,7 @@ export default async function SpecificationPage() {
       ]}
       live={{
         fact: book.maybe("rules.p26Date"),
-        kind: "file",
+        kind: "record",
         cadenceMinutes: P26_CADENCE_MINUTES,
       }}
       facts={book.snapshot()}
@@ -126,7 +126,7 @@ export default async function SpecificationPage() {
                   }),
                 })),
                 {
-                  href: "/network/tdh/implementations",
+                  href: "/network/tdh/implementations#vectors",
                   no: "→",
                   title: m("explained.tdh.spec.toc.vectors"),
                 },

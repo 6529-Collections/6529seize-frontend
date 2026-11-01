@@ -328,7 +328,10 @@ function Section13({ ctx }: { readonly ctx: SpecContext }) {
         {m("explained.tdh.spec.s13.body", {
           count: p.v("vectors.public.count"),
           link: (
-            <Link className={EX_LINK} href="/network/tdh/implementations">
+            <Link
+              className={EX_LINK}
+              href="/network/tdh/implementations#vectors"
+            >
               {m("explained.tdh.spec.s13.link")}
             </Link>
           ),

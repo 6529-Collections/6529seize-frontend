@@ -18,7 +18,8 @@ import LivePill from "./LivePill";
  */
 export interface LiveSource {
   readonly fact: FactEntry | null;
-  readonly kind: "feed" | "file" | "read";
+  /** "record": a dated record (a specification, a manifest), shown without the live pulse. */
+  readonly kind: "feed" | "file" | "read" | "record";
   /** Minutes between new values: a day for the feed. */
   readonly cadenceMinutes?: number;
 }

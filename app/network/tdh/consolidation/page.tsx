@@ -404,6 +404,14 @@ export default async function TdhYourWalletsPage({
                 </div>
               ))}
             </dl>
+            <p className="tw-m-0 tw-mt-6 tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
+              <Link className={EX_BUTTON.cta} href={GUIDED_SETUP_HREF}>
+                {wt(locale, "explained.tdh.wallets.setup")}
+              </Link>
+              <span className="tw-text-[15px] tw-leading-6 tw-text-iron-400">
+                {wt(locale, "explained.tdh.wallets.add.setupNote")}
+              </span>
+            </p>
           </EdRow>
         </Section>
 
@@ -415,9 +423,13 @@ export default async function TdhYourWalletsPage({
             wide
             labelIsHeading
           >
-            <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-3 md:tw-gap-5">
+            <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2 md:tw-gap-5">
               {(
                 [
+                  [
+                    "explained.tdh.wallets.before.profileTitle",
+                    "explained.tdh.wallets.before.profile",
+                  ],
                   [
                     "explained.tdh.wallets.before.keyTitle",
                     "explained.tdh.wallets.before.key",

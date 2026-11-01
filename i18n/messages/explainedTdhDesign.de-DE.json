@@ -1,5 +1,5 @@
 {
-  "explained.tdh.design.meta.title": "Konsolidierungsdesign",
+  "explained.tdh.design.meta.title": "Konsolidierungsdesign · 6529 Explained",
   "explained.tdh.design.meta.description": "Warum jedes Paar von Wallets in beide Richtungen verknüpft sein muss, was das schützt und was nicht.",
   "explained.tdh.design.eyebrow.shelf": "Regal",
   "explained.tdh.design.eyebrow.kind": "Referenz",
@@ -7,7 +7,7 @@
   "explained.tdh.design.lede": "Dass jedes Paar in beide Richtungen verknüpft sein muss, kostet ein paar Transaktionen, und unter den getesteten Regeln ist es die einzige, bei der keine kleinere Gruppe Ihrer Wallets ein fremdes Wallet hinzufügen kann.",
   "explained.tdh.design.rule.label": "Die Regel",
   "explained.tdh.design.rule.title": "Registrierungen, Paar für Paar",
-  "explained.tdh.design.rule.body": "Jedes Paar von Wallets registriert eine Konsolidierung, Use Case {useCase}, in beide Richtungen, auf Any Collection oder The Memes. Zwei Wallets brauchen {two} Registrierungen, drei brauchen {three} und vier brauchen {four}. Registrierungen laufen nicht ab: Eine Verknüpfung gilt, bis eine ihrer Wallets sie widerruft.",
+  "explained.tdh.design.rule.body": "Jedes Paar von Wallets registriert eine Konsolidierung in beide Richtungen im Delegationsvertrag von 6529, wo Konsolidierung Use Case {useCase} ist,, auf Any Collection oder The Memes. Zwei Wallets brauchen {two} Registrierungen, drei brauchen {three} und vier brauchen {four}. Registrierungen laufen nicht ab: Eine Verknüpfung gilt, bis eine ihrer Wallets sie widerruft.",
   "explained.tdh.design.rule.statTwo": "Registrierungen für zwei Wallets",
   "explained.tdh.design.rule.statThree": "für drei",
   "explained.tdh.design.rule.statFour": "für vier, die der vierten ab dem {date}",
@@ -29,7 +29,7 @@
   "explained.tdh.design.hwk.rule": "Die Regel",
   "explained.tdh.design.hwk.ruleBody": "D136; P26 §6.2 und §6.3 (TDH v1.4) bei {head}.",
   "explained.tdh.design.hwk.analysis": "Die Analyse",
-  "explained.tdh.design.hwk.analysisBody": "Die Texte von 6529.io zum Konsolidierungsdesign und ihre getestete Analyse.",
+  "explained.tdh.design.hwk.analysisBody": "Die frühere Seite Consolidation design der TDH-Seiten ({frontend}), How it was tested: jede Kandidatenregel gegen jede Menge von Registrierungen, die ein Angreifer mit einigen Ihrer Wallets signieren könnte, und der dort festgehaltene Gruppierungscode ({backend}).",
   "explained.tdh.design.hwk.model": "Das Modell",
   "explained.tdh.design.hwk.modelBody": "Die Gruppierung der Engine von TDH v1.4, in Ihrem Browser."
 }

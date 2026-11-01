@@ -25,6 +25,15 @@ function art(id: number, title: string, originalExt: string): MemeArt {
   };
 }
 
+/**
+ * The scaled art of any card by its number, for a card this file does not
+ * list (the newest, still minting); when 6529.io has not made it yet, the
+ * card draws its frame.
+ */
+export function scaledArt(id: number): string {
+  return `${MEMES_IMAGES}/scaled_x450/${MEMES_CONTRACT}/${id}.WEBP`;
+}
+
 export const MEME_ART = {
   2: art(2, "SeizeJPGs", "JPEG"),
   3: art(3, "UncleSeize", "JPEG"),

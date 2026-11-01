@@ -32,7 +32,21 @@
         "fullSet": 1.2,
         "maxSeason": 4
       }
-    ]
+    ],
+    "before": {
+      "source": "6529.io's backend code (6529seize-backend), calculateBoost from its first commit c076fc2 of 2022-12-16 until v1.1 (f03f8f8, deployed 2023-07-14): a full set 1.20, plus 0.02 for each further set and each Gradient, at most 1.30; without a full set, 1.05 to 1.01 for a set missing one to five cards",
+      "id": "tdh-before-1-1",
+      "from": "2022-12-16",
+      "to": "2023-07-13",
+      "fullSet": 1.2,
+      "fullSetMax": 1.3,
+      "partialHigh": 1.05,
+      "partialLow": 1.01
+    },
+    "inVersion": {
+      "source": "D136: 6529.io's four-wallet consolidation, live from 2026-10-15 inside TDH v1.4",
+      "fourWallets": "2026-10-15"
+    }
   },
   "names": {
     "source": "P26's history in 6529chain: the rule version tdh-v1.0 until 3bfa7b0, then tdh-v1.4 (D136, D137)",
@@ -51,7 +65,7 @@
     "minted": 6529
   },
   "netting": {
-    "source": "P26 §7.1's history in 6529chain, 2026-10-15: the sentence at 0621ed4, narrowed at 16d70d0, matched to the proof at 1c69528",
+    "source": "P26 §7.1's history in 6529chain, 2026-10-15: the sentence at 0621ed4, narrowed at 16d70d0, narrowed to the stacks at 1c69528, stated in the theorem's exact form at a4db4ae",
     "first": {
       "commit": "0621ed4651e7a3be37bfa1862648d0d0291215d5",
       "at": "2026-10-15T11:32:54Z"
@@ -63,6 +77,10 @@
     "proved": {
       "commit": "1c695283f38c5067e164ae674377599b978469ff",
       "at": "2026-10-15T18:18:13Z"
+    },
+    "exact": {
+      "commit": "a4db4ae1c00df82f23b1a4dc4566acb8c3bdea69",
+      "at": "2026-10-15T20:53:47Z"
     }
   },
   "cases": {
