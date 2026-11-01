@@ -5,6 +5,7 @@ import {
   getStructuredApiErrorCode,
   getStructuredApiErrorStatus,
 } from "@/services/api/common-api";
+import { getWalletAddress, getWalletRole } from "@/services/auth/auth.utils";
 import type {
   ApiE2eeBlob,
   ApiE2eeBlobChunk,
@@ -187,6 +188,36 @@ export function toE2eeApiError(error: unknown): unknown {
 
 const enc = encodeURIComponent;
 
+/** The account whose session an E2EE client may use: its engine's own. */
+export interface E2eeApiAccount {
+  readonly profileId: string;
+  readonly wallet: string;
+}
+
+/**
+ * The common API helpers send the browser's active session, which every tab
+ * shares and which an account switch replaces in place. Unless that session
+ * is the bound account acting as itself, this throws before anything is
+ * sent: another profile's credentials would get E2EE_NOT_YOUR_DEVICE for a
+ * device that is still valid. Status 0 (nothing sent) makes callers retry
+ * later instead of treating it as an answer.
+ */
+export function assertE2eeAccount(account: E2eeApiAccount): void {
+  const wallet = getWalletAddress()?.toLowerCase() ?? null;
+  const role = getWalletRole();
+  if (
+    wallet === account.wallet.toLowerCase() &&
+    (!role || role === account.profileId)
+  ) {
+    return;
+  }
+  throw new E2eeApiError({
+    message: "The active account is not this engine's",
+    status: 0,
+    code: "E2EE_ACCOUNT_CHANGED",
+  });
+}
+
 async function call<T>(request: () => Promise<T>): Promise<T> {
   try {
     return await request();
@@ -195,28 +226,40 @@ async function call<T>(request: () => Promise<T>): Promise<T> {
   }
 }
 
-const get = <T>(endpoint: string, params?: Record<string, string>) =>
-  call(() =>
-    commonApiFetch<T>({
-      endpoint,
-      ...(params ? { params } : {}),
-      errorMode: "structured",
-      cache: "no-store",
-    })
-  );
+function requests(account: E2eeApiAccount) {
+  // Checked right before the helper reads the session for its headers.
+  const send = <T>(request: () => Promise<T>) =>
+    call(() => {
+      assertE2eeAccount(account);
+      return request();
+    });
+  return {
+    get: <T>(endpoint: string, params?: Record<string, string>) =>
+      send(() =>
+        commonApiFetch<T>({
+          endpoint,
+          ...(params ? { params } : {}),
+          errorMode: "structured",
+          cache: "no-store",
+        })
+      ),
+    post: <T>(endpoint: string, body: object) =>
+      send(() =>
+        commonApiPost<object, T>({ endpoint, body, errorMode: "structured" })
+      ),
+    put: <T>(endpoint: string, body: object) =>
+      send(() =>
+        commonApiPut<object, T>({ endpoint, body, errorMode: "structured" })
+      ),
+  };
+}
 
-const post = <T>(endpoint: string, body: object) =>
-  call(() =>
-    commonApiPost<object, T>({ endpoint, body, errorMode: "structured" })
-  );
-
-const put = <T>(endpoint: string, body: object) =>
-  call(() =>
-    commonApiPut<object, T>({ endpoint, body, errorMode: "structured" })
-  );
-
-/** REST client bound to the signed-in profile via the common API helpers. */
-export function createE2eeApiClient(): E2eeApiClient {
+/**
+ * REST client over the common API helpers for one account: a request goes
+ * out only while the browser's session is that account's own.
+ */
+export function createE2eeApiClient(account: E2eeApiAccount): E2eeApiClient {
+  const { get, post, put } = requests(account);
   return {
     getMe: () => get<ApiE2eeMe>("e2ee/me"),
     registerDevice: (body) => post(`e2ee/devices`, body),

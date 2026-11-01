@@ -3,7 +3,11 @@ import {
   commonApiFetch,
   commonApiPost,
 } from "@/services/api/common-api";
-import { toE2eeApiError } from "../api";
+import {
+  assertE2eeAccount,
+  type E2eeApiAccount,
+  toE2eeApiError,
+} from "../api";
 
 /** REST shapes of the backup routes (backend `/e2ee/backup*`). */
 
@@ -92,22 +96,32 @@ async function call<T>(request: () => Promise<T>): Promise<T> {
 
 const enc = encodeURIComponent;
 
-const get = <T>(endpoint: string, params?: Record<string, string>) =>
-  call(() =>
-    commonApiFetch<T>({
-      endpoint,
-      ...(params ? { params } : {}),
-      errorMode: "structured",
-      cache: "no-store",
-    })
-  );
-
-const post = <T>(endpoint: string, body: object) =>
-  call(() =>
-    commonApiPost<object, T>({ endpoint, body, errorMode: "structured" })
-  );
-
-export function createE2eeBackupApiClient(): E2eeBackupApi {
+/**
+ * Backup routes for one account: like the engine's client, a request goes
+ * out only while the browser's session is that account's own, so another
+ * account's backup status never replaces (or deletes) this one's state.
+ */
+export function createE2eeBackupApiClient(
+  account: E2eeApiAccount
+): E2eeBackupApi {
+  const send = <T>(request: () => Promise<T>) =>
+    call(() => {
+      assertE2eeAccount(account);
+      return request();
+    });
+  const get = <T>(endpoint: string, params?: Record<string, string>) =>
+    send(() =>
+      commonApiFetch<T>({
+        endpoint,
+        ...(params ? { params } : {}),
+        errorMode: "structured",
+        cache: "no-store",
+      })
+    );
+  const post = <T>(endpoint: string, body: object) =>
+    send(() =>
+      commonApiPost<object, T>({ endpoint, body, errorMode: "structured" })
+    );
   return {
     getStatus: () => get<ApiE2eeBackupStatus>("e2ee/backup"),
     getBackup: (backupId) => get(`e2ee/backups/${enc(backupId)}`),
@@ -128,7 +142,7 @@ export function createE2eeBackupApiClient(): E2eeBackupApi {
     compact: (backupId, body) =>
       post(`e2ee/backups/${enc(backupId)}/compact`, body),
     deleteAll: () =>
-      call(() =>
+      send(() =>
         commonApiDelete({ endpoint: "e2ee/backup", errorMode: "structured" })
       ),
   };
