@@ -58,6 +58,10 @@ function pinBlock(book: FactBook, comment: string, retired: string | null) {
     `memes ${raw("rules.contract.memes")}`,
     `gradients ${raw("rules.contract.gradients")}`,
     `nextgen ${raw("rules.contract.nextgen")}`,
+    // The fourth contract whose logs count, and the fifth whose state is
+    // read (P26 §2): links between wallets, and the Memes' claim limits.
+    `delegation ${raw("rules.contract.delegation")}`,
+    `claim ${raw("rules.contract.claim")}`,
   ];
   const line = (name: string, value: string) => `${name.padEnd(15)}${value}`;
   return [
@@ -219,9 +223,7 @@ export default async function ImplementationsPage() {
                         locale={locale}
                         size="sm"
                         label={s("explained.tdh.impl.a.proof")}
-                        refText={s("explained.tdh.impl.a.proofRef", {
-                          version: p.f("proofs.day.ruleVersion"),
-                        })}
+                        refText={s("explained.tdh.impl.a.proofRef")}
                       />
                     ),
                   },

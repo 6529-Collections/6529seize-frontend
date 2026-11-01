@@ -211,7 +211,7 @@
   "explained.tdh.how.identity.walletA": "Wallet A",
   "explained.tdh.how.identity.walletB": "Wallet B",
   "explained.tdh.how.identity.sayLinked": "Liés, A et B détiennent ensemble les {count} cartes de la saison {season}, donc un seul boost de {boost} s'applique à chaque carte.",
-  "explained.tdh.how.identity.sayPerCard": "{typical} de ses cartes ajoutent {rate} par jour : {days} jours donnent une base de {base}, et × {boost} donne {final} chacune. Les {others} autres ont des éditions plus grandes et ajoutent moins.",
+  "explained.tdh.how.identity.sayPerCard": "{typical} de ses cartes ajoutent {rate} par jour : {days} jours donnent une base de {base}, et × {boost} donne {final} chacune. Les {others} autres ont d'autres éditions, donc d'autres taux.",
   "explained.tdh.how.identity.sayPerCardAll": "Chaque carte ajoute {rate} par jour : {days} jours donnent une base de {base}, et × {boost} donne {final} chacune.",
   "explained.tdh.how.identity.sayApart": "Séparés, aucun wallet ne complète la saison, donc aucun n'a de boost : {a} et {b}, deux collectionneurs distincts.",
   "explained.tdh.how.identity.label": "Une identité",

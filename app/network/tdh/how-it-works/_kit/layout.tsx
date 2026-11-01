@@ -34,6 +34,7 @@ export function PageHead({
   reference = false,
   titleClassName = "",
   children,
+  aside,
 }: {
   readonly eyebrow: ReactNode;
   readonly title: string;
@@ -42,9 +43,11 @@ export function PageHead({
   readonly reference?: boolean;
   readonly titleClassName?: string;
   readonly children?: ReactNode;
+  /** The page's subject, drawn beside the opening from a desktop up. */
+  readonly aside?: ReactNode;
 }) {
-  return (
-    <header className="tw-pt-[30px] md:tw-pt-[52px]">
+  const head = (
+    <>
       <Eyebrow>{eyebrow}</Eyebrow>
       <h1
         className={`${reference ? EX_TEXT.h1r : EX_TEXT.h1} ${H1_NARROW} ${titleClassName}`}
@@ -55,6 +58,15 @@ export function PageHead({
         {lede}
       </p>
       {children}
+    </>
+  );
+  if (aside === undefined) {
+    return <header className="tw-pt-[30px] md:tw-pt-[52px]">{head}</header>;
+  }
+  return (
+    <header className="tw-grid tw-grid-cols-1 tw-items-end tw-gap-8 tw-pt-[30px] md:tw-pt-[52px] lg:tw-grid-cols-[minmax(0,1fr)_360px] lg:tw-gap-12">
+      <div className="tw-min-w-0">{head}</div>
+      <div className="tw-hidden tw-min-w-0 lg:tw-block">{aside}</div>
     </header>
   );
 }

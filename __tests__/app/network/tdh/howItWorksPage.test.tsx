@@ -106,7 +106,7 @@ describe("How TDH is calculated", () => {
     await user.click(breakIt("mintburn"));
     expect(model).toHaveTextContent("800 → 1,600");
     expect(model).toHaveTextContent(
-      "minted rises from 10 to 20, H from 10 to 20, the rate of Meme #2 from 2.00 to 4.00, and B's TDH from 800 to 1,600"
+      "minted rises from 10 to 20, so H, the largest edition, goes from 10 to 20, and every rate rises with it: Meme #2's from 2.00 to 4.00, and B's TDH from 800 to 1,600"
     );
     expect(model).toHaveTextContent("Where the proof stops.");
   });
@@ -145,7 +145,7 @@ describe("How TDH is calculated", () => {
       within(model).getByRole("button", { name: "Genesis #1 to #3" })
     );
     expect(model).toHaveTextContent(
-      "Genesis (#1 to #3) and Nakamoto (#4) count only while the first season is not complete."
+      "Genesis (#1 to #3) and Nakamoto (#4) count only for a collector who does not hold all of the first season."
     );
   });
 
@@ -210,10 +210,14 @@ describe("How TDH is calculated", () => {
     expect(model).toHaveTextContent(
       "Linked, A and B together hold all 32 cards of season 13, so one boost of 1.05 applies to every card."
     );
-    expect(model).toHaveTextContent("42,720TDH");
+    // Each card at its own rate: 27 of the 32 have 310 copies.
+    expect(model).toHaveTextContent("42,419TDH");
+    expect(model).toHaveTextContent(
+      "27 of its cards add 12.71 a day: 100 days give a base of 1,271, and × 1.05 gives 1,335 each. The other 5 have other editions, so other rates."
+    );
     await user.click(within(model).getByRole("button", { name: "Not linked" }));
     expect(model).toHaveTextContent(
-      "35,588 and 5,084, two separate collectors"
+      "35,282 and 5,105, two separate collectors"
     );
     await user.click(breakIt("oneway"));
     expect(model).toHaveAttribute("data-broken", "1");
@@ -224,10 +228,10 @@ describe("How TDH is calculated", () => {
     const user = userEvent.setup();
     await renderPage();
     const model = lens("totals");
-    expect(model).toHaveTextContent("42,720TDH");
+    expect(model).toHaveTextContent("42,419TDH");
     await user.click(breakIt("wallets"));
-    expect(model).toHaveTextContent("40,672TDH");
-    expect(model).toHaveTextContent("Short by 2,048.");
+    expect(model).toHaveTextContent("40,387TDH");
+    expect(model).toHaveTextContent("Short by 2,032.");
   });
 
   it("lists every step in P26's order, each linked to its model", async () => {

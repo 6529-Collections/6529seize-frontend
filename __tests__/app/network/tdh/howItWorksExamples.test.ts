@@ -28,7 +28,11 @@ import {
   caseI,
   firstCountingResult,
 } from "@/app/network/tdh/how-it-works/models/eligibility";
-import { identityValues } from "@/app/network/tdh/how-it-works/models/identity";
+import {
+  identityValues,
+  rateFromEditions,
+} from "@/app/network/tdh/how-it-works/models/identity";
+import { ENGINE } from "@/lib/explained/engine";
 import { stackValues } from "@/app/network/tdh/how-it-works/models/stacks";
 import {
   ROUND_TRIP,
@@ -265,19 +269,48 @@ describe("The boost ladder", () => {
 });
 
 describe("An identity", () => {
-  it("gives 42,720 linked and 35,588 and 5,084 apart", () => {
-    const values = identityValues(1271, 562);
+  // Season 13's real editions (6529.io's API): five cards differ from 310.
+  const SEASON_13_EDITIONS: Readonly<Record<number, number>> = {
+    407: 335,
+    413: 329,
+    420: 328,
+    433: 328,
+    438: 305,
+  };
+  const editions = Array.from({ length: 32 }, (_, i) => {
+    const id = 407 + i;
+    return [
+      id,
+      13,
+      SEASON_13_EDITIONS[id] ?? 310,
+      SEASON_13_EDITIONS[id] ?? 310,
+    ];
+  });
+
+  it("gives 42,419 linked and 35,282 and 5,105 apart, each card at its own rate", () => {
+    const values = identityValues(
+      rateFromEditions(editions, 3941, ENGINE.rateCents),
+      562
+    );
+    // The Python reference gives 42,419 for the linked identity holding
+    // every card 100 days (P26 §8.1 to §8.4).
     expect(values).toEqual({
       season: 13,
+      days: 100,
       cards: 32,
       inA: 28,
       inB: 4,
       boostCents: 105,
       apartBoostCents: 100,
-      linkedTdh: 42_720,
-      aTdh: 35_588,
-      bTdh: 5_084,
+      linkedTdh: 42_419,
+      aTdh: 35_282,
+      bTdh: 5_105,
+      typical: { rateCents: 1271, cards: 27, base: 1271, linkedFinal: 1335 },
     });
+  });
+
+  it("is not drawn when a card's edition is unknown", () => {
+    expect(identityValues(() => null, 562)).toBeNull();
   });
 });
 

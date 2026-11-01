@@ -192,11 +192,12 @@ export default async function SpecificationPage() {
                 maturity="live"
                 locale={locale}
                 size="sm"
-                refText={s("explained.tdh.spec.version.live", {
-                  equal: p.f("tdh.days.equal"),
-                  days: p.f("tdh.days.compared"),
-                  first: p.f("tdh.days.first"),
-                })}
+                refText={s(
+                  p.num("tdh.days.equal") !== null &&
+                    p.num("tdh.days.equal") === p.num("tdh.days.compared")
+                    ? "explained.tdh.spec.version.live"
+                    : "explained.tdh.spec.version.liveSome"
+                )}
               />
             </div>
             <Caption className="tw-mt-3">

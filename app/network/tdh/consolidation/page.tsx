@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import WalletGraph from "@/components/explained/figures/WalletGraph";
 import type { ReactNode } from "react";
 import FactValue from "@/components/explained/facts/FactValue";
 import { kt } from "@/components/explained/i18n";
@@ -56,6 +57,25 @@ const DESIGN_HREF = "/network/tdh/consolidation/design";
  * wallet; what to know before starting; questions. Old anchors of the
  * consolidation guide land in their sections.
  */
+/**
+ * The page's subject beside its opening: four wallets, every pair linked
+ * both ways, one identity; D's links fresh, made after the gate.
+ */
+const HERO_WALLETS = [
+  { id: "A", x: 0.22, y: 0.24 },
+  { id: "B", x: 0.78, y: 0.24 },
+  { id: "C", x: 0.22, y: 0.76 },
+  { id: "D", x: 0.78, y: 0.76 },
+] as const;
+const HERO_LINKS = [
+  { a: "A", b: "B", kind: "old" },
+  { a: "A", b: "C", kind: "old" },
+  { a: "B", b: "C", kind: "old" },
+  { a: "A", b: "D", kind: "fresh" },
+  { a: "B", b: "D", kind: "fresh" },
+  { a: "C", b: "D", kind: "fresh" },
+] as const;
+
 export default async function TdhYourWalletsPage({
   searchParams,
 }: {
@@ -177,6 +197,16 @@ export default async function TdhYourWalletsPage({
           }
           title={wt(locale, "explained.tdh.wallets.title")}
           titleClassName="tw-max-w-[940px]"
+          aside={
+            <figure className="tw-m-0" aria-hidden="true">
+              <WalletGraph
+                wallets={HERO_WALLETS}
+                links={HERO_LINKS}
+                groups={[["A", "B", "C", "D"]]}
+                locale={locale}
+              />
+            </figure>
+          }
           lede={rich(locale, "explained.tdh.wallets.lede", {
             date: day(when.long),
           })}

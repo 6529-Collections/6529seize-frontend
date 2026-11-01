@@ -52,6 +52,7 @@ export default function NettingLens({
           </b>{" "}
           {ht(locale, "explained.tdh.how.netting.hOne", {
             m1: CASE_H.meme1,
+            m2: CASE_H.meme2,
             n: n(CASE_H.inserted),
           })}
         </p>

@@ -41,7 +41,7 @@ describe("Your wallets", () => {
       })
     ).toBeInTheDocument();
     expect(document.querySelector("[data-ex-lede]")).toHaveTextContent(
-      "a fourth needs fresh links, made from October 15, 2026."
+      "a fourth needs fresh links, made on or after October 15, 2026."
     );
     expect(
       screen.getByRole("link", { name: "Start guided setup" })

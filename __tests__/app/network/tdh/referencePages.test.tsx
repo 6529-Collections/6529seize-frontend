@@ -121,8 +121,11 @@ describe("How sure", () => {
     expect(container.querySelector('[data-drift-by="D136 D137"]')).toBeNull();
     expect(container.textContent).not.toMatch(/A newer model/);
     // D148 takes the network-held accounts out of the cap claim 5a states.
-    expect(container.querySelector('[data-drift-by="D148"]')).toHaveTextContent(
-      "D148 exempts the network’s two accounts from the 19.99% cap"
+    // D150 (two separate exempt parties) is named beside D148.
+    expect(
+      container.querySelector('[data-drift-by="D148 D150"]')
+    ).toHaveTextContent(
+      "D148 exempts the network’s two accounts from the 19.99% cap, and D150 makes them two separate parties"
     );
     const board = container.querySelector("[data-scoreboard]");
     expect(
@@ -130,7 +133,9 @@ describe("How sure", () => {
         (cell) => cell.textContent
       )
     ).toEqual(["9", "84", "11", "12"]);
-    expect(board?.textContent).toMatch(/65 distinct statements/);
+    expect(board?.textContent).toMatch(
+      /84Lean theorems, each a distinct statement/
+    );
     for (const id of [
       "why",
       "layers",
@@ -332,7 +337,7 @@ describe("the specification", () => {
     const { container } = await renderPage(SpecificationPage);
     expect(
       container.querySelector('[data-drift-by="D136 D137"]')?.textContent
-    ).toMatch(/the daily comparison's files report tdh-v1\.4/);
+    ).toMatch(/daily comparison's newer files report tdh-v1\.4/);
     expect(specificationMetadata().title).toMatch(/specification/);
   });
 });
