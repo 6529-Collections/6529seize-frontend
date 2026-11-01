@@ -1,3 +1,4 @@
+import { STREAM_BROWSE_MESSAGES } from "@/i18n/messages/stream-browse";
 import { STREAM_CORE_MESSAGES } from "@/i18n/messages/stream-core";
 import { STREAM_EDITION_MESSAGES } from "@/i18n/messages/stream-editions";
 import { STREAM_PAGE_MESSAGES } from "@/i18n/messages/stream-pages";
@@ -9,4 +10,5 @@ export const STREAM_MESSAGES = {
   ...STREAM_PAGE_MESSAGES,
   ...STREAM_WORK_MESSAGES,
   ...STREAM_EDITION_MESSAGES,
+  ...STREAM_BROWSE_MESSAGES,
 } as const;

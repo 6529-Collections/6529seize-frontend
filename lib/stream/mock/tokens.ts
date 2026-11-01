@@ -221,8 +221,10 @@ export function addOneOfOne(
     primarySaleSettled: false,
     burned: false,
     mintedAt: placement.mintedAt,
-    packageRoot: mockHash(`package:${spec.artistId}:${spec.title}`),
-    itemHash: mockHash(`item:${spec.title}`),
+    packageRoot:
+      spec.item?.packageRoot ??
+      mockHash(`package:${spec.artistId}:${spec.title}`),
+    itemHash: spec.item?.itemHash ?? mockHash(`item:${spec.title}`),
     federatedContract: placement.federatedContract,
   };
   engine.state.tokens.set(key, token);
