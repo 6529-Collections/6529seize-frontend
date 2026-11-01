@@ -28,7 +28,7 @@ function Item({
   readonly children: ReactNode;
 }) {
   return (
-    <li className="tw-mt-4 tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-pt-4 first:tw-mt-3 first:tw-border-t-0 first:tw-pt-0">
+    <li className="tw-mt-4 tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-pt-4 first:tw-mt-3 first:tw-border-t-0 first:tw-pt-0 lg:tw-mt-3 lg:tw-border-l lg:tw-border-t-0 lg:tw-pl-6 lg:tw-pt-0 lg:first:tw-border-l-0 lg:first:tw-pl-0">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
         {mark}
         <span className="tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-400">
@@ -68,7 +68,7 @@ export default function CheckableToday({
       data-ex-checkable=""
     >
       <span className={EX_TEXT.label}>{ht(locale, "check.label")}</span>
-      <ul className="tw-m-0 tw-list-none tw-p-0">
+      <ul className="tw-m-0 tw-list-none tw-p-0 lg:tw-grid lg:tw-grid-cols-3 lg:tw-gap-6">
         <Item
           mark={<Mark kind="tested" size="sm" locale={locale} />}
           when={hrich(locale, "check.identitiesWhen", {
@@ -88,15 +88,14 @@ export default function CheckableToday({
                 first,
                 equal: fact("tdh.days.equal"),
               })}
-          {late !== null &&
-            late.value > 0 && (
-              <>
-                {" "}
-                {hrich(locale, "check.identitiesLate", {
-                  late: fact("tdh.days.late"),
-                })}
-              </>
-            )}
+          {late !== null && late.value > 0 && (
+            <>
+              {" "}
+              {hrich(locale, "check.identitiesLate", {
+                late: fact("tdh.days.late"),
+              })}
+            </>
+          )}
         </Item>
         <Item
           mark={<Mark kind="proved" size="sm" locale={locale} />}
@@ -130,7 +129,9 @@ export default function CheckableToday({
           })}
         </Item>
       </ul>
-      <p className={`${EX_TEXT.cap} tw-m-0 tw-mt-4`}>
+      <p
+        className={`${EX_TEXT.cap} tw-m-0 tw-mt-4 tw-max-w-[860px] lg:tw-mt-6`}
+      >
         {ht(locale, "check.candour")}
       </p>
     </div>

@@ -51,8 +51,7 @@ export function Seg<V extends string>({
   const chars = options.reduce((sum, option) => sum + labelLength(option), 0);
   let layout = phone;
   if (layout === "auto") {
-    layout =
-      options.length > 2 && chars > PHONE_STACK_CHARS ? "stack" : "wrap";
+    layout = options.length > 2 && chars > PHONE_STACK_CHARS ? "stack" : "wrap";
   }
   const group = {
     wrap: "tw-inline-flex tw-flex-wrap tw-rounded-2xl",

@@ -313,7 +313,9 @@ export function AssumptionLedger({
                 kind={row.mark}
                 locale={locale}
                 size="sm"
-                {...(row.markLabel === undefined ? {} : { label: row.markLabel })}
+                {...(row.markLabel === undefined
+                  ? {}
+                  : { label: row.markLabel })}
               />
             </td>
             <td className={cell}>{row.covers}</td>

@@ -75,17 +75,73 @@ export default async function TdhYourWalletsPage({
   );
   const B = "tw-font-semibold tw-text-iron-50";
 
+  // Each answer is an element in a prop of the client picker, so its parts
+  // arrive there as a list: each carries its own key.
+  // A server component of its own: the client picker receives each answer
+  // already rendered, not elements to reconcile.
   const answer = (verdict: WalletsKey, body: ReactNode, extra?: ReactNode) => (
-    <>
-      <p className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-7 tw-tracking-[-0.015em] tw-text-iron-50 md:tw-text-[26px] md:tw-leading-8">
-        {wt(locale, verdict)}
-      </p>
-      <p className="tw-m-0 tw-mt-3 tw-text-[15px] tw-leading-6 tw-text-iron-300">
-        {body}
-      </p>
-      {extra}
-    </>
+    <WhyAnswer verdict={wt(locale, verdict)} body={body} extra={extra} />
   );
+
+  // Why did my number change: each cause and its answer.
+  const why = [
+    {
+      key: "moved",
+      label: wt(locale, "explained.tdh.wallets.why.moved"),
+      answer: answer(
+        "explained.tdh.wallets.why.movedVerdict",
+        wt(locale, "explained.tdh.wallets.why.movedBody"),
+        <div>
+          {[
+            <div key="picture" className="tw-mt-3">
+              <PairPicture locale={locale} />
+            </div>,
+            <p key="caption" className={`tw-m-0 tw-mt-2 ${EX_TEXT.cap}`}>
+              {wt(locale, "explained.tdh.wallets.why.movedCaption")}
+            </p>,
+          ]}
+        </div>
+      ),
+    },
+    {
+      key: "added",
+      label: wt(locale, "explained.tdh.wallets.why.added"),
+      answer: answer(
+        "explained.tdh.wallets.why.addedVerdict",
+        rich(locale, "explained.tdh.wallets.why.addedBody", {
+          how: (
+            <a className={EX_LINK} href="#add">
+              {wt(locale, "explained.tdh.wallets.why.addedHow")}
+            </a>
+          ),
+        })
+      ),
+    },
+    {
+      key: "sold",
+      label: wt(locale, "explained.tdh.wallets.why.sold"),
+      answer: answer(
+        "explained.tdh.wallets.why.soldVerdict",
+        wt(locale, "explained.tdh.wallets.why.soldBody")
+      ),
+    },
+    {
+      key: "unlinked",
+      label: wt(locale, "explained.tdh.wallets.why.unlinked"),
+      answer: answer(
+        "explained.tdh.wallets.why.unlinkedVerdict",
+        wt(locale, "explained.tdh.wallets.why.unlinkedBody")
+      ),
+    },
+    {
+      key: "newcard",
+      label: wt(locale, "explained.tdh.wallets.why.newcard"),
+      answer: answer(
+        "explained.tdh.wallets.why.newcardVerdict",
+        wt(locale, "explained.tdh.wallets.why.newcardBody")
+      ),
+    },
+  ];
 
   return (
     <ExplainedShell
@@ -163,62 +219,10 @@ export default async function TdhYourWalletsPage({
           <EdRow wide labelOnPhone={false} className="tw-mt-6">
             <WhyPicker
               label={wt(locale, "explained.tdh.wallets.why.group")}
-              options={[
-                {
-                  key: "moved",
-                  label: wt(locale, "explained.tdh.wallets.why.moved"),
-                  answer: answer(
-                    "explained.tdh.wallets.why.movedVerdict",
-                    wt(locale, "explained.tdh.wallets.why.movedBody"),
-                    <>
-                      <div className="tw-mt-3">
-                        <PairPicture locale={locale} />
-                      </div>
-                      <p className={`tw-m-0 tw-mt-2 ${EX_TEXT.cap}`}>
-                        {wt(locale, "explained.tdh.wallets.why.movedCaption")}
-                      </p>
-                    </>
-                  ),
-                },
-                {
-                  key: "added",
-                  label: wt(locale, "explained.tdh.wallets.why.added"),
-                  answer: answer(
-                    "explained.tdh.wallets.why.addedVerdict",
-                    rich(locale, "explained.tdh.wallets.why.addedBody", {
-                      how: (
-                        <a className={EX_LINK} href="#add">
-                          {wt(locale, "explained.tdh.wallets.why.addedHow")}
-                        </a>
-                      ),
-                    })
-                  ),
-                },
-                {
-                  key: "sold",
-                  label: wt(locale, "explained.tdh.wallets.why.sold"),
-                  answer: answer(
-                    "explained.tdh.wallets.why.soldVerdict",
-                    wt(locale, "explained.tdh.wallets.why.soldBody")
-                  ),
-                },
-                {
-                  key: "unlinked",
-                  label: wt(locale, "explained.tdh.wallets.why.unlinked"),
-                  answer: answer(
-                    "explained.tdh.wallets.why.unlinkedVerdict",
-                    wt(locale, "explained.tdh.wallets.why.unlinkedBody")
-                  ),
-                },
-                {
-                  key: "newcard",
-                  label: wt(locale, "explained.tdh.wallets.why.newcard"),
-                  answer: answer(
-                    "explained.tdh.wallets.why.newcardVerdict",
-                    wt(locale, "explained.tdh.wallets.why.newcardBody")
-                  ),
-                },
-              ]}
+              options={why.map(({ key, label }) => ({ key, label }))}
+              answers={Object.fromEntries(
+                why.map((option) => [option.key, option.answer])
+              )}
               footer={
                 <p className="tw-m-0 tw-mt-4 tw-text-[15px] tw-leading-6 tw-text-iron-300">
                   {wt(locale, "explained.tdh.wallets.why.explain")}{" "}
@@ -556,5 +560,28 @@ export function generateMetadata(): Metadata {
       description: wt(DEFAULT_LOCALE, "explained.tdh.wallets.meta.description"),
     },
     { canonicalPath: ROUTE }
+  );
+}
+
+/** One answer of Why did my number change: its verdict, its body, a figure. */
+function WhyAnswer({
+  verdict,
+  body,
+  extra,
+}: {
+  readonly verdict: string;
+  readonly body: ReactNode;
+  readonly extra?: ReactNode;
+}) {
+  return (
+    <div>
+      <p className="tw-m-0 tw-text-[22px] tw-font-semibold tw-leading-7 tw-tracking-[-0.015em] tw-text-iron-50 md:tw-text-[26px] md:tw-leading-8">
+        {verdict}
+      </p>
+      <p className="tw-m-0 tw-mt-3 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+        {body}
+      </p>
+      {extra}
+    </div>
   );
 }

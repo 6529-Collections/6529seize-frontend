@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { Children, useState, type ReactNode } from "react";
 import { EX_FOCUS } from "@/components/explained/tokens";
 
 /**
@@ -13,17 +13,23 @@ import { EX_FOCUS } from "@/components/explained/tokens";
 interface PickOption {
   readonly key: string;
   readonly label: string;
-  readonly answer: ReactNode;
 }
 
 export default function WhyPicker({
   label,
   options,
+  answers,
   footer,
 }: {
   /** The group's accessible name: "What happened". */
   readonly label: string;
   readonly options: readonly PickOption[];
+  /**
+   * Each option's answer, by its key. A record, not a field of the options:
+   * server elements inside an array prop reach the client as an unkeyed
+   * list.
+   */
+  readonly answers: Readonly<Record<string, ReactNode>>;
   /** Under the answer, whichever is picked. */
   readonly footer?: ReactNode;
 }) {
@@ -63,7 +69,9 @@ export default function WhyPicker({
               data-ans={option.key}
               className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-5 tw-py-5 md:tw-px-[22px]"
             >
-              {option.answer}
+              {/* An element from the server can arrive wrapped in a list;
+                  toArray keys whatever it holds. */}
+              {Children.toArray(answers[option.key])}
             </div>
           ))}
         </div>

@@ -84,9 +84,9 @@ function stations(book: FactBook, locale: SupportedLocale): AtlasStation[] {
 
 /** "Follow one copy": the stations in the order a copy meets them. */
 function steps(locale: SupportedLocale): AtlasStep[] {
-  return (["art", "hold", "time", "standing", "decide", "execute"] as const).map(
-    (station) => ({ label: ht(locale, `station.${station}`), station })
-  );
+  return (
+    ["art", "hold", "time", "standing", "decide", "execute"] as const
+  ).map((station) => ({ label: ht(locale, `station.${station}`), station }));
 }
 
 /** The chapter that explains each station (MAP.md §3). */

@@ -188,7 +188,7 @@
   "explained.tdh.how.boost.partGradients": "Gradients",
   "explained.tdh.how.boost.unit": "boost",
   "explained.tdh.how.boost.sayGradLead": "A sixth Gradient adds nothing.",
-  "explained.tdh.how.boost.sayGrad": "Gradients add {gradient} each, up to {max}; this one is a plain copy that earns its own rate.",
+  "explained.tdh.how.boost.sayGrad": "Gradients add {gradient} each, up to {max}, so with six the boost is what {max} give; the sixth is a plain copy that earns its own rate.",
   "explained.tdh.how.boost.saySets": "Hold a full set and every paying season counts at once ({count} today), plus a shrinking bonus for each extra set, never more than about {extra} in all.",
   "explained.tdh.how.boost.saySingles": "Genesis (#1 to #3) and Nakamoto (#4) count only for a collector who does not hold all of the first season.",
   "explained.tdh.how.boost.say": "One boost multiplies everything you hold. The newest season counts once the next one begins.",

@@ -33,7 +33,10 @@ function ProofSketch({ m }: { readonly m: SureContext["m"] }) {
       <summary
         className={`tw-cursor-pointer tw-list-none tw-text-[17px] tw-font-semibold tw-leading-6 tw-text-iron-50 marker:tw-hidden [&::-webkit-details-marker]:tw-hidden ${EX_FOCUS}`}
       >
-        <span aria-hidden="true" className="tw-mr-2 tw-inline-block tw-text-iron-400 group-open:tw-rotate-90">
+        <span
+          aria-hidden="true"
+          className="tw-mr-2 tw-inline-block tw-text-iron-400 group-open:tw-rotate-90"
+        >
           ›
         </span>
         {m("explained.tdh.sure.sketch.summary")}

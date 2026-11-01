@@ -124,7 +124,7 @@ const ITEM_GLYPH: Record<MarkKind, GlyphKind> = {
   notGuaranteed: "notGuaranteed",
   notYet: "notYet",
   drift: "drift",
-  assumed: "notGuaranteed",
+  assumed: "assumed",
   notProved: "notGuaranteed",
 };
 

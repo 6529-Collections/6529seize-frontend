@@ -3,7 +3,7 @@
 import type { SupportedLocale } from "@/i18n/locales";
 import { formatCents, formatNumberParts } from "./boostFormat";
 import { kt } from "../i18n";
-import { EX_HEX } from "../tokens";
+import { EX_HEX, EX_MOTION } from "../tokens";
 import { Hatch, Label, offsets, SvgFrame } from "./svg";
 import { useMeasuredWidth } from "./useMeasuredWidth";
 
@@ -99,6 +99,19 @@ export default function BoostFigure({
           rx={4}
           fill={EX_HEX.raised}
         />
+        {/* The scale: a faint line every quarter from 1.00, so a small
+            boost reads against the whole track. */}
+        {[1.25, 1.5, 1.75, 2].map((tick) => (
+          <line
+            key={tick}
+            x1={xAt(tick)}
+            y1={34}
+            x2={xAt(tick)}
+            y2={64}
+            stroke={EX_HEX.line2}
+            strokeWidth={1}
+          />
+        ))}
         {shown.map((part, index) => {
           const x0 = xAt(starts[index] ?? 1);
           const x1 = xAt((starts[index] ?? 1) + part.value);
@@ -112,6 +125,7 @@ export default function BoostFigure({
               fill={index % 2 ? "rgba(82,139,255,0.55)" : `url(#${hatchId})`}
               stroke={EX_HEX.you}
               strokeWidth={1}
+              className={EX_MOTION.model}
             />
           );
         })}
@@ -138,11 +152,11 @@ export default function BoostFigure({
             </g>
           ) : null
         )}
-        {valueX - xAt(1) > 48 && (
-          <Label x={xAt(1)} y={86}>
-            {formatCents(locale, 1)}
-          </Label>
-        )}
+        {/* The origin, always: above the track's start, clear of the
+            value under it and of the markers' labels at the right. */}
+        <Label x={xAt(1)} y={18} tone="ink3">
+          {formatCents(locale, 1)}
+        </Label>
         <line
           x1={valueX}
           y1={64}

@@ -188,7 +188,7 @@
   "explained.tdh.how.boost.partGradients": "Gradients",
   "explained.tdh.how.boost.unit": "boost",
   "explained.tdh.how.boost.sayGradLead": "Un sixième Gradient n'ajoute rien.",
-  "explained.tdh.how.boost.sayGrad": "Les Gradients ajoutent {gradient} chacun, jusqu'à {max} ; celui-ci est un exemplaire ordinaire qui gagne son propre taux.",
+  "explained.tdh.how.boost.sayGrad": "Les Gradients ajoutent {gradient} chacun, jusqu'à {max} : avec six, le boost est celui de {max}, et le sixième est un exemplaire ordinaire qui gagne son propre taux.",
   "explained.tdh.how.boost.saySets": "Avec un set complet, chaque saison qui paie compte d'un coup ({count} aujourd'hui), plus un bonus décroissant pour chaque set supplémentaire, jamais plus d'environ {extra} au total.",
   "explained.tdh.how.boost.saySingles": "Genesis (#1 à #3) et Nakamoto (#4) ne comptent que pour qui ne détient pas toute la première saison.",
   "explained.tdh.how.boost.say": "Un seul boost multiplie tout ce que vous détenez. La saison la plus récente compte dès que la suivante commence.",

@@ -56,10 +56,38 @@ function MiniRing({ stations, focus }: Pick<LoopProps, "stations" | "focus">) {
       aria-hidden="true"
       data-loop-mini=""
     >
-      <circle cx={c} cy={c} r={r} fill="none" stroke={EX_HEX.line} strokeWidth={1.5} />
-      <circle cx={c} cy={c} r={r + 24} fill="none" stroke={EX_HEX.line} strokeDasharray="3 6" />
-      <circle cx={c} cy={c} r={30} fill={EX_HEX.panel} stroke={EX_HEX.holds} strokeWidth={1.5} />
-      <path d={`M${c - 9} ${c}l6 6l12 -12`} fill="none" stroke={EX_HEX.holds} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+      <circle
+        cx={c}
+        cy={c}
+        r={r}
+        fill="none"
+        stroke={EX_HEX.line}
+        strokeWidth={1.5}
+      />
+      <circle
+        cx={c}
+        cy={c}
+        r={r + 24}
+        fill="none"
+        stroke={EX_HEX.line}
+        strokeDasharray="3 6"
+      />
+      <circle
+        cx={c}
+        cy={c}
+        r={30}
+        fill={EX_HEX.panel}
+        stroke={EX_HEX.holds}
+        strokeWidth={1.5}
+      />
+      <path
+        d={`M${c - 9} ${c}l6 6l12 -12`}
+        fill="none"
+        stroke={EX_HEX.holds}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
       {stations.map((station, index) => {
         const angle = ((ANGLES[index] ?? 0) * Math.PI) / 180;
         const x = round2(c + r * Math.cos(angle));
@@ -72,14 +100,18 @@ function MiniRing({ stations, focus }: Pick<LoopProps, "stations" | "focus">) {
               cy={y}
               r={20}
               fill={on ? "rgba(82,139,255,0.16)" : EX_HEX.panel}
-              stroke={on ? EX_HEX.you : station.chapter ? EX_HEX.ink2 : EX_HEX.line2}
+              stroke={
+                on ? EX_HEX.you : station.chapter ? EX_HEX.ink2 : EX_HEX.line2
+              }
               strokeWidth={on ? 2.2 : 1.4}
             />
             <StationGlyph
               kind={station.key}
               x={x}
               y={y}
-              tone={on ? EX_HEX.youInk : station.chapter ? EX_HEX.ink1 : EX_HEX.ink3}
+              tone={
+                on ? EX_HEX.youInk : station.chapter ? EX_HEX.ink1 : EX_HEX.ink3
+              }
             />
           </g>
         );
@@ -207,7 +239,11 @@ function StationGlyph({
       break;
     case "standing":
       body = (
-        <path d="M-7 7V2M-2.5 7V-1.5M2 7V-5M6.5 7V-8.5" {...stroke} strokeWidth={2.2} />
+        <path
+          d="M-7 7V2M-2.5 7V-1.5M2 7V-5M6.5 7V-8.5"
+          {...stroke}
+          strokeWidth={2.2}
+        />
       );
       break;
     case "decide":

@@ -431,21 +431,27 @@ function fileRow(ctx: Ctx, text: string | null): Row {
       ),
     note: (
       <ReceiptNote>
-        {rich(locale, writtenLate(day) ? "explained.tdh.day.row.fileNoteLate" : "explained.tdh.day.row.fileNote", {
-          file: (
-            <FactText fact={day.fact("file.url")} locale={locale}>
-              {name}
-            </FactText>
-          ),
-          written: (
-            <FactValue
-              fact={day.fact("writtenAt")}
-              locale={locale}
-              style="long"
-            />
-          ),
-          hash: <FactValue fact={day.fact("file.sha256")} locale={locale} />,
-        })}
+        {rich(
+          locale,
+          writtenLate(day)
+            ? "explained.tdh.day.row.fileNoteLate"
+            : "explained.tdh.day.row.fileNote",
+          {
+            file: (
+              <FactText fact={day.fact("file.url")} locale={locale}>
+                {name}
+              </FactText>
+            ),
+            written: (
+              <FactValue
+                fact={day.fact("writtenAt")}
+                locale={locale}
+                style="long"
+              />
+            ),
+            hash: <FactValue fact={day.fact("file.sha256")} locale={locale} />,
+          }
+        )}
       </ReceiptNote>
     ),
     text: `${name}: SHA-256 ${stated ?? plain(null, locale)}`,

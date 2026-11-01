@@ -37,9 +37,7 @@ export default function Section({
       {/* A heading with no prose beside it takes the full measure, so the
           right half is never an empty block. */}
       <div
-        className={
-          children === undefined ? "tw-max-w-[940px]" : EX_LAYOUT.stmt
-        }
+        className={children === undefined ? "tw-max-w-[940px]" : EX_LAYOUT.stmt}
       >
         <div>
           <span className={`${EX_TEXT.label} tw-mb-3.5 tw-block`}>

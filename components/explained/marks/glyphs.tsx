@@ -17,6 +17,7 @@ export type GlyphKind =
   | "tested"
   | "shownFalse"
   | "notGuaranteed"
+  | "assumed"
   | "notYet"
   | "drift";
 
@@ -117,6 +118,22 @@ const PATHS: Record<GlyphKind, ReactElement> = {
       strokeWidth="1.6"
       strokeDasharray="2.2 2"
     />
+  ),
+  // Taken as given: a dashed circle with a dot at its centre, so it is not
+  // read as Not guaranteed, whose circle is empty.
+  assumed: (
+    <>
+      <circle
+        cx="8"
+        cy="8"
+        r="5.4"
+        fill="none"
+        stroke={EX_HEX.ink3}
+        strokeWidth="1.6"
+        strokeDasharray="2.2 2"
+      />
+      <circle cx="8" cy="8" r="1.8" fill={EX_HEX.ink3} />
+    </>
   ),
   notYet: (
     <circle

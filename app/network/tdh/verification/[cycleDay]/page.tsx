@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import PrevNext from "@/components/explained/shell/PrevNext";
 import { getAppMetadata } from "@/components/providers/metadata";
 import Receipt from "@/components/explained/evidence/Receipt";
 import Verdict from "@/components/explained/evidence/Verdict";
@@ -370,6 +371,16 @@ export default async function TdhDayReceiptPage({
           </div>
         )}
         {file !== null && <Builds day={day} locale={locale} />}
+        {check && (
+          <PrevNext
+            locale={locale}
+            prev={{
+              href: CHECK_ROUTE,
+              title: kt(locale, check.title),
+              ...(check.n === undefined ? {} : { n: check.n }),
+            }}
+          />
+        )}
         <DayHowWeKnow day={day} book={book} locale={locale} title={title} />
       </article>
     </ExplainedShell>

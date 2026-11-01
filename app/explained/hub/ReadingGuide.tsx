@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { HalfPair } from "@/components/explained/evidence/AssuranceLadder";
 import Mark, { type MarkKind } from "@/components/explained/marks/Mark";
 import Tag from "@/components/explained/marks/Tag";
 import Track, { type Maturity } from "@/components/explained/marks/Track";
@@ -24,6 +25,7 @@ const KNOW: readonly { kind: MarkKind; note?: HubKey }[] = [
   { kind: "tested", note: "guide.tested" },
   { kind: "shownFalse" },
   { kind: "notGuaranteed", note: "guide.notGuaranteed" },
+  { kind: "assumed", note: "guide.assumed" },
   { kind: "notYet" },
 ];
 
@@ -87,6 +89,10 @@ export default function ReadingGuide({
               {item.note ? ` ${ht(locale, item.note)}` : ""}
             </li>
           ))}
+          <li className={NOTE}>
+            <HalfPair a b={false} locale={locale} />{" "}
+            {ht(locale, "guide.halfPair")}
+          </li>
         </Column>
         <Column title={ht(locale, "guide.since")}>
           <li className={NOTE}>{ht(locale, "guide.sinceLive")}</li>

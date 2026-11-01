@@ -222,7 +222,10 @@ export default async function VersionsPage() {
             />
           </div>
           {historySteps.length > 1 && ceilingValue !== null && (
-            <figure className="tw-m-0 tw-mt-10" aria-label={s("explained.tdh.versions.chart.label")}>
+            <figure
+              className="tw-m-0 tw-mt-10"
+              aria-label={s("explained.tdh.versions.chart.label")}
+            >
               <BoostHistory
                 steps={historySteps}
                 ceiling={ceilingValue}

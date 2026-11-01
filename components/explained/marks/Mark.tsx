@@ -7,7 +7,7 @@ import { Glyph, type GlyphKind } from "./glyphs";
  * set as text, with no border and no pill. Every mark reads in greyscale,
  * because the word says what the shape says.
  */
-export type MarkKind = GlyphKind | "assumed" | "notProved";
+export type MarkKind = GlyphKind | "notProved";
 export type MarkSize = "md" | "sm";
 
 const WORD: Record<MarkKind, KitKey> = {
@@ -36,7 +36,7 @@ const GLYPH: Record<MarkKind, GlyphKind> = {
   notGuaranteed: "notGuaranteed",
   notYet: "notYet",
   drift: "drift",
-  assumed: "notGuaranteed",
+  assumed: "assumed",
   notProved: "notGuaranteed",
 };
 
