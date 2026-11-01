@@ -100,6 +100,18 @@ async function signGrant(
   }
 }
 
+/**
+ * Whether enrollDevice() would create a device (and so prompt): no stored
+ * device on the current suite that it could resume, register or renew.
+ */
+export async function needsNewDevice(ctx: EngineContext): Promise<boolean> {
+  const stored = await ctx.storage.getDevice(ctx.profileId);
+  if (stored?.grant.ciphersuite !== E2EE_CIPHERSUITE) {
+    return true;
+  }
+  return !(stored.registered || reusablePending(ctx, stored));
+}
+
 const DEFAULT_DEVICE_LABEL = "Device";
 
 /** The caller's coarse name for a new device ("Chrome on Windows"). */

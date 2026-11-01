@@ -181,6 +181,18 @@ export interface E2eeEngine {
 
   // lifecycle
   enroll(): Promise<void>; // the single wallet prompt
+  /**
+   * Whether enroll() would create a new device key and ask for its grant
+   * signature: no stored device it could resume or renew. A combined
+   * sign-in (NC8) can grant that key instead.
+   */
+  needsNewDevice(): Promise<boolean>;
+  /**
+   * NC8: registers the key a combined sign-in just stored for this profile,
+   * with no wallet prompt, and starts the engine. Resolves with the status
+   * it settles on; a refused sign-in grant leaves "needs-enrollment".
+   */
+  enrollWithLoginGrant(): Promise<E2eeEngineStatus>;
   sync(): Promise<void>; // pull inbox + all groups now
   dispose(): void;
 

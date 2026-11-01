@@ -33,6 +33,7 @@ import {
 } from "./e2eeLocalState";
 import { E2eeSignOutPromptHost } from "./signout/E2eeSignOutPromptHost";
 import { useE2eeEngineDeps } from "./useE2eeEngineDeps";
+import { useLoginE2eePrefetch } from "./useLoginE2eePrefetch";
 
 interface E2eeProviderProps {
   readonly children: ReactNode;
@@ -150,6 +151,7 @@ function E2eeProviderEnabled({
   const { address } = useSeizeConnectContext();
   const pathname = usePathname();
   const buildDeps = useE2eeEngineDeps();
+  useLoginE2eePrefetch();
 
   const profileId = connectedProfile?.id ?? null;
   const wallet = address ? address.toLowerCase() : null;
