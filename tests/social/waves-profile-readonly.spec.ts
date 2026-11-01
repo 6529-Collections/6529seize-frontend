@@ -1128,29 +1128,74 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     });
     expect(feedScrollOffset).toBeGreaterThan(0);
 
-    const visibleFeedPostIndex = await feedPostButtons.evaluateAll(
-      (buttons) => {
-        const feed = buttons[0]?.closest("section");
-        if (!feed) {
-          return -1;
-        }
+    // The virtualized masonry re-renders its cells after the scroll, so a
+    // matched cell can detach before it is measured. Measure against the feed
+    // itself and retry until a connected post intersects it.
+    const profileFeedElement = await profileFeed.elementHandle();
+    let visibleFeedPostIndex = -1;
+    await expect
+      .poll(async () => {
+        visibleFeedPostIndex = await feedPostButtons.evaluateAll(
+          (buttons, feed) => {
+            if (!feed) {
+              return -1;
+            }
 
-        const feedRect = feed.getBoundingClientRect();
-        return buttons.findIndex((button) => {
-          const rect = button.getBoundingClientRect();
-          return rect.bottom > feedRect.top && rect.top < feedRect.bottom;
-        });
-      }
-    );
-    expect(visibleFeedPostIndex).toBeGreaterThanOrEqual(0);
+            const feedRect = feed.getBoundingClientRect();
+            return buttons.findIndex((button) => {
+              const rect = button.getBoundingClientRect();
+              return (
+                button.isConnected &&
+                rect.height > 0 &&
+                rect.bottom > feedRect.top &&
+                rect.top < feedRect.bottom
+              );
+            });
+          },
+          profileFeedElement
+        );
+        return visibleFeedPostIndex;
+      })
+      .toBeGreaterThanOrEqual(0);
     const visibleFeedPost = feedPostButtons.nth(visibleFeedPostIndex);
     await visibleFeedPost.focus();
-    await visibleFeedPost.press("Enter");
+    // Chat treats serialNo as a one-time jump target and removes it from the
+    // URL once mounted, sometimes within 100 ms of the navigation. Sampling
+    // the address bar can miss that, so observe the committed navigation,
+    // armed before Enter is pressed.
+    let openedWavePath = "";
+    await Promise.all([
+      page.waitForURL(
+        (url) => {
+          const matches =
+            /^\/waves\/[0-9a-f-]{36}$/i.test(url.pathname) &&
+            Boolean(url.searchParams.get("serialNo"));
+          if (matches) {
+            openedWavePath = url.pathname;
+          }
+          return matches;
+        },
+        { waitUntil: "commit", timeout: 20_000 }
+      ),
+      visibleFeedPost.press("Enter"),
+    ]);
+    // Next syncs that removal into its router in a transition. A Back press
+    // before the transition commits lets the router write the wave URL over
+    // the feed entry, so let the wave consume the target and go idle first.
     await expectUrlState(
       page,
       (url) =>
-        /^\/waves\/[0-9a-f-]{36}$/i.test(url.pathname) &&
-        Boolean(url.searchParams.get("serialNo"))
+        url.pathname === openedWavePath && !url.searchParams.has("serialNo")
+    );
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          if (typeof globalThis.requestIdleCallback === "function") {
+            globalThis.requestIdleCallback(() => resolve(), { timeout: 5_000 });
+          } else {
+            globalThis.setTimeout(resolve, 250);
+          }
+        })
     );
 
     await page.goBack();
