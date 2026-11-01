@@ -109,7 +109,9 @@ function LoopCircle({ stations, focus, verify, locale }: LoopProps) {
   const [ref, width] = useMeasuredWidth<HTMLDivElement>(600);
   const height = CIRCLE_HEIGHT;
   const cx = width / 2;
-  const cy = height / 2 + 2;
+  // The ring sits a little above the middle, so Art's number keeps clear of
+  // the Ethereum bar under it.
+  const cy = height / 2 - 6;
   const radius = round2(Math.min(width * 0.3, height * 0.31));
   const rad = (degrees: number) => (degrees * Math.PI) / 180;
   const at = (degrees: number, r = radius): [number, number] => [
