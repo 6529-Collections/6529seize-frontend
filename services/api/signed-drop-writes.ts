@@ -51,6 +51,7 @@ export function postDrop(
       wave: body.wave_id,
       refs: replyToDropId ? [replyToDropId] : [],
       body: signedBody(body),
+      signal: options.signal,
     },
     (deviceSignature) =>
       commonApiPost<ApiCreateDropRequest, ApiDrop>({
@@ -73,6 +74,7 @@ export function postDropUpdate(
       wave: waveId,
       refs: [dropId],
       body: signedBody(body),
+      signal: options.signal,
     },
     (deviceSignature) =>
       commonApiPost<ApiUpdateDropRequest, ApiDrop>({
@@ -94,6 +96,7 @@ export function deleteDrop(
       wave: waveId,
       refs: [dropId],
       body: null,
+      signal: options.signal,
     },
     (deviceSignature) =>
       commonApiDelete({
@@ -119,7 +122,12 @@ export function sendDropReaction(
   options: DropWriteOptions = {}
 ): Promise<void> {
   const endpoint = `drops/${dropId}/reaction`;
-  const target = { kind: DeviceEventKind.REACT, wave: waveId, refs: [dropId] };
+  const target = {
+    kind: DeviceEventKind.REACT,
+    wave: waveId,
+    refs: [dropId],
+    signal: options.signal,
+  };
   if (reaction === null) {
     return sendDeviceSignedWrite(
       { ...target, body: { on: false } },

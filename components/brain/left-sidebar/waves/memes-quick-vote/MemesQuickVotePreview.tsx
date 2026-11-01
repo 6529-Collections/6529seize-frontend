@@ -3,6 +3,7 @@
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
+import { WithDropAuthorSignedMarker } from "@/components/waves/drops/signature/DropAuthorSignedMarker";
 import {
   getDropPreviewImageUrl,
   type ExtendedDrop,
@@ -129,7 +130,9 @@ function MemesQuickVoteMobileDetails({
           <span aria-hidden="true" className="tw-text-iron-500">
             ·
           </span>
-          <WaveDropTime timestamp={drop.created_at} color="iron-400" />
+          <WithDropAuthorSignedMarker drop={drop}>
+            <WaveDropTime timestamp={drop.created_at} color="iron-400" />
+          </WithDropAuthorSignedMarker>
           <span className="tw-sr-only">{drop.wave.name}</span>
         </div>
 

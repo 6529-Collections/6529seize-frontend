@@ -1,10 +1,9 @@
 import { publicEnv } from "@/config/env";
 
 /**
- * The 6529 Stream product section (`/stream/**`) is staged behind a host flag,
- * like the public-review section in `config/publicReviews.ts`: on for local
- * development and staging, off in production and on any host it does not
- * recognize. It ships, and gets indexed, only after the contracts are on
+ * The 6529 Stream product section (`/stream/**`) is staged behind a host flag:
+ * on for local development and staging, off in production and on any host it
+ * does not recognize. Off, `/stream` shows the production placeholder. It ships, and gets indexed, only after the contracts are on
  * Sepolia r4 and the copy is approved; turning it on in production is one
  * change here.
  */

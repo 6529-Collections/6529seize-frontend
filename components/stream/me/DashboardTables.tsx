@@ -242,7 +242,7 @@ function editionSettleAction(
       subject={row.work.title}
       label={t(locale, "stream.me.action.settle")}
       send={(actions, from) =>
-        actions.sale("UNIFORM_EDITION_AUCTION").settle(from, auction.edition)
+        actions.sale("UNIFORM_AUCTION").settle(from, auction.edition)
       }
       run={run}
       pending={pending}
@@ -264,7 +264,7 @@ function editionAction(
         label={t(locale, "stream.me.action.withdraw")}
         send={(actions, from) =>
           actions
-            .sale("UNIFORM_EDITION_AUCTION")
+            .sale("UNIFORM_AUCTION")
             .withdraw(from, auction.edition, bid.bidId)
         }
         run={run}
@@ -285,7 +285,7 @@ function editionAction(
         })}
         send={(actions, from) =>
           actions
-            .sale("UNIFORM_EDITION_AUCTION")
+            .sale("UNIFORM_AUCTION")
             .raise(from, auction.edition, bid.bidId, step)
         }
         run={run}
@@ -481,7 +481,7 @@ function claimCells(
         editionClaimText(locale, item.editions, item.refund),
         claim((actions, from) =>
           actions
-            .sale("UNIFORM_EDITION_AUCTION")
+            .sale("UNIFORM_AUCTION")
             .claim(from, item.edition, item.bidId, from)
         ),
       ];

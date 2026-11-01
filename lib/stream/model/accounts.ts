@@ -28,6 +28,12 @@ export interface EditionBalance {
   readonly balance: number;
 }
 
+/** An edition's holder: ERC-1155 balances from `TransferSingle` (and batch) events. */
+export interface EditionHolder {
+  readonly account: Address;
+  readonly balance: number;
+}
+
 /** `ISplitWallet.Payee` with `released` / `releasable` for ETH. */
 export interface SplitPayeeView {
   readonly index: number;

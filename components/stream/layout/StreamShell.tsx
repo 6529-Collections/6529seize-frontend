@@ -82,6 +82,8 @@ function StreamSectionNav({
 /**
  * The /stream section shell: data provider, section navigation, status strip
  * and, on the mock, the dev panel. Rendered only when the feature flag is on.
+ * `tailwind-scope` opts the whole section out of the app's global heading and
+ * form-control rules (`styles/globals.css`), so the section's own classes win.
  */
 export default function StreamShell({
   children,
@@ -92,7 +94,7 @@ export default function StreamShell({
   const pathname = usePathname();
   return (
     <StreamProvider>
-      <div className="tw-mx-auto tw-w-full tw-max-w-6xl tw-px-4 tw-pb-16 tw-pt-5 sm:tw-px-6">
+      <div className="tailwind-scope tw-mx-auto tw-w-full tw-max-w-6xl tw-px-4 tw-pb-16 tw-pt-5 sm:tw-px-6">
         <div className="tw-flex tw-flex-col tw-gap-3">
           <p className={STREAM_LABEL}>{t(locale, "stream.section.name")}</p>
           <StreamSectionNav locale={locale} pathname={pathname} />

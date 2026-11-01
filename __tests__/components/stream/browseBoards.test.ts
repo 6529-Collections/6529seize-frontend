@@ -262,7 +262,10 @@ describe("the museum board", () => {
     expect(board.address).toBe(stream.dataSource.source().contracts.museum);
     expect(
       board.holdings.map((row) => [row.work?.title, row.holding.reason])
-    ).toEqual([["Lantern Field", "no-bids"]]);
+    ).toEqual([
+      ["Tide Table", "no-bids"],
+      ["Lantern Field", "no-bids"],
+    ]);
     expect(board.incoming.map((row) => row.work.title)).toEqual(["Night Tide"]);
     const night = board.incoming[0];
     expectOk(
@@ -274,6 +277,7 @@ describe("the museum board", () => {
     expect(after.incoming).toEqual([]);
     expect(after.holdings.map((row) => row.work?.title)).toEqual([
       "Night Tide",
+      "Tide Table",
       "Lantern Field",
     ]);
   });

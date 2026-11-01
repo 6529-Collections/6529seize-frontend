@@ -16,6 +16,7 @@ import {
   candidatesView,
   editionAuctionView,
   quoteBid,
+  quoteRaise,
   stepTotalsView,
 } from "@/lib/stream/mock/sales/editionAuction";
 import { acceptsBids } from "@/lib/stream/editionTiming";
@@ -200,6 +201,12 @@ export class MockStreamDataSource implements StreamDataSource {
     });
   }
 
+  claimableCredits(account: Address) {
+    return later(() => {
+      return this.engine.state.credits.get(account) ?? 0n;
+    });
+  }
+
   listEditionAuctions() {
     return later(() => {
       return [...this.engine.state.editionAuctions.values()]
@@ -281,6 +288,37 @@ export class MockStreamDataSource implements StreamDataSource {
         auctionPrices(auction),
         auction.terms.marginShare
       );
+    });
+  }
+
+  quoteEditionRaise(edition: WorkKey, bidId: number, newStep: number) {
+    return later(() => {
+      const auction = this.engine.state.editionAuctions.get(edition);
+      return auction ? quoteRaise(auction, bidId, newStep) : null;
+    });
+  }
+
+  editionActivity(edition: WorkKey) {
+    return later(() => {
+      const auction = this.engine.state.editionAuctions.get(edition);
+      return auction ? [...auction.events] : [];
+    });
+  }
+
+  editionHolders(edition: WorkKey) {
+    return later(() => {
+      const prefix = `${edition}|`;
+      return [...this.engine.state.editionBalances]
+        .filter(([key, balance]) => key.startsWith(prefix) && balance > 0)
+        .map(([key, balance]) => ({
+          account: key.slice(prefix.length) as Address,
+          balance,
+        }))
+        .sort(
+          (left, right) =>
+            right.balance - left.balance ||
+            left.account.localeCompare(right.account)
+        );
     });
   }
 

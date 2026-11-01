@@ -71,7 +71,8 @@ describe("the /stream pages on the mock", () => {
     expect(soonRows[1]).toHaveTextContent("1/1");
     expect(soonRows[2]).toHaveTextContent("Editions");
     const results = await table("Recent results");
-    expect(within(results).getByText("To the museum")).toBeInTheDocument();
+    // Lantern Field and Tide Table (lane FE2's seed) both went unbid to the museum.
+    expect(within(results).getAllByText("To the museum")).toHaveLength(2);
     expect(
       within(results).getByText("Burned: dispute upheld")
     ).toBeInTheDocument();
