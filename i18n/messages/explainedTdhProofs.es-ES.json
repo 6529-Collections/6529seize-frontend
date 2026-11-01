@@ -2,6 +2,7 @@
   "explained.tdh.proofs.meta.title": "Pruebas de conocimiento cero de un día de TDH: lo que está probado hasta ahora · 6529 Explained",
   "explained.tdh.proofs.meta.description": "Qué muestra una prueba de conocimiento cero de un día de TDH, por qué deben probarlo dos programas, qué se ha probado hasta ahora y qué no.",
   "explained.tdh.proofs.eyebrow": "Capítulo {chapter} · {n} {page}",
+  "explained.tdh.proofs.liveLead": "Registros de pruebas escritos",
   "explained.tdh.proofs.h1": "Qué muestra la prueba de un día, qué se ha probado hasta ahora y qué no.",
   "explained.tdh.proofs.lede": "Una prueba de conocimiento cero es un archivo pequeño que permite a cualquiera comprobar, barato y en Ethereum, que un programa produjo ciertas salidas, sin volver a ejecutarlo. Cuando ambos programas prueben un día y un contrato compruebe las dos, cualquiera podría confirmar que el TDH del día se deriva de los bloques de Ethereum y del día registrado antes. Los archivos de prueba aún no son públicos.",
   "explained.tdh.proofs.verdict.headline": "La ejecución del programa A del {date}, bajo las reglas retiradas {version}, está probada, y el verificador SP1 de mainnet acepta la prueba en una llamada de solo lectura.",

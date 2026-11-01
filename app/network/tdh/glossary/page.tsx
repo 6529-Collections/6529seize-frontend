@@ -151,6 +151,7 @@ export default async function GlossaryPage({
       live={{
         fact: book.maybe("rules.chainHeadDate"),
         kind: "record",
+        lead: t(locale, "explained.tdh.glossary.liveLead"),
         cadenceMinutes: RECORD_CADENCE_MINUTES,
       }}
       facts={book.snapshot()}

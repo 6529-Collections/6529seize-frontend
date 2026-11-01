@@ -2,6 +2,7 @@
   "explained.tdh.proofs.meta.title": "Zero-knowledge proofs of a TDH day: what is proved so far · 6529 Explained",
   "explained.tdh.proofs.meta.description": "What a zero-knowledge proof of a TDH day shows, why two programs must prove it, what has been proved so far, and what has not.",
   "explained.tdh.proofs.eyebrow": "Chapter {chapter} · {n} {page}",
+  "explained.tdh.proofs.liveLead": "Proof records written",
   "explained.tdh.proofs.h1": "What a proof of a day shows, what is proved so far, and what is not.",
   "explained.tdh.proofs.lede": "A zero-knowledge proof is a small file that lets anyone check, cheaply and on Ethereum, that a program produced given outputs, without running it again. Once both programs prove a day and a contract checks both, anyone could confirm that the day's TDH follows from Ethereum's blocks and the day recorded before it. The proof files are not public yet.",
   "explained.tdh.proofs.verdict.headline": "Program A's run of {date}, under the retired {version} rules, is proved, and mainnet's SP1 verifier accepts the proof in a read-only call.",

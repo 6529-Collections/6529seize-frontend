@@ -27,7 +27,7 @@
   "explained.tdh.day.row.drift": "Les règles s'appellent désormais TDH v1.4, et la version de règles de P26 est {version}, avec la consolidation de quatre wallets. Les fichiers écrits sous le nouveau nom portent un nouvel ID de règle, {ruleId}, donc leurs racines changent.",
   "explained.tdh.day.row.driftEqual": "Ce jour est égal pour chaque identité, donc aucune identité comparée n'avait de quatrième wallet.",
   "explained.tdh.day.row.current": "Ce fichier a été écrit sous les règles actuelles, TDH v1.4 (D137), avec la consolidation de quatre wallets (D136). Son ID de règle et son hash de registre sont ceux qu'indique P26. Les fichiers écrits sous l'ancien nom portent l'ancien ID de règle, donc leurs racines diffèrent.",
-  "explained.tdh.day.row.vector": "fixé par le vecteur de conformité {name}",
+  "explained.tdh.day.row.vector": "le hachage de chaque nombre qu'utilisent les règles, fixé par le vecteur de conformité {name}",
   "explained.tdh.day.row.cycleRootNote": "Les {size} octets qui représentent toute la journée : la racine qu'un validateur signe pour elle (D144). Pour l'instant seuls les validateurs de 6529 signent, en test.",
   "explained.tdh.day.row.cycleRootRetired": "Calculée sous les règles retirées {version}, dont l'ID de règle figure plus haut : ce n'est donc pas la racine qu'un validateur TDH v1.4 calcule pour ce jour.",
   "explained.tdh.day.row.walletRootNote": "Un arbre de hachage sur l'enregistrement de chaque wallet pour la journée.",

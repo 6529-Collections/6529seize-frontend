@@ -2,6 +2,7 @@
   "explained.tdh.proofs.meta.title": "Zero-Knowledge-Beweise eines TDH-Tages: was bisher bewiesen ist · 6529 Explained",
   "explained.tdh.proofs.meta.description": "Was ein Zero-Knowledge-Beweis eines TDH-Tages zeigt, warum zwei Programme ihn beweisen müssen, was bisher bewiesen ist und was nicht.",
   "explained.tdh.proofs.eyebrow": "Kapitel {chapter} · {n} {page}",
+  "explained.tdh.proofs.liveLead": "Beweisprotokolle geschrieben",
   "explained.tdh.proofs.h1": "Was der Beweis eines Tages zeigt, was bisher bewiesen ist und was nicht.",
   "explained.tdh.proofs.lede": "Ein Zero-Knowledge-Beweis ist eine kleine Datei, mit der jeder günstig und auf Ethereum prüfen kann, dass ein Programm bestimmte Ausgaben erzeugt hat, ohne es erneut auszuführen. Sobald beide Programme einen Tag beweisen und ein Vertrag beide prüft, könnte jeder bestätigen, dass das TDH des Tages aus den Blöcken von Ethereum und dem zuvor eingetragenen Tag folgt. Die Beweisdateien sind noch nicht öffentlich.",
   "explained.tdh.proofs.verdict.headline": "Der Lauf von Programm A für den {date}, unter den außer Dienst gestellten Regeln {version}, ist bewiesen, und der SP1-Verifier von Mainnet akzeptiert den Beweis in einem reinen Leseaufruf.",

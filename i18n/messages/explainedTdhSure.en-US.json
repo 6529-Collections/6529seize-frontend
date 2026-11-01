@@ -2,6 +2,7 @@
   "explained.tdh.sure.meta.title": "How sure: what is proved about TDH · 6529 Explained",
   "explained.tdh.sure.meta.description": "What is proved about the TDH rules, what is tested every day, and what is not, read from the Lean manifest.",
   "explained.tdh.sure.crumb": "How sure",
+  "explained.tdh.sure.liveLead": "Lean manifest written",
   "explained.tdh.sure.eyebrow": "Chapter {chapter} · {n} How sure",
   "explained.tdh.sure.title": "What is proved, what is tested, and what is not.",
   "explained.tdh.sure.lede": "Lean, a proof assistant, checks every step: the proofs show that a Lean model of P26's rules has the properties it states, while the daily check tests each day and proves nothing.",

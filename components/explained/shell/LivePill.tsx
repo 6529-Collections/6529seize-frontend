@@ -24,6 +24,7 @@ export default function LivePill({
   locale,
   kind = "feed",
   cadenceMinutes = 1440,
+  lead: leadText,
   asOf,
   clock = "live",
 }: {
@@ -32,6 +33,8 @@ export default function LivePill({
   readonly locale: SupportedLocale;
   readonly kind?: "feed" | "file" | "read" | "record";
   readonly cadenceMinutes?: number;
+  /** The pill's first words, naming what was written: "Manifest written". */
+  readonly lead?: string;
   /** The page's render time: the age shown before the browser's clock takes over. */
   readonly asOf: string;
   /** "frozen" keeps the render time (the gallery, the gates' renders). */
@@ -61,7 +64,7 @@ export default function LivePill({
   } else if (kind === "file") {
     lead = kt(locale, "explained.kit.live.fileWritten");
   } else if (record) {
-    lead = kt(locale, "explained.kit.live.recordWritten");
+    lead = leadText ?? kt(locale, "explained.kit.live.recordWritten");
   }
   const clockText = record
     ? formatUtcDay(locale, at)

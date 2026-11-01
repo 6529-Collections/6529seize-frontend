@@ -95,7 +95,7 @@
   "explained.kit.loop.ethereumSub": "what Art, Hold and Time read",
   "explained.kit.loop.cc0": "CC0: anyone may copy",
   "explained.kit.loop.aria": "The loop: art is held, holding time becomes TDH, TDH weighs decisions, decisions mint art. Verify sits at the centre.",
-  "explained.kit.loop.listVerify": "Verify, at the centre: two programs recompute every identity's TDH every day; equal on all {identities} today.",
+  "explained.kit.loop.listVerify": "Verify, at the centre: two programs recompute every identity's TDH every day; equal on all {identities} today. A strong check, not a proof.",
   "explained.kit.loop.chapter": "Chapter {chapter}",
   "explained.kit.loop.locator": "Where this chapter sits in the loop",
   "explained.kit.verdict.equal": "Equal",

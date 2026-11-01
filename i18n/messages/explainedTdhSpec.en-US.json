@@ -2,6 +2,7 @@
   "explained.tdh.spec.meta.title": "The TDH v1.4 specification · 6529 Explained",
   "explained.tdh.spec.meta.description": "The TDH v1.4 rules restated from P26, precise enough to write your own implementation, with the vectors that pin the edge cases.",
   "explained.tdh.spec.crumb": "Specification",
+  "explained.tdh.spec.liveLead": "P26 last changed",
   "explained.tdh.spec.eyebrow": "Shelf · {n} · Reference",
   "explained.tdh.spec.title": "The TDH v1.4 specification",
   "explained.tdh.spec.lede": "The rules restated from P26, precise enough that separately written programs produce the same records to the unit, with P26's vectors pinning the detail.",

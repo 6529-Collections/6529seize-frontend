@@ -109,6 +109,7 @@ export default async function SpecificationPage({
       live={{
         fact: book.maybe("rules.p26Date"),
         kind: "record",
+        lead: t(locale, "explained.tdh.spec.liveLead"),
         cadenceMinutes: P26_CADENCE_MINUTES,
       }}
       facts={book.snapshot()}

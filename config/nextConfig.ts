@@ -130,6 +130,13 @@ export function sharedConfig(
     poweredByHeader: false,
     redirects() {
       return Promise.resolve([
+        // CC0 in one minute lives on the 6529 Explained hub until The Memes
+        // and CC0 has its own page; a guessed /explained/cc0 goes there.
+        {
+          source: "/explained/cc0",
+          destination: "/explained#cc0",
+          permanent: false,
+        },
         {
           source: "/delegation/delegation-center",
           destination: "/safe-collecting",

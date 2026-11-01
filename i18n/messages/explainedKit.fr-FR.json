@@ -95,7 +95,7 @@
   "explained.kit.loop.ethereumSub": "ce que lisent Art, Détention et Temps",
   "explained.kit.loop.cc0": "CC0 : chacun peut copier",
   "explained.kit.loop.aria": "La boucle : l'art est détenu, le temps de détention devient du TDH, le TDH pèse les décisions, les décisions frappent l'art. Vérifier est au centre.",
-  "explained.kit.loop.listVerify": "Vérifier, au centre : deux programmes recalculent chaque jour le TDH de chaque identité ; égal pour les {identities} aujourd'hui.",
+  "explained.kit.loop.listVerify": "Vérifier, au centre : deux programmes recalculent chaque jour le TDH de chaque identité ; égal pour les {identities} aujourd'hui. Une vérification forte, pas une preuve.",
   "explained.kit.loop.chapter": "Chapitre {chapter}",
   "explained.kit.loop.locator": "La place de ce chapitre dans la boucle",
   "explained.kit.verdict.equal": "Égal",

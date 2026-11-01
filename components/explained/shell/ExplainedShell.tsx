@@ -22,6 +22,8 @@ export interface LiveSource {
   readonly kind: "feed" | "file" | "read" | "record";
   /** Minutes between new values: a day for the feed. */
   readonly cadenceMinutes?: number;
+  /** For a record: what was written, "Manifest written", instead of "Record written". */
+  readonly lead?: string;
 }
 
 export default function ExplainedShell({
@@ -73,6 +75,7 @@ export default function ExplainedShell({
                   fact={live.fact}
                   kind={live.kind}
                   cadenceMinutes={live.cadenceMinutes ?? 1440}
+                  {...(live.lead === undefined ? {} : { lead: live.lead })}
                   locale={locale}
                   asOf={facts.asOf}
                   clock={clock}

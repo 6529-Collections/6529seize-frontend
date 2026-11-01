@@ -143,8 +143,10 @@ const TOKEN_ART = MEME_ART[2].src;
 /** Under the station card: what Verify at the centre shows, and what it does not. */
 function VerifyNote({ locale }: { readonly locale: SupportedLocale }) {
   return (
+    // On a phone the loop's list ends on Verify with the same limit, so the
+    // note is for the circle's column only.
     <div
-      className="tw-rounded-xl tw-border tw-border-dashed tw-border-iron-800 tw-p-5"
+      className="tw-rounded-xl tw-border tw-border-dashed tw-border-iron-800 tw-p-5 max-xl:tw-hidden"
       data-verify-note=""
     >
       <span className={EX_TEXT.label}>{ht(locale, "verifyNote.label")}</span>

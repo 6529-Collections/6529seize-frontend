@@ -91,6 +91,7 @@ export default async function HowSurePage({
       live={{
         fact: book.maybe("manifest.writtenAt"),
         kind: "record",
+        lead: t(locale, "explained.tdh.sure.liveLead"),
         cadenceMinutes: MANIFEST_CADENCE_MINUTES,
       }}
       facts={book.snapshot()}

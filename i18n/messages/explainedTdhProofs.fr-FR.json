@@ -2,6 +2,7 @@
   "explained.tdh.proofs.meta.title": "Preuves à divulgation nulle d'une journée de TDH : ce qui est prouvé à ce jour · 6529 Explained",
   "explained.tdh.proofs.meta.description": "Ce que montre une preuve à divulgation nulle de connaissance d'une journée de TDH, pourquoi deux programmes doivent la prouver, ce qui est prouvé à ce jour et ce qui ne l'est pas.",
   "explained.tdh.proofs.eyebrow": "Chapitre {chapter} · {n} {page}",
+  "explained.tdh.proofs.liveLead": "Registres de preuves écrits",
   "explained.tdh.proofs.h1": "Ce que montre la preuve d'une journée, ce qui est prouvé à ce jour, et ce qui ne l'est pas.",
   "explained.tdh.proofs.lede": "Une preuve à divulgation nulle est un petit fichier qui permet à chacun de vérifier, à peu de frais et sur Ethereum, qu'un programme a produit des sorties données, sans le relancer. Une fois un jour prouvé par les deux programmes et les deux preuves vérifiées par un contrat, chacun pourrait confirmer que le TDH du jour découle des blocs d'Ethereum et du jour enregistré avant lui. Les fichiers de preuve ne sont pas encore publics.",
   "explained.tdh.proofs.verdict.headline": "L'exécution du programme A pour le {date}, sous les règles retirées {version}, est prouvée, et le vérificateur SP1 de mainnet accepte la preuve en un appel en lecture seule.",

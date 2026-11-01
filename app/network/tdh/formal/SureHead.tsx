@@ -203,7 +203,7 @@ function SplitTable({ ctx }: { readonly ctx: SureContext }) {
             <tr key={row.id} data-split-row={row.id}>
               <th
                 scope="row"
-                className={`${cell} tw-font-semibold ${row.id === "all" ? "tw-text-iron-50" : "tw-text-iron-300"}`}
+                className={`${cell} tw-text-left tw-font-semibold ${row.id === "all" ? "tw-text-iron-50" : "tw-text-iron-300"}`}
               >
                 {row.name}
               </th>

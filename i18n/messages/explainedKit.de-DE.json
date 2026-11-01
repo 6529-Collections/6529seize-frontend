@@ -95,7 +95,7 @@
   "explained.kit.loop.ethereumSub": "was Kunst, Halten und Zeit lesen",
   "explained.kit.loop.cc0": "CC0: jeder darf kopieren",
   "explained.kit.loop.aria": "Der Kreislauf: Kunst wird gehalten, Haltezeit wird zu TDH, TDH gewichtet Entscheidungen, Entscheidungen prägen Kunst. In der Mitte steht das Prüfen.",
-  "explained.kit.loop.listVerify": "Prüfen, in der Mitte: zwei Programme berechnen jeden Tag das TDH jeder Identität neu; heute gleich bei allen {identities}.",
+  "explained.kit.loop.listVerify": "Prüfen, in der Mitte: zwei Programme berechnen jeden Tag das TDH jeder Identität neu; heute gleich bei allen {identities}. Eine starke Prüfung, kein Beweis.",
   "explained.kit.loop.chapter": "Kapitel {chapter}",
   "explained.kit.loop.locator": "Wo dieses Kapitel im Kreislauf liegt",
   "explained.kit.verdict.equal": "Gleich",

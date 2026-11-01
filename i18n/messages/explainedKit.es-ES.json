@@ -95,7 +95,7 @@
   "explained.kit.loop.ethereumSub": "lo que leen Arte, Tenencia y Tiempo",
   "explained.kit.loop.cc0": "CC0: cualquiera puede copiar",
   "explained.kit.loop.aria": "El ciclo: el arte se conserva, el tiempo de tenencia se convierte en TDH, el TDH pondera las decisiones, las decisiones acuñan arte. Verificar está en el centro.",
-  "explained.kit.loop.listVerify": "Verificar, en el centro: dos programas recalculan cada día el TDH de cada identidad; igual en las {identities} hoy.",
+  "explained.kit.loop.listVerify": "Verificar, en el centro: dos programas recalculan cada día el TDH de cada identidad; igual en las {identities} hoy. Una comprobación fuerte, no una prueba.",
   "explained.kit.loop.chapter": "Capítulo {chapter}",
   "explained.kit.loop.locator": "Dónde está este capítulo en el ciclo",
   "explained.kit.verdict.equal": "Igual",
