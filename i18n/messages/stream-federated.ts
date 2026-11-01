@@ -94,8 +94,8 @@ export const STREAM_FEDERATED_MESSAGES = {
   "stream.federated.method.ENGLISH_AUCTION.name": "1/1 auction",
   "stream.federated.method.ENGLISH_AUCTION.line":
     "24 hours from zero. A bid in the last 15 minutes extends it.",
-  "stream.federated.method.UNIFORM_EDITION_AUCTION.name": "Edition auction",
-  "stream.federated.method.UNIFORM_EDITION_AUCTION.line":
+  "stream.federated.method.UNIFORM_AUCTION.name": "Edition auction",
+  "stream.federated.method.UNIFORM_AUCTION.line":
     "Bidders name a price and a quantity. Every winner pays the same price.",
   "stream.federated.method.unknown": "Sale method {kind}",
   "stream.federated.method.unknownLine": "Not shown on this page yet.",
@@ -108,8 +108,7 @@ export const STREAM_FEDERATED_MESSAGES = {
   "stream.federated.sell.capHelp": "Leave empty for no cap.",
   "stream.federated.sell.capError": "Use a whole number from 1.",
   "stream.federated.sell.start.ENGLISH_AUCTION": "Start the 1/1 auction",
-  "stream.federated.sell.start.UNIFORM_EDITION_AUCTION":
-    "Open the edition auction",
+  "stream.federated.sell.start.UNIFORM_AUCTION": "Open the edition auction",
   "stream.federated.sell.pairNote":
     "Its edition auction opens alongside and closes 15 minutes after the 1/1.",
   "stream.federated.sell.standaloneNote":

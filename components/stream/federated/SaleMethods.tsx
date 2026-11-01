@@ -46,7 +46,7 @@ interface SaleMethod {
 
 const KNOWN_KINDS: readonly KnownSaleKind[] = [
   "ENGLISH_AUCTION",
-  "UNIFORM_EDITION_AUCTION",
+  "UNIFORM_AUCTION",
 ];
 
 function isKnownKind(kind: SaleKindId): kind is KnownSaleKind {
@@ -57,7 +57,7 @@ function modeOf(contract: FederatedContract, kind: SaleKindId): MethodMode {
   if (kind === "ENGLISH_AUCTION" && contract.standard === "ERC721") {
     return "start";
   }
-  if (kind === "UNIFORM_EDITION_AUCTION" && contract.standard === "ERC1155") {
+  if (kind === "UNIFORM_AUCTION" && contract.standard === "ERC1155") {
     // A pair's editions open with each 1/1, as in 6529 Stream Editions.
     return contract.form === "PAIR" ? "withMaster" : "start";
   }
@@ -164,7 +164,7 @@ function StartedNote({
   readonly locale: SupportedLocale;
 }) {
   const href =
-    started.kind === "UNIFORM_EDITION_AUCTION"
+    started.kind === "UNIFORM_AUCTION"
       ? STREAM_ROUTES.edition(started.key)
       : STREAM_ROUTES.work(started.key);
   return (
@@ -187,7 +187,7 @@ function methodNote(locale: SupportedLocale, method: SaleMethod): string {
   if (method.contract.form === "PAIR") {
     return t(locale, "stream.federated.sell.pairNote");
   }
-  return method.kind === "UNIFORM_EDITION_AUCTION"
+  return method.kind === "UNIFORM_AUCTION"
     ? t(locale, "stream.federated.sell.standaloneNote")
     : t(locale, "stream.federated.method.ENGLISH_AUCTION.line");
 }
@@ -304,7 +304,7 @@ function SellForm({
       <p className={STREAM_HELP}>{t(locale, "stream.federated.sell.none")}</p>
     );
   }
-  const isEdition = method.kind === "UNIFORM_EDITION_AUCTION";
+  const isEdition = method.kind === "UNIFORM_AUCTION";
   const titleError =
     title.trim() === "" ? t(locale, "stream.federated.sell.titleError") : null;
   const capError =
@@ -316,7 +316,7 @@ function SellForm({
     const name = title.trim();
     const contract = chosen.contract.address;
     const result = await run((actions, from) =>
-      chosen.kind === "UNIFORM_EDITION_AUCTION"
+      chosen.kind === "UNIFORM_AUCTION"
         ? actions.openFederatedEditionAuction(
             from,
             contract,

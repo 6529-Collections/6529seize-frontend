@@ -106,7 +106,7 @@ describe("the federated registry entry", () => {
     expect(oneOfOnes?.royaltyRate).toBe(DEFAULT_ROYALTY_RATE);
     expect(oneOfOnes?.volume).toBe(0n);
     expect(oneOfOnes?.saleKinds).toEqual(["ENGLISH_AUCTION"]);
-    expect(editions?.saleKinds).toEqual(["UNIFORM_EDITION_AUCTION"]);
+    expect(editions?.saleKinds).toEqual(["UNIFORM_AUCTION"]);
     expect(oneOfOnes?.status).toBe("ACTIVE");
   });
 
