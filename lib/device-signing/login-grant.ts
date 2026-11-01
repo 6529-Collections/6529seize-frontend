@@ -9,7 +9,7 @@ import {
 } from "./device-key-store";
 import { getDeviceLabel } from "./device-label";
 import { isEd25519Supported } from "./ed25519";
-import { isSignedMessagesEnabled } from "./feature";
+import { isAppDeviceGrantsEnabled, isSignedMessagesEnabled } from "./feature";
 import {
   DEFAULT_DEVICE_SCOPES,
   isExpectedDeviceGrantMessage,
@@ -36,8 +36,8 @@ const GRANT_URN_MARKERS = [
 ] as const;
 
 /**
- * 6529 Desktop runs the site in Electron, which the session client type
- * reports as web; like 6529 Mobile it keeps the ordinary sign-in.
+ * 6529 Desktop runs the site in Electron; its renderer reports the desktop
+ * session client type, but this build may also report web.
  */
 const isDesktopApp = (): boolean =>
   (globalThis.navigator as Partial<Navigator> | undefined)?.userAgent?.includes(
@@ -58,16 +58,31 @@ export function skipAutoDeviceGrant(signerAddress: string): void {
   autoGrantSkippedWallets.add(signerAddress.toLowerCase());
 }
 
+/**
+ * 6529 Mobile (Capacitor) or 6529 Desktop (Electron). Their sign-in is not a
+ * SIWE web session, so this device is granted by an app grant (EIP-712, see
+ * app-grant.ts) instead of a sign-in grant.
+ */
+export const isAppGrantPlatform = (): boolean =>
+  getSessionClientType() !== "web" || isDesktopApp();
+
 /** Synchronous gate: flag on, the website (not an app) and the wallet's own (non-proxy) session. */
 export const isDeviceGrantPossible = (role: string | null): boolean =>
+  role === null && isSignedMessagesEnabled() && !isAppGrantPlatform();
+
+/** Synchronous gate for an app grant: flags on, an app and the wallet's own session. */
+export const isAppDeviceGrantPossible = (role: string | null): boolean =>
   role === null &&
   isSignedMessagesEnabled() &&
-  getSessionClientType() === "web" &&
-  !isDesktopApp();
+  isAppDeviceGrantsEnabled() &&
+  isAppGrantPlatform();
 
 /** Whether this browser session can hold a device key at all. */
 export async function canUseDeviceSigning(): Promise<boolean> {
-  return isDeviceGrantPossible(null) && (await isEd25519Supported());
+  return (
+    (isDeviceGrantPossible(null) || isAppDeviceGrantPossible(null)) &&
+    (await isEd25519Supported())
+  );
 }
 
 async function prepare(
