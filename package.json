@@ -218,7 +218,7 @@
     "@reown/appkit": "1.8.19",
     "@reown/appkit-adapter-wagmi": "1.8.19",
     "@reown/appkit-common": "1.8.19",
-    "@sentry/nextjs": "10.45.0",
+    "@sentry/nextjs": "10.75.2",
     "@tailwindcss/container-queries": "0.1.1",
     "@tailwindcss/forms": "0.5.11",
     "@tanstack/query-core": "5.95.2",
