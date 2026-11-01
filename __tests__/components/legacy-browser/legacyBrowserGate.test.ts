@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { runInNewContext, Script } from "node:vm";
 import {
   LEGACY_BROWSER_ATTRIBUTE,
@@ -130,5 +132,24 @@ describe("legacy browser gate", () => {
     expect(LEGACY_BROWSER_STYLES).toContain(
       `html[${LEGACY_BROWSER_ATTRIBUTE}] body>:not(#${LEGACY_BROWSER_NOTICE_ID}){display:none!important}`
     );
+  });
+
+  it("matches the strings the Device Farm notice probe verified", () => {
+    const fixture = JSON.parse(
+      readFileSync(
+        join(
+          process.cwd(),
+          "tests/device-farm/fixtures/legacy-browser-gate.json"
+        ),
+        "utf8"
+      )
+    ) as Record<string, string>;
+    expect(fixture).toMatchObject({
+      styles: LEGACY_BROWSER_STYLES,
+      flagScript: LEGACY_BROWSER_FLAG_SCRIPT,
+      syntaxScript: LEGACY_BROWSER_SYNTAX_SCRIPT,
+      noticeScript: LEGACY_BROWSER_NOTICE_SCRIPT,
+      attribute: LEGACY_BROWSER_ATTRIBUTE,
+    });
   });
 });
