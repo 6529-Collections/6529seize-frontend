@@ -55,7 +55,13 @@ export interface FakeDeliveryService {
   };
   setDmPolicy(
     profileId: string,
-    value: "EVERYONE" | "PEOPLE_I_FOLLOW" | "NOBODY"
+    value: "EVERYONE" | "PEOPLE_I_FOLLOW" | "NOBODY" | "GROUP_MEMBERS"
+  ): void;
+  /** GROUP_MEMBERS with the given members; followed profiles bypass by default. */
+  setDmGroup(
+    profileId: string,
+    memberProfileIds: string[],
+    allowFollowed?: boolean
   ): void;
   setAttachmentsEnabled(enabled: boolean): void;
   follow(subscriber: string, target: string): void;
