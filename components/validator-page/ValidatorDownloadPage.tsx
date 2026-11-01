@@ -201,7 +201,11 @@ function CheckYourDownload({
 }: {
   readonly release: ValidatorRelease;
 }) {
-  const { checksums } = groupReleaseFiles(release);
+  const { checksums, installers } = groupReleaseFiles(release);
+  // The commands name this release's own files, so they work as shown.
+  const fileFor = (kind: ValidatorInstallerKind): string =>
+    installers.find((installer) => installer.kind === kind)?.file.name ??
+    "<file>";
   return (
     <section aria-labelledby="check-download" className="tw-mt-12">
       <h2 id="check-download" className={SECTION_HEADING}>
@@ -214,18 +218,15 @@ function CheckYourDownload({
       <ul className="tw-mb-5 tw-list-disc tw-space-y-2 tw-pl-6">
         <li className={BODY}>
           Mac, in Terminal:{" "}
-          <code className={CODE}>shasum -a 256 6529-Validator-0.1.0.dmg</code>
+          <code className={CODE}>shasum -a 256 {fileFor("macos")}</code>
         </li>
         <li className={BODY}>
           Windows, in PowerShell:{" "}
-          <code className={CODE}>
-            Get-FileHash .\6529-Validator-0.1.0-x64.msi
-          </code>{" "}
-          (it prints capital letters; the digits and letters must match)
+          <code className={CODE}>Get-FileHash .\{fileFor("windows")}</code> (it
+          prints capital letters; the digits and letters must match)
         </li>
         <li className={BODY}>
-          Linux:{" "}
-          <code className={CODE}>sha256sum 6529-validator_0.1.0_amd64.deb</code>
+          Linux: <code className={CODE}>sha256sum {fileFor("deb-x64")}</code>
         </li>
       </ul>
       {checksums && (
