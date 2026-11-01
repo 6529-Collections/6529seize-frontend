@@ -117,6 +117,26 @@ function isUniversalLinkPath(pathname: string): boolean {
   );
 }
 
+/**
+ * The host and path of a custom-scheme link. Android System WebView before
+ * Chromium 130 parses `mobile6529://navigate/x` with an empty host and the
+ * path `//navigate/x`; read the host from the path there, as current
+ * parsers do.
+ */
+function getCustomSchemeParts(url: URL): {
+  readonly host: string;
+  readonly pathname: string;
+} {
+  if (url.hostname || !url.pathname.startsWith("//")) {
+    return { host: url.hostname, pathname: url.pathname };
+  }
+  const rest = url.pathname.slice(2);
+  const slash = rest.indexOf("/");
+  return slash === -1
+    ? { host: rest.toLowerCase(), pathname: "" }
+    : { host: rest.slice(0, slash).toLowerCase(), pathname: rest.slice(slash) };
+}
+
 function getNativeLinkPathname(url: URL, scheme: string): string | null {
   if (url.protocol === "https:") {
     return UNIVERSAL_LINK_HOSTS.has(url.hostname) &&
@@ -132,8 +152,9 @@ function getNativeLinkPathname(url: URL, scheme: string): string | null {
     )
   )
     return null;
-  if (url.hostname === DeepLinkScope.NAVIGATE) return url.pathname || "/";
-  if (url.hostname === DeepLinkScope.SHARE_CONNECTION)
+  const { host, pathname } = getCustomSchemeParts(url);
+  if (host === DeepLinkScope.NAVIGATE) return pathname || "/";
+  if (host === DeepLinkScope.SHARE_CONNECTION)
     return "/accept-connection-sharing";
   return null;
 }
