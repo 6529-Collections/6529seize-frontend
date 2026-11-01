@@ -11353,6 +11353,424 @@ paths:
           description: Payload too large (E2EE_TOO_LARGE)
         "429":
           description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/backup:
+    get:
+      tags:
+        - Encrypted Messages
+      summary: Get the caller's encrypted message-history backup
+      description: >-
+        Returns the active backup generation (with its opaque key envelope) or
+        null, plus the profile's backup storage use and quota. The server only
+        stores ciphertext; it cannot read the backup. Requires a profile;
+        proxies are rejected; 404 E2EE_DISABLED while the feature flag is off
+        and 404 E2EE_BACKUPS_DISABLED while backups are switched off.
+      operationId: e2eeGetBackupStatus
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeGetBackupStatus
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeBackupStatus"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN)
+        "404":
+          description: Disabled (E2EE_DISABLED, E2EE_BACKUPS_DISABLED)
+    delete:
+      tags:
+        - Encrypted Messages
+      summary: Delete all of the caller's encrypted backups
+      description: >-
+        Deletes every backup generation and chunk of the caller's profile
+        (turning backup off and making every recovery code useless).
+        Idempotent. Requires a profile; proxies are rejected.
+      operationId: e2eeDeleteBackups
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeDeleteBackups
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeAck"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN)
+        "404":
+          description: Disabled (E2EE_DISABLED, E2EE_BACKUPS_DISABLED)
+  /e2ee/backups:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Start a new encrypted backup generation
+      description: >-
+        Creates a pending generation with a client-chosen random backup_id and
+        the opaque envelope (the backup key wrapped by the user's recovery
+        method). Any other pending generation of the profile is deleted. The
+        generation replaces the active one only when activated. The device
+        must be an active device of the caller's profile.
+      operationId: e2eeCreateBackup
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeCreateBackup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeCreateBackupRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeBackup"
+        "400":
+          description: Invalid request (E2EE_BAD_REQUEST)
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE)
+        "404":
+          description: Disabled (E2EE_DISABLED, E2EE_BACKUPS_DISABLED)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/backups/{backup_id}:
+    get:
+      tags:
+        - Encrypted Messages
+      summary: Get one of the caller's backup generations
+      description: >-
+        Active or pending. 404 E2EE_NOT_FOUND when the generation does not
+        exist (deleted, replaced or pruned) or belongs to another profile.
+      operationId: e2eeGetBackup
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeGetBackup
+      parameters:
+        - name: backup_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{32}$
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeBackup"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_NOT_FOUND, E2EE_DISABLED,
+            E2EE_BACKUPS_DISABLED)
+  /e2ee/backups/{backup_id}/activate:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Make a backup generation the active one
+      description: >-
+        Activates the generation and deletes every other generation of the
+        profile (with its chunks). Idempotent for an active generation.
+      operationId: e2eeActivateBackup
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeActivateBackup
+      parameters:
+        - name: backup_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{32}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeBackupDeviceRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeBackup"
+        "400":
+          description: Invalid request (E2EE_BAD_REQUEST)
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_NOT_FOUND, E2EE_DISABLED,
+            E2EE_BACKUPS_DISABLED)
+  /e2ee/backups/{backup_id}/chunks:
+    get:
+      tags:
+        - Encrypted Messages
+      summary: List the chunks of a backup generation
+      description: >-
+        Chunk metadata (sequence number, ciphertext size, time) in ascending
+        sequence order, after `after_seq`.
+      operationId: e2eeListBackupChunks
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeListBackupChunks
+      parameters:
+        - name: backup_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{32}$
+        - name: after_seq
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeBackupChunkPage"
+        "400":
+          description: Invalid request (E2EE_BAD_REQUEST)
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_NOT_FOUND, E2EE_DISABLED,
+            E2EE_BACKUPS_DISABLED)
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Append one ciphertext chunk to a backup generation
+      description: >-
+        The server assigns the next sequence number. With `expected_seq` the
+        append succeeds only when that is the generation's next sequence
+        number; otherwise nothing is stored and the response is 409
+        E2EE_BACKUP_SEQ_CONFLICT with the current `next_seq` (another device
+        appended first). The ciphertext length must be one of the backup
+        chunk buckets (4, 16, 64 or 256 KiB, or 1 MiB). Each profile may
+        store at most 256 MiB of backup ciphertext across its generations
+        (413 E2EE_BACKUP_QUOTA) and at most 10,000 chunks per generation (413
+        E2EE_TOO_LARGE).
+      operationId: e2eeAppendBackupChunk
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeAppendBackupChunk
+      parameters:
+        - name: backup_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{32}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeBackupChunkUpload"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeBackupChunk"
+        "400":
+          description: Invalid request (E2EE_BAD_REQUEST)
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_NOT_FOUND, E2EE_DISABLED,
+            E2EE_BACKUPS_DISABLED)
+        "409":
+          description: >-
+            Conflict (E2EE_BACKUP_SEQ_CONFLICT, with the generation's current
+            next_seq in the error details): expected_seq is not the next
+            sequence number
+        "413":
+          description: Too large (E2EE_TOO_LARGE, E2EE_BACKUP_QUOTA)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/backups/{backup_id}/chunks/{seq}:
+    get:
+      tags:
+        - Encrypted Messages
+      summary: Download one ciphertext chunk of a backup generation
+      operationId: e2eeGetBackupChunk
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeGetBackupChunk
+      parameters:
+        - name: backup_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{32}$
+        - name: seq
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeBackupChunkData"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_NOT_FOUND, E2EE_DISABLED,
+            E2EE_BACKUPS_DISABLED)
+  /e2ee/backups/{backup_id}/compact:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Delete the older chunks of a backup generation
+      description: >-
+        Deletes the generation's chunks with seq <= through_seq. Clients call
+        it after re-uploading a full snapshot so superseded ciphertext (for
+        example of deleted messages) does not linger.
+      operationId: e2eeCompactBackup
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeCompactBackup
+      parameters:
+        - name: backup_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{32}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeCompactBackupRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeBackup"
+        "400":
+          description: Invalid request (E2EE_BAD_REQUEST)
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_NOT_FOUND, E2EE_DISABLED,
+            E2EE_BACKUPS_DISABLED)
   /e2ee/blobs:
     post:
       tags:
@@ -32326,6 +32744,184 @@ components:
       properties:
         acknowledged:
           type: boolean
+    ApiE2eeBackup:
+      type: object
+      description: >-
+        One generation of an encrypted message-history backup. The server
+        sees only ciphertext sizes and times.
+      required:
+        - backup_id
+        - envelope
+        - active
+        - chunk_count
+        - size
+        - next_seq
+        - created_at
+        - updated_at
+        - activated_at
+      properties:
+        backup_id:
+          type: string
+          description: 0x + 32 hex, chosen randomly by the client
+        envelope:
+          type: string
+          description: >-
+            Standard base64 of the opaque key envelope (the backup key
+            wrapped by the user's recovery method)
+        active:
+          type: boolean
+        chunk_count:
+          type: integer
+        size:
+          type: integer
+          format: int64
+          description: Ciphertext bytes of the generation's chunks
+        next_seq:
+          type: integer
+          description: The sequence number the next appended chunk gets
+        created_at:
+          type: integer
+          format: int64
+          description: Unix milliseconds
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix milliseconds
+        activated_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix milliseconds; null while pending
+    ApiE2eeBackupChunk:
+      type: object
+      required:
+        - seq
+        - size
+        - created_at
+      properties:
+        seq:
+          type: integer
+        size:
+          type: integer
+          description: Ciphertext bytes
+        created_at:
+          type: integer
+          format: int64
+          description: Unix milliseconds
+    ApiE2eeBackupChunkData:
+      type: object
+      required:
+        - seq
+        - data
+      properties:
+        seq:
+          type: integer
+        data:
+          type: string
+          description: Standard base64 of the chunk ciphertext
+    ApiE2eeBackupChunkPage:
+      type: object
+      required:
+        - items
+        - next_after_seq
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiE2eeBackupChunk"
+        next_after_seq:
+          type: integer
+          nullable: true
+          description: Pass as after_seq for the next page; null at the end
+    ApiE2eeBackupChunkUpload:
+      type: object
+      required:
+        - device_key
+        - data
+      properties:
+        device_key:
+          type: string
+          description: The caller's active device (0x + 64 lowercase hex)
+        data:
+          type: string
+          description: >-
+            Standard base64 of the chunk ciphertext; its length must be a
+            backup chunk bucket
+        expected_seq:
+          type: integer
+          minimum: 1
+          description: >-
+            Optional precondition: the sequence number this chunk must get.
+            When the generation's next sequence number differs (another
+            device appended first) the append is refused with 409
+            E2EE_BACKUP_SEQ_CONFLICT. Omitted, the chunk gets the next
+            sequence number.
+    ApiE2eeBackupDeviceRequest:
+      type: object
+      required:
+        - device_key
+      properties:
+        device_key:
+          type: string
+          description: The caller's active device (0x + 64 lowercase hex)
+    ApiE2eeBackupStatus:
+      type: object
+      required:
+        - backup
+        - used_bytes
+        - quota_bytes
+        - max_chunk_bytes
+        - chunk_buckets
+      properties:
+        backup:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ApiE2eeBackup"
+          description: The active generation, or null when backup is off
+        used_bytes:
+          type: integer
+          format: int64
+          description: Ciphertext bytes across the profile's generations
+        quota_bytes:
+          type: integer
+          format: int64
+        max_chunk_bytes:
+          type: integer
+        chunk_buckets:
+          type: array
+          items:
+            type: integer
+          description: Allowed chunk ciphertext lengths in bytes
+    ApiE2eeCompactBackupRequest:
+      type: object
+      required:
+        - device_key
+        - through_seq
+      properties:
+        device_key:
+          type: string
+          description: The caller's active device (0x + 64 lowercase hex)
+        through_seq:
+          type: integer
+          minimum: 1
+          description: Chunks with seq <= through_seq are deleted
+    ApiE2eeCreateBackupRequest:
+      type: object
+      required:
+        - backup_id
+        - envelope
+        - device_key
+      properties:
+        backup_id:
+          type: string
+          description: 0x + 32 lowercase hex, random
+        envelope:
+          type: string
+          description: >-
+            Standard base64 of the opaque key envelope (at most 8 KiB raw)
+        device_key:
+          type: string
+          description: The caller's active device (0x + 64 lowercase hex)
     ApiE2eeBlob:
       type: object
       required:
