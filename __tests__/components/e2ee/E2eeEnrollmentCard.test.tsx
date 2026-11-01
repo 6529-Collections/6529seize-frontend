@@ -65,6 +65,31 @@ describe("E2eeEnrollmentCard turn-on", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
+  it("announces the wait and marks the button busy during the combined sign-in", async () => {
+    let finish: (outcome: CombinedTurnOnOutcome) => void = () => undefined;
+    mockTurnOn.mockReturnValue(
+      new Promise((resolve) => {
+        finish = resolve;
+      })
+    );
+    renderCard();
+
+    fireEvent.click(screen.getByRole("button", BUTTON));
+
+    const status = await screen.findByText(
+      "Waiting for your wallet signature…"
+    );
+    expect(status.tagName).toBe("OUTPUT");
+    const button = screen.getByRole("button", BUTTON);
+    expect(button).toHaveAttribute("aria-busy", "true");
+    expect(button).toBeDisabled();
+
+    finish("done");
+    await waitFor(() =>
+      expect(screen.getByRole("button", BUTTON)).not.toBeDisabled()
+    );
+  });
+
   it("uses the separate grant prompt when the combined sign-in is not possible", async () => {
     mockTurnOn.mockResolvedValue("fallback");
     const engine = renderCard();
