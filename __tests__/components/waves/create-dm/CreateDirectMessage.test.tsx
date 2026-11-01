@@ -26,7 +26,14 @@ jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
 jest.mock("@/components/react-query-wrapper/ReactQueryWrapper", () => ({
   QueryKey: { PROFILE_SEARCH: "PROFILE_SEARCH" },
 }));
-jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
+jest.mock("@/services/api/common-api", () => {
+  const actual = jest.requireActual("@/services/api/common-api");
+  return {
+    commonApiFetch: jest.fn(),
+    getStructuredApiErrorBody: actual.getStructuredApiErrorBody,
+    getStructuredApiErrorCode: actual.getStructuredApiErrorCode,
+  };
+});
 jest.mock("@/helpers/waves/waves.helpers", () => ({
   createDirectMessageWave: jest.fn(),
 }));
@@ -179,6 +186,36 @@ it("keeps recipients on creation failure and allows retry", async () => {
   expect(screen.getByRole("button", { name: "Remove alice" })).toBeVisible();
   await user.click(screen.getByRole("button", { name: "Message alice" }));
   expect(mockPush).toHaveBeenCalledWith("/messages/dm-1");
+});
+
+it("explains a refused recipient with localized copy from the error code", async () => {
+  const refusal = Object.assign(new Error("server copy"), {
+    status: 403,
+    response: {
+      status: 403,
+      body: JSON.stringify({
+        error: "server copy",
+        code: "DM_RECIPIENT_GROUP_MEMBERS_ONLY",
+        handle: "alice",
+      }),
+    },
+  });
+  jest.mocked(createDirectMessageWave).mockRejectedValueOnce(refusal);
+  const user = userEvent.setup();
+  const { input } = setup();
+  await user.type(input, "ali");
+  await user.click(await screen.findByRole("button", { name: /alice Level/ }));
+  await user.click(screen.getByRole("button", { name: "Message alice" }));
+
+  await waitFor(() =>
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "error",
+        description:
+          "@alice only accepts new direct messages from members of a group they chose.",
+      })
+    )
+  );
 });
 
 it("prevents duplicate creation and locks recipient editing while submitting", async () => {

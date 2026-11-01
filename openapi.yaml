@@ -19144,6 +19144,17 @@ paths:
                 $ref: "#/components/schemas/ApiWave"
         "400":
           description: Invalid request
+        "403":
+          description: |
+            A recipient does not admit new direct messages from the caller.
+            Existing conversations with the same members are returned without
+            this check. The body is `{ error, code, handle }` (handle may be
+            null when the recipient has none) where code is
+            DM_RECIPIENT_NOT_ACCEPTING, DM_RECIPIENT_PEOPLE_I_FOLLOW_ONLY,
+            DM_RECIPIENT_GROUP_MEMBERS_ONLY (plus group_id and group_name only
+            when the recipient's group is public) or
+            DM_SENDER_BLOCKED_RECIPIENT. A recipient's block is reported as
+            DM_RECIPIENT_NOT_ACCEPTING and never disclosed.
   /waves/{id}:
     get:
       tags:
@@ -39317,15 +39328,41 @@ components:
       type: object
       required:
         - direct_message_policy
+        - direct_message_group_id
+        - direct_message_allow_people_i_follow
+        - direct_message_group_unavailable
         - notification_level
         - notifications
       properties:
         direct_message_policy:
           type: string
+          description: |
+            Who may start a new direct message with this profile. Blocked
+            profiles can never start one. GROUP_MEMBERS admits members of
+            direct_message_group_id.
           enum:
             - EVERYONE
             - PEOPLE_I_FOLLOW
             - NOBODY
+            - GROUP_MEMBERS
+        direct_message_group_id:
+          type: string
+          nullable: true
+          description: |
+            Group whose members may start a new direct message when
+            direct_message_policy is GROUP_MEMBERS. Kept when another policy
+            is selected so the choice can be restored.
+        direct_message_allow_people_i_follow:
+          type: boolean
+          description: |
+            When direct_message_policy is GROUP_MEMBERS, people this profile
+            follows may always start a new direct message. Defaults to true.
+        direct_message_group_unavailable:
+          type: boolean
+          description: |
+            True when direct_message_policy is GROUP_MEMBERS but the chosen
+            group is missing or hidden. Admission then falls back to people
+            this profile follows until another group is chosen.
         notification_level:
           type: string
           enum:
@@ -41448,10 +41485,23 @@ components:
       properties:
         direct_message_policy:
           type: string
+          description: |
+            GROUP_MEMBERS requires direct_message_group_id in the same request
+            or an already saved group.
           enum:
             - EVERYONE
             - PEOPLE_I_FOLLOW
             - NOBODY
+            - GROUP_MEMBERS
+        direct_message_group_id:
+          type: string
+          nullable: true
+          description: |
+            A visible, non-direct-message group the profile can see. Null
+            clears the saved group and is rejected while the policy is
+            GROUP_MEMBERS.
+        direct_message_allow_people_i_follow:
+          type: boolean
         notification_level:
           type: string
           enum:

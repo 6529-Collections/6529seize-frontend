@@ -172,7 +172,8 @@ profile picture and handle in that list link to the public profile. A blocked
 profile's header shows a red-tinted **Blocked** status beside the handle and a separate
 **Unblock** action where **Follow** normally appears. Follow and
 notification-mute actions are hidden while the block is active because the
-block already provides those states. Direct message remains available. Unblock
+block already provides those states. Direct message remains available for an
+existing conversation; starting a new one asks you to unblock first. Unblock
 opens a confirmation dialog; confirming restores the applicable actions
 immediately without changing the viewer's saved notification preference or
 refollowing the profile. On an unblocked profile, the standalone notification
@@ -196,13 +197,18 @@ blocked-post presentation.
 
 ## Blocking and direct messages
 
-Blocking is a directional, privacy-preserving mute rather than a delivery
-restriction. One-to-one direct messages remain available under the normal
-direct-message admission policy, including conversations created after the
-block. Messages continue to be delivered, so the blocked profile receives no
-error or explicit indication that a block exists.
+Blocking always wins over the blocker's direct-message setting for new
+conversations. A blocked profile can never start a new direct message,
+one-to-one or group, that includes the blocker, even under **Everyone** or when
+the blocker follows them. It sees the same "doesn't accept new direct messages"
+notice as the **Nobody** setting, so the block is never disclosed. The blocker
+is asked to unblock a profile before starting a new conversation with it.
 
-For the blocker, an existing or future one-to-one conversation is treated as
+Existing conversations stay available. Blocking is a directional,
+privacy-preserving mute for them: messages continue to be delivered, so the
+blocked profile receives no error or explicit indication that a block exists.
+
+For the blocker, an existing one-to-one conversation is treated as
 muted and deprioritized without changing its saved manual mute setting.
 Messages from the blocked profile retain the standard blocked-post presentation
 and can be revealed individually. They do not create ordinary notifications,

@@ -15,7 +15,15 @@ import { ApiUpdateProfileNotificationCategories } from '../models/ApiUpdateProfi
 import { HttpFile } from '../http/http';
 
 export class ApiUpdateProfilePreferences {
+    /**
+    * GROUP_MEMBERS requires direct_message_group_id in the same request or an already saved group. 
+    */
     'direct_message_policy'?: ApiUpdateProfilePreferencesDirectMessagePolicyEnum;
+    /**
+    * A visible, non-direct-message group the profile can see. Null clears the saved group and is rejected while the policy is GROUP_MEMBERS. 
+    */
+    'direct_message_group_id'?: string | null;
+    'direct_message_allow_people_i_follow'?: boolean;
     'notification_level'?: ApiUpdateProfilePreferencesNotificationLevelEnum;
     'notifications'?: ApiUpdateProfileNotificationCategories;
 
@@ -28,6 +36,18 @@ export class ApiUpdateProfilePreferences {
             "name": "direct_message_policy",
             "baseName": "direct_message_policy",
             "type": "ApiUpdateProfilePreferencesDirectMessagePolicyEnum",
+            "format": ""
+        },
+        {
+            "name": "direct_message_group_id",
+            "baseName": "direct_message_group_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "direct_message_allow_people_i_follow",
+            "baseName": "direct_message_allow_people_i_follow",
+            "type": "boolean",
             "format": ""
         },
         {
@@ -54,7 +74,8 @@ export class ApiUpdateProfilePreferences {
 export enum ApiUpdateProfilePreferencesDirectMessagePolicyEnum {
     Everyone = 'EVERYONE',
     PeopleIFollow = 'PEOPLE_I_FOLLOW',
-    Nobody = 'NOBODY'
+    Nobody = 'NOBODY',
+    GroupMembers = 'GROUP_MEMBERS'
 }
 export enum ApiUpdateProfilePreferencesNotificationLevelEnum {
     All = 'ALL',
