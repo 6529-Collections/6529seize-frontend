@@ -231,6 +231,7 @@ site's bordered page frame and consistent content padding:
 - **Needs review**: `/content-moderation/needs-review` (older `/content-moderation/open-reports` links also open this queue)
 - **Checks**: `/content-moderation/checks`
 - **Resolved reports**: `/content-moderation/resolved-reports`
+- **Encrypted reports**: `/content-moderation/encrypted-reports`
 - **Suspended profiles**: `/content-moderation/suspended-profiles`
 - **Block activity**: `/content-moderation/block-activity`
 
@@ -343,6 +344,28 @@ An item that changed during review requires **Load latest version** before
 another decision. A failed request can be retried safely with the same
 decision key. Expired evidence is labelled, its decision history remains
 available, and actions that require missing evidence are unavailable.
+
+Encrypted reports lists reports of severe or illegal harm from end-to-end
+encrypted chats, newest first, with **Load more** for older ones. Each row
+shows the category, when it was reported, whether the sender was verified, and
+**On hold** or the date it is deleted (180 days after the report unless held).
+The list shows no message content. **Review evidence** opens one report:
+
+- The one message the reporter chose to share, as they decrypted it, shown as
+  plain text with the names of any attachments (attachment contents are not
+  part of a report). A notice states that this is not the chat: 6529 can't
+  read anything else in the conversation, and the other people in it can't
+  see the report.
+- **Signature verified** when the sender's device signed this exact message
+  and the sender was in the chat, otherwise **Signature not verified**, to be
+  treated as unconfirmed.
+- The category, report time, sender and reporter profile ids, the reporter's
+  note and the retention date.
+- **Place on hold** keeps the report past its retention until **Release hold**.
+
+Every list, opened report and hold change is recorded in an access log on the
+server. **Back to encrypted reports** returns to the list without reloading
+it.
 
 Block activity is a newest-first,
 continuously loaded trail showing who blocked or unblocked whom. Each compact
