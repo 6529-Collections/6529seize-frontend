@@ -3,8 +3,8 @@ import { EX_FOCUS, EX_LAYOUT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { CARD, type DcId, type TierId } from "./_lib/card";
 import { hw, hwRich, type HwSuffix } from "./_lib/copy";
-import { CardText, Hw } from "./_lib/facts";
-import { CardHead, Chip } from "./parts";
+import { CardText, Hw, nb } from "./_lib/facts";
+import { CardHead, Chip, OpenMark, READ, SMALL, TAP_LINK } from "./parts";
 
 /**
  * The owner's card, in its order and its words: Home / Office with its
@@ -17,10 +17,10 @@ const CARD_BOX =
 
 /**
  * The line under a card's price. Side by side, every card keeps room for
- * two lines, so the price rows of a row of cards line up.
+ * two lines (three for the datacenter's), so the price rows of a row of
+ * cards line up.
  */
-const COST_LINE =
-  "tw-m-0 tw-mt-1 tw-text-[15px] tw-leading-6 tw-text-iron-300 md:tw-min-h-12";
+const COST_LINE = `tw-m-0 tw-mt-1 tw-text-iron-300 ${READ}`;
 
 function OptionCard({
   id,
@@ -28,6 +28,7 @@ function OptionCard({
   what,
   chips,
   data,
+  tip,
   cost,
   recommended,
   locale,
@@ -37,6 +38,8 @@ function OptionCard({
   readonly what: string;
   readonly chips: readonly string[];
   readonly data?: string;
+  /** A buying note under the card's own words. */
+  readonly tip?: ReactNode;
   readonly cost: ReactNode;
   readonly recommended?: boolean;
   readonly locale: SupportedLocale;
@@ -63,9 +66,9 @@ function OptionCard({
       <CardText
         id={`${id}.what`}
         locale={locale}
-        className="tw-mt-2 tw-block tw-text-[15px] tw-leading-6 tw-text-iron-300 md:tw-min-h-12"
+        className={`tw-mt-2 tw-block tw-text-iron-300 md:tw-min-h-[52px] ${READ}`}
       >
-        {what}
+        {nb(what)}
       </CardText>
       <CardText id={`${id}.chips`} locale={locale} as="div" className="tw-mt-4">
         <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-2 tw-p-0">
@@ -83,6 +86,9 @@ function OptionCard({
           <b className="tw-font-semibold tw-text-iron-300">{CARD.dataLabel}</b>{" "}
           {data}
         </CardText>
+      )}
+      {tip !== undefined && (
+        <p className={`tw-m-0 tw-mt-3 tw-text-iron-300 ${SMALL}`}>{tip}</p>
       )}
       <div className="tw-mt-auto tw-pt-5">
         <div className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4">
@@ -113,7 +119,7 @@ function TierCost({
           {hw(locale, "tier.buy")}
         </span>
       </p>
-      <p className={COST_LINE}>
+      <p className={`${COST_LINE} md:tw-min-h-[52px]`}>
         {tier === "acceptable"
           ? hwRich(locale, "tier.acceptableMonth", { month })
           : hwRich(locale, "tier.month", { month })}
@@ -141,9 +147,10 @@ function DcCost({
           {hw(locale, "tier.perMonth")}
         </span>
       </p>
-      <p className={COST_LINE}>
+      <p className={`${COST_LINE} md:tw-min-h-[78px]`}>
         {id === "rack"
           ? hwRich(locale, "dc.rackCost", {
+              spec: <Hw id="dc.rack.spec" locale={locale} />,
               colo: <Hw id="dc.colo.month" locale={locale} />,
               server: <Hw id="dc.colo.server" locale={locale} />,
             })
@@ -155,48 +162,102 @@ function DcCost({
   );
 }
 
+/**
+ * Why home and office come first: three one-line claims, each with its
+ * reasons behind a disclosure, so the tiers start close to the top.
+ */
 function WhyHome({ locale }: { readonly locale: SupportedLocale }) {
   const items = [
     {
       key: "spread",
       label: hw(locale, "home.spreadLabel"),
+      claim: hw(locale, "home.spreadClaim"),
       body: hw(locale, "home.spread"),
     },
     {
       key: "privacy",
       label: hw(locale, "home.privacyLabel"),
+      claim: hw(locale, "home.privacyClaim"),
       body: hw(locale, "home.privacy"),
     },
     {
       key: "cost",
       label: hw(locale, "home.costLabel"),
-      body: hwRich(locale, "home.cost", {
+      claim: hwRich(locale, "home.costClaim", {
         good: <Hw id="tier.good.month" locale={locale} />,
+      }),
+      body: hwRich(locale, "home.cost", {
+        ovh: <Hw id="dc.cloud.ovh" locale={locale} />,
         cloud: <Hw id="dc.cloud.bigThree" locale={locale} />,
       }),
     },
   ];
   return (
-    <div className="tw-mb-8 md:tw-mb-10" id="why-home">
+    <div className="tw-mb-6 md:tw-mb-8" id="why-home">
       <h3 className="tw-m-0 tw-text-[17px] tw-font-semibold tw-leading-6 tw-text-iron-50">
         {hw(locale, "home.why")}
       </h3>
-      <ul className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-grid-cols-1 tw-gap-x-8 tw-gap-y-4 tw-p-0 md:tw-grid-cols-3">
+      <ul className="tw-m-0 tw-mt-3 tw-grid tw-list-none tw-grid-cols-1 tw-items-start tw-gap-x-8 tw-gap-y-2 tw-p-0 md:tw-mt-4 md:tw-grid-cols-3">
         {items.map((item) => (
           <li
             key={item.key}
             className="tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-4"
+            data-why={item.key}
           >
-            <span className="tw-block tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-50">
-              {item.label}
-            </span>
-            <span className="tw-mt-1 tw-block tw-text-[15px] tw-leading-6 tw-text-iron-300">
-              {item.body}
-            </span>
+            <details className="tw-group">
+              <summary
+                className={`tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-start tw-justify-between tw-gap-3 tw-py-1 [&::-webkit-details-marker]:tw-hidden ${EX_FOCUS}`}
+              >
+                <span>
+                  <span className="tw-block tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.12em] tw-text-primary-300">
+                    {item.label}
+                  </span>
+                  <span
+                    className={`tw-mt-0.5 tw-block tw-font-semibold tw-text-iron-50 ${READ}`}
+                  >
+                    {item.claim}
+                  </span>
+                </span>
+                <OpenMark className="tw-mt-1" />
+              </summary>
+              <p
+                className={`tw-m-0 tw-mt-1.5 tw-hidden tw-pb-1 tw-text-iron-300 group-open:tw-block ${READ}`}
+              >
+                {item.body}
+              </p>
+            </details>
           </li>
         ))}
       </ul>
     </div>
+  );
+}
+
+/** The words the tier cards use, each in one line, under the cards. */
+function Terms({ locale }: { readonly locale: SupportedLocale }) {
+  const terms = [
+    { key: "reads", term: "tier.terms.reads", body: "tier.terms.readsBody" },
+    { key: "nvme", term: "tier.terms.nvme", body: "tier.terms.nvmeBody" },
+    { key: "ups", term: "tier.terms.ups", body: "tier.terms.upsBody" },
+  ] as const satisfies readonly {
+    key: string;
+    term: HwSuffix;
+    body: HwSuffix;
+  }[];
+  return (
+    <dl
+      className="tw-m-0 tw-mt-5 tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-2 md:tw-grid-cols-3"
+      aria-label={hw(locale, "tier.terms")}
+    >
+      {terms.map((item) => (
+        <div key={item.key} className={`tw-text-iron-400 ${SMALL}`}>
+          <dt className="tw-inline tw-font-semibold tw-text-iron-300">
+            {hw(locale, item.term)}.
+          </dt>{" "}
+          <dd className="tw-m-0 tw-inline">{hw(locale, item.body)}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }
 
@@ -226,6 +287,14 @@ export function HomeOffice({ locale }: { readonly locale: SupportedLocale }) {
               what={def.what}
               chips={def.chips}
               data={def.data}
+              {...(tier === "good"
+                ? {
+                    tip: hwRich(locale, "tier.goodDrive", {
+                      min: <Hw id="spec.good.driveMin" locale={locale} />,
+                      node: <Hw id="spec.great.disk" locale={locale} />,
+                    }),
+                  }
+                : {})}
               cost={<TierCost tier={tier} locale={locale} />}
               recommended={tier === "good"}
               locale={locale}
@@ -233,6 +302,7 @@ export function HomeOffice({ locale }: { readonly locale: SupportedLocale }) {
           );
         })}
       </div>
+      <Terms locale={locale} />
       <p className="tw-m-0 tw-mt-4 tw-max-w-[760px] tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-400">
         <CardText id="fine" locale={locale}>
           {CARD.fine}
@@ -241,10 +311,7 @@ export function HomeOffice({ locale }: { readonly locale: SupportedLocale }) {
           date: <Hw id="read.day" locale={locale} />,
           kwh: <Hw id="power.kwh" locale={locale} />,
         })}{" "}
-        <a
-          href="#spec"
-          className="tw-text-primary-300 tw-no-underline hover:tw-underline"
-        >
+        <a href="#spec" className={`${TAP_LINK} tw-font-semibold`}>
           {hw(locale, "tier.full")}
         </a>
       </p>
@@ -266,7 +333,9 @@ export function Datacenter({ locale }: { readonly locale: SupportedLocale }) {
         title={CARD.datacenter.title}
         note={CARD.datacenter.note}
       />
-      <p className={`${EX_LAYOUT.paragraph} tw-mb-6 md:tw-mb-8`}>
+      <p
+        className={`${EX_LAYOUT.paragraph} tw-mb-6 tw-text-iron-300 md:tw-mb-8 ${READ}`}
+      >
         {hw(locale, "dc.intro")}
       </p>
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2 md:tw-gap-[18px]">
@@ -324,7 +393,7 @@ export function LargeHolders({ locale }: { readonly locale: SupportedLocale }) {
                 <CardText
                   id={`holders.${index + 1}`}
                   locale={locale}
-                  className="tw-mt-1 tw-block tw-text-[15px] tw-leading-6 tw-text-iron-300 sm:tw-mt-2"
+                  className={`tw-mt-1 tw-block tw-text-iron-300 sm:tw-mt-2 ${READ}`}
                 >
                   {item.body}
                 </CardText>
@@ -333,11 +402,8 @@ export function LargeHolders({ locale }: { readonly locale: SupportedLocale }) {
           );
         })}
       </ol>
-      <p className="tw-m-0 tw-mt-4 tw-text-[15px] tw-leading-6">
-        <a
-          href="#several-machines"
-          className="tw-text-primary-300 tw-no-underline hover:tw-underline"
-        >
+      <p className={`tw-m-0 tw-mt-3 ${READ}`}>
+        <a href="#several-machines" className={TAP_LINK}>
           {hw(locale, "holders.title")}
         </a>
       </p>
@@ -380,14 +446,11 @@ export function EveryValidator({
             </li>
           ))}
         </ul>
-        <p className="tw-m-0 tw-mt-5 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+        <p className={`tw-m-0 tw-mt-5 tw-text-iron-300 ${READ}`}>
           {hwRich(locale, "every.wire", {
             wire: <Hw id="use.wire" locale={locale} />,
           })}{" "}
-          <a
-            href="#part-network"
-            className="tw-text-primary-300 tw-no-underline hover:tw-underline"
-          >
+          <a href="#part-network" className={TAP_LINK}>
             {hw(locale, "every.more")}
           </a>
         </p>
@@ -414,8 +477,9 @@ export function JumpRow({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <nav
       aria-label={hw(locale, "jump.label")}
-      className="tw-mt-8 tw-border-0 tw-border-y tw-border-solid tw-border-iron-900 tw-py-3 md:tw-mt-10"
+      className="tw-mt-8 tw-scroll-mt-24 tw-border-0 tw-border-y tw-border-solid tw-border-iron-900 tw-py-3 md:tw-mt-10"
       data-jumps=""
+      id="jumps"
     >
       <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-x-1 tw-gap-y-1.5 tw-p-0">
         {JUMPS.map((jump) => (

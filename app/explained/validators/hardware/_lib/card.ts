@@ -1,5 +1,5 @@
 /**
- * The owner's approved hardware card of Oct 31, 2026, word for word. The
+ * The owner's approved hardware card of October 31, 2026, word for word. The
  * page prints these sentences exactly as written and in the card's order:
  * the lede, the testing period, Home / Office, Datacenter, Large TDH
  * holders, For every validator. They are quoted, so they live here and not
@@ -7,7 +7,7 @@
  * (the voice lint's "separately written" rule is for the pages' own copy),
  * and the card's numbers print as one sourced fact, the card itself.
  *
- * Costs are not here. The card's prices were checked again on Oct 31, 2026
+ * Costs are not here. The card's prices were checked again on October 31, 2026
  * and the page prints today's, each with its source (`data.ts`).
  */
 export const CARD = {

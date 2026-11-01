@@ -1,7 +1,5 @@
 import { FactText } from "@/components/explained/facts/FactText";
 import { kt } from "@/components/explained/i18n";
-import Mark, { MARK_TEXT } from "@/components/explained/marks/Mark";
-import { TrackBar } from "@/components/explained/marks/Track";
 import { Icon } from "@/components/explained/marks/glyphs";
 import { EX_FOCUS, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -14,9 +12,12 @@ import MachineChooser, { type ChooserResult } from "./MachineChooser";
 
 /**
  * The top of the page: the eyebrow and title, the owner's lede as written,
- * where the guidance stands (decided, with no minimum) and the software
- * (built, in testing), the card's testing-period banner, and the chooser.
+ * where things stand (guidance with no minimum, the software in testing) as
+ * two plain status lines, the card's testing-period banner, and the
+ * chooser.
  */
+const STATUS =
+  "tw-inline-flex tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-px-3 tw-py-1 tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-50 md:tw-text-sm";
 function TestingBanner({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <aside
@@ -100,7 +101,6 @@ function results(
       body: hwRich(locale, "chooser.great.body", {
         ram: f("spec.great.ram"),
         disk: f("spec.great.disk"),
-        buy: f("tier.great.buy"),
       }),
       ...tierCost(locale, "great"),
       more: tierMore,
@@ -110,7 +110,8 @@ function results(
       recommended: false,
       title: hw(locale, "chooser.rack.title"),
       body: hwRich(locale, "chooser.rack.body", {
-        month: f("node.rented"),
+        spec: f("dc.rack.spec"),
+        small: f("node.rentedFrom"),
         cloud: f("node.cloud"),
       }),
       cost: (
@@ -128,7 +129,6 @@ function results(
         vcpu: f("spec.cloud.vcpu"),
         ram: f("spec.cloud.ram"),
         ram8: f("spec.cloud.ram8"),
-        month: f("dc.cloud.month"),
       }),
       cost: (
         <>
@@ -170,22 +170,21 @@ export default function Hero({
           {hw(locale, "jumpChooser")}
           <Icon kind="arrow" className="tw-size-[15px] tw-rotate-90" />
         </a>
-        <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-center tw-gap-x-[18px] tw-gap-y-2">
-          <Mark kind="decided" label={hw(locale, "guidance")} locale={locale} />
-          <FactText fact={version} locale={locale}>
-            <span
-              className={`tw-inline-flex tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-whitespace-nowrap tw-font-semibold tw-text-iron-50 ${MARK_TEXT.md}`}
-              data-track="built"
-            >
-              <TrackBar maturity="built" />
-              <span>
+        <ul
+          className="tw-m-0 tw-mt-6 tw-flex tw-list-none tw-flex-wrap tw-items-center tw-gap-2 tw-p-0"
+          aria-label={hw(locale, "status")}
+        >
+          <li className={STATUS}>{hw(locale, "guidance")}</li>
+          <li className={STATUS}>
+            <FactText fact={version} locale={locale}>
+              <span data-track="built">
                 {hw(locale, "software", {
                   version: version ? fmt(version, locale) : "",
                 })}
               </span>
-            </span>
-          </FactText>
-        </div>
+            </FactText>
+          </li>
+        </ul>
         <TestingBanner locale={locale} />
       </div>
       <div className="tw-min-w-0 lg:tw-pt-1">
@@ -193,6 +192,8 @@ export default function Hero({
           copy={{
             title: hw(locale, "chooser.title"),
             intro: hw(locale, "chooser.intro"),
+            starting: hw(locale, "chooser.starting"),
+            yours: hw(locale, "chooser.yours"),
             where: hw(locale, "chooser.where"),
             node: hw(locale, "chooser.node"),
             nodeHint: hw(locale, "chooser.nodeHint"),

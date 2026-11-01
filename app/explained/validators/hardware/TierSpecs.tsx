@@ -3,11 +3,12 @@ import { CARD, type TierId } from "./_lib/card";
 import { hw, hwRich } from "./_lib/copy";
 import { MACHINES, SPEC_ROWS } from "./_lib/data";
 import { Hw, nb, sourceTitle } from "./_lib/facts";
-import { Disclosure, FactTable } from "./parts";
+import { Disclosure, FactTable, READ } from "./parts";
 
 /**
  * The three home tiers in full: on a wide screen one table, Good's column
- * marked as the card marks it; on a phone one block per tier, Good open.
+ * marked as the card marks it, and a Good cell that repeats Acceptable's
+ * says so; on a phone one block per tier, Good open, every cell in full.
  * Then the systems every tier runs, and the machines that fit with their
  * store prices behind a disclosure.
  */
@@ -20,7 +21,7 @@ function SpecTable({ locale }: { readonly locale: SupportedLocale }) {
   const goodCell = "tw-bg-primary-400/[0.06] tw-text-iron-50";
   return (
     <table
-      className="tw-hidden tw-w-full tw-table-fixed tw-border-collapse tw-text-[15px] tw-leading-6 before:tw-content-none after:tw-content-none lg:tw-table [&_:is(thead,tbody,tr)]:before:tw-content-none [&_:is(thead,tbody,tr)]:after:tw-content-none"
+      className="tw-hidden tw-w-full tw-table-fixed tw-border-collapse tw-text-[15px] tw-leading-6 before:tw-content-none after:tw-content-none lg:tw-table lg:tw-text-base lg:tw-leading-[26px] [&_:is(thead,tbody,tr)]:before:tw-content-none [&_:is(thead,tbody,tr)]:after:tw-content-none"
       aria-label={hw(locale, "spec.caption")}
     >
       <colgroup>
@@ -70,14 +71,23 @@ function SpecTable({ locale }: { readonly locale: SupportedLocale }) {
             >
               {hw(locale, `spec.row.${row.id}`)}
             </th>
-            {TIERS.map((tier) => (
-              <td
-                key={tier}
-                className={`tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-px-4 tw-py-3.5 tw-align-top ${tier === "good" ? goodCell : "tw-text-iron-300"}`}
-              >
-                {nb(row[tier])}
-              </td>
-            ))}
+            {TIERS.map((tier) => {
+              const same = tier === "good" && row.good === row.acceptable;
+              return (
+                <td
+                  key={tier}
+                  className={`tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-px-4 tw-py-3.5 tw-align-top ${tier === "good" ? goodCell : "tw-text-iron-300"}`}
+                >
+                  {same ? (
+                    <span className="tw-text-iron-400">
+                      {hw(locale, "spec.same")}
+                    </span>
+                  ) : (
+                    nb(row[tier])
+                  )}
+                </td>
+              );
+            })}
           </tr>
         ))}
       </tbody>
@@ -190,13 +200,16 @@ export default function TierSpecs({
     <div className="tw-flex tw-flex-col tw-gap-6">
       <SpecTable locale={locale} />
       <TierBlocks locale={locale} />
-      <p className="tw-m-0 tw-max-w-[760px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
-        {hwRich(locale, "spec.systems", {
-          linux: <Hw id="os.linux" locale={locale} />,
-          mac: <Hw id="os.mac" locale={locale} />,
-          windows: <Hw id="os.windows" locale={locale} />,
-        })}
-      </p>
+      <div className={`tw-max-w-[760px] tw-text-iron-300 ${READ}`}>
+        <p className="tw-m-0">{hw(locale, "spec.systems")}</p>
+        <ul className="tw-m-0 tw-mt-1.5 tw-flex tw-list-disc tw-flex-col tw-gap-1 tw-pl-5 marker:tw-text-iron-600">
+          {(["os.linux", "os.mac", "os.windows"] as const).map((id) => (
+            <li key={id}>
+              <Hw id={id} locale={locale} />
+            </li>
+          ))}
+        </ul>
+      </div>
       <Machines locale={locale} />
     </div>
   );

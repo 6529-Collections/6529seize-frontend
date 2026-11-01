@@ -2,14 +2,14 @@ import type { SourceId } from "./sources";
 
 /**
  * Cloud VMs and servers for a node: each provider, the types priced there
- * on Oct 31, 2026, and what each costs a month all in. Each provider names
+ * on October 31, 2026, and what each costs a month all in. Each provider names
  * the source its prices were read from (`sources.ts`).
  */
 const V2_8GIB = "2 vCPU, 8 GiB";
 const V2_8GB = "2 vCPU, 8 GB";
 const V4_8GB = "4 vCPU, 8 GB";
 const AMPERE_ALTRA = "Ampere Altra";
-const SHARED = "Shared, no credits";
+const SHARED = "No, shared cores";
 
 /** Cloud VMs: each provider and the types priced there. */
 export type Arch = "arm" | "x86";
@@ -39,13 +39,25 @@ export interface CloudRow {
   readonly totalNote?: string;
   /** False when the provider does not sell it today. */
   readonly orderable: boolean;
+  /**
+   * False for a type the summary never picks, though it costs least:
+   * Oracle's Always Free A1, which Oracle may reclaim when it looks idle.
+   */
+  readonly summary?: false;
 }
 
 export interface CloudProvider {
   readonly id: string;
   readonly name: string;
+  /** A shorter name for the provider buttons, when the name is long. */
+  readonly tab?: string;
   readonly region: string;
   readonly source: SourceId;
+  /**
+   * The types are API ids ("t4g.large"), set in the code face; otherwise
+   * product names ("Basic, Regular"), set in the text face.
+   */
+  readonly typeIsId: boolean;
   /** How the total is made up, and what to know: from the source. */
   readonly notes: readonly string[];
   readonly rows: readonly CloudRow[];
@@ -61,6 +73,7 @@ export const CLOUD: readonly CloudProvider[] = [
     name: "AWS",
     region: "US East (N. Virginia)",
     source: "aws",
+    typeIsId: true,
     notes: [
       "Totals add 100 GB of gp3 disk ($8.00) and a public IPv4 address ($3.65). The first 100 GB out each month are free.",
       "If a t-type's 24-hour average ever passes its baseline, AWS bills the extra at $0.04 (t4g) or $0.05 (t3a) per vCPU-hour.",
@@ -138,6 +151,7 @@ export const CLOUD: readonly CloudProvider[] = [
     name: "Google Cloud",
     region: "us-central1 (Iowa)",
     source: "gcp",
+    typeIsId: true,
     notes: [
       "Totals add a 100 GB balanced disk ($10.00; C4A takes Hyperdisk, $8.00) and a public IPv4 address ($3.65).",
       "Totals use Standard Tier networking, whose first 200 GiB out a month are free. Premium Tier, the default, adds $5.47 for 50 GB (46.6 GiB, the first 1 GiB free).",
@@ -207,6 +221,7 @@ export const CLOUD: readonly CloudProvider[] = [
     name: "Azure",
     region: "East US",
     source: "azure",
+    typeIsId: false,
     notes: [
       "Totals add a 128 GiB Standard SSD ($9.60) and a public IPv4 address ($3.65). The first 100 GB out each month are free.",
       "B-series types slow to their base speed when their credits run out, instead of billing more.",
@@ -271,9 +286,10 @@ export const CLOUD: readonly CloudProvider[] = [
     name: "Hetzner",
     region: "Germany and Finland; CPX31 in the US",
     source: "hetzner",
+    typeIsId: false,
     notes: [
       "Prices include the disk, a public IPv4 address and 20 TB of traffic in the EU (1–3 TB in the US). Converted at 1 EUR = 1.1172 USD.",
-      "Hetzner raised cloud prices on June 15, 2026. CX and CAX plans showed as unavailable on Oct 31, 2026.",
+      "Hetzner raised cloud prices on June 15, 2026. CX and CAX plans showed as unavailable on October 31, 2026.",
     ],
     rows: [
       {
@@ -348,6 +364,7 @@ export const CLOUD: readonly CloudProvider[] = [
     name: "DigitalOcean",
     region: "Same price in every region",
     source: "digitalocean",
+    typeIsId: false,
     notes: [
       "IPv4 and transfer are included. No Arm droplets.",
       "A Basic droplet with 2 vCPU and 4 GiB costs $24: below the 8 GB of the tier, and enough for a test.",
@@ -386,6 +403,7 @@ export const CLOUD: readonly CloudProvider[] = [
     name: "Vultr",
     region: "Same price everywhere except São Paulo, 50% more",
     source: "vultr",
+    typeIsId: true,
     notes: ["IPv4 is included. No Arm plans."],
     rows: [
       {
@@ -435,8 +453,10 @@ export const CLOUD: readonly CloudProvider[] = [
   {
     id: "akamai",
     name: "Akamai (Linode)",
+    tab: "Akamai",
     region: "Core regions; Jakarta 20% more, São Paulo 40% more",
     source: "akamai",
+    typeIsId: true,
     notes: ["IPv4 is included. No Arm plans."],
     rows: [
       {
@@ -488,6 +508,7 @@ export const CLOUD: readonly CloudProvider[] = [
     name: "OVHcloud",
     region: "US catalog",
     source: "ovh",
+    typeIsId: false,
     notes: [
       "IPv4 is included. VPS traffic is unlimited, except in Mumbai, Singapore and Sydney. No Arm.",
       "Paid 12 months ahead, VPS-2 costs $8.50 a month and VPS-3 $12.32.",
@@ -537,12 +558,14 @@ export const CLOUD: readonly CloudProvider[] = [
   {
     id: "oracle",
     name: "Oracle Cloud",
+    tab: "Oracle",
     region: "Same price in every commercial region",
     source: "oracle",
+    typeIsId: false,
     notes: [
       "The first 200 GB of disk and 10 TB out each month are free. On Arm, 1 OCPU is 1 core; on x86, 1 OCPU is 2 vCPUs.",
       "The Always Free Arm tier was halved on June 15, 2026, to 2 cores and 12 GB. Oracle may reclaim an idle Always Free instance, and a validator looks idle by its measures: fine for the test phase.",
-      "On a pay-as-you-go account, Oracle’s price list (updated Oct 8, 2026) still prices the first 3,000 OCPU-hours and 18,000 GB-hours of A1 each month at $0: 4 cores and 16 GB cost nothing there. The list price is $46.72.",
+      "On a pay-as-you-go account, Oracle’s two sources disagree. Its price list (updated October 8, 2026) prices the first 3,000 OCPU-hours and 18,000 GB-hours of A1 each month at $0, so 4 cores and 16 GB cost $0.00. Its Always Free page gives every account 1,500 OCPU-hours and 9,000 GB-hours, which leaves $18.22. The list price is $46.72.",
     ],
     rows: [
       {
@@ -559,6 +582,7 @@ export const CLOUD: readonly CloudProvider[] = [
         totalUsd: 0,
         totalNote: "free tier; may be reclaimed when idle",
         orderable: true,
+        summary: false,
       },
       {
         id: "a1-4-16",
@@ -570,9 +594,9 @@ export const CLOUD: readonly CloudProvider[] = [
         disk: "Up to 200 GB, free",
         burst: "No",
         machine: "$46.72 list",
-        total: "$0.00",
-        totalUsd: 0,
-        totalNote: "within the free allowance",
+        total: "$0.00–18.22",
+        totalUsd: 18.22,
+        totalNote: "$0.00 by the price list, $18.22 by the Always Free page",
         orderable: true,
       },
       {
@@ -649,7 +673,7 @@ export const NODE_ROWS: readonly NodeRow[] = [
   {
     id: "ax102",
     option: "Hetzner AX102",
-    spec: "Ryzen 9 7950X3D, 16 cores, 128 GB ECC, two 1.92 TB NVMe",
+    spec: "Ryzen 9 7950X3D, 16 cores, 128 GB ECC, two 1.92 TB NVMe (up to two 7.68 TB)",
     machine: "€259 ($289), €129 setup",
     upload: "Unmetered",
     total: "$289",
@@ -667,53 +691,64 @@ export const NODE_ROWS: readonly NodeRow[] = [
     source: "ovhDedicated",
   },
   {
-    id: "i3en",
-    option: "AWS i3en.xlarge",
-    spec: "4 vCPU Intel, 32 GiB, 2.5 TB local NVMe",
-    machine: "$329.96",
+    id: "i3en-2xl",
+    option: "AWS i3en.2xlarge",
+    spec: "8 vCPU Intel, 64 GiB, two 2.5 TB local NVMe",
+    machine: "$659.92",
     upload: "$135–216",
-    total: "about $475–555",
+    total: "about $805–890",
     kind: "cloud",
     source: "awsNode",
   },
   {
-    id: "l4aos",
-    option: "Azure L4aos v4",
-    spec: "4 vCPU AMD, 32 GiB, three 960 GB local NVMe",
-    machine: "$329.96",
+    id: "l8aos",
+    option: "Azure L8aos v4",
+    spec: "8 vCPU AMD, 64 GiB, six 960 GB local NVMe",
+    machine: "$659.92",
     upload: "$131–209",
-    total: "about $475–550",
+    total: "about $805–880",
     kind: "cloud",
     source: "azureNode",
   },
   {
-    id: "i8ge",
-    option: "AWS i8ge.xlarge",
-    spec: "4 vCPU Graviton4, 32 GiB, 2.5 TB local NVMe",
-    machine: "$346.46",
+    id: "i8ge-2xl",
+    option: "AWS i8ge.2xlarge",
+    spec: "8 vCPU Graviton4, 64 GiB, two 2.5 TB local NVMe",
+    machine: "$692.92",
     upload: "$135–216",
-    total: "about $490–570",
+    total: "about $840–920",
     kind: "cloud",
     source: "awsNode",
   },
+];
+
+/**
+ * What to know about the servers above, from their sources. The cloud
+ * types meet the node's spec (4 TB or more of local NVMe, 32 GB or more):
+ * at AWS the cheapest that does is i3en.2xlarge, read from the price list.
+ */
+export const NODE_NOTES: readonly {
+  readonly text: string;
+  readonly source: SourceId;
+}[] = [
   {
-    id: "i7ie",
-    option: "AWS i7ie.xlarge",
-    spec: "4 vCPU Intel, 32 GiB, 2.5 TB local NVMe",
-    machine: "$379.45",
-    upload: "$135–216",
-    total: "about $520–600",
-    kind: "cloud",
+    text: "AWS’s cheapest type with 4 TB of local NVMe or more is the i3en.2xlarge, with 8 vCPUs and 64 GiB; no type with 4 vCPUs has that much. Azure’s L8aos v4 costs the same.",
     source: "awsNode",
   },
   {
-    id: "is4gen",
-    option: "AWS is4gen.xlarge",
-    spec: "4 vCPU Graviton2, 24 GiB, 3.75 TB local NVMe",
-    machine: "$420.70",
-    upload: "$135–216",
-    total: "about $560–645",
-    kind: "cloud",
+    text: "The local NVMe of the AWS and Azure types is wiped when the instance stops.",
     source: "awsNode",
+  },
+  {
+    text: "The OVHcloud KS-5-A, RISE-1 and ADVANCE-1 have 4–6 cores: enough for a node, which needs 4 cores and 8 threads, but fewer than the Rack tier’s 8–16.",
+    source: "ovhDedicated",
+  },
+  {
+    text: "The AX102’s two 1.92 TB drives hold a node only as one 3.84 TB volume, without a mirror. For RAID-1, order larger drives, which cost more.",
+    source: "hetznerDedicated",
+  },
+  {
+    text: "Hetzner’s AX41 and AX42 come with two 512 GB drives, too little for a node. Google Cloud was not priced for a node.",
+    source: "hetznerDedicated",
   },
 ];

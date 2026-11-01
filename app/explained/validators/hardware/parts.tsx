@@ -11,6 +11,23 @@ import type { SourceId } from "./_lib/sources";
  * phone.
  */
 
+/**
+ * Reading text: bullets, answers and tier lines. 15 px on a phone, 16 px
+ * from `md`, the reference band for running text.
+ */
+export const READ =
+  "tw-text-[15px] tw-leading-6 md:tw-text-base md:tw-leading-[26px]";
+
+/** Secondary text: 15 px on a phone, 14 px from `md`. */
+export const SMALL =
+  "tw-text-[15px] tw-leading-[22px] md:tw-text-sm md:tw-leading-[22px]";
+
+/**
+ * A text link that stands on its own line: 44 px tall on a phone and at
+ * least 24 px from `md`, so it is easy to tap.
+ */
+export const TAP_LINK = `tw-inline-flex tw-min-h-11 tw-items-center tw-text-primary-300 tw-no-underline hover:tw-underline md:tw-min-h-6 ${EX_FOCUS}`;
+
 /** The card's section head: "HOME / OFFICE  Three tiers  Tor on by default…". */
 export function CardHead({
   id,
@@ -43,7 +60,7 @@ export function CardHead({
 /** A spec as the card shows it: "16 GB RAM". A soft tile, never a bordered pill. */
 export function Chip({ children }: { readonly children: string }) {
   return (
-    <li className="tw-rounded-lg tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-text-sm tw-font-semibold tw-leading-6 tw-text-iron-50">
+    <li className="tw-rounded-lg tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-50 md:tw-text-sm">
       {nb(children)}
     </li>
   );
@@ -115,6 +132,11 @@ interface FactColumn {
   readonly numeric?: boolean;
   /** Width hint for a wide screen: "tw-w-[22%]". */
   readonly width?: string;
+  /**
+   * A short label for a stacked row on a phone, printed inline before the
+   * value ("Alone: Works.") instead of a label line above it.
+   */
+  readonly short?: string;
 }
 
 interface FactRow {
@@ -163,7 +185,7 @@ export function FactTable({
   }
   return (
     <table
-      className="tw-w-full tw-border-collapse tw-text-[15px] tw-leading-6 before:tw-content-none after:tw-content-none [&_:is(thead,tbody,tr)]:before:tw-content-none [&_:is(thead,tbody,tr)]:after:tw-content-none"
+      className="tw-w-full tw-border-collapse tw-text-[15px] tw-leading-6 before:tw-content-none after:tw-content-none lg:tw-text-base lg:tw-leading-[26px] [&_:is(thead,tbody,tr)]:before:tw-content-none [&_:is(thead,tbody,tr)]:after:tw-content-none"
       aria-label={caption}
     >
       <thead className="tw-hidden lg:tw-table-header-group">
@@ -188,11 +210,16 @@ export function FactTable({
             className={`tw-block tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 lg:tw-table-row lg:tw-py-0 ${row.muted ? "tw-opacity-60" : ""}`}
           >
             {columns.map((column, index) => {
-              const label = (
-                <span className="tw-block tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.1em] tw-text-iron-400 lg:tw-hidden">
-                  {column.label}
-                </span>
-              );
+              const label =
+                column.short === undefined ? (
+                  <span className="tw-block tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.1em] tw-text-iron-400 lg:tw-hidden">
+                    {column.label}
+                  </span>
+                ) : (
+                  <span className="tw-font-semibold tw-text-iron-400 lg:tw-hidden">
+                    {column.short}:{" "}
+                  </span>
+                );
               const cell = row.cells[column.key] ?? "–";
               const base = `tw-block tw-border-0 tw-py-1 tw-align-top lg:tw-table-cell lg:tw-border-b lg:tw-border-solid lg:tw-border-iron-900 lg:tw-py-3.5 lg:tw-pr-4 lg:last:tw-pr-0 ${column.numeric ? "lg:tw-text-right" : ""}`;
               return index === 0 ? (
@@ -231,7 +258,7 @@ function PlainTable({
 }) {
   return (
     <table
-      className="tw-w-full tw-border-collapse tw-text-[15px] tw-leading-6 before:tw-content-none after:tw-content-none [&_:is(thead,tbody,tr)]:before:tw-content-none [&_:is(thead,tbody,tr)]:after:tw-content-none"
+      className="tw-w-full tw-border-collapse tw-text-[15px] tw-leading-6 before:tw-content-none after:tw-content-none lg:tw-text-base lg:tw-leading-[26px] [&_:is(thead,tbody,tr)]:before:tw-content-none [&_:is(thead,tbody,tr)]:after:tw-content-none"
       aria-label={caption}
     >
       <thead>

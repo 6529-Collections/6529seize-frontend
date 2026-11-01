@@ -8,17 +8,17 @@ import {
 } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { hw, hwRich, hwTemplate, type HwSuffix } from "./_lib/copy";
-import { CLOUD, NODE_ROWS } from "./_lib/cloud";
+import { CLOUD, NODE_NOTES, NODE_ROWS } from "./_lib/cloud";
 import {
   MODE_ROWS,
   NODE_COST_AXIS,
   NODE_COST_BARS,
   USE_ROWS,
 } from "./_lib/data";
-import { Hw, nb, sourceText, sourceTitle } from "./_lib/facts";
+import { Hw, nb, Sourced, sourceText, sourceTitle } from "./_lib/facts";
 import { SOURCES, type SourceId } from "./_lib/sources";
 import CloudTable, { type ProviderMeta } from "./CloudTable";
-import { Disclosure, FactTable, OpenMark } from "./parts";
+import { Disclosure, FactTable, OpenMark, READ } from "./parts";
 import TierSpecs from "./TierSpecs";
 
 /**
@@ -68,7 +68,7 @@ function Section({
       tight
       {...(full === undefined
         ? {}
-        : { full: <div className="tw-mt-8 md:tw-mt-10">{full}</div> })}
+        : { full: <div className="tw-mt-6 md:tw-mt-8">{full}</div> })}
     >
       {children}
     </EdSection>
@@ -200,15 +200,15 @@ function Cloud({ locale }: { readonly locale: SupportedLocale }) {
               showFewer: hw(locale, "cloud.showFewer"),
             }}
           />
-          <div className="tw-mt-8 lg:tw-grid lg:tw-grid-cols-[192px_minmax(0,1fr)] lg:tw-gap-x-8">
-            <h3 className={`${EX_TEXT.label} tw-m-0 tw-pt-1`}>
+          <div className="tw-mt-6 tw-scroll-mt-24" id="cloud-tips">
+            <h3 className={`${EX_TEXT.label} tw-m-0`}>
               {hw(locale, "cloud.tips")}
             </h3>
-            <ul className="tw-m-0 tw-mt-3 tw-grid tw-list-none tw-grid-cols-1 tw-gap-x-8 tw-gap-y-3 tw-p-0 md:tw-grid-cols-3 lg:tw-mt-0">
+            <ul className="tw-m-0 tw-mt-3 tw-grid tw-list-none tw-grid-cols-1 tw-gap-x-8 tw-gap-y-3 tw-p-0 md:tw-grid-cols-3">
               {tips.map((tip) => (
                 <li
                   key={tip}
-                  className="tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-700 tw-pl-4 tw-text-[15px] tw-leading-6 tw-text-iron-300"
+                  className={`tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-700 tw-pl-4 tw-text-iron-300 ${READ}`}
                 >
                   {hw(locale, tip)}
                 </li>
@@ -229,6 +229,11 @@ function Cloud({ locale }: { readonly locale: SupportedLocale }) {
 
 function NodeCosts({ locale }: { readonly locale: SupportedLocale }) {
   const pct = (value: number) => `${(value / NODE_COST_AXIS.max) * 100}%`;
+  const dollars = new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
   return (
     <figure
       className="tw-m-0 tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5 md:tw-p-6"
@@ -291,7 +296,7 @@ function NodeCosts({ locale }: { readonly locale: SupportedLocale }) {
               className="tw-absolute tw-top-0 tw--translate-x-1/2 tw-text-xs tw-leading-5 tw-text-iron-400"
               style={{ left: pct(tick) }}
             >
-              ${tick}
+              {dollars.format(tick)}
             </span>
           ))}
         </span>
@@ -364,9 +369,19 @@ function OwnNode({ locale }: { readonly locale: SupportedLocale }) {
                 },
               }))}
             />
-            <p className="tw-m-0 tw-mt-4 tw-max-w-[760px] tw-text-sm tw-leading-[22px] tw-text-iron-400">
-              {hw(locale, "node.note")}
-            </p>
+            <ul className="tw-m-0 tw-mt-4 tw-flex tw-max-w-[760px] tw-list-disc tw-flex-col tw-gap-1 tw-pl-4 tw-text-[15px] tw-leading-[22px] tw-text-iron-300 marker:tw-text-iron-600 md:tw-text-sm">
+              {NODE_NOTES.map((note, index) => (
+                <Sourced
+                  key={note.text}
+                  id={`node.note.${index + 1}`}
+                  source={note.source}
+                  locale={locale}
+                  as="li"
+                >
+                  {nb(note.text)}
+                </Sourced>
+              ))}
+            </ul>
             <p className="tw-m-0 tw-mt-2.5 tw-max-w-[760px] tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-400">
               {hw(locale, "cloud.source")}:{" "}
               <SourceLink id="rented" locale={locale} />
@@ -526,17 +541,33 @@ function Questions({ locale }: { readonly locale: SupportedLocale }) {
       a: hwRich(locale, "faq.os.a", {
         mac: f("os.mac"),
         windows: f("os.windows"),
+        link: (
+          <a href="#part-power" className={EX_LINK}>
+            {hw(locale, "parts.name.power")}
+          </a>
+        ),
       }),
     },
     { id: "wifi", q: "faq.wifi.q", a: hw(locale, "faq.wifi.a") },
-    { id: "cloud", q: "faq.cloud.q", a: hw(locale, "faq.cloud.a") },
+    {
+      id: "cloud",
+      q: "faq.cloud.q",
+      a: hwRich(locale, "faq.cloud.a", {
+        link: (
+          <a href="#cloud-tips" className={EX_LINK}>
+            {hw(locale, "cloud.tips")}
+          </a>
+        ),
+      }),
+    },
     {
       id: "oracle",
       q: "faq.oracle.q",
       a: hwRich(locale, "faq.oracle.a", {
         free: f("oracle.free"),
         halved: f("oracle.halvedOn"),
-        payg: f("oracle.paygFree"),
+        paygSize: f("oracle.paygSize"),
+        payg: f("oracle.payg"),
       }),
     },
     {
@@ -544,7 +575,6 @@ function Questions({ locale }: { readonly locale: SupportedLocale }) {
       q: "faq.bill.q",
       a: hwRich(locale, "faq.bill.a", { upload: f("use.upload") }),
     },
-    { id: "shared", q: "faq.shared.q", a: hw(locale, "faq.shared.a") },
   ];
   return (
     <Section id="questions" locale={locale}>
@@ -562,7 +592,9 @@ function Questions({ locale }: { readonly locale: SupportedLocale }) {
               <span>{hw(locale, faq.q)}</span>
               <OpenMark />
             </summary>
-            <p className="tw-m-0 tw-hidden tw-max-w-[660px] tw-pb-4 tw-text-[15px] tw-leading-6 tw-text-iron-300 group-open:tw-block">
+            <p
+              className={`tw-m-0 tw-hidden tw-max-w-[660px] tw-pb-4 tw-text-iron-300 group-open:tw-block ${READ}`}
+            >
               {faq.a}
             </p>
           </details>

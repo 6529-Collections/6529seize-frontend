@@ -7,8 +7,8 @@ import type { SourceId } from "./sources";
  * with its source (`facts.tsx`), the 6529 Explained facts-layer pattern. An
  * id that is not here fails the typecheck.
  *
- * All prices were read on Oct 31, 2026: US dollars, on-demand, before tax,
- * a month of 730 hours, euros at the ECB rate of Oct 30.
+ * All prices were read on October 31, 2026: US dollars, on-demand, before
+ * tax, a month of 730 hours, euros at the ECB rate of October 30.
  */
 interface FactDef {
   readonly text: string;
@@ -19,7 +19,7 @@ const f = (text: string, source: SourceId): FactDef => ({ text, source });
 
 export const FACTS = {
   // The day it was all read.
-  "read.day": f("Oct 31, 2026", "readDay"),
+  "read.day": f("October 31, 2026", "readDay"),
 
   // What each tier costs today: to buy, and a month over four years with power.
   "tier.acceptable.own": f("$0", "homePrices"),
@@ -28,10 +28,16 @@ export const FACTS = {
   "tier.good.buy": f("$400–550", "homePrices"),
   "tier.good.month": f("$10–13", "homePrices"),
   "tier.great.buy": f("$2,000–2,200", "homePrices"),
-  "tier.great.month": f("$44–49", "homePrices"),
-  "dc.rack.month": f("$95–320", "rented"),
+  "tier.great.month": f("$44–50", "homePrices"),
+  // The Rack card: a rented server that meets it, cores, memory and drives.
+  "dc.rack.month": f("$192", "ovhDedicated"),
+  "dc.rack.spec": f(
+    "12 cores, 32 GB and two 3.84 TB NVMe drives",
+    "ovhDedicated"
+  ),
   "dc.cloud.month": f("$10–80", "cloudAll"),
   "dc.cloud.bigThree": f("$61–63", "cloudAll"),
+  "dc.cloud.ovh": f("$10", "ovh"),
   "dc.cloud.egress": f("50 GB", "cloudAll"),
   "dc.colo.month": f("$100–300", "colo"),
   "dc.colo.server": f("$2,000–5,000", "colo"),
@@ -43,6 +49,7 @@ export const FACTS = {
   "spec.good.watts": f("12 W", "p53"),
   "spec.great.ram": f("32 GB", "card"),
   "spec.great.disk": f("4 TB", "card"),
+  "spec.good.driveMin": f("500 GB", "homePrices"),
   "spec.cloud.vcpu": f("2–4 vCPUs", "card"),
   "spec.cloud.ram": f("8–16 GB", "card"),
   "spec.cloud.ram8": f("8 GB", "card"),
@@ -71,7 +78,8 @@ export const FACTS = {
   "node.consensus": f("15–90 GiB", "ethdocker"),
   "node.growthYear": f("2024", "paradigm"),
   "node.rented": f("$95–320", "rented"),
-  "node.cloud": f("$475–645", "awsNode"),
+  "node.rentedFrom": f("$95", "ovhDedicated"),
+  "node.cloud": f("$805–920", "awsNode"),
 
   // How the page's numbers were read.
   "use.blocks": f("24", "measured"),
@@ -82,7 +90,7 @@ export const FACTS = {
   // Systems the validator is built for.
   "os.pi": f("64-bit Raspberry Pi OS (Trixie or Bookworm)", "rpiOs"),
   "os.linux": f(
-    "64-bit Linux on x86 or Arm with glibc 2.35 or newer: Ubuntu 22.04, Debian 12, Fedora 36 or 64-bit Raspberry Pi OS (Trixie or Bookworm)",
+    "64-bit Linux on x86 or Arm with glibc 2.35 or newer, such as Ubuntu 22.04, Debian 12, Fedora 36 or 64-bit Raspberry Pi OS (Trixie or Bookworm)",
     "docs"
   ),
   "os.mac": f("macOS 11 or newer, Apple silicon or Intel", "docs"),
@@ -91,7 +99,11 @@ export const FACTS = {
   // Oracle's free tier.
   "oracle.free": f("2 Arm cores, 12 GB of memory and 200 GB of disk", "oracle"),
   "oracle.halvedOn": f("June 15, 2026", "oracle"),
-  "oracle.paygFree": f("4 Arm cores and 24 GB of memory", "oracle"),
+  // Pay-as-you-go A1 with 4 cores and 16 GB: $0 by Oracle's price list,
+  // $18.22 by its Always Free page (1,500 OCPU-hours and 9,000 GB-hours
+  // free: 1,420 x $0.01 + 2,680 x $0.0015). The two disagree.
+  "oracle.paygSize": f("4 Arm cores and 16 GB", "oracle"),
+  "oracle.payg": f("$0.00–18.22", "oracle"),
 } as const satisfies Readonly<Record<string, FactDef>>;
 
 export type HwFactId = keyof typeof FACTS;
@@ -115,8 +127,13 @@ interface SpecRow {
   readonly great: string;
 }
 
+/**
+ * The validator's own disk, the same at every tier: about 0.45 GB the first
+ * year and 1.8 GB after six at today's holders, plus about 4.4 MB a year for
+ * each validator on the network (its votes and reports, kept six years).
+ */
 const VALIDATOR_DISK =
-  "Under 1 GB in the first year and about 2 GB after six years: Ethereum history, the day's TDH weights and the network's votes";
+  "About 0.5 GB in the first year and about 2 GB after six years, plus about 4 MB a year for each validator on the network";
 
 export const SPEC_ROWS: readonly SpecRow[] = [
   {
@@ -137,9 +154,9 @@ export const SPEC_ROWS: readonly SpecRow[] = [
     id: "storage",
     source: "card",
     acceptable: "256–512 GB SSD",
-    good: "1–2 TB NVMe. 512 GB is enough for the validator alone; a node needs 4 TB",
+    good: "1–2 TB NVMe. The drive a mini PC comes with, 500 GB or more, is enough for the validator; a node needs a 4 TB drive of its own",
     great:
-      "4 TB NVMe, TLC with DRAM: ethereum.org expects 2 TB to be too small by 2027",
+      "4 TB NVMe, TLC with DRAM. ethereum.org expects 2 TB to be too small by 2027",
   },
   {
     id: "disk",
@@ -147,7 +164,7 @@ export const SPEC_ROWS: readonly SpecRow[] = [
     acceptable: VALIDATOR_DISK,
     good: VALIDATOR_DISK,
     great:
-      "The validator stays under 1 GB a year. The node adds 1.5–2 TiB for a full node in September 2026, and grows",
+      "For the validator, about 0.5 GB in the first year and about 2 GB after six years, plus about 4 MB a year for each validator on the network. The node’s database was 1.5–2 TiB in September 2026 and keeps growing",
   },
   {
     id: "internet",
@@ -155,7 +172,7 @@ export const SPEC_ROWS: readonly SpecRow[] = [
     acceptable: "About 0.5 GB a day, 15–20 GB a month",
     good: "About 0.5 GB a day, 15–20 GB a month",
     great:
-      "The node sends 1.6–2.5 TB a month to its peers and wants 50 Mbps down and 15 Mbps up",
+      "For the validator, about 0.5 GB a day, 15–20 GB a month. The node wants 50 Mbps down and 15 Mbps up; 6529’s node sent its peers 1.6–2.5 TB a month while syncing",
   },
   {
     id: "power",
@@ -198,11 +215,11 @@ export const SPEC_ROWS: readonly SpecRow[] = [
     acceptable: "$0 if you own it; about $300 for a new Pi 5 with an SSD",
     good: "About $400–550 with a UPS; about $10–13 a month",
     great:
-      "About $2,000–2,200 with a UPS and a 4 TB TLC drive with DRAM; about $44–49 a month",
+      "About $2,000–2,200 with a UPS and a 4 TB TLC drive with DRAM; about $44–50 a month",
   },
 ];
 
-/** Machines that fit each tier, with the store and the price on Oct 31. */
+/** Machines that fit each tier, with the store and the price on October 31. */
 interface MachineRow {
   readonly id: string;
   readonly tier: "acceptable" | "good" | "great" | "all";
@@ -267,7 +284,7 @@ export const MACHINES: readonly MachineRow[] = [
     tier: "great",
     machine: "Beelink SER8: 8-core Ryzen 7 8745HS, 32 GB, 1 TB",
     price: "$829",
-    where: "Beelink",
+    where: "Beelink; a pre-order in the US, in stock elsewhere",
     source: "beelink",
   },
   {
@@ -382,7 +399,7 @@ export const USE_ROWS: readonly UseRow[] = [
   },
   {
     id: "start",
-    value: "A minute or two the first time, while Tor connects",
+    value: "Up to a minute or two the first time, while Tor connects",
     source: "docs",
   },
   {
@@ -402,10 +419,13 @@ interface CostBar {
 }
 
 export const NODE_COST_BARS: readonly CostBar[] = [
-  { id: "home", fact: "tier.great.month", low: 44, high: 49 },
+  { id: "home", fact: "tier.great.month", low: 44, high: 50 },
   { id: "rented", fact: "node.rented", low: 95, high: 320 },
-  { id: "cloud", fact: "node.cloud", low: 475, high: 645 },
+  { id: "cloud", fact: "node.cloud", low: 805, high: 920 },
 ];
 
 /** The figure's axis: dollars a month. */
-export const NODE_COST_AXIS = { max: 700, ticks: [0, 200, 400, 600] } as const;
+export const NODE_COST_AXIS = {
+  max: 1000,
+  ticks: [0, 250, 500, 750, 1000],
+} as const;

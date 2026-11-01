@@ -12,6 +12,7 @@ import {
 } from "@/app/explained/validators/hardware/_lib/chooser";
 import {
   CLOUD,
+  NODE_NOTES,
   NODE_ROWS,
 } from "@/app/explained/validators/hardware/_lib/cloud";
 import {
@@ -196,7 +197,13 @@ describe("sources", () => {
     for (const fact of Object.values(FACTS)) {
       expect(known.has(fact.source)).toBe(true);
     }
-    for (const row of [...MACHINES, ...NODE_ROWS, ...USE_ROWS, ...DRIVES]) {
+    for (const row of [
+      ...MACHINES,
+      ...NODE_ROWS,
+      ...NODE_NOTES,
+      ...USE_ROWS,
+      ...DRIVES,
+    ]) {
       expect(known.has(row.source)).toBe(true);
     }
     for (const [id, said] of partFacts()) {
@@ -250,6 +257,42 @@ describe("cloud prices", () => {
     expect([...totals].sort((a, b) => a - b)).toEqual(totals);
     const hetzner = rows.find((entry) => entry.provider.id === "hetzner");
     expect(hetzner?.row?.type).toBe("CPX32");
+    // Oracle's summary is the pay-as-you-go A1 the FAQ recommends, not the
+    // Always Free one Oracle may reclaim.
+    const oracle = rows.find((entry) => entry.provider.id === "oracle");
+    expect(oracle?.row?.id).toBe("a1-4-16");
+  });
+
+  it("says Oracle's two sources disagree, and prices both", () => {
+    const oracle = CLOUD.find((entry) => entry.id === "oracle");
+    const payg = oracle?.rows.find((row) => row.id === "a1-4-16");
+    expect(payg?.total).toBe("$0.00–18.22");
+    expect(FACTS["oracle.payg"].text).toBe(payg?.total);
+    // 1,500 OCPU-hours and 9,000 GB-hours free; 4 cores and 16 GB for 730 h.
+    const rest = (4 * 730 - 1500) * 0.01 + (16 * 730 - 9000) * 0.0015;
+    expect(rest.toFixed(2)).toBe("18.22");
+    expect(oracle?.notes.join(" ")).toMatch(/two sources disagree/);
+  });
+
+  it("prices only cloud types that meet the node's own spec", () => {
+    const cloud = NODE_ROWS.filter((row) => row.kind === "cloud");
+    expect(cloud.length).toBeGreaterThan(0);
+    const words: Record<string, number> = { two: 2, three: 3, six: 6 };
+    for (const row of cloud) {
+      const disk = /(two|three|six) ([\d.]+) (TB|GB) local NVMe/.exec(row.spec);
+      const memory = /(\d+) GiB/.exec(row.spec);
+      const tb = disk
+        ? (words[disk[1] ?? ""] ?? 0) *
+          Number(disk[2]) *
+          (disk[3] === "GB" ? 0.001 : 1)
+        : 0;
+      expect([row.id, tb >= 4, Number(memory?.[1]) >= 32]).toEqual([
+        row.id,
+        true,
+        true,
+      ]);
+    }
+    expect(FACTS["node.cloud"].text).toBe("$805–920");
   });
 
   it("says when a provider has no Arm types", () => {
@@ -354,10 +397,10 @@ describe("numbers on a line", () => {
   it("prints every cloud total with cents", () => {
     for (const provider of CLOUD) {
       for (const row of provider.rows) {
-        expect([row.id, /^\$\d[\d,]*\.\d{2}$/.test(row.total)]).toEqual([
+        expect([
           row.id,
-          true,
-        ]);
+          /^\$\d[\d,]*\.\d{2}(–\d[\d,]*\.\d{2})?$/.test(row.total),
+        ]).toEqual([row.id, true]);
       }
     }
   });
@@ -491,5 +534,47 @@ describe("part by part", () => {
     expect(
       container.querySelector('[data-fact="hw.part.memory.tier.good"]')
     ).toHaveTextContent(/^16\sGB: room/);
+  });
+});
+
+describe("round 2: numbers that agree with each other", () => {
+  it("prices the Rack card with a server that meets it", () => {
+    expect(CARD.dc.rack.chips).toContain("8–16 cores");
+    expect(FACTS["dc.rack.spec"].text).toMatch(
+      /^12 cores, 32 GB and two 3\.84 TB/
+    );
+    const rise3 = NODE_ROWS.find((row) => row.id === "rise-3");
+    expect(rise3?.total).toBe(FACTS["dc.rack.month"].text);
+  });
+
+  it("writes the validator's disk the same way everywhere", () => {
+    const disk = SPEC_ROWS.find((row) => row.id === "disk");
+    expect(disk?.acceptable).toBe(disk?.good);
+    expect(disk?.acceptable).toMatch(
+      /about 2 GB after six years, plus about 4 MB a year for each validator/
+    );
+    expect(disk?.great).toMatch(
+      /about 2 GB after six years, plus about 4 MB a year for each validator/
+    );
+  });
+
+  it("prints each chooser price once, in the suggestion's footer", () => {
+    for (const id of ["great", "rack", "cloud"]) {
+      const body = messages[`explained.validators.hardware.chooser.${id}.body`];
+      expect([id, /\{(buy|month)\}/.test(body ?? "")]).toEqual([id, false]);
+    }
+  });
+
+  it("dates every source one way", () => {
+    const all = JSON.stringify([SOURCES, FACTS, CLOUD]);
+    expect(all).not.toMatch(
+      /\b(Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d/
+    );
+  });
+
+  it("drops the claims round 2 could not back", () => {
+    expect(Object.keys(messages).join(" ")).not.toMatch(/faq\.shared/);
+    expect(JSON.stringify(DRIVES)).not.toMatch(/in order/);
+    expect(JSON.stringify(messages)).not.toMatch(/Reth documentation/);
   });
 });

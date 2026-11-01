@@ -8,7 +8,7 @@ import type { SourceId } from "./sources";
  * way it prints a fact). The tiers' lines agree with the card's chips; the
  * page test checks that.
  *
- * Measured on Oct 31, 2026, on a release build of 0.1.0. Two findings of
+ * Measured on October 31, 2026, on a release build of 0.1.0. Two findings of
  * that day are fixed in the release and written here as fixed: blst is
  * built portable, so any 64-bit x86 processor runs it, and a node with the
  * 6529.io comparison off no longer keeps each day's records for a week.
@@ -87,7 +87,7 @@ export const PARTS: readonly PartDef[] = [
         "eip7870"
       ),
       rack: s(
-        "8–16 cores, for its own node and for serving other validators.",
+        "8–16 cores. A node alone runs on 4 cores and 8 threads, so a smaller server works too.",
         "card"
       ),
       cloud: s(
@@ -134,6 +134,10 @@ export const PARTS: readonly PartDef[] = [
         "bench"
       ),
       s("The optional third check, in Python, adds up to 590 MB.", "docs"),
+      s(
+        "ECC memory is not needed without a node. A memory error would most likely make the two programs disagree, and the validator would skip that day’s vote.",
+        "p53"
+      ),
     ],
     tiers: {
       acceptable: s(
@@ -148,16 +152,13 @@ export const PARTS: readonly PartDef[] = [
       rack: s("32–64 GB, for its own node.", "card"),
       cloud: s("8–16 GB. 8 GB is enough.", "card"),
     },
-    avoid: s(
-      "A board with 2 GB or less. ECC memory for a validator without a node: a memory error would most likely make its two programs disagree, and it would skip that day’s vote.",
-      "p53"
-    ),
+    avoid: s("A board with 2 GB or less.", "card"),
   },
   {
     id: "storage",
     answer: s("Any SSD. A hard disk works too.", "benchEstimate"),
     why: s(
-      "The validator keeps under 1 GB in its first year, and writes little.",
+      "The validator keeps about 0.5 GB in its first year, and writes little.",
       "benchEstimate"
     ),
     uses: [
@@ -166,11 +167,11 @@ export const PARTS: readonly PartDef[] = [
         "benchEstimate"
       ),
       s(
-        "Every validator’s daily vote and reports add about 4 MB a year for each validator on the network.",
+        "Each validator on the network adds about 4 MB a year: its daily vote and reports.",
         "benchEstimate"
       ),
       s(
-        "Days older than six years are dropped, so the total levels at about 2 GB at today’s number of holders, plus the votes.",
+        "Days older than six years are dropped, so the total levels at about 2 GB at today’s number of holders, plus about 26 MB for each validator on the network.",
         "benchEstimate"
       ),
       s(
@@ -184,7 +185,7 @@ export const PARTS: readonly PartDef[] = [
         "card"
       ),
       good: s(
-        "1–2 TB NVMe. 512 GB is enough for the validator alone; an Ethereum node needs a 4 TB drive of its own.",
+        "1–2 TB NVMe. The drive a mini PC comes with, 500 GB or more, is enough for the validator; an Ethereum node needs a 4 TB drive of its own.",
         "card"
       ),
       great: s(
@@ -208,11 +209,11 @@ export const PARTS: readonly PartDef[] = [
     ),
     uses: [
       s(
-        "About 0.5 GB a day, 15–20 GB a month, from the default Ethereum servers, which compress.",
+        "About 0.5 GB a day, 15–20 GB a month, from the first default Ethereum servers, PublicNode and dRPC, which compress.",
         "measured"
       ),
       s(
-        "The 50 GB a month above is the receipts’ size in Ethereum’s own encoding (47–56 GB). Servers send them as JSON, about 175 GB a month; the default servers compress that about 11 times.",
+        "The 50 GB a month above is the receipts’ size in Ethereum’s own encoding (47–56 GB). Servers send them as JSON, about 175 GB a month; PublicNode and dRPC compress that about 11 times.",
         "measured"
       ),
       s(
@@ -232,7 +233,7 @@ export const PARTS: readonly PartDef[] = [
       acceptable: s("Any home connection. Wi-Fi is fine.", "card"),
       good: s("Wired Ethernet to the router, for fewer drops.", "card"),
       great: s(
-        "Unmetered and wired: 50 Mbps down and 15 Mbps up for the node, which uploads 1.6–2.5 TB a month.",
+        "Unmetered and wired: 50 Mbps down and 15 Mbps up for the node. 6529’s node sent its peers 1.6–2.5 TB a month while syncing.",
         "eip7870"
       ),
       rack: s(
@@ -259,7 +260,11 @@ export const PARTS: readonly PartDef[] = [
         "benchEstimate"
       ),
       s(
-        "It needs about three hours on each day, inside 00:15 to 19:00 UTC: minutes to sign, then at home a random wait of up to two hours before its vote goes out. Offline is not a fault: you miss that day’s vote, and your account stays registered for seven days without one.",
+        "It needs to be on about three hours a day, inside 00:15 to 19:00 UTC: minutes to sign, then at home a random wait of up to two hours before its vote goes out.",
+        "p53"
+      ),
+      s(
+        "Being off is not a fault. You miss that day’s vote, and your account stays registered for seven days without one.",
         "p53"
       ),
       s(
@@ -340,7 +345,7 @@ export const DRIVES: readonly DriveRow[] = [
   {
     id: "hdd",
     drive: "Hard disk (HDD)",
-    alone: "Works. Its writes are small and in order.",
+    alone: "Works. Its writes are small and few.",
     node: "No. A node’s database needs fast random reads.",
     source: "ethdockerHw",
   },
@@ -371,7 +376,7 @@ export const DRIVES: readonly DriveRow[] = [
     drive: "NVMe SSD",
     alone: "Good. A small one is the best value.",
     node: "Needed: 4 TB, TLC with DRAM.",
-    source: "ethOrg",
+    source: "ethdockerHw",
   },
 ];
 
@@ -406,13 +411,30 @@ export const IDLE: readonly IdleRow[] = [
   },
 ];
 
-/** Turning off sleep, for a laptop or desktop that runs the validator. */
-export const SLEEP: readonly { readonly os: string; readonly cmd: string }[] = [
-  { os: "macOS", cmd: "sudo pmset -c sleep 0" },
-  { os: "Windows", cmd: "powercfg /change standby-timeout-ac 0" },
+/**
+ * Turning off sleep, for a laptop or desktop that runs the validator: the
+ * commands, and for Windows the lid setting, so a closed laptop keeps
+ * signing while it is plugged in.
+ */
+export const SLEEP: readonly {
+  readonly os: string;
+  readonly cmds: readonly string[];
+  readonly note?: string;
+}[] = [
+  { os: "macOS", cmds: ["sudo pmset -c sleep 0"] },
+  {
+    os: "Windows",
+    cmds: [
+      "powercfg /change standby-timeout-ac 0",
+      "powercfg /change hibernate-timeout-ac 0",
+    ],
+    note: "For a laptop with its lid closed: Settings, System, Power & battery, Lid & power button controls, and set Plugged in to Do nothing.",
+  },
   {
     os: "Linux",
-    cmd: "sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target",
+    cmds: [
+      "sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target",
+    ],
   },
 ];
 

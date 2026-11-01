@@ -14,7 +14,7 @@ import {
   type Said,
 } from "./_lib/partGuide";
 import CopyCommand from "./CopyCommand";
-import { CardHead, FactTable, OpenMark } from "./parts";
+import { CardHead, FactTable, OpenMark, READ } from "./parts";
 
 /**
  * Part by part: one row per part of the machine, the answer first ("Graphics
@@ -72,10 +72,10 @@ function Tiers({
     return (
       <dl className="tw-m-0">
         <div className="tw-py-2.5 sm:tw-grid sm:tw-grid-cols-[136px_minmax(0,1fr)] sm:tw-gap-x-4">
-          <dt className="tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-50">
+          <dt className={`tw-font-semibold tw-text-iron-50 ${READ}`}>
             {hw(locale, "parts.everyTier")}
           </dt>
-          <dd className="tw-m-0 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+          <dd className={`tw-m-0 tw-text-iron-300 ${READ}`}>
             <Line id={`${base}.all`} said={part.tiers} locale={locale} />
           </dd>
         </div>
@@ -92,7 +92,9 @@ function Tiers({
             key={tier}
             className={`tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-2.5 last:tw-border-b-0 sm:tw-grid sm:tw-grid-cols-[136px_minmax(0,1fr)] sm:tw-gap-x-4 ${good ? "-tw-mx-3 tw-rounded-lg tw-border-transparent tw-bg-primary-400/[0.08] tw-px-3" : ""}`}
           >
-            <dt className="tw-flex tw-flex-wrap tw-content-start tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-50">
+            <dt
+              className={`tw-flex tw-flex-wrap tw-content-start tw-items-center tw-gap-x-2 tw-gap-y-1 tw-font-semibold tw-text-iron-50 ${READ}`}
+            >
               {tierName(tier)}
               {good && (
                 <span className="tw-rounded-full tw-bg-primary-500 tw-px-2 tw-py-px tw-text-[12px] tw-font-bold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-white">
@@ -100,7 +102,9 @@ function Tiers({
                 </span>
               )}
             </dt>
-            <dd className="tw-m-0 tw-mt-0.5 tw-text-[15px] tw-leading-6 tw-text-iron-300 sm:tw-mt-0">
+            <dd
+              className={`tw-m-0 tw-mt-0.5 tw-text-iron-300 sm:tw-mt-0 ${READ}`}
+            >
               <Line
                 id={`${base}.${tier}`}
                 said={tiers[tier]}
@@ -132,9 +136,14 @@ function Drives({ locale }: { readonly locale: SupportedLocale }) {
             {
               key: "alone",
               label: hw(locale, "parts.drives.col.alone"),
+              short: hw(locale, "parts.drives.short.alone"),
               width: "tw-w-[38%]",
             },
-            { key: "node", label: hw(locale, "parts.drives.col.node") },
+            {
+              key: "node",
+              label: hw(locale, "parts.drives.col.node"),
+              short: hw(locale, "parts.drives.short.node"),
+            },
           ]}
           rows={DRIVES.map((row) => ({
             key: row.id,
@@ -215,16 +224,24 @@ function Idle({ locale }: { readonly locale: SupportedLocale }) {
           {SLEEP.map((row) => (
             <div
               key={row.os}
-              className="tw-mb-3 tw-text-[15px] tw-leading-6 tw-text-iron-300 last:tw-mb-0"
+              className={`tw-mb-4 tw-text-iron-300 last:tw-mb-0 ${READ}`}
             >
               <span className="tw-block tw-font-semibold tw-text-iron-50">
                 {row.os}
               </span>
-              <CopyCommand
-                cmd={row.cmd}
-                label={hw(locale, "parts.copy")}
-                copied={hw(locale, "parts.copied")}
-              />
+              {row.cmds.map((cmd) => (
+                <CopyCommand
+                  key={cmd}
+                  cmd={cmd}
+                  label={hw(locale, "parts.copy")}
+                  copied={hw(locale, "parts.copied")}
+                />
+              ))}
+              {row.note !== undefined && (
+                <span className="tw-mt-1.5 tw-block tw-text-iron-400">
+                  {row.note}
+                </span>
+              )}
             </div>
           ))}
         </Sourced>
@@ -264,12 +281,12 @@ function PartRow({
             id={`${base}.why`}
             said={part.why}
             locale={locale}
-            className="tw-mt-0.5 tw-block tw-text-[15px] tw-leading-6 tw-text-iron-300"
+            className={`tw-mt-0.5 tw-block tw-text-iron-300 ${READ}`}
           />
         </span>
         <OpenMark className="tw-col-start-2 tw-row-span-2 tw-row-start-1 tw-self-start lg:tw-col-start-3 lg:tw-row-span-1" />
       </summary>
-      <div className="tw-hidden tw-px-5 tw-pb-6 group-open:tw-block md:tw-px-6 lg:tw-pl-[264px]">
+      <div className="tw-hidden tw-px-5 tw-pb-6 group-open:tw-block md:tw-px-6">
         <div className="tw-grid tw-grid-cols-1 tw-gap-6 tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-pt-5 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:tw-gap-x-10">
           <div>
             <p className={LABEL}>{hw(locale, "parts.uses")}</p>
@@ -281,7 +298,7 @@ function PartRow({
                   said={said}
                   locale={locale}
                   as="li"
-                  className="tw-relative tw-pl-4 tw-text-[15px] tw-leading-6 tw-text-iron-300 before:tw-absolute before:tw-left-0 before:tw-top-[10px] before:tw-size-1.5 before:tw-rounded-full before:tw-bg-iron-600 before:tw-content-['']"
+                  className={`tw-relative tw-pl-4 tw-text-iron-300 before:tw-absolute before:tw-left-0 before:tw-top-[10px] before:tw-size-1.5 before:tw-rounded-full before:tw-bg-iron-600 before:tw-content-[''] md:before:tw-top-[11px] ${READ}`}
                 />
               ))}
             </ul>
@@ -305,7 +322,7 @@ function PartRow({
               said={part.avoid}
               locale={locale}
               as="p"
-              className="tw-m-0 tw-mt-1.5 tw-text-[15px] tw-leading-6 tw-text-iron-300"
+              className={`tw-m-0 tw-mt-1.5 tw-text-iron-300 ${READ}`}
             />
           </div>
         )}
@@ -337,12 +354,12 @@ function Spend({ locale }: { readonly locale: SupportedLocale }) {
               id={`spend.${index + 1}`}
               said={said}
               locale={locale}
-              className="tw-pt-0.5 tw-text-[15px] tw-leading-6 tw-text-iron-50 lg:tw-pt-0"
+              className={`tw-pt-0.5 tw-text-iron-50 lg:tw-pt-0 ${READ}`}
             />
           </li>
         ))}
       </ol>
-      <p className="tw-m-0 tw-mt-5 tw-max-w-[760px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
+      <p className={`tw-m-0 tw-mt-5 tw-max-w-[760px] tw-text-iron-300 ${READ}`}>
         {hw(locale, "parts.spend.node")} {hw(locale, "parts.spend.never")}
       </p>
     </div>

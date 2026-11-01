@@ -26,6 +26,7 @@ import {
   JumpRow,
   LargeHolders,
 } from "./CardSections";
+import BackToJumps from "./BackToJumps";
 import Detail, { DETAIL_SECTIONS } from "./Detail";
 import Hero from "./Hero";
 import OpenOnHash from "./OpenOnHash";
@@ -116,6 +117,7 @@ export default async function ValidatorHardwarePage({
           }}
         />
         <Sources locale={locale} title={title} />
+        <BackToJumps label={hw(locale, "jump.back")} />
       </article>
     </ExplainedShell>
   );

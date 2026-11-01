@@ -13,9 +13,10 @@ import { nb } from "./_lib/nb";
 
 /**
  * Instance types at nine providers: the cheapest type that fits at each
- * provider first, then every type priced at one provider, filtered by
- * processor (Arm or x86). Each row carries its source. A table on a wide
- * screen, one card per type on a phone.
+ * provider first, four of them until the reader asks for the rest, then
+ * every type priced at one provider, filtered by processor (Arm or x86).
+ * Each row carries its source. A table on a wide screen, one card per type
+ * on a phone.
  */
 interface CloudCopy {
   readonly provider: string;
@@ -40,16 +41,16 @@ interface CloudCopy {
   readonly region: string;
   readonly source: string;
   readonly allNote: string;
-  /** On a phone the summary shows the cheapest few; this shows the rest. */
+  /** The summary shows the cheapest few; this shows the rest. */
   readonly showAll: string;
   readonly showFewer: string;
 }
 
-/** How many providers a phone's summary shows before "Show every provider". */
-const PHONE_SUMMARY = 4;
+/** How many providers the summary shows before "Show every provider". */
+const SUMMARY_ROWS = 4;
 
 export interface ProviderMeta {
-  /** "Source: …, read Oct 31, 2026", for the rows' titles. */
+  /** "Source: …, read October 31, 2026", for the rows' titles. */
   readonly title: string;
   /** The source line printed under the table, with its link. */
   readonly line: ReactNode;
@@ -64,7 +65,10 @@ interface ShownRow {
 
 function cheapest(provider: CloudProvider, arch: ArchFilter): CloudRow | null {
   const fits = provider.rows.filter(
-    (row) => row.orderable && (arch === "any" || row.arch === arch)
+    (row) =>
+      row.orderable &&
+      row.summary !== false &&
+      (arch === "any" || row.arch === arch)
   );
   return fits.reduce<CloudRow | null>(
     (best, row) => (best === null || row.totalUsd < best.totalUsd ? row : best),
@@ -107,12 +111,23 @@ function ArchTag({ arch }: { readonly arch: Arch }) {
   );
 }
 
-function TypeName({ row }: { readonly row: CloudRow }) {
+/** An API id in the code face ("t4g.large"); a product name in the text face. */
+function TypeName({
+  row,
+  provider,
+}: {
+  readonly row: CloudRow;
+  readonly provider: CloudProvider;
+}) {
   return (
     <>
-      <code className="tw-font-mono tw-text-[14px] tw-text-iron-50 [overflow-wrap:anywhere]">
-        {row.type}
-      </code>
+      {provider.typeIsId ? (
+        <code className="tw-font-mono tw-text-[14px] tw-text-iron-50 [overflow-wrap:anywhere]">
+          {row.type}
+        </code>
+      ) : (
+        <span className="tw-font-semibold tw-text-iron-50">{row.type}</span>
+      )}
       {row.family !== undefined && (
         <span className="tw-block tw-text-[13px] tw-leading-5 tw-text-iron-400">
           {row.family}
@@ -185,7 +200,7 @@ export default function CloudTable({
 }) {
   const [tab, setTab] = useState("all");
   const [arch, setArch] = useState<ArchFilter>("any");
-  const [phoneAll, setPhoneAll] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const selectId = useId();
   const rows = shownRows(providers, tab, arch);
   const summary = tab === "all";
@@ -195,7 +210,7 @@ export default function CloudTable({
     { value: "all", label: copy.all },
     ...providers.map((provider) => ({
       value: provider.id,
-      label: provider.name,
+      label: provider.tab ?? provider.name,
     })),
   ];
   const archOptions = [
@@ -314,10 +329,11 @@ export default function CloudTable({
             </tr>
           </thead>
           <tbody>
-            {rows.map(({ provider, row }) =>
+            {rows.map(({ provider, row }, index) =>
               row === null ? (
                 <tr
                   key={`${provider.id}-none`}
+                  hidden={summary && !showAll && index >= SUMMARY_ROWS}
                   className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-900"
                 >
                   <td
@@ -330,6 +346,7 @@ export default function CloudTable({
               ) : (
                 <tr
                   key={`${provider.id}-${row.id}`}
+                  hidden={summary && !showAll && index >= SUMMARY_ROWS}
                   data-fact={factOf(provider, row)}
                   title={titleOf(provider)}
                   className={`tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-align-top ${row.orderable ? "" : "tw-opacity-60"}`}
@@ -345,7 +362,7 @@ export default function CloudTable({
                   <td
                     className={`tw-py-3.5 tw-pr-3 ${summary ? "" : "tw-pl-5"}`}
                   >
-                    <TypeName row={row} />
+                    <TypeName row={row} provider={provider} />
                   </td>
                   <td className="tw-py-3.5 tw-pr-3 tw-text-iron-300">
                     <span className="tw-mr-2">{row.cpu}</span>
@@ -374,7 +391,7 @@ export default function CloudTable({
           aria-label={copy.caption}
         >
           {rows.map(({ provider, row }, index) => {
-            const folded = summary && !phoneAll && index >= PHONE_SUMMARY;
+            const folded = summary && !showAll && index >= SUMMARY_ROWS;
             return row === null ? (
               <li
                 key={`${provider.id}-none`}
@@ -393,7 +410,11 @@ export default function CloudTable({
               >
                 <div className="tw-flex tw-items-baseline tw-justify-between tw-gap-3">
                   <span className="tw-min-w-0 tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-50">
-                    {summary ? provider.name : <TypeName row={row} />}
+                    {summary ? (
+                      provider.name
+                    ) : (
+                      <TypeName row={row} provider={provider} />
+                    )}
                   </span>
                   <span className="tw-flex-none tw-whitespace-nowrap tw-text-[17px] tw-font-semibold tw-leading-6 tw-text-iron-50">
                     {row.total}
@@ -401,60 +422,62 @@ export default function CloudTable({
                 </div>
                 {summary && (
                   <div className="tw-mt-0.5">
-                    <TypeName row={row} />
+                    <TypeName row={row} provider={provider} />
                   </div>
                 )}
                 <div className="tw-mt-1">
                   <TotalNotes row={row} copy={copy} showMachine={!summary} />
                 </div>
-                <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-[22px] tw-text-iron-300">
+                <p className="tw-m-0 tw-mt-2 tw-text-[15px] tw-leading-[22px] tw-text-iron-300">
                   <ArchTag arch={row.arch} /> {row.cpu} · {nb(row.size)}
                 </p>
-                <p className="tw-m-0 tw-mt-0.5 tw-text-sm tw-leading-[22px] tw-text-iron-400">
+                <p className="tw-m-0 tw-mt-0.5 tw-text-[15px] tw-leading-[22px] tw-text-iron-400">
                   {nb(row.disk)} · {copy.cols.burst}: {nb(row.burst)}
                 </p>
               </li>
             );
           })}
         </ul>
-        {summary && rows.length > PHONE_SUMMARY && (
-          <div className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-px-4 tw-py-3 md:tw-px-5 lg:tw-hidden">
+      </div>
+
+      <div className="tw-flex tw-flex-col tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-4 tw-py-4 md:tw-flex-row md:tw-items-start md:tw-justify-between md:tw-gap-6 md:tw-px-5">
+        {summary && rows.length > SUMMARY_ROWS && (
+          <div className="tw-flex-none md:tw-order-last">
             <button
               type="button"
-              aria-expanded={phoneAll}
+              aria-expanded={showAll}
               data-cloud-more=""
-              onClick={() => setPhoneAll((open) => !open)}
+              onClick={() => setShowAll((open) => !open)}
               className={`tw-min-h-11 tw-cursor-pointer tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-transparent tw-px-4 tw-text-sm tw-font-semibold tw-text-iron-50 hover:tw-border-iron-500 ${EX_FOCUS}`}
             >
-              {phoneAll ? copy.showFewer : copy.showAll}
+              {showAll ? copy.showFewer : copy.showAll}
             </button>
           </div>
         )}
-      </div>
-
-      <div className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-4 tw-py-4 md:tw-px-5">
-        {summary ? (
-          <p className="tw-m-0 tw-text-sm tw-leading-[22px] tw-text-iron-300">
-            {copy.allNote}
+        <div className="tw-min-w-0">
+          {summary ? (
+            <p className="tw-m-0 tw-text-[15px] tw-leading-[22px] tw-text-iron-300 md:tw-text-sm">
+              {copy.allNote}
+            </p>
+          ) : (
+            current && (
+              <ul className="tw-m-0 tw-flex tw-list-disc tw-flex-col tw-gap-1 tw-pl-4 tw-text-[15px] tw-leading-[22px] tw-text-iron-300 marker:tw-text-iron-600 md:tw-text-sm">
+                <li>
+                  <b className="tw-font-semibold tw-text-iron-50">
+                    {copy.region}:
+                  </b>{" "}
+                  {nb(current.region)}
+                </li>
+                {current.notes.map((note) => (
+                  <li key={note}>{nb(note)}</li>
+                ))}
+              </ul>
+            )
+          )}
+          <p className="tw-m-0 tw-mt-2.5 tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-400">
+            {copy.source}: {info?.line}
           </p>
-        ) : (
-          current && (
-            <ul className="tw-m-0 tw-flex tw-list-disc tw-flex-col tw-gap-1 tw-pl-4 tw-text-sm tw-leading-[22px] tw-text-iron-300 marker:tw-text-iron-600">
-              <li>
-                <b className="tw-font-semibold tw-text-iron-50">
-                  {copy.region}:
-                </b>{" "}
-                {nb(current.region)}
-              </li>
-              {current.notes.map((note) => (
-                <li key={note}>{nb(note)}</li>
-              ))}
-            </ul>
-          )
-        )}
-        <p className="tw-m-0 tw-mt-2.5 tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-400">
-          {copy.source}: {info?.line}
-        </p>
+        </div>
       </div>
     </div>
   );

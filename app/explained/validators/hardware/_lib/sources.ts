@@ -95,17 +95,17 @@ export const SOURCES = {
     read,
   },
   ecb: {
-    name: "the ECB euro reference rate of Oct 30, 2026",
+    name: "the ECB euro reference rate of October 30, 2026",
     url: "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html",
     read,
   },
   aws: {
-    name: "AWS EC2 on-demand price list for US East (N. Virginia), published Oct 29, 2026, with AWS's EBS and VPC price pages",
+    name: "AWS EC2 on-demand price list for US East (N. Virginia), published October 29, 2026, with AWS's EBS and VPC price pages",
     url: "https://aws.amazon.com/ec2/pricing/on-demand/",
     read,
   },
   gcp: {
-    name: "gcloud-compute.com, built from Google's billing catalog and updated Oct 25, 2026, with Google's disk, IP and network price pages",
+    name: "gcloud-compute.com, built from Google's billing catalog and updated October 25, 2026, with Google's disk, IP and network price pages",
     url: "https://gcloud-compute.com/",
     read,
     thirdParty: true,
@@ -116,7 +116,7 @@ export const SOURCES = {
     read,
   },
   hetzner: {
-    name: "Hetzner's cloud plan pages; whether CPX and CCX can be ordered comes from third-party checks of Oct 13 and 20, 2026",
+    name: "Hetzner's cloud plan pages; whether CPX and CCX can be ordered comes from third-party checks of October 13 and 20, 2026",
     url: "https://www.hetzner.com/cloud",
     read,
   },
@@ -141,7 +141,7 @@ export const SOURCES = {
     read,
   },
   oracle: {
-    name: "Oracle Cloud's public price list (updated Oct 8, 2026) and its Always Free documentation",
+    name: "Oracle Cloud's public price list (updated October 8, 2026) and its Always Free documentation (read again November 1, 2026), which disagree on what a pay-as-you-go account gets free",
     url: "https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm",
     read,
   },
@@ -178,7 +178,7 @@ export const SOURCES = {
     read,
   },
   hetznerDedicated: {
-    name: "Hetzner's dedicated server pages (AX and EX)",
+    name: "Hetzner's dedicated server pages (AX and EX); the AX102's €259 is its own page's price, in Falkenstein or Helsinki, with two 1.92 TB drives",
     url: "https://www.hetzner.com/dedicated-rootserver/matrix-ax",
     read,
   },
@@ -188,7 +188,7 @@ export const SOURCES = {
     read,
   },
   ethOrg: {
-    name: "ethereum.org, Spin up your own Ethereum node (updated Aug 17, 2026)",
+    name: "ethereum.org, Spin up your own Ethereum node (updated August 17, 2026)",
     url: "https://ethereum.org/en/developers/docs/nodes-and-clients/run-a-node/",
     read,
   },
@@ -204,7 +204,7 @@ export const SOURCES = {
     thirdParty: true,
   },
   ownNode: {
-    name: "6529's own Ethereum node, measured (6529chain design/ethereum-node-and-rpc.md section 8)",
+    name: "6529's own Ethereum node, measured while it was syncing (6529chain design/ethereum-node-and-rpc.md section 8)",
     read,
   },
   paradigm: {
@@ -233,23 +233,23 @@ export const SOURCES = {
     read: "2026-11-01",
   },
   power: {
-    name: "published power measurements: Jeff Geerling (Raspberry Pi 5), ServeTheHome and number13.de (Intel N150 mini PCs), Apple (Mac mini M4), and older reviews of desktops and business mini PCs; priced at the EIA's US average",
+    name: "published idle measurements of a Raspberry Pi 5, Intel N150 mini PCs, business mini PCs and older desktops, and Apple's Mac mini power page; priced at the EIA's US average",
     url: "https://support.apple.com/en-us/103253",
     read,
     thirdParty: true,
   },
   sleep: {
-    name: "the validator's macOS guide, Microsoft's powercfg documentation and systemd's sleep targets",
+    name: "the validator's macOS guide, Microsoft's powercfg documentation and Windows' lid settings, and systemd's sleep targets",
     url: "https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/powercfg-command-line-options",
     read,
   },
   rpiOs: {
-    name: "Raspberry Pi's operating system page (Raspberry Pi OS of Oct 6, 2026, on Debian Trixie)",
+    name: "Raspberry Pi's operating system page (Raspberry Pi OS of October 6, 2026, on Debian Trixie)",
     url: "https://www.raspberrypi.com/software/operating-systems/",
     read,
   },
   geth: {
-    name: "Geth's database documentation (edited Jan 12, 2024) and the validator's own crash-safe stores",
+    name: "Geth's database documentation (edited January 12, 2024) and the validator's own crash-safe stores",
     url: "https://geth.ethereum.org/docs/fundamentals/databases",
     read,
   },

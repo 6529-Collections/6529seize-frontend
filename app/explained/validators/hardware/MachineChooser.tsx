@@ -19,7 +19,8 @@ import {
  * questions and one suggestion. Every suggestion is rendered on the server,
  * so the page copies and indexes whole; the browser only shows the one the
  * answers lead to. It opens on "Start with the computer you have", the
- * testing period's advice; changing an answer shows another suggestion.
+ * testing period's advice, and says its answers are starting ones until the
+ * reader changes one.
  */
 export interface ChooserResult {
   /** "Good", "Cloud VM": the tier or option's own name. */
@@ -34,6 +35,10 @@ export interface ChooserResult {
 interface ChooserCopy {
   readonly title: string;
   readonly intro: string;
+  /** Above the questions until the reader changes an answer. */
+  readonly starting: string;
+  /** Above the questions once the reader has changed one. */
+  readonly yours: string;
   readonly where: string;
   readonly node: string;
   readonly nodeHint: string;
@@ -69,7 +74,7 @@ function Question({
           {text}
         </p>
         {hint !== undefined && (
-          <p className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-5 tw-text-iron-400">
+          <p className="tw-m-0 tw-mt-1 tw-text-[15px] tw-leading-[22px] tw-text-iron-400 md:tw-text-sm md:tw-leading-5">
             {hint}
           </p>
         )}
@@ -98,8 +103,11 @@ export default function MachineChooser({
   readonly results: Readonly<Record<Suggestion, ChooserResult>>;
 }) {
   const [answers, setAnswers] = useState<Answers>(DEFAULT_ANSWERS);
-  const set = (id: keyof Answers) => (value: Answer) =>
+  const [touched, setTouched] = useState(false);
+  const set = (id: keyof Answers) => (value: Answer) => {
+    setTouched(true);
     setAnswers((current) => ({ ...current, [id]: value }));
+  };
   const picked = suggest(answers);
 
   return (
@@ -115,10 +123,16 @@ export default function MachineChooser({
       >
         {copy.title}
       </h2>
-      <p className="tw-m-0 tw-mt-1.5 tw-text-sm tw-leading-5 tw-text-iron-400">
+      <p className="tw-m-0 tw-mt-1.5 tw-text-[15px] tw-leading-[22px] tw-text-iron-400 md:tw-text-sm md:tw-leading-5">
         {copy.intro}
       </p>
-      <div className="tw-mt-5">
+      <p
+        className="tw-m-0 tw-mt-4 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-primary-300"
+        data-answers={touched ? "yours" : "starting"}
+      >
+        {touched ? copy.yours : copy.starting}
+      </p>
+      <div className="tw-mt-3">
         <Question
           id="where"
           text={copy.where}
@@ -167,7 +181,7 @@ export default function MachineChooser({
               <p className="tw-m-0 tw-mt-2.5 tw-text-lg tw-font-semibold tw-leading-6 tw-tracking-[-0.01em] tw-text-iron-50 md:tw-text-xl md:tw-leading-7">
                 {result.title}
               </p>
-              <p className="tw-m-0 tw-mt-1.5 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+              <p className="tw-m-0 tw-mt-1.5 tw-text-[15px] tw-leading-6 tw-text-iron-300 md:tw-text-base md:tw-leading-[26px]">
                 {result.body}
               </p>
               <div className="tw-mt-3.5 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2">

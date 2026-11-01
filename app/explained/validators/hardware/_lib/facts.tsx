@@ -35,7 +35,7 @@ import { SOURCES, type HwSource, type SourceId } from "./sources";
  */
 const PREFIX = "hw.";
 
-/** "Hetzner's cloud plan pages, read Oct 31, 2026", or "…, an estimate". */
+/** "Hetzner's cloud plan pages, read October 31, 2026", or "…, an estimate". */
 export function sourceText(source: HwSource, locale: SupportedLocale): string {
   const day = formatUtcLongDay(locale, source.read);
   if ("estimate" in source && source.estimate) {
@@ -263,7 +263,11 @@ export function partFacts(): [string, Said][] {
   out.push([
     "part.power.sleep",
     {
-      text: SLEEP.map((row) => `${row.os}: ${row.cmd}`).join("; "),
+      text: SLEEP.map((row) =>
+        [`${row.os}: ${row.cmds.join(", then ")}`, row.note]
+          .filter(Boolean)
+          .join(". ")
+      ).join("; "),
       source: "sleep",
     },
   ]);
