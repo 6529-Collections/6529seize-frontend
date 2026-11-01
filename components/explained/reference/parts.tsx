@@ -161,6 +161,8 @@ interface StackColumn {
    * its value. A term and its meaning read without one.
    */
   readonly phoneLabel?: boolean;
+  /** The column's width as a table, a Tailwind class ("lg:tw-w-[160px]"). */
+  readonly width?: string;
 }
 
 interface StackRow {
@@ -186,6 +188,7 @@ const FROM = {
     label:
       "tw-block tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.1em] tw-text-iron-400 md:tw-hidden",
     right: "md:tw-text-right",
+    empty: "max-md:tw-hidden",
   },
   lg: {
     head: "tw-hidden lg:tw-table-header-group",
@@ -195,6 +198,7 @@ const FROM = {
     label:
       "tw-block tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.1em] tw-text-iron-400 lg:tw-hidden",
     right: "lg:tw-text-right",
+    empty: "max-lg:tw-hidden",
   },
 } as const;
 
@@ -235,7 +239,7 @@ export function StackTable({
             <th
               key={column.key}
               scope="col"
-              className={`${TH} ${column.numeric ? at.right : ""}`}
+              className={`${TH} ${column.numeric ? at.right : ""} ${column.width ?? ""}`}
             >
               {column.label}
             </th>
@@ -250,8 +254,11 @@ export function StackTable({
                 column.phoneLabel === false ? null : (
                   <span className={at.label}>{column.label}</span>
                 );
+              const empty = row.cells[column.key] === undefined;
               const cell = row.cells[column.key] ?? "–";
-              const align = column.numeric ? at.right : "";
+              // On a phone a row is a stack of label and value: an empty
+              // value is left out rather than printed as a dash.
+              const align = `${column.numeric ? at.right : ""} ${empty ? at.empty : ""}`;
               return index === 0 ? (
                 <th
                   key={column.key}
@@ -383,7 +390,7 @@ export function CodeBlock({
     >
       {showLabel && (
         <span
-          className="tw-block tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-400 md:tw-px-[18px]"
+          className="tw-block tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-2 tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-300 md:tw-px-[18px]"
           aria-hidden="true"
         >
           {label}

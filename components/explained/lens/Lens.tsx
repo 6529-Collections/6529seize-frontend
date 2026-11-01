@@ -62,7 +62,7 @@ export function RuleRail({
             data-rule-on={line.on ? "1" : "0"}
           >
             <span
-              className="tw-block"
+              className="tw-block [overflow-wrap:anywhere]"
               style={{ paddingLeft: hang, textIndent: `-${hang}` }}
             >
               {line.text}
@@ -114,7 +114,7 @@ export function Readout({
         )}
       </span>
       <p
-        className="tw-m-0 tw-max-w-[760px] tw-text-base tw-leading-[25px] tw-text-iron-300"
+        className="tw-m-0 tw-max-w-[620px] tw-text-base tw-leading-[25px] tw-text-iron-300"
         aria-live="polite"
       >
         {say}

@@ -53,7 +53,7 @@
   "explained.tdh.check.sim.investigating": "In Prüfung",
   "explained.tdh.check.sim.fixed": "Behoben",
   "explained.tdh.check.sim.closed": "Geschlossen",
-  "explained.tdh.check.ribbon.caption": "Jede Kachel ist ein Ergebnis: der gehaltene Tag, abgeschlossen durch den Snapshot um {midnight} an ihrem rechten Rand.",
+  "explained.tdh.check.ribbon.caption": "Jede Kachel ist ein Ergebnis: der gehaltene Tag, abgeschlossen durch den Snapshot um {midnight} an ihrem rechten Rand. Die Uhrzeit auf einer Kachel ist die, zu der ihre Datei geschrieben wurde.",
   "explained.tdh.check.ribbon.rewritten": "↻ markiert eine Datei, die nach ihrem Lauf neu geschrieben wurde: {groups}.",
   "explained.tdh.check.ribbon.rewrittenGroup": "{dates} am {date} um {time}",
   "explained.tdh.check.ribbon.window": "Gezeigt sind die neuesten {shown} von {total} Tagen.",

@@ -1,3 +1,8 @@
+import EnglishOnlyNote from "@/components/explained/shell/EnglishOnlyNote";
+import {
+  resolveExplainedLocale,
+  type ExplainedParams,
+} from "@/lib/explained/locale.server";
 import type { Metadata } from "next";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { kt } from "@/components/explained/i18n";
@@ -53,7 +58,15 @@ const SECTIONS: readonly (readonly [string, SpecKey])[] = [
   ["s13", "explained.tdh.spec.s13.title"],
 ];
 
-export default async function SpecificationPage() {
+export default async function SpecificationPage({
+  searchParams,
+}: {
+  readonly searchParams?: Promise<ExplainedParams>;
+} = {}) {
+  // The language the reader asked for: this page is English only for now.
+  const requested = searchParams
+    ? await resolveExplainedLocale(await searchParams)
+    : DEFAULT_LOCALE;
   const locale = DEFAULT_LOCALE;
   const book = await loadFactBook();
   const ctx = specContext(book, locale);
@@ -102,6 +115,7 @@ export default async function SpecificationPage() {
     >
       <SpecificationAnchors />
       <article data-ex-article="" lang={locale}>
+        <EnglishOnlyNote requested={requested} />
         <PageHead
           eyebrow={m("explained.tdh.spec.eyebrow", {
             n: <span>{place.n}</span>,

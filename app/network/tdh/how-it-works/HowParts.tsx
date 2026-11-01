@@ -140,10 +140,10 @@ function Term({
   return (
     <a
       href={href}
-      className={`tw-inline-flex tw-items-baseline tw-gap-0.5 tw-whitespace-nowrap tw-rounded tw-bg-iron-900 tw-px-1.5 tw-text-iron-50 tw-no-underline hover:tw-bg-iron-800 ${EX_FOCUS}`}
+      className={`tw-inline tw-rounded tw-bg-iron-900 tw-px-1.5 tw-text-iron-50 tw-no-underline [box-decoration-break:clone] hover:tw-bg-iron-800 md:tw-whitespace-nowrap ${EX_FOCUS}`}
     >
       {children}
-      <sup className="tw-text-[11px] tw-font-bold tw-not-italic tw-text-primary-300">
+      <sup className="tw-ml-0.5 tw-text-xs tw-font-bold tw-not-italic tw-text-primary-300">
         {letter}
       </sup>
     </a>

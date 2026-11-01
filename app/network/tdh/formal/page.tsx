@@ -1,3 +1,8 @@
+import EnglishOnlyNote from "@/components/explained/shell/EnglishOnlyNote";
+import {
+  resolveExplainedLocale,
+  type ExplainedParams,
+} from "@/lib/explained/locale.server";
 import type { Metadata } from "next";
 import { getAppMetadata } from "@/components/providers/metadata";
 import ExplainedShell from "@/components/explained/shell/ExplainedShell";
@@ -51,7 +56,15 @@ const MOVED: Readonly<Record<string, string>> = {
   balanceRaw: "limits",
 };
 
-export default async function HowSurePage() {
+export default async function HowSurePage({
+  searchParams,
+}: {
+  readonly searchParams?: Promise<ExplainedParams>;
+} = {}) {
+  // The language the reader asked for: this page is English only for now.
+  const requested = searchParams
+    ? await resolveExplainedLocale(await searchParams)
+    : DEFAULT_LOCALE;
   const locale = DEFAULT_LOCALE;
   const book = await loadFactBook();
   const ctx = sureContext(book, locale);
@@ -84,6 +97,7 @@ export default async function HowSurePage() {
     >
       <LegacyAnchors moved={MOVED} />
       <article data-ex-article="" lang={locale}>
+        <EnglishOnlyNote requested={requested} />
         <SureHead ctx={ctx} chapter={place.chapterNumber} n={place.n} />
         <TwoQuestions ctx={ctx} />
         <OneClaim ctx={ctx} />

@@ -136,7 +136,7 @@ export default function BuildSection({ ctx }: { readonly ctx: SureContext }) {
                 <span className="tw-block tw-text-[17px] tw-font-semibold tw-leading-[25px] tw-text-iron-50">
                   {row.what}
                 </span>
-                <p className="tw-m-0 tw-mt-1.5 tw-max-w-[660px] tw-text-base tw-leading-[25px] tw-text-iron-300">
+                <p className="tw-m-0 tw-mt-1.5 tw-max-w-[620px] tw-text-base tw-leading-[25px] tw-text-iron-300">
                   {row.body}
                 </p>
               </div>

@@ -1,3 +1,8 @@
+import EnglishOnlyNote from "@/components/explained/shell/EnglishOnlyNote";
+import {
+  resolveExplainedLocale,
+  type ExplainedParams,
+} from "@/lib/explained/locale.server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -79,7 +84,15 @@ function pinBlock(book: FactBook, comment: string, retired: string | null) {
   ].join("\n");
 }
 
-export default async function ImplementationsPage() {
+export default async function ImplementationsPage({
+  searchParams,
+}: {
+  readonly searchParams?: Promise<ExplainedParams>;
+} = {}) {
+  // The language the reader asked for: this page is English only for now.
+  const requested = searchParams
+    ? await resolveExplainedLocale(await searchParams)
+    : DEFAULT_LOCALE;
   const locale = DEFAULT_LOCALE;
   const book = await loadFactBook();
   const place = pagePlace("tdh", "impl", locale);
@@ -149,6 +162,7 @@ export default async function ImplementationsPage() {
     >
       <ImplAnchors />
       <article data-ex-article="" lang={locale}>
+        <EnglishOnlyNote requested={requested} />
         <PageHead
           eyebrow={m("explained.tdh.impl.eyebrow", {
             n: <span>{place.n}</span>,
@@ -197,10 +211,22 @@ export default async function ImplementationsPage() {
               from="lg"
               caption={s("explained.tdh.impl.cast.caption")}
               columns={[
-                { key: "program", label: s("explained.tdh.impl.col.program") },
-                { key: "written", label: s("explained.tdh.impl.col.written") },
+                {
+                  key: "program",
+                  label: s("explained.tdh.impl.col.program"),
+                  width: "lg:tw-w-[170px]",
+                },
+                {
+                  key: "written",
+                  label: s("explained.tdh.impl.col.written"),
+                  width: "lg:tw-w-[230px]",
+                },
                 { key: "runs", label: s("explained.tdh.impl.col.runs") },
-                { key: "proved", label: s("explained.tdh.impl.col.proved") },
+                {
+                  key: "proved",
+                  label: s("explained.tdh.impl.col.proved"),
+                  width: "lg:tw-w-[170px]",
+                },
               ]}
               rows={[
                 {

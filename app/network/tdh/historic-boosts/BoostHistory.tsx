@@ -94,20 +94,23 @@ export default function BoostHistory({
           y2={y(low)}
           stroke={EX_HEX.line2}
         />
-        {years.map((year) => (
-          <g key={year}>
-            <line
-              x1={x(year)}
-              y1={y(low)}
-              x2={x(year)}
-              y2={y(low) + 5}
-              stroke={EX_HEX.ink4}
-            />
-            <Label x={x(year)} y={HEIGHT - 8} anchor="middle">
-              {year.slice(0, 4)}
-            </Label>
-          </g>
-        ))}
+        {years
+          // A year too near an edge would be cut by the frame.
+          .filter((year) => x(year) > 18 && x(year) < width - 18)
+          .map((year) => (
+            <g key={year}>
+              <line
+                x1={x(year)}
+                y1={y(low)}
+                x2={x(year)}
+                y2={y(low) + 5}
+                stroke={EX_HEX.ink4}
+              />
+              <Label x={x(year)} y={HEIGHT - 8} anchor="middle">
+                {year.slice(0, 4)}
+              </Label>
+            </g>
+          ))}
         {steps.map((step, index) => {
           if (index === 0) placed.length = 0;
           const x0 = x(step.from);
@@ -173,7 +176,7 @@ export default function BoostHistory({
                   strokeWidth={1.5}
                 />
               )}
-              {(!narrow || step.current || index === 0) && (
+              {(!narrow || step.current || (index === 0 && fits)) && (
                 <Label
                   x={lx}
                   y={ly}

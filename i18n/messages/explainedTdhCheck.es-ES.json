@@ -53,7 +53,7 @@
   "explained.tdh.check.sim.investigating": "En investigación",
   "explained.tdh.check.sim.fixed": "Corregido",
   "explained.tdh.check.sim.closed": "Cerrado",
-  "explained.tdh.check.ribbon.caption": "Cada casilla es un resultado: el día mantenido, cerrado por la instantánea de las {midnight} en su borde derecho.",
+  "explained.tdh.check.ribbon.caption": "Cada casilla es un resultado: el día mantenido, cerrado por la instantánea de las {midnight} en su borde derecho. La hora de una casilla es cuando se escribió su archivo.",
   "explained.tdh.check.ribbon.rewritten": "↻ marca un archivo reescrito después de su ejecución: {groups}.",
   "explained.tdh.check.ribbon.rewrittenGroup": "{dates} el {date} a las {time}",
   "explained.tdh.check.ribbon.window": "Se muestran los {shown} días más recientes de {total}.",

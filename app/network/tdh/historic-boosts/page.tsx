@@ -1,3 +1,8 @@
+import EnglishOnlyNote from "@/components/explained/shell/EnglishOnlyNote";
+import {
+  resolveExplainedLocale,
+  type ExplainedParams,
+} from "@/lib/explained/locale.server";
 import type { Metadata } from "next";
 import BoostHistory, { type BoostStep } from "./BoostHistory";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -48,7 +53,15 @@ const MOVED: Readonly<Record<string, string>> = {
   current: "tdh-1-4",
 };
 
-export default async function VersionsPage() {
+export default async function VersionsPage({
+  searchParams,
+}: {
+  readonly searchParams?: Promise<ExplainedParams>;
+} = {}) {
+  // The language the reader asked for: this page is English only for now.
+  const requested = searchParams
+    ? await resolveExplainedLocale(await searchParams)
+    : DEFAULT_LOCALE;
   const locale = DEFAULT_LOCALE;
   const book = await loadFactBook();
   const place = pagePlace("tdh", "versions", locale);
@@ -227,6 +240,7 @@ export default async function VersionsPage() {
     >
       <LegacyAnchors moved={MOVED} />
       <article data-ex-article="" lang={locale}>
+        <EnglishOnlyNote requested={requested} />
         <PageHead
           eyebrow={m("explained.tdh.versions.eyebrow", {
             n: <span>{place.n}</span>,

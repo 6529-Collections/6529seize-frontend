@@ -1,3 +1,8 @@
+import EnglishOnlyNote from "@/components/explained/shell/EnglishOnlyNote";
+import {
+  resolveExplainedLocale,
+  type ExplainedParams,
+} from "@/lib/explained/locale.server";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -71,7 +76,15 @@ function StatusCell({
   return comparisonRef ? <span data-fact="tdh.days.first">{mark}</span> : mark;
 }
 
-export default async function GlossaryPage() {
+export default async function GlossaryPage({
+  searchParams,
+}: {
+  readonly searchParams?: Promise<ExplainedParams>;
+} = {}) {
+  // The language the reader asked for: this page is English only for now.
+  const requested = searchParams
+    ? await resolveExplainedLocale(await searchParams)
+    : DEFAULT_LOCALE;
   const locale = DEFAULT_LOCALE;
   const book = await loadFactBook();
   const place = pagePlace("tdh", "glossary", locale);
@@ -142,6 +155,7 @@ export default async function GlossaryPage() {
     >
       <GlossaryAnchors />
       <article data-ex-article="" lang={locale}>
+        <EnglishOnlyNote requested={requested} />
         <PageHead
           eyebrow={m("explained.tdh.glossary.eyebrow", {
             n: <span>{place.n}</span>,

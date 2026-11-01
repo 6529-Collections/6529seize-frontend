@@ -170,8 +170,12 @@ export function DaySide({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <aside className="tw-grid tw-min-w-0 tw-grid-cols-1 tw-content-start tw-gap-4">
-      <Glance day={day} cycle={cycle} locale={locale} />
+    // On a phone the side's parts join the page's single column, and the
+    // day at a glance, the headline, comes before the receipt.
+    <aside className="tw-grid tw-min-w-0 tw-grid-cols-1 tw-content-start tw-gap-4 max-lg:tw-contents">
+      <div className="max-lg:tw-order-first">
+        <Glance day={day} cycle={cycle} locale={locale} />
+      </div>
       <TwoTotals book={book} locale={locale} />
       <OwnTdh locale={locale} />
     </aside>

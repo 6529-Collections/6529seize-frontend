@@ -53,7 +53,7 @@
   "explained.tdh.check.sim.investigating": "En cours d'analyse",
   "explained.tdh.check.sim.fixed": "Corrigé",
   "explained.tdh.check.sim.closed": "Clos",
-  "explained.tdh.check.ribbon.caption": "Chaque tuile est un résultat : le jour détenu, clos par l'instantané de {midnight} sur son bord droit.",
+  "explained.tdh.check.ribbon.caption": "Chaque tuile est un résultat : le jour détenu, clos par l'instantané de {midnight} sur son bord droit. L'heure d'une tuile est celle où son fichier a été écrit.",
   "explained.tdh.check.ribbon.rewritten": "↻ marque un fichier réécrit après son exécution : {groups}.",
   "explained.tdh.check.ribbon.rewrittenGroup": "{dates} le {date} à {time}",
   "explained.tdh.check.ribbon.window": "Les {shown} jours les plus récents sur {total} sont dessinés.",

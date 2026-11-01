@@ -47,14 +47,15 @@ interface LoopProps {
  * the rest.
  */
 function MiniRing({ stations, focus }: Pick<LoopProps, "stations" | "focus">) {
-  // Wide enough for each station's name outside its circle, at 12 px.
-  const size = 300;
+  // Wide enough for each station's name outside its circle, at 14 px, which
+  // stays at 12 px or more when a 320 px window scales the ring down.
+  const size = 320;
   const c = size / 2;
   const r = 78;
   return (
     <svg
       viewBox={`0 0 ${size} ${size}`}
-      className="tw-mx-auto tw-mb-4 tw-block tw-h-auto tw-w-full tw-max-w-[300px]"
+      className="tw-mx-auto tw-mb-4 tw-block tw-h-auto tw-w-full tw-max-w-[320px]"
       aria-hidden="true"
       data-loop-mini=""
     >
@@ -154,7 +155,7 @@ function MiniLabel({
       x={x}
       y={y + dy}
       textAnchor={anchor}
-      fontSize={12}
+      fontSize={14}
       fontWeight={600}
       fill={on ? EX_HEX.youInk : EX_HEX.ink2}
     >

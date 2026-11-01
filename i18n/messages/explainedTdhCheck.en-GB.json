@@ -53,7 +53,7 @@
   "explained.tdh.check.sim.investigating": "Investigating",
   "explained.tdh.check.sim.fixed": "Fixed",
   "explained.tdh.check.sim.closed": "Closed",
-  "explained.tdh.check.ribbon.caption": "Each tile is one result: the day held, closed by the {midnight} snapshot on its right edge.",
+  "explained.tdh.check.ribbon.caption": "Each tile is one result: the day held, closed by the {midnight} snapshot on its right edge. The time on a tile is when its file was written.",
   "explained.tdh.check.ribbon.rewritten": "↻ marks a file rewritten after its run: {groups}.",
   "explained.tdh.check.ribbon.rewrittenGroup": "{dates} on {date} at {time}",
   "explained.tdh.check.ribbon.window": "The newest {shown} of {total} days are drawn.",

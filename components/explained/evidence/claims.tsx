@@ -221,6 +221,21 @@ export interface ScoreCell {
 }
 
 /** One row of counts with their units, once per page (§6.4). */
+/**
+ * A cell's rules: on a phone an even count is a grid of two columns (a rule
+ * left of the second column, above every row after the first), an odd one
+ * a single column; on a wide screen one row, a rule left of each cell.
+ */
+function scoreBorders(index: number, count: number): string {
+  const wide = index > 0 ? "lg:tw-border-l lg:tw-border-t-0" : "";
+  if (count % 2 !== 0) {
+    return index > 0 ? `tw-border-t ${wide}` : "";
+  }
+  const left = index % 2 === 1 ? "tw-border-l" : "";
+  const top = index >= 2 ? "tw-border-t" : "";
+  return `${left} ${top} ${wide}`.trim();
+}
+
 export function Scoreboard({
   cells,
   label,
@@ -232,7 +247,7 @@ export function Scoreboard({
 }) {
   return (
     <dl
-      className="tw-m-0 tw-grid tw-grid-cols-1 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 lg:[grid-template-columns:repeat(var(--ex-score),minmax(0,1fr))]"
+      className={`tw-m-0 tw-grid ${cells.length % 2 === 0 ? "tw-grid-cols-2" : "tw-grid-cols-1"} tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 lg:[grid-template-columns:repeat(var(--ex-score),minmax(0,1fr))]`}
       style={{ ["--ex-score" as string]: String(cells.length) }}
       aria-label={label}
       data-scoreboard=""
@@ -240,7 +255,7 @@ export function Scoreboard({
       {cells.map((cell, index) => (
         <div
           key={cell.value?.id ?? index}
-          className={`tw-px-[22px] tw-py-5 ${index > 0 ? "tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 lg:tw-border-l lg:tw-border-t-0" : ""}`}
+          className={`tw-border-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-4 md:tw-px-[22px] md:tw-py-5 ${scoreBorders(index, cells.length)}`}
         >
           <dt className="tw-sr-only">
             {typeof cell.caption === "string" ? cell.caption : ""}

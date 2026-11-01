@@ -59,7 +59,7 @@ function ProofSketch({ m }: { readonly m: SureContext["m"] }) {
         <h3 className="tw-m-0 tw-text-[19px] tw-font-semibold tw-leading-7 tw-text-iron-50">
           {m("explained.tdh.sure.sketch.summary")}
         </h3>
-        <p className="tw-m-0 tw-mt-2 tw-max-w-[760px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
+        <p className="tw-m-0 tw-mt-2 tw-max-w-[600px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
           {m("explained.tdh.sure.sketch.intro")}
         </p>
       </figcaption>
@@ -86,6 +86,9 @@ function ProofSketch({ m }: { readonly m: SureContext["m"] }) {
             {index < SKETCH.length - 1 && (
               <span
                 aria-hidden="true"
+                // The arrow sits in the gap between two steps, by design
+                // outside the step it follows.
+                data-tdh-check-ignore="text-escapes-frame"
                 className="tw-absolute tw-hidden tw-text-lg tw-text-iron-400 lg:tw-right-[-22px] lg:tw-top-1/2 lg:tw-block lg:-tw-translate-y-1/2"
               >
                 →
@@ -94,7 +97,7 @@ function ProofSketch({ m }: { readonly m: SureContext["m"] }) {
           </li>
         ))}
       </ol>
-      <p className="tw-m-0 tw-mt-4 tw-max-w-[760px] tw-text-[15px] tw-leading-6 tw-text-iron-400">
+      <p className="tw-m-0 tw-mt-4 tw-max-w-[600px] tw-text-[15px] tw-leading-6 tw-text-iron-400">
         {m("explained.tdh.sure.sketch.close")}
       </p>
     </figure>
