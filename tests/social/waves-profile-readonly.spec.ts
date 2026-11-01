@@ -1131,29 +1131,33 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     // The virtualized masonry re-renders its cells after the scroll, so a
     // matched cell can detach before it is measured. Measure against the feed
     // itself and retry until a connected post intersects it.
-    const profileFeedElement = await profileFeed.elementHandle();
     let visibleFeedPostIndex = -1;
     await expect
       .poll(async () => {
-        visibleFeedPostIndex = await feedPostButtons.evaluateAll(
-          (buttons, feed) => {
-            if (!feed) {
-              return -1;
-            }
+        const profileFeedElement = await profileFeed.elementHandle();
+        try {
+          visibleFeedPostIndex = await feedPostButtons.evaluateAll(
+            (buttons, feed) => {
+              if (!feed?.isConnected) {
+                return -1;
+              }
 
-            const feedRect = feed.getBoundingClientRect();
-            return buttons.findIndex((button) => {
-              const rect = button.getBoundingClientRect();
-              return (
-                button.isConnected &&
-                rect.height > 0 &&
-                rect.bottom > feedRect.top &&
-                rect.top < feedRect.bottom
-              );
-            });
-          },
-          profileFeedElement
-        );
+              const feedRect = feed.getBoundingClientRect();
+              return buttons.findIndex((button) => {
+                const rect = button.getBoundingClientRect();
+                return (
+                  button.isConnected &&
+                  rect.height > 0 &&
+                  rect.bottom > feedRect.top &&
+                  rect.top < feedRect.bottom
+                );
+              });
+            },
+            profileFeedElement
+          );
+        } finally {
+          await profileFeedElement?.dispose();
+        }
         return visibleFeedPostIndex;
       })
       .toBeGreaterThanOrEqual(0);
@@ -1163,22 +1167,18 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     // URL once mounted, sometimes within 100 ms of the navigation. Sampling
     // the address bar can miss that, so observe the committed navigation,
     // armed before Enter is pressed.
-    let openedWavePath = "";
     await Promise.all([
       page.waitForURL(
-        (url) => {
-          const matches =
-            /^\/waves\/[0-9a-f-]{36}$/i.test(url.pathname) &&
-            Boolean(url.searchParams.get("serialNo"));
-          if (matches) {
-            openedWavePath = url.pathname;
-          }
-          return matches;
-        },
+        (url) =>
+          /^\/waves\/[0-9a-f-]{36}$/i.test(url.pathname) &&
+          Boolean(url.searchParams.get("serialNo")),
         { waitUntil: "commit", timeout: 20_000 }
       ),
       visibleFeedPost.press("Enter"),
     ]);
+    // The cleanup keeps the pathname, so the current URL names the same wave.
+    const openedWavePath = new URL(page.url()).pathname;
+    expect(openedWavePath).toMatch(/^\/waves\/[0-9a-f-]{36}$/i);
     // Next syncs that removal into its router in a transition. A Back press
     // before the transition commits lets the router write the wave URL over
     // the feed entry, so let the wave consume the target and go idle first.
