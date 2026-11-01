@@ -199,6 +199,9 @@ async function takeLock(
   return waited;
 }
 
+/** Read through a call: an abort can land while a lock request is awaited. */
+const isAborted = (signal: AbortSignal): boolean => signal.aborted;
+
 /**
  * Takes the engine lock for a profile. Resolves once this tab may run the
  * engine; rejects with AbortError when `signal` aborts first. Without Web
@@ -257,7 +260,8 @@ export async function acquireE2eeEngineLock(
     }
   };
 
-  if (input.signal.aborted) {
+  // The signal can abort while the lock is awaited above.
+  if (isAborted(input.signal)) {
     release();
     throw abortError();
   }

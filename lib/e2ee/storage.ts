@@ -417,7 +417,8 @@ async function versionedWrite(
 ): Promise<void> {
   const tx = db.transaction(ALL_STORES, "readwrite");
   const finished = done(tx);
-  let conflict: Error | null = null;
+  // Set by the read callback when `next` refuses the write.
+  let conflict = null as Error | null;
   const read = tx.objectStore(S_WASM).get(profileId) as IDBRequest<
     WasmRecord | undefined
   >;
