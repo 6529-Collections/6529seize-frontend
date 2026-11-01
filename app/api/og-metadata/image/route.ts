@@ -6,11 +6,19 @@ import {
 } from "@/lib/security/urlGuard";
 import { OG_IMAGE_PROXY_MAX_BYTES } from "@/app/api/og-metadata/_lib/imageProxyPolicy";
 import {
+  GIPHY_MEDIA_HOSTS,
+  isGiphyVideoRenditionUrl,
+} from "@/app/api/og-metadata/_lib/giphyRenditions";
+import {
+  BoundedResultCache,
+  type CacheableResult,
+} from "@/lib/cache/boundedResultCache";
+import {
   AdmissionQueue,
   AdmissionQueueError,
 } from "@/lib/fetch/admissionQueue";
 import { NextResponse, type NextRequest } from "next/server";
-import sharp, { type Metadata } from "sharp";
+import sharp, { type Metadata, type Sharp } from "sharp";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -32,12 +40,23 @@ const MAX_INPUT_DIMENSION = 65_536;
 // Admit before fetching to bound both compressed buffers and native image work.
 // Ordinary multi-image cards can wait briefly without allocating image buffers.
 const imageAdmission = new AdmissionQueue({ maxPending: 32, waitMs: 15_000 });
+// Video pass-through never decodes, so it must not wait behind GIF re-encodes.
+const videoAdmission = new AdmissionQueue({ maxPending: 32, waitMs: 15_000 });
 const OVERSIZED_GIF_PREVIEW_MAX_BYTES = 8 * 1024 * 1024;
 const MAX_ANIMATED_WORK_BYTES = 512 * 1024 * 1024;
+const VIDEO_PASSTHROUGH_MAX_BYTES = 8 * 1024 * 1024;
 const PNG_CONTENT_TYPE = "image/png";
 const GIF_CONTENT_TYPE = "image/gif";
+const MP4_CONTENT_TYPE = "video/mp4";
 const CACHE_CONTROL =
   "public, max-age=604800, s-maxage=2592000, stale-while-revalidate=2592000";
+// A first frame served because the animated re-encode failed is a stand-in:
+// keep it briefly so a later request can still produce the animation.
+const DEGRADED_CACHE_CONTROL = "public, max-age=300";
+const RESULT_TTL_MS = 24 * 60 * 60 * 1000;
+const DEGRADED_RESULT_TTL_MS = 5 * 60 * 1000;
+// Brief, so a broken image cannot be hammered and a manual retry soon works.
+const FAILURE_TTL_MS = 30 * 1000;
 const IMAGE_ACCEPT_HEADER =
   "image/png,image/jpeg,image/gif,image/webp,*/*;q=0.5";
 const USER_AGENT =
@@ -85,6 +104,28 @@ const FETCH_OPTIONS: FetchPublicUrlOptions = {
   timeoutMs: 7000,
   userAgent: USER_AGENT,
 };
+// Every redirect hop must stay on an exact Giphy media host.
+const GIPHY_VIDEO_FETCH_OPTIONS: FetchPublicUrlOptions = {
+  ...FETCH_OPTIONS,
+  policy: { allowedHosts: GIPHY_MEDIA_HOSTS },
+};
+
+type ProxyResult =
+  | {
+      readonly kind: "media";
+      readonly data: Buffer;
+      readonly contentType: string;
+      readonly cacheControl: string;
+    }
+  | { readonly kind: "error"; readonly status: number; readonly error: string };
+
+type ByteRange = { readonly start: number; readonly end: number };
+
+// No shared cache sits in front of this route, so keep processed results here.
+const proxyResults = new BoundedResultCache<ProxyResult>({
+  maxBytes: 128 * 1024 * 1024,
+  maxEntryBytes: 16 * 1024 * 1024,
+});
 
 const parseWidth = (value: string | null): number => {
   if (!value) {
@@ -168,6 +209,32 @@ const cancelResponseBody = async (response: Response): Promise<void> => {
   }
 };
 
+const describeFailure = (
+  error: unknown
+): { readonly status: number; readonly error: string } => {
+  if (error instanceof UrlGuardError) {
+    switch (error.kind) {
+      case "missing-url":
+      case "invalid-url":
+      case "unsupported-protocol":
+        return { status: 400, error: "Invalid image url" };
+      case "host-not-allowed":
+      case "dns-lookup-failed":
+      case "ip-not-allowed":
+        return { status: 400, error: "Unsupported image host" };
+      case "timeout":
+        return { status: 504, error: "Upstream timeout" };
+      case "redirect-location-missing":
+      case "redirect-location-invalid":
+      case "too-many-redirects":
+      case "fetch-failed":
+        return { status: 502, error: "Failed to fetch image" };
+    }
+  }
+
+  return { status: 502, error: "Failed to normalize image" };
+};
+
 const mapErrorToResponse = (error: unknown): NextResponse => {
   if (error instanceof AdmissionQueueError) {
     return NextResponse.json(
@@ -178,24 +245,8 @@ const mapErrorToResponse = (error: unknown): NextResponse => {
       }
     );
   }
-  if (error instanceof UrlGuardError) {
-    switch (error.kind) {
-      case "missing-url":
-      case "invalid-url":
-      case "unsupported-protocol":
-        return jsonError("Invalid image url", 400);
-      case "host-not-allowed":
-      case "dns-lookup-failed":
-      case "ip-not-allowed":
-        return jsonError("Unsupported image host", 400);
-      case "timeout":
-        return jsonError("Upstream timeout", 504);
-      default:
-        return jsonError("Failed to fetch image", 502);
-    }
-  }
-
-  return jsonError("Failed to normalize image", 502);
+  const { status, error: message } = describeFailure(error);
+  return jsonError(message, status);
 };
 
 const readImageResponseBuffer = async (
@@ -322,7 +373,7 @@ const normalizeImage = async ({
   readonly buffer: Buffer;
   readonly width: number;
   readonly allowAnimation: boolean;
-}): Promise<{ data: Buffer; contentType: string }> => {
+}): Promise<{ data: Buffer; contentType: string; degraded: boolean }> => {
   const detectedContentType = detectContentType(buffer);
   if (!detectedContentType) {
     throw new Error("Upstream response is not a supported raster image.");
@@ -350,26 +401,41 @@ const normalizeImage = async ({
     animatedWorkBytes <= MAX_ANIMATED_WORK_BYTES;
   // Preserve ordinary external GIFs without admitting an unbounded animation.
   // Range-fetched or over-budget GIFs keep the existing first-frame PNG path.
-  const output = (
-    animated
-      ? sharp(buffer, {
-          animated: true,
-          limitInputPixels: MAX_ANIMATED_WORK_BYTES / 16,
-        }).timeout({ seconds: 7 })
-      : image
-  )
+  if (!animated) {
+    return { ...(await encodeFirstFrame(image, width)), degraded: false };
+  }
+  try {
+    const animatedImage = sharp(buffer, {
+      animated: true,
+      limitInputPixels: MAX_ANIMATED_WORK_BYTES / 16,
+    }).timeout({ seconds: 7 });
+    return {
+      data: await fitInside(animatedImage, width).gif().toBuffer(),
+      contentType: GIF_CONTENT_TYPE,
+      degraded: false,
+    };
+  } catch (error) {
+    // A slow or failing re-encode still has a usable first frame.
+    console.warn(
+      "Animated GIF re-encode failed; serving its first frame.",
+      error
+    );
+    return { ...(await encodeFirstFrame(image, width)), degraded: true };
+  }
+};
+
+const fitInside = (image: Sharp, width: number): Sharp =>
+  image
     .rotate()
     .resize(width, MAX_HEIGHT, { fit: "inside", withoutEnlargement: true });
-  if (animated)
-    return {
-      data: await output.gif().toBuffer(),
-      contentType: GIF_CONTENT_TYPE,
-    };
-  return {
-    data: await output.png({ quality: 100 }).toBuffer(),
-    contentType: PNG_CONTENT_TYPE,
-  };
-};
+
+const encodeFirstFrame = async (
+  image: Sharp,
+  width: number
+): Promise<{ data: Buffer; contentType: string }> => ({
+  data: await fitInside(image, width).png({ quality: 100 }).toBuffer(),
+  contentType: PNG_CONTENT_TYPE,
+});
 
 const ensureAllowedImageDimensions = (metadata: Metadata): void => {
   const width = metadata.width;
@@ -393,32 +459,210 @@ const parseImageUrl = (value: string | null): URL => {
   return parsed;
 };
 
-export async function GET(request: NextRequest) {
-  let releaseAdmission: (() => void) | undefined;
-  try {
-    const imageUrl = parseImageUrl(request.nextUrl.searchParams.get("url"));
-    const width = parseWidth(request.nextUrl.searchParams.get("w"));
-    releaseAdmission = await imageAdmission.acquire(request.signal);
-    const { buffer, complete } = await fetchImageBuffer(imageUrl);
-    const { data, contentType } = await normalizeImage({
-      buffer,
-      width,
-      allowAnimation:
-        complete && request.nextUrl.searchParams.get("animated") === "1",
-    });
+const isMp4 = (buffer: Buffer): boolean =>
+  buffer.byteLength >= 12 && buffer.toString("latin1", 4, 8) === "ftyp";
 
-    return new NextResponse(new Uint8Array(data), {
-      headers: {
-        "Cache-Control": CACHE_CONTROL,
-        "Content-Type": contentType,
-      },
-    });
+const fetchGiphyVideo = async (url: URL): Promise<Buffer> => {
+  const response = await fetchPublicUrl(
+    url,
+    { headers: { accept: MP4_CONTENT_TYPE } },
+    GIPHY_VIDEO_FETCH_OPTIONS
+  );
+  const contentLength = getContentLength(response);
+  if (
+    !response.ok ||
+    getResponseContentType(response) !== MP4_CONTENT_TYPE ||
+    (contentLength !== null && contentLength > VIDEO_PASSTHROUGH_MAX_BYTES)
+  ) {
+    await cancelResponseBody(response);
+    throw new Error(
+      `Video request did not return a bounded MP4: ${response.status}`
+    );
+  }
+
+  const buffer = await readImageResponseBuffer(
+    response,
+    VIDEO_PASSTHROUGH_MAX_BYTES
+  );
+  if (!isMp4(buffer)) {
+    throw new Error("Video response is not an MP4.");
+  }
+  return buffer;
+};
+
+const mediaResult = (
+  data: Buffer,
+  contentType: string,
+  degraded = false
+): CacheableResult<ProxyResult> => ({
+  value: {
+    kind: "media",
+    data,
+    contentType,
+    cacheControl: degraded ? DEGRADED_CACHE_CONTROL : CACHE_CONTROL,
+  },
+  bytes: data.byteLength,
+  ttlMs: degraded ? DEGRADED_RESULT_TTL_MS : RESULT_TTL_MS,
+});
+
+// Runs one admitted job. Busy or abandoned admissions propagate uncached; any
+// other failure becomes a briefly cached error answer.
+const runAdmittedJob = async (
+  admission: AdmissionQueue,
+  signal: AbortSignal,
+  job: () => Promise<CacheableResult<ProxyResult>>
+): Promise<CacheableResult<ProxyResult>> => {
+  const releaseAdmission = await admission.acquire(signal);
+  try {
+    return await job();
   } catch (error) {
-    if (!(error instanceof AdmissionQueueError)) {
-      console.error("Unable to normalize OG metadata image.", error);
-    }
-    return mapErrorToResponse(error);
+    console.error("Unable to normalize OG metadata image.", error);
+    return {
+      value: { kind: "error", ...describeFailure(error) },
+      bytes: 0,
+      ttlMs: FAILURE_TTL_MS,
+    };
   } finally {
-    releaseAdmission?.();
+    releaseAdmission();
+  }
+};
+
+// Copies only the bytes served; the cached buffer stays untouched.
+const toResponseBody = (data: Buffer): Uint8Array<ArrayBuffer> =>
+  new Uint8Array(data);
+
+/** One `bytes=` range; null serves the whole body, as RFC 9110 permits. */
+const parseByteRange = (
+  header: string | null,
+  size: number
+): ByteRange | null | "unsatisfiable" => {
+  const match = header ? /^bytes=(\d*)-(\d*)$/.exec(header.trim()) : null;
+  const startText = match?.[1] ?? "";
+  const endText = match?.[2] ?? "";
+  if (!startText && !endText) {
+    return null;
+  }
+  if (!startText) {
+    const suffixLength = Number(endText);
+    return suffixLength > 0
+      ? { start: Math.max(0, size - suffixLength), end: size - 1 }
+      : "unsatisfiable";
+  }
+  const start = Number(startText);
+  const end = endText ? Number(endText) : size - 1;
+  if (end < start) {
+    return null;
+  }
+  return start < size
+    ? { start, end: Math.min(end, size - 1) }
+    : "unsatisfiable";
+};
+
+// Media elements, Safari's in particular, fetch video by byte range.
+const videoResponse = (
+  data: Buffer,
+  cacheControl: string,
+  rangeHeader: string | null
+): NextResponse => {
+  const size = data.byteLength;
+  const range = parseByteRange(rangeHeader, size);
+  const headers = {
+    "Accept-Ranges": "bytes",
+    "Content-Type": MP4_CONTENT_TYPE,
+  };
+  if (range === "unsatisfiable") {
+    return new NextResponse(null, {
+      status: 416,
+      headers: { ...headers, "Content-Range": `bytes */${size}` },
+    });
+  }
+  const { start, end } = range ?? { start: 0, end: size - 1 };
+  return new NextResponse(toResponseBody(data.subarray(start, end + 1)), {
+    status: range ? 206 : 200,
+    headers: {
+      ...headers,
+      "Cache-Control": cacheControl,
+      "Content-Length": String(end - start + 1),
+      ...(range ? { "Content-Range": `bytes ${start}-${end}/${size}` } : {}),
+    },
+  });
+};
+
+const cacheKey = (mode: string, url: URL): string => {
+  const keyUrl = new URL(url.href);
+  keyUrl.hash = "";
+  return `${mode}:${keyUrl.href}`;
+};
+
+const serveGiphyVideo = async (
+  request: NextRequest,
+  videoUrl: URL
+): Promise<NextResponse> => {
+  if (!isGiphyVideoRenditionUrl(videoUrl)) {
+    return jsonError("Unsupported video url", 400);
+  }
+  const result = await proxyResults.load(
+    cacheKey("mp4", videoUrl),
+    (signal) =>
+      runAdmittedJob(videoAdmission, signal, async () =>
+        mediaResult(await fetchGiphyVideo(videoUrl), MP4_CONTENT_TYPE)
+      ),
+    request.signal
+  );
+  return result.kind === "media"
+    ? videoResponse(
+        result.data,
+        result.cacheControl,
+        request.headers.get("range")
+      )
+    : jsonError(result.error, result.status);
+};
+
+const serveImage = async (
+  request: NextRequest,
+  imageUrl: URL
+): Promise<NextResponse> => {
+  const width = parseWidth(request.nextUrl.searchParams.get("w"));
+  const animated = request.nextUrl.searchParams.get("animated") === "1";
+  const result = await proxyResults.load(
+    cacheKey(`${animated ? "animated" : "still"}:${width}`, imageUrl),
+    (signal) =>
+      runAdmittedJob(imageAdmission, signal, async () => {
+        const { buffer, complete } = await fetchImageBuffer(imageUrl);
+        const { data, contentType, degraded } = await normalizeImage({
+          buffer,
+          width,
+          allowAnimation: complete && animated,
+        });
+        return mediaResult(data, contentType, degraded);
+      }),
+    request.signal
+  );
+  if (result.kind === "error") {
+    return jsonError(result.error, result.status);
+  }
+  return new NextResponse(toResponseBody(result.data), {
+    headers: {
+      "Cache-Control": result.cacheControl,
+      "Content-Type": result.contentType,
+    },
+  });
+};
+
+export async function GET(request: NextRequest) {
+  try {
+    const sourceUrl = parseImageUrl(request.nextUrl.searchParams.get("url"));
+    return request.nextUrl.searchParams.get("format") === "mp4"
+      ? await serveGiphyVideo(request, sourceUrl)
+      : await serveImage(request, sourceUrl);
+  } catch (error) {
+    // A caller that left while queued keeps the existing busy answer.
+    const failure = request.signal.aborted
+      ? new AdmissionQueueError("aborted")
+      : error;
+    if (!(failure instanceof AdmissionQueueError)) {
+      console.error("Unable to normalize OG metadata image.", failure);
+    }
+    return mapErrorToResponse(failure);
   }
 }

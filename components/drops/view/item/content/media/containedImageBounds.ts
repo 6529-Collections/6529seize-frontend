@@ -121,6 +121,11 @@ export function getContainedImageBounds({
   };
 }
 
+const getIntrinsicSize = (media: HTMLImageElement | HTMLVideoElement) =>
+  "videoWidth" in media
+    ? { naturalHeight: media.videoHeight, naturalWidth: media.videoWidth }
+    : { naturalHeight: media.naturalHeight, naturalWidth: media.naturalWidth };
+
 export function useContainedImageBoundsStyle({
   containerRef,
   imageRef,
@@ -128,7 +133,7 @@ export function useContainedImageBoundsStyle({
   objectPosition,
 }: {
   readonly containerRef: RefObject<HTMLElement | null>;
-  readonly imageRef: RefObject<HTMLImageElement | null>;
+  readonly imageRef: RefObject<HTMLImageElement | HTMLVideoElement | null>;
   readonly loaded: boolean;
   readonly objectPosition: string;
 }): CSSProperties | null {
@@ -151,8 +156,7 @@ export function useContainedImageBoundsStyle({
     const bounds = getContainedImageBounds({
       containerHeight: containerRect.height,
       containerWidth: containerRect.width,
-      naturalHeight: image.naturalHeight,
-      naturalWidth: image.naturalWidth,
+      ...getIntrinsicSize(image),
       objectPosition,
     });
 

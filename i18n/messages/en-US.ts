@@ -4529,6 +4529,8 @@ export const EN_US_MESSAGES = {
   "drop.media.loadFailed": "Couldn’t load image.",
   "drop.media.videoLoadFailed": "Couldn’t load video.",
   "drop.media.retry": "Retry",
+  "drop.media.playAnimation": "Play animation",
+  "drop.media.pauseAnimation": "Pause animation",
   "drop.media.openPreview": "Open image preview",
   "drop.media.openMedia": "Open drop media",
   "drop.media.saveDialogTitle": "Save image",

@@ -3,8 +3,19 @@
 import {
   DropImagePreview,
   getDropImagePreviewSources,
+  getGiphyVideoPreviewSources,
+  IMAGE_RETRY_QUERY_PARAM,
+  isGuardedImageProxyUrl,
 } from "@/components/drops/view/item/content/media/DropImagePreview";
+import {
+  probeDropMediaFailure,
+  type DropMediaFailureKind,
+} from "@/components/drops/view/item/content/media/dropMediaRetry";
 import { GifPreviewLoadingIndicator } from "@/components/drops/view/item/content/media/GifPreviewLoadingIndicator";
+import {
+  GiphyPlaybackToggle,
+  GiphyVideoPreview,
+} from "@/components/drops/view/item/content/media/GiphyVideoPreview";
 import { isGifImageUrl } from "@/helpers/gif-preview.helpers";
 import Button from "@/components/utils/button/Button";
 import {
@@ -28,9 +39,12 @@ import React, {
 } from "react";
 
 const AUTO_RETRY_DELAY_MS = 1500;
+// First-party CDN previews can still be processing after an upload.
 const MAX_AUTO_RETRY_ATTEMPTS = 40;
 const MAX_FAILED_LOAD_ATTEMPTS = MAX_AUTO_RETRY_ATTEMPTS + 1;
-const IMAGE_RETRY_QUERY_PARAM = "drop_media_retry";
+// The guarded proxy is retried only while busy, with backoff.
+const MAX_PROXY_AUTO_RETRY_ATTEMPTS = 5;
+const MAX_PROXY_RETRY_DELAY_MS = 12_000;
 const NATURAL_IMAGE_RESERVED_ASPECT_RATIO = "16 / 9";
 const NATURAL_IMAGE_MAX_HEIGHT = "16rem";
 
@@ -192,11 +206,20 @@ type ImageViewState = {
   readonly failedAttempts: number;
   readonly retryPending: boolean;
   readonly retryTick: number;
+  // An image element cannot read why the proxy failed; a probe is asking.
+  readonly failureCheckPending: boolean;
+  readonly autoRetryStopped: boolean;
+  readonly videoFailed: boolean;
 };
 
 type ImageViewAction =
   | { readonly type: "image-loaded" }
-  | { readonly type: "image-error" }
+  | { readonly type: "image-error"; readonly checkFailure: boolean }
+  | {
+      readonly type: "failure-checked";
+      readonly failure: DropMediaFailureKind;
+    }
+  | { readonly type: "video-failed" }
   | { readonly type: "manual-retry" }
   | { readonly type: "auto-retry" }
   | { readonly type: "open-modal" }
@@ -208,6 +231,9 @@ const initialImageViewState: ImageViewState = {
   failedAttempts: 0,
   retryPending: false,
   retryTick: 0,
+  failureCheckPending: false,
+  autoRetryStopped: false,
+  videoFailed: false,
 };
 
 function imageViewReducer(
@@ -224,19 +250,45 @@ function imageViewReducer(
       };
     case "image-error": {
       const failedAttempts = state.failedAttempts + 1;
+      if (!action.checkFailure) {
+        return {
+          ...state,
+          loaded: false,
+          failedAttempts,
+          retryPending: failedAttempts <= MAX_AUTO_RETRY_ATTEMPTS,
+        };
+      }
+      const mayRetry = failedAttempts <= MAX_PROXY_AUTO_RETRY_ATTEMPTS;
       return {
         ...state,
         loaded: false,
         failedAttempts,
-        retryPending: failedAttempts <= MAX_AUTO_RETRY_ATTEMPTS,
+        retryPending: false,
+        failureCheckPending: mayRetry,
+        autoRetryStopped: !mayRetry,
       };
     }
+    case "failure-checked":
+      if (!state.failureCheckPending) {
+        return state;
+      }
+      return {
+        ...state,
+        failureCheckPending: false,
+        retryPending: action.failure === "retryable",
+        autoRetryStopped: action.failure === "definitive",
+      };
+    case "video-failed":
+      return { ...state, loaded: false, videoFailed: true };
     case "manual-retry":
       return {
         ...state,
         loaded: false,
         failedAttempts: 0,
         retryPending: false,
+        failureCheckPending: false,
+        autoRetryStopped: false,
+        videoFailed: false,
         retryTick: state.retryTick + 1,
       };
     case "auto-retry":
@@ -288,7 +340,22 @@ function WaveDropPartContentMediaImageContent({
   const imageGallery = useDropImageGallery();
   const imageFrameRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const modalImageRef = useRef<HTMLImageElement>(null);
+  const [videoPlaying, setVideoPlaying] = useState(false);
+  const giphyVideo = imageViewState.videoFailed
+    ? null
+    : getGiphyVideoPreviewSources(src);
+  const usesGiphyVideo = giphyVideo !== null;
+  const previewSrc = withRetryCacheBust(src, imageViewState.retryTick);
+  const previewSources = getDropImagePreviewSources(previewSrc, imageScale);
+  const lastPreviewSource = previewSources[previewSources.length - 1];
+  // Only the same-origin proxy can be asked why a load failed.
+  const proxyPreviewSrc =
+    lastPreviewSource && isGuardedImageProxyUrl(lastPreviewSource)
+      ? lastPreviewSource
+      : null;
+  const checksProxyFailures = proxyPreviewSrc !== null;
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
       url: src,
@@ -302,12 +369,33 @@ function WaveDropPartContentMediaImageContent({
   }, []);
 
   const handleError = useCallback(() => {
-    dispatchImageView({ type: "image-error" });
+    dispatchImageView({
+      type: "image-error",
+      checkFailure: checksProxyFailures,
+    });
+  }, [checksProxyFailures]);
+
+  const handleVideoLoad = useCallback(() => {
+    setVideoPlaying(videoRef.current ? !videoRef.current.paused : false);
+    dispatchImageView({ type: "image-loaded" });
+  }, []);
+
+  // A failed MP4 rendition falls back to the existing GIF preview.
+  const handleVideoError = useCallback(() => {
+    dispatchImageView({ type: "video-failed" });
   }, []);
 
   const manualRetry = useCallback(() => {
     dispatchImageView({ type: "manual-retry" });
   }, []);
+
+  const retryDelayMs = checksProxyFailures
+    ? Math.min(
+        AUTO_RETRY_DELAY_MS *
+          2 ** Math.max(0, imageViewState.failedAttempts - 1),
+        MAX_PROXY_RETRY_DELAY_MS
+      )
+    : AUTO_RETRY_DELAY_MS;
 
   useEffect(() => {
     if (!imageViewState.retryPending) {
@@ -316,10 +404,25 @@ function WaveDropPartContentMediaImageContent({
 
     const retryTimeout = window.setTimeout(() => {
       dispatchImageView({ type: "auto-retry" });
-    }, AUTO_RETRY_DELAY_MS);
+    }, retryDelayMs);
 
     return () => window.clearTimeout(retryTimeout);
-  }, [imageViewState.retryPending]);
+  }, [imageViewState.retryPending, retryDelayMs]);
+
+  useEffect(() => {
+    if (!imageViewState.failureCheckPending || !proxyPreviewSrc) {
+      return;
+    }
+
+    const controller = new AbortController();
+    probeDropMediaFailure(proxyPreviewSrc, controller.signal)
+      .then((failure) =>
+        dispatchImageView({ type: "failure-checked", failure })
+      )
+      .catch(() => undefined);
+
+    return () => controller.abort();
+  }, [imageViewState.failureCheckPending, proxyPreviewSrc]);
 
   const handleOpenModal = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -338,27 +441,33 @@ function WaveDropPartContentMediaImageContent({
   }, []);
 
   const handleFullScreen = useCallback(() => {
-    const fullscreenTarget = modalImageRef.current ?? imgRef.current;
+    const fullscreenTarget =
+      modalImageRef.current ??
+      (usesGiphyVideo ? videoRef.current : imgRef.current);
     if (fullscreenTarget) {
       requestCenteredImageFullscreen(fullscreenTarget);
     }
-  }, []);
+  }, [usesGiphyVideo]);
   const imageActionBoundsStyle = useContainedImageBoundsStyle({
     containerRef: imageFrameRef,
-    imageRef: imgRef,
+    imageRef: usesGiphyVideo ? videoRef : imgRef,
     loaded: imageViewState.loaded,
     objectPosition: imageObjectPosition,
   });
 
-  const previewSrc = withRetryCacheBust(src, imageViewState.retryTick);
   const hasPreview = getDropImagePreviewSources(src, imageScale).length > 0;
   const showError =
-    !hasPreview || imageViewState.failedAttempts >= MAX_FAILED_LOAD_ATTEMPTS;
+    !hasPreview ||
+    imageViewState.autoRetryStopped ||
+    imageViewState.failedAttempts >= MAX_FAILED_LOAD_ATTEMPTS;
+  const showProcessing =
+    !showError &&
+    (imageViewState.retryPending || imageViewState.failureCheckPending);
   const showGifLoading =
     isGifImageUrl(src) &&
     !imageViewState.loaded &&
     !showError &&
-    !imageViewState.retryPending;
+    !showProcessing;
   const image = fillContainer ? (
     <FillContainerImage
       key={imageViewState.retryTick}
@@ -383,6 +492,23 @@ function WaveDropPartContentMediaImageContent({
     />
   );
 
+  const media = giphyVideo ? (
+    <GiphyVideoPreview
+      key={imageViewState.retryTick}
+      videoRef={videoRef}
+      videoSrc={giphyVideo.videoSrc}
+      posterSrc={giphyVideo.posterSrc}
+      alt={t(DEFAULT_LOCALE, "drop.media.alt")}
+      fillContainer={fillContainer}
+      objectPosition={imageObjectPosition}
+      onLoad={handleVideoLoad}
+      onError={handleVideoError}
+      onPlayingChange={setVideoPlaying}
+    />
+  ) : (
+    image
+  );
+
   return (
     <>
       <div
@@ -391,10 +517,10 @@ function WaveDropPartContentMediaImageContent({
           fillContainer ? "tw-h-full" : ""
         }`}
       >
-        {image}
+        {media}
         {showGifLoading && <GifPreviewLoadingIndicator />}
         {showError && <ImageLoadErrorState onRetry={manualRetry} />}
-        {!showError && imageViewState.retryPending && (
+        {showProcessing && (
           <div className="tw-absolute tw-inset-0 tw-rounded-xl tw-bg-iron-900">
             <ImageProcessingRetryState />
           </div>
@@ -409,6 +535,9 @@ function WaveDropPartContentMediaImageContent({
             aria-label={t(DEFAULT_LOCALE, "drop.media.openMedia")}
             className="tw-pointer-events-auto tw-absolute tw-inset-0 tw-z-10 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-shadow-[0_0_0_4px_rgba(0,0,0,0.72)] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white"
           />
+          {usesGiphyVideo && imageViewState.loaded && !showError && (
+            <GiphyPlaybackToggle videoRef={videoRef} playing={videoPlaying} />
+          )}
           {imageViewState.loaded || showError ? (
             <InlineMediaActions
               variant="image"
