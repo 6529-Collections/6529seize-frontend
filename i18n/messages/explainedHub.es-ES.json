@@ -16,7 +16,7 @@
   "explained.hub.station.time": "Tiempo",
   "explained.hub.station.timeSub": "TDH, cada día",
   "explained.hub.station.timeNum": "{total} TDH",
-  "explained.hub.station.timeSay": "Cada día completo suma la tasa de una carta al TDH: {total} entre todos en el resultado del {date}.",
+  "explained.hub.station.timeSay": "Cada día completo que se conserva una copia suma la tasa de su carta: una copia de Meme #2 conservada cien días tiene {copy} TDH. Todos juntos, en el resultado del {date}: {total}.",
   "explained.hub.station.standing": "Reputación",
   "explained.hub.station.standingSub": "a partir de tu TDH",
   "explained.hub.station.standingNum": "Rep, NIC, Level",

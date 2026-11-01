@@ -16,7 +16,7 @@
   "explained.hub.station.time": "Time",
   "explained.hub.station.timeSub": "TDH, every day",
   "explained.hub.station.timeNum": "{total} TDH",
-  "explained.hub.station.timeSay": "Each whole day held adds a card's rate to TDH: {total} for everyone in the result of {date}.",
+  "explained.hub.station.timeSay": "Each whole day a copy is held adds its card's rate: a copy of Meme #2 held a hundred days has {copy} TDH. Everyone's together, in the result of {date}: {total}.",
   "explained.hub.station.standing": "Standing",
   "explained.hub.station.standingSub": "from your TDH",
   "explained.hub.station.standingNum": "Rep, NIC, Level",

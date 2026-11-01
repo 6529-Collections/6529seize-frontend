@@ -27,7 +27,7 @@
   "explained.tdh.wallets.why.soldBody": "Die Tage eines Exemplars gehen mit dem Exemplar. Wenn Sie eines von mehreren Exemplaren einer Karte verkaufen, geht das zuletzt erhaltene zuerst, damit Ihre ältesten Exemplare weiter zählen. Vervollständigte das Exemplar eine Season oder ein Full Set, sinkt Ihr Boost mit ihm.",
   "explained.tdh.wallets.why.unlinkedVerdict": "Auch die Vergangenheit wird neu gruppiert.",
   "explained.tdh.wallets.why.unlinkedBody": "Die Gruppierung am Tag des Snapshots gilt für die ganze Geschichte. Exemplare, die vorher zwischen diesen Wallets bewegt wurden, zählen nun ab ihrer Ankunft in ihrer jetzigen Wallet. Erneutes Verknüpfen gibt das Alter zurück.",
-  "explained.tdh.wallets.why.newcardVerdict": "Ein Full Set wartet auf die neue Karte.",
+  "explained.tdh.wallets.why.newcardVerdict": "Ein Full Set verliert nichts; zusätzliche Sets warten auf die neue Karte.",
   "explained.tdh.wallets.why.newcardBody": "Ein Full Set heißt jede Karte, die zählt, und jede neue Karte zählt einen Tag nach ihrem ersten Mint. Ein Full Set verliert nichts, weil vollständige Seasons weiter zählen. Wenn Sie mehr als ein Full Set halten, pausiert der Anteil Ihres Boosts für weitere Sets, bis Sie ebenso viele Exemplare der neuen Karte halten.",
   "explained.tdh.wallets.why.explain": "Explain my TDH zeigt, was Ihre Identität im neuesten Ergebnis hielt und gezählt bekam.",
   "explained.tdh.wallets.why.open": "Öffnen",

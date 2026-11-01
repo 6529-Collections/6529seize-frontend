@@ -27,7 +27,7 @@
   "explained.tdh.wallets.why.soldBody": "Les jours d'un exemplaire partent avec l'exemplaire. Quand vous vendez un exemplaire d'une carte parmi plusieurs, le dernier reçu part en premier, pour que vos exemplaires les plus anciens continuent de compter. Si l'exemplaire complétait une saison ou un set complet, votre boost baisse avec lui.",
   "explained.tdh.wallets.why.unlinkedVerdict": "Le passé est regroupé aussi.",
   "explained.tdh.wallets.why.unlinkedBody": "Le regroupement du jour de l'instantané s'applique à tout l'historique. Les exemplaires déplacés auparavant entre ces wallets comptent désormais depuis leur arrivée dans leur wallet actuel. Les lier à nouveau rend leur âge.",
-  "explained.tdh.wallets.why.newcardVerdict": "Un set complet attend la nouvelle carte.",
+  "explained.tdh.wallets.why.newcardVerdict": "Un set complet ne perd rien ; les sets supplémentaires attendent la nouvelle carte.",
   "explained.tdh.wallets.why.newcardBody": "Un set complet, c'est chaque carte qui compte, et chaque nouvelle carte compte un jour après son premier mint. Un seul set complet ne perd rien, car les saisons complètes comptent toujours. Si vous détenez plus d'un set complet, la part de votre boost pour les sets supplémentaires est suspendue jusqu'à ce que vous déteniez autant d'exemplaires de la nouvelle carte.",
   "explained.tdh.wallets.why.explain": "Explain my TDH montre ce que votre identité détenait et ce qui a compté dans le dernier résultat.",
   "explained.tdh.wallets.why.open": "L'ouvrir",

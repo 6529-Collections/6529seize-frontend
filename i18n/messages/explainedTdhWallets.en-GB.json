@@ -27,7 +27,7 @@
   "explained.tdh.wallets.why.soldBody": "A copy's days leave with the copy. When you sell one of several copies of a card, the one you received last goes first, so your oldest copies keep counting. If the copy completed a season or a full set, your boost drops with it.",
   "explained.tdh.wallets.why.unlinkedVerdict": "The past is regrouped too.",
   "explained.tdh.wallets.why.unlinkedBody": "The grouping on the snapshot day applies to all history. Copies moved between those wallets before now count from when they arrived in their current wallet. Linking again gives the age back.",
-  "explained.tdh.wallets.why.newcardVerdict": "A full set waits for the new card.",
+  "explained.tdh.wallets.why.newcardVerdict": "One full set loses nothing; extra sets wait for the new card.",
   "explained.tdh.wallets.why.newcardBody": "A full set means every card that counts, and each new card counts a day after its first mint. One full set loses nothing, because complete seasons still count. If you hold more than one full set, the extra-set part of your boost pauses until you hold that many copies of the new card.",
   "explained.tdh.wallets.why.explain": "Explain my TDH shows what your identity held and counted in the latest result.",
   "explained.tdh.wallets.why.open": "Open it",

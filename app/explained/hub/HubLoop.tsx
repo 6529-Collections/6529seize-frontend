@@ -60,6 +60,7 @@ function stations(book: FactBook, locale: SupportedLocale): AtlasStation[] {
       say: ht(locale, "station.timeSay", {
         total: f("tdh.latest.total"),
         date: f("tdh.latest.date"),
+        copy: f("engine.machine.default"),
       }),
     },
     {

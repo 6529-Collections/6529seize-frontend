@@ -2,7 +2,13 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useState, type FormEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 import { useFactSnapshot } from "@/components/explained/facts/FactsProvider";
 import { LimitNote } from "@/components/explained/evidence/notes";
 import { Seg } from "@/components/explained/lens/controls";
@@ -312,6 +318,9 @@ function LookupResult({
   return <div aria-live="polite">{body}</div>;
 }
 
+/** The address of the Explain my TDH section, as the hero links it. */
+const EXPLAIN_HASH = "#explain";
+
 function LookupForm({
   onSubmit,
   locale,
@@ -322,6 +331,19 @@ function LookupForm({
   readonly showsExample: boolean;
 }) {
   const [input, setInput] = useState("");
+  // "Explain my TDH" on the page's first screen jumps here: the field takes
+  // the focus, so the reader can type at once.
+  const field = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const focusOnArrival = () => {
+      if (globalThis.location.hash === EXPLAIN_HASH) {
+        field.current?.focus({ preventScroll: true });
+      }
+    };
+    focusOnArrival();
+    globalThis.addEventListener("hashchange", focusOnArrival);
+    return () => globalThis.removeEventListener("hashchange", focusOnArrival);
+  }, []);
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const value = input.trim().replace(/^@/, "");
@@ -340,6 +362,7 @@ function LookupForm({
           <SearchGlyph />
         </span>
         <input
+          ref={field}
           value={input}
           onChange={(event) => setInput(event.target.value)}
           maxLength={200}

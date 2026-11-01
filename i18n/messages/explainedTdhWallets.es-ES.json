@@ -27,7 +27,7 @@
   "explained.tdh.wallets.why.soldBody": "Los días de una copia se van con la copia. Cuando vendes una de varias copias de una carta, sale primero la última que recibiste, así que tus copias más antiguas siguen contando. Si la copia completaba una temporada o un set completo, tu boost baja con ella.",
   "explained.tdh.wallets.why.unlinkedVerdict": "El pasado también se reagrupa.",
   "explained.tdh.wallets.why.unlinkedBody": "La agrupación del día de la instantánea se aplica a todo el historial. Las copias movidas antes entre esas wallets cuentan ahora desde que llegaron a su wallet actual. Volver a vincularlas les devuelve la antigüedad.",
-  "explained.tdh.wallets.why.newcardVerdict": "Un set completo espera a la carta nueva.",
+  "explained.tdh.wallets.why.newcardVerdict": "Un set completo no pierde nada; los sets extra esperan a la carta nueva.",
   "explained.tdh.wallets.why.newcardBody": "Un set completo significa cada carta que cuenta, y cada carta nueva cuenta un día después de su primer mint. Un solo set completo no pierde nada, porque las temporadas completas siguen contando. Si tienes más de un set completo, la parte de tu boost por sets adicionales se pausa hasta que tengas esas mismas copias de la carta nueva.",
   "explained.tdh.wallets.why.explain": "Explain my TDH muestra qué tenía tu identidad y qué contó en el último resultado.",
   "explained.tdh.wallets.why.open": "Abrirlo",

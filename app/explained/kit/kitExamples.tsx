@@ -157,7 +157,7 @@ export function exampleCopy(book: FactBook, locale: SupportedLocale) {
       question: "Who checks the day, and what would it take to fool them?",
       maturity: "built",
       maturityLabel: `Built, ${f("site.validator.version")}`,
-      note: "“run one” waits on the code (D116)",
+      note: "“run one” waits on its release (D144)",
     },
     {
       id: "network",
