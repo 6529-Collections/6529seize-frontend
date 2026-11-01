@@ -3343,6 +3343,51 @@ paths:
           description: Authentication required
         "403":
           description: Not available to proxies
+    post:
+      tags:
+        - Authentication
+      summary: Register an app device grant
+      description: >-
+        Registers an EIP-712 device grant (domain "6529 Device Grant", primary
+        type DeviceGrant) that 6529 Mobile or 6529 Desktop had the signed-in
+        wallet sign outside a web sign-in. It grants the device's Ed25519
+        signing key and, when mls_device_key is set, its encrypted-messages
+        key (register that key next with POST /e2ee/devices/login-grant). The
+        server rebuilds the statement from the fields and verifies the wallet
+        signature (EOA, or EIP-1271 on Ethereum mainnet). The grant wallet
+        must be the authenticated wallet. Verification, expiry and revocation
+        work as for sign-in grants. Idempotent on grant id. Not available to
+        proxies.
+      operationId: registerDeviceGrant
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: device-signing
+        handler:
+          import: "@/api/device-signing/device-signing.handlers"
+          name: handleRegisterDeviceGrant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiRegisterDeviceGrantRequest"
+      responses:
+        "200":
+          description: The stored grant
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDeviceGrant"
+        "400":
+          description: Invalid grant or signature
+        "401":
+          description: Authentication required
+        "403":
+          description: Not available to proxies, or not the signed-in wallet
   /device-grants/{grantId}/revoke:
     post:
       tags:
@@ -10347,9 +10392,10 @@ paths:
       description: >-
         Registers the MLS device key that a combined sign-in grant (NC8) also
         granted, without a separate wallet signature. The grant must be one
-        this server stored at a Sign-In with Ethereum login, unrevoked and
-        unexpired, carrying an urn:6529:mls-device-grant:v1 resource for the
-        current ciphersuite, and its wallet must belong to the caller's
+        this server stored at a Sign-In with Ethereum login (carrying an
+        urn:6529:mls-device-grant:v1 resource for the current ciphersuite) or
+        an app device grant (POST /device-grants) with an mls_device_key,
+        unrevoked and unexpired, and its wallet must belong to the caller's
         profile. Same device limit and renewal rules as POST /e2ee/devices.
         Requires a profile; proxies are rejected; 404 E2EE_DISABLED while the
         feature flag is off.
@@ -31168,7 +31214,8 @@ components:
       description: >-
         A wallet signed grant that lets a browser-held Ed25519 device key sign
         drop writes. Its id is the EIP-191 hash of the exact SIWE message the
-        wallet signed.
+        wallet signed at sign-in, or the EIP-712 digest of an app device
+        grant.
       required:
         - id
         - wallet
@@ -31204,11 +31251,13 @@ components:
           type: string
         domain:
           type: string
-          description: SIWE domain the grant was signed for, e.g. 6529.io.
+          description: >-
+            SIWE domain the grant was signed for, e.g. 6529.io, or the origin
+            of an app device grant (e.g. 6529.io or "6529 Desktop").
         issued_at:
           type: integer
           format: int64
-          description: SIWE Issued At, epoch milliseconds.
+          description: SIWE Issued At (or app grant issuedAt), epoch milliseconds.
         expires_at:
           type: integer
           format: int64
@@ -31235,12 +31284,84 @@ components:
       properties:
         message:
           type: string
-          description: Exact SIWE message signed by the wallet.
+          description: >-
+            Exact SIWE message signed by the wallet, or for an app device grant
+            the signed EIP-712 DeviceGrant message as JSON (it starts with
+            "{"; its EIP-712 digest is the grant id).
         wallet_signature:
           type: string
         chain_id:
           type: integer
           format: int64
+          description: >-
+            SIWE Chain ID; 1 for app device grants, whose EIP-1271 contract
+            wallet signatures are checked on Ethereum mainnet.
+    ApiAppDeviceGrant:
+      type: object
+      additionalProperties: false
+      description: >-
+        The fields of an EIP-712 DeviceGrant (domain "6529 Device Grant",
+        version 1, the 6529 pre-genesis salt). The statement is not sent: the
+        server renders it from these fields.
+      required:
+        - wallet
+        - device_key
+        - scopes
+        - issued_at
+        - expires_at
+        - origin
+      properties:
+        wallet:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        device_key:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+          description: The Ed25519 signing key.
+        scopes:
+          type: array
+          description: Canonical order post, edit, delete, react, vote; must include post.
+          items:
+            type: string
+        mls_device_key:
+          type: string
+          nullable: true
+          pattern: ^0x[0-9a-fA-F]{64}$
+          description: >-
+            The encrypted-messages (MLS signature) key, different from
+            device_key; null or absent for a signing-only grant.
+        ciphersuite:
+          type: integer
+          nullable: true
+          description: >-
+            The MLS ciphersuite of mls_device_key; null or absent without one
+            (0 is rejected).
+        issued_at:
+          type: integer
+          format: int64
+          description: Unix seconds.
+        expires_at:
+          type: integer
+          format: int64
+          description: Unix seconds, minute aligned, at most 181 days after issued_at.
+        origin:
+          type: string
+          maxLength: 64
+          description: Printable ASCII, e.g. 6529.io or "6529 Desktop".
+    ApiRegisterDeviceGrantRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - grant
+        - wallet_signature
+      properties:
+        grant:
+          $ref: "#/components/schemas/ApiAppDeviceGrant"
+        wallet_signature:
+          type: string
+        device_label:
+          type: string
+          description: Sanitized to at most 48 characters of [A-Za-z0-9 ._()-].
     ApiDeviceSignature:
       type: object
       additionalProperties: false
@@ -33503,7 +33624,8 @@ components:
           pattern: ^0x[0-9a-f]{64}$
           description: >-
             Id of a combined grant this profile stored at sign-in (the
-            device_grant.id the session login returned)
+            device_grant.id the session login returned) or of an app device
+            grant with an encrypted-messages key
         label:
           type: string
           description: >-

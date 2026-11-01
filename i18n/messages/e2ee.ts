@@ -35,6 +35,8 @@ export const E2EE_MESSAGES = {
   "e2ee.gate.elsewhere.body":
     "They run in one tab at a time so your chats stay in sync. Use them here and the other tab will pause.",
   "e2ee.gate.elsewhere.action": "Use here",
+  "e2ee.desktopNotice.title": "6529",
+  "e2ee.desktopNotice.body": "New encrypted message",
   "e2ee.signOut.title": "Sign out",
   "e2ee.signOut.titleAll": "Sign out of all profiles",
   "e2ee.signOut.body":

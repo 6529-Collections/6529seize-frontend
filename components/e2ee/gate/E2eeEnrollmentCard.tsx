@@ -100,8 +100,8 @@ export function E2eeEnrollmentCard({
     setPending(true);
     setErrorKey(null);
     try {
-      // The website grants this device with one combined sign-in; the apps
-      // and any case it cannot cover use the separate grant prompt.
+      // One combined grant for this device (a sign-in on the website, an app
+      // grant in the apps); any case it cannot cover uses the grant prompt.
       const outcome = await turnOnWithCombinedSignIn({
         engine,
         address,

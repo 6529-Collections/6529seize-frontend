@@ -10,6 +10,13 @@ import {
 } from "viem";
 import { getNodeEnv } from "@/config/env";
 import {
+  type AppGrantFields,
+  computeAppGrantId,
+  isAppGrantMessage,
+  parseAppGrantMessage,
+  recoverAppGrantSigner,
+} from "@/lib/device-signing/app-grant";
+import {
   parseDeviceGrantMessage,
   parseSiweIssuedAtSeconds,
 } from "@/lib/device-signing/grant-message";
@@ -397,6 +404,59 @@ async function verifyLoginGrant(
   return await verifyContractOrServer(device, options, wallet, grantId);
 }
 
+/**
+ * The record's grant fields must be exactly the encrypted-messages half of a
+ * signed app grant (6529 Mobile or Desktop): key, ciphersuite, wallet,
+ * origin, Issued At and expiry.
+ */
+function checkAppGrantTerms(
+  device: ApiE2eeDevice,
+  fields: AppGrantFields
+): string | null {
+  const mls = fields.mls;
+  if (!mls) {
+    return "app-grant-without-e2ee";
+  }
+  const grant = device.grant;
+  const matches =
+    mls.deviceKeyHex === grant.device_key.toLowerCase() &&
+    mls.ciphersuite === grant.ciphersuite &&
+    fields.wallet === grant.wallet.toLowerCase() &&
+    fields.origin === grant.origin &&
+    fields.issuedAtSeconds === grant.issued_at &&
+    fields.expiresAtSeconds === grant.expires_at;
+  return matches ? null : "app-grant-mismatch";
+}
+
+/** App grant (EIP-712 DeviceGrant, one signature for both keys). */
+async function verifyAppGrant(
+  device: ApiE2eeDevice,
+  message: string,
+  options: VerifyGrantOptions
+): Promise<GrantVerification> {
+  const parsed = parseAppGrantMessage(message);
+  if (!parsed) {
+    return failed("app-grant-malformed");
+  }
+  const termsError = checkAppGrantTerms(device, parsed.fields);
+  if (termsError) {
+    return failed(termsError);
+  }
+  const grantId = computeAppGrantId(parsed.message);
+  if (grantId !== device.grant_id.toLowerCase()) {
+    return failed("grant-id-mismatch");
+  }
+  const wallet = device.grant.wallet.toLowerCase();
+  if (
+    isHex(device.wallet_signature, 65) &&
+    (await recoverAppGrantSigner(parsed.message, device.wallet_signature)) ===
+      wallet
+  ) {
+    return { ok: true, verified: true, via: "eoa", reason: null };
+  }
+  return await verifyContractOrServer(device, options, wallet, grantId);
+}
+
 /** A contract-wallet grant this client cannot check: never verified. */
 const unverifiable = (device: ApiE2eeDevice): GrantVerification =>
   device.verified_via === "eip1271"
@@ -429,7 +489,8 @@ async function verifyContractOrServer(
  * without an available verifier are accepted on the server's `verified_via`
  * word and reported as `verified: false` (the documented residual). A device
  * enrolled by a combined sign-in grant (NC8) carries the signed SIWE message
- * instead of an EIP-712 grant and is verified against it.
+ * instead of an EIP-712 grant and is verified against it; one enrolled by an
+ * app grant (6529 Mobile or Desktop) carries that grant's typed data as JSON.
  */
 export async function verifyGrant(
   device: ApiE2eeDevice,
@@ -450,7 +511,9 @@ export async function verifyGrant(
     return failed(fieldError);
   }
   if (typeof device.grant_message === "string") {
-    return await verifyLoginGrant(device, device.grant_message, options);
+    return isAppGrantMessage(device.grant_message)
+      ? await verifyAppGrant(device, device.grant_message, options)
+      : await verifyLoginGrant(device, device.grant_message, options);
   }
   let typedData: GrantTypedData;
   try {

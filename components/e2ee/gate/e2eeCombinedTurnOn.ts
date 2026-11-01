@@ -1,7 +1,7 @@
 import type { LoginE2eeGrantResult } from "@/components/auth/authRequestSignIn";
 import type { RequestSignedMessagesGrant } from "@/components/auth/authSignedMessagesGrant";
 import { readDeviceKey } from "@/lib/device-signing/device-key-store";
-import { isDeviceGrantPossible } from "@/lib/device-signing/login-grant";
+import { isAnyDeviceGrantPossible } from "@/lib/device-signing/login-grant";
 import type { E2eeEngine, E2eeEngineStatus } from "@/lib/e2ee/types";
 import { revokeDeviceGrant } from "@/services/api/device-grants-api";
 
@@ -72,12 +72,13 @@ async function needsNewDevice(engine: E2eeEngine): Promise<boolean> {
 }
 
 /**
- * NC8 on the website: "Turn on encrypted messages" signs in once more with
- * the combined grant, so one personal_sign grants this browser's signing
- * key and its encrypted-messages key, with one expiry and one thing to
- * revoke. The engine then registers the key with no second prompt. The
- * apps, proxies, a resumable device and any problem before the signature
- * keep the separate EIP-712 grant prompt ("fallback").
+ * NC8: "Turn on encrypted messages" grants this device's signing key and its
+ * encrypted-messages key with one signature, with one expiry and one thing
+ * to revoke: a combined sign-in (personal_sign) on the website, an app grant
+ * (EIP-712) in 6529 Mobile and Desktop. The engine then registers the key
+ * with no second prompt. Proxies, a resumable device, apps with app grants
+ * off and any problem before the signature keep the separate EIP-712 grant
+ * prompt ("fallback").
  */
 export async function turnOnWithCombinedSignIn({
   engine,
@@ -87,7 +88,7 @@ export async function turnOnWithCombinedSignIn({
   if (
     !address ||
     !requestGrant ||
-    !isDeviceGrantPossible(null) ||
+    !isAnyDeviceGrantPossible(null) ||
     !(await needsNewDevice(engine))
   ) {
     return "fallback";

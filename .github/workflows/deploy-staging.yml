@@ -45,6 +45,9 @@ jobs:
       ALLOWLIST_API_ENDPOINT: ${{ vars.STAGING_ALLOWLIST_API_ENDPOINT || 'https://allowlist-api.staging.6529.io' }}
       BASE_ENDPOINT: https://staging.6529.io
       NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: "true"
+      # App device grants (6529 Mobile/Desktop): staging only until the grant
+      # wording is owner-approved.
+      NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS: "true"
       NEXT_PUBLIC_E2EE_DM_ENABLED: "true"
       NEXTGEN_CHAIN_ID: ${{ vars.STAGING_NEXTGEN_CHAIN_ID || '1' }}
       ASSETS_FROM_S3: "false"

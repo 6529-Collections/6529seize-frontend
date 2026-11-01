@@ -16,7 +16,7 @@ import { HttpFile } from '../http/http';
 
 export class ApiE2eeRegisterLoginGrantDeviceRequest {
     /**
-    * Id of a combined grant this profile stored at sign-in (the device_grant.id the session login returned)
+    * Id of a combined grant this profile stored at sign-in (the device_grant.id the session login returned) or of an app device grant with an encrypted-messages key
     */
     'grant_id': string;
     /**

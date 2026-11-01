@@ -85,8 +85,10 @@ async function connect(capabilities) {
 
 /**
  * Browser session on the device under test: Chrome on Android, Safari on iOS.
+ * `extraCapabilities` (optional) is merged last, e.g. to capture the Safari
+ * console with `appium:showSafariConsoleLog`.
  */
-async function startWebSession() {
+async function startWebSession({ extraCapabilities = {} } = {}) {
   const capabilities = baseCapabilities();
   if (isIos()) {
     capabilities.browserName = "Safari";
@@ -109,7 +111,7 @@ async function startWebSession() {
       capabilities["appium:chromedriverExecutableDir"] = chromedriverDir;
     }
   }
-  return connect(capabilities);
+  return connect({ ...capabilities, ...extraCapabilities });
 }
 
 /**

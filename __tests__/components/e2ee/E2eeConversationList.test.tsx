@@ -19,6 +19,7 @@ import {
 const mockPathname = jest.fn(() => "/messages");
 jest.mock("next/navigation", () => ({
   usePathname: () => mockPathname(),
+  useSearchParams: () => new URLSearchParams(),
   useRouter: () => ({
     push: jest.fn(),
     replace: jest.fn(),

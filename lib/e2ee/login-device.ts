@@ -16,13 +16,18 @@ export interface LoginE2eeAdoption {
   /** The wallet's own profile (a grant sign-in never requests a proxy role). */
   readonly profileId: string;
   readonly wallet: string;
-  /** EIP-191 hash of the signed sign-in message; the stored grant's id. */
+  /**
+   * The stored grant's id: the EIP-191 hash of the signed sign-in message, or
+   * the EIP-712 digest of an app grant.
+   */
   readonly grantId: string;
   readonly walletSignature: string;
-  /** The SIWE domain the wallet signed for (the page host). */
+  /** The SIWE domain the wallet signed for (the page host), or the app grant's origin. */
   readonly origin: string;
   readonly issuedAtSeconds: number;
   readonly expiresAtSeconds: number;
+  /** The app's platform for an app grant (6529 Mobile or Desktop); "web" by default. */
+  readonly platform?: StoredDevice["platform"] | undefined;
 }
 
 export interface PreparedLoginE2eeDevice {
@@ -96,7 +101,7 @@ export async function createLoginE2eeDevice(
         registered: false,
         provisioned: false,
         label: "Device",
-        platform: "web",
+        platform: input.platform ?? "web",
         createdAt: (deps.now ?? Date.now)(),
         lastResortAt: null,
         loginGrantId: input.grantId.toLowerCase(),

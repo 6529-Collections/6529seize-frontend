@@ -195,7 +195,8 @@ const SCOPE_NOUNS: Readonly<Record<DeviceScope, string>> = {
 const toScopeNoun = (scope: string): string =>
   Object.hasOwn(SCOPE_NOUNS, scope) ? SCOPE_NOUNS[scope as DeviceScope] : scope;
 
-const describeScopes = (scopes: readonly string[]): string =>
+/** What the device will sign, e.g. "posts, edits, deletes and reactions". */
+export const describeDeviceScopes = (scopes: readonly string[]): string =>
   formatEnglishList(scopes.map(toScopeNoun));
 
 /**
@@ -215,7 +216,7 @@ export function renderDeviceGrantStatement({
   return (
     `Sign in to 6529 and turn on signed messages on this device until ` +
     `${formatGrantExpiryDate(expiresAtSeconds)}. ` +
-    `This device will sign your ${describeScopes(scopes)} ` +
+    `This device will sign your ${describeDeviceScopes(scopes)} ` +
     `so anyone can verify they came from your wallet. ` +
     `It can't move funds, change your handle, add devices or act as an admin. ` +
     `No transaction, no gas, no token approvals. ` +
@@ -239,7 +240,7 @@ const renderCombinedGrantStatementV1: CombinedStatementRenderer = (
 ) =>
   `Sign in to 6529 and turn on signed messages on this device until ` +
   `${formatGrantExpiryDate(signing.expiresAtSeconds)}. ` +
-  `This device will sign your ${describeScopes(signing.scopes)} ` +
+  `This device will sign your ${describeDeviceScopes(signing.scopes)} ` +
   `so anyone can verify they came from your wallet. ` +
   `It will also encrypt (send) and decrypt (read) your end-to-end encrypted ` +
   `messages, which 6529.io cannot read. ` +
@@ -314,7 +315,10 @@ export function buildDeviceGrantUrn({
   )}:${scopes.join(".")}:${expiresAtSeconds}`;
 }
 
-const areCanonicalScopes = (scopes: readonly string[]): boolean => {
+/** Canonical order, no duplicates, includes "post". */
+export const areCanonicalDeviceScopes = (
+  scopes: readonly string[]
+): boolean => {
   let previousIndex = -1;
   for (const scope of scopes) {
     const index = CANONICAL_SCOPE_ORDER.indexOf(scope as DeviceScope);
@@ -391,7 +395,7 @@ const parseGrantResource = (
   }
   const [, keyHex = "", scopeList = "", expiresAt = ""] = match;
   const scopes = scopeList.split(".");
-  if (!areCanonicalScopes(scopes)) {
+  if (!areCanonicalDeviceScopes(scopes)) {
     return null;
   }
   return {

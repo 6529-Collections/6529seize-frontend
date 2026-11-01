@@ -1,8 +1,16 @@
 import type { AppToastInput } from "@/components/utils/toast/AppToast";
 import { isWalletConnectSessionError } from "@/helpers/wallet-error.helpers";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 import type { AuthLoadingState } from "./authTypes";
 import type { AuthRequestGuard } from "./authRequestGuard";
+import {
+  isAppDeviceGrantPossible,
+  isAppGrantPlatform,
+} from "@/lib/device-signing/login-grant";
+import {
+  requestAppSignedMessagesGrant,
+  type SignAppGrant,
+} from "./authAppSignedMessagesGrant";
 import {
   createAuthRequestSignIn,
   type LoginE2eeGrantResult,
@@ -71,6 +79,10 @@ export type RequestSignedMessagesGrant = (
 
 interface SignedMessagesGrantRequestParams {
   readonly address: string | undefined;
+  /** The signed-in wallet's own profile, for the app grant's encrypted-messages key. */
+  readonly ownProfileId: string | null;
+  /** EIP-712 signing for the app grant (6529 Mobile and Desktop). */
+  readonly signAppGrant: SignAppGrant;
   /** False for proxy sessions, dev auth or disabled wallet authentication. */
   readonly canAuthenticate: boolean;
   readonly canSignActiveWallet: boolean;
@@ -86,6 +98,16 @@ interface SignedMessagesGrantRequestParams {
 const failed = (
   reason: SignedMessagesGrantFailure
 ): SignedMessagesGrantResult => ({ success: false, reason });
+
+/** What an app grant failure says; a declined signature says nothing. */
+const APP_GRANT_ERROR_KEYS: Partial<
+  Record<SignedMessagesGrantFailure, MessageKey>
+> = {
+  "device-key": "signedMessages.enable.error.deviceKey",
+  "signature-failed": "signedMessages.enable.error.signatureFailed",
+  "walletconnect-session": "signedMessages.enable.error.walletConnectSession",
+  "sign-in-failed": "signedMessages.enable.error.signInFailed",
+};
 
 const ignoreToast: ShowToast = () => undefined;
 
@@ -170,11 +192,15 @@ function createGrantProgress() {
 
 /**
  * "Turn on signed messages": an ordinary web sign-in for the active wallet
- * whose challenge also grants this device's key. One wallet signature.
+ * whose challenge also grants this device's key. One wallet signature. In
+ * 6529 Mobile and Desktop, whose sign-in is not SIWE, the wallet signs an
+ * app grant instead (still one signature).
  */
 export const createSignedMessagesGrantRequest =
   ({
     address,
+    ownProfileId,
+    signAppGrant,
     canAuthenticate,
     canSignActiveWallet,
     createGetSignature,
@@ -205,6 +231,31 @@ export const createSignedMessagesGrantRequest =
     if (!isActiveChainSupported()) {
       // AppKit explains an unsupported network; callers may switch it.
       return failed("wrong-network");
+    }
+
+    if (isAppGrantPlatform()) {
+      if (!isAppDeviceGrantPossible(null)) {
+        return failed("unavailable");
+      }
+      setAuthLoadingState("signing");
+      try {
+        const result = await requestAppSignedMessagesGrant({
+          address,
+          ownProfileId,
+          signAppGrant,
+          onSignatureRequested,
+          encryptedMessages,
+        });
+        const errorKey = result.success
+          ? undefined
+          : APP_GRANT_ERROR_KEYS[result.reason];
+        if (errorKey) {
+          showToast({ message: t(AUTH_MODAL_LOCALE, errorKey), type: "error" });
+        }
+        return result;
+      } finally {
+        setAuthLoadingState("idle");
+      }
     }
 
     const authRequestGuard = createSigningAuthRequestGuard();
