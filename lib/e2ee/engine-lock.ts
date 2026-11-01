@@ -99,30 +99,33 @@ function requestLock(
   options: LockOptions,
   onStolen: () => void
 ): Promise<HeldLock | null> {
+  let releaseHold: () => void = () => undefined;
+  const hold = new Promise<void>((resolve) => {
+    releaseHold = resolve;
+  });
   return new Promise<HeldLock | null>((resolve, reject) => {
     let granted = false;
-    let releaseHold: () => void = () => undefined;
-    const hold = new Promise<void>((done) => {
-      releaseHold = done;
-    });
-    locks
-      .request(name, options, (lock) => {
-        if (!lock) {
-          resolve(null);
-          return undefined;
-        }
-        granted = true;
-        resolve({ release: releaseHold });
-        return hold;
-      })
-      .catch((error: unknown) => {
+    const request = async () => {
+      try {
+        await locks.request(name, options, (lock) => {
+          if (!lock) {
+            resolve(null);
+            return undefined;
+          }
+          granted = true;
+          resolve({ release: releaseHold });
+          return hold;
+        });
+      } catch (error) {
         if (granted) {
           // A steal rejects the holder's request with AbortError.
           onStolen();
           return;
         }
         reject(error as Error);
-      });
+      }
+    };
+    void request();
   });
 }
 
@@ -138,7 +141,7 @@ function waitForRelease(
       channel?.removeEventListener("message", onMessage);
       signal.removeEventListener("abort", onAbort);
     };
-    const onMessage = (event: MessageEvent<ChannelMessage>) => {
+    const onMessage = (event: MessageEvent<ChannelMessage | null>) => {
       if (event.data?.type === "released") {
         finish();
         resolve();
@@ -233,7 +236,7 @@ export async function acquireE2eeEngineLock(
     return unguardedLease();
   }
 
-  const onMessage = (event: MessageEvent<ChannelMessage>) => {
+  const onMessage = (event: MessageEvent<ChannelMessage | null>) => {
     if (event.data?.type === "release-request") {
       loseOnce();
     }

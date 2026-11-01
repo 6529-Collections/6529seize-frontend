@@ -60,10 +60,10 @@ export function prepareInlineImage(url: string): Promise<boolean> {
         resolve(false);
         return;
       }
-      image.decode().then(
-        () => resolve(true),
-        () => reject(new Error("E2EE_IMAGE_UNREADABLE"))
-      );
+      image
+        .decode()
+        .then(() => resolve(true))
+        .catch(() => reject(new Error("E2EE_IMAGE_UNREADABLE")));
     };
     image.src = url;
   });

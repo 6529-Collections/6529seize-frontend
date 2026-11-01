@@ -5,7 +5,9 @@ const ENCRYPTED_MESSAGES_PATH_PATTERN = /^\/messages\/encrypted(?:\/|$)/;
 
 export const currentPathname = (): string | null => {
   try {
-    return globalThis.location?.pathname ?? null;
+    // Missing outside the browser (server rendering, tests).
+    const { location } = globalThis as { location?: Location };
+    return location?.pathname ?? null;
   } catch {
     return null;
   }

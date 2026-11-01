@@ -409,7 +409,7 @@ const versionOf = (record: WasmRecord | undefined): number =>
  * then writes. `next` computes the new record and throws on a version
  * conflict, which aborts the transaction before anything is written.
  */
-function versionedWrite(
+async function versionedWrite(
   db: IDBDatabase,
   profileId: string,
   next: (stored: WasmRecord | undefined) => WasmRecord,
@@ -432,9 +432,11 @@ function versionedWrite(
     }
     apply(tx, record);
   };
-  return finished.catch((error: unknown) => {
+  try {
+    await finished;
+  } catch (error) {
     throw conflict ?? error;
-  });
+  }
 }
 
 class IndexedDbE2eeStorage implements E2eeStorage {

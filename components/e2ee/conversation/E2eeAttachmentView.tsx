@@ -68,6 +68,9 @@ function InlineImage(props: AttachmentProps) {
       return;
     }
     let cancelled = false;
+    // Set by the cleanup while the load awaits; read through a call so the
+    // checks after each await are not narrowed away.
+    const isCancelled = () => cancelled;
     let objectUrl: string | null = null;
     const release = () => {
       if (objectUrl) {
@@ -76,16 +79,16 @@ function InlineImage(props: AttachmentProps) {
       }
     };
     withInlineImageSlot(async () => {
-      if (cancelled) {
+      if (isCancelled()) {
         return;
       }
       const blob = await engine.getAttachment(g, messageId, attachment.blob);
-      if (cancelled) {
+      if (isCancelled()) {
         return;
       }
       objectUrl = URL.createObjectURL(blob);
       const fits = await prepareInlineImage(objectUrl);
-      if (cancelled) {
+      if (isCancelled()) {
         return;
       }
       if (!fits) {
@@ -96,7 +99,7 @@ function InlineImage(props: AttachmentProps) {
       setUrl(objectUrl);
       setState("ready");
     }).catch(() => {
-      if (!cancelled) {
+      if (!isCancelled()) {
         release();
         setState("failed");
       }

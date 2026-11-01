@@ -143,7 +143,8 @@ export function startE2eeEngineRun(input: E2eeEngineRunInput): E2eeEngineRun {
   const run = async () => {
     try {
       await input.after;
-      let waited = false;
+      // Set by onBusy while the lock request is pending.
+      let waited = false as boolean;
       lease = await acquireE2eeEngineLock({
         profileId: input.profileId,
         takeOver: input.takeOver,

@@ -180,6 +180,7 @@ export default function E2eeReportDetail({
     holdFailed: hold.isError && !hold.isPending,
   });
   useEffect(() => {
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-data-to-parent -- The live regions stay mounted in the panel so screen readers keep hearing them while this view mounts and unmounts; this only hands them the derived text.
     onAnnounce({ status, alert });
   }, [onAnnounce, status, alert]);
 

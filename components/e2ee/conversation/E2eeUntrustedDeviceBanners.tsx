@@ -85,8 +85,8 @@ export function E2eeUntrustedDeviceBanners({
           selfProfileId
         );
         const busy = pending?.deviceKey === device.deviceKey;
-        const adding = busy && pending?.add === true;
-        const ignoring = busy && pending?.add === false;
+        const adding = busy && pending.add === true;
+        const ignoring = busy && pending.add === false;
         return (
           <E2eeBanner
             key={device.deviceKey}
