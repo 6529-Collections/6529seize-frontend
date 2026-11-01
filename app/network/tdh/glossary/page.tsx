@@ -92,7 +92,7 @@ export default async function GlossaryPage() {
       ),
       meaning: (
         <p className={`tw-m-0 tw-max-w-[640px] ${EX_TEXT.body}`}>
-          {m(key(term.id, "def"), term.values?.(p) ?? {})}
+          {m(term.def?.(p) ?? key(term.id, "def"), term.values?.(p) ?? {})}
         </p>
       ),
       status: (

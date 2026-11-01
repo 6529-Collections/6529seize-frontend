@@ -65,7 +65,7 @@ describe("the hub, first version", () => {
     );
     // The theorem counts are the bundled manifest's, read through the facts.
     expect(panel).toHaveTextContent(
-      `${book.num("manifest.proved").toLocaleString("en-US")} Lean theorems ${book.num("manifest.proved.tdh")} about TDH's rules and ${book.num("manifest.proved.p53")} about the validators', with ${book.num("manifest.shownFalse")} earlier statements shown false and kept on record.`
+      `${book.num("manifest.proved").toLocaleString("en-US")} Lean theorems (${book.num("manifest.proved.tdh")} about TDH's rules, ${book.num("manifest.proved.p53")} about the validators'), with ${book.num("manifest.shownFalse")} earlier statements shown false and kept on record.`
     );
     expect(panel).toHaveTextContent(
       "program A ran inside SP1, a zero-knowledge prover, and mainnet's SP1 verifier contract accepts the proof without a transaction. Proof B of that day is not done."

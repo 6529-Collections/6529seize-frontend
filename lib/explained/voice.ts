@@ -118,15 +118,17 @@ export function lintVoice(
 
 /**
  * Names that contain digits and are not quantities: 6529 and its domains,
- * CC0, SP1, SHA-256, token standards, card numbers (#562), decision and
- * proposal numbers (D136, P26), specification sections (§5.2), the rules'
- * name (TDH v1.4, D137) and placeholders ({count}).
+ * CC0, SP1, Groth16 and BN254, SHA-256, token standards, card numbers
+ * (#562), decision and proposal numbers (D136, P26), specification sections
+ * (§5.2), the rules' name (TDH v1.4, D137) and placeholders ({count}).
  */
 const NAME_TOKENS: readonly RegExp[] = [
   /\{\w+\}/g,
   /\b6529(?:\.io)?\b/g,
   /\bCC0\b/g,
   /\bSP1\b/g,
+  /\bGroth16\b/g,
+  /\bBN254\b/g,
   /\bSHA-256\b/g,
   /\bERC-(?:1155|721|20)\b/g,
   /#\d+/g,

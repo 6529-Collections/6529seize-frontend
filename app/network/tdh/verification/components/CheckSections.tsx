@@ -354,17 +354,26 @@ export function ReadItRight({
     text: (
       <>
         {bold(pt(locale, "explained.tdh.check.read.not4Title"))}{" "}
-        {rich(locale, "explained.tdh.check.read.not4", {
-          cutover: (
-            <FactValue fact={book.maybe("tdh.cutover.about")} locale={locale} />
-          ),
-          checked: (
-            <FactValue
-              fact={book.maybe("tdh.cutover.checkedAt")}
-              locale={locale}
-            />
-          ),
-        })}
+        {rich(
+          locale,
+          book.maybe("tdh.cutover.checkedAt") === null
+            ? "explained.tdh.check.read.not4"
+            : "explained.tdh.check.read.not4Late",
+          {
+            cutover: (
+              <FactValue
+                fact={book.maybe("tdh.cutover.about")}
+                locale={locale}
+              />
+            ),
+            checked: (
+              <FactValue
+                fact={book.maybe("tdh.cutover.checkedAt")}
+                locale={locale}
+              />
+            ),
+          }
+        )}
       </>
     ),
   });

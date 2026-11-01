@@ -30,11 +30,6 @@ function held(locale: SupportedLocale, seconds: number): string {
   return kt(locale, "explained.kit.age.hours", { ...hoursAndMinutes(seconds) });
 }
 
-/** "2026-10-17T19:05": an arrival's id, as the gates' states click it. */
-function minuteId(seconds: number): string {
-  return new Date(seconds * 1000).toISOString().slice(0, 16);
-}
-
 /** The readout's sentence: a bold lead (or none) and the rest. */
 function sentence(
   locale: SupportedLocale,
@@ -141,13 +136,13 @@ export default function FirstDayLens({
             <Seg
               label={ht(locale, "explained.tdh.how.firstday.arrivesGroup")}
               attr="at"
-              value={minuteId(arrivalAt(world, model.state.arrival))}
-              onChange={(id) => {
-                const picked = options.find((o) => minuteId(o.at) === id);
+              value={model.state.arrival}
+              onChange={(key) => {
+                const picked = options.find((o) => o.key === key);
                 if (picked) model.set({ arrival: picked.key, sold: false });
               }}
-              options={options.map(({ at }) => ({
-                value: minuteId(at),
+              options={options.map(({ key, at }) => ({
+                value: key,
                 label: ht(locale, "explained.tdh.how.firstday.option", {
                   date: utcDay(locale, at),
                   time: utcClock(locale, at),

@@ -84,7 +84,7 @@ describe("How TDH is calculated", () => {
       "Right. Oct 19. The snapshot of Oct 18 finds one minute; the snapshot of Oct 19 finds 24 hours and one minute."
     );
     await user.click(
-      model.querySelector<HTMLElement>('[data-at="2026-10-18T00:01"]')!
+      model.querySelector<HTMLElement>('[data-at="afterMidnight"]')!
     );
     expect(model).toHaveTextContent("The result dated Tuesday, Oct 20");
     await user.click(breakIt("sellearly"));

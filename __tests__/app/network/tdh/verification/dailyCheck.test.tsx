@@ -64,7 +64,7 @@ describe("the daily check (TDH-DESIGN.md §4.4)", () => {
     expect(verdict).toHaveTextContent("so do all 11,126 wallets");
     // The limit sits inside the verdict, as a sentence, not a colour.
     expect(verdict).toHaveTextContent(
-      "Not guaranteed: the history before the snapshot."
+      "Not guaranteed: that the logs are Ethereum's."
     );
     expect(verdict?.querySelector("[data-limit]")).not.toBeNull();
     // The three totals, equal, each through its fact.
@@ -235,7 +235,7 @@ describe("the daily check (TDH-DESIGN.md §4.4)", () => {
       })
     ).toBeInTheDocument();
     expect(container.querySelector("#diff")).toHaveTextContent(
-      "Once 6529.io cuts over to the Rust core, planned for about Oct 23, nothing re-reads the logs"
+      "was planned for about Oct 23 and, as of Nov 1, has not been made. Once it is, nothing re-reads the logs"
     );
     const trail = screen.getByRole("list", {
       name: "Who can repeat each step",

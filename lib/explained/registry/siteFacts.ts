@@ -146,8 +146,13 @@ export const SITE_FACTS = {
     format: "day",
     refresh: RECORD_REFRESH,
     source: (inputs) => source("site", inputs.site.cutover.statusSource),
+    // Only once the planned date has passed with no cutover: before it the
+    // pages say "planned for about", after it "as of <date>, not made".
     value: (inputs) =>
-      inputs.site.cutover.made ? undefined : inputs.site.cutover.checkedAt,
+      !inputs.site.cutover.made &&
+      Date.parse(inputs.site.cutover.about) < Date.parse(inputs.now)
+        ? inputs.site.cutover.checkedAt
+        : undefined,
   }),
   "site.validator.version": defineFact<string>({
     format: "text",

@@ -59,6 +59,8 @@ const NAMES = [
   /\b6529(?:\.io)?\b/g,
   /\bCC0\b/g,
   /\bSP1\b/g,
+  /\bGroth16\b/g,
+  /\bBN254\b/g,
   /\bSHA-256\b/g,
   /\bERC-(?:1155|721|20)\b/g,
   /#\d+/g,
@@ -460,13 +462,13 @@ describe("the glossary", () => {
     expect(container.querySelector("#nic")?.textContent).toMatch(/D142/);
     // The words How sure uses are defined here too.
     expect(container.querySelector("#lean")?.textContent).toMatch(
-      /the model has 84/
+      /the manifest has 84, 56 about TDH/
     );
     for (const id of ["axioms", "counterexample", "limit", "zk"]) {
       expect(container.querySelector(`[id="${id}"]`)).not.toBeNull();
     }
     expect(container.querySelector("#rate")?.textContent).toMatch(
-      /3,941 divided by a card's effective edition, in cents: 12\.71 for 310 copies/
+      /3,941 divided by a card's effective edition, computed in whole cents and shown in TDH: 12\.71 for 310 copies/
     );
     expect(glossaryMetadata().title).toMatch(/Glossary/);
   });

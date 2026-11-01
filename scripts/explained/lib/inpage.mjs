@@ -311,6 +311,8 @@ export function measure(vh) {
     /\b6529(?:\.io)?\b/g,
     /\bCC0\b/g,
     /\bSP1\b/g,
+    /\bGroth16\b/g,
+    /\bBN254\b/g,
     /\bSHA-256\b/g,
     /\bERC-(?:1155|721|20)\b/g,
     /#\d+/g,

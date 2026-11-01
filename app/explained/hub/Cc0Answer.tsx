@@ -64,10 +64,10 @@ export default function Cc0Answer({
           <h2 className={`${EX_TEXT.stmt} tw-mt-3`}>
             {ht(locale, "cc0.title")}
           </h2>
-          <p className={`${EX_TEXT.body} tw-m-0 tw-mt-4`}>
+          <p className={`${EX_TEXT.body} tw-m-0 tw-mb-[18px] tw-mt-4`}>
             {ht(locale, "cc0.body")}
           </p>
-          <p className={`${EX_TEXT.body} tw-m-0 tw-mt-4`} data-cc0="keep">
+          <p className={`${EX_TEXT.body} tw-m-0`} data-cc0="keep">
             {ht(locale, "cc0.keep")}
           </p>
           <div className="tw-mt-4">

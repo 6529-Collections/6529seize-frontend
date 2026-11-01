@@ -115,6 +115,7 @@
   "explained.tdh.overview.explain.result": "TDH de {identity}",
   "explained.tdh.overview.explain.loading": "Recherche de {identity}…",
   "explained.tdh.overview.explain.error": "6529.io n'a pas répondu. Réessayez dans un instant.",
+  "explained.tdh.overview.explain.errorEns": "6529.io n'a trouvé aucun wallet pour {identity}, ou n'a pas répondu. Vérifiez l'orthographe du nom, ou collez l'adresse.",
   "explained.tdh.overview.explain.retry": "Réessayer",
   "explained.tdh.overview.explain.empty": "Cet enregistrement ne contient aucune carte qui compte.",
   "explained.tdh.overview.explain.newTitle": "Votre carte compte à partir du {date}.",

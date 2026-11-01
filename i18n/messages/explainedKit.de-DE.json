@@ -85,7 +85,7 @@
   "explained.kit.loop.verifySub": "zwei Programme, täglich",
   "explained.kit.loop.verifyEqual": "gleich bei {identities}",
   "explained.kit.loop.verifyToday": "Identitäten heute",
-  "explained.kit.loop.network": "gestrichelter Ring: das Netzwerk, entworfen, nicht in Betrieb",
+  "explained.kit.loop.network": "Der gestrichelte Ring ist das Netzwerk: entworfen, noch nicht in Betrieb. Eine nummerierte Station hat ihr eigenes Kapitel; die übrigen warten auf ihres.",
   "explained.kit.loop.ethereum": "Ethereum",
   "explained.kit.loop.ethereumSub": "was jede Station liest",
   "explained.kit.loop.cc0": "CC0: jeder darf kopieren",

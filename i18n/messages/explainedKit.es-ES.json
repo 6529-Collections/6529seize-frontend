@@ -85,7 +85,7 @@
   "explained.kit.loop.verifySub": "dos programas, cada día",
   "explained.kit.loop.verifyEqual": "igual en {identities}",
   "explained.kit.loop.verifyToday": "identidades hoy",
-  "explained.kit.loop.network": "anillo discontinuo: la red, diseñada, no en marcha",
+  "explained.kit.loop.network": "El anillo discontinuo es la red: diseñada, aún sin funcionar. Una estación numerada tiene su propio capítulo; las demás esperan el suyo.",
   "explained.kit.loop.ethereum": "Ethereum",
   "explained.kit.loop.ethereumSub": "lo que lee cada estación",
   "explained.kit.loop.cc0": "CC0: cualquiera puede copiar",

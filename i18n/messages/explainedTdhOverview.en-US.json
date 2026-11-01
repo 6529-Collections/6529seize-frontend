@@ -115,6 +115,7 @@
   "explained.tdh.overview.explain.result": "TDH for {identity}",
   "explained.tdh.overview.explain.loading": "Looking up {identity}…",
   "explained.tdh.overview.explain.error": "6529.io did not answer. Try again in a moment.",
+  "explained.tdh.overview.explain.errorEns": "6529.io found no wallet for {identity}, or did not answer. Check the spelling of the name, or paste the address.",
   "explained.tdh.overview.explain.retry": "Try again",
   "explained.tdh.overview.explain.empty": "This record holds no card that counts.",
   "explained.tdh.overview.explain.newTitle": "Your card counts from {date}.",

@@ -25,7 +25,7 @@ export function HubOpener({ locale }: { readonly locale: SupportedLocale }) {
       <span className={`${EX_TEXT.label} tw-mb-4 tw-block`}>
         {ht(locale, "eyebrow")}
       </span>
-      <div className="lg:tw-grid lg:tw-grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:tw-items-end lg:tw-gap-14">
+      <div className="lg:tw-grid lg:tw-grid-cols-[minmax(0,1fr)_400px] lg:tw-items-end lg:tw-gap-14">
         <h1
           className={`${EX_TEXT.displayHub} tw-text-balance max-[359px]:tw-text-[30px] max-[359px]:tw-leading-[34px] lg:tw-text-[72px] lg:tw-leading-[76px]`}
         >

@@ -270,13 +270,18 @@ function LookupResult({
       </p>
     );
   } else if (query.isError) {
+    const status = getStructuredApiErrorStatus(query.error);
     body =
-      getStructuredApiErrorStatus(query.error) === 404 ? (
+      status === 404 ? (
         <NoneExample locale={locale} />
       ) : (
         <div>
           <p className="tw-m-0 tw-text-[15px] tw-leading-6 tw-text-iron-300">
-            {ot(locale, "explain.error")}
+            {/* A name 6529.io cannot resolve comes back as a server error,
+                so a name gets the spelling hint, not "did not answer". */}
+            {identity.toLowerCase().endsWith(".eth")
+              ? ot(locale, "explain.errorEns", { identity })
+              : ot(locale, "explain.error")}
           </p>
           <button
             type="button"

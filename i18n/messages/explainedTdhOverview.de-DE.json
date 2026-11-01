@@ -115,6 +115,7 @@
   "explained.tdh.overview.explain.result": "TDH für {identity}",
   "explained.tdh.overview.explain.loading": "{identity} wird gesucht…",
   "explained.tdh.overview.explain.error": "6529.io hat nicht geantwortet. Versuchen Sie es gleich noch einmal.",
+  "explained.tdh.overview.explain.errorEns": "6529.io hat für {identity} keine Wallet gefunden oder nicht geantwortet. Prüfen Sie die Schreibweise des Namens oder fügen Sie die Adresse ein.",
   "explained.tdh.overview.explain.retry": "Erneut versuchen",
   "explained.tdh.overview.explain.empty": "Dieser Datensatz enthält keine Karte, die zählt.",
   "explained.tdh.overview.explain.newTitle": "Ihre Karte zählt ab {date}.",

@@ -85,7 +85,7 @@
   "explained.kit.loop.verifySub": "deux programmes, chaque jour",
   "explained.kit.loop.verifyEqual": "égal pour {identities}",
   "explained.kit.loop.verifyToday": "identités aujourd'hui",
-  "explained.kit.loop.network": "anneau pointillé : le réseau, conçu, pas en service",
+  "explained.kit.loop.network": "L'anneau en pointillé est le réseau : conçu, pas encore en marche. Une station numérotée a son propre chapitre ; les autres attendent le leur.",
   "explained.kit.loop.ethereum": "Ethereum",
   "explained.kit.loop.ethereumSub": "ce que lit chaque station",
   "explained.kit.loop.cc0": "CC0 : chacun peut copier",

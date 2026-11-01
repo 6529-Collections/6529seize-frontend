@@ -69,7 +69,7 @@
       "states": [
         {
           "name": "firstday-2359",
-          "clicks": ["[data-at=\"2026-10-17T23:59\"]"],
+          "clicks": ["[data-at=\"beforeMidnight\"]"],
           "el": "[data-lens=\"firstday\"]"
         },
         {

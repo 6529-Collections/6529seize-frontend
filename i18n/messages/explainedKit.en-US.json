@@ -85,7 +85,7 @@
   "explained.kit.loop.verifySub": "two programs, daily",
   "explained.kit.loop.verifyEqual": "equal on {identities}",
   "explained.kit.loop.verifyToday": "identities today",
-  "explained.kit.loop.network": "dashed ring: the network, designed, not running",
+  "explained.kit.loop.network": "The dashed ring is the network: designed, not running yet. A numbered station has its own chapter; the others wait for theirs.",
   "explained.kit.loop.ethereum": "Ethereum",
   "explained.kit.loop.ethereumSub": "what every station reads",
   "explained.kit.loop.cc0": "CC0: anyone may copy",

@@ -28,6 +28,8 @@ interface Term {
   readonly also?: readonly string[];
   readonly status: Status;
   readonly values?: (p: ReturnType<typeof printers>) => RichValues;
+  /** Another definition key when the facts call for it (a date now past). */
+  readonly def?: (p: ReturnType<typeof printers>) => GlossaryKey | null;
 }
 
 const LIVE: Status = { track: "live" };
@@ -141,7 +143,10 @@ export const TERMS: readonly Term[] = [
     id: "lean",
     also: ["theorem"],
     status: { mark: "proved" },
-    values: (p) => ({ count: p.v("manifest.proved") }),
+    values: (p) => ({
+      count: p.v("manifest.proved"),
+      tdh: p.v("manifest.proved.tdh"),
+    }),
   },
   { id: "axioms", also: ["kernel"], status: { mark: "assumed" } },
   {
@@ -155,6 +160,24 @@ export const TERMS: readonly Term[] = [
     also: ["proof-a", "proof-b"],
     status: { mark: "decided", ref: "D119, D128" },
   },
+  { id: "zkvm", status: { mark: "decided", ref: "D119" } },
+  { id: "groth16", status: { mark: "decided", ref: "P52" } },
+  {
+    id: "word",
+    status: { mark: "decided", ref: "D128" },
+    values: (p) => ({
+      words: p.v("proofs.statement.words"),
+      bytes: p.v("proofs.statement.wordBytes"),
+    }),
+  },
+  { id: "anchor", status: { mark: "decided", ref: "D128" } },
+  { id: "bloom", status: { word: "explained.tdh.glossary.convention" } },
+  { id: "readonly", status: { word: "explained.tdh.glossary.convention" } },
+  {
+    id: "horizon",
+    status: { mark: "decided", ref: "D128" },
+    values: (p) => ({ horizon: p.v("proofs.contract.horizon", "long") }),
+  },
   { id: "root", status: { mark: "decided", ref: "D112" } },
   { id: "comparison", status: { mark: "tested" } },
   { id: "classes", status: LIVE },
@@ -162,6 +185,10 @@ export const TERMS: readonly Term[] = [
   {
     id: "cutover",
     status: { mark: "decided", ref: "D132" },
+    def: (p) =>
+      p.text("tdh.cutover.checkedAt") === null
+        ? null
+        : "explained.tdh.glossary.cutover.defLate",
     values: (p) => ({
       about: p.v("tdh.cutover.about", "long"),
       checked: p.v("tdh.cutover.checkedAt", "long"),

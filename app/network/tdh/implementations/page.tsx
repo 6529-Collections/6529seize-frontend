@@ -207,9 +207,12 @@ export default async function ImplementationsPage() {
                       "explained.tdh.impl.a.sub"
                     ),
                     written: m("explained.tdh.impl.a.written"),
-                    runs: m("explained.tdh.impl.a.runs", {
-                      checked: p.v("tdh.cutover.checkedAt"),
-                    }),
+                    runs:
+                      book.maybe("tdh.cutover.checkedAt") === null
+                        ? m("explained.tdh.impl.a.runs")
+                        : m("explained.tdh.impl.a.runsLate", {
+                            checked: p.v("tdh.cutover.checkedAt"),
+                          }),
                     proved: (
                       <Mark
                         kind={programsFact ? "proved" : "notYet"}

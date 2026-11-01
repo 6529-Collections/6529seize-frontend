@@ -468,7 +468,13 @@ function Section8({ ctx }: { readonly ctx: SpecContext }) {
                   )}
                 </FactText>
               ),
-              edition: cents(trap.value.example),
+              // A call is code: its numbers print as the rule writes them,
+              // with no thousands separator (RATE(3941, 200), not 3,941).
+              call: (
+                <FactText fact={trap} locale={locale}>
+                  <CodeName>{`RATE(${trap.value.h}, ${trap.value.example})`}</CodeName>
+                </FactText>
+              ),
               rate: <b className="tw-text-iron-50">{cents(trap.value.rate)}</b>,
               halfUp: cents(trap.value.halfUp),
             })}

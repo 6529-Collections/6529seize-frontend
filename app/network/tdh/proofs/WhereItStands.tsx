@@ -90,12 +90,6 @@ export default function WhereItStands({
             },
             {
               mark: "notYet",
-              text: rich(locale, k("isNot.v14"), {
-                date: facts.print("proofs.day.date"),
-              }),
-            },
-            {
-              mark: "notYet",
               text: rich(locale, k("isNot.certificate"), {
                 version: facts.print("site.validator.version"),
               }),

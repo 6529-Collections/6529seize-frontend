@@ -330,9 +330,16 @@ export function Trap({
  * specification, never translated. Comments (`#`, or Lean's `--`) are set
  * quieter. From a tablet up, lines keep their columns, and where a line is
  * wider than the frame the block scrolls sideways inside it (a focusable,
- * named region), never the page. On a phone a long line wraps with a
- * hanging indent instead, so no rule is cut mid-token out of sight.
+ * named region), never the page.
+ *
+ * On a phone, a block whose lines align columns with runs of spaces
+ * (`minted[i]  = ...`) keeps scrolling, since wrapped it reads as a
+ * staircase, and shows a fade at its right edge so the cut is visibly a
+ * scroll. Any other block wraps, each line hanging two characters to the
+ * right of its own start, so no rule is cut mid-token out of sight.
  */
+const ALIGNED_COLUMNS = /\S {2,}\S/;
+
 export function CodeBlock({
   code,
   label,
@@ -347,12 +354,17 @@ export function CodeBlock({
   readonly comment?: string;
 }) {
   const lines = code.split("\n");
+  const aligned = lines.some((line) => ALIGNED_COLUMNS.test(line));
+  const wrap = aligned
+    ? "tw-whitespace-pre"
+    : "tw-whitespace-pre-wrap [overflow-wrap:anywhere] md:tw-whitespace-pre md:[overflow-wrap:normal]";
   return (
     <div
-      className={`tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-[#0a0a0c] ${className}`.trim()}
+      className={`tw-relative tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-[#0a0a0c] ${className}`.trim()}
+      data-code-wrap={aligned ? "scroll" : "wrap"}
     >
       <pre
-        className={`tw-m-0 tw-overflow-x-auto tw-whitespace-pre-wrap tw-bg-transparent tw-px-4 tw-py-4 tw-font-mono tw-text-[13px] tw-leading-[21px] tw-text-iron-50 [overflow-wrap:anywhere] md:tw-whitespace-pre md:tw-px-[18px] md:tw-text-sm md:tw-leading-[22px] md:[overflow-wrap:normal] ${EX_FOCUS}`}
+        className={`tw-m-0 tw-overflow-x-auto tw-bg-transparent tw-px-4 tw-py-4 tw-font-mono tw-text-[13px] tw-leading-[21px] tw-text-iron-50 md:tw-px-[18px] md:tw-text-sm md:tw-leading-[22px] ${wrap} ${EX_FOCUS}`}
         aria-label={label}
         data-tdh-scroll=""
         role="region"
@@ -363,11 +375,17 @@ export function CodeBlock({
             const hash = line.indexOf(marker);
             const rule = hash >= 0 ? line.slice(0, hash) : line;
             const comment = hash >= 0 ? line.slice(hash) : "";
+            const hang = `${line.length - line.trimStart().length + 2}ch`;
             return (
               // A quoted block's lines are fixed in order.
               <span
                 key={index}
-                className="tw-block tw-pl-[2ch] -tw-indent-[2ch] md:tw-pl-0 md:tw-indent-0"
+                className="tw-block md:!tw-pl-0 md:!tw-indent-0"
+                style={
+                  aligned
+                    ? undefined
+                    : { paddingLeft: hang, textIndent: `-${hang}` }
+                }
               >
                 {rule}
                 {comment && <span className="tw-text-iron-400">{comment}</span>}
@@ -377,6 +395,12 @@ export function CodeBlock({
           })}
         </code>
       </pre>
+      {aligned && (
+        <span
+          className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-w-8 tw-rounded-r-lg tw-bg-gradient-to-l tw-from-[#0a0a0c] tw-to-transparent md:tw-hidden"
+          aria-hidden="true"
+        />
+      )}
     </div>
   );
 }

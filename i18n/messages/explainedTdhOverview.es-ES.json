@@ -115,6 +115,7 @@
   "explained.tdh.overview.explain.result": "TDH de {identity}",
   "explained.tdh.overview.explain.loading": "Buscando {identity}…",
   "explained.tdh.overview.explain.error": "6529.io no respondió. Vuelve a intentarlo en un momento.",
+  "explained.tdh.overview.explain.errorEns": "6529.io no encontró ninguna wallet para {identity}, o no respondió. Revisa cómo está escrito el nombre, o pega la dirección.",
   "explained.tdh.overview.explain.retry": "Reintentar",
   "explained.tdh.overview.explain.empty": "Este registro no tiene ninguna carta que cuente.",
   "explained.tdh.overview.explain.newTitle": "Tu carta cuenta desde el {date}.",

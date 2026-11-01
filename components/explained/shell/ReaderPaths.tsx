@@ -27,7 +27,7 @@ export default function ReaderPaths({
   return (
     <ul
       aria-label={kt(locale, "explained.kit.paths.label")}
-      className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-3.5 tw-p-0 md:tw-grid-cols-2 lg:tw-grid-cols-3"
+      className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-3.5 tw-p-0 md:tw-grid-cols-2 xl:tw-grid-cols-4"
     >
       {paths.map((path) => (
         <li key={path.who}>

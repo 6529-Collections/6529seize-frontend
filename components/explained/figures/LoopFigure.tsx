@@ -86,7 +86,7 @@ function LoopList({ stations, focus, verify, locale }: LoopProps) {
 }
 
 /** The circle: its height is fixed, so the page does not move when it measures its width. */
-const CIRCLE_HEIGHT = 560;
+const CIRCLE_HEIGHT = 520;
 
 /**
  * Where a station's name sits: beside the station on the circle's sides,
@@ -160,9 +160,6 @@ function LoopCircle({ stations, focus, verify, locale }: LoopProps) {
           stroke={EX_HEX.line}
           strokeDasharray="3 6"
         />
-        <Label x={4} y={16}>
-          {kt(locale, "explained.kit.loop.network")}
-        </Label>
         <rect
           x={cx - radius - 20}
           y={height - 30}
@@ -304,6 +301,9 @@ function LoopCircle({ stations, focus, verify, locale }: LoopProps) {
           {cc0}
         </Label>
       </SvgFrame>
+      <p className="tw-m-0 tw-mt-2 tw-max-w-[560px] tw-text-[13px] tw-leading-5 tw-text-iron-400">
+        {kt(locale, "explained.kit.loop.network")}
+      </p>
     </div>
   );
 }
