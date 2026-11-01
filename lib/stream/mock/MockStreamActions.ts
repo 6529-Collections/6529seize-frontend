@@ -18,7 +18,11 @@ import {
   openFederatedEdition,
   setFederatedStatus,
 } from "@/lib/stream/mock/federated";
-import { auctionTimes } from "@/lib/stream/mock/sales/editionAuction";
+import {
+  auctionTimes,
+  findEditionAuction,
+  simulateEditionBids,
+} from "@/lib/stream/mock/sales/editionAuction";
 import {
   englishState,
   findEnglishAuction,
@@ -26,6 +30,7 @@ import {
   resolveEnglishDispute,
 } from "@/lib/stream/mock/sales/englishAuction";
 import { MOCK_SALE_ADAPTERS } from "@/lib/stream/mock/sales/registry";
+import { OTHER_BIDDERS } from "@/lib/stream/mock/scenarioKit";
 import type { GasOperation } from "@/lib/stream/gas";
 import type {
   Address,
@@ -196,6 +201,17 @@ export class MockDevControls implements StreamDevControls {
         });
       }
       resolveEnglishDispute(this.engine, auctionOf(this.engine, work), upheld);
+    });
+  }
+
+  simulateEditionBids(edition: WorkKey, count: number): TxResult {
+    return this.engine.tx(null, () => {
+      simulateEditionBids(
+        this.engine,
+        findEditionAuction(this.engine, edition),
+        count,
+        OTHER_BIDDERS
+      );
     });
   }
 

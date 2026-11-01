@@ -3,22 +3,6 @@
  * the explainer bodies come from the owner-approved copy document.
  */
 export const STREAM_PAGE_MESSAGES = {
-  "stream.home.title": "6529 Stream",
-  "stream.home.intro":
-    "1/1 art voted in by the 6529 network. Each work sells in a 24-hour auction from zero.",
-  "stream.home.endingSoon": "Ending soon",
-  "stream.home.endingSoonEmpty": "Nothing ends in the next hour.",
-  "stream.home.live": "Live auctions",
-  "stream.home.liveEmpty": "No live auctions.",
-  "stream.home.editionsLive": "Stream Editions bidding",
-  "stream.home.editionsEmpty": "No edition auctions are open.",
-  "stream.home.upcoming": "Up next",
-  "stream.home.upcomingEmpty": "No approved works are waiting.",
-  "stream.home.upcomingReady":
-    "Approved and signed. Anyone can start its auction.",
-  "stream.home.results": "Recent results",
-  "stream.home.resultsEmpty": "No results yet.",
-
   "stream.card.editionsAt": "{count} at",
   "stream.card.outcome.museum": "No bids: to the museum",
   "stream.card.outcome.artist": "No bids: back to the artist",
@@ -107,57 +91,6 @@ export const STREAM_PAGE_MESSAGES = {
   "stream.edition.tagMost": "most",
   "stream.edition.thresholdNote":
     "Dashed line: {share} of the most. A larger count past it wins.",
-
-  "stream.artists.title": "Artists",
-  "stream.artists.intro":
-    "Artists with works in 6529 Stream or their own federated contracts.",
-  "stream.artists.noWorks": "No works yet.",
-  "stream.artist.metadataTitle": "Artist",
-  "stream.artist.identity": "Identity",
-  "stream.artist.authority": "Authority",
-  "stream.artist.payout": "Payout",
-  "stream.artist.status": "Can act as the artist",
-  "stream.artist.active": "Yes",
-  "stream.artist.restrained": "No: a recovery is pending",
-  "stream.artist.lastActivity": "Last signed",
-  "stream.artist.wallets": "Linked wallets",
-  "stream.artist.federatedContracts": "Federated contracts",
-  "stream.artist.pending": "A key recovery completes on {date}.",
-  "stream.artist.works": "Works",
-
-  "stream.me.title": "Dashboard",
-  "stream.me.intro": "Your bids, refunds, editions and payouts.",
-  "stream.me.connect": "Choose an account in the mock controls.",
-  "stream.me.bids": "1/1 bids",
-  "stream.me.editionBids": "Edition bids",
-  "stream.me.claims": "To claim",
-  "stream.me.toClaim": "To claim",
-  "stream.me.nothingToClaim": "Nothing to claim.",
-  "stream.me.claim.credit": "Outbid refunds:",
-  "stream.me.claim.editions": "{editions} editions and a refund of",
-  "stream.me.claim.delivery": "A won work waits for you to claim it",
-  "stream.me.claim.payout": "Payout:",
-  "stream.me.owned": "Your 1/1s",
-  "stream.me.ownedEmpty": "You hold no 1/1s.",
-  "stream.me.payouts": "Split wallets",
-  "stream.me.payoutsEmpty": "You're not paid by any split wallet.",
-  "stream.me.wallet": "Split wallet (works: {works}), received",
-
-  "stream.museum.title": "6529 Network Museum",
-  "stream.museum.intro": "A 6529 Stream work with no bids goes to the museum.",
-  "stream.museum.empty": "The museum holds no Stream works yet.",
-
-  "stream.curation.title": "Curation",
-  "stream.curation.intro":
-    "Works approved by a TDH vote, waiting for signatures or a start.",
-  "stream.curation.empty": "No approved packages.",
-  "stream.curation.package": "Approved {date}",
-  "stream.curation.parties": "{accepted} of {parties} parties signed",
-  "stream.curation.state.ready": "Ready to start",
-  "stream.curation.state.move": "Waiting for the artist's move",
-  "stream.curation.state.accept": "Waiting for signatures",
-  "stream.curation.state.consumed": "Started",
-  "stream.curation.start": "Start the auction",
 
   "stream.about.nav": "About 6529 Stream",
   "stream.about.copyPending": "Draft copy. The final text waits for approval.",

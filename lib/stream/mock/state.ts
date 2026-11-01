@@ -4,6 +4,7 @@ import type { ArtStyle } from "@/lib/stream/mock/art";
 import type {
   Address,
   CurationPackage,
+  EditionActivity,
   EditionAuctionStatus,
   EditionAuctionTerms,
   EnglishBid,
@@ -132,6 +133,24 @@ export interface MockEditionAuction {
   readonly oneOfOneSaleId: string | null;
   readonly book: EditionBook;
   result: BookResult | null;
+  /** The lowest and highest steps any bid has used (`Auction.lowStep`, `highStep`). */
+  lowStep: number | null;
+  highStep: number | null;
+  /** A settlement in progress or done (rc.2 chunked settle); null before the first call. */
+  settling: MockSettling | null;
+  /** The sale's events, oldest first. */
+  readonly events: EditionActivity[];
+}
+
+/** Where a chunked settlement stands (`ScanWord` and the result's sweep counters). */
+export interface MockSettling {
+  /** One past the next book word to scan (words are eight steps). */
+  cursor: number;
+  /** The lowest word: where the scan ends. */
+  readonly low: number;
+  cleared: boolean;
+  departuresSwept: number;
+  departures: number;
 }
 
 export interface MockSplitWallet {
@@ -183,6 +202,8 @@ export interface WorkSpec {
   readonly seedPolicy?: SeedPolicy;
   readonly collection?: { readonly id: number; readonly name: string };
   readonly storage?: Partial<MockStorage>;
+  /** The approved package item this work mints from (`IStream.work(id)`), when it has one. */
+  readonly item?: { readonly packageRoot: Hex32; readonly itemHash: Hex32 };
 }
 
 /** An approved item waiting in curation, with what `start` will mint. */

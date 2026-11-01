@@ -28,7 +28,7 @@ const TONE_CLASSES: Readonly<Record<BadgeTone, string>> = {
   muted: "tw-bg-transparent tw-text-iron-400 tw-ring-iron-700",
 };
 
-/** A compact status label (rounded-md, not a pill). Pass the label translated. */
+/** A compact, rectangular status tag (4px radius, not a pill). Pass the label translated. */
 export default function StatusBadge({
   tone,
   label,
@@ -40,7 +40,7 @@ export default function StatusBadge({
 }) {
   return (
     <span
-      className={`tw-inline-flex tw-items-center tw-whitespace-nowrap tw-rounded-md tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset ${TONE_CLASSES[tone]} ${className}`}
+      className={`tw-inline-flex tw-items-center tw-whitespace-nowrap tw-rounded tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset ${TONE_CLASSES[tone]} ${className}`}
     >
       {label}
     </span>
@@ -68,6 +68,7 @@ const EDITION_PHASE: Readonly<Record<EditionAuctionPhase, BadgeSpec>> = {
   extended: { tone: "warning", label: "stream.badge.edition.extended" },
   disputed: { tone: "warning", label: "stream.badge.edition.disputed" },
   closed: { tone: "neutral", label: "stream.badge.edition.closed" },
+  settling: { tone: "neutral", label: "stream.badge.edition.settling" },
   settled: { tone: "success", label: "stream.badge.edition.settled" },
   void: { tone: "danger", label: "stream.badge.edition.void" },
   noBids: { tone: "muted", label: "stream.badge.edition.noBids" },

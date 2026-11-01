@@ -1,9 +1,7 @@
 import type { SaleActionsByKind } from "@/lib/stream/dataSource";
 import type { MockStreamEngine } from "@/lib/stream/mock/engine";
-import {
-  createEditionActions,
-  editionAuctionView,
-} from "@/lib/stream/mock/sales/editionAuction";
+import { createEditionActions } from "@/lib/stream/mock/sales/editionActions";
+import { editionAuctionView } from "@/lib/stream/mock/sales/editionAuction";
 import {
   createEnglishActions,
   englishView,

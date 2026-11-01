@@ -1,4 +1,4 @@
-import { CurationPage } from "@/components/stream/pages/MuseumCurationPages";
+import { CurationPage } from "@/components/stream/pages/CurationPage";
 import {
   assertStreamProduct,
   streamPageMetadata,

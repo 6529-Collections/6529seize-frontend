@@ -134,6 +134,7 @@ export interface ProvenanceEvent {
     | "minted"
     | "auction-started"
     | "bid"
+    | "bid-withdrawn"
     | "settled"
     | "to-museum"
     | "to-artist"

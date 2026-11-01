@@ -84,7 +84,18 @@ export function startFromItem(
   if (!pending) {
     revert("UnknownItem", { itemHash });
   }
-  const work = addStreamWork(engine, pending.spec, at);
+  const entry = engine.state.packages[packageIndex];
+  // The minted work records the package item it consumed.
+  const work = addStreamWork(
+    engine,
+    entry
+      ? {
+          ...pending.spec,
+          item: { packageRoot: entry.packageRoot, itemHash },
+        }
+      : pending.spec,
+    at
+  );
   startEnglishAuction(engine, work.key, at);
   if (work.kind === "EDITION_MASTER") {
     const edition = addLinkedEdition(engine, work, {
@@ -98,7 +109,6 @@ export function startFromItem(
     });
     openPreparedAuction(engine, auction, at);
   }
-  const entry = engine.state.packages[packageIndex];
   if (entry) {
     engine.state.packages[packageIndex] = {
       ...entry,

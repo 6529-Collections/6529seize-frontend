@@ -12,7 +12,7 @@ import type {
   EditionBidView,
   EnglishAuctionState,
 } from "@/lib/stream/model/sales";
-import type { StreamArtist } from "@/lib/stream/model/records";
+import type { StatementView, StreamArtist } from "@/lib/stream/model/records";
 
 /** Editions, payouts, claims, museum, curation and listing queries. See `lib/stream/types.ts`. */
 
@@ -25,6 +25,12 @@ export interface EditionBalance {
   readonly edition: WorkKey;
   readonly token: Address;
   readonly id: number;
+  readonly balance: number;
+}
+
+/** An edition's holder: ERC-1155 balances from `TransferSingle` (and batch) events. */
+export interface EditionHolder {
+  readonly account: Address;
   readonly balance: number;
 }
 
@@ -148,6 +154,18 @@ export interface CurationPackage {
   readonly registeredAt: UnixSeconds;
   /** The wave vote the approval came from (off-chain). */
   readonly waveVote: string;
+  /**
+   * The curator's `CURATION_EVIDENCE` statement for this root (subject
+   * `(address(0), uint256(packageRoot))`): the published vote record that
+   * `evidenceHash` commits to. Null until the curator publishes it.
+   */
+  readonly voteRecord: StatementView | null;
+  /** `PackageRevoked`: a guardian revoked the approval, so unconsumed items cannot mint. */
+  readonly revocation: {
+    readonly at: UnixSeconds;
+    readonly reasonHash: Hex32;
+    readonly txHash: Hex32;
+  } | null;
   readonly items: readonly CurationItem[];
 }
 
