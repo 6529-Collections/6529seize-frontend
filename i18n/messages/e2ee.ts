@@ -46,7 +46,7 @@ export const E2EE_MESSAGES = {
     "Recommended on a shared computer. Deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved here for every profile. Your history is lost unless backup is on.",
   "e2ee.signOut.confirm": "Sign out",
   "e2ee.signOut.removeFailed":
-    "Couldn’t remove encrypted messages from this browser. You’re still signed in.",
+    "Couldn’t remove encrypted messages from this browser. Close any other 6529 tabs and try again. You’re still signed in.",
   "e2ee.enroll.identity": "You’ll sign as {name} with {wallet}.",
   "e2ee.enroll.identityUnknown":
     "You’ll sign with the wallet connected to this profile.",

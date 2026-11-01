@@ -66,3 +66,42 @@ describe("removing encrypted messages from this browser", () => {
     expect(await storage.getStateVersion("p1")).toBe(1);
   });
 });
+
+describe("removing all encrypted messages while another tab holds the database", () => {
+  function blockingFactory(succeedAfterBlock: boolean): IDBFactory {
+    return {
+      deleteDatabase: () => {
+        const req = {} as IDBOpenDBRequest;
+        setTimeout(() => {
+          req.onblocked?.({} as IDBVersionChangeEvent);
+          if (succeedAfterBlock) {
+            setTimeout(() => req.onsuccess?.({} as Event), 100);
+          }
+        }, 0);
+        return req;
+      },
+    } as unknown as IDBFactory;
+  }
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it("fails instead of reporting success while the delete stays blocked", async () => {
+    jest.useFakeTimers();
+    const removal = removeAllE2eeLocalData(blockingFactory(false));
+    const outcome = removal.then(
+      () => "removed",
+      () => "failed"
+    );
+    await jest.advanceTimersByTimeAsync(5000);
+    await expect(outcome).resolves.toBe("failed");
+  });
+
+  it("succeeds once the other tab lets the delete finish", async () => {
+    jest.useFakeTimers();
+    const removal = removeAllE2eeLocalData(blockingFactory(true));
+    await jest.advanceTimersByTimeAsync(200);
+    await expect(removal).resolves.toBeUndefined();
+  });
+});
