@@ -112,6 +112,13 @@ export interface StagingE2eeSession {
    * grant it also enrolled this browser for encrypted messages.
    */
   signInMessage: string | null;
+  /**
+   * Whether the wallet already had a profile when it signed in. A combined
+   * sign-in grant (NC8) enrolls only such a wallet: a new wallet has no
+   * profile to hold the key yet, so the app drops it and encrypted messages
+   * ask for their own grant once the profile exists.
+   */
+  hadProfileAtSignIn: boolean;
   close(): Promise<void>;
 }
 
@@ -238,6 +245,7 @@ export async function openStagingSession(
       productionWrites,
       droppedWrites,
       signInMessage: null,
+      hadProfileAtSignIn: false,
       close: () => context.close(),
     };
   } catch (error) {
@@ -309,6 +317,7 @@ async function dismissCookieBanner(page: Page) {
  */
 export async function signInThroughWalletModal(session: StagingE2eeSession) {
   const { page, wallet } = session;
+  session.hadProfileAtSignIn = Boolean(session.user.profileId);
   await gotoStaging(page, "/");
   await dismissCookieBanner(page);
 
@@ -590,9 +599,17 @@ export async function expectEnrollmentCard(session: StagingE2eeSession) {
 const COMBINED_GRANT_RESOURCE = "- urn:6529:mls-device-grant:v1:";
 
 /** NC8: the sign-in challenge also granted an encrypted-messages key. */
-export const signedInWithCombinedGrant = (
+const signedInWithCombinedGrant = (session: StagingE2eeSession): boolean =>
+  session.signInMessage?.includes(COMBINED_GRANT_RESOURCE) === true;
+
+/**
+ * NC8: the combined sign-in enrolled this browser. That takes a wallet that
+ * already had a profile; a new wallet's key is dropped at sign-in
+ * (adoptLoginE2eeDevice), so it enrolls with its own grant prompt instead.
+ */
+export const enrolledByCombinedSignIn = (
   session: StagingE2eeSession
-): boolean => session.signInMessage?.includes(COMBINED_GRANT_RESOURCE) === true;
+): boolean => session.hadProfileAtSignIn && signedInWithCombinedGrant(session);
 
 /**
  * NC8: a combined sign-in already enrolled this device. Encrypted messages
@@ -637,7 +654,7 @@ async function expectEnrolledBySignIn(session: StagingE2eeSession) {
  * registered with the delivery service.
  */
 export async function enrollDevice(session: StagingE2eeSession) {
-  if (signedInWithCombinedGrant(session)) {
+  if (enrolledByCombinedSignIn(session)) {
     await expectEnrolledBySignIn(session);
     return;
   }
@@ -689,18 +706,37 @@ async function enrollWithGrantPrompt(session: StagingE2eeSession) {
   expect(body.grant?.wallet?.toLowerCase()).toBe(wallet.address.toLowerCase());
 }
 
+interface PrepareSessionOptions {
+  /**
+   * After creating a new user's profile, sign in again on a fresh device,
+   * as a returning user does. That sign-in must carry the combined grant
+   * (NC8), which enrolls the device with no second signature.
+   */
+  readonly signInAgainWithProfile?: boolean;
+}
+
 /** Signs in, creates the throwaway profile when needed, then enrolls. */
 export async function prepareEnrolledSession(
   browser: Browser,
   testInfo: TestInfo,
   user: StagingE2eeUser,
-  label: string
+  label: string,
+  options: PrepareSessionOptions = {}
 ): Promise<StagingE2eeSession> {
-  const session = await openStagingSession(browser, testInfo, user, label);
+  let session = await openStagingSession(browser, testInfo, user, label);
   try {
     await signInThroughWalletModal(session);
     if (!user.profileId) {
       await createThrowawayProfile(session);
+      if (options.signInAgainWithProfile) {
+        await session.close();
+        session = await openStagingSession(browser, testInfo, user, label);
+        await signInThroughWalletModal(session);
+        expect(
+          enrolledByCombinedSignIn(session),
+          `${label}: a sign-in with a profile must carry the combined encrypted-messages grant`
+        ).toBe(true);
+      }
     }
     await enrollDevice(session);
     return session;
