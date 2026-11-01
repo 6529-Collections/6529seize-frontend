@@ -46,6 +46,9 @@ const PROFILE_FEED_DESCRIPTION =
 const APP_SECTIONS_LABEL =
   englishMessages["wave.navigation.appSections"] ?? "App sections";
 const PROFILE_FEED_TITLE = "Latest From Profile Waves";
+// A feed card's own open control; quoted drops nest their own buttons.
+const FEED_POST_BUTTON_SELECTOR =
+  '[role="button"][tabindex="0"]:not([role="button"] *)';
 const EMPTY_COMPETITION_ACTIVITY =
   englishMessages["competitions.emptyResource"] ?? "Nothing to show yet.";
 
@@ -1118,7 +1121,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const profileFeed = getProfileFeed(page);
     const feedPostButtons = profileFeed
       .getByRole("article")
-      .locator('[role="button"][tabindex="0"]');
+      .locator(FEED_POST_BUTTON_SELECTOR);
     await expect(feedPostButtons.first()).toBeVisible({ timeout: 15000 });
     const feedScrollOffset = await profileFeed.evaluate((element) => {
       const maxScrollOffset = element.scrollHeight - element.clientHeight;
@@ -1128,29 +1131,48 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     });
     expect(feedScrollOffset).toBeGreaterThan(0);
 
-    const visibleFeedPostIndex = await feedPostButtons.evaluateAll(
-      (buttons) => {
-        const feed = buttons[0]?.closest("section");
-        if (!feed) {
-          return -1;
-        }
-
-        const feedRect = feed.getBoundingClientRect();
-        return buttons.findIndex((button) => {
-          const rect = button.getBoundingClientRect();
-          return rect.bottom > feedRect.top && rect.top < feedRect.bottom;
-        });
+    // Masonry cells mount, unmount, and settle while the feed scrolls, so a
+    // DOM index can name a different post by the time it is focused. Lock the
+    // visible post by drop identity, whatever its media or link content.
+    const visibleFeedPostDrop = await feedPostButtons.evaluateAll((buttons) => {
+      const feed = buttons[0]?.closest("section");
+      if (!feed) {
+        return null;
       }
-    );
-    expect(visibleFeedPostIndex).toBeGreaterThanOrEqual(0);
-    const visibleFeedPost = feedPostButtons.nth(visibleFeedPostIndex);
+
+      const feedRect = feed.getBoundingClientRect();
+      const visibleButton = buttons.find((button) => {
+        const rect = button.getBoundingClientRect();
+        return rect.bottom > feedRect.top && rect.top < feedRect.bottom;
+      });
+      const drop = visibleButton
+        ?.closest("article")
+        ?.querySelector<HTMLElement>("[data-wave-drop-id][data-serial-no]");
+      return drop
+        ? {
+            id: drop.dataset["waveDropId"] ?? "",
+            serialNo: drop.dataset["serialNo"] ?? "",
+          }
+        : null;
+    });
+    expect(visibleFeedPostDrop?.id).toBeTruthy();
+    expect(visibleFeedPostDrop?.serialNo).toMatch(/^\d+$/);
+    const visibleFeedPost = profileFeed
+      .getByRole("article")
+      .filter({
+        has: page.locator(
+          `[data-wave-drop-id="${visibleFeedPostDrop?.id ?? ""}"]`
+        ),
+      })
+      .locator(FEED_POST_BUTTON_SELECTOR);
     await visibleFeedPost.focus();
+    await expect(visibleFeedPost).toBeFocused();
     await visibleFeedPost.press("Enter");
     await expectUrlState(
       page,
       (url) =>
         /^\/waves\/[0-9a-f-]{36}$/i.test(url.pathname) &&
-        Boolean(url.searchParams.get("serialNo"))
+        url.searchParams.get("serialNo") === visibleFeedPostDrop?.serialNo
     );
 
     await page.goBack();
