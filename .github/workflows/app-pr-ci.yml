@@ -345,7 +345,7 @@ jobs:
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ${{ matrix.runner }}
     # The complete native pack needs room for its dev-server bootstrap and tests.
-    timeout-minutes: ${{ (matrix.lane == 'playwright-native-competition' || matrix.lane == 'playwright-smoke') && 35 || 20 }}
+    timeout-minutes: ${{ matrix.lane == 'playwright-native-competition' && 30 || 20 }}
     permissions:
       contents: read
       issues: read
@@ -418,41 +418,12 @@ jobs:
           SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 ci
 
-      # TEMP A/B for the Memes RSC stall under the readonly guard; revert before merge.
       - name: Run small Playwright smoke pack
         if: matrix.lane == 'playwright-smoke'
         env:
           NEXT_DEV_DIST_DIR: ".next-playwright-smoke"
-          PLAYWRIGHT_SKIP_WEB_SERVER: "1"
-        run: |
-          set +e
-          ./bin/6529 run dev > dev-server.log 2>&1 &
-          node -e '
-            const deadline = Date.now() + 600000;
-            (async function wait() {
-              try {
-                const response = await fetch("http://localhost:3001/the-memes");
-                if (response.ok) return console.log("dev server warm", response.status);
-              } catch {}
-              if (Date.now() > deadline) process.exit(1);
-              setTimeout(wait, 3000);
-            })();
-          '
-          # Whole smoke pack per arm: the stall needs the pack's earlier tests.
-          run_arm() {
-            PLAYWRIGHT_READONLY="$2" ./bin/6529 exec playwright test tests/home/home.spec.ts \
-              tests/pages/about.spec.ts tests/pages/the-memes.spec.ts --grep @smoke \
-              --project=web-desktop-chromium --retries=0 --workers=1 --reporter=list > "ab-$1.log" 2>&1
-            line="AB $1 readonly=$2 full-pack: volume-stalls=$(grep -c 'Expected pattern: /sort=volume_days_7/' "ab-$1.log") url-stalls=$(grep -c 'Expected pattern: /' "ab-$1.log") | $(grep -oE '[0-9]+ (failed|passed|flaky|skipped|did not run)' "ab-$1.log" | tr '\n' ' ')"
-            echo "$line"
-            echo "$line" >> "$GITHUB_STEP_SUMMARY"
-            grep -E "✘" "ab-$1.log" | head -10
-          }
-          run_arm off 0
-          run_arm on 1
-          grep -hE "Expected pattern|Received string" ab-*.log | head -20
-          echo "A/B complete; failing on purpose so the result is reported."
-          exit 1
+          PLAYWRIGHT_READONLY: "1"
+        run: ./bin/6529 run test:e2e:smoke
 
       - name: Run Collect public browser pack
         if: matrix.lane == 'playwright-smoke' && needs.plan.outputs.playwright_collect_required == 'true'
