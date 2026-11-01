@@ -577,7 +577,7 @@ function getMessageRowClassName(
   pending: boolean,
   appear: boolean
 ): string {
-  return `tw-group tw-relative tw-flex tw-gap-3 tw-px-4 focus:tw-bg-iron-900/60 focus:tw-outline-none desktop-hover:hover:tw-bg-iron-950 ${
+  return `tw-group tw-relative tw-flex tw-gap-3 tw-px-4 focus:tw-bg-iron-900/60 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-950 ${
     compact ? "tw-py-0.5" : "tw-pb-0.5 tw-pt-3"
   } ${pending ? "tw-opacity-70" : ""} ${
     appear ? "motion-safe:tw-animate-sidebar-account-menu-in" : ""
