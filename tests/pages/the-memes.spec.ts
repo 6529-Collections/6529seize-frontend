@@ -96,13 +96,98 @@ test.describe("The Memes Page @smoke @medium @large", () => {
     await expect(page).toHaveURL(/sort=edition_size/);
     await expect(edition).toBeFocused();
 
+    // TEMP diagnostics for the Playwright 1.64.1 RSC hang; reverted before merge.
+    const diagStart = Date.now();
+    const diagLog: string[] = [];
+    const diagNote = (line: string) =>
+      diagLog.push(`${Date.now() - diagStart}ms ${line}`);
+    let diagVolumeRequest: import("@playwright/test").Request | undefined;
+    page.on("request", (request) => {
+      if (!request.url().includes("_rsc=")) return;
+      if (request.url().includes("volume_days_7")) diagVolumeRequest = request;
+      diagNote(`request ${request.url()}`);
+    });
+    page.on("response", (response) => {
+      if (response.url().includes("_rsc="))
+        diagNote(`response ${response.status()} ${response.url()}`);
+    });
+    page.on("requestfinished", (request) => {
+      if (request.url().includes("_rsc="))
+        diagNote(`finished ${request.url()}`);
+    });
+    page.on("requestfailed", (request) => {
+      if (request.url().includes("_rsc="))
+        diagNote(`failed ${request.failure()?.errorText} ${request.url()}`);
+    });
+    page.on("websocket", (socket) => {
+      diagNote(`ws open ${socket.url()}`);
+      socket.on("close", () => diagNote(`ws close ${socket.url()}`));
+    });
+    page.on("console", (message) =>
+      diagNote(`console ${message.type()} ${message.text().slice(0, 200)}`)
+    );
+    page.on("pageerror", (error) =>
+      diagNote(`pageerror ${error.message.slice(0, 200)}`)
+    );
+
     await volume.press("Enter");
     await page.getByRole("menuitem", { name: "7 Days", exact: true }).click();
     const selectedVolume = page.getByRole("button", {
       name: "Volume: 7 Days",
       exact: true,
     });
-    await expect(page).toHaveURL(/sort=volume_days_7/);
+    try {
+      await expect(page).toHaveURL(/sort=volume_days_7/);
+    } catch (error) {
+      if (diagVolumeRequest) {
+        const headers = await diagVolumeRequest.allHeaders();
+        const nodeStart = Date.now();
+        const nodeResult = await page.request
+          .get(diagVolumeRequest.url(), { headers, timeout: 20_000 })
+          .then(
+            async (response) =>
+              `${response.status()} ${(await response.body()).length}B`,
+            (nodeError: Error) => `ERR ${nodeError.message.slice(0, 160)}`
+          );
+        diagNote(`node replay ${nodeResult} in ${Date.now() - nodeStart}ms`);
+        const pageResult = await page
+          .evaluate(
+            async ({ url, requestHeaders }) => {
+              const started = performance.now();
+              const controller = new AbortController();
+              const timer = setTimeout(() => controller.abort(), 20_000);
+              try {
+                const response = await fetch(url, {
+                  headers: requestHeaders,
+                  signal: controller.signal,
+                });
+                const body = await response.text();
+                return `${response.status} ${body.length}B in ${Math.round(performance.now() - started)}ms`;
+              } catch (fetchError) {
+                return `ERR ${String(fetchError).slice(0, 160)} after ${Math.round(performance.now() - started)}ms`;
+              } finally {
+                clearTimeout(timer);
+              }
+            },
+            {
+              url: diagVolumeRequest.url(),
+              requestHeaders: Object.fromEntries(
+                Object.entries(headers).filter(
+                  ([name]) => !name.startsWith(":") && name !== "cookie"
+                )
+              ),
+            }
+          )
+          .catch(
+            (evalError: Error) => `ERR ${evalError.message.slice(0, 160)}`
+          );
+        diagNote(`page replay ${pageResult}`);
+      } else {
+        diagNote("no volume RSC request observed");
+      }
+      console.log(`[rsc-diagnostics]\n${diagLog.join("\n")}`);
+      throw error;
+    }
     await expect(selectedVolume).toHaveAttribute("aria-pressed", "true");
     await expect(selectedVolume).toHaveAttribute("aria-expanded", "false");
     for (const width of [390, 1024, 1440]) {
