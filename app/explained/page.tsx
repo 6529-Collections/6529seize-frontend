@@ -17,7 +17,7 @@ import { ht } from "./hub/copy";
 import HubChapters from "./hub/HubChapters";
 import HubLoop from "./hub/HubLoop";
 import HubPaths from "./hub/HubPaths";
-import { Corrections, HubOpener, HubSources } from "./hub/HubSections";
+import { HubOpener, HubSources } from "./hub/HubSections";
 import ReadingGuide from "./hub/ReadingGuide";
 
 /**
@@ -66,7 +66,6 @@ export default async function ExplainedHubPage({
         <HubChapters book={book} locale={locale} />
         <Cc0Answer locale={locale} />
         <ReadingGuide locale={locale} />
-        <Corrections locale={locale} />
         <HubSources book={book} locale={locale} />
       </article>
     </ExplainedShell>

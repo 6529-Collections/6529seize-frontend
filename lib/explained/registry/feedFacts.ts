@@ -51,6 +51,18 @@ function latestHash(
   });
 }
 
+/** An Arweave upload's transaction id, from the feed's "arweave:<id>". */
+function latestText(
+  pick: (inputs: FactInputs) => string | null | undefined
+): FactDef<string> {
+  return defineFact<string>({
+    format: "text",
+    refresh: FEED_REFRESH,
+    source: latestSource,
+    value: (inputs) => pick(inputs)?.replace(/^arweave:/, "") ?? undefined,
+  });
+}
+
 export interface DaySummary {
   readonly cycle: number;
   readonly date: string;
@@ -292,6 +304,14 @@ export const FEED_FACTS = {
     (inputs) =>
       latest(inputs)?.sources?.live?.identity?.sha256 ??
       latest(inputs)?.implementations.live?.sha256
+  ),
+  // 6529.io's two signed uploads of the day on Arweave (identities, then
+  // wallets), by transaction id, so a page can link them.
+  "tdh.latest.liveUpload": latestText(
+    (inputs) => latest(inputs)?.sources?.live?.identity?.source
+  ),
+  "tdh.latest.liveWalletUpload": latestText(
+    (inputs) => latest(inputs)?.sources?.live?.wallet?.source
   ),
   "tdh.latest.builds.rust.commit": defineFact<string>({
     format: "commit",

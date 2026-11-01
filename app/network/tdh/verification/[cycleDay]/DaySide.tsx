@@ -132,7 +132,43 @@ function TwoTotals({
   );
 }
 
-function OwnTdh({ locale }: { readonly locale: SupportedLocale }) {
+/** Where 6529.io's signed uploads live: one Arweave transaction each. */
+const ARWEAVE = "https://arweave.net/";
+
+/** A link to one of 6529.io's uploads of the day, by its Arweave id. */
+export function UploadLink({
+  day,
+  field,
+  label,
+}: {
+  readonly day: DayView;
+  readonly field: "liveUpload" | "liveWalletUpload";
+  readonly label: string;
+}) {
+  const id = day.text(field);
+  if (id === null) {
+    return <>{label}</>;
+  }
+  return (
+    <a
+      className={EX_LINK}
+      href={`${ARWEAVE}${id}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      data-fact={day.id(field)}
+    >
+      {label}
+    </a>
+  );
+}
+
+function OwnTdh({
+  day,
+  locale,
+}: {
+  readonly day: DayView;
+  readonly locale: SupportedLocale;
+}) {
   return (
     <div className="tw-rounded-lg tw-border tw-border-l-[3px] tw-border-solid tw-border-iron-700 tw-border-l-primary-400 tw-bg-primary-400/[0.04] tw-px-5 tw-py-[18px]">
       <span
@@ -151,6 +187,20 @@ function OwnTdh({ locale }: { readonly locale: SupportedLocale }) {
             <Link className={EX_LINK} href="/network/tdh/implementations#roots">
               {pt(locale, "explained.tdh.day.own.pin")}
             </Link>
+          ),
+          identities: (
+            <UploadLink
+              day={day}
+              field="liveUpload"
+              label={pt(locale, "explained.tdh.day.own.identities")}
+            />
+          ),
+          wallets: (
+            <UploadLink
+              day={day}
+              field="liveWalletUpload"
+              label={pt(locale, "explained.tdh.day.own.wallets")}
+            />
           ),
         })}
       </p>
@@ -177,7 +227,7 @@ export function DaySide({
         <Glance day={day} cycle={cycle} locale={locale} />
       </div>
       <TwoTotals book={book} locale={locale} />
-      <OwnTdh locale={locale} />
+      <OwnTdh day={day} locale={locale} />
     </aside>
   );
 }
@@ -235,6 +285,13 @@ function buildRows(day: DayView, locale: SupportedLocale): BuildRow[] {
       binaryLabel: "explained.tdh.day.builds.upload",
       binary: rich(locale, "explained.tdh.day.builds.liveUpload", {
         hash: hashCell(day.fact("liveSha"), locale),
+        link: (
+          <UploadLink
+            day={day}
+            field="liveUpload"
+            label={pt(locale, "explained.tdh.day.builds.liveOpen")}
+          />
+        ),
       }),
       run: none,
     },

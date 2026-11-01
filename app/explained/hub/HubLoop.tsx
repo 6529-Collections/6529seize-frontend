@@ -7,7 +7,8 @@ import LoopAtlas, {
   type AtlasStep,
 } from "@/components/explained/shell/LoopAtlas";
 import { chapterById } from "@/components/explained/shell/chapters";
-import { EX_BUTTON } from "@/components/explained/tokens";
+import { EX_BUTTON, EX_LINK, EX_TEXT } from "@/components/explained/tokens";
+import { MEME_ART } from "@/app/network/tdh/overview/art";
 import type { SupportedLocale } from "@/i18n/locales";
 import { fmt, type FactBook, type FactId } from "@/lib/explained/facts";
 import CheckableToday from "./CheckableToday";
@@ -46,6 +47,7 @@ function stations(book: FactBook, locale: SupportedLocale): AtlasStation[] {
       sub: ht(locale, "station.holdSub"),
       num: ht(locale, "station.holdNum", { count: f("tdh.latest.wallets") }),
       fact: "tdh.latest.wallets",
+      chapter: tdh,
       say: ht(locale, "station.holdSay"),
     },
     {
@@ -135,6 +137,27 @@ function stationActions(locale: SupportedLocale): Record<string, ReactNode> {
 /** "Follow one copy" opens on the copy being held: the Time station. */
 const HELD_STEP = 2;
 
+/** The copy that travels the loop: Meme #2, one of the CC0 cards below. */
+const TOKEN_ART = MEME_ART[2].src;
+
+/** Under the station card: what Verify at the centre shows, and what it does not. */
+function VerifyNote({ locale }: { readonly locale: SupportedLocale }) {
+  return (
+    <div
+      className="tw-rounded-xl tw-border tw-border-dashed tw-border-iron-800 tw-p-5"
+      data-verify-note=""
+    >
+      <span className={EX_TEXT.label}>{ht(locale, "verifyNote.label")}</span>
+      <p className="tw-m-0 tw-mt-2 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+        {ht(locale, "verifyNote.body")}{" "}
+        <Link className={EX_LINK} href="/network/tdh/verification">
+          {ht(locale, "verifyNote.link")}
+        </Link>
+      </p>
+    </div>
+  );
+}
+
 export default function HubLoop({
   book,
   locale,
@@ -155,6 +178,9 @@ export default function HubLoop({
           fact: "tdh.latest.agree.live.identities.equal",
         }}
         actions={stationActions(locale)}
+        note={<VerifyNote locale={locale} />}
+        tokenArt={TOKEN_ART}
+        autoplay
         aside={<CheckableToday book={book} locale={locale} />}
       />
     </div>

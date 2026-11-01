@@ -12,6 +12,7 @@ import Mark from "@/components/explained/marks/Mark";
 import Track from "@/components/explained/marks/Track";
 import ExplainedShell from "@/components/explained/shell/ExplainedShell";
 import HowWeKnow from "@/components/explained/shell/HowWeKnow";
+import PageContents from "@/components/explained/shell/PageContents";
 import { EX_TEXT } from "@/components/explained/tokens";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -123,6 +124,14 @@ export default async function SpecificationPage({
           title={m("explained.tdh.spec.title")}
           lede={m("explained.tdh.spec.lede")}
         />
+        <PageContents
+          locale={locale}
+          items={SECTIONS.map(([id, title], index) => ({
+            href: `#${id}`,
+            no: String(index + 1),
+            title: s(title, { count: p.f("spec.deviations.inForce") }),
+          }))}
+        />
 
         <div className="tw-mt-10 tw-grid tw-grid-cols-1 tw-items-start tw-gap-10 lg:tw-mt-12 lg:tw-grid-cols-[minmax(0,1fr)_360px]">
           <div>
@@ -182,7 +191,10 @@ export default async function SpecificationPage({
                   {
                     key: "vectors",
                     term: m("explained.tdh.spec.version.vectors"),
-                    value: p.v("rules.vectors"),
+                    value: m("explained.tdh.spec.version.vectorsValue", {
+                      count: p.v("rules.vectors"),
+                      public: p.v("vectors.public"),
+                    }),
                   },
                   {
                     key: "source",
@@ -204,6 +216,13 @@ export default async function SpecificationPage({
               />
               <Track
                 maturity="live"
+                locale={locale}
+                size="sm"
+                refText={s("explained.tdh.spec.version.liveRule")}
+              />
+              {/* How we know it runs as written: tested, a separate question. */}
+              <Mark
+                kind="tested"
                 locale={locale}
                 size="sm"
                 refText={s(

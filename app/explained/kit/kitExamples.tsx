@@ -241,7 +241,7 @@ export function exampleCopy(book: FactBook, locale: SupportedLocale) {
     },
     {
       what: "Signed by validators",
-      detail: `The validator software is at ${f("site.validator.version")}; nothing signs yet.`,
+      detail: `The validator software is at ${f("site.validator.version")}; so far only 6529's own validators sign, in testing.`,
       marks: [
         { kind: "decided", refText: "D112" },
         { maturity: "built", refText: f("site.validator.version") },

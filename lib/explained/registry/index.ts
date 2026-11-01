@@ -29,7 +29,7 @@ export type StaticFactId = keyof typeof FACT_REGISTRY;
 
 /** Facts keyed by a card, a decision, a published day or a manifest section. */
 export type FactFamilyId =
-  | `meme.${number}.${"minted" | "edition" | "season" | "rate" | "firstMint"}`
+  | `meme.${number}.${"minted" | "edition" | "season" | "rate" | "firstMint" | "art"}`
   | `decision.D${number}`
   | `tdh.day.${number}.${DayField}`
   | `manifest.section.${string}`;

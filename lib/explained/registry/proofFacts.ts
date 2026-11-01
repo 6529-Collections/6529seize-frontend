@@ -26,14 +26,19 @@ const KIND: Record<SourceKey, "site" | "spec" | "decision"> = {
   p52: "spec",
   runLog: "decision",
   sp1Update: "site",
+  sp1Cve: "site",
 };
 
 function proofSource(key: SourceKey) {
-  const entry: { readonly ref: string; readonly writtenAt?: string } =
-    proofs.sources[key];
+  const entry: {
+    readonly ref: string;
+    readonly writtenAt?: string;
+    readonly url?: string;
+  } = proofs.sources[key];
   return () =>
     source(KIND[key], entry.ref, {
       writtenAt: entry.writtenAt,
+      url: entry.url,
     });
 }
 
@@ -73,6 +78,11 @@ export const PROOF_FACTS = {
   "proofs.statement.wordBytes": count("p53", proofs.statement.wordBytes),
 
   "proofs.day.date": fact("programA", "day", proofs.day.date),
+  // The cycle is the statement's third word (P53 §4.6: cycleDay).
+  "proofs.day.cycle": count(
+    "programA",
+    Number.parseInt(proofs.day.wordsA[2] ?? "", 16)
+  ),
   "proofs.day.ruleVersion": fact("contracts", "text", proofs.day.ruleVersion),
   "proofs.day.wordsA": fact("programA", "list", proofs.day.wordsA, {
     evidence: "proved",
@@ -212,17 +222,13 @@ export const PROOF_FACTS = {
     proofs.contract.retiredRuleId
   ),
 
-  "proofs.sp1Advisory.id": fact("contracts", "text", proofs.sp1Advisory.id),
+  "proofs.sp1Advisory.id": fact("sp1Cve", "text", proofs.sp1Advisory.id),
   "proofs.sp1Advisory.published": fact(
-    "contracts",
+    "sp1Cve",
     "day",
     proofs.sp1Advisory.published
   ),
-  "proofs.sp1Advisory.fixed": fact(
-    "contracts",
-    "text",
-    proofs.sp1Advisory.fixed
-  ),
+  "proofs.sp1Advisory.fixed": fact("sp1Cve", "text", proofs.sp1Advisory.fixed),
   "proofs.sp1Advisory.earlier": fact(
     "sp1Update",
     "day",

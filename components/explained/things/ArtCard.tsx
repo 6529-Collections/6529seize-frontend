@@ -7,9 +7,11 @@ import { EX_ELEVATION } from "../tokens";
 /**
  * A card (EXPLAINED.md §4.2, §6.5): a portrait at the art's own ratio
  * (542:801) with the art inside, its alt text and a caption with its
- * number, name, season and licence. When the scaled art cannot load, the
- * original is tried; when neither can, an empty dashed frame with its
- * number. The art is the only colour in the art.
+ * number, name, season and licence. The art is served through the site's
+ * own image route, so a reader, a crawler or a link preview gets it even
+ * where 6529.io's image host turns their browser away. When the scaled art
+ * cannot load, the original is tried; when neither can, an empty dashed
+ * frame with its number. The art is the only colour in the art.
  */
 const ART_RATIO = "542 / 801";
 
@@ -52,7 +54,6 @@ export default function ArtCard({
             sizes={sizes}
             className="tw-object-cover"
             priority={priority}
-            unoptimized
             onError={() =>
               setAttempt((value) => (value === 0 && fallbackSrc ? 1 : 2))
             }

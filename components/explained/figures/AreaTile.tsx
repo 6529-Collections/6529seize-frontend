@@ -3,9 +3,10 @@
 import type { SupportedLocale } from "@/i18n/locales";
 import { formatCents, formatCount } from "@/lib/explained/format";
 import { kt } from "../i18n";
-import { EX_HEX } from "../tokens";
+import { EX_HEX, EX_MOTION } from "../tokens";
 import { Hatch, Label, SvgFrame, Tile } from "./svg";
 import { useMeasuredWidth } from "./useMeasuredWidth";
+import { useTween } from "./useTween";
 
 /**
  * The signature (EXPLAINED.md §4.1): one copy's TDH as an area. Width is
@@ -54,12 +55,16 @@ export default function AreaTile({
   const innerH = HEIGHT - PAD.top - PAD.bottom;
   const axis = dayAxisFor(Math.max(days, lostDays ?? 0));
   const rate = rateCents / 100;
+  // What is drawn moves to each new value; the labels say the value itself.
+  const drawnDays = useTween(days);
+  const drawnRate = useTween(rate);
+  const drawnBeta = useTween(betaCents);
   // The scale's top: the rate axis's 14, or more when rate × boost needs it,
   // so the band is never clipped and keeps its true height.
   const top = Math.max(MAX_RATE, ((rate * betaCents) / 100) * 1.06);
-  const tileW = Math.max(0, (days / axis) * innerW);
-  const tileH = (rate / top) * innerH;
-  const bandH = (tileH * (betaCents - 100)) / 100;
+  const tileW = Math.max(0, (drawnDays / axis) * innerW);
+  const tileH = (drawnRate / top) * innerH;
+  const bandH = (tileH * (drawnBeta - 100)) / 100;
   const baseY = PAD.top + innerH;
   const label = kt(locale, "explained.kit.area.aria", {
     days: formatCount(locale, days),
@@ -77,6 +82,8 @@ export default function AreaTile({
     : 0;
   const lostW =
     lostDays !== undefined && lostDays > 0 ? (lostDays / axis) * innerW : 0;
+  // A sold copy's area fades in as the copy's own area shrinks away.
+  const lostOpacity = useTween(lostW > 0 ? 1 : 0, EX_MOTION.liveMs);
 
   let tdhLabel = null;
   if (tileW > 0) {
@@ -137,7 +144,7 @@ export default function AreaTile({
               stroke={EX_HEX.ink4}
               strokeDasharray="3 4"
             />
-            <Label x={PAD.left + innerW} y={referenceY - 6} anchor="end">
+            <Label x={PAD.left + 4} y={referenceY - 6} anchor="start">
               {kt(locale, "explained.kit.area.reference", {
                 copies: formatCount(locale, reference.copies),
                 rate: formatCents(locale, reference.rateCents / 100),
@@ -170,7 +177,7 @@ export default function AreaTile({
           );
         })}
         {lostW > 0 && (
-          <g data-area-lost="">
+          <g data-area-lost="" opacity={lostOpacity}>
             <rect
               x={PAD.left}
               y={baseY - tileH - bandH}
@@ -195,7 +202,7 @@ export default function AreaTile({
             </Label>
           </g>
         )}
-        {tileW > 0 ? (
+        {tileW > 0.5 ? (
           <Tile
             x={PAD.left}
             y={baseY - tileH}

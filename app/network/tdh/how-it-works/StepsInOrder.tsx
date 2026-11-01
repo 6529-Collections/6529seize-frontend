@@ -54,7 +54,12 @@ const STEPS: readonly Step[] = [
     id: "rates",
     href: "#part-b",
     sections: "§5.3, §8.1",
-    rule: () => "rate = HALFUP(B64(B64(H ÷ E) × 100))",
+    rule: (n) =>
+      [
+        "Meme:     RATE(H, E), RATE(n, d) = HALFUP(B64(B64(n ÷ d) × 100))",
+        `Gradient: RATE(H, G), at least ${n(R.gradient_rate_minimum)} cents`,
+        `NextGen:  RATE(H, Nc), c = token div ${n(R.nextgen_collection_divisor)}`,
+      ].join("\n"),
   },
   {
     id: "seasons",
@@ -164,14 +169,16 @@ function traceLine(
     identities: {},
     stacks: { days: n(t.days) },
     records: { base: n(t.base) },
-    boost: { beta: c(t.betaCents) },
-    final: { base: n(t.base), beta: c(t.betaCents), final: n(t.final) },
+    boost: { cents: n(t.betaCents), beta: c(t.betaCents) },
     totals: { final: n(t.final) },
   };
-  // The base is P26's notation with the trace's numbers in it: code, not
-  // copy, as the rules beside it are.
+  // The base and the final are P26's notation with the trace's numbers in
+  // them: code, not copy, as the rules beside them are. Beta is in cents.
   if (id === "base") {
     return `(${n(t.rateCents)} × ${n(t.days)} + 50) div 100 = ${n(t.base)}`;
+  }
+  if (id === "final") {
+    return `HALFUP(B64(${n(t.base)} × B64(${n(t.betaCents)} ÷ 100))) = ${n(t.final)}`;
   }
   const params = values[id];
   return params === undefined ? null : ht(locale, key, params);

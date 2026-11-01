@@ -137,10 +137,17 @@ describe("Explain my TDH", () => {
       screen.getByRole("button", { name: "A record found" })
     ).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByText("6,399 TDH")).toBeInTheDocument();
-    // A constructed record was never compared: no verdict sits on it.
+    // A constructed record was never compared: no verdict sits on it, only
+    // what a real record's box says, and that this one was never compared.
     expect(screen.queryByText("This record was included.")).toBeNull();
     expect(
-      screen.getByText(/For a real record, this line says whether/)
+      screen.getByText(/On a real record: .This record was included/)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/This example was never compared/)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/at the rates of the result dated/)
     ).toBeInTheDocument();
   });
 
@@ -351,7 +358,7 @@ describe("how we know, on the overview", () => {
     );
     const zk = container.querySelector('[data-rung="5"]');
     expect(zk).toHaveTextContent(
-      "Proof A, program A in SP1: proved the day of Oct 11 under tdh-v1.0, the rules' earlier version; mainnet's SP1 verifier accepts it in a read-only call."
+      "Proof A, program A in SP1: proved the day of Oct 11 under tdh-v1.0, the rules' earlier version, and mainnet's SP1 verifier accepts it in a read-only call. One day under retired rules does not move the blue line."
     );
     expect(zk).toHaveTextContent(
       "Proof B, program B in RISC Zero, written separately from A and from the Python reference: no mainnet day yet. Under TDH v1.4, programs A and B both proved one synthetic test cycle."

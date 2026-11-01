@@ -128,23 +128,92 @@ export default function SureHead({
             : m("explained.tdh.sure.src.bundled")}
         </li>
         <li>
-          {m("explained.tdh.sure.src.audited", {
-            audited: p.v("manifest.audited"),
-            proved: p.v("manifest.proved"),
-            kernel: p.v("manifest.shownFalse.kernel"),
-            tdh: p.v("manifest.audited.tdh"),
-            p53: p.v("manifest.audited.p53"),
-            provedTdh: p.v("manifest.proved.tdh"),
-            provedP53: p.v("manifest.proved.p53"),
-          })}
-        </li>
-        <li>
           {m("explained.tdh.sure.src.vectors", {
             passed: p.v("manifest.vectors.passed"),
             total: p.v("manifest.vectors.total"),
           })}
         </li>
       </ul>
+      <p className="tw-m-0 tw-mt-5 tw-max-w-[720px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
+        {m("explained.tdh.sure.score.terms")}
+      </p>
+      <SplitTable ctx={ctx} />
     </>
+  );
+}
+
+/**
+ * The counts by whose rules they are about: TDH's (P26) or the validators'
+ * (P53, a proposal). One small table instead of four ways of slicing the
+ * same numbers in a sentence.
+ */
+function SplitTable({ ctx }: { readonly ctx: SureContext }) {
+  const { m, p } = ctx;
+  const head =
+    "tw-border-0 tw-border-b tw-border-solid tw-border-iron-700 tw-py-2 tw-pr-4 tw-text-left tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-400 last:tw-pr-0";
+  const cell =
+    "tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-2.5 tw-pr-4 tw-text-[15px] tw-tabular-nums tw-text-iron-300 last:tw-pr-0";
+  const rows = [
+    {
+      id: "tdh",
+      name: m("explained.tdh.sure.split.tdh"),
+      proved: p.v("manifest.proved.tdh"),
+      shownFalse: p.v("manifest.shownFalse.tdh"),
+      audited: p.v("manifest.audited.tdh"),
+    },
+    {
+      id: "p53",
+      name: m("explained.tdh.sure.split.p53"),
+      proved: p.v("manifest.proved.p53"),
+      shownFalse: p.v("manifest.shownFalse.p53"),
+      audited: p.v("manifest.audited.p53"),
+    },
+    {
+      id: "all",
+      name: m("explained.tdh.sure.split.all"),
+      proved: p.v("manifest.proved"),
+      shownFalse: p.v("manifest.shownFalse"),
+      audited: p.v("manifest.audited"),
+    },
+  ];
+  return (
+    <div className="tw-mt-5 tw-max-w-[720px] tw-overflow-x-auto">
+      <table className="tw-w-full tw-border-collapse" data-split="">
+        <caption className="tw-sr-only">
+          {m("explained.tdh.sure.split.caption")}
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col" className={head}>
+              {m("explained.tdh.sure.split.about")}
+            </th>
+            <th scope="col" className={head}>
+              {m("explained.tdh.sure.split.proved")}
+            </th>
+            <th scope="col" className={head}>
+              {m("explained.tdh.sure.split.shownFalse")}
+            </th>
+            <th scope="col" className={head}>
+              {m("explained.tdh.sure.split.audited")}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.id} data-split-row={row.id}>
+              <th
+                scope="row"
+                className={`${cell} tw-font-semibold ${row.id === "all" ? "tw-text-iron-50" : "tw-text-iron-300"}`}
+              >
+                {row.name}
+              </th>
+              <td className={cell}>{row.proved}</td>
+              <td className={cell}>{row.shownFalse}</td>
+              <td className={cell}>{row.audited}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }

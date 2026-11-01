@@ -44,6 +44,7 @@ export default function WhereItStands({
               mark: "proved",
               text: rich(locale, k("is.pair"), {
                 cycle: facts.print("proofs.pairV14.cycle"),
+                real: facts.cycleDate("proofs.pairV14.cycle"),
                 words: facts.print("proofs.statement.words"),
                 date: facts.print("proofs.pairV14.provedOn"),
                 block: facts.print("proofs.pairV14.ethCallBlock"),

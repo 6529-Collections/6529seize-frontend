@@ -32,6 +32,7 @@ import {
   rates,
 } from "./specCode";
 import type { SpecContext } from "./specShared";
+import { ENGINE } from "@/lib/explained/engine";
 
 /**
  * The specification's rule sections, §1 to §8 (TDH-DESIGN.md §4.7, S1):
@@ -448,6 +449,38 @@ function Section7({ ctx }: { readonly ctx: SpecContext }) {
   );
 }
 
+/**
+ * §8.3's checkpoints for ADD, the extra-set bonus, from the engine: two
+ * sets, three, and where it stops growing.
+ */
+function addCheckpoints(locale: SpecContext["locale"]): string {
+  const add = (sets: number) => ENGINE.additionalSetsMicro(sets);
+  let saturated = 2;
+  const ceiling = add(SATURATION_PROBE);
+  while (saturated < SATURATION_PROBE && add(saturated) !== ceiling) {
+    saturated += 1;
+  }
+  const n = (value: number) => formatInteger(locale, value);
+  return [
+    `ADD(2) = ${n(add(2))}`,
+    `ADD(3) = ${n(add(3))}`,
+    `ADD(s) = ${n(ceiling)} for every s >= ${saturated}   # micro-units`,
+  ].join("\n");
+}
+
+/** Where ADD is surely saturated: far past the first set it stops at. */
+const SATURATION_PROBE = 200;
+
+/**
+ * §8.4's tie: base × beta / 100 is exactly a half in decimals, but B64(β /
+ * 100) lies just below it, so FINAL rounds down (P26 §8.1's binary64).
+ */
+const FINAL_TIE = { base: 25, beta: 114 } as const;
+
+function finalTie(): string {
+  return String(ENGINE.finalTdh(FINAL_TIE.base, FINAL_TIE.beta));
+}
+
 function Section8({ ctx }: { readonly ctx: SpecContext }) {
   const { m, s, p, book, locale, registry } = ctx;
   const trap = book.maybe<HalfCent>("engine.halfCent");
@@ -510,10 +543,33 @@ function Section8({ ctx }: { readonly ctx: SpecContext }) {
             label={s("explained.tdh.spec.s8-3.code")}
           />
         )}
+        <CodeBlock
+          className="tw-mt-3"
+          code={addCheckpoints(locale)}
+          label={s("explained.tdh.spec.s8-3.checkpoints")}
+        />
       </Sub>
       <Sub id="s8-4" no="8.4" title={m("explained.tdh.spec.s8-4.title")}>
         <span id="s8-5" className="tw-scroll-mt-24" />
         <Prose>{m("explained.tdh.spec.s8-4.body")}</Prose>
+        <Trap
+          className="tw-mt-5"
+          label={m("explained.tdh.spec.s8-4.trapLabel")}
+        >
+          {m("explained.tdh.spec.s8-4.trap", {
+            call: (
+              <CodeName>{`FINAL(${FINAL_TIE.base}, ${FINAL_TIE.beta})`}</CodeName>
+            ),
+            final: <CodeName>{finalTie()}</CodeName>,
+            decimal: (
+              <CodeName>
+                {String(
+                  Math.floor((FINAL_TIE.base * FINAL_TIE.beta + 50) / 100)
+                )}
+              </CodeName>
+            ),
+          })}
+        </Trap>
       </Sub>
       <Sub id="s8-6" no="8.6" title={m("explained.tdh.spec.s8-6.title")}>
         <Prose>{m("explained.tdh.spec.s8-6.body")}</Prose>

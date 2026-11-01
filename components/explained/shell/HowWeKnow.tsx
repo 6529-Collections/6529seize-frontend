@@ -25,6 +25,7 @@ export default function HowWeKnow({
   slug,
   reportHref = REPORT_HREF,
   correctionsHref = CORRECTIONS_HREF,
+  log,
 }: {
   readonly rows: readonly HowWeKnowRow[];
   readonly locale: SupportedLocale;
@@ -32,6 +33,8 @@ export default function HowWeKnow({
   readonly slug: string;
   readonly reportHref?: string;
   readonly correctionsHref?: string;
+  /** The corrections log itself, on the page that keeps it (the hub). */
+  readonly log?: ReactNode;
 }) {
   const heading = kt(locale, "explained.kit.hwk.title");
   // Rows fill whole lines: four as two pairs (four across on a wide
@@ -45,7 +48,7 @@ export default function HowWeKnow({
   return (
     <footer
       aria-label={heading}
-      className="tw-mt-[88px] tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pb-[72px] tw-pt-[30px] md:tw-mt-[140px] lg:tw-grid lg:tw-grid-cols-[192px_minmax(0,1fr)] lg:tw-gap-x-8"
+      className="tw-mt-[80px] tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pb-[72px] tw-pt-[30px] md:tw-mt-24 lg:tw-grid lg:tw-grid-cols-[192px_minmax(0,1fr)] lg:tw-gap-x-8"
       data-ex-hwk=""
     >
       <h2 className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-400">
@@ -74,6 +77,14 @@ export default function HowWeKnow({
           reportHref={reportHref}
           correctionsHref={correctionsHref}
         />
+        {log !== undefined && (
+          <p
+            id="corrections"
+            className="tw-m-0 tw-mt-6 tw-max-w-[660px] tw-scroll-mt-24 tw-text-sm tw-leading-[21px] tw-text-iron-400"
+          >
+            {log}
+          </p>
+        )}
       </div>
     </footer>
   );

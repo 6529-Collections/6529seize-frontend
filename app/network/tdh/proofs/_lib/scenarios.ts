@@ -53,6 +53,8 @@ interface Scenario {
    * design that requires it (Decided, D128).
    */
   readonly evidence: "tested" | "decided";
+  /** Program B's honest output differs: B is why the contract refuses. */
+  readonly secondDiffers?: boolean;
 }
 
 export const SCENARIOS: readonly Scenario[] = [
@@ -60,10 +62,23 @@ export const SCENARIOS: readonly Scenario[] = [
   { id: "log", stoppedBy: "program", line: "program", evidence: "tested" },
   { id: "blocks", stoppedBy: "contract", line: "anchors", evidence: "tested" },
   // Program B is the reason these two stop, but the contract is what
-  // refuses them: at its second check (outputs differ) and at its eighth
-  // (RISC Zero's verification of the same words).
-  { id: "bugA", stoppedBy: "contract", line: "outputs", evidence: "tested" },
-  { id: "flaw", stoppedBy: "contract", line: "proofs", evidence: "tested" },
+  // refuses them, at its second check: B's honest output differs. Past it,
+  // a forged pair would also need a valid RISC Zero proof of the same wrong
+  // words, the eighth check.
+  {
+    id: "bugA",
+    stoppedBy: "contract",
+    line: "outputs",
+    evidence: "tested",
+    secondDiffers: true,
+  },
+  {
+    id: "flaw",
+    stoppedBy: "contract",
+    line: "outputs",
+    evidence: "tested",
+    secondDiffers: true,
+  },
   { id: "skip", stoppedBy: "contract", line: "chaining", evidence: "tested" },
   { id: "rule", stoppedBy: "contract", line: "network", evidence: "tested" },
 ];
@@ -76,7 +91,7 @@ export function scenarioById(id: ScenarioId): Scenario {
   return found;
 }
 
-export type LayerState = "passed" | "stops" | "unreached" | "wrong";
+export type LayerState = "passed" | "differs" | "stops" | "unreached" | "wrong";
 
 /**
  * Each layer's state for a scenario: the layers before the stop let it
@@ -94,7 +109,10 @@ export function layerStates(
     if (broken) {
       states[layer] = layer === "recorded" ? "wrong" : "passed";
     } else if (index < stop) {
-      states[layer] = "passed";
+      states[layer] =
+        layer === "second" && scenario.secondDiffers === true
+          ? "differs"
+          : "passed";
     } else if (index === stop) {
       states[layer] = "stops";
     } else {

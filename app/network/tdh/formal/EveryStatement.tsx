@@ -30,7 +30,20 @@ function shortName(entry: StatementRow): string {
     : entry.id.split(".").slice(1).join(".");
 }
 
+/**
+ * The first netting rule's five counterexamples: the kernel checks their
+ * pairs; the TDH totals in their words come from running the model at
+ * `9cd101a` (PROOFS.md, "The first rule").
+ */
+const FIRST_RULE = /^1\.firstRule_/;
+const FIRST_RULE_TOTALS_AT = "9cd101a";
+
 function checkedBy(ctx: SureContext, entry: StatementRow): string {
+  if (entry.status === "counterexample" && FIRST_RULE.test(entry.id)) {
+    return ctx.s("explained.tdh.sure.check.kernelPairs", {
+      commit: FIRST_RULE_TOTALS_AT,
+    });
+  }
   if (entry.status === "proved") {
     return entry.axioms && entry.axioms.length > 0
       ? entry.axioms
@@ -55,9 +68,14 @@ function Entry({
   readonly factId: string;
 }) {
   const { s, locale } = ctx;
-  const where = entry.file
-    ? `${entry.file.split("/").pop() ?? entry.file}:${entry.line ?? ""}`
-    : "–";
+  const file = entry.file ? (entry.file.split("/").pop() ?? entry.file) : null;
+  let where = "–";
+  if (file !== null) {
+    where =
+      entry.line === null || entry.line === undefined
+        ? file
+        : `${file}:${entry.line}`;
+  }
   return (
     <li
       className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-py-3.5 first:tw-border-t-0"

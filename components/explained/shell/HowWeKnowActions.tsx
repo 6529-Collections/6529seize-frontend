@@ -34,6 +34,8 @@ export default function HowWeKnowActions({
 }) {
   const snapshot = useFactSnapshot();
   const [done, setDone] = useState<"markdown" | "cite" | null>(null);
+  // The citation, shown once copied, so it can be checked before pasting.
+  const [cited, setCited] = useState<string | null>(null);
 
   const copy = async (which: "markdown" | "cite", text: string) => {
     try {
@@ -50,15 +52,16 @@ export default function HowWeKnowActions({
     const page = root?.querySelector("[data-ex-article]") ?? root;
     if (page) void copy("markdown", pageToMarkdown(page, url()));
   };
-  const onCite = () =>
-    void copy(
-      "cite",
-      kt(locale, "explained.kit.hwk.citation", {
-        title,
-        url: url(),
-        date: formatUtcLongDay(locale, snapshot.asOf),
-      })
-    );
+  const onCite = () => {
+    // A title that ends a sentence already takes no second full stop.
+    const citation = kt(locale, "explained.kit.hwk.citation", {
+      title: title.replace(/[.\s]+$/, ""),
+      url: url(),
+      date: formatUtcLongDay(locale, snapshot.asOf),
+    });
+    setCited(citation);
+    void copy("cite", citation);
+  };
   const onJson = () => {
     const blob = new Blob([factsAsJson(snapshot)], {
       type: "application/json",
@@ -102,6 +105,14 @@ export default function HowWeKnowActions({
       <button type="button" className={ACTION} onClick={onJson}>
         {kt(locale, "explained.kit.hwk.sources")}
       </button>
+      {cited !== null && (
+        <p
+          className="tw-m-0 tw-w-full tw-font-mono tw-text-[13px] tw-leading-5 tw-text-iron-400 [overflow-wrap:anywhere]"
+          data-citation=""
+        >
+          {cited}
+        </p>
+      )}
     </div>
   );
 }

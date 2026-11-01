@@ -150,7 +150,9 @@ export const TERMS: readonly Term[] = [
   {
     id: "lean",
     also: ["theorem"],
-    status: { mark: "proved" },
+    // The theorems are proved; the model itself is a definition, which the
+    // vectors test against P26.
+    status: { mark: "tested", ref: "P26" },
     values: (p) => ({
       count: p.v("manifest.proved"),
       tdh: p.v("manifest.proved.tdh"),

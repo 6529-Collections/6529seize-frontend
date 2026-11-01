@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ExplainedShell from "@/components/explained/shell/ExplainedShell";
+import PageContents from "@/components/explained/shell/PageContents";
 import PrevNext from "@/components/explained/shell/PrevNext";
 import { chapterById } from "@/components/explained/shell/chapters";
 import { fill, kt } from "@/components/explained/i18n";
@@ -76,6 +77,24 @@ export default async function ProofsPage({
           chapterNumber={chapter.number ?? ""}
           pageNumber={here?.n ?? ""}
           pageTitle={title}
+        />
+        <PageContents
+          locale={locale}
+          items={(
+            [
+              ["#statement", "01", "s1.label"],
+              ["#made", "02", "s2.label"],
+              ["#two", "03", "s3.label"],
+              ["#contract", "04", "s4.label"],
+              ["#guarantees", "05", "s6.label"],
+              ["#status", "06", "s5.label"],
+              ["#trust", "07", "s7.label"],
+            ] as const
+          ).map(([href, no, key]) => ({
+            href,
+            no,
+            title: fill(locale, k(key)),
+          }))}
         />
         <Section
           id="statement"

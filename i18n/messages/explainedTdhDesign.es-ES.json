@@ -25,7 +25,7 @@
   "explained.tdh.design.protects.old": "Los registros antiguos no pueden ocupar el cuarto puesto: los vínculos de antes del {date} nunca forman un grupo de cuatro.",
   "explained.tdh.design.protects.keys": "Ninguna wallet se vuelve más segura. Cada wallet vinculada es una llave completa de tu perfil; cuatro wallets son cuatro llaves.",
   "explained.tdh.design.protects.manager": "Frente a un delegation manager que actúa para todas tus wallets: su llave por sí sola puede cambiar tu consolidación.",
-  "explained.tdh.design.protects.tested": "Cada regla candidata se comprobó exhaustivamente: todo lo que podría firmar un atacante con algunas de tus wallets, y todo orden de llegada de las transacciones de una wallet nueva. La alternativa más barata ahorraba dos transacciones, una sola vez. La regla de P26 se comprobó con el propio código de 6529.io en {graphs} grafos de vínculos aleatorios y en las filas reales.",
+  "explained.tdh.design.protects.tested": "Cada regla candidata se comprobó exhaustivamente para un grupo de hasta cuatro wallets: todo lo que podría firmar un atacante con una a tres de tus wallets, y todo orden de llegada de las transacciones de una wallet nueva. La alternativa más barata ahorraba dos transacciones, una sola vez. La regla de P26 se comprobó con el propio código de 6529.io en {graphs} grafos de vínculos aleatorios y en las filas reales. Son pruebas propias de 6529, no una auditoría externa.",
   "explained.tdh.design.hwk.rule": "La regla",
   "explained.tdh.design.hwk.ruleBody": "D136; P26 §6.2 y §6.3 (TDH v1.4) en {head}.",
   "explained.tdh.design.hwk.analysis": "El análisis",

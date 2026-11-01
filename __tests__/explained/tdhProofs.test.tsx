@@ -184,7 +184,13 @@ describe("what a proof guarantees", () => {
       const stop = LAYERS.indexOf(scenario.stoppedBy);
       LAYERS.forEach((layer, index) => {
         let expected = "unreached";
-        if (index < stop) expected = "passed";
+        if (index < stop) {
+          // Program B's honest output differs: B is why the contract refuses.
+          expected =
+            layer === "second" && scenario.secondDiffers === true
+              ? "differs"
+              : "passed";
+        }
         if (index === stop) expected = "stops";
         expect([scenario.id, layer, states[layer]]).toEqual([
           scenario.id,

@@ -57,7 +57,6 @@ export default function CardPicker({
                 fill
                 sizes="31px"
                 className="tw-object-cover"
-                unoptimized
                 onError={() =>
                   setFailed((current) => new Set([...current, card.id]))
                 }

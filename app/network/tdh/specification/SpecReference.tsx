@@ -1,8 +1,10 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { EX_LINK } from "@/components/explained/tokens";
+import { REGISTRY_FIELDS } from "@/components/explained/engine/registry";
 import {
   Caption,
+  CodeBlock,
   CodeName,
   EdSection,
   Prose,
@@ -202,7 +204,67 @@ function Section10({ ctx }: { readonly ctx: SpecContext }) {
           vector: <CodeName>28-registry-hash</CodeName>,
         })}
       </Caption>
+      <FullRecord ctx={ctx} />
     </EdSection>
+  );
+}
+
+/** A value as the record writes it: lists in brackets, text in quotes. */
+function recordValue(value: unknown): string {
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => recordValue(item)).join(", ")}]`;
+  }
+  return typeof value === "string" && !/^(0x[0-9a-fA-F]+|\d+)$/.test(value)
+    ? JSON.stringify(value)
+    : String(value);
+}
+
+/**
+ * P26 §10's whole record, every field in the order the registry hash
+ * encodes it, with its ABI type and its value: what an implementation needs
+ * to compute TDH and to reproduce the registry hash (P28's H, lists sorted).
+ */
+function FullRecord({ ctx }: { readonly ctx: SpecContext }) {
+  const { m, s, book } = ctx;
+  const raw: unknown = book.maybe("rules.registryRecord")?.value;
+  if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
+    return null;
+  }
+  const record = raw as Readonly<Record<string, unknown>>;
+  const width = Math.max(...REGISTRY_FIELDS.map(([name]) => name.length));
+  const typeWidth = Math.max(...REGISTRY_FIELDS.map(([, type]) => type.length));
+  const lines = [
+    '# registryHash = keccak256(abi.encode(keccak256("6529.TdhRegistry.v1"),',
+    "#                fields in this order; every list sorted))",
+    ...REGISTRY_FIELDS.map(
+      ([name, type]) =>
+        `${name.padEnd(width)}  ${type.padEnd(typeWidth)}  ${recordValue(record[name])}`
+    ),
+  ];
+  return (
+    <FactScope ids={["rules.registryRecord"]} className="tw-mt-6">
+      <details className="tw-group/record">
+        <summary className="tw-inline-flex tw-min-h-10 tw-cursor-pointer tw-list-none tw-items-center tw-gap-2 tw-text-[15px] tw-font-semibold tw-text-primary-300 marker:tw-hidden [&::-webkit-details-marker]:tw-hidden">
+          <span aria-hidden="true" className="group-open/record:tw-hidden">
+            +
+          </span>
+          <span
+            aria-hidden="true"
+            className="tw-hidden group-open/record:tw-inline"
+          >
+            –
+          </span>
+          {m("explained.tdh.spec.s10.full", {
+            count: String(REGISTRY_FIELDS.length),
+          })}
+        </summary>
+        <CodeBlock
+          className="tw-mt-3"
+          code={lines.join("\n")}
+          label={s("explained.tdh.spec.s10.fullLabel")}
+        />
+      </details>
+    </FactScope>
   );
 }
 

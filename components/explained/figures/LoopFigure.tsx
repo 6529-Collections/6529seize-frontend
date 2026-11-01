@@ -1,7 +1,8 @@
 "use client";
 
+import { getImageProps } from "next/image";
 import type React from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { kt } from "../i18n";
 import { EX_HEX } from "../tokens";
@@ -38,8 +39,14 @@ interface LoopProps {
   readonly focus: string;
   /** The centre's live line: equal on all of today's identities. */
   readonly verify: { readonly identities: string; readonly fact?: string };
+  /** The copy that travels the ring: a real card's scaled art. */
+  readonly tokenArt?: string | null;
   readonly locale: SupportedLocale;
 }
+
+/** The travelling copy, at the art's ratio (542:801). */
+const TOKEN_W = 26;
+const TOKEN_H = 38;
 
 /**
  * On a phone, the loop's picture in small: the six stations round Verify,
@@ -202,45 +209,75 @@ function useArcAngle(target: number): number {
 }
 
 /**
- * "Follow one copy": the copy, drawn as a small card at the art's ratio
- * (542:801) with a blue face, travelling the ring between stations.
+ * "Follow one copy": the copy, drawn as a card at the art's ratio (542:801)
+ * with a real Meme's art inside a blue edge, travelling the ring between
+ * stations. The art comes through the site's image route; with none, the
+ * card keeps a blue face.
  */
 function CopyToken({
   angle,
   at,
   radius,
+  art,
 }: {
   readonly angle: number;
   readonly at: (degrees: number, r?: number) => [number, number];
   readonly radius: number;
+  readonly art: string | null;
 }) {
   const shown = useArcAngle(angle);
-  const [tx, ty] = at(shown, radius - 52);
+  const clip = `ex-copy-${useId().replaceAll(":", "")}`;
+  const [tx, ty] = at(shown, radius - 54);
+  const href =
+    art === null
+      ? null
+      : getImageProps({
+          src: art,
+          alt: "",
+          width: TOKEN_W * 2,
+          height: TOKEN_H * 2,
+        }).props.src;
+  const x = -TOKEN_W / 2;
+  const y = -TOKEN_H / 2;
   return (
     <g
       aria-hidden="true"
       data-copy-token=""
       transform={`translate(${tx} ${ty})`}
     >
+      <defs>
+        <clipPath id={clip}>
+          <rect x={x} y={y} width={TOKEN_W} height={TOKEN_H} rx={3} />
+        </clipPath>
+      </defs>
       <rect
-        x={-10}
-        y={-14}
-        width={20}
-        height={28}
+        x={x}
+        y={y}
+        width={TOKEN_W}
+        height={TOKEN_H}
         rx={3}
-        fill={EX_HEX.panel}
-        stroke={EX_HEX.youInk}
-        strokeWidth={1.2}
+        fill={EX_HEX.you}
       />
-      <rect x={-7} y={-11} width={14} height={16} rx={1.5} fill={EX_HEX.you} />
-      <line
-        x1={-6}
-        y1={9}
-        x2={4}
-        y2={9}
+      {href !== null && (
+        <image
+          href={href}
+          x={x}
+          y={y}
+          width={TOKEN_W}
+          height={TOKEN_H}
+          preserveAspectRatio="xMidYMid slice"
+          clipPath={`url(#${clip})`}
+        />
+      )}
+      <rect
+        x={x}
+        y={y}
+        width={TOKEN_W}
+        height={TOKEN_H}
+        rx={3}
+        fill="none"
         stroke={EX_HEX.youInk}
-        strokeWidth={1.2}
-        strokeLinecap="round"
+        strokeWidth={1.5}
       />
     </g>
   );
@@ -395,7 +432,13 @@ function StationGlyph({
   );
 }
 
-function LoopCircle({ stations, focus, verify, locale }: LoopProps) {
+function LoopCircle({
+  stations,
+  focus,
+  verify,
+  tokenArt = null,
+  locale,
+}: LoopProps) {
   const [ref, width] = useMeasuredWidth<HTMLDivElement>(600);
   const height = CIRCLE_HEIGHT;
   const cx = width / 2;
@@ -585,6 +628,7 @@ function LoopCircle({ stations, focus, verify, locale }: LoopProps) {
           }
           at={at}
           radius={radius}
+          art={tokenArt}
         />
         <path
           d={`M${artBottom[0] - 32} ${artBottom[1] + 4} C${artBottom[0] - 90} ${artBottom[1] + 10} ${artBottom[0] - 150} ${artBottom[1] - 6} ${artBottom[0] - 200} ${artBottom[1] - 30}`}

@@ -105,14 +105,17 @@ function TotalLine({
   summary,
   date,
   locale,
+  example = false,
 }: {
   readonly summary: RecordSummary;
   readonly date: string;
   readonly locale: SupportedLocale;
+  /** A constructed record: it says the rates it used, not a result it was in. */
+  readonly example?: boolean;
 }) {
   return (
     <p className="tw-m-0 tw-mt-4 tw-text-[15px] tw-leading-6 tw-text-iron-300">
-      {orich(locale, "explain.total", {
+      {orich(locale, example ? "explain.totalExample" : "explain.total", {
         base: formatCount(locale, summary.base),
         boost: formatCents(locale, summary.boostCents / 100),
         total: (
@@ -160,12 +163,17 @@ function FoundExample({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <div data-ans="found" data-ex-allow-number="">
       <RecordTable rows={summary.rows} locale={locale} />
-      <TotalLine summary={summary} date={date} locale={locale} />
-      {/* A constructed record was never compared: no verdict sits on it, only
-          what the line says for a real one. */}
-      <p className="tw-m-0 tw-mt-4 tw-text-[15px] tw-leading-6 tw-text-iron-400">
-        {ot(locale, "explain.includedExample")}
-      </p>
+      <TotalLine summary={summary} date={date} locale={locale} example />
+      {/* A constructed record was never compared: no verdict sits on it. The
+          box shows what a real record's says, in a dotted, example frame. */}
+      <div className="tw-mt-4">
+        <LimitNote
+          tone="holds"
+          title={ot(locale, "explain.includedExampleTitle")}
+        >
+          {ot(locale, "explain.includedExample")}
+        </LimitNote>
+      </div>
     </div>
   );
 }

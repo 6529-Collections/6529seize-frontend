@@ -55,19 +55,23 @@ export default function ContractSection({
                     horizon: facts.print("proofs.contract.horizon"),
                   })}
                 </span>
-                {check.refusals.length > 0 && (
-                  <span className="tw-mt-auto tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-0.5 tw-pt-1.5 tw-text-[13px] tw-leading-5 tw-text-iron-400">
-                    {fill(locale, k("check.refusal"))}
-                    {check.refusals.map((name) => (
+                {/* Every cell ends on its refusal, so the grid's lower edge
+                    lines up; the record names no error for two checks. */}
+                <span className="tw-mt-auto tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-0.5 tw-pt-1.5 tw-text-[13px] tw-leading-5 tw-text-iron-400">
+                  {fill(locale, k("check.refusal"))}
+                  {check.refusals.length > 0 ? (
+                    check.refusals.map((name) => (
                       <code
                         key={name}
                         className="tw-font-mono tw-text-[13px] tw-text-iron-50"
                       >
                         {name}
                       </code>
-                    ))}
-                  </span>
-                )}
+                    ))
+                  ) : (
+                    <span>{fill(locale, k("check.refusalUnnamed"))}</span>
+                  )}
+                </span>
               </li>
             ))}
           </ol>

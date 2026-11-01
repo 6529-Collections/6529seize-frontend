@@ -6,11 +6,7 @@ import CheckableToday from "@/app/explained/hub/CheckableToday";
 import HubChapters from "@/app/explained/hub/HubChapters";
 import HubLoop from "@/app/explained/hub/HubLoop";
 import HubPaths from "@/app/explained/hub/HubPaths";
-import {
-  Corrections,
-  HubOpener,
-  HubSources,
-} from "@/app/explained/hub/HubSections";
+import { HubOpener, HubSources } from "@/app/explained/hub/HubSections";
 import ReadingGuide from "@/app/explained/hub/ReadingGuide";
 import { explainedNavItem } from "@/components/navigation/explainedNavEntry";
 import { t } from "@/i18n/messages";
@@ -77,15 +73,15 @@ describe("the hub, first version", () => {
     );
     // The theorem counts are the bundled manifest's, read through the facts.
     expect(panel).toHaveTextContent(
-      `${book.num("manifest.proved").toLocaleString("en-US")} Lean theorems about a Lean model of the rules: ${book.num("manifest.proved.tdh")} on TDH's, ${book.num("manifest.proved.p53")} on the validators' (P53). ${book.num("manifest.shownFalse")} earlier statements were shown false and stay on record.`
+      `${book.num("manifest.proved").toLocaleString("en-US")} Lean theorems about a model of the rules, checked by machine. ${book.num("manifest.shownFalse")} earlier draft statements were shown false and stay on record.`
     );
     // The proved day carries its retired rule in the same sentence.
     expect(panel).toHaveTextContent(
-      "under the retired tdh-v1.0 rules. Mainnet's SP1 verifier accepts proof A in a read-only call, writing nothing to Ethereum. Proof B is not done; under TDH v1.4 both exist only for a synthetic test cycle."
+      "One real day, half proved Proof A proved the day of Oct 11 (cycle 20,737) under the retired tdh-v1.0 rules, and mainnet's SP1 verifier accepts it in a read-only call that writes nothing. Proof B is not done. Under TDH v1.4 both proofs exist only for a synthetic test cycle."
     );
     // What anyone can repeat today, and what needs private code.
     expect(panel).toHaveTextContent(
-      "Anyone can check each day's file against the index and add up 6529.io's signed upload. Recomputing a day needs the validator code, private for now (D116)"
+      "Anyone can check each day's file against the index and add up 6529.io's signed upload. Recomputing a day takes your own program, written from the specification, and your own read of Ethereum; 6529's two programs are private for now (D116)."
     );
     expect(panel).not.toHaveTextContent("repeat the daily comparison");
   });
@@ -101,7 +97,7 @@ describe("the hub, first version", () => {
       "waits on: how cards were chosen before Main Stage"
     );
     expect(rows[3]).toHaveTextContent(
-      'software 0.1.0, being tested; "run one" waits on the code (D116)'
+      'software 0.1.0, built and being tested; "run one" waits on its release (D144)'
     );
     expect(rows[6]).toHaveTextContent("6529 Stream Editions");
     expect(list).not.toHaveTextContent("NIC's full name");
@@ -142,12 +138,11 @@ describe("the hub, first version", () => {
       <>
         <HubPaths locale="en-US" />
         <ReadingGuide locale="en-US" />
-        <Corrections locale="en-US" />
         <HubSources book={book} locale="en-US" />
       </>
     );
     const paths = screen.getByRole("list", { name: "Reader paths" });
-    expect(within(paths).getAllByRole("link")).toHaveLength(7);
+    expect(within(paths).getAllByRole("link")).toHaveLength(8);
     expect(
       within(paths).getByRole("link", { name: /I make art/ })
     ).toHaveAttribute("href", "#cc0");

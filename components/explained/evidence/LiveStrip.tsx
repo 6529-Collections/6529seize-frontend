@@ -17,11 +17,6 @@ const TILE = {
   knownCause: "tw-border-green/45 tw-bg-green/[0.08]",
   differs: "tw-border-error/60 tw-bg-error/[0.09]",
 } as const;
-const BAR = {
-  equal: "tw-bg-green",
-  knownCause: "tw-bg-green",
-  differs: "tw-bg-error",
-} as const;
 const WORD = {
   equal: "explained.kit.verdict.equal",
   knownCause: "explained.kit.verdict.knownCause",
@@ -49,8 +44,21 @@ export default function LiveStrip({
   readonly openDate?: string;
   readonly locale: SupportedLocale;
 }) {
-  const dayNumber = (date: string) =>
-    String(new Date(`${date}T00:00:00Z`).getUTCDate());
+  const at = (date: string) => new Date(`${date}T00:00:00Z`);
+  const dayNumber = (date: string) => String(at(date).getUTCDate());
+  // Each tile says its month too, so "1" after "31" reads as a date.
+  const month = (date: string) =>
+    new Intl.DateTimeFormat(locale, { month: "short", timeZone: "UTC" }).format(
+      at(date)
+    );
+  const face = (date: string) => (
+    <span aria-hidden="true" className="tw-grid tw-justify-items-center">
+      <span className="tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400">
+        {month(date)}
+      </span>
+      <span className="tw-text-[15px] tw-leading-5">{dayNumber(date)}</span>
+    </span>
+  );
   const newest = days.at(-1);
   const holds = newest === undefined || stripKind(newest.verdict) !== "differs";
   return (
@@ -78,7 +86,7 @@ export default function LiveStrip({
           return (
             <li
               key={day.cycle}
-              className={`tw-relative tw-grid tw-h-11 tw-place-items-center tw-rounded-md tw-border tw-border-solid tw-text-[13px] tw-font-semibold tw-text-iron-50 md:tw-w-[46px] ${TILE[kind]}`}
+              className={`tw-relative tw-grid tw-h-12 tw-place-items-center tw-rounded-md tw-border tw-border-solid tw-font-semibold tw-text-iron-50 md:tw-w-[50px] ${TILE[kind]}`}
               title={formatUtcDay(locale, day.date)}
               aria-label={kt(locale, "explained.kit.day.name", {
                 date: formatUtcDay(locale, day.date),
@@ -87,23 +95,22 @@ export default function LiveStrip({
               })}
               data-day-kind={kind}
             >
-              <span aria-hidden="true">{dayNumber(day.date)}</span>
-              <span
-                className={`tw-absolute -tw-right-px tw-bottom-2 tw-top-2 tw-w-0.5 tw-rounded-sm ${BAR[kind]}`}
-                aria-hidden="true"
-              />
+              {face(day.date)}
             </li>
           );
         })}
         {openDate && (
           <li
-            className="tw-relative tw-grid tw-h-11 tw-place-items-center tw-rounded-md tw-border tw-border-dashed tw-border-primary-400/70 tw-bg-primary-400/[0.12] tw-text-[13px] tw-font-semibold tw-text-primary-300 md:tw-w-[46px]"
+            className="tw-relative tw-grid tw-h-12 tw-place-items-center tw-rounded-md tw-border tw-border-dashed tw-border-primary-400/70 tw-bg-primary-400/[0.12] tw-font-semibold tw-text-primary-300 md:tw-w-[50px]"
             aria-label={kt(locale, "explained.kit.verdict.open")}
           >
-            <span aria-hidden="true">{dayNumber(openDate)}</span>
+            {face(openDate)}
           </li>
         )}
       </ol>
+      <p className="tw-m-0 -tw-mt-1.5 tw-text-[13px] tw-leading-5 tw-text-iron-400">
+        {kt(locale, "explained.kit.liveStrip.legend")}
+      </p>
     </section>
   );
 }

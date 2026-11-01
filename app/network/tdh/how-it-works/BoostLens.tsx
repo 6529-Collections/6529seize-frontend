@@ -143,7 +143,12 @@ export default function BoostLens({
         <>
           {ht(locale, "explained.tdh.how.boost.ruleBeta")}
           {" = "}
-          <RuleValue>{formatCents(locale, result.beta / 100)}</RuleValue>
+          <RuleValue>
+            {ht(locale, "explained.tdh.how.boost.ruleBetaValue", {
+              cents: formatCount(locale, result.beta),
+              boost: formatCents(locale, result.beta / 100),
+            })}
+          </RuleValue>
         </>
       ),
       on: true,

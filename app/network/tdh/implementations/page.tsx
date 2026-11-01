@@ -8,6 +8,7 @@ import Link from "next/link";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { kt } from "@/components/explained/i18n";
 import Mark from "@/components/explained/marks/Mark";
+import { HalfPair } from "@/components/explained/evidence/AssuranceLadder";
 import ExplainedShell from "@/components/explained/shell/ExplainedShell";
 import HowWeKnow from "@/components/explained/shell/HowWeKnow";
 import { EX_BUTTON, EX_LINK, EX_TEXT } from "@/components/explained/tokens";
@@ -27,7 +28,6 @@ import {
   PageHead,
   Prose,
   StackTable,
-  Trap,
 } from "@/components/explained/reference/parts";
 import { FactScope, FactText } from "@/components/explained/facts/FactText";
 import {
@@ -131,6 +131,11 @@ export default async function ImplementationsPage({
   );
   const programsFact = book.maybe("site.proofA.cycle");
   const code = (name: string) => <CodeName wrap>{name}</CodeName>;
+  const notProved = (
+    <span className="tw-text-iron-400">
+      {s("explained.tdh.impl.notProved")}
+    </span>
+  );
   const program = (name: ImplKey, sub?: ImplKey) => (
     <>
       {m(name)}
@@ -243,9 +248,18 @@ export default async function ImplementationsPage({
                         : m("explained.tdh.impl.a.runsLate", {
                             checked: p.v("tdh.cutover.checkedAt"),
                           }),
-                    proved: (
+                    proved: programsFact ? (
+                      // One of the day's two proofs: the half-pair mark, as
+                      // on the overview and the proofs page.
+                      <span className="tw-inline-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+                        <HalfPair a b={false} locale={locale} />
+                        <span className={EX_TEXT.cap}>
+                          {s("explained.tdh.impl.a.proofRef")}
+                        </span>
+                      </span>
+                    ) : (
                       <Mark
-                        kind={programsFact ? "proved" : "notYet"}
+                        kind="notYet"
                         locale={locale}
                         size="sm"
                         label={s("explained.tdh.impl.a.proof")}
@@ -277,6 +291,7 @@ export default async function ImplementationsPage({
                     program: program("explained.tdh.impl.python.name"),
                     written: m("explained.tdh.impl.python.written"),
                     runs: m("explained.tdh.impl.python.runs"),
+                    proved: notProved,
                   },
                 },
                 {
@@ -287,6 +302,7 @@ export default async function ImplementationsPage({
                       choices: p.v("programs.cleanRoomChoices"),
                     }),
                     runs: m("explained.tdh.impl.rustRef.runs"),
+                    proved: notProved,
                   },
                 },
                 {
@@ -295,9 +311,7 @@ export default async function ImplementationsPage({
                     program: program("explained.tdh.impl.lean.name"),
                     written: m("explained.tdh.impl.lean.written"),
                     runs: m("explained.tdh.impl.lean.runs", {
-                      day: p.v("model.replayDay"),
                       random: p.v("programs.randomPerChange"),
-                      all: p.v("model.randomInputs"),
                     }),
                     proved: m("explained.tdh.impl.lean.proved", {
                       count: p.v("manifest.proved"),
@@ -310,6 +324,7 @@ export default async function ImplementationsPage({
                     program: program("explained.tdh.impl.live.name"),
                     written: m("explained.tdh.impl.live.written"),
                     runs: m("explained.tdh.impl.live.runs"),
+                    proved: notProved,
                   },
                 },
               ]}
@@ -320,6 +335,10 @@ export default async function ImplementationsPage({
               time: p.v("programs.rustReference.time"),
               day: p.v("model.replayDay"),
               runtime: p.v("tdh.latest.builds.rust.runtime"),
+            })}{" "}
+            {m("explained.tdh.impl.lean.runsNote", {
+              day: p.v("model.replayDay"),
+              all: p.v("model.randomInputs"),
             })}
           </Caption>
         </EdSection>
@@ -458,9 +477,12 @@ export default async function ImplementationsPage({
           <Prose className="tw-mt-6">
             {m("explained.tdh.impl.roots.body")}
           </Prose>
-          <Trap className="tw-mt-4" label={m("explained.tdh.impl.ask.label")}>
+          {/* A status, not a request: what is not published yet, and what
+              it would let an outside program do. */}
+          <p className="tw-m-0 tw-mt-5 tw-max-w-[660px] tw-text-base tw-leading-[26px] tw-text-iron-300">
+            <Mark kind="notYet" locale={locale} size="sm" />{" "}
             {m("explained.tdh.impl.ask.body")}
-          </Trap>
+          </p>
         </EdSection>
 
         <EdSection

@@ -24,6 +24,7 @@ import { pt } from "./components/copy";
 import { FactText } from "@/components/explained/facts/FactText";
 import { rich } from "@/components/explained/rich";
 import { dayView, type DayView } from "./components/dayModel";
+import { UploadLink } from "./[cycleDay]/DaySide";
 import { loadCheckBook, type PageBook } from "./components/loadBook.server";
 import { simulateFailingDay } from "./components/simulatedDay";
 
@@ -222,6 +223,13 @@ function HowWeKnowRows({
           title: pt(locale, "explained.tdh.check.hwk.live"),
           body: rich(locale, "explained.tdh.check.hwk.liveBody", {
             hash: <FactValue fact={day.fact("liveSha")} locale={locale} />,
+            link: (
+              <UploadLink
+                day={day}
+                field="liveUpload"
+                label={pt(locale, "explained.tdh.check.hwk.liveOpen")}
+              />
+            ),
           }),
         },
         {

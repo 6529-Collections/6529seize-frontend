@@ -40,6 +40,7 @@ import {
 } from "./dayModel";
 import FailDayVerdict, { type VerdictFace } from "./FailDayVerdict";
 import type { SimulatedDay } from "./simulatedDay";
+import Tag from "@/components/explained/marks/Tag";
 
 /**
  * The daily check's first screen below its header (TDH-DESIGN.md §4.4):
@@ -314,6 +315,11 @@ function simulatedFace(
     },
     aside: (
       <>
+        {/* The panel carries its own tag, so a cropped picture of it cannot
+            pass for a real failing day. */}
+        <div className="tw-mb-2.5" data-simulated="">
+          <Tag kind="simulated" locale={locale} />
+        </div>
         <Equation
           label={rich(locale, "explained.tdh.check.eq.label", {
             cycle: <FactValue fact={day.fact("cycle")} locale={locale} />,

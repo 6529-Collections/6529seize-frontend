@@ -60,7 +60,7 @@ adds n.` `Break it: sell it` takes the days with the copy; pressing it again
 4. Read 02 `Your TDH is your weight here.`: TDH is not money; it weighs votes
    on the next card, the Rep and NIC (Network Identity Check) ratings you
    can give, your Level, and later validators (decided, D112; the software,
-   0.1.0, is built and being tested, and nothing signs yet). The art itself is CC0, with a link to the hub's one-minute
+   0.1.0, is built and being tested; so far only 6529's own validators sign, in testing). The art itself is CC0, with a link to the hub's one-minute
    answer.
 5. Use 03 `Explain my TDH`: enter a profile, ENS name or address. 6529.io's
    stored calculation is shown card by card (copies × whole days × rate =

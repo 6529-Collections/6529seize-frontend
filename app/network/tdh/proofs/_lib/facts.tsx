@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import FactValue from "@/components/explained/facts/FactValue";
+import { formatUtcDay } from "@/lib/explained/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import {
   isFact,
@@ -32,7 +33,11 @@ export interface PageFacts {
   readonly strings: (id: FactId) => readonly string[] | null;
   /** Any value, or null when its source is down; the caller narrows it. */
   readonly raw: (id: FactId) => FactValueType | null;
+  /** The UTC day a cycle fact's number stands for (cycle N starts N days after 1970-01-01). */
+  readonly cycleDate: (id: FactId) => ReactNode;
 }
+
+const DAY_MS = 86_400_000;
 
 export function pageFacts(
   snapshot: FactSnapshot,
@@ -53,6 +58,16 @@ export function pageFacts(
   };
   return {
     entry,
+    cycleDate: (id) => {
+      const cycle = raw(id);
+      return typeof cycle === "number" ? (
+        <span data-fact={id}>
+          {formatUtcDay(locale, new Date(cycle * DAY_MS).toISOString())}
+        </span>
+      ) : (
+        <FactValue fact={entry(id)} locale={locale} />
+      );
+    },
     print: (id, style, className) => (
       <FactValue
         fact={entry(id)}

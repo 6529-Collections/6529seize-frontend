@@ -385,6 +385,13 @@ code {
   color: #25e4eb;
 }
 
+/* 6529 Explained sets its own code colours: inside it, code takes its text's
+   colour unless a utility class names one. :where keeps this rule as weak
+   as the one above, so any tw-text-* class still wins. */
+:where([data-explained-shell]) code {
+  color: inherit;
+}
+
 /* Links drop the UA outline for pointer focus only. Keyboard focus
    (:focus-visible) must stay visible (WCAG 2.4.7) so a link either shows its
    own focus-visible:tw-outline-* style or the browser default ring. :where()

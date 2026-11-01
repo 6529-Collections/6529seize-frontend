@@ -112,6 +112,16 @@ interface EditionsRow {
 interface NftsRow {
   readonly id?: unknown;
   readonly mint_date?: unknown;
+  readonly thumbnail?: unknown;
+}
+
+/** 6529.io's own image host: the only one a card's art is taken from. */
+const ART_HOST = "https://d3lqz0a4bldqgf.cloudfront.net/images/";
+
+/** Each Meme's first mint and its scaled art, from 6529.io's `nfts`. */
+interface CardMints {
+  readonly mints: ReadonlyMap<number, string>;
+  readonly art: ReadonlyMap<number, string>;
 }
 
 /** "2026-10-16T09:06:23Z": an instant as the facts layer writes it. */
@@ -171,23 +181,34 @@ async function readAllPages<Row>(base: string): Promise<Row[] | null> {
 }
 
 /**
- * Each Meme's first mint (`meme.N.firstMint`), from 6529.io's `nfts` for
- * The Memes' contract. When it cannot be read, those cards' first mints are
- * unavailable, never guessed.
+ * Each Meme's first mint (`meme.N.firstMint`) and scaled art
+ * (`meme.N.art`), from 6529.io's `nfts` for The Memes' contract. When they
+ * cannot be read, those cards' first mints are unavailable, never guessed,
+ * and their art draws its frame.
  */
-export async function loadFirstMints(): Promise<ReadonlyMap<number, string>> {
+export async function loadFirstMints(): Promise<CardMints> {
   const mints = new Map<number, string>();
+  const art = new Map<number, string>();
   const rows = await readAllPages<NftsRow>(
     `${publicEnv.API_ENDPOINT}/api/nfts?contract=${REGISTRY_V14.memes}&`
   );
   for (const row of rows ?? []) {
+    if (typeof row.id !== "number") {
+      continue;
+    }
     const at =
       typeof row.mint_date === "string" ? isoSeconds(row.mint_date) : null;
-    if (typeof row.id === "number" && at !== null) {
+    if (at !== null) {
       mints.set(row.id, at);
     }
+    if (
+      typeof row.thumbnail === "string" &&
+      row.thumbnail.startsWith(ART_HOST)
+    ) {
+      art.set(row.id, row.thumbnail);
+    }
   }
-  return mints;
+  return { mints, art };
 }
 
 /**
@@ -266,10 +287,14 @@ async function loadEditions(now: string): Promise<EditionsInput | null> {
   if (rows === null || byId.size === 0) {
     return lastEditions ?? snapshotEditions();
   }
-  const mints = await firstMints;
+  const { mints, art } = await firstMints;
   const read: EditionsInput = {
     cards: [...byId.values()]
-      .map((card) => ({ ...card, firstMint: mints.get(card.id) ?? null }))
+      .map((card) => ({
+        ...card,
+        firstMint: mints.get(card.id) ?? null,
+        art: art.get(card.id) ?? null,
+      }))
       .sort((a, b) => a.id - b.id),
     readAt: now,
     source: "6529.io API memes_extended_data",

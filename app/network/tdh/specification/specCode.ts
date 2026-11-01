@@ -124,6 +124,7 @@ export function rates(v: Values): string {
 
 /** P26 §6.2, the pair state machine, as written. */
 export const PAIR_STATE = [
+  "# row (first, second, position, confirmed, time of first, time of second)",
   "REGISTER(a, b) at t:",
   "  no row                       -> row (a, b, pos, false, t, -)",
   "  row (a, b, p, c, _, t2)      -> row (a, b, p, c, t, t2)       # a again: its time only",

@@ -86,6 +86,8 @@ export const formalManifestSchema = z
   .object({
     format: z.literal(FORMAL_MANIFEST_FORMAT),
     generatedAt: timestamp,
+    /** The script that wrote the file: it builds, audits and runs the vectors first. */
+    generator: nullish(z.string().regex(/^[\w./-]{1,120}$/)),
     source: z.object({
       repository: z.string().min(1).max(64),
       commit: fullCommit,

@@ -329,6 +329,12 @@ function PartB({
             threshold: v("rules.editionThreshold"),
           })}
         </Para>
+        <Para>
+          {rich(locale, "explained.tdh.how.b.others", {
+            H: v("engine.H"),
+            rateGradient: v("engine.rate.gradient"),
+          })}
+        </Para>
       </Statement>
       <div className="tw-mt-12">
         {ready ? null : (

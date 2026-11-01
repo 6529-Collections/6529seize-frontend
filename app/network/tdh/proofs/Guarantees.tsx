@@ -54,6 +54,7 @@ const LAYER_SUB = {
 
 const STATE_WORD = {
   passed: "state.passed",
+  differs: "state.differs",
   stops: "state.stops",
   unreached: "state.unreached",
   wrong: "state.wrong",
@@ -61,6 +62,7 @@ const STATE_WORD = {
 
 const BOX: Record<LayerState, string> = {
   passed: "tw-border-solid tw-border-iron-800 tw-bg-iron-950",
+  differs: "tw-border-solid tw-border-primary-400/45 tw-bg-primary-400/[0.07]",
   stops: "tw-border-solid tw-border-green/55 tw-bg-green/[0.09]",
   unreached: "tw-border-dashed tw-border-iron-800",
   wrong: "tw-border-solid tw-border-error/60 tw-bg-error/[0.09]",
@@ -68,6 +70,7 @@ const BOX: Record<LayerState, string> = {
 
 const STATE_TONE: Record<LayerState, string> = {
   passed: "tw-text-iron-400",
+  differs: "tw-text-primary-300",
   stops: "tw-text-green",
   unreached: "tw-text-iron-400",
   wrong: "tw-text-error",
@@ -200,7 +203,7 @@ export default function Guarantees({
       bytes: facts.print("proofs.statement.bytes"),
       words: facts.print("proofs.statement.words"),
       id: facts.print("proofs.sp1Advisory.id"),
-      earlier: facts.print("proofs.sp1Advisory.earlier"),
+      earlier: facts.print("proofs.sp1Advisory.earlier", "long"),
     })
   );
 

@@ -164,10 +164,17 @@ export default function IdentityModel({
                 {ht(locale, "explained.tdh.how.identity.ruleBeta")}
                 {" = "}
                 <RuleValue>
-                  {formatCents(
-                    locale,
-                    (linked ? values.boostCents : values.apartBoostCents) / 100
-                  )}
+                  {ht(locale, "explained.tdh.how.boost.ruleBetaValue", {
+                    cents: formatCount(
+                      locale,
+                      linked ? values.boostCents : values.apartBoostCents
+                    ),
+                    boost: formatCents(
+                      locale,
+                      (linked ? values.boostCents : values.apartBoostCents) /
+                        100
+                    ),
+                  })}
                 </RuleValue>
               </>
             ),

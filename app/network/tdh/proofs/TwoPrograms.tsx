@@ -123,6 +123,7 @@ function ProgramsTable({
       id: "pair",
       label: rich(locale, k("table.pair"), {
         cycle: facts.print("proofs.pairV14.cycle"),
+        real: facts.cycleDate("proofs.pairV14.cycle"),
       }),
       a: (
         <>
@@ -243,7 +244,7 @@ export default function TwoPrograms({
                 date: facts.print("proofs.sp1Advisory.published"),
                 id: facts.print("proofs.sp1Advisory.id"),
                 fixed: facts.print("proofs.sp1Advisory.fixed"),
-                earlier: facts.print("proofs.sp1Advisory.earlier"),
+                earlier: facts.print("proofs.sp1Advisory.earlier", "long"),
               })}
             </Case>
             <Case title={rich(locale, k("case.review.title"))}>

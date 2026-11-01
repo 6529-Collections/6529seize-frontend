@@ -1,5 +1,5 @@
 import HowWeKnow from "@/components/explained/shell/HowWeKnow";
-import { EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
+import { EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import type { FactBook } from "@/lib/explained/facts";
 import { mainStageDays } from "./schedule";
@@ -50,30 +50,6 @@ export function HubOpener({
   );
 }
 
-/** The corrections log every page's How we know links to (`/explained#corrections`). */
-export function Corrections({ locale }: { readonly locale: SupportedLocale }) {
-  return (
-    <section
-      id="corrections"
-      className={EX_LAYOUT.sectionTight}
-      aria-labelledby="corrections-title"
-    >
-      <div className={EX_LAYOUT.ed}>
-        <div className="lg:tw-pt-1">
-          <span className={EX_TEXT.label} id="corrections-title">
-            {ht(locale, "corrections.label")}
-          </span>
-        </div>
-        <div className={EX_LAYOUT.edWide}>
-          <p className="tw-m-0 tw-max-w-[660px] tw-text-[15px] tw-leading-6 tw-text-iron-300">
-            {ht(locale, "corrections.body")}
-          </p>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /** Main Stage's hour as a clock, "16:00", from the schedule fact. */
 function mainStageTime(book: FactBook): string {
   const hour = book.maybe<number>("site.mainStage.hourUtc")?.value;
@@ -94,6 +70,15 @@ export function HubSources({
     <HowWeKnow
       locale={locale}
       title={ht(locale, "title")}
+      log={
+        <>
+          <b className="tw-font-semibold tw-text-iron-50">
+            {ht(locale, "corrections.label")}
+          </b>
+          {" · "}
+          {ht(locale, "corrections.body")}
+        </>
+      }
       slug="explained-hub"
       rows={[
         {

@@ -7,6 +7,7 @@ import { kt } from "@/components/explained/i18n";
 import BreakIt, { breakItLabel } from "@/components/explained/lens/BreakIt";
 import { Seg, Slider } from "@/components/explained/lens/controls";
 import { useBreakable } from "@/components/explained/lens/useBreakable";
+import Tag from "@/components/explained/marks/Tag";
 import ArtCard from "@/components/explained/things/ArtCard";
 import CardPicker from "@/components/explained/things/CardPicker";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -327,16 +328,22 @@ export default function Machine({
             : {})}
         />
       </div>
-      <p
-        className="tw-m-0 tw-mt-3 tw-text-[15px] tw-leading-6 tw-text-iron-300"
-        aria-live="polite"
-      >
-        {say}
-      </p>
+      <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-4 tw-gap-y-1">
+        <p
+          className="tw-m-0 tw-text-[15px] tw-leading-6 tw-text-iron-300"
+          aria-live="polite"
+        >
+          {say}
+        </p>
+        <Tag kind="example" locale={locale}>
+          {ot(locale, "machine.exampleTag")}
+        </Tag>
+      </div>
       <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3.5 tw-gap-y-2.5">
         <Seg
           label={ot(locale, "machine.boostGroup")}
           attr="beta"
+          phone="wrap"
           value={String(beta)}
           onChange={(value) => model.set({ beta: Number(value) })}
           options={[

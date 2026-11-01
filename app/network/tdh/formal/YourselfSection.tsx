@@ -18,6 +18,8 @@ import type { SureContext } from "./sureShared";
 interface Step {
   readonly id: string;
   readonly who: "anyone" | "notYet";
+  /** Who can do it, when it is narrower than "Anyone, today". */
+  readonly whoText?: string;
   readonly title: string;
   readonly body: ReactNode;
   readonly extra?: ReactNode;
@@ -54,6 +56,7 @@ export default function YourselfSection({
     {
       id: "read",
       who: "anyone",
+      whoText: s("explained.tdh.sure.yourself.anyoneStatements"),
       title: s("explained.tdh.sure.yourself.read"),
       body: m("explained.tdh.sure.yourself.readBody", {
         commit: <CodeName>{p.v("manifest.commit")}</CodeName>,
@@ -69,6 +72,7 @@ export default function YourselfSection({
       who: "notYet",
       title: s("explained.tdh.sure.yourself.rerun"),
       body: m("explained.tdh.sure.yourself.rerunBody", {
+        generator: <CodeName>{p.v("manifest.generator")}</CodeName>,
         command: <CodeName>lake build</CodeName>,
         commit: <CodeName>{p.v("manifest.commit")}</CodeName>,
         version: p.v("manifest.lean"),
@@ -103,7 +107,7 @@ export default function YourselfSection({
                 </span>
                 {step.who === "anyone" ? (
                   <span className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-400">
-                    {s("explained.tdh.sure.yourself.anyone")}
+                    {step.whoText ?? s("explained.tdh.sure.yourself.anyone")}
                   </span>
                 ) : (
                   <Mark kind="notYet" locale={locale} size="sm" />

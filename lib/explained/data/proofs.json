@@ -36,7 +36,12 @@
       "ref": "6529's design record, run log of 2026-10-15"
     },
     "sp1Update": {
-      "ref": "Succinct's SP1 security update of 2025-01-27 (advisory GHSA-c873-wfhp-wx5m): two soundness flaws disclosed, and the routers to the SP1 verifier contracts on mainnets frozen"
+      "ref": "Succinct's SP1 security update of 2025-01-27 (advisory GHSA-c873-wfhp-wx5m): two soundness flaws disclosed, and the routers to the SP1 verifier contracts on mainnets frozen",
+      "url": "https://github.com/succinctlabs/sp1/security/advisories/GHSA-c873-wfhp-wx5m"
+    },
+    "sp1Cve": {
+      "ref": "GitHub's advisory database, GHSA-63x8-x938-vx33 (CVE-2026-40323): a soundness flaw in SP1 6's recursion circuit, fixed in 6.1.0",
+      "url": "https://github.com/advisories/GHSA-63x8-x938-vx33"
     }
   },
   "statement": {

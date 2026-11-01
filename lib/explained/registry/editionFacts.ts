@@ -217,11 +217,11 @@ export const EDITION_FACTS = {
   }),
 } as const;
 
-type MemeField = "minted" | "edition" | "season" | "rate" | "firstMint";
+type MemeField = "minted" | "edition" | "season" | "rate" | "firstMint" | "art";
 
-/** `meme.562.edition`: one card's minted count, effective edition, season, rate or first mint. */
+/** `meme.562.edition`: one card's minted count, effective edition, season, rate, first mint or scaled art. */
 export const MEME_FAMILY: FactFamily = {
-  pattern: /^meme\.(\d{1,5}\.(?:minted|edition|season|rate|firstMint))$/,
+  pattern: /^meme\.(\d{1,5}\.(?:minted|edition|season|rate|firstMint|art))$/,
   def: (key) => {
     const [idText, field] = key.split(".") as [string, MemeField];
     const id = Number(idText);
@@ -246,6 +246,8 @@ export const MEME_FAMILY: FactFamily = {
           return rateOf(inputs, effectiveOf(inputs, entry));
         case "firstMint":
           return entry.firstMint ?? undefined;
+        case "art":
+          return entry.art ?? undefined;
       }
     };
     let format: FactDef["format"] = "count";
@@ -253,6 +255,8 @@ export const MEME_FAMILY: FactFamily = {
       format = "cents";
     } else if (field === "firstMint") {
       format = "instant";
+    } else if (field === "art") {
+      format = "text";
     }
     return defineFact<number | string>({
       format,

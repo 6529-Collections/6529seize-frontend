@@ -19,6 +19,32 @@ function clean(text: string): string {
   return text.replace(/\s+/g, " ").trim();
 }
 
+/**
+ * Laid out as its own box (a block, a flex or grid item, a cell): its text
+ * is a separate word from its neighbours', even with no space in the HTML.
+ */
+function boxed(element: Element): boolean {
+  if (typeof getComputedStyle !== "function") {
+    return false;
+  }
+  // A test DOM has no layout: every display is "" or missing, and nothing is boxed.
+  const display = getComputedStyle(element).display ?? "";
+  return (
+    display !== "" && !display.startsWith("inline") && display !== "contents"
+  );
+}
+
+/** A picture with a name: an SVG, or anything with role="img". */
+function picture(element: Element): string | null {
+  if (
+    element.tagName.toLowerCase() === "svg" ||
+    element.getAttribute("role") === "img"
+  ) {
+    return element.getAttribute("aria-label") ?? "";
+  }
+  return null;
+}
+
 function inline(node: Node): string {
   if (node.nodeType === Node.TEXT_NODE) {
     return node.textContent ?? "";
@@ -26,13 +52,20 @@ function inline(node: Node): string {
   if (!(node instanceof Element) || skip(node)) {
     return "";
   }
-  if (node.tagName === "svg") {
-    return node.getAttribute("aria-label") ?? "";
+  const named = picture(node);
+  if (named !== null) {
+    return ` ${named} `;
   }
   if (node.tagName === "BR") {
     return " ";
   }
-  const inner = [...node.childNodes].map(inline).join("");
+  const inner = [...node.childNodes]
+    .map((child) =>
+      child instanceof Element && boxed(child)
+        ? ` ${inline(child)} `
+        : inline(child)
+    )
+    .join("");
   if (node.tagName === "B" || node.tagName === "STRONG") {
     const text = clean(inner);
     return text ? `**${text}**` : "";
@@ -82,9 +115,21 @@ function listBlock(list: Element, ordered: boolean): string {
     .join("\n");
 }
 
+/** Words of its own beside its child elements: a sentence with live values in it. */
+function hasOwnText(element: Element): boolean {
+  return [...element.childNodes].some(
+    (node) =>
+      node.nodeType === Node.TEXT_NODE && (node.textContent ?? "").trim() !== ""
+  );
+}
+
 /** One element as Markdown ("" when empty), or null to walk into it. */
 function blockOf(child: Element): string | null {
   const tag = child.tagName;
+  const named = picture(child);
+  if (named !== null) {
+    return clean(named);
+  }
   const level = /^H([1-6])$/.exec(tag)?.[1];
   if (level !== undefined) {
     const text = clean(inline(child));
@@ -106,7 +151,12 @@ function blockOf(child: Element): string | null {
     case "PRE":
       return `\`\`\`\n${child.textContent}\n\`\`\``;
     default:
-      return child.children.length === 0 ? clean(inline(child)) : null;
+      // A leaf, or a run of text with values and marks inside it: one
+      // paragraph. Anything else is walked into, so its parts keep their
+      // own paragraphs.
+      return child.children.length === 0 || hasOwnText(child)
+        ? clean(inline(child))
+        : null;
   }
 }
 

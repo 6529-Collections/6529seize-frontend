@@ -109,9 +109,6 @@ export default function CheckableToday({
             })}
           </Link>{" "}
           {hrich(locale, "check.theoremsBody", {
-            commit: fact("manifest.commit"),
-            tdh: fact("manifest.proved.tdh"),
-            p53: fact("manifest.proved.p53"),
             shownFalse: fact("manifest.shownFalse"),
           })}
         </Item>
@@ -126,6 +123,7 @@ export default function CheckableToday({
           </Link>{" "}
           {hrich(locale, "check.proofBody", {
             day: fact("proofs.day.date"),
+            cycle: fact("proofs.day.cycle"),
             version: fact("proofs.day.ruleVersion"),
           })}
         </Item>

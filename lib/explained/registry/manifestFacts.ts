@@ -91,6 +91,12 @@ export const MANIFEST_FACTS = {
     source: manifestSource,
     value: (inputs) => inputs.manifest?.manifest.source.commit,
   }),
+  "manifest.generator": defineFact<string>({
+    format: "text",
+    refresh: MANIFEST_REFRESH,
+    source: manifestSource,
+    value: (inputs) => inputs.manifest?.manifest.generator ?? undefined,
+  }),
   "manifest.lean": defineFact<string>({
     format: "text",
     refresh: MANIFEST_REFRESH,
@@ -117,6 +123,12 @@ export const MANIFEST_FACTS = {
     (manifest) =>
       manifest.theorems.filter(
         (entry) => entry.status === "counterexample" && entry.library === "tdh"
+      ).length
+  ),
+  "manifest.shownFalse.p53": count(
+    (manifest) =>
+      manifest.theorems.filter(
+        (entry) => entry.status === "counterexample" && entry.library === "p53"
       ).length
   ),
   // Distinct Lean statements: theorems are told apart by their Lean names.

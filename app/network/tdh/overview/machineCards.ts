@@ -24,6 +24,11 @@ function newestStillMinting(book: FactBook): number | null {
   return minted < threshold && edition > minted ? id : null;
 }
 
+function newestArt(book: FactBook, id: number): string | null {
+  const art = book.maybe<string>(`meme.${id}.art`)?.value;
+  return typeof art === "string" && art.length > 0 ? art : null;
+}
+
 export function machineCards(book: FactBook): MachineCard[] {
   const art = [MEME_ART[2], MEME_ART[4], MEME_ART[3]];
   const cards: MachineCard[] = art.map((entry) => ({
@@ -42,8 +47,12 @@ export function machineCards(book: FactBook): MachineCard[] {
           art: FLOOR_CARD.src,
           original: FLOOR_CARD.original,
         }
-      : // The newest card's scaled art is often not made yet, and a
-        // missing image is a console error, so it draws its frame.
-        { id: minting, title: null, art: null },
+      : // 6529.io's own scaled art, when its API lists one; until then
+        // the card draws its frame.
+        {
+          id: minting,
+          title: null,
+          art: newestArt(book, minting),
+        },
   ];
 }

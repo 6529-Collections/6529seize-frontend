@@ -1,4 +1,5 @@
 import HowWeKnow from "@/components/explained/shell/HowWeKnow";
+import { EX_LINK } from "@/components/explained/tokens";
 import { fill } from "@/components/explained/i18n";
 import type { SupportedLocale } from "@/i18n/locales";
 import proofs from "@/lib/explained/data/proofs.json";
@@ -29,6 +30,25 @@ export default function ProofsSources({
       {value}
     </code>
   );
+  // SP1's advisories are public: each links to where it was published.
+  const advisory = (
+    id: "proofs.sp1Advisory.earlier" | "proofs.sp1Advisory.id",
+    name: string
+  ) => {
+    const url = facts.entry(id)?.source.url;
+    return url ? (
+      <a
+        className={EX_LINK}
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <code className="tw-font-mono tw-text-[13px]">{name}</code>
+      </a>
+    ) : (
+      code(name)
+    );
+  };
   return (
     <>
       <HowWeKnow
@@ -66,6 +86,18 @@ export default function ProofsSources({
             title: fill(locale, k("hwk.runs.title")),
             body: rich(locale, k("hwk.runs.body"), {
               date: facts.print("proofs.day.provedOn"),
+            }),
+          },
+          {
+            title: fill(locale, k("hwk.sp1.title")),
+            body: rich(locale, k("hwk.sp1.body"), {
+              earlier: facts.print("proofs.sp1Advisory.earlier", "long"),
+              earlierLink: advisory(
+                "proofs.sp1Advisory.earlier",
+                "GHSA-c873-wfhp-wx5m"
+              ),
+              id: facts.print("proofs.sp1Advisory.id"),
+              idLink: advisory("proofs.sp1Advisory.id", "GHSA-63x8-x938-vx33"),
             }),
           },
           {

@@ -7,6 +7,7 @@ import type { Metadata } from "next";
 import { getAppMetadata } from "@/components/providers/metadata";
 import ExplainedShell from "@/components/explained/shell/ExplainedShell";
 import HowWeKnow from "@/components/explained/shell/HowWeKnow";
+import PageContents from "@/components/explained/shell/PageContents";
 import { kt } from "@/components/explained/i18n";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -99,6 +100,25 @@ export default async function HowSurePage({
       <article data-ex-article="" lang={locale}>
         <EnglishOnlyNote requested={requested} />
         <SureHead ctx={ctx} chapter={place.chapterNumber} n={place.n} />
+        <PageContents
+          locale={locale}
+          items={(
+            [
+              ["#layers", "01", "explained.tdh.sure.layers.label"],
+              ["#featured", "02", "explained.tdh.sure.featured.label"],
+              ["#claims", "03", "explained.tdh.sure.claims.label"],
+              ["#theorems", "04", "explained.tdh.sure.theorems.label"],
+              ["#how", "05", "explained.tdh.sure.build.label"],
+              ["#not", "06", "explained.tdh.sure.not.label"],
+              ["#yourself", "07", "explained.tdh.sure.yourself.label"],
+              ["#check", "08", "explained.tdh.sure.check.label"],
+            ] as const
+          ).map(([href, no, key]) => ({
+            href,
+            no,
+            title: ctx.s(key, { count: "" }).trim(),
+          }))}
+        />
         <TwoQuestions ctx={ctx} />
         <OneClaim ctx={ctx} />
         <ClaimsSection ctx={ctx} />

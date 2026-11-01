@@ -6,7 +6,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { ht, type HubKey } from "./copy";
 
 /**
- * Who are you reading as? (MAP.md §3): seven paths, each a few pages in
+ * Who are you reading as? (MAP.md §3): eight paths, each a few pages in
  * order with the time it takes. The minutes are reading-time estimates
  * for each path's pages, set by the editors with the paths, not facts
  * about 6529; the list is marked so the number gate reads them as such.
@@ -62,6 +62,14 @@ const PATHS: readonly PathDef[] = [
     route: "path.writerRoute",
     minutes: 8,
     href: "/network/tdh/verification",
+  },
+  // The eighth: for a reader none of the seven describes. Eight paths fill
+  // two rows of four.
+  {
+    who: "path.unsure",
+    route: "path.unsureRoute",
+    minutes: 2,
+    href: "/network/tdh",
   },
 ];
 
