@@ -1,0 +1,189 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "04d8b1e250984d73c2c537794e6b83e2ed1f6721",
+  "coverage": [
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/page-1440x1000-01.png through evidence/page-1440x1000-05.png"
+    },
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/page-390x844-01.png through evidence/page-390x844-09.png"
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 8.0,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png"
+      ],
+      "findings": ["F-001"],
+      "note": "The page answers what the Museum holds (the art grid, and the Collection kept separate from Keys and Gates), how it works (governance, public record, rights) and where to go next, with linked sources. The one section that introduces Research has no content (F-001)."
+    },
+    "J02": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png"
+      ],
+      "findings": ["F-003"],
+      "note": "The order makes sense: definition, art, collection, public access, institutional record, next stage, care, sources. Three links with different wording lead to the Collection (F-003)."
+    },
+    "J03": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-04.png"
+      ],
+      "findings": ["F-001", "F-002"],
+      "note": "The H1 and the art grid lead and there is a single filled primary button. The empty 'Where art becomes possibility' heading gets the same H2 weight as the real sections, and the framed Collection care panel stands out more than the sections around it."
+    },
+    "J04": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-04.png",
+        "evidence/page-390x844-08.png"
+      ],
+      "findings": ["F-001", "F-002"],
+      "note": "Dark and restrained, with real works credited and future plans written in the future tense. The page is let down by the 'Unlock a new era of connected culture' line and by a square-cornered, unpadded frame that breaks the radius hierarchy."
+    },
+    "J05": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png"
+      ],
+      "findings": [],
+      "note": "Gaps between sections are large (about 110 to 170px at 1440) and the left columns are wide and empty, which suits an About essay. Related text and links stay together."
+    },
+    "J06": {
+      "score": 7.0,
+      "evidence": [
+        "evidence/page-1440x1000-04.png",
+        "evidence/page-390x844-08.png",
+        "evidence/page-1440x1000-02.png"
+      ],
+      "findings": ["F-002", "F-003", "F-005"],
+      "note": "Collection care text runs right up to its frame and the frame's side edges are heavier than its top and bottom. Smaller issues: art-grid caption tops and dividers don't line up across the row, and 'Collection' is capitalized two different ways."
+    },
+    "J07": {
+      "score": 6.5,
+      "evidence": [
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-390x844-04.png",
+        "evidence/page-390x844-05.png"
+      ],
+      "findings": ["F-001", "F-004"],
+      "note": "Most of the copy is precise and properly hedged. One whole section is fake profundity with nothing concrete in it (F-001). TDH appears without explanation for first-time visitors (F-004)."
+    },
+    "J10": {
+      "score": 8.0,
+      "evidence": [
+        "evidence/page-390x844-01.png",
+        "evidence/page-390x844-02.png",
+        "evidence/page-390x844-08.png",
+        "evidence/page-390x844-09.png"
+      ],
+      "findings": ["F-002"],
+      "note": "At 390 the page stacks into one column with no horizontal overflow, and images scale to the column. The Museum sub-nav wraps onto two rows. Collection care text sits against its frame (F-002). The 390 capture ends just below the 'On-chain transition' and 'Museum Safe' links, so the last source link, the Source and contribute block, and the site footer are unverified at 390."
+    }
+  },
+  "checks": { "I1": "pass", "I2": "pass", "I3": "pass" },
+  "findings": [
+    {
+      "id": "F-001",
+      "targets": ["J07", "J04", "J01"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-02.png",
+      "observation": "The section between 'Collection and acquisition' and 'A museum open to the public' is headed 'Where art becomes possibility'. Its only body text is 'Unlock a new era of connected culture, where every work opens a doorway to what comes next and meaning flows freely between people and ideas.', followed by the link 'Read Museum research'. The same copy appears at 390 (page-390x844-04.png, page-390x844-05.png). Every other section names concrete objects and mechanisms.",
+      "consequence": "This is the only place the page introduces Museum research, and it does not say what that research is, what it covers, or what a reader will find. The line could sit on any product. It reads as filler on an institutional page and undercuts the precise sections around it.",
+      "change": "Replace the heading and paragraph, through i18n message keys, with a concrete description of the Research area. Draft copy, to be checked against what the Research route actually publishes: heading 'Research'; body 'Museum research studies the works in the Collection and the artists who made them: their histories, provenance, and rights. Essays and object studies are published in Research.' Keep the 'Read Museum research' link.",
+      "acceptance_check": "At 1440 and 390 in en-US: the section heading names Research; the body says what Museum research covers and where it is published, in terms that match the Research route; no 'new era', 'doorway', or 'meaning flows' language remains anywhere on the page; and the link still goes to Research.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-002",
+      "targets": ["J06", "J04", "J10"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/page-390x844-08.png",
+      "observation": "'Collection care' is the only section drawn inside a frame. The frame is a square-cornered rectangle with no inner padding, and its left and right edges render heavier than its top and bottom. At 1440 the heading starts about 2px inside the left border (page-1440x1000-04.png). At 390 every line of heading and body text sits directly against the left border, and the right edge is about 10px from the text (page-390x844-08.png).",
+      "consequence": "Text pressed against a border looks broken and is harder to read at phone width. The heavier box gives this section emphasis its neighbours don't have, and the square frame breaks the rounded-xl radius used for framed surfaces.",
+      "change": "Either remove the frame so Collection care uses the same top rule and two-column layout as the neighbouring sections, or, if the panel is intentional, give it tw-rounded-xl, a uniform 1px tw-border-white/10 (or iron) edge, and inner padding of at least tw-p-6 on desktop and tw-p-4 at 390.",
+      "acceptance_check": "At 1440 and 390, no Collection care text touches a border or sits within 16px of one. If the border is kept, it is uniform on all four sides with rounded-xl corners. The section carries the same visual emphasis as its neighbours.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-003",
+      "targets": ["J02", "J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-03.png",
+      "observation": "Three links lead to the Collection, with three labels and two capitalizations: 'View the Collection' (The Art), 'Explore the Collection' (Collection and acquisition), and the filled button 'Explore the collection' (A museum open to the public). Everywhere else the page writes 'Collection' with a capital C.",
+      "consequence": "The same destination looks like several different ones, and the lowercase button label breaks the page's own naming.",
+      "change": "Use one label with the page's capitalization, such as 'Explore the Collection', for every Collection link, or drop the middle text link because the primary button follows it.",
+      "acceptance_check": "Every link to the Collection uses the same wording and capitalizes 'Collection'.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-004",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/page-390x844-06.png",
+      "observation": "'The Network uses TDH-weighted voting for major collecting and policy decisions' uses TDH without expanding or linking it. The page's audience is visitors learning what the Museum is.",
+      "consequence": "A first-time visitor can't tell who votes or how votes are weighted, which weakens the governance explanation.",
+      "change": "Expand TDH on first use, for example 'voting weighted by TDH (Total Days Held)', or link the term to its explanation.",
+      "acceptance_check": "TDH is expanded or linked where it first appears on the page.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-005",
+      "targets": ["J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000 · en-US",
+      "evidence": "evidence/page-1440x1000-02.png",
+      "observation": "In the art grid, the two-line photograph caption starts about 10px higher than the one-line CENTURY captions beside it, and the divider under it sits about 4px lower.",
+      "consequence": "The row doesn't quite line up, so it reads slightly less finished.",
+      "change": "Top-align the caption blocks across the row and pin the dividers to a shared baseline.",
+      "acceptance_check": "At 1440, the three caption titles start on the same line and the three dividers sit at the same height.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "The opening definition of the Museum and its stewardship purpose, including the hedged 'Accessioned works are intended to remain in the Collection'",
+    "The art grid of real works with titles and artist credits, keeping each aspect ratio (the portrait photograph is not cropped to a square)",
+    "The Collection and acquisition copy that keeps accessioned works separate from the Keys and Gates acquisition program",
+    "How the Museum works: governance, public record, and rights education, each with a stated mechanism and a link to inspect it",
+    "The next stage, written in the future tense and kept apart from what exists today",
+    "The Institutional sources row and the Source and contribute footer that link the page to its public record",
+    "The restrained dark palette with primary-blue eyebrows and links and a single filled primary button",
+    "Clean single-column stacking at 390 with no horizontal overflow"
+  ]
+}

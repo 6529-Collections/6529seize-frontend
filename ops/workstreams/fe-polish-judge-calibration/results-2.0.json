@@ -1,0 +1,695 @@
+{
+  "summary": {
+    "repeat_totals": [7.927, 8.048, 7.855],
+    "repeat_mean": 7.943,
+    "repeat_spread": 0.193,
+    "repeat_outcomes": ["false-required", "false-required", "false-required"]
+  },
+  "results": {
+    "c01": {
+      "label": {
+        "kind": "control",
+        "expect": "no-required"
+      },
+      "decision": "repair",
+      "total": 7.927,
+      "errors": [],
+      "required": [
+        {
+          "id": "F-001",
+          "severity": "P2",
+          "targets": ["J06", "J03", "J04"],
+          "observation": "'Collection care' is the only section drawn inside a frame. The frame has square corners and an uneven grey border, with the left and right edges heavier than the top and bottom. It has no inner padding: the heading and body text sit against the left border (about x=173 at 1440, x=99 at 390) and run close to the right border. The section is shifted about 3px off the page's left content edge."
+        },
+        {
+          "id": "F-002",
+          "severity": "P2",
+          "targets": ["J06", "J03"],
+          "observation": "Peer sections use different heading roles. Only 'The art' and 'Institutional record' have blue letter-spaced eyebrows. 'Collection and acquisition', 'Scholarship and interpretation', 'A museum open to the public', 'The next stage' and 'Collection care' have none, and 'Institutional sources' has a grey one. 'The next stage' and 'Collection care' headings render smaller (about 30px at 1440; 'The next stage' about 24px at 390) than the other section headings (about 36px at 1440, about 30px at 390)."
+        },
+        {
+          "id": "F-003",
+          "severity": "P2",
+          "targets": ["J07"],
+          "observation": "The page's stated audience is visitors learning what the Museum is, but the governance and next-stage copy uses unexplained internal terms. Examples: 'TDH-weighted voting', 'Adopted effects and proposals awaiting adoption remain separate in the public record', 'the Museum's current canonical institutional record', 'Decision-constrained custody', 'The Museum Safe will follow valid Network decisions through technical custody controls', 'Valid decisions will have a reliable path to an authorized Ethereum action', and 'Meme Card-funded acquisition program'. TDH, the Museum Safe and Meme Cards are never defined. Separately, 'The Museum is built to survive changes in … signers' is in the present tense, while the custody controls it depends on are listed as future work under 'The next stage'."
+        },
+        {
+          "id": "F-004",
+          "severity": "P2",
+          "targets": ["J10"],
+          "observation": "The 390x844 full-page capture ends about 14px below the 'On-chain transition / Museum Safe' link row. Content that the 1440 capture shows is missing at 390: the fifth source link 'View the public record', the 'Source and contribute' bar (Read the source, Propose an edit, Contributor guide, Related works and context), and the site footer."
+        },
+        {
+          "id": "F-005",
+          "severity": "P2",
+          "targets": ["J02", "J06"],
+          "observation": "Three Collection links within four consecutive sections each use a different label: 'View the Collection' (art row), 'Explore the Collection' (Collection and acquisition), and the primary button 'Explore the collection' (A museum open to the public). Only the button uses a lowercase 'collection'."
+        }
+      ],
+      "failed_checks": [],
+      "outcome": "false-required"
+    },
+    "c02": {
+      "label": {
+        "kind": "seeded",
+        "seed": "brief leakage in the intro",
+        "expect": ["I2"]
+      },
+      "decision": "repair",
+      "total": 7.79,
+      "errors": [],
+      "required": [
+        {
+          "id": "F-001",
+          "severity": "P1",
+          "targets": ["I2", "J07", "J01", "J03", "J04"],
+          "observation": "Directly under the H1 'The 6529 Network Museum', the lede is set in the largest body type: 'A calm, premium, curator-grade experience: clear hierarchy, considered pacing, and actionable insight into the collection.' The same line leads the 390 view (evidence/page-390x844-01.png)."
+        },
+        {
+          "id": "F-002",
+          "severity": "P2",
+          "targets": ["J06", "J04", "J03", "J10"],
+          "observation": "The 'Collection care' section is wrapped in a square-cornered outline whose left edge renders as a heavier double rule. The heading and paragraphs sit flush against the left border with no inner padding. At 390 (evidence/page-390x844-08.png), every paragraph line starts against the left border and runs to within a few pixels of the right border. No other section on the page is framed."
+        }
+      ],
+      "failed_checks": ["I2"],
+      "outcome": "detected"
+    },
+    "c03": {
+      "label": {
+        "kind": "seeded",
+        "seed": "fake profundity heading and paragraph",
+        "expect": ["J07"]
+      },
+      "decision": "repair",
+      "total": 7.726,
+      "errors": [],
+      "required": [
+        {
+          "id": "F-001",
+          "severity": "P2",
+          "targets": ["J07", "J04", "J01"],
+          "observation": "The section between 'Collection and acquisition' and 'A museum open to the public' is headed 'Where art becomes possibility'. Its only body text is 'Unlock a new era of connected culture, where every work opens a doorway to what comes next and meaning flows freely between people and ideas.', followed by the link 'Read Museum research'. The same copy appears at 390 (page-390x844-04.png, page-390x844-05.png). Every other section names concrete objects and mechanisms."
+        },
+        {
+          "id": "F-002",
+          "severity": "P2",
+          "targets": ["J06", "J04", "J10"],
+          "observation": "'Collection care' is the only section drawn inside a frame. The frame is a square-cornered rectangle with no inner padding, and its left and right edges render heavier than its top and bottom. At 1440 the heading starts about 2px inside the left border (page-1440x1000-04.png). At 390 every line of heading and body text sits directly against the left border, and the right edge is about 10px from the text (page-390x844-08.png)."
+        }
+      ],
+      "failed_checks": [],
+      "outcome": "detected"
+    },
+    "c04": {
+      "label": {
+        "kind": "seeded",
+        "seed": "governance theater paragraph",
+        "expect": ["I3"]
+      },
+      "decision": "repair",
+      "total": 7.29,
+      "errors": [],
+      "required": [
+        {
+          "id": "F-001",
+          "severity": "P1",
+          "targets": ["I3", "J07", "J04", "J03", "J06", "J01"],
+          "observation": "Above the 'How the Museum works' heading, a blue, letter-spaced, all-caps eyebrow reads 'THE MUSEUM IS A SOVEREIGN, GOVERNED, AND FULLY AUDITABLE INSTITUTION: ACCOUNTABLE, TRANSPARENT, AND DEFENSIBLE BY DESIGN. TRUST IS BUILT INTO EVERY LAYER.' It runs to 5 lines at 1440x1000 and 7 lines at 390x844 (page-390x844-06.png), so it outweighs the heading it labels. 'Sovereign', 'defensible by design' and 'trust is built into every layer' name no mechanism. 'Fully auditable' contradicts the page's own 'The next stage' section, which says an independently verifiable on-chain record of decisions and decision-constrained custody 'will' come later."
+        },
+        {
+          "id": "F-002",
+          "severity": "P2",
+          "targets": ["J06", "J04", "J03"],
+          "observation": "'Collection care' is the only section drawn inside a frame. The frame has square corners, its side borders look heavier than the top and bottom, and it has no inner padding. At 1440x1000 the heading starts about 3 px inside the left border, off the 170 px left edge used by the other section headings. At 390x844 the heading and paragraphs sit directly against the left border (page-390x844-08.png, page-390x844-09.png)."
+        },
+        {
+          "id": "F-003",
+          "severity": "P2",
+          "targets": ["J10"],
+          "observation": "The full-page 390x844 capture ends 453 px into its ninth tile, directly after the second Institutional sources link ('Open Museum statement'). Several elements visible at 1440x1000 are missing at 390x844: the remaining source links (On-chain transition, Museum Safe, View the public record), the 'Source and contribute' strip with its links and the 'Related works and context' disclosure, and the site footer."
+        },
+        {
+          "id": "F-004",
+          "severity": "P2",
+          "targets": ["J07", "J01"],
+          "observation": "The 'The governance' card says the Network uses 'TDH-weighted voting' and that 'Adopted effects and proposals awaiting adoption remain separate in the public record.' TDH is never defined on the page, and 'adopted effects' is internal vocabulary. 'The Next stage' card 'Decision-constrained custody' refers to 'The Museum Safe' without saying what it is (page-1440x1000-04.png)."
+        }
+      ],
+      "failed_checks": ["I3"],
+      "outcome": "detected"
+    },
+    "c05": {
+      "label": {
+        "kind": "seeded",
+        "seed": "invented metrics tiles",
+        "expect": ["I1"]
+      },
+      "decision": "repair",
+      "total": 7.121,
+      "errors": [],
+      "required": [
+        {
+          "id": "F-001",
+          "severity": "P1",
+          "targets": ["I1", "J01", "J03", "J04", "J07", "J10"],
+          "observation": "Directly under the opening statement, a row of four bordered stat cards reads '12,483 Collectors', '98.7% Visitor satisfaction', '4.2x Growth this quarter' and '31 Countries reached'. None has a source, date, defined unit, or link. The page describes no visitor survey, no growth measure, and no tracking of countries. At 390 the cards stack to about 430 px across the first two screens, ahead of any artwork. At 1440 the row also stops short of the content grid's right edge."
+        },
+        {
+          "id": "F-002",
+          "severity": "P2",
+          "targets": ["J06", "J04", "J03", "J10"],
+          "observation": "'Collection care' is the only section wrapped in a frame. The frame has square corners, thin top and bottom edges, heavier left and right edges, and no inner padding. At 1440 the heading's first letter sits against the left edge. At 390 the heading and all three paragraphs run flush against the left border and reach within a few px of the right border. Every neighboring section uses an open layout under a hairline top divider."
+        },
+        {
+          "id": "F-003",
+          "severity": "P2",
+          "targets": ["J10"],
+          "observation": "At 1440, Collection care is followed by three blocks. First, 'Institutional sources' with five links: Founding record, Open Museum statement, On-chain transition, Museum Safe, View the public record. Second, the 'Source and contribute' bar: Read the source, Propose an edit, Contributor guide, Related works and context. Third, the site footer. The 390 full-page capture ends right after the hairline divider below Collection care (the last tile is 563 px tall), and none of that content appears."
+        },
+        {
+          "id": "F-004",
+          "severity": "P2",
+          "targets": ["J07", "J01"],
+          "observation": "The governance card reads: 'The Network uses TDH-weighted voting for major collecting and policy decisions. Adopted effects and proposals awaiting adoption remain separate in the public record.' TDH is not explained anywhere on the page, and 'adopted effects' is internal wording. 'The next stage' uses similarly abstract wording, such as the heading 'Decision-constrained custody' and the line 'Valid decisions will have a reliable path to an authorized Ethereum action'."
+        }
+      ],
+      "failed_checks": ["I1"],
+      "outcome": "detected"
+    },
+    "c06": {
+      "label": {
+        "kind": "seeded",
+        "seed": "internal path, commit, and TODO as a headline",
+        "expect": ["I2"]
+      },
+      "decision": "repair",
+      "total": 7.46,
+      "errors": [],
+      "required": [
+        {
+          "id": "F-001",
+          "severity": "P1",
+          "targets": ["I2", "J07", "J01", "J03", "J04", "J10"],
+          "observation": "Under the 'THE ART' label, the section heading reads 'records/entities/6529NM-W-0008.json @ 9aea66c07d'. The line beneath it, in primary-blue tracked caps, reads 'TODO(CURATOR): REPLACE WITH FINAL VISITOR COPY BEFORE LAUNCH.' At 390 the path cannot wrap, so it overflows the content column and is clipped at the viewport edge ('records/entities/6529N…'). The TODO line also runs past the right edge."
+        },
+        {
+          "id": "F-002",
+          "severity": "P2",
+          "targets": ["J06", "J04", "J03"],
+          "observation": "'Collection care' is the only section drawn inside a full rectangular border. The border has square corners and a heavier left edge. There is no left inner padding: the heading and the body text sit directly against the left border at both viewports. The heading starts about 3px right of every other section heading."
+        },
+        {
+          "id": "F-003",
+          "severity": "P2",
+          "targets": ["J10"],
+          "observation": "The 390 full-page capture ends about 20px below the 'On-chain transition · Museum Safe' link row. At 1440 the page also shows a fifth Institutional sources link ('View the public record') and the 'Source and contribute' strip (Read the source, Propose an edit, Contributor guide, Related works and context). Neither appears at 390. This may be a capture artifact or content clipping; the evidence alone cannot tell which."
+        },
+        {
+          "id": "F-004",
+          "severity": "P2",
+          "targets": ["J07"],
+          "observation": "Explanations aimed at visitors rely on internal terms and abstractions:\n- 'TDH-weighted voting' (TDH is never defined)\n- 'Adopted effects and proposals awaiting adoption remain separate in the public record'\n- 'object-level rights record'\n- 'Decision-constrained custody'\n- 'will have a form that can be independently verified on Ethereum'\n- 'a reliable path to an authorized Ethereum action'\nAlso, Collection care says in the present tense that the Museum 'is built to survive changes in ... signers', while 'The next stage' says custody controls are still to come."
+        }
+      ],
+      "failed_checks": ["I2"],
+      "outcome": "detected"
+    },
+    "c07": {
+      "label": {
+        "kind": "control",
+        "expect": "no-required"
+      },
+      "decision": "incomplete",
+      "total": 7.528,
+      "errors": [],
+      "required": [
+        {
+          "id": "F-001",
+          "severity": "P2",
+          "targets": ["J01", "J03", "J04", "J10"],
+          "observation": "The Latest Drop (The Memes #560, a video) renders as an empty black player showing '0:00 / —' with no poster frame. On desktop it is the largest element in the first viewport. In Coming up, the Next Mint video is also black. The Leading and 2nd place cards, both marked with the image icon, show only 'Preview unavailable' in grey boxes about 320 px tall at 390 (page-1440x1000-02, page-390x844-04). At 390 the player has no reserved height: the 64 px play button sits on the scrub bar in Latest Drop, and in Next Mint it overlaps the scrub bar and the '0:00 / —' pill above the icon row (page-390x844-01, page-390x844-03)."
+        },
+        {
+          "id": "F-002",
+          "severity": "P2",
+          "targets": ["J02", "J01"],
+          "observation": "Above the fold, the only statement of what 6529 is is the H1 'Building a decentralized network state'. The concrete definition ('6529 is a network society: a decentralized, permissionless global network that funds, builds, and coordinates public-goods work…') starts below the whole Latest Drop module: about y=1240 at desktop and mid tile 2 at 390. It also sits between Latest Drop and Coming up, separating the current drop from its queue."
+        },
+        {
+          "id": "F-003",
+          "severity": "P2",
+          "targets": ["J07", "J13"],
+          "observation": "The Coming up cards read 'LEADING 36,857,274 TDH' and '2ND PLACE 37,033,359 TDH', so the second-place entry shows the larger figure. Neither the card nor the section says which tally the figure is (current or weighted vote) or what TDH means (page-390x844-04 shows the same)."
+        },
+        {
+          "id": "F-004",
+          "severity": "P2",
+          "targets": ["J07", "J04", "J06"],
+          "observation": "The waves section is headed 'Tired of bot replies?' with the subline 'JOIN THE MOST INTERESTING CHATS IN CRYPTO', centered, with 'View all' centered below the grid. Every other section header is left-aligned, and Coming up puts 'View all' at the right. At 390 the subline wraps 'CRYPTO' onto a line of its own (page-390x844-05)."
+        },
+        {
+          "id": "F-005",
+          "severity": "P2",
+          "targets": ["J06", "J07"],
+          "observation": "The '6529 Book Club' card preview reads '**Punk6529's SciFi/NearFi Book List** **Background** I consider this my…' with literal asterisks, at both viewports (page-390x844-06)."
+        },
+        {
+          "id": "F-006",
+          "severity": "P2",
+          "targets": ["J10", "J06"],
+          "observation": "At 390 the footer wraps one item per line but keeps its '|' separators, leaving dangling pipes: '@punk6529 |', '@6529Collections |', 'Terms of Service | Privacy Policy |' (page-390x844-07, page-390x844-08). The page capture ends after 'Privacy Policy |'. Copyright, Cookie Policy, License, 6529 Apps, API, Contact Us and Status, all visible at 1440, are not shown at 390."
+        },
+        {
+          "id": "F-007",
+          "severity": "P2",
+          "targets": ["J04", "J07"],
+          "observation": "The sentence 'We're extending what Bitcoin and Ethereum proved for money and code to human coordination itself, so any activity can be organized permissionlessly.' is set in monospace inside a bordered box beside the network-society statement (page-390x844-03 shows the same). The block makes 'decentralized, permissionless' and 'funds, builds, and coordinates' claims but links nowhere."
+        }
+      ],
+      "failed_checks": [],
+      "outcome": "false-required"
+    },
+    "c08": {
+      "label": {
+        "kind": "seeded",
+        "seed": "false urgency mint banner and misleading claim CTA",
+        "expect": ["S6"]
+      },
+      "decision": "incomplete",
+      "total": 5.583,
+      "errors": [],
+      "required": [
+        {
+          "id": "F-001",
+          "severity": "P0",
+          "targets": [
+            "I1",
+            "I3",
+            "S6",
+            "J01",
+            "J02",
+            "J03",
+            "J04",
+            "J06",
+            "J07",
+            "J13"
+          ],
+          "observation": "A full-width red-to-orange gradient banner sits between the headline and the hero actions. It reads 'Mint closes in 04:59 - only 3 left! Connect your wallet to claim instantly. No fees, ever.' The same page shows the real state of The Memes #560: Edition 149/331, Mint price 0.06529 ETH, Status Active, and 'Public Phase Ends In 17h : 42m : 46s' (page-1440x1000-02.png). On desktop the banner extends past the content column to the rail edge. On mobile it wraps to three lines of white-on-gradient text (page-390x844-01.png)."
+        },
+        {
+          "id": "F-002",
+          "severity": "P0",
+          "targets": ["I3", "S1", "J01", "J07", "J13"],
+          "observation": "The secondary hero button reads 'Claim your free Meme now' and sits beside 'Start here'. The only Meme on offer on the page, The Memes #560, has a mint price of 0.06529 ETH. Nothing near the button states the price, that a network fee applies, which wallet acts, or that a mint cannot be undone."
+        },
+        {
+          "id": "F-003",
+          "severity": "P2",
+          "targets": ["J10"],
+          "observation": "At 390px the hero action row does not wrap. 'Start here' fits, but the second button is cropped on both sides and reads 'im your free Meme no'. Its box runs past the right edge of the viewport."
+        },
+        {
+          "id": "F-004",
+          "severity": "P2",
+          "targets": ["J03", "J06", "J10"],
+          "observation": "At 390px the Latest Drop video and the Next Mint card video (page-390x844-03.png) collapse to short strips. The large centered play button sits on the scrubber and collides with the '0:00 / —' time pill, with the control row crowded beneath. At 1440px the Latest Drop frame is a large black square with only a play button and no poster (page-1440x1000-01.png)."
+        }
+      ],
+      "failed_checks": ["I1", "I3", "S1", "S6"],
+      "outcome": "detected"
+    },
+    "c09": {
+      "label": {
+        "kind": "repeat",
+        "of": "c01",
+        "expect": "no-required"
+      },
+      "decision": "repair",
+      "total": 8.048,
+      "errors": [],
+      "required": [
+        {
+          "id": "F-001",
+          "severity": "P2",
+          "targets": ["J06", "J03", "J10", "J04"],
+          "observation": "'Collection care' is the only section wrapped in a 1px square-cornered border box. Every other section uses a top divider rule. At 1440 the heading starts about 3px inside the left border, and the box's left edge sits slightly off the content column. At 390 (page-390x844-08.png, -09.png) the heading and all three paragraphs sit 2–3px from the left border, and the text runs almost to the right border."
+        },
+        {
+          "id": "F-002",
+          "severity": "P2",
+          "targets": ["J07"],
+          "observation": "'How the Museum works' and 'The next stage' (page-1440x1000-04.png; page-390x844-06.png, -07.png) rely on undefined internal terms. Examples: 'TDH-weighted voting'; 'Adopted effects and proposals awaiting adoption remain separate in the public record'; 'The repository is the Museum's current canonical institutional record'; 'guidance accompanies the object-level rights record'; the heading 'Decision-constrained custody'; 'The Museum Safe will follow valid Network decisions through technical custody controls'; 'Valid decisions will have a reliable path to an authorized Ethereum action'."
+        },
+        {
+          "id": "F-003",
+          "severity": "P2",
+          "targets": ["J02", "J06"],
+          "observation": "'Collection care' describes present preservation practice ('Long-term care joins Ethereum state to content-addressed records…') but is placed after 'The next stage', which describes future plans in the future tense. Separately, the three links to the Collection use inconsistent forms: 'View the Collection', 'Explore the Collection', and the primary button 'Explore the collection' in lowercase (page-1440x1000-03.png). The page otherwise treats 'Collection' as a proper noun."
+        }
+      ],
+      "failed_checks": [],
+      "outcome": "false-required"
+    },
+    "c10": {
+      "label": {
+        "kind": "repeat",
+        "of": "c01",
+        "expect": "no-required"
+      },
+      "decision": "repair",
+      "total": 7.855,
+      "errors": [],
+      "required": [
+        {
+          "id": "F-001",
+          "severity": "P2",
+          "targets": ["J06", "J04", "J03"],
+          "observation": "'Collection care' is the only section drawn as a framed box: a square-cornered grey border with essentially no horizontal padding. At 1440 the heading sits at x≈173, against the left border and off the 170 px axis every other section heading uses. At 390 (page-390x844-08/09) the heading and all three paragraphs sit about 3 px inside the left border, and the line ends nearly touch the right border."
+        },
+        {
+          "id": "F-002",
+          "severity": "P2",
+          "targets": ["J07", "J01"],
+          "observation": "Several passages in 'How the Museum works', 'The next stage' and 'Collection care' rely on unexplained terms and spec language:\n- Governance: 'TDH-weighted voting' (TDH is never defined) and 'Adopted effects and proposals awaiting adoption remain separate in the public record.'\n- The public record: 'The repository is the Museum's current canonical institutional record ... version-controlled'.\n- The next stage (page-1440x1000-04.png): 'a form that can be independently verified', 'Decision-constrained custody', 'technical custody controls', 'a reliable path to an authorized Ethereum action'; 'Museum Safe' is never explained.\n- Collection care: states in the present tense that 'The Museum is built to survive changes in ... operators, signers', while the custody controls appear only as a future stage."
+        },
+        {
+          "id": "F-003",
+          "severity": "P2",
+          "targets": ["J10"],
+          "observation": "The 390x844 full-page capture ends about 10 px below the 'On-chain transition / Museum Safe' row, with no bottom spacing. Three things that appear at 1440 (page-1440x1000-04/05) are missing: the fifth Institutional sources link 'View the public record', the 'Source and contribute' bar ('Read the source', 'Propose an edit', 'Contributor guide', 'Related works and context'), and the site footer."
+        },
+        {
+          "id": "F-004",
+          "severity": "P2",
+          "targets": ["J02", "J07", "J06"],
+          "observation": "The Collection is linked three times under three labels: 'View the Collection' (art section, page-1440x1000-01), 'Explore the Collection' (Collection and acquisition, page-1440x1000-02), and the primary button 'Explore the collection' with a lowercase c (page-1440x1000-03). The text link and the button repeat each other about one screen apart."
+        },
+        {
+          "id": "F-005",
+          "severity": "P2",
+          "targets": ["J01", "J04", "J06"],
+          "observation": "The three 'Works held and studied' cards (CENTURY #31, 'Patrolling the border between the Negev Desert and Jordan', CENTURY #724) show only title and artist: no date, medium or credit line, although the next section says these artists are represented by completed gifts. On the David Seymour card the portrait image is centred in its column (x 635–885 at 1440; 143–327 at 390), but the caption starts at the column edge (x 571; 96 at 390). Its bottom rule also sits about 4 px lower than its neighbours'."
+        },
+        {
+          "id": "F-006",
+          "severity": "P2",
+          "targets": ["J10", "J05"],
+          "observation": "At 390 the 80 px icon rail stays docked on the left, so content runs only from x 96 to 374 (about 278 px). As a result the H1 breaks into three lines, body text runs about 30–35 characters per line, and the Museum subnav wraps into a row of three and a row of two, with the active 'About' on the second row."
+        }
+      ],
+      "failed_checks": [],
+      "outcome": "false-required"
+    },
+    "c11": {
+      "label": {
+        "kind": "recorded",
+        "source": "museum-home-consolidation: three reviewers PASS, shipped",
+        "expect": "no-required"
+      },
+      "decision": "repair",
+      "total": 7.431,
+      "errors": [],
+      "required": [
+        {
+          "id": "C-001",
+          "severity": "P1",
+          "targets": ["M4", "J14", "J01"],
+          "observation": "Themes and Variations #210 (Vera Molnár, in collaboration with Martin Grasser) is the hero image, and the same image appears again as the fourth Acquisitions card ('A Gift of Themes and Variations #210') on the same route at all three viewports. At 820 both copies are large (near full width in the hero, half width in the grid) and two screens apart. The run record does not name this repetition as a curatorial decision."
+        },
+        {
+          "id": "C-002",
+          "severity": "P2",
+          "targets": ["J14"],
+          "observation": "Only the Seymour card has a date and credit line ('David Seymour, Negev, 1952. © David Seymour/Magnum Photos 2022.'). The hero and the other three work labels show only title and 'artist · project', with no year: 'Themes and Variations #210 / Vera Molnár, in collaboration with Martin Grasser · Themes and Variations', 'CENTURY #31 / Casey Reas · CENTURY', and 'Take the Key! / GulYildiz'. The last credit is a run-together, handle-style name."
+        },
+        {
+          "id": "C-003",
+          "severity": "P2",
+          "targets": ["J14"],
+          "observation": "The Seymour photograph 'Patrolling the border between the Negev Desert and Jordan' is the only artwork with rounded corners; the hero and the other three card images have square corners. It also fills a square frame, while 'Take the Key!' is shown at its own portrait proportions within the same grid, so the captures cannot confirm that the photograph shows its full source frame."
+        },
+        {
+          "id": "C-004",
+          "severity": "P2",
+          "targets": ["J14", "J01"],
+          "observation": "The last artwork on the page is in the Acquisitions grid. Everything after it is text only: the four-principle strip, 'Explore the collection' with three text links, the Artists, Acquisitions and Research features, 'How the Network Museum works' and 'Public record'. That covers tiles 03–04 at 1440, tiles 04–06 at 820, and tiles 06–10 at 390 (half the mobile page). The 'Casey Reas' feature introduces the artist without any of his work. The 'Keys and Gates' feature presents again, with nearly the same description, the program already shown as an Acquisitions card a few screens earlier."
+        },
+        {
+          "id": "V-001",
+          "severity": "P2",
+          "targets": ["J02", "J04"],
+          "observation": "Below the Acquisitions row the page is a stack of text-only directories. (1) A band of four bold labels (Held by the 6529 Network, Governed through TDH, Art held on Ethereum, Open worldwide) with a 'How the Museum works' link. (2) 'Explore the collection' with All works / Artists / Projects tiles. (3) An Artists / Acquisitions / Research trio (Casey Reas, Keys and Gates, Research). (4) A 'How the Network Museum works' section that restates the band's facts and links 'Read about the Network Museum'. (5) Public record links. The how-it-works destination is offered three times (hero link, band link, section). 'Explore the collection' is both the hero CTA and a section heading. 'All works' appears in the Acquisitions header and again in the Explore tiles. Keys and Gates appears as a card and again in the trio. At 1440, roughly the lower 60% of the page shows no artwork."
+        },
+        {
+          "id": "V-002",
+          "severity": "P2",
+          "targets": ["J03", "J06"],
+          "observation": "Each Acquisitions card stacks an artwork caption (bold ~16px title, muted artist line), then a hairline, then a larger ~20px program heading, description and status line. Caption heights vary. The Patrolling caption runs a two-line title, a credit line and a 'View Wave publication' link, and the Themes and Variations artist line wraps. At 1440 the four program headings therefore start at about 713, 713, 808 and 733 px within the tile, and the status lines end at four different heights. At 820 the second row has the same offset. Because the program heading is larger than the artwork title, each card reads as two stacked items."
+        },
+        {
+          "id": "V-003",
+          "severity": "P2",
+          "targets": ["J03", "J05"],
+          "observation": "The Acquisitions header is split into two columns. The eyebrow and H2 sit at the bottom of the left column, while the intro paragraph and the 'All works' / 'Browse acquisitions' links fill the top of the right column. This leaves about 170 px of empty black above the heading at 1440 and about 250 px at 820, and the paragraph is read before the heading it introduces."
+        },
+        {
+          "id": "V-004",
+          "severity": "P2",
+          "targets": ["J06", "J04"],
+          "observation": "In the Acquisitions row, 'Patrolling the border between the Negev Desert and Jordan' renders with rounded corners. CENTURY #31, Take the Key!, Themes and Variations #210 and the hero artwork all render with square corners. This holds at all three widths."
+        },
+        {
+          "id": "V-005",
+          "severity": "P2",
+          "targets": ["J05"],
+          "observation": "Several section boundaries stack two hairlines around empty space. Between the four-label band and 'Explore the collection' there is an empty band about 110 px tall bounded by two full-width rules at 1440 and 820 (about 80 px at 390). The Explore tiles' own bottom rules are followed about 110 px later by another full-width rule. 'Public record' floats in roughly 120 px of blank space before the Source and contribute bar."
+        },
+        {
+          "id": "V-006",
+          "severity": "P2",
+          "targets": ["J10"],
+          "observation": "At 820x1000 the hero stacks. The 692 px square artwork and its caption fill the first viewport, and the eyebrow, the H1 'A public museum for a network state', the intro and both CTAs only begin after about 1,000 px of scrolling. At 1440 the same content sits beside the artwork, and at 390 the H1 starts inside the first viewport."
+        },
+        {
+          "id": "E-001",
+          "severity": "P2",
+          "targets": ["J07"],
+          "observation": "The holding and governance statement appears twice in near-identical words. The first is the band under Acquisitions (\"Held by the 6529 Network\", \"Governed through TDH\", \"Art held on Ethereum\", \"Governance and execution are moving progressively on-chain\"). The second is the How the Network Museum works section (\"The collection is held by the 6529 Network and governed through TDH. Its artworks are held on Ethereum, while its decisions, records, and operating systems are moving progressively on-chain.\"; home-1440x1000-04). Three links to this one topic use three labels: \"How the Network Museum works\", \"How the Museum works\" and \"Read about the Network Museum\". The Keys and Gates list \"access, exclusion, permission, surveillance, custody, autonomy, and exit\" appears word for word in its acquisition card (home-1440x1000-02) and again in the feature band (home-1440x1000-03). The gift card names \"Themes and Variations\" four times, in the caption, credit, heading and body."
+        },
+        {
+          "id": "E-002",
+          "severity": "P2",
+          "targets": ["J07"],
+          "observation": "Explore the collection says \"The Museum collects significant works of digital art, with a particular focus on art native to computation, networks, and the blockchain.\" The hero says the Collection holds \"digital art and photography\" (home-1440x1000-01), and two of the four acquisitions shown are photography: Conflict at Its Edges (photographs from 1952 to 2016) and Keys and Gates. The hero's second paragraph describes the Collection as \"accepted gifts alongside acquisitions still underway\". The Acquisitions intro (home-1440x1000-02) instead lists three completed acquisitions, only one of them labeled a gift, plus one in progress."
+        },
+        {
+          "id": "E-003",
+          "severity": "P2",
+          "targets": ["J07"],
+          "observation": "The System in Seven States is counted among \"three completed acquisitions\", but its card says \"A Museum curatorial grouping reads seven accessioned Casey Reas works through related computational systems without claiming an artist-defined canonical group.\" The Keys and Gates card opens with \"The program's selected group brings together…\" and never names the program. The eyebrow \"CURRENT ACQUISITIONS\" repeats the heading \"Acquisitions\", and \"current\" sits over acquisitions that are mostly complete. The Casey Reas feature (home-1440x1000-03) says only \"Read the artist and practice profile, then move through the projects and works held in the collection.\""
+        },
+        {
+          "id": "E-004",
+          "severity": "P2",
+          "targets": ["J07"],
+          "observation": "\"Governed through TDH\" (in the band) and \"governed through TDH\" (in How the Network Museum works) never expand or explain TDH or say who decides, even though the section heading promises to explain how the Museum works. \"View Wave publication\" (home-1440x1000-02) uses the 6529 product term Wave without saying what opens. The Public record links \"Museum Safe\", \"Decisions\" and \"Public repository\" are bare labels in a separate block, away from the claims they support."
+        }
+      ],
+      "failed_checks": ["M4"],
+      "outcome": "false-required"
+    },
+    "c12": {
+      "label": {
+        "kind": "recorded",
+        "source": "museum-art-first-rebuild: owner rejected registry-first pages with no artwork",
+        "expect": "required"
+      },
+      "decision": "repair",
+      "total": 4.951,
+      "errors": [],
+      "required": [
+        {
+          "id": "C-001",
+          "severity": "P1",
+          "targets": ["M1", "J01", "J14"],
+          "observation": "The CENTURY #31 object record shows no image or live render of the work anywhere in the captured viewport. The top ~390 px hold the shared section masthead ('A public collection for internet-native art', its deck, and the release line), the tab bar, and the 'Verified from the canonical Museum release' banner. Below them come the accession number, title, 'Casey REAS', two status chips, a technical-verification caveat, a comparative-sample note, an 'Artist statement' panel, and a 'Technical evidence' heading. The work the record describes never appears where the record leads."
+        },
+        {
+          "id": "C-002",
+          "severity": "P1",
+          "targets": ["J01", "J14"],
+          "observation": "No artwork appears in the first viewport at either width. At 1440 the landing page runs in this order: headline and deck, tab bar, release-verification banner, a 'Mission' section that restates the deck, then 'The 6529 Network Museum' as a text transcription. The transcription starts with a Record ID, an authority class, a source URL, a source-HTML timestamp, and a SHA-256 digest, followed by a note that operational facts 'must be reverified before action'. At 390 (evidence/home-390x844-01.png) the whole viewport is masthead, a horizontally scrolling tab row, and the release banner."
+        },
+        {
+          "id": "C-003",
+          "severity": "P1",
+          "targets": ["J01", "J14"],
+          "observation": "The captured program route is headed by the generic 'Programs' label and the section intro. 'Keys and Gates' appears only as a card with a lowercase subtitle ('photographs of access, control, and exit'), a status chip, and the count '16 selected works'. None of the 16 photographs appear, and neither do their photographers, a curatorial statement, the selector, or selection dates. Below the card the page ends with a footer disclaimer."
+        },
+        {
+          "id": "C-004",
+          "severity": "P1",
+          "targets": ["M2", "J14"],
+          "observation": "The panel headed 'Artist statement' holds a third-person paraphrase ('The artist describes CENTURY as a generative response to modernist painting and drawing…') with no source, link, or date. The artist's name also differs between linked records: 'Casey REAS' on the object record (object-1440x1000-01.png) and 'Casey Reas' in the gift lot title (gift-1440x1000-01.png)."
+        },
+        {
+          "id": "C-005",
+          "severity": "P2",
+          "targets": ["J01", "J14"],
+          "observation": "The gift record 'Casey Reas donation from punk6529' shows none of its seven works in the viewport. Several blocks come before the 'Objects in lot' heading, which starts at the bottom edge: a process sentence and status chips, four data cards (object count, donor credit, custody ENS name, and receipt transaction hash with date), and a 'Completion limits' panel that contains only '—'."
+        },
+        {
+          "id": "C-006",
+          "severity": "P2",
+          "targets": ["J14"],
+          "observation": "The object label gives the accession number, title, and artist, but no date, credit line, or rights statement appears in the viewport. The first descriptive lines are a verification caveat ('Determinism of live behavior has not yet been independently verified') and a sampling disclaimer ('it is not an artist-defined triptych'), not a description of what the work is or how it looks."
+        },
+        {
+          "id": "V-001",
+          "severity": "P1",
+          "targets": ["J10", "J06"],
+          "observation": "A page-level horizontal scrollbar sits across the bottom of the viewport. Under 'Culture held in public' the paragraph is cut off at the right edge ('The 6529 Network Museum is a perman'). The desktop icon rail stays visible and leaves a ~280px content column. The home page's long unbroken tokens (the Arweave source URL and the 'sha256:…' hash chip) are the likely cause of the overflow."
+        },
+        {
+          "id": "V-002",
+          "severity": "P2",
+          "targets": ["J10", "J02"],
+          "observation": "The section tab row is cut off after 'Collections | Acces'. Governance and Methodology are off-screen. The only cue to scroll is a bright white, Windows-classic scrollbar track with arrow buttons under the tabs, which clashes with the dark surface."
+        },
+        {
+          "id": "V-003",
+          "severity": "P2",
+          "targets": ["J02"],
+          "observation": "In all four desktop captures the six tabs (Overview, Collections, Accessions, Programs, Governance, Methodology) have the same dark pill style. None is marked as current, including 'Programs' on the program route and 'Overview' on the home page."
+        },
+        {
+          "id": "V-004",
+          "severity": "P2",
+          "targets": ["J03", "J05"],
+          "observation": "Each detail route repeats the home masthead: the H1 'A public collection for internet-native art', the intro paragraph, a floating 'Canonical Museum release · main' label, the tab row, and a full-width green-tinted 'Verified from the canonical Museum release' banner. Together they fill y≈0–390. The record's own title ('CENTURY #31', 'Casey Reas donation from punk6529') starts at y≈513 in smaller type than the masthead H1, and the release provenance appears twice above the content."
+        },
+        {
+          "id": "V-005",
+          "severity": "P2",
+          "targets": ["J04", "J03"],
+          "observation": "None of the five first viewports shows an artwork. The object page for CENTURY #31 shows the title, chips, prose and an 'Artist statement' card in a ~770px column, with the right ~40% empty. On the gift page the 'Objects in lot' section starts at the bottom edge (y≈990), below a 2x2 metadata grid. The program card reads '16 selected works' with no thumbnails. The home page is text, a URL and a SHA-256 hash."
+        },
+        {
+          "id": "V-006",
+          "severity": "P2",
+          "targets": ["J06", "J03"],
+          "observation": "Under the heading 'The 6529 Network Museum', the record fields run together as one inline paragraph at full body size: 'Record ID: [6529NM-POL-001] Authority class: founding institutional note Source: https://… Source HTML observed: 2026-08-01 UTC Source HTML SHA-256: [sha256:75889…]'. No field has its own line or separator. That heading is also the same size as the section heading 'Culture held in public' directly above it, so two peer headings stack."
+        },
+        {
+          "id": "V-007",
+          "severity": "P2",
+          "targets": ["J05", "J04"],
+          "observation": "The donation's facts sit in four equal, heavily padded cards in a KPI-style 2x2 grid: 'OBJECTS IN LOT 7', 'PUBLIC DONOR CREDIT Gift of punk6529', 'CUSTODY REFERENCE networkmuseum.6529.eth', and 'RECEIPT EVIDENCE 0xbdde33…0498 · Aug 1, 2026' with the full hash in small mono. Below them, a full-width 'Completion limits' card contains only '—'."
+        },
+        {
+          "id": "V-008",
+          "severity": "P2",
+          "targets": ["J02"],
+          "observation": "The program route capture shows the kicker 'PROGRAMS' over the heading 'Programs', the general programs description, and 'Keys and Gates' as a half-width list card. Unlike the gift and object records, it has no back link and no program-level heading. The kicker also just repeats the heading."
+        },
+        {
+          "id": "E-001",
+          "severity": "P1",
+          "targets": ["I2", "J07"],
+          "observation": "Every route shows release-pipeline status above its content. The masthead meta reads 'Canonical Museum release · main', and a banner reads 'Verified from the canonical Museum release / Canonical Museum release · main · Observed Aug 2, 2026 · 199 declared files' with 'View release manifest' and 'GitHub' links. The program page footer describes how the website itself works: 'Public records are rendered from a verified Museum release. The website does not infer accession, ownership, rights, or preservation completion from a transfer or a selected outcome.' The same content appears at 390 (home-390x844-01.png), where it takes up much of the first screen."
+        },
+        {
+          "id": "E-002",
+          "severity": "P1",
+          "targets": ["I2", "J07"],
+          "observation": "Under the H2 'The 6529 Network Museum', the overview body begins with record metadata run together as one paragraph: 'Record ID: 6529NM-POL-001 Authority class: founding institutional note Source: https://6529networkmuseum_thememes.ar.io/ Source HTML observed: 2026-08-01 UTC Source HTML SHA-256: sha256:75889ed2…ff28b8d4'. Next comes an operator note: 'This is a text transcription of the permanent institutional note. Current operational facts, especially custody configuration and program status, must be reverified before action.'"
+        },
+        {
+          "id": "E-003",
+          "severity": "P2",
+          "targets": ["J07"],
+          "observation": "The overview has the sentence 'The 6529 Network Museum is a permanent cultural collection held for stewardship, research, interpretation, preservation, and public access.' three times: as the hero lede, verbatim under 'MISSION / Culture held in public', and almost verbatim in 'Purpose'. The H2 'The 6529 Network Museum' repeats the eyebrow. The gift, object and program routes each reprint the H1 'A public collection for internet-native art' and the same lede above their own title, so 'CENTURY #31' and 'Casey Reas donation from punk6529' are smaller headings below the generic museum headline."
+        },
+        {
+          "id": "E-004",
+          "severity": "P1",
+          "targets": ["I2", "J07"],
+          "observation": "The program status chip shows a raw enum in Title Case that joins two states: 'Selection Complete Acquisition And Accession Unverified'. The object page shows a record-type chip, 'Accession object record', next to 'Accessioned' (object-1440x1000-01.png). The gift chips use Title Case: 'Formally Accepted' (gift-1440x1000-01.png)."
+        },
+        {
+          "id": "E-005",
+          "severity": "P2",
+          "targets": ["J07"],
+          "observation": "The gift subtitle is a generic methodology disclaimer, not a description of this gift: 'A transfer or custody reference is not, by itself, an accession. Each lot keeps its current gate visible.' Field labels are internal: 'CUSTODY REFERENCE' (networkmuseum.6529.eth) and 'RECEIPT EVIDENCE', whose value is a full 66-character transaction hash with the date. 'Completion limits' is a section heading followed only by '—'. On the object page, the back link 'Back to accession' does not say which accession, and 'Technical evidence' is internal wording (object-1440x1000-01.png)."
+        },
+        {
+          "id": "E-006",
+          "severity": "P2",
+          "targets": ["J07"],
+          "observation": "Under 'CENTURY #31 / Casey REAS' there is no plain label line with date and medium. The first paragraph reads like a verification log: 'On-chain generative software associated with an ERC-721 token on Ethereum; Art Blocks records a token hash. Determinism of live behavior has not yet been independently verified.' The fine print reads: 'This token is one comparative state in a three-token CENTURY sample… it is not an artist-defined triptych.' The 'Artist statement' panel contains a third-person paraphrase ('The artist describes CENTURY as…') with no source."
+        },
+        {
+          "id": "E-007",
+          "severity": "P2",
+          "targets": ["J07"],
+          "observation": "On the program route, the eyebrow 'PROGRAMS' repeats the heading 'Programs', and the program itself, 'Keys and Gates', appears only as a card title under the internal code '6529NM-AP-01'. Its subtitle starts in lowercase: 'photographs of access, control, and exit'. The intro is abstract: 'Programs give the Museum a curatorial frame, a public process, and a documented route from selection to acquisition.'"
+        }
+      ],
+      "failed_checks": ["M1", "M2", "I2"],
+      "outcome": "agrees"
+    },
+    "c13": {
+      "label": {
+        "kind": "recorded",
+        "source": "museum-art-first-rebuild: owner review passed release-verified captures",
+        "expect": "no-required"
+      },
+      "decision": "repair",
+      "total": 8.458,
+      "errors": [],
+      "required": [
+        {
+          "id": "C-001",
+          "severity": "P2",
+          "targets": ["J14"],
+          "observation": "CENTURY #31 renders across the full content column, about 1,260 CSS px wide, below a title block that ends about 400 px down the page. The visible arc shows a circle nearly as wide as the image, so the work is roughly square and about 1,260 px tall. Only the top third of the circle is in view. Because the image is taller than a 1,000 px viewport, the whole composition never fits on screen at any scroll position. The capture is about 16:9, so it shows less height than the pinned 1,000 px, but the overflow still holds at 1,000 px."
+        },
+        {
+          "id": "V-001",
+          "severity": "P2",
+          "targets": ["J03"],
+          "observation": "CENTURY #31 renders as a square at the full content width (about 1,260 px), starting about 400 px down the page. On load only the upper half of the circle is in view. Because the image is taller than the viewport, no scroll position shows the whole work."
+        }
+      ],
+      "failed_checks": [],
+      "outcome": "false-required"
+    },
+    "c14": {
+      "label": {
+        "kind": "recorded",
+        "source": "mint-progress-modals: reviewed and shipped",
+        "expect": "no-required"
+      },
+      "decision": "incomplete",
+      "total": 8.719,
+      "errors": [],
+      "required": [],
+      "failed_checks": [],
+      "outcome": "agrees"
+    },
+    "c15": {
+      "label": {
+        "kind": "recorded",
+        "source": "mint-success-modal: reviewed and shipped",
+        "expect": "no-required"
+      },
+      "decision": "incomplete",
+      "total": 8.781,
+      "errors": [],
+      "required": [],
+      "failed_checks": [],
+      "outcome": "agrees"
+    }
+  }
+}

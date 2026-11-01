@@ -1,0 +1,193 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "04d8b1e250984d73c2c537794e6b83e2ed1f6721",
+  "coverage": [
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/page-1440x1000-01.png through evidence/page-1440x1000-05.png"
+    },
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/page-390x844-01.png through evidence/page-390x844-09.png"
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "The primary task is for a visitor to learn what the Museum holds, how it is governed and preserved, and where to go next. A plain opening definition comes first, followed by three real works with titles and artists. Every section ends with a next-step link. Holdings are named by donor ('Casey Reas and Magnum Photos'), but the page gives no sense of how large the Collection is."
+    },
+    "J02": {
+      "score": 8,
+      "evidence": [
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png",
+        "evidence/page-390x844-07.png",
+        "evidence/page-390x844-08.png"
+      ],
+      "findings": ["F-003"],
+      "note": "The sections follow a sensible order from definition to art, collection, scholarship, public access, mechanism and sources. The exception is 'Collection care', which describes present practice but sits after the future-tense 'The next stage'. That placement splits the explanation of current operations and blurs present versus planned."
+    },
+    "J03": {
+      "score": 8,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-04.png",
+        "evidence/page-390x844-08.png"
+      ],
+      "findings": ["F-001"],
+      "note": "The H1 and lead paragraph dominate, the art comes next, and the sources and footer stay in the background. The bordered 'Collection care' block is the only framed section on the page, so it reads as a featured callout and pulls attention to a secondary section."
+    },
+    "J04": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png"
+      ],
+      "findings": ["F-001", "F-004"],
+      "note": "Restrained, dark and museum-native, with no casino or template styling. Real works lead the page, and governance is described through a named mechanism. Deductions: art labels lack dates and medium, and the square-cornered frame on 'Collection care' sits outside the radius hierarchy and does not look native."
+    },
+    "J05": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-390x844-04.png"
+      ],
+      "findings": [],
+      "note": "Editorial spacing suits an About page: related copy and links are grouped under each section heading and the divider-rule rhythm stays even. The two-column sections leave a large empty left column under each heading at 1440."
+    },
+    "J06": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-1440x1000-04.png",
+        "evidence/page-390x844-08.png",
+        "evidence/page-390x844-09.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-02.png"
+      ],
+      "findings": ["F-001", "F-003", "F-004"],
+      "note": "Type roles, eyebrows and divider rules are consistent overall. The 'Collection care' box has no horizontal padding: text sits about 3px inside the border at both widths. Link and button capitalisation is inconsistent: 'Explore the collection' sits beside 'Explore the Collection' and 'View the Collection'. The photograph's label is offset from its centred image."
+    },
+    "J07": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png",
+        "evidence/page-390x844-06.png",
+        "evidence/page-390x844-07.png"
+      ],
+      "findings": ["F-002"],
+      "note": "The opening, collection and scholarship copy is specific and accurate in tone. 'How the Museum works' and 'The next stage' use internal vocabulary the stated visitor audience cannot decode: TDH, 'Adopted effects', 'object-level rights record', 'Decision-constrained custody', 'canonical institutional record', and an unexplained 'Museum Safe'."
+    },
+    "J10": {
+      "score": 8,
+      "evidence": [
+        "evidence/page-390x844-01.png",
+        "evidence/page-390x844-02.png",
+        "evidence/page-390x844-08.png",
+        "evidence/page-390x844-09.png"
+      ],
+      "findings": ["F-001", "F-005"],
+      "note": "At 390 the page reflows to one column with no visible horizontal overflow. The art stacks at correct ratios and the museum nav wraps to two rows. The 'Collection care' frame leaves text against its border. The persistent 80px icon rail narrows the column to about 278px. The last 390 tile ends at the 'Institutional sources' links, so 'View the public record', the 'Source and contribute' bar and the site footer at 390 are not in evidence and remain unverified."
+    }
+  },
+  "checks": { "I1": "pass", "I2": "pass", "I3": "pass" },
+  "findings": [
+    {
+      "id": "F-001",
+      "targets": ["J06", "J03", "J10", "J04"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-04.png",
+      "observation": "'Collection care' is the only section wrapped in a 1px square-cornered border box. Every other section uses a top divider rule. At 1440 the heading starts about 3px inside the left border, and the box's left edge sits slightly off the content column. At 390 (page-390x844-08.png, -09.png) the heading and all three paragraphs sit 2–3px from the left border, and the text runs almost to the right border.",
+      "consequence": "The frame looks accidental and unfinished, makes a secondary section look like a featured callout, and crams the text against the frame on phones. It also breaks the radius hierarchy.",
+      "change": "Preferred: remove the border so 'Collection care' uses the same top-divider, two-column pattern and left alignment as the sections above it. If a frame is intended, use the card pattern instead: tw-rounded-xl, a tw-border-white/10 or tw-border-iron-* edge, and at least 24px inner padding at both widths.",
+      "acceptance_check": "At 1440 and 390, the 'Collection care' heading and paragraphs either align with the neighbouring sections' left edge under a top divider with no enclosing box, or sit in a rounded-xl frame with at least 24px between every text line and the frame on all sides.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-002",
+      "targets": ["J07"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-03.png",
+      "observation": "'How the Museum works' and 'The next stage' (page-1440x1000-04.png; page-390x844-06.png, -07.png) rely on undefined internal terms. Examples: 'TDH-weighted voting'; 'Adopted effects and proposals awaiting adoption remain separate in the public record'; 'The repository is the Museum's current canonical institutional record'; 'guidance accompanies the object-level rights record'; the heading 'Decision-constrained custody'; 'The Museum Safe will follow valid Network decisions through technical custody controls'; 'Valid decisions will have a reliable path to an authorized Ethereum action'.",
+      "consequence": "Visitors learning what the Museum is cannot tell who votes, what is recorded where, or what the Museum Safe is. The section meant to explain the mechanism reads as insider shorthand.",
+      "change": "Rewrite through i18n message keys. These are drafts; keep only what is accurate. Define TDH at first use: 'voting weighted by TDH (Total Days Held), 6529's measure of how long members have held its NFTs'. 'The public record lists adopted decisions separately from proposals not yet adopted.' 'The Museum's rules, records and revision history are kept in a public, version-controlled repository anyone can inspect.' 'Each work has its own rights record; the rights handbook explains copyright, public domain, and what artists and collectors may do.' Name what the Museum Safe is at first mention. Retitle 'Decision-constrained custody' to plain language, such as 'Custody that follows decisions'. Replace 'reliable path to an authorized Ethereum action' with a concrete outcome, such as 'Adopted decisions will be carried out on Ethereum, for example an acquisition, transfer or mint.'",
+      "acceptance_check": "In en-US at 1440 and 390, TDH and the Museum Safe are explained at first use. None of these phrases remain: 'Adopted effects', 'object-level rights record', 'Decision-constrained custody', 'canonical institutional record', 'reliable path'. Each card states who acts, what is recorded, and where to inspect it, and the copy is message-backed.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-003",
+      "targets": ["J02", "J06"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-04.png",
+      "observation": "'Collection care' describes present preservation practice ('Long-term care joins Ethereum state to content-addressed records…') but is placed after 'The next stage', which describes future plans in the future tense. Separately, the three links to the Collection use inconsistent forms: 'View the Collection', 'Explore the Collection', and the primary button 'Explore the collection' in lowercase (page-1440x1000-03.png). The page otherwise treats 'Collection' as a proper noun.",
+      "consequence": "Current practice reads as part of the roadmap, which blurs the present-versus-planned line the page otherwise draws carefully. The inconsistent CTA wording makes the main next step look less deliberate.",
+      "change": "Move 'Collection care' so it directly follows 'How the Museum works' and comes before 'The next stage', or fold it into 'How the Museum works'. Use 'Collection' capitalised in every link and button label, for example 'Explore the Collection' on the primary button.",
+      "acceptance_check": "At 1440 and 390 the section order runs: How the Museum works, Collection care (or its content inside How the Museum works), The next stage, Institutional sources. Every visible label that refers to the Museum's Collection capitalises 'Collection'.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-004",
+      "targets": ["J06", "J04"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000 · en-US",
+      "evidence": "evidence/page-1440x1000-02.png",
+      "observation": "In 'Works held and studied', the David Seymour photograph is centred in its column (about 635–885px) while its label starts at the column edge (about 571px). The label rules across the three cards do not share a baseline (about 158px vs 162px). Labels give title and artist only, with no date or medium.",
+      "consequence": "Small finish gaps in the one place where the page shows art with museum care.",
+      "change": "Align the photograph's label to the image edge or left-align the image within its column. Fix the label block height so the rules align. Add the date, and the medium where the record has it, to each label.",
+      "acceptance_check": "At 1440 each label starts at its image's left edge, the three label rules share one y-position, and each label shows title, artist and date.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-005",
+      "targets": ["J10"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 390x844 · en-US",
+      "evidence": "evidence/page-390x844-01.png",
+      "observation": "At 390 the unlabeled desktop icon rail stays visible and takes about 80px of the 390px width, leaving a reading column of about 278px. The lead paragraph runs about 30 characters per line and the H1 wraps to three lines.",
+      "consequence": "The reading column is cramped on phones, and the rail icons have no visible labels at this size.",
+      "change": "If this capture context reflects how phones receive the page, collapse the rail into the mobile app navigation at this width so the content gets the full width less the 16px gutters.",
+      "acceptance_check": "At 390 the museum content column spans the viewport minus standard side gutters, with no persistent icon rail.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "The opening H1 and lead paragraph stating in plain terms what the Museum is and what it does (collects, preserves, studies, shares)",
+    "'Works held and studied': real works with titles and artists, shown at their correct aspect ratio at both widths",
+    "The explicit distinction between the permanent Collection (completed gifts) and Keys and Gates acquisition work that stays separate until accession",
+    "The governance card that names the mechanism (TDH-weighted voting), with the 'View Museum decisions', 'View the Museum repository' and 'Visit the rights handbook' links",
+    "Future-tense framing of 'The next stage' kept apart from claims about current behaviour, and the hedged 'intended to remain' and 'should be able to' wording",
+    "The restrained dark editorial layout: divider-rule sections, primary-blue eyebrows and text links, one filled primary button with one secondary",
+    "The 'Institutional sources' link list and the 'Source and contribute' bar (Read the source, Propose an edit, Contributor guide)",
+    "The single-column mobile reflow with no horizontal overflow and the wrapped museum sub-navigation with the active 'About' indicator"
+  ]
+}

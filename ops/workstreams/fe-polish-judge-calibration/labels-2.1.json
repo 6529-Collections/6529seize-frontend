@@ -1,0 +1,51 @@
+{
+  "c16": {
+    "kind": "control",
+    "of": "c01",
+    "note": "phone device profile capture",
+    "expect": "adjudicate"
+  },
+  "c17": {
+    "kind": "control",
+    "of": "c07",
+    "note": "phone device profile capture",
+    "expect": "adjudicate"
+  },
+  "c18": {
+    "kind": "evidence-gap",
+    "of": "c01",
+    "note": "same evidence as c01: truncated phone capture with the desktop shell",
+    "expect": "adjudicate"
+  },
+  "c19": {
+    "kind": "seeded",
+    "of": "c02",
+    "seed": "brief leakage in the intro",
+    "expect": ["I2"]
+  },
+  "c20": {
+    "kind": "seeded",
+    "of": "c08",
+    "seed": "false urgency mint banner and misleading claim CTA",
+    "expect": ["S6"]
+  },
+  "c21": {
+    "kind": "recorded",
+    "of": "c14",
+    "source": "mint-progress-modals: reviewed and shipped",
+    "expect": "accepted"
+  },
+  "c22": {
+    "kind": "recorded",
+    "of": "c15",
+    "source": "mint-success-modal: reviewed and shipped",
+    "expect": "no-required"
+  },
+  "c23": {
+    "kind": "recorded",
+    "of": "c22",
+    "note": "after the S3 lifecycle-evidence prompt line",
+    "source": "mint-success-modal: reviewed and shipped",
+    "expect": "no-required"
+  }
+}

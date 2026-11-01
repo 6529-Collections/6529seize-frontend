@@ -1,0 +1,85 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "museum-art-first-release-verified",
+  "coverage": [
+    {
+      "route": "/museum/network/objects/[objectId]",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/object-1440x1000-01.png"
+    },
+    {
+      "route": "/museum/network/gifts/[accessionId]",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/gift-390x844-01.png"
+    },
+    {
+      "route": "/museum/network/artists/[slug]",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/artist-390x844-01.png"
+    }
+  ],
+  "dimensions": {
+    "J07": {
+      "score": 9,
+      "evidence": [
+        "evidence/object-1440x1000-01.png",
+        "evidence/gift-390x844-01.png",
+        "evidence/artist-390x844-01.png"
+      ],
+      "findings": ["E-001", "E-002"],
+      "note": "The copy is plain, specific museum language. The object header gives artist, title, series, year and object number. The gift record puts lot, status and credit in labeled fields. The artist bio names real media ('software, installations, prints, and drawings'). Back links name where they go. Nothing reads as brief leakage, abstraction or jargon. The only issues are P3: a 'View project' link that doesn't name the project, and 'seven works' repeated in the gift opening. The 'LCL:3204' badge in the global app chrome marks the local capture environment. It is not Museum copy and is not charged."
+    }
+  },
+  "checks": {
+    "I1": "pass",
+    "I2": "pass",
+    "I3": "pass"
+  },
+  "findings": [
+    {
+      "id": "E-001",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/objects/[objectId] · default · 1440x1000 · en-US",
+      "evidence": "evidence/object-1440x1000-01.png",
+      "observation": "The right-aligned link 'View project' doesn't name the project. It sits away from the 'CENTURY, 2021 · 6529NM.2026.001.01' line, and it doesn't say whether it opens a Museum page or an outside site.",
+      "consequence": "A reader scanning links can't tell which project this is or where the link goes without clicking.",
+      "change": "Name the project in the link, for example 'View the CENTURY project'. If the link leaves the Museum, say so in the label.",
+      "acceptance_check": "The link text names the CENTURY project, and a reader can tell from the label whether it is an internal or external destination.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-002",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/gifts/[accessionId] · default · 390x844 · en-US",
+      "evidence": "evidence/gift-390x844-01.png",
+      "observation": "'Seven works' appears four times in the opening view: in the title 'Casey Reas: seven works', in the lede, in the Institutional status field ('Gift accepted; seven works accessioned') and in the next 'Seven works' heading. The status field repeats the lede's 'formally accepted and accessioned'. The label 'Public credit' differs from the standard museum term 'Credit line'.",
+      "consequence": "The repetition is mild, but it slows scanning of an otherwise tight record. The nonstandard label is a small departure from museum practice.",
+      "change": "Have the lede add something the fields don't already say, or shorten the status to 'Accepted and accessioned'. Consider 'Credit line' in place of 'Public credit'.",
+      "acceptance_check": "Each fact (count, acceptance, accession) is stated once in the opening block, and the credit field uses a standard museum label.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "Object header order: artist link, then title, then series and year, then object number (CENTURY, 2021 · 6529NM.2026.001.01). The number is a real museum identifier, not machine text.",
+    "Gift record lede: 'A full gift of seven generative works by Casey Reas, formally accepted and accessioned into the permanent collection.' The museum terms are backed by an accession lot number and a status field.",
+    "Labeled record fields on the gift page: accession lot, institutional status and the 'Gift of punk6529' credit line",
+    "The artist bio names concrete roles and media instead of abstractions",
+    "Back links that name their destination ('Back to collection', 'Back to artists') and the plain section heading 'Works in the collection'",
+    "No hype, governance theater or invented metrics anywhere in the reviewed text"
+  ]
+}

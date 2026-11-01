@@ -1,0 +1,25 @@
+{
+  "rubric_version": "fe-polish-judge/2.1",
+  "run_id": "calibration-c20",
+  "candidate": {
+    "commit": "04d8b1e250984d73c2c537794e6b83e2ed1f6721",
+    "build": "production"
+  },
+  "scope": {
+    "routes": ["/"],
+    "audience": "Visitors and members arriving at 6529.io",
+    "primary_task": "Understand what 6529 is and take a first step: start here or connect a wallet",
+    "states": ["default"],
+    "viewports": ["1440x1000", "390x844"],
+    "locales": ["en-US"]
+  },
+  "not_applicable": {
+    "J08": "Screenshot-only calibration; interactions were not exercised",
+    "J11": "Screenshot-only calibration; no performance evidence was captured",
+    "J12": "Calibration evidence is en-US only",
+    "J09": "Screenshot-only calibration; only the populated state was captured"
+  },
+  "budget": {
+    "repair_batches": 6
+  }
+}

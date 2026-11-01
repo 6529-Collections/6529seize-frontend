@@ -111,7 +111,7 @@ not repeated. Fix any divergence through the normal development-branch flow.
 ## Claims
 
 Do not write “visual QA passed,” “museum-quality,” “production-ready,” or an
-equivalent claim unless the gate accepted the reviewed head. Until the judge is
-calibrated, report the outcome as `judge-accepted (uncalibrated)`. If any part
-of the gate was not performed, state that plainly and keep the release
-unqualified.
+equivalent claim unless the gate accepted the reviewed head. Report the outcome
+with the label the scoring script prints, currently `judge-accepted (partially
+calibrated)`. If any part of the gate was not performed, state that plainly and
+keep the release unqualified.

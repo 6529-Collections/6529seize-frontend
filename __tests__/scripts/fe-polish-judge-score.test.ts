@@ -7,7 +7,7 @@ const SCRIPT = path.join(
   process.cwd(),
   "ops/skills/fe-polish-judge/scripts/score.mjs"
 );
-const RUBRIC = "fe-polish-judge/2.0";
+const RUBRIC = "fe-polish-judge/2.1";
 const DIMENSIONS = [
   "J01",
   "J02",
@@ -255,7 +255,7 @@ describe("fe-polish-judge score.mjs", () => {
   it("accepts a consistent round with no open required findings", () => {
     const result = score(makeRun(), [makeRound()]);
     expect(result.decision).toBe("accepted");
-    expect(result.label).toBe("judge-accepted (uncalibrated)");
+    expect(result.label).toBe("judge-accepted (partially calibrated)");
     expect(result.total).toBe(9);
     expect(result.applicable_weight).toBe(90);
   });
@@ -318,6 +318,42 @@ describe("fe-polish-judge score.mjs", () => {
     const missing = { ...complete, checks: checksWithoutS3 };
     expect(score(run, [missing]).errors.join(" ")).toContain("S3");
     expect(score(run, [complete]).decision).toBe("accepted");
+  });
+
+  it("skips S checks pinned N/A for stages outside the reviewed states", () => {
+    const run = makeRun({
+      not_applicable: { S4: "Rejection and failure states are not reviewed" },
+    });
+    const complete = makeRound({ cryptoApplies: true });
+    const checks = Object.fromEntries(
+      Object.entries(complete.checks).filter(([id]) => id !== "S4")
+    );
+    const withoutS4 = { ...complete, checks };
+    expect(score(run, [withoutS4]).decision).toBe("accepted");
+
+    const judged = makeRound({
+      cryptoApplies: true,
+      checks: { S4: "unverified" },
+    });
+    expect(score(run, [judged]).errors.join(" ")).toContain(
+      "S4 is pinned N/A but was judged"
+    );
+  });
+
+  it("refuses to pin integrity, Museum, or S6 checks, or a pin without a reason", () => {
+    for (const id of ["I2", "M1", "S6"]) {
+      const result = runScore(
+        makeRun({ not_applicable: { J13: "No wallet", [id]: "Out of scope" } }),
+        [makeRound()]
+      );
+      expect(result.status).toBe(2);
+      expect(result.stderr).toContain(`${id} cannot be pinned N/A`);
+    }
+    const blank = runScore(makeRun({ not_applicable: { J13: " " } }), [
+      makeRound(),
+    ]);
+    expect(blank.status).toBe(2);
+    expect(blank.stderr).toContain("J13 is pinned N/A without a reason");
   });
 
   it("validates coverage against the pinned scope and candidate", () => {

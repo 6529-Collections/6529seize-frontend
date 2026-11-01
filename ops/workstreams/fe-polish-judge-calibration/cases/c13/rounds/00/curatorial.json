@@ -1,0 +1,81 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "museum-art-first-release-verified",
+  "coverage": [
+    {
+      "route": "/museum/network/objects/[objectId]",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/object-1440x1000-01.png"
+    },
+    {
+      "route": "/museum/network/gifts/[accessionId]",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/gift-390x844-01.png"
+    },
+    {
+      "route": "/museum/network/artists/[slug]",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/artist-390x844-01.png"
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/object-1440x1000-01.png",
+        "evidence/gift-390x844-01.png",
+        "evidence/artist-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "Each route leads with its object. The object page shows artist, title, series, year and accession number directly above the work. The gift page opens on what was given, its status and its credit. The artist page gives a short bio and then the works in the collection. The desktop work is too large to see whole; that problem is charged once, under J14 (C-001)."
+    },
+    "J14": {
+      "score": 8.0,
+      "evidence": [
+        "evidence/object-1440x1000-01.png",
+        "evidence/gift-390x844-01.png",
+        "evidence/artist-390x844-01.png"
+      ],
+      "findings": ["C-001"],
+      "note": "Reads as a credible museum publication. The artist, title, date and accession hierarchy is clear. The record agrees across routes: object 6529NM.2026.001.01 sits within lot 6529NM.2026.001, there are seven works, and the credit is Gift of punk6529. The bio is short and factual. The score is held at 8 because the principal work on the desktop object page is taller than the viewport and can never be seen whole (C-001). M4 passes: CENTURY #31 appears again on the artist page only as its entry in the works list, not as a reused lead image. Not charged: the floating 'N' dev-tools badge, which overlaps that image's lower-left corner, and the LCL:3204 badge. Both look like local development chrome, which does not match the production build the run record pins."
+    }
+  },
+  "checks": {
+    "M1": "pass",
+    "M2": "pass",
+    "M3": "pass",
+    "M4": "pass"
+  },
+  "findings": [
+    {
+      "id": "C-001",
+      "targets": ["J14"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/objects/[objectId] · default · 1440x1000 · en-US",
+      "evidence": "evidence/object-1440x1000-01.png",
+      "observation": "CENTURY #31 renders across the full content column, about 1,260 CSS px wide, below a title block that ends about 400 px down the page. The visible arc shows a circle nearly as wide as the image, so the work is roughly square and about 1,260 px tall. Only the top third of the circle is in view. Because the image is taller than a 1,000 px viewport, the whole composition never fits on screen at any scroll position. The capture is about 16:9, so it shows less height than the pinned 1,000 px, but the overflow still holds at 1,000 px.",
+      "consequence": "At the main desktop size, visitors never see the principal work whole. They have to scroll to piece the circular composition together, which undercuts the object page's purpose of presenting the work.",
+      "change": "On object pages, fit the principal image to the viewport. For example, cap its rendered height at the viewport height minus the site header (such as max-height: calc(100svh - <header height>)), use object-contain and center it on the existing ground. Keep the work uncropped and undistorted, and keep artist, title, date and accession number next to it (above or beside). Leave the full-width behavior at 390 px unchanged.",
+      "acceptance_check": "At 1440x1000 en-US: the top edge of the work is visible on first load. Scrolling the image up to the header shows the entire CENTURY #31 circle and its ground in one viewport, at the correct aspect ratio and with nothing cropped. At 390x844 the work still renders at full content width, uncropped.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "Object page record order: artist link above the title, CENTURY #31 as the title, then series, year and accession number 6529NM.2026.001.01, which ties the work to gift lot 6529NM.2026.001",
+    "The principal work renders uncropped at its own aspect ratio on a plain ground, with no captions, controls or overlays on top of it",
+    "Gift record fields: accession lot, institutional status ('Gift accepted; seven works accessioned') and public credit ('Gift of punk6529'), each consistent with the summary and with the artist page",
+    "The artist page's short factual bio followed directly by 'Works in the collection', with the first work shown uncropped inside the first mobile viewport",
+    "The same pattern on every route (back link, eyebrow, title, summary, record, then works), which keeps the pacing across the section consistent"
+  ]
+}

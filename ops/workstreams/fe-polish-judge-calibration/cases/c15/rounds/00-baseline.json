@@ -1,0 +1,203 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "mint-success-modal-review",
+  "coverage": [
+    {
+      "route": "/the-memes/mint",
+      "state": "success",
+      "viewport": "1440x900",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/success-1440x900-01.png"
+    },
+    {
+      "route": "/the-memes/mint",
+      "state": "success",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/success-390x844-01.png"
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 9,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "The success state answers the task. It shows the confirmed status, the card (artwork, The Memes #547, full title), quantity 3 and the recipient, with Done and a secondary explorer link."
+    },
+    "J02": {
+      "score": 9,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "The order runs status, then card, then quantity and recipient, then Done, then the explorer link. This matches how a collector reads a receipt."
+    },
+    "J03": {
+      "score": 9,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "The heading and card title lead. The receipt rows and the explorer link sit back, and the full-width Done is the one clear action."
+    },
+    "J04": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": ["F-004"],
+      "note": "Native dark iron modal with a rounded-xl panel, a rounded-lg button and restrained brand celebration (no confetti or neon in the captured state). The minted artwork is only a ~96px (80px mobile) square thumbnail, so the green heading and white button outweigh the art at the moment the art is the subject."
+    },
+    "J05": {
+      "score": 9,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "Compact receipt. Related data sits together under one divider, with no filler."
+    },
+    "J06": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": ["F-005"],
+      "note": "Type roles are consistent and the long title wraps cleanly. At 1440 the backdrop leaves ~15px darker bands at both viewport edges. Receipt rows mix an inline layout (Quantity) with a stacked one (Minted to)."
+    },
+    "J07": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": ["F-003"],
+      "note": "Receipt copy is plain and specific. The 'SEIZED!' heading is 6529 brand language: a newcomer may read 'seized' as 'confiscated', and only the subline makes the meaning clear."
+    },
+    "J09": {
+      "score": 9,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "Only the success state is pinned, and it is complete and deliberate at both widths. The long title wraps, and two ways to dismiss are visible (X and Done, not exercised)."
+    },
+    "J10": {
+      "score": 9,
+      "evidence": ["evidence/success-390x844-01.png"],
+      "findings": [],
+      "note": "At 390 the modal keeps 16px gutters, the title wraps to three lines, the 42-character address fits inside the content width and Done stays full width."
+    },
+    "J13": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": ["F-001", "F-002"],
+      "note": "The receipt says what arrived, how many and where, with the explorer link available but secondary. The recipient is raw hex with no tie to the user's wallet or profile, and the total paid is not restated. Lifecycle timing and the pre-prompt, rejection and failure stages do not appear in success-only screenshots. Address and token values look like harness fixture data."
+    }
+  },
+  "checks": {
+    "I1": "pass",
+    "I2": "pass",
+    "I3": "pass",
+    "S1": "unverified",
+    "S2": "unverified",
+    "S3": "unverified",
+    "S4": "unverified",
+    "S5": "unverified",
+    "S6": "pass"
+  },
+  "findings": [
+    {
+      "id": "F-001",
+      "targets": ["J13"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/the-memes/mint · success · 390x844 · en-US",
+      "evidence": "evidence/success-390x844-01.png",
+      "observation": "'Minted to' shows only the full 42-character hex address (0x1234567890AbcdEF…12345678) in mono, at both widths. Nothing says whether this is the connected wallet, and no profile handle or ENS name appears.",
+      "consequence": "Someone new to wallets cannot tell at a glance that the cards went to their own wallet without comparing hex strings.",
+      "change": "Show the recipient with the repo's ENS-plus-address or profile-handle pattern, e.g. 'Minted to <profile or ENS> · 0x1234…5678'. When the recipient is the connected wallet, say so, e.g. 'Minted to your connected wallet'. Keep the full checksummed address available.",
+      "acceptance_check": "When the recipient has a profile or ENS name, the success modal shows it next to the checksummed address. When the recipient is the connected wallet, the row says so. Text fits without overflow at 1440x900 and 390x844.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-002",
+      "targets": ["J13"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/the-memes/mint · success · 1440x900 · en-US",
+      "evidence": "evidence/success-1440x900-01.png",
+      "observation": "The receipt lists the card, quantity 3 and the recipient, but not what the mint cost (price × quantity in ETH). Same at 390x844.",
+      "consequence": "To check the cost of the action they just approved, the user has to open the block explorer.",
+      "change": "Add a 'Total paid' row that takes its ETH value from the transaction. Show fiat only when real data backs it.",
+      "acceptance_check": "The success modal shows a 'Total paid' row whose ETH value matches the transaction value. At 1440x900 and 390x844 the label and value do not collide.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-003",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/the-memes/mint · success · 390x844 · en-US",
+      "evidence": "evidence/success-390x844-01.png",
+      "observation": "The heading reads 'SEIZED!' in green capitals with an exclamation mark. In everyday English, 'seized' means confiscated. The meaning is clarified only by the subline 'Your mint is confirmed.'",
+      "consequence": "A collector new to 6529 may briefly read the success as a loss.",
+      "change": "Keep the brand heading if it is intentional, but make the subline state the result in full, e.g. 'Your mint is confirmed: 3 × The Memes #547.' (via i18n message keys).",
+      "acceptance_check": "Without relying on the brand verb, the heading plus subline state in plain words that the mint is confirmed and what was minted.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-004",
+      "targets": ["J04"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/the-memes/mint · success · 1440x900 · en-US",
+      "evidence": "evidence/success-1440x900-01.png",
+      "observation": "The minted artwork is a ~96px square thumbnail (~80px at 390x844) beside the title. The green heading and the full-width white Done button carry more visual weight than the card. These screenshots cannot show whether the square frame crops the card.",
+      "consequence": "The success moment centers on the status and the button rather than the artwork the collector just received.",
+      "change": "Give the artwork more presence, e.g. a larger preview at the card's native aspect ratio without cropping, with the receipt rows kept below it.",
+      "acceptance_check": "At 1440x900 and 390x844 the minted artwork renders uncropped at its native aspect ratio, at a size that leads the modal, with no horizontal overflow.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-005",
+      "targets": ["J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/the-memes/mint · success · 1440x900 · en-US",
+      "evidence": "evidence/success-1440x900-01.png",
+      "observation": "At 1440 the backdrop stops ~15px short of each viewport edge, leaving darker vertical bands at roughly x 0–15 and 1425–1440. These bands are absent at 390x844.",
+      "consequence": "The visible seams at the screen edges make the overlay look misaligned on desktop.",
+      "change": "Make the backdrop cover the whole viewport, including any reserved scrollbar gutter.",
+      "acceptance_check": "At 1440x900 the backdrop color runs unbroken to both viewport edges.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "Confirmation-only success wording: 'Your mint is confirmed.' directly under the heading",
+    "Receipt structure: artwork thumbnail, collection and token number ('The Memes #547'), full title, quantity and recipient",
+    "Full, mixed-case (checksum-style) recipient address in mono that fits inside the content width at 390 without overflow",
+    "'View transaction' explorer link with external-link icon, kept secondary below the Done action",
+    "Long title wraps cleanly without truncation (two lines at 1440, three at 390)",
+    "Dark iron modal surface on the radius hierarchy (rounded-xl panel, rounded-lg button) with restrained brand celebration and no confetti or neon",
+    "Mobile layout: 16px gutters, full-width Done and the close control top-right"
+  ]
+}

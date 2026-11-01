@@ -1,0 +1,121 @@
+{
+  "rubric_version": "fe-polish-judge/2.1",
+  "candidate": "mint-success-modal-review",
+  "coverage": [
+    {
+      "route": "/the-memes/mint",
+      "state": "success",
+      "viewport": "1440x900",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/success-1440x900-01.png"
+    },
+    {
+      "route": "/the-memes/mint",
+      "state": "success",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/success-390x844-01.png"
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 9,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "The modal answers 'what happened' completely: confirmed status, the card (artwork, The Memes #547, title), quantity 3, and the receiving address, then Done with the explorer link as a secondary option."
+    },
+    "J02": {
+      "score": 9,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "Order follows the reader's questions: status, then the item, then the details (quantity, recipient), then actions (primary Done, secondary View transaction)."
+    },
+    "J03": {
+      "score": 8.5,
+      "evidence": ["evidence/success-1440x900-01.png"],
+      "findings": [],
+      "note": "Hierarchy is clear and chrome recedes, but the green all-caps headline carries more weight than the artwork, which appears only as a 96 px thumbnail even though the card is what the user received."
+    },
+    "J04": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "The modal is dark and restrained, with iron-toned surfaces, a rounded-xl dialog, a rounded-lg button, no confetti and no neon. 'SEIZED!' with an icon is brand vocabulary, not casino styling, but it is louder than the plain register used on the rest of this transaction screen."
+    },
+    "J05": {
+      "score": 9,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "The receipt is compact, related facts sit together under one divider, and nothing is padded out."
+    },
+    "J06": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "Label and value roles are consistent, mono is used correctly for the address, and the title wraps cleanly. The details list mixes an inline, right-aligned value (Quantity) with a stacked, left-aligned one (Minted to). The address is set small, and the bottom padding below the link is visibly deeper than the top padding."
+    },
+    "J07": {
+      "score": 8.5,
+      "evidence": ["evidence/success-1440x900-01.png"],
+      "findings": [],
+      "note": "Copy is concrete and there is no brief leakage: 'Your mint is confirmed.', the token number and title, 'Quantity', 'Minted to', 'Done' and 'View transaction'. A newcomer could misread 'SEIZED!' as a negative, but the plain subline right below it carries the meaning."
+    },
+    "J09": {
+      "score": 9,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "The success state is the only state in scope, and it is deliberate. It says what happened, shows the receipt and offers a clear next step: dismiss it, or inspect the transaction on the explorer."
+    },
+    "J10": {
+      "score": 9,
+      "evidence": ["evidence/success-390x844-01.png"],
+      "findings": [],
+      "note": "At 390 px the modal keeps 16 px gutters. The title wraps to three lines without clipping, the full address fits on one line, and Done is a full-width target about 44 px tall."
+    },
+    "J13": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "The receipt names what arrived (artwork, collection number, title), how many (3) and where (the full address in mono). It labels the state as confirmed, and the explorer link is available but secondary. Small gaps for newcomers: the recipient is a raw address with no cue that it is their wallet, and 'mint' and 'seized' are not explained. The recipient value is harness fixture data."
+    }
+  },
+  "checks": {
+    "I1": "pass",
+    "I2": "pass",
+    "I3": "pass",
+    "S3": "pass",
+    "S6": "pass"
+  },
+  "findings": [],
+  "preserve": [
+    "Plain confirmation line 'Your mint is confirmed.' directly under the headline",
+    "Receipt block: artwork thumbnail, 'The Memes #547' collection label, and the full card title",
+    "Quantity and 'Minted to' details with the full recipient address in mono",
+    "Full-width primary 'Done' with 'View transaction' kept secondary and marked as external",
+    "No confetti, countdowns, upsells, or urgency on the success state",
+    "Dark iron-toned dialog with rounded-xl frame, rounded-lg button, and 16 px mobile gutters with clean title wrapping"
+  ]
+}

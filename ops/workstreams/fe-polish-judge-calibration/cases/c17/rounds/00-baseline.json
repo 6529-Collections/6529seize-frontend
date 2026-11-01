@@ -1,0 +1,331 @@
+{
+  "rubric_version": "fe-polish-judge/2.1",
+  "candidate": "04d8b1e250984d73c2c537794e6b83e2ed1f6721",
+  "coverage": [
+    {
+      "route": "/",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "unverified",
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png"
+      ],
+      "reason": "Media did not load in the 1440 capture. The Latest Drop video is a black frame with an unknown duration ('0:00 / —'), and the Leading and 2nd Place cards in Coming up show 'Preview unavailable', while the 390 capture renders those same artworks. The art-led presentation of this cell cannot be judged. Needed: a 1440x1000 production-build recapture after media, posters, and lazy images have loaded."
+    },
+    {
+      "route": "/",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": [
+        "evidence/page-390x844-01.png",
+        "evidence/page-390x844-02.png",
+        "evidence/page-390x844-03.png",
+        "evidence/page-390x844-04.png",
+        "evidence/page-390x844-05.png",
+        "evidence/page-390x844-06.png",
+        "evidence/page-390x844-07.png",
+        "evidence/page-390x844-08.png"
+      ]
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 8.0,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-390x844-01.png",
+        "evidence/page-390x844-02.png"
+      ],
+      "findings": ["F-001"],
+      "note": "'Start here' and 'Connect wallet' lead at both widths, followed by the live Latest Drop. Above the mint card, though, the only explanation of 6529 is the abstract headline. The explainer section sits below a card that is one desktop screen and about 1.5 mobile screens tall."
+    },
+    "J02": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png"
+      ],
+      "findings": [],
+      "note": "The order hero → Latest Drop → about → Coming up → chats → footer is coherent, and each list section ends in a 'View all'. The chats section breaks the section pattern; F-002 covers that."
+    },
+    "J03": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-390x844-02.png"
+      ],
+      "findings": ["F-012"],
+      "note": "Attention runs from the headline to the drop title, the countdown, and Mint, and the countdown is grouped with Mint in one panel. The blue Subscription Minting panel and the red heart button are the most saturated accents, but both stay secondary."
+    },
+    "J04": {
+      "score": 8.0,
+      "evidence": [
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-390x844-03.png",
+        "evidence/page-390x844-04.png",
+        "evidence/page-390x844-05.png"
+      ],
+      "findings": ["F-004"],
+      "note": "Dark, iron-toned, content-led, and native to the app shell. On mobile, Coming up shows each artwork whole at its own aspect ratio. The monospace quote panel reads as terminal decoration. The desktop art presentation is unverified (media did not load in the 1440 capture), and the Next Mint video shows no poster in either capture. Neither gap is filed."
+    },
+    "J05": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-390x844-06.png"
+      ],
+      "findings": [],
+      "note": "Card grids and stat rows scan quickly. The mission band and the Latest Drop card are spacious, which suits a home page."
+    },
+    "J06": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-390x844-03.png",
+        "evidence/page-390x844-06.png",
+        "evidence/page-390x844-08.png",
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-03.png"
+      ],
+      "findings": [
+        "F-003",
+        "F-004",
+        "F-005",
+        "F-006",
+        "F-009",
+        "F-010",
+        "F-011"
+      ],
+      "note": "Several finish defects: literal markdown in a card preview, a mono prose panel, a 12 px vs 16 px mobile gutter jog, orphaned footer separators, an unpadded countdown, and a one-line description that sits lower than its neighbors."
+    },
+    "J07": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-390x844-02.png"
+      ],
+      "findings": ["F-001", "F-002", "F-003", "F-007", "F-008", "F-011"],
+      "note": "Drop metadata is concrete (149/331, 0.06529 ETH, Active). The chats section uses a marketing hook with an unsupported superlative. TDH, Score, Hot, REP, 'allowance', and 'x67 subscriptions' go unexplained, and the page never says plainly what a visitor can do here."
+    },
+    "J10": {
+      "score": 8.0,
+      "evidence": [
+        "evidence/page-390x844-01.png",
+        "evidence/page-390x844-03.png",
+        "evidence/page-390x844-04.png",
+        "evidence/page-390x844-08.png"
+      ],
+      "findings": ["F-005", "F-006"],
+      "note": "The touch header, side-by-side CTAs, stacked cards, and whole artworks adapt well, with no horizontal overflow seen. A mobile gutter jog and the wrapping of footer separators remain."
+    },
+    "J13": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-390x844-02.png",
+        "evidence/page-1440x1000-02.png"
+      ],
+      "findings": ["F-007", "F-008"],
+      "note": "The price is in ETH with the edition count and status, and 'Connect wallet' is reachable from the hero and the allowance row. TDH, the allowance, and the subscription vocabulary are unexplained at the point of use. The flow after Mint or Connect (consent, lifecycle, rejection) was not captured, so S1–S5 are unverified. S6 is judged on the visible entry point: the countdown belongs to a named Public Phase and decrements consistently between captures, and no quantity is preselected."
+    }
+  },
+  "checks": {
+    "I1": "pass",
+    "I2": "pass",
+    "I3": "pass",
+    "S1": "unverified",
+    "S2": "unverified",
+    "S3": "unverified",
+    "S4": "unverified",
+    "S5": "unverified",
+    "S6": "pass"
+  },
+  "findings": [
+    {
+      "id": "F-001",
+      "targets": ["J01", "J07"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/ · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-390x844-01.png",
+      "observation": "Above the mint card, the only explanation of 6529 is the eyebrow '6529' and the headline 'Building a decentralized network state'. The descriptive section ('6529 is a network society … funds, builds, and coordinates public-goods work…') comes after the Latest Drop card and is still abstract. No sentence on the page says what a visitor can do here, although the page itself shows a Memes mint, a TDH vote queue, and community chats.",
+      "consequence": "A first-time visitor has to choose between 'Start here' and 'Connect wallet' without knowing what the site offers. That weakens the 'understand what 6529 is' half of the primary task.",
+      "change": "Add one message-backed line under the hero headline that names the things the page shows. Draft (confirm the facts): 'Collect The Memes, vote on what mints next, and join the community in waves.' Keep the headline and both buttons.",
+      "acceptance_check": "At 1440x1000 and 390x844, a plain sentence above the Latest Drop card names the collection, the vote, and the chats shown further down the page, and 'Start here' and 'Connect wallet' still sit on one row without clipping.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-002",
+      "targets": ["J07", "J06"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/ · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-03.png",
+      "observation": "The chats section is headed 'Tired of bot replies?' with the subhead 'JOIN THE MOST INTERESTING CHATS IN CRYPTO'. It never names waves, says nothing about how these six cards were chosen, and the superlative is unsupported. It is also the only centered section heading on the page, and its 'View all' is centered at the bottom, while 'Coming up' is left-aligned with 'View all' at the top right.",
+      "consequence": "Visitors get an ad-style hook instead of learning what the cards are and why these six appear. The section reads as promotion rather than part of the app.",
+      "change": "Name the object and the real selection rule. For example, use the heading 'Waves' and a subhead that states the actual ordering (say 'Most active community chats' only if ordering is by activity). Match the 'Coming up' layout for the heading and 'View all'.",
+      "acceptance_check": "At both viewports, the section heading names waves or chats, the subhead states the real selection basis without a superlative, and the heading and 'View all' follow the same alignment pattern as 'Coming up'.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-003",
+      "targets": ["J06", "J07"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/ · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-390x844-06.png",
+      "observation": "The 6529 Book Club card preview shows literal markdown at both widths: '**Punk6529's SciFi/NearFi Book List** **Background** I consider this my basic NearFi (Sci…'.",
+      "consequence": "The asterisks look like broken rendering and use up the two-line preview that should tell visitors what the wave is about.",
+      "change": "Strip or render markdown syntax in wave-card description previews before clamping them.",
+      "acceptance_check": "At 1440x1000 and 390x844, no wave-card preview shows literal '**', '#', or other markdown tokens, and the Book Club preview begins 'Punk6529's SciFi/NearFi Book List'.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-004",
+      "targets": ["J04", "J06"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/ · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-02.png",
+      "observation": "The statement 'We're extending what Bitcoin and Ethereum proved for money and code to human coordination itself, so any activity can be organized permissionlessly.' is set in monospace inside a bordered panel, styled like a terminal readout, beside the sans-serif mission paragraph.",
+      "consequence": "Decorative mono turns a mission statement into faux-terminal texture. The 6529 style reserves mono for hashes, addresses, and code, so the panel reads as styling rather than content.",
+      "change": "Set the statement in the page's sans family, for example as a pull quote or a second paragraph, and keep monospace for hashes, addresses, and code.",
+      "acceptance_check": "At both viewports, the statement renders in the sans family and no prose sentence on the page is set in monospace.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-005",
+      "targets": ["J06", "J10"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/ · default · 390x844 · en-US",
+      "evidence": "evidence/page-390x844-03.png",
+      "observation": "At 390 px, the network-society block starts about 12 px from the left edge, and its quote panel and divider run to about 378 px. The block includes '6529 is a network society', its paragraph, the goal line, the quote panel, and the divider. 'Latest Drop', 'Coming up', and every card sit at a 16 px gutter (16–372 px).",
+      "consequence": "The column's left edge jogs inward and then back while scrolling, so the page's one explanatory section looks misaligned with everything around it.",
+      "change": "Give the network-society block the same 16 px mobile gutter as the neighboring sections.",
+      "acceptance_check": "At 390x844, the left and right edges of the network-society heading, paragraph, quote panel, and divider line up with the 'Latest Drop' and 'Coming up' headings and cards.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-006",
+      "targets": ["J06", "J10"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/ · default · 390x844 · en-US",
+      "evidence": "evidence/page-390x844-08.png",
+      "observation": "At 390 px, the footer's '|' separators wrap along with the links. Lines begin with '| Cookie Policy' and '| Contact Us', and the social row ends with '@6529Collections |' before '6529-Collections' drops to the next line.",
+      "consequence": "Orphaned separators make the last screen of the mobile page look broken.",
+      "change": "Keep separators off line boundaries, for example with flex-wrap and gaps or a separator that is hidden at line starts, or stack the footer links on mobile.",
+      "acceptance_check": "At 390x844, no footer line begins or ends with a separator and every link stays visible.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-007",
+      "targets": ["J13", "J07"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/ · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-390x844-02.png",
+      "observation": "With no wallet connected, the Latest Drop card shows 'YOUR ALLOWANCE', an off 'Subscription Minting' toggle with 'SET UP →', 'x67 subscriptions', and 'FLOOR N/A'. Only a '?' icon hints at what subscription minting is. 'x67' does not say whose subscriptions it counts or what they are for.",
+      "consequence": "A newcomer cannot tell what the allowance limits, what turning subscription minting on would do or cost, or what the 67 counts. The word 'allowance' can also be confused with token approvals.",
+      "change": "Use plain labels (drafts; confirm the facts): 'Your mint allowance' with 'Connect a wallet to see how many you can mint'. Replace 'x67 subscriptions' with what it counts, for example '67 collectors subscribed'. Add one visible line saying what subscription minting does and that it needs a connected wallet, or show the toggle only after connection. Replace the floor 'N/A' with the reason, for example 'No listings yet', when that is why.",
+      "acceptance_check": "At both viewports, a visitor with no wallet connected can read, without opening a tooltip, what the allowance is, what the subscription count counts, and what subscription minting does. No bare 'x67' or unexplained toggle remains.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-008",
+      "targets": ["J13", "J07"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/ · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-02.png",
+      "observation": "Coming up ranks submissions as 'LEADING 37,248,905 TDH' and '2ND PLACE 37,034,203 TDH' with no explanation of TDH. Each wave card shows 'Score 96', 'Hot 98', and 'REP +691.8K' with no definition, and Score and Hot fall between 92 and 98 on every card.",
+      "consequence": "Visitors cannot read the vote or the chat rankings, which are the numbers that show how the community decides. The mechanism behind the page's 'decentralized' framing therefore stays opaque, and the near-uniform scores add noise.",
+      "change": "Explain TDH where it appears, for example with the subhead 'Ranked by TDH votes' plus a link or tooltip to the TDH explanation. Give Score, Hot, and REP a reachable definition, or drop any metric that does not tell the cards apart.",
+      "acceptance_check": "From the Coming up section, a visitor can reach a one-sentence definition of TDH without leaving the page. Every wave-card metric shown has a visible or reachable definition at both viewports, and at 390 it is reachable by tap.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-009",
+      "targets": ["J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/ · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-01.png",
+      "observation": "The countdown pads hours and minutes but not seconds ('17h : 19m : 8s' vs '17h : 18m : 53s'), so the centered string changes width as it ticks.",
+      "consequence": "The countdown jitters slightly every few seconds.",
+      "change": "Zero-pad the seconds ('08s') and use tabular numerals.",
+      "acceptance_check": "Countdown segments always show two digits and the string width stays constant from tick to tick.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-010",
+      "targets": ["J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/ · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-03.png",
+      "observation": "The one-line description on 'maybe's dive bar' ('if it's your first time in the bar, please let us know') is vertically centered in a two-line slot. Its text starts lower than the first line of the neighboring cards' descriptions.",
+      "consequence": "The text baselines across the card row do not line up.",
+      "change": "Top-align the description in its slot.",
+      "acceptance_check": "At 1440, the first description line starts at the same height in all three cards of a row.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-011",
+      "targets": ["J06", "J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/ · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-390x844-03.png",
+      "observation": "The next mint time reads '14 Oct · 02:40 PM'. That is day-first order with a leading-zero hour in an en-US session, and it names no time zone.",
+      "consequence": "US readers see an unfamiliar date format, and nobody can tell which clock the mint time uses.",
+      "change": "Format the date with the locale formatter (for example 'Oct 14 · 2:40 PM') and show the time zone.",
+      "acceptance_check": "In en-US, the next mint time shows month-first order with no leading-zero hour and a visible time zone.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-012",
+      "targets": ["J03"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/ · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-01.png",
+      "observation": "A red heart in a red-ringed circle sits alone at the top right on desktop and in the mobile header, with no visible label.",
+      "consequence": "It is the most saturated element in the header, and its purpose is not apparent.",
+      "change": "Add a short visible label or tooltip, or give it neutral iron styling to match the other header controls.",
+      "acceptance_check": "The heart control's purpose is clear from a visible label or tooltip, or it matches the neutral header controls.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "Hero with a single headline and 'Start here' and 'Connect wallet' side by side at both widths",
+    "Latest Drop metadata grid: The Memes number, title, artist avatar, Edition 149/331, Status, mint price in ETH, and floor",
+    "Countdown and Mint button grouped in one Public Phase panel with a Live badge",
+    "Coming up cards on mobile showing each artwork whole at its own aspect ratio, with rank label, TDH total, title, and artist",
+    "Wave cards with banner, title, two-line clamped description, stats row, and last-activity time plus drop count",
+    "Mobile touch header (logo, search, menu) and a single stacked column with no horizontal overflow",
+    "Dark iron surfaces with subtle borders and rounded-xl cards, consistent with the app shell"
+  ]
+}
