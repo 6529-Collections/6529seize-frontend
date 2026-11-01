@@ -120,6 +120,8 @@ export function startE2eeEngineRun(input: E2eeEngineRunInput): E2eeEngineRun {
   };
 
   let startBackup: E2eeEngineModules["startE2eeBackup"];
+  // Every request of this run uses only this account's own session.
+  const account = { profileId: input.profileId, wallet: input.wallet };
 
   const create = async (): Promise<E2eeEngine | null> => {
     const modules = await input.loadModules();
@@ -131,7 +133,7 @@ export function startE2eeEngineRun(input: E2eeEngineRunInput): E2eeEngineRun {
       ...input.buildDeps({
         profileId: input.profileId,
         wallet: input.wallet,
-        api: modules.createE2eeApiClient(),
+        api: modules.createE2eeApiClient(account),
       }),
       // A refused stale write: another tab owns newer state.
       onStateConflict: () => {
@@ -173,7 +175,7 @@ export function startE2eeEngineRun(input: E2eeEngineRunInput): E2eeEngineRun {
       }
       const store = createE2eeEngineStore(engine, input.onSnapshot);
       input.onSnapshot(store.getSnapshot());
-      const backup = startBackup?.(engine, input.profileId) ?? null;
+      const backup = startBackup?.(engine, account) ?? null;
       loaded = { engine, store, backup };
       input.onLoaded(loaded);
     } catch (error) {
