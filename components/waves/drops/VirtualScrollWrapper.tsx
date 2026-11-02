@@ -9,14 +9,10 @@ import {
   clearWaveDropNearViewport,
   setWaveDropNearViewport,
 } from "@/contexts/wave/drop-visibility";
-import { WaveDropContentExpansionProvider } from "./WaveDropContentExpansionContext";
 
 interface ResizeSubscription {
   readonly updateHeight: (height: number) => void;
 }
-
-const getPlaceholderHeight = (measuredHeight: number | null) =>
-  measuredHeight ?? "auto";
 
 const resizeSubscriptions = new Map<Element, ResizeSubscription>();
 let sharedResizeObserver: ResizeObserver | null = null;
@@ -87,7 +83,6 @@ interface VirtualScrollWrapperProps {
   readonly type: DropSize;
   readonly suspendLightDropHydration?: boolean | undefined;
   readonly rootMargin?: string | undefined;
-  readonly enableLongContentCollapse?: boolean | undefined;
 
   /**
    * The child components to be rendered or virtualized.
@@ -126,7 +121,6 @@ export default function VirtualScrollWrapper({
   type,
   suspendLightDropHydration = false,
   rootMargin = "5000px 0px 5000px 0px",
-  enableLongContentCollapse = false,
 }: VirtualScrollWrapperProps) {
   const { fetchAroundSerialNo } = useMyStreamActions();
 
@@ -298,24 +292,17 @@ export default function VirtualScrollWrapper({
 
   return (
     <div ref={containerRef}>
-      <WaveDropContentExpansionProvider
-        enabled={enableLongContentCollapse}
-        scrollContainerRef={scrollContainerRef}
-      >
-        <VideoPlaybackMemoryProvider
-          key={`${waveId}:${dropId ?? dropSerialNo}`}
-        >
-          {shouldRenderChildren ? (
-            children
-          ) : (
-            <div
-              style={{
-                height: getPlaceholderHeight(measuredHeight),
-              }}
-            />
-          )}
-        </VideoPlaybackMemoryProvider>
-      </WaveDropContentExpansionProvider>
+      <VideoPlaybackMemoryProvider key={`${waveId}:${dropId ?? dropSerialNo}`}>
+        {shouldRenderChildren ? (
+          children
+        ) : (
+          <div
+            style={{
+              height: measuredHeight,
+            }}
+          />
+        )}
+      </VideoPlaybackMemoryProvider>
     </div>
   );
 }

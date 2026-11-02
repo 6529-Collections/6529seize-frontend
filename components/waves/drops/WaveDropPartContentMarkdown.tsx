@@ -21,9 +21,6 @@ import {
   areHandlesEqual,
   isChatLinkRestrictionApplicable,
 } from "@/helpers/waves/chat-link-restriction.helpers";
-import WaveDropLongContent from "./WaveDropLongContent";
-
-const EMPTY_MENTIONED_GROUPS: ApiDropGroupMention[] = [];
 
 interface WaveDropPartContentMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
@@ -68,7 +65,7 @@ const WaveDropPartContentMarkdown: React.FC<
   WaveDropPartContentMarkdownProps
 > = ({
   mentionedUsers,
-  mentionedGroups = EMPTY_MENTIONED_GROUPS,
+  mentionedGroups = [],
   mentionedWaves,
   referencedNfts,
   part,
@@ -96,9 +93,6 @@ const WaveDropPartContentMarkdown: React.FC<
   const dropId = drop?.id;
   const dropSerialNo = drop?.serial_no;
   const waveId = wave.id;
-  const expansionScopeId =
-    dropId ??
-    (dropSerialNo !== undefined ? `${waveId}:${dropSerialNo}` : "pending-drop");
   const currentDropEmbedPath = React.useMemo(() => {
     const path = embedPath ? [...embedPath] : [];
     if (!dropId || path.includes(dropId)) {
@@ -196,29 +190,24 @@ const WaveDropPartContentMarkdown: React.FC<
             onSectionOpenChange={onQuorumCompactSectionOpenChange}
           />
         ) : (
-          <WaveDropLongContent
-            content={part.content ?? ""}
-            expansionKey={`${expansionScopeId}:${part.part_id}`}
-          >
-            <DropPartMarkdownWithPropLogger
-              mentionedUsers={mentionedUsers}
-              mentionedGroups={mentionedGroups}
-              mentionedWaves={mentionedWaves}
-              referencedNfts={referencedNfts}
-              nftLinks={drop?.nft_links}
-              partContent={part.content}
-              onQuoteClick={onQuoteClick}
-              currentDropId={drop?.id}
-              hideLinkPreviews={drop?.hide_link_preview}
-              embedPath={currentDropEmbedPath}
-              quotePath={currentQuotePath}
-              embedDepth={embedDepth}
-              maxEmbedDepth={maxEmbedDepth}
-              fullWidthLinkPreviews={fullWidthLinkPreviews}
-              linkPreviewToggleControl={linkPreviewToggleControl}
-              onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
-            />
-          </WaveDropLongContent>
+          <DropPartMarkdownWithPropLogger
+            mentionedUsers={mentionedUsers}
+            mentionedGroups={mentionedGroups}
+            mentionedWaves={mentionedWaves}
+            referencedNfts={referencedNfts}
+            nftLinks={drop?.nft_links}
+            partContent={part.content}
+            onQuoteClick={onQuoteClick}
+            currentDropId={drop?.id}
+            hideLinkPreviews={drop?.hide_link_preview}
+            embedPath={currentDropEmbedPath}
+            quotePath={currentQuotePath}
+            embedDepth={embedDepth}
+            maxEmbedDepth={maxEmbedDepth}
+            fullWidthLinkPreviews={fullWidthLinkPreviews}
+            linkPreviewToggleControl={linkPreviewToggleControl}
+            onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
+          />
         )}
         {typeof drop?.updated_at === "number" &&
           drop.updated_at !== drop.created_at && (
