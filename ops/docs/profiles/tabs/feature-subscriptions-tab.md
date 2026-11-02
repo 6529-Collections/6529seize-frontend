@@ -71,6 +71,7 @@ first render.
 
 1. Open `/{user}/subscriptions` and read the short coverage answer, next intended
    drop, and Subscription balance. A funded-through date is a projection.
+   The balance refresh icon shows its label on hover or keyboard focus.
 2. Open `Details` for Status, Drops funded, Funded through, Next unfunded,
    Balance capacity, Forecast use, Mode with its last-update time, Eligibility,
    and Edition Preference. The available mint count is retained as Balance
@@ -79,6 +80,8 @@ first render.
    authoritative deadlines, the projection note, and Refresh coverage remain here.
 3. Owners can open `Top up` inside the answer card. Choose Recommended or
    Minimum for next drop when supplied, 1 Card, Remaining SZN, or Other.
+   Entering an Other count shows a separate ETH preview and the same amount
+   on the Top up button.
    `More` reveals Remaining Year, Remaining Epoch, and Deep Time Subscriptions
    (Remaining Period, Era, and Eon). Only the selected coverage option shows its
    supplied projected funding outcome. Cancel closes the panel and returns focus
@@ -138,6 +141,7 @@ first render.
   - only the next unfunded token identified by coverage gets a `Next unfunded`
     marker, with a Top up link for owners; stale coverage does not mark rows
   - shows first 3 rows by default; `Show More` expands the list
+  - upcoming dates include the weekday, day, month, and year in UTC
   - first row can show phase metadata (phase, position, airdrop address,
     subscribed count)
   - a subscribed first row shows `No subscription allocation` once distribution
@@ -145,6 +149,7 @@ first render.
     profile; a phase-less finalized record remains pending, and no message
     appears for unsubscribed rows, unpublished distribution, or failed lookups
   - phase and publication details refresh once per minute while the tab is visible
+  - subscribed rows show selected quantity / current eligibility, such as `2 / 2`
   - subscribed rows keep the numeric quantity selector with every value from 1
     through current eligibility when eligibility is positive; at zero eligibility,
     it shows a single `0` option and is disabled without changing the saved request
@@ -153,8 +158,8 @@ first render.
   - choosing a quantity saves a manual override for that card, including later
     future cards; automatic eligibility updates never overwrite it
   - a saved manual quantity above eligibility is displayed at the eligibility
-    limit without changing the saved request: manual 11 displays `10 cards` at
-    eligibility 10, then `11 cards` after eligibility recovers to 12 and data is
+    limit without changing the saved request: manual 11 displays `10 / 10` at
+    eligibility 10, then `11 / 12` after eligibility recovers to 12 and data is
     refreshed
   - final quantities are capped by eligibility and available balance; refreshing
     upcoming quantities does not change historical finalized allocations

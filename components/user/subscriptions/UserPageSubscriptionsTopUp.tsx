@@ -4,6 +4,7 @@ import {
   type ReactNode,
   useCallback,
   useEffect,
+  useId,
   useRef,
   useState,
   useSyncExternalStore,
@@ -226,6 +227,7 @@ export default function UserPageSubscriptionsTopUp({
 }>) {
   const { isIos } = useCapacitor();
   const locale = useBrowserLocale();
+  const selectionDescriptionId = useId();
   const { country } = useCookieConsent();
   const hideSubscriptions = shouldHideSubscriptions({
     capacitorIsIos: isIos,
@@ -491,6 +493,7 @@ export default function UserPageSubscriptionsTopUp({
             inputMode="numeric"
             placeholder={t(locale, "subscriptions.topUp.countPlaceholder")}
             aria-label={t(locale, "subscriptions.topUp.customLabel")}
+            aria-describedby={selectionDescriptionId}
             value={memeCount}
             className="tw-min-h-7 tw-w-20 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1 tw-text-base tw-tabular-nums tw-text-iron-100 [color-scheme:dark] placeholder:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
             onFocus={() => setSelectedOption("other")}
@@ -535,15 +538,18 @@ export default function UserPageSubscriptionsTopUp({
       </div>
       <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 max-md:tw-flex-col max-md:tw-items-stretch max-md:tw-text-center">
         <p
+          id={selectionDescriptionId}
           role="status"
           aria-live="polite"
           aria-atomic="true"
           className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-300"
         >
           {selectedDescription}
-          {selectedOption === "other" && selectedTopUp !== null && (
-            <span className="tw-sr-only">{submitLabel}</span>
-          )}
+          {selectedOption === "other" &&
+            selectedTopUp !== null &&
+            t(locale, "subscriptions.coverage.balanceEth", {
+              amount: formatSubscriptionEth(locale, selectedTopUp.amountEth),
+            })}
         </p>
         <div className="tw-flex tw-flex-wrap tw-gap-2 max-md:tw-w-full">
           {onCancel && (

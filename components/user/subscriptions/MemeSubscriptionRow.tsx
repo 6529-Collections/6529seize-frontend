@@ -301,7 +301,7 @@ export default function MemeSubscriptionRow(
             className={
               isCompact
                 ? SUBSCRIPTION_COUNT_SELECT_CLASS
-                : "tw-h-11 tw-w-[88px] tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-0 tw-pl-2.5 tw-pr-6 tw-text-[13px] tw-text-iron-200 [color-scheme:dark] focus:tw-outline-none disabled:tw-cursor-not-allowed disabled:tw-opacity-40 md:tw-h-[30px]"
+                : "tw-h-11 tw-w-12 tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-0 tw-pl-2.5 tw-pr-6 tw-text-[13px] tw-text-iron-200 [color-scheme:dark] focus:tw-outline-none disabled:tw-cursor-not-allowed disabled:tw-opacity-40 md:tw-h-[30px]"
             }
             value={Math.max(0, Math.min(selectedCount, props.eligibilityCount))}
             disabled={isCountSelectDisabled}
@@ -310,28 +310,12 @@ export default function MemeSubscriptionRow(
             }}
             aria-label={`Select subscription quantity for ${props.title}`}
           >
-            {props.eligibilityCount < 1 && (
-              <option value={0}>
-                {isCompact
-                  ? "0"
-                  : t(locale, "subscriptions.row.cards.many", { count: "0" })}
+            {props.eligibilityCount < 1 && <option value={0}>0</option>}
+            {countOptions.map((num) => (
+              <option key={num} value={num}>
+                {formatInteger(locale, num)}
               </option>
-            )}
-            {countOptions.map((num) => {
-              const countKey =
-                num === 1
-                  ? "subscriptions.row.cards.one"
-                  : "subscriptions.row.cards.many";
-              return (
-                <option key={num} value={num}>
-                  {isCompact
-                    ? num
-                    : t(locale, countKey, {
-                        count: formatInteger(locale, num),
-                      })}
-                </option>
-              );
-            })}
+            ))}
           </select>
           <ChevronDownIcon
             className={`tw-pointer-events-none tw-absolute tw-right-0.5 tw-size-4 ${
@@ -340,11 +324,9 @@ export default function MemeSubscriptionRow(
             aria-hidden="true"
           />
         </span>
-        {isCompact && (
-          <span className="tw-pl-1 tw-pr-3 tw-text-sm tw-leading-none tw-text-iron-500">
-            / {props.eligibilityCount}
-          </span>
-        )}
+        <span className="tw-pl-1 tw-pr-3 tw-text-sm tw-leading-none tw-text-iron-500">
+          / {formatInteger(locale, props.eligibilityCount)}
+        </span>
       </span>
     );
   };
@@ -428,6 +410,7 @@ export default function MemeSubscriptionRow(
                   <span className="tw-text-iron-500">
                     {formatUtcDate(locale, props.date.utcDay, {
                       weekday: "short",
+                      year: "numeric",
                       month: "short",
                       day: "numeric",
                     })}

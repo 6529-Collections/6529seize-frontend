@@ -207,7 +207,9 @@ describe("UserPageSubscriptionsTopUp", () => {
     const countInput = screen.getByPlaceholderText("count");
     await user.type(countInput, "2");
 
-    expect(screen.getByRole("status")).toHaveTextContent("Top up 0.13058 ETH");
+    expect(screen.getByRole("status")).toHaveTextContent("0.13058 ETH");
+    expect(screen.getByText("0.13058 ETH", { exact: true })).toBeVisible();
+    expect(countInput).toHaveAccessibleDescription("0.13058 ETH");
     expect(screen.getByRole("status")).toHaveAttribute("aria-live", "polite");
 
     const sendButton = screen.getByRole("button", {

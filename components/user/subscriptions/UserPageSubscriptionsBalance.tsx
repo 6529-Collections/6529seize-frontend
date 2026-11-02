@@ -1,3 +1,6 @@
+import { useId } from "react";
+import { Tooltip } from "react-tooltip";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
@@ -16,6 +19,7 @@ export default function UserPageSubscriptionsBalance(
   }>
 ) {
   const locale = useBrowserLocale();
+  const refreshTooltipId = useId();
   const balance =
     props.coverage?.balance_eth ?? props.details?.balance.toString() ?? "0";
 
@@ -41,18 +45,33 @@ export default function UserPageSubscriptionsBalance(
         </>
       )}
       {props.show_refresh && (
-        <button
-          type="button"
-          onClick={props.refresh}
-          disabled={props.fetching}
-          aria-label={t(locale, "subscriptions.balance.refresh")}
-          className="tw-inline-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-opacity-50 desktop-hover:hover:tw-text-iron-100 md:tw-size-7"
-        >
-          <ArrowPathIcon
-            className={`tw-size-4 ${props.fetching ? "tw-animate-spin motion-reduce:tw-animate-none" : ""}`}
-            aria-hidden="true"
-          />
-        </button>
+        <>
+          <button
+            type="button"
+            onClick={props.refresh}
+            disabled={props.fetching}
+            aria-label={t(locale, "subscriptions.balance.refresh")}
+            data-tooltip-id={refreshTooltipId}
+            className="tw-inline-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-opacity-50 desktop-hover:hover:tw-text-iron-100 md:tw-size-7"
+          >
+            <ArrowPathIcon
+              className={`tw-size-4 ${props.fetching ? "tw-animate-spin motion-reduce:tw-animate-none" : ""}`}
+              aria-hidden="true"
+            />
+          </button>
+          <Tooltip
+            id={refreshTooltipId}
+            openEvents={{ mouseover: true, focus: true }}
+            place="top"
+            positionStrategy="fixed"
+            offset={8}
+            delayShow={250}
+            opacity={1}
+            style={TOOLTIP_STYLES}
+          >
+            {t(locale, "subscriptions.balance.refresh")}
+          </Tooltip>
+        </>
       )}
     </div>
   );

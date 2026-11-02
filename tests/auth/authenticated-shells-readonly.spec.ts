@@ -448,7 +448,15 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(
       page.getByRole("heading", { name: "Running low, covered until Nov 4" })
     ).toBeVisible();
+    await page.getByRole("button", { name: "Refresh balance" }).focus();
+    await expect(
+      page.getByRole("tooltip", { name: "Refresh balance" })
+    ).toBeVisible();
     const upcoming = page.getByRole("region", { name: "Upcoming Drops" });
+    await expect(
+      upcoming.getByText("Mon, Nov 2, 2026", { exact: true })
+    ).toBeVisible();
+    await expect(upcoming.getByText("/ 2", { exact: true })).toHaveCount(3);
     await expect(
       upcoming.getByRole("switch", { name: "Automatic subscription mode" })
     ).toBeChecked();
@@ -494,6 +502,17 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expectSingleLineLabel(
       topUp.getByRole("button", { name: "Choose a top-up amount", exact: true })
     );
+    const customCount = topUp.getByRole("spinbutton", {
+      name: "Other card count",
+    });
+    await customCount.fill("2");
+    await expect(topUp.getByRole("status")).toHaveText("0.13058 ETH");
+    await expect(topUp.getByText("0.13058 ETH", { exact: true })).toBeVisible();
+    await expect(customCount).toHaveAccessibleDescription("0.13058 ETH");
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(page, testInfo, "subscriptions-custom-preview");
+    await customCount.fill("");
+    await expect(topUp.getByRole("status")).toBeEmpty();
     await topUp.getByRole("button", { name: /^Recommended/ }).click();
     await expect(
       topUp.getByText("Funds 24 intended drops through The Memes #591")

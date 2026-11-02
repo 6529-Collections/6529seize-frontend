@@ -208,8 +208,8 @@ describe("UserPageSubscriptionsUpcoming", () => {
   it("displays dates for subscriptions", () => {
     renderComponent();
 
-    expect(screen.getByText("Mon, Jan 1")).toBeInTheDocument();
-    expect(screen.getByText("Tue, Jan 2")).toBeInTheDocument();
+    expect(screen.getByText("Mon, Jan 1, 2024")).toBeInTheDocument();
+    expect(screen.getByText("Tue, Jan 2, 2024")).toBeInTheDocument();
   });
 
   it("formats upcoming mint days as UTC calendar days", () => {
@@ -218,7 +218,7 @@ describe("UserPageSubscriptionsUpcoming", () => {
     expect(format).toHaveBeenCalledWith(
       "en-US",
       mockUpcomingRows[0].utcDay,
-      { weekday: "short", month: "short", day: "numeric" }
+      { weekday: "short", year: "numeric", month: "short", day: "numeric" }
     );
     format.mockRestore();
   });

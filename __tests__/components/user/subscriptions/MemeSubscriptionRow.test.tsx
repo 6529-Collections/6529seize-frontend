@@ -290,12 +290,15 @@ describe("Upcoming quantity eligibility changes", () => {
       name: "Select subscription quantity for The Memes",
     });
     expect(selector).toHaveValue("11");
+    expect(screen.getByText("/ 24")).toBeVisible();
     rerender(row(10));
     expect(selector).toHaveValue("10");
     expect(screen.getAllByRole("option")).toHaveLength(10);
+    expect(screen.getByText("/ 10")).toBeVisible();
     rerender(row(12));
     expect(selector).toHaveValue("11");
     expect(screen.getAllByRole("option")).toHaveLength(12);
+    expect(screen.getByText("/ 12")).toBeVisible();
     expect(commonApiPost).not.toHaveBeenCalled();
   });
 
