@@ -3,6 +3,19 @@ import { createElement } from "react";
 import { renderToString } from "react-dom/server";
 import { useNearViewport } from "@/hooks/useNearViewport";
 
+const intersectionEntry = (
+  target: HTMLElement,
+  visible: boolean
+): IntersectionObserverEntry => ({
+  target,
+  isIntersecting: visible,
+  intersectionRatio: Number(visible),
+  boundingClientRect: target.getBoundingClientRect(),
+  intersectionRect: target.getBoundingClientRect(),
+  rootBounds: null,
+  time: 0,
+});
+
 const original = globalThis.IntersectionObserver;
 afterEach(() => {
   Object.defineProperty(globalThis, "IntersectionObserver", {
@@ -40,19 +53,9 @@ it("waits for viewport observation, follows visibility and disconnects on unmoun
     rootMargin: "400px 0px",
   });
   expect(observe).toHaveBeenCalledWith(element);
-  act(() =>
-    callback?.(
-      [{ isIntersecting: true, target: element } as IntersectionObserverEntry],
-      observer
-    )
-  );
+  act(() => callback?.([intersectionEntry(element, true)], observer));
   expect(result.current).toBe(true);
-  act(() =>
-    callback?.(
-      [{ isIntersecting: false, target: element } as IntersectionObserverEntry],
-      observer
-    )
-  );
+  act(() => callback?.([intersectionEntry(element, false)], observer));
   expect(result.current).toBe(false);
   unmount();
   expect(disconnect).toHaveBeenCalledTimes(1);

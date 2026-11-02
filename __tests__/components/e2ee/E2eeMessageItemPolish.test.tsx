@@ -48,7 +48,7 @@ describe("E2eeMessageItem polish", () => {
   it("waits for a reply lookup before saying the original is unavailable", async () => {
     const engine = createFakeE2eeEngine();
     let finish:
-      | ((message: ReturnType<typeof message> | null) => void)
+      | ((value: ReturnType<typeof message> | null) => void)
       | undefined;
     engine.getMessage = jest.fn(
       () =>
@@ -59,7 +59,7 @@ describe("E2eeMessageItem polish", () => {
     render(
       <ul>
         <E2eeMessageItem
-          message={message({ reply: "missing" })}
+          message={message({ id: "reply", reply: "missing" })}
           conversation={conversation()}
           engine={engine}
           selfProfileId={SELF_ID}

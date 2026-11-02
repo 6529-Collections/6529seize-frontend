@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { performance } from "node:perf_hooks";
+import { setTimeout as delay } from "node:timers/promises";
 import { join } from "node:path";
 import { expect } from "@playwright/test";
 import { buildE2eeApiClient } from "@/lib/e2ee/api-client";
@@ -123,8 +124,11 @@ export async function measureStagingCatchUp(
     await receiver.idle();
     receiver = null;
     const count = 250;
+    // Match the browser importer and stay below 120 messages/minute/device.
+    const pacingMs = 700;
     const importing = performance.now();
     for (let index = 0; index < count; index++) {
+      if (index > 0) await delay(pacingMs);
       await sender.sendImported(g, {
         text: `catch-up fixture ${index}`,
         imported: {
@@ -156,6 +160,7 @@ export async function measureStagingCatchUp(
     expect(receiver.getMessages(g).length).toBeLessThanOrEqual(200);
     return {
       count,
+      pacingMs,
       importerMs,
       receiverMs,
       savedImported: count,

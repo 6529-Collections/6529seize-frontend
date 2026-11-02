@@ -38,7 +38,12 @@ it("exposes native mounted list items and retains a focused row outside the view
             {
               isIntersecting: visible,
               target: row,
-            } as IntersectionObserverEntry,
+              intersectionRatio: Number(visible),
+              boundingClientRect: row.getBoundingClientRect(),
+              intersectionRect: row.getBoundingClientRect(),
+              rootBounds: null,
+              time: 0,
+            },
           ],
           observer
         )
