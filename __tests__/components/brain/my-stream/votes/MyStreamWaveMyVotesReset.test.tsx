@@ -1,4 +1,10 @@
-import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import React from "react";
 import MyStreamWaveMyVotesReset from "@/components/brain/my-stream/votes/MyStreamWaveMyVotesReset";
 import { AuthContext } from "@/components/auth/Auth";
@@ -166,7 +172,9 @@ test("resets votes for selected drops", async () => {
   expect(onResettingChange).not.toHaveBeenCalled();
   expect(removeSelected).not.toHaveBeenCalled();
   expect(invalidateQueries).not.toHaveBeenCalled();
-  fireEvent.click(within(dialog).getByRole("button", { name: "Reset 2 votes" }));
+  fireEvent.click(
+    within(dialog).getByRole("button", { name: "Reset 2 votes" })
+  );
 
   await waitFor(() =>
     expect(onResettingChange).toHaveBeenNthCalledWith(2, false)
@@ -292,7 +300,9 @@ test("cleans up and invalidates once when a later reset fails", async () => {
   expect(onResettingChange).not.toHaveBeenCalled();
   expect(removeSelected).not.toHaveBeenCalled();
   expect(invalidateQueries).not.toHaveBeenCalled();
-  fireEvent.click(within(dialog).getByRole("button", { name: "Reset 2 votes" }));
+  fireEvent.click(
+    within(dialog).getByRole("button", { name: "Reset 2 votes" })
+  );
 
   await waitFor(() =>
     expect(onResettingChange).toHaveBeenNthCalledWith(2, false)
@@ -334,3 +344,35 @@ test("cleans up and invalidates once when a later reset fails", async () => {
     "0"
   );
 });
+
+test.each([
+  { haveDrops: false, isVotingClosed: false },
+  { haveDrops: true, isVotingClosed: true },
+])(
+  "keeps sorting available when reset controls are unavailable (%j)",
+  (state) => {
+    render(
+      <AuthContext.Provider value={auth}>
+        <MyStreamWaveMyVotesReset
+          {...state}
+          toolbarContent={<button type="button">Your vote amount</button>}
+          waveId="wave-1"
+          selected={new Set()}
+          allItemsSelected={false}
+          onToggleSelectAll={jest.fn()}
+          removeSelected={jest.fn()}
+          onResettingChange={jest.fn()}
+        />
+      </AuthContext.Provider>
+    );
+    expect(
+      screen.getByRole("button", { name: "Your vote amount" })
+    ).toBeEnabled();
+    expect(
+      screen.queryByRole("button", { name: "Select all" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Reset votes" })
+    ).not.toBeInTheDocument();
+  }
+);

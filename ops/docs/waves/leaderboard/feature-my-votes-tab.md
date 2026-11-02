@@ -4,7 +4,9 @@
 
 `My Votes` lists active submissions where your current vote is not `0`.
 Past winners are excluded; their historical vote records remain preserved.
-Use **Sort by** above the rows to choose:
+Use the compact sorting dropdown beside **Select all** and **Reset votes**.
+It shows the current order, with **Available in wave** on the same toolbar when
+a wave-wide balance is available. The controls wrap on narrow screens. Choose:
 
 - **Your vote amount** (the initial default): highest signed vote first, including
   negative votes. Equal amounts keep the existing allocation-update order,

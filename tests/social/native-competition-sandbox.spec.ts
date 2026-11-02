@@ -2617,26 +2617,67 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     );
     await page.goto(`${ROOT}/alpha?tab=votes`);
     const panel = page.getByRole("tabpanel", { name: "My Votes", exact: true });
-    const sort = panel.getByRole("combobox", { name: "Sort by" });
-    await expect(sort).toHaveValue("vote_amount");
+    const sort = panel.getByRole("button", { name: /^Sort by:/ });
+    const sortLabels: Record<string, string> = {
+      vote_amount: "Your vote amount",
+      leaderboard: "Leaderboard position",
+      last_voted: "Last voted",
+    };
+    const selectSort = async (order: string) => {
+      await sort.click();
+      await page
+        .getByRole("menuitem", { name: sortLabels[order], exact: true })
+        .click();
+      await expect(page.getByRole("menu")).toBeHidden();
+    };
+    await expect(sort).toHaveAccessibleName("Sort by: Your vote amount");
+    const selectAll = panel.getByRole("button", {
+      name: "Select all",
+      exact: true,
+    });
+    const reset = panel.getByRole("button", {
+      name: "Reset votes",
+      exact: true,
+    });
+    if ((page.viewportSize()?.width ?? 0) >= 1024) {
+      const controls = await Promise.all([
+        sort.boundingBox(),
+        selectAll.boundingBox(),
+        reset.boundingBox(),
+      ]);
+      expect(
+        controls.every(
+          (box) => box !== null && Math.abs(box.y - controls[0]!.y) < 1
+        )
+      ).toBe(true);
+      expect(controls[0]!.height).toBe(32);
+    }
+    await sort.focus();
+    await sort.press("ArrowDown");
+    await expect(page.getByRole("menu")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(sort).toBeFocused();
     await expect(panel.getByRole("article").first()).toHaveAccessibleName(
       "Sorted artwork 0"
     );
     await sort.focus();
     await expect(sort).toBeFocused();
-    await sort.selectOption("leaderboard");
+    await sort.press("ArrowDown");
+    await page.keyboard.press("Home");
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Enter");
     await expect.poll(() => releaseRanking !== undefined).toBe(true);
     await expect(sort).toBeEnabled();
-    await sort.selectOption("last_voted");
+    await selectSort("last_voted");
     await expect(panel.getByRole("alert")).toBeVisible();
     await panel.getByRole("button", { name: "Try again", exact: true }).click();
     await expect(panel.getByRole("article").first()).toHaveAccessibleName(
       "Sorted artwork 52"
     );
     releaseRanking?.();
-    await expect(sort).toHaveValue("last_voted");
+    await expect(sort).toHaveAccessibleName("Sort by: Last voted");
     for (const order of ["last_voted", "leaderboard", "vote_amount"]) {
-      await sort.selectOption(order);
+      await selectSort(order);
       await expect(panel.getByRole("article").first()).toHaveAccessibleName(
         orders[order]![0]!.title
       );
@@ -2652,17 +2693,17 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       expect(reads).toContainEqual({ sort: order, cursor: `${order}:50` });
     }
     await sort.scrollIntoViewIfNeeded();
-    await sort.selectOption("leaderboard");
+    await selectSort("leaderboard");
     await expectNoHorizontalOverflow(page);
     await page.screenshot({
       path: testInfo.outputPath("my-votes-sorting.png"),
     });
     await page.getByRole("tab", { name: "All votes", exact: true }).click();
     await page.getByRole("tab", { name: "My Votes", exact: true }).click();
-    await expect(sort).toHaveValue("leaderboard");
+    await expect(sort).toHaveAccessibleName("Sort by: Leaderboard position");
     expect(sandbox.requests).toHaveLength(0);
     expect(mutations).toHaveLength(0);
-    await sort.selectOption("last_voted");
+    await selectSort("last_voted");
     const newest = panel.getByRole("article", {
       name: "Sorted artwork 52",
       exact: true,
@@ -2682,9 +2723,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       newest.getByRole("spinbutton", { name: "Your vote" })
     ).toHaveValue("4");
-    await expect(sort).toHaveValue("last_voted");
+    await expect(sort).toHaveAccessibleName("Sort by: Last voted");
     await edited.getByRole("checkbox").check();
-    await sort.selectOption("vote_amount");
+    await selectSort("vote_amount");
     await expect(panel.getByRole("article").first()).toHaveAccessibleName(
       "Sorted artwork 51"
     );
@@ -2700,8 +2741,39 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       .getByRole("button", { name: "Reset vote", exact: true })
       .click();
     await expect(edited).toHaveCount(0);
-    await expect(sort).toHaveValue("vote_amount");
+    await expect(sort).toHaveAccessibleName("Sort by: Your vote amount");
     expect(mutations).toEqual([99, 0]);
+    if ((page.viewportSize()?.width ?? 0) < 1024) {
+      await page.setViewportSize({ width: 320, height: 800 });
+      await page.evaluate(() => {
+        Object.defineProperty(navigator, "languages", {
+          configurable: true,
+          value: ["es-ES"],
+        });
+        globalThis.dispatchEvent(new Event("languagechange"));
+      });
+      const translatedSort = page.getByRole("button", {
+        name: /^Ordenar por:/,
+      });
+      await translatedSort.click();
+      await page
+        .getByRole("menuitem", {
+          name: "Posición en la clasificación",
+          exact: true,
+        })
+        .click();
+      await expect(page.getByRole("menu")).toBeHidden();
+      await expect(translatedSort).toHaveAccessibleName(
+        "Ordenar por: Posición en la clasificación"
+      );
+      expect(
+        (await translatedSort.boundingBox())!.height
+      ).toBeGreaterThanOrEqual(44);
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("my-votes-sorting-narrow-es.png"),
+      });
+    }
   });
 
   test("loads My Votes cards without full drops and fetches more on scroll", async ({

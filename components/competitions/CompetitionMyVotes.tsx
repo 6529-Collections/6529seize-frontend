@@ -45,11 +45,8 @@ import { useCompetitionEntryDrops } from "@/hooks/competitions/useCompetitionEnt
 import { useCompetitionDropNavigation } from "@/hooks/competitions/useCompetitionDropNavigation";
 import MyStreamWaveMyVote from "@/components/brain/my-stream/votes/MyStreamWaveMyVote";
 import { CompetitionVoteForm } from "./CompetitionVote";
-import {
-  CompetitionState,
-  COMPETITION_BUTTON,
-  COMPETITION_INPUT,
-} from "./CompetitionState";
+import { CompetitionState, COMPETITION_BUTTON } from "./CompetitionState";
+import { CompetitionMyVotesSort } from "./CompetitionMyVotesSort";
 import { CompetitionLoadMore } from "./CompetitionLoadMore";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -318,46 +315,57 @@ function ScopedCompetitionMyVotes({
         {t(locale, "competitions.signIn")}
       </p>
     );
-  const sortControl = (
-    <div className="tw-px-2 tw-py-2 sm:tw-px-4">
-      <label className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-300">
-        <span>{t(locale, "waves.myVotes.sort")}</span>
-        <select
-          value={sort}
+  const toolbar = (
+    <MyStreamWaveMyVotesReset
+      toolbarContent={
+        <CompetitionMyVotesSort
+          sort={sort}
           disabled={resetting}
-          className={`${COMPETITION_INPUT} tw-min-h-11 !tw-w-auto tw-min-w-0 tw-max-w-full tw-flex-1 !tw-py-2 tw-text-base sm:tw-flex-none sm:tw-text-sm`}
-          onChange={(event) => {
-            const value = event.target.value;
-            if (isMyVotesSort(value)) {
-              setSelected(new Set());
-              setSort(value);
-            }
+          onChange={(value) => {
+            setSelected(new Set());
+            setSort(value);
           }}
-        >
-          <option value={ApiCompetitionMyVotesSort.VoteAmount}>
-            {t(locale, "waves.myVotes.sort.voteAmount")}
-          </option>
-          <option value={ApiCompetitionMyVotesSort.Leaderboard}>
-            {t(locale, "waves.myVotes.sort.leaderboard")}
-          </option>
-          <option value={ApiCompetitionMyVotesSort.LastVoted}>
-            {t(locale, "waves.myVotes.sort.lastVoted")}
-          </option>
-        </select>
-      </label>
-    </div>
+        />
+      }
+      waveId={competition.wave_id}
+      haveDrops={selectable.length > 0}
+      selected={selected}
+      allItemsSelected={allSelected}
+      availableVotes={
+        competition.voting.credit_scope === "WAVE"
+          ? (credits.data?.remaining ?? null)
+          : null
+      }
+      isVotingClosed={!competition.permissions.vote}
+      resetVote={resetVote}
+      onResettingChange={setResetting}
+      onToggleSelectAll={() =>
+        setSelected(
+          allSelected
+            ? new Set()
+            : new Set(selectable.map((vote) => vote.drop_id))
+        )
+      }
+      removeSelected={(dropId) =>
+        setSelected((current) => {
+          const next = new Set(current);
+          next.delete(dropId);
+          return next;
+        })
+      }
+    />
   );
   if (query.isPending)
     return (
       <div>
-        {sortControl}
+        {toolbar}
         <CompetitionState />
       </div>
     );
   if (query.isError && (!query.data || isCompetitionAccessError(query.error)))
     return (
       <div>
-        {sortControl}
+        {toolbar}
         <CompetitionState error retry={() => void query.refetch()} />
       </div>
     );
@@ -366,38 +374,11 @@ function ScopedCompetitionMyVotes({
   );
   return (
     <div>
-      {sortControl}
+      {toolbar}
       {query.isRefetchError && (
         <CompetitionState error retry={() => void query.refetch()} />
       )}
-      <MyStreamWaveMyVotesReset
-        waveId={competition.wave_id}
-        haveDrops={selectable.length > 0}
-        selected={selected}
-        allItemsSelected={allSelected}
-        availableVotes={
-          competition.voting.credit_scope === "WAVE"
-            ? (credits.data?.remaining ?? null)
-            : null
-        }
-        isVotingClosed={!competition.permissions.vote}
-        resetVote={resetVote}
-        onResettingChange={setResetting}
-        onToggleSelectAll={() =>
-          setSelected(
-            allSelected
-              ? new Set()
-              : new Set(selectable.map((vote) => vote.drop_id))
-          )
-        }
-        removeSelected={(dropId) =>
-          setSelected((current) => {
-            const next = new Set(current);
-            next.delete(dropId);
-            return next;
-          })
-        }
-      />
+
       {!votes.length && (
         <p className="tw-px-2 tw-py-10 tw-text-left tw-text-sm tw-italic tw-text-iron-500 sm:tw-px-4">
           {t(locale, "waves.myVotes.empty")}

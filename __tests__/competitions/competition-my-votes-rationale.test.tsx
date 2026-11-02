@@ -87,9 +87,9 @@ jest.mock("@/hooks/competitions/useCompetitionDropNavigation", () => ({
 }));
 jest.mock(
   "@/components/brain/my-stream/votes/MyStreamWaveMyVotesReset",
-  () => (props: unknown) => {
+  () => (props: { toolbarContent?: ReactNode }) => {
     mockResetControls(props);
-    return null;
+    return props.toolbarContent;
   }
 );
 jest.mock(
@@ -231,9 +231,12 @@ it("omits the reply action when the voter cannot chat", () => {
 it("keeps the order while explaining a vote, and restores it on remount", async () => {
   const user = userEvent.setup();
   const { unmount } = render(<CompetitionMyVotes />);
-  const sort = screen.getByRole("combobox", { name: "Sort by" });
-  expect(sort).toHaveValue("vote_amount");
-  await user.selectOptions(sort, "leaderboard");
+  const sort = screen.getByRole("button", { name: /^Sort by:/ });
+  expect(sort).toHaveAccessibleName("Sort by: Your vote amount");
+  await user.click(sort);
+  await user.click(
+    screen.getByRole("menuitem", { name: "Leaderboard position" })
+  );
   expect(mockResource).toHaveBeenLastCalledWith(
     { waveId: "wave", competitionId: "competition" },
     "votes/me",
@@ -241,50 +244,46 @@ it("keeps the order while explaining a vote, and restores it on remount", async 
     true
   );
   await user.click(screen.getByRole("button", { name: "Explain vote" }));
-  expect(sort).toHaveValue("leaderboard");
+  expect(sort).toHaveAccessibleName("Sort by: Leaderboard position");
   await user.click(screen.getByRole("button", { name: "Cancel rationale" }));
-  expect(sort).toHaveValue("leaderboard");
+  expect(sort).toHaveAccessibleName("Sort by: Leaderboard position");
   unmount();
   render(<CompetitionMyVotes />);
-  expect(screen.getByRole("combobox", { name: "Sort by" })).toHaveValue(
-    "leaderboard"
-  );
+  expect(
+    screen.getByRole("button", { name: /^Sort by:/ })
+  ).toHaveAccessibleName("Sort by: Leaderboard position");
 });
 
 it("keeps the control available during a new order's loading state", async () => {
   mockPending = true;
   render(<CompetitionMyVotes />);
-  await userEvent.selectOptions(
-    screen.getByRole("combobox", { name: "Sort by" }),
-    "last_voted"
-  );
+  await userEvent.click(screen.getByRole("button", { name: /^Sort by:/ }));
+  await userEvent.click(screen.getByRole("menuitem", { name: "Last voted" }));
   expect(screen.getByRole("status")).toBeInTheDocument();
-  expect(screen.getByRole("combobox", { name: "Sort by" })).toHaveValue(
-    "last_voted"
-  );
+  expect(
+    screen.getByRole("button", { name: /^Sort by:/ })
+  ).toHaveAccessibleName("Sort by: Last voted");
 });
 
 it("isolates preferences and interaction state when profile or competition changes", async () => {
   const { rerender } = render(<CompetitionMyVotes />);
-  await userEvent.selectOptions(
-    screen.getByRole("combobox", { name: "Sort by" }),
-    "last_voted"
-  );
+  await userEvent.click(screen.getByRole("button", { name: /^Sort by:/ }));
+  await userEvent.click(screen.getByRole("menuitem", { name: "Last voted" }));
   await userEvent.click(screen.getByRole("button", { name: "Explain vote" }));
   mockViewer = "another-viewer";
   rerender(<CompetitionMyVotes />);
   expect(screen.queryByRole("textbox", { name: "Rationale" })).toBeNull();
-  expect(screen.getByRole("combobox", { name: "Sort by" })).toHaveValue(
-    "vote_amount"
-  );
+  expect(
+    screen.getByRole("button", { name: /^Sort by:/ })
+  ).toHaveAccessibleName("Sort by: Your vote amount");
   mockViewer = "viewer";
   rerender(<CompetitionMyVotes />);
-  expect(screen.getByRole("combobox", { name: "Sort by" })).toHaveValue(
-    "last_voted"
-  );
+  expect(
+    screen.getByRole("button", { name: /^Sort by:/ })
+  ).toHaveAccessibleName("Sort by: Last voted");
   mockCompetitionId = "another-competition";
   rerender(<CompetitionMyVotes />);
-  expect(screen.getByRole("combobox", { name: "Sort by" })).toHaveValue(
-    "vote_amount"
-  );
+  expect(
+    screen.getByRole("button", { name: /^Sort by:/ })
+  ).toHaveAccessibleName("Sort by: Your vote amount");
 });
