@@ -228,10 +228,12 @@ function ScopedCompetitionMyVotes({
     }),
     [query.data, query.dataUpdatedAt]
   );
-  const drops = useCompetitionEntryDrops(
-    votes.map((vote) => ({ entryId: vote.entry_id, dropId: vote.drop_id })),
-    cards
+  const entries = useMemo(
+    () =>
+      votes.map((vote) => ({ entryId: vote.entry_id, dropId: vote.drop_id })),
+    [votes]
   );
+  const drops = useCompetitionEntryDrops(entries, cards);
   const onDropClick = useCompetitionDropNavigation();
   const identity = {
     waveId: competition.wave_id,
@@ -263,12 +265,8 @@ function ScopedCompetitionMyVotes({
   const assertActiveScope = () => {
     if (!activeScope.current) throw new Error("Voting session changed");
   };
-  const selectable = votes.filter(
-    (vote) => vote.entry_status === ApiCompetitionEntryStatus.Active
-  );
   const allSelected =
-    selectable.length > 0 &&
-    selectable.every((vote) => selected.has(vote.drop_id));
+    votes.length > 0 && votes.every((vote) => selected.has(vote.drop_id));
   const resetVote = async (dropId: string) => {
     const vote = votes.find((item) => item.drop_id === dropId);
     if (
@@ -322,13 +320,14 @@ function ScopedCompetitionMyVotes({
           sort={sort}
           disabled={resetting}
           onChange={(value) => {
+            if (value === sort) return;
             setSelected(new Set());
             setSort(value);
           }}
         />
       }
       waveId={competition.wave_id}
-      haveDrops={selectable.length > 0}
+      haveDrops={votes.length > 0}
       selected={selected}
       allItemsSelected={allSelected}
       availableVotes={
@@ -341,9 +340,7 @@ function ScopedCompetitionMyVotes({
       onResettingChange={setResetting}
       onToggleSelectAll={() =>
         setSelected(
-          allSelected
-            ? new Set()
-            : new Set(selectable.map((vote) => vote.drop_id))
+          allSelected ? new Set() : new Set(votes.map((vote) => vote.drop_id))
         )
       }
       removeSelected={(dropId) =>

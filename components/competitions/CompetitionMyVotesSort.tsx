@@ -2,6 +2,7 @@
 
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import { CompactMenu } from "@/components/compact-menu";
+import CompactMenuMobileBottomSheet from "@/components/compact-menu/CompactMenuMobileBottomSheet";
 import {
   COMPACT_ACTION_BUTTON_CLASS,
   COMPACT_ACTION_CONTENT_CLASS,
@@ -39,39 +40,60 @@ export function CompetitionMyVotesSort({
     ),
   };
 
+  const isMobile = isApp || isMobileViewport;
+  const title = t(locale, "waves.myVotes.sort");
+  const ariaLabel = `${title}: ${labels[sort]}`;
+  const triggerClassName = `${COMPACT_ACTION_BUTTON_CLASS} tw-max-w-full ${isMobile ? "tw-min-h-11" : "tw-h-8"}`;
+  const trigger = (
+    <span
+      className={`${COMPACT_ACTION_CONTENT_CLASS} tw-min-w-0 tw-max-w-full`}
+    >
+      <span className="tw-truncate">{labels[sort]}</span>
+      <ChevronDownIcon
+        aria-hidden="true"
+        className="tw-h-3.5 tw-w-3.5 tw-shrink-0"
+      />
+    </span>
+  );
+  const items = Object.values(ApiCompetitionMyVotesSort).map((value) => ({
+    id: value,
+    label: labels[value],
+    icon: (
+      <CheckIcon
+        aria-hidden="true"
+        className={`tw-h-4 tw-w-4 tw-shrink-0 ${value === sort ? "" : "tw-invisible"}`}
+      />
+    ),
+    onSelect: () => onChange(value),
+  }));
+
+  if (isMobile) {
+    return (
+      <CompactMenuMobileBottomSheet
+        title={title}
+        ariaLabel={ariaLabel}
+        trigger={trigger}
+        triggerClassName={triggerClassName}
+        items={items}
+        disabled={disabled}
+      />
+    );
+  }
+
   return (
     <CompactMenu
-      aria-label={`${t(locale, "waves.myVotes.sort")}: ${labels[sort]}`}
+      aria-label={ariaLabel}
       className="tw-min-w-0 tw-max-w-full"
       unstyledTrigger
-      triggerClassName={`${COMPACT_ACTION_BUTTON_CLASS} tw-max-w-full ${isApp || isMobileViewport ? "tw-min-h-11" : "tw-h-8"}`}
-      trigger={({ isOpen }) => (
-        <span
-          className={`${COMPACT_ACTION_CONTENT_CLASS} tw-min-w-0 tw-max-w-full`}
-        >
-          <span className="tw-truncate">{labels[sort]}</span>
-          <ChevronDownIcon
-            aria-hidden="true"
-            className={`tw-h-3.5 tw-w-3.5 tw-shrink-0 ${isOpen ? "tw-rotate-180" : ""}`}
-          />
-        </span>
-      )}
+      triggerClassName={triggerClassName}
+      trigger={trigger}
       disabled={disabled}
       anchor="bottom start"
+      menuClassName="!tw-transition-none"
       menuWidthClassName="tw-w-56 tw-max-w-[calc(100vw-2rem)]"
-      itemClassName="tw-min-h-11 tw-text-xs lg:tw-min-h-9"
+      itemClassName="tw-min-h-9 tw-text-xs"
       activeItemId={sort}
-      items={Object.values(ApiCompetitionMyVotesSort).map((value) => ({
-        id: value,
-        label: labels[value],
-        icon: (
-          <CheckIcon
-            aria-hidden="true"
-            className={`tw-h-4 tw-w-4 tw-shrink-0 ${value === sort ? "" : "tw-invisible"}`}
-          />
-        ),
-        onSelect: () => onChange(value),
-      }))}
+      items={items}
     />
   );
 }

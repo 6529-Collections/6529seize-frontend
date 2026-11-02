@@ -4,7 +4,8 @@
 
 `My Votes` lists active submissions where your current vote is not `0`.
 Past winners are excluded; their historical vote records remain preserved.
-Use the compact sorting dropdown beside **Select all** and **Reset votes**.
+Use the compact sorting control beside **Select all** and **Reset votes**.
+It opens a dropdown on desktop and the shared bottom sheet below 1024px and in the app.
 It shows the current order, with **Available in wave** on the same toolbar when
 a wave-wide balance is available. The controls wrap on narrow screens. Choose:
 

@@ -12,6 +12,21 @@ const mockResource = jest.fn();
 const mockRequestAuth = jest.fn();
 const mockSetVote = jest.fn();
 const mockResetControls = jest.fn();
+const mockVoteData = {
+  pages: [
+    {
+      data: [
+        {
+          entry_id: "entry",
+          drop_id: "drop",
+          entry_status: "ACTIVE",
+          value: 7,
+        },
+        { entry_id: "winner", drop_id: "winner-drop", entry_status: "WINNER" },
+      ],
+    },
+  ],
+};
 let mockParts: { part_id: number }[] = [{ part_id: 1 }];
 jest.mock("@/contexts/CompetitionContext", () => ({
   useCompetition: () => ({
@@ -46,25 +61,7 @@ jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
     return {
       isPending: mockPending,
       refetch: jest.fn(),
-      data: {
-        pages: [
-          {
-            data: [
-              {
-                entry_id: "entry",
-                drop_id: "drop",
-                entry_status: "ACTIVE",
-                value: 7,
-              },
-              {
-                entry_id: "winner",
-                drop_id: "winner-drop",
-                entry_status: "WINNER",
-              },
-            ],
-          },
-        ],
-      },
+      data: mockVoteData,
     };
   },
 }));
@@ -286,4 +283,26 @@ it("isolates preferences and interaction state when profile or competition chang
   expect(
     screen.getByRole("button", { name: /^Sort by:/ })
   ).toHaveAccessibleName("Sort by: Your vote amount");
+});
+
+it("does not rerender the list when opening the menu or reselecting its current order", async () => {
+  render(<CompetitionMyVotes />);
+  const calls = mockResource.mock.calls.length;
+  await userEvent.click(screen.getByRole("button", { name: /^Sort by:/ }));
+  expect(mockResource).toHaveBeenCalledTimes(calls);
+  await userEvent.click(
+    screen.getByRole("menuitem", { name: "Your vote amount" })
+  );
+  expect(mockResource).toHaveBeenCalledTimes(calls);
+});
+
+it("reuses card references while interacting with the current list", async () => {
+  render(<CompetitionMyVotes />);
+  const references = jest
+    .mocked(useCompetitionEntryDrops)
+    .mock.calls.at(-1)?.[0];
+  await userEvent.click(screen.getByRole("button", { name: "Explain vote" }));
+  expect(jest.mocked(useCompetitionEntryDrops).mock.calls.at(-1)?.[0]).toBe(
+    references
+  );
 });

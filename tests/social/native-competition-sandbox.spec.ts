@@ -2532,11 +2532,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         const { value } = route.request().postDataJSON() as { value: number };
         mutations.push(value);
         values.set(drop.id, value);
-        orders.last_voted = [
+        orders["last_voted"] = [
           drop,
-          ...orders.last_voted!.filter((item) => item !== drop),
+          ...orders["last_voted"]!.filter((item) => item !== drop),
         ];
-        orders.vote_amount = [...artworks].sort(
+        orders["vote_amount"] = [...artworks].sort(
           (a, b) => values.get(b.id)! - values.get(a.id)!
         );
         return route.fulfill({
@@ -2606,7 +2606,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
               vote_summary: {
                 ...resources.card(drop).vote_summary,
                 user_vote: values.get(drop.id),
-                rank: orders.leaderboard!.indexOf(drop) + 1,
+                rank: orders["leaderboard"]!.indexOf(drop) + 1,
               },
             })),
             has_more: end < ordered.length,
@@ -2623,14 +2623,24 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       leaderboard: "Leaderboard position",
       last_voted: "Last voted",
     };
+    const isMobile = (page.viewportSize()?.width ?? 0) < 1024;
+    const sortOptions = isMobile
+      ? page.getByRole("dialog", { name: "Sort by", exact: true })
+      : page.getByRole("menu");
     const selectSort = async (order: string) => {
       await sort.click();
-      await page
-        .getByRole("menuitem", { name: sortLabels[order], exact: true })
+      await sortOptions
+        .getByRole(isMobile ? "button" : "menuitem", {
+          name: sortLabels[order]!,
+          exact: true,
+        })
         .click();
-      await expect(page.getByRole("menu")).toBeHidden();
+      await expect(sortOptions).toHaveCount(0);
     };
     await expect(sort).toHaveAccessibleName("Sort by: Your vote amount");
+    const readsBeforeSameSort = reads.length;
+    for (let repeat = 0; repeat < 3; repeat++) await selectSort("vote_amount");
+    expect(reads).toHaveLength(readsBeforeSameSort);
     const selectAll = panel.getByRole("button", {
       name: "Select all",
       exact: true,
@@ -2653,19 +2663,42 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       expect(controls[0]!.height).toBe(32);
     }
     await sort.focus();
-    await sort.press("ArrowDown");
-    await expect(page.getByRole("menu")).toBeVisible();
+    await sort.press(isMobile ? "Enter" : "ArrowDown");
+    await expect(
+      sortOptions.getByRole(isMobile ? "button" : "menuitem", {
+        name: "Your vote amount",
+        exact: true,
+      })
+    ).toBeVisible();
+    if (isMobile) {
+      await expect(page.getByRole("menu")).toHaveCount(0);
+      const option = sortOptions.getByRole("button", {
+        name: "Your vote amount",
+        exact: true,
+      });
+      expect((await option.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+      await page.screenshot({
+        path: testInfo.outputPath("my-votes-sort-sheet.png"),
+        style: "nextjs-portal { display: none; }",
+        animations: "disabled",
+      });
+    }
     await page.keyboard.press("Escape");
+    await expect(sortOptions).toHaveCount(0);
     await expect(sort).toBeFocused();
     await expect(panel.getByRole("article").first()).toHaveAccessibleName(
       "Sorted artwork 0"
     );
-    await sort.focus();
-    await expect(sort).toBeFocused();
-    await sort.press("ArrowDown");
-    await page.keyboard.press("Home");
-    await page.keyboard.press("ArrowDown");
-    await page.keyboard.press("Enter");
+    if (isMobile) {
+      await selectSort("leaderboard");
+    } else {
+      await sort.focus();
+      await expect(sort).toBeFocused();
+      await sort.press("ArrowDown");
+      await page.keyboard.press("Home");
+      await page.keyboard.press("ArrowDown");
+      await page.keyboard.press("Enter");
+    }
     await expect.poll(() => releaseRanking !== undefined).toBe(true);
     await expect(sort).toBeEnabled();
     await selectSort("last_voted");
@@ -2756,13 +2789,25 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         name: /^Ordenar por:/,
       });
       await translatedSort.click();
-      await page
-        .getByRole("menuitem", {
+      const translatedSheet = page.getByRole("dialog", {
+        name: "Ordenar por",
+        exact: true,
+      });
+      await expect(
+        translatedSheet.getByRole("heading", { name: "Ordenar por" })
+      ).toBeVisible();
+      await page.screenshot({
+        path: testInfo.outputPath("my-votes-sort-sheet-narrow-es.png"),
+        style: "nextjs-portal { display: none; }",
+        animations: "disabled",
+      });
+      await translatedSheet
+        .getByRole("button", {
           name: "Posición en la clasificación",
           exact: true,
         })
         .click();
-      await expect(page.getByRole("menu")).toBeHidden();
+      await expect(translatedSheet).toHaveCount(0);
       await expect(translatedSort).toHaveAccessibleName(
         "Ordenar por: Posición en la clasificación"
       );
