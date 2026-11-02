@@ -116,7 +116,7 @@ export default function UserPageSubscriptionsHistory(
             ) : (
               <>
                 {tab.rows.length ? (
-                  <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06]">
+                  <div className="tw-flex tw-flex-col tw-rounded-xl tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-white/[0.03]">
                     {tab.rows}
                   </div>
                 ) : (
