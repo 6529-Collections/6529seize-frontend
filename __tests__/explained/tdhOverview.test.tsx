@@ -98,7 +98,11 @@ describe("the machine", () => {
       screen.getByRole("button", { name: "Meme #562, still minting" })
     );
     expect(
-      screen.getByText(exactText("152 minted so far · counts as 310 · CC0"))
+      screen.getByText(
+        exactText(
+          "152 minted so far · counts as 310, its floor, until minting ends · CC0"
+        )
+      )
     ).toBeInTheDocument();
     expect(screen.getByText("12.71")).toBeInTheDocument();
     expect(

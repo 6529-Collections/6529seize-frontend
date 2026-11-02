@@ -24,7 +24,7 @@
   "explained.tdh.overview.machine.pickName": "Meme #{id}",
   "explained.tdh.overview.machine.pickMinting": "Meme #{id}, aún en mint",
   "explained.tdh.overview.machine.copies": "{copies} copias · CC0",
-  "explained.tdh.overview.machine.copiesMinting": "{minted} acuñadas hasta ahora · cuenta como {edition} · CC0",
+  "explained.tdh.overview.machine.copiesMinting": "{minted} acuñadas hasta ahora · cuenta como {edition}, su suelo, hasta que acabe el mint · CC0",
   "explained.tdh.overview.machine.days": "Días completos",
   "explained.tdh.overview.machine.daysValue": "{days} días completos",
   "explained.tdh.overview.machine.rate": "× Tasa",

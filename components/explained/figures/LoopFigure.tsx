@@ -57,7 +57,11 @@ const TOKEN_H = 38;
 const SIDE_MIN_COS = 0.3;
 const CHAR_UNITS = 8.2;
 
-function MiniRing({ stations, focus }: Pick<LoopProps, "stations" | "focus">) {
+function MiniRing({
+  stations,
+  focus,
+  verifyWord,
+}: Pick<LoopProps, "stations" | "focus"> & { readonly verifyWord: string }) {
   // Wide enough for each station's name outside its circle, at 15 px, which
   // stays legible (12 px on a phone, 9 at 400% zoom) when the ring scales.
   // As wide as the longest side name needs beside its circle: square in
@@ -110,14 +114,27 @@ function MiniRing({ stations, focus }: Pick<LoopProps, "stations" | "focus">) {
         stroke={EX_HEX.holds}
         strokeWidth={1.5}
       />
-      <path
-        d={`M${cx - 9} ${c}l6 6l12 -12`}
+      {/* Verify as the Tested mark, its glyph and its word: a tick is not
+          in the marks' grammar and would read as "verified". */}
+      <circle
+        cx={cx}
+        cy={c - 7}
+        r={7}
         fill="none"
         stroke={EX_HEX.holds}
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        strokeWidth={1.8}
       />
+      <path d={`M${cx} ${c - 14}a7 7 0 0 1 0 14z`} fill={EX_HEX.holds} />
+      <text
+        x={cx}
+        y={c + 15}
+        textAnchor="middle"
+        fontSize={12}
+        fontWeight={600}
+        fill={EX_HEX.ink1}
+      >
+        {verifyWord}
+      </text>
       {stations.map((station, index) => {
         const angle = ((ANGLES[index] ?? 0) * Math.PI) / 180;
         const x = round2(cx + r * Math.cos(angle));
@@ -311,7 +328,11 @@ function LoopList({ stations, focus, verify, locale }: LoopProps) {
       data-fig="loop"
       data-loop-layout="list"
     >
-      <MiniRing stations={stations} focus={focus} />
+      <MiniRing
+        stations={stations}
+        focus={focus}
+        verifyWord={kt(locale, "explained.kit.loop.verify")}
+      />
       <ol
         className="tw-m-0 tw-grid tw-list-none tw-gap-2 tw-p-0"
         aria-label={kt(locale, "explained.kit.loop.aria")}

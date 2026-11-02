@@ -50,7 +50,7 @@
   "explained.tdh.day.glance.python": "Python",
   "explained.tdh.day.glance.pythonRun": "{runtime}, aus derselben Eingabe",
   "explained.tdh.day.totals.label": "Zwei richtige Summen",
-  "explained.tdh.day.totals.body": "6529.io zählt die zwei Burn-Adressen mit; Validatoren werden das nicht. Diese Summe zählt sie, wie 6529.io, und diese Datei veröffentlicht die andere noch nicht. Für den Tag {date}, den einen Tag, für den beide veröffentlicht sind, waren es {withBurn} und {withoutBurn}.",
+  "explained.tdh.day.totals.body": "6529.io zählt die zwei Burn-Adressen mit; Validatoren werden das nicht. Diese Summe zählt sie, wie 6529.io; die andere Summe, ohne die zwei Burn-Adressen, veröffentlicht diese Datei noch nicht. Für den Tag {date}, den einen Tag, für den beide veröffentlicht sind, waren es {withBurn} und {withoutBurn}.",
   "explained.tdh.day.own.label": "Schreiben Sie Ihre eigene TDH?",
   "explained.tdh.day.own.body": "Treffen Sie das finale TDH jeder Identität und die Summen: Die {spec} gibt jede Regel wieder, und {pin} nennt, was der Lauf eines Tages festlegt. Vergleichen Sie dann Ihre Datensätze, einen nach dem anderen, mit den signierten Uploads von 6529.io, der {identities} und der {wallets}, auf Arweave, um jede Abweichung zu finden. Die Kodierungen der Roots (P28, P11) sind noch nicht öffentlich, die Roots lassen sich heute also nicht nachrechnen.",
   "explained.tdh.day.own.spec": "Spezifikation",

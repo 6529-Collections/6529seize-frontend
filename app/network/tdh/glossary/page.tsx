@@ -11,7 +11,7 @@ import Mark from "@/components/explained/marks/Mark";
 import Track from "@/components/explained/marks/Track";
 import ExplainedShell from "@/components/explained/shell/ExplainedShell";
 import HowWeKnow from "@/components/explained/shell/HowWeKnow";
-import { EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
+import { EX_LAYOUT, EX_LINK, EX_TEXT } from "@/components/explained/tokens";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { loadFactBook } from "@/lib/explained/feed.server";
@@ -78,6 +78,17 @@ function StatusCell({
   // "since Oct 14": the date in the mark's reference is a fact.
   return comparisonRef ? <span data-fact="tdh.days.first">{mark}</span> : mark;
 }
+
+/** The jump index: each group of terms by its first term, in table order. */
+const JUMPS: readonly { readonly id: string; readonly label: GlossaryKey }[] = [
+  { id: "tdh", label: "explained.tdh.glossary.group.what" },
+  { id: "card", label: "explained.tdh.glossary.group.cards" },
+  { id: "raw", label: "explained.tdh.glossary.group.days" },
+  { id: "identity", label: "explained.tdh.glossary.group.wallets" },
+  { id: "canonical", label: "explained.tdh.glossary.group.rules" },
+  { id: "zk", label: "explained.tdh.glossary.group.proofs" },
+  { id: "root", label: "explained.tdh.glossary.group.check" },
+];
 
 export default async function GlossaryPage({
   searchParams,
@@ -167,6 +178,21 @@ export default async function GlossaryPage({
           title={m("explained.tdh.glossary.title")}
           lede={m("explained.tdh.glossary.lede")}
         />
+        {/* A jump index: the terms run in reading order, in these groups. */}
+        <nav
+          aria-label={s("explained.tdh.glossary.jump")}
+          className="tw-mt-8 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-5 tw-gap-y-2 tw-text-[15px] tw-leading-6"
+          data-glossary-jump=""
+        >
+          <span className={EX_TEXT.label}>
+            {s("explained.tdh.glossary.jump")}
+          </span>
+          {JUMPS.map((jump) => (
+            <a key={jump.id} className={EX_LINK} href={`#${jump.id}`}>
+              {s(jump.label)}
+            </a>
+          ))}
+        </nav>
         <section className={EX_LAYOUT.sectionTight}>
           <StackTable
             from="lg"

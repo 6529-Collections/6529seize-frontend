@@ -28,7 +28,7 @@
   "explained.hub.station.decideSay": "Main Stage pondère les votes par le TDH et choisit une carte {perWeek} fois par semaine.",
   "explained.hub.station.execute": "Exécuter",
   "explained.hub.station.executeSub": "clés d'admin aujourd'hui",
-  "explained.hub.station.executeNum": "la gagnante est mintée",
+  "explained.hub.station.executeNum": "mintée par des clés d'admin aujourd'hui",
   "explained.hub.station.executeSay": "Aujourd'hui, les clés d'admin de 6529 mintent la gagnante. Le mint par le réseau est décidé (D67), pas construit.",
   "explained.hub.chapterCta": "Chapitre {number} : {title}",
   "explained.hub.chapterComing": "Expliqué dans {title}, un chapitre encore à venir.",

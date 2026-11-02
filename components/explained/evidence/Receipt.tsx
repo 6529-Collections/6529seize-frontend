@@ -110,20 +110,17 @@ export default function Receipt({
   }
   return (
     // A slip, a little narrower than its column: paper a shade lighter than
-    // the page, a perforation under its head and a torn bottom edge.
-    <div className="tw-relative tw-max-w-[880px] tw-pb-3" data-receipt="">
+    // the page, a perforation under its head, and a whole border: a torn
+    // edge drawn in the paper's own shade read as a missing border.
+    <div className="tw-relative tw-max-w-[880px]" data-receipt="">
       <section
-        className="tw-rounded-t-xl tw-border tw-border-b-0 tw-border-solid tw-border-iron-800 tw-bg-[#17171B] tw-px-4 tw-pb-3 tw-pt-[18px] tw-shadow-[0_24px_48px_-28px_rgba(0,0,0,0.8)] md:tw-px-[26px] md:tw-pb-3 md:tw-pt-6"
+        className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-[#17171B] tw-px-4 tw-pb-4 tw-pt-[18px] tw-shadow-[0_24px_48px_-28px_rgba(0,0,0,0.8)] md:tw-px-[26px] md:tw-pb-5 md:tw-pt-6"
         aria-label={kt(locale, "explained.kit.receipt.label", { cycle })}
       >
         {ordered.map((row) => (
           <ReceiptRow key={row.id} row={row} locale={locale} />
         ))}
       </section>
-      <span
-        className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-3 tw-bg-[linear-gradient(-45deg,transparent_7px,#17171B_7px),linear-gradient(45deg,transparent_7px,#17171B_7px)] tw-bg-[length:14px_12px] tw-bg-repeat-x"
-        aria-hidden="true"
-      />
     </div>
   );
 }

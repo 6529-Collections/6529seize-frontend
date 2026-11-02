@@ -304,20 +304,34 @@ export default async function VersionsPage({
                 })}
                 locale={locale}
               />
-              <figcaption className="tw-mt-2 tw-text-[15px] tw-leading-6 tw-text-iron-400">
-                {s("explained.tdh.versions.chart.caption")}
+              {/* One caption under the chart: what it draws, then the
+                  figures it rests on, with the editions' read time. */}
+              <figcaption
+                className="tw-mt-2 tw-max-w-[760px] tw-scroll-mt-24 tw-text-[15px] tw-leading-6 tw-text-iron-300"
+                id="boost-figures"
+              >
+                {s("explained.tdh.versions.chart.caption")}{" "}
+                {m("explained.tdh.versions.note", {
+                  max: p.v("engine.boost.todayMax"),
+                  gradients: p.v("rules.gradientMax"),
+                  ceiling: p.v("engine.boost.ceiling"),
+                  last: p.v("rules.lastBoostedSeason"),
+                  date: p.v("memes.readOn", "long"),
+                })}
               </figcaption>
             </figure>
           )}
-          <Caption className="tw-mt-8 tw-scroll-mt-24" id="boost-figures">
-            {m("explained.tdh.versions.note", {
-              max: p.v("engine.boost.todayMax"),
-              gradients: p.v("rules.gradientMax"),
-              ceiling: p.v("engine.boost.ceiling"),
-              last: p.v("rules.lastBoostedSeason"),
-              date: p.v("memes.readOn", "long"),
-            })}
-          </Caption>
+          {(historySteps.length <= 1 || ceilingValue === null) && (
+            <Caption className="tw-mt-8 tw-scroll-mt-24" id="boost-figures">
+              {m("explained.tdh.versions.note", {
+                max: p.v("engine.boost.todayMax"),
+                gradients: p.v("rules.gradientMax"),
+                ceiling: p.v("engine.boost.ceiling"),
+                last: p.v("rules.lastBoostedSeason"),
+                date: p.v("memes.readOn", "long"),
+              })}
+            </Caption>
+          )}
         </EdSection>
 
         <EdSection

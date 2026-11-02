@@ -42,6 +42,8 @@ export default function HowWeKnowActions({
       // Plain-HTTP pages and older browsers have no clipboard.
       const clipboard = navigator.clipboard as Clipboard | undefined;
       await clipboard?.writeText(text);
+    } catch {
+      // A refused clipboard: the citation stays on screen to copy by hand.
     } finally {
       setDone(which);
     }

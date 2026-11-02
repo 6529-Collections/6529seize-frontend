@@ -18,7 +18,7 @@
   "explained.tdh.impl.col.written": "Written",
   "explained.tdh.impl.col.runs": "Runs today",
   "explained.tdh.impl.col.proved": "Proved as",
-  "explained.tdh.impl.notProved": "not proved",
+  "explained.tdh.impl.notProved": "Not proved",
   "explained.tdh.impl.a.name": "Program A",
   "explained.tdh.impl.a.sub": "the validator's code; its TDH part is the Rust core",
   "explained.tdh.impl.a.written": "Ported from the Rust reference, no rule changed: its TDH part is the daily check's Rust core itself",

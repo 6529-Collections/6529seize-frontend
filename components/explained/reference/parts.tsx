@@ -76,7 +76,10 @@ export function EdSection({
       className={`tw-scroll-mt-24 ${tight ? EX_LAYOUT.sectionTight : EX_LAYOUT.section}`}
     >
       <div className={EX_LAYOUT.ed}>
-        <div className="lg:tw-pt-2.5">
+        {/* The section's number and label stay in view in the left column
+            while its section scrolls, so a long reference page always says
+            where the reader is. */}
+        <div className="lg:tw-sticky lg:tw-top-40 lg:tw-self-start lg:tw-pt-2.5">
           {no !== undefined && (
             <span className="tw-mb-1.5 tw-block tw-text-sm tw-font-semibold tw-leading-5 tw-text-primary-300">
               {no}

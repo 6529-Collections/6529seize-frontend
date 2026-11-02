@@ -112,7 +112,26 @@ function BlocksFigure({
           />
         </span>
       </div>
-      <ul className="tw-m-0 tw-mt-3.5 tw-grid tw-list-none tw-grid-cols-1 tw-gap-2 tw-p-0 md:tw-grid-cols-3">
+      {/* The receipts' blocks, magnified, so the blocks that held a log
+          are seen, not only counted: a sliver of the whole bar is a part
+          of this one. */}
+      <div className="tw-mt-2 tw-flex tw-justify-end" aria-hidden="true">
+        <div className="tw-w-[62%] md:tw-w-[40%]" data-blocks-zoom="">
+          <div className="tw-flex tw-h-5 tw-w-full tw-overflow-hidden tw-rounded tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-400">
+            <span
+              className="tw-ml-auto tw-h-full tw-bg-iron-50"
+              style={{ width: `${(held / Math.max(1, receipts)) * 100}%` }}
+            />
+          </div>
+          <span className="tw-mt-1 tw-block tw-text-right tw-text-[13px] tw-leading-5 tw-text-iron-400">
+            {rich(locale, k("blocks.zoom"), {
+              receipts: facts.print("proofs.day.receiptBlocks"),
+              held: facts.print("proofs.day.txBlocks"),
+            })}
+          </span>
+        </div>
+      </div>
+      <ul className="tw-m-0 tw-mt-3.5 tw-grid tw-list-none tw-grid-cols-1 tw-gap-2 tw-p-0">
         {rows.map((row) => (
           <li
             key={row.id}

@@ -24,7 +24,7 @@
   "explained.tdh.overview.machine.pickName": "Meme #{id}",
   "explained.tdh.overview.machine.pickMinting": "Meme #{id}, mint en cours",
   "explained.tdh.overview.machine.copies": "{copies} copies · CC0",
-  "explained.tdh.overview.machine.copiesMinting": "{minted} mintées à ce jour · compte comme {edition} · CC0",
+  "explained.tdh.overview.machine.copiesMinting": "{minted} mintées à ce jour · compte comme {edition}, son plancher, jusqu'à la fin du mint · CC0",
   "explained.tdh.overview.machine.days": "Jours entiers de détention",
   "explained.tdh.overview.machine.daysValue": "{days} jours entiers",
   "explained.tdh.overview.machine.rate": "× Taux",

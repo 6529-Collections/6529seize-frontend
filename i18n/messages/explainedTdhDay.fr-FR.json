@@ -50,7 +50,7 @@
   "explained.tdh.day.glance.python": "Python",
   "explained.tdh.day.glance.pythonRun": "{runtime}, à partir de la même entrée",
   "explained.tdh.day.totals.label": "Deux totaux justes",
-  "explained.tdh.day.totals.body": "6529.io compte les deux adresses de burn ; les validateurs ne le feront pas. Ce total les compte, comme 6529.io, et ce fichier ne publie pas encore l'autre. Pour le jour du {date}, le seul jour où les deux sont publiés, ils étaient {withBurn} et {withoutBurn}.",
+  "explained.tdh.day.totals.body": "6529.io compte les deux adresses de burn ; les validateurs ne le feront pas. Ce total les compte, comme 6529.io ; ce fichier ne publie pas encore l'autre total, celui sans les deux adresses de burn. Pour le jour du {date}, le seul jour où les deux sont publiés, ils étaient {withBurn} et {withoutBurn}.",
   "explained.tdh.day.own.label": "Vous écrivez votre propre TDH ?",
   "explained.tdh.day.own.body": "Retrouvez le TDH final de chaque identité et les totaux : la {spec} reprend chaque règle, et le {pin} liste ce que fixe l'exécution d'un jour. Comparez ensuite vos enregistrements, un par un, aux dépôts signés de 6529.io, celui des {identities} et celui des {wallets}, sur Arweave, pour trouver tout écart. Les encodages des racines (P28, P11) ne sont pas encore publics : les racines ne peuvent donc pas être recalculées aujourd'hui.",
   "explained.tdh.day.own.spec": "Spécification",

@@ -28,7 +28,7 @@
   "explained.hub.station.decideSay": "Main Stage gewichtet Stimmen mit TDH und wählt {perWeek}-mal pro Woche eine Karte.",
   "explained.hub.station.execute": "Ausführen",
   "explained.hub.station.executeSub": "heute Admin-Schlüssel",
-  "explained.hub.station.executeNum": "die Gewinnerin wird gemintet",
+  "explained.hub.station.executeNum": "heute von Admin-Schlüsseln gemintet",
   "explained.hub.station.executeSay": "Heute minten die Admin-Schlüssel von 6529 die Gewinnerin. Das Minten durch das Netzwerk ist beschlossen (D67), nicht gebaut.",
   "explained.hub.chapterCta": "Kapitel {number}: {title}",
   "explained.hub.chapterComing": "Erklärt in {title}, einem Kapitel, das noch kommt.",

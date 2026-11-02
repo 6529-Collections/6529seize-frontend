@@ -4,6 +4,7 @@ import AssuranceLadder, {
 } from "@/components/explained/evidence/AssuranceLadder";
 import { EX_LAYOUT, EX_LINK, EX_TEXT } from "@/components/explained/tokens";
 import { FactScope } from "@/components/explained/facts/FactText";
+import ProvedWhere from "./ProvedWhere";
 import type { SureContext } from "./sureShared";
 
 /** Zero-knowledge proofs: the chapter's page on the zero-knowledge proofs. */
@@ -159,6 +160,15 @@ export default function TwoQuestions({ ctx }: { readonly ctx: SureContext }) {
             },
           ]}
         />
+      </FactScope>
+      <FactScope
+        ids={[
+          "manifest.vectors.total",
+          "manifest.proved",
+          "manifest.shownFalse",
+        ]}
+      >
+        <ProvedWhere ctx={ctx} />
       </FactScope>
     </section>
   );

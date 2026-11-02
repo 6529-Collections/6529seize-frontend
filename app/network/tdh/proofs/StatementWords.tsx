@@ -5,7 +5,7 @@ import { useFactSnapshot } from "@/components/explained/facts/FactsProvider";
 import { fill } from "@/components/explained/i18n";
 import BreakIt, { breakItLabel } from "@/components/explained/lens/BreakIt";
 import { Seg } from "@/components/explained/lens/controls";
-import { EX_FOCUS } from "@/components/explained/tokens";
+import { EX_FOCUS, EX_MOTION } from "@/components/explained/tokens";
 import Lens, { Readout } from "@/components/explained/lens/Lens";
 import { Glyph } from "@/components/explained/marks/glyphs";
 import Hash from "@/components/explained/marks/Hash";
@@ -150,7 +150,9 @@ function WordStrip({
 }) {
   return (
     <div
-      className="tw-mt-5 tw-grid tw-grid-cols-5 tw-gap-1 lg:[grid-template-columns:repeat(25,minmax(0,1fr))]"
+      // Five rows of five at every width: one row of 25 squeezed each word
+      // to a 22 px box beside the rule rail.
+      className="tw-mt-5 tw-grid tw-max-w-[460px] tw-grid-cols-5 tw-gap-1.5"
       role="img"
       aria-label={label}
       data-word-strip=""
@@ -165,7 +167,7 @@ function WordStrip({
         return (
           <span
             key={word.word.name}
-            className={`tw-flex tw-h-9 tw-items-center tw-justify-center tw-rounded tw-border tw-border-solid tw-text-xs tw-font-semibold tw-tabular-nums lg:tw-h-11 ${tone}`}
+            className={`tw-flex tw-h-10 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-text-[13px] tw-font-semibold tw-tabular-nums md:tw-h-11 md:tw-text-sm ${EX_MOTION.model} ${tone}`}
             data-strip-word={word.index}
             aria-hidden="true"
           >

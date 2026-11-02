@@ -24,7 +24,7 @@
   "explained.tdh.overview.machine.pickName": "Meme #{id}",
   "explained.tdh.overview.machine.pickMinting": "Meme #{id}, still minting",
   "explained.tdh.overview.machine.copies": "{copies} copies · CC0",
-  "explained.tdh.overview.machine.copiesMinting": "{minted} minted so far · counts as {edition} · CC0",
+  "explained.tdh.overview.machine.copiesMinting": "{minted} minted so far · counts as {edition}, its floor, until minting ends · CC0",
   "explained.tdh.overview.machine.days": "Whole days held",
   "explained.tdh.overview.machine.daysValue": "{days} whole days",
   "explained.tdh.overview.machine.rate": "× Rate",

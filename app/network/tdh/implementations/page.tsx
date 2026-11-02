@@ -135,14 +135,15 @@ export default async function ImplementationsPage({
   const code = (name: string) => <CodeName wrap>{name}</CodeName>;
   // Every row of the "Proved as" column leads with a mark, so the column
   // scans: the half pair, Proved, or a dotted ring for none.
+  // One mark grammar down the column: the kit's Not proved mark, as the
+  // half pair and Not yet beside it, never a dot drawn by hand.
   const notProved = (
-    <span className="tw-inline-flex tw-items-start tw-gap-1.5 tw-text-iron-400">
-      <span
-        className="tw-mt-[5px] tw-inline-block tw-size-3 tw-flex-none tw-rounded-full tw-border tw-border-dotted tw-border-iron-400"
-        aria-hidden="true"
-      />
-      {s("explained.tdh.impl.notProved")}
-    </span>
+    <Mark
+      kind="notProved"
+      locale={locale}
+      size="sm"
+      label={s("explained.tdh.impl.notProved")}
+    />
   );
   const program = (name: ImplKey, sub?: ImplKey) => (
     <>
@@ -222,6 +223,7 @@ export default async function ImplementationsPage({
           <div className="tw-mt-6">
             <StackTable
               from="lg"
+              size="small"
               caption={s("explained.tdh.impl.cast.caption")}
               columns={[
                 {

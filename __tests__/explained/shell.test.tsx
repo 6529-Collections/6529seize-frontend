@@ -209,7 +209,7 @@ describe("How we know", () => {
       within(footer).getByRole("button", { name: "Cite this page" })
     );
     expect(writeText.mock.calls[1]?.[0]).toMatch(
-      /^The daily check\. 6529 Explained, http.*\. Read October 18, 2026\.$/
+      /^The daily check\. 6529 Explained, published by 6529, http.*\. Read October 18, 2026\.$/
     );
     await user.click(
       within(footer).getByRole("button", {

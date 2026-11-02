@@ -50,7 +50,7 @@
   "explained.tdh.day.glance.python": "Python",
   "explained.tdh.day.glance.pythonRun": "{runtime}, con la misma entrada",
   "explained.tdh.day.totals.label": "Dos totales correctos",
-  "explained.tdh.day.totals.body": "6529.io cuenta las dos direcciones de quema; los validadores no lo harán. Este total las cuenta, como 6529.io, y este archivo aún no publica el otro. Para el día {date}, el único día con ambos publicados, fueron {withBurn} y {withoutBurn}.",
+  "explained.tdh.day.totals.body": "6529.io cuenta las dos direcciones de quema; los validadores no lo harán. Este total las cuenta, como 6529.io; este archivo aún no publica el otro total, el que no incluye las dos direcciones de quema. Para el día {date}, el único día con ambos publicados, fueron {withBurn} y {withoutBurn}.",
   "explained.tdh.day.own.label": "¿Escribes tu propio TDH?",
   "explained.tdh.day.own.body": "Iguala el TDH final de cada identidad y los totales: la {spec} recoge cada regla, y el {pin} enumera lo que fija la ejecución de un día. Después compara tus registros, uno a uno, con las subidas firmadas de 6529.io, la de {identities} y la de {wallets}, en Arweave, para encontrar cualquier fallo. Las codificaciones de las raíces (P28, P11) aún no son públicas, así que hoy las raíces no se pueden recalcular.",
   "explained.tdh.day.own.spec": "Especificación",

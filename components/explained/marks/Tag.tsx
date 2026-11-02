@@ -5,8 +5,8 @@ import { kt, type KitKey } from "../i18n";
 /**
  * Data provenance on figures (EXPLAINED.md §3): Real, with its source;
  * Example, dotted; What if, dashed; Simulated, rose, only on a failing day
- * or state. The tag is a small-caps word with its line under it, never a
- * bordered pill (SCORECARD §4).
+ * or state. The tag is meta text with its line under it, never a bordered
+ * pill (SCORECARD §4).
  */
 export type TagKind = "real" | "example" | "whatIf" | "simulated";
 
@@ -36,7 +36,9 @@ export default function Tag({
 }) {
   return (
     <span
-      className={`tw-inline-flex tw-items-center tw-border-0 tw-border-b tw-pb-px tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.1em] max-md:tw-whitespace-normal md:tw-whitespace-nowrap ${TONE[kind]}`}
+      // Meta text in the stamp line, its kind in its underline (dotted,
+      // dashed, solid) rather than in capitals beside the marks.
+      className={`tw-inline-flex tw-items-center tw-border-0 tw-border-b tw-pb-px tw-text-[13px] tw-font-medium tw-leading-5 max-md:tw-whitespace-normal md:tw-whitespace-nowrap ${TONE[kind]}`}
       data-tag={kind}
     >
       {children ?? kt(locale, WORD[kind])}

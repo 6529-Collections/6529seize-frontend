@@ -158,6 +158,17 @@ export default function NotFoundPage({
             {!def && <Icon kind="arrow" />}
           </Link>
         </div>
+        {/* A direction, not only an index: where to start, by what the
+            reader came for. */}
+        {def && def.read[1] && def.check[0] && (
+          <p className={`${EX_TEXT.body} tw-m-0 tw-mt-10`} data-start="">
+            {kt(locale, "explained.kit.notFound.start", {
+              hold: `${def.read[1].n ?? ""} ${kt(locale, def.read[1].title)}`.trim(),
+              check:
+                `${def.check[0].n ?? ""} ${kt(locale, def.check[0].title)}`.trim(),
+            })}
+          </p>
+        )}
         <div className="tw-mt-12 tw-max-w-[900px]">
           <PageIndex rows={rows} locale={locale} />
         </div>

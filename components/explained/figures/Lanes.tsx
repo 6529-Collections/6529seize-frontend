@@ -53,7 +53,7 @@ function StepText({
 function Arrow() {
   return (
     <div
-      className="tw-flex tw-h-[22px] tw-items-center tw-justify-center lg:tw-h-auto"
+      className="tw-flex tw-h-[22px] tw-items-center tw-justify-center lg:tw-h-auto lg:tw-pt-8"
       aria-hidden="true"
     >
       <svg
@@ -82,7 +82,9 @@ export default function Lanes({
     .join(" 28px ");
   return (
     <ol
-      className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-items-stretch tw-p-0 lg:[grid-template-columns:var(--ex-lanes)]"
+      // Each box keeps its own height, top-aligned: stretched to the
+      // tallest, the short ones were two-thirds empty.
+      className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-items-stretch tw-p-0 lg:tw-items-start lg:[grid-template-columns:var(--ex-lanes)]"
       style={{ ["--ex-lanes" as string]: columns }}
       aria-label={kt(locale, "explained.kit.lanes.aria", { label })}
       data-fig="lanes"

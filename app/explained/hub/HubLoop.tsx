@@ -31,7 +31,9 @@ function stations(book: FactBook, locale: SupportedLocale): AtlasStation[] {
     const fact = book.maybe(id);
     return fact === null ? NOT_AVAILABLE : fmt(fact, locale);
   };
-  const tdh = chapterById("tdh").number ?? "";
+  // The chapter's own stations carry its name, not its number: two
+  // stations both marked "01" read as two stations numbered one.
+  const tdh = kt(locale, chapterById("tdh").title);
   return [
     {
       key: "art",
