@@ -118,7 +118,7 @@ export default function RecordStrip({
             <div
               className={`tw-mt-2.5 tw-flex tw-flex-1 tw-flex-col tw-gap-2 tw-rounded-xl tw-border tw-px-4 tw-py-3.5 ${tile.next ? "tw-border-dashed tw-border-iron-700" : "tw-border-solid tw-border-iron-800 tw-bg-iron-950"}`}
             >
-              <span className="lg:tw-min-h-12">{tile.mark}</span>
+              <span className="lg:tw-min-h-[60px]">{tile.mark}</span>
               <b className="tw-text-base tw-font-semibold tw-leading-[22px] tw-text-iron-50 lg:tw-min-h-[44px]">
                 {tile.title}
               </b>
