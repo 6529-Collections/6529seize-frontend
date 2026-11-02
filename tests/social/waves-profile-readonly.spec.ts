@@ -561,12 +561,12 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expectNoHorizontalOverflow(page);
   });
 
-  test("keeps compact subscription history and preserves its selected pill across resizing", async ({
+  test("shows subscription history directly and preserves its selected pill across resizing", async ({
     page,
-  }) => {
+  }, testInfo) => {
     await gotoReadyWithApiResponse(
       page,
-      `/${PROFILE_HANDLE}/subscriptions`,
+      `/${PROFILE_HANDLE}/subscriptions#profile-subscriptions-history`,
       (url) => url.pathname.includes("/subscriptions/consolidation/logs/")
     );
     await expectProfileShell(page, "Subscriptions");
@@ -574,13 +574,23 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       name: "Subscription History",
       exact: true,
     });
-    const toggle = history.getByRole("button", {
-      name: "Subscription History",
-      exact: true,
-    });
-    await expect(toggle).toHaveAttribute("aria-expanded", "false");
-    await toggle.click();
+    await expect(
+      history.getByRole("heading", {
+        name: "Subscription History",
+        exact: true,
+      })
+    ).toBeFocused();
+    await expect(
+      history.getByRole("button", {
+        name: "Subscription History",
+        exact: true,
+      })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: /^Minting Settings/ })
+    ).toHaveAttribute("aria-expanded", "false");
     const tabs = history.getByRole("tablist");
+    await expect(tabs).toBeVisible();
     await expect(tabs.getByRole("tab")).toHaveText([
       "Redeemed Subscriptions",
       "Log History",
@@ -598,17 +608,27 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       width: viewport.width < 640 ? 900 : 390,
       height: viewport.height,
     });
-    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+    await expect(tabs).toBeVisible();
     await expect(logs).toHaveAttribute("aria-selected", "true");
     await expectNoHorizontalOverflow(page);
     await page.setViewportSize(viewport);
     await expect(logs).toHaveAttribute("aria-selected", "true");
-    await toggle.press("Enter");
-    await expect(toggle).toHaveAttribute("aria-expanded", "false");
-    await toggle.press("Space");
-    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+    await logs.press("ArrowRight");
+    const topUps = tabs.getByRole("tab", {
+      name: "Top Up History",
+      exact: true,
+    });
+    await expect(topUps).toBeFocused();
+    await expect(topUps).toHaveAttribute("aria-selected", "true");
+    await topUps.press("ArrowLeft");
+    await expect(logs).toBeFocused();
     await expect(logs).toHaveAttribute("aria-selected", "true");
     await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(
+      page,
+      testInfo,
+      "subscription-history-pills.png"
+    );
   });
 
   test("scrolls Main Stage Settings and validates live vote Activity in the app", async ({

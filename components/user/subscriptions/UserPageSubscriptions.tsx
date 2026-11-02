@@ -26,6 +26,7 @@ import UserPageSubscriptionsBalance from "./UserPageSubscriptionsBalance";
 import UserPageSubscriptionsEditionPreference from "./UserPageSubscriptionsEditionPreference";
 import UserPageSubscriptionsHistory from "./UserPageSubscriptionsHistory";
 import UserPageSubscriptionsDisclosure from "./UserPageSubscriptionsDisclosure";
+import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
 import { useSubscriptionDisclosure } from "./useSubscriptionDisclosure";
 import { useScrollToHashOnMount } from "@/hooks/useScrollToHashOnMount";
 import UserPageSubscriptionsTopUp from "./UserPageSubscriptionsTopUp";
@@ -79,6 +80,11 @@ export default function UserPageSubscriptions(
   useScrollToHashOnMount("profile-subscriptions-overview", {
     enabled: !!profileKey,
     focusId: "profile-subscriptions-overview-title",
+  });
+
+  useScrollToHashOnMount("profile-subscriptions-history", {
+    enabled: !!profileKey,
+    focusId: "profile-subscriptions-history-title",
   });
 
   const [fetchErrors, setFetchErrors] = useState<Record<string, boolean>>({});
@@ -337,7 +343,7 @@ export default function UserPageSubscriptions(
       <section
         id="profile-subscriptions-overview"
         aria-labelledby="profile-subscriptions-overview-title"
-        className={`tw-relative tw-isolate tw-overflow-hidden tw-scroll-mt-24 tw-rounded-2xl tw-border tw-border-solid tw-bg-iron-950 tw-p-5 tw-shadow-[0_15px_40px_rgba(0,0,0,0.35)] md:tw-p-8 ${COVERAGE_BORDER_CLASS[coverageTone]}`}
+        className={`tw-relative tw-isolate tw-scroll-mt-24 tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-bg-iron-950 tw-p-5 tw-shadow-[0_15px_40px_rgba(0,0,0,0.35)] md:tw-p-8 ${COVERAGE_BORDER_CLASS[coverageTone]}`}
       >
         <div
           aria-hidden="true"
@@ -394,7 +400,7 @@ export default function UserPageSubscriptions(
         loading={fetchingMemeSubscriptions}
         coverage={coverageQuery.isError ? undefined : coverageQuery.data}
       />
-      <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06] tw-rounded-xl tw-bg-iron-950 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] max-md:tw-bg-iron-900 max-md:tw-shadow-none">
+      <div className="tw-rounded-xl tw-bg-iron-950 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] max-md:tw-bg-iron-900 max-md:tw-shadow-none">
         <UserPageSubscriptionsDisclosure
           id="profile-subscriptions-settings"
           title={t(locale, "subscriptions.page.settingsTitle")}
@@ -414,35 +420,35 @@ export default function UserPageSubscriptions(
             />
           </div>
         </UserPageSubscriptionsDisclosure>
-        <UserPageSubscriptionsDisclosure
-          id="profile-subscriptions-history"
-          title={t(locale, "subscriptions.history.title")}
-        >
-          <UserPageSubscriptionsHistory
-            topups={topUpHistory}
-            redeemed={redeemedHistory}
-            logs={subscriptionLogs}
-            topUpsLoading={fetchingTopUpHistory}
-            redeemedLoading={fetchingRedeemedHistory}
-            logsLoading={fetchingSubscriptionLogs}
-            setRedeemedPage={fetchRedeemHistory}
-            setTopUpPage={fetchTopUpHistory}
-            setLogsPage={fetchLogs}
-          />
-        </UserPageSubscriptionsDisclosure>
-        <Link
-          href="/about/subscriptions"
-          className="tw-flex tw-min-h-14 tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-px-5 tw-py-4 tw-text-sm tw-text-iron-100 tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 max-md:tw-px-4"
-        >
-          <span className="tw-text-[15px] tw-font-medium">
-            {t(locale, "subscriptions.page.learnMore")}
-          </span>
-          <ArrowRightIcon
-            aria-hidden="true"
-            className="tw-size-4 tw-text-iron-400"
-          />
-        </Link>
       </div>
+      <UserPageSubscriptionsSection
+        id="profile-subscriptions-history"
+        title={t(locale, "subscriptions.history.title")}
+      >
+        <UserPageSubscriptionsHistory
+          topups={topUpHistory}
+          redeemed={redeemedHistory}
+          logs={subscriptionLogs}
+          topUpsLoading={fetchingTopUpHistory}
+          redeemedLoading={fetchingRedeemedHistory}
+          logsLoading={fetchingSubscriptionLogs}
+          setRedeemedPage={fetchRedeemHistory}
+          setTopUpPage={fetchTopUpHistory}
+          setLogsPage={fetchLogs}
+        />
+      </UserPageSubscriptionsSection>
+      <Link
+        href="/about/subscriptions"
+        className="tw-flex tw-min-h-14 tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-rounded-xl tw-bg-iron-950 tw-px-5 tw-py-4 tw-text-sm tw-text-iron-100 tw-no-underline tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 max-md:tw-bg-iron-900 max-md:tw-px-4 max-md:tw-shadow-none"
+      >
+        <span className="tw-text-[15px] tw-font-medium">
+          {t(locale, "subscriptions.page.learnMore")}
+        </span>
+        <ArrowRightIcon
+          aria-hidden="true"
+          className="tw-size-4 tw-text-iron-400"
+        />
+      </Link>
     </div>
   );
 }

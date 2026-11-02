@@ -298,7 +298,7 @@ describe('UserPageSubscriptions', () => {
 
       jest.clearAllMocks();
 
-      await user.click(screen.getByRole('button', {name: 'Subscription History'}));
+      expect(screen.getByRole('region', {name: 'Subscription History'})).toBeVisible();
       await user.click(screen.getByText('Load TopUp Page 2'));
 
       await waitFor(() => {
@@ -318,7 +318,7 @@ describe('UserPageSubscriptions', () => {
 
       jest.clearAllMocks();
 
-      await user.click(screen.getByRole('button', {name: 'Subscription History'}));
+      expect(screen.getByRole('region', {name: 'Subscription History'})).toBeVisible();
       await user.click(screen.getByText('Load Redeemed Page 2'));
 
       await waitFor(() => {
@@ -338,7 +338,7 @@ describe('UserPageSubscriptions', () => {
 
       jest.clearAllMocks();
 
-      await user.click(screen.getByRole('button', {name: 'Subscription History'}));
+      expect(screen.getByRole('region', {name: 'Subscription History'})).toBeVisible();
       await user.click(screen.getByText('Load Logs Page 2'));
 
       await waitFor(() => {

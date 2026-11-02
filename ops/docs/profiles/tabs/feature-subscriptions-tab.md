@@ -4,7 +4,8 @@
 
 The `Subscriptions` tab at `/{user}/subscriptions` leads with a projected Meme
 subscription answer and balance, followed by Upcoming Drops. Details, Top up,
-Minting Settings, and Subscription History open when needed.
+and Minting Settings open when needed. Subscription History is a separate,
+always-visible section with pills for each history view.
 
 This page covers tab content only. Tab visibility and hidden-tab URL fallback
 are documented in
@@ -51,7 +52,8 @@ first render.
 - Links to `#profile-subscriptions-overview`, `#profile-subscriptions-settings`,
   `#profile-subscriptions-top-up`, `#profile-subscriptions-upcoming`, and
   `#profile-subscriptions-history` scroll to and focus their section heading.
-  Settings, Top up, and History open automatically when linked to.
+  Settings and Top up open automatically when linked to. History is already
+  visible.
 
 ## Common Scenarios
 
@@ -95,8 +97,9 @@ first render.
    full Airdrop Address. Owners can use its edit link to open delegation
    registration. Settings starts closed and summarizes the edition preference
    and address on wider screens.
-6. Open `Subscription History` and choose Redeemed Subscriptions, Log History,
-   or Top Up History. The selected pill is light, the others are dark, and the
+6. In the always-visible `Subscription History` section, choose Redeemed
+   Subscriptions, Log History, or Top Up History. The selected pill is light,
+   the others are dark, and the
    labels have no counts. Pills wrap on narrow screens. One history view is shown
    at a time, retaining its original entry text, dates, addresses, transaction
    links, empty state, and independent pagination.
@@ -169,8 +172,9 @@ first render.
   - `Redeemed Subscriptions`
   - `Log History`
   - `Top Up History`
-  - the outer disclosure starts closed at every width; the tabs retain their
-    selected state while the panel closes, data refreshes, or the window resizes
+  - a separate heading and pills are always visible, with no expand/collapse
+    control; the pills retain their selected state while data refreshes or the
+    window resizes
   - pagination when a tab has more than 10 rows
 
 ## Consolidation Changes

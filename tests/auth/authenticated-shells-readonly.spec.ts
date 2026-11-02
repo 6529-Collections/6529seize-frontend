@@ -402,9 +402,10 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       page.getByRole("heading", { name: "Upcoming Drops" })
     ).toBeVisible();
     const settings = page.getByRole("button", { name: /^Minting Settings/ });
-    const history = page.getByRole("button", { name: "Subscription History" });
     await expect(settings).toHaveAttribute("aria-expanded", "false");
-    await expect(history).toHaveAttribute("aria-expanded", "false");
+    await expect(
+      page.getByRole("heading", { name: "Subscription History", exact: true })
+    ).toBeVisible();
     await page.getByRole("button", { name: "Details", exact: true }).click();
     await expect(page.getByText("Mode", { exact: true })).toBeVisible();
     await settings.click();
@@ -414,7 +415,6 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(
       page.getByRole("group", { name: "Edition Preference" })
     ).toBeVisible();
-    await history.click();
     await expect(
       page.getByRole("tab", { name: "Redeemed Subscriptions", exact: true })
     ).toBeVisible();
@@ -552,7 +552,6 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(
       page.getByRole("button", { name: address, exact: true })
     ).toBeVisible();
-    await page.getByRole("button", { name: "Subscription History" }).click();
     await expectSingleLineLabel(
       page.getByRole("tab", { name: "Top Up History", exact: true })
     );
