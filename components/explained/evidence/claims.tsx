@@ -4,7 +4,8 @@ import { factText, fmt, isFact, type FactEntry } from "@/lib/explained/facts";
 import { kt } from "../i18n";
 import Mark, { type MarkKind } from "../marks/Mark";
 import FactValue from "../facts/FactValue";
-import PhoneMore, { PHONE_MORE_HIDDEN } from "../layout/PhoneMore";
+import PhoneMore from "../layout/PhoneMore";
+import { PHONE_MORE_HIDDEN } from "../layout/phoneMoreClass";
 
 /**
  * Claims with their proof (EXPLAINED.md §6.4, §9): a claim told to the end

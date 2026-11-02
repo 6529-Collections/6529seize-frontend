@@ -4,9 +4,8 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { k } from "./_lib/copy";
 import type { PageFacts } from "./_lib/facts";
 import { rich } from "@/components/explained/rich";
-import PhoneMore, {
-  PHONE_MORE_HIDDEN,
-} from "@/components/explained/layout/PhoneMore";
+import PhoneMore from "@/components/explained/layout/PhoneMore";
+import { PHONE_MORE_HIDDEN } from "@/components/explained/layout/phoneMoreClass";
 import RecordStrip from "./RecordStrip";
 import Section from "./Section";
 

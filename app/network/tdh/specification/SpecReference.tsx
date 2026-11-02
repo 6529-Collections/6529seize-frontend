@@ -1,7 +1,6 @@
 import Link from "next/link";
-import PhoneMore, {
-  PHONE_MORE_HIDDEN,
-} from "@/components/explained/layout/PhoneMore";
+import PhoneMore from "@/components/explained/layout/PhoneMore";
+import { PHONE_MORE_HIDDEN } from "@/components/explained/layout/phoneMoreClass";
 import type { ReactNode } from "react";
 import Mark from "@/components/explained/marks/Mark";
 import { EX_LINK } from "@/components/explained/tokens";

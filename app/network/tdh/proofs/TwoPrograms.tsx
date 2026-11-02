@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
-import PhoneMore, {
-  PHONE_MORE_HIDDEN,
-} from "@/components/explained/layout/PhoneMore";
+import PhoneMore from "@/components/explained/layout/PhoneMore";
+import { PHONE_MORE_HIDDEN } from "@/components/explained/layout/phoneMoreClass";
 import { LimitNote } from "@/components/explained/evidence/notes";
 import { fill } from "@/components/explained/i18n";
 import Hash from "@/components/explained/marks/Hash";
