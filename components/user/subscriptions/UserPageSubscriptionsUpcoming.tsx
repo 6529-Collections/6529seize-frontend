@@ -73,37 +73,49 @@ export default function UserPageSubscriptionsUpcoming(
   } else if (subscriptions.length > 0) {
     content = (
       <div className="tw-flex tw-flex-col tw-py-1.5">
-        {subscriptions.map((subscription, index) => (
-          <div key={subscription.token_id}>
-            {props.coverage?.next_unfunded?.token_id ===
-              subscription.token_id && (
-              <div className="tw-mx-4 tw-flex tw-min-h-11 tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-border-t tw-border-dashed tw-border-amber-400/35 tw-text-sm tw-font-medium tw-text-amber-300">
-                <span>{t(locale, "subscriptions.coverage.nextUnfunded")}</span>
-                {!props.readonly && (
-                  <Link
-                    href="#profile-subscriptions-top-up"
-                    className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-px-1 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-                  >
-                    {t(locale, "subscriptions.page.topUpTitle")}
-                  </Link>
-                )}
-              </div>
-            )}
-            <MemeSubscriptionRow
-              profileKey={props.profileKey}
-              title="The Memes"
-              subscription={subscription}
-              eligibilityCount={
-                props.details?.subscription_eligibility_count ?? 1
+        {subscriptions.map((subscription, index) => {
+          const isNextUnfunded =
+            props.coverage?.next_unfunded?.token_id === subscription.token_id;
+          return (
+            <div
+              key={subscription.token_id}
+              className={
+                index > 0 && !isNextUnfunded
+                  ? "tw-border-0 tw-border-t tw-border-solid tw-border-white/10"
+                  : undefined
               }
-              readonly={props.readonly}
-              refresh={props.refresh}
-              minting_today={index === 0 && isMintingToday()}
-              first={index === 0}
-              date={rows[index] ?? null}
-            />
-          </div>
-        ))}
+            >
+              {isNextUnfunded && (
+                <div className="tw-mx-4 tw-flex tw-min-h-11 tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-border-t tw-border-dashed tw-border-amber-400/35 tw-text-sm tw-font-medium tw-text-amber-300">
+                  <span>
+                    {t(locale, "subscriptions.coverage.nextUnfunded")}
+                  </span>
+                  {!props.readonly && (
+                    <Link
+                      href="#profile-subscriptions-top-up"
+                      className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-px-1 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                    >
+                      {t(locale, "subscriptions.page.topUpTitle")}
+                    </Link>
+                  )}
+                </div>
+              )}
+              <MemeSubscriptionRow
+                profileKey={props.profileKey}
+                title="The Memes"
+                subscription={subscription}
+                eligibilityCount={
+                  props.details?.subscription_eligibility_count ?? 1
+                }
+                readonly={props.readonly}
+                refresh={props.refresh}
+                minting_today={index === 0 && isMintingToday()}
+                first={index === 0}
+                date={rows[index] ?? null}
+              />
+            </div>
+          );
+        })}
       </div>
     );
   } else {
