@@ -94,4 +94,16 @@ describe("DesktopAppDownloads", () => {
     expect(screen.getAllByRole("link")).toHaveLength(3);
     expect(refetch).toHaveBeenCalledTimes(1);
   });
+  it("keeps an OS with no available releases recoverable without download links", () => {
+    query = {
+      data: [{ ...app, releases: [], hasUnavailableRelease: true }],
+      refetch,
+    };
+    render(<DesktopAppDownloads />);
+    expect(screen.getByText("macOS")).toBeInTheDocument();
+    expect(screen.getByRole("status")).not.toHaveTextContent("Some downloads");
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(refetch).toHaveBeenCalledTimes(1);
+  });
 });

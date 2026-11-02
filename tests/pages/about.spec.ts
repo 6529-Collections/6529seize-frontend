@@ -37,17 +37,16 @@ test.describe("About Pages @smoke @medium @large", () => {
     );
     await page.goto("/about/6529-apps", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
-    const mac = page
-      .locator("details")
-      .filter({ has: page.locator("summary").filter({ hasText: /^macOS$/ }) });
-    await expect(mac.locator("summary")).toHaveText("macOS");
+    const macSummary = page.getByText("macOS", { exact: true }).locator("..");
+    const mac = page.getByText("macOS", { exact: true }).locator("../..");
+    await expect(macSummary).toHaveText("macOS");
     await expect(mac.getByText("Requires macOS 13 or later")).toBeVisible();
     await expect(mac.getByText("For macOS 12 Monterey")).toBeVisible();
     await expect(
       mac.getByRole("link", { name: /version 0.3.15, Apple silicon/ })
     ).toHaveAttribute("href", /6529-DESKTOP-mac-arm64-0\.3\.15\.dmg$/);
     await expect(mac.getByText(/Keep your existing app data/)).toBeVisible();
-    const windows = page.locator("summary").filter({ hasText: /^Windows$/ });
+    const windows = page.getByText("Windows", { exact: true }).locator("..");
     await windows.focus();
     await page.keyboard.press("Enter");
     await expect(mac).not.toHaveAttribute("open");

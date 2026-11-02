@@ -120,7 +120,7 @@ describe("feed-driven desktop downloads", () => {
     ).toBe(27);
   });
 
-  it("rejects unknown Darwin minima without display metadata and inconsistent requirements", async () => {
+  it("rejects unknown, inconsistent and unsupported minor requirements", async () => {
     for (const data of [
       {
         version: VERSION,
@@ -132,6 +132,12 @@ describe("feed-driven desktop downloads", () => {
         files: [{ url: mac }],
         minimumSystemVersion: "22.0.0",
         minimumMacOSVersion: "14.0",
+      },
+      {
+        version: VERSION,
+        files: [{ url: mac }],
+        minimumSystemVersion: "23.0.0",
+        minimumMacOSVersion: "14.4",
       },
     ]) {
       mockFeeds({ "mac/latest-mac.yml": JSON.stringify(data) });
@@ -240,5 +246,37 @@ describe("feed-driven desktop downloads", () => {
     } finally {
       jest.useRealTimers();
     }
+  });
+
+  it("propagates cancellation while optional mirror requests are in flight", async () => {
+    const controller = new AbortController();
+    const respondToFeed = fetchMock.getMockImplementation()!;
+    let mirrorStarted!: () => void;
+    const started = new Promise<void>((resolve) => {
+      mirrorStarted = resolve;
+    });
+    fetchMock.mockImplementation(
+      (url: string, options: { signal: AbortSignal }) => {
+        if (!url.endsWith(".json")) return respondToFeed(url, options);
+        if (options.signal.aborted) return Promise.reject(options.signal.reason);
+        return new Promise((_resolve, reject) => {
+          options.signal.addEventListener(
+            "abort",
+            () => reject(options.signal.reason),
+            { once: true }
+          );
+          mirrorStarted();
+        });
+      }
+    );
+    const pending = fetchDesktopAppVersions(controller.signal);
+    const reason = new DOMException(
+      "Query cancelled during mirrors",
+      "AbortError"
+    );
+    const rejection = expect(pending).rejects.toBe(reason);
+    await started;
+    controller.abort(reason);
+    await rejection;
   });
 });

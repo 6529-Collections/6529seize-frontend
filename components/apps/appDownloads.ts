@@ -208,6 +208,8 @@ function readMacOSMinimum(
       throw new Error("Unknown Darwin minimum without macOS display metadata");
     return known;
   }
+  // Core currently publishes verified major-version minima only. Supporting a
+  // non-zero minor requires its Darwin mapping too; do not truncate it here.
   if (
     typeof displayVersion !== "string" ||
     !/^\d+\.0(?:\.0)?$/.test(displayVersion)
