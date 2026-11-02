@@ -105,7 +105,7 @@ export const createMemoryE2eeStorage = (): E2eeStorage =>
 // ---------------------------------------------------------------------------
 
 export const E2EE_DB_NAME = "6529-e2ee";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const S_DEVICES = "devices";
 const S_WASM = "wasm";
 const S_KEYS = "keys";
@@ -113,7 +113,6 @@ const S_GROUPS = "groups";
 const S_MESSAGES = "messages";
 const S_OUTBOX = "outbox";
 const IDX_PROFILE = "profile";
-const IDX_GROUP = "group";
 const IDX_ORDER = "history-order";
 const IDX_IMPORT = "import-source";
 const IDX_LAST = "last-message";
@@ -206,23 +205,25 @@ function createStore(
   }
 }
 
-function upgrade(db: IDBDatabase, tx: IDBTransaction): void {
+function upgrade(
+  db: IDBDatabase,
+  tx: IDBTransaction,
+  oldVersion: number
+): void {
   createStore(db, S_DEVICES, "profileId", []);
   createStore(db, S_WASM, "profileId", []);
   createStore(db, S_KEYS, "profileId", []);
   createStore(db, S_GROUPS, ["profileId", "g"], [[IDX_PROFILE, "profileId"]]);
-  createStore(
-    db,
-    S_MESSAGES,
-    ["profileId", "g", "id"],
-    [
-      [IDX_GROUP, ["profileId", "g"]],
-      [IDX_PROFILE, "profileId"],
-    ]
-  );
+  createStore(db, S_MESSAGES, ["profileId", "g", "id"], []);
   createStore(db, S_OUTBOX, ["profileId", "id"], [[IDX_PROFILE, "profileId"]]);
   const messages = tx.objectStore(S_MESSAGES);
-  // Populate indexes after the rewrite to avoid five index updates per put.
+  // The primary key already supports profile/group prefix ranges. Duplicate
+  // index keys make large Chromium writes and upgrades disproportionately slow.
+  for (const name of ["group", IDX_PROFILE]) {
+    if (messages.indexNames.contains(name)) messages.deleteIndex(name);
+  }
+  if (oldVersion >= 2) return;
+  // Populate indexes after the rewrite to avoid index updates per put.
   // Both steps remain in the same atomic versionchange transaction.
   backfillHistory(
     messages,
@@ -230,15 +231,16 @@ function upgrade(db: IDBDatabase, tx: IDBTransaction): void {
     indexedMessage,
     (row) => strip(row),
     () => {
-      for (const [name, path] of [
-        [IDX_ORDER, "historyOrder"],
-        [IDX_LAST, "lastOrder"],
-        [IDX_IMPORT, "importSource"],
-        [IDX_UNREAD, "unreadSeq"],
-        [IDX_MENTION, "mentionSeq"],
-      ]) {
-        if (!messages.indexNames.contains(name!))
-          messages.createIndex(name!, ["profileId", "g", path!]);
+      const indexes: [string, string | string[]][] = [
+        [IDX_ORDER, ["profileId", "g", "historyOrder"]],
+        [IDX_LAST, ["profileId", "g", "lastOrder"]],
+        [IDX_IMPORT, ["profileId", "g", "importSource"]],
+        [IDX_UNREAD, ["profileId", "g", "unreadSeq"]],
+        [IDX_MENTION, ["profileId", "g", "mentionSeq"]],
+      ];
+      for (const [name, path] of indexes) {
+        if (!messages.indexNames.contains(name))
+          messages.createIndex(name, path);
       }
     }
   );
@@ -253,8 +255,8 @@ function openDatabase(
 ): Promise<IDBDatabase> {
   return new Promise<IDBDatabase>((resolve, reject) => {
     const req = factory.open(E2EE_DB_NAME, DB_VERSION);
-    req.onupgradeneeded = () => {
-      upgrade(req.result, req.transaction!);
+    req.onupgradeneeded = (event) => {
+      upgrade(req.result, req.transaction!, event.oldVersion);
     };
     req.onsuccess = () => {
       const db = req.result;
@@ -297,14 +299,20 @@ const strip = <T extends object>(record: WithProfile<T>): T => {
 const profileRange = (profileId: string): IDBKeyRange =>
   IDBKeyRange.only(profileId);
 
+const messageRange = (profileId: string, g?: string): IDBKeyRange => {
+  const prefix = g === undefined ? [profileId] : [profileId, g];
+  return IDBKeyRange.bound(prefix, [...prefix, []]);
+};
+
 function deleteByIndex(
   tx: IDBTransaction,
   storeName: string,
-  indexName: string,
+  indexName: string | null,
   range: IDBKeyRange
 ): void {
   const store = tx.objectStore(storeName);
-  const cursorRequest = store.index(indexName).openKeyCursor(range);
+  const source = indexName === null ? store : store.index(indexName);
+  const cursorRequest = source.openKeyCursor(range);
   cursorRequest.onsuccess = () => {
     const cursor = cursorRequest.result;
     if (cursor) {
@@ -326,7 +334,7 @@ function applyBatch(
   tx.objectStore(S_WASM).put(wasmRecord);
   for (const g of batch.deleteGroups ?? []) {
     tx.objectStore(S_GROUPS).delete([profileId, g]);
-    deleteByIndex(tx, S_MESSAGES, IDX_GROUP, IDBKeyRange.only([profileId, g]));
+    deleteByIndex(tx, S_MESSAGES, null, messageRange(profileId, g));
   }
   for (const group of batch.groups ?? []) {
     tx.objectStore(S_GROUPS).put({ ...group, profileId });
@@ -539,7 +547,7 @@ class IndexedDbE2eeStorage implements E2eeStorage {
   async listMessages(profileId: string, g: string): Promise<StoredMessage[]> {
     const rows = await this.read<WithProfile<StoredMessage>[]>(
       S_MESSAGES,
-      (os) => os.index(IDX_GROUP).getAll(IDBKeyRange.only([profileId, g]))
+      (os) => os.getAll(messageRange(profileId, g))
     );
     return rows.map((row) => strip(row));
   }
@@ -648,7 +656,7 @@ class IndexedDbE2eeStorage implements E2eeStorage {
         1
       ),
       this.read<number>(S_MESSAGES, (os) =>
-        os.index(IDX_GROUP).count(IDBKeyRange.only([profileId, g]))
+        os.count(messageRange(profileId, g))
       ),
       this.read<number>(S_MESSAGES, (os) =>
         os.index(IDX_UNREAD).count(unreadRange)
@@ -693,7 +701,8 @@ class IndexedDbE2eeStorage implements E2eeStorage {
         // Version only: no key material survives the clear.
         tx.objectStore(S_WASM).put(record);
         tx.objectStore(S_KEYS).delete(profileId);
-        for (const name of [S_GROUPS, S_MESSAGES, S_OUTBOX]) {
+        deleteByIndex(tx, S_MESSAGES, null, messageRange(profileId));
+        for (const name of [S_GROUPS, S_OUTBOX]) {
           deleteByIndex(tx, name, IDX_PROFILE, profileRange(profileId));
         }
       }

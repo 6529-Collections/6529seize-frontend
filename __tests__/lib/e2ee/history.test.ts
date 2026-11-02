@@ -5,6 +5,7 @@ import { historyKey, emptyHistorySummary } from "@/lib/e2ee/history-order";
 import { newRuntime } from "@/lib/e2ee/engine/groups";
 import {
   cacheMessage,
+  historyAround,
   loadHistoryPage,
   updateHistorySummary,
 } from "@/lib/e2ee/engine/history";
@@ -189,6 +190,71 @@ it("upgrades a v1 database in place without losing history, device or checkpoint
   });
 }, 30_000);
 
+it("upgrades an indexed v2 checkpoint without rewriting its history", async () => {
+  const factory = new IDBFactory();
+  const row = message(1);
+  const history = {
+    ...emptyHistorySummary(),
+    count: 1,
+    maxSeq: 1,
+    last: row,
+    tail: row,
+  };
+  const db = await new Promise<IDBDatabase>((resolve, reject) => {
+    const req = factory.open(E2EE_DB_NAME, 2);
+    req.onupgradeneeded = () => {
+      const messages = req.result.createObjectStore("messages", {
+        keyPath: ["profileId", "g", "id"],
+      });
+      messages.createIndex("group", ["profileId", "g"]);
+      messages.createIndex("profile", "profileId");
+      for (const [name, field] of [
+        ["history-order", "historyOrder"],
+        ["last-message", "lastOrder"],
+        ["import-source", "importSource"],
+        ["unread-seq", "unreadSeq"],
+        ["mention-seq", "mentionSeq"],
+      ])
+        messages.createIndex(name!, ["profileId", "g", field!]);
+      messages.put({
+        ...row,
+        profileId: "p",
+        historyOrder: historyKey(row),
+        lastOrder: historyKey(row),
+      });
+      const groups = req.result.createObjectStore("groups", {
+        keyPath: ["profileId", "g"],
+      });
+      groups.createIndex("profile", "profileId");
+      groups.put({ g: "g", profileId: "p", readSeq: 1, history });
+      req.result.createObjectStore("wasm", { keyPath: "profileId" }).put({
+        profileId: "p",
+        version: 37,
+      });
+    };
+    req.onerror = () => reject(req.error);
+    req.onsuccess = () => resolve(req.result);
+  });
+  db.close();
+  const storage = createIndexedDbE2eeStorage(factory);
+  expect(await storage.getStateVersion("p")).toBe(37);
+  expect(await storage.getMessage("p", "g", row.id)).toEqual(row);
+  expect((await storage.listGroups("p"))[0]?.history).toEqual(history);
+  const current = await new Promise<IDBDatabase>((resolve, reject) => {
+    const req = factory.open(E2EE_DB_NAME);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  expect(current.version).toBe(3);
+  const indexes = current
+    .transaction("messages")
+    .objectStore("messages").indexNames;
+  expect([...indexes]).toHaveLength(5);
+  expect(indexes.contains("group")).toBe(false);
+  expect(indexes.contains("profile")).toBe(false);
+  current.close();
+});
+
 it("retains at most two pages while browsing and preserves offscreen summary counts", async () => {
   const storage = createIndexedDbE2eeStorage(new IDBFactory());
   const rows = Array.from({ length: 1500 }, (_, i) => message(i + 1));
@@ -239,6 +305,36 @@ it("refreshes dirty snapshots while unchanged messages retain their identity", (
   expect(after[0]?.text).toBe("edited before checkpoint");
   expect(before[0]?.text).toBe("message 1");
   expect(after[1]).toBe(before[1]);
+});
+
+it("retains offscreen dirty edits without inserting them into a selected history window", async () => {
+  const storage = createIndexedDbE2eeStorage(new IDBFactory());
+  await storage.writeBatch("p", {
+    messages: Array.from({ length: 300 }, (_, i) => message(i + 1)),
+  });
+  const runtime = newRuntime({ g: "g", readSeq: 0 } as StoredGroup);
+  const store = new EngineStore("p", {} as DeviceDirectory);
+  store.groups.set("g", runtime);
+  const ctx = { storage, profileId: "p", store } as unknown as EngineContext;
+  await loadHistoryPage(ctx, runtime);
+  cacheMessage(runtime, message(1));
+  runtime.messages.set("m-1", message(1, { text: "unsaved old edit" }));
+  runtime.dirty.add("m-1");
+  await loadHistoryPage(ctx, runtime, { before: historyKey(message(201)) });
+  expect(store.getMessages("g")).toHaveLength(200);
+  expect(store.getMessages("g").some((row) => row.id === "m-1")).toBe(false);
+  expect(runtime.messages.get("m-1")?.text).toBe("unsaved old edit");
+  runtime.messages.set("m-150", message(150, { text: "unsaved visible edit" }));
+  runtime.dirty.add("m-150");
+  await historyAround(ctx, runtime, "m-220");
+  expect(store.getMessages("g")).toHaveLength(100);
+  expect(store.getMessages("g").some((row) => row.id === "m-150")).toBe(false);
+  expect(runtime.messages.get("m-150")?.text).toBe("unsaved visible edit");
+  await historyAround(ctx, runtime, "m-1");
+  expect(store.getMessages("g").find((row) => row.id === "m-1")?.text).toBe(
+    "unsaved old edit"
+  );
+  expect((await storage.getMessage("p", "g", "m-1"))?.text).toBe("message 1");
 });
 
 it("keeps a read marker advanced during a failed checkpoint when retrying summary deltas", async () => {

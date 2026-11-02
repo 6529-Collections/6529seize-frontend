@@ -54,4 +54,7 @@ it("overlays unsaved new, edited and deleted records without duplicate search hi
   await expect(
     searchHistory(ctx, "match", ["g"], controller.signal)
   ).rejects.toThrow();
+  await expect(
+    searchHistory(ctx, "match", [], controller.signal)
+  ).rejects.toThrow();
 });

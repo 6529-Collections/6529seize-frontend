@@ -79,7 +79,8 @@ export async function seedProcessedHistory(
           row.g === groupId &&
           row.kind === "message" &&
           !row.pending &&
-          !row.deleted
+          !row.deleted &&
+          row.attachments.length === 0
       );
       const photo = messages.find(
         (row) => row.g === groupId && row.attachments.length > 0
@@ -130,10 +131,8 @@ export async function seedProcessedHistory(
         const tx = legacy.transaction("messages", "readwrite");
         const complete = finished(tx);
         for (let index = offset; index < offset + 1000; index++) {
-          const sourceMessage =
-            index === 0 || (index > 10_000 && index % 10 === 0)
-              ? photo
-              : template;
+          const isPhoto = index === 0 || (index > 10_000 && index % 10 === 0);
+          const sourceMessage = isPhoto ? photo : template;
           const row = {
             ...sourceMessage,
             id: `performance-${index}`,
@@ -141,7 +140,7 @@ export async function seedProcessedHistory(
             text: `performance fixture ${index}`,
             body: null,
             sig: null,
-            attachments: sourceMessage === photo ? photo.attachments : [],
+            attachments: isPhoto ? photo.attachments : [],
             ts: template.ts - total + index,
             serverTs: template.serverTs - total + index,
             pending: false,
@@ -154,22 +153,40 @@ export async function seedProcessedHistory(
       for (let offset = 0; offset < total; offset += 1000)
         await appendBatch(offset);
       const verification = legacy.transaction(
-        ["devices", "wasm", "keys"],
+        ["devices", "wasm", "keys", "messages"],
         "readonly"
       );
       const verified = finished(verification);
-      const [device, state, sealingKey] = await Promise.all([
-        read<{ registered: boolean } | undefined>(
-          verification.objectStore("devices").get(profile)
-        ),
-        read<{ iv: Uint8Array; ciphertext: ArrayBuffer } | undefined>(
-          verification.objectStore("wasm").get(profile)
-        ),
-        read<{ key: CryptoKey } | undefined>(
-          verification.objectStore("keys").get(profile)
-        ),
-      ]);
+      const [device, state, sealingKey, photoSample, textSample] =
+        await Promise.all([
+          read<{ registered: boolean } | undefined>(
+            verification.objectStore("devices").get(profile)
+          ),
+          read<{ iv: Uint8Array; ciphertext: ArrayBuffer } | undefined>(
+            verification.objectStore("wasm").get(profile)
+          ),
+          read<{ key: CryptoKey } | undefined>(
+            verification.objectStore("keys").get(profile)
+          ),
+          read<IndexedMessage | undefined>(
+            verification
+              .objectStore("messages")
+              .get([profile, groupId, "performance-0"])
+          ),
+          read<IndexedMessage | undefined>(
+            verification
+              .objectStore("messages")
+              .get([profile, groupId, "performance-1"])
+          ),
+        ]);
       await verified;
+      if (
+        !photoSample?.attachments.length ||
+        textSample?.attachments.length !== 0
+      )
+        throw new Error(
+          "QA history must contain separate photo and text records"
+        );
       if (
         !device?.registered ||
         !state?.iv ||
