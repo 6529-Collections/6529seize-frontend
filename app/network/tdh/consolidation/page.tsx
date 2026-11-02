@@ -320,8 +320,18 @@ export default async function TdhYourWalletsPage({
                         step: "D–A",
                       }),
                     },
-                    { value: "step2", label: "D–B" },
-                    { value: "step3", label: "D–C" },
+                    {
+                      value: "step2",
+                      label: wt(locale, "explained.tdh.wallets.lens.then", {
+                        step: "D–B",
+                      }),
+                    },
+                    {
+                      value: "step3",
+                      label: wt(locale, "explained.tdh.wallets.lens.then", {
+                        step: "D–C",
+                      }),
+                    },
                     {
                       value: "batch",
                       label: wt(locale, "explained.tdh.wallets.lens.batch"),

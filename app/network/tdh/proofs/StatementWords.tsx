@@ -344,7 +344,7 @@ export default function StatementWords({
                   return (
                     <tr
                       key={word.word.name}
-                      className={`tw-grid tw-grid-cols-[28px_minmax(0,1fr)] tw-gap-x-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-1.5 lg:tw-table-row lg:tw-py-0 ${on || showAll ? "" : "tw-hidden"}`}
+                      className={`tw-grid tw-grid-cols-[28px_minmax(0,1fr)] tw-gap-x-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-1.5 lg:tw-py-0 ${on || showAll ? "lg:tw-table-row" : "tw-hidden"}`}
                       data-word={word.index}
                       data-lit={on ? "1" : "0"}
                     >

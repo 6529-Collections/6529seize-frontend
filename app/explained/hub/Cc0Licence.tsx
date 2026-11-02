@@ -66,7 +66,7 @@ export default function Cc0Licence({
       locale={locale}
       stage={
         <div className="tw-flex tw-flex-col tw-gap-4">
-          <div className="tw-flex tw-flex-col tw-gap-2">
+          <div className="tw-flex tw-flex-col tw-items-start tw-gap-2">
             <span className="tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-400">
               {ht(locale, "cc0.model.work")}
             </span>
@@ -82,7 +82,7 @@ export default function Cc0Licence({
               attr="work"
             />
           </div>
-          <div className="tw-flex tw-flex-col tw-gap-2">
+          <div className="tw-flex tw-flex-col tw-items-start tw-gap-2">
             <span className="tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-400">
               {ht(locale, "cc0.model.use")}
             </span>

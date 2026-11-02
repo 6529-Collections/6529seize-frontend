@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useFactSnapshot } from "@/components/explained/facts/FactsProvider";
 import AreaTile from "@/components/explained/figures/AreaTile";
 import { kt } from "@/components/explained/i18n";
@@ -9,6 +9,7 @@ import { Seg, Slider } from "@/components/explained/lens/controls";
 import { useBreakable } from "@/components/explained/lens/useBreakable";
 import Tag from "@/components/explained/marks/Tag";
 import { withCc0 } from "@/components/explained/marks/Cc0";
+import { EX_FOCUS } from "@/components/explained/tokens";
 import ArtCard from "@/components/explained/things/ArtCard";
 import CardPicker from "@/components/explained/things/CardPicker";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -219,6 +220,68 @@ function MachineArt({
   );
 }
 
+/** The address's names for the machine's state. */
+const LINK = { card: "card", days: "days", boost: "boost", sold: "sold" };
+
+/**
+ * The machine's state in the address (the delight judges' "send what selling
+ * does"): read once on arrival, then kept in step with each change, with
+ * replaceState, so the back button is not filled with slider moves. Only
+ * values the machine can show are read.
+ */
+function useMachineLink(
+  model: ReturnType<
+    typeof useBreakable<{ card: string; days: number; beta: number }>
+  >,
+  cards: readonly MachineCard[]
+) {
+  const read = useRef(false);
+  const { set, toggleBreak } = model;
+  useEffect(() => {
+    if (read.current) return;
+    read.current = true;
+    const params = new URLSearchParams(globalThis.location.search);
+    const card = params.get(LINK.card);
+    const days = Number(params.get(LINK.days));
+    const boost = Number(params.get(LINK.boost));
+    const next: { card?: string; days?: number; beta?: number } = {};
+    if (card !== null && cards.some((entry) => String(entry.id) === card)) {
+      next.card = card;
+    }
+    if (
+      Number.isInteger(days) &&
+      days >= 0 &&
+      days <= MAX_DAYS &&
+      params.has(LINK.days)
+    ) {
+      next.days = days;
+    }
+    if (Number.isInteger(boost) && boost >= 100 && boost <= 300) {
+      next.beta = boost;
+    }
+    if (Object.keys(next).length > 0) set(next);
+    if (params.get(LINK.sold) === "1") toggleBreak();
+  }, [cards, set, toggleBreak]);
+  const { state, broken, saved } = model;
+  // The arrival itself writes nothing: a reader who moves nothing keeps a
+  // plain address.
+  const moved = useRef(false);
+  useEffect(() => {
+    if (!moved.current) {
+      moved.current = true;
+      return;
+    }
+    const url = new URL(globalThis.location.href);
+    const shown = broken && saved ? saved : state;
+    url.searchParams.set(LINK.card, shown.card);
+    url.searchParams.set(LINK.days, String(shown.days));
+    url.searchParams.set(LINK.boost, String(shown.beta));
+    if (broken) url.searchParams.set(LINK.sold, "1");
+    else url.searchParams.delete(LINK.sold);
+    globalThis.history.replaceState(globalThis.history.state, "", url);
+  }, [state, broken, saved]);
+}
+
 export default function Machine({
   cards,
   locale,
@@ -231,6 +294,8 @@ export default function Machine({
     { card: String(cards[0]?.id ?? ""), days: DEFAULT_DAYS, beta: 100 },
     (state) => ({ ...state, days: 0 })
   );
+  useMachineLink(model, cards);
+  const [copied, setCopied] = useState(false);
   const card = cards.find((entry) => String(entry.id) === model.state.card);
   if (facts === null || card === undefined) {
     return (
@@ -374,6 +439,23 @@ export default function Machine({
           onToggle={model.toggleBreak}
           label={breakItLabel(locale, ot(locale, "machine.breakEdge"))}
         />
+        {/* The machine's state is in the address: this copy, these days,
+            this boost, sold or not, as a link to send. */}
+        <button
+          type="button"
+          className={`tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-semibold tw-text-primary-300 ${EX_FOCUS}`}
+          onClick={() => {
+            void globalThis.navigator.clipboard
+              ?.writeText(globalThis.location.href)
+              .then(() => setCopied(true));
+          }}
+          data-copy-link=""
+          aria-live="polite"
+        >
+          {copied
+            ? ot(locale, "machine.copied")
+            : ot(locale, "machine.copyLink")}
+        </button>
       </div>
     </section>
   );

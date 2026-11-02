@@ -56,6 +56,12 @@ function exactText(text: string) {
 }
 
 describe("the machine", () => {
+  // The machine keeps its state in the address: each test starts from a
+  // plain one.
+  beforeEach(() => {
+    globalThis.history.replaceState(null, "", "/network/tdh");
+  });
+
   it("opens on one copy of Meme #2 held 100 days: 394 TDH", () => {
     const { container } = withFacts(<Machine cards={CARDS} locale="en-US" />);
     const machine = container.querySelector('[data-lens="machine"]');
@@ -115,6 +121,31 @@ describe("the machine", () => {
     await user.click(breakIt);
     expect(machine).toHaveAttribute("data-broken", "0");
     expect(screen.getByText("394")).toBeInTheDocument();
+  });
+
+  it("keeps its state in the address, and opens on a link to one", async () => {
+    const user = userEvent.setup();
+    withFacts(<Machine cards={CARDS} locale="en-US" />);
+    // Arriving writes nothing; a change writes the state, sold or not.
+    expect(globalThis.location.search).toBe("");
+    await user.click(screen.getByRole("button", { name: "Break it: sell it" }));
+    const params = new URLSearchParams(globalThis.location.search);
+    expect(params.get("card")).toBe("2");
+    expect(params.get("days")).toBe("100");
+    expect(params.get("sold")).toBe("1");
+  });
+
+  it("opens sold when the link says so", () => {
+    globalThis.history.replaceState(
+      null,
+      "",
+      "/network/tdh?card=2&days=100&boost=100&sold=1"
+    );
+    const { container } = withFacts(<Machine cards={CARDS} locale="en-US" />);
+    expect(container.querySelector('[data-lens="machine"]')).toHaveAttribute(
+      "data-broken",
+      "1"
+    );
   });
 
   it("says so, with no number, when the editions cannot be read", () => {

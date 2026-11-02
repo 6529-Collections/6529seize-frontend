@@ -106,7 +106,7 @@ export default function ContractSection({
         <div className="tw-grid tw-gap-6">
           {/* The gas table takes the full width under the row, its note
               beside it, instead of squeezing into the prose column. */}
-          <div className="tw-grid tw-grid-cols-1 tw-items-end tw-gap-x-12 tw-gap-y-4 lg:tw-grid-cols-[minmax(0,620px)_minmax(0,1fr)]">
+          <div className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-x-12 tw-gap-y-4 lg:tw-grid-cols-[minmax(0,620px)_minmax(0,1fr)]">
             <div>
               <p className={`${EX_TEXT.body} tw-m-0 tw-mb-4`}>
                 {rich(locale, k("s4.p2"))}

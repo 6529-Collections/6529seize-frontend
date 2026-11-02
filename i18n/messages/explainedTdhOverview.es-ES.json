@@ -42,6 +42,8 @@
   "explained.tdh.overview.machine.plusGradient": "+ un Gradient",
   "explained.tdh.overview.machine.plusSet": "+ un set completo",
   "explained.tdh.overview.machine.breakEdge": "véndela",
+  "explained.tdh.overview.machine.copyLink": "Copiar un enlace a esto",
+  "explained.tdh.overview.machine.copied": "Enlace copiado",
   "explained.tdh.overview.machine.exampleTag": "Copia de ejemplo",
   "explained.tdh.overview.picture.label": "La imagen",
   "explained.tdh.overview.picture.title": "El TDH de una copia es un área.",

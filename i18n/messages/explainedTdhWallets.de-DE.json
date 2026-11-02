@@ -43,6 +43,7 @@
   "explained.tdh.wallets.lens.addD": "D hinzufügen",
   "explained.tdh.wallets.lens.adding": "Eine vierte Wallet hinzufügen",
   "explained.tdh.wallets.lens.step1": "riskant, eine Verknüpfung nach der anderen: {step}",
+  "explained.tdh.wallets.lens.then": "dann {step}",
   "explained.tdh.wallets.lens.batch": "sicher: D signiert zuletzt, in einem Batch",
   "explained.tdh.wallets.lens.caption": "Graue Linien: in beide Richtungen verknüpft vor dem {date}. Blaue Linien: in beide Richtungen verknüpft ab dem {date}. Eine gestrichelte Wallet zählt allein.",
   "explained.tdh.wallets.lens.groupsJoin": "{groups}; {alone}",

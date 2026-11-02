@@ -43,6 +43,7 @@
   "explained.tdh.wallets.lens.addD": "Ajouter D",
   "explained.tdh.wallets.lens.adding": "Ajouter un quatrième wallet",
   "explained.tdh.wallets.lens.step1": "risqué, un lien à la fois : {step}",
+  "explained.tdh.wallets.lens.then": "puis {step}",
   "explained.tdh.wallets.lens.batch": "sûr : D signe en dernier, en un seul lot",
   "explained.tdh.wallets.lens.caption": "Lignes grises : liés dans les deux sens avant le {date}. Lignes bleues : liés dans les deux sens à partir du {date}. Un wallet en pointillé compte seul.",
   "explained.tdh.wallets.lens.groupsJoin": "{groups} ; {alone}",
