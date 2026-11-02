@@ -47,7 +47,15 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await expect(
       inbox.getByText("sandbox-alice mentioned you", { exact: true })
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
-    await expect(inbox.getByText("Unread", { exact: true })).toHaveCount(5);
+    await expect(inbox.getByText("Unread", { exact: true })).toHaveCount(6);
+    const artwork = inbox.getByRole("link", {
+      name: /^sandbox-alice submitted Sandbox artwork to The Memes – Main Stage\./,
+    });
+    await expect(artwork).toBeVisible();
+    await expect(artwork).toHaveAttribute(
+      "href",
+      "/waves/00000000-0000-4000-8000-000000000533/competitions/10000000-0000-4000-8000-000000000001?entry=20000000-0000-4000-8000-000000000001"
+    );
     expect(page.url()).toBe(route);
     const requestsBefore = await fetchSandboxRequests(baseURL);
     expect(

@@ -7,6 +7,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type {
+  INotificationArtistArtwork,
   INotificationDropReplied,
   INotificationIdentitySubscribed,
   INotificationVotingCreditsReturned,
@@ -35,6 +36,47 @@ const replied: INotificationDropReplied = {
     replied_drop_part: "1",
   },
 };
+
+const artwork: INotificationArtistArtwork = {
+  ...base,
+  cause: ApiNotificationCause.ArtistArtworkSubmitted,
+  related_identity: actor,
+  related_drops: [original],
+  additional_context: {
+    artist_id: "artist",
+    drop_id: original.id,
+    wave_id: "public-wave",
+    competition_id: "competition",
+    entry_id: "entry",
+    competition_title: "The Memes Main Stage",
+    artwork_title: "  Open skies  ",
+    submitted_at: 1000,
+  },
+};
+
+it("names artwork alerts and opens their exact entry even with a related drop", () => {
+  expect(getInboxSummary(artwork, "en-US")).toBe(
+    "alice submitted Open skies to The Memes Main Stage."
+  );
+  expect(getInboxDestination(artwork, "viewer")).toBe(
+    "/waves/public-wave/competitions/competition?entry=entry"
+  );
+});
+
+it.each([null, "   "])("handles an untitled artwork (%s)", (title) => {
+  expect(
+    getInboxSummary(
+      {
+        ...artwork,
+        additional_context: {
+          ...artwork.additional_context,
+          artwork_title: title,
+        },
+      },
+      "en-US"
+    )
+  ).toBe("alice submitted untitled artwork to The Memes Main Stage.");
+});
 
 it("opens the reply itself in its DM rather than the original drop", () => {
   expect(getInboxDrop(replied)).toBe(reply);

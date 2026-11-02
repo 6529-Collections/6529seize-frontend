@@ -3,7 +3,7 @@
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import clsx from "clsx";
 import type { ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type { CompactMenuItem } from "./types";
 
 interface MobileBottomSheetTriggerProps {
@@ -44,13 +44,14 @@ export default function CompactMenuMobileBottomSheet({
 }: CompactMenuMobileBottomSheetProps) {
   const [isOpen, setIsOpen] = useState(false);
   const pendingActionRef = useRef<(() => void) | null>(null);
-  useEffect(() => {
-    onOpenChange?.(isOpen);
-  }, [isOpen, onOpenChange]);
+  const setOpen = (open: boolean) => {
+    setIsOpen(open);
+    onOpenChange?.(open);
+  };
 
   const close = () => {
     pendingActionRef.current = null;
-    setIsOpen(false);
+    setOpen(false);
   };
 
   const selectAction = (
@@ -58,7 +59,7 @@ export default function CompactMenuMobileBottomSheet({
     deferUntilClosed = true
   ) => {
     pendingActionRef.current = deferUntilClosed ? (onSelect ?? null) : null;
-    setIsOpen(false);
+    setOpen(false);
     if (!deferUntilClosed) onSelect?.();
   };
 
@@ -75,7 +76,7 @@ export default function CompactMenuMobileBottomSheet({
           ariaLabel,
           ariaExpanded: isOpen,
           disabled,
-          onClick: () => setIsOpen(true),
+          onClick: () => setOpen(true),
         })
       ) : (
         <button
@@ -85,7 +86,7 @@ export default function CompactMenuMobileBottomSheet({
           aria-haspopup="dialog"
           aria-expanded={isOpen}
           disabled={disabled}
-          onClick={() => setIsOpen(true)}
+          onClick={() => setOpen(true)}
         >
           {trigger}
         </button>

@@ -848,6 +848,12 @@ function notificationIdentity(handle, idSuffix) {
 const notificationActor = notificationIdentity("sandbox-alice", "541");
 const notificationReactorOne = notificationIdentity("sandbox-bob", "542");
 const notificationReactorTwo = notificationIdentity("sandbox-carol", "543");
+const artworkNotificationDrop = notificationDrop({
+  id: "00000000-0000-4000-8000-000000000560",
+  serialNo: 5,
+  content: "A study of light, motion and shared spaces.",
+  author: notificationActor,
+});
 
 const sandboxNotifications = [
   {
@@ -856,12 +862,12 @@ const sandboxNotifications = [
     created_at: CREATED_AT + 1005,
     read_at: null,
     related_identity: notificationActor,
-    related_drops: [mentionDrop],
+    related_drops: [artworkNotificationDrop],
     related_wave: notificationWaveOverview,
     additional_context: {
       artist_id: notificationActor.id,
       wave_id: SANDBOX_NOTIFICATION_WAVE_ID,
-      drop_id: mentionDrop.id,
+      drop_id: artworkNotificationDrop.id,
       competition_id: "10000000-0000-4000-8000-000000000001",
       entry_id: "20000000-0000-4000-8000-000000000001",
       competition_title: "The Memes – Main Stage",

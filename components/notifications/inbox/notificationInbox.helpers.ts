@@ -9,6 +9,7 @@ import {
   type TypedNotification,
   type INotificationVotingCreditsReturned,
   type INotificationCompetitionLifecycle,
+  type INotificationArtistArtwork,
 } from "@/types/feed.types";
 
 const NOTIFICATIONS_ROUTE = "/notifications";
@@ -39,6 +40,7 @@ function getInboxCompetitionDestination(
   notification:
     | INotificationVotingCreditsReturned
     | INotificationCompetitionLifecycle
+    | INotificationArtistArtwork
 ): string {
   const context = notification.additional_context;
   const route = getCompetitionRoute(context.wave_id, context.competition_id);
@@ -55,6 +57,9 @@ export function getInboxDestination(
   notification: TypedNotification,
   handle: string
 ): string {
+  if (notification.cause === ApiNotificationCause.ArtistArtworkSubmitted) {
+    return getInboxCompetitionDestination(notification);
+  }
   const drop = getInboxDrop(notification);
   if (drop) {
     return getWaveRoute({
@@ -123,6 +128,14 @@ export function getInboxSummary(
     : (identity?.handle ?? t(locale, "notifications.unknownProfile"));
   const params = { actor };
   switch (notification.cause) {
+    case ApiNotificationCause.ArtistArtworkSubmitted: {
+      const title = notification.additional_context.artwork_title?.trim() ?? "";
+      return t(locale, "artworkAlerts.notification", {
+        artist: actor,
+        artwork: title.length > 0 ? title : t(locale, "artworkAlerts.untitled"),
+        competition: notification.additional_context.competition_title,
+      });
+    }
     case ApiNotificationCause.IdentitySubscribed:
       return t(locale, "notifications.inbox.follow", params);
     case ApiNotificationCause.IdentityMentioned:

@@ -11,6 +11,8 @@ when they submit new artwork to **The Memes – Main Stage**. The menu shows
 - Another identity’s profile, inside **Profile actions** beside **Follow**.
 - New alerts appear in [Notifications](feature-notifications-feed.md), where the
   **Artwork alerts** filter shows these rows.
+- The desktop notification panel also shows the artist, artwork title and competition.
+  Select the row to open the specific submission.
 
 For signed-in viewers, the control appears for profiles with an artist activity badge: active Main Stage
 submissions, Main Stage wins, or earlier Meme artist credits. If you already have
@@ -26,7 +28,7 @@ Open the artist’s profile from a submission, search result, or profile link.
 1. Sign in with your own profile and open the artist’s profile.
 2. Open **Profile actions** and wait for the saved **On** or **Off** state to load. Select **Artwork alerts** and wait for confirmation.
 3. New Main Stage submissions by that artist can appear in Notifications.
-4. Open the artwork title in the notification to view the specific submission.
+4. Open the artwork title in the full feed, or the notification panel row, to view the specific submission.
 5. Open **Profile actions** and select **Artwork alerts** again to turn future alerts off.
 
 ## Common Scenarios
