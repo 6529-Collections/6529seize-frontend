@@ -1,0 +1,5 @@
+{
+  "utcSchedule.localEquivalent": "(your time: {when})",
+  "memesCheckpoint.faq.schedule": "Monday / Wednesday / Friday at {time}",
+  "memesCheckpoint.faq.checkpointTimes": "The checkpoint times are {schedule}. The card will be minted at the next The Memes mint (e.g. Wednesday / Friday / Monday)."
+}

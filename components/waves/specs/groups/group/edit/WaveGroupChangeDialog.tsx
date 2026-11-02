@@ -103,6 +103,7 @@ export default function WaveGroupChangeDialog({
   defaultIncludedIdentity,
   accessLabel,
   disabled = false,
+  embedded = false,
   onClose,
   onGroupChange,
   onCreateGroup,
@@ -113,6 +114,7 @@ export default function WaveGroupChangeDialog({
   readonly defaultIncludedIdentity: CommunityMemberMinimal | null;
   readonly accessLabel: string;
   readonly disabled?: boolean;
+  readonly embedded?: boolean;
   readonly onClose: () => void;
   readonly onGroupChange: (
     group: ApiGroupFull | null
@@ -223,6 +225,7 @@ export default function WaveGroupChangeDialog({
   return (
     <>
       <GroupAssignmentDialog
+        embedded={embedded}
         title={t(locale, EDIT_ACCESS_MESSAGES.title, {
           groupLabel: accessLabel,
         })}

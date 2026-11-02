@@ -1,6 +1,7 @@
 import { migratedWordPressTrustedHtml } from "@/components/migrated-wordpress/trusted-html";
 import { render, screen } from "@testing-library/react";
 
+import { withHostTimeZone } from "../../utils/timeZoneHarness";
 import MigratedWordPressArticlePage from "@/components/migrated-wordpress/MigratedWordPressArticlePage";
 import MigratedWordPressStaticPage from "@/components/migrated-wordpress/MigratedWordPressStaticPage";
 import type {
@@ -379,4 +380,16 @@ describe("MigratedWordPressArticlePage", () => {
       "<p>in-repo literal</p>"
     );
   });
+
+  it.each(["America/Los_Angeles", "Pacific/Auckland", "Pacific/Kiritimati"])(
+    "prints the publication date in UTC whatever the host zone is (%s)",
+    (zone) => {
+      // 18:30 UTC is already the next day east of UTC+5:30.
+      withHostTimeZone(zone, () =>
+        render(<MigratedWordPressArticlePage content={content} />)
+      );
+
+      expect(screen.getByText("February 23, 2023")).toBeInTheDocument();
+    }
+  );
 });

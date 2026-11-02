@@ -2,8 +2,7 @@
 
 set -euo pipefail
 
-for name in ARTIFACT_URL EXPECTED_DIGEST EXPECTED_SHA \
-  PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64 REPO_DIR RUN_AS \
+for name in ARTIFACT_URL EXPECTED_DIGEST EXPECTED_SHA REPO_DIR RUN_AS \
   SSR_CLIENT_ID_B64 SSR_CLIENT_SECRET_B64 ETHEREUM_RPC_URL_B64 ALCHEMY_API_KEY_B64; do
   if [[ -z "${!name:-}" ]]; then
     echo "Required deployment value $name is missing." >&2
@@ -35,8 +34,13 @@ id "$RUN_AS" >/dev/null 2>&1 || {
   echo "Repo directory '$REPO_DIR' is not a git checkout." >&2
   exit 1
 }
+SOURCE_DIR="${SOURCE_DIR:-$REPO_DIR}"
+[[ "$SOURCE_DIR" == /* && "$SOURCE_DIR" != / && -e "$SOURCE_DIR/.git" ]] || {
+  echo "The staging source directory is not a git checkout." >&2
+  exit 1
+}
 
-for command in base64 curl flock grep jq node sha256sum sudo unzip; do
+for command in base64 curl flock git grep jq node sha256sum sudo unzip; do
   command -v "$command" >/dev/null 2>&1 || {
     echo "Required staging command '$command' is unavailable." >&2
     exit 1
@@ -60,7 +64,7 @@ ethereum_rpc_url="$(printf '%s' "$ETHEREUM_RPC_URL_B64" | base64 -d)"
   exit 1
 }
 if ! printf '%s' "$ethereum_rpc_url" | \
-  node "$REPO_DIR/ops/scripts/validate-ethereum-rpc-url.cjs"; then
+  node "$SOURCE_DIR/ops/scripts/validate-ethereum-rpc-url.cjs"; then
   echo "Decoded staging Ethereum RPC URL is invalid." >&2
   exit 1
 fi
@@ -81,6 +85,10 @@ flock -n 9 || {
   echo "Another instance-local staging deployment is active." >&2
   exit 1
 }
+if [[ "$(sudo -H -u "$RUN_AS" git -C "$SOURCE_DIR" rev-parse HEAD)" != "$EXPECTED_SHA" ]]; then
+  echo "Refusing to deploy with a checkout that differs from the verified source." >&2
+  exit 1
+fi
 physical_release_root="$(readlink -f "$release_root")"
 release_id="$EXPECTED_SHA-$EXPECTED_DIGEST"
 release_dir="$physical_release_root/releases/$release_id"
@@ -193,6 +201,13 @@ if [[ "$process_kind" != absent ]]; then
     echo "Refusing to deploy without an exact healthy pre-mutation local version." >&2
     exit 1
   }
+  # Branch advancement is safe while a run is active. Replaying an older or
+  # divergent run after a newer runtime is healthy must not roll staging back.
+  if ! sudo -H -u "$RUN_AS" git -C "$SOURCE_DIR" merge-base \
+    --is-ancestor "$previous_local_version" "$EXPECTED_SHA"; then
+    echo "Refusing to replace healthy staging $previous_local_version with older, divergent, or unverifiable source $EXPECTED_SHA." >&2
+    exit 1
+  fi
 fi
 
 if [[ "$process_kind" == managed && \
@@ -281,19 +296,13 @@ prune_release_cache
 install -d -o "$RUN_AS" -g "$RUN_AS" "$release_dir"
 artifact_tmp="$(mktemp "$release_dir/package.XXXXXX.zip")"
 staging_app=""
-destinations_file=""
-retain_destinations_file=false
 runtime_secrets_tmp=""
 cleanup() {
-  unset review_destinations PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64 \
-    ssr_client_id SSR_CLIENT_ID_B64 ssr_client_secret SSR_CLIENT_SECRET_B64 \
+  unset ssr_client_id SSR_CLIENT_ID_B64 ssr_client_secret SSR_CLIENT_SECRET_B64 \
     ethereum_rpc_url ETHEREUM_RPC_URL_B64 alchemy_api_key ALCHEMY_API_KEY_B64
   rm -f "$artifact_tmp"
   if [[ -n "$staging_app" && -d "$staging_app" ]]; then
     rm -rf -- "$staging_app"
-  fi
-  if [[ "$retain_destinations_file" != true && -n "$destinations_file" ]]; then
-    rm -f -- "$destinations_file"
   fi
   if [[ -n "$runtime_secrets_tmp" ]]; then
     rm -f -- "$runtime_secrets_tmp"
@@ -320,24 +329,6 @@ printf 'source_sha=%s\npackage_sha256=%s\n' \
   "$EXPECTED_SHA" "$EXPECTED_DIGEST" > "$release_dir/artifact.env"
 chown -R "$RUN_AS:$RUN_AS" "$release_dir"
 
-review_destinations="$(
-  printf '%s' "$PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64" | base64 -d
-)"
-jq -e '
-  type == "object" and
-  has("staging") and
-  (.staging | type == "object") and
-  (.staging["stream-review"] | type == "string" and test("^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")) and
-  (has("production") | not)
-' <<<"$review_destinations" >/dev/null
-destinations_file="$release_dir/public-review-discussion-destinations.json"
-install -m 600 -o "$RUN_AS" -g "$RUN_AS" /dev/null "$destinations_file"
-printf '%s\n' "$review_destinations" \
-  > "$destinations_file"
-chown "$RUN_AS:$RUN_AS" "$destinations_file"
-unset review_destinations PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64
-retain_destinations_file=true
-
 runtime_secrets_tmp="$(mktemp "$release_root/runtime-secrets.XXXXXX.json")"
 jq -n \
   --arg ssr_client_id "$ssr_client_id" \
@@ -358,7 +349,6 @@ cat > "$release_root/ecosystem.config.cjs" <<'PM2_CONFIG'
 const fs = require('node:fs');
 const path = require('node:path');
 
-const currentApp = fs.realpathSync(path.join(__dirname, 'current'));
 const runtimeSecretsPath = path.join(__dirname, 'runtime-secrets.json');
 const runtimeEnv = JSON.parse(fs.readFileSync(runtimeSecretsPath, 'utf8'));
 const requireRuntimeEnv = (name) => {
@@ -370,22 +360,6 @@ const requireRuntimeEnv = (name) => {
   }
   return value;
 };
-const destinationsPath = path.join(
-  path.dirname(currentApp),
-  'public-review-discussion-destinations.json'
-);
-let publicReviewDiscussionDestinations;
-try {
-  publicReviewDiscussionDestinations = fs.readFileSync(
-    destinationsPath,
-    'utf8'
-  ).trim();
-} catch (error) {
-  if (error?.code !== 'ENOENT') {
-    throw error;
-  }
-}
-
 module.exports = {
   apps: [{
     name: '6529seize',
@@ -397,17 +371,12 @@ module.exports = {
       PORT: '3001',
       HOSTNAME: '0.0.0.0',
       KEEP_ALIVE_TIMEOUT: '65000',
+      UV_THREADPOOL_SIZE: '16',
       NODE_ENV: 'production',
       ['SSR_CLIENT_ID']: requireRuntimeEnv('SSR_CLIENT_ID'),
       ['SSR_CLIENT_SECRET']: requireRuntimeEnv('SSR_CLIENT_SECRET'),
       ['ETHEREUM_RPC_URL']: requireRuntimeEnv('ETHEREUM_RPC_URL'),
-      ['ALCHEMY_API_KEY']: requireRuntimeEnv('ALCHEMY_API_KEY'),
-      ...(publicReviewDiscussionDestinations
-        ? {
-            PUBLIC_REVIEW_DISCUSSION_DESTINATIONS:
-              publicReviewDiscussionDestinations
-          }
-        : {})
+      ['ALCHEMY_API_KEY']: requireRuntimeEnv('ALCHEMY_API_KEY')
     }
   }]
 };

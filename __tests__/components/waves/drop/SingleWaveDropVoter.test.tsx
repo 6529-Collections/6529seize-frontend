@@ -2,6 +2,12 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { SingleWaveDropVoter } from "@/components/waves/drop/SingleWaveDropVoter";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -15,6 +21,22 @@ describe("SingleWaveDropVoter", () => {
     negative_votes_summed: 1,
     absolute_votes_summed: 3,
   } as any;
+
+  it("requests the AUTOx50 derivative of a CDN profile picture", () => {
+    const { container } = render(
+      <SingleWaveDropVoter
+        voter={{
+          ...baseVoter,
+          voter: { ...baseVoter.voter, pfp: CDN_AVATAR_URL },
+        }}
+        position={1}
+        creditType={ApiWaveCreditType.Rep}
+      />
+    );
+    expect(getRequestedImageSrc(container.querySelector("img"))).toContain(
+      scaledAvatarPath(ImageScale.W_AUTO_H_50)
+    );
+  });
 
   it("renders voter information and totals", () => {
     render(

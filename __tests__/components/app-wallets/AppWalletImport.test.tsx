@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AppWalletImport from '@/components/app-wallets/AppWalletImport';
 import { useAppWallets } from '@/components/app-wallets/AppWalletsContext';
@@ -51,6 +51,21 @@ describe('AppWalletImport', () => {
     await user.click(screen.getByRole('button', { name: /private key/i }));
     await user.type(screen.getByPlaceholderText(/private key/i), 'badkey');
     await user.click(screen.getByRole('button', { name: /^validate$/i }));
-    expect(screen.getByText(/Error: invalid/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Error: invalid/i)).toBeInTheDocument();
+  });
+
+  it('ignores a validation result that resolves after the form is cleared', async () => {
+    mockedUseAppWallets.mockReturnValue({ appWalletsSupported: true });
+    const user = userEvent.setup();
+    render(<AppWalletImport />);
+    await user.click(screen.getByRole('button', { name: /private key/i }));
+    await user.type(screen.getByPlaceholderText(/private key/i), '0x123');
+    // ethers loads on demand, so clear before the validation can resolve.
+    fireEvent.click(screen.getByRole('button', { name: /^validate$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^clear$/i }));
+    await waitFor(() => expect(walletMock).toHaveBeenCalledWith('0x123'));
+    expect(screen.queryByText(/private key is valid/i)).not.toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/private key/i)).toHaveValue('');
+    expect(screen.getByPlaceholderText(/private key/i)).toBeEnabled();
   });
 });

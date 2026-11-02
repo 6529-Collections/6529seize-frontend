@@ -1,6 +1,12 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 
 import HeaderUserConnectedAccounts from "@/components/header/user/connected/HeaderUserConnectedAccounts";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
 
 jest.mock("@/components/auth/connection-state-indicator", () => ({
   getConnectionProfileIndicator: () => ({
@@ -12,11 +18,12 @@ jest.mock("@/components/auth/connection-state-indicator", () => ({
 jest.mock("@/components/ipfs/IPFSContext", () => ({
   resolveIpfsUrlSync: (value: string) => value,
 }));
+let mockProfilePfp: string | null = null;
 jest.mock("@/hooks/useIdentity", () => ({
   useIdentity: ({ handleOrWallet }: { readonly handleOrWallet: string }) => ({
     profile: {
       handle: handleOrWallet === "0xactive" ? "active" : "secondary",
-      pfp: null,
+      pfp: mockProfilePfp,
     },
     isLoading: false,
   }),
@@ -59,6 +66,18 @@ function renderAccounts({
 }
 
 describe("HeaderUserConnectedAccounts", () => {
+  afterEach(() => {
+    mockProfilePfp = null;
+  });
+
+  it("requests the AUTOx50 derivative of a CDN profile picture", () => {
+    mockProfilePfp = CDN_AVATAR_URL;
+    renderAccounts({ accounts: [activeAccount] });
+    expect(getRequestedImageSrc(screen.getByAltText("active"))).toContain(
+      scaledAvatarPath(ImageScale.W_AUTO_H_50)
+    );
+  });
+
   it("keeps a single profile visually neutral and hides multi-profile actions", () => {
     renderAccounts({ accounts: [activeAccount] });
 

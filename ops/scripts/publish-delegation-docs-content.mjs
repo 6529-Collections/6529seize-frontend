@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(SCRIPT_DIR, "..", "..");
-const VERSION = process.env.DELEGATION_DOCS_VERSION ?? "delegation-docs-2026-06-16";
+const VERSION = process.env.DELEGATION_DOCS_VERSION ?? "delegation-docs-2026-10-15";
 const BUNDLE_DIR = path.join(
   REPO_ROOT,
   "public",

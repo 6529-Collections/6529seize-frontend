@@ -22,12 +22,14 @@ export default function CreateWaveDrops({
   drops,
   errors,
   ongoingRanking = false,
+  lockSubmissionStrategy = false,
   setDrops,
 }: {
   readonly waveType: ApiWaveType;
   readonly drops: CreateWaveDropsConfig;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly ongoingRanking?: boolean;
+  readonly lockSubmissionStrategy?: boolean;
   readonly setDrops: (drops: CreateWaveDropsConfig) => void;
 }) {
   const locale = useBrowserLocale();
@@ -88,12 +90,17 @@ export default function CreateWaveDrops({
         description={t(locale, "waves.create.drops.description")}
       />
       {isNotChatType && (
-        <CreateWaveDropsSubmissionMode
-          submissionStrategy={drops.submissionStrategy}
-          errors={errors}
-          isOngoingRanking={waveType === ApiWaveType.Rank && ongoingRanking}
-          onChange={onSubmissionStrategyChange}
-        />
+        <fieldset
+          disabled={lockSubmissionStrategy}
+          className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0 disabled:tw-opacity-60"
+        >
+          <CreateWaveDropsSubmissionMode
+            submissionStrategy={drops.submissionStrategy}
+            errors={errors}
+            isOngoingRanking={waveType === ApiWaveType.Rank && ongoingRanking}
+            onChange={onSubmissionStrategyChange}
+          />
+        </fieldset>
       )}
       <section
         aria-labelledby="create-wave-submission-requirements-title"

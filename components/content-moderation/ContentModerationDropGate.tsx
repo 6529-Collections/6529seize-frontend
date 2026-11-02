@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
@@ -655,7 +655,10 @@ export default function ContentModerationDropGate({
               <span className="tw-relative tw-size-5 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-bg-iron-800">
                 {drop.author.pfp ? (
                   <Image
-                    src={resolveIpfsUrlSync(drop.author.pfp)}
+                    src={getScaledImageUri(
+                      drop.author.pfp,
+                      ImageScale.W_AUTO_H_50
+                    )}
                     alt=""
                     fill
                     sizes="20px"

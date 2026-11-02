@@ -1,3 +1,5 @@
+jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
+
 /**
  * Captures mocked JSON responses from the Pepe resolve route.
  */

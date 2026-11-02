@@ -26,6 +26,8 @@ import type { BaseNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { CICType } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { formatMintDate } from "@/helpers/mint-date.helpers";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import emojiRegex from "emoji-regex";
 import { goerli, mainnet, sepolia } from "wagmi/chains";
 
@@ -386,27 +388,28 @@ export function containsEmojis(s: string) {
   return codePointRegex.test(s);
 }
 
+// Replaces "U+XXXX" tokens with the emoji character and returns plain text.
+// Callers must render the result as text (React escapes it), never as HTML.
 export function parseEmojis(s: string) {
-  const regex = /U\+([\dA-Fa-f]{1,6})/g;
-  return s.replaceAll(regex, (_, hexValue) => {
-    return `&#x${hexValue};`;
+  // Match the whole hex run so an over-long token such as U+1000000 is left
+  // as written instead of converting its first six digits.
+  const regex = /U\+([\dA-Fa-f]+)/g;
+  return s.replaceAll(regex, (match, hexValue: string) => {
+    const codePoint = Number.parseInt(hexValue, 16);
+    const isScalarValue =
+      hexValue.length <= 6 &&
+      codePoint <= 0x10ffff &&
+      (codePoint < 0xd800 || codePoint > 0xdfff);
+    return isScalarValue ? String.fromCodePoint(codePoint) : match;
   });
 }
 
-function isValidDate(date?: Date): date is Date {
-  return !!date && !isNaN(new Date(date).getTime());
-}
-
-export function printMintDate(date?: Date) {
-  if (!isValidDate(date)) {
-    return "-";
-  }
-  const mintDate = new Date(date);
-  return mintDate.toLocaleString("default", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+// Pass a hydration-stable locale (a route locale or useBrowserLocale()).
+export function printMintDate(
+  date?: Date,
+  locale: SupportedLocale = DEFAULT_LOCALE
+) {
+  return formatMintDate(locale, date);
 }
 
 export function getRandomColor() {

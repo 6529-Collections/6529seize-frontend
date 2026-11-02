@@ -149,6 +149,7 @@ export default function UserPageProfileWaveContent({
     case "ready":
       return (
         <CurationOrganize
+          profileTypography
           axis={containerWidth >= 624 ? "horizontal" : "vertical"}
           order={order}
           enabled={isOrganizing}

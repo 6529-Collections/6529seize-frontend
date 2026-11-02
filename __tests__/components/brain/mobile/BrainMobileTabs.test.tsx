@@ -176,10 +176,30 @@ describe("BrainMobileTabs", () => {
     expect(settings).not.toHaveFocus();
 
     consumeSubmissionRulesFocus.mockReturnValueOnce(true);
-    rerender(<BrainMobileTabs {...props} activeView={BrainView.CONFIGURATION} />);
+    rerender(
+      <BrainMobileTabs {...props} activeView={BrainView.CONFIGURATION} />
+    );
     expect(settings).toHaveAttribute("aria-current", "true");
     expect(settings).toHaveFocus();
     expect(consumeSubmissionRulesFocus).toHaveBeenCalledWith("1");
+  });
+
+  it("hides Create when the viewer has no eligible creation actions", () => {
+    render(
+      <BrainMobileTabs
+        activeView={BrainView.DEFAULT}
+        onViewChange={onViewChange}
+        wave={createWave()}
+        waveActive={true}
+        showWavesTab={false}
+        showStreamBack={false}
+        isApp={true}
+      />
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Open create menu" })
+    ).not.toBeInTheDocument();
   });
 
   it("switches native curation tabs while preserving other URL state", async () => {
@@ -330,14 +350,14 @@ describe("BrainMobileTabs", () => {
 
     expect(scrollableTabs).toBeInTheDocument();
     expect(scrollableTabs).not.toContainElement(createButton);
-    expect(createButton).toHaveClass("tw-size-11");
+    expect(createButton).toHaveClass("tw-min-h-11");
 
     await userEvent.click(createButton);
     expect(
-      screen.getByRole("menuitem", { name: "New curation" })
+      screen.getByRole("button", { name: /^New curation/ })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("menuitem", { name: "New subwave" })
+      screen.getByRole("button", { name: /^New subwave/ })
     ).toBeInTheDocument();
   });
 

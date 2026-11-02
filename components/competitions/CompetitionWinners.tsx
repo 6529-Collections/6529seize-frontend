@@ -1,7 +1,11 @@
 "use client";
+import { useMemo } from "react";
+import { ApiCompetitionCapability } from "@/generated/models/ApiCompetitionCapability";
+import { useWaveProposalCardPresentation } from "@/hooks/waves/useWaveProposalCardPresentation";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 
-import { useEffect } from "react";
 import { useCompetition } from "@/contexts/CompetitionContext";
 import { useCompetitionResource } from "@/hooks/competitions/useCompetitionQueries";
 import { useCompetitionEntryDrops } from "@/hooks/competitions/useCompetitionEntryDrops";
@@ -21,46 +25,57 @@ import { CompetitionLoadMore } from "./CompetitionLoadMore";
 
 export default function CompetitionWinners() {
   const { competition, wave } = useCompetition();
-  const identity = { waveId: wave.id, competitionId: competition.id };
-  const query = useCompetitionResource(identity, "winners");
-  const awards = useCompetitionResource(identity, "awards");
-  const entries = query.data?.pages.flatMap((page) => page.data) ?? [];
-  const drops = useCompetitionEntryDrops(
-    entries.map((entry) => ({ entryId: entry.id, dropId: entry.drop_id }))
-  );
-  const onDropClick = useCompetitionDropNavigation();
-  const { hasNextPage, isFetchingNextPage, fetchNextPage, isError } = awards;
-  useEffect(() => {
-    if (hasNextPage && !isFetchingNextPage && !isError) void fetchNextPage();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage, isError]);
-  if (
-    query.isPending ||
-    awards.isPending ||
-    drops.some((drop) => drop.isPending)
+  const locale = useBrowserLocale();
+  const proposalCardPresentation = useWaveProposalCardPresentation(wave.id);
+  const contentPresentation = competition.capabilities.includes(
+    ApiCompetitionCapability.Quorum
   )
-    return <CompetitionState />;
-  if (query.isError || awards.isError || drops.some((drop) => drop.isError))
-    return (
-      <CompetitionState
-        error
-        retry={() => {
-          void query.refetch();
-          void awards.refetch();
-          drops.forEach((drop) => void drop.refetch());
-        }}
-      />
-    );
+    ? "quorumCompact"
+    : proposalCardPresentation;
+  const identity = { waveId: wave.id, competitionId: competition.id };
+  const query = useCompetitionResource(identity, "winners", {
+    direction: "DESC",
+    limit: "10",
+    include: "cards",
+  });
+  const entries = useMemo(
+    () => query.data?.pages.flatMap((page) => page.data) ?? [],
+    [query.data]
+  );
+  const references = useMemo(
+    () =>
+      entries.map((entry) => ({ entryId: entry.id, dropId: entry.drop_id })),
+    [entries]
+  );
+  const cards = useMemo(
+    () => ({
+      contexts: query.data?.pages.flatMap((page) => page.cards ?? []) ?? [],
+      updatedAt: query.dataUpdatedAt,
+    }),
+    [query.data, query.dataUpdatedAt]
+  );
+  const drops = useCompetitionEntryDrops(references, cards);
+  const onDropClick = useCompetitionDropNavigation();
+  if (query.isPending) return <CompetitionState />;
+  const haveDrops = drops.some((drop) => drop.data);
+  const loadingDrops = drops.some((drop) => drop.isPending);
+  const failed = query.isError || drops.some((drop) => drop.isError);
+  const retry = () => {
+    void query.refetch();
+    drops.filter((drop) => drop.isError).forEach((drop) => void drop.refetch());
+  };
+  if (loadingDrops && !haveDrops) return <CompetitionState />;
+  if (failed && !haveDrops) return <CompetitionState error retry={retry} />;
   const presentation = competitionPresentationWave(wave, competition);
   const outcomesVisible = getWaveOutcomeVisibilityFromMetadata(
     (competition.presentation ?? []).map((item, id) => ({ ...item, id }))
   );
-  const allAwards = awards.data.pages.flatMap((page) => page.data);
   const groups = new Map<string, ApiWaveDecision>();
   const winners: ApiWaveDecisionWinner[] = [];
   for (const result of drops) {
     if (!result.data) continue;
     const { entry, drop } = result.data;
-    const winnerAwards = allAwards
+    const winnerAwards = result.data.awards
       .filter(
         (award) =>
           award.entry_id === entry.id && award.decision_id === entry.decision_id
@@ -100,8 +115,9 @@ export default function CompetitionWinners() {
         onDropClick={onDropClick}
         winners={winners}
         isApprovalWave
-        emptyMessage="No drops approved yet"
+        emptyMessage={t(locale, "competitions.noApprovedEntries")}
         outcomesVisible={outcomesVisible}
+        contentPresentation={contentPresentation}
       />
     );
   } else if (multiDecision) {
@@ -112,6 +128,7 @@ export default function CompetitionWinners() {
         decisionPoints={[...groups.values()]}
         isLoading={false}
         outcomesVisible={outcomesVisible}
+        contentPresentation={contentPresentation}
       />
     );
   } else {
@@ -128,6 +145,7 @@ export default function CompetitionWinners() {
           winners={winners}
           onDropClick={onDropClick}
           outcomesVisible={outcomesVisible}
+          contentPresentation={contentPresentation}
         />
       </>
     );
@@ -135,6 +153,8 @@ export default function CompetitionWinners() {
   return (
     <div className="tw-space-y-4">
       {content}
+      {loadingDrops && <CompetitionState />}
+      {failed && <CompetitionState error retry={retry} />}
       <CompetitionLoadMore query={query} />
     </div>
   );

@@ -60,7 +60,7 @@ the parent and child:
 | Follows parent only | Parent stays visible from parent follow. | Child appears only when the parent is expanded or otherwise loaded. | Subwave posts do not enter the parent feed or create parent-scoped actions. |
 | Follows subwave only | Parent can appear as a container so the followed subwave is reachable. | Child should show the subwave's own unread/activity state once loaded. | Subwave posts belong to the subwave feed; parent state remains parent-specific. |
 | Follows both | Parent can sort by parent or aggregate activity, depending on backend data. | Child shows its own unread/activity state. | Parent and child feeds remain separate. |
-| Follows neither | Parent/subwave discovery is score/quality-driven. The parent can still show an aggregate unread-subwave count after the viewer has established read state in a visible child. | Child appears only through parent expansion/discovery. | Aggregate unread state does not imply that the parent or child is followed or that notifications are enabled. |
+| Follows neither | Parent/subwave discovery is score/quality-driven. Unfollowed subwaves do not add to the parent's aggregate unread-subwave count. | Child appears only through parent expansion/discovery. | Opening or reading a subwave does not imply that the parent or child is followed or that notifications are enabled. |
 
 If the backend wants followed-subwave activity to move a parent container upward
 in the activity-first sections, it should return an explicit aggregate activity
@@ -89,10 +89,11 @@ API returns enough parent-container metadata to do so.
 - The API should expose enough child metadata for the followed subwave row to
   render after expansion: subwave id, parent id, followed state, muted state,
   unread counts, latest drop timestamp, picture/contributors, REP, and score.
-- If visible subwaves have unread drops while the parent is collapsed, the API
-  should expose an aggregate unread-subwave count on the parent container. The
-  aggregate must not depend on whether the viewer follows the parent or any of
-  its subwaves.
+- If followed, unmuted visible subwaves have unread drops while the parent is
+  collapsed, the API should expose an aggregate unread-subwave count
+  (`subwave_unread_drops`) on the parent container. The aggregate counts only
+  subwaves the viewer follows and has not muted; it does not depend on whether
+  the viewer follows the parent.
 - The frontend should sort activity-first parent containers using the explicit
   aggregate field when present. Without that field, it should preserve the
   backend order and should not locally promote the parent based on child posts.
@@ -102,15 +103,17 @@ API returns enough parent-container metadata to do so.
 ## Unread And Activity
 
 - Root waves and subwaves carry independent unread counts.
-- Parent rows show the total unread count across visible, unmuted subwaves for
-  which the viewer has established read state, regardless of whether those
-  subwaves are followed.
+- Parent rows show the total unread count across visible subwaves that the
+  viewer follows and has not muted. Unfollowed subwaves do not contribute.
 - The aggregate excludes the viewer's own drops and drops from muted profiles.
   Muting the parent or an individual subwave suppresses the applicable unread
   presentation.
 - Before child rows are loaded, the parent uses the server aggregate. After
-  loading, newer child-row unread activity can increase the displayed count.
-- Subwaves are sorted by latest activity within an expanded parent.
+  loading, newer unread activity in followed, unmuted child rows can increase
+  the displayed count.
+- Within an expanded parent and in the mobile subwave bar, unmuted subwaves
+  come first and muted subwaves last. Each group is sorted by latest activity,
+  matching the muted-last order of root rows.
 - Pinned and following root sections are activity-first; discovery sections are quality-first.
 - If a parent row is present only because a followed subwave needs a container,
   its section placement should be treated as container placement, not as proof

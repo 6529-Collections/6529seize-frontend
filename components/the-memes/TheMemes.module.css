@@ -91,6 +91,57 @@
   padding: 0;
 }
 
+.mobileArtwork .artControls,
+.mobileArtwork .artControlsContent {
+  position: static;
+}
+
+@media (min-width: 640px) {
+  .mobileArtwork .artControls[data-has-controls="false"] {
+    padding: 0;
+  }
+  .mobileArtwork .artControls[data-has-controls="false"] .artControlsContent {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 639px) {
+  .mobileArtwork .artControls {
+    padding: 0 16px;
+  }
+  .mobileArtwork .artControlsContent {
+    min-height: 48px;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .mobileArtwork .artControlsCenterGrouped {
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+  .mobileArtwork .artControlsCenterWithBalance {
+    margin-left: 0;
+  }
+  .mobileArtwork .artControlsBalance > span {
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 399px) {
+  .mobileArtwork .artControls[data-multiple-formats="true"] button,
+  .mobileArtwork
+    .artControls[data-multiple-formats="true"]
+    .artControlsFormatLabel {
+    width: 28px;
+    min-width: 28px;
+  }
+  .mobileArtwork
+    .artControls[data-multiple-formats="true"]
+    .artControlsBalance
+    > span {
+    padding-inline: 4px;
+  }
+}
+
 .artControlsBalance {
   display: flex;
   flex: 0 1 auto;

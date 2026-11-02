@@ -1,0 +1,415 @@
+{
+  "label": "candidate",
+  "baseUrl": "http://localhost:3320",
+  "capturedAt": "2026-10-15T14:28:02.661Z",
+  "routes": {
+    "/museum/6529-fund-szn1/gazers": {
+      "slug": "gazers",
+      "viewports": {
+        "1440x1000": {
+          "status": 200,
+          "finalUrl": "/museum/6529-fund-szn1/gazers",
+          "full": "gazers-1440x1000-full.png",
+          "tiles": [
+            "gazers-1440x1000-01.png",
+            "gazers-1440x1000-02.png",
+            "gazers-1440x1000-03.png",
+            "gazers-1440x1000-04.png"
+          ],
+          "consoleErrors": [
+            "Permissions policy violation: accelerometer is not allowed in this document.",
+            "Permissions policy violation: accelerometer is not allowed in this document.",
+            "Permissions policy violation: accelerometer is not allowed in this document.",
+            "Permissions policy violation: accelerometer is not allowed in this document.",
+            "Permissions policy violation: accelerometer is not allowed in this document.",
+            "Permissions policy violation: accelerometer is not allowed in this document."
+          ],
+          "frames": {
+            "probes": [
+              {
+                "index": 0,
+                "file": "gazers-1440x1000-frame-1.png",
+                "animated": true,
+                "colourStdev": [
+                  22,
+                  25,
+                  25
+                ]
+              },
+              {
+                "index": 1,
+                "file": "gazers-1440x1000-frame-2.png",
+                "animated": true,
+                "colourStdev": [
+                  39,
+                  37,
+                  30
+                ]
+              },
+              {
+                "index": 2,
+                "file": "gazers-1440x1000-frame-3.png",
+                "animated": true,
+                "colourStdev": [
+                  18,
+                  32,
+                  20
+                ]
+              }
+            ],
+            "childFrames": [
+              {
+                "url": "https://generator.artblocks.io/1/0xa7d8d9ef8d8ce8992df33d8b8cf4aebabd5bd270/215000788",
+                "origin": "null",
+                "canvases": [
+                  "542x542"
+                ]
+              },
+              {
+                "url": "https://generator.artblocks.io/1/0xa7d8d9ef8d8ce8992df33d8b8cf4aebabd5bd270/215000566",
+                "origin": "null",
+                "canvases": [
+                  "542x542"
+                ]
+              },
+              {
+                "url": "https://generator.artblocks.io/1/0xa7d8d9ef8d8ce8992df33d8b8cf4aebabd5bd270/215000403",
+                "origin": "null",
+                "canvases": [
+                  "542x542"
+                ]
+              }
+            ]
+          },
+          "title": "GAZERS - 6529.io",
+          "robots": null,
+          "horizontalOverflowPx": -30,
+          "pageHeight": 3734,
+          "imageCount": 3,
+          "principalImage": {
+            "src": "http://localhost:3320/twitter.png",
+            "alt": "@punk6529",
+            "complete": true,
+            "naturalWidth": 512,
+            "naturalHeight": 512,
+            "renderedWidth": 18,
+            "renderedHeight": 18,
+            "top": 3634,
+            "objectFit": "fill"
+          },
+          "brokenImages": [],
+          "aspectMismatch": [],
+          "iframes": [
+            {
+              "src": "https://generator.artblocks.io/215000788",
+              "title": "Museum artwork embed",
+              "sandbox": "allow-scripts",
+              "allow": "autoplay",
+              "rendered": "544x544",
+              "top": 450
+            },
+            {
+              "src": "https://generator.artblocks.io/215000566",
+              "title": "Museum artwork embed",
+              "sandbox": "allow-scripts",
+              "allow": "autoplay",
+              "rendered": "544x544",
+              "top": 1094
+            },
+            {
+              "src": "https://generator.artblocks.io/215000403",
+              "title": "Museum artwork embed",
+              "sandbox": "allow-scripts",
+              "allow": "autoplay",
+              "rendered": "544x544",
+              "top": 1738
+            }
+          ],
+          "clippedText": [],
+          "wideElements": [],
+          "headings": [
+            "GAZERS",
+            "GAZERS #788",
+            "GAZERS #566"
+          ],
+          "identifierHeadings": [],
+          "fallbackHits": [],
+          "focusables": 12
+        },
+        "820x1000": {
+          "status": 200,
+          "finalUrl": "/museum/6529-fund-szn1/gazers",
+          "full": "gazers-820x1000-full.png",
+          "tiles": [
+            "gazers-820x1000-01.png",
+            "gazers-820x1000-02.png",
+            "gazers-820x1000-03.png",
+            "gazers-820x1000-04.png",
+            "gazers-820x1000-05.png"
+          ],
+          "consoleErrors": [
+            "Permissions policy violation: accelerometer is not allowed in this document.",
+            "Permissions policy violation: accelerometer is not allowed in this document.",
+            "Permissions policy violation: accelerometer is not allowed in this document.",
+            "Permissions policy violation: accelerometer is not allowed in this document.",
+            "Permissions policy violation: accelerometer is not allowed in this document.",
+            "Permissions policy violation: accelerometer is not allowed in this document."
+          ],
+          "frames": {
+            "probes": [
+              {
+                "index": 0,
+                "file": "gazers-820x1000-frame-1.png",
+                "animated": true,
+                "colourStdev": [
+                  21,
+                  24,
+                  25
+                ]
+              },
+              {
+                "index": 1,
+                "file": "gazers-820x1000-frame-2.png",
+                "animated": true,
+                "colourStdev": [
+                  40,
+                  37,
+                  31
+                ]
+              },
+              {
+                "index": 2,
+                "file": "gazers-820x1000-frame-3.png",
+                "animated": true,
+                "colourStdev": [
+                  17,
+                  32,
+                  19
+                ]
+              }
+            ],
+            "childFrames": [
+              {
+                "url": "https://generator.artblocks.io/1/0xa7d8d9ef8d8ce8992df33d8b8cf4aebabd5bd270/215000788",
+                "origin": "null",
+                "canvases": [
+                  "542x542"
+                ]
+              },
+              {
+                "url": "https://generator.artblocks.io/1/0xa7d8d9ef8d8ce8992df33d8b8cf4aebabd5bd270/215000566",
+                "origin": "null",
+                "canvases": [
+                  "542x542"
+                ]
+              },
+              {
+                "url": "https://generator.artblocks.io/1/0xa7d8d9ef8d8ce8992df33d8b8cf4aebabd5bd270/215000403",
+                "origin": "null",
+                "canvases": [
+                  "542x542"
+                ]
+              }
+            ]
+          },
+          "title": "GAZERS - 6529.io",
+          "robots": null,
+          "horizontalOverflowPx": 0,
+          "pageHeight": 4440,
+          "imageCount": 3,
+          "principalImage": {
+            "src": "http://localhost:3320/twitter.png",
+            "alt": "@punk6529",
+            "complete": true,
+            "naturalWidth": 512,
+            "naturalHeight": 512,
+            "renderedWidth": 18,
+            "renderedHeight": 18,
+            "top": 4298,
+            "objectFit": "fill"
+          },
+          "brokenImages": [],
+          "aspectMismatch": [],
+          "iframes": [
+            {
+              "src": "https://generator.artblocks.io/215000788",
+              "title": "Museum artwork embed",
+              "sandbox": "allow-scripts",
+              "allow": "autoplay",
+              "rendered": "544x544",
+              "top": 466
+            },
+            {
+              "src": "https://generator.artblocks.io/215000566",
+              "title": "Museum artwork embed",
+              "sandbox": "allow-scripts",
+              "allow": "autoplay",
+              "rendered": "544x544",
+              "top": 1110
+            },
+            {
+              "src": "https://generator.artblocks.io/215000403",
+              "title": "Museum artwork embed",
+              "sandbox": "allow-scripts",
+              "allow": "autoplay",
+              "rendered": "544x544",
+              "top": 1754
+            }
+          ],
+          "clippedText": [],
+          "wideElements": [],
+          "headings": [
+            "GAZERS",
+            "GAZERS #788",
+            "GAZERS #566"
+          ],
+          "identifierHeadings": [],
+          "fallbackHits": [],
+          "focusables": 12
+        },
+        "390x844": {
+          "status": 200,
+          "finalUrl": "/museum/6529-fund-szn1/gazers",
+          "full": "gazers-390x844-full.png",
+          "tiles": [
+            "gazers-390x844-01.png",
+            "gazers-390x844-02.png",
+            "gazers-390x844-03.png",
+            "gazers-390x844-04.png",
+            "gazers-390x844-05.png",
+            "gazers-390x844-06.png"
+          ],
+          "consoleErrors": [
+            "Permissions policy violation: accelerometer is not allowed in this document.",
+            "Permissions policy violation: accelerometer is not allowed in this document.",
+            "Permissions policy violation: accelerometer is not allowed in this document.",
+            "Permissions policy violation: accelerometer is not allowed in this document.",
+            "Permissions policy violation: accelerometer is not allowed in this document.",
+            "Permissions policy violation: accelerometer is not allowed in this document."
+          ],
+          "frames": {
+            "probes": [
+              {
+                "index": 0,
+                "file": "gazers-390x844-frame-1.png",
+                "animated": true,
+                "colourStdev": [
+                  22,
+                  25,
+                  26
+                ]
+              },
+              {
+                "index": 1,
+                "file": "gazers-390x844-frame-2.png",
+                "animated": true,
+                "colourStdev": [
+                  41,
+                  39,
+                  33
+                ]
+              },
+              {
+                "index": 2,
+                "file": "gazers-390x844-frame-3.png",
+                "animated": true,
+                "colourStdev": [
+                  17,
+                  33,
+                  20
+                ]
+              }
+            ],
+            "childFrames": [
+              {
+                "url": "https://generator.artblocks.io/1/0xa7d8d9ef8d8ce8992df33d8b8cf4aebabd5bd270/215000788",
+                "origin": "null",
+                "canvases": [
+                  "356x356"
+                ]
+              },
+              {
+                "url": "https://generator.artblocks.io/1/0xa7d8d9ef8d8ce8992df33d8b8cf4aebabd5bd270/215000566",
+                "origin": "null",
+                "canvases": [
+                  "356x356"
+                ]
+              },
+              {
+                "url": "https://generator.artblocks.io/1/0xa7d8d9ef8d8ce8992df33d8b8cf4aebabd5bd270/215000403",
+                "origin": "null",
+                "canvases": [
+                  "356x356"
+                ]
+              }
+            ]
+          },
+          "title": "GAZERS - 6529.io",
+          "robots": null,
+          "horizontalOverflowPx": 0,
+          "pageHeight": 4863,
+          "imageCount": 3,
+          "principalImage": {
+            "src": "http://localhost:3320/twitter.png",
+            "alt": "@punk6529",
+            "complete": true,
+            "naturalWidth": 512,
+            "naturalHeight": 512,
+            "renderedWidth": 18,
+            "renderedHeight": 18,
+            "top": 4636,
+            "objectFit": "fill"
+          },
+          "brokenImages": [],
+          "aspectMismatch": [],
+          "iframes": [
+            {
+              "src": "https://generator.artblocks.io/215000788",
+              "title": "Museum artwork embed",
+              "sandbox": "allow-scripts",
+              "allow": "autoplay",
+              "rendered": "358x358",
+              "top": 619
+            },
+            {
+              "src": "https://generator.artblocks.io/215000566",
+              "title": "Museum artwork embed",
+              "sandbox": "allow-scripts",
+              "allow": "autoplay",
+              "rendered": "358x358",
+              "top": 1068
+            },
+            {
+              "src": "https://generator.artblocks.io/215000403",
+              "title": "Museum artwork embed",
+              "sandbox": "allow-scripts",
+              "allow": "autoplay",
+              "rendered": "358x358",
+              "top": 1517
+            }
+          ],
+          "clippedText": [],
+          "wideElements": [],
+          "headings": [
+            "GAZERS",
+            "GAZERS #788",
+            "GAZERS #566"
+          ],
+          "identifierHeadings": [],
+          "fallbackHits": [],
+          "focusables": 12
+        }
+      }
+    }
+  },
+  "contactSheets": {
+    "1440x1000": "contact-sheet-1440x1000.png",
+    "820x1000": "contact-sheet-820x1000.png",
+    "390x844": "contact-sheet-390x844.png"
+  },
+  "principalImageRepeats": {
+    "1440x1000": {},
+    "820x1000": {},
+    "390x844": {}
+  }
+}

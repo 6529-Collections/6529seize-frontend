@@ -1,6 +1,8 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { MyStreamWaveTab } from "@/types/waves.types";
+import { mockDefaultTimeZone } from "../../../utils/timeZoneHydration";
 
 const setActiveContentTab = jest.fn();
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
@@ -22,7 +24,33 @@ jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
 
 import MyStreamWaveFAQ from "@/components/brain/my-stream/MyStreamWaveFAQ";
 
+const SUMMER_MONDAY = Date.UTC(2026, 6, 13, 10);
+const WINTER_MONDAY = Date.UTC(2026, 0, 12, 10);
+
+const waveWithFirstDecision = (firstDecisionTime: number): ApiWave =>
+  ({
+    wave: {
+      decisions_strategy: {
+        first_decision_time: firstDecisionTime,
+        subsequent_decisions: [172_800_000, 172_800_000, 259_200_000],
+        is_rolling: true,
+      },
+    },
+  }) as unknown as ApiWave;
+
+// first_decision_time of the live Memes wave: 2025-03-31T16:00:00Z.
+const MEMES_WAVE = waveWithFirstDecision(Date.UTC(2025, 2, 31, 16));
+
+const openVotingSection = () =>
+  fireEvent.click(
+    screen.getByRole("button", { name: "How Does Voting Work?" })
+  );
+
 describe("MyStreamWaveFAQ", () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   beforeEach(() => {
     jest
       .mocked(useNftPurchasingVisibility)
@@ -130,6 +158,82 @@ describe("MyStreamWaveFAQ", () => {
     );
     expect(faqWaveLink).toHaveAttribute("target", "_blank");
     expect(faqWaveLink).toHaveAttribute("rel", "noopener noreferrer");
+  });
+
+  it("states the checkpoint time as 16:00 UTC rather than 17:00 GMT", () => {
+    jest.spyOn(Date, "now").mockReturnValue(WINTER_MONDAY);
+    const restoreZone = mockDefaultTimeZone("America/Los_Angeles");
+    try {
+      render(<MyStreamWaveFAQ wave={MEMES_WAVE} />);
+      openVotingSection();
+
+      const region = screen.getByRole("region", {
+        name: "How Does Voting Work?",
+      });
+      expect(region).toHaveTextContent(
+        "The checkpoint times are Monday / Wednesday / Friday at 16:00 UTC (your time: Mon, Wed, Fri 08:00 PST)."
+      );
+      expect(region).toHaveTextContent(
+        "The card will be minted at the next The Memes mint (e.g. Wednesday / Friday / Monday)."
+      );
+      expect(region).not.toHaveTextContent("17:00");
+      expect(region).not.toHaveTextContent("GMT");
+    } finally {
+      restoreZone();
+    }
+  });
+
+  it.each([
+    {
+      zone: "America/Los_Angeles",
+      now: SUMMER_MONDAY,
+      local: "Mon, Wed, Fri 09:00 PDT",
+    },
+    {
+      zone: "Pacific/Auckland",
+      now: SUMMER_MONDAY,
+      local: "Tue, Thu, Sat 04:00 GMT+12",
+    },
+    {
+      zone: "Pacific/Auckland",
+      now: WINTER_MONDAY,
+      local: "Tue, Thu, Sat 05:00 GMT+13",
+    },
+  ])("shows $local for a viewer in $zone", ({ zone, now, local }) => {
+    jest.spyOn(Date, "now").mockReturnValue(now);
+    const restoreZone = mockDefaultTimeZone(zone);
+    try {
+      render(<MyStreamWaveFAQ wave={MEMES_WAVE} />);
+      openVotingSection();
+
+      expect(
+        screen.getByRole("region", { name: "How Does Voting Work?" })
+      ).toHaveTextContent(`at 16:00 UTC (your time: ${local})`);
+    } finally {
+      restoreZone();
+    }
+  });
+
+  it("derives the checkpoint time from the wave's decision strategy", () => {
+    render(
+      <MyStreamWaveFAQ
+        wave={waveWithFirstDecision(Date.UTC(2026, 6, 6, 9, 30))}
+      />
+    );
+    openVotingSection();
+
+    expect(
+      screen.getByRole("region", { name: "How Does Voting Work?" })
+    ).toHaveTextContent("Monday / Wednesday / Friday at 09:30 UTC");
+  });
+
+  it("falls back to 16:00 UTC while the wave has no decision strategy", () => {
+    render(<MyStreamWaveFAQ wave={{} as unknown as ApiWave} />);
+    openVotingSection();
+
+    expect(
+      screen.getByRole("region", { name: "How Does Voting Work?" })
+    ).toHaveTextContent("Monday / Wednesday / Friday at 16:00 UTC");
   });
 
   it("scrolls an opened accordion section to the top of the FAQ container", async () => {

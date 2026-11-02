@@ -52,7 +52,9 @@ Parent: [NextGen Index](README.md)
 
 - Slideshow and art cards open `/nextgen/token/{token}`.
 - `Live` shows iframe output only when `animation_url` exists. Otherwise, users
-  stay on static image output.
+  stay on static image output. The live iframe runs in a scripts-only sandbox,
+  so the generative script runs but cannot open popups, start downloads, or
+  navigate the page.
 - The control strip's `Download` menu lists `1K`, `2K`, `4K`, `8K`, and `16K`.
 - `Display Center` includes rendered downloads (`1K`, `2K`, `4K`, `8K`, `16K`),
   thumbnail-use variants (`Thumbnail`, `0.5K`), and custom render launch

@@ -1,5 +1,11 @@
 import UserPageCollectedCardsNoCards from "@/components/user/collected/cards/UserPageCollectedCardsNoCards";
-import { CollectedCollectionType, CollectionSeized } from "@/entities/IProfile";
+import {
+  CollectedCollectionType,
+  CollectionSeized,
+  CollectionSort,
+} from "@/entities/IProfile";
+import type { ProfileCollectedFilters } from "@/components/user/collected/UserPageCollected";
+import { SortDirection } from "@/entities/ISort";
 import type { MemeSeason } from "@/entities/ISeason";
 import { t as translate } from "@/i18n/messages";
 import { render, screen } from "@testing-library/react";
@@ -14,6 +20,19 @@ jest.mock("@/i18n/messages", () => {
 });
 
 const translateMock = translate as jest.MockedFunction<typeof translate>;
+const baseFilters: ProfileCollectedFilters = {
+  handleOrWallet: "testuser",
+  accountForConsolidations: true,
+  collection: CollectedCollectionType.MEMES,
+  subcollection: null,
+  seized: CollectionSeized.SEIZED,
+  szn: null,
+  initialSznId: null,
+  page: 1,
+  pageSize: 24,
+  sortBy: CollectionSort.TOKEN_ID,
+  sortDirection: SortDirection.DESC,
+};
 
 describe("UserPageCollectedCardsNoCards messages", () => {
   function renderComponent(
@@ -36,6 +55,44 @@ describe("UserPageCollectedCardsNoCards messages", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it.each(["en-US", "en-GB", "fr-FR", "es-ES", "de-DE"] as const)(
+    "provides recovery copy with locale fallback in %s",
+    (locale) => {
+      render(
+        <UserPageCollectedCardsNoCards
+          filters={baseFilters}
+          locale={locale}
+          onClearFilters={jest.fn()}
+          isLoading
+        />
+      );
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "No artwork matches these filters."
+      );
+      expect(
+        screen.getByRole("button", { name: "Clear filters" })
+      ).toBeDisabled();
+    }
+  );
+
+  it("preserves full-set congratulations while offering filter recovery", () => {
+    render(
+      <UserPageCollectedCardsNoCards
+        filters={{
+          ...baseFilters,
+          seized: CollectionSeized.NOT_SEIZED,
+          collection: CollectedCollectionType.MEMES,
+          szn: mockSeason,
+        }}
+        onClearFilters={jest.fn()}
+      />
+    );
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Congratulations, SZN 4 full setter!"
+    );
+    expect(screen.getByRole("button", { name: "Clear filters" })).toBeEnabled();
   });
 
   it("shows generic message when seized filter active", () => {

@@ -93,6 +93,7 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
     // TypeScript automatically narrows the type here
     return (
       <BooleanTrait
+        readOnly={effectiveReadOnly}
         label={definition.label}
         field={definition.field}
         traits={traits}

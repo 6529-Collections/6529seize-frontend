@@ -1,5 +1,7 @@
 "use client";
 
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { type DragEvent, useRef, useState } from "react";
@@ -72,8 +74,12 @@ export function MappingToolUpload({
           </button>
         </div>
       </div>
+      {/* Test harnesses and browser extensions can add attributes (for
+          example an inline caret-color) to this server-rendered input before
+          React hydrates it; that is not a mismatch worth a console error. */}
       <input
         ref={inputRef}
+        suppressHydrationWarning
         className={`tw-form-input ${styles["formInputHidden"]}`}
         type="file"
         accept=".csv"
@@ -122,6 +128,30 @@ export function MappingToolSubmitButton({
             </div>
           )}
         </button>
+      </div>
+    </div>
+  );
+}
+
+export type MappingToolErrorKind = "dataLoadFailed" | "fileReadFailed";
+
+interface MappingToolErrorProps {
+  readonly error: MappingToolErrorKind | null;
+}
+
+export function MappingToolError({ error }: MappingToolErrorProps) {
+  const locale = useBrowserLocale();
+
+  if (!error) {
+    return null;
+  }
+
+  return (
+    <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-3">
+      <div className="tw-w-full tw-px-3">
+        <p role="alert" className="tw-m-0 tw-text-sm tw-text-error">
+          {t(locale, `mappingTools.error.${error}`)}
+        </p>
       </div>
     </div>
   );

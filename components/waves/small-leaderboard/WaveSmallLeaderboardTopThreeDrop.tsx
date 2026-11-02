@@ -1,4 +1,5 @@
 import React from "react";
+import { AnonymousAuthorName } from "@/components/waves/drops/AnonymousDropAuthor";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import Link from "next/link";
 import Image from "next/image";
@@ -115,47 +116,51 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
                   contentPresentation={contentPresentation}
                 />
                 <div className="tw-flex tw-items-center tw-justify-between">
-                  <Link
-                    href={`/${authorLabel}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="tw-flex tw-items-center tw-gap-x-2 tw-no-underline"
-                  >
-                    {drop.author.pfp ? (
-                      // Small leaderboard avatars can come from arbitrary remote hosts, so this stays unoptimized.
-                      <Image
-                        className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-object-contain tw-p-px tw-ring-1 tw-ring-inset tw-ring-iron-700"
-                        src={getScaledImageUri(
-                          drop.author.pfp,
-                          ImageScale.W_AUTO_H_50
-                        )}
-                        alt={`${authorLabel}'s profile picture`}
-                        width={24}
-                        height={24}
-                        unoptimized
-                      />
-                    ) : (
-                      <div className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700" />
-                    )}
-                    <UserProfileTooltipWrapper
-                      user={drop.author.handle ?? drop.author.id}
+                  {drop.author.is_anonymous ? (
+                    <AnonymousAuthorName />
+                  ) : (
+                    <Link
+                      href={`/${authorLabel}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="tw-flex tw-items-center tw-gap-x-2 tw-no-underline"
                     >
-                      <span className="tw-text-sm tw-font-semibold tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline">
-                        {drop.author.handle}
-                      </span>
-                    </UserProfileTooltipWrapper>
-                    <div className="tw-relative">
-                      <div className="tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-900 tw-font-bold tw-leading-3 tw-ring-1 tw-ring-inset tw-ring-iron-700">
-                        <span className="tw-text-[10px] tw-text-iron-200">
-                          {drop.author.level}
+                      {drop.author.pfp ? (
+                        // Small leaderboard avatars can come from arbitrary remote hosts, so this stays unoptimized.
+                        <Image
+                          className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-object-contain tw-p-px tw-ring-1 tw-ring-inset tw-ring-iron-700"
+                          src={getScaledImageUri(
+                            drop.author.pfp,
+                            ImageScale.W_AUTO_H_50
+                          )}
+                          alt={`${authorLabel}'s profile picture`}
+                          width={24}
+                          height={24}
+                          unoptimized
+                        />
+                      ) : (
+                        <div className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700" />
+                      )}
+                      <UserProfileTooltipWrapper
+                        user={drop.author.handle ?? drop.author.id}
+                      >
+                        <span className="tw-text-sm tw-font-semibold tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline">
+                          {drop.author.handle}
                         </span>
+                      </UserProfileTooltipWrapper>
+                      <div className="tw-relative">
+                        <div className="tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-900 tw-font-bold tw-leading-3 tw-ring-1 tw-ring-inset tw-ring-iron-700">
+                          <span className="tw-text-[10px] tw-text-iron-200">
+                            {drop.author.level}
+                          </span>
+                        </div>
+                        <div
+                          className={`tw-absolute -tw-right-0.5 -tw-top-1 tw-size-2 tw-rounded-full ${getCICColor(
+                            drop.author.cic
+                          )}`}
+                        ></div>
                       </div>
-                      <div
-                        className={`tw-absolute -tw-right-0.5 -tw-top-1 tw-size-2 tw-rounded-full ${getCICColor(
-                          drop.author.cic
-                        )}`}
-                      ></div>
-                    </div>
-                  </Link>
+                    </Link>
+                  )}
                 </div>
                 <div
                   className={`tw-mt-3 tw-flex tw-items-center tw-gap-x-1.5 ${

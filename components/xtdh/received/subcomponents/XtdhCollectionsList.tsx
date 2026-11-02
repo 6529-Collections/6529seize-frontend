@@ -120,26 +120,47 @@ export function XtdhCollectionsList({
 }
 
 function CollectionsSkeleton() {
+  const locale = useBrowserLocale();
+
   return (
-    <div className="tw-px-6 tw-pb-6">
-      <ul className="tw-m-0 tw-flex tw-flex-col tw-gap-3 tw-p-0">
+    <div>
+      <output className="tw-sr-only" aria-live="polite">
+        {t(locale, "xtdh.collections.loading")}
+      </output>
+      <ul
+        aria-hidden="true"
+        className="tw-m-0 tw-flex tw-flex-col tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800 tw-p-0"
+      >
         {SKELETON_INDICES.map((index) => (
           <li
             key={`skeleton-${index}`}
-            className="tw-animate-pulse tw-list-none tw-rounded-xl tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-4"
+            data-testid="xtdh-collection-skeleton"
+            className="tw-w-full tw-list-none tw-overflow-hidden tw-rounded-b-xl tw-px-6 tw-py-6 motion-safe:tw-animate-pulse"
           >
-            <div className="tw-flex tw-items-center tw-gap-3">
-              <div className="tw-h-14 tw-w-14 tw-rounded-lg tw-bg-iron-800" />
-              <div className="tw-flex-1 tw-space-y-2">
-                <div className="tw-h-4 tw-w-32 tw-rounded tw-bg-iron-800" />
-                <div className="tw-bg-iron-850 tw-h-3 tw-w-48 tw-rounded" />
+            <div className="tw-flex tw-flex-col tw-items-start tw-justify-between tw-gap-x-3 tw-gap-y-6 md:tw-flex-row">
+              <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center">
+                <div
+                  data-xtdh-skeleton-thumbnail=""
+                  className="tw-h-16 tw-w-16 tw-shrink-0 tw-rounded-lg tw-bg-iron-800"
+                />
+                <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
+                  <div className="tw-h-6 tw-w-32 tw-rounded tw-bg-iron-800" />
+                  <div className="tw-bg-iron-850 tw-h-6 tw-w-40 tw-rounded" />
+                </div>
+              </div>
+              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+                <div className="tw-h-5 tw-w-24 tw-rounded tw-bg-iron-800" />
+                <div className="tw-h-5 tw-w-40 tw-rounded tw-bg-iron-800" />
               </div>
             </div>
-            <div className="tw-mt-4 tw-grid tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
+            <div
+              data-xtdh-skeleton-metrics=""
+              className="tw-mb-0 tw-mt-6 tw-grid tw-gap-x-6 tw-gap-y-4 sm:tw-grid-cols-2 md:tw-ml-20 md:tw-mt-4 md:tw-grid-cols-3"
+            >
               {SKELETON_METRIC_KEYS.map((metricKey) => (
-                <div key={metricKey} className="tw-space-y-2">
-                  <div className="tw-h-3 tw-w-20 tw-rounded tw-bg-iron-800" />
-                  <div className="tw-bg-iron-850 tw-h-4 tw-w-24 tw-rounded" />
+                <div key={metricKey} className="tw-space-y-1.5">
+                  <div className="tw-h-4 tw-w-20 tw-rounded tw-bg-iron-800" />
+                  <div className="tw-bg-iron-850 tw-h-6 tw-w-24 tw-rounded" />
                 </div>
               ))}
             </div>
@@ -152,7 +173,7 @@ function CollectionsSkeleton() {
 
 const SKELETON_INDICES = [0, 1, 2];
 const SKELETON_METRIC_KEYS = Array.from(
-  { length: 9 },
+  { length: 6 },
   (_, index) => `metric-${index}`
 );
 

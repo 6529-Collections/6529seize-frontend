@@ -1,4 +1,5 @@
-import CommonSelect from "@/components/utils/select/CommonSelect";
+import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import type { XtdhCollectionsSortField } from "@/hooks/useXtdhCollectionsQuery";
 import type { SortDirection } from "@/entities/ISort";
 
@@ -25,6 +26,16 @@ export function XtdhCollectionsControls({
 
   isDisabled = false,
 }: Readonly<XtdhCollectionsControlsProps>) {
+  const sortProps = {
+    items: COLLECTION_SORT_ITEMS,
+    activeItem: activeSortField,
+    filterLabel: "Sort collections by",
+    setSelected: onSortChange,
+    sortDirection: activeSortDirection,
+    disabled: isDisabled,
+    fill: false,
+  };
+
   return (
     <section
       className="tw-flex tw-flex-col tw-gap-3 tw-px-6 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between"
@@ -47,15 +58,12 @@ export function XtdhCollectionsControls({
         />
       </div>
       <div className="tw-no-scrollbar tw-w-full tw-overflow-x-auto sm:tw-w-auto">
-        <CommonSelect
-          items={COLLECTION_SORT_ITEMS}
-          activeItem={activeSortField}
-          filterLabel="Sort collections by"
-          setSelected={onSortChange}
-          sortDirection={activeSortDirection}
-          disabled={isDisabled}
-          fill={false}
-        />
+        <div className="tw-hidden lg:tw-block">
+          <CommonTabs {...sortProps} />
+        </div>
+        <div className="lg:tw-hidden">
+          <CommonDropdown {...sortProps} />
+        </div>
       </div>
     </section>
   );

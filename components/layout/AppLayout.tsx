@@ -1,7 +1,5 @@
 "use client";
 
-import "./WaveNavigationTransition.module.css";
-
 import dynamic from "next/dynamic";
 import type { CSSProperties, ReactNode } from "react";
 import { Suspense, useCallback, useMemo, useRef } from "react";
@@ -139,6 +137,12 @@ function AppLayoutContent({ children }: Props) {
   const headerRef = useRef<HTMLDivElement | null>(null);
   const pullContentRef = useRef<HTMLDivElement | null>(null);
   const pathname = usePathname();
+  // This content-height wrapper is not a scrollport on collection pages.
+  // Clip horizontally without trapping sticky descendants or document scrolling.
+  const overflowClassName =
+    pathname === "/the-memes"
+      ? "tw-overflow-x-clip"
+      : "tw-overflow-y-auto tw-overflow-x-hidden";
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
   const isSingleDropOpen = searchParams.get("drop") !== null;
@@ -208,7 +212,7 @@ function AppLayoutContent({ children }: Props) {
     <>
       <div
         data-mobile-bottom-nav-scroll-target="true"
-        className={`${safeAreaClass} tw-overflow-y-auto tw-overflow-x-hidden`}
+        className={`${safeAreaClass} ${overflowClassName}`}
         style={streamRouteLoadingReserveStyle}
       >
         <PullToRefresh contentRef={pullContentRef} triggerZoneRef={headerRef} />

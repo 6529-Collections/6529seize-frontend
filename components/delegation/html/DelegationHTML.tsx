@@ -137,7 +137,7 @@ function getInternalDelegationHref(
   }
   if (
     destination.origin !== window.location.origin ||
-    !destination.pathname.startsWith("/delegation/")
+    !destination.pathname.startsWith("/safe-collecting/")
   ) {
     return undefined;
   }
@@ -230,7 +230,7 @@ function DelegationArticleView({
             <div className="tw-flex tw-flex-col tw-items-start tw-gap-3">
               {article && (
                 <Link
-                  href="/delegation/delegation-faq"
+                  href="/safe-collecting/faq"
                   className="tw-inline-flex tw-min-h-10 tw-items-center tw-justify-start tw-gap-2 tw-rounded-lg tw-font-medium tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-primary-300 hover:tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                 >
                   <ArrowLeftIcon
@@ -241,7 +241,7 @@ function DelegationArticleView({
                 </Link>
               )}
               <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-wide tw-text-primary-300">
-                Delegation FAQ
+                FAQ
               </p>
             </div>
             {pageTitle && (
@@ -319,7 +319,7 @@ function DelegationArticleView({
         </article>
         {isFaqChildArticle && (previousArticle ?? nextArticle) && (
           <nav
-            aria-label="Delegation FAQ article navigation"
+            aria-label="FAQ article navigation"
             className="tw-mt-10 tw-grid tw-grid-cols-1 tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-pt-5 sm:tw-grid-cols-2"
           >
             {previousArticle ? (

@@ -2,7 +2,9 @@
 
 import { createContext, useContext } from "react";
 
-export type AppKitBootstrapStatus = "initializing" | "ready" | "error";
+// "idle": no stored wallet session or connect intent has loaded the wallet
+// stack yet; waitForReady() loads it.
+export type AppKitBootstrapStatus = "idle" | "initializing" | "ready" | "error";
 
 export type AppKitBootstrapContextValue = {
   readonly status: AppKitBootstrapStatus;

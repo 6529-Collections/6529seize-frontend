@@ -293,6 +293,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                         media_url={artworkMedia.url}
                         disableMediaInteraction
                         isInertPreview
+                        imageLoadingLayout="artwork"
                         fillVideoContainer
                         imageScale={mediaImageScale}
                         previewImageUrl={getDropPreviewImageUrl(drop.metadata)}
@@ -302,6 +303,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                         media_mime_type={artworkMedia.mime_type}
                         media_url={artworkMedia.url}
                         isCompetitionDrop={true}
+                        imageLoadingLayout="artwork"
                         fillVideoContainer={true}
                         imageScale={mediaImageScale}
                       />

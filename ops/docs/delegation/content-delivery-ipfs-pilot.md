@@ -52,7 +52,10 @@ Similar runtime S3-rendered content exists outside delegation, including About H
 
 ## Publishing Checklist
 
-1. Review article edits in `public/delegation-content/{version}/html`.
+1. Review article edits in `public/delegation-content/{version}/html`. A
+   published, pinned version is immutable, so put changes in a new version
+   directory as described in the source-of-truth spec's
+   [Publish Workflow](source-of-truth-spec.md#publish-workflow).
 2. Review asset edits in `content/delegation/assets`.
 3. Run `node ops/scripts/build-delegation-docs-content.mjs` to rebuild the manifest and public bundle.
 4. Publish `public/delegation-content/{version}` to IPFS through the internal

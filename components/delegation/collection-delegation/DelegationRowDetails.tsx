@@ -2,12 +2,43 @@
 
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
-import type { ContractWalletDelegation } from "../CollectionDelegation.utils";
+import type {
+  ContractDelegationExpiry,
+  ContractWalletDelegation,
+} from "../CollectionDelegation.utils";
+import {
+  formatDelegationExpiryLocal,
+  getViewerTimeZone,
+} from "../delegation-expiry";
 import DelegationWallet from "../DelegationWallet";
+
+function getExpiryLabel(
+  locale: SupportedLocale,
+  expiry: ContractDelegationExpiry | undefined
+) {
+  if (!expiry) {
+    return null;
+  }
+  switch (expiry.status) {
+    case "nonExpiring":
+      return t(locale, "delegation.collection.row.expiry.nonExpiring");
+    case "expired":
+      return t(locale, "delegation.collection.row.expiry.expired");
+    case "active":
+      return t(locale, "delegation.collection.row.expiry.active", {
+        date: formatDelegationExpiryLocal(
+          locale,
+          expiry.expiresAt,
+          getViewerTimeZone()
+        ),
+      });
+  }
+}
 
 /**
  * The wallet/expiry/consolidation-status details shown inside every
@@ -47,10 +78,10 @@ export function DelegationRowDetails(
         </span>
         <span
           className={`tw-font-semibold ${
-            w.expiry === "expired" ? "tw-text-error" : "tw-text-success"
+            w.expiry?.status === "expired" ? "tw-text-error" : "tw-text-success"
           }`}
         >
-          {w.expiry}
+          {getExpiryLabel(locale, w.expiry)}
         </span>
         {isConsolidation && (
           <span

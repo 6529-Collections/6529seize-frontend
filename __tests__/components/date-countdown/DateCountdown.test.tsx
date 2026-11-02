@@ -1,4 +1,5 @@
 import DateCountdown from "@/components/date-countdown/DateCountdown";
+import { loadLocaleMessages } from "@/i18n/messages";
 import { act, render, screen } from "@testing-library/react";
 
 // Mock timers for consistent testing
@@ -316,17 +317,19 @@ describe("DateCountdown", () => {
     });
 
     it("handles daylight saving time changes", () => {
-      // This test depends on locale, but we test the calculation logic
-      const now = new Date(2023, 2, 11, 12, 0, 0); // Before DST
+      // US clocks spring forward at 2023-03-12T10:00Z. The countdown counts
+      // elapsed milliseconds, so two instants exactly 48 hours apart show
+      // 2 days in every zone. Two local wall-clock noons would be 47 hours
+      // apart in Los Angeles, which is why the fixtures are not built from
+      // local parts.
+      const now = new Date("2023-03-11T20:00:00.000Z");
       jest.setSystemTime(now);
 
-      // 2 days ahead (after DST change in most US timezones)
-      const futureDate = new Date(2023, 2, 13, 12, 0, 0);
+      const futureDate = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000);
 
       render(<DateCountdown title="DST Test" date={futureDate} />);
 
-      // Should still show 2 days (our calculation is based on milliseconds)
-      expect(screen.getByText(/2 days/)).toBeInTheDocument();
+      expect(screen.getByText("2 days, 0 seconds")).toBeInTheDocument();
     });
   });
 
@@ -397,6 +400,52 @@ describe("DateCountdown", () => {
       });
 
       expect(screen.getByText(/2 seconds/)).toBeInTheDocument();
+    });
+  });
+
+  describe("Localization", () => {
+    const renderInLocale = async (
+      locale: "fr-FR" | "de-DE",
+      now: Date,
+      futureDate: Date
+    ) => {
+      await loadLocaleMessages(locale);
+      const languages = jest
+        .spyOn(navigator, "languages", "get")
+        .mockReturnValue([locale]);
+      jest.setSystemTime(now);
+      render(<DateCountdown title="Mint" date={futureDate} />);
+      return languages;
+    };
+
+    it("uses the locale's plural rules and conjunction", async () => {
+      const languages = await renderInLocale(
+        "fr-FR",
+        new Date(2023, 0, 1, 12, 0, 0),
+        new Date(2023, 0, 2, 13, 0, 0)
+      );
+
+      // French treats 0 as singular.
+      expect(
+        screen.getByText("1 jour, 1 heure, 0 seconde")
+      ).toBeInTheDocument();
+      languages.mockRestore();
+    });
+
+    it("formats counts with the locale's number grouping", async () => {
+      const now = new Date(2023, 0, 1, 12, 0, 0);
+      const languages = await renderInLocale(
+        "de-DE",
+        now,
+        new Date(
+          now.getTime() + (1000 * 86_400 + 3 * 3600 + 45 * 60 + 30) * 1000
+        )
+      );
+
+      expect(
+        screen.getByText("1.000 Tage, 3 Stunden, 45 Minuten und 30 Sekunden")
+      ).toBeInTheDocument();
+      languages.mockRestore();
     });
   });
 });

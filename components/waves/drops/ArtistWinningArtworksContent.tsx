@@ -1,13 +1,16 @@
 import React from "react";
+import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
-import type { CollectedCard } from "@/entities/IProfile";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useUserPrevoteCards } from "@/hooks/useUserPrevoteCards";
+import {
+  useUserPrevoteCards,
+  type ArtistPrevoteCard,
+} from "@/hooks/useUserPrevoteCards";
 import { useUserWinningArtworks } from "@/hooks/useUserWinningArtworks";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { faEye, faTrophy } from "@fortawesome/free-solid-svg-icons";
@@ -28,7 +31,7 @@ type TrophyItem =
   | {
       readonly type: "prevote";
       readonly key: string;
-      readonly card: CollectedCard;
+      readonly card: ArtistPrevoteCard;
     };
 
 const WinnerTrophyCard: React.FC<{
@@ -36,6 +39,8 @@ const WinnerTrophyCard: React.FC<{
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }> = ({ drop, onDropClick }) => {
   const extendedDrop = convertApiDropToExtendedDrop(drop);
+  const media = drop.parts[0]?.media;
+  const firstMedia = media?.[0];
   const decisionTime = drop.winning_context?.decision_time;
   const topRaters = drop.top_raters.slice(0, 3);
   const hasDecisionTime = typeof decisionTime === "number" && decisionTime > 0;
@@ -75,25 +80,37 @@ const WinnerTrophyCard: React.FC<{
           </div>
         </div>
 
-        <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-1.5 tw-bg-iron-950 tw-p-4">
-          {drop.title && (
-            <h3 className="tw-m-0 tw-line-clamp-1 tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100 tw-transition-colors group-hover:tw-text-white">
-              {drop.title}
-            </h3>
-          )}
+        <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-2 tw-bg-iron-950 tw-p-4">
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 empty:tw-hidden">
+            {firstMedia && (
+              <MediaTypeBadge
+                mimeType={firstMedia.mime_type}
+                dropId={drop.id}
+                size="sm"
+                iconClassName="focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                tooltipPortal
+                tooltipZIndex={1000002}
+              />
+            )}
+            {drop.title && (
+              <h3 className="tw-m-0 tw-line-clamp-1 tw-min-w-0 tw-flex-1 tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100 tw-transition-colors group-hover:tw-text-white">
+                {drop.title}
+              </h3>
+            )}
+          </div>
 
           <div className="tw-mt-2 tw-flex tw-items-center tw-justify-between tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-2.5">
-            <div className="tw-flex tw-items-baseline tw-gap-1.5">
-              <span className="tw-text-[13px] tw-font-semibold tw-text-amber-300">
+            <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-x-1.5 tw-gap-y-1">
+              <span className="tw-text-sm tw-font-semibold tw-tabular-nums tw-text-amber-300">
                 {formatNumberWithCommas(drop.rating)}
               </span>
-              <span className="tw-whitespace-nowrap tw-text-[13px] tw-font-semibold tw-text-iron-600">
+              <span className="tw-whitespace-nowrap tw-text-sm tw-font-normal tw-text-iron-500">
                 {drop.wave.voting_credit_type} total
               </span>
             </div>
           </div>
 
-          <div className="tw-mt-1 tw-flex tw-items-center tw-gap-2">
+          <div className="tw-flex tw-items-center tw-gap-2">
             {topRaters.length > 0 && (
               <div className="tw-flex tw-items-center -tw-space-x-2">
                 {topRaters.map((voter) => (
@@ -138,16 +155,16 @@ const WinnerTrophyCard: React.FC<{
                 ))}
               </div>
             )}
-            <span className="tw-text-[13px] tw-font-semibold tw-text-iron-300">
+            <span className="tw-text-meta tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-300">
               {formatNumberWithCommas(drop.raters_count)}{" "}
-              <span className="tw-font-semibold tw-text-iron-600">
+              <span className="tw-text-iron-400">
                 {drop.raters_count === 1 ? "voter" : "voters"}
               </span>
             </span>
           </div>
 
           {hasDecisionTime && (
-            <div className="tw-mt-1 tw-flex tw-items-center tw-gap-2 tw-text-[11px] tw-font-medium tw-text-iron-500">
+            <div className="tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500">
               <FontAwesomeIcon
                 icon={faTrophy}
                 className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-amber-300/80"
@@ -208,9 +225,9 @@ export const ArtistWinningArtworksContent: React.FC<
   }
 
   return (
-    <div className="tw-relative tw-z-[100] tw-max-h-[calc(75vh-120px)] tw-overflow-y-auto tw-p-6 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-max-h-[calc(90vh-140px)]">
+    <div className="tw-relative tw-z-[100] tw-max-h-[calc(75vh-120px)] tw-overflow-y-auto tw-px-6 tw-pb-6 tw-pt-4 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-max-h-[calc(90vh-140px)]">
       {trophyItems.length > 0 && (
-        <div className="tw-grid tw-grid-cols-1 tw-gap-6 sm:tw-grid-cols-2 md:tw-grid-cols-3">
+        <div className="tw-grid tw-grid-cols-1 tw-gap-6 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
           {trophyItems.map((item) =>
             item.type === "winner" ? (
               <WinnerTrophyCard

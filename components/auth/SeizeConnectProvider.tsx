@@ -22,6 +22,10 @@ import { useConnectedAccountsUnreadNotifications } from "@/hooks/useConnectedAcc
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useAppKitBootstrap } from "@/components/providers/AppKitBootstrapContext";
+import {
+  disconnectWithoutAppKit,
+  hasWalletChunkLoadFailed,
+} from "@/components/providers/walletChunkRecovery";
 import { SecurityEventType } from "@/types/security";
 import {
   createConnectionEventContext,
@@ -78,7 +82,11 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const appKitModalBridgeStore = useMemo(createAppKitModalBridgeStore, []);
   const appKitModalState = useAppKitModalBridgeState(appKitModalBridgeStore);
   const account = useAppKitAccountBridgeState(appKitModalBridgeStore);
-  const disconnect = useCallback(() => {
+  const disconnect = useCallback(async (): Promise<void> => {
+    if (hasWalletChunkLoadFailed()) {
+      // AppKit could not load in this page, so it cannot disconnect.
+      return disconnectWithoutAppKit();
+    }
     if (isAppKitReady) {
       return appKitModalBridgeStore
         .waitForOpen()
@@ -258,7 +266,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       try {
         clearConnectIntentHandoffTimeout();
         setIsConnectIntentWaitingForAppKit(true);
-        if (!isAppKitReady) {
+        // After a failed wallet chunk the stack can look ready while the
+        // modal cannot open; waitForAppKitReady reloads the page then.
+        if (!isAppKitReady || hasWalletChunkLoadFailed()) {
           await waitForAppKitReady();
         }
 

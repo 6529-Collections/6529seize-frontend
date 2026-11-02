@@ -215,6 +215,8 @@ describe("ArtworkDetails", () => {
         showAdditionalActionPromised={true}
         isAdditionalActionPromised={false}
         onAdditionalActionPromisedChange={onAdditionalActionPromisedChange}
+        additionalActionPlan=""
+        onAdditionalActionPlanChange={jest.fn()}
       />
     );
 
@@ -227,5 +229,68 @@ describe("ArtworkDetails", () => {
     await user.click(checkbox);
 
     expect(onAdditionalActionPromisedChange).toHaveBeenCalledWith(true);
+  });
+
+  it("shows an optional, labeled plan only when checked and restores its draft", async () => {
+    const user = userEvent.setup();
+    const onPlanChange = jest.fn();
+    const props = {
+      title: "",
+      description: "",
+      onTitleChange: jest.fn(),
+      onDescriptionChange: jest.fn(),
+      showAdditionalActionPromised: true as const,
+      onAdditionalActionPromisedChange: jest.fn(),
+      additionalActionPlan: "An exhibition for collectors if selected.",
+      onAdditionalActionPlanChange: onPlanChange,
+    };
+    const { rerender } = render(
+      <ArtworkDetails {...props} isAdditionalActionPromised={true} />
+    );
+    const plan = screen.getByRole("textbox", { name: "Your plan (optional)" });
+    expect(plan).toHaveValue(props.additionalActionPlan);
+    expect(plan).toHaveAttribute("maxlength", "5000");
+    expect(plan).toHaveAccessibleDescription(/who receives it/);
+    expect(plan).not.toBeRequired();
+    await user.clear(plan);
+    expect(onPlanChange).toHaveBeenCalledWith("");
+    rerender(<ArtworkDetails {...props} isAdditionalActionPromised={false} />);
+    expect(
+      screen.queryByRole("textbox", { name: "Your plan (optional)" })
+    ).not.toBeInTheDocument();
+    rerender(<ArtworkDetails {...props} isAdditionalActionPromised={true} />);
+    expect(
+      screen.getByRole("textbox", { name: "Your plan (optional)" })
+    ).toHaveValue(props.additionalActionPlan);
+  });
+
+  it("counts the saved text and flags an over-limit restored plan", () => {
+    const props = {
+      title: "",
+      description: "",
+      onTitleChange: jest.fn(),
+      onDescriptionChange: jest.fn(),
+      showAdditionalActionPromised: true as const,
+      isAdditionalActionPromised: true,
+      onAdditionalActionPromisedChange: jest.fn(),
+      onAdditionalActionPlanChange: jest.fn(),
+    };
+    const { rerender } = render(
+      <ArtworkDetails
+        {...props}
+        additionalActionPlan={`  ${"p".repeat(4999)}  `}
+      />
+    );
+    expect(screen.getByText("4,999 / 5,000")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    rerender(
+      <ArtworkDetails {...props} additionalActionPlan={"p".repeat(5001)} />
+    );
+    expect(
+      screen.getByRole("textbox", { name: "Your plan (optional)" })
+    ).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Shorten your plan to 5,000 characters or fewer."
+    );
   });
 });

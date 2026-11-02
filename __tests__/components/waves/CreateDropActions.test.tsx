@@ -451,11 +451,10 @@ describe("CreateDropActions", () => {
     const gifButtons = screen.getAllByLabelText("Add GIF");
     await userEvent.click(gifButtons[0]);
 
-    expect(screen.getByTestId("gif-picker")).toBeInTheDocument();
-    expect(screen.getByTestId("gif-picker")).toHaveAttribute(
-      "data-api-key",
-      "test-giphy-api-key"
-    );
+    // The picker loads its Giphy chunk on first open.
+    const picker = await screen.findByTestId("gif-picker");
+    expect(picker).toBeInTheDocument();
+    expect(picker).toHaveAttribute("data-api-key", "test-giphy-api-key");
   });
 
   it("calls onGifDrop when GIF is selected", async () => {
@@ -464,7 +463,7 @@ describe("CreateDropActions", () => {
     const gifButtons = screen.getAllByLabelText("Add GIF");
     await userEvent.click(gifButtons[0]);
 
-    const selectGifButton = screen.getByTestId("select-gif");
+    const selectGifButton = await screen.findByTestId("select-gif");
     await userEvent.click(selectGifButton);
 
     expect(defaultProps.onGifDrop).toHaveBeenCalledWith("test-gif.gif");
@@ -476,7 +475,7 @@ describe("CreateDropActions", () => {
     const gifButtons = screen.getAllByLabelText("Add GIF");
     await userEvent.click(gifButtons[0]);
 
-    expect(screen.getByTestId("gif-picker")).toBeInTheDocument();
+    expect(await screen.findByTestId("gif-picker")).toBeInTheDocument();
 
     const closeButton = screen.getByTestId("close-gif");
     await userEvent.click(closeButton);
@@ -490,7 +489,7 @@ describe("CreateDropActions", () => {
     const gifButtons = screen.getAllByLabelText("Add GIF");
     await userEvent.click(gifButtons[0]);
 
-    expect(screen.getByTestId("gif-picker")).toBeInTheDocument();
+    expect(await screen.findByTestId("gif-picker")).toBeInTheDocument();
 
     fireEvent.keyDown(globalThis as any, { key: "Escape" });
 
@@ -509,7 +508,7 @@ describe("CreateDropActions", () => {
 
     await userEvent.click(gifButton);
 
-    expect(screen.getByTestId("gif-picker")).not.toHaveAttribute(
+    expect(await screen.findByTestId("gif-picker")).not.toHaveAttribute(
       "data-api-key"
     );
   });

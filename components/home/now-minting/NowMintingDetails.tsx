@@ -44,13 +44,16 @@ export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
       </div>
       <div className="tw-flex tw-flex-col tw-gap-4 empty:tw-hidden">
         <LatestDropAllowlistStatus tokenId={nft.id} />
-        <LatestDropNextMintSubscribe tokenId={nft.id} statusSource="none" />
       </div>
-      <NowMintingCountdown
-        nftId={nft.id}
-        contract={MEMES_CONTRACT}
-        chainId={mainnet.id}
-      />
+      <div className="tw-flex tw-flex-col tw-gap-4">
+        <LatestDropNextMintSubscribe tokenId={nft.id} statusSource="none" />
+        <NowMintingCountdown
+          variant="home"
+          nftId={nft.id}
+          contract={MEMES_CONTRACT}
+          chainId={mainnet.id}
+        />
+      </div>
     </div>
   );
 }

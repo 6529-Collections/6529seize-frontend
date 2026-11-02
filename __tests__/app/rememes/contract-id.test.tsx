@@ -97,6 +97,23 @@ describe("ReMeme page", () => {
     );
   });
 
+  it.each([
+    [{ locale: "fr-FR" }, "fr-FR"],
+    [{}, "en-US"],
+  ])(
+    "declares the language of the page content for search params %j",
+    async (searchParams, lang) => {
+      const resolved = await ReMeme({
+        params: Promise.resolve({ contract: "0x123abc", id: "456" }),
+        searchParams: Promise.resolve(searchParams),
+      });
+
+      render(<TestProvider>{resolved}</TestProvider>);
+
+      expect(await screen.findByRole("main")).toHaveAttribute("lang", lang);
+    }
+  );
+
   it("sets page title on mount", () => {
     const pageProps = {
       contract: "0x123abc",
@@ -117,6 +134,29 @@ describe("ReMeme page", () => {
     );
 
     // Title is set via TitleContext hooks
+  });
+});
+
+describe("ReMeme page existence check", () => {
+  const params = Promise.resolve({ contract: "0x123abc", id: "456" });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("answers not found when the API does not know the token", async () => {
+    (commonApiFetch as jest.Mock).mockResolvedValue({ data: [] });
+
+    await expect(ReMeme({ params })).rejects.toMatchObject({
+      digest: "NEXT_HTTP_ERROR_FALLBACK;404",
+    });
+  });
+
+  it("keeps rendering when the API request fails so the client can retry", async () => {
+    (commonApiFetch as jest.Mock).mockRejectedValue("HTTP 503");
+    jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(ReMeme({ params })).resolves.toBeDefined();
   });
 });
 
@@ -169,13 +209,12 @@ describe("ReMeme generateMetadata", () => {
     expect(result.description).toContain("ReMemes");
     const imageUrl = getImageUrl(result);
     expect(imageUrl.pathname).toBe("/api/og-metadata/nfts/0x123abc/456");
-    expect(imageUrl.searchParams.get("image")).toBe(
-      "https://test.6529.io/custom-image.png"
-    );
+    // Card text and artwork come from backend data, never from the query.
+    expect(imageUrl.search).toBe("");
   });
 
   it("encodes reserved route params before fetching metadata", async () => {
-    mockCommonApiFetch.mockResolvedValue({ data: [] });
+    mockCommonApiFetch.mockResolvedValue({ data: [{ metadata: {} }] });
 
     await generateMetadata({
       params: Promise.resolve({
@@ -191,9 +230,19 @@ describe("ReMeme generateMetadata", () => {
     });
   });
 
-  it("returns metadata with default name and image when API returns empty data", async () => {
-    const mockResponse = { data: [] };
-    mockCommonApiFetch.mockResolvedValue(mockResponse);
+  it("answers not found when the API returns empty data", async () => {
+    mockCommonApiFetch.mockResolvedValue({ data: [] });
+
+    await expect(
+      generateMetadata({
+        params: Promise.resolve({ contract: "0x123abc", id: "456" }),
+      })
+    ).rejects.toMatchObject({ digest: "NEXT_HTTP_ERROR_FALLBACK;404" });
+  });
+
+  it("returns default metadata when the API request fails", async () => {
+    mockCommonApiFetch.mockRejectedValue("HTTP 503");
+    jest.spyOn(console, "error").mockImplementation(() => undefined);
 
     const result = await generateMetadata({
       params: Promise.resolve({ contract: "0x123abc", id: "456" }),
@@ -203,7 +252,7 @@ describe("ReMeme generateMetadata", () => {
     expect(result.title).toBe("0x123...abc #456 | ReMemes");
     const imageUrl = getImageUrl(result);
     expect(imageUrl.pathname).toBe("/api/og-metadata/nfts/0x123abc/456");
-    expect(imageUrl.searchParams.get("image")).toBeNull();
+    expect(imageUrl.search).toBe("");
   });
 
   it("returns default metadata when API returns null", async () => {
@@ -216,7 +265,7 @@ describe("ReMeme generateMetadata", () => {
     expect(result.title).toBe("0x123...abc #456 | ReMemes");
     const imageUrl = getImageUrl(result);
     expect(imageUrl.pathname).toBe("/api/og-metadata/nfts/0x123abc/456");
-    expect(imageUrl.searchParams.get("image")).toBeNull();
+    expect(imageUrl.search).toBe("");
   });
 
   it("handles data with partial metadata", async () => {
@@ -237,9 +286,7 @@ describe("ReMeme generateMetadata", () => {
     expect(result.title).toBe("0x123...abc #456 | ReMemes");
     const imageUrl = getImageUrl(result);
     expect(imageUrl.pathname).toBe("/api/og-metadata/nfts/0x123abc/456");
-    expect(imageUrl.searchParams.get("image")).toBe(
-      "https://test.com/partial-image.png"
-    );
+    expect(imageUrl.search).toBe("");
   });
 
   it("uses fallback ogImage when image is null", async () => {
@@ -259,6 +306,6 @@ describe("ReMeme generateMetadata", () => {
 
     const imageUrl = getImageUrl(result);
     expect(imageUrl.pathname).toBe("/api/og-metadata/nfts/0x123abc/456");
-    expect(imageUrl.searchParams.get("image")).toBeNull();
+    expect(imageUrl.search).toBe("");
   });
 });

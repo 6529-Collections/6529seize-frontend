@@ -1,14 +1,12 @@
 import type { ComponentProps } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import { CreateWaveStep } from "@/types/waves.types";
 import CreateWaveStepContent from "../CreateWaveStepContent";
 import CreateWaveAdvancedSection from "../utils/CreateWaveAdvancedSection";
 import CreateWaveStepHeader from "../utils/CreateWaveStepHeader";
 import CreateWaveNameInput from "./CreateWaveNameInput";
 import CreateWaveImageInput from "./CreateWaveImageInput";
-import CreateWaveType from "./type/CreateWaveType";
 
 type Props = ComponentProps<typeof CreateWaveStepContent>;
 
@@ -38,7 +36,7 @@ export function CreateWaveQuickChatHeader({
 
 export function CreateWaveQuickChatOptions(props: Props) {
   const locale = useBrowserLocale();
-  const { config, groupValidation, errors, setOverview } = props.controller;
+  const { config, groupValidation, setOverview } = props.controller;
   const isRestricted = config.groups.canView !== null;
   let permissionsKey: Parameters<typeof t>[1];
   if (isRestricted) {
@@ -91,22 +89,6 @@ export function CreateWaveQuickChatOptions(props: Props) {
           />
         </div>
       </CreateWaveAdvancedSection>
-      {!isMultiCompetitionEnabled() && (
-        <CreateWaveAdvancedSection
-          title={t(locale, "waves.create.quick.otherTypes")}
-          summary={t(locale, "waves.create.quick.otherTypesSummary")}
-          isCustomized={false}
-          hasError={false}
-        >
-          <CreateWaveType
-            selected={config.overview.type}
-            errors={errors}
-            onChange={(type) =>
-              setOverview({ ...config.overview, type, typeSelected: true })
-            }
-          />
-        </CreateWaveAdvancedSection>
-      )}
     </div>
   );
 }

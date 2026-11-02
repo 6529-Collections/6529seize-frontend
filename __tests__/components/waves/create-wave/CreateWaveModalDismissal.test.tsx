@@ -1,4 +1,11 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useImperativeHandle, useState, type ReactNode, type Ref } from "react";
 import CreateWaveModal from "@/components/waves/create-wave/CreateWaveModal";
@@ -95,9 +102,9 @@ jest.mock("@/components/waves/create-wave/CreateWaveStepContent", () => ({
         </label>
         <button
           type="button"
-          onClick={() => controller.onChatEnabledChange(false)}
+          onClick={() => controller.setDropsAdminCanDelete(false)}
         >
-          Disable chat
+          Disable admin deletion
         </button>
         <button
           type="button"
@@ -226,6 +233,30 @@ describe.each([undefined, "parent-wave"])(
       return { user, opener };
     }
 
+    it("keeps an unfinished form in place after a header swipe", async () => {
+      const { user } = await openForm();
+      await user.type(getName(), "My unfinished wave");
+      const header = screen.getByTestId("mobile-dialog-header");
+      const panel = header.closest<HTMLElement>(".mobile-wrapper-dialog")!;
+      const originalTransform = panel.style.transform;
+      fireEvent.touchStart(header, { touches: [{ clientX: 20, clientY: 20 }] });
+      fireEvent.touchMove(header, { touches: [{ clientX: 20, clientY: 100 }] });
+      fireEvent.touchEnd(header, {
+        touches: [],
+        changedTouches: [{ clientX: 20, clientY: 100 }],
+      });
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 180));
+      });
+      expect(panel.style.transform).toBe(originalTransform);
+      expect(getName()).toHaveValue("My unfinished wave");
+      expect(
+        screen.queryByRole("dialog", { name: "Discard your changes?" })
+      ).toBeNull();
+      await leave(user, "Close");
+      expect(confirmation()).toBeVisible();
+    });
+
     it.each<Exit>(["Close", "Escape", "backdrop"])(
       "confirms %s with live work and keeps editing safely",
       async (exit) => {
@@ -305,7 +336,9 @@ describe.each([undefined, "parent-wave"])(
 
     it("protects changed settings without requiring a name", async () => {
       const { user } = await openForm();
-      await user.click(screen.getByRole("button", { name: "Disable chat" }));
+      await user.click(
+        screen.getByRole("button", { name: "Disable admin deletion" })
+      );
       await leave(user, "Close");
       expect(confirmation()).toBeVisible();
     });

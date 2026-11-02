@@ -3,6 +3,7 @@
 import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { getScaledResolvedImageUri, ImageScale } from "@/helpers/image.helpers";
 
 const SIDEBAR_AVATAR_TIMEOUT_MS = 10_000;
 
@@ -49,7 +50,7 @@ export default function WebSidebarAccountAvatar({
         loading="eager"
         width={40}
         height={40}
-        src={src}
+        src={getScaledResolvedImageUri(src, ImageScale.W_AUTO_H_50)}
         alt=""
         onLoad={() => setStatus("loaded")}
         onError={() => setStatus("failed")}

@@ -7,10 +7,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { useCompetition } from "@/contexts/CompetitionContext";
 import type { ApiCompetitionDraftInput } from "@/generated/models/ApiCompetitionDraftInput";
 import type { ApiUpdateCompetitionRequest } from "@/generated/models/ApiUpdateCompetitionRequest";
-import {
-  isMultiCompetitionEnabled,
-  newCompetitionRequestKey,
-} from "@/helpers/competition.helpers";
+import { newCompetitionRequestKey } from "@/helpers/competition.helpers";
 import {
   commonApiFetch,
   getStructuredApiErrorStatus,
@@ -22,12 +19,10 @@ import {
 } from "@/services/api/competitions-api";
 
 export function useCompetitionConfigEditable() {
-  const { competition, hub } = useCompetition();
+  const { competition } = useCompetition();
   return (
-    isMultiCompetitionEnabled() &&
     competition.permissions.administer &&
-    (hub.legacy_primary_competition_id === competition.id ||
-      competition.lifecycle === ApiCompetitionLifecycle.Draft ||
+    (competition.lifecycle === ApiCompetitionLifecycle.Draft ||
       competition.lifecycle === ApiCompetitionLifecycle.Published)
   );
 }

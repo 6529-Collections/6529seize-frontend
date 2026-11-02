@@ -225,7 +225,7 @@ describe("Notifications component", () => {
     render(<Notifications activeDrop={null} setActiveDrop={jest.fn()} />);
 
     expect(
-      screen.getByText("Loading notifications...", { selector: "div" })
+      screen.getByRole("status", { name: "Loading notifications" })
     ).toBeInTheDocument();
     expect(mockMarkMobileLaunchStep).not.toHaveBeenCalled();
     expect(mockScheduleMobileLaunchFlush).not.toHaveBeenCalled();

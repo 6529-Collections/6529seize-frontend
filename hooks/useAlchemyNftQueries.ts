@@ -60,11 +60,24 @@ async function fetchJson<T>(
   return (await response.json()) as T;
 }
 
+/**
+ * The desktop app's local server has no Alchemy key, so its Alchemy routes
+ * always fail; it calls the backend proxy directly instead.
+ */
+function usesBackendProxyOnly(): boolean {
+  return (
+    typeof navigator !== "undefined" && navigator.userAgent.includes("Electron")
+  );
+}
+
 async function fetchJsonWithFailover<T>(
   primaryUrl: string,
   backendPath: string,
   init?: RequestInit
 ): Promise<T> {
+  if (usesBackendProxyOnly()) {
+    return fetchJson<T>(getBackendAlchemyProxyUrl(backendPath), init);
+  }
   try {
     return await fetchJson<T>(primaryUrl, init);
   } catch (error) {

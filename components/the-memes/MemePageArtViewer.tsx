@@ -91,11 +91,13 @@ export function MemePageArtViewer({
   showBalance = false,
   locale = DEFAULT_LOCALE,
   actions,
+  mobileControls = false,
 }: {
   readonly nft: BaseNFT;
   readonly showBalance?: boolean;
   readonly locale?: SupportedLocale;
   readonly actions?: ReactNode;
+  readonly mobileControls?: boolean;
 }) {
   const { connectedProfile } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -281,6 +283,11 @@ export function MemePageArtViewer({
 
     return (
       <InlineMediaActions
+        className={
+          mobileControls
+            ? "max-sm:!tw-static max-sm:tw-ml-auto max-sm:tw-shrink-0 max-sm:!tw-overflow-visible max-sm:!tw-bg-transparent max-sm:!tw-shadow-none max-sm:!tw-ring-0 max-sm:!tw-backdrop-blur-none max-sm:[&_button]:tw-rounded-lg max-sm:[&_button]:tw-text-iron-300"
+            : undefined
+        }
         variant={activeMedia.variant}
         onDownload={canUseBrowserMediaActions ? downloadMedia : undefined}
         onOpen={canUseBrowserMediaActions ? openMedia : undefined}
@@ -296,12 +303,14 @@ export function MemePageArtViewer({
   }
 
   function printArtworkControls() {
-    if (!showBalanceControl && !hasMultipleSlides) {
+    if (!mobileControls && !showBalanceControl && !hasMultipleSlides)
       return null;
-    }
-
     return (
-      <div className={`${styles["artControls"]} tw-w-full`}>
+      <div
+        className={`${styles["artControls"] ?? ""} tw-w-full`}
+        data-has-controls={showBalanceControl || hasMultipleSlides}
+        data-multiple-formats={hasMultipleSlides}
+      >
         <div className={styles["artControlsContent"]}>
           {showBalanceControl && (
             <div className={styles["artControlsBalance"] ?? ""}>
@@ -350,6 +359,7 @@ export function MemePageArtViewer({
               </button>
             </div>
           )}
+          {mobileControls && printMediaActions()}
         </div>
       </div>
     );
@@ -361,11 +371,12 @@ export function MemePageArtViewer({
       data-video-artwork={isVideoArtwork || undefined}
       className={clsx(
         "tw-flex tw-w-full tw-flex-col tw-p-0",
+        mobileControls && `tw-relative ${styles["mobileArtwork"] ?? ""}`,
         artworkLayout.root
       )}
     >
       <div className="tw-flex tw-flex-1 tw-flex-col">
-        {!hasAnimation && !hasImage && Boolean(actions) && (
+        {!mobileControls && !hasAnimation && !hasImage && Boolean(actions) && (
           <div className="tw-relative tw-min-h-9">{printMediaActions()}</div>
         )}
         {hasAnimation ? (
@@ -422,7 +433,7 @@ export function MemePageArtViewer({
                   </div>
                 )}
               </section>
-              {printMediaActions()}
+              {!mobileControls && printMediaActions()}
             </div>
             {printArtworkControls()}
           </>
@@ -442,7 +453,7 @@ export function MemePageArtViewer({
                   }
                   id="the-art-fullscreen-img"
                 />
-                {printMediaActions()}
+                {!mobileControls && printMediaActions()}
               </div>
             )}
             {printArtworkControls()}

@@ -506,9 +506,17 @@ describe("frontend i18n helpers", () => {
     expect(formatNumber("de-DE", 1234.5, { maximumFractionDigits: 1 })).toBe(
       "1.234,5"
     );
-    expect(formatDate("en-GB", new Date("2024-01-02T00:00:00.000Z"))).toBe(
-      "2 Jan 2024"
-    );
+    // An instant renders in the runtime zone unless one is given, so name UTC
+    // to keep the expected day the same in every zone the suite runs in.
+    expect(
+      formatDate("en-GB", new Date("2024-01-02T00:00:00.000Z"), {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        timeZone: "UTC",
+      })
+    ).toBe("2 Jan 2024");
+    expect(formatDate("en-GB", "2024-01-02")).toBe("2 Jan 2024");
     expect(formatRelativeTime("en-US", -1, "day")).toBe("yesterday");
     expect(compareLocalized("en-US", "2", "10")).toBeLessThan(0);
     const sampleTime = new Date("2024-01-02T13:05:00.000Z");

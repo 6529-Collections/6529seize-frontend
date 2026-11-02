@@ -107,6 +107,7 @@ export default function CheckActions({
           {
             moderator: false,
             has_open_reports: false,
+            needs_review_count: 0,
             open_report_count: 0,
             resolved_report_count: 0,
             suspended_profile_count: 0,
@@ -128,7 +129,12 @@ export default function CheckActions({
       aria-busy={mutation.isPending}
     >
       <p className="tw-text-sm tw-leading-6 tw-text-iron-300">
-        {t(locale, `checks.effect.${detail.action_effect}`)}
+        {t(
+          locale,
+          detail.current_state.deleted
+            ? "checks.deletedReportHelp"
+            : `checks.effect.${detail.action_effect}`
+        )}
       </p>
       <label className="tw-block tw-space-y-2 tw-text-sm tw-text-iron-300">
         <span>{t(locale, "checks.chooseAction")}</span>
@@ -151,6 +157,12 @@ export default function CheckActions({
           ))}
         </select>
       </label>
+      {action === ApiModerationAction.MarkReviewed &&
+        detail.current_state.open_report_count > 0 && (
+          <p className="tw-text-sm tw-text-iron-400">
+            {t(locale, "checks.markReviewedHelp")}
+          </p>
+        )}
       {action === ApiModerationAction.Reevaluate && (
         <p className="tw-text-sm tw-text-iron-400">
           {t(locale, "checks.reevaluateHelp")}

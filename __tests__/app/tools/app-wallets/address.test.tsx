@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { generateMetadata } from "@/app/tools/app-wallets/[app-wallet-address]/page";
 import { publicEnv } from "@/config/env";
 import React from "react";
@@ -33,6 +35,8 @@ describe("App Wallet page", () => {
       params: Promise.resolve({ "app-wallet-address": "0xdef" }),
     });
     expect(meta.title).toEqual("fmt-0xdef | App Wallets | 6529.io");
-    expect(meta.description).toEqual(`Tools | ${domain}`);
+    expect(meta.description).toEqual(
+      `${t(DEFAULT_LOCALE, "pageMetadata.appWallet.description")} | ${domain}`
+    );
   });
 });

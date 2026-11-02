@@ -1,11 +1,21 @@
 "use client";
 
 import { runWaveNavigationTransition } from "@/helpers/waves/wave-navigation-transition";
-import { isCompetitionPathname } from "@/helpers/competition.helpers";
+import {
+  getCompetitionRoute,
+  isCompetitionPathname,
+} from "@/helpers/competition.helpers";
+import { waveCompetitionTabs } from "@/helpers/default-competition.helpers";
+import { useWaveTabPreference } from "@/hooks/useWaveTabPreference";
+import { useQueryClient } from "@tanstack/react-query";
+import { defaultCompetitionQueryKey } from "@/services/api/competitions-api";
+import { useCompetitionViewer } from "@/hooks/competitions/useCompetitionQueries";
+import type { ApiDefaultCompetition } from "@/generated/models/ApiDefaultCompetition";
 import {
   getActiveWaveIdFromUrl,
   getWaveHomeRoute,
   getWaveRoute,
+  isEncryptedMessagesPathname,
 } from "@/helpers/navigation.helpers";
 import { useClientNavigation } from "@/hooks/useClientNavigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -39,7 +49,11 @@ const getRouteContext = (): { isOnWaves: boolean; isOnMessages: boolean } => {
     isOnWaves:
       !isCompetitionPathname(pathname) &&
       (pathname === "/waves" || pathname.startsWith("/waves/")),
-    isOnMessages: pathname === "/messages" || pathname.startsWith("/messages/"),
+    // Encrypted chats are separate routes: leaving them for a plaintext DM
+    // needs a router navigation, not a history-only wave switch.
+    isOnMessages:
+      (pathname === "/messages" || pathname.startsWith("/messages/")) &&
+      !isEncryptedMessagesPathname(pathname),
   };
 };
 
@@ -47,6 +61,9 @@ export function useActiveWaveManager() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { isApp } = useDeviceInfo();
+  const { tabsRef } = useWaveTabPreference();
+  const queryClient = useQueryClient();
+  const viewer = useCompetitionViewer();
 
   const waveFromLocation = useMemo(
     () =>
@@ -67,6 +84,24 @@ export function useActiveWaveManager() {
       const isDirectMessage = options?.isDirectMessage ?? false;
       const serialNo = options?.serialNo ?? undefined;
       const divider = options?.divider;
+      const remembered = waveId ? tabsRef.current[waveId] : undefined;
+      if (
+        waveId &&
+        !isDirectMessage &&
+        serialNo === undefined &&
+        typeof remembered === "object"
+      ) {
+        const selection = queryClient.getQueryData<ApiDefaultCompetition>(
+          defaultCompetitionQueryKey(waveId, viewer)
+        );
+        const tab = waveCompetitionTabs[remembered.tab];
+        if (tab && selection?.competition_id === remembered.competitionId) {
+          const params = new URLSearchParams({ tab, restore: "1" });
+          if (divider !== null && divider !== undefined)
+            params.set("divider", String(divider));
+          return `${getCompetitionRoute(waveId, remembered.competitionId)}?${params}`;
+        }
+      }
       return waveId
         ? getWaveRoute({
             waveId,
@@ -82,15 +117,20 @@ export function useActiveWaveManager() {
           })
         : getWaveHomeRoute({ isDirectMessage, isApp });
     },
-    [isApp]
+    [isApp, tabsRef, queryClient, viewer]
   );
 
   const canUsePushState = useCallback(
-    (_targetUrl: string, options?: WaveNavigationOptions) => {
+    (targetUrl: string, options?: WaveNavigationOptions) => {
       const { isOnWaves, isOnMessages } = getRouteContext();
       const isDirectMessage = options?.isDirectMessage ?? false;
+      const targetPathname = new URL(targetUrl, globalThis.location.href)
+        .pathname;
       return (
-        (!isDirectMessage && isOnWaves) || (isDirectMessage && isOnMessages)
+        (!isDirectMessage &&
+          isOnWaves &&
+          !isCompetitionPathname(targetPathname)) ||
+        (isDirectMessage && isOnMessages)
       );
     },
     []
@@ -104,6 +144,7 @@ export function useActiveWaveManager() {
     buildUrl,
     parseUrl: getWaveFromWindow,
     canUsePushState,
+    deferRouteState: true,
   });
 
   const setActiveWave = useCallback<typeof navigate>(

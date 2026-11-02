@@ -3,8 +3,7 @@
 ## Overview
 
 `Overview` is the final, read-only step when creating a wave or subwave.
-It follows the first Chat screen or `Description` for scheduled Rank, Perpetual Ranking, and
-Approve waves. The first step is named `Setup`.
+It follows the first Chat screen or `Description` for subwaves. The first guided step is named `Setup`.
 
 Review the configuration, then select `Confirm and create`. Use `Previous`
 to return to the first Chat screen or Description, or use completed guided steps to edit
@@ -16,22 +15,14 @@ moving backward and forward within the open wizard.
 The summary includes the wave name and picture, parent wave name for subwaves,
 and the following settings:
 
-- Wave type and access groups, with member inspection for restricted groups.
-- Submission and voting schedules and winner announcement timing.
-- Submission types, media, metadata, limits, and admin deletion permissions.
-- Voting credits, scope, category, profile, card set, negative voting, vote
-  limits, and time weighting.
-- Approval threshold, hold time, maximum approved drops, and approval window.
-- Outcomes visibility and count, plus each outcome's type, reward, category,
-  total, per-winner distribution, or credit per approved drop.
-- Author guidelines and rules requiring acceptance and wallet signatures.
-- The description drop, including its title, formatted content, media, and
-  attachment names.
+- Access, chat and admin groups, with member inspection for restricted groups.
+- Whether admins can delete posts.
+- Chat guidelines.
+- The description drop, including its title, formatted content, media and attachment names.
 
-Only applicable sections appear. Chat waves omit voting and outcomes.
-Perpetual Ranking reports that outcomes are unavailable and does not display
-stale outcome rewards from a saved configuration. No configuration fields can
-be edited on this step.
+No configuration fields can be edited on this step. New waves open shared chat;
+add schedules, entry requirements, voting and outcomes afterward through
+[competition setup](../competitions/feature-manage-competitions.md).
 
 ## Confirmation and Recovery
 

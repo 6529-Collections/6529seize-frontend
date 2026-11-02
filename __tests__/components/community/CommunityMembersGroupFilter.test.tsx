@@ -82,6 +82,9 @@ function renderFilter(activeGroupId: string | null = null) {
         value={{ onGroupCreate: jest.fn() } as any}
       >
         <CommunityMembersGroupFilter
+          view={null}
+          onViewChange={jest.fn()}
+          mobileNavigation
           activeGroupId={activeGroupId}
           onGroupChange={onGroupChange}
         />
@@ -238,6 +241,9 @@ describe("CommunityMembersGroupFilter", () => {
       <AuthContext.Provider value={{} as any}>
         <ReactQueryWrapperContext.Provider value={{} as any}>
           <CommunityMembersGroupFilter
+            view={null}
+            onViewChange={jest.fn()}
+            mobileNavigation
             activeGroupId="group-1"
             onGroupChange={onGroupChange}
           />

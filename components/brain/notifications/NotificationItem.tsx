@@ -1,3 +1,4 @@
+import NotificationVotingCreditsReturned from "./NotificationVotingCreditsReturned";
 import type { DropInteractionParams } from "@/components/waves/drops/Drop";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -8,6 +9,7 @@ import {
   type TypedNotification,
 } from "@/types/feed.types";
 import { memo } from "react";
+import NotificationMemeCollaboration from "./NotificationMemeCollaboration";
 import NotificationCompetitionLifecycle from "./NotificationCompetitionLifecycle";
 import NotificationAllDrops from "./all-drops/NotificationAllDrops";
 import NotificationDropQuoted from "./drop-quoted/NotificationDropQuoted";
@@ -36,6 +38,12 @@ function NotificationItemComponent({
 }) {
   const getComponent = (): JSX.Element => {
     switch (notification.cause) {
+      case ApiNotificationCause.VotingCreditsReturned:
+        return (
+          <NotificationVotingCreditsReturned notification={notification} />
+        );
+      case ApiNotificationCause.MemeCollaboration:
+        return <NotificationMemeCollaboration notification={notification} />;
       case ApiNotificationCause.CompetitionLifecycle:
         return <NotificationCompetitionLifecycle notification={notification} />;
       case ApiNotificationCause.DropQuoted:

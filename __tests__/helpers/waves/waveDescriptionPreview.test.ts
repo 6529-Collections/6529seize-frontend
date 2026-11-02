@@ -84,15 +84,76 @@ describe("getWaveDescriptionPreviewText", () => {
     ).toBe("Read the guide");
   });
 
-  it("keeps image markdown as URL text", () => {
-    const wave = {
-      description_drop: {
-        parts: [{ content: "Image ![alt](https://cdn.example.com/file.png)" }],
-      },
-    } as any;
+  const previewOf = (content: string) =>
+    getWaveDescriptionPreviewText({
+      description_drop: { parts: [{ content }] },
+    } as any);
 
-    expect(getWaveDescriptionPreviewText(wave)).toBe(
-      "Image https://cdn.example.com/file.png"
+  it("omits image markdown instead of showing its URL", () => {
+    expect(previewOf("Image ![alt](https://cdn.example.com/file.png)")).toBe(
+      "Image"
+    );
+  });
+
+  it("returns null for an image-only description on the media CDN", () => {
+    expect(
+      previewOf(
+        "![Seize](https://d3lqz0a4bldqgf.cloudfront.net/drops/author_0f831714-87b4-11ee-9d82-029a0e4b6159/91ca9f63-e46e-4e34-ae62-2561b6ba6dcf/image.png)"
+      )
+    ).toBeNull();
+  });
+
+  it("omits bare media CDN and media-file URLs", () => {
+    expect(
+      previewOf(
+        "Banner https://d3lqz0a4bldqgf.cloudfront.net/drops/author_x/y/giphy_downsized_medium and (clip: https://example.com/clip.mp4). Done"
+      )
+    ).toBe("Banner and (clip: ) Done");
+  });
+
+  it("omits 6529 drop and wave links that render as embeds", () => {
+    expect(
+      previewOf(
+        "https://test.6529.io/waves/da16201a-f4d0-40cf-b888-9f3a4a86a894?serialNo=1518681"
+      )
+    ).toBeNull();
+    expect(
+      previewOf(
+        "Read this https://test.6529.io/waves/da16201a-f4d0-40cf-b888-9f3a4a86a894?drop=abc and https://test.6529.io/waves/da16201a-f4d0-40cf-b888-9f3a4a86a894"
+      )
+    ).toBe("Read this and");
+  });
+
+  it("keeps the label of a markdown link to media", () => {
+    expect(
+      previewOf("See [the banner](https://d3lqz0a4bldqgf.cloudfront.net/x.png)")
+    ).toBe("See the banner");
+    expect(
+      previewOf("See [](https://d3lqz0a4bldqgf.cloudfront.net/x.png)")
+    ).toBe("See");
+  });
+
+  it("leaves no stray emphasis markers around an omitted URL", () => {
+    expect(
+      previewOf(
+        "Costs **https://d3lqz0a4bldqgf.cloudfront.net/x.png** and *https://example.com/y.gif*"
+      )
+    ).toBe("Costs and");
+  });
+
+  it("handles long punctuation runs after a URL", () => {
+    const punctuation = ".".repeat(5000);
+    expect(previewOf(`Clip https://example.com/a.mp4${punctuation}x`)).toBe(
+      `Clip https://example.com/a.mp4${punctuation}x`
+    );
+    expect(previewOf(`Clip https://example.com/a.mp4${punctuation}`)).toBe(
+      "Clip"
+    );
+  });
+
+  it("keeps external URLs", () => {
+    expect(previewOf("Docs at https://example.com/guide.")).toBe(
+      "Docs at https://example.com/guide."
     );
   });
 

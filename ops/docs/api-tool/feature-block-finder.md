@@ -24,7 +24,8 @@ time.
 ## User Journey
 
 1. Select date.
-2. Select time (enabled after date).
+2. Select time (enabled after date). Seconds are optional; when the time
+   picker shows them, they are included in the request.
 3. Optional: select a window and enter `Block number includes` values
    (`1, 7, 42`).
 4. Select `Submit`.
@@ -36,15 +37,20 @@ time.
 ## Mode and Validation Rules
 
 - `Submit` is disabled until both date and time are set.
-- Date input minimum uses the current UTC date
-  (`new Date().toISOString().slice(0, 10)`).
+- The selected date and time are read as local time in the browser's time
+  zone, so the day you pick is the day that is searched, including for users
+  west of UTC.
+- Date input minimum is the current local calendar date. It is applied once the
+  page has loaded in the browser, so the server-rendered page has no minimum.
 - Time input is disabled until date is selected.
 - Window default is `None`.
 - `Block number includes` input is disabled while window is `None`.
 - If window is not `None` and includes is empty, the page shows toast:
-  `You must provide some block number inclusions when using a time window!`.
+  `Add at least one block number when using a time window.`.
 - Includes must match numeric comma-separated format (`1, 7, 42`); invalid text
-  shows toast: `Block numbers must be numeric and comma-separated!`.
+  shows toast: `Enter block numbers separated by commas.`.
+- If the date and time cannot be read as a valid local date and time, the page
+  shows toast: `Enter a valid date and time.` and sends no request.
 - Available windows: `None`, `1 minute`, `5 minutes`, `10 minutes`,
   `30 minutes`, `1 hour`, `2 hours`, `4 hours`, `6 hours`, `12 hours`,
   `1 day`, `2 days`.
@@ -83,8 +89,11 @@ time.
 ## Failure and Recovery
 
 - Failed requests stop loading and keep results cleared.
-- API failures do not show a dedicated toast or inline error on this page.
-- Failures are logged in browser console.
+- A failed request shows an error toast. It reads
+  `Couldn’t predict block numbers: {reason}` when the API returned a message,
+  and `Couldn’t predict block numbers. Please try again.` otherwise (including
+  network failures).
+- Failures are also logged in the browser console.
 - Retry by submitting again (or refresh and retry).
 
 ## Limitations / Notes

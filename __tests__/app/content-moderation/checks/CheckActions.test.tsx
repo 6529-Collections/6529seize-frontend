@@ -2,9 +2,15 @@ import CheckActions from "@/app/content-moderation/checks/CheckActions";
 import { ApiModerationAction } from "@/generated/models/ApiModerationAction";
 import { ApiModerationCheckDetailActionEffectEnum } from "@/generated/models/ApiModerationCheckDetail";
 import { applyModerationAction } from "@/services/api/moderation-checks-api";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  QueryObserver,
+} from "@tanstack/react-query";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MODERATION_QUEUE_QUERY_KEY } from "@/services/content-moderation/content-moderation-query";
+import { CONTENT_MODERATOR_ACCESS_QUERY_KEY } from "@/hooks/content-moderation/useContentModeratorAccess";
 import { checkFixture } from "./check.fixture";
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
@@ -25,7 +31,7 @@ function setup(detail = checkFixture()) {
       <CheckActions detail={detail} onSaved={saved} onReload={reload} />
     </QueryClientProvider>
   );
-  return { saved, reload, ...mounted };
+  return { client, saved, reload, ...mounted };
 }
 
 beforeEach(() => jest.clearAllMocks());
@@ -126,4 +132,91 @@ it("does not restore review data after the private surface unmounts", async () =
     resolve(checkFixture());
   });
   expect(saved).not.toHaveBeenCalled();
+});
+
+it("resolves deleted reports with confirmation, required reason, and refreshes queue and badge", async () => {
+  const user = userEvent.setup();
+  const detail = checkFixture({
+    allowed_actions: [
+      ApiModerationAction.MarkReviewed,
+      ApiModerationAction.ResolveDeletedReport,
+    ],
+  });
+  detail.current_state = {
+    ...detail.current_state,
+    deleted: true,
+    open_report_count: 1,
+  };
+  const updated = {
+    ...detail,
+    current_state: { ...detail.current_state, open_report_count: 0 },
+  };
+  const { client, saved } = setup(detail);
+  const accessKey = [...CONTENT_MODERATOR_ACCESS_QUERY_KEY, "moderator-1"];
+  const queueKey = [...MODERATION_QUEUE_QUERY_KEY, "OPEN", "moderator-1"];
+  client.setQueryData(accessKey, {
+    has_open_reports: true,
+    open_report_count: 1,
+  });
+  client.setQueryData(queueKey, [{ id: "report-1" }]);
+  const accessFetch = jest
+    .fn()
+    .mockResolvedValue({ has_open_reports: false, open_report_count: 0 });
+  const queueFetch = jest.fn().mockResolvedValue([]);
+  const accessObserver = new QueryObserver(client, {
+    queryKey: accessKey,
+    queryFn: accessFetch,
+    staleTime: Infinity,
+  });
+  const queueObserver = new QueryObserver(client, {
+    queryKey: queueKey,
+    queryFn: queueFetch,
+    staleTime: Infinity,
+  });
+  const stopAccess = accessObserver.subscribe(() => undefined);
+  const stopQueue = queueObserver.subscribe(() => undefined);
+  jest.mocked(applyModerationAction).mockResolvedValue(updated);
+  expect(
+    screen.getByText(/closes all its open reports with a reason/)
+  ).toBeVisible();
+  await user.selectOptions(
+    screen.getByRole("combobox"),
+    ApiModerationAction.MarkReviewed
+  );
+  expect(
+    screen.getByText(/It does not resolve the post’s open reports/)
+  ).toBeVisible();
+  await user.selectOptions(
+    screen.getByRole("combobox"),
+    ApiModerationAction.ResolveDeletedReport
+  );
+  const confirm = screen.getByRole("button", {
+    name: "Confirm Resolve reports — post deleted",
+  });
+  expect(confirm).toBeDisabled();
+  expect(applyModerationAction).not.toHaveBeenCalled();
+  await user.type(
+    screen.getByRole("textbox"),
+    "Confirmed original post was deleted."
+  );
+  await user.click(confirm);
+  await waitFor(() => expect(saved).toHaveBeenCalledWith(updated));
+  expect(applyModerationAction).toHaveBeenCalledWith("check-1", {
+    action: "RESOLVE_DELETED_REPORT",
+    reason: "Confirmed original post was deleted.",
+    expected_version: 4,
+    idempotency_key: expect.any(String),
+  });
+  await waitFor(() => {
+    expect(client.getQueryData(accessKey)).toEqual({
+      has_open_reports: false,
+      open_report_count: 0,
+    });
+    expect(client.getQueryData(queueKey)).toEqual([]);
+  });
+  expect(accessFetch).toHaveBeenCalledTimes(1);
+  expect(queueFetch).toHaveBeenCalledTimes(1);
+  stopAccess();
+  stopQueue();
+  client.clear();
 });

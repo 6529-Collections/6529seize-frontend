@@ -69,7 +69,7 @@ export default function MobileNicTabContent({
                 />
               </span>
             )}
-            <span className="tw-whitespace-nowrap tw-text-xs tw-font-normal tw-text-iron-400">
+            <span className="tw-whitespace-nowrap tw-text-meta/4 tw-font-normal tw-text-iron-500">
               {contributorCountLabel}
             </span>
           </span>

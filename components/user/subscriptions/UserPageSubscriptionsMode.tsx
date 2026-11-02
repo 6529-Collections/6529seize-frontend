@@ -82,7 +82,7 @@ export default function UserPageSubscriptionsMode(
             Mode
           </h3>
           {props.details && props.details.last_update > 0 && (
-            <span className="tw-ml-auto tw-whitespace-nowrap tw-text-right tw-text-xs tw-font-normal tw-text-iron-600">
+            <span className="tw-ml-auto tw-whitespace-nowrap tw-text-right tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
               {new Date(props.details.last_update).toLocaleString("en-US", {
                 day: "numeric",
                 month: "short",
@@ -126,7 +126,7 @@ export default function UserPageSubscriptionsMode(
       {!props.readonly && (
         <p
           id={descriptionId}
-          className="tw-mb-0 tw-mt-1 tw-text-sm tw-font-light tw-leading-relaxed tw-text-iron-500"
+          className="tw-mb-0 tw-mt-1 tw-text-meta tw-font-normal tw-leading-relaxed tw-text-iron-500"
         >
           {isAuto
             ? "Automatic airdrops of all eligible drops unless you opt-out"

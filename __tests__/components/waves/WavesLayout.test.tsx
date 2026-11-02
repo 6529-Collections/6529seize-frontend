@@ -2,6 +2,14 @@ import WavesLayout from "@/components/waves/layout/WavesLayout";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 
+let mockPathname = "/waves";
+let mockSearchParams = new URLSearchParams();
+let mockDesktopLoading = false;
+jest.mock("next/navigation", () => ({
+  usePathname: () => mockPathname,
+  useSearchParams: () => mockSearchParams,
+}));
+
 const mockUseAuthenticatedContent = jest.fn();
 const mockUseDeviceInfo = jest.fn();
 const mockMarkMobileLaunchStep = jest.fn();
@@ -14,17 +22,30 @@ jest.mock("@/utils/monitoring/mobileLaunchTiming", () => ({
     mockScheduleMobileLaunchFlush(...args),
 }));
 
-jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
-  const loaderSource = loader.toString();
+jest.mock(
+  "next/dynamic",
+  () =>
+    (
+      loader: () => Promise<unknown>,
+      options: { loading: () => React.ReactNode }
+    ) => {
+      const loaderSource = loader.toString();
 
-  if (loaderSource.includes("WavesDesktop")) {
-    return require("@/components/waves/WavesDesktop").default;
-  }
+      if (loaderSource.includes("WavesDesktop")) {
+        return (props: { readonly children: React.ReactNode }) =>
+          mockDesktopLoading
+            ? options.loading()
+            : React.createElement(
+                require("@/components/waves/WavesDesktop").default,
+                props
+              );
+      }
 
-  throw new Error(
-    `Unexpected dynamic import in WavesLayout test: ${loaderSource}`
-  );
-});
+      throw new Error(
+        `Unexpected dynamic import in WavesLayout test: ${loaderSource}`
+      );
+    }
+);
 
 jest.mock("../../../hooks/useAuthenticatedContent", () => ({
   useAuthenticatedContent: () => mockUseAuthenticatedContent(),
@@ -67,6 +88,9 @@ jest.mock("@/components/common/ConnectWallet", () => ({
 
 describe("WavesLayout", () => {
   beforeEach(() => {
+    mockPathname = "/waves";
+    mockSearchParams = new URLSearchParams();
+    mockDesktopLoading = false;
     mockMarkMobileLaunchStep.mockClear();
     mockScheduleMobileLaunchFlush.mockClear();
     mockUseAuthenticatedContent.mockReturnValue({
@@ -95,6 +119,29 @@ describe("WavesLayout", () => {
       "waves_content_visible",
       250
     );
+  });
+
+  it("keeps the detail loader visible while the desktop shell module loads", () => {
+    mockPathname = "/waves/wave-1";
+    mockSearchParams = new URLSearchParams("drop=drop-1");
+    mockDesktopLoading = true;
+    render(<WavesLayout>Wave content</WavesLayout>);
+    expect(
+      screen.getByRole("status", { name: "Loading…" })
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Wave content")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("stream-route-loading-shell")
+    ).not.toBeInTheDocument();
+  });
+
+  it("retains the wave shell loader for ordinary navigation while its module loads", () => {
+    mockDesktopLoading = true;
+    render(<WavesLayout>Wave content</WavesLayout>);
+    expect(
+      screen.getByTestId("stream-route-loading-shell")
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("single-drop-loading")).not.toBeInTheDocument();
   });
 
   it("renders WavesMobile and children for logged-out app users", () => {
@@ -129,6 +176,20 @@ describe("WavesLayout", () => {
     ).toBeInTheDocument();
     expect(screen.queryByTestId("wave-content")).not.toBeInTheDocument();
     expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
+  });
+
+  it("preserves route-owned server content through auth restoration instead of flashing discovery cards", () => {
+    mockPathname = "/waves/wave-1";
+    mockUseAuthenticatedContent.mockReturnValue({ contentState: "loading" });
+    render(
+      <WavesLayout>
+        <div data-testid="server-wave-feed">Public wave posts</div>
+      </WavesLayout>
+    );
+    expect(screen.getByTestId("server-wave-feed")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("status", { name: "Loading waves" })
+    ).not.toBeInTheDocument();
   });
 
   it("renders Waves content while layout measurement is settling", () => {

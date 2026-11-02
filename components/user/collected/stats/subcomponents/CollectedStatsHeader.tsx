@@ -60,7 +60,7 @@ export function CollectedStatsHeader({
             onScroll={updateEndFade}
             className="tw-no-scrollbar tw-overflow-x-auto tw-overflow-y-hidden tw-py-1 md:tw-overflow-visible md:tw-py-0"
           >
-            <div className="tw-flex tw-w-max tw-flex-nowrap tw-items-center tw-gap-4 md:tw-w-auto md:tw-flex-wrap md:tw-gap-6">
+            <div className="tw-flex tw-w-max tw-flex-nowrap tw-items-center tw-gap-4 tw-pr-1 md:tw-w-auto md:tw-flex-wrap md:tw-gap-6 md:tw-pr-0">
               {metrics.map((metric, index) => {
                 const metricCollection = metric.collection;
                 const isInteractive =

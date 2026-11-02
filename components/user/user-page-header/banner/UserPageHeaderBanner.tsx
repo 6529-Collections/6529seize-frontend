@@ -38,7 +38,7 @@ export default function UserPageHeaderBanner({
   const banner2Color = getBannerColorValue(profile.banner2) ?? defaultBanner2;
 
   return (
-    <div className="tw-group tw-relative tw-z-10 tw-h-28 tw-w-full tw-overflow-hidden sm:tw-h-40 md:tw-h-52">
+    <div className="tw-group tw-relative tw-z-10 tw-h-28 tw-w-full tw-overflow-hidden after:tw-pointer-events-none after:tw-absolute after:tw-inset-x-0 after:tw-bottom-0 after:tw-z-20 after:tw-h-px after:tw-bg-white/[0.08] after:tw-content-[''] sm:tw-h-40 md:tw-h-52">
       {scaledBannerUrl ? (
         <FallbackImage
           primarySrc={scaledBannerUrl}
@@ -58,8 +58,6 @@ export default function UserPageHeaderBanner({
         />
       )}
       <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-ring-1 tw-ring-inset tw-ring-white/5 md:tw-hidden" />
-      <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-black/80 tw-via-black/30 tw-to-transparent md:tw-hidden" />
-      <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-hidden tw-h-44 tw-bg-gradient-to-t tw-from-black tw-via-black/50 tw-to-transparent md:tw-block" />
       <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-top-0 tw-hidden tw-h-20 tw-bg-gradient-to-b tw-from-black/20 tw-to-transparent md:tw-block" />
 
       {canEdit && (

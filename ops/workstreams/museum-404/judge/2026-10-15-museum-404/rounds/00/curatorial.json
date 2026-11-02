@@ -1,0 +1,255 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "198ef8e6a159436ae3c56856dd8b246c25506a30",
+  "coverage": [
+    {
+      "route": "/museum/network",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/home-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/home-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/home-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/artists",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/artists-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/artists",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/artists-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/artists",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/artists-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/acquisitions",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/acquisitions-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/acquisitions",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/acquisitions-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/acquisitions",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/acquisitions-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/works/6529NM-W-0008",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/work-w-0008-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/works/6529NM-W-0008",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/work-w-0008-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/works/6529NM-W-0008",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/work-w-0008-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/works/does-not-exist",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/work-not-found-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/works/does-not-exist",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/work-not-found-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/works/does-not-exist",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/work-not-found-390x844-full.png"
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/contact-sheet-1440x1000.png",
+        "evidence/candidate/home-1440x1000-01.png",
+        "evidence/candidate/work-w-0008-1440x1000-01.png",
+        "evidence/candidate/work-not-found-1440x1000-01.png",
+        "evidence/candidate/work-not-found-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "Art or the record leads on every published page and an unknown address says plainly that no record exists and offers Return to the Museum with the Museum navigation intact; published pages are unchanged from main (identical <main> text, 200 status), so remaining gaps are pre-existing (see C-003, C-004)."
+    },
+    "J14": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/contact-sheet-1440x1000.png",
+        "evidence/candidate/contact-sheet-820x1000.png",
+        "evidence/candidate/contact-sheet-390x844.png",
+        "evidence/candidate/acquisitions-1440x1000-02.png",
+        "evidence/candidate/work-w-0008-1440x1000-03.png",
+        "evidence/candidate/artists-1440x1000-03.png"
+      ],
+      "findings": [
+        "C-001",
+        "C-004",
+        "C-005"
+      ],
+      "note": "Reads as a credible museum publication: art leads the home hero, acquisitions carry tombstone credit lines with rights and method, the work record separates curatorial interpretation from the artist's account and states unminted status; deductions are pre-existing pacing, repetition and captioning gaps recorded as P3."
+    }
+  },
+  "checks": {
+    "M1": "pass",
+    "M2": "pass",
+    "M3": "pass",
+    "M4": "pass"
+  },
+  "findings": [
+    {
+      "id": "C-001",
+      "targets": [
+        "M4",
+        "J14"
+      ],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/candidate/home-1440x1000-02.png",
+      "observation": "Pre-existing on main: the home hero lead image, Themes and Variations #210, appears again as the fourth card of the Acquisitions row on the same page (about 850 px below the hero at 1440 wide, and again after a scroll at 820 and 390). Pixels and <main> text are identical to the baseline apart from the local-build badge.",
+      "consequence": "A visitor sees the same primary image twice in one scroll, which weakens the sense of a curated sequence on the museum front page.",
+      "change": "Lead the hero with a work that is not also sampled in the Acquisitions row, or drop that work from the row, or record the hero-plus-card repeat in a future run record as a curatorial decision.",
+      "acceptance_check": "On /museum/network at all three viewports, each principal image appears once, or the run record names the repeat as a curatorial decision.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-002",
+      "targets": [
+        "M4"
+      ],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/artists · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/candidate/artists-1440x1000-02.png",
+      "observation": "Pre-existing on main: the Vera Molnár and Martin Grasser cards sit side by side in Artists in the Collection with the same lead image (Themes and Variations #210, a collaboration), and the cards do not say that the work is shared.",
+      "consequence": "It reads as a duplicated image rather than a deliberate co-credit; the record link explains it but the page does not.",
+      "change": "Show the shared work once with a co-credit line (for example Vera Molnár, in collaboration with Martin Grasser), or caption each card with the work title and the collaborator, or name the collaboration repeat in a future run record.",
+      "acceptance_check": "The shared collaboration work is either shown once or each of the two cards names the other artist as co-credit.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-003",
+      "targets": [
+        "M3"
+      ],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/acquisitions · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/candidate/acquisitions-1440x1000-01.png",
+      "observation": "Pre-existing on main: the page introduction says Keys and Gates comprises twenty-three photographs selected for minting and acquisition, while the Keys and Gates card on the same page says 16 works, the Artists index says 16 works selected or in progress, and the home page says its sixteen selected photographs await minting. The twenty-three figure comes from i18n key museum.network.acquisitions.description; 23 is the Artists index artist count, not a work count. Recorded as P3 only because it is identical on the baseline (repair-scope rule); it should be reconciled with the public record before the next Museum release.",
+      "consequence": "A visitor reading the lead sentence gets a different program size than the card directly below it, which undermines trust in the holdings and program status the page reports.",
+      "change": "Reconcile the sentence with the record (if the record is 16: Keys and Gates comprises sixteen photographs selected for minting and acquisition) in every museum.*.json locale file, or derive the count from the same data as the card.",
+      "acceptance_check": "The program size reads the same on /museum/network, /museum/network/artists and /museum/network/acquisitions and matches the Keys and Gates record.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-004",
+      "targets": [
+        "J14"
+      ],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/works/6529NM-W-0008 · default · 1440x1000, 820x1000 · en-US",
+      "evidence": "evidence/candidate/work-w-0008-1440x1000-02.png",
+      "observation": "Pre-existing on main: the principal image of the work record fills the content width, rendering 1180 x 1770 at 1440 wide and 692 x 1038 at 820 wide (2:3 ratio kept, whole image, nothing overlapping it), so it is taller than a 1000 px viewport and the portrait photograph cannot be seen whole on one screen.",
+      "consequence": "The visitor must scroll through the work to see its composition, which is the opposite of the museum-wall presentation the rest of the page promises.",
+      "change": "Cap the principal image height to the viewport height minus the header (max-height with object-fit contain, centred), keeping the 2:3 ratio.",
+      "acceptance_check": "At 1440x1000 and 820x1000 the full principal image is visible within one viewport once scrolled to it, with its ratio unchanged.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-005",
+      "targets": [
+        "J14"
+      ],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/artists · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/candidate/artists-1440x1000-03.png",
+      "observation": "Pre-existing on main: the artist cards show a lead image with the artist name and a status line but no work title, date or credit, unlike the Home and Acquisitions cards; the Minalisa lead image is so dark it nearly disappears into the card ground.",
+      "consequence": "The index shows art without captions, so a visitor cannot tell what the image is, and one work is close to invisible.",
+      "change": "Add the lead work title (and date where the record has one) under each artist name, and give very dark images a visible edge or lighter card ground.",
+      "acceptance_check": "Each artist card names its lead work, and the Minalisa lead image reads as a framed photograph at all three viewports.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "The not-found state: calm, specific copy (No record at this address appears in the current Museum release.), the single Return to the Museum action, and the Museum header navigation kept, now with the correct 404 status and noindex.",
+    "Published pages stay pixel- and text-identical to main (only the local-build badge differs), with 200 status and no horizontal overflow, broken images, clipped text or fallback panels at 1440, 820 and 390.",
+    "Home hero: the lead artwork at full presence with title and artist caption beneath it, ahead of the headline copy.",
+    "Acquisition cards: tombstone credit lines with artist, year, rights (CC BY-NC 4.0, Magnum Photos copyright), method and works count, and the Accessioned versus Selected-and-unminted status chips.",
+    "Work record structure: caption, close looking, the artist's account attributed and kept apart from the curatorial interpretation, the status and source note, and the plain Selected and unminted. Acquisition and accession remain pending line.",
+    "Consistent status vocabulary across routes (Accessioned into the permanent Collection, Selected through an acquisition program; unminted), and Artists index figures (13, 16, 23) that reconcile with the cards listed.",
+    "Whole-image thumbnails with object-fit contain at their true aspect ratios, including the circular CENTURY #31 and the portrait Take the Key!."
+  ]
+}

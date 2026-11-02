@@ -51,7 +51,7 @@ export function DropForgePhaseDateTimeField({
         value={isPhaseSelected ? value : ""}
         onChange={(e) => onChange(e.target.value)}
         disabled={!isPhaseSelected}
-        className="tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white [color-scheme:dark] focus:tw-outline-none focus:tw-ring-0 disabled:tw-cursor-not-allowed disabled:tw-text-iron-500"
+        className="tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white [color-scheme:dark] focus:tw-outline-none focus:tw-ring-0 focus-visible:tw-rounded-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-text-iron-500"
       />
     </DropForgeFieldBox>
   );

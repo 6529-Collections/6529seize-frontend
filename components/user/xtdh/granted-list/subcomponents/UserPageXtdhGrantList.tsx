@@ -104,7 +104,7 @@ export function UserPageXtdhGrantList({
   ]);
 
   return (
-    <ul className="tw-m-0 tw-flex tw-flex-col tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800 tw-p-0">
+    <ul className="tw-m-0 tw-flex tw-flex-col tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.04] tw-overflow-hidden tw-rounded-xl tw-bg-iron-900/50 tw-p-0">
       {grants.map((grant) => {
         const request = getGrantContractRequest(grant);
         const state =

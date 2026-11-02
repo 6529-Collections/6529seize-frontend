@@ -31,7 +31,7 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 
 let mockCanAccessDropForge = false;
 let mockModeratorAccess = {
-  data: { moderator: false, has_open_reports: false },
+  data: { moderator: false, has_open_reports: false, needs_review_count: 0 },
 };
 jest.mock("@/hooks/useDropForgePermissions", () => ({
   useDropForgePermissions: () => ({
@@ -72,7 +72,11 @@ describe("WebSidebarNav", () => {
     mockUsePathname.mockReturnValue("/waves");
     mockCanAccessDropForge = false;
     mockModeratorAccess = {
-      data: { moderator: false, has_open_reports: false },
+      data: {
+        moderator: false,
+        has_open_reports: false,
+        needs_review_count: 0,
+      },
     };
   });
 
@@ -160,14 +164,14 @@ describe("WebSidebarNav", () => {
 
   it("shows WatchTower with an accessible open-report indicator", () => {
     mockModeratorAccess = {
-      data: { moderator: true, has_open_reports: true },
+      data: { moderator: true, has_open_reports: false, needs_review_count: 1 },
     };
 
     render(<WebSidebarNav isCollapsed={false} />);
 
     expect(
       screen.getByRole("link", {
-        name: "WatchTower: Open reports need review",
+        name: "WatchTower: Cases need manual review",
       })
     ).toHaveAttribute("href", "/content-moderation");
   });
@@ -175,7 +179,7 @@ describe("WebSidebarNav", () => {
   it("places WatchTower after Drop Forge when both are available", () => {
     mockCanAccessDropForge = true;
     mockModeratorAccess = {
-      data: { moderator: true, has_open_reports: false },
+      data: { moderator: true, has_open_reports: false, needs_review_count: 0 },
     };
 
     render(<WebSidebarNav isCollapsed={false} />);

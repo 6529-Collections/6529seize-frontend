@@ -8,6 +8,7 @@ import React, {
   useCallback,
   useMemo,
   useRef,
+  useSyncExternalStore,
 } from "react";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import { useCompetitionNavigation } from "@/contexts/CompetitionNavigationContext";
@@ -28,21 +29,14 @@ import {
 } from "@/helpers/competition.helpers";
 import {
   getLegacyCompetitionTab,
+  getSharedWaveTabRoute,
   waveCompetitionTabs,
 } from "@/helpers/default-competition.helpers";
 import {
   getWaveIdFromPathname,
   getWavePathRoute,
+  getActiveWaveIdFromUrl,
 } from "@/helpers/navigation.helpers";
-
-const getSharedWaveTabRoute = (pathname: string, tab: MyStreamWaveTab) => {
-  const waveId = getWaveIdFromPathname(pathname);
-  if (!waveId) return null;
-  const params = new URLSearchParams({ tab: tab.toLowerCase() });
-  const competitionId = getCompetitionIdFromPathname(pathname);
-  if (competitionId) params.set("competition", competitionId);
-  return `${getWavePathRoute(waveId)}?${params}`;
-};
 
 export enum WaveVotingState {
   NOT_STARTED = "NOT_STARTED",
@@ -179,6 +173,10 @@ const ContentTabContext = createContext<ContentTabContextType>({
   updateAvailableTabs: () => {},
 });
 
+const subscribeToHydration = () => () => {};
+const getHydratedSnapshot = () => true;
+const getServerHydratedSnapshot = () => false;
+
 // Export a provider component
 export const ContentTabProvider: React.FC<{
   children: ReactNode;
@@ -197,14 +195,37 @@ export const ContentTabProvider: React.FC<{
     respectCompetitionRoute &&
     !competitionOnly &&
     isCompetitionPathname(pathname);
-  const initialTab = competitionOnly
-    ? MyStreamWaveTab.LEADERBOARD
-    : MyStreamWaveTab.CHAT;
   const routeKey = `${pathname}:${search.get("wave") ?? ""}:${search.get("tab") ?? ""}:${search.get("serialNo") ?? ""}:${search.get("competition") ?? ""}`;
   const routeToken = useMemo(() => Symbol(routeKey), [routeKey]);
-  const { tabsRef: tabsByWaveIdRef, rememberTab } = useWaveTabPreference(
+  const {
+    tabs: rememberedTabs,
+    tabsRef: tabsByWaveIdRef,
+    rememberTab,
+  } = useWaveTabPreference(
     competitionOnly ? "legacy_competition_last_tab_by_id" : undefined
   );
+  const hydrated = useSyncExternalStore(
+    subscribeToHydration,
+    getHydratedSnapshot,
+    getServerHydratedSnapshot
+  );
+  const routeWaveId = getActiveWaveIdFromUrl({
+    pathname,
+    searchParams: search,
+  });
+  const remembered =
+    hydrated && routeWaveId && !hasWaveDestination(search)
+      ? (getHistoryWaveTab(routeWaveId) ?? rememberedTabs[routeWaveId])
+      : undefined;
+  const rememberedTab = getRememberedTab(remembered);
+  const requestedTab = competitionOnly
+    ? getLegacyCompetitionTab(search.get("tab"))
+    : Object.values(MyStreamWaveTab).find(
+        (tab) => tab.toLowerCase() === search.get("tab")
+      );
+  let initialTab = requestedTab ?? rememberedTab ?? MyStreamWaveTab.CHAT;
+  if (competitionOnly) initialTab = requestedTab ?? MyStreamWaveTab.LEADERBOARD;
+  else if (search.has("serialNo")) initialTab = MyStreamWaveTab.CHAT;
   const [selection, setSelection] = useState({
     routeToken,
     waveId: null as string | null,
@@ -217,6 +238,7 @@ export const ContentTabProvider: React.FC<{
     initialTab,
   ]);
   const [registeredWaveId, setRegisteredWaveId] = useState<string | null>(null);
+  const [registeredTabsReady, setRegisteredTabsReady] = useState(false);
   const currentWaveIdRef = useRef<string | null>(null);
   const defaultCompetitionRef = useRef<{ id: string | null; enabled: boolean }>(
     { id: null, enabled: false }
@@ -247,6 +269,7 @@ export const ContentTabProvider: React.FC<{
       if (!params) {
         setAvailableTabs([initialTab]);
         setRegisteredWaveId(null);
+        setRegisteredTabsReady(false);
         currentWaveIdRef.current = null;
         transientTabOverrideRef.current = null;
         setActiveTabInternal(initialTab);
@@ -341,6 +364,7 @@ export const ContentTabProvider: React.FC<{
 
       setAvailableTabs(tabs);
       setRegisteredWaveId(waveId ?? null);
+      setRegisteredTabsReady(tabsReady);
       setHideCompetitionsTab(hideCollection);
       currentWaveIdRef.current = waveId ?? null;
       defaultCompetitionRef.current = {
@@ -418,14 +442,14 @@ export const ContentTabProvider: React.FC<{
           const savedTab = getRememberedTab(remembered);
           const hasDestination = hasWaveDestination(search);
           let tab = MyStreamWaveTab.CHAT;
-          // Competition views restore through their committed destination route.
+          // Show the intended section while its competition identity is resolved.
+          // Its content supplies a section-specific loading state until navigation.
           if (
             !hasDestination &&
             savedTab !== undefined &&
-            typeof remembered === "string" &&
-            !(defaultSelectionEnabled && waveCompetitionTabs[savedTab])
+            (typeof remembered === "string" || defaultSelectionEnabled)
           ) {
-            if (tabs.includes(savedTab)) tab = savedTab;
+            if (tabs.includes(savedTab) || !tabsReady) tab = savedTab;
             else if (
               savedTab === MyStreamWaveTab.LEADERBOARD &&
               tabs.includes(MyStreamWaveTab.SUBMISSIONS)
@@ -481,13 +505,13 @@ export const ContentTabProvider: React.FC<{
         navigateTab(`${pathname}?${params}`);
       }
       const competitionTab = waveCompetitionTabs[tab];
-      if (
-        waveId &&
-        isCompetitionRoute &&
-        tab === MyStreamWaveTab.COMPETITIONS
-      ) {
-        navigateTab(getCompetitionsRoute(waveId));
-        return true;
+      if (isCompetitionRoute && tab === MyStreamWaveTab.COMPETITIONS) {
+        // The explicit route remains authoritative while wave data registers.
+        const selectedWaveId = getWaveIdFromPathname(pathname);
+        if (selectedWaveId) {
+          navigateTab(getCompetitionsRoute(selectedWaveId));
+          return true;
+        }
       }
       if (
         waveId &&
@@ -575,12 +599,17 @@ export const ContentTabProvider: React.FC<{
     ]
   );
 
-  const requestedTab = competitionOnly
-    ? getLegacyCompetitionTab(search.get("tab"))
-    : Object.values(MyStreamWaveTab).find(
-        (tab) => tab.toLowerCase() === search.get("tab")
-      );
   let activeContentTab = activeContentTabRaw;
+  if (
+    !competitionOnly &&
+    !isCompetitionRoute &&
+    search.get("serialNo") === null &&
+    !hasWaveDestination(search) &&
+    rememberedTab !== undefined &&
+    (registeredWaveId !== routeWaveId || !registeredTabsReady) &&
+    !(selection.routeToken === routeToken && selection.intentional)
+  )
+    activeContentTab = rememberedTab;
   if (isCompetitionRoute) {
     activeContentTab = MyStreamWaveTab.COMPETITIONS;
     if (flat) {
@@ -609,15 +638,21 @@ export const ContentTabProvider: React.FC<{
   } else if (
     (competitionOnly || search.get("serialNo") === null) &&
     requestedTab !== undefined &&
-    (availableTabs.includes(requestedTab) ||
+    (registeredWaveId !== routeWaveId ||
+      !registeredTabsReady ||
+      availableTabs.includes(requestedTab) ||
       (hideCompetitionsTab && requestedTab === MyStreamWaveTab.COMPETITIONS))
   ) {
     activeContentTab = requestedTab;
   }
   const visibleTabs = useMemo(() => {
-    if (!isCompetitionRoute) return availableTabs;
-    const tabs = [...availableTabs];
-    if (!hideCompetitionsTab && !tabs.includes(MyStreamWaveTab.COMPETITIONS)) {
+    const collectionReady =
+      registeredWaveId === routeWaveId && !hideCompetitionsTab;
+    const tabs = collectionReady
+      ? [...availableTabs]
+      : availableTabs.filter((tab) => tab !== MyStreamWaveTab.COMPETITIONS);
+    if (!isCompetitionRoute) return tabs;
+    if (collectionReady && !tabs.includes(MyStreamWaveTab.COMPETITIONS)) {
       tabs.splice(
         tabs.indexOf(MyStreamWaveTab.CHAT) + 1,
         0,
@@ -625,7 +660,13 @@ export const ContentTabProvider: React.FC<{
       );
     }
     return tabs;
-  }, [availableTabs, isCompetitionRoute, hideCompetitionsTab]);
+  }, [
+    availableTabs,
+    isCompetitionRoute,
+    hideCompetitionsTab,
+    registeredWaveId,
+    routeWaveId,
+  ]);
 
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(

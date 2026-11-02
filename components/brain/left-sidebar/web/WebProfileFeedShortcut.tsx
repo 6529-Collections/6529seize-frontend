@@ -37,10 +37,10 @@ function MasonryGridIcon() {
   );
 }
 
-function ProfileFeedAvatar({ isActive }: { readonly isActive: boolean }) {
+function ProfileFeedAvatar() {
   return (
     <div className="tw-relative tw-size-8 tw-flex-shrink-0">
-      <SidebarIconTile variant={isActive ? "selected" : "neutral"}>
+      <SidebarIconTile variant="neutral">
         <MasonryGridIcon />
       </SidebarIconTile>
     </div>
@@ -87,13 +87,7 @@ export function WebProfileFeedShortcut({
 
   if (isCollapsed) {
     return (
-      <div
-        className={`tw-group tw-flex tw-items-center tw-justify-center tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
-          isActive
-            ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
-            : "desktop-hover:hover:tw-bg-iron-900/70"
-        }`}
-      >
+      <div className="tw-group tw-flex tw-items-center tw-justify-center tw-py-2 tw-transition-all tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-900/70">
         <Link
           href={href}
           ref={featureUsageRef}
@@ -106,7 +100,7 @@ export function WebProfileFeedShortcut({
           data-tooltip-id={PROFILE_FEED_TOOLTIP_ID}
           data-tooltip-content={t(locale, "waves.sidebar.openProfileFeed")}
         >
-          <ProfileFeedAvatar isActive={isActive} />
+          <ProfileFeedAvatar />
         </Link>
       </div>
     );
@@ -121,7 +115,7 @@ export function WebProfileFeedShortcut({
       onClick={handleClick}
       aria-label={profileFeedLabel}
       aria-current={isActive ? "page" : undefined}
-      className={`${WAVE_HEADER_ACTION_CLASSES} ${isActive ? "tw-text-primary-300" : "tw-text-iron-300"}`}
+      className={WAVE_HEADER_ACTION_CLASSES}
       data-tooltip-id={PROFILE_FEED_TOOLTIP_ID}
       data-tooltip-content={t(locale, "waves.sidebar.openProfileFeed")}
     >

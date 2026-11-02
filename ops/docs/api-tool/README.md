@@ -13,6 +13,8 @@ private `/tools/6529bot/admin` operator page.
 - `/tools/block-finder`: estimate the closest block for a timestamp, or find
   block numbers that include selected sequences across a configurable window
   (`1 minute` to `2 days`).
+- `/tools/time-zones`: live world time-zone map with a UTC clock and a
+  searchable, sortable table of every IANA time zone.
 - `/tools/subscriptions-report`: read-only aggregate counts for active,
   upcoming, and redeemed The Memes subscriptions.
 - `/tools/app-wallets*`: create, import, and manage app-local wallets when
@@ -29,10 +31,11 @@ private `/tools/6529bot/admin` operator page.
    quickstart, multipart upload, and drop creation examples.
 4. Read `Block Finder` for timestamp lookup, include-sequence windows, and
    result detail actions.
-5. Read `Memes Subscriptions Report` for aggregate subscription reporting.
-6. Read `App Wallets Management` for native app-wallet setup, recovery, and
+5. Read `World Time Zones` for the live time-zone map, search, and table.
+6. Read `Memes Subscriptions Report` for aggregate subscription reporting.
+7. Read `App Wallets Management` for native app-wallet setup, recovery, and
    unsupported-state behavior.
-7. Read `6529bot Admin` for the private bot operator route and auth boundary.
+8. Read `6529bot Admin` for the private bot operator route and auth boundary.
 
 ## Route Coverage
 
@@ -40,6 +43,7 @@ private `/tools/6529bot/admin` operator page.
 - `/tools/api`
 - `/tools/api/authentication`
 - `/tools/block-finder`
+- `/tools/time-zones`
 - `/tools/subscriptions-report`
 - `/tools/app-wallets`
 - `/tools/app-wallets/import-wallet`
@@ -63,14 +67,16 @@ private `/tools/6529bot/admin` operator page.
 - Web sidebar paths:
   - `About -> Data & Developer Tools -> API`
   - `About -> Data & Developer Tools -> Block Finder`
+  - `About -> Data & Developer Tools -> World Time Zones`
   - `About -> Data & Developer Tools -> Subscriptions Report`
-  - `About -> Delegation & Wallets -> App Wallets` (only when app-wallet
+  - `About -> Safe Collecting -> App Wallets` (only when app-wallet
     support is enabled)
 - Native app sidebar paths:
   - `About -> Data & Developer Tools -> API`
   - `About -> Data & Developer Tools -> Block Finder`
+  - `About -> Data & Developer Tools -> World Time Zones`
   - `About -> Data & Developer Tools -> Subscriptions Report`
-  - `About -> Delegation & Wallets -> App Wallets` (only when app-wallet
+  - `About -> Safe Collecting -> App Wallets` (only when app-wallet
     support is enabled)
 - When app-wallet support is unavailable, direct `/tools/app-wallets*` routes
   still load but show an unsupported message panel instead of wallet controls.
@@ -91,9 +97,10 @@ private `/tools/6529bot/admin` operator page.
 2. [API Authentication](feature-api-authentication.md)
 3. [API Authentication and Media Drop Flow](feature-api-authentication-and-media-drop-flow.md)
 4. [Block Finder](feature-block-finder.md)
-5. [Memes Subscriptions Report](feature-memes-subscriptions-report.md)
-6. [App Wallets Management](feature-app-wallets.md)
-7. [6529bot Admin](feature-6529bot-admin.md)
+5. [World Time Zones](feature-world-time-zones.md)
+6. [Memes Subscriptions Report](feature-memes-subscriptions-report.md)
+7. [App Wallets Management](feature-app-wallets.md)
+8. [6529bot Admin](feature-6529bot-admin.md)
 
 ## Flows
 

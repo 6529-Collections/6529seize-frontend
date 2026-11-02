@@ -1,4 +1,3 @@
-import * as cheerio from "cheerio";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -26,6 +25,7 @@ import {
   readLimitedText,
 } from "@/lib/fetch/limitedBody";
 import LruTtlCache from "@/lib/cache/lruTtl";
+import { loadHtmlMetadata } from "@/lib/security/htmlMetadata";
 import { UrlGuardError, fetchPublicUrl } from "@/lib/security/urlGuard";
 
 const TOKENSCAN_BASE = "https://tokenscan.io/api";
@@ -132,7 +132,9 @@ async function scrapeNextData(url: string): Promise<ScrapeNextDataResult> {
     return { nextData: null, metaImages: [] };
   }
 
-  const $ = cheerio.load(html);
+  // fetchText already capped the page at HTML_RESPONSE_MAX_BYTES, and Next.js
+  // renders __NEXT_DATA__ at the end of the body, so scan all of it.
+  const $ = loadHtmlMetadata(html, { maxChars: html.length });
   const metaImageSelectors = [
     'meta[name="image"]',
     'meta[property="image"]',

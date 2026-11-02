@@ -2,6 +2,9 @@ import { Capacitor } from "@capacitor/core";
 import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
 import { PushNotifications } from "@capacitor/push-notifications";
 import { commonApiPost } from "@/services/api/common-api";
+import { getNativeRefreshToken } from "@/services/auth/native-refresh-token-storage";
+import * as Sentry from "@sentry/nextjs";
+import type { ApiRevokePushInstallationRequest } from "@/generated/models/ApiRevokePushInstallationRequest";
 import {
   getPushInstallationBadgeRefreshRequest,
   preparePushInstallationRegistration,
@@ -34,6 +37,7 @@ jest.mock("capacitor-secure-storage-plugin", () => ({
   },
 }));
 jest.mock("@/services/api/common-api", () => ({ commonApiPost: jest.fn() }));
+jest.mock("@sentry/nextjs", () => ({ addBreadcrumb: jest.fn() }));
 jest.mock("@/components/notifications/stable-device-id", () => ({
   getPushDeviceIdentity: jest.fn(async () => ({
     deviceId: mockDeviceId,
@@ -77,6 +81,10 @@ beforeEach(async () => {
     { address: "0x" + "2".repeat(40), profileId: "B", jwt: "jwt-B" },
   ];
   post.mockReset().mockResolvedValue({ revision: 1 });
+  jest
+    .mocked(getNativeRefreshToken)
+    .mockReset()
+    .mockImplementation(async (address: string) => `refresh-${address}`);
   jest
     .mocked(PushNotifications.getDeliveredNotifications)
     .mockResolvedValue({ notifications: [delivered("A"), delivered("B")] });
@@ -175,6 +183,163 @@ it("defers new registration while failed logout work remains pending", async () 
   await expect(
     preparePushInstallationRegistration("phone", "fcm-token", mockJwt)
   ).rejects.toThrow("deferred");
+  expect(storage().pending).toHaveLength(1);
+});
+
+const nativeSessionRequired = () =>
+  Object.assign(
+    new Error(
+      "A native session is required for logout before push registration"
+    ),
+    { status: 403 }
+  );
+
+it("uses a fresh login to reconcile early logout without replacing its deletion proofs", async () => {
+  jest.mocked(getNativeRefreshToken).mockResolvedValue(null);
+  post.mockRejectedValue(nativeSessionRequired());
+  await queueNativePushLogout(null, true);
+  await flushPendingPushLogouts();
+  const oldJob = storage().pending[0];
+  expect(oldJob.sessions).toEqual([]);
+  mockJwt = "fresh-jwt-A";
+  mockAccounts = [{ ...mockAccounts[0]!, jwt: mockJwt }];
+  jest.mocked(getNativeRefreshToken).mockResolvedValue("fresh-native-proof");
+  post.mockImplementation(async ({ body }) => {
+    if (!("reconciliation_sessions" in (body as object)))
+      throw nativeSessionRequired();
+    return { revision: 1 };
+  });
+  const credential = await preparePushInstallationRegistration(
+    "phone",
+    "fcm-token",
+    mockJwt
+  );
+  expect(credential.installation_revision).toBe(1);
+  expect(post).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      body: {
+        ...oldJob,
+        reconciliation_sessions: [
+          {
+            address: mockAccounts[0]!.address,
+            native_refresh_token: "fresh-native-proof",
+          },
+        ],
+      },
+      errorMode: "structured",
+    })
+  );
+  expect(storage().pending).toEqual([]);
+  expect(JSON.stringify(storage())).not.toContain("fresh-native-proof");
+  await expect(
+    preparePushInstallationRegistration("phone", "fcm-token", "jwt-A")
+  ).rejects.toThrow("signed-out");
+});
+
+it.each(["stale", "unreadable"])(
+  "reconciles past a %s connected peer proof",
+  async (peerProof) => {
+    jest.mocked(getNativeRefreshToken).mockResolvedValue(null);
+    post.mockRejectedValue(nativeSessionRequired());
+    await queueNativePushLogout(null, true);
+    await flushPendingPushLogouts();
+    mockJwt = "fresh-jwt-B";
+    mockAccounts = mockAccounts.map((account, index) => ({
+      ...account,
+      jwt: index === 0 ? "fresh-peer-jwt" : mockJwt!,
+    }));
+    jest.mocked(getNativeRefreshToken).mockImplementation(async (address) => {
+      if (address === mockAccounts[1]!.address) return "fresh-native-proof";
+      if (peerProof === "unreadable")
+        throw new Error("private storage failure");
+      return "stale-peer-proof";
+    });
+    post.mockImplementation(async ({ body }) => {
+      const request = body as ApiRevokePushInstallationRequest;
+      if (
+        !request.reconciliation_sessions?.some(
+          (proof) => proof.native_refresh_token === "fresh-native-proof"
+        )
+      )
+        throw nativeSessionRequired();
+      return { revision: 1 };
+    });
+    await expect(
+      preparePushInstallationRegistration("phone", "fcm-token", mockJwt)
+    ).resolves.toMatchObject({ installation_revision: 1 });
+    expect(storage().pending).toEqual([]);
+    const request = post.mock.lastCall![0]
+      .body as ApiRevokePushInstallationRequest;
+    expect(request.sessions).toEqual([]);
+    expect(request.reconciliation_sessions).toContainEqual({
+      address: mockAccounts[1]!.address,
+      native_refresh_token: "fresh-native-proof",
+    });
+    expect(request.reconciliation_sessions).toHaveLength(
+      peerProof === "stale" ? 2 : 1
+    );
+  }
+);
+
+it("keeps the original job when a fresh reconciliation request is rejected", async () => {
+  jest.mocked(getNativeRefreshToken).mockResolvedValue(null);
+  post.mockRejectedValue(nativeSessionRequired());
+  await queueNativePushLogout(null, true);
+  await flushPendingPushLogouts();
+  const oldJob = storage().pending[0];
+  mockJwt = "fresh-jwt-A";
+  mockAccounts = [{ ...mockAccounts[0]!, jwt: mockJwt }];
+  jest.mocked(getNativeRefreshToken).mockResolvedValue("fresh-native-proof");
+  await expect(
+    preparePushInstallationRegistration("phone", "fcm-token", mockJwt)
+  ).rejects.toThrow("deferred");
+  expect(storage().pending).toEqual([oldJob]);
+  expect(JSON.stringify(storage())).not.toContain("fresh-native-proof");
+  expect(Sentry.addBreadcrumb).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      data: {
+        reason: "native_session_required",
+        http_status: 403,
+        installation_scope: "current",
+        job_kind: "logout",
+        deletion_proof_present: false,
+      },
+    })
+  );
+  expect(
+    JSON.stringify(jest.mocked(Sentry.addBreadcrumb).mock.calls)
+  ).not.toContain("fresh-native-proof");
+});
+
+it("does not borrow a proof from an account disconnected while secure storage is read", async () => {
+  post.mockRejectedValue(nativeSessionRequired());
+  await queueNativePushLogout(null, true);
+  await flushPendingPushLogouts();
+  mockJwt = "fresh-jwt-A";
+  mockAccounts = [{ ...mockAccounts[0]!, jwt: mockJwt }];
+  jest.mocked(getNativeRefreshToken).mockImplementation(async () => {
+    mockAccounts = [];
+    return "fresh-native-proof";
+  });
+  post.mockClear();
+  await flushPendingPushLogouts();
+  expect(post).toHaveBeenCalledTimes(1);
+  expect(storage().pending).toHaveLength(1);
+});
+
+it.each([
+  "Invalid push installation credential",
+  "Legacy installation token ownership is ambiguous",
+  "Unrecognized rejection containing private data",
+])("does not attempt reconciliation for %s", async (message) => {
+  post.mockRejectedValue(Object.assign(new Error(message), { status: 403 }));
+  await queueNativePushLogout(null, true);
+  await flushPendingPushLogouts();
+  mockJwt = "fresh-jwt-A";
+  mockAccounts = [{ ...mockAccounts[0]!, jwt: mockJwt }];
+  post.mockClear();
+  await flushPendingPushLogouts();
+  expect(post).toHaveBeenCalledTimes(1);
   expect(storage().pending).toHaveLength(1);
 });
 

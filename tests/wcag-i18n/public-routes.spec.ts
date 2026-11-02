@@ -2,6 +2,7 @@ import { type Page } from "@playwright/test";
 import {
   expect,
   expectAxeClean,
+  expectFocusedLinksShowIndicator,
   expectKeyboardFocusVisibleWithinTabs,
   expectNoHorizontalOverflow,
   test,
@@ -10,6 +11,7 @@ import {
 } from "../testHelpers";
 import { isMobileSurfaceProject } from "../support/surfaceSimulation";
 
+const ABOUT_MINTING_ROUTE = "/about/minting";
 const THE_MEMES_ROUTE = "/the-memes";
 const THE_MEMES_STRESS_ROUTE = `${withLocale(
   THE_MEMES_ROUTE,
@@ -56,6 +58,18 @@ test.describe("WCAG and i18n public route evidence @wcag @i18n @medium @large", 
     const focused = await expectKeyboardFocusVisibleWithinTabs(page);
 
     expect(focused.tagName).not.toBe("");
+  });
+
+  test("Links keep a visible keyboard focus indicator across the shell and page content @wcag @keyboard @medium @large", async ({
+    page,
+  }) => {
+    await page.goto(ABOUT_MINTING_ROUTE, { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await expect(
+      page.getByRole("link", { name: "Mint the latest Meme Card" })
+    ).toBeVisible();
+
+    await expectFocusedLinksShowIndicator(page);
   });
 });
 

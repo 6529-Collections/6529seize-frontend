@@ -1,0 +1,216 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ProductionApplicationVersions",
+      "Effect": "Allow",
+      "Action": [
+        "elasticbeanstalk:CreateApplicationVersion",
+        "elasticbeanstalk:DescribeApplicationVersions"
+      ],
+      "Resource": [
+        "arn:aws:elasticbeanstalk:us-east-1:987989283142:application/seize app",
+        "arn:aws:elasticbeanstalk:us-east-1:987989283142:applicationversion/seize app/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        }
+      }
+    },
+    {
+      "Sid": "ProductionEnvironment",
+      "Effect": "Allow",
+      "Action": [
+        "elasticbeanstalk:DescribeEnvironments",
+        "elasticbeanstalk:UpdateEnvironment"
+      ],
+      "Resource": [
+        "arn:aws:elasticbeanstalk:us-east-1:987989283142:environment/seize app/seizeapp-env-node22"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        }
+      }
+    },
+    {
+      "Sid": "ProductionVersionInvalidation",
+      "Effect": "Allow",
+      "Action": ["cloudfront:GetDistribution", "cloudfront:CreateInvalidation"],
+      "Resource": [
+        "arn:aws:cloudfront::987989283142:distribution/EKB17CMB021J6"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        }
+      }
+    },
+    {
+      "Sid": "BeanstalkStack",
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:DescribeStacks",
+        "cloudformation:DescribeStackEvents",
+        "cloudformation:DescribeStackResource",
+        "cloudformation:DescribeStackResources",
+        "cloudformation:ListStackResources",
+        "cloudformation:GetTemplate",
+        "cloudformation:UpdateStack",
+        "cloudformation:CancelUpdateStack"
+      ],
+      "Resource": [
+        "arn:aws:cloudformation:us-east-1:987989283142:stack/awseb-e-8bsbxqrikc-stack/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        },
+        "Bool": {
+          "aws:ViaAWSService": "true"
+        }
+      }
+    },
+    {
+      "Sid": "BeanstalkScaling",
+      "Effect": "Allow",
+      "Action": [
+        "autoscaling:UpdateAutoScalingGroup",
+        "autoscaling:SuspendProcesses",
+        "autoscaling:ResumeProcesses",
+        "autoscaling:SetDesiredCapacity",
+        "autoscaling:TerminateInstanceInAutoScalingGroup"
+      ],
+      "Resource": [
+        "arn:aws:autoscaling:us-east-1:987989283142:autoScalingGroup:*:autoScalingGroupName/awseb-e-8bsbxqrikc-stack-AWSEBAutoScalingGroup-*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        },
+        "Bool": {
+          "aws:ViaAWSService": "true"
+        }
+      }
+    },
+    {
+      "Sid": "BeanstalkMetadata",
+      "Effect": "Allow",
+      "Action": [
+        "autoscaling:DescribeAutoScalingGroups",
+        "autoscaling:DescribeScalingActivities",
+        "ec2:DescribeAccountAttributes",
+        "ec2:DescribeAvailabilityZones",
+        "ec2:DescribeImages",
+        "ec2:DescribeInstances",
+        "ec2:DescribeKeyPairs",
+        "ec2:DescribeLaunchTemplates",
+        "ec2:DescribeLaunchTemplateVersions",
+        "ec2:DescribeSecurityGroups",
+        "ec2:DescribeSubnets",
+        "ec2:DescribeVpcs",
+        "logs:DescribeLogGroups"
+      ],
+      "Resource": ["*"],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        },
+        "Bool": {
+          "aws:ViaAWSService": "true"
+        }
+      }
+    },
+    {
+      "Sid": "BeanstalkLaunchTemplate",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:CreateLaunchTemplateVersion",
+        "ec2:DeleteLaunchTemplateVersions",
+        "ec2:ModifyLaunchTemplate"
+      ],
+      "Resource": [
+        "arn:aws:ec2:us-east-1:987989283142:launch-template/lt-0676ae03c840db014"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        },
+        "Bool": {
+          "aws:ViaAWSService": "true"
+        }
+      }
+    },
+    {
+      "Sid": "BeanstalkLogs",
+      "Effect": "Allow",
+      "Action": ["logs:CreateLogGroup", "logs:PutRetentionPolicy"],
+      "Resource": [
+        "arn:aws:logs:us-east-1:987989283142:log-group:/aws/elasticbeanstalk/seizeapp-env-node22/*"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        },
+        "Bool": {
+          "aws:ViaAWSService": "true"
+        }
+      }
+    },
+    {
+      "Sid": "ExistingEnvironmentRole",
+      "Effect": "Allow",
+      "Action": ["iam:GetRole"],
+      "Resource": ["arn:aws:iam::987989283142:role/ec2-seize-prod"],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        }
+      }
+    },
+    {
+      "Sid": "ExistingEnvironmentInstanceProfile",
+      "Effect": "Allow",
+      "Action": ["iam:GetInstanceProfile"],
+      "Resource": ["arn:aws:iam::987989283142:instance-profile/ec2-seize-prod"],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        }
+      }
+    },
+    {
+      "Sid": "PassExistingEnvironmentRole",
+      "Effect": "Allow",
+      "Action": ["iam:PassRole"],
+      "Resource": ["arn:aws:iam::987989283142:role/ec2-seize-prod"],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1",
+          "iam:PassedToService": [
+            "elasticbeanstalk.amazonaws.com",
+            "ec2.amazonaws.com"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "BeanstalkLoadBalancerMetadata",
+      "Effect": "Allow",
+      "Action": [
+        "elasticloadbalancing:DescribeTargetHealth",
+        "elasticloadbalancing:DescribeLoadBalancers"
+      ],
+      "Resource": ["*"],
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": "us-east-1"
+        },
+        "Bool": {
+          "aws:ViaAWSService": "true"
+        }
+      }
+    }
+  ]
+}

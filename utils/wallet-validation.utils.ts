@@ -1,5 +1,5 @@
 import type { AppWallet } from "@/components/app-wallets/AppWalletsContext";
-import { isAppWalletEncryptedEnvelope } from "@/components/app-wallets/app-wallet-helpers";
+import { isAppWalletEncryptedEnvelope } from "@/components/app-wallets/app-wallet-envelope";
 import {
   WalletValidationError,
   WalletSecurityError,

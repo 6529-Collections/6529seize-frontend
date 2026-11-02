@@ -10,9 +10,16 @@ jest.mock("@/components/auth/Auth");
 jest.mock("@/hooks/useNftBalance");
 
 const mockUserPageCollectedCard = jest.fn(
-  ({ card }: { card: CollectedCard }) => (
+  ({
+    card,
+    mediaBadge,
+  }: {
+    card: CollectedCard;
+    mediaBadge?: React.ReactNode;
+  }) => (
     <div data-testid="user-page-collected-card">
       seized:{String(card.seized_count)}
+      {mediaBadge}
     </div>
   )
 );
@@ -53,6 +60,15 @@ describe("ArtistPrevoteCollectedCard", () => {
       isLoading: false,
       error: null,
     });
+  });
+
+  it("passes the original NFT format through to the shared media indicator", () => {
+    render(
+      <ArtistPrevoteCollectedCard
+        card={{ ...baseCard, mediaMimeType: "video/mp4" }}
+      />
+    );
+    expect(screen.getByLabelText("Video - MP4")).toBeInTheDocument();
   });
 
   it("does not render the bottom 'You own n' text", () => {

@@ -380,7 +380,7 @@ export function DropForgeResearchAirdropSection({
             step="1"
             value={researchTargetEditionSize}
             onChange={(e) => onResearchTargetEditionSizeChange(e.target.value)}
-            className="tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white [color-scheme:dark] focus:tw-outline-none focus:tw-ring-0"
+            className="tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white [color-scheme:dark] focus:tw-outline-none focus:tw-ring-0 focus-visible:tw-rounded-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           />
         </DropForgeFieldBox>
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-4 lg:tw-self-end">

@@ -16,14 +16,16 @@ import {
   formatUtcMonth,
   getMintNumberForMintDate,
   getMonthWeeks,
-  isMintEligibleUtcDay,
-  mintStartInstantUtcForMintDay,
   printCalendarInvites,
   ymd,
 } from "../meme-calendar.helpers";
 import { getMintOverrideNoteForUtcDay } from "../meme-calendar.overrides";
-import { getHistoricalMintsOnUtcDay } from "../meme-calendar.szn1";
+import { calendarDayInZone } from "../meme-calendar.zone";
 import { getArtworkStatusMessageKey } from "../MemeCalendarArtworkAvailability";
+import {
+  getHistoricalMintsOnCalendarDay,
+  getScheduledMintOnCalendarDay,
+} from "./calendarDayMints";
 import { escapeHtml, getCalendarInviteLabels } from "./calendarText";
 import type {
   HistoricalMint,
@@ -63,11 +65,18 @@ function formatHistoricalMintLabel(
   return `#${formatInteger(locale, first.id)}-#${formatInteger(locale, last.id)}`;
 }
 
+/**
+ * The mints shown in the cell for `cellDay` (00:00 UTC of the cell's date):
+ * those that start on that date in `timeZone`. In local mode a mint can land
+ * on the day after its UTC day (east of UTC) or, for some SZN1 mints, the day
+ * before (far west of UTC).
+ */
 function getMintCellDetails(
-  cellDateUtcDay: Date,
+  cellDay: Date,
+  timeZone: string,
   locale: SupportedLocale
 ): MintCellDetails {
-  const historical = getHistoricalMintsOnUtcDay(cellDateUtcDay);
+  const historical = getHistoricalMintsOnCalendarDay(cellDay, timeZone);
 
   if (historical.length > 0) {
     return {
@@ -76,18 +85,21 @@ function getMintCellDetails(
       mintInstantUtc: historical[0]?.instantUtc,
       mintLabel: formatHistoricalMintLabel(historical, locale),
       mintNumber: historical[0]?.id,
+      mintUtcDay: undefined,
     };
   }
 
-  if (isMintEligibleUtcDay(cellDateUtcDay)) {
-    const mintNumber = getMintNumberForMintDate(cellDateUtcDay);
+  const scheduled = getScheduledMintOnCalendarDay(cellDay, timeZone);
+  if (scheduled) {
+    const mintNumber = getMintNumberForMintDate(scheduled.utcDay);
 
     return {
       historical,
       isMintDay: true,
-      mintInstantUtc: mintStartInstantUtcForMintDay(cellDateUtcDay),
+      mintInstantUtc: scheduled.instantUtc,
       mintLabel: formatMint(mintNumber, locale),
       mintNumber,
+      mintUtcDay: scheduled.utcDay,
     };
   }
 
@@ -97,6 +109,7 @@ function getMintCellDetails(
     mintInstantUtc: undefined,
     mintLabel: undefined,
     mintNumber: undefined,
+    mintUtcDay: undefined,
   };
 }
 
@@ -234,7 +247,6 @@ function getScheduledMintTooltip({
 }
 
 function getMintTooltip(
-  cellDateUtcDay: Date,
   details: MintCellDetails,
   displayTz: DisplayTz,
   locale: SupportedLocale,
@@ -254,7 +266,9 @@ function getMintTooltip(
     };
   }
 
-  const overrideNote = getMintOverrideNoteForUtcDay(cellDateUtcDay);
+  const overrideNote = details.mintUtcDay
+    ? getMintOverrideNoteForUtcDay(details.mintUtcDay)
+    : undefined;
 
   return getScheduledMintTooltip({
     displayTz,
@@ -288,12 +302,15 @@ function MonthDayCell({
   onSelectDay,
   publishedMemeIds,
   publishedMemesStatus,
+  timeZone,
+  todayYmd,
   year,
 }: MonthDayCellProps) {
-  const cellDateUtcDay = new Date(Date.UTC(year, month, day));
-  const isToday = ymd(cellDateUtcDay) === ymd(new Date());
+  // 00:00 UTC of the cell's calendar date: a day label, not an instant.
+  const cellDay = new Date(Date.UTC(year, month, day));
+  const isToday = ymd(cellDay) === todayYmd;
   const isWeekend = cellOffset % 7 >= 5;
-  const details = getMintCellDetails(cellDateUtcDay, locale);
+  const details = getMintCellDetails(cellDay, timeZone, locale);
   let dayTextClass = "tw-text-iron-300";
 
   if (isToday) {
@@ -318,7 +335,7 @@ function MonthDayCell({
             : ""
         }`}
       >
-        {formatFullDate(cellDateUtcDay, "utc", locale)}
+        {formatFullDate(cellDay, "utc", locale)}
       </span>
     </>
   );
@@ -343,7 +360,6 @@ function MonthDayCell({
   }
 
   const tooltip = getMintTooltip(
-    cellDateUtcDay,
     details,
     displayTz,
     locale,
@@ -354,17 +370,17 @@ function MonthDayCell({
   return (
     <button
       type="button"
-      id={`meme-cell-${ymd(cellDateUtcDay)}`}
+      id={`meme-cell-${ymd(cellDay)}`}
       className="tw-grid tw-min-h-11 tw-w-full tw-cursor-pointer tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800/50 tw-bg-iron-900/30 tw-px-3 tw-py-1.5 tw-text-left tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-iron-700/70 desktop-hover:hover:tw-bg-iron-900/60 min-[430px]:tw-flex min-[430px]:tw-min-h-12 min-[430px]:tw-flex-col min-[430px]:tw-justify-start min-[430px]:tw-gap-0 min-[430px]:tw-rounded-md min-[430px]:tw-px-0"
       data-tooltip-id="meme-tooltip"
       data-tooltip-html={tooltip.html}
       data-tooltip-class-name={tooltip.className}
       data-tooltip-place={getTooltipPlace(cellOffset)}
       aria-label={t(locale, "memeCalendar.grid.dayMintAriaLabel", {
-        date: formatFullDate(cellDateUtcDay, "utc", locale),
+        date: formatFullDate(cellDay, "utc", locale),
         mint: details.mintLabel ?? "",
       })}
-      onClick={() => onSelectDay?.(cellDateUtcDay)}
+      onClick={() => onSelectDay?.(cellDay)}
       aria-current={isToday ? "date" : undefined}
     >
       <span
@@ -390,10 +406,12 @@ export function Month({
   onSelectDay,
   autoOpenYmd,
   displayTz,
+  timeZone,
   locale,
   publishedMemeIds,
   publishedMemesStatus,
 }: MonthProps) {
+  const todayYmd = ymd(calendarDayInZone(new Date(), timeZone));
   const year = date.getUTCFullYear();
   const month = date.getUTCMonth();
   const monthName = formatUtcMonth(
@@ -471,6 +489,8 @@ export function Month({
               onSelectDay={onSelectDay}
               publishedMemeIds={publishedMemeIds}
               publishedMemesStatus={publishedMemesStatus}
+              timeZone={timeZone}
+              todayYmd={todayYmd}
               year={year}
             />
           )

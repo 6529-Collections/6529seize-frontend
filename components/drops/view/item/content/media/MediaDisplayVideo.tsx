@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
+import { useMobileBatterySavings } from "@/hooks/useMobileAppActivity";
 import { useInView } from "@/hooks/useInView";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
+import { useChatVideoPoster } from "@/hooks/useChatVideoPoster";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -11,6 +13,9 @@ import SeizeVideoPlayer from "./SeizeVideoPlayer";
 import VideoPlaybackErrorOverlay from "./VideoPlaybackErrorOverlay";
 import { useVideoPlaybackError } from "./useVideoPlaybackError";
 import { useMediaActions } from "./useMediaActions";
+import { assignRef } from "./SeizeVideoPlayer.config";
+import { useChatVideoPlayback } from "./ChatVideoPlayback";
+import { useRememberedVideoPlayback } from "./VideoPlaybackMemory";
 
 interface Props {
   readonly src: string;
@@ -20,6 +25,20 @@ interface Props {
   readonly fillContainer?: boolean | undefined;
 }
 
+function getVideoPresentation(fillContainer: boolean, isInertPreview: boolean) {
+  return {
+    className: clsx(
+      "tw-relative tw-flex tw-w-full tw-items-start",
+      fillContainer
+        ? "tw-h-full tw-max-h-full tw-justify-center"
+        : "tw-justify-start"
+    ),
+    template: isInertPreview ? "card-preview" : "ambient-media",
+    layout: fillContainer ? "fill" : "natural",
+    align: fillContainer ? "center" : "left",
+  } as const;
+}
+
 const MediaDisplayVideo: React.FC<Props> = ({
   src,
   mimeType,
@@ -27,16 +46,24 @@ const MediaDisplayVideo: React.FC<Props> = ({
   isInertPreview = false,
   fillContainer = false,
 }) => {
-  // Intersection observer for scroll-based triggers
+  const { isApp } = useDeviceInfo();
+  const isMobileEnvironment = useMobileBatterySavings();
   const [wrapperRef, inView] = useInView<HTMLDivElement>({
     freezeOnceVisible: false,
-    rootMargin: "400px 0px",
+    rootMargin: isMobileEnvironment ? "0px" : "400px 0px",
     threshold: 0.1,
   });
   const wasFullscreenRef = useRef(false);
   const locale = useBrowserLocale();
-  const { isApp } = useDeviceInfo();
-  const shouldAutoPlay = inView && !isApp;
+  const chat = useChatVideoPlayback(src);
+  const poster = useChatVideoPoster(
+    src,
+    chat.isChat && inView && !chat.requested
+  );
+  const savedPlayback = useRememberedVideoPlayback(src);
+  const shouldAutoPlay =
+    inView && !isApp && !chat.isChat && !savedPlayback?.userControlled;
+  const shouldLoadVideo = inView && (!chat.isChat || chat.requested);
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
       url: src,
@@ -47,7 +74,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
 
   // Poll for HLS → MP4 → fallback original
   const { playableUrl, isHls } = useOptimizedVideo(src, {
-    enabled: inView,
+    enabled: inView && (!chat.isChat || !chat.requested),
     pollInterval: 15000,
     maxRetries: 8,
     preferHls: true,
@@ -55,13 +82,26 @@ const MediaDisplayVideo: React.FC<Props> = ({
   });
 
   // Use HLS hook to handle the video ref, loading states, etc.
-  const { videoRef, isLoading, retry } = useHlsPlayer({
-    enabled: inView,
-    src: playableUrl,
-    isHls,
+  const {
+    videoRef,
+    retry,
+    isFullscreen: isVideoFullscreen,
+  } = useHlsPlayer({
+    enabled: shouldLoadVideo,
+    src: chat.rendition?.playableUrl ?? playableUrl,
+    isHls: chat.rendition?.isHls ?? isHls,
     fallbackSrc: src, // if HLS fails, revert to original
     autoPlay: shouldAutoPlay,
   });
+  const { setVideoElement } = chat;
+  const setVideoRef = useCallback(
+    (element: HTMLVideoElement | null) => {
+      assignRef(videoRef, element);
+      setVideoElement(element);
+    },
+    [videoRef, setVideoElement]
+  );
+
   const { handlePlaybackError, hasPlaybackError, retryPlayback } =
     useVideoPlaybackError({
       onRetry: retry,
@@ -76,24 +116,6 @@ const MediaDisplayVideo: React.FC<Props> = ({
     vid.setAttribute("x5-playsinline", "true");
   }, [videoRef]);
 
-  // Additional effect: if out of view, we can pause
-  useEffect(() => {
-    const vid = videoRef.current;
-    if (!vid || isLoading) return;
-    const fullscreenElement = document.fullscreenElement;
-    if (fullscreenElement?.contains(vid) ?? false) {
-      wasFullscreenRef.current = true;
-      return;
-    }
-
-    if (!inView || isApp) {
-      vid.pause();
-    } else {
-      // Attempt to play if we're in view
-      void vid.play().catch(() => {});
-    }
-  }, [inView, isApp, isLoading, videoRef]);
-
   useEffect(() => {
     if (!isApp) {
       return;
@@ -106,7 +128,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
       }
 
       const fullscreenElement = document.fullscreenElement;
-      if (fullscreenElement?.contains(vid) ?? false) {
+      if (isVideoFullscreen || (fullscreenElement?.contains(vid) ?? false)) {
         wasFullscreenRef.current = true;
         return;
       }
@@ -117,6 +139,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
       }
     };
 
+    pauseWhenFullscreenCloses();
     document.addEventListener("fullscreenchange", pauseWhenFullscreenCloses);
     return () => {
       document.removeEventListener(
@@ -124,28 +147,32 @@ const MediaDisplayVideo: React.FC<Props> = ({
         pauseWhenFullscreenCloses
       );
     };
-  }, [isApp, videoRef]);
+  }, [isApp, isVideoFullscreen, videoRef]);
+
+  const onPlaybackRequest = chat.isChat
+    ? () => chat.requestPlayback({ playableUrl, isHls })
+    : undefined;
+  const preload = chat.isChat && !chat.requested ? "none" : undefined;
+  const actionProps = showControls
+    ? { onDownload: downloadMedia, onOpen: openMedia, openLabel }
+    : {};
+  const presentation = getVideoPresentation(fillContainer, isInertPreview);
 
   return (
-    <div
-      ref={wrapperRef}
-      className={clsx(
-        "tw-relative tw-flex tw-w-full tw-items-start",
-        fillContainer
-          ? "tw-h-full tw-max-h-full tw-justify-center"
-          : "tw-justify-start"
-      )}
-    >
+    <div ref={wrapperRef} className={presentation.className}>
       <SeizeVideoPlayer
-        videoRef={videoRef}
-        template={isInertPreview ? "card-preview" : "ambient-media"}
+        videoRef={setVideoRef}
+        onPlaybackRequest={onPlaybackRequest}
+        preload={preload}
+        data-url={src}
+        poster={poster?.url}
+        aspectRatioHint={poster?.aspectRatio}
+        template={presentation.template}
         autoPlay={shouldAutoPlay}
-        layout={fillContainer ? "fill" : "natural"}
-        align={fillContainer ? "center" : "left"}
+        layout={presentation.layout}
+        align={presentation.align}
         showActions={showControls}
-        onDownload={showControls ? downloadMedia : undefined}
-        onOpen={showControls ? openMedia : undefined}
-        openLabel={showControls ? openLabel : undefined}
+        {...actionProps}
         isDownloading={isDownloading}
         locale={locale}
         onError={handlePlaybackError}

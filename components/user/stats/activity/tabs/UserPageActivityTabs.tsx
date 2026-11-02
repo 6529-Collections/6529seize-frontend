@@ -61,8 +61,21 @@ export default function UserPageActivityTabs({
     };
 
     revealSelectedTab();
+    // Font loading and a containing panel's layout can resize the strip
+    // without a window resize. Reveal the active tab after those changes.
+    const observer =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(revealSelectedTab);
+    observer?.observe(tablist);
+    if (tablist.firstElementChild) {
+      observer?.observe(tablist.firstElementChild);
+    }
     globalThis.addEventListener("resize", revealSelectedTab);
-    return () => globalThis.removeEventListener("resize", revealSelectedTab);
+    return () => {
+      observer?.disconnect();
+      globalThis.removeEventListener("resize", revealSelectedTab);
+    };
   }, [activeTab, locale]);
 
   const selectTabFromKeyboard = (

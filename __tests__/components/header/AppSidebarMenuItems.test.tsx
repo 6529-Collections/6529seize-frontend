@@ -61,7 +61,7 @@ describe("AppSidebarMenuItems", () => {
         path: "/content-moderation",
         icon: (props: React.SVGProps<SVGSVGElement>) => <svg {...props} />,
         hasIndicator: true,
-        indicatorLabel: "Open reports need review",
+        indicatorLabel: "Cases need manual review",
       },
     ];
 
@@ -71,7 +71,7 @@ describe("AppSidebarMenuItems", () => {
 
     expect(
       screen.getByRole("link", {
-        name: "WatchTower: Open reports need review",
+        name: "WatchTower: Cases need manual review",
       })
     ).toHaveAttribute("href", "/content-moderation");
     expect(container.querySelector(".tw-bg-red")).toBeInTheDocument();

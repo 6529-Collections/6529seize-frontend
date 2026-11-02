@@ -20,6 +20,12 @@ import {
 } from "@/services/api/competitions-api";
 
 let mockConfiguration: ApiCompetitionDraftInput | undefined;
+let mockHasEntries = false;
+let mockStepProps: {
+  lockSubmissionStrategy?: boolean;
+  lockOutcomeDefinitions?: boolean;
+  lockVotingCredits?: boolean;
+} = {};
 const mockRequestAuth = jest.fn().mockResolvedValue({ success: true });
 const mockReplace = jest.fn();
 jest.mock("next/navigation", () => ({
@@ -44,7 +50,10 @@ jest.mock("@/hooks/groups/useGroupMutations", () => ({
 }));
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useCompetitionViewer: () => "admin:self",
-  useCompetitionResource: () => ({ isError: false }),
+  useCompetitionResource: () => ({
+    isError: false,
+    data: { pages: [{ data: mockHasEntries ? [{}] : [] }] },
+  }),
 }));
 jest.mock("@/components/waves/create-wave/hooks/useMemeCardCount", () => ({
   useMemeCardCount: () => ({}),
@@ -85,10 +94,15 @@ jest.mock("@/components/waves/create-wave/CreateWaveStepContent", () => {
     default: ({
       controller,
       chatRestricted,
+      ...locks
     }: {
       controller: ReturnType<typeof useWaveConfig>;
       chatRestricted?: boolean | undefined;
+      lockSubmissionStrategy?: boolean;
+      lockOutcomeDefinitions?: boolean;
+      lockVotingCredits?: boolean;
     }) => {
+      mockStepProps = locks;
       if (controller.step === CreateWaveStep.VOTING)
         return (
           <Threshold
@@ -125,7 +139,7 @@ jest.mock("@/components/waves/create-wave/CreateWaveStepContent", () => {
             setMaxWinners={controller.onApprovalMaxWinnersChange}
           />
         );
-      return null;
+      return <output>{controller.step}</output>;
     },
   };
 });
@@ -154,12 +168,15 @@ const draft = {
   id: "draft",
   lifecycle: "DRAFT",
   config_version: 1,
+  permissions: {},
 } as ApiCompetition;
 
 beforeEach(() => {
   jest.clearAllMocks();
   localStorage.clear();
   mockConfiguration = undefined;
+  mockHasEntries = false;
+  mockStepProps = {};
   HTMLElement.prototype.scrollIntoView = jest.fn();
 });
 afterEach(() => jest.useRealTimers());
@@ -207,7 +224,9 @@ it.each([
         target: { value: "Review chat access" },
       }
     );
-    for (let step = 0; step < 4; step++) {
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByText(expected)).toBeVisible();
+    for (let step = 0; step < 3; step++) {
       fireEvent.click(screen.getByRole("button", { name: "Next" }));
     }
     fireEvent.change(
@@ -228,6 +247,182 @@ it.each([
     expect(screen.getByText(expected)).toBeVisible();
   }
 );
+
+it("defaults anonymous submissions off and saves the creator's explicit choice", async () => {
+  render(<CompetitionDraftEditor wave={wave} onClose={jest.fn()} />);
+  const anonymity = screen.getByRole("checkbox", {
+    name: "Anonymous submissions",
+  });
+  expect(anonymity).not.toBeChecked();
+  fireEvent.click(anonymity);
+  expect(anonymity).toBeChecked();
+  fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
+    target: { value: "Anonymous art" },
+  });
+  await waitFor(() =>
+    expect(createCompetition).toHaveBeenCalledWith(
+      "wave",
+      expect.objectContaining({
+        config: expect.objectContaining({
+          participation: expect.objectContaining({
+            anonymous_submissions: true,
+          }),
+        }),
+      })
+    )
+  );
+});
+
+it("keeps anonymity fixed after publication even before the first entry", () => {
+  const form = renderHook(() =>
+    useWaveConfig({ initialWaveType: ApiWaveType.Rank })
+  );
+  mockConfiguration = competitionFormToDraft(form.result.current.config, "");
+  mockConfiguration.participation.anonymous_submissions = true;
+  form.unmount();
+  render(
+    <CompetitionDraftEditor
+      wave={wave}
+      competition={{ ...draft, lifecycle: "PUBLISHED" } as ApiCompetition}
+      onClose={jest.fn()}
+    />
+  );
+  expect(
+    screen.getByRole("checkbox", { name: "Anonymous submissions" })
+  ).toBeChecked();
+  expect(
+    screen.getByRole("checkbox", { name: "Anonymous submissions" })
+  ).toBeDisabled();
+});
+
+it.each([false, true])(
+  "retains published original rule editing and protects credits when permitted=%s",
+  (editCredits) => {
+    const form = renderHook(() =>
+      useWaveConfig({ initialWaveType: ApiWaveType.Rank })
+    );
+    mockConfiguration = competitionFormToDraft(
+      {
+        ...form.result.current.config,
+        overview: {
+          ...form.result.current.config.overview,
+          name: "Original competition",
+        },
+        dates: { ...form.result.current.config.dates, ongoingRanking: true },
+      },
+      ""
+    );
+    form.unmount();
+    mockHasEntries = true;
+    render(
+      <CompetitionDraftEditor
+        wave={wave}
+        competition={
+          {
+            ...draft,
+            lifecycle: "PUBLISHED",
+            permissions: {
+              edit_rules_after_activity: true,
+              edit_credit_rules: editCredits,
+            },
+          } as ApiCompetition
+        }
+        onClose={jest.fn()}
+      />
+    );
+    expect(
+      screen.getByRole("combobox", { name: "Competition type" })
+    ).toBeDisabled();
+    for (let step = 0; step < 2; step++)
+      fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(mockStepProps).toMatchObject({
+      lockSubmissionStrategy: true,
+      lockOutcomeDefinitions: true,
+      lockVotingCredits: !editCredits,
+    });
+    expect(screen.getByText("DATES", { exact: true })).toBeInTheDocument();
+  }
+);
+
+it("keeps sibling rule editing locked after accepted entries", () => {
+  const form = renderHook(() =>
+    useWaveConfig({ initialWaveType: ApiWaveType.Rank })
+  );
+  mockConfiguration = competitionFormToDraft(
+    {
+      ...form.result.current.config,
+      overview: {
+        ...form.result.current.config.overview,
+        name: "Sibling competition",
+      },
+    },
+    ""
+  );
+  form.unmount();
+  mockHasEntries = true;
+  render(
+    <CompetitionDraftEditor
+      wave={wave}
+      competition={
+        { ...draft, lifecycle: "PUBLISHED", permissions: {} } as ApiCompetition
+      }
+      onClose={jest.fn()}
+    />
+  );
+  for (let step = 0; step < 2; step++)
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+  expect(screen.getByText("RULES", { exact: true })).toBeInTheDocument();
+});
+
+it("saves a published original through review without publishing again", async () => {
+  const form = renderHook(() =>
+    useWaveConfig({ initialWaveType: ApiWaveType.Rank })
+  );
+  mockConfiguration = competitionFormToDraft(
+    {
+      ...form.result.current.config,
+      overview: {
+        ...form.result.current.config.overview,
+        name: "Original competition",
+      },
+      dates: { ...form.result.current.config.dates, ongoingRanking: true },
+    },
+    ""
+  );
+  form.unmount();
+  mockHasEntries = true;
+  const onClose = jest.fn();
+  render(
+    <CompetitionDraftEditor
+      wave={wave}
+      competition={
+        {
+          ...draft,
+          lifecycle: "PUBLISHED",
+          permissions: {
+            edit_rules_after_activity: true,
+            edit_credit_rules: false,
+          },
+        } as ApiCompetition
+      }
+      onClose={onClose}
+    />
+  );
+  fireEvent.change(screen.getByRole("textbox", { name: "Description" }), {
+    target: { value: "Updated original" },
+  });
+  for (let step = 0; step < 6; step++)
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+  fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+  await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+  expect(updateCompetition).toHaveBeenCalledWith(
+    { waveId: "wave", competitionId: "draft" },
+    expect.objectContaining({
+      config: expect.objectContaining({ description: "Updated original" }),
+    })
+  );
+  expect(performCompetitionAction).not.toHaveBeenCalled();
+});
 
 it("keeps an incomplete Approve draft locally and validates the threshold before the next step", async () => {
   jest.useFakeTimers();
@@ -493,7 +688,7 @@ it("resolves a lost update response before reverting to the last saved values", 
   expect(onClose).toHaveBeenCalledTimes(1);
 });
 
-it("offers Previous, Close editor and Publish on review and publishes the saved version", async () => {
+it("offers Close editor, Previous and Publish on review and publishes the saved version", async () => {
   const form = renderHook(() =>
     useWaveConfig({ initialWaveType: ApiWaveType.Rank })
   );
@@ -523,7 +718,7 @@ it("offers Previous, Close editor and Publish on review and publishes the saved 
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
   expect(
     screen.getAllByRole("button").map((button) => button.textContent)
-  ).toEqual(["Previous", "Close editor", "Publish"]);
+  ).toEqual(["Close editor", "Previous", "Publish"]);
   fireEvent.click(screen.getByRole("button", { name: "Publish" }));
   await waitFor(() =>
     expect(performCompetitionAction).toHaveBeenCalledWith(

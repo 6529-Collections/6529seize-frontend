@@ -9,14 +9,9 @@ jest.mock("next/server", () => ({
 }));
 
 const mockFetchPublicJson = jest.fn();
-const mockIsTrustedVercelRuntime = jest.fn(() => true);
 
 jest.mock("@/config/alchemyEnv", () => ({
   getAlchemyApiKey: jest.fn(() => "test-alchemy-key"),
-}));
-
-jest.mock("@/config/deploymentEnv", () => ({
-  isTrustedVercelRuntime: () => mockIsTrustedVercelRuntime(),
 }));
 
 jest.mock("@/lib/security/urlGuard", () => {
@@ -30,6 +25,7 @@ jest.mock("@/lib/security/urlGuard", () => {
   }
 
   return {
+    ...jest.requireActual("@/lib/security/urlGuard"),
     UrlGuardError,
     fetchPublicJson: (...args: unknown[]) => mockFetchPublicJson(...args),
   };
@@ -73,7 +69,6 @@ function requestFor(
     "content-type": "application/json",
     "user-agent": "jest",
     "x-forwarded-for": clientIp,
-    "x-vercel-id": "iad1::jest",
   });
   Object.entries(headers ?? {}).forEach(([name, value]) => {
     requestHeaders.set(name, value);
@@ -102,7 +97,6 @@ function requestFor(
 
 describe("app/api/alchemy/token-metadata route", () => {
   beforeEach(() => {
-    mockIsTrustedVercelRuntime.mockReturnValue(true);
     mockNextResponseJson.mockClear();
     mockFetchPublicJson.mockReset();
     mockFetchPublicJson.mockResolvedValue({ tokens: [] });
@@ -119,12 +113,8 @@ describe("app/api/alchemy/token-metadata route", () => {
       tokenIds: ["1"],
     };
 
-    const first = (await POST(
-      requestFor(body, "203.0.113.10")
-    )) as RouteResponse;
-    const second = (await POST(
-      requestFor(body, "203.0.113.11")
-    )) as RouteResponse;
+    const first = (await POST(requestFor(body, "8.8.8.10"))) as RouteResponse;
+    const second = (await POST(requestFor(body, "8.8.8.11"))) as RouteResponse;
 
     expect(first.status).toBe(200);
     expect(second.status).toBe(200);
@@ -154,7 +144,7 @@ describe("app/api/alchemy/token-metadata route", () => {
             String(index + 1)
           ),
         },
-        "203.0.113.20"
+        "8.8.8.20"
       )
     )) as RouteResponse;
 
@@ -169,11 +159,11 @@ describe("app/api/alchemy/token-metadata route", () => {
     const invalidContract = (await POST(
       requestFor(
         { tokens: [{ contract: "not-an-address", tokenId: "1" }] },
-        "203.0.113.30"
+        "8.8.8.30"
       )
     )) as RouteResponse;
     const invalidTokenId = (await POST(
-      requestFor({ address: CONTRACT, tokenIds: ["-1"] }, "203.0.113.31")
+      requestFor({ address: CONTRACT, tokenIds: ["-1"] }, "8.8.8.31")
     )) as RouteResponse;
 
     expect(invalidContract.status).toBe(400);
@@ -183,14 +173,14 @@ describe("app/api/alchemy/token-metadata route", () => {
     expect(mockFetchPublicJson).not.toHaveBeenCalled();
   });
 
-  it("rate limits anonymous clients", async () => {
+  it("rate limits each client after its per-minute budget", async () => {
     let response: RouteResponse | undefined;
 
-    for (let index = 0; index < 21; index += 1) {
+    for (let index = 0; index < 121; index += 1) {
       response = (await POST(
         requestFor(
           { address: CONTRACT, tokenIds: [String(1000 + index)] },
-          "203.0.113.40"
+          "8.8.8.40"
         )
       )) as RouteResponse;
     }
@@ -199,54 +189,66 @@ describe("app/api/alchemy/token-metadata route", () => {
     expect(response?.body).toEqual({
       error: "Too many token metadata requests",
     });
-    expect(mockFetchPublicJson).toHaveBeenCalledTimes(20);
+    expect(response?.headers).toEqual(
+      expect.objectContaining({ "Retry-After": expect.any(String) })
+    );
+    expect(mockFetchPublicJson).toHaveBeenCalledTimes(120);
+
+    const otherClient = (await POST(
+      requestFor({ address: CONTRACT, tokenIds: ["1"] }, "8.8.8.41")
+    )) as RouteResponse;
+    expect(otherClient.status).toBe(200);
   });
 
   it("does not let arbitrary bearer headers bypass the client rate limit", async () => {
     let response: RouteResponse | undefined;
 
-    for (let index = 0; index < 21; index += 1) {
+    for (let index = 0; index < 121; index += 1) {
       response = (await POST(
         requestFor(
           { address: CONTRACT, tokenIds: [String(2000 + index)] },
-          "203.0.113.41",
+          "8.8.8.42",
           { authorization: `Bearer caller-supplied-${index}` }
         )
       )) as RouteResponse;
     }
 
     expect(response?.status).toBe(429);
-    expect(response?.body).toEqual({
-      error: "Too many token metadata requests",
-    });
-    expect(mockFetchPublicJson).toHaveBeenCalledTimes(20);
+    expect(mockFetchPublicJson).toHaveBeenCalledTimes(120);
   });
 
-  it("does not let untrusted forwarded headers mint rate limit buckets", async () => {
-    mockIsTrustedVercelRuntime.mockReturnValue(false);
+  it("does not let client-supplied forwarded entries mint rate limit buckets", async () => {
     let response: RouteResponse | undefined;
 
-    for (let index = 0; index < 21; index += 1) {
+    for (let index = 0; index < 121; index += 1) {
       response = (await POST(
         requestFor(
           { address: CONTRACT, tokenIds: [String(3000 + index)] },
-          `203.0.113.${index}`
+          `1.0.${index}.1, 8.8.8.43, 172.31.0.10`
         )
       )) as RouteResponse;
     }
 
     expect(response?.status).toBe(429);
-    expect(response?.body).toEqual({
-      error: "Too many token metadata requests",
-    });
-    expect(mockFetchPublicJson).toHaveBeenCalledTimes(20);
+    expect(mockFetchPublicJson).toHaveBeenCalledTimes(120);
+  });
+
+  it("does not spend the budget on invalid requests", async () => {
+    for (let index = 0; index < 121; index += 1) {
+      await POST(requestFor({ tokens: [{ contract: "nope" }] }, "8.8.8.44"));
+    }
+
+    const response = (await POST(
+      requestFor({ address: CONTRACT, tokenIds: ["4000"] }, "8.8.8.44")
+    )) as RouteResponse;
+    expect(response.status).toBe(200);
   });
 
   it("rejects oversized request bodies while streaming", async () => {
     const response = (await POST(
       requestFor(
         `{"address":"${CONTRACT}","tokenIds":["${"1".repeat(33_000)}"]}`,
-        "203.0.113.50"
+        "8.8.8.50"
       )
     )) as RouteResponse;
 

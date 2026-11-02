@@ -1,3 +1,5 @@
+jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
+
 /**
  * Captures mocked JSON responses from the Farcaster route.
  */
@@ -11,6 +13,12 @@ const nextResponseJson = jest.fn(
 jest.mock("next/server", () => ({
   NextResponse: { json: nextResponseJson },
   NextRequest: class {},
+}));
+
+let mockWarpcastApiKey: string | undefined;
+
+jest.mock("@/config/serverEnv", () => ({
+  getFarcasterWarpcastApiKey: () => mockWarpcastApiKey,
 }));
 
 /**
@@ -131,6 +139,7 @@ describe("farcaster API route", () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     mockFetch.mockReset();
+    mockWarpcastApiKey = undefined;
     global.fetch = mockFetch as unknown as typeof fetch;
     await loadRoute();
   });
@@ -196,8 +205,35 @@ describe("farcaster API route", () => {
     );
     const [requestUrl, init] = mockFetch.mock.calls[0];
     expect(requestUrl.toString()).toContain("/v2/cast");
+    expect(new URL(requestUrl.toString()).searchParams.has("key")).toBe(false);
     expect(init?.headers).toEqual(
       expect.objectContaining({ "user-agent": expect.any(String) })
+    );
+  });
+
+  it("adds the server-only Warpcast API key to Warpcast API requests", async () => {
+    mockWarpcastApiKey = "server-warpcast-key";
+    mockFetch.mockResolvedValueOnce(
+      createJsonResponse({
+        result: {
+          cast: {
+            hash: "0xabc",
+            text: "Hello",
+            author: { fid: 1, username: "alice" },
+          },
+        },
+      })
+    );
+
+    await GET({
+      nextUrl: new URL(
+        "https://api.local/farcaster?url=https://warpcast.com/alice/0xabc"
+      ),
+    } as unknown as Parameters<typeof GET>[0]);
+
+    const [requestUrl] = mockFetch.mock.calls[0];
+    expect(new URL(requestUrl.toString()).searchParams.get("key")).toBe(
+      "server-warpcast-key"
     );
   });
 
@@ -280,6 +316,59 @@ describe("farcaster API route", () => {
     expect(options).toEqual(
       expect.objectContaining({ userAgent: expect.any(String) })
     );
+  });
+
+  it("reads frame metadata from large, deeply nested documents", async () => {
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(
+        `<html><head><title>Frame &amp; Title</title><meta property="fc:frame" content="vNext"></head><body>${"<div>".repeat(150_000)}<meta content="/frame.png" property="fc:frame:image"><meta property="fc:frame:button:1" content="Mint"></body></html>`,
+        {
+          headers: { "content-type": "text/html" },
+          url: "https://example.com/frame",
+        }
+      )
+    );
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://api.local/farcaster?url=https://example.com/frame"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      type: "frame",
+      canonicalUrl: "https://example.com/frame",
+      frame: {
+        frameUrl: "https://example.com/frame",
+        title: "Frame & Title",
+        siteName: undefined,
+        imageUrl: "https://example.com/frame.png",
+        buttons: ["Mint"],
+      },
+    });
+  });
+
+  it("returns unsupported for documents of unterminated tags", async () => {
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse(`<meta ${"<meta ".repeat(200_000)}`, {
+        headers: { "content-type": "text/html" },
+        url: "https://example.com/broken",
+      })
+    );
+
+    const response = await GET({
+      nextUrl: new URL(
+        "https://api.local/farcaster?url=https://example.com/broken"
+      ),
+    } as any);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      type: "unsupported",
+      canonicalUrl: "https://example.com/broken",
+      reason: "Unsupported Farcaster URL",
+    });
   });
 
   it("returns unsupported for non-HTML generic URLs", async () => {

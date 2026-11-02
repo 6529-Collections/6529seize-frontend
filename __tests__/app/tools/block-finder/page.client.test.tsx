@@ -1,4 +1,5 @@
 import BlockFinderClient from "@/app/tools/block-finder/page.client";
+import * as blockFinderHelpers from "@/helpers/block-finder.helpers";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 const mockSetToast = jest.fn();
@@ -6,6 +7,11 @@ const mockSetTitle = jest.fn();
 
 const DEFAULT_DATE = "2025-09-26";
 const DEFAULT_TIME = "12:00";
+
+const PREDICT_FAILED_TOAST = {
+  message: "Couldn’t predict block numbers. Please try again.",
+  type: "error",
+};
 
 jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({ setTitle: mockSetTitle }),
@@ -113,22 +119,21 @@ jest.mock("@/components/block-picker/result/BlockPickerResult", () => ({
 }));
 
 /** Utilities */
-function setDateAndTime() {
+function setDateAndTime(time = DEFAULT_TIME) {
   fireEvent.change(screen.getByTestId("date-input"), {
     target: { value: DEFAULT_DATE },
   });
   fireEvent.change(screen.getByTestId("time-input"), {
-    target: { value: DEFAULT_TIME },
+    target: { value: time },
   });
 }
 
-// Mirrors the component's timestamp calculation so expectations stay timezone agnostic.
+// The inputs hold the user's LOCAL wall-clock time, so the expected timestamp is
+// the instant of that local date and time in whatever time zone the suite runs in.
 function getTimestamp(date: string, time: string) {
-  const dateObj = new Date(date);
-  const [hours, minutes] = time.split(":");
-  const startDate = new Date(dateObj);
-  startDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
-  return startDate.getTime();
+  const [year, month, day] = date.split("-").map(Number);
+  const [hours, minutes, seconds = 0] = time.split(":").map(Number);
+  return new Date(year!, month! - 1, day, hours, minutes, seconds).getTime();
 }
 
 describe("tools/block-finder/page.client.tsx (client)", () => {
@@ -229,6 +234,44 @@ describe("tools/block-finder/page.client.tsx (client)", () => {
     });
   });
 
+  it("includes the selected seconds in the local timestamp", async () => {
+    // @ts-expect-error global on jsdom
+    global.fetch.mockResolvedValue({
+      ok: true,
+      text: async () => "12345678",
+    });
+
+    render(<BlockFinderClient />);
+    setDateAndTime("12:34:56");
+
+    fireEvent.click(screen.getByTestId("submit-btn"));
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    // Let the submit finish so no async work leaks into the next test.
+    await waitFor(() => {
+      expect(screen.getByTestId("result")).toBeInTheDocument();
+    });
+
+    const [, init] = (global.fetch as jest.Mock).mock.calls[0];
+    const { timestamp } = JSON.parse(init.body as string);
+    const sent = new Date(timestamp);
+
+    expect(timestamp).toBe(getTimestamp(DEFAULT_DATE, "12:34:56"));
+    // Local components round-trip, so this holds in every time zone, including
+    // those west of UTC where the previous implementation selected the day before.
+    expect([
+      sent.getFullYear(),
+      sent.getMonth(),
+      sent.getDate(),
+      sent.getHours(),
+      sent.getMinutes(),
+      sent.getSeconds(),
+    ]).toEqual([2025, 8, 26, 12, 34, 56]);
+  });
+
   it("hits /other/predict-block-numbers when includes are provided and window != NONE", async () => {
     const mockResponse = [
       { blockNumberIncludes: 1, count: 2, blockNumbers: [111, 112] },
@@ -282,7 +325,10 @@ describe("tools/block-finder/page.client.tsx (client)", () => {
     });
   });
 
-  it("propagates API error messages via thrown Error path", async () => {
+  it("toasts the API error message and shows no result when the request fails", async () => {
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
     // @ts-expect-error global on jsdom
     global.fetch.mockResolvedValue({
       ok: false,
@@ -292,16 +338,71 @@ describe("tools/block-finder/page.client.tsx (client)", () => {
     render(<BlockFinderClient />);
     setDateAndTime();
 
-    // NONE & no includes -> predict-block-number path (sufficient for error path)
-    fireEvent.change(screen.getByTestId("timewindow-select"), {
-      target: { value: "NONE" },
+    fireEvent.click(screen.getByTestId("submit-btn"));
+
+    await waitFor(() => {
+      expect(mockSetToast).toHaveBeenCalledWith({
+        message: "Couldn’t predict block numbers: Specific failure",
+        type: "error",
+      });
     });
+    expect(screen.queryByTestId("result")).not.toBeInTheDocument();
+    expect(consoleError).toHaveBeenCalledTimes(1);
+  });
+
+  it("toasts a generic message when the error response has no usable message", async () => {
+    jest.spyOn(console, "error").mockImplementation(() => undefined);
+    // @ts-expect-error global on jsdom
+    global.fetch.mockResolvedValue({
+      ok: false,
+      json: async () => {
+        throw new SyntaxError("Unexpected token");
+      },
+    });
+
+    render(<BlockFinderClient />);
+    setDateAndTime();
 
     fireEvent.click(screen.getByTestId("submit-btn"));
 
-    // We don't toast inside catch; component logs error. Just ensure no result rendered.
     await waitFor(() => {
-      expect(screen.queryByTestId("result")).not.toBeInTheDocument();
+      expect(mockSetToast).toHaveBeenCalledWith(PREDICT_FAILED_TOAST);
     });
+    expect(screen.queryByTestId("result")).not.toBeInTheDocument();
+  });
+
+  it("toasts a generic message when the request itself fails", async () => {
+    jest.spyOn(console, "error").mockImplementation(() => undefined);
+    // @ts-expect-error global on jsdom
+    global.fetch.mockRejectedValue(new TypeError("Failed to fetch"));
+
+    render(<BlockFinderClient />);
+    setDateAndTime();
+
+    fireEvent.click(screen.getByTestId("submit-btn"));
+
+    await waitFor(() => {
+      expect(mockSetToast).toHaveBeenCalledWith(PREDICT_FAILED_TOAST);
+    });
+    expect(screen.queryByTestId("result")).not.toBeInTheDocument();
+  });
+
+  it("toasts and skips the request when the date and time cannot be parsed", async () => {
+    jest
+      .spyOn(blockFinderHelpers, "parseLocalDateTime")
+      .mockReturnValueOnce(null);
+
+    render(<BlockFinderClient />);
+    setDateAndTime();
+
+    fireEvent.click(screen.getByTestId("submit-btn"));
+
+    await waitFor(() => {
+      expect(mockSetToast).toHaveBeenCalledWith({
+        message: "Enter a valid date and time.",
+        type: "error",
+      });
+    });
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 });

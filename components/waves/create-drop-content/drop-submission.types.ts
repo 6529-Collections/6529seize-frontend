@@ -1,4 +1,5 @@
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 
 export interface DropMutationBody {
   readonly drop: ApiCreateDropRequest;
@@ -15,6 +16,9 @@ export interface SlowModeChatReservation {
 
 export interface QueuedDropMutationBody extends DropMutationBody {
   readonly slowModeChatReservation?: SlowModeChatReservation | undefined;
+  readonly nativeEntrySubmit?:
+    | ((drop: ApiCreateDropRequest) => Promise<ApiDrop>)
+    | undefined;
 }
 
 export interface SlowModeChatWaveState {

@@ -1,3 +1,4 @@
+import { render, screen } from "@testing-library/react";
 import type { CSSProperties, ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
@@ -29,6 +30,7 @@ jest.mock("react-tooltip", () => ({
       data-delay-show={delayShow}
       data-placement={place}
       data-shared-styles={style === TOOLTIP_STYLES}
+      style={style}
     >
       {children}
     </span>
@@ -36,26 +38,47 @@ jest.mock("react-tooltip", () => ({
 }));
 
 describe("AdditionalActionPromiseBadge", () => {
-  it("shows the badge with explanatory tooltip copy", () => {
+  it("keeps its tooltip outside the card's clipping and stacking context", () => {
+    const { container } = render(
+      <div style={{ overflow: "hidden", transform: "translateY(0)" }}>
+        <AdditionalActionPromiseBadge />
+      </div>
+    );
+    const badge = screen.getByRole("button", { name: BADGE_LABEL });
+    const tooltip = screen.getByTestId("shared-tooltip");
+
+    expect(badge).toHaveAttribute("type", "button");
+    expect(badge).toHaveClass("tw-cursor-help");
+    expect(badge).toHaveAccessibleDescription(TOOLTIP_COPY);
+    expect(badge).toHaveAttribute("data-tooltip-id", tooltip.id);
+    expect(tooltip.parentElement).toBe(document.body);
+    expect(container).not.toContainElement(tooltip);
+    expect(tooltip).toHaveTextContent(TOOLTIP_COPY);
+    expect(tooltip).toHaveAttribute("data-placement", "top");
+    expect(tooltip).toHaveAttribute("data-delay-show", "200");
+    expect(tooltip).toHaveAttribute("data-shared-styles", "true");
+  });
+
+  it("can layer the tooltip above a modal without changing its appearance", () => {
+    render(<AdditionalActionPromiseBadge tooltipZIndex={1000002} />);
+
+    const { style } = screen.getByTestId("shared-tooltip");
+    expect(style.zIndex).toBe("1000002");
+    expect(style.padding).toBe(TOOLTIP_STYLES.padding);
+    expect(style.fontSize).toBe(TOOLTIP_STYLES.fontSize);
+    expect(style.pointerEvents).toBe(TOOLTIP_STYLES.pointerEvents);
+  });
+
+  it("keeps the accessible description in server-rendered markup", () => {
     const markup = renderToStaticMarkup(<AdditionalActionPromiseBadge />);
     const descriptionId = markup.match(/aria-describedby="([^"]+)"/)?.[1];
-    const tooltipId = markup.match(/data-tooltip-id="([^"]+)"/)?.[1];
 
-    expect(tooltipId).toBeTruthy();
-    expect(markup).toContain(`id="${tooltipId}" data-testid="shared-tooltip"`);
-    expect(markup).toContain('data-placement="top"');
-    expect(markup).toContain('data-delay-show="200"');
-    expect(markup).toContain(
-      `data-shared-styles="true">${TOOLTIP_COPY}</span>`
-    );
-    expect(markup).toContain("<button");
-    expect(markup).toContain('type="button"');
-    expect(markup).toContain("tw-cursor-help");
-    expect(markup).toContain(BADGE_LABEL);
     expect(descriptionId).toBeTruthy();
+    expect(markup).toContain(BADGE_LABEL);
     expect(markup).toContain(
       `<span id="${descriptionId}" class="tw-sr-only">${TOOLTIP_COPY}</span>`
     );
+    expect(markup).not.toContain('data-testid="shared-tooltip"');
   });
 
   it("can disable keyboard focus when rendered inside another focus target", () => {

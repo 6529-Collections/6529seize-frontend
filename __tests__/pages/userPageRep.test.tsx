@@ -1,3 +1,5 @@
+jest.mock("@/contexts/TitleContext", () => ({ useSetTitle: jest.fn() }));
+jest.mock("@/components/user/layout/UserPageDropModal", () => () => null);
 import { render, screen } from "@testing-library/react";
 import React from "react";
 
@@ -29,11 +31,10 @@ jest.mock("@/components/providers/metadata", () => ({
 // Use real helpers but we'll spy on the metadata builder
 import * as Helpers from "@/helpers/Helpers";
 
-// Mock layout to avoid React Query provider
-jest.mock("@/components/user/layout/UserPageLayout", () => ({
+jest.mock("@/components/user/layout/UserPageTabTransition", () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="layout">{children}</div>
+    <div data-testid="tab-transition">{children}</div>
   ),
 }));
 
@@ -65,7 +66,7 @@ describe("rep page via createUserTabPage", () => {
     (userPageNeedsRedirect as jest.Mock).mockReturnValue(null);
   });
 
-  it("renders layout + tab when no redirect needed", async () => {
+  it("renders tab when no redirect needed", async () => {
     const { Page } = buildFactory();
 
     const element = await Page({

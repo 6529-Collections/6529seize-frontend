@@ -2,7 +2,10 @@ import { renderHook } from "@testing-library/react";
 import { QueryClient, useQuery } from "@tanstack/react-query";
 import { useDefaultCompetition } from "@/hooks/competitions/useCompetitionQueries";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
-import { invalidateCompetitionWave } from "@/services/api/competitions-api";
+import {
+  defaultCompetitionQueryKey,
+  invalidateCompetitionWave,
+} from "@/services/api/competitions-api";
 
 jest.mock("@tanstack/react-query", () => ({
   ...jest.requireActual("@tanstack/react-query"),
@@ -28,6 +31,32 @@ it("partitions selection by viewer and keeps disabled queries disabled", () => {
       staleTime: 0,
     })
   );
+  const key = jest.mocked(useQuery).mock.calls.at(-1)![0].queryKey;
+  expect(key).toEqual(defaultCompetitionQueryKey("wave", "alice:proxy"));
+});
+
+it("disables a missing wave ID even when the caller leaves enablement at its default", () => {
+  renderHook(() => useDefaultCompetition(""));
+  expect(useQuery).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      queryKey: defaultCompetitionQueryKey("", "alice:proxy"),
+      enabled: false,
+    })
+  );
+});
+
+it("uses the same real cache key for the hook and remembered navigation lookup", () => {
+  renderHook(() => useDefaultCompetition("wave"));
+  const key = jest.mocked(useQuery).mock.calls.at(-1)![0].queryKey;
+  const client = new QueryClient();
+  const selection = { competition_id: "alpha" };
+  client.setQueryData(key, selection);
+  expect(
+    client.getQueryData(defaultCompetitionQueryKey("wave", "alice:proxy"))
+  ).toEqual(selection);
+  expect(
+    client.getQueryData(defaultCompetitionQueryKey("wave", null))
+  ).toBeUndefined();
 });
 
 it("invalidates the actual viewer-partitioned selection key for its wave only", async () => {

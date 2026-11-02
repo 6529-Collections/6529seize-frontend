@@ -2,10 +2,11 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActionsOptional } from "@/contexts/wave/MyStreamContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { commonApiDelete } from "@/services/api/common-api";
+import { deleteDrop } from "@/services/api/signed-drop-writes";
+import { isSignedWriteCancelled } from "@/lib/device-signing/signing-decision";
 import { useCallback, useContext, useState } from "react";
 
 interface UseResubmissionDeleteParams {
@@ -23,7 +24,7 @@ export function useResubmissionDelete({
   const { addOptimisticDrop, invalidateDrops } = useContext(
     ReactQueryWrapperContext
   );
-  const myStream = useMyStreamOptional();
+  const myStream = useMyStreamActionsOptional();
   const [replacementDrop, setReplacementDrop] = useState<ApiDrop | null>(null);
   const [isDeletingOriginal, setIsDeletingOriginal] = useState(false);
   const [deleteOriginalError, setDeleteOriginalError] = useState<string | null>(
@@ -65,9 +66,7 @@ export function useResubmissionDelete({
     let didClose = false;
 
     try {
-      await commonApiDelete({
-        endpoint: `drops/${sourceDrop.id}`,
-      });
+      await deleteDrop({ dropId: sourceDrop.id, waveId: sourceDrop.wave.id });
 
       setToast({
         message: "Original submission deleted.",
@@ -82,6 +81,11 @@ export function useResubmissionDelete({
     } catch (error) {
       if (didClose) {
         throw error;
+      }
+      // Cancelled at the signing prompt: nothing was sent.
+      if (isSignedWriteCancelled(error)) {
+        setIsDeletingOriginal(false);
+        return;
       }
 
       let message = "Unable to delete the original submission.";

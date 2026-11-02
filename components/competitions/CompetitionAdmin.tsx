@@ -13,7 +13,6 @@ import {
 } from "@/services/api/competitions-api";
 import {
   getCompetitionRoute,
-  isMultiCompetitionEnabled,
   newCompetitionRequestKey,
 } from "@/helpers/competition.helpers";
 import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
@@ -24,10 +23,8 @@ import CompetitionPauseHistory from "./CompetitionPauseHistory";
 import { COMPETITION_BUTTON, COMPETITION_INPUT } from "./CompetitionState";
 
 function getLifecycleActions(
-  lifecycle: ApiCompetitionLifecycle,
-  legacy: boolean
+  lifecycle: ApiCompetitionLifecycle
 ): CompetitionAction[] {
-  if (legacy) return [];
   switch (lifecycle) {
     case ApiCompetitionLifecycle.Draft:
       return ["publish", "archive"];
@@ -48,8 +45,7 @@ export default function CompetitionAdmin({
   readonly paused: boolean | null;
   readonly onEdit: () => void;
 }) {
-  const { competition, hub } = useCompetition();
-  const legacy = hub.legacy_primary_competition_id === competition.id;
+  const { competition } = useCompetition();
   const { requestAuth } = useAuth();
   const locale = useBrowserLocale();
   const router = useRouter();
@@ -67,9 +63,10 @@ export default function CompetitionAdmin({
     version: number;
     key: string;
   } | null>(null);
-  const canAdminister =
-    isMultiCompetitionEnabled() && competition.permissions.administer;
-  const actions = getLifecycleActions(competition.lifecycle, legacy);
+  const canAdminister = competition.permissions.administer;
+  const canEditRules =
+    competition.permissions.edit_rules_after_activity === true;
+  const actions = getLifecycleActions(competition.lifecycle);
   const openAction = (command: CompetitionAction) => {
     setActionVersion(competition.config_version);
     setReason("");
@@ -141,7 +138,8 @@ export default function CompetitionAdmin({
       <CompetitionAppearance />
       {canAdminister &&
         (actions.length > 0 ||
-          competition.lifecycle === ApiCompetitionLifecycle.Draft) && (
+          competition.lifecycle === ApiCompetitionLifecycle.Draft ||
+          canEditRules) && (
           <div className="tw-flex tw-flex-wrap tw-gap-2">
             {competition.lifecycle === ApiCompetitionLifecycle.Draft && (
               <button
@@ -150,6 +148,15 @@ export default function CompetitionAdmin({
                 onClick={onEdit}
               >
                 {t(locale, "competitions.finishSetup")}
+              </button>
+            )}
+            {canEditRules && (
+              <button
+                type="button"
+                className={COMPETITION_BUTTON}
+                onClick={onEdit}
+              >
+                {t(locale, "competitions.editRules")}
               </button>
             )}
             {actions.map((command) => (

@@ -182,7 +182,8 @@ describe("waves multi-competition Phase 1 frontend contract", () => {
 
   it("keeps native competition transport out of legacy drop and vote consumers", () => {
     // Native competition rollout intentionally adds v3 consumers. Existing drop
-    // transports must still retain their legacy wave/drop contract.
+    // transports must still retain their legacy wave/drop contract. Capability
+    // metadata selects the same rich renderers for native entries and is not transport.
     const roots = [
       "components/waves/drops",
       "components/waves/drop",
@@ -191,7 +192,9 @@ describe("waves multi-competition Phase 1 frontend contract", () => {
     const violations = roots
       .flatMap((root) => sourceFiles(path.join(projectRoot, root)))
       .filter((file) =>
-        /ApiCompetition|ApiWaveV3|v3\/waves/.test(fs.readFileSync(file, "utf8"))
+        /ApiCompetition(?!Capability\b)|ApiWaveV3|v3\/waves/.test(
+          fs.readFileSync(file, "utf8")
+        )
       )
       .map((file) => path.relative(projectRoot, file));
     expect(violations).toEqual([]);

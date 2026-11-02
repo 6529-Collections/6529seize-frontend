@@ -12,6 +12,7 @@ import {
   isIndexedDBError,
 } from "@/utils/error-sanitizer";
 import { startMobileLaunchTiming } from "@/utils/monitoring/mobileLaunchTiming";
+import { sanitizeSentryLog } from "@/utils/monitoring/sentryLogSanitizer";
 import {
   enrichCyclicJsonTimerEvent,
   installCyclicJsonTimerDiagnostics,
@@ -539,8 +540,14 @@ Sentry.init({
       }),
     ];
 
-    if (!replayEnabled) return configuredIntegrations;
-    return [...configuredIntegrations, Sentry.replayIntegration()];
+    // next.config.ts inlines process.env["SENTRY_REPLAY_ENABLED"] at build time,
+    // so the bundler drops this branch (and the Replay SDK, ~40 KB gzip) from
+    // every build where Replay is not opted in. Keep the literal comparison
+    // here; wrapping it in a variable defeats the dead-code elimination.
+    if (process.env["SENTRY_REPLAY_ENABLED"] === "true" && replayEnabled) {
+      return [...configuredIntegrations, Sentry.replayIntegration()];
+    }
+    return configuredIntegrations;
   },
 
   tracesSampleRate: 0.1,
@@ -558,6 +565,11 @@ Sentry.init({
 
   beforeBreadcrumb(breadcrumb) {
     return sanitizeSentryBreadcrumb(breadcrumb);
+  },
+
+  // Structured logs skip beforeSend, so they are sanitized here as well.
+  beforeSendLog(log) {
+    return sanitizeSentryLog(log);
   },
 
   beforeSendSpan(span) {

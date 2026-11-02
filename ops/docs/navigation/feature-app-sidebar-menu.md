@@ -64,10 +64,9 @@ standalone row after `About`.
 
 - Open `NFTs`:
   `/the-memes`, `/6529-gradient`, `/nextgen`, `/meme-lab`, `/rememes`,
-  `/nft-activity`, `/meme-calendar`.
-- On local development and shared staging, `NFTs` also includes
-  `6529 Stream — Review` after `ReMemes`. It opens
-  `/reviews/6529-stream` and is absent on production.
+  `/stream`, `/nft-activity`, `/meme-calendar`.
+- `NFTs > 6529 Stream` appears after `ReMemes` on every host. It opens
+  `/stream`, a short notice that 6529 Stream is being rebuilt.
 - Open `Waves`:
   `/waves` and `Discover Waves` at `/discover`.
 - Open `Museum`:
@@ -84,16 +83,20 @@ standalone row after `About`.
 - Open `Drop Forge`:
   use the standalone row after `About` when the current wallet can access the
   landing route.
+- About groups these pages under `Safe Collecting`; `Primary Address`
+  is last, after `App Wallets` when supported. `GDRC` is the last item in
+  `Collections & Minting`.
 - Open About tool routes:
-  `/delegation/delegation-center`, `/delegation/wallet-architecture`,
-  `/delegation/delegation-faq`, `/delegation/consolidation-use-cases`,
-  `/delegation/wallet-checker`, `/tools/subscriptions-report`,
+  `/safe-collecting`, `/safe-collecting/tap-guide`,
+  `/safe-collecting/faq`, `/safe-collecting/consolidation-use-cases`,
+  `/safe-collecting/wallet-checker`, `/tools/subscriptions-report`,
   `/meme-accounting`, `/meme-gas`, `/tools/api`, `/emma`,
-  `/tools/block-finder`, `/open-data`, `/open-data/rememes` (`ReMemes Data`),
+  `/tools/block-finder`, `/tools/time-zones` (`World Time Zones`),
+  `/open-data`, `/open-data/rememes` (`ReMemes Data`),
   and `/open-data/team` (`Team Data`).
 - Open about routes:
   `/about/the-memes`, `/about/subscriptions`, `/about/meme-lab`,
-  `/about/gradients`, `/about/gdrc1`, `/about/nft-delegation`,
+  `/about/gradients`, `/about/gdrc1`,
   `/about/primary-address`, `/about/faq`, `/about/apply`, `/about/contact-us`,
   `/about/data-decentralization`, `/about/ens`, `/about/license`.
 - Open connected profile shortcut:
@@ -121,7 +124,7 @@ standalone row after `About`.
   shows the `6529` home link instead.
 - `NFTs`, `Waves`, and `About` are collapsible; `Museum` is a direct row. About
   group headers are nested disclosure controls, not links.
-- `App Wallets` appears inside `About > Delegation & Wallets` only when
+- `App Wallets` appears inside `About > Safe Collecting` only when
   app-wallet support is available.
 - `Scan QR Code` appears only when running in Capacitor with scanner support.
 - `Push Notifications` appears only when connected and opens an in-app modal.
@@ -158,8 +161,6 @@ standalone row after `About`.
 ## Limitations / Notes
 
 - App-sidebar behavior is app-layout only.
-- The Stream review entry uses the same environment gate as its routes and is
-  never enabled by wallet state alone.
 - `Museum` is available from the app drawer rather than as a bottom-navigation
   tab; profile/account actions stay in account surfaces.
 - Search stays in the header search control, not in this drawer.
@@ -176,3 +177,8 @@ standalone row after `About`.
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
 - [Navigation Entry and Switching Flow](flow-navigation-entry-and-switching.md)
 - [Navigation and Shell Controls Troubleshooting](troubleshooting-navigation-and-shell-controls.md)
+
+## Private bookmarks
+
+The signed-in account actions include **Bookmarks** when the owner has accessible
+saved messages. It opens `/bookmarks`. See [Private Bookmarks](../waves/chat/feature-private-bookmarks.md).

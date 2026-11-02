@@ -165,6 +165,11 @@ describe("AwsRumProvider", () => {
         releaseId: "test-version",
         disableAutoPageView: true,
         telemetries: [],
+        // Queued events go out at most once a minute; a hidden page flushes
+        // one batch with a beacon.
+        dispatchInterval: 60_000,
+        batchLimit: 50,
+        useBeacon: true,
       })
     );
     expect(

@@ -19,6 +19,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Tooltip } from "react-tooltip";
 
+import type { DisplayTz } from "../meme-calendar.helpers";
 import {
   dateFromMintNumber,
   displayedEonNumberFromIndex,
@@ -36,13 +37,14 @@ import {
   SZN1_SEASON_INDEX,
   ymd,
 } from "../meme-calendar.helpers";
+import { calendarDayInZone, getViewerTimeZone } from "../meme-calendar.zone";
 import {
   getDivisionName,
   getZoomLabel,
   getZoomTitle,
-  GRID_INFO_ITEMS,
   ZOOM_LEVELS,
 } from "./calendarText";
+import { CalendarGuide } from "./CalendarGuide";
 import {
   EonView,
   EpochView,
@@ -54,10 +56,25 @@ import {
 import type { MemeCalendarProps, ZoomLevel } from "./types";
 
 const MAX_MINT_NUMBER = 100_000;
+const UTC_TIME_ZONE = "UTC";
 const CONTROL_GROUP_CLASS =
   "tw-flex tw-h-9 tw-w-full tw-min-w-0 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-pl-3 tw-text-[13px] tw-font-semibold tw-leading-[18px] tw-text-iron-200 tw-shadow-sm tw-shadow-black/20 tw-transition-colors focus-within:tw-border-primary-400 focus-within:tw-ring-1 focus-within:tw-ring-primary-400";
 const CONTROL_INPUT_CLASS =
   "tw-h-8 tw-min-w-0 tw-flex-1 tw-rounded-r-lg tw-border-0 tw-bg-transparent tw-px-2 tw-text-[13px] tw-font-semibold tw-leading-[18px] tw-text-iron-50 tw-outline-none placeholder:tw-text-iron-600";
+
+/**
+ * The IANA zone whose calendar dates the grid shows: the viewer's zone in
+ * local mode, UTC otherwise. Only the browser knows the viewer's zone, so the
+ * grid must stay client-only: MemesMintingCalendar mounts it through
+ * ClientOnly, and server HTML holds a placeholder.
+ */
+function getCalendarTimeZone(displayTz: DisplayTz): string {
+  return displayTz === "local" ? getViewerTimeZone() : UTC_TIME_ZONE;
+}
+
+function getTodaySeasonIndex(timeZone: string): number {
+  return getSeasonIndexForDate(calendarDayInZone(new Date(), timeZone));
+}
 
 export default function MemeCalendar({
   displayTz,
@@ -66,9 +83,10 @@ export default function MemeCalendar({
   publishedMemesStatus = "loading",
 }: MemeCalendarProps) {
   const guideTooltipId = buildTooltipId(useId(), "meme-calendar-guide");
+  const calendarTimeZone = getCalendarTimeZone(displayTz);
   const [seasonIndex, setSeasonIndex] = useState<number>(() => {
     try {
-      return getSeasonIndexForDate(new Date());
+      return getTodaySeasonIndex(calendarTimeZone);
     } catch {
       return 0;
     }
@@ -120,6 +138,7 @@ export default function MemeCalendar({
             seasonIndex={seasonIndex}
             autoOpenYmd={autoOpenYmd ?? undefined}
             displayTz={displayTz}
+            timeZone={calendarTimeZone}
             locale={locale}
             publishedMemeIds={publishedMemeIds}
             publishedMemesStatus={publishedMemesStatus}
@@ -205,9 +224,7 @@ export default function MemeCalendar({
       : getSeasonIndexForDate(new Date(Date.UTC(2023 + 1000 * (n - 1), 0, 1)));
 
   const handleJumpToToday = () => {
-    const now = new Date();
-    const idx = getSeasonIndexForDate(now);
-    setSeasonIndex(clampIndex(idx));
+    setSeasonIndex(clampIndex(getTodaySeasonIndex(calendarTimeZone)));
     setZoomLevel("szn");
   };
 
@@ -218,11 +235,11 @@ export default function MemeCalendar({
       return;
     }
     setJumpMintError("");
-    const d = dateFromMintNumber(n);
-    const idx = getSeasonIndexForDate(d);
-    setSeasonIndex(clampIndex(idx));
+    // The cell that shows the mint: its start date in the grid's zone.
+    const mintDay = calendarDayInZone(dateFromMintNumber(n), calendarTimeZone);
+    setSeasonIndex(clampIndex(getSeasonIndexForDate(mintDay)));
     setZoomLevel("szn");
-    setAutoOpenYmd(ymd(d));
+    setAutoOpenYmd(ymd(mintDay));
     setTimeout(() => setAutoOpenYmd(null), 1200);
   };
 
@@ -508,31 +525,12 @@ export default function MemeCalendar({
         </fieldset>
       </div>
 
-      <section
-        id="meme-calendar-info"
-        aria-label={t(locale, "memeCalendar.grid.info.panelLabel")}
-        className="tw-mb-5 tw-rounded-2xl tw-bg-iron-950 tw-p-5 tw-text-sm tw-leading-5 tw-text-iron-300 tw-shadow-lg tw-ring-1 tw-ring-iron-800 sm:tw-p-6"
+      <CalendarGuide
+        displayTz={displayTz}
         hidden={!showInfo}
-      >
-        <dl className="tw-m-0 tw-flex tw-flex-col">
-          {GRID_INFO_ITEMS.map(({ label, text, note }) => (
-            <div
-              key={label}
-              className="tw-min-w-0 tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-py-4 first:tw-pt-0 last:tw-border-b-0 last:tw-pb-0"
-            >
-              <dt className="tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.14em] tw-text-iron-500">
-                {t(locale, label)}
-              </dt>
-              <dd className="tw-m-0 tw-mt-1 tw-text-sm tw-leading-5 tw-text-iron-200">
-                {t(locale, text)}{" "}
-                {note && (
-                  <span className="tw-text-iron-500">{t(locale, note)}</span>
-                )}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </section>
+        locale={locale}
+        timeZone={calendarTimeZone}
+      />
 
       {/* Calendar view */}
       <div className="tw-min-w-0">{renderView()}</div>

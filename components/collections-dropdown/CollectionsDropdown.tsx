@@ -155,9 +155,14 @@ export default function CollectionsDropdown(props: Readonly<Props>) {
             <button
               type="button"
               role="menuitem"
+              aria-current={
+                collection.id === props.activePage ? "true" : undefined
+              }
               onClick={() => handleSelect(collection)}
               className={`${
-                isMobile ? "tw-px-4 tw-py-3" : "tw-px-3 tw-py-2"
+                isMobile
+                  ? "tw-min-h-12 tw-px-3 tw-py-3 max-lg:tw-rounded-lg max-lg:tw-text-[15px]"
+                  : "tw-px-3 tw-py-2"
               } tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-text-left tw-text-sm tw-font-medium tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
                 collection.id === props.activePage
                   ? "tw-bg-iron-800 tw-text-iron-100"

@@ -9,6 +9,7 @@ type ProfileIdentityForOwnership =
   | undefined;
 
 type ComparableProfileIdentity = {
+  readonly is_anonymous?: boolean;
   readonly id?: string | null | undefined;
   readonly handle?: string | null | undefined;
   readonly primary_address?: string | null | undefined;
@@ -90,6 +91,7 @@ export const areSameProfileIdentity = ({
   if (leftId && rightId && leftId === rightId) {
     return true;
   }
+  if (left.is_anonymous || right.is_anonymous) return false;
 
   const leftHandle = normalizeProfileTarget(left.handle);
   const rightHandle = normalizeProfileTarget(right.handle);

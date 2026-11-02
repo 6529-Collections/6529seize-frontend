@@ -12,6 +12,7 @@ import {
   useMemo,
 } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Capacitor } from "@capacitor/core";
 import type { ViewKey } from "@/components/navigation/navTypes";
 import { useViewContext } from "@/components/navigation/ViewContext";
 import type { BrainView } from "@/components/brain/mobile/brainMobileViews";
@@ -31,6 +32,8 @@ interface WaveViewSelection {
 interface StackRoute {
   type: "route";
   path: string;
+  // Kept separately so filter changes never become extra Back steps.
+  href?: string;
   waveView?: WaveViewSelection;
 }
 interface StackView {
@@ -54,6 +57,59 @@ const Context = createContext<NavigationHistoryContextValue | undefined>(
 );
 const MAX_STACK = 50;
 
+const isCollectPath = (path: string) =>
+  path === "/collect" || path === "/collect/orders";
+
+function canReturnToRoute(
+  currentPath: string,
+  targetPath: string,
+  targetHref: string | undefined
+): boolean {
+  if (Capacitor.isNativePlatform() && isCollectPath(currentPath)) {
+    // The synthetic root entry is not a page the user actually visited.
+    return Boolean(targetHref) && targetPath !== currentPath;
+  }
+  return !sameMainPath(targetPath, currentPath);
+}
+
+function hasBackDestination(history: readonly StackEntry[], index: number) {
+  const current = history[index];
+  for (let i = index - 1; i >= 0; i--) {
+    const entry = history[i];
+    if (entry?.type === "view") return true;
+    if (
+      entry?.type === "route" &&
+      (current?.type !== "route" ||
+        canReturnToRoute(current.path, entry.path, entry.href))
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function getHistoryRoutePath(url: string, pathname: string): string {
+  if (pathname.startsWith("/[user]")) return mainSegment(url);
+
+  const [pathOnly = "", searchOnly = ""] = url.split("?");
+  const activeWaveId = getActiveWaveIdFromUrl({
+    pathname: pathOnly,
+    searchParams: new URLSearchParams(searchOnly),
+  });
+  const isWaveRoute =
+    Boolean(activeWaveId) &&
+    (pathOnly === "/" ||
+      pathOnly.startsWith("/waves") ||
+      pathOnly.startsWith("/messages"));
+
+  if (isWaveRoute && activeWaveId) {
+    return pathOnly.startsWith("/messages")
+      ? getMessagePathRoute(activeWaveId)
+      : getWavePathRoute(activeWaveId);
+  }
+  return url.split(/[?#]/)[0]!;
+}
+
 export const NavigationHistoryProvider: React.FC<{
   readonly children: ReactNode;
 }> = ({ children }) => {
@@ -68,7 +124,10 @@ export const NavigationHistoryProvider: React.FC<{
   const historyRef = useRef<StackEntry[]>([
     { type: "route", path: mainSegment(fullPath) },
   ]);
-  const [index, setIndex] = useState(0);
+  const [{ index, canGoBack }, setPosition] = useState({
+    index: 0,
+    canGoBack: false,
+  });
   const skipNext = useRef(false);
   const prevPathRef = useRef<string>("");
 
@@ -93,77 +152,57 @@ export const NavigationHistoryProvider: React.FC<{
     [index]
   );
 
-  const canGoBack = useMemo(() => {
-    if (index === 0) return false;
-    const current = historyRef.current[index];
-    const currentPath = current?.type === "route" ? current.path : null;
-
-    for (let i = index - 1; i >= 0; i--) {
-      const entry = historyRef.current[i];
-      if (entry?.type === "view") return true;
-      if (entry?.type === "route") {
-        if (!currentPath) return true;
-        if (!sameMainPath(entry.path, currentPath)) return true;
-      }
-    }
-    return false;
-  }, [index]);
+  const updatePosition = useCallback((nextIndex: number) => {
+    setPosition({
+      index: nextIndex,
+      canGoBack: hasBackDestination(historyRef.current, nextIndex),
+    });
+  }, []);
 
   const pushStack = useCallback((entry: StackEntry) => {
     setCurrentWaveView(null);
-    setIndex((prev) => {
+    setPosition((previous) => {
       const newHistory = [
-        ...historyRef.current.slice(0, prev + 1),
+        ...historyRef.current.slice(0, previous.index + 1),
         entry,
       ].slice(-MAX_STACK);
       historyRef.current = newHistory;
-      return Math.min(prev + 1, MAX_STACK - 1);
+      const nextIndex = newHistory.length - 1;
+      return {
+        index: nextIndex,
+        canGoBack: hasBackDestination(newHistory, nextIndex),
+      };
     });
   }, []);
 
   useEffect(() => {
     const url = fullPath;
-
     if (skipNext.current) {
       skipNext.current = false;
       prevPathRef.current = url;
+      const current = historyRef.current.at(-1);
+      if (current?.type === "route" && Capacitor.isNativePlatform()) {
+        current.href = url + globalThis.location.hash;
+      }
       return;
     }
 
     if (url === prevPathRef.current) return;
     prevPathRef.current = url;
 
-    const isProfile = pathname?.startsWith("/[user]");
-    const [pathOnly, searchOnly = ""] = url.split("?");
-    const activeWaveId = getActiveWaveIdFromUrl({
-      pathname: pathOnly,
-      searchParams: new URLSearchParams(searchOnly),
-    });
-    const isWaveRoute =
-      Boolean(activeWaveId) &&
-      (pathOnly === "/" ||
-        pathOnly?.startsWith("/waves") ||
-        pathOnly?.startsWith("/messages"));
-
-    let pathKey: string;
-    if (isProfile) {
-      pathKey = mainSegment(url);
-    } else if (isWaveRoute && activeWaveId) {
-      const isMessagesRoute = pathOnly?.startsWith("/messages");
-      pathKey = isMessagesRoute
-        ? getMessagePathRoute(activeWaveId)
-        : getWavePathRoute(activeWaveId);
-    } else {
-      pathKey = url.split(/[?#]/)[0]!;
-    }
-
+    const pathKey = getHistoryRoutePath(url, pathname);
     let i = historyRef.current.length - 1;
     while (i >= 0 && historyRef.current[i]?.type === "view") i -= 1;
     const lastRoute = i >= 0 ? historyRef.current[i] : null;
     const isDuplicate =
       lastRoute?.type === "route" && lastRoute.path === pathKey;
-    if (!isDuplicate) {
-      pushStack({ type: "route", path: pathKey });
+    const href = Capacitor.isNativePlatform()
+      ? url + globalThis.location.hash
+      : undefined;
+    if (isDuplicate) {
+      if (href) historyRef.current[i] = { ...lastRoute, href };
+    } else {
+      pushStack({ type: "route", path: pathKey, ...(href && { href }) });
     }
   }, [fullPath, pathname, searchParams, pushStack]);
 
@@ -175,6 +214,10 @@ export const NavigationHistoryProvider: React.FC<{
   );
 
   const goBack = useCallback(() => {
+    if (information?.returnFromNavigation) {
+      information.returnFromNavigation();
+      return;
+    }
     if (information?.request?.overlay) {
       information.close();
       return;
@@ -182,13 +225,12 @@ export const NavigationHistoryProvider: React.FC<{
     if (!canGoBack) return;
     let targetIndex = index - 1;
     const current = historyRef.current[index];
-
     while (targetIndex >= 0) {
       const entry = historyRef.current[targetIndex];
       if (
         entry?.type === "route" &&
         current?.type === "route" &&
-        sameMainPath(entry.path, current.path)
+        !canReturnToRoute(current.path, entry.path, entry.href)
       ) {
         targetIndex -= 1;
         continue;
@@ -208,12 +250,16 @@ export const NavigationHistoryProvider: React.FC<{
     );
     if (target?.type === "route") {
       skipNext.current = true;
-      router.push(target.path);
+      const collectBack =
+        Capacitor.isNativePlatform() &&
+        current?.type === "route" &&
+        isCollectPath(current.path);
+      router.push(collectBack ? (target.href ?? target.path) : target.path);
     } else {
       hardBack(target!.view);
     }
-    setIndex(targetIndex);
-  }, [canGoBack, index, router, hardBack, information]);
+    updatePosition(targetIndex);
+  }, [canGoBack, index, router, hardBack, information, updatePosition]);
 
   const goBackTo = useCallback(
     (path: string) => {
@@ -232,6 +278,7 @@ export const NavigationHistoryProvider: React.FC<{
           ...historyRef.current.slice(0, index),
           { type: "route", path },
         ];
+        updatePosition(index);
         setCurrentWaveView(null);
         router.replace(path);
         return;
@@ -243,9 +290,9 @@ export const NavigationHistoryProvider: React.FC<{
       );
       router.push(path);
       historyRef.current = historyRef.current.slice(0, targetIndex + 1);
-      setIndex(targetIndex);
+      updatePosition(targetIndex);
     },
-    [index, router]
+    [index, router, updatePosition]
   );
 
   const value = useMemo(

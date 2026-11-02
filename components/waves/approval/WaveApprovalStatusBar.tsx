@@ -5,7 +5,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   type FC,
   type ReactNode,
-  useEffect,
   useId,
   useMemo,
   useState,
@@ -21,6 +20,7 @@ import type { ApprovalWaveCloseStatus } from "@/helpers/waves/approve-wave.helpe
 import { getApprovalWindowEndTime } from "@/helpers/waves/approve-wave.helpers";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useVisibleInterval } from "@/hooks/usePageVisibility";
 import Button from "@/components/utils/button/Button";
 
 interface WaveApprovalStatusBarProps {
@@ -508,19 +508,10 @@ export default function WaveApprovalStatusBar({
   );
   const isCountOnlyError = isApprovalCountError && !isApprovalStatusError;
 
-  useEffect(() => {
-    if (closeStatus !== null || endTime === null) {
-      return;
-    }
-
-    const intervalId = globalThis.setInterval(() => {
-      setClockTick((tick) => tick + 1);
-    }, 1000);
-
-    return () => {
-      globalThis.clearInterval(intervalId);
-    };
-  }, [closeStatus, endTime]);
+  useVisibleInterval(
+    () => setClockTick((tick) => tick + 1),
+    closeStatus !== null || endTime === null ? null : 1000
+  );
 
   const thresholdLabel = formatWinningThreshold(winningThreshold);
   const thresholdIsSet = thresholdLabel !== "Not set";

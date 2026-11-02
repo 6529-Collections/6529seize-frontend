@@ -102,7 +102,7 @@ On web layouts, route switching is sidebar-first.
    `Join 6529` rows for direct navigation.
 5. In collapsed mode, hover a group row with a mouse or activate it by tap,
    click, or keyboard to open an anchored flyout submenu. The flyout preserves
-   subsection labels such as `Network & Reputation`, `Delegation & Wallets`, or
+   subsection labels such as `Network & Reputation`, `Safe Collecting`, or
    `Data & Developer Tools`.
 6. Select a destination and watch active state update.
 7. In overlay mode, sidebar closes after route change.
@@ -111,11 +111,10 @@ On web layouts, route switching is sidebar-first.
 
 - Open `NFTs` routes:
   `/the-memes`, `/6529-gradient`, `/nextgen`, `/meme-lab`, `/rememes`,
-  `/nft-activity`, `/meme-calendar`.
-- On local development and shared staging, open the pre-deployment Stream
-  review from `NFTs > 6529 Stream — Review`. It appears after `ReMemes` and
-  before `NFT Activity` and opens `/reviews/6529-stream`. It is absent on
-  production.
+  `/stream`, `/nft-activity`, `/meme-calendar`.
+- `NFTs > 6529 Stream` appears after `ReMemes` and before `NFT Activity` on
+  every host. It opens `/stream`, a short notice that 6529 Stream is being
+  rebuilt, with a link to the 6529-works repository.
 - Open `Waves` routes:
   use the primary `Waves` row for `/waves`; use `Discover Waves` in the Waves
   panel header or search for `/discover`.
@@ -136,16 +135,16 @@ On web layouts, route switching is sidebar-first.
 - Open `Drop Forge` from its standalone row after `About` when the current
   wallet has landing access.
 - Open `About` tool routes:
-  delegation pages under `Delegation & Wallets`, `/meme-accounting`,
+  delegation pages under `Safe Collecting`, `/meme-accounting`,
   `/meme-gas`, optional `/tools/subscriptions-report`, optional
   `/tools/app-wallets`, `/tools/api`, `/emma`, `/tools/block-finder`,
-  `/open-data`, `/open-data/6529bot`, `/open-data/network-metrics`,
+  `/tools/time-zones`, `/open-data`, `/open-data/6529bot`, `/open-data/network-metrics`,
   optional `/open-data/meme-subscriptions`, `/open-data/rememes`
   (`ReMemes Data`), `/open-data/team` (`Team Data`), and
   `/open-data/royalties`.
 - Use collapsed-rail flyouts for grouped destinations:
   `NFTs` keeps collection and NFT activity links, and `About` keeps subsection
-  labels such as `Network & Reputation`, `Delegation & Wallets`, and
+  labels such as `Network & Reputation`, `Safe Collecting`, and
   `Data & Developer Tools` instead of flattening every route into one list.
   `Museum`, `Waves`, and `Join 6529` remain direct rows in collapsed mode.
 - Open `About` and `6529 Capital` routes from grouped links.
@@ -200,7 +199,7 @@ On web layouts, route switching is sidebar-first.
   mobile-device web contexts. Supported mobile pages expose Share from the
   header instead. The route rules are documented in
   [Page Sharing and Device Connection](feature-share-modal.md).
-- `App Wallets` appears inside `About > Delegation & Wallets` only when
+- `App Wallets` appears inside `About > Safe Collecting` only when
   app-wallet support is enabled.
 - On iOS, subscription-related rows show only when country resolves to `US`:
   `Subscriptions Report`, `Open Data > Meme Subscriptions Data`,
@@ -230,9 +229,6 @@ On web layouts, route switching is sidebar-first.
 - Desktop-web sidebar search supports both `⌘K` and `Ctrl+K`.
 - Sidebar rows change with auth, device context, country gate, and runtime
   feature gates.
-- The Stream review item is controlled by the public-review environment gate,
-  not wallet state. Only loopback development and the exact shared staging
-  hostname enable it initially.
 - Native app primary switching is owned by
   [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md).
 
@@ -247,3 +243,9 @@ On web layouts, route switching is sidebar-first.
 - [6529 Apps Page](feature-6529-apps-page.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
 - [Network Index](../network/README.md)
+
+## Private bookmarks
+
+The account menu places **Bookmarks** below **Profile** and above **My artwork
+documentation** when the owner has accessible saved messages. See
+[Private Bookmarks](../waves/chat/feature-private-bookmarks.md).

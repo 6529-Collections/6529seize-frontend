@@ -1,0 +1,397 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "37dfd8e2852ac754733b6c7b522e0e0b2ae1e475",
+  "coverage": [
+    {
+      "route": "/museum/network/about/governance",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/governance-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/about/governance",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/governance-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/about/governance",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/governance-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/about/governance/6529NM-GOV-1069256",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/governance-decision-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/about/governance/6529NM-GOV-1069256",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/governance-decision-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/about/governance/6529NM-GOV-1069256",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/governance-decision-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/projects/century",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/project-century-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/projects/century",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/project-century-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/projects/century",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/project-century-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/works/6529NM-W-0008",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/work-w-0008-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/works/6529NM-W-0008",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/work-w-0008-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/works/6529NM-W-0008",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/work-w-0008-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/acquisitions/a-gift-of-themes-and-variations-210",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/acquisition-themes-variations-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/acquisitions/a-gift-of-themes-and-variations-210",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/acquisition-themes-variations-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/acquisitions/a-gift-of-themes-and-variations-210",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/acquisition-themes-variations-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/acquisition-programs/gift-acquisitions",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/program-gift-acquisitions-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/acquisition-programs/gift-acquisitions",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/program-gift-acquisitions-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/acquisition-programs/gift-acquisitions",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/program-gift-acquisitions-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/artists/david-seymour",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/artist-david-seymour-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/artists/david-seymour",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/artist-david-seymour-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/artists/david-seymour",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/artist-david-seymour-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/organizations/art-blocks",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/organization-art-blocks-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/organizations/art-blocks",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/organization-art-blocks-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/organizations/art-blocks",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/organization-art-blocks-390x844-full.png"
+    },
+    {
+      "route": "/museum/network/research/conflict-at-its-edges",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/research-conflict-at-its-edges-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network/research/conflict-at-its-edges",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/research-conflict-at-its-edges-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network/research/conflict-at-its-edges",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/research-conflict-at-its-edges-390x844-full.png"
+    }
+  ],
+  "dimensions": {
+    "J07": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/text/governance-1440x1000.txt",
+        "evidence/candidate/text/work-w-0008-1440x1000.txt",
+        "evidence/candidate/text/acquisition-themes-variations-1440x1000.txt",
+        "evidence/diff-candidate-vs-main.json"
+      ],
+      "findings": [
+        "E-001",
+        "E-002",
+        "E-003",
+        "E-004",
+        "E-006",
+        "E-007",
+        "E-008",
+        "E-009"
+      ],
+      "note": "The <main> text of all 27 cells is byte-identical to the baseline, so this change adds or alters no copy and every date is labelled where the change touches it (Status as of, As of, Recorded). The score assesses the candidate against the baseline per the run decision; the pre-existing copy debt visible in the same text (machine identifiers, unlabelled list date, raw rating, 1 works, interface-describing ledes, fragments, repeated status lines) is recorded as P3 and does not lower it."
+    },
+    "J12": {
+      "score": 9,
+      "evidence": [
+        "evidence/zone-comparison.json",
+        "evidence/diff-candidate-vs-main.json",
+        "evidence/candidate/governance-390x844-full.png",
+        "evidence/candidate/work-w-0008-390x844-full.png"
+      ],
+      "findings": ["E-003", "E-004", "E-005", "E-006"],
+      "note": "en-US is the only pinned locale. The candidate renders the same en-US short dates as the baseline in every cell, and they no longer depend on the host zone: 117 pages under UTC, Pacific/Auckland and America/Los_Angeles show 0 differences from candidate/UTC, while the baseline shifts 67 and 23 pages. A browser under Auckland and Los Angeles zones showed the same dates on both builds with no console errors. Date text wraps and does not clip at 820 and 390."
+    }
+  },
+  "checks": {
+    "I1": "pass",
+    "I2": "pass",
+    "I3": "pass"
+  },
+  "findings": [
+    {
+      "id": "E-001",
+      "targets": ["J07", "I2"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/acquisition-programs/gift-acquisitions and /museum/network/acquisitions/a-gift-of-themes-and-variations-210 · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/candidate/text/program-gift-acquisitions-1440x1000.txt",
+      "observation": "Pre-existing on main: internal record identifiers and file-style references are shown as public copy. The program page's Source record disclosure is titled by the slug 'wave-status-observation-2026-08-08' (a details summary) and opens onto 'Status observed 2026-08-01T15:01:05Z', 'Proposal-content SHA-256: sha256:...' and the Wave drop UUID. The acquisition essay tells readers the custody summary is at 'evidence/vera-molnar-210-custody' and the source manifest at 'evidence/vera-molnar-210-sources', names the field 'is_static: false', and lists a 'CAIP-19:' line in the visible object data.",
+      "consequence": "A visitor sees repository-style paths and field names where a museum label would say what the source is. Without a plain-language title the disclosure is not inspectable by a lay reader. This would otherwise touch I2, but it is identical on the baseline, so it is recorded for the Museum backlog and does not fail the check.",
+      "change": "Title the disclosure in words ('Wave status record, observed 1 August 2026') and keep the slug and hashes inside it as technical detail. Replace the 'evidence/...' paths with the public name of the record and its link, and write 'the work is not static' for is_static.",
+      "acceptance_check": "No details summary, heading or label on the two routes is a lowercase hyphenated slug, and the prose contains no 'evidence/' path or snake_case field name; hashes and CAIP-19 identifiers appear only inside technical-detail blocks or labelled fields.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-002",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about/governance · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/candidate/governance-1440x1000-full.png",
+      "observation": "Pre-existing on main: each decision card ends with a bare small date ('Jun 2, 2026', 'Jun 8, 2026') under the status chips. The card says 'Adopted by the Museum Wave.' and nothing says the date is when the proposal was recorded. The decision page labels the same value 'RECORDED'.",
+      "consequence": "A reader can take the date as the adoption date, which the record does not state. The value is real (it matches the decision page), so I1 stands, but the meaning is left to inference. This would otherwise touch J07 and the date-meaning part of I1; it is identical on the baseline.",
+      "change": "Prefix the card date with the same label as the detail page: 'Recorded Jun 2, 2026'.",
+      "acceptance_check": "Every date on a governance decision card carries the visible label 'Recorded', matching the decision page, at all three widths.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-003",
+      "targets": ["J07", "J12"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about/governance/6529NM-GOV-1069256 · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/candidate/governance-decision-1440x1000-full.png",
+      "observation": "Pre-existing on main: the RATING field reads '44711261 · 18 raters'. The rater count is formatted through formatInteger, but the rating is the raw source string with no grouping, no unit and no explanation of what is being summed.",
+      "consequence": "An eight-digit figure with no separators and no unit is hard to read and cannot be compared with another decision. Number grouping is also locale-specific, so the raw string would not follow a future locale. Identical on the baseline.",
+      "change": "Format the rating with formatInteger (44,711,261) and label what it measures, for example 'TDH-weighted rating', if that is what the figure is.",
+      "acceptance_check": "The rating renders with locale digit grouping and a visible unit or definition next to it, at all three widths.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-004",
+      "targets": ["J07", "J12"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/acquisitions/a-gift-of-themes-and-variations-210, /museum/network/projects/century, /museum/network/acquisition-programs/gift-acquisitions · default · all viewports · en-US",
+      "evidence": "evidence/candidate/text/acquisition-themes-variations-1440x1000.txt",
+      "observation": "Pre-existing on main: one record uses several date conventions. The status row prints 'Aug 23, 2026'; the essay prints '23 August 2026' and '09:40:04 UTC on 15 August 2026'; the project essay prints '2026-08-02'; the program source block prints '2026-08-01T15:01:05Z'. The Intl-formatted dates all match the written dates in value.",
+      "consequence": "The same day appears as 'Aug 23, 2026' and '23 August 2026' within a screen or two. The values agree, so nothing is invented, but the record reads as assembled from different sources. Identical on the baseline.",
+      "change": "Choose one en-US date form for interface chrome and leave source prose as published; render the machine ISO strings only inside technical-detail blocks.",
+      "acceptance_check": "On the acquisition route, interface-generated dates share one visible form and no bare ISO date or timestamp appears outside a labelled technical block.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-005",
+      "targets": ["J12"],
+      "severity": "P3",
+      "status": "open",
+      "where": "All routes with a status or recorded date · default · all viewports · en-US",
+      "evidence": "evidence/zone-comparison.json",
+      "observation": "Pre-existing on main: status and recorded dates are UTC calendar days, now formatted explicitly in UTC by this change, but the rendered text ('Aug 1, 2026', 'Jun 8, 2026') never says UTC. The essay prose does say 'UTC' where it gives a time. The machine-readable instant sits in the time element's dateTime attribute.",
+      "consequence": "A visitor in a far-east or far-west zone reading 'Status as of Aug 1, 2026' cannot tell which day boundary applies. Day-level dates make the effect small. The change itself is correct and the output is unchanged in production.",
+      "change": "Add a short 'Dates are shown in UTC' note to the Museum footer or a title on the time element; no per-date suffix is needed.",
+      "acceptance_check": "A visitor can find the stated date zone from any Museum record that shows a status date, without opening source HTML.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-006",
+      "targets": ["J07", "J12"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/organizations/art-blocks · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/candidate/organization-art-blocks-1440x1000-full.png",
+      "observation": "Pre-existing on main: the Projects list reads '3 works' and then '1 works' four times. The acquisition page uses the correct '1 work' for the same kind of count.",
+      "consequence": "A visible grammatical error on a public record, and the count is built without a plural rule, so it would also be wrong in locales with different plurals.",
+      "change": "Use the same plural-aware message as the other count labels.",
+      "acceptance_check": "The organization project list prints '1 work' for a single work and '3 works' for three, and uses the shared plural message.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-007",
+      "targets": ["J07", "I2"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/organizations/art-blocks, /museum/network/acquisition-programs/gift-acquisitions, /museum/network/about/governance · default · all viewports · en-US",
+      "evidence": "evidence/candidate/organization-art-blocks-1440x1000-full.png",
+      "observation": "Pre-existing on main: the lead line under three titles describes the page instead of the subject. Art Blocks: 'Institutional and project relationships are shown from the published Museum record.' Gift Acquisitions: 'This program record gives the scope and terms for the acquisitions it produces.' Governance: 'Adopted decisions and participatory proposals are presented with their recorded governance effect.' The Art Blocks page never says what Art Blocks is.",
+      "consequence": "The first sentence a visitor reads tells them how the interface is built, not what the organization or program is, so it carries no information and would fit any record. This would otherwise touch I2 and is identical on the baseline.",
+      "change": "Lead with the object: who or what the organization is and its link to the Museum, or what the program accepts and who decides. Keep the 'published Museum record' wording in the footer.",
+      "acceptance_check": "The lead sentence of each page names its subject and a fact about it, and would not fit an unrelated Museum record.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-008",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/works/6529NM-W-0008, /museum/network/artists/david-seymour, /museum/network/acquisitions/a-gift-of-themes-and-variations-210, /museum/network/research/conflict-at-its-edges · default · all viewports · en-US",
+      "evidence": "evidence/candidate/text/work-w-0008-1440x1000.txt",
+      "observation": "Pre-existing on main: several labels are fragments without a noun or an object. The work byline reads 'GulYildiz · not established' (nothing says what is not established). The artist lede is '1 in the permanent Collection', repeated in the Collection relationship field. A bare 'Gift' sits under the acquisition lede. The research cards use 'INTERPRETS' as a label. Under David Seymour, 'Projects represented: Magnum Photos 75, 5 works' can read as five works by Seymour, while the artist has one work.",
+      "consequence": "Readers must guess the meaning, and the Seymour count can be misread as a holding. Identical on the baseline.",
+      "change": "Name the object in each fragment ('Date not established', '1 work in the permanent Collection', 'Gift acquisition') and say '5 works in the project' where the count is the project's.",
+      "acceptance_check": "None of the listed fragments appears alone; each states what it describes, and the Magnum Photos 75 count names the project as its scope.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-009",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/works/6529NM-W-0008 and /museum/network/research/conflict-at-its-edges · default · all viewports · en-US",
+      "evidence": "evidence/candidate/work-w-0008-1440x1000-full.png",
+      "observation": "Pre-existing on main: the same status is stated three or four times on one screen sequence. The work page gives 'Selected through an acquisition program; unminted', then 'Status: Selected; not yet minted or accessioned; not in the permanent Collection.', then 'Selected and unminted. Acquisition and accession remain pending.', then the Collection context block repeats the first line with its date. The research page repeats 'STATUS Accessioned into the permanent Collection / STATUS AS OF Aug 12, 2026' on each of five cards.",
+      "consequence": "The repetition dilutes the one fact that matters and makes the date look like it varies by card. The statements agree, so it is a clarity issue only. Identical on the baseline.",
+      "change": "Keep one status line with its date per record; on the study page state the shared status once above the cards.",
+      "acceptance_check": "The work page states the unminted, unaccessioned status once in the header band and once in the narrative status note, and the research page prints one shared status date.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "Labelled date pairs next to the value they qualify: 'STATUS AS OF Aug 1, 2026', 'RECORDED Jun 8, 2026', 'As of Aug 2, 2026'",
+    "Machine-readable instants kept in time dateTime attributes while the visible text is an en-US short date",
+    "Explicit UTC wording where a time of day is given in prose ('09:40:04 UTC on 15 August 2026')",
+    "Plain status vocabulary: 'Accessioned into the permanent Collection', 'Selected and unminted. Acquisition and accession remain pending.', 'No adopted effect recorded at the snapshot.'",
+    "Governance claims that sit beside a mechanism: Wave status, disposition, rating, rater count and a link to the source Wave record",
+    "Source attribution and uncertainty in the essays ('A public archival record linking the estate filename to the Magnum archive number remains absent.')",
+    "Identical rendered text and dates across the 27 cells relative to main, and zone-independent dates across the three host zones"
+  ]
+}

@@ -124,7 +124,9 @@ export const SliderThumb: FC<SliderThumbProps> = ({
           <span className="tw-min-w-0 tw-truncate tw-leading-[14px]">
             {formatNumberWithCommas(numericVoteValue)}
           </span>
-          <span className="tw-sr-only">{label}</span>
+          <span className="tw-sr-only group-[.is-vote-panel]/inline-vote:tw-not-sr-only group-[.is-vote-panel]/inline-vote:tw-shrink-0 group-[.is-vote-panel]/inline-vote:tw-font-medium">
+            {label}
+          </span>
         </span>
         {isMini && (
           <div

@@ -1,6 +1,16 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import { createElement, forwardRef, type ComponentProps } from "react";
-import { DropImagePreview } from "@/components/drops/view/item/content/media/DropImagePreview";
+import {
+  createElement,
+  forwardRef,
+  StrictMode,
+  type ComponentProps,
+} from "react";
+import {
+  DropImagePreview,
+  getDropImagePreviewSources,
+  getGiphyVideoPreviewSources,
+} from "@/components/drops/view/item/content/media/DropImagePreview";
+import { LocalImagePreviewContext } from "@/components/drops/view/item/content/media/LocalImagePreviewContext";
 import { ImageScale } from "@/helpers/image.helpers";
 
 type MockImageProps = ComponentProps<"img"> & {
@@ -226,4 +236,187 @@ it("falls back from a rejected GIF animation to a legacy preview, never the orig
   );
   fireEvent.error(screen.getByAltText("GIF"));
   expect(screen.queryByRole("img")).not.toBeInTheDocument();
+});
+
+it("reports unavailable animated previews once across legacy load and error events", () => {
+  const gif = original.replace("file.jpg", "artwork.gif");
+  const onAnimatedPreviewUnavailable = jest.fn();
+  const { rerender } = render(
+    <DropImagePreview
+      originalSrc={gif}
+      imageScale={ImageScale.AUTOx1080}
+      alt="GIF"
+      fill
+      onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
+    />
+  );
+  const image = screen.getByAltText("GIF");
+  fireEvent.error(image);
+  expect(image).toHaveAttribute(
+    "src",
+    gif.replace("artwork.gif", "AUTOx450_gifv2/artwork.gif")
+  );
+  fireEvent.load(image);
+  expect(onAnimatedPreviewUnavailable).not.toHaveBeenCalled();
+  fireEvent.error(image);
+  expect(image).toHaveAttribute(
+    "src",
+    gif.replace("artwork.gif", "AUTOx1080/artwork.gif")
+  );
+  expect(onAnimatedPreviewUnavailable).toHaveBeenCalledTimes(1);
+  fireEvent.load(image);
+  fireEvent.error(image);
+  fireEvent.load(image);
+  fireEvent.error(image);
+  expect(onAnimatedPreviewUnavailable).toHaveBeenCalledTimes(1);
+  rerender(
+    <DropImagePreview
+      originalSrc={gif.replace("artwork", "next")}
+      imageScale={ImageScale.AUTOx1080}
+      alt="GIF"
+      fill
+      onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
+    />
+  );
+  fireEvent.error(screen.getByAltText("GIF"));
+  fireEvent.error(screen.getByAltText("GIF"));
+  expect(onAnimatedPreviewUnavailable).toHaveBeenCalledTimes(2);
+});
+
+it("reports an unverified external GIF preview once without claiming it is static", () => {
+  const onAnimatedPreviewUnavailable = jest.fn();
+  render(
+    <DropImagePreview
+      originalSrc="https://external.example/art.gif"
+      imageScale={ImageScale.AUTOx1080}
+      alt="GIF"
+      fill
+      onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
+    />
+  );
+  fireEvent.load(screen.getByAltText("GIF"));
+  fireEvent.load(screen.getByAltText("GIF"));
+  fireEvent.error(screen.getByAltText("GIF"));
+  expect(onAnimatedPreviewUnavailable).toHaveBeenCalledTimes(1);
+});
+
+it("reports a missing GIF preview once across strict effects and rerenders", () => {
+  const onUnavailable = jest.fn();
+  const view = (src: string) => (
+    <StrictMode>
+      <DropImagePreview
+        originalSrc={src}
+        imageScale={ImageScale.AUTOx1080}
+        alt="GIF"
+        onAnimatedPreviewUnavailable={() => onUnavailable()}
+      />
+    </StrictMode>
+  );
+  const src = "http://external.example/art.gif";
+  const { rerender } = render(view(src));
+  expect(screen.queryByRole("img")).not.toBeInTheDocument();
+  expect(onUnavailable).toHaveBeenCalledTimes(1);
+  rerender(view(src));
+  expect(onUnavailable).toHaveBeenCalledTimes(1);
+  rerender(view(src.replace("art.gif", "next.gif")));
+  expect(onUnavailable).toHaveBeenCalledTimes(2);
+  rerender(view(src.replace("art.gif", "still.jpg")));
+  expect(onUnavailable).toHaveBeenCalledTimes(2);
+});
+
+it("renders only the opted-in local raster preview without a proxy request", () => {
+  const src = "data:image/png;base64,AAAA";
+  const { rerender } = render(
+    <LocalImagePreviewContext.Provider value={src}>
+      <DropImagePreview
+        originalSrc={src}
+        imageScale={ImageScale.AUTOx450}
+        alt="Draft"
+        fill
+      />
+    </LocalImagePreviewContext.Provider>
+  );
+  expect(screen.getByAltText("Draft")).toHaveAttribute("src", src);
+  expect(screen.getByAltText("Draft")).toHaveAttribute(
+    "data-unoptimized",
+    "true"
+  );
+  rerender(
+    <LocalImagePreviewContext.Provider value={src}>
+      <DropImagePreview
+        originalSrc="data:image/png;base64,BBBB"
+        imageScale={ImageScale.AUTOx450}
+        alt="Draft"
+        fill
+      />
+    </LocalImagePreviewContext.Provider>
+  );
+  expect(screen.queryByRole("img")).not.toBeInTheDocument();
+});
+
+it.each(["data:image/svg+xml;base64,AAAA", "https://localhost/private.png"])(
+  "does not opt non-raster or remote sources into local previews: %s",
+  (src) => {
+    render(
+      <LocalImagePreviewContext.Provider value={src}>
+        <DropImagePreview
+          originalSrc={src}
+          imageScale={ImageScale.AUTOx450}
+          alt="Draft"
+          fill
+        />
+      </LocalImagePreviewContext.Provider>
+    );
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+  }
+);
+
+describe("guarded proxy preview URLs", () => {
+  const proxy = (params: Record<string, string>) =>
+    `/api/og-metadata/image?${new URLSearchParams(params).toString()}`;
+
+  it("keeps an external source URL byte-for-byte when there is no retry", () => {
+    const src = "https://cdn.example.com/a.gif?v=1";
+    expect(getDropImagePreviewSources(src, ImageScale.AUTOx450)).toEqual([
+      proxy({ url: src, animated: "1", w: "800" }),
+    ]);
+  });
+
+  it("moves the retry marker from the source URL onto the proxy URL", () => {
+    expect(
+      getDropImagePreviewSources(
+        "https://cdn.example.com/a.gif?v=1&drop_media_retry=3",
+        ImageScale.AUTOx1080
+      )
+    ).toEqual([
+      proxy({
+        url: "https://cdn.example.com/a.gif?v=1",
+        animated: "1",
+        w: "1200",
+        drop_media_retry: "3",
+      }),
+    ]);
+  });
+
+  it("builds proxied MP4 and still URLs only for Giphy GIF renditions", () => {
+    expect(
+      getGiphyVideoPreviewSources(
+        "https://media2.giphy.com/media/abc123/200w.gif?cid=1"
+      )
+    ).toEqual({
+      videoSrc: proxy({
+        url: "https://media2.giphy.com/media/abc123/200w.mp4",
+        format: "mp4",
+      }),
+      posterSrc: proxy({
+        url: "https://media2.giphy.com/media/abc123/480w_s.jpg",
+        w: "800",
+      }),
+    });
+    expect(
+      getGiphyVideoPreviewSources(
+        "https://cdn.example.com/media/abc123/giphy.gif"
+      )
+    ).toBeNull();
+  });
 });

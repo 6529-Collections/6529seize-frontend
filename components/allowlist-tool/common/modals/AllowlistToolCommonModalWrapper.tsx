@@ -91,7 +91,7 @@ export default function AllowlistToolCommonModalWrapper({
                         onClose();
                       }}
                       type="button"
-                      className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out">
+                      className="tw-p-2.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-border-0 tw-text-iron-400 hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
                       <span className="sr-only tw-text-sm">Close</span>
                       <XMarkIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" aria-hidden="true" />
                     </button>

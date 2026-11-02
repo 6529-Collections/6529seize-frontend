@@ -9,15 +9,20 @@ import UserCICAndLevel, {
 } from "@/components/user/utils/UserCICAndLevel";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropTime from "./time/WaveDropTime";
+import { WithDropAuthorSignedMarker } from "./signature/DropAuthorSignedMarker";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { DropAuthorBadges } from "./DropAuthorBadges";
 import { useCallback } from "react";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import type { DropTimestampLayout } from "./drop.types";
+import { isAnonymousAuthor } from "@/helpers/anonymous-author.helpers";
+import { AnonymousAuthorName } from "./AnonymousDropAuthor";
 
 interface WaveDropHeaderProps {
   readonly drop: ApiDrop;
+  /** The grouped chat posts this header stands for, header first. */
+  readonly signatureGroup?: readonly ApiDrop[] | undefined;
   readonly isStorm: boolean;
   readonly currentPartIndex: number;
   readonly partsCount: number;
@@ -34,6 +39,7 @@ interface WaveDropHeaderProps {
 
 const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
   drop,
+  signatureGroup,
   isStorm,
   currentPartIndex,
   partsCount,
@@ -78,24 +84,30 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
               <p
                 className={`tw-m-0 tw-min-w-0 tw-max-w-full tw-font-semibold tw-leading-5 [overflow-wrap:anywhere] ${compact ? "tw-text-sm" : "tw-text-md"}`}
               >
-                <UserProfileTooltipWrapper user={authorIdentity}>
-                  <Link
-                    onClick={(e) => handleNavigation(e, `/${authorIdentity}`)}
-                    href={`/${authorIdentity}`}
-                    className="tw-rounded-sm tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
-                  >
-                    <ProfileNameWithAiMarker
-                      classification={drop.author.classification}
+                {isAnonymousAuthor(drop.author) ? (
+                  <AnonymousAuthorName />
+                ) : (
+                  <UserProfileTooltipWrapper user={authorIdentity}>
+                    <Link
+                      onClick={(e) => handleNavigation(e, `/${authorIdentity}`)}
+                      href={`/${authorIdentity}`}
+                      className="tw-rounded-sm tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-opacity-80 desktop-hover:hover:tw-underline"
                     >
-                      {authorIdentity}
-                    </ProfileNameWithAiMarker>
-                  </Link>
-                </UserProfileTooltipWrapper>
+                      <ProfileNameWithAiMarker
+                        classification={drop.author.classification}
+                      >
+                        {authorIdentity}
+                      </ProfileNameWithAiMarker>
+                    </Link>
+                  </UserProfileTooltipWrapper>
+                )}
               </p>
-              <UserCICAndLevel
-                level={drop.author.level}
-                size={UserCICAndLevelSize.SMALL}
-              />
+              {!isAnonymousAuthor(drop.author) && (
+                <UserCICAndLevel
+                  level={drop.author.level}
+                  size={UserCICAndLevelSize.SMALL}
+                />
+              )}
               <DropAuthorBadges
                 profile={drop.author}
                 wave={drop.wave}
@@ -105,10 +117,16 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
                 <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></div>
               )}
               {!isStackedTimestamp && (
-                <WaveDropTime timestamp={drop.created_at} />
+                <WithDropAuthorSignedMarker drop={drop} group={signatureGroup}>
+                  <WaveDropTime timestamp={drop.created_at} />
+                </WithDropAuthorSignedMarker>
               )}
             </div>
-            {isStackedTimestamp && <WaveDropTime timestamp={drop.created_at} />}
+            {isStackedTimestamp && (
+              <WithDropAuthorSignedMarker drop={drop} group={signatureGroup}>
+                <WaveDropTime timestamp={drop.created_at} />
+              </WithDropAuthorSignedMarker>
+            )}
           </div>
           {Boolean(badge) && <div className="tw-ml-2">{badge}</div>}
         </div>

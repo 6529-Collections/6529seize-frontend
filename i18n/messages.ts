@@ -1,9 +1,10 @@
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
-import { DE_DE_MESSAGES } from "@/i18n/messages/de-DE";
-import { EN_GB_MESSAGES } from "@/i18n/messages/en-GB";
+import {
+  getLocaleDictionary,
+  loadLocaleDictionary,
+  type LocaleDictionary,
+} from "@/i18n/localeDictionaries";
 import { EN_US_MESSAGES, type MessageKey } from "@/i18n/messages/en-US";
-import { ES_ES_MESSAGES } from "@/i18n/messages/es-ES";
-import { FR_FR_MESSAGES } from "@/i18n/messages/fr-FR";
 
 export const TAB_TOGGLE_WITH_OVERFLOW_MESSAGES = {
   overflowFallbackLabel: "More",
@@ -13,24 +14,40 @@ export const TAB_TOGGLE_WITH_OVERFLOW_MESSAGES = {
 type MessageParams = Record<string, string | number>;
 type RichMessageParams<Value> = Record<string, string | number | Value>;
 
-const MESSAGE_DICTIONARIES: Record<
-  SupportedLocale,
-  Partial<Record<MessageKey, string>>
-> = {
-  [DEFAULT_LOCALE]: EN_US_MESSAGES,
-  "en-GB": EN_GB_MESSAGES,
-  "fr-FR": FR_FR_MESSAGES,
-  "es-ES": ES_ES_MESSAGES,
-  "de-DE": DE_DE_MESSAGES,
-};
+// en-US is the complete source dictionary and is always bundled. Other
+// locales come from `@/i18n/localeDictionaries`, which browsers load on demand.
+const SOURCE_MESSAGES: LocaleDictionary = EN_US_MESSAGES;
+
+function getLocaleMessages(
+  locale: SupportedLocale
+): LocaleDictionary | undefined {
+  return locale === DEFAULT_LOCALE
+    ? SOURCE_MESSAGES
+    : getLocaleDictionary(locale);
+}
+
+/** Whether `t()` can already return `locale` copy instead of en-US fallback. */
+export function hasLocaleMessages(locale: SupportedLocale): boolean {
+  return getLocaleMessages(locale) !== undefined;
+}
+
+/** Resolves once `locale` copy is available to `t()`. */
+export async function loadLocaleMessages(
+  locale: SupportedLocale
+): Promise<void> {
+  if (locale !== DEFAULT_LOCALE) {
+    await loadLocaleDictionary(locale);
+  }
+}
 
 function getMessageTemplate(locale: SupportedLocale, key: MessageKey): string {
-  const fallbackTemplate = MESSAGE_DICTIONARIES[DEFAULT_LOCALE][key];
+  const fallbackTemplate = SOURCE_MESSAGES[key];
   if (fallbackTemplate === undefined) {
     throw new Error(`Missing source message for key: ${key}`);
   }
 
-  return MESSAGE_DICTIONARIES[locale][key] ?? fallbackTemplate;
+  // A locale whose dictionary has not loaded yet renders en-US copy.
+  return getLocaleMessages(locale)?.[key] ?? fallbackTemplate;
 }
 
 function interpolateMessage(template: string, params: MessageParams): string {

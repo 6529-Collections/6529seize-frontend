@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
+import * as videoConfig from "@/components/drops/view/item/content/media/SeizeVideoPlayer.config";
 import RememeImage from "@/components/nft-image/RememeImage";
 
 jest.mock("next/image", () => ({
@@ -12,6 +13,12 @@ jest.mock("@/helpers/Helpers", () => ({
 }));
 
 describe("RememeImage", () => {
+  beforeEach(() => {
+    // Existing source-selection assertions model visible artwork.
+    jest.spyOn(videoConfig, "useElementInView").mockReturnValue(true);
+    jest.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
+  });
+  afterEach(() => jest.restoreAllMocks());
   const nftBase = {
     id: "1",
     contract: "0xabc",
@@ -38,6 +45,21 @@ describe("RememeImage", () => {
     expect(video).toBeTruthy();
     expect(video).toHaveAttribute("src", expect.stringContaining("parsed-"));
     expect(video).toHaveAttribute("poster", "thumb.jpg");
+  });
+
+  it("retains its poster and defers the selected animation until visible", () => {
+    const visibility = jest.mocked(videoConfig.useElementInView);
+    visibility.mockReturnValue(false);
+    const nft = { ...nftBase, image: "file.mp4", animation: "file.mp4" };
+    const { container, rerender } = render(
+      <RememeImage nft={nft} animation height={300} />
+    );
+    const video = container.querySelector("video")!;
+    expect(video).toHaveAttribute("poster", "thumb.jpg");
+    expect(video).not.toHaveAttribute("src");
+    visibility.mockReturnValue(true);
+    rerender(<RememeImage nft={nft} animation height={300} />);
+    expect(video).toHaveAttribute("src", "parsed-file.mp4");
   });
 
   it("uses scaled artwork as the poster in the detail view", () => {

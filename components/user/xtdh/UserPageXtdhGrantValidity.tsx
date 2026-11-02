@@ -89,10 +89,10 @@ export default function UserPageXtdhGrantValidity({
   return (
     <div className="tw-flex tw-flex-col tw-gap-4">
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
-        <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+        <h3 className="tw-m-0 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
           Validity
         </h3>
-        <label className="tw-inline-flex tw-items-center tw-gap-2 tw-text-xs tw-font-medium tw-text-iron-200">
+        <label className="tw-inline-flex tw-min-h-8 tw-items-center tw-gap-2 tw-text-[13px] tw-font-medium tw-text-iron-300">
           <input
             type="checkbox"
             className="tw-h-4 tw-w-4 tw-rounded tw-border-iron-600 tw-bg-iron-900 focus:tw-ring-primary-400"
@@ -104,7 +104,7 @@ export default function UserPageXtdhGrantValidity({
       </div>
 
       {!neverExpires && (
-        <div className="tw-grid tw-grid-cols-1 tw-gap-6 md:tw-grid-cols-2">
+        <div className="tw-grid tw-grid-cols-1 tw-gap-6 md:tw-grid-cols-2 [&_input]:tw-text-[16px] [&_input]:tw-font-normal [&_input]:tw-tabular-nums [&_input]:tw-text-iron-100 md:desktop-hover:[&_input]:tw-text-[14px]">
           <CommonCalendar
             initialMonth={selectedDate.getMonth()}
             initialYear={selectedDate.getFullYear()}

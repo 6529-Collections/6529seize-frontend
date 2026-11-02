@@ -7,7 +7,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { useSearchParams } from "next/navigation";
-import { useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { buildCollectedStatsViewModel } from "./stats/helpers";
 import { CollectedStatsDetailsPanel } from "./stats/subcomponents/CollectedStatsDetailsPanel";
 import { CollectedStatsHeader } from "./stats/subcomponents/CollectedStatsHeader";
@@ -17,6 +17,8 @@ import { useCollectedStatsData } from "./stats/useCollectedStatsData";
 import { useDesktopSeasonRowCapacity } from "./stats/useDesktopSeasonRowCapacity";
 import CollectEntryLink from "@/components/collect/CollectEntryLink";
 import ButtonLink from "@/components/utils/button/ButtonLink";
+import ProfileCollectedActivityLink from "./ProfileCollectedActivityLink";
+import { getButtonClasses } from "@/components/utils/button/buttonStyles";
 import { t } from "@/i18n/messages";
 
 const getCollapsedStartedSeasons = ({
@@ -83,40 +85,45 @@ export default function UserPageCollectedStats({
   onCollectionShortcut,
   onSeasonShortcut,
 }: Readonly<UserPageCollectedStatsProps>) {
-  const { hasTouchScreen } = useDeviceInfo();
+  const { hasTouchScreen, isApp } = useDeviceInfo();
   const searchParams = useSearchParams();
-  const shouldAutoOpenDetails = Boolean(
-    searchParams.get(SEARCH_PARAM_ACTIVITY)
-  );
-  const [isDetailsOpen, setIsDetailsOpen] = useState(shouldAutoOpenDetails);
+  const details = searchParams.get("details");
+  const isDetailsOpen =
+    details === "open" ||
+    (details !== "closed" && Boolean(searchParams.get(SEARCH_PARAM_ACTIVITY)));
   const [preferredSeasonPreview, setPreferredSeasonPreview] =
     useState<PreferredSeasonPreview | null>(null);
   const [isDesktopSeasonListExpanded, setIsDesktopSeasonListExpanded] =
     useState(false);
   const detailsId = useId();
   const detailsScrollTargetRef = useRef<HTMLDivElement>(null);
+  const scrollOnOpenRef = useRef(false);
 
   const handleToggleDetails = () => {
-    if (isDetailsOpen) {
-      setIsDetailsOpen(false);
-      return;
-    }
-
-    setIsDetailsOpen(true);
-    if (!autoScrollDetailsOnOpen) {
-      return;
-    }
-
-    globalThis.requestAnimationFrame(() => {
-      const prefersReducedMotion =
-        typeof globalThis.matchMedia === "function" &&
-        globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      detailsScrollTargetRef.current?.scrollIntoView({
-        behavior: prefersReducedMotion ? "auto" : "smooth",
-        block: "start",
-      });
-    });
+    // Read the live URL so rapid clicks cannot toggle a stale render's value.
+    const url = new URL(globalThis.location.href);
+    const liveDetails = url.searchParams.get("details");
+    const wasOpen =
+      liveDetails === "open" ||
+      (liveDetails !== "closed" &&
+        Boolean(url.searchParams.get(SEARCH_PARAM_ACTIVITY)));
+    url.searchParams.set("details", wasOpen ? "closed" : "open");
+    scrollOnOpenRef.current = !wasOpen && autoScrollDetailsOnOpen;
+    // Next preserves its internal history state and synchronizes useSearchParams.
+    globalThis.history.replaceState(null, "", url);
   };
+
+  useEffect(() => {
+    if (!isDetailsOpen || !scrollOnOpenRef.current) return;
+    scrollOnOpenRef.current = false;
+    const prefersReducedMotion =
+      typeof globalThis.matchMedia === "function" &&
+      globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    detailsScrollTargetRef.current?.scrollIntoView({
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+      block: "start",
+    });
+  }, [isDetailsOpen]);
 
   const {
     statsPath,
@@ -125,6 +132,7 @@ export default function UserPageCollectedStats({
     tdh,
     ownerBalance,
     balanceMemes,
+    isDetailsLoading,
   } = useCollectedStatsData({
     profile,
     activeAddress,
@@ -243,19 +251,36 @@ export default function UserPageCollectedStats({
               }
               locale={locale}
               complete
+              profileActivityKey={isApp ? "complete-set" : undefined}
             />
           </span>
-          <ButtonLink
-            data-profile-action="Manage orders"
-            href="/collect/orders"
-            variant="tertiary"
-            size="sm"
-          >
-            {t(locale, "collect.entry.manage")}
-          </ButtonLink>
+          {isApp ? (
+            <ProfileCollectedActivityLink
+              data-profile-action="Manage orders"
+              href="/collect/orders"
+              activityKey="manage-orders"
+              className={getButtonClasses({
+                variant: "tertiary",
+                size: "sm",
+                className: "tw-no-underline hover:tw-no-underline",
+              })}
+            >
+              {t(locale, "collect.entry.manage")}
+            </ProfileCollectedActivityLink>
+          ) : (
+            <ButtonLink
+              data-profile-action="Manage orders"
+              href="/collect/orders"
+              variant="tertiary"
+              size="sm"
+            >
+              {t(locale, "collect.entry.manage")}
+            </ButtonLink>
+          )}
         </div>
         <CollectedStatsDetailsPanel
           isOpen={isDetailsOpen}
+          isLoading={isDetailsLoading}
           detailsId={detailsId}
           statsPath={statsPath}
           profile={profile}

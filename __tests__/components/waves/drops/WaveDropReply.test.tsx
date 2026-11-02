@@ -2,6 +2,12 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import React from "react";
 import WaveDropReply from "@/components/waves/drops/WaveDropReply";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
+import { ImageScale } from "@/helpers/image.helpers";
+import {
+  CDN_AVATAR_URL,
+  getRequestedImageSrc,
+  scaledAvatarPath,
+} from "@/__tests__/utils/avatarSrc";
 
 jest.mock("@/components/waves/drops/DropLoading", () => () => (
   <div data-testid="loading" />
@@ -57,13 +63,36 @@ describe("WaveDropReply", () => {
     expect(within(fixedContainer).getByTestId("loading")).toBeInTheDocument();
   });
 
-  it("shows not found when author missing", () => {
-    hookData.isLoading = false;
-    hookData.drop = { author: { handle: null } } as any;
-    render(<WaveDropReply {...baseProps} />);
-    const fixedContainer = expectFixedContainer();
-    expect(within(fixedContainer).getByTestId("not-found")).toBeInTheDocument();
-  });
+  it.each(["Anonymous", null, ""])(
+    "shows anonymous reply attribution without profile navigation when handle is %s",
+    (handle) => {
+      hookData.drop = {
+        id: "d",
+        author: { handle, pfp: CDN_AVATAR_URL, is_anonymous: true },
+        serial_no: 1,
+        moderation: { status: ApiDropModerationStatus.Visible, can_view: true },
+      };
+      render(<WaveDropReply {...baseProps} />);
+      expect(screen.getByText("Anonymous")).toBeInTheDocument();
+      expect(screen.queryByRole("link")).not.toBeInTheDocument();
+      expect(screen.queryByRole("img")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("not-found")).not.toBeInTheDocument();
+      expect(screen.getByTestId("content")).toBeInTheDocument();
+    }
+  );
+
+  it.each([null, ""])(
+    "shows not found for a non-anonymous author whose handle is %s",
+    (handle) => {
+      hookData.isLoading = false;
+      hookData.drop = { author: { handle } } as any;
+      render(<WaveDropReply {...baseProps} />);
+      const fixedContainer = expectFixedContainer();
+      expect(
+        within(fixedContainer).getByTestId("not-found")
+      ).toBeInTheDocument();
+    }
+  );
 
   it("shows not found when drop is empty", () => {
     hookData.isLoading = false;
@@ -94,6 +123,22 @@ describe("WaveDropReply", () => {
       ][0];
     expect(lastCallProps.textClassName).not.toContain("tw-block");
     expect(lastCallProps.linkify).toBe(false);
+  });
+
+  it("requests the AUTOx50 derivative of the replied author's profile picture", () => {
+    hookData.drop = {
+      id: "d",
+      author: { handle: "alice", pfp: CDN_AVATAR_URL },
+      serial_no: 1,
+      moderation: {
+        status: ApiDropModerationStatus.Visible,
+        can_view: true,
+      },
+    } as any;
+    render(<WaveDropReply {...baseProps} />);
+    expect(
+      getRequestedImageSrc(screen.getByAltText("alice's avatar"))
+    ).toContain(scaledAvatarPath(ImageScale.W_AUTO_H_50));
   });
 
   it("does not clip a globally moderated tombstone", () => {

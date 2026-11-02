@@ -62,10 +62,9 @@ import {
   ApiMemesExtendedDataTokenTypeEnum,
   type ApiMemesExtendedData,
 } from "@/generated/models/ApiMemesExtendedData";
-import { formatDate } from "@/i18n/format";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { MemesSort } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
+import { renderServerThenHydrate } from "@/__tests__/utils/timeZoneHydration";
 
 const mockNFTImage = jest.mocked(NFTImage);
 const mockNFTImageBalance = jest.mocked(NFTImageBalance);
@@ -221,13 +220,33 @@ describe("TheMemesCard", () => {
       screen.getByText("#6529").parentElement?.parentElement?.parentElement
     ).toBe(balance.parentElement?.parentElement);
 
-    const date = screen.getByText(
-      formatDate(DEFAULT_LOCALE, nft.mint_date).replace(/\s+/g, " ").trim()
-    );
+    const date = screen.getByText("Jan 2, 2024");
     expect(date).toHaveClass("tw-w-full", "tw-text-center", "tw-text-iron-500");
     expect(date).not.toBe(
       screen.getByText("#6529").parentElement?.parentElement
     );
+  });
+
+  it("shows the UTC mint day so server HTML hydrates unchanged for an Auckland viewer", async () => {
+    // 11:27 UTC on Oct 12 is already Oct 13 in Auckland; the mint day is Oct 12.
+    const result = await renderServerThenHydrate(
+      <TheMemesCard
+        nft={{ ...nft, mint_date: new Date("2026-10-12T11:27:11.000Z") }}
+        sort={MemesSort.AGE}
+        volumeType={VolumeType.ALL_TIME}
+        hasConnectedProfile={false}
+      />,
+      { serverTimeZone: "UTC", clientTimeZone: "Pacific/Auckland" }
+    );
+    try {
+      expect(result.serverHtml).toContain("Oct 12, 2026");
+      expect(result.recoverableErrors).toEqual([]);
+      expect(result.hydrationConsoleErrors).toEqual([]);
+      expect(result.container).toHaveTextContent("Oct 12, 2026");
+      expect(result.container).not.toHaveTextContent("Oct 13, 2026");
+    } finally {
+      await result.cleanup();
+    }
   });
 
   it("renders localized card metrics and link names when a locale is provided", () => {

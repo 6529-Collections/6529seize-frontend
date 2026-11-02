@@ -13,12 +13,28 @@ const CONTRACTS = [
     inputs: [/^\.github\/workflows\/device-farm-qa\.yml$/u],
   },
   {
+    test: "__tests__/scripts/mobile-lab-workflow.test.ts",
+    inputs: [/^\.github\/workflows\/mobile-lab\.yml$/u],
+  },
+  {
     test: "__tests__/scripts/production-canary-workflow.test.ts",
     inputs: [/^\.github\/workflows\/production-e2e\.yml$/u],
   },
   {
     test: "__tests__/contracts/hover-revealed-controls.test.ts",
     inputs: [/^(?:app|components)\/.*\.tsx$/u, /^tailwind\.config\./u],
+  },
+  {
+    test: "__tests__/contracts/keyboard-focus-indicators.test.ts",
+    inputs: [
+      /^(?:app|components)\/.*\.tsx?$/u,
+      /^tailwind\.config\./u,
+      /^__tests__\/contracts\/support\/keyboardFocusIndicators\.ts$/u,
+    ],
+  },
+  {
+    test: "__tests__/styles/link-focus-visibility.test.ts",
+    inputs: [/^styles\/globals\.css$/u],
   },
   {
     test: "__tests__/scripts/changed-file-gates.test.ts",

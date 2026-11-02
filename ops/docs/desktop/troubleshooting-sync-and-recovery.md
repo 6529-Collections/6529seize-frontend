@@ -36,6 +36,24 @@ More disruptive transaction recovery is Transactions > Advanced Options > Reset 
 
 For a persistent failure, share app version and OS from 6529 Desktop > About, the two Last Block values, failing worker/status, and a redacted error or transaction hash. The bot cannot inspect the device; never share wallet secrets or credential-bearing RPC URLs.
 
+## Delegation upgrade replay
+
+In desktop builds with the native four-wallet index upgrade,
+`Waiting for native delegation timestamp/scope replay to complete` means
+NFTDelegation must finish its automatic replay before TDH can run. Let an
+active replay finish rather than starting transaction reconciliation or resets.
+
+The replay requires historical contract state (`eth_call`) back to the
+NFTDelegation deployment block. Passing the RPC connection test does not
+guarantee archive access. If NFTDelegation Logs show historical-state errors,
+select an archive-capable Ethereum RPC and rerun NFTDelegation; it resumes
+from saved progress. Live indexed rows are preserved until replacement.
+
+After completion, recalculate TDH and compare results at the same Last Block.
+NFTDelegation Reset clears upgrade progress and restarts replay on a later
+worker run; it does not scan immediately. Do not delete wallets or the app
+database to repair provider errors.
+
 ## Common Scenarios
 
 ### Repair transaction history
@@ -160,3 +178,7 @@ time and RPC access and does not change on-chain holdings. Let Transactions and
 NFTDelegation finish syncing before recalculating TDH. A continuing mismatch after
 reset/resync/recalculation moves to diagnostics, not repeated resets. NFT recovery
 and wallet recovery remain separate procedures.
+
+### Waiting for consolidation settings
+
+Four-wallet native TDH uses the activation cutoff from the selected backend. If TDH reports that it is waiting for valid consolidation settings, prior results remain displayed. Check connectivity and that this backend exposes its consolidation policy, then retry `Recalculate TDH Now`. This is separate from an Ethereum archive RPC replay error. A changed cutoff or backend makes the next incremental calculation rebuild all groups under the new policy.

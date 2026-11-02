@@ -10,6 +10,7 @@ export type MemesQuickVoteDialogState = Pick<
   UseMemesQuickVoteQueueResult,
   | "activeDrop"
   | "hasDiscoveryError"
+  | "submissionError"
   | "isExhausted"
   | "isRestartingRound"
   | "leftThisRoundCount"
@@ -44,7 +45,7 @@ export const useMemesQuickVoteDialogController =
     const lastIssuedSessionIdRef = useRef(0);
     const reservedSessionIdRef = useRef<number | null>(null);
     const quickVoteQueue = useMemesQuickVoteQueue({
-      enabled: quickVoteSessionId > 0,
+      enabled: isQuickVoteOpen,
       sessionId: quickVoteSessionId,
     });
     const { retryDiscovery } = quickVoteQueue;
@@ -103,6 +104,7 @@ export const useMemesQuickVoteDialogController =
       dialogState: {
         activeDrop: quickVoteQueue.activeDrop,
         hasDiscoveryError: quickVoteQueue.hasDiscoveryError,
+        submissionError: quickVoteQueue.submissionError,
         isExhausted: quickVoteQueue.isExhausted,
         isRestartingRound: quickVoteQueue.isRestartingRound,
         isOpen: isQuickVoteOpen,

@@ -53,6 +53,22 @@ describe("Meme Lab Distribution Page", () => {
     );
   });
 
+  it.each([
+    [{ locale: "fr-FR" }, "fr-FR"],
+    [{}, "en-US"],
+  ])(
+    "declares the language of the page content for search params %j",
+    async (searchParams, lang) => {
+      const page = await MemeDistributionPage({
+        searchParams: Promise.resolve(searchParams),
+      });
+
+      render(page);
+
+      expect(screen.getByRole("main")).toHaveAttribute("lang", lang);
+    }
+  );
+
   it("falls back to the default locale for unsupported locale values", async () => {
     const page = await MemeDistributionPage({
       searchParams: Promise.resolve({ locale: "unsupported-LC" }),

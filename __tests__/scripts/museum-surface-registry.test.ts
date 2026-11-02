@@ -205,8 +205,8 @@ describe("Museum surface registry", () => {
   it("validates complete ownership of the checked-in Museum inventory", () => {
     const result = registryScript.validateRegistry(process.cwd());
     expect(result.inventory.routes).toHaveLength(56);
-    expect(result.inventory.supportFiles).toHaveLength(16);
-    expect(result.inventory.components).toHaveLength(71);
+    expect(result.inventory.supportFiles).toHaveLength(13);
+    expect(result.inventory.components).toHaveLength(70);
     expect(result.inventory.e2eSpecs).toHaveLength(6);
   });
 

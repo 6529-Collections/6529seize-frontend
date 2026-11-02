@@ -13,6 +13,15 @@ export interface RankedPageMatch {
 }
 
 export const PAGE_SEARCH_ALIASES_BY_HREF: Record<string, string[]> = {
+  "/safe-collecting": ["delegation", "delegations", "Delegation Center"],
+  "/safe-collecting/tap-guide": [
+    "delegation",
+    "delegations",
+    "Wallet Architecture",
+  ],
+  "/safe-collecting/faq": ["delegation", "delegations", "Delegation FAQ"],
+  "/safe-collecting/consolidation-use-cases": ["delegation", "delegations"],
+  "/safe-collecting/wallet-checker": ["delegation", "delegations"],
   "/waves/create": [
     "Create wave",
     "New wave",

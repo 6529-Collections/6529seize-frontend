@@ -26,6 +26,8 @@ Legacy tooltip-only links should resolve here.
 - Web expanded rows keep names inline and show a tooltip only when the name is
   truncated.
 - Truncation is re-measured when row width or viewport size changes.
+- Name tooltips render above the sidebar, so they stay fully readable beside
+  subwave rows and at the sidebar's right edge.
 - Direct-message rows follow the same web tooltip rules as wave rows.
 - Direct-message names that include wallet IDs are shown with shortened address
   formatting.
@@ -72,13 +74,15 @@ Timestamp source and precedence:
 
 - A parent row with subwaves can show a `new` badge beside the expand/collapse
   control.
-- The badge totals unread drops across all visible, unmuted subwaves where read
-  state is available. Joining or following a subwave is not required.
+- The badge totals unread drops across visible subwaves that you follow and
+  have not muted. Subwaves you have not joined or followed do not count.
 - The total excludes your own drops and drops from muted profiles.
 - Muting the parent hides the aggregate. Muting an individual subwave removes
   that subwave's unread contribution.
 - The initial value comes from the wave list. Once subwave rows are loaded,
-  newer unread activity in those rows can increase the total.
+  newer unread activity in followed, unmuted rows can increase the total.
+- Expanded subwave rows list unmuted subwaves first, newest activity first,
+  followed by muted subwaves in the same activity order.
 
 ## Sorting and Section Behavior
 
@@ -95,8 +99,8 @@ Timestamp source and precedence:
 - If websocket delivery pauses, current labels remain until live updates or a
   list refresh.
 - Reconnect/refetch can refresh stale timestamps.
-- A subwave with no established read state has no historical unread baseline,
-  so its older drops are not added to the parent badge.
+- A followed subwave with no established read state has no historical unread
+  baseline, so its older drops are not added to the parent badge.
 - If no timestamp is returned after refresh, `Last drop` remains hidden.
 - Resizing can change truncation and tooltip eligibility in expanded rows.
 - Active-row highlight and unread badges do not block web hover tooltips.

@@ -428,6 +428,11 @@ describe("useNativeKeyboard", () => {
     });
 
     expect(result.current.isVisible).toBe(true);
+    expect(
+      document.documentElement.style.getPropertyValue(
+        "--native-keyboard-layout-transition-easing"
+      )
+    ).toBe("cubic-bezier(0.1, 0.8, 0.2, 1)");
 
     act(() => {
       listeners["keyboardWillHide"]?.();
@@ -583,6 +588,11 @@ describe("useNativeKeyboard", () => {
     expect(result.current.isVisible).toBe(true);
     expect(result.current.keyboardHeight).toBe(280);
     expect(result.current.phase).toBe("showing");
+    expect(
+      document.documentElement.style.getPropertyValue(
+        "--native-keyboard-layout-transition-easing"
+      )
+    ).toBe("ease-out");
   });
 
   it("does not set up listeners outside native app mode", () => {

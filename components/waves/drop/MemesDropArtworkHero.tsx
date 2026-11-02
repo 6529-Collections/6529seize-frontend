@@ -1,7 +1,11 @@
+"use client";
+
 import artworkStyles from "@/components/drops/view/item/content/media/ArtworkFrame.module.css";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import videoFrameStyles from "@/components/drops/view/item/content/media/SeizeVideoFrame.module.css";
 import { ImageScale } from "@/helpers/image.helpers";
+import { useIsMobileDeviceStatus } from "@/hooks/isMobileDevice";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import clsx from "clsx";
 import type { MemesDropMedia } from "./memesDropPanelTypes";
 
@@ -12,6 +16,18 @@ interface MemesDropArtworkHeroProps {
 export function MemesDropArtworkHero({
   artworkMedia,
 }: MemesDropArtworkHeroProps) {
+  const { isMobileDevice, isDeviceDetectionResolved } =
+    useIsMobileDeviceStatus();
+  const device = useDeviceInfo();
+  // Wait for device detection so hydration cannot start an original download
+  // on a phone, tablet (including desktop-UA iPads), or native mobile app.
+  const allowAutomaticOriginal =
+    isDeviceDetectionResolved &&
+    !isMobileDevice &&
+    !device.isMobileDevice &&
+    !device.isApp &&
+    !device.isAppleMobile &&
+    !device.hasTouchScreen;
   const loadStrategy =
     artworkMedia?.mime_type === "text/html" ? "in-view" : "eager";
   const isImage = artworkMedia?.mime_type.startsWith("image/") ?? false;
@@ -54,6 +70,11 @@ export function MemesDropArtworkHero({
                 imageScale={ImageScale.AUTOx1080}
                 showOriginalQualityToggle={isImage}
                 preferHighQualityImage={isImage}
+                autoAnimateGif={
+                  allowAutomaticOriginal &&
+                  artworkMedia.mime_type === "image/gif"
+                }
+                imageLoadingLayout="artwork"
                 loadStrategy={loadStrategy}
                 artworkVideoLayout={isVideo}
                 fillVideoContainer={!isVideo}

@@ -21,6 +21,22 @@ describe("getStatsPath", () => {
     expect(result).toBe("consolidation/key123");
   });
 
+  it("uses the complete four-wallet key and allows selecting the fourth wallet", () => {
+    const wallets = ["0xaaa", "0xbbb", "0xccc", "0xddd"];
+    const profile = {
+      handle: "four-wallet-collector",
+      wallets: wallets.map((wallet) => ({ wallet, display: wallet, tdh: 1 })),
+      primary_wallet: wallets[0],
+      consolidation_key: wallets.join("-"),
+    } as ApiIdentity;
+
+    expect(getProfileStatsPath(profile)).toBe(
+      "consolidation/0xaaa-0xbbb-0xccc-0xddd"
+    );
+    expect(getStatsPath(profile, wallets[3]!)).toBe("wallet/0xddd");
+    expect(getCollectedStatsIdentityKey(profile)).toBe("four-wallet-collector");
+  });
+
   it("falls back to first wallet when no active address and no consolidation key", () => {
     const profile = {
       wallets: [{ wallet: "0x999" }],

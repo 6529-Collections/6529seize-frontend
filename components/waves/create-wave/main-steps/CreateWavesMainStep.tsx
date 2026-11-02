@@ -42,7 +42,7 @@ export default function CreateWavesMainStep({
         type="button"
         disabled={!isDone || disabled}
         onClick={() => onStep(step)}
-        className="tw-group tw-relative tw-flex tw-items-center tw-border-none tw-bg-transparent tw-p-0 focus:tw-outline-none"
+        className="tw-group tw-relative tw-flex tw-items-center tw-border-none tw-bg-transparent tw-p-0 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
       >
         <span className="tw-flex tw-h-8 tw-items-center">
           <CreateWavesMainStepIcon stepStatus={stepStatus} />

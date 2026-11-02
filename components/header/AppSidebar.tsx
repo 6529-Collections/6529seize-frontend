@@ -70,8 +70,8 @@ export default function AppSidebar({
   const { canAccessLanding: showDropForge } = useDropForgePermissions();
   const moderatorAccess = useContentModeratorAccess();
   const showModeration = moderatorAccess.data?.moderator === true;
-  const hasOpenModerationReports =
-    moderatorAccess.data?.has_open_reports === true;
+  const hasPendingModerationCases =
+    (moderatorAccess.data?.needs_review_count ?? 0) > 0;
   const capacitor = useCapacitor();
   const cookieConsent = useOptionalCookieConsent();
   const sections = useSidebarSections(
@@ -117,7 +117,7 @@ export default function AppSidebar({
               label: t(DEFAULT_LOCALE, "contentModeration.moderator.menu"),
               path: "/content-moderation",
               icon: WatchTowerIcon,
-              hasIndicator: hasOpenModerationReports,
+              hasIndicator: hasPendingModerationCases,
               indicatorLabel: t(
                 DEFAULT_LOCALE,
                 "contentModeration.moderator.openReportsIndicator"
@@ -136,7 +136,7 @@ export default function AppSidebar({
 
       return [item];
     });
-  }, [hasOpenModerationReports, sections, showDropForge, showModeration]);
+  }, [hasPendingModerationCases, sections, showDropForge, showModeration]);
 
   // Close on right-to-left swipe
   useEffect(() => {

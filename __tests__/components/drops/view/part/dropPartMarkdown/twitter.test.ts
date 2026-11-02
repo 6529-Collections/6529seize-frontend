@@ -1,4 +1,21 @@
-import { ensureTwitterLink, isTwitterLink } from "@/components/drops/view/part/dropPartMarkdown/twitter";
+import {
+  ensureTwitterLink,
+  isTwitterLink,
+  TWITTER_DOMAINS,
+} from "@/components/drops/view/part/dropPartMarkdown/twitter";
+
+// Simulate the client bundle: the marker module throws exactly as it does when
+// a Client Component graph reaches it, and cheerio must never load either.
+jest.mock(
+  "next/dist/compiled/server-only",
+  () => {
+    throw new Error("server-only module reached the client graph");
+  },
+  { virtual: true }
+);
+jest.mock("cheerio", () => {
+  throw new Error("cheerio reached the client graph");
+});
 
 describe("ensureTwitterLink", () => {
   it.each([
@@ -65,4 +82,21 @@ describe("isTwitterLink", () => {
     expect(isTwitterLink("https://twitter.com/test/1234567890")).toBe(false);
     expect(isTwitterLink("not-a-url")).toBe(false);
   });
+});
+
+describe("client bundle boundary", () => {
+  it("keeps the drop markdown helper free of server-only Twitter code", () => {
+    expect(TWITTER_DOMAINS).toEqual(["twitter.com", "x.com"]);
+  });
+
+  it.each(["fetcher", "parser"])(
+    "marks lib/twitter/%s as server-only",
+    (moduleName) => {
+      jest.isolateModules(() => {
+        expect(() => require(`@/lib/twitter/${moduleName}`)).toThrow(
+          "server-only module reached the client graph"
+        );
+      });
+    }
+  );
 });

@@ -4,6 +4,8 @@
   `BrainMobileTabs`, across desktop web, mobile web, and the app.
 - Untranslated surface: wave information (`waves.information.open`), Settings
   (`competitions.settings`), Votes and its subtabs, and the legacy Settings notice.
+  The Create menu's curation and subwave descriptions (`waves.create.actions.*Description`)
+  use the same fallback.
   Mobile Chat, Sales, My Stream and Polls labels and shared tab-loading status now
   use `wave.navigation` keys, with English fallback in untranslated locales.
   `MyStreamWaveDesktopTabs` also retains English literals for Chat, Leaderboard,

@@ -16,6 +16,11 @@ export const BLOCK_ACTIVITY_QUERY_KEY = [
   "block-activity",
 ] as const;
 
+export const ENCRYPTED_REPORTS_QUERY_KEY = [
+  QueryKey.CONTENT_MODERATION_REPORTS,
+  "encrypted-reports",
+] as const;
+
 export const PUBLIC_PROFILE_MODERATION_STATUS_QUERY_KEY = [
   QueryKey.CONTENT_MODERATION_REPORTS,
   "public-profile-status",
@@ -105,12 +110,17 @@ export const reconcileIdentityFollowingAfterBlockChange = async (
   profileHandle: string | null | undefined
 ): Promise<void> => {
   if (profileHandle) {
+    // Preserve legacy eager clearing; viewer-scoped entries must only refetch.
+    // This helper has no viewer identity and must not overwrite other accounts.
     queryClient.setQueryData<ApiIdentitySubscriptionActions>(
       [QueryKey.IDENTITY_FOLLOWING_ACTIONS, profileHandle],
       { actions: [] }
     );
   }
   await Promise.allSettled([
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.IDENTITY_FOLLOWING],
+    }),
     queryClient.invalidateQueries({
       queryKey: [QueryKey.IDENTITY_FOLLOWING_ACTIONS],
     }),

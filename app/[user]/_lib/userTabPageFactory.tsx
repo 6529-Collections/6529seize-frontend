@@ -1,29 +1,37 @@
 import { TransferProvider } from "@/components/nft-transfer/TransferState";
 import { getAppMetadata } from "@/components/providers/metadata";
-import UserPageLayout from "@/components/user/layout/UserPageLayout";
+import UserPageClientHydrator from "@/components/user/layout/UserPageClientHydrator";
+import UserPageDropModal from "@/components/user/layout/UserPageDropModal";
+import UserPageTabTransition from "@/components/user/layout/UserPageTabTransition";
+import { getUserPageHeaderState } from "@/components/user/user-page-header/UserPageHeader";
+import UserPageHeaderRefresh from "@/components/user/user-page-header/UserPageHeaderRefresh";
+import { getHandlesFromProfile } from "@/components/react-query-wrapper/profileQueryHandles";
+import { getIdentityQueryKey } from "@/services/api/identity-query";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
+import { cache } from "react";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getMetadataForUserPage, getUserPageTitle } from "@/helpers/Helpers";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import { userPageNeedsRedirect } from "@/helpers/server.helpers";
 import {
-  getUserProfile,
-  userPageNeedsRedirect,
-} from "@/helpers/server.helpers";
+  loadProfileStatements,
+  loadUserProfile,
+} from "@/helpers/user-page.server";
 import JsonLdScript from "@/lib/structured-data/json-ld";
 import { buildProfilePageJsonLd } from "@/lib/structured-data/profile";
-import { commonApiFetch } from "@/services/api/common-api";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
 type TabProps = { readonly profile: ApiIdentity };
 type UserRouteParams = { user: string };
 type UserSearchParams = Record<string, string | string[] | undefined>;
-type ProfileLoadResult =
-  | { readonly ok: true; readonly profile: ApiIdentity }
-  | { readonly ok: false; readonly error: unknown };
 
 const PROBE_USER_SUFFIXES = [
   ".html",
@@ -71,6 +79,16 @@ const normalizeSearchParams = (
   }, {} as UserSearchParams);
 };
 
+const serializeSearchParams = (query: UserSearchParams): string => {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    for (const entry of Array.isArray(value) ? value : [value]) {
+      if (entry !== undefined) params.append(key, entry);
+    }
+  }
+  return params.toString();
+};
+
 const isNotFoundError = (error: unknown): boolean => {
   if (
     error === null ||
@@ -100,26 +118,27 @@ const isProbeLikeUserSlug = (user: string): boolean => {
   return PROBE_USER_SUFFIXES.some((suffix) => normalized.endsWith(suffix));
 };
 
-const loadProfile = async (
-  user: string,
-  headers: Record<string, string>
-): Promise<ProfileLoadResult> => {
-  try {
-    return { ok: true, profile: await getUserProfile({ user, headers }) };
-  } catch (error) {
-    return { ok: false, error };
+// The identity request itself is shared with generateMetadata through
+// loadUserProfile, so the layout, page and metadata make one request.
+export const getUserPageProfile = cache(
+  async (user: string): Promise<ApiIdentity> => {
+    if (!user || isProbeLikeUserSlug(user)) {
+      notFound();
+    }
+    const result = await loadUserProfile(user.toLowerCase());
+    if (!result.ok) {
+      if (isNotFoundError(result.error)) {
+        notFound();
+      }
+      throw result.error;
+    }
+    return result.profile;
   }
-};
+);
 
-const loadPublicProfileBio = async (
-  user: string,
-  headers: Record<string, string>
-): Promise<string | null> => {
+const loadPublicProfileBio = async (user: string): Promise<string | null> => {
   try {
-    const statements = await commonApiFetch<CicStatement[]>({
-      endpoint: `profiles/${encodeURIComponent(user)}/cic/statements`,
-      headers,
-    });
+    const statements = await loadProfileStatements(user);
     return (
       statements.find(
         (statement) =>
@@ -166,17 +185,19 @@ export function createUserTabPage<
     }
 
     const normalizedUser = user.toLowerCase();
-    const resolvedSearchParams = searchParams ? await searchParams : undefined;
+    const profileUpdatedAt = Date.now();
+    // The identity request and the search params are independent, so they
+    // resolve together. The existence check still runs before anything renders
+    // or suspends, which keeps unknown profiles on a real 404 status.
+    const [resolvedSearchParams, profile] = await Promise.all([
+      searchParams,
+      getUserPageProfile(user),
+    ]);
     const query: UserSearchParams = normalizeSearchParams(resolvedSearchParams);
-    const headers = await getAppCommonHeaders();
-    const profileResult = await loadProfile(normalizedUser, headers);
-    if (!profileResult.ok) {
-      if (isNotFoundError(profileResult.error)) {
-        notFound();
-      }
-      throw profileResult.error;
+    const needsXtdhDefault = subroute === "xtdh" && query["tab"] === undefined;
+    if (needsXtdhDefault) {
+      query["tab"] = "granted";
     }
-    const profile = profileResult.profile;
 
     const needsRedirect = userPageNeedsRedirect({
       profile,
@@ -185,9 +206,19 @@ export function createUserTabPage<
     });
 
     if (needsRedirect) {
-      redirect(needsRedirect.redirect.destination);
+      return redirect(needsRedirect.redirect.destination);
+    }
+    if (needsXtdhDefault) {
+      return redirect(
+        `/${encodeURIComponent(user)}/xtdh?${serializeSearchParams(query)}`
+      );
     }
 
+    const headerStatePromise = getUserPageHeaderState(
+      normalizedUser,
+      profile.id,
+      profile.handle?.toLowerCase() ?? null
+    );
     const extraProps = getTabProps
       ? await getTabProps({ profile, query })
       : ({} as TExtra);
@@ -197,30 +228,42 @@ export function createUserTabPage<
     const profilePath = `/${encodeURIComponent(canonicalUser)}${
       subroute ? `/${subroute}` : ""
     }`;
+    const queryClient = new QueryClient();
+    for (const handle of new Set([
+      normalizedUser,
+      ...getHandlesFromProfile(profile),
+    ])) {
+      queryClient.setQueryData(getIdentityQueryKey(handle), profile, {
+        updatedAt: profileUpdatedAt,
+      });
+    }
 
-    const TabComponent = (
-      <>
+    return (
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        {/* The header snapshot streams after the tab instead of holding back
+            the first flush; the layout's header shares the same requests. */}
+        <UserPageHeaderRefresh state={headerStatePromise} />
         <JsonLdScript
           data={buildProfilePageJsonLd({
             profile,
             path: profilePath,
           })}
         />
-        <UserPageLayout
-          profile={profile}
-          handleOrWallet={normalizedUser}
+        <UserPageClientHydrator
           pageTitle={getUserPageTitle(profile, subroute)}
-        >
-          <Tab profile={profile} {...extraProps} />
-        </UserPageLayout>
-      </>
+        />
+        <UserPageDropModal />
+        <UserPageTabTransition>
+          {enableTransfer ? (
+            <TransferProvider>
+              <Tab profile={profile} {...extraProps} />
+            </TransferProvider>
+          ) : (
+            <Tab profile={profile} {...extraProps} />
+          )}
+        </UserPageTabTransition>
+      </HydrationBoundary>
     );
-
-    if (enableTransfer) {
-      return <TransferProvider>{TabComponent}</TransferProvider>;
-    }
-
-    return TabComponent;
   }
 
   async function generateMetadata({
@@ -238,8 +281,12 @@ export function createUserTabPage<
     }
 
     const normalizedUser = resolvedParams.user.toLowerCase();
-    const headers = await getAppCommonHeaders();
-    const profileResult = await loadProfile(normalizedUser, headers);
+    // The public bio only needs the route identity, so it loads alongside the
+    // profile instead of after it. Both loaders are request-memoized, so the
+    // layout, page and header reuse these responses instead of refetching.
+    const profilePromise = loadUserProfile(normalizedUser);
+    const publicBioPromise = loadPublicProfileBio(normalizedUser);
+    const profileResult = await profilePromise;
     if (!profileResult.ok) {
       if (isNotFoundError(profileResult.error)) {
         notFound();
@@ -256,7 +303,7 @@ export function createUserTabPage<
       );
     }
     const profile = profileResult.profile;
-    const publicBio = await loadPublicProfileBio(normalizedUser, headers);
+    const publicBio = await publicBioPromise;
     const canonicalUser = profile.handle ?? profile.primary_wallet;
     const canonicalUserPath = canonicalUser
       ? `/${encodeURIComponent(canonicalUser)}`
@@ -265,13 +312,16 @@ export function createUserTabPage<
       canonicalUserPath && subroute
         ? `${canonicalUserPath}/${subroute}`
         : canonicalUserPath;
-    return getAppMetadata(getMetadataForUserPage(profile, subroute, publicBio), {
-      canonicalPath,
-      robots: {
-        index: !PROFILE_NOINDEX_SUBROUTES.has(subroute),
-        follow: true,
-      },
-    });
+    return getAppMetadata(
+      getMetadataForUserPage(profile, subroute, publicBio),
+      {
+        canonicalPath,
+        robots: {
+          index: !PROFILE_NOINDEX_SUBROUTES.has(subroute),
+          follow: true,
+        },
+      }
+    );
   }
 
   return { Page, generateMetadata };

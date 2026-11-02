@@ -92,7 +92,7 @@ export default function LatestDropAllowlistStatus({
       retry: false,
     });
 
-  if (!hasTokenId) {
+  if (!hasTokenId || !normalizedAddress) {
     return null;
   }
 
@@ -105,9 +105,7 @@ export default function LatestDropAllowlistStatus({
   const hasDistribution = data?.has_distribution;
 
   let status = t(locale, "home.mintAllowlist.notFound");
-  if (!address) {
-    status = t(locale, "home.mintAllowlist.connectWallet");
-  } else if (walletIsTransitioning || isPending) {
+  if (walletIsTransitioning || isPending) {
     status = t(locale, "home.mintAllowlist.checking");
   } else if (connectionState === "error" || isError) {
     status = t(locale, "home.mintAllowlist.unavailable");
@@ -125,7 +123,7 @@ export default function LatestDropAllowlistStatus({
 
   return (
     <section className="tw-min-w-0">
-      <h3 className="tw-m-0 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-400">
+      <h3 className="tw-m-0 tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-500">
         {t(locale, "home.mintAllowlist.label")}
       </h3>
       <div
@@ -149,7 +147,7 @@ export default function LatestDropAllowlistStatus({
             ))}
           </ul>
         ) : (
-          <span className="tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300">
+          <span className="tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-300">
             {status}
           </span>
         )}

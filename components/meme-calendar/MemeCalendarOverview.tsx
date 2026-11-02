@@ -5,6 +5,7 @@ import ClientOnly from "@/components/client-only/ClientOnly";
 import Button from "@/components/utils/button/Button";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useVisibleInterval } from "@/hooks/usePageVisibility";
 import type { PublishedMemesStatus } from "@/hooks/usePublishedMemes";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
@@ -14,7 +15,6 @@ import Link from "next/link";
 import {
   memo,
   useCallback,
-  useEffect,
   useId,
   useMemo,
   useRef,
@@ -317,10 +317,7 @@ function MemeCalendarOverviewNextMintContent({
     [mintInputValue, handleMintSelection, locale]
   );
 
-  useEffect(() => {
-    const tick = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(tick);
-  }, []);
+  useVisibleInterval(() => setNow(new Date()), 1000);
 
   const mintDetails = useMemo(
     () => getMintTimelineDetails(selectedMintNumber),
@@ -646,8 +643,9 @@ function MemeCalendarOverviewUpcomingMints({
           {upcomingHeading}
         </div>
         <div className="tw-min-w-0 tw-text-sm tw-leading-5 tw-text-iron-400 sm:tw-max-w-[15rem] sm:tw-text-right">
-          {formatFullDate(seasonStart, displayTz, locale)} -{" "}
-          {formatFullDate(seasonEndInclusive, displayTz, locale)}
+          {/* Calendar dates (00:00 UTC carriers): the same in every zone. */}
+          {formatFullDate(seasonStart, "utc", locale)} -{" "}
+          {formatFullDate(seasonEndInclusive, "utc", locale)}
         </div>
       </div>
 

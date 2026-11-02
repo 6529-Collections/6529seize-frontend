@@ -16,7 +16,7 @@ describe("UserPageSubscriptionsAirdropAddress", () => {
     const link = screen.getByRole("link", { name: /Change airdrop address/i });
     expect(link).toHaveAttribute(
       "href",
-      `/delegation/register-delegation?collection=${MEMES_CONTRACT}&use_case=${AIRDROPS_USE_CASE.use_case}`
+      `/safe-collecting/register-delegation?collection=${MEMES_CONTRACT}&use_case=${AIRDROPS_USE_CASE.use_case}`
     );
     expect(link.querySelector("svg")).toBeInTheDocument();
   });

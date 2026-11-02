@@ -16,7 +16,6 @@ import {
   assertPublicUrl,
   fetchPublicUrl,
   parsePublicUrl,
-  type UrlGuardOptions,
 } from "@/lib/security/urlGuard";
 import LruTtlCache from "@/lib/cache/lruTtl";
 import {
@@ -43,6 +42,7 @@ import { detectEnsTarget, fetchEnsPreview, EnsPreviewError } from "./ens";
 import { HTML_FETCH_HEADERS, createFetchConfig } from "./fetchConfig";
 import { fetchTokenUriJson } from "./tokenUriMetadata";
 import { copyPreviewCacheEntry } from "./previewCacheBudget";
+import { PUBLIC_URL_OPTIONS } from "./publicUrlOptions";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const CACHE_MAX_ITEMS = 500;
@@ -52,23 +52,6 @@ const BATCH_CONCURRENCY = 5;
 const MAX_BATCH_URLS = BATCH_CONCURRENCY;
 const HTML_RESPONSE_MAX_BYTES = 8 * 1024 * 1024;
 const BATCH_REQUEST_MAX_BYTES = 64 * 1024;
-
-const PUBLIC_URL_POLICY: UrlGuardOptions["policy"] = {
-  blockedHosts: ["localhost", "127.0.0.1", "::1"],
-  blockedHostSuffixes: [
-    ".local",
-    ".internal",
-    ".lan",
-    ".intra",
-    ".corp",
-    ".home",
-    ".test",
-  ],
-};
-
-const PUBLIC_URL_OPTIONS: UrlGuardOptions = {
-  policy: PUBLIC_URL_POLICY,
-};
 
 type PreviewContext = {
   readonly apiAuth?: string | null | undefined;

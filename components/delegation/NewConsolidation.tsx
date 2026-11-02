@@ -1,10 +1,13 @@
 "use client";
 
 import { DELEGATION_ABI } from "@/abis/abis";
+import { useConsolidationPolicy } from "@/hooks/useConsolidationPolicy";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants/constants";
 import { isValidEthAddress } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
+import { DelegationCenterSection } from "@/types/enums";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
@@ -27,6 +30,7 @@ import {
   DelegationFormShell,
   DelegationSubmitGroups,
 } from "./DelegationFormParts";
+import { DELEGATION_INLINE_LINK_CLASS_NAME } from "./delegation-ui";
 
 interface Props {
   address: string;
@@ -47,6 +51,7 @@ interface Props {
  */
 export default function NewConsolidationComponent(props: Readonly<Props>) {
   const locale = useBrowserLocale();
+  const { limits } = useConsolidationPolicy();
   const [newDelegationCollection, setNewDelegationCollection] =
     useState<string>("0");
 
@@ -127,12 +132,22 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
           <h3 className="tw-mb-2 tw-mt-0 tw-text-sm tw-font-semibold tw-text-iron-100">
             {t(locale, "delegation.consolidation.instructions.title")}
           </h3>
+          {limits && (
+            <p className="tw-mb-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+              {t(locale, "delegation.consolidation.instructions.steps", {
+                limit: formatInteger(locale, limits.maxWallets),
+              })}
+            </p>
+          )}
           <p className="tw-mb-2 tw-text-sm tw-leading-6 tw-text-iron-300">
-            {t(locale, "delegation.consolidation.instructions.steps")}
-          </p>
-          <p className="tw-mb-0 tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, "delegation.consolidation.instructions.publicLink")}
           </p>
+          <Link
+            href={`/safe-collecting/${DelegationCenterSection.BUILD_CONSOLIDATION}`}
+            className={`${DELEGATION_INLINE_LINK_CLASS_NAME} tw-text-sm tw-leading-6`}
+          >
+            {t(locale, "delegation.consolidation.instructions.guided")}
+          </Link>
         </div>
       )}
       <form>
@@ -172,7 +187,7 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
             Note: For TDH Consolidation use either &apos;Any Collection&apos; or
             &apos;The Memes&apos;
             <Link
-              href={`/delegation/delegation-faq/register-consolidation`}
+              href={`/safe-collecting/faq/register-consolidation`}
               target="_blank"
               rel="noopener noreferrer"
             >

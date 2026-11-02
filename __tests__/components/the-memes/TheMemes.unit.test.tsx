@@ -21,6 +21,7 @@ describe("TheMemes helpers", () => {
       name: `Volume: ${VolumeType.ALL_TIME}`,
     });
     expect(screen.getByText("Volume:")).not.toHaveClass("tw-uppercase");
-    expect(button).not.toHaveClass("focus-visible:tw-outline-primary-400");
+    expect(button).toHaveClass("focus-visible:tw-outline-primary-400");
+    expect(button).toHaveClass("focus-visible:tw-outline-offset-2");
   });
 });

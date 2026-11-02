@@ -7,7 +7,13 @@ const mockSandboxedExternalIframe = jest.fn();
 
 jest.mock(
   "@/components/drops/view/item/content/media/MediaDisplayImage",
-  () => (props: any) => <div data-testid="image" data-src={props.src} />
+  () => (props: any) => (
+    <div
+      data-testid="image"
+      data-src={props.src}
+      data-loading-layout={props.imageLoadingLayout}
+    />
+  )
 );
 jest.mock(
   "@/components/drops/view/item/content/media/MediaDisplayVideo",
@@ -107,6 +113,22 @@ describe("MediaDisplay", () => {
   it("renders image", () => {
     render(<MediaDisplay media_mime_type="image/png" media_url="img.png" />);
     expect(screen.getByTestId("image")).toHaveAttribute("data-src", "img.png");
+  });
+
+  it("forwards artwork loading layout to inert image cards", () => {
+    render(
+      <MediaDisplay
+        media_mime_type="image/gif"
+        media_url="art.gif"
+        imageLoadingLayout="artwork"
+        isInertPreview
+        disableMediaInteraction
+      />
+    );
+    expect(screen.getByTestId("image")).toHaveAttribute(
+      "data-loading-layout",
+      "artwork"
+    );
   });
 
   it("renders video", () => {

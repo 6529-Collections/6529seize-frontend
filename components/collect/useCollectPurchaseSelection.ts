@@ -1,7 +1,8 @@
 "use client";
 
 import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
-import { useEffect, useState, type SetStateAction } from "react";
+import { useVisibleInterval } from "@/hooks/usePageVisibility";
+import { useState, type SetStateAction } from "react";
 import type { CollectSelectedListing } from "./collect-selection.helpers";
 import {
   readPendingMarketPurchases,
@@ -55,13 +56,7 @@ export function useCollectPurchaseSelection(
       settlementRevision:
         typeof next === "function" ? next(current.settlementRevision) : next,
     }));
-  useEffect(() => {
-    const timer = globalThis.setInterval(
-      () => setListingTime(Date.now() / 1000),
-      15_000
-    );
-    return () => globalThis.clearInterval(timer);
-  }, []);
+  useVisibleInterval(() => setListingTime(Date.now() / 1000), 15_000);
   const orderIsPending = (order: ApiMarketTradeOrder) =>
     pending.some((purchase) => collectPurchaseMatchesOrder(order, purchase));
   const orderIsPendingNow = (order: ApiMarketTradeOrder) =>

@@ -38,6 +38,7 @@ const createWaveData = (
 });
 
 const createDropMessages = (serials: number[] = []) => ({
+  isError: false,
   drops: serials.map(createDrop),
   fetchNextPage: jest.fn(),
   hasNextPage: false,
@@ -73,6 +74,17 @@ describe("useVirtualizedWaveMessages", () => {
     );
 
     expect(result.current).toBeUndefined();
+  });
+
+  it("preserves a failed thread request and its retry action", () => {
+    currentDropMessages = { ...createDropMessages(), isError: true };
+    const { result } = renderHook(() =>
+      useVirtualizedWaveMessages("wave-1", "drop-1")
+    );
+    expect(result.current?.isError).toBe(true);
+    expect(result.current?.drops).toEqual([]);
+    result.current?.retryDropMessages?.();
+    expect(currentDropMessages.refetch).toHaveBeenCalledTimes(1);
   });
 
   it("keeps the same-wave snapshot during transient gaps and clears it on wave change", () => {

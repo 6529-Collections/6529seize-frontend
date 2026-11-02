@@ -209,13 +209,34 @@ const webE2EFields =
         validation_pack: CI_PIPELINES_VALIDATION_PACK,
       }
     : {};
+let description = CI_PIPELINES_DESCRIPTION || null;
+if (
+  status === "failure" &&
+  (alertType === "web_e2e" || process.env.CI_PIPELINES_FAILURE_ARTIFACT_ROOT)
+) {
+  try {
+    const { getFailureDescription } = await import("./ci-failure-details.cjs");
+    description = await getFailureDescription({
+      artifactRoot: process.env.CI_PIPELINES_FAILURE_ARTIFACT_ROOT,
+      description: CI_PIPELINES_DESCRIPTION,
+      repository,
+      runId,
+      runAttempt,
+      token: process.env.GH_TOKEN,
+    });
+  } catch {
+    description =
+      description || "Failure details unavailable; inspect the linked run.";
+  }
+}
+
 const payload = {
   alert_type: alertType,
   repo: repository.split("/").pop() ?? repository,
   workflow: CI_PIPELINES_WORKFLOW || GITHUB_WORKFLOW || "GitHub Actions",
   status,
   title,
-  description: CI_PIPELINES_DESCRIPTION || null,
+  description,
   triggered_by_github_login: triggeredByGithubLogin,
   run_id: runId,
   run_number: GITHUB_RUN_NUMBER || null,

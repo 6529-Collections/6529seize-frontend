@@ -415,7 +415,7 @@ function UserPageStatsCollectedMemes({
           </table>
         </UserPageStatsTableScroll>
       ) : (
-        <p className="tw-mb-0 tw-px-4 tw-py-5 tw-text-sm tw-text-iron-500">
+        <p className="tw-mb-0 tw-px-4 tw-py-5 tw-text-meta/5 tw-font-normal tw-text-iron-500">
           {t(locale, "user.collected.stats.details.tables.memesBySeasonEmpty")}
         </p>
       )}

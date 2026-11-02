@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import NextGenCollectionArt from '@/components/nextGen/collections/collectionParts/NextGenCollectionArt';
 
 jest.mock('next/navigation', () => ({
@@ -11,7 +12,11 @@ jest.mock('@/services/api/common-api', () => ({
 }));
 
 jest.mock('@/components/nextGen/collections/NextGenTokenList', () => (props: any) => (
-  <div data-testid="token-list" data-limit={String(props.limit)} />
+  <div data-testid="token-list" data-limit={String(props.limit)}>
+    <button type="button" onClick={() => props.setLoadFailed?.(true)}>
+      fail list
+    </button>
+  </div>
 ));
 
 jest.mock('@fortawesome/react-fontawesome', () => ({
@@ -57,7 +62,10 @@ describe('NextGenCollectionArt', () => {
     await screen.findByTestId('token-list');
     expect(screen.queryByRole('link', { name: /View All/i })).toBeNull();
     expect(screen.getByTestId('token-list')).toHaveAttribute('data-limit', 'undefined');
-    expect(commonApiFetch).toHaveBeenCalledWith({ endpoint: 'nextgen/collections/1/traits' });
+    expect(commonApiFetch).toHaveBeenCalledWith({
+      endpoint: 'nextgen/collections/1/traits',
+      signal: expect.any(AbortSignal),
+    });
   });
 
   it('hides filters on small screens', async () => {
@@ -95,5 +103,65 @@ describe('NextGenCollectionArt', () => {
 
     expect(await screen.findByText('x1,234')).toBeInTheDocument();
     expect(screen.getByText('x2,345')).toBeInTheDocument();
+  });
+
+  it('shows an accessible error instead of an endless spinner when traits fail to load', async () => {
+    (commonApiFetch as jest.Mock).mockRejectedValueOnce('HTTP error! status: 500');
+    render(<NextGenCollectionArt collection={collection} />);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Collection traits could not be loaded.'
+    );
+    expect(screen.queryByTestId('loader')).toBeNull();
+    expect(screen.queryByTestId('token-list')).toBeNull();
+  });
+
+  it('retries loading traits', async () => {
+    (commonApiFetch as jest.Mock)
+      .mockRejectedValueOnce('HTTP error! status: 500')
+      .mockResolvedValueOnce([]);
+    render(<NextGenCollectionArt collection={collection} />);
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Try again' })
+    );
+
+    expect(await screen.findByTestId('token-list')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(commonApiFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('ignores traits for a previous collection and aborts on unmount', async () => {
+    let resolveFirst: (value: unknown) => void = () => {};
+    (commonApiFetch as jest.Mock)
+      .mockReturnValueOnce(new Promise((resolve) => (resolveFirst = resolve)))
+      .mockResolvedValueOnce([
+        { trait: 'Palette', values: ['Blue'], value_counts: [{ key: 'Blue', count: 2 }] },
+      ]);
+    const { rerender, unmount } = render(
+      <NextGenCollectionArt collection={collection} />
+    );
+    rerender(<NextGenCollectionArt collection={{ ...collection, id: 2 }} />);
+
+    const [firstCall, secondCall] = (commonApiFetch as jest.Mock).mock.calls;
+    expect(firstCall[0].signal.aborted).toBe(true);
+    expect(secondCall[0].endpoint).toBe('nextgen/collections/2/traits');
+
+    expect(await screen.findByText('Palette')).toBeInTheDocument();
+    resolveFirst([
+      { trait: 'Stale', values: ['X'], value_counts: [{ key: 'X', count: 1 }] },
+    ]);
+    await Promise.resolve();
+    expect(screen.queryByText('Stale')).toBeNull();
+
+    unmount();
+    expect(secondCall[0].signal.aborted).toBe(true);
+  });
+
+  it('stops the count spinner when the token list reports a failure', async () => {
+    render(<NextGenCollectionArt collection={collection} />);
+    await userEvent.click(await screen.findByRole('button', { name: 'fail list' }));
+
+    expect(screen.queryByTestId('loader')).toBeNull();
   });
 });

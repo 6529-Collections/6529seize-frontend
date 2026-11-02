@@ -37,7 +37,6 @@ const artwork: ArtworkShareDetails = {
   title: "Pebble #7",
   artist: "6529er",
   collection: "Pebbles",
-  imageUrl: "https://images.test/7.png",
 };
 const file = new File(["artwork"], "6529-nextgen-7-portrait.png", {
   type: "image/png",

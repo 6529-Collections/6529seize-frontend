@@ -51,6 +51,7 @@ export const useContentModerationStateScope = (
           {
             moderator: false,
             has_open_reports: false,
+            needs_review_count: 0,
             open_report_count: 0,
             resolved_report_count: 0,
             suspended_profile_count: 0,

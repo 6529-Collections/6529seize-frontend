@@ -14,6 +14,9 @@ it("labels known audit actions and operations while preserving future diagnostic
   expect(checkAuditActionLabel("en-US", "SUSPEND")).toBe(
     "Suspend author posting"
   );
+  expect(checkAuditActionLabel("en-US", "RESOLVE_DELETED_REPORT")).toBe(
+    "Resolve reports — post deleted"
+  );
   expect(checkValueLabel("en-US", "UPDATE")).toBe("Update");
   expect(checkAuditActionLabel("en-US", "FUTURE_DIAGNOSTIC")).toBe(
     "FUTURE_DIAGNOSTIC"

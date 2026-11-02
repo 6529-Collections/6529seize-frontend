@@ -93,7 +93,7 @@ export default function FilterGridDropdownDesktopWrapper({
 
   return createPortal(
     <div
-      className="tw-absolute tw-z-[100]"
+      className="tailwind-scope tw-absolute tw-z-[100]"
       ref={dropdownRef}
       style={{ left: 0, top: 0 }}
     >

@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 
 import { useSingleWaveDropData } from "@/components/waves/drop/useSingleWaveDropData";
@@ -74,6 +74,30 @@ describe("useSingleWaveDropData", () => {
       { data_key: "priority", data_value: "drop-1" },
       { data_key: "title", data_value: "Full Title" },
     ]);
+  });
+
+  it("reports loading and failures without caching partial metadata as complete, then retries", async () => {
+    fetchDropMetadataByIdV2Mock.mockRejectedValueOnce(
+      new Error("Metadata unavailable")
+    );
+    const initialDrop = createInitialDrop("drop-1");
+    const { result } = renderHook(
+      () => useSingleWaveDropData(initialDrop, jest.fn()),
+      { wrapper: createWrapper() }
+    );
+    expect(result.current.metadataState.status).toBe("loading");
+    await waitFor(() =>
+      expect(result.current.metadataState.status).toBe("error")
+    );
+    expect(result.current.drop.metadata).toEqual(initialDrop.metadata);
+    expect(fetchDropMetadataByIdV2Mock).toHaveBeenCalledWith(
+      expect.objectContaining({ throwOnError: true })
+    );
+    act(() => result.current.metadataState.retry());
+    await waitFor(() =>
+      expect(result.current.metadataState.status).toBe("ready")
+    );
+    expect(result.current.drop.metadata).toHaveLength(2);
   });
 
   it.each([

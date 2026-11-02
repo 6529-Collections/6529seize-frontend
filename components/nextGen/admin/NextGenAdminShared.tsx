@@ -248,7 +248,7 @@ function FormSelect({
     <select
       {...props}
       className={adminClassName(
-        "tw-block tw-w-full tw-rounded-none tw-border tw-border-iron-200 tw-bg-white tw-px-3 tw-py-1.5 tw-text-base tw-text-iron-800 focus:tw-border-iron-700 focus:tw-outline-none",
+        "tw-block tw-w-full tw-rounded-none tw-border tw-border-iron-200 tw-bg-white tw-px-3 tw-py-1.5 tw-text-base tw-text-iron-800 focus:tw-border-iron-700 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400",
         className
       )}
     >

@@ -1,4 +1,5 @@
 "use client";
+import { MemeCollaboratorCredits } from "@/components/waves/memes/collaborations/MemeCollaboratorCredits";
 
 import Link from "next/link";
 import UserCICAndLevel, {
@@ -7,6 +8,7 @@ import UserCICAndLevel, {
 import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
+import { WithDropAuthorSignedMarker } from "@/components/waves/drops/signature/DropAuthorSignedMarker";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
@@ -53,7 +55,9 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
           />
           <span className="tw-inline-flex tw-items-center tw-gap-x-1.5 tw-whitespace-nowrap">
             <span className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700" />
-            <WaveDropTime timestamp={drop.created_at} />
+            <WithDropAuthorSignedMarker drop={drop}>
+              <WaveDropTime timestamp={drop.created_at} />
+            </WithDropAuthorSignedMarker>
           </span>
         </div>
         <Link
@@ -67,6 +71,9 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
         >
           {drop.wave.name}
         </Link>
+        <div className="tw-w-full">
+          <MemeCollaboratorCredits collaborators={drop.collaborators} />
+        </div>
       </div>
     </div>
   );

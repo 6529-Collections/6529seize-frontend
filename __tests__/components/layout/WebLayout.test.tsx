@@ -242,7 +242,7 @@ it("clears a stale mobile startup marker when React mounts on desktop", () => {
   );
 });
 
-it("adapts chrome and clears its overlay without remounting the editor or SidebarProvider", () => {
+it("adapts chrome and clears its overlay without remounting the editor or SidebarProvider", async () => {
   document.documentElement.setAttribute("data-small-web-startup", "true");
   const transfer = new AbortController();
   const { rerender, unmount } = render(
@@ -300,7 +300,9 @@ it("adapts chrome and clears its overlay without remounting the editor or Sideba
 
   // The desktop search belongs to the chrome, so switching back clears it.
   fireEvent.click(screen.getByRole("button", { name: "Search" }));
-  expect(screen.getByRole("dialog", { name: "Search" })).toBeInTheDocument();
+  expect(
+    await screen.findByRole("dialog", { name: "Search" })
+  ).toBeInTheDocument();
   resize(390);
   rerender(
     <WebLayout isSmall>

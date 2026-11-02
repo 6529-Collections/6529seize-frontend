@@ -125,6 +125,27 @@ describe("production exact-artifact deployment contract", () => {
     expect(deploySource).not.toContain("NEXT_PUBLIC_ETHEREUM_RPC_URL");
   });
 
+  it("bakes signed messages on into production builds", () => {
+    expect(build.env.NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES).toBe("true");
+  });
+
+  it("turns the encrypted messages flag on in production builds", () => {
+    // Encrypted DMs (D109) are on in production by owner decision
+    // (2026-10-31); switching them off is a one-line change to "false" here.
+    expect(build.env.NEXT_PUBLIC_E2EE_DM_ENABLED).toBe("true");
+  });
+
+  it("generates the production sitemap under the fail-closed policy", () => {
+    const buildStep = build.jobs["build-production-artifact"].steps.find(
+      (step: { name?: string }) => step.name === "Build exact production bytes"
+    );
+
+    // build:ci runs the postbuild sitemap step with this environment.
+    expect(buildStep.run).toBe("./bin/6529 run build:ci");
+    expect(buildStep.env.SITEMAP_FAILURE_POLICY).toBe("fail");
+    expect(buildSource).not.toContain("SITEMAP_FAILURE_POLICY: fallback");
+  });
+
   it("keeps production manual and deploys only the independently verified artifact", () => {
     expect(deploy.name).toBe("Web Deploy - PROD");
     expect(deploy.on.push).toBeUndefined();

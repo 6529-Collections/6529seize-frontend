@@ -48,7 +48,9 @@ describe("About index page", () => {
     ).toHaveAttribute("href", "/about/6529-apps");
     expect(screen.getByText("Collections & Minting")).toBeInTheDocument();
     expect(screen.getByText("Network & Reputation")).toBeInTheDocument();
-    expect(screen.getByText("Delegation & Wallets")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Safe Collecting" })
+    ).toBeInTheDocument();
     expect(screen.getByText("Data & Developer Tools")).toBeInTheDocument();
     expect(screen.getByText("Legal")).toBeInTheDocument();
     expect(
@@ -82,8 +84,13 @@ describe("About index page", () => {
       screen.getByRole("link", { name: /open page: network nerd/i })
     ).toHaveAttribute("href", "/network/nerd");
     expect(
-      screen.getByRole("link", { name: /open page: prenodes/i })
-    ).toHaveAttribute("href", "/network/prenodes");
+      screen.queryByRole("link", { name: /open page: prenodes/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen
+        .getAllByRole("link", { hidden: true })
+        .every((link) => link.getAttribute("href") !== "/network/prenodes")
+    ).toBe(true);
   });
 
   it("does not render the sticky contents dropdown", () => {
@@ -102,5 +109,8 @@ describe("About index page", () => {
     render(<AboutIndexPage />);
 
     expect(screen.queryByText("Subscription Minting")).toBeNull();
+    expect(
+      screen.queryByRole("link", { name: /prenodes/i })
+    ).not.toBeInTheDocument();
   });
 });

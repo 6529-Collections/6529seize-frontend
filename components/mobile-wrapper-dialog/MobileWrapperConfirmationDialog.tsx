@@ -19,6 +19,8 @@ interface MobileWrapperConfirmationDialogProps {
   readonly confirmVariant?: ButtonVariant | undefined;
   readonly zIndexClassName?: string | undefined;
   readonly children?: ReactNode;
+  readonly titleClassName?: string | undefined;
+  readonly messageClassName?: string | undefined;
 }
 
 export default function MobileWrapperConfirmationDialog({
@@ -34,18 +36,22 @@ export default function MobileWrapperConfirmationDialog({
   confirmVariant = "primary",
   zIndexClassName,
   children,
+  titleClassName,
+  messageClassName = "tw-text-sm tw-leading-6 tw-text-iron-400",
 }: MobileWrapperConfirmationDialogProps) {
   return (
     <MobileWrapperDialog
       title={title}
+      titleClassName={titleClassName}
       isOpen={isOpen}
       onClose={onClose}
+      dismissible={!isConfirming}
       tabletModal
       maxWidthClass="md:tw-max-w-lg"
       zIndexClassName={zIndexClassName}
     >
       <div className="tw-px-4 sm:tw-px-6">
-        <Description className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+        <Description className={`tw-mb-0 tw-mt-3 ${messageClassName}`}>
           {message}
         </Description>
         {children}

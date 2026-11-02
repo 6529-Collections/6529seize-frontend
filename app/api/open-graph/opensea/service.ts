@@ -14,10 +14,9 @@ import {
   toObjectRecord,
   truncateForLog,
 } from "./shared";
-import { fetchAlchemyMetadataCandidate } from "./alchemy";
+import { fetchNftMetadata } from "./alchemy";
 import {
   TOKEN_URI_PREFIXED_PLACEHOLDER_PATTERN,
-  buildTokenIdCandidates,
   getTokenIdParts,
   hasTokenIdPlaceholder,
   replaceTokenIdPlaceholders,
@@ -484,105 +483,12 @@ async function buildOpenSeaOpenGraphFallbackPreview(
 async function fetchOpenSeaNftMetadata(
   context: OpenSeaContext
 ): Promise<OpenSeaMetadataFetchResult> {
-  const network = ALCHEMY_NETWORK_BY_OPENSEA_CHAIN[context.chainSegment];
-  if (!network) {
-    return {
-      kind: "fallback",
-      reason: "unsupported_chain",
-    };
-  }
-
-  let apiKey: string;
-  try {
-    apiKey = getAlchemyApiKey();
-  } catch {
-    return {
-      kind: "fallback",
-      reason: "missing_api_key",
-    };
-  }
-
-  const tokenIdCandidates = buildTokenIdCandidates(context.tokenId);
-  let lastHttpStatus: number | undefined;
-  let lastHttpTokenId: string | undefined;
-  let lastJsonError: string | undefined;
-  let lastJsonTokenId: string | undefined;
-  let lastTopLevelKeys: string[] = [];
-
-  for (const tokenIdCandidate of tokenIdCandidates) {
-    const candidateResult = await fetchAlchemyMetadataCandidate(
-      network,
-      apiKey,
-      context.contractAddress,
-      tokenIdCandidate
-    );
-
-    if (candidateResult.kind === "success") {
-      return {
-        kind: "success",
-        metadata: candidateResult.metadata,
-        network,
-        requestedTokenId: tokenIdCandidate,
-        payloadTopLevelKeys: candidateResult.topLevelKeys,
-      };
-    }
-
-    if (candidateResult.kind === "http_error") {
-      lastHttpStatus = candidateResult.status;
-      lastHttpTokenId = tokenIdCandidate;
-      continue;
-    }
-
-    if (candidateResult.kind === "json_error") {
-      lastJsonError = candidateResult.errorMessage;
-      lastJsonTokenId = tokenIdCandidate;
-      continue;
-    }
-
-    if (candidateResult.kind === "metadata_missing") {
-      lastTopLevelKeys = candidateResult.topLevelKeys;
-      continue;
-    }
-
-    return {
-      kind: "fallback",
-      reason: "unexpected_error",
-      network,
-      requestedTokenId: tokenIdCandidate,
-      errorMessage: candidateResult.errorMessage,
-    };
-  }
-
-  if (lastHttpStatus !== undefined) {
-    return {
-      kind: "fallback",
-      reason: "alchemy_http_error",
-      network,
-      status: lastHttpStatus,
-      requestedTokenId: lastHttpTokenId,
-    };
-  }
-
-  if (lastJsonError) {
-    return {
-      kind: "fallback",
-      reason: "alchemy_json_error",
-      network,
-      requestedTokenId: lastJsonTokenId,
-      errorMessage: lastJsonError,
-    };
-  }
-
-  return {
-    kind: "fallback",
-    reason: "no_image_candidate",
-    network,
-    requestedTokenId: tokenIdCandidates.at(-1),
-    errorMessage:
-      lastTopLevelKeys.length > 0
-        ? `metadata_not_found_in_payload:${lastTopLevelKeys.join(",")}`
-        : "metadata_not_found_in_payload",
-  };
+  return fetchNftMetadata(
+    ALCHEMY_NETWORK_BY_OPENSEA_CHAIN[context.chainSegment],
+    context.contractAddress,
+    context.tokenId,
+    getAlchemyApiKey
+  );
 }
 
 async function buildOpenSeaPreview(

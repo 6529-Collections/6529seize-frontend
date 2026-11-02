@@ -57,6 +57,14 @@ describe("UserPageXtdh", () => {
     jest.clearAllMocks();
   });
 
+  it("does not schedule a second navigation when mounted without a tab", () => {
+    mockUseSearchParams.mockReturnValue(new URLSearchParams());
+    const profile = { handle: "alice", primary_wallet: "0xabc" } as ApiIdentity;
+    render(<UserPageXtdh profile={profile} />);
+    expect(screen.getByTestId("granted-view")).toBeInTheDocument();
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
   it("clears non-shared params when switching tabs", async () => {
     mockUseSearchParams.mockReturnValue(
       new URLSearchParams("tab=granted&status=PENDING&sort=created_at")

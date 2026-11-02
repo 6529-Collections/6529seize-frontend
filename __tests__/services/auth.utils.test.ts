@@ -324,13 +324,43 @@ describe("auth.utils", () => {
     expect(hasActiveSessionV2Auth({ address: "0xccc" })).toBe(false);
   });
 
-  it("getStagingAuth returns cookie or env", () => {
-    const { publicEnv } = require("@/config/env");
+  it("getStagingAuth returns only the access cookie", () => {
     (Cookies.get as jest.Mock).mockReturnValueOnce("c");
     expect(getStagingAuth()).toBe("c");
     (Cookies.get as jest.Mock).mockReturnValueOnce(undefined);
-    publicEnv.STAGING_API_KEY = "e";
-    expect(getStagingAuth()).toBe("e");
+    expect(getStagingAuth()).toBeNull();
+  });
+
+  describe("outside a development or test runtime", () => {
+    const { publicEnv } = require("@/config/env");
+    const originalNodeEnv = publicEnv.NODE_ENV;
+
+    beforeEach(() => {
+      publicEnv.NODE_ENV = "production";
+      publicEnv.USE_DEV_AUTH = "true";
+      publicEnv.DEV_MODE_AUTH_JWT = "dev-jwt";
+      publicEnv.DEV_MODE_WALLET_ADDRESS = "0xDev";
+    });
+
+    afterEach(() => {
+      publicEnv.NODE_ENV = originalNodeEnv;
+    });
+
+    it("ignores the dev auth jwt", () => {
+      (Cookies.get as jest.Mock).mockReturnValue("cookie");
+      expect(getAuthJwt()).toBe("cookie");
+    });
+
+    it("ignores the dev auth wallet address", () => {
+      (safeLocalStorage.getItem as jest.Mock).mockReturnValue("stored");
+      expect(getWalletAddress()).toBe("stored");
+    });
+
+    it("does not authorize the dev auth address", () => {
+      expect(
+        isAuthAddressAuthorized({ address: "0xdev", connectedAccounts: [] })
+      ).toBe(false);
+    });
   });
 
   it("getWalletAddress respects dev mode and storage", () => {

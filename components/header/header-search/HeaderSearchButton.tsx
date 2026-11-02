@@ -6,7 +6,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useKey } from "react-use";
 
-import WaveDropsSearchModal from "@/components/waves/drops/search/WaveDropsSearchModal";
+import LazyWaveDropsSearchModal, {
+  preloadWaveDropsSearchModal,
+  useWaveDropsSearchModalEarlyPreload,
+} from "@/components/waves/drops/search/LazyWaveDropsSearchModal";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -14,7 +17,10 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { t } from "@/i18n/messages";
 
-import HeaderSearchModal from "./HeaderSearchModal";
+import LazyHeaderSearchModal, {
+  preloadHeaderSearchModal,
+  useHeaderSearchModalEarlyPreload,
+} from "./LazyHeaderSearchModal";
 
 interface HeaderSearchButtonProps {
   readonly wave: ApiWave | null;
@@ -49,6 +55,16 @@ export default function HeaderSearchButton({ wave }: HeaderSearchButtonProps) {
 
   const openContextSearch = () => setOpenSearch(wave ? "wave" : "site");
   const closeSearch = () => setOpenSearch(null);
+  const hasWave = wave !== null;
+  const preloadContextSearch = hasWave
+    ? preloadWaveDropsSearchModal
+    : preloadHeaderSearchModal;
+
+  // Warm the modal this button opens from the visitor's first interaction (or
+  // when idle), so the first open does not wait on the network. The chunk stays
+  // out of first-load JS.
+  useWaveDropsSearchModalEarlyPreload(hasWave);
+  useHeaderSearchModalEarlyPreload(!hasWave);
   const handleSearchShortcut = (event?: KeyboardEvent) => {
     event?.preventDefault();
     openContextSearch();
@@ -84,18 +100,23 @@ export default function HeaderSearchButton({ wave }: HeaderSearchButtonProps) {
         aria-label={buttonLabel}
         title={buttonLabel}
         onClick={openContextSearch}
+        onPointerEnter={preloadContextSearch}
+        onFocus={preloadContextSearch}
         className={clsx(
-          "tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-text-iron-300 tw-shadow-sm tw-transition tw-duration-200 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400",
+          "tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-text-iron-300 tw-shadow-sm tw-transition tw-duration-200 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400",
           isApp
-            ? "tw-size-9 tw-bg-black"
-            : "tw-size-10 tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700"
+            ? "tw-bg-black"
+            : "tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700"
         )}
       >
-        <MagnifyingGlassIcon className="tw-size-5 tw-flex-shrink-0" />
+        <MagnifyingGlassIcon
+          className="tw-size-5 tw-flex-shrink-0"
+          strokeWidth={isApp ? 2 : 1.5}
+        />
       </button>
 
       {wave && (
-        <WaveDropsSearchModal
+        <LazyWaveDropsSearchModal
           isOpen={openSearch === "wave"}
           onClose={closeSearch}
           wave={wave}
@@ -105,7 +126,7 @@ export default function HeaderSearchButton({ wave }: HeaderSearchButtonProps) {
       )}
 
       {openSearch === "site" && (
-        <HeaderSearchModal onClose={closeSearch} wave={null} />
+        <LazyHeaderSearchModal onClose={closeSearch} wave={null} />
       )}
     </div>
   );

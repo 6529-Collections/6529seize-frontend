@@ -6,6 +6,7 @@ export interface CompactMenuActionItem {
   readonly kind?: "item" | undefined;
   readonly label: ReactNode;
   readonly icon?: ReactNode | undefined;
+  readonly iconClassName?: string | undefined;
   readonly href?: string | undefined;
   readonly onSelect?: (() => void) | undefined;
   readonly disabled?: boolean | undefined;
@@ -50,6 +51,8 @@ export interface CompactMenuProps {
   readonly disabled?: boolean | undefined;
   readonly activeItemId?: string | undefined;
   readonly closeOnSelect?: boolean | undefined;
+  /** Keep input-aware Headless UI focus behavior when false. */
+  readonly autoFocusItem?: boolean | undefined;
   readonly "aria-label"?: string | undefined;
   readonly unstyledItems?: boolean | undefined;
 }

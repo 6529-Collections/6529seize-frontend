@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
+import { usePathname } from "next/navigation";
 import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 import { useSidebarController } from "../../hooks/useSidebarController";
 import { SidebarProvider, useSidebarState } from "../../hooks/useSidebarState";
@@ -28,6 +29,11 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
     sidebarWidth,
   } = useSidebarController();
   const { isRightSidebarOpen } = useSidebarState();
+  const pathname = usePathname();
+  const smallWebOverflow =
+    pathname === "/the-memes" || /^\/the-memes\/\d+\/?$/.test(pathname)
+      ? "tw-overflow-x-clip"
+      : "tw-overflow-auto";
 
   // Changing responsive chrome must not remount page state or live uploads.
   // Close the old menu just as the previous separate layout did on unmount.
@@ -58,7 +64,7 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
     <div
       className={
         isSmall
-          ? "tw-overflow-auto tw-bg-black"
+          ? `${smallWebOverflow} tw-bg-black`
           : "layout-root tw-relative tw-flex tw-w-full tw-justify-between"
       }
       style={isSmall ? undefined : cssVars}

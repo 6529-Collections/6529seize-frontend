@@ -1,8 +1,7 @@
 "use client";
 
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { useAnimate } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import FilterGridDropdownItemsWrapper from "./FilterGridDropdownItemsWrapper";
 
 interface FilterGridDropdownItem<TValue extends string | number> {
@@ -30,22 +29,12 @@ export default function FilterGridDropdown<TValue extends string | number>({
   readonly triggerAriaLabel: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [iconScope, animateIcon] = useAnimate();
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const activeItem = useMemo(
     () => items.find((item) => item.value === selectedValue) ?? null,
     [items, selectedValue]
   );
-
-  useEffect(() => {
-    if (!iconScope.current) return;
-    if (isOpen) {
-      animateIcon(iconScope.current, { rotate: 0 });
-    } else {
-      animateIcon(iconScope.current, { rotate: -90 });
-    }
-  }, [animateIcon, iconScope, isOpen]);
 
   const activeLabel = triggerLabel ?? activeItem?.label ?? allItemLabel;
 
@@ -55,10 +44,10 @@ export default function FilterGridDropdown<TValue extends string | number>({
   };
 
   const getMenuItemClassName = (isActive: boolean) =>
-    `tw-flex tw-min-w-0 tw-items-center tw-justify-center tw-gap-x-1 tw-whitespace-nowrap tw-rounded-md tw-border tw-border-solid tw-px-2 tw-py-2 tw-text-sm tw-font-medium tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
+    `tw-flex tw-min-h-11 tw-min-w-0 tw-items-center tw-justify-center tw-gap-x-1 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-px-2 tw-py-2 tw-text-sm tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 motion-reduce:tw-transition-none lg:tw-min-h-9 ${
       isActive
-        ? "tw-bg-primary-500/20 tw-border-primary-500 tw-text-primary-300"
-        : "tw-bg-transparent tw-border-iron-700 tw-text-iron-200 hover:tw-bg-iron-800"
+        ? "tw-bg-iron-200 tw-font-semibold tw-text-iron-950"
+        : "tw-bg-iron-800 tw-font-medium tw-text-iron-300 hover:tw-bg-iron-700"
     }`;
 
   return (
@@ -81,8 +70,7 @@ export default function FilterGridDropdown<TValue extends string | number>({
           {activeLabel}
           <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 -tw-mr-1 tw-flex tw-items-center tw-pr-3.5">
             <ChevronDownIcon
-              ref={iconScope}
-              className="tw-h-5 tw-w-5"
+              className={`tw-h-5 tw-w-5 tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${isOpen ? "tw-rotate-180" : ""}`}
               aria-hidden="true"
             />
           </div>
@@ -101,6 +89,7 @@ export default function FilterGridDropdown<TValue extends string | number>({
           className={`tw-col-span-full tw-w-full ${getMenuItemClassName(
             selectedValue === null
           )}`}
+          aria-current={selectedValue === null ? "true" : undefined}
           role="menuitem"
         >
           <span className="tw-whitespace-nowrap">{allItemLabel}</span>
@@ -111,6 +100,7 @@ export default function FilterGridDropdown<TValue extends string | number>({
             type="button"
             onClick={() => handleSelect(item.value)}
             className={getMenuItemClassName(selectedValue === item.value)}
+            aria-current={selectedValue === item.value ? "true" : undefined}
             role="menuitem"
           >
             <span className="tw-whitespace-nowrap">{item.label}</span>

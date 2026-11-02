@@ -4,10 +4,7 @@ import { t, type MessageKey } from "@/i18n/messages";
 import { STATEMENT_ADD_VIEW } from "./UserPageIdentityAddStatements.constants";
 
 const CAVEAT_MESSAGE_KEYS = [
-  "user.profile.identity.statements.add.caveatOptional",
-  "user.profile.identity.statements.add.caveatPublic",
   "user.profile.identity.statements.add.caveatNoVerification",
-  "user.profile.identity.statements.add.caveatCommunityRates",
 ] as const satisfies readonly MessageKey[];
 
 const TILE_TITLE_CLASS_NAME =

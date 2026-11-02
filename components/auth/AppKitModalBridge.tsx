@@ -1,20 +1,23 @@
 "use client";
 
-import {
+import type {
   useAppKit,
   useAppKitAccount,
-  useAppKitState,
   useDisconnect,
   useWalletInfo,
 } from "@reown/appkit/react";
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useSyncExternalStore,
-} from "react";
+import dynamic from "next/dynamic";
+import React, { useSyncExternalStore } from "react";
 import { logError } from "@/utils/security-logger";
-import { isSafeWalletInfo } from "@/utils/wallet-detection";
+import { noteWalletChunkFailure } from "@/components/providers/walletChunkRecovery";
+import { AppKitModalBridgeStoreContext } from "./appKitModalBridgeStoreContext";
+
+// The AppKit hooks pull in the Reown SDK, so they load only after AppKit has
+// been created for a stored session or a connect intent.
+const AppKitModalHooks = dynamic(() => import("./AppKitModalHooks"), {
+  loading: () => null,
+  ssr: false,
+});
 
 type OpenAppKitModal = ReturnType<typeof useAppKit>["open"];
 type CloseAppKitModal = ReturnType<typeof useAppKit>["close"];
@@ -40,7 +43,7 @@ type AppKitOpenWaiter = {
   readonly timeoutHandle: ReturnType<typeof setTimeout>;
 };
 
-type AppKitModalBridgeStore = {
+export type AppKitModalBridgeStore = {
   readonly dispose: () => void;
   readonly close: () => Promise<void>;
   readonly disconnect: () => Promise<void>;
@@ -70,8 +73,6 @@ const EMPTY_APPKIT_ACCOUNT_STATE: AppKitAccountState = Object.freeze({
   isConnected: false,
   status: "disconnected",
 });
-const AppKitModalBridgeStoreContext =
-  createContext<AppKitModalBridgeStore | null>(null);
 
 function getEmptyAppKitModalState(): AppKitModalState {
   return EMPTY_APPKIT_MODAL_STATE;
@@ -252,47 +253,8 @@ export function useAppKitAccountBridgeState(
   );
 }
 
-function useAppKitModalBridgeStore(): AppKitModalBridgeStore {
-  const store = useContext(AppKitModalBridgeStoreContext);
-  if (!store) {
-    throw new Error("AppKit modal bridge store is unavailable");
-  }
-  return store;
-}
-
-const AppKitModalHooks: React.FC = () => {
-  const store = useAppKitModalBridgeStore();
-  const { close, open } = useAppKit();
-  const { address, isConnected, status } = useAppKitAccount();
-  const { disconnect } = useDisconnect();
-  const { walletInfo } = useWalletInfo();
-  const { open: isOpen } = useAppKitState();
-  const walletName = walletInfo?.name;
-  const walletIcon = walletInfo?.icon;
-  const isSafeWallet = isSafeWalletInfo(walletInfo);
-
-  useEffect(() => {
-    store.setOpen(open);
-    store.setClose(close);
-    store.setDisconnect(disconnect);
-    return () => {
-      store.setOpen(null);
-      store.setClose(null);
-      store.setDisconnect(null);
-    };
-  }, [close, disconnect, open, store]);
-
-  useEffect(() => {
-    store.setAccount({ address, isConnected, status });
-  }, [address, isConnected, status, store]);
-
-  useEffect(() => {
-    store.setState({ isOpen, walletName, walletIcon, isSafeWallet });
-  }, [isOpen, isSafeWallet, store, walletIcon, walletName]);
-
-  return null;
-};
-
+// Also catches a failed AppKitModalHooks chunk, so a network error fails the
+// wallet bootstrap instead of the surrounding page.
 class AppKitModalBridgeErrorBoundary extends React.Component<
   {
     readonly children: React.ReactNode;
@@ -307,6 +269,9 @@ class AppKitModalBridgeErrorBoundary extends React.Component<
   }
 
   override componentDidCatch(error: Error): void {
+    // A failed hooks chunk cannot load again in this page; the next connect
+    // intent reloads it.
+    noteWalletChunkFailure(error);
     this.props.store.failBootstrap();
     logError("appkit_modal_bridge", error);
   }

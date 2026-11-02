@@ -16,6 +16,7 @@ import { pinnedWavesApi } from "@/services/api/pinned-waves-api";
 import { ApiWavesPinFilter } from "@/generated/models/ApiWavesPinFilter";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { refetchQueryIfStale } from "@/components/react-query-wrapper/utils/refetchQueryIfStale";
 import {
   fetchWavesV2Page,
   getWavesV2OverviewQueryKeyParams,
@@ -55,6 +56,7 @@ interface UsePinnedWavesServerReturn {
   pinWave: (waveId: string) => Promise<void>;
   unpinWave: (waveId: string) => Promise<void>;
   refetch: () => Promise<QueryObserverResult<SidebarWave[], Error>>;
+  refetchIfStale: () => void;
   isOperationInProgress: (waveId: string) => boolean;
   canPinWave: (waveId: string) => boolean;
 }
@@ -126,7 +128,8 @@ function usePinnedWavesQuery(
     staleTime: PINNED_WAVES_STALE_TIME,
     gcTime: PINNED_WAVES_GC_TIME,
     refetchInterval: PINNED_WAVES_REFETCH_INTERVAL,
-    refetchOnWindowFocus: "always",
+    // Focus refreshes only pinned data older than PINNED_WAVES_STALE_TIME.
+    refetchOnWindowFocus: true,
   });
 
   useEffect(() => {
@@ -515,6 +518,9 @@ export function usePinnedWavesServer(
     () => data?.filter((wave) => wave.pinned === true) ?? [],
     [data]
   );
+  const refetchIfStale = useCallback(() => {
+    refetchQueryIfStale(queryClient, pinnedWavesQueryKey);
+  }, [queryClient, pinnedWavesQueryKey]);
   const { pinnedIds, canPinWave } = usePinnedWavesBudget(
     pinnedWaves,
     ongoingOperations,
@@ -586,6 +592,7 @@ export function usePinnedWavesServer(
     pinWave,
     unpinWave,
     refetch,
+    refetchIfStale,
     isOperationInProgress: (waveId: string) =>
       ongoingOperations.current.has(waveId),
     canPinWave,

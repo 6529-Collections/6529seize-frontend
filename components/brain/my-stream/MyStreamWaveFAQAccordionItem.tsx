@@ -1,3 +1,4 @@
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
 import { useId } from "react";
@@ -7,11 +8,12 @@ export interface WaveFaqSection<TId extends string = string> {
   readonly id: TId;
   readonly title: string;
   readonly Icon: ComponentType<SVGProps<SVGSVGElement>>;
-  readonly Content: ComponentType;
+  readonly Content: ComponentType<{ readonly wave: ApiWave }>;
 }
 
 interface MyStreamWaveFAQAccordionItemProps {
   readonly section: WaveFaqSection;
+  readonly wave: ApiWave;
   readonly sectionRef: (element: HTMLElement | null) => void;
   readonly isOpen: boolean;
   readonly shouldReduceMotion: boolean;
@@ -40,6 +42,7 @@ function cx(...classes: ReadonlyArray<string | false | null | undefined>) {
 
 export default function MyStreamWaveFAQAccordionItem({
   section,
+  wave,
   sectionRef,
   isOpen,
   shouldReduceMotion,
@@ -115,7 +118,7 @@ export default function MyStreamWaveFAQAccordionItem({
               )}
             >
               <div className="tw-col-start-2 tw-col-end-4 [&_h4]:tw-mt-0 [&_p]:tw-mt-0">
-                <Content />
+                <Content wave={wave} />
               </div>
             </div>
           </motion.div>

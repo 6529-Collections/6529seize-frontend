@@ -30,3 +30,10 @@ describe the competition experience where it is available.
 - [Waves](../README.md)
 - [Wave creation](../create/README.md)
 - [Wave leaderboards](../leaderboard/README.md)
+
+## Setup guides
+
+- [Schedule](setup/feature-dates-step.md)
+- [Entry requirements](setup/feature-drops-step.md)
+- [Voting](setup/feature-voting-step.md)
+- [Outcomes](setup/feature-outcomes-step.md)

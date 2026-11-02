@@ -9,6 +9,10 @@ const SHORT_TIME_FORMAT = {
   hour: "2-digit",
   minute: "2-digit",
 } satisfies Intl.DateTimeFormatOptions;
+// A "YYYY-MM-DD" string names a calendar day, not an instant: it has no zone,
+// so it must render as the same day for every viewer and every server zone.
+const CALENDAR_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
+const UTC_TIME_ZONE = "UTC";
 const DEFAULT_RELATIVE_TIME_FORMAT_OPTIONS = {
   numeric: "auto",
 } satisfies Intl.RelativeTimeFormatOptions;
@@ -32,6 +36,31 @@ function toValidDate(value: Date | string | number | null | undefined) {
 
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
+}
+
+/**
+ * Parses a strict "YYYY-MM-DD" calendar date to the Date at 00:00 UTC of that
+ * day. Returns null when the value is not a date-only string or names a day
+ * that does not exist (for example 2026-02-30). Format the result with
+ * `timeZone: "UTC"`; it is a carrier for the calendar day, not an instant.
+ */
+function parseCalendarDate(value: string): Date | null {
+  const match = CALENDAR_DATE_PATTERN.exec(value);
+  if (match === null) {
+    return null;
+  }
+
+  const year = Number(match[1]);
+  const month = Number(match[2]) - 1;
+  const day = Number(match[3]);
+  // setUTCFullYear, unlike Date.UTC, does not map years 0-99 onto 1900-1999.
+  const date = new Date(0);
+  date.setUTCFullYear(year, month, day);
+  return date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month &&
+    date.getUTCDate() === day
+    ? date
+    : null;
 }
 
 export function formatNumber(
@@ -135,17 +164,53 @@ export function formatPercent(
   });
 }
 
+/**
+ * Formats a date for display.
+ *
+ * - A date-only string ("YYYY-MM-DD") is a calendar date. It always renders as
+ *   that day, whatever the viewer's or server's zone: any `timeZone` in
+ *   `options` is ignored and the value is never shifted. An impossible day
+ *   such as 2026-02-30 renders as "-". It carries no time of day, so do not
+ *   request time fields for it.
+ * - Any other value is an instant. It renders in `options.timeZone`, or in the
+ *   runtime's zone when none is given. Pass an explicit `timeZone` (or use
+ *   `formatUtcDate`) wherever the output must not depend on the host zone, as
+ *   in Server Components.
+ */
 export function formatDate(
   locale: SupportedLocale,
   value: Date | string | number | null | undefined,
   options: Intl.DateTimeFormatOptions = SHORT_DATE_FORMAT
 ): string {
+  if (typeof value === "string" && CALENDAR_DATE_PATTERN.test(value)) {
+    const calendarDate = parseCalendarDate(value);
+    return calendarDate === null
+      ? "-"
+      : new Intl.DateTimeFormat(locale, {
+          ...options,
+          timeZone: UTC_TIME_ZONE,
+        }).format(calendarDate);
+  }
+
   const date = toValidDate(value);
   if (date === null) {
     return "-";
   }
 
   return new Intl.DateTimeFormat(locale, options).format(date);
+}
+
+/**
+ * Formats the UTC calendar day of a value, independent of the runtime's zone.
+ * Use it for instants that are published as UTC days (and for server-rendered
+ * dates), so the server and every client print the same text.
+ */
+export function formatUtcDate(
+  locale: SupportedLocale,
+  value: Date | string | number | null | undefined,
+  options: Intl.DateTimeFormatOptions = SHORT_DATE_FORMAT
+): string {
+  return formatDate(locale, value, { ...options, timeZone: UTC_TIME_ZONE });
 }
 
 // Returns "" (not "-") so callers rendering optional time suffixes can omit

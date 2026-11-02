@@ -2990,8 +2990,13 @@ describe("Auth component", () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
       const authUtils = require("@/services/auth/auth.utils");
-      const removal = createDeferredPromise<void>();
-      authUtils.removeAuthJwt.mockReturnValueOnce(removal.promise);
+      authUtils.getWalletAddress.mockReturnValue(validAddress);
+      const nonce = createDeferredPromise<{
+        readonly signable_message: string;
+        readonly server_signature: string;
+      }>();
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      sessionV2.getSessionNonce.mockReturnValueOnce(nonce.promise);
       const { toast } = require("react-toastify");
 
       const Child = () => {
@@ -3023,18 +3028,19 @@ describe("Auth component", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "switch profile" }));
       await waitFor(() => {
-        expect(authUtils.removeAuthJwt).toHaveBeenCalled();
+        expect(sessionV2.getSessionNonce).toHaveBeenCalled();
       });
 
       mockActiveChainId = 137;
-      removal.resolve();
+      nonce.resolve({
+        signable_message: "sign this message exactly",
+        server_signature: "server-signature",
+      });
 
       await waitFor(() => {
         expect(toast).toHaveBeenCalled();
       });
-      expect(
-        require("@/services/auth/session-v2.utils").getSessionNonce
-      ).not.toHaveBeenCalled();
+      expect(authUtils.removeAuthJwt).not.toHaveBeenCalled();
       expect(mockSignMessage).not.toHaveBeenCalled();
       expect(mockSeizeDisconnect).not.toHaveBeenCalled();
     });

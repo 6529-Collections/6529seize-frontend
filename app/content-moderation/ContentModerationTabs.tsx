@@ -11,21 +11,22 @@ import {
 
 export default function ContentModerationTabs({
   activeTab,
-  openCount,
+  reviewCount,
   resolvedCount,
   suspendedCount,
 }: {
   readonly activeTab: ModerationTab;
-  readonly openCount: number;
+  readonly reviewCount: number | undefined;
   readonly resolvedCount: number;
   readonly suspendedCount: number;
 }) {
   const locale = useBrowserLocale();
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const tabs = [
-    { id: "OPEN", key: "open", count: openCount },
+    { id: "REVIEW", key: "needsReview", count: reviewCount },
     { id: "CHECKS", key: "checks", count: undefined },
     { id: "RESOLVED", key: "resolved", count: resolvedCount },
+    { id: "ENCRYPTED_REPORTS", key: "encryptedReports", count: undefined },
     { id: "SUSPENDED", key: "suspended", count: suspendedCount },
     { id: "BLOCK_ACTIVITY", key: "blockActivity", count: undefined },
   ] as const;

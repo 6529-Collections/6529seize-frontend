@@ -46,7 +46,7 @@ export function ActiveWaveVotes() {
         </p>
       )}
       {!votes.isPending && !votes.isError && count === 0 && (
-        <output className="tw-block tw-text-iron-400">
+        <output className="tw-block tw-italic tw-text-iron-400">
           {t(locale, "waves.discovery.emptyVotes")}
         </output>
       )}

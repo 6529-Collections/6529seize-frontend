@@ -1,4 +1,4 @@
-import { formatInteger } from "@/i18n/format";
+import { formatDate, formatInteger, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 
@@ -11,6 +11,7 @@ import {
   displayedSeasonNumberFromIndex,
   displayedYearNumberFromIndex,
   formatUtcMonthYear,
+  mintStartInstantUtcForMintDay,
 } from "../meme-calendar.helpers";
 
 export function escapeHtml(value: string): string {
@@ -71,15 +72,45 @@ const ZOOM_MESSAGE_KEYS: Record<
   },
 };
 
+// Weekdays of the regular mint schedule, by UTC day: Monday, Wednesday, Friday.
+const REGULAR_MINT_UTC_WEEKDAYS = [1, 3, 5] as const;
+const DAYS_PER_WEEK = 7;
+const MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
+
+/**
+ * The weekdays on which the regular Monday/Wednesday/Friday (UTC) mints start
+ * in `timeZone`, as a short list: "Mon, Wed, Fri" in Los Angeles, "Tue, Thu,
+ * Sat" in Auckland. Each weekday is resolved to its mint start in the week
+ * from `now`, so the answer follows the current daylight-saving offsets.
+ */
+export function formatMintWeekdaysInZone(
+  locale: SupportedLocale,
+  timeZone: string,
+  now: Date
+): string {
+  const todayUtc = Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate()
+  );
+  const weekdays = REGULAR_MINT_UTC_WEEKDAYS.map((weekday) => {
+    const daysAhead =
+      (weekday - now.getUTCDay() + DAYS_PER_WEEK) % DAYS_PER_WEEK;
+    const mintDay = new Date(todayUtc + daysAhead * MILLIS_PER_DAY);
+    return formatDate(locale, mintStartInstantUtcForMintDay(mintDay), {
+      weekday: "short",
+      timeZone,
+    });
+  });
+  return formatList(locale, weekdays, { style: "short", type: "unit" });
+}
+
+/** Guide rows after "Minting Days", which `CalendarGuide` renders itself. */
 export const GRID_INFO_ITEMS: ReadonlyArray<{
   readonly label: MessageKey;
   readonly text: MessageKey;
   readonly note?: MessageKey;
 }> = [
-  {
-    label: "memeCalendar.grid.info.mintingDays.label",
-    text: "memeCalendar.grid.info.mintingDays.text",
-  },
   {
     label: "memeCalendar.grid.info.szn.label",
     text: "memeCalendar.grid.info.szn.text",

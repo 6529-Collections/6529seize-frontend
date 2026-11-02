@@ -28,6 +28,8 @@ import {
 } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
 
+import { formatDateTime } from "./reviewbot-admin.format";
+
 interface ReviewbotAdminDashboardProps {
   readonly result: ReviewbotAdminDashboardResult;
 }
@@ -45,15 +47,6 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
 const percentFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 1,
   style: "percent",
-});
-
-const dateTimeFormatter = new Intl.DateTimeFormat("en-US", {
-  day: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-  month: "short",
-  timeZone: "UTC",
-  year: "numeric",
 });
 
 export default function ReviewbotAdminDashboard({
@@ -757,16 +750,6 @@ function formatPercentValue(value: number): string {
 
 function formatSha(value: string): string {
   return value ? value.slice(0, 12) : "unknown";
-}
-
-function formatDateTime(value: string): string {
-  if (!value) {
-    return "unknown";
-  }
-  const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? "unknown"
-    : dateTimeFormatter.format(date);
 }
 
 function formatTopCost(

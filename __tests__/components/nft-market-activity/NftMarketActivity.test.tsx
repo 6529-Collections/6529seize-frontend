@@ -392,4 +392,52 @@ describe("NftMarketActivity", () => {
       screen.getByText("Collection-level order · card eligibility varies")
     ).toBeInTheDocument();
   });
+
+  it("retries an initial failure without changing the request", async () => {
+    mockFetch
+      .mockRejectedValueOnce(new Error("Unavailable"))
+      .mockResolvedValueOnce({
+        data: [marketEvent()],
+        next: null,
+        market_history_started_at: null,
+        notes: [],
+      });
+    renderFeed({ contract: MEMES_CONTRACT, tokenId: "7", filter: "offers" });
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Could not load NFT activity."
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(await screen.findByText("Cancelled")).toBeInTheDocument();
+    expect(mockFetch.mock.calls[1]?.[0].params).toEqual(
+      mockFetch.mock.calls[0]?.[0].params
+    );
+  });
+
+  it("keeps existing rows through a failed load more and retries the same cursor", async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        data: [marketEvent()],
+        next: "older",
+        market_history_started_at: null,
+        notes: [],
+      })
+      .mockRejectedValueOnce(new Error("Unavailable"))
+      .mockResolvedValueOnce({
+        data: [marketEvent({ event_id: "older-row", action: "transfer" })],
+        next: null,
+        market_history_started_at: null,
+        notes: [],
+      });
+    renderFeed();
+    await screen.findByText("Cancelled");
+    await userEvent.click(screen.getByRole("button", { name: "Load more" }));
+    await screen.findByRole("alert");
+    expect(screen.getByText("Cancelled")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(await screen.findByText("Transferred")).toBeInTheDocument();
+    expect(screen.getByText("Cancelled")).toBeInTheDocument();
+    expect(mockFetch.mock.calls[2]?.[0].params).toEqual(
+      mockFetch.mock.calls[1]?.[0].params
+    );
+  });
 });

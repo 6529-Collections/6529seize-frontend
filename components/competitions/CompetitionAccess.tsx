@@ -19,10 +19,7 @@ import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroup } from "@/generated/models/ApiGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import {
-  isMultiCompetitionEnabled,
-  newCompetitionRequestKey,
-} from "@/helpers/competition.helpers";
+import { newCompetitionRequestKey } from "@/helpers/competition.helpers";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -41,7 +38,7 @@ export default function CompetitionAccess({
 }: {
   readonly type: "participation" | "voting";
 }) {
-  const { competition, wave, hub } = useCompetition();
+  const { competition, wave } = useCompetition();
   const { requestAuth, setToast, connectedProfile } = useAuth();
   const client = useQueryClient();
   const locale = useBrowserLocale();
@@ -75,10 +72,8 @@ export default function CompetitionAccess({
           is_direct_message: groupQuery.data?.is_direct_message ?? false,
         };
   const editable =
-    isMultiCompetitionEnabled() &&
     competition.permissions.administer &&
-    (hub.legacy_primary_competition_id === competition.id ||
-      competition.lifecycle === ApiCompetitionLifecycle.Draft ||
+    (competition.lifecycle === ApiCompetitionLifecycle.Draft ||
       competition.lifecycle === ApiCompetitionLifecycle.Published);
   const groupLabel = t(
     locale,

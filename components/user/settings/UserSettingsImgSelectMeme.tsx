@@ -64,7 +64,7 @@ export default function UserSettingsImgSelectMeme({
           aria-controls={isOpen ? "meme-search-results" : undefined}
           autoComplete="off"
           placeholder="Search"
-          className="tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-4 tw-text-left tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-200 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-white/15 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400/60 sm:tw-leading-6"
+          className="tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-4 tw-text-left tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition tw-duration-200 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-white/15 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-leading-6"
         />
         <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-3.5 tw-flex tw-items-center">
           <svg
@@ -108,7 +108,7 @@ export default function UserSettingsImgSelectMeme({
                         <button
                           type="button"
                           onClick={() => setMemeAndCloseDropdown(meme)}
-                          className="tw-flex tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-2 tw-text-left tw-transition-colors tw-duration-150 focus:tw-outline-none focus-visible:tw-bg-iron-800 focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400/60 desktop-hover:hover:tw-bg-iron-800"
+                          className="tw-flex tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-2 tw-text-left tw-transition-colors tw-duration-150 focus:tw-outline-none focus-visible:tw-bg-iron-800 focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800"
                         >
                           <span className="tw-relative tw-size-7 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-bg-iron-800">
                             {imageUrl && (

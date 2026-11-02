@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { ArtistWinningArtworksContent } from "@/components/waves/drops/ArtistWinningArtworksContent";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
@@ -121,6 +121,48 @@ describe("ArtistWinningArtworksContent", () => {
       prevoteCards: [],
       isLoading: false,
     });
+  });
+
+  it("shows the winner media format and preserves opening the artwork", () => {
+    const drop = createWinnerDrop(0);
+    drop.parts[0]!.media = [
+      { url: "https://example.com/art.gif", mime_type: "image/gif" },
+    ];
+    useUserWinningArtworksMock.mockReturnValue({
+      winningDrops: [drop],
+      isLoading: false,
+    });
+    const onDropClick = jest.fn();
+    render(
+      <ArtistWinningArtworksContent
+        user={user}
+        isOpen
+        onDropClick={onDropClick}
+      />
+    );
+    expect(screen.getByLabelText("Image - GIF")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Hometeam"));
+    expect(onDropClick).toHaveBeenCalledWith(
+      expect.objectContaining({ id: drop.id })
+    );
+  });
+
+  it("keeps the text fallback when media metadata is absent", () => {
+    const drop = createWinnerDrop(0);
+    Reflect.deleteProperty(drop.parts[0]!, "media");
+    useUserWinningArtworksMock.mockReturnValue({
+      winningDrops: [drop],
+      isLoading: false,
+    });
+    render(
+      <ArtistWinningArtworksContent
+        user={user}
+        isOpen
+        onDropClick={jest.fn()}
+      />
+    );
+    expect(screen.getByText("Artwork")).toBeInTheDocument();
+    expect(screen.queryByTestId("media-display")).not.toBeInTheDocument();
   });
 
   it("does not render epoch as the win date when decision time is missing", () => {

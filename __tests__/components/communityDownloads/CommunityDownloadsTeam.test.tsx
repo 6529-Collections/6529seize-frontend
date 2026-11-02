@@ -3,7 +3,6 @@ import CommunityDownloadsTeam from "@/components/community-downloads/CommunityDo
 import { TitleProvider } from "@/contexts/TitleContext";
 
 jest.mock("@/components/community-downloads/CommunityDownloadsHelpers", () => ({
-  formatDate: (date: string) => date,
   DownloadsLayout: ({ children }: any) => <div>{children}</div>,
   DownloadsTable: ({ data, renderRow }: any) => (
     <div>
@@ -25,6 +24,9 @@ describe("CommunityDownloadsTeam", () => {
     );
     const rows = screen.getAllByTestId("row");
     expect(rows).toHaveLength(3);
+    expect(rows[0]).toHaveTextContent("Wed, May 10, 2023");
+    expect(rows[1]).toHaveTextContent("Thu, Mar 2, 2023");
+    expect(rows[2]).toHaveTextContent("Thu, Apr 11, 2024");
     expect(screen.queryByText("Nothing here yet")).not.toBeInTheDocument();
   });
 });

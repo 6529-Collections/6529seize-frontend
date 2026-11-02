@@ -1,6 +1,6 @@
 import { generateMetadata as generateGradientMetadata } from "@/app/6529-gradient/page";
 import { generateMetadata as generateMemeLabMetadata } from "@/app/meme-lab/page";
-import { generateMetadata as generateTheMemesMetadata } from "@/app/the-memes/page";
+import { generateMetadata as generateTheMemesMetadata } from "@/app/the-memes/(index)/page";
 import type { Metadata } from "next";
 
 jest.mock("@/components/6529Gradient/6529Gradient", () => ({

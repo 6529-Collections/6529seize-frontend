@@ -4,6 +4,7 @@ import {
   type ReactNode,
   useCallback,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -16,6 +17,8 @@ import { t } from "@/i18n/messages";
 import { formatInteger } from "@/i18n/format";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
+import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { DATA_TABLE_HEADER_TEXT_CLASS_NAME } from "@/components/utils/table/tableStyles";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "@/entities/ISort";
@@ -23,6 +26,10 @@ import type { CICType } from "@/entities/IProfile";
 import type { DBResponse } from "@/entities/IDBResponse";
 import { LeaderboardCollector } from "./LeaderboardCollector";
 import { LEADERBOARD_ROW_CLASS_NAME } from "./leaderboardTableStyles";
+import {
+  NFTLeaderboardMobileRows,
+  NFTLeaderboardMobileSort,
+} from "./NFTLeaderboardMobile";
 import {
   SearchModalDisplay,
   SearchWalletsDisplay,
@@ -34,6 +41,13 @@ import {
   faSquareCaretUp,
   faSquareCaretDown,
 } from "@fortawesome/free-solid-svg-icons";
+
+import {
+  buildNftCollectorsCsv,
+  downloadNftCollectorsCsv,
+} from "./nftCollectorsCsv";
+
+export { buildNftCollectorsCsv } from "./nftCollectorsCsv";
 
 const tableHeaderClassName = `tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-font-semibold tw-text-iron-400 md:tw-px-4 md:tw-py-3 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`;
 
@@ -48,18 +62,6 @@ interface Props {
 
 export const PAGE_SIZE = 25;
 const EXPORT_PAGE_SIZE = 100;
-
-const CSV_HEADERS = [
-  "rank",
-  "collector",
-  "primary_wallet",
-  "balance",
-  "card_tdh",
-  "card_unweighted_tdh",
-  "total_balance",
-  "total_tdh",
-  "total_unweighted_tdh",
-] as const;
 
 interface FetchNftTdhResultsParams {
   readonly contract: string;
@@ -163,79 +165,6 @@ export async function fetchAllNftTdhResults({
   return allResults;
 }
 
-function getCollectorCsvName(collector: NftTDH) {
-  const nameCandidates: ReadonlyArray<string | null | undefined> = [
-    collector.handle,
-    collector.consolidation_display,
-    collector.consolidation_key,
-  ];
-  const populatedName = nameCandidates.find(
-    (value): value is string =>
-      typeof value === "string" && value.trim().length > 0
-  );
-
-  return populatedName ?? "";
-}
-
-function escapeCsvValue(value: number | string | null | undefined) {
-  const rawValue = value === null || value === undefined ? "" : `${value}`;
-  const stringValue = /^[=+\-@\t]/.test(rawValue) ? `'${rawValue}` : rawValue;
-
-  if (!/[",\n\r]/.test(stringValue)) {
-    return stringValue;
-  }
-
-  return `"${stringValue.replaceAll('"', '""')}"`;
-}
-
-export function buildNftCollectorsCsv(
-  collectors: readonly NftTDH[],
-  isSearchFiltered: boolean
-) {
-  const rows = collectors.map((collector, index) => {
-    const rank = isSearchFiltered ? collector.tdh_rank : index + 1;
-
-    return [
-      rank,
-      getCollectorCsvName(collector),
-      collector.primary_wallet,
-      collector.balance,
-      collector.boosted_tdh,
-      collector.tdh__raw,
-      collector.total_balance,
-      collector.total_boosted_tdh,
-      collector.total_tdh__raw,
-    ]
-      .map(escapeCsvValue)
-      .join(",");
-  });
-
-  return `${[CSV_HEADERS.join(","), ...rows].join("\n")}\n`;
-}
-
-function downloadNftCollectorsCsv(nftId: number, csv: string) {
-  if (
-    typeof document === "undefined" ||
-    typeof globalThis.URL.createObjectURL !== "function"
-  ) {
-    throw new TypeError("CSV downloads are unavailable in this browser.");
-  }
-
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = globalThis.URL.createObjectURL(blob);
-  const link = document.createElement("a");
-
-  try {
-    link.href = url;
-    link.download = `the-memes-${nftId}-collectors.csv`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-  } finally {
-    globalThis.URL.revokeObjectURL(url);
-  }
-}
-
 export function setScrollPosition() {
   const top = document.getElementById("nft-leaderboard")?.offsetTop;
   if (top !== undefined && top > 0 && window.scrollY > 0) {
@@ -246,7 +175,7 @@ export function setScrollPosition() {
   }
 }
 
-enum Sort {
+export enum Sort {
   balance = "balance",
   tdh__raw = "tdh__raw",
   boosted_tdh = "boosted_tdh",
@@ -257,7 +186,7 @@ enum Sort {
 
 type CsvDownloadStatus = "idle" | "downloading" | "success" | "error";
 
-interface NftTDH {
+export interface NftTDH {
   id: number;
   contract: string;
   handle: string;
@@ -357,6 +286,7 @@ function CollectorsCsvDownloadControls({
   sortDirection: SortDirection;
 }>) {
   const csvAbortControllerRef = useRef<AbortController | null>(null);
+  const csvTooltipId = useId();
   const [csvDownloadState, setCsvDownloadState] = useState<
     Readonly<{
       status: CsvDownloadStatus;
@@ -436,15 +366,22 @@ function CollectorsCsvDownloadControls({
   ]);
 
   const isCsvDownloading = csvStatus === "downloading";
+  const csvButtonLabel = t(
+    locale,
+    isCsvDownloading
+      ? "theMemes.detail.collectors.downloadingCsv"
+      : "theMemes.detail.collectors.downloadCsv"
+  );
 
   return (
-    <div className="tw-flex tw-flex-col tw-items-end tw-gap-2">
+    <div className="tw-flex tw-flex-col tw-items-end tw-gap-2 max-md:tw-contents max-md:[&>div>button]:tw-size-9 max-md:[&>div>button]:tw-shrink-0 max-md:[&>div>button]:tw-rounded-lg max-md:[&>div>button]:tw-border-iron-800 max-md:[&>div>button]:tw-bg-iron-950 max-md:[&>div>button]:tw-p-0 max-md:[&>div>button]:tw-text-iron-300 max-md:[&>div]:tw-contents max-md:[&>p]:tw-order-2 max-md:[&>p]:tw-w-full">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-3">
         <Button
           type="button"
           onClick={handleCsvDownload}
           disabled={isCsvDownloading}
           aria-busy={isCsvDownloading}
+          data-tooltip-id={csvTooltipId}
           variant="secondary"
           size="sm"
           aria-label={t(
@@ -452,10 +389,8 @@ function CollectorsCsvDownloadControls({
             "theMemes.detail.collectors.downloadCsvAriaLabel"
           )}
         >
-          <span className="tw-whitespace-nowrap">
-            {isCsvDownloading
-              ? t(locale, "theMemes.detail.collectors.downloadingCsv")
-              : t(locale, "theMemes.detail.collectors.downloadCsv")}
+          <span className="tw-hidden tw-whitespace-nowrap md:tw-inline">
+            {csvButtonLabel}
           </span>
           <FontAwesomeIcon
             icon={isCsvDownloading ? faSpinner : faDownload}
@@ -465,6 +400,14 @@ function CollectorsCsvDownloadControls({
         </Button>
         {children}
       </div>
+      <BodyPortalTooltip
+        id={csvTooltipId}
+        content={csvButtonLabel}
+        place="top"
+        className="md:!tw-hidden [&.react-tooltip\_\_closing]:tw-invisible"
+        style={TOOLTIP_STYLES}
+        globalCloseEvents={{ escape: true, scroll: true, resize: true }}
+      />
       <span className="tw-sr-only" role="status" aria-live="polite">
         {csvStatusMessage}
       </span>
@@ -571,7 +514,9 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
             })
           }
           className="tw-m-0 tw-flex tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0"
-          aria-label={`Sort ${label} ascending`}
+          aria-label={t(locale, "theMemes.detail.collectors.sortAscending", {
+            label,
+          })}
         >
           <FontAwesomeIcon
             icon={faSquareCaretUp}
@@ -587,7 +532,9 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
             })
           }
           className="tw-m-0 tw-flex tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0"
-          aria-label={`Sort ${label} descending`}
+          aria-label={t(locale, "theMemes.detail.collectors.sortDescending", {
+            label,
+          })}
         >
           <FontAwesomeIcon
             icon={faSquareCaretDown}
@@ -630,8 +577,8 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
       className="tw-scroll-mt-24 tw-pt-8"
       id="nft-leaderboard"
     >
-      <div className="tw-mb-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-        <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
+      <div className="tw-mb-3 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 max-md:tw-gap-x-2 max-md:tw-gap-y-1 md:tw-mb-4">
+        <h3 className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-[17px] tw-font-semibold tw-leading-[22px] tw-text-iron-50 md:tw-flex-none md:tw-text-lg md:tw-leading-7 md:tw-text-iron-100">
           {t(locale, "theMemes.detail.collectors.leaderboardTitle")}
         </h3>
         <CollectorsCsvDownloadControls
@@ -642,14 +589,54 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
           sort={sort.sort}
           sortDirection={sort.sort_direction}
         >
-          <SearchWalletsDisplay
-            searchWallets={searchWallets}
-            setSearchWallets={setSearchWallets}
-            setShowSearchModal={setShowSearchModal}
-          />
+          <div className="tw-contents [&>span>button:last-of-type]:tw-rounded-lg max-md:[&>span>button:last-of-type]:tw-size-9 max-md:[&>span>button:last-of-type]:tw-shrink-0 max-md:[&>span>button:last-of-type]:tw-border-iron-800 max-md:[&>span>button:last-of-type]:tw-bg-iron-950 max-md:[&>span>button:last-of-type]:tw-p-0 max-md:[&>span>button:last-of-type]:tw-text-iron-300 max-md:[&>span>button:last-of-type_svg]:tw-size-3.5 max-md:[&>span>button:not(:last-of-type)]:tw-order-1 max-md:[&>span>button:not(:last-of-type)]:tw-min-w-0 max-md:[&>span>button:not(:last-of-type)]:tw-max-w-full max-md:[&>span>span>span]:tw-truncate max-md:[&>span>span]:tw-order-1 max-md:[&>span>span]:tw-min-w-0 max-md:[&>span>span]:tw-max-w-full max-md:[&>span]:tw-contents">
+            <SearchWalletsDisplay
+              searchWallets={searchWallets}
+              setSearchWallets={setSearchWallets}
+              setShowSearchModal={setShowSearchModal}
+            />
+          </div>
         </CollectorsCsvDownloadControls>
       </div>
-      <div className="tw-overflow-x-auto">
+      <NFTLeaderboardMobileSort
+        locale={locale}
+        sort={sort.sort}
+        direction={sort.sort_direction}
+        options={[
+          {
+            value: Sort.balance,
+            label: t(locale, "theMemes.detail.collectors.balance"),
+          },
+          {
+            value: Sort.boosted_tdh,
+            label: t(locale, "theMemes.detail.collectors.tdh"),
+          },
+          {
+            value: Sort.tdh__raw,
+            label: t(locale, "theMemes.detail.collectors.unweightedTdh"),
+          },
+          {
+            value: Sort.total_balance,
+            label: t(locale, "theMemes.detail.collectors.totalBalance"),
+          },
+          {
+            value: Sort.total_boosted_tdh,
+            label: t(locale, "theMemes.detail.collectors.totalTdh"),
+          },
+          {
+            value: Sort.total_tdh__raw,
+            label: t(locale, "theMemes.detail.collectors.totalUnweightedTdh"),
+          },
+        ]}
+        onSort={(value) => setSort({ ...sort, sort: value })}
+        onDirection={(value) => setSort({ ...sort, sort_direction: value })}
+      />
+      <NFTLeaderboardMobileRows
+        locale={locale}
+        leaderboard={leaderboard}
+        sort={sort.sort}
+      />
+      <div className="tw-hidden tw-overflow-x-auto md:tw-block">
         <table className="tw-w-full tw-min-w-[23rem] tw-border-collapse md:tw-min-w-[1040px]">
           <thead>
             <tr>
@@ -663,14 +650,14 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                 scope="colgroup"
                 className={`tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-l tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-font-semibold tw-text-iron-300 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`}
               >
-                This Card
+                {t(locale, "theMemes.detail.collectors.thisCard")}
               </th>
               <th
                 colSpan={3}
                 scope="colgroup"
                 className={`tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-l tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-font-semibold tw-text-iron-300 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`}
               >
-                Total
+                {t(locale, "theMemes.detail.collectors.total")}
               </th>
             </tr>
             <tr>
@@ -678,25 +665,44 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                 scope="col"
                 className={`tw-w-12 tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-font-semibold tw-text-iron-400 md:tw-w-20 md:tw-px-4 md:tw-py-3 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`}
               >
-                Rank
+                {t(locale, "theMemes.detail.collectors.rank")}
               </th>
               <th
                 scope="col"
                 className={`tw-min-w-[11rem] tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-left tw-font-semibold tw-text-iron-400 md:tw-min-w-[18rem] md:tw-px-4 md:tw-py-3 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`}
               >
-                Collector{" "}
-                {totalResults > 0 && `x${formatInteger(locale, totalResults)}`}
+                {totalResults > 0
+                  ? t(locale, "theMemes.detail.collectors.collectorCount", {
+                      count: formatInteger(locale, totalResults),
+                    })
+                  : t(locale, "theMemes.detail.collectors.collector")}
               </th>
-              {printSortableHeader("Balance", Sort.balance, "tw-border-l")}
-              {printSortableHeader("TDH", Sort.boosted_tdh)}
-              {printSortableHeader("Unweighted TDH", Sort.tdh__raw)}
               {printSortableHeader(
-                "Balance",
+                t(locale, "theMemes.detail.collectors.balance"),
+                Sort.balance,
+                "tw-border-l"
+              )}
+              {printSortableHeader(
+                t(locale, "theMemes.detail.collectors.tdh"),
+                Sort.boosted_tdh
+              )}
+              {printSortableHeader(
+                t(locale, "theMemes.detail.collectors.unweightedTdh"),
+                Sort.tdh__raw
+              )}
+              {printSortableHeader(
+                t(locale, "theMemes.detail.collectors.balance"),
                 Sort.total_balance,
                 "tw-border-l"
               )}
-              {printSortableHeader("TDH", Sort.total_boosted_tdh)}
-              {printSortableHeader("Unweighted TDH", Sort.total_tdh__raw)}
+              {printSortableHeader(
+                t(locale, "theMemes.detail.collectors.tdh"),
+                Sort.total_boosted_tdh
+              )}
+              {printSortableHeader(
+                t(locale, "theMemes.detail.collectors.unweightedTdh"),
+                Sort.total_tdh__raw
+              )}
             </tr>
           </thead>
           <tbody>
@@ -729,11 +735,11 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
       </div>
       {leaderboard.length === 0 && !fetchingLeaderboard && (
         <div className="tw-py-5 tw-text-sm tw-font-medium tw-text-iron-400">
-          No Results found
+          {t(locale, "theMemes.detail.collectors.noResults")}
         </div>
       )}
       {totalResults > 0 && (
-        <div className="tw-flex tw-justify-center tw-pb-3 tw-pt-4">
+        <div className="tw-flex tw-justify-center tw-pb-3 tw-pt-4 max-md:[&>span>button:first-child]:tw-size-9 max-md:[&>span>button:first-child]:tw-rounded-lg max-md:[&>span>button:first-child]:tw-border max-md:[&>span>button:first-child]:tw-border-solid max-md:[&>span>button:first-child]:tw-border-iron-800 max-md:[&>span>button:first-child]:tw-bg-iron-950 max-md:[&>span>button:first-child]:tw-text-iron-200 max-md:[&>span>button:last-child]:tw-size-9 max-md:[&>span>button:last-child]:tw-rounded-lg max-md:[&>span>button:last-child]:tw-border max-md:[&>span>button:last-child]:tw-border-solid max-md:[&>span>button:last-child]:tw-border-iron-800 max-md:[&>span>button:last-child]:tw-bg-iron-950 max-md:[&>span>button:last-child]:tw-text-iron-200 max-md:[&>span>button]:tw-text-sm max-md:[&>span>span]:tw-text-sm max-md:[&>span]:tw-gap-2 max-md:[&>span]:tw-text-sm max-md:[&>span]:tw-text-iron-400 max-md:[&_input]:tw-h-9 max-md:[&_input]:tw-w-12 max-md:[&_input]:tw-rounded-lg max-md:[&_input]:tw-border max-md:[&_input]:tw-border-solid max-md:[&_input]:tw-border-iron-800 max-md:[&_input]:tw-bg-iron-950 max-md:[&_input]:tw-text-center max-md:[&_input]:tw-text-sm max-md:[&_input]:tw-text-iron-100 max-md:[&_svg]:tw-w-3.5">
           <Pagination
             page={page}
             pageSize={PAGE_SIZE}

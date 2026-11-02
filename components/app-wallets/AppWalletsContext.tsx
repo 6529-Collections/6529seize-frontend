@@ -8,12 +8,9 @@ import React, {
   useState,
 } from "react";
 import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
-import { ethers } from "ethers";
-import {
-  decryptData,
-  encryptData,
-  isAppWalletEncryptedEnvelope,
-} from "./app-wallet-helpers";
+import { isAddress } from "viem";
+import { isAppWalletEncryptedEnvelope } from "./app-wallet-envelope";
+import { decryptData, encryptData } from "./app-wallet-helpers";
 import { Time } from "@/helpers/time";
 import useCapacitor from "@/hooks/useCapacitor";
 import {
@@ -211,6 +208,9 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
     async (name: string, pass: string): Promise<boolean> => {
       if (!appWalletsSupported) return false;
 
+      // ethers is only needed to generate a wallet; keep it out of the
+      // provider's static graph so it does not ship with every route.
+      const { ethers } = await import("ethers");
       const wallet = ethers.Wallet.createRandom();
       const appWallet = await buildEncryptedAppWallet({
         name,
@@ -281,7 +281,7 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const migrateAppWallet = useCallback(
     async (address: string, pass: string): Promise<boolean> => {
-      if (!appWalletsSupported || !ethers.isAddress(address)) {
+      if (!appWalletsSupported || !isAddress(address)) {
         return false;
       }
 

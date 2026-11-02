@@ -1,4 +1,6 @@
-import Page, { generateMetadata } from "@/app/[user]/collected/page";
+jest.mock("@/contexts/TitleContext", () => ({ useSetTitle: jest.fn() }));
+jest.mock("@/components/user/layout/UserPageDropModal", () => () => null);
+import Page, { generateMetadata } from "@/app/[user]/(profile)/collected/page";
 import { EMPTY_USER_PAGE_STATS_INITIAL_DATA } from "@/components/user/stats/userPageStats.types";
 import { getUserPageStatsInitialData } from "@/components/user/stats/userPageStats.server";
 import { render, screen } from "@testing-library/react";
@@ -16,7 +18,7 @@ jest.mock("@/components/nft-transfer/TransferState", () => ({
   __esModule: true,
   TransferProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
-jest.mock("@/components/user/layout/UserPageLayout", () => ({
+jest.mock("@/components/user/layout/UserPageTabTransition", () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));

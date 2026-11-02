@@ -6,6 +6,8 @@ export type ButtonVariant =
   | "action"
   | "secondary"
   | "tertiary"
+  | "filter"
+  | "filterSelected"
   | "success"
   | "positiveToggle"
   | "negativeToggle"
@@ -14,17 +16,22 @@ export type ButtonVariant =
 
 export type ButtonSize = "xs" | "sm" | "md" | "lg" | "xl";
 
+const PRIMARY_CLASSES =
+  "tw-border-iron-200 tw-bg-iron-200 tw-text-iron-950 desktop-hover:hover:tw-border-iron-300 desktop-hover:hover:tw-bg-iron-300 desktop-hover:hover:tw-text-iron-950 active:tw-border-iron-400 active:tw-bg-iron-400";
+
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   ghost:
     "tw-bg-transparent tw-text-iron-400 enabled:desktop-hover:hover:tw-bg-iron-900/50 enabled:desktop-hover:hover:tw-text-iron-100 enabled:active:tw-bg-iron-900 disabled:tw-opacity-50",
-  primary:
-    "tw-border-iron-200 tw-bg-iron-200 tw-text-iron-950 desktop-hover:hover:tw-border-iron-300 desktop-hover:hover:tw-bg-iron-300 desktop-hover:hover:tw-text-iron-950 active:tw-border-iron-400 active:tw-bg-iron-400",
+  primary: PRIMARY_CLASSES,
+  filterSelected: PRIMARY_CLASSES,
   action:
     "tw-border-primary-500 tw-bg-primary-500 tw-text-white tw-ring-1 tw-ring-inset tw-ring-white/10 desktop-hover:hover:tw-border-primary-600 desktop-hover:hover:tw-bg-primary-600 active:tw-border-primary-700 active:tw-bg-primary-700",
   secondary:
     "tw-border-white/10 tw-bg-white/[0.07] tw-text-iron-100 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-iron-50 active:tw-bg-white/5",
   tertiary:
     "tw-border-iron-800 tw-bg-iron-950 tw-text-iron-100 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white active:tw-bg-black",
+  filter:
+    "tw-border-transparent tw-bg-iron-900 tw-text-iron-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50 active:tw-bg-iron-800",
   success:
     "tw-border-emerald-600 tw-bg-emerald-600 tw-text-white desktop-hover:hover:tw-border-emerald-500 desktop-hover:hover:tw-bg-emerald-500 active:tw-border-emerald-700 active:tw-bg-emerald-700",
   positiveToggle:
@@ -65,11 +72,15 @@ export function getButtonClasses({
   fullWidth = false,
   className,
 }: ButtonStyleOptions = {}): string {
+  const withoutShadow =
+    variant === "ghost" || variant === "filter" || variant === "filterSelected";
+
   return clsx(
     "tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 enabled:tw-cursor-pointer disabled:tw-cursor-not-allowed",
     variant === "ghost"
-      ? "tw-border-0 tw-font-medium tw-shadow-none motion-reduce:tw-transition-none"
-      : "tw-border tw-border-solid tw-font-semibold tw-shadow-sm tw-shadow-black/20 disabled:tw-opacity-50",
+      ? "tw-border-0 tw-font-medium motion-reduce:tw-transition-none"
+      : "tw-border tw-border-solid tw-font-semibold disabled:tw-opacity-50",
+    withoutShadow ? "tw-shadow-none" : "tw-shadow-sm tw-shadow-black/20",
     FOCUS_CLASSES[variant] ?? "focus-visible:tw-outline-primary-400",
     VARIANT_CLASSES[variant],
     size && SIZE_CLASSES[size],

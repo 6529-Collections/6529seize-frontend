@@ -40,7 +40,7 @@ const OVERLAY_TRIGGER_BUTTON_CLASSES =
   "tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-black/70 tw-text-iron-100 tw-shadow-lg tw-shadow-black/40 tw-backdrop-blur-sm tw-transition tw-duration-200 hover:tw-bg-black/85 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 
 const MENU_ITEM_CLASSES =
-  "tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-font-medium tw-text-iron-100 tw-transition-colors hover:tw-bg-iron-800 focus-visible:tw-outline-none focus-visible:tw-bg-iron-800";
+  "tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-font-medium tw-text-iron-100 tw-transition-colors hover:tw-bg-iron-800 focus-visible:tw-outline-none focus-visible:tw-bg-iron-800 focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400";
 
 const RAIL_BUTTON_CLASSES =
   "tw-flex tw-items-center tw-gap-x-2 tw-rounded-xl tw-border-0 tw-bg-iron-900 tw-p-2 hover:tw-text-iron-400";

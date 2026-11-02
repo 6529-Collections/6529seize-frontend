@@ -1,5 +1,6 @@
 "use client";
 
+import { LocalImagePreviewContext } from "@/components/drops/view/item/content/media/LocalImagePreviewContext";
 import Button from "@/components/utils/button/Button";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -15,8 +16,13 @@ import { PreviewLeaderboardGalleryCase } from "./components/PreviewLeaderboardGa
 import { PreviewLeaderboardListCase } from "./components/PreviewLeaderboardListCase";
 import { ProposalCardPreview } from "../components/ProposalCardPreview";
 import type { ProposalCardDocumentInput } from "@/lib/proposal-card/document";
+import { AdditionalActionSummary } from "../components/AdditionalActionSummary";
+import { MemesSubmissionAdditionalInfoKey } from "../types/OperationalData";
+
+import type { ApiMemeCollaboratorProfile } from "@/generated/models/ApiMemeCollaboratorProfile";
 
 interface MemesSubmissionPreviewScreenProps {
+  readonly collaborators?: readonly ApiMemeCollaboratorProfile[];
   readonly proposalCard?: ProposalCardDocumentInput | undefined;
   readonly previewDrop: ExtendedDrop;
   readonly onBackToEdit: () => void;
@@ -28,8 +34,10 @@ interface MemesSubmissionPreviewScreenProps {
   readonly submitLabel?: string | undefined;
 }
 
+/** Review the metadata-backed drop and its operational information before submitting. */
 export function MemesSubmissionPreviewScreen({
   proposalCard,
+  collaborators,
   previewDrop,
   onBackToEdit,
   onSubmit,
@@ -61,6 +69,39 @@ export function MemesSubmissionPreviewScreen({
           </p>
         </div>
 
+        <AdditionalActionSummary
+          isAdditionalActionPromised={
+            previewDrop.is_additional_action_promised === true
+          }
+          plan={
+            previewDrop.metadata.find(
+              (item) =>
+                item.data_key ===
+                String(MemesSubmissionAdditionalInfoKey.ADDITIONAL_ACTION_PLAN)
+            )?.data_value
+          }
+        />
+        {(collaborators?.length ?? 0) > 0 && (
+          <div className="tw-space-y-2 tw-text-sm tw-text-iron-300">
+            <p className="tw-m-0 tw-font-medium">
+              {t(locale, "memes.collaborations.previewInvites")}
+            </p>
+            <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-2 tw-p-0">
+              {collaborators?.map((profile) => (
+                <li
+                  key={profile.id}
+                  className="tw-rounded-full tw-bg-iron-900 tw-px-3 tw-py-1 tw-text-iron-100"
+                >
+                  @{profile.handle}
+                </li>
+              ))}
+            </ul>
+            <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+              {t(locale, "memes.collaborations.hint")}
+            </p>
+          </div>
+        )}
+
         {proposalCard && (
           <div className="tw-space-y-3">
             <h4 className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-100">
@@ -71,14 +112,18 @@ export function MemesSubmissionPreviewScreen({
             </div>
           </div>
         )}
-        <PreviewLeaderboardListCase
-          drop={previewDrop}
-          onDropClick={onDropClick}
-        />
-        <PreviewLeaderboardGalleryCase
-          drop={previewDrop}
-          onDropClick={onDropClick}
-        />
+        <LocalImagePreviewContext.Provider
+          value={previewDrop.parts[0]?.media[0]?.url ?? null}
+        >
+          <PreviewLeaderboardListCase
+            drop={previewDrop}
+            onDropClick={onDropClick}
+          />
+          <PreviewLeaderboardGalleryCase
+            drop={previewDrop}
+            onDropClick={onDropClick}
+          />
+        </LocalImagePreviewContext.Provider>
       </div>
 
       <div className="tw-mt-auto tw-space-y-2 tw-border-t tw-border-iron-800 tw-px-4 tw-pt-3">

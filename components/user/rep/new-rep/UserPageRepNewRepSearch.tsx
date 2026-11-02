@@ -536,6 +536,7 @@ export default function UserPageRepNewRepSearch({
                     variant="ghost"
                     size="lg"
                     fullWidth
+                    className="tw-hidden md:tw-inline-flex"
                   >
                     {t(locale, "rep.categories.grant.actions.cancel")}
                   </Button>

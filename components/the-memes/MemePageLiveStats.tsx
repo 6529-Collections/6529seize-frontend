@@ -11,11 +11,11 @@ import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { BaseNFT, NFT } from "@/entities/INFT";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import { formatMintDate } from "@/helpers/mint-date.helpers";
 import { getFileMimeTypeFromMetadata } from "@/helpers/nft.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import useCapacitor from "@/hooks/useCapacitor";
 import {
-  formatDate,
   formatInteger,
   formatNumber,
   formatPercent as formatLocalePercent,
@@ -40,7 +40,7 @@ const CREATOR_NAME_CLASS =
 const INLINE_METRIC_LABEL_CLASS =
   "tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400";
 const MARKET_METRIC_LABEL_BASE_CLASS =
-  "tw-mb-1 md:tw-mb-2 tw-text-sm tw-font-medium tw-leading-5";
+  "tw-mb-1 md:tw-mb-2 tw-text-[13px] sm:tw-text-sm tw-font-medium tw-leading-5";
 const MARKET_METRIC_VALUE_CLASS =
   "tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6";
 const COLLECTOR_METRIC_VALUE_CLASS =
@@ -55,13 +55,6 @@ const MARKET_OVERVIEW_ROW_CLASS =
   "tw-flex tw-flex-wrap tw-items-start tw-gap-x-6 tw-gap-y-6 xl:tw-gap-x-8";
 const MARKET_GRID_ITEM_CLASS =
   "tw-min-w-0 tw-basis-[calc(50%-0.75rem)] lg:tw-basis-[calc(33.333%-1rem)] xl:tw-basis-[calc(33.333%-1.334rem)]";
-const MEME_MINT_DATE_FORMAT: Intl.DateTimeFormatOptions = {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-  timeZone: "UTC",
-};
-
 export function MemeCollectorsStats({
   nftMeta,
   locale = DEFAULT_LOCALE,
@@ -281,10 +274,12 @@ function formatLivePercent(locale: SupportedLocale, value: number) {
 export function MemeArtworkDetails({
   nft,
   layout = "default",
+  compactMobile = false,
   locale = DEFAULT_LOCALE,
 }: {
   readonly nft: BaseNFT;
   readonly layout?: "default" | "aligned";
+  readonly compactMobile?: boolean;
   readonly locale?: SupportedLocale | undefined;
 }) {
   const mintDate = getMintDateParts(nft.mint_date, locale);
@@ -320,10 +315,14 @@ export function MemeArtworkDetails({
     : "tw-flex tw-h-7 tw-flex-wrap tw-items-center";
 
   return (
-    <section className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-6 tw-pt-8 md:tw-pb-8 lg:tw-pt-0">
+    <section
+      className={`tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 md:tw-pb-8 lg:tw-pt-0 ${compactMobile ? "tw-py-4 sm:tw-pb-6 sm:tw-pt-8" : "tw-pb-6 tw-pt-8"}`}
+    >
       <div className={rowClassName}>
         <div className={creatorClassName}>
-          <div className={ARTWORK_LABEL_CLASS}>
+          <div
+            className={`${ARTWORK_LABEL_CLASS} ${compactMobile ? "max-sm:tw-text-[13px]" : ""}`}
+          >
             {t(locale, "theMemes.detail.live.artwork.createdBy")}
           </div>
           <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-y-2">
@@ -367,7 +366,9 @@ export function MemeArtworkDetails({
           </div>
         </div>
         <div className={itemClassName}>
-          <div className={ARTWORK_LABEL_CLASS}>
+          <div
+            className={`${ARTWORK_LABEL_CLASS} ${compactMobile ? "max-sm:tw-text-[13px]" : ""}`}
+          >
             {t(locale, "theMemes.detail.live.artwork.mintDate")}
           </div>
           <div className={mintDateClassName}>
@@ -426,7 +427,7 @@ function getMintDateParts(
   locale: SupportedLocale
 ) {
   return {
-    date: formatDate(locale, date, MEME_MINT_DATE_FORMAT),
+    date: formatMintDate(locale, date),
   };
 }
 
@@ -563,7 +564,7 @@ export function MemeNftLivePanel({
       : undefined;
 
   return (
-    <section className="tw-pt-6 md:tw-pt-8">
+    <section className="tw-pt-4 sm:tw-pt-6 md:tw-pt-8">
       <div className={MARKET_OVERVIEW_ROW_CLASS}>
         <MarketMetric
           label={t(locale, "theMemes.detail.live.market.mintPrice")}
@@ -623,7 +624,7 @@ function MarketMetric({
         <span
           className={
             displayValue !== undefined || formattedValue === unavailableLabel
-              ? "tw-break-words tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-500"
+              ? "tw-break-words tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-500 sm:tw-text-sm"
               : `${MARKET_METRIC_VALUE_CLASS} tw-break-words`
           }
         >

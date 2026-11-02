@@ -1,16 +1,14 @@
 import { getEthereumRpcUrl } from "@/config/ethereumRpcEnv";
-import { createPublicClient, http } from "viem";
+import { createServerPublicClient } from "@/lib/ethereum/serverPublicClient";
 import { mainnet } from "viem/chains";
 
 const MAINNET_RPC_TIMEOUT_MS = 5_000;
 
 function createEthereumMainnetClient() {
-  return createPublicClient({
+  return createServerPublicClient({
     chain: mainnet,
-    transport: http(getEthereumRpcUrl(), {
-      retryCount: 0,
-      timeout: MAINNET_RPC_TIMEOUT_MS,
-    }),
+    rpcUrl: getEthereumRpcUrl(),
+    timeoutMs: MAINNET_RPC_TIMEOUT_MS,
   });
 }
 

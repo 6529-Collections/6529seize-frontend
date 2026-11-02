@@ -1,18 +1,10 @@
 "use client";
 
-import { useContext, useState } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { useMutation } from "@tanstack/react-query";
-import type { ApiWaveSubscriptionActions } from "@/generated/models/ApiWaveSubscriptionActions";
-import {
-  commonApiDeleteWithBody,
-  commonApiPost,
-} from "@/services/api/common-api";
-import { useAuth } from "@/components/auth/Auth";
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
-import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "@/components/react-query-wrapper/utils/query-utils";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWaveJoin } from "@/hooks/waves/useWaveJoin";
+import { t } from "@/i18n/messages";
 
 export enum WaveFollowBtnSize {
   SMALL = "SMALL",
@@ -42,93 +34,16 @@ export default function WaveHeaderFollow({
   size = WaveFollowBtnSize.MEDIUM,
   fullWidth = false,
 }: WaveHeaderFollowProps) {
-  const { setToast, requestAuth } = useAuth();
-  const { onWaveFollowChange } = useContext(ReactQueryWrapperContext);
-  const following = !!wave.subscribed_actions.length;
-  const label = following ? "Joined" : "Join";
-  const [mutating, setMutating] = useState(false);
-
-  const followMutation = useMutation({
-    mutationFn: async () => {
-      await commonApiPost<
-        ApiWaveSubscriptionActions,
-        ApiWaveSubscriptionActions
-      >({
-        endpoint: `waves/${wave.id}/subscriptions`,
-        body: {
-          actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS,
-        },
-      });
-      if (subscribeToAllDrops) {
-        await commonApiPost({
-          endpoint: `notifications/wave-subscription/${wave.id}`,
-          body: {},
-        });
-      }
-    },
-    onSuccess: () => {
-      onWaveFollowChange({
-        waveId: wave.id,
-        following: true,
-      });
-    },
-    onError: (error) => {
-      setToast({
-        type: "error",
-        title: "Couldn't join this wave.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
-      });
-    },
-    onSettled: () => {
-      setMutating(false);
-    },
-  });
-
-  const unFollowMutation = useMutation({
-    mutationFn: async () => {
-      await commonApiDeleteWithBody<
-        ApiWaveSubscriptionActions,
-        ApiWaveSubscriptionActions
-      >({
-        endpoint: `waves/${wave.id}/subscriptions`,
-        body: {
-          actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS,
-        },
-      });
-    },
-    onSuccess: () => {
-      onWaveFollowChange({
-        waveId: wave.id,
-        following: false,
-      });
-    },
-    onError: (error) => {
-      setToast({
-        type: "error",
-        title: "Couldn't leave this wave.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
-      });
-    },
-    onSettled: () => {
-      setMutating(false);
-    },
-  });
-
-  const onFollow = async (): Promise<void> => {
-    setMutating(true);
-    const { success } = await requestAuth();
-    if (!success) {
-      setMutating(false);
-      return;
-    }
-    if (following) {
-      await unFollowMutation.mutateAsync();
-      return;
-    }
-    await followMutation.mutateAsync();
-  };
+  const locale = useBrowserLocale();
+  const {
+    isJoined: following,
+    isPending: mutating,
+    toggle,
+  } = useWaveJoin(wave, { subscribeToAllDrops });
+  const label = t(
+    locale,
+    following ? "waves.join.joined" : "waves.join.action"
+  );
 
   const printIcon = () => {
     if (following) {
@@ -170,7 +85,9 @@ export default function WaveHeaderFollow({
 
   return (
     <Button
-      onClick={onFollow}
+      onClick={() => {
+        void toggle();
+      }}
       loading={mutating}
       variant={following ? "secondary" : "primary"}
       size={BUTTON_SIZES[size]}

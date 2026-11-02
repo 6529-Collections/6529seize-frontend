@@ -62,6 +62,18 @@ async function installPdfDrop(page: Page, baseURL: string | undefined) {
   await page.route(`${apiOrigin}/api/v2/drops/${DROP_ID}`, (route) =>
     route.fulfill({ headers: CORS_HEADERS, json: { drop, wave: feed.wave } })
   );
+  // Detail panels load drops through the batch endpoint. Match the feed and
+  // direct-drop fixtures so this journey exercises the actual detail panel.
+  await page.route(`${apiOrigin}/api/v2/drops?**`, (route) => {
+    const ids = new URL(route.request().url()).searchParams
+      .get("ids")
+      ?.split(",");
+    if (!ids?.includes(DROP_ID)) return route.fallback();
+    return route.fulfill({
+      headers: CORS_HEADERS,
+      json: { data: [{ ...drop, wave: feed.wave }], page: 1, next: false },
+    });
+  });
   await page.route(`${MEDIA_ROOT}**`, (route) =>
     route.fulfill({
       headers: CORS_HEADERS,
@@ -509,7 +521,11 @@ test.describe("PDF attachment previews @local-only", () => {
     }) => {
       await installPdfDrop(page, baseURL);
       await openWave(page, true);
-      await page.getByRole("button", { name: PREVIEW_BUTTON }).last().click();
+      const detail = page
+        .getByRole("button", { name: "Close panel", exact: true })
+        .locator("xpath=ancestor::*[@data-video-viewport][1]");
+      await expect(detail).toHaveCount(1);
+      await detail.getByRole("button", { name: PREVIEW_BUTTON }).last().click();
       await expect(
         page.getByRole("dialog").getByText("Page 1 of 20", { exact: true })
       ).toBeVisible();
