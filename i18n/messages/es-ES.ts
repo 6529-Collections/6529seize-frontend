@@ -35,6 +35,9 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.es-ES.json";
 
 export const ES_ES_MESSAGES = {
+  "e2ee.profile.view": "Ver el perfil de {name}",
+  "e2ee.profile.viewUnknown": "Ver perfil",
+  "e2ee.profile.level": "Nivel {level}",
   ...safeCollectingMessages,
   ...delegationTapGuideMessages,
   ...networkTdhConsolidationMessages,

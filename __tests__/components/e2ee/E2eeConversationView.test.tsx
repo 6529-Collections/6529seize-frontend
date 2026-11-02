@@ -125,6 +125,23 @@ describe("E2eeConversationView", () => {
     expect(screen.getByLabelText("Encrypted message")).toHaveFocus();
   });
 
+  it("links the DM header name and avatar to the peer's profile", () => {
+    renderView(
+      conversation({
+        kind: "dm",
+        name: null,
+        members: conversation().members.slice(0, 2),
+      })
+    );
+    const heading = screen.getByRole("heading", { level: 1, name: "alice" });
+    expect(
+      within(heading).getByRole("link", { name: "alice" })
+    ).toHaveAttribute("href", "/alice");
+    expect(
+      screen.getAllByRole("link", { name: "View alice's profile" })[0]
+    ).toHaveAttribute("href", "/alice");
+  });
+
   it("renders messages, notices and message states", () => {
     renderView();
     const log = screen.getByRole("list", { name: "Messages" });
@@ -139,6 +156,10 @@ describe("E2eeConversationView", () => {
     // Mentions of members are highlighted, the viewer's more strongly.
     expect(within(log).getByText("@me")).toHaveClass("tw-bg-primary-500/25");
     expect(within(log).getByText("@bob")).toHaveClass("tw-font-semibold");
+    expect(within(log).getByRole("link", { name: "@bob" })).toHaveAttribute(
+      "href",
+      "/bob"
+    );
     expect(
       within(log).getByRole("button", {
         name: "🔥: 2. Reacted by alice and bob",

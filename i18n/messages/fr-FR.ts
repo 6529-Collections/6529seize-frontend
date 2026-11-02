@@ -37,6 +37,9 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.fr-FR.jso
 const LOADING_LABEL = "Chargement…";
 
 export const FR_FR_MESSAGES = {
+  "e2ee.profile.view": "Voir le profil de {name}",
+  "e2ee.profile.viewUnknown": "Voir le profil",
+  "e2ee.profile.level": "Niveau {level}",
   ...safeCollectingMessages,
   ...delegationTapGuideMessages,
   ...networkTdhConsolidationMessages,

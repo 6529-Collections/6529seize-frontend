@@ -412,10 +412,12 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
 
     const activeContainerWave = activeSidebarContext.containerWave;
     const activeContainerWaveId = activeContainerWave?.id ?? null;
+    // Joined follows its loaded snapshot. Eagerly adding older pins would
+    // conceal missing batches and push the pagination trigger past those pins.
     const sourceWaves = [
       ...(activeContainerWave ? [activeContainerWave] : []),
       ...mainWaves,
-      ...separatelyFetchedPinnedWaves,
+      ...(isJoinedMode ? [] : separatelyFetchedPinnedWaves),
     ];
 
     sourceWaves.forEach((wave) => {
