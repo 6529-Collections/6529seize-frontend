@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "tolerance": {
+    "ratio": 0.005,
+    "min_bytes": 1024
+  },
+  "targets": [
+    {
+      "id": "root",
+      "label": "Root layout",
+      "route": null
+    },
+    {
+      "id": "home",
+      "label": "Home",
+      "route": "(home)"
+    },
+    {
+      "id": "wave",
+      "label": "Wave",
+      "route": "waves/[wave]"
+    },
+    {
+      "id": "meme",
+      "label": "Meme card",
+      "route": "the-memes/[id]"
+    },
+    {
+      "id": "profile",
+      "label": "Profile",
+      "route": "[user]/(profile)"
+    },
+    {
+      "id": "museum",
+      "label": "Museum",
+      "route": "museum"
+    }
+  ]
+}
