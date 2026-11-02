@@ -93,9 +93,9 @@ export default function UserPageSubscriptionsHistory(
             className={({ selected }) =>
               getButtonClasses({
                 variant: selected ? "filterSelected" : "filter",
-                size: "md",
+                size: null,
                 className:
-                  "tw-min-h-11 !tw-rounded-full motion-reduce:tw-transition-none",
+                  "tw-h-8 !tw-rounded-full tw-px-3 tw-text-sm motion-reduce:tw-transition-none",
               })
             }
           >
