@@ -9,7 +9,7 @@ import {
 } from "@/components/utils/button/compactActionButtonStyles";
 import { ApiCompetitionMyVotesSort } from "@/generated/models/ApiCompetitionMyVotesSort";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useCapacitor from "@/hooks/useCapacitor";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { t } from "@/i18n/messages";
 
@@ -23,7 +23,7 @@ export function CompetitionMyVotesSort({
   readonly disabled: boolean;
 }) {
   const locale = useBrowserLocale();
-  const { isApp } = useDeviceInfo();
+  const { isCapacitor } = useCapacitor();
   const isMobileViewport = useIsMobileLayoutViewport();
   const labels = {
     [ApiCompetitionMyVotesSort.VoteAmount]: t(
@@ -40,7 +40,7 @@ export function CompetitionMyVotesSort({
     ),
   };
 
-  const isMobile = isApp || isMobileViewport;
+  const isMobile = isCapacitor || isMobileViewport;
   const title = t(locale, "waves.myVotes.sort");
   const ariaLabel = `${title}: ${labels[sort]}`;
   const triggerClassName = `${COMPACT_ACTION_BUTTON_CLASS} tw-max-w-full ${isMobile ? "tw-min-h-11" : "tw-h-8"}`;
@@ -89,9 +89,8 @@ export function CompetitionMyVotesSort({
       trigger={trigger}
       disabled={disabled}
       anchor="bottom start"
-      menuClassName="!tw-transition-none"
       menuWidthClassName="tw-w-56 tw-max-w-[calc(100vw-2rem)]"
-      itemClassName="tw-min-h-9 tw-text-xs"
+      autoFocusItem={false}
       activeItemId={sort}
       items={items}
     />
