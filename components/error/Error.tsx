@@ -94,12 +94,7 @@ export default function ErrorComponent({
         </p>
 
         {onReset && (
-          <Button
-            type="button"
-            onClick={onReset}
-            variant="primary"
-            size="md"
-          >
+          <Button type="button" onClick={onReset} variant="primary" size="md">
             Try Again
           </Button>
         )}
@@ -147,10 +142,10 @@ export default function ErrorComponent({
                 id={stacktraceContentId}
                 className="tw-w-full tw-overflow-hidden motion-safe:tw-animate-fadeIn"
               >
-                  <div className="tw-max-h-[16rem] tw-w-full tw-max-w-full tw-overflow-auto tw-whitespace-pre-wrap tw-break-all tw-rounded-lg tw-bg-black tw-p-4 tw-font-mono tw-text-xs tw-leading-5 tw-text-gray-200">
-                    {digest && <div className="tw-mb-2">Digest: {digest}</div>}
-                    {resolvedStackTrace}
-                  </div>
+                <div className="tw-max-h-[16rem] tw-w-full tw-max-w-full tw-overflow-auto tw-whitespace-pre-wrap tw-break-all tw-rounded-lg tw-bg-black tw-p-4 tw-font-mono tw-text-xs tw-leading-5 tw-text-gray-200">
+                  {digest && <div className="tw-mb-2">Digest: {digest}</div>}
+                  {resolvedStackTrace}
+                </div>
               </div>
             )}
           </div>
