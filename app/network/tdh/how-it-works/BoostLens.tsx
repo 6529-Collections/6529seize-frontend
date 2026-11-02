@@ -7,6 +7,7 @@ import BoostFigure from "@/components/explained/figures/BoostFigure";
 import BreakIt, { breakItLabel } from "@/components/explained/lens/BreakIt";
 import { Stepper } from "@/components/explained/lens/controls";
 import Lens, { Readout, RuleValue } from "@/components/explained/lens/Lens";
+import Predict from "@/components/explained/lens/Predict";
 import { useBreakable } from "@/components/explained/lens/useBreakable";
 import StampLine from "@/components/explained/marks/StampLine";
 import { EX_LINK } from "@/components/explained/tokens";
@@ -184,6 +185,33 @@ export default function BoostLens({
       question={ht(locale, "explained.tdh.how.boost.question")}
       broken={broken}
       locale={locale}
+      // Guess first: does one more Gradient past the limit help? The
+      // answer moves the model to that case, its Break it.
+      predict={
+        <Predict
+          id="boost"
+          locale={locale}
+          question={ht(locale, "explained.tdh.how.boost.guess", {
+            next: formatCount(locale, limit + 1),
+          })}
+          options={[
+            {
+              label: ht(locale, "explained.tdh.how.boost.guessYes"),
+              right: false,
+            },
+            {
+              label: ht(locale, "explained.tdh.how.boost.guessNo"),
+              right: true,
+            },
+          ]}
+          onAnswer={() => {
+            if (!broken) toggleBreak();
+          }}
+          answer={ht(locale, "explained.tdh.how.boost.guessAnswer", {
+            max: formatCount(locale, limit),
+          })}
+        />
+      }
       stage={
         <>
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-6 tw-gap-y-3">

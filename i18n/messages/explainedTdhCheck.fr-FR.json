@@ -121,7 +121,7 @@
   "explained.tdh.check.read.not3": "6529 exploite aujourd'hui les trois programmes.",
   "explained.tdh.check.read.not4Title": "Une seconde lecture des journaux.",
   "explained.tdh.check.read.not4": "Les deux programmes lisent un seul fichier d'entrée, écrit par le noyau Rust. Dès que 6529.io basculera sur le noyau Rust, prévue vers le {cutover}, rien ne relira les journaux séparément tant que des validateurs extérieurs ne tourneront pas.",
-  "explained.tdh.check.read.not4Late": "Les deux programmes lisent un seul fichier d'entrée, écrit par le noyau Rust. Le passage de 6529.io au résultat du noyau Rust était prévu vers le {cutover} et, au {checked}, n'a pas eu lieu. Une fois fait, rien ne relira les journaux séparément tant que des validateurs extérieurs ne tourneront pas.",
+  "explained.tdh.check.read.not4Late": "Les deux programmes lisent un seul fichier d'entrée, écrit par le noyau Rust. Le passage de 6529.io au résultat du noyau Rust était prévu vers le {cutover} ; la vérification par 6529 du backend de 6529.io le {checked} l'a trouvé non fait. Une fois fait, rien ne relira les journaux séparément tant que des validateurs extérieurs ne tourneront pas.",
   "explained.tdh.check.self.label": "Vérifiez vous-même",
   "explained.tdh.check.self.title": "Qui peut refaire chaque étape aujourd'hui.",
   "explained.tdh.check.self.body": "Sur les sept étapes, trois peuvent être refaites par tout le monde dès maintenant, dont une avec un nœud Ethereum, et une de plus à partir de la spécification. Trois demandent un code qui n'est pas encore public ; le publier est la décision du propriétaire (D116), sans date fixée.",

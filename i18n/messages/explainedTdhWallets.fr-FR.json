@@ -61,7 +61,7 @@
   "explained.tdh.wallets.lens.sayOldFour": "Seuls trois comptent ensemble. Un groupe ne dépasse trois que lorsqu'un wallet a des liens dans les deux sens avec chacun des autres, créés le {date} ou après (D136). Pour faire entrer le quatrième, liez-le à nouveau : il signe en dernier, en un lot.",
   "explained.tdh.wallets.lens.sayOne": "Une identité : un TDH, un boost, un vote.",
   "explained.tdh.wallets.lens.ruleBoth": "une paire compte une fois liée dans les deux sens",
-  "explained.tdh.wallets.lens.ruleNewest": "le lien confirmé le plus récent d'abord ; les liens d'un même bloc par clé de paire (les deux adresses, triées)",
+  "explained.tdh.wallets.lens.ruleNewest": "lien confirmé le plus récent d'abord ; liens d'un même bloc par clé de paire (les deux adresses, triées), qui décide lequel compte comme le plus récent",
   "explained.tdh.wallets.lens.ruleEvery": "un wallet ne rejoint que s'il est lié à chaque membre",
   "explained.tdh.wallets.lens.ruleGate": "au-delà de {ungated} seulement si un membre est lié dans les deux sens à chaque autre membre, chaque lien enregistré le {date} ({gate}) ou après",
   "explained.tdh.wallets.lens.ruleMax": "{max} au plus",

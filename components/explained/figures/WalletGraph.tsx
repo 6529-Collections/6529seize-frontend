@@ -35,6 +35,9 @@ const NONE_EXCLUDED: readonly string[] = [];
 /** The least height of the drawing, in px. */
 const MIN_HEIGHT = 180;
 
+/** The widest the wallets spread, centred in a wider frame. */
+const MAX_SPREAD = 420;
+
 export default function WalletGraph({
   wallets,
   links,
@@ -58,7 +61,10 @@ export default function WalletGraph({
   const pad = 46;
   const raw = wallets.map((wallet) => ({
     id: wallet.id,
-    x: wallet.x * width,
+    // One graph, one size: spread over at most this width wherever it is
+    // drawn, so the hero's and a model's graphs read as the same object
+    // and a wide stage does not stretch it into long diagonals.
+    x: wallet.x * Math.min(width, MAX_SPREAD),
     y: wallet.y * base,
   }));
   const xs = raw.map((point) => point.x);

@@ -61,7 +61,7 @@
   "explained.tdh.wallets.lens.sayOldFour": "Solo tres cuentan juntas. Un grupo solo pasa de tres cuando una wallet tiene vínculos en ambos sentidos con cada una de las demás, creados el {date} o después (D136). Para sumar la cuarta, vincúlala de nuevo: firma la última, en un lote.",
   "explained.tdh.wallets.lens.sayOne": "Una identidad: un TDH, un boost, un voto.",
   "explained.tdh.wallets.lens.ruleBoth": "un par cuenta una vez vinculado en ambos sentidos",
-  "explained.tdh.wallets.lens.ruleNewest": "primero el vínculo confirmado más reciente; los vínculos de un mismo bloque por clave de par (las dos direcciones, ordenadas)",
+  "explained.tdh.wallets.lens.ruleNewest": "primero el vínculo confirmado más reciente; vínculos de un mismo bloque por clave de par (las dos direcciones, ordenadas), que decide cuál cuenta como el más reciente",
   "explained.tdh.wallets.lens.ruleEvery": "una wallet solo se une si está vinculada con cada miembro",
   "explained.tdh.wallets.lens.ruleGate": "más de {ungated} solo si un miembro está vinculado en ambos sentidos con cada otro miembro, cada vínculo registrado el {date} ({gate}) o después",
   "explained.tdh.wallets.lens.ruleMax": "{max} como máximo",

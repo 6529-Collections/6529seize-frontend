@@ -61,7 +61,7 @@
   "explained.tdh.wallets.lens.sayOldFour": "Only three count together. A group grows past three only when one wallet has links both ways with each of the others, made on or after {date} (D136). To bring the fourth in, link it afresh: it signs last, in one batch.",
   "explained.tdh.wallets.lens.sayOne": "One identity: one TDH, one boost, one vote.",
   "explained.tdh.wallets.lens.ruleBoth": "a pair counts once linked both ways",
-  "explained.tdh.wallets.lens.ruleNewest": "newest confirmed link first; links in one block by pair key (the two addresses, sorted)",
+  "explained.tdh.wallets.lens.ruleNewest": "newest confirmed link first; links in one block by pair key (the two addresses, sorted), which settles which counts as newest",
   "explained.tdh.wallets.lens.ruleEvery": "a wallet joins only if linked with every member",
   "explained.tdh.wallets.lens.ruleGate": "past {ungated} only if one member links both ways with each other member, every link registered at or after {date} ({gate})",
   "explained.tdh.wallets.lens.ruleMax": "at most {max}",

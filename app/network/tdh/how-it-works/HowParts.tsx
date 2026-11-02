@@ -1,11 +1,12 @@
 import type { SupportedLocale } from "@/i18n/locales";
+import StampLine from "@/components/explained/marks/StampLine";
 import { EX_FOCUS } from "@/components/explained/tokens";
 import { ht, type HowKey } from "./copy";
 
 /**
  * The four parts under the header: Time, Rarity, Collections and You, each a
  * link to its part with a small drawing of its idea (a fourth day filled; a
- * tall narrow tile beside low wide ones; one hatched band; three wallets).
+ * tall narrow tile beside low wide ones; one hatched band; four wallets).
  * Drawn in HTML, ink and blue only.
  */
 const PARTS: readonly {
@@ -79,10 +80,11 @@ function Drawing({
   }
   return (
     <>
-      {[0, 1, 2].map((wallet) => (
+      {/* Four wallets, as the line under the title says. */}
+      {[0, 1, 2, 3].map((wallet) => (
         <i
           key={wallet}
-          className={`${TILE} tw-h-[22px] tw-w-[32%] tw-rounded`}
+          className={`${TILE} tw-h-[22px] tw-w-[24%] tw-rounded`}
         />
       ))}
     </>
@@ -197,6 +199,19 @@ export function HowFormula({ locale }: { readonly locale: SupportedLocale }) {
           {ht(locale, "explained.tdh.how.formula.round")}
         </span>
       </p>
+      {/* The summary line is qualified as the models below it are. */}
+      <div className="tw-mt-2.5">
+        <StampLine
+          locale={locale}
+          marks={[
+            { kind: "proposed", refText: "P26" },
+            {
+              maturity: "live",
+              label: ht(locale, "explained.tdh.how.formula.live"),
+            },
+          ]}
+        />
+      </div>
     </figure>
   );
 }

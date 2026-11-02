@@ -240,7 +240,7 @@ describe("the daily check (TDH-DESIGN.md §4.4)", () => {
       })
     ).toBeInTheDocument();
     expect(container.querySelector("#diff")).toHaveTextContent(
-      "was planned for about Oct 23 and, as of Nov 1, has not been made. Once it is, nothing re-reads the logs"
+      "was planned for about Oct 23; 6529's check of 6529.io's backend on Nov 1 found it not made. Once it is, nothing re-reads the logs"
     );
     const trail = screen.getByRole("list", {
       name: "Who can repeat each step",

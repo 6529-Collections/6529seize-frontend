@@ -62,7 +62,9 @@ export const CONTRACT_CHECKS: readonly ContractCheck[] = [
   {
     id: "cycleRoot",
     refusals: ["CycleRootMismatch"],
-    rule: 'cycleRoot = H("6529.TdhCycleRoot.v1", NETWORK_ID, cycleDay, t_N, tdhRuleId, cutNumber, cutHash, cutTimestamp, walletRoot, walletCount, identityCount, totalTDH, tokenRoot, tokenCount)',
+    // H and TAG as TStatementV1.sol computes them, so the root can be
+    // recomputed from the printed words by anyone.
+    rule: 'cycleRoot = H("6529.TdhCycleRoot.v1", NETWORK_ID, cycleDay, t_N, tdhRuleId, cutNumber, cutHash, cutTimestamp, walletRoot, walletCount, identityCount, totalTDH, tokenRoot, tokenCount); H(name, x…) = keccak256(abi.encode(TAG(name), x…)), TAG(name) = keccak256(name)',
   },
   {
     id: "anchors",

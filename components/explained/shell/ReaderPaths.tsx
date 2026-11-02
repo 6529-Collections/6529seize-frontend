@@ -28,7 +28,9 @@ export default function ReaderPaths({
   return (
     <ul
       aria-label={kt(locale, "explained.kit.paths.label")}
-      className={`tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-3.5 tw-p-0 md:tw-grid-cols-2 ${
+      // Two short tiles a row on a phone, each who and time only, so the
+      // eight paths take two screens less; the route shows from a tablet.
+      className={`tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-2.5 tw-p-0 md:tw-gap-3.5 ${
         paths.length === 7
           ? // Seven paths: four, then three that fill the row, never an empty slot.
             "xl:tw-grid-cols-12 xl:[&>li:nth-child(-n+4)]:tw-col-span-3 xl:[&>li:nth-child(n+5)]:tw-col-span-4"
@@ -39,12 +41,12 @@ export default function ReaderPaths({
         <li key={path.who}>
           <Link
             href={path.href}
-            className={`tw-flex tw-h-full tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-5 tw-pb-[18px] tw-pt-5 tw-no-underline hover:tw-border-iron-700 ${EX_FOCUS}`}
+            className={`tw-flex tw-h-full tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3.5 tw-pb-3.5 tw-pt-3.5 tw-no-underline hover:tw-border-iron-700 md:tw-px-5 md:tw-pb-[18px] md:tw-pt-5 ${EX_FOCUS}`}
           >
-            <span className="tw-block tw-text-lg tw-font-semibold tw-leading-[25px] tw-text-iron-50">
+            <span className="tw-block tw-text-base tw-font-semibold tw-leading-[22px] tw-text-iron-50 md:tw-text-lg md:tw-leading-[25px]">
               {path.who}
             </span>
-            <span className="tw-mt-2 tw-block tw-text-[15px] tw-leading-6 tw-text-iron-300">
+            <span className="tw-mt-2 tw-hidden tw-text-[15px] tw-leading-6 tw-text-iron-300 md:tw-block">
               {withCc0(path.route)}
             </span>
             {/* The time sits on the card's foot, so a row of cards reads as a grid. */}
