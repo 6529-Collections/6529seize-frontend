@@ -280,7 +280,7 @@
   "explained.tdh.how.totals.break": "additionner plutôt les wallets",
   "explained.tdh.how.order.label": "Le tout",
   "explained.tdh.how.order.title": "Le calcul, étape par étape, dans l'ordre de P26.",
-  "explained.tdh.how.order.body": "Les quatre idées ci-dessus, dans l'ordre où la spécification calcule un cycle. Lire les logs (§3) vient avant, écrire la sortie et les racines (§9) après ; la Spécification contient les deux. Chaque étape renvoie à son modèle.",
+  "explained.tdh.how.order.body": "Les quatre idées ci-dessus, dans l'ordre de la spécification. Lire les logs (§3) vient avant, écrire la sortie et les racines (§9) après ; la Spécification contient les deux. Chaque étape renvoie à son modèle.",
   "explained.tdh.how.order.snapshot": "L'instantané",
   "explained.tdh.how.order.eligible": "Les cartes qui comptent",
   "explained.tdh.how.order.editions": "Éditions et plancher",
