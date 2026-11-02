@@ -5,6 +5,7 @@ import type { ApiXTdhGrantsPage } from "../../generated/models/ApiXTdhGrantsPage
 import { ApiXTdhGrantStatus } from "../../generated/models/ApiXTdhGrantStatus";
 import { ApiXTdhGrantTargetChain } from "../../generated/models/ApiXTdhGrantTargetChain";
 import { ApiXTdhGrantTargetTokenMode } from "../../generated/models/ApiXTdhGrantTargetTokenMode";
+import { fetchWaveDiscoveryPage } from "./waveDiscoveryPagination";
 import type { ApiXTdhGrantTokensPage } from "../../generated/models/ApiXTdhGrantTokensPage";
 import { expectUrlState } from "../support/urlState";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
@@ -139,16 +140,11 @@ async function getPublicChatMessageTarget(page: Page) {
     const nextPage = overview.page + 1;
     const nextPageUrl = new URL(response.url());
     nextPageUrl.searchParams.set("page", String(nextPage));
-    // Transport errors can include private request headers.
-    const nextResponse = await page.request
-      .get(nextPageUrl.toString(), {
-        ...(stagingAccess ? { headers: { "x-6529-auth": stagingAccess } } : {}),
-      })
-      .catch(() => {
-        throw new Error("Wave discovery pagination transport failed");
-      });
-    expect(nextResponse.ok()).toBe(true);
-    overview = (await nextResponse.json()) as ApiWaveOverviewPage;
+    overview = await fetchWaveDiscoveryPage(
+      page.context(),
+      nextPageUrl,
+      stagingAccess
+    );
     expect(overview.page).toBe(nextPage);
     wave = overview.data.find(isEligibleChat);
   }
