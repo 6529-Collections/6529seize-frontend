@@ -4963,7 +4963,7 @@ paths:
             competition's authoritative rank ascending, unranked entries last,
             with the leaderboard's stable identity tie-breaker. last_voted uses
             the most recent confirmed user vote change (including retained
-            history), excluding automatic adjustments and unchanged votes;
+            history), newest first, excluding automatic adjustments and unchanged votes;
             unknown times sort last, ties by drop ID ascending. Cursors are
             bound to the sort.
           schema:

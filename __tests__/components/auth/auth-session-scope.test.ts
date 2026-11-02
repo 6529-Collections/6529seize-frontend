@@ -1,5 +1,6 @@
 import {
   getAuthSessionRole,
+  isAuthSessionForProfile,
   isDirectProfileAuthSession,
   resolveActiveProfileProxy,
 } from "@/components/auth/auth-session-scope";
@@ -117,5 +118,37 @@ describe("active proxy resolution", () => {
         receivedProfileProxies: undefined,
       })
     ).toBeUndefined();
+  });
+});
+
+describe("authenticated actor before a mutation", () => {
+  const scope = { address: "0xAbC", profileId: "owner", proxyProfileId: null };
+  const token = (sub: string, role?: string, iat = 1) =>
+    `e30.${btoa(JSON.stringify({ sub, role, iat }))}.signature`;
+
+  it("allows token renewal for the same actor but rejects wallet and proxy switches", () => {
+    for (const iat of [1, 2]) {
+      jest.mocked(getAuthJwt).mockReturnValue(token("0xabc", undefined, iat));
+      expect(isAuthSessionForProfile(scope)).toBe(true);
+    }
+    jest.mocked(getAuthJwt).mockReturnValue(token("0xdef"));
+    expect(isAuthSessionForProfile(scope)).toBe(false);
+    jest.mocked(getAuthJwt).mockReturnValue(token("0xabc", "delegate"));
+    expect(isAuthSessionForProfile(scope)).toBe(false);
+    expect(
+      isAuthSessionForProfile({ ...scope, proxyProfileId: "delegate" })
+    ).toBe(true);
+    expect(isAuthSessionForProfile({ ...scope, proxyProfileId: "other" })).toBe(
+      false
+    );
+  });
+
+  it("supports a legacy direct role and fails closed without readable credentials", () => {
+    jest.mocked(getAuthJwt).mockReturnValue(token("0xabc", "owner"));
+    expect(isAuthSessionForProfile(scope)).toBe(true);
+    for (const value of [null, "not-a-token"]) {
+      jest.mocked(getAuthJwt).mockReturnValue(value);
+      expect(isAuthSessionForProfile(scope)).toBe(false);
+    }
   });
 });

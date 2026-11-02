@@ -1,3 +1,4 @@
+import { isAuthSessionForProfile } from "@/components/auth/auth-session-scope";
 import type { ReactNode } from "react";
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -28,6 +29,9 @@ const mockVoteData = {
   ],
 };
 let mockParts: { part_id: number }[] = [{ part_id: 1 }];
+jest.mock("@/components/auth/auth-session-scope", () => ({
+  isAuthSessionForProfile: jest.fn(() => true),
+}));
 jest.mock("@/contexts/CompetitionContext", () => ({
   useCompetition: () => ({
     competition: {
@@ -129,6 +133,7 @@ jest.mock("@/components/waves/PrivilegedDropCreator", () => ({
 }));
 
 beforeEach(() => {
+  jest.mocked(isAuthSessionForProfile).mockReturnValue(true);
   localStorage.clear();
   mockResource.mockClear();
   mockRequestAuth.mockReset().mockResolvedValue({ success: true });
@@ -159,6 +164,25 @@ it("stops an old reset before submitting when its profile changes during authent
   await rejection;
   expect(mockSetVote).not.toHaveBeenCalled();
   await expect(resetVote("drop")).rejects.toThrow("Voting session changed");
+});
+
+it("blocks a reset when the token actor changes before React updates", async () => {
+  let finishAuth!: (result: { success: boolean }) => void;
+  mockRequestAuth.mockReturnValue(
+    new Promise((resolve) => {
+      finishAuth = resolve;
+    })
+  );
+  render(<CompetitionMyVotes />);
+  const { resetVote } = mockResetControls.mock.lastCall![0] as {
+    resetVote: (id: string) => Promise<void>;
+  };
+  const pending = resetVote("drop");
+  const rejection = expect(pending).rejects.toThrow("Voting session changed");
+  jest.mocked(isAuthSessionForProfile).mockReturnValue(false);
+  await act(async () => finishAuth({ success: true }));
+  await rejection;
+  expect(mockSetVote).not.toHaveBeenCalled();
 });
 
 it.each(["Cancel rationale", "Send rationale"])(
