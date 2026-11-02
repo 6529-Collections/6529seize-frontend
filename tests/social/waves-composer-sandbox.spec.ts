@@ -378,6 +378,89 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("keeps an older long drop toggle in place when expanding and collapsing", async ({
+    baseURL,
+    page,
+  }) => {
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(baseURL)}/api/v2/waves/${SANDBOX_WAVE_ID}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const payload = (await response.json()) as {
+      drops: Array<Record<string, unknown>>;
+      wave: Record<string, unknown>;
+    };
+    const sourceDrop = payload.drops[0];
+    if (!sourceDrop) {
+      throw new Error("Expected the sandbox wave to return one source drop.");
+    }
+    const drops = Array.from({ length: 40 }, (_, index) => ({
+      ...sourceDrop,
+      id: `00000000-0000-4000-8000-${String(600 + index).padStart(12, "0")}`,
+      serial_no: index + 1,
+      created_at: Number(sourceDrop["created_at"] ?? 0) + index * 60_000,
+      content:
+        index === 19
+          ? LONG_DROP_CONTENT
+          : `Surrounding history message ${index + 1}.`,
+    }));
+    await page.route(
+      `**/api/v2/waves/${SANDBOX_WAVE_ID}/drops**`,
+      async (route) => route.fulfill({ json: { ...payload, drops } })
+    );
+    await gotoSandboxWave(page);
+
+    const longDrop = page.locator('[data-serial-no="20"]');
+    const scrollContainer = page.locator("[data-wave-drops-scroll-container]");
+    const showMore = longDrop.getByRole("button", { name: "Show more" });
+    await showMore.scrollIntoViewIfNeeded();
+    await showMore.focus();
+    await showMore.evaluate((button) => {
+      const container = button.closest<HTMLElement>(
+        "[data-wave-drops-scroll-container]"
+      );
+      if (!container) throw new Error("Expected a wave scroll container.");
+      const desiredTop =
+        container.getBoundingClientRect().top + container.clientHeight / 2;
+      container.scrollTop += button.getBoundingClientRect().top - desiredTop;
+    });
+    await expect
+      .poll(() => scrollContainer.evaluate((node) => node.scrollTop))
+      .toBeLessThan(-100);
+    const buttonTop = await showMore.evaluate(
+      (button) => button.getBoundingClientRect().top
+    );
+
+    await showMore.press("Enter");
+    const showLess = longDrop.getByRole("button", { name: "Show less" });
+    await expect(longDrop).toContainText(LONG_DROP_END_MARKER);
+    await expect(showLess).toBeFocused();
+    await expect
+      .poll(async () =>
+        Math.abs(
+          (await showLess.evaluate(
+            (button) => button.getBoundingClientRect().top
+          )) - buttonTop
+        )
+      )
+      .toBeLessThanOrEqual(2);
+
+    await showLess.press("Space");
+    await expect(longDrop).not.toContainText(LONG_DROP_END_MARKER);
+    await expect(showMore).toBeFocused();
+    await expect
+      .poll(async () =>
+        Math.abs(
+          (await showMore.evaluate(
+            (button) => button.getBoundingClientRect().top
+          )) - buttonTop
+        )
+      )
+      .toBeLessThanOrEqual(2);
+    await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("restores an in-progress chat draft across a full reload", async ({
     baseURL,
     page,
@@ -1006,7 +1089,8 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     }) => {
       const parentDropId = "00000000-0000-4000-8000-000000000547";
       const quotedDropId = "00000000-0000-4000-8000-000000000548";
-      const quotedWaveId = "00000000-0000-4000-8000-000000000549";
+      // Use a wave served by the sandbox so quote navigation can finish.
+      const quotedWaveId = "00000000-0000-4000-8000-000000000533";
 
       // Read the synthetic fixture before navigation so background route
       // handlers never parse an APIResponse after the test context closes.
@@ -1118,7 +1202,8 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       await quoteCard.press(key);
       await quoteNavigation;
       await expect(page).toHaveURL(
-        new RegExp(`/waves/${quotedWaveId}(?:\\?serialNo=42)?$`)
+        new RegExp(`/waves/${quotedWaveId}(?:\\?serialNo=42)?$`),
+        { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
       );
     });
   }
