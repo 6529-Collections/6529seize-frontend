@@ -230,6 +230,48 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("desktop unread row still marks its notification read after an automatic read failure", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "Desktop sidebar inbox"
+    );
+    await page.route("**/api/notifications/read", (route) =>
+      route.fulfill({
+        status: 500,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "Temporary read failure" }),
+      })
+    );
+    await page.goto("/waves", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await page
+      .getByRole("button", { name: "Notifications", exact: true })
+      .click();
+    const inbox = page.getByRole("region", {
+      name: "Notifications",
+      exact: true,
+    });
+    await expect(inbox.getByRole("alert")).toBeVisible();
+    await inbox
+      .getByRole("link")
+      .filter({ hasText: "sandbox-alice mentioned you" })
+      .click();
+    await expect
+      .poll(async () =>
+        (await fetchSandboxRequests(baseURL)).some(
+          (request) =>
+            request.method === "POST" &&
+            request.path === "/api/notifications/1001/read"
+        )
+      )
+      .toBe(true);
+    await expect(inbox).not.toBeVisible();
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("mobile bell keeps full-page navigation", async ({ page }, testInfo) => {
     // Desktop navigation and read actions are exercised by the two scenarios above.
     test.skip(
