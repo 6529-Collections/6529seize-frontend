@@ -113,8 +113,9 @@ never ask for a signature per message.
 ## Starting a chat
 
 1. Open `/messages/encrypted` and select **New encrypted chat**.
-2. Search for people and add them. Each person shows whether they can receive
-   encrypted messages:
+2. Search for people and tap or click a result to add them. The search clears
+   and the person appears in the selected list. Each person shows whether they
+   can receive encrypted messages:
    - **Can receive encrypted messages**
    - **Doesn’t accept messages from you**: their direct-message setting does
      not allow you.
