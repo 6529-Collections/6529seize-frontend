@@ -284,7 +284,6 @@
   "explained.tdh.sure.check.limit": "named limit",
   "explained.tdh.sure.check.notCovered": "Not covered",
   "explained.tdh.sure.check.inLean": "In Lean",
-  "explained.tdh.sure.check.sameStatement": "Same sentence as the entry above.",
   "explained.tdh.sure.hwk.manifest": "The Lean manifest",
   "explained.tdh.sure.hwk.manifestBody": "formal/manifest.json from the public feed, written {written}, built from 6529's design record at {commit}; SHA-256 {sha}.",
   "explained.tdh.sure.hwk.manifestBundled": "formal/manifest.json, the copy bundled with 6529.io, written {written} and built from 6529's design record at {commit}. The page shows it while the feed's copy cannot be read.",

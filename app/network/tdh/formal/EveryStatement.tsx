@@ -80,9 +80,13 @@ function Entry({
         : `${file}:${entry.line}`;
   }
   return (
+    // An entry whose sentence repeats the one above joins it: no rule
+    // between them and no sentence of its own, so a run of helpers under
+    // one statement reads as one group, not as rows of filler.
     <li
-      className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-py-3.5 first:tw-border-t-0"
+      className={`tw-border-0 tw-border-solid tw-border-iron-900 first:tw-border-t-0 ${repeats ? "tw-pb-3.5 tw-pl-4" : "tw-border-t tw-py-3.5"}`}
       data-entry={entry.id}
+      {...(repeats ? { "data-repeats": "" } : {})}
     >
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1.5">
         <Mark
@@ -106,11 +110,6 @@ function Entry({
         </span>
         <span className="tw-block sm:tw-inline">{checkedBy(ctx, entry)}</span>
       </span>
-      {entry.statement && repeats && (
-        <p className="tw-m-0 tw-mt-2 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-400">
-          {s("explained.tdh.sure.check.sameStatement")}
-        </p>
-      )}
       {entry.statement && !repeats && (
         <p
           className="tw-m-0 tw-mt-2 tw-max-w-[560px] tw-text-[15px] tw-leading-6 tw-text-iron-300 [overflow-wrap:anywhere]"
