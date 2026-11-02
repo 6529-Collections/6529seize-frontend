@@ -360,5 +360,10 @@
   "apps.desktop.file.intel": "Intel",
   "apps.desktop.file.appImage": "AppImage",
   "apps.desktop.file.debian": "Debian / Ubuntu",
-  "apps.desktop.file.redHat": "Fedora / Red Hat"
+  "apps.desktop.file.redHat": "Fedora / Red Hat",
+  "apps.desktop.format.exe": "EXE installer",
+  "apps.desktop.format.dmg": "DMG installer",
+  "apps.desktop.format.appImage": ".AppImage",
+  "apps.desktop.format.deb": ".deb",
+  "apps.desktop.format.rpm": ".rpm"
 }

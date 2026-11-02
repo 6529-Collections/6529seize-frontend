@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { DesktopAppDownloads } from "@/components/apps/DesktopAppDownloads";
 import type { DesktopAppVersion } from "@/components/apps/appDownloads";
 
@@ -66,7 +66,7 @@ describe("DesktopAppDownloads", () => {
     expect(screen.queryByText("Latest")).not.toBeInTheDocument();
     expect(
       screen.getByRole("link", {
-        name: "Download 6529 Desktop for macOS, version 0.3.16, Apple silicon (DMG)",
+        name: "Download 6529 Desktop for macOS, version 0.3.16, Apple silicon (DMG installer)",
       })
     ).toHaveAttribute("href", "https://example.com/current.dmg");
     expect(
@@ -81,7 +81,7 @@ describe("DesktopAppDownloads", () => {
     ).toBeInTheDocument();
     query = { isError: true, refetch };
     view.rerender(<DesktopAppDownloads />);
-    screen.getByRole("button", { name: "Try again" }).click();
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(refetch).toHaveBeenCalledTimes(1);
   });
   it("preserves available releases and exposes a retry for a partial feed failure", () => {
@@ -89,7 +89,8 @@ describe("DesktopAppDownloads", () => {
     render(<DesktopAppDownloads />);
     const status = screen.getByRole("status");
     expect(status).toHaveTextContent("Some downloads");
-    within(status).getByRole("button", { name: "Try again" }).click();
+    expect(within(status).queryByRole("button")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(screen.getAllByRole("link")).toHaveLength(3);
     expect(refetch).toHaveBeenCalledTimes(1);
   });

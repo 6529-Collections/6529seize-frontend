@@ -88,6 +88,59 @@ describe("feed-driven desktop downloads", () => {
     );
   });
 
+  it("uses the published files[].url list rather than the updater's top-level path", async () => {
+    mockFeeds({
+      "mac/latest-mac.yml": JSON.stringify({
+        version: VERSION,
+        files: [{ url: mac }],
+        path: mac.replace(".dmg", ".zip"),
+        minimumSystemVersion: "22.0.0",
+      }),
+    });
+    expect(
+      (await fetchDesktopAppVersions())[1]!.releases[0]!.downloads[0]!.fileName
+    ).toBe(mac);
+  });
+
+  it("handles the macOS 26 naming jump and explicit future display metadata", async () => {
+    mockFeeds({ "mac/latest-mac.yml": manifest(VERSION, [mac], "25.0.0") });
+    expect(
+      (await fetchDesktopAppVersions())[1]!.releases[0]!.minimumMacOS
+    ).toBe(26);
+    mockFeeds({
+      "mac/latest-mac.yml": JSON.stringify({
+        version: VERSION,
+        files: [{ url: mac }],
+        minimumSystemVersion: "26.0.0",
+        minimumMacOSVersion: "27.0",
+      }),
+    });
+    expect(
+      (await fetchDesktopAppVersions())[1]!.releases[0]!.minimumMacOS
+    ).toBe(27);
+  });
+
+  it("rejects unknown Darwin minima without display metadata and inconsistent requirements", async () => {
+    for (const data of [
+      {
+        version: VERSION,
+        files: [{ url: mac }],
+        minimumSystemVersion: "26.0.0",
+      },
+      {
+        version: VERSION,
+        files: [{ url: mac }],
+        minimumSystemVersion: "22.0.0",
+        minimumMacOSVersion: "14.0",
+      },
+    ]) {
+      mockFeeds({ "mac/latest-mac.yml": JSON.stringify(data) });
+      expect((await fetchDesktopAppVersions())[1]!.releases).toMatchObject([
+        { legacyMac: true },
+      ]);
+    }
+  });
+
   it("keeps legacy recovery downloads when the current Mac feed fails", async () => {
     mockFeeds({ "mac/latest-mac.yml": null });
     const app = (await fetchDesktopAppVersions())[1]!;

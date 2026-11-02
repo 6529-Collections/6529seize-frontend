@@ -7,7 +7,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 import {
   fetchDesktopAppVersions,
   type DesktopAppVersion,
@@ -16,6 +16,13 @@ import {
 } from "./appDownloads";
 
 const APPS_LOCALE = DEFAULT_LOCALE;
+const FORMAT_MESSAGES: Record<DesktopDownload["format"], MessageKey> = {
+  EXE: "apps.desktop.format.exe",
+  DMG: "apps.desktop.format.dmg",
+  ".AppImage": "apps.desktop.format.appImage",
+  ".deb": "apps.desktop.format.deb",
+  ".rpm": "apps.desktop.format.rpm",
+};
 const FOCUS =
   "focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950";
 
@@ -70,20 +77,17 @@ function DownloadError({
   readonly partial?: boolean;
 }) {
   return (
-    <div
-      role="status"
-      className="tw-px-5 tw-py-4 tw-text-sm tw-text-iron-300 sm:tw-px-6"
-    >
-      <p className="tw-m-0 tw-leading-6">
+    <div className="tw-px-5 tw-py-4 tw-text-sm tw-text-iron-300 sm:tw-px-6">
+      <output className="tw-block tw-leading-6">
         {t(
           APPS_LOCALE,
           partial ? "apps.desktop.partialError" : "apps.desktop.error"
         )}
-      </p>
+      </output>
       <button
         type="button"
         onClick={onRetry}
-        className={`tw-mt-2 tw-min-h-8 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1 tw-text-sm tw-text-iron-50 tw-underline tw-underline-offset-4 ${FOCUS}`}
+        className={`tw-mt-2 tw-min-h-8 tw-min-w-11 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1 tw-text-sm tw-text-iron-50 tw-underline tw-underline-offset-4 touch-only:tw-min-h-11 ${FOCUS}`}
       >
         {t(APPS_LOCALE, "apps.desktop.retry")}
       </button>
@@ -205,13 +209,12 @@ function DownloadRow({
   readonly file: DesktopDownload;
 }) {
   const label = t(APPS_LOCALE, `apps.desktop.file.${file.label}`);
+  const format = t(APPS_LOCALE, FORMAT_MESSAGES[file.format]);
   return (
     <div className="tw-flex tw-min-h-14 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 tw-py-2 [&+div]:tw-border-x-0 [&+div]:tw-border-b-0 [&+div]:tw-border-t [&+div]:tw-border-solid [&+div]:tw-border-white/10">
       <div className="tw-min-w-0 tw-text-sm tw-text-iron-50">
         {label}
-        <span className="tw-ml-2 tw-text-xs tw-text-iron-300">
-          {file.format}
-        </span>
+        <span className="tw-ml-2 tw-text-xs tw-text-iron-300">{format}</span>
       </div>
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
         <a
@@ -222,7 +225,7 @@ function DownloadRow({
             platform: app.displayName,
             version: release.version,
             file: label,
-            format: file.format,
+            format,
           })}
           className={`tw-inline-flex tw-min-h-[30px] tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-solid tw-border-iron-100 tw-bg-iron-100 tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-leading-[18px] tw-text-iron-950 tw-no-underline hover:tw-bg-white touch-only:tw-min-h-11 ${FOCUS}`}
         >
@@ -238,7 +241,7 @@ function DownloadRow({
               platform: app.displayName,
               version: release.version,
               file: label,
-              format: file.format,
+              format,
             })}
             className={`tw-inline-flex tw-min-h-[30px] tw-items-center tw-rounded-md tw-text-xs tw-text-iron-300 tw-underline tw-underline-offset-4 hover:tw-text-iron-50 touch-only:tw-min-h-11 ${FOCUS}`}
           >

@@ -150,7 +150,10 @@ function parseRelease(
       !/^\d+\.\d+\.\d+$/.test(data["minimumSystemVersion"])
     )
       throw new Error("Missing Mac OS requirement");
-    minimumMacOS = Number(data["minimumSystemVersion"].split(".")[0]) - 9;
+    minimumMacOS = readMacOSMinimum(
+      data["minimumSystemVersion"],
+      data["minimumMacOSVersion"]
+    );
     if (legacyMac ? minimumMacOS !== 12 : minimumMacOS < 13)
       throw new Error("Invalid Mac OS requirement");
   }
@@ -184,6 +187,38 @@ function parseRelease(
       (a, b) => order.indexOf(a.label) - order.indexOf(b.label)
     ),
   };
+}
+
+function readMacOSMinimum(
+  darwinVersion: string,
+  displayVersion: unknown
+): number {
+  // Older feeds have only the updater's Darwin minimum. The naming jump from
+  // macOS 15 to 26 means subtracting a constant is not a safe conversion.
+  const knownVersions: Partial<Record<number, number>> = {
+    21: 12,
+    22: 13,
+    23: 14,
+    24: 15,
+    25: 26,
+  };
+  const known = knownVersions[Number(darwinVersion.split(".")[0])];
+  if (displayVersion === undefined) {
+    if (known === undefined)
+      throw new Error("Unknown Darwin minimum without macOS display metadata");
+    return known;
+  }
+  if (
+    typeof displayVersion !== "string" ||
+    !/^\d+\.0(?:\.0)?$/.test(displayVersion)
+  )
+    throw new Error("Invalid macOS display minimum");
+  const minimum = Number(displayVersion.split(".")[0]);
+  if (!Number.isSafeInteger(minimum) || minimum < 12)
+    throw new Error("Invalid macOS display minimum");
+  if (known !== undefined && minimum !== known)
+    throw new Error("Inconsistent macOS and Darwin requirements");
+  return minimum;
 }
 
 async function addMirrors(
