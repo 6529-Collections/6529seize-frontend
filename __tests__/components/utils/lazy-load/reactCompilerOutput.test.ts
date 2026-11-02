@@ -79,6 +79,10 @@ describe("lazy-load modules under the React Compiler", () => {
       "components/waves/drops/search/LazyWaveDropsSearchModal.tsx",
       ["CancelOnEscapeWhileLoading", "LoadedWaveDropsSearchModal"],
     ],
+    [
+      "components/utils/lazy-load/createLazyDialog.tsx",
+      ["CancelOnEscapeWhileLoading", "LoadedDialog"],
+    ],
   ])("renders only its own components in %s", (file, components) => {
     const types = jsxElementTypes(compileWithReactCompiler(file));
 
