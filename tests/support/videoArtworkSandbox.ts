@@ -4,6 +4,7 @@ import path from "node:path";
 import type { ApiDropV2 } from "../../generated/models/ApiDropV2";
 import { ApiDropMainType } from "../../generated/models/ApiDropMainType";
 import type { ApiWaveOverview } from "../../generated/models/ApiWaveOverview";
+import type { ApiWave } from "../../generated/models/ApiWave";
 import { expect } from "../testHelpers";
 import { getSandboxApiOrigin } from "./localSandbox";
 import composerSandboxConstants from "./composerSandboxConstants.json";
@@ -177,22 +178,51 @@ async function installArtworkSandbox(
       : "/__video-fixture/portrait.mp4",
     baseURL
   ).href;
+  const memesWaveId = composerSandboxConstants.linkedDropMemesWaveId;
+  const submissionWave = { ...feed.wave, id: memesWaveId };
+  const waveResponse = await page.request.get(
+    `${apiOrigin}/api/waves/${WAVE_ID}`
+  );
+  expect(waveResponse.ok()).toBe(true);
+  const wave = (await waveResponse.json()) as ApiWave;
   const drop: ApiDropV2 = {
     ...source,
     drop_type: ApiDropMainType.Submission,
     title: "Local video artwork fixture",
     content: "",
+    wave: submissionWave,
     media: [
       { url: videoUrl, mime_type: dimensions ? "image/svg+xml" : "video/mp4" },
     ],
   };
   const headers = { "access-control-allow-origin": "*" };
+  await page.route("**/api/open-graph**", (route) =>
+    route.fulfill({ headers, json: { results: {} } })
+  );
   await page.route(`${apiOrigin}/api/settings`, (route) =>
-    route.fulfill({ headers, json: { memes_wave_id: WAVE_ID } })
+    route.fulfill({ headers, json: { memes_wave_id: memesWaveId } })
+  );
+  await page.route(`${apiOrigin}/api/waves/${memesWaveId}`, (route) =>
+    route.fulfill({ headers, json: { ...wave, id: memesWaveId } })
+  );
+  await page.route(
+    `${apiOrigin}/api/v3/waves/${memesWaveId}/drops/${DROP_ID}/competition-context`,
+    (route) =>
+      route.fulfill({ headers, json: { competition: null, entry: null } })
   );
   await page.route(`${apiOrigin}/api/v2/drops/${DROP_ID}`, (route) =>
-    route.fulfill({ headers, json: { drop, wave: feed.wave } })
+    route.fulfill({ headers, json: { drop, wave: submissionWave } })
   );
+  await page.route(`${apiOrigin}/api/v2/drops?*`, (route) => {
+    const ids = new URL(route.request().url()).searchParams
+      .get("ids")
+      ?.split(",");
+    if (!ids?.includes(DROP_ID)) return route.fallback();
+    return route.fulfill({
+      headers,
+      json: { data: [drop], page: 1, next: false },
+    });
+  });
   await page.route(`${apiOrigin}/api/v2/waves/${WAVE_ID}/drops*`, (route) =>
     route.fulfill({ headers, json: { ...feed, drops: [drop] } })
   );

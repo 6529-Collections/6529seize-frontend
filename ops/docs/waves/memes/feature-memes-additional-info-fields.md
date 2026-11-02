@@ -124,6 +124,10 @@ or plan in `Artwork`; see [Additional Action](feature-memes-submission.md#additi
 - While the saved plan loads, the section shows a loading message. If loading
   fails, use `Retry loading plan`. A failed request does not mean no plan exists.
 - `Additional Media` shows at most `4` items.
+- Supporting and promo videos show an available preview frame before playback.
+  If a preview is not available yet, a video icon marks the playable area.
+  `Additional Media` loads only the small preview image until you press Play;
+  viewing the section does not download the original video.
 - Click or tap `Preview Image` or an image in `Additional Media` to open the
   [image viewer](../drop-actions/feature-image-viewer-and-scaling.md), with zoom,
   download, open-original, and fullscreen controls where supported. Desktop
