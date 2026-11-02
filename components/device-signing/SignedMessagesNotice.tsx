@@ -103,16 +103,16 @@ function SignedMessagesNoticeContent({
     <section
       aria-labelledby={titleId}
       data-testid="signed-messages-notice"
-      className={`tw-mb-2 tw-flex tw-flex-wrap tw-items-start tw-gap-x-3 tw-gap-y-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2.5 ${
+      className={`tw-mb-2 tw-flex tw-flex-wrap tw-gap-x-3 tw-gap-y-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2.5 ${
         isAlert
-          ? "tw-border-red/30 tw-bg-red/10"
-          : "tw-border-white/10 tw-bg-iron-950"
+          ? "tw-items-center tw-border-red/30 tw-bg-red/10"
+          : "tw-items-start tw-border-white/10 tw-bg-iron-950"
       }`}
     >
       <Icon
         aria-hidden="true"
-        className={`tw-mt-0.5 tw-size-5 tw-flex-shrink-0 ${
-          isAlert ? "tw-text-red" : "tw-text-iron-400"
+        className={`tw-size-5 tw-flex-shrink-0 ${
+          isAlert ? "tw-text-red" : "tw-mt-0.5 tw-text-iron-400"
         }`}
       />
       <div className="tw-min-w-0 tw-flex-1 tw-basis-48">
