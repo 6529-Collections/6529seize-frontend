@@ -178,6 +178,31 @@ describe("DropListItemContentMediaImage Giphy video", () => {
     ).toBeInTheDocument();
   });
 
+  it("opens the popup on the MP4 video and fullscreens that video", () => {
+    const requestFullscreen = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(HTMLVideoElement.prototype, "requestFullscreen", {
+      configurable: true,
+      value: requestFullscreen,
+    });
+    renderMarkdownImage({ alt: "Dancing cat" });
+
+    fireEvent.click(screen.getByRole("button", { name: "Open image preview" }));
+
+    const [inline, expanded] = screen.getAllByLabelText("Dancing cat", {
+      selector: "video",
+    });
+    expect(inline!.closest("[data-drop-image-content]")).not.toBeNull();
+    expect(expanded!.closest("[data-drop-image-content]")).toBeNull();
+    expect(expanded).toHaveAttribute(
+      "src",
+      proxyUrl({ url: `${GIPHY_DIRECTORY}giphy.mp4`, format: "mp4" })
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Full screen" }));
+
+    expect(requestFullscreen).toHaveBeenCalledTimes(1);
+    expect(requestFullscreen.mock.contexts[0]).toBe(expanded);
+  });
+
   it("names the video with a caller-supplied description", () => {
     renderMarkdownImage({ alt: "Dancing cat" });
 
