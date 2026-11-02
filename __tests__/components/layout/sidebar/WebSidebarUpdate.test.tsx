@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import WebSidebar from "@/components/layout/sidebar/WebSidebar";
 import NewVersionToast from "@/components/utils/NewVersionToast";
+import { VERSION_RELOAD_IMAGE_SRC } from "@/components/version-update/versionReloadImage";
 import { useVersionStatus } from "@/contexts/VersionStatusContext";
 import { refreshAppVersion } from "@/helpers/version-refresh.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -104,9 +105,10 @@ it("puts the collapsed update rocket above Search with no desktop toast", () => 
   ).not.toBeNull();
   expect(update).toHaveAttribute("data-tooltip-content", "Update");
   expect(update).toHaveAttribute("data-tooltip-hidden", "false");
+  // The small hash-named WebP shared with the reload cover, not the 1.1 MB PNG.
   expect(update.querySelector("img")).toHaveAttribute(
     "src",
-    "/rocket-refresh-small.png"
+    VERSION_RELOAD_IMAGE_SRC
   );
   expect(screen.getByText("Update")).toHaveClass("tw-w-0", "tw-opacity-0");
   expect(

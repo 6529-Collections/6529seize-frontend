@@ -3,7 +3,10 @@ import { unstable_getResponseFromNextConfig } from "next/experimental/testing/se
 import { publicEnvSchema } from "@/config/env.schema";
 import { sharedConfig } from "@/config/nextConfig";
 import { ROOT_PUBLIC_FILES } from "@/lib/proxy/publicPaths";
-import { VERSION_RELOAD_IMAGE_SRC } from "@/components/version-update/versionReloadImage";
+import {
+  VERSION_RELOAD_IMAGE_SRC,
+  VERSION_UPDATE_ROCKET_IMAGE_SRC,
+} from "@/components/version-update/versionReloadImage";
 
 const BRAND_ASSET_CACHE_CONTROL =
   "public, max-age=86400, stale-while-revalidate=604800";
@@ -38,12 +41,16 @@ async function getCacheControl(
 }
 
 const GENERATED_FILES = ["/help-index.json", "/llms.txt", "/glossary.json"];
-// The reload cover image carries a content hash and is served immutable by
-// its own rule (config/versionReloadImageHeaders.ts), so it is checked apart.
+// The version-update artwork carries content hashes and is served immutable
+// by its own rules (config/versionReloadImageHeaders.ts), so it is checked apart.
+const HASHED_ARTWORK = [
+  VERSION_RELOAD_IMAGE_SRC,
+  VERSION_UPDATE_ROCKET_IMAGE_SRC,
+];
 const rootImages = [...ROOT_PUBLIC_FILES].filter(
   (path) =>
     /\.(?:png|jpe?g|svg|webp|avif)$/i.test(path) &&
-    path !== VERSION_RELOAD_IMAGE_SRC
+    !HASHED_ARTWORK.includes(path)
 );
 
 describe("public file cache policy", () => {
@@ -60,11 +67,14 @@ describe("public file cache policy", () => {
     }
   );
 
-  it("keeps the content-hashed reload cover image immutable", async () => {
-    expect(await getCacheControl(VERSION_RELOAD_IMAGE_SRC)).toBe(
-      "public, max-age=31536000, immutable"
-    );
-  });
+  it.each(HASHED_ARTWORK)(
+    "keeps the content-hashed version-update image %s immutable",
+    async (path) => {
+      expect(await getCacheControl(path)).toBe(
+        "public, max-age=31536000, immutable"
+      );
+    }
+  );
 
   it.each(GENERATED_FILES)(
     "keeps the per-deploy file %s fresh for five minutes only",

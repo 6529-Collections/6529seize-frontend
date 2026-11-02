@@ -7,6 +7,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
 import DockUpdateSurface from "./DockUpdateSurface";
+import { VERSION_RELOAD_IMAGE_SRC } from "./versionReloadImage";
 
 export default function DockedVersionUpdate({
   children,
@@ -53,9 +54,9 @@ function VersionUpdateButton({
       onClick={refreshAppVersion}
       className={`tw-pointer-events-auto tw-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-1 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#95ffad] active:tw-opacity-70 desktop-hover:hover:tw-opacity-80 ${className}`}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element -- Cache the same local asset used by the pre-hydration reload screen. */}
+      {/* eslint-disable-next-line @next/next/no-img-element -- Cache the same hash-named WebP used by the pre-hydration reload screen. */}
       <img
-        src="/rocket-refresh-small.png"
+        src={VERSION_RELOAD_IMAGE_SRC}
         alt=""
         width={28}
         height={28}

@@ -7,7 +7,10 @@
  */
 
 // Relative import, like other modules reachable from next.config.
-import { VERSION_RELOAD_IMAGE_SRC } from "../../components/version-update/versionReloadImage";
+import {
+  VERSION_RELOAD_IMAGE_SRC,
+  VERSION_UPDATE_ROCKET_IMAGE_SRC,
+} from "../../components/version-update/versionReloadImage";
 
 /** Every committed root-level file in `public/`. */
 export const ROOT_PUBLIC_FILES: ReadonlySet<string> = new Set([
@@ -127,9 +130,10 @@ export const ROOT_PUBLIC_FILES: ReadonlySet<string> = new Set([
   "/watermark.png",
   "/windows.png",
   "/x_black.png",
-  // Content-hashed reload cover artwork; the generator renames it, so the
-  // entry follows its constant instead of a hand-copied file name.
+  // Content-hashed version-update artwork; the generator renames it, so the
+  // entries follow their constants instead of hand-copied file names.
   VERSION_RELOAD_IMAGE_SRC,
+  VERSION_UPDATE_ROCKET_IMAGE_SRC,
 ]);
 
 /**

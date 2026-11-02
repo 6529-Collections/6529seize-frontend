@@ -2,3 +2,8 @@
 // Source SHA-256: 3626d63346dd41dafeafffaaa6ff4de740cd4b52c5c5e458505e13f5257cc6fd
 export const VERSION_RELOAD_IMAGE_SRC =
   "/version-reload-rocket.7c59a908404e.webp";
+// Source SHA-256: d763eec3803c2d7a51a3a0495f99391ec74fbb17ea89335847fe7ee1ee15d7c8
+export const VERSION_UPDATE_ROCKET_IMAGE_SRC =
+  "/version-update-rocket.5af88de5f722.webp";
+// CSS width at 48px tall.
+export const VERSION_UPDATE_ROCKET_IMAGE_WIDTH = 115;
