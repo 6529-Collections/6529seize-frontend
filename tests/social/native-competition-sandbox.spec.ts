@@ -1938,6 +1938,17 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     baseURL,
     page,
   }, testInfo) => {
+    const groupResponse = await page.request.get(
+      `${getSandboxApiOrigin(baseURL)}/api/groups/sandbox-submission-club`
+    );
+    expect(groupResponse.ok()).toBe(true);
+    expect(await groupResponse.json()).toMatchObject({
+      id: "sandbox-submission-club",
+      name: "Sandbox Submission Club",
+      visible: true,
+      is_private: false,
+      group: { tdh: { min: 100 }, level: { min: 1 } },
+    });
     const sandbox = await installCompetitionApi(
       page,
       false,
@@ -5094,6 +5105,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           { exact: true }
         )
       ).toBeVisible();
+      // Competition review omits parent-wave access rows; only the accurate
+      // summary above describes chat, including when its group ID is hidden.
+      await expect(page.getByText("Chat access", { exact: true })).toHaveCount(
+        0
+      );
       await expectNoHorizontalOverflow(page);
     });
   }

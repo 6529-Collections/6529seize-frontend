@@ -231,6 +231,12 @@ const sandboxPreviewGroup = {
   },
 };
 
+const sandboxSubmissionGroup = {
+  ...sandboxPreviewGroup,
+  id: "sandbox-submission-club",
+  name: "Sandbox Submission Club",
+};
+
 const sandboxGroupMembers = Array.from({ length: 25 }, (_, index) => {
   const memberNumber = index + 1;
   const memberSuffix = String(memberNumber).padStart(2, "0");
@@ -750,8 +756,8 @@ const accessWave = {
     authenticated_user_eligible: false,
     scope: {
       group: {
-        id: "sandbox-submission-club",
-        name: "Sandbox Submission Club",
+        id: sandboxSubmissionGroup.id,
+        name: sandboxSubmissionGroup.name,
         is_hidden: false,
       },
     },
@@ -2691,6 +2697,8 @@ function handleGroupRead(pathname, res) {
     group = sandboxAdminGroup;
   } else if (groupId === sandboxPreviewGroup.id) {
     group = sandboxPreviewGroup;
+  } else if (groupId === sandboxSubmissionGroup.id) {
+    group = sandboxSubmissionGroup;
   }
   if (group) {
     return writeJsonResponse(res, group);
