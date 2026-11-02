@@ -73,7 +73,7 @@ import type sharp from "sharp";
 let GET: typeof ImageRoute.GET;
 let dynamic: typeof ImageRoute.dynamic;
 let mockFetchPublicUrl: jest.Mock;
-let mockSharp: jest.MockedFunction<typeof sharp>;
+let mockSharp: jest.MockedFunctionDeep<typeof sharp>;
 const actualSharp = jest.requireActual<typeof sharp>("sharp");
 
 const loadRoute = () => {

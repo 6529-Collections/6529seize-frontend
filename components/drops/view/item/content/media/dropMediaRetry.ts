@@ -1,14 +1,16 @@
-export type DropMediaFailureKind = "retryable" | "definitive";
-
 /**
- * A busy proxy (or one that has since produced the image) is worth another
- * automatic attempt. Any other answer is final until someone asks to retry.
+ * - available: the proxy now answers 2xx, so the image loaded but did not
+ *   decode, or appeared since the failure. It is worth one recovery attempt.
+ * - retryable: the proxy is busy or was unreachable; try again with backoff.
+ * - definitive: any other answer is final until someone asks to retry.
  */
-export function classifyDropMediaStatus(status: number): DropMediaFailureKind {
-  return (status >= 200 && status < 300) ||
-    status === 408 ||
-    status === 429 ||
-    status === 503
+export type DropMediaFailureKind = "available" | "retryable" | "definitive";
+
+function classifyDropMediaStatus(status: number): DropMediaFailureKind {
+  if (status >= 200 && status < 300) {
+    return "available";
+  }
+  return status === 408 || status === 429 || status === 503
     ? "retryable"
     : "definitive";
 }

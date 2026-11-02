@@ -208,6 +208,8 @@ type ImageViewState = {
   readonly retryTick: number;
   // An image element cannot read why the proxy failed; a probe is asking.
   readonly failureCheckPending: boolean;
+  // A 2xx answer gets one recovery attempt; the same cached bytes would fail again.
+  readonly availableRetryUsed: boolean;
   readonly autoRetryStopped: boolean;
   readonly videoFailed: boolean;
 };
@@ -232,6 +234,7 @@ const initialImageViewState: ImageViewState = {
   retryPending: false,
   retryTick: 0,
   failureCheckPending: false,
+  availableRetryUsed: false,
   autoRetryStopped: false,
   videoFailed: false,
 };
@@ -268,16 +271,22 @@ function imageViewReducer(
         autoRetryStopped: !mayRetry,
       };
     }
-    case "failure-checked":
+    case "failure-checked": {
       if (!state.failureCheckPending) {
         return state;
       }
+      const isAvailable = action.failure === "available";
+      const retry =
+        action.failure === "retryable" ||
+        (isAvailable && !state.availableRetryUsed);
       return {
         ...state,
         failureCheckPending: false,
-        retryPending: action.failure === "retryable",
-        autoRetryStopped: action.failure === "definitive",
+        availableRetryUsed: state.availableRetryUsed || isAvailable,
+        retryPending: retry,
+        autoRetryStopped: !retry,
       };
+    }
     case "video-failed":
       return { ...state, loaded: false, videoFailed: true };
     case "manual-retry":
@@ -287,6 +296,7 @@ function imageViewReducer(
         failedAttempts: 0,
         retryPending: false,
         failureCheckPending: false,
+        availableRetryUsed: false,
         autoRetryStopped: false,
         videoFailed: false,
         retryTick: state.retryTick + 1,
@@ -349,7 +359,7 @@ function WaveDropPartContentMediaImageContent({
   const usesGiphyVideo = giphyVideo !== null;
   const previewSrc = withRetryCacheBust(src, imageViewState.retryTick);
   const previewSources = getDropImagePreviewSources(previewSrc, imageScale);
-  const lastPreviewSource = previewSources[previewSources.length - 1];
+  const lastPreviewSource = previewSources.at(-1);
   // Only the same-origin proxy can be asked why a load failed.
   const proxyPreviewSrc =
     lastPreviewSource && isGuardedImageProxyUrl(lastPreviewSource)

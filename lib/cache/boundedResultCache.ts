@@ -58,7 +58,7 @@ export class BoundedResultCache<T> {
     }
     this.maxBytes = maxBytes;
     this.maxEntryBytes = maxEntryBytes;
-    this.now = now ?? Date.now;
+    this.now = now ?? (() => Date.now());
   }
 
   load(
@@ -133,9 +133,16 @@ export class BoundedResultCache<T> {
     job: (signal: AbortSignal) => Promise<CacheableResult<T>>
   ): Flight<T> {
     const controller = new AbortController();
-    const promise = new Promise<CacheableResult<T>>((resolve) => {
-      resolve(job(controller.signal));
-    }).then((result) => {
+    let pending: Promise<CacheableResult<T>>;
+    try {
+      pending = job(controller.signal);
+    } catch (error) {
+      // A job that throws before returning its promise fails like any other.
+      pending = Promise.reject(
+        error instanceof Error ? error : new Error(String(error))
+      );
+    }
+    const promise = pending.then((result) => {
       this.store(key, result);
       return result.value;
     });

@@ -549,7 +549,7 @@ const parseByteRange = (
       : "unsatisfiable";
   }
   const start = Number(startText);
-  const end = endText ? Number(endText) : size - 1;
+  const end = endText ? Number(endText) : Number.POSITIVE_INFINITY;
   if (end < start) {
     return null;
   }

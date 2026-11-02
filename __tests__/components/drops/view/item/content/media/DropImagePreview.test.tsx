@@ -5,7 +5,11 @@ import {
   StrictMode,
   type ComponentProps,
 } from "react";
-import { DropImagePreview } from "@/components/drops/view/item/content/media/DropImagePreview";
+import {
+  DropImagePreview,
+  getDropImagePreviewSources,
+  getGiphyVideoPreviewSources,
+} from "@/components/drops/view/item/content/media/DropImagePreview";
 import { LocalImagePreviewContext } from "@/components/drops/view/item/content/media/LocalImagePreviewContext";
 import { ImageScale } from "@/helpers/image.helpers";
 
@@ -366,3 +370,53 @@ it.each(["data:image/svg+xml;base64,AAAA", "https://localhost/private.png"])(
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
   }
 );
+
+describe("guarded proxy preview URLs", () => {
+  const proxy = (params: Record<string, string>) =>
+    `/api/og-metadata/image?${new URLSearchParams(params).toString()}`;
+
+  it("keeps an external source URL byte-for-byte when there is no retry", () => {
+    const src = "https://cdn.example.com/a.gif?v=1";
+    expect(getDropImagePreviewSources(src, ImageScale.AUTOx450)).toEqual([
+      proxy({ url: src, animated: "1", w: "800" }),
+    ]);
+  });
+
+  it("moves the retry marker from the source URL onto the proxy URL", () => {
+    expect(
+      getDropImagePreviewSources(
+        "https://cdn.example.com/a.gif?v=1&drop_media_retry=3",
+        ImageScale.AUTOx1080
+      )
+    ).toEqual([
+      proxy({
+        url: "https://cdn.example.com/a.gif?v=1",
+        animated: "1",
+        w: "1200",
+        drop_media_retry: "3",
+      }),
+    ]);
+  });
+
+  it("builds proxied MP4 and still URLs only for Giphy GIF renditions", () => {
+    expect(
+      getGiphyVideoPreviewSources(
+        "https://media2.giphy.com/media/abc123/200w.gif?cid=1"
+      )
+    ).toEqual({
+      videoSrc: proxy({
+        url: "https://media2.giphy.com/media/abc123/200w.mp4",
+        format: "mp4",
+      }),
+      posterSrc: proxy({
+        url: "https://media2.giphy.com/media/abc123/480w_s.jpg",
+        w: "800",
+      }),
+    });
+    expect(
+      getGiphyVideoPreviewSources(
+        "https://cdn.example.com/media/abc123/giphy.gif"
+      )
+    ).toBeNull();
+  });
+});
