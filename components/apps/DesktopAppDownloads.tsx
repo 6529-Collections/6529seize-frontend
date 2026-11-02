@@ -181,7 +181,7 @@ function ReleaseDownloads({
           {t(APPS_LOCALE, "apps.desktop.file.x64")}
         </p>
       )}
-      <div className="tw-max-w-xl">
+      <div>
         {release.downloads.map((file) => (
           <DownloadRow
             key={file.fileName}

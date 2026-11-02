@@ -63,6 +63,17 @@ test.describe("About Pages @smoke @medium @large", () => {
       mac.getByRole("link", { name: /version 0.3.15, Apple silicon/ })
     ).toHaveAttribute("href", /6529-DESKTOP-mac-arm64-0\.3\.15\.dmg$/);
     await expect(mac.getByText(/Keep your existing app data/)).toBeVisible();
+    const panelBox = await mac.boundingBox();
+    const downloadBox = await mac
+      .getByRole("link", { name: /version 0.3.15, Apple silicon/ })
+      .boundingBox();
+    expect(panelBox).not.toBeNull();
+    expect(downloadBox).not.toBeNull();
+    if (panelBox && downloadBox) {
+      expect(
+        panelBox.x + panelBox.width - downloadBox.x - downloadBox.width
+      ).toBeLessThanOrEqual(32);
+    }
     const windows = page
       .getByText("Windows", { exact: true })
       .locator("xpath=ancestor::summary");
