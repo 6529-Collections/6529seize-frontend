@@ -67,6 +67,11 @@ async function detectHistoricalMediaType(
   url: string,
   signal: AbortSignal
 ): Promise<MediaType> {
+  // Only recognized Arweave references may trigger automatic header requests.
+  // Arbitrary historical hosts with no format retain the explicit open link.
+  if (parseDecentralizedMediaRef(url)?.protocol !== "arweave") {
+    return MediaType.UNKNOWN;
+  }
   const controller = new AbortController();
   const abort = () => controller.abort();
   signal.addEventListener("abort", abort, { once: true });
@@ -78,6 +83,13 @@ async function detectHistoricalMediaType(
     for (const source of getHistoricalMediaSources(url)) {
       if (controller.signal.aborted) break;
       try {
+        const candidate = new URL(source);
+        if (
+          candidate.protocol !== "https:" ||
+          candidate.username ||
+          candidate.password
+        )
+          continue;
         const response = await fetch(source, {
           method: "HEAD",
           credentials: "omit",

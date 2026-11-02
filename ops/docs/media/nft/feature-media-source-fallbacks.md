@@ -59,10 +59,12 @@
   A removed video stays a video even if today's card has no animation, and the
   before and after previews can use different formats. Current artwork continues
   to use the current card's media and format.
-- When a historical animation's format is missing or unrecognized, the preview
-  checks that historical file's content type. An `Open` link remains available
-  while checking or if the format cannot be identified; it does not assume an
-  image. Header checks stop after roughly eight seconds.
+- When a historical Arweave animation's format is missing or unrecognized, the
+  preview checks that file's content type through supported HTTPS gateways. An
+  `Open` link remains available while checking or if the format cannot be
+  identified; it does not assume an image or use today's card format. Header
+  checks stop after roughly eight seconds. Other sources without a recorded
+  format keep the `Open` link without an automatic header request.
 - For recognized Arweave references, a failed preview can try the 6529 media
   resolver and approved gateways for the same transaction and file path. Each
   candidate is tried at most once. Changing the historical preview resets that

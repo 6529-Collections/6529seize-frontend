@@ -145,16 +145,73 @@ describe("TimelineMedia", () => {
     ).toHaveAttribute("href", HISTORICAL_URL);
   });
 
-  it("does not invent gateway lookups for arbitrary historical URLs", async () => {
-    const url = "https://archive.example/old";
+  it.each([
+    "https://archive.example/old",
+    "http://127.0.0.1/private",
+    "https://localhost/private",
+    "http://192.168.1.1/private",
+    "ftp://archive.example/old",
+    "data:text/html,example",
+    "javascript:void(0)",
+    `https://arweave.net.evil.example/${HISTORICAL_TX}`,
+    `ar://${HISTORICAL_TX}/../ifosq_ZN9_PrDSQmq65JTjeB2GnnfPSFoHxRazxC4PY/old`,
+  ])("does not probe an unapproved historical source: %s", async (url) => {
     const fetch = jest
       .spyOn(globalThis, "fetch")
       .mockResolvedValue(headResponse("application/json"));
     render(<TimelineMedia url={url} type={MediaType.UNKNOWN} />);
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
-    expect(screen.getByRole("link")).toHaveAttribute("href", url);
+    await waitFor(() => expect(queryClient.isFetching()).toBe(0));
+    expect(fetch).not.toHaveBeenCalled();
+    expect(screen.getByRole("link")).toBeInTheDocument();
     expect(screen.queryByRole("img")).toBeNull();
   });
+
+  it("uses a trusted configured resolver for a recognized historical reference", async () => {
+    jest.replaceProperty(
+      publicEnv,
+      "MEDIA_RESOLVER_ENDPOINT",
+      "https://archive.example/media/v1"
+    );
+    const fetch = jest
+      .spyOn(globalThis, "fetch")
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      .mockResolvedValue(headResponse("video/mp4"));
+    const { container } = render(
+      <TimelineMedia url={opaqueVideoUrl} type={MediaType.UNKNOWN} />
+    );
+    await waitFor(() =>
+      expect(container.querySelector("video")).toBeInTheDocument()
+    );
+    expect(fetch.mock.calls.map(([url]) => url)).toEqual([
+      opaqueVideoUrl,
+      opaqueVideoUrl.replace(
+        "https://arweave.net/",
+        "https://archive.example/media/v1/arweave/"
+      ),
+    ]);
+  });
+
+  it.each([
+    `ar://${HISTORICAL_TX}/old`,
+    `http://arweave.net/${HISTORICAL_TX}/old`,
+    `https://user:password@arweave.net/${HISTORICAL_TX}/old`,
+  ])(
+    "only probes HTTPS gateway candidates without URL credentials for %s",
+    async (url) => {
+      const fetch = jest
+        .spyOn(globalThis, "fetch")
+        .mockResolvedValue(headResponse("video/mp4"));
+      const { container } = render(
+        <TimelineMedia url={url} type={MediaType.UNKNOWN} />
+      );
+      await waitFor(() =>
+        expect(container.querySelector("video")).toBeInTheDocument()
+      );
+      expect(fetch.mock.calls.map(([source]) => source)).toEqual([
+        `https://media.6529.io/arweave/${HISTORICAL_TX}/old`,
+      ]);
+    }
+  );
 
   it("bounds header detection and ignores a response arriving after the deadline", async () => {
     jest.useFakeTimers();

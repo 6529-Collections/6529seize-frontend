@@ -948,7 +948,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
       const timeline = page.getByRole("region", {
         name: "The Memes card timeline",
       });
-      const video = timeline.locator("video");
+      const video = timeline.getByLabel("Removed Animation preview video");
       await expect(video).toHaveAttribute("src", primary);
       await expect(video).toHaveAttribute(
         "aria-label",
