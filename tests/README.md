@@ -78,6 +78,14 @@ and run a non-empty pack set sequentially. Deployed-environment entries are
 validated as explicitly read-only and must use the exact approved base URL.
 Their artifacts can be preserved per pack with `--artifact-root <path>`.
 
+The restricted-submission fixture in that pack covers public chat, on-demand
+access details, copied competition rules links, and draft preservation through
+Settings. Keyboard coverage checks Enter/Space, Tab/Shift+Tab, Escape, and focus
+after routing. Available chat stays free of access panels. A wave without a
+default competition keeps its existing no-submission-action behavior. Only
+notification read acknowledgements are allowed for this fixture; posting fails
+closed.
+
 PR selection for `test:e2e:native-competition-sandbox` is owned by
 `scripts/app-pr-ci-effective-plan.cjs`. Its desktop and mobile scenarios cover
 native competitions plus shared submission dialogs, leaderboard controls and
@@ -425,13 +433,6 @@ Surface matrix:
   form; upload and attachment endpoints still fail closed. It must run against a
   loopback base URL, but it is not a full network-isolation harness and is not a
   staging or production smoke pack.
-  A separate Rank fixture also covers public chat with restricted
-  submissions, on-demand submission-lock details, and draft preservation through
-  Settings. It also verifies that available chat has no access panel.
-  Keyboard coverage checks Enter/Space activation, Tab access to links, Escape
-  focus restoration, and focus on Settings after opening submission rules.
-  SSR and client requests receive the same fixture. Only the existing notification
-  read acknowledgement is allowed; posting to this fixture still fails closed.
 - `test:e2e:reaction-sandbox` runs a local-only authenticated Waves reaction
   sandbox on desktop Chromium. It adds and removes the deterministic quick
   reaction on the synthetic sandbox drop, then verifies that only the exact
