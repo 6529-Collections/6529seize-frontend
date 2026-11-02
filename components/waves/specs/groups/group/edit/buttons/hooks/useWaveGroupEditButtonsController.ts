@@ -57,7 +57,7 @@ export const useWaveGroupEditButtonsController = ({
     mutationFn: async (body: ApiUpdateWaveRequest) =>
       await updateWaveHub(wave.id, {
         ...(type === WaveGroupType.VIEW ? { visibility: body.visibility } : {}),
-        ...(body.chat?.scope &&
+        ...((type === WaveGroupType.VIEW || type === WaveGroupType.CHAT) &&
         body.chat.scope.group_id !== (wave.chat.scope.group?.id ?? null)
           ? { chat: { scope: body.chat.scope } }
           : {}),
@@ -119,7 +119,7 @@ export const useWaveGroupEditButtonsController = ({
               type: "error",
               message: t(
                 locale,
-                "waves.create.groups.validation.invalidDescription"
+                "waves.create.groups.editAccess.validationDescription"
               ),
             });
             setMutating(false);

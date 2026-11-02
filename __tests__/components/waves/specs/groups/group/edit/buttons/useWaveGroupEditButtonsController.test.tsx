@@ -67,6 +67,40 @@ beforeEach(() => {
 });
 
 describe("useWaveGroupEditButtonsController", () => {
+  it("validates only shared access when visibility changes on a competition wave", async () => {
+    const { result } = renderHook(() =>
+      useWaveGroupEditButtonsController({
+        wave: buildWave(),
+        type: WaveGroupType.VIEW,
+        requestAuth,
+        setToast,
+        onWaveCreated,
+      })
+    );
+    await act(async () => {
+      await result.current.updateWave({
+        visibility: { scope: { group_id: "view-group" } },
+        participation: { scope: { group_id: "competition-entry-group" } },
+        voting: { scope: { group_id: "competition-vote-group" } },
+        chat: { enabled: true, scope: { group_id: "chat-group" } },
+        wave: { type: "RANK", admin_group: { group_id: "admin-group" } },
+      } as never);
+    });
+    expect(mockValidateWaveGroups).toHaveBeenCalledWith({
+      visibility_group_id: "view-group",
+      chat_group_id: "chat-group",
+      admin_group_id: "admin-group",
+    });
+    expect(mockCommonApiPatch).toHaveBeenCalledWith({
+      endpoint: "v3/waves/wave-1",
+      body: {
+        visibility: { scope: { group_id: "view-group" } },
+        chat: { scope: { group_id: "chat-group" } },
+      },
+      errorMode: "structured",
+    });
+  });
+
   it.each([true, false])(
     "respects the parent audience warning before saving: %s",
     async (confirmed) => {
@@ -107,30 +141,33 @@ describe("useWaveGroupEditButtonsController", () => {
     }
   );
 
-  it("preserves omitted chat settings when clearing an administrator group", async () => {
-    const { result } = renderHook(() =>
-      useWaveGroupEditButtonsController({
-        wave: buildWave(),
-        type: WaveGroupType.ADMIN,
-        requestAuth,
-        setToast,
-        onWaveCreated,
-      })
-    );
-    await act(async () => {
-      await expect(
-        result.current.updateWave({
-          visibility: { scope: { group_id: null } },
-          wave: { admin_group: null },
-        } as never)
-      ).resolves.toBe(true);
-    });
-    expect(mockCommonApiPatch).toHaveBeenCalledWith({
-      endpoint: "v3/waves/wave-1",
-      body: { admin_group: { group_id: null } },
-      errorMode: "structured",
-    });
-  });
+  it.each([null, { group_id: "new-admin" }])(
+    "preserves omitted chat settings when changing an administrator group: %j",
+    async (adminGroup) => {
+      const { result } = renderHook(() =>
+        useWaveGroupEditButtonsController({
+          wave: buildWave(),
+          type: WaveGroupType.ADMIN,
+          requestAuth,
+          setToast,
+          onWaveCreated,
+        })
+      );
+      await act(async () => {
+        await expect(
+          result.current.updateWave({
+            visibility: { scope: { group_id: null } },
+            wave: { admin_group: adminGroup },
+          } as never)
+        ).resolves.toBe(true);
+      });
+      expect(mockCommonApiPatch).toHaveBeenCalledWith({
+        endpoint: "v3/waves/wave-1",
+        body: { admin_group: adminGroup ?? { group_id: null } },
+        errorMode: "structured",
+      });
+    }
+  );
 
   it("blocks a wave update when a privilege group is outside visibility", async () => {
     mockValidateWaveGroups.mockResolvedValue({

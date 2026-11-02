@@ -778,6 +778,8 @@ export const EN_GB_MESSAGES = {
   "waves.create.groups.editAccess.chatLabel": "Chat",
   "waves.create.groups.editAccess.description":
     "The current criteria are prefilled. Saving creates a new group and changes only {groupLabel} access.",
+  "waves.create.groups.editAccess.validationDescription":
+    "Everyone with chat or admin access must also be able to view the wave.",
   "waves.create.groups.editAccess.loading": "Loading current criteria…",
   "waves.create.groups.editAccess.loadErrorTitle":
     "Couldn't load the current criteria.",
