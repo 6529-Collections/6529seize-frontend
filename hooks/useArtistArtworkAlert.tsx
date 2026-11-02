@@ -142,7 +142,7 @@ export default function useArtistArtworkAlert(
             {stateLabel}
           </span>
         </span>
-        <span className="tw-mt-1 tw-block tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-400">
+        <span className="tw-mt-1 tw-block tw-text-balance tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-400">
           {description}
         </span>
       </span>
