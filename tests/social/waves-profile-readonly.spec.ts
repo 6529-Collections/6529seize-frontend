@@ -612,9 +612,24 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         exact: true,
       })
     ).toHaveCount(0);
-    await expect(
-      page.getByRole("button", { name: /^Minting Settings/ })
-    ).toHaveAttribute("aria-expanded", "false");
+    const mintingSettings = overview.getByRole("button", {
+      name: /^Minting Settings/,
+    });
+    await expect(mintingSettings).toHaveAttribute("aria-expanded", "false");
+    const settingsBox = await mintingSettings.boundingBox();
+    const coverageBox = await overview
+      .locator("#profile-subscriptions-overview")
+      .boundingBox();
+    const upcomingBox = await page
+      .getByRole("region", { name: "Upcoming Drops", exact: true })
+      .boundingBox();
+    expect(settingsBox).not.toBeNull();
+    expect(coverageBox).not.toBeNull();
+    expect(upcomingBox).not.toBeNull();
+    expect(settingsBox!.y).toBeGreaterThanOrEqual(
+      coverageBox!.y + coverageBox!.height
+    );
+    expect(settingsBox!.y + settingsBox!.height).toBeLessThan(upcomingBox!.y);
     const tabs = history.getByRole("tablist");
     await expect(tabs).toBeVisible();
     await expect(tabs.getByRole("tab")).toHaveText([

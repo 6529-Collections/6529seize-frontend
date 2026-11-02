@@ -404,6 +404,27 @@ export default function UserPageSubscriptions(
             )}
           </SubscriptionCoverageSummary>
         </section>
+        <div className="tw-mt-6 tw-rounded-xl tw-bg-iron-950 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] max-md:tw-bg-iron-900 max-md:tw-shadow-none">
+          <UserPageSubscriptionsDisclosure
+            id="profile-subscriptions-settings"
+            title={t(locale, "subscriptions.page.settingsTitle")}
+            summary={fetchingDetails ? undefined : settingsSummary}
+          >
+            <UserPageSubscriptionsEditionPreference
+              profileKey={profileKey}
+              details={details}
+              readonly={!isConnectedAccount}
+              refresh={refresh}
+            />
+            <div className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-py-3">
+              <UserPageSubscriptionsAirdropAddress
+                show_edit={isConnectedAccount}
+                airdrop={airdropResult}
+                fetching={fetchingAirdropAddress}
+              />
+            </div>
+          </UserPageSubscriptionsDisclosure>
+        </div>
       </UserPageSubscriptionsSection>
       <UserPageSubscriptionsUpcoming
         profileKey={profileKey}
@@ -414,27 +435,6 @@ export default function UserPageSubscriptions(
         loading={fetchingMemeSubscriptions}
         coverage={coverageQuery.isError ? undefined : coverageQuery.data}
       />
-      <div className="tw-rounded-xl tw-bg-iron-950 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] max-md:tw-bg-iron-900 max-md:tw-shadow-none">
-        <UserPageSubscriptionsDisclosure
-          id="profile-subscriptions-settings"
-          title={t(locale, "subscriptions.page.settingsTitle")}
-          summary={fetchingDetails ? undefined : settingsSummary}
-        >
-          <UserPageSubscriptionsEditionPreference
-            profileKey={profileKey}
-            details={details}
-            readonly={!isConnectedAccount}
-            refresh={refresh}
-          />
-          <div className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-py-3">
-            <UserPageSubscriptionsAirdropAddress
-              show_edit={isConnectedAccount}
-              airdrop={airdropResult}
-              fetching={fetchingAirdropAddress}
-            />
-          </div>
-        </UserPageSubscriptionsDisclosure>
-      </div>
       <UserPageSubscriptionsSection
         id="profile-subscriptions-history"
         title={t(locale, "subscriptions.history.title")}

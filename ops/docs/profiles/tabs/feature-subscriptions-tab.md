@@ -3,7 +3,8 @@
 ## Overview
 
 The `Subscriptions` tab at `/{user}/subscriptions` leads with a projected Meme
-subscription answer and balance, followed by Upcoming Drops. Details, Top up,
+subscription answer and balance, with compact Minting Settings directly beneath
+the coverage card in the same section, followed by Upcoming Drops. Details, Top up,
 and Minting Settings open when needed. Subscription History is a separate,
 always-visible section with pills for each history view.
 
@@ -14,8 +15,8 @@ are documented in
 ## Location in the Site
 
 - Route: `/{user}/subscriptions`
-- Sections: coverage answer and `Subscription balance`, `Upcoming Drops`,
-  `Minting Settings`, `Subscription History`, and inline `Top up` for owners
+- Sections: coverage answer and `Subscription balance`, `Minting Settings`,
+  `Upcoming Drops`, `Subscription History`, and inline `Top up` for owners
 
 ## Entry Points
 
@@ -90,14 +91,14 @@ first render.
    supplied projected funding outcome. Cancel closes the panel and returns focus
    to the Top up button. Direct top-up links focus the inline panel; its
    accessible title is retained without an extra visible heading.
-4. Use `Upcoming Drops` to review the first three drops, change individual
+4. Open `Minting Settings` beneath the coverage card to choose One edition or
+   All eligible and read the full Airdrop Address. Owners can use its edit link
+   to open delegation registration. Settings starts closed and summarizes the
+   edition preference and address on wider screens.
+5. Use `Upcoming Drops` to review the first three drops, change individual
    selections or quantities, or turn Automatic mode on or off. `Show More`
    reveals the remaining rows. Minting Today rows are locked; focus, tap, or
    hover the label for the explanation.
-5. Open `Minting Settings` to choose One edition or All eligible and read the
-   full Airdrop Address. Owners can use its edit link to open delegation
-   registration. Settings starts closed and summarizes the edition preference
-   and address on wider screens.
 6. In the always-visible `Subscription History` section, choose Redeemed
    Subscriptions, Log History, or Top Up History. The selected pill is light,
    the others are dark, and the
@@ -245,7 +246,7 @@ processed; they do not automatically recover rows stranded by earlier failures.
 
 ## Responsive Behavior
 
-- The answer card, Upcoming Drops, and the bottom disclosure card keep a
+- The answer card, Minting Settings, and Upcoming Drops keep a
   consistent layout at each width.
 - Subscription settings wrap without clipping on narrow screens.
 - Upcoming-drop titles and dates wrap beside bordered quantity pickers and
