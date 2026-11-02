@@ -5,6 +5,7 @@ import type { ApiXTdhGrantsPage } from "../../generated/models/ApiXTdhGrantsPage
 import { ApiXTdhGrantStatus } from "../../generated/models/ApiXTdhGrantStatus";
 import { ApiXTdhGrantTargetChain } from "../../generated/models/ApiXTdhGrantTargetChain";
 import { ApiXTdhGrantTargetTokenMode } from "../../generated/models/ApiXTdhGrantTargetTokenMode";
+import { fetchWaveDiscoveryPage } from "./waveDiscoveryPagination";
 import type { ApiXTdhGrantTokensPage } from "../../generated/models/ApiXTdhGrantTokensPage";
 import { expectUrlState } from "../support/urlState";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
@@ -124,16 +125,29 @@ async function getPublicChatMessageTarget(page: Page) {
     (url) =>
       url.pathname === "/api/v2/waves" &&
       !url.searchParams.has("name") &&
-      !url.searchParams.has("pinned")
+      !url.searchParams.has("pinned") &&
+      (!url.searchParams.has("page") || url.searchParams.get("page") === "1")
   );
-  const overview = (await response.json()) as ApiWaveOverviewPage;
-  const wave = overview.data.find(
-    (candidate) =>
-      !candidate.has_competition &&
-      !candidate.is_private &&
-      !candidate.is_dm_wave &&
-      candidate.total_drops_count > 1
-  );
+  const isEligibleChat = (candidate: ApiWaveOverviewPage["data"][number]) =>
+    !candidate.has_competition &&
+    !candidate.is_private &&
+    !candidate.is_dm_wave &&
+    candidate.total_drops_count > 1;
+  let overview = (await response.json()) as ApiWaveOverviewPage;
+  let wave = overview.data.find(isEligibleChat);
+  const stagingAccess = await response.request().headerValue("x-6529-auth");
+  while (!wave && overview.next) {
+    const nextPage = overview.page + 1;
+    const nextPageUrl = new URL(response.url());
+    nextPageUrl.searchParams.set("page", String(nextPage));
+    overview = await fetchWaveDiscoveryPage(
+      page.context(),
+      nextPageUrl,
+      stagingAccess
+    );
+    expect(overview.page).toBe(nextPage);
+    wave = overview.data.find(isEligibleChat);
+  }
   expect(
     wave,
     "Legacy-link fixture unavailable: public discovery must contain a nonempty public chat wave"
