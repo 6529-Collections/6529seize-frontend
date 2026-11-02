@@ -7,6 +7,11 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The `media.video-player` record covers preview frames and the video-icon fallback
+for Additional Media and Promo Video in submission details. Additional Media
+keeps original video downloads deferred until Play; Promo Video retains metadata
+preloading.
+
 The `waves.native-competitions` record covers optional anonymous submissions,
 their default-off creation setting, publication lock, per-entry winner reveal,
 continued anonymity across later draws, own-entry access, and submitters'
@@ -121,6 +126,12 @@ The `waves.content-tabs` record describes steady tab rows with screen-reader
 loading announcements, section-specific loading, and destination-bound competition
 controls. It also explains that app tabs already in view keep their position
 when selected. It does not promise instant data or a loading screen on every switch.
+
+The `messages.encrypted-chats` record covers profile links in DM headers and
+introductions, sender names and avatars, desktop profile cards, level and public
+author badges, profile-wave navigation, and linked member mentions. Those
+details come from public profile data; chat contents stay encrypted. Missing
+profile details do not prevent reading messages stored on the device.
 
 The `waves.leaderboard.sort-group-filters` record covers Main Stage's one-tap
 Additional Action checkbox, independent sorting and view selection, complete-result

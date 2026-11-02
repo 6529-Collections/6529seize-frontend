@@ -24,7 +24,7 @@ import {
 } from "./useOriginalImage";
 
 export function requestCenteredImageFullscreen(
-  fullscreenTarget: HTMLImageElement
+  fullscreenTarget: HTMLImageElement | HTMLVideoElement
 ) {
   const previousObjectPosition = fullscreenTarget.style.objectPosition;
 

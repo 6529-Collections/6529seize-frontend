@@ -137,7 +137,10 @@ describe("imported messages", () => {
         imported: imported({ authorProfileId: SELF_ID, authorHandle: "x" }),
       })
     );
-    expect(screen.getByText("You")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "me" })).toHaveAttribute(
+      "href",
+      "/me"
+    );
     expect(screen.getByText("Moved by alice")).toBeVisible();
   });
 });
