@@ -11160,13 +11160,13 @@
       "facts": [
         "Open Profile actions and select Artwork alerts on another artist's profile to opt into notifications for their new non-anonymous submissions to The Memes – Main Stage.",
         "Signed-out viewers do not see Artwork alerts. After signing in, it appears for profiles with an artist activity badge: active Main Stage submissions, Main Stage wins, or earlier Meme artist credits. If alerts are already on, the control remains available without the badge so they can be turned off; turning them off then hides it.",
-        "The menu shows On with a check mark when enabled, or Off. Select Artwork alerts again to turn alerts off. Sign in with your own profile; proxies cannot manage artwork alerts.",
+        "Open Profile actions and wait for the saved On or Off state to load. On includes a check mark. Select Artwork alerts again to turn alerts off. Sign in with your own profile; proxies cannot manage artwork alerts.",
         "Artwork alerts and Follow are independent. Enabling alerts does not follow the artist, and following or unfollowing does not change alerts. Existing followers are not opted in.",
         "Only new confirmed Main Stage entries submitted after opt-in qualify. Existing work, other competitions, chat, edits, votes, reactions, proposals and curation do not generate artwork alerts. A new dedicated resubmission can qualify; retries of the same submission do not duplicate alerts.",
         "Anonymous entries never generate artist-specific alerts, even after identity disclosure. Private access, blocks, mutes and moderation still apply.",
         "Find alerts under the Artwork alerts filter in /notifications. The artwork title, or untitled artwork, opens the exact submission.",
         "Profile preferences including Essential only and Direct messages and wave activity apply. App push also requires device permission and the Wave Invites setting.",
-        "Artwork alerts shows Try again when the preference could not load; select it to retry. Without an artist badge, the control appears only once an enabled preference is known; reopen the profile if the initial request fails. A failed save displays an error and rechecks saved state before another toggle."
+        "Artwork alerts shows Try again when the preference could not load; select it to retry. Without an artist badge, the control appears only once an enabled preference is known; close and reopen Profile actions if the initial request fails, or reopen the profile if no actions menu is available. A failed save displays an error and rechecks saved state before another toggle."
       ],
       "canonical_path": "/notifications",
       "related_paths": ["/waves"],

@@ -6,11 +6,13 @@ describe("CompactMenu focus", () => {
   it("preserves active-item autofocus by default and supports keyboard selection", async () => {
     const user = userEvent.setup();
     const select = jest.fn();
+    const onOpenChange = jest.fn();
     render(
       <CompactMenu
         trigger="Options"
         activeItemId="second"
         onItemSelect={select}
+        onOpenChange={onOpenChange}
         items={[
           { id: "first", label: "First" },
           { id: "second", label: "Second" },
@@ -19,6 +21,7 @@ describe("CompactMenu focus", () => {
     );
 
     await user.click(screen.getByRole("button", { name: "Options" }));
+    expect(onOpenChange).toHaveBeenLastCalledWith(true);
     await waitFor(() =>
       expect(screen.getByRole("menuitem", { name: "Second" })).toHaveFocus()
     );
@@ -26,6 +29,7 @@ describe("CompactMenu focus", () => {
     expect(select).toHaveBeenCalledWith("first");
     await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
     expect(screen.getByRole("button", { name: "Options" })).toHaveFocus();
+    expect(onOpenChange).toHaveBeenLastCalledWith(false);
   });
 
   it("opens neutrally with a pointer and exposes link items to keyboard navigation", async () => {

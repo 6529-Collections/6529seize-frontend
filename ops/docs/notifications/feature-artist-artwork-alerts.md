@@ -24,7 +24,7 @@ Open the artist’s profile from a submission, search result, or profile link.
 ## User Journey
 
 1. Sign in with your own profile and open the artist’s profile.
-2. Open **Profile actions** and select **Artwork alerts**. Wait for the saved-state confirmation.
+2. Open **Profile actions** and wait for the saved **On** or **Off** state to load. Select **Artwork alerts** and wait for confirmation.
 3. New Main Stage submissions by that artist can appear in Notifications.
 4. Open the artwork title in the notification to view the specific submission.
 5. Open **Profile actions** and select **Artwork alerts** again to turn future alerts off.
@@ -59,7 +59,7 @@ When available, the control is disabled while loading or saving. If loading fail
 **Artwork alerts** with **Try again**. If saving fails, an error appears and the saved state
 is checked again before another toggle is offered. On profiles without an artist
 badge, the control appears only once an enabled preference is known; if the
-initial request fails, reopen the profile to retry.
+initial request fails, close and reopen **Profile actions** to retry. If there is no actions menu, reopen the profile.
 
 ## Limitations / Notes
 

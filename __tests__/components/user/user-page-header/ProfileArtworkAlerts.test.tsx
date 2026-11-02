@@ -1,4 +1,10 @@
-import { act, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthContext, type AuthContextType } from "@/components/auth/Auth";
@@ -33,8 +39,16 @@ jest.mock("@/hooks/useProfileMute", () => () => ({
 }));
 jest.mock("@/hooks/useIsMobileLayoutViewport", () => () => false);
 jest.mock("@/components/compact-menu", () => ({
-  CompactMenu: ({ items }: { items: readonly CompactMenuItem[] }) => (
+  CompactMenu: ({
+    items,
+    onOpenChange,
+  }: {
+    items: readonly CompactMenuItem[];
+    onOpenChange?: (open: boolean) => void;
+  }) => (
     <div data-testid="profile-actions">
+      <button onClick={() => onOpenChange?.(true)}>Open actions</button>
+      <button onClick={() => onOpenChange?.(false)}>Close actions</button>
       {items.map(
         (item) =>
           item.kind !== "section" && (
@@ -58,12 +72,16 @@ const name = /^Artwork alerts/;
 function setup(
   overrides: Partial<AuthContextType> = {},
   blocked = false,
-  hasArtistActivity = true
+  hasArtistActivity = true,
+  options: { open?: boolean; showPersonalActions?: boolean } = {}
 ) {
   const requestAuth = jest.fn().mockResolvedValue({ success: true });
   const setToast = jest.fn();
   const client = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    defaultOptions: {
+      queries: { retry: false, staleTime: 10_000 },
+      mutations: { retry: false },
+    },
   });
   const auth = {
     connectedProfile: { id: "viewer", handle: "viewer" },
@@ -83,12 +101,16 @@ function setup(
           blocked={blocked}
           disabled={false}
           onBlock={() => undefined}
-          showPersonalActions={false}
+          showPersonalActions={options.showPersonalActions ?? false}
         />
       </AuthContext.Provider>
     </QueryClientProvider>
   );
   const rendered = render(view(auth));
+  if (options.open !== false) {
+    const trigger = screen.queryByRole("button", { name: "Open actions" });
+    if (trigger) fireEvent.click(trigger);
+  }
   return {
     requestAuth,
     setToast,
@@ -196,6 +218,8 @@ it("cancels pending authentication when the viewer switches profiles", async () 
   });
   await act(async () => finishAuth({ success: true }));
   expect(postPreference).not.toHaveBeenCalled();
+  expect(fetchPreference).toHaveBeenCalledTimes(1);
+  await userEvent.click(screen.getByRole("button", { name: "Open actions" }));
   await waitFor(() =>
     expect(screen.getByRole("button", { name })).toHaveTextContent("Off")
   );
@@ -255,6 +279,8 @@ it("loads the viewer preference after a guest signs in, without implicit opt-in"
     isAuthenticated: true,
     isDirectProfileSession: true,
   });
+  expect(fetchPreference).not.toHaveBeenCalled();
+  await userEvent.click(screen.getByRole("button", { name: "Open actions" }));
   await waitFor(() =>
     expect(screen.getByRole("button", { name })).toBeEnabled()
   );
@@ -334,4 +360,62 @@ it("hides saved alerts after authentication ends, even with a remembered profile
   expect(fetchPreference).toHaveBeenCalledTimes(1);
   expect(postPreference).not.toHaveBeenCalled();
   expect(deletePreference).not.toHaveBeenCalled();
+});
+
+it.each([true, false])(
+  "defers the preference read until opening actions (artist activity: %s)",
+  async (hasArtistActivity) => {
+    setup({}, false, hasArtistActivity, {
+      open: false,
+      showPersonalActions: true,
+    });
+    expect(fetchPreference).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole("button", { name: "Open actions" }));
+    await waitFor(() => expect(fetchPreference).toHaveBeenCalledTimes(1));
+    if (hasArtistActivity) {
+      await waitFor(() =>
+        expect(screen.getByRole("button", { name })).toHaveTextContent("Off")
+      );
+    } else {
+      expect(screen.queryByRole("button", { name })).not.toBeInTheDocument();
+    }
+    await userEvent.click(
+      screen.getByRole("button", { name: "Close actions" })
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Open actions" }));
+    expect(fetchPreference).toHaveBeenCalledTimes(1);
+  }
+);
+
+it("discovers saved alerts for an unbadged artist when actions open", async () => {
+  fetchPreference.mockResolvedValue({ enabled: true });
+  setup({}, false, false, { open: false, showPersonalActions: true });
+  expect(fetchPreference).not.toHaveBeenCalled();
+  expect(screen.queryByRole("button", { name })).not.toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Open actions" }));
+  const alert = await screen.findByRole("button", { name });
+  await waitFor(() => expect(alert).toHaveTextContent("On"));
+  await userEvent.click(alert);
+  await waitFor(() => expect(deletePreference).toHaveBeenCalledTimes(1));
+});
+
+it("reconciles an uncertain write when the menu next opens", async () => {
+  let rejectSave!: (error: Error) => void;
+  postPreference.mockImplementationOnce(
+    () =>
+      new Promise((_resolve, reject) => {
+        rejectSave = reject;
+      })
+  );
+  setup();
+  const button = screen.getByRole("button", { name });
+  await waitFor(() => expect(button).toBeEnabled());
+  await userEvent.click(button);
+  await userEvent.click(screen.getByRole("button", { name: "Close actions" }));
+  fetchPreference.mockResolvedValue({ enabled: true });
+  await act(async () => rejectSave(new Error("lost response")));
+  expect(fetchPreference).toHaveBeenCalledTimes(1);
+  await userEvent.click(screen.getByRole("button", { name: "Open actions" }));
+  await waitFor(() => expect(button).toHaveTextContent("On"));
+  expect(fetchPreference).toHaveBeenCalledTimes(2);
 });

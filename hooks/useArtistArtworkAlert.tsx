@@ -22,7 +22,8 @@ export default function useArtistArtworkAlert(
   handle: string,
   scope: string,
   blocked: boolean,
-  hasArtistActivity: boolean
+  hasArtistActivity: boolean,
+  loadPreference: boolean
 ): CompactMenuItem | null {
   const {
     connectedProfile,
@@ -52,7 +53,7 @@ export default function useArtistArtworkAlert(
   const preference = useQuery<ApiArtistArtworkAlert>({
     queryKey,
     queryFn: ({ signal }) => commonApiFetch({ endpoint, signal }),
-    enabled: canManage,
+    enabled: canManage && loadPreference,
     retry: false,
   });
   const mutation = useMutation({
@@ -92,7 +93,8 @@ export default function useArtistArtworkAlert(
         description: t(locale, "artworkAlerts.tryAgain"),
         details: getToastErrorDetails(error),
       });
-      // Read back after a lost response before offering another toggle.
+      // Read back after a lost response before offering another toggle, either
+      // now or when the menu reopens.
       void queryClient.invalidateQueries({ queryKey });
     },
   });
@@ -100,7 +102,9 @@ export default function useArtistArtworkAlert(
   if (!connectedProfile?.id || isAuthenticated !== true) return null;
   if (!hasArtistActivity && !enabled) return null;
 
-  const loading = fetchingProfile || (canManage && preference.isFetching);
+  const loading =
+    fetchingProfile ||
+    (canManage && (preference.isPending || preference.isFetching));
   const failed = canManage && preference.isError;
   const savedStateLabel = t(
     locale,
@@ -154,5 +158,7 @@ export default function useArtistArtworkAlert(
       loading ||
       mutation.isPending,
     onSelect: () => void onClick(),
+    // A save must not depend on completion of a closing animation.
+    deferUntilClosed: false,
   };
 }

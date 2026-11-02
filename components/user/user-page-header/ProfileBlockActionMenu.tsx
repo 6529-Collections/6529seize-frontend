@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import useArtistArtworkAlert from "@/hooks/useArtistArtworkAlert";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
@@ -60,12 +61,18 @@ function ProfileActionsMenu({
 }: Props & { readonly scope: string }) {
   const locale = useBrowserLocale();
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
+  const [menuOpen, setMenuOpen] = useState(false);
   const mute = useProfileMute(showPersonalActions ? handle : "");
   const artworkAlert = useArtistArtworkAlert(
     handle,
     scope,
     blocked,
-    hasArtistActivity
+    hasArtistActivity,
+    // With no other actions, discover a saved opt-in so its off switch stays
+    // reachable even after the artist loses their badge or is blocked.
+    !disabled &&
+      (menuOpen ||
+        (!hasArtistActivity && !showPersonalActions && !moderationAction))
   );
   const menuLabel = t(locale, "contentModeration.profile.actionsMenu");
   const MuteIcon = mute.isMuted ? BellSlashIcon : BellIcon;
@@ -129,6 +136,7 @@ function ProfileActionsMenu({
         trigger={trigger}
         triggerClassName={TRIGGER_CLASS_NAME}
         disabled={disabled}
+        onOpenChange={setMenuOpen}
       />
     );
   }
@@ -138,6 +146,7 @@ function ProfileActionsMenu({
       aria-label={menuLabel}
       items={items}
       disabled={disabled}
+      onOpenChange={setMenuOpen}
       trigger={trigger}
       triggerClassName={TRIGGER_CLASS_NAME}
       unstyledTrigger

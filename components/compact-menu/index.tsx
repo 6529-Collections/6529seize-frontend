@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Menu, MenuItems, Transition } from "@headlessui/react";
 import clsx from "clsx";
 import { CompactMenuTrigger } from "./subcomponents/CompactMenuTrigger";
@@ -13,6 +13,7 @@ export function CompactMenu({
   trigger,
   items,
   onItemSelect,
+  onOpenChange,
   className,
   triggerClassName,
   triggerAsChild,
@@ -50,6 +51,7 @@ export function CompactMenu({
           trigger={trigger}
           items={items}
           onItemSelect={onItemSelect}
+          onOpenChange={onOpenChange}
           triggerClassName={triggerClassName}
           triggerAsChild={triggerAsChild}
           unstyledTrigger={unstyledTrigger}
@@ -95,6 +97,7 @@ function CompactMenuContent({
   trigger,
   items,
   onItemSelect,
+  onOpenChange,
   triggerClassName,
   triggerAsChild = false,
   unstyledTrigger = false,
@@ -118,6 +121,9 @@ function CompactMenuContent({
   isOpen,
   close,
 }: Readonly<CompactMenuContentProps>) {
+  useEffect(() => {
+    onOpenChange?.(isOpen);
+  }, [isOpen, onOpenChange]);
   const { menuItemsRef, focusInitialMenuItem } = useCompactMenuFocus(
     isOpen,
     autoFocusItem || keyboardNavigation

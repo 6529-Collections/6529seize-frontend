@@ -189,10 +189,12 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
     let following = false;
     let followWrites = 0;
     let alertWrites = 0;
+    let alertReads = 0;
     await page.route(
       `${api}/api/identities/following-artist-0/artwork-alerts`,
       (route) => {
         const method = route.request().method();
+        if (method === "GET") alertReads++;
         if (method !== "GET") {
           enabled = method === "POST";
           alertWrites++;
@@ -215,19 +217,13 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
     );
     await openOwnProfile(page);
     const loadProfile = async (reload = false) => {
-      const preferenceLoaded = page.waitForResponse(
-        (response) =>
-          response
-            .url()
-            .endsWith("/identities/following-artist-0/artwork-alerts") &&
-          response.request().method() === "GET"
-      );
+      const readsBeforeNavigation = alertReads;
       if (reload) await page.reload();
       else await page.goto("/following-artist-0");
-      await preferenceLoaded;
       await expect(
         page.getByRole("button", { name: "Follow", exact: true })
       ).toBeVisible();
+      expect(alertReads).toBe(readsBeforeNavigation);
     };
     await loadProfile();
     const mobile = (page.viewportSize()?.width ?? 0) < 1024;
@@ -267,6 +263,7 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
       page.getByRole("button", { name: /^Artwork alerts/ })
     ).toHaveCount(0);
     await openActions();
+    await expect.poll(() => alertReads).toBe(1);
     await expect(
       page.getByRole(mobile ? "button" : "menuitem", {
         name: /^Artwork alerts/,
