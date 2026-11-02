@@ -50,7 +50,9 @@ describe("the hub, first version", () => {
     // The card follows the copy: its own TDH heads it, the network's total
     // stays on the loop and in the sentence.
     expect(card).toHaveTextContent("394 TDH");
-    expect(card).toHaveTextContent("Everyone's, on Oct 18: 2,082,190,981.");
+    expect(card).toHaveTextContent(
+      "All holders together, on Oct 18: 2,082,190,981."
+    );
     expect(
       within(card as HTMLElement).getByRole("link", { name: /Chapter 01: TDH/ })
     ).toHaveAttribute("href", "/network/tdh");
@@ -80,12 +82,12 @@ describe("the hub, first version", () => {
       `${book.num("manifest.proved.tdh").toLocaleString("en-US")} Lean theorems`
     );
     expect(panel).toHaveTextContent(
-      `About a model of TDH's rules, each checked by machine, and ${book.num("manifest.proved.p53")} more about the proposed validator rules. ${book.num("manifest.shownFalse.tdh")} earlier statements about TDH's rules were shown false and stay on record.`
+      `About a model of TDH's rules, each checked by machine, and ${book.num("manifest.proved.p53")} more about the proposed validator rules: Lean proves things about the rules, never about a day. ${book.num("manifest.shownFalse.tdh")} earlier statements about TDH were shown false and stay on record, ${book.num("manifest.shownFalse.never")} of them properties the rules never had.`
     );
     // The proved day carries its retired rule in the same sentence.
     expect(panel).toHaveTextContent("One real day, half proved");
     expect(panel).toHaveTextContent(
-      "A zero-knowledge proof lets a contract check a program's result without running it again. Proof A proved Oct 11 (cycle 20,737) under the retired tdh-v1.0 rules, and Ethereum's checker for such proofs accepts it, asked without a transaction. Proof B is not done; under TDH v1.4 both proved only made-up test blocks."
+      "A zero-knowledge proof lets a contract check a program's result without running it again. Proof A proved Oct 11 (cycle 20,737) under the retired tdh-v1.0 rules, and mainnet's SP1 verifier accepts it in a read-only call; nothing is recorded. Proof B is not done; under TDH v1.4 both proved only made-up test blocks, a pair mainnet's verifiers also accept."
     );
     // What anyone can repeat today, and what needs private code.
     expect(panel).toHaveTextContent(
@@ -126,8 +128,9 @@ describe("the hub, first version", () => {
     ]);
   });
 
-  it("answers CC0 in one minute, with where it stops and the absolute behind it", () => {
-    const { container } = render(<Cc0Answer locale="en-US" />);
+  it("answers CC0 in one minute, with where it stops and the absolute behind it", async () => {
+    const user = userEvent.setup();
+    const { container } = withFacts(<Cc0Answer book={book} locale="en-US" />);
     expect(container.querySelector("#cc0")).not.toBeNull();
     expect(
       screen.getByRole("heading", {
@@ -143,7 +146,19 @@ describe("the hub, first version", () => {
     expect(container.querySelector('[data-mark="absolute"]')).toHaveTextContent(
       "CC0 for The Memes, D89"
     );
-    expect(screen.getAllByRole("img")).toHaveLength(3);
+    expect(screen.getAllByRole("img", { name: /^Meme #\d+/ })).toHaveLength(3);
+    // The artist's three boxes, the copies read from the facts (D91).
+    expect(container.querySelector('[data-cc0="keep"]')).toHaveTextContent(
+      "5 copies of each card plus 15 for people you choose"
+    );
+    expect(container.querySelector('[data-cc0="unstated"]')).not.toBeNull();
+    // The model: a Meme card may be sold; a Gradient may not, and the lens
+    // turns rose.
+    const lens = container.querySelector('[data-lens="licence"]');
+    expect(lens).toHaveTextContent("Yes.");
+    await user.click(screen.getByRole("button", { name: "A 6529 Gradient" }));
+    expect(lens).toHaveAttribute("data-broken", "1");
+    expect(lens).toHaveTextContent("Not without permission.");
   });
 
   it("shows the paths, the guide, the corrections log and the sources", () => {

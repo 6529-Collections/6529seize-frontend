@@ -257,6 +257,7 @@ function RealVerdict({
       )}
       {p(
         rich(locale, k("verdict.bodyB"), {
+          equal: facts.print("proofs.dayB.wordsEqual"),
           words: facts.print("proofs.statement.words"),
         })
       )}

@@ -172,7 +172,15 @@ describe("the proofs facts", () => {
       expect(entry.ref).not.toMatch(/0x[0-9a-f]{40}\b/i);
       expect(entry.ref).not.toMatch(/@/);
     }
-    const text = JSON.stringify(proofs);
+    // The only addresses are mainnet's public verifier contracts, kept apart.
+    const { verifiers, ...rest } = proofs;
+    expect(Object.keys(verifiers)).toEqual([
+      "sp1Gateway",
+      "sp1Selector",
+      "risc0Router",
+      "risc0Selector",
+    ]);
+    const text = JSON.stringify(rest);
     expect(text).not.toMatch(/\b0x[0-9a-fA-F]{40}\b(?![0-9a-fA-F])/);
   });
 });
@@ -330,7 +338,7 @@ describe("the page's sections", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: "What a proof of a day shows, what is proved so far, and what is not.",
+        name: "Proofs of a day: Ethereum checks that a program ran, not that the rules are right.",
       })
     ).toBeInTheDocument();
     expect(container.querySelector("[data-ex-lede]")).toBeInTheDocument();
@@ -384,7 +392,7 @@ describe("the page's sections", () => {
       CONTRACT_CHECKS.length
     );
     expect(container.querySelectorAll("[data-phase]")).toHaveLength(7);
-    expect(container.querySelectorAll("[data-row]")).toHaveLength(6);
+    expect(container.querySelectorAll("[data-row]")).toHaveLength(7);
     expect(
       screen.getByText("Not deployed, and not audited.")
     ).toBeInTheDocument();

@@ -113,6 +113,8 @@ interface NftsRow {
   readonly id?: unknown;
   readonly mint_date?: unknown;
   readonly thumbnail?: unknown;
+  /** The original file: the card's art while no scaled image is listed. */
+  readonly image?: unknown;
   readonly tdh?: unknown;
   readonly tdh__raw?: unknown;
 }
@@ -214,6 +216,11 @@ export async function loadFirstMints(): Promise<CardMints> {
       row.thumbnail.startsWith(ART_HOST)
     ) {
       art.set(row.id, row.thumbnail);
+    } else if (
+      typeof row.image === "string" &&
+      row.image.startsWith(ART_HOST)
+    ) {
+      art.set(row.id, row.image);
     }
     if (
       typeof row.tdh === "number" &&

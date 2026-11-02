@@ -104,6 +104,23 @@ export default function ContractSection({
       heading={rich(locale, k("s4.heading"))}
       figure={
         <div className="tw-grid tw-gap-6">
+          {/* The gas table takes the full width under the row, its note
+              beside it, instead of squeezing into the prose column. */}
+          <div className="tw-grid tw-grid-cols-1 tw-items-end tw-gap-x-12 tw-gap-y-4 lg:tw-grid-cols-[minmax(0,620px)_minmax(0,1fr)]">
+            <div>
+              <p className={`${EX_TEXT.body} tw-m-0 tw-mb-4`}>
+                {rich(locale, k("s4.p2"))}
+              </p>
+              <GasTable locale={locale} facts={facts} />
+            </div>
+            <p className={`${EX_TEXT.cap} tw-m-0 tw-max-w-[440px]`}>
+              {rich(locale, k("gas.note"), {
+                submit: facts.print("proofs.pair.submitGas"),
+                cold: facts.print("proofs.pair.coldCallGas"),
+                total: facts.print("proofs.pair.transactionGas"),
+              })}
+            </p>
+          </div>
           <ol
             className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-gap-px tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-800 tw-p-0 md:tw-grid-cols-2 lg:tw-grid-cols-4"
             aria-label={fill(locale, k("s4.checks"), {
@@ -132,8 +149,8 @@ export default function ContractSection({
                 </span>
                 {/* Every cell ends on its refusal, so the grid's lower edge
                     lines up; the record names no error for two checks. */}
-                <span className="tw-mt-auto tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-0.5 tw-pt-1.5 tw-text-[13px] tw-leading-5 tw-text-iron-400">
-                  {fill(locale, k("check.refusal"))}
+                <span className="tw-mt-auto tw-flex tw-flex-col tw-gap-0.5 tw-pt-1.5 tw-text-[13px] tw-leading-5 tw-text-iron-400">
+                  <span>{fill(locale, k("check.refusal"))}</span>
                   {check.refusals.length > 0 ? (
                     check.refusals.map((name) => (
                       <code
@@ -174,8 +191,6 @@ export default function ContractSection({
       }
     >
       <Para>{rich(locale, k("s4.p1"), { decision: "D128" })}</Para>
-      <Para>{rich(locale, k("s4.p2"))}</Para>
-      <GasTable locale={locale} facts={facts} />
     </Section>
   );
 }

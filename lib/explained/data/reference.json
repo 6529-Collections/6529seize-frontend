@@ -120,6 +120,11 @@
     "source": "decision D96; P53 §6.3 and §6.4",
     "percent": "19.99"
   },
+  "artistCopies": {
+    "source": "decision D91: today each card airdrops the artist 5 copies and 15 of the artist's choice, and from 2027-01-01 these remain the only free copies",
+    "own": 5,
+    "choice": 15
+  },
   "programs": {
     "source": "6529's design record: P52 §3.4 (the run times of the 2026-10-11 cycle), the second implementation's findings of 2026-10-11, and 6529chain's tdh-formal workflow",
     "rustReferenceSeconds": 0.6,

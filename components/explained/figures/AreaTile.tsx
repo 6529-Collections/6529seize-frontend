@@ -94,6 +94,19 @@ export default function AreaTile({
     lostDays !== undefined && lostDays > 0 ? (lostDays / axis) * innerW : 0;
   // A sold copy's area fades in as the copy's own area shrinks away.
   const lostOpacity = useTween(lostW > 0 ? 1 : 0, EX_MOTION.liveMs);
+  // Its label stays inside the dashed box, never across its edge: the long
+  // words where they fit (about 7.2 px a 13 px character), the short where
+  // they do not, else above the box.
+  const lostLong = kt(locale, "explained.kit.area.lost", {
+    days: formatCount(locale, lostDays ?? 0),
+  });
+  const lostShort = kt(locale, "explained.kit.area.lostShort", {
+    days: formatCount(locale, lostDays ?? 0),
+  });
+  const fitsInside = (text: string) => text.length * 7.2 + 16 <= lostW;
+  let lostText = lostLong;
+  if (!fitsInside(lostLong)) lostText = lostShort;
+  const lostInside = fitsInside(lostText);
 
   let tdhLabel = null;
   // Once the copy is sold its area leaves and the lost area speaks; a total
@@ -202,7 +215,7 @@ export default function AreaTile({
             <Label
               x={PAD.left + 8}
               y={
-                tileH + bandH > 30
+                lostInside && tileH + bandH > 30
                   ? baseY - tileH - bandH + 19
                   : Math.max(18, baseY - tileH - bandH - 10)
               }
@@ -211,9 +224,7 @@ export default function AreaTile({
               weight={600}
               tone="fails"
             >
-              {kt(locale, "explained.kit.area.lost", {
-                days: formatCount(locale, lostDays ?? 0),
-              })}
+              {lostText}
             </Label>
           </g>
         )}

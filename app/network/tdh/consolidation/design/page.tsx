@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { REGISTRY_V14 } from "@/components/explained/engine/tdh";
 import FactValue from "@/components/explained/facts/FactValue";
+import Mark from "@/components/explained/marks/Mark";
 import { kt } from "@/components/explained/i18n";
 import { chapterById, HUB_HREF } from "@/components/explained/shell/chapters";
 import ExplainedShell from "@/components/explained/shell/ExplainedShell";
 import HowWeKnow from "@/components/explained/shell/HowWeKnow";
 import { PlaceLinks, pagePlace } from "@/components/explained/shell/place";
-import { EX_TEXT } from "@/components/explained/tokens";
+import { EX_LINK, EX_TEXT } from "@/components/explained/tokens";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { loadFactBook } from "@/lib/explained/feed.server";
@@ -235,7 +236,11 @@ export default async function TdhConsolidationDesignPage({
                 ],
               }}
             />
-            <Para className="tw-mt-6">
+            {/* The mark sits on the claim it qualifies: 6529's own tests. */}
+            <div className="tw-mt-6">
+              <Mark kind="tested" locale={locale} size="sm" />
+            </div>
+            <Para className="tw-mt-2">
               {rich(locale, "explained.tdh.design.protects.tested", {
                 graphs: (
                   <RecordValue
@@ -279,10 +284,18 @@ function howWeKnow(book: FactBook, locale: SupportedLocale) {
     {
       title: dt(locale, "explained.tdh.design.hwk.analysis"),
       body: rich(locale, "explained.tdh.design.hwk.analysisBody", {
-        // Where the candidate rules were checked: the earlier TDH pages'
-        // Consolidation design, "How it was tested", and the grouping code
-        // it pins.
-        frontend: <code className="tw-font-mono">7f2f68700e</code>,
+        // Where the candidate rules' check is recorded: the four-wallet
+        // change's public tracking issue; the check's code is 6529's own.
+        issue: (
+          <a
+            className={EX_LINK}
+            href="https://github.com/6529-Collections/6529seize-frontend/issues/4214"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            #4214
+          </a>
+        ),
         backend: (
           <code className="tw-font-mono">6529seize-backend ee74952</code>
         ),

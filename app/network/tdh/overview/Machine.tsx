@@ -185,30 +185,36 @@ function MachineArt({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <div className="max-[359px]:tw-w-24 md:tw-row-span-2">
-      <ArtCard
-        key={card.id}
-        src={card.art}
-        fallbackSrc={card.original ?? null}
-        alt={alt}
-        number={`#${card.id}`}
-        sizes="(max-width: 768px) 96px, 150px"
-        priority
-      />
-      <CardPicker
-        label={ot(locale, "machine.pick")}
-        value={value}
-        onChange={onPick}
-        cards={cards.map((entry) => ({
-          id: String(entry.id),
-          thumb: entry.art,
-          name:
-            entry.title === null
-              ? ot(locale, "machine.pickMinting", { id: entry.id })
-              : ot(locale, "machine.pickName", { id: entry.id }),
-          short: String(entry.id),
-        }))}
-      />
+    // On a phone the art and the picker are the grid's own items: the art
+    // beside the card's name, the thumbnails in one row under both.
+    <div className="max-md:tw-contents md:tw-row-span-2">
+      <div className="max-md:tw-col-start-1 max-md:tw-row-start-1 max-[359px]:tw-w-24">
+        <ArtCard
+          key={card.id}
+          src={card.art}
+          fallbackSrc={card.original ?? null}
+          alt={alt}
+          number={`#${card.id}`}
+          sizes="(max-width: 768px) 96px, 150px"
+          priority
+        />
+      </div>
+      <div className="max-md:tw-col-span-2 max-md:tw-row-start-2 max-[359px]:tw-col-span-1">
+        <CardPicker
+          label={ot(locale, "machine.pick")}
+          value={value}
+          onChange={onPick}
+          cards={cards.map((entry) => ({
+            id: String(entry.id),
+            thumb: entry.art,
+            name:
+              entry.title === null
+                ? ot(locale, "machine.pickMinting", { id: entry.id })
+                : ot(locale, "machine.pickName", { id: entry.id }),
+            short: String(entry.id),
+          }))}
+        />
+      </div>
     </div>
   );
 }
@@ -274,11 +280,11 @@ export default function Machine({
           onPick={(id) => model.set({ card: id })}
           locale={locale}
         />
-        <p className="tw-m-0 tw-self-start tw-text-sm tw-leading-5 tw-text-iron-400">
+        <p className="tw-m-0 tw-self-start tw-text-sm tw-leading-5 tw-text-iron-400 max-md:tw-col-start-2 max-md:tw-row-start-1 max-[359px]:tw-col-start-1 max-[359px]:tw-row-start-auto">
           <b className={`tw-block ${BOLD}`}>{words.name}</b>
           <span>{withCc0(words.copies)}</span>
         </p>
-        <div className="tw-col-span-2 tw-mt-2 max-[359px]:tw-col-span-1 md:tw-col-span-1 md:tw-col-start-2 md:tw-mt-0">
+        <div className="tw-col-span-2 tw-mt-2 max-md:tw-row-start-3 max-[359px]:tw-col-span-1 max-[359px]:tw-row-start-auto md:tw-col-span-1 md:tw-col-start-2 md:tw-mt-0">
           <Factor
             label={ot(locale, "machine.days")}
             value={formatCount(locale, days)}

@@ -24,13 +24,21 @@ interface Row {
   readonly b: ReactNode;
 }
 
+const HASH_NAMES = {
+  "proofs.a.vkey": "table.keyName",
+  "proofs.b.imageId": "table.imageName",
+  "proofs.day.vkeyA": "table.dayKeyName",
+  "proofs.verifiers.sp1Gateway": "table.gatewayName",
+  "proofs.verifiers.risc0Router": "table.routerName",
+} as const;
+
 function HashFact({
   facts,
   id,
   locale,
 }: {
   readonly facts: PageFacts;
-  readonly id: "proofs.a.vkey" | "proofs.b.imageId";
+  readonly id: keyof typeof HASH_NAMES;
   readonly locale: SupportedLocale;
 }) {
   const entry = facts.entry(id);
@@ -41,10 +49,7 @@ function HashFact({
         value={factText(entry)}
         locale={locale}
         copy
-        name={fill(
-          locale,
-          k(id === "proofs.a.vkey" ? "table.keyName" : "table.imageName")
-        )}
+        name={fill(locale, k(HASH_NAMES[id]))}
       />
     </span>
   );
@@ -106,18 +111,50 @@ function ProgramsTable({
           {rich(locale, k("table.dayA"), {
             hours: facts.print("site.proofA.provedHours"),
             minutes: facts.print("site.proofA.provedMinutes"),
+            key: (
+              <HashFact facts={facts} id="proofs.day.vkeyA" locale={locale} />
+            ),
           })}
         </>
       ),
       b: (
         <>
           <Mark kind="notYet" locale={locale} size="sm" />{" "}
-          {rich(locale, k("table.dayB"), {
-            low: facts.print("proofs.dayB.gpuHoursLow"),
-            high: facts.print("proofs.dayB.gpuHoursHigh"),
-          })}
+          {rich(locale, k("table.dayB"))}
         </>
       ),
+    },
+    {
+      id: "verify",
+      label: rich(locale, k("table.verify")),
+      a: rich(locale, k("table.verifyA"), {
+        address: (
+          <HashFact
+            facts={facts}
+            id="proofs.verifiers.sp1Gateway"
+            locale={locale}
+          />
+        ),
+        selector: (
+          <code className="tw-font-mono tw-text-[13px]">
+            {facts.print("proofs.verifiers.sp1Selector")}
+          </code>
+        ),
+      }),
+      b: rich(locale, k("table.verifyB"), {
+        address: (
+          <HashFact
+            facts={facts}
+            id="proofs.verifiers.risc0Router"
+            locale={locale}
+          />
+        ),
+        selector: (
+          <code className="tw-font-mono tw-text-[13px]">
+            {facts.print("proofs.verifiers.risc0Selector")}
+          </code>
+        ),
+      }),
     },
     {
       id: "pair",

@@ -1,5 +1,5 @@
 {
-  "note": "The zero-knowledge proofs of a TDH day (6529chain P52, P53 section 4.6, D119, D128) as the validator's own records state them, at the commits named in sources. Program A's proof of 2026-10-11 and the first pair are under the retired tdh-v1.0; the pair of 2026-10-31 is under tdh-v1.4. Refresh at ship time with the fact gate. No person, account, host or address is named; program identities are hashes of public code.",
+  "note": "The zero-knowledge proofs of a TDH day (6529chain P52, P53 section 4.6, D119, D128) as the validator's own records state them, at the commits named in sources. Program A's proof of 2026-10-11 and the first pair are under the retired tdh-v1.0; the pair of 2026-10-31 is under tdh-v1.4. Refresh at ship time with the fact gate. No person, account or host is named; the only addresses are mainnet's public verifier contracts, and program identities are hashes of the programs' code.",
   "sources": {
     "contracts": {
       "ref": "the validator's contracts record (contracts/README.md), commit d49ffc7",
@@ -60,6 +60,7 @@
   "day": {
     "date": "2026-10-11",
     "ruleVersion": "tdh-v1.0",
+    "vkeyA": "0x00d666ad2a6f6087e0f747a27890fc23573d53f71b6b7ed5ee32d9a683ec1595",
     "wordsA": [
       "9a1f1eb01d9e60d7da5cab32650af0204525f51d30e121a58a30fb52395a6529",
       "305a60a8768fcb3908a775373e58a0f8c60642dba778d8158c8cbd75284cd102",
@@ -216,6 +217,12 @@
       "wrapper": "Groth16 on BN254",
       "imageId": "0x1dca211533ac7761e32d0ad76eef3fd72616bd1070328e4612e09e5d9c763a0d"
     }
+  },
+  "verifiers": {
+    "sp1Gateway": "0x397A5f7f3dBd538f23DE225B51f532c34448dA9B",
+    "sp1Selector": "0x4388a21c",
+    "risc0Router": "0x8EaB2D97Dfce405A1692a21b3ff3A172d593D319",
+    "risc0Selector": "0x73c457ba"
   },
   "contract": {
     "checks": 8,

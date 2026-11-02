@@ -65,17 +65,19 @@ export default function WhatItIsFor({
         </div>
       </div>
       <figure
-        className="tw-m-0 tw-mt-10 tw-grid tw-grid-cols-1 md:tw-mt-12 md:tw-grid-cols-[200px_minmax(0,1fr)]"
+        className="tw-m-0 tw-mt-10 tw-grid tw-grid-cols-1 md:tw-mt-12"
         aria-label={ot(locale, "uses.aria")}
       >
-        <div className="tw-flex tw-flex-col tw-justify-start tw-gap-1.5 tw-rounded-t-xl tw-border tw-border-solid tw-border-primary-400/50 tw-bg-primary-400/[0.12] tw-p-4 md:tw-rounded-l-xl md:tw-rounded-tr-none md:tw-p-6">
+        {/* The source, one number, as a band across the top: a side panel
+            held three lines in a column four cells tall. */}
+        <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-4 tw-gap-y-1 tw-rounded-t-xl tw-border tw-border-solid tw-border-primary-400/50 tw-bg-primary-400/[0.12] tw-px-4 tw-py-3.5 md:tw-px-6 md:tw-py-4">
           <span className={EX_TEXT.label}>{ot(locale, "uses.src")}</span>
-          <span className="tw-text-[26px] tw-font-semibold tw-leading-8 tw-tracking-[-0.02em] tw-text-primary-300">
+          <span className="tw-whitespace-nowrap tw-text-[22px] tw-font-semibold tw-leading-7 tw-tracking-[-0.02em] tw-text-primary-300">
             {ot(locale, "uses.srcNum")}
           </span>
           <span className={EX_TEXT.cap}>{ot(locale, "uses.srcCap")}</span>
         </div>
-        <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-rounded-b-xl tw-border tw-border-t-0 tw-border-solid tw-border-iron-800 tw-p-0 md:tw-grid-cols-2 md:tw-rounded-r-xl md:tw-rounded-bl-none md:tw-border-l-0 md:tw-border-t">
+        <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-rounded-b-xl tw-border tw-border-t-0 tw-border-solid tw-border-iron-800 tw-p-0 md:tw-grid-cols-2">
           {USES.map((use, index) => (
             <li
               key={use.title}
@@ -94,13 +96,21 @@ export default function WhatItIsFor({
                           locale={locale}
                         />
                       ),
+                      cap: (
+                        <Fact book={book} id="validators.cap" locale={locale} />
+                      ),
                     })
                   : ot(locale, use.body)}
               </p>
               {use.status === "live" ? (
                 <Track maturity="live" locale={locale} size="sm" />
               ) : (
-                <Mark kind="decided" locale={locale} size="sm" refText="D112" />
+                <Mark
+                  kind="decided"
+                  locale={locale}
+                  size="sm"
+                  refText="D112, D148"
+                />
               )}
             </li>
           ))}

@@ -617,6 +617,18 @@ export const REFERENCE_FACTS = {
     (d) => d.replay.source,
     (d) => d.replay.withoutSinks
   ),
+  "memes.artistCopies": fromReference<number>(
+    "count",
+    "decision",
+    (d) => d.artistCopies.source,
+    (d) => d.artistCopies.own
+  ),
+  "memes.artistChoice": fromReference<number>(
+    "count",
+    "decision",
+    (d) => d.artistCopies.source,
+    (d) => d.artistCopies.choice
+  ),
   "validators.cap": fromReference<string>(
     "text",
     "decision",

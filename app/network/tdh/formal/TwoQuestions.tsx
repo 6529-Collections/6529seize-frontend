@@ -87,7 +87,9 @@ export default function TwoQuestions({ ctx }: { readonly ctx: SureContext }) {
     },
     {
       what: s("explained.tdh.sure.day.inputs"),
-      detail: m("explained.tdh.sure.day.inputsDetail"),
+      detail: m("explained.tdh.sure.day.inputsDetail", {
+        date: p.v("proofs.day.date"),
+      }),
       marks: [{ kind: "notYet" }],
     },
     {

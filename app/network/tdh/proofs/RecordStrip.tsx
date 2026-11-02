@@ -82,7 +82,10 @@ export default function RecordStrip({
       when: rich(locale, k("record.next.when")),
       mark: <Mark kind="notYet" locale={locale} size="sm" />,
       title: rich(locale, k("record.next.title")),
-      body: rich(locale, k("record.next.body")),
+      body: rich(locale, k("record.next.body"), {
+        low: facts.print("proofs.dayB.gpuHoursLow"),
+        high: facts.print("proofs.dayB.gpuHoursHigh"),
+      }),
       next: true,
     },
   ];

@@ -117,6 +117,16 @@ export const PROOF_FACTS = {
   "proofs.day.costUsd": count("runbook", proofs.day.costUsd),
   "proofs.day.provedOn": fact("contracts", "day", proofs.day.provedOn),
 
+  // Program A's key for the day of Oct 11, under the retired rule (P53 §4.6).
+  "proofs.day.vkeyA": fact("programA", "hash", proofs.day.vkeyA),
+  /** Words program B's output shares with proof A's: all but the anchor's. */
+  "proofs.dayB.wordsEqual": fact(
+    "programB",
+    "count",
+    proofs.day.wordsA.filter((word, index) => word === proofs.day.wordsB[index])
+      .length,
+    { evidence: "tested" }
+  ),
   "proofs.dayB.total": fact("programB", "count", proofs.dayB.total, {
     unit: "TDH",
     evidence: "tested",
@@ -198,6 +208,27 @@ export const PROOF_FACTS = {
   "proofs.b.zkvm": fact("contracts", "text", proofs.programs.b.zkvm),
   "proofs.b.wrapper": fact("contracts", "text", proofs.programs.b.wrapper),
   "proofs.b.imageId": fact("contracts", "hash", proofs.programs.b.imageId),
+
+  "proofs.verifiers.sp1Gateway": fact(
+    "contracts",
+    "hash",
+    proofs.verifiers.sp1Gateway
+  ),
+  "proofs.verifiers.sp1Selector": fact(
+    "contracts",
+    "text",
+    proofs.verifiers.sp1Selector
+  ),
+  "proofs.verifiers.risc0Router": fact(
+    "contracts",
+    "hash",
+    proofs.verifiers.risc0Router
+  ),
+  "proofs.verifiers.risc0Selector": fact(
+    "contracts",
+    "text",
+    proofs.verifiers.risc0Selector
+  ),
 
   "proofs.contract.checks": count("contracts", proofs.contract.checks),
   "proofs.contract.unitTests": fact(

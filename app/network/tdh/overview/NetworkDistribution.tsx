@@ -34,23 +34,23 @@ interface Tone {
 // nothing else (EXPLAINED.md §4.2).
 const TONES: Record<RankGroup["key"], Tone> = {
   top: {
-    fill: "rgba(232, 233, 237, 0.96)",
-    band: "rgba(232, 233, 237, 0.55)",
+    fill: "rgb(236, 237, 241)",
+    band: "rgba(236, 237, 241, 0.5)",
     ink: "tw-text-[#0D0D0F]",
   },
   next: {
-    fill: "rgba(206, 207, 212, 0.7)",
-    band: "rgba(206, 207, 212, 0.36)",
+    fill: "rgb(168, 170, 180)",
+    band: "rgba(168, 170, 180, 0.42)",
     ink: "tw-text-[#0D0D0F]",
   },
   next2: {
-    fill: "rgba(170, 171, 178, 0.48)",
-    band: "rgba(170, 171, 178, 0.22)",
+    fill: "rgb(104, 106, 118)",
+    band: "rgba(104, 106, 118, 0.42)",
     ink: "tw-text-iron-50",
   },
   rest: {
-    fill: "rgba(140, 141, 150, 0.26)",
-    band: "rgba(140, 141, 150, 0.12)",
+    fill: "rgb(58, 59, 67)",
+    band: "rgba(58, 59, 67, 0.55)",
     ink: "tw-text-iron-50",
   },
 };
@@ -206,7 +206,9 @@ function Callouts({
   readonly pick: (share: Share) => number;
   readonly locale: SupportedLocale;
 }) {
-  const thin = items.filter((share) => pick(share) < LABEL_MIN_SHARE);
+  // Too thin for its label on a phone: named here, on a phone only when
+  // the bar carries it from a tablet up.
+  const thin = items.filter((share) => pick(share) < LABEL_MIN_SHARE_PHONE);
   if (thin.length === 0) return null;
   return (
     <span
@@ -215,7 +217,10 @@ function Callouts({
       data-network-callouts=""
     >
       {thin.map((share) => (
-        <span key={share.group.key} className="tw-inline-flex tw-items-center">
+        <span
+          key={share.group.key}
+          className={`tw-inline-flex tw-items-center ${pick(share) < LABEL_MIN_SHARE ? "" : "md:tw-hidden"}`}
+        >
           <span
             className="tw-mr-1.5 tw-inline-block tw-size-2.5 tw-rounded-sm"
             style={{ background: TONES[share.group.key].fill }}
@@ -331,17 +336,26 @@ export default function NetworkDistribution({
           <span className={rowLabel} aria-hidden="true">
             {ot(locale, "network.tdhRow")}
           </span>
+          {/* The thin groups' shares of TDH, named above the bar so the
+              ribbons below it stay joined to it. */}
+          <div className="tw-mb-1.5 [&>span]:tw-mt-0">
+            <Callouts
+              items={items}
+              pick={(share) => share.tdh}
+              locale={locale}
+            />
+          </div>
           <Bar items={items} pick={(share) => share.tdh} locale={locale} />
           <Bands items={items} />
           <Bar items={items} pick={(share) => share.people} locale={locale} />
+          <span className={`${rowLabel} tw-mb-0 tw-mt-1.5`} aria-hidden="true">
+            {ot(locale, "network.peopleRow")}
+          </span>
           <Callouts
             items={items}
             pick={(share) => share.people}
             locale={locale}
           />
-          <span className={`${rowLabel} tw-mb-0 tw-mt-1.5`} aria-hidden="true">
-            {ot(locale, "network.peopleRow")}
-          </span>
         </div>
         <ShareTable items={items} locale={locale} />
       </div>

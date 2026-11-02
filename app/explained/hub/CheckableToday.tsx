@@ -123,6 +123,7 @@ export default function CheckableToday({
           {hrich(locale, "check.theoremsBody", {
             p53: fact("manifest.proved.p53"),
             shownFalse: fact("manifest.shownFalse.tdh"),
+            never: fact("manifest.shownFalse.never"),
           })}
         </Item>
         <Item

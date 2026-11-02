@@ -37,7 +37,9 @@ export default function BuildSection({ ctx }: { readonly ctx: SureContext }) {
         version: p.v("manifest.lean"),
         jobs: p.v("manifest.build.jobs"),
       }),
-      mark: "proved",
+      // A build report no reader can rerun while the source is private:
+      // tested, as the audit beside it, never the green Proved.
+      mark: "tested",
       refText: s("explained.tdh.sure.build.kernelRef"),
     },
     {

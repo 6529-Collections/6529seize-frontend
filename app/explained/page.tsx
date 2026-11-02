@@ -64,7 +64,7 @@ export default async function ExplainedHubPage({
         <HubLoop book={book} locale={locale} />
         <HubPaths locale={locale} />
         <HubChapters book={book} locale={locale} />
-        <Cc0Answer locale={locale} />
+        <Cc0Answer book={book} locale={locale} />
         <ReadingGuide locale={locale} />
         <HubSources book={book} locale={locale} />
       </article>

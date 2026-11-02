@@ -4,6 +4,7 @@ import type { PageIndexRow } from "@/components/explained/shell/PageIndex";
 import { EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import ChapterPages from "./ChapterPages";
+import SectionLabel from "./SectionLabel";
 import { orich, ot, type OverviewKey } from "./copy";
 
 /**
@@ -64,28 +65,25 @@ export default function InThisChapter({
   return (
     <section
       id="tdh-deeper"
-      className={EX_LAYOUT.sectionTight}
+      className={EX_LAYOUT.section}
       aria-labelledby="tdh-deeper-title"
     >
-      <div className={EX_LAYOUT.ed}>
-        <div className="lg:tw-pt-2.5">
-          <span className="tw-mb-1.5 tw-block tw-text-sm tw-font-semibold tw-text-primary-300">
-            05
-          </span>
-          <span className={EX_TEXT.label} id="tdh-deeper-title">
-            {ot(locale, "index.label")}
-          </span>
+      {/* The same statement row as §01 to §04: number, label, heading. */}
+      <div className={EX_LAYOUT.stmt}>
+        <div>
+          <SectionLabel no="05" label={ot(locale, "index.label")} />
+          <h2 className={EX_TEXT.stmt} id="tdh-deeper-title">
+            {ot(locale, "index.title")}
+          </h2>
         </div>
-        <div className={EX_LAYOUT.edWide}>
-          <p className="tw-m-0 tw-text-[15px] tw-leading-6 tw-text-iron-300 lg:tw-pt-2.5">
-            {orich(locale, "index.start", {
-              hold: <span>{n("how")}</span>,
-              check: <span>{n("check")}</span>,
-            })}
-          </p>
-        </div>
+        <p className={`${EX_TEXT.body} tw-m-0 lg:tw-pt-1.5`}>
+          {orich(locale, "index.start", {
+            hold: <span>{n("how")}</span>,
+            check: <span>{n("check")}</span>,
+          })}
+        </p>
       </div>
-      <div className="tw-mt-6" id="tdh-explore">
+      <div className="tw-mt-8 md:tw-mt-10" id="tdh-explore">
         <ChapterPages rows={rows} locale={locale} />
       </div>
     </section>

@@ -48,14 +48,14 @@ export default function CardPicker({
             aria-label={card.name}
             data-card={card.id}
             onClick={() => onChange(card.id)}
-            className={`tw-relative tw-h-11 tw-min-w-[31px] tw-cursor-pointer tw-overflow-hidden tw-rounded tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-0 tw-text-xs tw-font-semibold tw-text-iron-400 ${thumb ? "tw-w-[31px]" : "tw-px-1"} ${on ? "tw-outline tw-outline-2 tw-outline-offset-1 tw-outline-primary-400" : ""} ${EX_FOCUS}`}
+            className={`tw-relative tw-h-11 tw-min-w-[31px] tw-cursor-pointer tw-overflow-hidden tw-rounded tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-0 tw-text-xs tw-font-semibold tw-text-iron-400 ${thumb ? "tw-w-11 md:tw-w-[31px]" : "tw-min-w-11 tw-px-1 md:tw-min-w-[31px]"} ${on ? "tw-outline tw-outline-2 tw-outline-offset-1 tw-outline-primary-400" : ""} ${EX_FOCUS}`}
           >
             {thumb ? (
               <Image
                 src={thumb}
                 alt=""
                 fill
-                sizes="31px"
+                sizes="44px"
                 className="tw-object-cover"
                 onError={() =>
                   setFailed((current) => new Set([...current, card.id]))

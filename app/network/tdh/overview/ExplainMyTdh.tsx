@@ -184,16 +184,64 @@ function FoundExample({ locale }: { readonly locale: SupportedLocale }) {
   );
 }
 
-function NoneExample({ locale }: { readonly locale: SupportedLocale }) {
+function NoneExample({
+  locale,
+  address = false,
+}: {
+  readonly locale: SupportedLocale;
+  /** An address 6529.io has no record for, rather than a name it cannot find. */
+  readonly address?: boolean;
+}) {
   return (
     <div data-ans="none">
       <p className="tw-m-0 tw-text-[21px] tw-font-semibold tw-leading-7 tw-text-iron-50">
-        {ot(locale, "explain.noneTitle")}
+        {ot(locale, address ? "explain.noneAddressTitle" : "explain.noneTitle")}
       </p>
       <p className="tw-m-0 tw-mt-2 tw-text-[15px] tw-leading-6 tw-text-iron-300">
-        {ot(locale, "explain.noneBody")}
+        {ot(locale, address ? "explain.noneAddressBody" : "explain.noneBody")}
       </p>
     </div>
+  );
+}
+
+const ADDRESS = /^0x[\da-f]{40}$/i;
+
+/** "0x1f2e…9c0d": a wallet, short, as a reader checks it against their own. */
+function shortWallet(wallet: string): string {
+  return `${wallet.slice(0, 6)}…${wallet.slice(-4)}`;
+}
+
+/**
+ * Which wallets the record counts as one identity: after a move, or with a
+ * fourth wallet linked late, the reader sees whether each still counts.
+ */
+function Wallets({
+  wallets,
+  locale,
+}: {
+  readonly wallets: readonly string[];
+  readonly locale: SupportedLocale;
+}) {
+  if (wallets.length === 0) return null;
+  return (
+    <p
+      className="tw-m-0 tw-mt-2 tw-text-[15px] tw-leading-6 tw-text-iron-300"
+      data-explain-wallets=""
+    >
+      {wallets.length === 1
+        ? ot(locale, "explain.walletOne")
+        : ot(locale, "explain.wallets", {
+            count: formatCount(locale, wallets.length),
+          })}{" "}
+      {wallets.map((wallet, index) => (
+        <span key={wallet}>
+          {index > 0 && ", "}
+          <code className="tw-whitespace-nowrap tw-font-mono tw-text-[13px] tw-text-iron-50">
+            {shortWallet(wallet)}
+          </code>
+        </span>
+      ))}
+    </p>
   );
 }
 
@@ -220,6 +268,7 @@ function RealRecord({
       <h3 className="tw-m-0 tw-break-words tw-text-[21px] tw-font-semibold tw-leading-7 tw-text-iron-50">
         {ot(locale, "explain.result", { identity })}
       </h3>
+      <Wallets wallets={profile.wallets} locale={locale} />
       {summary.rows.length > 0 ? (
         <div className="tw-mt-4">
           <RecordTable rows={summary.rows} locale={locale} />
@@ -291,7 +340,7 @@ function LookupResult({
     const status = getStructuredApiErrorStatus(query.error);
     body =
       status === 404 ? (
-        <NoneExample locale={locale} />
+        <NoneExample locale={locale} address={ADDRESS.test(identity)} />
       ) : (
         <div>
           <p className="tw-m-0 tw-text-[15px] tw-leading-6 tw-text-iron-300">
@@ -432,21 +481,30 @@ export default function ExplainMyTdh({
         locale={locale}
         showsExample={showsExample}
       />
+      {/* The examples' switch shows only with an example under it: after a
+          real lookup it gives way to one way back. */}
       <div className="tw-mt-4">
-        <Seg
-          label={ot(locale, "explain.examplesGroup")}
-          attr="pick"
-          value={showsExample ? pick : null}
-          onChange={(value) => {
-            setPick(value);
-            setIdentity("");
-          }}
-          options={[
-            { value: "found", label: ot(locale, "explain.pickFound") },
-            { value: "new", label: ot(locale, "explain.pickNew") },
-            { value: "none", label: ot(locale, "explain.pickNone") },
-          ]}
-        />
+        {showsExample ? (
+          <Seg
+            label={ot(locale, "explain.examplesGroup")}
+            attr="pick"
+            value={pick}
+            onChange={setPick}
+            options={[
+              { value: "found", label: ot(locale, "explain.pickFound") },
+              { value: "new", label: ot(locale, "explain.pickNew") },
+              { value: "none", label: ot(locale, "explain.pickNone") },
+            ]}
+          />
+        ) : (
+          <button
+            type="button"
+            className={`tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-semibold tw-text-primary-300 ${EX_FOCUS}`}
+            onClick={() => setIdentity("")}
+          >
+            {ot(locale, "explain.backToExamples")}
+          </button>
+        )}
       </div>
       <div className="tw-mt-6">
         {!showsExample && <LookupResult identity={identity} locale={locale} />}

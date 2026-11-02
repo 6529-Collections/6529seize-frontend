@@ -26,6 +26,14 @@ export interface LiveSource {
   readonly lead?: string;
 }
 
+/**
+ * Headings and short titles balance their lines; running text avoids a
+ * word alone on its last line (EXPLAINED.md §5.2). Only the wrap style is
+ * set, so an element that must not wrap keeps its nowrap.
+ */
+const TEXT_WRAP =
+  "[&_:is(h1,h2,h3,h4,h5,h6,figcaption,caption,dt,th,b,strong,summary)]:[text-wrap-style:balance] [&_:is(p,li,dd,td,blockquote)]:[text-wrap-style:pretty]";
+
 export default function ExplainedShell({
   chapter,
   page,
@@ -55,7 +63,7 @@ export default function ExplainedShell({
   return (
     <FactsProvider snapshot={facts}>
       <div
-        className={`tailwind-scope tw-min-h-[100dvh] tw-w-full tw-bg-[#0D0D0F] tw-text-base tw-leading-[26px] tw-text-iron-300 tw-antialiased [font-variant-numeric:tabular-nums] md:tw-text-[18px] md:tw-leading-[29px]`}
+        className={`tailwind-scope tw-min-h-[100dvh] tw-w-full tw-bg-[#0D0D0F] tw-text-base tw-leading-[26px] tw-text-iron-300 tw-antialiased [font-variant-numeric:tabular-nums] md:tw-text-[18px] md:tw-leading-[29px] ${TEXT_WRAP}`}
         data-explained-shell={chapter}
         data-explained-page={page}
         // On a phone the shell's crumbs bar and chapter bar (EXPLAINED.md
