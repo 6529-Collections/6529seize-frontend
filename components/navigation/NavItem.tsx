@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import type { MouseEvent, PointerEvent } from "react";
 import { useEffect, useRef, useState } from "react";
-import { useTitle } from "@/contexts/TitleContext";
+import { useTitleActions } from "@/contexts/TitleContext";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { useAuth } from "../auth/Auth";
@@ -209,7 +209,7 @@ const NavItemContent = ({
     handle: connectedProfile?.handle,
     normalisedHandle: connectedProfile?.normalised_handle,
   });
-  const { setTitle } = useTitle();
+  const { setTitle } = useTitleActions();
   const { notifications, haveUnreadNotifications } = useUnreadNotifications(
     item.name === "Notifications" && hasValidWalletAuth
       ? (connectedProfile?.handle ?? null)

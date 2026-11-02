@@ -3,7 +3,7 @@ import NavItem from "@/components/navigation/NavItem";
 import { useViewContext } from "@/components/navigation/ViewContext";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { useTitle } from "@/contexts/TitleContext";
+import { useTitleActions } from "@/contexts/TitleContext";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
@@ -93,7 +93,7 @@ jest.mock("@/components/auth/Auth", () => ({ useAuth: jest.fn() }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
-jest.mock("@/contexts/TitleContext", () => ({ useTitle: jest.fn() }));
+jest.mock("@/contexts/TitleContext", () => ({ useTitleActions: jest.fn() }));
 jest.mock("@/hooks/useUnreadNotifications", () => ({
   useUnreadNotifications: jest.fn(),
 }));
@@ -156,10 +156,8 @@ describe("NavItem notifications", () => {
       notifications: { unread_count: 0 },
       haveUnreadNotifications: false,
     });
-    (useTitle as jest.Mock).mockReturnValue({
+    (useTitleActions as jest.Mock).mockReturnValue({
       setTitle,
-      title: "6529.io",
-      notificationCount: 0,
       setNotificationCount: jest.fn(),
       setWaveData: jest.fn(),
     });

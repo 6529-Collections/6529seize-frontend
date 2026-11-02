@@ -43,6 +43,18 @@ type WaveTitleData = {
 
 const TitleContext = createContext<TitleContextType | undefined>(undefined);
 
+type TitleActionsContextType = Pick<
+  TitleContextType,
+  "setTitle" | "setNotificationCount" | "setWaveData"
+>;
+
+// Pages and nav items only set the title. Keeping the setters in their own
+// context stops them re-rendering whenever the title text changes, which
+// happens on every new message in the open wave.
+const TitleActionsContext = createContext<TitleActionsContextType | undefined>(
+  undefined
+);
+
 export const DEFAULT_TITLE = publicEnv.BASE_ENDPOINT?.includes("staging")
   ? "6529 Staging"
   : "6529.io";
@@ -271,10 +283,21 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
     updateTitle,
   ]);
 
+  const actionsValue = useMemo<TitleActionsContextType>(
+    () => ({
+      setTitle: updateTitle,
+      setNotificationCount,
+      setWaveData,
+    }),
+    [updateTitle]
+  );
+
   return (
-    <TitleContext.Provider value={contextValue}>
-      {children}
-    </TitleContext.Provider>
+    <TitleActionsContext.Provider value={actionsValue}>
+      <TitleContext.Provider value={contextValue}>
+        {children}
+      </TitleContext.Provider>
+    </TitleActionsContext.Provider>
   );
 };
 
@@ -286,9 +309,18 @@ export const useTitle = () => {
   return context;
 };
 
+/** Title setters without subscribing to title text changes. */
+export const useTitleActions = () => {
+  const context = useContext(TitleActionsContext);
+  if (!context) {
+    throw new Error("useTitleActions must be used within a TitleProvider");
+  }
+  return context;
+};
+
 // Hook to set page title - use this in page components
 export const useSetTitle = (pageTitle: string) => {
-  const { setTitle } = useTitle();
+  const { setTitle } = useTitleActions();
   const pathname = usePathname();
 
   // Set title immediately on mount and when title changes
@@ -299,7 +331,7 @@ export const useSetTitle = (pageTitle: string) => {
 
 // Hook to set wave data for title
 export const useSetWaveData = (data: WaveTitleData | null) => {
-  const { setWaveData } = useTitle();
+  const { setWaveData } = useTitleActions();
 
   useEffect(() => {
     setWaveData(data);

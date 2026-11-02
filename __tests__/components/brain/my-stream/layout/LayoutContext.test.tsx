@@ -71,7 +71,7 @@ function TestComponent() {
     <>
       <div ref={ref} />
       <div data-testid="content" style={waveViewStyle}>
-        {spaces.contentSpace}
+        {spaces.headerSpace}
       </div>
     </>
   );
@@ -178,8 +178,54 @@ describe("LayoutProvider", () => {
       </LayoutProvider>
     );
     const content = screen.getByTestId("content");
-    expect(content.textContent).toBe("900");
+    expect(content.textContent).toBe("100");
     expect(content.style.height).toContain("100px");
+  });
+
+  it("does not re-render consumers when a window resize leaves measurements unchanged", () => {
+    let renders = 0;
+    function RenderCounter() {
+      useLayout();
+      renders += 1;
+      return null;
+    }
+    render(
+      <LayoutProvider>
+        <TestComponent />
+        <RenderCounter />
+      </LayoutProvider>
+    );
+    const rendersAfterMeasurement = renders;
+
+    // A mobile URL bar collapsing during scroll changes only innerHeight.
+    act(() => {
+      Object.defineProperty(globalThis, "innerHeight", {
+        value: 700,
+        configurable: true,
+      });
+      window.dispatchEvent(new Event("resize"));
+      window.dispatchEvent(new Event("resize"));
+    });
+
+    expect(renders).toBe(rendersAfterMeasurement);
+    expect(screen.getByTestId("content").textContent).toBe("100");
+  });
+
+  it("re-measures after a window resize changes a registered element", () => {
+    render(
+      <LayoutProvider>
+        <TestComponent />
+      </LayoutProvider>
+    );
+    const header = screen.getByTestId("content").previousElementSibling;
+    expect(header).not.toBeNull();
+
+    act(() => {
+      (header as any).getBoundingClientRect = () => ({ height: 64 });
+      window.dispatchEvent(new Event("resize"));
+    });
+
+    expect(screen.getByTestId("content").textContent).toBe("64");
   });
 
   it("does not apply fallback capSpace on Android when keyboard is closed", () => {

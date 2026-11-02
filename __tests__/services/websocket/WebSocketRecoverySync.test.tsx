@@ -110,3 +110,50 @@ it("does not refetch while the native app is inactive and cancels work on unmoun
   expect(mockInvalidate).not.toHaveBeenCalled();
   expect(mockUnsubscribe).toHaveBeenCalled();
 });
+it("does not refetch on window focus or a brief tab switch", () => {
+  render(<WebSocketRecoverySync />);
+  act(() => {
+    window.dispatchEvent(new Event("focus"));
+    jest.advanceTimersByTime(10_000);
+  });
+  Object.defineProperty(document, "visibilityState", {
+    configurable: true,
+    value: "hidden",
+  });
+  act(() => {
+    document.dispatchEvent(new Event("visibilitychange"));
+    jest.advanceTimersByTime(29_000);
+  });
+  Object.defineProperty(document, "visibilityState", {
+    configurable: true,
+    value: "visible",
+  });
+  act(() => {
+    document.dispatchEvent(new Event("visibilitychange"));
+    window.dispatchEvent(new Event("focus"));
+    jest.advanceTimersByTime(10_000);
+  });
+  expect(mockInvalidate).not.toHaveBeenCalled();
+});
+it("refetches when a tab returns after being hidden long enough to miss updates", () => {
+  render(<WebSocketRecoverySync />);
+  Object.defineProperty(document, "visibilityState", {
+    configurable: true,
+    value: "hidden",
+  });
+  act(() => {
+    document.dispatchEvent(new Event("visibilitychange"));
+    jest.advanceTimersByTime(30_000);
+  });
+  Object.defineProperty(document, "visibilityState", {
+    configurable: true,
+    value: "visible",
+  });
+  act(() => {
+    document.dispatchEvent(new Event("visibilitychange"));
+    window.dispatchEvent(new Event("focus"));
+    jest.advanceTimersByTime(1000);
+  });
+  expect(mockInvalidate).toHaveBeenCalledTimes(1);
+  expect(mockInvalidate).toHaveBeenCalledWith({ refetchType: "active" });
+});

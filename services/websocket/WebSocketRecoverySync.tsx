@@ -11,6 +11,12 @@ import {
   WEBSOCKET_RECONNECT_RESYNC_STAGGER_MAX_MS,
 } from "./WebSocketTypes";
 
+// The socket stays connected through a brief tab switch, so returning from
+// one has nothing to repair. A longer absence may have frozen the page while
+// the server kept sending; resync then even if the socket never dropped.
+// Reconnects, resync markers and native app resumes always resync.
+const RESUME_RESYNC_MIN_HIDDEN_MS = 30_000;
+
 /** Missed live updates are repaired from current authorized HTTP state. */
 export function WebSocketRecoverySync() {
   const client = useQueryClient();
@@ -19,6 +25,7 @@ export function WebSocketRecoverySync() {
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const pending = useRef(false);
   const lastRefreshAt = useRef(0);
+  const hiddenAt = useRef<number | undefined>(undefined);
   const previous = useRef({
     status,
     active,
@@ -73,15 +80,31 @@ export function WebSocketRecoverySync() {
   }, [active, refresh, status]);
 
   useEffect(() => {
-    const resume = () => {
-      if (document.visibilityState === "visible") refresh();
+    if (document.visibilityState !== "visible") {
+      hiddenAt.current ??= Date.now();
+    }
+    const onVisibilityChange = () => {
+      if (document.visibilityState !== "visible") {
+        hiddenAt.current ??= Date.now();
+        return;
+      }
+      const hiddenFor =
+        hiddenAt.current === undefined ? 0 : Date.now() - hiddenAt.current;
+      hiddenAt.current = undefined;
+      if (pending.current || hiddenFor >= RESUME_RESYNC_MIN_HIDDEN_MS) {
+        refresh();
+      }
     };
-    window.addEventListener("focus", resume);
-    document.addEventListener("visibilitychange", resume);
+    // Focus alone (switching windows, closing devtools) loses no updates.
+    const onFocus = () => {
+      if (document.visibilityState === "visible" && pending.current) refresh();
+    };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibilityChange);
     if (pending.current) refresh();
     return () => {
-      window.removeEventListener("focus", resume);
-      document.removeEventListener("visibilitychange", resume);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [refresh]);
 
