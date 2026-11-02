@@ -275,8 +275,11 @@ describe("How TDH is calculated", () => {
     expect(records?.textContent).toMatch(
       /card and Gradient: [\d,]+ \+ [\d,]+ = [\d,]+/
     );
+    // The card's final, the Gradient's, their sum, and the binary64 tie of
+    // §8.4 that a re-implementer meets at this step.
     const final = document.querySelector('[data-trace="final"]');
-    expect(final?.textContent?.split("\n")).toHaveLength(3);
+    expect(final?.textContent?.split("\n")).toHaveLength(4);
+    expect(final).toHaveTextContent("FINAL(25, 114) = 28, not 29");
   });
 
   it("prints the network from the latest day, every number a fact", async () => {

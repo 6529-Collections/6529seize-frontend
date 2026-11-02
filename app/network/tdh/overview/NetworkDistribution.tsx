@@ -195,7 +195,7 @@ function Bands({ items }: { readonly items: readonly Share[] }) {
 
 /**
  * The groups too thin to carry their share inside the bar, named under it
- * at the left edge where they sit, so no slice of the drawing is unlabelled.
+ * at the end where they sit, so no slice of the drawing is unlabelled.
  */
 function Callouts({
   items,
@@ -207,27 +207,42 @@ function Callouts({
   readonly locale: SupportedLocale;
 }) {
   // Too thin for its label on a phone: named here, on a phone only when
-  // the bar carries it from a tablet up.
-  const thin = items.filter((share) => pick(share) < LABEL_MIN_SHARE_PHONE);
+  // the bar carries it from a tablet up. Each name sits under its own end
+  // of the bar: a slice past the middle is named at the right edge, so the
+  // name is never read against the wrong slice.
+  let from = 0;
+  const placed = items.map((share) => {
+    const value = pick(share);
+    const centre = from + value / 2;
+    from += value;
+    return { share, value, right: centre > 0.5 };
+  });
+  const thin = placed.filter((item) => item.value < LABEL_MIN_SHARE_PHONE);
   if (thin.length === 0) return null;
+  const callout = (item: (typeof placed)[number]) => (
+    <span
+      key={item.share.group.key}
+      className={`tw-inline-flex tw-items-center ${item.value < LABEL_MIN_SHARE ? "" : "md:tw-hidden"}`}
+    >
+      <span
+        className="tw-mr-1.5 tw-inline-block tw-size-2.5 tw-rounded-sm"
+        style={{ background: TONES[item.share.group.key].fill }}
+      />
+      {`${groupName(locale, item.share.group)} ${percent(locale, item.value)}`}
+    </span>
+  );
   return (
     <span
-      className="tw-mt-1.5 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-4 tw-gap-y-1 tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-300"
+      className="tw-mt-1.5 tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-4 tw-gap-y-1 tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-300"
       aria-hidden="true"
       data-network-callouts=""
     >
-      {thin.map((share) => (
-        <span
-          key={share.group.key}
-          className={`tw-inline-flex tw-items-center ${pick(share) < LABEL_MIN_SHARE ? "" : "md:tw-hidden"}`}
-        >
-          <span
-            className="tw-mr-1.5 tw-inline-block tw-size-2.5 tw-rounded-sm"
-            style={{ background: TONES[share.group.key].fill }}
-          />
-          {`${groupName(locale, share.group)} ${percent(locale, pick(share))}`}
-        </span>
-      ))}
+      <span className="tw-flex tw-flex-wrap tw-gap-x-4 tw-gap-y-1">
+        {thin.filter((item) => !item.right).map(callout)}
+      </span>
+      <span className="tw-ml-auto tw-flex tw-flex-wrap tw-justify-end tw-gap-x-4 tw-gap-y-1 tw-text-right">
+        {thin.filter((item) => item.right).map(callout)}
+      </span>
     </span>
   );
 }

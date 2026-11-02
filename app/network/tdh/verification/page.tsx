@@ -304,7 +304,6 @@ export default async function TdhDailyCheckPage({
             day={day}
             simulated={simulated}
             locale={locale}
-            phoneLede={pt(locale, "explained.tdh.check.lede")}
           />
         )}
         <HowTheCheckRuns book={book} day={day} locale={locale} />

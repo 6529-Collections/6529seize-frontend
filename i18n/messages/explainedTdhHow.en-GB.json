@@ -330,5 +330,6 @@
   "explained.tdh.how.hwk.decisionsBody": "D89 (the {threshold} threshold), D131 (netting), D132 (the cutover), D136 (four wallets).",
   "explained.tdh.how.hwk.totals": "Totals",
   "explained.tdh.how.hwk.totalsBody": "The daily comparison, written {written}.",
-  "explained.tdh.how.boost.sayGradOnly": "Each Gradient adds {gradient}: with {count}, beta is {cents} cents, a boost of {boost}."
+  "explained.tdh.how.boost.sayGradOnly": "Each Gradient adds {gradient}: with {count}, beta is {cents} cents, a boost of {boost}.",
+  "explained.tdh.how.trace.finalTie": "The tie to watch: {call} = {final}, not {decimal}; the binary64 boost lies just below the half (§8.4)."
 }

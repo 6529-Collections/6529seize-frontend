@@ -180,7 +180,7 @@
   "explained.tdh.proofs.check.outputs.title": "Deux sorties, un énoncé",
   "explained.tdh.proofs.check.outputs.body": "La sortie du programme B égale celle du programme A sur chaque mot sauf l'ancre.",
   "explained.tdh.proofs.check.network.title": "Réseau, règle et horizon",
-  "explained.tdh.proofs.check.network.body": "Ce réseau, l'unique règle qu'il accepte, et un cycle avant le {horizon}, l'horizon de fork des programmes : une mise à jour d'Ethereum après cette date pourrait changer ce qu'ils lisent. Un déploiement refuse définitivement tout cycle ultérieur. Les cycles ultérieurs exigent des programmes reconstruits et un nouveau déploiement, que l'ancien inscrit ensuite comme son successeur.",
+  "explained.tdh.proofs.check.network.body": "Ce réseau, l'unique règle qu'il accepte, et un cycle avant le {horizon}, l'horizon de fork des programmes : une mise à jour d'Ethereum après cette date pourrait changer ce qu'ils lisent. Un déploiement refuse définitivement les cycles ultérieurs ; ils exigent des programmes reconstruits et un déploiement successeur.",
   "explained.tdh.proofs.check.chaining.title": "Chaînage",
   "explained.tdh.proofs.check.chaining.body": "Le cycle qui suit le dernier enregistré, en partant de là où il s'est terminé.",
   "explained.tdh.proofs.check.time.title": "Temps",
@@ -311,5 +311,18 @@
   "explained.tdh.proofs.words.showLit": "N'afficher que le groupe",
   "explained.tdh.proofs.raw.summary": "Les {bytes} octets, tels que le vérificateur les lit",
   "explained.tdh.proofs.raw.cap": "Les valeurs publiques de la preuve A pour le {date} : un mot par ligne, dans l'ordre de l'énoncé.",
-  "explained.tdh.proofs.raw.copy": "Copier les octets"
+  "explained.tdh.proofs.raw.copy": "Copier les octets",
+  "explained.tdh.proofs.figure.aria": "Une demi-paire : le programme A, dans SP1, a prouvé une vraie journée, sous des règles retirées ; le programme B, dans RISC Zero, seulement des cycles de test. Le contrat n'enregistrerait une journée qu'avec les deux preuves, et n'a rien enregistré.",
+  "explained.tdh.proofs.figure.a": "Programme A, dans SP1",
+  "explained.tdh.proofs.figure.aSub": "une vraie journée, règles retirées",
+  "explained.tdh.proofs.figure.b": "Programme B, dans RISC Zero",
+  "explained.tdh.proofs.figure.bSub": "cycles de test seulement",
+  "explained.tdh.proofs.figure.contract": "Le contrat",
+  "explained.tdh.proofs.figure.contractSub": "construit, non déployé",
+  "explained.tdh.proofs.figure.none1": "Encore rien",
+  "explained.tdh.proofs.figure.none2": "d'enregistré",
+  "explained.tdh.proofs.s3.more": "Comparer les deux programmes",
+  "explained.tdh.proofs.s3.less": "Masquer la comparaison",
+  "explained.tdh.proofs.s5.more": "Ce que c'est aujourd'hui, et pas encore",
+  "explained.tdh.proofs.s5.less": "Masquer le bilan"
 }

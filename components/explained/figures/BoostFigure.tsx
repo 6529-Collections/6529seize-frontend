@@ -45,7 +45,7 @@ export default function BoostFigure({
   const wide = width > 520;
   // The track: a band tall enough to read as the boost's area, not a rule.
   const trackY = 34;
-  const trackH = 44;
+  const trackH = 64;
   const trackBottom = trackY + trackH;
   // The ceiling's label sits between the two lines: its long form needs
   // about 170 px there, its short form about 95 (a figure beside a rule
@@ -95,10 +95,10 @@ export default function BoostFigure({
           text: `${part.label} +${formatNumberParts(locale, part.value)}`,
           swatch: index % 2 ? "rgba(82,139,255,0.55)" : `url(#${hatchId})`,
         }));
-  if (!wide) {
-    keyRows.push({ text: ceilingText, swatch: "dashed" });
-  }
-  const keyTop = trackBottom + 44;
+  // On a narrow figure the ceiling is named under its own tick, on a row
+  // below the value, instead of in the key.
+  const ceilingRow = trackBottom + 42;
+  const keyTop = trackBottom + (wide ? 44 : 66);
   const rowH = 20;
   const height = keyTop + keyRows.length * rowH;
 
@@ -154,7 +154,7 @@ export default function BoostFigure({
               x1={xAt(marker.value)}
               y1={26}
               x2={xAt(marker.value)}
-              y2={trackBottom + 8}
+              y2={!wide && !marker.solid ? ceilingRow - 14 : trackBottom + 8}
               stroke={marker.solid ? EX_HEX.ink2 : EX_HEX.ink4}
               strokeDasharray={marker.solid ? undefined : "3 3"}
               strokeWidth={1.5}
@@ -165,6 +165,16 @@ export default function BoostFigure({
                 y={18}
                 anchor="end"
                 tone={marker.solid ? "ink2" : "ink3"}
+              >
+                {marker.text}
+              </Label>
+            )}
+            {!wide && !marker.solid && (
+              <Label
+                x={Math.min(width - 4, xAt(marker.value) + 4)}
+                y={ceilingRow}
+                anchor="end"
+                tone="ink3"
               >
                 {marker.text}
               </Label>

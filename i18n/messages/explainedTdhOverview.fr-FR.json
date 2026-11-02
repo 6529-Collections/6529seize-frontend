@@ -11,8 +11,8 @@
   "explained.tdh.overview.cta.explain": "Expliquer mon TDH",
   "explained.tdh.overview.cta.how": "Comment il est calculé",
   "explained.tdh.overview.live.total": "{total} TDH",
-  "explained.tdh.overview.live.line": "{identities} identités : deux programmes écrits séparément concordent avec 6529.io pour toutes.",
-  "explained.tdh.overview.live.lineDiffers": "{identities} identités : deux programmes écrits séparément concordent avec 6529.io pour {equal} d'entre elles.",
+  "explained.tdh.overview.live.line": "{identities} identités : deux programmes écrits séparément, tous deux exécutés par 6529, concordent avec 6529.io pour toutes.",
+  "explained.tdh.overview.live.lineDiffers": "{identities} identités : deux programmes écrits séparément, tous deux exécutés par 6529, concordent avec 6529.io pour {equal} d'entre elles.",
   "explained.tdh.overview.live.equation": "Cœur Rust = référence Python = 6529.io",
   "explained.tdh.overview.live.link": "Vérification quotidienne",
   "explained.tdh.overview.machine.label": "Une copie, comme une aire",
@@ -215,5 +215,6 @@
   "explained.tdh.overview.hwk.figures": "Les figures",
   "explained.tdh.overview.hwk.figuresBody": "Calculées dans votre navigateur par le moteur TDH v1.4, qui passe les {vectors} vecteurs de P26.",
   "explained.tdh.overview.hwk.proofs": "Les preuves",
-  "explained.tdh.overview.hwk.proofsBody": "La preuve A du cycle {cycle}, acceptée par le vérificateur SP1 du mainnet dans un appel en lecture seule au bloc {block}, d'après le registre des contrats du validateur."
+  "explained.tdh.overview.hwk.proofsBody": "La preuve A du cycle {cycle}, acceptée par le vérificateur SP1 du mainnet dans un appel en lecture seule au bloc {block}, d'après le registre des contrats du validateur.",
+  "explained.tdh.overview.explain.busy": "6529.io est occupé en ce moment et n'a pas pu le chercher. Réessayez dans une minute."
 }

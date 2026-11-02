@@ -180,7 +180,7 @@
   "explained.tdh.proofs.check.outputs.title": "Zwei Ausgaben, eine Aussage",
   "explained.tdh.proofs.check.outputs.body": "Die Ausgabe von Programm B gleicht der von Programm A in jedem Wort außer dem Anker.",
   "explained.tdh.proofs.check.network.title": "Netzwerk, Regel und Horizont",
-  "explained.tdh.proofs.check.network.body": "Dieses Netzwerk, die eine Regel, die er annimmt, und ein Zyklus vor dem {horizon}, dem Fork-Horizont der Programme: Ein Ethereum-Upgrade danach könnte ändern, was sie lesen. Eine Bereitstellung lehnt jeden späteren Zyklus für immer ab. Spätere Zyklen brauchen neu gebaute Programme und eine neue Bereitstellung, die die alte dann als ihre Nachfolgerin einträgt.",
+  "explained.tdh.proofs.check.network.body": "Dieses Netzwerk, die eine Regel, die er annimmt, und ein Zyklus vor dem {horizon}, dem Fork-Horizont der Programme: Ein Ethereum-Upgrade danach könnte ändern, was sie lesen. Eine Bereitstellung lehnt spätere Zyklen für immer ab; sie brauchen neu gebaute Programme und eine Nachfolge-Bereitstellung.",
   "explained.tdh.proofs.check.chaining.title": "Verkettung",
   "explained.tdh.proofs.check.chaining.body": "Der Zyklus nach dem zuletzt festgehaltenen, beginnend dort, wo dieser endete.",
   "explained.tdh.proofs.check.time.title": "Zeit",
@@ -311,5 +311,18 @@
   "explained.tdh.proofs.words.showLit": "Nur die Gruppe zeigen",
   "explained.tdh.proofs.raw.summary": "Die {bytes} Bytes, wie der Verifier sie liest",
   "explained.tdh.proofs.raw.cap": "Die öffentlichen Werte von Beweis A für den {date}: ein Wort pro Zeile, in der Reihenfolge der Aussage.",
-  "explained.tdh.proofs.raw.copy": "Die Bytes kopieren"
+  "explained.tdh.proofs.raw.copy": "Die Bytes kopieren",
+  "explained.tdh.proofs.figure.aria": "Ein halbes Paar: Programm A, in SP1, hat einen echten Tag bewiesen, unter ausgemusterten Regeln; Programm B, in RISC Zero, nur Testzyklen. Der Vertrag würde einen Tag nur mit beiden Beweisen festhalten und hat nichts festgehalten.",
+  "explained.tdh.proofs.figure.a": "Programm A, in SP1",
+  "explained.tdh.proofs.figure.aSub": "ein echter Tag, alte Regeln",
+  "explained.tdh.proofs.figure.b": "Programm B, in RISC Zero",
+  "explained.tdh.proofs.figure.bSub": "nur Testzyklen",
+  "explained.tdh.proofs.figure.contract": "Der Vertrag",
+  "explained.tdh.proofs.figure.contractSub": "gebaut, nicht live",
+  "explained.tdh.proofs.figure.none1": "Noch nichts",
+  "explained.tdh.proofs.figure.none2": "festgehalten",
+  "explained.tdh.proofs.s3.more": "Die zwei Programme vergleichen",
+  "explained.tdh.proofs.s3.less": "Vergleich ausblenden",
+  "explained.tdh.proofs.s5.more": "Was es heute ist, und was noch nicht",
+  "explained.tdh.proofs.s5.less": "Aufstellung ausblenden"
 }

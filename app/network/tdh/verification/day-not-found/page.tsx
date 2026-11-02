@@ -12,7 +12,7 @@ import {
   normalizeLocale,
   type SupportedLocale,
 } from "@/i18n/locales";
-import { loadFactBook } from "@/lib/explained/feed.server";
+import { loadCheckBook } from "../components/loadBook.server";
 import type { FactBook } from "@/lib/explained/facts";
 import {
   formatUtcClock,
@@ -174,7 +174,9 @@ export default async function TdhVerificationDayNotFound({
 }) {
   const params = await searchParams;
   const locale = normalizeLocale(firstValue(params.locale));
-  const book = await loadFactBook();
+  // Every day file, as the daily check reads them, so each tile of the
+  // ribbon carries the same lines: its write time included.
+  const { book } = await loadCheckBook();
   const cycle = askedCycle(params.day);
   const latest = book.maybe<number>("tdh.latest.cycle");
   const latestDate = book.maybe<string>("tdh.latest.date");

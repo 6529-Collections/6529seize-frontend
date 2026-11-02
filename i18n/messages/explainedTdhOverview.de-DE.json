@@ -11,8 +11,8 @@
   "explained.tdh.overview.cta.explain": "Mein TDH erklären",
   "explained.tdh.overview.cta.how": "Wie es berechnet wird",
   "explained.tdh.overview.live.total": "{total} TDH",
-  "explained.tdh.overview.live.line": "{identities} Identitäten: Zwei getrennt geschriebene Programme stimmen bei allen mit 6529.io überein.",
-  "explained.tdh.overview.live.lineDiffers": "{identities} Identitäten: Zwei getrennt geschriebene Programme stimmen bei {equal} davon mit 6529.io überein.",
+  "explained.tdh.overview.live.line": "{identities} Identitäten: Zwei getrennt geschriebene Programme, beide von 6529 betrieben, stimmen bei allen mit 6529.io überein.",
+  "explained.tdh.overview.live.lineDiffers": "{identities} Identitäten: Zwei getrennt geschriebene Programme, beide von 6529 betrieben, stimmen bei {equal} davon mit 6529.io überein.",
   "explained.tdh.overview.live.equation": "Rust-Kern = Python-Referenz = 6529.io",
   "explained.tdh.overview.live.link": "Die tägliche Prüfung",
   "explained.tdh.overview.machine.label": "Eine Kopie als Fläche",
@@ -215,5 +215,6 @@
   "explained.tdh.overview.hwk.figures": "Die Abbildungen",
   "explained.tdh.overview.hwk.figuresBody": "In Ihrem Browser von der Engine für TDH v1.4 berechnet, die alle {vectors} Vektoren von P26 besteht.",
   "explained.tdh.overview.hwk.proofs": "Die Beweise",
-  "explained.tdh.overview.hwk.proofsBody": "Beweis A für Zyklus {cycle}, vom SP1-Verifier im Mainnet in einem schreibgeschützten Aufruf bei Block {block} akzeptiert, laut dem Vertragsprotokoll des Validators."
+  "explained.tdh.overview.hwk.proofsBody": "Beweis A für Zyklus {cycle}, vom SP1-Verifier im Mainnet in einem schreibgeschützten Aufruf bei Block {block} akzeptiert, laut dem Vertragsprotokoll des Validators.",
+  "explained.tdh.overview.explain.busy": "6529.io ist gerade ausgelastet und konnte das nicht nachschlagen. Versuchen Sie es in einer Minute erneut."
 }

@@ -330,5 +330,6 @@
   "explained.tdh.how.hwk.decisionsBody": "D89 (el umbral de {threshold}), D131 (la compensación), D132 (el cambio), D136 (cuatro wallets).",
   "explained.tdh.how.hwk.totals": "Totales",
   "explained.tdh.how.hwk.totalsBody": "La comparación diaria, escrita {written}.",
-  "explained.tdh.how.boost.sayGradOnly": "Cada Gradient suma {gradient}: con {count}, beta es {cents} céntimos, un boost de {boost}."
+  "explained.tdh.how.boost.sayGradOnly": "Cada Gradient suma {gradient}: con {count}, beta es {cents} céntimos, un boost de {boost}.",
+  "explained.tdh.how.trace.finalTie": "El empate a vigilar: {call} = {final}, no {decimal}; el boost en binary64 queda justo por debajo de la mitad (§8.4)."
 }

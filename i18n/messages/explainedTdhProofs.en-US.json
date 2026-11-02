@@ -180,7 +180,7 @@
   "explained.tdh.proofs.check.outputs.title": "Two outputs, one statement",
   "explained.tdh.proofs.check.outputs.body": "Program B's output equals program A's in every word but the anchor.",
   "explained.tdh.proofs.check.network.title": "Network, rule and horizon",
-  "explained.tdh.proofs.check.network.body": "This network, the one rule it accepts, and a cycle before {horizon}, the programs' fork horizon: an Ethereum upgrade after it could change what they read. A deployment refuses every later cycle for good. Later cycles need rebuilt programs and a new deployment, which the old one then names as its successor.",
+  "explained.tdh.proofs.check.network.body": "This network, the one rule it accepts, and a cycle before {horizon}, the programs' fork horizon: an Ethereum upgrade after it could change what they read. A deployment refuses later cycles for good; they need rebuilt programs and a successor deployment.",
   "explained.tdh.proofs.check.chaining.title": "Chaining",
   "explained.tdh.proofs.check.chaining.body": "The cycle after the last one recorded, starting where it ended.",
   "explained.tdh.proofs.check.time.title": "Time",
@@ -311,5 +311,18 @@
   "explained.tdh.proofs.words.showLit": "Show only the group",
   "explained.tdh.proofs.raw.summary": "The {bytes} bytes, as the verifier reads them",
   "explained.tdh.proofs.raw.cap": "Proof A's public values for {date}: one word a line, in the statement's order.",
-  "explained.tdh.proofs.raw.copy": "Copy the bytes"
+  "explained.tdh.proofs.raw.copy": "Copy the bytes",
+  "explained.tdh.proofs.figure.aria": "Half a pair: program A, in SP1, has proved one real day, under retired rules; program B, in RISC Zero, only test cycles. The contract would record a day only with both proofs, and has recorded nothing.",
+  "explained.tdh.proofs.figure.a": "Program A, in SP1",
+  "explained.tdh.proofs.figure.aSub": "one real day, retired rules",
+  "explained.tdh.proofs.figure.b": "Program B, in RISC Zero",
+  "explained.tdh.proofs.figure.bSub": "test cycles only",
+  "explained.tdh.proofs.figure.contract": "The contract",
+  "explained.tdh.proofs.figure.contractSub": "built, not deployed",
+  "explained.tdh.proofs.figure.none1": "Nothing",
+  "explained.tdh.proofs.figure.none2": "recorded yet",
+  "explained.tdh.proofs.s3.more": "Compare the two programs",
+  "explained.tdh.proofs.s3.less": "Hide the comparison",
+  "explained.tdh.proofs.s5.more": "What it is today, and not yet",
+  "explained.tdh.proofs.s5.less": "Hide the ledger"
 }

@@ -71,7 +71,7 @@ export default function ProvenanceTrail({
             key={step.title}
             className={
               long
-                ? "tw-relative tw-pb-[18px] tw-pl-8 lg:tw-grid lg:tw-grid-cols-[200px_minmax(0,1fr)_minmax(0,280px)] lg:tw-items-baseline lg:tw-gap-x-8"
+                ? "tw-relative tw-pb-[18px] tw-pl-8 lg:tw-grid lg:tw-grid-cols-[200px_minmax(0,400px)_auto] lg:tw-items-baseline lg:tw-justify-start lg:tw-gap-x-8"
                 : "tw-relative tw-pb-[18px] tw-pl-8 lg:tw-pb-0 lg:tw-pl-0 lg:tw-pr-3.5"
             }
             data-who={step.who}

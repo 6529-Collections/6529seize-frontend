@@ -35,9 +35,10 @@ export function HubOpener({
       {/* From xl the line sits beside the title, its last line on the
           title's baseline, so the whole loop fits the first screen at
           1440 × 900; under it on narrower windows. */}
-      <div className="xl:tw-grid xl:tw-grid-cols-[minmax(0,1fr)_460px] xl:tw-items-end xl:tw-gap-x-14">
+      <div className="xl:tw-grid xl:tw-grid-cols-[minmax(0,1fr)_440px] xl:tw-items-end xl:tw-gap-x-14">
+        {/* 72/76 beside the line keeps the title to two lines in its column. */}
         <h1
-          className={`${EX_TEXT.displayHub} tw-text-balance max-[359px]:tw-text-[30px] max-[359px]:tw-leading-[34px]`}
+          className={`${EX_TEXT.displayHub} tw-text-balance max-[359px]:tw-text-[30px] max-[359px]:tw-leading-[34px] xl:tw-text-[72px] xl:tw-leading-[76px]`}
         >
           {ht(locale, "title")}
         </h1>

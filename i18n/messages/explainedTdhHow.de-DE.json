@@ -330,5 +330,6 @@
   "explained.tdh.how.hwk.decisionsBody": "D89 (die Schwelle von {threshold}), D131 (Verrechnung), D132 (die Umstellung), D136 (vier Wallets).",
   "explained.tdh.how.hwk.totals": "Summen",
   "explained.tdh.how.hwk.totalsBody": "Der tägliche Vergleich, geschrieben {written}.",
-  "explained.tdh.how.boost.sayGradOnly": "Jeder Gradient bringt {gradient}: mit {count} ist Beta {cents} Cent, ein Boost von {boost}."
+  "explained.tdh.how.boost.sayGradOnly": "Jeder Gradient bringt {gradient}: mit {count} ist Beta {cents} Cent, ein Boost von {boost}.",
+  "explained.tdh.how.trace.finalTie": "Die Falle beim Runden: {call} = {final}, nicht {decimal}; der Boost in binary64 liegt knapp unter der Hälfte (§8.4)."
 }

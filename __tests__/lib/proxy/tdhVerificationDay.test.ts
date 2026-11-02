@@ -23,6 +23,13 @@ describe("isImpossibleTdhVerificationDay", () => {
     expect(day("20742")).toBe(false);
   });
 
+  it("never rewrites the not-found view's own address to itself", () => {
+    expect(isImpossibleTdhVerificationDay(TDH_DAY_NOT_FOUND_PATH, NOW)).toBe(
+      false
+    );
+    expect(possibleTdhVerificationDay(TDH_DAY_NOT_FOUND_PATH, NOW)).toBeNull();
+  });
+
   it("refuses segments that are no cycle day", () => {
     expect(day("abc")).toBe(true);
     expect(day("020742")).toBe(true);

@@ -66,6 +66,9 @@ function claimRow(ctx: SureContext, section: SureSection): ClaimRow {
   };
 }
 
+/** Claims shown on a phone before "All 9 claims" opens the rest. */
+const PHONE_CLAIMS = 3;
+
 /** The counterexample letters of a group: "H and I". */
 function letters(ctx: SureContext, pick: (section: string) => boolean): string {
   const found = ctx.sections
@@ -107,7 +110,17 @@ export default function ClaimsSection({ ctx }: { readonly ctx: SureContext }) {
             className="tw-mt-6"
             ids={["manifest.sections", "validators.cap"]}
           >
-            <ClaimTable rows={rows} locale={locale} />
+            <ClaimTable
+              rows={rows}
+              locale={locale}
+              phoneFold={{
+                limit: PHONE_CLAIMS,
+                more: m("explained.tdh.sure.claims.all", {
+                  count: p.v("manifest.sections.count"),
+                }),
+                less: m("explained.tdh.sure.claims.fewer"),
+              }}
+            />
           </FactScope>
           <Caption className="tw-mt-4">{byKind}</Caption>
           {/* D148 exempts the network-held accounts from the cap claim 5a

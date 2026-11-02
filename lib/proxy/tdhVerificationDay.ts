@@ -11,13 +11,25 @@ const MS_PER_DAY = 86_400_000;
 /** A cycle day written as the feed writes it: digits, no leading zero. */
 const CANONICAL_DAY = /^[1-9]\d{0,6}$/;
 
-/** The day permalink's segment, or null for any other path. */
+/** The not-found view's own segment: it is the target, never a day asked for. */
+const NOT_FOUND_SEGMENT = "day-not-found";
+
+/**
+ * The day permalink's segment, or null for any other path. The not-found
+ * view's own address is not a day: when a rewrite reaches it as a fresh
+ * request (a server whose own address differs from the one it rewrites to
+ * proxies the rewrite), it must render, not be rewritten to itself again.
+ */
 function daySegment(pathname: string): string | null {
   if (!pathname.startsWith(DAY_PATH_PREFIX)) {
     return null;
   }
   const segment = pathname.slice(DAY_PATH_PREFIX.length);
-  return segment === "" || segment.includes("/") ? null : segment;
+  return segment === "" ||
+    segment.includes("/") ||
+    segment === NOT_FOUND_SEGMENT
+    ? null
+    : segment;
 }
 
 /**

@@ -25,7 +25,8 @@ const PATHS: readonly PathDef[] = [
     route: "path.firstRoute",
     minutes: 6,
     // Lands on the record a first-card holder needs: "Just bought".
-    href: "/network/tdh#just-bought",
+    // The overview's top: what TDH is comes first, then when a card counts.
+    href: "/network/tdh",
   },
   {
     who: "path.collect",

@@ -299,5 +299,10 @@
   "explained.tdh.spec.hwk.standing": "Its standing",
   "explained.tdh.spec.hwk.standingBody": "P26's header: proposal, not adopted as the consensus rule. D137: these are 6529.io's TDH v1.4 rules.",
   "explained.tdh.spec.hwk.registry": "The registry hash",
-  "explained.tdh.spec.hwk.registryBody": "Vector {vector} in P26's reference implementation; the registry's values as the TDH v1.4 engine reads them."
+  "explained.tdh.spec.hwk.registryBody": "Vector {vector} in P26's reference implementation; the registry's values as the TDH v1.4 engine reads them.",
+  "explained.tdh.spec.s11.more": "All {count} deviations",
+  "explained.tdh.spec.s11.less": "Hide the deviations",
+  "explained.tdh.spec.s12.more": "All {count} issues",
+  "explained.tdh.spec.s12.less": "Hide the issues",
+  "explained.tdh.spec.scrollHint": "Scroll sideways for the whole line"
 }

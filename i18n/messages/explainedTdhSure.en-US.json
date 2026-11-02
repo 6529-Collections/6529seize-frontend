@@ -291,5 +291,7 @@
   "explained.tdh.sure.hwk.nettingBody": "P26's history at {first}, {narrowed} and {proved}, {day}.",
   "explained.tdh.sure.hwk.proofA": "Proof A",
   "explained.tdh.sure.hwk.proofABody": "From {record}. Proved in {hours} h {minutes} min; the call was made at block {block}.",
-  "explained.tdh.sure.theorems.scrollHint": "Scroll sideways for the whole line"
+  "explained.tdh.sure.theorems.scrollHint": "Scroll sideways for the whole line",
+  "explained.tdh.sure.claims.all": "All {count} claims",
+  "explained.tdh.sure.claims.fewer": "Fewer claims"
 }

@@ -180,7 +180,7 @@
   "explained.tdh.proofs.check.outputs.title": "Dos salidas, un enunciado",
   "explained.tdh.proofs.check.outputs.body": "La salida del programa B es igual a la del programa A en cada palabra salvo el ancla.",
   "explained.tdh.proofs.check.network.title": "Red, regla y horizonte",
-  "explained.tdh.proofs.check.network.body": "Esta red, la única regla que acepta y un ciclo anterior al {horizon}, el horizonte de bifurcación de los programas: una actualización de Ethereum posterior podría cambiar lo que leen. Un despliegue rechaza para siempre todo ciclo posterior. Los ciclos posteriores necesitan programas reconstruidos y un despliegue nuevo, que el anterior registra luego como su sucesor.",
+  "explained.tdh.proofs.check.network.body": "Esta red, la única regla que acepta y un ciclo anterior al {horizon}, el horizonte de bifurcación de los programas: una actualización de Ethereum posterior podría cambiar lo que leen. Un despliegue rechaza para siempre los ciclos posteriores; necesitan programas reconstruidos y un despliegue sucesor.",
   "explained.tdh.proofs.check.chaining.title": "Encadenamiento",
   "explained.tdh.proofs.check.chaining.body": "El ciclo que sigue al último registrado, empezando donde terminó.",
   "explained.tdh.proofs.check.time.title": "Tiempo",
@@ -311,5 +311,18 @@
   "explained.tdh.proofs.words.showLit": "Mostrar solo el grupo",
   "explained.tdh.proofs.raw.summary": "Los {bytes} bytes, tal como los lee el verificador",
   "explained.tdh.proofs.raw.cap": "Los valores públicos de la prueba A para el {date}: una palabra por línea, en el orden del enunciado.",
-  "explained.tdh.proofs.raw.copy": "Copiar los bytes"
+  "explained.tdh.proofs.raw.copy": "Copiar los bytes",
+  "explained.tdh.proofs.figure.aria": "Medio par: el programa A, en SP1, ha probado un día real, bajo reglas retiradas; el programa B, en RISC Zero, solo ciclos de prueba. El contrato registraría un día solo con ambas pruebas, y no ha registrado nada.",
+  "explained.tdh.proofs.figure.a": "Programa A, en SP1",
+  "explained.tdh.proofs.figure.aSub": "un día real, reglas retiradas",
+  "explained.tdh.proofs.figure.b": "Programa B, en RISC Zero",
+  "explained.tdh.proofs.figure.bSub": "solo ciclos de prueba",
+  "explained.tdh.proofs.figure.contract": "El contrato",
+  "explained.tdh.proofs.figure.contractSub": "hecho, sin desplegar",
+  "explained.tdh.proofs.figure.none1": "Aún nada",
+  "explained.tdh.proofs.figure.none2": "registrado",
+  "explained.tdh.proofs.s3.more": "Comparar los dos programas",
+  "explained.tdh.proofs.s3.less": "Ocultar la comparación",
+  "explained.tdh.proofs.s5.more": "Lo que es hoy, y lo que aún no",
+  "explained.tdh.proofs.s5.less": "Ocultar el registro"
 }

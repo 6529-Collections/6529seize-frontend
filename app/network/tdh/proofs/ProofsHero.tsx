@@ -12,7 +12,8 @@ import { fill, kt } from "@/components/explained/i18n";
 import DriftNote from "@/components/explained/marks/DriftNote";
 import { Glyph } from "@/components/explained/marks/glyphs";
 import Tag from "@/components/explained/marks/Tag";
-import { EX_BUTTON, EX_TEXT } from "@/components/explained/tokens";
+import { EX_BUTTON, EX_HEX, EX_TEXT } from "@/components/explained/tokens";
+import { Label, SvgFrame } from "@/components/explained/figures/svg";
 import type { SupportedLocale } from "@/i18n/locales";
 import { formatCount } from "@/lib/explained/format";
 import { CONTRACT_CHECKS } from "./_lib/checks";
@@ -58,6 +59,131 @@ function refusedWord(facts: PageFacts): number {
   return verdict.accepted ? TOTAL_WORD : verdict.word;
 }
 
+/**
+ * The page's subject beside its title, from a desktop up: the half pair as
+ * a picture. Program A's lane is solid and green, it proved one real day;
+ * program B's is dashed, test cycles only; both run into the contract,
+ * which would record a day only with both, and has recorded nothing.
+ */
+function HalfPairFigure({ locale }: { readonly locale: SupportedLocale }) {
+  const t = (
+    key:
+      | "aria"
+      | "a"
+      | "aSub"
+      | "b"
+      | "bSub"
+      | "contract"
+      | "contractSub"
+      | "none1"
+      | "none2"
+  ) => fill(locale, k(`figure.${key}`));
+  const lane = (y: number, done: boolean) => ({
+    stroke: done ? EX_HEX.holds : EX_HEX.ink4,
+    dash: done ? undefined : "4 4",
+    y,
+  });
+  const a = lane(100, true);
+  const b = lane(200, false);
+  return (
+    <SvgFrame width={380} height={290} label={t("aria")}>
+      <path
+        d={`M 38 ${a.y} H 220 L 250 124`}
+        fill="none"
+        stroke={a.stroke}
+        strokeWidth={2}
+      />
+      <path
+        d={`M 38 ${b.y} H 220 L 250 156`}
+        fill="none"
+        stroke={b.stroke}
+        strokeWidth={2}
+        strokeDasharray={b.dash}
+      />
+      <circle cx={24} cy={a.y} r={14} fill={EX_HEX.holds} />
+      <text
+        x={24}
+        y={a.y + 5}
+        textAnchor="middle"
+        fontSize={13}
+        fontWeight={700}
+        fill={EX_HEX.surface}
+      >
+        A
+      </text>
+      <circle
+        cx={24}
+        cy={b.y}
+        r={14}
+        fill={EX_HEX.surface}
+        stroke={EX_HEX.ink3}
+        strokeWidth={1.5}
+        strokeDasharray="3 3"
+      />
+      <text
+        x={24}
+        y={b.y + 5}
+        textAnchor="middle"
+        fontSize={13}
+        fontWeight={700}
+        fill={EX_HEX.ink3}
+      >
+        B
+      </text>
+      <Label x={46} y={a.y - 26} size={13} weight={600} tone="ink1">
+        {t("a")}
+      </Label>
+      <Label x={46} y={a.y - 10}>
+        {t("aSub")}
+      </Label>
+      <Label x={46} y={b.y - 26} size={13} weight={600} tone="ink1">
+        {t("b")}
+      </Label>
+      <Label x={46} y={b.y - 10}>
+        {t("bSub")}
+      </Label>
+      <rect
+        x={250}
+        y={112}
+        width={126}
+        height={56}
+        rx={8}
+        fill={EX_HEX.raised}
+        stroke={EX_HEX.line2}
+      />
+      <Label x={313} y={136} anchor="middle" size={13} weight={600} tone="ink1">
+        {t("contract")}
+      </Label>
+      <Label x={313} y={154} anchor="middle">
+        {t("contractSub")}
+      </Label>
+      <path
+        d="M 313 168 V 216"
+        fill="none"
+        stroke={EX_HEX.ink4}
+        strokeWidth={1.5}
+        strokeDasharray="3 3"
+      />
+      <rect
+        x={250}
+        y={216}
+        width={126}
+        height={56}
+        rx={8}
+        fill="none"
+        stroke={EX_HEX.ink4}
+        strokeDasharray="4 4"
+      />
+      <Label x={313} y={240} anchor="middle">
+        {t("none1")}
+      </Label>
+      <Label x={313} y={258} anchor="middle">
+        {t("none2")}
+      </Label>
+    </SvgFrame>
+  );
+}
+
 function Header({
   locale,
   chapterNumber,
@@ -70,23 +196,34 @@ function Header({
   readonly pageTitle: string;
 }) {
   return (
-    <header className="tw-pt-[30px] md:tw-pt-[52px]" id="top">
-      <span className={EX_TEXT.label}>
-        {rich(locale, k("eyebrow"), {
-          chapter: <span>{chapterNumber}</span>,
-          n: <span className="tw-text-primary-300">{pageNumber}</span>,
-          page: pageTitle,
-        })}
-      </span>
-      <h1 className={`${EX_TEXT.h1r} tw-mt-4 tw-max-w-[900px]`}>
-        {rich(locale, k("h1"))}
-      </h1>
-      {/* The lede stays under the title at every width: it is the page's
+    <header
+      className="tw-pt-[30px] md:tw-pt-[52px] lg:tw-grid lg:tw-grid-cols-[minmax(0,1fr)_380px] lg:tw-items-center lg:tw-gap-x-12"
+      id="top"
+    >
+      <div className="tw-min-w-0">
+        <span className={EX_TEXT.label}>
+          {rich(locale, k("eyebrow"), {
+            chapter: <span>{chapterNumber}</span>,
+            n: <span className="tw-text-primary-300">{pageNumber}</span>,
+            page: pageTitle,
+          })}
+        </span>
+        <h1 className={`${EX_TEXT.h1r} tw-mt-4 tw-max-w-[900px]`}>
+          {rich(locale, k("h1"))}
+        </h1>
+        {/* The lede stays under the title at every width: it is the page's
           one plain definition of a zero-knowledge proof, so it comes before
           the verdict's terms on a phone too. */}
-      <p className={`${EX_TEXT.lede} tw-mt-4 md:tw-mt-[22px]`} data-ex-lede="">
-        {rich(locale, k("lede"))}
-      </p>
+        <p
+          className={`${EX_TEXT.lede} tw-mt-4 md:tw-mt-[22px]`}
+          data-ex-lede=""
+        >
+          {rich(locale, k("lede"))}
+        </p>
+      </div>
+      <div className="tw-hidden lg:tw-block" data-fig="half-pair">
+        <HalfPairFigure locale={locale} />
+      </div>
     </header>
   );
 }
@@ -252,12 +389,8 @@ function RealVerdict({
           block: facts.print("site.proofA.ethCallBlock"),
         })
       )}
-      {p(
-        rich(locale, k("verdict.bodyB"), {
-          equal: facts.print("proofs.dayB.wordsEqual"),
-          words: facts.print("proofs.statement.words"),
-        })
-      )}
+      {/* Program B's run of the day, 23 of the 25 words equal, is told in
+          the 25 words model ("Beside program B"), not here. */}
       {/* On a phone the limit comes first, under the headline. */}
       <div className="max-md:tw-order-first max-md:tw-mb-4">
         <LimitNote title={rich(locale, k("verdict.limitTitle"))}>

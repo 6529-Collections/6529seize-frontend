@@ -330,5 +330,6 @@
   "explained.tdh.how.hwk.decisionsBody": "D89 (le seuil de {threshold}), D131 (la compensation), D132 (la bascule), D136 (quatre wallets).",
   "explained.tdh.how.hwk.totals": "Totaux",
   "explained.tdh.how.hwk.totalsBody": "La comparaison quotidienne, écrite {written}.",
-  "explained.tdh.how.boost.sayGradOnly": "Chaque Gradient ajoute {gradient} : avec {count}, bêta vaut {cents} centimes, un boost de {boost}."
+  "explained.tdh.how.boost.sayGradOnly": "Chaque Gradient ajoute {gradient} : avec {count}, bêta vaut {cents} centimes, un boost de {boost}.",
+  "explained.tdh.how.trace.finalTie": "L'égalité à surveiller : {call} = {final}, et non {decimal} ; le boost en binary64 est juste sous la moitié (§8.4)."
 }

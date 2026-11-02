@@ -4,6 +4,7 @@ import { factText, fmt, isFact, type FactEntry } from "@/lib/explained/facts";
 import { kt } from "../i18n";
 import Mark, { type MarkKind } from "../marks/Mark";
 import FactValue from "../facts/FactValue";
+import PhoneMore, { PHONE_MORE_HIDDEN } from "../layout/PhoneMore";
 
 /**
  * Claims with their proof (EXPLAINED.md §6.4, §9): a claim told to the end
@@ -185,9 +186,20 @@ export interface ClaimRow {
 export function ClaimTable({
   rows,
   locale,
+  phoneFold,
 }: {
   readonly rows: readonly ClaimRow[];
   readonly locale: SupportedLocale;
+  /**
+   * On a phone, only `limit` claims show until the reader opens the rest
+   * with `more` ("All 9 claims", its count a fact); every claim shows from
+   * a tablet up.
+   */
+  readonly phoneFold?: {
+    readonly limit: number;
+    readonly more: ReactNode;
+    readonly less: ReactNode;
+  };
 }) {
   const count = (
     entry: FactEntry | null | undefined,
@@ -209,7 +221,8 @@ export function ClaimTable({
       </span>
     );
   };
-  return (
+  const folds = phoneFold !== undefined && rows.length > phoneFold.limit;
+  const list = (
     <ol
       className="tw-m-0 tw-list-none tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-p-0"
       data-claims=""
@@ -217,7 +230,7 @@ export function ClaimTable({
       {rows.map((row, index) => (
         <li
           key={row.what}
-          className="tw-grid tw-grid-cols-[30px_minmax(0,1fr)] tw-gap-x-2.5 tw-gap-y-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-5 lg:tw-grid-cols-[48px_minmax(0,1.2fr)_minmax(0,1fr)_150px] lg:tw-gap-[22px]"
+          className={`tw-grid tw-grid-cols-[30px_minmax(0,1fr)] tw-gap-x-2.5 tw-gap-y-2 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-5 lg:tw-grid-cols-[48px_minmax(0,1.2fr)_minmax(0,1fr)_150px] lg:tw-gap-[22px] ${folds && index >= (phoneFold?.limit ?? 0) ? PHONE_MORE_HIDDEN : ""}`}
         >
           <span className="tw-text-[15px] tw-font-semibold tw-text-iron-400">
             {index + 1}
@@ -242,6 +255,12 @@ export function ClaimTable({
         </li>
       ))}
     </ol>
+  );
+  if (!folds || phoneFold === undefined) return list;
+  return (
+    <PhoneMore more={phoneFold.more} less={phoneFold.less}>
+      {list}
+    </PhoneMore>
   );
 }
 

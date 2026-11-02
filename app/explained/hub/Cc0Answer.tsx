@@ -91,7 +91,7 @@ export default function Cc0Answer({
   readonly locale: SupportedLocale;
 }) {
   return (
-    <section id="cc0" className={`${EX_LAYOUT.section} tw-scroll-mt-24`}>
+    <section id="cc0" className={`${EX_LAYOUT.section} tw-scroll-mt-0`}>
       <div className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-5 lg:tw-grid-cols-[500px_minmax(0,1fr)] lg:tw-gap-16">
         {/* On a phone the heading and its answer come first, then the art
             with its credits under it. */}

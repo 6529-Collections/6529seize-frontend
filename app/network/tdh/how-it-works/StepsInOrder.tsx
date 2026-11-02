@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { DAY, REGISTRY_V14 } from "@/components/explained/engine/tdh";
+import { DAY, REGISTRY_V14, finalTdh } from "@/components/explained/engine/tdh";
 import { EX_FOCUS, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { formatCents, formatCount } from "@/lib/explained/format";
@@ -162,6 +162,9 @@ const STEPS: readonly Step[] = [
   },
 ];
 
+/** The specification's binary64 tie (§8.4): FINAL(25, 114). */
+const FINAL_TIE = { base: 25, beta: 114 } as const;
+
 function traceLine(
   id: string,
   t: Trace,
@@ -208,6 +211,14 @@ function traceLine(
       one(t.base, t.cardFinal),
       one(t.gradBase, t.gradFinal),
       `${n(t.cardFinal)} + ${n(t.gradFinal)} = ${n(t.final)}`,
+      // The one rounding trap a re-implementer meets here, computed by
+      // the engine: the specification's tie (§8.4), where the decimal
+      // product rounds the other way.
+      ht(locale, "explained.tdh.how.trace.finalTie", {
+        call: `FINAL(${n(FINAL_TIE.base)}, ${n(FINAL_TIE.beta)})`,
+        final: n(finalTdh(FINAL_TIE.base, FINAL_TIE.beta)),
+        decimal: n(Math.floor((FINAL_TIE.base * FINAL_TIE.beta + 50) / 100)),
+      }),
     ].join("\n");
   }
   const params = values[id];
@@ -308,7 +319,7 @@ export default function StepsInOrder({
           {STEPS.map((step, index) => (
             <li
               key={step.id}
-              className="tw-grid tw-grid-cols-[32px_minmax(0,1fr)] tw-gap-x-3 tw-gap-y-1.5 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 md:tw-grid-cols-[40px_minmax(0,200px)_minmax(0,1fr)_120px] md:tw-items-baseline md:tw-gap-x-5 xl:tw-grid-cols-[40px_minmax(0,170px)_minmax(0,1fr)_minmax(0,250px)_120px]"
+              className="tw-grid tw-grid-cols-[32px_minmax(0,1fr)] tw-gap-x-3 tw-gap-y-1.5 tw-border-0 tw-border-b tw-border-solid tw-border-iron-900 tw-py-3.5 md:tw-grid-cols-[40px_minmax(0,200px)_minmax(0,1fr)_140px] md:tw-items-baseline md:tw-gap-x-5 xl:tw-grid-cols-[40px_minmax(0,170px)_minmax(0,1fr)_minmax(0,240px)_140px]"
               data-step={step.id}
             >
               <span className="tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-400">
@@ -321,8 +332,9 @@ export default function StepsInOrder({
                 {ht(locale, `explained.tdh.how.order.${step.id}` as HowKey)}
               </Link>
               {/* An operator stays with what follows it, so a formula
-                  breaks between terms, never inside one. */}
-              <code className="tw-col-start-2 tw-whitespace-pre-wrap tw-break-words tw-font-mono tw-text-[14px] tw-leading-[21px] tw-text-iron-300 md:tw-col-start-auto">
+                  breaks between terms, never inside one; a wrapped line
+                  hangs two characters in. */}
+              <code className="tw-col-start-2 tw-block tw-whitespace-pre-wrap tw-break-words tw-pl-[2ch] tw-indent-[-2ch] tw-font-mono tw-text-[14px] tw-leading-[21px] tw-text-iron-300 md:tw-col-start-auto">
                 {step.rule(n).replace(/([≤−×÷=+→]) /g, "$1\u00a0")}
               </code>
               {trace !== null && (

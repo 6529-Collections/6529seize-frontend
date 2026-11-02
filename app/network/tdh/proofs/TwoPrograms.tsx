@@ -1,4 +1,7 @@
 import type { ReactNode } from "react";
+import PhoneMore, {
+  PHONE_MORE_HIDDEN,
+} from "@/components/explained/layout/PhoneMore";
 import { LimitNote } from "@/components/explained/evidence/notes";
 import { fill } from "@/components/explained/i18n";
 import Hash from "@/components/explained/marks/Hash";
@@ -274,7 +277,14 @@ export default function TwoPrograms({
       heading={rich(locale, k("s3.heading"))}
       figure={
         <div className="tw-grid tw-gap-8">
-          <ProgramsTable locale={locale} facts={facts} />
+          <PhoneMore
+            more={fill(locale, k("s3.more"))}
+            less={fill(locale, k("s3.less"))}
+          >
+            <div className={PHONE_MORE_HIDDEN}>
+              <ProgramsTable locale={locale} facts={facts} />
+            </div>
+          </PhoneMore>
           <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2">
             <Case title={rich(locale, k("case.flaw.title"))}>
               {rich(locale, k("case.flaw.body"), {

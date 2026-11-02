@@ -345,10 +345,13 @@ function LookupResult({
         <div>
           <p className="tw-m-0 tw-text-[15px] tw-leading-6 tw-text-iron-300">
             {/* A name 6529.io cannot resolve comes back as a server error,
-                so a name gets the spelling hint, not "did not answer". */}
-            {identity.toLowerCase().endsWith(".eth")
-              ? ot(locale, "explain.errorEns", { identity })
-              : ot(locale, "explain.error")}
+                so a name gets the spelling hint, not "did not answer"; a
+                busy API (429) is said as busy, never as a spelling slip. */}
+            {status === 429
+              ? ot(locale, "explain.busy")
+              : identity.toLowerCase().endsWith(".eth")
+                ? ot(locale, "explain.errorEns", { identity })
+                : ot(locale, "explain.error")}
           </p>
           <button
             type="button"
