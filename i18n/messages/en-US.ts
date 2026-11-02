@@ -782,6 +782,8 @@ const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
   copyLink: "Copy link",
   copied: "Copied!",
   copyFailed: "Copy failed",
+  showMore: "Show more",
+  showLess: "Show less",
 } as const);
 
 const WAVE_PROPOSAL_CARD_MESSAGES = objectMessages("waves.proposalCard", {
@@ -1653,6 +1655,8 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "editAccess.chatLabel": "Chat",
   "editAccess.description":
     "The current criteria are prefilled. Saving creates a new group and changes only {groupLabel} access.",
+  "editAccess.validationDescription":
+    "Everyone with chat or admin access must also be able to view the wave.",
   "editAccess.loading": "Loading current criteria…",
   "editAccess.loadErrorTitle": "Couldn't load the current criteria.",
   "editAccess.loadErrorDescription":
