@@ -152,6 +152,10 @@ the same people already chosen. Earlier messages are not copied.
   right-to-left override characters, and at most 120 characters long.
   The server can switch attachments off as a kill switch; while it is off
   there is no attach control and chats are text only.
+- Paste images (Ctrl+V or Cmd+V) into the composer to attach them, with the
+  same limits as the attach control. Text copied together with an image is
+  pasted into the message as well. Pasting attaches images only while the
+  attach control is shown, so not while you edit a message.
 - Open a message's menu to react, reply, or edit or delete your own messages.
   On someone else's message the menu also offers **Mute on this device** (the
   same switch as in **Chat info**: the chat stops counting toward the Messages badge and shows a muted

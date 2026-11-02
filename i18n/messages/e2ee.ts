@@ -327,6 +327,8 @@ export const E2EE_MESSAGES = {
   "e2ee.composer.sendFailed": "Couldn’t send. Try again.",
   "e2ee.composer.uploading.one": "Encrypting and sending {count} file…",
   "e2ee.composer.uploading.other": "Encrypting and sending {count} files…",
+  "e2ee.composer.pastedImages.one": "{count} pasted image attached",
+  "e2ee.composer.pastedImages.other": "{count} pasted images attached",
   "e2ee.composer.dropped.body": "This message couldn’t be sent.",
   "e2ee.composer.dropped.quote": "“{text}”",
   "e2ee.composer.dropped.restore": "Edit and resend",
