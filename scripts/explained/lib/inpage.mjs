@@ -327,6 +327,9 @@ export function measure(vh) {
     /§\s?\d+(?:\.\d+)*/g,
     /\bTDH v\d+\.\d+\b/g,
     /\bS\d\b/g,
+    /\bB64\b/g,
+    /\bbinary64\b/g,
+    /\bEIP-\d+\b/g,
   ];
   const outside = [];
   const numberWalker = document.createTreeWalker(article, NodeFilter.SHOW_TEXT);

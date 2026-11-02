@@ -273,6 +273,9 @@ export default function Guarantees({
             { maturity: "built" },
             { kind: "tested" },
           ]}
+          // A mistake in the rules is constructed, as every failing state
+          // on these pages is: it carries the Simulated tag.
+          {...(broken ? { tag: { kind: "simulated" as const } } : {})}
         />
       }
     />

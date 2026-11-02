@@ -129,7 +129,7 @@ describe("How sure", () => {
     expect(
       container.querySelector('[data-drift-by="D144 D148 D150"]')
     ).toHaveTextContent(
-      "D148 exempts the network’s two accounts from the 19.99% cap, and D150 makes them two separate parties"
+      "D148 exempts the network’s two accounts from the 19.99% cap, and D150 makes them two parties"
     );
     const board = container.querySelector("[data-scoreboard]");
     expect(

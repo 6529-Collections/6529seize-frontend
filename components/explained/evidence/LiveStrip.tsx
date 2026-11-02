@@ -1,3 +1,4 @@
+import { rich } from "../rich";
 import type { ReactNode } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { formatUtcDay } from "@/lib/explained/format";
@@ -117,8 +118,12 @@ export default function LiveStrip({
           today, so the legend says which day it counts. */}
       <p className="tw-m-0 -tw-mt-1.5 tw-text-[13px] tw-leading-5 tw-text-iron-400">
         {openDate
-          ? kt(locale, "explained.kit.liveStrip.legendOpen", {
-              date: formatUtcDay(locale, openDate),
+          ? rich(locale, "explained.kit.liveStrip.legendOpen", {
+              date: (
+                <span data-fact="tdh.open.date">
+                  {formatUtcDay(locale, openDate)}
+                </span>
+              ),
             })
           : kt(locale, "explained.kit.liveStrip.legend")}
       </p>

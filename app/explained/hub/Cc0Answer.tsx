@@ -75,14 +75,14 @@ export default function Cc0Answer({
             {ht(locale, "cc0.title")}
           </h2>
           {/* The mark travels with the claim it qualifies. */}
-          <p className="tw-m-0 tw-mt-3">
+          <div className="tw-mt-3">
             <Mark
               kind="absolute"
               locale={locale}
               size="sm"
               refText={ht(locale, "cc0.markRef")}
             />
-          </p>
+          </div>
           <p className={`${EX_TEXT.body} tw-m-0 tw-mb-[18px] tw-mt-4`}>
             {ht(locale, "cc0.body")}
           </p>

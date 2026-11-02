@@ -156,6 +156,12 @@ export default async function SpecificationPage({
                 },
               ]}
             />
+            {/* Where P26 lives, under the contents: the panel keeps to its
+                rows and marks, and the column beside it does not stand
+                empty. */}
+            <Caption className="tw-mt-6 tw-max-w-[540px]">
+              {m("explained.tdh.spec.version.private")}
+            </Caption>
           </div>
           <aside
             id="this-version"
@@ -244,11 +250,6 @@ export default async function SpecificationPage({
             </div>
           </aside>
         </div>
-        {/* Where P26 lives, under the panel and the contents, so the panel
-            keeps to its rows and marks and no column stands empty. */}
-        <Caption className="tw-mt-6 tw-max-w-[760px]">
-          {m("explained.tdh.spec.version.private")}
-        </Caption>
 
         <div className="tw-mt-8">
           <DriftNote by={["D136", "D137"]} locale={locale}>

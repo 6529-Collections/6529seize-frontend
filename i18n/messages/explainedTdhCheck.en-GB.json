@@ -138,7 +138,7 @@
   "explained.tdh.check.trail.yoursSub": "match every final TDH",
   "explained.tdh.check.cmd.label": "Check this day's file",
   "explained.tdh.check.cmd.comment": "# the file and its hash",
-  "explained.tdh.check.cmd.expect": "equals the index",
+  "explained.tdh.check.cmd.expected": "the index's SHA-256 for this file:",
   "explained.tdh.check.build.label": "Build your own TDH",
   "explained.tdh.check.build.body": "The {specification} restates the rules in full. Match every identity's final TDH and the totals, then compare record by record with 6529.io's signed upload to find any miss. The day's {size}-byte cycle root, {root}, needs encodings that are not public yet (P28, P11). {vectors}.",
   "explained.tdh.check.build.specification": "specification",

@@ -138,7 +138,7 @@
   "explained.tdh.check.trail.yoursSub": "retrouver chaque TDH final",
   "explained.tdh.check.cmd.label": "Vérifier le fichier de ce jour",
   "explained.tdh.check.cmd.comment": "# le fichier et son hash",
-  "explained.tdh.check.cmd.expect": "égal à l'index",
+  "explained.tdh.check.cmd.expected": "le SHA-256 de ce fichier dans l'index :",
   "explained.tdh.check.build.label": "Calculer votre propre TDH",
   "explained.tdh.check.build.body": "La {specification} reprend les règles en entier. Retrouvez le TDH final de chaque identité et les totaux, puis comparez enregistrement par enregistrement avec le dépôt signé de 6529.io pour trouver tout écart. La racine de cycle de {size} octets du jour, {root}, demande des encodages pas encore publics (P28, P11). {vectors}.",
   "explained.tdh.check.build.specification": "spécification",

@@ -77,7 +77,7 @@ function Header({
       <p className={`${EX_TEXT.lede} tw-mt-4 md:tw-mt-[22px]`} data-ex-lede="">
         {pt(locale, "explained.tdh.check.lede")}
       </p>
-      <p className={`${EX_TEXT.meta} tw-m-0 tw-mt-4`}>
+      <p className={`${EX_TEXT.meta} tw-m-0 tw-mt-5 md:tw-mt-6`}>
         <b className="tw-font-semibold tw-text-iron-300">
           {pt(locale, "explained.tdh.check.scope.all")}
         </b>

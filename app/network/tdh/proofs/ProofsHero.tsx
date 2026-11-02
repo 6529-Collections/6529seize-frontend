@@ -119,7 +119,7 @@ function VerdictFrame({
         <h2 className="tw-m-0 tw-mb-3 tw-mt-4 tw-text-2xl tw-font-semibold tw-leading-[31px] tw-tracking-[-0.02em] tw-text-iron-50 md:tw-text-[30px] md:tw-leading-[38px]">
           {headline}
         </h2>
-        {children}
+        <div className="tw-flex tw-flex-col">{children}</div>
       </div>
       <div>{aside}</div>
       {/* The actions span the frame, so the three sit on one row. */}
@@ -226,7 +226,7 @@ function RealVerdict({
               total: facts.print("site.proofA.totalWithBurn"),
             })}
           </p>
-          <p className={`${EX_TEXT.meta} tw-m-0 tw-mt-2`}>
+          <p className={`${EX_TEXT.meta} tw-m-0 tw-mt-3`}>
             {rich(locale, k("verdict.source"), {
               bytes: facts.print("proofs.statement.bytes"),
               block: facts.print("site.proofA.ethCallBlock"),
@@ -250,7 +250,8 @@ function RealVerdict({
         })
       )}
       {p(rich(locale, k("verdict.bodyB")))}
-      <div>
+      {/* On a phone the limit comes first, under the headline. */}
+      <div className="max-md:tw-order-first max-md:tw-mb-4">
         <LimitNote title={rich(locale, k("verdict.limitTitle"))}>
           {rich(locale, k("verdict.limitBody"), { decision: "D128" })}
         </LimitNote>

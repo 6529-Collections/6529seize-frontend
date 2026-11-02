@@ -138,7 +138,7 @@
   "explained.tdh.check.trail.yoursSub": "jedes finale TDH treffen",
   "explained.tdh.check.cmd.label": "Die Datei dieses Tages prüfen",
   "explained.tdh.check.cmd.comment": "# die Datei und ihr Hash",
-  "explained.tdh.check.cmd.expect": "gleich dem Index",
+  "explained.tdh.check.cmd.expected": "der SHA-256 dieser Datei im Index:",
   "explained.tdh.check.build.label": "Ihre eigene TDH berechnen",
   "explained.tdh.check.build.body": "Die {specification} gibt die Regeln vollständig wieder. Treffen Sie das finale TDH jeder Identität und die Summen, und vergleichen Sie dann Datensatz für Datensatz mit dem signierten Upload von 6529.io, um jede Abweichung zu finden. Der {size}-Byte-Zyklus-Root des Tages, {root}, braucht Kodierungen, die noch nicht öffentlich sind (P28, P11). {vectors}.",
   "explained.tdh.check.build.specification": "Spezifikation",

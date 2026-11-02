@@ -174,12 +174,7 @@ export default function ContractSection({
       }
     >
       <Para>{rich(locale, k("s4.p1"), { decision: "D128" })}</Para>
-      <Para>
-        {rich(locale, k("s4.p2"), {
-          submit: facts.print("proofs.pair.submitGas"),
-          cold: facts.print("proofs.pair.coldCallGas"),
-        })}
-      </Para>
+      <Para>{rich(locale, k("s4.p2"))}</Para>
       <GasTable locale={locale} facts={facts} />
     </Section>
   );

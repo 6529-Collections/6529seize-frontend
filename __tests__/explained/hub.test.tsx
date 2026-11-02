@@ -50,9 +50,7 @@ describe("the hub, first version", () => {
     // The card follows the copy: its own TDH heads it, the network's total
     // stays on the loop and in the sentence.
     expect(card).toHaveTextContent("394 TDH");
-    expect(card).toHaveTextContent(
-      "Everyone's together, on Oct 18: 2,082,190,981."
-    );
+    expect(card).toHaveTextContent("Everyone's, on Oct 18: 2,082,190,981.");
     expect(
       within(card as HTMLElement).getByRole("link", { name: /Chapter 01: TDH/ })
     ).toHaveAttribute("href", "/network/tdh");
@@ -82,7 +80,7 @@ describe("the hub, first version", () => {
     );
     // The proved day carries its retired rule in the same sentence.
     expect(panel).toHaveTextContent(
-      "One real day, half proved A zero-knowledge proof lets a contract check a program's output without running it again. Proof A proved the day of Oct 11 (cycle 20,737) under the retired tdh-v1.0 rules; mainnet's SP1 verifier accepts it in a read-only call. Proof B is not done; under TDH v1.4 both exist only for a synthetic test cycle."
+      "One real day, half proved A zero-knowledge proof lets a contract check a program's output without rerunning it. Proof A proved the day of Oct 11 (cycle 20,737) under the retired tdh-v1.0 rules; mainnet's SP1 verifier accepts it in a read-only call. Proof B is not done; under TDH v1.4 both exist only for a synthetic test cycle."
     );
     // What anyone can repeat today, and what needs private code.
     expect(panel).toHaveTextContent(

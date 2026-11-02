@@ -310,7 +310,7 @@ export function HowTheCheckRuns({
         {CLASSES.map(([name, key]) => (
           <li
             key={name}
-            className="tw-grid tw-grid-cols-[88px_minmax(0,1fr)] tw-items-baseline tw-gap-x-4 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-3.5"
+            className="tw-grid tw-grid-cols-[88px_minmax(0,1fr)] tw-items-baseline tw-gap-x-4 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-3.5 max-[359px]:tw-grid-cols-1"
           >
             <span className={EX_TEXT.label}>
               {pt(locale, "explained.tdh.check.classes.name", { name })}
@@ -466,7 +466,9 @@ function CheckCommand({
       </span>
       {`\ncurl -s ${url} \\\n  | sha256sum\n`}
       <span className="tw-text-iron-400">
-        {`# ${hash.slice(0, 40)}\n# ${hash.slice(40)}  ${pt(locale, "explained.tdh.check.cmd.expect")}`}
+        {/* The expected hash whole, on one line of its own: split over two
+            comment lines it reads as two hashes. */}
+        {`# ${pt(locale, "explained.tdh.check.cmd.expected")}\n${hash}`}
       </span>
     </pre>
   );

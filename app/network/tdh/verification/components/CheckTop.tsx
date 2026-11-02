@@ -237,8 +237,10 @@ function HistoryLimit({
   if (day.text("mode") !== "unchecked-history") {
     return null;
   }
+  // On a phone the limit comes first, under the headline, so the first
+  // screen carries the verdict and what it does not guarantee.
   return (
-    <div className="tw-mt-4">
+    <div className="tw-mt-4 max-md:tw-order-first max-md:tw-mb-4 max-md:tw-mt-0">
       <LimitNote title={pt(locale, "explained.tdh.check.limit.title")}>
         {pt(locale, "explained.tdh.check.limit.body")}
       </LimitNote>
@@ -257,10 +259,10 @@ function realFace(day: DayView, locale: SupportedLocale): VerdictFace {
       : {}),
     headline: words.headline,
     detail: (
-      <>
+      <div className="tw-flex tw-flex-col">
         <p className={DETAIL}>{words.detail}</p>
         <HistoryLimit day={day} locale={locale} />
-      </>
+      </div>
     ),
     aside: (
       <>

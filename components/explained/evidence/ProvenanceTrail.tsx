@@ -52,7 +52,7 @@ export default function ProvenanceTrail({
     <ol
       className={
         long
-          ? "tw-m-0 tw-max-w-[880px] tw-list-none tw-p-0"
+          ? "tw-m-0 tw-max-w-[760px] tw-list-none tw-p-0"
           : "tw-m-0 tw-list-none tw-p-0 lg:tw-grid lg:[grid-template-columns:repeat(var(--ex-trail),minmax(0,1fr))]"
       }
       style={{ ["--ex-trail" as string]: String(steps.length) }}
@@ -71,7 +71,7 @@ export default function ProvenanceTrail({
             key={step.title}
             className={
               long
-                ? "tw-relative tw-pb-[18px] tw-pl-8 md:tw-grid md:tw-grid-cols-[200px_minmax(0,1fr)_170px] md:tw-items-baseline md:tw-gap-x-6"
+                ? "tw-relative tw-pb-[18px] tw-pl-8 md:tw-grid md:tw-grid-cols-[180px_minmax(0,1fr)_200px] md:tw-items-baseline md:tw-gap-x-6"
                 : "tw-relative tw-pb-[18px] tw-pl-8 lg:tw-pb-0 lg:tw-pl-0 lg:tw-pr-3.5"
             }
             data-who={step.who}

@@ -249,6 +249,7 @@ export default function TwoPrograms({
             </Case>
             <Case title={rich(locale, k("case.review.title"))}>
               {rich(locale, k("case.review.body"), {
+                nettingDay: facts.print("netting.day"),
                 date: facts.print("proofs.vectorFinding.date"),
                 count: facts.print("proofs.vectorFinding.vectors"),
               })}

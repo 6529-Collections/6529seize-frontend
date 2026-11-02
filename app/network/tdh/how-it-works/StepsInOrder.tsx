@@ -76,7 +76,7 @@ const STEPS: readonly Step[] = [
     rule: (n) =>
       [
         `pairs registered both ways → groups of ≤ ${n(R.consolidation_max_wallets)}`,
-        `beyond ${n(R.consolidation_ungated_max_wallets)}: one member freshly linked to every other (D136)`,
+        `beyond ${n(R.consolidation_ungated_max_wallets)}: one member freshly linked to all (D136)`,
       ].join("\n"),
     summary: true,
   },
@@ -237,7 +237,7 @@ export default function StepsInOrder({
               </code>
               {trace !== null && (
                 <span
-                  className="tw-col-start-2 tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-2.5 tw-text-[13px] tw-leading-[20px] tw-text-iron-300 md:tw-col-span-2 md:tw-col-start-3 md:tw-row-start-2 md:tw-text-[14px] md:tw-leading-[21px] xl:tw-col-span-1 xl:tw-col-start-auto xl:tw-row-start-auto"
+                  className="tw-col-start-2 tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-2.5 tw-text-[13px] tw-leading-[20px] tw-text-iron-300 max-[359px]:tw-col-span-2 max-[359px]:tw-col-start-1 md:tw-col-span-2 md:tw-col-start-3 md:tw-row-start-2 md:tw-text-[14px] md:tw-leading-[21px] xl:tw-col-span-1 xl:tw-col-start-auto xl:tw-row-start-auto"
                   data-trace={step.id}
                 >
                   {traceLine(step.id, trace, locale)}
