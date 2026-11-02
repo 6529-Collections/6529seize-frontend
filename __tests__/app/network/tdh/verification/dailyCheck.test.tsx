@@ -154,9 +154,9 @@ describe("the daily check (TDH-DESIGN.md §4.4)", () => {
     ]);
     expect(ribbon.querySelectorAll('[data-day="equal"]')).toHaveLength(5);
     expect(ribbon.querySelector('[data-day="open"]')).not.toBeNull();
-    // The caption says which files were rewritten, and when, from the facts.
+    // The caption says which results were written late or re-run, and when, from the facts.
     expect(container.querySelector("#history")).toHaveTextContent(
-      "↻ marks a file rewritten after its run: Oct 14, Oct 15, and Oct 16 on Oct 16 at 15:59 UTC."
+      "↻ marks a result written later than its day's usual run: Oct 14, Oct 15, and Oct 16 on Oct 16 at 15:59 UTC."
     );
   });
 
@@ -194,7 +194,7 @@ describe("the daily check (TDH-DESIGN.md §4.4)", () => {
       identitiesEqual: 10,
       identitiesTotal: 10,
       writtenAt: null,
-      rewritten: false,
+      late: false,
     })).filter((day) => day.cycle !== 20735);
     const input = {
       days,

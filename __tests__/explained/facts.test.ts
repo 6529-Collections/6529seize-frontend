@@ -86,10 +86,10 @@ describe("the facts layer", () => {
     expect(show("tdh.cutover.about")).toBe("Oct 23");
   });
 
-  it("marks the three days rewritten on Oct 16 and the two written on time", () => {
+  it("marks the three days written late on Oct 16 and the two written on time", () => {
     const days =
-      book.get<{ cycle: number; rewritten: boolean }[]>("tdh.days").value;
-    expect(days.map((day) => [day.cycle, day.rewritten])).toEqual([
+      book.get<{ cycle: number; late: boolean }[]>("tdh.days").value;
+    expect(days.map((day) => [day.cycle, day.late])).toEqual([
       [20740, true],
       [20741, true],
       [20742, true],

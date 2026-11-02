@@ -131,7 +131,7 @@
   "explained.kit.day.due": "Ergebnis fällig",
   "explained.kit.day.cutover": "Umstellung, etwa",
   "explained.kit.day.about": "~{date}",
-  "explained.kit.day.rewritten": "neu geschrieben {date}",
+  "explained.kit.day.writtenLate": "geschrieben {date}",
   "explained.kit.day.written": "{time}",
   "explained.kit.day.missing": "keine Datei",
   "explained.kit.day.future": "noch nicht",

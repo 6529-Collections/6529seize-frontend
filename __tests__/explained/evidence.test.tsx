@@ -140,9 +140,9 @@ describe("the ribbon", () => {
     ).toHaveLength(10);
     expect(
       screen.getByRole("img", {
-        name: "Oct 14, cycle 20,740: Equal, rewritten Oct 16",
+        name: "Oct 14, cycle 20,740: Equal, written Oct 16",
       })
-    ).toHaveAttribute("data-rewritten", "");
+    ).toHaveAttribute("data-late", "");
     expect(
       screen.getByRole("img", {
         name: "Oct 19: open, the result in 14 h 20 min",

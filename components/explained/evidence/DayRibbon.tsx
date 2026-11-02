@@ -11,7 +11,7 @@ import Ribbon from "../figures/Ribbon";
  * Shown false, a known cause Tested with the words, a missing file Not
  * guaranteed; the open day is a dashed blue tile with its progress; days to
  * come are dashed; the cutover is outlined and "about". ↻ marks a file
- * rewritten after its run.
+ * written late or re-run.
  */
 export type DayKind =
   | "equal"
@@ -30,8 +30,8 @@ export interface DayTileProps {
   readonly cycle?: number;
   /** Identities equal (or differing, for a failing day). */
   readonly count?: number;
-  /** When the file was written: a time, or the day it was rewritten. */
-  readonly written?: { readonly rewritten: boolean; readonly at: string };
+  /** When the file was written: a time, or the day of a late or re-run write. */
+  readonly written?: { readonly late: boolean; readonly at: string };
   /** The open day: minutes to its snapshot and the share gone, 0 to 100. */
   readonly open?: { readonly minutesLeft: number; readonly progress: number };
 }
@@ -93,8 +93,8 @@ function accessibleName(props: DayTileProps, day: string): string {
     verdict: word ? kt(locale, word) : "",
   });
   const { written } = props;
-  return written?.rewritten
-    ? `${name}, ${kt(locale, "explained.kit.day.rewritten", { date: formatUtcDay(locale, written.at) })}`
+  return written?.late
+    ? `${name}, ${kt(locale, "explained.kit.day.writtenLate", { date: formatUtcDay(locale, written.at) })}`
     : name;
 }
 
@@ -146,8 +146,8 @@ function secondaryText(props: DayTileProps): string | null {
   if (!written) {
     return null;
   }
-  return written.rewritten
-    ? `↻ ${kt(locale, "explained.kit.day.rewritten", { date: formatUtcDay(locale, written.at) })}`
+  return written.late
+    ? `↻ ${kt(locale, "explained.kit.day.writtenLate", { date: formatUtcDay(locale, written.at) })}`
     : kt(locale, "explained.kit.day.written", {
         time: written.at.slice(11, 16),
       });
@@ -166,7 +166,7 @@ export function DayTile(props: DayTileProps) {
       role="img"
       aria-label={accessibleName(props, day)}
       data-day={kind}
-      {...(written?.rewritten ? { "data-rewritten": "" } : {})}
+      {...(written?.late ? { "data-late": "" } : {})}
     >
       {snapshot && (
         <span
@@ -190,7 +190,7 @@ export function DayTile(props: DayTileProps) {
         aria-hidden="true"
       >
         {primary}
-        {written?.rewritten && <span className="tw-ml-1 md:tw-hidden">↻</span>}
+        {written?.late && <span className="tw-ml-1 md:tw-hidden">↻</span>}
         {secondary && open && open.minutesLeft > 0 ? (
           <span className="tw-block tw-text-xs">
             <span className="md:tw-hidden">
@@ -260,7 +260,7 @@ export interface ResultDay {
   readonly identitiesEqual: number | null;
   readonly identitiesTotal: number | null;
   readonly writtenAt: string | null;
-  readonly rewritten: boolean;
+  readonly late: boolean;
   /** As the facts layer lists it (`tdh.days`): plain values only. */
   readonly [key: string]: string | number | boolean | null;
 }
@@ -303,7 +303,7 @@ export function ribbonDays({
       cycle: day.cycle,
       count,
       ...(day.writtenAt
-        ? { written: { rewritten: day.rewritten, at: day.writtenAt } }
+        ? { written: { late: day.late, at: day.writtenAt } }
         : {}),
     };
   });

@@ -131,7 +131,7 @@
   "explained.kit.day.due": "result due",
   "explained.kit.day.cutover": "cutover, about",
   "explained.kit.day.about": "~{date}",
-  "explained.kit.day.rewritten": "rewritten {date}",
+  "explained.kit.day.writtenLate": "written {date}",
   "explained.kit.day.written": "{time}",
   "explained.kit.day.missing": "no file",
   "explained.kit.day.future": "not yet",

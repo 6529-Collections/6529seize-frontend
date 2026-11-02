@@ -131,7 +131,7 @@
   "explained.kit.day.due": "résultat attendu",
   "explained.kit.day.cutover": "bascule, environ",
   "explained.kit.day.about": "~{date}",
-  "explained.kit.day.rewritten": "réécrit {date}",
+  "explained.kit.day.writtenLate": "écrit {date}",
   "explained.kit.day.written": "{time}",
   "explained.kit.day.missing": "aucun fichier",
   "explained.kit.day.future": "pas encore",

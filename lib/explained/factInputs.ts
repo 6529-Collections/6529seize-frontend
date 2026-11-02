@@ -30,7 +30,7 @@ export interface FeedInput {
   readonly previous: FeedDayInput | null;
   /**
    * Every day file the page read, when it read them all (the ribbon marks a
-   * file rewritten after its run, which only the file itself says).
+   * file written late or re-run, which only the file itself says).
    */
   readonly days?: readonly FeedDayInput[];
 }

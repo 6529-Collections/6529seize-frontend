@@ -131,7 +131,7 @@
   "explained.kit.day.due": "resultado pendiente",
   "explained.kit.day.cutover": "cambio, aprox.",
   "explained.kit.day.about": "~{date}",
-  "explained.kit.day.rewritten": "reescrito {date}",
+  "explained.kit.day.writtenLate": "escrito {date}",
   "explained.kit.day.written": "{time}",
   "explained.kit.day.missing": "sin archivo",
   "explained.kit.day.future": "todavía no",

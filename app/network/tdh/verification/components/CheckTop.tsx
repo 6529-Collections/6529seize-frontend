@@ -344,8 +344,11 @@ function simulatedFace(
   };
 }
 
-/** "↻ marks a file rewritten after its run: Oct 14 and Oct 15 on Oct 16 at 15:59 UTC." */
-function RewrittenLine({
+/**
+ * "↻ marks a result written later than its day's usual run: Oct 14 and
+ * Oct 15 on Oct 16 at 15:59 UTC." Every late result, not only the shown ones.
+ */
+function LateLine({
   days,
   daysFact,
   locale,
@@ -356,7 +359,7 @@ function RewrittenLine({
 }) {
   const groups = new Map<string, ResultDay[]>();
   for (const day of days) {
-    if (day.rewritten && day.writtenAt) {
+    if (day.late && day.writtenAt) {
       const minute = day.writtenAt.slice(0, 16);
       groups.set(minute, [...(groups.get(minute) ?? []), day]);
     }
@@ -368,7 +371,7 @@ function RewrittenLine({
     const at = `${minute}:00Z`;
     return (
       <FactText key={minute} fact={daysFact} locale={locale}>
-        {pt(locale, "explained.tdh.check.ribbon.rewrittenGroup", {
+        {pt(locale, "explained.tdh.check.ribbon.lateGroup", {
           dates: formatList(
             locale,
             group.map((day) => formatUtcDay(locale, day.date))
@@ -387,10 +390,10 @@ function RewrittenLine({
   return (
     <>
       {" "}
-      {rich(locale, "explained.tdh.check.ribbon.rewritten", {
+      {rich(locale, "explained.tdh.check.ribbon.late", {
         groups: joined,
       })}{" "}
-      {pt(locale, "explained.tdh.check.ribbon.rewrittenWhy")}
+      {pt(locale, "explained.tdh.check.ribbon.lateWhy")}
     </>
   );
 }
@@ -407,9 +410,6 @@ function RibbonCaption({
   readonly locale: SupportedLocale;
 }) {
   const shown = ribbonResults(input);
-  const results = shown.flatMap((slot) =>
-    slot.kind === "result" ? [slot.day] : []
-  );
   const total = resultSlots(input.days).length;
   const midnight =
     latestDate === null
@@ -424,7 +424,7 @@ function RibbonCaption({
           </FactText>
         ),
       })}
-      <RewrittenLine days={results} daysFact={daysFact} locale={locale} />
+      <LateLine days={input.days} daysFact={daysFact} locale={locale} />
       {shown.length < total && (
         <>
           {" "}
