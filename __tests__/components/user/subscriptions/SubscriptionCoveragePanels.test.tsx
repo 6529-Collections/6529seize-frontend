@@ -1,15 +1,20 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import Disclosure from "@/components/user/subscriptions/UserPageSubscriptionsDisclosure";
+import SubscriptionCoverageSummary from "@/components/user/subscriptions/coverage/SubscriptionCoverageSummary";
 
 const id = "profile-subscriptions-settings";
 function Fixture() {
   return (
     <>
       <a href={`#${id}`}>Open settings</a>
-      <Disclosure id={id} title="Minting Settings">
-        <p>Full settings</p>
-      </Disclosure>
+      <SubscriptionCoverageSummary
+        coverage={undefined}
+        isError={false}
+        isLoading={false}
+        isOwner={false}
+        onRefresh={jest.fn()}
+        settings={<p>Full settings</p>}
+      />
     </>
   );
 }

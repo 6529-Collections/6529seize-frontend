@@ -72,6 +72,7 @@ function createCoverage(
 }
 
 describe("SubscriptionCoverageSummary", () => {
+  afterEach(() => jest.useRealTimers());
   const renderSummary = (
     coverage: ApiSubscriptionCoverage | undefined = createCoverage(),
     extra = {}
@@ -142,6 +143,52 @@ describe("SubscriptionCoverageSummary", () => {
     ).toHaveAttribute("href", "/the-memes/560");
     expect(screen.getByText(/Oct 12, 2026/)).toBeVisible();
   });
+
+  it.each([
+    {
+      firstSubscribed: true,
+      count: 12,
+      expected: "Next: The Memes #569 · Minting today · 12 cards.",
+    },
+    {
+      firstSubscribed: false,
+      count: 1,
+      expected: "Next: The Memes #570 · Nov 4, 2026 · 1 card.",
+    },
+  ])(
+    "keeps the next intended drop, date and quantity accurate ($firstSubscribed)",
+    ({ firstSubscribed, count, expected }) => {
+      jest.useFakeTimers({ now: new Date("2026-11-02T00:01:00Z") });
+      renderSummary(
+        createCoverage({ status: ApiSubscriptionCoverageStatus.Covered }),
+        {
+          subscriptions: [
+            {
+              consolidation_key: "profile-key",
+              contract: "contract",
+              token_id: 569,
+              subscribed: firstSubscribed,
+              subscribed_count: count,
+            },
+            {
+              consolidation_key: "profile-key",
+              contract: "contract",
+              token_id: 570,
+              subscribed: true,
+              subscribed_count: count,
+            },
+          ],
+        }
+      );
+      const drop = screen.getByText(
+        firstSubscribed ? "The Memes #569" : "The Memes #570",
+        { selector: "strong" }
+      );
+      expect(drop.closest("p")).toHaveTextContent(expected);
+      if (!firstSubscribed)
+        expect(screen.queryByText("Minting today")).not.toBeInTheDocument();
+    }
+  );
 
   it("does not call the next drop unfunded when one intended drop is still covered", () => {
     renderSummary(

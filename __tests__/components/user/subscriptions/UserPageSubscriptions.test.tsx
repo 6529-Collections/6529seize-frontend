@@ -35,8 +35,8 @@ jest.mock('@/components/user/subscriptions/UserPageSubscriptionsTopUp', () => ({
 
 jest.mock('@/components/user/subscriptions/coverage/SubscriptionCoverageSummary', () => ({
   __esModule: true,
-  default: ({balance, children}: any) => (
-    <div data-testid="subscription-coverage-summary">Coverage summary{balance}{children}</div>
+  default: ({balance, settings, children}: any) => (
+    <div data-testid="subscription-coverage-summary">Coverage summary{balance}{settings}{children}</div>
   ),
 }));
 

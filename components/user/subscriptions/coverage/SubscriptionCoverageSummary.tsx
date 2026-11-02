@@ -14,9 +14,11 @@ import {
   getUpcomingMintsAcrossSeasons,
   isMintingToday,
 } from "@/components/meme-calendar/meme-calendar.helpers";
+import { useScrollToHashOnMount } from "@/hooks/useScrollToHashOnMount";
+import { useSubscriptionDisclosure } from "../useSubscriptionDisclosure";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger, formatUtcDate } from "@/i18n/format";
-import { t, type MessageKey } from "@/i18n/messages";
+import { t, tRich, type MessageKey } from "@/i18n/messages";
 import {
   formatSubscriptionCoverageDate,
   formatSubscriptionCoverageDeadline,
@@ -25,6 +27,8 @@ import {
   getSubscriptionCoveragePresentation,
   getSubscriptionModeLabel,
 } from "./subscriptionCoverage.helpers";
+
+const SETTINGS_ID = "profile-subscriptions-settings";
 
 const EMPTY_SUBSCRIPTIONS: NFTSubscription[] = [];
 const DOT_CLASS = {
@@ -103,6 +107,7 @@ export default function SubscriptionCoverageSummary({
   subscriptions = EMPTY_SUBSCRIPTIONS,
   upcomingLoading = false,
   balance,
+  settings,
   topUpExpanded = false,
   onToggleTopUp,
   children,
@@ -116,12 +121,18 @@ export default function SubscriptionCoverageSummary({
   subscriptions?: NFTSubscription[];
   upcomingLoading?: boolean;
   balance?: ReactNode;
+  settings?: ReactNode;
   topUpExpanded?: boolean;
   onToggleTopUp?: () => void;
   children?: ReactNode;
 }>) {
   const locale = useBrowserLocale();
   const [expanded, setExpanded] = useState(false);
+  const mintingSettings = useSubscriptionDisclosure(SETTINGS_ID, !!settings);
+  useScrollToHashOnMount(SETTINGS_ID, {
+    enabled: !!settings && mintingSettings.expanded,
+    focusId: `${SETTINGS_ID}-title`,
+  });
   const [today] = useState(() => {
     const date = new Date();
     date.setUTCHours(0, 0, 0, 0);
@@ -174,28 +185,49 @@ export default function SubscriptionCoverageSummary({
       ? getUpcomingMintsAcrossSeasons(subscriptions.length, today)[nextIndex]
           ?.utcDay
       : undefined;
-  let nextLine = "";
+  const mintingToday = nextIndex === 0 && isMintingToday();
+  let nextLine: ReactNode = null;
   if (next && nextDate)
-    nextLine = t(
+    nextLine = tRich<ReactNode>(
       locale,
       (next.subscribed_count ?? 1) === 1
         ? "subscriptions.answer.next.one"
         : "subscriptions.answer.next.many",
       {
-        token: formatInteger(locale, next.token_id),
+        drop: (
+          <strong key="drop" className="tw-font-semibold tw-text-iron-100">
+            {t(locale, "subscriptions.coverage.memeToken", {
+              token: formatInteger(locale, next.token_id),
+            })}
+          </strong>
+        ),
         count: formatInteger(locale, next.subscribed_count ?? 1),
-        date:
-          nextIndex === 0 && isMintingToday()
-            ? t(locale, "subscriptions.answer.today")
-            : formatSubscriptionCoverageDate(locale, nextDate),
+        date: (
+          <span
+            key="date"
+            className={
+              mintingToday
+                ? "tw-font-medium tw-text-emerald-300"
+                : "tw-text-iron-200"
+            }
+          >
+            {mintingToday
+              ? t(locale, "subscriptions.answer.today")
+              : formatSubscriptionCoverageDate(locale, nextDate)}
+          </span>
+        ),
       }
     );
-  let subtitle = description;
+  let subtitle: ReactNode = description;
   if (status === Status.Covered && nextLine) subtitle = nextLine;
   if (status === Status.RunningLow)
-    subtitle = isOwner
-      ? `${t(locale, "subscriptions.answer.keepMinting")} ${nextLine}`
-      : nextLine || description;
+    subtitle = isOwner ? (
+      <>
+        {t(locale, "subscriptions.answer.keepMinting")} {nextLine}
+      </>
+    ) : (
+      nextLine || description
+    );
   if (status === Status.EarlyWarning)
     subtitle = isOwner ? t(locale, "subscriptions.answer.plan") : description;
   if (status === Status.NoUpcomingSelections && isOwner)
@@ -234,32 +266,90 @@ export default function SubscriptionCoverageSummary({
 
   return (
     <>
-      <h2
-        id="profile-subscriptions-overview-title"
-        tabIndex={-1}
-        className="tw-m-0 tw-flex tw-items-center tw-gap-3 tw-text-[22px] tw-font-semibold tw-leading-[30px] tw-tracking-tight tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 md:tw-text-[26px] md:tw-leading-[34px]"
-      >
-        <span
-          aria-hidden="true"
-          className={`tw-size-2 tw-shrink-0 tw-rounded-full ${DOT_CLASS[presentation.tone]}`}
-        />
-        {isLoading && !coverage
-          ? t(locale, "subscriptions.coverage.loading")
-          : headline}
-      </h2>
-      <p
-        aria-busy={isLoading}
-        className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400 md:tw-pl-5 md:tw-text-[15px]"
-      >
-        {isLoading && !coverage ? (
-          <span
-            aria-hidden="true"
-            className="tw-block tw-h-5 tw-w-3/4 tw-animate-pulse tw-rounded tw-bg-iron-800 motion-reduce:tw-animate-none"
-          />
-        ) : (
-          subtitle
-        )}
-      </p>
+      <div className="tw-flex tw-flex-col tw-gap-3 md:tw-flex-row md:tw-items-start md:tw-justify-between md:tw-gap-6">
+        <div className="tw-min-w-0 tw-flex-1">
+          <h2
+            id="profile-subscriptions-overview-title"
+            tabIndex={-1}
+            className="tw-m-0 tw-flex tw-items-center tw-gap-3 tw-text-[22px] tw-font-semibold tw-leading-[30px] tw-tracking-tight tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 md:tw-text-[26px] md:tw-leading-[34px]"
+          >
+            <span
+              aria-hidden="true"
+              className={`tw-size-2 tw-shrink-0 tw-rounded-full ${DOT_CLASS[presentation.tone]}`}
+            />
+            {isLoading && !coverage
+              ? t(locale, "subscriptions.coverage.loading")
+              : headline}
+          </h2>
+          <p
+            aria-busy={isLoading}
+            className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400 md:tw-pl-5 md:tw-text-[15px]"
+          >
+            {isLoading && !coverage ? (
+              <span
+                aria-hidden="true"
+                className="tw-block tw-h-5 tw-w-3/4 tw-animate-pulse tw-rounded tw-bg-iron-800 motion-reduce:tw-animate-none"
+              />
+            ) : (
+              subtitle
+            )}
+          </p>
+        </div>
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2 md:tw-max-w-[50%] md:tw-shrink-0">
+          <button
+            type="button"
+            aria-expanded={expanded}
+            aria-controls="subscription-coverage-details"
+            onClick={() => setExpanded(!expanded)}
+            className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          >
+            {t(locale, "subscriptions.details.title")}
+            <ChevronDownIcon
+              aria-hidden="true"
+              className={`tw-size-3 ${expanded ? "tw-rotate-180" : ""}`}
+            />
+          </button>
+          {settings && (
+            <button
+              type="button"
+              aria-expanded={mintingSettings.expanded}
+              aria-controls={SETTINGS_ID}
+              onClick={() =>
+                mintingSettings.setExpanded(!mintingSettings.expanded)
+              }
+              className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            >
+              {t(locale, "subscriptions.page.settingsTitle")}
+              <ChevronDownIcon
+                aria-hidden="true"
+                className={`tw-size-3 ${mintingSettings.expanded ? "tw-rotate-180" : ""}`}
+              />
+            </button>
+          )}
+          {isOwner &&
+            status === Status.NoUpcomingSelections &&
+            !emptyBalance && (
+              <Link
+                href="#profile-subscriptions-upcoming"
+                className={`${BUTTON_CLASS} tw-border-white tw-bg-white tw-text-iron-950`}
+              >
+                {t(locale, "subscriptions.coverage.action.chooseDrops")}
+              </Link>
+            )}
+          {isOwner && !topUpExpanded && (
+            <button
+              id="subscription-top-up-opener"
+              type="button"
+              aria-expanded={topUpExpanded}
+              aria-controls="profile-subscriptions-top-up"
+              onClick={onToggleTopUp}
+              className={`${BUTTON_CLASS} ${urgent ? "tw-border-white tw-bg-white tw-text-iron-950" : "tw-border-white/[0.12] tw-bg-transparent tw-text-iron-100"}`}
+            >
+              {t(locale, "subscriptions.page.topUpTitle")}
+            </button>
+          )}
+        </div>
+      </div>
       {isError && coverage && (
         <p
           role="status"
@@ -272,39 +362,6 @@ export default function SubscriptionCoverageSummary({
         <div className="tw-flex-1 max-md:tw-w-full max-md:tw-flex-auto">
           {balance}
         </div>
-        <button
-          type="button"
-          aria-expanded={expanded}
-          aria-controls="subscription-coverage-details"
-          onClick={() => setExpanded(!expanded)}
-          className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-        >
-          {t(locale, "subscriptions.details.title")}
-          <ChevronDownIcon
-            aria-hidden="true"
-            className={`tw-size-3 ${expanded ? "tw-rotate-180" : ""}`}
-          />
-        </button>
-        {isOwner && status === Status.NoUpcomingSelections && !emptyBalance && (
-          <Link
-            href="#profile-subscriptions-upcoming"
-            className={`${BUTTON_CLASS} tw-border-white tw-bg-white tw-text-iron-950`}
-          >
-            {t(locale, "subscriptions.coverage.action.chooseDrops")}
-          </Link>
-        )}
-        {isOwner && !topUpExpanded && (
-          <button
-            id="subscription-top-up-opener"
-            type="button"
-            aria-expanded={topUpExpanded}
-            aria-controls="profile-subscriptions-top-up"
-            onClick={onToggleTopUp}
-            className={`${BUTTON_CLASS} ${urgent ? "tw-border-white tw-bg-white tw-text-iron-950" : "tw-border-white/[0.12] tw-bg-transparent tw-text-iron-100"}`}
-          >
-            {t(locale, "subscriptions.page.topUpTitle")}
-          </button>
-        )}
       </div>
       <div id="subscription-coverage-details" hidden={!expanded}>
         <SubscriptionCoverageDetails
@@ -316,6 +373,23 @@ export default function SubscriptionCoverageSummary({
           deadlineText={deadlineText}
         />
       </div>
+      {settings && (
+        <section
+          id={SETTINGS_ID}
+          aria-labelledby={`${SETTINGS_ID}-title`}
+          hidden={!mintingSettings.expanded}
+          className="tw-mt-5 tw-scroll-mt-24 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-5"
+        >
+          <h3
+            id={`${SETTINGS_ID}-title`}
+            tabIndex={-1}
+            className="tw-mb-2 tw-mt-0 tw-text-base tw-font-semibold tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          >
+            {t(locale, "subscriptions.page.settingsTitle")}
+          </h3>
+          {settings}
+        </section>
+      )}
       {children}
     </>
   );

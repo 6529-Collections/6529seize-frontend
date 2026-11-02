@@ -3676,11 +3676,9 @@ export const EN_US_MESSAGES = {
     "The intended drops are covered for now. The funded runway will end soon.",
   "subscriptions.answer.noSelectionsVisitor":
     "Manual mode has no upcoming drops selected.",
-  "subscriptions.answer.next.one":
-    "Next: The Memes #{token} {date}, {count} card.",
-  "subscriptions.answer.next.many":
-    "Next: The Memes #{token} {date}, {count} cards.",
-  "subscriptions.answer.today": "today",
+  "subscriptions.answer.next.one": "Next: {drop} · {date} · {count} card.",
+  "subscriptions.answer.next.many": "Next: {drop} · {date} · {count} cards.",
+  "subscriptions.answer.today": "Minting today",
   "subscriptions.answer.keepMinting": "Top up to keep minting.",
   "subscriptions.answer.plan": "Plan a top up before then.",
   "subscriptions.answer.choose": "Turn on the drops you want below.",

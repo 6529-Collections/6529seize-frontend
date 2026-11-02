@@ -17,7 +17,6 @@ import type { Page } from "@/helpers/Types";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
-import { formatAddress } from "@/helpers/Helpers";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { AirdropAddressResult } from "./UserPageSubscriptionsAirdropAddress";
@@ -25,7 +24,6 @@ import UserPageSubscriptionsAirdropAddress from "./UserPageSubscriptionsAirdropA
 import UserPageSubscriptionsBalance from "./UserPageSubscriptionsBalance";
 import UserPageSubscriptionsEditionPreference from "./UserPageSubscriptionsEditionPreference";
 import UserPageSubscriptionsHistory from "./UserPageSubscriptionsHistory";
-import UserPageSubscriptionsDisclosure from "./UserPageSubscriptionsDisclosure";
 import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
 import { useSubscriptionDisclosure } from "./useSubscriptionDisclosure";
 import { useScrollToHashOnMount } from "@/hooks/useScrollToHashOnMount";
@@ -309,20 +307,6 @@ export default function UserPageSubscriptions(
     return <></>;
   }
 
-  const settingsSummary = [
-    t(
-      locale,
-      details?.subscribe_all_editions
-        ? "subscriptions.settings.all"
-        : "subscriptions.coverage.editions.one"
-    ),
-    airdropResult?.airdrop_address?.address
-      ? formatAddress(airdropResult.airdrop_address.address)
-      : null,
-  ]
-    .filter(Boolean)
-    .join(" · ");
-
   return (
     <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-8 tw-pb-12 md:tw-gap-10">
       {Object.values(fetchErrors).some(Boolean) && (
@@ -375,6 +359,23 @@ export default function UserPageSubscriptions(
             upcomingLoading={fetchingMemeSubscriptions}
             topUpExpanded={topUp.expanded}
             onToggleTopUp={() => topUp.setExpanded(!topUp.expanded)}
+            settings={
+              <>
+                <UserPageSubscriptionsEditionPreference
+                  profileKey={profileKey}
+                  details={details}
+                  readonly={!isConnectedAccount}
+                  refresh={refresh}
+                />
+                <div className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-py-3">
+                  <UserPageSubscriptionsAirdropAddress
+                    show_edit={isConnectedAccount}
+                    airdrop={airdropResult}
+                    fetching={fetchingAirdropAddress}
+                  />
+                </div>
+              </>
+            }
             balance={
               <UserPageSubscriptionsBalance
                 coverage={coverageQuery.data}
@@ -404,27 +405,6 @@ export default function UserPageSubscriptions(
             )}
           </SubscriptionCoverageSummary>
         </section>
-        <div className="tw-mt-6 tw-rounded-xl tw-bg-iron-950 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] max-md:tw-bg-iron-900 max-md:tw-shadow-none">
-          <UserPageSubscriptionsDisclosure
-            id="profile-subscriptions-settings"
-            title={t(locale, "subscriptions.page.settingsTitle")}
-            summary={fetchingDetails ? undefined : settingsSummary}
-          >
-            <UserPageSubscriptionsEditionPreference
-              profileKey={profileKey}
-              details={details}
-              readonly={!isConnectedAccount}
-              refresh={refresh}
-            />
-            <div className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-py-3">
-              <UserPageSubscriptionsAirdropAddress
-                show_edit={isConnectedAccount}
-                airdrop={airdropResult}
-                fetching={fetchingAirdropAddress}
-              />
-            </div>
-          </UserPageSubscriptionsDisclosure>
-        </div>
       </UserPageSubscriptionsSection>
       <UserPageSubscriptionsUpcoming
         profileKey={profileKey}

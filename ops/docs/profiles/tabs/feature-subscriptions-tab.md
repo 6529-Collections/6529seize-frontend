@@ -3,9 +3,9 @@
 ## Overview
 
 The `Subscriptions` tab at `/{user}/subscriptions` leads with a projected Meme
-subscription answer and balance, with compact Minting Settings directly beneath
-the coverage card in the same section, followed by Upcoming Drops. Details, Top up,
-and Minting Settings open when needed. Subscription History is a separate,
+subscription answer and balance, followed by Upcoming Drops. Details and Minting
+Settings sit at the right of the coverage card header on wider screens and wrap
+within the card on phones. Details, Top up, and Minting Settings open when needed. Subscription History is a separate,
 always-visible section with pills for each history view.
 
 This page covers tab content only. Tab visibility and hidden-tab URL fallback
@@ -75,6 +75,8 @@ first render.
 
 1. Open `/{user}/subscriptions` and read the short coverage answer, next intended
    drop, and Subscription balance. A funded-through date is a projection.
+   The next-drop name is emphasized, and a drop minting today has a green
+   `Minting today` label. The card quantity remains visible.
    The balance refresh icon shows its label on hover or keyboard focus.
 2. Open `Details` for Status, Drops funded, Funded through, Next unfunded,
    Balance capacity, Forecast use, Mode with its last-update time, Eligibility,
@@ -91,10 +93,10 @@ first render.
    supplied projected funding outcome. Cancel closes the panel and returns focus
    to the Top up button. Direct top-up links focus the inline panel; its
    accessible title is retained without an extra visible heading.
-4. Open `Minting Settings` beneath the coverage card to choose One edition or
+4. Open `Minting Settings` from the coverage card header to choose One edition or
    All eligible and read the full Airdrop Address. Owners can use its edit link
-   to open delegation registration. Settings starts closed and summarizes the
-   edition preference and address on wider screens.
+   to open delegation registration. Settings starts closed and expands inside
+   the coverage card; its direct section link still opens and focuses it.
 5. Use `Upcoming Drops` to review the first three drops, change individual
    selections or quantities, or turn Automatic mode on or off. `Show More`
    reveals the remaining rows. Minting Today rows are locked; focus, tap, or

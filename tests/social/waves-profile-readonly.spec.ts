@@ -612,24 +612,51 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         exact: true,
       })
     ).toHaveCount(0);
-    const mintingSettings = overview.getByRole("button", {
-      name: /^Minting Settings/,
+    const coverage = overview.locator("#profile-subscriptions-overview");
+    const mintingSettings = coverage.getByRole("button", {
+      name: "Minting Settings",
+      exact: true,
+    });
+    const details = coverage.getByRole("button", {
+      name: "Details",
+      exact: true,
     });
     await expect(mintingSettings).toHaveAttribute("aria-expanded", "false");
-    const settingsBox = await mintingSettings.boundingBox();
-    const coverageBox = await overview
-      .locator("#profile-subscriptions-overview")
+    await expect(details).toHaveAttribute("aria-expanded", "false");
+    const coverageBox = await coverage.boundingBox();
+    const headlineBox = await coverage
+      .locator("#profile-subscriptions-overview-title")
       .boundingBox();
-    const upcomingBox = await page
-      .getByRole("region", { name: "Upcoming Drops", exact: true })
+    const balanceBox = await coverage
+      .getByText("Subscription balance", { exact: true })
       .boundingBox();
-    expect(settingsBox).not.toBeNull();
     expect(coverageBox).not.toBeNull();
-    expect(upcomingBox).not.toBeNull();
-    expect(settingsBox!.y).toBeGreaterThanOrEqual(
-      coverageBox!.y + coverageBox!.height
-    );
-    expect(settingsBox!.y + settingsBox!.height).toBeLessThan(upcomingBox!.y);
+    expect(headlineBox).not.toBeNull();
+    expect(balanceBox).not.toBeNull();
+    for (const control of [details, mintingSettings]) {
+      const box = await control.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.x).toBeGreaterThanOrEqual(coverageBox!.x);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(
+        coverageBox!.x + coverageBox!.width
+      );
+      expect(box!.y + box!.height).toBeLessThan(balanceBox!.y);
+      if (page.viewportSize()!.width >= 768) {
+        expect(box!.x).toBeGreaterThanOrEqual(
+          headlineBox!.x + headlineBox!.width
+        );
+        expect(box!.y).toBeLessThan(headlineBox!.y + headlineBox!.height);
+      }
+    }
+    await mintingSettings.click();
+    await expect(
+      coverage.getByRole("heading", { name: "Edition Preference", exact: true })
+    ).toBeVisible();
+    await expect(
+      coverage.getByRole("heading", { name: "Airdrop Address", exact: true })
+    ).toBeVisible();
+    await expect(details).toHaveAttribute("aria-expanded", "false");
+    await mintingSettings.click();
     const tabs = history.getByRole("tablist");
     await expect(tabs).toBeVisible();
     await expect(tabs.getByRole("tab")).toHaveText([
