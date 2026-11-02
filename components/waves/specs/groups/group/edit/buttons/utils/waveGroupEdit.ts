@@ -8,12 +8,6 @@ import {
   updateGroupIdByType,
 } from "../../utils/waveGroupUpdate";
 
-const VISIBILITY_DEPENDENT_GROUP_TYPES = [
-  WaveGroupType.DROP,
-  WaveGroupType.VOTE,
-  WaveGroupType.CHAT,
-] as const;
-
 export const getScopedGroup = (
   wave: ApiWave,
   type: WaveGroupType
@@ -34,11 +28,9 @@ export const getScopedGroup = (
   }
 };
 
-const isFullyPublicExceptAdmin = (wave: ApiWave): boolean =>
+const isSharedAccessPublic = (wave: ApiWave): boolean =>
   getScopedGroup(wave, WaveGroupType.VIEW) === null &&
-  VISIBILITY_DEPENDENT_GROUP_TYPES.every(
-    (dependentType) => getScopedGroup(wave, dependentType) === null
-  );
+  getScopedGroup(wave, WaveGroupType.CHAT) === null;
 
 export const buildWaveUpdateBody = (
   wave: ApiWave,
@@ -50,15 +42,12 @@ export const buildWaveUpdateBody = (
   if (
     type !== WaveGroupType.VIEW ||
     groupId === null ||
-    !isFullyPublicExceptAdmin(wave)
+    !isSharedAccessPublic(wave)
   ) {
     return updatedBody;
   }
 
-  return VISIBILITY_DEPENDENT_GROUP_TYPES.reduce(
-    (body, dependentType) => updateGroupIdByType(body, dependentType, groupId),
-    updatedBody
-  );
+  return updateGroupIdByType(updatedBody, WaveGroupType.CHAT, groupId);
 };
 
 export const getGroupIdFromUpdateBody = (

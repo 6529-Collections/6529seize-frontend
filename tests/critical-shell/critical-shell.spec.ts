@@ -59,7 +59,7 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
     const diagnostics = attachConsoleDiagnostics(page);
 
     await page.goto("/emma", { waitUntil: "domcontentloaded" });
-    await waitForRouteReady(page, { readySelector: "h1:visible" });
+    await waitForRouteReady(page, { readySelector: "main h1:visible" });
 
     await expect(
       page.getByRole("heading", { level: 1, name: "EMMA" }).first()
@@ -162,7 +162,7 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
     const diagnostics = attachConsoleDiagnostics(page);
 
     await page.goto("/tools/app-wallets", { waitUntil: "domcontentloaded" });
-    await waitForRouteReady(page, { readySelector: "h1:visible" });
+    await waitForRouteReady(page, { readySelector: "main h1:visible" });
 
     await expect(
       page.getByRole("heading", { level: 1, name: "App Wallets" })
@@ -203,7 +203,7 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
       const diagnostics = attachConsoleDiagnostics(page);
 
       await page.goto(path, { waitUntil: "domcontentloaded" });
-      await waitForRouteReady(page, { readySelector: "h1:visible" });
+      await waitForRouteReady(page, { readySelector: "main h1:visible" });
 
       await expect(
         page.getByRole("heading", {
@@ -277,7 +277,7 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
     const diagnostics = attachConsoleDiagnostics(page);
 
     await page.goto("/tools/block-finder", { waitUntil: "domcontentloaded" });
-    await waitForRouteReady(page, { readySelector: "h1:visible" });
+    await waitForRouteReady(page, { readySelector: "main h1:visible" });
     await expect(
       page.getByRole("heading", { level: 1, name: "Block Finder" })
     ).toBeVisible();

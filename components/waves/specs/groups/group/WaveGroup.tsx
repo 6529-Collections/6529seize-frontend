@@ -11,7 +11,7 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import WaveGroupScope from "./WaveGroupScope";
 import WaveGroupMembersScope from "./WaveGroupMembersScope";
-import type { WaveGroupType } from "./WaveGroup.types";
+import { WaveGroupType } from "./WaveGroup.types";
 
 export default function WaveGroup({
   scope,
@@ -26,6 +26,8 @@ export default function WaveGroup({
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const showEdit =
+    type !== WaveGroupType.DROP &&
+    type !== WaveGroupType.VOTE &&
     canEditWave({ connectedProfile, activeProfileProxy, wave }) &&
     !scope.group?.is_direct_message;
   const emptyScopeLabel = t(DEFAULT_LOCALE, "waves.chatSettings.access.public");

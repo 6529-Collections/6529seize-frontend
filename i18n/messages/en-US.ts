@@ -783,6 +783,8 @@ const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
   copyLink: "Copy link",
   copied: "Copied!",
   copyFailed: "Copy failed",
+  showMore: "Show more",
+  showLess: "Show less",
 } as const);
 
 const WAVE_PROPOSAL_CARD_MESSAGES = objectMessages("waves.proposalCard", {
@@ -1654,6 +1656,8 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "editAccess.chatLabel": "Chat",
   "editAccess.description":
     "The current criteria are prefilled. Saving creates a new group and changes only {groupLabel} access.",
+  "editAccess.validationDescription":
+    "Everyone with chat or admin access must also be able to view the wave.",
   "editAccess.loading": "Loading current criteria…",
   "editAccess.loadErrorTitle": "Couldn't load the current criteria.",
   "editAccess.loadErrorDescription":
@@ -4755,6 +4759,12 @@ export const EN_US_MESSAGES = {
   "waves.discovery.label": "Wave discovery",
   "waves.discovery.expandSection": "Expand {section}",
   "waves.discovery.collapseSection": "Collapse {section}",
+  "waves.publicDrop.title": "Drop #{number}",
+  "waves.publicDrop.image": "{title} — image {number}",
+  "waves.publicDrop.media": "Open attachment {number} ({type})",
+  "waves.publicDrop.published": "Published {date} (UTC)",
+  "waves.publicDrop.moreParts":
+    "Connect your wallet to read the rest of this storm.",
   "waves.discovery.voteList": "Active voting waves",
   "waves.discovery.viewAll": "View all",
   "waves.discovery.viewVotes": "View all active votes",
