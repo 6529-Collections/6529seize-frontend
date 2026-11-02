@@ -8,10 +8,10 @@ import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useProfileMute from "@/hooks/useProfileMute";
 import { t } from "@/i18n/messages";
-import { faBell, faBellSlash } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   ArrowPathIcon,
+  BellIcon,
+  BellSlashIcon,
   EllipsisVerticalIcon,
   MinusCircleIcon,
   NoSymbolIcon,
@@ -68,6 +68,7 @@ function ProfileActionsMenu({
     hasArtistActivity
   );
   const menuLabel = t(locale, "contentModeration.profile.actionsMenu");
+  const MuteIcon = mute.isMuted ? BellSlashIcon : BellIcon;
   const items: readonly CompactMenuItem[] = [
     ...(artworkAlert ? [artworkAlert] : []),
     ...(showPersonalActions
@@ -80,13 +81,7 @@ function ProfileActionsMenu({
                 ? "profile.mute.action.unmute"
                 : "profile.mute.action.mute"
             ),
-            icon: (
-              <FontAwesomeIcon
-                aria-hidden="true"
-                icon={mute.isMuted ? faBellSlash : faBell}
-                className="tw-size-4"
-              />
-            ),
+            icon: <MuteIcon aria-hidden="true" className="tw-size-4" />,
             onSelect: () => void mute.toggleMute(),
             disabled: mute.isPending,
           },
