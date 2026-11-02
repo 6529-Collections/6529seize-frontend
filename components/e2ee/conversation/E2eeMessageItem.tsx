@@ -23,6 +23,7 @@ import type {
   E2eeConversation,
   E2eeEngine,
   E2eeMessage,
+  E2eeMember,
 } from "@/lib/e2ee/types";
 import {
   findMember,
@@ -32,7 +33,8 @@ import {
   getMemberName,
   getNoticeText,
 } from "../e2eeFormat";
-import { E2eeAvatar } from "../ui/E2eeAvatar";
+import { E2eeProfileLink } from "../ui/E2eeProfileLink";
+import { E2eeMessageAvatar, E2eeMessageIdentity } from "./E2eeMessageIdentity";
 import { E2eeAttachmentView } from "./E2eeAttachmentView";
 import { splitLinks } from "./e2eeLinks";
 import {
@@ -125,11 +127,12 @@ function MessageBody({
     message.mentions
   );
   return (
-    <p className="tw-m-0 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-leading-6 tw-text-iron-100">
+    <p className="tw-m-0 tw-whitespace-pre-wrap tw-break-words tw-text-md tw-leading-6 tw-text-iron-100">
       {segments.flatMap((segment) =>
         segment.kind === "mention" ? (
-          <span
+          <E2eeProfileLink
             key={segment.start}
+            member={findMember(conversation.members, segment.profileId)}
             className={`tw-rounded tw-px-0.5 tw-font-semibold ${
               segment.profileId === selfProfileId
                 ? "tw-bg-primary-500/25 tw-text-primary-300"
@@ -137,7 +140,7 @@ function MessageBody({
             }`}
           >
             {segment.value}
-          </span>
+          </E2eeProfileLink>
         ) : (
           splitLinks(segment.value, segment.start).map((part) =>
             part.kind === "link" ? (
@@ -543,10 +546,12 @@ const hasMarkers = (message: E2eeMessage) =>
 function MessageMeta({
   message,
   name,
+  member,
   compact,
 }: {
   readonly message: E2eeMessage;
   readonly name: string;
+  readonly member: E2eeMember | null;
   readonly compact: boolean;
 }) {
   const locale = useBrowserLocale();
@@ -556,10 +561,16 @@ function MessageMeta({
     return <span className="tw-sr-only">{name}</span>;
   }
   return (
-    <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2">
-      <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
-        {name}
-      </span>
+    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-text-md tw-leading-5">
+      <E2eeMessageIdentity
+        member={member}
+        fallbackName={name}
+        messageId={message.id}
+      />
+      <span
+        aria-hidden="true"
+        className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"
+      />
       <time
         dateTime={new Date(shownTs).toISOString()}
         title={formatE2eeDateTime(locale, shownTs)}
@@ -662,15 +673,20 @@ function E2eeMessageItemComponent({
       tabIndex={-1}
       className={getMessageRowClassName(compact, message.pending, appear)}
     >
-      <div className="tw-w-9 tw-flex-shrink-0">
+      <div className="tw-w-10 tw-flex-shrink-0">
         {compact ? null : (
-          <E2eeAvatar pfp={sender?.pfp ?? null} name={shownName} size="sm" />
+          <E2eeMessageAvatar member={sender} fallbackName={shownName} />
         )}
       </div>
       <div
         className={`tw-min-w-0 tw-flex-1 ${showActions ? "touch-only:tw-pr-8" : ""}`}
       >
-        <MessageMeta message={message} name={shownName} compact={compact} />
+        <MessageMeta
+          message={message}
+          name={shownName}
+          member={sender}
+          compact={compact}
+        />
         {message.reply ? (
           <ReplyPreview
             replyId={message.reply}

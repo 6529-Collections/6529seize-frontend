@@ -11,7 +11,16 @@ describe("video helpers", () => {
     expect(isVideoUrl("file.txt")).toBe(false);
   });
 
-  it.each(["mp4", "MP4"])(
+  it.each(["mp4", "mov", "m4v", "webm", "ogv"])(
+    "recognizes the supported Additional Media .%s format",
+    async (extension) => {
+      const { isVideoUrl } = await import("@/helpers/video.helpers");
+      expect(isVideoUrl(`process.${extension}`)).toBe(true);
+      expect(isVideoUrl(`process.${extension.toUpperCase()}`)).toBe(true);
+    }
+  );
+
+  it.each(["mp4", "MP4", "m4v", "ogv"])(
     "creates conversion URLs with preferred and legacy posters for .%s",
     async (extension) => {
       const { getVideoConversions } = await import("@/helpers/video.helpers");

@@ -148,6 +148,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:profile-following-sandbox`                | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Profile Following, artist artwork alerts and REP editing dialogs, permissions and recovery.           |
 | `test:e2e:wave-creation-sandbox`                    | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Wave creation, permissions, and draft recovery on desktop and mobile.                                 |
 | `test:e2e:e2ee-sandbox`                             | —                             | sandbox  | local       | manual                    | 30m     | Encrypted DMs and groups across several local browsers against the fake delivery service.             |
+| `test:e2e:e2ee-picker-sandbox`                      | —                             | sandbox  | local       | manual                    | 15m     | Encrypted chat recipient selection in desktop Chromium and iPhone WebKit.                             |
 | `test:e2e:smoke:surface-matrix`                     | —                             | local    | local       | pr-ci, manual             | 15m     | @smoke subset on desktop and mobile web shells.                                                       |
 | `test:e2e:surface-matrix`                           | —                             | local    | local       | pr-ci, manual             | 15m     | Core surfaces on desktop and mobile web shells.                                                       |
 | `test:e2e:browser-diversity`                        | —                             | local    | local       | pr-ci, manual             | 15m     | Engine-diversity pass on Firefox and WebKit.                                                          |
@@ -260,7 +261,8 @@ Opt-in stateful staging packs:
   earlier signing-only grant. No device signs an EIP-712 `MlsDeviceGrant` on
   the website. The spec covers a DM in both directions, an image
   attachment through the blob store, a group with a third user and a revoked
-  second device that can no longer read new messages. It also asserts that no
+  second device that can no longer read new messages. It also checks sender
+  profile links and levels, plus DM header profile links. Its privacy checks ensure no
   request URL, body or sent WebSocket frame contains any plaintext (raw, hex
   or base64 at any alignment), that the MLS WebAssembly module loads under the
   served CSP (`'wasm-unsafe-eval'` without `'unsafe-eval'`) and that the
@@ -454,6 +456,12 @@ Surface matrix:
   external browser writes are blocked by a browser route guard. Known wallet and
   analytics SDK background writes are still blocked in-browser, but they do not
   fail the test. This pack must never run against staging or production.
+- `test:e2e:e2ee-picker-sandbox` runs the real encrypted-compose recipient
+  picker in desktop Chromium and iPhone WebKit. It checks completed taps,
+  selection and eligibility, search reset, Enter/Space activation, Escape and
+  outside dismissal. This is browser simulation; physical iPhone verification
+  remains separate. Like the other local E2EE pack, it is manually owned and
+  uses only the loopback delivery service.
 - `test:e2e:e2ee-sandbox` runs end-to-end encrypted DMs and groups (D109)
   in several browser contexts at once, each a different local user (alice,
   bob, carol, dave) or another device of the same user, against one Next dev
