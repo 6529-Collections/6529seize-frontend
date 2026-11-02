@@ -113,7 +113,7 @@ it("toggles the saved preference without changing feed subscriptions", async () 
   const button = screen.getByRole("button", { name });
   await waitFor(() => expect(button).toBeEnabled());
   expect(button).toHaveTextContent("Off");
-  expect(button).toHaveTextContent("New artwork in The Memes – Main Stage.");
+  expect(button).toHaveTextContent("New Main Stage artwork.");
   await user.click(button);
   await waitFor(() => expect(button).toHaveTextContent("On"));
   expect(postPreference).toHaveBeenCalledTimes(1);

@@ -3091,7 +3091,7 @@ export const EN_US_MESSAGES = {
   "artworkAlerts.on": "On",
   "artworkAlerts.off": "Off",
   "artworkAlerts.saving": "Please wait…",
-  "artworkAlerts.mainStage": "New artwork in The Memes – Main Stage.",
+  "artworkAlerts.mainStage": "New Main Stage artwork.",
   "artworkAlerts.enabled": "Artwork alerts are on.",
   "artworkAlerts.disabled": "Artwork alerts are off.",
   "artworkAlerts.ownProfile":
