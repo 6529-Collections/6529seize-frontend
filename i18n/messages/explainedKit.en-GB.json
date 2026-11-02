@@ -144,7 +144,7 @@
   "explained.kit.day.simulated": "simulated",
   "explained.kit.liveStrip.today": "Today on the network",
   "explained.kit.liveStrip.legend": "Dashed: today, still open.",
-  "explained.kit.liveStrip.legendOpen": "Dashed: today, still counting, dated {date}.",
+  "explained.kit.liveStrip.legendOpen": "Dashed: today, dated {date}.",
   "explained.kit.contents.label": "On this page",
   "explained.kit.receipt.label": "The receipt for cycle {cycle}",
   "explained.kit.receipt.result": "Result",
