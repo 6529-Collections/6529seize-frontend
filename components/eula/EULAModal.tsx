@@ -5,10 +5,10 @@
 import { CURRENT_EULA_VERSION } from "@/constants/constants";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import { useEULAConsent } from "./useEULAConsent";
 import { useEffect, useId, useRef, useSyncExternalStore } from "react";
-import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
+import { faArrowDown } from "@fortawesome/free-solid-svg-icons/faArrowDown";
 import EULAIntroSections from "./EULAIntroSections";
 import EULACommunicationsSection from "./EULACommunicationsSection";
 import EULAFooter from "./EULAFooter";
@@ -686,7 +686,11 @@ export default function EULAModal() {
                   aria-label={t(locale, "eula.modal.scrollToEnd")}
                   className="tw-absolute tw-bottom-4 tw-right-4 tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-50 tw-p-2 tw-text-iron-950 tw-shadow-xl tw-transition tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-white motion-reduce:tw-transition-none sm:tw-bottom-5 sm:tw-right-8"
                 >
-                  <FontAwesomeIcon icon={faArrowDown} height={16} width={16} />
+                  <FontAwesomeSvgIcon
+                    icon={faArrowDown}
+                    height={16}
+                    width={16}
+                  />
                 </button>
               )}
             </div>

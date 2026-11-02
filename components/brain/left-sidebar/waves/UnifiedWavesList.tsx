@@ -5,8 +5,8 @@ import { useWaveSidebarCollection } from "@/hooks/useWaveSidebarCollection";
 
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useCreateModalState from "@/hooks/useCreateModalState";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons/faPlus";
+import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import React, { useEffect, useEffectEvent, useRef } from "react";
 import UnifiedWavesListEmpty from "./UnifiedWavesListEmpty";
 import { UnifiedWavesListLoader } from "./UnifiedWavesListLoader";
@@ -137,7 +137,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
         {!isApp && (
           <div className="tw-mb-4 tw-w-full tw-px-4">
             <Button onClick={openWave} variant="primary" size="sm" fullWidth>
-              <FontAwesomeIcon
+              <FontAwesomeSvgIcon
                 icon={faPlus}
                 className="tw-size-3.5 tw-flex-shrink-0"
               />

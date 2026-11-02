@@ -1,15 +1,13 @@
 "use client";
 
-import {
-  faPlugCircleMinus,
-  faPlugCirclePlus,
-  faRightFromBracket,
-  faShuffle,
-  faShieldHalved,
-  faSliders,
-  faUser,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlugCircleMinus } from "@fortawesome/free-solid-svg-icons/faPlugCircleMinus";
+import { faPlugCirclePlus } from "@fortawesome/free-solid-svg-icons/faPlugCirclePlus";
+import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons/faRightFromBracket";
+import { faShuffle } from "@fortawesome/free-solid-svg-icons/faShuffle";
+import { faShieldHalved } from "@fortawesome/free-solid-svg-icons/faShieldHalved";
+import { faSliders } from "@fortawesome/free-solid-svg-icons/faSliders";
+import { faUser } from "@fortawesome/free-solid-svg-icons/faUser";
+import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
@@ -316,7 +314,7 @@ export default function HeaderUserMenuDropdown({
                       aria-label="Disconnect"
                       className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                     >
-                      <FontAwesomeIcon
+                      <FontAwesomeSvgIcon
                         icon={faPlugCircleMinus}
                         height={20}
                         width={20}
@@ -338,7 +336,7 @@ export default function HeaderUserMenuDropdown({
                       aria-label="Connect"
                       className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                     >
-                      <FontAwesomeIcon
+                      <FontAwesomeSvgIcon
                         icon={faPlugCirclePlus}
                         height={20}
                         width={20}
@@ -389,7 +387,7 @@ export default function HeaderUserMenuDropdown({
                           aria-label={upgradeAuthenticationLabel}
                           className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                         >
-                          <FontAwesomeIcon
+                          <FontAwesomeSvgIcon
                             icon={faShieldHalved}
                             height={20}
                             width={20}
@@ -411,7 +409,7 @@ export default function HeaderUserMenuDropdown({
                       aria-label="Switch Chain"
                       className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                     >
-                      <FontAwesomeIcon
+                      <FontAwesomeSvgIcon
                         icon={faShuffle}
                         height={16}
                         width={16}
@@ -432,7 +430,11 @@ export default function HeaderUserMenuDropdown({
                         )}
                         className="tw-relative tw-grid tw-h-11 tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-iron-800 tw-px-3 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                       >
-                        <FontAwesomeIcon icon={faUser} height={20} width={20} />
+                        <FontAwesomeSvgIcon
+                          icon={faUser}
+                          height={20}
+                          width={20}
+                        />
                         <span>
                           {t(HEADER_USER_MENU_LOCALE, "headerUserMenu.profile")}
                         </span>
@@ -447,7 +449,7 @@ export default function HeaderUserMenuDropdown({
                       )}
                       className="tw-relative tw-flex tw-size-11 tw-flex-shrink-0 tw-cursor-pointer tw-select-none tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-iron-800 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                     >
-                      <FontAwesomeIcon
+                      <FontAwesomeSvgIcon
                         icon={faSliders}
                         height={20}
                         width={20}
@@ -479,7 +481,7 @@ export default function HeaderUserMenuDropdown({
                     )}
                     className="tw-relative tw-grid tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-grid-cols-[1.5rem_minmax(0,1fr)] tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                   >
-                    <FontAwesomeIcon
+                    <FontAwesomeSvgIcon
                       icon={faRightFromBracket}
                       height={20}
                       width={20}

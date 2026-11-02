@@ -1,8 +1,8 @@
 import WavePicture from "@/components/waves/WavePicture";
 import { AnnouncementWaveIcon } from "@/components/brain/left-sidebar/waves/SidebarIconTile";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
-import { faBellSlash } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBellSlash } from "@fortawesome/free-solid-svg-icons/faBellSlash";
+import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 
 interface WaveAvatarProps {
   readonly isAnnouncement?: boolean | undefined;
@@ -135,7 +135,10 @@ export const WaveAvatar = ({
       {showBadge && <div className={UNREAD_BADGE_CLASSES}>{displayCount}</div>}
       {wave.isMuted && (
         <div className={MUTED_BADGE_CLASSES}>
-          <FontAwesomeIcon icon={faBellSlash} className={MUTED_ICON_CLASSES} />
+          <FontAwesomeSvgIcon
+            icon={faBellSlash}
+            className={MUTED_ICON_CLASSES}
+          />
         </div>
       )}
     </div>

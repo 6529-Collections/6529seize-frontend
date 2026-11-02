@@ -3,8 +3,8 @@
 import { useMemo } from "react";
 import { FallbackImage } from "@/components/common/FallbackImage";
 import { useAuth } from "@/components/auth/Auth";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faWater } from "@fortawesome/free-solid-svg-icons";
+import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
+import { faWater } from "@fortawesome/free-solid-svg-icons/faWater";
 import {
   buildDirectMessageIdentityCandidates,
   normalizeDirectMessageIdentity,
@@ -134,7 +134,7 @@ export default function WavePicture({
       <div
         className={`tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-white/10 ${roundedClassName}`}
       >
-        <FontAwesomeIcon
+        <FontAwesomeSvgIcon
           icon={faWater}
           className="tw-size-[54%] tw-text-white/60"
           aria-hidden="true"
