@@ -33,11 +33,6 @@ const { commonApiFetch } = jest.requireMock<{
   commonApiFetch: jest.Mock;
 }>("@/services/api/common-api");
 
-type ServerCookies = {
-  readonly initialIsIos: boolean;
-  readonly initialConsentVersion?: string | undefined;
-};
-
 type Harness = {
   readonly react: typeof import("react");
   readonly hydrateRoot: typeof import("react-dom/client").hydrateRoot;
@@ -69,7 +64,7 @@ function setBrowserConsent(version: string | null) {
       : `${CONSENT_EULA_COOKIE}=${version}; Path=/`;
 }
 
-async function hydratePage(server: ServerCookies) {
+async function hydratePage() {
   const harness = loadHarness();
   const { react, hydrateRoot, renderToString, EULAConsentStartup } = harness;
   const commits: string[] = [];
@@ -82,13 +77,13 @@ async function hydratePage(server: ServerCookies) {
     }, []);
     return <h1>Museum page</h1>;
   }
-  const page = (cookies: ServerCookies) => (
-    <EULAConsentStartup {...cookies}>
+  const page = () => (
+    <EULAConsentStartup>
       <PageContent />
     </EULAConsentStartup>
   );
   const container = document.createElement("div");
-  container.innerHTML = renderToString(page(server));
+  container.innerHTML = renderToString(page());
   document.body.appendChild(container);
   const serverHtml = container.innerHTML;
   const serverHeading = container.querySelector("h1");
@@ -96,7 +91,7 @@ async function hydratePage(server: ServerCookies) {
   const recoverableErrors: unknown[] = [];
   let root: ReturnType<typeof hydrateRoot> | undefined;
   await react.act(async () => {
-    root = hydrateRoot(container, page(server), {
+    root = hydrateRoot(container, page(), {
       onRecoverableError: (error) => recoverableErrors.push(error),
     });
   });
@@ -111,8 +106,8 @@ async function hydratePage(server: ServerCookies) {
     serverHeading,
     serverCheck,
     recoverableErrors,
-    rerender: async (cookies: ServerCookies) => {
-      await react.act(async () => root?.render(page(cookies)));
+    rerender: async () => {
+      await react.act(async () => root?.render(page()));
     },
     cleanup: async () => {
       await react.act(async () => root?.unmount());
@@ -131,12 +126,13 @@ beforeEach(() => {
   commonApiFetch.mockReset();
 });
 
-it("prerenders the ungated page without reading browser state", () => {
+it("renders the ungated page on the server without reading browser state", () => {
   mockPlatform = "ios";
+  setBrowserConsent(null);
   const { renderToString, EULAConsentStartup } = loadHarness();
 
   const html = renderToString(
-    <EULAConsentStartup initialIsIos={false}>
+    <EULAConsentStartup>
       <h1>Museum page</h1>
     </EULAConsentStartup>
   );
@@ -150,11 +146,11 @@ it.each([
   ["android", null],
   ["ios", CURRENT_EULA_VERSION],
 ] as const)(
-  "keeps a prerendered %s page mounted (browser consent %s)",
+  "keeps a %s page mounted (browser consent %s)",
   async (platform, consent) => {
     mockPlatform = platform;
     setBrowserConsent(consent);
-    const result = await hydratePage({ initialIsIos: false });
+    const result = await hydratePage();
     try {
       expect(result.recoverableErrors).toEqual([]);
       expect(result.container.querySelector("h1")).toBe(result.serverHeading);
@@ -167,14 +163,16 @@ it.each([
 );
 
 it.each([null, "2025-01-01"])(
-  "replaces a prerendered native iOS page with the blocking check (browser consent %s)",
+  "replaces a native iOS page with the blocking check (browser consent %s)",
   async (consent) => {
     mockPlatform = "ios";
     setBrowserConsent(consent);
     commonApiFetch.mockReturnValue(new Promise(() => undefined));
-    const result = await hydratePage({ initialIsIos: false });
+    const result = await hydratePage();
     try {
+      // The server HTML never holds the check; the browser starts it.
       expect(result.serverHeading).not.toBeNull();
+      expect(result.serverCheck).toBeNull();
       expect(result.recoverableErrors).toEqual([]);
       // The hidden hydration commit is removed by the commit that reveals
       // native iOS, before the page content can be shown.
@@ -194,31 +192,13 @@ it.each([null, "2025-01-01"])(
   }
 );
 
-it("keeps a request-time native iOS check that the server already started", async () => {
-  mockPlatform = "ios";
-  commonApiFetch.mockReturnValue(new Promise(() => undefined));
-  const result = await hydratePage({ initialIsIos: true });
-  try {
-    expect(result.serverHeading).toBeNull();
-    expect(result.serverCheck).not.toBeNull();
-    expect(result.recoverableErrors).toEqual([]);
-    expect(result.container.querySelector('main[aria-busy="true"]')).toBe(
-      result.serverCheck
-    );
-    expect(result.commits).toEqual([]);
-    expect(commonApiFetch).toHaveBeenCalledTimes(1);
-  } finally {
-    await result.cleanup();
-  }
-});
-
-it("opens a prerendered native iOS page once after restored acceptance", async () => {
+it("opens a native iOS page once after restored acceptance", async () => {
   mockPlatform = "ios";
   commonApiFetch.mockResolvedValue({
     accepted_at: Date.now() - 1_000,
     eula_version: CURRENT_EULA_VERSION,
   });
-  const result = await hydratePage({ initialIsIos: false });
+  const result = await hydratePage();
   try {
     expect(result.recoverableErrors).toEqual([]);
     expect(result.container.querySelector("h1")?.textContent).toBe(
@@ -226,17 +206,13 @@ it("opens a prerendered native iOS page once after restored acceptance", async (
     );
     expect(result.commits).toEqual(["mount", "unmount", "mount"]);
 
-    // A later root refresh carries the restored cookies. The page that is
-    // already open must not restart.
-    await result.rerender({
-      initialIsIos: true,
-      initialConsentVersion: CURRENT_EULA_VERSION,
-    });
+    // A later root refresh or client navigation re-renders the startup with
+    // the restored cookie in place. The accepted app stays mounted: the
+    // document's starting decision is never re-read.
+    await result.rerender();
     expect(result.commits).toEqual(["mount", "unmount", "mount"]);
 
-    // Moving on to another prerendered page carries empty server cookies
-    // again. The accepted app stays mounted and is not checked again.
-    await result.rerender({ initialIsIos: false });
+    await result.rerender();
     expect(result.commits).toEqual(["mount", "unmount", "mount"]);
     expect(result.container.querySelector("h1")?.textContent).toBe(
       "Museum page"
