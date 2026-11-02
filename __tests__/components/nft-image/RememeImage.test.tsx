@@ -207,4 +207,19 @@ describe("RememeImage", () => {
       expect.stringMatching(/^data:image\/gif;base64,/)
     );
   });
+
+  it("lazy-loads grid images without high priority", () => {
+    render(<RememeImage nft={nftBase} animation={false} height={300} />);
+    const image = screen.getByRole("img");
+    expect(image).toHaveAttribute("loading", "lazy");
+    expect(image).toHaveAttribute("fetchPriority", "auto");
+    expect(image).not.toHaveAttribute("priority");
+  });
+
+  it("loads the single-rememe hero image eagerly at high priority", () => {
+    render(<RememeImage nft={nftBase} animation={false} height={650} />);
+    const image = screen.getByRole("img");
+    expect(image).toHaveAttribute("loading", "eager");
+    expect(image).toHaveAttribute("fetchPriority", "high");
+  });
 });
