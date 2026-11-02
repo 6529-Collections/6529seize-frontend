@@ -10,7 +10,9 @@
 // never replaced or deleted, so HTML from any earlier build still finds its
 // files. A name that already exists with different bytes would break that
 // promise for one of the two builds, so the whole publication fails before
-// anything is written.
+// anything is written. Bytes are compared by SHA-256: every upload sends its
+// checksum, S3 verifies and stores it, and existing objects are read back with
+// checksum mode.
 
 const { execFile } = require("node:child_process");
 const crypto = require("node:crypto");
@@ -24,11 +26,10 @@ const IMMUTABLE_CACHE_CONTROL = "public, max-age=31536000, immutable";
 const DEFAULT_CONCURRENCY = 16;
 const MAX_CONCURRENCY = 64;
 // A single PutObject accepts up to 5 GiB; static files are far smaller. One
-// part keeps the S3 ETag equal to the file's MD5, which the comparison needs.
+// part keeps the stored SHA-256 a full-object checksum.
 const MAX_SINGLE_PUT_BYTES = 5 * 1024 * 1024 * 1024;
 const BUCKET_PATTERN = /^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/u;
 const KEY_SEGMENT_PATTERN = /^[A-Za-z0-9._~@+=,-]+$/u;
-const MD5_ETAG_PATTERN = /^[a-f0-9]{32}$/u;
 
 // The values `aws s3 cp` (Python mimetypes) gave the same files under the
 // per-commit prefixes, so cached responses keep their Content-Type. Unknown
@@ -59,6 +60,12 @@ const CONTENT_TYPES = Object.freeze({
 
 function fail(message) {
   throw new Error(message);
+}
+
+// S3 keys compare by code point; locale order would vary by runner.
+function compareCodePoints(a, b) {
+  if (a < b) return -1;
+  return a > b ? 1 : 0;
 }
 
 function contentTypeFor(relativePath) {
@@ -125,7 +132,7 @@ function buildLocalInventory(sourceDirectory, prefix) {
   if (!metadata.isDirectory() || metadata.isSymbolicLink()) {
     fail("--source must be a real directory");
   }
-  const relativePaths = walkFiles(root).sort();
+  const relativePaths = walkFiles(root).sort(compareCodePoints);
   if (relativePaths.length === 0) {
     fail("--source contains no files");
   }
@@ -143,63 +150,59 @@ function buildLocalInventory(sourceDirectory, prefix) {
     if (bytes.length > MAX_SINGLE_PUT_BYTES) {
       fail(`static file is too large for a single upload: ${relativePath}`);
     }
-    const md5 = crypto.createHash("md5").update(bytes).digest();
     return {
       relativePath,
       absolutePath,
       key: `${prefix}/${relativePath}`,
       size: bytes.length,
-      md5Hex: md5.toString("hex"),
-      md5Base64: md5.toString("base64"),
+      // The form S3 uses for x-amz-checksum-sha256 and ChecksumSHA256.
+      sha256: crypto.createHash("sha256").update(bytes).digest("base64"),
       contentType,
     };
   });
   if (unknownTypes.size > 0) {
     fail(
-      `no Content-Type is defined for: ${[...unknownTypes].sort().join(", ")}; add it to CONTENT_TYPES`
+      `no Content-Type is defined for: ${[...unknownTypes].sort(compareCodePoints).join(", ")}; add it to CONTENT_TYPES`
     );
   }
   return inventory;
 }
 
-function normalizeEtag(etag) {
-  return typeof etag === "string" ? etag.replaceAll('"', "").toLowerCase() : "";
-}
-
 function sameObject(file, remote) {
-  const etag = normalizeEtag(remote.etag);
   return (
     Number(remote.size) === file.size &&
-    MD5_ETAG_PATTERN.test(etag) &&
-    etag === file.md5Hex
+    typeof remote.sha256 === "string" &&
+    remote.sha256 === file.sha256
   );
 }
 
+// Names the prefix lacks are uploaded. Names it holds with another size are
+// collisions; the rest still need their stored checksum compared.
 function planPublication(inventory, remoteObjects) {
   const remoteByKey = new Map();
   for (const remote of remoteObjects) {
     remoteByKey.set(remote.key, remote);
   }
   const upload = [];
-  const reuse = [];
+  const verify = [];
   const collisions = [];
   for (const file of inventory) {
     const remote = remoteByKey.get(file.key);
     if (!remote) {
       upload.push(file);
-    } else if (sameObject(file, remote)) {
-      reuse.push(file);
+    } else if (Number(remote.size) === file.size) {
+      verify.push(file);
     } else {
       collisions.push({ file, remote });
     }
   }
-  return { upload, reuse, collisions };
+  return { upload, verify, collisions };
 }
 
 function describeCollisions(collisions) {
   const shown = collisions.slice(0, 20).map(({ file, remote }) => {
-    const remoteEtag = normalizeEtag(remote.etag) || "unknown";
-    return `${file.key} (local md5 ${file.md5Hex}, ${file.size} bytes; stored ETag ${remoteEtag}, ${remote.size} bytes)`;
+    const stored = remote.sha256 ?? "no SHA-256 checksum";
+    return `${file.key} (local sha256 ${file.sha256}, ${file.size} bytes; stored ${stored}, ${remote.size} bytes)`;
   });
   const more =
     collisions.length > shown.length
@@ -213,6 +216,8 @@ const execFileAsync = promisify(execFile);
 async function defaultRunAws(args) {
   try {
     const { stdout, stderr } = await execFileAsync("aws", args, {
+      // An empty pager keeps the CLI from paging output on a terminal.
+      env: { ...process.env, AWS_PAGER: "" },
       maxBuffer: 1024 * 1024 * 1024,
       windowsHide: true,
     });
@@ -235,6 +240,12 @@ function parseJson(text, label) {
   }
 }
 
+// S3 returns at most 1,000 keys per ListObjectsV2 page. AWS CLI v2 follows
+// every continuation token by default and prints all keys; only
+// --no-paginate, --max-items, --page-size or --starting-token change that
+// (https://docs.aws.amazon.com/cli/latest/userguide/cli-usage-pagination.html).
+// JSON output builds the full result before applying --query, so the query
+// sees every page. Keep those flags out of this call.
 async function listRemoteObjects({ bucket, prefix, runAws }) {
   const result = await runAws([
     "s3api",
@@ -244,7 +255,7 @@ async function listRemoteObjects({ bucket, prefix, runAws }) {
     "--prefix",
     `${prefix}/`,
     "--query",
-    "Contents[].{key: Key, etag: ETag, size: Size}",
+    "Contents[].{key: Key, size: Size}",
     "--output",
     "json",
   ]);
@@ -269,6 +280,8 @@ async function headRemoteObject({ bucket, key, runAws }) {
     bucket,
     "--key",
     key,
+    "--checksum-mode",
+    "ENABLED",
     "--output",
     "json",
   ]);
@@ -276,7 +289,12 @@ async function headRemoteObject({ bucket, key, runAws }) {
     fail(`reading s3://${bucket}/${key} failed: ${result.stderr.trim()}`);
   }
   const head = parseJson(result.stdout, "head-object") ?? {};
-  return { key, etag: head.ETag, size: head.ContentLength };
+  return { key, sha256: head.ChecksumSHA256, size: head.ContentLength };
+}
+
+async function verifyExisting({ bucket, file, runAws }) {
+  const remote = await headRemoteObject({ bucket, key: file.key, runAws });
+  return { file, remote, same: sameObject(file, remote) };
 }
 
 // Returns "uploaded", or "reused" when another writer stored the same bytes
@@ -295,8 +313,10 @@ async function uploadFile({ bucket, file, cacheControl, runAws }) {
     file.contentType,
     "--cache-control",
     cacheControl,
-    "--content-md5",
-    file.md5Base64,
+    "--checksum-algorithm",
+    "SHA256",
+    "--checksum-sha256",
+    file.sha256,
     "--if-none-match",
     "*",
     "--output",
@@ -304,8 +324,8 @@ async function uploadFile({ bucket, file, cacheControl, runAws }) {
   ]);
   if (result.code === 0) {
     const stored = parseJson(result.stdout, "put-object") ?? {};
-    if (normalizeEtag(stored.ETag) !== file.md5Hex) {
-      fail(`stored ETag for ${file.key} does not match its MD5`);
+    if (stored.ChecksumSHA256 !== file.sha256) {
+      fail(`stored SHA-256 for ${file.key} does not match the verified file`);
     }
     return "uploaded";
   }
@@ -319,19 +339,31 @@ async function uploadFile({ bucket, file, cacheControl, runAws }) {
   fail(`uploading ${file.key} failed: ${result.stderr.trim()}`);
 }
 
+// Runs up to `concurrency` workers. After the first failure no new item
+// starts; items already running finish, then the failure is thrown.
 async function runWithConcurrency(items, concurrency, worker) {
   const results = new Array(items.length);
   let next = 0;
+  let failed = false;
   async function lane() {
-    while (next < items.length) {
-      const index = next;
-      next += 1;
-      results[index] = await worker(items[index]);
+    if (failed || next >= items.length) {
+      return;
     }
+    // Claim the item synchronously: an await between reading and advancing
+    // `next` would let two lanes take the same item.
+    const index = next;
+    next += 1;
+    try {
+      results[index] = await worker(items[index]);
+    } catch (error) {
+      failed = true;
+      throw error;
+    }
+    await lane();
   }
   const lanes = Array.from(
     { length: Math.min(concurrency, items.length) },
-    lane
+    () => lane()
   );
   await Promise.all(lanes);
   return results;
@@ -362,8 +394,15 @@ async function publishSharedStaticAssets({
   const inventory = buildLocalInventory(source, prefix);
   const remoteObjects = await listRemoteObjects({ bucket, prefix, runAws });
   const plan = planPublication(inventory, remoteObjects);
-  if (plan.collisions.length > 0) {
-    fail(describeCollisions(plan.collisions));
+  const verified = await runWithConcurrency(plan.verify, concurrency, (file) =>
+    verifyExisting({ bucket, file, runAws })
+  );
+  const collisions = [
+    ...plan.collisions,
+    ...verified.filter((check) => !check.same),
+  ];
+  if (collisions.length > 0) {
+    fail(describeCollisions(collisions));
   }
 
   const outcomes = await runWithConcurrency(plan.upload, concurrency, (file) =>
@@ -371,7 +410,7 @@ async function publishSharedStaticAssets({
   );
   const uploaded = plan.upload.filter((_, i) => outcomes[i] === "uploaded");
   const reused = [
-    ...plan.reuse,
+    ...plan.verify,
     ...plan.upload.filter((_, i) => outcomes[i] === "reused"),
   ];
 
@@ -385,7 +424,9 @@ async function publishSharedStaticAssets({
     bytes: sumBytes(inventory),
     uploaded: { files: uploaded.length, bytes: sumBytes(uploaded) },
     reused: { files: reused.length, bytes: sumBytes(reused) },
-    uploaded_paths: uploaded.map((file) => file.relativePath).sort(),
+    uploaded_paths: uploaded
+      .map((file) => file.relativePath)
+      .sort(compareCodePoints),
   };
 }
 
@@ -431,7 +472,10 @@ async function main() {
 }
 
 if (require.main === module) {
-  main();
+  main().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
 }
 
 module.exports = {
@@ -441,4 +485,5 @@ module.exports = {
   contentTypeFor,
   planPublication,
   publishSharedStaticAssets,
+  runWithConcurrency,
 };

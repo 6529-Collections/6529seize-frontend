@@ -19,9 +19,10 @@ version>/`, plus the exact `web_build/current-production-version.json` object.
   `seize-web/web_build/shared/_next/static/`, and list only that prefix.
   Uploads must send `If-None-Match` (`s3:if-none-match` must be present), so
   the role can add new content-hashed files but cannot replace or delete one
-  that earlier builds' pages load. Listing lets the workflow compare stored
-  ETags (MD5 under SSE-S3, single-part uploads) with the verified files before
-  writing; see `ops/scripts/publish-shared-static-assets.cjs`.
+  that earlier builds' pages load. Listing finds the names that already exist;
+  reading their stored SHA-256 checksums (`HeadObject` with checksum mode,
+  covered by `s3:GetObject`) lets the workflow compare them with the verified
+  files before writing; see `ops/scripts/publish-shared-static-assets.cjs`.
 - Describe/create application versions for `seize app`; describe/update only
   `seizeapp-env-node22` in `us-east-1`.
 - Read and invalidate only the existing announcement distribution `EKB17CMB021J6`.

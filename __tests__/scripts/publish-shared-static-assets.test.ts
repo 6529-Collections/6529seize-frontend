@@ -9,6 +9,7 @@ const {
   contentTypeFor,
   planPublication,
   publishSharedStaticAssets,
+  runWithConcurrency,
 } = require("../../ops/scripts/publish-shared-static-assets.cjs");
 
 const BUCKET = "seize-web";
@@ -16,28 +17,38 @@ const PREFIX = "web_build/shared/_next/static";
 const BUILD_ID = "a".repeat(40);
 
 type AwsResult = { code: number; stdout: string; stderr: string };
-type RemoteObject = { key: string; etag: string; size: number };
+type Stored = { size: number; sha256?: string };
 
-const md5 = (content: string) =>
-  createHash("md5").update(content).digest("hex");
+const sha256 = (content: string | Buffer) =>
+  createHash("sha256").update(content).digest("base64");
 const ok = (body: unknown): AwsResult => ({
   code: 0,
   stdout: JSON.stringify(body),
   stderr: "",
 });
-const stored = (relativePath: string, content: string): RemoteObject => ({
-  key: `${PREFIX}/${relativePath}`,
-  etag: `"${md5(content)}"`,
+const preconditionFailed: AwsResult = {
+  code: 254,
+  stdout: "",
+  stderr:
+    "An error occurred (PreconditionFailed) when calling the PutObject operation",
+};
+const storedFor = (content: string): Stored => ({
   size: Buffer.byteLength(content),
+  sha256: sha256(content),
 });
+const compare = (a: string, b: string) => {
+  if (a < b) return -1;
+  return a > b ? 1 : 0;
+};
 
 const FILES: Record<string, string> = {
   "chunks/00ieasdvpo4ki.js": "console.log('shared');",
   "chunks/0200ktct53i0m.js": "console.log('changed');",
-  "css/0a1b2c3d4e5f6.css": "body{color:red}",
+  "chunks/0a1b2c3d4e5f6.css": "body{color:red}",
   "media/Montserrat-s.p.3s2s_7pxl2s0_.woff2": "wOF2",
   [`${BUILD_ID}/_buildManifest.js`]: "self.__BUILD_MANIFEST={}",
 };
+const SORTED_PATHS = Object.keys(FILES).sort(compare);
 
 let root: string;
 
@@ -49,35 +60,58 @@ function writeFiles(files: Record<string, string>) {
   }
 }
 
-function fakeAws({
-  listed = null as RemoteObject[] | null,
-  put = (_key: string, args: string[]): AwsResult =>
-    ok({ ETag: `"${md5(fs.readFileSync(argValue(args, "--body"), "utf8"))}"` }),
-  head = (_key: string): AwsResult => ({ code: 254, stdout: "", stderr: "" }),
-  list = (): AwsResult => ok(listed),
-} = {}) {
-  const calls: string[][] = [];
-  const runAws = jest.fn(async (args: string[]) => {
-    calls.push(args);
-    switch (args[1]) {
-      case "list-objects-v2":
-        return list();
-      case "put-object":
-        return put(argValue(args, "--key"), args);
-      case "head-object":
-        return head(argValue(args, "--key"));
-      default:
-        throw new Error(`unexpected aws call: ${args.join(" ")}`);
-    }
-  });
-  const puts = () => calls.filter((args) => args[1] === "put-object");
-  return { runAws, calls, puts };
-}
-
 function argValue(args: string[], name: string): string {
   const index = args.indexOf(name);
   if (index === -1) throw new Error(`missing ${name}`);
   return args[index + 1]!;
+}
+
+// A fake S3 prefix keyed by path relative to PREFIX.
+function fakeAws({
+  stored = {} as Record<string, Stored>,
+  put,
+  list,
+}: {
+  stored?: Record<string, Stored>;
+  put?: (key: string, args: string[]) => AwsResult;
+  list?: () => AwsResult;
+} = {}) {
+  const objects = new Map(
+    Object.entries(stored).map(([name, value]) => [`${PREFIX}/${name}`, value])
+  );
+  const calls: string[][] = [];
+  const runAws = jest.fn(async (args: string[]) => {
+    calls.push(args);
+    switch (args[1]) {
+      case "list-objects-v2": {
+        if (list) return list();
+        const contents = [...objects].map(([key, value]) => ({
+          key,
+          size: value.size,
+        }));
+        return ok(contents.length > 0 ? contents : null);
+      }
+      case "head-object": {
+        const value = objects.get(argValue(args, "--key"));
+        return value
+          ? ok({ ContentLength: value.size, ChecksumSHA256: value.sha256 })
+          : { code: 254, stdout: "", stderr: "Not Found" };
+      }
+      case "put-object": {
+        const key = argValue(args, "--key");
+        if (put) return put(key, args);
+        if (objects.has(key)) return preconditionFailed;
+        const body = fs.readFileSync(argValue(args, "--body"));
+        objects.set(key, { size: body.length, sha256: sha256(body) });
+        return ok({ ChecksumSHA256: sha256(body) });
+      }
+      default:
+        throw new Error(`unexpected aws call: ${args.join(" ")}`);
+    }
+  });
+  const of = (operation: string) =>
+    calls.filter((args) => args[1] === operation);
+  return { runAws, calls, of };
 }
 
 function publish(runAws: unknown, options: Record<string, unknown> = {}) {
@@ -102,34 +136,31 @@ afterEach(() => {
 describe("publish-shared-static-assets", () => {
   it("serves each static file type with the Content-Type the per-commit uploads used", () => {
     expect(contentTypeFor("chunks/a.js")).toBe("text/javascript");
-    expect(contentTypeFor("css/a.css")).toBe("text/css");
+    expect(contentTypeFor("chunks/a.css")).toBe("text/css");
     expect(contentTypeFor("media/a.woff2")).toBe("font/woff2");
+    expect(contentTypeFor("media/a.ttf")).toBe("font/ttf");
     expect(contentTypeFor("media/a.SVG")).toBe("image/svg+xml");
     expect(contentTypeFor("chunks/a.unknown")).toBeNull();
-    expect(contentTypeFor("chunks/constructor")).toBeNull();
+    expect(contentTypeFor("chunks/a.constructor")).toBeNull();
   });
 
-  it("inventories files with their shared keys and MD5 digests", () => {
+  it("inventories files in code-point order with their shared keys and SHA-256", () => {
     const inventory = buildLocalInventory(root, PREFIX);
 
     expect(inventory.map((file: { key: string }) => file.key)).toEqual(
-      Object.keys(FILES)
-        .sort()
-        .map((relativePath) => `${PREFIX}/${relativePath}`)
+      SORTED_PATHS.map((relativePath) => `${PREFIX}/${relativePath}`)
     );
-    const chunk = inventory.find(
-      (file: { relativePath: string }) =>
-        file.relativePath === "chunks/00ieasdvpo4ki.js"
-    );
-    expect(chunk).toEqual(
+    expect(
+      inventory.find(
+        (file: { relativePath: string }) =>
+          file.relativePath === "chunks/00ieasdvpo4ki.js"
+      )
+    ).toEqual(
       expect.objectContaining({
         size: Buffer.byteLength(FILES["chunks/00ieasdvpo4ki.js"]!),
-        md5Hex: md5(FILES["chunks/00ieasdvpo4ki.js"]!),
+        sha256: sha256(FILES["chunks/00ieasdvpo4ki.js"]!),
         contentType: "text/javascript",
       })
-    );
-    expect(Buffer.from(chunk.md5Base64, "base64").toString("hex")).toBe(
-      chunk.md5Hex
     );
   });
 
@@ -151,40 +182,37 @@ describe("publish-shared-static-assets", () => {
     }
   });
 
-  it("plans new names for upload, identical names for reuse, and other bytes as collisions", () => {
+  it("plans new names for upload, same-size names for checksum checks, and other sizes as collisions", () => {
     const inventory = buildLocalInventory(root, PREFIX);
     const plan = planPublication(inventory, [
-      stored("chunks/00ieasdvpo4ki.js", FILES["chunks/00ieasdvpo4ki.js"]!),
-      stored("chunks/0200ktct53i0m.js", "different bytes"),
-      // A multipart ETag cannot be compared with an MD5, so it never counts as
-      // the same object.
       {
-        key: `${PREFIX}/css/0a1b2c3d4e5f6.css`,
-        etag: `"${md5(FILES["css/0a1b2c3d4e5f6.css"]!)}-2"`,
-        size: Buffer.byteLength(FILES["css/0a1b2c3d4e5f6.css"]!),
+        key: `${PREFIX}/chunks/00ieasdvpo4ki.js`,
+        size: Buffer.byteLength(FILES["chunks/00ieasdvpo4ki.js"]!),
       },
+      { key: `${PREFIX}/chunks/0200ktct53i0m.js`, size: 1 },
     ]);
 
     const keys = (files: { key: string }[]) => files.map((file) => file.key);
-    expect(keys(plan.reuse)).toEqual([`${PREFIX}/chunks/00ieasdvpo4ki.js`]);
+    expect(keys(plan.verify)).toEqual([`${PREFIX}/chunks/00ieasdvpo4ki.js`]);
     expect(
       plan.collisions.map(({ file }: { file: { key: string } }) => file.key)
-    ).toEqual([
-      `${PREFIX}/chunks/0200ktct53i0m.js`,
-      `${PREFIX}/css/0a1b2c3d4e5f6.css`,
-    ]);
+    ).toEqual([`${PREFIX}/chunks/0200ktct53i0m.js`]);
     expect(keys(plan.upload)).toEqual([
       `${PREFIX}/${BUILD_ID}/_buildManifest.js`,
+      `${PREFIX}/chunks/0a1b2c3d4e5f6.css`,
       `${PREFIX}/media/Montserrat-s.p.3s2s_7pxl2s0_.woff2`,
     ]);
   });
 
-  it("uploads every file create-only on the first publication", async () => {
-    const aws = fakeAws({ listed: null });
+  it("lists the whole prefix, relying on the CLI's default pagination", async () => {
+    const aws = fakeAws();
 
-    const evidence = await publish(aws.runAws, { concurrency: 2 });
+    await publish(aws.runAws);
 
-    expect(aws.calls[0]).toEqual([
+    // S3 pages ListObjectsV2 at 1,000 keys. The CLI follows every page unless
+    // one of these flags is passed, so the listing must never pass them.
+    const [listCall] = aws.of("list-objects-v2");
+    expect(listCall).toEqual([
       "s3api",
       "list-objects-v2",
       "--bucket",
@@ -192,13 +220,29 @@ describe("publish-shared-static-assets", () => {
       "--prefix",
       `${PREFIX}/`,
       "--query",
-      "Contents[].{key: Key, etag: ETag, size: Size}",
+      "Contents[].{key: Key, size: Size}",
       "--output",
       "json",
     ]);
-    expect(aws.puts()).toHaveLength(Object.keys(FILES).length);
+    for (const flag of [
+      "--no-paginate",
+      "--max-items",
+      "--page-size",
+      "--starting-token",
+    ]) {
+      expect(listCall).not.toContain(flag);
+    }
+  });
+
+  it("uploads every file create-only with its SHA-256 on the first publication", async () => {
+    const aws = fakeAws();
+
+    const evidence = await publish(aws.runAws, { concurrency: 2 });
+
+    expect(aws.of("head-object")).toHaveLength(0);
+    expect(aws.of("put-object")).toHaveLength(SORTED_PATHS.length);
     const chunkPut = aws
-      .puts()
+      .of("put-object")
       .find(
         (args) => argValue(args, "--key") === `${PREFIX}/chunks/00ieasdvpo4ki.js`
       )!;
@@ -207,9 +251,11 @@ describe("publish-shared-static-assets", () => {
     expect(argValue(chunkPut, "--cache-control")).toBe(IMMUTABLE_CACHE_CONTROL);
     expect(IMMUTABLE_CACHE_CONTROL).toBe("public, max-age=31536000, immutable");
     expect(argValue(chunkPut, "--content-type")).toBe("text/javascript");
-    expect(
-      Buffer.from(argValue(chunkPut, "--content-md5"), "base64").toString("hex")
-    ).toBe(md5(FILES["chunks/00ieasdvpo4ki.js"]!));
+    expect(argValue(chunkPut, "--checksum-algorithm")).toBe("SHA256");
+    expect(argValue(chunkPut, "--checksum-sha256")).toBe(
+      sha256(FILES["chunks/00ieasdvpo4ki.js"]!)
+    );
+    expect(chunkPut.join(" ")).not.toMatch(/md5/i);
     expect(evidence).toEqual(
       expect.objectContaining({
         schema_version: "shared-static-publication.v1",
@@ -221,25 +267,37 @@ describe("publish-shared-static-assets", () => {
         reused: { files: 0, bytes: 0 },
       })
     );
-    expect(evidence.uploaded_paths).toEqual(Object.keys(FILES).sort());
+    expect(evidence.uploaded_paths).toEqual(SORTED_PATHS);
   });
 
-  it("uploads only names the prefix does not already hold", async () => {
+  it("uploads only names the prefix lacks after checking stored checksums", async () => {
     const unchanged = [
       "chunks/00ieasdvpo4ki.js",
-      "css/0a1b2c3d4e5f6.css",
+      "chunks/0a1b2c3d4e5f6.css",
       "media/Montserrat-s.p.3s2s_7pxl2s0_.woff2",
     ];
     const aws = fakeAws({
-      listed: [
-        ...unchanged.map((name) => stored(name, FILES[name]!)),
-        stored("chunks/zz-from-an-older-build.js", "old"),
-      ],
+      stored: {
+        ...Object.fromEntries(
+          unchanged.map((name) => [name, storedFor(FILES[name]!)])
+        ),
+        "chunks/zz-from-an-older-build.js": storedFor("old"),
+      },
     });
 
     const evidence = await publish(aws.runAws);
 
-    expect(aws.puts().map((args) => argValue(args, "--key")).sort()).toEqual([
+    const head = aws.of("head-object");
+    expect(head.map((args) => argValue(args, "--key")).sort(compare)).toEqual(
+      unchanged.map((name) => `${PREFIX}/${name}`)
+    );
+    expect(argValue(head[0]!, "--checksum-mode")).toBe("ENABLED");
+    expect(
+      aws
+        .of("put-object")
+        .map((args) => argValue(args, "--key"))
+        .sort(compare)
+    ).toEqual([
       `${PREFIX}/${BUILD_ID}/_buildManifest.js`,
       `${PREFIX}/chunks/0200ktct53i0m.js`,
     ]);
@@ -252,58 +310,58 @@ describe("publish-shared-static-assets", () => {
     expect(evidence.bytes).toBe(evidence.reused.bytes + evidence.uploaded.bytes);
   });
 
-  it("writes nothing when an existing name holds different bytes", async () => {
-    const aws = fakeAws({
-      listed: [stored("chunks/0200ktct53i0m.js", "bytes from another build")],
-    });
+  // "console.log('changed');" is 23 bytes.
+  it.each<[string, Stored]>([
+    ["different bytes of the same size", { size: 23, sha256: sha256("y".repeat(23)) }],
+    ["a different size", { size: 3, sha256: sha256("old") }],
+    ["no stored SHA-256", { size: 23 }],
+  ])("writes nothing when an existing name holds %s", async (_, stored) => {
+    expect(Buffer.byteLength(FILES["chunks/0200ktct53i0m.js"]!)).toBe(23);
+    const aws = fakeAws({ stored: { "chunks/0200ktct53i0m.js": stored } });
 
     await expect(publish(aws.runAws)).rejects.toThrow(
       /refusing to publish: 1 static file name\(s\) already exist with different bytes[\s\S]*chunks\/0200ktct53i0m\.js/
     );
-    expect(aws.puts()).toHaveLength(0);
+    expect(aws.of("put-object")).toHaveLength(0);
   });
 
-  it("accepts identical bytes stored by a concurrent writer after the listing", async () => {
-    const aws = fakeAws({
-      put: (key, args) =>
-        key.endsWith("00ieasdvpo4ki.js")
-          ? {
-              code: 254,
-              stdout: "",
-              stderr:
-                "An error occurred (PreconditionFailed) when calling the PutObject operation",
-            }
-          : ok({ ETag: `"${md5(fs.readFileSync(argValue(args, "--body"), "utf8"))}"` }),
-      head: () =>
-        ok({
-          ETag: `"${md5(FILES["chunks/00ieasdvpo4ki.js"]!)}"`,
-          ContentLength: Buffer.byteLength(FILES["chunks/00ieasdvpo4ki.js"]!),
-        }),
+  // Another writer stores the name between the listing and the upload, so the
+  // upload gets 412 and head-object sees the other writer's object.
+  function racingAws(racedName: string, racedObject: Stored) {
+    const racedKey = `${PREFIX}/${racedName}`;
+    return jest.fn(async (args: string[]): Promise<AwsResult> => {
+      if (args[1] === "list-objects-v2") return ok(null);
+      if (args[1] === "head-object") {
+        return ok({
+          ContentLength: racedObject.size,
+          ChecksumSHA256: racedObject.sha256,
+        });
+      }
+      if (argValue(args, "--key") === racedKey) return preconditionFailed;
+      const body = fs.readFileSync(argValue(args, "--body"));
+      return ok({ ChecksumSHA256: sha256(body) });
     });
+  }
 
-    const evidence = await publish(aws.runAws);
+  it("accepts identical bytes stored by a concurrent writer after the listing", async () => {
+    const name = "chunks/00ieasdvpo4ki.js";
+
+    const evidence = await publish(racingAws(name, storedFor(FILES[name]!)));
 
     expect(evidence.uploaded.files).toBe(4);
     expect(evidence.reused.files).toBe(1);
-    expect(evidence.uploaded_paths).not.toContain("chunks/00ieasdvpo4ki.js");
+    expect(evidence.uploaded_paths).not.toContain(name);
   });
 
   it("fails when a concurrent writer stored different bytes under the name", async () => {
-    const aws = fakeAws({
-      put: () => ({
-        code: 254,
-        stdout: "",
-        stderr: "An error occurred (PreconditionFailed) when calling the PutObject operation",
-      }),
-      head: () => ok({ ETag: `"${md5("other")}"`, ContentLength: 5 }),
-    });
-
-    await expect(publish(aws.runAws, { concurrency: 1 })).rejects.toThrow(
-      "already exist with different bytes"
-    );
+    await expect(
+      publish(racingAws("chunks/00ieasdvpo4ki.js", storedFor("other")), {
+        concurrency: 1,
+      })
+    ).rejects.toThrow("already exist with different bytes");
   });
 
-  it("fails on listing, upload, and stored-digest errors", async () => {
+  it("fails on listing, upload, and stored-checksum errors", async () => {
     await expect(
       publish(
         fakeAws({
@@ -321,10 +379,35 @@ describe("publish-shared-static-assets", () => {
     ).rejects.toThrow("failed: AccessDenied");
 
     await expect(
-      publish(fakeAws({ put: () => ok({ ETag: `"${md5("other")}"` }) }).runAws, {
+      publish(fakeAws({ put: () => ok({ ChecksumSHA256: sha256("other") }) }).runAws, {
         concurrency: 1,
       })
-    ).rejects.toThrow("does not match its MD5");
+    ).rejects.toThrow("does not match the verified file");
+  });
+
+  it("stops starting new uploads after the first failure", async () => {
+    const started: number[] = [];
+    const worker = async (item: number) => {
+      started.push(item);
+      if (item === 1) throw new Error("upload 1 failed");
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      return item;
+    };
+
+    await expect(
+      runWithConcurrency([0, 1, 2, 3, 4, 5], 2, worker)
+    ).rejects.toThrow("upload 1 failed");
+    // Items 0 and 1 start together; 1 fails while 0 is still running, so
+    // 0 finishes and nothing after them starts.
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(started).toEqual([0, 1]);
+
+    await expect(runWithConcurrency([0, 1, 2], 1, worker)).rejects.toThrow(
+      "upload 1 failed"
+    );
+    await expect(runWithConcurrency([3, 4, 5], 2, worker)).resolves.toEqual([
+      3, 4, 5,
+    ]);
   });
 
   it("validates the bucket, prefix, and concurrency before calling AWS", async () => {

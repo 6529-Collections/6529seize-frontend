@@ -216,7 +216,12 @@ describe("production exact-artifact deployment contract", () => {
     expect(deploy.env.SHARED_STATIC_PREFIX).toBe(sharedStaticPrefix);
     expect(deploy.env.AWS_BUCKET).toBe("seize-web");
 
-    const publish = steps[stepIndex("Publish verified static files to the shared prefix")];
+    const publish = steps.find(
+      (step) => step.name === "Publish verified static files to the shared prefix"
+    );
+    if (!publish?.run) {
+      throw new Error("missing shared static publish step");
+    }
     expect(publish.run).toContain(
       "node ops/scripts/publish-shared-static-assets.cjs"
     );
@@ -265,8 +270,10 @@ describe("production exact-artifact deployment contract", () => {
     };
     const statement = (sid: string) => {
       const found = storage.Statement.find((entry) => entry.Sid === sid);
-      expect(found).toBeDefined();
-      return found!;
+      if (!found) {
+        throw new Error(`missing IAM statement ${sid}`);
+      }
+      return found;
     };
     const objects = `arn:aws:s3:::seize-web/${sharedStaticPrefix}/*`;
     expect(statement("ProductionSharedStaticCreateOnly")).toEqual(

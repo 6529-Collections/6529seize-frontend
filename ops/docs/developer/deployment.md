@@ -231,9 +231,10 @@ reuse their cached copy after a deploy instead of downloading it again.
 
 `Web Deploy - PROD` publishes the verified artifact's static files with
 `ops/scripts/publish-shared-static-assets.cjs` before Elastic Beanstalk
-changes. It lists the prefix, uploads only new names with
-`If-None-Match: *` and a `Content-MD5` check, and fails without writing
-anything if an existing name holds different bytes. Each run uploads
+changes. It lists the prefix, compares each existing name's stored SHA-256
+checksum with the verified file, and uploads only new names with
+`If-None-Match: *` and a SHA-256 checksum that S3 verifies. If an existing
+name holds different bytes, it fails without writing anything. Each run uploads
 `production-shared-static-publication-<run ID>` evidence with uploaded and
 reused file and byte counts. The Elastic Beanstalk bundle stays at
 `web_build/<commit SHA>/package.zip`.
@@ -241,7 +242,9 @@ reused file and byte counts. The Elastic Beanstalk bundle stays at
 A collision means a name was not content-addressed, or a shortened content
 hash collided. Never delete or overwrite the stored object: pages already use
 it. Find the cause; Next's `outputHashSalt` setting changes every hashed name
-if the build must ship before the cause is fixed.
+if the build must ship before the cause is fixed. That deploy uploads every
+file again, returning visitors download everything once, and the old objects
+stay.
 
 Objects in the shared prefix are never replaced or deleted, and the bucket has
 no expiry rule, so pages from any earlier build, including tabs open across
