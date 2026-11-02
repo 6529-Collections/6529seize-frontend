@@ -1,4 +1,4 @@
-import { getNodeEnv, publicEnv } from "./env";
+import { getNodeEnv, publicEnv } from "@/config/env";
 
 const DEV_LIKE_NODE_ENVS: ReadonlySet<string> = new Set([
   "development",
