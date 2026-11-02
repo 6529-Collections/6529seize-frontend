@@ -31,9 +31,12 @@ export default function WaveDropLongContent({
   const contentId = useId();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const pendingAnchorRef = useRef<PendingAnchor | null>(null);
-  const preview = useMemo(() => getDropContentPreview(content), [content]);
   const { enabled, isExpanded, scrollContainerRef, setExpanded } =
     useWaveDropContentExpansion(expansionKey);
+  const preview = useMemo(
+    () => (enabled ? getDropContentPreview(content) : null),
+    [content, enabled]
+  );
 
   useLayoutEffect(() => {
     const pendingAnchor = pendingAnchorRef.current;
@@ -70,7 +73,7 @@ export default function WaveDropLongContent({
     );
   }, [isExpanded, scrollContainerRef]);
 
-  if (!enabled || !preview.isLong) {
+  if (!preview?.isLong) {
     return children;
   }
 

@@ -297,22 +297,24 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     baseURL,
     page,
   }) => {
+    // Load the fixture before navigation; a route may still be in flight
+    // when Playwright disposes the page's request context at test teardown.
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(baseURL)}/api/v2/waves/${SANDBOX_WAVE_ID}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const payload = (await response.json()) as {
+      drops: Array<Record<string, unknown>>;
+      wave: Record<string, unknown>;
+    };
+    const sourceDrop = payload.drops[0];
+    if (!sourceDrop) {
+      throw new Error("Expected the sandbox wave to return one source drop.");
+    }
     await page.route(
       `**/api/v2/waves/${SANDBOX_WAVE_ID}/drops**`,
       async (route) => {
-        const response = await route.fetch();
-        const payload = (await response.json()) as {
-          drops: Array<Record<string, unknown>>;
-          wave: Record<string, unknown>;
-        };
-        const sourceDrop = payload.drops[0];
-        if (!sourceDrop) {
-          throw new Error(
-            "Expected the sandbox wave to return one source drop."
-          );
-        }
         await route.fulfill({
-          response,
           json: {
             ...payload,
             drops: [
@@ -1104,9 +1106,19 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       await expectNoUnsafeSandboxMutations(baseURL);
 
       await quoteCard.focus();
+      // Chat consumes serialNo into its scroll target and removes it from
+      // the URL. Assert the exact outgoing destination before that cleanup.
+      const quoteNavigation = page.waitForRequest((request) => {
+        const url = new URL(request.url());
+        return (
+          url.pathname === `/waves/${quotedWaveId}` &&
+          url.searchParams.get("serialNo") === "42"
+        );
+      });
       await quoteCard.press(key);
+      await quoteNavigation;
       await expect(page).toHaveURL(
-        new RegExp(`/waves/${quotedWaveId}\\?serialNo=42$`)
+        new RegExp(`/waves/${quotedWaveId}(?:\\?serialNo=42)?$`)
       );
     });
   }

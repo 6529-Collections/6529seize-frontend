@@ -2,6 +2,7 @@ import { WaveDropContentExpansionProvider } from "@/components/waves/drops/WaveD
 import WaveDropLongContent from "@/components/waves/drops/WaveDropLongContent";
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { RefObject } from "react";
+import * as dropContentPreview from "@/helpers/waves/dropContentPreview";
 
 const LONG_CONTENT = "Long post content ".repeat(80);
 
@@ -53,8 +54,11 @@ describe("WaveDropLongContent", () => {
   });
 
   it("renders full content without a toggle when collapse is disabled", () => {
+    const previewSpy = jest.spyOn(dropContentPreview, "getDropContentPreview");
     renderLongContent({ enabled: false });
 
+    expect(previewSpy).not.toHaveBeenCalled();
+    previewSpy.mockRestore();
     expect(screen.getByTestId("full-markdown")).toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
