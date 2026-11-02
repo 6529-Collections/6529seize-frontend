@@ -83,6 +83,13 @@ To report or apply audit fixes, use the same secure wrapper path:
 6529 audit:fix
 ```
 
+The wrapper also accepts `6529 audit --prod --audit-level=high` (optionally
+with `--json`). The weekly **Dependency Audit** GitHub Actions workflow runs it
+against the lockfile and fails when a production package has a high or critical
+advisory with a published fix; advisories with no fix yet are listed in the run
+summary without failing it. `pnpm audit --ignore` and `--ignore-unfixable` stay
+blocked because they write `auditConfig` into `pnpm-workspace.yaml`.
+
 For an intentional dependency update, use:
 
 ```bash

@@ -22,10 +22,13 @@ import { WaveLeaderboardLoading } from "./WaveLeaderboardLoading";
 import { useWaveProposalCardPresentation } from "@/hooks/waves/useWaveProposalCardPresentation";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import WaveLeaderboardError from "../WaveLeaderboardError";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 const PROPOSAL_CARD_ROW_ESTIMATE_PX = 360;
 
 interface WaveLeaderboardDropsProps {
+  readonly additionalActionOnly?: boolean | undefined;
   readonly wave: ApiWave;
   readonly sort: WaveDropsLeaderboardSort;
   readonly isVotingClosed?: boolean | undefined;
@@ -41,6 +44,7 @@ interface WaveLeaderboardDropsProps {
 const getDropId = (drop: ExtendedDrop): string => drop.id;
 
 export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
+  additionalActionOnly = false,
   wave,
   sort,
   isVotingClosed = false,
@@ -52,6 +56,7 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   priceCurrency,
   scrollContainerRef,
 }) => {
+  const locale = useBrowserLocale();
   const {
     drops,
     pageMetadata,
@@ -68,6 +73,7 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
     isFetchPreviousPageError,
     refetch,
   } = useWaveDropsLeaderboard({
+    additionalActionOnly,
     waveId: wave.id,
     sort,
     maxPages: WAVE_DROPS_LEADERBOARD_MAX_PAGES,
@@ -109,7 +115,11 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
         />
       );
     }
-    return (
+    return additionalActionOnly ? (
+      <output className="tw-block tw-p-6 tw-text-sm tw-font-light tw-text-iron-500">
+        {t(locale, "memes.additionalAction.empty")}
+      </output>
+    ) : (
       <WaveLeaderboardEmptyState onCreateDrop={onCreateDrop} wave={wave} />
     );
   }

@@ -132,3 +132,5 @@ Use this area for wave and direct-message tasks:
 - [Profiles Index](../profiles/README.md)
 - [Media Index](../media/README.md)
 - [Shared Index](../shared/README.md)
+
+- [Private Bookmarks](chat/feature-private-bookmarks.md): privately save messages and return to their conversations.

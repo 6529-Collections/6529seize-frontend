@@ -74,6 +74,23 @@ describe("drop.helpers", () => {
     expect(extended.type).toBe(DropSize.FULL);
   });
 
+  it("keeps identical anonymous submissions distinct using their entry-local author ids", () => {
+    const first = {
+      ...baseDrop,
+      type: DropSize.FULL,
+      author: { id: "anonymous-one", handle: "Anonymous", is_anonymous: true },
+    };
+    const second = {
+      ...first,
+      id: "d2",
+      author: { ...first.author, id: "anonymous-two" },
+    };
+    expect(getStableDropKey(first).hash).not.toBe(
+      getStableDropKey(second).hash
+    );
+    expect(getStableDropKey(second, [first])).toEqual(getStableDropKey(second));
+  });
+
   describe("getDropPreviewImageUrl", () => {
     it("returns null when metadata is undefined", () => {
       expect(getDropPreviewImageUrl(undefined)).toBeNull();

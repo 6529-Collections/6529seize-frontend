@@ -3248,6 +3248,57 @@ paths:
           description: >-
             Backward-compatible request field. Session challenges are issued for
             the backend-configured auth chain, not this client-supplied value.
+        - name: device_key
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+          description: >-
+            Web only. Raw 32-byte Ed25519 public key of a browser-held device
+            key, as 0x + 64 lowercase hex. When present, the SIWE message also
+            grants this key the right to sign drop writes for 180 days (one
+            device-grant URN resource and a matching statement). Sending any
+            device parameter with a native or desktop client type returns 400.
+        - name: device_key_type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ed25519
+          description: Required when device_key is present.
+        - name: device_scopes
+          in: query
+          required: false
+          schema:
+            type: string
+          description: >-
+            Optional comma separated list from post, edit, delete, react, vote.
+            Defaults to post,edit,delete,react. Must include post; duplicates
+            are rejected. The grant stores the scopes in canonical order.
+        - name: mls_device_key
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+          description: >-
+            Web only, with device_key and mls_ciphersuite. The device's MLS
+            Ed25519 signature public key (0x + 64 lowercase hex), different from
+            device_key. When encrypted messages are on and mls_ciphersuite is
+            the server's ciphersuite, the SIWE message is a combined grant: it
+            also grants this key for end-to-end encrypted messages with the same
+            expiry (a second urn:6529:mls-device-grant:v1 resource and a
+            combined statement). Otherwise the challenge grants device_key only.
+        - name: mls_ciphersuite
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 65535
+          description: The MLS ciphersuite of mls_device_key; required with it.
       x-6529-query-schema:
         $ref: "#/components/schemas/ApiSessionNonceQuery"
       responses:
@@ -3259,6 +3310,79 @@ paths:
                 $ref: "#/components/schemas/ApiSessionNonceResponse"
         "400":
           description: Invalid request
+  /device-grants:
+    get:
+      tags:
+        - Authentication
+      summary: List the device signing grants of the authenticated profile
+      description: >-
+        Returns active, expired and revoked device grants (newest first, at most
+        100) whose wallet belongs to the authenticated profile, or to the
+        authenticated wallet when it has no profile. Not available to proxies.
+      operationId: getDeviceGrants
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: device-signing
+        handler:
+          import: "@/api/device-signing/device-signing.handlers"
+          name: handleGetDeviceGrants
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiDeviceGrant"
+        "401":
+          description: Authentication required
+        "403":
+          description: Not available to proxies
+  /device-grants/{grantId}/revoke:
+    post:
+      tags:
+        - Authentication
+      summary: Revoke a device signing grant
+      description: >-
+        Revokes a grant whose wallet belongs to the authenticated profile (or
+        equals the authenticated wallet when it has no profile). Idempotent:
+        revoking an already revoked grant keeps the first revocation time and
+        returns the grant. Not available to proxies.
+      operationId: revokeDeviceGrant
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: device-signing
+        handler:
+          import: "@/api/device-signing/device-signing.handlers"
+          name: handleRevokeDeviceGrant
+      parameters:
+        - name: grantId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDeviceGrant"
+        "401":
+          description: Authentication required
+        "403":
+          description: Not available to proxies
+        "404":
+          description: Grant not found
   /auth/session-login:
     post:
       tags:
@@ -5653,6 +5777,48 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiCompetitionError"
   /v3/waves/{wave_id}:
+    patch:
+      tags:
+        - CompetitionsV3
+      summary: Update shared wave settings without changing any competition
+      operationId: updateWaveHubV3
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: competitions-v3
+        handler:
+          import: "@/api/waves/wave-hub.handlers"
+          name: handleUpdateWaveHubV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiUpdateWaveHubRequest"
+      responses:
+        "200":
+          description: Updated shared wave and configuration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveV3"
+        "400":
+          description: Invalid wave settings
+        "403":
+          description: Wave administration is not permitted
+        "404":
+          description: Wave is absent or unavailable
     get:
       tags:
         - CompetitionsV3
@@ -6044,6 +6210,15 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: is_additional_action_promised
+          in: query
+          required: false
+          description: >-
+            Filter entries by the artist's Additional Action promise, including
+            promises without plan text. False returns entries without a promise
+            (including unset flags). Omit to include all entries.
+          schema:
+            type: boolean
         - name: sort
           in: query
           required: false
@@ -9169,6 +9344,38 @@ paths:
                 $ref: "#/components/schemas/ApiDrop"
         "404":
           description: Drop not found
+  /drops-bookmarked/status:
+    get:
+      tags:
+        - Drops
+      summary: Get the signed-in owner's accessible bookmark count
+      description: >-
+        Private to the authenticated owner, independently of the active proxy
+        profile.
+      operationId: getDropBookmarksStatus
+      parameters:
+        - name: drop_id
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drops/drop-bookmarks-status.handler"
+          name: getDropBookmarksStatus
+      responses:
+        "200":
+          description: Accessible bookmark count for the authenticated owner
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropBookmarksStatus"
+        "403":
+          description: Authentication with a profile required
   /drops-bookmarked/:
     get:
       tags:
@@ -9176,7 +9383,8 @@ paths:
       summary: Get bookmarked drops for authenticated user
       description: >-
         Requires the user to be authenticated. Returns drops bookmarked by the
-        current user, sorted by bookmark time.
+        authenticated owner, independently of the active proxy profile, sorted
+        by bookmark time.
       operationId: getBookmarkedDrops
       parameters:
         - name: wave_id
@@ -9275,9 +9483,19 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDeviceSignedWriteRequest"
       responses:
         "201":
           description: successful operation
+        "400":
+          description: >-
+            Invalid request. A rejected device_signature returns a message
+            starting with "Invalid device signature:".
         "404":
           description: Drop not found
   /drops/{dropId}/ratings:
@@ -9414,6 +9632,48 @@ paths:
       responses:
         "201":
           description: successful operation
+  /drops/{dropId}/signed-events:
+    get:
+      tags:
+        - Drops
+      summary: Get the device signed events of a drop
+      description: >-
+        Returns every stored device signed event that authorized a write to this
+        drop (oldest first), together with the wallet signed grants they
+        reference, so anyone can verify them without trusting 6529.io.
+        current_event_id is the event whose body is the drop's current content,
+        or null when the current content is not author signed. Returns 404 when
+        the caller cannot read the drop. When moderation hides the drop's
+        content from the caller or its author is anonymous to the caller,
+        returns the empty result of an unsigned drop (no events, no grants,
+        current_event_id null).
+      operationId: getDropSignedEvents
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        cache: false
+        typeImportGroup: device-signing
+        handler:
+          import: "@/api/device-signing/device-signing.handlers"
+          name: handleGetDropSignedEvents
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropSignedEvents"
+        "404":
+          description: Drop not found
   /drops/{dropId}/subscriptions:
     post:
       tags:
@@ -10611,6 +10871,2009 @@ paths:
           description: >-
             At least one of term or author_id is required; term must contain 3
             to 200 characters
+  /e2ee/me:
+    get:
+      tags:
+        - Encrypted Messages
+      summary: Get the caller's encrypted-messaging devices and KeyPackage status
+      description: >-
+        Lists the caller's devices (active, and revoked or expired within 90
+        days) and KeyPackage availability per active device. Requires a profile;
+        proxies are rejected; 404 E2EE_DISABLED while the feature flag is off.
+      operationId: e2eeGetMe
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeGetMe
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeMe"
+        "400":
+          description: >-
+            Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT,
+            E2EE_BAD_SIGNATURE)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE, E2EE_POLICY,
+            E2EE_BLOCKED)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_DISABLED, E2EE_NOT_FOUND,
+            E2EE_NOT_MEMBER)
+        "409":
+          description: >-
+            Conflict (E2EE_EPOCH_CONFLICT and E2EE_EPOCH_STALE carry
+            current_epoch; E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS,
+            E2EE_KEY_PACKAGE_LIMIT)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/devices:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Register or renew an encrypted-messaging device
+      description: >-
+        Verifies the wallet-signed device grant (EIP-712, EOA or EIP-1271 on
+        Ethereum mainnet). The grant wallet must belong to the caller's profile.
+        At most 10 active devices per profile. Re-registering an unrevoked key
+        of the same profile renews its grant. Requires a profile; proxies are
+        rejected; 404 E2EE_DISABLED while the feature flag is off.
+      operationId: e2eeRegisterDevice
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeRegisterDevice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeRegisterDeviceRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeDevice"
+        "400":
+          description: >-
+            Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT,
+            E2EE_BAD_SIGNATURE)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE, E2EE_POLICY,
+            E2EE_BLOCKED)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_DISABLED, E2EE_NOT_FOUND,
+            E2EE_NOT_MEMBER)
+        "409":
+          description: >-
+            Conflict (E2EE_EPOCH_CONFLICT and E2EE_EPOCH_STALE carry
+            current_epoch; E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS,
+            E2EE_KEY_PACKAGE_LIMIT)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/devices/login-grant:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Register or renew an encrypted-messaging device from a sign-in grant
+      description: >-
+        Registers the MLS device key that a combined sign-in grant (NC8) also
+        granted, without a separate wallet signature. The grant must be one this
+        server stored at a Sign-In with Ethereum login, unrevoked and unexpired,
+        carrying an urn:6529:mls-device-grant:v1 resource for the current
+        ciphersuite, and its wallet must belong to the caller's profile. Same
+        device limit and renewal rules as POST /e2ee/devices. Requires a
+        profile; proxies are rejected; 404 E2EE_DISABLED while the feature flag
+        is off.
+      operationId: e2eeRegisterLoginGrantDevice
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeRegisterLoginGrantDevice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeRegisterLoginGrantDeviceRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeDevice"
+        "400":
+          description: Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT)
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN)
+        "404":
+          description: Not found or disabled (E2EE_DISABLED)
+        "409":
+          description: Conflict (E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS)
+  /e2ee/devices/lookup:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Look up encrypted-messaging devices in bulk
+      description: >-
+        Returns the devices of the given profiles (active, and revoked or
+        expired within 90 days) and the records of the given device keys, so a
+        client can verify every member's grants in one request. At most 200
+        profile ids and 500 device keys; at least one of the two. Requires a
+        profile; proxies are rejected; 404 E2EE_DISABLED while the feature flag
+        is off.
+      operationId: e2eeLookupDevices
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeLookupDevices
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeDeviceLookupRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeDeviceLookupResponse"
+        "400":
+          description: Invalid request (E2EE_BAD_REQUEST)
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN)
+        "404":
+          description: Disabled (E2EE_DISABLED)
+  /e2ee/devices/{device_key}:
+    get:
+      tags:
+        - Encrypted Messages
+      summary: Get an encrypted-messaging device record
+      description: >-
+        Any authenticated profile may read a device record, to verify the device
+        grant behind an MLS leaf. Requires a profile; proxies are rejected; 404
+        E2EE_DISABLED while the feature flag is off.
+      operationId: e2eeGetDevice
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeGetDevice
+      parameters:
+        - name: device_key
+          in: path
+          required: true
+          description: Device key (0x + 64 lowercase hex)
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeDevice"
+        "400":
+          description: >-
+            Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT,
+            E2EE_BAD_SIGNATURE)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE, E2EE_POLICY,
+            E2EE_BLOCKED)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_DISABLED, E2EE_NOT_FOUND,
+            E2EE_NOT_MEMBER)
+        "409":
+          description: >-
+            Conflict (E2EE_EPOCH_CONFLICT and E2EE_EPOCH_STALE carry
+            current_epoch; E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS,
+            E2EE_KEY_PACKAGE_LIMIT)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/devices/{device_key}/revoke:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Revoke an encrypted-messaging device
+      description: >-
+        Signed by the device itself or by another active device of the same
+        profile. Idempotent. Removes the device from every delivery roster and
+        deletes its unclaimed KeyPackages and pending welcomes. Requires a
+        profile; proxies are rejected; 404 E2EE_DISABLED while the feature flag
+        is off.
+      operationId: e2eeRevokeDevice
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeRevokeDevice
+      parameters:
+        - name: device_key
+          in: path
+          required: true
+          description: Device key (0x + 64 lowercase hex)
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeRevokeDeviceRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeDevice"
+        "400":
+          description: >-
+            Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT,
+            E2EE_BAD_SIGNATURE)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE, E2EE_POLICY,
+            E2EE_BLOCKED)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_DISABLED, E2EE_NOT_FOUND,
+            E2EE_NOT_MEMBER)
+        "409":
+          description: >-
+            Conflict (E2EE_EPOCH_CONFLICT and E2EE_EPOCH_STALE carry
+            current_epoch; E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS,
+            E2EE_KEY_PACKAGE_LIMIT)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/devices/{device_key}/key-packages:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Upload MLS KeyPackages for an own device
+      description: >-
+        At most 100 unclaimed one-time KeyPackages per device (409
+        E2EE_KEY_PACKAGE_LIMIT beyond that). A new last-resort KeyPackage
+        replaces the previous one. Requires a profile; proxies are rejected; 404
+        E2EE_DISABLED while the feature flag is off.
+      operationId: e2eeUploadKeyPackages
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeUploadKeyPackages
+      parameters:
+        - name: device_key
+          in: path
+          required: true
+          description: Device key (0x + 64 lowercase hex)
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeUploadKeyPackagesRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeKeyPackageStatus"
+        "400":
+          description: >-
+            Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT,
+            E2EE_BAD_SIGNATURE)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE, E2EE_POLICY,
+            E2EE_BLOCKED)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_DISABLED, E2EE_NOT_FOUND,
+            E2EE_NOT_MEMBER)
+        "409":
+          description: >-
+            Conflict (E2EE_EPOCH_CONFLICT and E2EE_EPOCH_STALE carry
+            current_epoch; E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS,
+            E2EE_KEY_PACKAGE_LIMIT)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/devices/{device_key}/welcomes:
+    get:
+      tags:
+        - Encrypted Messages
+      summary: List pending MLS Welcomes for an own device
+      description: >-
+        Oldest first; at most 50 welcomes and about 2.5 MiB of welcome bytes per
+        response (always at least one). Requires a profile; proxies are
+        rejected; 404 E2EE_DISABLED while the feature flag is off.
+      operationId: e2eeGetWelcomes
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeGetWelcomes
+      parameters:
+        - name: device_key
+          in: path
+          required: true
+          description: Device key (0x + 64 lowercase hex)
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiE2eeWelcome"
+        "400":
+          description: >-
+            Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT,
+            E2EE_BAD_SIGNATURE)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE, E2EE_POLICY,
+            E2EE_BLOCKED)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_DISABLED, E2EE_NOT_FOUND,
+            E2EE_NOT_MEMBER)
+        "409":
+          description: >-
+            Conflict (E2EE_EPOCH_CONFLICT and E2EE_EPOCH_STALE carry
+            current_epoch; E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS,
+            E2EE_KEY_PACKAGE_LIMIT)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/devices/{device_key}/welcomes/{welcome_id}/ack:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Acknowledge a pending MLS Welcome
+      description: >-
+        Deletes the delivery for this device. Idempotent. Requires a profile;
+        proxies are rejected; 404 E2EE_DISABLED while the feature flag is off.
+      operationId: e2eeAckWelcome
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeAckWelcome
+      parameters:
+        - name: device_key
+          in: path
+          required: true
+          description: Device key (0x + 64 lowercase hex)
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+        - name: welcome_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{32}$
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeAck"
+        "400":
+          description: >-
+            Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT,
+            E2EE_BAD_SIGNATURE)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE, E2EE_POLICY,
+            E2EE_BLOCKED)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_DISABLED, E2EE_NOT_FOUND,
+            E2EE_NOT_MEMBER)
+        "409":
+          description: >-
+            Conflict (E2EE_EPOCH_CONFLICT and E2EE_EPOCH_STALE carry
+            current_epoch; E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS,
+            E2EE_KEY_PACKAGE_LIMIT)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/devices/{device_key}/groups:
+    get:
+      tags:
+        - Encrypted Messages
+      summary: List groups whose current delivery roster contains an own device
+      description: >-
+        Ordered by last activity, newest first. Requires a profile; proxies are
+        rejected; 404 E2EE_DISABLED while the feature flag is off.
+      operationId: e2eeGetDeviceGroups
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeGetDeviceGroups
+      parameters:
+        - name: device_key
+          in: path
+          required: true
+          description: Device key (0x + 64 lowercase hex)
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiE2eeDeviceGroup"
+        "400":
+          description: >-
+            Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT,
+            E2EE_BAD_SIGNATURE)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE, E2EE_POLICY,
+            E2EE_BLOCKED)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_DISABLED, E2EE_NOT_FOUND,
+            E2EE_NOT_MEMBER)
+        "409":
+          description: >-
+            Conflict (E2EE_EPOCH_CONFLICT and E2EE_EPOCH_STALE carry
+            current_epoch; E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS,
+            E2EE_KEY_PACKAGE_LIMIT)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/profiles/{profile_id}/devices:
+    get:
+      tags:
+        - Encrypted Messages
+      summary: List a profile's encrypted-messaging devices
+      description: >-
+        Active devices and devices revoked or expired within 90 days. Requires a
+        profile; proxies are rejected; 404 E2EE_DISABLED while the feature flag
+        is off.
+      operationId: e2eeGetProfileDevices
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeGetProfileDevices
+      parameters:
+        - name: profile_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiE2eeDevice"
+        "400":
+          description: >-
+            Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT,
+            E2EE_BAD_SIGNATURE)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE, E2EE_POLICY,
+            E2EE_BLOCKED)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_DISABLED, E2EE_NOT_FOUND,
+            E2EE_NOT_MEMBER)
+        "409":
+          description: >-
+            Conflict (E2EE_EPOCH_CONFLICT and E2EE_EPOCH_STALE carry
+            current_epoch; E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS,
+            E2EE_KEY_PACKAGE_LIMIT)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/key-packages/claim:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Claim KeyPackages to add profiles' devices to a group
+      description: >-
+        Applies each target's DM policy and blocks unless the target already
+        shares the given group with the claimer device. Pops one unexpired
+        one-time KeyPackage per device (FIFO), else returns the last-resort
+        KeyPackage. Requires a profile; proxies are rejected; 404 E2EE_DISABLED
+        while the feature flag is off.
+      operationId: e2eeClaimKeyPackages
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeClaimKeyPackages
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeClaimKeyPackagesRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeClaimKeyPackagesResponse"
+        "400":
+          description: >-
+            Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT,
+            E2EE_BAD_SIGNATURE)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE, E2EE_POLICY,
+            E2EE_BLOCKED)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_DISABLED, E2EE_NOT_FOUND,
+            E2EE_NOT_MEMBER)
+        "409":
+          description: >-
+            Conflict (E2EE_EPOCH_CONFLICT and E2EE_EPOCH_STALE carry
+            current_epoch; E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS,
+            E2EE_KEY_PACKAGE_LIMIT)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/eligibility:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Check whether profiles can be added to an encrypted chat
+      description: >-
+        Same policy evaluation as a claim; no KeyPackage is consumed. Requires a
+        profile; proxies are rejected; 404 E2EE_DISABLED while the feature flag
+        is off.
+      operationId: e2eeCheckEligibility
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeCheckEligibility
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeEligibilityRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeEligibilityResponse"
+        "400":
+          description: >-
+            Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT,
+            E2EE_BAD_SIGNATURE)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE, E2EE_POLICY,
+            E2EE_BLOCKED)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_DISABLED, E2EE_NOT_FOUND,
+            E2EE_NOT_MEMBER)
+        "409":
+          description: >-
+            Conflict (E2EE_EPOCH_CONFLICT and E2EE_EPOCH_STALE carry
+            current_epoch; E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS,
+            E2EE_KEY_PACKAGE_LIMIT)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/groups:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Create an encrypted group's delivery record
+      description: >-
+        Epoch 0 with the creator's declared commit key; the roster is the
+        creator device. Retrying an identical creation returns the existing
+        record. Requires a profile; proxies are rejected; 404 E2EE_DISABLED
+        while the feature flag is off.
+      operationId: e2eeCreateGroup
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeCreateGroup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeCreateGroupRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeGroup"
+        "400":
+          description: >-
+            Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT,
+            E2EE_BAD_SIGNATURE)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE, E2EE_POLICY,
+            E2EE_BLOCKED)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_DISABLED, E2EE_NOT_FOUND,
+            E2EE_NOT_MEMBER)
+        "409":
+          description: >-
+            Conflict (E2EE_EPOCH_CONFLICT and E2EE_EPOCH_STALE carry
+            current_epoch; E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS,
+            E2EE_KEY_PACKAGE_LIMIT)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/groups/{group}:
+    get:
+      tags:
+        - Encrypted Messages
+      summary: Get an encrypted group's delivery record
+      description: >-
+        The device must be an own device that is or was in the roster. A removed
+        device receives an empty roster. Requires a profile; proxies are
+        rejected; 404 E2EE_DISABLED while the feature flag is off.
+      operationId: e2eeGetGroup
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeGetGroup
+      parameters:
+        - name: group
+          in: path
+          required: true
+          description: Group handle (0x + 64 lowercase hex)
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+        - name: device_key
+          in: query
+          required: true
+          description: The caller's device key (0x + 64 lowercase hex)
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeGroup"
+        "400":
+          description: >-
+            Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT,
+            E2EE_BAD_SIGNATURE)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE, E2EE_POLICY,
+            E2EE_BLOCKED)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_DISABLED, E2EE_NOT_FOUND,
+            E2EE_NOT_MEMBER)
+        "409":
+          description: >-
+            Conflict (E2EE_EPOCH_CONFLICT and E2EE_EPOCH_STALE carry
+            current_epoch; E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS,
+            E2EE_KEY_PACKAGE_LIMIT)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/groups/{group}/entries:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Submit an MLS commit or proposal for sequencing
+      description: >-
+        Signed by the epoch commit key. The first valid commit for an epoch
+        wins; later ones get 409 E2EE_EPOCH_CONFLICT with current_epoch.
+        Requires a profile; proxies are rejected; 404 E2EE_DISABLED while the
+        feature flag is off.
+      operationId: e2eeSubmitEntry
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeSubmitEntry
+      parameters:
+        - name: group
+          in: path
+          required: true
+          description: Group handle (0x + 64 lowercase hex)
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeSubmitEntryRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeLogItem"
+        "400":
+          description: >-
+            Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT,
+            E2EE_BAD_SIGNATURE)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE, E2EE_POLICY,
+            E2EE_BLOCKED)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_DISABLED, E2EE_NOT_FOUND,
+            E2EE_NOT_MEMBER)
+        "409":
+          description: >-
+            Conflict (E2EE_EPOCH_CONFLICT and E2EE_EPOCH_STALE carry
+            current_epoch; E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS,
+            E2EE_KEY_PACKAGE_LIMIT)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/groups/{group}/log:
+    get:
+      tags:
+        - Encrypted Messages
+      summary: Read an encrypted group's ordered log
+      description: >-
+        Returns items with seq greater than after_seq inside the device's roster
+        windows, at most about 2.5 MiB of item bytes per page (always at least
+        one item). Requires a profile; proxies are rejected; 404 E2EE_DISABLED
+        while the feature flag is off.
+      operationId: e2eeGetGroupLog
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeGetGroupLog
+      parameters:
+        - name: group
+          in: path
+          required: true
+          description: Group handle (0x + 64 lowercase hex)
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+        - name: device_key
+          in: query
+          required: true
+          description: The caller's device key (0x + 64 lowercase hex)
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+        - name: after_seq
+          in: query
+          required: false
+          description: Return items with seq greater than this. Default 0.
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+        - name: limit
+          in: query
+          required: false
+          description: Default 100, maximum 200
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeLogPage"
+        "400":
+          description: >-
+            Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT,
+            E2EE_BAD_SIGNATURE)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE, E2EE_POLICY,
+            E2EE_BLOCKED)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_DISABLED, E2EE_NOT_FOUND,
+            E2EE_NOT_MEMBER)
+        "409":
+          description: >-
+            Conflict (E2EE_EPOCH_CONFLICT and E2EE_EPOCH_STALE carry
+            current_epoch; E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS,
+            E2EE_KEY_PACKAGE_LIMIT)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/groups/{group}/messages:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Send an encrypted application message
+      description: >-
+        Accepted only for the group's current epoch (else 409 E2EE_EPOCH_STALE
+        with current_epoch). Requires a profile; proxies are rejected; 404
+        E2EE_DISABLED while the feature flag is off.
+      operationId: e2eeSendMessage
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeSendMessage
+      parameters:
+        - name: group
+          in: path
+          required: true
+          description: Group handle (0x + 64 lowercase hex)
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeSendMessageRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeSendMessageResponse"
+        "400":
+          description: >-
+            Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT,
+            E2EE_BAD_SIGNATURE)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE, E2EE_POLICY,
+            E2EE_BLOCKED)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_DISABLED, E2EE_NOT_FOUND,
+            E2EE_NOT_MEMBER)
+        "409":
+          description: >-
+            Conflict (E2EE_EPOCH_CONFLICT and E2EE_EPOCH_STALE carry
+            current_epoch; E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS,
+            E2EE_KEY_PACKAGE_LIMIT)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/groups/{group}/roster:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Replace a group's delivery roster with the members' MLS view
+      description: >-
+        Signed by the current epoch commit key. Requires a profile; proxies are
+        rejected; 404 E2EE_DISABLED while the feature flag is off.
+      operationId: e2eeRepairRoster
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeRepairRoster
+      parameters:
+        - name: group
+          in: path
+          required: true
+          description: Group handle (0x + 64 lowercase hex)
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeRosterRepairRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeGroup"
+        "400":
+          description: >-
+            Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT,
+            E2EE_BAD_SIGNATURE)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE, E2EE_POLICY,
+            E2EE_BLOCKED)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_DISABLED, E2EE_NOT_FOUND,
+            E2EE_NOT_MEMBER)
+        "409":
+          description: >-
+            Conflict (E2EE_EPOCH_CONFLICT and E2EE_EPOCH_STALE carry
+            current_epoch; E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS,
+            E2EE_KEY_PACKAGE_LIMIT)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/backup:
+    get:
+      tags:
+        - Encrypted Messages
+      summary: Get the caller's encrypted message-history backup
+      description: >-
+        Returns the active backup generation (with its opaque key envelope) or
+        null, plus the profile's backup storage use and quota. The server only
+        stores ciphertext; it cannot read the backup. Requires a profile;
+        proxies are rejected; 404 E2EE_DISABLED while the feature flag is off
+        and 404 E2EE_BACKUPS_DISABLED while backups are switched off.
+      operationId: e2eeGetBackupStatus
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeGetBackupStatus
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeBackupStatus"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN)
+        "404":
+          description: Disabled (E2EE_DISABLED, E2EE_BACKUPS_DISABLED)
+    delete:
+      tags:
+        - Encrypted Messages
+      summary: Delete all of the caller's encrypted backups
+      description: >-
+        Deletes every backup generation and chunk of the caller's profile
+        (turning backup off and making every recovery code useless). Idempotent.
+        Requires a profile; proxies are rejected.
+      operationId: e2eeDeleteBackups
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeDeleteBackups
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeAck"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN)
+        "404":
+          description: Disabled (E2EE_DISABLED, E2EE_BACKUPS_DISABLED)
+  /e2ee/backups:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Start a new encrypted backup generation
+      description: >-
+        Creates a pending generation with a client-chosen random backup_id and
+        the opaque envelope (the backup key wrapped by the user's recovery
+        method). Any other pending generation of the profile is deleted. The
+        generation replaces the active one only when activated. The device must
+        be an active device of the caller's profile.
+      operationId: e2eeCreateBackup
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeCreateBackup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeCreateBackupRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeBackup"
+        "400":
+          description: Invalid request (E2EE_BAD_REQUEST)
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE)
+        "404":
+          description: Disabled (E2EE_DISABLED, E2EE_BACKUPS_DISABLED)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/backups/{backup_id}:
+    get:
+      tags:
+        - Encrypted Messages
+      summary: Get one of the caller's backup generations
+      description: >-
+        Active or pending. 404 E2EE_NOT_FOUND when the generation does not exist
+        (deleted, replaced or pruned) or belongs to another profile.
+      operationId: e2eeGetBackup
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeGetBackup
+      parameters:
+        - name: backup_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{32}$
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeBackup"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_NOT_FOUND, E2EE_DISABLED,
+            E2EE_BACKUPS_DISABLED)
+  /e2ee/backups/{backup_id}/activate:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Make a backup generation the active one
+      description: >-
+        Activates the generation and deletes every other generation of the
+        profile (with its chunks). Idempotent for an active generation.
+      operationId: e2eeActivateBackup
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeActivateBackup
+      parameters:
+        - name: backup_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{32}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeBackupDeviceRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeBackup"
+        "400":
+          description: Invalid request (E2EE_BAD_REQUEST)
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_NOT_FOUND, E2EE_DISABLED,
+            E2EE_BACKUPS_DISABLED)
+  /e2ee/backups/{backup_id}/chunks:
+    get:
+      tags:
+        - Encrypted Messages
+      summary: List the chunks of a backup generation
+      description: >-
+        Chunk metadata (sequence number, ciphertext size, time) in ascending
+        sequence order, after `after_seq`.
+      operationId: e2eeListBackupChunks
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeListBackupChunks
+      parameters:
+        - name: backup_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{32}$
+        - name: after_seq
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeBackupChunkPage"
+        "400":
+          description: Invalid request (E2EE_BAD_REQUEST)
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_NOT_FOUND, E2EE_DISABLED,
+            E2EE_BACKUPS_DISABLED)
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Append one ciphertext chunk to a backup generation
+      description: >-
+        The server assigns the next sequence number. With `expected_seq` the
+        append succeeds only when that is the generation's next sequence number;
+        otherwise nothing is stored and the response is 409
+        E2EE_BACKUP_SEQ_CONFLICT with the current `next_seq` (another device
+        appended first). The ciphertext length must be one of the backup chunk
+        buckets (4, 16, 64 or 256 KiB, or 1 MiB). Each profile may store at most
+        256 MiB of backup ciphertext across its generations (413
+        E2EE_BACKUP_QUOTA) and at most 10,000 chunks per generation (413
+        E2EE_TOO_LARGE).
+      operationId: e2eeAppendBackupChunk
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeAppendBackupChunk
+      parameters:
+        - name: backup_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{32}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeBackupChunkUpload"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeBackupChunk"
+        "400":
+          description: Invalid request (E2EE_BAD_REQUEST)
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_NOT_FOUND, E2EE_DISABLED,
+            E2EE_BACKUPS_DISABLED)
+        "409":
+          description: >-
+            Conflict (E2EE_BACKUP_SEQ_CONFLICT, with the generation's current
+            next_seq in the error details): expected_seq is not the next
+            sequence number
+        "413":
+          description: Too large (E2EE_TOO_LARGE, E2EE_BACKUP_QUOTA)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/backups/{backup_id}/chunks/{seq}:
+    get:
+      tags:
+        - Encrypted Messages
+      summary: Download one ciphertext chunk of a backup generation
+      operationId: e2eeGetBackupChunk
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeGetBackupChunk
+      parameters:
+        - name: backup_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{32}$
+        - name: seq
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeBackupChunkData"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_NOT_FOUND, E2EE_DISABLED,
+            E2EE_BACKUPS_DISABLED)
+  /e2ee/backups/{backup_id}/compact:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Delete the older chunks of a backup generation
+      description: >-
+        Deletes the generation's chunks with seq <= through_seq. Clients call it
+        after re-uploading a full snapshot so superseded ciphertext (for example
+        of deleted messages) does not linger.
+      operationId: e2eeCompactBackup
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeCompactBackup
+      parameters:
+        - name: backup_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{32}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeCompactBackupRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeBackup"
+        "400":
+          description: Invalid request (E2EE_BAD_REQUEST)
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_NOT_FOUND, E2EE_DISABLED,
+            E2EE_BACKUPS_DISABLED)
+  /e2ee/blobs:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Start an encrypted attachment upload
+      description: >-
+        The uploader device must be in the group's current roster. At most 25
+        chunks; each uploading profile may declare at most 200 MiB per rolling
+        24 hours (429 E2EE_RATE_LIMITED) and keep at most 1 GiB of attachments
+        (413 E2EE_TOO_LARGE). Incomplete uploads are deleted after 24 hours.
+        Requires a profile; proxies are rejected; 404 E2EE_DISABLED while the
+        feature flag is off.
+      operationId: e2eeCreateBlob
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeCreateBlob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeCreateBlobRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeBlob"
+        "400":
+          description: >-
+            Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT,
+            E2EE_BAD_SIGNATURE)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE, E2EE_POLICY,
+            E2EE_BLOCKED)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_DISABLED, E2EE_NOT_FOUND,
+            E2EE_NOT_MEMBER)
+        "409":
+          description: >-
+            Conflict (E2EE_EPOCH_CONFLICT and E2EE_EPOCH_STALE carry
+            current_epoch; E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS,
+            E2EE_KEY_PACKAGE_LIMIT)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/blobs/{blob_id}/chunks/{index}:
+    put:
+      tags:
+        - Encrypted Messages
+      summary: Upload one ciphertext chunk of an attachment
+      description: >-
+        Uploader only, before completion. Requires a profile; proxies are
+        rejected; 404 E2EE_DISABLED while the feature flag is off.
+      operationId: e2eePutBlobChunk
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eePutBlobChunk
+      parameters:
+        - name: blob_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{32}$
+        - name: index
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeBlobChunk"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeBlob"
+        "400":
+          description: >-
+            Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT,
+            E2EE_BAD_SIGNATURE)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE, E2EE_POLICY,
+            E2EE_BLOCKED)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_DISABLED, E2EE_NOT_FOUND,
+            E2EE_NOT_MEMBER)
+        "409":
+          description: >-
+            Conflict (E2EE_EPOCH_CONFLICT and E2EE_EPOCH_STALE carry
+            current_epoch; E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS,
+            E2EE_KEY_PACKAGE_LIMIT)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+    get:
+      tags:
+        - Encrypted Messages
+      summary: Download one ciphertext chunk of an attachment
+      description: >-
+        The device must be an own device that is or was in the blob's group
+        roster. Requires a profile; proxies are rejected; 404 E2EE_DISABLED
+        while the feature flag is off.
+      operationId: e2eeGetBlobChunk
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeGetBlobChunk
+      parameters:
+        - name: blob_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{32}$
+        - name: index
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+        - name: device_key
+          in: query
+          required: true
+          description: The caller's device key (0x + 64 lowercase hex)
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeBlobChunk"
+        "400":
+          description: >-
+            Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT,
+            E2EE_BAD_SIGNATURE)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE, E2EE_POLICY,
+            E2EE_BLOCKED)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_DISABLED, E2EE_NOT_FOUND,
+            E2EE_NOT_MEMBER)
+        "409":
+          description: >-
+            Conflict (E2EE_EPOCH_CONFLICT and E2EE_EPOCH_STALE carry
+            current_epoch; E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS,
+            E2EE_KEY_PACKAGE_LIMIT)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/blobs/{blob_id}/complete:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Complete an encrypted attachment upload
+      description: >-
+        All chunks must be present and their sizes must add up. Requires a
+        profile; proxies are rejected; 404 E2EE_DISABLED while the feature flag
+        is off.
+      operationId: e2eeCompleteBlob
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeCompleteBlob
+      parameters:
+        - name: blob_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{32}$
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeBlob"
+        "400":
+          description: >-
+            Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT,
+            E2EE_BAD_SIGNATURE)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE, E2EE_POLICY,
+            E2EE_BLOCKED)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_DISABLED, E2EE_NOT_FOUND,
+            E2EE_NOT_MEMBER)
+        "409":
+          description: >-
+            Conflict (E2EE_EPOCH_CONFLICT and E2EE_EPOCH_STALE carry
+            current_epoch; E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS,
+            E2EE_KEY_PACKAGE_LIMIT)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/reports:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Report a decrypted encrypted message
+      description: >-
+        For severe or illegal harm only. The reporter discloses one message body
+        and the sender's inner signature, which the server verifies. Reports are
+        readable only by content moderators (and the optional
+        E2EE_TRUST_AND_SAFETY_GROUP_ID group), are never sent to an AI provider
+        or to wave moderators, and are deleted after 180 days unless placed on
+        hold. Requires a profile; proxies are rejected; 404 E2EE_DISABLED while
+        the feature flag is off.
+      operationId: e2eeReportMessage
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeReportMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeReportRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeReport"
+        "400":
+          description: >-
+            Invalid request (E2EE_BAD_REQUEST, E2EE_BAD_GRANT,
+            E2EE_BAD_SIGNATURE)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE, E2EE_POLICY,
+            E2EE_BLOCKED)
+        "404":
+          description: >-
+            Not found or disabled (E2EE_DISABLED, E2EE_NOT_FOUND,
+            E2EE_NOT_MEMBER)
+        "409":
+          description: >-
+            Conflict (E2EE_EPOCH_CONFLICT and E2EE_EPOCH_STALE carry
+            current_epoch; E2EE_DEVICE_LIMIT, E2EE_DEVICE_EXISTS,
+            E2EE_KEY_PACKAGE_LIMIT)
+        "413":
+          description: Payload too large (E2EE_TOO_LARGE)
+        "429":
+          description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/trust-and-safety/reports:
+    get:
+      tags:
+        - Encrypted Messages
+      summary: List reported encrypted messages (trust and safety)
+      description: >-
+        Newest first. Only content moderators (the content-moderation queue's
+        moderator check) and, when it is set, members of the group named by
+        E2EE_TRUST_AND_SAFETY_GROUP_ID may call this; every call is recorded in
+        an access log. Works whether or not the encrypted messaging flag is on.
+        Proxies are rejected.
+      operationId: e2eeListTrustAndSafetyReports
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee-trust-and-safety.handlers"
+          name: handleE2eeListTrustAndSafetyReports
+      parameters:
+        - name: before
+          in: query
+          required: false
+          description: >-
+            Return reports created before this time (ms). With `before_id`, also
+            reports created at exactly this time whose id sorts before
+            `before_id`.
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+        - name: before_id
+          in: query
+          required: false
+          description: >-
+            The `next_before_id` of the previous page; only together with
+            `before`
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeTrustAndSafetyReportPage"
+        "400":
+          description: Invalid request (E2EE_BAD_REQUEST)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Not a content moderator or a member of the optional review group
+            (E2EE_FORBIDDEN)
+  /e2ee/trust-and-safety/reports/{report_id}:
+    get:
+      tags:
+        - Encrypted Messages
+      summary: Read one reported encrypted message (trust and safety)
+      description: >-
+        Only content moderators and, when it is set, members of the group named
+        by E2EE_TRUST_AND_SAFETY_GROUP_ID may call this; every read is recorded
+        in an access log. Proxies are rejected.
+      operationId: e2eeGetTrustAndSafetyReport
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee-trust-and-safety.handlers"
+          name: handleE2eeGetTrustAndSafetyReport
+      parameters:
+        - name: report_id
+          in: path
+          required: true
+          description: Report id (0x + 32 lowercase hex)
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{32}$
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeTrustAndSafetyReport"
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Not a content moderator or a member of the optional review group
+            (E2EE_FORBIDDEN)
+        "404":
+          description: Not found (E2EE_NOT_FOUND)
+  /e2ee/trust-and-safety/reports/{report_id}/hold:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Place a reported encrypted message on hold or release it
+      description: >-
+        A report on hold is kept past the 180-day retention until released. Only
+        content moderators and, when it is set, members of the group named by
+        E2EE_TRUST_AND_SAFETY_GROUP_ID may call this; every change is recorded
+        in an access log. Proxies are rejected.
+      operationId: e2eeSetTrustAndSafetyReportHold
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee-trust-and-safety.handlers"
+          name: handleE2eeSetTrustAndSafetyReportHold
+      parameters:
+        - name: report_id
+          in: path
+          required: true
+          description: Report id (0x + 32 lowercase hex)
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{32}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiE2eeReportHoldRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeTrustAndSafetyReport"
+        "400":
+          description: Invalid request (E2EE_BAD_REQUEST)
+        "401":
+          description: Unauthorized
+        "403":
+          description: >-
+            Not a content moderator or a member of the optional review group
+            (E2EE_FORBIDDEN)
+        "404":
+          description: Not found (E2EE_NOT_FOUND)
   /feed:
     get:
       tags:
@@ -17549,6 +19812,10 @@ paths:
       tags:
         - Waves
       summary: Create or edit wave decision pause
+      deprecated: true
+      description: >-
+        Legacy compatibility command; accepted without changing competition
+        pauses.
       operationId: updateWaveDecisionPause
       parameters:
         - name: id
@@ -17577,9 +19844,10 @@ paths:
       tags:
         - Waves
       summary: Delete wave decision pause
+      deprecated: true
       description: >-
-        Pause can only be deleted if no past decisions have already been skipped
-        based on it.
+        Legacy compatibility command; accepted without changing competition
+        pauses.
       operationId: deleteWaveDecisionPause
       parameters:
         - name: waveId
@@ -17871,7 +20139,9 @@ paths:
       tags:
         - Waves
       summary: Create new wave
-      description: Requires the user to be authenticated
+      description: >-
+        Applies shared wave fields only. Legacy competition settings are
+        accepted and ignored. Requires permission to create a wave.
       operationId: createWave
       requestBody:
         required: true
@@ -17950,6 +20220,17 @@ paths:
                 $ref: "#/components/schemas/ApiWave"
         "400":
           description: Invalid request
+        "403":
+          description: |
+            A recipient does not admit new direct messages from the caller.
+            Existing conversations with the same members are returned without
+            this check. The body is `{ error, code, handle }` (handle may be
+            null when the recipient has none) where code is
+            DM_RECIPIENT_NOT_ACCEPTING, DM_RECIPIENT_PEOPLE_I_FOLLOW_ONLY,
+            DM_RECIPIENT_GROUP_MEMBERS_ONLY (plus group_id and group_name only
+            when the recipient's group is public) or
+            DM_SENDER_BLOCKED_RECIPIENT. A recipient's block is reported as
+            DM_RECIPIENT_NOT_ACCEPTING and never disclosed.
   /waves/{id}:
     get:
       tags:
@@ -17991,6 +20272,9 @@ paths:
       tags:
         - Waves
       summary: Update wave by ID
+      description: >-
+        Applies shared wave fields only. Legacy competition settings are
+        accepted and ignored. Use competition endpoints to edit competitions.
       operationId: updateWaveById
       parameters:
         - name: id
@@ -18265,6 +20549,51 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiUndiscoveredDrop"
+        "403":
+          description: User is not eligible to quick vote in this wave
+        "404":
+          description: Wave not found
+  /waves/{id}/undiscovered-drops:
+    get:
+      tags:
+        - Waves
+      summary: Get an ordered quick vote preview window with shared counts
+      operationId: getWaveUndiscoveredDrops
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/waves/wave-quick-vote.handler"
+          name: handleGetWaveUndiscoveredDrops
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Maximum number of previews, ordered by unskipped then skipped drops.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 4
+            default: 4
+        - name: skip
+          in: query
+          description: Zero-based offset within the four-preview quick vote window.
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 3
+            default: 0
+      responses:
+        "200":
+          description: Ordered previews and exact counts for the acting profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiUndiscoveredDrops"
         "403":
           description: User is not eligible to quick vote in this wave
         "404":
@@ -20519,6 +22848,8 @@ components:
       properties:
         reaction:
           type: string
+        device_signature:
+          $ref: "#/components/schemas/ApiDeviceSignature"
     ApiAggregatedActivity:
       type: object
       required:
@@ -27189,6 +29520,13 @@ components:
         - ends_at
         - terms
       properties:
+        anonymous_submissions:
+          type: boolean
+          default: false
+          description: >-
+            Competition creation option. Conceal each submission author from
+            other users until that entry wins. Fixed when published; defaults to
+            false.
         group_id:
           type: string
           nullable: true
@@ -27390,6 +29728,13 @@ components:
         credit_spent:
           type: integer
           format: int64
+        voter:
+          description: >-
+            Public profile summary of the voter, resolved for the whole page in
+            one batched lookup. Omitted when the profile cannot be resolved;
+            clients can then look up the identity by profile_id.
+          allOf:
+            - $ref: "#/components/schemas/ApiProfileMin"
     ApiCompetitionVoterPage:
       type: object
       additionalProperties: false
@@ -28537,6 +30882,8 @@ components:
             hidden. Omit or set to false to leave previews visible.
             Signature-required drops must include this field in the signed
             payload when present.
+        device_signature:
+          $ref: "#/components/schemas/ApiDeviceSignature"
     ApiCreateGroup:
       type: object
       required:
@@ -28878,6 +31225,13 @@ components:
         - required_media
         - terms
       properties:
+        anonymous_submissions:
+          type: boolean
+          default: false
+          description: >-
+            Competition creation option. Conceal each submission author from
+            other users until that entry wins. Fixed when published; defaults to
+            false.
         scope:
           $ref: "#/components/schemas/ApiCreateNewWaveScope"
         no_of_applications_allowed_per_participant:
@@ -29242,7 +31596,9 @@ components:
           type: string
     ApiCreateWaveHubRequest:
       type: object
-      additionalProperties: false
+      description: >-
+        Creates a shared wave. Legacy competition settings are accepted and
+        ignored.
       required:
         - idempotency_key
         - name
@@ -29260,7 +31616,7 @@ components:
         picture:
           type: string
           format: uri
-          pattern: ^https://
+          pattern: ^https://d3lqz0a4bldqgf\.cloudfront\.net/
           description: HTTPS URL for the wave picture, or null.
           nullable: true
         description_drop:
@@ -29457,6 +31813,192 @@ components:
             null when the pinned drop was not authored by the caller.
           type: string
           nullable: true
+    ApiDeviceGrant:
+      type: object
+      description: >-
+        A wallet signed grant that lets a browser-held Ed25519 device key sign
+        drop writes. Its id is the EIP-191 hash of the exact SIWE message the
+        wallet signed.
+      required:
+        - id
+        - wallet
+        - key_type
+        - device_key
+        - scopes
+        - device_label
+        - domain
+        - issued_at
+        - expires_at
+        - created_at
+        - revoked_at
+        - last_used_at
+      properties:
+        id:
+          type: string
+          pattern: ^0x[0-9a-f]{64}$
+        wallet:
+          type: string
+          description: Lowercase 0x address that signed the grant.
+        key_type:
+          type: string
+          example: ed25519
+        device_key:
+          type: string
+          pattern: ^0x[0-9a-f]{64}$
+        scopes:
+          type: array
+          description: Canonical order post, edit, delete, react, vote.
+          items:
+            type: string
+        device_label:
+          type: string
+        domain:
+          type: string
+          description: SIWE domain the grant was signed for, e.g. 6529.io.
+        issued_at:
+          type: integer
+          format: int64
+          description: SIWE Issued At, epoch milliseconds.
+        expires_at:
+          type: integer
+          format: int64
+          description: Grant expiry, epoch milliseconds.
+        created_at:
+          type: integer
+          format: int64
+        revoked_at:
+          type: integer
+          format: int64
+          nullable: true
+        last_used_at:
+          type: integer
+          format: int64
+          nullable: true
+    ApiDeviceGrantProof:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/ApiDeviceGrant"
+      required:
+        - message
+        - wallet_signature
+        - chain_id
+      properties:
+        message:
+          type: string
+          description: Exact SIWE message signed by the wallet.
+        wallet_signature:
+          type: string
+        chain_id:
+          type: integer
+          format: int64
+    ApiDeviceSignature:
+      type: object
+      additionalProperties: false
+      description: >-
+        Ed25519 signature by a granted device key over the EIP-712 event id of
+        the write. A rejected signature returns 400 with a message starting with
+        "Invalid device signature:"; the write is then not performed.
+      required:
+        - grant_id
+        - seq
+        - claimed_time
+        - signature
+      properties:
+        grant_id:
+          type: string
+          pattern: ^0x[0-9a-f]{64}$
+        seq:
+          type: integer
+          format: int64
+          minimum: 1
+          maximum: 9007199254740991
+          description: Unique per device key; a reused value is rejected.
+        claimed_time:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 9007199254740991
+          description: >-
+            Author clock in epoch milliseconds, within 10 minutes of server
+            time.
+        signature:
+          type: string
+          pattern: ^0x[0-9a-f]{128}$
+    ApiDeviceSignedEvent:
+      type: object
+      required:
+        - id
+        - kind
+        - kind_version
+        - wave
+        - author
+        - key_type
+        - device_key
+        - auth_ref
+        - seq
+        - anchor
+        - claimed_time
+        - refs
+        - body
+        - body_hash
+        - body_size
+        - signature
+        - created_at
+      properties:
+        id:
+          type: string
+          description: EIP-712 event id, 0x + 64 hex.
+        kind:
+          type: integer
+          description: 1 POST, 2 EDIT, 3 TOMBSTONE, 4 REACT.
+        kind_version:
+          type: integer
+        wave:
+          type: string
+        author:
+          type: string
+          description: Lowercase grant wallet.
+        key_type:
+          type: integer
+          description: 2 for Ed25519.
+        device_key:
+          type: string
+        auth_ref:
+          type: string
+          description: Grant id.
+        seq:
+          type: integer
+          format: int64
+        anchor:
+          type: integer
+          format: int64
+        claimed_time:
+          type: integer
+          format: int64
+        refs:
+          type: array
+          items:
+            type: string
+        body:
+          type: string
+          nullable: true
+          description: Canonical JSON exactly as hashed, null when the event has no body.
+        body_hash:
+          type: string
+        body_size:
+          type: integer
+        signature:
+          type: string
+          description: 0x + 128 hex, the 64-byte Ed25519 signature.
+        created_at:
+          type: integer
+          format: int64
+          description: Server receive time, epoch milliseconds.
+    ApiDeviceSignedWriteRequest:
+      type: object
+      properties:
+        device_signature:
+          $ref: "#/components/schemas/ApiDeviceSignature"
     ApiDistributionAirdropsCsvUploadRequest:
       type: object
       required:
@@ -29675,6 +32217,14 @@ components:
             $ref: "#/components/schemas/ApiDropSubscriptionTargetAction"
         is_signed:
           type: boolean
+        is_author_signed:
+          type: boolean
+          description: >-
+            True when the drop's current content is the body of an author's
+            device signed create or edit event, the same state as a non-null
+            current_event_id from GET /drops/{dropId}/signed-events. False
+            otherwise, including when the viewer cannot see the drop's content
+            or its author is anonymous. Treat a missing value as false.
         reactions:
           type: array
           items:
@@ -29722,6 +32272,19 @@ components:
         attachment_id:
           type: string
           maxLength: 100
+    ApiDropBookmarksStatus:
+      type: object
+      required:
+        - count
+      properties:
+        count:
+          type: integer
+          minimum: 0
+        bookmarked:
+          type: boolean
+          description: >-
+            Whether the optional drop_id is accessible and bookmarked by this
+            owner.
     ApiDropBoost:
       type: object
       required:
@@ -30840,6 +33403,30 @@ components:
         - FIND_OLDER
         - FIND_NEWER
         - FIND_BOTH
+    ApiDropSignedEvents:
+      type: object
+      required:
+        - drop_id
+        - current_event_id
+        - events
+        - grants
+      properties:
+        drop_id:
+          type: string
+        current_event_id:
+          type: string
+          nullable: true
+          description: >-
+            Event whose body is the drop's current content, or null when the
+            current content is not author signed.
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDeviceSignedEvent"
+        grants:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDeviceGrantProof"
     ApiDropsLeaderboardPage:
       type: object
       required:
@@ -30945,6 +33532,14 @@ components:
           format: int64
         is_signed:
           type: boolean
+        is_author_signed:
+          type: boolean
+          description: >-
+            True when the drop's current content is the body of an author's
+            device signed create or edit event, the same state as a non-null
+            current_event_id from GET /drops/{dropId}/signed-events. False
+            otherwise, including when the viewer cannot see the drop's content
+            or its author is anonymous. Treat a missing value as false.
         hide_link_preview:
           type: boolean
         title:
@@ -31332,6 +33927,14 @@ components:
             $ref: "#/components/schemas/ApiDropSubscriptionTargetAction"
         is_signed:
           type: boolean
+        is_author_signed:
+          type: boolean
+          description: >-
+            True when the drop's current content is the body of an author's
+            device signed create or edit event, the same state as a non-null
+            current_event_id from GET /drops/{dropId}/signed-events. False
+            otherwise, including when the viewer cannot see the drop's content
+            or its author is anonymous. Treat a missing value as false.
         reactions:
           type: array
           items:
@@ -31361,6 +33964,1128 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropWithoutWave"
+    ApiE2eeAck:
+      type: object
+      description: Acknowledgement; the server currently returns an empty object
+      properties:
+        acknowledged:
+          type: boolean
+    ApiE2eeBackup:
+      type: object
+      description: >-
+        One generation of an encrypted message-history backup. The server sees
+        only ciphertext sizes and times.
+      required:
+        - backup_id
+        - envelope
+        - active
+        - chunk_count
+        - size
+        - next_seq
+        - created_at
+        - updated_at
+        - activated_at
+      properties:
+        backup_id:
+          type: string
+          description: 0x + 32 hex, chosen randomly by the client
+        envelope:
+          type: string
+          description: >-
+            Standard base64 of the opaque key envelope (the backup key wrapped
+            by the user's recovery method)
+        active:
+          type: boolean
+        chunk_count:
+          type: integer
+        size:
+          type: integer
+          format: int64
+          description: Ciphertext bytes of the generation's chunks
+        next_seq:
+          type: integer
+          description: The sequence number the next appended chunk gets
+        created_at:
+          type: integer
+          format: int64
+          description: Unix milliseconds
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix milliseconds
+        activated_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix milliseconds; null while pending
+    ApiE2eeBackupChunk:
+      type: object
+      required:
+        - seq
+        - size
+        - created_at
+      properties:
+        seq:
+          type: integer
+        size:
+          type: integer
+          description: Ciphertext bytes
+        created_at:
+          type: integer
+          format: int64
+          description: Unix milliseconds
+    ApiE2eeBackupChunkData:
+      type: object
+      required:
+        - seq
+        - data
+      properties:
+        seq:
+          type: integer
+        data:
+          type: string
+          description: Standard base64 of the chunk ciphertext
+    ApiE2eeBackupChunkPage:
+      type: object
+      required:
+        - items
+        - next_after_seq
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiE2eeBackupChunk"
+        next_after_seq:
+          type: integer
+          nullable: true
+          description: Pass as after_seq for the next page; null at the end
+    ApiE2eeBackupChunkUpload:
+      type: object
+      required:
+        - device_key
+        - data
+      properties:
+        device_key:
+          type: string
+          description: The caller's active device (0x + 64 lowercase hex)
+        data:
+          type: string
+          description: >-
+            Standard base64 of the chunk ciphertext; its length must be a backup
+            chunk bucket
+        expected_seq:
+          type: integer
+          minimum: 1
+          description: >-
+            Optional precondition: the sequence number this chunk must get. When
+            the generation's next sequence number differs (another device
+            appended first) the append is refused with 409
+            E2EE_BACKUP_SEQ_CONFLICT. Omitted, the chunk gets the next sequence
+            number.
+    ApiE2eeBackupDeviceRequest:
+      type: object
+      required:
+        - device_key
+      properties:
+        device_key:
+          type: string
+          description: The caller's active device (0x + 64 lowercase hex)
+    ApiE2eeBackupStatus:
+      type: object
+      required:
+        - backup
+        - used_bytes
+        - quota_bytes
+        - max_chunk_bytes
+        - chunk_buckets
+      properties:
+        backup:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ApiE2eeBackup"
+          description: The active generation, or null when backup is off
+        used_bytes:
+          type: integer
+          format: int64
+          description: Ciphertext bytes across the profile's generations
+        quota_bytes:
+          type: integer
+          format: int64
+        max_chunk_bytes:
+          type: integer
+        chunk_buckets:
+          type: array
+          items:
+            type: integer
+          description: Allowed chunk ciphertext lengths in bytes
+    ApiE2eeBlob:
+      type: object
+      required:
+        - blob_id
+        - group
+        - size
+        - chunk_count
+        - complete
+        - created_at
+      properties:
+        blob_id:
+          type: string
+          description: 0x + 32 hex, random
+        group:
+          type: string
+        size:
+          type: integer
+          format: int64
+          description: Total ciphertext bytes
+        chunk_count:
+          type: integer
+        complete:
+          type: boolean
+        created_at:
+          type: integer
+          format: int64
+          description: Unix milliseconds
+    ApiE2eeBlobChunk:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: string
+          description: >-
+            Standard base64 of one ciphertext chunk (at most 1 MiB plus the
+            16-byte AES-GCM tag)
+    ApiE2eeClaimedKeyPackage:
+      type: object
+      required:
+        - device
+        - key_package
+        - last_resort
+      properties:
+        device:
+          $ref: "#/components/schemas/ApiE2eeDevice"
+        key_package:
+          type: string
+          description: Standard base64 TLS-serialized KeyPackage
+        last_resort:
+          type: boolean
+    ApiE2eeClaimKeyPackagesRequest:
+      type: object
+      required:
+        - targets
+        - claimer_device_key
+      properties:
+        targets:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/ApiE2eeClaimTarget"
+        group:
+          type: string
+          description: >-
+            Group handle; profiles already in its roster bypass the DM policy
+            when the claimer device is in it too
+        claimer_device_key:
+          type: string
+    ApiE2eeClaimKeyPackagesResponse:
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiE2eeClaimResult"
+    ApiE2eeClaimResult:
+      type: object
+      required:
+        - profile_id
+        - status
+        - key_packages
+      properties:
+        profile_id:
+          type: string
+        status:
+          $ref: "#/components/schemas/ApiE2eeEligibilityStatus"
+        key_packages:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiE2eeClaimedKeyPackage"
+    ApiE2eeClaimTarget:
+      type: object
+      required:
+        - profile_id
+      properties:
+        profile_id:
+          type: string
+        device_keys:
+          type: array
+          description: Only these devices; default all active devices of the profile
+          items:
+            type: string
+    ApiE2eeCompactBackupRequest:
+      type: object
+      required:
+        - device_key
+        - through_seq
+      properties:
+        device_key:
+          type: string
+          description: The caller's active device (0x + 64 lowercase hex)
+        through_seq:
+          type: integer
+          minimum: 1
+          description: Chunks with seq <= through_seq are deleted
+    ApiE2eeCreateBackupRequest:
+      type: object
+      required:
+        - backup_id
+        - envelope
+        - device_key
+      properties:
+        backup_id:
+          type: string
+          description: 0x + 32 lowercase hex, random
+        envelope:
+          type: string
+          description: Standard base64 of the opaque key envelope (at most 8 KiB raw)
+        device_key:
+          type: string
+          description: The caller's active device (0x + 64 lowercase hex)
+    ApiE2eeCreateBlobRequest:
+      type: object
+      required:
+        - group
+        - uploader_device_key
+        - size
+        - chunk_count
+      properties:
+        group:
+          type: string
+        uploader_device_key:
+          type: string
+        size:
+          type: integer
+          format: int64
+          description: Total ciphertext bytes
+        chunk_count:
+          type: integer
+    ApiE2eeCreateGroupRequest:
+      type: object
+      required:
+        - group
+        - commit_key
+        - creator_device_key
+      properties:
+        group:
+          type: string
+          description: Random 32-byte group handle chosen by the creator (0x + 64 hex)
+        commit_key:
+          type: string
+          description: pub(K_0), 0x + 64 hex
+        creator_device_key:
+          type: string
+    ApiE2eeDevice:
+      type: object
+      required:
+        - device_key
+        - profile_id
+        - grant
+        - grant_id
+        - wallet_signature
+        - verified_via
+        - label
+        - platform
+        - created_at
+        - last_seen_at
+        - revoked_at
+        - revocation
+      properties:
+        device_key:
+          type: string
+          description: MLS Ed25519 signature public key; also the device id
+        profile_id:
+          type: string
+        grant:
+          $ref: "#/components/schemas/ApiE2eeDeviceGrant"
+        grant_id:
+          type: string
+          description: EIP-712 digest of the grant
+        wallet_signature:
+          type: string
+          description: >-
+            The wallet's signature over the grant (EOA 65 bytes; contract
+            wallets any length)
+        verified_via:
+          type: string
+          enum:
+            - eoa
+            - eip1271
+        label:
+          type: string
+        platform:
+          $ref: "#/components/schemas/ApiE2eeDevicePlatform"
+        created_at:
+          type: integer
+          format: int64
+          description: Unix milliseconds
+        last_seen_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix milliseconds
+        revoked_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix milliseconds
+        revocation:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ApiE2eeDeviceRevocation"
+        grant_message:
+          type: string
+          nullable: true
+          description: >-
+            Set when the device was granted by a combined sign-in grant: the
+            exact Sign-In with Ethereum message the wallet signed. Then
+            wallet_signature is the EIP-191 signature over it, grant_id is its
+            EIP-191 hash, and grant holds the terms of its
+            urn:6529:mls-device-grant:v1 resource (origin = the SIWE domain,
+            issued_at = its Issued At). Null for EIP-712 MlsDeviceGrant grants.
+    ApiE2eeDeviceGrant:
+      type: object
+      description: >-
+        The fields of the wallet-signed MlsDeviceGrant typed data (the statement
+        is rebuilt from them)
+      required:
+        - wallet
+        - device_key
+        - ciphersuite
+        - issued_at
+        - expires_at
+        - origin
+      properties:
+        wallet:
+          type: string
+          description: Lowercase 0x address
+        device_key:
+          type: string
+          description: 0x + 64 hex
+        ciphersuite:
+          type: integer
+          description: >-
+            79 (0x004F, MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519, a draft
+            code point)
+        issued_at:
+          type: integer
+          format: int64
+          description: Unix seconds
+        expires_at:
+          type: integer
+          format: int64
+          description: Unix seconds, minute aligned, at most 181 days after issued_at
+        origin:
+          type: string
+          maxLength: 64
+    ApiE2eeDeviceGroup:
+      type: object
+      required:
+        - group
+        - epoch
+        - last_seq
+        - joined_epoch
+        - updated_at
+      properties:
+        group:
+          type: string
+        epoch:
+          type: integer
+          format: int64
+        last_seq:
+          type: integer
+          format: int64
+        joined_epoch:
+          type: integer
+          format: int64
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix milliseconds
+    ApiE2eeDeviceLookupRequest:
+      type: object
+      properties:
+        profile_ids:
+          type: array
+          maxItems: 200
+          items:
+            type: string
+        device_keys:
+          type: array
+          maxItems: 500
+          items:
+            type: string
+    ApiE2eeDeviceLookupResponse:
+      type: object
+      required:
+        - devices
+      properties:
+        devices:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiE2eeDevice"
+    ApiE2eeDevicePlatform:
+      type: string
+      enum:
+        - web
+        - desktop
+        - phone
+    ApiE2eeDeviceRevocation:
+      type: object
+      required:
+        - revoker_device_key
+        - revoked_at
+        - signature
+      properties:
+        revoker_device_key:
+          type: string
+        revoked_at:
+          type: integer
+          format: int64
+          description: Unix seconds, as signed
+        signature:
+          type: string
+          description: Ed25519 signature over the revoke digest, 0x + 128 hex
+    ApiE2eeEligibility:
+      type: object
+      required:
+        - profile_id
+        - status
+        - active_devices
+      properties:
+        profile_id:
+          type: string
+        status:
+          $ref: "#/components/schemas/ApiE2eeEligibilityStatus"
+        active_devices:
+          type: integer
+        reason:
+          type: string
+          description: |
+            The shared DM admission code behind POLICY or BLOCKED, the same
+            codes legacy direct messages return. A target's block of the
+            caller is DM_RECIPIENT_NOT_ACCEPTING with status POLICY, so it is
+            never disclosed; BLOCKED with DM_SENDER_BLOCKED_RECIPIENT is the
+            caller's own block. Absent for OK and NO_DEVICES.
+          enum:
+            - DM_RECIPIENT_NOT_ACCEPTING
+            - DM_RECIPIENT_PEOPLE_I_FOLLOW_ONLY
+            - DM_RECIPIENT_GROUP_MEMBERS_ONLY
+            - DM_SENDER_BLOCKED_RECIPIENT
+    ApiE2eeEligibilityRequest:
+      type: object
+      required:
+        - profile_ids
+      properties:
+        profile_ids:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: string
+    ApiE2eeEligibilityResponse:
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiE2eeEligibility"
+    ApiE2eeEligibilityStatus:
+      type: string
+      enum:
+        - OK
+        - POLICY
+        - BLOCKED
+        - NO_DEVICES
+    ApiE2eeGroup:
+      type: object
+      required:
+        - group
+        - epoch
+        - commit_key
+        - last_seq
+        - created_at
+        - updated_at
+        - roster
+      properties:
+        group:
+          type: string
+        epoch:
+          type: integer
+          format: int64
+        commit_key:
+          type: string
+          description: pub(K_epoch)
+        last_seq:
+          type: integer
+          format: int64
+        created_at:
+          type: integer
+          format: int64
+          description: Unix milliseconds
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix milliseconds of the last log item
+        roster:
+          type: array
+          description: Current roster; empty when the requesting device was removed
+          items:
+            $ref: "#/components/schemas/ApiE2eeRosterDevice"
+    ApiE2eeKeyPackageStatus:
+      type: object
+      required:
+        - device_key
+        - one_time_available
+        - last_resort_expires_at
+      properties:
+        device_key:
+          type: string
+        one_time_available:
+          type: integer
+        last_resort_expires_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: Unix seconds
+    ApiE2eeKeyPackageUpload:
+      type: object
+      required:
+        - data
+        - last_resort
+        - expires_at
+      properties:
+        data:
+          type: string
+          description: Standard base64 TLS-serialized KeyPackage (at most 4 KiB)
+        last_resort:
+          type: boolean
+        expires_at:
+          type: integer
+          format: int64
+          description: Unix seconds, from the KeyPackage lifetime
+    ApiE2eeLogItem:
+      type: object
+      required:
+        - seq
+        - type
+        - epoch
+        - kind
+        - data
+        - entry_hash
+        - epoch_commitment
+        - next_commit_key
+        - signature
+        - roster_add
+        - roster_remove
+        - epoch_fp
+        - created_at
+      properties:
+        seq:
+          type: integer
+          format: int64
+        type:
+          type: string
+          enum:
+            - entry
+            - message
+        epoch:
+          type: integer
+          format: int64
+        kind:
+          type: string
+          nullable: true
+          description: Entries only
+          enum:
+            - commit
+            - proposal
+        data:
+          type: string
+          description: Standard base64 wrapped bytes
+        entry_hash:
+          type: string
+          nullable: true
+        epoch_commitment:
+          type: string
+          nullable: true
+        next_commit_key:
+          type: string
+          nullable: true
+        signature:
+          type: string
+          nullable: true
+        roster_add:
+          type: array
+          items:
+            type: string
+        roster_remove:
+          type: array
+          items:
+            type: string
+        epoch_fp:
+          type: string
+          nullable: true
+          description: Messages only, 16 hex
+        created_at:
+          type: integer
+          format: int64
+          description: Unix milliseconds (server time)
+    ApiE2eeLogPage:
+      type: object
+      required:
+        - items
+        - next_after_seq
+        - group
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiE2eeLogItem"
+        next_after_seq:
+          type: integer
+          format: int64
+          nullable: true
+          description: Null when caught up
+        group:
+          $ref: "#/components/schemas/ApiE2eeGroup"
+    ApiE2eeMe:
+      type: object
+      required:
+        - profile_id
+        - devices
+        - key_packages
+        - max_devices
+        - attachments_enabled
+      properties:
+        profile_id:
+          type: string
+        devices:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiE2eeDevice"
+        key_packages:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiE2eeKeyPackageStatus"
+        max_devices:
+          type: integer
+        attachments_enabled:
+          type: boolean
+          description: >-
+            Whether this server accepts encrypted attachments
+            (E2EE_ATTACHMENTS_ENABLED); clients hide attaching while false
+    ApiE2eeNotifyHint:
+      type: object
+      required:
+        - profile_id
+        - kind
+      properties:
+        profile_id:
+          type: string
+        kind:
+          type: string
+          enum:
+            - message
+            - mention
+            - reply
+    ApiE2eeRegisterDeviceRequest:
+      type: object
+      required:
+        - grant
+        - wallet_signature
+        - platform
+      properties:
+        grant:
+          $ref: "#/components/schemas/ApiE2eeDeviceGrant"
+        wallet_signature:
+          type: string
+        label:
+          type: string
+          description: >-
+            Sanitized to at most 48 characters of [A-Za-z0-9 ._()-]; default
+            "Device"
+        platform:
+          $ref: "#/components/schemas/ApiE2eeDevicePlatform"
+    ApiE2eeRegisterLoginGrantDeviceRequest:
+      type: object
+      required:
+        - grant_id
+        - platform
+      properties:
+        grant_id:
+          type: string
+          pattern: ^0x[0-9a-f]{64}$
+          description: >-
+            Id of a combined grant this profile stored at sign-in (the
+            device_grant.id the session login returned)
+        label:
+          type: string
+          description: >-
+            Sanitized to at most 48 characters of [A-Za-z0-9 ._()-]; default
+            "Device"
+        platform:
+          $ref: "#/components/schemas/ApiE2eeDevicePlatform"
+    ApiE2eeReport:
+      type: object
+      required:
+        - id
+        - verified
+        - sender_profile_id
+        - created_at
+      properties:
+        id:
+          type: string
+        verified:
+          type: boolean
+        sender_profile_id:
+          type: string
+          nullable: true
+        created_at:
+          type: integer
+          format: int64
+    ApiE2eeReportCategory:
+      type: string
+      description: >-
+        Severe or illegal harm only: child sexual abuse material, a credible
+        threat of violence, non-consensual intimate imagery, or doxxing (exposed
+        personal data)
+      enum:
+        - CHILD_SEXUAL_ABUSE_MATERIAL
+        - CREDIBLE_THREAT_OF_VIOLENCE
+        - NON_CONSENSUAL_INTIMATE_IMAGERY
+        - DOXXING
+    ApiE2eeReportHoldRequest:
+      type: object
+      required:
+        - on_hold
+      properties:
+        on_hold:
+          type: boolean
+    ApiE2eeReportRequest:
+      type: object
+      required:
+        - group
+        - epoch
+        - body
+        - signature
+        - sender_device_key
+        - reporter_device_key
+        - reason
+      properties:
+        group:
+          type: string
+        epoch:
+          type: integer
+          format: int64
+        body:
+          type: string
+          description: Standard base64 of the exact message body bytes
+        signature:
+          type: string
+          description: The sender's sig64, 0x + 128 hex
+        sender_device_key:
+          type: string
+        reporter_device_key:
+          type: string
+        reason:
+          $ref: "#/components/schemas/ApiE2eeReportCategory"
+        notes:
+          type: string
+          maxLength: 1000
+    ApiE2eeRevokeDeviceRequest:
+      type: object
+      required:
+        - revoker_device_key
+        - revoked_at
+        - signature
+      properties:
+        revoker_device_key:
+          type: string
+        revoked_at:
+          type: integer
+          format: int64
+          description: Unix seconds, within 10 minutes of server time
+        signature:
+          type: string
+    ApiE2eeRosterDevice:
+      type: object
+      required:
+        - device_key
+        - profile_id
+        - joined_epoch
+      properties:
+        device_key:
+          type: string
+        profile_id:
+          type: string
+        joined_epoch:
+          type: integer
+          format: int64
+    ApiE2eeRosterRepairRequest:
+      type: object
+      required:
+        - epoch
+        - device_keys
+        - requester_device_key
+        - signature
+      properties:
+        epoch:
+          type: integer
+          format: int64
+        device_keys:
+          type: array
+          description: The full roster per the client's MLS state
+          items:
+            type: string
+        requester_device_key:
+          type: string
+        signature:
+          type: string
+          description: >-
+            Ed25519(K_epoch, H("6529.MlsRoster.v1", g, uint32 epoch,
+            keccak256(sorted device keys)))
+    ApiE2eeSendMessageRequest:
+      type: object
+      required:
+        - epoch
+        - data
+        - epoch_fp
+        - sender_device_key
+      properties:
+        epoch:
+          type: integer
+          format: int64
+        data:
+          type: string
+          description: Standard base64 wrapped message (a MESSAGE bucket length)
+        epoch_fp:
+          type: string
+          description: 16 hex
+        sender_device_key:
+          type: string
+        notify:
+          type: array
+          maxItems: 200
+          items:
+            $ref: "#/components/schemas/ApiE2eeNotifyHint"
+    ApiE2eeSendMessageResponse:
+      type: object
+      required:
+        - seq
+        - created_at
+      properties:
+        seq:
+          type: integer
+          format: int64
+        created_at:
+          type: integer
+          format: int64
+    ApiE2eeSubmitEntryRequest:
+      type: object
+      required:
+        - kind
+        - epoch
+        - data
+        - entry_hash
+        - epoch_commitment
+        - next_commit_key
+        - signature
+        - sender_device_key
+      properties:
+        kind:
+          type: string
+          enum:
+            - commit
+            - proposal
+        epoch:
+          type: integer
+          format: int64
+        data:
+          type: string
+          description: Standard base64 wrapped entry (an ENTRY bucket length)
+        entry_hash:
+          type: string
+        epoch_commitment:
+          type: string
+          description: 32 zero bytes for proposals
+        next_commit_key:
+          type: string
+          description: 32 zero bytes for proposals
+        signature:
+          type: string
+          description: Ed25519 by K_epoch over the entry digest, 0x + 128 hex
+        sender_device_key:
+          type: string
+        roster_add:
+          type: array
+          items:
+            type: string
+        roster_remove:
+          type: array
+          items:
+            type: string
+        welcome:
+          $ref: "#/components/schemas/ApiE2eeWelcomeUpload"
+    ApiE2eeTrustAndSafetyReport:
+      type: object
+      required:
+        - id
+        - group
+        - epoch
+        - category
+        - body
+        - signature
+        - sender_device_key
+        - sender_profile_id
+        - reporter_device_key
+        - reporter_profile_id
+        - notes
+        - verified
+        - on_hold
+        - created_at
+        - expires_at
+      properties:
+        id:
+          type: string
+        group:
+          type: string
+        epoch:
+          type: integer
+          format: int64
+        category:
+          type: string
+          description: >-
+            An ApiE2eeReportCategory value (reports filed before categories were
+            restricted may hold an older reason)
+        body:
+          type: string
+          description: Standard base64 of the reported message body (UTF-8 JSON)
+        signature:
+          type: string
+        sender_device_key:
+          type: string
+        sender_profile_id:
+          type: string
+          nullable: true
+        reporter_device_key:
+          type: string
+        reporter_profile_id:
+          type: string
+        notes:
+          type: string
+          nullable: true
+        verified:
+          type: boolean
+          description: >-
+            The sender's device signature verified and the sender was in the
+            group
+        on_hold:
+          type: boolean
+        created_at:
+          type: integer
+          format: int64
+        expires_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: When retention deletes the report (ms); null while on hold
+    ApiE2eeTrustAndSafetyReportPage:
+      type: object
+      required:
+        - items
+        - next_before
+        - next_before_id
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiE2eeTrustAndSafetyReport"
+        next_before:
+          type: integer
+          format: int64
+          nullable: true
+          description: Pass as `before` for the next page; null on the last page
+        next_before_id:
+          type: string
+          nullable: true
+          description: >-
+            Pass as `before_id` with `before` for the next page, so reports
+            sharing a timestamp are neither skipped nor repeated; null on the
+            last page
+    ApiE2eeUploadKeyPackagesRequest:
+      type: object
+      required:
+        - key_packages
+      properties:
+        key_packages:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/ApiE2eeKeyPackageUpload"
+    ApiE2eeWelcome:
+      type: object
+      required:
+        - id
+        - group
+        - epoch
+        - data
+        - ratchet_tree
+        - added_by_profile_id
+        - added_by_device_key
+        - created_at
+      properties:
+        id:
+          type: string
+        group:
+          type: string
+        epoch:
+          type: integer
+          format: int64
+          description: The epoch the welcome joins
+        data:
+          type: string
+          description: Standard base64 MLS Welcome
+        ratchet_tree:
+          type: string
+          nullable: true
+        added_by_profile_id:
+          type: string
+        added_by_device_key:
+          type: string
+        created_at:
+          type: integer
+          format: int64
+    ApiE2eeWelcomeUpload:
+      type: object
+      required:
+        - data
+        - targets
+      properties:
+        data:
+          type: string
+          description: Standard base64 MLS Welcome
+        ratchet_tree:
+          type: string
+          description: Standard base64; omitted when inline
+        targets:
+          type: array
+          description: Device keys; a subset of roster_add
+          items:
+            type: string
     ApiErrorResponse:
       type: object
       additionalProperties: false
@@ -31935,6 +35660,11 @@ components:
         - profile_wave_id
         - is_wave_creator
       properties:
+        is_anonymous:
+          type: boolean
+          description: >-
+            True for an anonymous competition author. Identity details and
+            profile links are unavailable.
         id:
           type: string
           nullable: true
@@ -32055,6 +35785,11 @@ components:
         - classification
         - badges
       properties:
+        is_anonymous:
+          type: boolean
+          description: >-
+            True for an anonymous competition author. Identity details and
+            profile links are unavailable.
         id:
           type: string
         handle:
@@ -35875,6 +39610,11 @@ components:
       required:
         - id
       properties:
+        is_anonymous:
+          type: boolean
+          description: >-
+            True for an anonymous competition author. Identity details and
+            profile links are unavailable.
         id:
           type: string
         handle:
@@ -37320,6 +41060,11 @@ components:
         - profile_wave_id
         - is_wave_creator
       properties:
+        is_anonymous:
+          type: boolean
+          description: >-
+            True for an anonymous competition author. Identity details and
+            profile links are unavailable.
         id:
           type: string
           format: uuid
@@ -37427,15 +41172,41 @@ components:
       type: object
       required:
         - direct_message_policy
+        - direct_message_group_id
+        - direct_message_allow_people_i_follow
+        - direct_message_group_unavailable
         - notification_level
         - notifications
       properties:
         direct_message_policy:
           type: string
+          description: |
+            Who may start a new direct message with this profile. Blocked
+            profiles can never start one. GROUP_MEMBERS admits members of
+            direct_message_group_id.
           enum:
             - EVERYONE
             - PEOPLE_I_FOLLOW
             - NOBODY
+            - GROUP_MEMBERS
+        direct_message_group_id:
+          type: string
+          nullable: true
+          description: |
+            Group whose members may start a new direct message when
+            direct_message_policy is GROUP_MEMBERS. Kept when another policy
+            is selected so the choice can be restored.
+        direct_message_allow_people_i_follow:
+          type: boolean
+          description: |
+            When direct_message_policy is GROUP_MEMBERS, people this profile
+            follows may always start a new direct message. Defaults to true.
+        direct_message_group_unavailable:
+          type: boolean
+          description: |
+            True when direct_message_policy is GROUP_MEMBERS but the chosen
+            group is missing or hidden. Admission then falls back to people
+            this profile follows until another group is chosen.
         notification_level:
           type: string
           enum:
@@ -38100,6 +41871,11 @@ components:
       required:
         - handle
       properties:
+        is_anonymous:
+          type: boolean
+          description: >-
+            True for an anonymous competition author. Identity details and
+            profile links are unavailable.
         handle:
           type: string
         pfp:
@@ -38245,6 +42021,18 @@ components:
           maxItems: 50
           items:
             $ref: "#/components/schemas/ApiPushLogoutSession"
+        reconciliation_sessions:
+          type: array
+          maxItems: 50
+          items:
+            $ref: "#/components/schemas/ApiPushLogoutSession"
+          description: >-
+            Optional native session proofs authorizing a credential-scoped fence
+            when logout preceded the first push registration and its original
+            sessions are missing or no longer live. At least one must be live.
+            These sessions are not revoked unless also listed in sessions. They
+            never prove installation ownership or bypasses an existing
+            installation credential.
     ApiRevokePushInstallationResponse:
       type: object
       required:
@@ -38392,6 +42180,15 @@ components:
             Optional 6529 session-signature protocol compatibility field. This
             is not the ERC-4361 SIWE Version field; SIWE messages always use
             Version 1.
+        device_label:
+          type: string
+          maxLength: 64
+          description: >-
+            Optional human readable name for the device key granted by a web
+            SIWE message, for example "Chrome on macOS". The server keeps only
+            letters, digits, spaces and ._()- characters, collapses spaces,
+            trims, truncates to 48 characters and uses "Browser" when empty.
+            Ignored when the signed message carries no device grant.
     ApiSessionLogoutNativeRequest:
       type: object
       required:
@@ -38482,6 +42279,31 @@ components:
           description: >-
             Backward-compatible request field. Session challenges are issued for
             the backend-configured auth chain, not this client-supplied value.
+        device_key:
+          type: string
+          pattern: ^0x[0-9a-f]{64}$
+          description: >-
+            Web only. Raw 32-byte Ed25519 public key (0x + 64 lowercase hex) to
+            grant signing rights to in the SIWE message.
+        device_key_type:
+          type: string
+          enum:
+            - ed25519
+          description: Required when device_key is present.
+        device_scopes:
+          type: string
+          description: >-
+            Optional comma separated list from post, edit, delete, react, vote.
+            Defaults to post,edit,delete,react. Must include post.
+        mls_device_key:
+          type: string
+          pattern: ^0x[0-9a-f]{64}$
+          description: "Combined grant: the MLS device key to grant for encrypted messages."
+        mls_ciphersuite:
+          type: integer
+          minimum: 1
+          maximum: 65535
+          description: Required when mls_device_key is present.
     ApiSessionNonceResponse:
       type: object
       required:
@@ -38558,6 +42380,8 @@ components:
           type: string
           enum:
             - web
+        device_grant:
+          $ref: "#/components/schemas/ApiDeviceGrant"
     ApiSetCompetitionVoteRequest:
       type: object
       additionalProperties: false
@@ -39410,6 +43234,24 @@ components:
         total_count:
           type: integer
           format: int64
+    ApiUndiscoveredDrops:
+      type: object
+      required:
+        - drops
+        - left_to_vote_in_current_round
+        - total_count
+      properties:
+        drops:
+          type: array
+          maxItems: 4
+          items:
+            $ref: "#/components/schemas/ApiDrop"
+        left_to_vote_in_current_round:
+          type: integer
+          format: int64
+        total_count:
+          type: integer
+          format: int64
     ApiUnpublishProfileCmsPackageRequest:
       type: object
       additionalProperties: false
@@ -39457,6 +43299,9 @@ components:
       type: object
       allOf:
         - $ref: "#/components/schemas/ApiCreateWaveDropRequest"
+      properties:
+        device_signature:
+          $ref: "#/components/schemas/ApiDeviceSignature"
     ApiUpdateProfileNotificationCategories:
       type: object
       additionalProperties: false
@@ -39483,10 +43328,23 @@ components:
       properties:
         direct_message_policy:
           type: string
+          description: |
+            GROUP_MEMBERS requires direct_message_group_id in the same request
+            or an already saved group.
           enum:
             - EVERYONE
             - PEOPLE_I_FOLLOW
             - NOBODY
+            - GROUP_MEMBERS
+        direct_message_group_id:
+          type: string
+          nullable: true
+          description: |
+            A visible, non-direct-message group the profile can see. Null
+            clears the saved group and is rejected while the policy is
+            GROUP_MEMBERS.
+        direct_message_allow_people_i_follow:
+          type: boolean
         notification_level:
           type: string
           enum:
@@ -39533,6 +43391,46 @@ components:
             Decisions before this time will not be made. Should not overlap with
             other pauses. Needs to be after start_time, after now and after
             wave.next_decision_time
+    ApiUpdateWaveHubChat:
+      type: object
+      properties:
+        scope:
+          $ref: "#/components/schemas/ApiCreateNewWaveScope"
+        enabled:
+          type: boolean
+        links_disabled:
+          type: boolean
+        slow_mode_cooldown_ms:
+          type: integer
+          format: int64
+          minimum: 1000
+          nullable: true
+        replies:
+          $ref: "#/components/schemas/ApiCreateNewWaveChatRepliesConfig"
+    ApiUpdateWaveHubRequest:
+      type: object
+      description: >-
+        Partial shared-wave edit. Omitted fields remain unchanged. Legacy
+        competition fields are accepted and ignored, including explicit nulls.
+        This command never changes competition configuration.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 250
+        picture:
+          type: string
+          format: uri
+          pattern: ^https://d3lqz0a4bldqgf\.cloudfront\.net/
+          nullable: true
+        visibility:
+          $ref: "#/components/schemas/ApiCreateNewWaveVisibilityConfig"
+        chat:
+          $ref: "#/components/schemas/ApiUpdateWaveHubChat"
+        admin_group:
+          $ref: "#/components/schemas/ApiCreateNewWaveScope"
+        admin_drop_deletion_enabled:
+          type: boolean
     ApiUpdateWaveNotificationPreferencesRequest:
       type: object
       properties:
@@ -40465,6 +44363,9 @@ components:
         - pinned
         - identity_wave
       properties:
+        is_direct_message:
+          type: boolean
+          description: Whether conversation links should open in Messages.
         id:
           type: string
         name:
@@ -41391,6 +45292,9 @@ components:
         - capabilities
         - permissions
       properties:
+        configuration:
+          description: Shared wave settings independent of the original competition.
+          $ref: "#/components/schemas/ApiWave"
         legacy_primary_competition_id:
           type: string
           nullable: true

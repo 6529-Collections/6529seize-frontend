@@ -177,6 +177,55 @@ describe("mobile app links", () => {
       expect(resolve(value)).toBe(expected);
     });
 
+    it("routes a shared staging link within the staging app", () => {
+      expect(
+        getNativeLinkDestination(
+          "https://STAGING.6529.IO/waves/1?drop=2&tag=a&tag=b#drop-2",
+          "mobileStaging6529",
+          "https://staging.6529.io",
+          123
+        )
+      ).toBe("/waves/1?drop=2&tag=a&tag=b&_t=123#drop-2");
+    });
+
+    it.each([
+      "https://6529.io",
+      "https://prxtstaging.6529.io",
+      "https://staging.6529.io.example.com",
+      "http://localhost:3001",
+      "http://staging.6529.io",
+      "https://staging.6529.io:8443",
+    ])("rejects staging links from a different app origin %s", (appOrigin) => {
+      expect(
+        getNativeLinkDestination(
+          "https://staging.6529.io/waves/1",
+          "mobileStaging6529",
+          appOrigin,
+          123
+        )
+      ).toBeNull();
+    });
+
+    it.each([
+      "/auth/callback",
+      "/tools/app-wallets/import-wallet",
+      "/open-mobile",
+      "/api/version",
+      "/.well-known/apple-app-site-association",
+      "/favicon.svg",
+      "/bad%",
+      "//evil.example",
+    ])("keeps staging exclusion or unsafe path %s in the browser", (path) => {
+      expect(
+        getNativeLinkDestination(
+          `https://staging.6529.io${path}`,
+          "mobileStaging6529",
+          "https://staging.6529.io",
+          123
+        )
+      ).toBeNull();
+    });
+
     it.each([
       "https://evil.example/waves/1",
       "https://6529.io.evil.example/waves/1",

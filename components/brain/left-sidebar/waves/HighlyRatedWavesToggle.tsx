@@ -9,6 +9,7 @@ import { WaveAvatar } from "../web/WebBrainLeftSidebarWave/subcomponents/WaveAva
 import { WaveScoreSummaryHoverCard } from "@/components/waves/WaveTrustSignals";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { useHoverIntent } from "@/hooks/useHoverIntent";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -309,7 +310,16 @@ function HighlyRatedWavePreviewLink({
             score: scoreLabel,
           }
         );
+  // Hover prefetches only after the pointer rests on the preview, not while it
+  // sweeps across the row. Clicking prefetches right away instead.
+  const { schedule: scheduleHoverIntent, cancel: cancelHoverIntent } =
+    useHoverIntent();
+  const { onMouseEnter } = item;
+  const handleMouseEnter = onMouseEnter
+    ? () => scheduleHoverIntent(onMouseEnter)
+    : undefined;
   const handleLinkClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    cancelHoverIntent();
     item.onClick(event);
     if (event.defaultPrevented || isModifiedAnchorClick(event)) {
       event.stopPropagation();
@@ -348,7 +358,9 @@ function HighlyRatedWavePreviewLink({
         aria-label={linkLabel}
         aria-current={item.isActive ? "page" : undefined}
         onClick={handleLinkClick}
-        {...(item.onMouseEnter ? { onMouseEnter: item.onMouseEnter } : {})}
+        {...(handleMouseEnter
+          ? { onMouseEnter: handleMouseEnter, onMouseLeave: cancelHoverIntent }
+          : {})}
         className={`tw-group/preview tw-relative tw-flex ${isTouchPreview ? "tw-size-11" : "tw-size-8"} tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-overflow-visible tw-rounded-full tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
       >
         <WaveAvatar

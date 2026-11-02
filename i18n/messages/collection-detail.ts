@@ -215,6 +215,8 @@ export const TIMELINE_MESSAGES = namespaceMessages("timeline", [
   ["media.imageAlt", "{label} preview image"],
   ["media.videoAriaLabel", "{label} preview video"],
   ["media.htmlTitle", "{label} interactive preview"],
+  ["media.openMedia", "Open {label}"],
+  ["media.unavailable", "{label} preview unavailable"],
 ] as const);
 
 export const DISTRIBUTION_MESSAGES = namespaceMessages("distribution", [

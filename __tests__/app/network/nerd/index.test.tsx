@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import "@testing-library/jest-dom";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
@@ -95,7 +97,9 @@ describe("generateMetadata", () => {
     });
     expect(metadata).toMatchObject({
       title: "Network Nerd - Interactions",
-      description: expect.stringContaining("Network"),
+      description: expect.stringContaining(
+        t(DEFAULT_LOCALE, "pageMetadata.networkNerd.description")
+      ),
       openGraph: expect.objectContaining({
         title: "Network Nerd - Interactions",
       }),
@@ -108,7 +112,9 @@ describe("generateMetadata", () => {
     });
     expect(metadata).toMatchObject({
       title: "Network Nerd - Cards Collected",
-      description: expect.stringContaining("Network"),
+      description: expect.stringContaining(
+        t(DEFAULT_LOCALE, "pageMetadata.networkNerd.description")
+      ),
       openGraph: expect.objectContaining({
         title: "Network Nerd - Cards Collected",
       }),

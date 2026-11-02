@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import Page, { generateMetadata } from "@/app/tools/subscriptions-report/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
@@ -698,7 +700,7 @@ describe("Subscriptions report page", () => {
     const metadata = await generateMetadata();
     expect(metadata.title).toEqual("Subscriptions Report | Tools");
     expect(metadata.description).toEqual(
-      `Tools | ${new URL(publicEnv.BASE_ENDPOINT).hostname}`
+      `${t(DEFAULT_LOCALE, "pageMetadata.subscriptionsReport.description")} | ${new URL(publicEnv.BASE_ENDPOINT).hostname}`
     );
   });
 });

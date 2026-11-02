@@ -47,7 +47,7 @@ export const getWaveUpdateGroupValidationRequest = (
     !includesRole(ApiWaveGroupRole.Voting)
       ? {}
       : { voting_group_id: body.voting.scope.group_id }),
-    ...(body.chat.enabled && includesRole(ApiWaveGroupRole.Chat)
+    ...(includesRole(ApiWaveGroupRole.Chat) && body.chat.enabled
       ? { chat_group_id: body.chat.scope.group_id }
       : {}),
     ...(body.wave.admin_group && includesRole(ApiWaveGroupRole.Admin)

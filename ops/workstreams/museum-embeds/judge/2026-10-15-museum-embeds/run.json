@@ -1,0 +1,47 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "profile": "museum",
+  "run_id": "2026-10-15-museum-embeds",
+  "candidate": {
+    "commit": "5a826f65056ae64cb5f6c789699d8533c98baaa4",
+    "build": "production"
+  },
+  "baseline": {
+    "commit": "3c57e071f898cd9dcbec1a6193a9ed5ae4245aed",
+    "build": "production",
+    "museum_publication_commit": "92966f2836ebf2af06edfe0fe2cff25041307c92"
+  },
+  "scope": {
+    "routes": ["/museum/6529-fund-szn1/gazers"],
+    "templates": {
+      "/museum/6529-fund-szn1/gazers": "Migrated 6529 Fund SZN1 collection page with three live Art Blocks generator embeds (Gazers #788, #566, #403) followed by the collection essay"
+    },
+    "audience": "Visitors reading the 6529 Fund SZN1 Museum collection page for Matt Kane's Gazers",
+    "primary_task": "See the three Gazers works running live and read the collection essay",
+    "release_intent": "Sandbox the three Art Blocks generator frames with sandbox=\"allow-scripts\", the policy the other Museum Art Blocks embeds already use. No visible change is intended: the works must still render, animate, and keep their size and placement.",
+    "states": ["default"],
+    "viewports": ["1440x1000", "820x1000", "390x844"],
+    "locales": ["en-US"]
+  },
+  "not_applicable": {
+    "J13": "No wallet or chain interaction on this page"
+  },
+  "budget": {
+    "repair_batches": 6
+  },
+  "decisions": [
+    "Baseline: main at 3c57e071f8, built and served the same way, is the comparison baseline. evidence/main holds the same capture matrix as evidence/candidate.",
+    "Repair scope (coordinator decision): this run repairs only deficits that the candidate introduces or alters relative to the baseline. A deficit present identically on the baseline is pre-existing Museum debt: file it as P3, begin its observation with 'Pre-existing on main:', and name any dimension or check it would otherwise affect, so it is recorded for the Museum backlog without blocking this change. Scores and checks assess the candidate relative to the baseline; a pre-existing deficit filed as P3 does not lower a score or fail a check.",
+    "The works are live generative programs: each frame draws a new state over time, and Gazers changes with the date and time of day, so pixel differences inside the frames between captures and between builds are expected. automated-checks.json records, per frame and viewport, two frame captures 2.5 s apart (animated true when they differ), the frame's colour spread, and each frame document's origin and canvas size; the sandboxed candidate frames report the opaque origin 'null'.",
+    "The LCL:3320 and LCL:3321 badge in the header marks a locally served build; production 6529.io does not show it. The 390x844 cell uses a Pixel 7 phone profile, so the app shows its mobile-app banner and touch header as it does for phone visitors."
+  ],
+  "evidence_index": {
+    "candidate": "evidence/candidate: gazers-<viewport>-full.png full-page captures, gazers-<viewport>-NN.png viewport-height tiles, gazers-<viewport>-frame-N.png per-frame captures, text/gazers-<viewport>.txt (text of <main>), automated-checks.json, contact-sheet-<viewport>.png",
+    "baseline": "evidence/main: the same files for the baseline build",
+    "comparison": "evidence/diff-candidate-vs-main.json: per-cell status, <main> text, iframe attributes, frame probes, pixel, and automated-check comparison",
+    "live_builds": "Candidate served at http://localhost:3320 and baseline at http://localhost:3321 while the round is judged",
+    "slugs": {
+      "/museum/6529-fund-szn1/gazers": "gazers"
+    }
+  }
+}

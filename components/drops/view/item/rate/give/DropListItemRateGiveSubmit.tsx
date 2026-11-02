@@ -1,7 +1,7 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import type { DropRateChangeRequest } from "@/entities/IDrop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
@@ -48,13 +48,14 @@ export default function DropListItemRateGiveSubmit({
   readonly onSuccessfulRateChange: () => void;
   readonly isMobile?: boolean | undefined;
 }) {
-  const { requestAuth, setToast } = useContext(AuthContext);
+  const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
+    useContext(AuthContext);
   const queryClient = useQueryClient();
   const [mutating, setMutating] = useState<boolean>(false);
   const [clickCount, setClickCount] = useState<number>(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { voteState } = useDropInteractionRules(drop);
-  const { applyOptimisticDropUpdate } = useMyStream();
+  const { applyOptimisticDropUpdate } = useMyStreamActions();
   const optimisticRollbackRef = useRef<(() => void) | null>(null);
 
   const rateChangeMutation = useMutation({
@@ -68,7 +69,11 @@ export default function DropListItemRateGiveSubmit({
       }),
     onSuccess: (updatedDrop) => {
       onSuccessfulRateChange();
-      applyWaveDropVoteUpdate(queryClient, updatedDrop, drop.wave.id);
+      applyWaveDropVoteUpdate(queryClient, updatedDrop, drop.wave.id, {
+        contextProfile: activeProfileProxy
+          ? undefined
+          : connectedProfile?.handle,
+      });
       optimisticRollbackRef.current = null;
     },
     onError: (error) => {

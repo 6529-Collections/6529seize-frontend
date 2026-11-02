@@ -1,9 +1,12 @@
-import { render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { ExploreWaveCard } from "@/components/home/explore-waves/ExploreWaveCard";
 import { getTimeAgoShort } from "@/helpers/Helpers";
 import type { ImgHTMLAttributes, ReactNode } from "react";
 import type { SidebarWave } from "@/types/waves.types";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { getWaveCardTint } from "@/components/home/explore-waves/getWaveCardTint";
+
+jest.mock("@/components/home/explore-waves/getWaveCardTint");
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -83,6 +86,126 @@ describe("ExploreWaveCard", () => {
         apiMedia: [],
       },
     });
+  });
+
+  it("keeps the homepage cover source, description, and link when styling changes", () => {
+    const wave = createWave({
+      descriptionDrop: {
+        contents: "**A wave** for [art](https://example.com)",
+        media: [],
+      },
+      picture: "https://example.com/wave.png",
+    });
+    const { rerender } = render(
+      <ExploreWaveCard wave={wave} horizontalOnMobile />
+    );
+    const link = screen.getByRole("link", { name: /^View wave Wave One/ });
+    expect(link).toHaveAttribute("href", "/waves/wave-1");
+    expect(screen.getByText("A wave for art")).toBeInTheDocument();
+    expect(screen.getByText(/2m ago · 3/i)).toBeInTheDocument();
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+    expect(screen.getByRole("img")).toHaveAttribute(
+      "sizes",
+      "(max-width: 639px) 33vw, (max-width: 767px) 17vw, (max-width: 1023px) 50vw, 33vw"
+    );
+    expect(mockContentDisplay).not.toHaveBeenCalled();
+
+    rerender(<ExploreWaveCard wave={wave} />);
+    expect(screen.getByTestId("content-display")).toBeInTheDocument();
+  });
+
+  it("samples only the desktop homepage variant and clears tint on mobile", () => {
+    const desktop = {
+      matches: false,
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+    };
+    const mediaSpy = jest
+      .spyOn(window, "matchMedia")
+      .mockReturnValue(desktop as unknown as MediaQueryList);
+    jest.mocked(getWaveCardTint).mockReturnValue("20 30 40");
+    const wave = createWave({ picture: "https://example.com/tinted-wave.png" });
+    const { rerender, unmount } = render(
+      <ExploreWaveCard wave={wave} horizontalOnMobile />
+    );
+    const card = screen.getByRole("link");
+    const details = card.lastElementChild as HTMLElement;
+    fireEvent.load(screen.getByRole("img"));
+    expect(getWaveCardTint).not.toHaveBeenCalled();
+    expect(details.style.getPropertyValue("--card-tint")).toBe("");
+
+    const changeBreakpoint = desktop.addEventListener.mock
+      .calls[0]![1] as () => void;
+    desktop.matches = true;
+    act(changeBreakpoint);
+    expect(details.style.getPropertyValue("--card-tint")).toBe("20 30 40");
+    rerender(<ExploreWaveCard wave={wave} horizontalOnMobile />);
+    fireEvent.mouseOver(card);
+    expect(getWaveCardTint).toHaveBeenCalledTimes(1);
+
+    desktop.matches = false;
+    act(changeBreakpoint);
+    expect(details.style.getPropertyValue("--card-tint")).toBe("");
+    desktop.matches = true;
+    rerender(<ExploreWaveCard wave={wave} />);
+    fireEvent.load(screen.getByRole("img"));
+    expect(getWaveCardTint).toHaveBeenCalledTimes(1);
+    expect(desktop.removeEventListener).toHaveBeenCalledWith(
+      "change",
+      changeBreakpoint
+    );
+    unmount();
+    mediaSpy.mockRestore();
+  });
+
+  it("reuses the image tint on Discover mobile without resampling on hover or rerender", () => {
+    const mediaSpy = jest.spyOn(window, "matchMedia").mockReturnValue({
+      matches: false,
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+    } as unknown as MediaQueryList);
+    jest.mocked(getWaveCardTint).mockReturnValue("20 30 40");
+    const wave = createWave({
+      picture: "https://example.com/discover-wave.png",
+    });
+    const { rerender, unmount } = render(
+      <ExploreWaveCard wave={wave} artworkOverlay />
+    );
+    const card = screen.getByRole("link");
+    const details = card.lastElementChild as HTMLElement;
+    expect(details.style.getPropertyValue("--card-tint")).toBe("20 30 40");
+    const calls = jest.mocked(getWaveCardTint).mock.calls.length;
+    rerender(<ExploreWaveCard wave={wave} artworkOverlay />);
+    fireEvent.mouseOver(card);
+    expect(getWaveCardTint).toHaveBeenCalledTimes(calls);
+    expect(screen.getByTestId("content-display")).toBeInTheDocument();
+    expect(screen.getByText(/2m ago · 3/i)).toBeInTheDocument();
+    expect(card).toHaveAttribute("href", "/waves/wave-1");
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+    rerender(<ExploreWaveCard wave={wave} compact artworkOverlay />);
+    expect(details.style.getPropertyValue("--card-tint")).toBe("");
+    expect(getWaveCardTint).toHaveBeenCalledTimes(calls);
+    unmount();
+    mediaSpy.mockRestore();
+  });
+
+  it("keeps the untinted fallback when a homepage Wave has no artwork", () => {
+    const samplingCalls = jest.mocked(getWaveCardTint).mock.calls.length;
+    render(
+      <ExploreWaveCard
+        wave={createWave({ picture: null })}
+        horizontalOnMobile
+      />
+    );
+
+    const card = screen.getByRole("link");
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    expect(
+      (card.lastElementChild as HTMLElement).style.getPropertyValue("--card-tint")
+    ).toBe("");
+    expect(getWaveCardTint).toHaveBeenCalledTimes(samplingCalls);
+    expect(card).toHaveAttribute("href", "/waves/wave-1");
+    expect(screen.getByText("Description preview")).toBeInTheDocument();
   });
 
   it("shows empty state when latest drop is missing", () => {

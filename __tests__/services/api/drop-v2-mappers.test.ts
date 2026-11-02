@@ -1,5 +1,9 @@
 import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
-import { mapApiWaveOverviewToApiWaveMin } from "@/services/api/drop-v2-mappers";
+import {
+  mapApiWaveOverviewToApiWaveMin,
+  mapIdentityOverviewToProfileMin,
+} from "@/services/api/drop-v2-mappers";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 
 type ApiWaveOverviewWithVoteRestrictions = ApiWaveOverview & {
   readonly forbid_negative_votes?: boolean;
@@ -30,6 +34,19 @@ const createWaveOverview = (
 });
 
 describe("mapApiWaveOverviewToApiWaveMin", () => {
+  it("preserves the anonymous author marker when adapting V2 drop identities", () => {
+    const profile = mapIdentityOverviewToProfileMin({
+      id: "anonymous-entry-profile",
+      handle: "Anonymous",
+      primary_address: "",
+      level: 0,
+      classification: ApiProfileClassification.Pseudonym,
+      is_anonymous: true,
+      badges: { artist_of_main_stage_submissions: 0, artist_of_memes: 0 },
+    });
+    expect(profile.is_anonymous).toBe(true);
+    expect(profile.primary_address).toBe("");
+  });
   it("preserves no-negative vote waves from V2 overviews", () => {
     const result = mapApiWaveOverviewToApiWaveMin(
       createWaveOverview({ forbid_negative_votes: true })

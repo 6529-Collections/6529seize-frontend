@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import Page, {
   generateMetadata,
 } from "@/app/tools/app-wallets/import-wallet/page";
@@ -48,6 +50,8 @@ describe("Import App Wallet Page", () => {
   it("exposes metadata", async () => {
     const metadata = await generateMetadata();
     expect(metadata.title).toEqual("Import App Wallet | Tools");
-    expect(metadata.description).toEqual(`Tools | ${domain}`);
+    expect(metadata.description).toEqual(
+      `${t(DEFAULT_LOCALE, "pageMetadata.appWalletsImport.description")} | ${domain}`
+    );
   });
 });

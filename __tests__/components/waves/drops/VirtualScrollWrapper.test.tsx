@@ -1,5 +1,12 @@
-import { act, cleanup, render } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
 import VirtualScrollWrapper from "@/components/waves/drops/VirtualScrollWrapper";
+import WaveDropLongContent from "@/components/waves/drops/WaveDropLongContent";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import {
   clearWaveDropNearViewport,
@@ -45,7 +52,7 @@ beforeAll(() => {
 
 beforeEach(() => {
   const module = require("@/contexts/wave/MyStreamContext");
-  (module.useMyStream as jest.Mock).mockReturnValue({
+  (module.useMyStreamActions as jest.Mock).mockReturnValue({
     fetchAroundSerialNo: jest.fn(),
   });
 });
@@ -65,7 +72,7 @@ afterEach(() => {
 });
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: jest.fn(() => ({ fetchAroundSerialNo: jest.fn() })),
+  useMyStreamActions: jest.fn(() => ({ fetchAroundSerialNo: jest.fn() })),
 }));
 
 function setup(size: DropSize, dropId?: string, rootMargin?: string) {
@@ -114,10 +121,51 @@ test("renders placeholder when out of view", () => {
   expect(placeholder.children).toHaveLength(0);
 });
 
+test("preserves long-content expansion while children are virtualized", () => {
+  const scrollRef = { current: document.createElement("div") };
+  const { container } = render(
+    <VirtualScrollWrapper
+      scrollContainerRef={scrollRef}
+      dropSerialNo={1}
+      waveId="wave"
+      type={DropSize.FULL}
+      enableLongContentCollapse
+    >
+      <WaveDropLongContent
+        content={"Long virtualized post ".repeat(60)}
+        expansionKey="drop-1:0"
+      >
+        <div data-testid="full-long-content">Full content</div>
+      </WaveDropLongContent>
+    </VirtualScrollWrapper>
+  );
+  const wrapper = container.firstChild as HTMLElement;
+
+  fireEvent.click(screen.getByRole("button", { name: "Show more" }));
+  expect(screen.getByTestId("full-long-content")).toBeInTheDocument();
+
+  act(() => {
+    emitResize(wrapper, 320);
+    intersectionCb([{ isIntersecting: false } as any]);
+  });
+  expect(screen.queryByTestId("full-long-content")).not.toBeInTheDocument();
+
+  act(() => {
+    intersectionCb([{ isIntersecting: true } as any]);
+  });
+  expect(screen.getByTestId("full-long-content")).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Show less" })).toHaveAttribute(
+    "aria-expanded",
+    "true"
+  );
+});
+
 test("fetches light drop when entering view", () => {
   const fetchAroundSerialNo = jest.fn();
   const module = require("@/contexts/wave/MyStreamContext");
-  (module.useMyStream as jest.Mock).mockReturnValue({ fetchAroundSerialNo });
+  (module.useMyStreamActions as jest.Mock).mockReturnValue({
+    fetchAroundSerialNo,
+  });
   setup(DropSize.LIGHT);
   act(() => {
     intersectionCb([{ isIntersecting: true } as any]);
@@ -212,7 +260,9 @@ describe("Drop Size Behavior", () => {
   test("does not fetch when FULL drop enters view", () => {
     const fetchAroundSerialNo = jest.fn();
     const module = require("@/contexts/wave/MyStreamContext");
-    (module.useMyStream as jest.Mock).mockReturnValue({ fetchAroundSerialNo });
+    (module.useMyStreamActions as jest.Mock).mockReturnValue({
+      fetchAroundSerialNo,
+    });
 
     setup(DropSize.FULL);
     act(() => {
@@ -225,7 +275,9 @@ describe("Drop Size Behavior", () => {
   test("does not fetch when LIGHT drop leaves view", () => {
     const fetchAroundSerialNo = jest.fn();
     const module = require("@/contexts/wave/MyStreamContext");
-    (module.useMyStream as jest.Mock).mockReturnValue({ fetchAroundSerialNo });
+    (module.useMyStreamActions as jest.Mock).mockReturnValue({
+      fetchAroundSerialNo,
+    });
 
     setup(DropSize.LIGHT);
     act(() => {

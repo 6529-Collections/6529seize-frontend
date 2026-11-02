@@ -7,7 +7,13 @@ import React from "react";
 import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
 import { waveFeatureAttributes } from "@/services/analytics/waveFeatureUsage";
 
+import {
+  getMainStageTabClassName,
+  MAIN_STAGE_TABLIST_CLASS_NAME,
+} from "./mainStageToolbarStyles";
+
 interface WaveleaderboardSortProps {
+  readonly isMainStage?: boolean;
   readonly sort: WaveDropsLeaderboardSort;
   readonly onSortChange: (sort: WaveDropsLeaderboardSort) => void;
   readonly mode?: WaveleaderboardSortMode;
@@ -169,6 +175,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
   sort,
   onSortChange,
   mode = "dropdown",
+  isMainStage = false,
   items = WAVE_LEADERBOARD_SORT_ITEMS,
   telemetryScope,
 }) => {
@@ -180,6 +187,9 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
     telemetryScope !== undefined
   );
   const getTabClassName = (value: WaveDropsLeaderboardSort): string => {
+    if (isMainStage) {
+      return `${getMainStageTabClassName(sort === value)} tw-whitespace-nowrap tw-px-[11px] tw-text-xs tw-font-medium tw-leading-5`;
+    }
     const baseClass =
       "tw-flex tw-h-[30px] tw-items-center tw-justify-center tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-px-2.5 tw-py-0 tw-text-xs tw-font-medium tw-leading-5 tw-transition-[color,background-color,box-shadow] tw-duration-200 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 focus-visible:tw-ring-offset-1 focus-visible:tw-ring-offset-iron-900 motion-reduce:tw-transition-none";
 
@@ -196,7 +206,11 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
         role="tablist"
         ref={featureUsageRef}
         aria-label="Sort options"
-        className="tw-box-border tw-flex tw-h-[38px] tw-flex-shrink-0 tw-items-center tw-gap-x-1 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900/75 tw-p-1 tw-shadow-sm tw-shadow-black/30 tw-backdrop-blur"
+        className={
+          isMainStage
+            ? MAIN_STAGE_TABLIST_CLASS_NAME
+            : "tw-box-border tw-flex tw-h-[38px] tw-flex-shrink-0 tw-items-center tw-gap-x-1 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900/75 tw-p-1 tw-shadow-sm tw-shadow-black/30 tw-backdrop-blur"
+        }
       >
         {items.map((item) => (
           <button
@@ -223,7 +237,9 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
   return (
     <div
       ref={featureUsageRef}
-      className="tw-min-w-0 tw-flex-shrink-0 [&_button]:tw-pl-2 [&_button]:tw-pr-6"
+      className={`tw-min-w-0 tw-flex-shrink-0 [&_button]:tw-pl-2 ${
+        isMainStage ? "[&_button]:tw-pr-8" : "[&_button]:tw-pr-6"
+      }`}
     >
       <CommonDropdown<WaveDropsLeaderboardSort>
         items={items}

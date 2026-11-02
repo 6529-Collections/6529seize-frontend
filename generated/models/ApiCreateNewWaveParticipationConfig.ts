@@ -19,6 +19,10 @@ import { ApiWaveRequiredMetadata } from '../models/ApiWaveRequiredMetadata';
 import { HttpFile } from '../http/http';
 
 export class ApiCreateNewWaveParticipationConfig {
+    /**
+    * Competition creation option. Conceal each submission author from other users until that entry wins. Fixed when published; defaults to false.
+    */
+    'anonymous_submissions'?: boolean;
     'scope': ApiCreateNewWaveScope;
     /**
     * The number of applications allowed per participant. Infinite if omitted.
@@ -45,6 +49,12 @@ export class ApiCreateNewWaveParticipationConfig {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "anonymous_submissions",
+            "baseName": "anonymous_submissions",
+            "type": "boolean",
+            "format": ""
+        },
         {
             "name": "scope",
             "baseName": "scope",

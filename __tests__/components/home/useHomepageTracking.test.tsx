@@ -1,3 +1,4 @@
+import type { HomepageSection } from "@/components/home/homepageTracking";
 import { useHomepageTracking } from "@/components/home/useHomepageTracking";
 import { trackAnalyticsEvent } from "@/services/analytics/mixpanel";
 import { act, fireEvent, render, screen } from "@testing-library/react";
@@ -21,9 +22,11 @@ const disconnect = jest.fn();
 function Fixture({
   ready = true,
   signedIn = false,
+  sectionName = "Explore waves",
 }: {
   readonly ready?: boolean;
   readonly signedIn?: boolean;
+  readonly sectionName?: HomepageSection;
 }) {
   const { rootRef, onClickCapture } = useHomepageTracking(signedIn);
   return (
@@ -34,7 +37,7 @@ function Fixture({
     >
       <section
         data-testid="section"
-        data-home-section={ready ? "Explore waves" : undefined}
+        data-home-section={ready ? sectionName : undefined}
       >
         <button
           data-home-action="Open wave"
@@ -251,3 +254,20 @@ it("counts middle-clicked links but not middle-clicked buttons or context menus"
   );
   expect(trackAnalyticsEvent).toHaveBeenCalledTimes(1);
 });
+
+it.each(["What is 6529?", "How to start"] as const)(
+  "observes the new %s section with the existing consent and dwell rules",
+  (sectionName) => {
+    const { rerender } = render(<Fixture sectionName={sectionName} />);
+    intersect(0.5);
+    advance();
+    expect(trackAnalyticsEvent).toHaveBeenCalledWith(
+      "Homepage section seen",
+      expect.objectContaining({ section: sectionName })
+    );
+    consent = false;
+    rerender(<Fixture sectionName={sectionName} />);
+    fireEvent.click(screen.getByText("Private wave title"));
+    expect(trackAnalyticsEvent).toHaveBeenCalledTimes(1);
+  }
+);

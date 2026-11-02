@@ -174,5 +174,6 @@ export const createDirectMessageWave = ({
     body: {
       identity_addresses: addresses,
     },
+    errorMode: "structured",
   });
 };

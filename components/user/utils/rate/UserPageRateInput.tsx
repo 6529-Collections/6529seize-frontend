@@ -29,6 +29,8 @@ export default function UserPageRateInput({
   inputId,
   focusRingClassName,
   required = false,
+  readOnly = false,
+  autoFocus = false,
 }: {
   readonly value: string;
   readonly onChange: (value: string) => void;
@@ -39,6 +41,8 @@ export default function UserPageRateInput({
   readonly inputId?: string;
   readonly focusRingClassName?: string;
   readonly required?: boolean;
+  readonly readOnly?: boolean;
+  readonly autoFocus?: boolean;
 }) {
   const valueAsNumber = getStringAsNumberOrZero(value);
   const isValidValue =
@@ -99,9 +103,11 @@ export default function UserPageRateInput({
         ref={inputRef}
         type="text"
         data-rating-input="true"
+        data-autofocus={autoFocus || undefined}
         id={inputId}
         autoComplete="off"
         required={required}
+        readOnly={readOnly}
         value={value}
         onChange={handleChange}
         onBlur={handleBlur}

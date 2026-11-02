@@ -227,6 +227,18 @@ jobs:
           if (plan.checks.playwright_wave_feature_usage?.required) {
             corePlaywrightLanes.push({ lane: "playwright-wave-feature-usage", label: "Wave feature tracking desktop and mobile", runner: defaultRunner });
           }
+          const bookmarksBrowserRequired = plan.changed_files.some((file) =>
+            /^(?:app\/bookmarks\/|components\/bookmarks\/|components\/header\/user\/HeaderBookmarksLink|components\/waves\/drops\/WaveDropBookmarkAction|hooks\/drops\/useDropBookmark|services\/api\/drop-bookmarks|i18n\/messages\/bookmarks|tests\/social\/bookmarks-sandbox|tests\/support\/bookmarks|package\.json$|\.github\/workflows\/app-pr-ci\.yml$)/.test(file)
+          );
+          if (bookmarksBrowserRequired) {
+            corePlaywrightLanes.push({ lane: "playwright-bookmarks", label: "Private bookmarks desktop and mobile", runner: defaultRunner });
+          }
+          const notificationsInboxRequired = plan.changed_files.some((file) =>
+            /^(?:components\/notifications\/inbox\/|components\/layout\/sidebar\/WebSidebar\.tsx$|tests\/auth\/notifications-inbox-sandbox|i18n\/messages\/notifications-inbox)/.test(file)
+          );
+          if (notificationsInboxRequired) {
+            corePlaywrightLanes.push({ lane: "playwright-notifications-inbox", label: "Notifications inbox desktop and mobile", runner: defaultRunner });
+          }
           const waveCreationBrowserRequired = plan.changed_files.some((file) =>
             /^(?:app\/waves\/create\/|components\/waves\/create-wave\/|components\/drops\/create\/|helpers\/waves\/create-wave|tests\/social\/create-wave-sandbox)/.test(file) ||
             ["components/brain/left-sidebar/web/WebUnifiedWavesListWaves.tsx", "components/shared/WavesMessagesWrapper.tsx", "components/user/utils/set-up-profile/UserPageSetUpProfile.tsx", "components/header/header-search/header-search-modal/constants.ts", "components/header/header-search/header-search-modal/pageSearch.ts", "i18n/messages/en-US.ts", "i18n/messages/wave-creation.en-US.json", ".github/workflows/app-pr-ci.yml"].includes(file)
@@ -455,6 +467,14 @@ jobs:
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/pdf-attachments"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/pdf-attachments"
         run: ./bin/6529 run test:e2e:pdf-attachments-sandbox
+
+      - name: Run private bookmarks browser pack
+        if: matrix.lane == 'playwright-bookmarks'
+        run: ./bin/6529 run test:e2e:bookmarks-sandbox
+
+      - name: Run notifications inbox browser pack
+        if: matrix.lane == 'playwright-notifications-inbox'
+        run: ./bin/6529 run test:e2e:notifications-inbox-sandbox
 
       - name: Run isolated Wave feature tracking browser pack
         if: matrix.lane == 'playwright-wave-feature-usage'
@@ -715,12 +735,12 @@ jobs:
             __tests__/scripts/frontend-deployment-workflows.test.ts \
             __tests__/scripts/museum-release-tier.test.ts \
             __tests__/scripts/museum-surface-registry.test.ts \
-            __tests__/scripts/package-public-review-artifacts.test.ts \
+            __tests__/scripts/package-web-artifact.test.ts \
             __tests__/scripts/production-build-artifact.test.ts \
             __tests__/scripts/production-artifact-metadata.test.ts \
             __tests__/scripts/production-artifact-verifier.test.ts \
             __tests__/scripts/deployment-e2e-workflows.test.ts \
-            __tests__/scripts/public-review-artifact-workflows.test.ts \
+            __tests__/scripts/web-artifact-workflows.test.ts \
             __tests__/scripts/sync-e2e-manifest.test.ts
 
       - name: Lint changed source

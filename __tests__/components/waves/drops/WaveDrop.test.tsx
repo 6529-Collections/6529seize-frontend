@@ -5,6 +5,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import {
   EditingDropProvider,
@@ -77,6 +78,9 @@ jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => (props: any) => {
 });
 
 jest.mock("@/hooks/isMobileDevice");
+jest.mock("@/lib/device-signing/feature", () => ({
+  isSignedMessagesEnabled: () => true,
+}));
 jest.mock("@/hooks/useHasTouchInput", () => ({
   __esModule: true,
   default: jest.fn(() => false),
@@ -739,6 +743,54 @@ describe("WaveDrop", () => {
     expect(timestamp).toHaveClass("tw-w-[9.25rem]");
     expect(timestamp).toHaveClass("desktop-hover:group-hover:tw-opacity-100");
     expect(timestamp.querySelector("p")).toHaveClass("tw-whitespace-nowrap");
+  });
+
+  it("shows the labelled author signed seal beside a grouped message's timestamp", () => {
+    const previousGroupedDrop = {
+      ...drop,
+      id: "previous-grouped",
+      created_at: 1_700_000_000_000,
+      stableHash: "previous-grouped",
+    };
+    const renderGrouped = (isAuthorSigned: boolean) =>
+      renderWithEditingDropProvider(
+        <WaveDrop
+          drop={{
+            ...drop,
+            id: "current-grouped",
+            created_at: 1_700_000_040_000,
+            stableHash: "current-grouped",
+            is_author_signed: isAuthorSigned,
+          }}
+          previousDrop={previousGroupedDrop}
+          nextDrop={null}
+          showWaveInfo={false}
+          activeDrop={null}
+          showReplyAndQuote={true}
+          location={DropLocation.WAVE}
+          dropViewDropId={null}
+          onReply={jest.fn()}
+          onReplyClick={jest.fn()}
+          onQuoteClick={jest.fn()}
+        />
+      );
+
+    const { unmount } = renderGrouped(true);
+    expect(
+      within(screen.getByTestId("grouped-drop-hover-timestamp")).getByRole(
+        "img",
+        { name: "Signed by its author" }
+      )
+    ).toBeInTheDocument();
+    unmount();
+
+    renderGrouped(false);
+    expect(
+      within(screen.getByTestId("grouped-drop-hover-timestamp")).queryByRole(
+        "img",
+        { name: "Signed by its author" }
+      )
+    ).not.toBeInTheDocument();
   });
 
   it("does not hijack mouse drags for the timestamp swipe on desktop", () => {

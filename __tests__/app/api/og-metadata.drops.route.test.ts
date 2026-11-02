@@ -1,3 +1,5 @@
+/** @jest-environment node */
+
 const mockImageResponse = jest.fn((element, init) => ({
   element,
   init,
@@ -38,12 +40,19 @@ jest.mock("@/app/api/og-metadata/profiles/[identity]/font", () => ({
 }));
 
 import { GET } from "@/app/api/og-metadata/drops/[id]/route";
-import { publicEnv } from "@/config/env";
+
+const setServerStagingApiKey = (key: string | undefined): void => {
+  if (key === undefined) {
+    delete process.env["STAGING_API_KEY"];
+  } else {
+    process.env["STAGING_API_KEY"] = key;
+  }
+};
 
 describe("/api/og-metadata/drops/[id]", () => {
   beforeEach(() => {
     jest.spyOn(console, "error").mockImplementation(() => undefined);
-    delete publicEnv.STAGING_API_KEY;
+    setServerStagingApiKey(undefined);
     mockGetCookie.mockReset();
     mockImageResponse.mockClear();
     mockLoadMontserratFonts.mockReset();
@@ -59,6 +68,7 @@ describe("/api/og-metadata/drops/[id]", () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+    setServerStagingApiKey(undefined);
   });
 
   it("fetches drop metadata from the backend and returns an image response", async () => {
@@ -113,7 +123,7 @@ describe("/api/og-metadata/drops/[id]", () => {
   ])(
     "uses staging access from the cookie or configuration (%s, %s)",
     async (cookie, key, headers) => {
-      publicEnv.STAGING_API_KEY = key;
+      setServerStagingApiKey(key);
       mockGetCookie.mockReturnValue(cookie ? { value: cookie } : undefined);
       (globalThis.fetch as jest.Mock).mockResolvedValue({
         ok: true,

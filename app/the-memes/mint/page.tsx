@@ -44,8 +44,7 @@ export async function generateMetadata(): Promise<Metadata> {
     getLargeSocialCardMetadata({
       title,
       ogImage: getCollectionSocialCardImagePath("the-memes", {
-        title,
-        subtitle: "Latest The Memes mint on 6529.io",
+        variant: "mint",
       }),
       ogImageAlt: "The Memes mint social card",
       description: t(DEFAULT_LOCALE, "theMemes.mint.metadata.description"),

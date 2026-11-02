@@ -554,6 +554,7 @@ export default function MemesQuickVoteDialog({
   onClose,
   activeDrop,
   hasDiscoveryError,
+  submissionError,
   isExhausted,
   isRestartingRound,
   leftThisRoundCount,
@@ -732,6 +733,14 @@ export default function MemesQuickVoteDialog({
             <div className="tw-relative tw-z-10 tw-min-h-0 tw-flex-1 tw-overflow-hidden md:tw-p-0">
               {dialogBody}
             </div>
+            {submissionError && (
+              <div
+                role="alert"
+                className="tw-shrink-0 tw-border-0 tw-border-t tw-border-solid tw-border-error/20 tw-bg-error/10 tw-px-5 tw-py-3 tw-text-sm tw-text-error"
+              >
+                {submissionError}
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -1,11 +1,17 @@
 import {
   getActiveWaveIdFromUrl,
+  getEncryptedConversationIdFromPathname,
+  getEncryptedConversationRoute,
+  getEncryptedDevicesRoute,
+  getEncryptedMessagesRoute,
   getMessageIdFromPathname,
+  getNewEncryptedChatRoute,
   getWaveHomeRoute,
   getWaveIdFromPathname,
   getWaveRoute,
   getWaveRouteWithSearchParams,
   hidesMobileBottomNavigation,
+  isEncryptedMessagesPathname,
   mainSegment,
   sameMainPath,
   usesReverseMobileBottomNavigationScroll,
@@ -192,6 +198,75 @@ describe("navigation.helpers", () => {
 
     it("returns null for messages create route", () => {
       expect(getMessageIdFromPathname("/messages/create")).toBeNull();
+    });
+
+    it("never reads encrypted chat routes as a plaintext wave id", () => {
+      expect(getMessageIdFromPathname("/messages/encrypted")).toBeNull();
+      expect(getMessageIdFromPathname("/messages/encrypted/new")).toBeNull();
+      expect(
+        getMessageIdFromPathname(`/messages/encrypted/0x${"a".repeat(64)}`)
+      ).toBeNull();
+      expect(
+        getActiveWaveIdFromUrl({
+          pathname: `/messages/encrypted/0x${"a".repeat(64)}`,
+        })
+      ).toBeNull();
+    });
+  });
+
+  describe("encrypted chat routes", () => {
+    const group = `0x${"b".repeat(64)}`;
+
+    it("builds the encrypted routes", () => {
+      expect(getEncryptedMessagesRoute()).toBe("/messages/encrypted");
+      expect(getNewEncryptedChatRoute()).toBe("/messages/encrypted/new");
+      expect(getEncryptedDevicesRoute()).toBe("/messages/encrypted/devices");
+      expect(getEncryptedConversationRoute(group)).toBe(
+        `/messages/encrypted/${group}`
+      );
+    });
+
+    it("recognizes encrypted pathnames", () => {
+      expect(isEncryptedMessagesPathname("/messages/encrypted")).toBe(true);
+      expect(isEncryptedMessagesPathname("/messages/encrypted/new")).toBe(
+        true
+      );
+      expect(isEncryptedMessagesPathname("/messages/encrypted-x")).toBe(false);
+      expect(isEncryptedMessagesPathname("/messages/dm-1")).toBe(false);
+      expect(isEncryptedMessagesPathname(null)).toBe(false);
+    });
+
+    it("extracts only conversation handles", () => {
+      expect(
+        getEncryptedConversationIdFromPathname(`/messages/encrypted/${group}`)
+      ).toBe(group);
+      expect(
+        getEncryptedConversationIdFromPathname("/messages/encrypted/new")
+      ).toBeNull();
+      expect(
+        getEncryptedConversationIdFromPathname("/messages/encrypted/devices")
+      ).toBeNull();
+      expect(
+        getEncryptedConversationIdFromPathname("/messages/encrypted")
+      ).toBeNull();
+      expect(
+        getEncryptedConversationIdFromPathname("/messages/encrypted/")
+      ).toBeNull();
+      expect(getEncryptedConversationIdFromPathname("/messages/dm")).toBeNull();
+    });
+
+    it("hides the mobile dock only inside an encrypted conversation", () => {
+      expect(
+        hidesMobileBottomNavigation({
+          pathname: `/messages/encrypted/${group}`,
+        })
+      ).toBe(true);
+      expect(
+        hidesMobileBottomNavigation({ pathname: "/messages/encrypted" })
+      ).toBe(false);
+      expect(
+        hidesMobileBottomNavigation({ pathname: "/messages/encrypted/new" })
+      ).toBe(false);
     });
   });
 

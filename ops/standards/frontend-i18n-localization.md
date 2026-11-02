@@ -43,6 +43,13 @@ specific translation feature is added.
 - Avoid text embedded in images unless the image is content and an accessible
   text alternative is supplied.
 - Keep untranslated locales functional through documented fallback to `en-US`.
+- Keep language declarations truthful (WCAG 3.1.1, 3.1.2). The root layout
+  declares `en-US`, the locale the server renders, on `<html lang>`;
+  `DocumentLanguage` in `Providers` moves it to the browser locale after
+  hydration, in step with `useBrowserLocale`. A page that renders content in
+  another locale, such as a route opened with `?locale=`, sets `lang` on that
+  content instead of changing the document language. Do not set
+  `document.documentElement.lang` elsewhere.
 
 ## Progressive Routing Policy
 

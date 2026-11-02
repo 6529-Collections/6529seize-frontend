@@ -31,9 +31,10 @@ Wave and DM rows in the left list control which thread is open.
   its subwaves are loaded, the parent opens, and the active child row is
   highlighted.
 - Navigating to a wave scrolls its active row into the nearest visible position.
-- Once you scroll or interact with the Waves list, incoming activity does not
-  automatically pull the list back to the open wave. Badges and recent-activity
-  ordering still update. Opening another wave enables active-row reveal again.
+- Incoming messages update badges and recent-activity ordering without moving
+  the Waves list's scroll position, including messages in the open wave.
+  Opening another wave reveals its row once after the list finishes loading;
+  later messages do not scroll to it again.
 - On desktop pointer devices, the Waves list uses a slim iron scrollbar for
   dragging and track clicks. Touch devices keep their native scrolling behavior.
 - `All`, `Pinned`, and `Joined` are peer collections in one sticky row, with
@@ -58,6 +59,9 @@ Wave and DM rows in the left list control which thread is open.
 - Joined waves load in batches without skipping a wave when new activity moves
   it higher in the list. The order uses recent wave activity, including joined,
   unmuted subwaves. Muting a wave removes its own activity from the ordering.
+- In `Joined`, pinned waves appear when their batch loads in activity order.
+  Older pins do not appear ahead of unloaded joined waves. Use `Pinned` to see
+  saved pins without loading more of `Joined`.
 - More joined waves load near the bottom. `Load more joined waves` is also
   available below the loaded rows. If loading fails, the existing rows stay
   available and `Retry` resumes loading. An expired list refreshes automatically

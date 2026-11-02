@@ -19,7 +19,7 @@ export default function NowMintingSection({
   if (isFetching && !nft) {
     return (
       <section className="tw-px-4 tw-pb-4 tw-pt-8 md:tw-px-6 md:tw-pb-8 md:tw-pt-10 lg:tw-px-8">
-        <span className="tw-mb-5 tw-block tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-[-0.03em] tw-text-iron-50 md:tw-text-[22px] lg:tw-text-2xl">
+        <span className="tw-mb-7 tw-mt-0 tw-block tw-text-[28px] tw-font-semibold tw-leading-[1.17] tw-tracking-[-0.04em] tw-text-iron-50 md:tw-mb-8 md:tw-text-[38px] md:tw-leading-[1.14]">
           Latest Drop
         </span>
 
@@ -29,7 +29,7 @@ export default function NowMintingSection({
               <div className="tw-relative tw-min-h-[clamp(360px,65vw,640px)] tw-w-full tw-rounded-none tw-bg-iron-800/50 motion-safe:tw-animate-pulse" />
             </div>
 
-            <div className="tw-min-w-0 tw-p-5 md:tw-p-6 lg:tw-col-span-6 lg:tw-p-8 xl:tw-col-span-4">
+            <div className="tw-min-w-0 tw-px-5 tw-py-8 md:tw-px-6 md:tw-py-10 lg:tw-col-span-6 lg:tw-p-8 xl:tw-col-span-4">
               <div className="tw-flex tw-flex-col tw-gap-8 lg:tw-gap-10">
                 <div className="tw-space-y-2">
                   <div className="tw-h-4 tw-w-24 tw-rounded tw-bg-iron-800/50 motion-safe:tw-animate-pulse" />
@@ -73,9 +73,10 @@ export default function NowMintingSection({
   return (
     <section
       data-home-section="Latest drop"
-      className="tw-relative tw-z-50 tw-px-4 tw-pb-4 tw-pt-8 md:tw-px-6 md:tw-pb-8 md:tw-pt-10 lg:tw-px-8"
+      data-home-drop
+      className="tw-group/home-drop tw-relative tw-z-50 tw-px-4 tw-pb-4 tw-pt-8 md:tw-px-6 md:tw-pb-8 md:tw-pt-10 lg:tw-px-8"
     >
-      <span className="tw-mb-5 tw-block tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-[-0.03em] tw-text-iron-50 md:tw-text-[22px] lg:tw-text-2xl">
+      <span className="tw-mb-7 tw-mt-0 tw-block tw-text-[28px] tw-font-semibold tw-leading-[1.17] tw-tracking-[-0.04em] tw-text-iron-50 md:tw-mb-8 md:tw-text-[38px] md:tw-leading-[1.14]">
         Latest Drop
       </span>
 
@@ -94,7 +95,7 @@ export default function NowMintingSection({
             <HomeNftArtwork nft={nft} />
           </div>
 
-          <div className="tw-min-w-0 tw-p-5 md:tw-p-6 lg:tw-col-span-6 lg:tw-p-8 xl:tw-col-span-4">
+          <div className="tw-min-w-0 tw-px-5 tw-py-8 md:tw-px-6 md:tw-py-10 lg:tw-col-span-6 lg:tw-p-8 xl:tw-col-span-4">
             <NowMintingDetails nft={nft} />
           </div>
         </div>

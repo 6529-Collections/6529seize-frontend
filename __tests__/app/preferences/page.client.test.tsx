@@ -22,6 +22,13 @@ jest.mock("@/components/preferences/ContentPreferencesSettings", () => () => (
 jest.mock("@/components/preferences/ReportsPreferencesSettings", () => () => (
   <div>Reports settings panel</div>
 ));
+jest.mock("@/components/preferences/DevicesPreferencesSettings", () => () => (
+  <div>Devices settings panel</div>
+));
+let mockSignedMessagesEnabled = false;
+jest.mock("@/lib/device-signing/feature", () => ({
+  isSignedMessagesEnabled: () => mockSignedMessagesEnabled,
+}));
 describe("PreferencesPageClient", () => {
   beforeEach(() => {
     (useAuth as jest.Mock).mockReturnValue({
@@ -37,7 +44,23 @@ describe("PreferencesPageClient", () => {
     });
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => {
+    jest.clearAllMocks();
+    mockSignedMessagesEnabled = false;
+  });
+
+  it("offers the Devices tab only while signed messages are enabled", () => {
+    const { rerender } = render(<PreferencesPageClient activeTab="devices" />);
+    expect(screen.queryByRole("link", { name: "Devices" })).toBeNull();
+    expect(screen.queryByText("Devices settings panel")).toBeNull();
+
+    mockSignedMessagesEnabled = true;
+    rerender(<PreferencesPageClient activeTab="devices" />);
+    const devicesTab = screen.getByRole("link", { name: "Devices" });
+    expect(devicesTab).toHaveAttribute("href", "/preferences?tab=devices");
+    expect(devicesTab).toHaveAttribute("aria-current", "page");
+    expect(screen.getByText("Devices settings panel")).toBeVisible();
+  });
 
   it("renders the full-height default notifications view", () => {
     const { container } = render(

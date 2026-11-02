@@ -6,10 +6,11 @@ import type {
   NextGenToken,
   TraitValuePair,
 } from "@/entities/INextgen";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Pagination from "@/components/pagination/Pagination";
 import { commonApiFetch } from "@/services/api/common-api";
 import DotLoader from "@/components/dotLoader/DotLoader";
+import NextGenLoadError from "@/components/nextGen/NextGenLoadError";
 import {
   NextGenListFilters,
   NextGenTokenListedType,
@@ -27,6 +28,7 @@ interface Props {
   show_trait_count?: boolean | undefined;
   listed_type?: NextGenTokenListedType | undefined;
   setTotalResults?: ((totalResults: number) => void) | undefined;
+  setLoadFailed?: ((failed: boolean) => void) | undefined;
   show_pagination?: boolean | undefined;
 }
 
@@ -35,12 +37,21 @@ export default function NextGenTokenList(props: Readonly<Props>) {
 
   const [tokens, setTokens] = useState<NextGenToken[]>([]);
   const [tokensLoaded, setTokensLoaded] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const controllerRef = useRef<AbortController | null>(null);
   const [totalResults, setTotalResults] = useState(0);
   const [page, setPage] = useState(1);
   const [rarityType, setRarityType] = useState<NextGenTokenRarityType>();
 
+  // Only the newest request may update the list: starting a request aborts the
+  // previous one (and unmounting aborts the last one), and a response from an
+  // aborted request is ignored.
   function fetchResults(mypage: number) {
+    controllerRef.current?.abort();
+    const controller = new AbortController();
+    controllerRef.current = controller;
     setTokensLoaded(false);
+    setLoadFailed(false);
     let endpoint = `nextgen/collections/${props.collection.id}/tokens?page_size=${pageSize}&page=${mypage}`;
     if (props.selected_traits) {
       const traitsQ = props.selected_traits
@@ -74,15 +85,31 @@ export default function NextGenTokenList(props: Readonly<Props>) {
       data: NextGenToken[];
     }>({
       endpoint: endpoint,
-    }).then((response) => {
-      setTotalResults(response.count);
-      if (props.setTotalResults) {
-        props.setTotalResults(response.count);
-      }
-      setTokens(response.data);
-      setTokensLoaded(true);
-    });
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (controller.signal.aborted) {
+          return;
+        }
+        setTotalResults(response.count);
+        if (props.setTotalResults) {
+          props.setTotalResults(response.count);
+        }
+        setTokens(response.data);
+        setTokensLoaded(true);
+        props.setLoadFailed?.(false);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) {
+          setLoadFailed(true);
+          props.setLoadFailed?.(true);
+        }
+      });
   }
+
+  useEffect(() => {
+    return () => controllerRef.current?.abort();
+  }, []);
 
   useEffect(() => {
     if (page === 1) {
@@ -151,6 +178,15 @@ export default function NextGenTokenList(props: Readonly<Props>) {
     <div className="tw-w-full">
       <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 sm:tw-grid-cols-3 sm:tw-gap-x-6">
         {(() => {
+          if (loadFailed) {
+            return (
+              <NextGenLoadError
+                className="tw-col-span-full"
+                message="nextgen.loadError.tokens"
+                onRetry={() => fetchResults(page)}
+              />
+            );
+          }
           if (tokensLoaded) {
             if (tokens.length > 0) {
               return tokens.map((t) => (

@@ -35,7 +35,8 @@ export default function MySubmissionsDialog({
             </div>
             <Button
               variant="tertiary"
-              size="sm"
+              size={null}
+              className="tw-size-11 tw-p-0"
               onClick={onClose}
               aria-label={t(locale, "waves.submissions.close")}
             >

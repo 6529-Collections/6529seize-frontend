@@ -100,6 +100,8 @@ artwork visible. Opening a winner loads its full drop.
 - Winner rank labels use ordinal place formatting (`1st`, `2nd`, `3rd`,
   `4th`, and so on).
 - Winner rows can show your vote value when you voted on that drop.
+- Vote totals, voter avatars and controls, and your vote summary wrap onto
+  additional lines when they do not fit within a winner or approved-drop card.
 - If the voter list at the decision time was not saved, the winner shows
   `Voters unavailable` instead of a zero voter count. Select it for an
   explanation, then select `Vote log` to inspect any recorded changes. The

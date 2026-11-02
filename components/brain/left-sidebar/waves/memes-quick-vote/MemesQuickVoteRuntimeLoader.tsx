@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useMemesQuickVoteContext } from "@/hooks/useMemesQuickVoteContext";
 import { useCallback, useRef, useState } from "react";
 import type {
   MemesQuickVoteRuntimeIntent,
@@ -67,7 +68,9 @@ export const useMemesQuickVoteRuntimeLauncher =
     }, []);
 
     const resetQuickVoteRuntime = useCallback(() => {
-      setRuntimeIntent(null);
+      setRuntimeIntent((current) =>
+        current ? { ...current, action: "idle" } : null
+      );
     }, []);
 
     return {
@@ -83,5 +86,12 @@ export function LazyMemesQuickVoteRuntime({
   intent,
   onIdle,
 }: MemesQuickVoteRuntimeProps) {
-  return <DynamicMemesQuickVoteRuntime intent={intent} onIdle={onIdle} />;
+  const { contextProfile, memesWaveId, proxyId } = useMemesQuickVoteContext();
+  return (
+    <DynamicMemesQuickVoteRuntime
+      key={JSON.stringify([contextProfile, memesWaveId, proxyId])}
+      intent={intent}
+      onIdle={onIdle}
+    />
+  );
 }

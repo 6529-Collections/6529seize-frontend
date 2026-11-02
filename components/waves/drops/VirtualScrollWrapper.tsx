@@ -3,16 +3,20 @@
 import type { ReactNode } from "react";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { DropSize } from "@/helpers/waves/drop.helpers";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { VideoPlaybackMemoryProvider } from "@/components/drops/view/item/content/media/VideoPlaybackMemory";
 import {
   clearWaveDropNearViewport,
   setWaveDropNearViewport,
 } from "@/contexts/wave/drop-visibility";
+import { WaveDropContentExpansionProvider } from "./WaveDropContentExpansionContext";
 
 interface ResizeSubscription {
   readonly updateHeight: (height: number) => void;
 }
+
+const getPlaceholderHeight = (measuredHeight: number | null) =>
+  measuredHeight ?? "auto";
 
 const resizeSubscriptions = new Map<Element, ResizeSubscription>();
 let sharedResizeObserver: ResizeObserver | null = null;
@@ -83,6 +87,7 @@ interface VirtualScrollWrapperProps {
   readonly type: DropSize;
   readonly suspendLightDropHydration?: boolean | undefined;
   readonly rootMargin?: string | undefined;
+  readonly enableLongContentCollapse?: boolean | undefined;
 
   /**
    * The child components to be rendered or virtualized.
@@ -121,8 +126,9 @@ export default function VirtualScrollWrapper({
   type,
   suspendLightDropHydration = false,
   rootMargin = "5000px 0px 5000px 0px",
+  enableLongContentCollapse = false,
 }: VirtualScrollWrapperProps) {
-  const { fetchAroundSerialNo } = useMyStream();
+  const { fetchAroundSerialNo } = useMyStreamActions();
 
   /**
    * isInView: Tracks if the component is currently in the viewport.
@@ -292,17 +298,24 @@ export default function VirtualScrollWrapper({
 
   return (
     <div ref={containerRef}>
-      <VideoPlaybackMemoryProvider key={`${waveId}:${dropId ?? dropSerialNo}`}>
-        {shouldRenderChildren ? (
-          children
-        ) : (
-          <div
-            style={{
-              height: measuredHeight,
-            }}
-          />
-        )}
-      </VideoPlaybackMemoryProvider>
+      <WaveDropContentExpansionProvider
+        enabled={enableLongContentCollapse}
+        scrollContainerRef={scrollContainerRef}
+      >
+        <VideoPlaybackMemoryProvider
+          key={`${waveId}:${dropId ?? dropSerialNo}`}
+        >
+          {shouldRenderChildren ? (
+            children
+          ) : (
+            <div
+              style={{
+                height: getPlaceholderHeight(measuredHeight),
+              }}
+            />
+          )}
+        </VideoPlaybackMemoryProvider>
+      </WaveDropContentExpansionProvider>
     </div>
   );
 }

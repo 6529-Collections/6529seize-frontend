@@ -1,7 +1,9 @@
 import { MOBILE_APP_EXCLUDED_ROUTES } from "@/helpers/mobileAppLinks";
+import { getAppEnvironment } from "@/config/appEnvironment";
 
 /** `<Apple team ID>.<bundle ID>` of the 6529 Mobile iOS app. */
 const IOS_APP_ID = "4962266Y3D.com.core6529.app";
+const IOS_STAGING_APP_ID = "4962266Y3D.com.core6529staging.app";
 
 /** Path families that never render a page (`/api` is a mobile app exclusion). */
 const NON_PAGE_ROUTES = ["/_next", "/.well-known", "/review-data"] as const;
@@ -52,7 +54,11 @@ function excludeExtension(extension: string): AppLinkComponent {
  * app supports iOS 15+). iOS uses the first matching component, so exclusions
  * come before the catch-all. Routes match case-sensitively, like Next routes.
  */
-export function getAppleAppSiteAssociation() {
+export function getAppleAppSiteAssociation(baseEndpoint: string) {
+  const appId =
+    getAppEnvironment(baseEndpoint).hostname === "staging.6529.io"
+      ? IOS_STAGING_APP_ID
+      : IOS_APP_ID;
   const components: AppLinkComponent[] = [
     ...[...MOBILE_APP_EXCLUDED_ROUTES, ...NON_PAGE_ROUTES].flatMap(
       excludeRoute
@@ -66,7 +72,7 @@ export function getAppleAppSiteAssociation() {
 
   return {
     applinks: {
-      details: [{ appIDs: [IOS_APP_ID], components }],
+      details: [{ appIDs: [appId], components }],
     },
   };
 }

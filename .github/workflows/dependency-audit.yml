@@ -1,0 +1,72 @@
+name: Dependency Audit
+
+# Weekly production dependency audit. Fails when the lockfile resolves a
+# production package with a known high or critical advisory that has a fix
+# available, so a vulnerable override or transitive pin cannot sit unnoticed
+# between Dependabot runs. Advisories with no published fix are reported in the
+# run summary without failing the run (see scripts/dependency-audit-gate.cjs).
+# This workflow is read-only: it has no secrets and never changes the
+# repository. It can also be started manually from any ref.
+
+on:
+  schedule:
+    - cron: "37 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dependency-audit-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    name: Production dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.17.1"
+
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable pnpm
+          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+          pnpm --version
+
+      - name: Install Socket Firewall
+        id: socket_firewall
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
+        with:
+          mode: firewall
+
+      - name: Audit production dependencies
+        env:
+          SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
+        run: |
+          set -euo pipefail
+
+          report="$RUNNER_TEMP/dependency-audit.json"
+          summary="$RUNNER_TEMP/dependency-audit.md"
+
+          # pnpm audit exits non-zero whenever it finds a high advisory, even an
+          # unfixable one. Keep the report either way: the gate script fails
+          # closed when the report is missing or is not valid audit JSON.
+          ./bin/6529 audit --prod --audit-level=high --json > "$report" || true
+
+          status=0
+          node scripts/dependency-audit-gate.cjs "$report" > "$summary" || status=$?
+          cat "$summary"
+          cat "$summary" >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"

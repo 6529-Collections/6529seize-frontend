@@ -21,7 +21,8 @@ import {
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
+import { getWaveCardTint } from "./getWaveCardTint";
 
 interface ExploreWaveCardProps {
   readonly wave: SidebarWave;
@@ -30,6 +31,7 @@ interface ExploreWaveCardProps {
   readonly compact?: boolean;
   readonly horizontalOnMobile?: boolean;
   readonly subtleHover?: boolean;
+  readonly artworkOverlay?: boolean;
 }
 
 interface ExploreWaveMetric {
@@ -241,28 +243,43 @@ const getMetricsSummaryLabel = (
 
 function getWaveCardClassNames(
   horizontalOnMobile: boolean,
-  subtleHover: boolean
+  subtleHover: boolean,
+  artworkOverlay: boolean
 ) {
   const cardInteractionClassName = subtleHover
-    ? "tw-transition-colors tw-duration-200 focus-visible:tw-border-white/20 desktop-hover:hover:tw-border-white/20 active:tw-border-white/20"
+    ? "tw-transition-[transform,border-color,box-shadow] tw-duration-500 focus-visible:tw-border-white/20 desktop-hover:hover:tw-border-white/20 active:tw-border-white/20 md:motion-safe:desktop-hover:hover:-tw-translate-y-1 md:desktop-hover:hover:tw-shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_30px_60px_-20px_rgba(0,0,0,0.6)]"
     : "tw-transform-gpu tw-transition-[transform,border-color,box-shadow] tw-duration-300 desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-shadow-[0_14px_34px_rgba(0,0,0,0.36)]";
   const imageInteractionClassName = subtleHover
-    ? ""
+    ? "md:tw-transition-transform md:tw-duration-[1400ms] md:tw-ease-[cubic-bezier(0.2,0.7,0.2,1)] md:motion-safe:desktop-hover:group-hover:tw-scale-[1.06] md:motion-reduce:tw-transition-none"
     : "tw-transform-gpu tw-saturate-[.9] tw-transition-[transform,filter] tw-duration-700 tw-ease-out group-focus-visible:tw-saturate-100 desktop-hover:group-hover:tw-scale-105 desktop-hover:group-hover:tw-saturate-100 touch-only:tw-saturate-100 motion-reduce:tw-transform-none motion-reduce:tw-transition-none";
+  if (artworkOverlay) {
+    return {
+      cardInteractionClassName,
+      imageInteractionClassName,
+      cardDirectionClassName: "tw-min-h-72 tw-w-full tw-min-w-0 tw-aspect-square tw-flex-col tw-justify-end md:tw-min-h-0",
+      cardSurfaceClassName:
+        "tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-shadow-[0_0_0_1px_rgba(255,255,255,0.05)]",
+      titleClassName:
+        "tw-line-clamp-1 tw-text-[21px] tw-leading-[1.2] tw-tracking-[-0.025em] tw-text-white desktop-hover:group-hover:tw-text-white",
+      imageSizeClassName: "tw-absolute tw-inset-0 tw-h-full tw-w-full",
+      contentPaddingClassName:
+        "tw-flex-none tw-px-[22px] tw-pb-5 tw-pt-16 tw-bg-[image:linear-gradient(to_top,rgb(var(--card-tint,19_19_22))_0%,rgb(var(--card-tint,19_19_22))_calc(100%_-_60px),rgb(var(--card-tint,19_19_22)/0.8)_calc(100%_-_34px),transparent_100%)]",
+    };
+  }
   const cardDirectionClassName = horizontalOnMobile
-    ? "tw-flex-row md:tw-flex-col"
+    ? "tw-flex-row md:tw-aspect-square md:tw-flex-col md:tw-justify-end"
     : "tw-flex-col";
   const cardSurfaceClassName = horizontalOnMobile
-    ? "tw-rounded-xl tw-border-white/[0.06] tw-bg-iron-950"
+    ? "tw-rounded-xl tw-border-white/[0.06] tw-bg-iron-950 md:tw-border-0 md:tw-shadow-[0_0_0_1px_rgba(255,255,255,0.05)]"
     : "tw-rounded-lg tw-border-white/[0.05] tw-bg-iron-950";
   const titleClassName = horizontalOnMobile
-    ? "tw-line-clamp-1 tw-text-[17px] tw-leading-[1.3] tw-tracking-[-0.015em] md:tw-text-lg"
+    ? "tw-line-clamp-1 tw-text-[17px] tw-leading-[1.3] tw-tracking-[-0.015em] md:tw-text-[21px] md:tw-leading-[1.2] md:tw-tracking-[-0.025em] md:tw-text-white md:desktop-hover:group-hover:tw-text-white"
     : "tw-line-clamp-1 tw-text-lg tw-leading-tight tw-tracking-tight";
   const imageSizeClassName = horizontalOnMobile
-    ? "tw-w-1/3 tw-self-stretch md:tw-h-48 md:tw-w-full lg:tw-h-44 xl:tw-h-48"
+    ? "tw-w-1/3 tw-self-stretch md:tw-absolute md:tw-inset-0 md:tw-h-full md:tw-w-full"
     : "tw-h-44 tw-rounded-t-lg sm:tw-h-48 lg:tw-h-44 xl:tw-h-48";
   const contentPaddingClassName = horizontalOnMobile
-    ? "tw-px-4 tw-py-3.5 md:tw-px-5 md:tw-py-[18px]"
+    ? "tw-px-4 tw-py-3.5 md:tw-flex-none md:tw-px-[22px] md:tw-pb-5 md:tw-pt-16 md:tw-bg-[image:linear-gradient(to_top,rgb(var(--card-tint,19_19_22))_0%,rgb(var(--card-tint,19_19_22))_calc(100%_-_60px),rgb(var(--card-tint,19_19_22)/0.8)_calc(100%_-_34px),transparent_100%)]"
     : "tw-px-4 tw-pb-4 tw-pt-2";
   return {
     cardInteractionClassName,
@@ -282,7 +299,43 @@ export function ExploreWaveCard({
   compact = false,
   horizontalOnMobile = false,
   subtleHover = false,
+  artworkOverlay = false,
 }: ExploreWaveCardProps) {
+  const showArtworkOverlay = artworkOverlay && !compact;
+  const imageRef = useRef<HTMLImageElement>(null);
+  const detailsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const image = imageRef.current;
+    const details = detailsRef.current;
+    if (
+      (!horizontalOnMobile && !showArtworkOverlay) ||
+      compact ||
+      !wave.picture ||
+      !image ||
+      !details
+    )
+      return;
+
+    const desktop = window.matchMedia("(min-width: 768px)");
+    const updateTint = () => {
+      const tint =
+        showArtworkOverlay || desktop.matches ? getWaveCardTint(image) : null;
+      if (tint) details.style.setProperty("--card-tint", tint);
+      else details.style.removeProperty("--card-tint");
+    };
+    image.addEventListener("load", updateTint);
+    image.addEventListener("error", updateTint);
+    desktop.addEventListener("change", updateTint);
+    updateTint();
+    return () => {
+      image.removeEventListener("load", updateTint);
+      image.removeEventListener("error", updateTint);
+      desktop.removeEventListener("change", updateTint);
+      details.style.removeProperty("--card-tint");
+    };
+  }, [horizontalOnMobile, showArtworkOverlay, compact, wave.picture]);
+
   const {
     cardInteractionClassName,
     imageInteractionClassName,
@@ -291,7 +344,11 @@ export function ExploreWaveCard({
     titleClassName,
     imageSizeClassName,
     contentPaddingClassName,
-  } = getWaveCardClassNames(horizontalOnMobile, subtleHover);
+  } = getWaveCardClassNames(
+    horizontalOnMobile,
+    subtleHover,
+    showArtworkOverlay
+  );
   const waveHref = getWaveRoute({
     waveId: wave.id,
     isDirectMessage: wave.isDirectMessage,
@@ -325,9 +382,12 @@ export function ExploreWaveCard({
       )
     : null;
   const metrics = getExploreWaveMetrics(wave);
+  const activityClassName = showArtworkOverlay
+    ? "tw-mt-1.5 tw-font-medium tw-text-iron-400"
+    : "tw-mt-2.5 tw-text-iron-500";
   const activityRow = !compact && (
     <div
-      className={`${horizontalOnMobile ? "tw-mt-1 tw-font-medium" : "tw-mt-2.5"} tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-text-iron-500`}
+      className={`${horizontalOnMobile ? "tw-mt-1 tw-font-medium tw-text-iron-500 md:tw-mt-1.5 md:tw-text-iron-400" : activityClassName} tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs`}
     >
       {!horizontalOnMobile && hasDrops && (
         <ClockIcon
@@ -389,11 +449,12 @@ export function ExploreWaveCard({
       )}
       {!compact && (
         <div
-          className={`${imageSizeClassName} tw-relative tw-flex-shrink-0 tw-overflow-hidden tw-bg-iron-900`}
+          className={`${imageSizeClassName} ${showArtworkOverlay ? "" : "tw-relative"} tw-flex-shrink-0 tw-overflow-hidden tw-bg-iron-900`}
           style={imageAreaStyle}
         >
           {wave.picture && (
             <Image
+              ref={imageRef}
               src={getScaledImageUri(wave.picture, ImageScale.AUTOx450)}
               alt={t(EXPLORE_WAVE_CARD_LOCALE, "waves.explore.card.coverAlt", {
                 waveName: wave.name,
@@ -409,12 +470,13 @@ export function ExploreWaveCard({
           )}
           <div
             aria-hidden="true"
-            className={`${horizontalOnMobile ? "tw-hidden md:tw-block" : ""} tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-2/3 tw-bg-gradient-to-t tw-from-iron-950 tw-via-iron-950/50 tw-to-transparent`}
+            className={`${horizontalOnMobile || showArtworkOverlay ? "tw-hidden" : ""} tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-2/3 tw-bg-gradient-to-t tw-from-iron-950 tw-via-iron-950/50 tw-to-transparent`}
           />
         </div>
       )}
 
       <div
+        ref={detailsRef}
         className={`tw-relative tw-z-10 tw-flex tw-min-w-0 tw-flex-1 tw-flex-col ${compact ? "tw-p-3" : contentPaddingClassName}`}
       >
         <div
@@ -427,13 +489,13 @@ export function ExploreWaveCard({
           </span>
         </div>
 
-        {horizontalOnMobile && activityRow}
+        {(horizontalOnMobile || showArtworkOverlay) && activityRow}
 
         {headingDetails}
 
         {horizontalOnMobile ? (
-          <div className="tw-mb-3 tw-mt-2 tw-flex tw-min-w-0 tw-items-start tw-overflow-hidden tw-text-sm tw-leading-[1.45] md:tw-mb-[18px] md:tw-mt-2.5 md:tw-min-h-[2.9em]">
-            <p className="tw-m-0 tw-line-clamp-1 tw-break-words tw-font-normal tw-text-iron-400 md:tw-line-clamp-2">
+          <div className="tw-mb-3 tw-mt-2 tw-flex tw-min-w-0 tw-items-start tw-overflow-hidden tw-text-sm tw-leading-[1.45] md:tw-mb-4 md:tw-mt-3 md:tw-min-h-5 md:tw-text-[13px] md:tw-leading-5">
+            <p className="tw-m-0 tw-line-clamp-1 tw-break-words tw-font-normal tw-text-iron-400 md:tw-text-white/55">
               {markdownToPlainText(wave.descriptionDrop.contents ?? "", {
                 includeImageUrls: false,
                 includeLinkDestinations: false,
@@ -444,6 +506,7 @@ export function ExploreWaveCard({
           <MessagePreviewContent
             previewContent={getWavePreviewContent(wave)}
             compact={compact}
+            artworkOverlay={showArtworkOverlay}
           />
         )}
 
@@ -451,9 +514,10 @@ export function ExploreWaveCard({
           metrics={metrics}
           compact={compact}
           horizontalOnMobile={horizontalOnMobile}
+          artworkOverlay={showArtworkOverlay}
         />
 
-        {!horizontalOnMobile && activityRow}
+        {!horizontalOnMobile && !showArtworkOverlay && activityRow}
       </div>
     </Link>
   );
@@ -463,14 +527,21 @@ function ExploreWaveCompactMetrics({
   metrics,
   compact,
   horizontalOnMobile,
+  artworkOverlay,
 }: {
   readonly metrics: readonly ExploreWaveMetric[];
   readonly compact: boolean;
   readonly horizontalOnMobile: boolean;
+  readonly artworkOverlay: boolean;
 }) {
-  const defaultSpacingClassName = compact ? "tw-mt-2" : "tw-mt-3";
+  let defaultSpacingClassName = compact ? "tw-mt-2" : "tw-mt-3";
+  if (artworkOverlay) defaultSpacingClassName = "tw-mt-0";
+  const metricIconClassName = artworkOverlay ? "tw-opacity-70" : "";
+  const metricValueClassName = artworkOverlay
+    ? "tw-text-white/70"
+    : "tw-text-iron-200";
   const spacingClassName = horizontalOnMobile
-    ? "tw-mt-auto tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-2.5 md:tw-pt-3.5"
+    ? "tw-mt-auto tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-2.5 md:tw-mt-0 md:tw-border-t-0 md:tw-pt-0"
     : defaultSpacingClassName;
 
   return (
@@ -483,13 +554,17 @@ function ExploreWaveCompactMetrics({
           className="tw-contents"
         >
           <span
-            className={`${METRIC_CHIP_CLASSES} ${horizontalOnMobile ? "tw-text-xs" : "tw-text-[11px]"} tw-gap-1`}
+            className={`${METRIC_CHIP_CLASSES} ${horizontalOnMobile || artworkOverlay ? "tw-text-xs" : "tw-text-[11px]"} tw-gap-1`}
             aria-label={metric.ariaLabel}
           >
-            <span className={metric.iconToneClasses}>{metric.icon}</span>
+            <span
+              className={`${metric.iconToneClasses} ${horizontalOnMobile ? "md:tw-opacity-70" : metricIconClassName}`}
+            >
+              {metric.icon}
+            </span>
             <span className="tw-text-iron-400">{metric.label}</span>
             <span
-              className={`${horizontalOnMobile ? "tw-text-iron-50" : "tw-text-iron-200"} tw-font-semibold tw-tabular-nums`}
+              className={`${horizontalOnMobile ? "tw-text-iron-50 md:tw-text-white/70" : metricValueClassName} tw-font-semibold tw-tabular-nums`}
             >
               {metric.value}
             </span>
@@ -503,15 +578,26 @@ function ExploreWaveCompactMetrics({
 function MessagePreviewContent({
   previewContent,
   compact,
+  artworkOverlay,
 }: {
   readonly previewContent: ProcessedContent | null;
   readonly compact: boolean;
+  readonly artworkOverlay: boolean;
 }) {
+  const previewClassName = artworkOverlay
+    ? "tw-mb-4 tw-mt-3 tw-min-h-9"
+    : "tw-mt-1.5 tw-min-h-9";
+  const previewTextClassName = artworkOverlay
+    ? "tw-text-white/55"
+    : "tw-text-iron-500";
+  const emptyPreviewClassName = artworkOverlay
+    ? previewClassName
+    : "tw-mt-2 tw-min-h-10";
   if (!previewContent) {
     return (
       <div
         aria-hidden="true"
-        className={compact ? "tw-mt-1.5 tw-h-[18px]" : "tw-mt-2 tw-min-h-10"}
+        className={compact ? "tw-mt-1.5 tw-h-[18px]" : emptyPreviewClassName}
       />
     );
   }
@@ -520,8 +606,8 @@ function MessagePreviewContent({
     <ContentDisplay
       content={previewContent}
       shouldClamp={false}
-      className={`${compact ? "tw-h-[18px]" : "tw-min-h-9"} tw-mt-1.5 tw-flex tw-min-w-0 tw-items-start tw-gap-1 tw-overflow-hidden`}
-      textClassName={`${compact ? "tw-line-clamp-1" : "tw-line-clamp-2"} tw-text-[13px] tw-leading-[18px] tw-text-iron-500 tw-break-words tw-font-normal`}
+      className={`${compact ? "tw-mt-1.5 tw-h-[18px]" : previewClassName} tw-flex tw-min-w-0 tw-items-start tw-gap-1 tw-overflow-hidden`}
+      textClassName={`${compact ? "tw-line-clamp-1" : "tw-line-clamp-2"} tw-text-[13px] tw-leading-[18px] ${previewTextClassName} tw-break-words tw-font-normal`}
       linkify={false}
     />
   );

@@ -96,24 +96,21 @@ describe("LatestDropAllowlistStatus", () => {
     );
   });
 
-  it("prompts disconnected users without starting an allocation request", () => {
-    mockUseSeizeConnectContext.mockReturnValue({
-      address: undefined,
-      connectionState: "disconnected",
-    });
-    render(<LatestDropAllowlistStatus tokenId={532} />);
+  it.each(["disconnected", "initializing", "connecting"])(
+    "hides the allowance block without a wallet address while %s",
+    (connectionState) => {
+      mockUseSeizeConnectContext.mockReturnValue({
+        address: undefined,
+        connectionState,
+      });
+      const { container } = render(<LatestDropAllowlistStatus tokenId={532} />);
 
-    expect(
-      screen.getByRole("heading", { name: "Your allowance" })
-    ).toBeInTheDocument();
-    const status = screen.getByRole("status");
-    expect(status).toHaveTextContent("Connect your wallet to view details.");
-    expect(status).not.toHaveClass("tw-min-h-7");
-    expect(screen.queryByRole("list")).not.toBeInTheDocument();
-    expect(useQueryMock).toHaveBeenCalledWith(
-      expect.objectContaining({ enabled: false })
-    );
-  });
+      expect(container).toBeEmptyDOMElement();
+      expect(useQueryMock).toHaveBeenCalledWith(
+        expect.objectContaining({ enabled: false })
+      );
+    }
+  );
 
   it.each([
     [

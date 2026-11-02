@@ -61,15 +61,16 @@ Profile tab routes live under `/{user}`.
 - Once that `Brain` access check settles, `/{user}/brain` stays selected if
   Waves became available; otherwise the app replaces the URL with `/{user}`.
 - `Subscriptions` is hidden on iOS unless consent country is `US`.
-- The `Subscriptions` tab is not part of the server HTML or the first render on
-  any platform. It appears right after the page loads on web, Android, and US
-  iOS (once the country is known), so it can show up a moment after the other
-  tabs.
-- Direct `/{user}/subscriptions` links delay hidden-tab fallback during that
-  first render. On web and Android the tab then appears and stays selected. On
-  iOS the fallback also waits for the country check, so a US deep link stays on
-  `Subscriptions` once `US` resolves. A non-US, unknown, failed, or slow check
-  replaces the URL with `/{user}`.
+- On web and Android, including search crawlers, the `Subscriptions` tab is
+  part of the server HTML. In the iOS app and in iPhone or iPad browsers it is
+  left out of the server HTML and the first render, then appears right after
+  the page loads where it is allowed (on US iOS once the country is known), so
+  it can show up a moment after the other tabs.
+- Direct `/{user}/subscriptions` links delay hidden-tab fallback while the tab
+  is left out of that first render. On web and Android the tab stays selected.
+  On iOS the fallback also waits for the country check, so a US deep link stays
+  on `Subscriptions` once `US` resolves. A non-US, unknown, failed, or slow
+  check replaces the URL with `/{user}`.
 - `Proxy` is shown only when you are on your own profile (matched by connected handle or connected wallet).
 - `Curation` is visible to owners and public viewers when Waves are available;
   management controls are limited to the connected owner outside proxy mode.

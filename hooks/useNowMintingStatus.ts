@@ -3,7 +3,7 @@ import { useDropForgeManifoldClaim } from "@/hooks/useDropForgeManifoldClaim";
 import type { ManifoldClaimStatus } from "@/hooks/useManifoldClaim";
 import { useNowMinting } from "@/hooks/useNowMinting";
 
-type NowMintingStatus = {
+export type NowMintingStatus = {
   readonly nft: ApiMemesExtendedData | undefined;
   readonly isFetching: boolean;
   readonly status: ManifoldClaimStatus | null;

@@ -52,11 +52,29 @@ jest.mock("@/components/waves/drops/time/WaveDropTime", () => ({
 
 jest.mock("@heroicons/react/24/outline", () => ({
   EllipsisVerticalIcon: () => <div data-testid="ellipsis-icon" />,
+  ShieldCheckIcon: () => <svg data-testid="outlined-seal" />,
 }));
 
 jest.mock("@/contexts/CompactModeContext", () => ({
   useCompactMode: () => false,
 }));
+
+let mockSignedMessagesEnabled = true;
+jest.mock("@/lib/device-signing/feature", () => ({
+  isSignedMessagesEnabled: () => mockSignedMessagesEnabled,
+}));
+
+jest.mock("@/components/waves/drops/signature/DropSignatureDialog", () => ({
+  __esModule: true,
+  default: () => null,
+}));
+jest.mock(
+  "@/components/waves/drops/signature/DropGroupSignatureDialog",
+  () => ({
+    __esModule: true,
+    default: () => null,
+  })
+);
 
 describe("WaveDropHeader", () => {
   const createDrop = (
@@ -98,6 +116,25 @@ describe("WaveDropHeader", () => {
     expect(
       screen.getByRole("link", { name: /ai profile ai-bot/i })
     ).toBeInTheDocument();
+  });
+
+  it("does not render an author profile link, tooltip or level for anonymous submissions", () => {
+    const drop = createDrop("alice", "0xabc", ApiProfileClassification.Ai);
+    drop.author.is_anonymous = true;
+    render(
+      <WaveDropHeader
+        drop={drop}
+        isStorm={false}
+        currentPartIndex={0}
+        partsCount={1}
+        showWaveInfo={false}
+      />
+    );
+    expect(screen.getByText("Anonymous")).toBeInTheDocument();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("tooltip-wrapper")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("user-cic-level")).not.toBeInTheDocument();
+    expect(screen.queryByText("🤖")).not.toBeInTheDocument();
   });
 
   it("does not render a robot emoji for non-AI profiles", () => {
@@ -183,4 +220,92 @@ describe("WaveDropHeader", () => {
       );
     }
   );
+  describe("author signed seal", () => {
+    const signedDrop = () => ({
+      ...createDrop("alice", "0xabc", ApiProfileClassification.Pseudonym),
+      is_author_signed: true,
+    });
+    const seal = () =>
+      screen.queryByRole("button", { name: "Signed by its author" });
+
+    beforeEach(() => {
+      mockSignedMessagesEnabled = true;
+    });
+
+    it.each(["inline", "stacked"] as const)(
+      "sits beside the %s timestamp of an author signed drop",
+      (timestampLayout) => {
+        render(
+          <WaveDropHeader
+            drop={signedDrop()}
+            isStorm={false}
+            currentPartIndex={0}
+            partsCount={1}
+            showWaveInfo={false}
+            timestampLayout={timestampLayout}
+          />
+        );
+
+        expect(seal()?.parentElement).toContainElement(
+          screen.getByTestId("wave-drop-time")
+        );
+      }
+    );
+
+    it("is absent for unsigned drops and while signed messages are off", () => {
+      const { rerender } = render(
+        <WaveDropHeader
+          drop={createDrop(
+            "alice",
+            "0xabc",
+            ApiProfileClassification.Pseudonym
+          )}
+          isStorm={false}
+          currentPartIndex={0}
+          partsCount={1}
+          showWaveInfo={false}
+        />
+      );
+      expect(seal()).not.toBeInTheDocument();
+
+      mockSignedMessagesEnabled = false;
+      rerender(
+        <WaveDropHeader
+          drop={signedDrop()}
+          isStorm={false}
+          currentPartIndex={0}
+          partsCount={1}
+          showWaveInfo={false}
+        />
+      );
+      expect(seal()).not.toBeInTheDocument();
+      expect(screen.getByTestId("wave-drop-time")).toBeInTheDocument();
+    });
+
+    it("stands for the whole group of posts under a chat header", () => {
+      const header = signedDrop();
+      const unsigned = {
+        ...signedDrop(),
+        id: "drop-2",
+        is_author_signed: false,
+      };
+      render(
+        <WaveDropHeader
+          drop={header}
+          signatureGroup={[header, unsigned, { ...header, id: "drop-3" }]}
+          isStorm={false}
+          currentPartIndex={0}
+          partsCount={1}
+          showWaveInfo={false}
+        />
+      );
+
+      expect(seal()).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", {
+          name: "2 of 3 posts signed by their author",
+        })
+      ).toBeInTheDocument();
+    });
+  });
 });

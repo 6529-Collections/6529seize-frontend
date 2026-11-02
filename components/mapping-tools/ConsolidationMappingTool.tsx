@@ -4,12 +4,15 @@ import { publicEnv } from "@/config/env";
 import type { Consolidation } from "@/entities/IDelegation";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { fetchAllPages } from "@/services/6529api";
-import csvParser from "csv-parser";
 import { useEffect, useState } from "react";
 import {
+  MappingToolError,
+  type MappingToolErrorKind,
   MappingToolSubmitButton,
   MappingToolUpload,
 } from "./MappingToolControls";
+import { parseCsvFile } from "./mappingToolCsv";
+import { downloadCsvFile } from "./mappingToolDownload";
 import styles from "./MappingTool.module.css";
 
 interface ConsolidationData {
@@ -20,14 +23,48 @@ interface ConsolidationData {
   name: string;
 }
 
+function parseConsolidationRow(row: Record<string, string>): ConsolidationData {
+  return {
+    address: row["_0"]!,
+    token_id: Number.parseInt(row["_1"]!, 10),
+    balance: Number.parseInt(row["_2"]!, 10),
+    contract: row["_3"]!,
+    name: row["_4"]!,
+  };
+}
+
 export default function ConsolidationMappingTool() {
   const [file, setFile] = useState<File | undefined>();
   const [processing, setProcessing] = useState(false);
   const [consolidations, setConsolidations] = useState<Consolidation[]>([]);
 
   const [csvData, setCsvData] = useState<ConsolidationData[]>([]);
+  const [error, setError] = useState<MappingToolErrorKind | null>(null);
+  function failProcessing(kind: MappingToolErrorKind) {
+    setError(kind);
+    setProcessing(false);
+  }
+
   function submit() {
+    setError(null);
     setProcessing(true);
+
+    fetchAllPages<Consolidation>(`${publicEnv.API_ENDPOINT}/api/consolidations`)
+      .then((loadedConsolidations) => {
+        setConsolidations(loadedConsolidations);
+        if (file) {
+          void parseCsvFile(
+            file,
+            (row, index) =>
+              index === 0 ? undefined : parseConsolidationRow(row),
+            setCsvData,
+            () => failProcessing("fileReadFailed")
+          );
+        }
+      })
+      .catch(() => {
+        failProcessing("dataLoadFailed");
+      });
   }
 
   function getForAddress(address: string) {
@@ -52,71 +89,16 @@ export default function ConsolidationMappingTool() {
     return balance;
   }
 
-  function downloadCsvFile(data: ConsolidationData[]) {
+  function downloadConsolidatedCsv(data: ConsolidationData[]) {
     const csvHeader = "address,token_id,balance,contract,name";
-    const csvData = data.map((d) => {
+    const csvRows = data.map((d) => {
       return `${d.address},${d.token_id},${d.balance},${d.contract},${d.name}`;
     });
-    const csvString = `${csvHeader}\n${csvData.join("\n")}`;
-
-    const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
-
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", "consolidation_output.csv");
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    downloadCsvFile(
+      `${csvHeader}\n${csvRows.join("\n")}`,
+      "consolidation_output.csv"
+    );
   }
-
-  useEffect(() => {
-    async function fetchConsolidations(url: string) {
-      fetchAllPages<Consolidation>(url).then((consolidations) => {
-        setConsolidations(consolidations);
-        const reader = new FileReader();
-
-        reader.onload = async () => {
-          const data = reader.result;
-          const results: ConsolidationData[] = [];
-          let isFirstRow = true;
-
-          const parser = csvParser({ headers: true })
-            .on("data", (row: Record<string, string>) => {
-              if (isFirstRow) {
-                isFirstRow = false;
-              } else {
-                const address = row["_0"]!;
-                const token_id = Number.parseInt(row["_1"]!, 10);
-                const balance = Number.parseInt(row["_2"]!, 10);
-                const contract = row["_3"]!;
-                const name = row["_4"]!;
-                results.push({ address, token_id, balance, contract, name });
-              }
-            })
-            .on("end", () => {
-              setCsvData(results);
-            })
-            .on("error", (err: Error) => {
-              console.error(err);
-            });
-
-          parser.write(data);
-          parser.end();
-        };
-
-        if (file) {
-          reader.readAsText(file);
-        }
-      });
-    }
-    if (processing) {
-      const initialUrl = `${publicEnv.API_ENDPOINT}/api/consolidations`;
-      fetchConsolidations(initialUrl);
-    }
-  }, [processing]);
 
   useEffect(() => {
     const out: ConsolidationData[] = [];
@@ -146,7 +128,7 @@ export default function ConsolidationMappingTool() {
           out.push(consolidationData);
         }
       });
-      downloadCsvFile(out);
+      downloadConsolidatedCsv(out);
       setProcessing(false);
     }
   }, [csvData]);
@@ -166,6 +148,7 @@ export default function ConsolidationMappingTool() {
         processing={processing}
         onSubmit={submit}
       />
+      <MappingToolError error={error} />
     </div>
   );
 }

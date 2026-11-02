@@ -1,9 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, type Query } from "@tanstack/react-query";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  isInfiniteQueryData,
+  refreshInfiniteQueryHead,
+  type InfinitePageAdapter,
+} from "@/components/react-query-wrapper/utils/refreshInfiniteQueryHead";
 import { scheduleStaggered } from "@/helpers/jitter.helpers";
 import { WsMessageType } from "@/helpers/Types";
 import {
@@ -14,6 +19,10 @@ import {
   WALLET_ACCOUNTS_UPDATED_EVENT,
 } from "@/services/auth/auth.utils";
 import { setNotificationRealtimeState } from "@/services/notifications/notification-realtime-state";
+import type {
+  TypedNotification,
+  TypedNotificationsResponse,
+} from "@/types/feed.types";
 import { useWebSocket } from "./useWebSocket";
 import { useWebSocketMessage } from "./useWebSocketMessage";
 import {
@@ -22,6 +31,18 @@ import {
 } from "./WebSocketTypes";
 
 const INVALIDATION_COALESCE_MS = 150;
+
+const notificationsPageAdapter: InfinitePageAdapter<
+  TypedNotificationsResponse,
+  TypedNotification
+> = {
+  getItems: (page) => page.notifications,
+  withItems: (page, notifications) => ({ ...page, notifications }),
+  getKey: (notification) => notification.id,
+};
+
+const isMountedNotificationList = (query: Query): boolean =>
+  query.isActive() && isInfiniteQueryData(query.state.data);
 
 interface NotificationIdentitiesSyncedData {
   readonly profile_ids: readonly string[];
@@ -63,6 +84,13 @@ export function NotificationWebSocketSync() {
   const invalidationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
+  const headRefreshControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    headRefreshControllerRef.current = controller;
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     const onAuthUpdated = () => setAuthRevision((revision) => revision + 1);
@@ -122,6 +150,52 @@ export function NotificationWebSocketSync() {
     );
   }, [authRevision, connectedAccountsRevision, send, status]);
 
+  // A notification event only adds recent entries, so a mounted list reloads
+  // its first page instead of replaying every page the user has scrolled
+  // through. Anything else under the key (counters, lists that are not mounted)
+  // is invalidated as before, and a list whose first page cannot be merged
+  // safely falls back to the same full invalidation.
+  const refreshIdentityNotifications = useCallback(() => {
+    const signal = headRefreshControllerRef.current?.signal;
+    if (!signal || signal.aborted) {
+      return;
+    }
+
+    const mountedLists = queryClient.getQueryCache().findAll({
+      queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
+      predicate: isMountedNotificationList,
+    });
+    queryClient
+      .invalidateQueries(
+        {
+          queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
+          predicate: (query) => !isMountedNotificationList(query),
+        },
+        {
+          cancelRefetch: false,
+        }
+      )
+      .catch(() => undefined);
+    for (const { queryKey } of mountedLists) {
+      refreshInfiniteQueryHead({
+        queryClient,
+        queryKey,
+        strategy: "cursor",
+        adapter: notificationsPageAdapter,
+        signal,
+      })
+        .then((refreshed) =>
+          refreshed
+            ? undefined
+            : queryClient.invalidateQueries(
+                { queryKey, exact: true },
+                { cancelRefetch: false }
+              )
+        )
+        .catch(() => undefined);
+    }
+  }, [queryClient]);
+
   const invalidateProfiles = useCallback(
     (profileIds: readonly string[], forceActiveRefresh = false) => {
       const profileIdSet = new Set(profileIds);
@@ -143,16 +217,7 @@ export function NotificationWebSocketSync() {
         );
 
       if (shouldRefreshActive) {
-        queryClient
-          .invalidateQueries(
-            {
-              queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
-            },
-            {
-              cancelRefetch: false,
-            }
-          )
-          .catch(() => undefined);
+        refreshIdentityNotifications();
       }
       if (shouldRefreshConnectedAccounts) {
         queryClient
@@ -167,7 +232,7 @@ export function NotificationWebSocketSync() {
           .catch(() => undefined);
       }
     },
-    [connectedAccounts, queryClient]
+    [connectedAccounts, queryClient, refreshIdentityNotifications]
   );
 
   const flushInvalidations = useCallback(() => {

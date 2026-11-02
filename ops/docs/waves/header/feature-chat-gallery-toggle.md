@@ -44,8 +44,10 @@ Icon behavior:
 3. Content updates in place without route change.
 4. In gallery mode:
    - drop list and composer are replaced by gallery cards
-   - first fetch shows `Loading gallery...`
-   - no media result shows `No media drops yet`
+   - first fetch shows `Loading gallery...`, which also stays up while older
+     drops are still being searched for media
+   - no media result shows `No media drops yet` once nothing older is left to
+     search
 5. Select again to return to chat.
 
 ## Persistence and Sync

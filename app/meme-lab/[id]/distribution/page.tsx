@@ -26,7 +26,7 @@ export default async function MemeDistributionPage({
   const locale = getDistributionRouteLocale(await searchParams);
 
   return (
-    <main className={`${styles["main"]} tailwind-scope`}>
+    <main className={`${styles["main"] ?? ""} tailwind-scope`} lang={locale}>
       <DistributionComponent
         header="Meme Lab"
         contract={MEMELAB_CONTRACT}

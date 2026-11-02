@@ -43,6 +43,11 @@ export function presentCompetitionEntryDrop(
   const drop = applyCompetitionDropSummary(
     {
       ...original,
+      // Card refreshes may reuse cached content; entry identity is authoritative.
+      author:
+        entry.submitter.is_anonymous || original.author.is_anonymous
+          ? entry.submitter
+          : original.author,
       type: DropSize.FULL,
       stableKey: `${identity.competitionId}:${entryId}`,
       stableHash: `${identity.competitionId}:${entryId}`,
