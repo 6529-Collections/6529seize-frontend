@@ -75,8 +75,10 @@ export function getVideoConversions(
 export function isVideoUrl(url: string): boolean {
   const videoExtensions = [
     ".mp4",
+    ".m4v",
     ".webm",
     ".ogg",
+    ".ogv",
     ".mov",
     ".avi",
     ".wmv",
