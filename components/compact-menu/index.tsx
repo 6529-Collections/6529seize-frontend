@@ -127,7 +127,7 @@ function CompactMenuContent({
         ref={menuItemsRef}
         anchor={menuAnchor}
         className={clsx(
-          "tw-transition data-[closed]:tw-translate-y-1 data-[closed]:tw-opacity-0 data-[enter]:tw-duration-150 data-[leave]:tw-duration-100 data-[enter]:tw-ease-out data-[leave]:tw-ease-in",
+          "tw-group/compact-menu tw-transition data-[closed]:tw-translate-y-1 data-[closed]:tw-opacity-0 data-[enter]:tw-duration-150 data-[leave]:tw-duration-100 data-[enter]:tw-ease-out data-[leave]:tw-ease-in",
           unstyledMenu ? undefined : DEFAULT_MENU_CLASSES,
           menuWidthClassName,
           menuClassName

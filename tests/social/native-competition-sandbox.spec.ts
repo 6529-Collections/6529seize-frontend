@@ -2677,6 +2677,23 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         )
       ).toBe(true);
       expect(controls[0]!.height).toBe(32);
+      await sort.click();
+      const amountOption = sortOptions.getByRole("menuitem", {
+        name: "Your vote amount",
+        exact: true,
+      });
+      await amountOption.hover();
+      await expect(amountOption).toHaveCSS("font-size", "14px");
+      await expect(amountOption).toHaveCSS("box-shadow", "none");
+      await page.screenshot({
+        path: testInfo.outputPath("my-votes-sort-menu.png"),
+        style: "nextjs-portal { display: none; }",
+        animations: "disabled",
+      });
+      await page.keyboard.press("Home");
+      await expect(amountOption).toHaveCSS("box-shadow", /2px/);
+      await page.keyboard.press("Escape");
+      await expect(sortOptions).toHaveCount(0);
     }
     await sort.focus();
     await sort.press(isMobile ? "Enter" : "ArrowDown");
