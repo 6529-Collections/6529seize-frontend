@@ -34,7 +34,7 @@
   "explained.tdh.day.row.walletRootNote": "Un arbre de hachage sur l'enregistrement de chaque wallet pour la journée.",
   "explained.tdh.day.row.historyRootNote": "Un arbre de hachage sur chaque log lu des quatre contrats qui comptent, de leur déploiement à la fin de la journée.",
   "explained.tdh.day.row.inputNote": "publié sous forme de hash uniquement ; le fichier lui-même n'est pas encore public",
-  "explained.tdh.day.row.recordsSame": "Rust = Python, octet pour octet",
+  "explained.tdh.day.row.recordsSame": "Rust = Python, octet pour octet ; publiés comme hachages seulement, pas encore les fichiers ni leur format",
   "explained.tdh.day.row.recordsIdentities": "identités :",
   "explained.tdh.day.row.recordsWallets": "wallets :",
   "explained.tdh.day.row.recordsDiffer": "les enregistrements de la référence Python : {hash}",

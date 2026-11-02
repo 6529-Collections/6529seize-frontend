@@ -74,8 +74,13 @@ export default function InThisChapter({
         <div>
           <SectionLabel no="05" label={ot(locale, "index.label")} />
           <h2 className={EX_TEXT.stmt} id="tdh-deeper-title">
-            {ot(locale, "index.title", {
-              count: formatCount(locale, spine.length),
+            {orich(locale, "index.title", {
+              // A count of this chapter's pages, not a fact about 6529.
+              count: (
+                <span data-ex-allow-number="count">
+                  {formatCount(locale, spine.length)}
+                </span>
+              ),
             })}
           </h2>
         </div>

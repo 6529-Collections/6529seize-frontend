@@ -82,12 +82,12 @@ describe("the hub, first version", () => {
       `${book.num("manifest.proved.tdh").toLocaleString("en-US")} Lean theorems`
     );
     expect(panel).toHaveTextContent(
-      `About a model of TDH's rules, and ${book.num("manifest.proved.p53")} more about the proposed validator rules, written before D144, D148 and D150 changed some of them. Lean proves things about rules, never about a day. ${book.num("manifest.shownFalse.tdh")} counterexamples stay on record.`
+      `About a model of TDH's rules, and ${book.num("manifest.proved.p53")} more about the proposed validator rules, from before D144, D148 and D150. Lean proves things about rules, never about a day. ${book.num("manifest.shownFalse.tdh")} counterexamples stay on record.`
     );
     // The proved day carries its retired rule in the same sentence.
     expect(panel).toHaveTextContent("One real day, half proved");
     expect(panel).toHaveTextContent(
-      "A zero-knowledge proof lets a contract check a program's result without running it again. Each day needs one from each of two programs. One real day, Oct 11, has the first, under rules since retired, and nothing is recorded on Ethereum yet. Only 6529 holds the proof file today (D116)."
+      "A zero-knowledge proof lets a contract check a program's result without running it again; each day needs one from each of two programs. One real day, Oct 11, has the first, under rules since retired. Nothing is on Ethereum yet, and only 6529 holds the proof file (D116)."
     );
     // What anyone can repeat today, and what needs private code.
     expect(panel).toHaveTextContent(

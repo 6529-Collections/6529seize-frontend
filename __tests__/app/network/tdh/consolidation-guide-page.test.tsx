@@ -141,9 +141,9 @@ describe("Your wallets", () => {
     const details = faq.querySelectorAll("details");
     expect(details).toHaveLength(6);
     expect(details[0]).toHaveAttribute("open");
-    // The question D136 raised is open too.
-    expect(details[2]).toHaveAttribute("open");
-    expect(details[2]).toHaveTextContent(
+    // The question D136 raised comes second, open too.
+    expect(details[1]).toHaveAttribute("open");
+    expect(details[1]).toHaveTextContent(
       "I set up four wallets before Oct 15."
     );
     expect(

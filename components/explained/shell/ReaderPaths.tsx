@@ -50,7 +50,7 @@ export default function ReaderPaths({
               {withCc0(path.route)}
             </span>
             {/* The time sits on the card's foot, so a row of cards reads as a grid. */}
-            <span className="tw-mt-auto tw-block tw-pt-3 tw-text-[13px] tw-font-semibold tw-text-primary-300">
+            <span className="tw-mt-auto tw-block tw-pt-3 tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-primary-300">
               {kt(locale, "explained.kit.paths.minutes", {
                 minutes: path.minutes,
               })}

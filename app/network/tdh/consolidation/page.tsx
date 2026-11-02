@@ -111,18 +111,13 @@ export default async function TdhYourWalletsPage({
       answer: answer(
         "explained.tdh.wallets.why.movedVerdict",
         // Two cases, the one that loses days first: a reader who saw a big
-        // drop finds its cause without reading past the harmless case.
+        // drop finds its cause, and its common cause drawn, before the
+        // harmless case.
         <>
           <b className={B}>
             {wt(locale, "explained.tdh.wallets.why.movedApartLead")}
           </b>{" "}
           {wt(locale, "explained.tdh.wallets.why.movedApart")}
-          <span className="tw-mt-3 tw-block">
-            <b className={B}>
-              {wt(locale, "explained.tdh.wallets.why.movedLinkedLead")}
-            </b>{" "}
-            {wt(locale, "explained.tdh.wallets.why.movedBody")}
-          </span>
         </>,
         <div>
           {[
@@ -131,6 +126,12 @@ export default async function TdhYourWalletsPage({
             </div>,
             <p key="caption" className={`tw-m-0 tw-mt-2 ${EX_TEXT.claim}`}>
               {wt(locale, "explained.tdh.wallets.why.movedCaption")}
+            </p>,
+            <p key="linked" className={`${EX_TEXT.body} tw-m-0 tw-mt-4`}>
+              <b className={B}>
+                {wt(locale, "explained.tdh.wallets.why.movedLinkedLead")}
+              </b>{" "}
+              {wt(locale, "explained.tdh.wallets.why.movedBody")}
             </p>,
           ]}
         </div>
@@ -222,8 +223,8 @@ export default async function TdhYourWalletsPage({
               </div>
               {/* The two line colours, keyed where they are first drawn. */}
               <figcaption className={`tw-mt-2 ${EX_TEXT.cap}`}>
-                {wt(locale, "explained.tdh.wallets.heroCaption", {
-                  date: when.day,
+                {rich(locale, "explained.tdh.wallets.heroCaption", {
+                  date: day(when.day),
                 })}
               </figcaption>
             </figure>
@@ -517,12 +518,12 @@ export default async function TdhYourWalletsPage({
                   "explained.tdh.wallets.faq.roundA",
                 ],
                 [
-                  "explained.tdh.wallets.faq.laterQ",
-                  "explained.tdh.wallets.faq.laterA",
-                ],
-                [
                   "explained.tdh.wallets.faq.oldQ",
                   "explained.tdh.wallets.faq.oldA",
+                ],
+                [
+                  "explained.tdh.wallets.faq.laterQ",
+                  "explained.tdh.wallets.faq.laterA",
                 ],
                 [
                   "explained.tdh.wallets.faq.whenQ",
@@ -540,9 +541,9 @@ export default async function TdhYourWalletsPage({
             ).map(([question, answerKey], index) => (
               <details
                 key={question}
-                // The first three are the commonest collector questions;
-                // the third is the one D136 raised.
-                open={index < 3}
+                // The two commonest collector questions, the one D136
+                // raised among them.
+                open={index < 2}
                 className="tw-group tw-border-0 tw-border-t tw-border-solid tw-border-iron-900"
               >
                 <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-py-4 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 [&::-webkit-details-marker]:tw-hidden">

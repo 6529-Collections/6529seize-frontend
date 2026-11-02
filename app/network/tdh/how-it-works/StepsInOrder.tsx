@@ -153,7 +153,8 @@ const STEPS: readonly Step[] = [
     sections: "§9",
     rule: () =>
       [
-        "header (N, B, hash(B), T, rule version, registry hash)",
+        "header (N, B, hash(B), T,",
+        "  rule version, registry hash)",
         "per identity: key, wallets, beta, final, per-token values",
         "roots: P28 and P53 §4.1–§4.2, not P26",
       ].join("\n"),

@@ -3,6 +3,7 @@ import { fill } from "@/components/explained/i18n";
 import { EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { formatNumber } from "@/i18n/format";
+import { formatCount } from "@/lib/explained/format";
 import { fmt, isFact } from "@/lib/explained/facts";
 import type { ProofPhase } from "@/lib/explained/registry/proofFacts";
 import { k } from "./_lib/copy";
@@ -112,25 +113,34 @@ function BlocksFigure({
           />
         </span>
       </div>
-      {/* The receipts' blocks, magnified, so the blocks that held a log
-          are seen, not only counted: a sliver of the whole bar is a part
-          of this one. */}
-      <div className="tw-mt-2 tw-flex tw-justify-end" aria-hidden="true">
-        <div className="tw-w-[62%] md:tw-w-[40%]" data-blocks-zoom="">
-          <div className="tw-flex tw-h-5 tw-w-full tw-overflow-hidden tw-rounded tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-400">
-            <span
-              className="tw-ml-auto tw-h-full tw-bg-iron-50"
-              style={{ width: `${(held / Math.max(1, receipts)) * 100}%` }}
-            />
+      {/* The blocks that held a log, made visible: a strip of one block in
+          each of about N rebuilt ones, the one lit. In the bar above they
+          are a sliver no eye can find. */}
+      {held > 0 && receipts >= held && (
+        <div className="tw-mt-4" data-blocks-zoom="">
+          <div
+            className="tw-flex tw-h-5 tw-w-full tw-gap-px tw-overflow-hidden tw-rounded-sm"
+            aria-hidden="true"
+          >
+            {Array.from({ length: Math.round(receipts / held) }, (_, cell) => (
+              <i
+                key={cell}
+                className={`tw-block tw-h-full tw-min-w-px tw-flex-1 ${cell === 0 ? "tw-bg-iron-50" : "tw-bg-iron-600"}`}
+              />
+            ))}
           </div>
-          <span className="tw-mt-1 tw-block tw-text-right tw-text-[13px] tw-leading-5 tw-text-iron-400">
+          <span className="tw-mt-1.5 tw-block tw-text-[13px] tw-leading-5 tw-text-iron-300">
             {rich(locale, k("blocks.zoom"), {
               receipts: facts.print("proofs.day.receiptBlocks"),
-              held: facts.print("proofs.day.txBlocks"),
+              ratio: (
+                <span data-ex-allow-number="ratio">
+                  {formatCount(locale, Math.round(receipts / held))}
+                </span>
+              ),
             })}
           </span>
         </div>
-      </div>
+      )}
       <ul className="tw-m-0 tw-mt-3.5 tw-grid tw-list-none tw-grid-cols-1 tw-gap-2 tw-p-0">
         {rows.map((row) => (
           <li

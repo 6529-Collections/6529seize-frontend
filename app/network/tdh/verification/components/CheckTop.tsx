@@ -453,7 +453,7 @@ function LateList({
                     className={`${cell} tw-whitespace-nowrap tw-text-iron-300`}
                   >
                     <FactText fact={daysFact} locale={locale}>
-                      {`${formatUtcDay(locale, at)}, ${formatUtcClock(locale, at)} UTC`}
+                      {`${formatUtcDay(locale, at)}, ${formatUtcClock(locale, at)}`}
                     </FactText>
                   </td>
                 </tr>

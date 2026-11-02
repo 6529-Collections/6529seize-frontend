@@ -34,7 +34,7 @@
   "explained.tdh.day.row.walletRootNote": "A hash tree over every wallet's record for the day.",
   "explained.tdh.day.row.historyRootNote": "A hash tree over every log read from the four contracts that count, from their deployment to the day's end.",
   "explained.tdh.day.row.inputNote": "published as a hash only; the file itself is not public yet",
-  "explained.tdh.day.row.recordsSame": "Rust = Python, byte for byte",
+  "explained.tdh.day.row.recordsSame": "Rust = Python, byte for byte; published as hashes only, the files and their format not yet",
   "explained.tdh.day.row.recordsIdentities": "identities:",
   "explained.tdh.day.row.recordsWallets": "wallets:",
   "explained.tdh.day.row.recordsDiffer": "the Python reference's records: {hash}",
