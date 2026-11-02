@@ -349,9 +349,11 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       "Ongoing work remains a separate paragraph.",
       "End of the complete formatted update.",
     ]) {
-      await expect(
-        post.getByRole("paragraph").filter({ hasText: paragraph })
-      ).toHaveCount(1);
+      const matchingParagraph = post
+        .getByRole("paragraph")
+        .filter({ hasText: paragraph });
+      await expect(matchingParagraph).toHaveCount(1);
+      await expect(matchingParagraph).toHaveText(paragraph);
     }
     await expect(
       post.getByRole("button", { name: /Show more|Show less/ })
