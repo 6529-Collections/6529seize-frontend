@@ -77,6 +77,25 @@ describe("opening the chat a push woke", () => {
     );
   });
 
+  it("handles another push after clearing the first wake query", async () => {
+    mockConversations = [chat("g1", 1), chat("g2", 1)];
+    const { rerender } = renderHook(() => useOpenWakeChat());
+    await waitFor(() =>
+      expect(mockReplace).toHaveBeenCalledWith("/messages/encrypted")
+    );
+
+    mockSearch = "";
+    rerender();
+    mockSearch = "wake=1";
+    mockConversations = [chat("g1", 0), chat("g2", 1)];
+    rerender();
+
+    await waitFor(() =>
+      expect(mockReplace).toHaveBeenLastCalledWith("/messages/encrypted/g2")
+    );
+    expect(mockSync).toHaveBeenCalledTimes(2);
+  });
+
   it("does nothing for an ordinary visit or before the device is ready", async () => {
     mockSearch = "";
     const { rerender } = renderHook(() => useOpenWakeChat());

@@ -115,5 +115,5 @@ export function e2eeNoticeId(notice: E2eeDesktopNotice): number {
   const key = `e2ee:${notice.g}:${notice.seq}`;
   const high = fnv1a(key, 0x811c9dc5) & 0xfffff;
   const low = fnv1a(key, 0x050c5d1f);
-  return -(high * 0x1_0000_0000 + low + 1);
+  return -(high * 2 ** 32 + low + 1);
 }

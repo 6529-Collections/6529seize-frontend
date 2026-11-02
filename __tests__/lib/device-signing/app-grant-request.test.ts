@@ -201,6 +201,19 @@ describe("requestAppDeviceGrant", () => {
     ).resolves.toEqual({ success: false, reason: "register-failed" });
   });
 
+  it("reports a failed local save and releases the encrypted-messages key", async () => {
+    const device = e2eeDevice();
+    mockSaveDeviceGrant.mockRejectedValueOnce(
+      new Error("IndexedDB write failed")
+    );
+
+    await expect(
+      requestAppDeviceGrant(baseRequest({ e2eeDevice: device }))
+    ).resolves.toEqual({ success: false, reason: "register-failed" });
+    expect(device.adopt).not.toHaveBeenCalled();
+    expect(device.dispose).toHaveBeenCalledTimes(1);
+  });
+
   it("reports a device key that cannot be prepared", async () => {
     mockEnsureDeviceKey.mockRejectedValue(new Error("no IndexedDB"));
     await expect(requestAppDeviceGrant(baseRequest())).resolves.toEqual({

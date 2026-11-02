@@ -49,7 +49,11 @@ export function useOpenWakeChat(): void {
   }, [muted]);
 
   useEffect(() => {
-    if (!woke || status !== "ready" || !engine || handled.current) {
+    if (!woke) {
+      handled.current = false;
+      return;
+    }
+    if (status !== "ready" || !engine || handled.current) {
       return;
     }
     handled.current = true;

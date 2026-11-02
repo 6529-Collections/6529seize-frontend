@@ -163,15 +163,15 @@ export async function requestAppDeviceGrant(
       grant = await request.registerGrant(
         toRequest(fields, signature, request.deviceLabel)
       );
+      // The server must have stored exactly what the wallet signed.
+      if (
+        grant.id.toLowerCase() !== computeAppGrantId(typedData.message) ||
+        grant.revoked_at !== null ||
+        !(await saveDeviceGrant(fields.wallet, grant, request.ownProfileId))
+      ) {
+        return failed("register-failed");
+      }
     } catch {
-      return failed("register-failed");
-    }
-    // The server must have stored exactly what the wallet signed.
-    if (
-      grant.id.toLowerCase() !== computeAppGrantId(typedData.message) ||
-      grant.revoked_at !== null ||
-      !(await saveDeviceGrant(fields.wallet, grant, request.ownProfileId))
-    ) {
       return failed("register-failed");
     }
     handedOver = true;
