@@ -11,6 +11,11 @@ export const TEST_RELEASE_ENTRY = {
   files: [
     { name: "6529-Validator-0.1.0.dmg", size: 55_073_145, sha256: hash("1") },
     {
+      name: "6529-Validator-Setup-0.1.0-x64.exe",
+      size: 18_900_000,
+      sha256: hash("c"),
+    },
+    {
       name: "6529-Validator-0.1.0-x64.msi",
       size: 18_116_608,
       sha256: hash("2"),
