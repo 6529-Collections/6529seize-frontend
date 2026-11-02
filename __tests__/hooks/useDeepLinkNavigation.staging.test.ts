@@ -1,5 +1,4 @@
 /**
- * @jest-environment jsdom
  * @jest-environment-options {"url":"https://staging.6529.io"}
  */
 
