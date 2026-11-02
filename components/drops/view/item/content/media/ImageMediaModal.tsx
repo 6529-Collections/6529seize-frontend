@@ -3,7 +3,9 @@
 import {
   DropImagePreview,
   getDropImagePreviewSources,
+  getGiphyVideoPreviewSources,
 } from "./DropImagePreview";
+import { GiphyPlaybackToggle, GiphyVideoPreview } from "./GiphyVideoPreview";
 import Button from "@/components/utils/button/Button";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -12,7 +14,7 @@ import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { ImageScale } from "@/helpers/image.helpers";
 import { isGifImageUrl } from "@/helpers/gif-preview.helpers";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
@@ -22,6 +24,17 @@ import {
   useOriginalImage,
   type OriginalImageQuality,
 } from "./useOriginalImage";
+
+type ExpandedMediaElement = HTMLImageElement | HTMLVideoElement;
+type GiphyVideoSources = NonNullable<
+  ReturnType<typeof getGiphyVideoPreviewSources>
+>;
+
+const EXPANDED_MEDIA_STYLE: React.CSSProperties = {
+  objectFit: "contain",
+  objectPosition: "center",
+  pointerEvents: "auto",
+};
 
 export function requestCenteredImageFullscreen(
   fullscreenTarget: HTMLImageElement | HTMLVideoElement
@@ -46,6 +59,90 @@ export function requestCenteredImageFullscreen(
   });
 }
 
+function getIntrinsicSize(media: ExpandedMediaElement) {
+  return media instanceof HTMLVideoElement
+    ? { width: media.videoWidth, height: media.videoHeight }
+    : { width: media.naturalWidth, height: media.naturalHeight };
+}
+
+function isPointInsideRenderedMedia(
+  media: ExpandedMediaElement,
+  clientX: number,
+  clientY: number
+) {
+  const rect = media.getBoundingClientRect();
+  const { width: naturalWidth, height: naturalHeight } =
+    getIntrinsicSize(media);
+
+  if (
+    rect.width <= 0 ||
+    rect.height <= 0 ||
+    naturalWidth <= 0 ||
+    naturalHeight <= 0
+  ) {
+    return true;
+  }
+
+  const imageAspectRatio = naturalWidth / naturalHeight;
+  const containerAspectRatio = rect.width / rect.height;
+  const renderedWidth =
+    imageAspectRatio > containerAspectRatio
+      ? rect.width
+      : rect.height * imageAspectRatio;
+  const renderedHeight =
+    imageAspectRatio > containerAspectRatio
+      ? rect.width / imageAspectRatio
+      : rect.height;
+  const renderedLeft = rect.left + (rect.width - renderedWidth) / 2;
+  const renderedTop = rect.top + (rect.height - renderedHeight) / 2;
+
+  return (
+    clientX >= renderedLeft &&
+    clientX <= renderedLeft + renderedWidth &&
+    clientY >= renderedTop &&
+    clientY <= renderedTop + renderedHeight
+  );
+}
+
+// Giphy GIFs play from Giphy's MP4 rendition, like the inline preview, until
+// the video fails; every other image keeps the optimized preview.
+function getExpandedGiphyVideo(src: string, failedVideoSource: string | null) {
+  return failedVideoSource === src ? null : getGiphyVideoPreviewSources(src);
+}
+
+function ExpandedGiphyVideo({
+  sources,
+  videoRef,
+  alt,
+  onError,
+  onPlayingChange,
+}: {
+  readonly sources: GiphyVideoSources;
+  readonly videoRef: React.RefObject<HTMLVideoElement | null>;
+  readonly alt: string;
+  readonly onError: () => void;
+  readonly onPlayingChange: (playing: boolean) => void;
+}) {
+  return (
+    <span className="tw-absolute tw-inset-0">
+      <GiphyVideoPreview
+        videoRef={videoRef}
+        videoSrc={sources.videoSrc}
+        posterSrc={sources.posterSrc}
+        alt={alt}
+        fillContainer
+        objectPosition="center"
+        // Sync with the element in case playback began before this listener.
+        onLoad={() =>
+          onPlayingChange(videoRef.current ? !videoRef.current.paused : false)
+        }
+        onError={onError}
+        onPlayingChange={onPlayingChange}
+      />
+    </span>
+  );
+}
+
 export function ImageMediaModal({
   src,
   imageRef,
@@ -60,6 +157,7 @@ export function ImageMediaModal({
   originalQuality,
   preferHighQualityPreview = false,
   onAnimatedPreviewUnavailable,
+  videoAlt,
 }: {
   readonly src: string;
   readonly imageRef: React.RefObject<HTMLImageElement | null>;
@@ -73,6 +171,8 @@ export function ImageMediaModal({
   readonly originalQuality?: OriginalImageQuality | undefined;
   readonly preferHighQualityPreview?: boolean | undefined;
   readonly onAnimatedPreviewUnavailable?: (() => void) | undefined;
+  // A caller's description names the expanded Giphy video.
+  readonly videoAlt?: string | undefined;
   readonly gallery?:
     | {
         readonly canGoNext: boolean;
@@ -93,14 +193,26 @@ export function ImageMediaModal({
     DEFAULT_LOCALE,
     isGif ? "drop.media.loadingOriginalGif" : "drop.media.loadingOriginalImage"
   );
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoPlaying, setVideoPlaying] = useState(false);
+  const [failedVideoSource, setFailedVideoSource] = useState<string | null>(
+    null
+  );
   const [zoomState, setZoomState] = useState({ src, isZoomed: false });
-  if (zoomState.src !== src) setZoomState({ src, isZoomed: false });
+  if (zoomState.src !== src) {
+    setZoomState({ src, isZoomed: false });
+    setVideoPlaying(false);
+  }
   const isZoomed = zoomState.src === src && zoomState.isZoomed;
   const [failedSource, setFailedSource] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
+  const giphyVideo = getExpandedGiphyVideo(src, failedVideoSource);
+  // An original the viewer asked for replaces the video once it loads.
+  const showsVideo = giphyVideo !== null && !playingOriginal;
   const previewUnavailable =
-    failedSource === src ||
-    getDropImagePreviewSources(src, ImageScale.AUTOx1080).length === 0;
+    giphyVideo === null &&
+    (failedSource === src ||
+      getDropImagePreviewSources(src, ImageScale.AUTOx1080).length === 0);
   const showGalleryControls = Boolean(gallery && gallery.total > 1);
 
   const goToPrevious = useCallback(() => {
@@ -119,43 +231,28 @@ export function ImageMediaModal({
   useKeyPressEvent("ArrowLeft", goToPrevious);
   useKeyPressEvent("ArrowRight", goToNext);
 
-  const isPointInsideRenderedImage = (
-    image: HTMLImageElement,
-    clientX: number,
-    clientY: number
-  ) => {
-    const rect = image.getBoundingClientRect();
-    const naturalWidth = image.naturalWidth;
-    const naturalHeight = image.naturalHeight;
+  // A failed MP4 rendition falls back to the existing GIF preview.
+  const handleVideoError = () => {
+    setFailedVideoSource(src);
+    setVideoPlaying(false);
+  };
 
-    if (
-      rect.width <= 0 ||
-      rect.height <= 0 ||
-      naturalWidth <= 0 ||
-      naturalHeight <= 0
-    ) {
-      return true;
+  const retryPreview = () => {
+    setFailedSource(null);
+    setFailedVideoSource(null);
+    setVideoPlaying(false);
+    setRetry((value) => value + 1);
+  };
+
+  // The video is the expanded media, so it is what goes full screen; callers
+  // only know the image elements they passed in.
+  const handleFullscreen = () => {
+    const video = showsVideo ? videoRef.current : null;
+    if (video) {
+      requestCenteredImageFullscreen(video);
+      return;
     }
-
-    const imageAspectRatio = naturalWidth / naturalHeight;
-    const containerAspectRatio = rect.width / rect.height;
-    const renderedWidth =
-      imageAspectRatio > containerAspectRatio
-        ? rect.width
-        : rect.height * imageAspectRatio;
-    const renderedHeight =
-      imageAspectRatio > containerAspectRatio
-        ? rect.width / imageAspectRatio
-        : rect.height;
-    const renderedLeft = rect.left + (rect.width - renderedWidth) / 2;
-    const renderedTop = rect.top + (rect.height - renderedHeight) / 2;
-
-    return (
-      clientX >= renderedLeft &&
-      clientX <= renderedLeft + renderedWidth &&
-      clientY >= renderedTop &&
-      clientY <= renderedTop + renderedHeight
-    );
+    onFullscreen();
   };
 
   const handleExpandedImageButtonClick = (
@@ -163,13 +260,13 @@ export function ImageMediaModal({
   ) => {
     event.stopPropagation();
 
-    const image = imageRef.current;
-    if (!image || event.detail === 0) {
+    const media = showsVideo ? videoRef.current : imageRef.current;
+    if (!media || event.detail === 0) {
       onClose();
       return;
     }
 
-    if (!isPointInsideRenderedImage(image, event.clientX, event.clientY)) {
+    if (!isPointInsideRenderedMedia(media, event.clientX, event.clientY)) {
       onClose();
     }
   };
@@ -232,38 +329,48 @@ export function ImageMediaModal({
                         hidden={!playingOriginal}
                         onLoad={quality.onLoad}
                         onError={quality.onError}
-                        style={{
-                          objectFit: "contain",
-                          objectPosition: "center",
-                          pointerEvents: "auto",
-                        }}
+                        style={EXPANDED_MEDIA_STYLE}
                       />
                     )}
-                    <span
-                      className="tw-absolute tw-inset-0"
-                      hidden={playingOriginal}
-                    >
-                      <DropImagePreview
+                    {showsVideo && (
+                      <ExpandedGiphyVideo
                         key={`${src}:${retry}`}
-                        ref={playingOriginal ? null : imageRef}
-                        onError={() => setFailedSource(src)}
-                        onLoad={() => setFailedSource(null)}
-                        originalSrc={src}
-                        imageScale={ImageScale.AUTOx1080}
-                        preferHighQuality={preferHighQualityPreview}
-                        onAnimatedPreviewUnavailable={
-                          onAnimatedPreviewUnavailable
+                        sources={giphyVideo}
+                        videoRef={videoRef}
+                        alt={
+                          videoAlt ??
+                          t(
+                            DEFAULT_LOCALE,
+                            "drop.media.expandedGifAnimationAlt"
+                          )
                         }
-                        alt={t(DEFAULT_LOCALE, "drop.media.previewAlt")}
-                        fill
-                        sizes="95vw"
-                        style={{
-                          objectFit: "contain",
-                          objectPosition: "center",
-                          pointerEvents: "auto",
-                        }}
+                        onError={handleVideoError}
+                        onPlayingChange={setVideoPlaying}
                       />
-                    </span>
+                    )}
+                    {giphyVideo === null && (
+                      <span
+                        className="tw-absolute tw-inset-0"
+                        hidden={playingOriginal}
+                      >
+                        <DropImagePreview
+                          key={`${src}:${retry}`}
+                          ref={playingOriginal ? null : imageRef}
+                          onError={() => setFailedSource(src)}
+                          onLoad={() => setFailedSource(null)}
+                          originalSrc={src}
+                          imageScale={ImageScale.AUTOx1080}
+                          preferHighQuality={preferHighQualityPreview}
+                          onAnimatedPreviewUnavailable={
+                            onAnimatedPreviewUnavailable
+                          }
+                          alt={t(DEFAULT_LOCALE, "drop.media.previewAlt")}
+                          fill
+                          sizes="95vw"
+                          style={EXPANDED_MEDIA_STYLE}
+                        />
+                      </span>
+                    )}
                   </button>
                 </TransformComponent>
               </div>
@@ -271,6 +378,14 @@ export function ImageMediaModal({
           </div>
         )}
       </TransformWrapper>
+      {showsVideo && (
+        <GiphyPlaybackToggle
+          videoRef={videoRef}
+          playing={videoPlaying}
+          autoHide={false}
+          placement="expanded"
+        />
+      )}
       {quality.loading && (
         <output
           aria-label={loadingOriginalLabel}
@@ -289,10 +404,7 @@ export function ImageMediaModal({
             type="button"
             variant="tertiary"
             size="sm"
-            onClick={() => {
-              setFailedSource(null);
-              setRetry((value) => value + 1);
-            }}
+            onClick={retryPreview}
           >
             {t(DEFAULT_LOCALE, "drop.media.retryPreview")}
           </Button>
@@ -340,7 +452,7 @@ export function ImageMediaModal({
         openLabel={openLabel}
         onDownload={onDownload}
         isDownloading={isDownloading}
-        onFullscreen={onFullscreen}
+        onFullscreen={handleFullscreen}
         fullscreenTargetAvailable={
           fullscreenTargetAvailable && (playingOriginal || !previewUnavailable)
         }

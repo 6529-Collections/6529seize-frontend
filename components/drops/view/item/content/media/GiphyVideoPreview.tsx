@@ -23,6 +23,15 @@ const NATURAL_MAX_HEIGHT = "16rem";
 const AUTO_HIDE_CLASS =
   "desktop-hover:tw-pointer-events-none desktop-hover:tw-opacity-0 desktop-hover:tw-transition-opacity desktop-hover:tw-duration-200 desktop-hover:group-hover/media:tw-pointer-events-auto desktop-hover:group-hover/media:tw-opacity-100 group-focus-within/media:tw-pointer-events-auto group-focus-within/media:tw-opacity-100 touch-only:tw-pointer-events-auto touch-only:tw-opacity-100 motion-reduce:tw-transition-none";
 
+// Inline, the control sits in the media's corner. The expanded popup keeps its
+// controls at the viewport edges, outside the zoomed media, like its gallery
+// buttons and counter.
+const TOGGLE_PLACEMENT_CLASS = {
+  inline: "tw-absolute tw-bottom-[5px] tw-left-[5px] tw-z-30",
+  expanded:
+    "tw-fixed tw-bottom-[calc(env(safe-area-inset-bottom,0px)+1rem)] tw-left-3 tw-z-[1102] sm:tw-left-4",
+} as const;
+
 type GiphyVideoPreviewProps = {
   readonly videoRef: RefObject<HTMLVideoElement | null>;
   readonly videoSrc: string;
@@ -120,10 +129,12 @@ export function GiphyPlaybackToggle({
   videoRef,
   playing,
   autoHide,
+  placement = "inline",
 }: {
   readonly videoRef: RefObject<HTMLVideoElement | null>;
   readonly playing: boolean;
   readonly autoHide: boolean;
+  readonly placement?: keyof typeof TOGGLE_PLACEMENT_CLASS | undefined;
 }) {
   const label = t(
     DEFAULT_LOCALE,
@@ -149,7 +160,8 @@ export function GiphyPlaybackToggle({
       title={label}
       onClick={handleClick}
       className={clsx(
-        "tw-pointer-events-auto tw-absolute tw-bottom-[5px] tw-left-[5px] tw-z-30 tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-950/90 tw-p-0 tw-text-iron-100 tw-shadow-lg tw-shadow-black/20 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-backdrop-blur focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white desktop-hover:hover:tw-bg-iron-700",
+        TOGGLE_PLACEMENT_CLASS[placement],
+        "tw-pointer-events-auto tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-950/90 tw-p-0 tw-text-iron-100 tw-shadow-lg tw-shadow-black/20 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-backdrop-blur focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white desktop-hover:hover:tw-bg-iron-700",
         autoHide && AUTO_HIDE_CLASS
       )}
     >
