@@ -96,6 +96,14 @@ function getInlineGiphyVideo({
   return getGiphyVideoPreviewSources(src);
 }
 
+// A caller's description names the media however it renders.
+function getMediaAlt(altOverride: string | undefined) {
+  return {
+    imageAlt: altOverride ?? t(DEFAULT_LOCALE, "drop.media.alt"),
+    videoAlt: altOverride ?? t(DEFAULT_LOCALE, "drop.media.gifAnimationAlt"),
+  };
+}
+
 function getImageLoadingState({
   loaded,
   unavailable,
@@ -307,7 +315,7 @@ function DropListItemContentMediaImage({
 
 function DropListItemContentMediaImageContent({
   src,
-  alt = t(DEFAULT_LOCALE, "drop.media.alt"),
+  alt: altOverride,
   openPreviewLabel = t(DEFAULT_LOCALE, "drop.media.openPreview"),
   maxRetries = 0,
   isCompetitionDrop = false,
@@ -322,6 +330,7 @@ function DropListItemContentMediaImageContent({
   autoAnimateGif = false,
   imageLoadingLayout = "inline",
 }: DropListItemContentMediaImageProps & { readonly imageScale: ImageScale }) {
+  const { imageAlt: alt, videoAlt } = getMediaAlt(altOverride);
   const [ref, inView] = useInView<HTMLDivElement>();
   const [loaded, setLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -380,15 +389,17 @@ function DropListItemContentMediaImageContent({
     }, delay);
   }, [errorCount, maxRetries]);
 
-  const handleVideoError = useCallback(() => {
+  const handleVideoError = () => {
     setLoaded(false);
     setVideoFailed(true);
-  }, []);
+    setVideoPlaying(false);
+  };
 
   const manualRetry = () => {
     setErrorCount(0);
     setLoaded(false);
     setVideoFailed(false);
+    setVideoPlaying(false);
     setRetryTick((tick) => tick + 1);
   };
 
@@ -529,7 +540,7 @@ function DropListItemContentMediaImageContent({
                   videoRef={videoRef}
                   videoSrc={giphyVideo.videoSrc}
                   posterSrc={giphyVideo.posterSrc}
-                  alt={t(DEFAULT_LOCALE, "drop.media.gifAnimationAlt")}
+                  alt={videoAlt}
                   fillContainer={!intrinsicHeight}
                   objectPosition={resolvedObjectPosition}
                   onLoad={handleImageLoad}
