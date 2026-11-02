@@ -14,9 +14,9 @@ jest.mock("@tanstack/react-query", () => ({
   useMutation: jest.fn(),
 }));
 
-const mockCommonApiPost = jest.fn();
+const mockCommonApiPatch = jest.fn();
 jest.mock("@/services/api/common-api", () => ({
-  commonApiPost: (...args: unknown[]) => mockCommonApiPost(...args),
+  commonApiPatch: (...args: unknown[]) => mockCommonApiPatch(...args),
 }));
 
 const mockValidateWaveGroups = jest.fn();
@@ -48,7 +48,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   jest.mocked(hasSubwaveMembersOutsideParent).mockResolvedValue(false);
   requestAuth.mockResolvedValue({ success: true });
-  mockCommonApiPost.mockResolvedValue({});
+  mockCommonApiPatch.mockResolvedValue({});
   mockValidateWaveGroups.mockResolvedValue({ valid: true, invalid_roles: [] });
   (useMutation as jest.Mock).mockImplementation((options) => ({
     mutateAsync: async (body: unknown) => {
@@ -97,12 +97,12 @@ describe("useWaveGroupEditButtonsController", () => {
       await waitFor(() =>
         expect(result.current.subwaveAccessConfirmation.isOpen).toBe(true)
       );
-      expect(mockCommonApiPost).not.toHaveBeenCalled();
+      expect(mockCommonApiPatch).not.toHaveBeenCalled();
       await act(async () => {
         result.current.subwaveAccessConfirmation.onDecision(confirmed);
         await expect(pending!).resolves.toBe(confirmed);
       });
-      expect(mockCommonApiPost).toHaveBeenCalledTimes(confirmed ? 1 : 0);
+      expect(mockCommonApiPatch).toHaveBeenCalledTimes(confirmed ? 1 : 0);
       expect(result.current.mutating).toBe(false);
     }
   );
@@ -134,7 +134,7 @@ describe("useWaveGroupEditButtonsController", () => {
     });
 
     expect(mockValidateWaveGroups).toHaveBeenCalledTimes(1);
-    expect(mockCommonApiPost).not.toHaveBeenCalled();
+    expect(mockCommonApiPatch).not.toHaveBeenCalled();
     expect(setToast).toHaveBeenCalledWith(
       expect.objectContaining({ type: "error" })
     );
@@ -164,8 +164,8 @@ describe("useWaveGroupEditButtonsController", () => {
     expect(mockValidateWaveGroups).toHaveBeenCalledWith({
       visibility_group_id: "view-group",
     });
-    expect(mockCommonApiPost).toHaveBeenCalledWith(
-      expect.objectContaining({ endpoint: "waves/wave-1" })
+    expect(mockCommonApiPatch).toHaveBeenCalledWith(
+      expect.objectContaining({ endpoint: "v3/waves/wave-1" })
     );
   });
 
@@ -224,7 +224,7 @@ describe("useWaveGroupEditButtonsController", () => {
       expect(updated).toBe(false);
     });
 
-    expect(mockCommonApiPost).not.toHaveBeenCalled();
+    expect(mockCommonApiPatch).not.toHaveBeenCalled();
     expect(result.current.mutating).toBe(false);
   });
 });

@@ -92,6 +92,9 @@ export const createWaveQueryHandlers = (queryClient: QueryClient) => {
   };
 
   const onWaveCreated = () => {
+    void queryClient.invalidateQueries({
+      queryKey: [QueryKey.COMPETITION_HUB],
+    });
     invalidateProfileWaveActivity();
     invalidateAllWaves();
   };

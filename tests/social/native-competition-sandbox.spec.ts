@@ -1009,6 +1009,75 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  test("edits shared wave metadata through v3 without rewriting its original competition", async ({
+    page,
+  }) => {
+    const sandbox = await installCompetitionApi(page, true);
+    await sandbox.legacyPrimary("alpha");
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/waves/${WAVE}`
+    );
+    expect(response.ok()).toBe(true);
+    const configuration = await response.json();
+    configuration.wave.type = "CHAT";
+    const patches: Record<string, unknown>[] = [];
+    await page.route(`**/api/v3/waves/${WAVE}`, async (route) => {
+      if (route.request().method() === "PATCH") {
+        const patch = route.request().postDataJSON() as Record<string, unknown>;
+        patches.push(patch);
+        Object.assign(configuration, patch);
+      }
+      return route.fulfill({
+        json: {
+          id: WAVE,
+          name: configuration.name,
+          picture: configuration.picture,
+          created_at: 1,
+          legacy_primary_competition_id: "alpha",
+          capabilities: { chat: true, competitions: true },
+          permissions: {
+            view: true,
+            chat: true,
+            administer: true,
+            create_competition: true,
+          },
+          configuration,
+        },
+      });
+    });
+    await page.goto(`${ROOT}/alpha`);
+    await page
+      .getByRole("button", { name: /^About Local Composer Sandbox Wave/ })
+      .click();
+    await page
+      .getByRole("heading", { name: configuration.name, exact: true })
+      .hover();
+    await page
+      .getByRole("button", { name: "Edit wave name", exact: true })
+      .click();
+    const dialog = page.getByRole("dialog", {
+      name: "Rename wave",
+      exact: true,
+    });
+    await dialog
+      .getByPlaceholder("Please select a name")
+      .fill("Shared wave renamed");
+    await dialog.getByRole("button", { name: "Save", exact: true }).click();
+    await expect.poll(() => patches).toEqual([{ name: "Shared wave renamed" }]);
+    await expect(
+      page.getByRole("heading", { name: "Shared wave renamed", exact: true })
+    ).toBeVisible();
+    expect(sandbox.requests).toEqual([]);
+    await page.reload();
+    await page
+      .getByRole("button", { name: /^About Local Composer Sandbox Wave/ })
+      .click();
+    await expect(
+      page.getByRole("heading", { name: "Shared wave renamed", exact: true })
+    ).toBeVisible();
+    expect(sandbox.requests).toEqual([]);
+  });
+
   test("preserves Additional Action through the actual submission flow", async ({
     page,
   }, testInfo) => {

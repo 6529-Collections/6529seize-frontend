@@ -8,10 +8,10 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { getWaveUpdateGroupValidationRequest } from "@/helpers/waves/wave-group-validation.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { commonApiPost } from "@/services/api/common-api";
+import { updateWaveHub } from "@/services/api/wave-hub-api";
 import { validateWaveGroups } from "@/services/api/wave-group-validation-api";
 import { toErrorMessage } from "@/services/groups/groupMutations";
-import type { WaveGroupType } from "../../../WaveGroup.types";
+import { WaveGroupType } from "../../../WaveGroup.types";
 import { getGroupIdFromUpdateBody } from "../utils/waveGroupEdit";
 import { getValidationRoles } from "../utils/waveGroupValidation";
 import { useSubwaveAccessConfirmation } from "@/components/waves/hooks/useSubwaveAccessConfirmation";
@@ -55,9 +55,14 @@ export const useWaveGroupEditButtonsController = ({
   const [mutating, setMutating] = useState(false);
   const editWaveMutation = useMutation({
     mutationFn: async (body: ApiUpdateWaveRequest) =>
-      await commonApiPost<ApiUpdateWaveRequest, ApiWave>({
-        endpoint: `waves/${wave.id}`,
-        body,
+      await updateWaveHub(wave.id, {
+        ...(type === WaveGroupType.VIEW ? { visibility: body.visibility } : {}),
+        ...(body.chat.scope.group_id !== (wave.chat.scope.group?.id ?? null)
+          ? { chat: { scope: body.chat.scope } }
+          : {}),
+        ...(type === WaveGroupType.ADMIN
+          ? { admin_group: body.wave.admin_group }
+          : {}),
       }),
     onSuccess: () => {
       onWaveCreated();

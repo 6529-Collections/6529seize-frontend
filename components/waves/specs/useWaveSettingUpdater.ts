@@ -2,19 +2,16 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
+import type { ApiUpdateWaveHubChat } from "@/generated/models/ApiUpdateWaveHubChat";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import {
-  canEditWave,
-  convertWaveToUpdateWave,
-} from "@/helpers/waves/waves.helpers";
+import { canEditWave } from "@/helpers/waves/waves.helpers";
+import { getWaveChatRepliesUpdate } from "@/helpers/waves/wave-chat-replies.helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { commonApiPost } from "@/services/api/common-api";
+import { updateWaveHub } from "@/services/api/wave-hub-api";
+import type { ApiUpdateWaveHubRequest } from "@/generated/models/ApiUpdateWaveHubRequest";
 import { useCallback, useContext, useState } from "react";
 
-type WaveChatUpdate = ApiUpdateWaveRequest["chat"];
-type WaveConfigUpdate = ApiUpdateWaveRequest["wave"];
-type WaveParticipationUpdate = ApiUpdateWaveRequest["participation"];
+type WaveChatUpdate = ApiUpdateWaveHubChat;
 
 export const useWaveSettingUpdater = (wave: ApiWave) => {
   const { connectedProfile, activeProfileProxy, requestAuth, setToast } =
@@ -25,7 +22,7 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
 
   const updateWave = useCallback(
     async (
-      body: ApiUpdateWaveRequest,
+      body: ApiUpdateWaveHubRequest,
       closeEditor: () => void,
       onSuccess?: () => void
     ) => {
@@ -42,10 +39,7 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
           return;
         }
 
-        await commonApiPost<ApiUpdateWaveRequest, ApiWave>({
-          endpoint: `waves/${wave.id}`,
-          body,
-        });
+        await updateWaveHub(wave.id, body);
         onSuccess?.();
         onWaveCreated();
         closeEditor();
@@ -72,60 +66,25 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
         return;
       }
 
-      const body = convertWaveToUpdateWave(wave);
-      updateWave(
-        {
-          ...body,
-          chat: getChatUpdate(body.chat),
-        },
-        closeEditor
-      ).catch(() => undefined);
-    },
-    [mutating, updateWave, wave]
-  );
-
-  const saveWaveConfigUpdate = useCallback(
-    (
-      closeEditor: () => void,
-      getWaveConfigUpdate: (waveConfig: WaveConfigUpdate) => WaveConfigUpdate,
-      onSuccess?: () => void
-    ) => {
-      if (mutating) {
-        return;
-      }
-
-      const body = convertWaveToUpdateWave(wave);
-      updateWave(
-        {
-          ...body,
-          wave: getWaveConfigUpdate(body.wave),
-        },
-        closeEditor,
-        onSuccess
-      ).catch(() => undefined);
-    },
-    [mutating, updateWave, wave]
-  );
-
-  const saveParticipationUpdate = useCallback(
-    (
-      closeEditor: () => void,
-      getParticipationUpdate: (
-        participation: WaveParticipationUpdate
-      ) => WaveParticipationUpdate
-    ) => {
-      if (mutating) {
-        return;
-      }
-
-      const body = convertWaveToUpdateWave(wave);
-      updateWave(
-        {
-          ...body,
-          participation: getParticipationUpdate(body.participation),
-        },
-        closeEditor
-      ).catch(() => undefined);
+      const current: WaveChatUpdate = {
+        scope: { group_id: wave.chat.scope.group?.id ?? null },
+        enabled: wave.chat.enabled,
+        links_disabled: wave.chat.links_disabled === true,
+        slow_mode_cooldown_ms: wave.chat.slow_mode_cooldown_ms ?? null,
+        ...getWaveChatRepliesUpdate(wave.chat),
+      };
+      const next = getChatUpdate(current);
+      const chat = Object.fromEntries(
+        Object.entries({
+          ...next,
+          slow_mode_cooldown_ms: next.slow_mode_cooldown_ms ?? null,
+        }).filter(
+          ([key, value]) =>
+            JSON.stringify(value) !==
+            JSON.stringify(current[key as keyof WaveChatUpdate] ?? null)
+        )
+      );
+      updateWave({ chat }, closeEditor).catch(() => undefined);
     },
     [mutating, updateWave, wave]
   );
@@ -134,8 +93,6 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
     canEdit,
     mutating,
     saveChatUpdate,
-    saveParticipationUpdate,
-    saveWaveConfigUpdate,
     setToast,
   };
 };

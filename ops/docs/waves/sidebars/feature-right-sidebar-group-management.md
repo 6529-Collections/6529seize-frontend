@@ -4,6 +4,9 @@
 
 Wave details `Configuration` lets users inspect access groups. Editors can also
 manage them in place from the same consolidated view.
+Wave Configuration changes shared wave access and chat settings. Competition
+entry rules, voting rules, schedules, and awards are managed in the selected
+competition’s Settings and remain unchanged when the wave is edited.
 
 Users can:
 
