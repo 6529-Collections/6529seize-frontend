@@ -50,9 +50,7 @@ describe("the hub, first version", () => {
     // The card follows the copy: its own TDH heads it, the network's total
     // stays on the loop and in the sentence.
     expect(card).toHaveTextContent("394 TDH");
-    expect(card).toHaveTextContent(
-      "All holders together, on Oct 18: 2,082,190,981."
-    );
+    expect(card).toHaveTextContent("All holders, on Oct 18: 2,082,190,981.");
     expect(
       within(card as HTMLElement).getByRole("link", { name: /Chapter 01: TDH/ })
     ).toHaveAttribute("href", "/network/tdh");
@@ -91,7 +89,7 @@ describe("the hub, first version", () => {
     );
     // What anyone can repeat today, and what needs private code.
     expect(panel).toHaveTextContent(
-      "Anyone can check each day's file against the index and add up 6529.io's signed upload; recomputing a day needs your own program and read of Ethereum, as 6529's are private (D116). Your TDH is in each of those results: see yours."
+      "Anyone can check each day's file against the index and add up 6529.io's signed upload. Recomputing a day needs your own program and read of Ethereum: 6529's are private (D116). Your TDH is in each of those results: see yours."
     );
     expect(panel).not.toHaveTextContent("repeat the daily comparison");
   });
@@ -109,7 +107,7 @@ describe("the hub, first version", () => {
     ).toEqual(["/network/tdh", "#cc0", "/explained/validators/hardware"]);
     expect(rows[0]).toHaveTextContent("checked every day since Oct 14");
     expect(rows[1]).toHaveTextContent(
-      "waits on: how cards were chosen before Main Stage"
+      "waits on: the history before Main Stage"
     );
     expect(rows[3]).toHaveTextContent(
       "software 0.1.0, built and being tested; live already: Hardware"

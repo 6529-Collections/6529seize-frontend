@@ -162,7 +162,7 @@
   "explained.tdh.overview.rung.writtenStanding": "P26, como regla de consenso",
   "explained.tdh.overview.rung.writtenVectors": "{vectors} vectores",
   "explained.tdh.overview.rung.proved": "Probado sobre ellas",
-  "explained.tdh.overview.rung.provedBody": "Pruebas en Lean sobre un modelo de las reglas de P26, cada una con lo que no cubre; los vectores prueban el modelo contra P26. {p53} más tratan de las reglas propuestas para los validadores (P53), de antes de D144, D148 y D150.",
+  "explained.tdh.overview.rung.provedBody": "Pruebas en Lean sobre un modelo de las reglas de P26, cada una con sus límites; los vectores prueban el modelo contra P26. {p53} más tratan de las reglas propuestas para los validadores (P53), de antes de D144, D148 y D150.",
   "explained.tdh.overview.rung.provedMark": "Probado · {proved} teoremas sobre el TDH",
   "explained.tdh.overview.rung.provedRef": "{shownFalse} contraejemplos sobre el TDH guardados en el registro ({all} con las reglas de los validadores)",
   "explained.tdh.overview.rung.daily": "Recalculado cada día",
