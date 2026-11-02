@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import NewVersionToast from "@/components/utils/NewVersionToast";
+import { VERSION_UPDATE_ROCKET_IMAGE_SRC } from "@/components/version-update/versionReloadImage";
 import { useVersionStatus } from "@/contexts/VersionStatusContext";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { refreshAppVersion } from "@/helpers/version-refresh.helpers";
@@ -36,6 +37,17 @@ it("retains the full mobile-browser toast and uses the shared updating flow", ()
   expect(screen.getByText("Yes, again!")).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Refresh page" }));
   expect(refreshAppVersion).toHaveBeenCalledTimes(1);
+});
+
+it("shows the small hash-named rocket with its size reserved", () => {
+  const { container } = render(<NewVersionToast />);
+  const rocket = container.querySelector(
+    `img[src="${VERSION_UPDATE_ROCKET_IMAGE_SRC}"]`
+  );
+  expect(rocket).not.toBeNull();
+  expect(rocket).toHaveAttribute("width", "115");
+  expect(rocket).toHaveAttribute("height", "48");
+  expect(container.querySelector('img[src="/rocket-refresh.png"]')).toBeNull();
 });
 
 it("leaves native app updates to the dock", () => {
