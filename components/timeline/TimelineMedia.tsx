@@ -3,6 +3,7 @@
 import styles from "./Timeline.module.css";
 import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 import { getMediaGatewayFallbackUrls } from "@/components/nft-image/utils/gateway-fallback";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { publicEnv } from "@/config/env";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -11,6 +12,10 @@ import {
   to6529ResolverUrl,
 } from "@/lib/media/decentralized-media";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getTimelineMediaType, MediaType } from "./timeline-media-type";
+
+export { MediaType } from "./timeline-media-type";
 
 interface Props {
   type: MediaType;
@@ -19,13 +24,8 @@ interface Props {
   locale?: SupportedLocale;
 }
 
-export enum MediaType {
-  IMAGE,
-  VIDEO,
-  HTML,
-}
-
 const IFRAME_FALLBACK_TIMEOUT_MS = 8000;
+const MEDIA_TYPE_TIMEOUT_MS = 8000;
 
 function getHistoricalMediaSources(url: string): string[] {
   // Only the recorded Arweave transaction/path proves an alternate gateway
@@ -57,7 +57,68 @@ function getHistoricalMediaSources(url: string): string[] {
 }
 
 export default function TimelineMediaComponent(props: Readonly<Props>) {
+  if (props.type === MediaType.UNKNOWN) {
+    return <DetectedTimelineMedia key={props.url} {...props} />;
+  }
   return <TimelineMediaPreview key={`${props.type}:${props.url}`} {...props} />;
+}
+
+async function detectHistoricalMediaType(
+  url: string,
+  signal: AbortSignal
+): Promise<MediaType> {
+  const controller = new AbortController();
+  const abort = () => controller.abort();
+  signal.addEventListener("abort", abort, { once: true });
+  if (signal.aborted) abort();
+  // One shared deadline bounds the complete, finite gateway lookup. HEAD
+  // reads only headers; never download a historical animation to classify it.
+  const timeout = globalThis.setTimeout(abort, MEDIA_TYPE_TIMEOUT_MS);
+  try {
+    for (const source of getHistoricalMediaSources(url)) {
+      if (controller.signal.aborted) break;
+      try {
+        const response = await fetch(source, {
+          method: "HEAD",
+          credentials: "omit",
+          signal: controller.signal,
+        });
+        controller.signal.throwIfAborted();
+        if (!response.ok) continue;
+        const detected = getTimelineMediaType(
+          response.headers.get("content-type")
+        );
+        if (detected !== MediaType.UNKNOWN) return detected;
+      } catch {
+        // A failed or CORS-blocked source can use only a matching gateway.
+      }
+    }
+    return MediaType.UNKNOWN;
+  } finally {
+    globalThis.clearTimeout(timeout);
+    signal.removeEventListener("abort", abort);
+  }
+}
+
+function DetectedTimelineMedia(props: Readonly<Props>) {
+  const { data: type = MediaType.UNKNOWN } = useQuery({
+    queryKey: [QueryKey.NFT_TIMELINE_MEDIA_TYPE, props.url],
+    queryFn: ({ signal }) => detectHistoricalMediaType(props.url, signal),
+    staleTime: 5 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  const locale = props.locale ?? DEFAULT_LOCALE;
+  const label = props.label ?? t(locale, "timeline.media.defaultLabel");
+  if (type === MediaType.UNKNOWN) {
+    return (
+      <a href={props.url} target="_blank" rel="noopener noreferrer">
+        {t(locale, "timeline.media.openMedia", { label })}
+      </a>
+    );
+  }
+  return <TimelineMediaPreview {...props} type={type} />;
 }
 
 function TimelineMediaPreview(props: Readonly<Props>) {

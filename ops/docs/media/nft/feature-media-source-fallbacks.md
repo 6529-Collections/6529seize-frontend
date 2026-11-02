@@ -55,6 +55,14 @@
 
 - Each image, video, or interactive HTML preview starts with its recorded
   historical media URL.
+- Historical animations use the format recorded for that side of the change.
+  A removed video stays a video even if today's card has no animation, and the
+  before and after previews can use different formats. Current artwork continues
+  to use the current card's media and format.
+- When a historical animation's format is missing or unrecognized, the preview
+  checks that historical file's content type. An `Open` link remains available
+  while checking or if the format cannot be identified; it does not assume an
+  image. Header checks stop after roughly eight seconds.
 - For recognized Arweave references, a failed preview can try the 6529 media
   resolver and approved gateways for the same transaction and file path. Each
   candidate is tried at most once. Changing the historical preview resets that

@@ -15,7 +15,7 @@ jest.mock("@/components/timeline/Timeline.module.css", () => ({
 let mediaProps: any[] = [];
 jest.mock("@/components/timeline/TimelineMedia", () => ({
   __esModule: true,
-  MediaType: { IMAGE: 0, VIDEO: 1, HTML: 2 },
+  MediaType: { IMAGE: 0, VIDEO: 1, HTML: 2, UNKNOWN: 3 },
   default: (props: any) => {
     mediaProps.push(props);
     return (
@@ -141,18 +141,71 @@ describe("Timeline", () => {
     });
   });
 
-  it("uses video type when nft animation is video", () => {
+  it("renders the removed historical MP4 even when the current NFT has no animation", () => {
+    const historical =
+      "https://arweave.net/RNN6a_VraO1wM7Cmmv95okPU0Zqsnt3sc_CEBMNqNBw";
+    const step = makeStep("animation", historical, "");
+    step.description.changes.push({
+      key: "animation_details::format",
+      from: "MP4",
+      to: "",
+    });
+    render(<Timeline nft={{ ...baseNft, metadata: {} }} steps={[step]} />);
+    expect(mediaProps).toHaveLength(1);
+    expect(mediaProps[0]).toMatchObject({
+      label: t("en-US", "timeline.fields.removedAnimation"),
+      locale: "en-US",
+      type: MediaType.VIDEO,
+      url: historical,
+    });
+  });
+
+  it.each([
+    ["MP4", "HTML", MediaType.VIDEO, MediaType.HTML],
+    ["gif", "video/webm", MediaType.IMAGE, MediaType.VIDEO],
+    ["MOV", "GLB", MediaType.VIDEO, MediaType.UNKNOWN],
+  ])(
+    "uses separate historical formats when %s changes to %s",
+    (from, to, fromType, toType) => {
+      const step = makeStep(
+        "animation",
+        "https://example.com/before",
+        "https://example.com/after"
+      );
+      step.description.changes.push({
+        key: "animation_details::format",
+        from,
+        to,
+      });
+      render(<Timeline nft={baseNft} steps={[step]} />);
+      expect(mediaProps.map(({ type }) => type)).toEqual([fromType, toType]);
+    }
+  );
+
+  it("uses the added historical format despite different current metadata", () => {
+    const step = makeStep("animation", "", "https://example.com/added");
+    step.description.changes.push({
+      key: "animation_details::format",
+      from: "",
+      to: "HTML",
+    });
+    render(<Timeline nft={baseNft} steps={[step]} />);
+    expect(mediaProps[0]).toMatchObject({
+      type: MediaType.HTML,
+      label: "Added Animation",
+    });
+  });
+
+  it("detects the historical asset when no format change was recorded", () => {
     render(
       <Timeline
         nft={baseNft}
-        steps={[makeStep("animation", undefined, "vid.mp4")]}
+        steps={[makeStep("animation", "https://example.com/old", "")]}
       />
     );
     expect(mediaProps[0]).toMatchObject({
-      label: t("en-US", "timeline.fields.addedAnimation"),
-      locale: "en-US",
-      type: MediaType.VIDEO,
-      url: "vid.mp4",
+      type: MediaType.UNKNOWN,
+      url: "https://example.com/old",
     });
   });
 

@@ -1,4 +1,12 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render as renderWithoutProviders,
+  screen,
+  waitFor,
+} from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactElement, ReactNode } from "react";
 import TimelineMedia, { MediaType } from "@/components/timeline/TimelineMedia";
 import { getMediaGatewayFallbackUrls } from "@/components/nft-image/utils/gateway-fallback";
 import { publicEnv } from "@/config/env";
@@ -12,13 +20,191 @@ jest.mock("@/components/timeline/Timeline.module.css", () => ({
 const HISTORICAL_TX = "IFosq_ZN9_PrDSQmq65JTjeB2GnnfPSFoHxRazxC4PY";
 const HISTORICAL_URL = `https://arweave.net/${HISTORICAL_TX}/Original.png`;
 const RESOLVER_URL = `https://media.6529.io/arweave/${HISTORICAL_TX}/Original.png`;
+let queryClient: QueryClient;
+
+function QueryWrapper({ children }: { readonly children: ReactNode }) {
+  return (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+}
+
+function render(element: ReactElement) {
+  return renderWithoutProviders(element, { wrapper: QueryWrapper });
+}
+
+beforeEach(() => {
+  queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  jest.mocked(globalThis.fetch).mockReset();
+});
 
 afterEach(() => {
+  queryClient.clear();
   jest.useRealTimers();
   jest.restoreAllMocks();
 });
 
 describe("TimelineMedia", () => {
+  const opaqueVideoUrl =
+    "https://arweave.net/RNN6a_VraO1wM7Cmmv95okPU0Zqsnt3sc_CEBMNqNBw";
+
+  function headResponse(contentType: string, status = 200) {
+    return {
+      ok: status >= 200 && status < 300,
+      headers: {
+        get: (name: string) =>
+          name.toLowerCase() === "content-type" ? contentType : null,
+      },
+    } as Response;
+  }
+
+  it.each([
+    ["video/mp4", "video"],
+    ["video/quicktime", "video"],
+    ["image/gif", "img"],
+    ["TEXT/HTML; charset=utf-8", "iframe"],
+  ])(
+    "detects %s from the recorded source when historical format is absent",
+    async (mime, tag) => {
+      const fetch = jest
+        .spyOn(globalThis, "fetch")
+        .mockResolvedValue(headResponse(mime));
+      const { container } = render(
+        <TimelineMedia url={opaqueVideoUrl} type={MediaType.UNKNOWN} />
+      );
+      expect(screen.getByRole("link")).toHaveAttribute("href", opaqueVideoUrl);
+      expect(container.querySelector("img")).toBeNull();
+      await waitFor(() =>
+        expect(container.querySelector(tag)).toHaveAttribute(
+          "src",
+          opaqueVideoUrl
+        )
+      );
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(fetch).toHaveBeenCalledWith(
+        opaqueVideoUrl,
+        expect.objectContaining({
+          method: "HEAD",
+          credentials: "omit",
+          signal: expect.any(AbortSignal),
+        })
+      );
+      if (tag === "iframe")
+        expect(container.querySelector(tag)).toHaveAttribute(
+          "sandbox",
+          "allow-scripts"
+        );
+    }
+  );
+
+  it("detects through a matching gateway after an inaccessible recorded source", async () => {
+    const fetch = jest
+      .spyOn(globalThis, "fetch")
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      .mockResolvedValue(headResponse("video/mp4"));
+    const { container } = render(
+      <TimelineMedia url={opaqueVideoUrl} type={MediaType.UNKNOWN} />
+    );
+    await waitFor(() =>
+      expect(container.querySelector("video")).toHaveAttribute(
+        "src",
+        opaqueVideoUrl
+      )
+    );
+    expect(fetch.mock.calls.map(([url]) => url)).toEqual([
+      opaqueVideoUrl,
+      opaqueVideoUrl.replace(
+        "https://arweave.net/",
+        "https://media.6529.io/arweave/"
+      ),
+    ]);
+    expect(container.querySelector("img")).toBeNull();
+  });
+
+  it("exhausts matching header lookups without assuming unknown or failed responses are images", async () => {
+    const sources = Array.from(
+      new Set([HISTORICAL_URL, ...getMediaGatewayFallbackUrls(HISTORICAL_URL)])
+    );
+    const fetch = jest
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(headResponse("image/png", 503))
+      .mockResolvedValue(headResponse("application/octet-stream"));
+    const { container } = render(
+      <TimelineMedia
+        url={HISTORICAL_URL}
+        type={MediaType.UNKNOWN}
+        label="Removed Animation"
+      />
+    );
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(sources.length));
+    expect(fetch.mock.calls.map(([url]) => url)).toEqual(sources);
+    expect(container.querySelector("img,video,iframe")).toBeNull();
+    expect(
+      screen.getByRole("link", { name: "Open Removed Animation" })
+    ).toHaveAttribute("href", HISTORICAL_URL);
+  });
+
+  it("does not invent gateway lookups for arbitrary historical URLs", async () => {
+    const url = "https://archive.example/old";
+    const fetch = jest
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(headResponse("application/json"));
+    render(<TimelineMedia url={url} type={MediaType.UNKNOWN} />);
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
+    expect(screen.getByRole("link")).toHaveAttribute("href", url);
+    expect(screen.queryByRole("img")).toBeNull();
+  });
+
+  it("bounds header detection and ignores a response arriving after the deadline", async () => {
+    jest.useFakeTimers();
+    let resolve: (response: Response) => void = () => {};
+    const fetch = jest.spyOn(globalThis, "fetch").mockReturnValue(
+      new Promise<Response>((done) => {
+        resolve = done;
+      })
+    );
+    const { container } = render(
+      <TimelineMedia url={opaqueVideoUrl} type={MediaType.UNKNOWN} />
+    );
+    const signal = fetch.mock.calls[0]?.[1]?.signal;
+    act(() => jest.advanceTimersByTime(8000));
+    expect(signal?.aborted).toBe(true);
+    await act(async () => resolve(headResponse("video/mp4")));
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(container.querySelector("img,video,iframe")).toBeNull();
+  });
+
+  it("aborts stale detection when the recorded URL changes", async () => {
+    let resolve: (response: Response) => void = () => {};
+    const fetch = jest
+      .spyOn(globalThis, "fetch")
+      .mockReturnValueOnce(
+        new Promise<Response>((done) => {
+          resolve = done;
+        })
+      )
+      .mockResolvedValue(headResponse("image/gif"));
+    const { container, rerender } = render(
+      <TimelineMedia url={opaqueVideoUrl} type={MediaType.UNKNOWN} />
+    );
+    const signal = fetch.mock.calls[0]?.[1]?.signal;
+    rerender(<TimelineMedia url={HISTORICAL_URL} type={MediaType.UNKNOWN} />);
+    expect(signal?.aborted).toBe(true);
+    await waitFor(() =>
+      expect(screen.getByRole("img")).toHaveAttribute("src", HISTORICAL_URL)
+    );
+    await act(async () => resolve(headResponse("video/mp4")));
+    expect(container.querySelector("video")).toBeNull();
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not probe when the historical format is known", () => {
+    const fetch = jest.spyOn(globalThis, "fetch");
+    render(<TimelineMedia url={opaqueVideoUrl} type={MediaType.VIDEO} />);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
   it("keeps a successful recorded primary source", () => {
     jest.useFakeTimers();
     render(<TimelineMedia url={HISTORICAL_URL} type={MediaType.IMAGE} />);
