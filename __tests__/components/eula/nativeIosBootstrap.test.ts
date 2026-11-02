@@ -89,12 +89,13 @@ it("runs as a synchronous inline head script, not a queued next/script", () => {
     path.join(process.cwd(), "app/layout.tsx"),
     "utf8"
   );
-  // Locate the element by its id so attribute order and formatting don't matter.
+  // Locate the opening tag by its id so attribute order, formatting and a
+  // self-closing or paired form don't matter. Its attributes contain no ">".
   const idIndex = layout.indexOf('id="native-ios-platform-bootstrap"');
   expect(idIndex).toBeGreaterThan(-1);
   const element = layout.slice(
     layout.lastIndexOf("<", idIndex),
-    layout.indexOf("/>", idIndex)
+    layout.indexOf(">", idIndex) + 1
   );
   // Lowercase <script> is plain HTML; <Script> would be next/script.
   expect(element).toMatch(/^<script\b/);
