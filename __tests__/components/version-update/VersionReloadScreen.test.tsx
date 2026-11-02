@@ -10,6 +10,7 @@ import VersionReloadScreen from "@/components/version-update/VersionReloadScreen
 import {
   VERSION_RELOAD_IMAGE_SRC,
   VERSION_UPDATE_ROCKET_IMAGE_SRC,
+  VERSION_UPDATE_ROCKET_IMAGE_WIDTH,
 } from "@/components/version-update/versionReloadImage";
 import { sharedConfig } from "@/config/nextConfig";
 import type { PublicEnv } from "@/config/env.schema";
@@ -105,6 +106,10 @@ describe("new-version toast rocket", () => {
       height: 144,
       hasAlpha: true,
     });
+    // The toast reserves this width before decoding; it must follow the art.
+    expect(VERSION_UPDATE_ROCKET_IMAGE_WIDTH).toBe(
+      Math.round((metadata.width! * 48) / metadata.height!)
+    );
 
     const digest = createHash("sha256").update(bytes).digest("hex");
     expect(path.basename(toastArtworkPath)).toBe(

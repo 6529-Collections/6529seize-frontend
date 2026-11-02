@@ -27,11 +27,16 @@ const ARTWORKS = [
     resize: { width: 180, height: 180, fit: "inside" },
   },
   {
-    // New-version toast: shown 48 CSS pixels tall, kept at 3x density.
+    // New-version toast: shown 48 CSS pixels tall, kept at 3x density. The
+    // toast reserves the matching width, emitted here so it follows the art.
     exportName: "VERSION_UPDATE_ROCKET_IMAGE_SRC",
     prefix: "version-update-rocket",
     source: "rocket-refresh.png",
     resize: { height: 144, fit: "inside" },
+    displayWidth: {
+      exportName: "VERSION_UPDATE_ROCKET_IMAGE_WIDTH",
+      cssHeight: 48,
+    },
   },
 ];
 
@@ -61,7 +66,14 @@ async function generateArtwork(publicDir, artwork) {
     `${artwork.exportName}: public/${fileName} (${image.length} bytes)`
   );
 
-  return `// Source SHA-256: ${sha256(source)}\nexport const ${artwork.exportName} =\n  "/${fileName}";\n`;
+  let output = `// Source SHA-256: ${sha256(source)}\nexport const ${artwork.exportName} =\n  "/${fileName}";\n`;
+  if (artwork.displayWidth) {
+    const { width, height } = await sharp(image).metadata();
+    const { cssHeight, exportName } = artwork.displayWidth;
+    const cssWidth = Math.round((width * cssHeight) / height);
+    output += `// CSS width at ${cssHeight}px tall.\nexport const ${exportName} = ${cssWidth};\n`;
+  }
+  return output;
 }
 
 async function generate() {
