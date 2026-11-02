@@ -40,7 +40,8 @@ export default function ProofsSources({
     id:
       | "proofs.sp1Advisory.earlier"
       | "proofs.sp1Advisory.id"
-      | "proofs.sp1Advisory.latestId",
+      | "proofs.sp1Advisory.latestId"
+      | "proofs.risc0Advisory.id",
     name: string
   ) => {
     const url = facts.entry(id)?.source.url;
@@ -114,6 +115,11 @@ export default function ProofsSources({
               latestLink: advisory(
                 "proofs.sp1Advisory.latestId",
                 LATEST_ADVISORY
+              ),
+              r0Date: facts.print("proofs.risc0Advisory.published", "long"),
+              r0Link: advisory(
+                "proofs.risc0Advisory.id",
+                "GHSA-g3qg-6746-3mg9"
               ),
             }),
           },

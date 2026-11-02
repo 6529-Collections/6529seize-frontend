@@ -97,7 +97,7 @@ function Tiers({
             >
               {tierName(tier)}
               {good && (
-                <span className="tw-rounded-full tw-bg-primary-500 tw-px-2 tw-py-px tw-text-[12px] tw-font-bold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-white">
+                <span className="tw-text-[12px] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-200">
                   {CARD.recommended}
                 </span>
               )}
@@ -348,8 +348,8 @@ function PartRow({
         {part.id === "storage" && <Drives locale={locale} />}
         {part.id === "power" && <Idle locale={locale} />}
         {part.avoid !== undefined && (
-          <div className="tw-mt-6 tw-border-0 tw-border-l-2 tw-border-solid tw-border-error/50 tw-pl-4">
-            <p className={`${LABEL} tw-text-error`}>
+          <div className="tw-mt-6 tw-border-0 tw-border-l-2 tw-border-dashed tw-border-iron-500 tw-pl-4">
+            <p className={`${LABEL} tw-text-iron-50`}>
               {hw(locale, "parts.avoid")}
             </p>
             <Line
@@ -379,7 +379,7 @@ function Spend({ locale }: { readonly locale: SupportedLocale }) {
             className="tw-flex tw-items-start tw-gap-3 lg:tw-flex-col lg:tw-gap-2.5"
           >
             <span
-              className="tw-grid tw-size-7 tw-flex-none tw-place-items-center tw-rounded-lg tw-border tw-border-solid tw-border-primary-300/30 tw-bg-primary-400/[0.12] tw-text-sm tw-font-bold tw-text-primary-300"
+              className="tw-grid tw-size-7 tw-flex-none tw-place-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-text-sm tw-font-bold tw-text-iron-200"
               aria-hidden="true"
               data-ex-allow-number=""
             >

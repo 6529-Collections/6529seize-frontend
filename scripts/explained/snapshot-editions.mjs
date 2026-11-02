@@ -3,10 +3,12 @@
  * Writes lib/explained/data/editionsSnapshot.json: The Memes as 6529.io's
  * public API reports them now, the copy the facts layer falls back to when
  * the API cannot be read during a render (lib/explained/feed.server.ts).
- * Each row is [id, season, edition_size, edition_size_floor, first mint];
- * the facts layer derives each card's minted count and edition from them
- * exactly as it does from a live read, and prints the snapshot's read time
- * wherever it prints the editions' source. Run it at ship time:
+ * Each row is [id, season, edition_size, edition_size_floor, first mint,
+ * applied rate], the applied rate being `tdh ÷ tdh__raw` from 6529.io's
+ * `nfts` (the rate its own TDH applies to the card); the facts layer derives
+ * each card's minted count and edition from them exactly as it does from a
+ * live read, and prints the snapshot's read time wherever it prints the
+ * editions' source. Run it at ship time:
  *
  *   ./bin/6529 run explained:snapshot-editions
  */
@@ -53,6 +55,18 @@ const mints = new Map(
       new Date(row.mint_date).toISOString().replace(/\.\d{3}Z$/, "Z"),
     ])
 );
+const rates = new Map(
+  nfts
+    .filter(
+      (row) =>
+        typeof row.id === "number" &&
+        typeof row.tdh === "number" &&
+        typeof row.tdh__raw === "number" &&
+        row.tdh > 0 &&
+        row.tdh__raw > 0
+    )
+    .map((row) => [row.id, Number((row.tdh / row.tdh__raw).toFixed(6))])
+);
 const cards = [
   ...new Map(
     extended
@@ -72,6 +86,7 @@ const cards = [
             ? row.edition_size_floor
             : null,
           mints.get(row.id) ?? null,
+          rates.get(row.id) ?? null,
         ],
       ])
   ).values(),
@@ -80,7 +95,7 @@ writeFileSync(
   OUT,
   `${JSON.stringify(
     {
-      note: "The Memes as 6529.io's public API reported them at readAt: [id, season, edition_size, edition_size_floor, first mint (UTC)]. Written by scripts/explained/snapshot-editions.mjs; the facts layer uses it only when the API cannot be read, and says when it was read.",
+      note: "The Memes as 6529.io's public API reported them at readAt: [id, season, edition_size, edition_size_floor, first mint (UTC), the rate 6529.io's TDH applies (tdh / tdh__raw)]. Written by scripts/explained/snapshot-editions.mjs; the facts layer uses it only when the API cannot be read, and says when it was read.",
       readAt,
       source: "6529.io API memes_extended_data",
       cards,

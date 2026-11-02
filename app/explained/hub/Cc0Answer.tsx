@@ -11,6 +11,7 @@ import {
 } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import { MEME_ART } from "@/app/network/tdh/overview/art";
+import { withCc0 } from "@/components/explained/marks/Cc0";
 import { ht } from "./copy";
 
 /**
@@ -25,9 +26,9 @@ import { ht } from "./copy";
 const FAN = [
   {
     art: MEME_ART[3],
-    place: "tw-left-0 tw-top-6 tw-rotate-[-5deg]",
+    place: "tw-left-[3%] tw-top-6 tw-rotate-[-5deg]",
   },
-  { art: MEME_ART[2], place: "tw-left-[30%] tw-top-0 tw-z-[2]" },
+  { art: MEME_ART[2], place: "tw-left-[31.5%] tw-top-0 tw-z-[2]" },
   {
     art: MEME_ART[4],
     place: "tw-left-[60%] tw-top-6 tw-rotate-[5deg]",
@@ -58,7 +59,7 @@ export default function Cc0Answer({
           aria-label={ht(locale, "cc0.fanLabel")}
         >
           {FAN.map(({ art, place }) => (
-            <div key={art.id} className={`tw-absolute tw-w-[38%] ${place}`}>
+            <div key={art.id} className={`tw-absolute tw-w-[37%] ${place}`}>
               <ArtCard
                 src={art.src}
                 fallbackSrc={art.original}
@@ -70,9 +71,11 @@ export default function Cc0Answer({
           ))}
         </div>
         <div className="tw-max-w-[600px]">
-          <span className={EX_TEXT.label}>{ht(locale, "cc0.label")}</span>
+          <span className={EX_TEXT.label}>
+            {withCc0(ht(locale, "cc0.label"))}
+          </span>
           <h2 className={`${EX_TEXT.stmt} tw-mt-3`}>
-            {ht(locale, "cc0.title")}
+            {withCc0(ht(locale, "cc0.title"))}
           </h2>
           {/* The mark travels with the claim it qualifies. */}
           <div className="tw-mt-3">
@@ -84,14 +87,14 @@ export default function Cc0Answer({
             />
           </div>
           <p className={`${EX_TEXT.body} tw-m-0 tw-mb-[18px] tw-mt-4`}>
-            {ht(locale, "cc0.body")}
+            {withCc0(ht(locale, "cc0.body"))}
           </p>
           <p className={`${EX_TEXT.body} tw-m-0`} data-cc0="keep">
-            {ht(locale, "cc0.keep")}
+            {withCc0(ht(locale, "cc0.keep"))}
           </p>
           <div className="tw-mt-8">
-            <LimitNote title={ht(locale, "cc0.limitTitle")}>
-              {ht(locale, "cc0.limit")}{" "}
+            <LimitNote title={withCc0(ht(locale, "cc0.limitTitle"))}>
+              {withCc0(ht(locale, "cc0.limit"))}{" "}
               <Link className={EX_LINK} href={MEME_ONE}>
                 {ht(locale, "cc0.limitLink")}
               </Link>
@@ -104,7 +107,7 @@ export default function Cc0Answer({
               <Icon kind="arrow" className="tw-size-4" />
             </Link>
           </p>
-          <p className="tw-m-0 tw-mt-4 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-5 tw-gap-y-2 tw-text-[15px] tw-leading-6">
+          <p className="tw-m-0 tw-mt-4 tw-flex tw-flex-col tw-items-start tw-gap-y-2 tw-text-[15px] tw-leading-6 sm:tw-flex-row sm:tw-flex-wrap sm:tw-items-baseline sm:tw-gap-x-5">
             <a
               className={EX_LINK}
               href={DOWNLOAD.original}
@@ -114,7 +117,7 @@ export default function Cc0Answer({
               {ht(locale, "cc0.download", { id: DOWNLOAD.id })}
             </a>
             <Link className={EX_LINK} href="/about/license">
-              {ht(locale, "cc0.chapter")}
+              {withCc0(ht(locale, "cc0.chapter"))}
             </Link>
             <a
               className={EX_LINK}
@@ -122,7 +125,7 @@ export default function Cc0Answer({
               target="_blank"
               rel="noopener noreferrer"
             >
-              {ht(locale, "cc0.deed")}
+              {withCc0(ht(locale, "cc0.deed"))}
             </a>
           </p>
         </div>

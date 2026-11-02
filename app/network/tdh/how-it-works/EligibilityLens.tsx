@@ -232,6 +232,7 @@ export default function EligibilityLens({
                 </b>{" "}
                 {ht(locale, "explained.tdh.how.eligible.sayI", {
                   days: n(CASE_I.earlyDays),
+                  late: String(CASE_I.late),
                 })}
               </>
             }

@@ -372,6 +372,41 @@ function namePlace(
   return { x, y: below ? y + 48 : y - 54, anchor: "middle" };
 }
 
+/** A 13 px semibold character's width in Montserrat, at its widest (digits). */
+const CHAR_13PX_WIDE = 8.2;
+
+/**
+ * A station's number in the lines it needs to stay inside the figure: whole
+ * words, each line no wider than the room between its anchor and the edge.
+ */
+function fitLines(
+  text: string,
+  anchor: "start" | "middle" | "end",
+  x: number,
+  width: number
+): string[] {
+  const margin = 4;
+  let room = width - 2 * margin;
+  if (anchor === "end") room = x - margin;
+  else if (anchor === "start") room = width - x - margin;
+  else room = 2 * Math.min(x - margin, width - x - margin);
+  const most = Math.max(4, Math.floor(room / CHAR_13PX_WIDE));
+  if (text.length <= most) return [text];
+  const lines: string[] = [];
+  let line = "";
+  for (const word of text.split(" ")) {
+    const next = line ? `${line} ${word}` : word;
+    if (next.length > most && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = next;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
 /**
  * A station's pictogram, drawn in its ring: a card, a wallet, a clock,
  * rising bars, a ballot and a mint press. Strokes only, in the station's
@@ -647,7 +682,11 @@ function LoopCircle({
                 fill={on ? EX_HEX.youInk : EX_HEX.ink2}
                 {...(station.fact ? { "data-fact": station.fact } : {})}
               >
-                {station.num}
+                {fitLines(station.num, anchor, tx, width).map((line, row) => (
+                  <tspan key={line} x={tx} dy={row === 0 ? 0 : 16}>
+                    {line}
+                  </tspan>
+                ))}
               </text>
             </g>
           );

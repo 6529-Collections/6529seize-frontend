@@ -19,6 +19,8 @@ export interface ContentsEntry {
   /** "01" */
   readonly no: string;
   readonly title: string;
+  /** A shorter title for the wide bar, where every section must fit on one line. */
+  readonly short?: string;
 }
 
 /** Where a section counts as being read: a third of the way down the screen. */
@@ -92,7 +94,9 @@ export default function PageContents({
         <span className="tw-text-xs tw-font-semibold tw-tabular-nums tw-text-iron-400">
           {item.no}
         </span>
-        <span className={wide ? "" : "tw-whitespace-normal"}>{item.title}</span>
+        <span className={wide ? "" : "tw-whitespace-normal"}>
+          {wide ? (item.short ?? item.title) : item.title}
+        </span>
       </a>
     );
   };

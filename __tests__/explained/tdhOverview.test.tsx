@@ -48,13 +48,22 @@ function withFacts(node: ReactNode) {
   );
 }
 
+/** An element whose own text is exactly this, across inline children (CC0's slashed zero). */
+function exactText(text: string) {
+  return (_: string, element: Element | null) =>
+    element?.textContent === text &&
+    Array.from(element.children).every((child) => child.textContent !== text);
+}
+
 describe("the machine", () => {
   it("opens on one copy of Meme #2 held 100 days: 394 TDH", () => {
     const { container } = withFacts(<Machine cards={CARDS} locale="en-US" />);
     const machine = container.querySelector('[data-lens="machine"]');
     expect(machine).toHaveAttribute("data-broken", "0");
     expect(screen.getByText("Meme #2 · SeizeJPGs")).toBeInTheDocument();
-    expect(screen.getByText("1,000 copies · CC0")).toBeInTheDocument();
+    expect(
+      screen.getByText(exactText("1,000 copies · CC0"))
+    ).toBeInTheDocument();
     expect(
       screen.getByText("3,941, the largest edition, ÷ 1,000 copies")
     ).toBeInTheDocument();
@@ -64,16 +73,16 @@ describe("the machine", () => {
     );
   });
 
-  it("gives Meme #4 with one Gradient 1,335 TDH (TDH-DESIGN.md §5.1)", async () => {
+  it("gives Meme #4 (300 minted) with one Gradient 1,340 TDH", async () => {
     const user = userEvent.setup();
     const { container } = withFacts(<Machine cards={CARDS} locale="en-US" />);
     await user.click(screen.getByRole("button", { name: "Meme #4" }));
     await user.click(
       container.querySelector('[data-beta="102"]') as HTMLElement
     );
-    expect(screen.getByText("1,335")).toBeInTheDocument();
+    expect(screen.getByText("1,340")).toBeInTheDocument();
     expect(screen.getByText("one Gradient")).toBeInTheDocument();
-    expect(screen.getByText("301 copies · CC0")).toBeInTheDocument();
+    expect(screen.getByText(exactText("300 copies · CC0"))).toBeInTheDocument();
   });
 
   it("counts the newest card at its floor while it is still minting", async () => {
@@ -83,7 +92,7 @@ describe("the machine", () => {
       screen.getByRole("button", { name: "Meme #562, still minting" })
     );
     expect(
-      screen.getByText("152 minted so far · counts as 310 · CC0")
+      screen.getByText(exactText("152 minted so far · counts as 310 · CC0"))
     ).toBeInTheDocument();
     expect(screen.getByText("12.71")).toBeInTheDocument();
     expect(
@@ -358,7 +367,7 @@ describe("how we know, on the overview", () => {
     );
     const zk = container.querySelector('[data-rung="5"]');
     expect(zk).toHaveTextContent(
-      "Proof A, program A in SP1: proved the day of Oct 11 under tdh-v1.0, the rules' earlier version, and mainnet's SP1 verifier accepts it in a read-only call. One day under retired rules does not move the blue line."
+      "Proof A, program A in SP1: proved the day of Oct 11 under tdh-v1.0, the rules' earlier version, and mainnet's SP1 verifier accepts it in a read-only call, one that changes nothing on chain. One day under retired rules does not move the blue line."
     );
     expect(zk).toHaveTextContent(
       "Proof B, program B in RISC Zero, written separately from A and from the Python reference: no mainnet day yet. Under TDH v1.4, programs A and B both proved one synthetic test cycle."

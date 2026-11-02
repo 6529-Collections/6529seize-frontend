@@ -1,10 +1,11 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { kt } from "@/components/explained/i18n";
 import ChapterIndex, {
   type ChapterIndexRow,
 } from "@/components/explained/shell/ChapterIndex";
-import { CHAPTERS } from "@/components/explained/shell/chapters";
-import { EX_LAYOUT, EX_TEXT } from "@/components/explained/tokens";
+import { CHAPTERS, chapterById } from "@/components/explained/shell/chapters";
+import { EX_LAYOUT, EX_LINK, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
 import type { FactBook } from "@/lib/explained/facts";
 import { Fact } from "../_lib/facts";
@@ -82,8 +83,17 @@ function comingRow(
     kt(locale, "explained.kit.chapters.waitsOn", { what });
   let note: ReactNode = waitsOn(ht(locale, def.waits ?? "chapter.nothing"));
   if (id === "validators") {
+    // Its first page is live before the chapter is: link it here.
+    const live = chapterById("validators").read[0];
     note = hrich(locale, "chapter.validatorsNote", {
       version: <Fact book={book} id="site.validator.version" locale={locale} />,
+      page: live ? (
+        <Link className={EX_LINK} href={live.href}>
+          {kt(locale, live.title)}
+        </Link>
+      ) : (
+        ""
+      ),
     });
   }
   return {

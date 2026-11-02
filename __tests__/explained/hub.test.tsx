@@ -71,36 +71,46 @@ describe("the hub, first version", () => {
   it("lists three things checked today, with who can repeat each", () => {
     const { container } = render(<CheckableToday book={book} locale="en-US" />);
     const panel = container.querySelector("[data-ex-checkable]");
+    expect(panel).toHaveTextContent("10,273 of 10,273 identities");
     expect(panel).toHaveTextContent(
-      "10,273 of 10,273 identities: 6529.io's TDH equals two separately written recomputations, in each of the 5 results since Oct 14."
+      "6529.io's TDH equals two separately written recomputations, in each of the 5 results since Oct 14."
     );
     // The theorem counts are the bundled manifest's, read through the facts.
     expect(panel).toHaveTextContent(
-      `${book.num("manifest.proved.tdh").toLocaleString("en-US")} Lean theorems about a model of TDH's rules, checked by machine, and ${book.num("manifest.proved.p53")} more about the proposed validator rules. ${book.num("manifest.shownFalse.tdh")} earlier drafts about TDH were shown false and stay on record.`
+      `${book.num("manifest.proved.tdh").toLocaleString("en-US")} Lean theorems`
+    );
+    expect(panel).toHaveTextContent(
+      `About a model of TDH's rules, each checked by machine, and ${book.num("manifest.proved.p53")} more about the proposed validator rules. ${book.num("manifest.shownFalse.tdh")} earlier statements about TDH's rules were shown false and stay on record.`
     );
     // The proved day carries its retired rule in the same sentence.
+    expect(panel).toHaveTextContent("One real day, half proved");
     expect(panel).toHaveTextContent(
-      "One real day, half proved A zero-knowledge proof lets a contract check a program's output without rerunning it. Proof A proved the day of Oct 11 (cycle 20,737) under the retired tdh-v1.0 rules; mainnet's SP1 verifier accepts it in a read-only call. Proof B is not done; under TDH v1.4 both exist only for a synthetic test cycle."
+      "A zero-knowledge proof lets a contract check a program's result without running it again. Proof A proved Oct 11 (cycle 20,737) under the retired tdh-v1.0 rules, and Ethereum's checker for such proofs accepts it, asked without a transaction. Proof B is not done; under TDH v1.4 both proved only made-up test blocks."
     );
     // What anyone can repeat today, and what needs private code.
     expect(panel).toHaveTextContent(
-      "Anyone can check each day's file against the index and add up 6529.io's signed upload. Recomputing a day takes your own program and your own read of Ethereum; 6529's are private for now (D116)."
+      "Anyone can check each day's file against the index and add up 6529.io's signed upload. Recomputing a day takes your own program and your own read of Ethereum; 6529's are private for now (D116). Your TDH is in each of those results: see yours."
     );
     expect(panel).not.toHaveTextContent("repeat the daily comparison");
   });
 
-  it("lists TDH live, the rest coming in order, with no link until they ship", () => {
+  it("lists TDH live, the rest coming in order, linking only what has shipped", () => {
     render(<HubChapters book={book} locale="en-US" />);
     const list = screen.getByRole("list", { name: "The chapters" });
     const rows = within(list).getAllByRole("listitem");
     expect(rows).toHaveLength(8);
-    expect(within(list).getAllByRole("link")).toHaveLength(1);
+    // TDH's row, and the one Validators page live before its chapter.
+    expect(
+      within(list)
+        .getAllByRole("link")
+        .map((link) => link.getAttribute("href"))
+    ).toEqual(["/network/tdh", "/explained/validators/hardware"]);
     expect(rows[0]).toHaveTextContent("checked every day since Oct 14");
     expect(rows[1]).toHaveTextContent(
       "waits on: how cards were chosen before Main Stage"
     );
     expect(rows[3]).toHaveTextContent(
-      'software 0.1.0, built and being tested; "run one" waits on its release'
+      "software 0.1.0, built and being tested; live already: Hardware"
     );
     expect(rows[6]).toHaveTextContent("6529 Stream Editions");
     expect(list).not.toHaveTextContent("NIC's full name");

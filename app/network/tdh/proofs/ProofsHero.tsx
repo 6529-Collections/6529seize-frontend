@@ -249,7 +249,11 @@ function RealVerdict({
           seconds: facts.print("proofs.day.nativeSeconds"),
         })
       )}
-      {p(rich(locale, k("verdict.bodyB")))}
+      {p(
+        rich(locale, k("verdict.bodyB"), {
+          words: facts.print("proofs.statement.words"),
+        })
+      )}
       {/* On a phone the limit comes first, under the headline. */}
       <div className="max-md:tw-order-first max-md:tw-mb-4">
         <LimitNote title={rich(locale, k("verdict.limitTitle"))}>

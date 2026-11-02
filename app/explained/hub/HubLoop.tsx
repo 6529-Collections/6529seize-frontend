@@ -63,12 +63,14 @@ function stations(book: FactBook, locale: SupportedLocale): AtlasStation[] {
       head: ht(locale, "station.timeHead", {
         copy: f("engine.machine.default"),
       }),
+      example: true,
       say: ht(locale, "station.timeSay", {
         total: f("tdh.latest.total"),
         date: f("tdh.latest.date"),
         copy: f("engine.machine.default"),
         rate: f(`meme.${HELD_CARD}.rate`),
         edition: f(`meme.${HELD_CARD}.edition`),
+        h: f("engine.H"),
       }),
     },
     {

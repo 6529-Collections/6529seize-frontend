@@ -245,6 +245,16 @@ export default function TwoPrograms({
                 id: facts.print("proofs.sp1Advisory.id"),
                 fixed: facts.print("proofs.sp1Advisory.fixed"),
                 earlier: facts.print("proofs.sp1Advisory.earlier", "long"),
+                latestId: facts.print("proofs.sp1Advisory.latestId"),
+                latestDate: facts.print(
+                  "proofs.sp1Advisory.latestPublished",
+                  "long"
+                ),
+                r0Id: facts.print("proofs.risc0Advisory.id"),
+                r0Date: facts.print("proofs.risc0Advisory.published", "long"),
+                r0Fixed: facts.print("proofs.risc0Advisory.fixed"),
+                zkvmA: facts.print("proofs.a.zkvm"),
+                zkvmB: facts.print("proofs.b.zkvm"),
               })}
             </Case>
             <Case title={rich(locale, k("case.review.title"))}>

@@ -503,7 +503,8 @@ export default async function TdhYourWalletsPage({
             ).map(([question, answerKey], index) => (
               <details
                 key={question}
-                open={index === 0}
+                // The first two are the commonest collector questions.
+                open={index < 2}
                 className="tw-group tw-border-0 tw-border-t tw-border-solid tw-border-iron-900"
               >
                 <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-py-4 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 [&::-webkit-details-marker]:tw-hidden">

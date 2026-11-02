@@ -49,12 +49,12 @@ export const CONTRACT_CHECKS: readonly ContractCheck[] = [
   {
     id: "time",
     refusals: [],
-    rule: "t_N ≤ block.timestamp; cutTimestamp < t_N",
+    rule: "t_N = the midnight, UTC, that closes cycleDay; t_N ≤ block.timestamp; cutTimestamp < t_N",
   },
   {
     id: "cycleRoot",
     refusals: ["CycleRootMismatch"],
-    rule: "cycleRoot = ROOT(the statement's own words)",
+    rule: 'cycleRoot = H("6529.TdhCycleRoot.v1", NETWORK_ID, cycleDay, t_N, tdhRuleId, cutNumber, cutHash, cutTimestamp, walletRoot, walletCount, identityCount, totalTDH, tokenRoot, tokenCount)',
   },
   {
     id: "anchors",

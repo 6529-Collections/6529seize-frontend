@@ -11,7 +11,7 @@ import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { loadFactBook } from "@/lib/explained/feed.server";
 import type { FactBook, FactEntry } from "@/lib/explained/facts";
 import { ENGINE } from "@/lib/explained/engine";
-import { formatCents, formatCount, formatUtcDay } from "@/lib/explained/format";
+import { formatCents, formatCount } from "@/lib/explained/format";
 import {
   resolveExplainedLocale,
   type ExplainedParams,
@@ -410,7 +410,6 @@ function howWeKnow(book: FactBook, locale: SupportedLocale) {
       {...(style ? { style } : {})}
     />
   );
-  const readAt = book.maybe<string>("memes.readAt");
   const source = `components/explained/engine/conformance.json, P26 at ${conformance.specification.commit.slice(0, 7)}`;
   return [
     {
@@ -440,14 +439,6 @@ function howWeKnow(book: FactBook, locale: SupportedLocale) {
       title: ht(locale, "explained.tdh.how.hwk.editions"),
       body: rich(locale, "explained.tdh.how.hwk.editionsBody", {
         time: v("memes.readAt"),
-        date:
-          readAt === null ? (
-            v("memes.readAt")
-          ) : (
-            <FactText fact={readAt} locale={locale}>
-              {formatUtcDay(locale, readAt.value)}
-            </FactText>
-          ),
       }),
     },
     {

@@ -47,14 +47,12 @@ function StatusCell({
   readonly comparisonRef?: string;
 }): ReactNode {
   if ("word" in status) {
-    // A status in words keeps the glyph column empty, so every status's
-    // word starts on one line down the table.
+    // A status in words has no glyph of its own: an empty slot the width
+    // of a mark's glyph keeps every status's word on one line down the
+    // table, without inventing a mark the grammar does not have.
     return (
       <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-[13px] tw-font-semibold tw-text-iron-50">
-        <span
-          className="tw-inline-block tw-size-3 tw-rounded-full tw-border tw-border-dotted tw-border-iron-400"
-          aria-hidden="true"
-        />
+        <span className="tw-inline-block tw-size-3" aria-hidden="true" />
         {t(locale, status.word)}
       </span>
     );

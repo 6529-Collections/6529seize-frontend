@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { SupportedLocale } from "@/i18n/locales";
 import { kt } from "../i18n";
+import { withCc0 } from "../marks/Cc0";
 import { EX_FOCUS } from "../tokens";
 
 /**
@@ -44,7 +45,7 @@ export default function ReaderPaths({
               {path.who}
             </span>
             <span className="tw-mt-2 tw-block tw-text-[15px] tw-leading-[23px] tw-text-iron-400">
-              {path.route}
+              {withCc0(path.route)}
             </span>
             {/* The time sits on the card's foot, so a row of cards reads as a grid. */}
             <span className="tw-mt-auto tw-block tw-pt-3 tw-text-[13px] tw-font-semibold tw-text-primary-300">

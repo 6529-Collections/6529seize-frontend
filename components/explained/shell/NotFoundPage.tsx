@@ -3,7 +3,8 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { kt } from "../i18n";
 import { Icon } from "../marks/glyphs";
 import { EX_BUTTON, EX_TEXT } from "../tokens";
-import { CHAPTERS, HUB_HREF, chapterById } from "./chapters";
+import type { Maturity } from "../marks/Track";
+import { CHAPTERS, HUB_HREF, chapterById, chapterPages } from "./chapters";
 import ExplainedShell from "./ExplainedShell";
 import PageIndex, { type PageIndexRow } from "./PageIndex";
 
@@ -14,13 +15,30 @@ import PageIndex, { type PageIndexRow } from "./PageIndex";
  * itself is never echoed. The page reads no live source, so it cannot fail
  * while a source is down; its facts are only the shell's.
  */
+/** A coming chapter, as the hub's list says it: does its subject run today? */
+const COMING_RUNS: Readonly<
+  Record<
+    Maturity,
+    | "explained.kit.notFound.comingLive"
+    | "explained.kit.notFound.comingBuilt"
+    | "explained.kit.notFound.comingDesign"
+  >
+> = {
+  live: "explained.kit.notFound.comingLive",
+  built: "explained.kit.notFound.comingBuilt",
+  design: "explained.kit.notFound.comingDesign",
+};
+
 export default function NotFoundPage({
   chapter,
   locale,
+  descriptions = {},
 }: {
   /** A chapter id from the map, or "hub" for an address under /explained. */
   readonly chapter: string;
   readonly locale: SupportedLocale;
+  /** One line for each of the chapter's pages, by page id, as its overview lists them. */
+  readonly descriptions?: Readonly<Record<string, string>>;
 }) {
   const def = chapter === "hub" ? null : chapterById(chapter);
   const chapterTitle = def
@@ -41,30 +59,45 @@ export default function NotFoundPage({
           no: page.n ?? "",
           title: kt(locale, page.title),
           href: page.href,
+          ...(descriptions[page.id] ? { desc: descriptions[page.id] } : {}),
         })),
         ...def.shelf.map((page, index) => ({
           no: `S${index + 1}`,
           title: kt(locale, page.title),
           href: page.href,
           shelf: true,
+          ...(descriptions[page.id] ? { desc: descriptions[page.id] } : {}),
         })),
       ]
     : // Every chapter, the coming ones listed without a link, so a reader
-      // who typed /explained/validators learns it is coming, not missing.
-      CHAPTERS.map((entry) =>
+      // who typed /explained/validators learns it is coming, not missing;
+      // a coming chapter's pages already live follow it, with their links.
+      CHAPTERS.flatMap((entry): PageIndexRow[] =>
         entry.status === "live" && entry.href
-          ? {
-              no: entry.number ?? "",
-              title: kt(locale, entry.title),
-              href: entry.href,
-            }
-          : {
-              // A coming chapter's place in the build order, as the hub
-              // lists it: Next, Then, Later.
-              no: entry.order ? kt(locale, entry.order) : "",
-              title: kt(locale, entry.title),
-              desc: kt(locale, "explained.kit.chapters.coming"),
-            }
+          ? [
+              {
+                no: entry.number ?? "",
+                title: kt(locale, entry.title),
+                href: entry.href,
+              },
+            ]
+          : [
+              {
+                // A coming chapter's place in the build order, as the hub
+                // lists it: Next, Then, Later; and whether its subject runs.
+                no: entry.order ? kt(locale, entry.order) : "",
+                title: kt(locale, entry.title),
+                desc: kt(locale, COMING_RUNS[entry.maturity]),
+              },
+              ...chapterPages(entry).map((page) => ({
+                no: "",
+                title: kt(locale, page.title),
+                href: page.href,
+                desc: kt(locale, "explained.kit.notFound.liveInComing", {
+                  chapter: kt(locale, entry.title),
+                }),
+              })),
+            ]
       );
   return (
     <ExplainedShell

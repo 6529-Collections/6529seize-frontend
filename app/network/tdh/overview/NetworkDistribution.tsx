@@ -29,8 +29,9 @@ interface Tone {
 }
 
 // A stepped ramp, lightest at the top of the ranking: each group's bar and
-// ribbon are one step of it, so the four ribbons read apart. The rest keep
-// their hatch from bar to ribbon to bar.
+// ribbon are one step of it, so the four ribbons read apart. The rest take
+// the ramp's lowest step, a plain fill: the 45° hatch means the boost and
+// nothing else (EXPLAINED.md §4.2).
 const TONES: Record<RankGroup["key"], Tone> = {
   top: {
     fill: "rgba(232, 233, 237, 0.96)",
@@ -48,8 +49,8 @@ const TONES: Record<RankGroup["key"], Tone> = {
     ink: "tw-text-iron-50",
   },
   rest: {
-    fill: "repeating-linear-gradient(45deg, rgba(206, 207, 212, 0.3) 0 3px, rgba(206, 207, 212, 0.1) 3px 8px)",
-    band: "url(#ex-network-hatch)",
+    fill: "rgba(140, 141, 150, 0.26)",
+    band: "rgba(140, 141, 150, 0.12)",
     ink: "tw-text-iron-50",
   },
 };
@@ -164,18 +165,6 @@ function Bands({ items }: { readonly items: readonly Share[] }) {
       className="tw-block tw-h-20 tw-w-full"
       aria-hidden="true"
     >
-      <defs>
-        <pattern
-          id="ex-network-hatch"
-          width="8"
-          height="8"
-          patternUnits="userSpaceOnUse"
-          patternTransform="rotate(45)"
-        >
-          <rect width="8" height="8" fill="rgba(206, 207, 212, 0.06)" />
-          <rect width="3" height="8" fill="rgba(206, 207, 212, 0.2)" />
-        </pattern>
-      </defs>
       {bandShapes(items).map(({ key, top, bottom }) => {
         // Each group flows as a ribbon from its share of TDH (above) to
         // its share of identities (below): curved sides, a filled body.
@@ -221,11 +210,10 @@ function Callouts({
   if (thin.length === 0) return null;
   return (
     <span
-      className="tw-mt-1 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-text-[12px] tw-font-semibold tw-leading-4 tw-text-iron-300"
+      className="tw-mt-1.5 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-4 tw-gap-y-1 tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-300"
       aria-hidden="true"
       data-network-callouts=""
     >
-      <span className="tw-text-iron-400">↑</span>
       {thin.map((share) => (
         <span key={share.group.key} className="tw-inline-flex tw-items-center">
           <span

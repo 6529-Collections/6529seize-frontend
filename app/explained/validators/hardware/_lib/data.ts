@@ -358,7 +358,7 @@ export const MODE_ROWS: readonly ModeRow[] = [
   },
   {
     id: "bootstrap",
-    home: "Off by default. Turned on, it serves new validators over Tor, with no port to open; peers can then tell which validator it is, though not where.",
+    home: "Off by default. Turned on, it serves new validators over Tor, with no port to open; peers can then tell which validator it is, though not where. A second computer without a key avoids that.",
     rack: "Can serve as a bootstrap node, so new validators find the network",
   },
 ];

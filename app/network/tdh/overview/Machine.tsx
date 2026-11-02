@@ -8,6 +8,7 @@ import BreakIt, { breakItLabel } from "@/components/explained/lens/BreakIt";
 import { Seg, Slider } from "@/components/explained/lens/controls";
 import { useBreakable } from "@/components/explained/lens/useBreakable";
 import Tag from "@/components/explained/marks/Tag";
+import { withCc0 } from "@/components/explained/marks/Cc0";
 import ArtCard from "@/components/explained/things/ArtCard";
 import CardPicker from "@/components/explained/things/CardPicker";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -275,7 +276,7 @@ export default function Machine({
         />
         <p className="tw-m-0 tw-self-start tw-text-sm tw-leading-5 tw-text-iron-400">
           <b className={`tw-block ${BOLD}`}>{words.name}</b>
-          {words.copies}
+          <span>{withCc0(words.copies)}</span>
         </p>
         <div className="tw-col-span-2 tw-mt-2 max-[359px]:tw-col-span-1 md:tw-col-span-1 md:tw-col-start-2 md:tw-mt-0">
           <Factor

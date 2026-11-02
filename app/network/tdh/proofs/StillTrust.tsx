@@ -49,6 +49,11 @@ export default function StillTrust({
                   ),
                   latestFixed: facts.print("proofs.sp1Advisory.latestFixed"),
                   zkvm: facts.print("proofs.a.zkvm"),
+                  earlier: facts.print("proofs.sp1Advisory.earlier", "long"),
+                  r0Id: facts.print("proofs.risc0Advisory.id"),
+                  r0Date: facts.print("proofs.risc0Advisory.published", "long"),
+                  r0Fixed: facts.print("proofs.risc0Advisory.fixed"),
+                  zkvmB: facts.print("proofs.b.zkvm"),
                 }),
               },
               {

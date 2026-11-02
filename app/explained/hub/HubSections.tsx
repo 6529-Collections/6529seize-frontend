@@ -32,9 +32,11 @@ export function HubOpener({
       <span className={`${EX_TEXT.label} tw-mb-4 tw-block`}>
         {ht(locale, "eyebrow")}
       </span>
-      <div className="lg:tw-grid lg:tw-grid-cols-[minmax(0,1fr)_400px] lg:tw-items-end lg:tw-gap-14">
+      <div className="lg:tw-grid lg:tw-grid-cols-[minmax(0,1fr)_360px] lg:tw-items-end lg:tw-gap-12">
+        {/* 80/84 from xl, as the design sets it: the front door's title is
+            never smaller than a chapter's. */}
         <h1
-          className={`${EX_TEXT.displayHub} tw-text-balance max-[359px]:tw-text-[30px] max-[359px]:tw-leading-[34px] lg:tw-text-[72px] lg:tw-leading-[76px]`}
+          className={`${EX_TEXT.displayHub} tw-text-balance max-[359px]:tw-text-[30px] max-[359px]:tw-leading-[34px] lg:tw-text-[68px] lg:tw-leading-[72px] xl:tw-text-[84px] xl:tw-leading-[88px]`}
         >
           {ht(locale, "title")}
         </h1>

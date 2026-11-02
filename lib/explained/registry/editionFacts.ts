@@ -123,8 +123,10 @@ export const EDITION_FACTS = {
     source: editionsSource,
     value: (inputs) => cards(inputs)?.length,
   }),
+  // With its day: a fallback copy read on an earlier day must not print a
+  // bare time that looks later than the page's own read.
   "memes.readAt": defineFact<string>({
-    format: "clock",
+    format: "instant",
     unit: "UTC",
     refresh: EDITIONS_REFRESH,
     source: editionsSource,

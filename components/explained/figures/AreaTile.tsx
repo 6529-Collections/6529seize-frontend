@@ -75,8 +75,18 @@ export default function AreaTile({
     fraction,
     value: axis * fraction,
   }));
+  const referenceText =
+    reference === undefined
+      ? ""
+      : kt(locale, "explained.kit.area.reference", {
+          copies: formatCount(locale, reference.copies),
+          rate: formatCents(locale, reference.rateCents / 100),
+        });
+  // Drawn only where its label fits whole: about 6.8 px a 12 px character.
   const showReference =
-    reference !== undefined && rate < 10 && width >= REFERENCE_MIN_WIDTH;
+    reference !== undefined &&
+    rate < 10 &&
+    width >= Math.max(REFERENCE_MIN_WIDTH, referenceText.length * 6.8 + 12);
   const referenceY = reference
     ? baseY - (reference.rateCents / 100 / top) * innerH
     : 0;
@@ -147,10 +157,7 @@ export default function AreaTile({
               strokeDasharray="3 4"
             />
             <Label x={PAD.left + 4} y={referenceY - 6} anchor="start">
-              {kt(locale, "explained.kit.area.reference", {
-                copies: formatCount(locale, reference.copies),
-                rate: formatCents(locale, reference.rateCents / 100),
-              })}
+              {referenceText}
             </Label>
           </g>
         )}
@@ -190,9 +197,15 @@ export default function AreaTile({
               strokeWidth={1.5}
               strokeDasharray="5 4"
             />
+            {/* Inside the area when it has room, so the label never sits
+                on the area's dashed edge. */}
             <Label
-              x={PAD.left + 4}
-              y={Math.max(18, baseY - tileH - bandH - 8)}
+              x={PAD.left + 8}
+              y={
+                tileH + bandH > 30
+                  ? baseY - tileH - bandH + 19
+                  : Math.max(18, baseY - tileH - bandH - 10)
+              }
               anchor="start"
               size={13}
               weight={600}

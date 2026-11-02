@@ -28,6 +28,7 @@ const KIND: Record<SourceKey, "site" | "spec" | "decision"> = {
   sp1Update: "site",
   sp1Cve: "site",
   sp1Native: "site",
+  risc0Cve: "site",
 };
 
 function proofSource(key: SourceKey) {
@@ -251,6 +252,19 @@ export const PROOF_FACTS = {
     "sp1Native",
     "text",
     proofs.sp1Advisory.latestFixed
+  ),
+
+  // RISC Zero's published flaw: fixed long before the version program B uses.
+  "proofs.risc0Advisory.id": fact("risc0Cve", "text", proofs.risc0Advisory.id),
+  "proofs.risc0Advisory.published": fact(
+    "risc0Cve",
+    "day",
+    proofs.risc0Advisory.published
+  ),
+  "proofs.risc0Advisory.fixed": fact(
+    "risc0Cve",
+    "text",
+    proofs.risc0Advisory.fixed
   ),
 
   "proofs.catchup.chainStart": count("p53", proofs.catchup.chainStart),

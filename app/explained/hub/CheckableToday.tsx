@@ -16,19 +16,22 @@ import { hrich, ht } from "./copy";
  * with its second proof not done; then what anyone can check by themselves.
  * Each head links to the page that shows it.
  */
-const HEAD_LINK = `${EX_LINK} tw-font-semibold`;
+const HEAD_LINK = `${EX_LINK} tw-font-semibold tw-text-iron-50`;
 
 function Item({
   mark,
   when,
+  head,
   children,
 }: {
   readonly mark: ReactNode;
   readonly when: ReactNode;
+  /** The one number or verdict, as a link to the page that shows it. */
+  readonly head: ReactNode;
   readonly children: ReactNode;
 }) {
   return (
-    <li className="tw-mt-4 tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-pt-4 first:tw-mt-3 first:tw-border-t-0 first:tw-pt-0 lg:tw-mt-3 lg:tw-border-l lg:tw-border-t-0 lg:tw-pl-6 lg:tw-pt-0 lg:first:tw-border-l-0 lg:first:tw-pl-0">
+    <li className="tw-mt-4 tw-flex tw-flex-col tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-pt-4 first:tw-mt-3 first:tw-border-t-0 first:tw-pt-0 lg:tw-mt-3 lg:tw-border-l lg:tw-border-t-0 lg:tw-pl-6 lg:tw-pt-0 lg:first:tw-border-l-0 lg:first:tw-pl-0">
       {/* Two lines kept for the mark and its date from lg up, where the three
           sit side by side, so their headlines share one baseline. */}
       <div className="tw-flex tw-flex-wrap tw-content-start tw-items-center tw-gap-x-2 tw-gap-y-1 lg:tw-min-h-[48px]">
@@ -37,7 +40,10 @@ function Item({
           {when}
         </span>
       </div>
-      <span className="tw-mt-1.5 tw-block tw-text-[15px] tw-leading-[23px] tw-text-iron-300">
+      <span className="tw-mt-2 tw-block tw-text-[22px] tw-font-semibold tw-tabular-nums tw-leading-7 tw-tracking-[-0.01em]">
+        {head}
+      </span>
+      <span className="tw-mt-2 tw-block tw-text-[15px] tw-leading-[23px] tw-text-iron-300">
         {children}
       </span>
     </li>
@@ -76,13 +82,15 @@ export default function CheckableToday({
           when={hrich(locale, "check.identitiesWhen", {
             date: fact("tdh.latest.date"),
           })}
+          head={
+            <Link className={HEAD_LINK} href="/network/tdh/verification">
+              {hrich(locale, "check.identities", {
+                equal: fact("tdh.latest.agree.live.identities.equal"),
+                total: fact("tdh.latest.agree.live.identities.total"),
+              })}
+            </Link>
+          }
         >
-          <Link className={HEAD_LINK} href="/network/tdh/verification">
-            {hrich(locale, "check.identities", {
-              equal: fact("tdh.latest.agree.live.identities.equal"),
-              total: fact("tdh.latest.agree.live.identities.total"),
-            })}
-          </Link>{" "}
           {everyDayEqual(book)
             ? hrich(locale, "check.identitiesBody", { days, first })
             : hrich(locale, "check.identitiesSome", {
@@ -104,12 +112,14 @@ export default function CheckableToday({
           when={hrich(locale, "check.theoremsWhen", {
             date: fact("manifest.writtenAt"),
           })}
+          head={
+            <Link className={HEAD_LINK} href="/network/tdh/formal">
+              {hrich(locale, "check.theorems", {
+                proved: fact("manifest.proved.tdh"),
+              })}
+            </Link>
+          }
         >
-          <Link className={HEAD_LINK} href="/network/tdh/formal">
-            {hrich(locale, "check.theorems", {
-              proved: fact("manifest.proved.tdh"),
-            })}
-          </Link>{" "}
           {hrich(locale, "check.theoremsBody", {
             p53: fact("manifest.proved.p53"),
             shownFalse: fact("manifest.shownFalse.tdh"),
@@ -121,10 +131,12 @@ export default function CheckableToday({
             day: fact("proofs.day.date"),
             date: fact("proofs.day.provedOn"),
           })}
+          head={
+            <Link className={HEAD_LINK} href="/network/tdh/proofs">
+              {ht(locale, "check.proof")}
+            </Link>
+          }
         >
-          <Link className={HEAD_LINK} href="/network/tdh/proofs">
-            {ht(locale, "check.proof")}
-          </Link>{" "}
           {hrich(locale, "check.proofBody", {
             day: fact("proofs.day.date"),
             cycle: fact("proofs.day.cycle"),
@@ -133,9 +145,12 @@ export default function CheckableToday({
         </Item>
       </ul>
       <p
-        className={`${EX_TEXT.cap} tw-m-0 tw-mt-4 tw-max-w-[560px] lg:tw-mt-6`}
+        className={`${EX_TEXT.cap} tw-m-0 tw-mt-4 tw-max-w-[640px] lg:tw-mt-6`}
       >
-        {ht(locale, "check.candour")}
+        {ht(locale, "check.candour")}{" "}
+        <Link className={EX_LINK} href="/network/tdh#explain">
+          {ht(locale, "check.yours")}
+        </Link>
       </p>
     </div>
   );

@@ -9,7 +9,7 @@
   "explained.tdh.versions.site.title": "{count} boost schedules since {year}",
   "explained.tdh.versions.site.body": "Each version changed the boost: what a full set pays, and how many seasons can pay. Before TDH v1.1 there were no seasons: 6529.io's code, from its first published commit, boosted a full set of every card. The specification restates only the current version, TDH v1.4, and the daily comparison checks only that one.",
   "explained.tdh.versions.table": "Every boost schedule in 6529.io's code",
-  "explained.tdh.versions.tableSource": "Read from 6529.io's own backend code, public on GitHub, at each version's commit; How we know names them.",
+  "explained.tdh.versions.tableSource": "The versions with seasons as 6529.io's own Historic boosts page and current rules give them; the first row, before seasons, from 6529.io's backend code, public on GitHub, at the commits How we know names.",
   "explained.tdh.versions.col.version": "Version",
   "explained.tdh.versions.col.when": "In effect",
   "explained.tdh.versions.col.fullSet": "Full-set boost, from seasons",

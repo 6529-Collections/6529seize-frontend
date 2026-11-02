@@ -36,7 +36,7 @@
       "ref": "6529's design record, run log of 2026-10-15"
     },
     "sp1Update": {
-      "ref": "Succinct's SP1 security update of 2025-01-27 (advisory GHSA-c873-wfhp-wx5m): two soundness flaws disclosed, and the routers to the SP1 verifier contracts on mainnets frozen",
+      "ref": "SP1's security advisory GHSA-c873-wfhp-wx5m, published 2025-01-15: missing verifier checks and Fiat-Shamir observations in sp1-stark before 4.0.0, fixed in 4.0.0; Succinct's security update of 2025-01-27 disclosed them with the freezing of the routers to the SP1 verifier contracts on mainnets",
       "url": "https://github.com/succinctlabs/sp1/security/advisories/GHSA-c873-wfhp-wx5m"
     },
     "sp1Cve": {
@@ -46,6 +46,10 @@
     "sp1Native": {
       "ref": "SP1's security advisory GHSA-p7v2-jjv3-8p8f, published 2026-10-11 (high): mismatched tensor lengths in SP1 6's native Rust verifier, versions 6.0.0 to 6.8.0, fixed in 6.8.1; the on-chain Groth16 and PLONK verifiers were not affected",
       "url": "https://github.com/succinctlabs/sp1/security/advisories/GHSA-p7v2-jjv3-8p8f"
+    },
+    "risc0Cve": {
+      "ref": "GitHub's advisory database, GHSA-g3qg-6746-3mg9 (CVE-2025-52484), published 2025-06-20: an underconstrained rv32im circuit in RISC Zero's zkVM, risc0-zkvm 2.0.0 to 2.0.2, fixed in 2.1.0",
+      "url": "https://github.com/advisories/GHSA-g3qg-6746-3mg9"
     }
   },
   "statement": {
@@ -225,10 +229,15 @@
     "id": "CVE-2026-40323",
     "published": "2026-04-11",
     "fixed": "6.1.0",
-    "earlier": "2025-01-27",
+    "earlier": "2025-01-15",
     "latestId": "GHSA-p7v2-jjv3-8p8f",
     "latestPublished": "2026-10-11",
     "latestFixed": "6.8.1"
+  },
+  "risc0Advisory": {
+    "id": "CVE-2025-52484",
+    "published": "2025-06-20",
+    "fixed": "2.1.0"
   },
   "catchup": {
     "chainStart": 13360862,

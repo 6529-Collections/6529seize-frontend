@@ -176,7 +176,7 @@ export default function MachineChooser({
                 <span aria-hidden="true">·</span>
                 <span className="tw-text-iron-50">{result.name}</span>
                 {result.recommended && (
-                  <span className="tw-rounded-full tw-bg-primary-500 tw-px-2 tw-py-0.5 tw-text-[12px] tw-tracking-[0.1em] tw-text-white">
+                  <span className="tw-text-[12px] tw-tracking-[0.1em] tw-text-iron-200">
                     {copy.recommended}
                   </span>
                 )}

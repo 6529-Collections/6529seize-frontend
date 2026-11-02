@@ -136,9 +136,9 @@ export default async function ImplementationsPage({
   // Every row of the "Proved as" column leads with a mark, so the column
   // scans: the half pair, Proved, or a dotted ring for none.
   const notProved = (
-    <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-iron-400">
+    <span className="tw-inline-flex tw-items-start tw-gap-1.5 tw-text-iron-400">
       <span
-        className="tw-inline-block tw-size-3 tw-flex-none tw-rounded-full tw-border tw-border-dotted tw-border-iron-400"
+        className="tw-mt-[5px] tw-inline-block tw-size-3 tw-flex-none tw-rounded-full tw-border tw-border-dotted tw-border-iron-400"
         aria-hidden="true"
       />
       {s("explained.tdh.impl.notProved")}
@@ -227,18 +227,22 @@ export default async function ImplementationsPage({
                 {
                   key: "program",
                   label: s("explained.tdh.impl.col.program"),
-                  width: "lg:tw-w-[170px]",
+                  width: "lg:tw-w-[22%]",
                 },
                 {
                   key: "written",
                   label: s("explained.tdh.impl.col.written"),
-                  width: "lg:tw-w-[230px]",
+                  width: "lg:tw-w-[22%]",
                 },
-                { key: "runs", label: s("explained.tdh.impl.col.runs") },
+                {
+                  key: "runs",
+                  label: s("explained.tdh.impl.col.runs"),
+                  width: "lg:tw-w-[30%]",
+                },
                 {
                   key: "proved",
                   label: s("explained.tdh.impl.col.proved"),
-                  width: "lg:tw-w-[170px]",
+                  width: "lg:tw-w-[26%]",
                 },
               ]}
               rows={[
@@ -259,7 +263,7 @@ export default async function ImplementationsPage({
                     proved: programsFact ? (
                       // One of the day's two proofs: the half-pair mark, as
                       // on the overview and the proofs page.
-                      <span className="tw-inline-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+                      <span className="tw-inline-flex tw-flex-wrap tw-items-start tw-gap-x-2 tw-gap-y-1">
                         <HalfPair a b={false} locale={locale} />
                         <span className={EX_TEXT.cap}>
                           {m("explained.tdh.impl.a.proofRef", {

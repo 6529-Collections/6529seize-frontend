@@ -214,6 +214,14 @@ export default function NettingLens({
               refText: ht(locale, "explained.tdh.how.netting.stampProved"),
             },
           ]}
+          tag={
+            caseOn
+              ? {
+                  kind: "example",
+                  text: ht(locale, "explained.tdh.how.eligible.tagCase"),
+                }
+              : { kind: "example" }
+          }
         />
       }
     />

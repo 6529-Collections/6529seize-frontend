@@ -126,6 +126,7 @@ const ITEM_GLYPH: Record<MarkKind, GlyphKind> = {
   drift: "drift",
   assumed: "assumed",
   notProved: "notGuaranteed",
+  retired: "retired",
 };
 
 function Column({

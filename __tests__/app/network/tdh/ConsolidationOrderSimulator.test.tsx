@@ -79,9 +79,11 @@ describe("the signing-order model", () => {
     renderLens(true);
     const rail = document.querySelector<HTMLElement>("[data-rule-rail]")!;
     expect(rail).toHaveTextContent(
-      "past 3 only if one member links both ways with each other member, every link registered at or after 1,792,022,400"
+      "past 3 only if one member links both ways with each other member, every link registered at or after Oct 15, 2026, 00:00 UTC (1,792,022,400)"
     );
-    expect(rail).toHaveTextContent("1,792,022,400 is Oct 15, 2026, 00:00 UTC.");
+    expect(rail).toHaveTextContent(
+      "The gate, 1,792,022,400, is block time in seconds: Oct 15, 2026, 00:00 UTC."
+    );
     const toggle = screen.getByRole("button", { name: "The exact rule" });
     expect(toggle).toHaveAttribute("aria-expanded", "false");
     await user.click(toggle);

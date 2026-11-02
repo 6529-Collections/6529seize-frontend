@@ -19,7 +19,8 @@ export type GlyphKind =
   | "notGuaranteed"
   | "assumed"
   | "notYet"
-  | "drift";
+  | "drift"
+  | "retired";
 
 interface GlyphProps {
   readonly kind: GlyphKind;
@@ -80,6 +81,23 @@ const PATHS: Record<GlyphKind, ReactElement> = {
       strokeWidth="1.6"
       strokeDasharray="2.4 2"
     />
+  ),
+  // A standing replaced by a newer one: the square of the standings, grey,
+  // struck through corner to corner.
+  retired: (
+    <>
+      <rect
+        x="3"
+        y="3"
+        width="10"
+        height="10"
+        rx="1.5"
+        fill="none"
+        stroke={EX_HEX.ink3}
+        strokeWidth="1.6"
+      />
+      <path d="M3.6 12.4l8.8-8.8" stroke={EX_HEX.ink3} strokeWidth="1.6" />
+    </>
   ),
   proved: <circle cx="8" cy="8" r="6" fill={EX_HEX.holds} />,
   tested: (

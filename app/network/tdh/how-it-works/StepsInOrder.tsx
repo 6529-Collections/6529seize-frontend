@@ -76,7 +76,8 @@ const STEPS: readonly Step[] = [
     rule: (n) =>
       [
         `pairs registered both ways → groups of ≤ ${n(R.consolidation_max_wallets)}`,
-        `beyond ${n(R.consolidation_ungated_max_wallets)}: one member freshly linked to all (D136)`,
+        `beyond ${n(R.consolidation_ungated_max_wallets)}: one member linked both ways with each other one,`,
+        `  every link registered at or after ${new Date(R.consolidation_gate_activation_s * 1000).toISOString().slice(0, 16).replace("T", " ")} UTC (D136)`,
       ].join("\n"),
     summary: true,
   },
@@ -246,7 +247,18 @@ export default function StepsInOrder({
               <span
                 className={`tw-col-start-2 md:tw-col-start-4 md:tw-row-start-1 md:tw-text-right xl:tw-col-start-auto xl:tw-row-start-auto ${EX_TEXT.small}`}
               >
-                {`P26 ${step.sections}`}
+                P26{" "}
+                {step.sections.split(", ").map((section, index) => (
+                  <span key={section}>
+                    {index > 0 && ", "}
+                    <Link
+                      className={`tw-text-inherit tw-underline tw-decoration-iron-600 tw-underline-offset-2 hover:tw-text-iron-50 ${EX_FOCUS}`}
+                      href={`/network/tdh/specification#s${section.slice(1).replace(".", "-")}`}
+                    >
+                      {section}
+                    </Link>
+                  </span>
+                ))}
                 {step.summary === true &&
                   ` · ${ht(locale, "explained.tdh.how.order.summary")}`}
               </span>
@@ -263,7 +275,10 @@ export default function StepsInOrder({
             <>
               {" "}
               <span className="tw-text-iron-400">
-                {ht(locale, "explained.tdh.how.trace.caption")}
+                {ht(locale, "explained.tdh.how.trace.caption", {
+                  edition: n(trace.edition),
+                  threshold: n(R.edition_floor_threshold),
+                })}
               </span>
             </>
           )}

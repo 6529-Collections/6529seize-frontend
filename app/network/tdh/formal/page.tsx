@@ -105,19 +105,22 @@ export default async function HowSurePage({
           locale={locale}
           items={(
             [
-              ["#layers", "01", "explained.tdh.sure.layers.label"],
-              ["#featured", "02", "explained.tdh.sure.featured.label"],
-              ["#claims", "03", "explained.tdh.sure.claims.label"],
-              ["#theorems", "04", "explained.tdh.sure.theorems.label"],
-              ["#how", "05", "explained.tdh.sure.build.label"],
-              ["#not", "06", "explained.tdh.sure.not.label"],
-              ["#yourself", "07", "explained.tdh.sure.yourself.label"],
-              ["#check", "08", "explained.tdh.sure.check.label"],
+              ["#layers", "01", "layers"],
+              ["#featured", "02", "featured"],
+              ["#claims", "03", "claims"],
+              ["#theorems", "04", "theorems"],
+              ["#how", "05", "build"],
+              ["#not", "06", "not"],
+              ["#yourself", "07", "yourself"],
+              ["#check", "08", "check"],
             ] as const
           ).map(([href, no, key]) => ({
             href,
             no,
-            title: ctx.s(key, { count: "" }).trim(),
+            title: ctx
+              .s(`explained.tdh.sure.${key}.label` as const, { count: "" })
+              .trim(),
+            short: ctx.s(`explained.tdh.sure.${key}.short` as const),
           }))}
         />
         <TwoQuestions ctx={ctx} />

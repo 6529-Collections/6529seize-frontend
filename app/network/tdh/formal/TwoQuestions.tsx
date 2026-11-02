@@ -52,7 +52,8 @@ export default function TwoQuestions({ ctx }: { readonly ctx: SureContext }) {
     {
       what: s("explained.tdh.sure.rule.proved"),
       detail: m("explained.tdh.sure.rule.provedDetail", {
-        count: p.v("manifest.sections.count"),
+        tdh: p.v("manifest.sections.tdh"),
+        p53: p.v("manifest.sections.p53"),
       }),
       marks: [
         { kind: "proved", refText: s("explained.tdh.sure.rule.provedRef") },

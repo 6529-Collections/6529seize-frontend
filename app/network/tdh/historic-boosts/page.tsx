@@ -379,11 +379,13 @@ export default async function VersionsPage({
                     )}
                   </p>
                 </div>
-                {/* Retired is a standing, not evidence: plain words, never
-                    the Not yet glyph, which answers "how do we know". */}
-                <span className="tw-text-[15px] tw-font-semibold tw-text-iron-400">
-                  {s("explained.tdh.versions.v10.mark")}
-                </span>
+                {/* Retired is a standing, not evidence: the struck square
+                    of a standing replaced, never the Not yet glyph. */}
+                <Mark
+                  kind="retired"
+                  locale={locale}
+                  label={s("explained.tdh.versions.v10.mark")}
+                />
               </li>
             </ol>
           </FactScope>

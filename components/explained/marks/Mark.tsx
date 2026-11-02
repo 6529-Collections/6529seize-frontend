@@ -23,6 +23,7 @@ const WORD: Record<MarkKind, KitKey> = {
   drift: "explained.kit.mark.drift",
   assumed: "explained.kit.mark.assumed",
   notProved: "explained.kit.mark.notProved",
+  retired: "explained.kit.mark.retired",
 };
 
 const GLYPH: Record<MarkKind, GlyphKind> = {
@@ -38,6 +39,7 @@ const GLYPH: Record<MarkKind, GlyphKind> = {
   drift: "drift",
   assumed: "assumed",
   notProved: "notGuaranteed",
+  retired: "retired",
 };
 
 /** Which question a mark answers; a day's verdict uses the same marks (§3.8). */
@@ -57,6 +59,7 @@ export const MARK_QUESTION: Record<
   assumed: "evidence",
   notProved: "evidence",
   drift: "since",
+  retired: "standing",
 };
 
 export const MARK_TEXT: Record<MarkSize, string> = {

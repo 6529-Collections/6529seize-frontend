@@ -151,6 +151,7 @@ export default function WalletsLens({
               text: wt(locale, "explained.tdh.wallets.lens.ruleGate", {
                 ungated: formatCount(locale, ungated.value),
                 gate: formatCount(locale, gateSeconds),
+                date: `${utcDayYear(locale, gateSeconds)}, ${utcClock(locale, gateSeconds)} UTC`,
               }),
               on: preset === "oldfour" || preset === "batch",
             },
