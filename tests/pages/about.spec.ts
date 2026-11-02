@@ -72,7 +72,8 @@ test.describe("About Pages @smoke @medium @large", () => {
       const download = mac.getByRole("link", {
         name: /version 0.3.15, Apple silicon/,
       });
-      const contentBox = await download
+      const contentBox = await mac
+        .getByRole("link", { name: /version 0.3.15, Apple silicon/ })
         .locator("xpath=ancestor::section")
         .boundingBox();
       const downloadBox = await download.boundingBox();
