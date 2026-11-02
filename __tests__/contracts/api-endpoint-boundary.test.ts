@@ -38,54 +38,6 @@ const TEST_FILE = /\.(?:test|spec)\.[cm]?[jt]sx?$/u;
 
 const HELPER = "services/api/api-endpoints.ts";
 
-// Component reads that the follow-up components PR migrates. Delete this list
-// there; the stale-exemption check fails once a file no longer matches.
-const PENDING_COMPONENT_MIGRATION = [
-  "components/6529Gradient/6529Gradient.tsx",
-  "components/6529Gradient/GradientPage.tsx",
-  "components/community-downloads/CommunityDownloadsRememes.tsx",
-  "components/community-downloads/CommunityDownloadsRoyalties.tsx",
-  "components/community-downloads/CommunityDownloadsTDH.tsx",
-  "components/communityStats/CommunityStats.tsx",
-  "components/delegation/consolidation-builder/useConsolidationBuilderData.ts",
-  "components/delegation/safe-collecting/useSafeCollectingSetup.ts",
-  "components/delegation/walletChecker/WalletChecker.tsx",
-  "components/delegation/walletChecker/walletCheckerConsolidations.ts",
-  "components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscriptionFooter.tsx",
-  "components/distribution/Distribution.tsx",
-  "components/drop-forge/craft/sections/DistributionSection.tsx",
-  "components/gas-royalties/GasRoyalties.tsx",
-  "components/leaderboard/Leaderboard.tsx",
-  "components/leaderboard/leaderboard_helpers.ts",
-  "components/mapping-tools/ConsolidationMappingTool.tsx",
-  "components/mapping-tools/DelegationMappingTool.tsx",
-  "components/memelab/MemeLabCollection.tsx",
-  "components/memelab/MemeLabPage.tsx",
-  "components/memelab/useMemeLabCatalog.ts",
-  "components/nextGen/admin/NextGenAdminInitializeBurn.tsx",
-  "components/nextGen/admin/NextGenAdminInitializeExternalBurnSwap.tsx",
-  "components/nextGen/admin/NextGenAdminUploadAL.tsx",
-  "components/nextGen/collections/NextGenArtists.tsx",
-  "components/nextGen/collections/NextGenCollections.tsx",
-  "components/nextGen/collections/collectionParts/NextGenCollectionHeader.tsx",
-  "components/nextGen/collections/collectionParts/mint/NextGenMint.tsx",
-  "components/nextGen/collections/collectionParts/mint/NextGenMintBurnWidget.tsx",
-  "components/nextGen/collections/collectionParts/mint/NextGenMintWidget.tsx",
-  "components/rememes/RememeAddComponent.tsx",
-  "components/rememes/RememeAddPage.tsx",
-  "components/rememes/RememePage.tsx",
-  "components/rememes/Rememes.tsx",
-  "components/subscriptions-report/SubscriptionsReport.tsx",
-  "components/the-memes/MemePage.tsx",
-  "components/the-memes/MemePageReferences.tsx",
-  "components/the-memes/MemePageTimeline.tsx",
-  "components/the-memes/MemeShared.tsx",
-  "components/the-memes/TheMemes.tsx",
-  "components/the-memes/useMemePageFallbackData.ts",
-  "components/user/collected/UserPageCollected.tsx",
-  "components/waves/drop/SingleWaveDropVotersDownload.tsx",
-];
-
 type Rule = {
   readonly name: string;
   readonly pattern: RegExp;
@@ -101,12 +53,6 @@ const RULES: readonly Rule[] = [
       [HELPER]: "The endpoint list reads the configured value here.",
       "app/layout.tsx":
         "Preconnect hint in the root layout, which the static-shell work owns; switch it to getApiBase() there.",
-      ...Object.fromEntries(
-        PENDING_COMPONENT_MIGRATION.map((file) => [
-          file,
-          "Pending: the follow-up components PR migrates this file.",
-        ])
-      ),
     },
   },
   {
