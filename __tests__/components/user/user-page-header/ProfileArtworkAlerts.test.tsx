@@ -11,10 +11,9 @@ import {
 } from "@/services/api/common-api";
 
 const mockConnect = jest.fn();
-let mockAddress: string | undefined = "0xviewer";
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({
-    address: mockAddress,
+    address: "0xviewer",
     seizeConnect: mockConnect,
   }),
 }));
@@ -103,7 +102,6 @@ function setup(
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockAddress = "0xviewer";
   fetchPreference.mockResolvedValue({ enabled: false });
   postPreference.mockResolvedValue({ enabled: true });
   deletePreference.mockResolvedValue(undefined);
@@ -133,15 +131,14 @@ it("toggles the saved preference without changing feed subscriptions", async () 
   });
 });
 
-it("opens authentication for guests without opting them in", async () => {
-  mockAddress = undefined;
+it("hides artwork alerts from signed-out viewers, including artist profiles", () => {
   setup({
     connectedProfile: null,
     isAuthenticated: false,
     isDirectProfileSession: false,
   });
-  await userEvent.click(screen.getByRole("button", { name }));
-  expect(mockConnect).toHaveBeenCalledTimes(1);
+  expect(screen.queryByTestId("profile-actions")).not.toBeInTheDocument();
+  expect(mockConnect).not.toHaveBeenCalled();
   expect(fetchPreference).not.toHaveBeenCalled();
   expect(postPreference).not.toHaveBeenCalled();
 });
@@ -249,6 +246,7 @@ it("loads the viewer preference after a guest signs in, without implicit opt-in"
     isDirectProfileSession: false,
   });
   expect(fetchPreference).not.toHaveBeenCalled();
+  expect(screen.queryByRole("button", { name })).not.toBeInTheDocument();
   rerenderAuth({
     connectedProfile: {
       id: "viewer",
@@ -323,4 +321,17 @@ it("omits an empty actions menu for guests viewing profiles without artist activ
   setup({ connectedProfile: null, isAuthenticated: false }, false, false);
   expect(screen.queryByTestId("profile-actions")).not.toBeInTheDocument();
   expect(fetchPreference).not.toHaveBeenCalled();
+});
+
+it("hides saved alerts after authentication ends, even with a remembered profile", async () => {
+  fetchPreference.mockResolvedValue({ enabled: true });
+  const { rerenderAuth } = setup();
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name })).toHaveTextContent("On")
+  );
+  rerenderAuth({ isAuthenticated: false, isDirectProfileSession: false });
+  expect(screen.queryByTestId("profile-actions")).not.toBeInTheDocument();
+  expect(fetchPreference).toHaveBeenCalledTimes(1);
+  expect(postPreference).not.toHaveBeenCalled();
+  expect(deletePreference).not.toHaveBeenCalled();
 });

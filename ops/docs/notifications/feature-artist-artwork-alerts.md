@@ -12,7 +12,7 @@ when they submit new artwork to **The Memes – Main Stage**. The menu shows
 - New alerts appear in [Notifications](feature-notifications-feed.md), where the
   **Artwork alerts** filter shows these rows.
 
-The control appears for profiles with an artist activity badge: active Main Stage
+For signed-in viewers, the control appears for profiles with an artist activity badge: active Main Stage
 submissions, Main Stage wins, or earlier Meme artist credits. If you already have
 alerts on, it stays available even without the badge so you can turn them off.
 Turning them off then hides the control until the profile has an artist badge again.
@@ -41,8 +41,8 @@ Open the artist’s profile from a submission, search result, or profile link.
 
 ## Edge Cases
 
-- Signed-out viewers can start sign-in from the control, then select it again to
-  opt in. Proxy profiles cannot manage artwork alerts.
+- Signed-out viewers do not see the control. Sign in through the account menu
+  first. Proxy profiles cannot manage artwork alerts.
 - Only Main Stage submissions qualify. Chat, other competitions, proposals,
   curation, comments, votes, reactions, and edits do not trigger artwork alerts.
 - A new dedicated resubmission can qualify as a new entry; retrying the same

@@ -11159,7 +11159,7 @@
       ],
       "facts": [
         "Open Profile actions and select Artwork alerts on another artist's profile to opt into notifications for their new non-anonymous submissions to The Memes – Main Stage.",
-        "Artwork alerts appears for profiles with an artist activity badge: active Main Stage submissions, Main Stage wins, or earlier Meme artist credits. If alerts are already on, the control remains available without the badge so they can be turned off; turning them off then hides it.",
+        "Signed-out viewers do not see Artwork alerts. After signing in, it appears for profiles with an artist activity badge: active Main Stage submissions, Main Stage wins, or earlier Meme artist credits. If alerts are already on, the control remains available without the badge so they can be turned off; turning them off then hides it.",
         "The menu shows On with a check mark when enabled, or Off. Select Artwork alerts again to turn alerts off. Sign in with your own profile; proxies cannot manage artwork alerts.",
         "Artwork alerts and Follow are independent. Enabling alerts does not follow the artist, and following or unfollowing does not change alerts. Existing followers are not opted in.",
         "Only new confirmed Main Stage entries submitted after opt-in qualify. Existing work, other competitions, chat, edits, votes, reactions, proposals and curation do not generate artwork alerts. A new dedicated resubmission can qualify; retries of the same submission do not duplicate alerts.",

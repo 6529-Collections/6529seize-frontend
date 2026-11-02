@@ -73,8 +73,11 @@ The profile header appears on profile routes under `/{user}` and shows:
      handle: follow/unfollow button
    - **Profile actions → Artwork alerts** independently opts into new Main Stage
      artwork submissions by that artist; the menu shows On with a check mark when enabled.
-     It appears for profiles with an artist activity badge, or while alerts are
-     already on so they can still be turned off.
+     Signed-in viewers see it for profiles with an artist activity badge, or
+     while alerts are already on so they can still be turned off.
+     On desktop, opening Profile actions with a pointer leaves rows unselected;
+     hovering uses a background highlight. Keyboard navigation shows a focus ring,
+     and Escape closes the menu and returns focus to its button.
      See [Artist Artwork Alerts](../../notifications/feature-artist-artwork-alerts.md).
    - if that target also has a primary wallet: direct-message button appears
      beside follow/unfollow immediately; it is not gated on existing follow

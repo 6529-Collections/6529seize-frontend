@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { Menu, MenuItems, Transition } from "@headlessui/react";
 import clsx from "clsx";
 import { CompactMenuTrigger } from "./subcomponents/CompactMenuTrigger";
@@ -35,10 +35,18 @@ export function CompactMenu({
   "aria-label": ariaLabel,
   unstyledItems,
 }: Readonly<CompactMenuProps>) {
+  const [keyboardNavigation, setKeyboardNavigation] = useState(false);
   return (
-    <Menu as="div" className={clsx("tw-relative", className)}>
+    <Menu
+      as="div"
+      className={clsx("tw-relative", className)}
+      onKeyDownCapture={() => setKeyboardNavigation(true)}
+      onPointerDownCapture={() => setKeyboardNavigation(false)}
+      onPointerMoveCapture={() => setKeyboardNavigation(false)}
+    >
       {({ open, close }) => (
         <CompactMenuContent
+          keyboardNavigation={keyboardNavigation}
           trigger={trigger}
           items={items}
           onItemSelect={onItemSelect}
@@ -77,11 +85,13 @@ interface CompactMenuContentProps extends Omit<
   readonly anchor: CompactMenuProps["anchor"];
   readonly menuWidthClassName: CompactMenuProps["menuWidthClassName"];
   readonly ariaLabel: CompactMenuProps["aria-label"];
+  readonly keyboardNavigation: boolean;
   readonly isOpen: boolean;
   readonly close: () => void;
 }
 
 function CompactMenuContent({
+  keyboardNavigation,
   trigger,
   items,
   onItemSelect,
@@ -110,7 +120,7 @@ function CompactMenuContent({
 }: Readonly<CompactMenuContentProps>) {
   const { menuItemsRef, focusInitialMenuItem } = useCompactMenuFocus(
     isOpen,
-    autoFocusItem
+    autoFocusItem || keyboardNavigation
   );
   const menuAnchor = anchor ?? DEFAULT_ANCHOR;
 
@@ -138,8 +148,10 @@ function CompactMenuContent({
       >
         <MenuItems
           ref={menuItemsRef}
+          data-keyboard-navigation={keyboardNavigation}
           anchor={menuAnchor}
           className={clsx(
+            "tw-group/compact-menu",
             unstyledMenu ? undefined : DEFAULT_MENU_CLASSES,
             menuWidthClassName,
             menuClassName

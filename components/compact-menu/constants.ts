@@ -17,12 +17,13 @@ export const DEFAULT_INACTIVE_ITEM_CLASSES =
 export const DEFAULT_FOCUS_ITEM_CLASSES = "tw-bg-iron-800 tw-text-iron-50";
 
 /**
- * Headless UI marks the active item for keyboard and pointer alike, and a tint
- * of iron-800 over iron-900 is only about 1.2:1, so the active item also draws
- * an inset primary ring. It replaces the browser outline on the same item.
+ * Headless UI marks hovered and keyboard-selected items alike. Only keyboard
+ * navigation needs the high-contrast ring; pointer hover keeps the background
+ * tint. Important ring width also covers virtual focus in portaled menus,
+ * where the global pointer-focus reset would otherwise erase the ring.
  */
 export const FOCUS_ITEM_RING_CLASSES =
-  "tw-outline-none tw-ring-2 tw-ring-inset tw-ring-primary-400";
+  "tw-outline-none group-data-[keyboard-navigation=true]/compact-menu:!tw-ring-2 tw-ring-inset tw-ring-primary-400";
 
 export const DEFAULT_ANCHOR: NonNullable<MenuItemsProps["anchor"]> =
   "bottom end";

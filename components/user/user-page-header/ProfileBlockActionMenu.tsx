@@ -146,6 +146,7 @@ function ProfileActionsMenu({
       trigger={trigger}
       triggerClassName={TRIGGER_CLASS_NAME}
       unstyledTrigger
+      autoFocusItem={false}
       menuWidthClassName="tw-w-72"
     />
   );

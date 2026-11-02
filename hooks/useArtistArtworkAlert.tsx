@@ -4,7 +4,6 @@ import { useEffect, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BellIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "@/components/auth/Auth";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import type { CompactMenuItem } from "@/components/compact-menu";
 import { getAuthStateFingerprint } from "@/services/auth/auth-token-fingerprint";
@@ -34,7 +33,6 @@ export default function useArtistArtworkAlert(
     requestAuth,
     setToast,
   } = useAuth();
-  const { address, seizeConnect } = useSeizeConnectContext();
   const locale = useBrowserLocale();
   const queryClient = useQueryClient();
   const mounted = useRef(true);
@@ -99,6 +97,7 @@ export default function useArtistArtworkAlert(
     },
   });
   const enabled = canManage && preference.data?.enabled === true;
+  if (!connectedProfile?.id || isAuthenticated !== true) return null;
   if (!hasArtistActivity && !enabled) return null;
 
   const loading = fetchingProfile || (canManage && preference.isFetching);
@@ -121,8 +120,7 @@ export default function useArtistArtworkAlert(
 
   async function onClick() {
     if (!canManage) {
-      if (!address) seizeConnect();
-      else await requestAuth();
+      await requestAuth();
       return;
     }
     if (failed) {

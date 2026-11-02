@@ -64,7 +64,7 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
     "Following coverage requires the local mock API runner."
   );
 
-  test.beforeEach(async ({ page, baseURL }) => {
+  test.beforeEach(async ({ page, baseURL }, testInfo) => {
     const apiOrigin = new URL(getSandboxApiOrigin(baseURL));
     // Model the local shell socket; this profile test does not need wave events.
     await page.routeWebSocket(
@@ -100,10 +100,11 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
       "",
     ].join(".");
     await page.addInitScript(
-      ({ address, token }) => {
+      ({ address, token, guest }) => {
         // Keep analytics outside this profile fixture; external writes stay blocked.
         document.cookie = "essential-cookies-consent=true; path=/";
         document.cookie = "performance-cookies-consent=false; path=/";
+        if (guest) return;
         localStorage.setItem("6529-wallet-active-address", address);
         localStorage.setItem(
           "6529-wallet-accounts",
@@ -120,9 +121,36 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
           ])
         );
       },
-      { address: wallet, token: jwt }
+      { address: wallet, token: jwt, guest: testInfo.tags.includes("@guest") }
     );
   });
+
+  test(
+    "hides artwork alerts from signed-out artist profile visitors",
+    { tag: "@guest" },
+    async ({ page, baseURL, request }, testInfo) => {
+      const api = getSandboxApiOrigin(baseURL);
+      expect(
+        (await request.post(`${api}/__composer-sandbox/artist-activity`)).ok()
+      ).toBe(true);
+      const preferenceReads: string[] = [];
+      page.on("request", (request) => {
+        if (request.url().endsWith("/artwork-alerts"))
+          preferenceReads.push(request.url());
+      });
+      await page.goto("/following-artist-0");
+      await expect(
+        page.getByRole("heading", { name: "following-artist-0", exact: true })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Profile actions", exact: true })
+      ).toHaveCount(0);
+      expect(preferenceReads).toEqual([]);
+      await page.screenshot({
+        path: testInfo.outputPath("artwork-alerts-signed-out.png"),
+      });
+    }
+  );
 
   test("keeps artist artwork alerts separate from Follow and persists toggles", async ({
     page,
@@ -256,6 +284,33 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
     ).toBe(true);
     await loadProfile(true);
     const alert = await openAlerts("Off");
+    if (!mobile) {
+      await alert.hover();
+      await expect(alert).toHaveCSS("box-shadow", "none");
+      await page.screenshot({
+        path: testInfo.outputPath("artwork-alerts-pointer-focus.png"),
+      });
+      await page.keyboard.press("Home");
+      await expect(alert).not.toHaveCSS("box-shadow", "none");
+      await page.screenshot({
+        path: testInfo.outputPath("artwork-alerts-keyboard-focus.png"),
+      });
+      const mute = page.getByRole("menuitem", {
+        name: "Mute notifications",
+        exact: true,
+      });
+      await page.keyboard.press("ArrowDown");
+      await expect(mute).not.toHaveCSS("box-shadow", "none");
+      await expect(alert).toHaveCSS("box-shadow", "none");
+      await alert.hover();
+      await expect(alert).toHaveCSS("box-shadow", "none");
+      await page.keyboard.press("Escape");
+      await expect(
+        page.getByRole("button", { name: "Profile actions", exact: true })
+      ).toBeFocused();
+      await page.keyboard.press("Enter");
+      await expect(alert).not.toHaveCSS("box-shadow", "none");
+    }
     await alert.press("Enter");
     await expect.poll(() => enabled).toBe(true);
     expect(followWrites).toBe(0);
