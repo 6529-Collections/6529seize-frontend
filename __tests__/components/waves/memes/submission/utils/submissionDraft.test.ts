@@ -2,6 +2,25 @@ import { buildMemesSubmissionDraftFromDrop } from "@/components/waves/memes/subm
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 
 describe("buildMemesSubmissionDraftFromDrop", () => {
+  it("keeps legacy bio text separate and treats a null declaration as unmarked", () => {
+    const drop = {
+      title: "Legacy entry",
+      parts: [],
+      is_additional_action_promised: null,
+      metadata: [
+        {
+          data_key: "about_artist",
+          data_value: "I will send prints if selected.",
+        },
+      ],
+    } as unknown as ApiDrop;
+    const draft = buildMemesSubmissionDraftFromDrop(drop);
+    expect(draft.isAdditionalActionPromised).toBe(false);
+    expect(draft.operationalData.additional_action_plan).toBe("");
+    expect(draft.operationalData.about_artist).toBe(
+      "I will send prints if selected."
+    );
+  });
   it("restores the unframed media and original preview instead of nesting frames", () => {
     const source = {
       version: 1,
@@ -91,11 +110,19 @@ describe("buildMemesSubmissionDraftFromDrop", () => {
         },
         { data_key: "commentary", data_value: "Commentary" },
         { data_key: "about_artist", data_value: "About Alice" },
+        {
+          data_key: "additional_action_plan",
+          data_value:
+            "If selected, send a print to each of the top five voters.\nShipping is included.",
+        },
       ],
     } as any;
 
     const draft = buildMemesSubmissionDraftFromDrop(drop);
 
+    expect(draft.operationalData.additional_action_plan).toBe(
+      "If selected, send a print to each of the top five voters.\nShipping is included."
+    );
     expect(draft.traits.title).toBe("Cloned Title");
     expect(draft.traits.description).toBe("Cloned description");
     expect(draft.traits.artist).toBe("alice");

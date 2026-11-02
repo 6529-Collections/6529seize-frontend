@@ -9,6 +9,9 @@ import { commonApiFetch } from "@/services/api/common-api";
 let mockCompetitionId = "alpha";
 let mockProfileId = "me";
 let mockEntryId: string | null = null;
+let mockEntriesPending = false;
+let mockEntriesError = false;
+let mockEntriesStale = false;
 let mockEntries: Array<{
   id: string;
   wave_id: string;
@@ -49,8 +52,9 @@ jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
     mockReadEntries(...args);
     return {
       data: { pages: [{ data: mockEntries }] },
-      isPending: false,
-      isError: false,
+      isPending: mockEntriesPending,
+      isError: mockEntriesError,
+      isStale: mockEntriesStale,
       isFetching: false,
       hasNextPage: false,
       refetch: mockRefetch,
@@ -115,6 +119,9 @@ beforeEach(() => {
   mockProfileId = "me";
   mockEntryId = null;
   mockEntries = [entry];
+  mockEntriesPending = false;
+  mockEntriesError = false;
+  mockEntriesStale = false;
 });
 
 it("requests only the current submitter and selected competition, and closes on competition change", () => {
@@ -135,6 +142,54 @@ it("requests only the current submitter and selected competition, and closes on 
   );
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 });
+
+it("checks for personal entries before opening and hides a confirmed empty result", () => {
+  mockEntries = [];
+  renderWithClient(<CompetitionMySubmissions />);
+  expect(mockReadEntries).toHaveBeenLastCalledWith(
+    { waveId: "wave", competitionId: "alpha" },
+    "entries",
+    { submitter: "me", sort: "submitted_at", direction: "DESC" },
+    true
+  );
+  expect(
+    screen.queryByRole("button", { name: "My submissions" })
+  ).not.toBeInTheDocument();
+});
+
+it("does not flash a personal submissions button while entries are loading", () => {
+  mockEntries = [];
+  mockEntriesPending = true;
+  renderWithClient(<CompetitionMySubmissions />);
+  expect(
+    screen.queryByRole("button", { name: "My submissions" })
+  ).not.toBeInTheDocument();
+});
+
+it("keeps failed personal entry reads recoverable without claiming an empty result", () => {
+  mockEntries = [];
+  mockEntriesError = true;
+  renderWithClient(<CompetitionMySubmissions />);
+  fireEvent.click(screen.getByRole("button", { name: "My submissions" }));
+  expect(
+    screen.queryByText(
+      "You haven’t submitted an entry to this competition yet."
+    )
+  ).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+  expect(mockRefetch).toHaveBeenCalledTimes(1);
+});
+
+it.each([false, true])(
+  "refreshes personal entries on opening only when stale (%s)",
+  (stale) => {
+    mockEntriesStale = stale;
+    renderWithClient(<CompetitionMySubmissions />);
+    fireEvent.click(screen.getByRole("button", { name: "My submissions" }));
+    expect(mockRefetch).toHaveBeenCalledTimes(stale ? 1 : 0);
+    expect(screen.getByTestId("entry")).toBeVisible();
+  }
+);
 
 it("does not display entries returned for another submitter", () => {
   mockEntries = [{ ...entry, submitter: { id: "other" } }];

@@ -124,7 +124,7 @@ const AUDITED_REVEAL_EXEMPTIONS: readonly AuditedRevealExemption[] = [
       "WaveDrop passes forceVisible from mouse pointerover/out even when CSS hover is unavailable; focus-within also reveals the toolbar for keyboard users, and touch mode has its own action sheet.",
   },
   {
-    file: "components/waves/drops/WaveDrop.helpers.tsx",
+    file: "components/waves/drops/GroupedDropTimestamp.tsx",
     marker: "tw-opacity-0 desktop-hover:group-hover:tw-opacity-100",
     literalHash:
       "dc415d6ed3f1074154a978fff7bea616f299625cfe95d3b0ab2197cefb2768df",

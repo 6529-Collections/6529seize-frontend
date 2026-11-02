@@ -45,7 +45,7 @@ jest.mock("@/hooks/drops/useDropSignature", () => ({
 }));
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: jest.fn(() => ({
+  useMyStreamActions: jest.fn(() => ({
     processIncomingDrop: jest.fn(),
   })),
 }));

@@ -52,18 +52,19 @@ const WebBrainLeftSidebarWave = ({
   const prefetchWaveData = usePrefetchWaveData();
   const { hasTouchScreen } = useDeviceInfo();
 
-  const { href, isActive, onMouseEnter, onClick } = useWaveNavigation({
-    basePath,
-    activeWaveId: activeWave.id,
-    setActiveWave: activeWave.set,
-    onHover,
-    prefetchWaveData,
-    pathname,
-    searchParams,
-    waveId: wave.id,
-    hasTouchScreen,
-    firstUnreadDropSerialNo: wave.firstUnreadDropSerialNo,
-  });
+  const { href, isActive, onMouseEnter, onMouseLeave, onClick } =
+    useWaveNavigation({
+      basePath,
+      activeWaveId: activeWave.id,
+      setActiveWave: activeWave.set,
+      onHover,
+      prefetchWaveData,
+      pathname,
+      searchParams,
+      waveId: wave.id,
+      hasTouchScreen,
+      firstUnreadDropSerialNo: wave.firstUnreadDropSerialNo,
+    });
 
   const formattedWaveName = useMemo(
     () =>
@@ -96,6 +97,7 @@ const WebBrainLeftSidebarWave = ({
         isAnnouncement={isAnnouncement}
         isDropWave={isDropWave}
         onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
         onClick={onClick}
         showTooltip={showCollapsedTooltip}
         tooltipId={tooltipId}
@@ -118,6 +120,7 @@ const WebBrainLeftSidebarWave = ({
       latestDropTimestamp={wave.newDropsCount.latestDropTimestamp}
       nameRef={nameRef}
       onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       onClick={onClick}
       showExpandedTooltip={showExpandedTooltip}
       showPin={showPin}

@@ -1,11 +1,10 @@
-import { isAddress } from "viem";
-import { getNodeEnv, publicEnv } from "@/config/env";
+import type { AppToastInput } from "@/components/utils/toast/AppToast";
+import { isDevAuthEnabled } from "@/config/devAuth";
 import {
   InvalidRoleStateError,
   MissingActiveProfileError,
 } from "@/errors/authentication";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import type { ApiSessionNonceResponse } from "@/generated/models/ApiSessionNonceResponse";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import {
   ConnectionMismatchError,
@@ -20,7 +19,6 @@ import {
   PROFILE_SWITCHED_EVENT,
 } from "@/services/auth/auth.utils";
 import { validateJwt } from "@/services/auth/jwt-validation.utils";
-import { getSessionNonce } from "@/services/auth/session-v2.utils";
 import { logErrorSecurely } from "@/utils/error-sanitizer";
 import { validateRoleForAuthentication } from "@/utils/role-validation";
 import {
@@ -35,29 +33,19 @@ import type {
   RequestAuthOptions,
 } from "./authTypes";
 import {
-  AuthenticationNonceError,
-  InvalidSignerAddressError,
-  NonceResponseValidationError,
-} from "./authErrors";
-import {
   createAuthRequestGuard,
   type AuthRequestGuard,
 } from "./authRequestGuard";
 import { createTimedAbortSignal } from "./authRequestAbortSignal";
+import { getAuthNonce } from "./authNonce";
 import { createAuthRequestSignIn } from "./authRequestSignIn";
+import { createSignedMessagesGrantRequest } from "./authSignedMessagesGrant";
 import type {
   AuthRequestActions,
   CreateAuthRequestActionsParams,
 } from "./authActionTypes";
 
 const MANUAL_AUTH_VALIDATION_TIMEOUT_MS = 30_000;
-
-const isDevAuthenticationEnabled = (): boolean => {
-  const nodeEnv = getNodeEnv();
-  const isDevLikeEnv = nodeEnv === "development" || nodeEnv === "test";
-
-  return publicEnv.USE_DEV_AUTH === "true" && isDevLikeEnv;
-};
 
 const dispatchProfileSwitchedEvent = (profileProxy: ApiProfileProxy | null) => {
   if (globalThis.window === undefined) {
@@ -94,74 +82,19 @@ export function createAuthRequestActions({
   signMessage,
   signModalReason,
 }: CreateAuthRequestActionsParams): AuthRequestActions {
-  const getNonce = async ({
-    signerAddress,
-  }: {
-    signerAddress: string;
-  }): Promise<ApiSessionNonceResponse> => {
-    if (!signerAddress || typeof signerAddress !== "string") {
-      throw new InvalidSignerAddressError(signerAddress);
-    }
-
-    if (!isAddress(signerAddress)) {
-      throw new InvalidSignerAddressError(signerAddress);
-    }
-
-    try {
-      const response = await getSessionNonce({ signerAddress });
-
-      if (!response) {
-        throw new NonceResponseValidationError(
-          "Nonce API returned null or undefined response"
-        );
-      }
-
-      if (
-        !response.signable_message ||
-        typeof response.signable_message !== "string" ||
-        response.signable_message.length === 0
-      ) {
-        throw new NonceResponseValidationError(
-          "Invalid signable_message in API response",
-          response
-        );
-      }
-
-      if (
-        !response.server_signature ||
-        typeof response.server_signature !== "string" ||
-        response.server_signature.trim().length === 0
-      ) {
-        throw new NonceResponseValidationError(
-          "Invalid server_signature in API response",
-          response
-        );
-      }
-
-      return response;
-    } catch (error) {
-      if (
-        error instanceof NonceResponseValidationError ||
-        error instanceof InvalidSignerAddressError
-      ) {
-        throw error;
-      }
-
-      throw new AuthenticationNonceError(
-        "Failed to obtain authentication nonce from server",
-        error
-      );
-    }
-  };
-
-  const getSignature = async ({
-    message,
-  }: {
-    message: string;
-  }): Promise<{
+  const signWithWallet = async (
+    {
+      message,
+    }: {
+      message: string;
+    },
+    showToast: (toast: AppToastInput) => void
+  ): Promise<{
     signature: string | null;
     userRejected: boolean;
     failureToastShown: boolean;
+    /** The wallet's error, for callers that classify failures. */
+    error?: unknown;
   }> => {
     if (!isActiveChainSupported()) {
       // AppKit already explains the unsupported-network state. Suppress the
@@ -179,21 +112,21 @@ export function createAuthRequestActions({
 
       if (result.error) {
         if (result.error instanceof ConnectionMismatchError) {
-          setToast({
+          showToast({
             message:
               "Wallet address mismatch. Disconnect and reconnect the correct wallet.",
             type: "error",
           });
           failureToastShown = true;
         } else if (result.error instanceof SigningProviderError) {
-          setToast({
+          showToast({
             message:
               "Wallet provider error. Reconnect your wallet and try again.",
             type: "error",
           });
           failureToastShown = true;
         } else if (result.error instanceof MobileSigningError) {
-          setToast({
+          showToast({
             type: "error",
             title: "Couldn't sign in with this wallet.",
             description: "Check your wallet and try again.",
@@ -207,10 +140,11 @@ export function createAuthRequestActions({
         signature: result.signature,
         userRejected: result.userRejected,
         failureToastShown,
+        error: result.error,
       };
     } catch (error) {
       logErrorSecurely("getSignature", error);
-      setToast({
+      showToast({
         type: "error",
         title: "Couldn't sign in with this wallet.",
         description: "Check your wallet and try again.",
@@ -220,12 +154,21 @@ export function createAuthRequestActions({
         signature: null,
         userRejected: false,
         failureToastShown: true,
+        error,
       };
     }
   };
 
+  // The signed-messages grant reports its own failures, so it can pass a
+  // different toast function.
+  const createGetSignature =
+    (showToast: (toast: AppToastInput) => void) =>
+    (params: { message: string }) =>
+      signWithWallet(params, showToast);
+  const getSignature = createGetSignature(setToast);
+
   const requestSignIn = createAuthRequestSignIn({
-    getNonce,
+    getNonce: getAuthNonce,
     getSignature,
     setToast,
   });
@@ -591,7 +534,7 @@ export function createAuthRequestActions({
       return { success: false };
     }
 
-    if (!enableWalletAuthentication || isDevAuthenticationEnabled()) {
+    if (!enableWalletAuthentication || isDevAuthEnabled()) {
       return { success: true };
     }
 
@@ -698,6 +641,20 @@ export function createAuthRequestActions({
     }
   };
 
+  const requestSignedMessagesGrant = createSignedMessagesGrantRequest({
+    address,
+    canAuthenticate:
+      !activeProfileProxy && enableWalletAuthentication && !isDevAuthEnabled(),
+    canSignActiveWallet,
+    createGetSignature,
+    createSigningAuthRequestGuard: () =>
+      createSigningAuthRequestGuard(createAuthRequestGuard({})),
+    getNonce: getAuthNonce,
+    isActiveChainSupported,
+    setAuthLoadingState,
+    setToast,
+  });
+
   const onActiveProfileProxy = async (
     profileProxy: ApiProfileProxy | null
   ): Promise<boolean> => {
@@ -794,5 +751,6 @@ export function createAuthRequestActions({
     onActiveProfileProxy,
     requestAuth,
     requestSessionUpgrade,
+    requestSignedMessagesGrant,
   };
 }

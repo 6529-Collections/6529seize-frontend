@@ -1,6 +1,6 @@
 "use client";
 
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { WsDropUpdateMessage } from "@/helpers/Types";
 import { isWsDropUpdateRefData, WsMessageType } from "@/helpers/Types";
@@ -69,7 +69,7 @@ const WaveReplyThreadsContext =
  * change. Compact events use the same API-backed ancestry traversal.
  */
 function useLiveReplyCounts(waveId: string, enabled: boolean) {
-  const { applyOptimisticDropUpdate } = useMyStream();
+  const { applyOptimisticDropUpdate } = useMyStreamActions();
   const reconciliationRef = useRef<ReturnType<
     typeof createReplyCountReconciliation
   > | null>(null);

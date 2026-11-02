@@ -7,7 +7,7 @@ import useDeviceInfo from "../../hooks/useDeviceInfo";
 export default function FooterWrapper() {
   const { isApp } = useDeviceInfo();
   const pathname = usePathname();
-  const myFeedRoutes = ["/my-feed", "/feed"];
+  const myFeedRoutes = ["/my-feed"];
   const hideFooter =
     isApp ||
     myFeedRoutes.some((path) => pathname?.startsWith(path)) ||

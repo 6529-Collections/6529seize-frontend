@@ -676,6 +676,107 @@ exit "\${INSTALL_EXIT:-0}"
     );
   });
 
+  it("runs the opt-in stateful E2EE pack alone, serially and never under all", () => {
+    const job = stagingE2e.workflow.jobs["staging-packs"];
+    const options: string[] =
+      stagingE2e.workflow.on.workflow_dispatch.inputs.pack.options;
+    const readonlyStep = job.steps.find(
+      (step: { name?: string }) => step.name === "Run read-only staging packs"
+    );
+    const statefulStep = job.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Run opt-in stateful staging pack"
+    );
+
+    expect(stagingE2e.workflow.on.workflow_dispatch.inputs.pack.default).toBe(
+      "all"
+    );
+    expect(options).toContain("e2ee-staging");
+    expect(job.env.SELECTED_PACK).toBe("${{ inputs.pack || 'all' }}");
+    expect(readonlyStep.if).toBe("env.SELECTED_PACK != 'e2ee-staging'");
+    expect(statefulStep.if).toBe("env.SELECTED_PACK == 'e2ee-staging'");
+    expect(statefulStep.env.PLAYWRIGHT_STAGING_ACCESS_CODE).toBe(
+      "${{ secrets.PLAYWRIGHT_STAGING_ACCESS_CODE }}"
+    );
+
+    // Every dispatchable alias is a staging pack of the manifest; only the
+    // stateful one bypasses the post-deploy selection.
+    const { PACKS } = require("../../tests/packs.manifest.cjs") as {
+      PACKS: Array<{
+        alias?: string;
+        environments: string[];
+        safety: string;
+        triggers: string[];
+      }>;
+    };
+    for (const option of options.filter((value) => value !== "all")) {
+      const pack = PACKS.find(
+        (candidate) =>
+          candidate.environments.includes("staging") &&
+          candidate.alias === option
+      );
+      expect(pack).toBeDefined();
+      if (option === "e2ee-staging") {
+        expect(pack).toMatchObject({
+          safety: "stateful",
+          triggers: ["manual"],
+        });
+      } else {
+        expect(pack?.triggers).toContain("post-deploy");
+      }
+    }
+
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "stateful-pack-"));
+    writeExecutable(
+      root,
+      "6529",
+      `#!/usr/bin/env node
+require('node:fs').writeFileSync(process.env.RESULT_PATH, JSON.stringify({
+  args: process.argv.slice(2),
+  sourceSha: process.env.DEPLOYMENT_E2E_SOURCE_SHA
+}));
+`
+    );
+    try {
+      const result = childProcess.spawnSync(bash, ["-c", statefulStep.run], {
+        cwd: root,
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          DEPLOYED_SHA: "c".repeat(40),
+          RESULT_PATH: path.join(root, "arguments.json"),
+          SELECTED_PACK: "e2ee-staging",
+        },
+      });
+      expect(result.status).toBe(0);
+      const invocation = JSON.parse(
+        fs.readFileSync(path.join(root, "arguments.json"), "utf8")
+      );
+      expect(invocation).toEqual({
+        args: [
+          "run",
+          "e2e:packs",
+          "--",
+          "--env",
+          "staging",
+          "--trigger",
+          "manual",
+          "--pack",
+          "e2ee-staging",
+          "--artifact-root",
+          "staging-e2e-artifacts",
+          "--parallel",
+          "1",
+          "--retry-failed-packs",
+          "0",
+        ],
+        sourceSha: "c".repeat(40),
+      });
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
   it.each([
     ["staging", stagingE2e, true],
     ["production", productionE2e, true],

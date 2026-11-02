@@ -119,6 +119,8 @@ const createProps = (
   setTraits: () => {},
   isAdditionalActionPromised: false,
   onAdditionalActionPromisedChange: () => {},
+  additionalActionPlan: "",
+  onAdditionalActionPlanChange: () => {},
   ...override,
 });
 

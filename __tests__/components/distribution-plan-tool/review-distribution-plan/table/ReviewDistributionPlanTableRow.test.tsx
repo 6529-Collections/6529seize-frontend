@@ -91,6 +91,7 @@ describe("ReviewDistributionPlanTableRow", () => {
     await waitFor(() => expect(distributionPlanApiFetch).toHaveBeenCalled());
     expect(click).toHaveBeenCalled();
     expect(createdAnchor!.download).toMatch(/phase-1\.json$/);
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:url");
     document.createElement = origCreate;
   });
 

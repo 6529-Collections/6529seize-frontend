@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { useVirtualizedWaveMessages } from "./useVirtualizedWaveMessages";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import type { NextPageProps } from "@/contexts/wave/hooks/useWavePagination";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -21,8 +21,8 @@ export function useVirtualizedWaveDrops(
   wave?: ApiWave,
   pageSize: number = 50
 ) {
-  // Original implementation - would be imported from useMyStream
-  const { fetchNextPageForWave: originalFetchNextPage } = useMyStream();
+  // Original implementation - would be imported from useMyStreamActions
+  const { fetchNextPageForWave: originalFetchNextPage } = useMyStreamActions();
 
   // Get virtualized wave messages
   const virtualizedWaveMessages = useVirtualizedWaveMessages(

@@ -1,4 +1,6 @@
 // @ts-nocheck
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import MemeAccountingPage, {
   generateMetadata,
 } from "@/app/meme-accounting/page";
@@ -59,7 +61,7 @@ describe("MemeAccountingPage", () => {
     });
     expect(metadata).toMatchObject({
       title: "Meme Accounting - The Memes",
-      description: `Tools | ${domain}`,
+      description: `${t(DEFAULT_LOCALE, "pageMetadata.memeAccounting.description")} | ${domain}`,
     });
   });
 });

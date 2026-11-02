@@ -16,7 +16,7 @@ jest.mock('@tanstack/react-query', () => ({
   },
 }));
 
-jest.mock('@/contexts/wave/MyStreamContext', () => ({ useMyStream: () => ({ processDropRemoved: jest.fn() }) }));
+jest.mock('@/contexts/wave/MyStreamContext', () => ({ useMyStreamActions: () => ({ processDropRemoved: jest.fn() }) }));
 
 describe('WaveDropMobileMenuDelete', () => {
   const drop = { id: '1', wave: { id: 'w' } } as any;

@@ -28,7 +28,6 @@ const EXPLICIT_INPUT_CATEGORIES = new Map([
   ["NEXT_PUBLIC_MIXPANEL_TOKEN", "telemetry"],
   ["SENTRY_DSN", "sentry"],
   ["SENTRY_REPLAY_ENABLED", "sentry"],
-  ["PUBLIC_REVIEW_PROFILE", "public_review_profile"],
 ]);
 
 const KNOWN_RUNTIME_KEYS = new Set([

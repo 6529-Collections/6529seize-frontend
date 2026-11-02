@@ -5,7 +5,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { updateDropInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import Button from "@/components/utils/button/Button";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
-import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActionsOptional } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropPoll } from "@/generated/models/ApiDropPoll";
@@ -176,7 +176,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   const queryClient = useQueryClient();
   const { requestAuth, setToast } = useAuth();
   const { getEligibility } = useWaveEligibility();
-  const myStream = useMyStreamOptional();
+  const myStream = useMyStreamActionsOptional();
   const { clearUpdatedVoteStatus, flashUpdatedVoteStatus, showUpdated } =
     useUpdatedVoteStatus();
   const [localPollOverride, setLocalPollOverride] =

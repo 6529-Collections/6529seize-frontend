@@ -613,6 +613,21 @@ describe("MemePage search params handling", () => {
     });
   });
 
+  it.each([
+    ["fr-FR", "fr-FR"],
+    [null, "en-US"],
+    ["unsupported-LC", "en-US"],
+  ])(
+    "declares the route locale %s as the language of the card page",
+    async (routeLocale, lang) => {
+      currentLocale = routeLocale;
+      renderPage();
+
+      const artViewer = await screen.findByTestId("art-viewer");
+      expect(artViewer.closest("[lang]")).toHaveAttribute("lang", lang);
+    }
+  );
+
   it("sets focus from valid search param", async () => {
     currentFocus = MEME_FOCUS.ACTIVITY;
     renderPage();

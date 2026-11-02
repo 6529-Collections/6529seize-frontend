@@ -9,7 +9,9 @@ profiles, and submitted report history.
 ## Location in the Site
 
 Preferences is a dedicated page at `/preferences`. It contains three tabs:
-**Notifications & messages**, **Blocked Profiles**, and **Reports**.
+**Notifications & messages**, **Blocked Profiles**, and **Reports**. A
+fourth **Devices** tab at `/preferences?tab=devices` lists the browsers that
+can post as you with signed messages.
 
 ## Entry Points
 
@@ -48,13 +50,28 @@ profile is created.
 
 - `Everyone`
 - `People I follow`
+- `Members of a group I choose`
 - `Nobody`
+
+**Members of a group I choose** reuses network groups, so it can require a
+level, TDH, REP (overall or in one category), NIC, NFTs, or specific included
+and excluded profiles. Select **Choose group** to pick an existing group or
+build a new one with the same group builder used for Wave access. Membership is
+checked when someone starts a conversation, so daily TDH and REP changes apply.
+**People I follow can always message me** is on by default and also admits
+profiles you follow who are not in the group. **Save Changes** stays disabled
+until a group is chosen.
+
+Profiles you block can never start a new conversation with you, whichever
+option you choose, including people you follow.
 
 The policy applies only when a new exact participant set is created. Existing
 one-to-one and group conversations remain available even if one of their
 participants would not pass the current policy. A new group conversation must
-be accepted by every recipient; otherwise the creator sees the recipient's
-admission-policy error.
+be accepted by every recipient; otherwise the creator sees that recipient's
+admission notice, such as "@alice only accepts new direct messages from people
+they follow". A group is named in that notice only when it is public, and a
+block is shown as the generic "doesn't accept new direct messages" notice.
 
 ### Notifications
 
@@ -78,6 +95,12 @@ Device-level push settings remain separate. Push delivery can only happen after
 an in-app notification is created, so a notification suppressed by these
 profile preferences cannot trigger a push.
 
+### Devices
+
+**Devices** lists every browser key granted to sign your posts, edits,
+deletes, and reactions, marks **This device**, and lets you revoke a device.
+See [Signed Messages](../waves/drop-actions/feature-signed-messages.md).
+
 ### Blocks and Reports
 
 **Blocked Profiles** manages personal blocks. **Reports** tracks reports
@@ -92,6 +115,9 @@ internal moderation or AI detail.
   are connected.
 - Existing direct-message conversations remain available after the admission
   policy changes.
+- If the chosen group is deleted or hidden, Preferences warns that only people
+  you follow can start new conversations until you choose another group. New
+  conversations fall back to **People I follow** in the meantime.
 
 ## Failure and Recovery
 
@@ -106,7 +132,7 @@ profile-menu entries omit it and rely on the standard shell navigation.
 ## Limitations / Notes
 
 Profiles without stored preferences use `Everyone`, `All`, and all optional
-categories enabled. This preserves existing behavior when the backend is
+categories enabled. **People I follow can always message me** defaults to on. This preserves existing behavior when the backend is
 deployed before the frontend.
 
 ## Related Pages
@@ -114,3 +140,4 @@ deployed before the frontend.
 - [Notifications](README.md)
 - [Mobile Push Notifications](feature-mobile-push-notifications.md)
 - [Direct Message Creation](../waves/create/feature-direct-message-creation.md)
+- [Signed Messages](../waves/drop-actions/feature-signed-messages.md)

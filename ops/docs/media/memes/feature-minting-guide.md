@@ -65,6 +65,9 @@ works`, `Eligibility`, or `Help and history`.
   the guide or an unavailable message. US iOS, web, and Android keep the guides.
   On iOS the return waits for the country check, so a US deep link stays on
   the guide; a failed or empty check counts as unknown.
+- On web and Android, including search crawlers, both guides are part of the
+  server HTML. In the iOS app and in iPhone or iPad browsers they appear just
+  after the page loads, once the page can tell whether it is the iOS app.
 - A card may not yet have published claim or Distribution Plan data. The live
   mint flow owns the associated loading, unavailable, and recovery states.
 - A phase can end before a later phase begins. The live mint flow, not the

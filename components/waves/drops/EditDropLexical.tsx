@@ -67,7 +67,9 @@ import type { MentionedUser, MentionedWave } from "@/entities/IDrop";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { t } from "@/i18n/messages";
 import CreateDropEmojiPicker from "../CreateDropEmojiPicker";
 import {
   addBlankLinePlaceholders,
@@ -383,6 +385,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
   const saveInProgressRef = useRef(false);
   const waveMentionsRef = useRef<NewWaveMentionsPluginHandles>(null);
   const { isApp, isMobileDevice } = useDeviceInfo();
+  const locale = useBrowserLocale();
   const isMobileOrApp = isMobileDevice || isApp;
   const normalizedInitialContent = useMemo(
     () => normalizeDropMarkdown(initialContent),
@@ -548,6 +551,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
             contentEditable={
               <div className="tw-relative">
                 <ContentEditable
+                  ariaLabel={t(locale, "waves.dropEditor.label")}
                   className="tw-min-h-[40px] tw-w-full tw-resize-none tw-overflow-y-auto tw-overflow-x-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-py-2.5 tw-pl-3 tw-pr-10 tw-text-sm tw-text-iron-100 tw-outline-none tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 focus:tw-border-primary-400 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
                   style={{
                     fontFamily: "inherit",
@@ -562,7 +566,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
             }
             placeholder={
               <div className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-2 tw-text-sm tw-text-iron-500">
-                Edit message...
+                {t(locale, "waves.dropEditor.placeholder")}
               </div>
             }
             ErrorBoundary={LexicalErrorBoundary}

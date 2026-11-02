@@ -110,23 +110,86 @@ describe("BrainLeftSidebarWave", () => {
     }));
   });
 
-  it("prefetches wave data on hover when not active", async () => {
-    render(<BrainLeftSidebarWave wave={baseWave} onHover={onHover} />);
-    const link = screen.getByRole("link");
-    await userEvent.hover(link);
-    expect(onHover).toHaveBeenCalledWith("1");
-    expect(prefetch).toHaveBeenCalledWith("1");
+  it("prefetches wave data after hover intent when not active", () => {
+    jest.useFakeTimers();
+    try {
+      render(<BrainLeftSidebarWave wave={baseWave} onHover={onHover} />);
+      fireEvent.mouseEnter(getWaveRow());
+
+      act(() => {
+        jest.advanceTimersByTime(149);
+      });
+      expect(onHover).not.toHaveBeenCalled();
+      expect(prefetch).not.toHaveBeenCalled();
+
+      act(() => {
+        jest.advanceTimersByTime(1);
+      });
+      expect(onHover).toHaveBeenCalledTimes(1);
+      expect(onHover).toHaveBeenCalledWith("1");
+      expect(prefetch).toHaveBeenCalledTimes(1);
+      expect(prefetch).toHaveBeenCalledWith("1");
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
-  it("does not prefetch when hovering active wave", async () => {
-    activeWaveId = "1";
-    mockedUseMyStream.mockImplementation(() => ({
-      activeWave: { id: activeWaveId, set: setActiveWave },
-    }));
-    render(<BrainLeftSidebarWave wave={baseWave} onHover={onHover} />);
-    await userEvent.hover(screen.getByRole("link"));
-    expect(onHover).not.toHaveBeenCalled();
-    expect(prefetch).not.toHaveBeenCalled();
+  it("does not prefetch wave data when the pointer leaves before the intent delay", () => {
+    jest.useFakeTimers();
+    try {
+      render(<BrainLeftSidebarWave wave={baseWave} onHover={onHover} />);
+      const row = getWaveRow();
+      fireEvent.mouseEnter(row);
+      fireEvent.mouseLeave(row);
+
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+      expect(onHover).not.toHaveBeenCalled();
+      expect(prefetch).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("prefetches immediately on click and drops the pending hover prefetch", () => {
+    jest.useFakeTimers();
+    try {
+      render(<BrainLeftSidebarWave wave={baseWave} onHover={onHover} />);
+      fireEvent.mouseEnter(getWaveRow());
+      fireEvent.click(screen.getByRole("link"));
+
+      expect(onHover).toHaveBeenCalledTimes(1);
+      expect(prefetch).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+      expect(onHover).toHaveBeenCalledTimes(1);
+      expect(prefetch).toHaveBeenCalledTimes(1);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("does not prefetch when hovering active wave", () => {
+    jest.useFakeTimers();
+    try {
+      activeWaveId = "1";
+      mockedUseMyStream.mockImplementation(() => ({
+        activeWave: { id: activeWaveId, set: setActiveWave },
+      }));
+      render(<BrainLeftSidebarWave wave={baseWave} onHover={onHover} />);
+      fireEvent.mouseEnter(getWaveRow());
+
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+      expect(onHover).not.toHaveBeenCalled();
+      expect(prefetch).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("computes href based on current wave", () => {

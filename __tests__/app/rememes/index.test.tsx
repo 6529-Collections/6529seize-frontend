@@ -53,6 +53,18 @@ describe("ReMemes page", () => {
     expect(screen.getByText(/Add ReMeme/)).toBeInTheDocument();
   });
 
+  it.each([
+    [{ locale: "fr-FR" }, "fr-FR"],
+    [{}, "en-US"],
+  ])(
+    "declares the language of the page content for search params %j",
+    async (searchParams, lang) => {
+      await renderReMemesPage(searchParams);
+
+      expect(screen.getByRole("main")).toHaveAttribute("lang", lang);
+    }
+  );
+
   it("redirects malformed meme ids away while preserving unrelated params and locale", async () => {
     await expect(
       ReMemes({

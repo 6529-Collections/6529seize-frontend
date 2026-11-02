@@ -7,7 +7,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { QueryKey as AppQueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useAuth } from "@/components/auth/Auth";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import * as commonApi from "@/services/api/common-api";
 import * as dropReactionMonitoring from "@/utils/monitoring/dropReactionMonitoring";
@@ -37,7 +37,7 @@ jest.mock("@/components/auth/Auth", () => ({
 }));
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: jest.fn(),
+  useMyStreamActions: jest.fn(),
 }));
 
 jest.mock("@/contexts/wave/WaveEligibilityContext", () => ({
@@ -108,7 +108,7 @@ const mockGetAuthJwt = getAuthJwt as jest.MockedFunction<typeof getAuthJwt>;
 const mockGetWalletAddress = getWalletAddress as jest.MockedFunction<
   typeof getWalletAddress
 >;
-const mockUseMyStream = useMyStream as jest.Mock;
+const mockUseMyStream = useMyStreamActions as jest.Mock;
 const { fetchDropByIdBatched } = require("@/services/api/drop-api");
 const {
   updateDropInCachedDrops,

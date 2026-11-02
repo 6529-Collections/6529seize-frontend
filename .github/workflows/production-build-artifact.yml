@@ -75,6 +75,9 @@ env:
   WS_ENDPOINT: "wss://ws.6529.io"
   ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io"
   BASE_ENDPOINT: "https://6529.io"
+  NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: "true"
+  # Encrypted DMs and groups (D109): on in production (owner decision, 2026-10-31).
+  NEXT_PUBLIC_E2EE_DM_ENABLED: "true"
   NEXTGEN_CHAIN_ID: "1"
   MOBILE_APP_SCHEME: "mobile6529"
   CORE_SCHEME: "core6529"
@@ -231,6 +234,9 @@ jobs:
         env:
           NODE_ENV: "production"
           VERSION: ${{ inputs.target_sha }}
+          # Never publish a truncated sitemap from a deploy build, whatever the
+          # sitemap's own build detection concludes.
+          SITEMAP_FAILURE_POLICY: fail
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
           GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY || secrets.GIPHY_API_KEY }}
@@ -265,7 +271,7 @@ jobs:
             fi
           done
 
-          node scripts/package-public-review-artifacts.cjs prepare \
+          node scripts/package-web-artifact.cjs prepare \
             --profile production \
             --bundle-root .production-bundle
           test -z "$(find production-artifact/target/_next -type l -print -quit)"
@@ -275,12 +281,12 @@ jobs:
           zip_extract="$(mktemp -d)"
           trap 'rm -f "$zip_listing"; rm -rf "$zip_extract"' EXIT
           unzip -Z1 production-artifact/target/package.zip > "$zip_listing"
-          node scripts/package-public-review-artifacts.cjs assert-listing \
+          node scripts/package-web-artifact.cjs assert-listing \
             --profile production \
             --bundle-root .production-bundle \
             --listing-file "$zip_listing"
           unzip -q production-artifact/target/package.zip -d "$zip_extract"
-          node scripts/package-public-review-artifacts.cjs assert-zip \
+          node scripts/package-web-artifact.cjs assert-zip \
             --profile production \
             --bundle-root .production-bundle \
             --listing-file "$zip_listing" \
@@ -307,7 +313,7 @@ jobs:
             --runtime-config "$zip_extract/.next/PUBLIC_RUNTIME.json" \
             --assets-flag "$zip_extract/.next/ASSETS_FROM_S3" \
             --source-root . \
-            --content-roots "public,content/public-reviews,config/public-reviews,public/review-data" \
+            --content-roots "public" \
             --environment production \
             --node-version "$(node --version)" \
             --pnpm-version "$(pnpm --version)" \
@@ -317,7 +323,6 @@ jobs:
             find manifest.json artifact-portability.json target -type f -print0 | LC_ALL=C sort -z | xargs -0 sha256sum > SHA256SUMS
           )
           test -z "$(git status --porcelain=v1 --untracked-files=all -- public/help-index.json public/glossary.json public/llms.txt)"
-          test -z "$(git status --porcelain=v1 --untracked-files=all -- public/review-data content/public-reviews config/public-reviews)"
           echo "package_sha256=$package_digest" >> "$GITHUB_OUTPUT"
 
       - name: Upload exact production artifact

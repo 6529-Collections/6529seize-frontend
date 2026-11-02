@@ -1,8 +1,16 @@
-import { hydrate, QueryClient } from "@tanstack/react-query";
+import {
+  hydrate,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
+import { render } from "@testing-library/react";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { commonApiFetch } from "@/services/api/common-api";
 import { getProfileCmsPrimarySite } from "@/lib/profile-cms/runtime/fetcher";
-import { getUserPageHeaderState } from "@/components/user/user-page-header/UserPageHeader";
+import UserPageHeader, {
+  getUserPageHeaderState,
+} from "@/components/user/user-page-header/UserPageHeader";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 jest.mock("@/helpers/server.app.helpers", () => ({
   getAppCommonHeaders: jest.fn(async () => ({})),
@@ -14,9 +22,13 @@ jest.mock("@/lib/profile-cms/runtime/fetcher", () => ({
 jest.mock("@/lib/profile-cms/runtime/routes", () => ({
   getCmsPublicPath: () => "/alice/index.html",
 }));
+const mockHeaderClientProps = jest.fn();
 jest.mock(
   "@/components/user/user-page-header/UserPageHeaderClient",
-  () => () => null
+  () => (props: Record<string, unknown>) => {
+    mockHeaderClientProps(props);
+    return null;
+  }
 );
 
 const followerKey = [
@@ -89,5 +101,48 @@ describe("profile header refresh snapshots", () => {
     expect(client.getQueryData(followerKey)).toEqual({ count: 9, data: [] });
     expect(client.getQueryData(websiteKey)).toBeNull();
     client.clear();
+  });
+
+  const renderHeader = async () => {
+    const element = await UserPageHeader({
+      profile: { id: "alice-id", handle: "alice" } as ApiIdentity,
+      handleOrWallet: "Alice",
+      fallbackMainAddress: "0x1",
+    });
+    const client = new QueryClient();
+    render(
+      <QueryClientProvider client={client}>{element}</QueryClientProvider>
+    );
+    client.clear();
+    return mockHeaderClientProps.mock.calls.at(-1)?.[0];
+  };
+
+  it("hands the header its server snapshot so the server HTML and hydration render match", async () => {
+    await expect(renderHeader()).resolves.toEqual(
+      expect.objectContaining({
+        initialStatements: [{ statement_value: "Server bio" }],
+        profileEnabledAt: new Date(1700000000000).toISOString(),
+        followersCount: 7,
+        cmsWebsiteHref: null,
+      })
+    );
+  });
+
+  it("hands the header empty values when its server requests fail", async () => {
+    jest
+      .mocked(commonApiFetch)
+      .mockRejectedValue(new Error("Temporarily unavailable"));
+    jest
+      .mocked(getProfileCmsPrimarySite)
+      .mockRejectedValue(new Error("Temporarily unavailable"));
+
+    await expect(renderHeader()).resolves.toEqual(
+      expect.objectContaining({
+        initialStatements: [],
+        profileEnabledAt: null,
+        followersCount: null,
+        cmsWebsiteHref: null,
+      })
+    );
   });
 });

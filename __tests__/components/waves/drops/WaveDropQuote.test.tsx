@@ -44,9 +44,20 @@ jest.mock("next/link", () => ({ children, href }: any) => (
   <a href={href}>{children}</a>
 ));
 
+let mockSignedMessagesEnabled = false;
+jest.mock("@/lib/device-signing/feature", () => ({
+  isSignedMessagesEnabled: () => mockSignedMessagesEnabled,
+}));
+jest.mock("@/components/waves/drops/signature/DropSignatureDialog", () => ({
+  __esModule: true,
+  default: (props: any) =>
+    props.isOpen ? <div role="dialog" aria-label="Signature"></div> : null,
+}));
+
 beforeEach(() => {
   markdownProps = undefined;
   mockProposalCardPresentation = "default";
+  mockSignedMessagesEnabled = false;
 });
 
 test("renders loading placeholder when drop missing", () => {
@@ -391,5 +402,79 @@ test("falls back to link preview context for nested markdown suppression", () =>
 
   expect(markdownProps.onLinkCardActionsActiveChange).toBe(
     onCardActionsActiveChange
+  );
+});
+
+describe("signed-by-author seal on a quoted or previewed drop", () => {
+  const signedDrop = (overrides: Record<string, unknown> = {}) =>
+    ({
+      id: "0982d42f-0000-4000-8000-000000000000",
+      wave: { id: "w1", name: "Announcements" },
+      author: { handle: "punk6529", level: 1, cic: "BRONZE", pfp: null },
+      parts: [{ part_id: 1, content: "hello" }],
+      created_at: Date.UTC(2026, 9, 31, 8, 0),
+      mentioned_users: [],
+      referenced_nfts: [],
+      moderation: visibleModeration,
+      is_author_signed: true,
+      ...overrides,
+    }) as any;
+
+  it("shows the seal by the timestamp when signed messages are on", () => {
+    mockSignedMessagesEnabled = true;
+    render(
+      <WaveDropQuote drop={signedDrop()} partId={1} onQuoteClick={jest.fn()} />
+    );
+    expect(
+      screen.getByRole("button", { name: "Signed by its author" })
+    ).toHaveAttribute("aria-haspopup", "dialog");
+  });
+
+  it.each([
+    ["the flag is off", false, {}],
+    ["the drop is unsigned", true, { is_author_signed: false }],
+  ])("shows no seal when %s", (_name, enabled, overrides) => {
+    mockSignedMessagesEnabled = enabled;
+    render(
+      <WaveDropQuote
+        drop={signedDrop(overrides)}
+        partId={1}
+        onQuoteClick={jest.fn()}
+      />
+    );
+    expect(
+      screen.queryByRole("button", { name: "Signed by its author" })
+    ).not.toBeInTheDocument();
+  });
+
+  it.each(["click", "keyboard"] as const)(
+    "opens the Signature dialog by %s without opening the quoted drop",
+    async (activation) => {
+      mockSignedMessagesEnabled = true;
+      const user = userEvent.setup();
+      const onQuoteClick = jest.fn();
+      render(
+        <WaveDropQuote
+          drop={signedDrop()}
+          partId={1}
+          onQuoteClick={onQuoteClick}
+        />
+      );
+
+      const seal = screen.getByRole("button", {
+        name: "Signed by its author",
+      });
+      if (activation === "click") {
+        await user.click(seal);
+      } else {
+        seal.focus();
+        await user.keyboard("{Enter}");
+      }
+      expect(
+        screen.getByRole("dialog", { name: "Signature" })
+      ).toBeInTheDocument();
+      // Events inside the real dialog are covered by DropSignatureDialog.test.
+      expect(onQuoteClick).not.toHaveBeenCalled();
+    }
   );
 });

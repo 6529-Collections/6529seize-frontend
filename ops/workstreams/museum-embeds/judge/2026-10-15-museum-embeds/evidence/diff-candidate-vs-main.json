@@ -1,0 +1,566 @@
+{
+  "ignoreTopPx": 0,
+  "cells": {
+    "/museum/6529-fund-szn1/gazers · 1440x1000": {
+      "status": {
+        "candidate": 200,
+        "main": 200
+      },
+      "title": {
+        "candidate": "GAZERS - 6529.io",
+        "main": "GAZERS - 6529.io"
+      },
+      "robots": {
+        "candidate": null,
+        "main": null
+      },
+      "mainTextIdentical": true,
+      "pageHeight": {
+        "candidate": 3734,
+        "main": 3734
+      },
+      "consoleErrors": {
+        "candidate": [
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document."
+        ],
+        "main": [
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document."
+        ]
+      },
+      "iframes": {
+        "candidate": [
+          {
+            "src": "https://generator.artblocks.io/215000788",
+            "title": "Museum artwork embed",
+            "sandbox": "allow-scripts",
+            "allow": "autoplay",
+            "rendered": "544x544",
+            "top": 450
+          },
+          {
+            "src": "https://generator.artblocks.io/215000566",
+            "title": "Museum artwork embed",
+            "sandbox": "allow-scripts",
+            "allow": "autoplay",
+            "rendered": "544x544",
+            "top": 1094
+          },
+          {
+            "src": "https://generator.artblocks.io/215000403",
+            "title": "Museum artwork embed",
+            "sandbox": "allow-scripts",
+            "allow": "autoplay",
+            "rendered": "544x544",
+            "top": 1738
+          }
+        ],
+        "main": [
+          {
+            "src": "https://generator.artblocks.io/215000788",
+            "title": "Museum artwork embed",
+            "sandbox": null,
+            "allow": "autoplay",
+            "rendered": "544x544",
+            "top": 450
+          },
+          {
+            "src": "https://generator.artblocks.io/215000566",
+            "title": "Museum artwork embed",
+            "sandbox": null,
+            "allow": "autoplay",
+            "rendered": "544x544",
+            "top": 1094
+          },
+          {
+            "src": "https://generator.artblocks.io/215000403",
+            "title": "Museum artwork embed",
+            "sandbox": null,
+            "allow": "autoplay",
+            "rendered": "544x544",
+            "top": 1738
+          }
+        ]
+      },
+      "frameProbes": {
+        "candidate": [
+          {
+            "index": 0,
+            "file": "gazers-1440x1000-frame-1.png",
+            "animated": true,
+            "colourStdev": [
+              22,
+              25,
+              25
+            ]
+          },
+          {
+            "index": 1,
+            "file": "gazers-1440x1000-frame-2.png",
+            "animated": true,
+            "colourStdev": [
+              39,
+              37,
+              30
+            ]
+          },
+          {
+            "index": 2,
+            "file": "gazers-1440x1000-frame-3.png",
+            "animated": true,
+            "colourStdev": [
+              18,
+              32,
+              20
+            ]
+          }
+        ],
+        "main": [
+          {
+            "index": 0,
+            "file": "gazers-1440x1000-frame-1.png",
+            "animated": true,
+            "colourStdev": [
+              22,
+              25,
+              25
+            ]
+          },
+          {
+            "index": 1,
+            "file": "gazers-1440x1000-frame-2.png",
+            "animated": true,
+            "colourStdev": [
+              39,
+              37,
+              30
+            ]
+          },
+          {
+            "index": 2,
+            "file": "gazers-1440x1000-frame-3.png",
+            "animated": true,
+            "colourStdev": [
+              19,
+              33,
+              20
+            ]
+          }
+        ]
+      },
+      "checks": {
+        "horizontalOverflowPx": [
+          -30,
+          -30
+        ],
+        "brokenImages": [
+          0,
+          0
+        ],
+        "clippedText": [
+          0,
+          0
+        ],
+        "fallbackHits": [
+          0,
+          0
+        ]
+      },
+      "pixels": {
+        "candidateSize": "1440x3734",
+        "mainSize": "1440x3734",
+        "sameSize": true,
+        "differingPixels": 173011,
+        "differingRatio": 0.032176,
+        "differingPixelsBelowHeader": 173011,
+        "differingRowRange": [
+          81,
+          992
+        ]
+      }
+    },
+    "/museum/6529-fund-szn1/gazers · 820x1000": {
+      "status": {
+        "candidate": 200,
+        "main": 200
+      },
+      "title": {
+        "candidate": "GAZERS - 6529.io",
+        "main": "GAZERS - 6529.io"
+      },
+      "robots": {
+        "candidate": null,
+        "main": null
+      },
+      "mainTextIdentical": true,
+      "pageHeight": {
+        "candidate": 4440,
+        "main": 4440
+      },
+      "consoleErrors": {
+        "candidate": [
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document."
+        ],
+        "main": [
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document."
+        ]
+      },
+      "iframes": {
+        "candidate": [
+          {
+            "src": "https://generator.artblocks.io/215000788",
+            "title": "Museum artwork embed",
+            "sandbox": "allow-scripts",
+            "allow": "autoplay",
+            "rendered": "544x544",
+            "top": 466
+          },
+          {
+            "src": "https://generator.artblocks.io/215000566",
+            "title": "Museum artwork embed",
+            "sandbox": "allow-scripts",
+            "allow": "autoplay",
+            "rendered": "544x544",
+            "top": 1110
+          },
+          {
+            "src": "https://generator.artblocks.io/215000403",
+            "title": "Museum artwork embed",
+            "sandbox": "allow-scripts",
+            "allow": "autoplay",
+            "rendered": "544x544",
+            "top": 1754
+          }
+        ],
+        "main": [
+          {
+            "src": "https://generator.artblocks.io/215000788",
+            "title": "Museum artwork embed",
+            "sandbox": null,
+            "allow": "autoplay",
+            "rendered": "544x544",
+            "top": 466
+          },
+          {
+            "src": "https://generator.artblocks.io/215000566",
+            "title": "Museum artwork embed",
+            "sandbox": null,
+            "allow": "autoplay",
+            "rendered": "544x544",
+            "top": 1110
+          },
+          {
+            "src": "https://generator.artblocks.io/215000403",
+            "title": "Museum artwork embed",
+            "sandbox": null,
+            "allow": "autoplay",
+            "rendered": "544x544",
+            "top": 1754
+          }
+        ]
+      },
+      "frameProbes": {
+        "candidate": [
+          {
+            "index": 0,
+            "file": "gazers-820x1000-frame-1.png",
+            "animated": true,
+            "colourStdev": [
+              21,
+              24,
+              25
+            ]
+          },
+          {
+            "index": 1,
+            "file": "gazers-820x1000-frame-2.png",
+            "animated": true,
+            "colourStdev": [
+              40,
+              37,
+              31
+            ]
+          },
+          {
+            "index": 2,
+            "file": "gazers-820x1000-frame-3.png",
+            "animated": true,
+            "colourStdev": [
+              17,
+              32,
+              19
+            ]
+          }
+        ],
+        "main": [
+          {
+            "index": 0,
+            "file": "gazers-820x1000-frame-1.png",
+            "animated": true,
+            "colourStdev": [
+              21,
+              25,
+              25
+            ]
+          },
+          {
+            "index": 1,
+            "file": "gazers-820x1000-frame-2.png",
+            "animated": true,
+            "colourStdev": [
+              40,
+              37,
+              31
+            ]
+          },
+          {
+            "index": 2,
+            "file": "gazers-820x1000-frame-3.png",
+            "animated": true,
+            "colourStdev": [
+              21,
+              32,
+              20
+            ]
+          }
+        ]
+      },
+      "checks": {
+        "horizontalOverflowPx": [
+          0,
+          0
+        ],
+        "brokenImages": [
+          0,
+          0
+        ],
+        "clippedText": [
+          0,
+          0
+        ],
+        "fallbackHits": [
+          0,
+          0
+        ]
+      },
+      "pixels": {
+        "candidateSize": "820x4440",
+        "mainSize": "820x4440",
+        "sameSize": true,
+        "differingPixels": 207333,
+        "differingRatio": 0.056947,
+        "differingPixelsBelowHeader": 207333,
+        "differingRowRange": [
+          81,
+          1008
+        ]
+      }
+    },
+    "/museum/6529-fund-szn1/gazers · 390x844": {
+      "status": {
+        "candidate": 200,
+        "main": 200
+      },
+      "title": {
+        "candidate": "GAZERS - 6529.io",
+        "main": "GAZERS - 6529.io"
+      },
+      "robots": {
+        "candidate": null,
+        "main": null
+      },
+      "mainTextIdentical": true,
+      "pageHeight": {
+        "candidate": 4863,
+        "main": 4863
+      },
+      "consoleErrors": {
+        "candidate": [
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document."
+        ],
+        "main": [
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document.",
+          "Permissions policy violation: accelerometer is not allowed in this document."
+        ]
+      },
+      "iframes": {
+        "candidate": [
+          {
+            "src": "https://generator.artblocks.io/215000788",
+            "title": "Museum artwork embed",
+            "sandbox": "allow-scripts",
+            "allow": "autoplay",
+            "rendered": "358x358",
+            "top": 619
+          },
+          {
+            "src": "https://generator.artblocks.io/215000566",
+            "title": "Museum artwork embed",
+            "sandbox": "allow-scripts",
+            "allow": "autoplay",
+            "rendered": "358x358",
+            "top": 1068
+          },
+          {
+            "src": "https://generator.artblocks.io/215000403",
+            "title": "Museum artwork embed",
+            "sandbox": "allow-scripts",
+            "allow": "autoplay",
+            "rendered": "358x358",
+            "top": 1517
+          }
+        ],
+        "main": [
+          {
+            "src": "https://generator.artblocks.io/215000788",
+            "title": "Museum artwork embed",
+            "sandbox": null,
+            "allow": "autoplay",
+            "rendered": "358x358",
+            "top": 619
+          },
+          {
+            "src": "https://generator.artblocks.io/215000566",
+            "title": "Museum artwork embed",
+            "sandbox": null,
+            "allow": "autoplay",
+            "rendered": "358x358",
+            "top": 1068
+          },
+          {
+            "src": "https://generator.artblocks.io/215000403",
+            "title": "Museum artwork embed",
+            "sandbox": null,
+            "allow": "autoplay",
+            "rendered": "358x358",
+            "top": 1517
+          }
+        ]
+      },
+      "frameProbes": {
+        "candidate": [
+          {
+            "index": 0,
+            "file": "gazers-390x844-frame-1.png",
+            "animated": true,
+            "colourStdev": [
+              22,
+              25,
+              26
+            ]
+          },
+          {
+            "index": 1,
+            "file": "gazers-390x844-frame-2.png",
+            "animated": true,
+            "colourStdev": [
+              41,
+              39,
+              33
+            ]
+          },
+          {
+            "index": 2,
+            "file": "gazers-390x844-frame-3.png",
+            "animated": true,
+            "colourStdev": [
+              17,
+              33,
+              20
+            ]
+          }
+        ],
+        "main": [
+          {
+            "index": 0,
+            "file": "gazers-390x844-frame-1.png",
+            "animated": true,
+            "colourStdev": [
+              22,
+              26,
+              26
+            ]
+          },
+          {
+            "index": 1,
+            "file": "gazers-390x844-frame-2.png",
+            "animated": true,
+            "colourStdev": [
+              42,
+              40,
+              34
+            ]
+          },
+          {
+            "index": 2,
+            "file": "gazers-390x844-frame-3.png",
+            "animated": true,
+            "colourStdev": [
+              19,
+              32,
+              19
+            ]
+          }
+        ]
+      },
+      "checks": {
+        "horizontalOverflowPx": [
+          0,
+          0
+        ],
+        "brokenImages": [
+          0,
+          0
+        ],
+        "clippedText": [
+          0,
+          0
+        ],
+        "fallbackHits": [
+          0,
+          0
+        ]
+      },
+      "pixels": {
+        "candidateSize": "390x4863",
+        "mainSize": "390x4863",
+        "sameSize": true,
+        "differingPixels": 79511,
+        "differingRatio": 0.041924,
+        "differingPixelsBelowHeader": 79511,
+        "differingRowRange": [
+          93,
+          975
+        ]
+      }
+    }
+  }
+}

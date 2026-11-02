@@ -34,22 +34,6 @@ export function ProfileCmsState({
   );
 }
 
-export function ProfileCmsLoadingState() {
-  const locale = DEFAULT_LOCALE;
-  return (
-    <ProfileCmsState
-      locale={locale}
-      title={t(locale, "profileCms.state.loading.title")}
-    >
-      <div className="tw-space-y-3" aria-hidden="true">
-        <div className="tw-h-4 tw-w-3/4 tw-animate-pulse tw-bg-iron-800" />
-        <div className="tw-h-4 tw-w-full tw-animate-pulse tw-bg-iron-800" />
-        <div className="tw-h-4 tw-w-2/3 tw-animate-pulse tw-bg-iron-800" />
-      </div>
-    </ProfileCmsState>
-  );
-}
-
 export function ProfileCmsEmptyState({
   locale = DEFAULT_LOCALE,
   title,

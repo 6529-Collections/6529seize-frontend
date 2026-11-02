@@ -4,6 +4,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import ProfilePreferencesSettings from "@/components/header/ProfilePreferencesSettings";
 import ContentPreferencesSettings from "@/components/preferences/ContentPreferencesSettings";
+import DevicesPreferencesSettings from "@/components/preferences/DevicesPreferencesSettings";
 import ReportsPreferencesSettings from "@/components/preferences/ReportsPreferencesSettings";
 import UserSetUpProfileCta from "@/components/user/utils/set-up-profile/UserSetUpProfileCta";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -13,10 +14,15 @@ import {
   type PreferencesRouteTab,
 } from "@/helpers/preferences-navigation";
 import { t } from "@/i18n/messages";
+import { isSignedMessagesEnabled } from "@/lib/device-signing/feature";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
-export type PreferencesTab = "notifications" | "blocked-profiles" | "reports";
+export type PreferencesTab =
+  | "notifications"
+  | "blocked-profiles"
+  | "reports"
+  | "devices";
 
 const TABS: ReadonlyArray<{
   readonly id: PreferencesTab;
@@ -24,7 +30,8 @@ const TABS: ReadonlyArray<{
   readonly labelKey:
     | "preferences.tabs.notifications"
     | "preferences.tabs.blockedProfiles"
-    | "preferences.tabs.reports";
+    | "preferences.tabs.reports"
+    | "preferences.tabs.devices";
 }> = [
   {
     id: "notifications",
@@ -41,7 +48,16 @@ const TABS: ReadonlyArray<{
     routeTab: "reports",
     labelKey: "preferences.tabs.reports",
   },
+  {
+    id: "devices",
+    routeTab: "devices",
+    labelKey: "preferences.tabs.devices",
+  },
 ];
+
+/** The Devices tab exists only while signed messages are enabled. */
+const getVisibleTabs = () =>
+  isSignedMessagesEnabled() ? TABS : TABS.filter((tab) => tab.id !== "devices");
 
 export default function PreferencesPageClient({
   activeTab,
@@ -95,7 +111,7 @@ export default function PreferencesPageClient({
           aria-label={t(locale, "preferences.tabs.ariaLabel")}
           className="tw-mt-8 tw-flex tw-gap-x-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 lg:tw-gap-x-4"
         >
-          {TABS.map((tab) => {
+          {getVisibleTabs().map((tab) => {
             const isActive = tab.id === activeTab;
             return (
               <Link
@@ -148,6 +164,13 @@ export default function PreferencesPageClient({
           ) : null}
           {canManagePreferences && activeTab === "reports" ? (
             <ReportsPreferencesSettings
+              key={connectedProfile?.id ?? "signed-out"}
+            />
+          ) : null}
+          {canManagePreferences &&
+          activeTab === "devices" &&
+          isSignedMessagesEnabled() ? (
+            <DevicesPreferencesSettings
               key={connectedProfile?.id ?? "signed-out"}
             />
           ) : null}

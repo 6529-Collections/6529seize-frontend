@@ -1,6 +1,13 @@
 import { TitleProvider } from "@/contexts/TitleContext";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import RememeAddPage from "@/components/rememes/RememeAddPage";
+import { createDeferredPromise } from "@/__tests__/utils/deferredPromise";
 
 // Mock Next.js Image component
 jest.mock("next/image", () => ({
@@ -572,5 +579,79 @@ describe("RememeAddPage", () => {
     });
 
     expect(mockReset).toHaveBeenCalled();
+  });
+
+  it("disables the add button and shows progress while the signature is pending", async () => {
+    mockEligibleProfile();
+    const signMessageMock = {
+      ...defaultSignMessage,
+      signMessage: jest.fn(),
+    };
+    mockUseSignMessage.mockReturnValue(signMessageMock);
+
+    const { rerender } = renderComponent();
+    await verifyAndClickAddRememe();
+    expect(signMessageMock.signMessage).toHaveBeenCalledTimes(1);
+
+    mockUseSignMessage.mockReturnValue({ ...signMessageMock, isPending: true });
+    rerenderComponent(rerender);
+
+    const addButton = screen.getByText("Add Rememe").closest(
+      "button"
+    ) as HTMLButtonElement;
+    expect(addButton).toBeDisabled();
+    expect(addButton).toHaveAttribute("aria-busy", "true");
+    expect(screen.getByText("Signing Message")).toBeInTheDocument();
+
+    fireEvent.click(addButton);
+    expect(signMessageMock.signMessage).toHaveBeenCalledTimes(1);
+  });
+
+  it("blocks repeat submissions while the request is in flight and re-enables after a failure", async () => {
+    mockEligibleProfile();
+    const signMessageMock = {
+      ...defaultSignMessage,
+      signMessage: jest.fn(),
+    };
+    mockUseSignMessage.mockReturnValue(signMessageMock);
+    const response = createDeferredPromise<unknown>();
+    (globalThis.fetch as jest.Mock).mockReturnValue(response.promise);
+
+    const { rerender } = renderComponent();
+    await verifyAndClickAddRememe();
+
+    mockUseSignMessage.mockReturnValue({
+      ...signMessageMock,
+      isSuccess: true,
+      data: "signature",
+    });
+    rerenderComponent(rerender);
+
+    await waitFor(() => {
+      expect(screen.getByText("Adding Rememe")).toBeInTheDocument();
+    });
+    const addButton = screen.getByText("Add Rememe").closest(
+      "button"
+    ) as HTMLButtonElement;
+    expect(addButton).toBeDisabled();
+    expect(addButton).toHaveAttribute("aria-busy", "true");
+
+    fireEvent.click(addButton);
+    expect(signMessageMock.signMessage).toHaveBeenCalledTimes(1);
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      response.resolve({
+        status: 400,
+        json: jest.fn().mockResolvedValue({ error: "Insufficient TDH" }),
+      });
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("Status: Fail")).toBeInTheDocument();
+    });
+    expect(screen.queryByText("Adding Rememe")).not.toBeInTheDocument();
+    expect(addButton).toBeEnabled();
+    expect(addButton).not.toHaveAttribute("aria-busy");
   });
 });

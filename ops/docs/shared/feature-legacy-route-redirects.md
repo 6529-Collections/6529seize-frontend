@@ -10,6 +10,7 @@ They redirect to active routes or external assets.
 This page covers:
 
 - middleware exact-path redirects (`301`)
+- middleware `404` not-found page for wave links whose id is not a wave id
 - middleware desktop `/my-stream*` compatibility redirects (`301`)
 - route-level legacy aliases (`307`)
 - `/waves?wave=<id>` normalization to `/waves/<id>` (`307`)
@@ -21,11 +22,13 @@ Profile-only legacy aliases are documented in
 
 1. Request starts at a legacy URL.
 2. Middleware exact-path map runs first.
-3. Desktop-only `/my-stream*` middleware compatibility runs next.
-4. On staging deployments only, access control runs (`401 -> /access`,
+3. Wave links whose id is not a wave id get the not-found page with a `404`
+   status ([Malformed Wave Ids](#malformed-wave-ids-404)).
+4. Desktop-only `/my-stream*` middleware compatibility runs next.
+5. On staging deployments only, access control runs (`401 -> /access`,
    `403 -> /restricted`). Production and local development skip it.
-5. Route-level redirects run (including `/waves?wave=<id>` normalization).
-6. Canonical destination route loads.
+6. Route-level redirects run (including `/waves?wave=<id>` normalization).
+7. Canonical destination route loads.
 
 ## Redirect Families
 
@@ -90,7 +93,6 @@ Common outcomes:
 - `/city/6529-museum-district` -> `/om/6529-museum-district/`
 - `/element_category/columns` -> `/`
 - `/element_category/sections` -> `/`
-- `/feed` -> `/index.xml`
 - `/gm-or-die-small-mp4` ->
   `https://videos.files.wordpress.com/Pr49XLee/gm-or-die-small.mp4`
 - `/om/partnership-request` -> `/om/join-om/`
@@ -115,6 +117,31 @@ Rules:
 - If `wave` is repeated, use the first value.
 - Preserve repeated values for non-`wave` keys.
 
+## Malformed Wave Ids (`404`)
+
+A wave id is a UUID (for example `5f207393-5418-4a75-8738-e40edb44a94d`, upper
+or lower case). When a wave link names an id that is not UUID-shaped, no wave
+can have that id, so middleware answers before access control with the
+standard not-found page (`404 | PAGE NOT FOUND`) and a real `404` status. The
+address bar keeps the original URL:
+
+- `/waves/<id>` and `/messages/<id>`
+- `/waves/<id>/competitions` and `/waves/<id>/competitions/<competition>`
+- the legacy `/waves?wave=<id>` and `/messages?wave=<id>` links
+
+Rules:
+
+- `/waves/create` and `/messages/create` are the create pages and are never
+  answered this way.
+- `/waves` and `/messages` without a `wave` value, or with an empty one, load
+  normally. A repeated `wave` uses its first value.
+- Only the wave id is checked. `drop`, `serialNo`, `divider` and the
+  competition segment are not, and neither is `/my-stream` (its redirect target
+  is checked instead).
+- A UUID-shaped id is never answered here. Waves, direct messages and
+  competitions that do not exist, or that the signed-in account cannot see,
+  still open the app shell and resolve on the page.
+
 ## Edge Cases
 
 - `/om/OM` resolves through middleware exact-path map (case-insensitive match to
@@ -138,6 +165,8 @@ Rules:
   The one exception is `/.well-known/apple-app-site-association`, which returns
   the 6529 Mobile iOS app association JSON on every deployment, including
   staging without an access cookie.
+- Wave links with a malformed wave id show the not-found page. Copy a fresh
+  link from the wave: a link cut short when pasted is the usual cause.
 - If the destination route fails, use
   [Route Error and Not-Found Screens](feature-route-error-and-not-found.md).
 - External redirect targets can fail independently; retry from another network

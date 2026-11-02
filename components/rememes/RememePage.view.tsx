@@ -2,6 +2,7 @@ import Address from "@/components/address/Address";
 import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
+import { getSafeExternalUrl } from "@/components/the-memes/MemePageAdditionalDetails";
 import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants/constants";
 import type { Rememe } from "@/entities/INFT";
 import { areEqualAddresses, formatAddress } from "@/helpers/Helpers";
@@ -139,10 +140,23 @@ export function RememeExternalLink({
 }) {
   const alignmentClass =
     align === "start" ? "tw-items-start" : "tw-items-center";
+  const safeHref = getSafeExternalUrl(href);
+
+  // Only http(s) and decentralized-storage URLs become links; anything else
+  // (javascript:, data:, ...) is shown as plain text.
+  if (!safeHref) {
+    return (
+      <span
+        className={`tw-inline-flex tw-min-w-0 ${alignmentClass} tw-gap-3 tw-break-all tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6`}
+      >
+        {children}
+      </span>
+    );
+  }
 
   return (
     <a
-      href={href}
+      href={safeHref}
       {...(openInNewTab
         ? { target: "_blank", rel: "noopener noreferrer" }
         : {})}

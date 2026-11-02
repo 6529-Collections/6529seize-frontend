@@ -1,6 +1,6 @@
 import { useDropLinkPreviewToggleControl } from "@/components/waves/drops/useDropLinkPreviewToggleControl";
 import type { useAuth as useAuthHook } from "@/components/auth/Auth";
-import type { useMyStreamOptional as useMyStreamOptionalHook } from "@/contexts/wave/MyStreamContext";
+import type { useMyStreamActionsOptional as useMyStreamActionsOptionalHook } from "@/contexts/wave/MyStreamContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
@@ -14,7 +14,7 @@ jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
 }));
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStreamOptional: jest.fn(),
+  useMyStreamActionsOptional: jest.fn(),
 }));
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
@@ -26,11 +26,11 @@ const authModule = jest.requireMock("@/components/auth/Auth") as {
 const myStreamModule = jest.requireMock(
   "@/contexts/wave/MyStreamContext"
 ) as {
-  useMyStreamOptional: typeof useMyStreamOptionalHook;
+  useMyStreamActionsOptional: typeof useMyStreamActionsOptionalHook;
 };
 const mockedUseAuth = jest.mocked(authModule.useAuth);
-const mockedUseMyStreamOptional = jest.mocked(
-  myStreamModule.useMyStreamOptional
+const mockedUseMyStreamActionsOptional = jest.mocked(
+  myStreamModule.useMyStreamActionsOptional
 );
 const mockedCommonApiPost = jest.mocked(commonApiPost);
 
@@ -139,7 +139,9 @@ function setupStream() {
       return { rollback };
     }
   );
-  mockedUseMyStreamOptional.mockReturnValue({ applyOptimisticDropUpdate });
+  mockedUseMyStreamActionsOptional.mockReturnValue({
+    applyOptimisticDropUpdate,
+  });
 
   return { applyOptimisticDropUpdate, rollback, updates };
 }

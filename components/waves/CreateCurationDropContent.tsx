@@ -29,7 +29,7 @@ import { AuthContext } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import type { DropMutationBody } from "./create-drop-content/drop-submission.types";
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import { CreateDropSubmit } from "./CreateDropSubmit";
@@ -107,7 +107,7 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
   const { isSafeWallet, address } = useSeizeConnectContext();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
-  const { processIncomingDrop } = useMyStream();
+  const { processIncomingDrop } = useMyStreamActions();
   const { signDrop } = useDropSignature();
 
   const [urlInput, setUrlInput] = useState(() => ({
