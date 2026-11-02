@@ -6,7 +6,7 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useContext, useEffect, useId, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t, type MessageKey } from "@/i18n/messages";
+import { t } from "@/i18n/messages";
 import { formatInteger } from "@/i18n/format";
 
 export default function UserPageSubscriptionsEditionPreference(
@@ -78,13 +78,9 @@ export default function UserPageSubscriptionsEditionPreference(
     }
   };
 
-  let descriptionKey: MessageKey = isAllEditions
+  const descriptionKey = isAllEditions
     ? "subscriptions.settings.allDescription"
     : "subscriptions.settings.oneDescription";
-  if (props.readonly)
-    descriptionKey = isAllEditions
-      ? "subscriptions.settings.allVisitorDescription"
-      : "subscriptions.settings.oneVisitorDescription";
   return (
     <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-py-3">
       <div className="tw-min-w-0">

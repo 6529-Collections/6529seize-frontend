@@ -273,9 +273,24 @@ describe("UserPageSubscriptionsTopUp", () => {
 
     render(<UserPageSubscriptionsTopUp coverage={coverage} />);
 
+    const recommendation = screen.getByText(
+      "Funds 7 intended drops through The Memes #560"
+    );
+    const minimum = screen.getByText(
+      "Funds 1 intended drop through The Memes #554"
+    );
+    expect(recommendation).toBeVisible();
+    expect(minimum).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: /^Recommended/ })
+    ).toHaveAccessibleDescription(recommendation.textContent!);
+    expect(
+      screen.getByRole("button", { name: /^Minimum for next drop/ })
+    ).toHaveAccessibleDescription(minimum.textContent!);
     await user.click(
       screen.getByRole("button", { name: "Recommended 3 Cards · 0.17087 ETH" })
     );
+    expect(minimum).toBeVisible();
     await user.click(
       screen.getByRole("button", { name: "Top up 0.17087 ETH" })
     );

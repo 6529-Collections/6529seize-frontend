@@ -24,6 +24,8 @@ import {
   formatSubscriptionCoverageDeadline,
   formatSubscriptionEth,
   getFundedDropsLabel,
+  getSubscriptionCoverageActionLabel,
+  getSubscriptionCoverageAnchor,
   getSubscriptionCoveragePresentation,
   getSubscriptionModeLabel,
 } from "./subscriptionCoverage.helpers";
@@ -40,18 +42,7 @@ const DOT_CLASS = {
 const BUTTON_CLASS =
   "tw-inline-flex tw-min-h-11 md:tw-min-h-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 max-md:tw-flex-1";
 
-function getDescriptionKey(status: Status, isOwner: boolean): MessageKey {
-  if (!isOwner) {
-    if (status === Status.NotSetUp)
-      return "subscriptions.answer.notSetUpVisitor";
-    if (status === Status.Unknown)
-      return "subscriptions.answer.unavailableVisitor";
-    if (status === Status.Covered) return "subscriptions.answer.coveredVisitor";
-    if (status === Status.EarlyWarning)
-      return "subscriptions.answer.planVisitor";
-    if (status === Status.NoUpcomingSelections)
-      return "subscriptions.answer.noSelectionsVisitor";
-  }
+function getDescriptionKey(status: Status): MessageKey {
   switch (status) {
     case Status.Covered:
       return "subscriptions.coverage.covered.description";
@@ -140,7 +131,7 @@ export default function SubscriptionCoverageSummary({
   });
   const status = coverage?.status ?? Status.Unknown;
   const presentation = getSubscriptionCoveragePresentation(locale, status);
-  const description = t(locale, getDescriptionKey(status, isOwner));
+  const description = t(locale, getDescriptionKey(status));
   const fundedDate = coverage?.funded_through
     ? formatUtcDate(locale, coverage.funded_through.mint_at, {
         month: "short",
@@ -251,13 +242,7 @@ export default function SubscriptionCoverageSummary({
       t(locale, "subscriptions.answer.topUpFor", {
         token: formatInteger(locale, coverage.next_unfunded.token_id),
       });
-  if (!coverage)
-    subtitle = t(
-      locale,
-      isOwner
-        ? "subscriptions.coverage.unavailable"
-        : "subscriptions.answer.fetchUnavailableVisitor"
-    );
+  if (!coverage) subtitle = t(locale, "subscriptions.coverage.unavailable");
   const urgent =
     emptyBalance ||
     [Status.RunningLow, Status.ActionRequired, Status.EarlyWarning].includes(
@@ -415,23 +400,19 @@ function SubscriptionCoverageDetails({
     locale,
     coverage?.status ?? Status.Unknown
   );
-  const automatic =
-    details?.automatic ??
-    coverage?.mode === ApiSubscriptionCoverageMode.Automatic;
-  let mode = t(locale, "subscriptions.details.unavailable");
-  if (details)
-    mode = t(
-      locale,
-      details.automatic
-        ? "subscriptions.coverage.mode.automatic"
-        : "subscriptions.coverage.mode.manual"
-    );
-  else if (coverage?.mode)
-    mode = getSubscriptionModeLabel(locale, coverage.mode);
-  let modeDescription: MessageKey = isOwner
-    ? "subscriptions.mode.manualDescription"
-    : "subscriptions.mode.manualVisitorDescription";
-  if (automatic) modeDescription = "subscriptions.mode.automaticDescription";
+  let modeValue = coverage?.mode;
+  if (modeValue !== null && details)
+    modeValue = details.automatic
+      ? ApiSubscriptionCoverageMode.Automatic
+      : ApiSubscriptionCoverageMode.Manual;
+  const mode =
+    modeValue === undefined
+      ? t(locale, "subscriptions.details.unavailable")
+      : getSubscriptionModeLabel(locale, modeValue);
+  const modeDescription =
+    modeValue === ApiSubscriptionCoverageMode.Automatic
+      ? "subscriptions.mode.automaticDescription"
+      : "subscriptions.mode.manualDescription";
   const allEditions =
     details?.subscribe_all_editions ?? coverage?.subscribe_all_editions;
   let editionLabel = t(locale, "subscriptions.details.unavailable");
@@ -497,6 +478,9 @@ function SubscriptionCoverageDetails({
   ];
   return (
     <>
+      <h3 className="tw-mb-0 tw-mt-5 tw-text-base tw-font-semibold tw-text-iron-100">
+        {t(locale, "subscriptions.coverage.title")}
+      </h3>
       <dl className="tw-mb-0 tw-mt-4 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06]">
         {fields.map(([label, value]) => (
           <div
@@ -513,7 +497,7 @@ function SubscriptionCoverageDetails({
       <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
         {description}
       </p>
-      {(details || coverage?.mode) && (
+      {modeValue != null && (
         <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
           {t(locale, modeDescription)}
         </p>
@@ -543,13 +527,16 @@ function SubscriptionCoverageDetails({
       )}
       {!coverage && (
         <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-400">
-          {t(
-            locale,
-            isOwner
-              ? "subscriptions.coverage.unavailable"
-              : "subscriptions.answer.fetchUnavailableVisitor"
-          )}
+          {t(locale, "subscriptions.coverage.unavailable")}
         </p>
+      )}
+      {isOwner && coverage && (
+        <Link
+          href={getSubscriptionCoverageAnchor(presentation.action)}
+          className="tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-text-sm tw-font-medium tw-text-iron-100 tw-underline tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        >
+          {getSubscriptionCoverageActionLabel(locale, presentation.action)}
+        </Link>
       )}
       <div className="tw-mt-1.5 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-3 tw-gap-y-1 tw-text-xs tw-leading-5 tw-text-iron-500">
         <span>{t(locale, "subscriptions.coverage.basis")}</span>

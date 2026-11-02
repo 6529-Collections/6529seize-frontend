@@ -3645,12 +3645,6 @@ export const EN_US_MESSAGES = {
   "home.mintAllowlist.pill.allowlist": "{phase} · {allowlist}x Allowlist",
   "home.mintAllowlist.pill.mixed":
     "{phase} · {airdrop}x Airdrop · {allowlist}x Allowlist",
-  "subscriptions.answer.notSetUpVisitor":
-    "Subscription minting has not been set up for this profile.",
-  "subscriptions.answer.unavailableVisitor":
-    "The forecast inputs are incomplete. Coverage is unavailable until settings and schedule data are available.",
-  "subscriptions.answer.fetchUnavailableVisitor":
-    "Coverage is temporarily unavailable. Subscription settings have not changed.",
   "subscriptions.page.refreshError":
     "Some subscription data could not be refreshed. Previously loaded data may be out of date.",
   "subscriptions.page.retry": "Retry",
@@ -3670,12 +3664,6 @@ export const EN_US_MESSAGES = {
   "subscriptions.answer.actionRequired": "Your next drop is not fully funded",
   "subscriptions.answer.actionRequiredVisitor":
     "The next intended drop is not fully funded",
-  "subscriptions.answer.coveredVisitor":
-    "The immediate intended drops are fully funded.",
-  "subscriptions.answer.planVisitor":
-    "The intended drops are covered for now. The funded runway will end soon.",
-  "subscriptions.answer.noSelectionsVisitor":
-    "Manual mode has no upcoming drops selected.",
   "subscriptions.answer.next.one": "Next: {drop} · {date} · {count} card.",
   "subscriptions.answer.next.many": "Next: {drop} · {date} · {count} cards.",
   "subscriptions.answer.today": "Minting today",
@@ -3693,8 +3681,6 @@ export const EN_US_MESSAGES = {
     "Automatic airdrops of all eligible drops unless you opt-out",
   "subscriptions.mode.manualDescription":
     "You have to opt-in to each specific drop",
-  "subscriptions.mode.manualVisitorDescription":
-    "Each specific drop must be opted into.",
   "subscriptions.settings.editions": "Edition Preference",
   "subscriptions.settings.all": "All eligible",
   "subscriptions.settings.loading": "Loading settings",
@@ -3702,10 +3688,6 @@ export const EN_US_MESSAGES = {
   "subscriptions.settings.allDescription":
     "You will receive all editions you are eligible for",
   "subscriptions.settings.oneDescription": "You will receive only one edition",
-  "subscriptions.settings.allVisitorDescription":
-    "All eligible editions are included.",
-  "subscriptions.settings.oneVisitorDescription":
-    "Only one edition is included.",
   "subscriptions.topUp.ios": "Top-up on 6529.io",
   "subscriptions.topUp.remaining": "Remaining {period} {number}",
   "subscriptions.topUp.other": "Other",
@@ -3713,7 +3695,8 @@ export const EN_US_MESSAGES = {
   "subscriptions.topUp.customLabel": "Other card count",
   "subscriptions.topUp.more": "More",
   "subscriptions.topUp.less": "Less",
-  "subscriptions.topUp.deepTime": "Deep Time Subscriptions",
+  "subscriptions.topUp.showDeepTime": "Show Deep Time Subscriptions",
+  "subscriptions.topUp.hideDeepTime": "Hide Deep Time Subscriptions",
   "subscriptions.topUp.cancel": "Cancel",
   "subscriptions.upcoming.title": "Upcoming Drops",
   "subscriptions.upcoming.showMore": "Show More",

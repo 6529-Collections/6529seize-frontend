@@ -148,13 +148,16 @@ retention after a split. The subscription record covers balance and setting
 merges, manual quantity precedence over All eligible, priority preservation,
 highest-TDH split routing, and finalized-allocation conflicts that need manual
 reconciliation. The subscriptions overview also explains that profile history
-sections start closed on phones and preserve user toggles during resizing or
-data refreshes. The profile subscription record also explains how tapping,
+is a separate, always-visible section with three pills, preserving the selected
+view during resizing. The profile subscription record also explains how tapping,
 hovering, or focusing the address reveals its full value on compact layouts.
 Profile subscription facts describe the short coverage answer and balance,
-Details for the complete coverage report and mode timestamp, inline Top up with
-More for Year/Epoch/Deep Time, Upcoming Drops with the Automatic switch, and the
-closed Minting Settings and Subscription History panels. They retain all five
+Details for the Subscription coverage report, original explanations and actions,
+mode timestamp, and the distinction between Not configured and Unavailable.
+Inline Top up shows both supplied funding projections before selection, with
+More for Year/Epoch and Show/Hide Deep Time Subscriptions for Period/Era/Eon.
+Upcoming Drops keeps the Automatic switch; Minting Settings starts closed.
+Wrapped coverage actions align left beneath the heading. The facts retain all five
 section anchors, exact supplied top-up amounts, full history records, pagination,
 and the existing owner, visitor, proxy, and regional iOS rules.
 

@@ -252,6 +252,110 @@ describe("SubscriptionCoverageSummary", () => {
     ).toBeVisible();
   });
 
+  it.each([undefined, false, true])(
+    "preserves Not configured when coverage mode is null (legacy automatic: %s)",
+    async (automatic) => {
+      renderSummary(createCoverage({ mode: null }), {
+        details:
+          automatic === undefined ? undefined : { automatic, last_update: 0 },
+      });
+      await openDetails();
+      const mode = screen.getByText("Mode", { exact: true }).parentElement!;
+      expect(within(mode).getByText("Not configured")).toBeVisible();
+      expect(
+        screen.queryByText("You have to opt-in to each specific drop")
+      ).not.toBeInTheDocument();
+    }
+  );
+
+  it("distinguishes unavailable coverage from a confirmed unconfigured mode", async () => {
+    const { rerender } = renderSummary(undefined, { coverage: undefined });
+    await openDetails();
+    const mode = () => screen.getByText("Mode", { exact: true }).parentElement!;
+    expect(within(mode()).getByText("Unavailable")).toBeVisible();
+    rerender(
+      <SubscriptionCoverageSummary
+        coverage={createCoverage({ mode: null })}
+        isError={false}
+        isLoading={false}
+        isOwner
+        onRefresh={jest.fn()}
+      />
+    );
+    expect(within(mode()).getByText("Not configured")).toBeVisible();
+  });
+
+  it.each([
+    [
+      ApiSubscriptionCoverageStatus.Covered,
+      "Your immediate intended drops are fully funded.",
+    ],
+    [
+      ApiSubscriptionCoverageStatus.EarlyWarning,
+      "You are covered for now. Plan a top up before the funded runway ends.",
+    ],
+    [
+      ApiSubscriptionCoverageStatus.NotSetUp,
+      "Set up subscription minting so eligible Meme drops can be handled automatically or one at a time.",
+    ],
+    [
+      ApiSubscriptionCoverageStatus.NoUpcomingSelections,
+      "Manual mode has no upcoming drops selected. Choose a drop to see how long the balance will last.",
+    ],
+    [
+      ApiSubscriptionCoverageStatus.Unknown,
+      "The forecast inputs are incomplete. Review settings or refresh when the schedule is available.",
+    ],
+  ])(
+    "retains the original %s explanation for visitors",
+    async (status, description) => {
+      renderSummary(createCoverage({ status }), { isOwner: false });
+      await openDetails();
+      const report = document.getElementById("subscription-coverage-details")!;
+      expect(
+        within(report).getByRole("heading", { name: "Subscription coverage" })
+      ).toBeVisible();
+      expect(within(report).getByText(description)).toBeVisible();
+      expect(
+        within(report).queryByRole("link", { name: "Review settings" })
+      ).not.toBeInTheDocument();
+    }
+  );
+
+  it.each([
+    [
+      ApiSubscriptionCoverageStatus.Covered,
+      "Review settings",
+      "#profile-subscriptions-settings",
+    ],
+    [
+      ApiSubscriptionCoverageStatus.NotSetUp,
+      "Set up",
+      "#profile-subscriptions-settings",
+    ],
+    [
+      ApiSubscriptionCoverageStatus.NoUpcomingSelections,
+      "Choose drops",
+      "#profile-subscriptions-upcoming",
+    ],
+    [
+      ApiSubscriptionCoverageStatus.ActionRequired,
+      "Top up subscriptions",
+      "#profile-subscriptions-top-up",
+    ],
+  ])(
+    "restores the original %s action in Details",
+    async (status, label, href) => {
+      renderSummary(createCoverage({ status }));
+      await openDetails();
+      const report = document.getElementById("subscription-coverage-details")!;
+      expect(within(report).getByRole("link", { name: label })).toHaveAttribute(
+        "href",
+        href
+      );
+    }
+  );
+
   it("distinguishes choosing drops from topping up an empty balance", () => {
     const coverage = createCoverage({
       status: ApiSubscriptionCoverageStatus.NoUpcomingSelections,

@@ -4,8 +4,8 @@
 
 The `Subscriptions` tab at `/{user}/subscriptions` leads with a projected Meme
 subscription answer and balance, followed by Upcoming Drops. Details and Minting
-Settings sit at the right of the coverage card header on wider screens and wrap
-within the card on phones. Details, Top up, and Minting Settings open when needed. Subscription History is a separate,
+Settings sit at the right of the coverage card header on wider screens and align
+left beneath the heading on phones. Details, Top up, and Minting Settings open when needed. Subscription History is a separate,
 always-visible section with pills for each history view.
 
 This page covers tab content only. Tab visibility and hidden-tab URL fallback
@@ -78,19 +78,24 @@ first render.
    The next-drop name is emphasized, and a drop minting today has a green
    `Minting today` label. The card quantity remains visible.
    The balance refresh icon shows its label on hover or keyboard focus.
-2. Open `Details` for Status, Drops funded, Funded through, Next unfunded,
+2. Open `Details` for the `Subscription coverage` report: Status, Drops funded, Funded through, Next unfunded,
    Balance capacity, Forecast use, Mode with its last-update time, Eligibility,
    and Edition Preference. The available mint count is retained as Balance
    capacity in Details instead of repeating it beside the ETH balance.
    Status and mode explanations, recommendations,
    authoritative deadlines, the projection note, and Refresh coverage remain here.
+   Owners also get the status-specific action: Set up, Choose drops,
+   Top up subscriptions, or Review settings. A confirmed unconfigured mode shows
+   `Not configured`; unavailable mode data shows `Unavailable`.
 3. Owners can open `Top up` inside the answer card. Choose Recommended or
    Minimum for next drop when supplied, 1 Card, Remaining SZN, or Other.
    Entering an Other count shows a separate ETH preview and the same amount
    on the Top up button.
-   `More` reveals Remaining Year, Remaining Epoch, and Deep Time Subscriptions
-   (Remaining Period, Era, and Eon). Only the selected coverage option shows its
-   supplied projected funding outcome. Cancel closes the panel and returns focus
+   Recommended and Minimum each show their supplied projected funding outcome
+   beneath the option before selection. `More` reveals Remaining Year,
+   Remaining Epoch, and `Show Deep Time Subscriptions`. That control reveals
+   Remaining Period, Era, and Eon and becomes `Hide Deep Time Subscriptions`.
+   Cancel closes the panel and returns focus
    to the Top up button. Direct top-up links focus the inline panel; its
    accessible title is retained without an extra visible heading.
 4. Open `Minting Settings` from the coverage card header to choose One edition or

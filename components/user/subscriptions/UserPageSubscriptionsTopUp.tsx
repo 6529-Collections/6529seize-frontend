@@ -266,6 +266,7 @@ export default function UserPageSubscriptionsTopUp({
 
   const [error, setError] = useState<string>("");
   const [showMore, setShowMore] = useState(false);
+  const [showDeep, setShowDeep] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState<string | null>(null);
   const [topUpCardCount, setTopUpCardCount] = useState<number | null>(null);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -430,23 +431,9 @@ export default function UserPageSubscriptionsTopUp({
   };
   const recommendation = coverage?.recommended_top_up;
   const minimum = coverage?.minimum_top_up;
-  let selectedDescription: string | undefined;
-  if (selectedOption === "recommended" && recommendation) {
-    selectedDescription = getCoverageTopUpDescription(
-      locale,
-      recommendation.target_fully_funded_drops,
-      recommendation.projected_through.token_id
-    );
-  } else if (selectedOption === "minimum" && minimum) {
-    selectedDescription = getCoverageTopUpDescription(
-      locale,
-      minimum.resulting_fully_funded_drops,
-      minimum.projected_through.token_id
-    );
-  }
   const topUpContent = (
     <>
-      <div className="tw-flex tw-flex-wrap tw-gap-2 max-md:tw-flex-col">
+      <div className="tw-flex tw-flex-wrap tw-items-start tw-gap-2 max-md:tw-flex-col max-md:tw-items-stretch">
         {recommendation && (
           <CardCountOption
             id="subscription-top-up-recommended"
@@ -460,6 +447,11 @@ export default function UserPageSubscriptionsTopUp({
             }
             selected={selectedOption === "recommended"}
             onSelect={() => selectCoverageTopUp("recommended")}
+            description={getCoverageTopUpDescription(
+              locale,
+              recommendation.target_fully_funded_drops,
+              recommendation.projected_through.token_id
+            )}
           />
         )}
         {minimum && minimum.amount_eth !== recommendation?.amount_eth && (
@@ -470,6 +462,11 @@ export default function UserPageSubscriptionsTopUp({
             display={t(locale, "subscriptions.topUp.minimum")}
             selected={selectedOption === "minimum"}
             onSelect={() => selectCoverageTopUp("minimum")}
+            description={getCoverageTopUpDescription(
+              locale,
+              minimum.resulting_fully_funded_drops,
+              minimum.projected_through.token_id
+            )}
           />
         )}
         <CardCountOption
@@ -522,18 +519,31 @@ export default function UserPageSubscriptionsTopUp({
           {printRemainingMints(remainingMintsForYear, "Year", year, "year")}
           {printRemainingMints(remainingMintsForEpoch, "Epoch", epoch, "epoch")}
         </div>
-        <p className="tw-mb-2 tw-mt-4 tw-text-sm tw-text-iron-400">
-          {t(locale, "subscriptions.topUp.deepTime")}
-        </p>
-        <div className="tw-flex tw-flex-wrap tw-gap-2 max-md:tw-flex-col">
-          {printRemainingMints(
-            remainingMintsForPeriod,
-            "Period",
-            period,
-            "period"
+        <button
+          type="button"
+          aria-expanded={showDeep}
+          aria-controls="subscription-top-up-deep-time"
+          onClick={() => setShowDeep(!showDeep)}
+          className="tw-mt-3 tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-text-left tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        >
+          {t(
+            locale,
+            showDeep
+              ? "subscriptions.topUp.hideDeepTime"
+              : "subscriptions.topUp.showDeepTime"
           )}
-          {printRemainingMints(remainingMintsForEra, "Era", era, "era")}
-          {printRemainingMints(remainingMintsForEon, "Eon", eon, "eon")}
+        </button>
+        <div id="subscription-top-up-deep-time" hidden={!showDeep}>
+          <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-2 max-md:tw-flex-col">
+            {printRemainingMints(
+              remainingMintsForPeriod,
+              "Period",
+              period,
+              "period"
+            )}
+            {printRemainingMints(remainingMintsForEra, "Era", era, "era")}
+            {printRemainingMints(remainingMintsForEon, "Eon", eon, "eon")}
+          </div>
         </div>
       </div>
       <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 max-md:tw-flex-col max-md:tw-items-stretch max-md:tw-text-center">
@@ -544,7 +554,6 @@ export default function UserPageSubscriptionsTopUp({
           aria-atomic="true"
           className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-300"
         >
-          {selectedDescription}
           {selectedOption === "other" &&
             selectedTopUp !== null &&
             t(locale, "subscriptions.coverage.balanceEth", {
@@ -645,6 +654,7 @@ function CardCountOption(
     count: number;
     amountEth?: string | undefined;
     display?: ReactNode;
+    description?: string;
     selected: boolean;
     featured?: boolean;
     onSelect: () => void;
@@ -652,11 +662,14 @@ function CardCountOption(
 ) {
   const locale = useBrowserLocale();
   const countLabel = getCardCountLabel(locale, props.count);
-  return (
+  const option = (
     <button
       id={props.id}
       type="button"
       aria-pressed={props.selected}
+      aria-describedby={
+        props.description ? `${props.id}-description` : undefined
+      }
       onClick={props.onSelect}
       className={`${TOP_UP_CHIP_CLASS} ${getTopUpOptionStateClass(props.selected, props.featured)}`}
     >
@@ -670,5 +683,17 @@ function CardCountOption(
         {t(locale, "subscriptions.balance.ethUnit")}
       </span>
     </button>
+  );
+  if (!props.description) return option;
+  return (
+    <div className="tw-min-w-0 tw-max-w-full">
+      {option}
+      <p
+        id={`${props.id}-description`}
+        className="tw-mb-0 tw-mt-1.5 tw-px-1 tw-text-xs tw-leading-5 tw-text-iron-400"
+      >
+        {props.description}
+      </p>
+    </div>
   );
 }

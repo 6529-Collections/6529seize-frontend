@@ -501,6 +501,22 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await upcoming.getByRole("link", { name: "Top up", exact: true }).click();
     const topUp = page.getByRole("region", { name: "Top up", exact: true });
     await expect(topUp).toBeFocused();
+    await expect(
+      topUp.getByText("Funds 24 intended drops through The Memes #591")
+    ).toBeVisible();
+    await expect(
+      topUp.getByRole("button", { name: /^Minimum for next drop/ })
+    ).toHaveAccessibleDescription(
+      /^Funds 4 intended drops through The Memes #571$/
+    );
+    if (page.viewportSize()!.width >= 768) {
+      await expectSingleLineLabel(
+        topUp.getByText("Recommended", { exact: true })
+      );
+      await expectSingleLineLabel(
+        topUp.getByText("Minimum for next drop", { exact: true })
+      );
+    }
     await expectSingleLineLabel(
       topUp.getByRole("button", { name: "Choose a top-up amount", exact: true })
     );
@@ -527,11 +543,38 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       topUp.getByRole("button", { name: "Top up 0.12232 ETH" })
     ).toBeVisible();
     await topUp.getByRole("button", { name: "More", exact: true }).click();
+    const deepTime = topUp.getByRole("button", {
+      name: "Show Deep Time Subscriptions",
+      exact: true,
+    });
+    await expect(deepTime).toHaveAttribute("aria-expanded", "false");
     await expect(
-      topUp.getByText("Deep Time Subscriptions", { exact: true })
+      topUp.getByRole("button", { name: /^Remaining Period/ })
+    ).toBeHidden();
+    await deepTime.click();
+    await expect(
+      topUp.getByRole("button", { name: /^Remaining Period/ })
     ).toBeVisible();
+    await expect(
+      topUp.getByRole("button", {
+        name: "Hide Deep Time Subscriptions",
+        exact: true,
+      })
+    ).toHaveAttribute("aria-expanded", "true");
     await expectNoHorizontalOverflow(page);
     await captureSafeScreenshot(page, testInfo, "subscriptions-top-up");
+    await topUp
+      .getByRole("button", {
+        name: "Hide Deep Time Subscriptions",
+        exact: true,
+      })
+      .click();
+    await expect(
+      topUp.getByRole("button", { name: /^Remaining Period/ })
+    ).toBeHidden();
+    await expect(
+      topUp.getByRole("button", { name: "Top up 0.12232 ETH" })
+    ).toBeVisible();
     await topUp.getByRole("button", { name: "Cancel", exact: true }).click();
     await expect(
       page.getByRole("button", { name: "Top up", exact: true })
