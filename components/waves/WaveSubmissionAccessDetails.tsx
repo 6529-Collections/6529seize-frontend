@@ -8,10 +8,7 @@ import {
   getActiveWaveIdFromUrl,
   getWavePathRoute,
 } from "@/helpers/navigation.helpers";
-import {
-  getCompetitionIdFromPathname,
-  isMultiCompetitionEnabled,
-} from "@/helpers/competition.helpers";
+import { getCompetitionIdFromPathname } from "@/helpers/competition.helpers";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import {
   useCompetitionDetail,
@@ -154,16 +151,9 @@ export default function WaveSubmissionAccessDetails({
 
   return (
     <div className="tw-space-y-2 tw-text-sm tw-leading-5 tw-text-iron-300">
-      {isMultiCompetitionEnabled() ? (
-        <div className="tw-space-y-2" aria-live="polite">
-          <SelectedSubmissionScope wave={wave} competitionId={competitionId} />
-        </div>
-      ) : (
-        <SubmissionScope
-          group={wave.participation.scope.group}
-          signatureRequired={wave.participation.signature_required}
-        />
-      )}
+      <div className="tw-space-y-2" aria-live="polite">
+        <SelectedSubmissionScope wave={wave} competitionId={competitionId} />
+      </div>
       <Link
         href={`${getWavePathRoute(wave.id)}?${rulesParams}`}
         prefetch={false}

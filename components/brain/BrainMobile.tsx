@@ -315,8 +315,8 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     []
   );
   const viewSubmissionRules = useCallback(() => {
-    // This tab belongs to the persistent shell, so focus survives the chat
-    // content unmounting as the mobile view changes.
+    // This tab belongs to the persistent shell, so focus survives changes
+    // to the routed content when opening submission rules.
     if (waveId) requestSubmissionRulesFocus?.(waveId);
     onViewChange(BrainView.CONFIGURATION);
     configurationButtonRef.current?.focus();

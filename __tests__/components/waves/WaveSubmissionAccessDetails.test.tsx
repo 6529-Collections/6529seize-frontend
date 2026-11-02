@@ -6,7 +6,6 @@ import {
   useCompetitionDetail,
   useDefaultCompetition,
 } from "@/hooks/competitions/useCompetitionQueries";
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import type { ComponentProps } from "react";
 import WaveSubmissionAccessDetails from "@/components/waves/WaveSubmissionAccessDetails";
 import { ApiWave } from "@/generated/models/ApiWave";
@@ -17,10 +16,6 @@ jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useDefaultCompetition: jest.fn(),
 }));
 jest.mock("@tanstack/react-query", () => ({ useQuery: jest.fn() }));
-jest.mock("@/helpers/competition.helpers", () => ({
-  ...jest.requireActual("@/helpers/competition.helpers"),
-  isMultiCompetitionEnabled: jest.fn(),
-}));
 jest.mock("next/navigation", () => ({
   usePathname: jest.fn(),
   useSearchParams: jest.fn(),
@@ -82,7 +77,6 @@ function selectCompetition(
 describe("WaveSubmissionAccessDetails", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(isMultiCompetitionEnabled).mockReturnValue(true);
     (useDefaultCompetition as jest.Mock).mockReturnValue({
       data: { competition_id: null },
       isPending: false,
@@ -291,9 +285,7 @@ describe("WaveSubmissionAccessDetails", () => {
     }
   );
 
-  it("uses legacy access without competition requests when the feature is disabled", () => {
-    jest.mocked(isMultiCompetitionEnabled).mockReturnValue(false);
-    selectCompetition();
+  it("uses wave access after confirming there is no default competition", () => {
     render(
       <WaveSubmissionAccessDetails
         wave={makeWave({
@@ -304,7 +296,7 @@ describe("WaveSubmissionAccessDetails", () => {
       />
     );
     expect(useCompetitionDetail).not.toHaveBeenCalled();
-    expect(useDefaultCompetition).not.toHaveBeenCalled();
+    expect(useDefaultCompetition).toHaveBeenCalledWith("wave-1", true);
     expect(
       screen.getByRole("link", {
         name: "Inspect Legacy Club group criteria and members",
