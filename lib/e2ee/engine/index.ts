@@ -48,6 +48,7 @@ import {
   setAdmin,
 } from "./membership";
 import { searchHistory } from "./history-search";
+import { latestReadSeq } from "./history";
 import { previewReport, sendReport } from "./report";
 import { queueImported, queueMessage, queueTargeted } from "./send";
 import {
@@ -389,7 +390,10 @@ class E2eeEngineImpl implements E2eeEngineExt {
     const key = g?.toLowerCase() ?? null;
     const changed = key !== this.ctx.openConversation;
     this.ctx.openConversation = key;
-    if (key !== null && changed) this.background(() => this.loadHistory(key));
+    if (key !== null && changed) {
+      // The conversation's historyError owns read failures and retry feedback.
+      this.background(() => this.loadHistory(key).catch(() => undefined));
+    }
     this.ctx.openUntil = key === null ? 0 : Number.MAX_SAFE_INTEGER;
     if (key !== null && changed && this.ctx.store.status === "ready") {
       // Contract 12: an open conversation polls every 5 s, starting now.
@@ -528,7 +532,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
     if (!runtime) {
       return;
     }
-    const latest = runtime.record.history?.maxSeq ?? runtime.record.cursor;
+    const latest = latestReadSeq(runtime);
     this.ctx.openConversation = runtime.record.g;
     this.ctx.openUntil = Math.max(
       this.ctx.openUntil,

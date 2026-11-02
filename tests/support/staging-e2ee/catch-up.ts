@@ -5,55 +5,30 @@ import { join } from "node:path";
 import { expect } from "@playwright/test";
 import type { E2eeEngineExt, E2eeEngineOptions } from "@/lib/e2ee/types";
 import { loadNodeEngine } from "./load-node-engine";
+import { buildStagingQaApi } from "./api-transport";
 import type { StagingE2eeSession } from "./session";
 
 /** Authorization comes only from this run's throwaway browser, never an existing user session. */
 async function qaTransport(
   session: StagingE2eeSession,
-  { buildE2eeApiClient, E2eeApiError }: typeof import("./node-engine")
+  runtime: typeof import("./node-engine")
 ) {
   const next = session.page.waitForRequest(
     (request) =>
       new URL(request.url()).hostname === "api.staging.6529.io" &&
-      Boolean(request.headers()["authorization"])
+      Boolean(request.headers()["authorization"]) &&
+      Boolean(request.headers()["x-6529-auth"])
   );
   await session.page.reload({ waitUntil: "domcontentloaded" });
-  const authorization = (await next).headers()["authorization"]!;
-  const send = async <T>(
-    method: string,
-    endpoint: string,
-    params?: Record<string, string>,
-    body?: object
-  ): Promise<T> => {
-    const url = new URL(`/api/${endpoint}`, "https://api.staging.6529.io");
-    for (const [key, value] of Object.entries(params ?? {}))
-      url.searchParams.set(key, value);
-    const response = await session.context.request
-      .fetch(url.toString(), {
-        method,
-        headers: { authorization },
-        ...(body ? { data: body } : {}),
-      })
-      .catch(() => {
-        throw new Error("Staging QA transport failed");
-      });
-    const result = await response.json();
-    if (!response.ok())
-      throw new E2eeApiError({
-        message: "Staging QA API request failed",
-        status: response.status(),
-        code: typeof result.code === "string" ? result.code : null,
-      });
-    return result as T;
-  };
-  return buildE2eeApiClient({
-    get: <T>(endpoint: string, params?: Record<string, string>) =>
-      send<T>("GET", endpoint, params),
-    post: <T>(endpoint: string, body: object) =>
-      send<T>("POST", endpoint, undefined, body),
-    put: <T>(endpoint: string, body: object) =>
-      send<T>("PUT", endpoint, undefined, body),
-  });
+  const captured = (await next).headers();
+  return buildStagingQaApi(
+    session.context.request,
+    {
+      authorization: captured["authorization"]!,
+      "x-6529-auth": captured["x-6529-auth"]!,
+    },
+    runtime
+  );
 }
 
 export async function measureStagingCatchUp(
