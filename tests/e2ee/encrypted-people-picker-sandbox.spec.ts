@@ -16,6 +16,7 @@ import {
 
 test.describe("Encrypted chat people picker @medium @local-only @e2ee", () => {
   test.describe.configure({ timeout: 300_000 });
+  // Dev auth and mutable fixtures require the opt-in loopback delivery service.
   test.skip(
     process.env["PLAYWRIGHT_E2EE_SANDBOX"] !== "1" ||
       process.env["PLAYWRIGHT_ENV"] !== "local",
