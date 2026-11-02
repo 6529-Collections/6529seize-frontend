@@ -297,6 +297,19 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     await sendEncrypted(b, reply);
     await expectDecrypted(a, reply);
     await expect(messageRow(b.page, hello)).toHaveCount(1);
+    const sender = messageRow(b.page, hello);
+    await expect(
+      sender.getByRole("link", { name: a.user.handle, exact: true })
+    ).toHaveAttribute("href", `/${a.user.handle}`);
+    await expect(
+      sender.getByRole("link", { name: `View ${a.user.handle}'s profile` })
+    ).toHaveAttribute("href", `/${a.user.handle}`);
+    await expect(sender.getByLabel(/^Level \d+$/u)).toBeVisible();
+    await expect(
+      b.page
+        .getByRole("heading", { level: 1, name: a.user.handle })
+        .getByRole("link")
+    ).toHaveAttribute("href", `/${a.user.handle}`);
     await expectNothingUndecryptable(a);
     await expectNothingUndecryptable(b);
 

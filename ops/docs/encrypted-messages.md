@@ -137,6 +137,15 @@ the same people already chosen. Earlier messages are not copied.
 
 ## In a chat
 
+- In a direct chat, select the person's name or avatar in the header or chat
+  introduction to open their profile. Group titles stay as group titles.
+- Message authors have the same profile links, level, artist badges and
+  profile-wave badge as ordinary messages, where those apply. Hover over a
+  name or avatar on desktop for the profile card. Select a profile-wave badge
+  for the usual wave navigation or mobile preview.
+- Select a highlighted member mention to open that person's profile. If a
+  profile cannot be resolved, its unavailable details are omitted; messages
+  remain readable on this device.
 - Write in the composer and press Enter to send; Shift+Enter starts a new line.
 - Type `@` to mention a member.
 - Attach up to 10 files of up to 25 MB each; they are encrypted on your

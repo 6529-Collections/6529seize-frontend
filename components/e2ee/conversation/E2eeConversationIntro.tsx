@@ -6,6 +6,7 @@ import { t } from "@/i18n/messages";
 import type { E2eeConversation } from "@/lib/e2ee/types";
 import { getConversationTitle, getDmPeer } from "../e2eeFormat";
 import { E2eeAvatar, E2eeAvatarStack } from "../ui/E2eeAvatar";
+import { E2eeProfileLink } from "../ui/E2eeProfileLink";
 
 interface E2eeConversationIntroProps {
   readonly conversation: E2eeConversation;
@@ -38,16 +39,18 @@ export function E2eeConversationIntro({
   return (
     <div className="tw-mx-auto tw-flex tw-max-w-md tw-flex-col tw-items-center tw-px-6 tw-pb-6 tw-pt-10 tw-text-center">
       {peer || conversation.kind === "dm" ? (
-        <E2eeAvatar
-          pfp={peer?.pfp ?? null}
-          name={peer?.handle ?? title}
-          size="lg"
-        />
+        <E2eeProfileLink member={peer} avatar className="tw-inline-flex">
+          <E2eeAvatar
+            pfp={peer?.pfp ?? null}
+            name={peer?.handle ?? title}
+            size="lg"
+          />
+        </E2eeProfileLink>
       ) : (
         <E2eeAvatarStack people={others} max={3} size="md" />
       )}
       <h2 className="tw-m-0 tw-mt-3 tw-max-w-full tw-truncate tw-text-base tw-font-semibold tw-text-iron-50">
-        {title}
+        <E2eeProfileLink member={peer}>{title}</E2eeProfileLink>
       </h2>
       <p className="tw-m-0 tw-mt-3 tw-inline-flex tw-items-start tw-gap-1.5 tw-text-left tw-text-xs tw-leading-5 tw-text-iron-300">
         <LockClosedIcon
