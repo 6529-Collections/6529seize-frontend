@@ -146,6 +146,11 @@ it("selects every core browser lane when their shared workflow changes", () => {
         runner: "ubuntu-latest",
       },
       {
+        lane: "playwright-bookmarks",
+        label: "Private bookmarks desktop and mobile",
+        runner: "ubuntu-latest",
+      },
+      {
         lane: "playwright-wave-creation",
         label: "Wave creation desktop and mobile",
         runner: "ubuntu-latest",
