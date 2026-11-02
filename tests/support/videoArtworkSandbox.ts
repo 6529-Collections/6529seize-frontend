@@ -13,6 +13,19 @@ const WAVE_ID = "00000000-0000-4000-8000-000000000529";
 const DROP_ID = "00000000-0000-4000-8000-000000000530";
 const LINKING_DROP_ID = "00000000-0000-4000-8000-000000000546";
 
+async function installMemesWaveSettings(page: Page, apiOrigin: string) {
+  const headers = { "access-control-allow-origin": "*" };
+  await page.route("**/api/open-graph**", (route) =>
+    route.fulfill({ headers, json: { results: {} } })
+  );
+  await page.route(`${apiOrigin}/api/settings`, (route) =>
+    route.fulfill({
+      headers,
+      json: { memes_wave_id: composerSandboxConstants.linkedDropMemesWaveId },
+    })
+  );
+}
+
 /** Load and validate the shared wave/drop seed before installing route overrides. */
 async function loadSandboxSeed(
   page: Page,
@@ -116,15 +129,7 @@ export async function installLinkedDropVideoSandbox(
   };
   const headers = { "access-control-allow-origin": "*" };
 
-  await page.route("**/api/open-graph", (route) =>
-    route.fulfill({ headers, json: { results: {} } })
-  );
-  await page.route(`${apiOrigin}/api/settings`, (route) =>
-    route.fulfill({
-      headers,
-      json: { memes_wave_id: composerSandboxConstants.linkedDropMemesWaveId },
-    })
-  );
+  await installMemesWaveSettings(page, apiOrigin);
   await page.route(`${apiOrigin}/api/v2/drops?*`, async (route) => {
     const ids = new URL(route.request().url()).searchParams.get("ids");
     if (ids !== DROP_ID) {
@@ -196,12 +201,7 @@ async function installArtworkSandbox(
     ],
   };
   const headers = { "access-control-allow-origin": "*" };
-  await page.route("**/api/open-graph**", (route) =>
-    route.fulfill({ headers, json: { results: {} } })
-  );
-  await page.route(`${apiOrigin}/api/settings`, (route) =>
-    route.fulfill({ headers, json: { memes_wave_id: memesWaveId } })
-  );
+  await installMemesWaveSettings(page, apiOrigin);
   await page.route(`${apiOrigin}/api/waves/${memesWaveId}`, (route) =>
     route.fulfill({ headers, json: { ...wave, id: memesWaveId } })
   );
