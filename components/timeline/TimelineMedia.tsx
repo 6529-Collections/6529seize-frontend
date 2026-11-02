@@ -95,6 +95,7 @@ function TimelineMediaPreview(props: Readonly<Props>) {
     );
   }
   if (props.type === MediaType.HTML) {
+    // React does not attach a direct iframe error listener; capture non-bubbling errors.
     return (
       <iframe
         key={activeSrc}
@@ -102,7 +103,7 @@ function TimelineMediaPreview(props: Readonly<Props>) {
         src={activeSrc}
         sandbox="allow-scripts"
         title={t(locale, "timeline.media.htmlTitle", { label })}
-        onError={advance}
+        onErrorCapture={advance}
         onLoad={() => {
           setLoadState((current) =>
             current.index === index ? { ...current, didLoad: true } : current

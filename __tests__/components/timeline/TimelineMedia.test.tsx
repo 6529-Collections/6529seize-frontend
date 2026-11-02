@@ -125,7 +125,7 @@ describe("TimelineMedia", () => {
     ).toHaveAttribute("src", `https://arweave.net/${otherTx}/Original.png`);
   });
 
-  it("uses the shared video player's matching-source fallback", () => {
+  it("tries every matching video source once and stops when exhausted", () => {
     const load = jest
       .spyOn(HTMLMediaElement.prototype, "load")
       .mockImplementation(() => {});
@@ -139,6 +139,89 @@ describe("TimelineMedia", () => {
     expect(load).toHaveBeenCalled();
     fireEvent.loadedMetadata(video);
     expect(video).toHaveAttribute("src", RESOLVER_URL);
+    const sources = [
+      HISTORICAL_URL,
+      ...getMediaGatewayFallbackUrls(HISTORICAL_URL).filter(
+        (url) => url !== HISTORICAL_URL
+      ),
+    ];
+    for (const source of sources.slice(1)) {
+      expect(video).toHaveAttribute("src", source);
+      expect(parseDecentralizedMediaRef(source)).toEqual({
+        protocol: "arweave",
+        id: HISTORICAL_TX,
+        path: "Original.png",
+      });
+      fireEvent.error(video);
+    }
+    expect(video).toHaveAttribute("src", sources.at(-1));
+    expect(load).toHaveBeenCalledTimes(sources.length - 1);
+    fireEvent.error(video);
+    expect(load).toHaveBeenCalledTimes(sources.length - 1);
+    expect(video).toHaveAttribute("src", sources.at(-1));
+  });
+
+  it("does not skip a gateway when HTML errors are batched", () => {
+    const { container } = render(
+      <TimelineMedia url={HISTORICAL_URL} type={MediaType.HTML} />
+    );
+    const firstFrame = container.querySelector("iframe")!;
+    act(() => {
+      fireEvent.error(firstFrame);
+      fireEvent.error(firstFrame);
+    });
+    expect(container.querySelector("iframe")).toHaveAttribute(
+      "src",
+      RESOLVER_URL
+    );
+    fireEvent.error(container.querySelector("iframe")!);
+    expect(container.querySelector("iframe")).toHaveAttribute(
+      "src",
+      `https://gateway.arweave.net/${HISTORICAL_TX}/Original.png`
+    );
+  });
+
+  it("advances once when the same HTML source loads then errors in a batch", () => {
+    jest.useFakeTimers();
+    const { container } = render(
+      <TimelineMedia url={HISTORICAL_URL} type={MediaType.HTML} />
+    );
+    const firstFrame = container.querySelector("iframe")!;
+    act(() => {
+      fireEvent.load(firstFrame);
+      fireEvent.error(firstFrame);
+    });
+    expect(container.querySelector("iframe")).toHaveAttribute(
+      "src",
+      RESOLVER_URL
+    );
+    act(() => jest.advanceTimersByTime(8000));
+    expect(container.querySelector("iframe")).toHaveAttribute(
+      "src",
+      `https://gateway.arweave.net/${HISTORICAL_TX}/Original.png`
+    );
+  });
+
+  it("ignores a previous HTML frame's events during a timeout advance", () => {
+    jest.useFakeTimers();
+    const { container } = render(
+      <TimelineMedia url={HISTORICAL_URL} type={MediaType.HTML} />
+    );
+    const firstFrame = container.querySelector("iframe")!;
+    act(() => {
+      jest.advanceTimersByTime(8000);
+      fireEvent.error(firstFrame);
+      fireEvent.load(firstFrame);
+    });
+    expect(container.querySelector("iframe")).toHaveAttribute(
+      "src",
+      RESOLVER_URL
+    );
+    act(() => jest.advanceTimersByTime(8000));
+    expect(container.querySelector("iframe")).toHaveAttribute(
+      "src",
+      `https://gateway.arweave.net/${HISTORICAL_TX}/Original.png`
+    );
   });
 
   it("stops the HTML loading timeout after a successful load", () => {

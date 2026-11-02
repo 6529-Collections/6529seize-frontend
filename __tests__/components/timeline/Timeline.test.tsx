@@ -124,6 +124,23 @@ describe("Timeline", () => {
     });
   });
 
+  it("keeps the recorded removed image when the next historical state has none", () => {
+    const historical =
+      "https://arweave.net/IFosq_ZN9_PrDSQmq65JTjeB2GnnfPSFoHxRazxC4PY";
+    render(
+      <Timeline
+        nft={{ ...baseNft, image: "https://example.com/current.png" }}
+        steps={[makeStep("image", historical, "")]}
+      />
+    );
+    expect(mediaProps).toHaveLength(1);
+    expect(mediaProps[0]).toMatchObject({
+      label: t("en-US", "timeline.fields.removedImage"),
+      type: MediaType.IMAGE,
+      url: historical,
+    });
+  });
+
   it("uses video type when nft animation is video", () => {
     render(
       <Timeline
