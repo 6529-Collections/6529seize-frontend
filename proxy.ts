@@ -37,6 +37,7 @@ import {
   hasMalformedWaveId,
   MALFORMED_WAVE_ROUTE,
 } from "@/lib/proxy/waveRoutes";
+import { handleValidatorPageGate } from "@/lib/validator-page/proxyGate";
 import { publicEnv } from "./config/env";
 import { API_AUTH_COOKIE } from "./constants/constants";
 
@@ -465,6 +466,14 @@ export default async function proxy(req: NextRequest) {
 
     if (isStaticAssetPath(normalizedPathname)) {
       return NextResponse.next();
+    }
+
+    const validatorGateResponse = handleValidatorPageGate(
+      req,
+      normalizedPathname
+    );
+    if (validatorGateResponse) {
+      return validatorGateResponse;
     }
 
     return await enforceAccessControl(req, normalizedPathname);
