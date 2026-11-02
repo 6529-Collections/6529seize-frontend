@@ -302,7 +302,9 @@ export default function VirtualScrollWrapper({
         enabled={enableLongContentCollapse}
         scrollContainerRef={scrollContainerRef}
       >
-        <VideoPlaybackMemoryProvider key={`${waveId}:${dropId ?? dropSerialNo}`}>
+        <VideoPlaybackMemoryProvider
+          key={`${waveId}:${dropId ?? dropSerialNo}`}
+        >
           {shouldRenderChildren ? (
             children
           ) : (

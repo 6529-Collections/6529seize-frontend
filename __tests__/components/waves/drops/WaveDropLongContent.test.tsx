@@ -2,6 +2,7 @@ import { WaveDropContentExpansionProvider } from "@/components/waves/drops/WaveD
 import WaveDropLongContent from "@/components/waves/drops/WaveDropLongContent";
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { RefObject } from "react";
+import * as dropContentPreview from "@/helpers/waves/dropContentPreview";
 
 const LONG_CONTENT = "Long post content ".repeat(80);
 
@@ -53,8 +54,11 @@ describe("WaveDropLongContent", () => {
   });
 
   it("renders full content without a toggle when collapse is disabled", () => {
+    const previewSpy = jest.spyOn(dropContentPreview, "getDropContentPreview");
     renderLongContent({ enabled: false });
 
+    expect(previewSpy).not.toHaveBeenCalled();
+    previewSpy.mockRestore();
     expect(screen.getByTestId("full-markdown")).toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
@@ -78,7 +82,29 @@ describe("WaveDropLongContent", () => {
     expect(scrollContainer.scrollTop).toBe(-350);
   });
 
-  it("anchors collapse from the pre-toggle position if the browser clamps scroll", () => {
+  it("accounts for the browser adjusting scroll during expansion", () => {
+    const scrollContainer = document.createElement("div");
+    Object.defineProperties(scrollContainer, {
+      clientHeight: { configurable: true, value: 500 },
+      scrollHeight: { configurable: true, value: 2_000 },
+      scrollTop: { configurable: true, value: -500, writable: true },
+    });
+    renderLongContent({ scrollContainer });
+    const button = screen.getByRole("button", { name: "Show more" });
+    jest
+      .spyOn(button, "getBoundingClientRect")
+      .mockReturnValueOnce({ top: 200 } as DOMRect)
+      .mockImplementation(() => {
+        scrollContainer.scrollTop = -650;
+        return { top: 350 } as DOMRect;
+      });
+
+    fireEvent.click(button);
+
+    expect(scrollContainer.scrollTop).toBe(-500);
+  });
+
+  it("corrects from the current position when the browser clamps scroll on collapse", () => {
     const scrollContainer = document.createElement("div");
     Object.defineProperties(scrollContainer, {
       clientHeight: { configurable: true, value: 500 },
@@ -103,7 +129,7 @@ describe("WaveDropLongContent", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Show less" }));
 
-    expect(scrollContainer.scrollTop).toBe(-500);
+    expect(scrollContainer.scrollTop).toBe(-250);
   });
 
   it("stays pinned to the latest drop when expanded at the bottom", () => {

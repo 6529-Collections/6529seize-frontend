@@ -17,6 +17,9 @@ import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisi
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
 import { HttpFile } from '../http/http';
 
+/**
+* Creates a shared wave. Legacy competition settings are accepted and ignored.
+*/
 export class ApiCreateWaveHubRequest {
     /**
     * Stable client-generated command identity. Reuse for identical retries only.

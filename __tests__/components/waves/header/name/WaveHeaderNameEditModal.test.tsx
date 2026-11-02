@@ -1,25 +1,27 @@
-import React from 'react';
+import React from "react";
 
 // Mock fetch
-global.fetch = jest.fn(() => 
+global.fetch = jest.fn(() =>
   Promise.resolve({
     ok: true,
     json: () => Promise.resolve({}),
   })
 ) as jest.Mock;
 
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import WaveHeaderNameEditModal from '@/components/waves/header/name/WaveHeaderNameEditModal';
-import { AuthContext } from '@/components/auth/Auth';
-import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
-import { useMutation } from '@tanstack/react-query';
-import { convertWaveToUpdateWave } from '@/helpers/waves/waves.helpers';
-import { createMockApiWave } from '@/__tests__/utils/mockFactories';
-import { createMockAuthContext } from '@/__tests__/utils/testContexts';
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import WaveHeaderNameEditModal from "@/components/waves/header/name/WaveHeaderNameEditModal";
+import { AuthContext } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { useMutation } from "@tanstack/react-query";
+import { updateWaveHub } from "@/services/api/wave-hub-api";
+import { createMockApiWave } from "@/__tests__/utils/mockFactories";
+import { createMockAuthContext } from "@/__tests__/utils/testContexts";
 
-jest.mock('@/helpers/waves/waves.helpers', () => ({ convertWaveToUpdateWave: jest.fn(() => ({ id: '1' })) }));
-jest.mock('@tanstack/react-query');
+jest.mock("@/services/api/wave-hub-api", () => ({
+  updateWaveHub: jest.fn().mockResolvedValue({}),
+}));
+jest.mock("@tanstack/react-query");
 
 const mutateAsync = jest.fn();
 (useMutation as jest.Mock).mockImplementation((opts) => ({
@@ -31,7 +33,7 @@ const mutateAsync = jest.fn();
   },
 }));
 
-describe('WaveHeaderNameEditModal', () => {
+describe("WaveHeaderNameEditModal", () => {
   const auth = createMockAuthContext({
     requestAuth: jest.fn().mockResolvedValue({ success: true }),
     setToast: jest.fn(),
@@ -40,13 +42,13 @@ describe('WaveHeaderNameEditModal', () => {
     onWaveCreated: jest.fn(),
   } as React.ContextType<typeof ReactQueryWrapperContext>;
 
-  it('picks up a rename that landed while the dialog was closed', () => {
+  it("picks up a rename that landed while the dialog was closed", () => {
     const { rerender } = render(
       <AuthContext.Provider value={auth}>
         <ReactQueryWrapperContext.Provider value={rq}>
           <WaveHeaderNameEditModal
             isOpen={false}
-            wave={createMockApiWave({ id: '1', name: 'Old' })}
+            wave={createMockApiWave({ id: "1", name: "Old" })}
             onClose={jest.fn()}
           />
         </ReactQueryWrapperContext.Provider>
@@ -61,23 +63,27 @@ describe('WaveHeaderNameEditModal', () => {
         <ReactQueryWrapperContext.Provider value={rq}>
           <WaveHeaderNameEditModal
             isOpen
-            wave={createMockApiWave({ id: '1', name: 'Renamed elsewhere' })}
+            wave={createMockApiWave({ id: "1", name: "Renamed elsewhere" })}
             onClose={jest.fn()}
           />
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
     );
 
-    expect(screen.getByPlaceholderText('Please select a name')).toHaveValue(
-      'Renamed elsewhere'
+    expect(screen.getByPlaceholderText("Please select a name")).toHaveValue(
+      "Renamed elsewhere"
     );
   });
 
-  it('renders on the shared dialog surface above the wave sidebar', () => {
+  it("renders on the shared dialog surface above the wave sidebar", () => {
     render(
       <AuthContext.Provider value={auth}>
         <ReactQueryWrapperContext.Provider value={rq}>
-          <WaveHeaderNameEditModal isOpen wave={createMockApiWave({ id: '1', name: 'Old' })} onClose={jest.fn()} />
+          <WaveHeaderNameEditModal
+            isOpen
+            wave={createMockApiWave({ id: "1", name: "Old" })}
+            onClose={jest.fn()}
+          />
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
     );
@@ -85,34 +91,38 @@ describe('WaveHeaderNameEditModal', () => {
     // The hand-rolled portal this replaced sat at tw-z-50, which rendered the
     // rename form underneath the wave sidebar, and had no keyboard handling,
     // so the native keyboard covered the input and Save.
-    const dialog = screen.getByRole('dialog', { name: 'Rename wave' });
-    expect(dialog).toHaveClass('tw-z-[9999]');
-    expect(dialog.querySelector('.mobile-wrapper-dialog')).not.toBeNull();
+    const dialog = screen.getByRole("dialog", { name: "Rename wave" });
+    expect(dialog).toHaveClass("tw-z-[9999]");
+    expect(dialog.querySelector(".mobile-wrapper-dialog")).not.toBeNull();
 
     // Opens straight into the field, which headless-ui resolves via
     // data-autofocus.
-    expect(screen.getByPlaceholderText('Please select a name')).toHaveAttribute(
-      'data-autofocus'
+    expect(screen.getByPlaceholderText("Please select a name")).toHaveAttribute(
+      "data-autofocus"
     );
   });
 
-  it('submits new name', async () => {
+  it("submits new name", async () => {
     const user = userEvent.setup();
     render(
       <AuthContext.Provider value={auth}>
         <ReactQueryWrapperContext.Provider value={rq}>
-          <WaveHeaderNameEditModal isOpen wave={createMockApiWave({ id: '1', name: 'Old' })} onClose={jest.fn()} />
+          <WaveHeaderNameEditModal
+            isOpen
+            wave={createMockApiWave({ id: "1", name: "Old" })}
+            onClose={jest.fn()}
+          />
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
     );
 
-    const nameInput = screen.getByPlaceholderText('Please select a name');
+    const nameInput = screen.getByPlaceholderText("Please select a name");
     await user.clear(nameInput);
-    await user.type(nameInput, 'New');
-    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.type(nameInput, "New");
+    await user.click(screen.getByRole("button", { name: "Save" }));
 
     expect(auth.requestAuth).toHaveBeenCalled();
-    expect(convertWaveToUpdateWave).toHaveBeenCalled();
+    expect(updateWaveHub).toHaveBeenCalledWith("1", { name: "New" });
     expect(mutateAsync).toHaveBeenCalled();
     expect(rq.onWaveCreated).toHaveBeenCalled();
   });
