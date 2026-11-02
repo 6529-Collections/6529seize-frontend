@@ -518,6 +518,19 @@ for (const guide of [
         page.getByRole("link", { name: guide.link, exact: true })
       ).toBeVisible();
       await expectNoHorizontalOverflow(page);
+      if (guide.locale === "fr-FR") {
+        const airdrops = page.getByRole("link", {
+          name: "Choisir la destination des airdrops",
+          exact: true,
+        });
+        await expect(airdrops).toBeVisible();
+        await expect(airdrops).toHaveAttribute(
+          "href",
+          "/safe-collecting/register-delegation?collection=MEMES&use_case=3"
+        );
+        await page.getByRole("tab", { name: "Déjà collectionneur" }).click();
+        await expectNoHorizontalOverflow(page);
+      }
     });
   });
 }
