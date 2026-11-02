@@ -1050,11 +1050,8 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       .getByRole("button", { name: /^About Local Composer Sandbox Wave/ })
       .click();
     await page
-      .getByRole("heading", { name: configuration.name, exact: true })
-      .hover();
-    await page
       .getByRole("button", { name: "Edit wave name", exact: true })
-      .click();
+      .press("Enter");
     const dialog = page.getByRole("dialog", {
       name: "Rename wave",
       exact: true,
