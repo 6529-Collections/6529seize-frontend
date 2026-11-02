@@ -236,6 +236,7 @@ export function E2eeTimeline({
     }
     if (direction !== "latest") nearBottomRef.current = false;
     pagingRef.current = true;
+    setHistoryLoaded(false);
     setLoadingHistory(true);
     setHistoryError(false);
     try {

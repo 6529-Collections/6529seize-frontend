@@ -53,12 +53,12 @@ function useOpenConversation(
   lastSeq: number
 ) {
   useEffect(() => {
-    if (!hasOpenConversationHint(engine)) {
+    if (!hasOpenConversationHint(engine) || !hasConversation) {
       return;
     }
     engine.setOpenConversation(g);
     return () => engine.setOpenConversation(null);
-  }, [engine, g]);
+  }, [engine, g, hasConversation]);
 
   useEffect(() => {
     if (!hasConversation) {

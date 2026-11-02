@@ -104,6 +104,27 @@ describe("E2eeConversationView", () => {
     globalThis.localStorage.clear();
   });
 
+  it("starts open-chat tracking when initial sync makes the conversation available", async () => {
+    const setOpenConversation = jest.fn((_g: string | null) => undefined);
+    const engine = Object.assign(createFakeE2eeEngine(), {
+      setOpenConversation,
+    });
+    const view = render(
+      <E2eeTestProvider value={contextFor(engine)}>
+        <E2eeConversationView g={GROUP_G} />
+      </E2eeTestProvider>
+    );
+    await waitFor(() => expect(engine.sync).toHaveBeenCalled());
+    expect(setOpenConversation).not.toHaveBeenCalled();
+    act(() => engine.update({ conversations: [conversation()] }));
+    await waitFor(() =>
+      expect(setOpenConversation).toHaveBeenCalledWith(GROUP_G)
+    );
+    expect(setOpenConversation).toHaveBeenCalledTimes(1);
+    view.unmount();
+    expect(setOpenConversation).toHaveBeenLastCalledWith(null);
+  });
+
   it("handles each reply jump once and permits another jump to the same message", async () => {
     const engine = renderView();
     const reply = screen.getByRole("button", { name: /hello @me and @bob/u });
@@ -179,6 +200,7 @@ describe("E2eeConversationView", () => {
         "Messages could not be loaded"
       )
     );
+    expect(screen.queryByText("Messages loaded.")).toBeNull();
     expect(older).toBeEnabled();
   });
 
