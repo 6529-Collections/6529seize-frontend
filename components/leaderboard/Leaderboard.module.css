@@ -427,7 +427,7 @@
 
 .viewAllLink {
   font-size: 15px !important;
-  font-family: "Montserrat", sans-serif;
+  font-family: var(--font-montserrat, "Montserrat"), sans-serif;
   font-weight: lighter;
 }
 

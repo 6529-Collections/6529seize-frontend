@@ -305,7 +305,7 @@ body {
   background-color: #000000 !important;
   color: white !important;
   font-size: 16px !important;
-  font-family: "Montserrat", sans-serif !important;
+  font-family: var(--font-montserrat, "Montserrat"), sans-serif !important;
   margin: 0;
   overflow: auto;
 }
