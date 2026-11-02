@@ -340,57 +340,71 @@ export default function UserPageSubscriptions(
           </button>
         </div>
       )}
-      <section
-        id="profile-subscriptions-overview"
-        aria-labelledby="profile-subscriptions-overview-title"
-        className={`tw-relative tw-isolate tw-scroll-mt-24 tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-bg-iron-950 tw-p-5 tw-shadow-[0_15px_40px_rgba(0,0,0,0.35)] md:tw-p-8 ${COVERAGE_BORDER_CLASS[coverageTone]}`}
+      <UserPageSubscriptionsSection
+        id="profile-subscriptions"
+        title={t(locale, "subscriptions.page.title")}
+        action={
+          <Link
+            href="/about/subscriptions"
+            className="tw-inline-flex tw-min-h-8 tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-font-semibold tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-rounded-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 desktop-hover:hover:tw-text-primary-300"
+          >
+            {t(locale, "subscriptions.page.learnMore")}
+            <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
+          </Link>
+        }
       >
-        <div
-          aria-hidden="true"
-          className="tw-pointer-events-none tw-absolute -tw-top-24 tw-right-[5%] -tw-z-10 tw-size-80 tw-bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.04),transparent_70%)] lg:-tw-top-32 lg:tw-right-[28%] lg:tw-size-[28rem]"
-        />
-        <SubscriptionCoverageSummary
-          coverage={coverageQuery.data}
-          isError={coverageQuery.isError}
-          isLoading={coverageQuery.isLoading}
-          isOwner={isConnectedAccount}
-          onRefresh={() => {
-            void coverageQuery.refetch();
-          }}
-          details={details}
-          subscriptions={memeSubscriptions}
-          upcomingLoading={fetchingMemeSubscriptions}
-          topUpExpanded={topUp.expanded}
-          onToggleTopUp={() => topUp.setExpanded(!topUp.expanded)}
-          balance={
-            <UserPageSubscriptionsBalance
-              coverage={coverageQuery.data}
-              details={details}
-              fetching={fetchingDetails}
-              refresh={refresh}
-              show_refresh={isConnectedAccount}
-            />
-          }
+        <section
+          id="profile-subscriptions-overview"
+          aria-labelledby="profile-subscriptions-overview-title"
+          className={`tw-relative tw-isolate tw-scroll-mt-24 tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-bg-iron-950 tw-p-5 tw-shadow-[0_15px_40px_rgba(0,0,0,0.35)] md:tw-p-8 ${COVERAGE_BORDER_CLASS[coverageTone]}`}
         >
-          {isConnectedAccount && (
-            <div hidden={!topUp.expanded}>
-              <UserPageSubscriptionsTopUp
-                expanded={topUp.expanded}
+          <div
+            aria-hidden="true"
+            className="tw-pointer-events-none tw-absolute -tw-top-24 tw-right-[5%] -tw-z-10 tw-size-80 tw-bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.04),transparent_70%)] lg:-tw-top-32 lg:tw-right-[28%] lg:tw-size-[28rem]"
+          />
+          <SubscriptionCoverageSummary
+            coverage={coverageQuery.data}
+            isError={coverageQuery.isError}
+            isLoading={coverageQuery.isLoading}
+            isOwner={isConnectedAccount}
+            onRefresh={() => {
+              void coverageQuery.refetch();
+            }}
+            details={details}
+            subscriptions={memeSubscriptions}
+            upcomingLoading={fetchingMemeSubscriptions}
+            topUpExpanded={topUp.expanded}
+            onToggleTopUp={() => topUp.setExpanded(!topUp.expanded)}
+            balance={
+              <UserPageSubscriptionsBalance
                 coverage={coverageQuery.data}
-                onTransactionConfirmed={refresh}
-                onCancel={() => {
-                  topUp.setExpanded(false);
-                  requestAnimationFrame(() =>
-                    document
-                      .getElementById("subscription-top-up-opener")
-                      ?.focus()
-                  );
-                }}
+                details={details}
+                fetching={fetchingDetails}
+                refresh={refresh}
+                show_refresh={isConnectedAccount}
               />
-            </div>
-          )}
-        </SubscriptionCoverageSummary>
-      </section>
+            }
+          >
+            {isConnectedAccount && (
+              <div hidden={!topUp.expanded}>
+                <UserPageSubscriptionsTopUp
+                  expanded={topUp.expanded}
+                  coverage={coverageQuery.data}
+                  onTransactionConfirmed={refresh}
+                  onCancel={() => {
+                    topUp.setExpanded(false);
+                    requestAnimationFrame(() =>
+                      document
+                        .getElementById("subscription-top-up-opener")
+                        ?.focus()
+                    );
+                  }}
+                />
+              </div>
+            )}
+          </SubscriptionCoverageSummary>
+        </section>
+      </UserPageSubscriptionsSection>
       <UserPageSubscriptionsUpcoming
         profileKey={profileKey}
         details={details}
@@ -437,18 +451,6 @@ export default function UserPageSubscriptions(
           setLogsPage={fetchLogs}
         />
       </UserPageSubscriptionsSection>
-      <Link
-        href="/about/subscriptions"
-        className="tw-flex tw-min-h-14 tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-rounded-xl tw-bg-iron-950 tw-px-5 tw-py-4 tw-text-sm tw-text-iron-100 tw-no-underline tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 max-md:tw-bg-iron-900 max-md:tw-px-4 max-md:tw-shadow-none"
-      >
-        <span className="tw-text-[15px] tw-font-medium">
-          {t(locale, "subscriptions.page.learnMore")}
-        </span>
-        <ArrowRightIcon
-          aria-hidden="true"
-          className="tw-size-4 tw-text-iron-400"
-        />
-      </Link>
     </div>
   );
 }

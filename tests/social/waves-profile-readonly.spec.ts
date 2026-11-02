@@ -570,6 +570,32 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       (url) => url.pathname.includes("/subscriptions/consolidation/logs/")
     );
     await expectProfileShell(page, "Subscriptions");
+    const overview = page.getByRole("region", {
+      name: "Subscription minting",
+      exact: true,
+    });
+    const learnMore = overview.getByRole("link", {
+      name: "Learn more",
+      exact: true,
+    });
+    await expect(
+      page
+        .locator("main")
+        .getByRole("link", { name: "Learn more", exact: true })
+    ).toHaveCount(1);
+    await expect(learnMore).toHaveAttribute("href", "/about/subscriptions");
+    const titleBox = await overview
+      .getByRole("heading", { name: "Subscription minting", exact: true })
+      .boundingBox();
+    const linkBox = await learnMore.boundingBox();
+    expect(titleBox).not.toBeNull();
+    expect(linkBox).not.toBeNull();
+    expect(linkBox!.x).toBeGreaterThan(titleBox!.x + titleBox!.width);
+    expect(
+      Math.abs(
+        linkBox!.y + linkBox!.height / 2 - (titleBox!.y + titleBox!.height / 2)
+      )
+    ).toBeLessThanOrEqual(1);
     const history = page.getByRole("region", {
       name: "Subscription History",
       exact: true,

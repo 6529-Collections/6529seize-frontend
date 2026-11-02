@@ -48,7 +48,8 @@ first render.
   Where Subscriptions are hidden (the iOS app outside the US) the tab
   redirects to Identity and nothing scrolls.
 - Use the subscription-awareness action on Home or a Meme card.
-- Use `Learn more` below Subscription History to open `/about/subscriptions`.
+- Use `Learn more` at the right of the `Subscription minting` title above the
+  coverage card to open `/about/subscriptions`.
 - Links to `#profile-subscriptions-overview`, `#profile-subscriptions-settings`,
   `#profile-subscriptions-top-up`, `#profile-subscriptions-upcoming`, and
   `#profile-subscriptions-history` scroll to and focus their section heading.
