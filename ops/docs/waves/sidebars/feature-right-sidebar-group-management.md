@@ -10,8 +10,8 @@ competition’s Settings and remain unchanged when the wave is edited.
 
 Users can:
 
-- review `Visibility`, `Chat access`, and `Admins` scopes; competition `Drop`
-  and `Vote` rows are visible but edited in competition Settings
+- review `Visibility`, `Chat access`, and `Admins` scopes; competition entry
+  and voting access are managed in competition Settings
 - follow visible `1 user` or `X users` counts to inspect both criteria and
   current members
 - open a prefilled group editor from a `Visibility`, `Chat access`, or `Admins` gear
@@ -74,7 +74,7 @@ Users can:
 11. `Chat access` offers `Use visibility criteria` when its effective criteria
     differ from Visibility. Confirmation changes Chat to the Visibility group;
     when Visibility is public, Chat becomes public too. `Admins` does not offer
-    this shortcut. Drop and Vote have no editing controls in Configuration.
+    this shortcut. Drop and Vote access are managed in competition Settings.
 12. Authenticate when prompted.
 13. Saving edited criteria creates a separate group and assigns that copy only
     to the access row whose gear was opened. The original group, other access
@@ -94,8 +94,7 @@ Users can:
 
 ## Common Scenarios
 
-- Inspect competition `Drop` and `Vote` groups, then use competition Settings
-  to change them.
+- Use competition Settings to inspect or change entry and voting groups.
 - Restrict a public wave and public Chat by assigning one Visibility group in
   one save.
 - Make Visibility public with confirmation.
@@ -112,7 +111,8 @@ Users can:
   audience need no warning, even when the group itself is different.
 - Parent visibility can change while subwaves exist. Opening a subwave always
   requires access to both waves.
-- Chat waves show only `Visibility`, `Chat access`, and `Admins`.
+- Configuration shows only `Visibility`, `Chat access`, and `Admins` for every
+  wave. Competition access rows are omitted.
 - `Chat access` controls who can chat only when chat is enabled; it does not
   show whether chat is currently enabled or disabled.
 - Chat waves require chat to stay enabled, so Configuration does not show a
@@ -172,8 +172,8 @@ unavailable` without exposing the group id or treating the scope as public.
 ## Limitations / Notes
 
 - Editing controls require a non-proxy profile with wave edit permission.
-- Curation actions are separate from `Visibility`/`Drop`/`Vote`/
-  `Chat access`/`Admins` access scope rows.
+- Curation actions are separate from `Visibility`, `Chat access`, and `Admins`
+  access scope rows.
 - Include/exclude limits are enforced per group:
   - include list max: `10,000`
   - exclude list max: `1,000`
