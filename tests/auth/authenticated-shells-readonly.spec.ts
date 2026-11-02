@@ -415,7 +415,9 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       page.getByRole("group", { name: "Edition Preference" })
     ).toBeVisible();
     await history.click();
-    await expect(page.getByRole("tab", { name: "Redeemed" })).toBeVisible();
+    await expect(
+      page.getByRole("tab", { name: "Redeemed Subscriptions", exact: true })
+    ).toBeVisible();
     await expectNoHorizontalOverflow(page);
   });
 
@@ -552,25 +554,25 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     ).toBeVisible();
     await page.getByRole("button", { name: "Subscription History" }).click();
     await expectSingleLineLabel(
-      page.getByRole("tab", { name: "Top Ups", exact: true })
+      page.getByRole("tab", { name: "Top Up History", exact: true })
     );
-    for (const [tab, heading] of [
-      ["Redeemed", "Redeemed Subscriptions"],
-      ["Log", "Log History"],
-      ["Top Ups", "Top Up History"],
+    for (const title of [
+      "Redeemed Subscriptions",
+      "Log History",
+      "Top Up History",
     ]) {
-      await page.getByRole("tab", { name: tab, exact: true }).click();
-      const panel = page.getByRole("tabpanel");
-      await expect(
-        panel.getByRole("heading", { name: heading, exact: true })
-      ).toBeVisible();
+      const tab = page.getByRole("tab", { name: title, exact: true });
+      await expectSingleLineLabel(tab);
+      await tab.click();
+      const panel = page.getByRole("tabpanel", { name: title, exact: true });
+      await expect(panel).toBeVisible();
       await panel.getByRole("button", { name: "Next page" }).click();
       await expect(
         panel.getByRole("textbox", { name: "Page number" })
       ).toHaveValue("2");
       await expectNoHorizontalOverflow(page);
     }
-    await page.getByRole("tab", { name: "Log", exact: true }).click();
+    await page.getByRole("tab", { name: "Log History", exact: true }).click();
     await expect(
       page.getByText(
         "Added to Final Subscription for Meme #568 on 2026-10-30",

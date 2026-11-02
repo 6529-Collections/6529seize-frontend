@@ -1,4 +1,5 @@
 import Pagination from "@/components/pagination/Pagination";
+import { getButtonClasses } from "@/components/utils/button/buttonStyles";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import type { RedeemedSubscription } from "@/generated/models/RedeemedSubscription";
 import type { SubscriptionLog } from "@/generated/models/SubscriptionLog";
@@ -45,7 +46,6 @@ export default function UserPageSubscriptionsHistory(
   const tabs = [
     {
       id: "redeemed",
-      title: t(locale, "subscriptions.history.redeemed"),
       heading: t(locale, "subscriptions.history.redeemedTitle"),
       loading: props.redeemedLoading,
       empty: t(locale, "subscriptions.history.emptyRedeemed"),
@@ -58,7 +58,6 @@ export default function UserPageSubscriptionsHistory(
     },
     {
       id: "logs",
-      title: t(locale, "subscriptions.history.logs"),
       heading: t(locale, "subscriptions.history.logsTitle"),
       loading: props.logsLoading,
       empty: t(locale, "subscriptions.history.emptyLogs"),
@@ -71,7 +70,6 @@ export default function UserPageSubscriptionsHistory(
     },
     {
       id: "topups",
-      title: t(locale, "subscriptions.history.topups"),
       heading: t(locale, "subscriptions.history.topupsTitle"),
       loading: props.topUpsLoading,
       empty: t(locale, "subscriptions.history.emptyTopups"),
@@ -87,14 +85,21 @@ export default function UserPageSubscriptionsHistory(
     <TabGroup>
       <TabList
         aria-label={t(locale, "subscriptions.history.title")}
-        className="tw-mb-3 tw-flex tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900 tw-p-0.5 md:tw-w-fit"
+        className="tw-mb-4 tw-flex tw-flex-wrap tw-gap-2"
       >
         {tabs.map((tab) => (
           <Tab
             key={tab.id}
-            className="tw-min-h-11 tw-flex-1 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-[13px] tw-font-medium tw-text-iron-400 data-[selected]:tw-bg-iron-700 data-[selected]:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 md:tw-min-h-8 md:tw-flex-none"
+            className={({ selected }) =>
+              getButtonClasses({
+                variant: selected ? "filterSelected" : "filter",
+                size: "md",
+                className:
+                  "tw-min-h-11 !tw-rounded-full motion-reduce:tw-transition-none",
+              })
+            }
           >
-            {tab.title}
+            {tab.heading}
           </Tab>
         ))}
       </TabList>
@@ -105,9 +110,7 @@ export default function UserPageSubscriptionsHistory(
             aria-busy={tab.loading === true}
             className="focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
           >
-            <h3 className="tw-mb-2 tw-mt-4 tw-text-sm tw-font-medium tw-text-iron-300">
-              {tab.heading}
-            </h3>
+            <h3 className="tw-sr-only">{tab.heading}</h3>
             {tab.loading ? (
               <HistoryLoadingState title={tab.heading} />
             ) : (

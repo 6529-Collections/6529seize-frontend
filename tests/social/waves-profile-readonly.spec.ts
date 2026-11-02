@@ -561,7 +561,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expectNoHorizontalOverflow(page);
   });
 
-  test("keeps subscription history defaults responsive and preserves user toggles", async ({
+  test("keeps compact subscription history and preserves its selected pill across resizing", async ({
     page,
   }) => {
     await gotoReadyWithApiResponse(
@@ -570,34 +570,44 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       (url) => url.pathname.includes("/subscriptions/consolidation/logs/")
     );
     await expectProfileShell(page, "Subscriptions");
-    const isPhone = (page.viewportSize()?.width ?? 0) < 640;
-    const disclosures = page
-      .getByRole("region", { name: "Subscription History", exact: true })
-      .locator("details");
-    await expect(disclosures).toHaveCount(3);
-    for (const disclosure of await disclosures.all()) {
-      await expect(disclosure).toHaveJSProperty("open", !isPhone);
-      await expect(disclosure).toHaveAttribute("aria-busy", "false");
-    }
-    const logs = disclosures.filter({ hasText: "Log History" });
-    const summary = page
-      .getByRole("region", { name: "Subscription History", exact: true })
-      .locator("summary")
-      .filter({ hasText: "Log History" });
-    await summary.click();
-    await expect(logs).toHaveJSProperty("open", isPhone);
+    const history = page.getByRole("region", {
+      name: "Subscription History",
+      exact: true,
+    });
+    const toggle = history.getByRole("button", {
+      name: "Subscription History",
+      exact: true,
+    });
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+    await toggle.click();
+    const tabs = history.getByRole("tablist");
+    await expect(tabs.getByRole("tab")).toHaveText([
+      "Redeemed Subscriptions",
+      "Log History",
+      "Top Up History",
+    ]);
+    const logs = tabs.getByRole("tab", { name: "Log History", exact: true });
+    await logs.click();
+    await expect(logs).toHaveAttribute("aria-selected", "true");
+    await expect(history.getByRole("tabpanel")).toHaveAttribute(
+      "aria-busy",
+      "false"
+    );
     const viewport = page.viewportSize()!;
     await page.setViewportSize({
-      width: isPhone ? 900 : 390,
+      width: viewport.width < 640 ? 900 : 390,
       height: viewport.height,
     });
-    await expect(logs).toHaveJSProperty("open", isPhone);
+    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+    await expect(logs).toHaveAttribute("aria-selected", "true");
+    await expectNoHorizontalOverflow(page);
     await page.setViewportSize(viewport);
-    await expect(logs).toHaveJSProperty("open", isPhone);
-    await summary.press("Enter");
-    await expect(logs).toHaveJSProperty("open", !isPhone);
-    await summary.press("Space");
-    await expect(logs).toHaveJSProperty("open", isPhone);
+    await expect(logs).toHaveAttribute("aria-selected", "true");
+    await toggle.press("Enter");
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+    await toggle.press("Space");
+    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+    await expect(logs).toHaveAttribute("aria-selected", "true");
     await expectNoHorizontalOverflow(page);
   });
 

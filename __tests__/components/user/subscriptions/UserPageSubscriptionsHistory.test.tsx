@@ -68,12 +68,16 @@ describe("UserPageSubscriptionsHistory", () => {
     const user = userEvent.setup();
     const props = makeProps();
     const { rerender } = render(<UserPageSubscriptionsHistory {...props} />);
-    expect(screen.getByRole("tab", { name: "Redeemed" })).toHaveAttribute(
-      "aria-selected",
-      "true"
-    );
+    expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
+      "Redeemed Subscriptions",
+      "Log History",
+      "Top Up History",
+    ]);
     expect(
-      screen.getByRole("heading", { name: "Redeemed Subscriptions" })
+      screen.getByRole("tab", { name: "Redeemed Subscriptions", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+    expect(
+      screen.getByRole("tabpanel", { name: "Redeemed Subscriptions" })
     ).toBeVisible();
     expect(
       screen.getByText("Redeemed Subscription for Meme #568 x2")
@@ -94,15 +98,19 @@ describe("UserPageSubscriptionsHistory", () => {
         redeemed={{ ...props.redeemed, page: 2 }}
       />
     );
-    await user.click(screen.getByRole("tab", { name: "Log", exact: true }));
-    expect(screen.getByRole("heading", { name: "Log History" })).toBeVisible();
+    await user.click(
+      screen.getByRole("tab", { name: "Log History", exact: true })
+    );
+    expect(screen.getByRole("tabpanel", { name: "Log History" })).toBeVisible();
     expect(screen.getByText(props.logs.data[0].log)).toBeVisible();
     expect(screen.getByText(props.logs.data[0].additional_info!)).toBeVisible();
     await user.click(screen.getByRole("button", { name: "Next page" }));
     expect(props.setLogsPage).toHaveBeenCalledWith(2);
-    await user.click(screen.getByRole("tab", { name: "Top Ups" }));
+    await user.click(
+      screen.getByRole("tab", { name: "Top Up History", exact: true })
+    );
     expect(
-      screen.getByRole("heading", { name: "Top Up History" })
+      screen.getByRole("tabpanel", { name: "Top Up History" })
     ).toBeVisible();
     expect(screen.getByText(`from: ${address}`)).toBeVisible();
     expect(screen.getByRole("tabpanel")).not.toHaveTextContent("—");
@@ -111,9 +119,13 @@ describe("UserPageSubscriptionsHistory", () => {
     ).toHaveAttribute("href", expect.stringContaining("0x456"));
     await user.click(screen.getByRole("button", { name: "Next page" }));
     expect(props.setTopUpPage).toHaveBeenCalledWith(2);
-    await user.click(screen.getByRole("tab", { name: "Redeemed" }));
+    await user.click(
+      screen.getByRole("tab", { name: "Redeemed Subscriptions", exact: true })
+    );
     expect(
-      within(screen.getByRole("tabpanel")).getByRole("textbox", {name: "Page number"})
+      within(screen.getByRole("tabpanel")).getByRole("textbox", {
+        name: "Page number",
+      })
     ).toHaveValue("2");
   });
 
@@ -122,10 +134,10 @@ describe("UserPageSubscriptionsHistory", () => {
     const { rerender } = render(<UserPageSubscriptionsHistory {...props} />);
     await userEvent
       .setup()
-      .click(screen.getByRole("tab", { name: "Log", exact: true }));
+      .click(screen.getByRole("tab", { name: "Log History", exact: true }));
     rerender(<UserPageSubscriptionsHistory {...props} logsLoading />);
     expect(
-      screen.getByRole("tab", { name: "Log", exact: true })
+      screen.getByRole("tab", { name: "Log History", exact: true })
     ).toHaveAttribute("aria-selected", "true");
     expect(screen.getByText("Loading Log History")).toBeInTheDocument();
     rerender(<UserPageSubscriptionsHistory {...props} logs={page([])} />);
@@ -135,11 +147,15 @@ describe("UserPageSubscriptionsHistory", () => {
   it("supports arrow-key tab navigation", async () => {
     render(<UserPageSubscriptionsHistory {...makeProps()} />);
     const user = userEvent.setup();
-    await user.click(screen.getByRole("tab", { name: "Redeemed" }));
+    await user.click(
+      screen.getByRole("tab", { name: "Redeemed Subscriptions", exact: true })
+    );
     await user.keyboard("{ArrowRight}");
-    expect(screen.getByRole("tab", { name: "Log", exact: true })).toHaveFocus();
     expect(
-      screen.getByRole("tab", { name: "Log", exact: true })
+      screen.getByRole("tab", { name: "Log History", exact: true })
+    ).toHaveFocus();
+    expect(
+      screen.getByRole("tab", { name: "Log History", exact: true })
     ).toHaveAttribute("aria-selected", "true");
   });
 });

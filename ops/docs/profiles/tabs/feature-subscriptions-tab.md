@@ -95,9 +95,11 @@ first render.
    full Airdrop Address. Owners can use its edit link to open delegation
    registration. Settings starts closed and summarizes the edition preference
    and address on wider screens.
-6. Open `Subscription History` and choose Redeemed, Log, or Top Ups. Each tab
-   retains the original entry text, dates, addresses, transaction links, empty
-   state, and independent pagination.
+6. Open `Subscription History` and choose Redeemed Subscriptions, Log History,
+   or Top Up History. The selected pill is light, the others are dark, and the
+   labels have no counts. Pills wrap on narrow screens. One history view is shown
+   at a time, retaining its original entry text, dates, addresses, transaction
+   links, empty state, and independent pagination.
 
 ## Current Behavior
 
