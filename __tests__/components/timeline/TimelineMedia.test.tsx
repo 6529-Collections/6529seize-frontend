@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import TimelineMedia, { MediaType } from "@/components/timeline/TimelineMedia";
 import { getMediaGatewayFallbackUrls } from "@/components/nft-image/utils/gateway-fallback";
+import { publicEnv } from "@/config/env";
 import { t } from "@/i18n/messages";
 import { parseDecentralizedMediaRef } from "@/lib/media/decentralized-media";
 
@@ -60,6 +61,39 @@ describe("TimelineMedia", () => {
     );
     fireEvent.error(screen.getByRole("img"));
     expect(screen.getByRole("img")).toHaveAttribute("src", RESOLVER_URL);
+  });
+
+  it.each([
+    "https://archive.example",
+    "https://archive.example/media/v1",
+    "https://media.6529.io/cache",
+  ])("keeps a configured historical resolver at %s", (endpoint) => {
+    jest.replaceProperty(publicEnv, "MEDIA_RESOLVER_ENDPOINT", endpoint);
+    render(<TimelineMedia url={HISTORICAL_URL} type={MediaType.IMAGE} />);
+    expect(screen.getByRole("img")).toHaveAttribute("src", HISTORICAL_URL);
+    fireEvent.error(screen.getByRole("img"));
+    expect(screen.getByRole("img")).toHaveAttribute(
+      "src",
+      `${endpoint}/arweave/${HISTORICAL_TX}/Original.png`
+    );
+    fireEvent.error(screen.getByRole("img"));
+    expect(screen.getByRole("img")).toHaveAttribute(
+      "src",
+      `https://gateway.arweave.net/${HISTORICAL_TX}/Original.png`
+    );
+  });
+
+  it("rejects normalized transaction changes on a configured resolver", () => {
+    jest.replaceProperty(
+      publicEnv,
+      "MEDIA_RESOLVER_ENDPOINT",
+      "https://archive.example/media/v1"
+    );
+    const url = `ar://${HISTORICAL_TX}/../ifosq_ZN9_PrDSQmq65JTjeB2GnnfPSFoHxRazxC4PY/old.png`;
+    render(<TimelineMedia url={url} type={MediaType.IMAGE} />);
+    const image = screen.getByRole("img");
+    fireEvent.error(image);
+    expect(image).toHaveAttribute("src", url);
   });
 
   it.each([

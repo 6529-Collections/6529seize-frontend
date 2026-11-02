@@ -3,9 +3,13 @@
 import styles from "./Timeline.module.css";
 import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 import { getMediaGatewayFallbackUrls } from "@/components/nft-image/utils/gateway-fallback";
+import { publicEnv } from "@/config/env";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { parseDecentralizedMediaRef } from "@/lib/media/decentralized-media";
+import {
+  parseDecentralizedMediaRef,
+  to6529ResolverUrl,
+} from "@/lib/media/decentralized-media";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface Props {
@@ -28,8 +32,19 @@ function getHistoricalMediaSources(url: string): string[] {
   // serves the same historical asset. Never infer an archive from current NFT data.
   const recorded = parseDecentralizedMediaRef(url);
   if (recorded?.protocol !== "arweave") return [url];
+  const resolverUrl = to6529ResolverUrl(
+    recorded,
+    publicEnv.MEDIA_RESOLVER_ENDPOINT
+  );
+  // The configured resolver may have another host or a path prefix. Its actual
+  // request path must still contain the complete, unmodified historical reference.
+  const resolverPath = to6529ResolverUrl(recorded, "");
+  const matchingResolver = new URL(resolverUrl).pathname.endsWith(resolverPath)
+    ? resolverUrl
+    : null;
   const matchingSources = getMediaGatewayFallbackUrls(url).filter(
     (candidate) => {
+      if (candidate === matchingResolver) return true;
       const ref = parseDecentralizedMediaRef(candidate);
       return (
         ref?.protocol === "arweave" &&
