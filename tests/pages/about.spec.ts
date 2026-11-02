@@ -11,6 +11,16 @@ test.describe("About Pages @smoke @medium @large", () => {
   test("shows direct desktop downloads and independent macOS 12 recovery", async ({
     page,
   }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "userAgentData", {
+        configurable: true,
+        value: { platform: "macOS", mobile: false },
+      });
+      Object.defineProperty(navigator, "maxTouchPoints", {
+        configurable: true,
+        value: 0,
+      });
+    });
     await page.route(
       "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/**",
       async (route) => {
@@ -44,8 +54,11 @@ test.describe("About Pages @smoke @medium @large", () => {
       .getByText("macOS", { exact: true })
       .locator("xpath=ancestor::summary");
     await expect(macSummary).toHaveText("macOS");
+    await expect(mac).toHaveAttribute("open");
     await expect(mac.getByText("Requires macOS 13 or later")).toBeVisible();
-    await expect(mac.getByText("For macOS 12 Monterey")).toBeVisible();
+    await expect(
+      mac.getByText("Last compatible version for macOS 12 Monterey")
+    ).toBeVisible();
     await expect(
       mac.getByRole("link", { name: /version 0.3.15, Apple silicon/ })
     ).toHaveAttribute("href", /6529-DESKTOP-mac-arm64-0\.3\.15\.dmg$/);

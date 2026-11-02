@@ -33,7 +33,9 @@ choose a platform before asking.
 
 1. Open the `6529 Apps` page.
 2. Use `6529 Mobile` to choose the iOS App Store or Android Google Play.
-3. Expand Windows, macOS, or Linux under `6529 Desktop`.
+3. The matching desktop OS expands automatically when detected. Expand Windows,
+   macOS, or Linux yourself to choose another platform; phones, tablets and
+   unrecognized devices start with all desktop sections collapsed.
 4. Choose the version appropriate for your OS, then the architecture or package
    format. `Download` opens the installer directly. An `Arweave mirror` appears
    when a mirror has been published.
@@ -80,6 +82,9 @@ choose a platform before asking.
   are not installation choices on this page.
 - The mobile and desktop sections span the page width. Accordion headers show
   only the operating system; version and compatibility appear after expanding.
+  Compact download rows show architectures for Windows/macOS and package names
+  for Linux, with a quieter optional mirror link. macOS 12 compatibility is
+  explained once below its version, without a duplicate badge.
 - Download and store destinations are external and can have their own regional
   or device restrictions.
 - The site footer opens this page in the same tab; it does not link directly to
