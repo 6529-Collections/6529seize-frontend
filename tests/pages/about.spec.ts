@@ -8,6 +8,57 @@ import {
 } from "../testHelpers";
 
 test.describe("About Pages @smoke @medium @large", () => {
+  test("shows direct desktop downloads and independent macOS 12 recovery", async ({
+    page,
+  }) => {
+    await page.route(
+      "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/**",
+      async (route) => {
+        const url = route.request().url();
+        if (url.endsWith(".json")) {
+          await route.fulfill({ json: { version: "0.3.18", files: [] } });
+          return;
+        }
+        const legacy = url.endsWith("latest-macos-12.yml");
+        const version = legacy ? "0.3.15" : "0.3.18";
+        const file = url.includes("/win/")
+          ? `6529-DESKTOP-win-x64-${version}.exe`
+          : url.includes("/linux/")
+            ? `6529-DESKTOP-linux-x86_64-${version}.AppImage`
+            : `6529-DESKTOP-mac-arm64-${version}.dmg`;
+        await route.fulfill({
+          json: {
+            version,
+            files: [{ url: file }],
+            minimumSystemVersion: legacy ? "21.0.0" : "22.0.0",
+          },
+        });
+      }
+    );
+    await page.goto("/about/6529-apps", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    const mac = page
+      .locator("details")
+      .filter({ has: page.locator("summary").filter({ hasText: /^macOS$/ }) });
+    await expect(mac.locator("summary")).toHaveText("macOS");
+    await expect(mac.getByText("Requires macOS 13 or later")).toBeVisible();
+    await expect(mac.getByText("For macOS 12 Monterey")).toBeVisible();
+    await expect(
+      mac.getByRole("link", { name: /version 0.3.15, Apple silicon/ })
+    ).toHaveAttribute("href", /6529-DESKTOP-mac-arm64-0\.3\.15\.dmg$/);
+    await expect(mac.getByText(/Keep your existing app data/)).toBeVisible();
+    const windows = page.locator("summary").filter({ hasText: /^Windows$/ });
+    await windows.focus();
+    await page.keyboard.press("Enter");
+    await expect(mac).not.toHaveAttribute("open");
+    await expect(
+      page.getByRole("link", { name: /Windows, version 0.3.18, x64/ })
+    ).toHaveAttribute("href", /win-x64-0\.3\.18\.exe$/);
+    await expectNoHorizontalOverflow(page);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("should load the about index page", async ({ page }) => {
     await page.goto("/about", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);

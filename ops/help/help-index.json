@@ -1215,6 +1215,9 @@
         "Open it from About > About 6529 > 6529 Apps, the About contents menu, site-wide page search, or the site footer's second text-link row.",
         "The footer link is labeled 6529 Apps, appears between License and API, and opens the internal route in the same tab.",
         "The page keeps 6529 Mobile iOS and Android store links together with versioned 6529 Desktop downloads for Windows, macOS, and Linux.",
+        "Expand Windows, macOS or Linux to see versions and download installers directly. Arweave mirrors appear when published. Windows has x64/ARM64 EXEs; Linux has x64 AppImage, DEB and RPM installers.",
+        "Current Desktop releases require macOS 13+. macOS 12 Monterey has a separate last-compatible release feed, currently 0.3.15, for Intel and Apple silicon. If an update stops opening on macOS 12, reinstall that compatible app and keep existing application data.",
+        "Versions and installer links are feed-driven and update without a frontend deployment. If one feed is unavailable, other downloads remain usable and Try again retries the failed requests.",
         "Use this page to find official app downloads; the footer does not link directly to a platform download."
       ],
       "canonical_path": "/about/6529-apps",
