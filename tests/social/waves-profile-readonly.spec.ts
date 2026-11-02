@@ -1,5 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 import { ApiProfileClassification } from "../../generated/models/ApiProfileClassification";
+import type { ApiWaveOverviewPage } from "../../generated/models/ApiWaveOverviewPage";
 import type { ApiXTdhGrantsPage } from "../../generated/models/ApiXTdhGrantsPage";
 import { ApiXTdhGrantStatus } from "../../generated/models/ApiXTdhGrantStatus";
 import { ApiXTdhGrantTargetChain } from "../../generated/models/ApiXTdhGrantTargetChain";
@@ -117,33 +118,29 @@ async function getFirstWaveId(page: Page) {
 }
 
 async function getPublicChatMessageTarget(page: Page) {
-  await gotoReady(page, "/waves");
-  // Use the same public chat fixtures as the remembered-wave journey. Choosing
-  // an arbitrary wave and serialNo=1 does not establish a real message target.
-  const name =
-    new URL(page.url()).hostname === "staging.6529.io"
-      ? "Memes-Chat"
-      : "maybe's dive bar";
-  const toggle = page
-    .getByRole("button", { name: "Find a wave…", exact: true })
-    .filter({ visible: true });
-  const search = page
-    .getByRole("searchbox", { name: "Find a wave…", exact: true })
-    .filter({ visible: true });
-  await expect(search.or(toggle)).toBeVisible();
-  if (!(await search.isVisible())) await toggle.click();
-  await search.fill(name);
-  const link = page
-    .getByRole("region", { name: "Search results · All waves" })
-    .filter({ visible: true })
-    .getByRole("link")
-    .filter({ hasText: name })
-    .first();
-  await expect(link).toBeVisible({ timeout: 15000 });
-  const href = await link.getAttribute("href");
-  expect(href).toMatch(/^\/waves\/[0-9a-f-]{36}$/i);
-  const waveId = href!.split("/").at(-1)!;
-  await link.click();
+  const response = await gotoReadyWithApiResponse(
+    page,
+    "/waves",
+    (url) =>
+      url.pathname === "/api/v2/waves" &&
+      !url.searchParams.has("name") &&
+      !url.searchParams.has("pinned")
+  );
+  const overview = (await response.json()) as ApiWaveOverviewPage;
+  const wave = overview.data.find(
+    (candidate) =>
+      !candidate.has_competition &&
+      !candidate.is_private &&
+      !candidate.is_dm_wave &&
+      candidate.total_drops_count > 1
+  );
+  expect(
+    wave,
+    "Legacy-link fixture unavailable: public discovery must contain a nonempty public chat wave"
+  ).toBeDefined();
+  const waveId = wave!.id;
+  expect(waveId).toMatch(/^[0-9a-f-]{36}$/i);
+  await gotoReady(page, `/waves/${waveId}`);
   const message = page
     .getByRole("region", {
       name: "Wave chat file upload area",
