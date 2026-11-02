@@ -124,6 +124,16 @@ give the staging server its own access key: `/api` routes bypass the staging
 access gate, so a server-held key would let anyone without staging access render
 pre-release data through `/api/og-metadata/*`.
 
+## Page edge cache
+
+`staging.6529.io` is served through CloudFront, which answers prerendered
+pages from the edge. Each staging deployment purges that cache after the exact
+HTTP version check, and the purge must complete before the job succeeds.
+Production is not behind CloudFront yet; its purge step is skipped until the
+cutover sets `PRODUCTION_PAGE_DISTRIBUTION_ID`. See
+[Page edge cache](cloudfront-page-cache.md) for what is cached, manual purges,
+rollback and the production cutover plan.
+
 ## Order and completion
 
 - Fetch shared refs before merging; preserve other developers' staging changes

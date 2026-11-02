@@ -68,7 +68,9 @@ if (process.argv.includes("--check")) {
     );
     process.exit(1);
   }
-  console.log(`CloudFront origin-facing ranges are current (${ipv4.length} IPv4, ${ipv6.length} IPv6).`);
+  console.log(
+    `CloudFront origin-facing ranges are current (${ipv4.length} IPv4, ${ipv6.length} IPv6).`
+  );
 } else {
   writeFileSync(OUTPUT, next);
   console.log(`Wrote ${ipv4.length} IPv4 and ${ipv6.length} IPv6 prefixes.`);

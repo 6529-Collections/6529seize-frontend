@@ -188,7 +188,11 @@ describe("createClientRateLimiter", () => {
       ])
     ).toBe(1);
     expect(
-      allowedCount(enforce, ["2a00:1450:0:1::1", "2a00:1450:1::1", "2a00:1451::"])
+      allowedCount(enforce, [
+        "2a00:1450:0:1::1",
+        "2a00:1450:1::1",
+        "2a00:1451::",
+      ])
     ).toBe(3);
   });
 
