@@ -27,11 +27,15 @@ async function qaTransport(session: StagingE2eeSession) {
     const url = new URL(`/api/${endpoint}`, "https://api.staging.6529.io");
     for (const [key, value] of Object.entries(params ?? {}))
       url.searchParams.set(key, value);
-    const response = await session.context.request.fetch(url.toString(), {
-      method,
-      headers: { authorization },
-      ...(body ? { data: body } : {}),
-    });
+    const response = await session.context.request
+      .fetch(url.toString(), {
+        method,
+        headers: { authorization },
+        ...(body ? { data: body } : {}),
+      })
+      .catch(() => {
+        throw new Error("Staging QA transport failed");
+      });
     const result = await response.json();
     if (!response.ok())
       throw new E2eeApiError({

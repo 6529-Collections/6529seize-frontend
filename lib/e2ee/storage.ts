@@ -1,5 +1,6 @@
 import { MemoryE2eeStorage } from "./storage-memory";
 import { nextVersion } from "./storage-version";
+import { backfillHistory } from "./storage-upgrade";
 import {
   historyKey,
   isUnread,
@@ -232,14 +233,9 @@ function upgrade(db: IDBDatabase, tx: IDBTransaction): void {
       messages.createIndex(name!, ["profileId", "g", path!]);
   }
   // Upgrade existing records in place, inside the versionchange transaction.
-  const cursor = messages.openCursor();
-  cursor.onsuccess = () => {
-    const row = cursor.result;
-    if (!row) return;
-    const value = row.value as WithProfile<StoredMessage>;
-    row.update(indexedMessage(value.profileId, value));
-    row.continue();
-  };
+  backfillHistory(messages, tx.objectStore(S_GROUPS), indexedMessage, (row) =>
+    strip(row)
+  );
 }
 
 export const isIndexedDbAvailable = (): boolean =>

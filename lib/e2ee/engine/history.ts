@@ -119,7 +119,7 @@ export function updateHistorySummary(
   ctx: EngineContext,
   runtime: GroupRuntime
 ): void {
-  const summary = runtime.record.history ?? emptyHistorySummary();
+  const summary = { ...(runtime.record.history ?? emptyHistorySummary()) };
   for (const id of new Set([...runtime.dirty, ...runtime.deleted])) {
     const previous = runtime.originals.get(id);
     const current = runtime.deleted.has(id)

@@ -1,7 +1,7 @@
 /** @jest-environment node */
 import { IDBFactory, IDBKeyRange } from "fake-indexeddb";
 import { createIndexedDbE2eeStorage, E2EE_DB_NAME } from "@/lib/e2ee/storage";
-import { historyKey } from "@/lib/e2ee/history-order";
+import { historyKey, emptyHistorySummary } from "@/lib/e2ee/history-order";
 import { newRuntime } from "@/lib/e2ee/engine/groups";
 import {
   cacheMessage,
@@ -10,6 +10,7 @@ import {
 } from "@/lib/e2ee/engine/history";
 import type { StoredGroup, StoredMessage } from "@/lib/e2ee/records";
 import type { EngineContext } from "@/lib/e2ee/engine/context";
+import { checkpoint } from "@/lib/e2ee/engine/context";
 
 const message = (
   seq: number,
@@ -41,6 +42,47 @@ const message = (
 
 beforeAll(() => {
   globalThis.IDBKeyRange = IDBKeyRange;
+});
+
+it("does not double unread or history counts when an atomic write is retried", async () => {
+  const storage = createIndexedDbE2eeStorage(new IDBFactory());
+  const runtime = newRuntime({
+    g: "g",
+    readSeq: 0,
+    history: emptyHistorySummary(),
+  } as StoredGroup);
+  await storage.writeBatch("p", { groups: [runtime.record] });
+  const ctx = {
+    storage,
+    profileId: "p",
+    store: { touch: jest.fn() },
+    mls: null,
+    stateVersion: 0,
+    persistChain: Promise.resolve(),
+    disposed: false,
+    options: {},
+  } as unknown as EngineContext;
+  const incoming = message(1, { mentions: ["p"] });
+  runtime.messages.set(incoming.id, incoming);
+  runtime.dirty.add(incoming.id);
+  jest
+    .spyOn(storage, "writeBatch")
+    .mockRejectedValueOnce(new Error("Storage temporarily unavailable"));
+  await expect(
+    checkpoint(ctx, { groups: [runtime], skipWasm: true })
+  ).rejects.toThrow("Storage temporarily unavailable");
+  expect(runtime.record.history).toMatchObject({
+    count: 0,
+    unread: 0,
+    mentions: 0,
+  });
+  await checkpoint(ctx, { groups: [runtime], skipWasm: true });
+  expect((await storage.listGroups("p"))[0]?.history).toMatchObject({
+    count: 1,
+    unread: 1,
+    mentions: 1,
+  });
+  expect(await storage.listMessages("p", "g")).toHaveLength(1);
 });
 
 it("pages equal-sequence notices, pending messages and profiles without gaps or repeats", async () => {
@@ -111,7 +153,13 @@ it("upgrades a v1 database in place without losing history, device or checkpoint
       });
       messages.createIndex("group", ["profileId", "g"]);
       messages.createIndex("profile", "profileId");
-      messages.put({ ...message(7), profileId: "p" });
+      for (let seq = 1; seq <= 550; seq++)
+        messages.put({ ...message(seq), profileId: "p" });
+      const groups = req.result.createObjectStore("groups", {
+        keyPath: ["profileId", "g"],
+      });
+      groups.createIndex("profile", "profileId");
+      groups.put({ g: "g", profileId: "p", readSeq: 6 });
       const wasm = req.result.createObjectStore("wasm", {
         keyPath: "profileId",
       });
@@ -127,8 +175,17 @@ it("upgrades a v1 database in place without losing history, device or checkpoint
   const storage = createIndexedDbE2eeStorage(factory);
   expect(await storage.getStateVersion("p")).toBe(42);
   expect(await storage.getDevice("p")).toMatchObject({ deviceKey: "device" });
-  expect(await storage.pageMessages("p", "g")).toEqual([message(7)]);
-});
+  expect(await storage.pageMessages("p", "g", { limit: 1 })).toEqual([
+    message(550),
+  ]);
+  expect(await storage.listMessages("p", "g")).toHaveLength(550);
+  expect((await storage.listGroups("p"))[0]?.history).toMatchObject({
+    count: 550,
+    unread: 544,
+    mentions: 0,
+    maxSeq: 550,
+  });
+}, 30_000);
 
 it("retains at most two pages while browsing and preserves offscreen summary counts", async () => {
   const storage = createIndexedDbE2eeStorage(new IDBFactory());

@@ -16,6 +16,7 @@ export function E2eeViewportRow({
   scrollRef,
   messageId,
   forceVisible = false,
+  restoreAnchor,
   estimate = 96,
 }: {
   readonly children: ReactNode;
@@ -23,6 +24,7 @@ export function E2eeViewportRow({
   readonly messageId: string;
   readonly estimate?: number;
   readonly forceVisible?: boolean;
+  readonly restoreAnchor: () => boolean;
 }) {
   const ref = useRef<HTMLLIElement>(null);
   const near = useNearViewport(ref, "600px 0px", scrollRef);
@@ -38,6 +40,7 @@ export function E2eeViewportRow({
         heightRef.current = value;
         const root = scrollRef.current;
         if (
+          !restoreAnchor() &&
           root &&
           element.getBoundingClientRect().bottom <=
             root.getBoundingClientRect().top
@@ -46,7 +49,7 @@ export function E2eeViewportRow({
         setHeight(value);
       },
     });
-  }, [near, scrollRef]);
+  }, [near, scrollRef, restoreAnchor]);
   return (
     <li
       ref={ref}

@@ -215,6 +215,8 @@ export const E2EE_MESSAGES = {
   "e2ee.conversation.day.today": "Today",
   "e2ee.conversation.day.yesterday": "Yesterday",
   "e2ee.conversation.older": "Load older messages",
+  "e2ee.conversation.search.previous": "Previous results",
+  "e2ee.conversation.search.next": "Next results",
   "e2ee.conversation.newer": "Load newer messages",
   "e2ee.conversation.historyFailed": "Messages could not be loaded. Try again.",
   "e2ee.conversation.jumpToLatest": "New messages",

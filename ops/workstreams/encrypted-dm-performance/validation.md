@@ -47,8 +47,10 @@ trust, revocation and backup tests remain required.
 The local encrypted sandbox pack runs desktop and mobile. The existing opt-in
 `e2ee-staging` pack retains its real user/device/text/image/group/revocation
 journeys. It additionally seeds 100,000 processed records, including 9,000
-historical photo references, in a throwaway staging identity. It records
-opening/input latency, DOM rows, placeholders, heap and blob requests, checks
+historical photo references, in a throwaway staging identity. Its v1 fixture
+retains the real device key and sealed MLS checkpoint. It records the first
+schema upgrade separately from subsequent opening/input latency, plus DOM rows,
+placeholders, heap and blob requests, checks
 that log cursors do not regress, and browses older history. A separate real
 staging transport uses the same engine and OpenMLS to send 250 imported
 originals and reconnect an offline receiver. Tokens and throwaway wallet keys

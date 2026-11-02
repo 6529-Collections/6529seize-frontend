@@ -3,6 +3,7 @@
 import { ArrowDownIcon } from "@heroicons/react/24/outline";
 import {
   type ReactNode,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -162,16 +163,44 @@ export function E2eeTimeline({
   const scrollRef = useRef<HTMLDivElement>(null);
   const nearBottomRef = useRef(true);
   const hasScrolledRef = useRef(false);
+  const anchorRef = useRef<{ id: string; top: number } | null>(null);
 
   useLayoutEffect(() => {
     if (!jumpToId) return;
     const element = document.getElementById(getMessageDomId(jumpToId));
     if (!element) return;
+    anchorRef.current = null;
     nearBottomRef.current = false;
     element.scrollIntoView({ block: "center", behavior: "auto" });
     element.focus({ preventScroll: true });
   }, [jumpToId, messages]);
-  const anchorRef = useRef<{ id: string; top: number } | null>(null);
+  const restoreAnchor = useCallback((): boolean => {
+    const anchor = anchorRef.current;
+    const element = scrollRef.current;
+    if (!anchor || !element) return false;
+    const row = [
+      ...element.querySelectorAll<HTMLElement>("[data-e2ee-row]"),
+    ].find((item) => item.dataset["e2eeRow"] === anchor.id);
+    if (!row) return false;
+    element.scrollBy({
+      top: row.getBoundingClientRect().top - anchor.top,
+      behavior: "auto",
+    });
+    return true;
+  }, []);
+  useEffect(() => {
+    const element = scrollRef.current;
+    if (!element) return;
+    const release = () => {
+      anchorRef.current = null;
+    };
+    const events = ["wheel", "touchstart", "pointerdown", "keydown"];
+    for (const event of events)
+      element.addEventListener(event, release, { passive: true });
+    return () => {
+      for (const event of events) element.removeEventListener(event, release);
+    };
+  }, []);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [historyError, setHistoryError] = useState(false);
   const pagingRef = useRef(false);
@@ -214,17 +243,8 @@ export function E2eeTimeline({
     }
   };
   useLayoutEffect(() => {
-    const anchor = anchorRef.current;
-    const element = scrollRef.current;
-    if (!anchor || !element) return;
-    const row = [
-      ...element.querySelectorAll<HTMLElement>("[data-e2ee-row]"),
-    ].find((item) => item.dataset["e2eeRow"] === anchor.id);
-    if (row) {
-      element.scrollTop += row.getBoundingClientRect().top - anchor.top;
-      anchorRef.current = null;
-    }
-  }, [messages]);
+    restoreAnchor();
+  }, [messages, restoreAnchor]);
   const byId = useMemo(
     () => new Map(messages.map((message) => [message.id, message])),
     [messages]
@@ -311,6 +331,7 @@ export function E2eeTimeline({
   };
 
   const jumpToLatest = () => {
+    anchorRef.current = null;
     if (!latestLoaded) {
       nearBottomRef.current = true;
       hasScrolledRef.current = false;
@@ -365,6 +386,7 @@ export function E2eeTimeline({
         key={message.id}
         messageId={message.id}
         scrollRef={scrollRef}
+        restoreAnchor={restoreAnchor}
         forceVisible={message.id === jumpToId}
         estimate={message.attachments.length > 0 ? 400 : 96}
       >

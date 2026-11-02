@@ -180,7 +180,8 @@ them from memory; returning to a photo may download it again. This does not
 remove its message or attachment keys from your saved history.
 
 Search covers all messages saved on this device, including older messages
-outside the current view. Replies and search results can open that older
+outside the current view. Use **Previous results** and **Next results** to
+browse a long result list. Replies and search results can open that older
 history. Encrypted backups also include the complete saved history.
 
 A device catching up after being offline still needs to process the messages

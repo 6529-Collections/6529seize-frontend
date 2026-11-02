@@ -265,7 +265,11 @@ export interface E2eeEngine {
     dropId: string,
     part: number
   ): Promise<E2eeMessage | null>;
-  search(query: string, g?: string): Promise<E2eeMessage[]>; // local only
+  search(
+    query: string,
+    g?: string,
+    signal?: AbortSignal
+  ): Promise<E2eeMessage[]>; // local only
   getAttachment(
     g: string,
     id: string,

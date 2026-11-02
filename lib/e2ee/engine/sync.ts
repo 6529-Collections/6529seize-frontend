@@ -249,6 +249,7 @@ async function acceptJoin(
   });
   record.cursor = existing?.record.cursor ?? 0;
   record.readSeq = existing?.record.readSeq ?? 0;
+  if (existing?.record.history) record.history = existing.record.history;
   record.badGrants = checks.badGrants;
   record.splitView = checks.splitView;
   const runtime = existing ?? newRuntime(record);

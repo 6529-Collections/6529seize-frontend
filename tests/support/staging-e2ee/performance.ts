@@ -1,91 +1,150 @@
 import type { Page } from "@playwright/test";
+import type { StoredGroup, StoredMessage } from "@/lib/e2ee/records";
 
-/** Synthetic processed records in a throwaway staging identity. No MLS state is fabricated. */
+type IndexedMessage = StoredMessage & {
+  profileId: string;
+  historyOrder?: unknown;
+  lastOrder?: unknown;
+  importSource?: unknown;
+  unreadSeq?: unknown;
+  mentionSeq?: unknown;
+};
+type IndexedGroup = StoredGroup & { profileId: string };
+
+/** A v1 saved-history fixture in a throwaway identity, retaining its real sealed MLS checkpoint and key. */
 export async function seedProcessedHistory(
   page: Page,
   g: string,
   profileId: string
 ) {
-  // Leave the app first so a live engine cannot overwrite the fixture's summaries.
   await page.goto("https://staging.6529.io/api/version");
   return page.evaluate(
     async ({ groupId, profile }) => {
-      const db = await new Promise<IDBDatabase>((resolve, reject) => {
-        const req = indexedDB.open("6529-e2ee");
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-      });
+      const names = ["devices", "wasm", "keys", "groups", "messages", "outbox"];
       const read = <T>(request: IDBRequest<T>) =>
         new Promise<T>((resolve, reject) => {
           request.onsuccess = () => resolve(request.result);
           request.onerror = () => reject(request.error);
         });
-      const tx = db.transaction(["messages", "groups"], "readonly");
-      const rows = await read(
-        tx
-          .objectStore("messages")
-          .index("group")
-          .getAll(IDBKeyRange.only([profile, groupId]))
+      const finished = (tx: IDBTransaction) =>
+        new Promise<void>((resolve, reject) => {
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+          tx.onabort = () => reject(tx.error);
+        });
+      const db = await new Promise<IDBDatabase>((resolve, reject) => {
+        const req = indexedDB.open("6529-e2ee");
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+      const source = db.transaction(names, "readonly");
+      const [datasets] = await Promise.all([
+        Promise.all(
+          names.map((name) =>
+            read<unknown[]>(source.objectStore(name).getAll())
+          )
+        ),
+        finished(source),
+      ]);
+      if (
+        datasets.some((rows) =>
+          (rows as { profileId: string }[]).some(
+            (row) => row.profileId !== profile
+          )
+        )
+      )
+        throw new Error(
+          "Performance fixture requires an isolated QA profile database"
+        );
+      const saved = new Map(
+        names.map((name, index) => [name, datasets[index]!] as const)
       );
-      const group = await read(
-        db
-          .transaction("groups", "readonly")
-          .objectStore("groups")
-          .get([profile, groupId])
+      const messages = saved.get("messages") as IndexedMessage[];
+      for (const row of messages) {
+        delete row.historyOrder;
+        delete row.lastOrder;
+        delete row.importSource;
+        delete row.unreadSeq;
+        delete row.mentionSeq;
+      }
+      const groups = saved.get("groups") as IndexedGroup[];
+      for (const row of groups) delete row.history;
+      const group = groups.find((row) => row.g === groupId);
+      const template = messages.find(
+        (row) =>
+          row.g === groupId &&
+          row.kind === "message" &&
+          !row.pending &&
+          !row.deleted
       );
-      const template = rows.find(
-        (row) => row.kind === "message" && !row.pending && !row.deleted
+      const photo = messages.find(
+        (row) => row.g === groupId && row.attachments.length > 0
       );
-      const photo = rows.find((row) => row.attachments?.length > 0);
-      if (!template || !group || !photo)
+      if (!group || !template || !photo)
         throw new Error(
           "Performance fixture needs a delivered message and encrypted image"
         );
-      const total = 100_000;
-      const originalCursor: number = group.cursor;
-      for (let offset = 0; offset < total; offset += 1000) {
-        await new Promise<void>((resolve, reject) => {
-          const write = db.transaction("messages", "readwrite");
-          write.oncomplete = () => resolve();
-          write.onerror = () => reject(write.error);
-          const store = write.objectStore("messages");
-          for (let index = offset; index < offset + 1000; index++) {
-            const id = `performance-${index}`;
-            const seq = index - total; // Older than real traffic; the real saved MLS cursor is unchanged.
-            const source =
-              index < 90_000 && index % 10 === 0 ? photo : template;
-            const row = {
-              ...source,
-              id,
-              seq,
-              text: `performance fixture ${index}`,
-              body: null,
-              sig: null,
-              attachments: source === photo ? photo.attachments : [],
-              ts: template.ts - total + index,
-              serverTs: template.serverTs - total + index,
-              historyOrder: [0, seq, 1, id],
-              lastOrder: [0, seq, 1, id],
-              pending: false,
-            };
-            delete row.unreadSeq;
-            delete row.mentionSeq;
-            delete row.importSource;
-            delete row.imported;
-            store.put(row);
-          }
-        });
-      }
-      // Force the same incremental summary used by ordinary processed histories.
-      group.history = { ...group.history, count: rows.length + total };
-      await new Promise<void>((resolve, reject) => {
-        const write = db.transaction("groups", "readwrite");
-        write.oncomplete = () => resolve();
-        write.onerror = () => reject(write.error);
-        write.objectStore("groups").put(group);
-      });
+      const originalCursor = group.cursor;
       db.close();
-      return { total, originalCursor, photos: 9000 };
+      await new Promise<void>((resolve, reject) => {
+        const req = indexedDB.deleteDatabase("6529-e2ee");
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+        req.onblocked = () =>
+          reject(new Error("QA engine database did not close"));
+      });
+      const legacy = await new Promise<IDBDatabase>((resolve, reject) => {
+        const req = indexedDB.open("6529-e2ee", 1);
+        req.onupgradeneeded = () => {
+          for (const name of ["devices", "wasm", "keys"])
+            req.result.createObjectStore(name, { keyPath: "profileId" });
+          const legacyGroups = req.result.createObjectStore("groups", {
+            keyPath: ["profileId", "g"],
+          });
+          legacyGroups.createIndex("profile", "profileId");
+          const legacyMessages = req.result.createObjectStore("messages", {
+            keyPath: ["profileId", "g", "id"],
+          });
+          legacyMessages.createIndex("group", ["profileId", "g"]);
+          legacyMessages.createIndex("profile", "profileId");
+          req.result
+            .createObjectStore("outbox", { keyPath: ["profileId", "id"] })
+            .createIndex("profile", "profileId");
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+      const restore = legacy.transaction(names, "readwrite");
+      const restored = finished(restore);
+      for (const [name, rows] of saved)
+        for (const row of rows) restore.objectStore(name).put(row);
+      await restored;
+      const total = 100_000;
+      for (let offset = 0; offset < total; offset += 1000) {
+        const tx = legacy.transaction("messages", "readwrite");
+        const complete = finished(tx);
+        for (let index = offset; index < offset + 1000; index++) {
+          const sourceMessage =
+            index < 90_000 && index % 10 === 0 ? photo : template;
+          const row = {
+            ...sourceMessage,
+            id: `performance-${index}`,
+            seq: index - total,
+            text: `performance fixture ${index}`,
+            body: null,
+            sig: null,
+            attachments: sourceMessage === photo ? photo.attachments : [],
+            ts: template.ts - total + index,
+            serverTs: template.serverTs - total + index,
+            pending: false,
+          };
+          delete row.imported;
+          tx.objectStore("messages").put(row);
+        }
+        await complete;
+      }
+      legacy.close();
+      return { total, originalCursor, photos: 9000, schemaVersion: 1 };
     },
     { groupId: g, profile: profileId }
   );

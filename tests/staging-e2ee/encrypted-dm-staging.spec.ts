@@ -492,9 +492,17 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       if (/e2ee\/groups\/.*\/log$/u.test(url.pathname))
         logCursors.push(Number(url.searchParams.get("after_seq") ?? 0));
     });
-    const opened = performance.now();
+    const upgrading = performance.now();
     await openChat(a, dm);
     const input = a.page.getByRole("textbox", { name: "Encrypted message" });
+    await expect(input).toBeEnabled({ timeout: UI_TIMEOUT_MS });
+    await expect(a.page.locator("[data-e2ee-row]").first()).toBeAttached({
+      timeout: UI_TIMEOUT_MS,
+    });
+    const migrationMs = performance.now() - upgrading;
+    await a.page.goto("https://staging.6529.io/api/version");
+    const opened = performance.now();
+    await openChat(a, dm);
     await expect(input).toBeEnabled({ timeout: UI_TIMEOUT_MS });
     await expect(a.page.locator("[data-e2ee-row]").first()).toBeAttached({
       timeout: UI_TIMEOUT_MS,
@@ -521,16 +529,57 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     await scroll.evaluate((element) => {
       element.scrollTop = 0;
     });
+    const anchor = await a.page
+      .locator("[data-e2ee-row]")
+      .first()
+      .evaluate((element) => ({
+        id: (element as HTMLElement).dataset["e2eeRow"]!,
+        top: element.getBoundingClientRect().top,
+      }));
     await a.page.getByRole("button", { name: "Load older messages" }).click();
-    await expect(a.page.locator("[data-e2ee-row]")).toHaveCount(200);
+    await expect
+      .poll(() => a.page.locator("[data-e2ee-row]").count())
+      .toBeGreaterThan(100);
+    expect(await a.page.locator("[data-e2ee-row]").count()).toBeLessThanOrEqual(
+      200
+    );
+    await expect
+      .poll(() =>
+        scroll.evaluate((element, saved) => {
+          const row = [
+            ...element.querySelectorAll<HTMLElement>("[data-e2ee-row]"),
+          ].find((item) => item.dataset["e2eeRow"] === saved.id);
+          return row
+            ? Math.abs(row.getBoundingClientRect().top - saved.top)
+            : Number.POSITIVE_INFINITY;
+        }, anchor)
+      )
+      .toBeLessThan(4);
     await expect(input).toBeEnabled();
+    const searching = performance.now();
+    await a.page.getByRole("button", { name: "Search this chat" }).click();
+    await a.page
+      .getByRole("searchbox", { name: "Search messages on this device" })
+      .fill("performance fixture 0");
+    await expect(a.page.getByText("1 result", { exact: true })).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    await a.page.getByText("performance fixture 0", { exact: true }).click();
+    const oldestRow = messageRow(a.page, "performance fixture 0");
+    await expect(oldestRow).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    await expect(oldestRow.locator('img[src^="blob:"]')).toBeVisible({
+      timeout: UI_TIMEOUT_MS,
+    });
+    const searchJumpMs = performance.now() - searching;
     await testInfo.attach("long-history-performance.json", {
       body: Buffer.from(
         JSON.stringify(
           {
             fixture,
+            migrationMs,
             openingMs,
             typingMs,
+            searchJumpMs,
             ...snapshot,
             blobRequests: blobRequests.length,
             logCursors,

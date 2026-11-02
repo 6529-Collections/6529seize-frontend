@@ -194,6 +194,11 @@ export async function checkpoint(
   extra: CheckpointExtra = {}
 ): Promise<void> {
   const runtimes = extra.groups ?? [];
+  const previousSummaries = runtimes.map((runtime) => ({
+    runtime,
+    history: runtime.record.history,
+    readSeq: runtime.record.readSeq,
+  }));
   const state =
     ctx.mls && extra.skipWasm !== true ? ctx.mls.exportState() : null;
   for (const runtime of runtimes) updateHistorySummary(ctx, runtime);
@@ -207,9 +212,25 @@ export async function checkpoint(
     ...(extra.outbox ? { outbox: extra.outbox } : {}),
     ...(extra.deleteOutbox ? { deleteOutbox: extra.deleteOutbox } : {}),
   });
-  await persist(ctx, (expectedVersion) =>
-    ctx.storage.writeBatch(ctx.profileId, { ...batch, expectedVersion })
-  );
+  try {
+    await persist(ctx, (expectedVersion) =>
+      ctx.storage.writeBatch(ctx.profileId, { ...batch, expectedVersion })
+    );
+  } catch (error) {
+    // Dirty records remain retryable; their summary deltas must apply once.
+    for (const previous of previousSummaries) {
+      const { runtime, history, readSeq } = previous;
+      if (history) {
+        runtime.record.history = history;
+        if (runtime.record.readSeq > readSeq) {
+          history.unread = 0;
+          history.mentions = 0;
+        }
+      } else delete runtime.record.history;
+      ctx.store.touch(runtime.record.g);
+    }
+    throw error;
+  }
   if (state) {
     ctx.lastState = state;
   }

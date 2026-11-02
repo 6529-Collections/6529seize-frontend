@@ -688,7 +688,11 @@ class E2eeEngineImpl implements E2eeEngineExt {
     });
   }
 
-  async search(query: string, g?: string): Promise<E2eeMessage[]> {
+  async search(
+    query: string,
+    g?: string,
+    signal?: AbortSignal
+  ): Promise<E2eeMessage[]> {
     if (!query.trim()) return [];
     const groups =
       g === undefined
@@ -698,11 +702,13 @@ class E2eeEngineImpl implements E2eeEngineExt {
     for (const group of groups) {
       let after: HistoryKey = [0, Number.NEGATIVE_INFINITY, 0, ""];
       for (;;) {
+        signal?.throwIfAborted();
         const rows = await this.ctx.storage.pageMessages(
           this.ctx.profileId,
           group,
           { after, limit: 200 }
         );
+        signal?.throwIfAborted();
         if (!rows.length) break;
         const runtime = {
           messages: new Map(rows.map((message) => [message.id, message])),
