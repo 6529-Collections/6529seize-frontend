@@ -14,6 +14,7 @@ interface E2eeAvatarProps {
   readonly name: string;
   readonly size?: keyof typeof SIZE_CLASSES | undefined;
   readonly className?: string | undefined;
+  readonly rounded?: boolean | undefined;
 }
 
 /** Decorative round avatar; pair it with visible or accessible text. */
@@ -22,12 +23,13 @@ export function E2eeAvatar({
   name,
   size = "md",
   className = "",
+  rounded = false,
 }: E2eeAvatarProps) {
   const initial = name.trim().charAt(0).toUpperCase() || "?";
   return (
     <span
       aria-hidden="true"
-      className={`tw-relative tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-iron-800 tw-font-semibold tw-text-iron-200 tw-ring-1 tw-ring-white/10 ${SIZE_CLASSES[size]} ${className}`}
+      className={`tw-relative tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden ${rounded ? "tw-rounded-lg" : "tw-rounded-full"} tw-bg-iron-800 tw-font-semibold tw-text-iron-200 tw-ring-1 tw-ring-white/10 ${SIZE_CLASSES[size]} ${className}`}
     >
       {pfp ? (
         // eslint-disable-next-line @next/next/no-img-element -- profile pictures come from arbitrary remote hosts, as in ProfileAvatar; keep them unoptimized.
