@@ -116,6 +116,47 @@ async function getFirstWaveId(page: Page) {
   return match?.[1] ?? "";
 }
 
+async function getPublicChatMessageTarget(page: Page) {
+  await gotoReady(page, "/waves");
+  // Use the same public chat fixtures as the remembered-wave journey. Choosing
+  // an arbitrary wave and serialNo=1 does not establish a real message target.
+  const name =
+    new URL(page.url()).hostname === "staging.6529.io"
+      ? "Memes-Chat"
+      : "maybe's dive bar";
+  const toggle = page
+    .getByRole("button", { name: "Find a wave…", exact: true })
+    .filter({ visible: true });
+  const search = page
+    .getByRole("searchbox", { name: "Find a wave…", exact: true })
+    .filter({ visible: true });
+  await expect(search.or(toggle)).toBeVisible();
+  if (!(await search.isVisible())) await toggle.click();
+  await search.fill(name);
+  const link = page
+    .getByRole("region", { name: "Search results · All waves" })
+    .filter({ visible: true })
+    .getByRole("link")
+    .filter({ hasText: name })
+    .first();
+  await expect(link).toBeVisible({ timeout: 15000 });
+  const href = await link.getAttribute("href");
+  expect(href).toMatch(/^\/waves\/[0-9a-f-]{36}$/i);
+  const waveId = href!.split("/").at(-1)!;
+  await link.click();
+  const message = page
+    .getByRole("region", {
+      name: "Wave chat file upload area",
+      exact: true,
+    })
+    .locator("[data-serial-no]")
+    .first();
+  await expect(message).toBeVisible({ timeout: 15000 });
+  const serialNo = await message.getAttribute("data-serial-no");
+  expect(serialNo).toMatch(/^[1-9]\d*$/);
+  return { waveId, serialNo: serialNo! };
+}
+
 function getProfileFeed(page: Page): Locator {
   return page
     .getByRole("heading", { level: 1, name: PROFILE_FEED_TITLE })
@@ -1422,24 +1463,53 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
   });
 
   test("handles legacy wave query links without mutation", async ({ page }) => {
-    const waveId = await getFirstWaveId(page);
-
-    await gotoDocumentWithTransientRetry(
-      page,
-      `/waves?wave=${waveId}&serialNo=1`
-    );
-    // Next can emit the redirect in the streamed document. The initial shell
-    // is visible before that navigation destroys its execution context.
-    await page.waitForURL((url) => url.pathname === `/waves/${waveId}`, {
-      waitUntil: "domcontentloaded",
-      timeout: 45_000,
+    const { waveId, serialNo } = await getPublicChatMessageTarget(page);
+    const wavePath = `/waves/${waveId}`;
+    await test.info().attach("legacy-wave-message-target", {
+      body: JSON.stringify({ waveId, serialNo }),
+      contentType: "application/json",
     });
-    await waitForRouteReady(page);
+    // Observe both the redirect and the chat's target lookup before navigating.
+    // Chat intentionally consumes serialNo; an address-bar check after hydration
+    // races that cleanup and cannot prove which message was actually opened.
+    await Promise.all([
+      page.waitForURL(
+        (url) =>
+          url.pathname === wavePath &&
+          !url.searchParams.has("wave") &&
+          url.searchParams.get("serialNo") === serialNo,
+        { waitUntil: "commit", timeout: 45_000 }
+      ),
+      page.waitForResponse(
+        (response) => {
+          const url = new URL(response.url());
+          return (
+            response.ok() &&
+            url.pathname.endsWith(`/v2/waves/${waveId}/drops`) &&
+            url.searchParams.get("serial_no_limit") === serialNo &&
+            url.searchParams.get("search_strategy") === "FIND_BOTH"
+          );
+        },
+        { timeout: RESPONSE_TIMEOUT_MS }
+      ),
+      gotoDocumentWithTransientRetry(
+        page,
+        `/waves?wave=${waveId}&serialNo=${serialNo}`
+      ),
+    ]);
+    await expectUrlState(
+      page,
+      (url) =>
+        url.pathname === wavePath &&
+        !url.searchParams.has("wave") &&
+        !url.searchParams.has("serialNo")
+    );
+    const target = page
+      .getByRole("region", { name: "Wave chat file upload area", exact: true })
+      .locator(`[data-serial-no="${serialNo}"]`);
+    await expect(target).toBeVisible();
+    await expect(target).toBeInViewport();
     await expectNoHorizontalOverflow(page);
-
-    const url = new URL(page.url());
-    expect(url.searchParams.get("wave")).toBeNull();
-    expect(url.searchParams.get("serialNo")).toBe("1");
   });
 
   test("keeps profile statistics natural and activity loading compact", async ({
