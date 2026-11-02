@@ -108,17 +108,23 @@ function describeFile(
       return { label: "appleSilicon", format: "DMG" };
     if (suffix === `x64-${version}.dmg`)
       return { label: "intel", format: "DMG" };
-  } else {
-    if (
-      suffix === `x86_64-${version}.AppImage` ||
-      suffix === `x64-${version}.AppImage`
-    )
-      return { label: "appImage", format: ".AppImage" };
-    if (suffix === `amd64-${version}.deb` || suffix === `x64-${version}.deb`)
-      return { label: "debian", format: ".deb" };
-    if (suffix === `x86_64-${version}.rpm` || suffix === `x64-${version}.rpm`)
-      return { label: "redHat", format: ".rpm" };
-  }
+  } else return describeLinuxFile(suffix, version);
+  return null;
+}
+
+function describeLinuxFile(
+  suffix: string,
+  version: string
+): Pick<DesktopDownload, "label" | "format"> | null {
+  if (
+    suffix === `x86_64-${version}.AppImage` ||
+    suffix === `x64-${version}.AppImage`
+  )
+    return { label: "appImage", format: ".AppImage" };
+  if (suffix === `amd64-${version}.deb` || suffix === `x64-${version}.deb`)
+    return { label: "debian", format: ".deb" };
+  if (suffix === `x86_64-${version}.rpm` || suffix === `x64-${version}.rpm`)
+    return { label: "redHat", format: ".rpm" };
   return null;
 }
 
@@ -130,33 +136,33 @@ function parseRelease(
   const data: unknown = yaml.load(text);
   if (
     !isRecord(data) ||
-    typeof data.version !== "string" ||
-    !VERSION_PATTERN.test(data.version) ||
-    !Array.isArray(data.files)
+    typeof data["version"] !== "string" ||
+    !VERSION_PATTERN.test(data["version"]) ||
+    !Array.isArray(data["files"])
   ) {
     throw new Error("Invalid desktop release manifest");
   }
-  const version = data.version;
+  const version = data["version"];
   let minimumMacOS: number | undefined;
   if (config.name === "mac") {
     if (
-      typeof data.minimumSystemVersion !== "string" ||
-      !/^\d+\.\d+\.\d+$/.test(data.minimumSystemVersion)
+      typeof data["minimumSystemVersion"] !== "string" ||
+      !/^\d+\.\d+\.\d+$/.test(data["minimumSystemVersion"])
     )
       throw new Error("Missing Mac OS requirement");
-    minimumMacOS = Number(data.minimumSystemVersion.split(".")[0]) - 9;
+    minimumMacOS = Number(data["minimumSystemVersion"].split(".")[0]) - 9;
     if (legacyMac ? minimumMacOS !== 12 : minimumMacOS < 13)
       throw new Error("Invalid Mac OS requirement");
   }
   const files = new Map<string, DesktopDownload>();
-  for (const file of data.files) {
-    if (!isRecord(file) || typeof file.url !== "string") continue;
-    const description = describeFile(file.url, config, version);
+  for (const file of data["files"]) {
+    if (!isRecord(file) || typeof file["url"] !== "string") continue;
+    const description = describeFile(file["url"], config, version);
     if (!description) continue;
-    files.set(file.url, {
-      fileName: file.url,
+    files.set(file["url"], {
+      fileName: file["url"],
       ...description,
-      url: `${DOWNLOAD_BASE}/${config.directory}/${file.url}`,
+      url: `${DOWNLOAD_BASE}/${config.directory}/${file["url"]}`,
     });
   }
   if (files.size === 0)
@@ -195,19 +201,19 @@ async function addMirrors(
     );
     if (
       !isRecord(catalog) ||
-      catalog.version !== release.version ||
-      !Array.isArray(catalog.files)
+      catalog["version"] !== release.version ||
+      !Array.isArray(catalog["files"])
     )
       return release;
     const mirrors = new Map<string, string>();
-    for (const file of catalog.files) {
+    for (const file of catalog["files"]) {
       if (
         isRecord(file) &&
-        typeof file.url === "string" &&
-        typeof file.arweaveUrl === "string" &&
-        /^https:\/\/arweave\.net\/[A-Za-z0-9_-]{43}$/.test(file.arweaveUrl)
+        typeof file["url"] === "string" &&
+        typeof file["arweaveUrl"] === "string" &&
+        /^https:\/\/arweave\.net\/[A-Za-z0-9_-]{43}$/.test(file["arweaveUrl"])
       )
-        mirrors.set(file.url, file.arweaveUrl);
+        mirrors.set(file["url"], file["arweaveUrl"]);
     }
     return {
       ...release,

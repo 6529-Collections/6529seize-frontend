@@ -160,7 +160,7 @@ function ReleaseDownloads({
           </span>
         )}
       </div>
-      {release.minimumMacOS && (
+      {release.minimumMacOS !== undefined && (
         <p className="tw-mb-2 tw-mt-0 tw-text-xs tw-leading-5 tw-text-iron-300">
           {t(
             APPS_LOCALE,
