@@ -11,7 +11,7 @@ import {
   markMobileLaunchStep,
   scheduleMobileLaunchFlush,
 } from "../../../utils/monitoring/mobileLaunchTiming";
-import WavesMobile from "../WavesMobile";
+import { createNativeOnlyBranch } from "@/components/layout/createNativeOnlyBranch";
 import WavesRouteLoading from "../WavesRouteLoading";
 import useBodyScrollLock from "@/hooks/useBodyScrollLock";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -45,6 +45,12 @@ const WavesDesktop = dynamic<WavesBranchProps>(
   {
     loading: () => <WavesBranchLoadingFallback />,
   }
+);
+
+// The mobile shell (BrainMobile) is rendered only inside the native app.
+const WavesMobile = createNativeOnlyBranch(
+  () => import("../WavesMobile"),
+  WavesBranchLoadingFallback
 );
 
 function WavesContentLoadingFallback() {

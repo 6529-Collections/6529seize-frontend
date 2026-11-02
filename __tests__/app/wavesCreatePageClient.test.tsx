@@ -108,7 +108,7 @@ describe("WavesCreatePageClient", () => {
     mockUseDeviceInfo.mockReturnValue({ isApp: true, isMobileDevice: true });
   });
 
-  it("renders the connect prompt inside WavesMobile for logged-out app users", () => {
+  it("renders the connect prompt inside WavesMobile for logged-out app users", async () => {
     mockUseAuth.mockReturnValue({ connectedProfile: null });
     mockUseAuthenticatedContent.mockReturnValue({
       contentState: "not-authenticated",
@@ -116,14 +116,15 @@ describe("WavesCreatePageClient", () => {
 
     renderCreatePage();
 
-    expect(screen.getByTestId("waves-mobile")).toContainElement(
+    // The native-only mobile shell loads on demand.
+    expect(await screen.findByTestId("waves-mobile")).toContainElement(
       screen.getByTestId("connect-wallet")
     );
     expect(screen.queryByTestId("create-wave")).not.toBeInTheDocument();
     expect(screen.queryByTestId("waves-desktop")).not.toBeInTheDocument();
   });
 
-  it("renders CreateWave instead of ConnectWallet when a profile is connected", () => {
+  it("renders CreateWave instead of ConnectWallet when a profile is connected", async () => {
     mockUseAuth.mockReturnValue({
       connectedProfile: {
         id: "profile-1",
@@ -137,7 +138,7 @@ describe("WavesCreatePageClient", () => {
 
     renderCreatePage();
 
-    expect(screen.getByTestId("waves-mobile")).toContainElement(
+    expect(await screen.findByTestId("waves-mobile")).toContainElement(
       screen.getByTestId("create-wave")
     );
     expect(screen.getByTestId("create-wave")).toHaveAttribute(
@@ -150,7 +151,7 @@ describe("WavesCreatePageClient", () => {
 
 it.each(["initializing", "connecting"])(
   "does not show Connect Wallet while %s",
-  (state) => {
+  async (state) => {
     mockConnectionState = state;
     mockUseAuth.mockReturnValue({
       connectedProfile: null,
@@ -161,6 +162,7 @@ it.each(["initializing", "connecting"])(
     });
     mockUseDeviceInfo.mockReturnValue({ isApp: true, isMobileDevice: true });
     renderCreatePage();
+    await screen.findByTestId("waves-mobile");
     expect(screen.getByRole("status")).toBeInTheDocument();
     expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
     expect(screen.queryByTestId("setup-profile")).not.toBeInTheDocument();
