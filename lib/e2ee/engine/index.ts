@@ -1,15 +1,10 @@
-import type { ImportedPayload } from "../imported-payload";
 import {
-  historyAround,
-  loadHistoryPage,
-  loadMessage,
-  trimHistory,
-} from "./history";
-import {
-  historyKey,
-  type HistoryPageOptions,
-  type HistoryKey,
-} from "../history-order";
+  findSavedImport,
+  getSavedMessage,
+  loadSavedHistory,
+  requireSavedMessage,
+} from "./history-read";
+import type { HistoryPageOptions } from "../history-order";
 import { downloadMedia, localBlobType } from "../media";
 import { getDefaultBackupStateStore } from "../backup/state";
 import type { BackupHistory } from "../backup/format";
@@ -52,7 +47,7 @@ import {
   restartTargets,
   setAdmin,
 } from "./membership";
-import { searchMessages } from "./messages";
+import { searchHistory } from "./history-search";
 import { previewReport, sendReport } from "./report";
 import { queueImported, queueMessage, queueTargeted } from "./send";
 import {
@@ -478,17 +473,8 @@ class E2eeEngineImpl implements E2eeEngineExt {
     }
   }
 
-  private async ownMessage(g: string, id: string) {
-    const message = await loadMessage(this.ctx, requireGroup(this.ctx, g), id);
-    if (message?.kind !== "message") {
-      throw new E2eeError("E2EE_NO_MESSAGE");
-    }
-    trimHistory(
-      requireGroup(this.ctx, g),
-      this.ctx.openConversation === g.toLowerCase()
-    );
-    return message;
-  }
+  private ownMessage = (g: string, id: string) =>
+    requireSavedMessage(this.ctx, g, id);
 
   async edit(g: string, id: string, text: string): Promise<void> {
     this.requireReady();
@@ -646,47 +632,19 @@ class E2eeEngineImpl implements E2eeEngineExt {
     );
   }
 
-  async getMessage(g: string, id: string): Promise<E2eeMessage | null> {
-    return this.ctx.queue.run(async () => {
-      const runtime = requireGroup(this.ctx, g);
-      const message = await loadMessage(this.ctx, runtime, id);
-      const snapshot = message ? toE2eeMessage(message) : null;
-      trimHistory(runtime, this.ctx.openConversation === runtime.record.g);
-      return snapshot;
-    });
-  }
+  getMessage = (g: string, id: string) => getSavedMessage(this.ctx, g, id);
 
-  async loadHistory(
+  loadHistory = (
     g: string,
     options: HistoryPageOptions & { around?: string } = {}
-  ): Promise<void> {
-    return this.ctx.queue.run(async () => {
-      const runtime = requireGroup(this.ctx, g);
-      if (options.around)
-        await historyAround(this.ctx, runtime, options.around);
-      else await loadHistoryPage(this.ctx, runtime, options);
-    });
-  }
+  ) => loadSavedHistory(this.ctx, g, options);
 
-  async findImportedMessage(
+  findImportedMessage = (
     g: string,
     waveId: string,
     dropId: string,
     part: number
-  ): Promise<E2eeMessage | null> {
-    return this.ctx.queue.run(async () => {
-      const matches = await this.ctx.storage.findImported(
-        this.ctx.profileId,
-        g,
-        {
-          w: waveId,
-          d: dropId,
-          p: part,
-        } as ImportedPayload
-      );
-      return matches[0] ? toE2eeMessage(matches[0]) : null;
-    });
-  }
+  ) => findSavedImport(this.ctx, g, waveId, dropId, part);
 
   async search(
     query: string,
@@ -698,26 +656,9 @@ class E2eeEngineImpl implements E2eeEngineExt {
       g === undefined
         ? [...this.ctx.store.groups.keys()]
         : [requireGroup(this.ctx, g).record.g];
-    const results: E2eeMessage[] = [];
-    for (const group of groups) {
-      let after: HistoryKey = [0, Number.NEGATIVE_INFINITY, 0, ""];
-      for (;;) {
-        signal?.throwIfAborted();
-        const rows = await this.ctx.storage.pageMessages(
-          this.ctx.profileId,
-          group,
-          { after, limit: 200 }
-        );
-        signal?.throwIfAborted();
-        if (!rows.length) break;
-        const runtime = {
-          messages: new Map(rows.map((message) => [message.id, message])),
-        };
-        results.push(...searchMessages([runtime], query).map(toE2eeMessage));
-        after = historyKey(rows.at(-1)!);
-      }
-    }
-    return results.sort((a, b) => b.serverTs - a.serverTs || b.seq - a.seq);
+    return (await searchHistory(this.ctx, query, groups, signal)).map(
+      toE2eeMessage
+    );
   }
 
   async getAttachment(

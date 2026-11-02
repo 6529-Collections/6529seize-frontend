@@ -104,6 +104,73 @@ describe("E2eeConversationView", () => {
     globalThis.localStorage.clear();
   });
 
+  it("handles each reply jump once and permits another jump to the same message", async () => {
+    const engine = renderView();
+    const reply = screen.getByRole("button", { name: /hello @me and @bob/u });
+    fireEvent.click(reply);
+    await waitFor(() =>
+      expect(Element.prototype.scrollIntoView).toHaveBeenCalledTimes(1)
+    );
+    const input = screen.getByRole("textbox", { name: "Encrypted message" });
+    act(() => {
+      input.focus();
+      engine.update({
+        messages: {
+          [GROUP_G]: [
+            ...timeline,
+            message({ id: "incoming", seq: 10, text: "incoming" }),
+          ],
+        },
+      });
+    });
+    expect(input).toHaveFocus();
+    expect(Element.prototype.scrollIntoView).toHaveBeenCalledTimes(1);
+    fireEvent.click(reply);
+    await waitFor(() =>
+      expect(Element.prototype.scrollIntoView).toHaveBeenCalledTimes(2)
+    );
+  });
+
+  it("announces paging progress, completion and failure while retaining the control", async () => {
+    const engine = renderView();
+    let resolve: (() => void) | undefined;
+    engine.loadHistory = jest.fn(
+      () =>
+        new Promise<void>((done) => {
+          resolve = done;
+        })
+    );
+    // The fixture engine now exposes paging; publish a fresh snapshot.
+    act(() =>
+      engine.update({
+        conversations: [conversation({ updatedAt: Date.now() })],
+      })
+    );
+    const older = await screen.findByRole("button", {
+      name: "Load older messages",
+    });
+    fireEvent.click(older);
+    expect(older).toHaveAttribute("aria-busy", "true");
+    expect(screen.getByText("Loading messages…")).toHaveAttribute(
+      "role",
+      "status"
+    );
+    await act(async () => resolve?.());
+    expect(screen.getByText("Messages loaded.")).toHaveAttribute(
+      "role",
+      "status"
+    );
+    expect(older).toBeEnabled();
+    engine.loadHistory = jest.fn().mockRejectedValue(new Error("Read failed"));
+    fireEvent.click(older);
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Messages could not be loaded"
+      )
+    );
+    expect(older).toBeEnabled();
+  });
+
   it("renders the header with name, members and the encryption badge", () => {
     renderView();
     expect(

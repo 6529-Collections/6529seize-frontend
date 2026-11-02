@@ -100,6 +100,63 @@ interface CheckpointExtra {
   skipWasm?: boolean;
 }
 
+interface PreviousHistorySummary {
+  runtime: GroupRuntime;
+  history: StoredGroup["history"];
+  readSeq: number;
+}
+
+function restoreHistorySummaries(
+  ctx: EngineContext,
+  previousSummaries: readonly PreviousHistorySummary[]
+): void {
+  // Dirty records remain retryable; their summary deltas must apply once.
+  for (const previous of previousSummaries) {
+    const { runtime, history, readSeq } = previous;
+    if (history) {
+      runtime.record.history = history;
+      if (runtime.record.readSeq > readSeq) {
+        history.unread = 0;
+        history.mentions = 0;
+      }
+    } else delete runtime.record.history;
+    ctx.store.touch(runtime.record.g);
+  }
+}
+
+function finishHistoryCheckpoint(
+  ctx: EngineContext,
+  runtime: GroupRuntime
+): void {
+  for (const id of runtime.dirty) {
+    const message = runtime.messages.get(id);
+    if (message) {
+      // Replace mutated objects so unchanged UI snapshots keep their identity.
+      cacheMessage(runtime, structuredClone(message));
+      if (runtime.followingLatest) runtime.windowIds?.add(id);
+    }
+  }
+  for (const id of runtime.deleted) {
+    runtime.originals.delete(id);
+    runtime.windowIds?.delete(id);
+  }
+  runtime.dirty.clear();
+  runtime.deleted.clear();
+  if (runtime.followingLatest && runtime.windowIds) {
+    const latest = [...runtime.messages.values()]
+      .filter((message) => runtime.windowIds?.has(message.id))
+      .sort((a, b) =>
+        a.pending === b.pending
+          ? a.seq - b.seq
+          : Number(a.pending) - Number(b.pending)
+      )
+      .slice(-100);
+    runtime.windowIds = new Set(latest.map((message) => message.id));
+  }
+  trimHistory(runtime, ctx.openConversation === runtime.record.g);
+  ctx.store.touch(runtime.record.g);
+}
+
 /**
  * Persists the WASM state together with the given group records and their
  * changed messages in one atomic write. Called BEFORE submitting anything the
@@ -217,52 +274,13 @@ export async function checkpoint(
       ctx.storage.writeBatch(ctx.profileId, { ...batch, expectedVersion })
     );
   } catch (error) {
-    // Dirty records remain retryable; their summary deltas must apply once.
-    for (const previous of previousSummaries) {
-      const { runtime, history, readSeq } = previous;
-      if (history) {
-        runtime.record.history = history;
-        if (runtime.record.readSeq > readSeq) {
-          history.unread = 0;
-          history.mentions = 0;
-        }
-      } else delete runtime.record.history;
-      ctx.store.touch(runtime.record.g);
-    }
+    restoreHistorySummaries(ctx, previousSummaries);
     throw error;
   }
   if (state) {
     ctx.lastState = state;
   }
-  for (const runtime of runtimes) {
-    for (const id of runtime.dirty) {
-      const message = runtime.messages.get(id);
-      if (message) {
-        // Replace mutated objects so unchanged UI snapshots keep their identity.
-        cacheMessage(runtime, structuredClone(message));
-        if (runtime.followingLatest) runtime.windowIds?.add(id);
-      }
-    }
-    for (const id of runtime.deleted) {
-      runtime.originals.delete(id);
-      runtime.windowIds?.delete(id);
-    }
-    runtime.dirty.clear();
-    runtime.deleted.clear();
-    if (runtime.followingLatest && runtime.windowIds) {
-      const latest = [...runtime.messages.values()]
-        .filter((message) => runtime.windowIds?.has(message.id))
-        .sort((a, b) =>
-          a.pending === b.pending
-            ? a.seq - b.seq
-            : Number(a.pending) - Number(b.pending)
-        )
-        .slice(-100);
-      runtime.windowIds = new Set(latest.map((message) => message.id));
-    }
-    trimHistory(runtime, ctx.openConversation === runtime.record.g);
-    ctx.store.touch(runtime.record.g);
-  }
+  for (const runtime of runtimes) finishHistoryCheckpoint(ctx, runtime);
 }
 
 /** Status check that also defeats stale narrowing across awaits. */

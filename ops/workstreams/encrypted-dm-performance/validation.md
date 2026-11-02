@@ -30,6 +30,18 @@ The small catch-up fixture does not show a cryptographic speedup. Ordered MLS
 work remains necessary. Indexed duplicate lookup, summaries, bounded snapshots
 and frame-batched notifications remove history-dependent surrounding work.
 
+## One-time native upgrade
+
+Two isolated local Chromium runs migrated 100,000 v1 records in 90.0 seconds
+and 130.5 seconds under different concurrent machine load. Both retained all
+100,000 records, checkpoint version 42, correct unread counts and a 100-record
+newest page. These runs do not establish an improvement in migration speed.
+The first upgrade remains a material one-time preparation cost; warm reopening
+is measured separately. The staging migration case therefore has an explicit
+five-minute preparation budget, while ordinary opening assertions retain their
+normal timeout. A separate native run verified the negative-infinity composite
+start key used by complete search/backup traversal.
+
 ## Functional coverage
 
 Storage tests cover profile isolation, stable ordering of equal-sequence

@@ -12,8 +12,8 @@ import type { StoredMessage } from "../records";
 import type { EngineContext } from "./context";
 import type { GroupRuntime } from "./store";
 
-export const HISTORY_PAGE_SIZE = 100;
-export const HISTORY_CACHE_LIMIT = 200;
+const HISTORY_PAGE_SIZE = 100;
+const HISTORY_CACHE_LIMIT = 200;
 
 /** Read processed plaintext records only. This never calls MLS. Call in the serial queue. */
 export async function loadMessage(
@@ -104,7 +104,11 @@ function adjustUnread(
 function updateLatest(summary: HistorySummary, message: StoredMessage): void {
   if (message.pending) return;
   summary.maxSeq = Math.max(summary.maxSeq, message.seq);
-  if (!summary.tail || compareHistory(summary.tail, message) < 0)
+  if (
+    !summary.tail ||
+    summary.tail.id === message.id ||
+    compareHistory(summary.tail, message) < 0
+  )
     summary.tail = structuredClone(message);
   if (message.kind !== "message") return;
   if (

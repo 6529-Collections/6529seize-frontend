@@ -93,8 +93,8 @@ export async function measureStagingCatchUp(
     api,
     storage,
     polling: false,
-    loadWasm: async () => wasm,
-    resolveProfiles: async () => ({}),
+    loadWasm: () => Promise.resolve(wasm),
+    resolveProfiles: () => Promise.resolve({}),
     signTypedData: async (
       data: Parameters<E2eeEngineOptions["signTypedData"]>[0]
     ) =>

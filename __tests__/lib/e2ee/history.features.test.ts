@@ -52,6 +52,15 @@ it("edits, reacts, replies, searches, reports and backs up records outside the a
       profile_id: "alice",
       kind: "reply",
     });
+    const latest = b
+      .getMessages(g)
+      .find((message) => message.text === "reply to evicted history")!;
+    await b.remove(g, latest.id);
+    expect(b.getConversation(g)?.lastMessage).toMatchObject({
+      id: latest.id,
+      deleted: true,
+      text: "",
+    });
     await a.remove(g, id);
     await b.sync();
     await b.idle();
@@ -150,6 +159,33 @@ it("resumes an interrupted backlog from the last atomic checkpoint", async () =>
     ).toBeGreaterThan(0);
   } finally {
     storage.writeBatch = write;
+    for (const device of [...world.devices]) {
+      stopDevice(world, device);
+      await device.engine.idle();
+    }
+  }
+});
+
+it("surfaces an initial saved-history read failure and clears it on retry", async () => {
+  const world = await createWorld();
+  const alice = await addUser(world, "alice");
+  await addUser(world, "bob");
+  try {
+    const engine = alice.primary.engine;
+    const g = await engine.createConversation({
+      profileIds: ["bob"],
+      kind: "dm",
+    });
+    await settle(world);
+    jest
+      .spyOn(alice.primary.storage, "pageMessages")
+      .mockRejectedValueOnce(new Error("Read unavailable"));
+    engine.setOpenConversation(g);
+    await engine.idle();
+    expect(engine.getConversation(g)?.historyError).toBe(true);
+    await engine.loadHistory(g);
+    expect(engine.getConversation(g)?.historyError).toBe(false);
+  } finally {
     for (const device of [...world.devices]) {
       stopDevice(world, device);
       await device.engine.idle();

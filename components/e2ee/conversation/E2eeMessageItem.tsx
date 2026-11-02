@@ -81,6 +81,7 @@ interface E2eeMessageItemProps {
   readonly actions: E2eeMessageActions;
   /** Arrived after the chat was opened: ease in (respects reduced motion). */
   readonly appear?: boolean | undefined;
+  readonly inViewportRow?: boolean;
 }
 
 function MessageBody({
@@ -458,16 +459,18 @@ function NoticeItem({
   message,
   conversation,
   selfProfileId,
+  inViewportRow,
 }: {
   readonly message: E2eeMessage;
   readonly conversation: E2eeConversation;
   readonly selfProfileId: string | null;
+  readonly inViewportRow: boolean;
 }) {
   const locale = useBrowserLocale();
+  const Container = inViewportRow ? "div" : "li";
   return (
-    <div
-      role="listitem"
-      id={getMessageDomId(message.id)}
+    <Container
+      id={inViewportRow ? undefined : getMessageDomId(message.id)}
       className="tw-flex tw-justify-center tw-px-4 tw-py-1.5"
     >
       <p className="tw-m-0 tw-rounded-full tw-bg-iron-900 tw-px-3 tw-py-1 tw-text-center tw-text-xs tw-text-iron-400">
@@ -477,7 +480,7 @@ function NoticeItem({
           {formatE2eeDateTime(locale, message.serverTs)}
         </span>
       </p>
-    </div>
+    </Container>
   );
 }
 
@@ -648,8 +651,9 @@ function E2eeMessageItemComponent({
   canAct,
   actions,
   appear = false,
+  inViewportRow = false,
 }: E2eeMessageItemProps) {
-  const { data: storedReply } = useQuery({
+  const { data: storedReply, isFetching: replyLoading } = useQuery({
     queryKey: [
       "e2ee-reply",
       engine.getThisDevice()?.deviceKey,
@@ -673,6 +677,7 @@ function E2eeMessageItemComponent({
         message={message}
         conversation={conversation}
         selfProfileId={selfProfileId}
+        inViewportRow={inViewportRow}
       />
     );
   }
@@ -687,11 +692,11 @@ function E2eeMessageItemComponent({
   const showActions =
     canAct && !message.deleted && !message.undecryptable && !message.pending;
 
+  const Container = inViewportRow ? "div" : "li";
   return (
-    <div
-      role="listitem"
-      id={getMessageDomId(message.id)}
-      tabIndex={-1}
+    <Container
+      id={inViewportRow ? undefined : getMessageDomId(message.id)}
+      tabIndex={inViewportRow ? undefined : -1}
       className={getMessageRowClassName(compact, message.pending, appear)}
     >
       <div className="tw-w-10 tw-flex-shrink-0">
@@ -708,7 +713,7 @@ function E2eeMessageItemComponent({
           member={sender}
           compact={compact}
         />
-        {message.reply ? (
+        {message.reply && !(replyLoading && !resolvedReply) ? (
           <ReplyPreview
             replyId={message.reply}
             target={resolvedReply}
@@ -769,7 +774,7 @@ function E2eeMessageItemComponent({
           />
         </div>
       ) : null}
-    </div>
+    </Container>
   );
 }
 

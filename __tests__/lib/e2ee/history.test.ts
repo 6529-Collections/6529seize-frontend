@@ -11,6 +11,8 @@ import {
 import type { StoredGroup, StoredMessage } from "@/lib/e2ee/records";
 import type { EngineContext } from "@/lib/e2ee/engine/context";
 import { checkpoint } from "@/lib/e2ee/engine/context";
+import { EngineStore } from "@/lib/e2ee/engine/store";
+import type { DeviceDirectory } from "@/lib/e2ee/engine/directory";
 
 const message = (
   seq: number,
@@ -218,4 +220,64 @@ it("retains at most two pages while browsing and preserves offscreen summary cou
   runtime.dirty.add(target.id);
   updateHistorySummary(ctx, runtime);
   expect(runtime.record.history).toMatchObject({ count: 1500, unread: 1499 });
+});
+
+it("refreshes dirty snapshots while unchanged messages retain their identity", () => {
+  const store = new EngineStore("p", {} as DeviceDirectory);
+  const runtime = newRuntime({ g: "g" } as StoredGroup);
+  const changing = message(1);
+  runtime.messages.set(changing.id, changing);
+  runtime.messages.set("m-2", message(2));
+  store.groups.set("g", runtime);
+  const before = store.getMessages("g");
+  changing.text = "edited before checkpoint";
+  runtime.dirty.add(changing.id);
+  store.touch("g");
+  const after = store.getMessages("g");
+  expect(after[0]?.text).toBe("edited before checkpoint");
+  expect(before[0]?.text).toBe("message 1");
+  expect(after[1]).toBe(before[1]);
+});
+
+it("keeps a read marker advanced during a failed checkpoint when retrying summary deltas", async () => {
+  const storage = createIndexedDbE2eeStorage(new IDBFactory());
+  const runtime = newRuntime({
+    g: "g",
+    readSeq: 0,
+    history: { ...emptyHistorySummary(), count: 1, unread: 1 },
+  } as StoredGroup);
+  await storage.writeBatch("p", {
+    groups: [runtime.record],
+    messages: [message(1)],
+  });
+  runtime.messages.set("m-2", message(2, { mentions: ["p"] }));
+  runtime.dirty.add("m-2");
+  const ctx = {
+    storage,
+    profileId: "p",
+    store: { touch: jest.fn() },
+    mls: null,
+    stateVersion: 0,
+    persistChain: Promise.resolve(),
+    disposed: false,
+    options: {},
+  } as unknown as EngineContext;
+  jest.spyOn(storage, "writeBatch").mockImplementationOnce(async () => {
+    runtime.record.readSeq = 2;
+    throw new Error("Write unavailable");
+  });
+  await expect(
+    checkpoint(ctx, { groups: [runtime], skipWasm: true })
+  ).rejects.toThrow("Write unavailable");
+  expect(runtime.record.history).toMatchObject({
+    count: 1,
+    unread: 0,
+    mentions: 0,
+  });
+  await checkpoint(ctx, { groups: [runtime], skipWasm: true });
+  expect((await storage.listGroups("p"))[0]?.history).toMatchObject({
+    count: 2,
+    unread: 0,
+    mentions: 0,
+  });
 });

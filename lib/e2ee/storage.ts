@@ -222,19 +222,25 @@ function upgrade(db: IDBDatabase, tx: IDBTransaction): void {
   );
   createStore(db, S_OUTBOX, ["profileId", "id"], [[IDX_PROFILE, "profileId"]]);
   const messages = tx.objectStore(S_MESSAGES);
-  for (const [name, path] of [
-    [IDX_ORDER, "historyOrder"],
-    [IDX_LAST, "lastOrder"],
-    [IDX_IMPORT, "importSource"],
-    [IDX_UNREAD, "unreadSeq"],
-    [IDX_MENTION, "mentionSeq"],
-  ]) {
-    if (!messages.indexNames.contains(name!))
-      messages.createIndex(name!, ["profileId", "g", path!]);
-  }
-  // Upgrade existing records in place, inside the versionchange transaction.
-  backfillHistory(messages, tx.objectStore(S_GROUPS), indexedMessage, (row) =>
-    strip(row)
+  // Populate indexes after the rewrite to avoid five index updates per put.
+  // Both steps remain in the same atomic versionchange transaction.
+  backfillHistory(
+    messages,
+    tx.objectStore(S_GROUPS),
+    indexedMessage,
+    (row) => strip(row),
+    () => {
+      for (const [name, path] of [
+        [IDX_ORDER, "historyOrder"],
+        [IDX_LAST, "lastOrder"],
+        [IDX_IMPORT, "importSource"],
+        [IDX_UNREAD, "unreadSeq"],
+        [IDX_MENTION, "mentionSeq"],
+      ]) {
+        if (!messages.indexNames.contains(name!))
+          messages.createIndex(name!, ["profileId", "g", path!]);
+      }
+    }
   );
 }
 

@@ -1,7 +1,7 @@
 import type { E2eeApiClient } from "./api";
 import type { ApiE2eeBlob, ApiE2eeMe } from "./api-types";
 
-export interface E2eeRequestTransport {
+interface E2eeRequestTransport {
   get: <T>(
     endpoint: string,
     params?: Record<string, string>,

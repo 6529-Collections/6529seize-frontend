@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useNearViewport } from "@/hooks/useNearViewport";
 import { observeHeight } from "@/helpers/observeHeight";
+import { getMessageDomId } from "./E2eeMessageItem";
 
 /** Uses the regular timeline's measured-height primitive, without wave hydration. */
 export function E2eeViewportRow({
@@ -17,6 +18,8 @@ export function E2eeViewportRow({
   messageId,
   forceVisible = false,
   restoreAnchor,
+  position,
+  setSize,
   estimate = 96,
 }: {
   readonly children: ReactNode;
@@ -25,10 +28,14 @@ export function E2eeViewportRow({
   readonly estimate?: number;
   readonly forceVisible?: boolean;
   readonly restoreAnchor: () => boolean;
+  readonly position: number;
+  readonly setSize: number;
 }) {
   const ref = useRef<HTMLLIElement>(null);
   const near = useNearViewport(ref, "600px 0px", scrollRef);
   const [height, setHeight] = useState(estimate);
+  const [focused, setFocused] = useState(false);
+  const visible = near || forceVisible || focused;
   const heightRef = useRef(estimate);
   useEffect(() => {
     const element = ref.current;
@@ -53,11 +60,22 @@ export function E2eeViewportRow({
   return (
     <li
       ref={ref}
-      role="presentation"
+      role="listitem"
+      id={getMessageDomId(messageId)}
+      tabIndex={-1}
+      aria-hidden={visible ? undefined : true}
+      aria-posinset={position}
+      aria-setsize={setSize}
+      onFocusCapture={() => setFocused(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget))
+          setFocused(false);
+      }}
       data-e2ee-row={messageId}
-      style={near || forceVisible ? undefined : { height }}
+      data-e2ee-mounted={visible ? "" : undefined}
+      style={visible ? undefined : { height }}
     >
-      {near || forceVisible ? children : null}
+      {visible ? children : null}
     </li>
   );
 }

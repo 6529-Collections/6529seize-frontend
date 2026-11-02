@@ -42,7 +42,8 @@ export function backfillHistory(
   messages: IDBObjectStore,
   groups: IDBObjectStore,
   indexed: (profileId: string, message: StoredMessage) => unknown,
-  plain: (row: ProfileMessage) => StoredMessage
+  plain: (row: ProfileMessage) => StoredMessage,
+  complete: () => void
 ): void {
   const readGroups = groups.getAll() as IDBRequest<ProfileGroup[]>;
   readGroups.onsuccess = () => {
@@ -61,6 +62,7 @@ export function backfillHistory(
         if (!rows.length) {
           for (const { group, history } of summaries.values())
             groups.put({ ...group, history });
+          complete();
           return;
         }
         for (const row of rows) {

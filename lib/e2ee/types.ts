@@ -150,6 +150,8 @@ export interface E2eeConversation {
   lastMessage: E2eeMessage | null;
   unread: number;
   mentions: number;
+  /** A local saved-history read failed; retry without changing MLS state. */
+  historyError?: boolean;
   updatedAt: number;
 }
 

@@ -219,6 +219,8 @@ export const E2EE_MESSAGES = {
   "e2ee.conversation.search.next": "Next results",
   "e2ee.conversation.newer": "Load newer messages",
   "e2ee.conversation.historyFailed": "Messages could not be loaded. Try again.",
+  "e2ee.conversation.historyLoading": "Loading messages…",
+  "e2ee.conversation.historyLoaded": "Messages loaded.",
   "e2ee.conversation.jumpToLatest": "New messages",
   "e2ee.conversation.skipToComposer": "Skip to message composer",
   "e2ee.conversation.timelineLabel": "Messages",

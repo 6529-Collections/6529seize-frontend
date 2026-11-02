@@ -334,6 +334,18 @@ function recordStep(
   progress.mediaNotMoved += collected.notMoved + collected.files.length - moved;
 }
 
+async function indexSavedImport(
+  source: { engine: LegacyImportDeps["engine"]; g: string; waveId: string },
+  dropId: string,
+  part: number,
+  messageIdByDrop: Map<string, string>
+): Promise<boolean> {
+  const { engine, g, waveId } = source;
+  const existing = await engine.findImportedMessage?.(g, waveId, dropId, part);
+  if (existing && part === 0) messageIdByDrop.set(dropId, existing.id);
+  return Boolean(existing);
+}
+
 export async function runLegacyDmImport(input: {
   readonly g: string;
   readonly waveId: string;
@@ -386,14 +398,12 @@ export async function runLegacyDmImport(input: {
     if (signal.aborted) {
       return { ...progress, outcome: "cancelled" };
     }
-    const existing = await deps.engine.findImportedMessage?.(
-      g,
-      waveId,
+    const existing = await indexSavedImport(
+      { engine: deps.engine, g, waveId },
       unit.item.legacy_drop_id,
-      unit.part
+      unit.part,
+      messageIdByDrop
     );
-    if (existing && unit.part === 0)
-      messageIdByDrop.set(unit.item.legacy_drop_id, existing.id);
     if (existing || present.has(unitKey(unit.item.legacy_drop_id, unit.part))) {
       progress.skipped += 1;
       report();
@@ -407,13 +417,12 @@ export async function runLegacyDmImport(input: {
     );
     const replyDrop = unit.part === 0 ? unit.item.reply_to : null;
     if (replyDrop && !messageIdByDrop.has(replyDrop)) {
-      const target = await deps.engine.findImportedMessage?.(
-        g,
-        waveId,
+      await indexSavedImport(
+        { engine: deps.engine, g, waveId },
         replyDrop,
-        0
+        0,
+        messageIdByDrop
       );
-      if (target) messageIdByDrop.set(replyDrop, target.id);
     }
     const step = await sendUnit(deps, g, {
       text: unit.text,

@@ -493,18 +493,29 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
         logCursors.push(Number(url.searchParams.get("after_seq") ?? 0));
     });
     const upgrading = performance.now();
-    await openChat(a, dm);
+    // A one-time 100k-record schema upgrade has its own budget; warm opens retain the normal timeout.
+    await openChat(a, dm, 5 * 60_000);
     const input = a.page.getByRole("textbox", { name: "Encrypted message" });
-    await expect(input).toBeEnabled({ timeout: UI_TIMEOUT_MS });
-    await expect(a.page.locator("[data-e2ee-row]").first()).toBeAttached({
-      timeout: UI_TIMEOUT_MS,
+    await expect(input).toBeEnabled({ timeout: 5 * 60_000 });
+    await expect(
+      a.page
+        .getByRole("list", { name: "Messages" })
+        .locator("[data-e2ee-row]")
+        .first()
+    ).toBeAttached({
+      timeout: 5 * 60_000,
     });
     const migrationMs = performance.now() - upgrading;
     await a.page.goto("https://staging.6529.io/api/version");
     const opened = performance.now();
     await openChat(a, dm);
     await expect(input).toBeEnabled({ timeout: UI_TIMEOUT_MS });
-    await expect(a.page.locator("[data-e2ee-row]").first()).toBeAttached({
+    await expect(
+      a.page
+        .getByRole("list", { name: "Messages" })
+        .locator("[data-e2ee-row]")
+        .first()
+    ).toBeAttached({
       timeout: UI_TIMEOUT_MS,
     });
     const openingMs = performance.now() - opened;
@@ -525,11 +536,13 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     expect(logCursors.every((cursor) => cursor >= fixture.originalCursor)).toBe(
       true
     );
-    const scroll = a.page.locator("[data-e2ee-scroll]");
+    const scroll = a.page.getByRole("list", { name: "Messages" });
     await scroll.evaluate((element) => {
-      element.scrollTop = 0;
+      const container = element.closest<HTMLElement>("[data-e2ee-scroll]")!;
+      container.scrollTop = 0;
     });
     const anchor = await a.page
+      .getByRole("list", { name: "Messages" })
       .locator("[data-e2ee-row]")
       .first()
       .evaluate((element) => ({
@@ -538,11 +551,19 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       }));
     await a.page.getByRole("button", { name: "Load older messages" }).click();
     await expect
-      .poll(() => a.page.locator("[data-e2ee-row]").count())
+      .poll(() =>
+        a.page
+          .getByRole("list", { name: "Messages" })
+          .locator("[data-e2ee-row]")
+          .count()
+      )
       .toBeGreaterThan(100);
-    expect(await a.page.locator("[data-e2ee-row]").count()).toBeLessThanOrEqual(
-      200
-    );
+    expect(
+      await a.page
+        .getByRole("list", { name: "Messages" })
+        .locator("[data-e2ee-row]")
+        .count()
+    ).toBeLessThanOrEqual(200);
     await expect
       .poll(() =>
         scroll.evaluate((element, saved) => {
@@ -567,9 +588,10 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     await a.page.getByText("performance fixture 0", { exact: true }).click();
     const oldestRow = messageRow(a.page, "performance fixture 0");
     await expect(oldestRow).toBeVisible({ timeout: UI_TIMEOUT_MS });
-    await expect(oldestRow.locator('img[src^="blob:"]')).toBeVisible({
+    await expect(oldestRow.getByRole("img")).toBeVisible({
       timeout: UI_TIMEOUT_MS,
     });
+    await expect(oldestRow.getByRole("img")).toHaveAttribute("src", /^blob:/u);
     const searchJumpMs = performance.now() - searching;
     await testInfo.attach("long-history-performance.json", {
       body: Buffer.from(

@@ -24,18 +24,22 @@ export async function seedProcessedHistory(
       const read = <T>(request: IDBRequest<T>) =>
         new Promise<T>((resolve, reject) => {
           request.onsuccess = () => resolve(request.result);
-          request.onerror = () => reject(request.error);
+          request.onerror = () =>
+            reject(request.error ?? new Error("QA IndexedDB request failed"));
         });
       const finished = (tx: IDBTransaction) =>
         new Promise<void>((resolve, reject) => {
           tx.oncomplete = () => resolve();
-          tx.onerror = () => reject(tx.error);
-          tx.onabort = () => reject(tx.error);
+          tx.onerror = () =>
+            reject(tx.error ?? new Error("QA IndexedDB transaction failed"));
+          tx.onabort = () =>
+            reject(tx.error ?? new Error("QA IndexedDB transaction failed"));
         });
       const db = await new Promise<IDBDatabase>((resolve, reject) => {
         const req = indexedDB.open("6529-e2ee");
         req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
+        req.onerror = () =>
+          reject(req.error ?? new Error("QA IndexedDB open failed"));
       });
       const source = db.transaction(names, "readonly");
       const [datasets] = await Promise.all([
@@ -89,7 +93,8 @@ export async function seedProcessedHistory(
       await new Promise<void>((resolve, reject) => {
         const req = indexedDB.deleteDatabase("6529-e2ee");
         req.onsuccess = () => resolve();
-        req.onerror = () => reject(req.error);
+        req.onerror = () =>
+          reject(req.error ?? new Error("QA IndexedDB open failed"));
         req.onblocked = () =>
           reject(new Error("QA engine database did not close"));
       });
@@ -112,7 +117,8 @@ export async function seedProcessedHistory(
             .createIndex("profile", "profileId");
         };
         req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
+        req.onerror = () =>
+          reject(req.error ?? new Error("QA IndexedDB open failed"));
       });
       const restore = legacy.transaction(names, "readwrite");
       const restored = finished(restore);
@@ -120,12 +126,14 @@ export async function seedProcessedHistory(
         for (const row of rows) restore.objectStore(name).put(row);
       await restored;
       const total = 100_000;
-      for (let offset = 0; offset < total; offset += 1000) {
+      const appendBatch = async (offset: number) => {
         const tx = legacy.transaction("messages", "readwrite");
         const complete = finished(tx);
         for (let index = offset; index < offset + 1000; index++) {
           const sourceMessage =
-            index < 90_000 && index % 10 === 0 ? photo : template;
+            index === 0 || (index > 10_000 && index % 10 === 0)
+              ? photo
+              : template;
           const row = {
             ...sourceMessage,
             id: `performance-${index}`,
@@ -142,7 +150,9 @@ export async function seedProcessedHistory(
           tx.objectStore("messages").put(row);
         }
         await complete;
-      }
+      };
+      for (let offset = 0; offset < total; offset += 1000)
+        await appendBatch(offset);
       legacy.close();
       return { total, originalCursor, photos: 9000, schemaVersion: 1 };
     },
@@ -150,15 +160,13 @@ export async function seedProcessedHistory(
   );
 }
 
-export async function browserPerformanceSnapshot(page: Page) {
+export function browserPerformanceSnapshot(page: Page) {
   return page.evaluate(() => {
     const memory = (
       performance as Performance & { memory?: { usedJSHeapSize: number } }
     ).memory;
     return {
-      renderedRows: document.querySelectorAll(
-        '[role="listitem"][id^="e2ee-message"]'
-      ).length,
+      renderedRows: document.querySelectorAll("[data-e2ee-mounted]").length,
       placeholders: document.querySelectorAll("[data-e2ee-row]").length,
       heapUsedBytes: memory?.usedJSHeapSize ?? null,
       images: document.querySelectorAll('[data-e2ee-scroll] img[src^="blob:"]')

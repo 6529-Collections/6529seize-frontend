@@ -129,7 +129,10 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
   useOpenConversation(engine, g, conversation !== null, lastSeq);
   const synced = useInitialSync(engine, conversation === null);
 
-  const [jumpToId, setJumpToId] = useState<string | null>(null);
+  const [jumpTarget, setJump] = useState<{
+    id: string;
+    request: number;
+  } | null>(null);
   const [replyToId, setReplyToId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<E2eeMessage | null>(null);
@@ -189,7 +192,10 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         const jump = async () => {
           try {
             await engine.loadHistory?.(g, { around: id });
-            setJumpToId(id);
+            setJump((previous) => ({
+              id,
+              request: (previous?.request ?? 0) + 1,
+            }));
           } catch {
             setActionErrorKey("e2ee.conversation.historyFailed");
           }
@@ -278,7 +284,8 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         selfProfileId={profileId}
         canAct={canAct}
         actions={actions}
-        jumpToId={jumpToId}
+        jumpToId={jumpTarget?.id ?? null}
+        jumpRequest={jumpTarget?.request ?? 0}
       />
       {actionErrorKey ? (
         <p

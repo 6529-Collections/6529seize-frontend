@@ -133,6 +133,7 @@ interface E2eeTimelineProps {
   readonly canAct: boolean;
   readonly actions: E2eeMessageActions;
   readonly jumpToId?: string | null;
+  readonly jumpRequest?: number;
 }
 
 /**
@@ -150,6 +151,7 @@ export function E2eeTimeline({
   canAct,
   actions,
   jumpToId,
+  jumpRequest = 0,
 }: E2eeTimelineProps) {
   const locale = useBrowserLocale();
   // Your own device changes live in the new-device notice and Devices page.
@@ -164,16 +166,23 @@ export function E2eeTimeline({
   const nearBottomRef = useRef(true);
   const hasScrolledRef = useRef(false);
   const anchorRef = useRef<{ id: string; top: number } | null>(null);
+  const handledJumpRef = useRef<{ id: string; request: number } | null>(null);
 
   useLayoutEffect(() => {
     if (!jumpToId) return;
+    if (
+      handledJumpRef.current?.id === jumpToId &&
+      handledJumpRef.current.request === jumpRequest
+    )
+      return;
     const element = document.getElementById(getMessageDomId(jumpToId));
     if (!element) return;
+    handledJumpRef.current = { id: jumpToId, request: jumpRequest };
     anchorRef.current = null;
     nearBottomRef.current = false;
     element.scrollIntoView({ block: "center", behavior: "auto" });
     element.focus({ preventScroll: true });
-  }, [jumpToId, messages]);
+  }, [jumpToId, jumpRequest, messages]);
   const restoreAnchor = useCallback((): boolean => {
     const anchor = anchorRef.current;
     const element = scrollRef.current;
@@ -203,6 +212,7 @@ export function E2eeTimeline({
   }, []);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [historyError, setHistoryError] = useState(false);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
   const pagingRef = useRef(false);
   const latestLoaded =
     !conversation.lastMessage ||
@@ -235,6 +245,7 @@ export function E2eeTimeline({
       if (direction !== "latest" && key)
         options = direction === "older" ? { before: key } : { after: key };
       await engine.loadHistory(conversation.g, options);
+      setHistoryLoaded(true);
     } catch {
       setHistoryError(true);
     } finally {
@@ -385,12 +396,15 @@ export function E2eeTimeline({
       <E2eeViewportRow
         key={message.id}
         messageId={message.id}
+        position={index + 1}
+        setSize={messages.length}
         scrollRef={scrollRef}
         restoreAnchor={restoreAnchor}
         forceVisible={message.id === jumpToId}
         estimate={message.attachments.length > 0 ? 400 : 96}
       >
         <E2eeMessageItem
+          inViewportRow
           message={message}
           conversation={displayConversation}
           engine={engine}
@@ -419,10 +433,12 @@ export function E2eeTimeline({
             selfProfileId={selfProfileId}
             empty={!messages.some((message) => message.kind === "message")}
           />
-          {engine.loadHistory && messages.length > 0 ? (
+          {engine.loadHistory &&
+          (messages.length > 0 || conversation.historyError) ? (
             <button
               type="button"
               disabled={loadingHistory}
+              aria-busy={loadingHistory}
               className="tw-mx-auto tw-block tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
               onClick={() => {
                 void loadPage("older");
@@ -431,9 +447,14 @@ export function E2eeTimeline({
               {t(locale, "e2ee.conversation.older")}
             </button>
           ) : null}
-          {historyError ? (
+          {historyError || conversation.historyError ? (
             <p role="alert">{t(locale, "e2ee.conversation.historyFailed")}</p>
           ) : null}
+          <p role="status" className="tw-sr-only">
+            {loadingHistory
+              ? t(locale, "e2ee.conversation.historyLoading")
+              : historyLoaded && t(locale, "e2ee.conversation.historyLoaded")}
+          </p>
           {messages.length > 0 ? (
             <ol
               aria-label={t(locale, "e2ee.conversation.timelineLabel")}
@@ -446,6 +467,7 @@ export function E2eeTimeline({
             <button
               type="button"
               disabled={loadingHistory}
+              aria-busy={loadingHistory}
               className="tw-mx-auto tw-block tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
               onClick={() => {
                 void loadPage("newer");

@@ -24,6 +24,7 @@ export interface GroupRuntime {
   windowIds: Set<string> | null;
   followingLatest: boolean;
   historyLoaded: boolean;
+  historyError?: boolean;
   /** Message ids changed since the last checkpoint. */
   dirty: Set<string>;
   /** Message ids removed since the last checkpoint. */
@@ -280,6 +281,9 @@ export class EngineStore {
         )
         .sort(compareMessages)
         .map((message) => {
+          // A log page can publish progress before its atomic checkpoint.
+          // Dirty objects are mutable; only committed identities are cacheable.
+          if (runtime.dirty.has(message.id)) return toE2eeMessage(message);
           let snapshot = this.messageSnapshots.get(message);
           if (!snapshot) {
             snapshot = toE2eeMessage(message);
@@ -373,6 +377,7 @@ export class EngineStore {
       lastMessage: last ? toE2eeMessage(last) : null,
       unread,
       mentions,
+      historyError: runtime.historyError === true,
       updatedAt: Math.max(record.updatedAt, last?.serverTs ?? 0, last?.ts ?? 0),
     };
   }
