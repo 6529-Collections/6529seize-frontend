@@ -47,6 +47,44 @@ export function addComposerFiles(
   return { files, error };
 }
 
+/** The clipboard's files, from `items` only where `files` is empty. */
+function getClipboardFiles(data: DataTransfer): File[] {
+  const listed = Array.from(data.files);
+  if (listed.length > 0) {
+    // Chrome lists one pasted file in both collections as separate objects.
+    return listed;
+  }
+  return Array.from(data.items, (item) =>
+    item.kind === "file" ? item.getAsFile() : null
+  ).filter((file): file is File => file !== null);
+}
+
+/** Pasted images, which are attached like files picked with the attach control. */
+export function getPastedImages(data: DataTransfer | null): File[] {
+  if (!data) {
+    return [];
+  }
+  return getClipboardFiles(data).filter((file) =>
+    file.type.toLowerCase().startsWith("image/")
+  );
+}
+
+/** `text` with `start`..`end` replaced by `inserted`, caret after the insert. */
+export function insertComposerText(
+  text: string,
+  start: number,
+  end: number,
+  inserted: string
+): { readonly text: string; readonly caret: number } {
+  // A textarea stores line breaks as "\n", as a native paste would.
+  const normalized = inserted.replaceAll(/\r\n?/g, "\n");
+  const before = text.slice(0, start);
+  return {
+    text: `${before}${normalized}${text.slice(end)}`,
+    caret: before.length + normalized.length,
+  };
+}
+
 interface MentionPicker {
   readonly query: ActiveMentionQuery | null;
   readonly candidates: readonly E2eeMember[];

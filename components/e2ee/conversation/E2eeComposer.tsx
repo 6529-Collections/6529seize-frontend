@@ -7,6 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import {
   type ChangeEvent,
+  type ClipboardEvent,
   type KeyboardEvent,
   useEffect,
   useId,
@@ -34,7 +35,9 @@ import {
   addComposerFiles,
   type ComposerError,
   E2EE_MAX_TEXT_LENGTH,
+  getPastedImages,
   handleMentionKey,
+  insertComposerText,
   isSendKey,
   useMentionPicker,
 } from "./useE2eeComposerParts";
@@ -318,6 +321,41 @@ function ComposerTopBars({
   );
 }
 
+interface PasteNotice {
+  /** Changes with every paste, so the same count is announced again. */
+  readonly id: number;
+  readonly count: number;
+}
+
+/**
+ * Announces images taken from a paste. They become attachments instead of
+ * text in the box, so a screen reader would otherwise say nothing.
+ */
+function PastedImagesStatus({
+  locale,
+  notice,
+}: {
+  readonly locale: SupportedLocale;
+  readonly notice: PasteNotice | null;
+}) {
+  return (
+    <output className="tw-sr-only">
+      {notice ? (
+        <span key={notice.id}>
+          {tCount(
+            locale,
+            {
+              one: "e2ee.composer.pastedImages.one",
+              other: "e2ee.composer.pastedImages.other",
+            },
+            notice.count
+          )}
+        </span>
+      ) : null}
+    </output>
+  );
+}
+
 function ComposerFooter({
   locale,
   hintId,
@@ -422,6 +460,7 @@ export function E2eeComposer({
   const [error, setError] = useState<ComposerError | null>(null);
   // Files of the message being encrypted and uploaded right now.
   const [uploading, setUploading] = useState<readonly File[]>([]);
+  const [pasteNotice, setPasteNotice] = useState<PasteNotice | null>(null);
   const mentions = useMentionPicker(conversation.members, selfProfileId);
 
   // Attachments switched off server-side drop anything already picked.
@@ -457,16 +496,25 @@ export function E2eeComposer({
   const isEmpty = text.trim().length === 0 && files.length === 0;
   const isUploading = uploading.length > 0;
   const tooLong = text.length > E2EE_MAX_TEXT_LENGTH;
+  // Editing changes only the text, and the server can switch attachments off.
+  const canAttach = editing === null && attachmentsEnabled;
 
-  const pickMention = (member: E2eeMember) => {
-    const next = mentions.apply(text, member);
-    if (!next) {
-      return;
-    }
+  /** Puts `next.text` in the box with the caret at `next.caret`. */
+  const placeText = (next: {
+    readonly text: string;
+    readonly caret: number;
+  }) => {
     setText(next.text);
     globalThis.requestAnimationFrame(() => {
       textareaRef.current?.setSelectionRange(next.caret, next.caret);
     });
+  };
+
+  const pickMention = (member: E2eeMember) => {
+    const next = mentions.apply(text, member);
+    if (next) {
+      placeText(next);
+    }
   };
 
   const submitEdit = async (message: E2eeMessage, trimmed: string) => {
@@ -552,12 +600,50 @@ export function E2eeComposer({
     mentions.update(event.target.value, event.target.selectionStart);
   };
 
+  /** Adds files within the attach limits; returns how many were added. */
+  const addFiles = (incoming: readonly File[]): number => {
+    const result = addComposerFiles(files, incoming);
+    setFiles(result.files);
+    setError(result.error);
+    return result.files.length - files.length;
+  };
+
   const onFilesChosen = (event: ChangeEvent<HTMLInputElement>) => {
     const chosen = Array.from(event.target.files ?? []);
     event.target.value = "";
-    const result = addComposerFiles(files, chosen);
-    setFiles(result.files);
-    setError(result.error);
+    addFiles(chosen);
+  };
+
+  /** Inserts the text of a paste whose images became attachments. */
+  const insertPastedText = (element: HTMLTextAreaElement, pasted: string) => {
+    if (!pasted) {
+      return;
+    }
+    const next = insertComposerText(
+      element.value,
+      element.selectionStart,
+      element.selectionEnd,
+      pasted
+    );
+    placeText(next);
+    mentions.update(next.text, next.caret);
+  };
+
+  // Pasted images go in like picked files; any other paste stays native.
+  const onPaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
+    const images = canAttach ? getPastedImages(event.clipboardData) : [];
+    if (images.length === 0) {
+      return;
+    }
+    event.preventDefault();
+    insertPastedText(
+      event.currentTarget,
+      event.clipboardData.getData("text/plain")
+    );
+    const added = addFiles(images);
+    setPasteNotice((current) =>
+      added > 0 ? { id: (current?.id ?? 0) + 1, count: added } : null
+    );
   };
 
   if (disabledReasonKey) {
@@ -607,7 +693,7 @@ export function E2eeComposer({
             label={t(locale, "e2ee.composer.mentions.label")}
           />
         ) : null}
-        {editing || !attachmentsEnabled ? null : (
+        {canAttach ? (
           <>
             <input
               ref={fileInputRef}
@@ -628,7 +714,7 @@ export function E2eeComposer({
               <PaperClipIcon aria-hidden="true" className="tw-size-5" />
             </button>
           </>
-        )}
+        ) : null}
         <label className="tw-sr-only" htmlFor={textareaId}>
           {t(locale, "e2ee.composer.label")}
         </label>
@@ -639,6 +725,7 @@ export function E2eeComposer({
           value={text}
           onChange={onChange}
           onKeyDown={onKeyDown}
+          onPaste={onPaste}
           onSelect={(event) =>
             mentions.update(
               event.currentTarget.value,
@@ -669,6 +756,10 @@ export function E2eeComposer({
           <PaperAirplaneIcon aria-hidden="true" className="tw-size-5" />
         </button>
       </div>
+      <PastedImagesStatus
+        locale={locale}
+        notice={files.length > 0 ? pasteNotice : null}
+      />
       <ComposerFooter locale={locale} hintId={hintId} error={error} />
     </div>
   );
