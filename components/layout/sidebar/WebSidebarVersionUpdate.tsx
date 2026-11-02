@@ -13,7 +13,7 @@ function UpdateRocketIcon({
   readonly className?: string | undefined;
 }) {
   return (
-    // react-doctor-disable-next-line react-doctor/nextjs-no-img-element the small hash-named WebP the reload cover already caches, served as-is.
+    // eslint-disable-next-line @next/next/no-img-element -- Use the small hash-named WebP the reload cover already caches.
     <img
       src={VERSION_RELOAD_IMAGE_SRC}
       alt=""
