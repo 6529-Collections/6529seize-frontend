@@ -63,3 +63,30 @@ it("retains the epoch hint used to recover from a concurrent group update", asyn
     currentEpoch: 12,
   });
 });
+
+it("redacts malformed response bodies while retaining failed HTTP status", async () => {
+  const fetch = jest.fn().mockResolvedValue({
+    ok: () => false,
+    status: () => 503,
+    json: async () => {
+      throw new SyntaxError(JSON.stringify(headers));
+    },
+  });
+  const api = buildStagingQaApi({ fetch }, headers, runtime);
+  await expect(api.getMe()).rejects.toMatchObject({
+    name: "E2eeApiError",
+    status: 503,
+    code: null,
+    message: "Staging QA API GET failed (HTTP 503)",
+  });
+  fetch.mockResolvedValue({
+    ok: () => true,
+    status: () => 200,
+    json: async () => {
+      throw new SyntaxError(JSON.stringify(headers));
+    },
+  });
+  await expect(api.getMe()).rejects.toThrow(
+    /^Staging QA API GET returned invalid JSON$/u
+  );
+});

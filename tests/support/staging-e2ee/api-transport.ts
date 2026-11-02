@@ -68,11 +68,16 @@ export function buildStagingQaApi(
       .catch(() => {
         throw new Error("Staging QA transport failed");
       });
-    const result = await response.json();
-    if (!response.ok()) {
+    const ok = response.ok();
+    const result = await response.json().catch(() => {
+      if (ok) throw new Error(`Staging QA API ${method} returned invalid JSON`);
+      return null;
+    });
+    if (!ok) {
       const { code, currentEpoch } = errorDetails(result);
+      const codeDetail = code ? `, ${code}` : "";
       throw new E2eeApiError({
-        message: `Staging QA API ${method} failed (HTTP ${response.status()}${code ? `, ${code}` : ""})`,
+        message: `Staging QA API ${method} failed (HTTP ${response.status()}${codeDetail})`,
         status: response.status(),
         code,
         currentEpoch,

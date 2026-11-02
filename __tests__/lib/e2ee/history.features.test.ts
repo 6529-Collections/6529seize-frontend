@@ -9,6 +9,66 @@ import {
 
 jest.setTimeout(120_000);
 
+it("persists a read requested as an incoming message becomes visible before its checkpoint", async () => {
+  const world = await createWorld();
+  const alice = await addUser(world, "alice");
+  const bob = await addUser(world, "bob", undefined, { noWake: true });
+  const b = bob.primary.engine;
+  let unsubscribe = () => {};
+  try {
+    const g = await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "dm",
+    });
+    await settle(world);
+    let visibleSeq = 0;
+    unsubscribe = b.subscribe(() => {
+      const incoming = b
+        .getMessages(g)
+        .find((message) => message.text === "read on arrival");
+      if (incoming && incoming.seq > visibleSeq) {
+        visibleSeq = incoming.seq;
+        b.markRead(g);
+      }
+    });
+    await alice.primary.engine.send(g, {
+      text: "read on arrival",
+      mentions: ["bob"],
+    });
+    await alice.primary.engine.send(g, { text: "later unread" });
+    const laterId = alice.primary.engine
+      .getMessages(g)
+      .find((message) => message.text === "later unread")!.id;
+    const storage = bob.primary.storage;
+    const getMessage = storage.getMessage.bind(storage);
+    jest
+      .spyOn(storage, "getMessage")
+      .mockImplementation(async (profile, group, id) => {
+        // Let the UI's batched notification observe the first item while this
+        // page is still being processed, before its atomic checkpoint.
+        if (id === laterId)
+          await new Promise((resolve) => setTimeout(resolve, 40));
+        return getMessage(profile, group, id);
+      });
+    await b.sync();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    await b.idle();
+    expect(visibleSeq).toBeGreaterThan(0);
+    expect(b.getConversation(g)).toMatchObject({ unread: 1, mentions: 0 });
+    const saved = (await bob.primary.storage.listGroups("bob")).find(
+      (row) => row.g === g
+    )!;
+    expect(saved.readSeq).toBeGreaterThanOrEqual(visibleSeq);
+    expect(saved.history).toMatchObject({ unread: 1, mentions: 0 });
+  } finally {
+    unsubscribe();
+    for (const device of [...world.devices]) {
+      stopDevice(world, device);
+      await device.engine.idle();
+    }
+  }
+});
+
 it("keeps optimistic reads consistent after a failed write and persists them on retry", async () => {
   const world = await createWorld();
   const alice = await addUser(world, "alice");
@@ -236,10 +296,12 @@ it("surfaces an initial saved-history read failure and clears it on background r
     engine.setOpenConversation(g);
     await engine.idle();
     expect(engine.getConversation(g)?.historyError).toBe(true);
+    expect(engine.getError()).toBeNull();
     engine.setOpenConversation(null);
     engine.setOpenConversation(g);
     await engine.idle();
     expect(engine.getConversation(g)?.historyError).toBe(false);
+    expect(engine.getError()).toBeNull();
   } finally {
     for (const device of [...world.devices]) {
       stopDevice(world, device);

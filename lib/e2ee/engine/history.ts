@@ -137,6 +137,16 @@ export function updateHistorySummary(
   runtime.record.history = summary;
 }
 
+/** A page can become visible before its checkpoint refreshes the summary. */
+export function latestReadSeq(runtime: GroupRuntime): number {
+  let latest = runtime.record.history?.maxSeq ?? runtime.record.cursor;
+  for (const id of runtime.dirty) {
+    const message = runtime.messages.get(id);
+    if (message && !message.pending) latest = Math.max(latest, message.seq);
+  }
+  return latest;
+}
+
 /** Eviction is memory-only and runs only after a successful checkpoint. */
 export function trimHistory(runtime: GroupRuntime, open: boolean): void {
   const ordered = [...runtime.messages.values()].sort(compareHistory);
