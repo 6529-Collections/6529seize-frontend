@@ -127,10 +127,11 @@ function createBuild(): string {
     "[project]/app/error": [layout],
     "[project]/app/(home)/page": [`/_next/${layout}`, `/_next/${home}`],
   });
+  // A Turbopack root above the project prefixes the project folder.
   writeRouteManifest(nextDir, "waves/[wave]", {
-    "[project]/app/layout": [layout],
-    "[project]/app/waves/layout": [wave],
-    "[project]/app/waves/[wave]/page": [wave],
+    "[project]/frontend/app/layout": [layout],
+    "[project]/frontend/app/waves/layout": [wave],
+    "[project]/frontend/app/waves/[wave]/page": [wave],
   });
   return root;
 }
@@ -177,6 +178,22 @@ describe("first-load JavaScript budget", () => {
           Array.from({ length: 400 }, (_, index) => `layout${index};`).join("")
             .length
       );
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("finds the root layout entry when Turbopack prefixes the project folder", () => {
+    const root = createBuild();
+    try {
+      const measurement = measure({
+        nextDir: path.join(root, ".next"),
+        budget: {
+          ...BASE_BUDGET,
+          targets: BASE_BUDGET.targets.filter((target) => target.id !== "home"),
+        },
+      });
+      expect(measurement.targets["root"]!.chunks).toBe(2);
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }

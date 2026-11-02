@@ -8,32 +8,50 @@
     {
       "id": "root",
       "label": "Root layout",
-      "route": null
+      "route": null,
+      "chunks": 48,
+      "gzip_bytes": 1219933,
+      "brotli_bytes": 1043465
     },
     {
       "id": "home",
       "label": "Home",
-      "route": "(home)"
+      "route": "(home)",
+      "chunks": 66,
+      "gzip_bytes": 1465615,
+      "brotli_bytes": 1251569
     },
     {
       "id": "wave",
       "label": "Wave",
-      "route": "waves/[wave]"
+      "route": "waves/[wave]",
+      "chunks": 102,
+      "gzip_bytes": 2875715,
+      "brotli_bytes": 2407359
     },
     {
       "id": "meme",
       "label": "Meme card",
-      "route": "the-memes/[id]"
+      "route": "the-memes/[id]",
+      "chunks": 75,
+      "gzip_bytes": 1618921,
+      "brotli_bytes": 1383779
     },
     {
       "id": "profile",
       "label": "Profile",
-      "route": "[user]/(profile)"
+      "route": "[user]/(profile)",
+      "chunks": 65,
+      "gzip_bytes": 1558169,
+      "brotli_bytes": 1322356
     },
     {
       "id": "museum",
       "label": "Museum",
-      "route": "museum"
+      "route": "museum",
+      "chunks": 52,
+      "gzip_bytes": 1224167,
+      "brotli_bytes": 1047019
     }
   ]
 }

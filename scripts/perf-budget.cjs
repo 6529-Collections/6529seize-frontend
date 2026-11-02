@@ -37,7 +37,9 @@ const zlib = require("node:zlib");
 
 const SCHEMA_VERSION = 1;
 const DEFAULT_BUDGET_PATH = path.join(__dirname, "perf-budget.json");
-const ROOT_LAYOUT_ENTRY = "[project]/app/layout";
+// Turbopack names client entries by project-relative path. A build whose
+// Turbopack root is a parent directory prefixes the project folder.
+const ROOT_LAYOUT_ENTRY = /^\[project\]\/(?:[^/]+\/)?app\/layout$/u;
 const ROOT_TARGET_ID = "root";
 const MEASURED_FIELDS = Object.freeze(["gzip_bytes", "brotli_bytes"]);
 
@@ -216,7 +218,7 @@ function measure({ nextDir, budget }) {
       for (const file of list) {
         const normalized = normalizeAssetPath(file);
         files.add(normalized);
-        if (entry === ROOT_LAYOUT_ENTRY) {
+        if (ROOT_LAYOUT_ENTRY.test(entry)) {
           rootFiles.add(normalized);
         }
       }
