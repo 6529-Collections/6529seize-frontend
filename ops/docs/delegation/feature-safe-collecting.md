@@ -56,8 +56,9 @@ subscriptions keep working as if every wallet were one.
    - `Already collecting`: combine the wallets you use (up to four, including
      old addresses); move your best NFTs to a vault; appoint a manager for the
      vault; review who can act for your wallets in the Wallet Checker.
-     Every step links to the tool that does it. Long translated button labels
-     wrap within the step on narrow screens, keeping the full action readable.
+     Every step links to the tool that does it. Long translated action labels
+     wrap on narrow screens, including the main setup link and wallet-connect
+     button, keeping the full action readable.
 6. **Common tasks** (`#safe-tasks`): combine wallets, appoint a manager, let a
    wallet mint for another, choose where airdrops go, set the primary address,
    lock or unlock a wallet, remove a wallet or delegation, check any wallet.
