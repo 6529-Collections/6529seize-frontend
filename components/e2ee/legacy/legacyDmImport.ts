@@ -60,7 +60,10 @@ export type LegacyImportResult = LegacyImportProgress &
 export interface LegacyImportDeps {
   readonly engine: Pick<
     E2eeEngine,
-    "sendImported" | "getMessages" | "getAttachmentsEnabled"
+    | "sendImported"
+    | "getMessages"
+    | "getAttachmentsEnabled"
+    | "findImportedMessage"
   >;
   readonly fetchMedia: (url: string, signal: AbortSignal) => Promise<Blob>;
   readonly sleep: (ms: number, signal: AbortSignal) => Promise<void>;
@@ -383,7 +386,15 @@ export async function runLegacyDmImport(input: {
     if (signal.aborted) {
       return { ...progress, outcome: "cancelled" };
     }
-    if (present.has(unitKey(unit.item.legacy_drop_id, unit.part))) {
+    const existing = await deps.engine.findImportedMessage?.(
+      g,
+      waveId,
+      unit.item.legacy_drop_id,
+      unit.part
+    );
+    if (existing && unit.part === 0)
+      messageIdByDrop.set(unit.item.legacy_drop_id, existing.id);
+    if (existing || present.has(unitKey(unit.item.legacy_drop_id, unit.part))) {
       progress.skipped += 1;
       report();
       continue;
@@ -394,6 +405,16 @@ export async function runLegacyDmImport(input: {
       input.skipMedia === true,
       signal
     );
+    const replyDrop = unit.part === 0 ? unit.item.reply_to : null;
+    if (replyDrop && !messageIdByDrop.has(replyDrop)) {
+      const target = await deps.engine.findImportedMessage?.(
+        g,
+        waveId,
+        replyDrop,
+        0
+      );
+      if (target) messageIdByDrop.set(replyDrop, target.id);
+    }
     const step = await sendUnit(deps, g, {
       text: unit.text,
       reply: unit.part === 0 ? replyFor(unit.item.reply_to) : null,

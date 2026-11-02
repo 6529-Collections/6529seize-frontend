@@ -1,3 +1,4 @@
+import { trimHistory, updateHistorySummary, cacheMessage } from "./history";
 import type { E2eeApiClient } from "../api";
 import { MlsClient } from "../mls-adapter";
 import type {
@@ -195,6 +196,7 @@ export async function checkpoint(
   const runtimes = extra.groups ?? [];
   const state =
     ctx.mls && extra.skipWasm !== true ? ctx.mls.exportState() : null;
+  for (const runtime of runtimes) updateHistorySummary(ctx, runtime);
   const writes = groupWrites(runtimes);
   const batch = compact({
     ...writes,
@@ -212,8 +214,33 @@ export async function checkpoint(
     ctx.lastState = state;
   }
   for (const runtime of runtimes) {
+    for (const id of runtime.dirty) {
+      const message = runtime.messages.get(id);
+      if (message) {
+        // Replace mutated objects so unchanged UI snapshots keep their identity.
+        cacheMessage(runtime, structuredClone(message));
+        if (runtime.followingLatest) runtime.windowIds?.add(id);
+      }
+    }
+    for (const id of runtime.deleted) {
+      runtime.originals.delete(id);
+      runtime.windowIds?.delete(id);
+    }
     runtime.dirty.clear();
     runtime.deleted.clear();
+    if (runtime.followingLatest && runtime.windowIds) {
+      const latest = [...runtime.messages.values()]
+        .filter((message) => runtime.windowIds?.has(message.id))
+        .sort((a, b) =>
+          a.pending === b.pending
+            ? a.seq - b.seq
+            : Number(a.pending) - Number(b.pending)
+        )
+        .slice(-100);
+      runtime.windowIds = new Set(latest.map((message) => message.id));
+    }
+    trimHistory(runtime, ctx.openConversation === runtime.record.g);
+    ctx.store.touch(runtime.record.g);
   }
 }
 
@@ -237,6 +264,15 @@ export async function rollback(ctx: EngineContext): Promise<void> {
     const runtime = ctx.store.groups.get(record.g);
     if (runtime) {
       runtime.record = record;
+      runtime.messages.clear();
+      runtime.originals.clear();
+      runtime.dirty.clear();
+      runtime.deleted.clear();
+      const rows = await ctx.storage.pageMessages(ctx.profileId, record.g);
+      for (const row of rows) cacheMessage(runtime, row);
+      runtime.windowIds = null;
+      runtime.followingLatest = true;
+      trimHistory(runtime, ctx.openConversation === record.g);
     }
   }
   ctx.store.touch();

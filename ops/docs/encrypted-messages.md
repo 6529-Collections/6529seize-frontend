@@ -168,6 +168,25 @@ the same people already chosen. Earlier messages are not copied.
   new devices (with the wallet that signed them) or removed devices, renames,
   admin changes and safety-code changes.
 
+### Browsing saved history
+
+A chat opens at its newest saved messages. **Load older messages** reads the
+previous part of this device's history; **Load newer messages** moves forward
+again. **New messages** returns to the latest messages. Incoming messages do
+not move you away from older history you are reading.
+
+Photos load when you approach them while scrolling. Moving away can release
+them from memory; returning to a photo may download it again. This does not
+remove its message or attachment keys from your saved history.
+
+Search covers all messages saved on this device, including older messages
+outside the current view. Replies and search results can open that older
+history. Encrypted backups also include the complete saved history.
+
+A device catching up after being offline still needs to process the messages
+it has not received yet. Opening already synced history does not repeat that
+work. Keep the app open while a large import catches up.
+
 ### Safety code
 
 The safety code in **Chat info** is the same for everyone who sees the same

@@ -1,5 +1,7 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import {
   ArrowUturnLeftIcon,
@@ -463,7 +465,8 @@ function NoticeItem({
 }) {
   const locale = useBrowserLocale();
   return (
-    <li
+    <div
+      role="listitem"
       id={getMessageDomId(message.id)}
       className="tw-flex tw-justify-center tw-px-4 tw-py-1.5"
     >
@@ -474,7 +477,7 @@ function NoticeItem({
           {formatE2eeDateTime(locale, message.serverTs)}
         </span>
       </p>
-    </li>
+    </div>
   );
 }
 
@@ -646,6 +649,23 @@ function E2eeMessageItemComponent({
   actions,
   appear = false,
 }: E2eeMessageItemProps) {
+  const { data: storedReply } = useQuery({
+    queryKey: [
+      "e2ee-reply",
+      engine.getThisDevice()?.deviceKey,
+      message.g,
+      message.reply,
+    ],
+    queryFn: () =>
+      message.reply
+        ? (engine.getMessage?.(message.g, message.reply) ?? null)
+        : null,
+    enabled: Boolean(
+      message.reply && !replyTarget && typeof engine.getMessage === "function"
+    ),
+    gcTime: 0,
+  });
+  const resolvedReply = replyTarget ?? storedReply ?? null;
   const locale = useBrowserLocale();
   if (message.kind === "notice") {
     return (
@@ -668,7 +688,8 @@ function E2eeMessageItemComponent({
     canAct && !message.deleted && !message.undecryptable && !message.pending;
 
   return (
-    <li
+    <div
+      role="listitem"
       id={getMessageDomId(message.id)}
       tabIndex={-1}
       className={getMessageRowClassName(compact, message.pending, appear)}
@@ -690,7 +711,7 @@ function E2eeMessageItemComponent({
         {message.reply ? (
           <ReplyPreview
             replyId={message.reply}
-            target={replyTarget}
+            target={resolvedReply}
             conversation={conversation}
             selfProfileId={selfProfileId}
             onJumpTo={actions.onJumpTo}
@@ -748,7 +769,7 @@ function E2eeMessageItemComponent({
           />
         </div>
       ) : null}
-    </li>
+    </div>
   );
 }
 

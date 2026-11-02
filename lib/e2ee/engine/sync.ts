@@ -1,4 +1,4 @@
-import { asE2eeApiError } from "../api";
+import { asE2eeApiError } from "../api-errors";
 import type {
   ApiE2eeGroup,
   ApiE2eeLogItem,

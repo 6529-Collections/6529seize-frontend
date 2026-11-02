@@ -1,3 +1,4 @@
+import { compareHistory } from "../history-order";
 import { safetyCodeFromFp } from "../digests";
 import { parseCredentialIdentity } from "../grant";
 import type { PayloadAttachment } from "../payload";
@@ -19,6 +20,10 @@ import { displayText, fromImportedPayload } from "./imported";
 export interface GroupRuntime {
   record: StoredGroup;
   messages: Map<string, StoredMessage>;
+  originals: Map<string, StoredMessage>;
+  windowIds: Set<string> | null;
+  followingLatest: boolean;
+  historyLoaded: boolean;
   /** Message ids changed since the last checkpoint. */
   dirty: Set<string>;
   /** Message ids removed since the last checkpoint. */
@@ -92,21 +97,7 @@ export function toE2eeMessage(stored: StoredMessage): E2eeMessage {
 }
 
 /** Ascending seq; notices of one commit keep their order; pending last. */
-export function compareMessages(a: StoredMessage, b: StoredMessage): number {
-  if (a.pending !== b.pending) {
-    return a.pending ? 1 : -1;
-  }
-  if (a.pending) {
-    return a.ts - b.ts;
-  }
-  if (a.seq !== b.seq) {
-    return a.seq - b.seq;
-  }
-  if (a.kind !== b.kind) {
-    return a.kind === "notice" ? -1 : 1;
-  }
-  return a.id < b.id ? -1 : 1;
-}
+export const compareMessages = compareHistory;
 
 const isCountable = (message: StoredMessage, own: string): boolean =>
   message.kind === "message" &&
@@ -130,6 +121,7 @@ export class EngineStore {
   private readonly conversationCache = new Map<string, E2eeConversation>();
   private readonly messagesCache = new Map<string, E2eeMessage[]>();
   private notifyScheduled = false;
+  private readonly messageSnapshots = new WeakMap<StoredMessage, E2eeMessage>();
   private directoryVersion = -1;
   private readonly ownProfileId: string;
   private readonly directory: DeviceDirectory;
@@ -160,7 +152,7 @@ export class EngineStore {
       return;
     }
     this.notifyScheduled = true;
-    queueMicrotask(() => {
+    setTimeout(() => {
       this.notifyScheduled = false;
       for (const listener of [...this.listeners]) {
         try {
@@ -169,7 +161,7 @@ export class EngineStore {
           // A listener failure must not break the engine.
         }
       }
-    });
+    }, 16);
   }
 
   /**
@@ -280,8 +272,21 @@ export class EngineStore {
     let messages = this.messagesCache.get(g);
     if (!messages) {
       messages = [...runtime.messages.values()]
+        .filter(
+          (message) =>
+            runtime.windowIds === null ||
+            runtime.windowIds.has(message.id) ||
+            message.pending
+        )
         .sort(compareMessages)
-        .map(toE2eeMessage);
+        .map((message) => {
+          let snapshot = this.messageSnapshots.get(message);
+          if (!snapshot) {
+            snapshot = toE2eeMessage(message);
+            this.messageSnapshots.set(message, snapshot);
+          }
+          return snapshot;
+        });
       this.messagesCache.set(g, messages);
     }
     return messages;
@@ -322,7 +327,9 @@ export class EngineStore {
 
   private buildConversation(runtime: GroupRuntime): E2eeConversation {
     const record = runtime.record;
-    const ordered = [...runtime.messages.values()].sort(compareMessages);
+    const ordered = record.history
+      ? []
+      : [...runtime.messages.values()].sort(compareMessages);
     let last: StoredMessage | null = null;
     let unread = 0;
     let mentions = 0;
@@ -339,6 +346,16 @@ export class EngineStore {
           mentions += 1;
         }
       }
+    }
+    if (record.history) {
+      last = record.history.last;
+      unread = record.history.unread;
+      mentions = record.history.mentions;
+      const pending = [...runtime.messages.values()]
+        .filter((message) => message.pending && message.kind === "message")
+        .sort(compareMessages)
+        .at(-1);
+      if (pending) last = pending;
     }
     return {
       g: record.g,

@@ -273,6 +273,12 @@ describe("E2eeConversationView", () => {
       name: "What does this message contain?",
     });
     expect(within(categories).getAllByRole("radio")).toHaveLength(4);
+    // Loading the complete report preview may read an evicted local record.
+    await waitFor(() =>
+      expect(
+        within(dialog).getByRole("button", { name: "Send report" })
+      ).toBeEnabled()
+    );
     // A category is required.
     fireEvent.click(
       within(dialog).getByRole("button", { name: "Send report" })

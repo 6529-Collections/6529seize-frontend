@@ -1,3 +1,9 @@
+import { measureStagingCatchUp } from "../support/staging-e2ee/catch-up";
+import { performance } from "node:perf_hooks";
+import {
+  seedProcessedHistory,
+  browserPerformanceSnapshot,
+} from "../support/staging-e2ee/performance";
 import type { Browser, TestInfo } from "@playwright/test";
 
 import { expect, test } from "../testHelpers";
@@ -469,5 +475,83 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       needles({ beforeRevoke, afterRevoke }),
       new Map([[b2, b2Mark]])
     );
+  });
+  test("a synced 100,000-message photo history stays bounded and responsive", async ({}, testInfo) => {
+    const current = requireWorld();
+    const { a, b } = current;
+    const dm = await ensureDm(current);
+    if (!a.user.profileId) throw new Error("Missing QA profile");
+    await openChat(a, dm);
+    const fixture = await seedProcessedHistory(a.page, dm, a.user.profileId);
+    const blobRequests: string[] = [];
+    const logCursors: number[] = [];
+    a.page.on("request", (request) => {
+      const url = new URL(request.url());
+      if (request.method() === "GET" && /e2ee\/blobs\//u.test(url.pathname))
+        blobRequests.push(url.pathname);
+      if (/e2ee\/groups\/.*\/log$/u.test(url.pathname))
+        logCursors.push(Number(url.searchParams.get("after_seq") ?? 0));
+    });
+    const opened = performance.now();
+    await openChat(a, dm);
+    const input = a.page.getByRole("textbox", { name: "Encrypted message" });
+    await expect(input).toBeEnabled({ timeout: UI_TIMEOUT_MS });
+    await expect(a.page.locator("[data-e2ee-row]").first()).toBeAttached({
+      timeout: UI_TIMEOUT_MS,
+    });
+    const openingMs = performance.now() - opened;
+    const typing = performance.now();
+    await input.pressSequentially(
+      "Typing stays responsive while a large saved photo history is open."
+    );
+    const typingMs = performance.now() - typing;
+    await expect(input).toHaveValue(
+      "Typing stays responsive while a large saved photo history is open."
+    );
+    await input.fill("");
+    const snapshot = await browserPerformanceSnapshot(a.page);
+    expect(snapshot.placeholders).toBeLessThanOrEqual(200);
+    expect(snapshot.renderedRows).toBeLessThan(60);
+    expect(blobRequests.length).toBeLessThan(10);
+    expect(typingMs).toBeLessThan(2000);
+    expect(logCursors.every((cursor) => cursor >= fixture.originalCursor)).toBe(
+      true
+    );
+    const scroll = a.page.locator("[data-e2ee-scroll]");
+    await scroll.evaluate((element) => {
+      element.scrollTop = 0;
+    });
+    await a.page.getByRole("button", { name: "Load older messages" }).click();
+    await expect(a.page.locator("[data-e2ee-row]")).toHaveCount(200);
+    await expect(input).toBeEnabled();
+    await testInfo.attach("long-history-performance.json", {
+      body: Buffer.from(
+        JSON.stringify(
+          {
+            fixture,
+            openingMs,
+            typingMs,
+            ...snapshot,
+            blobRequests: blobRequests.length,
+            logCursors,
+          },
+          null,
+          2
+        )
+      ),
+      contentType: "application/json",
+    });
+    await a.page.screenshot({ path: testInfo.outputPath("long-history.png") });
+    expectPrivateAndClean([a, b], new Map());
+  });
+
+  test("a receiver catches up with a real imported staging backlog", async ({}, testInfo) => {
+    test.setTimeout(30 * 60_000);
+    const { a, b } = requireWorld();
+    const result = await measureStagingCatchUp(a, b);
+    await testInfo.attach("real-mls-catch-up-performance.json", {
+      body: Buffer.from(JSON.stringify(result, null, 2)),
+      contentType: "application/json",
+    });
   });
 });

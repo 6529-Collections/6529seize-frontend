@@ -20,8 +20,15 @@ import type {
 import { getE2eeDayKey, getE2eeDayLabel, getMemberName } from "../e2eeFormat";
 import { getScrollBehavior } from "../e2eeMotion";
 import { E2eeConversationIntro } from "./E2eeConversationIntro";
-import { type E2eeMessageActions, E2eeMessageItem } from "./E2eeMessageItem";
+import {
+  type E2eeMessageActions,
+  E2eeMessageItem,
+  getMessageDomId,
+} from "./E2eeMessageItem";
 import { useE2eeDisplayMembers } from "./useE2eeDisplayMembers";
+
+import { historyKey } from "@/lib/e2ee/history-order";
+import { E2eeViewportRow } from "./E2eeViewportRow";
 
 const GROUP_WINDOW_MS = 5 * 60 * 1000;
 const NEAR_BOTTOM_PX = 120;
@@ -124,6 +131,7 @@ interface E2eeTimelineProps {
   readonly selfProfileId: string | null;
   readonly canAct: boolean;
   readonly actions: E2eeMessageActions;
+  readonly jumpToId?: string | null;
 }
 
 /**
@@ -140,6 +148,7 @@ export function E2eeTimeline({
   selfProfileId,
   canAct,
   actions,
+  jumpToId,
 }: E2eeTimelineProps) {
   const locale = useBrowserLocale();
   // Your own device changes live in the new-device notice and Devices page.
@@ -153,6 +162,69 @@ export function E2eeTimeline({
   const scrollRef = useRef<HTMLDivElement>(null);
   const nearBottomRef = useRef(true);
   const hasScrolledRef = useRef(false);
+
+  useLayoutEffect(() => {
+    if (!jumpToId) return;
+    const element = document.getElementById(getMessageDomId(jumpToId));
+    if (!element) return;
+    nearBottomRef.current = false;
+    element.scrollIntoView({ block: "center", behavior: "auto" });
+    element.focus({ preventScroll: true });
+  }, [jumpToId, messages]);
+  const anchorRef = useRef<{ id: string; top: number } | null>(null);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [historyError, setHistoryError] = useState(false);
+  const pagingRef = useRef(false);
+  const latestLoaded =
+    !conversation.lastMessage ||
+    messages.some((message) => message.id === conversation.lastMessage?.id);
+  const loadPage = async (direction: "older" | "newer" | "latest") => {
+    if (!engine.loadHistory || pagingRef.current) return;
+    const element = scrollRef.current;
+    if (element && direction !== "latest") {
+      const first = [
+        ...element.querySelectorAll<HTMLElement>("[data-e2ee-row]"),
+      ].find(
+        (row) =>
+          row.getBoundingClientRect().bottom >=
+          element.getBoundingClientRect().top
+      );
+      if (first?.dataset["e2eeRow"])
+        anchorRef.current = {
+          id: first.dataset["e2eeRow"],
+          top: first.getBoundingClientRect().top,
+        };
+    }
+    if (direction !== "latest") nearBottomRef.current = false;
+    pagingRef.current = true;
+    setLoadingHistory(true);
+    setHistoryError(false);
+    try {
+      const boundary = direction === "older" ? messages[0] : messages.at(-1);
+      const key = boundary ? historyKey(boundary) : undefined;
+      let options = {};
+      if (direction !== "latest" && key)
+        options = direction === "older" ? { before: key } : { after: key };
+      await engine.loadHistory(conversation.g, options);
+    } catch {
+      setHistoryError(true);
+    } finally {
+      pagingRef.current = false;
+      setLoadingHistory(false);
+    }
+  };
+  useLayoutEffect(() => {
+    const anchor = anchorRef.current;
+    const element = scrollRef.current;
+    if (!anchor || !element) return;
+    const row = [
+      ...element.querySelectorAll<HTMLElement>("[data-e2ee-row]"),
+    ].find((item) => item.dataset["e2eeRow"] === anchor.id);
+    if (row) {
+      element.scrollTop += row.getBoundingClientRect().top - anchor.top;
+      anchorRef.current = null;
+    }
+  }, [messages]);
   const byId = useMemo(
     () => new Map(messages.map((message) => [message.id, message])),
     [messages]
@@ -172,7 +244,10 @@ export function E2eeTimeline({
   );
 
   // Announce only messages that arrive after the first render of this chat.
-  const maxSeq = getSequencedMax(messages);
+  const maxSeq = Math.max(
+    getSequencedMax(messages),
+    conversation.lastMessage?.seq ?? 0
+  );
   const [announcement, setAnnouncement] = useState<AnnouncementState>({
     seq: null,
     text: "",
@@ -183,7 +258,9 @@ export function E2eeTimeline({
         ? null
         : getIncomingAnnouncement({
             locale,
-            messages,
+            messages: conversation.lastMessage
+              ? [...messages, conversation.lastMessage]
+              : messages,
             members,
             selfProfileId,
             afterSeq: announcement.seq,
@@ -226,13 +303,20 @@ export function E2eeTimeline({
       return;
     }
     const near =
+      latestLoaded &&
       element.scrollHeight - element.scrollTop - element.clientHeight <
-      NEAR_BOTTOM_PX;
+        NEAR_BOTTOM_PX;
     nearBottomRef.current = near;
     setAtBottom(near);
   };
 
   const jumpToLatest = () => {
+    if (!latestLoaded) {
+      nearBottomRef.current = true;
+      hasScrolledRef.current = false;
+      void loadPage("latest");
+      return;
+    }
     const element = scrollRef.current;
     if (element) {
       element.scrollTo({
@@ -277,18 +361,25 @@ export function E2eeTimeline({
       );
     }
     items.push(
-      <E2eeMessageItem
+      <E2eeViewportRow
         key={message.id}
-        message={message}
-        conversation={displayConversation}
-        engine={engine}
-        selfProfileId={selfProfileId}
-        replyTarget={message.reply ? (byId.get(message.reply) ?? null) : null}
-        compact={!newDay && isGroupedWith(messages[index - 1], message)}
-        canAct={canAct}
-        actions={actions}
-        appear={!initialIds.has(message.id)}
-      />
+        messageId={message.id}
+        scrollRef={scrollRef}
+        forceVisible={message.id === jumpToId}
+        estimate={message.attachments.length > 0 ? 400 : 96}
+      >
+        <E2eeMessageItem
+          message={message}
+          conversation={displayConversation}
+          engine={engine}
+          selfProfileId={selfProfileId}
+          replyTarget={message.reply ? (byId.get(message.reply) ?? null) : null}
+          compact={!newDay && isGroupedWith(messages[index - 1], message)}
+          canAct={canAct}
+          actions={actions}
+          appear={!initialIds.has(message.id)}
+        />
+      </E2eeViewportRow>
     );
   });
 
@@ -296,6 +387,7 @@ export function E2eeTimeline({
     <div className="tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
       <div
         ref={scrollRef}
+        data-e2ee-scroll
         onScroll={onScroll}
         className="tw-[overflow-anchor:none] tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-y-contain tw-pb-3 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500"
       >
@@ -305,6 +397,21 @@ export function E2eeTimeline({
             selfProfileId={selfProfileId}
             empty={!messages.some((message) => message.kind === "message")}
           />
+          {engine.loadHistory && messages.length > 0 ? (
+            <button
+              type="button"
+              disabled={loadingHistory}
+              className="tw-mx-auto tw-block tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              onClick={() => {
+                void loadPage("older");
+              }}
+            >
+              {t(locale, "e2ee.conversation.older")}
+            </button>
+          ) : null}
+          {historyError ? (
+            <p role="alert">{t(locale, "e2ee.conversation.historyFailed")}</p>
+          ) : null}
           {messages.length > 0 ? (
             <ol
               aria-label={t(locale, "e2ee.conversation.timelineLabel")}
@@ -313,12 +420,24 @@ export function E2eeTimeline({
               {items}
             </ol>
           ) : null}
+          {!latestLoaded && engine.loadHistory ? (
+            <button
+              type="button"
+              disabled={loadingHistory}
+              className="tw-mx-auto tw-block tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              onClick={() => {
+                void loadPage("newer");
+              }}
+            >
+              {t(locale, "e2ee.conversation.newer")}
+            </button>
+          ) : null}
         </div>
         <p aria-live="polite" aria-atomic="true" className="tw-sr-only">
           {announcement.text}
         </p>
       </div>
-      {hasUnseen ? (
+      {hasUnseen || !latestLoaded ? (
         <button
           type="button"
           onClick={jumpToLatest}
