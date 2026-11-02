@@ -94,11 +94,25 @@ export async function loadGroups(ctx: EngineContext): Promise<void> {
   const outbox = await ctx.storage.listOutbox(ctx.profileId);
   for (const record of groups) {
     const runtime = newRuntime(record);
-    for (const message of await ctx.storage.listMessages(
+    record.history ??= await ctx.storage.historySummary(
       ctx.profileId,
-      record.g
-    )) {
-      runtime.messages.set(message.id, message);
+      record.g,
+      record.readSeq
+    );
+    record.history.maxSeq = Math.max(record.history.maxSeq, record.cursor);
+    // Outbox echoes are a bounded working set, not historical hydration.
+    for (const item of outbox
+      .filter((entry) => entry.g === record.g && entry.payload.t === "msg")
+      .slice(-100)) {
+      const message = await ctx.storage.getMessage(
+        ctx.profileId,
+        record.g,
+        item.id
+      );
+      if (message) {
+        runtime.messages.set(message.id, message);
+        runtime.originals.set(message.id, structuredClone(message));
+      }
     }
     for (const item of outbox.filter((entry) => entry.g === record.g)) {
       runtime.outbox.set(item.id, item);

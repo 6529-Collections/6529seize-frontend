@@ -82,7 +82,7 @@
   background-color: transparent;
   box-shadow: 0 4px 4px rgb(0 0 0 / 25%);
   color: rgb(154, 154, 154) !important;
-  font-family: "Montserrat", sans-serif;
+  font-family: var(--font-montserrat, "Montserrat"), sans-serif;
   font-size: 16px;
   white-space: nowrap;
 }
@@ -94,7 +94,7 @@
 
 .balanceInline {
   color: rgb(154, 154, 154) !important;
-  font-family: "Montserrat", sans-serif;
+  font-family: var(--font-montserrat, "Montserrat"), sans-serif;
   font-size: 16px;
   white-space: nowrap;
 }

@@ -17,7 +17,7 @@ describe("groupReleaseFiles", () => {
       groups.installers.map((item) => [item.kind, item.file.name])
     ).toEqual([
       ["macos", "6529-Validator-0.1.0.dmg"],
-      ["windows", "6529-Validator-0.1.0-x64.msi"],
+      ["windows", "6529-Validator-Setup-0.1.0-x64.exe"],
       ["deb-x64", "6529-validator_0.1.0_amd64.deb"],
       ["deb-arm64", "6529-validator_0.1.0_arm64.deb"],
       ["appimage", "6529-Validator-0.1.0-x86_64.AppImage"],
@@ -29,12 +29,33 @@ describe("groupReleaseFiles", () => {
   it("puts the archives under other downloads and finds the checksums", () => {
     const groups = groupReleaseFiles(release!);
     expect(groups.archives.map((item) => item.title)).toEqual([
+      "Windows, .msi installer",
       "macOS, Apple silicon",
       "Windows, x64",
       "Linux, x64",
     ]);
     expect(groups.checksums?.name).toBe("SHA256SUMS");
     expect(groups.releaseJson?.name).toBe("release.json");
+  });
+
+  it("gives the Windows button to the .msi when a release has no Setup.exe", () => {
+    const [withoutSetup] = parseReleaseFeed({
+      releases: [
+        {
+          ...TEST_RELEASE_ENTRY,
+          files: TEST_RELEASE_ENTRY.files.filter(
+            (file) => !file.name.includes("Setup")
+          ),
+        },
+      ],
+    });
+    const groups = groupReleaseFiles(withoutSetup!);
+    expect(
+      groups.installers.find((item) => item.kind === "windows")?.file.name
+    ).toBe("6529-Validator-0.1.0-x64.msi");
+    expect(groups.archives.map((item) => item.title)).not.toContain(
+      "Windows, .msi installer"
+    );
   });
 
   it("builds download paths and labels", () => {
