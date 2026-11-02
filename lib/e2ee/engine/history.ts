@@ -147,6 +147,8 @@ export function trimHistory(runtime: GroupRuntime, open: boolean): void {
         .map((message) => message.id)
   );
   for (const message of ordered) {
+    // Retain unsaved work without inserting off-window edits into the page
+    // the reader selected. Pending echoes are displayed separately by the store.
     if (runtime.dirty.has(message.id)) keep.add(message.id);
   }
   for (const id of runtime.messages.keys()) {

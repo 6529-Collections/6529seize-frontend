@@ -8,6 +8,48 @@ import {
 } from "./support/harness";
 
 jest.setTimeout(120_000);
+
+it("keeps optimistic reads consistent after a failed write and persists them on retry", async () => {
+  const world = await createWorld();
+  const alice = await addUser(world, "alice");
+  const bob = await addUser(world, "bob", undefined, { noWake: true });
+  const a = alice.primary.engine;
+  const b = bob.primary.engine;
+  const storage = bob.primary.storage;
+  const write = jest.spyOn(storage, "writeBatch");
+  try {
+    const g = await a.createConversation({ profileIds: ["bob"], kind: "dm" });
+    await settle(world);
+    await a.send(g, { text: "unread mention", mentions: ["bob"] });
+    await b.sync();
+    await b.idle();
+    expect(b.getConversation(g)).toMatchObject({ unread: 1, mentions: 1 });
+    const saved = (await storage.listGroups("bob")).find((row) => row.g === g)!;
+    write.mockRejectedValueOnce(new Error("QA failed read-marker checkpoint"));
+    b.markRead(g);
+    await b.idle();
+    expect(b.getConversation(g)).toMatchObject({ unread: 0, mentions: 0 });
+    const unchanged = (await storage.listGroups("bob")).find(
+      (row) => row.g === g
+    )!;
+    expect(unchanged.readSeq).toBe(saved.readSeq);
+    expect(unchanged.history).toMatchObject({ unread: 1, mentions: 1 });
+    await b.send(g, { text: "checkpoint retry" });
+    await b.idle();
+    const retried = (await storage.listGroups("bob")).find(
+      (row) => row.g === g
+    )!;
+    expect(retried.readSeq).toBeGreaterThan(saved.readSeq);
+    expect(retried.history).toMatchObject({ unread: 0, mentions: 0 });
+  } finally {
+    write.mockRestore();
+    for (const device of [...world.devices]) {
+      stopDevice(world, device);
+      await device.engine.idle();
+    }
+  }
+});
+
 it("edits, reacts, replies, searches, reports and backs up records outside the active page", async () => {
   const world = await createWorld();
   const alice = await addUser(world, "alice");

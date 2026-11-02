@@ -535,6 +535,8 @@ class E2eeEngineImpl implements E2eeEngineExt {
       this.ctx.now() + OPEN_CONVERSATION_MS
     );
     if (latest <= runtime.record.readSeq) return;
+    // Preserve the existing optimistic read intent if its background write
+    // fails. A later checkpoint saves the marker and matching zero counters.
     runtime.record.readSeq = latest;
     if (runtime.record.history) {
       runtime.record.history.unread = 0;

@@ -5,6 +5,7 @@ import { historyKey, emptyHistorySummary } from "@/lib/e2ee/history-order";
 import { newRuntime } from "@/lib/e2ee/engine/groups";
 import {
   cacheMessage,
+  historyAround,
   loadHistoryPage,
   updateHistorySummary,
 } from "@/lib/e2ee/engine/history";
@@ -304,6 +305,36 @@ it("refreshes dirty snapshots while unchanged messages retain their identity", (
   expect(after[0]?.text).toBe("edited before checkpoint");
   expect(before[0]?.text).toBe("message 1");
   expect(after[1]).toBe(before[1]);
+});
+
+it("retains offscreen dirty edits without inserting them into a selected history window", async () => {
+  const storage = createIndexedDbE2eeStorage(new IDBFactory());
+  await storage.writeBatch("p", {
+    messages: Array.from({ length: 300 }, (_, i) => message(i + 1)),
+  });
+  const runtime = newRuntime({ g: "g", readSeq: 0 } as StoredGroup);
+  const store = new EngineStore("p", {} as DeviceDirectory);
+  store.groups.set("g", runtime);
+  const ctx = { storage, profileId: "p", store } as unknown as EngineContext;
+  await loadHistoryPage(ctx, runtime);
+  cacheMessage(runtime, message(1));
+  runtime.messages.set("m-1", message(1, { text: "unsaved old edit" }));
+  runtime.dirty.add("m-1");
+  await loadHistoryPage(ctx, runtime, { before: historyKey(message(201)) });
+  expect(store.getMessages("g")).toHaveLength(200);
+  expect(store.getMessages("g").some((row) => row.id === "m-1")).toBe(false);
+  expect(runtime.messages.get("m-1")?.text).toBe("unsaved old edit");
+  runtime.messages.set("m-150", message(150, { text: "unsaved visible edit" }));
+  runtime.dirty.add("m-150");
+  await historyAround(ctx, runtime, "m-220");
+  expect(store.getMessages("g")).toHaveLength(100);
+  expect(store.getMessages("g").some((row) => row.id === "m-150")).toBe(false);
+  expect(runtime.messages.get("m-150")?.text).toBe("unsaved visible edit");
+  await historyAround(ctx, runtime, "m-1");
+  expect(store.getMessages("g").find((row) => row.id === "m-1")?.text).toBe(
+    "unsaved old edit"
+  );
+  expect((await storage.getMessage("p", "g", "m-1"))?.text).toBe("message 1");
 });
 
 it("keeps a read marker advanced during a failed checkpoint when retrying summary deltas", async () => {

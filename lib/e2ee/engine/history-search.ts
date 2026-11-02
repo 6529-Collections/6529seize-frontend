@@ -48,5 +48,6 @@ export async function searchHistory(
       after = historyKey(rows.at(-1)!);
     }
   }
+  signal?.throwIfAborted();
   return results.sort((a, b) => b.serverTs - a.serverTs || b.seq - a.seq);
 }
