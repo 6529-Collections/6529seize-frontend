@@ -1,6 +1,6 @@
-import HeaderShare, {
-  HeaderConnectModal,
-} from "@/components/header/share/HeaderShare";
+import HeaderShare from "@/components/header/share/HeaderShare";
+// The modal's own behavior is tested eagerly; HeaderShare loads it on demand.
+import { HeaderConnectModal } from "@/components/header/share/header-share/HeaderQRModal";
 import HeaderPageShareButton from "@/components/header/share/HeaderPageShareButton";
 import {
   getCurrentPageLocation,

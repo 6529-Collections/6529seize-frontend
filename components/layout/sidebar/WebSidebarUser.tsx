@@ -10,7 +10,10 @@ import { getConnectionProfileIndicator } from "@/components/auth/connection-stat
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import { HeaderConnectModal } from "@/components/header/share/HeaderShare";
+import {
+  HeaderConnectModal,
+  preloadHeaderQRModal,
+} from "@/components/header/share/HeaderShare";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import HeaderUserMenuDropdown from "@/components/header/user/HeaderUserMenuDropdown";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
@@ -42,6 +45,8 @@ function WebSidebarUser({
 }: WebSidebarUserProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showConnectModal, setShowConnectModal] = useState(false);
+  const [hasRequestedConnectModal, setHasRequestedConnectModal] =
+    useState(false);
   const hasHydrated = useHasHydrated();
   const accountDescriptionId = useId();
   const capacitor = useCapacitor();
@@ -301,8 +306,17 @@ function WebSidebarUser({
     }, PROFILE_DOUBLE_ACTIVATE_DELAY_MS);
   };
 
+  // The account menu holds the "Connect Device" entry; fetch the modal while
+  // it is open so the dialog appears without a network wait.
+  useEffect(() => {
+    if (showUserMenu && canUseDesktopConnect) {
+      preloadHeaderQRModal();
+    }
+  }, [showUserMenu, canUseDesktopConnect]);
+
   const onOpenConnect = () => {
     setShowUserMenu(false);
+    setHasRequestedConnectModal(true);
     setShowConnectModal(true);
   };
 
@@ -394,10 +408,12 @@ function WebSidebarUser({
           />
         </div>
       )}
-      <HeaderConnectModal
-        show={canUseDesktopConnect && showConnectModal}
-        onClose={() => setShowConnectModal(false)}
-      />
+      {hasRequestedConnectModal && (
+        <HeaderConnectModal
+          show={canUseDesktopConnect && showConnectModal}
+          onClose={() => setShowConnectModal(false)}
+        />
+      )}
     </div>
   );
 }
