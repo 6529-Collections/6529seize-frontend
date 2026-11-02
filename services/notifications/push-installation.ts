@@ -2,7 +2,7 @@ import { Capacitor } from "@capacitor/core";
 import * as Sentry from "@sentry/nextjs";
 import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
 import { v4 as uuidv4 } from "uuid";
-import { z } from "zod";
+import type { z as zod } from "zod";
 import { commonApiPost } from "@/services/api/common-api";
 import {
   getConnectedWalletAccounts,
@@ -24,40 +24,45 @@ import {
 } from "./push-installation-errors";
 
 const STORAGE_KEY = "push-installation-lifecycle-v1";
-const secretSchema = z.string().regex(/^[a-f0-9]{64}$/i);
-const revisionSchema = z.number().int().min(0).max(4294967295);
-const installationSchema = z
-  .object({
-    deviceId: z.string().min(1).max(100),
-    secret: secretSchema,
-    revision: revisionSchema,
-    token: z.string().optional(),
-    previousDeviceId: z.string().optional(),
-    migrationQueued: z.boolean().optional(),
-    blockedAuth: z.array(z.string()),
-    pending: z.array(
-      z.object({
-        device_id: z.string().min(1).max(100),
-        installation_secret: secretSchema,
-        revision: revisionSchema.min(1),
-        token: z.string().optional(),
-        profile_id: z.string().optional(),
-        all_profiles: z.boolean(),
-        token_scoped: z.boolean().optional(),
-        sessions: z.array(
-          z.object({ address: z.string(), native_refresh_token: z.string() })
-        ),
-      })
-    ),
-  })
-  .refine((state) =>
-    state.pending.every(
-      (job) =>
-        job.device_id !== state.deviceId ||
-        (job.installation_secret === state.secret &&
-          job.revision <= state.revision)
-    )
-  );
+// Push state is read on native devices only, but its callers (auth, the
+// notifications provider) load on every page, so zod loads with the first
+// state read instead of with the page.
+function createInstallationSchema(z: typeof zod) {
+  const secretSchema = z.string().regex(/^[a-f0-9]{64}$/i);
+  const revisionSchema = z.number().int().min(0).max(4294967295);
+  return z
+    .object({
+      deviceId: z.string().min(1).max(100),
+      secret: secretSchema,
+      revision: revisionSchema,
+      token: z.string().optional(),
+      previousDeviceId: z.string().optional(),
+      migrationQueued: z.boolean().optional(),
+      blockedAuth: z.array(z.string()),
+      pending: z.array(
+        z.object({
+          device_id: z.string().min(1).max(100),
+          installation_secret: secretSchema,
+          revision: revisionSchema.min(1),
+          token: z.string().optional(),
+          profile_id: z.string().optional(),
+          all_profiles: z.boolean(),
+          token_scoped: z.boolean().optional(),
+          sessions: z.array(
+            z.object({ address: z.string(), native_refresh_token: z.string() })
+          ),
+        })
+      ),
+    })
+    .refine((state) =>
+      state.pending.every(
+        (job) =>
+          job.device_id !== state.deviceId ||
+          (job.installation_secret === state.secret &&
+            job.revision <= state.revision)
+      )
+    );
+}
 interface InstallationState {
   deviceId: string;
   secret: string;
@@ -77,8 +82,15 @@ function serialized<T>(action: () => Promise<T>): Promise<T> {
   return result;
 }
 const newSecret = () => (uuidv4() + uuidv4()).replaceAll("-", "");
+async function loadInstallationSchema() {
+  const { z } = await import("zod");
+  return createInstallationSchema(z);
+}
 async function readState(): Promise<InstallationState> {
   const identity = await getPushDeviceIdentity();
+  // Loaded before the storage read so a failed import is never mistaken for
+  // a missing credential below.
+  const installationSchema = await loadInstallationSchema();
   let state: InstallationState;
   try {
     const stored = await SecureStoragePlugin.get({ key: STORAGE_KEY });
