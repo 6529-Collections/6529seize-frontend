@@ -334,8 +334,22 @@ export default function StepsInOrder({
               {/* An operator stays with what follows it, so a formula
                   breaks between terms, never inside one; a wrapped line
                   hangs two characters in. */}
-              <code className="tw-col-start-2 tw-block tw-whitespace-pre-wrap tw-break-words tw-pl-[2ch] tw-indent-[-2ch] tw-font-mono tw-text-[14px] tw-leading-[21px] tw-text-iron-300 md:tw-col-start-auto">
-                {step.rule(n).replace(/([≤−×÷=+→]) /g, "$1\u00a0")}
+              <code className="tw-col-start-2 tw-block tw-whitespace-pre-wrap tw-break-words tw-font-mono tw-text-[14px] tw-leading-[21px] tw-text-iron-300 md:tw-col-start-auto">
+                {step
+                  .rule(n)
+                  .replace(/([≤−×÷=+→]) /g, "$1\u00a0")
+                  .split("\n")
+                  .map((line, index) => (
+                    // Each rule line hangs on its own: a wrapped line's
+                    // rest sits two characters in, under its own start.
+                    <span
+                      // A rule's lines are fixed in order.
+                      key={index}
+                      className="tw-block tw-pl-[2ch] tw-indent-[-2ch]"
+                    >
+                      {line}
+                    </span>
+                  ))}
               </code>
               {trace !== null && (
                 <span

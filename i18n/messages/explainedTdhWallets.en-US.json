@@ -6,7 +6,7 @@
   "explained.tdh.wallets.lede": "Link your wallets both ways, and their copies, days and one boost count together; a fourth needs fresh links, made on or after {date}.",
   "explained.tdh.wallets.liveOn": "Live on 6529.io",
   "explained.tdh.wallets.since": "since {date}",
-  "explained.tdh.wallets.heroCaption": "Grey: linked before {date}. Blue: linked from {date}. D, the fourth, needs fresh links to all three.",
+  "explained.tdh.wallets.heroCaption": "Grey: linked before {date}. Blue: linked from {date}. D needs fresh links to all three.",
   "explained.tdh.wallets.setup": "Start guided setup",
   "explained.tdh.wallets.explain": "Explain my TDH",
   "explained.tdh.wallets.why.label": "First question",
@@ -113,5 +113,5 @@
   "explained.tdh.wallets.hwk.model": "The model",
   "explained.tdh.wallets.hwk.modelBody": "The TDH v1.4 engine's grouping, run in your browser; it passes all {pass} of P26's grouping vectors.",
   "explained.tdh.wallets.hwk.setup": "The guided setup",
-  "explained.tdh.wallets.hwk.setupBody": "6529.io's consolidation tools and their copy: cost, order and managers; that the wallets' profiles merge permanently and the one with the highest CIC keeps its handle; and that a wallet in another consolidation leaves it."
+  "explained.tdh.wallets.hwk.setupBody": "6529.io's consolidation tools and their copy: cost, order and managers; that profiles merge permanently, the one with the highest CIC keeping its handle; and that a wallet in another consolidation leaves it."
 }

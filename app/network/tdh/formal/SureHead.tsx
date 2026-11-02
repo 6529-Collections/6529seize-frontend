@@ -54,7 +54,7 @@ function Glance({ ctx }: { readonly ctx: SureContext }) {
       {rows.map((row, index) => (
         <li
           key={row.mark}
-          className={`tw-px-5 tw-py-4 ${index > 0 ? "tw-border-0 tw-border-t tw-border-solid tw-border-iron-800" : ""}`}
+          className={`tw-px-5 tw-py-3.5 ${index > 0 ? "tw-border-0 tw-border-t tw-border-solid tw-border-iron-800" : ""}`}
         >
           <Mark kind={row.mark} locale={locale} size="sm" />
           <p className="tw-m-0 tw-mt-1.5 tw-text-[15px] tw-leading-6 tw-text-iron-300">

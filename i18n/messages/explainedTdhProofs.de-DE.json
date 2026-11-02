@@ -116,7 +116,7 @@
   "explained.tdh.proofs.blocks.receipts": "Jede Quittung neu aufgebaut",
   "explained.tdh.proofs.blocks.held": "davon enthielten ein zählendes Log",
   "explained.tdh.proofs.blocks.zoom": "{held} der {receipts} neu aufgebauten Blöcke enthielten ein zählendes Log, etwa einer von {ratio}: ein heller Block für jeden.",
-  "explained.tdh.proofs.blocks.cap": "Jeder Block hat in der Eingabe genau eine Art von Nachweis, seinen Bloom-Filter oder seine neu aufgebauten Receipts, sodass die Programme A und B dieselbe Datei lesen; die Blöcke mit einem Log gehören zu den neu aufgebauten. Ein Bloom-Filter aus lauter Nullen zählt nie: Ein vorgeschlagenes Upgrade (EIP-7668) würde Bloom-Filter leeren.",
+  "explained.tdh.proofs.blocks.cap": "Jeder Block hat in der Eingabe genau eine Art von Nachweis, seinen Bloom-Filter oder seine neu aufgebauten Receipts, sodass die Programme A und B dieselbe Datei lesen. Die Blöcke mit einem Log gehören zu den neu aufgebauten. Ein Bloom-Filter aus lauter Nullen zählt nie: Ein vorgeschlagenes Upgrade (EIP-7668) würde Bloom-Filter leeren.",
   "explained.tdh.proofs.phases.label": "Wohin die Schritte von Programm A gehen",
   "explained.tdh.proofs.phases.receipts": "Quittungen zu ihren Headern neu aufbauen",
   "explained.tdh.proofs.phases.tdh": "TDH über die ganze Historie nachspielen",

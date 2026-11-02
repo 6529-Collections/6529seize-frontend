@@ -44,7 +44,7 @@ export function PageHead({
       {aside === undefined ? (
         opening
       ) : (
-        <div className="lg:tw-grid lg:tw-grid-cols-[minmax(0,1fr)_360px] lg:tw-items-end lg:tw-gap-x-12">
+        <div className="lg:tw-grid lg:tw-grid-cols-[minmax(0,1fr)_360px] lg:tw-items-start lg:tw-gap-x-12">
           <div className="tw-min-w-0">{opening}</div>
           <div className="tw-hidden tw-min-w-0 lg:tw-block">{aside}</div>
         </div>

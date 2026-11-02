@@ -377,7 +377,7 @@ describe("the overview", () => {
     expect(
       screen.getByText(/The top 100 identities hold 70\.0% of all TDH, read/)
     ).toHaveTextContent(
-      "read Oct 31, 09:12 UTC. An identity is one to four linked wallets, not always one person. It does not mark 6529's own or the network's accounts. The groups count the 1,100 identities 6529.io's API ranks above zero."
+      "read Oct 31, 09:12 UTC. An identity is one to four linked wallets. It does not mark 6529's own or the network's accounts. The groups count the 1,100 identities 6529.io's API ranks above zero."
     );
     const table = screen.getByRole("table");
     expect(within(table).getAllByRole("row")).toHaveLength(5);

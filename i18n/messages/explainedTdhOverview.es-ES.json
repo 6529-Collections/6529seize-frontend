@@ -11,7 +11,7 @@
   "explained.tdh.overview.cta.explain": "Explicar mi TDH",
   "explained.tdh.overview.cta.how": "Cómo se calcula",
   "explained.tdh.overview.live.total": "{total} TDH",
-  "explained.tdh.overview.live.line": "{identities} identidades: dos programas escritos por separado, ambos ejecutados por 6529, coinciden con 6529.io en todas.",
+  "explained.tdh.overview.live.line": "{identities} identidades: dos programas escritos por separado, ambos ejecutados por 6529, coinciden con 6529.io.",
   "explained.tdh.overview.live.lineDiffers": "{identities} identidades: dos programas escritos por separado, ambos ejecutados por 6529, coinciden con 6529.io en {equal} de ellas.",
   "explained.tdh.overview.live.equation": "Núcleo Rust = referencia Python = 6529.io",
   "explained.tdh.overview.live.link": "La comprobación diaria",

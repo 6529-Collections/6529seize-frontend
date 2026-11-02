@@ -101,7 +101,7 @@
   "explained.tdh.check.agree.rootsDiffer": "La referencia Python no tiene árbol de hashes, así que no calcula raíces; ese día sus registros no son byte a byte los del núcleo Rust.",
   "explained.tdh.check.classes.name": "Clase {name}",
   "explained.tdh.check.classes.a": "Una diferencia conocida y deliberada entre TDH v1.4 y el código que 6529.io ejecuta hasta el cambio (D132). El día dice Causa conocida.",
-  "explained.tdh.check.classes.b": "Un fallo conocido del código que 6529.io ejecuta hasta el cambio. El día dice Causa conocida.",
+  "explained.tdh.check.classes.b": "Un fallo conocido de ese código. El día dice Causa conocida.",
   "explained.tdh.check.classes.c": "Los dos programas no coinciden: un defecto en uno de ellos. Lanza una alarma; el día dice Difiere.",
   "explained.tdh.check.classes.d": "6529.io difiere, sin causa conocida. Lanza una alarma; el día dice Difiere.",
   "explained.tdh.check.classes.none": "Hasta ahora ningún día tiene diferencias de ninguna clase.",

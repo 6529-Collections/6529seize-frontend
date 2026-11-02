@@ -6,7 +6,7 @@
   "explained.tdh.wallets.lede": "Verknüpfen Sie Ihre Wallets in beide Richtungen, dann zählen ihre Exemplare, Tage und ein Boost zusammen; eine vierte braucht frische Verknüpfungen, angelegt am {date} oder später.",
   "explained.tdh.wallets.liveOn": "Live auf 6529.io",
   "explained.tdh.wallets.since": "seit {date}",
-  "explained.tdh.wallets.heroCaption": "Grau: verknüpft vor dem {date}. Blau: verknüpft ab dem {date}. D, die vierte, braucht frische Verknüpfungen mit allen drei.",
+  "explained.tdh.wallets.heroCaption": "Grau: verknüpft vor dem {date}. Blau: verknüpft ab dem {date}. D braucht frische Verknüpfungen mit allen drei.",
   "explained.tdh.wallets.setup": "Geführte Einrichtung starten",
   "explained.tdh.wallets.explain": "Mein TDH erklären",
   "explained.tdh.wallets.why.label": "Erste Frage",

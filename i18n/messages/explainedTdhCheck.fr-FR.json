@@ -101,7 +101,7 @@
   "explained.tdh.check.agree.rootsDiffer": "La référence Python n'a pas d'arbre de hachage, donc pas de racines. Ce jour-là, ses enregistrements ne sont pas ceux du noyau Rust octet pour octet.",
   "explained.tdh.check.classes.name": "Classe {name}",
   "explained.tdh.check.classes.a": "Une différence connue et voulue entre TDH v1.4 et le code que 6529.io exécute jusqu'à la bascule (D132). La journée affiche Cause connue.",
-  "explained.tdh.check.classes.b": "Un bug connu du code que 6529.io exécute jusqu'à la bascule. La journée affiche Cause connue.",
+  "explained.tdh.check.classes.b": "Un bug connu de ce code. La journée affiche Cause connue.",
   "explained.tdh.check.classes.c": "Les deux programmes sont en désaccord : un défaut dans l'un d'eux. Déclenche une alarme ; la journée affiche Diffère.",
   "explained.tdh.check.classes.d": "6529.io diffère, sans cause connue. Déclenche une alarme ; la journée affiche Diffère.",
   "explained.tdh.check.classes.none": "Aucun jour jusqu'ici ne présente de différence, de quelque classe que ce soit.",

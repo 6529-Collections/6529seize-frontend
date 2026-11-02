@@ -81,7 +81,10 @@ function comingRow(
 ): Pick<ChapterIndexRow, "order" | "question" | "maturityLabel" | "note"> {
   const waitsOn = (what: string) =>
     kt(locale, "explained.kit.chapters.waitsOn", { what });
-  let note: ReactNode = waitsOn(ht(locale, def.waits ?? "chapter.nothing"));
+  // A chapter that waits only for its turn says nothing more: its order
+  // ("Then", "Later") already says when.
+  let note: ReactNode =
+    def.waits === null ? null : waitsOn(ht(locale, def.waits));
   if (id === "memes") {
     // Its one-minute CC0 answer is live on this page: link it here, as the
     // Validators row links its live page.

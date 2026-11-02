@@ -299,6 +299,6 @@
   "explained.tdh.sure.glance.lean": "{count} statements about them are checked by Lean's kernel.",
   "explained.tdh.sure.glance.daysLead": "Each day:",
   "explained.tdh.sure.glance.days": "6529.io equals two recomputations in {equal} of {days} results, tested, not proved.",
-  "explained.tdh.sure.glance.notLead": "Not proved:",
-  "explained.tdh.sure.glance.not": "that a day under TDH v1.4 followed the rules; no proof of one exists yet."
+  "explained.tdh.sure.glance.notLead": "A day:",
+  "explained.tdh.sure.glance.not": "no proof yet that a day under TDH v1.4 followed the rules."
 }

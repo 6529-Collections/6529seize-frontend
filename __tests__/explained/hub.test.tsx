@@ -47,10 +47,12 @@ describe("the hub, first version", () => {
     const { container } = withFacts(<HubLoop book={book} locale="en-US" />);
     const card = container.querySelector("[data-station-card]");
     expect(card).toHaveAttribute("data-station-card", "time");
-    // The card follows the copy: its own TDH heads it, the network's total
-    // stays on the loop and in the sentence.
+    // The card follows the copy: its own TDH heads it, and the sentence
+    // says where it comes from; the network's total stays on the loop.
     expect(card).toHaveTextContent("394 TDH");
-    expect(card).toHaveTextContent("All holders, on Oct 18: 2,082,190,981.");
+    expect(card).toHaveTextContent(
+      "A hundred whole days give the number above."
+    );
     expect(
       within(card as HTMLElement).getByRole("link", { name: /Chapter 01: TDH/ })
     ).toHaveAttribute("href", "/network/tdh");
@@ -73,23 +75,23 @@ describe("the hub, first version", () => {
     const panel = container.querySelector("[data-ex-checkable]");
     expect(panel).toHaveTextContent("10,273 of 10,273 identities");
     expect(panel).toHaveTextContent(
-      "6529.io's TDH equals two separately written recomputations, in each of the 5 results since Oct 14."
+      "6529.io's TDH equals two separately written recomputations in all 5 results since Oct 14."
     );
     // The theorem counts are the bundled manifest's, read through the facts.
     expect(panel).toHaveTextContent(
       `${book.num("manifest.proved.tdh").toLocaleString("en-US")} Lean theorems`
     );
     expect(panel).toHaveTextContent(
-      `About a model of TDH's rules, and ${book.num("manifest.proved.p53")} more about the proposed validator rules, from before three later decisions on those rules. Lean proves things about rules, never about a day. ${book.num("manifest.shownFalse.tdh")} counterexamples about TDH (${book.num("manifest.shownFalse")} with the validator rules) stay on record.`
+      `About a model of TDH's rules, plus ${book.num("manifest.proved.p53")} about the proposed validator rules, from before three later decisions. Lean proves things about rules, never a day. ${book.num("manifest.shownFalse.tdh")} counterexamples about TDH (${book.num("manifest.shownFalse")} in all) stay on record; only 6529 can rerun them today.`
     );
     // The proved day carries its retired rule in the same sentence.
     expect(panel).toHaveTextContent("One real day, half proved");
     expect(panel).toHaveTextContent(
-      "A zero-knowledge proof lets a contract check a program's result without running it again; each day needs one from each of two programs. One real day, Oct 11, has the first, under rules since retired. Nothing is on Ethereum yet. The proof file is not published: it is kept with the private validator code (D116)."
+      "A zero-knowledge proof lets a contract check a program's result without rerunning it; each day needs one from each of two programs. One real day, Oct 11, has the first, under retired rules. Nothing is on Ethereum yet, and the proof file is kept private with the validator code (D116)."
     );
     // What anyone can repeat today, and what needs private code.
     expect(panel).toHaveTextContent(
-      "Anyone can check each day's file against the index, which is hashed, not signed, and add up 6529.io's signed upload. 6529 runs all three programs today. Recomputing a day needs your own program and your own copy of Ethereum's logs: 6529's programs are private (D116). Your TDH is in each of those results: see yours."
+      "Anyone can check each day's file against the index (hashed, not signed) and add up 6529.io's signed upload. 6529 runs all three programs; recomputing a day needs your own program and Ethereum's logs, as 6529's are private (D116). Your TDH is in each of those results: see yours."
     );
     expect(panel).not.toHaveTextContent("repeat the daily comparison");
   });

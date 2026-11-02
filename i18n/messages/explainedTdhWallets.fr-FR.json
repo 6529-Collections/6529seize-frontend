@@ -6,7 +6,7 @@
   "explained.tdh.wallets.lede": "Liez vos wallets dans les deux sens, et leurs exemplaires, leurs jours et un seul boost comptent ensemble ; un quatrième demande des liens neufs, créés le {date} ou après.",
   "explained.tdh.wallets.liveOn": "En service sur 6529.io",
   "explained.tdh.wallets.since": "depuis le {date}",
-  "explained.tdh.wallets.heroCaption": "Gris : liés avant le {date}. Bleu : liés à partir du {date}. D, le quatrième, a besoin de liens nouveaux avec les trois.",
+  "explained.tdh.wallets.heroCaption": "Gris : liés avant le {date}. Bleu : liés à partir du {date}. D a besoin de liens nouveaux avec les trois.",
   "explained.tdh.wallets.setup": "Lancer la configuration guidée",
   "explained.tdh.wallets.explain": "Expliquer mon TDH",
   "explained.tdh.wallets.why.label": "Première question",

@@ -116,7 +116,7 @@
   "explained.tdh.proofs.blocks.receipts": "Cada recibo reconstruido",
   "explained.tdh.proofs.blocks.held": "de ellos, contenían un registro que cuenta",
   "explained.tdh.proofs.blocks.zoom": "{held} de los {receipts} bloques reconstruidos contenían un log que cuenta, más o menos uno de cada {ratio}: un bloque encendido por cada uno.",
-  "explained.tdh.proofs.blocks.cap": "Cada bloque tiene en la entrada exactamente un tipo de prueba, su filtro de Bloom o sus recibos reconstruidos, así que los programas A y B leen el mismo archivo; los bloques con un registro están entre los reconstruidos. Un filtro de Bloom a ceros nunca cuenta: una mejora propuesta (EIP-7668) vaciaría los filtros.",
+  "explained.tdh.proofs.blocks.cap": "Cada bloque tiene en la entrada exactamente un tipo de prueba, su filtro de Bloom o sus recibos reconstruidos, así que los programas A y B leen el mismo archivo. Los bloques con un registro están entre los reconstruidos. Un filtro de Bloom a ceros nunca cuenta: una mejora propuesta (EIP-7668) vaciaría los filtros.",
   "explained.tdh.proofs.phases.label": "A dónde van los pasos del programa A",
   "explained.tdh.proofs.phases.receipts": "Reconstruir los recibos en sus cabeceras",
   "explained.tdh.proofs.phases.tdh": "Repetir el TDH sobre todo el historial",

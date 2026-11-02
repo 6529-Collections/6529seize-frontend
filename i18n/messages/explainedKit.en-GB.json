@@ -145,7 +145,7 @@
   "explained.kit.day.simulated": "simulated",
   "explained.kit.liveStrip.today": "Today on the network",
   "explained.kit.liveStrip.legend": "Dashed: the day under way, still open.",
-  "explained.kit.liveStrip.legendOpen": "Dashed: the day under way; {date}'s result will count it.",
+  "explained.kit.liveStrip.legendOpen": "Dashed: the day under way.",
   "explained.kit.contents.label": "On this page",
   "explained.kit.receipt.label": "The receipt for cycle {cycle}",
   "explained.kit.receipt.result": "Result",

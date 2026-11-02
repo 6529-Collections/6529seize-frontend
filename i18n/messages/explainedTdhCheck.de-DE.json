@@ -101,7 +101,7 @@
   "explained.tdh.check.agree.rootsDiffer": "Die Python-Referenz hat keinen Hash-Baum und berechnet daher keine Roots; an diesem Tag sind ihre Datensätze nicht Byte für Byte die des Rust-Kerns.",
   "explained.tdh.check.classes.name": "Klasse {name}",
   "explained.tdh.check.classes.a": "Eine bekannte, gewollte Abweichung zwischen TDH v1.4 und dem Code, den 6529.io bis zur Umstellung ausführt (D132). Der Tag zeigt Bekannte Ursache.",
-  "explained.tdh.check.classes.b": "Ein bekannter Fehler im Code, den 6529.io bis zur Umstellung ausführt. Der Tag zeigt Bekannte Ursache.",
+  "explained.tdh.check.classes.b": "Ein bekannter Fehler in diesem Code. Der Tag zeigt Bekannte Ursache.",
   "explained.tdh.check.classes.c": "Die beiden Programme sind uneins: ein Fehler in einem von ihnen. Löst Alarm aus; der Tag zeigt Abweichend.",
   "explained.tdh.check.classes.d": "6529.io weicht ab, ohne bekannte Ursache. Löst Alarm aus; der Tag zeigt Abweichend.",
   "explained.tdh.check.classes.none": "An keinem Tag bisher gibt es eine Abweichung irgendeiner Klasse.",

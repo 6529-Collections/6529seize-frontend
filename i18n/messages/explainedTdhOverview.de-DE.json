@@ -11,7 +11,7 @@
   "explained.tdh.overview.cta.explain": "Mein TDH erklären",
   "explained.tdh.overview.cta.how": "Wie es berechnet wird",
   "explained.tdh.overview.live.total": "{total} TDH",
-  "explained.tdh.overview.live.line": "{identities} Identitäten: Zwei getrennt geschriebene Programme, beide von 6529 betrieben, stimmen bei allen mit 6529.io überein.",
+  "explained.tdh.overview.live.line": "{identities} Identitäten: Zwei getrennt geschriebene Programme, beide von 6529 betrieben, stimmen mit 6529.io überein.",
   "explained.tdh.overview.live.lineDiffers": "{identities} Identitäten: Zwei getrennt geschriebene Programme, beide von 6529 betrieben, stimmen bei {equal} davon mit 6529.io überein.",
   "explained.tdh.overview.live.equation": "Rust-Kern = Python-Referenz = 6529.io",
   "explained.tdh.overview.live.link": "Die tägliche Prüfung",

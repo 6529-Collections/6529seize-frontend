@@ -116,7 +116,7 @@
   "explained.tdh.proofs.blocks.receipts": "Chaque reçu reconstruit",
   "explained.tdh.proofs.blocks.held": "dont contenaient un journal qui compte",
   "explained.tdh.proofs.blocks.zoom": "{held} des {receipts} blocs reconstruits contenaient un log qui compte, environ un sur {ratio} : un bloc allumé pour chacun.",
-  "explained.tdh.proofs.blocks.cap": "Chaque bloc a dans l'entrée exactement un type de preuve, son filtre de Bloom ou ses reçus reconstruits, si bien que les programmes A et B lisent le même fichier ; les blocs qui contenaient un journal sont parmi les reconstruits. Un filtre de Bloom nul ne compte jamais : une mise à jour proposée (EIP-7668) viderait les filtres.",
+  "explained.tdh.proofs.blocks.cap": "Chaque bloc a dans l'entrée exactement un type de preuve, son filtre de Bloom ou ses reçus reconstruits, si bien que les programmes A et B lisent le même fichier. Les blocs qui contenaient un journal sont parmi les reconstruits. Un filtre de Bloom nul ne compte jamais : une mise à jour proposée (EIP-7668) viderait les filtres.",
   "explained.tdh.proofs.phases.label": "Où vont les étapes du programme A",
   "explained.tdh.proofs.phases.receipts": "Reconstruire les reçus en leurs en-têtes",
   "explained.tdh.proofs.phases.tdh": "Rejouer le TDH sur tout l'historique",

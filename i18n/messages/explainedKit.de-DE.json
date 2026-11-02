@@ -145,7 +145,7 @@
   "explained.kit.day.simulated": "simuliert",
   "explained.kit.liveStrip.today": "Heute im Netzwerk",
   "explained.kit.liveStrip.legend": "Gestrichelt: der laufende Tag, noch offen.",
-  "explained.kit.liveStrip.legendOpen": "Gestrichelt: der laufende Tag; das Ergebnis vom {date} wird ihn zählen.",
+  "explained.kit.liveStrip.legendOpen": "Gestrichelt: der laufende Tag.",
   "explained.kit.contents.label": "Auf dieser Seite",
   "explained.kit.receipt.label": "Der Beleg für Zyklus {cycle}",
   "explained.kit.receipt.result": "Ergebnis",
