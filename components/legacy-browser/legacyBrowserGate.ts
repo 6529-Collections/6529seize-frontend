@@ -19,7 +19,7 @@
 
 export const LEGACY_BROWSER_NOTICE_ID = "legacy-browser-notice";
 export const LEGACY_BROWSER_ATTRIBUTE = "data-legacy-browser";
-export const LEGACY_BROWSER_VARIANT_ATTRIBUTE = "data-legacy-variant";
+const LEGACY_BROWSER_VARIANT_ATTRIBUTE = "data-legacy-variant";
 export const LEGACY_BROWSER_VARIANTS = ["ios", "other"] as const;
 export type LegacyBrowserVariant = (typeof LEGACY_BROWSER_VARIANTS)[number];
 

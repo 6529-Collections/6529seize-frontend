@@ -27,6 +27,7 @@
  */
 
 const fs = require("node:fs");
+const assert = require("node:assert/strict");
 const path = require("node:path");
 const {
   openPage,
@@ -233,5 +234,10 @@ describe("Legacy-browser notice probe (real device)", function () {
     console.log(`LEGACY_NOTICE_RESULT ${JSON.stringify(result)}`);
     writeArtifact(result);
     await saveScreenshot(driver, "legacy-notice");
+    assert.equal(
+      result.outcome?.written,
+      true,
+      "The legacy-browser probe document must be parsed"
+    );
   });
 });

@@ -27,6 +27,7 @@ fallback dictionaries.
 | [Public wave sign-in](public-wave-sign-in.md) | New sign-in copy falls back to `en-US`; existing composer restriction messages remain English |
 | [EMMA entry and help](emma-entry-help.md) | EMMA entry, help, and plans header use source-locale copy with complete English fallback |
 | [Direct-message admission](direct-message-admission.md) | The Preferences group option, its controls, and new-DM refusal notices exist only in `en-US` and fall back to it in other locales |
+| [Legacy-browser update notice](legacy-browser-notice.md) | The pre-hydration update notice uses `DEFAULT_LOCALE`, matching the server-rendered document language |
 
 Remove a debt record only in the same change that completes its remediation and
 verifies the supported locale and accessible-name behavior described by the
