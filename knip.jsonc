@@ -111,6 +111,7 @@
       "ops/scripts/verify-production-artifact.cjs": ["exports"],
       // Invoked from workflow YAML; pure helpers are exported for focused tests.
       "ops/scripts/elastic-beanstalk-readiness.cjs": ["exports"],
+      "ops/scripts/publish-shared-static-assets.cjs": ["exports"],
       "services/**": ["files"],
       // In-repo idb-keyval clone behind the bundler alias: it keeps the full
       // package API for aliased third-party consumers knip cannot see.
