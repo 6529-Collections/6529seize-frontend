@@ -253,6 +253,7 @@ export * from '../models/ApiCompetitionLeaderboardPage';
 export * from '../models/ApiCompetitionLifecycle';
 export * from '../models/ApiCompetitionMyVote';
 export * from '../models/ApiCompetitionMyVotePage';
+export * from '../models/ApiCompetitionMyVotesSort';
 export * from '../models/ApiCompetitionOutcome';
 export * from '../models/ApiCompetitionOutcomePage';
 export * from '../models/ApiCompetitionPage';
@@ -1231,6 +1232,7 @@ import { ApiCompetitionLeaderboardPage } from '../models/ApiCompetitionLeaderboa
 import { ApiCompetitionLifecycle } from '../models/ApiCompetitionLifecycle';
 import { ApiCompetitionMyVote      } from '../models/ApiCompetitionMyVote';
 import { ApiCompetitionMyVotePage } from '../models/ApiCompetitionMyVotePage';
+import { ApiCompetitionMyVotesSort } from '../models/ApiCompetitionMyVotesSort';
 import { ApiCompetitionOutcome } from '../models/ApiCompetitionOutcome';
 import { ApiCompetitionOutcomePage } from '../models/ApiCompetitionOutcomePage';
 import { ApiCompetitionPage } from '../models/ApiCompetitionPage';
@@ -2058,6 +2060,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiCompetitionDecisionStatus",
     "ApiCompetitionEntryStatus",
     "ApiCompetitionLifecycle",
+    "ApiCompetitionMyVotesSort",
     "ApiCompetitionParticipationConfigRequiredMediaEnum",
     "ApiCompetitionRulesInputTypeEnum",
     "ApiCompetitionSortDirection",

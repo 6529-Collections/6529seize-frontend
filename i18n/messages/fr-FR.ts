@@ -37,6 +37,10 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.fr-FR.jso
 const LOADING_LABEL = "Chargement…";
 
 export const FR_FR_MESSAGES = {
+  "waves.myVotes.sort": "Trier par",
+  "waves.myVotes.sort.voteAmount": "Votre nombre de votes",
+  "waves.myVotes.sort.leaderboard": "Position au classement",
+  "waves.myVotes.sort.lastVoted": "Dernier vote",
   "e2ee.profile.view": "Voir le profil de {name}",
   "e2ee.profile.viewUnknown": "Voir le profil",
   "e2ee.profile.level": "Niveau {level}",
