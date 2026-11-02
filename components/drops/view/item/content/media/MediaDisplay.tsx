@@ -10,6 +10,7 @@ import {
   getMediaGatewayFallbackUrls,
   shouldUseIframeFallbackTimeout,
 } from "@/components/nft-image/utils/gateway-fallback";
+import { canonicalizeInteractiveMediaUrl } from "@/components/waves/memes/submission/constants/security";
 import { ImageScale } from "@/helpers/image.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -81,6 +82,12 @@ function InteractiveHtmlMediaDisplay({
   const [didLoadCurrentUrl, setDidLoadCurrentUrl] = useState(false);
   const [isIframeVisible, setIsIframeVisible] = useState(false);
   const activeUrl = urls[activeIndex];
+  // SandboxedExternalIframe renders nothing for a URL it rejects, so only
+  // show the loading status when a frame can actually load.
+  const canRenderFrame = useMemo(
+    () => !!activeUrl && canonicalizeInteractiveMediaUrl(activeUrl) !== null,
+    [activeUrl]
+  );
 
   useEffect(() => {
     setIsActivated(!requireInteractionToLoad);
@@ -168,11 +175,11 @@ function InteractiveHtmlMediaDisplay({
           setIsIframeVisible(true);
         }}
       />
-      {didLoadCurrentUrl ? null : (
+      {canRenderFrame && !didLoadCurrentUrl ? (
         <InteractiveHtmlLoadingStatus
           label={t(locale, "media.interactive.loading")}
         />
-      )}
+      ) : null}
     </div>
   );
 }

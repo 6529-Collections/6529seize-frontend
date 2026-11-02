@@ -3,6 +3,17 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import type { ComponentProps, ReactNode } from "react";
 
 let mockHasTouchScreen = false;
+const mockGetMediaGatewayFallbackUrls = jest.fn();
+
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: () => "en-US",
+}));
+
+jest.mock("@/components/nft-image/utils/gateway-fallback", () => ({
+  getMediaGatewayFallbackUrls: (url: string) =>
+    mockGetMediaGatewayFallbackUrls(url),
+  shouldUseIframeFallbackTimeout: () => false,
+}));
 
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
@@ -48,6 +59,8 @@ jest.mock(
 );
 
 const HTML_MEDIA_CID = "Qmd5N9f92qgeHoeCJZFf6XVvXice6Pn6uLc42rWXGLQXYr";
+const HTML_MEDIA_GATEWAY_URL = `https://media.6529.io/ipfs/${HTML_MEDIA_CID}`;
+const HTML_FRAME_TITLE = `Interactive HTML media: ${HTML_MEDIA_GATEWAY_URL}`;
 const PREVIEW_IMAGE_URL = "https://d3lqz0a4bldqgf.cloudfront.net/preview.png";
 
 const createHtmlDrop = () =>
@@ -95,21 +108,30 @@ const renderPreview = ({ isMobile }: { readonly isMobile: boolean }) =>
     />
   );
 
-const getArtworkFrame = () =>
-  screen.getByTitle((title) => title.startsWith("Interactive HTML media: "));
+const getArtworkFrame = () => screen.getByTitle(HTML_FRAME_TITLE);
 
 describe("MemesQuickVotePreview interactive HTML artwork", () => {
   beforeEach(() => {
     mockHasTouchScreen = false;
+    mockGetMediaGatewayFallbackUrls.mockReset();
+    mockGetMediaGatewayFallbackUrls.mockReturnValue([HTML_MEDIA_GATEWAY_URL]);
   });
 
   it("loads the sandboxed HTML artwork right away on desktop", () => {
     renderPreview({ isMobile: false });
 
     const frame = getArtworkFrame();
+    expect(mockGetMediaGatewayFallbackUrls).toHaveBeenCalledWith(
+      `ipfs://${HTML_MEDIA_CID}`
+    );
     expect(frame.tagName).toBe("IFRAME");
-    expect(frame.getAttribute("src")).toContain(`/ipfs/${HTML_MEDIA_CID}`);
+    expect(frame).toHaveAttribute("src", HTML_MEDIA_GATEWAY_URL);
     expect(frame).toHaveAttribute("sandbox", "allow-scripts");
+    const sandboxTokens = frame.getAttribute("sandbox")?.split(/s+/) ?? [];
+    expect(sandboxTokens).not.toContain("allow-same-origin");
+    expect(sandboxTokens).not.toContain("allow-top-navigation");
+    expect(sandboxTokens).not.toContain("allow-popups");
+    expect(frame).toHaveAttribute("allow", "fullscreen");
     expect(
       screen.queryByRole("button", { name: "Load interactive media" })
     ).not.toBeInTheDocument();
@@ -143,17 +165,22 @@ describe("MemesQuickVotePreview interactive HTML artwork", () => {
         "data-src",
         PREVIEW_IMAGE_URL
       );
-      expect(
-        screen.queryByTitle((title) =>
-          title.startsWith("Interactive HTML media: ")
-        )
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTitle(HTML_FRAME_TITLE)).not.toBeInTheDocument();
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
 
       fireEvent.click(
         screen.getByRole("button", { name: "Load interactive media" })
       );
 
-      expect(getArtworkFrame().tagName).toBe("IFRAME");
+      const frame = getArtworkFrame();
+      expect(frame).toHaveAttribute("src", HTML_MEDIA_GATEWAY_URL);
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Loading interactive media"
+      );
+
+      fireEvent.load(frame);
+
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
     }
   );
 });
