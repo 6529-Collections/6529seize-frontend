@@ -357,11 +357,10 @@
   "apps.desktop.downloadAriaLabel": "Download 6529 Desktop for {platform}, version {version}",
   "apps.desktop.download": "Download",
   "apps.desktop.mirror": "Arweave mirror",
-  "apps.desktop.fileDownloadAria": "Download 6529 Desktop for {platform}, version {version}, {file} ({format})",
-  "apps.desktop.mirrorAria": "Arweave mirror for 6529 Desktop for {platform}, version {version}, {file} ({format})",
-  "apps.desktop.legacyMac": "Last compatible with macOS 12",
+  "apps.desktop.fileDownloadAria": "Download 6529 Desktop for {platform}, version {version}, {file}",
+  "apps.desktop.mirrorAria": "Arweave mirror for 6529 Desktop for {platform}, version {version}, {file}",
   "apps.desktop.macRequirement": "Requires macOS {version} or later",
-  "apps.desktop.mac12Requirement": "For macOS 12 Monterey",
+  "apps.desktop.mac12Requirement": "Last compatible version for macOS 12 Monterey",
   "apps.desktop.macRecovery": "App stopped opening after an update on macOS 12? Reinstall {version} using the downloads above. Keep your existing app data.",
   "apps.desktop.partialError": "Some downloads for this operating system are temporarily unavailable. Please try again.",
   "apps.desktop.file.x64": "x64",
@@ -369,11 +368,6 @@
   "apps.desktop.file.appleSilicon": "Apple silicon",
   "apps.desktop.file.intel": "Intel",
   "apps.desktop.file.appImage": "AppImage",
-  "apps.desktop.file.debian": "Debian / Ubuntu",
-  "apps.desktop.file.redHat": "Fedora / Red Hat",
-  "apps.desktop.format.exe": "EXE installer",
-  "apps.desktop.format.dmg": "DMG installer",
-  "apps.desktop.format.appImage": ".AppImage",
-  "apps.desktop.format.deb": ".deb",
-  "apps.desktop.format.rpm": ".rpm"
+  "apps.desktop.file.debian": "Debian / Ubuntu (.deb)",
+  "apps.desktop.file.redHat": "Fedora / Red Hat (.rpm)"
 }

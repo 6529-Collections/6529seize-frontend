@@ -1,5 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 import { ApiProfileClassification } from "../../generated/models/ApiProfileClassification";
+import type { ApiWaveOverviewPage } from "../../generated/models/ApiWaveOverviewPage";
 import type { ApiXTdhGrantsPage } from "../../generated/models/ApiXTdhGrantsPage";
 import { ApiXTdhGrantStatus } from "../../generated/models/ApiXTdhGrantStatus";
 import { ApiXTdhGrantTargetChain } from "../../generated/models/ApiXTdhGrantTargetChain";
@@ -114,6 +115,43 @@ async function getFirstWaveId(page: Page) {
     `Expected first wave href to use /waves/{id}; got ${href}`
   ).not.toBeNull();
   return match?.[1] ?? "";
+}
+
+async function getPublicChatMessageTarget(page: Page) {
+  const response = await gotoReadyWithApiResponse(
+    page,
+    "/waves",
+    (url) =>
+      url.pathname === "/api/v2/waves" &&
+      !url.searchParams.has("name") &&
+      !url.searchParams.has("pinned")
+  );
+  const overview = (await response.json()) as ApiWaveOverviewPage;
+  const wave = overview.data.find(
+    (candidate) =>
+      !candidate.has_competition &&
+      !candidate.is_private &&
+      !candidate.is_dm_wave &&
+      candidate.total_drops_count > 1
+  );
+  expect(
+    wave,
+    "Legacy-link fixture unavailable: public discovery must contain a nonempty public chat wave"
+  ).toBeDefined();
+  const waveId = wave!.id;
+  expect(waveId).toMatch(/^[0-9a-f-]{36}$/i);
+  await gotoReady(page, `/waves/${waveId}`);
+  const message = page
+    .getByRole("region", {
+      name: "Wave chat file upload area",
+      exact: true,
+    })
+    .locator("[data-serial-no]")
+    .first();
+  await expect(message).toBeVisible({ timeout: 15000 });
+  const serialNo = await message.getAttribute("data-serial-no");
+  expect(serialNo).toMatch(/^[1-9]\d*$/);
+  return { waveId, serialNo: serialNo! };
 }
 
 function getProfileFeed(page: Page): Locator {
@@ -1422,24 +1460,53 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
   });
 
   test("handles legacy wave query links without mutation", async ({ page }) => {
-    const waveId = await getFirstWaveId(page);
-
-    await gotoDocumentWithTransientRetry(
-      page,
-      `/waves?wave=${waveId}&serialNo=1`
-    );
-    // Next can emit the redirect in the streamed document. The initial shell
-    // is visible before that navigation destroys its execution context.
-    await page.waitForURL((url) => url.pathname === `/waves/${waveId}`, {
-      waitUntil: "domcontentloaded",
-      timeout: 45_000,
+    const { waveId, serialNo } = await getPublicChatMessageTarget(page);
+    const wavePath = `/waves/${waveId}`;
+    await test.info().attach("legacy-wave-message-target", {
+      body: JSON.stringify({ waveId, serialNo }),
+      contentType: "application/json",
     });
-    await waitForRouteReady(page);
+    // Observe both the redirect and the chat's target lookup before navigating.
+    // Chat intentionally consumes serialNo; an address-bar check after hydration
+    // races that cleanup and cannot prove which message was actually opened.
+    await Promise.all([
+      page.waitForURL(
+        (url) =>
+          url.pathname === wavePath &&
+          !url.searchParams.has("wave") &&
+          url.searchParams.get("serialNo") === serialNo,
+        { waitUntil: "commit", timeout: 45_000 }
+      ),
+      page.waitForResponse(
+        (response) => {
+          const url = new URL(response.url());
+          return (
+            response.ok() &&
+            url.pathname.endsWith(`/v2/waves/${waveId}/drops`) &&
+            url.searchParams.get("serial_no_limit") === serialNo &&
+            url.searchParams.get("search_strategy") === "FIND_BOTH"
+          );
+        },
+        { timeout: RESPONSE_TIMEOUT_MS }
+      ),
+      gotoDocumentWithTransientRetry(
+        page,
+        `/waves?wave=${waveId}&serialNo=${serialNo}`
+      ),
+    ]);
+    await expectUrlState(
+      page,
+      (url) =>
+        url.pathname === wavePath &&
+        !url.searchParams.has("wave") &&
+        !url.searchParams.has("serialNo")
+    );
+    const target = page
+      .getByRole("region", { name: "Wave chat file upload area", exact: true })
+      .locator(`[data-serial-no="${serialNo}"]`);
+    await expect(target).toBeVisible();
+    await expect(target).toBeInViewport();
     await expectNoHorizontalOverflow(page);
-
-    const url = new URL(page.url());
-    expect(url.searchParams.get("wave")).toBeNull();
-    expect(url.searchParams.get("serialNo")).toBe("1");
   });
 
   test("keeps profile statistics natural and activity loading compact", async ({

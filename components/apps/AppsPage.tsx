@@ -97,14 +97,14 @@ function AppPanel({
       <div
         className={`tw-flex tw-items-center tw-gap-3 ${mobile ? "" : "tw-p-5 sm:tw-p-6"}`}
       >
-        <span className="tw-flex tw-size-11 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-text-primary-300">
-          <Icon aria-hidden="true" className="tw-size-6" />
+        <span className="tw-flex tw-size-12 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-text-primary-300">
+          <Icon aria-hidden="true" className="tw-size-7" />
         </span>
         <div className="tw-min-w-0">
           <h2 id={headingId} className={ABOUT_SECTION_HEADING_CLASS_NAME}>
             {title}
           </h2>
-          <p className={`tw-mb-0 tw-mt-2 ${ABOUT_SUPPORTING_TEXT_CLASS_NAME}`}>
+          <p className={`tw-m-0 ${ABOUT_SUPPORTING_TEXT_CLASS_NAME}`}>
             {description}
           </p>
         </div>

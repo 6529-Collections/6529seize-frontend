@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { DesktopAppDownloads } from "@/components/apps/DesktopAppDownloads";
 import type { DesktopAppVersion } from "@/components/apps/appDownloads";
 
@@ -54,24 +60,53 @@ const app: DesktopAppVersion = {
 };
 describe("DesktopAppDownloads", () => {
   beforeEach(() => {
+    jest.spyOn(navigator, "platform", "get").mockReturnValue("MacIntel");
     refetch.mockReset();
     query = { data: [app], refetch };
   });
+  afterEach(() => jest.restoreAllMocks());
   it("keeps the accordion header OS-only and places requirements beside versions", () => {
     const { container } = render(<DesktopAppDownloads />);
     expect(container.querySelector("summary")!.textContent).toBe("macOS");
     expect(screen.getByText("Requires macOS 13 or later")).toBeInTheDocument();
-    expect(screen.getByText("For macOS 12 Monterey")).toBeInTheDocument();
+    expect(
+      screen.getByText("Last compatible version for macOS 12 Monterey")
+    ).toBeInTheDocument();
     expect(screen.getByText(/Reinstall 0.3.15/)).toBeInTheDocument();
     expect(screen.queryByText("Latest")).not.toBeInTheDocument();
     expect(
       screen.getByRole("link", {
-        name: "Download 6529 Desktop for macOS, version 0.3.16, Apple silicon (DMG installer)",
+        name: "Download 6529 Desktop for macOS, version 0.3.16, Apple silicon",
       })
     ).toHaveAttribute("href", "https://example.com/current.dmg");
     expect(
       screen.getByRole("link", { name: /Arweave mirror/ })
     ).toHaveAttribute("href", "https://arweave.net/mirror");
+    expect(
+      screen.queryByText(/DMG installer|EXE installer/)
+    ).not.toBeInTheDocument();
+  });
+  it.each([
+    ["Win32", "Windows"],
+    ["MacIntel", "macOS"],
+    ["Linux x86_64", "Linux"],
+    ["Unknown", null],
+  ])("opens only the matching OS for %s", (platform, expected) => {
+    jest.spyOn(navigator, "platform", "get").mockReturnValue(platform);
+    query = {
+      data: [
+        { ...app, name: "windows", displayName: "Windows", releases: [] },
+        app,
+        { ...app, name: "linux", displayName: "Linux", releases: [] },
+      ],
+      refetch,
+    };
+    render(<DesktopAppDownloads />);
+    for (const group of screen.getAllByRole("group")) {
+      expect(group.hasAttribute("open")).toBe(
+        group.querySelector("summary")?.textContent === expected
+      );
+    }
   });
   it("keeps loading and full failure recoverable", () => {
     query = { isLoading: true, refetch };
@@ -83,6 +118,17 @@ describe("DesktopAppDownloads", () => {
     view.rerender(<DesktopAppDownloads />);
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(refetch).toHaveBeenCalledTimes(1);
+  });
+  it("tracks native open mutations without waiting for toggle events", async () => {
+    render(<DesktopAppDownloads />);
+    const download = screen.getByRole("link", {
+      name: "Download 6529 Desktop for macOS, version 0.3.16, Apple silicon",
+    });
+    const disclosure = download.closest("details")!;
+    disclosure.removeAttribute("open");
+    await waitFor(() => expect(download.closest("[inert]")).not.toBeNull());
+    disclosure.setAttribute("open", "");
+    await waitFor(() => expect(download.closest("[inert]")).toBeNull());
   });
   it("preserves available releases and exposes a retry for a partial feed failure", () => {
     query = { data: [{ ...app, hasUnavailableRelease: true }], refetch };
