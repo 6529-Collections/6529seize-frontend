@@ -228,7 +228,7 @@
   "explained.kit.area.lostShort": "{days} jours partis",
   "explained.kit.area.days": "{days} jours",
   "explained.kit.area.tdh": "{tdh} TDH",
-  "explained.kit.area.reference": "pour comparer, une carte plus rare de {copies} copies : {rate} par jour",
+  "explained.kit.area.reference": "une carte plus rare de {copies} copies : {rate} par jour",
   "explained.kit.equal.aria": "Éditions à l'échelle : chaque rectangle a la largeur de ses copies et la hauteur de son taux, et tous ont à peu près la même surface.",
   "explained.kit.equal.copies": "{copies} copies × {rate}",
   "explained.kit.equal.perDay": "≈ {area} par jour",
