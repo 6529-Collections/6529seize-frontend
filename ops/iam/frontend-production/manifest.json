@@ -13,8 +13,8 @@
     {
       "name": "FrontendProductionStorage",
       "file": "FrontendProductionStorage.json",
-      "characters": 3410,
-      "sha256": "ea20c5449b38e25c9c78f44ae161d635309cbb95e90a8b8d7328158fc704021f"
+      "characters": 4132,
+      "sha256": "42141d1d0c562e907143b41316c1c4acbb1355a4042da22e3e1700644fc59b1d"
     }
   ],
   "recovery_source_commit": "6a2bf8685b473f4da8962dec5b6c1969162a46ce"
