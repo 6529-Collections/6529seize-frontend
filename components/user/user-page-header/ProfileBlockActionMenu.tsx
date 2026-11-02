@@ -22,6 +22,7 @@ const TRIGGER_CLASS_NAME =
 
 type Props = Readonly<{
   handle: string;
+  hasArtistActivity: boolean;
   disabled: boolean;
   blocked?: boolean;
   moderationAction?:
@@ -49,6 +50,7 @@ export default function ProfileBlockActionMenu(props: Props) {
 
 function ProfileActionsMenu({
   handle,
+  hasArtistActivity,
   disabled,
   blocked = false,
   moderationAction,
@@ -59,10 +61,15 @@ function ProfileActionsMenu({
   const locale = useBrowserLocale();
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const mute = useProfileMute(showPersonalActions ? handle : "");
-  const artworkAlert = useArtistArtworkAlert(handle, scope, blocked);
+  const artworkAlert = useArtistArtworkAlert(
+    handle,
+    scope,
+    blocked,
+    hasArtistActivity
+  );
   const menuLabel = t(locale, "contentModeration.profile.actionsMenu");
   const items: readonly CompactMenuItem[] = [
-    artworkAlert,
+    ...(artworkAlert ? [artworkAlert] : []),
     ...(showPersonalActions
       ? ([
           {
@@ -112,6 +119,8 @@ function ProfileActionsMenu({
         ] satisfies CompactMenuItem[])
       : []),
   ];
+  if (items.length === 0) return null;
+
   const trigger = (
     <EllipsisVerticalIcon aria-hidden="true" className="tw-size-5" />
   );

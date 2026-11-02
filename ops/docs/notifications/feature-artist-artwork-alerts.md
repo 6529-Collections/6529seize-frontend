@@ -12,6 +12,11 @@ when they submit new artwork to **The Memes – Main Stage**. The menu shows
 - New alerts appear in [Notifications](feature-notifications-feed.md), where the
   **Artwork alerts** filter shows these rows.
 
+The control appears for profiles with an artist activity badge: active Main Stage
+submissions, Main Stage wins, or earlier Meme artist credits. If you already have
+alerts on, it stays available even without the badge so you can turn them off.
+Turning them off then hides the control until the profile has an artist badge again.
+
 ## Entry Points
 
 Open the artist’s profile from a submission, search result, or profile link.
@@ -50,9 +55,11 @@ Open the artist’s profile from a submission, search result, or profile link.
 
 ## Failure and Recovery
 
-The control is disabled while loading or saving. If loading fails, select
+When available, the control is disabled while loading or saving. If loading fails, select
 **Retry artwork alerts**. If saving fails, an error appears and the saved state
-is checked again before another toggle is offered.
+is checked again before another toggle is offered. On profiles without an artist
+badge, the control appears only once an enabled preference is known; if the
+initial request fails, reopen the profile to retry.
 
 ## Limitations / Notes
 

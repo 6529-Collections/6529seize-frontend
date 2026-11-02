@@ -92,6 +92,7 @@ describe("ProfileBlockActionMenu", () => {
     render(
       <ProfileBlockActionMenu
         handle="alice"
+        hasArtistActivity
         disabled={false}
         onBlock={onBlock}
       />
@@ -124,6 +125,7 @@ describe("ProfileBlockActionMenu", () => {
     render(
       <ProfileBlockActionMenu
         handle="alice"
+        hasArtistActivity
         disabled={false}
         onBlock={jest.fn()}
       />
@@ -147,6 +149,7 @@ describe("ProfileBlockActionMenu", () => {
     render(
       <ProfileBlockActionMenu
         handle="alice"
+        hasArtistActivity
         disabled={false}
         showPersonalActions={false}
         moderationAction={{

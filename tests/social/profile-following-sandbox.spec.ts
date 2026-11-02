@@ -127,6 +127,7 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
   test("keeps artist artwork alerts separate from Follow and persists toggles", async ({
     page,
     baseURL,
+    request,
   }, testInfo) => {
     // Keep wallet balance reads deterministic; the sandbox blocks external RPC.
     await page.route("https://rpc.walletconnect.org/v1/**", async (route) => {
@@ -185,20 +186,29 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
       }
     );
     await openOwnProfile(page);
-    const preferenceLoaded = page.waitForResponse(
-      (response) =>
-        response
-          .url()
-          .endsWith("/identities/following-artist-0/artwork-alerts") &&
-        response.request().method() === "GET"
-    );
-    await page.goto("/following-artist-0");
-    await preferenceLoaded;
+    const loadProfile = async (reload = false) => {
+      const preferenceLoaded = page.waitForResponse(
+        (response) =>
+          response
+            .url()
+            .endsWith("/identities/following-artist-0/artwork-alerts") &&
+          response.request().method() === "GET"
+      );
+      if (reload) await page.reload();
+      else await page.goto("/following-artist-0");
+      await preferenceLoaded;
+      await expect(
+        page.getByRole("button", { name: "Follow", exact: true })
+      ).toBeVisible();
+    };
+    await loadProfile();
     const mobile = (page.viewportSize()?.width ?? 0) < 1024;
-    const openAlerts = async (state: "On" | "Off") => {
-      await page
+    const openActions = () =>
+      page
         .getByRole("button", { name: "Profile actions", exact: true })
         .click();
+    const openAlerts = async (state: "On" | "Off") => {
+      await openActions();
       const alert = page.getByRole(mobile ? "button" : "menuitem", {
         name: new RegExp(`^Artwork alerts.*${state}`),
       });
@@ -228,6 +238,23 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("button", { name: /^Artwork alerts/ })
     ).toHaveCount(0);
+    await openActions();
+    await expect(
+      page.getByRole(mobile ? "button" : "menuitem", {
+        name: /^Artwork alerts/,
+      })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole(mobile ? "button" : "menuitem", {
+        name: "Mute notifications",
+        exact: true,
+      })
+    ).toBeVisible();
+    await closeActions();
+    expect(
+      (await request.post(`${api}/__composer-sandbox/artist-activity`)).ok()
+    ).toBe(true);
+    await loadProfile(true);
     const alert = await openAlerts("Off");
     await alert.press("Enter");
     await expect.poll(() => enabled).toBe(true);
@@ -250,10 +277,24 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
       page.getByRole("button", { name: "Follow", exact: true })
     ).toBeVisible();
     expect(alertWrites).toBe(1);
-    await page.reload();
+    expect(
+      (await request.delete(`${api}/__composer-sandbox/artist-activity`)).ok()
+    ).toBe(true);
+    await loadProfile(true);
     await (await openAlerts("On")).click();
     await expect.poll(() => enabled).toBe(false);
-    await openAlerts("Off");
+    await openActions();
+    await expect(
+      page.getByRole(mobile ? "button" : "menuitem", {
+        name: /^Artwork alerts/,
+      })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole(mobile ? "button" : "menuitem", {
+        name: "Block profile",
+        exact: true,
+      })
+    ).toBeVisible();
     await closeActions();
     expect(alertWrites).toBe(2);
     expect(followWrites).toBe(2);

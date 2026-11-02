@@ -1,5 +1,9 @@
 import { useAuth } from "@/components/auth/Auth";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import {
+  getSubmissionCount,
+  getTrophyArtworkCount,
+} from "@/helpers/artist-activity.helpers";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import UserFollowBtn from "../utils/UserFollowBtn";
@@ -58,6 +62,9 @@ export default function ProfileHeaderRelationshipActions({
   const actionMenu = (
     <ProfileBlockActionMenu
       handle={profile.handle}
+      hasArtistActivity={
+        getSubmissionCount(profile) > 0 || getTrophyArtworkCount(profile) > 0
+      }
       blocked={moderationControls.isBlocked}
       disabled={
         moderationControls.isLoading || moderationControls.isActionPending

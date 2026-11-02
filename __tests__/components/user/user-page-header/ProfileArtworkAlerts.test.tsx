@@ -35,7 +35,7 @@ jest.mock("@/hooks/useProfileMute", () => () => ({
 jest.mock("@/hooks/useIsMobileLayoutViewport", () => () => false);
 jest.mock("@/components/compact-menu", () => ({
   CompactMenu: ({ items }: { items: readonly CompactMenuItem[] }) => (
-    <>
+    <div data-testid="profile-actions">
       {items.map(
         (item) =>
           item.kind !== "section" && (
@@ -48,7 +48,7 @@ jest.mock("@/components/compact-menu", () => ({
             </button>
           )
       )}
-    </>
+    </div>
   ),
 }));
 const fetchPreference = jest.mocked(commonApiFetch);
@@ -56,7 +56,11 @@ const postPreference = jest.mocked(commonApiPost);
 const deletePreference = jest.mocked(commonApiDelete);
 const name = /^Artwork alerts/;
 
-function setup(overrides: Partial<AuthContextType> = {}, blocked = false) {
+function setup(
+  overrides: Partial<AuthContextType> = {},
+  blocked = false,
+  hasArtistActivity = true
+) {
   const requestAuth = jest.fn().mockResolvedValue({ success: true });
   const setToast = jest.fn();
   const client = new QueryClient({
@@ -71,11 +75,12 @@ function setup(overrides: Partial<AuthContextType> = {}, blocked = false) {
     setToast,
     ...overrides,
   } as AuthContextType;
-  const view = (value: AuthContextType) => (
+  const view = (value: AuthContextType, activity = hasArtistActivity) => (
     <QueryClientProvider client={client}>
       <AuthContext.Provider value={value}>
         <ProfileBlockActionMenu
           handle="artist"
+          hasArtistActivity={activity}
           blocked={blocked}
           disabled={false}
           onBlock={() => undefined}
@@ -89,6 +94,8 @@ function setup(overrides: Partial<AuthContextType> = {}, blocked = false) {
     requestAuth,
     setToast,
     client,
+    rerenderArtistActivity: (activity: boolean) =>
+      rendered.rerender(view(auth, activity)),
     rerenderAuth: (next: Partial<AuthContextType>) =>
       rendered.rerender(view({ ...auth, ...next })),
   };
@@ -162,6 +169,7 @@ it("reads back uncertain writes and reports an actionable error", async () => {
   fetchPreference.mockResolvedValue({ enabled: true });
   await userEvent.click(button);
   await waitFor(() => expect(button).toHaveTextContent("On"));
+  expect(fetchPreference).toHaveBeenCalledTimes(2);
   expect(setToast).toHaveBeenCalledWith(
     expect.objectContaining({
       type: "error",
@@ -256,4 +264,63 @@ it("loads the viewer preference after a guest signs in, without implicit opt-in"
   expect(postPreference).not.toHaveBeenCalled();
   await userEvent.click(screen.getByRole("button", { name }));
   await waitFor(() => expect(postPreference).toHaveBeenCalledTimes(1));
+});
+
+it("hides alerts without artist activity but still checks for an enabled preference", async () => {
+  const { client } = setup({}, false, false);
+  await waitFor(() => expect(client.isFetching()).toBe(0));
+  expect(fetchPreference).toHaveBeenCalledWith(
+    expect.objectContaining({ endpoint: "identities/artist/artwork-alerts" })
+  );
+  expect(screen.queryByTestId("profile-actions")).not.toBeInTheDocument();
+});
+
+it("keeps existing alerts available without artist activity until turned off", async () => {
+  fetchPreference.mockResolvedValue({ enabled: true });
+  setup({}, false, false);
+  const button = await screen.findByRole("button", { name });
+  expect(button).toHaveTextContent("On");
+  await userEvent.click(button);
+  await waitFor(() =>
+    expect(screen.queryByTestId("profile-actions")).not.toBeInTheDocument()
+  );
+  expect(deletePreference).toHaveBeenCalledTimes(1);
+  expect(postPreference).not.toHaveBeenCalled();
+});
+
+it("keeps enabled alerts when artist activity disappears", async () => {
+  fetchPreference.mockResolvedValue({ enabled: true });
+  const { rerenderArtistActivity } = setup();
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name })).toHaveTextContent("On")
+  );
+  rerenderArtistActivity(false);
+  expect(screen.getByRole("button", { name })).toBeEnabled();
+  expect(screen.getByRole("button", { name })).toHaveTextContent("On");
+});
+
+it("keeps retry available after a failed refresh of enabled alerts without activity", async () => {
+  fetchPreference.mockResolvedValueOnce({ enabled: true });
+  const { client } = setup({}, false, false);
+  await screen.findByRole("button", { name });
+  fetchPreference.mockRejectedValueOnce(new Error("offline"));
+  await act(async () => {
+    await client.invalidateQueries();
+  });
+  const retry = await screen.findByRole("button", {
+    name: /^Retry artwork alerts/,
+  });
+  expect(retry).toBeEnabled();
+  expect(retry).not.toHaveTextContent("Off");
+  fetchPreference.mockResolvedValue({ enabled: true });
+  await userEvent.click(retry);
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name })).toHaveTextContent("On")
+  );
+});
+
+it("omits an empty actions menu for guests viewing profiles without artist activity", () => {
+  setup({ connectedProfile: null, isAuthenticated: false }, false, false);
+  expect(screen.queryByTestId("profile-actions")).not.toBeInTheDocument();
+  expect(fetchPreference).not.toHaveBeenCalled();
 });

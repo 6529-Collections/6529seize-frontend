@@ -22,8 +22,9 @@ import {
 export default function useArtistArtworkAlert(
   handle: string,
   scope: string,
-  blocked: boolean
-): CompactMenuItem {
+  blocked: boolean,
+  hasArtistActivity: boolean
+): CompactMenuItem | null {
   const {
     connectedProfile,
     fetchingProfile,
@@ -98,6 +99,8 @@ export default function useArtistArtworkAlert(
     },
   });
   const enabled = canManage && preference.data?.enabled === true;
+  if (!hasArtistActivity && !enabled) return null;
+
   const loading = fetchingProfile || (canManage && preference.isFetching);
   const failed = canManage && preference.isError;
   const label = t(

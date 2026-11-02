@@ -94,6 +94,7 @@ let publicWavePreviewReads = 0;
 // wave drafts remain resolvable after the request log is reset between tests.
 let sandboxDropReaction = null;
 let sandboxWaveGuidelinesEnabled = false;
+let sandboxArtistActivityEnabled = false;
 let sandboxCreatedWaveType = "CHAT";
 let sandboxRuleGroupSequence = 0;
 const sandboxRuleGroups = new Map();
@@ -2539,6 +2540,14 @@ function requestLog() {
 
 function handleDiagnostics(method, pathname, res) {
   if (
+    pathname === "/__composer-sandbox/artist-activity" &&
+    (method === "POST" || method === "DELETE")
+  ) {
+    sandboxArtistActivityEnabled = method === "POST";
+    writeJson(res, 200, { ok: true });
+    return true;
+  }
+  if (
     pathname === "/__composer-sandbox/public-preview" &&
     isSafeReadMethod(method)
   ) {
@@ -2554,6 +2563,7 @@ function handleDiagnostics(method, pathname, res) {
     publicWavePreviewReads = 0;
     sandboxDropReaction = null;
     sandboxWaveGuidelinesEnabled = false;
+    sandboxArtistActivityEnabled = false;
     sandboxCreatedWaveType = "CHAT";
     writeJson(res, 200, { ok: true });
     return true;
@@ -2686,6 +2696,7 @@ const mockApiPatternReadRoutes = [
       handle: "following-artist-0",
       normalised_handle: "following-artist-0",
       query: "following-artist-0",
+      artist_of_prevote_cards: sandboxArtistActivityEnabled ? [1] : [],
       wallets: [],
       primary_wallet: "0x0000000000000000000000000000000000000001",
       primary_address: "0x0000000000000000000000000000000000000001",
