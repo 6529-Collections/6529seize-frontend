@@ -17,6 +17,7 @@ import * as browserSourceMessages from "@/i18n/sourceMessages.browser";
 type SourceMessagesModule = typeof serverSourceMessages;
 type MessagesModule = typeof import("@/i18n/messages");
 type RegistryModule = typeof import("@/i18n/messageRegistry");
+type LocaleDictionariesModule = typeof import("@/i18n/localeDictionaries");
 type CompleteDictionaryModule = typeof import("@/i18n/messages/en-US.complete");
 
 const BROWSER_MODULE = "@/i18n/sourceMessages.browser";
@@ -35,7 +36,8 @@ const publicEnv = {
 const browserModuleContract: SourceMessagesModule = browserSourceMessages;
 
 // Evaluate the browser modules from scratch, as a fresh page load would,
-// resolving `@/i18n/sourceMessages` the way the Turbopack alias does.
+// resolving `@/i18n/sourceMessages` and `@/i18n/localeDictionaries` the way
+// the Turbopack aliases do.
 function loadBrowserModules(): {
   readonly messages: MessagesModule;
   readonly registry: RegistryModule;
@@ -45,6 +47,11 @@ function loadBrowserModules(): {
   jest.isolateModules(() => {
     jest.doMock("@/i18n/sourceMessages", () =>
       jest.requireActual<SourceMessagesModule>(BROWSER_MODULE)
+    );
+    jest.doMock("@/i18n/localeDictionaries", () =>
+      jest.requireActual<LocaleDictionariesModule>(
+        "@/i18n/localeDictionaries.browser"
+      )
     );
     registry = jest.requireActual<RegistryModule>("@/i18n/messageRegistry");
     messages = jest.requireActual<MessagesModule>("@/i18n/messages");
@@ -75,7 +82,11 @@ beforeEach(() => {
 afterEach(() => {
   consoleError.mockRestore();
   jest.dontMock("@/i18n/sourceMessages");
+  jest.dontMock("@/i18n/localeDictionaries");
   jest.dontMock(COMPLETE_MODULE);
+  // The complete dictionary loads after `isolateModules` returns, into the
+  // shared registry; drop it so each test's mock is the one that loads.
+  jest.resetModules();
 });
 
 describe("source message registry", () => {
@@ -152,6 +163,8 @@ describe("browser source messages", () => {
     registry.registerSourceMessages({ [UNREGISTERED_KEY]: "Namespace title" });
 
     expect(messages.t("en-US", UNREGISTERED_KEY)).toBe("Namespace title");
+    // de-DE has no copy for the key: it falls back to the registered en-US.
+    expect(messages.t("de-DE", UNREGISTERED_KEY)).toBe("Namespace title");
     expect(consoleError).not.toHaveBeenCalled();
   });
 
