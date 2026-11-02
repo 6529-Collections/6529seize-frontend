@@ -127,7 +127,12 @@ describe("MemesQuickVotePreview interactive HTML artwork", () => {
     expect(frame.tagName).toBe("IFRAME");
     expect(frame).toHaveAttribute("src", HTML_MEDIA_GATEWAY_URL);
     expect(frame).toHaveAttribute("sandbox", "allow-scripts");
-    const sandboxTokens = frame.getAttribute("sandbox")?.split(/s+/) ?? [];
+    const sandboxTokens = (frame.getAttribute("sandbox") ?? "")
+      .split(" ")
+      .filter(Boolean);
+    // Guards the tokenizer itself, so the negative checks below cannot pass
+    // vacuously on a mis-split attribute.
+    expect(sandboxTokens).toEqual(["allow-scripts"]);
     expect(sandboxTokens).not.toContain("allow-same-origin");
     expect(sandboxTokens).not.toContain("allow-top-navigation");
     expect(sandboxTokens).not.toContain("allow-popups");
