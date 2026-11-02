@@ -32,8 +32,15 @@ import UserPageSubscriptionsTopUp from "./UserPageSubscriptionsTopUp";
 import UserPageSubscriptionsUpcoming from "./UserPageSubscriptionsUpcoming";
 import SubscriptionCoverageSummary from "./coverage/SubscriptionCoverageSummary";
 import { useSubscriptionCoverage } from "./coverage/useSubscriptionCoverage";
+import { getSubscriptionCoveragePresentation } from "./coverage/subscriptionCoverage.helpers";
 
 const HISTORY_PAGE_SIZE = 10;
+const COVERAGE_BORDER_CLASS = {
+  neutral: "tw-border-white/[0.04]",
+  positive: "tw-border-emerald-400/20",
+  caution: "tw-border-amber-300/20",
+  danger: "tw-border-red-300/25",
+};
 function getSubscriptionProfileKey(
   profile: ApiIdentity | null | undefined
 ): string | undefined {
@@ -59,6 +66,11 @@ export default function UserPageSubscriptions(
     : getSubscriptionProfileKey(connectedProfile);
   const isConnectedAccount = !!profileKey && connectedProfileKey === profileKey;
   const coverageQuery = useSubscriptionCoverage({ profileKey });
+  const coverageTone =
+    coverageQuery.isLoading || coverageQuery.isError || !coverageQuery.data
+      ? "neutral"
+      : getSubscriptionCoveragePresentation(locale, coverageQuery.data.status)
+          .tone;
   const topUp = useSubscriptionDisclosure(
     "profile-subscriptions-top-up",
     isConnectedAccount,
@@ -325,8 +337,12 @@ export default function UserPageSubscriptions(
       <section
         id="profile-subscriptions-overview"
         aria-labelledby="profile-subscriptions-overview-title"
-        className="tw-scroll-mt-24 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-p-5 md:tw-p-8"
+        className={`tw-relative tw-isolate tw-overflow-hidden tw-scroll-mt-24 tw-rounded-2xl tw-border tw-border-solid tw-bg-iron-950 tw-p-5 tw-shadow-[0_15px_40px_rgba(0,0,0,0.35)] md:tw-p-8 ${COVERAGE_BORDER_CLASS[coverageTone]}`}
       >
+        <div
+          aria-hidden="true"
+          className="tw-pointer-events-none tw-absolute -tw-top-24 tw-right-[5%] -tw-z-10 tw-size-80 tw-bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.04),transparent_70%)] lg:-tw-top-32 lg:tw-right-[28%] lg:tw-size-[28rem]"
+        />
         <SubscriptionCoverageSummary
           coverage={coverageQuery.data}
           isError={coverageQuery.isError}
@@ -378,7 +394,7 @@ export default function UserPageSubscriptions(
         loading={fetchingMemeSubscriptions}
         coverage={coverageQuery.isError ? undefined : coverageQuery.data}
       />
-      <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06] tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950">
+      <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06] tw-rounded-xl tw-bg-iron-950 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] max-md:tw-bg-iron-900 max-md:tw-shadow-none">
         <UserPageSubscriptionsDisclosure
           id="profile-subscriptions-settings"
           title={t(locale, "subscriptions.page.settingsTitle")}

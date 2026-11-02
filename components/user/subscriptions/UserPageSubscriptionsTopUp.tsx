@@ -140,7 +140,18 @@ function getTopUpTransactionModalState(
 }
 
 const TOP_UP_CHIP_CLASS =
-  "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-bg-transparent tw-px-4 tw-py-2 tw-text-left tw-text-sm tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 max-md:tw-w-full";
+  "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-between tw-gap-3 tw-rounded-xl tw-border-0 tw-px-4 tw-py-2 tw-text-left tw-text-sm tw-text-iron-100 tw-shadow-lg tw-ring-1 tw-ring-inset focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 max-md:tw-w-full";
+
+function getTopUpOptionStateClass(selected: boolean, featured = false): string {
+  if (selected) {
+    return featured
+      ? "tw-bg-primary-500/15 tw-ring-primary-300/45"
+      : "tw-bg-iron-900 tw-ring-white/[0.05]";
+  }
+  return featured
+    ? "tw-bg-primary-500/[0.08] tw-ring-primary-400/25"
+    : "tw-bg-iron-950 tw-ring-white/[0.03]";
+}
 
 interface TopUpSelection {
   readonly amountEth: string;
@@ -437,6 +448,7 @@ export default function UserPageSubscriptionsTopUp({
         {recommendation && (
           <CardCountOption
             id="subscription-top-up-recommended"
+            featured
             count={recommendation.additional_mints}
             amountEth={recommendation.amount_eth}
             display={
@@ -470,7 +482,7 @@ export default function UserPageSubscriptionsTopUp({
         />
         {printRemainingMints(remainingMintsForSeason, "SZN", szn, "szn")}
         <label
-          className={`${TOP_UP_CHIP_CLASS} ${selectedOption === "other" ? "tw-border-iron-100" : "tw-border-white/[0.12]"}`}
+          className={`${TOP_UP_CHIP_CLASS} ${getTopUpOptionStateClass(selectedOption === "other")}`}
         >
           <span>{t(locale, "subscriptions.topUp.other")}</span>
           <input
@@ -494,7 +506,7 @@ export default function UserPageSubscriptionsTopUp({
           aria-expanded={showMore}
           aria-controls="subscription-top-up-more"
           onClick={() => setShowMore(!showMore)}
-          className={`${TOP_UP_CHIP_CLASS} tw-border-dashed tw-border-white/[0.12] tw-text-iron-300`}
+          className={`${TOP_UP_CHIP_CLASS} tw-bg-iron-950 tw-text-iron-300 tw-ring-white/[0.03]`}
         >
           {t(
             locale,
@@ -576,7 +588,7 @@ export default function UserPageSubscriptionsTopUp({
               <button
                 type="button"
                 onClick={onCancel}
-                className={`${TOP_UP_CHIP_CLASS} tw-border-white/[0.12]`}
+                className={`${TOP_UP_CHIP_CLASS} ${getTopUpOptionStateClass(false)}`}
               >
                 {t(locale, "subscriptions.topUp.cancel")}
               </button>
@@ -628,6 +640,7 @@ function CardCountOption(
     amountEth?: string | undefined;
     display?: ReactNode;
     selected: boolean;
+    featured?: boolean;
     onSelect: () => void;
   }>
 ) {
@@ -639,7 +652,7 @@ function CardCountOption(
       type="button"
       aria-pressed={props.selected}
       onClick={props.onSelect}
-      className={`${TOP_UP_CHIP_CLASS} ${props.selected ? "tw-border-iron-100" : "tw-border-white/[0.12]"}`}
+      className={`${TOP_UP_CHIP_CLASS} ${getTopUpOptionStateClass(props.selected, props.featured)}`}
     >
       <span className="tw-font-medium">{props.display ?? countLabel}</span>
       <span className="tw-text-right tw-tabular-nums tw-text-iron-400">

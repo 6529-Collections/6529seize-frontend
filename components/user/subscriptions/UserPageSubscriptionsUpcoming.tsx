@@ -134,7 +134,7 @@ export default function UserPageSubscriptionsUpcoming(
       }
     >
       <>
-        <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950">
+        <div className="tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03]">
           {content}
           {!props.loading &&
             subscriptions.length > 0 &&
