@@ -328,10 +328,12 @@ export default async function ImplementationsPage({
                       random: p.v("programs.randomPerChange"),
                     }),
                     proved: (
-                      <span className="tw-inline-flex tw-items-baseline tw-gap-1.5">
+                      // The dot on the first line, not centred on a cell
+                      // of three.
+                      <span className="tw-inline-flex tw-items-start tw-gap-1.5">
                         <Glyph
                           kind="proved"
-                          className="tw-size-3 tw-self-center"
+                          className="tw-mt-[5px] tw-size-3 tw-flex-none"
                         />
                         <span>
                           {m("explained.tdh.impl.lean.proved", {
