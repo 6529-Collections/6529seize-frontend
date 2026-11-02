@@ -214,6 +214,8 @@
 
 ## Failure and Recovery
 
+- Timeline previews use [historical media fallbacks](../nft/feature-media-source-fallbacks.md#historical-timeline-previews)
+  when a recorded Arweave source fails.
 - If artist works cannot load, use their `Try again` button. A failed image
   displays `Artwork preview unavailable` while keeping its card link usable.
 - If a numeric ID resolves to fallback mode, use fallback timing details or return to `/the-memes` and open a nearby card.

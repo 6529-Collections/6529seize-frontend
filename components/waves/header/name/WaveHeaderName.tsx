@@ -1,5 +1,6 @@
 "use client";
 
+import { useWaveConfiguration } from "@/hooks/waves/useWaveConfiguration";
 import Link from "next/link";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useContext } from "react";
@@ -9,7 +10,12 @@ import { canEditWave } from "@/helpers/waves/waves.helpers";
 import { getWavePathRoute } from "@/helpers/navigation.helpers";
 import WaveParentNavigation from "../WaveParentNavigation";
 
-export default function WaveHeaderName({ wave }: { readonly wave: ApiWave }) {
+export default function WaveHeaderName({
+  wave: source,
+}: {
+  readonly wave: ApiWave;
+}) {
+  const wave = useWaveConfiguration(source);
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const isDirectMessage = wave.chat.scope.group?.is_direct_message ?? false;
   const showEdit =

@@ -177,6 +177,55 @@ describe("mobile app links", () => {
       expect(resolve(value)).toBe(expected);
     });
 
+    it("routes a shared staging link within the staging app", () => {
+      expect(
+        getNativeLinkDestination(
+          "https://STAGING.6529.IO/waves/1?drop=2&tag=a&tag=b#drop-2",
+          "mobileStaging6529",
+          "https://staging.6529.io",
+          123
+        )
+      ).toBe("/waves/1?drop=2&tag=a&tag=b&_t=123#drop-2");
+    });
+
+    it.each([
+      "https://6529.io",
+      "https://prxtstaging.6529.io",
+      "https://staging.6529.io.example.com",
+      "http://localhost:3001",
+      "http://staging.6529.io",
+      "https://staging.6529.io:8443",
+    ])("rejects staging links from a different app origin %s", (appOrigin) => {
+      expect(
+        getNativeLinkDestination(
+          "https://staging.6529.io/waves/1",
+          "mobileStaging6529",
+          appOrigin,
+          123
+        )
+      ).toBeNull();
+    });
+
+    it.each([
+      "/auth/callback",
+      "/tools/app-wallets/import-wallet",
+      "/open-mobile",
+      "/api/version",
+      "/.well-known/apple-app-site-association",
+      "/favicon.svg",
+      "/bad%",
+      "//evil.example",
+    ])("keeps staging exclusion or unsafe path %s in the browser", (path) => {
+      expect(
+        getNativeLinkDestination(
+          `https://staging.6529.io${path}`,
+          "mobileStaging6529",
+          "https://staging.6529.io",
+          123
+        )
+      ).toBeNull();
+    });
+
     it.each([
       "https://evil.example/waves/1",
       "https://6529.io.evil.example/waves/1",
@@ -265,11 +314,12 @@ describe("mobile app links", () => {
       constructor(value: string | URL, base?: string | URL) {
         super(value, base);
         const text = String(value);
-        if (!text.startsWith("mobile6529://")) {
+        const schemePrefix = /^(?:mobile6529|mobilestaging6529):\/\//i.exec(text);
+        if (!schemePrefix) {
           return;
         }
         const legacy = new RealURL(
-          `${text.replace("mobile6529://", "https://legacy.invalid//")}`
+          `https://legacy.invalid//${text.slice(schemePrefix[0].length)}`
         );
         Object.defineProperty(this, "hostname", { value: "" });
         Object.defineProperty(this, "pathname", { value: legacy.pathname });
@@ -316,6 +366,17 @@ describe("mobile app links", () => {
           123
         )
       ).toBeNull();
+    });
+
+    it("preserves the configured staging scheme on an older WebView", () => {
+      expect(
+        getNativeLinkDestination(
+          "mobilestaging6529://navigate/messages/encrypted?x=1#m",
+          "mobileStaging6529",
+          origin,
+          123
+        )
+      ).toBe("/messages/encrypted?x=1&_t=123#m");
     });
   });
 });

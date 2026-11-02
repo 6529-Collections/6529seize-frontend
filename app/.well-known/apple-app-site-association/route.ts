@@ -1,3 +1,4 @@
+import { publicEnv } from "@/config/env";
 import { getAppleAppSiteAssociation } from "@/helpers/appleAppSiteAssociation";
 
 // Built once; Apple's CDN fetches it at this exact path, without a redirect.
@@ -8,7 +9,7 @@ export const dynamic = "force-static";
 const CACHE_CONTROL = "public, max-age=3600";
 
 export function GET() {
-  return Response.json(getAppleAppSiteAssociation(), {
+  return Response.json(getAppleAppSiteAssociation(publicEnv.BASE_ENDPOINT), {
     headers: { "Cache-Control": CACHE_CONTROL },
   });
 }
