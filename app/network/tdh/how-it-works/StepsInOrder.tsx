@@ -1,8 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { DAY, REGISTRY_V14 } from "@/components/explained/engine/tdh";
 import { EX_FOCUS, EX_TEXT } from "@/components/explained/tokens";
 import type { SupportedLocale } from "@/i18n/locales";
-import { ENGINE } from "@/lib/explained/engine";
 import { formatCents, formatCount } from "@/lib/explained/format";
 import {
   Para,
@@ -11,7 +12,10 @@ import {
   StatementLabel,
 } from "@/components/explained/layout/rows";
 import { rich } from "@/components/explained/rich";
+import { useState } from "react";
+import { Seg, Slider } from "@/components/explained/lens/controls";
 import { ht, type HowKey } from "./copy";
+import { traceOf, type Trace } from "./trace";
 
 /**
  * Every step of P26, in its order (the owner's brief for this chapter: the
@@ -157,63 +161,6 @@ const STEPS: readonly Step[] = [
   },
 ];
 
-/**
- * One wallet through every step (the full calculation by hand): one copy of
- * a 310-copy card and one Gradient, each held a whole hundred days, in a
- * wallet of its own. The Gradient earns its own base and gives the boost;
- * each token's final is its base times the boost, and the identity's is
- * their sum (P26 §8.4). Every number is the engine's, on today's H.
- */
-interface Trace {
-  readonly h: number;
-  readonly edition: number;
-  readonly days: number;
-  readonly rateCents: number;
-  readonly base: number;
-  /** The Gradient's rate, base and final. */
-  readonly gradRateCents: number;
-  readonly gradBase: number;
-  readonly betaCents: number;
-  readonly cardFinal: number;
-  readonly gradFinal: number;
-  readonly final: number;
-}
-
-export function traceOf(
-  h: number,
-  edition: number,
-  nMemes: number,
-  gradRateCents: number
-): Trace {
-  const days = 100;
-  const rateCents = ENGINE.rateCents(h, edition);
-  const base = ENGINE.baseTdh(rateCents, days);
-  const gradBase = ENGINE.baseTdh(gradRateCents, days);
-  const betaCents = ENGINE.boostCents({
-    fullSets: 0,
-    gradients: 1,
-    completeSeasons: [],
-    genesis: false,
-    nakamoto: false,
-    nMemes,
-  });
-  const cardFinal = ENGINE.finalTdh(base, betaCents);
-  const gradFinal = ENGINE.finalTdh(gradBase, betaCents);
-  return {
-    h,
-    edition,
-    days,
-    rateCents,
-    base,
-    gradRateCents,
-    gradBase,
-    betaCents,
-    cardFinal,
-    gradFinal,
-    final: cardFinal + gradFinal,
-  };
-}
-
 function traceLine(
   id: string,
   t: Trace,
@@ -266,15 +213,34 @@ function traceLine(
   return params === undefined ? null : ht(locale, key, params);
 }
 
+/** What the worked example is computed from, read on the server. */
+export interface TraceInputs {
+  readonly h: number;
+  readonly nMemes: number;
+  readonly gradRateCents: number;
+  /** The editions a reader can pick, the first shown first; none below the threshold. */
+  readonly editions: readonly number[];
+}
+
+const DAYS_MAX = 1000;
+
 export default function StepsInOrder({
   locale,
-  trace,
+  inputs,
 }: {
   readonly locale: SupportedLocale;
-  /** The worked example, or null when the editions could not be read. */
-  readonly trace: Trace | null;
+  /** The worked example's inputs, or null when the editions could not be read. */
+  readonly inputs: TraceInputs | null;
 }) {
   const n = (value: number) => formatCount(locale, value);
+  // The worked column is live: pick the card's edition and the days, and
+  // every line beside the rules recomputes, in P26's order.
+  const [edition, setEdition] = useState(inputs?.editions[0] ?? 0);
+  const [days, setDays] = useState(100);
+  const trace: Trace | null =
+    inputs === null
+      ? null
+      : traceOf(inputs.h, edition, inputs.nMemes, inputs.gradRateCents, days);
   return (
     <Section id="steps">
       <Statement
@@ -288,15 +254,54 @@ export default function StepsInOrder({
         <Para>{ht(locale, "explained.tdh.how.order.body")}</Para>
       </Statement>
       <figure className="tw-m-0 tw-mt-12" data-fig="steps">
-        {trace !== null && (
+        {trace !== null && inputs !== null && (
           // The worked holder is a new example, so it is introduced before
-          // step 00 and the blue column reads as one story from the start.
-          <p className="tw-m-0 tw-mb-4 tw-max-w-[760px] tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-3 tw-text-[15px] tw-leading-6 tw-text-iron-300">
-            {ht(locale, "explained.tdh.how.trace.caption", {
-              edition: n(trace.edition),
-              threshold: n(R.edition_floor_threshold),
-            })}
-          </p>
+          // step 00 and the blue column reads as one story from the start;
+          // its two controls drive every blue line below.
+          <div
+            className="tw-mb-5 tw-grid tw-max-w-[860px] tw-gap-3"
+            data-lens="trace"
+          >
+            <p className="tw-m-0 tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/60 tw-pl-3 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+              {ht(locale, "explained.tdh.how.trace.caption", {
+                edition: n(trace.edition),
+                threshold: n(R.edition_floor_threshold),
+                days: n(trace.days),
+              })}
+            </p>
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-6 tw-gap-y-3">
+              <Seg
+                label={ht(locale, "explained.tdh.how.trace.edition")}
+                attr="edition"
+                value={String(edition)}
+                onChange={(value) => setEdition(Number(value))}
+                options={inputs.editions.map((copies) => ({
+                  value: String(copies),
+                  label: ht(locale, "explained.tdh.how.trace.editionOption", {
+                    copies: n(copies),
+                  }),
+                }))}
+              />
+              <div className="tw-flex tw-min-w-[220px] tw-flex-1 tw-flex-col tw-gap-1">
+                <span className="tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-400">
+                  {ht(locale, "explained.tdh.how.trace.daysValue", {
+                    days: n(days),
+                  })}
+                </span>
+                <Slider
+                  label={ht(locale, "explained.tdh.how.trace.days")}
+                  value={days}
+                  min={1}
+                  max={DAYS_MAX}
+                  attr="days"
+                  valueText={ht(locale, "explained.tdh.how.trace.daysValue", {
+                    days: n(days),
+                  })}
+                  onChange={setDays}
+                />
+              </div>
+            </div>
+          </div>
         )}
         <ol className="tw-m-0 tw-list-none tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-p-0">
           {STEPS.map((step, index) => (

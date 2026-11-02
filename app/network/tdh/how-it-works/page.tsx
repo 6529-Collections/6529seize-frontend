@@ -28,7 +28,7 @@ import NetworkSection from "./NetworkSection";
 import { EXAMPLE_CARD, FIRST_GM } from "./models/rates";
 import RatesLens from "./RatesLens";
 import StacksLens from "./StacksLens";
-import StepsInOrder, { traceOf } from "./StepsInOrder";
+import StepsInOrder from "./StepsInOrder";
 import { RecordValue } from "@/components/explained/layout/RecordValue";
 import { FactText } from "@/components/explained/facts/FactText";
 import {
@@ -95,14 +95,30 @@ export default async function TdhHowItWorksPage({
   const capFact = book.maybe<number>("rules.editionFloorCap");
   const countFact = book.maybe<number>("memes.count");
   const gradFact = book.maybe<number>("engine.rate.gradient");
-  const trace =
-    hFact && capFact && countFact && gradFact
-      ? traceOf(
-          hFact.value,
-          capFact.value,
-          countFact.value,
-          Math.round(gradFact.value * 100)
-        )
+  // The editions a reader can pick for it: a 310-copy card first, then the
+  // rarest and a 1,000-copy card, as 6529.io's editions are read today.
+  // None is below the threshold, so the worked example never needs a floor.
+  const thresholdFact = book.maybe<number>("rules.editionThreshold");
+  const candidates = [
+    capFact?.value,
+    book.maybe<number>("meme.4.edition")?.value,
+    book.maybe<number>("meme.2.edition")?.value,
+  ];
+  const pickable = candidates.filter(
+    (copies, index): copies is number =>
+      typeof copies === "number" &&
+      thresholdFact !== null &&
+      copies >= thresholdFact.value &&
+      candidates.indexOf(copies) === index
+  );
+  const traceInputs =
+    hFact && capFact && countFact && gradFact && pickable.length > 0
+      ? {
+          h: hFact.value,
+          nMemes: countFact.value,
+          gradRateCents: Math.round(gradFact.value * 100),
+          editions: pickable,
+        }
       : null;
 
   const chapter = chapterById("tdh");
@@ -249,7 +265,7 @@ export default async function TdhHowItWorksPage({
 
         <NetworkSection book={book} locale={locale} />
 
-        <StepsInOrder locale={locale} trace={trace} />
+        <StepsInOrder locale={locale} inputs={traceInputs} />
 
         <PrevNext
           locale={locale}
