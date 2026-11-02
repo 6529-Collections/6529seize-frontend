@@ -1,6 +1,8 @@
 "use client";
 
-import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { CompactMenu } from "@/components/compact-menu";
 import CompactMenuMobileBottomSheet from "@/components/compact-menu/CompactMenuMobileBottomSheet";
 import {
@@ -57,12 +59,17 @@ export function CompetitionMyVotesSort({
   );
   const items = Object.values(ApiCompetitionMyVotesSort).map((value) => ({
     id: value,
-    label: labels[value],
-    icon: (
-      <CheckIcon
-        aria-hidden="true"
-        className={`tw-h-4 tw-w-4 tw-shrink-0 ${value === sort ? "" : "tw-invisible"}`}
-      />
+    label: (
+      <span className="tw-flex tw-items-center tw-justify-between tw-gap-x-2">
+        <span>{labels[value]}</span>
+        {value === sort && (
+          <FontAwesomeIcon
+            icon={faCheck}
+            aria-hidden="true"
+            className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-primary-300"
+          />
+        )}
+      </span>
     ),
     onSelect: () => onChange(value),
   }));
@@ -89,6 +96,7 @@ export function CompetitionMyVotesSort({
       trigger={trigger}
       disabled={disabled}
       anchor="bottom start"
+      menuClassName="tailwind-scope"
       menuWidthClassName="tw-w-56 tw-max-w-[calc(100vw-2rem)]"
       autoFocusItem={false}
       activeItemId={sort}

@@ -54,7 +54,7 @@ describe("CompactMenu focus", () => {
     expect(screen.getByRole("button", { name: "Create" })).toHaveFocus();
   });
 
-  it("draws a ring on the active item, not a background tint alone", async () => {
+  it("keeps the active-item ring scoped to visible keyboard focus", async () => {
     const user = userEvent.setup();
     render(
       <CompactMenu
@@ -74,7 +74,8 @@ describe("CompactMenu focus", () => {
 
     await user.keyboard("{ArrowDown}");
     expect(first).toHaveClass(
-      "tw-ring-2",
+      "focus-visible:tw-ring-2",
+      "group-focus-visible/compact-menu:tw-ring-2",
       "tw-ring-inset",
       "tw-ring-primary-400",
       "tw-bg-iron-800"
