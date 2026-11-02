@@ -1,6 +1,7 @@
 "use client";
 
 import { useWebVersionUpdate } from "@/components/version-update/useWebVersionUpdate";
+import { VERSION_UPDATE_ROCKET_IMAGE_SRC } from "@/components/version-update/versionReloadImage";
 import { refreshAppVersion } from "@/helpers/version-refresh.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -14,11 +15,17 @@ const SGT_WINK_IMAGE = (
   />
 );
 
+// Intrinsic size at the 48px display height (source artwork is 1790x747), so
+// the toast reserves its width before the image decodes.
+const ROCKET_REFRESH_IMAGE_WIDTH = 115;
+
 const ROCKET_REFRESH_IMAGE = (
   // react-doctor-disable-next-line react-doctor/nextjs-no-img-element restored plain img to avoid unrelated next/image optimization behavior in this dock-positioning PR.
   <img
-    src="/rocket-refresh.png"
+    src={VERSION_UPDATE_ROCKET_IMAGE_SRC}
     alt=""
+    width={ROCKET_REFRESH_IMAGE_WIDTH}
+    height={48}
     className="tw-relative tw-z-10 tw-h-12 tw-w-auto tw-flex-shrink-0 tw-text-[#dfffe8] tw-transition-all tw-duration-200 tw-ease-out group-active:tw-scale-[0.985] desktop-hover:group-hover:tw-brightness-150 desktop-hover:group-hover:tw-saturate-150"
   />
 );

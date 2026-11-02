@@ -7,7 +7,10 @@ import { checkCustomRoutes } from "next/dist/lib/load-custom-routes";
 import { renderToStaticMarkup } from "react-dom/server";
 import sharp from "sharp";
 import VersionReloadScreen from "@/components/version-update/VersionReloadScreen";
-import { VERSION_RELOAD_IMAGE_SRC } from "@/components/version-update/versionReloadImage";
+import {
+  VERSION_RELOAD_IMAGE_SRC,
+  VERSION_UPDATE_ROCKET_IMAGE_SRC,
+} from "@/components/version-update/versionReloadImage";
 import { sharedConfig } from "@/config/nextConfig";
 import type { PublicEnv } from "@/config/env.schema";
 import { createSecurityHeaders } from "@/config/securityHeaders";
@@ -81,6 +84,54 @@ it("keeps the rocket synchronized with the current public source artwork", () =>
     "utf8"
   );
   expect(generated).toContain(`Source SHA-256: ${hash}`);
+});
+
+describe("new-version toast rocket", () => {
+  const toastArtworkPath = path.join(
+    PUBLIC_DIR,
+    VERSION_UPDATE_ROCKET_IMAGE_SRC
+  );
+
+  it("is a small, transparent, hash-named WebP at 3x its 48px display height", async () => {
+    expect(VERSION_UPDATE_ROCKET_IMAGE_SRC).toMatch(
+      /^\/version-update-rocket\.[0-9a-f]{12}\.webp$/
+    );
+    const bytes = readFileSync(toastArtworkPath);
+    // The 1.1 MB source PNG used to ship as-is to every user on each deploy.
+    expect(bytes.length).toBeLessThan(25_000);
+    const metadata = await sharp(bytes).metadata();
+    expect(metadata).toMatchObject({
+      format: "webp",
+      height: 144,
+      hasAlpha: true,
+    });
+
+    const digest = createHash("sha256").update(bytes).digest("hex");
+    expect(path.basename(toastArtworkPath)).toBe(
+      `version-update-rocket.${digest.slice(0, 12)}.webp`
+    );
+  });
+
+  it("leaves no stale hash-named copies behind in public", () => {
+    const artwork = readdirSync(PUBLIC_DIR).filter(
+      (name) =>
+        name.startsWith("version-update-rocket.") && name.endsWith(".webp")
+    );
+    expect(artwork).toEqual([path.basename(VERSION_UPDATE_ROCKET_IMAGE_SRC)]);
+  });
+
+  it("stays synchronized with its public source artwork", () => {
+    const source = readFileSync(path.join(PUBLIC_DIR, "rocket-refresh.png"));
+    const hash = createHash("sha256").update(source).digest("hex");
+    const generated = readFileSync(
+      path.join(
+        process.cwd(),
+        "components/version-update/versionReloadImage.ts"
+      ),
+      "utf8"
+    );
+    expect(generated).toContain(`Source SHA-256: ${hash}`);
+  });
 });
 
 describe("deployment delivery", () => {

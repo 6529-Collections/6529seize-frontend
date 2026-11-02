@@ -3,7 +3,10 @@ import { e2eeAssetCacheHeaders } from "./e2eeAssetCacheHeaders";
 import { isE2eeFlagEnabled } from "./e2eeFlag";
 import { meebits445Headers } from "./meebits445Headers";
 import { staticAssetCacheHeaders } from "./staticAssetCacheHeaders";
-import { versionReloadImageHeaders } from "./versionReloadImageHeaders";
+import {
+  versionReloadImageHeaders,
+  versionUpdateRocketImageHeaders,
+} from "./versionReloadImageHeaders";
 import { PublicEnv } from "./env.schema";
 import { NextConfig } from "next";
 import type { RemotePattern } from "next/dist/shared/lib/image-config";
@@ -210,6 +213,7 @@ export function sharedConfig(
         },
         meebits445Headers,
         versionReloadImageHeaders,
+        versionUpdateRocketImageHeaders,
         e2eeAssetCacheHeaders,
         {
           // Connection links carry one-time credentials in the query string.
