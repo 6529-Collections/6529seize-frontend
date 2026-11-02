@@ -436,8 +436,24 @@ function ProfileDetailActions(props: CollectDetailActionsProps) {
 
 export default function CollectDetailActions(props: CollectDetailActionsProps) {
   return (
-    <NftPurchasingGate>
+    <NftPurchasingGate placeholder={<CollectDetailActionsSpace {...props} />}>
       <ProfileDetailActions {...props} />
     </NftPurchasingGate>
+  );
+}
+
+// Blank space with the panel's first-render footprint, its loading state
+// (measured on the production build at 390 and 1280 px: 76 px framed, 108 px
+// unframed), while the actions may still mount, so the detail page does not
+// move when they replace it. Never shows purchasing UI.
+function CollectDetailActionsSpace({
+  mobileSticky,
+}: Pick<CollectDetailActionsProps, "mobileSticky">) {
+  return (
+    <div
+      aria-hidden="true"
+      data-testid="collect-detail-actions-space"
+      className={mobileSticky ? "tw-h-[76px]" : "tw-h-[108px]"}
+    />
   );
 }

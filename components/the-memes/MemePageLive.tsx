@@ -48,7 +48,16 @@ export function MemePageLiveRightMenu(props: {
         {props.nftMeta && (
           <MemeEditionSizeStats nftMeta={props.nftMeta} locale={locale} />
         )}
-        <NftPurchasingGate>
+        <NftPurchasingGate
+          placeholder={
+            <div
+              aria-hidden="true"
+              className="tw-border-0 tw-border-b tw-border-solid tw-border-transparent tw-py-1"
+            >
+              <div className="tw-h-11" />
+            </div>
+          }
+        >
           <div className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-py-1">
             <CollectMarketButton
               locale={locale}
