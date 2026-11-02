@@ -2,6 +2,8 @@
 import { ApiCompetitionEntryStatus } from "@/generated/models/ApiCompetitionEntryStatus";
 
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
+import { ApiCompetitionMyVotesSort } from "@/generated/models/ApiCompetitionMyVotesSort";
+import useLocalPreference from "@/hooks/useLocalPreference";
 
 import PrivilegedDropCreator, {
   DropMode,
@@ -11,6 +13,7 @@ import { getVoteRationaleReplyMarkdown } from "@/helpers/waves/vote-rationale.he
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -42,7 +45,11 @@ import { useCompetitionEntryDrops } from "@/hooks/competitions/useCompetitionEnt
 import { useCompetitionDropNavigation } from "@/hooks/competitions/useCompetitionDropNavigation";
 import MyStreamWaveMyVote from "@/components/brain/my-stream/votes/MyStreamWaveMyVote";
 import { CompetitionVoteForm } from "./CompetitionVote";
-import { CompetitionState, COMPETITION_BUTTON } from "./CompetitionState";
+import {
+  CompetitionState,
+  COMPETITION_BUTTON,
+  COMPETITION_INPUT,
+} from "./CompetitionState";
 import { CompetitionLoadMore } from "./CompetitionLoadMore";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -148,9 +155,31 @@ function MyVotesLoadMore({
 }
 
 export default function CompetitionMyVotes() {
-  const { competition, wave } = useCompetition();
+  const { competition } = useCompetition();
   const viewer = useCompetitionViewer();
+  return (
+    <ScopedCompetitionMyVotes
+      key={`${competition.wave_id}:${competition.id}:${viewer ?? "anonymous"}`}
+      viewer={viewer}
+    />
+  );
+}
+
+const isMyVotesSort = (value: unknown): value is ApiCompetitionMyVotesSort =>
+  Object.values(ApiCompetitionMyVotesSort).some((sort) => sort === value);
+
+function ScopedCompetitionMyVotes({
+  viewer,
+}: {
+  readonly viewer: string | null;
+}) {
+  const { competition, wave } = useCompetition();
   const locale = useBrowserLocale();
+  const [sort, setSort] = useLocalPreference<ApiCompetitionMyVotesSort>(
+    `competitionMyVotesSort_${competition.wave_id}_${competition.id}_${viewer ?? "anonymous"}`,
+    ApiCompetitionMyVotesSort.VoteAmount,
+    isMyVotesSort
+  );
   const [rationale, setRationale] = useState<{
     drop: ExtendedDrop;
     partId: number;
@@ -185,7 +214,7 @@ export default function CompetitionMyVotes() {
   const query = useCompetitionResource(
     { waveId: competition.wave_id, competitionId: competition.id },
     "votes/me",
-    { include: "cards" },
+    { include: "cards", sort },
     !!viewer
   );
   const votes = useMemo(
@@ -227,6 +256,16 @@ export default function CompetitionMyVotes() {
   const { requestAuth } = useAuth();
   const sign = useCompetitionSignatureFor(competition);
   const pendingResets = useRef(new Map<string, ApiSetCompetitionVoteRequest>());
+  const activeScope = useRef(true);
+  useLayoutEffect(() => {
+    activeScope.current = true;
+    return () => {
+      activeScope.current = false;
+    };
+  }, []);
+  const assertActiveScope = () => {
+    if (!activeScope.current) throw new Error("Voting session changed");
+  };
   const selectable = votes.filter(
     (vote) => vote.entry_status === ApiCompetitionEntryStatus.Active
   );
@@ -240,8 +279,10 @@ export default function CompetitionMyVotes() {
       !competition.permissions.vote
     )
       throw new Error("Vote cannot be reset");
+    assertActiveScope();
     if (!viewer || !(await requestAuth()).success)
       throw new Error("Authentication required");
+    assertActiveScope();
     const key = `${viewer}:${competition.config_version}:${vote.entry_id}`;
     let body = pendingResets.current.get(key);
     if (!body) {
@@ -259,6 +300,7 @@ export default function CompetitionMyVotes() {
         );
       pendingResets.current.set(key, body);
     }
+    assertActiveScope();
     try {
       await setCompetitionVote(identity, vote.entry_id, body);
       pendingResets.current.delete(key);
@@ -276,14 +318,58 @@ export default function CompetitionMyVotes() {
         {t(locale, "competitions.signIn")}
       </p>
     );
-  if (query.isPending) return <CompetitionState />;
+  const sortControl = (
+    <div className="tw-px-2 tw-py-2 sm:tw-px-4">
+      <label className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-text-iron-300">
+        <span>{t(locale, "waves.myVotes.sort")}</span>
+        <select
+          value={sort}
+          disabled={resetting}
+          className={`${COMPETITION_INPUT} tw-min-h-11 !tw-w-auto tw-min-w-0 tw-max-w-full tw-flex-1 !tw-py-2 tw-text-base sm:tw-flex-none sm:tw-text-sm`}
+          onChange={(event) => {
+            const value = event.target.value;
+            if (isMyVotesSort(value)) {
+              setSelected(new Set());
+              setSort(value);
+            }
+          }}
+        >
+          <option value={ApiCompetitionMyVotesSort.VoteAmount}>
+            {t(locale, "waves.myVotes.sort.voteAmount")}
+          </option>
+          <option value={ApiCompetitionMyVotesSort.Leaderboard}>
+            {t(locale, "waves.myVotes.sort.leaderboard")}
+          </option>
+          <option value={ApiCompetitionMyVotesSort.LastVoted}>
+            {t(locale, "waves.myVotes.sort.lastVoted")}
+          </option>
+        </select>
+      </label>
+    </div>
+  );
+  if (query.isPending)
+    return (
+      <div>
+        {sortControl}
+        <CompetitionState />
+      </div>
+    );
   if (query.isError && (!query.data || isCompetitionAccessError(query.error)))
-    return <CompetitionState error retry={() => void query.refetch()} />;
+    return (
+      <div>
+        {sortControl}
+        <CompetitionState error retry={() => void query.refetch()} />
+      </div>
+    );
   const loadingDrops = drops.some(
     (result) => result.isPending && result.isFetching
   );
   return (
     <div>
+      {sortControl}
+      {query.isRefetchError && (
+        <CompetitionState error retry={() => void query.refetch()} />
+      )}
       <MyStreamWaveMyVotesReset
         waveId={competition.wave_id}
         haveDrops={selectable.length > 0}

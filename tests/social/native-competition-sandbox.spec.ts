@@ -2465,6 +2465,245 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     });
   }
 
+  test("sorts complete My Votes pages, recovers errors and ignores a late previous order", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page);
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
+    );
+    const fixture = await response.json();
+    const artworks = Array.from({ length: 53 }, (_, index) => ({
+      ...fixture.drops[0],
+      id: `sorted-vote-${index}`,
+      drop_type: "SUBMISSION",
+      title: `Sorted artwork ${index}`,
+    }));
+    const resources = await installArtworkCompetitionResources(
+      page,
+      WAVE,
+      fixture.wave,
+      () => artworks
+    );
+    const orders: Record<string, typeof artworks> = {
+      vote_amount: artworks,
+      leaderboard: [artworks[52]!, ...artworks.slice(0, 52)],
+      last_voted: [...artworks].reverse(),
+    };
+    const values = new Map(
+      artworks.map((drop, index) => [drop.id, 53 - index])
+    );
+    const mutations: number[] = [];
+    await page.route(
+      "**/v3/waves/*/competitions/alpha/credits/me**",
+      (route) => {
+        const entryId = new URL(route.request().url()).searchParams.get(
+          "entry_id"
+        );
+        const drop = artworks.find(
+          (item) => resources.entry(item.id).id === entryId
+        );
+        return route.fulfill({
+          json: {
+            competition_id: "alpha",
+            profile_id: PROFILE,
+            entry_id: entryId,
+            credit_type: "TDH",
+            credit_scope: "WAVE",
+            available: 10000,
+            spent: 1431,
+            remaining: 8569,
+            current_vote: drop ? values.get(drop.id) : 0,
+            min_vote: -1000,
+            max_vote: 1000,
+          },
+        });
+      }
+    );
+    await page.route(
+      "**/v3/waves/*/competitions/alpha/entries/*/votes/me",
+      (route) => {
+        const entryId = new URL(route.request().url()).pathname
+          .split("/")
+          .at(-3);
+        const drop = artworks.find(
+          (item) => resources.entry(item.id).id === entryId
+        )!;
+        const { value } = route.request().postDataJSON() as { value: number };
+        mutations.push(value);
+        values.set(drop.id, value);
+        orders.last_voted = [
+          drop,
+          ...orders.last_voted!.filter((item) => item !== drop),
+        ];
+        orders.vote_amount = [...artworks].sort(
+          (a, b) => values.get(b.id)! - values.get(a.id)!
+        );
+        return route.fulfill({
+          json: {
+            competition_id: "alpha",
+            profile_id: PROFILE,
+            entry_id: entryId,
+            credit_type: "TDH",
+            credit_scope: "WAVE",
+            available: 10000,
+            spent: 1431,
+            remaining: 8569,
+            current_vote: value,
+            min_vote: -1000,
+            max_vote: 1000,
+          },
+        });
+      }
+    );
+    const reads: { sort: string; cursor: string | null }[] = [];
+    let holdRanking = true;
+    let releaseRanking: (() => void) | undefined;
+    let failRecent = true;
+    await page.route(
+      "**/v3/waves/*/competitions/alpha/votes/me?**",
+      async (route) => {
+        const url = new URL(route.request().url());
+        const sort = url.searchParams.get("sort") ?? "vote_amount";
+        const cursor = url.searchParams.get("cursor");
+        reads.push({ sort, cursor });
+        if (cursor && !cursor.startsWith(`${sort}:`)) {
+          return route.fulfill({
+            status: 400,
+            json: { message: "Wrong sort cursor" },
+          });
+        }
+        if (sort === "leaderboard" && holdRanking) {
+          holdRanking = false;
+          await new Promise<void>((resolve) => {
+            releaseRanking = resolve;
+          });
+        }
+        if (sort === "last_voted" && failRecent) {
+          failRecent = false;
+          return route.fulfill({
+            status: 503,
+            json: { message: "Temporary failure" },
+          });
+        }
+        const start = cursor ? Number(cursor.split(":")[1]) : 0;
+        const end = start + 50;
+        const ordered = orders[sort]!.filter(
+          (drop) => values.get(drop.id) !== 0
+        );
+        const items = ordered.slice(start, end);
+        return route.fulfill({
+          json: {
+            data: items.map((drop) => ({
+              entry_id: resources.entry(drop.id).id,
+              drop_id: drop.id,
+              value: values.get(drop.id),
+              credit_spent: Math.abs(values.get(drop.id)!),
+              entry_status: "ACTIVE",
+            })),
+            cards: items.map((drop) => ({
+              ...resources.card(drop),
+              vote_summary: {
+                ...resources.card(drop).vote_summary,
+                user_vote: values.get(drop.id),
+                rank: orders.leaderboard!.indexOf(drop) + 1,
+              },
+            })),
+            has_more: end < ordered.length,
+            next_cursor: end < ordered.length ? `${sort}:${end}` : null,
+          },
+        });
+      }
+    );
+    await page.goto(`${ROOT}/alpha?tab=votes`);
+    const panel = page.getByRole("tabpanel", { name: "My Votes", exact: true });
+    const sort = panel.getByRole("combobox", { name: "Sort by" });
+    await expect(sort).toHaveValue("vote_amount");
+    await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+      "Sorted artwork 0"
+    );
+    await sort.focus();
+    await expect(sort).toBeFocused();
+    await sort.selectOption("leaderboard");
+    await expect.poll(() => releaseRanking !== undefined).toBe(true);
+    await expect(sort).toBeEnabled();
+    await sort.selectOption("last_voted");
+    await expect(panel.getByRole("alert")).toBeVisible();
+    await panel.getByRole("button", { name: "Try again", exact: true }).click();
+    await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+      "Sorted artwork 52"
+    );
+    releaseRanking?.();
+    await expect(sort).toHaveValue("last_voted");
+    for (const order of ["last_voted", "leaderboard", "vote_amount"]) {
+      await sort.selectOption(order);
+      await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+        orders[order]![0]!.title
+      );
+      const more = panel.getByRole("button", {
+        name: "Load more",
+        exact: true,
+      });
+      if (await more.isVisible()) await more.scrollIntoViewIfNeeded();
+      await expect(panel.getByRole("article")).toHaveCount(53);
+      await expect(panel.getByRole("heading", { level: 3 })).toHaveText(
+        orders[order]!.map((drop) => drop.title)
+      );
+      expect(reads).toContainEqual({ sort: order, cursor: `${order}:50` });
+    }
+    await sort.scrollIntoViewIfNeeded();
+    await sort.selectOption("leaderboard");
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("my-votes-sorting.png"),
+    });
+    await page.getByRole("tab", { name: "All votes", exact: true }).click();
+    await page.getByRole("tab", { name: "My Votes", exact: true }).click();
+    await expect(sort).toHaveValue("leaderboard");
+    expect(sandbox.requests).toHaveLength(0);
+    expect(mutations).toHaveLength(0);
+    await sort.selectOption("last_voted");
+    const newest = panel.getByRole("article", {
+      name: "Sorted artwork 52",
+      exact: true,
+    });
+    const edited = panel.getByRole("article", {
+      name: "Sorted artwork 51",
+      exact: true,
+    });
+    await newest.getByRole("spinbutton", { name: "Your vote" }).fill("4");
+    await edited.getByRole("spinbutton", { name: "Your vote" }).fill("99");
+    await edited
+      .getByRole("button", { name: "Save vote", exact: true })
+      .click();
+    await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+      "Sorted artwork 51"
+    );
+    await expect(
+      newest.getByRole("spinbutton", { name: "Your vote" })
+    ).toHaveValue("4");
+    await expect(sort).toHaveValue("last_voted");
+    await edited.getByRole("checkbox").check();
+    await sort.selectOption("vote_amount");
+    await expect(panel.getByRole("article").first()).toHaveAccessibleName(
+      "Sorted artwork 51"
+    );
+    await expect(
+      panel.getByRole("button", { name: "Reset votes", exact: true })
+    ).toBeDisabled();
+    await edited.getByRole("checkbox").check();
+    await panel
+      .getByRole("button", { name: "Reset 1 vote", exact: true })
+      .click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Reset vote", exact: true })
+      .click();
+    await expect(edited).toHaveCount(0);
+    await expect(sort).toHaveValue("vote_amount");
+    expect(mutations).toEqual([99, 0]);
+  });
+
   test("loads My Votes cards without full drops and fetches more on scroll", async ({
     page,
   }) => {

@@ -1,15 +1,22 @@
 import type { ReactNode } from "react";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CompetitionMyVotes from "@/components/competitions/CompetitionMyVotes";
 import { useCompetitionEntryDrops } from "@/hooks/competitions/useCompetitionEntryDrops";
 
 let mockCanChat = true;
+let mockViewer = "viewer";
+let mockCompetitionId = "competition";
+let mockPending = false;
+const mockResource = jest.fn();
+const mockRequestAuth = jest.fn();
+const mockSetVote = jest.fn();
+const mockResetControls = jest.fn();
 let mockParts: { part_id: number }[] = [{ part_id: 1 }];
 jest.mock("@/contexts/CompetitionContext", () => ({
   useCompetition: () => ({
     competition: {
-      id: "competition",
+      id: mockCompetitionId,
       wave_id: "wave",
       type: "RANK",
       voting: { credit_scope: "WAVE" },
@@ -19,7 +26,11 @@ jest.mock("@/contexts/CompetitionContext", () => ({
   }),
 }));
 jest.mock("@/components/auth/Auth", () => ({
-  useAuth: () => ({ requestAuth: jest.fn() }),
+  useAuth: () => ({ requestAuth: mockRequestAuth }),
+}));
+jest.mock("@/services/api/competitions-api", () => ({
+  ...jest.requireActual("@/services/api/competitions-api"),
+  setCompetitionVote: (...args: unknown[]) => mockSetVote(...args),
 }));
 jest.mock("@tanstack/react-query", () => ({
   ...jest.requireActual("@tanstack/react-query"),
@@ -29,29 +40,33 @@ jest.mock("@/hooks/competitions/useCompetitionSignature", () => ({
   useCompetitionSignatureFor: () => jest.fn(),
 }));
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
-  useCompetitionViewer: () => "viewer",
-  useCompetitionResource: () => ({
-    refetch: jest.fn(),
-    data: {
-      pages: [
-        {
-          data: [
-            {
-              entry_id: "entry",
-              drop_id: "drop",
-              entry_status: "ACTIVE",
-              value: 7,
-            },
-            {
-              entry_id: "winner",
-              drop_id: "winner-drop",
-              entry_status: "WINNER",
-            },
-          ],
-        },
-      ],
-    },
-  }),
+  useCompetitionViewer: () => mockViewer,
+  useCompetitionResource: (...args: unknown[]) => {
+    mockResource(...args);
+    return {
+      isPending: mockPending,
+      refetch: jest.fn(),
+      data: {
+        pages: [
+          {
+            data: [
+              {
+                entry_id: "entry",
+                drop_id: "drop",
+                entry_status: "ACTIVE",
+                value: 7,
+              },
+              {
+                entry_id: "winner",
+                drop_id: "winner-drop",
+                entry_status: "WINNER",
+              },
+            ],
+          },
+        ],
+      },
+    };
+  },
 }));
 jest.mock("@/hooks/competitions/useCompetitionEntryDrops", () => ({
   useCompetitionEntryDrops: jest.fn(() => [
@@ -72,7 +87,10 @@ jest.mock("@/hooks/competitions/useCompetitionDropNavigation", () => ({
 }));
 jest.mock(
   "@/components/brain/my-stream/votes/MyStreamWaveMyVotesReset",
-  () => () => null
+  () => (props: unknown) => {
+    mockResetControls(props);
+    return null;
+  }
 );
 jest.mock(
   "@/components/brain/my-stream/votes/MyStreamWaveMyVote",
@@ -114,8 +132,36 @@ jest.mock("@/components/waves/PrivilegedDropCreator", () => ({
 }));
 
 beforeEach(() => {
+  localStorage.clear();
+  mockResource.mockClear();
+  mockRequestAuth.mockReset().mockResolvedValue({ success: true });
+  mockSetVote.mockReset();
+  mockResetControls.mockClear();
+  mockViewer = "viewer";
+  mockCompetitionId = "competition";
+  mockPending = false;
   mockParts = [{ part_id: 1 }];
   mockCanChat = true;
+});
+it("stops an old reset before submitting when its profile changes during authentication", async () => {
+  let finishAuth!: (result: { success: boolean }) => void;
+  mockRequestAuth.mockReturnValue(
+    new Promise((resolve) => {
+      finishAuth = resolve;
+    })
+  );
+  const { rerender } = render(<CompetitionMyVotes />);
+  const { resetVote } = mockResetControls.mock.lastCall![0] as {
+    resetVote: (id: string) => Promise<void>;
+  };
+  const pending = resetVote("drop");
+  const rejection = expect(pending).rejects.toThrow("Voting session changed");
+  mockViewer = "another-viewer";
+  rerender(<CompetitionMyVotes />);
+  await act(async () => finishAuth({ success: true }));
+  await rejection;
+  expect(mockSetVote).not.toHaveBeenCalled();
+  await expect(resetVote("drop")).rejects.toThrow("Voting session changed");
 });
 
 it.each(["Cancel rationale", "Send rationale"])(
@@ -180,4 +226,65 @@ it("omits the reply action when the voter cannot chat", () => {
   mockCanChat = false;
   render(<CompetitionMyVotes />);
   expect(screen.queryByRole("button", { name: "Explain vote" })).toBeNull();
+});
+
+it("keeps the order while explaining a vote, and restores it on remount", async () => {
+  const user = userEvent.setup();
+  const { unmount } = render(<CompetitionMyVotes />);
+  const sort = screen.getByRole("combobox", { name: "Sort by" });
+  expect(sort).toHaveValue("vote_amount");
+  await user.selectOptions(sort, "leaderboard");
+  expect(mockResource).toHaveBeenLastCalledWith(
+    { waveId: "wave", competitionId: "competition" },
+    "votes/me",
+    { include: "cards", sort: "leaderboard" },
+    true
+  );
+  await user.click(screen.getByRole("button", { name: "Explain vote" }));
+  expect(sort).toHaveValue("leaderboard");
+  await user.click(screen.getByRole("button", { name: "Cancel rationale" }));
+  expect(sort).toHaveValue("leaderboard");
+  unmount();
+  render(<CompetitionMyVotes />);
+  expect(screen.getByRole("combobox", { name: "Sort by" })).toHaveValue(
+    "leaderboard"
+  );
+});
+
+it("keeps the control available during a new order's loading state", async () => {
+  mockPending = true;
+  render(<CompetitionMyVotes />);
+  await userEvent.selectOptions(
+    screen.getByRole("combobox", { name: "Sort by" }),
+    "last_voted"
+  );
+  expect(screen.getByRole("status")).toBeInTheDocument();
+  expect(screen.getByRole("combobox", { name: "Sort by" })).toHaveValue(
+    "last_voted"
+  );
+});
+
+it("isolates preferences and interaction state when profile or competition changes", async () => {
+  const { rerender } = render(<CompetitionMyVotes />);
+  await userEvent.selectOptions(
+    screen.getByRole("combobox", { name: "Sort by" }),
+    "last_voted"
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Explain vote" }));
+  mockViewer = "another-viewer";
+  rerender(<CompetitionMyVotes />);
+  expect(screen.queryByRole("textbox", { name: "Rationale" })).toBeNull();
+  expect(screen.getByRole("combobox", { name: "Sort by" })).toHaveValue(
+    "vote_amount"
+  );
+  mockViewer = "viewer";
+  rerender(<CompetitionMyVotes />);
+  expect(screen.getByRole("combobox", { name: "Sort by" })).toHaveValue(
+    "last_voted"
+  );
+  mockCompetitionId = "another-competition";
+  rerender(<CompetitionMyVotes />);
+  expect(screen.getByRole("combobox", { name: "Sort by" })).toHaveValue(
+    "vote_amount"
+  );
 });

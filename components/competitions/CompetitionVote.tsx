@@ -192,7 +192,8 @@ export function CompetitionVoteForm({
     setFailed(false);
     setSaved(false);
     try {
-      if (!(await requestAuth()).success) return;
+      if (!(await requestAuth()).success || currentViewer.current !== viewer)
+        return;
       let body =
         pending.current?.actor === viewer ? pending.current.body : null;
       if (
@@ -213,6 +214,7 @@ export function CompetitionVoteForm({
           );
         pending.current = { actor: viewer, body };
       }
+      if (currentViewer.current !== viewer) return;
       const budget = await setCompetitionVote(identity, entryId, body);
       pending.current = null;
       await updateCompetitionVoteInCache(client, {
