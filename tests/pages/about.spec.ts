@@ -179,6 +179,7 @@ test.describe("About Pages @smoke @medium @large", () => {
       .getByRole("button", { name: /Open About contents navigation/i })
       .click();
     const contentsMenu = page.getByRole("menu");
+    await expect(contentsMenu).toBeVisible();
     await expect(
       contentsMenu.getByRole("menuitem", { name: /prenodes/i })
     ).toHaveCount(0);
@@ -192,6 +193,40 @@ test.describe("About Pages @smoke @medium @large", () => {
       contentsMenu.getByRole("menuitem", { name: /Go to page: GDRC/i })
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
+  });
+
+  test("keeps About contents inactive until hydration makes the first click usable", async ({
+    page,
+  }) => {
+    let releaseScripts = () => {};
+    const scriptsReady = new Promise<void>((resolve) => {
+      releaseScripts = resolve;
+    });
+    await page.route("**/*", async (route) => {
+      if (route.request().resourceType() === "script") await scriptsReady;
+      await route.continue();
+    });
+    try {
+      await page.goto("/about/subscriptions", { waitUntil: "commit" });
+      await expect(
+        page.getByRole("heading", {
+          level: 1,
+          name: "Subscription Minting",
+          exact: true,
+        })
+      ).toBeVisible();
+      const contents = page.getByRole("button", {
+        name: /Open About contents navigation/i,
+      });
+      await expect(contents).toBeDisabled();
+      releaseScripts();
+      await expect(contents).toBeEnabled();
+      await contents.click();
+      await expect(page.getByRole("menu")).toBeVisible();
+      await expect(contents).toHaveAttribute("aria-expanded", "true");
+    } finally {
+      releaseScripts();
+    }
   });
 
   test("should keep GDRC in view beside the narrow desktop menu", async ({
