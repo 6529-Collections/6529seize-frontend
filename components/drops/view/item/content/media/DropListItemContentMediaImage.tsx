@@ -76,6 +76,26 @@ function getAutomaticGifFallback(
     : undefined;
 }
 
+// Giphy GIFs play from their MP4 rendition. The pause control lives in the
+// interaction layer, so a drop without one keeps the GIF path, as do local
+// upload previews and a video that already failed.
+function getInlineGiphyVideo({
+  src,
+  videoFailed,
+  hasLocalSource,
+  disableModal,
+}: {
+  readonly src: string;
+  readonly videoFailed: boolean;
+  readonly hasLocalSource: boolean;
+  readonly disableModal: boolean;
+}) {
+  if (videoFailed || hasLocalSource || disableModal) {
+    return null;
+  }
+  return getGiphyVideoPreviewSources(src);
+}
+
 function getImageLoadingState({
   loaded,
   unavailable,
@@ -329,12 +349,12 @@ function DropListItemContentMediaImageContent({
   const [videoFailed, setVideoFailed] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
   const localSource = useLocalImagePreviewSource(src);
-  // Giphy GIFs play from their MP4 rendition. The pause control lives in the
-  // interaction layer, so a drop without one keeps the GIF path.
-  const giphyVideo =
-    videoFailed || localSource || disableModal
-      ? null
-      : getGiphyVideoPreviewSources(src);
+  const giphyVideo = getInlineGiphyVideo({
+    src,
+    videoFailed,
+    hasLocalSource: Boolean(localSource),
+    disableModal,
+  });
   const usesGiphyVideo = giphyVideo !== null;
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
