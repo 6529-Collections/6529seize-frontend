@@ -124,6 +124,7 @@ export const ROOT_PUBLIC_FILES: ReadonlySet<string> = new Set([
   "/transient.png",
   "/twitter.png",
   "/twitter2.png",
+  "/video-preview-placeholder.svg",
   "/watermark.png",
   "/windows.png",
   "/x_black.png",
