@@ -299,18 +299,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
   }) => {
     // Load the fixture before navigation; a route may still be in flight
     // when Playwright disposes the page's request context at test teardown.
-    const response = await page.request.get(
-      `${getSandboxApiOrigin(baseURL)}/api/v2/waves/${SANDBOX_WAVE_ID}/drops`
-    );
-    expect(response.ok()).toBe(true);
-    const payload = (await response.json()) as {
-      drops: Array<Record<string, unknown>>;
-      wave: Record<string, unknown>;
-    };
-    const sourceDrop = payload.drops[0];
-    if (!sourceDrop) {
-      throw new Error("Expected the sandbox wave to return one source drop.");
-    }
+    const { payload, sourceDrop } = await loadSandboxDropFixture(page, baseURL);
     await page.route(
       `**/api/v2/waves/${SANDBOX_WAVE_ID}/drops**`,
       async (route) => {
@@ -382,18 +371,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     baseURL,
     page,
   }) => {
-    const response = await page.request.get(
-      `${getSandboxApiOrigin(baseURL)}/api/v2/waves/${SANDBOX_WAVE_ID}/drops`
-    );
-    expect(response.ok()).toBe(true);
-    const payload = (await response.json()) as {
-      drops: Array<Record<string, unknown>>;
-      wave: Record<string, unknown>;
-    };
-    const sourceDrop = payload.drops[0];
-    if (!sourceDrop) {
-      throw new Error("Expected the sandbox wave to return one source drop.");
-    }
+    const { payload, sourceDrop } = await loadSandboxDropFixture(page, baseURL);
     const drops = Array.from({ length: 40 }, (_, index) => ({
       ...sourceDrop,
       id: `00000000-0000-4000-8000-${String(600 + index).padStart(12, "0")}`,
@@ -410,8 +388,13 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     );
     await gotoSandboxWave(page);
 
-    const longDrop = page.locator('[data-serial-no="20"]');
-    const scrollContainer = page.locator("[data-wave-drops-scroll-container]");
+    const longDrop = page
+      .getByText("Long timeline detail", { exact: false })
+      .locator('xpath=ancestor::*[@data-serial-no="20"][1]');
+    const scrollContainer = page
+      .getByRole("main")
+      .locator("[data-wave-drops-scroll-container]")
+      .first();
     const showMore = longDrop.getByRole("button", { name: "Show more" });
     await showMore.scrollIntoViewIfNeeded();
     await showMore.focus();
@@ -1092,20 +1075,10 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       // Use a wave served by the sandbox so quote navigation can finish.
       const quotedWaveId = "00000000-0000-4000-8000-000000000533";
 
-      // Read the synthetic fixture before navigation so background route
-      // handlers never parse an APIResponse after the test context closes.
-      const fixtureResponse = await page.request.get(
-        `${getSandboxApiOrigin(baseURL)}/api/v2/waves/${SANDBOX_WAVE_ID}/drops`
+      const { payload, sourceDrop } = await loadSandboxDropFixture(
+        page,
+        baseURL
       );
-      expect(fixtureResponse.ok()).toBe(true);
-      const payload = (await fixtureResponse.json()) as {
-        drops: Array<Record<string, unknown>>;
-        wave: Record<string, unknown>;
-      };
-      const sourceDrop = payload.drops[0];
-      if (!sourceDrop) {
-        throw new Error("Expected one source drop for the quote fixture.");
-      }
       const quotedDrop = {
         ...sourceDrop,
         id: quotedDropId,
@@ -1396,6 +1369,23 @@ async function showDropActionsIfCollapsed(page: Page) {
       { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
     )
     .toBe(true);
+}
+
+async function loadSandboxDropFixture(page: Page, baseURL: string | undefined) {
+  // Parse before navigation so routes never read a disposed request context.
+  const response = await page.request.get(
+    `${getSandboxApiOrigin(baseURL)}/api/v2/waves/${SANDBOX_WAVE_ID}/drops`
+  );
+  expect(response.ok()).toBe(true);
+  const payload = (await response.json()) as {
+    drops: Array<Record<string, unknown>>;
+    wave: Record<string, unknown>;
+  };
+  const sourceDrop = payload.drops[0];
+  if (!sourceDrop) {
+    throw new Error("Expected the sandbox wave to return one source drop.");
+  }
+  return { payload, sourceDrop };
 }
 
 async function installOpenGraphFixture(page: Page) {
