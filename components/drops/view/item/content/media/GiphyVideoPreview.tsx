@@ -7,6 +7,7 @@ import { PauseIcon, PlayIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import {
   useCallback,
+  useEffect,
   useState,
   type MouseEvent,
   type RefObject,
@@ -52,6 +53,12 @@ export function GiphyVideoPreview({
 }: GiphyVideoPreviewProps) {
   const prefersReducedMotion = usePrefersReducedMotion();
   const [aspectRatio, setAspectRatio] = useState<string | undefined>();
+
+  // A changed motion preference remounts the element, and the element it
+  // drops sends no pause event; the fresh one starts paused.
+  useEffect(() => {
+    onPlayingChange(false);
+  }, [prefersReducedMotion, onPlayingChange]);
 
   const handleLoadedMetadata = useCallback(
     (event: SyntheticEvent<HTMLVideoElement>) => {

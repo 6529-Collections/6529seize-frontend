@@ -3,7 +3,9 @@
 import {
   DropImagePreview,
   getDropImagePreviewSources,
+  getGiphyVideoPreviewSources,
 } from "./DropImagePreview";
+import { GiphyPlaybackToggle, GiphyVideoPreview } from "./GiphyVideoPreview";
 import {
   GifPreviewLoadingIndicator,
   type GifPreviewLoadingLayout,
@@ -72,6 +74,34 @@ function getAutomaticGifFallback(
   return enabled && canToggleOriginal && isGif
     ? requestAutomatically
     : undefined;
+}
+
+// Giphy GIFs play from their MP4 rendition. The pause control lives in the
+// interaction layer, so a drop without one keeps the GIF path, as do local
+// upload previews and a video that already failed.
+function getInlineGiphyVideo({
+  src,
+  videoFailed,
+  hasLocalSource,
+  disableModal,
+}: {
+  readonly src: string;
+  readonly videoFailed: boolean;
+  readonly hasLocalSource: boolean;
+  readonly disableModal: boolean;
+}) {
+  if (videoFailed || hasLocalSource || disableModal) {
+    return null;
+  }
+  return getGiphyVideoPreviewSources(src);
+}
+
+// A caller's description names the media however it renders.
+function getMediaAlt(altOverride: string | undefined) {
+  return {
+    imageAlt: altOverride ?? t(DEFAULT_LOCALE, "drop.media.alt"),
+    videoAlt: altOverride ?? t(DEFAULT_LOCALE, "drop.media.gifAnimationAlt"),
+  };
 }
 
 function getImageLoadingState({
@@ -285,7 +315,7 @@ function DropListItemContentMediaImage({
 
 function DropListItemContentMediaImageContent({
   src,
-  alt = t(DEFAULT_LOCALE, "drop.media.alt"),
+  alt: altOverride,
   openPreviewLabel = t(DEFAULT_LOCALE, "drop.media.openPreview"),
   maxRetries = 0,
   isCompetitionDrop = false,
@@ -300,6 +330,7 @@ function DropListItemContentMediaImageContent({
   autoAnimateGif = false,
   imageLoadingLayout = "inline",
 }: DropListItemContentMediaImageProps & { readonly imageScale: ImageScale }) {
+  const { imageAlt: alt, videoAlt } = getMediaAlt(altOverride);
   const [ref, inView] = useInView<HTMLDivElement>();
   const [loaded, setLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -321,8 +352,19 @@ function DropListItemContentMediaImageContent({
 
   const imageFrameRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const originalImgRef = useRef<HTMLImageElement>(null);
   const modalImageRef = useRef<HTMLImageElement>(null);
+  const [videoFailed, setVideoFailed] = useState(false);
+  const [videoPlaying, setVideoPlaying] = useState(false);
+  const localSource = useLocalImagePreviewSource(src);
+  const giphyVideo = getInlineGiphyVideo({
+    src,
+    videoFailed,
+    hasLocalSource: Boolean(localSource),
+    disableModal,
+  });
+  const usesGiphyVideo = giphyVideo !== null;
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
       url: src,
@@ -347,9 +389,17 @@ function DropListItemContentMediaImageContent({
     }, delay);
   }, [errorCount, maxRetries]);
 
+  const handleVideoError = () => {
+    setLoaded(false);
+    setVideoFailed(true);
+    setVideoPlaying(false);
+  };
+
   const manualRetry = () => {
     setErrorCount(0);
     setLoaded(false);
+    setVideoFailed(false);
+    setVideoPlaying(false);
     setRetryTick((tick) => tick + 1);
   };
 
@@ -393,16 +443,18 @@ function DropListItemContentMediaImageContent({
     []
   );
 
+  const previewMediaRef = usesGiphyVideo ? videoRef : imgRef;
   const handleFullScreen = useCallback(() => {
     const fullscreenTarget =
       modalImageRef.current ??
-      (quality.showingOriginal ? originalImgRef.current : imgRef.current);
+      (quality.showingOriginal
+        ? originalImgRef.current
+        : previewMediaRef.current);
     if (fullscreenTarget) {
       requestCenteredImageFullscreen(fullscreenTarget);
     }
-  }, [quality.showingOriginal]);
+  }, [previewMediaRef, quality.showingOriginal]);
 
-  const localSource = useLocalImagePreviewSource(src);
   const shouldLoadImage = loadStrategy === "eager" || inView;
   const previewSource =
     localSource ?? getDropImagePreviewSources(src, imageScale)[0];
@@ -425,7 +477,7 @@ function DropListItemContentMediaImageContent({
     imageObjectPosition ?? (isCompetitionDrop ? "center" : "left top");
   const imageActionBoundsStyle = useContainedImageBoundsStyle({
     containerRef: imageFrameRef,
-    imageRef: quality.showingOriginal ? originalImgRef : imgRef,
+    imageRef: quality.showingOriginal ? originalImgRef : previewMediaRef,
     loaded: quality.showingOriginal || loaded,
     objectPosition: resolvedObjectPosition,
   });
@@ -482,22 +534,37 @@ function DropListItemContentMediaImageContent({
               }
               hidden={hidePreview}
             >
-              <DropImageContent
-                src={src}
-                alt={alt}
-                imageScale={imageScale}
-                retryTick={retryTick}
-                imgRef={imgRef}
-                loaded={loaded}
-                intrinsicHeight={intrinsicHeight}
-                loadStrategy={loadStrategy}
-                resolvedObjectPosition={resolvedObjectPosition}
-                handleImageLoad={handleImageLoad}
-                handleIntrinsicImageError={handleIntrinsicImageError}
-                handleError={handleError}
-                preferHighQualityImage={preferHighQualityImage}
-                onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
-              />
+              {giphyVideo ? (
+                <GiphyVideoPreview
+                  key={retryTick}
+                  videoRef={videoRef}
+                  videoSrc={giphyVideo.videoSrc}
+                  posterSrc={giphyVideo.posterSrc}
+                  alt={videoAlt}
+                  fillContainer={!intrinsicHeight}
+                  objectPosition={resolvedObjectPosition}
+                  onLoad={handleImageLoad}
+                  onError={handleVideoError}
+                  onPlayingChange={setVideoPlaying}
+                />
+              ) : (
+                <DropImageContent
+                  src={src}
+                  alt={alt}
+                  imageScale={imageScale}
+                  retryTick={retryTick}
+                  imgRef={imgRef}
+                  loaded={loaded}
+                  intrinsicHeight={intrinsicHeight}
+                  loadStrategy={loadStrategy}
+                  resolvedObjectPosition={resolvedObjectPosition}
+                  handleImageLoad={handleImageLoad}
+                  handleIntrinsicImageError={handleIntrinsicImageError}
+                  handleError={handleError}
+                  preferHighQualityImage={preferHighQualityImage}
+                  onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
+                />
+              )}
             </span>
           )}
           {quality.loading &&
@@ -530,36 +597,45 @@ function DropListItemContentMediaImageContent({
               label={openPreviewLabel}
               onClick={handleImageClick}
               actions={
-                loaded || unavailable || canToggleOriginal ? (
-                  <InlineMediaActions
-                    variant="image"
-                    onOpen={openMedia}
-                    openLabel={openLabel}
-                    onDownload={downloadMedia}
-                    isDownloading={isDownloading}
-                    onFullscreen={handleFullScreen}
-                    fullscreenTargetAvailable={
-                      !isCapacitor && (loaded || quality.showingOriginal)
-                    }
-                    visibility={
-                      unavailable || canToggleOriginal
-                        ? "always"
-                        : "desktop-hover"
-                    }
-                    className={
-                      canToggleOriginal ? "tw-pointer-events-auto" : undefined
-                    }
-                  >
-                    {canToggleOriginal && (
-                      <ImageQualityToggle
-                        showingOriginal={quality.requested}
-                        failed={quality.failed}
-                        onToggle={quality.toggle}
-                        isGif={isGif}
-                      />
-                    )}
-                  </InlineMediaActions>
-                ) : null
+                <>
+                  {usesGiphyVideo && !quality.showingOriginal && (
+                    <GiphyPlaybackToggle
+                      videoRef={videoRef}
+                      playing={videoPlaying}
+                      autoHide={videoPlaying || !loaded}
+                    />
+                  )}
+                  {(loaded || unavailable || canToggleOriginal) && (
+                    <InlineMediaActions
+                      variant="image"
+                      onOpen={openMedia}
+                      openLabel={openLabel}
+                      onDownload={downloadMedia}
+                      isDownloading={isDownloading}
+                      onFullscreen={handleFullScreen}
+                      fullscreenTargetAvailable={
+                        !isCapacitor && (loaded || quality.showingOriginal)
+                      }
+                      visibility={
+                        unavailable || canToggleOriginal
+                          ? "always"
+                          : "desktop-hover"
+                      }
+                      className={
+                        canToggleOriginal ? "tw-pointer-events-auto" : undefined
+                      }
+                    >
+                      {canToggleOriginal && (
+                        <ImageQualityToggle
+                          showingOriginal={quality.requested}
+                          failed={quality.failed}
+                          onToggle={quality.toggle}
+                          isGif={isGif}
+                        />
+                      )}
+                    </InlineMediaActions>
+                  )}
+                </>
               }
             />
           )}
