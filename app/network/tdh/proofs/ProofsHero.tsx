@@ -81,7 +81,12 @@ function Header({
       <h1 className={`${EX_TEXT.h1r} tw-mt-4 tw-max-w-[900px]`}>
         {rich(locale, k("h1"))}
       </h1>
-      <p className={`${EX_TEXT.lede} tw-mt-4 md:tw-mt-[22px]`} data-ex-lede="">
+      {/* On a phone the lede follows the verdict, so the verdict and its
+          limit share the first screen (TDH-DESIGN.md §4.4). */}
+      <p
+        className={`${EX_TEXT.lede} tw-mt-4 max-md:tw-hidden md:tw-mt-[22px]`}
+        data-ex-lede=""
+      >
         {rich(locale, k("lede"))}
       </p>
     </header>
@@ -402,6 +407,9 @@ export default function ProofsHero({
           </WhenSimulated>
         </SimulationSwitch>
       </div>
+      <p className={`${EX_TEXT.lede} tw-mt-6 md:tw-hidden`}>
+        {rich(locale, k("lede"))}
+      </p>
       <div className="tw-mt-6">
         <DriftNote by={["D136", "D137"]} locale={locale}>
           {rich(locale, k("drift"), {

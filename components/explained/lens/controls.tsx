@@ -34,7 +34,9 @@ function labelLength(option: SegOption<string>): number {
  * ragged rows becomes separate chips, each with its own edge, that wrap
  * onto as many rows as they need: every label is whole and every option is
  * in view, with nothing scrolled off-screen. `phone` forces a layout
- * ("stack" lists one option a row, "wrap" lets short labels wrap).
+ * ("stack" lists one option a row, "wrap" lets short labels wrap); "list"
+ * lists one option a row at every width, each with its radio dot, for a
+ * long set of long labels that would wrap raggedly anywhere.
  */
 export function Seg<V extends string>({
   label,
@@ -51,7 +53,7 @@ export function Seg<V extends string>({
   readonly onChange: (value: V) => void;
   /** A data attribute carrying each option's value: "card" gives data-card="4". */
   readonly attr?: string;
-  readonly phone?: "auto" | "stack" | "row" | "wrap";
+  readonly phone?: "auto" | "stack" | "row" | "wrap" | "list";
 }) {
   const chars = options.reduce((sum, option) => sum + labelLength(option), 0);
   let layout = phone;
@@ -59,6 +61,17 @@ export function Seg<V extends string>({
     layout = options.length > 2 && chars > PHONE_STACK_CHARS ? "row" : "wrap";
   }
   const groupRef = useRef<HTMLDivElement>(null);
+  if (layout === "list") {
+    return (
+      <SegList
+        label={label}
+        options={options}
+        value={value}
+        onChange={onChange}
+        {...(attr ? { attr } : {})}
+      />
+    );
+  }
   const group = {
     wrap: "tw-inline-flex tw-flex-wrap tw-rounded-2xl",
     stack:
@@ -117,6 +130,51 @@ export function Seg<V extends string>({
             className={`tw-min-h-10 tw-max-w-full tw-shrink-0 tw-basis-auto tw-cursor-pointer tw-border-0 ${chip} tw-px-3 tw-py-1 tw-text-[13px] tw-font-semibold tw-leading-4 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none md:tw-min-h-9 md:tw-grow-0 md:tw-px-3.5 md:tw-text-sm ${button} ${on ? "tw-bg-iron-50 tw-text-iron-950" : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-50"} ${EX_FOCUS}`}
           >
             {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** One option a row, each with its radio dot: the wallets picker's look. */
+function SegList<V extends string>({
+  label,
+  options,
+  value,
+  onChange,
+  attr,
+}: {
+  readonly label: string;
+  readonly options: readonly SegOption<V>[];
+  readonly value: V | null;
+  readonly onChange: (value: V) => void;
+  readonly attr?: string;
+}) {
+  return (
+    <div
+      className="tw-grid tw-w-full tw-max-w-[640px] tw-gap-1.5"
+      role="group"
+      aria-label={label}
+      data-seg-layout="list"
+    >
+      {options.map((option) => {
+        const on = option.value === value;
+        return (
+          <button
+            key={option.value}
+            type="button"
+            aria-pressed={on}
+            onClick={() => onChange(option.value)}
+            {...(option.name ? { "aria-label": option.name } : {})}
+            {...(attr ? { [`data-${attr}`]: option.value } : {})}
+            className={`tw-grid tw-min-h-11 tw-cursor-pointer tw-grid-cols-[18px_minmax(0,1fr)] tw-items-start tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-px-3.5 tw-py-2.5 tw-text-left tw-text-[15px] tw-font-semibold tw-leading-6 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none md:tw-min-h-10 md:tw-py-2 ${on ? "tw-border-iron-300 tw-bg-iron-50/[0.06] tw-text-iron-50" : "tw-border-iron-800 tw-bg-transparent tw-text-iron-400 hover:tw-border-iron-600 hover:tw-text-iron-50"} ${EX_FOCUS}`}
+          >
+            <span
+              className={`tw-mt-[3px] tw-block tw-size-[18px] tw-rounded-full tw-border-2 tw-border-solid ${on ? "tw-border-iron-50 [background:radial-gradient(#ECECEE_0_4px,transparent_5px)]" : "tw-border-iron-500"}`}
+              aria-hidden="true"
+            />
+            <span>{option.label}</span>
           </button>
         );
       })}

@@ -40,7 +40,7 @@
   "explained.tdh.impl.rustRef.runs": "Beside P26; program A's ancestor",
   "explained.tdh.impl.lean.name": "Lean model",
   "explained.tdh.impl.lean.written": "From P26; the validator-rule models from P53",
-  "explained.tdh.impl.lean.runs": "CI on every change: the build, its axiom audit, P26's vectors and {random} seeded random inputs.",
+  "explained.tdh.impl.lean.runs": "CI in 6529's private design record, on every change: the build, its axiom audit, P26's vectors and {random} seeded random inputs.",
   "explained.tdh.impl.lean.runsNote": "The Lean model has also run {all} random inputs against the Python reference, most of them once, and the day of {day}, replayed once, record by record.",
   "explained.tdh.impl.lean.proved": "{tdh} theorems about TDH's rules ({all} with the validator rules)",
   "explained.tdh.impl.live.name": "6529.io",

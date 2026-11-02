@@ -146,6 +146,13 @@ export default function StillTrust({
                   }),
                   who: "read",
                 },
+                {
+                  // The step a reader can take today: the block hashes the
+                  // statement names are Ethereum's own.
+                  title: fill(locale, k("trail.hashes")),
+                  sub: fill(locale, k("trail.hashesSub")),
+                  who: "anyone",
+                },
               ]}
             />
             <p className={`${EX_TEXT.cap} tw-m-0 tw-mt-6 tw-max-w-[760px]`}>

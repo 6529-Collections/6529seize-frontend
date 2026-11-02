@@ -11,7 +11,7 @@ import { ht, type HubKey } from "./copy";
  * How to read these pages (EXPLAINED.md §3; MAP.md §3): the four questions
  * every claim answers, each with its marks and what each mark means.
  */
-const NOTE = "tw-text-sm tw-leading-5 tw-text-iron-400";
+const NOTE = "tw-text-[15px] tw-leading-6 tw-text-iron-400";
 
 const RULE: readonly { kind: MarkKind; note: HubKey }[] = [
   { kind: "decided", note: "guide.decided" },
@@ -66,11 +66,11 @@ export default function ReadingGuide({
           </p>
         </div>
       </div>
-      <div className="tw-mt-8 tw-grid tw-grid-cols-1 tw-gap-6 md:tw-grid-cols-2 lg:tw-grid-cols-4 lg:tw-gap-5">
+      <div className="tw-mt-8 tw-grid tw-grid-cols-1 tw-gap-6 md:tw-grid-cols-2 xl:tw-grid-cols-4 xl:tw-gap-5">
         <Column title={ht(locale, "guide.rule")}>
           {RULE.map((item) => (
             <li key={item.kind} className={NOTE}>
-              <Mark kind={item.kind} locale={locale} size="sm" />{" "}
+              <Mark kind={item.kind} locale={locale} size="md" />{" "}
               {ht(locale, item.note)}
             </li>
           ))}
@@ -85,7 +85,7 @@ export default function ReadingGuide({
         <Column title={ht(locale, "guide.know")}>
           {KNOW.map((item) => (
             <li key={item.kind} className={NOTE}>
-              <Mark kind={item.kind} locale={locale} size="sm" />
+              <Mark kind={item.kind} locale={locale} size="md" />
               {item.note ? ` ${ht(locale, item.note)}` : ""}
             </li>
           ))}
@@ -97,7 +97,7 @@ export default function ReadingGuide({
         <Column title={ht(locale, "guide.since")}>
           <li className={NOTE}>{ht(locale, "guide.sinceLive")}</li>
           <li className={NOTE}>
-            <Mark kind="drift" locale={locale} size="sm" />{" "}
+            <Mark kind="drift" locale={locale} size="md" />{" "}
             {ht(locale, "guide.drift")}
           </li>
           <li className={NOTE}>

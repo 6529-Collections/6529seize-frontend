@@ -202,6 +202,9 @@ export default function WalletsLens({
                     value={value}
                     onChange={(next) => model.set({ preset: next })}
                     options={group.options}
+                    // On a phone, one state a row: long labels never break
+                    // into boxes of unequal width.
+                    phone="stack"
                   />
                 </div>
               );

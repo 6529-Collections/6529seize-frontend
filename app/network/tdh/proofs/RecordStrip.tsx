@@ -6,12 +6,15 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { k } from "./_lib/copy";
 import type { PageFacts } from "./_lib/facts";
 import { rich } from "@/components/explained/rich";
+import { fill } from "@/components/explained/i18n";
 
 /**
- * The record so far: each step of the proofs as a tile on one line, in the
- * order it happened, the way the daily check's ribbon lays out days. The
- * last tile is the next step, dashed and undated, since dates are "about"
- * until they happen (EXPLAINED.md §10).
+ * The record so far: each step of the proofs as a tile on one dated axis,
+ * in the order it happened, the way the daily check's ribbon lays out days.
+ * The tiles share their rows (date, mark, title) and their height, so the
+ * headings start on one line. Every proof of made-up blocks carries the
+ * test mark, never Proved. The last tile is the next step, dashed and
+ * undated, since dates are "about" until they happen (EXPLAINED.md §10).
  */
 interface Tile {
   readonly id: string;
@@ -33,7 +36,14 @@ export default function RecordStrip({
     {
       id: "first",
       when: facts.print("proofs.milestones.firstProofs"),
-      mark: <Mark kind="proved" locale={locale} size="sm" />,
+      mark: (
+        <Mark
+          kind="tested"
+          locale={locale}
+          size="sm"
+          label={fill(locale, k("record.first.mark"))}
+        />
+      ),
       title: rich(locale, k("record.first.title")),
       body: rich(locale, k("record.first.body")),
     },
@@ -82,25 +92,38 @@ export default function RecordStrip({
         {rich(locale, k("record.label"))}
       </h2>
       <ol
-        className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-grid-cols-1 tw-items-start tw-gap-2.5 tw-p-0 sm:tw-grid-cols-2 lg:tw-grid-cols-5"
+        className="tw-relative tw-m-0 tw-mt-4 tw-grid tw-list-none tw-grid-cols-1 tw-items-stretch tw-gap-x-2.5 tw-gap-y-4 tw-p-0 sm:tw-grid-cols-2 lg:tw-grid-cols-5"
         data-fig="record"
       >
+        {/* The time axis the dated tiles hang from, from lg up. */}
+        <span
+          className="tw-pointer-events-none tw-absolute tw-inset-x-1 tw-top-[9px] tw-hidden tw-h-px tw-bg-iron-700 lg:tw-block"
+          aria-hidden="true"
+        />
         {tiles.map((tile) => (
           <li
             key={tile.id}
-            className={`tw-flex tw-flex-col tw-gap-2 tw-rounded-xl tw-border tw-px-4 tw-py-3.5 ${tile.next ? "tw-border-dashed tw-border-iron-700" : "tw-border-solid tw-border-iron-800 tw-bg-iron-950"}`}
+            className="tw-flex tw-flex-col"
             data-record={tile.id}
           >
-            <span className="tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-400">
+            <span className="tw-flex tw-items-center tw-gap-2 tw-text-[13px] tw-font-semibold tw-leading-5 tw-text-iron-400">
+              <span
+                className={`tw-relative tw-z-[1] tw-size-[9px] tw-flex-none tw-rounded-full tw-ring-4 tw-ring-[#0D0D0F] ${tile.next ? "tw-border tw-border-dashed tw-border-iron-500 tw-bg-[#0D0D0F]" : "tw-bg-iron-300"}`}
+                aria-hidden="true"
+              />
               {tile.when}
             </span>
-            <span>{tile.mark}</span>
-            <b className="tw-text-base tw-font-semibold tw-leading-[22px] tw-text-iron-50">
-              {tile.title}
-            </b>
-            <span className="tw-text-[15px] tw-leading-[22px] tw-text-iron-300">
-              {tile.body}
-            </span>
+            <div
+              className={`tw-mt-2.5 tw-flex tw-flex-1 tw-flex-col tw-gap-2 tw-rounded-xl tw-border tw-px-4 tw-py-3.5 ${tile.next ? "tw-border-dashed tw-border-iron-700" : "tw-border-solid tw-border-iron-800 tw-bg-iron-950"}`}
+            >
+              <span className="lg:tw-min-h-10">{tile.mark}</span>
+              <b className="tw-text-base tw-font-semibold tw-leading-[22px] tw-text-iron-50 lg:tw-min-h-[44px]">
+                {tile.title}
+              </b>
+              <span className="tw-text-[15px] tw-leading-[22px] tw-text-iron-300">
+                {tile.body}
+              </span>
+            </div>
           </li>
         ))}
       </ol>

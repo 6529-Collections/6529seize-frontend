@@ -150,8 +150,9 @@ export const EX_LAYOUT = {
   ed: "tw-grid tw-grid-cols-1 tw-gap-y-4 lg:tw-grid-cols-[192px_minmax(0,660px)_minmax(0,236px)] lg:tw-gap-x-8 lg:tw-gap-y-0",
   edWide: "lg:tw-col-span-2",
   edFull: "lg:tw-col-span-3",
-  /** the statement row: heading left, prose right, 5 : 6, 64 px apart */
-  stmt: "tw-grid tw-grid-cols-1 tw-items-start tw-gap-y-4 lg:tw-grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:tw-gap-x-16",
+  /** the statement row: heading left, prose right, 6 : 5, 64 px apart, so a
+   * statement heading keeps to three lines */
+  stmt: "tw-grid tw-grid-cols-1 tw-items-start tw-gap-y-4 lg:tw-grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:tw-gap-x-16",
 } as const;
 
 /** Radius (EXPLAINED.md §5.3): models 16, panels 12, controls 8, tags 4. */

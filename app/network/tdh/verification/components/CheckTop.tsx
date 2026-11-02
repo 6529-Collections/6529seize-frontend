@@ -13,7 +13,7 @@ import {
 } from "@/components/explained/evidence/Simulation";
 import FactValue from "@/components/explained/facts/FactValue";
 import Hash from "@/components/explained/marks/Hash";
-import { EX_BUTTON, EX_LINK } from "@/components/explained/tokens";
+import { EX_BUTTON, EX_LINK, EX_TEXT } from "@/components/explained/tokens";
 import { formatList, formatTime } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { factText, type Fact, type FactBook } from "@/lib/explained/facts";
@@ -471,11 +471,14 @@ export default function CheckTop({
   day,
   simulated,
   locale,
+  phoneLede,
 }: {
   readonly book: FactBook;
   readonly day: DayView;
   readonly simulated: SimulatedDay | null;
   readonly locale: SupportedLocale;
+  /** The page's lede, shown under the verdict on a phone only. */
+  readonly phoneLede?: string;
 }) {
   const cycle = day.num("cycle");
   const input = ribbonInput(book);
@@ -515,6 +518,9 @@ export default function CheckTop({
           locale={locale}
         />
       </div>
+      {phoneLede !== undefined && (
+        <p className={`${EX_TEXT.lede} tw-mt-8 md:tw-hidden`}>{phoneLede}</p>
+      )}
       <div className="tw-mt-8 tw-scroll-mt-24" id="history">
         <WhenReal>
           <CheckRibbon input={input} locale={locale} />

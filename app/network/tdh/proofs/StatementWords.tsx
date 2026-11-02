@@ -5,6 +5,7 @@ import { useFactSnapshot } from "@/components/explained/facts/FactsProvider";
 import { fill } from "@/components/explained/i18n";
 import BreakIt, { breakItLabel } from "@/components/explained/lens/BreakIt";
 import { Seg } from "@/components/explained/lens/controls";
+import { EX_FOCUS } from "@/components/explained/tokens";
 import Lens, { Readout } from "@/components/explained/lens/Lens";
 import { Glyph } from "@/components/explained/marks/glyphs";
 import Hash from "@/components/explained/marks/Hash";
@@ -216,22 +217,35 @@ export default function StatementWords({
       locale={locale}
       stage={
         <div>
-          <Seg<WordPick>
-            label={fill(locale, k("words.groups"))}
-            attr="group"
-            value={flip ? null : pick}
-            onChange={(next) => {
-              setFlip(false);
-              setPick(next);
-            }}
-            options={[
-              ...WORD_GROUPS.map((value) => ({
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 md:tw-gap-3">
+            <Seg<WordPick>
+              label={fill(locale, k("words.groups"))}
+              attr="group"
+              value={flip ? null : pick}
+              onChange={(next) => {
+                setFlip(false);
+                setPick(next);
+              }}
+              options={WORD_GROUPS.map((value) => ({
                 value,
                 label: fill(locale, k(`words.group.${value}`)),
-              })),
-              { value: "b" as const, label: fill(locale, k("words.group.b")) },
-            ]}
-          />
+              }))}
+            />
+            {/* Program B's run beside A's is a view of its own, not a sixth
+              group: a toggle of its own, so the six groups keep one row. */}
+            <button
+              type="button"
+              aria-pressed={compare}
+              data-group="b"
+              onClick={() => {
+                setFlip(false);
+                setPick(compare ? "result" : "b");
+              }}
+              className={`tw-inline-flex tw-min-h-10 tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-px-3.5 tw-text-sm tw-font-semibold tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none md:tw-min-h-9 ${compare ? "tw-border-iron-50 tw-bg-iron-50 tw-text-iron-950" : "tw-border-iron-700 tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-50"} ${EX_FOCUS}`}
+            >
+              {fill(locale, k("words.group.b"))}
+            </button>
+          </div>
           {decoded.a ? (
             <table
               className="tw-mt-5 tw-w-full tw-border-collapse max-lg:tw-block"

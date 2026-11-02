@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import Mark from "@/components/explained/marks/Mark";
 import { EX_LINK } from "@/components/explained/tokens";
 import { REGISTRY_FIELDS } from "@/components/explained/engine/registry";
 import {
@@ -273,7 +274,21 @@ function Section11({ ctx }: { readonly ctx: SpecContext }) {
   const settled = ctx.deviations.filter((item) => item.settled);
   const decision = (id: string, isSettled: boolean): ReactNode => {
     if (isSettled) return m("explained.tdh.spec.s11.settled");
-    return m(DECISION[id] ?? "explained.tdh.spec.s11.adopted");
+    const key = DECISION[id] ?? "explained.tdh.spec.s11.adopted";
+    // A proposal no decision has taken yet carries the Proposed mark, so a
+    // skim of the column never reads it as adopted.
+    if (
+      key !== "explained.tdh.spec.s11.proposedSpecWins" &&
+      key !== "explained.tdh.spec.s11.proposedAdopt"
+    ) {
+      return m(key);
+    }
+    return (
+      <span className="tw-flex tw-flex-col tw-items-start tw-gap-1">
+        <Mark kind="proposed" locale={ctx.locale} size="sm" />
+        <span>{m(key)}</span>
+      </span>
+    );
   };
   const text = (id: string, part: "old" | "v14" | "effect") => {
     const key = itemKey("dev", id, part);

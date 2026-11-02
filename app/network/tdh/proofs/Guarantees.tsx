@@ -238,6 +238,9 @@ export default function Guarantees({
               value: entry.id,
               label: fill(locale, k(`guard.s.${entry.id}`)),
             }))}
+            // Seven long choices: one a row at every width, never a
+            // control that wraps into ragged rows.
+            phone="list"
           />
           <Layers
             states={states}
