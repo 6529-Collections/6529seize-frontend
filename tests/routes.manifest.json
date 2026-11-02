@@ -436,6 +436,10 @@
       "classification": "exempt",
       "exemptReason": "The not-found view the proxy rewrites an unknown /explained address to, with a 404 status and noindex; it is not a page to crawl."
     },
+    "/explained/validators/hardware": {
+      "classification": "crawlable",
+      "family": "info"
+    },
     "/gm-or-die-small-mp4": {
       "classification": "exempt",
       "exemptReason": "Bare media-asset wrapper page, not a user surface."

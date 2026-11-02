@@ -144,12 +144,22 @@ export const CHAPTERS: readonly ChapterDef[] = [
     "live",
     "explained.kit.order.then"
   ),
-  coming(
-    "validators",
-    "explained.kit.map.validators",
-    "built",
-    "explained.kit.order.then"
-  ),
+  {
+    // Coming, with one page live: the hardware guide.
+    ...coming(
+      "validators",
+      "explained.kit.map.validators",
+      "built",
+      "explained.kit.order.then"
+    ),
+    read: [
+      {
+        id: "hardware",
+        title: "explained.kit.map.validators.hardware",
+        href: "/explained/validators/hardware",
+      },
+    ],
+  },
   coming(
     "nextgen",
     "explained.kit.map.nextgen",

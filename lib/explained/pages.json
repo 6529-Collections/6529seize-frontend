@@ -392,6 +392,39 @@
       "states": []
     },
     {
+      "id": "validators-hardware",
+      "route": "/explained/validators/hardware",
+      "title": "Validator hardware",
+      "genre": "R",
+      "mockup": null,
+      "lane": "VH",
+      "sources": ["app/explained/validators/hardware/**"],
+      "dependsOn": ["D118", "D144", "D146", "D147", "D149", "D156", "D157"],
+      "checkedThrough": "D157",
+      "states": [
+        {
+          "name": "chooser-cloud",
+          "clicks": ["[data-q=\"where\"] [data-answer=\"no\"]"],
+          "el": "[data-lens=\"chooser\"]"
+        },
+        {
+          "name": "cloud-arm",
+          "clicks": ["[data-lens=\"cloud\"] [data-arch=\"arm\"]"],
+          "el": "[data-lens=\"cloud\"]"
+        },
+        {
+          "name": "part-storage",
+          "clicks": ["[data-part=\"storage\"] summary"],
+          "el": "[data-part=\"storage\"]"
+        },
+        {
+          "name": "part-power",
+          "clicks": ["[data-part=\"power\"] summary"],
+          "el": "[data-part=\"power\"]"
+        }
+      ]
+    },
+    {
       "id": "kit",
       "route": "/explained/kit",
       "title": "The 6529 Explained kit",

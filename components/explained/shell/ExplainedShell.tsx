@@ -91,7 +91,9 @@ export default function ExplainedShell({
             </div>
           </div>
         </div>
-        {def && (
+        {/* A chapter with one page so far needs no bar: the crumbs already
+            name the page. */}
+        {def && def.read.length + def.check.length + def.shelf.length > 1 && (
           <div className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-900">
             <div className="tw-mx-auto tw-max-w-[1244px]">
               <ChapterBar

@@ -9,7 +9,11 @@
 const PREFIX = "/explained/";
 
 /** Each page's address under /explained, as the app's routes define them. */
-const PAGES: ReadonlySet<string> = new Set(["kit", "not-found-view"]);
+const PAGES: ReadonlySet<string> = new Set([
+  "kit",
+  "not-found-view",
+  "validators/hardware",
+]);
 
 /** Where an unknown address is rewritten. */
 export const EXPLAINED_UNKNOWN_PAGE_PATH = "/explained/not-found-view";

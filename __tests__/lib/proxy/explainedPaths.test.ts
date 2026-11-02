@@ -12,19 +12,26 @@ import {
  */
 const HUB = path.resolve(__dirname, "../../../app/explained");
 
-function pages(): string[] {
-  return readdirSync(HUB).filter((entry) => {
-    const full = path.join(HUB, entry);
-    if (!statSync(full).isDirectory()) return false;
-    if (entry.startsWith("_") || entry.startsWith("[")) return false;
-    return readdirSync(full).includes("page.tsx");
-  });
+/** Every folder under app/explained that holds a page, at any depth. */
+function pages(dir = HUB, prefix = ""): string[] {
+  const found: string[] = [];
+  for (const entry of readdirSync(dir)) {
+    const full = path.join(dir, entry);
+    if (!statSync(full).isDirectory()) continue;
+    if (entry.startsWith("_") || entry.startsWith("[")) continue;
+    const route = `${prefix}${entry}`;
+    if (readdirSync(full).includes("page.tsx")) found.push(route);
+    found.push(...pages(full, `${route}/`));
+  }
+  return found;
 }
 
 describe("6529 Explained's addresses", () => {
   it("knows every page the app defines", () => {
     const found = pages();
-    expect(found).toEqual(expect.arrayContaining(["kit", "not-found-view"]));
+    expect(found).toEqual(
+      expect.arrayContaining(["kit", "not-found-view", "validators/hardware"])
+    );
     for (const page of found) {
       expect([page, isUnknownExplainedPath(`/explained/${page}`)]).toEqual([
         page,
@@ -39,6 +46,7 @@ describe("6529 Explained's addresses", () => {
     for (const unknown of [
       "/explained/no-such-page",
       "/explained/validators",
+      "/explained/validators/hardware/more",
       "/explained/kit/more",
     ]) {
       expect(isUnknownExplainedPath(unknown)).toBe(true);
