@@ -37,12 +37,10 @@ describe("UserPageSubscriptionsBalance", () => {
     );
     await user.click(screen.getByLabelText("Refresh balance"));
     expect(refresh).toHaveBeenCalled();
-    expect(
-      screen.getByText((t) => t.includes("mints available"))
-    ).toBeInTheDocument();
+    expect(screen.queryByText(/mints available/)).not.toBeInTheDocument();
   });
 
-  it("uses the exact coverage balance and raw mint capacity", () => {
+  it("uses the exact coverage balance in the compact row", () => {
     render(
       <UserPageSubscriptionsBalance
         coverage={
@@ -59,7 +57,6 @@ describe("UserPageSubscriptionsBalance", () => {
     );
 
     expect(screen.getByText("0.18 ETH")).toBeInTheDocument();
-    expect(screen.getByText("(2 mints available)")).toBeInTheDocument();
     expect(screen.queryByText("99")).not.toBeInTheDocument();
   });
 
@@ -74,10 +71,9 @@ describe("UserPageSubscriptionsBalance", () => {
     );
 
     expect(screen.getByText("0.2 ETH")).toBeInTheDocument();
-    expect(screen.getByText("(3 mints available)")).toBeInTheDocument();
   });
 
-  it("does not infer capacity when the coverage service marks it unknown", () => {
+  it("keeps the exact balance visible when capacity is unknown", () => {
     render(
       <UserPageSubscriptionsBalance
         coverage={
@@ -93,6 +89,6 @@ describe("UserPageSubscriptionsBalance", () => {
       />
     );
 
-    expect(screen.getByText("(mint capacity unavailable)")).toBeInTheDocument();
+    expect(screen.getByText("0.18 ETH")).toBeInTheDocument();
   });
 });

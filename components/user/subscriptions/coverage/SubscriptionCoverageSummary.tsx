@@ -9,6 +9,7 @@ import { ApiSubscriptionCoverageMode } from "@/generated/models/ApiSubscriptionC
 import { ApiSubscriptionCoverageStatus as Status } from "@/generated/models/ApiSubscriptionCoverageStatus";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import type { NFTSubscription } from "@/generated/models/NFTSubscription";
+import { MEMES_MINT_PRICE } from "@/constants/constants";
 import {
   getUpcomingMintsAcrossSeasons,
   isMintingToday,
@@ -33,7 +34,7 @@ const DOT_CLASS = {
   danger: "tw-bg-red-400",
 };
 const BUTTON_CLASS =
-  "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 max-md:tw-flex-1";
+  "tw-inline-flex tw-min-h-11 md:tw-min-h-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 max-md:tw-flex-1";
 
 function getDescriptionKey(status: Status, isOwner: boolean): MessageKey {
   if (!isOwner) {
@@ -268,7 +269,7 @@ export default function SubscriptionCoverageSummary({
           {t(locale, "subscriptions.coverage.stale")}
         </p>
       )}
-      <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4">
+      <div className="tw-mt-7 tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-5">
         <div className="tw-flex-1 max-md:tw-w-full max-md:tw-flex-auto">
           {balance}
         </div>
@@ -300,7 +301,7 @@ export default function SubscriptionCoverageSummary({
             aria-expanded={topUpExpanded}
             aria-controls="profile-subscriptions-top-up"
             onClick={onToggleTopUp}
-            className={`${BUTTON_CLASS} ${urgent ? "tw-border-white tw-bg-white tw-text-iron-950" : "tw-border-white/20 tw-bg-transparent tw-text-iron-100"}`}
+            className={`${BUTTON_CLASS} ${urgent ? "tw-border-white tw-bg-white tw-text-iron-950" : "tw-border-white/[0.12] tw-bg-transparent tw-text-iron-100"}`}
           >
             {t(locale, "subscriptions.page.topUpTitle")}
           </button>
@@ -377,6 +378,13 @@ function SubscriptionCoverageDetails({
         ),
       })
     : mode;
+  const legacyBalance = details?.balance;
+  const mintCapacity =
+    coverage === undefined &&
+    legacyBalance !== undefined &&
+    Number.isFinite(legacyBalance)
+      ? Math.floor(legacyBalance / MEMES_MINT_PRICE)
+      : coverage?.mint_capacity;
   const fields: [string, ReactNode][] = [
     [t(locale, "subscriptions.details.status"), presentation.label],
     [
@@ -395,9 +403,9 @@ function SubscriptionCoverageDetails({
     ],
     [
       t(locale, "subscriptions.coverage.capacity"),
-      coverage?.mint_capacity == null
+      mintCapacity == null
         ? t(locale, "subscriptions.balance.mintCapacity.unknown")
-        : `${formatInteger(locale, coverage.mint_capacity)} ${t(locale, "subscriptions.coverage.capacityUnit")}`,
+        : `${formatInteger(locale, mintCapacity)} ${t(locale, "subscriptions.coverage.capacityUnit")}`,
     ],
     [
       t(locale, "subscriptions.coverage.allocated"),
@@ -422,7 +430,7 @@ function SubscriptionCoverageDetails({
             key={label}
             className="tw-flex tw-justify-between tw-gap-4 tw-py-2.5 tw-text-sm"
           >
-            <dt className="tw-text-iron-400">{label}</dt>
+            <dt className="tw-text-iron-500">{label}</dt>
             <dd className="tw-m-0 tw-max-w-[65%] tw-text-right tw-tabular-nums tw-text-iron-100">
               {value}
             </dd>
@@ -470,13 +478,13 @@ function SubscriptionCoverageDetails({
           )}
         </p>
       )}
-      <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-1 tw-text-sm tw-leading-5 tw-text-iron-400">
+      <div className="tw-mt-1.5 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-3 tw-gap-y-1 tw-text-xs tw-leading-5 tw-text-iron-500">
         <span>{t(locale, "subscriptions.coverage.basis")}</span>
         {isOwner && (
           <button
             type="button"
             onClick={onRefresh}
-            className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-text-xs tw-font-medium tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 md:tw-min-h-6"
           >
             {t(locale, "subscriptions.coverage.refresh")}
           </button>

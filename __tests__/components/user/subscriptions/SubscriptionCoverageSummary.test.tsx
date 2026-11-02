@@ -256,6 +256,24 @@ describe("SubscriptionCoverageSummary", () => {
     expect(screen.getByText("mint capacity unavailable")).toBeVisible();
   });
 
+  it.each([
+    { coverage: undefined, balance: 0.2, capacity: "3 mints" },
+    { coverage: createCoverage(), balance: 99, capacity: "2 mints" },
+    {
+      coverage: createCoverage({ mint_capacity: null }),
+      balance: 99,
+      capacity: "mint capacity unavailable",
+    },
+  ])(
+    "preserves balance capacity in Details ($capacity)",
+    async ({ coverage, balance, capacity }) => {
+      renderSummary(coverage, { coverage, details: { balance } });
+      await openDetails();
+      const label = screen.getByText("Balance capacity", { exact: true });
+      expect(label.parentElement).toHaveTextContent(capacity);
+    }
+  );
+
   it("offers recovery from unavailable coverage within Details", async () => {
     const onRefresh = jest.fn();
     renderSummary(undefined, { coverage: undefined, isError: true, onRefresh });

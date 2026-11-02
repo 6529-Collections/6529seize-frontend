@@ -5,7 +5,6 @@ import {
   getUpcomingMintsAcrossSeasons,
   isMintingToday,
 } from "@/components/meme-calendar/meme-calendar.helpers";
-import ShowMoreButton from "@/components/show-more-button/ShowMoreButton";
 import Link from "next/link";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useScrollToHashOnMount } from "@/hooks/useScrollToHashOnMount";
@@ -20,7 +19,6 @@ import MemeSubscriptionRow from "./MemeSubscriptionRow";
 import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
 
 const UPCOMING_SKELETON_ROWS = ["first", "second", "third"] as const;
-const SHOW_MORE_WRAPPER_CLASS = "tw-mt-3 tw-flex tw-justify-center tw-pb-1";
 
 export default function UserPageSubscriptionsUpcoming(
   props: Readonly<{
@@ -74,7 +72,7 @@ export default function UserPageSubscriptionsUpcoming(
     );
   } else if (subscriptions.length > 0) {
     content = (
-      <div className="tw-flex tw-flex-col tw-p-1">
+      <div className="tw-flex tw-flex-col tw-py-1.5">
         {subscriptions.map((subscription, index) => (
           <div key={subscription.token_id}>
             {props.coverage?.next_unfunded?.token_id ===
@@ -141,13 +139,19 @@ export default function UserPageSubscriptionsUpcoming(
           {!props.loading &&
             subscriptions.length > 0 &&
             props.memes_subscriptions.length > 3 && (
-              <div className={SHOW_MORE_WRAPPER_CLASS}>
-                <ShowMoreButton
-                  expanded={expanded}
-                  setExpanded={setExpanded}
-                  variant="subtle"
-                />
-              </div>
+              <button
+                type="button"
+                aria-expanded={expanded}
+                onClick={() => setExpanded(!expanded)}
+                className="tw-block tw-min-h-11 tw-w-full tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-transparent tw-py-3 tw-text-[13px] tw-font-medium tw-text-iron-400 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-100"
+              >
+                {t(
+                  locale,
+                  expanded
+                    ? "subscriptions.upcoming.showLess"
+                    : "subscriptions.upcoming.showMore"
+                )}
+              </button>
             )}
         </div>
       </>

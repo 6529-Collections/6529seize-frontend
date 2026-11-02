@@ -40,6 +40,19 @@ function hasDevAuthConfig() {
   );
 }
 
+async function expectSingleLineLabel(locator: Locator) {
+  const fits = await locator.evaluate((element) => {
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    const style = getComputedStyle(element);
+    const lineHeight =
+      Number.parseFloat(style.lineHeight) ||
+      Number.parseFloat(style.fontSize) * 1.5;
+    return range.getBoundingClientRect().height <= lineHeight + 1;
+  });
+  expect(fits).toBe(true);
+}
+
 async function gotoReady(
   page: Page,
   path: string,
@@ -421,10 +434,9 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     );
 
     const topUp = page.getByRole("region", { name: "Top up" });
-    const heading = page.getByRole("heading", { level: 2, name: "Top up" });
     await expect(topUp).toHaveAttribute("id", hash.slice(1));
-    await expect(heading).toBeFocused();
-    await expect(heading).toBeInViewport();
+    await expect(topUp).toBeFocused();
+    await expect(topUp).toBeInViewport();
   });
 
   test("subscriptions preserve full details, compact top up and history pagination", async ({
@@ -450,15 +462,38 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(
       page.getByRole("tooltip", { name: "No changes allowed on minting day" })
     ).toBeVisible();
-    await upcoming.getByRole("button", { name: "Show More" }).click();
+    const upcomingHeading = await upcoming
+      .getByRole("heading", { name: "Upcoming Drops" })
+      .boundingBox();
+    const automatic = await upcoming
+      .getByRole("switch", { name: "Automatic subscription mode" })
+      .boundingBox();
+    expect(upcomingHeading).not.toBeNull();
+    expect(automatic).not.toBeNull();
+    expect(
+      Math.abs(
+        upcomingHeading!.y +
+          upcomingHeading!.height / 2 -
+          automatic!.y -
+          automatic!.height / 2
+      )
+    ).toBeLessThan(12);
+    const showMore = upcoming.getByRole("button", { name: "Show More" });
+    const footer = await showMore.boundingBox();
+    const list = await showMore.locator("..").boundingBox();
+    expect(footer).not.toBeNull();
+    expect(list).not.toBeNull();
+    expect(Math.abs(footer!.width - list!.width)).toBeLessThanOrEqual(2);
+    await showMore.click();
     await expect(
       upcoming.getByText("Next unfunded", { exact: true })
     ).toHaveCount(1);
     await upcoming.getByRole("link", { name: "Top up", exact: true }).click();
     const topUp = page.getByRole("region", { name: "Top up", exact: true });
-    await expect(
-      topUp.getByRole("heading", { name: "Top up", exact: true })
-    ).toBeFocused();
+    await expect(topUp).toBeFocused();
+    await expectSingleLineLabel(
+      topUp.getByRole("button", { name: "Choose a top-up amount", exact: true })
+    );
     await topUp.getByRole("button", { name: /^Recommended/ }).click();
     await expect(
       topUp.getByText("Funds 24 intended drops through The Memes #591")
@@ -488,10 +523,18 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     await expect(
       page.getByRole("radio", { name: "All eligible", exact: true })
     ).toBeChecked();
+    await expectSingleLineLabel(
+      page
+        .getByRole("group", { name: "Edition Preference" })
+        .getByText("One edition", { exact: true })
+    );
     await expect(
       page.getByRole("button", { name: address, exact: true })
     ).toBeVisible();
     await page.getByRole("button", { name: "Subscription History" }).click();
+    await expectSingleLineLabel(
+      page.getByRole("tab", { name: "Top Ups", exact: true })
+    );
     for (const [tab, heading] of [
       ["Redeemed", "Redeemed Subscriptions"],
       ["Log", "Log History"],

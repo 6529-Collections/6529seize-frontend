@@ -61,7 +61,8 @@ export default function UserPageSubscriptions(
   const coverageQuery = useSubscriptionCoverage({ profileKey });
   const topUp = useSubscriptionDisclosure(
     "profile-subscriptions-top-up",
-    isConnectedAccount
+    isConnectedAccount,
+    "profile-subscriptions-top-up"
   );
   useScrollToHashOnMount("profile-subscriptions-overview", {
     enabled: !!profileKey,
@@ -389,7 +390,7 @@ export default function UserPageSubscriptions(
             readonly={!isConnectedAccount}
             refresh={refresh}
           />
-          <div className="tw-mt-4 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4">
+          <div className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-py-3">
             <UserPageSubscriptionsAirdropAddress
               show_edit={isConnectedAccount}
               airdrop={airdropResult}

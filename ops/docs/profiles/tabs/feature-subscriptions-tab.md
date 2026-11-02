@@ -73,14 +73,17 @@ first render.
    drop, and Subscription balance. A funded-through date is a projection.
 2. Open `Details` for Status, Drops funded, Funded through, Next unfunded,
    Balance capacity, Forecast use, Mode with its last-update time, Eligibility,
-   and Edition Preference. Status and mode explanations, recommendations,
+   and Edition Preference. The available mint count is retained as Balance
+   capacity in Details instead of repeating it beside the ETH balance.
+   Status and mode explanations, recommendations,
    authoritative deadlines, the projection note, and Refresh coverage remain here.
 3. Owners can open `Top up` inside the answer card. Choose Recommended or
    Minimum for next drop when supplied, 1 Card, Remaining SZN, or Other.
    `More` reveals Remaining Year, Remaining Epoch, and Deep Time Subscriptions
    (Remaining Period, Era, and Eon). Only the selected coverage option shows its
    supplied projected funding outcome. Cancel closes the panel and returns focus
-   to the Top up button.
+   to the Top up button. Direct top-up links focus the inline panel; its
+   accessible title is retained without an extra visible heading.
 4. Use `Upcoming Drops` to review the first three drops, change individual
    selections or quantities, or turn Automatic mode on or off. `Show More`
    reveals the remaining rows. Minting Today rows are locked; focus, tap, or

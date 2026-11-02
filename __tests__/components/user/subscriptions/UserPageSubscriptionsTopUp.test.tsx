@@ -269,7 +269,7 @@ describe("UserPageSubscriptionsTopUp", () => {
     render(<UserPageSubscriptionsTopUp coverage={coverage} />);
 
     await user.click(
-      screen.getByRole("button", { name: "Recommended 3 Cards, 0.17087 ETH" })
+      screen.getByRole("button", { name: "Recommended 3 Cards · 0.17087 ETH" })
     );
     await user.click(
       screen.getByRole("button", { name: "Top up 0.17087 ETH" })
@@ -441,7 +441,7 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
     expect(section).toHaveClass("tw-scroll-mt-24");
   });
 
-  it("scrolls to the section and focuses its heading for the top-up hash", async () => {
+  it("scrolls to and focuses the panel for the top-up hash", async () => {
     setHash(`#${TOP_UP_ID}`);
     render(<UserPageSubscriptionsTopUp />);
 
@@ -451,7 +451,7 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
     expect(scrollIntoView.mock.contexts[0]).toBe(
       screen.getByRole("region", { name: "Top up" })
     );
-    expect(screen.getByRole("heading", { name: "Top up" })).toHaveFocus();
+    expect(screen.getByRole("region", { name: "Top up" })).toHaveFocus();
     await settleFrames();
     expect(scrollIntoView).toHaveBeenCalledTimes(1);
   });
@@ -515,7 +515,7 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
     await waitFor(() => {
       expect(scrollIntoView).toHaveBeenCalledTimes(1);
     });
-    expect(screen.getByRole("heading", { name: "Top up" })).toHaveFocus();
+    expect(screen.getByRole("region", { name: "Top up" })).toHaveFocus();
   });
 
   it("scrolls for a late-mounting section on Android and web", async () => {

@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 
 /** Keep the tab's existing hash destinations reachable inside disclosures. */
-export function useSubscriptionDisclosure(id: string, enabled = true) {
+export function useSubscriptionDisclosure(
+  id: string,
+  enabled = true,
+  focusId = `${id}-title`
+) {
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
@@ -37,7 +41,7 @@ export function useSubscriptionDisclosure(id: string, enabled = true) {
       // A repeated click on the current hash does not emit hashchange.
       if (frame !== undefined) cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() =>
-        document.getElementById(`${id}-title`)?.focus({ preventScroll: true })
+        document.getElementById(focusId)?.focus({ preventScroll: true })
       );
     };
     const initialFrame = requestAnimationFrame(revealHash);
@@ -49,6 +53,6 @@ export function useSubscriptionDisclosure(id: string, enabled = true) {
       document.removeEventListener("click", revealLink);
       if (frame !== undefined) cancelAnimationFrame(frame);
     };
-  }, [id, enabled]);
+  }, [id, enabled, focusId]);
   return { expanded, setExpanded };
 }

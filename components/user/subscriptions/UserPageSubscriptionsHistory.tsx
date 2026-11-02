@@ -87,12 +87,12 @@ export default function UserPageSubscriptionsHistory(
     <TabGroup>
       <TabList
         aria-label={t(locale, "subscriptions.history.title")}
-        className="tw-mb-3 tw-flex tw-gap-1 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900 tw-p-1 md:tw-w-fit"
+        className="tw-mb-3 tw-flex tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900 tw-p-0.5 md:tw-w-fit"
       >
         {tabs.map((tab) => (
           <Tab
             key={tab.id}
-            className="tw-min-h-11 tw-flex-1 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-400 data-[selected]:tw-bg-iron-700 data-[selected]:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            className="tw-min-h-11 tw-flex-1 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-[13px] tw-font-medium tw-text-iron-400 data-[selected]:tw-bg-iron-700 data-[selected]:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 md:tw-min-h-8 md:tw-flex-none"
           >
             {tab.title}
           </Tab>

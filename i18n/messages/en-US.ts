@@ -3718,6 +3718,8 @@ export const EN_US_MESSAGES = {
   "subscriptions.topUp.deepTime": "Deep Time Subscriptions",
   "subscriptions.topUp.cancel": "Cancel",
   "subscriptions.upcoming.title": "Upcoming Drops",
+  "subscriptions.upcoming.showMore": "Show More",
+  "subscriptions.upcoming.showLess": "Show Less",
   "subscriptions.upcoming.loading": "Loading upcoming drops",
   "subscriptions.upcoming.empty": "No upcoming drops found",
   "subscriptions.row.cards.one": "{count} card",

@@ -77,10 +77,10 @@ export default function UserPageSubscriptionsMode(
   };
 
   return (
-    <div className="tw-flex tw-min-h-11 tw-shrink-0 tw-items-center tw-gap-2.5">
+    <div className="tw-flex tw-min-h-11 tw-shrink-0 tw-items-center tw-gap-2 sm:tw-gap-2.5">
       <label
         htmlFor="subscription-mode"
-        className="tw-text-sm tw-text-iron-300"
+        className="tw-whitespace-nowrap tw-text-[13px] tw-text-iron-300 sm:tw-text-sm"
       >
         {t(locale, "subscriptions.coverage.mode.automatic")}
       </label>

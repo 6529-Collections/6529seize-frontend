@@ -95,7 +95,7 @@ export default function UserPageSubscriptionsEditionPreference(
           >
             {t(locale, "subscriptions.settings.editions")}
           </h3>
-          <span className="tw-rounded-md tw-bg-iron-800 tw-px-1.5 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-300">
+          <span className="tw-rounded-md tw-bg-iron-800 tw-px-1.5 tw-py-0.5 tw-text-[11px] tw-font-semibold tw-text-iron-400">
             {props.details
               ? t(locale, "subscriptions.settings.eligibilityBadge", {
                   count: formatInteger(locale, subscriptionEligibilityCount),
@@ -105,7 +105,7 @@ export default function UserPageSubscriptionsEditionPreference(
         </div>
         <p
           id={descriptionId}
-          className="tw-mb-0 tw-mt-1 tw-text-sm tw-leading-5 tw-text-iron-400"
+          className="tw-mb-0 tw-mt-1 tw-text-[13px] tw-leading-5 tw-text-iron-500"
         >
           {t(locale, descriptionKey)}
         </p>
@@ -114,12 +114,12 @@ export default function UserPageSubscriptionsEditionPreference(
         aria-labelledby="subscription-editions-label"
         aria-describedby={descriptionId}
         disabled={isDisabled}
-        className="tw-m-0 tw-flex tw-min-w-0 tw-gap-1 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-p-1 max-md:tw-w-full"
+        className="tw-m-0 tw-flex tw-min-w-0 tw-shrink-0 tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900 tw-p-0.5 max-md:tw-w-full"
       >
         {[false, true].map((all) => (
           <label
             key={String(all)}
-            className="tw-relative tw-flex tw-flex-1 tw-cursor-pointer"
+            className="tw-relative tw-flex tw-flex-1 tw-cursor-pointer md:tw-flex-none"
           >
             <input
               type="radio"
@@ -130,7 +130,7 @@ export default function UserPageSubscriptionsEditionPreference(
               }}
               className="tw-peer tw-sr-only"
             />
-            <span className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-md tw-px-3 tw-py-2 tw-text-center tw-text-sm tw-font-medium tw-text-iron-400 peer-checked:tw-bg-iron-700 peer-checked:tw-text-iron-100 peer-focus-visible:tw-outline peer-focus-visible:tw-outline-2 peer-focus-visible:tw-outline-primary-400 peer-disabled:tw-cursor-not-allowed">
+            <span className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-md tw-px-3 tw-py-1.5 tw-text-center tw-text-[13px] tw-font-medium tw-text-iron-400 peer-checked:tw-bg-iron-700 peer-checked:tw-text-iron-100 peer-focus-visible:tw-outline peer-focus-visible:tw-outline-2 peer-focus-visible:tw-outline-primary-400 peer-disabled:tw-cursor-not-allowed md:tw-min-h-8">
               {t(
                 locale,
                 all

@@ -294,14 +294,14 @@ export default function MemeSubscriptionRow(
 
     return (
       <span
-        className={`tw-inline-flex tw-h-11 tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-ring-1 tw-ring-inset tw-transition-shadow focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${isCompact ? "tw-bg-iron-900 tw-ring-white/[0.03]" : "tw-bg-transparent tw-ring-white/20"}`}
+        className={`tw-inline-flex tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-ring-1 tw-ring-inset tw-transition-shadow focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${isCompact ? "tw-h-11 tw-bg-iron-900 tw-ring-white/[0.03]" : "tw-h-11 tw-bg-transparent tw-ring-white/[0.12] md:tw-h-[30px]"}`}
       >
         <span className="tw-relative tw-inline-flex tw-items-center">
           <select
             className={
               isCompact
                 ? SUBSCRIPTION_COUNT_SELECT_CLASS
-                : "tw-h-11 tw-w-[88px] tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-0 tw-pl-2.5 tw-pr-6 tw-text-sm tw-text-iron-200 [color-scheme:dark] focus:tw-outline-none disabled:tw-cursor-not-allowed disabled:tw-opacity-40"
+                : "tw-h-11 tw-w-[88px] tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-0 tw-pl-2.5 tw-pr-6 tw-text-[13px] tw-text-iron-200 [color-scheme:dark] focus:tw-outline-none disabled:tw-cursor-not-allowed disabled:tw-opacity-40 md:tw-h-[30px]"
             }
             value={Math.max(0, Math.min(selectedCount, props.eligibilityCount))}
             disabled={isCountSelectDisabled}
@@ -409,20 +409,20 @@ export default function MemeSubscriptionRow(
   }
 
   return (
-    <div className="tw-rounded-xl tw-p-4 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-bg-iron-900/40 motion-reduce:tw-transition-none max-sm:tw-p-3">
+    <div className="tw-rounded-lg tw-px-5 tw-py-3 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-bg-iron-900/40 motion-reduce:tw-transition-none max-md:tw-px-4">
       <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-4 max-sm:tw-gap-2">
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-2">
           <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
-            <span className="tw-break-words tw-text-sm tw-font-medium tw-tabular-nums tw-leading-5 tw-text-iron-100 sm:tw-whitespace-nowrap">
+            <span className="tw-break-words tw-text-[15px] tw-font-medium tw-tabular-nums tw-leading-[22px] tw-text-iron-100 sm:tw-whitespace-nowrap">
               {props.title} #{props.subscription.token_id}
             </span>
             {props.date && (
-              <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-text-meta tw-font-normal tw-tabular-nums tw-leading-4">
+              <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 tw-text-[13px] tw-font-normal tw-tabular-nums tw-leading-[18px]">
                 {props.minting_today ? (
                   <MintingTodayLabel
                     tokenId={props.subscription.token_id}
                     locale={locale}
-                    className="tw-text-xs tw-font-medium tw-text-primary-300"
+                    className="tw-text-[13px] tw-font-medium tw-text-primary-300"
                   />
                 ) : (
                   <span className="tw-text-iron-500">

@@ -32,41 +32,18 @@ export default function UserPageSubscriptionsAirdropAddress(
 
   return (
     <div className="tw-min-w-0">
-      <div className="tw-flex tw-min-h-8 tw-items-center tw-justify-between tw-gap-3">
+      <div className="tw-flex tw-items-center">
         <h3 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
           {t(locale, "subscriptions.airdrop.title")}
         </h3>
-        {airdropAddress && props.show_edit && (
-          <>
-            <Link
-              href={editHref}
-              aria-label={t(locale, "subscriptions.airdrop.change")}
-              data-tooltip-id="subscriptions-change-airdrop-address"
-              className="tw-inline-flex tw-size-11 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
-            >
-              <PencilSquareIcon className="tw-size-4" aria-hidden="true" />
-            </Link>
-            <Tooltip
-              id="subscriptions-change-airdrop-address"
-              place="top"
-              positionStrategy="fixed"
-              offset={8}
-              delayShow={250}
-              opacity={1}
-              style={TOOLTIP_STYLES}
-            >
-              {t(locale, "subscriptions.airdrop.change")}
-            </Tooltip>
-          </>
-        )}
       </div>
-      <div className="tw-mt-2 tw-min-h-8">
+      <div className="tw-mt-1 tw-min-h-8">
         {props.fetching ? (
           <DotLoader />
         ) : (
-          <div>
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1">
             {airdropAddress && (
-              <span className="tw-break-all">
+              <span className="tw-min-w-0 tw-break-all">
                 {airdropAddress.ens && (
                   <span className="tw-mb-1 tw-block tw-text-sm tw-font-medium tw-text-iron-100">
                     {airdropAddress.ens}
@@ -79,7 +56,7 @@ export default function UserPageSubscriptionsAirdropAddress(
                   className={`tw-block tw-w-full tw-break-all tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-leading-5 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${
                     airdropAddress.ens
                       ? "tw-text-xs tw-text-iron-500"
-                      : "tw-text-sm tw-text-iron-200"
+                      : "tw-text-[13px] tw-text-iron-300"
                   }`}
                 >
                   {airdropAddress.address}
@@ -97,6 +74,29 @@ export default function UserPageSubscriptionsAirdropAddress(
                   {airdropAddress.address}
                 </Tooltip>
               </span>
+            )}
+            {airdropAddress && props.show_edit && (
+              <>
+                <Link
+                  href={editHref}
+                  aria-label={t(locale, "subscriptions.airdrop.change")}
+                  data-tooltip-id="subscriptions-change-airdrop-address"
+                  className="tw-inline-flex tw-size-11 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100 md:tw-size-7"
+                >
+                  <PencilSquareIcon className="tw-size-4" aria-hidden="true" />
+                </Link>
+                <Tooltip
+                  id="subscriptions-change-airdrop-address"
+                  place="top"
+                  positionStrategy="fixed"
+                  offset={8}
+                  delayShow={250}
+                  opacity={1}
+                  style={TOOLTIP_STYLES}
+                >
+                  {t(locale, "subscriptions.airdrop.change")}
+                </Tooltip>
+              </>
             )}
             {!airdropAddress && (
               <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
