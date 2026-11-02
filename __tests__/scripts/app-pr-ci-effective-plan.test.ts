@@ -112,6 +112,11 @@ describe("effective App PR CI plan", () => {
   it.each([
     "tests/media/submission-artwork-sandbox.spec.ts",
     "tests/media/waveImagePreviewCases.ts",
+    "tests/support/videoArtworkSandbox.ts",
+    "components/waves/drop/WaveDropAdditionalInfo.tsx",
+    "components/waves/drop/WaveDropAdditionalInfoVideo.tsx",
+    "hooks/useChatVideoPoster.ts",
+    "public/video-preview-placeholder.svg",
     "components/waves/drop/MemesDropArtworkHero.tsx",
     "components/drops/view/item/content/media/DropImagePreview.tsx",
     "components/drops/view/item/content/media/GifPreviewLoadingIndicator.tsx",
