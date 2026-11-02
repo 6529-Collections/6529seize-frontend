@@ -28,7 +28,7 @@
   "explained.tdh.day.row.driftEqual": "Dieser Tag ist bei jeder Identität gleich, also hatte keine verglichene Identität eine vierte Wallet.",
   "explained.tdh.day.row.current": "Diese Datei wurde unter den aktuellen Regeln geschrieben, TDH v1.4 (D137), mit Konsolidierung von vier Wallets (D136): Ihre Regel-ID und ihr Registry-Hash sind die, die P26 angibt. Dateien unter dem alten Namen tragen die alte Regel-ID, daher weichen ihre Roots ab.",
   "explained.tdh.day.row.vector": "jede Regelzahl, gehasht; festgelegt durch Vektor {name}",
-  "explained.tdh.day.row.cycleRootNote": "Die {size} Bytes, die für den ganzen Tag stehen: die Wurzel, die Validatoren signieren würden (D144). Noch signiert keiner, also hat dieser Tag kein Validator-Zertifikat.",
+  "explained.tdh.day.row.cycleRootNote": "Die {size} Bytes, die für den ganzen Tag stehen: die Wurzel, die Validatoren signieren würden (D144). Noch signiert keiner.",
   "explained.tdh.day.row.cycleRootRetired": "Unter den ausgemusterten Regeln {version} berechnet, deren Regel-ID oben steht, also nicht die Wurzel, die ein Validator unter TDH v1.4 für diesen Tag berechnet.",
   "explained.tdh.day.row.walletRootNote": "Ein Hash-Baum über den Datensatz jeder Wallet für den Tag.",
   "explained.tdh.day.row.historyRootNote": "Ein Hash-Baum über jedes Log der vier zählenden Verträge, von ihrem Deployment bis zum Ende des Tages.",

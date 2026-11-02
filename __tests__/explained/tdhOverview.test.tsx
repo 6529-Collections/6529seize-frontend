@@ -342,7 +342,7 @@ describe("the overview", () => {
     expect(
       screen.getByText(/The top 100 identities hold 70\.0% of today's TDH/)
     ).toHaveTextContent(
-      "It does not mark 6529's own or the network's accounts. The groups count the 1,100 identities 6529.io's API ranks above zero TDH, fewer than the daily check compares. Read Oct 31, 09:12 UTC."
+      "It does not mark 6529's own or the network's accounts. The groups count the 1,100 identities 6529.io's API ranks above zero, fewer than the daily check compares. Read Oct 31, 09:12 UTC."
     );
     const table = screen.getByRole("table");
     expect(within(table).getAllByRole("row")).toHaveLength(5);
@@ -367,7 +367,7 @@ describe("how we know, on the overview", () => {
     );
     const zk = container.querySelector('[data-rung="5"]');
     expect(zk).toHaveTextContent(
-      "Proof A, program A in SP1: proved the day of Oct 11 under tdh-v1.0, the rules' earlier version, and mainnet's SP1 verifier accepts it in a read-only call, one that changes nothing on chain. One day under retired rules does not move the blue line."
+      "Proof A, program A in SP1: proved the day of Oct 11 under tdh-v1.0, the rules' earlier version, and mainnet's SP1 verifier accepts it in a read-only call, which changes nothing. One day under retired rules does not move the blue line."
     );
     expect(zk).toHaveTextContent(
       "Proof B, program B in RISC Zero, written separately from A and from the Python reference: no mainnet day yet. Under TDH v1.4, programs A and B both proved one synthetic test cycle."

@@ -76,8 +76,8 @@ const STEPS: readonly Step[] = [
     rule: (n) =>
       [
         `pairs registered both ways → groups of ≤ ${n(R.consolidation_max_wallets)}`,
-        `beyond ${n(R.consolidation_ungated_max_wallets)}: one member linked both ways to all others,`,
-        `  all from ${new Date(R.consolidation_gate_activation_s * 1000).toISOString().slice(0, 16).replace("T", " ")} UTC on (D136)`,
+        `beyond ${n(R.consolidation_ungated_max_wallets)}: one linked both ways to all,`,
+        `  every link from ${new Date(R.consolidation_gate_activation_s * 1000).toISOString().slice(0, 10)} (D136)`,
       ].join("\n"),
     summary: true,
   },
