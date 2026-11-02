@@ -57,9 +57,12 @@ export default function SafeCollectingYourSetup({
             type="button"
             variant="secondary"
             size="lg"
+            className="tw-max-w-full"
             onClick={seizeConnect}
           >
-            {t(locale, "safeCollecting.yourSetup.connect")}
+            <span className="tw-whitespace-normal">
+              {t(locale, "safeCollecting.yourSetup.connect")}
+            </span>
           </Button>
         </div>
       );
