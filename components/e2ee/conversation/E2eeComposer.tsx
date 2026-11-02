@@ -7,7 +7,6 @@ import {
 } from "@heroicons/react/24/outline";
 import {
   type ChangeEvent,
-  type ClipboardEvent,
   type KeyboardEvent,
   useEffect,
   useId,
@@ -34,12 +33,13 @@ import { collectMentionIds } from "./e2eeMentions";
 import {
   addComposerFiles,
   type ComposerError,
+  type ComposerText,
   E2EE_MAX_TEXT_LENGTH,
-  getPastedImages,
   handleMentionKey,
-  insertComposerText,
   isSendKey,
+  type PasteNotice,
   useMentionPicker,
+  usePastedImages,
 } from "./useE2eeComposerParts";
 import { isSafeInlineImageMime } from "@/lib/e2ee/media";
 
@@ -321,12 +321,6 @@ function ComposerTopBars({
   );
 }
 
-interface PasteNotice {
-  /** Changes with every paste, so the same count is announced again. */
-  readonly id: number;
-  readonly count: number;
-}
-
 /**
  * Announces images taken from a paste. They become attachments instead of
  * text in the box, so a screen reader would otherwise say nothing.
@@ -341,6 +335,7 @@ function PastedImagesStatus({
   return (
     <output className="tw-sr-only">
       {notice ? (
+        // A new node per paste, so the same count is announced again.
         <span key={notice.id}>
           {tCount(
             locale,
@@ -460,7 +455,6 @@ export function E2eeComposer({
   const [error, setError] = useState<ComposerError | null>(null);
   // Files of the message being encrypted and uploaded right now.
   const [uploading, setUploading] = useState<readonly File[]>([]);
-  const [pasteNotice, setPasteNotice] = useState<PasteNotice | null>(null);
   const mentions = useMentionPicker(conversation.members, selfProfileId);
 
   // Attachments switched off server-side drop anything already picked.
@@ -500,10 +494,7 @@ export function E2eeComposer({
   const canAttach = editing === null && attachmentsEnabled;
 
   /** Puts `next.text` in the box with the caret at `next.caret`. */
-  const placeText = (next: {
-    readonly text: string;
-    readonly caret: number;
-  }) => {
+  const placeText = (next: ComposerText) => {
     setText(next.text);
     globalThis.requestAnimationFrame(() => {
       textareaRef.current?.setSelectionRange(next.caret, next.caret);
@@ -600,51 +591,27 @@ export function E2eeComposer({
     mentions.update(event.target.value, event.target.selectionStart);
   };
 
-  /** Adds files within the attach limits; returns how many were added. */
-  const addFiles = (incoming: readonly File[]): number => {
+  const addFiles = (incoming: readonly File[]) => {
     const result = addComposerFiles(files, incoming);
     setFiles(result.files);
     setError(result.error);
-    return result.files.length - files.length;
+    return result.files;
   };
 
   const onFilesChosen = (event: ChangeEvent<HTMLInputElement>) => {
-    const chosen = Array.from(event.target.files ?? []);
+    addFiles(Array.from(event.target.files ?? []));
     event.target.value = "";
-    addFiles(chosen);
   };
 
-  /** Inserts the text of a paste whose images became attachments. */
-  const insertPastedText = (element: HTMLTextAreaElement, pasted: string) => {
-    if (!pasted) {
-      return;
-    }
-    const next = insertComposerText(
-      element.value,
-      element.selectionStart,
-      element.selectionEnd,
-      pasted
-    );
-    placeText(next);
-    mentions.update(next.text, next.caret);
-  };
-
-  // Pasted images go in like picked files; any other paste stays native.
-  const onPaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
-    const images = canAttach ? getPastedImages(event.clipboardData) : [];
-    if (images.length === 0) {
-      return;
-    }
-    event.preventDefault();
-    insertPastedText(
-      event.currentTarget,
-      event.clipboardData.getData("text/plain")
-    );
-    const added = addFiles(images);
-    setPasteNotice((current) =>
-      added > 0 ? { id: (current?.id ?? 0) + 1, count: added } : null
-    );
-  };
+  const paste = usePastedImages({
+    canAttach,
+    files,
+    addFiles,
+    onText: (next) => {
+      placeText(next);
+      mentions.update(next.text, next.caret);
+    },
+  });
 
   if (disabledReasonKey) {
     return (
@@ -725,7 +692,7 @@ export function E2eeComposer({
           value={text}
           onChange={onChange}
           onKeyDown={onKeyDown}
-          onPaste={onPaste}
+          onPaste={paste.onPaste}
           onSelect={(event) =>
             mentions.update(
               event.currentTarget.value,
@@ -756,10 +723,7 @@ export function E2eeComposer({
           <PaperAirplaneIcon aria-hidden="true" className="tw-size-5" />
         </button>
       </div>
-      <PastedImagesStatus
-        locale={locale}
-        notice={files.length > 0 ? pasteNotice : null}
-      />
+      <PastedImagesStatus locale={locale} notice={paste.notice} />
       <ComposerFooter locale={locale} hintId={hintId} error={error} />
     </div>
   );

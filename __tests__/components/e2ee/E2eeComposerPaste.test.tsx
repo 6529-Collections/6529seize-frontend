@@ -22,6 +22,9 @@ type ComposerProps = ComponentProps<typeof E2eeComposer>;
 const png = (name: string): File =>
   new File(["png-bytes"], name, { type: "image/png" });
 
+const pdf = (name: string): File =>
+  new File(["%PDF"], name, { type: "application/pdf" });
+
 const fileItem = (file: File) => ({
   kind: "file",
   type: file.type,
@@ -75,6 +78,13 @@ const renderComposer = (overrides: Partial<ComposerProps> = {}) => {
 const paste = (target: HTMLElement, data: ReturnType<typeof clipboard>) =>
   fireEvent.paste(target, { clipboardData: data });
 
+/** Chooses files through the attach control's file input. */
+const pickFiles = (files: File[]) => {
+  const fileInput =
+    document.querySelector<HTMLInputElement>('input[type="file"]');
+  fireEvent.change(fileInput!, { target: { files } });
+};
+
 const attachmentNames = (): string[] => {
   const list = screen.queryByRole("list", { name: "Attachments" });
   return list
@@ -108,6 +118,26 @@ describe("E2eeComposer paste", () => {
       })
     );
     expect(attachmentNames()).toEqual([]);
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
+
+    // A file picked after the send does not bring the old notice back.
+    pickFiles([pdf("notes.pdf")]);
+    expect(attachmentNames()).toEqual(["notes.pdf"]);
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
+  });
+
+  it("ends the paste notice when an attachment is removed", () => {
+    const { input } = renderComposer();
+    paste(input, clipboard({ files: [png("one.png"), png("two.png")] }));
+
+    fireEvent.click(screen.getByRole("button", { name: "Remove one.png" }));
+    expect(attachmentNames()).toEqual(["two.png"]);
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
+
+    fireEvent.click(screen.getByRole("button", { name: "Remove two.png" }));
+    pickFiles([pdf("notes.pdf")]);
+    expect(attachmentNames()).toEqual(["notes.pdf"]);
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
   });
 
   it("attaches several pasted images at once", () => {
@@ -148,14 +178,32 @@ describe("E2eeComposer paste", () => {
     expect(attachmentNames()).toEqual(["shot.png"]);
   });
 
+  it("holds text pasted with an image to the same length rule as a native paste", () => {
+    const { input } = renderComposer();
+    // The box has no maxlength, so a native paste inserts everything and the
+    // limit is enforced at send; the manual insert does the same.
+    expect(input).not.toHaveAttribute("maxlength");
+    const long = "a".repeat(10_001);
+
+    paste(input, clipboard({ files: [png("image.png")], text: long }));
+
+    expect(input).toHaveValue(long);
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Messages can be up to 10,000 characters."
+    );
+  });
+
   it("ignores non-image files in a paste", () => {
     const { input } = renderComposer();
-    const pdf = new File(["%PDF"], "notes.pdf", { type: "application/pdf" });
+    const notes = pdf("notes.pdf");
 
-    expect(paste(input, clipboard({ files: [pdf] }))).toBe(true);
+    expect(paste(input, clipboard({ files: [notes] }))).toBe(true);
     expect(attachmentNames()).toEqual([]);
 
-    paste(input, clipboard({ files: [pdf, png("photo.png")] }));
+    paste(input, clipboard({ files: [notes, png("photo.png")] }));
     expect(attachmentNames()).toEqual(["photo.png"]);
   });
 
@@ -181,14 +229,26 @@ describe("E2eeComposer paste", () => {
     expect(attachmentNames()).toEqual(["image.png"]);
   });
 
+  it("keeps an image listed only in items next to listed files", () => {
+    const { input } = renderComposer();
+
+    paste(
+      input,
+      clipboard({
+        files: [png("listed.png")],
+        items: [fileItem(png("listed.png")), fileItem(png("items-only.png"))],
+      })
+    );
+
+    expect(attachmentNames()).toEqual(["listed.png", "items-only.png"]);
+  });
+
   it("applies the attach control's count limit across picked and pasted files", () => {
     const { input } = renderComposer();
     const picked = Array.from({ length: 9 }, (_, index) =>
       png(`picked-${index}.png`)
     );
-    const fileInput =
-      document.querySelector<HTMLInputElement>('input[type="file"]');
-    fireEvent.change(fileInput!, { target: { files: picked } });
+    pickFiles(picked);
 
     paste(input, clipboard({ files: [png("tenth.png"), png("eleventh.png")] }));
 
@@ -198,6 +258,10 @@ describe("E2eeComposer paste", () => {
     expect(names).not.toContain("eleventh.png");
     expect(screen.getByRole("alert")).toHaveTextContent(
       "You can attach up to 10 files."
+    );
+    // Only the accepted image is announced.
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "1 pasted image attached"
     );
   });
 
@@ -214,6 +278,13 @@ describe("E2eeComposer paste", () => {
       "huge.png is larger than 25 MB."
     );
     expect(screen.getByRole("status")).toBeEmptyDOMElement();
+
+    paste(input, clipboard({ files: [huge, png("small.png")] }));
+
+    expect(attachmentNames()).toEqual(["small.png"]);
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "1 pasted image attached"
+    );
   });
 
   it("leaves pastes alone while editing a message", () => {

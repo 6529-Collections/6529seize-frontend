@@ -1,6 +1,6 @@
 "use client";
 
-import { type KeyboardEvent, useState } from "react";
+import { type ClipboardEvent, type KeyboardEvent, useState } from "react";
 import type { MessageKey } from "@/i18n/messages";
 import type { E2eeMember } from "@/lib/e2ee/types";
 import {
@@ -47,20 +47,42 @@ export function addComposerFiles(
   return { files, error };
 }
 
-/** The clipboard's files, from `items` only where `files` is empty. */
-function getClipboardFiles(data: DataTransfer): File[] {
-  const listed = Array.from(data.files);
-  if (listed.length > 0) {
-    // Chrome lists one pasted file in both collections as separate objects.
-    return listed;
+/** Name, size and type: what two views of one clipboard file share. */
+const clipboardFileKey = (file: File): string =>
+  JSON.stringify([file.name, file.size, file.type]);
+
+/** Uses up one count of `key`; false when none was left. */
+function takeMatch(counts: Map<string, number>, key: string): boolean {
+  const remaining = counts.get(key) ?? 0;
+  if (remaining > 0) {
+    counts.set(key, remaining - 1);
   }
-  return Array.from(data.items, (item) =>
-    item.kind === "file" ? item.getAsFile() : null
-  ).filter((file): file is File => file !== null);
+  return remaining > 0;
+}
+
+/**
+ * The clipboard's files from both `files` and `items`. Chrome lists one
+ * pasted file in both as separate objects, so an `items` file matching a
+ * listed one is skipped once per match; any other `items` file is kept.
+ */
+function getClipboardFiles(data: DataTransfer): File[] {
+  const files = Array.from(data.files);
+  const unmatched = new Map<string, number>();
+  for (const file of files) {
+    const key = clipboardFileKey(file);
+    unmatched.set(key, (unmatched.get(key) ?? 0) + 1);
+  }
+  for (const item of Array.from(data.items)) {
+    const file = item.kind === "file" ? item.getAsFile() : null;
+    if (file && !takeMatch(unmatched, clipboardFileKey(file))) {
+      files.push(file);
+    }
+  }
+  return files;
 }
 
 /** Pasted images, which are attached like files picked with the attach control. */
-export function getPastedImages(data: DataTransfer | null): File[] {
+function getPastedImages(data: DataTransfer | null): File[] {
   if (!data) {
     return [];
   }
@@ -69,13 +91,19 @@ export function getPastedImages(data: DataTransfer | null): File[] {
   );
 }
 
+/** Composer text with the caret position to restore. */
+export interface ComposerText {
+  readonly text: string;
+  readonly caret: number;
+}
+
 /** `text` with `start`..`end` replaced by `inserted`, caret after the insert. */
-export function insertComposerText(
+function insertComposerText(
   text: string,
   start: number,
   end: number,
   inserted: string
-): { readonly text: string; readonly caret: number } {
+): ComposerText {
   // A textarea stores line breaks as "\n", as a native paste would.
   const normalized = inserted.replaceAll(/\r\n?/g, "\n");
   const before = text.slice(0, start);
@@ -83,6 +111,68 @@ export function insertComposerText(
     text: `${before}${normalized}${text.slice(end)}`,
     caret: before.length + normalized.length,
   };
+}
+
+export interface PasteNotice {
+  /** Changes with every paste, so the same count is announced again. */
+  readonly id: number;
+  /** Pasted images that were added as attachments. */
+  readonly count: number;
+  /** The attachments right after the paste; any later change ends the notice. */
+  readonly files: readonly File[];
+}
+
+/**
+ * Paste into the composer: images are added with `addFiles`, the attach
+ * control's path, and text pasted with them goes to `onText`. Any other
+ * paste is left to the browser. The notice lasts until the attachments
+ * change again (send, remove, pick, clear).
+ */
+export function usePastedImages({
+  canAttach,
+  files,
+  addFiles,
+  onText,
+}: {
+  readonly canAttach: boolean;
+  /** The composer's attachments now. */
+  readonly files: readonly File[];
+  /** Adds files within the attach limits; returns the new attachments. */
+  readonly addFiles: (files: readonly File[]) => readonly File[];
+  readonly onText: (next: ComposerText) => void;
+}): {
+  readonly notice: PasteNotice | null;
+  readonly onPaste: (event: ClipboardEvent<HTMLTextAreaElement>) => void;
+} {
+  const [notice, setNotice] = useState<PasteNotice | null>(null);
+  const onPaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
+    const images = canAttach ? getPastedImages(event.clipboardData) : [];
+    if (images.length === 0) {
+      return;
+    }
+    event.preventDefault();
+    const pasted = event.clipboardData.getData("text/plain");
+    if (pasted) {
+      const element = event.currentTarget;
+      onText(
+        insertComposerText(
+          element.value,
+          element.selectionStart,
+          element.selectionEnd,
+          pasted
+        )
+      );
+    }
+    const next = addFiles(images);
+    // addComposerFiles only appends, so the growth is the images accepted.
+    const added = next.length - files.length;
+    setNotice((current) =>
+      added > 0
+        ? { id: (current?.id ?? 0) + 1, count: added, files: next }
+        : null
+    );
+  };
+  return { notice: notice?.files === files ? notice : null, onPaste };
 }
 
 interface MentionPicker {
