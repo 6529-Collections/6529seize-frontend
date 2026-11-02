@@ -106,7 +106,7 @@ describe("the hub, first version", () => {
       within(list)
         .getAllByRole("link")
         .map((link) => link.getAttribute("href"))
-    ).toEqual(["/network/tdh", "/explained/validators/hardware"]);
+    ).toEqual(["/network/tdh", "#cc0", "/explained/validators/hardware"]);
     expect(rows[0]).toHaveTextContent("checked every day since Oct 14");
     expect(rows[1]).toHaveTextContent(
       "waits on: how cards were chosen before Main Stage"

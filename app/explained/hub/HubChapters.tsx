@@ -82,6 +82,18 @@ function comingRow(
   const waitsOn = (what: string) =>
     kt(locale, "explained.kit.chapters.waitsOn", { what });
   let note: ReactNode = waitsOn(ht(locale, def.waits ?? "chapter.nothing"));
+  if (id === "memes") {
+    // Its one-minute CC0 answer is live on this page: link it here, as the
+    // Validators row links its live page.
+    note = hrich(locale, "chapter.memesNote", {
+      what: ht(locale, def.waits ?? "chapter.nothing"),
+      page: (
+        <Link className={EX_LINK} href="#cc0">
+          {ht(locale, "cc0.label")}
+        </Link>
+      ),
+    });
+  }
   if (id === "validators") {
     // Its first page is live before the chapter is: link it here.
     const live = chapterById("validators").read[0];

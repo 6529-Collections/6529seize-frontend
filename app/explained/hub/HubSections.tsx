@@ -66,7 +66,10 @@ export function HubSources({
   readonly book: FactBook;
   readonly locale: SupportedLocale;
 }) {
-  const fact = (id: Parameters<typeof Fact>[0]["id"], style?: "long") => (
+  const fact = (
+    id: Parameters<typeof Fact>[0]["id"],
+    style?: "long" | "dated"
+  ) => (
     <Fact book={book} id={id} locale={locale} {...(style ? { style } : {})} />
   );
   return (
@@ -87,8 +90,9 @@ export function HubSources({
         {
           title: ht(locale, "hwk.feed"),
           body: hrich(locale, "hwk.feedBody", {
-            written: fact("feed.writtenAt", "long"),
-            read: fact("feed.readAt"),
+            // One format in the block: "Nov 2, 00:49 UTC".
+            written: fact("feed.writtenAt", "dated"),
+            read: fact("feed.readAt", "dated"),
           }),
         },
         {

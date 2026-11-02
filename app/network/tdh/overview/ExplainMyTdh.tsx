@@ -369,6 +369,8 @@ function LookupResult({
 
 /** The address of the Explain my TDH section, as the hero links it. */
 const EXPLAIN_HASH = "#explain";
+/** The hub's first-card path lands here, on the "Just bought" record. */
+const JUST_BOUGHT_HASH = "#just-bought";
 
 function LookupForm({
   onSubmit,
@@ -471,9 +473,22 @@ export default function ExplainMyTdh({
   const [pick, setPick] = useState<Pick>("found");
   const [identity, setIdentity] = useState("");
   const showsExample = identity.length === 0;
+  // A first-card holder arrives at #just-bought: show that record first.
+  useEffect(() => {
+    const onArrival = () => {
+      if (globalThis.location.hash === JUST_BOUGHT_HASH) {
+        setPick("new");
+        setIdentity("");
+      }
+    };
+    onArrival();
+    globalThis.addEventListener("hashchange", onArrival);
+    return () => globalThis.removeEventListener("hashchange", onArrival);
+  }, []);
   return (
     <div
-      className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-p-4 md:tw-p-6"
+      id={JUST_BOUGHT_HASH.slice(1)}
+      className="tw-scroll-mt-24 tw-rounded-xl tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-950 tw-p-4 md:tw-p-6"
       data-lens="picker"
     >
       <LookupForm

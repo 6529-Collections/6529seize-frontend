@@ -39,6 +39,24 @@ export interface ClaimSpan {
   readonly duration: string;
   readonly what: string;
   readonly outcome: "refuted" | "holds";
+  /**
+   * How long it stood, in minutes: the timeline's segments are drawn to
+   * scale. A span still standing has none; it takes the longest one's
+   * width and fades out at its open end.
+   */
+  readonly minutes?: number;
+}
+
+/** The timeline's columns: each closed span to scale, an open one as wide as the longest. */
+function spanColumns(spans: readonly ClaimSpan[]): string | undefined {
+  const closed = spans.flatMap((span) =>
+    span.minutes === undefined ? [] : [span.minutes]
+  );
+  if (closed.length === 0) return undefined;
+  const longest = Math.max(...closed);
+  return spans
+    .map((span) => `minmax(0,${span.minutes ?? longest}fr)`)
+    .join(" ");
 }
 
 function LeanBlock({
@@ -127,13 +145,17 @@ export function ClaimInParts({
       </ol>
       {spans && (
         <ol
-          className="tw-m-0 tw-mt-[18px] tw-grid tw-list-none tw-grid-cols-1 tw-gap-2.5 tw-p-0 md:tw-grid-cols-3 md:tw-gap-0"
+          className="tw-m-0 tw-mt-[18px] tw-grid tw-list-none tw-grid-cols-1 tw-gap-2.5 tw-p-0 md:tw-gap-x-1 md:tw-gap-y-0 md:[grid-template-columns:var(--ex-spans)]"
+          style={{
+            ["--ex-spans" as string]:
+              spanColumns(spans) ?? `repeat(${spans.length},minmax(0,1fr))`,
+          }}
           aria-label={kt(locale, "explained.kit.claim.timeline")}
         >
           {spans.map((span) => (
             <li
               key={span.what}
-              className={`tw-border-0 tw-border-t-[3px] tw-border-solid tw-pt-2.5 tw-text-sm tw-leading-[21px] tw-text-iron-400 ${span.outcome === "holds" ? "tw-border-green" : "tw-border-error"}`}
+              className={`tw-relative tw-border-0 tw-border-t-[3px] tw-border-solid tw-pr-3 tw-pt-2.5 tw-text-sm tw-leading-[21px] tw-text-iron-400 ${span.outcome === "holds" ? "tw-border-green" : "tw-border-error"} ${span.outcome === "holds" && span.minutes === undefined ? "md:[border-image:linear-gradient(90deg,#3ccb7f_70%,transparent)_1]" : ""}`}
             >
               <b className="tw-block tw-text-[15px] tw-font-semibold tw-text-iron-50">
                 {span.duration}
@@ -239,10 +261,11 @@ function scoreBorders(index: number, count: number): string {
   if (count % 2 !== 0) {
     return index > 0 ? `tw-border-t ${wide}` : "";
   }
-  // Under 360 px the cells stack in one column, a rule above each.
-  const left = index % 2 === 1 ? "min-[360px]:tw-border-l" : "";
+  // On a phone the cells stack in one column, a rule above each; two
+  // columns from a tablet up.
+  const left = index % 2 === 1 ? "md:tw-border-l" : "";
   const top =
-    index >= 2 ? "tw-border-t" : index === 1 ? "max-[359px]:tw-border-t" : "";
+    index >= 2 ? "tw-border-t" : index === 1 ? "max-md:tw-border-t" : "";
   return `${left} ${top} ${wide}`.trim();
 }
 
@@ -257,7 +280,7 @@ export function Scoreboard({
 }) {
   return (
     <dl
-      className={`tw-m-0 tw-grid tw-grid-cols-1 ${cells.length % 2 === 0 ? "min-[360px]:tw-grid-cols-2" : ""} tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 lg:[grid-template-columns:repeat(var(--ex-score),minmax(0,1fr))]`}
+      className={`tw-m-0 tw-grid tw-grid-cols-1 ${cells.length % 2 === 0 ? "md:tw-grid-cols-2" : ""} tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 lg:[grid-template-columns:repeat(var(--ex-score),minmax(0,1fr))]`}
       style={{ ["--ex-score" as string]: String(cells.length) }}
       aria-label={label}
       data-scoreboard=""
@@ -265,18 +288,19 @@ export function Scoreboard({
       {cells.map((cell, index) => (
         <div
           key={cell.value?.id ?? index}
-          className={`tw-border-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-4 md:tw-px-[22px] md:tw-py-5 ${scoreBorders(index, cells.length)}`}
+          className={`tw-border-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3.5 md:tw-px-[22px] md:tw-py-5 ${scoreBorders(index, cells.length)}`}
         >
           <dt className="tw-sr-only">
             {typeof cell.caption === "string" ? cell.caption : ""}
           </dt>
-          <dd className="tw-m-0">
+          {/* On a phone the number sits beside its caption, one row a count. */}
+          <dd className="tw-m-0 max-md:tw-grid max-md:tw-grid-cols-[72px_minmax(0,1fr)] max-md:tw-items-baseline max-md:tw-gap-x-3">
             <FactValue
               fact={cell.value}
               locale={locale}
               className="tw-block tw-text-[30px] tw-font-semibold tw-leading-9 tw-tracking-[-0.02em] tw-text-iron-50 md:tw-text-[40px] md:tw-leading-[46px]"
             />
-            <span className="tw-mt-1.5 tw-block tw-text-[15px] tw-leading-[22px] tw-text-iron-400">
+            <span className="tw-block tw-text-[15px] tw-leading-[22px] tw-text-iron-400 md:tw-mt-1.5">
               {cell.caption}
             </span>
           </dd>

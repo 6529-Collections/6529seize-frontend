@@ -113,7 +113,7 @@ export default function Receipt({
     // the page, a perforation under its head and a torn bottom edge.
     <div className="tw-relative tw-max-w-[880px] tw-pb-3" data-receipt="">
       <section
-        className="tw-rounded-t-xl tw-border tw-border-b-0 tw-border-solid tw-border-iron-800 tw-bg-[#17171B] tw-px-4 tw-pb-[26px] tw-pt-[18px] tw-shadow-[0_24px_48px_-28px_rgba(0,0,0,0.8)] md:tw-px-[26px] md:tw-pb-8 md:tw-pt-6"
+        className="tw-rounded-t-xl tw-border tw-border-b-0 tw-border-solid tw-border-iron-800 tw-bg-[#17171B] tw-px-4 tw-pb-3 tw-pt-[18px] tw-shadow-[0_24px_48px_-28px_rgba(0,0,0,0.8)] md:tw-px-[26px] md:tw-pb-3 md:tw-pt-6"
         aria-label={kt(locale, "explained.kit.receipt.label", { cycle })}
       >
         {ordered.map((row) => (

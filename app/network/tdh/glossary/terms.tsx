@@ -93,11 +93,17 @@ export const TERMS: readonly Term[] = [
       cap: p.v("rules.editionFloorCap"),
     }),
   },
+  {
+    id: "largest",
+    status: LIVE,
+    values: (p) => ({ h: p.v("engine.H") }),
+  },
   { id: "cents", status: { word: "explained.tdh.glossary.convention" } },
   { id: "arith", status: { mark: "proposed", ref: "P26 §8.1" } },
   { id: "raw", status: LIVE },
   { id: "base", status: LIVE },
   { id: "boost", status: LIVE },
+  { id: "beta", status: { mark: "proposed", ref: "P26 §8.3" } },
   {
     id: "season",
     status: LIVE,
@@ -143,6 +149,7 @@ export const TERMS: readonly Term[] = [
   { id: "netting", status: { mark: "decided", ref: "D131" } },
   { id: "stack", status: LIVE },
   { id: "underflow", status: LIVE },
+  { id: "canonical", status: { mark: "proposed", ref: "P26 §3.3" } },
   { id: "registry", status: { mark: "proposed", ref: "P26" } },
   {
     id: "vector",
@@ -194,6 +201,7 @@ export const TERMS: readonly Term[] = [
     }),
   },
   { id: "anchor", status: { mark: "decided", ref: "D128" } },
+  { id: "route", status: LIVE },
   { id: "bloom", status: { word: "explained.tdh.glossary.convention" } },
   { id: "readonly", status: { word: "explained.tdh.glossary.convention" } },
   {

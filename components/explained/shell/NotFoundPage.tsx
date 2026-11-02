@@ -97,6 +97,21 @@ export default function NotFoundPage({
                   chapter: kt(locale, entry.title),
                 }),
               })),
+              // The Memes' one-minute CC0 answer lives on the hub until its
+              // chapter ships: an artist who types /explained/the-memes
+              // finds it.
+              ...(entry.id === "memes"
+                ? [
+                    {
+                      no: "",
+                      title: kt(locale, "explained.kit.notFound.cc0"),
+                      href: `${HUB_HREF}#cc0`,
+                      desc: kt(locale, "explained.kit.notFound.liveInComing", {
+                        chapter: kt(locale, entry.title),
+                      }),
+                    },
+                  ]
+                : []),
             ]
       );
   return (

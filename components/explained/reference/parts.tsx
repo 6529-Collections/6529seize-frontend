@@ -373,20 +373,19 @@ export function CodeBlock({
 }) {
   const lines = code.split("\n");
   const aligned = lines.some((line) => ALIGNED_COLUMNS.test(line));
-  // Wrapped on a wide screen, so a long rule line is never cut at the
-  // frame's edge out of sight. A column-aligned block scrolls, and so does
-  // Lean on a phone, where wrapping would split its long identifiers; a
-  // scrolling block fades at its right edge to say there is more.
-  const lean = marker === "--";
+  // Wrapped, so a long rule line is never cut at the frame's edge out of
+  // sight. Only a column-aligned block scrolls; it fades at its right edge
+  // to say there is more.
   // A block that scrolls sideways on a phone fades at its right edge, so the
   // cut reads as more to scroll, not as the end of the line.
   const scrollCue =
     "max-md:[mask-image:linear-gradient(90deg,#000_calc(100%-28px),transparent)]";
+  // Lean wraps too, on a phone as well: each line hangs under its own
+  // indent, so a hypothesis that runs on reads as one, and none is cut off
+  // in a sideways scroll.
   const wrap = aligned
     ? "tw-whitespace-pre"
-    : lean
-      ? "max-md:tw-whitespace-pre md:tw-whitespace-pre-wrap md:[overflow-wrap:anywhere]"
-      : "tw-whitespace-pre-wrap [overflow-wrap:anywhere]";
+    : "tw-whitespace-pre-wrap [overflow-wrap:anywhere]";
   return (
     <div
       className={`tw-relative tw-min-w-0 tw-max-w-[924px] tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-[#0a0a0c] ${className}`.trim()}
@@ -401,7 +400,7 @@ export function CodeBlock({
         </span>
       )}
       <pre
-        className={`tw-m-0 tw-overflow-x-auto tw-bg-transparent tw-px-4 tw-py-4 tw-font-mono tw-text-[13px] tw-leading-[21px] tw-text-iron-50 md:tw-px-[18px] md:tw-text-sm md:tw-leading-[22px] ${wrap} ${aligned || lean ? scrollCue : ""} ${EX_FOCUS}`}
+        className={`tw-m-0 tw-overflow-x-auto tw-bg-transparent tw-px-4 tw-py-4 tw-font-mono tw-text-[13px] tw-leading-[21px] tw-text-iron-50 md:tw-px-[18px] md:tw-text-sm md:tw-leading-[22px] ${wrap} ${aligned ? scrollCue : ""} ${EX_FOCUS}`}
         aria-label={label}
         data-tdh-scroll=""
         role="region"
@@ -432,7 +431,7 @@ export function CodeBlock({
           })}
         </code>
       </pre>
-      {(aligned || lean) && (
+      {aligned && (
         <span
           className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-w-8 tw-rounded-r-lg tw-bg-gradient-to-l tw-from-[#0a0a0c] tw-to-transparent md:tw-hidden"
           aria-hidden="true"

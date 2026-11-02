@@ -40,7 +40,7 @@ export default function Hash({
     }
   };
   return (
-    <span className="tw-inline-flex tw-max-w-full tw-flex-wrap tw-items-center tw-gap-2 tw-align-middle">
+    <span className="tw-inline-flex tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-1 tw-align-middle">
       <span
         className="tw-break-all tw-font-mono tw-text-[13px] tw-normal-case tw-leading-5 tw-tracking-normal tw-text-iron-50 md:tw-text-sm"
         title={value}

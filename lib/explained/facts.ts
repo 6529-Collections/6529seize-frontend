@@ -237,7 +237,12 @@ export function factFromSnapshot<T extends FactValue = FactValue>(
   return isFact(found) ? (found as Fact<T>) : null;
 }
 
-export type FactStyle = "short" | "long";
+/**
+ * How a value prints: short (a clock, a short hash), long (the full hash,
+ * the instant to the second), or dated: a clock with its day, "Nov 2,
+ * 00:49 UTC", so the times in one block read alike.
+ */
+export type FactStyle = "short" | "long" | "dated";
 
 function asNumber(value: FactValue): number {
   return typeof value === "number" ? value : Number(asText(value));
@@ -286,6 +291,9 @@ export function fmt(
     case "weekday":
       return formatUtcWeekday(locale, asText(value));
     case "clock":
+      if (style === "dated") {
+        return `${formatUtcDay(locale, asText(value))}, ${formatUtcClock(locale, asText(value))}`;
+      }
       return style === "long"
         ? formatUtcInstant(asText(value))
         : formatUtcClock(locale, asText(value));

@@ -20,8 +20,9 @@ export type Lane =
   | { readonly pair: readonly [LaneStep, LaneStep]; readonly ok?: boolean };
 
 /**
- * A step's words. A lane of one step fills its box, its caption (the hash
- * or the count) at the box's foot, so every box in a row ends on content.
+ * A step's words, top down with one gap: kicker, title, then its caption
+ * (the hash or the count) right under the title, never pinned to the
+ * box's foot with an empty middle.
  */
 function StepText({
   step,
@@ -40,7 +41,7 @@ function StepText({
       </b>
       {step.cap !== undefined && (
         <span
-          className={`tw-block tw-text-[13px] tw-leading-[19px] tw-text-iron-400 ${foot ? "tw-mt-auto tw-pt-2" : ""}`}
+          className={`tw-block tw-text-[13px] tw-leading-[19px] tw-text-iron-400 ${foot ? "tw-pt-1" : ""}`}
         >
           {step.cap}
         </span>

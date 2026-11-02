@@ -15,6 +15,7 @@ import {
 import { k, PROOFS_PAGE_ID, PROOFS_ROUTE } from "./_lib/copy";
 import { pageFacts } from "./_lib/facts";
 import { rich } from "@/components/explained/rich";
+import CastStrip from "./CastStrip";
 import ContractSection from "./ContractSection";
 import Guarantees from "./Guarantees";
 import HowMade from "./HowMade";
@@ -106,6 +107,7 @@ export default async function ProofsPage({
             title: fill(locale, k(key)),
           }))}
         />
+        <CastStrip locale={locale} />
         <Section
           id="statement"
           number="01"

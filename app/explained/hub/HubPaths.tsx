@@ -24,7 +24,8 @@ const PATHS: readonly PathDef[] = [
     who: "path.first",
     route: "path.firstRoute",
     minutes: 6,
-    href: "/network/tdh",
+    // Lands on the record a first-card holder needs: "Just bought".
+    href: "/network/tdh#just-bought",
   },
   {
     who: "path.collect",

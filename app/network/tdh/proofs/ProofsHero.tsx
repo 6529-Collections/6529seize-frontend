@@ -234,7 +234,6 @@ function RealVerdict({
           <p className={`${EX_TEXT.meta} tw-m-0 tw-mt-3`}>
             {rich(locale, k("verdict.source"), {
               bytes: facts.print("proofs.statement.bytes"),
-              block: facts.print("site.proofA.ethCallBlock"),
             })}
           </p>
         </>

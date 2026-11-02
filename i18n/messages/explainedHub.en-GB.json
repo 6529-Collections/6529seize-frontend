@@ -81,6 +81,7 @@
   "explained.hub.chapter.tdhNote": "checked every day since {date}",
   "explained.hub.chapter.memesQ": "How does a meme become a card thousands hold, and why is it free to copy?",
   "explained.hub.chapter.memesWaits": "how cards were chosen before Main Stage",
+  "explained.hub.chapter.memesNote": "waits on: {what}; live already: {page}",
   "explained.hub.chapter.wavesQ": "How does a community choose, three times a week?",
   "explained.hub.chapter.validatorsQ": "Who checks the day, and what would it take to fool them?",
   "explained.hub.chapter.validatorsNote": "software {version}, built and being tested; live already: {page}",

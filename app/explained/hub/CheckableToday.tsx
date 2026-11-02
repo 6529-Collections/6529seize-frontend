@@ -31,19 +31,19 @@ function Item({
   readonly children: ReactNode;
 }) {
   return (
-    <li className="tw-mt-4 tw-flex tw-flex-col tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-pt-4 first:tw-mt-3 first:tw-border-t-0 first:tw-pt-0 lg:tw-mt-3 lg:tw-border-l lg:tw-border-t-0 lg:tw-pl-6 lg:tw-pt-0 lg:first:tw-border-l-0 lg:first:tw-pl-0">
-      {/* Two lines kept for the mark and its date from lg up, where the three
-          sit side by side, so their headlines share one baseline. */}
-      <div className="tw-flex tw-flex-wrap tw-content-start tw-items-center tw-gap-x-2 tw-gap-y-1 lg:tw-min-h-[48px]">
+    // From lg up the three share one grid's rows (mark and date, headline,
+    // body), so their headlines sit on one baseline however long a date runs.
+    <li className="tw-mt-4 tw-flex tw-flex-col tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-pt-4 first:tw-mt-3 first:tw-border-t-0 first:tw-pt-0 lg:tw-row-span-3 lg:tw-mt-3 lg:tw-grid lg:tw-grid-rows-subgrid lg:tw-gap-y-2 lg:tw-border-l lg:tw-border-t-0 lg:tw-pl-6 lg:tw-pt-0 lg:first:tw-border-l-0 lg:first:tw-pl-0">
+      <div className="tw-flex tw-flex-wrap tw-content-start tw-items-center tw-gap-x-2 tw-gap-y-1">
         {mark}
         <span className="tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-400">
           {when}
         </span>
       </div>
-      <span className="tw-mt-2 tw-block tw-text-[22px] tw-font-semibold tw-tabular-nums tw-leading-7 tw-tracking-[-0.01em] max-[359px]:tw-text-base max-[359px]:tw-leading-6">
+      <span className="tw-mt-2 tw-block tw-text-[22px] tw-font-semibold tw-tabular-nums tw-leading-7 tw-tracking-[-0.01em] max-[359px]:tw-text-base max-[359px]:tw-leading-6 lg:tw-mt-0 lg:tw-self-end">
         {head}
       </span>
-      <span className="tw-mt-2 tw-block tw-text-[15px] tw-leading-[23px] tw-text-iron-300">
+      <span className="tw-mt-2 tw-block tw-text-[15px] tw-leading-[23px] tw-text-iron-300 lg:tw-mt-0">
         {children}
       </span>
     </li>
@@ -76,7 +76,7 @@ export default function CheckableToday({
       data-ex-checkable=""
     >
       <span className={EX_TEXT.label}>{ht(locale, "check.label")}</span>
-      <ul className="tw-m-0 tw-list-none tw-p-0 lg:tw-grid lg:tw-grid-cols-3 lg:tw-gap-6">
+      <ul className="tw-m-0 tw-list-none tw-p-0 lg:tw-grid lg:tw-grid-cols-3 lg:tw-gap-x-6 lg:tw-gap-y-0">
         <Item
           mark={<Mark kind="tested" size="sm" locale={locale} />}
           when={hrich(locale, "check.identitiesWhen", {

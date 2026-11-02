@@ -268,9 +268,7 @@ export default function HowMade({
               {
                 kicker: fill(locale, k("lanes.verify.kicker")),
                 title: fill(locale, k("lanes.verify.title")),
-                cap: rich(locale, k("lanes.verify.cap"), {
-                  block: facts.print("site.proofA.ethCallBlock"),
-                }),
+                cap: rich(locale, k("lanes.verify.cap")),
                 ok: true,
               },
             ]}

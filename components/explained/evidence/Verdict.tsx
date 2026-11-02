@@ -136,14 +136,16 @@ export default function Verdict({
         </h2>
         {children}
         {incident && (
+          // A row of steps from a tablet up; on a phone a vertical stepper,
+          // each step a line with its bar on the left, never a 3 + 2 wrap.
           <ol
-            className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-grid-cols-3 tw-gap-x-1 tw-gap-y-2.5 tw-p-0 md:tw-grid-cols-5"
+            className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-grid-cols-1 tw-gap-y-1.5 tw-p-0 md:tw-grid-cols-5 md:tw-gap-x-1 md:tw-gap-y-2.5"
             aria-label={kt(locale, "explained.kit.verdict.incident")}
           >
             {incident.steps.map((step, index) => (
               <li
                 key={step}
-                className={`tw-border-0 tw-border-t-[3px] tw-border-solid tw-pt-[9px] tw-text-[13px] tw-font-semibold ${index < incident.done ? "tw-border-error tw-text-iron-50" : "tw-border-iron-700 tw-text-iron-400"}`}
+                className={`tw-border-0 tw-border-l-[3px] tw-border-solid tw-py-0.5 tw-pl-2.5 tw-text-[13px] tw-font-semibold md:tw-border-l-0 md:tw-border-t-[3px] md:tw-py-0 md:tw-pl-0 md:tw-pt-[9px] ${index < incident.done ? "tw-border-error tw-text-iron-50" : "tw-border-iron-700 tw-text-iron-400"}`}
               >
                 {step}
               </li>

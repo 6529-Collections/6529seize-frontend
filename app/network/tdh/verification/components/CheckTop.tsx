@@ -273,6 +273,9 @@ function realFace(day: DayView, locale: SupportedLocale): VerdictFace {
           rows={equationRows(day, locale)}
           locale={locale}
         />
+        <p className="tw-m-0 tw-mt-2 tw-text-[13px] tw-leading-5 tw-text-iron-400">
+          {pt(locale, "explained.tdh.check.eq.cycleNote")}
+        </p>
         <FileLine day={day} locale={locale} />
       </>
     ),

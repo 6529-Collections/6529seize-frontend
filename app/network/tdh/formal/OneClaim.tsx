@@ -112,6 +112,14 @@ export default function OneClaim({ ctx }: { readonly ctx: SureContext }) {
     const value = book.maybe<number>(id)?.value;
     return value === undefined ? p.f(id) : ageText(locale, value);
   };
+  // The timeline draws each refuted span to scale (4 h 3 min beside 2 h
+  // 43 min), from the same facts its labels print.
+  const minutesOf = (
+    id: "netting.first.minutes" | "netting.narrowed.minutes"
+  ) => {
+    const value = book.maybe<number>(id)?.value;
+    return value === undefined ? {} : { minutes: value };
+  };
   const parts: ClaimPart[] = [
     {
       when: s("explained.tdh.sure.part.first.when", {
@@ -187,11 +195,13 @@ export default function OneClaim({ ctx }: { readonly ctx: SureContext }) {
       duration: minutes("netting.first.minutes"),
       what: s("explained.tdh.sure.span.first"),
       outcome: "refuted",
+      ...minutesOf("netting.first.minutes"),
     },
     {
       duration: minutes("netting.narrowed.minutes"),
       what: s("explained.tdh.sure.span.narrowed"),
       outcome: "refuted",
+      ...minutesOf("netting.narrowed.minutes"),
     },
     {
       duration: s("explained.tdh.sure.span.since", {

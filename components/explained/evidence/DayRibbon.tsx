@@ -191,8 +191,11 @@ export function DayTile(props: DayTileProps) {
       >
         {primary}
         {written?.late && <span className="tw-ml-1 md:tw-hidden">↻</span>}
+        {/* Every tile keeps a line for its note, written or not, so the
+            counts in a row of tiles sit at one height; the note is one
+            line, never "in 17 h 32 / min". */}
         {secondary && open && open.minutesLeft > 0 ? (
-          <span className="tw-block tw-text-xs">
+          <span className="tw-block tw-min-h-4 tw-whitespace-nowrap tw-text-xs md:tw-min-h-[18px]">
             <span className="md:tw-hidden">
               {kt(locale, "explained.kit.day.openIn", {
                 time: ageTextShort(locale, open.minutesLeft),
@@ -201,13 +204,11 @@ export function DayTile(props: DayTileProps) {
             <span className="max-md:tw-hidden">{secondary}</span>
           </span>
         ) : (
-          secondary && (
-            <span
-              className={`tw-block tw-text-xs ${written && !open ? "max-md:tw-hidden" : ""}`}
-            >
-              {secondary}
-            </span>
-          )
+          <span
+            className={`tw-block tw-min-h-4 tw-whitespace-nowrap tw-text-xs md:tw-min-h-[18px] ${written && !open ? "max-md:tw-hidden" : ""}`}
+          >
+            {secondary}
+          </span>
         )}
       </span>
       {open && (
