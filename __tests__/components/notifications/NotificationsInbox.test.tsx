@@ -6,6 +6,9 @@ import NotificationsInbox from "@/components/notifications/inbox/NotificationsIn
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useNotificationsQuery } from "@/hooks/useNotificationsQuery";
+import { ProfileConnectedStatus } from "@/entities/IProfile";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 
 const postRead = jest.mocked(commonApiPostWithoutBodyAndResponse);
 let queryClient: QueryClient;
@@ -38,10 +41,17 @@ jest.mock("@/services/api/common-api", () => ({
 
 function setProfile(handle: string | null, proxy = false) {
   jest.mocked(useAuth).mockReturnValue({
-    connectedProfile: handle ? { handle } : null,
-    activeProfileProxy: proxy ? { id: "proxy" } : null,
+    connectedProfile: handle ? ({ handle } as ApiIdentity) : null,
+    activeProfileProxy: proxy ? ({ id: "proxy" } as ApiProfileProxy) : null,
+    fetchingProfile: false,
+    connectionStatus: ProfileConnectedStatus.HAVE_PROFILE,
+    receivedProfileProxies: [],
+    showWaves: true,
+    sessionUpgradeRequired: false,
+    requestAuth: jest.fn(async () => ({ success: true })),
+    setActiveProfileProxy: jest.fn(async () => false),
     setToast: jest.fn(),
-  } as ReturnType<typeof useAuth>);
+  });
 }
 
 function setQuerySuccess(isSuccess: boolean) {
