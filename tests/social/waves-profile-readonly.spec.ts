@@ -1424,22 +1424,24 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
   test("handles legacy wave query links without mutation", async ({ page }) => {
     const waveId = await getFirstWaveId(page);
 
-    await gotoDocumentWithTransientRetry(
-      page,
-      `/waves?wave=${waveId}&serialNo=1`
-    );
-    // Next can emit the redirect in the streamed document. The initial shell
-    // is visible before that navigation destroys its execution context.
-    await page.waitForURL((url) => url.pathname === `/waves/${waveId}`, {
-      waitUntil: "domcontentloaded",
-      timeout: 45_000,
-    });
+    // Observe the redirect at commit: chat consumes serialNo after mounting,
+    // so reading it after route readiness can miss the preserved jump target.
+    await Promise.all([
+      page.waitForURL(
+        (url) =>
+          url.pathname === `/waves/${waveId}` &&
+          !url.searchParams.has("wave") &&
+          url.searchParams.get("serialNo") === "1",
+        { waitUntil: "commit", timeout: 45_000 }
+      ),
+      gotoDocumentWithTransientRetry(page, `/waves?wave=${waveId}&serialNo=1`),
+    ]);
     await waitForRouteReady(page);
     await expectNoHorizontalOverflow(page);
 
     const url = new URL(page.url());
+    expect(url.pathname).toBe(`/waves/${waveId}`);
     expect(url.searchParams.get("wave")).toBeNull();
-    expect(url.searchParams.get("serialNo")).toBe("1");
   });
 
   test("keeps profile statistics natural and activity loading compact", async ({
