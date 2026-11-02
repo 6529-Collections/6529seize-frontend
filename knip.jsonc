@@ -75,6 +75,11 @@
       // (W6 C4) makes it reachable and removes these exemptions.
       "lib/chain/codec/**": ["files", "exports", "types"],
       "lib/chain/types/**": ["files", "exports", "types"],
+      // W6 C2: gateway client, status ladder and the CI mock gateway, under
+      // the same exemption until W6 C4 imports them.
+      "lib/chain/gateway/**": ["files", "exports", "types"],
+      "lib/chain/mock/**": ["files", "exports", "types"],
+      "lib/chain/status-ladder.ts": ["files", "exports", "types"],
       // Backend operation-code catalog; several codes are intentionally
       // declared before the tool implements them (see inline comments).
       "components/allowlist-tool/allowlist-tool.types.ts": ["enumMembers"],
