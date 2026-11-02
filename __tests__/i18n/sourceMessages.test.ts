@@ -22,6 +22,7 @@ type CompleteDictionaryModule = typeof import("@/i18n/messages/en-US.complete");
 
 const BROWSER_MODULE = "@/i18n/sourceMessages.browser";
 const COMPLETE_MODULE = "@/i18n/messages/en-US.complete";
+const MONITORING_MODULE = "@/utils/monitoring/i18nMonitoring";
 const ROOT_KEY = "waves.sidebar.allWaves";
 const POSTING_KEY = "waves.header.postLabel.inProgress";
 // Stands in for a key from a namespace this bundle never imported.
@@ -74,9 +75,12 @@ function mockCompleteDictionary(extraMessages: Record<string, string>) {
 }
 
 let consoleError: jest.SpyInstance;
+const reportUnregisteredMessageKey = jest.fn();
 
 beforeEach(() => {
   consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
+  reportUnregisteredMessageKey.mockReset();
+  jest.doMock(MONITORING_MODULE, () => ({ reportUnregisteredMessageKey }));
 });
 
 afterEach(() => {
@@ -84,6 +88,7 @@ afterEach(() => {
   jest.dontMock("@/i18n/sourceMessages");
   jest.dontMock("@/i18n/localeDictionaries");
   jest.dontMock(COMPLETE_MODULE);
+  jest.dontMock(MONITORING_MODULE);
   // The complete dictionary loads after `isolateModules` returns, into the
   // shared registry; drop it so each test's mock is the one that loads.
   jest.resetModules();
@@ -182,6 +187,30 @@ describe("browser source messages", () => {
     await waitFor(() => {
       expect(messages.t("en-US", UNREGISTERED_KEY)).toBe("Complete title");
     });
+    expect(consoleError).toHaveBeenCalledTimes(1);
+    expect(reportUnregisteredMessageKey).toHaveBeenCalledTimes(1);
+    expect(reportUnregisteredMessageKey).toHaveBeenCalledWith(UNREGISTERED_KEY);
+  });
+
+  it("stops asking for the complete dictionary after one retry", async () => {
+    let attempts = 0;
+    jest.doMock(COMPLETE_MODULE, () => {
+      attempts += 1;
+      throw new Error("chunk request failed");
+    });
+    const { messages } = loadBrowserModules();
+
+    expect(messages.t("en-US", UNREGISTERED_KEY)).toBe("");
+    await waitFor(() => {
+      messages.t("en-US", UNREGISTERED_KEY);
+      expect(attempts).toBe(2);
+    });
+    // Let the second failure settle, then keep missing: no third request.
+    for (let miss = 0; miss < 5; miss += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(messages.t("en-US", UNREGISTERED_KEY)).toBe("");
+    }
+    expect(attempts).toBe(2);
     expect(consoleError).toHaveBeenCalledTimes(1);
   });
 

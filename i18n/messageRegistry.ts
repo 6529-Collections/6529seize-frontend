@@ -2,10 +2,10 @@
  * en-US source copy for a set of message keys: the root dictionary, the
  * complete dictionary, or one feature namespace from `@/i18n/namespaces`.
  */
-export type SourceMessages = Readonly<Record<string, string>>;
+type SourceMessages = Readonly<Record<string, string>>;
 
 // Dictionaries in registration order. Keys are unique across the root
-// dictionary and every namespace (see __tests__/i18n/messageRegistry.test.ts),
+// dictionary and every namespace (see __tests__/i18n/messageNamespaces.test.ts),
 // so the order never changes which copy a key resolves to.
 const registeredDictionaries: SourceMessages[] = [];
 
