@@ -1,6 +1,6 @@
 "use client";
 
-import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
+import { observeFocusedField } from "@/helpers/focused-field-visibility";
 import {
   Dialog,
   DialogPanel,
@@ -9,18 +9,16 @@ import {
 } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import type { CSSProperties, ReactNode } from "react";
-import { Fragment, useRef } from "react";
+import { Fragment, useCallback } from "react";
 
 const KEYBOARD_INSET = "var(--native-keyboard-inset-bottom, 0px)";
 const KEYBOARD_TRANSITION =
   "var(--native-keyboard-layout-transition-duration, 0ms)";
+const KEYBOARD_EASING =
+  "var(--native-keyboard-layout-transition-easing, ease-out)";
 const APP_DIALOG_LAYOUT_STYLE: CSSProperties = {
   height: `max(0px, calc(100% - ${KEYBOARD_INSET}))`,
-  transform: `translate3d(0, calc(0px - ${KEYBOARD_INSET}), 0)`,
-  transition: `height ${KEYBOARD_TRANSITION} ease-out, transform ${KEYBOARD_TRANSITION} ease-out`,
-};
-const APP_DIALOG_PANEL_STYLE: CSSProperties = {
-  maxHeight: `min(85vh, max(0px, calc(100vh - ${KEYBOARD_INSET})))`,
+  transition: `height ${KEYBOARD_TRANSITION} ${KEYBOARD_EASING}`,
 };
 
 export default function ArtistPreviewAppWrapper({
@@ -32,9 +30,20 @@ export default function ArtistPreviewAppWrapper({
   readonly onClose: () => void;
   readonly children: ReactNode;
 }) {
-  const constraintsRef = useRef(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  useKeyboardFocusScroll(contentRef);
+  const contentRef = useCallback((container: HTMLDivElement | null) => {
+    if (!container) return;
+    const focusedField = observeFocusedField(container);
+    const viewport = globalThis.visualViewport;
+    viewport?.addEventListener("resize", focusedField.reveal);
+    viewport?.addEventListener("scroll", focusedField.reveal, {
+      passive: true,
+    });
+    return () => {
+      focusedField.disconnect();
+      viewport?.removeEventListener("resize", focusedField.reveal);
+      viewport?.removeEventListener("scroll", focusedField.reveal);
+    };
+  }, []);
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -57,11 +66,10 @@ export default function ArtistPreviewAppWrapper({
 
         <div
           data-testid="artist-preview-app-layout"
-          className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-items-end"
+          className="tw-fixed tw-inset-x-0 tw-top-0 tw-flex tw-items-end tw-pt-[calc(env(safe-area-inset-top,0px)+4rem)]"
           style={APP_DIALOG_LAYOUT_STYLE}
           onClick={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}
-          ref={constraintsRef}
         >
           <TransitionChild
             as={Fragment}
@@ -72,7 +80,7 @@ export default function ArtistPreviewAppWrapper({
             leaveFrom="tw-translate-y-0"
             leaveTo="tw-translate-y-full"
           >
-            <div className="tw-pointer-events-auto tw-relative tw-w-full tw-transform-gpu tw-will-change-transform">
+            <div className="tw-pointer-events-auto tw-relative tw-flex tw-max-h-full tw-w-full tw-transform-gpu tw-flex-col tw-will-change-transform">
               <TransitionChild
                 as={Fragment}
                 enter="tw-duration-300 tw-ease-in-out motion-reduce:tw-transition-none"
@@ -94,10 +102,7 @@ export default function ArtistPreviewAppWrapper({
                 </div>
               </TransitionChild>
 
-              <DialogPanel
-                style={APP_DIALOG_PANEL_STYLE}
-                className="tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-t-2xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-[#0B0C0E] tw-pb-[env(safe-area-inset-bottom,0px)] tw-shadow-[0_-18px_50px_rgba(0,0,0,0.45)]"
-              >
+              <DialogPanel className="tw-relative tw-flex tw-max-h-[85vh] tw-min-h-0 tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-t-2xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-[#0B0C0E] tw-pb-[env(safe-area-inset-bottom,0px)] tw-shadow-[0_-18px_50px_rgba(0,0,0,0.45)]">
                 <div
                   ref={contentRef}
                   data-testid="artist-preview-app-scroll"
