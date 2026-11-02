@@ -107,7 +107,7 @@ function CompactMenuContent({
   isOpen,
   close,
 }: Readonly<CompactMenuContentProps>) {
-  const { menuItemsRef } = useCompactMenuFocus(isOpen, autoFocusItem);
+  const { menuItemsRef } = useCompactMenuFocus(autoFocusItem);
   const menuAnchor = anchor ?? DEFAULT_ANCHOR;
 
   return (
@@ -123,11 +123,10 @@ function CompactMenuContent({
         close={close}
       />
       <MenuItems
-        transition
         ref={menuItemsRef}
         anchor={menuAnchor}
         className={clsx(
-          "tw-group/compact-menu tw-transition data-[closed]:tw-translate-y-1 data-[closed]:tw-opacity-0 data-[enter]:tw-duration-150 data-[leave]:tw-duration-100 data-[enter]:tw-ease-out data-[leave]:tw-ease-in",
+          "tw-group/compact-menu",
           unstyledMenu ? undefined : DEFAULT_MENU_CLASSES,
           menuWidthClassName,
           menuClassName

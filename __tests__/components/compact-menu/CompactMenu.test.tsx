@@ -25,7 +25,9 @@ describe("CompactMenu focus", () => {
     await user.keyboard("{ArrowUp}{Enter}");
     expect(select).toHaveBeenCalledWith("first");
     await waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
-    expect(screen.getByRole("button", { name: "Options" })).toHaveFocus();
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Options" })).toHaveFocus()
+    );
   });
 
   it("opens neutrally with a pointer and exposes link items to keyboard navigation", async () => {
