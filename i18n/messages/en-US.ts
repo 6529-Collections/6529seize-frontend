@@ -4569,6 +4569,8 @@ export const EN_US_MESSAGES = {
   "drop.media.processingFailed": "Image processing failed.",
   "drop.media.processingTimedOut": "Image processing timed out.",
   "media.interactive.untrustedContent": "Untrusted interactive content",
+  "media.interactive.frameTitle": "Interactive HTML media",
+  "media.interactive.loading": "Loading interactive media",
   "walletAddress.copy.optionsAriaLabel": "Copy wallet options",
   "walletAddress.copy.ensAriaLabel": "Copy ENS name",
   "walletAddress.copy.walletAriaLabel": "Copy wallet address",

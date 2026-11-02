@@ -29,7 +29,7 @@ export const VALIDATOR_GUIDE_MARKDOWN = joinMarkdown([
   "",
   "The defaults, Tor on, suit a cloud VM too. For the terminal path, each archive holds the guide in `docs/install/`. Skip its Sigstore step: test releases have no `SHA256SUMS.sigstore.json`.",
   "",
-  "To check what you installed, run `validator --version`. It prints `validator 0.1.0 (<commit>, TDH v1.4, rule version tdh-v1.4)`. The commit in the brackets must match the one listed for your release on the [releases page](/validator/releases). If it shows another commit, you have a different build, so tell us.",
+  'To check what you installed, run `validator --version`. On a Mac, run the program inside the app: `"/Applications/6529 Validator.app/Contents/Resources/validator" --version`. It prints `validator 0.1.0 (<commit>, TDH v1.4, rule version tdh-v1.4)`. The commit in the brackets must match the one listed for your release on the [releases page](/validator/releases). If it shows another commit, you have a different build, so tell us.',
   "",
   "## Make the key and sign the authorization",
   "",
