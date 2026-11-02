@@ -847,6 +847,67 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     ).toBeVisible();
   });
 
+  test("recovers a historical Timeline image using the same Arweave transaction", async ({
+    page,
+  }) => {
+    const tx = "IFosq_ZN9_PrDSQmq65JTjeB2GnnfPSFoHxRazxC4PY";
+    const primary = `https://arweave.net/${tx}/timeline-history.png`;
+    const fallback = `https://media.6529.io/arweave/${tx}/timeline-history.png`;
+    const requests: string[] = [];
+    await page.route("**/api/nft_history/**", async (route) => {
+      await route.fulfill({
+        json: {
+          data: [
+            {
+              nft_id: 1,
+              contract: "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+              uri: `https://arweave.net/${tx}`,
+              transaction_date: "2024-01-01T00:00:00Z",
+              created_at: "2024-01-01T00:00:00Z",
+              transaction_hash: `0x${"1".repeat(64)}`,
+              block: 1,
+              description: {
+                event: "Edit",
+                changes: [{ key: "image", from: primary, to: "" }],
+              },
+            },
+          ],
+          next: null,
+        },
+      });
+    });
+    await page.route(primary, async (route) => {
+      requests.push(route.request().url());
+      await route.fulfill({ status: 503, body: "Unavailable" });
+    });
+    await page.route(fallback, async (route) => {
+      requests.push(route.request().url());
+      await route.fulfill({
+        contentType: "image/png",
+        body: Buffer.from(
+          "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=",
+          "base64"
+        ),
+      });
+    });
+    await gotoReady(page, "/the-memes/1?focus=timeline");
+    const timeline = page.getByRole("region", {
+      name: "The Memes card timeline",
+    });
+    const preview = timeline.getByRole("img");
+    await expect(preview).toHaveAttribute("src", fallback);
+    await expect
+      .poll(() =>
+        preview.evaluate((image: HTMLImageElement) => image.naturalWidth)
+      )
+      .toBeGreaterThan(0);
+    expect(requests).toEqual([primary, fallback]);
+    await expect(
+      timeline.getByRole("link", { name: "Open metadata URI" })
+    ).toHaveAttribute("href", `https://arweave.net/${tx}`);
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("renders The Memes activity focus with locale-preserving links", async ({
     baseURL,
     page,

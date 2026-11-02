@@ -45,6 +45,24 @@ beforeEach(() => {
 });
 
 describe("Timeline", () => {
+  it("uses each recorded historical image instead of the current NFT artwork", () => {
+    const from =
+      "https://arweave.net/IFosq_ZN9_PrDSQmq65JTjeB2GnnfPSFoHxRazxC4PY";
+    const to =
+      "https://arweave.net/ifosq_ZN9_PrDSQmq65JTjeB2GnnfPSFoHxRazxC4PY";
+    render(
+      <Timeline
+        nft={{
+          ...baseNft,
+          image: "https://example.com/current.png",
+          metadata: { image: "https://example.com/current.png" },
+        }}
+        steps={[makeStep("image", from, to)]}
+      />
+    );
+    expect(mediaProps.map((props) => props.url)).toEqual([from, to]);
+  });
+
   it("formats date header and displays key label", () => {
     render(<Timeline nft={baseNft} steps={[makeStep("some_key", "a", "b")]} />);
     expect(screen.getByText("05/02/2024, 07:08 UTC")).toBeInTheDocument();
