@@ -295,7 +295,7 @@ export default function SubscriptionCoverageSummary({
             )}
           </p>
         </div>
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2 md:tw-max-w-[50%] md:tw-shrink-0">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-start tw-gap-2 md:tw-max-w-[50%] md:tw-shrink-0 md:tw-justify-end">
           <button
             type="button"
             aria-expanded={expanded}

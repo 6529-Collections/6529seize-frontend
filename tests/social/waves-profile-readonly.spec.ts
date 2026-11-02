@@ -648,6 +648,14 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         expect(box!.y).toBeLessThan(headlineBox!.y + headlineBox!.height);
       }
     }
+    if (page.viewportSize()!.width < 768) {
+      const detailsBox = await details.boundingBox();
+      expect(detailsBox).not.toBeNull();
+      expect(Math.abs(detailsBox!.x - headlineBox!.x)).toBeLessThanOrEqual(1);
+      expect(detailsBox!.y).toBeGreaterThanOrEqual(
+        headlineBox!.y + headlineBox!.height
+      );
+    }
     await mintingSettings.click();
     await expect(
       coverage.getByRole("heading", { name: "Edition Preference", exact: true })
